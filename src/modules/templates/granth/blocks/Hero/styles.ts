@@ -1,7 +1,7 @@
 // Hero-specific CSS (edit + published parity). `gr-` prefixed. Shared utilities
 // (gr-wrap, gr-orn, gr-btn, gr-caption*, gr-display) are injected globally by the
 // theme (tokens.ts serializeBaseTokens). Block does NOT paint a full-bleed section
-// bg — the data-surface wrapper does. Ported from WRDirection1Granth.html (.hero).
+// bg — the data-surface wrapper does. Ported from template-design/WRDirection1Granth.html (.hero).
 
 export const HERO_STYLES = `
 .gr-hero{ padding:clamp(70px,9vw,110px) 0 clamp(60px,8vw,96px); text-align:center; }

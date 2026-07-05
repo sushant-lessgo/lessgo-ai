@@ -1,5 +1,5 @@
 // Single-source Books (पुस्तकें / GranthJacketShelf) layout. PLAIN module. Ported
-// from WRDirection1Granth.html: centred header · lead · responsive grid of book
+// from template-design/WRDirection1Granth.html: centred header · lead · responsive grid of book
 // jackets (CSS-typeset by default; a real cover_image replaces the face) with
 // title, meta (kind · year · blurb) and an external Amazon buy link.
 

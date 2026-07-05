@@ -9,7 +9,7 @@ import { resolveOgImage } from '@/lib/staticExport/buildPageMetadata';
 // Multi-page subpage route. Serves content.subpages[pathSlug] from a published
 // project. The blob fast path (KV route:{host}:{path} → blob-proxy) handles most
 // hits; this SSR route is the fallback (and what local /p/{slug}/{path} uses).
-// See multiPagePlan.md.
+// See docs/tracks/multiPagePlan.md.
 
 export const revalidate = 3600;
 export const dynamicParams = true;

@@ -8,7 +8,7 @@
 // the dev seed route with templateId:'granth', paletteId:'sinduri', variantId:'granth'.
 //
 // Default content = the fictional senior Hindi poet केशव नारायण ‘अरण्य’ from
-// WRDirection1Granth.html (Devanagari numerals authored, no formatter).
+// template-design/WRDirection1Granth.html (Devanagari numerals authored, no formatter).
 
 const rid = (p: string): string => `${p}${Math.random().toString(36).slice(2, 8)}`;
 const sectionId = (type: string): string => `${type}-${Math.random().toString(36).slice(2, 10)}`;

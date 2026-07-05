@@ -3,7 +3,7 @@
 // existing auth() + verifyProjectAccess pattern (src/lib/security.ts) before calling these.
 //
 // status/source are stored as String (no DB enum, matching repo convention), so the DB
-// won't enforce valid values — this layer does. See testimonialSystem.md.
+// won't enforce valid values — this layer does. See docs/tracks/testimonialSystem.md.
 
 import { prisma } from '@/lib/prisma';
 import type { Testimonial } from '@prisma/client';

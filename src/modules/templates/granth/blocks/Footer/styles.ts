@@ -1,5 +1,5 @@
 // Footer (जुड़िए / GranthFollowFooter) CSS. Centred follow block + social row + fine
-// print. Ported from WRDirection1Granth.html (footer). Social classes duplicated
+// print. Ported from template-design/WRDirection1Granth.html (footer). Social classes duplicated
 // (also in Hero) so the footer is self-contained.
 
 export const FOOTER_STYLES = `

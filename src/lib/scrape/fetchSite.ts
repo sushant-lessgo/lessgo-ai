@@ -2,7 +2,7 @@
 // SSRF-hardened fetch + bounded crawl + HTML→text for the onboarding website
 // import (/api/v2/scrape-website). Server-only.
 //
-// Security model (see POreview.md):
+// Security model:
 //  - Only http/https.
 //  - Resolve the host to IP(s) and validate EVERY resolved IP against private
 //    ranges. The validated IP is PINNED for the connection via an undici Agent

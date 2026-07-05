@@ -71,3 +71,6 @@ backups/
 # Designer handoff package (local reference only; not shipped)
 Lessgo.zip
 design_handoff_naayom/
+
+# Template design mockups (local reference only)
+template-design/

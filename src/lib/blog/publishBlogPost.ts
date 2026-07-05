@@ -6,7 +6,7 @@
 // it — this flow does its own stale-blob cleanup), then writes route:{host}:/blog/*
 // KV keys for every live host. Ordering: upload → KV → DB → delete-stale; a
 // mid-flight failure serves stale content, never broken routes.
-// See blogFeature.md.
+// See docs/tracks/blogFeature.md.
 import { prisma } from '@/lib/prisma';
 import { del } from '@vercel/blob';
 import { nanoid } from 'nanoid';

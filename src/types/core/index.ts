@@ -824,7 +824,7 @@ export const normalizeFieldName = (input: string): CanonicalFieldName | null => 
 
 /**
  * ===== NEW GENERATION SYSTEM TYPES =====
- * Phase 1 Foundation - see newOnboarding.md
+ * Phase 1 Foundation (onboarding rebuild)
  */
 export type {
   LandingGoal,

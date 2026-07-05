@@ -12,7 +12,7 @@ import { personaToAudienceType, type UserPersona } from '@/types/service'
 
 // Phase 8: agency + consultant + coach reach the service onboarding flow.
 // Remaining service personas (freelancer, local-service, productized-service)
-// waitlist (nsoPlan.md resolution #25).
+// waitlist (docs/tracks/nsoPlan.md resolution #25).
 const PILOT_SERVICE_PERSONAS: ReadonlySet<UserPersona> = new Set([
   'agency',
   'consultant',

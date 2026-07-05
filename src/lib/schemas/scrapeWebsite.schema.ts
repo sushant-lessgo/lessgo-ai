@@ -40,7 +40,7 @@ export const ScrapeWebsiteSchema = z.object({
 export type ScrapedTestimonial = z.infer<typeof ScrapedTestimonialSchema>;
 export type ScrapeWebsiteData = z.infer<typeof ScrapeWebsiteSchema>;
 
-// ===== Extended extraction (SiteContext — newGeneration.md Part 2) =====
+// ===== Extended extraction (SiteContext — docs/tracks/newGeneration.md Part 2) =====
 // Same single AI call at scrape time, extended with confidence-tagged atomic
 // facts + VERBATIM excerpts. Product path only for now (service mirrors later,
 // on need). NO summary field — summaries launder away the exact phrasing.

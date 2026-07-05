@@ -2,7 +2,7 @@
 // Granth palette config. Unlike Lumen (one accent knob), a Granth palette swaps
 // EVERY colour — paper, ink, accent, hairline, ornament gold — so the whole
 // design re-tones (warm ivory+maroon ⇄ cool grey+blue). Source of truth:
-// WRDirection1Granth.html (:root = सिंदूरी, html[data-alt] = नील, lines 11-32).
+// template-design/WRDirection1Granth.html (:root = सिंदूरी, html[data-alt] = नील, lines 11-32).
 //
 // Family designed for growth (like hearth/lex 9-palette families) — add `van`
 // (forest-green) etc. later by extending granthPalettes in @/types/service.

@@ -1,7 +1,7 @@
 // src/modules/service/strategy/promptsService.ts
 // Strategy prompt builder for the service route. Mirror of promptsV3 structure
 // (templated user prompt, no system msg, "Output valid JSON only" footer).
-// Reference: newServiceOnboarding.md §3 Step 7, §6 Voice (Hearth).
+// Reference: docs/architecture/newServiceOnboarding.md §3 Step 7, §6 Voice (Hearth).
 
 import type {
   ServiceUnderstandingInput,

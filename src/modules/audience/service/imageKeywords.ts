@@ -3,7 +3,7 @@
 // keyed by serviceType — shared by ALL service templates. The palette-specific
 // mood phrase is template-scoped and passed in as a plain string, so this
 // module has no template (Hearth/Folio/…) coupling.
-// Reference: newServiceOnboarding.md §5.serviceImageKeywords.
+// Reference: docs/architecture/newServiceOnboarding.md §5.serviceImageKeywords.
 
 export const SERVICE_IMAGE_KEYWORDS: Record<string, string> = {
   default:    'warm professional craft natural light',

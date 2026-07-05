@@ -3,7 +3,7 @@
 //
 // Mirror of audience/service/sectionSelection.ts, but FLAT for the pilot: no
 // awareness routing, no asset gating — the 7 Meridian blocks always render in
-// this order (meridianPlan.md: "Fixed now, awareness-engine later"). The
+// this order (docs/tracks/meridianPlan.md: "Fixed now, awareness-engine later"). The
 // awareness → section-sequence engine is re-introduced in P7. Signature kept
 // trivial so it can widen without changing call sites.
 

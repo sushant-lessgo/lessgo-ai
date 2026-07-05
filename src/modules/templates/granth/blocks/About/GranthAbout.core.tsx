@@ -1,5 +1,5 @@
 // Single-source About (परिचय) layout. PLAIN module. Ported from
-// WRDirection1Granth.html: centred eyebrow + heading · · ornament · bio prose
+// template-design/WRDirection1Granth.html: centred eyebrow + heading · · ornament · bio prose
 // (narrow) · hairline-divided facts row.
 
 import React from 'react';

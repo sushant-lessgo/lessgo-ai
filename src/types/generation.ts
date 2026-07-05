@@ -1,6 +1,6 @@
 // src/types/generation.ts
 // New generation system types - Phase 1 Foundation
-// Reference: newOnboarding.md
+// Onboarding-era generation types (still active)
 
 /**
  * ===== LANDING GOALS =====

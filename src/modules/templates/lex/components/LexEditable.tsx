@@ -5,7 +5,7 @@
 // LOGIC-IDENTICAL to the Hearth version: this component has no template-specific
 // styling (the caller controls all styling via className/style), so the copy is
 // byte-for-byte. That identity IS the genericity test — if it ever needs to
-// diverge for Lex, log the divergence in phase11aArchitectureGaps.md. A shared
+// diverge for Lex, log the divergence in docs/architecture/phase11aArchitectureGaps.md. A shared
 // template-kit extraction is tracked as a post-Phase-11 cleanup.
 
 import React from 'react';

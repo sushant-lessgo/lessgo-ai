@@ -1,5 +1,5 @@
 // src/lib/siteContext.ts
-// Persisted website-scrape context (newGeneration.md Part 2 — "stop discarding
+// Persisted website-scrape context (docs/tracks/newGeneration.md Part 2 — "stop discarding
 // what the crawl already paid for"). Global URL-keyed cache (SiteContext table,
 // IVOCCache pattern): per-page raw prose + structured extract + confidence-tagged
 // facts + VERBATIM excerpts, upserted at scrape time, TTL-gated on read.
@@ -137,7 +137,7 @@ export async function upsertSiteContext(input: UpsertSiteContextInput): Promise<
 
 /**
  * Render facts + excerpts as a copy-prompt block (Phase 3). Framing per
- * newGeneration.md: facts = claim backbone ("draw from, improve on — don't
+ * docs/tracks/newGeneration.md: facts = claim backbone ("draw from, improve on — don't
  * imitate"); excerpts = TONE REFERENCE ONLY, never assertable claims.
  * Returns '' when there is nothing to feed (brand-new business path).
  */

@@ -11,7 +11,7 @@ import { buildBlogPostingJsonLd } from '@/lib/blog/jsonLd';
 
 // Blog article SSR fallback (blob fast path via KV route:{host}:/blog/{postSlug}
 // is primary). Static segment — wins over the [...subpath] catch-all. Live DB
-// data: an unpublished post 404s immediately. See blogFeature.md.
+// data: an unpublished post 404s immediately. See docs/tracks/blogFeature.md.
 
 export const dynamic = 'force-dynamic';
 

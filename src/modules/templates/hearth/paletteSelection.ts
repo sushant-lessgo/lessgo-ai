@@ -1,6 +1,6 @@
 // src/modules/service/design/paletteSelection.ts
 // Industry-signal default palette inference (Phase 7).
-// Reference: newServiceOnboarding.md §6 (Step 6 default pre-selection).
+// Reference: docs/architecture/newServiceOnboarding.md §6 (Step 6 default pre-selection).
 //
 // Strategy: score each palette by # of substring hits across the user's
 // services[] + outcomes[] + whatYouDo. Highest score wins. Ties / zero hits

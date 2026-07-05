@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 // Blog (Phase 1): per-post instant publish. Owner-gated; thin wrapper over
-// publishBlogPost (upload → KV → DB → stale cleanup). See blogFeature.md.
+// publishBlogPost (upload → KV → DB → stale cleanup). See docs/tracks/blogFeature.md.
 import type { NextRequest } from 'next/server';
 import { createSecureResponse } from '@/lib/security';
 import { withPublishRateLimit } from '@/lib/rateLimit';

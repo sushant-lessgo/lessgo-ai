@@ -1,7 +1,7 @@
 // src/modules/templates/granth/blocks/shared/socialIcons.tsx
 // Inline social SVGs (Facebook / YouTube / Instagram / X) shared by Hero + Footer.
 // Plain module (pure JSX, no hooks/'use client') — core-safe. Paths lifted from
-// WRDirection1Granth.html. For this audience Facebook + YouTube come first.
+// template-design/WRDirection1Granth.html. For this audience Facebook + YouTube come first.
 import React from 'react';
 
 export type SocialNetwork = 'facebook' | 'youtube' | 'instagram' | 'x';

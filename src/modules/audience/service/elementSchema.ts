@@ -3,7 +3,7 @@
 // AUDIENCE-LEVEL (7.5d): these field shapes are shared by ALL service templates
 // (the 6 block types have the same role-named fields regardless of template), so
 // this lives at audience level — importing it must NOT drag any template module
-// into the bundle. Reference: newServiceOnboarding.md §4.
+// into the bundle. Reference: docs/architecture/newServiceOnboarding.md §4.
 //
 // Schemas slot into the global `layoutElementSchema` registry so existing
 // V2 helpers (getAllElements, getCardRequirements, applyAllSchemaDefaults) work

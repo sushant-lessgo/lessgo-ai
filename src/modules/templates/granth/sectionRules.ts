@@ -3,7 +3,7 @@
 // About / Writing (the "page" card sits on paper-2 per the HTML). The published
 // renderer wraps each section in `<div data-surface="...">`; blocks must NOT paint
 // their own full-bleed section background (let the surface wrapper do it).
-// Source of truth: WRDirection1Granth.html section backgrounds.
+// Source of truth: template-design/WRDirection1Granth.html section backgrounds.
 
 export type GranthSurface = 'paper' | 'paper-2';
 

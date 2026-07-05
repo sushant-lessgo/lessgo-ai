@@ -4,211 +4,165 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Lessgo** is a Next.js 14 application for AI-powered copywriting focused landing page generation, editing, publishing and managing for SaaS founders. The app uses Clerk authentication, Prisma with PostgreSQL, and a dual state management architecture with both an onboarding store and legacy edit store.
+**Lessgo** is a Next.js 14 application that generates, edits, publishes, and manages AI-written landing pages for founders. It is built around a **3-tier template model** (`audienceType → templateId → variant + palette`), a two-phase AI copy-generation pipeline, a visual inline editor, and a static-export publishing system (Vercel Blob + KV) that supports custom domains.
+
+Stack: Next.js 14 (App Router) · TypeScript · TailwindCSS · Prisma/PostgreSQL · Clerk auth · Zustand+Immer state · Stripe billing · PostHog analytics · OpenAI/Nebius for generation.
 
 ## Development Commands
 
 ```bash
-# Development server
-npm run dev
+npm run dev                  # Dev server
+npm run build                # build:published-css → build:assets → next build
+npm start                    # Production server
+npm run lint                 # ESLint
 
-# Build for production
-npm run build
+# Tests
+npm test                     # Vitest (watch)
+npm run test:run             # Vitest (single run) — unit/integration: src/**/*.test.{ts,tsx}
+npm run test:e2e             # Playwright E2E (e2e/**/*.spec.ts)
 
-# Start production server
-npm start
-
-# Linting
-npm run lint
-
-# Database operations (run automatically on install)
-npm run postinstall  # Runs: prisma generate && prisma migrate deploy
+# Database
+npx prisma migrate dev       # Local dev migrations (ALWAYS prefer over db push)
+npm run postinstall          # prisma generate && prisma migrate deploy
 ```
 
-## Debug Environment Variables
-
-For enhanced AI debugging and troubleshooting, set these environment variables in your `.env.local` file:
-
-```bash
-# AI Debug Controls
-DEBUG_AI_PROMPTS=true           # Log full AI prompts (strategy + copy generation)
-DEBUG_AI_RESPONSES=true         # Log full AI responses with detailed analysis
-DEBUG_ELEMENT_SELECTION=true    # Log element selection scoring and decisions
-
-# Default behavior (when not set or false):
-# - Prompts are logged with smart truncation (~800 chars)
-# - Responses are logged with smart truncation (~1000 chars)
-# - All prompt/response metadata is still logged (length, sections, usage, etc.)
-# - Element selection runs silently without detailed scoring logs
-```
-
-**Debug Output Features:**
-- **Prompt Debugging**: Full strategy and copy generation prompts with metadata
-- **Response Analysis**: Token usage, content length, parsing steps
-- **Element Selection**: Detailed scoring breakdown for optional elements
-  - Rule evaluation with condition matching
-  - Score calculation and threshold comparison
-  - Final included/excluded element decisions
-  - Section-by-section element mapping
-- **Card Requirements**: Detailed reports on UIBlock constraints and mappings
-- **JSON Validation**: Step-by-step parsing and validation with error context
-- **Strategy Mapping**: Card count determination and constraint application
-
-**Recommended Usage:**
-- Enable for debugging specific AI generation issues
-- Disable in production due to log volume
-- Use in combination with backend log analysis tools
+> **Build is not just `next build`.** It first runs `scripts/buildPublishedCSS.js` (compiles the
+> standalone CSS bundle shipped with published pages → `public/published.css`) and
+> `scripts/buildAssets.js` (minifies `formHandler.js`/`analyticsGenerator.js` → `public/assets/`,
+> copies self-hosted fonts CSS). Changes to published-page styling/assets require a rebuild to take effect.
 
 ## Architecture Overview
 
-### Core Structure
-- **Frontend**: Next.js 14 with App Router, TypeScript, TailwindCSS
-- **Database**: PostgreSQL with Prisma ORM  
-- **State Management**: Dual Zustand stores (useOnboardingStore + useEditStoreLegacy) with Immer
-- **Authentication**: Clerk for user management
-- **AI Integration**: OpenAI API for content generation
-- **Analytics**: PostHog for tracking and feature flags
-- **UI Libraries**: Radix UI, @dnd-kit for drag-and-drop, canvas-confetti
+### 3-Tier Template Model (core mental model)
 
-### Key Directories
-- `src/app/` - Next.js app router pages and API routes
-- `src/components/` - Reusable React components
-- `src/hooks/` - Custom hooks including state management stores
-- `src/modules/` - Business logic modules (Design, UIBlocks, generatedLanding, etc.)
-- `src/types/` - Comprehensive TypeScript type definitions
-- `src/providers/` - Context providers (PostHog, Token context)
-- `src/stores/` - Alternative store locations
-- `prisma/` - Database schema and migrations
+A landing page is rendered from three orthogonal inputs:
 
-### Database Schema
-- **User**: Clerk-based user management
-- **Project**: User projects with token-based access
-- **Token**: Unique access tokens for projects
-- **PublishedPage**: Published landing pages with slugs
-- **TaxonomyEmbedding**: AI embeddings for content classification
+| Tier | Values | Chosen at |
+|------|--------|-----------|
+| `audienceType` | `product`, `service`, (`ecommerce` reserved) | Onboarding persona/route |
+| `templateId` | `meridian`, `techpremium` (product); `hearth`, `lex` (service) | Product = locked to template; Service = picker |
+| `variantId` + `paletteId` | Spacing/feel variant + accent palette | Picker, or template defaults |
 
-### State Management Architecture
+- **Type contracts:** `src/types/service.ts` (audience + templateIds + defaults), `src/types/product.ts` (product palettes/variants), `src/types/template.ts` (`TemplateModule` contract).
+- **Registry:** `src/modules/templates/registry.ts` — each `templateId` is loaded via an **async dynamic-import loader** so template code never enters the main bundle (the "dispatch firewall"). Module surface: `resolveBlock()`, `ThemeInjector`, `SSRTokens`, `getSurfaceForSection()`, palette/variant defaults.
+- **Templates live in** `src/modules/templates/{meridian,techpremium,hearth,lex}/` — each with `tokens.ts`, `palettes.ts`, `sectionRules.ts`, `ThemeInjector.tsx`, `resolve*Block.ts`, `index.ts`, and `blocks/<Section>/`.
+- A **template is a skin**: it supplies tokens/palettes/variants/block components but consumes the audience's existing content contract. It does NOT change copy generation, the element schema, or the section list. See `docs/guides/newTemplate.md` for the full guide to adding one.
 
-#### useOnboardingStore (`src/hooks/useOnboardingStore.ts`)
-Manages the onboarding flow and field confirmation:
-- **Field Management**: Confirmed fields, validated fields, hidden inferred fields
-- **Type-safe Fields**: Uses canonical field names with display name mappings
-- **Field Dependencies**: Handles cascading field updates (e.g., category → subcategory)
-- **Features**: AI-generated features management
-- **Force Manual**: Tracks fields requiring manual input
+### ⚠️ Dual-Renderer Pitfall (the #1 architectural trap)
 
-#### useEditStoreLegacy (`src/hooks/useEditStoreLegacy.ts`)
-Legacy editor store still in active use:
-- **Layout**: Page sections, layouts, themes, global settings
-- **Content**: Section content data and elements  
-- **UI**: Edit modes, selections, toolbars, auto-save state
-- **Meta**: Project metadata, publishing state
-- **Persistence**: Draft saving, loading, conflict resolution
+Every block exists as a **pair** and is rendered by one of **two renderers**:
 
-#### useModalManager (`src/hooks/useModalManager.ts`)
-Orchestrates modal states and field editing:
-- **Modal Queue**: Sequential modal processing
-- **Field Updates**: Integrates with onboarding store
-- **Auto-save Triggers**: Coordinates with edit store
+- **Edit renderer:** `src/modules/generatedLanding/LandingPageRenderer.tsx` → block's `.tsx` (`'use client'`, hooks, contentEditable).
+- **Published renderer:** `src/modules/generatedLanding/LandingPagePublishedRenderer.tsx` → block's `.published.tsx` (server-safe, no hooks, flat props, `ReactDOMServer.renderToStaticMarkup`).
+- Two component registries back these: `componentRegistry.ts` and `componentRegistry.published.ts`.
 
-### Type System
-Comprehensive type definitions in `src/types/core/index.ts` covering:
-- Content types (sections, elements, themes)
-- AI generation types  
-- Forms and images systems
-- UI state management
-- API request/response types
+**If the two renderers diverge, a change "looks right in the editor but wrong when published" (or vice-versa).** When editing any block, update BOTH `.tsx` and `.published.tsx` and keep their layout/CSS identical. Surface tones use a template-agnostic `data-surface` attribute.
 
-### Key Features
-1. **AI-Powered Generation**: Landing page creation from user input with field inference
-2. **Visual Editor**: 
-   3 prone architecture. Edit header, left panel and right panel
-   - Inline text editing with contenteditable
-   - Section toolbar
-   - element toolbar
-   - Text formatting toolbar (size, color, alignment, styles)
-   - Image editing toolbar
-   - Form builder with placement system
-3. **Theme System**: 
-   - Variable color system with migration support
-   - Background archetype scoring
-   - Typography management with font themes
-   - Device-responsive preview
-4. **Publishing**: 
-   - Token-based project access
-   - Published pages at `/p/[slug]`
-   - Preview mode at `/preview/[token]`
-5. **Auto-Save**: Automatic draft persistence with conflict resolution
-6. **Blog System**: MDX-based blog with Giscus comments
-7. **Analytics**: PostHog integration for tracking and feature flags
+### AI Generation Pipeline (`/api/generate-landing`)
 
-## Development Notes
+Two-phase strategic generation:
 
-### Working with the Editor
+1. **Strategy phase** — `buildStrategyPrompt()` builds business context + brand positioning + layout requirements; AI returns `copyStrategy` (big idea) + per-section `cardCounts`. Parsed by `parseStrategyResponse()`.
+2. **Copy phase** — `buildStrategicCopyPrompt()` (in `src/modules/prompt/buildPrompt.ts`) instructs the AI to fill each section's elements per the card counts; parsed by `parseAiResponse()`, validated by the layout schema, manual-preferred defaults applied.
 
-#### State Management Best Practices
-- **Onboarding Flow**: Use `useOnboardingStore` for field confirmation and validation
-- **Editor State**: Use `useEditStoreLegacy` for layout, content, and UI state
-- **Modal Management**: Use `useModalManager` for field editing modals
-- **Text Editing**: Inline editor uses contenteditable with toolbar integration
-- **Sections**: Stored as arrays of IDs with separate content mapping
-- **Theme Changes**: Trigger automatic background regeneration
+- **Element selection:** `getCompleteElementsMap()` (`src/modules/sections/elementDetermination.ts`) maps every section→layout→all elements and marks excluded optional elements by business context. The AI sees all elements + the exclusion map.
+- **Section selection:** Product uses a fixed section list (`src/modules/sections/sectionList.ts`). Service uses awareness-driven ordering (`src/modules/audience/service/sectionSelection.ts`).
+- **Providers (fallback chain):** OpenAI (`gpt-4o-mini`, primary when `USE_OPENAI=true`) → Nebius/Mixtral → mock response. **Note: the generation pipeline uses OpenAI/Nebius, not Anthropic.** (`@anthropic-ai/sdk` is a dependency but not used in the generation path.)
+- Prompt builders, parsers, and mock generators live in `src/modules/prompt/`.
 
-#### UI Components
-- **Text Toolbar**: Provides formatting options (size, color, alignment)
-- **Element Toolbar**: Context-aware actions for selected elements
-- **Section Toolbar**: Section-level operations
-- **Form Toolbar**: Form configuration and management
-- **Device Toggle**: Switch between desktop/tablet/mobile views
+### Onboarding Flow
 
-### Database Operations
-- Use `prisma/schema.prisma` for schema changes
-- Run `npx prisma migrate dev` for local development migrations
-- Token-based project access pattern is core to the architecture
+- Routes: `/onboarding/product/[token]` and `/onboarding/service/[token]`. `/api/start` is the persona gate (non-pilot service personas → waitlist).
+- ~5 steps (one-liner → understanding → goal → offer → generating). Product uses `useProductGenerationStore`; service uses `useServiceGenerationStore`.
+- **Website import:** `/api/v2/scrape-website` (product) and `/api/v2/understand` (service) do an SSRF-safe bounded crawl + one structured AI call to pre-fill fields (one-liner, name, categories, audiences, features, offer, **verbatim testimonials**, goal). Costs 1 credit.
+- **Field validation:** `/api/validate-fields` checks taxonomy fields. **Market insights:** `/api/market-insights` generates features + infers hidden copywriting fields; backed by IVOC research (see below).
 
-### API Routes
-- Most API routes are in `src/app/api/` following Next.js 14 conventions
-- **Generation**: `/generate-landing`, `/infer-fields`, `/validate-fields`
-- **Content**: `/regenerate-content`, `/regenerate-element`
-- **Persistence**: `/saveDraft`, `/loadDraft`
-- **Publishing**: `/publish`, `/checkSlug`
-- **Analytics**: `/market-insights`
-- **Forms**: `/forms/submit`
-- **Misc**: `/subscribe`, `/start`
+### State Management (Zustand + Immer)
 
-### Component Patterns
-- **UI Framework**: Radix UI components for accessibility
-- **Styling**: TailwindCSS with custom design tokens
-- **Drag & Drop**: @dnd-kit for sortable sections and elements
-- **Components Organization**:
-  - `/components/ui/` - Base UI components
-  - `/components/forms/` - Form builder system
-  - `/components/layout/` - Layout components
-  - `/components/dashboard/` - Dashboard specific
-  - `/modules/UIBlocks/` - Pre-built section templates
-  - `/modules/Design/` - Design system utilities
+- `useOnboardingStore` (`src/hooks/`) — onboarding fields: confirmed/validated/inferred, dependencies, AI features.
+- `useEditStoreLegacy` (`src/hooks/`) — **still the active editor store**: layout/sections, content, UI/toolbars, meta, persistence/auto-save.
+- `useModalManager` (`src/hooks/`) — modal queue + field-edit dialogs.
+- `src/stores/`: `editStore.ts` (token-scoped store factory), `useThemeStore.ts`, `storeManager.ts`.
+- Generation stores: `useProductGenerationStore`, `useServiceGenerationStore`, `useGenerationStore`.
 
-### Additional Systems
+### Publishing & Static Export
 
-#### Design System
-- **Color System**: Variable-based with theme migration support
-- **Backgrounds**: Archetype-based scoring for auto-selection
-- **Typography**: Font themes with market category matching
-- **Button Shapes**: Configurable rounded corners
+Flow: edit `/edit/[token]` → preview `/preview/[token]` → publish → live `/p/[slug]`.
 
-#### Forms System
-- **Form Builder**: Visual form creation interface
-- **Form Placement**: Strategic positioning in sections
-- **Form Connection**: Buttons can trigger form modals
-- **Submission Handling**: API endpoint for form data
+- `POST /api/publish` creates/updates `PublishedPage` + a new immutable `PublishedPageVersion`, runs `generateStaticHTML()` (`src/lib/staticExport/htmlGenerator.ts`) via the **published renderer**, uploads to Vercel Blob (`blobKey = pages/{pageId}/{version}/index.html`), then atomically writes KV routes.
+- `publishState` machine: `draft → publishing → published | failed`; orphaned blobs are cleaned up on DB failure.
+- `/p/[slug]` is ISR (`revalidate = 3600`); a blob-proxy edge route serves the static HTML by KV lookup.
+- Published pages embed minified `form.v1.js` and `a.v1.js` (analytics beacon).
 
-#### Publishing Flow
-1. Edit at `/edit/[token]`
-2. Preview at `/preview/[token]`
-3. Publish to `/p/[slug]`
-4. Form submissions tracked at `/dashboard/forms/[slug]`
+### Custom Domains
 
-### Testing & Quality
-- No specific test runner configured - check with team for testing approach
-- PostHog for analytics and feature flag testing
-- Consider the complexity of dual state management when adding tests
+- `PublishedPage.customDomain*` fields track status: `pending_ownership → pending_dns → issuing_ssl → live | failed`.
+- `/api/domains/verify-ownership` (TXT record `_lessgo-verify.{apex}`) → adds domain via Vercel API → `/api/domains/verify-dns` polls Vercel `getDomainConfig` until SSL is live.
+- Routing: `src/lib/routing/kvRoutes.ts` (edge-compatible KV REST). `src/middleware.ts` resolves custom-domain requests via KV → blob-proxy, with SSR fallback through a slug-for-host lookup.
+
+### Billing, Plans & Credits
+
+- Models: `UserPlan` (tier FREE/PRO/AGENCY/ENTERPRISE, Stripe IDs, feature flags, limits), `UserUsage` (monthly credit/token tracking), `UsageEvent` (per-operation ledger).
+- Config in `src/lib/planManager.ts`; credit costs in `src/lib/creditSystem.ts` (e.g. FULL_PAGE_GEN=10, SECTION_REGEN=2, ELEMENT_REGEN=1, IVOC_RESEARCH=3, SCRAPE_WEBSITE=1). `checkCredits()` gates AI operations.
+- Stripe: `/api/stripe/webhooks` (updates plan/status, resets credits on renewal), checkout + portal session routes. Endpoints under `/api/billing` and `/api/credits`.
+
+### Analytics, Forms & Integrations
+
+- **Analytics:** `PageAnalytics` (daily per-slug aggregation: views, unique visitors, conversions, device split, top referrers/UTM). `POST /api/analytics/event` is a privacy-first beacon (no raw IP/UA stored). PostHog used app-side for tracking + feature flags.
+- **Forms:** `POST /api/forms/submit` validates + stores `FormSubmission`, runs integrations. `UserIntegration` holds encrypted API keys (ConvertKit live: `src/lib/integrations/convertkit.ts`).
+- **IVOC (Voice-of-Customer):** `IVOCCache` caches pains/desires/objections/beliefs/phrases keyed by `(categoryKey, audienceKey)`. `src/lib/tavily.ts` searches; `src/lib/ivocExtractor.ts` extracts via `gpt-4o-mini` with a GPT fallback when Tavily is unavailable.
+
+### Admin
+
+- `requireAdmin()` (`src/lib/admin.ts`) gates `/api/admin/*` via `ADMIN_CLERK_IDS` or `CRON_SECRET`. Endpoints: KV diagnostics/repair (`/api/admin/kv`), `env-check`, `migrate-project` (dev→prod copy), `transfer-ownership`. Admin UI under `src/app/admin/`.
+
+### Design System v3
+
+- **Self-hosted fonts** under `public/fonts/` (Inter, Inter Tight, JetBrains Mono, DM Sans, Lora, EB Garamond, Fraunces, Source Serif 4); `@font-face` in `src/styles/fonts-self-hosted.css`. The legacy dynamic font system was removed; LCP hero-headline font is preloaded per template (`CriticalFontPreload.tsx`).
+- **Tokens/variants:** each template's `tokens.ts` + `variants.ts` define CSS-variable design tokens (neutrals, hairlines, type, spacing, radius, section rhythm, accent trio applied via `[data-palette]`).
+- **Palettes:** template palettes in `src/modules/templates/*/palettes.ts`; legacy 30-palette v3 background system in `src/modules/Design/background/` (`palettes.ts`, `textures.ts`, `backgroundIntegration.ts`). Shared design tokens: `src/modules/Design/designTokens.ts`.
+- Color system, button shapes, card styles under `src/modules/Design/`.
+
+## Database (`prisma/schema.prisma`)
+
+Key models: `User`, `Project` (token-scoped; `audienceType`/`templateId`/`variantId`/`paletteId` + `content`/`themeValues`/`computedDesign` JSON), `Token`, `PublishedPage` (+ static-export & custom-domain fields), `PublishedPageVersion`, `TaxonomyEmbedding`, `FormSubmission`, `UserIntegration`, `PageAnalytics`, `UserPlan`, `UserUsage`, `UsageEvent`, `IVOCCache`.
+
+Token-based project access is core to the architecture. **Use `prisma migrate dev`, not `db push`** — dev/prod schemas are reconciled via migrations.
+
+## Testing & Quality
+
+- **Vitest** (`vitest.config.ts`, jsdom): unit/integration `src/**/*.test.{ts,tsx}`. Coverage includes utils/validation, template **dispatch** regression, **palette-selection** regression, service **section selection**, **generation contract** (frozen-fixture shape), and **golden** tests (`captureGolden.test.ts`, opt-in real-LLM via `CAPTURE=1`).
+- **Playwright** (`playwright.config.ts`, serial/1 worker): `e2e/` has public specs (`generation.spec.ts`, `render.spec.ts`, mock mode) + an authed `publish.spec.ts` using a Clerk session from `auth.setup.ts` (`@clerk/testing`). Toggles: `E2E_LLM=real`, `E2E_PORT`. See `e2e/README.md`.
+- **`docs/guides/TESTING.md`** is the manual pre-launch checklist (P0/P1/P2) covering what automation can't: real-LLM quality, **editor↔published parity**, editor interactions — run against `npm run dev`, not mocked.
+
+## API Routes (`src/app/api/`)
+
+Generation/content: `generate-landing`, `regenerate-content`, `regenerate-section`, `regenerate-element`, `validate-fields`, `market-insights`, `v2/*` (scrape-website, understand). Persistence: `saveDraft`, `loadDraft`, `projects`. Publishing/domains: `publish`, `checkSlug`, `domains/*`, `blob-proxy`. Commerce: `stripe/*`, `billing/*`, `credits/*`. Other: `forms/submit`, `analytics/event`, `images`/`upload-image`/`proxy-image`, `og`, `audience`, `admin/*`, `subscribe`, `start`, `generate-privacy-policy`, `csrf`.
+
+## Debug Environment Variables
+
+Set in `.env.local` for enhanced AI debugging (logs are verbose — disable in production):
+
+```bash
+DEBUG_AI_PROMPTS=true           # Full strategy + copy generation prompts
+DEBUG_AI_RESPONSES=true         # Full AI responses with token usage / parsing steps
+DEBUG_ELEMENT_SELECTION=true    # Element scoring, rule evaluation, included/excluded decisions
+```
+
+When unset/false: prompts/responses are smart-truncated (~800/~1000 chars) but metadata is still logged; element selection runs silently.
+
+## Component Organization
+
+- `src/components/ui/` — base UI (Radix). `src/components/forms/` — form builder + placement. `src/components/layout/`, `src/components/dashboard/`.
+- `src/modules/templates/` — template skins (blocks + tokens). `src/modules/sections/` — section/layout schemas & rules. `src/modules/Design/` — design system. `src/modules/prompt/`, `src/modules/audience/`, `src/modules/generation/`, `src/modules/inference/`, `src/modules/generatedLanding/` (renderers + registries).
+- Drag & drop via `@dnd-kit`. Section IDs follow `${type}-${uuid}` (e.g. `hero-abc12345`).
+
+## Documentation (`docs/`)
+
+All project docs live under `docs/` (see `docs/README.md` for the full index):
+
+- `docs/architecture/` — evergreen references: `publishArch.md`, `pricingSystem.md`, `design-system-v3.md`, `newServiceOnboarding.md`, `phase11aArchitectureGaps.md` (multi-template firewall + dual-renderer notes), `TROUBLESHOOTING.md`, `STRIPE_SETUP.md`.
+- `docs/guides/` — how-to guides: `newTemplate.md` (adding a template — clone an existing one), `TESTING.md` (manual pre-launch checklist).
+- `docs/tracks/` — one plan doc per active track (product=`meridianPlan.md`, service=`nsoPlan.md`, plus multi-page, blog, SEO, testimonials, writer, i18n, newGeneration). Fold new phase specs into the track's existing doc; don't create separate spec files.
+- `docs/product/` — `productBacklog.md`, `brandMessage.md`.
+- Completed/stale plans are deleted (recoverable via git history). Scratch files (dev logs, review verdicts like `POreview.md`) are written at repo root when needed and deleted after use — don't commit them long-term.

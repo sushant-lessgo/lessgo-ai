@@ -46,7 +46,7 @@ model Project {
 // Blog (Phase 1). Posts have their own draft→publish lifecycle, decoupled from
 // PublishedPageVersion: each publish uploads blobs under a 'blog-*' version that
 // is never registered in a version row (invisible to versionCleanup) and writes
-// route:{host}:/blog/{slug} KV keys per live host. See blogFeature.md.
+// route:{host}:/blog/{slug} KV keys per live host. See docs/tracks/blogFeature.md.
 model BlogPost {
   id               String    @id @default(cuid())
   projectId        String
@@ -88,7 +88,7 @@ model BlogSubscriber {
 
 // Multi-page support. Uniform model: every page of a project is a row, including
 // the home page (archetypeKey 'home', pathSlug '/'). content holds this page's
-// own { sections, sectionLayouts, content } slice. See multiPagePlan.md.
+// own { sections, sectionLayouts, content } slice. See docs/tracks/multiPagePlan.md.
 model ProjectPage {
   id           String   @id @default(cuid())
   projectId    String
@@ -415,7 +415,7 @@ model IVOCCache {
   @@index([audienceKey])
 }
 
-// Persisted website-scrape context (newGeneration.md Part 2). GLOBAL cache keyed
+// Persisted website-scrape context (docs/tracks/newGeneration.md Part 2). GLOBAL cache keyed
 // by normalized origin (IVOCCache pattern, NOT project-scoped): dedupe is
 // URL-shaped (onboarding reload retries, re-onboarding, multi-project) and the
 // content is the public web. Upsert overwrites (no rows-per-scrape); freshness =
@@ -455,7 +455,7 @@ model SiteContext {
 
 // Testimonial collection system. Owner-scoped (Clerk userId, external — not a FK,
 // matching PublishedPage/FormSubmission). Superset of fields; templates consume only
-// what they render. See testimonialSystem.md for the full track plan.
+// what they render. See docs/tracks/testimonialSystem.md for the full track plan.
 model Testimonial {
   id        String   @id @default(cuid())
   userId    String // Clerk User ID (owner / tenant)

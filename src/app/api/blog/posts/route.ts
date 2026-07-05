@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Blog (Phase 1): list + create posts. Token-keyed, owner-gated. See blogFeature.md.
+// Blog (Phase 1): list + create posts. Token-keyed, owner-gated. See docs/tracks/blogFeature.md.
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createSecureResponse } from '@/lib/security';

@@ -1,6 +1,6 @@
 // hooks/editStore/pageActions.ts — multi-page axis actions (Phase 1).
 //
-// See multiPagePlan.md. Phase 1 "Add page" clones the home slice so the new page
+// See docs/tracks/multiPagePlan.md. Phase 1 "Add page" clones the home slice so the new page
 // is immediately valid and renderable (no blank-canvas problem, no drag-drop).
 // Real template archetypes replace the clone in Phase 4.
 

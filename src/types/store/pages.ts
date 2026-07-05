@@ -1,6 +1,6 @@
 // types/store/pages.ts — Multi-page axis for the edit store.
 //
-// Mirror strategy (see multiPagePlan.md, Phase 1): the existing top-level
+// Mirror strategy (see docs/tracks/multiPagePlan.md, Phase 1): the existing top-level
 // `sections` / `sectionLayouts` / `sectionSpacing` / `content` fields remain the
 // SINGLE live working copy of the *active* page, so the ~200 existing references
 // keep working untouched. `pages` is the store of every page's slice; the active

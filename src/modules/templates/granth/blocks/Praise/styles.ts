@@ -1,5 +1,5 @@
 // Praise (सम्मान और चर्चा / GranthCriticsGrid) CSS. Two-column critic quotes with a
-// gold ❝ mark + hairline awards line. Ported from WRDirection1Granth.html (.praise).
+// gold ❝ mark + hairline awards line. Ported from template-design/WRDirection1Granth.html (.praise).
 
 export const PRAISE_STYLES = `
 .gr-praise__eyebrow{ text-align:center; }

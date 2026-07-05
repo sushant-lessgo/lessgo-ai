@@ -1,6 +1,6 @@
 // src/hooks/useGenerationStore.ts
 // New generation flow state management - Phase 1 Foundation
-// Reference: newOnboarding.md, newOnboardingPlan.md
+// Legacy onboarding-era store (still active for generation flow)
 
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";

@@ -1,6 +1,6 @@
 // src/types/service.ts
 // Service-route types - Phase 0 foundation
-// Reference: newServiceOnboarding.md, nsoPlan.md
+// Reference: docs/architecture/newServiceOnboarding.md, docs/tracks/nsoPlan.md
 
 import { meridianPalettes, techPremiumPalettes, vestriaPalettes } from '@/types/product';
 
@@ -10,7 +10,7 @@ import { meridianPalettes, techPremiumPalettes, vestriaPalettes } from '@/types/
  * `ecommerce` reserved for the Phase 13 wave (no persona maps to it yet).
  */
 // `writer` = the Writer vertical (Hindi literary profile sites; Granth template).
-// First-class audience per writerFlownTemplate.md §1, but v1 has NO generation
+// First-class audience per docs/tracks/writerFlownTemplate.md §1, but v1 has NO generation
 // store / strategy / onboarding route — writer projects are seeded white-glove and
 // render through the template module (usesTemplateModule returns true below).
 export const audienceTypes = ['product', 'service', 'ecommerce', 'writer'] as const;
@@ -300,7 +300,7 @@ export type LumenPalette = (typeof lumenPalettes)[number];
  * Granth (bespoke §13 Hindi-literary template, Writer vertical) ships a small
  * palette family designed for growth: `sinduri` (ivory paper + maroon accent,
  * default) and `neel` (cool grey + deep blue). More may be added later (e.g.
- * `van` forest-green) like the hearth/lex families. Source: WRDirection1Granth.html.
+ * `van` forest-green) like the hearth/lex families. Source: template-design/WRDirection1Granth.html.
  */
 export const granthPalettes = ['sinduri', 'neel'] as const;
 

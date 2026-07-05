@@ -1,6 +1,6 @@
 // src/modules/service/design/sectionRules.ts
 // Hearth section surface rhythm — alternates cream / cream-1 / cream-2.
-// Source of truth: newServiceOnboarding.md §5 "Section Rules (Hearth)".
+// Source of truth: docs/architecture/newServiceOnboarding.md §5 "Section Rules (Hearth)".
 
 export type HearthSurface = 'cream' | 'cream-1' | 'cream-2';
 

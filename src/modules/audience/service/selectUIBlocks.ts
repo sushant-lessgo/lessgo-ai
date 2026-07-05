@@ -3,7 +3,7 @@
 // Pilot scope: hardcoded mapping from PILOT_LAYOUT_NAMES.
 //
 // Phase 7+ replaces this with the full per-section heuristics from
-// newServiceOnboarding.md §3 Step 9 (asset signals + LLM uiblockDecisions
+// docs/architecture/newServiceOnboarding.md §3 Step 9 (asset signals + LLM uiblockDecisions
 // hints + service-type / awareness rhythm).
 
 import { PILOT_LAYOUT_NAMES } from './elementSchema';

@@ -1,4 +1,4 @@
-// Books (पुस्तकें / GranthJacketShelf) CSS. Ported from WRDirection1Granth.html
+// Books (पुस्तकें / GranthJacketShelf) CSS. Ported from template-design/WRDirection1Granth.html
 // (.books/.book/.cover). CSS-typeset book jackets with page-block shadow + inset
 // frame; a real uploaded cover replaces the face. `gr-` prefixed.
 

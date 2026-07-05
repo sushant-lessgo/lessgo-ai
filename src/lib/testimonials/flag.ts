@@ -1,4 +1,4 @@
-// Dark-launch gate for the testimonial system. See testimonialSystem.md.
+// Dark-launch gate for the testimonial system. See docs/tracks/testimonialSystem.md.
 //
 // Two flags, kept in sync:
 // - TESTIMONIALS_ENABLED (server-only) gates the dashboard page + API routes — the real

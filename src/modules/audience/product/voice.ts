@@ -1,5 +1,5 @@
 // src/modules/audience/product/voice.ts
-// Product-type voice spec — Meridian "Modern Tech" (meridianPlan.md §9 voice).
+// Product-type voice spec — Meridian "Modern Tech" (docs/tracks/meridianPlan.md §9 voice).
 // Type-level (shared by ALL product templates, not Meridian-visual-specific):
 // the accent-<em> emphasis is a product-copy rule. Baked into the product copy
 // prompt. Counterpart to audience/service/voice.ts (Hearth).

@@ -1,5 +1,5 @@
 // Writing (एक रचना / GranthFramedPage) CSS. The poem on a double-framed "page" card
-// sitting on the paper-2 band. Ported from WRDirection1Granth.html (.poem/.page).
+// sitting on the paper-2 band. Ported from template-design/WRDirection1Granth.html (.poem/.page).
 
 export const WRITING_STYLES = `
 .gr-writing{ border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline); }

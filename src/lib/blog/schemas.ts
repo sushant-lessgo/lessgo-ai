@@ -1,5 +1,5 @@
 // Blog (Phase 1) — server-entry validation for /api/blog/* routes.
-// See blogFeature.md. Body is markdown-only in P1; seo reuses the PageSeo gate.
+// See docs/tracks/blogFeature.md. Body is markdown-only in P1; seo reuses the PageSeo gate.
 import { z } from 'zod';
 import { PageSeoSchema } from '@/lib/validation';
 

@@ -1,4 +1,4 @@
-// About (परिचय) CSS. Ported from WRDirection1Granth.html (.about/.facts). Section
+// About (परिचय) CSS. Ported from template-design/WRDirection1Granth.html (.about/.facts). Section
 // sits on paper-2 (data-surface) with hairline top/bottom rules. `gr-` prefixed.
 
 export const ABOUT_STYLES = `

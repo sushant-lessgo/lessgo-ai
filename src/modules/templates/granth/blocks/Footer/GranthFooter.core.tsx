@@ -1,6 +1,6 @@
 // Single-source Footer (जुड़िए / GranthFollowFooter) layout. PLAIN module. Follow
 // block: eyebrow · heading · note · social row (Facebook + YouTube first) · fine
-// print. Ported from WRDirection1Granth.html (footer).
+// print. Ported from template-design/WRDirection1Granth.html (footer).
 
 import React from 'react';
 import type { GranthPrimitives } from '../primitives';

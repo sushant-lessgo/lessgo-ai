@@ -7,7 +7,7 @@ import { resolveCanonicalURL } from '@/lib/staticExport/canonicalUrl';
 
 // Blog index SSR fallback (blob fast path via KV route:{host}:/blog is primary).
 // Static segment — wins over the [...subpath] catch-all. Live DB data: 404s the
-// moment the last post is unpublished. See blogFeature.md.
+// moment the last post is unpublished. See docs/tracks/blogFeature.md.
 
 export const dynamic = 'force-dynamic';
 

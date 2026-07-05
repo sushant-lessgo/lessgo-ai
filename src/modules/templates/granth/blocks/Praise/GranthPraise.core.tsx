@@ -1,6 +1,6 @@
 // Single-source Praise (सम्मान और चर्चा / GranthCriticsGrid) layout. PLAIN module.
 // OPTIONAL section. Critic quotes in a 2-col grid + a gold-separated awards line.
-// Ported from WRDirection1Granth.html (.praise).
+// Ported from template-design/WRDirection1Granth.html (.praise).
 
 import React from 'react';
 import type { GranthPrimitives } from '../primitives';

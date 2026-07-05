@@ -2,7 +2,7 @@
 // SINGLE-SOURCE hero layout. PLAIN server-safe module (no client directive, no
 // hooks/stores) — the layout lives here once and renders through injected
 // primitives (E). Edit + published
-// wrappers pass edit/static primitives respectively. Ported from WRDirection1Granth.html
+// wrappers pass edit/static primitives respectively. Ported from template-design/WRDirection1Granth.html
 // hero: centred role line · display name · gold ❖ ornament · arched portrait ·
 // evocative quote · one CTA · social row (Facebook + YouTube first).
 

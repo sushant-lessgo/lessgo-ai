@@ -1,6 +1,6 @@
 // Single-source Writing (एक रचना / GranthFramedPage) layout. PLAIN module. One poem
 // on a double-framed page card. OPTIONAL section — the page composes without it.
-// Ported from WRDirection1Granth.html (.poem).
+// Ported from template-design/WRDirection1Granth.html (.poem).
 
 import React from 'react';
 import type { GranthPrimitives } from '../primitives';

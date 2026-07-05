@@ -1,6 +1,6 @@
 // src/modules/templates/granth/tokens.ts
 // Granth design tokens — palette-INVARIANT base (fonts, type scale, spacing).
-// Source of truth: WRDirection1Granth.html (:root + type scale, lines 34-63).
+// Source of truth: template-design/WRDirection1Granth.html (:root + type scale, lines 34-63).
 //
 // Unlike Lumen (one brass accent, fixed surfaces), Granth's PALETTE swaps every
 // COLOUR (paper/ink/accent/hairline/gold) — so all colour tokens live in
