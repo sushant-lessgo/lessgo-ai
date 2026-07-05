@@ -18,13 +18,15 @@ export interface MockProductStrategyInput {
   oneLiner: string;
   features: string[];
   primaryAudience: string;
+  /** Template-aware section/block selection (vestria mock flows). */
+  templateId?: string;
 }
 
 export function generateMockMeridianStrategy(
   input: MockProductStrategyInput
 ): ProductStrategyOutput {
-  const sections = selectProductSections();
-  const { uiblocks } = selectProductBlocks({ sections });
+  const sections = selectProductSections({ templateId: input.templateId });
+  const { uiblocks } = selectProductBlocks({ sections, templateId: input.templateId });
 
   return {
     awareness: 'solution-aware-skeptical',
@@ -77,6 +79,11 @@ export interface MockProductCopyInput {
 export function generateMockMeridianCopy(
   input: MockProductCopyInput
 ): Record<string, SectionCopy> {
+  // Vestria layouts → vestria-shaped mock (element keys differ per template family).
+  if (input.uiblocks.hero?.startsWith('Vestria') || input.uiblocks.header?.startsWith('Vestria')) {
+    return generateMockVestriaCopy(input);
+  }
+
   const out: Record<string, SectionCopy> = {};
 
   if (input.uiblocks.header) {
@@ -185,6 +192,211 @@ export function generateMockMeridianCopy(
         footer_columns: [
           { id: '', heading: 'Product', links: [ { id: '', label: 'Features', href: '#' }, { id: '', label: 'Pricing', href: '#' }, { id: '', label: 'Docs', href: '#' } ] },
           { id: '', heading: 'Company', links: [ { id: '', label: 'About', href: '#' }, { id: '', label: 'Blog', href: '#' } ] },
+        ],
+      } as any,
+    };
+  }
+
+  return out;
+}
+
+/**
+ * Vestria (tailored-trade) mock copy — a fictional joinery workshop, matching
+ * the vestria element schemas. Ids intentionally "" to exercise backfill.
+ */
+function generateMockVestriaCopy(input: MockProductCopyInput): Record<string, SectionCopy> {
+  const out: Record<string, SectionCopy> = {};
+  const u = input.uiblocks;
+
+  if (u.header) {
+    out.header = {
+      elements: {
+        logo_text: input.productName || 'Vestria',
+        logo_mark_text: 'Workshop',
+        cta_text: 'Request a Quote',
+        cta_href: '#contact',
+        secondary_cta_text: 'Catalogue',
+        secondary_cta_href: '#catalog',
+        util_note: 'Manufacturing since 2009',
+        nav_items: [
+          { id: '', label: 'Industries', href: '#industries' },
+          { id: '', label: 'About', href: '#about' },
+          { id: '', label: 'Services', href: '#features' },
+          { id: '', label: 'Catalogue', href: '#catalog' },
+        ],
+      } as any,
+    };
+  }
+
+  if (u.hero) {
+    out.hero = {
+      elements: {
+        tag_text: 'Commercial Joinery · Northeast',
+        headline: 'Fit-outs built to <em>outlast the lease.</em>',
+        lede: 'From boutique counters to full hotel refits — designed, machined and installed to your spec, on your programme.',
+        cta_text: 'Request a Quote',
+        cta_href: '#contact',
+        secondary_cta_text: 'View Catalogue',
+        secondary_cta_href: '#catalog',
+        stamp_value: '300+',
+        stamp_label: 'Projects delivered',
+        values: [
+          { id: '', kicker: '01 — Precision', title: 'Millimetre Tolerances', description: 'CNC-machined panels checked against drawings before dispatch.' },
+          { id: '', kicker: '02 — Programme', title: 'On-Site On Time', description: 'Install crews scheduled around your trades.' },
+          { id: '', kicker: '03 — Partnership', title: 'One Point of Contact', description: 'A named project manager from survey to snag list.' },
+        ],
+      } as any,
+    };
+  }
+
+  if (u.trust) {
+    out.trust = {
+      elements: {
+        label_text: 'Trusted by operators across the region',
+        logos: [],
+      } as any,
+    };
+  }
+
+  if (u.industries) {
+    out.industries = {
+      elements: {
+        eyebrow: 'Our Core Industries',
+        headline: 'Joinery for every floor you run.',
+        lede: 'Sector-specific programmes built to each environment’s standards.',
+        industries: [
+          { id: '', kicker: 'Sector 01', title: 'Hospitality', description: 'Reception desks, bars and back-of-house.' },
+          { id: '', kicker: 'Sector 02', title: 'Retail', description: 'Counters, shelving and window displays.' },
+          { id: '', kicker: 'Sector 03', title: 'Workplace', description: 'Meeting rooms, storage walls and booths.' },
+        ],
+      } as any,
+    };
+  }
+
+  if (u.about) {
+    out.about = {
+      elements: {
+        eyebrow: 'About the Workshop',
+        headline: 'Craft at production scale.',
+        lede: 'From a single bench in 2009 to a full-service workshop.',
+        body: 'Every programme runs on the same foundations — considered materials, precise machining and an accountable install.',
+        stats: [
+          { id: '', value: '2009', label: 'Founded' },
+          { id: '', value: '300+', label: 'Projects' },
+        ],
+      } as any,
+    };
+  }
+
+  if (u.features) {
+    out.features = {
+      elements: {
+        eyebrow: 'Our Services',
+        headline: 'Services that separate us.',
+        lede: 'From first sketch to final snag.',
+        features: [
+          { id: '', kicker: 'SVC / 01', title: 'Design & Drawings', description: 'Shop drawings for sign-off before cutting.' },
+          { id: '', kicker: 'SVC / 02', title: 'CNC Manufacture', description: 'In-house machining with batch QC.' },
+          { id: '', kicker: 'SVC / 03', title: 'Installation', description: 'Fitted, snagged and handed over clean.' },
+        ],
+      } as any,
+    };
+  }
+
+  if (u.catalog) {
+    out.catalog = {
+      elements: {
+        eyebrow: 'The Catalogue',
+        headline: 'A build for every brief.',
+        cta_text: 'Request full catalogue (PDF)',
+        cta_href: '#contact',
+        items: [
+          { id: '', code: 'J-01', title: 'Reception Counter', category: 'Hospitality · Oak veneer', glyph: 'Counter' },
+          { id: '', code: 'J-02', title: 'Storage Wall', category: 'Workplace · Laminate', glyph: 'Storage' },
+          { id: '', code: 'J-03', title: 'Retail Gondola', category: 'Retail · Birch ply', glyph: 'Gondola' },
+          { id: '', code: 'J-04', title: 'Banquette Seating', category: 'Hospitality · Upholstered', glyph: 'Seating' },
+        ],
+      } as any,
+    };
+  }
+
+  if (u.materials) {
+    out.materials = {
+      elements: {
+        eyebrow: 'Materials & Finishes',
+        headline: 'Material chosen for the work.',
+        lede: 'Stock finishes plus made-to-order veneers.',
+        swatches: [
+          { id: '', name: 'Oak Veneer', code: '/ 01' },
+          { id: '', name: 'Walnut', code: '/ 02' },
+          { id: '', name: 'Birch Ply', code: '/ 03' },
+        ],
+        rows: [
+          { id: '', name: 'Oak Veneer', use: 'Front-of-house — warm, durable' },
+          { id: '', name: 'Compact Laminate', use: 'High-traffic worktops' },
+          { id: '', name: 'Birch Ply', use: 'Exposed-edge retail fittings' },
+        ],
+      } as any,
+    };
+  }
+
+  if (u.process) {
+    out.process = {
+      elements: {
+        eyebrow: 'How We Work',
+        headline: 'From survey to sign-off, one team.',
+        steps: [
+          { id: '', kicker: 'Step 01', title: 'Survey', description: 'We measure on site.' },
+          { id: '', kicker: 'Step 02', title: 'Drawings', description: 'Sign-off before cutting.' },
+          { id: '', kicker: 'Step 03', title: 'Manufacture', description: 'Machined in-house, batch QC.' },
+          { id: '', kicker: 'Step 04', title: 'Install', description: 'Fitted and handed over clean.' },
+        ],
+      } as any,
+    };
+  }
+
+  if (u.testimonials) {
+    out.testimonials = {
+      elements: {
+        eyebrow: 'In Their Words',
+        headline: 'Clients who stopped shopping around.',
+        testimonials: [
+          { id: '', quote: 'The counters arrived exactly to drawing and the install was done overnight.', author_name: 'An operations director', author_role: 'Hotel group' },
+          { id: '', quote: 'One point of contact from survey to snag list — refreshingly boring.', author_name: 'A project lead', author_role: 'Retail fit-out' },
+        ],
+      } as any,
+    };
+  }
+
+  if (u.contact) {
+    out.contact = {
+      elements: {
+        tag_text: 'Request a Quote',
+        headline: 'Tell us what you’re fitting out.',
+        lede: 'Share the scope and a named estimator replies within one business day.',
+        form_note: 'We reply within 1 business day.',
+        assurances: [
+          { id: '', kicker: '01', text: 'No obligation — quotes are complimentary.' },
+          { id: '', kicker: '02', text: 'Site surveys within one week of enquiry.' },
+        ],
+      } as any,
+    };
+  }
+
+  if (u.footer) {
+    out.footer = {
+      elements: {
+        brand_text: input.productName || 'Vestria',
+        blurb: 'Design, manufacture and installation for professional interiors.',
+        address_heading: 'Get in Touch',
+        copyright: `© ${input.productName || 'Vestria'} — All rights reserved.`,
+        tagline: 'Built to outlast the lease.',
+        link_columns: [
+          { id: '', heading: 'Explore', links: [
+            { id: '', label: 'Industries', href: '#industries' },
+            { id: '', label: 'Services', href: '#features' },
+            { id: '', label: 'Catalogue', href: '#catalog' },
+          ] },
         ],
       } as any,
     };

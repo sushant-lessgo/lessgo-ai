@@ -5,10 +5,11 @@
 // schema (audience/product/elementSchema.ts). Heuristic/awareness block choice
 // is a later phase.
 
-import { MERIDIAN_LAYOUT_NAMES } from './elementSchema';
+import { MERIDIAN_LAYOUT_NAMES, VESTRIA_LAYOUT_NAMES } from './elementSchema';
 
 export interface SelectProductBlocksInput {
   sections: string[];
+  templateId?: string;
 }
 
 export interface SelectProductBlocksOutput {
@@ -18,7 +19,9 @@ export interface SelectProductBlocksOutput {
 export function selectProductBlocks(
   input: SelectProductBlocksInput
 ): SelectProductBlocksOutput {
-  const map = MERIDIAN_LAYOUT_NAMES as Record<string, string>;
+  const map = (input.templateId === 'vestria'
+    ? VESTRIA_LAYOUT_NAMES
+    : MERIDIAN_LAYOUT_NAMES) as Record<string, string>;
   const uiblocks: Record<string, string> = {};
   for (const section of input.sections) {
     const layout = map[section];

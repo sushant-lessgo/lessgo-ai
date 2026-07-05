@@ -13,8 +13,17 @@ import {
   defaultMeridianVariant,
   defaultTechPremiumPalette,
   defaultTechPremiumVariant,
+  defaultVestriaPalette,
+  defaultVestriaVariant,
 } from '@/types/product';
 import { buildTechPremiumHomeFinalContent } from '@/hooks/editStore/archetypes';
+// Plain data module (fields only, no component code) — safe to import statically
+// without breaching the template bundle firewall.
+import {
+  DEFAULT_VESTRIA_LEAD_FIELDS,
+  VESTRIA_LEAD_SUBMIT_TEXT,
+  VESTRIA_LEAD_SUCCESS_MESSAGE,
+} from '@/modules/templates/vestria/blocks/Contact/contactFields';
 
 type Stage = 'strategy' | 'copy' | 'saving' | 'done';
 
@@ -46,6 +55,8 @@ export default function GeneratingStep() {
   const landingGoal = useProductGenerationStore((s) => s.landingGoal);
   const offer = useProductGenerationStore((s) => s.offer);
   const importedTestimonials = useProductGenerationStore((s) => s.importedTestimonials);
+  const importSourceUrl = useProductGenerationStore((s) => s.importSourceUrl);
+  const storeTemplateId = useProductGenerationStore((s) => s.templateId);
   const setGenerationError = useProductGenerationStore((s) => s.setGenerationError);
 
   const [stage, setStage] = useState<Stage>('strategy');
@@ -90,6 +101,31 @@ export default function GeneratingStep() {
       };
     });
 
+    // Lead-form provisioning (vestria contact section) — mirror of pageActions'
+    // ensureContactForm: a real MVPForm in finalContent.forms (top level — where
+    // loadFromDraft restores from) + the section's form_id, so form.v1.js wires
+    // up on publish and submissions land in the dashboard.
+    let forms: Record<string, any> | undefined;
+    if (storeTemplateId === 'vestria') {
+      const contactId = sectionIds.find((id, i) => sectionTypes[i] === 'contact');
+      if (contactId) {
+        const formId = `form-${Date.now()}`;
+        forms = {
+          [formId]: {
+            id: formId,
+            name: 'Contact',
+            fields: JSON.parse(JSON.stringify(DEFAULT_VESTRIA_LEAD_FIELDS)),
+            submitButtonText: VESTRIA_LEAD_SUBMIT_TEXT,
+            successMessage: VESTRIA_LEAD_SUCCESS_MESSAGE,
+            integrations: [{ id: 'int-dashboard', type: 'dashboard', name: 'Dashboard', enabled: true }],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        };
+        content[contactId].elements.form_id = formId;
+      }
+    }
+
     return {
       finalContent: {
         layout: {
@@ -109,12 +145,15 @@ export default function GeneratingStep() {
           version: 1,
           tokenId,
         },
+        ...(forms ? { forms } : {}),
         onboardingData: {
           oneLiner,
           productName,
           understanding,
           landingGoal,
           offer,
+          // Durable project ↔ SiteContext link (Phase 1) + Phase 3 lookup key.
+          ...(importSourceUrl ? { importSourceUrl } : {}),
         },
         generatedAt: Date.now(),
       },
@@ -136,13 +175,20 @@ export default function GeneratingStep() {
     setError(null);
     setCreditsError(false);
 
+    // ─── Explicit template selection wins (checked BEFORE the persona branch) ───
+    // ?template=vestria → store.templateId; a vestria run must never be hijacked
+    // by the hardware-founder persona bridge below.
+    const explicitVestria = storeTemplateId === 'vestria';
+
     // ─── Persona → template (fired in parallel with generation; no serial cost) ───
     // The hardware-founder persona gets the TechPremium product template; every other
     // product persona keeps Meridian. On fetch error / null persona → Meridian (safe).
-    const personaPromise: Promise<string | null> = fetch('/api/user/persona')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => (j?.persona ?? null) as string | null)
-      .catch(() => null);
+    const personaPromise: Promise<string | null> = explicitVestria
+      ? Promise.resolve(null)
+      : fetch('/api/user/persona')
+          .then((r) => (r.ok ? r.json() : null))
+          .then((j) => (j?.persona ?? null) as string | null)
+          .catch(() => null);
 
     // ─── TechPremium deterministic bridge (Phase 4c) ───
     // TODO(ai-fill): hardware-founder onboarding currently SKIPS AI strategy/copy and
@@ -150,7 +196,7 @@ export default function GeneratingStep() {
     // temporary naayom-era bridge — replace with an AI path that fills the 12
     // TechPremium section types before onboarding a 2nd hardware founder.
     const persona = await personaPromise;
-    if (persona === 'hardware-founder') {
+    if (!explicitVestria && persona === 'hardware-founder') {
       setStage('saving');
       try {
         const finalContent = buildTechPremiumHomeFinalContent({
@@ -210,6 +256,7 @@ export default function GeneratingStep() {
           primaryAudience: audiences[0] || 'early adopters',
           otherAudiences: audiences.slice(1),
           categories: understanding.categories ?? [],
+          templateId: storeTemplateId,
         }),
       });
       const json = await res.json();
@@ -250,6 +297,7 @@ export default function GeneratingStep() {
           landingGoal,
           features,
           realTestimonials: importedTestimonials,
+          templateId: storeTemplateId,
         }),
       });
       const json = await res.json();
@@ -277,10 +325,10 @@ export default function GeneratingStep() {
     // ─── Save ───
     setStage('saving');
     // Hardware-founder (TechPremium) was handled by the deterministic branch above;
-    // only Meridian reaches here.
-    const templateId = PILOT_TEMPLATE;
-    const paletteId = PILOT_PALETTE;
-    const variantId = PILOT_VARIANT;
+    // Meridian or Vestria reaches here (store templateId decides).
+    const templateId = explicitVestria ? 'vestria' : PILOT_TEMPLATE;
+    const paletteId = explicitVestria ? defaultVestriaPalette : PILOT_PALETTE;
+    const variantId = explicitVestria ? defaultVestriaVariant : PILOT_VARIANT;
     try {
       const { finalContent } = buildFinalContent(strategy, copySections, title);
       const res = await fetch('/api/saveDraft', {
@@ -322,6 +370,8 @@ export default function GeneratingStep() {
     oneLiner,
     offer,
     importedTestimonials,
+    importSourceUrl,
+    storeTemplateId,
     tokenId,
     posthog,
     router,

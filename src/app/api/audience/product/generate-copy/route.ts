@@ -32,6 +32,8 @@ import {
 import { generateMockMeridianCopy } from '@/modules/prompt/mockResponseGeneratorProduct';
 import { landingGoals } from '@/types/generation';
 import type { SectionCopy } from '@/types/generation';
+import { isAdmin } from '@/lib/admin';
+import type { ProductVoiceId } from '@/modules/audience/product/voice';
 
 export const dynamic = 'force-dynamic';
 
@@ -86,6 +88,9 @@ const GenerateProductCopyRequestSchema = z.object({
       })
     )
     .optional(),
+  // Voice derivation only (whitelist) — stripped before prompt input; the prompt
+  // receives a copy-voice id, never template identity. vestria admin-gated.
+  templateId: z.enum(['meridian', 'vestria']).optional(),
 });
 
 async function productCopyHandler(req: NextRequest): Promise<Response> {
@@ -111,6 +116,7 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       landingGoal,
       features,
       realTestimonials,
+      templateId,
     } = validation.data;
 
     // 2. Auth
@@ -122,6 +128,15 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       );
     }
     const userId = authCheck.userId!;
+
+    // 2a. Vestria admin gate (matches the strategy route) + voice derivation.
+    if (templateId === 'vestria' && !isAdmin(userId)) {
+      return createSecureResponse(
+        { success: false, error: 'forbidden', message: 'This template is not yet generally available.' },
+        403
+      );
+    }
+    const voiceId: ProductVoiceId = templateId === 'vestria' ? 'tailored-trade' : 'modern-tech';
 
     // 2b. Mock mode
     const authHeader = req.headers.get('authorization');
@@ -151,7 +166,7 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       });
     }
 
-    // 3. Build prompt
+    // 3. Build prompt (voiceId only — templateId never reaches the prompt layer)
     const prompt = buildProductCopyPrompt({
       strategy: strategy as any,
       uiblocks,
@@ -160,6 +175,7 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       offer,
       landingGoal: landingGoal as any,
       features,
+      voiceId,
     });
     logger.dev('[product-generate-copy] PROMPT:', prompt);
 

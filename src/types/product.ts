@@ -62,6 +62,25 @@ export const defaultTechPremiumPalette: TechPremiumPalette = 'forest';
 export const defaultTechPremiumVariant: TechPremiumVariant = 'default';
 
 /**
+ * ===== VESTRIA PALETTE / VARIANT =====
+ * GA product template for B2B manufacturing / trade lead-gen (pilot: Golden Shadow
+ * Trading — uniform manufacturing). Paper+dark editorial system with a cobalt
+ * accent duo. Single palette + single variant v1 (family designed for growth).
+ * Source of truth: "Vestria - Uniform Manufacturing (Cobalt).html" (<head> :root).
+ */
+export const vestriaPalettes = ['cobalt'] as const;
+export type VestriaPalette = (typeof vestriaPalettes)[number];
+
+export const vestriaVariants = ['tailored'] as const;
+export type VestriaVariant = (typeof vestriaVariants)[number];
+
+/** Default palette when none is picked or persisted. */
+export const defaultVestriaPalette: VestriaPalette = 'cobalt';
+
+/** Default variant when none is picked or persisted. */
+export const defaultVestriaVariant: VestriaVariant = 'tailored';
+
+/**
  * ===== MERIDIAN STRATEGY (P3 — generation wiring) =====
  * The assembled strategy passed from /api/audience/product/strategy into
  * /api/audience/product/generate-copy. = raw LLM output (ProductStrategyResponse:

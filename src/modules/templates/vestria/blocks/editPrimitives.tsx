@@ -1,0 +1,200 @@
+'use client';
+
+// src/modules/templates/vestria/blocks/editPrimitives.tsx
+// SHARED edit-mode primitives for every Vestria block core (one place, not per
+// block). Backed by VestriaEditable (text), the store (image upload + collection
+// writes), and LinkTargetPopover (href editing). Provided to a core via
+// <VestriaEditProvider> + the module-level `editPrimitives` object; the core stays
+// a pure plain module that only references the VestriaPrimitives contract.
+
+import React from 'react';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
+import { buildPageLinkOptions } from '@/utils/pageLinks';
+import { VestriaEditable } from '../components/VestriaEditable';
+import { LinkTargetPopover } from '../components/LinkTargetPopover';
+import type {
+  VestriaPrimitives, VestriaTxtProps, VestriaImgProps, VestriaLinkProps, VestriaListProps,
+} from './primitives';
+
+export interface VestriaEditCtx {
+  sectionId: string;
+  update: (elementKey: string, value: any) => void;
+  updateCollection: (collectionKey: string, value: any[]) => void;
+  getCollection: (collectionKey: string) => any[];
+  uploadImage?: (file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>;
+  sectionOptions: { value: string; label: string }[];
+  pageOptions: { value: string; label: string }[];
+}
+
+const Ctx = React.createContext<VestriaEditCtx | null>(null);
+
+export function VestriaEditProvider({ ctx, children }: { ctx: VestriaEditCtx; children: React.ReactNode }) {
+  return <Ctx.Provider value={ctx}>{children}</Ctx.Provider>;
+}
+
+function useCtx(): VestriaEditCtx {
+  const c = React.useContext(Ctx);
+  if (!c) throw new Error('Vestria edit primitive used outside <VestriaEditProvider>');
+  return c;
+}
+
+/** Parse a collection-item path 'coll.<id>.field' → parts, or null for a scalar key. */
+function parsePath(key: string): { coll: string; id: string; field: string } | null {
+  const i = key.indexOf('.');
+  if (i < 0) return null;
+  const j = key.indexOf('.', i + 1);
+  if (j < 0) return null;
+  return { coll: key.slice(0, i), id: key.slice(i + 1, j), field: key.slice(j + 1) };
+}
+
+function genId(prefix: string): string {
+  return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function saveField(ctx: VestriaEditCtx, elementKey: string, value: any) {
+  const p = parsePath(elementKey);
+  if (!p) { ctx.update(elementKey, value); return; }
+  const arr = ctx.getCollection(p.coll).map((it) => (it.id === p.id ? { ...it, [p.field]: value } : it));
+  ctx.updateCollection(p.coll, arr);
+}
+
+const Txt: React.FC<VestriaTxtProps> = ({ elementKey, value, as = 'span', className, style, placeholder, multiline, isButton }) => {
+  const ctx = useCtx();
+  return (
+    <VestriaEditable
+      as={as}
+      mode="edit"
+      sectionId={ctx.sectionId}
+      content={{ [elementKey]: value ?? '' }}
+      elementKey={elementKey}
+      onSave={(k, v) => saveField(ctx, k, v)}
+      className={className}
+      style={style}
+      placeholder={placeholder}
+      multiline={multiline}
+      enterBehavior={multiline ? 'newline' : 'save'}
+      isButton={isButton}
+    />
+  );
+};
+
+const Img: React.FC<VestriaImgProps> = ({ elementKey, src, alt, className, imgClassName, placeholder }) => {
+  const ctx = useCtx();
+  const [uploading, setUploading] = React.useState(false);
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !ctx.uploadImage) return;
+    setUploading(true);
+    try {
+      const p = parsePath(elementKey);
+      const url = await ctx.uploadImage(file, { sectionId: ctx.sectionId, elementKey });
+      // Collection-item image: the store writes by elementKey; also patch the item
+      // so the resolved collection value carries the new src.
+      if (p && typeof url === 'string') saveField(ctx, elementKey, url);
+    } catch { /* surfaced by the store */ }
+    finally { setUploading(false); }
+  };
+  const clear = () => saveField(ctx, elementKey, '');
+  return (
+    <div className={className} style={{ position: 'relative' }}>
+      {src ? <img src={src} alt={alt || ''} className={imgClassName} /> : placeholder}
+      <span className="vs-img-edit">
+        <label className="vs-img-edit__btn">
+          {uploading ? '…' : (src ? 'Replace' : '↥ Image')}
+          <input type="file" accept="image/*" onChange={onFile} hidden disabled={uploading} />
+        </label>
+        {src && <button type="button" className="vs-img-edit__x" onClick={clear}>Remove</button>}
+      </span>
+    </div>
+  );
+};
+
+const Link: React.FC<VestriaLinkProps> = ({ hrefKey, href, className, ariaLabel, children }) => {
+  const ctx = useCtx();
+  return (
+    <span className="vs-link-edit" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <span className={className} aria-label={ariaLabel}>{children}</span>
+      <LinkTargetPopover
+        href={href || ''}
+        sectionOptions={ctx.sectionOptions}
+        pageOptions={ctx.pageOptions}
+        onChange={(next) => saveField(ctx, hrefKey, next)}
+      />
+    </span>
+  );
+};
+
+const List: React.FC<VestriaListProps> = ({ collectionKey, items, render, makeItem, min = 0, max = 99, addLabel = '+ Add', className, itemClassName }) => {
+  const ctx = useCtx();
+  const add = () => {
+    if (!makeItem || items.length >= max) return;
+    ctx.updateCollection(collectionKey, [...items, { id: genId(collectionKey), ...makeItem() }]);
+  };
+  const removeAt = (idx: number) => {
+    if (items.length <= min) return;
+    ctx.updateCollection(collectionKey, items.filter((_, i) => i !== idx));
+  };
+  return (
+    <div className={className}>
+      {items.map((item, i) => (
+        <div key={item.id ?? i} className={itemClassName} style={{ position: 'relative' }}>
+          {render(item, i)}
+          {items.length > min && (
+            <button type="button" className="vs-list-x" onClick={() => removeAt(i)} title="Remove">×</button>
+          )}
+        </div>
+      ))}
+      {makeItem && items.length < max && (
+        <button type="button" className="vs-list-add" onClick={add}>{addLabel}</button>
+      )}
+    </div>
+  );
+};
+
+export const editPrimitives: VestriaPrimitives = { Txt, Img, Link, List };
+
+/**
+ * Build the edit context every Vestria block wrapper needs, in one place, so the
+ * thin `.tsx` wrappers stay ~10 lines. `blockContent` (resolved, incl. collections)
+ * backs getCollection; sections/pages/uploadImage come from the store.
+ */
+export function useVestriaEditCtx(
+  sectionId: string,
+  blockContent: Record<string, any>,
+  update: (elementKey: string, value: any) => void,
+  updateCollection: (collectionKey: string, value: any[]) => void,
+): VestriaEditCtx {
+  const store = useEditStore() as any;
+  const sections = store.sections as string[] | undefined;
+  const pages = store.pages;
+  const uploadImage = store.uploadImage;
+  const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
+  const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
+  const contentRef = React.useRef(blockContent);
+  contentRef.current = blockContent;
+  return {
+    sectionId,
+    update,
+    updateCollection,
+    getCollection: (k) => (contentRef.current?.[k] as any[]) || [],
+    uploadImage,
+    sectionOptions,
+    pageOptions,
+  };
+}
+
+/** Small CSS for the edit-only affordances (image/list/link controls). Injected
+ *  by VestriaThemeInjector (edit/preview only); kept here so the markup and its
+ *  chrome stay together. */
+export const EDIT_AFFORDANCE_STYLES = `
+.vs-img-edit{ position:absolute; right:8px; bottom:8px; z-index:3; display:inline-flex; gap:6px; }
+.vs-img-edit__btn{ font-family:var(--ff-mono); font-size:11px; letter-spacing:.04em; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:5px 9px; cursor:pointer; }
+.vs-img-edit__btn:hover{ border-color:var(--accent); }
+.vs-img-edit__x{ font-family:var(--ff-mono); font-size:11px; color:#fff; background:var(--accent-deep); border:none; border-radius:var(--r); padding:5px 8px; cursor:pointer; }
+.vs-list-x{ position:absolute; top:-8px; right:-8px; z-index:4; width:20px; height:20px; line-height:1; font-size:14px; color:#fff; background:var(--accent-deep); border:none; border-radius:999px; cursor:pointer; opacity:0; transition:opacity .15s; }
+.vs-list-x:hover, *:hover > .vs-list-x{ opacity:1; }
+.vs-list-add{ font-family:var(--ff-mono); font-size:12px; letter-spacing:.06em; color:var(--accent-deep); background:transparent; border:1px dashed var(--line); border-radius:var(--r); padding:10px 16px; cursor:pointer; }
+.vs-list-add:hover{ border-color:var(--accent); }
+`;

@@ -4,7 +4,9 @@
 // Mirrors /onboarding/service/[token]/page.tsx. In-memory store; reload
 // restarts at oneLiner (acceptable for pilot, matches service/product flows).
 
+import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { useSearchParams } from 'next/navigation';
 import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
 import StepContainer from './components/StepContainer';
 import OneLinerStep from './components/steps/OneLinerStep';
@@ -27,8 +29,23 @@ const stepComponents: Record<string, React.ComponentType> = {
   generating: GeneratingStep,
 };
 
+// Whitelisted ?template= values (vestria is additionally admin-gated server-side).
+const TEMPLATE_PARAM_WHITELIST = ['meridian', 'vestria'] as const;
+
 export default function ProductOnboardingPage() {
   const currentStep = useProductGenerationStore((s) => s.currentStep);
+  const setTemplateId = useProductGenerationStore((s) => s.setTemplateId);
+  const searchParams = useSearchParams();
+  const templateParam = searchParams?.get('template');
+
+  // Read ?template=vestria once on mount (pilot selection; a future product
+  // picker sets the same store field).
+  useEffect(() => {
+    if (templateParam && (TEMPLATE_PARAM_WHITELIST as readonly string[]).includes(templateParam)) {
+      setTemplateId(templateParam as (typeof TEMPLATE_PARAM_WHITELIST)[number]);
+    }
+  }, [templateParam, setTemplateId]);
+
   const StepComponent = stepComponents[currentStep] ?? OneLinerStep;
 
   return (

@@ -273,6 +273,28 @@
 }
 
 /* ============================================================================
+   Bodoni Moda - Vestria display (VARIABLE: opsz 6..96 + wght 400..900)
+   Variable file + weight RANGE are load-bearing — a static instance kills the
+   optical-size axis. Italic face covers the Vestria hero <em> accent.
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Bodoni Moda';
+  src: url('/fonts/bodoni-moda/bodoni-moda-latin-opsz-normal.woff2') format('woff2-variations');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bodoni Moda';
+  src: url('/fonts/bodoni-moda/bodoni-moda-latin-opsz-italic.woff2') format('woff2-variations');
+  font-weight: 400 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ============================================================================
    Instrument Serif - Surge `editorial` variant display (static 400 + italic)
    ============================================================================ */
 

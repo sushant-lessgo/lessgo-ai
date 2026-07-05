@@ -55,10 +55,85 @@ export const PRODUCT_VOICE = {
 } as const;
 
 /**
- * Render the voice spec as a prompt-ready Markdown block. Injected into
- * buildProductCopyPrompt.
+ * ===== TAILORED TRADE (Vestria) =====
+ * Premium trade manufacturer voice — concrete, procurement-friendly, zero hype,
+ * restrained. Speaks to operations/procurement buyers (hotels, hospitals,
+ * schools, sites), not developers. Accent-<em> here is an ITALIC serif accent
+ * (Bodoni Moda italic + accent colour), hero headline only.
  */
-export function formatProductVoiceForPrompt(): string {
+export const TAILORED_TRADE_VOICE = {
+  toneProfile:
+    'assured, tailored, operator-to-operator — trade credibility without salesmanship',
+
+  cadenceRules: [
+    'Calm, complete sentences. State the capability, then what it means on their floor.',
+    'Concrete and specific: name materials, quantities, turnaround ("QC pass on every batch", not "premium quality").',
+    'Accent emphasis is rare — wrap 1-2 words in <em> in the HERO headline only. Rendered as an italic serif accent.',
+    'Speak to the person who runs procurement or operations. They buy reliability, not excitement.',
+    'No exclamation marks. Craft carries the tone, not punctuation.',
+  ],
+
+  lexicon: {
+    preferred: ['tailored', 'manufactured', 'delivered', 'managed', 'fitted', 'durable', 'consistent', 'accountable'],
+    forbidden: [
+      'revolutionary', 'game-changing', 'cutting-edge', 'seamless', 'supercharge',
+      'unlock', 'leverage', 'synergy', 'best-in-class', 'next-level', 'effortless',
+      'world-class', 'passion',
+    ],
+  },
+
+  examples: {
+    heroHeadline: [
+      'Uniforms tailored for teams that <em>mean business.</em>',
+      'Workwear built for the <em>floor you run.</em>',
+    ],
+    tag: ['Uniform Manufacturing · GCC', 'Custom Workwear · Since 2009'],
+    lede: [
+      'From five-star housekeeping to hospital wards — we design, manufacture and deliver professional attire at scale, built to your brand and fit standards.',
+      'One accountable partner from first sketch to reorder: held stock, managed sizing, named account support.',
+    ],
+  },
+
+  roleNotes: {
+    accent:
+      'The <em> accent renders as an ITALIC serif word in the accent colour (Bodoni Moda italic). Reserve it for the emotional pivot of the hero headline — nothing else.',
+    tag: 'Tracked uppercase mono with a dashed rule prefix. Category + region framing fits ("Uniform Manufacturing · GCC").',
+  },
+} as const;
+
+export type ProductVoiceId = 'modern-tech' | 'tailored-trade';
+
+/**
+ * Render the voice spec as a prompt-ready Markdown block. Injected into
+ * buildProductCopyPrompt. Defaults to Meridian "Modern Tech".
+ */
+export function formatProductVoiceForPrompt(voiceId: ProductVoiceId = 'modern-tech'): string {
+  if (voiceId === 'tailored-trade') {
+    return `## VOICE — TAILORED TRADE (Premium Manufacturer)
+
+**Tone profile:** ${TAILORED_TRADE_VOICE.toneProfile}
+
+**Cadence rules:**
+${TAILORED_TRADE_VOICE.cadenceRules.map((r) => `- ${r}`).join('\n')}
+
+**Preferred words:** ${TAILORED_TRADE_VOICE.lexicon.preferred.join(', ')}
+**Forbidden words (do NOT use, anywhere — incl. brand names, CTAs, footer text):** ${TAILORED_TRADE_VOICE.lexicon.forbidden.join(', ')}
+
+**Accent convention (CRITICAL — hero headline only):**
+${TAILORED_TRADE_VOICE.roleNotes.accent}
+- Wrap 1-2 emphasized words in <em>...</em> in the HERO headline ONLY.
+- Do NOT add <em> to ledes, section headlines, cards, quotes, or any other field.
+
+Hero headline examples:
+${TAILORED_TRADE_VOICE.examples.heroHeadline.map((e) => `  - "${e}"`).join('\n')}
+
+Lede examples (PLAIN — no <em>, concrete and operator-facing):
+${TAILORED_TRADE_VOICE.examples.lede.map((e) => `  - "${e}"`).join('\n')}
+
+**Tag style:** ${TAILORED_TRADE_VOICE.roleNotes.tag}
+Examples: ${TAILORED_TRADE_VOICE.examples.tag.map((e) => `"${e}"`).join(', ')}`;
+  }
+
   return `## VOICE — MERIDIAN (Modern Tech)
 
 **Tone profile:** ${PRODUCT_VOICE.toneProfile}

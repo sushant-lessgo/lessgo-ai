@@ -17,6 +17,28 @@ export const MERIDIAN_PILOT_SECTIONS = [
   'footer',
 ] as const;
 
-export function selectProductSections(): string[] {
+// Vestria (GA manufacturing/trade lead-gen) home — full mock order. Flat like
+// the Meridian pilot; the Phase-2 sitemap gate makes this per-page/editable.
+export const VESTRIA_PILOT_SECTIONS = [
+  'header',
+  'hero',
+  'trust',
+  'industries',
+  'about',
+  'features',
+  'catalog',
+  'materials',
+  'process',
+  'testimonials',
+  'contact',
+  'footer',
+] as const;
+
+export interface SelectProductSectionsOptions {
+  templateId?: string;
+}
+
+export function selectProductSections(opts?: SelectProductSectionsOptions): string[] {
+  if (opts?.templateId === 'vestria') return [...VESTRIA_PILOT_SECTIONS];
   return [...MERIDIAN_PILOT_SECTIONS];
 }

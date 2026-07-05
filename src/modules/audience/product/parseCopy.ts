@@ -13,7 +13,9 @@
 import type { SectionCopy } from '@/types/generation';
 import { logger } from '@/lib/logger';
 import { applyAllSchemaDefaults } from '@/modules/sections/layoutElementSchema';
-import { meridianElementSchema } from './elementSchema';
+// Combined product schema (meridian + vestria) so layout lookups cover ALL
+// product templates — a meridian-only lookup silently skips vestria collections.
+import { productElementSchema } from './elementSchema';
 import { applyAccentEmFallback } from './accentFallback';
 
 export interface ProductCopyValidationResult {
@@ -70,7 +72,7 @@ export function backfillCollectionIds(
 ): Record<string, SectionCopy> {
   for (const [sectionName, sectionCopy] of Object.entries(sections)) {
     const layoutName = uiblocks[sectionName];
-    const schema = layoutName ? meridianElementSchema[layoutName] : undefined;
+    const schema = layoutName ? productElementSchema[layoutName] : undefined;
     if (!schema?.collections || !sectionCopy?.elements) continue;
 
     for (const [collectionKey, collection] of Object.entries(schema.collections)) {

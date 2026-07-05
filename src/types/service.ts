@@ -2,7 +2,7 @@
 // Service-route types - Phase 0 foundation
 // Reference: newServiceOnboarding.md, nsoPlan.md
 
-import { meridianPalettes, techPremiumPalettes } from '@/types/product';
+import { meridianPalettes, techPremiumPalettes, vestriaPalettes } from '@/types/product';
 
 /**
  * ===== AUDIENCE TYPE =====
@@ -29,7 +29,11 @@ export type AudienceType = (typeof audienceTypes)[number];
 // `granth` = bespoke §13 Hindi-literary template (Writer vertical). Registered +
 // renderable but intentionally NOT in the onboarding picker (templateCatalog) —
 // same pattern as lumen/meridian/techpremium. Writer audience.
-export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen', 'granth'] as const;
+// `vestria` = GA product template (B2B manufacturing / trade lead-gen; pilot:
+// Golden Shadow Trading). Registered + renderable; product has no picker yet —
+// selected via the onboarding `?template=vestria` param (admin-gated server-side
+// until GA metering).
+export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen', 'granth', 'vestria'] as const;
 export type TemplateId = (typeof templateIds)[number];
 
 export type VariantId = string;
@@ -43,6 +47,7 @@ export const defaultVariantForTemplate: Record<TemplateId, VariantId> = {
   techpremium: 'default',
   lumen: 'default',
   granth: 'granth', // serif-led (Tiro) default; 'adhunik' = sans-led (Mukta) alt
+  vestria: 'tailored',
 };
 
 /**
@@ -75,7 +80,8 @@ export function usesTemplateModule(
   return (
     audienceType === 'service' ||
     audienceType === 'writer' ||
-    (audienceType === 'product' && (templateId === 'meridian' || templateId === 'techpremium'))
+    (audienceType === 'product' &&
+      (templateId === 'meridian' || templateId === 'techpremium' || templateId === 'vestria'))
   );
 }
 
@@ -312,6 +318,7 @@ export const templateLabels: Record<TemplateId, string> = {
   techpremium: 'TechPremium',
   lumen: 'Lumen',
   granth: 'Granth',
+  vestria: 'Vestria',
 };
 
 export const templateBlurbs: Record<TemplateId, string> = {
@@ -322,6 +329,7 @@ export const templateBlurbs: Record<TemplateId, string> = {
   techpremium: 'Industrial IoT — warm paper, forest + signal-lime, control-room readouts.',
   lumen: 'Photography & creative — warm gallery, one brass accent, editorial captions + lightbox.',
   granth: 'Hindi literary — ivory paper, maroon accent, Devanagari-first.',
+  vestria: 'Manufacturing & trade — editorial paper, dark bands, cobalt accent, quote-led.',
 };
 
 /** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Surge → 9 accent-hue, Meridian → 9 accent, TechPremium → forest). */
@@ -332,6 +340,7 @@ export function palettesForTemplate(templateId: TemplateId): readonly string[] {
   if (templateId === 'techpremium') return techPremiumPalettes;
   if (templateId === 'lumen') return lumenPalettes;
   if (templateId === 'granth') return granthPalettes;
+  if (templateId === 'vestria') return vestriaPalettes;
   return hearthPalettes;
 }
 

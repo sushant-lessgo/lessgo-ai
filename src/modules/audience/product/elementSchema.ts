@@ -598,6 +598,381 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
 };
 
 /**
+ * ===== VESTRIA (GA product template — B2B manufacturing / trade lead-gen) =====
+ * 12 layouts, Vestria-prefixed (globally-unique — §3g #3 merged-schema tie rule).
+ * 3 section types are NEW at the audience level: `industries`, `about`,
+ * `materials` (single lowercase tokens). Everything else reuses existing product
+ * section types with Vestria layouts. Source of truth:
+ * "Vestria - Uniform Manufacturing (Cobalt).html".
+ *
+ * fillMode discipline (spec): copy → ai_generated; stats/quotes/stamp numbers →
+ * ai_generated_needs_review; images/logos/tel/whatsapp/address/map/swatch colours
+ * → manual_preferred (AI NEVER authors phone numbers / addresses); ids → system.
+ */
+export const vestriaElementSchema: Record<string, UIBlockSchemaV2> = {
+  // ===== Header (util bar + nav) =====
+  VestriaNavHeader: {
+    sectionType: 'header',
+    elements: {
+      logo_text:          { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      logo_mark_text:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' }, // small mono mark next to the brand ("Uniforms")
+      logo_image:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      cta_text:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Request a Quote' },
+      cta_href:           { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '#contact' },
+      secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      secondary_cta_href: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '#catalog' },
+      util_note:          { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' }, // "Manufacturing since 2009 · Dubai, U.A.E."
+      util_tel:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      util_whatsapp:      { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      nav_items: {
+        requirement: 'required',
+        fillMode: 'ai_generated',
+        constraints: { min: 2, max: 6 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          label: { type: 'string', fillMode: 'ai_generated', default: '' },
+          href:  { type: 'string', fillMode: 'ai_generated', default: '#' },
+        },
+      },
+    },
+  },
+
+  // ===== Hero (+ 3 value props under a stitch rule) =====
+  // Accent convention: headline may include <em>…</em> wrapping 1-2 emphasized
+  // words — rendered ITALIC (Bodoni Moda italic 500) + accent-deep (unlike
+  // Meridian's upright em). The .vs-display em rule handles it.
+  VestriaTailoredHero: {
+    sectionType: 'hero',
+    elements: {
+      tag_text:           { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' }, // "Uniform Manufacturing · GCC"
+      headline:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Uniforms tailored for teams that <em>mean business.</em>' },
+      lede:               { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      cta_text:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Request a Quote' },
+      cta_href:           { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '#contact' },
+      secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      secondary_cta_href: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '#catalog' },
+      hero_image:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      stamp_value:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated_needs_review', default: '' }, // "40k+"
+      stamp_label:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      values: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 3 },
+        fields: {
+          id:          { type: 'string', fillMode: 'system' },
+          kicker:      { type: 'string', fillMode: 'ai_generated', default: '' }, // "01 — Assurance"
+          title:       { type: 'string', fillMode: 'ai_generated', default: '' },
+          description: { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+    },
+  },
+
+  // ===== Trust (client logo strip) =====
+  // Client NAMES are real-world claims — manual_preferred (never fabricated).
+  VestriaClientStrip: {
+    sectionType: 'trust',
+    elements: {
+      label_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Trusted by teams across the region' },
+    },
+    collections: {
+      logos: {
+        requirement: 'optional',
+        fillMode: 'manual_preferred',
+        constraints: { min: 0, max: 8 },
+        fields: {
+          id:   { type: 'string', fillMode: 'system' },
+          name: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          sub:  { type: 'string', fillMode: 'manual_preferred', default: '' }, // small mono qualifier ("Hospitality")
+        },
+      },
+    },
+  },
+
+  // ===== Industries (image-led sector cards) — NEW section type =====
+  VestriaIndustriesGrid: {
+    sectionType: 'industries',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      industries: {
+        requirement: 'required',
+        fillMode: 'ai_generated',
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:          { type: 'string', fillMode: 'system' },
+          kicker:      { type: 'string', fillMode: 'ai_generated', default: '' }, // "Sector 01"
+          title:       { type: 'string', fillMode: 'ai_generated', default: '' },
+          description: { type: 'string', fillMode: 'ai_generated', default: '' },
+          image:       { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
+    },
+  },
+
+  // ===== About (story + stat band, dark surface) — NEW section type =====
+  VestriaAboutStats: {
+    sectionType: 'about',
+    elements: {
+      eyebrow:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline:    { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      lede:        { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      body:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      about_image: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      stats: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 4 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          value: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          label: { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+    },
+  },
+
+  // ===== Services (bordered grid) — reuses `features` contract =====
+  VestriaServicesGrid: {
+    sectionType: 'features',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      features: {
+        requirement: 'required',
+        fillMode: 'ai_generated',
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:          { type: 'string', fillMode: 'system' },
+          kicker:      { type: 'string', fillMode: 'ai_generated', default: '' }, // "SVC / 01"
+          title:       { type: 'string', fillMode: 'ai_generated', default: '' },
+          description: { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+    },
+  },
+
+  // ===== Catalogue (product grid, GRID-ONLY v1) =====
+  // Items are ai_generated plain fields — deliberately NOT a registered collection
+  // (no CollectionDef, no materializeIntoPages, no product-detail pages). The
+  // Products panel is techpremium-gated; vestria must never trip materialization.
+  VestriaCatalogueGrid: {
+    sectionType: 'catalog',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' }, // "Request full catalogue (PDF)"
+      cta_href: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '#contact' },
+    },
+    collections: {
+      items: {
+        requirement: 'required',
+        fillMode: 'ai_generated',
+        constraints: { min: 4, max: 8 },
+        fields: {
+          id:       { type: 'string', fillMode: 'system' },
+          code:     { type: 'string', fillMode: 'ai_generated', default: '' },  // "C-04"
+          title:    { type: 'string', fillMode: 'ai_generated', default: '' },
+          category: { type: 'string', fillMode: 'ai_generated', default: '' }, // "Culinary · Poly-cotton"
+          glyph:    { type: 'string', fillMode: 'ai_generated', default: '' },  // placeholder label when no image
+          image:    { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
+    },
+  },
+
+  // ===== Materials (swatch grid + material/use rows) — NEW section type =====
+  // (Generic name — 'materials' not 'fabrics' — reusable by any manufacturer.)
+  VestriaMaterials: {
+    sectionType: 'materials',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      swatches: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 9 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          name:  { type: 'string', fillMode: 'ai_generated', default: '' },
+          code:  { type: 'string', fillMode: 'ai_generated', default: '' },              // "/ 04"
+          color: { type: 'string', fillMode: 'manual_preferred', default: '#8a8f98' },  // swatch CSS colour — designed value, user-tuned
+        },
+      },
+      rows: {
+        requirement: 'required',
+        fillMode: 'ai_generated',
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:   { type: 'string', fillMode: 'system' },
+          name: { type: 'string', fillMode: 'ai_generated', default: '' },
+          use:  { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+    },
+  },
+
+  // ===== Process (numbered step rail) — reuses `process` type =====
+  VestriaProcessRail: {
+    sectionType: 'process',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      steps: {
+        requirement: 'required',
+        fillMode: 'ai_generated',
+        constraints: { min: 3, max: 6 },
+        fields: {
+          id:          { type: 'string', fillMode: 'system' },
+          kicker:      { type: 'string', fillMode: 'ai_generated', default: '' }, // "Step 01"
+          title:       { type: 'string', fillMode: 'ai_generated', default: '' },
+          description: { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+    },
+  },
+
+  // ===== Testimonials (dark quote grid) =====
+  // Collection MUST stay named `testimonials` with quote/author_name/author_role —
+  // injectRealTestimonials (parseCopy.ts) targets exactly that shape.
+  VestriaQuotes: {
+    sectionType: 'testimonials',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      testimonials: {
+        requirement: 'required',
+        fillMode: 'ai_generated_needs_review',
+        constraints: { min: 1, max: 3 },
+        fields: {
+          id:          { type: 'string', fillMode: 'system' },
+          quote:       { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          author_name: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          author_role: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+        },
+      },
+    },
+  },
+
+  // ===== Lead form (quote request) — reuses `contact` type =====
+  // Real form via content.forms + form.v1.js; form_id is system-set at
+  // provisioning (ensureContactForm equivalent in the generation path).
+  VestriaLeadForm: {
+    sectionType: 'contact',
+    elements: {
+      tag_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      lede:     { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      form_id:  { type: 'string', requirement: 'optional', fillMode: 'system', default: '' },
+      form_note:{ type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'We reply within 1 business day.' },
+    },
+    collections: {
+      assurances: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 4 },
+        fields: {
+          id:     { type: 'string', fillMode: 'system' },
+          kicker: { type: 'string', fillMode: 'ai_generated', default: '' }, // "01"
+          text:   { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+    },
+  },
+
+  // ===== Footer (dark-2: brand, link columns, address, bottom bar) =====
+  VestriaFooter: {
+    sectionType: 'footer',
+    elements: {
+      brand_text:      { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      blurb:           { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      address_heading: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: 'Get in Touch' },
+      address_html:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      email:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      tel:             { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp:        { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      map_caption:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      copyright:       { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      tagline:         { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      // Optional WhatsApp FAB (site-wide affordance rendered by the footer block)
+      whatsapp_number:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp_label:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      whatsapp_prefill: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      link_columns: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 3 },
+        fields: {
+          id:      { type: 'string', fillMode: 'system' },
+          heading: { type: 'string', fillMode: 'ai_generated', default: '' },
+          links: {
+            type: 'array',
+            fillMode: 'ai_generated',
+            constraints: { min: 0, max: 6 },
+            fields: {
+              id:    { type: 'string', fillMode: 'system' },
+              label: { type: 'string', fillMode: 'ai_generated', default: '' },
+              href:  { type: 'string', fillMode: 'ai_generated', default: '#' },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+/**
+ * Vestria layout names — single source of truth for tests + block map.
+ */
+export const VESTRIA_LAYOUT_NAMES = {
+  header:       'VestriaNavHeader',
+  hero:         'VestriaTailoredHero',
+  trust:        'VestriaClientStrip',
+  industries:   'VestriaIndustriesGrid',
+  about:        'VestriaAboutStats',
+  features:     'VestriaServicesGrid',
+  catalog:      'VestriaCatalogueGrid',
+  materials:    'VestriaMaterials',
+  process:      'VestriaProcessRail',
+  testimonials: 'VestriaQuotes',
+  contact:      'VestriaLeadForm',
+  footer:       'VestriaFooter',
+} as const;
+
+export type VestriaSectionType = keyof typeof VESTRIA_LAYOUT_NAMES;
+
+/**
+ * Combined product-audience schema (ALL product templates). Use this for
+ * layout-name lookups on the product copy path (parseCopy etc.) so Vestria
+ * layouts resolve alongside Meridian's.
+ */
+export const productElementSchema: Record<string, UIBlockSchemaV2> = {
+  ...meridianElementSchema,
+  ...vestriaElementSchema,
+};
+
+/**
  * Pilot layout names — single source of truth for tests + gallery + block map.
  */
 export const MERIDIAN_LAYOUT_NAMES = {

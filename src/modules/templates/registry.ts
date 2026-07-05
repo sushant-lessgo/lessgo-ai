@@ -91,6 +91,21 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
     };
   },
+  // GA product template (manufacturing/trade lead-gen) — selected via the
+  // onboarding ?template=vestria param (product has no picker yet).
+  vestria: async () => {
+    const m = await import('@/modules/templates/vestria');
+    return {
+      resolveBlock: m.resolveBlock,
+      ThemeInjector: m.ThemeInjector,
+      SSRTokens: m.SSRTokens,
+      getSurfaceForSection: m.getSurfaceForSection,
+      defaultPaletteId: m.defaultVestriaPalette,
+      variants: m.vestriaVariantDefs,
+      defaultVariantId: m.defaultVestriaVariant,
+      paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
+    };
+  },
   // Bespoke §13 (Writer vertical) — registered + renderable, but absent from the
   // onboarding picker. Writer projects are seeded white-glove.
   granth: async () => {

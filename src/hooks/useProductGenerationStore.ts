@@ -32,9 +32,16 @@ export const PRODUCT_GENERATION_STEPS = [
 
 export type ProductGenerationStep = (typeof PRODUCT_GENERATION_STEPS)[number];
 
+/** Product template selection (pilot: query param; future: product picker sets
+ *  the same field). vestria is admin-gated server-side until GA metering. */
+export type ProductTemplateId = 'meridian' | 'vestria';
+
 interface ProductGenerationState {
   currentStep: ProductGenerationStep;
   stepIndex: number;
+
+  // Template selection — checked BEFORE the persona branch in GeneratingStep.
+  templateId: ProductTemplateId;
 
   // Step 0
   productName: string;
@@ -65,6 +72,8 @@ interface ProductGenerationActions {
   nextStep: () => void;
   prevStep: () => void;
 
+  setTemplateId: (id: ProductTemplateId) => void;
+
   setProductName: (value: string) => void;
   setOneLiner: (value: string) => void;
 
@@ -90,6 +99,7 @@ type ProductGenerationStore = ProductGenerationState & ProductGenerationActions;
 const initialState: ProductGenerationState = {
   currentStep: 'oneLiner',
   stepIndex: 0,
+  templateId: 'meridian',
   productName: '',
   oneLiner: '',
   understanding: null,
@@ -129,6 +139,11 @@ export const useProductGenerationStore = create<ProductGenerationStore>()(
           const prev = Math.max(state.stepIndex - 1, 0);
           state.stepIndex = prev;
           state.currentStep = PRODUCT_GENERATION_STEPS[prev];
+        }),
+
+      setTemplateId: (id) =>
+        set((state) => {
+          state.templateId = id;
         }),
 
       setProductName: (value) =>

@@ -61,6 +61,15 @@ function criticalFontHrefs(
         ? ['/fonts/mukta/mukta-devanagari-400-normal.woff2']
         : ['/fonts/tiro-devanagari-hindi/tiro-devanagari-hindi-devanagari-400-normal.woff2'];
 
+    case 'vestria':
+      // Hero headline (LCP) = Bodoni Moda variable (opsz/wght axes preserved).
+      // Italic face covers the hero <em> accent; body Hanken Grotesk is small
+      // enough to ride the CSS discovery path.
+      return [
+        '/fonts/bodoni-moda/bodoni-moda-latin-opsz-normal.woff2',
+        '/fonts/bodoni-moda/bodoni-moda-latin-opsz-italic.woff2',
+      ];
+
     default:
       return [];
   }

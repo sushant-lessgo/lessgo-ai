@@ -10,19 +10,22 @@ import { selectProductBlocks } from '../selectBlocks';
 
 export interface AssembleProductStrategyInput {
   llmResponse: ProductStrategyResponse;
+  /** Template-aware section/block selection. ASSEMBLY ONLY — never fed into any
+   *  prompt builder (the prompt firewall forbids templateId in prompt input). */
+  templateId?: string;
 }
 
 /**
  * Combine LLM strategy (awareness/oneReader/oneIdea/featureAnalysis) with the
- * fixed Meridian section list + block map.
+ * deterministic per-template section list + block map.
  */
 export function assembleProductStrategy(
   input: AssembleProductStrategyInput
 ): ProductStrategyOutput {
-  const { llmResponse } = input;
+  const { llmResponse, templateId } = input;
 
-  const sections = selectProductSections();
-  const { uiblocks } = selectProductBlocks({ sections });
+  const sections = selectProductSections({ templateId });
+  const { uiblocks } = selectProductBlocks({ sections, templateId });
 
   return {
     awareness: llmResponse.awareness,

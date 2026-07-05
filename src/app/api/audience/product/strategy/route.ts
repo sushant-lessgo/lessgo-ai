@@ -23,6 +23,7 @@ import { buildProductStrategyPrompt } from '@/modules/audience/product/strategy/
 import { assembleProductStrategy } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { generateMockMeridianStrategy } from '@/modules/prompt/mockResponseGeneratorProduct';
 import { landingGoals } from '@/types/generation';
+import { isAdmin } from '@/lib/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +45,9 @@ const ProductStrategyRequestSchema = z.object({
   hasSocialProof: z.boolean().optional(),
   hasConcreteResults: z.boolean().optional(),
   hasDemoVideo: z.boolean().optional(),
+  // Template-aware assembly (whitelist). Fed ONLY to assembleProductStrategy —
+  // never to the prompt builder (firewall). vestria is admin-gated until GA metering.
+  templateId: z.enum(['meridian', 'vestria']).optional(),
 });
 
 async function productStrategyHandler(req: NextRequest): Promise<Response> {
@@ -71,6 +75,15 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
     }
     const userId = authCheck.userId!;
 
+    // 2a. Vestria admin gate — unmetered N× credit path until GA metering ships
+    // (credits system rebuild). Pilot (Golden Shadow) runs on an admin account.
+    if (data.templateId === 'vestria' && !isAdmin(userId)) {
+      return createSecureResponse(
+        { success: false, error: 'forbidden', message: 'This template is not yet generally available.' },
+        403
+      );
+    }
+
     // 2b. Mock mode
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -81,6 +94,7 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
         oneLiner: data.oneLiner,
         features: data.features,
         primaryAudience: data.primaryAudience,
+        templateId: data.templateId,
       });
       return createSecureResponse({
         success: true,
@@ -126,8 +140,9 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    // 5. Assemble (deterministic fixed sections + Meridian block map)
-    const strategyData = assembleProductStrategy({ llmResponse });
+    // 5. Assemble (deterministic per-template sections + block map; templateId
+    //    is assembly-only — the prompt above never saw it)
+    const strategyData = assembleProductStrategy({ llmResponse, templateId: data.templateId });
     logger.info('[Product Strategy] Final sections:', strategyData.sections);
     logger.info('[Product Strategy] Final UIBlocks:', strategyData.uiblocks);
 
