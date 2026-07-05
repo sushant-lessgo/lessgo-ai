@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Quote, X } from 'lucide-react';
 import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
+import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
 import { getPageArchetypesForTemplate } from '@/modules/audience/product/pageArchetypes';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,6 +15,14 @@ const examples = [
   'Early access + founding-member pricing',
 ];
 
+// Manufacturer / trade-supplier flow (onboarding1) — enquiry-driven offers,
+// not SaaS trials. SaaS `examples` above stay byte-identical.
+const manufacturerExamples = [
+  'Request a quote — MOQ 50 units, samples in 7 days',
+  'Free sample kit + bulk pricing within 24 hours',
+  'Custom quote within one business day',
+];
+
 export default function OfferStep() {
   const offer = useProductGenerationStore((s) => s.offer);
   const setOffer = useProductGenerationStore((s) => s.setOffer);
@@ -22,6 +31,8 @@ export default function OfferStep() {
   const nextStep = useProductGenerationStore((s) => s.nextStep);
   const goToStep = useProductGenerationStore((s) => s.goToStep);
   const templateId = useProductGenerationStore((s) => s.templateId);
+
+  const isManufacturer = isManufacturerFlow(templateId);
 
   const [local, setLocal] = useState(offer);
   const trimmed = local.trim();
@@ -51,8 +62,17 @@ export default function OfferStep() {
           What do they get to start?
         </h1>
         <p className="mt-2 text-gray-600">
-          The thing on the other side of the CTA — a free trial, early access,
-          a starter credit. Specific beats generic.
+          {isManufacturer ? (
+            <>
+              The thing on the other side of the enquiry — a quote, samples,
+              a catalogue. Specific beats generic.
+            </>
+          ) : (
+            <>
+              The thing on the other side of the CTA — a free trial, early access,
+              a starter credit. Specific beats generic.
+            </>
+          )}
         </p>
       </div>
 
@@ -62,7 +82,11 @@ export default function OfferStep() {
         </Label>
         <Textarea
           id="offer"
-          placeholder="Free 14-day trial, no credit card"
+          placeholder={
+            isManufacturer
+              ? 'Request a quote — MOQ 50 units, samples in 7 days'
+              : 'Free 14-day trial, no credit card'
+          }
           value={local}
           onChange={(e) => setLocal(e.target.value)}
           className="min-h-[80px]"
@@ -71,7 +95,7 @@ export default function OfferStep() {
         <p className="text-xs text-gray-400 text-right">{local.length}/300</p>
 
         <div className="flex flex-wrap gap-2 pt-1">
-          {examples.map((ex) => (
+          {(isManufacturer ? manufacturerExamples : examples).map((ex) => (
             <button
               key={ex}
               type="button"

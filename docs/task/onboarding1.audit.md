@@ -59,3 +59,33 @@
 **Open risks**
 - Real-LLM eyeball run against goldenshadowtrading.com (plan verification, 1 credit) not run here — needs live server + credits; first-pass quality check deferred to Phase 5 pilot (or a manual curl before it).
 - Required manufacturer keys mean extraction of a site with truly zero value-adds would fail schema validation → `ai_error` (recoverable). Accepted: strictness is the point; retry path exists.
+
+## Phase 3 — onboarding UI: manufacturer fields + hydration + de-SaaS copy + goal gating
+
+**Files changed**
+- `src/hooks/useProductGenerationStore.ts` — NOT modified (verified only)
+- `src/app/onboarding/product/[token]/components/steps/UnderstandingStep.tsx` — modified
+- `src/app/onboarding/product/[token]/components/steps/OneLinerStep.tsx` — modified
+- `src/app/onboarding/product/[token]/components/steps/OfferStep.tsx` — modified
+- `src/app/onboarding/product/[token]/components/steps/GoalStep.tsx` — modified
+
+**Per file**
+- `useProductGenerationStore.ts`: verified `setUnderstanding` (~:171) assigns the FULL `UnderstandingData` object (`state.understanding = data`) — optional manufacturer keys pass through untouched. No field-picking → zero edits needed; file left byte-identical.
+- `UnderstandingStep.tsx`: (a) manufacturer branch renders 4 blocks reusing in-file primitives — WhatYouMake (Textarea, 200 max), IndustriesServed (ChipEditor, max 3), ProductCategories (ChipEditor, max 8), ValueAdds (FeatureListEditor, max 8) — SaaS JSX moved into the else-arm byte-identical; 4 manufacturer updaters added. (b) `/api/v2/understand` fetch body now sends `{ oneLiner, templateId }`; manufacturer hydration writes the 4 mfr keys and PADS `categories:[]/audiences:[]/whatItDoes:''/features:[]` (D2). (c) manufacturer `isValid` short-circuits BEFORE the SaaS check (4 mfr fields non-empty + valueAdds all non-blank); SaaS expression unchanged. `templateId`/`isManufacturer` added to `callUnderstandAPI` deps.
+- `OneLinerStep.tsx`: (a) scrape hydration branches — manufacturer writes all 8 keys (`?? ''`/`?? []` defaults; scrape mfr response also carries SaaS keys, taken when present, padded otherwise); SaaS writer byte-identical. (b) de-SaaS copy behind branch: manufacturer examples (uniforms/CNC/private-label), one-liner placeholder "Custom workwear manufacturer for hotels and hospitals", product-name placeholder "Apex Uniform Works". (c) scrape body now `{ url, templateId }`.
+- `OfferStep.tsx`: manufacturer branch — examples ("Request a quote — MOQ 50 units, samples in 7 days" etc.), placeholder, and sub-heading ("a quote, samples, a catalogue") swapped; SaaS strings byte-identical.
+- `GoalStep.tsx`: `visibleGoals` — manufacturer sees all 7 incl. `enquiry`; non-manufacturer filters `enquiry` out (`enquiry` is appended LAST in `landingGoals`, so the filtered list is the original 6 in original order — byte-for-byte criterion holds).
+
+**Deviations**
+- Race-hardening (D1 optional: gate OneLinerStep submit/import on templateId resolution) — NOT added. Kept D1 behavior as-is per plan's "accepted for pilot"; conservative/smaller diff.
+- `templateId` is sent unconditionally in both fetch bodies (also for SaaS `'meridian'`) — routes derive `isManufacturerFlow('meridian') === false` → SaaS branch, so SaaS behavior unchanged; avoids conditional-body complexity.
+- Manufacturer understand hydration pads SaaS fields to `[]/''` (route returns only 4 mfr keys); scrape hydration takes SaaS keys from response when present (mfr scrape shape includes them) — both satisfy D2, `.length` reads safe either way.
+
+**Test results**
+- `npm run build` → exit 0 (full build).
+- `npm run test:run` → 50 files passed | 1 skipped; 657 tests passed | 2 skipped; exit 0.
+- Reasoned parity check: SaaS path — same 4 fields (identical JSX in else-arm), same 6 goals (filter removes only the appended `enquiry`), all original strings intact; manufacturer path — 4 new fields, hydrates from scrape AND manual understand, 7th goal visible, de-SaaS placeholders/examples.
+
+**Open risks**
+- Persona-fetch race window remains (accepted, D1): manufacturer submitting on step 1 before `/api/user/persona` resolves takes SaaS branch.
+- Manual dev-server walk (plan's manual verification) not run in this phase — recommend covering during Phase 5 pilot / impl-review.

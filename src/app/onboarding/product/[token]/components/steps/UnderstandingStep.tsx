@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
+import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -127,6 +128,9 @@ export default function UnderstandingStep() {
   const resetUnderstanding = useProductGenerationStore((s) => s.resetUnderstanding);
   const nextStep = useProductGenerationStore((s) => s.nextStep);
   const prevStep = useProductGenerationStore((s) => s.prevStep);
+  const templateId = useProductGenerationStore((s) => s.templateId);
+
+  const isManufacturer = isManufacturerFlow(templateId);
 
   const hasCalledApi = useRef(false);
   const [localEdits, setLocalEdits] = useState<UnderstandingData | null>(null);
@@ -145,21 +149,41 @@ export default function UnderstandingStep() {
       const response = await fetch('/api/v2/understand', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ oneLiner }),
+        // templateId carries the manufacturer signal (onboarding1, D1) so the
+        // route runs the manufacturer extraction branch.
+        body: JSON.stringify({ oneLiner, templateId }),
       });
 
       const result = await response.json();
 
       if (result.success) {
-        setUnderstanding(result.data);
-        setLocalEdits({ ...result.data });
+        if (isManufacturer) {
+          // Manufacturer response carries only the 4 manufacturer keys —
+          // PAD the 4 required SaaS fields (onboarding1, D2) so the object
+          // satisfies setUnderstanding and `.length` reads never throw.
+          const data: UnderstandingData = {
+            categories: [],
+            audiences: [],
+            whatItDoes: '',
+            features: [],
+            whatYouMake: result.data.whatYouMake ?? '',
+            industriesServed: result.data.industriesServed ?? [],
+            productCategories: result.data.productCategories ?? [],
+            valueAdds: result.data.valueAdds ?? [],
+          };
+          setUnderstanding(data);
+          setLocalEdits({ ...data });
+        } else {
+          setUnderstanding(result.data);
+          setLocalEdits({ ...result.data });
+        }
       } else {
         setUnderstandingError(result.message || 'Failed to analyze product');
       }
     } catch (error) {
       setUnderstandingError('Network error. Please try again.');
     }
-  }, [oneLiner, setUnderstanding, setUnderstandingLoading, setUnderstandingError]);
+  }, [oneLiner, templateId, isManufacturer, setUnderstanding, setUnderstandingLoading, setUnderstandingError]);
 
   useEffect(() => {
     if (understandingLoading && !understanding && !understandingError && !hasCalledApi.current) {
@@ -188,8 +212,30 @@ export default function UnderstandingStep() {
     if (localEdits) setLocalEdits({ ...localEdits, features });
   };
 
-  const isValid =
-    localEdits &&
+  // Manufacturer updaters (onboarding1)
+  const updateWhatYouMake = (whatYouMake: string) => {
+    if (localEdits) setLocalEdits({ ...localEdits, whatYouMake });
+  };
+  const updateIndustriesServed = (industriesServed: string[]) => {
+    if (localEdits) setLocalEdits({ ...localEdits, industriesServed });
+  };
+  const updateProductCategories = (productCategories: string[]) => {
+    if (localEdits) setLocalEdits({ ...localEdits, productCategories });
+  };
+  const updateValueAdds = (valueAdds: string[]) => {
+    if (localEdits) setLocalEdits({ ...localEdits, valueAdds });
+  };
+
+  // Manufacturer validity short-circuits BEFORE the SaaS check (which reads
+  // the required SaaS fields — padded to []/'' in the manufacturer flow).
+  const isValid = isManufacturer
+    ? !!localEdits &&
+      (localEdits.whatYouMake ?? '').trim().length > 0 &&
+      (localEdits.industriesServed ?? []).length > 0 &&
+      (localEdits.productCategories ?? []).length > 0 &&
+      (localEdits.valueAdds ?? []).length > 0 &&
+      (localEdits.valueAdds ?? []).every((v) => v.trim().length > 0)
+    : localEdits &&
     localEdits.categories.length > 0 &&
     localEdits.audiences.length > 0 &&
     localEdits.whatItDoes.trim().length > 0 &&
@@ -248,46 +294,95 @@ export default function UnderstandingStep() {
         <p className="mt-2 text-gray-600">Review and edit if needed. Click chips to remove.</p>
       </div>
 
-      <div className="p-4 bg-gray-50 rounded-lg">
-        <ChipEditor
-          label="Categories"
-          chips={localEdits.categories}
-          onChange={updateCategories}
-          placeholder="Add category..."
-          maxChips={3}
-        />
-      </div>
+      {isManufacturer ? (
+        <>
+          <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+            <label className="text-sm font-medium text-gray-700">What You Make</label>
+            <Textarea
+              value={localEdits.whatYouMake ?? ''}
+              onChange={(e) => updateWhatYouMake(e.target.value)}
+              placeholder="Describe what you manufacture or supply..."
+              className="min-h-[80px] bg-white"
+              maxLength={200}
+            />
+            <p className="text-xs text-gray-400 text-right">
+              {(localEdits.whatYouMake ?? '').length}/200
+            </p>
+          </div>
 
-      <div className="p-4 bg-gray-50 rounded-lg">
-        <ChipEditor
-          label="Target Audiences"
-          chips={localEdits.audiences}
-          onChange={updateAudiences}
-          placeholder="Add audience..."
-          maxChips={3}
-        />
-      </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <ChipEditor
+              label="Industries Served"
+              chips={localEdits.industriesServed ?? []}
+              onChange={updateIndustriesServed}
+              placeholder="Add industry..."
+              maxChips={3}
+            />
+          </div>
 
-      <div className="p-4 bg-gray-50 rounded-lg space-y-2">
-        <label className="text-sm font-medium text-gray-700">What It Does</label>
-        <Textarea
-          value={localEdits.whatItDoes}
-          onChange={(e) => updateWhatItDoes(e.target.value)}
-          placeholder="Describe what your product does..."
-          className="min-h-[80px] bg-white"
-          maxLength={200}
-        />
-        <p className="text-xs text-gray-400 text-right">{localEdits.whatItDoes.length}/200</p>
-      </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <ChipEditor
+              label="Product Categories"
+              chips={localEdits.productCategories ?? []}
+              onChange={updateProductCategories}
+              placeholder="Add category..."
+              maxChips={8}
+            />
+          </div>
 
-      <div className="p-4 bg-gray-50 rounded-lg space-y-2">
-        <label className="text-sm font-medium text-gray-700">Key Features</label>
-        <FeatureListEditor
-          features={localEdits.features}
-          onChange={updateFeatures}
-          maxFeatures={8}
-        />
-      </div>
+          <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+            <label className="text-sm font-medium text-gray-700">Value-adds</label>
+            <FeatureListEditor
+              features={localEdits.valueAdds ?? []}
+              onChange={updateValueAdds}
+              maxFeatures={8}
+            />
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <ChipEditor
+              label="Categories"
+              chips={localEdits.categories}
+              onChange={updateCategories}
+              placeholder="Add category..."
+              maxChips={3}
+            />
+          </div>
+
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <ChipEditor
+              label="Target Audiences"
+              chips={localEdits.audiences}
+              onChange={updateAudiences}
+              placeholder="Add audience..."
+              maxChips={3}
+            />
+          </div>
+
+          <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+            <label className="text-sm font-medium text-gray-700">What It Does</label>
+            <Textarea
+              value={localEdits.whatItDoes}
+              onChange={(e) => updateWhatItDoes(e.target.value)}
+              placeholder="Describe what your product does..."
+              className="min-h-[80px] bg-white"
+              maxLength={200}
+            />
+            <p className="text-xs text-gray-400 text-right">{localEdits.whatItDoes.length}/200</p>
+          </div>
+
+          <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+            <label className="text-sm font-medium text-gray-700">Key Features</label>
+            <FeatureListEditor
+              features={localEdits.features}
+              onChange={updateFeatures}
+              maxFeatures={8}
+            />
+          </div>
+        </>
+      )}
 
       <Button
         onClick={handleConfirm}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Globe, Loader2 } from 'lucide-react';
 import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
+import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
 import type { LandingGoal } from '@/types/generation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +14,14 @@ const examples = [
   'AI note taker for sales calls',
   'Invoice generator for freelancers',
   'Workout planner for busy parents',
+];
+
+// Manufacturer / trade-supplier flow (onboarding1) — maker-appropriate
+// examples. SaaS `examples` above stay byte-identical.
+const manufacturerExamples = [
+  'Custom uniforms & workwear for hospitality and healthcare',
+  'CNC-machined precision parts for industrial equipment makers',
+  'Private-label skincare manufacturing for indie brands',
 ];
 
 /** Normalize user input to an http(s) URL; returns null if not URL-like. */
@@ -72,6 +81,9 @@ export default function OneLinerStep() {
   const setImportSourceUrl = useProductGenerationStore((s) => s.setImportSourceUrl);
   const setImportedTestimonials = useProductGenerationStore((s) => s.setImportedTestimonials);
   const nextStep = useProductGenerationStore((s) => s.nextStep);
+  const templateId = useProductGenerationStore((s) => s.templateId);
+
+  const isManufacturer = isManufacturerFlow(templateId);
 
   const [localOneLiner, setLocalOneLiner] = useState(oneLiner);
   const [localProductName, setLocalProductName] = useState(productName);
@@ -92,7 +104,9 @@ export default function OneLinerStep() {
       const res = await fetch('/api/v2/scrape-website', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: normalizedUrl }),
+        // templateId carries the manufacturer signal (onboarding1, D1) so the
+        // scrape route runs the manufacturer extraction branch.
+        body: JSON.stringify({ url: normalizedUrl, templateId }),
       });
       const json = await res.json();
       if (!res.ok || !json?.success) {
@@ -107,12 +121,28 @@ export default function OneLinerStep() {
       // without firing a second /understand call — no double charge.
       setOneLiner(d.oneLiner || '');
       if (d.productName) setProductName(d.productName);
-      setUnderstanding({
-        categories: d.categories ?? [],
-        audiences: d.audiences ?? [],
-        whatItDoes: d.whatItDoes ?? '',
-        features: d.features ?? [],
-      });
+      if (isManufacturer) {
+        // Manufacturer shape (onboarding1, D2): write the 4 manufacturer keys
+        // and PAD the 4 required SaaS fields so the object satisfies
+        // setUnderstanding and SaaS-path reads like `.length` never throw.
+        setUnderstanding({
+          categories: d.categories ?? [],
+          audiences: d.audiences ?? [],
+          whatItDoes: d.whatItDoes ?? '',
+          features: d.features ?? [],
+          whatYouMake: d.whatYouMake ?? '',
+          industriesServed: d.industriesServed ?? [],
+          productCategories: d.productCategories ?? [],
+          valueAdds: d.valueAdds ?? [],
+        });
+      } else {
+        setUnderstanding({
+          categories: d.categories ?? [],
+          audiences: d.audiences ?? [],
+          whatItDoes: d.whatItDoes ?? '',
+          features: d.features ?? [],
+        });
+      }
       if (d.offer) setOffer(d.offer);
       if (d.landingGoal) setLandingGoal(d.landingGoal as LandingGoal);
       setImportedTestimonials(Array.isArray(d.testimonials) ? d.testimonials : []);
@@ -217,7 +247,11 @@ export default function OneLinerStep() {
         </Label>
         <Textarea
           id="oneliner"
-          placeholder="AI-powered invoice generator for freelancers"
+          placeholder={
+            isManufacturer
+              ? 'Custom workwear manufacturer for hotels and hospitals'
+              : 'AI-powered invoice generator for freelancers'
+          }
           value={localOneLiner}
           onChange={(e) => setLocalOneLiner(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -232,7 +266,7 @@ export default function OneLinerStep() {
         </div>
 
         <div className="flex flex-wrap gap-2 pt-1">
-          {examples.map((ex) => (
+          {(isManufacturer ? manufacturerExamples : examples).map((ex) => (
             <button
               key={ex}
               type="button"
@@ -254,7 +288,7 @@ export default function OneLinerStep() {
         </Label>
         <Input
           id="productName"
-          placeholder="Lessgo.ai"
+          placeholder={isManufacturer ? 'Apex Uniform Works' : 'Lessgo.ai'}
           value={localProductName}
           onChange={(e) => setLocalProductName(e.target.value)}
           onKeyDown={(e) => {

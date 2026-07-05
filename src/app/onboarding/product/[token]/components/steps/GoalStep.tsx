@@ -1,6 +1,7 @@
 'use client';
 
 import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
+import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
 import { landingGoals, landingGoalLabels, type LandingGoal } from '@/types/generation';
 import OptionCard from '@/components/onboarding/shared/OptionCard';
 import {
@@ -37,6 +38,14 @@ export default function GoalStep() {
   const landingGoal = useProductGenerationStore((s) => s.landingGoal);
   const setLandingGoal = useProductGenerationStore((s) => s.setLandingGoal);
   const nextStep = useProductGenerationStore((s) => s.nextStep);
+  const templateId = useProductGenerationStore((s) => s.templateId);
+
+  // `enquiry` is manufacturer-only (onboarding1, D1). SaaS personas keep
+  // exactly the original 6 goals ('enquiry' is appended last in landingGoals,
+  // so filtering preserves the original order).
+  const visibleGoals = isManufacturerFlow(templateId)
+    ? landingGoals
+    : landingGoals.filter((g) => g !== 'enquiry');
 
   const handleSelect = (goal: LandingGoal) => {
     setLandingGoal(goal);
@@ -55,7 +64,7 @@ export default function GoalStep() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {landingGoals.map((goal) => (
+        {visibleGoals.map((goal) => (
           <OptionCard
             key={goal}
             icon={goalIcons[goal]}
