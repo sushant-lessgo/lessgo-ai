@@ -2,10 +2,9 @@
  * Published Component Registry - Server-safe component resolution for published pages
  *
  * @remarks
- * P5 (meridianPlan.md): the legacy 47-UIBlock published registry was archived to
- * `archive/modules/UIBlocks`. Published product pages now render exclusively through
- * the Meridian template module; service through Hearth. Dispatch is solely via the
- * dynamic template registry — there is no remaining non-template published path.
+ * The legacy 47-UIBlock published registry was removed. Published pages render
+ * exclusively through template modules. Dispatch is solely via the dynamic
+ * template registry — there is no remaining non-template published path.
  */
 
 import React from 'react';

@@ -1,6 +1,5 @@
 // src/modules/inference/generateFeatures.ts
-// STUB: Placeholder for archived feature generation
-// Actual implementation archived - see archive/onboarding-v1/
+// STUB: Placeholder for removed onboarding-v1 feature generation
 
 import type { InputVariables } from '@/types/core/content';
 

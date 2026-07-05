@@ -540,7 +540,6 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     Problem: {
-      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       StackedPainBullets: "Pain point list emphasizing problems. Use visceral, relatable language. Stack pains to build urgency before solution.",
       // V3 ARCHIVED: SideBySideSplit: "Problem-solution preview layout. Balance problem urgency with solution hope. Create natural bridge between states.",
       // V3 ARCHIVED: CollapsedCards: "Expandable problem exploration. Problem titles should be immediately recognizable. Details should build emotional connection.",
@@ -548,20 +547,17 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     Results: {
-      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       StatBlocks: "Metric-focused results presentation. Lead with compelling numbers. Support statistics with clear context and explanations.",
       StackedWinsList: "Achievement-focused results list. Use victory language and positive framing. Stack wins for cumulative impact.",
     },
 
-    // Security: ENTIRE SECTION ARCHIVED - see archive/prompt/buildPrompt.guidance.archived.ts
+    // Security: section removed (legacy layout guidance)
 
     SocialProof: {
-      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       LogoWall: "Simple logo credibility display. Let logos establish market presence. Use minimal text that doesn't compete with visual impact.",
     },
 
     Testimonial: {
-      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       QuoteGrid: "Multiple testimonial showcase. Use authentic customer voice throughout. Include relevant customer context and credibility markers.",
       VideoTestimonials: "ENTERPRISE VIDEO TESTIMONIAL FOCUS with maximum credibility and authority. VIDEO CONTENT: Generate video_titles and video_descriptions that highlight specific business outcomes and ROI results. CUSTOMER PROFILES: Create enterprise-appropriate customer_names, customer_titles (Director level+), and customer_companies using real-sounding business names. ENTERPRISE CONTEXT: Include industry_leaders_title and enterprise statistics (enterprise_customers_stat, uptime_stat, support_stat) that build B2B credibility. TRUST INDICATORS: Use specific metrics and timeframes in descriptions. AUTHENTICITY: Generate realistic video scenarios that could actually exist. PLATFORM CREDIBILITY: Reference legitimate business contexts and use cases that match your target audience.",
       // V3 ARCHIVED: AvatarCarousel: "Rotating testimonial presentation. Each testimonial should be complete and compelling. Use consistent formatting across testimonials.",
@@ -570,7 +566,6 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     UniqueMechanism: {
-      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       MethodologyBreakdown: "Tagged explanation format. Use clear categorization language. Tags should enhance understanding and organization.",
       ProcessFlowDiagram: "Process visualization presentation. Use cyclical, momentum-building language. Show how components work together.",
       PropertyComparisonMatrix: "Approach comparison presentation. Use clear differentiation language. Show advantages of unique approach.",
@@ -580,14 +575,12 @@ function getSectionLayoutGuidance(sectionType: string, layout: string): string {
     },
 
     UseCase: {
-      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       IndustryUseCaseGrid: "Industry-specific application display. Use industry-appropriate language and terminology. Address industry-specific needs.",
       PersonaGrid: "User type showcase layout. Use persona-specific language and concerns. Address different user needs and motivations.",
       RoleBasedScenarios: "Role-specific scenario presentation. Use role-appropriate language and concerns. Show practical application for each role.",
     },
 
     Footer: {
-      // Archived layouts moved to archive/prompt/buildPrompt.guidance.archived.ts
       ContactFooter: "Contact-focused footer. Include multiple contact methods. Make contact info scannable."
     }
   };

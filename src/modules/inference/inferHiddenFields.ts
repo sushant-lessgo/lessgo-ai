@@ -1,6 +1,5 @@
 // src/modules/inference/inferHiddenFields.ts
-// STUB: Placeholder for archived hidden field inference
-// Actual implementation archived - see archive/onboarding-v1/
+// STUB: Placeholder for removed onboarding-v1 hidden field inference
 
 import type { InputVariables, HiddenInferredFields } from '@/types/core/content';
 

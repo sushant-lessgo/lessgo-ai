@@ -1,6 +1,5 @@
 import { layoutElementSchema, getLayoutElements } from './layoutElementSchema';
-// ARCHIVED: selectOptionalElements.ts moved to archive/sections/
-// AI now decides optional elements at generation time
+// AI decides optional elements at generation time (legacy selectOptionalElements removed)
 import { sectionList } from './sectionList';
 import type { InputVariables, HiddenInferredFields } from '@/types/core/index';
 import { logger } from '@/lib/logger';

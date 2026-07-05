@@ -185,7 +185,6 @@ export function scanSectionsForNavigation(
  * Get max navigation items for header variant
  */
 export function getMaxNavItemsForHeader(headerLayout: string): number {
-  // Archived header layouts moved to archive/utils/sectionScanner.archived.ts
   const maxItemsMap: Record<string, number> = {
     MinimalNavHeader: 4,
   };

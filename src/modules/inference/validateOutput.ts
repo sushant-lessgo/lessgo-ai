@@ -1,6 +1,5 @@
 // src/modules/inference/validateOutput.ts
-// STUB: Placeholder for archived field validation
-// Actual implementation archived - see archive/onboarding-v1/
+// STUB: Placeholder for removed onboarding-v1 field validation
 
 import type { InputVariables } from '@/types/core/content';
 

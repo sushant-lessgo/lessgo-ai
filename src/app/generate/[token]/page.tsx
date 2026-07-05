@@ -4,9 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { EditProvider, useEditStoreContext } from '@/components/EditProvider';
 import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
-// ARCHIVED: Debug panels moved to archive/onboarding-v1
-// import { StoreDebugPanel } from '@/app/create/[token]/components/StoreDebugPanel';
-// import { OnboardingDebugPanel } from '@/app/create/[token]/components/OnboardingDebugPanel';
 import EditTransitionModal from './components/EditTransitionModal';
 import PageRevealAnimation from './components/PageRevealAnimation';
 
@@ -337,10 +334,6 @@ logger.debug('🎯 Theme after setMode:', afterModeSet.theme);
         currentStep={transitionStep}
         progress={transitionProgress}
       />
-
-      {/* Development Debug Panels - ARCHIVED: Moved to archive/onboarding-v1 */}
-      {/* {process.env.NODE_ENV === 'development' && <StoreDebugPanel />} */}
-      {/* {process.env.NODE_ENV === 'development' && <OnboardingDebugPanel />} */}
 
       {/* Bottom padding to prevent content from being hidden behind fixed bar */}
       <div className="h-20"></div>

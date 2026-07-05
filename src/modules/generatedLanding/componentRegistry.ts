@@ -8,10 +8,9 @@ import { getLoadedTemplate } from '@/modules/templates/registry';
 import type { AudienceType, TemplateId } from '@/types/service';
 import { usesTemplateModule } from '@/types/service';
 
-// P5 (meridianPlan.md): the legacy 47-UIBlock à-la-carte registry was archived to
-// `archive/modules/UIBlocks`. Product now renders exclusively through the Meridian
-// template module; service through Hearth. There is no remaining non-template
-// render path — `getComponent` dispatches solely via the template registry.
+// The legacy 47-UIBlock à-la-carte registry was removed. All rendering goes
+// through template modules. There is no remaining non-template render path —
+// `getComponent` dispatches solely via the template registry.
 
 // Helper function to extract section type from section ID
 export function extractSectionType(sectionId: string): string {
