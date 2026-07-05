@@ -18,6 +18,7 @@ import {
 } from '@/types/product';
 import { buildTechPremiumHomeFinalContent } from '@/hooks/editStore/archetypes';
 import { selectProductBlocks } from '@/modules/audience/product/selectBlocks';
+import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
 import {
   buildMultiPageSkeleton,
   mergePageIntoFinalContent,
@@ -214,7 +215,11 @@ export default function GeneratingStep() {
       const ob = fc.onboardingData as MultiPageOnboardingData;
       const sitemap: SitemapPage[] = ob.sitemap;
       const fanStrategy = ob.strategy;
-      const fanFeatures: string[] = ob.understanding?.features ?? [];
+      // Fan-out is vestria-only (manufacturer): copy features slot carries
+      // valueAdds (D3). Fallback to SaaS-shape features keeps older drafts
+      // (pre-manufacturer understanding) resumable.
+      const fanFeatures: string[] =
+        ob.understanding?.valueAdds ?? ob.understanding?.features ?? [];
       const sitePages = sitemap.map((p) => ({ title: p.title, pathSlug: p.pathSlug }));
       const total = sitemap.length;
 
@@ -336,7 +341,13 @@ export default function GeneratingStep() {
       setError('Missing onboarding data. Please restart from the beginning.');
       return;
     }
-    const features = understanding.features ?? [];
+    // Manufacturer flow (onboarding1 D3): remap the manufacturer field set into
+    // the EXISTING body keys (features ← valueAdds, categories ← productCategories,
+    // otherAudiences ← industriesServed). SaaS path passes the old fields untouched.
+    const isMfr = isManufacturerFlow(storeTemplateId);
+    const features = isMfr
+      ? understanding.valueAdds ?? understanding.features ?? []
+      : understanding.features ?? [];
     const audiences = understanding.audiences ?? [];
 
     // ─── Persona → template (fired in parallel with generation; no serial cost) ───
@@ -532,9 +543,18 @@ export default function GeneratingStep() {
           features,
           landingGoal,
           offer,
-          primaryAudience: audiences[0] || 'early adopters',
-          otherAudiences: audiences.slice(1),
-          categories: understanding.categories ?? [],
+          primaryAudience:
+            audiences[0] ||
+            (isMfr ? 'trade buyers / procurement teams' : 'early adopters'),
+          otherAudiences: isMfr
+            ? understanding.industriesServed ?? []
+            : audiences.slice(1),
+          categories: isMfr
+            ? understanding.productCategories ?? understanding.categories ?? []
+            : understanding.categories ?? [],
+          ...(isMfr && understanding.whatYouMake
+            ? { whatYouMake: understanding.whatYouMake }
+            : {}),
           templateId: storeTemplateId,
         }),
       });

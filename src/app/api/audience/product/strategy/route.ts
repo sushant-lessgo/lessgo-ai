@@ -23,6 +23,8 @@ import {
   ProductStrategyWithSitemapSchema,
 } from '@/lib/schemas/productStrategy.schema';
 import { buildProductStrategyPrompt } from '@/modules/audience/product/strategy/promptsProduct';
+import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
+import type { ProductVoiceId } from '@/modules/audience/product/voice';
 import { getPageArchetypesForTemplate } from '@/modules/audience/product/pageArchetypes';
 import { assembleProductStrategy } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { generateMockMeridianStrategy } from '@/modules/prompt/mockResponseGeneratorProduct';
@@ -48,6 +50,9 @@ const ProductStrategyRequestSchema = z.object({
   hasSocialProof: z.boolean().optional(),
   hasConcreteResults: z.boolean().optional(),
   hasDemoVideo: z.boolean().optional(),
+  // Manufacturer flow (onboarding1 D3): what the business makes — fed to the
+  // strategy prompt's manufacturer branch only.
+  whatYouMake: z.string().optional(),
   // Template-aware assembly (whitelist). Fed ONLY to assembleProductStrategy —
   // never to the prompt builder (firewall). vestria is admin-gated until GA metering.
   templateId: z.enum(['meridian', 'vestria']).optional(),
@@ -102,6 +107,11 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
     //    (capability data — templateId itself never reaches the prompt layer);
     //    single-page templates (meridian) get the exact prompt as before.
     const pageArchetypes = getPageArchetypesForTemplate(data.templateId) ?? undefined;
+    // Voice derivation (D4) — same pattern as generate-copy: the prompt layer
+    // receives the derived VOICE, never templateId itself (firewall).
+    const voiceId: ProductVoiceId = isManufacturerFlow(data.templateId)
+      ? 'tailored-trade'
+      : 'modern-tech';
     const prompt = buildProductStrategyPrompt({
       productName: data.productName,
       oneLiner: data.oneLiner,
@@ -111,6 +121,8 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
       primaryAudience: data.primaryAudience,
       otherAudiences: data.otherAudiences,
       categories: data.categories,
+      voiceId,
+      whatYouMake: data.whatYouMake,
       pageArchetypes,
     });
     logger.dev('[product-strategy] PROMPT:', prompt);

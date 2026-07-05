@@ -10,6 +10,7 @@
 
 import type { LandingGoal } from '@/types/generation';
 import type { PageArchetypeDef } from '../pageArchetypes';
+import type { ProductVoiceId } from '../voice';
 import { assertNoTemplateLeak } from '../promptFirewall';
 
 export interface ProductStrategyPromptInput {
@@ -21,6 +22,13 @@ export interface ProductStrategyPromptInput {
   primaryAudience: string;
   otherAudiences: string[];
   categories: string[];
+  /** Copy-voice id, resolved ROUTE-side from templateId (D4 — same firewall
+   *  stance as buildProductCopyPrompt: a VOICE, never template identity).
+   *  'tailored-trade' switches the manufacturer labels/framing. */
+  voiceId?: ProductVoiceId;
+  /** Manufacturer flow only (onboarding1 D3): what the business makes —
+   *  the one-liner alone under-specifies a maker. Strategy-side only. */
+  whatYouMake?: string;
   /** Page-archetype MENU (capability data, not template identity — resolved
    *  route-side). When present, the prompt gains Step 5: sitemap proposal. */
   pageArchetypes?: PageArchetypeDef[];
@@ -61,10 +69,31 @@ export function buildProductStrategyPrompt(input: ProductStrategyPromptInput): s
     primaryAudience,
     otherAudiences,
     categories,
+    whatYouMake,
     pageArchetypes,
   } = input;
 
+  const isTrade = (input.voiceId ?? 'modern-tech') === 'tailored-trade';
+
   const sitemapStep = pageArchetypes?.length ? buildSitemapStep(pageArchetypes) : '';
+
+  // Manufacturer branch (onboarding1 D3): explicit "What they make:" line —
+  // emitted ONLY for tailored-trade; SaaS output stays byte-identical.
+  const whatTheyMakeLine =
+    isTrade && whatYouMake ? `\n**What they make:** ${whatYouMake}` : '';
+
+  // Manufacturer branch: otherAudiences slot carries industriesServed — relabel.
+  const audienceListLabel = isTrade ? 'Industries served' : 'Other audiences';
+
+  // Trailing framing paragraph — SaaS wording is frozen (byte-identical);
+  // tailored-trade replaces the "Modern Tech" SaaS framing entirely.
+  const framing = isTrade
+    ? `This strategy drives downstream copy generation for a manufacturer / trade-supplier
+page — concrete, capability-led, enquiry-driven, no startup hype. Keep oneReader/oneIdea
+phrasing concrete and specific; copy generation builds directly on these fields.`
+    : `This strategy drives downstream copy generation for a "Modern Tech" product page —
+confident, precise, builder-to-builder, no hype. Keep oneReader/oneIdea phrasing
+concrete and specific; copy generation builds directly on these fields.`;
 
   return `You are a landing page strategist. Analyze this product and create a conversion-optimized strategy.
 
@@ -74,12 +103,12 @@ export function buildProductStrategyPrompt(input: ProductStrategyPromptInput): s
 **Description:** ${oneLiner}
 **Landing Goal:** ${landingGoal}
 **Offer:** ${offer}
-**Categories:** ${categories.join(', ') || '—'}
+**Categories:** ${categories.join(', ') || '—'}${whatTheyMakeLine}
 
 ## Target Audience
 
 **Primary:** ${primaryAudience}
-${otherAudiences.length > 0 ? `**Other audiences:** ${otherAudiences.join(', ')}` : ''}
+${otherAudiences.length > 0 ? `**${audienceListLabel}:** ${otherAudiences.join(', ')}` : ''}
 
 ## Features
 
@@ -121,9 +150,7 @@ ${sitemapStep}
 
 ---
 
-This strategy drives downstream copy generation for a "Modern Tech" product page —
-confident, precise, builder-to-builder, no hype. Keep oneReader/oneIdea phrasing
-concrete and specific; copy generation builds directly on these fields.
+${framing}
 
 Output valid JSON only. No explanations or markdown.`;
 }

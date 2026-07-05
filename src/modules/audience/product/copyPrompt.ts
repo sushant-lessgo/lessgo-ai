@@ -342,7 +342,7 @@ Offer: ${offer}
 Landing goal: ${landingGoal}
 ${getGoalCtaGuidance(landingGoal)}
 
-Features (raw, from the founder):
+${isTrade ? 'Value-adds / USPs (raw, from the founder):' : 'Features (raw, from the founder):'}
 ${features.map((f) => `- ${f}`).join('\n')}
 
 ## ONE READER (Ideal Reader)

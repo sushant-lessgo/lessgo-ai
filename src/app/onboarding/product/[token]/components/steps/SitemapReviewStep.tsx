@@ -20,6 +20,7 @@ import {
   getPageArchetypesForTemplate,
   type PageArchetypeDef,
 } from '@/modules/audience/product/pageArchetypes';
+import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
 import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
 
 const SECTION_LABELS: Record<string, string> = {
@@ -78,6 +79,9 @@ export default function SitemapReviewStep() {
     setError(null);
     setCreditsError(false);
     const audiences = understanding.audiences ?? [];
+    // Manufacturer flow (onboarding1 D3): remap the manufacturer field set into
+    // the EXISTING body keys. SaaS path passes the old fields untouched.
+    const isMfr = isManufacturerFlow(templateId);
     try {
       const res = await fetch('/api/audience/product/strategy', {
         method: 'POST',
@@ -85,12 +89,23 @@ export default function SitemapReviewStep() {
         body: JSON.stringify({
           productName: productName.trim() || 'Your Product',
           oneLiner,
-          features: understanding.features ?? [],
+          features: isMfr
+            ? understanding.valueAdds ?? understanding.features ?? []
+            : understanding.features ?? [],
           landingGoal,
           offer,
-          primaryAudience: audiences[0] || 'early adopters',
-          otherAudiences: audiences.slice(1),
-          categories: understanding.categories ?? [],
+          primaryAudience:
+            audiences[0] ||
+            (isMfr ? 'trade buyers / procurement teams' : 'early adopters'),
+          otherAudiences: isMfr
+            ? understanding.industriesServed ?? []
+            : audiences.slice(1),
+          categories: isMfr
+            ? understanding.productCategories ?? understanding.categories ?? []
+            : understanding.categories ?? [],
+          ...(isMfr && understanding.whatYouMake
+            ? { whatYouMake: understanding.whatYouMake }
+            : {}),
           templateId,
         }),
       });

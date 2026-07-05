@@ -89,3 +89,35 @@
 **Open risks**
 - Persona-fetch race window remains (accepted, D1): manufacturer submitting on step 1 before `/api/user/persona` resolves takes SaaS branch.
 - Manual dev-server walk (plan's manual verification) not run in this phase — recommend covering during Phase 5 pilot / impl-review.
+
+## Phase 4 — downstream generation wiring (strategy + copy consume manufacturer fields)
+
+**Files changed**
+- `src/app/onboarding/product/[token]/components/steps/GeneratingStep.tsx` — D3 client remap on `isManufacturerFlow(storeTemplateId)`: `features ← valueAdds`, strategy body `otherAudiences ← industriesServed`, `categories ← productCategories`, `whatYouMake` added to strategy body; fan-out `fanFeatures ← ob.understanding.valueAdds ?? features` (vestria-only path). SaaS path passes the old fields exactly as before.
+- `src/app/onboarding/product/[token]/components/steps/SitemapReviewStep.tsx` — same D3 remap in the sitemap-gate strategy fetch body (this is where vestria strategy is actually charged).
+- `src/app/api/audience/product/strategy/route.ts` — zod widened with `whatYouMake: z.string().optional()`; derives `voiceId` via `isManufacturerFlow(data.templateId)` → `'tailored-trade'` else `'modern-tech'` (mirror of generate-copy:156); passes `voiceId` + `whatYouMake` into `buildProductStrategyPrompt`. Firewall intact — templateId never enters the prompt builder (`assertNoTemplateLeak` untouched, input carries only the derived voice).
+- `src/modules/audience/product/strategy/promptsProduct.ts` — input gains `voiceId?: ProductVoiceId` + `whatYouMake?`; `isTrade` branch: `What they make:` line after Categories, `Other audiences:` relabeled `Industries served:`, trailing framing paragraph branched (tailored-trade: "manufacturer / trade-supplier page — concrete, capability-led, enquiry-driven, no startup hype"). SaaS output byte-identical (proven by frozen-baseline test).
+- `src/modules/audience/product/copyPrompt.ts` — existing `isTrade` branch: features block header relabeled "Value-adds / USPs (raw, from the founder):". SaaS byte-identical.
+- `src/modules/audience/product/promptBranch.test.ts` (NEW) — SaaS strategy+copy prompts asserted byte-identical to frozen inline baselines CAPTURED FROM THE PRE-PHASE-4 BUILDERS (captured before editing, then frozen as JSON-escaped literals); manufacturer prompts asserted to contain `What they make:` / `Industries served:` / value-adds label / trade framing and to NOT contain `Other audiences:` / "Modern Tech" / builder-to-builder / Meridian identity.
+
+**voiceId threading**: client sends `templateId` (already did) → strategy route derives `voiceId` via `isManufacturerFlow` → prompt builder receives voice only (same D4 pattern as generate-copy). Copy side needed no new plumbing — route already derived `tailored-trade`.
+
+**Framing-paragraph branch**: promptsProduct.ts trailing paragraph now a `framing` const branched on `isTrade`; SaaS string preserved character-for-character.
+
+**Deviations**
+- Conservative fallbacks in the remaps (`valueAdds ?? features`, `productCategories ?? categories`) per D2's sanctioned mapping style — keeps old-shape vestria drafts (Golden Shadow v1) generating instead of sending empty `features` (strategy zod requires min 1).
+- `whatYouMake` only added to the body when non-empty (optional key; keeps prompt clean).
+- `primaryAudience` untouched for manufacturer (plan remaps only the 3 keys + whatYouMake); manufacturer padding leaves `audiences` empty → falls back to 'early adopters'. Flagged for Phase 5 pilot eyeball.
+
+**Tests/build**
+- `npm run test:run`: 51 passed | 1 skipped (665 tests passed | 2 skipped) — includes new `promptBranch.test.ts` (8 tests).
+- `npm run build`: green.
+
+**Open risks**
+- Frozen copy-prompt baseline covers a 2-section (hero+cta) Meridian fixture — layout-schema edits to those sections will legitimately require re-freezing the baseline.
+- Manufacturer real-LLM prompt quality unverified until Phase 5 pilot (mock short-circuit precedes prompt build; unit test is the verification, per plan).
+
+**Follow-up fix (post-Phase-4): manufacturer primaryAudience fallback**
+- Resolves the Deviation flagged above ("falls back to 'early adopters'"): in `GeneratingStep.tsx` (~:546) and `SitemapReviewStep.tsx` (~:97), the `primaryAudience` fallback is now gated on the existing `isMfr` flag — manufacturer defaults to `'trade buyers / procurement teams'` when `audiences[0]` is empty; SaaS keeps `audiences[0] || 'early adopters'` exactly as before.
+- No test changes needed: `promptBranch.test.ts` manufacturer fixture sets `primaryAudience: 'procurement managers'` explicitly and never asserts the fallback string; SaaS byte-baselines untouched.
+- Verify: `npx tsc --noEmit` exit 0; `npm run test:run` 51 passed | 1 skipped (665 passed | 2 skipped).
