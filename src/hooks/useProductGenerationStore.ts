@@ -9,6 +9,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type { LandingGoal, UnderstandingData } from '@/types/generation';
+import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
 
 /** Real testimonial imported from a user's existing website (verbatim). */
 export interface ImportedTestimonial {
@@ -27,7 +28,8 @@ export const PRODUCT_GENERATION_STEPS = [
   'understanding', // 1: AI extracts categories / audiences / whatItDoes / features
   'goal', // 2: primary CTA (landingGoal)
   'offer', // 3: what the visitor gets
-  'generating', // 4: strategy + copy generation, then redirect to /edit
+  'sitemap', // 4: sitemap proposal + human gate (multi-page templates ONLY — OfferStep skips it when the template has no page menu)
+  'generating', // 5: copy generation, then redirect to /generate
 ] as const;
 
 export type ProductGenerationStep = (typeof PRODUCT_GENERATION_STEPS)[number];
@@ -62,7 +64,13 @@ interface ProductGenerationState {
   importSourceUrl: string | null;
   importedTestimonials: ImportedTestimonial[];
 
-  // Step 4
+  // Step 4 (sitemap gate — multi-page templates only). strategy is fetched by
+  // SitemapReviewStep and reused by GeneratingStep (no second strategy charge);
+  // sitemap is the USER-AGREED shape (edited from strategy.sitemap).
+  strategy: ProductStrategyOutput | null;
+  sitemap: SitemapPage[] | null;
+
+  // Step 5
   generationProgress: number;
   generationError: string | null;
 }
@@ -88,6 +96,9 @@ interface ProductGenerationActions {
   setImportSourceUrl: (url: string | null) => void;
   setImportedTestimonials: (testimonials: ImportedTestimonial[]) => void;
 
+  setStrategy: (strategy: ProductStrategyOutput | null) => void;
+  setSitemap: (sitemap: SitemapPage[] | null) => void;
+
   setGenerationProgress: (progress: number) => void;
   setGenerationError: (error: string | null) => void;
 
@@ -109,6 +120,8 @@ const initialState: ProductGenerationState = {
   offer: '',
   importSourceUrl: null,
   importedTestimonials: [],
+  strategy: null,
+  sitemap: null,
   generationProgress: 0,
   generationError: null,
 };
@@ -193,6 +206,15 @@ export const useProductGenerationStore = create<ProductGenerationStore>()(
       setImportedTestimonials: (testimonials) =>
         set((state) => {
           state.importedTestimonials = testimonials;
+        }),
+
+      setStrategy: (strategy) =>
+        set((state) => {
+          state.strategy = strategy as any;
+        }),
+      setSitemap: (sitemap) =>
+        set((state) => {
+          state.sitemap = sitemap as any;
         }),
 
       setGenerationProgress: (progress) =>

@@ -13,6 +13,7 @@ import OneLinerStep from './components/steps/OneLinerStep';
 import UnderstandingStep from './components/steps/UnderstandingStep';
 import GoalStep from './components/steps/GoalStep';
 import OfferStep from './components/steps/OfferStep';
+import SitemapReviewStep from './components/steps/SitemapReviewStep';
 
 // GeneratingStep uses crypto.randomUUID + router + saveDraft fetch; keep it
 // dynamic (ssr:false) to mirror the service flow and avoid hydration concerns.
@@ -26,6 +27,7 @@ const stepComponents: Record<string, React.ComponentType> = {
   understanding: UnderstandingStep,
   goal: GoalStep,
   offer: OfferStep,
+  sitemap: SitemapReviewStep,
   generating: GeneratingStep,
 };
 

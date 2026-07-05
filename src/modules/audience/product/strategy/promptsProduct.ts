@@ -9,6 +9,7 @@
 // Legacy promptsV3.ts is UNTOUCHED — it still serves the 47-block path.
 
 import type { LandingGoal } from '@/types/generation';
+import type { PageArchetypeDef } from '../pageArchetypes';
 import { assertNoTemplateLeak } from '../promptFirewall';
 
 export interface ProductStrategyPromptInput {
@@ -20,6 +21,33 @@ export interface ProductStrategyPromptInput {
   primaryAudience: string;
   otherAudiences: string[];
   categories: string[];
+  /** Page-archetype MENU (capability data, not template identity — resolved
+   *  route-side). When present, the prompt gains Step 5: sitemap proposal. */
+  pageArchetypes?: PageArchetypeDef[];
+}
+
+function buildSitemapStep(menu: PageArchetypeDef[]): string {
+  const menuLines = menu
+    .map(
+      (a) =>
+        `- "${a.key}"${a.required ? ' (ALWAYS included, first)' : ''} — ${a.description}\n  allowed sections: ${a.allowedSections.join(', ')} · required: ${a.requiredSections.join(', ') || '—'}`
+    )
+    .join('\n');
+
+  return `
+
+### Step 5: sitemap
+Propose the pages this business's site needs, from THIS menu only:
+
+${menuLines}
+
+Return sitemap.pages — for each page: { archetypeKey, title, sections, reason }.
+- archetypeKey: a key from the menu. title: short page name. reason: one line on why this business needs the page.
+- sections: the page's body sections IN ORDER, chosen ONLY from that page's allowed sections. Include its required sections.
+- "home" is always present and always first.
+- Include a page only when this business has real substance for it — a thin or brand-new business may legitimately be home-only or home + contact.
+- Do not repeat the same heavy section on many pages (e.g. the full catalogue grid belongs on one or two pages, not every page).
+- When a section moves to its own dedicated page, consider whether home still needs the full section or the site reads better without the duplication.`;
 }
 
 export function buildProductStrategyPrompt(input: ProductStrategyPromptInput): string {
@@ -33,7 +61,10 @@ export function buildProductStrategyPrompt(input: ProductStrategyPromptInput): s
     primaryAudience,
     otherAudiences,
     categories,
+    pageArchetypes,
   } = input;
+
+  const sitemapStep = pageArchetypes?.length ? buildSitemapStep(pageArchetypes) : '';
 
   return `You are a landing page strategist. Analyze this product and create a conversion-optimized strategy.
 
@@ -86,6 +117,7 @@ For each feature provided, create:
 - feature: The raw feature (from input)
 - benefit: What the user directly gets from this feature
 - benefitOfBenefit: The emotional/practical impact of that benefit
+${sitemapStep}
 
 ---
 

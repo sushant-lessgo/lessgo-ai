@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Quote, X } from 'lucide-react';
 import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
+import { getPageArchetypesForTemplate } from '@/modules/audience/product/pageArchetypes';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,8 @@ export default function OfferStep() {
   const importedTestimonials = useProductGenerationStore((s) => s.importedTestimonials);
   const setImportedTestimonials = useProductGenerationStore((s) => s.setImportedTestimonials);
   const nextStep = useProductGenerationStore((s) => s.nextStep);
+  const goToStep = useProductGenerationStore((s) => s.goToStep);
+  const templateId = useProductGenerationStore((s) => s.templateId);
 
   const [local, setLocal] = useState(offer);
   const trimmed = local.trim();
@@ -32,7 +35,13 @@ export default function OfferStep() {
     e.preventDefault();
     if (!isValid) return;
     setOffer(trimmed);
-    nextStep();
+    // Single-page templates (meridian) have no page menu → skip the sitemap
+    // gate entirely (zero behavior change); multi-page templates enter it.
+    if (getPageArchetypesForTemplate(templateId)) {
+      nextStep();
+    } else {
+      goToStep('generating');
+    }
   };
 
   return (

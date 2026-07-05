@@ -88,7 +88,25 @@ export const defaultVestriaVariant: VestriaVariant = 'tailored';
  * section list and block map. No vibe / section-decisions / uiblock-decisions —
  * the pilot makes no layout choices (see productStrategy.schema.ts).
  */
+/**
+ * One page of an agreed multi-page sitemap (newGeneration Phase 2). Produced by
+ * clampSitemap (server is the law over the LLM proposal), edited by the user in
+ * the SitemapReviewStep, consumed by the per-page copy fan-out (Phase 3).
+ * sections are BODY-ONLY types (chrome is shared, injected at page boundaries).
+ */
+export interface SitemapPage {
+  archetypeKey: string;
+  title: string;
+  pathSlug: string;
+  sections: string[];
+  /** AI rationale shown in the review UI (not persisted downstream). */
+  reason?: string;
+}
+
 export interface ProductStrategyOutput extends ProductStrategyResponse {
-  sections: string[]; // fixed 7: header, hero, features, testimonials, pricing, cta, footer
-  uiblocks: Record<string, string>; // section type → Meridian layout name (PascalCase)
+  sections: string[]; // top-level (home incl. chrome): header + home body + footer
+  uiblocks: Record<string, string>; // section type → layout name (PascalCase)
+  /** Present only when the template has a page-archetype menu (vestria).
+   *  [0] is always home. Absent for single-page templates (meridian). */
+  sitemap?: SitemapPage[];
 }

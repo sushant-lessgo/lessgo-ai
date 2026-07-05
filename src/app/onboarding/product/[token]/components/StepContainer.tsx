@@ -4,6 +4,7 @@ import {
   useProductGenerationStore,
   PRODUCT_GENERATION_STEPS,
 } from '@/hooks/useProductGenerationStore';
+import { getPageArchetypesForTemplate } from '@/modules/audience/product/pageArchetypes';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/shared/Logo';
@@ -12,18 +13,23 @@ interface StepContainerProps {
   children: React.ReactNode;
 }
 
-const BACK_ALLOWED_STEPS = ['understanding', 'goal', 'offer'];
+const BACK_ALLOWED_STEPS = ['understanding', 'goal', 'offer', 'sitemap'];
 
-// Generating uses the wider layout for status indicators.
-const WIDE_STEPS = new Set(['generating']);
+// Generating + sitemap review use the wider layout.
+const WIDE_STEPS = new Set(['generating', 'sitemap']);
 
 export default function StepContainer({ children }: StepContainerProps) {
   const currentStep = useProductGenerationStore((s) => s.currentStep);
   const stepIndex = useProductGenerationStore((s) => s.stepIndex);
   const prevStep = useProductGenerationStore((s) => s.prevStep);
+  const templateId = useProductGenerationStore((s) => s.templateId);
 
-  const totalUserSteps = PRODUCT_GENERATION_STEPS.length; // all steps shown
-  const progress = (stepIndex / (totalUserSteps - 1)) * 100;
+  // Single-page templates skip the sitemap step — don't count it in the bar.
+  const hasSitemapStep = !!getPageArchetypesForTemplate(templateId);
+  const sitemapIdx = PRODUCT_GENERATION_STEPS.indexOf('sitemap');
+  const totalUserSteps = PRODUCT_GENERATION_STEPS.length - (hasSitemapStep ? 0 : 1);
+  const displayIndex = !hasSitemapStep && stepIndex > sitemapIdx ? stepIndex - 1 : stepIndex;
+  const progress = (displayIndex / (totalUserSteps - 1)) * 100;
   const showBack = BACK_ALLOWED_STEPS.includes(currentStep);
   const isWide = WIDE_STEPS.has(currentStep);
 
@@ -34,7 +40,7 @@ export default function StepContainer({ children }: StepContainerProps) {
           <div className="w-24" />
           <Logo size={80} />
           <span className="w-24 text-right text-sm text-gray-500">
-            Step {Math.min(stepIndex + 1, totalUserSteps)} of {totalUserSteps}
+            Step {Math.min(displayIndex + 1, totalUserSteps)} of {totalUserSteps}
           </span>
         </div>
         <div className="h-1.5 bg-gray-100">

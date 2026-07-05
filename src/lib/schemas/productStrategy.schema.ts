@@ -40,3 +40,25 @@ export const ProductStrategyResponseSchema = z.object({
 });
 
 export type ProductStrategyResponse = z.infer<typeof ProductStrategyResponseSchema>;
+
+// ===== Sitemap proposal (newGeneration Phase 2 — multi-page templates only) =====
+// Used ONLY when the template has a page-archetype menu (getPageArchetypesForTemplate
+// returns non-null): the route swaps in the WithSitemap schema so the base schema —
+// and every meridian response — stays byte-identical. The LLM proposal is a
+// SUGGESTION; clampSitemap (parseStrategyProduct.ts) is the law.
+
+export const SitemapProposalPageSchema = z.object({
+  archetypeKey: z.string().min(1),
+  title: z.string(),
+  sections: z.array(z.string()),
+  reason: z.string(),
+});
+
+export const ProductStrategyWithSitemapSchema = ProductStrategyResponseSchema.extend({
+  sitemap: z.object({
+    pages: z.array(SitemapProposalPageSchema).min(1),
+  }),
+});
+
+export type SitemapProposalPage = z.infer<typeof SitemapProposalPageSchema>;
+export type ProductStrategyWithSitemapResponse = z.infer<typeof ProductStrategyWithSitemapSchema>;

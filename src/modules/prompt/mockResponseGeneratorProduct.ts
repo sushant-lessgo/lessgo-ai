@@ -12,6 +12,8 @@ import type { ProductStrategyOutput } from '@/types/product';
 import type { SectionCopy } from '@/types/generation';
 import { selectProductSections } from '@/modules/audience/product/sectionSelection';
 import { selectProductBlocks } from '@/modules/audience/product/selectBlocks';
+import { getPageArchetypesForTemplate } from '@/modules/audience/product/pageArchetypes';
+import { clampSitemap } from '@/modules/audience/product/strategy/parseStrategyProduct';
 
 export interface MockProductStrategyInput {
   productName: string;
@@ -25,10 +27,18 @@ export interface MockProductStrategyInput {
 export function generateMockMeridianStrategy(
   input: MockProductStrategyInput
 ): ProductStrategyOutput {
-  const sections = selectProductSections({ templateId: input.templateId });
+  // Multi-page templates: mock the clamped default sitemap (exercises the gate
+  // UI + per-page fan-out offline). assembleProductStrategy's law applies.
+  const menu = getPageArchetypesForTemplate(input.templateId);
+  const sitemap = menu ? clampSitemap(null, menu) : undefined;
+
+  const sections = sitemap
+    ? ['header', ...sitemap[0].sections, 'footer']
+    : selectProductSections({ templateId: input.templateId });
   const { uiblocks } = selectProductBlocks({ sections, templateId: input.templateId });
 
   return {
+    ...(sitemap ? { sitemap } : {}),
     awareness: 'solution-aware-skeptical',
     oneReader: {
       personaDescription:

@@ -17,6 +17,7 @@ import {
   defaultVestriaVariant,
 } from '@/types/product';
 import { buildTechPremiumHomeFinalContent } from '@/hooks/editStore/archetypes';
+import { selectProductBlocks } from '@/modules/audience/product/selectBlocks';
 // Plain data module (fields only, no component code) — safe to import statically
 // without breaching the template bundle firewall.
 import {
@@ -57,6 +58,8 @@ export default function GeneratingStep() {
   const importedTestimonials = useProductGenerationStore((s) => s.importedTestimonials);
   const importSourceUrl = useProductGenerationStore((s) => s.importSourceUrl);
   const storeTemplateId = useProductGenerationStore((s) => s.templateId);
+  const storeStrategy = useProductGenerationStore((s) => s.strategy);
+  const storeSitemap = useProductGenerationStore((s) => s.sitemap);
   const setGenerationError = useProductGenerationStore((s) => s.setGenerationError);
 
   const [stage, setStage] = useState<Stage>('strategy');
@@ -239,7 +242,108 @@ export default function GeneratingStep() {
       return;
     }
 
+    // ─── Copy + Save (shared tail; strategy comes from the gate or the fetch below) ───
+    const runCopyAndSave = async (strategy: ProductStrategyOutput) => {
+      setStage('copy');
+      const copyStart = Date.now();
+      let copySections: Record<string, SectionCopy>;
+      try {
+        const res = await fetch('/api/audience/product/generate-copy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            strategy,
+            uiblocks: strategy.uiblocks,
+            productName: effectiveProductName,
+            oneLiner,
+            offer,
+            landingGoal,
+            features,
+            realTestimonials: importedTestimonials,
+            templateId: storeTemplateId,
+          }),
+        });
+        const json = await res.json();
+        posthog?.capture('product_copy_call_complete', {
+          success: !!json?.success,
+          creditsUsed: json?.creditsUsed,
+          creditsRemaining: json?.creditsRemaining,
+          durationMs: Date.now() - copyStart,
+          attempts: json?.meta?.attempts,
+          audienceType: 'product',
+        });
+        if (!res.ok || !json?.success) {
+          if (res.status === 402 || /credit/i.test(json?.error ?? '')) {
+            setCreditsError(true);
+            return;
+          }
+          throw new Error(json?.message || 'Copy generation failed');
+        }
+        copySections = json.sections as Record<string, SectionCopy>;
+      } catch (e: any) {
+        setError(e?.message || 'Copy generation failed.');
+        return;
+      }
+
+      // ─── Save ───
+      setStage('saving');
+      // Hardware-founder (TechPremium) was handled by the deterministic branch
+      // above; Meridian or Vestria reaches here (store templateId decides).
+      const templateId = explicitVestria ? 'vestria' : PILOT_TEMPLATE;
+      const paletteId = explicitVestria ? defaultVestriaPalette : PILOT_PALETTE;
+      const variantId = explicitVestria ? defaultVestriaVariant : PILOT_VARIANT;
+      try {
+        const { finalContent } = buildFinalContent(strategy, copySections, title);
+        const res = await fetch('/api/saveDraft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tokenId,
+            title,
+            paletteId,
+            templateId,
+            variantId,
+            finalContent,
+          }),
+        });
+        if (!res.ok) {
+          throw new Error('Failed to save draft');
+        }
+      } catch (e: any) {
+        setError(e?.message || 'Could not save the draft.');
+        return;
+      }
+
+      setStage('done');
+      posthog?.capture('product_onboarding_complete', {
+        totalDurationMs: Date.now() - startedAt.current,
+        sectionCount: strategy.sections.length,
+        templateId,
+        paletteId,
+        variantId,
+        audienceType: 'product',
+      });
+
+      // Reveal the generated page (wow moment) before the editor.
+      setTimeout(() => router.push(`/generate/${tokenId}`), 600);
+    };
+
     // ─── Strategy ───
+    // Sitemap-gated flows (vestria) already fetched strategy in the review step
+    // — reuse it (no second charge) and honor the USER-EDITED home shape.
+    if (storeStrategy) {
+      let strategy = storeStrategy;
+      if (storeSitemap?.length) {
+        const homeSections = ['header', ...storeSitemap[0].sections, 'footer'];
+        const { uiblocks } = selectProductBlocks({
+          sections: homeSections,
+          templateId: storeTemplateId,
+        });
+        strategy = { ...strategy, sections: homeSections, uiblocks, sitemap: storeSitemap };
+      }
+      return runCopyAndSave(strategy);
+    }
+
     setStage('strategy');
     const strategyStart = Date.now();
     let strategy: ProductStrategyOutput;
@@ -280,89 +384,7 @@ export default function GeneratingStep() {
       return;
     }
 
-    // ─── Copy ───
-    setStage('copy');
-    const copyStart = Date.now();
-    let copySections: Record<string, SectionCopy>;
-    try {
-      const res = await fetch('/api/audience/product/generate-copy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          strategy,
-          uiblocks: strategy.uiblocks,
-          productName: effectiveProductName,
-          oneLiner,
-          offer,
-          landingGoal,
-          features,
-          realTestimonials: importedTestimonials,
-          templateId: storeTemplateId,
-        }),
-      });
-      const json = await res.json();
-      posthog?.capture('product_copy_call_complete', {
-        success: !!json?.success,
-        creditsUsed: json?.creditsUsed,
-        creditsRemaining: json?.creditsRemaining,
-        durationMs: Date.now() - copyStart,
-        attempts: json?.meta?.attempts,
-        audienceType: 'product',
-      });
-      if (!res.ok || !json?.success) {
-        if (res.status === 402 || /credit/i.test(json?.error ?? '')) {
-          setCreditsError(true);
-          return;
-        }
-        throw new Error(json?.message || 'Copy generation failed');
-      }
-      copySections = json.sections as Record<string, SectionCopy>;
-    } catch (e: any) {
-      setError(e?.message || 'Copy generation failed.');
-      return;
-    }
-
-    // ─── Save ───
-    setStage('saving');
-    // Hardware-founder (TechPremium) was handled by the deterministic branch above;
-    // Meridian or Vestria reaches here (store templateId decides).
-    const templateId = explicitVestria ? 'vestria' : PILOT_TEMPLATE;
-    const paletteId = explicitVestria ? defaultVestriaPalette : PILOT_PALETTE;
-    const variantId = explicitVestria ? defaultVestriaVariant : PILOT_VARIANT;
-    try {
-      const { finalContent } = buildFinalContent(strategy, copySections, title);
-      const res = await fetch('/api/saveDraft', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tokenId,
-          title,
-          paletteId,
-          templateId,
-          variantId,
-          finalContent,
-        }),
-      });
-      if (!res.ok) {
-        throw new Error('Failed to save draft');
-      }
-    } catch (e: any) {
-      setError(e?.message || 'Could not save the draft.');
-      return;
-    }
-
-    setStage('done');
-    posthog?.capture('product_onboarding_complete', {
-      totalDurationMs: Date.now() - startedAt.current,
-      sectionCount: strategy.sections.length,
-      templateId,
-      paletteId,
-      variantId,
-      audienceType: 'product',
-    });
-
-    // Reveal the generated page (wow moment) before the editor.
-    setTimeout(() => router.push(`/generate/${tokenId}`), 600);
+    await runCopyAndSave(strategy);
   }, [
     understanding,
     landingGoal,
@@ -372,6 +394,8 @@ export default function GeneratingStep() {
     importedTestimonials,
     importSourceUrl,
     storeTemplateId,
+    storeStrategy,
+    storeSitemap,
     tokenId,
     posthog,
     router,

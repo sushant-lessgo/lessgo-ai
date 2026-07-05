@@ -18,8 +18,12 @@ import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
 import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
 import { generateWithSchema } from '@/lib/aiClient';
-import { ProductStrategyResponseSchema } from '@/lib/schemas/productStrategy.schema';
+import {
+  ProductStrategyResponseSchema,
+  ProductStrategyWithSitemapSchema,
+} from '@/lib/schemas/productStrategy.schema';
 import { buildProductStrategyPrompt } from '@/modules/audience/product/strategy/promptsProduct';
+import { getPageArchetypesForTemplate } from '@/modules/audience/product/pageArchetypes';
 import { assembleProductStrategy } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { generateMockMeridianStrategy } from '@/modules/prompt/mockResponseGeneratorProduct';
 import { landingGoals } from '@/types/generation';
@@ -104,7 +108,10 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
       });
     }
 
-    // 3. Build prompt
+    // 3. Build prompt. Multi-page templates get the page-archetype MENU
+    //    (capability data — templateId itself never reaches the prompt layer);
+    //    single-page templates (meridian) get the exact prompt as before.
+    const pageArchetypes = getPageArchetypesForTemplate(data.templateId) ?? undefined;
     const prompt = buildProductStrategyPrompt({
       productName: data.productName,
       oneLiner: data.oneLiner,
@@ -114,18 +121,27 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
       primaryAudience: data.primaryAudience,
       otherAudiences: data.otherAudiences,
       categories: data.categories,
+      pageArchetypes,
     });
     logger.dev('[product-strategy] PROMPT:', prompt);
 
-    // 4. Call AI with structured outputs
+    // 4. Call AI with structured outputs (sitemap-extended schema only when a
+    //    menu exists — meridian responses stay byte-identical)
     let llmResponse;
     try {
-      llmResponse = await generateWithSchema(
-        'strategy',
-        [{ role: 'user', content: prompt }],
-        ProductStrategyResponseSchema,
-        'productStrategy'
-      );
+      llmResponse = pageArchetypes
+        ? await generateWithSchema(
+            'strategy',
+            [{ role: 'user', content: prompt }],
+            ProductStrategyWithSitemapSchema,
+            'productStrategySitemap'
+          )
+        : await generateWithSchema(
+            'strategy',
+            [{ role: 'user', content: prompt }],
+            ProductStrategyResponseSchema,
+            'productStrategy'
+          );
       logger.info('[Product Strategy] Awareness:', llmResponse.awareness);
     } catch (aiError: any) {
       logger.error('[Product Strategy] AI call failed:', aiError);
