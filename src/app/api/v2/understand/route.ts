@@ -19,17 +19,22 @@ import { generateWithSchema } from '@/lib/aiClient';
 import {
   UnderstandingResponseSchema,
   ServiceUnderstandingResponseSchema,
+  ManufacturerUnderstandingResponseSchema,
 } from '@/lib/schemas';
 import { buildServiceUnderstandPrompt } from '@/modules/audience/service/promptUnderstand';
+import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
 import { isDemoMode } from '@/lib/mockMode';
 
 export const dynamic = 'force-dynamic';
 
 // Request schema. audienceType selects the extraction schema + prompt; the
 // shared plumbing (auth, credits, rate-limit, demo) is audience-agnostic.
+// templateId (optional) carries the manufacturer signal (onboarding1, D1) —
+// absent → SaaS extraction, unchanged.
 const UnderstandRequestSchema = z.object({
   oneLiner: z.string().min(10, 'One-liner must be at least 10 characters'),
   audienceType: z.enum(['product', 'service']).optional().default('product'),
+  templateId: z.string().optional(),
 });
 
 function buildUnderstandPrompt(oneLiner: string): string {
@@ -44,6 +49,26 @@ Return a JSON object with:
 - features: 3-6 key product features (short phrases, e.g., ["AI-powered creation", "Multi-currency support"])
 
 Be specific and practical. Extract what's stated or strongly implied.`;
+}
+
+// Manufacturer / trade-supplier extraction (onboarding1, D2/D3). Parallel to
+// buildUnderstandPrompt — SaaS prompt above is untouched.
+function buildManufacturerUnderstandPrompt(oneLiner: string): string {
+  return `Extract manufacturer / trade-supplier information from this business description:
+
+"${oneLiner}"
+
+Return a JSON object with:
+- whatYouMake: one clear sentence describing what this business manufactures or supplies (the physical goods, not the mission)
+- industriesServed: 1-3 END-CUSTOMER verticals this business sells into (e.g., ["Hospitality", "Healthcare", "Security"])
+- productCategories: 1-8 CONCRETE product types they make (e.g., ["Chef coats", "Scrubs", "Hi-vis jackets"])
+- valueAdds: 1-8 CONCRETE differentiators (e.g., ["Custom embroidery", "Low MOQ", "48h dispatch", "In-house dyeing"])
+
+STRICT RULES — no synonyms, no fluff:
+- productCategories must be actual product types a buyer would order — NOT synonyms or restatements of the business itself ("uniforms", "workwear solutions" are NOT categories if the description names specific garments).
+- industriesServed must be end-customer verticals — NEVER vague groups like "businesses", "professionals", or "companies".
+- valueAdds must be concrete, verifiable capabilities or terms — NEVER quality-platitudes like "attention to detail", "commitment to quality", or "customer satisfaction".
+- Extract only what is stated or strongly implied. Do not invent.`;
 }
 
 async function understandHandler(req: NextRequest): Promise<Response> {
@@ -65,8 +90,9 @@ async function understandHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    const { oneLiner, audienceType } = validation.data;
+    const { oneLiner, audienceType, templateId } = validation.data;
     const isService = audienceType === 'service';
+    const isManufacturer = !isService && isManufacturerFlow(templateId);
 
     // 2. Auth check
     const authCheck = await requireAuth(req);
@@ -85,10 +111,30 @@ async function understandHandler(req: NextRequest): Promise<Response> {
 
     // 2b. Check for demo/mock mode - return mock data without AI call
     if (isDemoMode(req)) {
-      logger.info(`[understand] Using mock response (${audienceType})`);
+      logger.info(
+        `[understand] Using mock response (${isManufacturer ? 'manufacturer' : audienceType})`
+      );
       return createSecureResponse({
         success: true,
-        data: isService
+        data: isManufacturer
+          ? {
+              whatYouMake:
+                'We manufacture custom workwear and uniforms for institutional buyers',
+              industriesServed: ['Hospitality', 'Healthcare', 'Security'],
+              productCategories: [
+                'Chef coats',
+                'Scrubs',
+                'Hi-vis jackets',
+                'Corporate shirts',
+              ],
+              valueAdds: [
+                'Custom embroidery',
+                'Low MOQ',
+                '48h dispatch',
+                'In-house dyeing',
+              ],
+            }
+          : isService
           ? {
               whatYouDo:
                 'We help brands launch conversion-focused marketing sites that turn visitors into booked calls',
@@ -119,9 +165,11 @@ async function understandHandler(req: NextRequest): Promise<Response> {
       });
     }
 
-    // 3. Build prompt (audience-specific)
+    // 3. Build prompt (audience-specific; manufacturer branches within product)
     const prompt = isService
       ? buildServiceUnderstandPrompt(oneLiner)
+      : isManufacturer
+      ? buildManufacturerUnderstandPrompt(oneLiner)
       : buildUnderstandPrompt(oneLiner);
 
     // 4. Call AI with structured outputs
@@ -134,8 +182,14 @@ async function understandHandler(req: NextRequest): Promise<Response> {
         [{ role: 'user', content: prompt }],
         isService
           ? ServiceUnderstandingResponseSchema
+          : isManufacturer
+          ? ManufacturerUnderstandingResponseSchema
           : UnderstandingResponseSchema,
-        isService ? 'service_understanding' : 'understanding'
+        isService
+          ? 'service_understanding'
+          : isManufacturer
+          ? 'manufacturer_understanding'
+          : 'understanding'
       );
       logger.dev('[understand] RESPONSE:', understandingData);
     } catch (error: any) {
@@ -166,6 +220,15 @@ async function understandHandler(req: NextRequest): Promise<Response> {
               servicesCount: understandingData.services.length,
               targetClientsCount: understandingData.targetClients.length,
               outcomesCount: understandingData.outcomes.length,
+            }
+          : isManufacturer
+          ? {
+              audienceType,
+              extractionShape: 'manufacturer',
+              oneLinerLength: oneLiner.length,
+              industriesServedCount: understandingData.industriesServed.length,
+              productCategoriesCount: understandingData.productCategories.length,
+              valueAddsCount: understandingData.valueAdds.length,
             }
           : {
               audienceType,
