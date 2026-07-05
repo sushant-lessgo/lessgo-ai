@@ -9,7 +9,7 @@ description: >-
   discuss, shape, or spec a new feature/idea BEFORE any planning. NOT for
   planning or implementation (that's /feature), and NOT for quick questions.
 model: opus
-effort: medium
+effort: high
 argument-hint: <feature-name or one-line idea>
 ---
 
@@ -30,13 +30,26 @@ implementer. The deliverable is an agreed spec file — nothing else.
    the current one is settled:
    problem → who it's for → scope IN → scope OUT (explicit non-goals) →
    constraints → success criteria.
-4. **Challenge the feature.** Ask: is there a simpler alternative? What happens
+   Interview style: **one question at a time**, prioritizing questions whose
+   answer would change the architecture; details can wait.
+4. **Blindspot pass first when the area is unfamiliar.** If the feature touches
+   territory the user (or this session) doesn't know well, hunt the **unknown
+   unknowns** before the normal interrogation: what questions aren't being
+   asked? what does "good" look like here? what prior art/potholes exist in
+   this codebase? Surface them, then interrogate.
+5. **Prototype before spec for visual features.** Lessgo is a visual product —
+   if the feature is UI/template-shaped and the user will "know it when they
+   see it", offer 2–4 throwaway HTML mockups (à la template-design/) to react
+   to BEFORE writing the spec. Reacting is cheaper than describing taste.
+6. **Ask for references.** The best spec input is existing source code — a
+   block, module, or site to imitate ("SurgeTestimonials is the pattern").
+   Capture these in the spec's References section.
+7. **Challenge the feature.** Ask: is there a simpler alternative? What happens
    if we do nothing? Solo-founder time is the scarcest resource — killing or
    shrinking a feature is a win, not a failure.
-5. **Pilot-first.** Always ask "what's the smallest vertical slice that proves
+8. **Pilot-first.** Always ask "what's the smallest vertical slice that proves
    this?" — prefer a thin pilot + decision gate over a multi-week build.
-6. Be extremely concise. Sacrifice grammar for concision. Ask questions in
-   small batches (1–3), not walls of questions.
+9. Be extremely concise. Sacrifice grammar for concision. No walls of questions.
 
 ## End condition
 
@@ -61,6 +74,9 @@ If discussion stalls or the feature gets killed, say so plainly — no spec.
 
 ## Constraints
 - <tech/product/time constraints the planner must respect>
+
+## References                   <!-- best input is source code -->
+- <existing block/module/site to imitate, and what to take from it>
 
 ## Open exploration questions   <!-- feeds scout -->
 - <where does X live / how does Y work>

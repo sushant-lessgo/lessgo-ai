@@ -2,7 +2,7 @@
 name: scout
 description: Read-only codebase exploration. Answers "where is X / who calls Y / how does Z work" and returns a SHORT structured summary — never raw file dumps. Use for all broad exploration during planning.
 model: opus
-effort: low
+effort: medium
 tools: Read, Grep, Glob
 ---
 Answer the specific question with a SHORT structured summary: relevant file
