@@ -38,6 +38,11 @@ export type ProductGenerationStep = (typeof PRODUCT_GENERATION_STEPS)[number];
  *  the same field). vestria is admin-gated server-side until GA metering. */
 export type ProductTemplateId = 'meridian' | 'vestria';
 
+/** Vestria hero variant (onboarding2 Axis B). Picked non-blockingly while copy
+ *  streams; written into `content[heroId].layout` (the authoritative field the
+ *  renderers read) at save time. Default = tailored (existing behavior). */
+export type VestriaHeroVariant = 'VestriaTailoredHero' | 'VestriaFullBleedHero';
+
 interface ProductGenerationState {
   currentStep: ProductGenerationStep;
   stepIndex: number;
@@ -73,6 +78,13 @@ interface ProductGenerationState {
   // Step 5
   generationProgress: number;
   generationError: string | null;
+
+  // Hero variant (vestria/manufacturer only) — non-blocking mid-generation pick.
+  heroVariant: VestriaHeroVariant;
+  // True only after an EXPLICIT user pick this session. Guards the save-time
+  // application: a resumed run (store reset → false) must never re-apply the
+  // default and clobber a previously persisted choice in the DB draft.
+  heroVariantPicked: boolean;
 }
 
 interface ProductGenerationActions {
@@ -102,6 +114,8 @@ interface ProductGenerationActions {
   setGenerationProgress: (progress: number) => void;
   setGenerationError: (error: string | null) => void;
 
+  setHeroVariant: (variant: VestriaHeroVariant) => void;
+
   reset: () => void;
 }
 
@@ -124,6 +138,8 @@ const initialState: ProductGenerationState = {
   sitemap: null,
   generationProgress: 0,
   generationError: null,
+  heroVariant: 'VestriaTailoredHero',
+  heroVariantPicked: false,
 };
 
 export const useProductGenerationStore = create<ProductGenerationStore>()(
@@ -224,6 +240,12 @@ export const useProductGenerationStore = create<ProductGenerationStore>()(
       setGenerationError: (error) =>
         set((state) => {
           state.generationError = error;
+        }),
+
+      setHeroVariant: (variant) =>
+        set((state) => {
+          state.heroVariant = variant;
+          state.heroVariantPicked = true;
         }),
 
       reset: () => set(initialState),

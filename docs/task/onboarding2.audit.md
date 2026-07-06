@@ -113,3 +113,54 @@ Verified empirically on the repo's React (18.3.1): `renderToStaticMarkup(<video 
 - Blob videos are never garbage-collected on replace (same as images today) — storage cost accrues on repeated re-uploads; accepted, matches image behavior.
 - Local dev needs `BLOB_READ_WRITE_TOKEN` in `.env.local` — unlike upload-image there is NO filesystem fallback (client upload goes direct to Blob); without the token dev uploads fail with a clear error.
 - This phase is a HUMAN GATE (route existence + 50MB cap + new pattern sign-off before merge).
+
+---
+
+## Phase 3 — Generation-time hero-variant picker (non-blocking)
+
+**Files changed**
+- `src/hooks/useProductGenerationStore.ts` (modified)
+- `src/app/onboarding/product/[token]/components/steps/GeneratingStep.tsx` (modified)
+- `src/app/onboarding/product/[token]/components/fields/HeroVariantPicker.tsx` (new)
+
+### Per-file
+
+**`src/hooks/useProductGenerationStore.ts`**
+- Added exported `VestriaHeroVariant = 'VestriaTailoredHero' | 'VestriaFullBleedHero'` type.
+- Added `heroVariant` state (default `'VestriaTailoredHero'` — no-pick = existing behavior) + `setHeroVariant` action. Included in `initialState` so `reset()` clears it.
+- **(Review fix)** Added `heroVariantPicked: boolean` (default `false`, in `initialState` so `reset()` clears it); `setHeroVariant` flips it `true` on any explicit pick. This flag — not the template guard — is what prevents a resumed run from clobbering a persisted pick (see Deviations).
+
+**`src/app/onboarding/product/[token]/components/fields/HeroVariantPicker.tsx`** (new)
+- Two-card radio-group chooser (Image hero / Video hero) with miniature CSS layout sketches (two-column image vs dark full-bleed with play glyph). Controlled component (`value`/`onChange`), fire-and-forget — writes only the store; no pipeline interaction. Copy notes video clips are uploaded later in the editor (Phase 1 poster/placeholder behavior until then).
+
+**`src/app/onboarding/product/[token]/components/steps/GeneratingStep.tsx`**
+- Module-level `applyHeroVariantToFinalContent(fc, variant)` helper (mutates payload before save).
+- `saveFC` now applies the CURRENT store hero variant (via `useProductGenerationStore.getState()`, never a stale closure) on EVERY save when `isManufacturerFlow(storeTemplateId) && heroVariantPicked` — covers skeleton save (no-op, no hero yet), every per-page save, and the final save after `finalizeMultiPageGeneration` (the completion re-apply).
+- Single-page vestria fallback (`runCopyAndSave`, no sitemap): same application on `finalContent` right after `buildFinalContent`, gated `explicitVestria && heroVariantPicked`.
+- Picker rendered below the STAGES `<ol>` only when `stage === 'copy' && isManufacturerFlow(storeTemplateId)`; wired to `heroVariant`/`setHeroVariant` selectors. Pipeline never awaits it.
+
+### Hero-id location + authoritative-field write
+Hero sections are found by the `${type}-${uuid}` id convention: any key in a `content` map starting with `hero-`. For each match, the helper writes:
+1. `content[heroId].layout = variant` — the **authoritative** field (published renderer + `useVestriaBlock`/`getSchemaDefaults` read this);
+2. mirrors `sectionLayouts[heroId] = variant` (matches `updateSectionLayout` behavior).
+
+It applies to BOTH the flat top-level (`fc.content` + `fc.layout.sectionLayouts`) AND every `fc.pages[key]` entry (`page.content` + `page.sectionLayouts`) — after a DB round-trip (resume) these are no longer shared references. Extra safety guard: only entries whose current layout is already a vestria hero layout (`VestriaTailoredHero`/`VestriaFullBleedHero`) are touched, so meridian/service payloads pass through byte-identical even if the helper were ever miscalled. No new API fields; `/api/saveDraft` already persists both fields.
+
+### Race handling
+The picker is non-blocking, so the home/hero page may be saved before OR after the pick. Handled by re-applying the live store value at every `saveFC` call: pick-before-hero-save → applied when the hero page merges; pick-after-hero-save → applied on the next per-page save AND unconditionally on the final completion save. `getState()` guarantees the value read is at save-time, not pipeline-start. Default (never picked) = tailored → identical output to pre-phase behavior.
+
+### Deviations / judgment calls (in-scope)
+- **Resumed runs (reload mid-generation) never re-apply — via `heroVariantPicked`, NOT the template guard (review fix):** the original audit claimed a resumed run's store resets to `templateId: 'meridian'` so `isManufacturerFlow(storeTemplateId)` skips the application. That claim was FALSE — the resume path (`page.tsx:86`) sets `templateId: 'vestria'` BEFORE `GeneratingStep` mounts, so the flow guard is TRUE on resume and `saveFC` would have re-applied the default tailored variant, silently clobbering a previously persisted `'VestriaFullBleedHero'` pick. Real mechanism now: both apply sites are additionally gated on `heroVariantPicked === true`, which only `setHeroVariant` (an explicit user pick this session) sets; a resumed run's store reset leaves it `false`, so the persisted choice survives. Fresh no-pick run: `false` → no application → byte-identical to pre-phase output (merged hero already defaults to tailored). Fresh pick: `true` → applies; the every-save re-apply race handling is unchanged.
+- Picker gate uses `isManufacturerFlow(storeTemplateId)` directly (the D1 single-source helper), same guard as the rest of the vestria pipeline.
+- Single-page vestria fallback path also gets the variant applied (plan text focuses on the fan-out; leaving the fallback tailored-only would be an inconsistent gap).
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 51 files passed, 1 skipped (670 passed / 2 skipped).
+- `npm run build` — green.
+- Diff scope: `git status` shows only the 3 Files-touched (2 modified + 1 new).
+- Reasoning check: mid-stream video pick → next `saveFC` (and the guaranteed final one) writes `content[heroId].layout === 'VestriaFullBleedHero'` + mirrored `sectionLayouts`; no pick → `heroVariantPicked` false → helper never called, generated value untouched; resume-with-saved-pick → store reset (`picked=false`) → persisted full-bleed layout survives every subsequent save; pipeline has zero awaits on the picker; meridian (isManufacturerFlow false) and service (different route tree) render no picker and take no code path through the helper.
+
+### Open risks
+- Pick landing in the ~600ms window between the final save and the redirect is lost (picker unmounts at `stage==='saving'`, so effectively unreachable).
+- Full-bleed pick at generation shows poster-only/placeholder until editor upload (Phase 1 fallback chain) — expected per plan step 4.

@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Check, Loader2 } from 'lucide-react';
-import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
+import {
+  useProductGenerationStore,
+  type VestriaHeroVariant,
+} from '@/hooks/useProductGenerationStore';
+import HeroVariantPicker from '../fields/HeroVariantPicker';
 import { usePostHog } from 'posthog-js/react';
 import ErrorRetry from '@/components/onboarding/shared/ErrorRetry';
 import type { SectionCopy } from '@/types/generation';
@@ -53,6 +57,45 @@ const PILOT_PALETTE = defaultMeridianPalette; // 'mint'
 const PILOT_VARIANT = defaultMeridianVariant; // 'developer'
 const PILOT_TEMPLATE = 'meridian';
 
+const VESTRIA_HERO_LAYOUTS = ['VestriaTailoredHero', 'VestriaFullBleedHero'];
+
+/**
+ * Apply the picked vestria hero variant into a finalContent payload (mutates).
+ * The AUTHORITATIVE field is `content[heroId].layout` — that's what the
+ * renderers and getSchemaDefaults read; `sectionLayouts[heroId]` is mirrored
+ * for consistency (matches updateSectionLayout). Hero sections are located by
+ * their `${type}-${uuid}` id prefix, and only entries already carrying a
+ * vestria hero layout are touched (meridian/service payloads pass through
+ * untouched even if this were ever miscalled). Covers BOTH the flat top-level
+ * content AND per-page entries in fc.pages (after a DB round-trip they are no
+ * longer shared references).
+ */
+function applyHeroVariantToFinalContent(fc: any, variant: VestriaHeroVariant): void {
+  if (!fc) return;
+
+  const applyTo = (
+    content: Record<string, any> | undefined,
+    sectionLayouts: Record<string, string> | undefined
+  ) => {
+    if (!content) return;
+    for (const id of Object.keys(content)) {
+      if (!id.startsWith('hero-')) continue;
+      const entry = content[id];
+      if (!entry || !VESTRIA_HERO_LAYOUTS.includes(entry.layout)) continue;
+      entry.layout = variant; // authoritative
+      if (sectionLayouts && id in sectionLayouts) sectionLayouts[id] = variant; // mirror
+    }
+  };
+
+  applyTo(fc.content, fc.layout?.sectionLayouts);
+  if (fc.pages) {
+    for (const key of Object.keys(fc.pages)) {
+      const page = fc.pages[key];
+      applyTo(page?.content, page?.sectionLayouts);
+    }
+  }
+}
+
 export default function GeneratingStep() {
   const router = useRouter();
   const params = useParams();
@@ -70,6 +113,8 @@ export default function GeneratingStep() {
   const storeStrategy = useProductGenerationStore((s) => s.strategy);
   const storeSitemap = useProductGenerationStore((s) => s.sitemap);
   const setGenerationError = useProductGenerationStore((s) => s.setGenerationError);
+  const heroVariant = useProductGenerationStore((s) => s.heroVariant);
+  const setHeroVariant = useProductGenerationStore((s) => s.setHeroVariant);
 
   const [stage, setStage] = useState<Stage>('strategy');
   const [creditsError, setCreditsError] = useState(false);
@@ -194,6 +239,21 @@ export default function GeneratingStep() {
       fc: any,
       templateInfo?: { templateId: string; paletteId: string; variantId: string }
     ) => {
+      // Hero-variant race handling (onboarding2 Phase 3): the picker is
+      // non-blocking, so the hero page may save before OR after the user picks.
+      // Re-apply the CURRENT store value on every save (incl. the final save at
+      // pipeline completion) so a late pick still lands. getState() (not the
+      // hook selector) so a mid-pipeline pick is never stale. Gated on
+      // heroVariantPicked — a RESUMED run resets the store (picked=false), so
+      // the default is never re-applied over a previously persisted choice
+      // (resume sets templateId='vestria' before mount, so the flow guard
+      // alone is NOT enough). A fresh no-pick run also skips (merged hero
+      // already defaults to tailored).
+      const { heroVariant, heroVariantPicked } =
+        useProductGenerationStore.getState();
+      if (isManufacturerFlow(storeTemplateId) && heroVariantPicked) {
+        applyHeroVariantToFinalContent(fc, heroVariant);
+      }
       const res = await fetch('/api/saveDraft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -461,6 +521,14 @@ export default function GeneratingStep() {
       const variantId = explicitVestria ? defaultVestriaVariant : PILOT_VARIANT;
       try {
         const { finalContent } = buildFinalContent(strategy, copySections, title);
+        // Single-page vestria fallback: same hero-variant application as the
+        // multi-page saveFC path — only after an EXPLICIT pick this session
+        // (heroVariantPicked); resumed/no-pick runs never apply the default.
+        const { heroVariant, heroVariantPicked } =
+          useProductGenerationStore.getState();
+        if (explicitVestria && heroVariantPicked) {
+          applyHeroVariantToFinalContent(finalContent, heroVariant);
+        }
         const res = await fetch('/api/saveDraft', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -699,6 +767,14 @@ export default function GeneratingStep() {
           );
         })}
       </ol>
+
+      {/* Hero-variant picker (onboarding2 Phase 3) — manufacturer/vestria only,
+          shown during the multi-second copy fan-out. Purely optional and never
+          awaited: the pipeline streams on regardless; the choice is applied to
+          every draft save (incl. the final one) via saveFC. */}
+      {stage === 'copy' && isManufacturerFlow(storeTemplateId) && (
+        <HeroVariantPicker value={heroVariant} onChange={setHeroVariant} />
+      )}
     </div>
   );
 }
