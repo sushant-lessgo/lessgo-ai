@@ -67,6 +67,29 @@ describe('Vestria block registration', () => {
     }
   });
 
+  // Hero variant (NOT in VESTRIA_LAYOUT_NAMES — selected via content[heroId].layout).
+  // Without this schema entry, getSchemaDefaults returns null → the editor renders
+  // an EMPTY hero and the uploaded video keys are silently dropped from blockContent.
+  describe('VestriaFullBleedHero variant schema', () => {
+    it('has a schema entry (getSchemaDefaults !== null) with sectionType hero', () => {
+      const defaults = getSchemaDefaults('VestriaFullBleedHero');
+      expect(defaults).not.toBeNull();
+      expect((layoutElementSchema as any).VestriaFullBleedHero?.sectionType).toBe('hero');
+    });
+    it('shares the tailored hero copy contract (variant swap is content-preserving)', () => {
+      const d = getSchemaDefaults('VestriaFullBleedHero')!;
+      for (const k of ['tag_text', 'headline', 'lede', 'cta_text', 'cta_href', 'secondary_cta_text', 'secondary_cta_href', 'hero_image', 'stamp_value', 'stamp_label', 'values']) {
+        expect(d, `missing shared key ${k}`).toHaveProperty(k);
+      }
+    });
+    it('media keys are manual_preferred (video URLs NEVER AI-generated — firewall)', () => {
+      const schema: any = (layoutElementSchema as any).VestriaFullBleedHero;
+      for (const k of ['hero_video_desktop', 'hero_video_mobile', 'hero_video_poster']) {
+        expect(schema.elements[k]?.fillMode, k).toBe('manual_preferred');
+      }
+    });
+  });
+
   // Contract sanity: representative collections + required fields exist.
   describe('content contract', () => {
     it('VestriaTailoredHero exposes headline + a values collection', () => {

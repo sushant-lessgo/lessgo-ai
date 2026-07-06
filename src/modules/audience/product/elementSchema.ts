@@ -599,7 +599,8 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
 
 /**
  * ===== VESTRIA (GA product template — B2B manufacturing / trade lead-gen) =====
- * 12 layouts, Vestria-prefixed (globally-unique — §3g #3 merged-schema tie rule).
+ * 13 layouts (12 default section layouts + the VestriaFullBleedHero hero
+ * variant), Vestria-prefixed (globally-unique — §3g #3 merged-schema tie rule).
  * 3 section types are NEW at the audience level: `industries`, `about`,
  * `materials` (single lowercase tokens). Everything else reuses existing product
  * section types with Vestria layouts. Source of truth:
@@ -667,6 +668,47 @@ export const vestriaElementSchema: Record<string, UIBlockSchemaV2> = {
           kicker:      { type: 'string', fillMode: 'ai_generated', default: '' }, // "01 — Assurance"
           title:       { type: 'string', fillMode: 'ai_generated', default: '' },
           description: { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+    },
+  },
+
+  // ===== Hero — FULL-BLEED VIDEO VARIANT =====
+  // Second hero rendering (dark full-bleed autoplay video, centered stack,
+  // bottom stat row). SAME copy keys as VestriaTailoredHero so swapping
+  // variants never regenerates or loses copy; the bottom stats REUSE
+  // stamp_value/stamp_label + values[] (title → stat value, kicker → stat
+  // label — no new stat copy keys). Adds 3 media keys (desktop/mobile clip +
+  // poster) as manual_preferred: uploaded only, NEVER AI-generated — firewall
+  // intact, no prompt-builder change. NOT in VESTRIA_LAYOUT_NAMES (that map is
+  // the default per-section layout); selected via content[heroId].layout.
+  VestriaFullBleedHero: {
+    sectionType: 'hero',
+    elements: {
+      tag_text:           { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Uniforms tailored for teams that <em>mean business.</em>' },
+      lede:               { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      cta_text:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Request a Quote' },
+      cta_href:           { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '#contact' },
+      secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      secondary_cta_href: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '#catalog' },
+      hero_image:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' }, // poster fallback (hero_video_poster → hero_image)
+      hero_video_desktop: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' }, // uploaded clip URL (landscape)
+      hero_video_mobile:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' }, // uploaded clip URL (portrait); absent → desktop clip everywhere
+      hero_video_poster:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' }, // uploaded poster image URL
+      stamp_value:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated_needs_review', default: '' }, // "40k+"
+      stamp_label:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      values: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 3 },
+        fields: {
+          id:          { type: 'string', fillMode: 'system' },
+          kicker:      { type: 'string', fillMode: 'ai_generated', default: '' }, // full-bleed: stat label
+          title:       { type: 'string', fillMode: 'ai_generated', default: '' }, // full-bleed: stat value
+          description: { type: 'string', fillMode: 'ai_generated', default: '' }, // unused in full-bleed (preserved across swaps)
         },
       },
     },

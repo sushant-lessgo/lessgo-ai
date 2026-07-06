@@ -15,6 +15,7 @@ import { makePublishedPrimitives } from './blocks/publishedPrimitives';
 
 import { VestriaNavHeaderCore } from './blocks/Header/VestriaNavHeader.core';
 import { VestriaTailoredHeroCore } from './blocks/Hero/VestriaTailoredHero.core';
+import { VestriaFullBleedHeroCore } from './blocks/Hero/VestriaFullBleedHero.core';
 import { VestriaClientStripCore } from './blocks/Trust/VestriaClientStrip.core';
 import { VestriaIndustriesGridCore } from './blocks/Industries/VestriaIndustriesGrid.core';
 import { VestriaAboutStatsCore } from './blocks/About/VestriaAboutStats.core';
@@ -51,8 +52,8 @@ const FORBIDDEN = [
 describe('Vestria core-purity (single-source guard)', () => {
   const files = coreFiles(BLOCKS_DIR);
 
-  it('finds all 12 block cores', () => {
-    expect(files.length).toBe(12);
+  it('finds all 13 block cores', () => {
+    expect(files.length).toBe(13);
   });
 
   for (const file of files) {
@@ -75,6 +76,7 @@ describe('Vestria core-purity (single-source guard)', () => {
     const fixtures: Array<[React.FC<any>, any, string]> = [
       [VestriaNavHeaderCore as any, { logo_text: 'Vestria', cta_text: 'Request a Quote', util_note: 'Since 2009', util_tel: '+971 4 352 1700', nav_items: [{ id: 'n1', label: 'Industries', href: '#industries' }] }, 'Request a Quote'],
       [VestriaTailoredHeroCore as any, { tag_text: 'Uniform Manufacturing', headline: 'Teams that <em>mean business.</em>', lede: 'From hotels to hangars.', cta_text: 'Request a Quote', stamp_value: '40k+', stamp_label: 'Garments / year', values: [{ id: 'v1', kicker: '01', title: 'Quality', description: 'QC on every batch.' }] }, 'mean business.'],
+      [VestriaFullBleedHeroCore as any, { tag_text: 'Uniform Manufacturing', headline: 'Teams that <em>mean business.</em>', lede: 'From hotels to hangars.', cta_text: 'Request a Quote', hero_video_desktop: 'https://blob.example/clip-d.mp4', hero_video_mobile: 'https://blob.example/clip-m.mp4', hero_video_poster: 'https://blob.example/poster.jpg', stamp_value: '40k+', stamp_label: 'Garments / year', values: [{ id: 'v1', kicker: 'Organisations outfitted', title: '300+', description: '' }] }, 'mean business.'],
       [VestriaClientStripCore as any, { label_text: 'Trusted across the Gulf', logos: [{ id: 'l1', name: 'Marisol', sub: 'Hospitality' }] }, 'Marisol'],
       [VestriaIndustriesGridCore as any, { headline: 'Every floor you run.', industries: [{ id: 'i1', kicker: 'Sector 01', title: 'Hospitality', description: 'Front desk to F&B.' }] }, 'Hospitality'],
       [VestriaAboutStatsCore as any, { headline: 'Dressing excellence.', lede: 'More than a supplier.', stats: [{ id: 's1', value: '2009', label: 'Since' }] }, 'Dressing excellence.'],
@@ -90,5 +92,36 @@ describe('Vestria core-purity (single-source guard)', () => {
       const html = renderToStaticMarkup(React.createElement(Core, { content, E }));
       expect(html).toContain(expected);
     }
+  });
+
+  // Full-bleed hero <video> contract: static markup MUST carry muted + autoplay +
+  // playsinline (React can drop `muted` in server markup → mobile autoplay dies
+  // silently) and the poster; no clip → NO <video> (poster-only fallback).
+  it('full-bleed hero emits muted/autoplay/playsinline videos; poster-only without clips', () => {
+    const E = makePublishedPrimitives();
+    const withClips = renderToStaticMarkup(React.createElement(VestriaFullBleedHeroCore as any, {
+      E,
+      content: {
+        headline: 'H', hero_video_desktop: 'https://blob.example/d.mp4',
+        hero_video_mobile: 'https://blob.example/m.mp4', hero_video_poster: 'https://blob.example/p.jpg',
+      },
+    }));
+    const videos = withClips.match(/<video[^>]*>/g) || [];
+    expect(videos.length).toBe(2);
+    for (const tag of videos) {
+      expect(tag).toContain('muted');
+      expect(tag).toContain('autoplay');
+      expect(tag).toContain('playsinline');
+      expect(tag).toContain('poster="https://blob.example/p.jpg"');
+    }
+    expect(withClips).toContain('vs-heroFull__video--desktop');
+    expect(withClips).toContain('vs-heroFull__video--mobile');
+
+    const noClips = renderToStaticMarkup(React.createElement(VestriaFullBleedHeroCore as any, {
+      E,
+      content: { headline: 'H', hero_image: 'https://blob.example/img.jpg' },
+    }));
+    expect(noClips).not.toContain('<video');
+    expect(noClips).toContain('https://blob.example/img.jpg');
   });
 });
