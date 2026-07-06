@@ -900,7 +900,8 @@ export function createUIActions(set: any, get: any): UIActions {
             if (state.selectedSection) {
               get().duplicateSection(state.selectedSection);
             }
-            case '.':
+            break;
+          case '.':
             event.preventDefault();
             // Show advanced menu for current selection
             if (state.selectedElement) {

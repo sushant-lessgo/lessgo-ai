@@ -5,6 +5,7 @@
 - `src/hooks/editStore/contentActions.ts`
 - `src/hooks/editStore/uiActions.ts`
 - `src/hooks/editStore/pageHelpers.ts`
+- `src/app/edit/[token]/components/ui/UndoRedoButtons.tsx` (Phase 2)
 
 ## Phase 1 — History plumbing (text edits → stack, raw-value restore, page-swap clear)
 
@@ -37,3 +38,26 @@
 ### Open risks
 - Legacy wrapped-object restorer branch remains reachable by old pushers (`executeUndoableAction` etc.) — pre-existing, out of scope.
 - Manual multi-page verification (plan item f) pending human QA.
+
+## Phase 2 — Wire Undo/Redo buttons, fix Cmd+D
+
+### `src/app/edit/[token]/components/ui/UndoRedoButtons.tsx`
+- Replaced hardcoded-`disabled` placeholders with live buttons via existing `useUndoRedo` hook (`./useUndoRedo`, unmodified).
+- **Hook return shape used:** `{ handleUndo, handleRedo, canUndo, canRedo }` where `canUndo`/`canRedo` are BOOLEANS — the hook already invokes the store's `canUndo()`/`canRedo()` internally (with a `typeof === 'function'` safety guard). So wiring is `disabled={!canUndo}` / `disabled={!canRedo}` (NOT `!canUndo()` as the plan sketched — plan wording assumed function shape; boolean is the actual shape).
+- Kept markup/icons/layout identical; tooltips updated from "Undo (Not available)" → "Undo (Ctrl+Z)" / "Redo (Ctrl+Y)"; className made conditional (enabled: gray-600 + hover; disabled: prior gray-300 cursor-not-allowed styling preserved).
+- Removed now-unused `useEffect` import.
+
+### `src/hooks/editStore/uiActions.ts`
+- `handleKeyboardShortcut`: added missing `break;` after the `case 'd':` block (duplicateSection) so it no longer falls through into `case '.':` (advanced-menu side effect). Also re-indented `case '.':` to align with siblings (was mis-indented inside the 'd' block — cosmetic, same edit site).
+- Verified by READING (no edits): Cmd+Z undo (line 886), Cmd+Y redo (890), Cmd+Shift+Z redo (918–924) all correctly wired; contentEditable/input guard at 876–879 intact.
+
+### Deviations
+- None functional. `disabled={!canUndo}` (boolean) instead of plan's literal `!canUndo()` — hook's actual return shape, per plan's own "check the exact return shape" instruction.
+
+### Test results
+- `npx tsc --noEmit`: clean (no output).
+- `npm run test:run`: 51 files passed | 1 skipped; 670 tests passed | 2 skipped. Green.
+
+### Open risks / manual QA needed (Slice-1 gate)
+- Button interactivity (buttons track stack state; click Undo/Redo works; disabled after page switch per Phase-1 choke-point clear) — manual.
+- Cmd+D duplicates selected section WITHOUT advanced-menu side effect; Cmd+. unchanged; shortcuts inert while typing in contentEditable — manual.
