@@ -4,6 +4,7 @@ import type { FormsImageActions } from '@/types/store';
 import type { FormField } from '@/types/core/forms';
 import { createFormActions } from './formActions';
 import { logger } from '@/lib/logger';
+import { upload } from '@vercel/blob/client';
 /**
  * ===== UTILITY FUNCTIONS =====
  */
@@ -21,6 +22,11 @@ const isValidImageType = (file: File): boolean => {
 const getFileSizeMB = (file: File): number => {
   return file.size / (1024 * 1024);
 };
+
+// Video upload constraints (client-side guard; the real gate is the Blob client
+// token minted by /api/upload-video — same values enforced server-side there).
+const VALID_VIDEO_TYPES = ['video/mp4', 'video/webm'];
+const MAX_VIDEO_SIZE_MB = 50;
 
 /**
  * ===== FORMS & IMAGE ACTIONS CREATOR =====
@@ -399,6 +405,101 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
       }
     },
     
+    uploadVideo: async (file: File, targetElement: { sectionId: string; elementKey: string }) => {
+      const videoId = generateId();
+
+      // Client-side guards (server enforces the same via the Blob client token)
+      if (!VALID_VIDEO_TYPES.includes(file.type)) {
+        throw new Error('Invalid file type. Please upload an MP4 or WebM video.');
+      }
+      if (getFileSizeMB(file) > MAX_VIDEO_SIZE_MB) {
+        throw new Error(`File too large. Please upload a video smaller than ${MAX_VIDEO_SIZE_MB}MB.`);
+      }
+
+      const tokenId = get().tokenId;
+      if (!tokenId) {
+        throw new Error('No project token — cannot upload video.');
+      }
+
+      set((state: EditStore) => {
+        state.images.uploadProgress[videoId] = 0;
+      });
+
+      try {
+        // CLIENT upload: the browser sends the file straight to Vercel Blob.
+        // /api/upload-video only mints a constrained token (auth + ownership +
+        // MIME/size cap) — a fetch POST of the file would 413 at Vercel's
+        // ~4.5MB serverless body limit.
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
+        const blob = await upload(`uploads/${tokenId}/${Date.now()}-${safeName}`, file, {
+          access: 'public',
+          handleUploadUrl: '/api/upload-video',
+          clientPayload: JSON.stringify({ tokenId }),
+          contentType: file.type,
+          onUploadProgress: ({ percentage }) => {
+            set((state: EditStore) => {
+              state.images.uploadProgress[videoId] = percentage;
+            });
+          },
+        });
+
+        const permanentUrl = blob.url;
+
+        set((state: EditStore) => {
+          state.images.uploadProgress[videoId] = 100;
+        });
+
+        get().updateElementContent(targetElement.sectionId, targetElement.elementKey, permanentUrl);
+
+        // Force immediate save. MUST route through the full save()/export()
+        // path — it serializes the multi-page `pages` (+chrome); a bespoke
+        // {layout, content} payload would let loadFromDraft's authoritative
+        // `pages` drop the upload on reload (same fix as uploadImage above).
+        try {
+          if (get().tokenId && typeof get().save === 'function') {
+            await get().save();
+            logger.debug('💾 Full save after video upload succeeded');
+          }
+        } catch (error) {
+          // Non-blocking - auto-save will retry (isDirty stays set)
+          logger.warn('❌ Immediate save failed after video upload:', error);
+        }
+
+        // Track change
+        set((state: EditStore) => {
+          state.history.undoStack.push({
+            type: 'content',
+            description: `Uploaded video to ${targetElement.elementKey}`,
+            timestamp: Date.now(),
+            beforeState: { sectionId: targetElement.sectionId, elementKey: targetElement.elementKey },
+            afterState: { sectionId: targetElement.sectionId, elementKey: targetElement.elementKey, videoUrl: permanentUrl },
+            sectionId: targetElement.sectionId,
+          });
+
+          state.history.redoStack = [];
+        });
+
+        // Clean up progress tracking
+        setTimeout(() => {
+          set((state: EditStore) => {
+            delete state.images.uploadProgress[videoId];
+          });
+        }, 1000);
+
+        logger.debug('✅ Video uploaded successfully:', { url: permanentUrl });
+        return permanentUrl;
+
+      } catch (error) {
+        set((state: EditStore) => {
+          delete state.images.uploadProgress[videoId];
+          state.errors['video-upload'] = error instanceof Error ? error.message : 'Upload failed';
+        });
+
+        logger.error('❌ Video upload failed:', error);
+        throw error;
+      }
+    },
+
     replaceImage: (sectionId: string, elementKey: string, imageUrl: string) => {
       const oldImageUrl = get().content[sectionId]?.elements[elementKey]?.content;
       

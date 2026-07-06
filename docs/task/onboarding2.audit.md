@@ -57,3 +57,59 @@ Verified empirically on the repo's React (18.3.1): `renderToStaticMarkup(<video 
 - Until Phase 2 upload UI, the only in-editor media control on the full-bleed hero is the poster-image Replace affordance; clips can only arrive via draft-content edits.
 - Generated `values[]` copy authored for the tailored hero (e.g. title "Quality Assurance") will read as prose, not numbers, in the stat row until regenerated/edited — accepted consequence of the reuse-keys decision.
 - `.vs-heroFull__stats` renders (dashed-top stat borders) whenever stamp or values exist — with tailored-style prose values this is cosmetically fine but worth an eyeball at the pilot gate.
+
+---
+
+## Phase 2 — video upload: Blob CLIENT upload route + editor upload chrome
+
+### Files changed
+- `src/app/api/upload-video/route.ts` (NEW)
+- `src/hooks/editStore/formsImageActions.ts`
+- `src/modules/templates/vestria/blocks/Hero/VestriaTailoredHero.tsx`
+
+### Per-file detail
+
+**`src/app/api/upload-video/route.ts` (new)**
+- First `@vercel/blob/client` client-upload route in the repo. POST handler parses `request.json()` as `HandleUploadBody` and delegates to `handleUpload({ body, request, onBeforeGenerateToken, onUploadCompleted })`.
+- `onBeforeGenerateToken(pathname, clientPayload)`: Clerk `auth()` → `prisma.user.findUnique({ clerkId })` → parse `clientPayload` JSON for `tokenId` → `prisma.token.findUnique({ value }, include: { project })` → ownership `token.project.userId === user.id` with the SAME admin override as `/api/upload-image` (`isAdmin(clerkId)` + `logAdminOverride(action: 'video.upload')`). All failures `throw` (→ 400, token refused; file never uploaded).
+- Token constraints returned: `allowedContentTypes: ['video/mp4','video/webm']`, `maximumSizeInBytes: MAX_VIDEO_SIZE_BYTES` (named const, **50MB — orchestrator decision Q1**; enforced HERE, not via request body since the file never transits the function), `addRandomSuffix: false` (client pathname is timestamp-unique, matches image-route convention), `tokenPayload` with `{tokenId, userId}`.
+- Extra guard (in-scope hardening): pathname must start with `uploads/${tokenId}/` so a token minted for project A can't write into project B's folder.
+- `onUploadCompleted`: console log only. **Localhost caveat:** Blob calls this via a public webhook URL, so it will NOT fire on localhost — non-fatal, the client gets the blob URL from `upload()`'s return value directly (documented in the route header).
+- Errors return `NextResponse.json({error}, {status: 400})` per handleUpload convention.
+
+**`src/hooks/editStore/formsImageActions.ts`**
+- Added `uploadVideo(file, {sectionId, elementKey})` sibling to `uploadImage` plus consts `VALID_VIDEO_TYPES = ['video/mp4','video/webm']`, `MAX_VIDEO_SIZE_MB = 50`, and `import { upload } from '@vercel/blob/client'`.
+- Flow: client MIME/size guards → require `get().tokenId` → `upload(\`uploads/${tokenId}/${Date.now()}-${safeName}\`, file, { access:'public', handleUploadUrl:'/api/upload-video', clientPayload: JSON.stringify({tokenId}), contentType, onUploadProgress })` — direct-to-Blob, NOT a fetch POST of the file (4.5MB serverless body limit) → `updateElementContent(sectionId, elementKey, blob.url)` → `await get().save()` (full save()/export() path so multi-page `pages` serialize — mirrors uploadImage's fix; save failure is non-blocking, isDirty stays) → history undo entry → progress cleanup. Errors set `state.errors['video-upload']` and rethrow.
+- Uses `state.images.uploadProgress` map like uploadImage (real progress via `onUploadProgress` percentage).
+- No change to `FormsImageActions` type needed — factory return is cast, and callers access via `(store as any)` per existing template-block precedent (surge/lumen/techpremium do this for uploadImage).
+
+**`src/modules/templates/vestria/blocks/Hero/VestriaTailoredHero.tsx` (edit wrapper only)**
+- When `layout === 'VestriaFullBleedHero'`, renders `<FullBleedMediaChrome>` after the core (inside the provider, hero render untouched): 3 `MediaSlot`s — desktop clip + mobile clip (accept mp4/webm, via `store.uploadVideo`) and poster image (via EXISTING `store.uploadImage`, elementKey `hero_video_poster`). Each slot: hidden file input + Upload/Replace button + current filename tail + busy state + inline error.
+- Chrome is edit-only by design (published wrapper untouched); parity lives in the shared core + styles.ts from Phase 1. Chrome uses inline styles (avoids touching styles.ts, which is not in this phase's Files-touched). Uploaded URLs land in the Phase-1 schema-backed media keys, so they survive `extractLayoutContent` + reload.
+
+### handleUpload/upload shapes used (from `@vercel/blob@^2.0.0` `client.d.ts`)
+- `handleUpload({ body: HandleUploadBody, request, onBeforeGenerateToken: (pathname, clientPayload, multipart) => Promise<Pick<GenerateClientTokenOptions,'allowedContentTypes'|'maximumSizeInBytes'|...> & {tokenPayload?, callbackUrl?}>, onUploadCompleted?: ({blob, tokenPayload}) => Promise<void> })`
+- `upload(pathname, file, { access:'public', handleUploadUrl, clientPayload, contentType, onUploadProgress }) => Promise<PutBlobResult>` (`.url` used).
+
+### Deviations
+- Added pathname-prefix validation in `onBeforeGenerateToken` (not in plan text; conservative security hardening within the file's scope).
+- `uploadVideo`'s `targetElement` param is REQUIRED (orchestrator signature `uploadVideo(file,{sectionId,elementKey})`), unlike uploadImage's optional — video uploads always target a media key.
+
+### Test results
+- `npx tsc --noEmit` — clean, no output.
+- `npm run test:run` — 51 files passed | 1 skipped; 670 tests passed | 2 skipped.
+- `npm run build` — green (full build incl. buildPublishedCSS/buildAssets).
+- `git status --porcelain` — exactly the 3 Files-touched; `git diff HEAD -- src/app/api/upload-image/route.ts` — empty (byte-unchanged, read only).
+
+### Reasoned walkthrough (can't do a real prod upload here)
+- Oversized file: client guard throws at 50MB; even if bypassed, Blob rejects at `maximumSizeInBytes` in the minted token.
+- Wrong MIME: client guard + `allowedContentTypes` in token → refused.
+- Non-owner: `onBeforeGenerateToken` throws before any token is minted → route 400 → `upload()` rejects client-side; no file reaches Blob.
+- Unauthenticated: Clerk `auth()` null → throw → 400.
+
+### Open risks
+- **Post-deploy check required (plan):** one real ~20–50MB upload through Vercel to confirm no 413 — this phase is the repo's first client-upload pattern.
+- `onUploadCompleted` won't fire on localhost (no public callback URL) — logging-only, non-fatal.
+- Blob videos are never garbage-collected on replace (same as images today) — storage cost accrues on repeated re-uploads; accepted, matches image behavior.
+- Local dev needs `BLOB_READ_WRITE_TOKEN` in `.env.local` — unlike upload-image there is NO filesystem fallback (client upload goes direct to Blob); without the token dev uploads fail with a clear error.
+- This phase is a HUMAN GATE (route existence + 50MB cap + new pattern sign-off before merge).
