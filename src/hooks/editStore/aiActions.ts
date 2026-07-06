@@ -2,6 +2,7 @@
 import type { EditStore } from '@/types/store';
 
 import { logger } from '@/lib/logger';
+import { deepCopy, pushHistoryEntry } from './historyHelpers';
 /**
  * Consolidated AI actions for content generation and regeneration
  */
@@ -10,7 +11,11 @@ export function createAIActions(set: any, get: any) {
     /**
      * ===== GENERATION ACTIONS =====
      */
-    regenerateSection: async (sectionId: string, userGuidance?: string) => {
+    regenerateSection: async (
+      sectionId: string,
+      userGuidance?: string,
+      options?: { suppressHistory?: boolean }
+    ) => {
       set((state: EditStore) => {
         state.aiGeneration.isGenerating = true;
         state.aiGeneration.currentOperation = 'section';
@@ -70,6 +75,9 @@ export function createAIActions(set: any, get: any) {
         set((state: EditStore) => {
           if (state.content[sectionId] && data.content) {
             const existingElements = state.content[sectionId].elements;
+            // Snapshot pre-mutation elements for the undo entry (whole-map
+            // swap rides the existing { elements } restorer branch).
+            const preElements = deepCopy(existingElements);
             const updatedElements = { ...existingElements };
 
             // Helpers: detect image elements to preserve during copy regen
@@ -136,6 +144,20 @@ export function createAIActions(set: any, get: any) {
               timestamp: Date.now(),
               source: 'ai',
             });
+
+            // ONE undo entry per standalone section regen. Suppressed when
+            // called from regenerateAllContent, which pushes a single
+            // 'fullContent' entry for the whole loop instead.
+            if (!options?.suppressHistory) {
+              pushHistoryEntry(state, {
+                type: 'content',
+                description: `Regenerated section ${sectionId}`,
+                timestamp: Date.now(),
+                sectionId,
+                beforeState: { elements: preElements },
+                afterState: { elements: deepCopy(updatedElements) },
+              });
+            }
           }
         });
         

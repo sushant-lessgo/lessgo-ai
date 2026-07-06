@@ -727,10 +727,21 @@ export function createUIActions(set: any, get: any): UIActions {
               section.elements = lastAction.beforeState.elements;
             }
           }
+        } else if (lastAction.type === 'fullContent') {
+          // Wholesale restore of the ACTIVE page's body (Regen Copy undo).
+          // theme is restored ONLY when the snapshot carries it (copy-only
+          // producers like header Regen Copy don't include theme).
+          const snap = lastAction.beforeState;
+          if (snap) {
+            if (snap.content !== undefined) state.content = deepCopy(snap.content);
+            if (snap.sections !== undefined) state.sections = deepCopy(snap.sections);
+            if (snap.sectionLayouts !== undefined) state.sectionLayouts = deepCopy(snap.sectionLayouts);
+            if (snap.theme !== undefined) state.theme = deepCopy(snap.theme);
+          }
         }
-        
+
         state.persistence.isDirty = true;
-        
+
         logger.debug('🔄 Undo:', lastAction.description);
       }),
 
@@ -796,10 +807,19 @@ export function createUIActions(set: any, get: any): UIActions {
               section.elements = actionToRedo.afterState.elements;
             }
           }
+        } else if (actionToRedo.type === 'fullContent') {
+          // Wholesale re-apply of the ACTIVE page's body (Regen Copy redo).
+          const snap = actionToRedo.afterState;
+          if (snap) {
+            if (snap.content !== undefined) state.content = deepCopy(snap.content);
+            if (snap.sections !== undefined) state.sections = deepCopy(snap.sections);
+            if (snap.sectionLayouts !== undefined) state.sectionLayouts = deepCopy(snap.sectionLayouts);
+            if (snap.theme !== undefined) state.theme = deepCopy(snap.theme);
+          }
         }
-        
+
         state.persistence.isDirty = true;
-        
+
         logger.debug('🔄 Redo:', actionToRedo.description);
       }),
 

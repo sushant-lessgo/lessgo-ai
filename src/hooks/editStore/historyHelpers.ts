@@ -27,6 +27,17 @@ export interface ContentHistoryEntry extends EditHistoryEntry {
   afterState: ContentHistorySnapshot;
 }
 
+/** Whole-page content snapshot for a 'fullContent' entry (Regen Copy).
+ * Captures the ACTIVE page's body only. `theme` is included ONLY when the
+ * producing operation touches it — header Regen Copy is copy-only and does
+ * NOT pass theme. */
+export interface FullContentSnapshot {
+  content: any;
+  sections: string[];
+  sectionLayouts: Record<string, string>;
+  theme?: any;
+}
+
 /** Coalesce window: rapid successive commits to the SAME element within this
  * window mutate the top entry instead of pushing a new one. */
 const COALESCE_WINDOW_MS = 3000;
@@ -34,6 +45,41 @@ const COALESCE_WINDOW_MS = 3000;
 /** JSON deep clone (matches persistenceActions' existing pattern). */
 export const deepCopy = <T>(v: T): T =>
   v === undefined ? v : JSON.parse(JSON.stringify(v));
+
+/**
+ * Deep-copy snapshot of the ACTIVE page's content body
+ * ({content, sections, sectionLayouts}) for a 'fullContent' history entry.
+ * `theme` is an optional param for future producers that also touch theme;
+ * header Regen Copy does NOT pass it (copy-only).
+ */
+export function snapshotPageContent(state: any, theme?: any): FullContentSnapshot {
+  const snapshot: FullContentSnapshot = {
+    content: deepCopy(state.content),
+    sections: deepCopy(state.sections),
+    sectionLayouts: deepCopy(state.sectionLayouts),
+  };
+  if (theme !== undefined) {
+    snapshot.theme = deepCopy(theme);
+  }
+  return snapshot;
+}
+
+/**
+ * Push ANY history entry onto the undo stack (Immer draft `state`) with cap
+ * enforcement + redoStack clear. No coalescing — use `pushContentHistoryEntry`
+ * for coalescing text-edit entries.
+ */
+export function pushHistoryEntry(state: any, entry: EditHistoryEntry): void {
+  if (!state.history) return;
+
+  const { undoStack } = state.history;
+  undoStack.push(entry);
+  const max = state.history.maxHistorySize ?? 50;
+  while (undoStack.length > max) {
+    undoStack.shift();
+  }
+  state.history.redoStack = [];
+}
 
 /**
  * Push a content history entry onto the undo stack (Immer draft `state`).
@@ -62,10 +108,5 @@ export function pushContentHistoryEntry(state: any, entry: ContentHistoryEntry):
     return;
   }
 
-  undoStack.push(entry);
-  const max = state.history.maxHistorySize ?? 50;
-  while (undoStack.length > max) {
-    undoStack.shift();
-  }
-  state.history.redoStack = [];
+  pushHistoryEntry(state, entry);
 }
