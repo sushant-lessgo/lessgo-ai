@@ -33,7 +33,7 @@ npm run postinstall          # prisma generate && prisma migrate deploy
 
 ## Feature Workflow (`/feature`)
 
-Non-trivial features run through a delegation pipeline (agents in `.claude/agents/`, orchestrated by the `/feature` skill): **discuss** (`/discuss` skill, Opus/high, PO-style interrogation → spec) → **scout** (Opus/medium, read-only explore) → **plan** (Fable/high, phased plan with a per-phase *Files touched* list + human-gate markers) → **plan-review** (Opus/xhigh, loop ×3) → **implement** per phase (Fable/medium, edits only its Files-touched, writes an `audit.md`) → **impl-review** (Opus/high, scoped diff + `tsc`/`test:run` gate, loop ×3). Model philosophy: Fable is the scarce budget — spend it only on plan + implement; everything else runs Opus at max useful effort. Run the orchestrating session itself on Opus (`/model opus`).
+Non-trivial features run through a delegation pipeline (agents in `.claude/agents/`, orchestrated by the `/feature` skill): **discuss** (`/discuss` skill, Opus/medium, PO-style interrogation → spec) → **scout** (Opus/low, read-only explore) → **plan** (Fable/high, phased plan with a per-phase *Files touched* list + human-gate markers) → **plan-review** (Opus/high, loop ×3) → **implement** per phase (Fable/medium, edits only its Files-touched, writes an `audit.md`) → **impl-review** (Opus/high, scoped diff + `tsc`/`test:run` gate, loop ×3). Model philosophy: reserve Fable for plan + implement; everything else Opus at modest effort — token spend matters. Run the orchestrating session itself on Opus (`/model opus`).
 
 Usage: `/discuss <idea>` → agree → it writes `docs/task/<feature>.spec.md` → run `/feature docs/task/<feature>.spec.md`. Artifacts (`spec`/`plan`/`audit`) live in `docs/task/`.
 

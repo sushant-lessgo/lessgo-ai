@@ -3,9 +3,8 @@ name: feature
 description: >-
   Runs the Lessgo feature-build pipeline for an agreed spec: scout → plan →
   plan-review (loop) → implement per phase → impl-review (loop), delegating each
-  stage to a model+effort-tuned subagent (scout=Opus/medium, planner=Fable/high,
-  plan-reviewer=Opus/xhigh, impl-reviewer=Opus/high, implementer=Fable/medium).
-  Use AFTER you've discussed a
+  stage to a model+effort-tuned subagent (scout=Opus/low, planner=Fable/high,
+  reviewers=Opus/high, implementer=Fable/medium). Use AFTER you've discussed a
   feature and written its spec to docs/task/<feature>.spec.md, when you want the
   plan→review→implement→review loops driven automatically instead of by hand.
   NOT for the discuss stage (that's manual chat) and NOT for one-off trivial edits.
