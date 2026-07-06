@@ -164,3 +164,86 @@ The picker is non-blocking, so the home/hero page may be saved before OR after t
 ### Open risks
 - Pick landing in the ~600ms window between the final save and the redirect is lost (picker unmounts at `stage==='saving'`, so effectively unreachable).
 - Full-bleed pick at generation shows poster-only/placeholder until editor upload (Phase 1 fallback chain) — expected per plan step 4.
+
+---
+
+## Phase 4 — Editor hero swap via scoped LayoutChangeModal
+
+### Files changed
+- `src/app/edit/[token]/components/ui/LayoutChangeModal.tsx` (modified)
+- `src/app/edit/[token]/components/ui/VestriaHeroVariantSelector.tsx` (new)
+
+### Per-file detail
+
+**LayoutChangeModal.tsx** — narrowed the blanket template-module gate. The old
+`if (usesTemplateModule(audienceType, templateId)) return null;` becomes:
+inside the `usesTemplateModule` branch, compute
+
+```
+isVestriaHero = templateId === 'vestria'
+             && layoutChangeModal.sectionType === 'hero'
+             && !!effectiveLayout
+             && VESTRIA_HERO_LAYOUTS.includes(effectiveLayout)
+```
+
+where `effectiveLayout = content[sectionId]?.layout ?? layoutChangeModal.currentLayout`
+(a new `useStoreState` selector reads the authoritative `content[sectionId].layout`).
+`!isVestriaHero` → `return null` (all other template modules + all non-hero
+vestria sections stay disabled exactly as before). `isVestriaHero` → render the
+new `VestriaHeroVariantSelector` — NOT the legacy `LayoutChangeSelector`.
+`onSelect` calls the existing `updateSectionLayout(sectionId, layoutId)` (only
+when the layout actually changes) then `hideLayoutChangeModal()`. No
+`setSection` call — element content, including uploaded `hero_video_*` URLs,
+is never touched, so a round-trip swap preserves everything (both layouts have
+schema entries + shared copy keys from Phase 1). Legacy non-module path
+(`LayoutChangeSelector` + `handleLayoutChange`) is byte-identical.
+
+**VestriaHeroVariantSelector.tsx** — bespoke 2-card selector following the
+existing modal conventions (`Dialog`/`DialogContent`/`DialogHeader`, `cn`,
+`ring-2 ring-primary bg-primary/5` selected state, `Badge` "Current" marker,
+mirroring `LayoutChangeSelector`'s card styling and `HeroVariantPicker`'s
+thumbnails). Cards: "Tailored" (`VestriaTailoredHero`, image sketch) and
+"Full-bleed" (`VestriaFullBleedHero`, dark video sketch with play glyph).
+Presentational: current variant via `currentLayout` prop; pick via `onSelect`
+prop (the modal owns the store write). Exports `VESTRIA_HERO_LAYOUTS` used by
+the modal's gate.
+
+### Persistence path
+`updateSectionLayout` (`src/hooks/editStore/layoutActions.ts:279`) writes BOTH
+`sectionLayouts[sectionId]` and `content[sectionId].layout`, marks
+`persistence.isDirty` (autosave), and pushes undo history — reused unmodified,
+no reimplemented persistence.
+
+### Other modules stay disabled
+surge / hearth / lex / lumen / meridian / techpremium all fail
+`templateId === 'vestria'` → `return null` (same behavior as before). Vestria
+non-hero sections fail the layout-membership check (and usually the
+sectionType check) → `return null`. Legacy non-module products never enter the
+`usesTemplateModule` branch → unchanged legacy selector.
+
+### Deviations
+- **Added layout-membership check beyond the planned `sectionType === 'hero'`
+  gate (conservative, in-scope):** `SectionToolbar`'s
+  `getSectionTypeFromLayout()` DEFAULTS unknown layouts to `'hero'`, and
+  vestria's new section types (`industries`, `about`, `materials`, `trust`, …)
+  are neither in that map nor in the sectionId-regex fallback — so vestria
+  NON-hero sections reach the modal with `sectionType === 'hero'`. Gating on
+  sectionType alone would open the hero selector on them. Requiring the
+  section's current layout ∈ {VestriaTailoredHero, VestriaFullBleedHero}
+  closes that hole without touching `SectionToolbar.tsx` (out of scope).
+- Selector is presentational (modal passes `onSelect` that calls
+  `updateSectionLayout`) rather than reading the store itself — same write
+  path, cleaner separation; matches how the modal already drives the legacy
+  selector.
+
+### Test results
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 51 files passed, 1 skipped; 670 tests passed, 2 skipped.
+- `npm run build` — green (published CSS + assets + next build).
+- `git status` — only the 2 Files-touched changed.
+
+### Open risks
+- Manual gate pending (per plan): dev-verify swap both directions persists on
+  reload + publish, video URLs survive round-trip, no-op on other modules.
+- If a future vestria hero variant is added, `VESTRIA_HERO_LAYOUTS` must be
+  extended or the gate silently hides the modal for it (fail-closed by design).

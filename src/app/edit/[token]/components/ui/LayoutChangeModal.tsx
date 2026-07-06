@@ -3,6 +3,7 @@
 import React from 'react';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { LayoutChangeSelector } from './LayoutChangeSelector';
+import { VestriaHeroVariantSelector, VESTRIA_HERO_LAYOUTS } from './VestriaHeroVariantSelector';
 import type { EditableElement } from '@/types/core';
 import { usesTemplateModule } from '@/types/service';
 
@@ -17,6 +18,13 @@ export function LayoutChangeModal() {
   const hideLayoutChangeModal = useStoreState(state => state.hideLayoutChangeModal);
   const audienceType = useStoreState(state => state.audienceType);
   const templateId = useStoreState(state => state.templateId);
+  // Authoritative current layout for the open section — content[sectionId].layout
+  // is what the renderers and getSchemaDefaults read (not the modal snapshot).
+  const currentContentLayout = useStoreState(state =>
+    state.layoutChangeModal.sectionId
+      ? state.content[state.layoutChangeModal.sectionId]?.layout
+      : undefined
+  );
 
   const handleLayoutChange = (layoutId: string, migratedData: Record<string, EditableElement>) => {
     if (!layoutChangeModal.sectionId) return;
@@ -42,11 +50,45 @@ export function LayoutChangeModal() {
     return null;
   }
 
-  // Template-backed projects (service = Hearth; product+meridian = Meridian) use
-  // a fixed 1-block-per-section library at pilot — no layout-swap UI. Hide
-  // unconditionally; opening the modal is a no-op.
+  // Template-backed projects use a fixed 1-block-per-section library — no
+  // layout-swap UI, with ONE exception: the vestria hero, which has two
+  // variants (tailored image / full-bleed video) sharing the same copy keys.
+  // That case gets a bespoke 2-card selector — NOT the legacy
+  // LayoutChangeSelector (built for the legacy layout library).
+  // NOTE: SectionToolbar's getSectionTypeFromLayout() defaults unknown
+  // (template-module) layouts to 'hero', so sectionType alone is unreliable
+  // here — we ALSO require the section's current layout to be one of the two
+  // vestria hero layouts. Every other template module (surge/hearth/lex/
+  // lumen/meridian/techpremium) and every non-hero vestria section stays null.
   if (usesTemplateModule(audienceType, templateId)) {
-    return null;
+    const effectiveLayout = currentContentLayout ?? layoutChangeModal.currentLayout;
+    const isVestriaHero =
+      templateId === 'vestria' &&
+      layoutChangeModal.sectionType === 'hero' &&
+      !!effectiveLayout &&
+      VESTRIA_HERO_LAYOUTS.includes(effectiveLayout);
+
+    if (!isVestriaHero) {
+      return null;
+    }
+
+    return (
+      <VestriaHeroVariantSelector
+        isOpen={layoutChangeModal.visible}
+        currentLayout={effectiveLayout!}
+        onClose={() => hideLayoutChangeModal()}
+        onSelect={(layoutId) => {
+          // Content-preserving swap: updateSectionLayout writes BOTH
+          // content[sectionId].layout and sectionLayouts[sectionId], marks
+          // dirty (autosave) and pushes undo history. No setSection call —
+          // element content (incl. uploaded hero_video_* URLs) is untouched.
+          if (layoutChangeModal.sectionId && layoutId !== effectiveLayout) {
+            updateSectionLayout(layoutChangeModal.sectionId, layoutId);
+          }
+          hideLayoutChangeModal();
+        }}
+      />
+    );
   }
 
   return (
