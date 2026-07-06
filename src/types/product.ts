@@ -65,13 +65,30 @@ export const defaultTechPremiumVariant: TechPremiumVariant = 'default';
  * ===== VESTRIA PALETTE / VARIANT =====
  * GA product template for B2B manufacturing / trade lead-gen (pilot: Golden Shadow
  * Trading — uniform manufacturing). Paper+dark editorial system with a cobalt
- * accent duo. Single palette + single variant v1 (family designed for growth).
- * Source of truth: "Vestria - Uniform Manufacturing (Cobalt).html" (<head> :root).
+ * accent duo. Look system (onboarding2 Phase 5): typeface variants + accent
+ * palettes + neutral mood (`data-mood` bone/slate — mood ids live in
+ * modules/templates/vestria/tokens.ts, persisted via Project.themeValues).
+ * Sources of truth: "Vestria - Uniform Manufacturing (Cobalt).html" (<head>
+ * :root) + "Vestria - Uniform Manufacturing.html" (accent/type/surface variants).
  */
-export const vestriaPalettes = ['cobalt'] as const;
+// The 8 accents mirror the mock's html[data-accent=...] blocks
+// ("Vestria - Uniform Manufacturing.html"; `brass` = its :root default).
+export const vestriaPalettes = [
+  'cobalt',
+  'brass',
+  'emerald',
+  'safety',
+  'claret',
+  'teal',
+  'aubergine',
+  'indigo',
+] as const;
 export type VestriaPalette = (typeof vestriaPalettes)[number];
 
-export const vestriaVariants = ['tailored'] as const;
+/** Typeface variants: `tailored` = editorial baseline (Bodoni Moda + Hanken
+ *  Grotesk — id is a hard rule, do NOT rename), `modern` (Space Grotesk +
+ *  Hanken Grotesk), `heritage` (Cormorant Garamond + Source Serif 4). */
+export const vestriaVariants = ['tailored', 'modern', 'heritage'] as const;
 export type VestriaVariant = (typeof vestriaVariants)[number];
 
 /** Default palette when none is picked or persisted. */

@@ -1,6 +1,8 @@
 // src/modules/templates/vestria/paletteSelection.ts
-// Single palette v1 — the picker/registry contract still expects
-// inferDefaultPalette(...); it always returns cobalt until the family grows.
+// The picker/registry contract expects inferDefaultPalette(...); it DELIBERATELY
+// stays the cobalt stub (Phase 5 decision — conservative: the accent family is
+// user-picked cosmetics, not business-context-inferred). Revisit only if a
+// heuristic is explicitly requested.
 
 import type { VestriaPalette } from '@/types/product';
 import { defaultVestriaPalette } from './palettes';

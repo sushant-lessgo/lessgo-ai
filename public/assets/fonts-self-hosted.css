@@ -273,6 +273,39 @@
 }
 
 /* ============================================================================
+   Space Grotesk - Vestria `modern` variant display (VARIABLE: wght 300..700)
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/space-grotesk/space-grotesk-latin-wght-normal.woff2') format('woff2-variations');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================================
+   Cormorant Garamond - Vestria `heritage` variant display (VARIABLE: wght
+   300..700 + italic). Italic is load-bearing (Vestria hero <em> accent).
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('/fonts/cormorant-garamond/cormorant-garamond-latin-wght-normal.woff2') format('woff2-variations');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('/fonts/cormorant-garamond/cormorant-garamond-latin-wght-italic.woff2') format('woff2-variations');
+  font-weight: 300 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ============================================================================
    Bodoni Moda - Vestria display (VARIABLE: opsz 6..96 + wght 400..900)
    Variable file + weight RANGE are load-bearing — a static instance kills the
    optical-size axis. Italic face covers the Vestria hero <em> accent.

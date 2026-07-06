@@ -62,13 +62,24 @@ function criticalFontHrefs(
         : ['/fonts/tiro-devanagari-hindi/tiro-devanagari-hindi-devanagari-400-normal.woff2'];
 
     case 'vestria':
-      // Hero headline (LCP) = Bodoni Moda variable (opsz/wght axes preserved).
-      // Italic face covers the hero <em> accent; body Hanken Grotesk is small
-      // enough to ride the CSS discovery path.
-      return [
-        '/fonts/bodoni-moda/bodoni-moda-latin-opsz-normal.woff2',
-        '/fonts/bodoni-moda/bodoni-moda-latin-opsz-italic.woff2',
-      ];
+      // Hero headline (LCP) = the variant's display face (typeface variants swap
+      // it — see vestria/tokens.ts serializeVariantOverrides). Body faces are
+      // small enough to ride the CSS discovery path. Italic covers the hero
+      // <em> accent (the `modern` variant renders its em upright — no italic file).
+      switch (variantId) {
+        case 'modern':
+          return ['/fonts/space-grotesk/space-grotesk-latin-wght-normal.woff2'];
+        case 'heritage':
+          return [
+            '/fonts/cormorant-garamond/cormorant-garamond-latin-wght-normal.woff2',
+            '/fonts/cormorant-garamond/cormorant-garamond-latin-wght-italic.woff2',
+          ];
+        default: // tailored
+          return [
+            '/fonts/bodoni-moda/bodoni-moda-latin-opsz-normal.woff2',
+            '/fonts/bodoni-moda/bodoni-moda-latin-opsz-italic.woff2',
+          ];
+      }
 
     default:
       return [];

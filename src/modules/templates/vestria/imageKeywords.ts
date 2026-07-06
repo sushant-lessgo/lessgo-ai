@@ -6,7 +6,14 @@
 import type { VestriaPalette } from '@/types/product';
 
 export const PALETTE_IMAGE_KEYWORDS: Record<VestriaPalette, string> = {
-  cobalt: 'manufacturing workshop editorial clean industrial teams',
+  cobalt:    'manufacturing workshop editorial clean industrial teams',
+  brass:     'manufacturing atelier editorial warm craft workmanship',
+  emerald:   'manufacturing facility editorial clean sustainable production',
+  safety:    'manufacturing floor editorial hi-vis industrial workwear',
+  claret:    'manufacturing heritage editorial tailoring craft workshop',
+  teal:      'manufacturing lab editorial clean technical production',
+  aubergine: 'manufacturing studio editorial refined textile craft',
+  indigo:    'manufacturing plant editorial denim textile industrial',
 };
 
 export function getVestriaImageQuery(query: string, paletteId?: VestriaPalette): string {

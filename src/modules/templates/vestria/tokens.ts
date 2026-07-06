@@ -1,12 +1,18 @@
 // src/modules/templates/vestria/tokens.ts
 // Vestria design tokens — palette-INVARIANT base (paper/ink/dark surfaces, type,
-// rhythm, shared utility classes). Source of truth:
-// "Vestria - Uniform Manufacturing (Cobalt).html" (:root, lines 12-33).
+// rhythm, shared utility classes) + the Phase 5 look system (typeface variants,
+// neutral moods). Source of truth:
+// "Vestria - Uniform Manufacturing.html" (:root bone neutrals; html[data-surface="slate"]
+// → our [data-mood="slate"]; html[data-type=...] → our [data-variant=...]).
 //
-// The PALETTE swaps only the accent duo (--accent / --accent-deep — the mock's
-// --brass / --brass-deep); paper/ink/dark are the template's invariant DNA and
-// live here. Fonts (Bodoni Moda + Hanken Grotesk + JetBrains Mono) are
-// self-hosted globally via src/styles/fonts-self-hosted.css.
+// Three orthogonal cosmetic axes:
+//   - PALETTE  (palettes.ts) — swaps only the accent duo (--accent/--accent-deep)
+//   - VARIANT  ([data-variant]) — swaps the display/body typeface pairing
+//   - MOOD     ([data-mood], root-level) — swaps the NEUTRAL system (bone warm /
+//     slate cool). NOT the per-section `data-surface` bands (paper/dark from
+//     sectionRules.ts) — that is a different axis; mood layers UNDER it by
+//     re-pointing the CSS variables the surface bands consume.
+// Fonts are self-hosted globally via src/styles/fonts-self-hosted.css.
 
 export interface VestriaBaseTokens {
   // Surfaces + ink (palette-invariant)
@@ -38,18 +44,20 @@ export interface VestriaBaseTokens {
   r: string;
 }
 
+// Default mood = `bone` (warm neutrals — the mock's :root). The previous cool
+// values (from the Cobalt mock) now live on as the `slate` mood below.
 export const vestriaBaseTokens: VestriaBaseTokens = {
-  paper:      'oklch(0.975 0.004 252)',
-  paper2:     'oklch(0.944 0.007 252)',
-  ink:        'oklch(0.235 0.018 258)',
-  inkSoft:    'oklch(0.46 0.02 258)',
-  line:       'oklch(0.235 0.018 258 / 0.16)',
-  lineSoft:   'oklch(0.235 0.018 258 / 0.09)',
-  dark:       'oklch(0.27 0.025 260)',
-  dark2:      'oklch(0.19 0.02 260)',
-  onDark:     'oklch(0.95 0.006 255)',
-  onDarkSoft: 'oklch(0.73 0.018 255)',
-  lineDark:   'oklch(0.95 0.006 255 / 0.16)',
+  paper:      'oklch(0.973 0.008 78)',
+  paper2:     'oklch(0.945 0.013 76)',
+  ink:        'oklch(0.205 0.013 54)',
+  inkSoft:    'oklch(0.43 0.013 56)',
+  line:       'oklch(0.205 0.013 54 / 0.16)',
+  lineSoft:   'oklch(0.205 0.013 54 / 0.09)',
+  dark:       'oklch(0.238 0.015 52)',
+  dark2:      'oklch(0.185 0.013 52)',
+  onDark:     'oklch(0.945 0.01 80)',
+  onDarkSoft: 'oklch(0.72 0.013 74)',
+  lineDark:   'oklch(0.945 0.01 80 / 0.16)',
 
   fontDisplay: "'Bodoni Moda', Georgia, serif",
   fontBody:    "'Hanken Grotesk', system-ui, -apple-system, sans-serif",
@@ -63,6 +71,39 @@ export const vestriaBaseTokens: VestriaBaseTokens = {
   padY:   'clamp(64px, 8.5vw, 120px)',
   padYSm: 'clamp(52px, 6vw, 84px)',
   r:      '2px',
+};
+
+/**
+ * ===== MOODS (neutral system) =====
+ * Root-level `data-mood` attribute (documentElement in edit, the SSRTokens
+ * wrapper div in published). `bone` IS the `:root` baseline (no override block);
+ * `slate` re-points the 11 neutral vars to the cool system. Values: mock
+ * html[data-surface="slate"] — renamed to data-mood to avoid colliding with the
+ * per-section data-surface bands (paper/dark), which stay untouched.
+ */
+export const vestriaMoods = ['bone', 'slate'] as const;
+export type VestriaMood = (typeof vestriaMoods)[number];
+
+/** Default mood when none is persisted (bone = the :root values). */
+export const defaultVestriaMood: VestriaMood = 'bone';
+
+type VestriaNeutralTokens = Pick<
+  VestriaBaseTokens,
+  'paper' | 'paper2' | 'ink' | 'inkSoft' | 'line' | 'lineSoft' | 'dark' | 'dark2' | 'onDark' | 'onDarkSoft' | 'lineDark'
+>;
+
+export const vestriaSlateTokens: VestriaNeutralTokens = {
+  paper:      'oklch(0.975 0.004 252)',
+  paper2:     'oklch(0.944 0.007 252)',
+  ink:        'oklch(0.235 0.016 258)',
+  inkSoft:    'oklch(0.46 0.018 258)',
+  line:       'oklch(0.235 0.016 258 / 0.16)',
+  lineSoft:   'oklch(0.235 0.016 258 / 0.09)',
+  dark:       'oklch(0.27 0.022 260)',
+  dark2:      'oklch(0.19 0.018 260)',
+  onDark:     'oklch(0.95 0.006 255)',
+  onDarkSoft: 'oklch(0.73 0.016 255)',
+  lineDark:   'oklch(0.95 0.006 255 / 0.16)',
 };
 
 /**
@@ -100,6 +141,19 @@ export function serializeBaseTokens(t: VestriaBaseTokens = vestriaBaseTokens): s
   --pad-y-sm:${t.padYSm};
   --r:${t.r};
 }
+[data-mood="slate"]{
+  --paper:${vestriaSlateTokens.paper};
+  --paper-2:${vestriaSlateTokens.paper2};
+  --ink:${vestriaSlateTokens.ink};
+  --ink-soft:${vestriaSlateTokens.inkSoft};
+  --line:${vestriaSlateTokens.line};
+  --line-soft:${vestriaSlateTokens.lineSoft};
+  --dark:${vestriaSlateTokens.dark};
+  --dark-2:${vestriaSlateTokens.dark2};
+  --on-dark:${vestriaSlateTokens.onDark};
+  --on-dark-soft:${vestriaSlateTokens.onDarkSoft};
+  --line-dark:${vestriaSlateTokens.lineDark};
+}
 [data-surface="paper"]{background:var(--paper);color:var(--ink);}
 [data-surface="paper-2"]{background:var(--paper-2);color:var(--ink);border-block:1px solid var(--line-soft);}
 [data-surface="dark"]{background:var(--dark);color:var(--on-dark);}
@@ -134,20 +188,33 @@ export function serializeBaseTokens(t: VestriaBaseTokens = vestriaBaseTokens): s
 }
 
 /**
- * ===== VARIANTS =====
- * Single variant v1 — `tailored` (the mock's `data-theme="tailored"` feel is the
- * :root baseline). Placeholder hook kept so a future spacing/mood variant is a
- * pure token swap, matching every other template module's contract.
+ * ===== VARIANTS (typeface pairing) =====
+ * `tailored` IS the :root baseline (Bodoni Moda + Hanken Grotesk — id is a hard
+ * rule, never rename: defaultVestriaVariant, ThemeInjector default, coreParity
+ * fixtures and persisted drafts all reference it). `modern`/`heritage` swap the
+ * display/body faces via [data-variant] var overrides, plus the mock's
+ * per-pairing display nudges (Space Grotesk is lower-contrast; Cormorant runs
+ * light and small). Mono labels stay JetBrains Mono throughout.
+ * Source: mock html[data-type="modern"|"heritage"] blocks.
  */
 import type { TemplateVariant } from '@/types/template';
 
 export const vestriaVariantDefs: TemplateVariant[] = [
-  { id: 'tailored', label: 'Tailored', blurb: 'Editorial paper + dark bands — the atelier baseline.' },
+  { id: 'tailored', label: 'Tailored', blurb: 'Editorial — Bodoni Moda display over Hanken Grotesk. The atelier baseline.' },
+  { id: 'modern',   label: 'Modern',   blurb: 'Engineered — Space Grotesk display over Hanken Grotesk.' },
+  { id: 'heritage', label: 'Heritage', blurb: 'Established — Cormorant Garamond display over Source Serif 4.' },
 ];
 
 export const defaultVestriaVariant = 'tailored';
 
 export function serializeVariantOverrides(): string {
-  // `tailored` IS the :root baseline — no overrides yet.
-  return '';
+  // `tailored` IS the :root baseline — no block emitted for it.
+  // Emitted AFTER serializeBaseTokens in both injectors, so the same-element
+  // var overrides win the specificity tie against :root in edit mode.
+  return `[data-variant="modern"]{--ff-display:'Space Grotesk',system-ui,-apple-system,sans-serif;--ff-body:'Hanken Grotesk',system-ui,-apple-system,sans-serif;}
+[data-variant="modern"] .vs-display,[data-variant="modern"] .vs-heading{font-weight:600;letter-spacing:-0.02em;}
+[data-variant="modern"] .vs-display em,[data-variant="modern"] .vs-heading em{font-style:normal;}
+[data-variant="heritage"]{--ff-display:'Cormorant Garamond',Georgia,serif;--ff-body:'Source Serif 4',Georgia,serif;}
+[data-variant="heritage"] .vs-display,[data-variant="heritage"] .vs-heading{font-weight:600;letter-spacing:0;}
+[data-variant="heritage"] .vs-hero__h1{font-size:clamp(3.3rem,7.2vw,6.2rem);}`;
 }
