@@ -91,7 +91,7 @@ async function publishHandler(req: NextRequest) {
     // template/variant/palette so service projects ship with the right tokens).
     const project = await prisma.project.findUnique({
       where: { tokenId },
-      select: { id: true, audienceType: true, templateId: true, variantId: true, paletteId: true }
+      select: { id: true, audienceType: true, templateId: true, variantId: true, paletteId: true, themeValues: true }
     });
 
     const audienceType: 'product' | 'service' | 'writer' =
@@ -101,6 +101,17 @@ async function publishHandler(req: NextRequest) {
     const templateId: string | null = project?.templateId ?? null;
     const variantId: string | null = project?.variantId ?? null;
     const paletteId: string | null = project?.paletteId ?? null;
+    // Neutral mood (vestria) lives in Project.themeValues.mood — the client's
+    // publish payload themeValues is the legacy color record and doesn't carry
+    // it. Merge it into what we store on PublishedPage so the SSR fallback +
+    // verify-dns regeneration read the same value the static HTML was baked with.
+    const projectMood: string | null =
+      typeof (project?.themeValues as any)?.mood === 'string'
+        ? (project!.themeValues as any).mood
+        : null;
+    const publishedThemeValues = projectMood
+      ? { ...((themeValues as Record<string, any> | undefined) ?? {}), mood: projectMood }
+      : themeValues;
 
     // Phase 2: No longer generating htmlContent - using dynamic rendering
     // Published pages now render on-demand via React Server Components
@@ -125,7 +136,7 @@ async function publishHandler(req: NextRequest) {
           htmlContent: '',  // Phase 2: Empty for dynamic rendering
           title: cleanTitle,
           content: content as any,
-          themeValues: themeValues as any,
+          themeValues: publishedThemeValues as any,
           projectId: project?.id || null,
           audienceType,
           templateId,
@@ -159,7 +170,7 @@ async function publishHandler(req: NextRequest) {
           htmlContent: '',  // Phase 2: Empty for dynamic rendering
           title: cleanTitle,
           content: content as any,
-          themeValues: themeValues as any,
+          themeValues: publishedThemeValues as any,
           projectId: project?.id || null,
           audienceType,
           templateId,
@@ -267,6 +278,7 @@ async function publishHandler(req: NextRequest) {
         templateId,
         variantId,
         paletteId,
+        mood: projectMood,
         baseUrl,
         canonicalDomain,
       });

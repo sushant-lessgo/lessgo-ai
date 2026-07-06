@@ -396,3 +396,198 @@ Verification (completion run):
 - `npm run build` — green.
 - `git status` — only the 3 files above changed by this run (plus this audit);
   remaining diffs are the earlier Phase 5 typeface/mood/font work, untouched.
+
+---
+
+## Phase 6 — Cosmetic pickers (generation-time + editor popover) + mood plumbing
+
+**Files changed**
+
+Planned files:
+- `src/hooks/useProductGenerationStore.ts`
+- `src/app/onboarding/product/[token]/components/fields/ProductStylePicker.tsx` (NEW)
+- `src/app/onboarding/product/[token]/components/steps/GeneratingStep.tsx`
+- `src/app/edit/[token]/components/ui/VestriaThemePopover.tsx` (NEW)
+- `src/app/edit/[token]/components/layout/EditHeader.tsx`
+
+Deviation-b renderer/mood plumbing (authorized "thread mood minimally, matching
+how paletteId/variantId already reach the mounts"):
+- `src/modules/generatedLanding/LandingPageRenderer.tsx` (edit mount)
+- `src/modules/generatedLanding/LandingPagePublishedRenderer.tsx` (published mount)
+- `src/types/template.ts` (TemplateModule contract: optional `mood?` on ThemeInjector/SSRTokens prop types — required for tsc)
+- `src/types/store/state.ts` (MetaSlice: `themeValues` field)
+- `src/stores/editStore.ts` (initial `themeValues: null` + partialize entry)
+- `src/hooks/editStore/persistenceActions.ts` (save() sends `themeValues`; loadFromDraft hydrates it)
+- `src/lib/staticExport/htmlGenerator.ts` (`mood` option → renderer prop)
+- `src/lib/staticExport/renderPublishedExport.ts` (`mood` input → both generateStaticHTML calls, root + subpages)
+- `src/app/api/publish/route.ts` (reads `Project.themeValues.mood`, passes to export, merges mood into `PublishedPage.themeValues`)
+- `src/app/p/[slug]/page.tsx` + `src/app/p/[slug]/[...subpath]/page.tsx` (SSR fallbacks: select `themeValues`, pass `mood`)
+- `src/app/api/domains/verify-dns/route.ts` (custom-domain go-live regeneration: select `themeValues`, pass `mood` so regen doesn't drop it)
+
+NOT mine (pre-existing working-tree state when this run started):
+`docs/temp/message.md` (modified), `docs/task/editpage.md`, `docs/task/scale.md`
+(untracked orchestrator scratch).
+
+### Per-file what/why
+
+**useProductGenerationStore.ts** — added `variantId`/`paletteId`/`mood` state
+(defaults `tailored`/`cobalt`/`bone`) + `setStyleVariantId`/`setStylePaletteId`/
+`setStyleMood`. Resume-safe guard = **per-field picked flags**
+(`styleVariantPicked`/`stylePalettePicked`/`styleMoodPicked`), each set only by
+an explicit setter call this session. Per-field (not one shared flag, stricter
+than the mandated single-flag pattern) because a RESUMED run can re-open the
+picker: a mood-only pick there must not re-send default variant/palette over a
+previously persisted choice — the exact Phase-3-review data-loss class,
+extended across three fields.
+
+**ProductStylePicker.tsx (new)** — typeface-variant cards (from
+`vestriaVariantDefs`), 8 accent swatches, bone/slate mood toggle (orchestrator
+decision: mood IS a picker control). Reads/writes the generation store
+directly; never awaited.
+*Swatch-sourcing deviation (logged):* the rule said "swatches from injected
+`[data-palette]{--accent}` vars, do NOT import template palette modules" — but
+no vestria ThemeInjector is mounted on the onboarding route, so those vars do
+not exist there and swatches would render gray. Conservative resolution
+honoring both the mechanism and the firewall intent: the picker mounts the
+variable blocks itself via a `<style>` tag filled by
+`serializePaletteOverrides()`, and the swatches still resolve `var(--accent)`
+through `data-palette` attrs. `serializePaletteOverrides`/
+`pilotEnabledPalettes` (palettes.ts) and `vestriaVariantDefs` (tokens.ts) are
+data-only modules with zero block/JSX code, and onboarding is not a
+firewall-gated dir — same documented precedent as the service onboarding
+`templateCatalog.ts` ("static template imports here are allowed... imports
+target palettes.ts / tokens.ts... the React block chunks are never pulled in")
+and GeneratingStep's existing vestria `contactFields` import. No prompt-builder
+file touched anywhere in this phase.
+
+**GeneratingStep.tsx** — (1) mounts `ProductStylePicker` in the SAME
+non-blocking `stage==='copy' && isManufacturerFlow(storeTemplateId)` slot, hero
+picker first, cosmetic second. (2) `saveFC` now reads style state via
+`getState()` on EVERY save (incl. the completion save) and sends only the
+explicitly picked fields: `variantId`/`paletteId` as top-level saveDraft
+fields, mood as `themeValues:{mood}` (spread AFTER `templateInfo` so a pick
+beats the skeleton defaults; `/api/saveDraft` treats undefined as "leave
+persisted value untouched" — verified in the route's upsert). (3) skeleton save
++ single-page vestria save replace the hardcoded
+`defaultVestriaPalette`/`defaultVestriaVariant` with the store values (both
+paths are fresh-run-only — resume returns into `runFanOut` before them — so
+store defaults reproduce the old behavior exactly when nothing is picked).
+(4) mood written only when `styleMoodPicked` (bone = renderer default; skipping
+avoids touching older drafts). (5) posthog completion event reports
+picked-vs-default values + a `stylePicked` rollup.
+
+**VestriaThemePopover.tsx (new)** — clone of `ServiceThemePopover` minus the
+template switcher; gated `audienceType==='product' && templateId==='vestria'`.
+Variants from `getLoadedTemplate('vestria').variants` (registry cache — no
+static template import; label-only fallback list if uncached); palette ids from
+the type-level `vestriaPalettes` (`@/types/product`); swatch colors from the
+already-injected `[data-palette]{--accent}` vars (the editor has the vestria
+stylesheet mounted — rule followed verbatim here). Variant/palette via
+`updateMeta({variantId|paletteId})`; mood via
+`updateMeta({ themeValues: {...existing, mood} })` (merge, not replace). All
+three call `triggerAutoSave()`. Live update: `VestriaThemeInjector` already
+reacts to its props (useEffect deps re-set `data-palette`/`data-variant`/
+`data-mood` on documentElement); the renderer feeds it store meta, so a click
+restyles immediately — service-popover pattern.
+
+**EditHeader.tsx** — product+vestria branch renders `VestriaThemePopover`;
+product+meridian/techpremium (and writer+granth) keep the LOCKED-label branch
+identical; service (`ServiceThemePopover`) and legacy (`ThemePopover`) branches
+untouched.
+
+### How mood reaches both renderers (deviation-b, parity)
+
+Source of truth: `Project.themeValues.mood` (permissive record — no
+schema/migration change, as pre-verified).
+
+- **Edit:** loadDraft returns `themeValues` top-level → `loadFromDraft`
+  hydrates the new `state.themeValues` (MetaSlice) → `LandingPageRenderer`
+  passes `mood={themeValues?.mood}` to `tmpl.ThemeInjector` →
+  `VestriaThemeInjector` narrows it (unknown → bone) and sets `data-mood`.
+  `save()` round-trips the full `themeValues` record (null → undefined →
+  saveDraft skips the column, so non-vestria saves change nothing).
+- **Published (blob/static export):** `/api/publish` selects
+  `Project.themeValues`, passes `mood` → `renderPublishedExport` → both
+  `generateStaticHTML` calls (root + every subpage) →
+  `LandingPagePublishedRenderer` → `tmpl.SSRTokens mood=` → `VestriaSSRTokens`
+  emits the same `data-mood` + identical serialized CSS. Both sides share the
+  SAME `resolveMood` narrowing and the same serializers — parity by
+  construction.
+- **Published (SSR fallbacks + domain go-live):** publish also merges mood into
+  `PublishedPage.themeValues` (the client publish payload is the legacy color
+  record and does not carry it), so `/p/[slug]`, `/p/[slug]/[...subpath]` and
+  the verify-dns regeneration read the same value the blob HTML was baked with.
+- `src/types/template.ts` gained optional `mood?: any` on the
+  ThemeInjector/SSRTokens contract; other templates' components simply don't
+  declare it (structurally assignable — tsc clean) and ignore the extra prop.
+
+### Deviations
+1. **Per-field picked flags** instead of one `stylePicked` flag (stronger
+   version of the mandated guard; rationale above).
+2. **Generation picker self-injects palette CSS** via a
+   `serializePaletteOverrides()` data-import (rationale above; the editor
+   popover follows the injected-CSS-var rule verbatim).
+3. **Extra plumbing files beyond the two renderers** (template contract type,
+   edit-store meta/persistence, static-export chain, publish/SSR routes) — all
+   are the exact hops paletteId/variantId already travel; without them mood
+   cannot reach either mount. Every file listed above.
+4. **verify-dns route added on my own judgment:** without it the custom-domain
+   go-live regeneration would silently re-render the pilot site with default
+   mood (the pilot IS the custom-domain scenario).
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 51 files passed / 1 skipped; 670 tests passed / 2
+  skipped (service dispatch/palette regression suites untouched-green).
+- `npm run build` — green. (First attempt died in "Collecting page data" with
+  missing-module errors on ~40 unrelated routes — stale `.next` on Windows;
+  `rm -rf .next` + rebuild → exit 0. Compile + type-check had already passed.)
+- Scenario reasoning: mid-stream pick of variant+palette+mood → every
+  subsequent `saveFC` + the completion save carry
+  `variantId`/`paletteId`/`themeValues.mood`; skip → skeleton save persists
+  store defaults (== old hardcoded cobalt/tailored), mood column untouched
+  (renderers default bone). Resumed run → flags reset → nothing re-sent →
+  persisted look preserved; a partial pick on resume sends ONLY that field.
+  Editor popover → updateMeta → injector props change → `data-*` attrs re-set
+  live; `save()` persists; reload rehydrates via loadFromDraft; publish bakes
+  the same mood into blob HTML, PublishedPage.themeValues, SSR fallbacks and
+  domain-go-live regen — edit === published. Meridian/techpremium: the
+  EditHeader vestria branch requires `templateId==='vestria'` → LOCKED label
+  unchanged; their injectors never receive a defined mood. Service: StyleStep +
+  ServiceThemePopover files untouched; the new save() `themeValues` send is
+  `state.themeValues ?? undefined` = undefined for service unless the DB row
+  already had legacy themeValues, which then round-trips identically.
+- `git status` — diffs limited to the files listed above (+ the pre-existing
+  orchestrator scratch noted).
+
+### Review fix (post-review, authorized): autoSaveDraft mood preservation
+- **Was an open risk, now CLOSED.** `src/utils/autoSaveDraft.ts` (Step 4,
+  ~line 221) unconditionally set
+  `payload.themeValues = {primary, background, muted}` from color tokens;
+  `/api/saveDraft` REPLACES the whole `Project.themeValues` column, so any
+  `completeSaveDraft` flow (section regen `aiActions.ts:145`, content regen
+  `regenerationActions.ts:139`, design+copy regen `regenerationActions.ts:330`)
+  on a vestria project silently wiped `mood`.
+- **Fix (single file, `src/utils/autoSaveDraft.ts`):** spread the hydrated
+  store state first —
+  `payload.themeValues = { ...(editStoreState.themeValues ?? {}), primary, background, muted }`
+  — using the `editStoreState` already in scope in that Step-4 block (hydrated
+  with `mood` by `loadFromDraft`, `persistenceActions.ts:242`). Legacy
+  primary/background/muted keys written exactly as before; they just no longer
+  clobber sibling keys. Non-vestria projects have no sibling keys → zero
+  behavior change.
+- **Verification:** `npx tsc --noEmit` clean; `npm run test:run` 51 files
+  passed / 1 skipped, 670 tests passed / 2 skipped; `npm run build` green.
+  `git diff --stat` confirms the only new code diff is
+  `src/utils/autoSaveDraft.ts` (+ this audit). Scenario: vestria draft with
+  `themeValues.mood='slate'` → regenerate a section → payload now carries
+  `mood:'slate'` alongside the color tokens → reload renders slate → publish
+  bakes slate.
+
+### Open risks
+- Popover swatch colors depend on the vestria stylesheet being mounted; if the
+  popover renders before the template module injects (sub-second), swatches
+  show the `#ccc` fallback until it does (same characteristic as
+  ServiceThemePopover).
+- Manual QA still required per plan: full manufacturer run + editor live-swap +
+  publish parity eyeball (`/manual-test` vestria items) before merge.

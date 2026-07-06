@@ -81,6 +81,7 @@ export default async function PublishedPage({ params }: PageProps) {
       templateId: true,
       variantId: true,
       paletteId: true,
+      themeValues: true,
       customDomain: true,
       customDomainStatus: true,
     },
@@ -185,6 +186,7 @@ export default async function PublishedPage({ params }: PageProps) {
         templateId={templateId}
         variantId={page.variantId}
         paletteId={page.paletteId}
+        mood={(page.themeValues as any)?.mood ?? null}
       />
     </>
   );

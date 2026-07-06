@@ -218,6 +218,7 @@ function createInitialState(tokenId: string): EditStore {
     templateId: null,
     variantId: null,
     paletteId: null,
+    themeValues: null,
     onboardingData: {
       oneLiner: '',
       validatedFields: {},
@@ -387,6 +388,7 @@ export function createEditStore(tokenId: string) {
               templateId: state.templateId,
               variantId: state.variantId,
               paletteId: state.paletteId,
+              themeValues: state.themeValues,
               sections: state.sections,
               sectionLayouts: state.sectionLayouts,
               sectionSpacing: state.sectionSpacing,

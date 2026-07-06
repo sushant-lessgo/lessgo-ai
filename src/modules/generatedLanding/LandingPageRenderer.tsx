@@ -109,6 +109,7 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     templateId,
     variantId,
     paletteId,
+    themeValues,
   } = storeState;
 
   const usesTemplate = usesTemplateModule(audienceType, templateId);
@@ -845,7 +846,13 @@ const finalSections: OrderedSection[] = processedSections
     if (!templateReady || !tmpl) return null;
     const ThemeInjector = tmpl.ThemeInjector;
     return (
-      <ThemeInjector paletteId={effectivePalette} variantId={effectiveVariant}>
+      <ThemeInjector
+        paletteId={effectivePalette}
+        variantId={effectiveVariant}
+        // Neutral mood (vestria) from Project.themeValues.mood — undefined for
+        // other templates / unset drafts; injectors default it (bone).
+        mood={(themeValues as Record<string, any> | null)?.mood}
+      >
         {renderContent()}
       </ThemeInjector>
     );

@@ -128,6 +128,7 @@ export default async function PublishedSubpage({ params }: PageProps) {
       templateId: true,
       variantId: true,
       paletteId: true,
+      themeValues: true,
     },
   });
 
@@ -179,6 +180,7 @@ export default async function PublishedSubpage({ params }: PageProps) {
         templateId={templateId}
         variantId={page.variantId}
         paletteId={page.paletteId}
+        mood={(page.themeValues as any)?.mood ?? null}
       />
     </>
   );

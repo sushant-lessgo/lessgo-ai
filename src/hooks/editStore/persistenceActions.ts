@@ -44,6 +44,9 @@ export function createPersistenceActions(set: any, get: any) {
             templateId: state.templateId ?? undefined,
             variantId: state.variantId ?? undefined,
             paletteId: state.paletteId ?? undefined,
+            // Theme values (vestria mood etc.) — undefined = saveDraft leaves
+            // the persisted Project.themeValues untouched.
+            themeValues: state.themeValues ?? undefined,
           }),
         });
 
@@ -236,6 +239,10 @@ export function createPersistenceActions(set: any, get: any) {
           state.templateId = apiResponse.templateId ?? null;
           state.variantId = apiResponse.variantId ?? null;
           state.paletteId = apiResponse.paletteId ?? null;
+          // Project.themeValues mirror (loadDraft returns it top-level).
+          // Carries vestria's `mood`; hydrating here means a later save()
+          // round-trips the full record instead of dropping keys.
+          state.themeValues = apiResponse.themeValues ?? null;
 
           // Dev-only override (Phase 11a): `?templateId=lex` (optionally
           // `&paletteId=counsel`) lets us exercise a template in edit/preview

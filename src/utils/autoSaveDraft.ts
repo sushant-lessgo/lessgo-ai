@@ -218,7 +218,10 @@ if (includePageData) {
       if (editStoreState.getColorTokens) {
         const colorTokens = editStoreState.getColorTokens();
         
+        // Merge hydrated store themeValues first so sibling keys (e.g. vestria
+        // `mood`) survive — /api/saveDraft REPLACES the whole column, not a merge.
         payload.themeValues = {
+          ...(editStoreState.themeValues ?? {}),
           primary: colorTokens.accent,
           background: colorTokens.bgNeutral,
           muted: colorTokens.textMuted,

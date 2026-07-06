@@ -3,13 +3,20 @@
 // Mirrors useServiceGenerationStore but with product-specific shape
 // (productName + UnderstandingData + landingGoal). Drives the parallel
 // /onboarding/product/[token] wizard and the P3 /api/audience/product/* routes.
-// Palette/variant are pilot-locked (mint/developer) — no style step.
+// Meridian palette/variant stay pilot-locked (mint/developer); the vestria/
+// manufacturer flow picks variant/palette/mood non-blockingly mid-generation
+// (onboarding2 Phase 6).
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type { LandingGoal, UnderstandingData } from '@/types/generation';
-import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
+import type {
+  ProductStrategyOutput,
+  SitemapPage,
+  VestriaPalette,
+  VestriaVariant,
+} from '@/types/product';
 
 /** Real testimonial imported from a user's existing website (verbatim). */
 export interface ImportedTestimonial {
@@ -42,6 +49,10 @@ export type ProductTemplateId = 'meridian' | 'vestria';
  *  streams; written into `content[heroId].layout` (the authoritative field the
  *  renderers read) at save time. Default = tailored (existing behavior). */
 export type VestriaHeroVariant = 'VestriaTailoredHero' | 'VestriaFullBleedHero';
+
+/** Vestria neutral mood (onboarding2 Axis A). Mirrors vestriaMoods in
+ *  modules/templates/vestria/tokens.ts; persisted via Project.themeValues.mood. */
+export type VestriaLookMood = 'bone' | 'slate';
 
 interface ProductGenerationState {
   currentStep: ProductGenerationStep;
@@ -85,6 +96,21 @@ interface ProductGenerationState {
   // application: a resumed run (store reset → false) must never re-apply the
   // default and clobber a previously persisted choice in the DB draft.
   heroVariantPicked: boolean;
+
+  // Cosmetic look (onboarding2 Axis A, vestria/manufacturer only) — typeface
+  // variant + accent palette + neutral mood, picked non-blockingly while copy
+  // streams. Defaults = tailored/cobalt/bone (existing behavior when skipped).
+  variantId: VestriaVariant;
+  paletteId: VestriaPalette;
+  mood: VestriaLookMood;
+  // Same resume-safe guard pattern as heroVariantPicked, but PER FIELD: only an
+  // EXPLICITLY picked field may be written to the draft. Per-field (not one
+  // shared flag) because a RESUMED run can re-open the picker — a mood-only
+  // pick there must not re-send the default variant/palette over previously
+  // persisted choices.
+  styleVariantPicked: boolean;
+  stylePalettePicked: boolean;
+  styleMoodPicked: boolean;
 }
 
 interface ProductGenerationActions {
@@ -116,6 +142,10 @@ interface ProductGenerationActions {
 
   setHeroVariant: (variant: VestriaHeroVariant) => void;
 
+  setStyleVariantId: (variantId: VestriaVariant) => void;
+  setStylePaletteId: (paletteId: VestriaPalette) => void;
+  setStyleMood: (mood: VestriaLookMood) => void;
+
   reset: () => void;
 }
 
@@ -140,6 +170,12 @@ const initialState: ProductGenerationState = {
   generationError: null,
   heroVariant: 'VestriaTailoredHero',
   heroVariantPicked: false,
+  variantId: 'tailored',
+  paletteId: 'cobalt',
+  mood: 'bone',
+  styleVariantPicked: false,
+  stylePalettePicked: false,
+  styleMoodPicked: false,
 };
 
 export const useProductGenerationStore = create<ProductGenerationStore>()(
@@ -246,6 +282,22 @@ export const useProductGenerationStore = create<ProductGenerationStore>()(
         set((state) => {
           state.heroVariant = variant;
           state.heroVariantPicked = true;
+        }),
+
+      setStyleVariantId: (variantId) =>
+        set((state) => {
+          state.variantId = variantId;
+          state.styleVariantPicked = true;
+        }),
+      setStylePaletteId: (paletteId) =>
+        set((state) => {
+          state.paletteId = paletteId;
+          state.stylePalettePicked = true;
+        }),
+      setStyleMood: (mood) =>
+        set((state) => {
+          state.mood = mood;
+          state.styleMoodPicked = true;
         }),
 
       reset: () => set(initialState),

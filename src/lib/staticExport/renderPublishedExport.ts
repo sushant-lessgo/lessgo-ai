@@ -34,6 +34,9 @@ export interface RenderPublishedExportInput {
   templateId: string | null;
   variantId: string | null;
   paletteId: string | null;
+  /** Neutral mood (vestria; Project.themeValues.mood). Optional — omitting it
+   *  renders the default (bone). */
+  mood?: string | null;
   baseUrl: string;
   /** Live custom domain (no scheme) to bake into canonical/og:url; undefined → subdomain. */
   canonicalDomain?: string;
@@ -64,6 +67,7 @@ export async function renderPublishedExport(
     templateId,
     variantId,
     paletteId,
+    mood,
     baseUrl,
     canonicalDomain,
   } = input;
@@ -123,6 +127,7 @@ export async function renderPublishedExport(
     templateId,
     paletteId,
     variantId,
+    mood: mood ?? null,
     canonicalDomain,
     canonicalPath: '/',
   });
@@ -207,6 +212,7 @@ export async function renderPublishedExport(
         templateId,
         paletteId,
         variantId,
+        mood: mood ?? null,
         canonicalDomain,
         canonicalPath: path,
       });

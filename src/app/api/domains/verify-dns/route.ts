@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       templateId: true,
       variantId: true,
       paletteId: true,
+      themeValues: true,
     },
   });
   if (!page) return createSecureResponse({ error: 'Page not found' }, 404);
@@ -123,6 +124,9 @@ export async function POST(req: NextRequest) {
         templateId: page.templateId,
         variantId: page.variantId,
         paletteId: page.paletteId,
+        // Mood was merged into PublishedPage.themeValues at publish time —
+        // pass it through so the go-live regeneration doesn't drop it.
+        mood: (page.themeValues as any)?.mood ?? null,
         baseUrl: 'https://lessgo.ai',
         canonicalDomain: customHost,
       });

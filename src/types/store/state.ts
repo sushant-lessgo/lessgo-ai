@@ -343,6 +343,9 @@ export interface MetaSlice {
   templateId: string | null;
   variantId: string | null;
   paletteId: string | null;
+  /** Project.themeValues mirror (permissive record; carries e.g. `mood` for
+   *  vestria). Hydrated by loadFromDraft, persisted by save(). */
+  themeValues: Record<string, any> | null;
 
 
   // Onboarding Data

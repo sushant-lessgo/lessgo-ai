@@ -47,6 +47,7 @@ interface LandingPagePublishedRendererProps {
   templateId?: string | null;   // Which template module to dispatch to
   paletteId?: string | null;    // Template palette for template-backed projects
   variantId?: string | null;    // Template variant (Lex/Meridian token rescale)
+  mood?: string | null;         // Neutral mood (vestria; Project.themeValues.mood)
 }
 
 export function LandingPagePublishedRenderer({
@@ -62,6 +63,7 @@ export function LandingPagePublishedRenderer({
   templateId = 'hearth',
   paletteId = null,
   variantId = null,
+  mood = null,
 }: LandingPagePublishedRendererProps) {
   const usesTemplate = usesTemplateModule(audienceType, templateId);
   // Module was preloaded by the caller; read it synchronously from the cache.
@@ -191,7 +193,7 @@ export function LandingPagePublishedRenderer({
   return (
     <>
     {usesTemplate && tmpl ? (
-      <tmpl.SSRTokens paletteId={effectivePalette} variantId={effectiveVariant}>
+      <tmpl.SSRTokens paletteId={effectivePalette} variantId={effectiveVariant} mood={mood ?? undefined}>
         {sectionsTree}
       </tmpl.SSRTokens>
     ) : (

@@ -34,6 +34,8 @@ export interface StaticHTMLOptions {
   templateId?: string | null;
   paletteId?: string | null;
   variantId?: string | null;
+  /** Neutral mood (vestria) — Project.themeValues.mood; default bone. */
+  mood?: string | null;
 
   // Canonical / social URL resolution.
   // canonicalDomain: the live custom domain (no scheme) when one is active; when unset,
@@ -96,6 +98,7 @@ export async function generateStaticHTML(
       templateId: options.templateId ?? null,
       paletteId: options.paletteId ?? null,
       variantId: options.variantId ?? null,
+      mood: options.mood ?? null,
     })
   );
 

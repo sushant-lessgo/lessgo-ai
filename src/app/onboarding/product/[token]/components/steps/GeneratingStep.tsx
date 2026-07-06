@@ -8,6 +8,7 @@ import {
   type VestriaHeroVariant,
 } from '@/hooks/useProductGenerationStore';
 import HeroVariantPicker from '../fields/HeroVariantPicker';
+import ProductStylePicker from '../fields/ProductStylePicker';
 import { usePostHog } from 'posthog-js/react';
 import ErrorRetry from '@/components/onboarding/shared/ErrorRetry';
 import type { SectionCopy } from '@/types/generation';
@@ -249,11 +250,33 @@ export default function GeneratingStep() {
       // (resume sets templateId='vestria' before mount, so the flow guard
       // alone is NOT enough). A fresh no-pick run also skips (merged hero
       // already defaults to tailored).
-      const { heroVariant, heroVariantPicked } =
-        useProductGenerationStore.getState();
+      const {
+        heroVariant,
+        heroVariantPicked,
+        variantId: pickedVariantId,
+        paletteId: pickedPaletteId,
+        mood: pickedMood,
+        styleVariantPicked,
+        stylePalettePicked,
+        styleMoodPicked,
+      } = useProductGenerationStore.getState();
       if (isManufacturerFlow(storeTemplateId) && heroVariantPicked) {
         applyHeroVariantToFinalContent(fc, heroVariant);
       }
+      // Cosmetic look (onboarding2 Phase 6) — same non-blocking + resume-safe
+      // rules as the hero variant: apply the CURRENT store pick on every save,
+      // but ONLY fields EXPLICITLY picked this session (per-field flags). A
+      // resumed run (store reset → all false) sends nothing, so /api/saveDraft
+      // leaves persisted variantId/paletteId/themeValues untouched (undefined
+      // = skip); a partial pick on a resumed run sends ONLY the picked field.
+      // Spread AFTER templateInfo so a pick wins over the skeleton defaults.
+      const styleInfo = isManufacturerFlow(storeTemplateId)
+        ? {
+            ...(styleVariantPicked ? { variantId: pickedVariantId } : {}),
+            ...(stylePalettePicked ? { paletteId: pickedPaletteId } : {}),
+            ...(styleMoodPicked ? { themeValues: { mood: pickedMood } } : {}),
+          }
+        : {};
       const res = await fetch('/api/saveDraft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -261,6 +284,7 @@ export default function GeneratingStep() {
           tokenId,
           title: fc.meta?.title || title,
           ...(templateInfo ?? {}),
+          ...styleInfo,
           finalContent: fc,
         }),
       });
@@ -368,12 +392,18 @@ export default function GeneratingStep() {
       }
 
       setStage('done');
+      const finalStyle = useProductGenerationStore.getState();
       posthog?.capture('product_onboarding_complete', {
         totalDurationMs: Date.now() - startedAt.current,
         pageCount: total,
         templateId: 'vestria',
-        paletteId: defaultVestriaPalette,
-        variantId: defaultVestriaVariant,
+        paletteId: finalStyle.stylePalettePicked ? finalStyle.paletteId : defaultVestriaPalette,
+        variantId: finalStyle.styleVariantPicked ? finalStyle.variantId : defaultVestriaVariant,
+        mood: finalStyle.styleMoodPicked ? finalStyle.mood : undefined,
+        stylePicked:
+          finalStyle.styleVariantPicked ||
+          finalStyle.stylePalettePicked ||
+          finalStyle.styleMoodPicked,
         audienceType: 'product',
         multiPage: true,
       });
@@ -516,15 +546,20 @@ export default function GeneratingStep() {
       setStage('saving');
       // Hardware-founder (TechPremium) was handled by the deterministic branch
       // above; Meridian or Vestria reaches here (store templateId decides).
+      // Vestria look comes from the generation store (Phase 6) — this path is
+      // only reached on a FRESH run (resume goes through runFanOut), so store
+      // defaults (cobalt/tailored) reproduce the old hardcoded behavior when
+      // nothing was picked.
+      const styleState = useProductGenerationStore.getState();
       const templateId = explicitVestria ? 'vestria' : PILOT_TEMPLATE;
-      const paletteId = explicitVestria ? defaultVestriaPalette : PILOT_PALETTE;
-      const variantId = explicitVestria ? defaultVestriaVariant : PILOT_VARIANT;
+      const paletteId = explicitVestria ? styleState.paletteId : PILOT_PALETTE;
+      const variantId = explicitVestria ? styleState.variantId : PILOT_VARIANT;
       try {
         const { finalContent } = buildFinalContent(strategy, copySections, title);
         // Single-page vestria fallback: same hero-variant application as the
         // multi-page saveFC path — only after an EXPLICIT pick this session
         // (heroVariantPicked); resumed/no-pick runs never apply the default.
-        const { heroVariant, heroVariantPicked } =
+        const { heroVariant, heroVariantPicked, styleMoodPicked, mood } =
           useProductGenerationStore.getState();
         if (explicitVestria && heroVariantPicked) {
           applyHeroVariantToFinalContent(finalContent, heroVariant);
@@ -538,6 +573,9 @@ export default function GeneratingStep() {
             paletteId,
             templateId,
             variantId,
+            // Mood only after an explicit pick (bone = renderer default; no
+            // need to write it, and skipping avoids clobbering older drafts).
+            ...(explicitVestria && styleMoodPicked ? { themeValues: { mood } } : {}),
             finalContent,
           }),
         });
@@ -583,10 +621,16 @@ export default function GeneratingStep() {
         };
         const fc = buildMultiPageSkeleton({ tokenId, title, onboardingData: ob });
         try {
+          // Skeleton save carries the CURRENT store look (Phase 6) — store
+          // defaults are cobalt/tailored, so a no-pick run saves exactly what
+          // the old hardcoded defaults did. saveFC's styleInfo overrides these
+          // on later saves if the user picks mid-stream.
+          const { variantId: styleVariantId, paletteId: stylePaletteId } =
+            useProductGenerationStore.getState();
           await saveFC(fc, {
             templateId: 'vestria',
-            paletteId: defaultVestriaPalette,
-            variantId: defaultVestriaVariant,
+            paletteId: stylePaletteId,
+            variantId: styleVariantId,
           });
         } catch (e: any) {
           setError(e?.message || 'Could not save the draft.');
@@ -773,7 +817,13 @@ export default function GeneratingStep() {
           awaited: the pipeline streams on regardless; the choice is applied to
           every draft save (incl. the final one) via saveFC. */}
       {stage === 'copy' && isManufacturerFlow(storeTemplateId) && (
-        <HeroVariantPicker value={heroVariant} onChange={setHeroVariant} />
+        <>
+          <HeroVariantPicker value={heroVariant} onChange={setHeroVariant} />
+          {/* Cosmetic look picker (onboarding2 Phase 6) — hero variant first,
+              then look, per spec. Same non-blocking contract: applied on every
+              saveFC + re-applied at completion, gated on stylePicked. */}
+          <ProductStylePicker />
+        </>
       )}
     </div>
   );
