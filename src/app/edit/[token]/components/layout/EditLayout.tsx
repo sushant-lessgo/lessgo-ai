@@ -50,6 +50,12 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   const templateId = useStoreState(state => state.templateId);
   const variantId = useStoreState(state => state.variantId);
   const paletteId = useStoreState(state => state.paletteId);
+  // Neutral mood (vestria bone/slate) — lives in Project.themeValues.mood.
+  // Select the scalar (string identity → reactive to loadFromDraft hydration
+  // AND the VestriaThemePopover's updateMeta({themeValues}) live toggle).
+  const mood = useStoreState(
+    state => (state.themeValues as Record<string, any> | null)?.mood as string | undefined
+  );
   const usesTemplate = usesTemplateModule(audienceType, templateId);
   const { tmpl } = useTemplateModule(audienceType, templateId);
   const effectivePalette = (paletteId as any) || tmpl?.defaultPaletteId;
@@ -202,7 +208,13 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
     if (!tmpl) return shell;
     const ThemeInjector = tmpl.ThemeInjector;
     return (
-      <ThemeInjector paletteId={effectivePalette} variantId={effectiveVariant}>
+      <ThemeInjector
+        paletteId={effectivePalette}
+        variantId={effectiveVariant}
+        // Neutral mood (vestria) — undefined for other templates / unset
+        // drafts; injectors default it (bone). Mirrors LandingPageRenderer.
+        mood={mood}
+      >
         {shell}
       </ThemeInjector>
     );
