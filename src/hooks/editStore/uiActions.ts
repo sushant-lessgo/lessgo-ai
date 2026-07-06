@@ -3,6 +3,7 @@ import type { EditStore, UISlice, ElementSelection, ToolbarAction, EditHistoryEn
 import type { UIActions } from '@/types/store';
 import type { AdvancedActionItem, AdvancedMenuState } from '@/types/store/state';
 import { logger } from '@/lib/logger';
+import { deepCopy } from './historyHelpers';
 import type { 
   UndoableAction, 
   ActionHistoryItem, 
@@ -703,7 +704,15 @@ export function createUIActions(set: any, get: any): UIActions {
         } else if (lastAction.type === 'content') {
           if (lastAction.sectionId && lastAction.beforeState) {
             const section = state.content[lastAction.sectionId];
-            if (section && lastAction.beforeState.elementKey) {
+            // NEW raw-value shape { storageKey, value }: assign the raw stored
+            // value back (V2 stores raw strings/arrays/collection arrays).
+            if (section && lastAction.beforeState.storageKey !== undefined) {
+              section.elements[lastAction.beforeState.storageKey] = deepCopy(lastAction.beforeState.value);
+            } else if (section && lastAction.beforeState.elementKey) {
+              // LEGACY branch: synthesizes a wrapped {content,type,isEditable,editMode}
+              // object that does NOT match V2 raw storage — known pre-existing
+              // corruption. Kept only for old pushers; new entries must never
+              // use this shape (use { storageKey, value } above).
               // Restore element content
               if (lastAction.beforeState.content !== undefined) {
                 section.elements[lastAction.beforeState.elementKey] = {
@@ -764,7 +773,15 @@ export function createUIActions(set: any, get: any): UIActions {
         } else if (actionToRedo.type === 'content') {
           if (actionToRedo.sectionId && actionToRedo.afterState) {
             const section = state.content[actionToRedo.sectionId];
-            if (section && actionToRedo.afterState.elementKey) {
+            // NEW raw-value shape { storageKey, value }: assign the raw stored
+            // value back (V2 stores raw strings/arrays/collection arrays).
+            if (section && actionToRedo.afterState.storageKey !== undefined) {
+              section.elements[actionToRedo.afterState.storageKey] = deepCopy(actionToRedo.afterState.value);
+            } else if (section && actionToRedo.afterState.elementKey) {
+              // LEGACY branch: synthesizes a wrapped {content,type,isEditable,editMode}
+              // object that does NOT match V2 raw storage — known pre-existing
+              // corruption. Kept only for old pushers; new entries must never
+              // use this shape (use { storageKey, value } above).
               // Restore element content
               if (actionToRedo.afterState.content !== undefined) {
                 section.elements[actionToRedo.afterState.elementKey] = {

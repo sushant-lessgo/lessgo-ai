@@ -3,6 +3,7 @@ import { useOnboardingStore } from '../useOnboardingStore';
 import { buildFullPrompt, buildSectionPrompt, buildElementPrompt } from '@/modules/prompt/buildPrompt';
 import { parseAiResponse } from '@/modules/prompt/parseAiResponse';
 import { createSectionCRUDActions } from './sectionCRUDActions';
+import { pushContentHistoryEntry, deepCopy } from './historyHelpers';
 import type { BackgroundType } from '@/types/core/index';
 import type { EditStore, APIRequest, ValidationError } from '@/types/store';
 import type { ContentActions } from '@/types/store';
@@ -95,6 +96,20 @@ export function createContentActions(set: any, get: any): ContentActions {
 
               (state.content[sectionId].elements as Record<string, any>)[collectionName] = updatedCollection;
 
+              // History: raw collection-array snapshot under the collection's storage key.
+              // Skip when nothing actually changed. elementKey = full dotted key (coalesce identity).
+              if (JSON.stringify(oldCollection) !== JSON.stringify(updatedCollection)) {
+                pushContentHistoryEntry(state, {
+                  type: 'content',
+                  description: `Edited ${elementKey}`,
+                  timestamp: Date.now(),
+                  sectionId,
+                  elementKey,
+                  beforeState: { storageKey: collectionName, value: deepCopy(oldCollection) },
+                  afterState: { storageKey: collectionName, value: deepCopy(updatedCollection) },
+                });
+              }
+
               // Initialize aiMetadata if missing
               if (!state.content[sectionId].aiMetadata) {
                 state.content[sectionId].aiMetadata = {
@@ -138,6 +153,19 @@ export function createContentActions(set: any, get: any): ContentActions {
         if (Array.isArray(content)) {
           const oldValue = state.content[sectionId].elements[elementKey];
           (state.content[sectionId].elements as Record<string, any>)[elementKey] = content;
+
+          // History: raw array snapshot. Skip when JSON-equal.
+          if (JSON.stringify(oldValue) !== JSON.stringify(content)) {
+            pushContentHistoryEntry(state, {
+              type: 'content',
+              description: `Edited ${elementKey}`,
+              timestamp: Date.now(),
+              sectionId,
+              elementKey,
+              beforeState: { storageKey: elementKey, value: deepCopy(oldValue) },
+              afterState: { storageKey: elementKey, value: deepCopy(content) },
+            });
+          }
 
           // Initialize aiMetadata if missing
           if (!state.content[sectionId].aiMetadata) {
@@ -199,7 +227,20 @@ export function createContentActions(set: any, get: any): ContentActions {
         // V2: Always store directly (no wrapped format)
         const oldValue = state.content[sectionId].elements[elementKey];
         (state.content[sectionId].elements[elementKey] as any) = stringContent;
-        
+
+        // History: raw string snapshot. Skip when unchanged.
+        if (oldValue !== stringContent) {
+          pushContentHistoryEntry(state, {
+            type: 'content',
+            description: `Edited ${elementKey}`,
+            timestamp: Date.now(),
+            sectionId,
+            elementKey,
+            beforeState: { storageKey: elementKey, value: deepCopy(oldValue) },
+            afterState: { storageKey: elementKey, value: stringContent },
+          });
+        }
+
 
         // Mark as customized (initialize aiMetadata if missing)
         if (!state.content[sectionId].aiMetadata) {
