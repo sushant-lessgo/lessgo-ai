@@ -1,0 +1,23 @@
+#!/bin/sh
+# Pre-push gate: typecheck + lint + unit tests must be green before anything
+# leaves this machine (no CI; main auto-deploys via Vercel).
+# Installed via the "prepare" npm script (git config core.hooksPath .githooks).
+# Emergency bypass: git push --no-verify
+
+echo "[pre-push] typecheck"
+# tsconfig has incremental:true; a stale tsconfig.tsbuildinfo can produce ghost
+# TS2304 errors — on failure, drop the cache and retry once before blocking.
+npm run --silent typecheck || {
+  echo "[pre-push] typecheck failed - clearing incremental cache and retrying"
+  rm -f tsconfig.tsbuildinfo
+  npm run --silent typecheck || { echo "[pre-push] BLOCKED: typecheck failed"; exit 1; }
+}
+
+echo "[pre-push] lint"
+npm run --silent lint || { echo "[pre-push] BLOCKED: lint failed"; exit 1; }
+
+echo "[pre-push] test:run"
+npm run --silent test:run || { echo "[pre-push] BLOCKED: tests failed"; exit 1; }
+
+echo "[pre-push] all green"
+exit 0

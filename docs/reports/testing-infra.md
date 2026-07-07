@@ -82,11 +82,21 @@ reproduced in a jsdom component test — it needs a **real browser (Playwright)*
 ## Recommendation — the balanced plan
 
 ### Do now (≈1 day, cheap, removes most bug-shipping risk)
-1. **Pre-push hook** running `typecheck + lint + test:run`. Converts "tests I might forget" into
-   "tests that always run." Single biggest lever given there's no CI.
-   - Add a `"typecheck": "tsc --noEmit"` script first.
-2. **One dual-renderer structural parity test** (Vitest) for a representative block — guards the
-   trap that causes editor↔published divergence.
+1. ✅ **DONE 2026-07-07** — **Pre-push hook** (`.githooks/pre-push`, activated via the `prepare`
+   npm script → `git config core.hooksPath .githooks`) running `typecheck + lint + test:run`.
+   `"typecheck": "tsc --noEmit"` script added. Bypass: `git push --no-verify`.
+   **Lint debt cleared same day** (was ~100 errors): `react/no-unescaped-entities` disabled
+   (cosmetic; React escapes text), `src/generated/` eslint-ignored, vestigial `eslint.config.mjs`
+   deleted, dead code removed (TextToolbar, ReadinessBanner, LogoEditableComponent, perf-monitor
+   utils, the multi-page-unsafe content-serializer save path), rules-of-hooks fixed in live editor
+   components via outer-gate/inner-component splits (SectionToolbar, TextToolbarMVP,
+   EnhancedAddSection). Warnings (~160) remain non-blocking by design.
+2. ✅ **DONE 2026-07-07** — **Dual-renderer content-parity test**
+   (`src/modules/templates/__tests__/renderParity.meridian.test.tsx`): all 7 Meridian block
+   pairs rendered from the shared `MERIDIAN_BLOCK_MOCKS` fixtures; fails if any visible field
+   renders in exactly one mode. (Resolution-level parity was already guarded by the per-template
+   `registration.test.ts` files + `dispatch.test.ts` — the audit's "zero protection" slightly
+   overstated; the *rendered-content* level was the real gap.)
 
 ### Do this month (regression-lock the bugs the QA found)
 3. **2–3 Playwright visual snapshots** of published pages (catches the font/layout parity class).
