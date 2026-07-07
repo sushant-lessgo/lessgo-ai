@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react';
 import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
+import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
 import { getLayoutElements } from '@/modules/sections/layoutElementSchema';
 import type {
@@ -280,7 +281,12 @@ export function useElementCRUD() {
 
     // Confirmation check
     if (options?.confirmRequired !== false) {
-      const confirmed = window.confirm('Are you sure you want to delete this element?');
+      const confirmed = await confirmDialog({
+        title: 'Delete element',
+        message: 'Are you sure you want to delete this element?',
+        confirmLabel: 'Delete',
+        destructive: true,
+      });
       if (!confirmed) return false;
     }
 
@@ -796,7 +802,12 @@ export function useElementCRUD() {
     const section = content[sectionId];
     if (!section) return false;
 
-    const confirmed = window.confirm(`Are you sure you want to delete ${elementKeys.length} elements?`);
+    const confirmed = await confirmDialog({
+      title: 'Delete elements',
+      message: `Are you sure you want to delete ${elementKeys.length} elements?`,
+      confirmLabel: 'Delete',
+      destructive: true,
+    });
     if (!confirmed) return false;
 
     const deletedElements: any[] = [];

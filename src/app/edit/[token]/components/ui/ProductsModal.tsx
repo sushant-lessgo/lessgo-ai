@@ -7,6 +7,7 @@
 import React from 'react';
 import { useEditStore } from '@/hooks/useEditStoreLegacy';
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
+import { confirmDialog, promptDialog } from '@/components/ui/ConfirmDialog';
 
 const COLLECTION = 'products';
 
@@ -40,8 +41,8 @@ export function ProductsModal({ onClose }: { onClose: () => void }) {
 
   const items: any[] = store.getCollectionItems ? store.getCollectionItems(COLLECTION) : [];
 
-  const handleAdd = () => {
-    const title = window.prompt('Product name', 'New product');
+  const handleAdd = async () => {
+    const title = await promptDialog({ title: 'Product name', defaultValue: 'New product' });
     if (title === null) return;
     const id = store.addCollectionItem(COLLECTION, { title: title.trim() || 'New product' });
     if (id) onClose(); // navigate to the new product to fill its record
@@ -99,7 +100,7 @@ export function ProductsModal({ onClose }: { onClose: () => void }) {
                       </select>
                     )}
                     <button onClick={() => { store.setCurrentPage(p.id); onClose(); }} className="rounded-md border px-2.5 py-1 text-sm text-gray-700 hover:bg-gray-50">Edit</button>
-                    <button onClick={() => { if (window.confirm('Delete this product?')) store.deletePage(p.id); }} className="rounded-md px-2 py-1 text-sm text-gray-400 hover:text-red-600">Delete</button>
+                    <button onClick={async () => { if (await confirmDialog({ title: 'Delete product', message: 'Delete this product?', confirmLabel: 'Delete', destructive: true })) store.deletePage(p.id); }} className="rounded-md px-2 py-1 text-sm text-gray-400 hover:text-red-600">Delete</button>
                   </li>
                 );
               })}
@@ -149,7 +150,7 @@ function CategoriesSection({ store, categories }: { store: any; categories: Cat[
               </div>
               <input value={c.title} onChange={(e) => editLocal(c.id, 'title', e.target.value)} onBlur={commit} placeholder="Title" className="flex-1 rounded-md border px-2 py-1 text-sm" />
               <input value={c.label || ''} onChange={(e) => editLocal(c.id, 'label', e.target.value)} onBlur={commit} placeholder="Label (optional)" className="w-40 rounded-md border px-2 py-1 text-sm" />
-              <button onClick={() => { if (cats.length > 1 && window.confirm('Delete this category?')) remove(c.id); }} disabled={cats.length <= 1} className="rounded-md px-2 py-1 text-sm text-gray-400 hover:text-red-600 disabled:opacity-30">Delete</button>
+              <button onClick={async () => { if (cats.length > 1 && await confirmDialog({ title: 'Delete category', message: 'Delete this category?', confirmLabel: 'Delete', destructive: true })) remove(c.id); }} disabled={cats.length <= 1} className="rounded-md px-2 py-1 text-sm text-gray-400 hover:text-red-600 disabled:opacity-30">Delete</button>
             </li>
           ))}
         </ul>

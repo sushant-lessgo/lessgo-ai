@@ -1,6 +1,7 @@
 // hooks/useSectionCRUD.ts - Section CRUD operations hook
 import { useCallback } from 'react';
 import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
+import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import type { ValidationResult } from '@/types/store';
 import type { BackgroundType } from '@/types/sectionBackground';
 // import type { SectionType } from '@/types/store/state';
@@ -226,7 +227,12 @@ export function useSectionCRUD() {
     const { confirmRequired = true, archiveInstead = false, saveBackup = true } = options;
 
     if (confirmRequired) {
-      const confirmed = window.confirm('Are you sure you want to delete this section? This action cannot be undone.');
+      const confirmed = await confirmDialog({
+        title: 'Delete section',
+        message: 'Are you sure you want to delete this section? This action cannot be undone.',
+        confirmLabel: 'Delete',
+        destructive: true,
+      });
       if (!confirmed) {
         return false;
       }
@@ -366,7 +372,12 @@ export function useSectionCRUD() {
 
   // Batch delete sections
   const batchDeleteSections = useCallback(async (sectionIds: string[]): Promise<boolean> => {
-    const confirmed = window.confirm(`Are you sure you want to delete ${sectionIds.length} sections? This action cannot be undone.`);
+    const confirmed = await confirmDialog({
+      title: 'Delete sections',
+      message: `Are you sure you want to delete ${sectionIds.length} sections? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      destructive: true,
+    });
     if (!confirmed) {
       return false;
     }

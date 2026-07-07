@@ -4,6 +4,7 @@ import ReactDOM, { createPortal } from 'react-dom';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
+import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import type { StockPhoto } from '@/services/pexelsApi';
 import { TextInputModal } from '../modals/TextInputModal';
@@ -315,8 +316,8 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       id: 'delete-image',
       label: 'Delete',
       icon: 'trash',
-      handler: () => {
-        if (confirm('Are you sure you want to delete this image?')) {
+      handler: async () => {
+        if (await confirmDialog({ title: 'Delete image', message: 'Are you sure you want to delete this image?', confirmLabel: 'Delete', destructive: true })) {
           // Remove image by setting empty content
           const targetInfo = parseTargetId(targetId);
           if (targetInfo) {

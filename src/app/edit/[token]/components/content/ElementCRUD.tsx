@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { useElementCRUD } from '@/hooks/useElementCRUD';
+import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { useElementPicker } from '@/hooks/useElementPicker';
 import { ElementPicker } from './ElementPicker';
@@ -398,11 +399,15 @@ function ElementCard({
           </button>
           
           <button
-            onClick={(e) => {
+            onClick={async (e) => {
               e.stopPropagation();
-              if (confirm('Are you sure you want to delete this element?')) {
-                onDelete();
-              }
+              const confirmed = await confirmDialog({
+                title: 'Delete element',
+                message: 'Are you sure you want to delete this element?',
+                confirmLabel: 'Delete',
+                destructive: true,
+              });
+              if (confirmed) onDelete();
             }}
             className="p-1 text-red-400 hover:text-red-600"
             title="Delete"

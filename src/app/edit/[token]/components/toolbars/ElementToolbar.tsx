@@ -7,6 +7,7 @@ import { useEditor } from '@/hooks/useEditor';
 import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { useButtonConfigModal } from '@/hooks/useButtonConfigModal';
+import { confirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface ElementToolbarProps {
   elementSelection: any;
@@ -206,10 +207,14 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
       id: 'delete',
       label: 'Delete',
       icon: 'trash',
-      handler: () => {
-        if (confirm('Are you sure you want to delete this element?')) {
-          handleDeleteElement();
-        }
+      handler: async () => {
+        const confirmed = await confirmDialog({
+          title: 'Delete element',
+          message: 'Are you sure you want to delete this element?',
+          confirmLabel: 'Delete',
+          destructive: true,
+        });
+        if (confirmed) handleDeleteElement();
       },
     }] : []),
   ];

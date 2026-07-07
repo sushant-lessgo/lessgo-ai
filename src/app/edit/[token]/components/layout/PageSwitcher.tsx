@@ -7,6 +7,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import { useEditStore } from '@/hooks/useEditStoreLegacy';
 import { showProductsModal } from '../ui/GlobalModals';
+import { confirmDialog, promptDialog } from '@/components/ui/ConfirmDialog';
 import { usesTemplateModule } from '@/types/service';
 
 // Blog (Phase 1): link to the dashboard blog manager for this project's
@@ -80,8 +81,8 @@ export function PageSwitcher() {
   // entry only until that page exists; after that it's a normal tab.
   const hasArchetype = (key: string) => Object.values(pages).some((p: any) => p.archetypeKey === key);
 
-  const handleAdd = () => {
-    const title = window.prompt('Page name', 'New page');
+  const handleAdd = async () => {
+    const title = await promptDialog({ title: 'Page name', defaultValue: 'New page' });
     if (title === null) return;
     const slug =
       '/' +
@@ -93,14 +94,20 @@ export function PageSwitcher() {
     store.addPage({ title: title.trim() || 'New page', pathSlug: slug || `/page-${list.length}` });
   };
 
-  const handleDelete = (e: React.MouseEvent, id: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (window.confirm('Delete this page?')) store.deletePage(id);
+    const confirmed = await confirmDialog({
+      title: 'Delete page',
+      message: 'Delete this page?',
+      confirmLabel: 'Delete',
+      destructive: true,
+    });
+    if (confirmed) store.deletePage(id);
   };
 
-  const handleRename = (e: React.MouseEvent, id: string, current: string) => {
+  const handleRename = async (e: React.MouseEvent, id: string, current: string) => {
     e.stopPropagation();
-    const title = window.prompt('Rename page', current);
+    const title = await promptDialog({ title: 'Rename page', defaultValue: current });
     if (title) store.renamePage(id, title.trim());
   };
 

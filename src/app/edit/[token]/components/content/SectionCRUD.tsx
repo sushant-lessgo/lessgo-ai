@@ -1,6 +1,7 @@
 // app/edit/[token]/components/content/SectionCRUD.tsx - Section management components
 import React, { useState, useCallback } from 'react';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
+import { promptDialog } from '@/components/ui/ConfirmDialog';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import type { SectionType } from '@/types/core/content';
 import type { AddSectionOptions } from '@/hooks/useSectionCRUD';
@@ -143,7 +144,7 @@ export function SectionActionsMenu({ sectionId, position, onClose }: SectionActi
       label: 'Save as Template',
       icon: '💾',
       handler: async () => {
-        const templateName = prompt('Enter template name:');
+        const templateName = await promptDialog({ title: 'Save as template', message: 'Enter template name:' });
         if (templateName) {
           await saveAsTemplate(sectionId, templateName);
         }

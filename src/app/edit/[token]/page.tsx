@@ -6,6 +6,7 @@ import { EditProvider } from "@/components/EditProvider";
 import { EditLayout } from "./components/layout/EditLayout";
 import { EditLayoutErrorBoundary } from "@/app/edit/[token]/components/layout/EditLayoutErrorBoundary";
 import { ToastProvider } from "./components/ui/ToastProvider";
+import { DialogHost } from "@/components/ui/ConfirmDialog";
 
 
 export default function EditPage() {
@@ -42,6 +43,7 @@ export default function EditPage() {
       <EditLayoutErrorBoundary tokenId={tokenId}>
         <ToastProvider>
           <EditPageContent tokenId={tokenId} />
+          <DialogHost />
         </ToastProvider>
       </EditLayoutErrorBoundary>
     </EditProvider>

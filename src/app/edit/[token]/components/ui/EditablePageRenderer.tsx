@@ -4,6 +4,7 @@ import { getComponent, extractSectionType } from '@/modules/generatedLanding/com
 import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 import { sectionList } from '@/modules/sections/sectionList';
 import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineTextEditorV2';
+import { promptDialog } from '@/components/ui/ConfirmDialog';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { usesTemplateModule } from '@/types/service';
 import type { TextFormatState } from '@/utils/textFormatting';
@@ -679,10 +680,10 @@ const EditableImageContent: React.FC<{
   onUpdate: (value: string) => void;
   mode: 'edit' | 'preview';
 }> = ({ content, onUpdate, mode }) => {
-  const handleClick = () => {
+  const handleClick = async () => {
     if (mode !== 'preview') {
       // Open image picker/uploader
-      const newImageUrl = prompt('Enter image URL:', content);
+      const newImageUrl = await promptDialog({ title: 'Image URL', message: 'Enter image URL:', defaultValue: content });
       if (newImageUrl) {
         onUpdate(newImageUrl);
       }
