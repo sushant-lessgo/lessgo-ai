@@ -131,6 +131,18 @@ Rich IVOC with real quotes
 
 ## Future Considerations
 
+### Per-Section Surface Override (reimagined Background Settings)
+**Value Proposition:** Let the founder flip an individual section to a different template surface (e.g. cream/white/ink/accent) instead of the `getSurfaceForSection()` default.
+
+**How it works:**
+- Store as a per-section override
+- Honor in BOTH edit (`LandingPageRenderer`) and published (`LandingPagePublishedRenderer`) via the `data-surface` attribute
+- Requires a new template-contract method to enumerate a template's available surfaces (templates don't expose this today)
+- Requires a per-template picker UI
+
+**Why valuable:**
+- Replaces the old dead primary/neutral/custom background modal (killed 2026-07-07) with something that actually affects the template render path
+
 ### A/B Testing
 - Multiple variations of same page
 - Performance tracking

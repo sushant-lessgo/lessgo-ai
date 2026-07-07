@@ -6,7 +6,6 @@ import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import { AddSectionButton } from '../content/SectionCRUD';
-import { showBackgroundModal } from '../ui/GlobalModals';
 import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import type { SectionType } from '@/types/core/content';
 import { logger } from '@/lib/logger';
@@ -250,14 +249,6 @@ export function SectionToolbar({ sectionId, position, contextActions }: SectionT
 
   // Enhanced Advanced Actions
   const advancedActions = [
-    {
-      id: 'background-settings',
-      label: 'Background Settings',
-      icon: 'palette',
-      handler: () => {
-        showBackgroundModal(sectionId);
-      },
-    },
     {
       id: 'regenerate-section',
       label: 'Regenerate Content',

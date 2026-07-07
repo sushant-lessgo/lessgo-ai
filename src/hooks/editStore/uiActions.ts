@@ -80,7 +80,7 @@ function parseImageTargetId(targetId: string) {
 function getActionsForType(type: string, targetId: string, state: EditStore): string[] {
   switch (type) {
     case 'section':
-      return ['change-layout', 'add-element', 'background-settings', 'regenerate-section', 'duplicate-section', 'delete-section'];
+      return ['change-layout', 'add-element', 'regenerate-section', 'duplicate-section', 'delete-section'];
     case 'element':
       return ['regenerate-element', 'duplicate-element', 'element-style', 'delete-element'];
     case 'text':
