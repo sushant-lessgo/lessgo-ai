@@ -74,7 +74,7 @@ store (`useEditStoreLegacy`).
 
 ## Standalone hooks
 - `useCSRFToken.ts` — fetches/holds the CSRF token for mutating API calls.
-- `useReviewState.ts` — testimonial/review UI state.
+- `useReviewState.ts` — element-verification / "Getting started" setup-guide state (curated auto-checked tasks + AI-invented `needs_review` markers), derived from live content. Not testimonials.
 - `useSimplifiedOnboarding.ts` — simplified onboarding helper.
 
 ---

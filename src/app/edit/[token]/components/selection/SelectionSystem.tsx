@@ -8,6 +8,36 @@ interface SelectionSystemProps {
   children: React.ReactNode;
 }
 
+/**
+ * Phase 6 — persist the current "leave as-is" dismisses.
+ *
+ * Why a bespoke minimal POST (not the store's routine autosave): the routine edit-page autosave
+ * ships `finalContent: state.export()`, and `export()` does NOT carry `dismissedReviewFlags`
+ * (that's Feature-2 review state, not page content). So marking the store dirty alone would fire a
+ * save that drops the dismiss. Instead we send ONLY `finalContent: { dismissedReviewFlags }`, which
+ * rides the saveDraft shallow merge (`updatedContent.finalContent = { ...existing, ...incoming }`)
+ * and touches a single disjoint key — safe on multi-page projects (never overwrites page content /
+ * pages / chrome), and equivalent to how routine autosaves already treat the onboarding fields
+ * (bare payload → defaults merged over existing).
+ */
+async function persistDismissedFlags(tokenId: string): Promise<void> {
+  if (!tokenId) return;
+  try {
+    await fetch('/api/saveDraft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tokenId,
+        finalContent: {
+          dismissedReviewFlags: useReviewState.getState().dismissedReviewFlags,
+        },
+      }),
+    });
+  } catch {
+    // Best-effort: a later serialize/forceSave re-persists the same array.
+  }
+}
+
 export function SelectionSystem({ children }: SelectionSystemProps) {
   const { mode } = useEditStore();
   // Selection state now comes from unified editor system
@@ -66,36 +96,43 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
     });
   }, [mode, selectedSection, selectedElement, multiSelection]);
 
-  // Apply review indicator classes
-  const { reviewItems } = useReviewState();
+  // Apply inline "verify AI-written" markers — Feature 2, edit canvas ONLY.
+  // Only the `ai_generated_needs_review` category gets a marker now. The former stock-image /
+  // manual-preferred / unconfigured inline badges are gone — those categories are surfaced by
+  // Feature 1's "Getting started" guide instead.
+  //
+  // Render source is `activeMarkers`, NOT the raw `needsReviewItems`: a marker stays active only
+  // while its value still equals the baseline AI original. Editing an element diverges it from
+  // baseline → the Phase-2 store.subscribe refresh recomputes → the item drops out of
+  // `activeMarkers` → the marker disappears (permanently, since baseline is never mutated).
+  const { activeMarkers } = useReviewState();
 
   useEffect(() => {
     const allElements = document.querySelectorAll('[data-element-key]');
 
     if (mode === 'preview') {
-      allElements.forEach((el) => {
-        el.classList.remove('element-needs-review', 'element-manual-preferred', 'element-unconfigured');
-      });
+      allElements.forEach((el) => el.classList.remove('element-ai-verify'));
       return;
     }
 
-    const { getElementReviewStatus } = useReviewState.getState();
+    // Flagged composite keys (`sectionId::elementKey`). elementKey may be plain OR dotted
+    // (`collName.itemId.fieldName`); collection-field DOM nodes carry the same dotted
+    // `data-element-key`, so attribute matching resolves them with no special-casing. An
+    // item whose DOM node isn't present simply matches nothing and no-ops (no crash).
+    const flagged = new Set(
+      activeMarkers.map((i) => `${i.sectionId}::${i.elementKey}`)
+    );
+
     allElements.forEach((el) => {
       const sectionId = el.closest('[data-section-id]')?.getAttribute('data-section-id');
       const elementKey = el.getAttribute('data-element-key');
-      if (!sectionId || !elementKey) return;
-
-      const status = getElementReviewStatus(sectionId, elementKey);
-      el.classList.remove('element-needs-review', 'element-manual-preferred', 'element-unconfigured');
-      if (status === 'needs_review') {
-        el.classList.add('element-needs-review');
-      } else if (status === 'manual_preferred' || status === 'stock_image') {
-        el.classList.add('element-manual-preferred');
-      } else if (status === 'unconfigured') {
-        el.classList.add('element-unconfigured');
+      if (sectionId && elementKey && flagged.has(`${sectionId}::${elementKey}`)) {
+        el.classList.add('element-ai-verify');
+      } else {
+        el.classList.remove('element-ai-verify');
       }
     });
-  }, [mode, selectedSection, selectedElement, multiSelection, reviewItems]);
+  }, [mode, selectedSection, selectedElement, multiSelection, activeMarkers]);
 
   // Handle focus management
   useEffect(() => {
@@ -131,9 +168,101 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
         <>
           <SelectionStyles />
           <SelectionIndicators />
+          <VerifyMarkerControls mode={mode} />
         </>
       )}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Feature 2 — "leave as-is" dismiss controls (EDIT-ONLY overlay)
+// ---------------------------------------------------------------------------
+// One tiny control per active AI-verify marker. Rendered as a positioned overlay (NOT injected
+// into the flagged element) so it never pollutes contentEditable serialization. Clicking it
+// dismisses the marker (drops it from activeMarkers immediately) and persists the dismiss.
+// Stripped in preview mode (only mounted when mode !== 'preview').
+function VerifyMarkerControls({ mode }: { mode: string }) {
+  const activeMarkers = useReviewState((s) => s.activeMarkers);
+  const dismiss = useReviewState((s) => s.dismiss);
+  const { tokenId, trackChange } = useEditStore();
+
+  const [positions, setPositions] = React.useState<
+    Array<{ key: string; sectionId: string; elementKey: string; top: number; left: number }>
+  >([]);
+
+  useEffect(() => {
+    if (mode === 'preview') {
+      setPositions([]);
+      return;
+    }
+
+    const compute = () => {
+      const next: Array<{ key: string; sectionId: string; elementKey: string; top: number; left: number }> = [];
+      for (const m of activeMarkers) {
+        // elementKey may be dotted (collName.itemId.fieldName); inside a quoted attribute selector
+        // dots are literal, so no escaping is needed. A missing node simply contributes nothing.
+        const el = document.querySelector(
+          `[data-section-id="${m.sectionId}"] [data-element-key="${m.elementKey}"]`
+        );
+        if (el instanceof HTMLElement) {
+          const rect = el.getBoundingClientRect();
+          next.push({
+            key: `${m.sectionId}::${m.elementKey}`,
+            sectionId: m.sectionId,
+            elementKey: m.elementKey,
+            top: rect.top, // viewport coords → position: fixed (recomputed on scroll)
+            left: rect.right,
+          });
+        }
+      }
+      setPositions(next);
+    };
+
+    compute();
+    const handle = () => requestAnimationFrame(compute);
+    window.addEventListener('scroll', handle, true);
+    window.addEventListener('resize', handle);
+    return () => {
+      window.removeEventListener('scroll', handle, true);
+      window.removeEventListener('resize', handle);
+    };
+  }, [mode, activeMarkers]);
+
+  if (mode === 'preview' || positions.length === 0) return null;
+
+  return (
+    <>
+      {positions.map((p) => (
+        <button
+          key={p.key}
+          type="button"
+          className="ai-verify-dismiss"
+          title="Leave this value as-is (hide the verify marker)"
+          style={{ position: 'fixed', top: p.top - 10, left: p.left - 66, zIndex: 1000 }}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.stopPropagation();
+            dismiss(p.sectionId, p.elementKey);
+            // Mark dirty (status indicators) + persist the dismiss immediately. trackChange only
+            // flips persistence.isDirty / lastUpdated — the concrete fields are otherwise unused.
+            try {
+              trackChange?.({
+                type: 'content',
+                sectionId: p.sectionId,
+                elementKey: p.elementKey,
+                oldValue: null,
+                newValue: null,
+                source: 'user',
+              });
+            } catch { /* noop */ }
+            void persistDismissedFlags(tokenId);
+          }}
+        >
+          leave as-is
+        </button>
+      ))}
+    </>
   );
 }
 

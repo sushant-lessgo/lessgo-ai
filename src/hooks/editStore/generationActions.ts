@@ -608,6 +608,29 @@ export function createGenerationActions(set: any, get: any) {
       // captureBaseline → export() reads committed state via get().
       get().captureBaseline();
 
+      // Phase 6 — clear stale "leave as-is" dismisses. Regen re-captures baseline (markers reset
+      // to all-active for the fresh AI copy); a dismiss still living in
+      // finalContent.dismissedReviewFlags would silently suppress the marker on a RE-INVENTED value
+      // at the same sectionId::elementKey. Clear BOTH the in-memory review state AND the persisted
+      // finalContent slot so regenerated specifics start un-dismissed.
+      try {
+        const { useReviewState } = await import('@/hooks/useReviewState');
+        const hadDismisses = useReviewState.getState().dismissedReviewFlags.length > 0;
+        useReviewState.getState().clearDismissed();
+        const tid = get().tokenId;
+        if (hadDismisses && tid) {
+          // Minimal saveDraft POST: overwrite ONLY dismissedReviewFlags (→ []) via the shallow
+          // merge; disjoint from page content, safe on multi-page.
+          void fetch('/api/saveDraft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tokenId: tid, finalContent: { dismissedReviewFlags: [] } }),
+          }).catch(() => { /* best-effort */ });
+        }
+      } catch (err) {
+        logger.warn('Failed to clear dismissedReviewFlags on regen:', err);
+      }
+
       set((draft: EditStore) => {
         draft.aiGeneration.isGenerating = false;
         draft.aiGeneration.currentOperation = null;

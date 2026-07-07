@@ -174,12 +174,27 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
               logger.warn(`🎨 [EDIT-DEBUG] Failed to get color tokens:`, error);
             }
 
-            // Initialize review state from loaded content
+            // Initialize review state from loaded content (also thread baseline +
+            // currentPageId + globalSettings so first render matches the reactive refresh).
+            //
+            // Phase 6 read-side hydration: the persisted "leave as-is" dismisses live at
+            // content.finalContent.dismissedReviewFlags. loadFromDraft does NOT carry them into the
+            // edit store (they are Feature-2 review state, not page content), so read them straight
+            // from the loadDraft response's finalContent and thread them into initFromContent — the
+            // read-side twin of the useContentSerializer write path. Without this, a dismiss would
+            // re-appear on reload.
             try {
+              const hydratedDismisses = Array.isArray(data?.finalContent?.dismissedReviewFlags)
+                ? (data.finalContent.dismissedReviewFlags as string[])
+                : [];
               useReviewState.getState().initFromContent(
                 updatedState.content,
                 updatedState.sectionLayouts,
-                updatedState.sections
+                updatedState.sections,
+                updatedState.globalSettings,
+                updatedState.baseline,
+                updatedState.currentPageId,
+                hydratedDismisses
               );
             } catch (err) {
               logger.warn('Failed to init review state:', err);
@@ -198,6 +213,49 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
         });
     }
   }, [store, isInitialized, isHydrating, tokenId]);
+
+  // Reactivity: keep review state (Feature 1 auto-check / Feature 2 markers) in sync with
+  // live content via a store subscription OUTSIDE React render (not a render-phase selector).
+  // The callback reads content/baseline/currentPageId/globalSettings FRESH from getState() at
+  // fire time (never captured once) so post-regen baseline recapture is seen. Debounced + guarded
+  // to avoid churn; refreshFromContent itself no-ops when the derived output is unchanged.
+  useEffect(() => {
+    if (!store) return;
+
+    let prevContent = store.getState().content;
+    let prevLogoUrl = store.getState().globalSettings?.logoUrl;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const unsubscribe = store.subscribe(() => {
+      const s = store.getState();
+      const nextContent = s.content;
+      const nextLogoUrl = s.globalSettings?.logoUrl;
+      // Only react to content / logo changes — ignore unrelated store churn.
+      if (nextContent === prevContent && nextLogoUrl === prevLogoUrl) return;
+      prevContent = nextContent;
+      prevLogoUrl = nextLogoUrl;
+
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        try {
+          const fresh = store.getState();
+          useReviewState.getState().refreshFromContent(
+            fresh.content,
+            fresh.baseline,
+            fresh.currentPageId,
+            fresh.globalSettings
+          );
+        } catch (err) {
+          logger.warn('Failed to refresh review state:', err);
+        }
+      }, 150);
+    });
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      unsubscribe();
+    };
+  }, [store, tokenId]);
 
 
   // Create context value - get fresh data from store if available
