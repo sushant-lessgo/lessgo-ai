@@ -70,6 +70,15 @@ describe('sanitizeContentForPublish — object→string coercion', () => {
     expect(c.content['hero-abc12345'].elements.headline).toBe('Guarded');
   });
 
+  it('strips excluded elements for schema-less layouts (editor Delete parity)', () => {
+    const c = makeContent({ cta_text: 'Get started', secondary_cta_text: 'Talk to us' });
+    c.content['hero-abc12345'].aiMetadata = { excludedElements: ['secondary_cta_text'] };
+    sanitizeContentForPublish(c);
+    const els = c.content['hero-abc12345'].elements;
+    expect(els.cta_text).toBe('Get started');
+    expect(els.secondary_cta_text).toBeUndefined();
+  });
+
   it('coerces subpage sections too (multi-page publish)', () => {
     const c = {
       layout: { sections: [] },

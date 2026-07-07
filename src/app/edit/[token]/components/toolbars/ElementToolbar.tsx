@@ -37,13 +37,29 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     updateElementContent,
     content,
     announceLiveRegion,
+    setSection,
+    selectElement,
   } = useEditStore();
 
   const { enterTextEditMode } = useEditor();
 
-  // Stub executeAction (removed in V2 refactor)
-  const executeAction = (action: string, params: any) => {
-    console.warn('Advanced action not implemented in V2:', action);
+  // Delete = exclude the element (same mechanism as the +Elements toggle OFF:
+  // aiMetadata.excludedElements). Editables hide excluded keys in the editor and
+  // sanitizeContentForPublish strips them at publish. The old handler routed to
+  // an executeAction STUB (console.warn only) — Delete/Duplicate silently
+  // no-oped for every element (QA naayom C1/C2).
+  const handleDeleteElement = () => {
+    const { sectionId, elementKey } = elementSelection;
+    const sectionData = content[sectionId];
+    if (!sectionData) return;
+    const meta = (sectionData as any).aiMetadata || {};
+    const excluded: string[] = Array.isArray(meta.excludedElements)
+      ? [...meta.excludedElements]
+      : [];
+    if (!excluded.includes(elementKey)) excluded.push(elementKey);
+    setSection(sectionId, { aiMetadata: { ...meta, excludedElements: excluded } } as any);
+    selectElement(null);
+    announceLiveRegion(`Deleted ${elementKey}`);
   };
 
   // Close menus when clicking outside - MOVED UP WITH OTHER HOOKS
@@ -182,29 +198,20 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
       icon: 'refresh',
       handler: handleRegenerate,
     },
-    {
-      id: 'element-style',
-      label: 'Style',
-      icon: 'palette',
-      handler: () => executeAction('element-style', { elementSelection }),
-    },
-    {
-      id: 'duplicate',
-      label: 'Duplicate',
-      icon: 'copy',
-      handler: () => executeAction('duplicate-element', { elementSelection }),
-    },
-    {
+    // 'Style' and 'Duplicate' removed: both routed to a stub (never implemented
+    // in V2) and schema blocks render fixed element keys, so a duplicated key
+    // would never appear. Dead buttons read as bugs (QA naayom C2).
+    // Delete only for flat schema keys — collection items have their own ✕.
+    ...(!elementSelection.elementKey.includes('.') ? [{
       id: 'delete',
       label: 'Delete',
       icon: 'trash',
       handler: () => {
         if (confirm('Are you sure you want to delete this element?')) {
-          executeAction('delete-element', { elementSelection });
-          announceLiveRegion(`Deleted ${elementSelection.elementKey}`);
+          handleDeleteElement();
         }
       },
-    },
+    }] : []),
   ];
 
 

@@ -381,6 +381,19 @@ function coerceSectionElements(section: any): void {
   }
 }
 
+/** Strip excluded elements generically (editor Delete = exclusion). The schema
+ *  gate below already does this for schema-known root sections; this covers
+ *  schema-less layouts (TechPremium) and subpages, whose published blocks
+ *  render on value presence — without the strip, an element deleted in the
+ *  editor would still show on the published page. */
+function stripExcludedElements(section: any): void {
+  const excluded: string[] = section?.aiMetadata?.excludedElements || [];
+  if (!excluded.length || !section?.elements) return;
+  for (const key of excluded) {
+    if (key in section.elements) delete section.elements[key];
+  }
+}
+
 /**
  * Sanitize content for publish: apply 4-case gating per section.
  * Strips excluded elements, sets defaults for missing required ones.
@@ -396,7 +409,10 @@ export function sanitizeContentForPublish(content: Record<string, any>): void {
       const subSections: string[] | undefined = sub?.layout?.sections;
       if (!Array.isArray(subSections)) continue;
       const subContainer = sub.content && typeof sub.content === 'object' ? sub.content : sub;
-      for (const sid of subSections) coerceSectionElements(subContainer[sid]);
+      for (const sid of subSections) {
+        coerceSectionElements(subContainer[sid]);
+        stripExcludedElements(subContainer[sid]);
+      }
     }
   }
 
@@ -415,9 +431,9 @@ export function sanitizeContentForPublish(content: Record<string, any>): void {
     // Coerce before the schema gate — runs for every section, schema or not.
     coerceSectionElements(section);
 
-    if (!section.layout) continue;
+    if (!section.layout) { stripExcludedElements(section); continue; }
     const schema = layoutElementSchema[section.layout];
-    if (!schema || !isV2Schema(schema)) continue;
+    if (!schema || !isV2Schema(schema)) { stripExcludedElements(section); continue; }
 
     const excludedArr: string[] = section.aiMetadata?.excludedElements || [];
     const excludedSet = new Set(excludedArr);

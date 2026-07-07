@@ -118,6 +118,12 @@ export function ButtonConfigurationModal({
         const savedConfig =
           sectionData.elementMetadata?.[elementSelection.elementKey]?.buttonConfig;
 
+        // Seed CTA type from the element key when nothing is saved — defaulting
+        // to 'primary' made every secondary CTA (key `secondary_cta_text`) show
+        // "Primary CTA" selected (QA naayom C4).
+        const inferredCtaType: 'primary' | 'secondary' =
+          elementSelection.elementKey.includes('secondary') ? 'secondary' : 'primary';
+
         if (savedConfig) {
           // Load saved configuration
           setConfig({
@@ -128,7 +134,7 @@ export function ButtonConfigurationModal({
             pathSlug: savedConfig.pathSlug,
             formId: savedConfig.formId || '',
             behavior: savedConfig.behavior || 'scrollTo',
-            ctaType: savedConfig.ctaType || 'primary', // NEW: Load CTA type
+            ctaType: savedConfig.ctaType || inferredCtaType,
             leadingIcon: savedConfig.leadingIcon,
             trailingIcon: savedConfig.trailingIcon,
             iconConfig: savedConfig.iconConfig || { leadingSize: 'md', trailingSize: 'md' },
@@ -139,7 +145,7 @@ export function ButtonConfigurationModal({
           setConfig({
             type: 'link',
             text: buttonText,
-            ctaType: 'primary', // NEW: Default CTA type
+            ctaType: inferredCtaType,
           });
         }
       }
@@ -260,11 +266,13 @@ export function ButtonConfigurationModal({
         setSection(elementSelection.sectionId, {
           elements: updatedElements,
           elementMetadata: updatedElementMetadata,
-          // Also save ctaConfig at section level for easy access by CTA handler
+          // Also save ctaConfig at section level for easy access by CTA handler.
+          // variant follows the chosen CTA type (was hardcoded 'primary'; no
+          // reader styles from this field — blocks style by element key).
           cta: {
             ...ctaConfig,
             label: ctaConfig.cta_text,
-            variant: 'primary',
+            variant: config.ctaType || 'primary',
             size: 'medium'
           }
         });
