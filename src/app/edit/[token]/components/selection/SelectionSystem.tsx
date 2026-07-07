@@ -66,36 +66,38 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
     });
   }, [mode, selectedSection, selectedElement, multiSelection]);
 
-  // Apply review indicator classes
-  const { reviewItems } = useReviewState();
+  // Apply inline "verify AI-written" markers — Feature 2, edit canvas ONLY.
+  // Only the `ai_generated_needs_review` category (exposed as `needsReviewItems`) gets a
+  // marker now. The former stock-image / manual-preferred / unconfigured inline badges are
+  // gone — those categories are surfaced by Feature 1's "Getting started" guide instead.
+  const { needsReviewItems } = useReviewState();
 
   useEffect(() => {
     const allElements = document.querySelectorAll('[data-element-key]');
 
     if (mode === 'preview') {
-      allElements.forEach((el) => {
-        el.classList.remove('element-needs-review', 'element-manual-preferred', 'element-unconfigured');
-      });
+      allElements.forEach((el) => el.classList.remove('element-ai-verify'));
       return;
     }
 
-    const { getElementReviewStatus } = useReviewState.getState();
+    // Flagged composite keys (`sectionId::elementKey`). elementKey may be plain OR dotted
+    // (`collName.itemId.fieldName`); collection-field DOM nodes carry the same dotted
+    // `data-element-key`, so attribute matching resolves them with no special-casing. An
+    // item whose DOM node isn't present simply matches nothing and no-ops (no crash).
+    const flagged = new Set(
+      needsReviewItems.map((i) => `${i.sectionId}::${i.elementKey}`)
+    );
+
     allElements.forEach((el) => {
       const sectionId = el.closest('[data-section-id]')?.getAttribute('data-section-id');
       const elementKey = el.getAttribute('data-element-key');
-      if (!sectionId || !elementKey) return;
-
-      const status = getElementReviewStatus(sectionId, elementKey);
-      el.classList.remove('element-needs-review', 'element-manual-preferred', 'element-unconfigured');
-      if (status === 'needs_review') {
-        el.classList.add('element-needs-review');
-      } else if (status === 'manual_preferred' || status === 'stock_image') {
-        el.classList.add('element-manual-preferred');
-      } else if (status === 'unconfigured') {
-        el.classList.add('element-unconfigured');
+      if (sectionId && elementKey && flagged.has(`${sectionId}::${elementKey}`)) {
+        el.classList.add('element-ai-verify');
+      } else {
+        el.classList.remove('element-ai-verify');
       }
     });
-  }, [mode, selectedSection, selectedElement, multiSelection, reviewItems]);
+  }, [mode, selectedSection, selectedElement, multiSelection, needsReviewItems]);
 
   // Handle focus management
   useEffect(() => {

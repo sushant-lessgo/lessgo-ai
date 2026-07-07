@@ -168,3 +168,69 @@ longer called from these two components. No 5th file needed changes; a repo grep
 - None functional. The Setup tab auto-suppression relies on `useReviewState.allComplete`
   subscription in LeftPanel/EditHeader; if `activeTab` is left on 'review' when the last task
   completes mid-session, the panel silently reverts to the sections view (intended).
+
+## Phase 4 — Inline markers for `ai_generated_needs_review`
+
+### Files changed
+- `src/app/edit/[token]/components/selection/SelectionSystem.tsx`
+- `src/app/globals.css`
+
+### What changed
+- **SelectionSystem.tsx**: The review-indicator effect was reworked. It previously read
+  `reviewItems` + `getElementReviewStatus()` and applied THREE inline classes
+  (`element-needs-review`, `element-manual-preferred` for `manual_preferred`/`stock_image`,
+  `element-unconfigured`). Now it reads ONLY `useReviewState().needsReviewItems` (the isolated
+  `ai_generated_needs_review` category from Phase 1) and applies a single new class
+  `element-ai-verify`. It builds a `Set` of `sectionId::elementKey` flagged keys, then walks
+  every `[data-element-key]` DOM node, resolving each node's `sectionId` via
+  `closest('[data-section-id]')` and adding/removing `element-ai-verify` by membership. In
+  `preview` mode all markers are stripped. Effect deps switched from `reviewItems` to
+  `needsReviewItems`.
+- **globals.css**: Replaced the entire "Review Indicator System" block (the four badge classes
+  `element-needs-review`, `element-manual-preferred`, `element-unconfigured`, `image-source-badge`
+  + their contenteditable-hide rule) with one new edit-only class `.element-ai-verify` (violet
+  left-border + `AI · verify` `::after` pill) and a matching contenteditable-hide rule.
+
+### How needsReviewItems map to markers
+- Each `needsReviewItem` is `{sectionId, elementKey, ...}`. Composite key = `sectionId::elementKey`.
+- `elementKey` may be plain (`headline`) or dotted (`collName.itemId.fieldName`, e.g.
+  `images.<id>.src`). Collection-field DOM nodes carry that SAME dotted value in their
+  `data-element-key` attribute (verified in e.g. `surge/blocks/Testimonials/ReviewGrid.tsx:122`,
+  `data-element-key={`images.${r.id}.src`}`), so plain attribute matching resolves collection
+  fields with no special-casing.
+- A flagged item whose DOM node is not present (wrong page, excluded, not yet rendered) simply
+  matches no element and no-ops — no crash, per phase requirement.
+- NOTE (expected, Phase 5): markers do NOT yet clear on edit. Phase 4 renders a marker for every
+  `needsReviewItems` entry; auto-clear (baseline diff) is Phase 5, dismiss is Phase 6.
+
+### Old badge categories/classes removed from inline rendering
+- `element-manual-preferred` (backed `manual_preferred` + `stock_image`) — removed; stock/placeholder
+  images are now a Feature 1 guide task, no inline badge.
+- `element-unconfigured` (backed `unconfigured` config items: CTA/nav links) — removed; now Feature 1.
+- `element-needs-review` (old red "Verify" badge) — replaced by the distinct `element-ai-verify`.
+- `image-source-badge` — was already dead (only referenced in globals.css, never applied); removed.
+- Grep confirmed these four classes were referenced ONLY in SelectionSystem.tsx + globals.css, so
+  removing them from globals.css leaves no dangling references.
+
+### Published-renderer safety
+- Edit-only. No `.published.tsx` / published renderer file touched. Markers are applied via
+  imperative `classList` on the live edit DOM inside `SelectionSystem` (an edit-canvas component);
+  no marker class is emitted by any published renderer path. No import into a published renderer.
+
+### Verification
+- `npx tsc --noEmit`: clean (no output).
+- `npm run test:run`: green — 52 files passed / 1 skipped; 686 tests passed / 2 skipped.
+- CSS-only visual (violet marker + `AI · verify` pill positioning) cannot be verified headless;
+  described from the code above. Structurally the new class mirrors the removed `element-needs-review`
+  geometry (same top/right offsets, `::after` pill), so layout risk is minimal.
+
+### Deviations
+- Plan step 2 left it open whether to remove dead classes; grep proved `element-manual-preferred`,
+  `element-unconfigured`, and `image-source-badge` are dead after the SelectionSystem rework, so all
+  three were removed from globals.css (conservative: confirmed no other references first). The old
+  `element-needs-review` was also retired in favor of the distinct new `element-ai-verify`, per the
+  plan's "distinct from the now-removed generic review badges" instruction.
+
+### Open risks
+- None functional for Phase 4. Expected-by-design: markers don't clear on edit until Phase 5, and
+  there's no dismiss control until Phase 6.
