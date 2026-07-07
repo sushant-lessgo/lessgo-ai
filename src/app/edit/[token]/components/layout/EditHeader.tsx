@@ -8,6 +8,7 @@ import { VestriaThemePopover } from '../ui/VestriaThemePopover';
 import { EditHeaderRightPanel } from './EditHeaderRightPanel';
 import { ReviewPill } from '../ui/ReviewPill';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useReviewState } from '@/hooks/useReviewState';
 import { usesTemplateModule, templateLabels } from '@/types/service';
 
 interface EditHeaderProps {
@@ -19,6 +20,7 @@ const titleCase = (s?: string | null) =>
 
 export function EditHeader({ tokenId }: EditHeaderProps) {
   const { audienceType, templateId, paletteId, variantId } = useEditStore();
+  const { allComplete } = useReviewState();
   const isService = audienceType === 'service';
   const usesTemplate = usesTemplateModule(audienceType, templateId);
 
@@ -60,9 +62,9 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
         {designControls}
       </div>
 
-      {/* Center: Review counter pill */}
+      {/* Center: Setup guide pill (hidden once every guide task is done) */}
       <div className="flex-1 flex justify-center">
-        <ReviewPill />
+        {!allComplete && <ReviewPill />}
       </div>
 
       {/* Right Section - Action Controls */}

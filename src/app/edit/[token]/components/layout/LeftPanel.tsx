@@ -18,21 +18,25 @@ const SECTION_ICONS: Record<string, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// ReviewChecklist — shown when leftPanel.activeTab === 'review'
+// GettingStartedChecklist — shown when leftPanel.activeTab === 'review'.
+// Renders the curated 4-item "Getting started" guide (auto-checked from content).
+// No manual ticking: `done` is derived from live content by useReviewState.
 // ---------------------------------------------------------------------------
 
-function ReviewChecklist() {
-  const { reviewItems, confirmItem, unconfirmItem, isConfirmed, getItemsBySectionId } = useReviewState();
-  const sections = useStoreState(state => state.sections);
+function GettingStartedChecklist() {
+  const { guideTasks } = useReviewState();
   const { store } = useEditStoreContext();
 
-  const itemsBySection = getItemsBySectionId();
+  // Only surfaces the page actually has.
+  const visibleTasks = guideTasks.filter(t => t.present);
 
   const handleBack = () => {
     store?.getState()?.setLeftPanelTab('pageStructure');
   };
 
-  const handleItemClick = (sectionId: string, elementKey: string) => {
+  const handleTaskClick = (target?: { sectionId: string; elementKey: string }) => {
+    if (!target) return;
+    const { sectionId, elementKey } = target;
     const sectionEl = document.querySelector(`[data-section-id="${sectionId}"]`);
     sectionEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(() => {
@@ -42,28 +46,6 @@ function ReviewChecklist() {
       }
     }, 300);
   };
-
-  const handleConfirmToggle = (sectionId: string, elementKey: string) => {
-    if (isConfirmed(sectionId, elementKey)) {
-      unconfirmItem(sectionId, elementKey);
-    } else {
-      confirmItem(sectionId, elementKey);
-    }
-  };
-
-  if (reviewItems.length === 0) {
-    return (
-      <div className="p-3">
-        <button
-          onClick={handleBack}
-          className="text-xs text-blue-600 hover:text-blue-800 mb-3 flex items-center gap-1"
-        >
-          <span>←</span> Back to sections
-        </button>
-        <p className="text-sm text-gray-400 px-2">No items to review.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="p-3">
@@ -75,73 +57,44 @@ function ReviewChecklist() {
       </button>
 
       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
-        Review Checklist
+        Setup
       </h3>
 
-      {sections.map(sectionId => {
-        const items = itemsBySection.get(sectionId);
-        if (!items?.length) return null;
-
-        const sectionType = sectionId.split('-')[0].toLowerCase();
-
-        return (
-          <div key={sectionId} className="mb-4">
-            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2 mb-1.5 flex items-center gap-1.5">
-              <span>{SECTION_ICONS[sectionType] || '📄'}</span>
-              {getSectionLabel(sectionId)}
-            </div>
-            <div className="space-y-0.5">
-              {items.map(item => {
-                const confirmed = isConfirmed(item.sectionId, item.elementKey);
-                return (
-                  <div
-                    key={`${item.sectionId}::${item.elementKey}`}
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-50 group transition-opacity ${confirmed ? 'opacity-50' : ''}`}
-                  >
-                    {/* Severity dot */}
-                    <span
-                      className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                        item.severity === 'high' ? 'bg-red-500' : item.severity === 'config' ? 'bg-blue-500' : 'bg-amber-400'
-                      }`}
-                      title={
-                        item.severity === 'high' ? 'Verify — AI-generated data'
-                          : item.severity === 'config' ? 'Set up — needs configuration'
-                          : 'Add yours — placeholder content'
-                      }
-                    />
-
-                    {/* Element name — click to scroll */}
-                    <button
-                      onClick={() => handleItemClick(item.sectionId, item.elementKey)}
-                      className={`text-sm text-left flex-1 truncate transition-colors ${
-                        confirmed
-                          ? 'line-through text-gray-400'
-                          : 'text-gray-700 hover:text-gray-900'
-                      }`}
-                      title={`Scroll to ${item.displayName}`}
-                    >
-                      {item.displayName}
-                    </button>
-
-                    {/* Confirm toggle */}
-                    <button
-                      onClick={() => handleConfirmToggle(item.sectionId, item.elementKey)}
-                      className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 transition-colors text-xs ${
-                        confirmed
-                          ? 'bg-green-100 text-green-600 border border-green-200'
-                          : 'border border-gray-300 text-transparent hover:border-green-400 hover:text-green-400'
-                      }`}
-                      title={confirmed ? 'Unmark as reviewed' : 'Mark as reviewed'}
-                    >
-                      ✓
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
+      {visibleTasks.length === 0 ? (
+        <p className="text-sm text-gray-400 px-2">Nothing to set up.</p>
+      ) : (
+        <div className="space-y-0.5">
+          {visibleTasks.map(task => (
+            <button
+              key={task.id}
+              onClick={() => handleTaskClick(task.target)}
+              className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-md hover:bg-gray-50 group text-left transition-colors ${
+                task.done ? 'opacity-60' : ''
+              }`}
+              title={task.target ? `Go to ${task.label}` : task.label}
+            >
+              {/* Auto-check state — tick when done, open circle otherwise */}
+              <span
+                className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs ${
+                  task.done
+                    ? 'bg-green-100 text-green-600 border border-green-200'
+                    : 'border border-gray-300 text-transparent'
+                }`}
+                aria-hidden
+              >
+                ✓
+              </span>
+              <span
+                className={`text-sm flex-1 truncate ${
+                  task.done ? 'line-through text-gray-400' : 'text-gray-700 group-hover:text-gray-900'
+                }`}
+              >
+                {task.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -154,6 +107,7 @@ export function LeftPanel() {
   const { store } = useEditStoreContext();
   const leftPanel = useStoreState(state => state.leftPanel);
   const sections = useStoreState(state => state.sections);
+  const { allComplete } = useReviewState();
 
   const storeState = store?.getState();
   const setLeftPanelWidth = storeState?.setLeftPanelWidth;
@@ -162,7 +116,9 @@ export function LeftPanel() {
   const [isResizing, setIsResizing] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const isReviewMode = leftPanel.activeTab === 'review';
+  // Hide the Setup tab entirely once every guide task is done — even if the
+  // active tab is still 'review', fall back to the sections view.
+  const isReviewMode = leftPanel.activeTab === 'review' && !allComplete;
 
   useEffect(() => setMounted(true), []);
 
@@ -210,7 +166,7 @@ export function LeftPanel() {
         </button>
         <div className="flex-1 flex items-center justify-center py-4">
           <div className="transform -rotate-90 text-xs text-gray-400 whitespace-nowrap">
-            {isReviewMode ? 'Review' : 'Page'}
+            {isReviewMode ? 'Setup' : 'Page'}
           </div>
         </div>
       </div>
@@ -226,7 +182,7 @@ export function LeftPanel() {
         {/* Header */}
         <div className="h-12 border-b border-gray-200 flex items-center justify-between px-4 flex-shrink-0">
           <h2 className="text-sm font-semibold text-gray-900">
-            {isReviewMode ? 'Review' : 'Page'}
+            {isReviewMode ? 'Setup' : 'Page'}
           </h2>
           <button
             onClick={toggleLeftPanel}
@@ -242,7 +198,7 @@ export function LeftPanel() {
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto min-h-0">
           {isReviewMode ? (
-            <ReviewChecklist />
+            <GettingStartedChecklist />
           ) : (
             <div className="p-3">
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">Sections</h3>

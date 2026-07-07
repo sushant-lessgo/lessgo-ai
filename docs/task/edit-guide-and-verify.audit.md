@@ -96,3 +96,75 @@ The `needs_review` category and all other `reviewItems` remain intact and expose
 - Structural-change reactivity limitation noted above (content-only refresh reuses last scan inputs).
 - Debounce is a fixed 150ms; if a downstream flow depends on a synchronous marker update it would see up to a 150ms lag (markers are cosmetic; acceptable).
 - `derivedEqual` uses `JSON.stringify` on the derived arrays — cheap at these sizes; if items ever grow very large this could be swapped for a targeted compare (not a concern now).
+
+## Phase 3 — UI rewire: pill + left-panel guide + auto-hide
+
+### Files changed
+- `src/app/edit/[token]/components/ui/ReviewPill.tsx`
+- `src/app/edit/[token]/components/layout/LeftPanel.tsx`
+- `src/app/edit/[token]/components/layout/EditHeader.tsx`
+- `src/hooks/README.md`
+
+### What changed
+
+**ReviewPill.tsx** — now reads `{ remainingCount, allComplete }` from `useReviewState`
+(was `{ totalCount, confirmedCount }`). Returns `null` when `allComplete` (auto-hide),
+replacing the old `totalCount === 0` guard and the "all done" green state. Label reworded
+from `${confirmedCount}/${totalCount} reviewed` to `Setup: ${remainingCount} left`; title
+tooltip reworded to a plain step-count string (no em dash). Click behavior unchanged: still
+toggles the left-panel 'review' tab and un-collapses the panel. Removed the now-unused
+`pillDoneStyle` const (pill never renders a "done" state — it just unmounts).
+
+**LeftPanel.tsx** — `ReviewChecklist` renamed to `GettingStartedChecklist` and rewritten to
+read `{ guideTasks }` from `useReviewState` (was `reviewItems`/`confirmItem`/`unconfirmItem`/
+`isConfirmed`/`getItemsBySectionId`). It now renders ONLY the curated guide tasks with
+`present === true` (max 4 rows), each showing auto-check state: a green tick circle when
+`t.done`, an open circle otherwise. All manual checkbox/tick toggles removed (no
+`confirmItem`/`unconfirmItem`/`isConfirmed` calls) — auto-check is the sole source of truth.
+Per-section grouping and per-element `needs_review` rows are gone; the panel shows only the 4
+curated tasks. Click-to-scroll preserved using each task's `target` ({sectionId, elementKey})
+via the same `data-section-id` / `data-element-key` query + smooth-scroll mechanism as before.
+The `LeftPanel` shell now also reads `allComplete` and computes
+`isReviewMode = activeTab === 'review' && !allComplete`, so the Setup tab (header, collapsed
+rotated label, and content) is hidden entirely once all tasks are done — falling back to the
+sections view. Tab/label text retitled "Review" → "Setup" (header h2, collapsed label, and the
+checklist h3) for consistency with the pill's "Setup: N left" wording.
+
+**EditHeader.tsx** — imports `useReviewState`, reads `allComplete`, and gates the pill mount as
+`{!allComplete && <ReviewPill />}` (belt-and-suspenders with the pill's own return-null).
+
+**README.md:77** — corrected the `useReviewState.ts` description from "testimonial/review UI
+state" to the element-verification / "Getting started" setup-guide state.
+
+### Call-site updates
+The pill and the checklist were the only consumers of the removed-from-use fields. Per the
+plan, `confirmItem`/`unconfirmItem`/`isConfirmed`/`getItemsBySectionId`/`totalCount`/
+`confirmedCount` remain EXPORTED by `useReviewState` (untouched — out of scope) but are no
+longer called from these two components. No 5th file needed changes; a repo grep for the old
+`ReviewChecklist` name finds only docs.
+
+### Expected UX (verified by reading the code, can't run headless)
+- Pill reads `Setup: N left` where N = present-but-not-done guide tasks; disappears when N hits 0.
+- Left panel "Setup" tab shows at most 4 curated rows (only `present` tasks), each auto-ticked
+  from content; clicking a row scrolls/focuses its target element. No per-element `needs_review`
+  rows appear (those are Phase 4 inline markers).
+- When all present tasks are done: pill unmounts (both EditHeader gate + pill self-hide) AND the
+  Setup tab is suppressed (LeftPanel falls back to sections view).
+- Progress survives reload because `guideTasks` derive from persisted content (Phase 1/2).
+
+### Verification
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run` — 686 passed | 2 skipped (52 files passed, 1 skipped). Green.
+- No `.published.tsx` / published renderer file touched — all four files are edit-only UI or docs.
+
+### Deviations
+- Label wording: chose "Setup" (not "Getting started") for the tab header/labels to stay
+  consistent with the fixed pill copy "Setup: N left", per the plan's "pick one, be consistent
+  with the pill" instruction.
+- Removed the unused `pillDoneStyle` constant in ReviewPill (dead after the "all reviewed" state
+  was dropped) — conservative cleanup within the touched file to keep tsc/lint clean.
+
+### Open risks
+- None functional. The Setup tab auto-suppression relies on `useReviewState.allComplete`
+  subscription in LeftPanel/EditHeader; if `activeTab` is left on 'review' when the last task
+  completes mid-session, the panel silently reverts to the sections view (intended).

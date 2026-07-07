@@ -4,13 +4,13 @@ import { useReviewState } from '@/hooks/useReviewState';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 
 export function ReviewPill() {
-  const { totalCount, confirmedCount } = useReviewState();
+  const { remainingCount, allComplete } = useReviewState();
   const { store } = useEditStoreContext();
   const leftPanel = useStoreState(state => state.leftPanel);
 
-  if (totalCount === 0) return null;
+  // Auto-hide once every present guide task is done.
+  if (allComplete) return null;
 
-  const allDone = confirmedCount === totalCount;
   const isActive = leftPanel.activeTab === 'review';
 
   const handleClick = () => {
@@ -28,14 +28,10 @@ export function ReviewPill() {
   return (
     <button
       onClick={handleClick}
-      title={
-        allDone
-          ? 'All elements reviewed'
-          : `${totalCount - confirmedCount} elements need review — click to open checklist`
-      }
-      style={allDone ? pillDoneStyle : isActive ? pillActiveStyle : pillPendingStyle}
+      title={`${remainingCount} setup ${remainingCount === 1 ? 'step' : 'steps'} left, click to open`}
+      style={isActive ? pillActiveStyle : pillPendingStyle}
     >
-      {allDone ? '\u2713 All reviewed' : `${confirmedCount}/${totalCount} reviewed`}
+      {`Setup: ${remainingCount} left`}
     </button>
   );
 }
@@ -63,12 +59,4 @@ const pillActiveStyle: React.CSSProperties = {
   background: '#fef3c7',
   borderColor: '#f59e0b',
   color: '#92400e',
-};
-
-const pillDoneStyle: React.CSSProperties = {
-  ...pillBase,
-  background: '#ecfdf5',
-  borderColor: '#a7f3d0',
-  color: '#065f46',
-  cursor: 'default',
 };
