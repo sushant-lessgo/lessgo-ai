@@ -22,9 +22,11 @@ Started: 2026-07-07.
 Status values: `pending` → `in-progress` → `done` | `blocked` | `awaiting-gate`.
 
 ## RESUME POINTER (post-/clear: read this first)
-Current: **spec 02**, stage = **planning** (planner writing scale-02-router-serve-gate.plan.md).
-Next action after clear: if that plan.md exists + looks complete → spawn plan-reviewer on it;
-else re-scout + re-plan. Then follow the runbook resume decision tree. Branch: feature/scale.
+Current: **spec 02**, stage = **plan written, NOT yet reviewed**.
+plan = docs/task/scale-02-router-serve-gate.plan.md (7 phases; human gates on phase 2
+DemandLead migration + phase 6 access-control cutover; scout findings baked into its
+Key-decisions section). NEXT ACTION: spawn plan-reviewer on it (loop max 3) → on approve,
+implement phase 1. Follow the runbook resume decision tree. Branch: feature/scale.
 Cron heartbeat: job 81da2219 (every 15 min) — if it didn't survive the clear, re-arm with
 `/loop 15m <driver prompt from runbook>`.
 
