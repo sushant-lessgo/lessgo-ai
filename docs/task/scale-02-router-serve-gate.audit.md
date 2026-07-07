@@ -288,3 +288,41 @@ generation-contract + golden tests green (tripwire held).
   cheap-tier model may fill prefill arrays thinly — acceptable, wizard steps
   re-ask. Enum fields are schema-constrained so buildBriefDraft can't throw on
   bad enums; a genuinely failed parse falls into the existing ai_error path.
+
+---
+
+## Phase 4 — API routes: brief confirm/hydrate + demand-lead + founder email
+
+**Files changed**
+- `src/app/api/brief/route.ts` (create — GET hydrate)
+- `src/app/api/brief/confirm/route.ts` (create — POST authoritative gate + write)
+- `src/app/api/demand-lead/route.ts` (create — POST create + PATCH fasttrack)
+
+**Real infra signatures found (reviewer check)**
+- `assertProjectOwner(clerkId: string|null|undefined, tokenId: string, opts: { action: string; claimIfOrphan?: boolean; allowMissing?: boolean }): Promise<ProjectOwnerResult>` — `src/lib/security.ts:57`. Returns `{ok:true,...}` or `{ok:false,status,error}`.
+- `createSecureResponse(data: any, status = 200, logData?): NextResponse` — `src/lib/security.ts:152`.
+- `withFormRateLimit(handler: (req: NextRequest) => Promise<Response>)` — `src/lib/rateLimit.ts:284` (FORM_SUBMISSION preset).
+- `sendLeadNotification(args: { formName: string; data: Record<string,string>; fields?: MVPFormField[]; replyTo?: string; pageId?: string }): Promise<void>` — `src/lib/email/sendLeadNotification.ts:47`. Env-gated (RESEND_API_KEY + LEAD_NOTIFICATION_EMAIL), never throws.
+- `validateToken(token): boolean` — `src/lib/security.ts:179` (loadDraft idiom, reused on both brief routes).
+- Brief modules: no barrel `@/modules/brief/index.ts` exists — imported `decideServe` from `@/modules/brief/serveGate` and `getEntryFacts` from `@/modules/brief/classify` directly (matches how serveGate itself imports classify).
+
+**Per-file**
+- `brief/route.ts` — GET: Clerk `auth()` → 401; `validateToken` → 400; `assertProjectOwner({action:'brief:get'})` (read: no claimIfOrphan, no allowMissing ⇒ missing project = 404 from the helper); returns `{brief, audienceType, templateId}` (nulls when unset).
+- `brief/confirm/route.ts` — POST: zod body `{tokenId, brief: BriefSchema}` (BriefSchema.parse is the D2 tripwire — place/quick-yes never in copyEngine); `assertProjectOwner({action:'brief:confirm', claimIfOrphan:true})` (write route, saveDraft idiom; no allowMissing — project pre-exists via /api/start). **Server re-runs `decideServe(brief)` — client verdict never read from the body** (schema has no outcome field at all). SERVE ⇒ single `prisma.project.update {brief, audienceType, templateId}` ⇒ `{outcome:'serve', redirectTo:'/onboarding/{audienceType}/{token}'}`. MANUAL ⇒ zero project writes ⇒ `{outcome:'manual', missing, outOfIcp}`.
+- `demand-lead/route.ts` — POST (Clerk-gated, `withFormRateLimit`): zod `{input(≤2000), briefDraft: BriefSchema, missing, email (z.email), phone?, fasttrack?}`; `prisma.demandLead.create` with `userId = clerkId` (phase-2 ownership column); founder notify in try/catch AFTER the write (`formName: 'Demand lead' + ' — FAST TRACK'` when fasttrack; flat data `{input, businessType, engine, missing, email, phone, fasttrack}`, engine via `getEntryFacts(briefDraft)?.resolvedEngine`; `replyTo: email`); returns `{id}`.
+  PATCH (also rate-limited — conservative): **ownership-scoped** `prisma.demandLead.updateMany({where:{id, userId: clerkId}, data:{fasttrack:true}})`; `count===0` ⇒ 404 (covers not-found AND not-yours — no ownership oracle). On success, second FAST TRACK notification built from the STORED row (`lead.briefDraft.businessType` / `facts.entry.resolvedEngine`), not request data.
+
+**Middleware evidence (verified, NOT edited)** — `src/middleware.ts` `isPublicRoute` list (lines 13–47) contains no `/api/brief*` or `/api/demand-lead` entry; nearest API entries are `'/api/forms/submit'`, `'/api/analytics/event'`, `'/api/og(.*)'`. Line 160–162: `if (!isPublicRoute(req)) { await auth.protect() }` ⇒ all three routes protected-by-default. No middleware change needed.
+
+**Deviations**
+- PATCH also wrapped in `withFormRateLimit` (task only mandates POST; plan step 3 says "withFormRateLimit" generally) — conservative, prevents notification spam via repeated PATCH.
+- `validateToken` added on both brief routes (not explicitly in plan) — matches loadDraft/saveDraft injection-prevention idiom on every token route.
+- Imports from `@/modules/brief/serveGate`/`@/modules/brief/classify` (deep paths) because phase 1 created no `@/modules/brief` barrel; creating one was out of Files-touched.
+
+**Verification**
+- `npx tsc --noEmit` — clean ✅
+- `npm run test:run` — 64 files passed | 1 skipped; 886 passed | 2 skipped ✅ (unchanged from phase 3 — no new tests in this phase per plan)
+- Middleware read-verified (above) ✅ — no edit.
+- `decideServe` invoked server-side in confirm; request schema carries no client verdict ✅
+- Firewall: routes import only `@/modules/brief/*` (pure), prisma, zod, security/rateLimit/email helpers — no template resolver/registry/renderer ✅
+- Plan's manual dev checks (agency confirm ⇒ surge row, photographer ⇒ DemandLead, PATCH cross-user 404) NOT run — deferred to phase-5/6 manual QA when the entry UI exists to drive them.
