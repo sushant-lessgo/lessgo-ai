@@ -33,6 +33,7 @@ model Project {
 
   themeValues    Json?
   computedDesign Json?
+  brief          Json?
   inputText      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -517,4 +518,24 @@ model AdminAuditLog {
 
   @@index([actorClerkId])
   @@index([createdAt])
+}
+
+// Demand lead — manual-path capture for the entry router serve gate (scale-02).
+// FormSubmission idiom: string status, NOT enum. userId = Clerk id of creator,
+// used for PATCH ownership scoping (phase 4).
+model DemandLead {
+  id         String   @id @default(cuid())
+  userId     String // Clerk id of creator — PATCH ownership scope (phase 4)
+  input      String // raw one-liner or URL
+  briefDraft Json // classified Brief draft at submit time
+  missing    String // "rungC:gallery,rungA:photographer" | "out-of-icp" | "bridge:work" | "rungE:place"
+  email      String
+  phone      String?
+  fasttrack  Boolean  @default(false)
+  status     String   @default("new") // new|contacted|converted|declined
+  createdAt  DateTime @default(now())
+
+  @@index([status, createdAt])
+  @@index([missing])
+  @@index([userId])
 }

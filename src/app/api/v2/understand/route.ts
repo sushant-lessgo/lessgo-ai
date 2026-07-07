@@ -20,10 +20,16 @@ import {
   UnderstandingResponseSchema,
   ServiceUnderstandingResponseSchema,
   ManufacturerUnderstandingResponseSchema,
+  EntryUnderstandSchema,
+  entryClassificationPromptBlock,
+  entryPrefillDeltaPromptBlock,
 } from '@/lib/schemas';
 import { buildServiceUnderstandPrompt } from '@/modules/audience/service/promptUnderstand';
 import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
 import { isDemoMode } from '@/lib/mockMode';
+// Entry mode (scale-02 phase 3, D6): pure brief module — engine resolution +
+// Brief construction happen server-side here, never in the AI call.
+import { buildBriefDraft, type EntrySignals } from '@/modules/brief/classify';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +41,10 @@ const UnderstandRequestSchema = z.object({
   oneLiner: z.string().min(10, 'One-liner must be at least 10 characters'),
   audienceType: z.enum(['product', 'service']).optional().default('product'),
   templateId: z.string().optional(),
+  // Entry-mode classification flag (scale-02 phase 3). Absent/false ⇒ the
+  // route behaves byte-identically to before; true ⇒ EntryUnderstandSchema
+  // + classification prompt + server-side briefDraft.
+  entry: z.boolean().optional(),
 });
 
 function buildUnderstandPrompt(oneLiner: string): string {
@@ -71,6 +81,138 @@ STRICT RULES — no synonyms, no fluff:
 - Extract only what is stated or strongly implied. Do not invent.`;
 }
 
+// ===== Entry mode (scale-02 phase 3, plan D6) =====
+// One AI call emits raw EntrySignals only (guesses + neutral prefill); the
+// copy engine is resolved by CODE (businessTypes lookup / tiebreaker ladder)
+// inside buildBriefDraft — the prompt explicitly forbids the AI to decide it.
+
+function buildEntryUnderstandPrompt(oneLiner: string): string {
+  return `Extract business information and classification signals from this description:
+
+"${oneLiner}"
+
+Return a JSON object with ALL of the following fields.
+
+NEUTRAL BUSINESS FIELDS:
+- oneLiner: one clear sentence describing what the business offers and who it's for (may lightly rephrase the input)
+- businessName: the business/brand name, or "" if not stated
+- categories: 1-3 market categories
+- audiences: 1-3 target audiences/clients
+- offer: the main call-to-action offer a visitor gets (e.g. "Free 30-min audit"), or "" if none is evident
+- testimonials: verbatim customer quotes if any are included in the description (word-for-word strings), else an empty array
+
+${entryPrefillDeltaPromptBlock()}
+
+${entryClassificationPromptBlock()}
+
+RULES:
+- Extract only what is stated or strongly implied. Do not invent facts, names, or numbers.
+- Signals are GUESSES for downstream code — never decide the engine, template, or serve outcome.`;
+}
+
+// Demo-mode entry fixture — agency-shaped so the SERVE path is testable free
+// (agency ⇒ known businessType ⇒ engine 'trust' by lookup).
+const ENTRY_DEMO_SIGNALS: EntrySignals = {
+  businessTypeGuess: 'agency',
+  businessTypeConfidence: 0.9,
+  category: 'Growth marketing',
+  goalIntentGuess: 'book-call',
+  tiebreaker: 'expertise',
+  structureHint: 'single',
+  designStyleHint: 'bold-performance',
+  platformNeeds: 'none',
+  summary:
+    'A growth marketing agency that runs paid acquisition and conversion-focused landing pages for SaaS companies.',
+  businessName: 'Scale Growth Co',
+  offerings: ['Paid social campaigns', 'Landing page CRO', 'Growth strategy'],
+  audiences: ['B2B SaaS founders', 'Marketing leads'],
+  categories: ['Growth marketing', 'Performance marketing'],
+  outcomes: ['3.2x average ROAS', 'Pipeline in 60 days'],
+  deliveryModel: 'remote',
+  offer: 'Free growth audit',
+  oneLiner:
+    'Growth marketing agency for SaaS companies that turns paid traffic into booked demos',
+  proofAvailable: ['testimonials', 'case studies'],
+  socialProfiles: [],
+  testimonials: [],
+};
+
+async function handleEntryUnderstand(
+  req: NextRequest,
+  oneLiner: string,
+  userId: string,
+  startTime: number
+): Promise<Response> {
+  // Demo/mock mode — agency-shaped fixture, no AI call, 0 credits.
+  if (isDemoMode(req)) {
+    logger.info('[understand] Using mock response (entry)');
+    return createSecureResponse({
+      success: true,
+      data: ENTRY_DEMO_SIGNALS,
+      briefDraft: buildBriefDraft(ENTRY_DEMO_SIGNALS, oneLiner),
+      creditsUsed: 0,
+      creditsRemaining: 999,
+    });
+  }
+
+  const prompt = buildEntryUnderstandPrompt(oneLiner);
+  logger.dev('[understand] ENTRY PROMPT:', prompt);
+
+  let signals: EntrySignals;
+  let briefDraft;
+  try {
+    signals = await generateWithSchema(
+      'understand',
+      [{ role: 'user', content: prompt }],
+      EntryUnderstandSchema,
+      'entry_understanding'
+    );
+    logger.dev('[understand] ENTRY RESPONSE:', signals);
+    // Server-side Brief construction (D1/D6) — engine via code lookup; safe
+    // for place/quick-yes by construction (copyEngine omitted, D2).
+    briefDraft = buildBriefDraft(signals, oneLiner);
+  } catch (error: any) {
+    logger.error('AI entry understand call failed:', error);
+    return createSecureResponse(
+      {
+        success: false,
+        error: 'ai_error',
+        message: error.message || 'AI service error',
+        recoverable: true,
+      },
+      500
+    );
+  }
+
+  const creditResult = await consumeCredits(
+    userId,
+    UsageEventType.UNDERSTAND,
+    CREDIT_COSTS.UNDERSTAND,
+    {
+      endpoint: '/api/v2/understand',
+      duration: Date.now() - startTime,
+      metadata: {
+        extractionShape: 'entry',
+        oneLinerLength: oneLiner.length,
+      },
+    }
+  );
+  if (!creditResult.success) {
+    logger.warn(`Credit consumption failed: ${creditResult.error}`);
+    // Still return success - we have the data
+  }
+
+  logger.dev(`Understand (entry) completed in ${Date.now() - startTime}ms`);
+
+  return createSecureResponse({
+    success: true,
+    data: signals,
+    briefDraft,
+    creditsUsed: CREDIT_COSTS.UNDERSTAND,
+    creditsRemaining: creditResult.remaining,
+  });
+}
+
 async function understandHandler(req: NextRequest): Promise<Response> {
   const startTime = Date.now();
 
@@ -90,7 +232,7 @@ async function understandHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    const { oneLiner, audienceType, templateId } = validation.data;
+    const { oneLiner, audienceType, templateId, entry } = validation.data;
     const isService = audienceType === 'service';
     const isManufacturer = !isService && isManufacturerFlow(templateId);
 
@@ -108,6 +250,12 @@ async function understandHandler(req: NextRequest): Promise<Response> {
     }
 
     const userId = authCheck.userId!;
+
+    // 2a. Entry-mode branch (scale-02 phase 3). Fully additive: when the
+    // `entry` flag is absent, everything below is byte-identical to before.
+    if (entry === true) {
+      return handleEntryUnderstand(req, oneLiner, userId, startTime);
+    }
 
     // 2b. Check for demo/mock mode - return mock data without AI call
     if (isDemoMode(req)) {

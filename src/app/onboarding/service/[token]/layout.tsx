@@ -2,23 +2,15 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
-import { personaToAudienceType, type UserPersona } from '@/types/service';
 
 interface LayoutProps {
   children: React.ReactNode;
   params: { token: string };
 }
 
-// Phase 8: agency + consultant + coach reach the service wizard. The remaining
-// service personas (freelancer, local-service, productized-service) still hit the
-// waitlist gate via /api/start. This guard also catches direct-URL access
-// (someone bookmarking a wizard URL after a persona change, etc).
-const PILOT_SERVICE_PERSONAS: ReadonlySet<UserPersona> = new Set([
-  'agency',
-  'consultant',
-  'coach',
-]);
-
+// scale-02 phase 6: persona gate + pilot allowlist removed — routing into
+// this wizard is decided by the universal entry's serve gate, which writes
+// Project.audienceType at confirm. Persona may be null for self-serve users.
 export default async function ServiceOnboardingLayout({
   children,
   params,
@@ -29,27 +21,24 @@ export default async function ServiceOnboardingLayout({
     redirect('/sign-in');
   }
 
-  const dbUser = await prisma.user.findUnique({
+  const dbUser = await prisma.user.upsert({
     where: { clerkId: userId },
-    select: { id: true, persona: true },
+    update: {},
+    create: { clerkId: userId },
+    select: { id: true },
   });
 
-  // No persona → bounce to persona prompt with hand-back via /api/start.
-  if (!dbUser?.persona) {
-    redirect('/onboarding/persona?next=/api/start');
-  }
-
-  const persona = dbUser.persona as UserPersona;
-  const audienceType = personaToAudienceType(persona);
-
-  // Wrong audienceType (saas-founder / indie-maker) → product flow.
-  if (audienceType !== 'service') {
-    redirect(`/onboarding/product/${params.token}`);
-  }
-
-  // Service persona, but not pilot-eligible → waitlist gate.
-  if (!PILOT_SERVICE_PERSONAS.has(persona)) {
-    redirect('/onboarding/waitlist');
+  // Soft guard keyed on the PROJECT (not persona): a bookmarked service-wizard
+  // URL pointing at a product project bounces to the product wizard. Anything
+  // else (service / null / missing project) passes through.
+  if (params?.token) {
+    const project = await prisma.project.findUnique({
+      where: { tokenId: params.token },
+      select: { audienceType: true },
+    });
+    if (project?.audienceType === 'product') {
+      redirect(`/onboarding/product/${params.token}`);
+    }
   }
 
   // Anon → authed claim-on-visit (mirror of /create/[token]/layout.tsx).

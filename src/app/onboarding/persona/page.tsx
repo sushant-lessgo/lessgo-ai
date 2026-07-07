@@ -1,32 +1,9 @@
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
-import PersonaPrompt from '@/components/onboarding/PersonaPrompt';
 
-interface PageProps {
-  searchParams: { next?: string };
-}
-
-export default async function PersonaOnboardingPage({ searchParams }: PageProps) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect('/sign-in');
-  }
-
-  const user = await prisma.user.upsert({
-    where: { clerkId: userId },
-    update: {},
-    create: { clerkId: userId },
-    select: { persona: true },
-  });
-
-  const next = searchParams?.next || '/dashboard';
-
-  // If persona already set, nothing to ask — bounce to next.
-  if (user.persona) {
-    redirect(next);
-  }
-
-  return <PersonaPrompt next={next} />;
+// Replaced by the scale-02 router: the persona gate is gone — entry is the
+// universal /onboarding/[token] serve gate. Persona editing survives in
+// /dashboard/settings (PersonaPrompt). This route stays as a redirect for
+// old bookmarks/links.
+export default function PersonaOnboardingPage() {
+  redirect('/dashboard');
 }

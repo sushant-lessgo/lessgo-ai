@@ -6,7 +6,6 @@ import Footer from '@/components/shared/Footer'
 import DashboardHeader from '@/components/dashboard/DashboardHeader'
 import ProjectCard from '@/components/dashboard/ProjectCard'
 import EmptyState from '@/components/dashboard/EmptyState'
-import PersonaPrompt from '@/components/onboarding/PersonaPrompt'
 import PersonaUpdatedBanner from '@/components/dashboard/PersonaUpdatedBanner'
 
 export default async function DashboardPage({
@@ -37,13 +36,9 @@ export default async function DashboardPage({
 
   const viewerIsAdmin = isAdmin(userId)
 
-  // Block dashboard until persona is captured (non-admins only). Existing users with
-  // persona=null (pre-Phase-0) hit this gate on first dashboard load post-deploy.
-  // Admins skip the gate so a persona-null admin account isn't locked out of the
-  // admin-all view.
-  if (!viewerIsAdmin && user && !user.persona) {
-    return <PersonaPrompt next="/dashboard" />
-  }
+  // scale-02: the persona gate is removed — self-serve users (persona=null)
+  // go straight to the dashboard; the universal entry's serve gate handles
+  // routing. Persona editing survives in /dashboard/settings.
 
   type SourceProject = {
     id: string

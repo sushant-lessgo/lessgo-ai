@@ -1,0 +1,53 @@
+// src/types/brief.ts
+// Shared closed enums for the Brief record (scale track, scalePlan §§2/3/7) +
+// canonical re-export of `type Brief` (inferred from the zod schema in
+// src/lib/schemas/brief.schema.ts — single source of truth, no dual-maintained
+// interface). Import Brief from HERE (`@/types/brief`), not the schema file.
+//
+// These lists are FROZEN closed vocabularies (scalePlan §11.2): copy engines,
+// capability ids, and design styles are coder-maintained; do not extend them
+// casually — every downstream catalog/shortlist/gate keys on them.
+
+/**
+ * ===== COPY ENGINES =====
+ * The closed copy-engine set (scalePlan §2): thing (products), trust
+ * (expertise/services), work (the work itself). place/quick-yes reserved.
+ */
+export const copyEngines = ['thing', 'trust', 'work'] as const;
+export type CopyEngine = (typeof copyEngines)[number];
+
+/**
+ * ===== CAPABILITIES =====
+ * Closed capability vocabulary (scalePlan §7). Block-backed vs structural split
+ * lives in the conformance tests (spec 01 phase 4), not here.
+ */
+export const capabilityIds = [
+  'multipage',
+  'gallery',
+  'catalog',
+  'map-hours',
+  'bilingual',
+  'video-hero',
+  'store-badges',
+  'lead-form',
+  'packages',
+  'blog',
+] as const;
+export type CapabilityId = (typeof capabilityIds)[number];
+
+/**
+ * ===== DESIGN STYLES =====
+ * Closed design-style vocabulary — one per shipped template family feel.
+ */
+export const designStyles = [
+  'tech-minimal',
+  'editorial-craft',
+  'warm-human',
+  'authority-professional',
+  'bold-performance',
+  'literary-quiet',
+] as const;
+export type DesignStyle = (typeof designStyles)[number];
+
+// Canonical Brief type — inferred from BriefSchema (zod = source of truth).
+export type { Brief } from '@/lib/schemas/brief.schema';

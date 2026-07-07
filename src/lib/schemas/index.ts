@@ -4,3 +4,4 @@ export * from './understandService.schema';
 export * from './copy.schema';
 export * from './scrapeWebsite.schema';
 export * from './scrapeWebsiteService.schema';
+export * from './entryClassify.schema';

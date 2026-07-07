@@ -13,7 +13,7 @@ published/dashboard/marketing UI.
 | `layout/` | Cross-route layout/edit glue: `GlobalButtonConfigModal`, `GlobalFormBuilder`, `SmartTextSection`. |
 | `dashboard/` | Dashboard UI: `DashboardHeader`, `ProjectCard`, `FormSubmissionsTable`, `EmptyState`, `PersonaUpdatedBanner`, `testimonials/`. |
 | `published/` | **Published-renderer** server-safe components (no hooks): `*Published.tsx` (CTA, Image, Icon, Avatar…), `FormIsland`, `FormMarkupPublished`. Keep in lockstep with their editor twins (dual-renderer pitfall). |
-| `onboarding/` | `PersonaPrompt` + `shared/` onboarding UI. |
+| `onboarding/` | `PersonaPrompt` (settings-only persona editor — used by `/dashboard/settings`; no longer an onboarding gate since scale-02) + `shared/` onboarding UI. |
 | `domain/` | Custom-domain wizard steps: `AddDomainForm`, `OwnershipStep`, `DnsStep`, `DnsRecordRow`, `LiveStep`, `FailedStep`. |
 | `billing/` | `CreditBadge`, `OutOfCreditsModal`. |
 | `admin/` | `TransferOwnershipControl`. |
