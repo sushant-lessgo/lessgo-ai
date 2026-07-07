@@ -65,3 +65,42 @@
 
 **Open risks**
 - None. Column is nullable/unread; first reader arrives in spec 02+.
+
+---
+
+## Phase 3 — templateMeta + engine-core sections
+
+**Files changed**
+- `src/modules/templates/templateMeta.ts` (create)
+- `src/modules/engines/coreSections.ts` (create)
+- `src/modules/templates/templateMeta.test.ts` (create)
+- `src/modules/engines/README.md` (create — plan-review non-blocking #1 fold-in)
+
+**What changed**
+- `templateMeta.ts`: static sibling to the loader-only registry (D-C; `registry.ts` untouched, no template-module/resolver imports — firewall intact). `TemplateMeta` interface + `templateMeta: Record<TemplateId, TemplateMeta>` with the D-D table exactly: meridian(thing/tech-minimal/lead-form→cta), vestria(thing/editorial-craft/multipage+lead-form→contact+catalog→catalog), hearth(trust/warm-human/lead-form→cta), lex(trust/authority-professional/lead-form→cta), surge(trust/bold-performance/lead-form→cta+packages→packages), granth(work/literary-quiet/NO caps), lumen(work/editorial-craft/bilingual+gallery→portfolio+lead-form→contact, bespoke:true), techpremium(retired:true, empty lists). FROZEN header records: granth no-blog rationale, casestudies-not-a-capability, lumen D4 bespoke, techpremium §11.4 retired. Inline notes at vestria (`multipage`) + lumen (`bilingual`): structural caps are trust-on-declaration, no block-existence check yet (plan-review non-blocking #3).
+- `coreSections.ts`: `engineCoreSections` per D-A — thing 5 (`header,hero,features,testimonials,footer`), trust 7 (hearth canonical), work 6 (granth canonical). FROZEN header with full D-A rationale (vestria ground truth kills pricing/cta; lumen bespoke-exempt; rejected cta-alias alternative).
+- `templateMeta.test.ts`: keys === templateIds (8) · exactly 7 non-retired · lumen bespoke/techpremium retired (and nobody else) · techpremium empty lists · caps ⊆ capabilityIds · engines ⊆ copyEngines · every block-backed declared cap has capabilitySections evidence (STRUCTURAL_CAPABILITIES=[multipage,bilingual] exempt) · granth caps empty · engineCoreSections keys === copyEngines + exact D-A set freeze.
+- `README.md` (engines/): agent-oriented — purpose, FROZEN §3 status, one-line D-A rationale, downstream-specs pointer, firewall note.
+
+**Resolver re-verification (phase 3 step 3) — NO drift**
+Read all six resolvers (vestria re-confirmed via key grep too):
+- meridian: header,hero,features,testimonials,pricing,cta,footer (+blog blocks) — thing-core 5 ⊆ ✓, lead-form→cta ✓
+- vestria: header,hero,trust,industries,about,features,catalog,materials,process,testimonials,contact,footer — no pricing/cta confirmed ✓, contact+catalog evidence ✓
+- hearth: exact trust-core 7 (+blog) ✓ · lex: exact trust-core 7 (+blog) ✓
+- surge: trust-core 7 + logos,about,casestudies,stats (+blog) ✓, packages evidence ✓
+- granth: hero,about,books,writing,praise,footer — exactly work-core 6, NO blog blocks (confirms no-blog decision) ✓
+- lumen: header,hero,logos,services,process,portfolio,about,contact,footer (+blog) — portfolio/contact evidence ✓
+No D-A/D-D table updates needed.
+
+**Verification**
+- `npx tsc --noEmit` → clean (exit 0).
+- `npm run test:run` → **57 passed | 1 skipped (58 files), 761 passed | 2 skipped (763 tests)** — green, new templateMeta.test.ts included (+10 tests).
+- Import audit: grep for `templateMeta|engines/coreSections|modules/engines` in `src/` → only the 4 new files. Zero app imports ⇒ zero runtime change.
+
+**Deviations**
+- None from D-A/D-D. Additions within scope: engines/README.md (orchestrator fold-in of plan-review non-blocking #1); test also freezes exact engineCoreSections arrays + "nobody else flagged" assertions (strictly additive coverage).
+- Observation (not a change): hearth/lex/surge/lumen/meridian resolvers carry shared blog blocks (blogpostbody/blogindex) yet no template declares a `blog` capability per D-D — left as planned; blog capability declaration is a future-spec question, not phase 3's.
+
+**Open risks**
+- Structural caps (multipage/bilingual) unverifiable by conformance — trust-on-declaration until a structural check exists (noted inline, plan-review #3).
+- work-core is single-template canonical (granth); revisit when a second shortlist-eligible work template lands (noted in FROZEN header).

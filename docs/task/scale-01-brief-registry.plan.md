@@ -12,7 +12,7 @@ Create the pure data layer everything downstream (router, gate, wizard, generati
 
 - phase 1 vocabulary + brief contract: done (review loops 1, ship)
 - phase 2 prisma brief column: done (review loops 1, ship; migration 20260707191204_add_project_brief)
-- phase 3 template metadata + engine-core sections: pending
+- phase 3 template metadata + engine-core sections: done (review loops 1, ship; no resolver drift)
 - phase 4 conformance tests: pending
 - phase 5 businessTypes v0 + fit() + final green sweep: pending
 
