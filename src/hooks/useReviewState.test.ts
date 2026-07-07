@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   deriveGuideTasks,
+  useReviewState,
   type GuideSurfaces,
   type GuideTaskId,
   type ReviewItem,
@@ -136,5 +137,63 @@ describe('deriveGuideTasks', () => {
       const addr = { [FOOTER]: { elements: { contact_address: '1 Main St' } } };
       expect(byId(deriveGuideTasks(addr, baseSurfaces()), 'add_contact').done).toBe(true);
     });
+  });
+});
+
+describe('refreshFromContent (Phase 2 reactivity)', () => {
+  it('no-ops (skips set, keeps refs) when the derived output is unchanged', () => {
+    const store = useReviewState.getState();
+    store.initFromContent({}, {}, [], {});
+    const g1 = useReviewState.getState().guideTasks;
+    const r1 = useReviewState.getState().reviewItems;
+
+    // Same content + same globalSettings → nothing derived changes → no set.
+    useReviewState.getState().refreshFromContent({}, null, null, {});
+
+    // No set means reference identity is preserved (proves the set was skipped).
+    expect(useReviewState.getState().guideTasks).toBe(g1);
+    expect(useReviewState.getState().reviewItems).toBe(r1);
+  });
+
+  it('re-derives (new refs) when the derived output changes', () => {
+    const store = useReviewState.getState();
+    store.initFromContent({}, {}, [], {});
+    const g1 = useReviewState.getState().guideTasks;
+    expect(g1.find((t) => t.id === 'add_logo')?.done).toBe(false);
+
+    // globalSettings.logoUrl now set → add_logo.done flips → derived changes → set fires.
+    useReviewState.getState().refreshFromContent({}, null, null, { logoUrl: 'https://x/l.png' });
+
+    const g2 = useReviewState.getState().guideTasks;
+    expect(g2).not.toBe(g1);
+    expect(g2.find((t) => t.id === 'add_logo')?.done).toBe(true);
+  });
+
+  it('stores threaded baseline + currentPageId (Phase 5 wiring), setting even when derived is equal', () => {
+    const store = useReviewState.getState();
+    store.initFromContent({}, {}, [], { logoUrl: 'https://x/l.png' }, null, null);
+    const g1 = useReviewState.getState().guideTasks;
+    expect(useReviewState.getState().baseline).toBeNull();
+
+    // Same derived output (same logoUrl), but baseline changes → must set + store baseline.
+    const baseline = { content: {}, pages: {} };
+    useReviewState.getState().refreshFromContent({}, baseline, 'page-2', { logoUrl: 'https://x/l.png' });
+
+    expect(useReviewState.getState().baseline).toBe(baseline);
+    expect(useReviewState.getState().currentPageId).toBe('page-2');
+    // Derived was equal, so a set still happened for baseline — guideTasks may be a fresh ref.
+    expect(useReviewState.getState().guideTasks.find((t) => t.id === 'add_logo')?.done).toBe(true);
+    void g1;
+  });
+
+  it('does not clobber confirmedElements on refresh', () => {
+    const store = useReviewState.getState();
+    store.initFromContent({}, {}, [], {});
+    store.confirmItem('hero-1', 'headline');
+    expect(useReviewState.getState().isConfirmed('hero-1', 'headline')).toBe(true);
+
+    useReviewState.getState().refreshFromContent({}, null, null, { logoUrl: 'https://x/l.png' });
+
+    expect(useReviewState.getState().isConfirmed('hero-1', 'headline')).toBe(true);
   });
 });

@@ -71,11 +71,32 @@ interface ReviewState {
   totalCount: number;
   confirmedCount: number;
 
+  // --- Scan inputs retained so a content-only refresh can re-derive ---
+  /** Section→layout map from the last `initFromContent`, reused by `refreshFromContent`. */
+  sectionLayouts: Record<string, string>;
+  /** Section id list from the last `initFromContent`, reused by `refreshFromContent`. */
+  sections: string[];
+  /** Persisted AI-original baseline snapshot (edit store `export()`), threaded in for Phase 5
+   *  auto-clear. Stored now; not yet consumed by the derive. */
+  baseline: Record<string, any> | null;
+  /** Active page id (edit-store `currentPageId`), threaded in for Phase 5 page-aware baseline. */
+  currentPageId: string | null;
+
   // Actions
   initFromContent: (
     content: Record<string, any>,
     sectionLayouts: Record<string, string>,
     sections: string[],
+    globalSettings?: { logoUrl?: string },
+    baseline?: Record<string, any> | null,
+    currentPageId?: string | null
+  ) => void;
+  /** Re-derive tasks + needs_review from live content WITHOUT resetting user-set state.
+   *  No-ops (`set` skipped) when the derived output is unchanged so keystrokes don't re-render. */
+  refreshFromContent: (
+    content: Record<string, any>,
+    baseline?: Record<string, any> | null,
+    currentPageId?: string | null,
     globalSettings?: { logoUrl?: string }
   ) => void;
   confirmItem: (sectionId: string, elementKey: string) => void;
@@ -270,6 +291,206 @@ export function deriveGuideTasks(
 }
 
 // ---------------------------------------------------------------------------
+// Shared derivation — single scan, used by both initFromContent + refreshFromContent
+// ---------------------------------------------------------------------------
+
+/** The content-derived slice of review state (everything auto-computed from content). */
+interface DerivedReview {
+  reviewItems: ReviewItem[];
+  needsReviewItems: ReviewItem[];
+  guideTasks: GuideTask[];
+  remainingCount: number;
+  allComplete: boolean;
+  totalCount: number;
+  confirmedCount: number;
+}
+
+/**
+ * Run the single content scan and derive the review slice (items, needs_review,
+ * curated guide tasks, counts). Pure — no store access; `confirmedElements` is passed in.
+ */
+function deriveReviewState(
+  content: Record<string, any>,
+  sectionLayouts: Record<string, string>,
+  sections: string[],
+  confirmedElements: Set<string>,
+  globalSettings?: { logoUrl?: string }
+): DerivedReview {
+  const items: ReviewItem[] = [];
+
+  // Surface facts collected during the single scan → curated guide (Feature 1).
+  let headerSectionId: string | null = null;
+  let footerSectionId: string | null = null;
+  const primaryCtas: Array<{ sectionId: string; elementKey: string }> = [];
+  let hasImageElement = false;
+  let firstImageTarget: { sectionId: string; elementKey: string } | null = null;
+
+  for (const sectionId of sections) {
+    const sectionData = content[sectionId];
+    if (!sectionData) continue;
+
+    const layoutName = sectionLayouts[sectionId];
+    if (!layoutName) continue;
+
+    const schema = layoutElementSchema[layoutName];
+    if (!schema || !isV2Schema(schema)) continue;
+
+    const elements = sectionData.elements || {};
+    const excluded: string[] = sectionData.aiMetadata?.excludedElements || [];
+
+    const effectiveExclusions = new Set(excluded);
+    for (const [key, def] of Object.entries(schema.elements)) {
+      if (def.toggleGroup && effectiveExclusions.has(def.toggleGroup)) {
+        effectiveExclusions.add(key);
+      }
+    }
+
+    // Scan top-level elements
+    for (const [key, def] of Object.entries(schema.elements)) {
+      if (def.type === 'boolean') continue;
+      if (effectiveExclusions.has(key)) continue;
+      if (elements[key] === undefined && def.requirement === 'optional') continue;
+
+      // Track non-logo image surfaces for the "replace stock photos" task.
+      if (isImageElement(key) && !key.includes('logo')) {
+        hasImageElement = true;
+        if (!firstImageTarget) firstImageTarget = { sectionId, elementKey: key };
+      }
+
+      const status = getStatusForElement(def.fillMode, key, elements[key], def.default);
+      if (status) {
+        items.push({
+          sectionId,
+          elementKey: key,
+          type: status,
+          severity: statusToSeverity(status),
+          displayName: humanizeElementKey(key),
+        });
+      }
+    }
+
+    // --- Config items: CTA buttons always need setup ---
+    const sectionType = sectionId.split('-')[0].toLowerCase();
+
+    if (schema.elements.cta_text && !effectiveExclusions.has('cta_text')) {
+      primaryCtas.push({ sectionId, elementKey: 'cta_text' });
+      items.push({
+        sectionId, elementKey: 'cta_text', type: 'unconfigured',
+        severity: 'config', displayName: 'CTA Button Link',
+      });
+    }
+    if (schema.elements.secondary_cta_text && !effectiveExclusions.has('secondary_cta_text')) {
+      items.push({
+        sectionId, elementKey: 'secondary_cta_text', type: 'unconfigured',
+        severity: 'config', displayName: 'Secondary CTA Link',
+      });
+    }
+
+    // Header-specific config → surface fact for the "add logo" task.
+    if (sectionType === 'header') {
+      if (!headerSectionId) headerSectionId = sectionId;
+      if (schema.collections?.nav_items && !effectiveExclusions.has('nav_items')) {
+        items.push({
+          sectionId, elementKey: '__nav_links__', type: 'unconfigured',
+          severity: 'config', displayName: 'Navigation Links',
+        });
+      }
+    }
+
+    // Footer-specific config → surface fact for the "add contact" task.
+    if (sectionType === 'footer') {
+      if (!footerSectionId) footerSectionId = sectionId;
+    }
+
+    // Scan collections
+    if (schema.collections) {
+      for (const [collName, collDef] of Object.entries(schema.collections)) {
+        if (effectiveExclusions.has(collName)) continue;
+        if ((collDef as any).toggleGroup && effectiveExclusions.has((collDef as any).toggleGroup)) continue;
+        const collData = elements[collName];
+        if (!Array.isArray(collData)) continue;
+
+        for (const item of collData) {
+          const itemId = item?.id;
+          if (!itemId) continue;
+
+          for (const [fieldName, fieldDef] of Object.entries(collDef.fields)) {
+            if (fieldName === 'id') continue;
+            const elementKey = `${collName}.${itemId}.${fieldName}`;
+
+            const status = getStatusForElement(
+              fieldDef.fillMode,
+              fieldName,
+              item[fieldName],
+              fieldDef.default
+            );
+            if (status) {
+              items.push({
+                sectionId,
+                elementKey,
+                type: status,
+                severity: statusToSeverity(status),
+                displayName: humanizeElementKey(elementKey),
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Count how many are already confirmed from previous state
+  let confirmedCount = 0;
+  for (const item of items) {
+    if (confirmedElements.has(`${item.sectionId}::${item.elementKey}`)) {
+      confirmedCount++;
+    }
+  }
+
+  // Feature 2 — isolate the AI-invented-specifics category (untouched, for markers).
+  const needsReviewItems = items.filter((i) => i.type === 'needs_review');
+
+  // Feature 1 — derive the curated 4-task guide from live content + surface facts.
+  const stockItems = items.filter((i) => i.type === 'stock_image');
+  const guideTasks = deriveGuideTasks(
+    content,
+    {
+      headerSectionId,
+      footerSectionId,
+      primaryCtas,
+      hasImageElement,
+      firstImageTarget,
+      stockItems,
+    },
+    globalSettings
+  );
+  const remainingCount = guideTasks.filter((t) => t.present && !t.done).length;
+
+  return {
+    reviewItems: items,
+    needsReviewItems,
+    guideTasks,
+    remainingCount,
+    allComplete: remainingCount === 0,
+    totalCount: items.length,
+    confirmedCount,
+  };
+}
+
+/** Structural equality of the derived slice, so a refresh can skip a no-op `set`. */
+function derivedEqual(a: DerivedReview, b: DerivedReview): boolean {
+  return (
+    a.remainingCount === b.remainingCount &&
+    a.allComplete === b.allComplete &&
+    a.totalCount === b.totalCount &&
+    a.confirmedCount === b.confirmedCount &&
+    JSON.stringify(a.guideTasks) === JSON.stringify(b.guideTasks) &&
+    JSON.stringify(a.needsReviewItems) === JSON.stringify(b.needsReviewItems) &&
+    JSON.stringify(a.reviewItems) === JSON.stringify(b.reviewItems)
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Store
 // ---------------------------------------------------------------------------
 
@@ -284,167 +505,67 @@ export const useReviewState = create<ReviewState>()(
       confirmedElements: new Set<string>(),
       totalCount: 0,
       confirmedCount: 0,
+      sectionLayouts: {},
+      sections: [],
+      baseline: null,
+      currentPageId: null,
 
-      initFromContent: (content, sectionLayouts, sections, globalSettings) => {
+      initFromContent: (content, sectionLayouts, sections, globalSettings, baseline, currentPageId) => {
         const { confirmedElements } = get();
-        const items: ReviewItem[] = [];
-
-        // Surface facts collected during the single scan → curated guide (Feature 1).
-        let headerSectionId: string | null = null;
-        let footerSectionId: string | null = null;
-        const primaryCtas: Array<{ sectionId: string; elementKey: string }> = [];
-        let hasImageElement = false;
-        let firstImageTarget: { sectionId: string; elementKey: string } | null = null;
-
-        for (const sectionId of sections) {
-          const sectionData = content[sectionId];
-          if (!sectionData) continue;
-
-          const layoutName = sectionLayouts[sectionId];
-          if (!layoutName) continue;
-
-          const schema = layoutElementSchema[layoutName];
-          if (!schema || !isV2Schema(schema)) continue;
-
-          const elements = sectionData.elements || {};
-          const excluded: string[] = sectionData.aiMetadata?.excludedElements || [];
-
-          const effectiveExclusions = new Set(excluded);
-          for (const [key, def] of Object.entries(schema.elements)) {
-            if (def.toggleGroup && effectiveExclusions.has(def.toggleGroup)) {
-              effectiveExclusions.add(key);
-            }
-          }
-
-          // Scan top-level elements
-          for (const [key, def] of Object.entries(schema.elements)) {
-            if (def.type === 'boolean') continue;
-            if (effectiveExclusions.has(key)) continue;
-            if (elements[key] === undefined && def.requirement === 'optional') continue;
-
-            // Track non-logo image surfaces for the "replace stock photos" task.
-            if (isImageElement(key) && !key.includes('logo')) {
-              hasImageElement = true;
-              if (!firstImageTarget) firstImageTarget = { sectionId, elementKey: key };
-            }
-
-            const status = getStatusForElement(def.fillMode, key, elements[key], def.default);
-            if (status) {
-              items.push({
-                sectionId,
-                elementKey: key,
-                type: status,
-                severity: statusToSeverity(status),
-                displayName: humanizeElementKey(key),
-              });
-            }
-          }
-
-          // --- Config items: CTA buttons always need setup ---
-          const sectionType = sectionId.split('-')[0].toLowerCase();
-
-          if (schema.elements.cta_text && !effectiveExclusions.has('cta_text')) {
-            primaryCtas.push({ sectionId, elementKey: 'cta_text' });
-            items.push({
-              sectionId, elementKey: 'cta_text', type: 'unconfigured',
-              severity: 'config', displayName: 'CTA Button Link',
-            });
-          }
-          if (schema.elements.secondary_cta_text && !effectiveExclusions.has('secondary_cta_text')) {
-            items.push({
-              sectionId, elementKey: 'secondary_cta_text', type: 'unconfigured',
-              severity: 'config', displayName: 'Secondary CTA Link',
-            });
-          }
-
-          // Header-specific config → surface fact for the "add logo" task.
-          if (sectionType === 'header') {
-            if (!headerSectionId) headerSectionId = sectionId;
-            if (schema.collections?.nav_items && !effectiveExclusions.has('nav_items')) {
-              items.push({
-                sectionId, elementKey: '__nav_links__', type: 'unconfigured',
-                severity: 'config', displayName: 'Navigation Links',
-              });
-            }
-          }
-
-          // Footer-specific config → surface fact for the "add contact" task.
-          if (sectionType === 'footer') {
-            if (!footerSectionId) footerSectionId = sectionId;
-          }
-
-          // Scan collections
-          if (schema.collections) {
-            for (const [collName, collDef] of Object.entries(schema.collections)) {
-              if (effectiveExclusions.has(collName)) continue;
-              if ((collDef as any).toggleGroup && effectiveExclusions.has((collDef as any).toggleGroup)) continue;
-              const collData = elements[collName];
-              if (!Array.isArray(collData)) continue;
-
-              for (const item of collData) {
-                const itemId = item?.id;
-                if (!itemId) continue;
-
-                for (const [fieldName, fieldDef] of Object.entries(collDef.fields)) {
-                  if (fieldName === 'id') continue;
-                  const elementKey = `${collName}.${itemId}.${fieldName}`;
-
-                  const status = getStatusForElement(
-                    fieldDef.fillMode,
-                    fieldName,
-                    item[fieldName],
-                    fieldDef.default
-                  );
-                  if (status) {
-                    items.push({
-                      sectionId,
-                      elementKey,
-                      type: status,
-                      severity: statusToSeverity(status),
-                      displayName: humanizeElementKey(elementKey),
-                    });
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        // Count how many are already confirmed from previous state
-        let confirmedInItems = 0;
-        for (const item of items) {
-          if (confirmedElements.has(`${item.sectionId}::${item.elementKey}`)) {
-            confirmedInItems++;
-          }
-        }
-
-        // Feature 2 — isolate the AI-invented-specifics category (untouched, for markers).
-        const needsReviewItems = items.filter((i) => i.type === 'needs_review');
-
-        // Feature 1 — derive the curated 4-task guide from live content + surface facts.
-        const stockItems = items.filter((i) => i.type === 'stock_image');
-        const guideTasks = deriveGuideTasks(
+        const derived = deriveReviewState(
           content,
-          {
-            headerSectionId,
-            footerSectionId,
-            primaryCtas,
-            hasImageElement,
-            firstImageTarget,
-            stockItems,
-          },
+          sectionLayouts,
+          sections,
+          confirmedElements,
           globalSettings
         );
-        const remainingCount = guideTasks.filter((t) => t.present && !t.done).length;
 
         set({
-          reviewItems: items,
-          needsReviewItems,
-          guideTasks,
-          remainingCount,
-          allComplete: remainingCount === 0,
-          totalCount: items.length,
-          confirmedCount: confirmedInItems,
+          ...derived,
+          // Retain scan inputs so a content-only refresh can re-derive without them.
+          sectionLayouts,
+          sections,
+          baseline: baseline ?? null,
+          currentPageId: currentPageId ?? null,
+        });
+      },
+
+      refreshFromContent: (content, baseline, currentPageId, globalSettings) => {
+        const state = get();
+        const derived = deriveReviewState(
+          content,
+          state.sectionLayouts,
+          state.sections,
+          state.confirmedElements,
+          globalSettings
+        );
+
+        // No-op guard: skip the `set` entirely when nothing content-derived changed,
+        // so contentEditable keystrokes don't trigger review-state re-renders.
+        const current: DerivedReview = {
+          reviewItems: state.reviewItems,
+          needsReviewItems: state.needsReviewItems,
+          guideTasks: state.guideTasks,
+          remainingCount: state.remainingCount,
+          allComplete: state.allComplete,
+          totalCount: state.totalCount,
+          confirmedCount: state.confirmedCount,
+        };
+        const baselineChanged =
+          baseline !== undefined && baseline !== state.baseline;
+        const pageChanged =
+          currentPageId !== undefined && (currentPageId ?? null) !== state.currentPageId;
+
+        if (derivedEqual(derived, current) && !baselineChanged && !pageChanged) {
+          return;
+        }
+
+        set({
+          ...derived,
+          // Keep the latest baseline / active page for Phase 5 auto-clear derivation.
+          // Never touch confirmedElements or other user-set state here.
+          ...(baseline !== undefined ? { baseline: baseline ?? null } : {}),
+          ...(currentPageId !== undefined ? { currentPageId: currentPageId ?? null } : {}),
         });
       },
 
