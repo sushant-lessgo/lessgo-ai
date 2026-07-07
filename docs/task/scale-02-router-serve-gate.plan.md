@@ -10,8 +10,8 @@ Replace the persona gate + pilot allowlist + waitlist with one universal entry `
 
 ## Progress log
 
-- phase 1 brief modules (classify/serveGate/bridge/playback): done (review loops 1, ship) — 40 brief tests + full suite green; open q for founder: booking-payments treated in-ICP (only checkout/ordering = out-of-icp) — confirm before phase 5 UI
-- phase 2 DemandLead migration: pending
+- phase 1 brief modules (classify/serveGate/bridge/playback): done (commit a1a2138, review loops 1) — 40 brief tests + full suite green; open q for founder: booking-payments treated in-ICP (only checkout/ordering = out-of-icp) — confirm before phase 5 UI
+- phase 2 DemandLead migration: done (review loops 1) — additive CREATE TABLE + 3 indexes (migration 20260707210859_add_demand_lead); userId required; tsc+suite green
 - phase 3 classification extension of understand/scrape: pending
 - phase 4 API routes (brief confirm/hydrate + demand-lead): pending
 - phase 5 entry UI /onboarding/[token]: pending

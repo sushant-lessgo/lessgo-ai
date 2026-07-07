@@ -99,3 +99,81 @@ user copy centralized for founder review.
 - The gallery/rungC augmented check deliberately scans ALL templateIds via
   `fit()` (retired/bespoke are rejected inside `fit`), so lumen (bespoke,
   gallery-capable) correctly does NOT satisfy it.
+
+---
+
+## Phase 2 — DemandLead model + migration
+
+**Files changed**
+- `prisma/schema.prisma` — added `DemandLead` model (appended at end)
+- `prisma/migrations/20260707210859_add_demand_lead/migration.sql` — CLI-generated
+
+**Final model (as in schema.prisma):**
+```prisma
+model DemandLead {
+  id         String   @id @default(cuid())
+  userId     String // Clerk id of creator — PATCH ownership scope (phase 4)
+  input      String // raw one-liner or URL
+  briefDraft Json // classified Brief draft at submit time
+  missing    String // "rungC:gallery,rungA:photographer" | "out-of-icp" | "bridge:work" | "rungE:place"
+  email      String
+  phone      String?
+  fasttrack  Boolean  @default(false)
+  status     String   @default("new") // new|contacted|converted|declined
+  createdAt  DateTime @default(now())
+
+  @@index([status, createdAt])
+  @@index([missing])
+  @@index([userId])
+}
+```
+
+**Migration:** `20260707210859_add_demand_lead/migration.sql`
+```sql
+-- CreateTable
+CREATE TABLE "DemandLead" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "input" TEXT NOT NULL,
+    "briefDraft" JSONB NOT NULL,
+    "missing" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "phone" TEXT,
+    "fasttrack" BOOLEAN NOT NULL DEFAULT false,
+    "status" TEXT NOT NULL DEFAULT 'new',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "DemandLead_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE INDEX "DemandLead_status_createdAt_idx" ON "DemandLead"("status", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "DemandLead_missing_idx" ON "DemandLead"("missing");
+
+-- CreateIndex
+CREATE INDEX "DemandLead_userId_idx" ON "DemandLead"("userId");
+```
+
+**Deviations**
+- Orchestrator's task message said the revised plan model has `userId String?`
+  (optional); the plan's actual Phase-2 block (line 93) says `userId String`
+  (required). Plan text is authoritative per instructions ("reproduce verbatim")
+  → used REQUIRED `userId`. This also matches phase 4 (route is Clerk-gated,
+  userId always set at create).
+
+**Verification**
+- `npx prisma migrate status` — "Database schema is up to date!" (22 migrations) ✅
+- migration.sql — CREATE TABLE + 3 CREATE INDEX only; no DROP/ALTER, no data migration ✅
+- `npx tsc --noEmit` — clean ✅
+- `npm run test:run` — 63 files passed | 1 skipped; 874 tests passed | 2 skipped ✅
+
+**Gotchas**
+- Known EPERM on `prisma generate` (query_engine-windows.dll.node rename blocked
+  by running dev server) — hit twice; benign per scale-01 audit: client JS/types
+  regenerated (`DemandLead` present in `node_modules/.prisma/client/index.d.ts`),
+  DLL is same version already in place. `.tmp` leftovers cleaned.
+
+**Open risks**
+- None. No readers of DemandLead yet ⇒ zero behavior change by construction.
