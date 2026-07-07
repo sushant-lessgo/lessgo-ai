@@ -89,7 +89,7 @@ export function FloatingToolbars() {
 
       {shouldShowToolbar('text') && editorSelection.textEditingElement && editorSelection.selectedElement && (
         <TextToolbarMVP
-          elementSelection={editorSelection.selectedElement}
+          elementSelection={editorSelection.textEditingElement || editorSelection.selectedElement}
           position={position}
           contextActions={contextActions}
         />

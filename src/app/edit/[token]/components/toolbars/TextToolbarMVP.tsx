@@ -11,6 +11,7 @@ import {
   toggleFormatOnSelection,
   getSelectionFormatting,
   removeFormattingFromSelection,
+  wrapElementContentWithStyles,
   type PartialFormatResult
 } from '@/utils/textFormatting';
 
@@ -260,40 +261,34 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
 
         setFormatState(updatedFormat);
         
-        // Update store for persistence - ALWAYS extract from parent element styles
-        // This prevents nested spans and ensures all formatting persists correctly
-        const elementHasDirectStyles = !!(
-          targetElement.style.color ||
-          targetElement.style.fontSize ||
-          targetElement.style.fontWeight ||
-          targetElement.style.fontStyle ||
-          targetElement.style.textDecoration
-        );
+        // Update store for persistence — wrap the element's inner HTML in one
+        // styled span (merging into an existing wrapper span instead of
+        // nesting). Preserves inner markup (<em> accents, partial-selection
+        // spans); the old textContent rebuild dropped them and emitted a raw
+        // markup string that fed the literal-`<span>` corruption.
+        const styles: Record<string, string> = {};
+        if (targetElement.style.color) styles['color'] = targetElement.style.color;
+        if (targetElement.style.fontSize) styles['font-size'] = targetElement.style.fontSize;
+        // CRITICAL: Save font-weight even if 'normal' to override h1/h2 defaults
+        if (targetElement.style.fontWeight) styles['font-weight'] = targetElement.style.fontWeight;
+        if (targetElement.style.fontStyle) styles['font-style'] = targetElement.style.fontStyle;
+        // CRITICAL: Save text-decoration even if 'none' to persist un-underline
+        if (targetElement.style.textDecoration) styles['text-decoration'] = targetElement.style.textDecoration;
+        // Alignment was never persisted (QA: align silently dropped). A span is
+        // inline, so persist it as a block-level wrapper.
+        if (targetElement.style.textAlign) {
+          styles['text-align'] = targetElement.style.textAlign;
+          styles['display'] = 'block';
+        }
 
         let contentToSave: string;
-        if (elementHasDirectStyles) {
-          // Build styles array from parent element (ignoring any inner spans)
-          const styles: string[] = [];
-
-          if (targetElement.style.color) styles.push(`color: ${targetElement.style.color}`);
-          if (targetElement.style.fontSize) styles.push(`font-size: ${targetElement.style.fontSize}`);
-          // CRITICAL: Save font-weight even if 'normal' to override h1/h2 defaults
-          if (targetElement.style.fontWeight) styles.push(`font-weight: ${targetElement.style.fontWeight}`);
-          if (targetElement.style.fontStyle) styles.push(`font-style: ${targetElement.style.fontStyle}`);
-          // CRITICAL: Save text-decoration even if 'none' to persist un-underline
-          if (targetElement.style.textDecoration) styles.push(`text-decoration: ${targetElement.style.textDecoration}`);
-
-          // Use textContent to strip any existing spans and avoid nesting
-          const textContent = targetElement.textContent || '';
-
-          // Create clean span with all merged styles
-          contentToSave = `<span style="${styles.join('; ')}">${textContent}</span>`;
+        if (Object.keys(styles).length > 0) {
+          contentToSave = wrapElementContentWithStyles(targetElement.innerHTML, styles);
         } else {
-          // No formatting - save plain text
+          // No formatting — save plain text
           contentToSave = targetElement.textContent || '';
         }
-        
-        
+
         updateElementContent(
           elementSelection.sectionId, 
           elementSelection.elementKey, 

@@ -76,8 +76,12 @@ export function InlineTextEditorV2({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sync content from props to DOM when NOT editing
-  // This prevents cursor jumping by avoiding updates during typing
+  // Sync content from props to DOM when NOT editing.
+  // The DOM is the single source of truth: the element renders NO React children
+  // (see JSX below) — content is only ever written imperatively here. Rendering
+  // `{content}` as a text child let React re-render mid-edit (e.g. after a
+  // toolbar formatting write to the store) and replace the formatted DOM with
+  // the raw HTML string as literal text — the `<span style=…>` corruption bug.
   useEffect(() => {
     if (!isEditing && editorRef.current) {
       const isHtml = /<[^>]*>/g.test(content);
@@ -259,9 +263,7 @@ export function InlineTextEditorV2({
       aria-label={`Edit ${elementKey}`}
       aria-multiline={Element !== 'span'}
       tabIndex={0}
-    >
-      {content || placeholder}
-    </Element>
+    />
   );
 }
 

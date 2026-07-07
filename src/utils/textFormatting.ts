@@ -456,49 +456,107 @@ import { sanitizeHTML, isValidFormattingHTML } from './htmlSanitization';
 
 import { logger } from '@/lib/logger';
 /**
- * Simple HTML sanitizer that doesn't cause infinite loops
- * This replaces the complex sanitizeHTML function that was hanging
+ * DOM-based cleanup for formatted element HTML. Replaces the old regex
+ * sanitizer, whose entity unescape/re-escape passes were the root cause of the
+ * `<span style=…>`-as-literal-text corruption (QA 2026-07-07): it blindly
+ * unescaped `&lt;`/`&gt;` in ordinary text and only "fixed" one hard-coded
+ * corruption pattern, so a second formatting pass double-serialized the field.
+ *
+ * This version parses the HTML once and normalizes structurally — it NEVER
+ * rewrites entities, so already-escaped text stays inert text:
+ *  - strips non-style attributes from formatting spans
+ *  - unwraps spans with no/empty style
+ *  - removes empty spans
+ *  - merges single-child nested spans (inner styles win)
  */
-function simpleSanitizeHTML(html: string): string {
-  if (!html) return html;
-  
-  // 1. Unescape HTML entities to prevent double-escaping
-  let cleaned = html
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, "'");
-  
-  // 1.5. Fix specific corruption case: mixed escaped/unescaped spans
-  cleaned = cleaned.replace(/&lt;span style="([^"]*)"&gt;([^&]*)&lt;\/span&gt;/g, '<span style="$1">$2</span>');
-  
-  // 1.6. Fix the exact case from user: "AI &lt;span style="font-weight: normal;"&gt;Solution&lt;/span&gt;"
-  cleaned = cleaned.replace(/\s+&lt;span[^&]*&gt;([^&]*)&lt;\/span&gt;/g, ' $1');
-  
-  // 2. Remove redundant nested spans with the same styling
-  cleaned = cleaned.replace(/<span style="([^"]*)"[^>]*><span style="\1"[^>]*>(.*?)<\/span><\/span>/g, '<span style="$1">$2</span>');
-  
-  // 3. Merge adjacent spans with the same style
-  cleaned = cleaned.replace(/<\/span><span style="([^"]*)">/g, '');
-  
-  // 4. Clean up empty spans
-  cleaned = cleaned.replace(/<span[^>]*><\/span>/g, '');
-  
-  // 5. Remove redundant font-weight: normal (it's the default) - BUT preserve other meaningful styles
-  // Only remove font-weight: normal if it's the ONLY style, preserve if there are other styles
-  cleaned = cleaned.replace(/style="font-weight:\s*normal;?\s*"/g, '');
-  cleaned = cleaned.replace(/font-weight:\s*normal;\s*/g, ''); // Remove if it's part of multiple styles
-  
-  // 6. Clean up empty style attributes
-  cleaned = cleaned.replace(/style="[;\s]*"/g, '');
-  cleaned = cleaned.replace(/<span\s+>/g, '<span>');
-  
-  // 7. Remove spans with no style attribute (preserve formatting spans with meaningful styles)
-  cleaned = cleaned.replace(/<span>([^<]*)<\/span>/g, '$1');
-  
-  
-  return cleaned;
+export function cleanFormattedHTML(html: string): string {
+  if (!html || typeof document === 'undefined') return html;
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html;
+
+  const unwrap = (el: Element) => {
+    const parent = el.parentNode;
+    if (!parent) return;
+    while (el.firstChild) parent.insertBefore(el.firstChild, el);
+    parent.removeChild(el);
+  };
+
+  let changed = true;
+  let guard = 0;
+  while (changed && guard++ < 20) {
+    changed = false;
+    for (const span of Array.from(tpl.content.querySelectorAll('span'))) {
+      // Skip nodes detached by an earlier unwrap/remove in this same snapshot
+      // (fragment nodes are never `isConnected`, so use contains()).
+      if (!tpl.content.contains(span)) continue;
+      for (const attr of Array.from(span.attributes)) {
+        if (attr.name !== 'style') {
+          span.removeAttribute(attr.name);
+          changed = true;
+        }
+      }
+      const style = span.getAttribute('style')?.trim();
+      if (!style) {
+        unwrap(span);
+        changed = true;
+        continue;
+      }
+      if (!span.textContent) {
+        span.remove();
+        changed = true;
+        continue;
+      }
+      // <span a><span b>text</span></span> → <span a; b>text</span> (b last = wins)
+      const onlyChild =
+        span.childNodes.length === 1 && span.firstElementChild?.tagName === 'SPAN'
+          ? (span.firstElementChild as HTMLElement)
+          : null;
+      if (onlyChild) {
+        const merged = `${style}; ${onlyChild.getAttribute('style') || ''}`;
+        onlyChild.setAttribute('style', merged);
+        unwrap(span);
+        changed = true;
+      }
+    }
+  }
+  return tpl.innerHTML;
+}
+
+/**
+ * Wrap an element's ENTIRE inner HTML in a styled span, preserving existing
+ * inline markup (<em> accents, prior formatting spans). If the content is
+ * already exactly one wrapper span, merge the new styles into it instead of
+ * nesting. Used by the toolbar's whole-element formatting path, which used to
+ * rebuild from textContent + a raw markup string (dropping <em> and feeding
+ * the literal-text corruption).
+ */
+export function wrapElementContentWithStyles(
+  innerHTML: string,
+  styles: Record<string, string>
+): string {
+  if (typeof document === 'undefined') return innerHTML;
+  const tpl = document.createElement('template');
+  tpl.innerHTML = innerHTML;
+
+  const meaningful = Array.from(tpl.content.childNodes).filter(
+    (n) => !(n.nodeType === Node.TEXT_NODE && !n.textContent?.trim())
+  );
+  let wrapper: HTMLElement;
+  if (
+    meaningful.length === 1 &&
+    meaningful[0].nodeType === Node.ELEMENT_NODE &&
+    (meaningful[0] as Element).tagName === 'SPAN'
+  ) {
+    wrapper = meaningful[0] as HTMLElement;
+  } else {
+    wrapper = document.createElement('span');
+    while (tpl.content.firstChild) wrapper.appendChild(tpl.content.firstChild);
+    tpl.content.appendChild(wrapper);
+  }
+  for (const [prop, value] of Object.entries(styles)) {
+    wrapper.style.setProperty(prop, value);
+  }
+  return tpl.innerHTML;
 }
 
 export interface PartialFormatResult {
@@ -570,9 +628,9 @@ export function formatSelectedText(options: Partial<TextFormatState>): PartialFo
 
     // Get the containing element's HTML for storage (we already have it!)
     const rawHTML = containingElement.innerHTML;
-    
-    // FIXED: Use simple, safe HTML cleanup instead of complex sanitizer
-    const sanitizedHTML = simpleSanitizeHTML(rawHTML);
+
+    // DOM-based structural cleanup (no entity rewriting — see cleanFormattedHTML)
+    const sanitizedHTML = cleanFormattedHTML(rawHTML);
     
     logger.debug('✨ Partial text formatting complete:', {
       rawHTML: rawHTML.substring(0, 100),
@@ -733,9 +791,9 @@ export function removeFormattingFromSelection(): PartialFormatResult {
     // Get the containing element's HTML for storage
     const containingElement = range.startContainer.parentElement?.closest('[data-element-key]') as HTMLElement;
     const rawHTML = containingElement?.innerHTML || '';
-    
-    // FIXED: Use simple, safe HTML cleanup instead of complex sanitizer
-    const sanitizedHTML = simpleSanitizeHTML(rawHTML);
+
+    // DOM-based structural cleanup (no entity rewriting — see cleanFormattedHTML)
+    const sanitizedHTML = cleanFormattedHTML(rawHTML);
 
     return {
       success: true,
