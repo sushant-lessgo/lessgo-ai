@@ -33,6 +33,7 @@ model Project {
 
   themeValues    Json?
   computedDesign Json?
+  brief          Json?
   inputText      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
