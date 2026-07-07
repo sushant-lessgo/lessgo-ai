@@ -21,6 +21,10 @@ your job is coordination + carrying artifacts between agents.
 > Fable-budget note: orchestration needs no Fable. If the session is on Fable,
 > suggest the user switch to `/model opus` for the run — subagents pin their own
 > models regardless; only planner/implementer spawns should consume Fable.
+>
+> Fable fallback: planner + implementer pin `model: fable`. If Fable is
+> unavailable, spawn those two on Opus instead (`model: opus`) — never block the
+> run waiting on Fable. All other stages already use Opus.
 
 **Artifacts** (all under `docs/task/`): `<feature>.spec.md` (the user, already
 written), `<feature>.plan.md` (planner), `<feature>.audit.md` (implementer).

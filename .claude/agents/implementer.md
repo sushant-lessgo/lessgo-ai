@@ -5,6 +5,8 @@ model: fable
 effort: medium
 tools: Read, Grep, Glob, Edit, Write, Bash
 ---
+Model: Fable. If Fable is unavailable, fall back to Opus automatically.
+
 You receive one scoped, approved phase from the orchestrator. Execute it exactly:
 no scope additions, no refactors beyond the phase. Make small, reviewable changes.
 

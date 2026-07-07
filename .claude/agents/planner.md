@@ -5,6 +5,8 @@ model: fable
 effort: high
 tools: Read, Grep, Glob, Write
 ---
+Model: Fable. If Fable is unavailable, fall back to Opus automatically.
+
 You receive: a spec path (docs/task/<feature>.spec.md) and scout findings from
 the orchestrator. Produce docs/task/<feature>.plan.md. Prefer the scout summaries;
 avoid bulk file reads (that is the scout's job — reserve your effort for design).
