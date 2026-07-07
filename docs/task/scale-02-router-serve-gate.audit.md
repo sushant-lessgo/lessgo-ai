@@ -326,3 +326,37 @@ generation-contract + golden tests green (tripwire held).
 - `decideServe` invoked server-side in confirm; request schema carries no client verdict ✅
 - Firewall: routes import only `@/modules/brief/*` (pure), prisma, zod, security/rateLimit/email helpers — no template resolver/registry/renderer ✅
 - Plan's manual dev checks (agency confirm ⇒ surge row, photographer ⇒ DemandLead, PATCH cross-user 404) NOT run — deferred to phase-5/6 manual QA when the entry UI exists to drive them.
+
+---
+
+## Phase 5 — entry UI `/onboarding/[token]`
+
+**Files changed**
+- `src/app/onboarding/[token]/layout.tsx` (create)
+- `src/app/onboarding/[token]/page.tsx` (create)
+- `src/app/onboarding/[token]/components/EntryInputStep.tsx` (create)
+- `src/app/onboarding/[token]/components/ConfirmBriefStep.tsx` (create)
+- `src/app/onboarding/[token]/components/ManualOnboardStep.tsx` (create)
+
+**Per-file**
+- `layout.tsx` (SERVER) — Clerk guard (`redirect('/sign-in')`); claim-on-visit copied verbatim from `src/app/onboarding/product/[token]/layout.tsx` (`prisma.project.updateMany({where:{tokenId, userId:null}})` — race-safe, try/catch'd, logger idiom); then project-existence check `findUnique({where:{tokenId}, select:{id:true}})` OUTSIDE any try/catch (Next `redirect()` throws) ⇒ missing project → `redirect('/dashboard')`. ZERO persona reads.
+- `page.tsx` (CLIENT) — 3-step `useState` flow `input → confirm → manual` (NO new zustand store, D1 in-memory draft); holds `{rawInput, briefDraft, leadId}` + `missing`. Simple chrome mirroring StepContainer's shell (fixed white header + Logo, `max-w-xl` white card) — StepContainer itself is product-store-coupled so not reused.
+- `EntryInputStep.tsx` — ONE field. URL detection = OneLinerStep's `normalizeUrl` (protocol-prefix + `new URL` + dot-in-hostname guard) — copied verbatim from `src/app/onboarding/product/[token]/components/steps/OneLinerStep.tsx`, plus one added guard: input containing whitespace ⇒ not a URL (OneLinerStep has separate one-liner/URL fields; this shared field must not misroute a sentence — logged as deviation). One-liner validation = OneLinerStep's `validateOneLiner` verbatim (min-10 matches the understand route's zod min). URL ⇒ POST `/api/v2/scrape-website {url, entry:true}`; text ⇒ POST `/api/v2/understand {oneLiner, entry:true}`; success gate = `res.ok && json.success && json.briefDraft` (phase-3 shape `{success, data, briefDraft, creditsUsed}`); `json.message` fallback error copy + Loader2 states per OneLinerStep conventions.
+- `ConfirmBriefStep.tsx` — renders `playbackSentence(briefDraft)`; 1-tap Confirm; "Not quite right?" reveals `chooserCards()` (6 businessType labels + "Something else", D7); chooser rendered UPFRONT when `(brief.confidence ?? 0) < LOW_CONFIDENCE_THRESHOLD` (undefined confidence treated as low — conservative). **Chooser tap routes ONLY through `applyBusinessTypeCorrection(draft, key)`** (`@/modules/brief/classify`) — never hand-mutates businessType; the helper resets `classificationSource='lookup'`/`tiebreaker='none'`/`resolvedEngine` per D7, so a corrected KNOWN type carries no stale portfolio rung. "Something else" ⇒ `onManual('rungA:unclassified')`. Confirm ⇒ POST `/api/brief/confirm {tokenId, brief}` ⇒ `serve` → `router.push(redirectTo)` (server's authoritative verdict); `manual` → manual step with the SERVER's `missing`.
+- `ManualOnboardStep.tsx` — spec §5 copy VERBATIM: "Not automated yet — someone from Lessgo AI will connect with you shortly."; email required (regex), phone optional; POST `/api/demand-lead {input, briefDraft, missing, email, phone?}` ⇒ `leadId` lifted to page state; thank-you shows "Need it sooner?" ⇒ PATCH `{id, fasttrack:true}` ⇒ message upgrades verbatim to "Sushant will connect with you shortly to personalize." Screen identical for out-of-icp — only the `missing` payload tag differs; nothing internal rendered.
+
+**No internal-term leak** — grep of the 5 files: `engine`/`rung`/`archetype`/`missing` appear only in comments, prop names, and payloads; all rendered strings come from `playbackSentence`/`chooserCards` (pure playback module) + the spec §5/§11.11 verbatim copy. Confirmed none reach JSX text.
+
+**App Router precedence** — `src/app/onboarding/` contains static siblings `persona/`, `waitlist/`, `product/`, `service/` alongside new `[token]/`. Next App Router matches static segments before dynamic ones at the same level, so `/onboarding/persona`, `/onboarding/waitlist`, `/onboarding/product/*`, `/onboarding/service/*` all still resolve to their existing segments; only unmatched `/onboarding/<anything-else>` hits `[token]`. Nothing routes here yet (cutover = phase 6) ⇒ phase invisible to existing flows.
+
+**Deviations**
+- `normalizeUrl` whitespace guard added (above) — required because entry has ONE shared field; without it `new URL('https://a b.com…')` behavior is engine-dependent and a sentence containing a domain-like word could misroute to scrape.
+- Undefined `brief.confidence` treated as below threshold (chooser upfront) — conservative; `buildBriefDraft` always sets it, so only defensive.
+- Confirm button copy "Looks right — continue" + input-step headline copy authored here (no spec-verbatim copy exists for these); centralized playback strings untouched — founder reviews wording pre-launch per spec open q1.
+
+**Verification**
+- `npx tsc --noEmit` — clean ✅
+- `npm run test:run` — 64 files passed | 1 skipped; 886 passed | 2 skipped ✅ (identical to phase 4 — no existing test changed)
+- `git status` — only the 5 new files under `src/app/onboarding/[token]/` (+ a PRE-EXISTING uncommitted orchestrator edit to this plan.md adding phase-4's commit hash — not touched by this phase). No wizard/`/api/start`/middleware edit ✅
+- Firewall: components import `@/modules/brief/{classify,playback}` + `@/types/brief` + ui/lucide/Logo only — no template resolver/registry/renderer/block ✅
+- Plan's manual dev checks (real-LLM 3 acceptance inputs, fasttrack upgrade, rungE no-500) NOT run here — deferred to manual QA per plan (wizard hydrate lands phase 6; serve redirect into an empty wizard is EXPECTED).
