@@ -5,6 +5,11 @@ import posthog from "posthog-js";
 import { PostHogProvider } from '@/providers/ph-provider'
 import { GeistSans, GeistMono } from 'geist/font';
 import "./globals.css";
+// Template @font-face declarations (self-hosted). Published pages load these via
+// p/layout.tsx; without this import the editor + preview rendered fallback fonts
+// (QA vestria: display serif fell back to a slab serif). Declarations are lazy —
+// browsers only download faces actually used on screen.
+import "@/styles/fonts-self-hosted.css";
 // import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { Suspense } from 'react';
 import {
