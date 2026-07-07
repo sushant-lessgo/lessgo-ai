@@ -23,13 +23,20 @@ import {
   ScrapeWebsiteExtendedSchema,
   ScrapeWebsiteManufacturerSchema,
   ScrapeWebsiteServiceSchema,
+  EntryScrapeSchema,
+  entryClassificationPromptBlock,
+  entryPrefillDeltaPromptBlock,
 } from '@/lib/schemas';
 import type {
   ScrapeWebsiteData,
   ScrapeWebsiteExtendedData,
   ScrapeWebsiteManufacturerData,
   ScrapeWebsiteServiceData,
+  EntryScrapeData,
 } from '@/lib/schemas';
+// Entry mode (scale-02 phase 3, D6): pure brief module — engine resolution +
+// Brief construction happen server-side here, never in the AI call.
+import { buildBriefDraft, type EntrySignals } from '@/modules/brief/classify';
 import { buildServiceScrapePrompt } from '@/modules/audience/service/promptScrape';
 import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
 import { isDemoMode } from '@/lib/mockMode';
@@ -51,6 +58,10 @@ const ScrapeRequestSchema = z.object({
   url: z.string().url('Enter a valid website URL'),
   audienceType: z.enum(['product', 'service']).optional().default('product'),
   templateId: z.string().optional(),
+  // Entry-mode classification flag (scale-02 phase 3). Absent/false ⇒ the
+  // route behaves byte-identically to before; true ⇒ EntryScrapeSchema
+  // + appended classification prompt block + server-side briefDraft.
+  entry: z.boolean().optional(),
 });
 
 function buildScrapePrompt(combinedText: string): string {
@@ -205,6 +216,197 @@ const MOCK_DATA_SERVICE: ScrapeWebsiteServiceData = {
   ],
 };
 
+// ===== Entry mode (scale-02 phase 3, plan D6) =====
+// Same single AI call, EXTENDED schema (base scrape fields — incl. verbatim
+// testimonials/facts/excerpts — plus entry classification signals). Engine
+// resolution + Brief construction are CODE (buildBriefDraft), server-side.
+
+// Map the entry scrape extract into the phase-1 EntrySignals shape.
+// Base scrape fields double as the neutral prefill (oneLiner/productName/
+// categories/audiences/offer); rich testimonials flatten to quote strings.
+function mapEntryScrapeToSignals(
+  data: Omit<EntryScrapeData, 'facts' | 'excerpts'>
+): EntrySignals {
+  return {
+    businessTypeGuess: data.businessTypeGuess,
+    businessTypeConfidence: data.businessTypeConfidence,
+    category: data.category,
+    goalIntentGuess: data.goalIntentGuess,
+    tiebreaker: data.tiebreaker,
+    structureHint: data.structureHint,
+    designStyleHint: data.designStyleHint,
+    platformNeeds: data.platformNeeds,
+    summary: data.summary,
+    businessName: data.productName,
+    offerings: data.offerings,
+    audiences: data.audiences,
+    categories: data.categories,
+    outcomes: data.outcomes,
+    deliveryModel: data.deliveryModel,
+    offer: data.offer,
+    oneLiner: data.oneLiner,
+    proofAvailable: data.proofAvailable,
+    socialProfiles: data.socialProfiles,
+    testimonials: data.testimonials.map((t) => t.quote),
+  };
+}
+
+// Demo-mode entry fixture — agency-shaped so the SERVE path is testable free
+// (agency ⇒ known businessType ⇒ engine 'trust' by lookup). Client-facing
+// shape (facts/excerpts stripped, same as the other mocks).
+const MOCK_DATA_ENTRY: Omit<EntryScrapeData, 'facts' | 'excerpts'> = {
+  oneLiner:
+    'Growth marketing agency for SaaS companies that turns paid traffic into booked demos',
+  productName: 'Scale Growth Co',
+  categories: ['Growth marketing', 'Performance marketing'],
+  audiences: ['B2B SaaS founders', 'Marketing leads'],
+  whatItDoes:
+    'Runs paid acquisition and conversion-focused landing pages that turn traffic into booked demos.',
+  features: ['Paid social campaigns', 'Landing page CRO', 'Growth strategy'],
+  offer: 'Free growth audit',
+  landingGoal: 'demo',
+  testimonials: [
+    {
+      quote: 'Scale Growth Co took us from 12 to 60 booked demos a month.',
+      author_name: 'Ana Torres',
+      author_role: 'CMO, Flowstack',
+    },
+  ],
+  businessTypeGuess: 'agency',
+  businessTypeConfidence: 0.9,
+  category: 'Growth marketing',
+  goalIntentGuess: 'book-call',
+  tiebreaker: 'expertise',
+  structureHint: 'single',
+  designStyleHint: 'bold-performance',
+  platformNeeds: 'none',
+  summary:
+    'A growth marketing agency that runs paid acquisition and conversion-focused landing pages for SaaS companies.',
+  offerings: ['Paid social campaigns', 'Landing page CRO', 'Growth strategy'],
+  outcomes: ['3.2x average ROAS', 'Pipeline in 60 days'],
+  deliveryModel: 'remote',
+  proofAvailable: ['testimonials', 'case studies'],
+  socialProfiles: [],
+};
+
+async function handleEntryScrape(
+  req: NextRequest,
+  url: string,
+  userId: string,
+  startTime: number
+): Promise<Response> {
+  // Demo/mock mode — agency-shaped fixture, no network, no AI call, 0 credits.
+  if (isDemoMode(req)) {
+    logger.info('[scrape-website] Using mock response (entry)');
+    return createSecureResponse({
+      success: true,
+      data: MOCK_DATA_ENTRY,
+      briefDraft: buildBriefDraft(mapEntryScrapeToSignals(MOCK_DATA_ENTRY), url),
+      creditsUsed: 0,
+      creditsRemaining: 999,
+    });
+  }
+
+  // No SiteContext cache on the entry path (conservative): cached extracts
+  // lack the signal fields, and writing entry-shaped extracts would change
+  // what the non-entry cached path returns.
+
+  // SSRF-safe fetch + crawl + strip (same plumbing as the default path).
+  let combinedText: string;
+  let pageCount: number;
+  try {
+    const site = await scrapeSite(url);
+    combinedText = site.combinedText;
+    pageCount = site.pages.length;
+  } catch (err) {
+    if (err instanceof ScrapeError) {
+      logger.warn(`[scrape-website] scrape failed (${err.code}) for ${url}`);
+      return createSecureResponse(
+        { success: false, error: err.code, message: err.message, recoverable: true },
+        err.code === 'blocked_host' || err.code === 'invalid_url' ? 400 : 502
+      );
+    }
+    throw err;
+  }
+
+  if (!combinedText || combinedText.trim().length < 40) {
+    return createSecureResponse(
+      {
+        success: false,
+        error: 'no_content',
+        message: "We couldn't read enough text from that site.",
+        recoverable: true,
+      },
+      422
+    );
+  }
+
+  // ONE AI call: existing extraction prompt + appended entry blocks.
+  const prompt = `${buildScrapePrompt(combinedText)}
+
+${entryPrefillDeltaPromptBlock()}
+
+${entryClassificationPromptBlock()}`;
+
+  let data: EntryScrapeData;
+  let briefDraft;
+  try {
+    data = await generateWithSchema(
+      'understand',
+      [{ role: 'user', content: prompt }],
+      EntryScrapeSchema,
+      'entry_scrape_website'
+    );
+    // Server-side Brief construction (D1/D6) — engine via code lookup; safe
+    // for place/quick-yes by construction (copyEngine omitted, D2).
+    briefDraft = buildBriefDraft(mapEntryScrapeToSignals(data), url);
+  } catch (error: any) {
+    logger.error('[scrape-website] AI entry extraction failed:', error);
+    return createSecureResponse(
+      {
+        success: false,
+        error: 'ai_error',
+        message: error.message || 'AI service error',
+        recoverable: true,
+      },
+      500
+    );
+  }
+
+  // Client response carries the STRIPPED extract (same convention as the
+  // default path — facts/excerpts stay server-side).
+  const { facts, excerpts, ...extract } = data;
+
+  const creditResult = await consumeCredits(
+    userId,
+    UsageEventType.SCRAPE_WEBSITE,
+    CREDIT_COSTS.SCRAPE_WEBSITE,
+    {
+      endpoint: '/api/v2/scrape-website',
+      duration: Date.now() - startTime,
+      metadata: {
+        extractionShape: 'entry',
+        pageCount,
+        textLength: combinedText.length,
+        testimonialsFound: data.testimonials.length,
+      },
+    }
+  );
+  if (!creditResult.success) {
+    logger.warn(`[scrape-website] Credit consumption failed: ${creditResult.error}`);
+  }
+
+  logger.dev(`[scrape-website] entry completed in ${Date.now() - startTime}ms`);
+
+  return createSecureResponse({
+    success: true,
+    data: extract,
+    briefDraft,
+    creditsUsed: CREDIT_COSTS.SCRAPE_WEBSITE,
+    creditsRemaining: creditResult.remaining,
+  });
+}
+
 async function scrapeHandler(req: NextRequest): Promise<Response> {
   const startTime = Date.now();
 
@@ -218,7 +420,7 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
         400
       );
     }
-    const { url, audienceType, templateId } = validation.data;
+    const { url, audienceType, templateId, entry } = validation.data;
     const isService = audienceType === 'service';
     const isManufacturer = !isService && isManufacturerFlow(templateId);
 
@@ -231,6 +433,12 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
       );
     }
     const userId = authCheck.userId!;
+
+    // 2a. Entry-mode branch (scale-02 phase 3). Fully additive: when the
+    // `entry` flag is absent, everything below is byte-identical to before.
+    if (entry === true) {
+      return handleEntryScrape(req, url, userId, startTime);
+    }
 
     // 2b. Demo/mock mode — no network, no AI call.
     if (isDemoMode(req)) {

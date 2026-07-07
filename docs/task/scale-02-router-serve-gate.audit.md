@@ -177,3 +177,114 @@ CREATE INDEX "DemandLead_userId_idx" ON "DemandLead"("userId");
 
 **Open risks**
 - None. No readers of DemandLead yet ⇒ zero behavior change by construction.
+
+---
+
+## Phase 3 — classification extension of understand + scrape (entry mode)
+
+**Files changed**
+- `src/lib/schemas/entryClassify.schema.ts` (created)
+- `src/lib/schemas/index.ts` (edited — 1 line, barrel export)
+- `src/lib/schemas/entryClassify.schema.test.ts` (created)
+- `src/app/api/v2/understand/route.ts` (edited — additive)
+- `src/app/api/v2/scrape-website/route.ts` (edited — additive)
+
+**Per file**
+
+- `entryClassify.schema.ts` — `EntrySignalsSchema` (full zod mirror of phase-1
+  `EntrySignals`; compile-time parity guard `EntrySignalsData extends EntrySignals`).
+  Idiom copied from `scrapeWebsite.schema.ts`: nullable-NOT-optional for guess
+  fields (OpenAI strict structured outputs); NO numeric min/max on
+  `businessTypeConfidence` (strict json_schema conversion risk — range is
+  prompt-enforced, matching the file's existing avoidance of string `.min` on
+  suggested fields). Composites: `EntryUnderstandSchema = EntrySignalsSchema`
+  (standalone one-liner path) and
+  `EntryScrapeSchema = ScrapeWebsiteExtendedSchema.extend({...signal fields})`
+  — base name confirmed as `ScrapeWebsiteExtendedSchema`; extension deliberately
+  EXCLUDES fields the base already has (oneLiner/productName/categories/
+  audiences/offer/testimonials) so verbatim `{quote,author_name,author_role}`
+  testimonials + facts + excerpts are preserved; route maps base→signals.
+  Enums sourced from `@/modules/goals/vocabulary` (goalIntents/goalIntentMeta),
+  `@/types/brief` (designStyles), `@/modules/businessTypes/config` (keys+labels).
+  Also exports two prompt-block builders (`entryClassificationPromptBlock`,
+  `entryPrefillDeltaPromptBlock`) — co-located here because the menus derive
+  from the same closed vocabularies as the schema enums, and the only other
+  allowed homes were the two routes (would mean duplicated menu text). Both
+  blocks state "guess only — do not decide the engine". Firewall: imports are
+  zod + pure vocab/config modules + a TYPE-ONLY import from
+  `@/modules/brief/classify` (erased at compile) — no template/resolver/registry.
+
+- `index.ts` — barrel EXISTS and both routes already import from `@/lib/schemas`;
+  added `export * from './entryClassify.schema';` following the existing
+  `export *` convention. (Noted: barrel doesn't export brief/productStrategy/
+  strategyService schemas — left as-is, matched sibling scrape/understand
+  convention.)
+
+- `understand/route.ts` — request schema gains `entry: z.boolean().optional()`
+  (additive field inside the existing object). New code: imports,
+  `buildEntryUnderstandPrompt()` (neutral fields + delta block + classification
+  block + no-invention rules), `ENTRY_DEMO_SIGNALS` (agency-shaped ⇒ serve path
+  testable free), `handleEntryUnderstand()` (demo branch → fixture+briefDraft;
+  real branch → `generateWithSchema('understand', ..., EntryUnderstandSchema,
+  'entry_understanding')` → SERVER-SIDE `buildBriefDraft(signals, oneLiner)` →
+  `consumeCredits(UNDERSTAND)` with metadata `extractionShape:'entry'` →
+  `{ success, data, briefDraft, creditsUsed, creditsRemaining }`). Branch wired
+  as `if (entry === true) return handleEntryUnderstand(...)` immediately after
+  auth, BEFORE the existing demo-mode block — existing statements untouched.
+
+- `scrape-website/route.ts` — same pattern: `entry` flag on request schema;
+  `mapEntryScrapeToSignals()` (base fields double as prefill: productName→
+  businessName, testimonials→quote strings); `MOCK_DATA_ENTRY` (agency-shaped,
+  facts/excerpts stripped like the other mocks); `handleEntryScrape()` — demo →
+  fixture+briefDraft; real → own crawl (same scrapeSite/ScrapeError/no_content
+  handling as the default path) → prompt = `buildScrapePrompt(combinedText)` +
+  appended delta + classification blocks (verbatim-testimonial rules ride the
+  base prompt) → `EntryScrapeSchema` / `'entry_scrape_website'` → briefDraft
+  from mapped signals → facts/excerpts stripped from response →
+  `consumeCredits(SCRAPE_WEBSITE)` metadata `extractionShape:'entry'`. Branch
+  `if (entry === true)` after auth, before demo/cache. SaaS/extended/
+  manufacturer/service paths untouched.
+
+**Non-entry byte-identity (the hard invariant)** — `git diff` of the two routes
+shows removed lines are EXACTLY the two destructure statements, each replaced
+by the same line + `, entry`:
+```
+-    const { oneLiner, audienceType, templateId } = validation.data;
+-    const { url, audienceType, templateId } = validation.data;
+```
+Everything else is insertions (new imports, schema field, helpers above the
+handlers, one early-return `if (entry === true)` block per handler). With
+`entry` absent, `validation.data.entry` is `undefined`, the branch is not
+taken, and every downstream statement is the prior code verbatim. Frozen
+generation-contract + golden tests green (tripwire held).
+
+**Deviations**
+- SiteContext cache is BYPASSED on the entry scrape path (no read, no write).
+  Plan is silent on cache; conservative call: cached extracts lack signal
+  fields (unusable), and WRITING entry-shaped extracts would change what the
+  non-entry cached path returns to clients (violates byte-identity in spirit).
+  Cost: entry re-crawls a previously-cached URL. Revisit if entry volume makes
+  this expensive.
+- Added a demo entry fixture to the SCRAPE route too (plan step 2 only mandates
+  one for understand; step 3 says "same pattern"). Without it, demo-mode
+  `entry:true` scrape would have returned the non-entry mock with no briefDraft
+  and broken phase-5 free QA on the URL path.
+- Prompt-block builders live in `entryClassify.schema.ts` rather than a route
+  file — Files-touched constraint left either duplication across both routes or
+  co-location with the enums they render; chose co-location (logged above).
+
+**Verification**
+- `npx tsc --noEmit` — clean ✅
+- `npm run test:run` — 64 files passed | 1 skipped; 886 tests passed | 2 skipped
+  (was 874 pre-phase; +12 = the new schema tests). Generation-contract + golden
+  green ✅
+- `git diff` route inspection — only additive per quoted diff above ✅
+- Manual dev-server POST check (plan verification line) NOT run — read-level
+  diff verification performed instead per task instructions ("read, don't run
+  a server").
+
+**Open risks**
+- `entry_understanding`/`entry_scrape_website` schemas are large flat objects;
+  cheap-tier model may fill prefill arrays thinly — acceptable, wizard steps
+  re-ask. Enum fields are schema-constrained so buildBriefDraft can't throw on
+  bad enums; a genuinely failed parse falls into the existing ai_error path.
