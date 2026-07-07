@@ -33,8 +33,20 @@ run continuously within a firing — do NOT wait between phases or specs.
 
 ## Context hygiene
 State lives in the ledger + each spec's `*.plan.md` (Progress log) + `*.audit.md`.
-Between phases/specs, drop prior detail from working context — `/clear`-safe. To resume
-after any interruption: read ledger → next non-done spec → its plan Progress log → continue.
+Between phases/specs, drop prior detail from working context — `/clear`-safe.
+
+### Post-`/clear` resume decision tree (fresh context, nothing in memory)
+Read the ledger's RESUME POINTER + the in-progress spec's artifacts on disk, then:
+1. No `<spec>.plan.md` exists → re-scout (spawn scouts) then plan. (Scout findings are
+   NOT on disk until captured in plan.md — a clear before plan.md is written loses them,
+   so only clear once plan.md exists.)
+2. `<spec>.plan.md` exists but ledger says stage=planning/plan-review → spawn plan-reviewer
+   on it (the plan already encodes scout findings in its design-decisions section).
+3. Plan approved (Progress log seeded) → find the lowest phase NOT marked `done` in the
+   plan's Progress log → spawn implementer for it → impl-review → commit → next phase.
+4. All phases `done` → run final build, mark spec `done` in ledger, start next spec.
+Always re-confirm `git branch --show-current == feature/scale` first. NEVER re-do a phase
+already marked `done` (its commit is on the branch).
 
 ## Ledger discipline
 Update `scale-run.progress.md` on every transition (spec start, spec done, gate, block)

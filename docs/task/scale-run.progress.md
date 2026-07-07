@@ -9,7 +9,7 @@ Started: 2026-07-07.
 | # | Spec | Status | Last commit | Notes |
 |---|------|--------|-------------|-------|
 | 01 | scale-01-brief-registry.spec.md | done | 2216674+phase5 | 5/5 phases shipped; acceptance green (tsc+834 tests+build); zero runtime change |
-| 02 | scale-02-router-serve-gate.spec.md | pending | — | dep 01 |
+| 02 | scale-02-router-serve-gate.spec.md | in-progress | — | dep 01 (done); planning |
 | 03 | scale-03-images-at-birth.spec.md | pending | — | dep 01 |
 | — | **PILOT GATE (human)** | pending | — | HALT after 03 → wait for user go |
 | 04 | scale-04-click-system.spec.md | pending | — | dep 01 |
@@ -20,6 +20,13 @@ Started: 2026-07-07.
 | 09 | scale-09-block-variants.spec.md | pending | — | dep 07 |
 
 Status values: `pending` → `in-progress` → `done` | `blocked` | `awaiting-gate`.
+
+## RESUME POINTER (post-/clear: read this first)
+Current: **spec 02**, stage = **planning** (planner writing scale-02-router-serve-gate.plan.md).
+Next action after clear: if that plan.md exists + looks complete → spawn plan-reviewer on it;
+else re-scout + re-plan. Then follow the runbook resume decision tree. Branch: feature/scale.
+Cron heartbeat: job 81da2219 (every 15 min) — if it didn't survive the clear, re-arm with
+`/loop 15m <driver prompt from runbook>`.
 
 ## Run log
 (append one line per firing: timestamp — what advanced / why stopped)
