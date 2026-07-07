@@ -234,3 +234,79 @@ longer called from these two components. No 5th file needed changes; a repo grep
 ### Open risks
 - None functional for Phase 4. Expected-by-design: markers don't clear on edit until Phase 5, and
   there's no dismiss control until Phase 6.
+
+## Phase 5 — Auto-clear on edit (diff vs persisted baseline)
+
+### Files changed
+- `src/hooks/useReviewState.ts` (modified)
+- `src/app/edit/[token]/components/selection/SelectionSystem.tsx` (modified)
+- `src/hooks/useReviewState.test.ts` (modified — added Phase 5 tests)
+
+### What changed — `src/hooks/useReviewState.ts`
+- New exported helper `resolveElementValue(root, sectionId, elementKey)`:
+  - plain key → `root[sectionId].elements[elementKey]`;
+  - dotted `collName.itemId.fieldName` → the `collName` array item whose `id === itemId`, then `item[fieldName]`.
+  - Returns the value unwrapped through the existing `unwrapContentValue` ({content}-aware), or
+    `undefined` when the path can't be resolved (missing section/elements/collection/item/field).
+    The `undefined` signal is load-bearing for the missing-baseline guard.
+  - Used for BOTH the current-content read and the baseline read (apples-to-apples).
+- `deriveReviewState(...)` gained two params `baseline?, currentPageId?` and now derives
+  `activeMarkers` (added to `DerivedReview` and the store `ReviewState`):
+  - Page-aware baseline root:
+    `baselineRoot = (currentPageId ? baseline?.pages?.[currentPageId]?.content : undefined) ?? baseline?.content`.
+    Optional chaining on `.pages` so a pre-`pages` baseline never throws; `currentPageId`-guarded
+    so a null id never indexes with null.
+  - `activeMarkers` = `needsReviewItems` filtered to those where
+    `resolveElementValue(content, …) === resolveElementValue(baselineRoot, …)`.
+  - Missing-baseline guard: if the baseline resolve returns `undefined`, the marker is treated
+    ACTIVE (kept) rather than crashing — covers legacy pages / absent baseline slots.
+  - A `// Phase 6 will add: && !dismissedReviewFlags.has(...)` comment marks the single exclusion
+    point Phase 6 plugs into. NO snapshot/`originalValues` state was added — the immutable
+    `baseline` reference is the sole source of the AI original.
+- `initFromContent` now passes `baseline ?? null, currentPageId ?? null` into `deriveReviewState`.
+- `refreshFromContent` falls back to the stored `state.baseline` / `state.currentPageId` when the
+  caller omits them, then passes them into `deriveReviewState`, so the reactive refresh always has
+  the baseline to diff against.
+- `derivedEqual` and the no-op snapshot now include `activeMarkers`; store initial state seeds
+  `activeMarkers: []`.
+
+### What SelectionSystem now renders
+- Switched the render source from `needsReviewItems` to `activeMarkers` (destructure + the
+  `flagged` Set + the effect dependency array). Same class (`element-ai-verify`) and same
+  `data-element-key` DOM mapping as Phase 4 — only the source list changed. Editing an element →
+  `updateElementContent` → content ref changes → Phase-2 `store.subscribe` refresh recomputes
+  `activeMarkers` → the edited item (value ≠ baseline) drops out → its marker disappears.
+
+### Reload-persistence + multi-page guarantees (can't run headless)
+- Reload persistence: `activeMarkers` is derived purely from `(persisted content, immutable
+  baseline)`. `baseline` is captured once and NEVER mutated by edits (see Design decisions), so an
+  edited element's value stays ≠ baseline across reload → its marker stays cleared. A returning
+  user whose edits are already baked into first-load content likewise shows markers ONLY on
+  still-AI-original fields (proved headless by the "already-edited-at-first-load" test).
+- Multi-page: the page-aware baseline root reads `baseline.pages[currentPageId].content` for the
+  active subpage, so subpage markers diff against the correct per-page AI original instead of the
+  home body-only `baseline.content` (which lacks subpage sections) — proved by the multi-page test.
+
+### Tests added (`useReviewState.test.ts`)
+- `resolveElementValue`: plain key (string + `{content}`), undefined for missing paths, dotted
+  collection resolve by item id (not raw index), non-array/missing-item guards.
+- `activeMarkers`: unchanged = present / edited = absent; already-edited-at-first-load = absent;
+  collection dotted key edited = absent, sibling stays present; multi-page subpage page-aware root
+  (present when equal to page-baseline, clears when diverged); missing baseline = active + no throw
+  (both `null` baseline and a baseline lacking `.pages`).
+- Fixtures use real layouts: `PullQuoteWithMark` (top-level `quote` needs_review) and
+  `VestriaQuotes` (`testimonials` collection with dotted needs_review fields).
+
+### Deviations
+- None. Dismiss / `dismissedReviewFlags` intentionally deferred to Phase 6; the exclusion point is
+  structured (commented) but not implemented.
+
+### Test results
+- `npx tsc --noEmit`: clean.
+- `npx vitest run src/hooks/useReviewState.test.ts`: 24 passed.
+- `npm run test:run`: 694 passed | 2 skipped (52 files passed, 1 skipped).
+
+### Open risks
+- Legacy-page transitional caveat (per Design decisions): for projects whose baseline was captured
+  after user edits already existed, markers may show active on already-edited fields until a further
+  edit or a (Phase 6) dismiss. Self-healing, acknowledged, out of scope for Phase 5.

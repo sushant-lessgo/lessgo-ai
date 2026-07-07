@@ -60,6 +60,9 @@ interface ReviewState {
   reviewItems: ReviewItem[];
   /** Feature 2 — AI-invented specifics (the `needs_review` category), isolated for markers. */
   needsReviewItems: ReviewItem[];
+  /** Feature 2 render source — needs_review items still equal to their baseline AI original.
+   *  A marker auto-clears (drops out) once the element value diverges from baseline. */
+  activeMarkers: ReviewItem[];
   /** Feature 1 — curated, content-derived task list (always exactly 4 tasks). */
   guideTasks: GuideTask[];
   /** Count of present-but-not-done guide tasks (backs the pill wording + auto-hide). */
@@ -198,6 +201,44 @@ function unwrapContentValue(value: unknown): string {
 }
 
 /**
+ * Resolve an element's normalized value from a content root, handling BOTH key shapes:
+ *  - plain `elementKey` → `root[sectionId].elements[elementKey]`
+ *  - dotted `collName.itemId.fieldName` → the `collName` array item whose `id === itemId`,
+ *    then `item[fieldName]`.
+ * Returns the value unwrapped through {@link unwrapContentValue}, or `undefined` when the
+ * path cannot be resolved (missing section/elements/collection/item/field). The `undefined`
+ * signal is meaningful — Phase 5 auto-clear treats a `undefined` baseline as "no baseline
+ * for that page/element" and keeps the marker active rather than crashing.
+ *
+ * Used for BOTH the current-content read and the baseline read so the comparison is
+ * apples-to-apples.
+ */
+export function resolveElementValue(
+  root: Record<string, any> | null | undefined,
+  sectionId: string,
+  elementKey: string
+): string | undefined {
+  const elements = root?.[sectionId]?.elements;
+  if (!elements) return undefined;
+
+  const parts = elementKey.split('.');
+  if (parts.length === 1) {
+    const raw = elements[elementKey];
+    if (raw === undefined) return undefined;
+    return unwrapContentValue(raw);
+  }
+
+  const [collName, itemId, fieldName] = parts;
+  const coll = elements[collName];
+  if (!Array.isArray(coll)) return undefined;
+  const item = coll.find((it) => it?.id === itemId);
+  if (!item) return undefined;
+  const raw = item[fieldName];
+  if (raw === undefined) return undefined;
+  return unwrapContentValue(raw);
+}
+
+/**
  * A primary CTA is "linked" when its buttonConfig is a link with a non-empty url.
  * Mirrors `src/utils/ctaHandler.ts:20-51` semantics (V2 elementMetadata, legacy `cta` fallback).
  */
@@ -298,6 +339,8 @@ export function deriveGuideTasks(
 interface DerivedReview {
   reviewItems: ReviewItem[];
   needsReviewItems: ReviewItem[];
+  /** Feature 2 — the needs_review items still equal to their baseline AI original (render source). */
+  activeMarkers: ReviewItem[];
   guideTasks: GuideTask[];
   remainingCount: number;
   allComplete: boolean;
@@ -314,7 +357,9 @@ function deriveReviewState(
   sectionLayouts: Record<string, string>,
   sections: string[],
   confirmedElements: Set<string>,
-  globalSettings?: { logoUrl?: string }
+  globalSettings?: { logoUrl?: string },
+  baseline?: Record<string, any> | null,
+  currentPageId?: string | null
 ): DerivedReview {
   const items: ReviewItem[] = [];
 
@@ -450,6 +495,27 @@ function deriveReviewState(
   // Feature 2 — isolate the AI-invented-specifics category (untouched, for markers).
   const needsReviewItems = items.filter((i) => i.type === 'needs_review');
 
+  // Feature 2 auto-clear — a marker is ACTIVE only while the element still equals its
+  // baseline AI original (i.e. unedited). Derive purely from (current content, baseline);
+  // hold NO snapshot state so the result survives reload (baseline is immutable).
+  //
+  // Page-aware baseline root: on a multi-page project the live `content` is the ACTIVE page,
+  // so the baseline for that page lives in `baseline.pages[currentPageId].content`. Fall back
+  // to `baseline.content` (home body-only) when absent. NOTE the optional chaining on `.pages`
+  // — a baseline captured before `pages` existed would otherwise throw.
+  const baselineRoot =
+    (currentPageId ? baseline?.pages?.[currentPageId]?.content : undefined) ??
+    baseline?.content;
+  const activeMarkers = needsReviewItems.filter((item) => {
+    const currentVal = resolveElementValue(content, item.sectionId, item.elementKey);
+    const baselineVal = resolveElementValue(baselineRoot, item.sectionId, item.elementKey);
+    // Missing-baseline guard: no baseline for that page/element (e.g. legacy page) →
+    // treat the marker as active (unchanged) rather than crashing.
+    if (baselineVal === undefined) return true;
+    // Phase 6 will add: && !dismissedReviewFlags.has(`${sectionId}::${elementKey}`)
+    return currentVal === baselineVal;
+  });
+
   // Feature 1 — derive the curated 4-task guide from live content + surface facts.
   const stockItems = items.filter((i) => i.type === 'stock_image');
   const guideTasks = deriveGuideTasks(
@@ -469,6 +535,7 @@ function deriveReviewState(
   return {
     reviewItems: items,
     needsReviewItems,
+    activeMarkers,
     guideTasks,
     remainingCount,
     allComplete: remainingCount === 0,
@@ -486,6 +553,7 @@ function derivedEqual(a: DerivedReview, b: DerivedReview): boolean {
     a.confirmedCount === b.confirmedCount &&
     JSON.stringify(a.guideTasks) === JSON.stringify(b.guideTasks) &&
     JSON.stringify(a.needsReviewItems) === JSON.stringify(b.needsReviewItems) &&
+    JSON.stringify(a.activeMarkers) === JSON.stringify(b.activeMarkers) &&
     JSON.stringify(a.reviewItems) === JSON.stringify(b.reviewItems)
   );
 }
@@ -499,6 +567,7 @@ export const useReviewState = create<ReviewState>()(
     (set, get) => ({
       reviewItems: [],
       needsReviewItems: [],
+      activeMarkers: [],
       guideTasks: [],
       remainingCount: 0,
       allComplete: true,
@@ -517,7 +586,9 @@ export const useReviewState = create<ReviewState>()(
           sectionLayouts,
           sections,
           confirmedElements,
-          globalSettings
+          globalSettings,
+          baseline ?? null,
+          currentPageId ?? null
         );
 
         set({
@@ -532,12 +603,19 @@ export const useReviewState = create<ReviewState>()(
 
       refreshFromContent: (content, baseline, currentPageId, globalSettings) => {
         const state = get();
+        // Fall back to the stored baseline / active page when the caller omits them, so the
+        // auto-clear derivation always has the immutable AI-original reference to diff against.
+        const effectiveBaseline = baseline !== undefined ? baseline : state.baseline;
+        const effectivePageId =
+          currentPageId !== undefined ? currentPageId : state.currentPageId;
         const derived = deriveReviewState(
           content,
           state.sectionLayouts,
           state.sections,
           state.confirmedElements,
-          globalSettings
+          globalSettings,
+          effectiveBaseline,
+          effectivePageId
         );
 
         // No-op guard: skip the `set` entirely when nothing content-derived changed,
@@ -545,6 +623,7 @@ export const useReviewState = create<ReviewState>()(
         const current: DerivedReview = {
           reviewItems: state.reviewItems,
           needsReviewItems: state.needsReviewItems,
+          activeMarkers: state.activeMarkers,
           guideTasks: state.guideTasks,
           remainingCount: state.remainingCount,
           allComplete: state.allComplete,

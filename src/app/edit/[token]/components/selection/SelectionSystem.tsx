@@ -67,10 +67,15 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
   }, [mode, selectedSection, selectedElement, multiSelection]);
 
   // Apply inline "verify AI-written" markers — Feature 2, edit canvas ONLY.
-  // Only the `ai_generated_needs_review` category (exposed as `needsReviewItems`) gets a
-  // marker now. The former stock-image / manual-preferred / unconfigured inline badges are
-  // gone — those categories are surfaced by Feature 1's "Getting started" guide instead.
-  const { needsReviewItems } = useReviewState();
+  // Only the `ai_generated_needs_review` category gets a marker now. The former stock-image /
+  // manual-preferred / unconfigured inline badges are gone — those categories are surfaced by
+  // Feature 1's "Getting started" guide instead.
+  //
+  // Render source is `activeMarkers`, NOT the raw `needsReviewItems`: a marker stays active only
+  // while its value still equals the baseline AI original. Editing an element diverges it from
+  // baseline → the Phase-2 store.subscribe refresh recomputes → the item drops out of
+  // `activeMarkers` → the marker disappears (permanently, since baseline is never mutated).
+  const { activeMarkers } = useReviewState();
 
   useEffect(() => {
     const allElements = document.querySelectorAll('[data-element-key]');
@@ -85,7 +90,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
     // `data-element-key`, so attribute matching resolves them with no special-casing. An
     // item whose DOM node isn't present simply matches nothing and no-ops (no crash).
     const flagged = new Set(
-      needsReviewItems.map((i) => `${i.sectionId}::${i.elementKey}`)
+      activeMarkers.map((i) => `${i.sectionId}::${i.elementKey}`)
     );
 
     allElements.forEach((el) => {
@@ -97,7 +102,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
         el.classList.remove('element-ai-verify');
       }
     });
-  }, [mode, selectedSection, selectedElement, multiSelection, needsReviewItems]);
+  }, [mode, selectedSection, selectedElement, multiSelection, activeMarkers]);
 
   // Handle focus management
   useEffect(() => {
