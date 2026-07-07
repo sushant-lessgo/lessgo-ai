@@ -8,7 +8,7 @@ Started: 2026-07-07.
 
 | # | Spec | Status | Last commit | Notes |
 |---|------|--------|-------------|-------|
-| 01 | scale-01-brief-registry.spec.md | in-progress | — | plan approved; implementing (5 phases) |
+| 01 | scale-01-brief-registry.spec.md | done | 2216674+phase5 | 5/5 phases shipped; acceptance green (tsc+834 tests+build); zero runtime change |
 | 02 | scale-02-router-serve-gate.spec.md | pending | — | dep 01 |
 | 03 | scale-03-images-at-birth.spec.md | pending | — | dep 01 |
 | — | **PILOT GATE (human)** | pending | — | HALT after 03 → wait for user go |
@@ -23,3 +23,4 @@ Status values: `pending` → `in-progress` → `done` | `blocked` | `awaiting-ga
 
 ## Run log
 (append one line per firing: timestamp — what advanced / why stopped)
+- spec 01 COMPLETE: 5 phases (vocab+Brief, prisma brief col, templateMeta+coreSections, conformance tests, businessTypes+fit); all ship on loop 1; pure data layer, zero runtime change verified. → starting spec 02.

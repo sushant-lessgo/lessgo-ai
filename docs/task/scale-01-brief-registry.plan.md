@@ -14,7 +14,9 @@ Create the pure data layer everything downstream (router, gate, wizard, generati
 - phase 2 prisma brief column: done (review loops 1, ship; migration 20260707191204_add_project_brief)
 - phase 3 template metadata + engine-core sections: done (review loops 1, ship; no resolver drift)
 - phase 4 conformance tests: done (review loops 1, ship; 51/51 pass, no metadata fixes)
-- phase 5 businessTypes v0 + fit() + final green sweep: pending
+- phase 5 businessTypes v0 + fit() + final green sweep: done (review loops 1, ship; acceptance green: tsc + 834 tests + build)
+
+**SPEC 01 COMPLETE** — all 5 phases shipped on feature/scale.
 
 ## Design decisions baked into this plan (plan-review: challenge these)
 

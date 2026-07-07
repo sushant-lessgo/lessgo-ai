@@ -133,3 +133,40 @@ No D-A/D-D table updates needed.
 
 **Open risks**
 - Same structural-caps trust-on-declaration gap as phase 3 (multipage/bilingual unverifiable by block check — spec 02+).
+
+---
+
+## Phase 5 — businessTypes v0 + fit() + final green sweep
+
+**Files changed**
+- `src/modules/businessTypes/config.ts` (created)
+- `src/modules/businessTypes/config.test.ts` (created)
+- `src/modules/businessTypes/README.md` (created — plan-review non-blocking #1)
+- `src/modules/templates/fit.ts` (created)
+- `src/modules/templates/fit.test.ts` (created)
+
+**Per file**
+- `config.ts` (D-H): `BusinessTypeEntry` interface (ServiceVoiceSpec record idiom) + `businessTypeKeys` + `businessTypes` with the 6 seed entries exactly per the D-H table. All `extractionSchemaKey` = `'<key>-v0'` placeholders. manufacturer: `requiredCapabilities: ['lead-form']` only — catalog preferred not required (header comment cites §7.3). wizardFields: 2–3 per type with label+example. Behavior-free.
+- `fit.ts` (D-G): `fit(templateId, engine, required)` pure hard-fit (`!retired && !bespoke && engine ∈ copyEngines && required ⊆ capabilities`); `requiredCapabilitiesFromBrief()` (§7.2 v0: businessType entry ∪ M1→lead-form ∪ download-app→store-badges ∪ multi→multipage; unknown businessType contributes none — gate rejects spec 02+; no bilingual derivation yet, noted inline); `shortlist()` filters `templateIds` in declaration order; `fitsBrief(templateId, brief)` — plan-review non-blocking #2 convenience wrapper, named distinctly (not an overload). Imports: templateMeta + businessTypes + types ONLY — no template modules/resolvers/registry loaders.
+- `fit.test.ts`: 3 acceptance fixtures + edge cases (retired, bespoke, M1, multi→['vestria'], download-app→[], unknown-businessType, missing-engine) + fitsBrief tests (true/false + agrees-with-shortlist sweep over all 8 templates).
+- `config.test.ts`: 6 keys incl manufacturer+writer; key===record-key; engines valid; requiredCapabilities⊆capabilityIds; manufacturer=['lead-form'] exactly; likelyIntents⊆goalIntents len 3–4 (manufacturer 2–4); defaultStyle∈designStyles; wizardFields ≥2 with non-empty label+example; extractionSchemaKey placeholder format.
+
+**Acceptance-fixture results (all PASS, exact match)**
+1. saas brief (thing, M1) → `['meridian', 'vestria']` ✓ (techpremium excluded via retired)
+2. agency brief (trust, M1) → `['hearth', 'lex', 'surge']` ✓
+3. photographer / explicit `required: ['gallery']` on work AND trust engines → `[]` ✓ (granth lacks gallery; lumen bespoke-excluded)
+
+**Final green sweep (spec acceptance gate) — all 4 PASS**
+1. `npx tsc --noEmit` → clean, exit 0.
+2. `npm run test:run` → **60 passed | 1 skipped (61 files), 834 passed | 2 skipped (836 tests)** — green (+22 from fit.test 13 + config.test 9).
+3. `npm run build` → succeeds (published-css → assets → next build; exit 0; middleware 81.3 kB, routes emitted normally).
+4. Import audit: grep for `@/types/brief | schemas/brief | @/modules/goals/ | @/modules/engines/ | @/modules/businessTypes/ | templateMeta | templates/fit | goals/vocabulary | engines/coreSections | businessTypes/config` across `src/` → 15 files, ALL of them the scale-01 modules themselves (their configs, tests, READMEs, brief schema/types). **Nothing under `src/app/`, `src/modules/generatedLanding/`, `src/middleware.ts`, or any `componentRegistry*` imports any new module** ⇒ zero runtime behavior change.
+
+**Deviations**
+- Orchestrator-folded additions (not in original plan Files-touched): `fitsBrief()` in fit.ts + light tests (plan-review #2) and `src/modules/businessTypes/README.md` (plan-review #1). Both explicitly directed.
+- `fit()` accepts `engine: string | undefined` (not strictly `CopyEngine`) so `fitsBrief`/`shortlist` can pass `brief.copyEngine` (optional in v0) without casts; undefined → never fits. Conservative, purely widening.
+- `config.ts` also exports `businessTypeKeys as const` + `BusinessTypeKey` (service.ts idiom) — needed for the record type + key-set test.
+
+**Open risks**
+- businessType lookup in `requiredCapabilitiesFromBrief` casts open `brief.businessType: string` to `BusinessTypeKey` for record access; unknown keys yield `undefined` safely. Gate-time validation is spec 02+.
+- wizardFields copy is placeholder-quality (shape-frozen, wording TBD when the wizard lands, spec 04).
