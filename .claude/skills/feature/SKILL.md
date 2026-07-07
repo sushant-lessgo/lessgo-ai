@@ -71,7 +71,18 @@ list + verification + any **human gate** markers).
 - d. **Commit the phase** (orchestrator, on the feature branch ONLY):
      `git add` the phase's files + artifacts, commit as
      `feat(<feature>): phase <n> — <title>`. Never commit on main.
-- e. Note progress, continue to the next phase.
+- e. **Record durable progress.** Append the impl-reviewer's final verdict + any
+     non-blocking notes to `<feature>.audit.md`, and update a **Progress log** at
+     the top of `<feature>.plan.md` — one line per phase:
+     `phase <n> <title>: done (commit <sha>, review loops <k>) | pending`. This is
+     the resume anchor; everything needed to continue must live here, not in chat.
+- f. **Context checkpoint.** All state for the next phase now lives in the md
+     artifacts, so DROP this phase's detail — do not carry prior phases' diffs,
+     audit bodies, or reviewer transcripts forward in your working context. On a
+     long run (many phases, or context getting heavy) `/clear` here is safe: to
+     resume, read `<feature>.plan.md` (Progress log → next pending phase) +
+     `<feature>.audit.md`, re-confirm the branch with `git branch --show-current`,
+     and continue at 4a. Then move to the next phase.
 
 **5. Finish + merge gate.** After the final phase, run `npm run build` once.
 Report a summary: phases shipped, files changed (from the audit), test + build
@@ -103,7 +114,12 @@ auto-fix without their go.
   the feature branch only. Merge only at step 5's human gate; delete the branch
   only after deploy is green. The user alone pushes.
 - Reviewers are automated approvers; the only human gates are the ones the plan marks.
-- Keep progress in the md artifacts, not just this chat, so a phase can resume after
-  `/clear`.
+- **Context hygiene = a token budget, not just a nicety.** Subagents run in isolated
+  context; their file reads / build logs die with them and only their final message
+  returns to you. Keep it that way: hand each stage POINTERS (spec path, plan phase,
+  scout summaries, branch), never re-paste raw files or prior-phase transcripts. All
+  durable state lives in the md artifacts (spec/plan Progress log/audit) so any phase
+  can resume after a `/clear` — see 4e/4f. Between phases, treat those files as the
+  source of truth and let prior-phase detail fall out of your working context.
 - You never edit code directly — if a stage needs code changed, that's the
   implementer's job.

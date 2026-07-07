@@ -13,6 +13,9 @@ avoid bulk file reads (that is the scout's job — reserve your effort for desig
 
 The plan MUST contain:
 - Overview: the goal in 2–4 sentences.
+- A **Progress log** section right after the Overview: one line per phase, seeded as
+  `phase <n> <title>: pending`. Leave it for the orchestrator to update as phases
+  land — it's the resume anchor after a `/clear`. Just create the slots.
 - Phases: ordered, each independently implementable + reviewable.
 - For EACH phase: an explicit **Files touched** list (every file to create/edit).
   Its absence is a defect. A phase edits nothing outside its list.
