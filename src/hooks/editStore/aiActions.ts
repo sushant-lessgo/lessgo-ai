@@ -92,23 +92,31 @@ export function createAIActions(set: any, get: any) {
               key.includes('visual') || key.includes('mockup') ||
               key.includes('logo');
 
-            // Merge new content — skip image elements
+            // Merge new content — skip image elements.
+            // Shape-preserving: string slots STAY strings. The old code spread
+            // the existing value into the merge object, so a string element
+            // became { 0:'H', 1:'e', …, type, content } — the exact object
+            // that React-#31-crashed the published page (QA naayom §H).
             Object.entries(data.content).forEach(([key, value]: [string, any]) => {
               if (isImageValue(existingElements[key]) || isImageKey(key)) return;
 
-              if (updatedElements[key]) {
-                if (typeof value === 'object' && value.content !== undefined) {
-                  updatedElements[key] = {
-                    ...updatedElements[key],
-                    content: value.content,
-                    ...(value.type && { type: value.type })
-                  };
+              const existing = updatedElements[key];
+              const existingIsObject =
+                existing !== null && typeof existing === 'object' && !Array.isArray(existing);
+
+              if (existing !== undefined && existing !== null && existing !== '') {
+                if (typeof value === 'object' && value !== null && value.content !== undefined) {
+                  updatedElements[key] = existingIsObject
+                    ? { ...existing, content: value.content, ...(value.type && { type: value.type }) }
+                    : value.content;
                 } else if (typeof value === 'string') {
-                  if (typeof updatedElements[key] === 'object') {
-                    updatedElements[key].content = value;
-                  } else {
+                  if (existingIsObject) {
+                    updatedElements[key] = { ...existing, content: value };
+                  } else if (!Array.isArray(existing)) {
                     updatedElements[key] = value;
                   }
+                  // Array (collection) receiving a plain string: skip — never
+                  // clobber a collection with scalar copy.
                 }
               } else {
                 updatedElements[key] = value;
