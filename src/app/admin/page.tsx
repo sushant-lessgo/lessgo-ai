@@ -33,7 +33,7 @@ export default async function AdminPage() {
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
-  const [users, projects, published] = await Promise.all([
+  const [users, projects, published, demandLeads] = await Promise.all([
     prisma.user.findMany({
       select: {
         id: true,
@@ -72,7 +72,33 @@ export default async function AdminPage() {
       orderBy: { updatedAt: 'desc' },
       take: 200,
     }),
+    prisma.demandLead.findMany({
+      take: 500,
+      orderBy: [{ fasttrack: 'desc' }, { createdAt: 'desc' }],
+    }),
   ]);
+
+  // Demand-board grouping (briefDraft is Json — can't groupBy in SQL, group in JS).
+  const missingTagCounts = new Map<string, number>();
+  const businessTypeCounts = new Map<string, number>();
+  const engineCounts = new Map<string, number>();
+  for (const lead of demandLeads) {
+    for (const tag of lead.missing.split(',').map((t) => t.trim()).filter(Boolean)) {
+      missingTagCounts.set(tag, (missingTagCounts.get(tag) ?? 0) + 1);
+    }
+    const draft = lead.briefDraft as any;
+    const bt = typeof draft?.businessType === 'string' ? draft.businessType : '(none)';
+    businessTypeCounts.set(bt, (businessTypeCounts.get(bt) ?? 0) + 1);
+    const engine =
+      typeof draft?.facts?.entry?.resolvedEngine === 'string'
+        ? draft.facts.entry.resolvedEngine
+        : '(none)';
+    engineCounts.set(engine, (engineCounts.get(engine) ?? 0) + 1);
+  }
+  const rankedMissing = [...missingTagCounts.entries()].sort((a, b) => b[1] - a[1]);
+  const rankedBusinessTypes = [...businessTypeCounts.entries()].sort((a, b) => b[1] - a[1]);
+  const rankedEngines = [...engineCounts.entries()].sort((a, b) => b[1] - a[1]);
+  const fasttrackCount = demandLeads.filter((l) => l.fasttrack).length;
 
   const clerkIds = users.map((u) => u.clerkId);
 
@@ -335,6 +361,125 @@ export default async function AdminPage() {
               </tbody>
             </table>
           </div>
+        </section>
+
+        {/* DEMAND BOARD */}
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3">
+            Demand Board ({demandLeads.length} leads · {fasttrackCount} fast-track)
+          </h2>
+
+          {demandLeads.length === 0 ? (
+            <div className="bg-white rounded-lg border border-slate-200 px-4 py-6 text-sm text-slate-500">
+              No demand leads yet.
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                {/* Blocked-on counts (ranked by missing tag) */}
+                <div className="bg-white rounded-lg border border-slate-200 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-100 text-left text-xs uppercase text-slate-600">
+                      <tr>
+                        <th className="px-3 py-2">Blocked on</th>
+                        <th className="px-3 py-2 text-right">Leads</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rankedMissing.map(([tag, count]) => (
+                        <tr key={tag} className="border-t border-slate-100 hover:bg-slate-50">
+                          <td className="px-3 py-2 font-mono text-xs">{tag}</td>
+                          <td className="px-3 py-2 text-right tabular-nums font-semibold">{count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Business-type counts */}
+                <div className="bg-white rounded-lg border border-slate-200 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-100 text-left text-xs uppercase text-slate-600">
+                      <tr>
+                        <th className="px-3 py-2">Business type</th>
+                        <th className="px-3 py-2 text-right">Leads</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rankedBusinessTypes.map(([bt, count]) => (
+                        <tr key={bt} className="border-t border-slate-100 hover:bg-slate-50">
+                          <td className="px-3 py-2 text-xs">{bt}</td>
+                          <td className="px-3 py-2 text-right tabular-nums font-semibold">{count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Engine counts */}
+                <div className="bg-white rounded-lg border border-slate-200 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-100 text-left text-xs uppercase text-slate-600">
+                      <tr>
+                        <th className="px-3 py-2">Engine</th>
+                        <th className="px-3 py-2 text-right">Leads</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rankedEngines.map(([engine, count]) => (
+                        <tr key={engine} className="border-t border-slate-100 hover:bg-slate-50">
+                          <td className="px-3 py-2 text-xs">{engine}</td>
+                          <td className="px-3 py-2 text-right tabular-nums font-semibold">{count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Lead table — fasttrack rows pinned to top by the query orderBy */}
+              <div className="bg-white rounded-lg border border-slate-200 overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-100 text-left text-xs uppercase text-slate-600">
+                    <tr>
+                      <th className="px-3 py-2">Status</th>
+                      <th className="px-3 py-2">Email</th>
+                      <th className="px-3 py-2">Input</th>
+                      <th className="px-3 py-2">Missing</th>
+                      <th className="px-3 py-2">Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {demandLeads.map((l) => (
+                      <tr
+                        key={l.id}
+                        className={
+                          l.fasttrack
+                            ? 'border-t border-slate-100 bg-amber-50 hover:bg-amber-100'
+                            : 'border-t border-slate-100 hover:bg-slate-50'
+                        }
+                      >
+                        <td className="px-3 py-2 text-xs">
+                          {l.fasttrack && (
+                            <span className="inline-block rounded bg-amber-200 text-amber-900 px-2 py-0.5 text-xs font-semibold mr-2">
+                              FAST TRACK
+                            </span>
+                          )}
+                          {l.status}
+                        </td>
+                        <td className="px-3 py-2 font-medium">{l.email}</td>
+                        <td className="px-3 py-2 text-xs text-slate-600" title={l.input}>
+                          {truncate(l.input, 80)}
+                        </td>
+                        <td className="px-3 py-2 font-mono text-xs text-slate-600">{l.missing}</td>
+                        <td className="px-3 py-2 text-xs text-slate-500">{fmtDate(l.createdAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </section>
       </div>
     </div>

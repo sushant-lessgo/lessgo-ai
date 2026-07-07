@@ -15,8 +15,8 @@ Replace the persona gate + pilot allowlist + waitlist with one universal entry `
 - phase 3 classification extension of understand/scrape: done (commit 3fae52f, review loops 1) — flag-gated entry branch, non-entry path byte-identical (verified line-by-line); +12 tests, generation-contract/golden green; entry-scrape bypasses SiteContext cache (re-crawl, by design)
 - phase 4 API routes (brief confirm/hydrate + demand-lead): done (commit 326f3be, review loops 1) — GET/confirm assertProjectOwner-gated, confirm re-runs decideServe server-side (authoritative), demand-lead PATCH ownership-scoped (404 on cross-user), founder email try/catch-after-write; tsc+suite green. NOTE: no automated tests on PATCH-ownership/authoritative-gate (deferred to manual QA)
 - phase 5 entry UI /onboarding/[token]: done (review loops 1) — new route segment (invisible until phase-6 cutover); 3-step useState flow, chooser via applyBusinessTypeCorrection, no internal-term leak, §5/§11.11 copy verbatim; tsc+suite green. NOTE: real-LLM acceptance QA deferred to phase-6/merge gate
-- phase 6 cutover (/api/start, old-route redirects, wizard bridge hydrate): done (review loops 1, HUMAN GATE signed off) — persona/pilot/waitlist gate removed (incl. dashboard gate); universal entry; wizard hydrate no-ops on null brief (legacy byte-identical); PersonaPrompt kept as settings editor. tsc+unit green, product-publish e2e PASS. Files-touched amended mid-phase (added dashboard/page.tsx, layout.tsx, components/README.md; PersonaPrompt NOT deleted). KNOWN: service-publish e2e RED = pre-existing stale seedDraft.ts fixture (since 2026-06-18) → fix folded into phase 7
-- phase 7 admin demand board + final sweep: pending
+- phase 6 cutover (/api/start, old-route redirects, wizard bridge hydrate): done (commit 5eca64a, review loops 1, HUMAN GATE signed off) — persona/pilot/waitlist gate removed (incl. dashboard gate); universal entry; wizard hydrate no-ops on null brief (legacy byte-identical); PersonaPrompt kept as settings editor. tsc+unit green, product-publish e2e PASS. Files-touched amended mid-phase (added dashboard/page.tsx, layout.tsx, components/README.md; PersonaPrompt NOT deleted). KNOWN: service-publish e2e RED = pre-existing stale seedDraft.ts fixture (since 2026-06-18) → fix folded into phase 7
+- phase 7 admin demand board + final sweep: done (review loops 1) — demand board (gated, null-safe grouping), seedDraft fixture fixed → service publish (Hearth+Lex) GREEN, stale-doc sweep. ACCEPTANCE GATES ALL GREEN: tsc clean, unit 886, e2e 8-pass/1-skip, full npm run build SUCCESS
 
 ## Key decisions (the spine — resolved, not open)
 
@@ -208,12 +208,17 @@ Atomic phase — the gate can't be half-replaced. This is the behavior-change co
 
 **Files touched**
 - `src/app/admin/page.tsx` (edit)
+- `e2e/helpers/seedDraft.ts` (edit — fix the PRE-EXISTING stale service fixture: `understanding.whatYouDo` missing + `targetClients` sent as string; the service-strategy lean schema (2026-06-18, `ServiceStrategyRequestSchema`) requires `whatYouDo: string.min(1)` + `targetClients: array(string).min(1)` + `outcomes` array. Add `whatYouDo`, make `targetClients`/`outcomes` arrays in BOTH `strategyBody.understanding` + `copyExtra.understanding`. This unblocks service-publish e2e (Hearth/Lex) — RED since before scale-01, NOT caused by this spec.)
+- `src/app/api/README.md` (edit — stale `/api/start` persona-gate description → universal entry)
+- `src/components/dashboard/DashboardHeader.tsx` (edit — remove the now-dead `/onboarding/persona` branch flagged by phase-6 review; harmless fall-through today but sweep-worthy)
 
 **Steps**
 1. Add a "Demand board" `<section>` to the existing single admin page (server, `isAdmin(userId) || notFound()` already present): `prisma.demandLead.findMany` (take 500, `orderBy: [{fasttrack:'desc'},{createdAt:'desc'}]`); group in JS (Json fields can't groupBy): (a) counts ranked by `missing` tag (split comma-joined, count per tag — "3 leads blocked on gallery" per scalePlan §7 rule 6), (b) counts by `briefDraft.businessType`/engine, (c) lead table — fasttrack rows pinned + visually flagged, status/email/input/missing/createdAt columns. Hand-rolled Tailwind tables per file idiom.
-2. Final sweep (spec acceptance gate): full `npm run build` (published-css → assets → next build) · `npm run test:run` · `npm run test:e2e` · re-run 3 acceptance inputs manually against dev · confirm demand board shows the photographer lead grouped under `rungC:gallery` with fasttrack pinned.
+2. Fix `e2e/helpers/seedDraft.ts` per Files-touched note (pre-existing fixture drift). After the fix, service-publish e2e (Hearth/Lex) must go GREEN.
+3. Stale-doc sweep: `src/app/api/README.md` + `src/components/dashboard/DashboardHeader.tsx` dead persona branch.
+4. Final sweep (spec acceptance gate): full `npm run build` (published-css → assets → next build) · `npm run test:run` · `npm run test:e2e` (product AND service publish now green) · re-run 3 acceptance inputs manually against dev · confirm demand board shows the photographer lead grouped under `rungC:gallery` with fasttrack pinned.
 
-**Verification**: `npx tsc --noEmit` · `npm run test:run` · `npm run build` succeeds · manual `/admin` view as admin; non-admin gets 404.
+**Verification**: `npx tsc --noEmit` · `npm run test:run` · **`npm run test:e2e` — product + service publish + generation/render ALL green (seedDraft fix lands service publish)** · `npm run build` succeeds · manual `/admin` view as admin; non-admin gets 404.
 
 ---
 

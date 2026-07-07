@@ -507,3 +507,72 @@ The pre-flagged shape gap handled as planned: `ServicePrefill.importedTestimonia
 - **publish.spec service (Hearth/Lex) red — pre-existing stale seed fixture** (`e2e/helpers/seedDraft.ts` vs the 2026-06-18 lean-understanding schema). The phase's hard-invariant "service publish green" CANNOT be met without editing that out-of-scope file; the failure is provably independent of this diff (the 400 fires in the seed helper on a route this phase never touched; product publish through the SAME rewritten /api/start passes). Recommend: orchestrator authorizes a fixture update to seedDraft.ts (add `whatYouDo`, make `targetClients` an array, add `outcomes`) as a phase-6 addendum or in phase 7.
 - Product serve-path templateId `techpremium` can't be represented in the product wizard store (deviation 3) — falls back to meridian. Cosmetic until product shortlists actually emit it.
 - Manual dev end-to-end (entry → confirm → prefilled wizard on UnderstandingStep with surge) NOT run here — real-LLM QA is the plan's merge-gate item.
+
+---
+
+## Phase 7 — admin demand board + final sweep
+
+**Files changed**
+- `src/app/admin/page.tsx` (edit — Demand board section)
+- `e2e/helpers/seedDraft.ts` (edit — fix pre-existing stale service fixture)
+- `src/app/api/README.md` (edit — /api/start row rewritten)
+- `src/components/dashboard/DashboardHeader.tsx` (edit — dead /onboarding/persona branch removed)
+
+### 1. Demand board (`src/app/admin/page.tsx`)
+
+- Added `prisma.demandLead.findMany({ take: 500, orderBy: [{fasttrack:'desc'},{createdAt:'desc'}] })` to the page's existing first `Promise.all`.
+- JS grouping (briefDraft is Json — no SQL groupBy): (a) `missing` split on commas → per-tag counts, ranked desc ("N leads blocked on X"); (b) `briefDraft.businessType` counts (null-safe via `(lead.briefDraft as any)?.businessType`, fallback `(none)`); (c) `briefDraft.facts.entry.resolvedEngine` counts (same null-safe pattern).
+- Rendered as a new "Demand Board" `<section>` after Published Pages, matching the page's existing hand-rolled Tailwind table idiom: 3-column summary grid (blocked-on / business type / engine) + full lead table with columns status/email/input/missing/createdAt. Fasttrack rows are pinned to top by the query orderBy and visually flagged (amber row bg + "FAST TRACK" badge in the status cell). Empty state handled ("No demand leads yet.").
+- **Gate UNCHANGED**: `if (!isAdmin(userId)) notFound();` remains the first statement; the board is inside the same server component after it. Manual reasoning: admin sees the board; non-admin still hits notFound() — no new client code, no new route.
+
+### 2. seedDraft.ts fixture fix (pre-existing drift, RED since 2026-06-18)
+
+Schema satisfied: `ServiceStrategyRequestSchema.understanding` (strategy route) + the identical object in `GenerateServiceCopyRequestSchema` (generate-copy route) — both require `whatYouDo: z.string().min(1)`, `targetClients: z.array(z.string()).min(1)`, `outcomes: z.array(z.string()).default([])`, plus serviceType/services/deliveryModel (already correct in the fixture).
+
+All FOUR understanding blocks fixed (Hearth strategyBody + copyExtra, Lex strategyBody + copyExtra), same three-line change each:
+
+Before (Hearth; Lex analogous with consultancy values):
+```
+serviceType: 'agency', serviceCategories: ['branding'], industries: ['dtc'],
+targetClients: 'DTC founders at $300k-$2M ARR',          // STRING — schema wants array
+                                                          // whatYouDo MISSING
+services: [...], deliveryModel: 'remote',
+```
+After:
+```
+serviceType: 'agency', serviceCategories: ['branding'], industries: ['dtc'],
+whatYouDo: 'We build complete brand identities for DTC founders in six weeks',
+targetClients: ['DTC founders at $300k-$2M ARR'],         // now array(string).min(1)
+outcomes: [],                                             // explicit array (schema default)
+services: [...], deliveryModel: 'remote',
+```
+Lex: `whatYouDo: 'We advise regulated firms on risk, compliance and counsel'`, `targetClients: ['CFOs at mid-market regulated firms']`, `outcomes: []`. Extra keys (`serviceCategories`, `industries`) left as-is — zod objects strip unknown keys; only the shapes the schema rejects were changed.
+
+### 3. Stale-doc sweep
+
+- `src/app/api/README.md:48` — `/start` row rewritten: persona gate + waitlist description → universal entry bootstrap (upsert User + plan, Token+Project, persona still seeds `Project.audienceType` for back-compat, serve gate overwrites at `/api/brief/confirm`, returns `/onboarding/{token}`).
+- `src/components/dashboard/DashboardHeader.tsx` — deleted the dead `if (url.includes('/onboarding/persona')) router.push(...)` branch (never matches post-cutover); kept the working `window.open(url, '_blank')` path with a short comment. Also removed the now-unused `useRouter` import + `router` var (lint hygiene; no behavior change).
+
+### Verification (spec acceptance gate)
+
+- `npx tsc --noEmit` — **clean**
+- `npm run test:run` — **64 files passed | 1 skipped; 886 passed | 2 skipped** (same counts as phase 6)
+- `npm run test:e2e` — full suite, clean `.next` (wiped pre-run per phase-6 audit note; no stray dev servers on port 3000): **8 passed | 1 skipped, exit 0 (2.4m)**
+  - `[setup] authenticate` — PASS
+  - `generation.spec` — PASS (service pipeline conditional skip = the 1 skipped, pre-existing, unchanged)
+  - `render.spec` (hearth-demo / meridian / meridian blocks) — PASS
+  - `publish.spec` **service / Hearth — PASS (30.1s) — now GREEN via the seedDraft fix**
+  - `publish.spec` **service / Lex — PASS (7.1s) — now GREEN**
+  - `publish.spec` product / Meridian — PASS (1.0m; rate-limiter 429 retries handled by the seed helper's built-in backoff, as designed)
+- `npm run build` — **SUCCESS** (full pipeline: build:published-css → build:assets → next build; route table emitted, no errors)
+- Manual reasoning (stated, no server): admin demand board renders for admins; non-admin path unchanged (`isAdmin || notFound()` untouched, first statement).
+
+### Deviations
+
+1. Removed the unused `useRouter` import/var in DashboardHeader alongside the dead branch — strictly consequential cleanup within the listed file (the branch was its only user).
+2. None otherwise. Scope guard respected: no schema/brief-module/route/wizard files touched.
+
+### Open risks
+
+- Live-data confirmation of the board (photographer lead under `rungC:gallery`, fasttrack pinned) needs a dev-server manual pass — the plan's real-LLM acceptance QA remains a merge-gate item (per phase 5/6 notes).
+- Demand board renders raw `missing` tags + engine keys (internal vocabulary) — fine for the admin surface by design (spec keeps internal terms admin-only).

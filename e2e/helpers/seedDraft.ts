@@ -39,7 +39,9 @@ export const AUDIENCES: AudienceConfig[] = [
       paletteId: 'terracotta',
       understanding: {
         serviceType: 'agency', serviceCategories: ['branding'], industries: ['dtc'],
-        targetClients: 'DTC founders at $300k-$2M ARR',
+        whatYouDo: 'We build complete brand identities for DTC founders in six weeks',
+        targetClients: ['DTC founders at $300k-$2M ARR'],
+        outcomes: [],
         services: ['Brand identity', 'Packaging', 'Website refresh'], deliveryModel: 'remote',
       },
       assets: {
@@ -53,7 +55,9 @@ export const AUDIENCES: AudienceConfig[] = [
       goal: 'book-call',
       understanding: {
         serviceType: 'agency', serviceCategories: ['branding'], industries: ['dtc'],
-        targetClients: 'DTC founders at $300k-$2M ARR',
+        whatYouDo: 'We build complete brand identities for DTC founders in six weeks',
+        targetClients: ['DTC founders at $300k-$2M ARR'],
+        outcomes: [],
         services: ['Brand identity', 'Packaging', 'Website refresh'], deliveryModel: 'remote',
       },
     },
@@ -77,7 +81,9 @@ export const AUDIENCES: AudienceConfig[] = [
       paletteId: 'counsel',
       understanding: {
         serviceType: 'consultancy', serviceCategories: ['advisory'], industries: ['finance'],
-        targetClients: 'CFOs at mid-market regulated firms',
+        whatYouDo: 'We advise regulated firms on risk, compliance and counsel',
+        targetClients: ['CFOs at mid-market regulated firms'],
+        outcomes: [],
         services: ['Risk advisory', 'Compliance review', 'Fractional counsel'], deliveryModel: 'hybrid',
       },
       assets: {
@@ -91,7 +97,9 @@ export const AUDIENCES: AudienceConfig[] = [
       goal: 'book-call',
       understanding: {
         serviceType: 'consultancy', serviceCategories: ['advisory'], industries: ['finance'],
-        targetClients: 'CFOs at mid-market regulated firms',
+        whatYouDo: 'We advise regulated firms on risk, compliance and counsel',
+        targetClients: ['CFOs at mid-market regulated firms'],
+        outcomes: [],
         services: ['Risk advisory', 'Compliance review', 'Fractional counsel'], deliveryModel: 'hybrid',
       },
     },

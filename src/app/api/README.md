@@ -45,7 +45,7 @@ by hand.
 
 | Route | Method | Purpose | Auth |
 |-------|--------|---------|------|
-| `/start` | GET | **Persona gate** + project bootstrap: upserts User, gates persona (→ `/onboarding/persona`), waitlists non-pilot service personas (→ `/onboarding/waitlist`), else creates Token+Project and returns the wizard URL (product vs service by `audienceType`) | Clerk (anon allowed → product) |
+| `/start` | GET | **Universal entry bootstrap** (scale-02): upserts User + default plan, creates Token+Project (persona still seeds `Project.audienceType` for back-compat; the serve gate overwrites it at `/api/brief/confirm`), returns `/onboarding/{token}` — the universal entry where classification + the serve gate run. No persona gate, no waitlist | Clerk (anon allowed) |
 | `/user/persona` | GET / POST | Read / set the user's persona | authed |
 | `/saveDraft` | POST | Persist editor draft state | public · RL:draft · owner |
 | `/loadDraft` | GET | Load saved draft by token | authed |

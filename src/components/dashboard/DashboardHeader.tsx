@@ -3,13 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import posthog from 'posthog-js'
-import { useRouter } from 'next/navigation'
 
 
 
 export default function DashboardHeader() {
   const { user, isLoaded } = useUser()
-  const router = useRouter()
   const firstName = isLoaded ? user?.firstName ?? 'there' : ''
 
   const [userInput, setUserInput] = useState("");
@@ -41,14 +39,9 @@ const [stepIndex, setStepIndex] = useState(0);
   const res = await fetch('/api/start');
   const { url } = await res.json();
 
-  // /api/start may redirect to the persona prompt for authed-no-persona users.
-  // Navigate same tab in that case so the prompt replaces the dashboard;
-  // otherwise open the project create flow in a new tab as before.
-  if (typeof url === 'string' && url.includes('/onboarding/persona')) {
-    router.push(url.replace(process.env.NEXT_PUBLIC_SITE_URL || '', ''));
-  } else {
-    window.open(url, '_blank');
-  }
+  // /api/start returns the universal entry URL (/onboarding/{token});
+  // the persona-prompt redirect branch was removed in scale-02.
+  window.open(url, '_blank');
 
   setUserInput("");
   setConfirmedFields({});
