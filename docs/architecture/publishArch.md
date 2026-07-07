@@ -292,7 +292,7 @@ export default function LeftCopyRightImagePublished(props: LayoutComponentProps)
 |-------------------|----------------------|--------|
 | `EditableText` | `TextPublished` | `@/components/published/TextPublished` |
 | `EditableHeadline` | `HeadlinePublished` | `@/components/published/TextPublished` |
-| `LogoEditableComponent` | `LogoPublished` | `@/components/published/LogoPublished` |
+| logo (edit-side removed) | `LogoPublished` | `@/components/published/LogoPublished` |
 | `IconEditableComponent` | `IconPublished` | `@/components/published/IconPublished` |
 | SVG checkmarks (React component) | `CheckmarkIconPublished` | `@/components/published/CheckmarkIconPublished` |
 | `ButtonComponent` | `CTAButtonPublished` | `@/components/published/CTAButtonPublished` |

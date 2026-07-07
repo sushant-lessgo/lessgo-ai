@@ -25,7 +25,7 @@ published/dashboard/marketing UI.
 | `shared/` | Generic building blocks: `Header`, `Footer`, `Logo`, `PageIntro`, `LoadingButtonBar`. |
 | `t/` | `CollectFormClient` — public testimonial collect form (`/t/[collectToken]`). |
 | `mdx/` | `MDXComponents` for the marketing blog. |
-| `debug/` | Dev overlays: `ModalDebugPanel`, `ReadinessBanner`. |
+| `debug/` | Dev overlays: `ModalDebugPanel`. |
 
 ## Top-level files
 

@@ -3,7 +3,7 @@
 
 import { useMemo, useEffect, useRef } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { useTransitionLock, useTransitionAwareVisibility } from '@/hooks/useTransitionLock';
+import { useTransitionLock, getTransitionAwareVisibility } from '@/hooks/useTransitionLock';
 import { useGlobalAnchor } from '@/hooks/useGlobalAnchor';
 import { 
   getActiveToolbar, 
@@ -116,7 +116,7 @@ export function useSelectionPriority() {
   // Enhanced shouldShowToolbar with transition lock support
   const shouldShowToolbarWithLock = (toolbarType: ToolbarType): boolean => {
     const naturalVisibility = shouldShowToolbar(toolbarType, editorSelection);
-    const { shouldRender } = useTransitionAwareVisibility(toolbarType, naturalVisibility, transitionLock);
+    const { shouldRender } = getTransitionAwareVisibility(toolbarType, naturalVisibility, transitionLock);
     return shouldRender;
   };
   

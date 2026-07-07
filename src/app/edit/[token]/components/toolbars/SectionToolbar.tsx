@@ -22,24 +22,28 @@ interface SectionToolbarProps {
   contextActions: any[];
 }
 
-export function SectionToolbar({ sectionId, position, contextActions }: SectionToolbarProps) {
+// Outer gate: visibility-priority check only. Split from the inner component so
+// the early return sits above zero hooks (rules-of-hooks); hidden ⇒ inner
+// unmounted ⇒ no state/effects run — same behavior as the old early return.
+export function SectionToolbar(props: SectionToolbarProps) {
   // STEP 1: Check toolbar visibility priority
-  const { isVisible, reason } = useToolbarVisibility('section');
-  
+  const { isVisible } = useToolbarVisibility('section');
+  if (!isVisible) {
+    return null;
+  }
+  return <SectionToolbarInner {...props} />;
+}
+
+function SectionToolbarInner({ sectionId, position, contextActions }: SectionToolbarProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showElementToggle, setShowElementToggle] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const advancedRef = useRef<HTMLDivElement>(null);
   const advancedTriggerRef = useRef<HTMLButtonElement>(null);
-  
+
   // Debug instance
   const instanceId = useRef(Math.random().toString(36).substr(2, 9));
 
-  // STEP 1: Priority-based early returns
-  if (!isVisible) {
-    return null;
-  }
-  
   // Debug mounting/unmounting
   useEffect(() => {
     logger.dev(`🟢 SectionToolbar[${instanceId.current}] MOUNTED for section:`, () => sectionId);

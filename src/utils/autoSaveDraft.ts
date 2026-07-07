@@ -25,7 +25,6 @@ interface AutoSaveDraftParams {
   hiddenInferredFields?: HiddenInferredFields;
   title?: string;
   includePageData?: boolean;
-  serializationOptions?: SerializationOptions;
   // Enhanced parameters for edit store integration
   source?: 'onboarding' | 'edit' | 'persistence-manager';
   conflictResolution?: 'ignore' | 'overwrite' | 'merge';
@@ -70,12 +69,6 @@ interface AutoSaveDraftResult {
     dataSize: number;
     compressionRatio?: number;
   };
-}
-
-interface SerializationOptions {
-  useContentSerializer?: boolean;
-  validateSerialization?: boolean;
-  includeContentSummary?: boolean;
 }
 
 /**
@@ -152,40 +145,14 @@ export async function autoSaveDraft(params: AutoSaveDraftParams): Promise<AutoSa
    let pageData: any = null;
 if (includePageData) {
   try {
-    const { serializationOptions = {} } = params;
-    
     if (source === 'edit' || source === 'persistence-manager') {
       const { storeManager } = await import('@/stores/storeManager');
       const editStore = storeManager.getEditStore(tokenId);
       const editStoreState = editStore.getState();
-      
-      if (serializationOptions.useContentSerializer) {
-        // Use content serializer for structured data
-        const { useContentSerializer } = await import('@/hooks/useContentSerializer');
-        const { serialize, validate, getSerializedSize } = useContentSerializer();
-        
-        const serializedContent = serialize();
-        
-        if (serializationOptions.validateSerialization) {
-          const validation = validate(serializedContent);
-          if (!validation.isValid) {
-            logger.warn('⚠️ Serialization validation failed:', validation.errors);
-            payload.warnings = validation.errors;
-          }
-        }
-        
-        pageData = serializedContent;
-        
-        if (serializationOptions.includeContentSummary) {
-          const { getContentSummary } = await import('@/utils/contentSerialization');
-          payload.contentSummary = getContentSummary(serializedContent);
-        }
-        
-        // Using content serializer for structured save
-      } else {
-        // Use standard export
-        pageData = editStoreState.export();
-      }
+      // Standard export only. The old useContentSerializer branch was deleted:
+      // its serialize() dropped pages/chrome (multi-page-UNSAFE, see
+      // docs/task/edit-guide-and-verify.audit.md) and violated rules-of-hooks.
+      pageData = editStoreState.export();
     } else {
       // Fallback to onboarding - use token-based store
       const { storeManager } = await import('@/stores/storeManager');
@@ -649,87 +616,6 @@ export async function completeSaveDraft(tokenId: string, options?: {
   });
 }
 
-// Serialized complete save
-export async function serializedSaveDraft(tokenId: string, options?: {
-  description?: string;
-  validateSerialization?: boolean;
-  includeContentSummary?: boolean;
-  forceOverwrite?: boolean;
-}): Promise<AutoSaveDraftResult> {
-  const { description, validateSerialization, includeContentSummary, forceOverwrite } = options || {};
-  
-  return autoSaveDraft({
-    tokenId,
-    source: 'edit',
-    includePageData: true,
-    validateBeforeSave: true,
-    conflictResolution: forceOverwrite ? 'overwrite' : 'merge',
-    serializationOptions: {
-      useContentSerializer: true,
-      validateSerialization: validateSerialization ?? true,
-      includeContentSummary: includeContentSummary ?? true,
-    },
-    saveMetadata: {
-      description: description || 'Serialized complete save',
-      source: 'user',
-      triggeredBy: 'user-action',
-      sessionId: generateSessionId(),
-    },
-  });
-}
-
-// Load with deserialization support
-export async function loadDraftWithDeserialization(tokenId: string): Promise<{
-  success: boolean;
-  data?: any;
-  error?: string;
-}> {
-  try {
-    const response = await fetch(`/api/loadDraft?tokenId=${encodeURIComponent(tokenId)}`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    // Check if we have serialized content
-    if (data.finalContent && data.finalContent.version) {
-      const { useContentSerializer } = await import('@/hooks/useContentSerializer');
-      const { deserialize, validate } = useContentSerializer();
-      
-      // Validate before deserializing
-      const validation = validate(data.finalContent);
-      if (!validation.isValid) {
-        logger.warn('⚠️ Deserialization validation failed:', validation.errors);
-        // Continue with warnings
-      }
-      
-      // Deserialize into edit store
-      deserialize(data.finalContent);
-      
-      logger.debug('✅ Successfully loaded and deserialized content');
-      return { success: true, data };
-    } else {
-      // Fallback to standard loading
-      const { storeManager } = await import('@/stores/storeManager');
-      const editStore = storeManager.getEditStore(tokenId);
-      const editStoreState = editStore.getState();
-      
-      await editStoreState.loadFromDraft(data, tokenId);
-      
-      logger.debug('✅ Successfully loaded content (fallback method)');
-      return { success: true, data };
-    }
-  } catch (error) {
-    logger.error('❌ Failed to load draft:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-}
-
 // Background auto-save
 export async function backgroundSaveDraft(tokenId: string): Promise<AutoSaveDraftResult> {
   return autoSaveDraft({
@@ -877,47 +763,6 @@ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
           source: 'user',
         },
       });
-    },
-
-    // Serialization functions
-    serializedSaveDraft,
-    loadDraftWithDeserialization,
-    
-    // Test serialization
-    testSerialization: async (tokenId: string) => {
-      logger.debug('🧪 Testing serialization...');
-      const { useContentSerializer } = await import('@/hooks/useContentSerializer');
-      const { serialize, validate, getSerializedSize } = useContentSerializer();
-      
-      const serialized = serialize();
-      const validation = validate(serialized);
-      const size = getSerializedSize();
-      
-      logger.debug('📊 Serialization test results:', {
-        isValid: validation.isValid,
-        errors: validation.errors,
-        warnings: validation.warnings,
-        size: `${(size / 1024).toFixed(2)}KB`,
-        content: serialized,
-      });
-      
-      return { serialized, validation, size };
-    },
-    
-    testDeserialization: async (data: any) => {
-      logger.debug('🧪 Testing deserialization...');
-      const { useContentSerializer } = await import('@/hooks/useContentSerializer');
-      const { deserialize, validate } = useContentSerializer();
-      
-      const validation = validate(data);
-      if (validation.isValid) {
-        deserialize(data);
-        logger.debug('✅ Deserialization successful');
-      } else {
-        logger.error('❌ Deserialization failed:', validation.errors);
-      }
-      
-      return validation;
     },
   };
   

@@ -27,19 +27,25 @@ interface EnhancedAddSectionProps {
   className?: string;
 }
 
-export function EnhancedAddSection({
+// Outer gate: template-module projects get no à-la-carte add-section UI.
+// Split from the inner component so the guard's early return sits above zero
+// hooks (rules-of-hooks) while hidden ⇒ inner unmounted ⇒ no state/effects.
+export function EnhancedAddSection(props: EnhancedAddSectionProps) {
+  const { audienceType, templateId } = useEditStore();
+  if (usesTemplateModule(audienceType, templateId)) return null;
+  return <EnhancedAddSectionInner {...props} />;
+}
+
+function EnhancedAddSectionInner({
   position,
   afterSectionId,
   existingSections,
   onAddSection,
   className
 }: EnhancedAddSectionProps) {
-  const { audienceType, templateId } = useEditStore();
   const [showSectionSelector, setShowSectionSelector] = useState(false);
   const [showLayoutSelector, setShowLayoutSelector] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
-
-  if (usesTemplateModule(audienceType, templateId)) return null;
 
   // Validate props on mount
   React.useEffect(() => {

@@ -69,7 +69,6 @@ store (`useEditStoreLegacy`).
 | `useImageToolbar.ts` / `useButtonConfigModal.ts` / `useAdvancedActionsMenu.ts` | Per-widget toolbar/menu state |
 | `useSmartTextColors.ts` | Contrast-aware text color resolution |
 | `useOptimizedEditStore.ts` | Selector-based reads to cut re-renders |
-| `usePerformanceMonitor.ts` | Dev render/timing instrumentation |
 | `useTransitionLock.ts` / `useGlobalAnchor.ts` | Interaction guards / anchor tracking |
 
 ## Standalone hooks

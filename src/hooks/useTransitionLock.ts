@@ -224,10 +224,11 @@ export function useTransitionLock(config: Partial<TransitionLockConfig> = {}) {
 }
 
 /**
- * Hook for components that need to respect transition locks
- * Returns whether the component should render based on lock state
+ * Plain helper (NOT a hook — no React state) for components that need to
+ * respect transition locks. Returns whether the component should render
+ * based on lock state. Safe to call inside callbacks.
  */
-export function useTransitionAwareVisibility(
+export function getTransitionAwareVisibility(
   toolbarType: ToolbarType,
   naturalVisibility: boolean,
   transitionLock: ReturnType<typeof useTransitionLock>

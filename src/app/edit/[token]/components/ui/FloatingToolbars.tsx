@@ -8,7 +8,6 @@ import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 
 // Import action handlers
 import { SectionToolbar } from '../toolbars/SectionToolbar';
-import { TextToolbar } from '../toolbars/TextToolbar';
 import { TextToolbarMVP } from '../toolbars/TextToolbarMVP'; // Step 4: MVP Implementation
 import { ElementToolbar } from '../toolbars/ElementToolbar';
 import { ImageToolbar } from '../toolbars/ImageToolbar';

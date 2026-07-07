@@ -43,8 +43,7 @@ not exhaustive.
 `taxonomyMappingUtils.ts`, `taxonomyDisplayUtils.ts`, `getOptionsForField.ts`.
 
 ## CSS variables & performance
-`cssVariableValidation.ts`, `cssVariablePerformance.ts`, `performanceMonitor.ts`,
-`bulletproofSuppression.ts`.
+`cssVariableValidation.ts`, `cssVariablePerformance.ts`, `bulletproofSuppression.ts`.
 
 ## Routing / URLs
 `urlHelpers.ts`, `reservedPaths.ts` (+ `reservedPaths.test.ts`).

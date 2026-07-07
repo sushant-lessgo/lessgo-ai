@@ -63,20 +63,46 @@ const COLOR_PALETTE = [
 
 let globalRenderCount = 0;
 
-export function TextToolbarMVP({ elementSelection, position, contextActions }: TextToolbarMVPProps) {
+// Outer gate: visibility priority + valid-selection checks only. Split from the
+// inner component so the early returns sit above zero hooks (rules-of-hooks);
+// hidden ⇒ inner unmounted ⇒ no format/selection effects run — same behavior as
+// the old early returns. Inner receives elementSelection guaranteed non-null.
+export function TextToolbarMVP(props: TextToolbarMVPProps) {
+  // Step 3: Global anchor positioning with MVP sizing
+  const {
+    isVisible,
+    position: anchorPosition,
+    hasValidPosition,
+  } = useToolbarVisibility('text', { width: 320, height: 52 }); // Widened for sparkle button
+
+  // Priority-based early return
+  if (!isVisible) {
+    return null;
+  }
+
+  if (!props.elementSelection || !props.elementSelection.sectionId || !props.elementSelection.elementKey) {
+    logger.warn('TextToolbarMVP: Invalid elementSelection', props.elementSelection);
+    return null;
+  }
+
+  return (
+    <TextToolbarMVPInner
+      {...props}
+      anchorPosition={anchorPosition}
+      hasValidPosition={hasValidPosition}
+    />
+  );
+}
+
+function TextToolbarMVPInner({
+  elementSelection,
+  position,
+  contextActions,
+  anchorPosition,
+  hasValidPosition,
+}: TextToolbarMVPProps & { anchorPosition: any; hasValidPosition: boolean }) {
   const currentRender = ++globalRenderCount;
   const renderTime = Date.now();
-  
-  // Step 3: Global anchor positioning with MVP sizing
-  const { 
-    isVisible, 
-    reason, 
-    isTransitionLocked, 
-    lockReason,
-    anchor,
-    position: anchorPosition,
-    hasValidPosition 
-  } = useToolbarVisibility('text', { width: 320, height: 52 }); // Widened for sparkle button
 
   const [formatState, setFormatState] = useState<MVPFormatState>({
     bold: false,
@@ -112,18 +138,8 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
   const [hasTextSelection, setHasTextSelection] = useState(false);
 
   // Debug logging removed to prevent log spam
-  
+
   // Track render count removed for type safety
-
-  // Priority-based early return
-  if (!isVisible) {
-    return null;
-  }
-
-  if (!elementSelection || !elementSelection.sectionId || !elementSelection.elementKey) {
-    logger.warn('TextToolbarMVP: Invalid elementSelection', elementSelection);
-    return null;
-  }
 
   // Detect current formatting from selected element - FIXED: Only update if values actually changed
   useEffect(() => {
@@ -496,8 +512,9 @@ export function TextToolbarMVP({ elementSelection, position, contextActions }: T
           top: finalPosition.y,
           height: '52px', // Fixed MVP height
           whiteSpace: 'nowrap',
-          opacity: isVisible ? 1 : 0,
-          pointerEvents: isVisible ? 'auto' : 'none',
+          // Inner only mounts when the outer visibility gate passes.
+          opacity: 1,
+          pointerEvents: 'auto',
           userSelect: 'none', // Prevent text selection on toolbar
         }}
         data-toolbar-type="text-mvp"
