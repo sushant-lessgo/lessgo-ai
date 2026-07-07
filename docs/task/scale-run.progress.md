@@ -8,7 +8,7 @@ Started: 2026-07-07.
 
 | # | Spec | Status | Last commit | Notes |
 |---|------|--------|-------------|-------|
-| 01 | scale-01-brief-registry.spec.md | pending | — | |
+| 01 | scale-01-brief-registry.spec.md | in-progress | — | plan approved; implementing (5 phases) |
 | 02 | scale-02-router-serve-gate.spec.md | pending | — | dep 01 |
 | 03 | scale-03-images-at-birth.spec.md | pending | — | dep 01 |
 | — | **PILOT GATE (human)** | pending | — | HALT after 03 → wait for user go |
