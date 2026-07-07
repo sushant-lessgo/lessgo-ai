@@ -345,11 +345,61 @@ export const layoutElementSchema: LayoutSchema = {
 }
 
 /**
+ * Publish-side defense (React #31 white-screen): element values must be
+ * primitives/arrays by the time they reach the published blocks, which render
+ * them as JSX children. Two corruption shapes observed in prod content:
+ * the legacy `{ type, content }` element object, and a string spread into an
+ * object (`{ 0:'a', 1:'b', …, type, content }`). Coerce both back to strings;
+ * recurse into arrays/objects so collection item fields are covered too.
+ */
+function coercePublishValue(val: any): any {
+  if (val === null || typeof val !== 'object') return val;
+  if (Array.isArray(val)) {
+    for (let i = 0; i < val.length; i++) val[i] = coercePublishValue(val[i]);
+    return val;
+  }
+  if (typeof val.content === 'string' && typeof val.type === 'string') {
+    return val.content; // legacy `{ type, content }` element shape
+  }
+  const keys = Object.keys(val);
+  const charKeys = keys.filter((k) => /^\d+$/.test(k));
+  if (charKeys.length > 0 && charKeys.every((k) => typeof val[k] === 'string')) {
+    // A string was spread into an object — reassemble the original text.
+    return charKeys.sort((a, b) => Number(a) - Number(b)).map((k) => val[k]).join('');
+  }
+  for (const k of keys) val[k] = coercePublishValue(val[k]);
+  return val;
+}
+
+/** Coerce every element value of one section in place. Schema-independent —
+ *  must also cover sections whose layout has no entry in layoutElementSchema
+ *  (e.g. TechPremium blocks). */
+function coerceSectionElements(section: any): void {
+  if (!section?.elements || typeof section.elements !== 'object') return;
+  for (const key of Object.keys(section.elements)) {
+    section.elements[key] = coercePublishValue(section.elements[key]);
+  }
+}
+
+/**
  * Sanitize content for publish: apply 4-case gating per section.
  * Strips excluded elements, sets defaults for missing required ones.
+ * Also coerces corrupted object-shaped text values to strings (all pages,
+ * including subpages; gating itself stays root-page + schema-scoped).
  * Mutates content in place.
  */
 export function sanitizeContentForPublish(content: Record<string, any>): void {
+  // Coercion for subpages (multi-page publish) — gating below is root-only.
+  const subpages = content?.subpages;
+  if (subpages && typeof subpages === 'object') {
+    for (const sub of Object.values(subpages) as any[]) {
+      const subSections: string[] | undefined = sub?.layout?.sections;
+      if (!Array.isArray(subSections)) continue;
+      const subContainer = sub.content && typeof sub.content === 'object' ? sub.content : sub;
+      for (const sid of subSections) coerceSectionElements(subContainer[sid]);
+    }
+  }
+
   const sections: string[] = content?.layout?.sections;
   if (!sections || !Array.isArray(sections)) return;
 
@@ -360,8 +410,12 @@ export function sanitizeContentForPublish(content: Record<string, any>): void {
 
   for (const sectionId of sections) {
     const section = container[sectionId];
-    if (!section?.elements || !section?.layout) continue;
+    if (!section?.elements) continue;
 
+    // Coerce before the schema gate — runs for every section, schema or not.
+    coerceSectionElements(section);
+
+    if (!section.layout) continue;
     const schema = layoutElementSchema[section.layout];
     if (!schema || !isV2Schema(schema)) continue;
 

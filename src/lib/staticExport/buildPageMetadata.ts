@@ -97,6 +97,20 @@ export function resolveOgImage(opts: {
   );
 }
 
+/**
+ * Site-wide favicon fallback: published pages with no uploaded favicon used to
+ * emit no <link rel="icon"> at all (browser default). Absolute URL — published
+ * pages are served from *.lessgo.site / custom domains, not lessgo.ai.
+ */
+export const DEFAULT_FAVICON_URL = 'https://lessgo.ai/favicon.ico';
+
+/** Element text, tolerant of both stored shapes: plain string or `{ content }`. */
+function elementText(el: any): string | undefined {
+  if (typeof el === 'string' && el) return el;
+  if (el && typeof el.content === 'string' && el.content) return el.content;
+  return undefined;
+}
+
 export function buildPageMetadata(input: BuildPageMetadataInput): PageMetadata {
   const content = input.content || {};
   // Per-page seo overrides. `content.seo` is the sanitized blob the publish route
@@ -109,17 +123,16 @@ export function buildPageMetadata(input: BuildPageMetadataInput): PageMetadata {
   // Description: seo override → subheadline → headline → title, capped at 160 for
   // the auto path (matches the static path exactly); overrides render verbatim
   // (schema caps them at 200).
-  const rawDesc = heroEls?.subheadline?.content || heroEls?.headline?.content || input.pageTitle;
-  const autoDescription =
-    typeof rawDesc === 'string' ? rawDesc.slice(0, 160) : input.pageTitle.slice(0, 160);
+  const rawDesc =
+    elementText(heroEls?.subheadline) || elementText(heroEls?.headline) || input.pageTitle;
+  const autoDescription = rawDesc.slice(0, 160);
   const description = seo?.description || autoDescription;
 
   // Title: seo override → the resolved page title → hero headline → generic label.
   // For the static path pageTitle is always set, so the fallbacks are inert there
   // (byte-identical head); they only benefit the dynamic route where page.title may be empty.
-  const headline = heroEls?.headline?.content;
   const title =
-    seo?.title || input.pageTitle || (typeof headline === 'string' ? headline : '') || 'Landing Page';
+    seo?.title || input.pageTitle || elementText(heroEls?.headline) || 'Landing Page';
 
   const canonicalURL = resolveCanonicalURL({
     slug: input.slug,
@@ -146,6 +159,6 @@ export function buildPageMetadata(input: BuildPageMetadataInput): PageMetadata {
     siteName: 'Lessgo.ai',
     ogType: 'website',
     noIndex: !!seo?.noIndex,
-    faviconUrl: seo?.faviconUrl || input.rootSeo?.faviconUrl || undefined,
+    faviconUrl: seo?.faviconUrl || input.rootSeo?.faviconUrl || DEFAULT_FAVICON_URL,
   };
 }

@@ -156,6 +156,29 @@ describe('buildPageMetadata', () => {
   });
 });
 
+describe('buildPageMetadata — element shape tolerance', () => {
+  const base = { slug: 'acme', pageTitle: 'Acme', baseUrl: 'https://lessgo.ai' };
+
+  it('derives description from string-shaped hero elements (post-coercion content)', () => {
+    const stringShaped = {
+      layout: { sections: ['hero-abc12345'] },
+      'hero-abc12345': {
+        elements: { headline: 'Ship fast', subheadline: 'Founders launch in minutes.' },
+      },
+    };
+    const m = buildPageMetadata({ ...base, content: stringShaped });
+    expect(m.description).toBe('Founders launch in minutes.');
+  });
+
+  it('string-shaped headline feeds the title fallback when pageTitle empty', () => {
+    const c = {
+      layout: { sections: ['hero-abc12345'] },
+      'hero-abc12345': { elements: { headline: 'Ship fast' } },
+    };
+    expect(buildPageMetadata({ ...base, pageTitle: '', content: c }).title).toBe('Ship fast');
+  });
+});
+
 describe('buildPageMetadata — seo overrides (Phase 2)', () => {
   const base = {
     slug: 'acme',
@@ -164,10 +187,10 @@ describe('buildPageMetadata — seo overrides (Phase 2)', () => {
     baseUrl: 'https://lessgo.ai',
   };
 
-  it('no-seo output is unchanged and reports noIndex=false, no favicon (parity guard)', () => {
+  it('no-seo output reports noIndex=false and the default favicon (parity guard)', () => {
     const m = buildPageMetadata({ ...base, content: flatContent });
     expect(m.noIndex).toBe(false);
-    expect(m.faviconUrl).toBeUndefined();
+    expect(m.faviconUrl).toBe('https://lessgo.ai/favicon.ico');
   });
 
   it('an empty seo blob behaves exactly like no seo', () => {
