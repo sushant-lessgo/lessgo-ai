@@ -157,7 +157,7 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
             minWidth: leftPanel.collapsed ? '48px' : '250px',
           }}
         >
-          <LeftPanel tokenId={tokenId} />
+          <LeftPanel />
         </div>
 
         {/* Mobile Overlay for Left Panel */}

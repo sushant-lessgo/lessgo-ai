@@ -1,27 +1,13 @@
-// app/edit/[token]/components/layout/LeftPanel.tsx - Section Outline + Read-only Inputs + Review Checklist
+// app/edit/[token]/components/layout/LeftPanel.tsx - Section Outline + Review Checklist
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
-import { FIELD_DISPLAY_NAMES, HIDDEN_FIELD_DISPLAY_NAMES, type CanonicalFieldName } from '@/types/core/index';
 import { useReviewState } from '@/hooks/useReviewState';
-
-interface LeftPanelProps {
-  tokenId: string;
-}
 
 const getSectionLabel = (sectionId: string): string => {
   const type = sectionId.split('-')[0];
   return type.charAt(0).toUpperCase() + type.slice(1);
-};
-
-const sanitizeValue = (value: unknown): string => {
-  if (typeof value === 'string') return value;
-  if (typeof value === 'object' && value !== null && 'value' in value) {
-    return String((value as { value: unknown }).value || '');
-  }
-  return String(value || '');
 };
 
 const SECTION_ICONS: Record<string, string> = {
@@ -164,11 +150,9 @@ function ReviewChecklist() {
 // LeftPanel
 // ---------------------------------------------------------------------------
 
-export function LeftPanel({ tokenId }: LeftPanelProps) {
-  const router = useRouter();
+export function LeftPanel() {
   const { store } = useEditStoreContext();
   const leftPanel = useStoreState(state => state.leftPanel);
-  const onboardingData = useStoreState(state => state.onboardingData);
   const sections = useStoreState(state => state.sections);
 
   const storeState = store?.getState();
@@ -176,7 +160,6 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   const toggleLeftPanel = storeState?.toggleLeftPanel;
 
   const [isResizing, setIsResizing] = useState(false);
-  const [inputsExpanded, setInputsExpanded] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   const isReviewMode = leftPanel.activeTab === 'review';
@@ -212,23 +195,6 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
   };
 
   if (!mounted) return null;
-
-  // Prepare read-only input fields
-  const validatedEntries = Object.entries(onboardingData.validatedFields || {})
-    .map(([key, value]) => ({
-      label: FIELD_DISPLAY_NAMES[key as CanonicalFieldName] || key,
-      value: sanitizeValue(value),
-    }))
-    .filter(f => f.value);
-
-  const hiddenEntries = Object.entries(onboardingData.hiddenInferredFields || {})
-    .map(([key, value]) => ({
-      label: HIDDEN_FIELD_DISPLAY_NAMES[key] || FIELD_DISPLAY_NAMES[key as CanonicalFieldName] || key,
-      value: sanitizeValue(value),
-    }))
-    .filter(f => f.value);
-
-  const features = (onboardingData.featuresFromAI || []) as Array<{ feature: string; benefit?: string }>;
 
   if (leftPanel.collapsed) {
     return (
@@ -278,104 +244,24 @@ export function LeftPanel({ tokenId }: LeftPanelProps) {
           {isReviewMode ? (
             <ReviewChecklist />
           ) : (
-            <>
-              {/* Section Outline */}
-              <div className="p-3">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">Sections</h3>
-                <div className="space-y-0.5">
-                  {sections.map((sectionId, index) => (
-                    <button
-                      key={sectionId}
-                      onClick={() => handleSectionClick(sectionId)}
-                      className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-brand-highlightBG transition-colors text-brand-text group flex items-center gap-2.5"
-                    >
-                      <span className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100 group-hover:bg-white text-xs flex-shrink-0">
-                        {SECTION_ICONS[sectionId.split('-')[0].toLowerCase()] || '📄'}
-                      </span>
-                      <span className="truncate font-medium">{getSectionLabel(sectionId)}</span>
-                      <span className="ml-auto text-[10px] text-brand-mutedText font-mono opacity-0 group-hover:opacity-100 transition-opacity">{index + 1}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="border-t border-gray-200 mx-3" />
-
-              {/* Your Inputs Accordion */}
-              <div className="p-3">
-                <button
-                  onClick={() => setInputsExpanded(!inputsExpanded)}
-                  className="w-full flex items-center justify-between px-2 py-2 hover:text-brand-text transition-colors"
-                >
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Your Inputs</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-brand-mutedText font-normal normal-case tracking-normal">
-                      {validatedEntries.length + hiddenEntries.length + (features.length > 0 ? 1 : 0)} fields
+            <div className="p-3">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">Sections</h3>
+              <div className="space-y-0.5">
+                {sections.map((sectionId, index) => (
+                  <button
+                    key={sectionId}
+                    onClick={() => handleSectionClick(sectionId)}
+                    className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-brand-highlightBG transition-colors text-brand-text group flex items-center gap-2.5"
+                  >
+                    <span className="w-6 h-6 flex items-center justify-center rounded-md bg-gray-100 group-hover:bg-white text-xs flex-shrink-0">
+                      {SECTION_ICONS[sectionId.split('-')[0].toLowerCase()] || '📄'}
                     </span>
-                    <svg
-                      className={`w-4 h-4 text-gray-400 transition-transform ${inputsExpanded ? 'rotate-180' : ''}`}
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </button>
-
-                {inputsExpanded && (
-                  <div className="mt-2 space-y-3 px-1">
-                    {/* Product Description */}
-                    {onboardingData.oneLiner && (
-                      <div className="bg-brand-highlightBG border border-orange-100 rounded-lg p-3">
-                        <div className="text-[10px] font-semibold text-brand-mutedText uppercase tracking-wider mb-1.5">Product Description</div>
-                        <p className="text-sm text-brand-text leading-relaxed">{onboardingData.oneLiner}</p>
-                      </div>
-                    )}
-
-                    {/* Validated Fields */}
-                    {validatedEntries.map(({ label, value }) => (
-                      <div key={label} className="px-1 py-1.5 border-b border-gray-100 last:border-b-0">
-                        <div className="text-[10px] font-semibold text-brand-mutedText uppercase tracking-wider mb-0.5">{label}</div>
-                        <p className="text-sm text-gray-800">{value}</p>
-                      </div>
-                    ))}
-
-                    {/* Hidden Inferred Fields */}
-                    {hiddenEntries.map(({ label, value }) => (
-                      <div key={label} className="px-1 py-1.5 border-b border-gray-100 last:border-b-0">
-                        <div className="text-[10px] font-semibold text-brand-mutedText uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
-                          {label}
-                          <span className="text-[9px] font-bold text-brand-logo bg-blue-50 px-1 py-px rounded tracking-wide">AI</span>
-                        </div>
-                        <p className="text-sm text-gray-800">{value}</p>
-                      </div>
-                    ))}
-
-                    {/* Features */}
-                    {features.length > 0 && (
-                      <div className="px-1">
-                        <div className="text-xs font-medium text-gray-500 mb-1">Features</div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {features.map((f, i) => (
-                            <span key={i} className="text-xs bg-gray-50 text-brand-text border border-gray-200 px-2.5 py-1 rounded-full font-medium">
-                              {f.feature}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Change inputs & regenerate */}
-                    <button
-                      onClick={() => router.push(`/onboarding/product/${tokenId}`)}
-                      className="w-full mt-4 px-3 py-2.5 text-sm text-white bg-brand-accentPrimary hover:bg-orange-500 rounded-lg transition-colors text-center font-medium shadow-sm"
-                    >
-                      Change inputs & regenerate
-                    </button>
-                  </div>
-                )}
+                    <span className="truncate font-medium">{getSectionLabel(sectionId)}</span>
+                    <span className="ml-auto text-[10px] text-brand-mutedText font-mono opacity-0 group-hover:opacity-100 transition-opacity">{index + 1}</span>
+                  </button>
+                ))}
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
