@@ -161,3 +161,40 @@
 - What Reset will NOT revert (plan step 7, for the record): `templateId/variantId/paletteId` and `Project.themeValues` (e.g. vestria `mood`) live OUTSIDE the exported in-store `theme` — post-generation mood/template switches are not restored by baseline. Known limitation vs the spec's "restores copy + theme".
 - `content` column roughly doubles when baseline is present (accepted at the gate).
 - If a baseline-carrying autosave fails, the flag stays dirty and baseline simply rides the next save attempt (retry-safe by construction).
+
+## Phase 5 — Reset restores copy + theme from baseline
+
+**Files changed**
+- `src/hooks/editStore/persistenceActions.ts`
+- `src/hooks/editStore/layoutActions.ts`
+- `src/app/edit/[token]/components/ui/useResetSystem.ts`
+
+### persistenceActions.ts
+- Extracted the hydration core of `loadFromDraft` (sections/sectionLayouts/sectionSpacing/content + blob-URL migration + mismatch logging, theme merge, globalSettings, navigationConfig, socialMediaConfig, legalPages, forms + orphaned-button validation, and the full pages+chrome hydration/migration block) into an exported `applySnapshot(state, payload)` — moved VERBATIM (only `contentToLoad` → `payload` renamed). Runs inside a set() producer (Immer draft).
+- `loadFromDraft` now delegates: meta restore (id/title/tokenId/audienceType/template/variant/palette/themeValues/dev-override/onboardingData — all read `apiResponse`, not the content payload) → `applySnapshot(state, contentToLoad)` → stored-baseline hydration → tail flags. **No behavior change**; one ordering note below under Deviations.
+- Phase-4 `captureBaseline()` call untouched — still OUTSIDE/AFTER the set() producer (never inside applySnapshot).
+- Added `get().clearHistory()` at end of `loadFromDraft` (Design decision 9) — idempotent overlap with the Phase-1 choke-point reset inside `loadPageIntoActive` (double-clear, harmless).
+- Known limitation carried over (Design decision 2, documented in applySnapshot's JSDoc): theme restored via MERGE (`{...state.theme, ...theme}`), not wholesale — a theme key ADDED post-generation survives Reset. Near-equivalent since baseline `export()` carries a full theme. Left as-is per plan.
+
+### layoutActions.ts
+- `resetToGenerated()`: new primary path — if `state.baseline` present, deep-clone it (`JSON.parse(JSON.stringify(...))` — baseline lives in committed, possibly frozen, state and applySnapshot mutates nested objects / aliases `payload.content`), apply via `applySnapshot(state, clone)`, set `persistence.isDirty = true` (1s autosave persists the restored state), and clear BOTH history stacks via direct draft mutation (Reset not undoable — confirmed acceptable). Baseline `export()` carries pages/currentPageId/chrome, so multi-page (naayom-style) subpage + chrome state restores through the same path loadFromDraft uses.
+- No baseline (should be unreachable post-Phase-4): existing derive-from-onboarding fallback kept byte-identical (including its undo push).
+- Import added: `applySnapshot` from `./persistenceActions` (no circular-import issue — persistenceActions does not import layoutActions).
+
+### useResetSystem.ts
+- Kept confirm → `resetToGenerated()` → `triggerAutoSave()` flow. Toast now a single message: "Restored original copy + design" (was scope-branched design-only wording, which would now mislead since Reset restores everything). Scope stays behavior-inert (text-only), per plan.
+
+### Deviations
+- Minor, within scope: in `loadFromDraft`, the meta-restore block (previously sandwiched BETWEEN forms-validation and pages-hydration) now runs BEFORE `applySnapshot`. Verified nothing in the hydration core reads meta except `state.title` in the legacy single-page branch — which previously also ran AFTER title was set, so the effective ordering (and behavior) is unchanged. This was required to keep applySnapshot a single contiguous verbatim move.
+- Toast collapsed to one message for both scopes instead of two scope-branched strings — conservative reading of step 4 ("toast copy → 'restored original copy + design'"); a design-only string would misstate what Reset now does.
+
+### Test results
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run` — 51 files passed | 1 skipped; 670 tests passed | 2 skipped. Green.
+
+### Open risks / manual QA for final gate
+- Manual: edit copy + change theme → Reset → BOTH revert; reload survives (autosave shipped restored state).
+- Manual multi-page (naayom-style): edit subpage copy + shared header → Reset → subpage content AND chrome restore; page switching still works after Reset.
+- Manual: undo stack EMPTY immediately after Reset (buttons disabled).
+- Manual: devtools-forced `baseline = null` → Reset falls back to derive-from-onboarding without crash.
+- Standing limitations (documented Phase 4): Reset does not revert `templateId/variantId/paletteId` or `Project.themeValues` (vestria mood); theme-merge (not wholesale) on Reset.
