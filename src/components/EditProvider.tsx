@@ -176,14 +176,25 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
 
             // Initialize review state from loaded content (also thread baseline +
             // currentPageId + globalSettings so first render matches the reactive refresh).
+            //
+            // Phase 6 read-side hydration: the persisted "leave as-is" dismisses live at
+            // content.finalContent.dismissedReviewFlags. loadFromDraft does NOT carry them into the
+            // edit store (they are Feature-2 review state, not page content), so read them straight
+            // from the loadDraft response's finalContent and thread them into initFromContent — the
+            // read-side twin of the useContentSerializer write path. Without this, a dismiss would
+            // re-appear on reload.
             try {
+              const hydratedDismisses = Array.isArray(data?.finalContent?.dismissedReviewFlags)
+                ? (data.finalContent.dismissedReviewFlags as string[])
+                : [];
               useReviewState.getState().initFromContent(
                 updatedState.content,
                 updatedState.sectionLayouts,
                 updatedState.sections,
                 updatedState.globalSettings,
                 updatedState.baseline,
-                updatedState.currentPageId
+                updatedState.currentPageId,
+                hydratedDismisses
               );
             } catch (err) {
               logger.warn('Failed to init review state:', err);

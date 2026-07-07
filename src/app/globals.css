@@ -232,6 +232,29 @@ h1, h2, h3, h4, h5 {
   display: none;
 }
 
+/* "Leave as-is" dismiss control (Feature 2 — EDIT-ONLY overlay, positioned by SelectionSystem).
+   A real clickable button rendered as a fixed overlay (never injected into the flagged element,
+   so it can't pollute contentEditable serialization). Clicking it permanently dismisses the
+   marker at that key. Never emitted by any published renderer. */
+.ai-verify-dismiss {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  color: #6d28d9;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: background 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+.ai-verify-dismiss:hover {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
 /* Optional: Dark mode (if you want it) */
 @media (prefers-color-scheme: dark) {
   body {

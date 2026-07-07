@@ -2,6 +2,7 @@
 import { useCallback, useMemo } from 'react';
 import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
 import { validateContentStructure } from '@/utils/contentSerialization';
+import { useReviewState } from './useReviewState';
 
 export interface SerializedContent {
   version: number;
@@ -16,6 +17,10 @@ export interface SerializedContent {
     tokenId: string;
     lastUpdated: number;
   };
+  /** Phase 6 — "leave as-is" dismisses. Rides finalContent via the saveDraft shallow merge so
+   *  the serialize save path (forceSave) persists it. Sourced from useReviewState, not the edit
+   *  store, because it is Feature-2 review state. */
+  dismissedReviewFlags: string[];
 }
 
 export interface ContentValidationResult {
@@ -51,6 +56,9 @@ export const useContentSerializer = (): UseContentSerializerReturn => {
         tokenId: state.tokenId,
         lastUpdated: state.lastUpdated,
       },
+      // Phase 6 — persist the current dismisses. Read from the (non-persisted) review store at
+      // serialize time so a forceSave carries the latest set.
+      dismissedReviewFlags: useReviewState.getState().dismissedReviewFlags,
     };
   }, [store]);
 

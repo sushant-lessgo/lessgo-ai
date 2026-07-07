@@ -357,3 +357,85 @@ describe('activeMarkers (Phase 5 auto-clear)', () => {
     expect(activeKeys().has(`${sec}::quote`)).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Phase 6 — "leave as-is" dismiss + persistence (dismissedReviewFlags)
+// ---------------------------------------------------------------------------
+
+describe('dismiss / dismissedReviewFlags (Phase 6)', () => {
+  const QUOTE_LAYOUT = 'PullQuoteWithMark';
+
+  function activeKeys(): Set<string> {
+    return new Set(
+      useReviewState.getState().activeMarkers.map((i) => `${i.sectionId}::${i.elementKey}`)
+    );
+  }
+
+  it('dismiss() adds the composite key and removes the item from activeMarkers', () => {
+    const sec = 'testimonials-d1';
+    const layouts = { [sec]: QUOTE_LAYOUT };
+    const baseline = { content: { [sec]: { elements: { quote: 'AI original' } } } };
+    // Unchanged value → marker present to start.
+    useReviewState.getState().initFromContent(
+      { [sec]: { elements: { quote: 'AI original' } } },
+      layouts, [sec], {}, baseline, null
+    );
+    expect(activeKeys().has(`${sec}::quote`)).toBe(true);
+    expect(useReviewState.getState().dismissedReviewFlags).toEqual([]);
+
+    useReviewState.getState().dismiss(sec, 'quote');
+
+    expect(useReviewState.getState().dismissedReviewFlags).toContain(`${sec}::quote`);
+    expect(activeKeys().has(`${sec}::quote`)).toBe(false);
+  });
+
+  it('a refresh AFTER dismiss keeps it dismissed (marker does not reappear)', () => {
+    const sec = 'testimonials-d2';
+    const layouts = { [sec]: QUOTE_LAYOUT };
+    const content = { [sec]: { elements: { quote: 'AI original' } } };
+    const baseline = { content };
+    useReviewState.getState().initFromContent(content, layouts, [sec], {}, baseline, null);
+    useReviewState.getState().dismiss(sec, 'quote');
+    expect(activeKeys().has(`${sec}::quote`)).toBe(false);
+
+    // Value is still unchanged (= baseline), so without the dismiss it WOULD be active.
+    // A content-only refresh must preserve the dismiss and keep the marker suppressed.
+    useReviewState.getState().refreshFromContent(content, baseline, null, {});
+
+    expect(useReviewState.getState().dismissedReviewFlags).toContain(`${sec}::quote`);
+    expect(activeKeys().has(`${sec}::quote`)).toBe(false);
+  });
+
+  it('initFromContent hydrates dismissedReviewFlags from finalContent (marker starts suppressed)', () => {
+    const sec = 'testimonials-d3';
+    const layouts = { [sec]: QUOTE_LAYOUT };
+    const content = { [sec]: { elements: { quote: 'AI original' } } };
+    const baseline = { content };
+
+    // Simulate reload: the persisted dismiss is threaded in via the last arg.
+    useReviewState.getState().initFromContent(
+      content, layouts, [sec], {}, baseline, null, [`${sec}::quote`]
+    );
+
+    expect(useReviewState.getState().dismissedReviewFlags).toEqual([`${sec}::quote`]);
+    // Value equals baseline (would be active), but the hydrated dismiss suppresses it.
+    expect(activeKeys().has(`${sec}::quote`)).toBe(false);
+  });
+
+  it('clearDismissed() empties dismissedReviewFlags (regen path)', () => {
+    const sec = 'testimonials-d4';
+    const layouts = { [sec]: QUOTE_LAYOUT };
+    const content = { [sec]: { elements: { quote: 'AI original' } } };
+    const baseline = { content };
+    useReviewState.getState().initFromContent(
+      content, layouts, [sec], {}, baseline, null, [`${sec}::quote`]
+    );
+    expect(useReviewState.getState().dismissedReviewFlags).toHaveLength(1);
+
+    useReviewState.getState().clearDismissed();
+
+    expect(useReviewState.getState().dismissedReviewFlags).toEqual([]);
+    // With dismisses cleared, the still-unedited (= baseline) marker is active again.
+    expect(activeKeys().has(`${sec}::quote`)).toBe(true);
+  });
+});

@@ -84,6 +84,11 @@ interface ReviewState {
   baseline: Record<string, any> | null;
   /** Active page id (edit-store `currentPageId`), threaded in for Phase 5 page-aware baseline. */
   currentPageId: string | null;
+  /** Phase 6 — the ONE persisted field of this feature: "leave as-is" dismisses, as
+   *  `"sectionId::elementKey"` composite keys. Hydrated from `finalContent.dismissedReviewFlags`
+   *  on init, excluded from `activeMarkers`, and re-emitted by `useContentSerializer`. Survives a
+   *  content-only `refreshFromContent` (never wiped by a refresh). */
+  dismissedReviewFlags: string[];
 
   // Actions
   initFromContent: (
@@ -92,7 +97,8 @@ interface ReviewState {
     sections: string[],
     globalSettings?: { logoUrl?: string },
     baseline?: Record<string, any> | null,
-    currentPageId?: string | null
+    currentPageId?: string | null,
+    dismissedReviewFlags?: string[]
   ) => void;
   /** Re-derive tasks + needs_review from live content WITHOUT resetting user-set state.
    *  No-ops (`set` skipped) when the derived output is unchanged so keystrokes don't re-render. */
@@ -105,6 +111,12 @@ interface ReviewState {
   confirmItem: (sectionId: string, elementKey: string) => void;
   unconfirmItem: (sectionId: string, elementKey: string) => void;
   isConfirmed: (sectionId: string, elementKey: string) => boolean;
+  /** Phase 6 — "leave as-is": permanently suppress a marker at this key. Adds the composite key
+   *  to `dismissedReviewFlags` and drops the item from `activeMarkers` immediately. */
+  dismiss: (sectionId: string, elementKey: string) => void;
+  /** Phase 6 — clear ALL dismisses (Regen Copy recaptures baseline → re-invented specifics must
+   *  start un-dismissed). Re-derives `activeMarkers` from the last scan without them. */
+  clearDismissed: () => void;
   getElementReviewStatus: (sectionId: string, elementKey: string) => ReviewStatus | null;
   getItemsBySectionId: () => Map<string, ReviewItem[]>;
 }
@@ -359,7 +371,8 @@ function deriveReviewState(
   confirmedElements: Set<string>,
   globalSettings?: { logoUrl?: string },
   baseline?: Record<string, any> | null,
-  currentPageId?: string | null
+  currentPageId?: string | null,
+  dismissedReviewFlags: string[] = []
 ): DerivedReview {
   const items: ReviewItem[] = [];
 
@@ -506,13 +519,15 @@ function deriveReviewState(
   const baselineRoot =
     (currentPageId ? baseline?.pages?.[currentPageId]?.content : undefined) ??
     baseline?.content;
+  const dismissed = new Set(dismissedReviewFlags);
   const activeMarkers = needsReviewItems.filter((item) => {
+    // Phase 6 — a dismissed ("leave as-is") key is never active, regardless of value.
+    if (dismissed.has(`${item.sectionId}::${item.elementKey}`)) return false;
     const currentVal = resolveElementValue(content, item.sectionId, item.elementKey);
     const baselineVal = resolveElementValue(baselineRoot, item.sectionId, item.elementKey);
     // Missing-baseline guard: no baseline for that page/element (e.g. legacy page) →
     // treat the marker as active (unchanged) rather than crashing.
     if (baselineVal === undefined) return true;
-    // Phase 6 will add: && !dismissedReviewFlags.has(`${sectionId}::${elementKey}`)
     return currentVal === baselineVal;
   });
 
@@ -578,9 +593,12 @@ export const useReviewState = create<ReviewState>()(
       sections: [],
       baseline: null,
       currentPageId: null,
+      dismissedReviewFlags: [],
 
-      initFromContent: (content, sectionLayouts, sections, globalSettings, baseline, currentPageId) => {
+      initFromContent: (content, sectionLayouts, sections, globalSettings, baseline, currentPageId, dismissedReviewFlags) => {
         const { confirmedElements } = get();
+        // Hydrate the persisted "leave as-is" dismisses (from finalContent) on first load.
+        const nextDismissed = dismissedReviewFlags ?? [];
         const derived = deriveReviewState(
           content,
           sectionLayouts,
@@ -588,7 +606,8 @@ export const useReviewState = create<ReviewState>()(
           confirmedElements,
           globalSettings,
           baseline ?? null,
-          currentPageId ?? null
+          currentPageId ?? null,
+          nextDismissed
         );
 
         set({
@@ -598,6 +617,7 @@ export const useReviewState = create<ReviewState>()(
           sections,
           baseline: baseline ?? null,
           currentPageId: currentPageId ?? null,
+          dismissedReviewFlags: nextDismissed,
         });
       },
 
@@ -615,7 +635,9 @@ export const useReviewState = create<ReviewState>()(
           state.confirmedElements,
           globalSettings,
           effectiveBaseline,
-          effectivePageId
+          effectivePageId,
+          // Preserve dismisses across a content-only refresh — never wiped here.
+          state.dismissedReviewFlags
         );
 
         // No-op guard: skip the `set` entirely when nothing content-derived changed,
@@ -678,6 +700,32 @@ export const useReviewState = create<ReviewState>()(
 
       isConfirmed: (sectionId, elementKey) => {
         return get().confirmedElements.has(`${sectionId}::${elementKey}`);
+      },
+
+      dismiss: (sectionId, elementKey) => {
+        const key = `${sectionId}::${elementKey}`;
+        const { dismissedReviewFlags, activeMarkers } = get();
+        if (dismissedReviewFlags.includes(key)) return;
+        // A dismiss can only REMOVE a marker, never add one, so filter activeMarkers directly
+        // (no re-scan / no stored content needed). Future refreshes also exclude it because
+        // deriveReviewState reads state.dismissedReviewFlags.
+        set({
+          dismissedReviewFlags: [...dismissedReviewFlags, key],
+          activeMarkers: activeMarkers.filter(
+            (m) => `${m.sectionId}::${m.elementKey}` !== key
+          ),
+        });
+      },
+
+      clearDismissed: () => {
+        const { dismissedReviewFlags, needsReviewItems } = get();
+        if (dismissedReviewFlags.length === 0) return;
+        // Clearing dismisses can only make previously-suppressed needs_review items active again.
+        // We hold no live content here to re-run the value diff, but callers (Regen Copy) re-capture
+        // baseline and fire a value-aware refreshFromContent immediately after — that produces the
+        // authoritative activeMarkers. Set them to all needs_review now so nothing stays wrongly
+        // suppressed in the gap.
+        set({ dismissedReviewFlags: [], activeMarkers: needsReviewItems });
       },
 
       getElementReviewStatus: (sectionId, elementKey) => {

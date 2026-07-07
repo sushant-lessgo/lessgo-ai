@@ -310,3 +310,76 @@ longer called from these two components. No 5th file needed changes; a repo grep
 - Legacy-page transitional caveat (per Design decisions): for projects whose baseline was captured
   after user edits already existed, markers may show active on already-edited fields until a further
   edit or a (Phase 6) dismiss. Self-healing, acknowledged, out of scope for Phase 5.
+
+---
+
+## Phase 6 — "Leave as-is" dismiss + persistence
+
+### Files changed
+- `src/hooks/useReviewState.ts`
+- `src/app/edit/[token]/components/selection/SelectionSystem.tsx`
+- `src/hooks/useContentSerializer.ts`
+- `src/components/EditProvider.tsx`
+- `src/hooks/editStore/generationActions.ts`
+- `src/app/globals.css`
+- `src/hooks/useReviewState.test.ts` (tests)
+- `src/app/api/saveDraft/route.ts` — **NOT changed** (confirmed the existing shallow merge is safe; see below)
+
+### Per-file: what changed
+
+**`src/hooks/useReviewState.ts`**
+- Added state `dismissedReviewFlags: string[]` (composite `"sectionId::elementKey"`), the only new persisted field of the feature.
+- `deriveReviewState` gained a `dismissedReviewFlags` param; the `activeMarkers` filter now excludes any dismissed key FIRST (before the value/baseline diff) — a dismissed marker is never active.
+- `initFromContent` gained a trailing `dismissedReviewFlags?: string[]` param → hydrates the state (default `[]`) and feeds the derive, so a reload starts with markers already suppressed.
+- `refreshFromContent` passes the CURRENT `state.dismissedReviewFlags` into the derive, so a content-only refresh preserves dismisses (never wipes them).
+- New action `dismiss(sectionId, elementKey)`: appends the key and filters it out of `activeMarkers` directly (a dismiss can only REMOVE a marker, so no re-scan / stored content is needed). Marker clears immediately; future refreshes also exclude it via the derive.
+- New action `clearDismissed()`: empties `dismissedReviewFlags` and sets `activeMarkers` to all `needsReviewItems` (the authoritative value-aware set is produced by the refresh the caller fires right after). Used by the regen path.
+
+**`src/app/edit/[token]/components/selection/SelectionSystem.tsx`**
+- Added `VerifyMarkerControls` (edit-only, mounted only when `mode !== 'preview'`): renders one tiny "leave as-is" button per `activeMarkers` item, positioned as a `position: fixed` overlay over the flagged element (recomputed on scroll/resize). Rendered as an OVERLAY, not injected into the flagged element, so it can never pollute contentEditable serialization.
+- Click → `dismiss(...)` (marker clears instantly), marks the edit store dirty via `trackChange`, and calls `persistDismissedFlags(tokenId)`.
+- `persistDismissedFlags` sends a minimal `POST /api/saveDraft` with ONLY `finalContent: { dismissedReviewFlags }` (see persistence rationale below).
+
+**`src/hooks/useContentSerializer.ts`**
+- `SerializedContent` gained `dismissedReviewFlags: string[]`; `serialize()` sources it from `useReviewState.getState().dismissedReviewFlags`. Covers the serialize/`forceSave` path (autoSaveDraft spreads the serialized object into `payload.finalContent`, landing at `content.finalContent.dismissedReviewFlags`). `validateContentStructure` ignores the extra key.
+
+**`src/components/EditProvider.tsx` (read-side hydration)**
+- After `loadFromDraft`, read `data.finalContent?.dismissedReviewFlags` (array-guarded) and thread it into `initFromContent` as the new trailing arg. Required because `loadFromDraft` does NOT carry the flags into the edit store (they are review state, not page content), so without this a dismiss would re-appear on reload.
+
+**`src/hooks/editStore/generationActions.ts` (Regen Copy — clear stale dismisses)**
+- Right after `captureBaseline()` in `regenerateAllContent`, dynamic-import `useReviewState`, call `clearDismissed()`, and (if there were dismisses) fire a minimal `saveDraft` POST writing `finalContent: { dismissedReviewFlags: [] }`. Prevents a dismissed key from silently suppressing a RE-INVENTED value at the same `sectionId::elementKey` after regen.
+
+**`src/app/globals.css`**
+- Added `.ai-verify-dismiss` (+ `:hover`) near `.element-ai-verify`: violet pill styling for the overlay dismiss button. Edit-only class; never emitted by a published renderer.
+
+**`src/hooks/useReviewState.test.ts`**
+- Added a `dismiss / dismissedReviewFlags (Phase 6)` block: dismiss adds key + removes from activeMarkers; refresh after dismiss stays suppressed; `initFromContent` hydrates flags from the threaded arg (marker starts suppressed); `clearDismissed` empties flags and re-activates the still-unedited marker.
+
+### Persistence path — key finding + rationale (deviation from plan's literal wording)
+The plan (steps 3/7) framed `useContentSerializer` as "the client payload" and said marking the store dirty makes "the existing auto-save" persist the array. Tracing the code:
+- The **routine** edit-page autosave is `store.triggerAutoSave() -> store.save()` (persistenceActions), which ships `finalContent: state.export()`. `export()` does NOT (and, being out of Phase-6 scope, cannot here) carry `dismissedReviewFlags`. So marking dirty alone would fire a save that drops the dismiss -> the must-pass "reload stays cleared" test would fail.
+- The `useContentSerializer`/`serializedSaveDraft` path IS wired (forceSave) but is only invoked by manual force-save, not routine autosave — AND `serialize()` emits `content: state.content` (the ACTIVE page, no `pages`/`chrome`), so routing every dismiss through it would risk overwriting home body content on a multi-page project (live customer Naayom). Unsafe as the primary vehicle.
+
+**Chosen vehicle (in-scope, multi-page-safe):** on dismiss (and on regen-clear) send a bespoke minimal `POST /api/saveDraft` with ONLY `finalContent: { dismissedReviewFlags }`. This rides the existing shallow merge (`updatedContent.finalContent = { ...existing, ...incoming }`, saveDraft `:144-148`) touching a single disjoint key: never overwrites `content`/`pages`/`chrome`, and equivalent to how routine autosaves already treat onboarding fields (bare payload -> defaults merged over existing; `persistenceActions.save()` itself sends no `stepIndex`/onboarding fields). `serialize()` still carries the field (plan step 3) so the forceSave path stays consistent.
+
+### saveDraft/route.ts — confirmed NO change needed
+`finalContent` is `z.unknown().optional()` and merged shallowly at `:144-148` (`{ ...existingContent.finalContent, ...finalContent }`). A payload that omits `dismissedReviewFlags` (routine export autosave) preserves the existing value; a payload that includes it (dismiss/regen POST or serialize forceSave) sets it. Nested array survives intact. No route edit required.
+
+### Deviations
+- **Persistence vehicle:** used a minimal direct `saveDraft` POST for the dismiss/regen-clear writes instead of relying on "mark dirty -> existing autosave" (plan step 7) — because the routine autosave uses `export()` which does not carry the field and is out of Phase-6 scope, and the serialize path is multi-page-unsafe. `trackChange` is still called on dismiss so status indicators/dirty flag stay correct. Conservative + in-scope; logged here.
+
+### Test results
+- `npx tsc --noEmit`: clean.
+- `npx vitest run src/hooks/useReviewState.test.ts`: 28 passed.
+- `npm run test:run`: 698 passed | 2 skipped (52 files passed, 1 skipped).
+
+### Manual verification (needs `npm run dev`; not runnable headless)
+- Dismiss a flagged value -> its "AI · verify" marker + "leave as-is" control clear immediately; other markers unaffected.
+- Dismiss -> reload the edit page -> marker STAYS cleared (write via minimal saveDraft POST + read via EditProvider hydration from `data.finalContent.dismissedReviewFlags`).
+- Dismiss a marker -> Regen Copy -> a re-invented value at that same key shows a marker again (`clearDismissed` + the `finalContent.dismissedReviewFlags: []` POST wiped the stale dismiss).
+- Preview mode: no markers, no dismiss controls (VerifyMarkerControls unmounted; classes stripped).
+- No Prisma migration invoked (JSON-only via `content.finalContent`); `prisma/schema.prisma` untouched.
+
+### Open risks
+- **Concurrent-save race:** a routine `export()` autosave and the dismiss POST both read-modify-write `content.finalContent`. If an export save reads the pre-dismiss snapshot and commits AFTER the dismiss POST, it can revert `dismissedReviewFlags` (export omits the key, so the whole `finalContent` object it writes carries the older value it read). Low-probability (autosave debounced ~2s; dismiss is a deliberate low-frequency click) and self-healing (any later dismiss or forceSave re-persists). A fully race-free fix would put `dismissedReviewFlags` into `export()` (persistenceActions — out of Phase-6 scope); flagged for the persistence-path human gate.
+- Overlay control positioning uses `position: fixed` + rect recompute on scroll/resize; correct for the standard edit canvas. Not exercised by unit tests (DOM/positioning) — covered by manual QA.
