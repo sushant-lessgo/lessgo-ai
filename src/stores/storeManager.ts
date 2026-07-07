@@ -293,7 +293,7 @@ export type { EditStoreInstance };
 export { EditStoreManager };
 
 // Development utilities
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   (window as any).__storeManagerDebug = {
     getInstance: () => EditStoreManager.getInstance(),
     getCacheStats: () => storeManager.getCacheStats(),
