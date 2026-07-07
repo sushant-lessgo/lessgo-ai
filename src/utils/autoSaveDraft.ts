@@ -204,8 +204,21 @@ if (includePageData) {
       source: source,
       version: localVersion || 1,
     };
-    
+
     // Auto-saving with page data
+  }
+
+  // Baseline (header Reset): ships ONLY when freshly captured (dirty flag) —
+  // keeps routine autosave bodies small. Flag cleared via markBaselineSaved()
+  // after this request succeeds (plain util → named store action, no inline set).
+  try {
+    const { storeManager } = await import('@/stores/storeManager');
+    const editStoreState = storeManager.getEditStore(tokenId).getState();
+    if (editStoreState.baselineDirty && editStoreState.baseline) {
+      payload.baseline = editStoreState.baseline;
+    }
+  } catch (error) {
+    logger.warn('⚠️ Could not read baseline for save:', error);
   }
 }
 
@@ -296,10 +309,22 @@ if (includePageData) {
     }
 
     const result = await response.json();
-    
+
     // Step 8: Process successful response
     // Auto-save successful
-    
+
+    // This save shipped the baseline → clear the dirty flag so subsequent
+    // routine saves omit it (persistenceActions.save() clears inline; this
+    // path goes through the named store action).
+    if (payload.baseline !== undefined) {
+      try {
+        const { storeManager } = await import('@/stores/storeManager');
+        storeManager.getEditStore(tokenId).getState().markBaselineSaved();
+      } catch (error) {
+        logger.warn('⚠️ Could not clear baseline dirty flag:', error);
+      }
+    }
+
     return {
       success: true,
       timestamp: endTime,

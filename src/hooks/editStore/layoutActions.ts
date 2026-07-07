@@ -6,6 +6,7 @@ import type { Theme, ColorTokens } from '@/types/core/index';
 import type { EditStore, EditHistoryEntry } from '@/types/store';
 import type { LayoutActions } from '@/types/store';
 import { isChromeId } from './pageHelpers';
+import { applySnapshot } from './persistenceActions';
 // pickFont removed — vibe not persisted, reset uses hardcoded Inter default
 import type { FontTheme, TypographyState } from '@/types/core/index';
 
@@ -601,6 +602,27 @@ getTypographyForSection: (sectionId: string) => {
     
     resetToGenerated: () =>
       set((state: EditStore) => {
+        // Primary path: restore the stored generation baseline (copy + theme
+        // + pages/chrome/forms) via the SAME hydration core loadFromDraft
+        // uses. Deep-clone first: state.baseline lives in committed (possibly
+        // frozen) state, and applySnapshot mutates nested objects and aliases
+        // payload.content into the active state.
+        if (state.baseline) {
+          const snapshot = JSON.parse(JSON.stringify(state.baseline));
+          applySnapshot(state, snapshot);
+
+          // isDirty → the 1s autosave poller persists the restored state.
+          state.persistence.isDirty = true;
+
+          // Reset is NOT undoable (confirmed acceptable): clear both stacks.
+          // Direct draft mutation, matching uiActions' pattern.
+          state.history.undoStack = [];
+          state.history.redoStack = [];
+          return;
+        }
+
+        // Fallback (should be unreachable post-Phase-4 — loadFromDraft always
+        // captures a baseline): legacy derive-design-from-onboarding reset.
         // Store current state for undo
         const currentState = {
           theme: { ...state.theme },

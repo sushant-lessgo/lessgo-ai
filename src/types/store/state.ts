@@ -87,7 +87,7 @@ export interface ChangeEvent {
 }
 
 export interface EditHistoryEntry {
-  type: 'content' | 'layout' | 'theme' | 'section';
+  type: 'content' | 'layout' | 'theme' | 'section' | 'fullContent';
   description: string;
   timestamp: number;
   beforeState: any;
@@ -375,7 +375,18 @@ export interface MetaSlice {
 export interface PersistenceSlice {
   // Persistence Manager
   persistenceManager?: any;
-  
+
+  /** Most-recent-generation snapshot (full `export()` payload — content,
+   *  sections/layouts, theme, pages/chrome, forms…). Captured by
+   *  `captureBaseline()` on first load with no stored baseline (initial-gen /
+   *  legacy backfill) and after Regen Copy; persisted to `Project.content.baseline`.
+   *  Source of truth for the header Reset action. NEVER in `partialize`. */
+  baseline: Record<string, any> | null;
+  /** True when `baseline` was (re)captured and not yet shipped to the server.
+   *  Gates including `baseline` in save payloads (it ~doubles body size);
+   *  cleared on a successful save that carried it. NEVER in `partialize`. */
+  baselineDirty: boolean;
+
   // Persistence State
   persistence: {
     isDirty: boolean;

@@ -96,7 +96,7 @@ export interface ContentActions {
   setSection: (sectionId: string, data: Partial<SectionData>) => void;
   
   // AI Generation
-  regenerateSection: (sectionId: string, userGuidance?: string) => Promise<void>;
+  regenerateSection: (sectionId: string, userGuidance?: string, options?: { suppressHistory?: boolean }) => Promise<void>;
   regenerateElement: (sectionId: string, elementKey: string, variationCount?: number) => Promise<void>;
   regenerateAllContent: () => Promise<void>;
   updateFromAIResponse: (aiResponse: any, elementsMap?: any) => void;
@@ -407,6 +407,10 @@ export interface MetaActions {
   export: () => object;
   loadFromDraft: (apiResponse: any, urlTokenId?: string) => Promise<void>;
   save: () => Promise<void>;
+
+  // Baseline (edit-header Reset) — snapshot/dirty-flag lifecycle.
+  captureBaseline: () => void;
+  markBaselineSaved: () => void;
 
   // Legal Pages
   setLegalPage: (kind: 'privacy', entry: { content: string; metadata?: any } | undefined) => void;

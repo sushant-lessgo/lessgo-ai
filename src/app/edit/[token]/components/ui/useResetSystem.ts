@@ -16,12 +16,11 @@ export function useResetSystem() {
     try {
       resetToGenerated();
       await triggerAutoSave();
-      
-      const message = scope === 'design' 
-        ? 'Reset design to LessGo-generated' 
-        : 'Reset everything to LessGo-generated';
-      
-      showToast(message, 'success');
+
+      // Reset now restores the full generation baseline (copy + design)
+      // regardless of the dialog's scope selection — scope stays text-only,
+      // and a design-only message would now mislead.
+      showToast('Restored original copy + design', 'success');
 
     } catch (error) {
       // console.error('Reset failed:', error);

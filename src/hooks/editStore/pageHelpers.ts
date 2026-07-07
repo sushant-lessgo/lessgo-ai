@@ -139,6 +139,18 @@ export function loadPageIntoActive(state: any, entry: ProjectPageEntry): void {
   state.sectionLayouts = working.sectionLayouts;
   state.sectionSpacing = working.sectionSpacing;
   state.content = working.content;
+
+  // History entries are ACTIVE-PAGE-relative (no pageId) — they must never
+  // outlive the page body they snapshot, or undo-after-switch writes page A's
+  // snapshot into page B. This helper is the single choke point through which
+  // EVERY active-page swap runs (setCurrentPage/addPage/deletePage/
+  // applyArchetype/addArchetypePage/addCollectionItem + load-time hydration),
+  // so resetting here covers all current AND future swap sites by construction.
+  // Direct draft mutation: the clearHistory() store action isn't callable here.
+  if (state.history) {
+    state.history.undoStack = [];
+    state.history.redoStack = [];
+  }
 }
 
 /**

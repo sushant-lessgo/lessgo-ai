@@ -153,6 +153,15 @@ async function saveDraftHandler(req: NextRequest) {
       }
     }
 
+    // ✅ Baseline snapshot (edit-header Reset): REPLACE wholesale when present
+    // — never deep-merge (it's an immutable point-in-time export). Absent →
+    // preserved automatically via the ...existingContent spread above.
+    // Read from the raw body: DraftSaveSchema strips unknown keys, and
+    // baseline carries the same trust level as finalContent (z.unknown()).
+    if (body.baseline !== undefined) {
+      updatedContent.baseline = body.baseline;
+    }
+
     // 💾 Upsert project with merged content
     const updatedProject = await prisma.project.upsert({
       where: { tokenId },

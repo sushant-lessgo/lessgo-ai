@@ -1,6 +1,12 @@
 /**
  * Edit Store Factory - Creates token-scoped Zustand stores
- * Converts the previous global store into isolated per-project stores
+ * Converts the previous global store into isolated per-project stores.
+ *
+ * This IS the live editor store (one instance per project token). Components do
+ * not import it directly — they reach it through `useEditStoreLegacy` +
+ * `EditProvider`, and instances are created/cached by `storeManager`.
+ * Actions are composed from the slice creators in `../hooks/editStore/*`.
+ * `partialize` persists a subset to localStorage under a per-token storage key.
  */
 
 import { create } from "zustand";
@@ -261,6 +267,11 @@ function createInitialState(tokenId: string): EditStore {
     analytics: {} as Record<string, any>,
 
     // Persistence Slice
+    // Baseline snapshot (header Reset) — captured post-load / post-Regen-Copy.
+    // Deliberately NOT in `partialize` below: hydrated from the server
+    // (content.baseline) or re-captured on load; never from localStorage.
+    baseline: null as Record<string, any> | null,
+    baselineDirty: false,
     persistence: {
       isDirty: false,
       isSaving: false,

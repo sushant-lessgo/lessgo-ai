@@ -12,6 +12,7 @@ import {
 
 import { layoutElementSchema as lesSchema, isV2Schema as lesIsV2 } from '@/modules/sections/layoutElementSchema';
 import { logger } from '@/lib/logger';
+import { snapshotPageContent, pushHistoryEntry } from './historyHelpers';
 // AI Generation Status type
 type AIGenerationStatus = {
   isGenerating: boolean;
@@ -551,14 +552,37 @@ export function createGenerationActions(set: any, get: any) {
       draft.aiGeneration.status = 'Regenerating all content...';
     });
 
+    // BEFORE snapshot of the active page's body — the whole Regen Copy loop
+    // becomes exactly ONE undoable 'fullContent' entry. Copy-only: theme is
+    // intentionally NOT in the snapshot (regenerateSection preserves
+    // images/theme).
+    const beforeSnapshot = snapshotPageContent(state);
+    const pushFullContentEntry = () => {
+      const afterSnapshot = snapshotPageContent(get());
+      // Skip the push when nothing changed (e.g. every section failed) —
+      // never push a no-op entry.
+      if (JSON.stringify(afterSnapshot) === JSON.stringify(beforeSnapshot)) return;
+      set((draft: EditStore) => {
+        pushHistoryEntry(draft, {
+          type: 'fullContent',
+          description: 'Regenerated all copy',
+          timestamp: Date.now(),
+          beforeState: beforeSnapshot,
+          afterState: afterSnapshot,
+        });
+      });
+    };
+
     try {
       const sections = state.sections;
       let completed = 0;
-      
+
       // Sequential to avoid parallel store write race conditions
       for (const sectionId of sections) {
         try {
-          await state.regenerateSection(sectionId);
+          // suppressHistory: the loop's per-section pushes are replaced by the
+          // single 'fullContent' entry below.
+          await state.regenerateSection(sectionId, undefined, { suppressHistory: true });
           completed++;
 
           set((draft: EditStore) => {
@@ -576,14 +600,26 @@ export function createGenerationActions(set: any, get: any) {
         }
       }
       
+      // ONE undo entry for the entire loop (success or partial failure).
+      pushFullContentEntry();
+
+      // Refresh the Reset baseline: the regenerated page IS the new
+      // "most recent generation". Outside any set() by design —
+      // captureBaseline → export() reads committed state via get().
+      get().captureBaseline();
+
       set((draft: EditStore) => {
         draft.aiGeneration.isGenerating = false;
         draft.aiGeneration.currentOperation = null;
         draft.aiGeneration.progress = 100;
         draft.aiGeneration.status = completed === sections.length ? 'All content regenerated successfully' : 'Content regeneration completed with some errors';
       });
-      
+
     } catch (error) {
+      // Unexpected mid-loop failure: some sections may already have new copy —
+      // still push the (non-no-op) entry so undo can restore pre-regen state.
+      pushFullContentEntry();
+
       set((draft: EditStore) => {
         draft.aiGeneration.isGenerating = false;
         draft.aiGeneration.currentOperation = null;

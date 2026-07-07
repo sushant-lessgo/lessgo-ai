@@ -6,6 +6,216 @@ import type { ChromeState, PageSlice } from '@/types/store';
 import { logger } from '@/lib/logger';
 
 const deepClone = <T>(v: T): T => JSON.parse(JSON.stringify(v ?? null));
+
+/**
+ * Hydration core shared by loadFromDraft AND resetToGenerated (header Reset
+ * applies the stored baseline through this exact path so it inherits
+ * pages/chrome/forms hydration). MUST run inside a set() producer — `state`
+ * is an Immer draft. Callers passing a payload that lives in committed state
+ * (e.g. state.baseline) must deep-clone it first: this function mutates
+ * nested objects (blob-URL migration) and aliases payload.content into state.
+ *
+ * KNOWN LIMITATION (plan Design decision 2): theme is restored via MERGE
+ * ({...state.theme, ...theme}), not wholesale — a theme key ADDED after
+ * generation is not cleared by Reset. Near-equivalent in practice because the
+ * baseline export() carries a FULL theme; documented, not fixed here.
+ */
+export function applySnapshot(state: EditStore, payload: any): void {
+  // Extract sections from either new format (top-level) or legacy format (nested in layout)
+  const sections = payload?.sections ?? payload?.layout?.sections ?? [];
+  const sectionLayouts = payload?.sectionLayouts ?? payload?.layout?.sectionLayouts ?? {};
+  const sectionSpacing = payload?.sectionSpacing ?? payload?.layout?.sectionSpacing ?? {};
+
+  // Restore core content if available
+  if (payload && sections && Array.isArray(sections)) {
+
+    state.sections = sections;
+    state.sectionLayouts = sectionLayouts;
+    state.sectionSpacing = sectionSpacing;
+    state.content = payload.content || {};
+
+    // Migrate blob URLs to placeholders
+    let blobUrlsFound = 0;
+    for (const sectionId in state.content) {
+      const section = state.content[sectionId];
+      if (section?.elements) {
+        for (const elementKey in section.elements) {
+          const element = section.elements[elementKey];
+          if (element?.type === 'image' && typeof element.content === 'string') {
+            if (element.content.startsWith('blob:')) {
+              element.content = '/hero-placeholder.jpg';
+              blobUrlsFound++;
+              logger.warn(`⚠️ Migrated blob URL in ${sectionId}.${elementKey} to placeholder`);
+            }
+          }
+        }
+      }
+    }
+
+    if (blobUrlsFound > 0) {
+      logger.warn(`⚠️ Found and migrated ${blobUrlsFound} blob URL(s) to placeholders. Please re-upload affected images.`);
+    }
+
+    // Log section/content match for debugging
+    const sectionsInContent = Object.keys(state.content).length;
+    const sectionsInLayout = state.sections.length;
+
+    if (sectionsInContent !== sectionsInLayout) {
+      logger.warn('⚠️ Section/Content mismatch detected:', {
+        sectionsInLayout,
+        sectionsInContent,
+        sections: state.sections,
+        contentKeys: Object.keys(state.content)
+      });
+    } else {
+    }
+  } else {
+  }
+
+  // Restore theme and settings if available (check both new and legacy paths)
+  const theme = payload?.theme ?? payload?.layout?.theme;
+  if (payload && theme) {
+    // DEBUG: Verify shallow merge issue
+    console.log('🔍 [DEBUG-BUG2] Theme BEFORE merge:', JSON.stringify(state.theme.colors, null, 2));
+    console.log('🔍 [DEBUG-BUG2] Theme from API:', JSON.stringify(theme?.colors, null, 2));
+
+    const mergedTheme = { ...state.theme, ...theme };
+    state.theme = mergedTheme;
+
+    console.log('🔍 [DEBUG-BUG2] Theme AFTER merge:', JSON.stringify(state.theme.colors, null, 2));
+  } else {
+    console.log('🔍 [DEBUG-BUG2] No theme in contentToLoad');
+  }
+
+  const globalSettings = payload?.globalSettings ?? payload?.layout?.globalSettings;
+  if (payload && globalSettings) {
+    Object.assign(state.globalSettings, globalSettings);
+  }
+
+  // Restore navigation configuration if available
+  if (payload && payload.navigationConfig) {
+    state.navigationConfig = payload.navigationConfig;
+    logger.debug('🧭 [NAV-DEBUG] Restored navigation config:', state.navigationConfig);
+  }
+
+  if (payload && payload.socialMediaConfig) {
+    state.socialMediaConfig = payload.socialMediaConfig;
+    logger.debug('🔗 [SOCIAL-DEBUG] Restored social media config:', state.socialMediaConfig);
+  }
+
+  if (payload && payload.legalPages) {
+    state.legalPages = payload.legalPages;
+  }
+
+  // Restore forms data if available
+  if (payload && payload.forms) {
+    const restoredForms: Record<string, any> = {};
+
+    try {
+      const formsData = payload.forms;
+
+      if (typeof formsData === 'object' && formsData !== null) {
+        Object.entries(formsData).forEach(([formId, form]: [string, any]) => {
+          if (form && typeof form === 'object' && form.id && Array.isArray(form.fields)) {
+            restoredForms[formId] = {
+              ...form,
+              createdAt: form.createdAt ? new Date(form.createdAt) : new Date(),
+              updatedAt: form.updatedAt ? new Date(form.updatedAt) : new Date(),
+            };
+          }
+        });
+
+        state.forms = restoredForms;
+        logger.debug('✅ Restored forms:', Object.keys(restoredForms).length);
+      }
+    } catch (error) {
+      logger.error('❌ Error restoring forms:', error);
+      state.forms = {};
+    }
+  } else {
+    state.forms = {};
+  }
+
+  // Validate button-form connections
+  if (state.forms && state.content) {
+    const formIds = Object.keys(state.forms);
+    let orphanedConnections = 0;
+
+    Object.keys(state.content).forEach(sectionId => {
+      const section = state.content[sectionId];
+      if (section?.elements) {
+        Object.entries(section.elements).forEach(([elementKey, element]: [string, any]) => {
+          const buttonConfig = element?.metadata?.buttonConfig;
+          if (buttonConfig?.type === 'form' && buttonConfig.formId) {
+            if (!formIds.includes(buttonConfig.formId)) {
+              orphanedConnections++;
+              logger.warn(`⚠️ Orphaned button: ${sectionId}.${elementKey} → ${buttonConfig.formId}`);
+            }
+          }
+        });
+      }
+    });
+
+    if (orphanedConnections > 0) {
+      logger.warn(`⚠️ Found ${orphanedConnections} orphaned connection(s)`);
+    }
+  }
+
+  // ===== Multi-page + shared-chrome hydration =====
+  // Pages are stored BODY-ONLY; shared header/footer live in `chrome`.
+  // - If the draft carries `chrome`, use it and assume pages are body-only.
+  // - Else (Phase-1 data or legacy single page) MIGRATE: extract chrome by
+  //   type from the home page and strip header/footer from ALL pages.
+  const pagesFromDraft = payload?.pages;
+  const chromeFromDraft: ChromeState | undefined = payload?.chrome;
+
+  if (pagesFromDraft && typeof pagesFromDraft === 'object' && Object.keys(pagesFromDraft).length > 0) {
+    const pages = deepClone(pagesFromDraft) as Record<string, any>;
+    const homeId = findHomeId(pages) || Object.keys(pages)[0];
+
+    if (chromeFromDraft && (chromeFromDraft.header || chromeFromDraft.footer)) {
+      state.chrome = deepClone(chromeFromDraft);
+    } else {
+      // Migration: pull chrome out of the home page, strip from all pages.
+      state.chrome = splitChrome(pages[homeId] as PageSlice).chrome;
+    }
+    // Ensure every page is body-only (idempotent; no-op when already clean).
+    for (const pid of Object.keys(pages)) {
+      const { body } = splitChrome(pages[pid] as PageSlice);
+      pages[pid] = { ...pages[pid], ...body };
+    }
+    state.pages = pages;
+
+    const desired =
+      payload.currentPageId && pages[payload.currentPageId]
+        ? payload.currentPageId
+        : homeId;
+    if (pages[desired]) loadPageIntoActive(state, pages[desired]); // injects chrome
+  } else {
+    // Legacy single page: top-level slice still has header/footer inline.
+    const { body, chrome } = splitChrome(
+      deepClone({
+        sections: state.sections,
+        sectionLayouts: state.sectionLayouts,
+        sectionSpacing: state.sectionSpacing || {},
+        content: state.content,
+      }) as PageSlice,
+    );
+    state.chrome = chrome;
+    state.pages = {
+      [HOME_PAGE_ID]: {
+        id: HOME_PAGE_ID,
+        archetypeKey: 'home',
+        pathSlug: '/',
+        title: state.title || 'Home',
+        order: 0,
+        ...body,
+      },
+    };
+    loadPageIntoActive(state, state.pages[HOME_PAGE_ID]); // re-inject chrome
+  }
+}
+
 /**
  * Consolidated persistence actions for save/load operations plus forms and images
  */
@@ -23,12 +233,17 @@ export function createPersistenceActions(set: any, get: any) {
 
         const state = get();
         const exportedData = state.export();
-        
-        
+
+
         if (!state.tokenId) {
           throw new Error('No tokenId available in EditStore');
         }
-        
+
+        // Baseline (header Reset) rides the save ONLY when freshly captured —
+        // routine autosaves keep their body small. Flag cleared below only
+        // when this request actually shipped it.
+        const shipBaseline = state.baselineDirty && state.baseline ? state.baseline : undefined;
+
         // Real API call to save draft
         const response = await fetch('/api/saveDraft', {
           method: 'POST',
@@ -38,6 +253,7 @@ export function createPersistenceActions(set: any, get: any) {
           body: JSON.stringify({
             tokenId: state.tokenId,
             finalContent: exportedData,  // Changed from 'content' to 'finalContent' to match API
+            ...(shipBaseline !== undefined && { baseline: shipBaseline }),
             title: state.title,
             // Service template selection (Phase 11b) — persist editor switches.
             // Null for product; saveDraft writes only when provided.
@@ -60,6 +276,8 @@ export function createPersistenceActions(set: any, get: any) {
           state.persistence.isSaving = false;
           state.persistence.lastSaved = Date.now();
           state.persistence.isDirty = false;
+          // This save carried the baseline → it's persisted; stop shipping it.
+          if (shipBaseline !== undefined) state.baselineDirty = false;
           state.persistence.metrics.totalSaves += 1;
           state.persistence.metrics.successfulSaves += 1;
           state.persistence.metrics.lastSaveTime = Date.now();
@@ -86,149 +304,17 @@ export function createPersistenceActions(set: any, get: any) {
         // Handle different response formats - check both finalContent and content
         // The API stores the data under content.finalContent path
         const contentToLoad = apiResponse.finalContent || apiResponse.content?.finalContent || apiResponse.content;
-        
+
+        // Stored baseline (header Reset): loadDraft returns it top-level
+        // (from Project.content.baseline); tolerate a raw-content shape too.
+        const storedBaseline = apiResponse.baseline ?? apiResponse.content?.baseline ?? null;
+
         set((state: EditStore) => {
-          // Extract sections from either new format (top-level) or legacy format (nested in layout)
-          const sections = contentToLoad?.sections ?? contentToLoad?.layout?.sections ?? [];
-          const sectionLayouts = contentToLoad?.sectionLayouts ?? contentToLoad?.layout?.sectionLayouts ?? {};
-          const sectionSpacing = contentToLoad?.sectionSpacing ?? contentToLoad?.layout?.sectionSpacing ?? {};
-
-          // Restore core content if available
-          if (contentToLoad && sections && Array.isArray(sections)) {
-
-            state.sections = sections;
-            state.sectionLayouts = sectionLayouts;
-            state.sectionSpacing = sectionSpacing;
-            state.content = contentToLoad.content || {};
-
-            // Migrate blob URLs to placeholders
-            let blobUrlsFound = 0;
-            for (const sectionId in state.content) {
-              const section = state.content[sectionId];
-              if (section?.elements) {
-                for (const elementKey in section.elements) {
-                  const element = section.elements[elementKey];
-                  if (element?.type === 'image' && typeof element.content === 'string') {
-                    if (element.content.startsWith('blob:')) {
-                      element.content = '/hero-placeholder.jpg';
-                      blobUrlsFound++;
-                      logger.warn(`⚠️ Migrated blob URL in ${sectionId}.${elementKey} to placeholder`);
-                    }
-                  }
-                }
-              }
-            }
-
-            if (blobUrlsFound > 0) {
-              logger.warn(`⚠️ Found and migrated ${blobUrlsFound} blob URL(s) to placeholders. Please re-upload affected images.`);
-            }
-
-            // Log section/content match for debugging
-            const sectionsInContent = Object.keys(state.content).length;
-            const sectionsInLayout = state.sections.length;
-
-            if (sectionsInContent !== sectionsInLayout) {
-              logger.warn('⚠️ Section/Content mismatch detected:', {
-                sectionsInLayout,
-                sectionsInContent,
-                sections: state.sections,
-                contentKeys: Object.keys(state.content)
-              });
-            } else {
-            }
-          } else {
-          }
-          
-          // Restore theme and settings if available (check both new and legacy paths)
-          const theme = contentToLoad?.theme ?? contentToLoad?.layout?.theme;
-          if (contentToLoad && theme) {
-            // DEBUG: Verify shallow merge issue
-            console.log('🔍 [DEBUG-BUG2] Theme BEFORE merge:', JSON.stringify(state.theme.colors, null, 2));
-            console.log('🔍 [DEBUG-BUG2] Theme from API:', JSON.stringify(theme?.colors, null, 2));
-
-            const mergedTheme = { ...state.theme, ...theme };
-            state.theme = mergedTheme;
-
-            console.log('🔍 [DEBUG-BUG2] Theme AFTER merge:', JSON.stringify(state.theme.colors, null, 2));
-          } else {
-            console.log('🔍 [DEBUG-BUG2] No theme in contentToLoad');
-          }
-
-          const globalSettings = contentToLoad?.globalSettings ?? contentToLoad?.layout?.globalSettings;
-          if (contentToLoad && globalSettings) {
-            Object.assign(state.globalSettings, globalSettings);
-          }
-          
-          // Restore navigation configuration if available
-          if (contentToLoad && contentToLoad.navigationConfig) {
-            state.navigationConfig = contentToLoad.navigationConfig;
-            logger.debug('🧭 [NAV-DEBUG] Restored navigation config:', state.navigationConfig);
-          }
-          
-          if (contentToLoad && contentToLoad.socialMediaConfig) {
-            state.socialMediaConfig = contentToLoad.socialMediaConfig;
-            logger.debug('🔗 [SOCIAL-DEBUG] Restored social media config:', state.socialMediaConfig);
-          }
-
-          if (contentToLoad && contentToLoad.legalPages) {
-            state.legalPages = contentToLoad.legalPages;
-          }
-
-          // Restore forms data if available
-          if (contentToLoad && contentToLoad.forms) {
-            const restoredForms: Record<string, any> = {};
-
-            try {
-              const formsData = contentToLoad.forms;
-
-              if (typeof formsData === 'object' && formsData !== null) {
-                Object.entries(formsData).forEach(([formId, form]: [string, any]) => {
-                  if (form && typeof form === 'object' && form.id && Array.isArray(form.fields)) {
-                    restoredForms[formId] = {
-                      ...form,
-                      createdAt: form.createdAt ? new Date(form.createdAt) : new Date(),
-                      updatedAt: form.updatedAt ? new Date(form.updatedAt) : new Date(),
-                    };
-                  }
-                });
-
-                state.forms = restoredForms;
-                logger.debug('✅ Restored forms:', Object.keys(restoredForms).length);
-              }
-            } catch (error) {
-              logger.error('❌ Error restoring forms:', error);
-              state.forms = {};
-            }
-          } else {
-            state.forms = {};
-          }
-
-          // Validate button-form connections
-          if (state.forms && state.content) {
-            const formIds = Object.keys(state.forms);
-            let orphanedConnections = 0;
-
-            Object.keys(state.content).forEach(sectionId => {
-              const section = state.content[sectionId];
-              if (section?.elements) {
-                Object.entries(section.elements).forEach(([elementKey, element]: [string, any]) => {
-                  const buttonConfig = element?.metadata?.buttonConfig;
-                  if (buttonConfig?.type === 'form' && buttonConfig.formId) {
-                    if (!formIds.includes(buttonConfig.formId)) {
-                      orphanedConnections++;
-                      logger.warn(`⚠️ Orphaned button: ${sectionId}.${elementKey} → ${buttonConfig.formId}`);
-                    }
-                  }
-                });
-              }
-            });
-
-            if (orphanedConnections > 0) {
-              logger.warn(`⚠️ Found ${orphanedConnections} orphaned connection(s)`);
-            }
-          }
-
-          // Restore meta data
+          // Restore meta data — reads apiResponse (not the content payload) so
+          // it stays here rather than in applySnapshot. Runs BEFORE the
+          // snapshot so the legacy single-page branch's `state.title` fallback
+          // sees the loaded title (same effective ordering as before the
+          // extraction — nothing in the hydration core reads meta earlier).
           state.id = apiResponse.tokenId || urlTokenId || '';
           state.title = apiResponse.title || 'Untitled Project';
           state.tokenId = apiResponse.tokenId || urlTokenId || '';
@@ -269,59 +355,17 @@ export function createPersistenceActions(set: any, get: any) {
             hiddenInferredFields: onboardingFromContent?.hiddenInferredFields || apiResponse.hiddenInferredFields || {},
             confirmedFields: onboardingFromContent?.confirmedFields || apiResponse.confirmedFields || {},
           };
-          
-          // ===== Multi-page + shared-chrome hydration =====
-          // Pages are stored BODY-ONLY; shared header/footer live in `chrome`.
-          // - If the draft carries `chrome`, use it and assume pages are body-only.
-          // - Else (Phase-1 data or legacy single page) MIGRATE: extract chrome by
-          //   type from the home page and strip header/footer from ALL pages.
-          const pagesFromDraft = contentToLoad?.pages;
-          const chromeFromDraft: ChromeState | undefined = contentToLoad?.chrome;
 
-          if (pagesFromDraft && typeof pagesFromDraft === 'object' && Object.keys(pagesFromDraft).length > 0) {
-            const pages = deepClone(pagesFromDraft) as Record<string, any>;
-            const homeId = findHomeId(pages) || Object.keys(pages)[0];
+          // Hydration core (sections/layouts/spacing/content/theme/
+          // globalSettings/nav/social/legal/forms/pages+chrome) — extracted
+          // verbatim into applySnapshot, shared with resetToGenerated.
+          applySnapshot(state, contentToLoad);
 
-            if (chromeFromDraft && (chromeFromDraft.header || chromeFromDraft.footer)) {
-              state.chrome = deepClone(chromeFromDraft);
-            } else {
-              // Migration: pull chrome out of the home page, strip from all pages.
-              state.chrome = splitChrome(pages[homeId] as PageSlice).chrome;
-            }
-            // Ensure every page is body-only (idempotent; no-op when already clean).
-            for (const pid of Object.keys(pages)) {
-              const { body } = splitChrome(pages[pid] as PageSlice);
-              pages[pid] = { ...pages[pid], ...body };
-            }
-            state.pages = pages;
-
-            const desired =
-              contentToLoad.currentPageId && pages[contentToLoad.currentPageId]
-                ? contentToLoad.currentPageId
-                : homeId;
-            if (pages[desired]) loadPageIntoActive(state, pages[desired]); // injects chrome
-          } else {
-            // Legacy single page: top-level slice still has header/footer inline.
-            const { body, chrome } = splitChrome(
-              deepClone({
-                sections: state.sections,
-                sectionLayouts: state.sectionLayouts,
-                sectionSpacing: state.sectionSpacing || {},
-                content: state.content,
-              }) as PageSlice,
-            );
-            state.chrome = chrome;
-            state.pages = {
-              [HOME_PAGE_ID]: {
-                id: HOME_PAGE_ID,
-                archetypeKey: 'home',
-                pathSlug: '/',
-                title: state.title || 'Home',
-                order: 0,
-                ...body,
-              },
-            };
-            loadPageIntoActive(state, state.pages[HOME_PAGE_ID]); // re-inject chrome
+          // Hydrate the stored baseline (plain assignment — no export() here;
+          // capture for the no-baseline case happens AFTER this producer, below).
+          if (storedBaseline) {
+            state.baseline = deepClone(storedBaseline);
+            state.baselineDirty = false; // already persisted server-side
           }
 
           state.lastUpdated = Date.now();
@@ -339,7 +383,21 @@ export function createPersistenceActions(set: any, get: any) {
           }
 
         });
-        
+
+        // No stored baseline → capture the just-hydrated state as baseline.
+        // This one path covers BOTH initial-generation capture (first editor
+        // load after onboarding gen) AND legacy-page backfill. MUST run after
+        // the hydration set() above has committed: captureBaseline → export()
+        // reads committed state via get(); inside the producer it would
+        // snapshot stale pre-hydration state.
+        if (!storedBaseline) {
+          get().captureBaseline();
+        }
+
+        // Fresh load = empty history. Idempotent overlap with the Phase-1
+        // choke-point reset inside loadPageIntoActive (harmless double-clear).
+        get().clearHistory();
+
       } catch (error) {
         logger.error('❌ Error in loadFromDraft:', error);
         set((state: EditStore) => {
@@ -381,6 +439,32 @@ export function createPersistenceActions(set: any, get: any) {
 
 
       return exportData;
+    },
+
+    /**
+     * ===== BASELINE (header Reset) =====
+     */
+    // Snapshot the CURRENT committed state as the generation baseline.
+    // Callers (caller-driven, never automatic): loadFromDraft when the server
+    // returned no stored baseline, and regenerateAllContent after its loop.
+    // NEVER call from inside a set() producer — export() reads via get().
+    captureBaseline: () => {
+      const snapshot = get().export();
+      set((state: EditStore) => {
+        state.baseline = snapshot;
+        state.baselineDirty = true;
+        // Intentionally does NOT set persistence.isDirty — the baseline rides
+        // the next natural save; capturing alone is not a user edit.
+      });
+    },
+
+    // Clear the dirty flag after a save that shipped the baseline succeeded.
+    // Named action because utils/autoSaveDraft.ts (plain util) has no inline
+    // store access; persistenceActions.save() clears the flag inline instead.
+    markBaselineSaved: () => {
+      set((state: EditStore) => {
+        state.baselineDirty = false;
+      });
     },
 
     /**
