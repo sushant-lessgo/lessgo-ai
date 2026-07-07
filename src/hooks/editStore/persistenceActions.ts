@@ -23,12 +23,17 @@ export function createPersistenceActions(set: any, get: any) {
 
         const state = get();
         const exportedData = state.export();
-        
-        
+
+
         if (!state.tokenId) {
           throw new Error('No tokenId available in EditStore');
         }
-        
+
+        // Baseline (header Reset) rides the save ONLY when freshly captured —
+        // routine autosaves keep their body small. Flag cleared below only
+        // when this request actually shipped it.
+        const shipBaseline = state.baselineDirty && state.baseline ? state.baseline : undefined;
+
         // Real API call to save draft
         const response = await fetch('/api/saveDraft', {
           method: 'POST',
@@ -38,6 +43,7 @@ export function createPersistenceActions(set: any, get: any) {
           body: JSON.stringify({
             tokenId: state.tokenId,
             finalContent: exportedData,  // Changed from 'content' to 'finalContent' to match API
+            ...(shipBaseline !== undefined && { baseline: shipBaseline }),
             title: state.title,
             // Service template selection (Phase 11b) — persist editor switches.
             // Null for product; saveDraft writes only when provided.
@@ -60,6 +66,8 @@ export function createPersistenceActions(set: any, get: any) {
           state.persistence.isSaving = false;
           state.persistence.lastSaved = Date.now();
           state.persistence.isDirty = false;
+          // This save carried the baseline → it's persisted; stop shipping it.
+          if (shipBaseline !== undefined) state.baselineDirty = false;
           state.persistence.metrics.totalSaves += 1;
           state.persistence.metrics.successfulSaves += 1;
           state.persistence.metrics.lastSaveTime = Date.now();
@@ -86,7 +94,11 @@ export function createPersistenceActions(set: any, get: any) {
         // Handle different response formats - check both finalContent and content
         // The API stores the data under content.finalContent path
         const contentToLoad = apiResponse.finalContent || apiResponse.content?.finalContent || apiResponse.content;
-        
+
+        // Stored baseline (header Reset): loadDraft returns it top-level
+        // (from Project.content.baseline); tolerate a raw-content shape too.
+        const storedBaseline = apiResponse.baseline ?? apiResponse.content?.baseline ?? null;
+
         set((state: EditStore) => {
           // Extract sections from either new format (top-level) or legacy format (nested in layout)
           const sections = contentToLoad?.sections ?? contentToLoad?.layout?.sections ?? [];
@@ -324,6 +336,13 @@ export function createPersistenceActions(set: any, get: any) {
             loadPageIntoActive(state, state.pages[HOME_PAGE_ID]); // re-inject chrome
           }
 
+          // Hydrate the stored baseline (plain assignment — no export() here;
+          // capture for the no-baseline case happens AFTER this producer, below).
+          if (storedBaseline) {
+            state.baseline = deepClone(storedBaseline);
+            state.baselineDirty = false; // already persisted server-side
+          }
+
           state.lastUpdated = Date.now();
           state.persistence.isLoading = false;
           state.persistence.isDirty = false;
@@ -339,7 +358,17 @@ export function createPersistenceActions(set: any, get: any) {
           }
 
         });
-        
+
+        // No stored baseline → capture the just-hydrated state as baseline.
+        // This one path covers BOTH initial-generation capture (first editor
+        // load after onboarding gen) AND legacy-page backfill. MUST run after
+        // the hydration set() above has committed: captureBaseline → export()
+        // reads committed state via get(); inside the producer it would
+        // snapshot stale pre-hydration state.
+        if (!storedBaseline) {
+          get().captureBaseline();
+        }
+
       } catch (error) {
         logger.error('❌ Error in loadFromDraft:', error);
         set((state: EditStore) => {
@@ -381,6 +410,32 @@ export function createPersistenceActions(set: any, get: any) {
 
 
       return exportData;
+    },
+
+    /**
+     * ===== BASELINE (header Reset) =====
+     */
+    // Snapshot the CURRENT committed state as the generation baseline.
+    // Callers (caller-driven, never automatic): loadFromDraft when the server
+    // returned no stored baseline, and regenerateAllContent after its loop.
+    // NEVER call from inside a set() producer — export() reads via get().
+    captureBaseline: () => {
+      const snapshot = get().export();
+      set((state: EditStore) => {
+        state.baseline = snapshot;
+        state.baselineDirty = true;
+        // Intentionally does NOT set persistence.isDirty — the baseline rides
+        // the next natural save; capturing alone is not a user edit.
+      });
+    },
+
+    // Clear the dirty flag after a save that shipped the baseline succeeded.
+    // Named action because utils/autoSaveDraft.ts (plain util) has no inline
+    // store access; persistenceActions.save() clears the flag inline instead.
+    markBaselineSaved: () => {
+      set((state: EditStore) => {
+        state.baselineDirty = false;
+      });
     },
 
     /**

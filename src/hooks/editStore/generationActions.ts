@@ -603,6 +603,11 @@ export function createGenerationActions(set: any, get: any) {
       // ONE undo entry for the entire loop (success or partial failure).
       pushFullContentEntry();
 
+      // Refresh the Reset baseline: the regenerated page IS the new
+      // "most recent generation". Outside any set() by design —
+      // captureBaseline → export() reads committed state via get().
+      get().captureBaseline();
+
       set((draft: EditStore) => {
         draft.aiGeneration.isGenerating = false;
         draft.aiGeneration.currentOperation = null;

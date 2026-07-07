@@ -133,6 +133,10 @@ export async function GET(req: Request) {
       // Final content (supports both new and legacy formats)
       finalContent: finalContent,
 
+      // Generation baseline (edit-header Reset). Null for legacy projects —
+      // the editor backfills by capturing load-time state (loadFromDraft).
+      baseline: content.baseline ?? null,
+
       // Metadata
       lastUpdated: project.updatedAt,
     };

@@ -111,3 +111,53 @@
 - `fullContent` snapshots are active-page-relative (no `pageId`) — safe ONLY because `loadPageIntoActive` clears the stacks on every swap (Phase 1). Any future swap path bypassing that helper reintroduces cross-page corruption.
 - Content-map JSON.stringify equality is key-order-sensitive; a pure reorder would push a technically-no-op entry (undo then harmless). Accepted.
 - Two `fullContent` entries roughly double the page-content memory per Regen Copy; capped at 50 entries.
+
+## Phase 4 — Baseline capture + persistence (`content.baseline`)
+
+### Files changed
+- `src/types/store/state.ts`
+- `src/stores/editStore.ts`
+- `src/hooks/editStore/persistenceActions.ts`
+- `src/hooks/editStore/generationActions.ts`
+- `src/utils/autoSaveDraft.ts`
+- `src/app/api/saveDraft/route.ts`
+- `src/app/api/loadDraft/route.ts`
+- `src/types/store/actions.ts`
+
+### Per-file changes
+- **`src/types/store/state.ts`** — `PersistenceSlice` gains `baseline: Record<string, any> | null` (full `export()` payload — covers content/sections/layouts/theme/**pages/currentPageId/chrome**/forms for free) and `baselineDirty: boolean`, both doc-commented "NEVER in partialize".
+- **`src/stores/editStore.ts`** — `createInitialState`: `baseline: null`, `baselineDirty: false` in the Persistence Slice block. `partialize` is an ALLOWLIST — neither key added, so both are excluded from localStorage persistence (no partialize edit needed; verified).
+- **`src/hooks/editStore/persistenceActions.ts`** —
+  - New `captureBaseline()`: `get().export()` OUTSIDE any producer, then `set` assigns `state.baseline` + `baselineDirty = true`. Does NOT set `persistence.isDirty` (baseline rides the next natural autosave). Comment forbids calling it from inside a `set()` producer.
+  - New `markBaselineSaved()`: clears `baselineDirty` (named action for the plain-util autoSave path).
+  - `loadFromDraft`: reads `storedBaseline = apiResponse.baseline ?? apiResponse.content?.baseline ?? null` before the producer. Present → hydrated INSIDE the producer via `deepClone` plain assignment, `baselineDirty = false`. Absent → `get().captureBaseline()` runs **after the big hydration `set()` producer returns** (post-commit, so `export()` sees hydrated state) — this one path is BOTH initial-gen capture and legacy backfill.
+  - `save()`: computes `shipBaseline` from `baselineDirty && baseline` before the fetch; spreads `baseline` into the POST body only then; success `set` clears `baselineDirty` inline only when this request shipped it.
+- **`src/hooks/editStore/generationActions.ts`** — `regenerateAllContent`: `get().captureBaseline()` after the loop + `pushFullContentEntry()`, in the try path only (already outside any `set()`). NOT added to the outer catch (unexpected mid-loop crash shouldn't enshrine a half-regenerated page as "the generation"). Per-section/element regen and `updateFromAIResponse` get no capture.
+- **`src/utils/autoSaveDraft.ts`** — inside the `includePageData` block (after `payload.finalContent` assembly): reads the store via `storeManager.getEditStore(tokenId).getState()`; `payload.baseline = baseline` only when `baselineDirty && baseline`. On successful response, `payload.baseline !== undefined` → `markBaselineSaved()` via the store. Both wrapped in try/catch (warn-only), matching the file's existing store-access pattern.
+- **`src/app/api/saveDraft/route.ts`** — after the `finalContent` block: `if (body.baseline !== undefined) updatedContent.baseline = body.baseline` — wholesale REPLACE, never deep-merge. Absent → preserved via the existing `{...existingContent, onboarding}` spread (verified: spread carries all non-`onboarding` keys; `finalContent` merge behavior untouched).
+- **`src/app/api/loadDraft/route.ts`** — response gains `baseline: content.baseline ?? null` alongside `finalContent`.
+- **`src/types/store/actions.ts`** — carried-over Phase-3 fix: `regenerateSection` widened to `(sectionId: string, userGuidance?: string, options?: { suppressHistory?: boolean }) => Promise<void>` (matches the aiActions implementation; behavior-free). Also declared `captureBaseline: () => void` and `markBaselineSaved: () => void` in `MetaActions` (next to `save`/`loadFromDraft`, whose implementations live in the same persistenceActions file).
+
+### Deviations
+- **`baseline` read from raw `body` in saveDraft, not from `validationResult.data`:** `DraftSaveSchema` (`src/lib/validation.ts`) strips unknown keys, and validation.ts is NOT in this phase's Files-touched list. Adding `baseline: z.unknown().optional()` there would be validation-equivalent to reading the raw body (finalContent is already `z.unknown()`), so the conservative in-scope option was raw-body read with a comment. If the reviewer prefers the schema key, it's a 1-line validation.ts change in a later phase.
+- **`actions.ts` gained the two baseline action declarations** beyond the mandated `regenerateSection` fix — required for `tsc` (`EditStore extends MetaActions`; `get().captureBaseline()` and `editStoreState.markBaselineSaved()` are typed calls). No behavior.
+- **`captureBaseline()` not called in `regenerateAllContent`'s outer catch** (only after the loop in the try path). Task said "after the loop completes"; the outer catch is an unexpected mid-loop crash — refreshing the baseline there would enshrine a half-regenerated page as the Reset target. Per-section failures inside the loop still reach the try-path capture (loop catches per-section errors), matching "fully/partially successful loop".
+- `loadFromDraft` also tolerates `apiResponse.content.baseline` (raw-project shape) as a fallback, mirroring the file's existing `finalContent || content?.finalContent` tolerance. Primary path is the new top-level `baseline` from loadDraft.
+
+### Test results
+- `npx tsc --noEmit`: clean (no output).
+- `npm run test:run`: **51 files passed | 1 skipped; 670 tests passed | 2 skipped.** No failures.
+
+### Manual items for Phase-5 / final QA (not automatable)
+- Fresh generation → open editor → make one edit → autosave → DB `Project.content.baseline` exists and mirrors the pristine post-gen state, NOT the edit (proves capture ran post-hydration, pre-edit).
+- Further edits/autosaves leave DB baseline byte-identical; network tab: `baseline` absent from routine save bodies (dirty flag works).
+- BOTH save paths clear the flag: `persistenceActions.save()` (inline) and `completeSaveDraft` → `markBaselineSaved()`.
+- Regen Copy → the NEXT save ships a refreshed baseline exactly once.
+- Pre-existing project with no stored baseline → loads without crash; baseline captured from load-time state (backfill).
+- Publish flow unaffected (`/api/publish` reads `finalContent`; baseline sits beside it in `content`).
+
+### Open risks / notes
+- Reset is NOT built this phase — baseline is captured-but-unused (safe intermediate; Phase 5 consumes it).
+- What Reset will NOT revert (plan step 7, for the record): `templateId/variantId/paletteId` and `Project.themeValues` (e.g. vestria `mood`) live OUTSIDE the exported in-store `theme` — post-generation mood/template switches are not restored by baseline. Known limitation vs the spec's "restores copy + theme".
+- `content` column roughly doubles when baseline is present (accepted at the gate).
+- If a baseline-carrying autosave fails, the flag stays dirty and baseline simply rides the next save attempt (retry-safe by construction).
