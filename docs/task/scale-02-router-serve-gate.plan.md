@@ -15,7 +15,7 @@ Replace the persona gate + pilot allowlist + waitlist with one universal entry `
 - phase 3 classification extension of understand/scrape: done (commit 3fae52f, review loops 1) — flag-gated entry branch, non-entry path byte-identical (verified line-by-line); +12 tests, generation-contract/golden green; entry-scrape bypasses SiteContext cache (re-crawl, by design)
 - phase 4 API routes (brief confirm/hydrate + demand-lead): done (commit 326f3be, review loops 1) — GET/confirm assertProjectOwner-gated, confirm re-runs decideServe server-side (authoritative), demand-lead PATCH ownership-scoped (404 on cross-user), founder email try/catch-after-write; tsc+suite green. NOTE: no automated tests on PATCH-ownership/authoritative-gate (deferred to manual QA)
 - phase 5 entry UI /onboarding/[token]: done (review loops 1) — new route segment (invisible until phase-6 cutover); 3-step useState flow, chooser via applyBusinessTypeCorrection, no internal-term leak, §5/§11.11 copy verbatim; tsc+suite green. NOTE: real-LLM acceptance QA deferred to phase-6/merge gate
-- phase 6 cutover (/api/start, old-route redirects, wizard bridge hydrate): pending
+- phase 6 cutover (/api/start, old-route redirects, wizard bridge hydrate): done (review loops 1, HUMAN GATE signed off) — persona/pilot/waitlist gate removed (incl. dashboard gate); universal entry; wizard hydrate no-ops on null brief (legacy byte-identical); PersonaPrompt kept as settings editor. tsc+unit green, product-publish e2e PASS. Files-touched amended mid-phase (added dashboard/page.tsx, layout.tsx, components/README.md; PersonaPrompt NOT deleted). KNOWN: service-publish e2e RED = pre-existing stale seedDraft.ts fixture (since 2026-06-18) → fix folded into phase 7
 - phase 7 admin demand board + final sweep: pending
 
 ## Key decisions (the spine — resolved, not open)
@@ -176,25 +176,29 @@ New route segment only — static siblings (`persona`, `waitlist`, `product`, `s
 
 Atomic phase — the gate can't be half-replaced. This is the behavior-change core; e2e green is the exit criterion.
 
-**Files touched**
+**Files touched** *(amended mid-phase 2026-07-07: plan-review missed the `PersonaPrompt` readers. `PersonaPrompt.tsx` is NOT deleted — it stays as the settings persona editor; the cutover removes the persona GATE, not persona editing. Added the 3 real readers: `dashboard/page.tsx` (the actual blocking gate), `layout.tsx` (signup redirect), `components/README.md` (doc).)*
 - `src/app/api/start/route.ts` (edit)
 - `src/app/onboarding/persona/page.tsx` (edit — replace with redirect)
-- `src/components/onboarding/PersonaPrompt.tsx` (delete)
+- `src/app/dashboard/page.tsx` (edit — REMOVE the persona-gate block `if (!persona) return <PersonaPrompt>` + its import; this is the real gate the cutover removes)
+- `src/app/layout.tsx` (edit — `signUpForceRedirectUrl` `/onboarding/persona?next=/dashboard` → `/dashboard`)
 - `src/app/onboarding/waitlist/page.tsx` (edit — replace with redirect)
 - `src/app/onboarding/waitlist/WaitlistForm.tsx` (delete)
 - `src/app/onboarding/service/[token]/layout.tsx` (edit)
 - `src/app/onboarding/product/[token]/page.tsx` (edit — hydrate effect only)
 - `src/app/onboarding/service/[token]/page.tsx` (edit — hydrate effect only)
 - `src/app/README.md` (edit — entry/persona docs)
+- `src/components/README.md` (edit — PersonaPrompt now settings-only, no longer an onboarding gate)
+
+*NOT touched (intentionally kept): `src/components/onboarding/PersonaPrompt.tsx` (settings persona editor), `src/app/dashboard/settings/page.tsx` (still uses PersonaPrompt as the persona editor — persona editing survives), `/api/user/persona` + `User.persona`.*
 
 **Steps**
 1. `/api/start` per D4: delete persona-prompt redirect + `PILOT_SERVICE_PERSONAS` + waitlist branch; KEEP upsert/default-plan/persona→audienceType-on-Project (e2e back-compat — `publish.spec.ts` comment "audienceType is captured on the Project at /api/start" stays true); return `${SITE_URL}/onboarding/${tokenValue}`. Response shape `{url}` unchanged ⇒ DashboardHeader untouched.
-2. `/onboarding/persona/page.tsx` → server `redirect('/dashboard')` (comment: replaced by scale-02 router). Delete `PersonaPrompt.tsx`. **Keep `/api/user/persona`** (e2e + UnderstandingStep/OneLinerStep/product-page readers).
+2. `/onboarding/persona/page.tsx` → server `redirect('/dashboard')` (comment: replaced by scale-02 router). **Do NOT delete `PersonaPrompt.tsx`** — it stays as the settings persona editor. Instead: (a) in `src/app/dashboard/page.tsx` REMOVE the persona-gate block (`if (!viewerIsAdmin && user && !user.persona) return <PersonaPrompt next="/dashboard" />`) + its import — this blocking gate is exactly the persona gate the cutover removes (new self-serve users have no persona and must reach the dashboard); (b) in `src/app/layout.tsx` change `signUpForceRedirectUrl` from `/onboarding/persona?next=/dashboard` to `/dashboard`; (c) `src/app/dashboard/settings/page.tsx` is left UNCHANGED (keeps PersonaPrompt as the optional persona editor). **Keep `/api/user/persona`** (e2e + UnderstandingStep/OneLinerStep/product-page readers).
 3. `/onboarding/waitlist/page.tsx` → server `redirect('/dashboard')`; delete `WaitlistForm.tsx`.
 4. `service/[token]/layout.tsx` — remove persona lookup, persona-prompt bounce, `PILOT_SERVICE_PERSONAS`, persona-derived wrong-audience redirect. Keep auth + claim-on-visit. Add soft guard keyed on Project not persona: `project.audienceType === 'product'` ⇒ redirect to product wizard (bookmarked-URL case); anything else passes.
 5. Wizard hydrate (D5 — page.tsx ONLY, steps/stores untouched): one mount effect per wizard — GET `/api/brief?tokenId=`; no brief / no `facts.entry` / store already dirty (`currentStep !== 'oneLiner'` or oneLiner set) ⇒ no-op. Else `briefToProductPrefill`/`briefToServicePrefill` (phase 1) → store setters (`setTemplateId` from response templateId — bypasses the `?template=` whitelist path; `setOneLiner`/`setProductName|setBusinessName`/`setUnderstanding`/`setOffer`/`setLandingGoal|setGoal`/`setImportedTestimonials` when present) → `goToStep('understanding')` (skips OneLinerStep ⇒ no double AI charge; mirrors import-hydrate). Product: sequence AFTER the existing resume check (share/extend the `checkedResume` ref flow so resume-to-generating wins) — do not reorder existing effects.
 6. `src/app/README.md`: rewrite entry-flow paragraph (persona gate → universal entry + serve gate).
-7. Grep sweep: no remaining reader of `PILOT_SERVICE_PERSONAS`, `PersonaPrompt`, `WaitlistForm`, `/onboarding/persona?next=` (README/comments included).
+7. Grep sweep: no remaining reader of `PILOT_SERVICE_PERSONAS`, `WaitlistForm` (onboarding one), or `/onboarding/persona?next=` (README/comments included). **`PersonaPrompt` is EXPECTED to remain referenced by `src/app/dashboard/settings/page.tsx` + `src/components/README.md` (settings persona editor — intentionally kept); the sweep must confirm it is NO longer used as a GATE anywhere (dashboard gate removed) but IS still the settings editor.** Paste grep results into the audit.
 
 **Verification**: `npx tsc --noEmit` · `npm run test:run` · **`npm run test:e2e` — publish.spec (product + service) AND generation/render specs GREEN (the hard invariant)** · manual dev end-to-end: dashboard "New project" → entry → "growth agency for SaaS" → confirm → service wizard opens ON UnderstandingStep, prefilled, surge selected; a legacy direct wizard URL with a brief-less project behaves exactly as today.
 

@@ -1,6 +1,12 @@
 export const dynamic = 'force-dynamic';
 
 // app/api/start/route.ts
+// scale-02 phase 6 (D4): /api/start stays the creator; the persona gate +
+// pilot waitlist moved into the universal entry (/onboarding/[token] serve
+// gate). Persona→audienceType derivation on the Project row is KEPT for
+// back-compat (e2e publish.spec seeds drafts straight off /api/start and
+// dispatch keys on Project.audienceType; the serve gate overwrites it at
+// confirm for real users).
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 
@@ -10,23 +16,12 @@ import { createDefaultPlan } from '@/lib/planManager'
 import { logger } from '@/lib/logger'
 import { personaToAudienceType, type UserPersona } from '@/types/service'
 
-// Phase 8: agency + consultant + coach reach the service onboarding flow.
-// Remaining service personas (freelancer, local-service, productized-service)
-// waitlist (docs/tracks/nsoPlan.md resolution #25).
-const PILOT_SERVICE_PERSONAS: ReadonlySet<UserPersona> = new Set([
-  'agency',
-  'consultant',
-  'coach',
-])
-
 export async function GET() {
   const { userId } = await auth()
 
   let dbUser = null
 
-  // If logged in, find or create a User entry FIRST so we can read persona
-  // before allocating a Token. This prevents orphan-token leaks when the user
-  // has no persona yet and needs to be redirected to the persona prompt.
+  // If logged in, find or create a User entry first.
   if (userId) {
     dbUser = await prisma.user.upsert({
       where: { clerkId: userId },
@@ -35,15 +30,6 @@ export async function GET() {
         clerkId: userId,
       },
     })
-
-    // Persona gate: authed-without-persona users must capture persona before
-    // we create any Token / Project rows. Caller navigates to the persona
-    // prompt; on save it re-hits /api/start and the create path runs.
-    if (!dbUser.persona) {
-      return NextResponse.json({
-        url: `${process.env.NEXT_PUBLIC_SITE_URL}/onboarding/persona?next=/api/start`,
-      })
-    }
 
     // Create default plan for new users
     try {
@@ -61,19 +47,12 @@ export async function GET() {
     }
   }
 
-  // Derive audienceType: from persona for authed users, default 'product' for anon.
+  // Derive audienceType: from persona when present (e2e back-compat — the
+  // serve gate overwrites this at /api/brief/confirm), default 'product'.
   const persona = dbUser?.persona as UserPersona | null | undefined
   const audienceType = persona ? personaToAudienceType(persona) : 'product'
 
-  // Pilot waitlist gate: non-agency service personas short-circuit BEFORE any
-  // Token/Project creation, so we don't leak orphan rows for waitlisted users.
-  if (audienceType === 'service' && persona && !PILOT_SERVICE_PERSONAS.has(persona)) {
-    return NextResponse.json({
-      url: `${process.env.NEXT_PUBLIC_SITE_URL}/onboarding/waitlist`,
-    })
-  }
-
-  // Create token (now safe — persona check passed for authed users)
+  // Create token
   const tokenValue = nanoid(12)
   const token = await prisma.token.create({
     data: {
@@ -90,14 +69,9 @@ export async function GET() {
     },
   })
 
-  // Branch redirect by audienceType. Service (agency-only at pilot) → service
-  // wizard. Product / anon → Meridian product onboarding (P4 cutover; legacy
-  // /create archived in P5).
-  const wizardPath = audienceType === 'service'
-    ? `/onboarding/service/${tokenValue}`
-    : `/onboarding/product/${tokenValue}`
-
+  // Universal entry: one-liner/URL → classify → confirm → serve gate routes
+  // into the product/service wizard (or manual-onboard capture).
   return NextResponse.json({
-    url: `${process.env.NEXT_PUBLIC_SITE_URL}${wizardPath}`,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL}/onboarding/${tokenValue}`,
   });
 }

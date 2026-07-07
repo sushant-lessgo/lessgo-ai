@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
 import { isResumableGeneration } from '@/modules/generation/multiPageAssembly';
+import { briefToProductPrefill } from '@/modules/brief/bridge';
 import StepContainer from './components/StepContainer';
 import OneLinerStep from './components/steps/OneLinerStep';
 import UnderstandingStep from './components/steps/UnderstandingStep';
@@ -79,15 +80,49 @@ export default function ProductOnboardingPage() {
     (async () => {
       try {
         const res = await fetch(`/api/loadDraft?tokenId=${encodeURIComponent(tokenId)}`);
-        if (!res.ok) return;
-        const json = await res.json();
-        const fc = json?.finalContent || json?.content?.finalContent || json?.content;
-        if (isResumableGeneration(fc)) {
-          if (fc.onboardingData?.strategy) setTemplateId('vestria');
-          goToStep('generating');
+        if (res.ok) {
+          const json = await res.json();
+          const fc = json?.finalContent || json?.content?.finalContent || json?.content;
+          if (isResumableGeneration(fc)) {
+            if (fc.onboardingData?.strategy) setTemplateId('vestria');
+            goToStep('generating');
+            return; // resume-to-generating wins — skip brief hydrate
+          }
         }
       } catch {
         /* best-effort */
+      }
+
+      // scale-02 phase 6 (D5): bridge hydrate — sequenced AFTER the resume
+      // check (same async chain) so resume-to-generating wins. No-ops when
+      // the project has no Brief / no facts.entry (legacy flows byte-
+      // identical) or the store is already dirty. goToStep('understanding')
+      // skips OneLinerStep so the entry's 1-credit classify isn't re-charged
+      // (mirrors the import-hydrate pattern).
+      try {
+        const pre = useProductGenerationStore.getState();
+        if (pre.currentStep !== 'oneLiner' || pre.oneLiner) return;
+        const briefRes = await fetch(`/api/brief?tokenId=${encodeURIComponent(tokenId)}`);
+        if (!briefRes.ok) return;
+        const { brief, templateId } = await briefRes.json();
+        const prefill = briefToProductPrefill(brief);
+        if (!prefill) return; // no brief / no facts.entry ⇒ no-op
+        const s = useProductGenerationStore.getState();
+        if (s.currentStep !== 'oneLiner' || s.oneLiner) return; // dirty since fetch
+        if (
+          templateId &&
+          (TEMPLATE_PARAM_WHITELIST as readonly string[]).includes(templateId)
+        ) {
+          setTemplateId(templateId as (typeof TEMPLATE_PARAM_WHITELIST)[number]);
+        }
+        s.setOneLiner(prefill.oneLiner);
+        s.setProductName(prefill.productName);
+        s.setUnderstanding(prefill.understanding);
+        if (prefill.offer) s.setOffer(prefill.offer);
+        if (prefill.landingGoal) s.setLandingGoal(prefill.landingGoal);
+        goToStep('understanding');
+      } catch {
+        /* best-effort — wizard starts empty, exactly as today */
       }
     })();
   }, [tokenId, goToStep, setTemplateId]);

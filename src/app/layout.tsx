@@ -86,7 +86,7 @@ export default function RootLayout({
 
   return (
     <ClerkProvider
-      signUpForceRedirectUrl="/onboarding/persona?next=/dashboard"
+      signUpForceRedirectUrl="/dashboard"
       signInForceRedirectUrl="/dashboard"
     >
       <html lang="en">

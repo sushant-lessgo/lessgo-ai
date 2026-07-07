@@ -360,3 +360,150 @@ generation-contract + golden tests green (tripwire held).
 - `git status` — only the 5 new files under `src/app/onboarding/[token]/` (+ a PRE-EXISTING uncommitted orchestrator edit to this plan.md adding phase-4's commit hash — not touched by this phase). No wizard/`/api/start`/middleware edit ✅
 - Firewall: components import `@/modules/brief/{classify,playback}` + `@/types/brief` + ui/lucide/Logo only — no template resolver/registry/renderer/block ✅
 - Plan's manual dev checks (real-LLM 3 acceptance inputs, fasttrack upgrade, rungE no-500) NOT run here — deferred to manual QA per plan (wizard hydrate lands phase 6; serve redirect into an empty wizard is EXPECTED).
+
+---
+
+## Phase 6 — cutover: /api/start rewrite, old-route redirects, wizard bridge hydrate
+
+**Files changed**
+- `src/app/api/start/route.ts` (edit)
+- `src/app/onboarding/persona/page.tsx` (edit — now a redirect)
+- `src/app/dashboard/page.tsx` (edit — persona gate removed)
+- `src/app/layout.tsx` (edit — signUpForceRedirectUrl)
+- `src/app/onboarding/waitlist/page.tsx` (edit — now a redirect)
+- `src/app/onboarding/waitlist/WaitlistForm.tsx` (DELETED)
+- `src/app/onboarding/service/[token]/layout.tsx` (edit — persona gate removed, project-keyed soft guard added)
+- `src/app/onboarding/product/[token]/page.tsx` (edit — hydrate added inside the existing `checkedResume` effect, per plan "share/extend the checkedResume ref flow")
+- `src/app/onboarding/service/[token]/page.tsx` (edit — mount hydrate effect added)
+- `src/app/README.md` (edit — entry-flow docs)
+- `src/components/README.md` (edit — PersonaPrompt settings-only note)
+
+NOT touched (per amended plan): `src/components/onboarding/PersonaPrompt.tsx`, `src/app/dashboard/settings/page.tsx`, `/api/user/persona` route, `User.persona` column, wizard steps/stores/components.
+
+### Per-file changes
+
+**`src/app/api/start/route.ts` (D4)** — deleted the persona-prompt redirect (`/onboarding/persona?next=/api/start`) and the entire `PILOT_SERVICE_PERSONAS` waitlist branch. KEPT: user upsert, default-plan creation, persona→audienceType derivation onto the Project row (e2e back-compat; serve gate overwrites at confirm). Redirect target changed from `/onboarding/{product|service}/{token}` to `/onboarding/${tokenValue}` (universal entry).
+**`{url}` shape-unchanged evidence:** the route still returns exactly `NextResponse.json({ url: SITE_URL + '/onboarding/' + tokenValue })` — one key, `url`, token still the LAST path segment. Verified live: `DashboardHeader.handleCreatePage` parses `{url}` (its `/onboarding/persona` branch is now dead but harmless — falls to `window.open(url)`); e2e `publish.spec.ts:31-34` got a 200 + url and successfully parsed the token (product publish spec passed end-to-end through this route).
+
+**`src/app/onboarding/persona/page.tsx`** — full file replaced by a server `redirect('/dashboard')` with a scale-02 comment. `PersonaPrompt` import removed (component itself kept for settings).
+
+**`src/app/dashboard/page.tsx`** — removed exactly the persona-gate block:
+```tsx
+-  if (!viewerIsAdmin && user && !user.persona) {
+-    return <PersonaPrompt next="/dashboard" />
+-  }
+```
+plus the `import PersonaPrompt from '@/components/onboarding/PersonaPrompt'` line; replaced by a comment. NOTHING else in the file touched — persona-null self-serve users now reach the dashboard.
+
+**`src/app/layout.tsx`** — one-line change: `signUpForceRedirectUrl="/onboarding/persona?next=/dashboard"` → `signUpForceRedirectUrl="/dashboard"`. `signInForceRedirectUrl` untouched.
+
+**`src/app/onboarding/waitlist/page.tsx`** — full file replaced by server `redirect('/dashboard')`. **`WaitlistForm.tsx` deleted** — reader check before deletion: its ONLY importer was `waitlist/page.tsx` (relative `./WaitlistForm`); the marketing `src/app/components/WaitlistForm.tsx` (different file, imported by `src/app/page.tsx`) untouched.
+
+**`src/app/onboarding/service/[token]/layout.tsx`** — removed: persona lookup/select, persona-null bounce to `/onboarding/persona?next=`, `PILOT_SERVICE_PERSONAS` set + waitlist redirect, persona-derived wrong-audience redirect. KEPT: Clerk auth redirect + claim-on-visit (verbatim). ADDED: project-keyed soft guard — `project.audienceType === 'product'` ⇒ redirect to `/onboarding/product/{token}`; anything else passes.
+
+**`src/app/onboarding/product/[token]/page.tsx` — exact hydrate diff.** Added import `briefToProductPrefill` from `@/modules/brief/bridge`. The hydrate lives INSIDE the existing resume effect's async chain (plan step 5: "share/extend the `checkedResume` ref flow so resume-to-generating wins"), sequenced strictly AFTER the resume check. The resume logic is preserved except `if (!res.ok) return` → `if (res.ok) { … }` nesting + an added `return` after `goToStep('generating')` (so resume WINS deterministically — no race). Added block:
+```tsx
+      // scale-02 phase 6 (D5): bridge hydrate — sequenced AFTER the resume
+      // check (same async chain) so resume-to-generating wins. …
+      try {
+        const pre = useProductGenerationStore.getState();
+        if (pre.currentStep !== 'oneLiner' || pre.oneLiner) return;
+        const briefRes = await fetch(`/api/brief?tokenId=${encodeURIComponent(tokenId)}`);
+        if (!briefRes.ok) return;
+        const { brief, templateId } = await briefRes.json();
+        const prefill = briefToProductPrefill(brief);
+        if (!prefill) return; // no brief / no facts.entry ⇒ no-op
+        const s = useProductGenerationStore.getState();
+        if (s.currentStep !== 'oneLiner' || s.oneLiner) return; // dirty since fetch
+        if (
+          templateId &&
+          (TEMPLATE_PARAM_WHITELIST as readonly string[]).includes(templateId)
+        ) {
+          setTemplateId(templateId as (typeof TEMPLATE_PARAM_WHITELIST)[number]);
+        }
+        s.setOneLiner(prefill.oneLiner);
+        s.setProductName(prefill.productName);
+        s.setUnderstanding(prefill.understanding);
+        if (prefill.offer) s.setOffer(prefill.offer);
+        if (prefill.landingGoal) s.setLandingGoal(prefill.landingGoal);
+        goToStep('understanding');
+      } catch { /* best-effort — wizard starts empty, exactly as today */ }
+```
+**Steps/stores untouched proof:** the template-selection effect (`?template=` whitelist + manufacturer→vestria, lines 51-70) is byte-identical; `stepComponents` map, `TEMPLATE_PARAM_WHITELIST`, all step imports, and `useProductGenerationStore.ts` show ZERO diff (`git status`: no file under `components/steps/`, no hook file). Effect ORDER unchanged (template effect first, resume effect second; hydrate is inside the second).
+
+**`src/app/onboarding/service/[token]/page.tsx` — exact hydrate diff.** Added imports: `useEffect, useRef` (react), `useParams` (next/navigation), `briefToServicePrefill`, `templateIds`/`TemplateId`. Added inside the component (before the untouched `stepComponents` dispatch):
+```tsx
+  const params = useParams();
+  const tokenId = params?.token as string | undefined;
+  const checkedBrief = useRef(false);
+  useEffect(() => {
+    if (checkedBrief.current || !tokenId) return;
+    checkedBrief.current = true;
+    (async () => {
+      try {
+        const pre = useServiceGenerationStore.getState();
+        if (pre.currentStep !== 'oneLiner' || pre.oneLiner) return;
+        const res = await fetch(`/api/brief?tokenId=${encodeURIComponent(tokenId)}`);
+        if (!res.ok) return;
+        const { brief, templateId } = await res.json();
+        const prefill = briefToServicePrefill(brief);
+        if (!prefill) return; // no brief / no facts.entry ⇒ no-op
+        const s = useServiceGenerationStore.getState();
+        if (s.currentStep !== 'oneLiner' || s.oneLiner) return; // dirty since fetch
+        if (templateId && (templateIds as readonly string[]).includes(templateId)) {
+          s.setTemplateId(templateId as TemplateId);
+        }
+        s.setOneLiner(prefill.oneLiner);
+        s.setBusinessName(prefill.businessName);
+        s.setUnderstanding(prefill.understanding);
+        if (prefill.goal) s.setGoal(prefill.goal);
+        if (prefill.offer) s.setOffer(prefill.offer);
+        if (prefill.importedTestimonials?.length) {
+          s.setImportedTestimonials(
+            prefill.importedTestimonials.map((quote) => ({
+              quote, author_name: '', author_role: '',
+            }))
+          );
+        }
+        s.goToStep('understanding');
+      } catch { /* best-effort — wizard starts empty, exactly as today */ }
+    })();
+  }, [tokenId]);
+```
+The pre-flagged shape gap handled as planned: `ServicePrefill.importedTestimonials: string[]` → `ScrapedTestimonial[]` mapping (`q ⇒ {quote:q, author_name:'', author_role:''}`) lives HERE in page.tsx, not in the bridge. `stepComponents` map + all step imports byte-identical; `useServiceGenerationStore.ts` zero diff.
+
+**READMEs** — `src/app/README.md`: onboarding table rewritten (universal entry row added; persona/waitlist rows documented as redirects; wizards noted as brief-hydrating) + entry-flow paragraph rewritten (no persona gate; serve gate decides). `src/components/README.md`: `onboarding/` row now says PersonaPrompt is the settings-only persona editor, no longer an onboarding gate.
+
+### Grep sweep (step 7)
+
+`rg 'PILOT_SERVICE_PERSONAS|onboarding/waitlist|onboarding/persona\?next=|PersonaPrompt' src/`:
+- `PILOT_SERVICE_PERSONAS` — **zero hits**
+- `/onboarding/persona?next=` — **zero hits**
+- onboarding `WaitlistForm` — **zero readers** (file deleted; remaining `WaitlistForm` hits are the DIFFERENT marketing component `src/app/components/WaitlistForm.tsx` + its reader `src/app/page.tsx`, intentionally untouched)
+- `PersonaPrompt` — remaining refs exactly as the plan EXPECTS: `src/app/dashboard/settings/page.tsx` (settings editor — kept), `src/components/onboarding/PersonaPrompt.tsx` (the component), `src/components/README.md` (doc), a comment in the new `persona/page.tsx` redirect. **No gate usage remains** (dashboard gate removed).
+- Residual STALE references outside Files-touched (NOT edited — out of scope, flagged for phase 7 sweep): `src/app/api/README.md:48` still describes /api/start's old persona gate/waitlist; `src/components/dashboard/DashboardHeader.tsx:44-48` has a now-dead `/onboarding/persona` branch (harmless — never matches, falls through to `window.open`).
+
+### Verification
+
+- `npx tsc --noEmit` — **clean**
+- `npm run test:run` — **64 files passed | 1 skipped; 886 passed | 2 skipped** (identical counts to phase 5)
+- `npm run test:e2e` — full-suite result:
+  - `[setup] authenticate` — **PASS**
+  - `generation.spec` product pipeline — **PASS**; service pipeline — skipped (pre-existing conditional skip, unchanged)
+  - `render.spec` /dev/hearth-demo, /dev/meridian, /dev/meridian/blocks — **PASS (all 3)**
+  - `publish.spec` **product / Meridian → /p/[slug] — PASS** (end-to-end through the rewritten /api/start: persona set → {url} parsed → seed → publish → published page renders)
+  - `publish.spec` **service / Hearth — FAIL (PRE-EXISTING, not phase-6)**: seed helper `e2e/helpers/seedDraft.ts` sends the LEGACY understanding shape (`targetClients` as string, no `whatYouDo`) and `/api/audience/service/strategy` 400s on zod validation (`whatYouDo Required`, `targetClients Expected array, received string`). Provenance: seedDraft.ts last touched `87888a7` (2026-06-15); the strategy route's lean-understanding schema landed `a89e370` (2026-06-18) — the fixture has been stale since, on the branch base, BEFORE any scale work. Neither file is in this phase's Files-touched, and neither is in this phase's diff. Fix = update the two service `strategyBody`/`copyExtra` understanding fixtures in `e2e/helpers/seedDraft.ts` (out of scope here — reporting per instructions). service/Lex publish shares the same stale fixture (did not run — serial abort after Hearth).
+  - Environmental note: the FIRST 3 e2e runs failed `auth.setup` (clerk-js never loaded) + `/dev/meridian/blocks` ("Loading blocks…" stuck). Root cause: 4 stale concurrent `next dev` processes had corrupted `.next` (client chunks 404'd as text/html — confirmed via a Playwright network probe). Killed the processes, wiped `.next`, clean server ⇒ both specs green. Not code-related.
+
+### Deviations
+
+1. **service layout `findUnique` → `upsert` on User**: old code did `findUnique` then hard-stopped on `!dbUser?.persona`, guaranteeing a row before claim-on-visit used `dbUser.id`. With the persona gate gone, a first-visit user could have NO User row ⇒ crash. Conservative fix: `upsert` (same idiom as /api/start + old persona/page.tsx). In-scope judgment call.
+2. **Product hydrate placed INSIDE the resume effect** (after the resume check, early-`return` when resumable) rather than as a sibling effect — this is the plan's "share/extend the `checkedResume` ref flow" and the only race-free way for resume-to-generating to win deterministically. Resume semantics preserved (`if (!res.ok) return` became `if (res.ok) {…}` nesting; same behavior).
+3. **templateId store-type guards in the hydrate effects**: GET /api/brief returns a DB string; the product store accepts only `'meridian'|'vestria'`, the service store the `templateIds` union. Guarded with whitelist checks — an out-of-union value (e.g. product `techpremium`, which a product shortlist can emit but the product store cannot represent) is SKIPPED (store default stays) rather than force-cast. Conservative; the rest of the prefill still hydrates.
+4. e2e required 3 re-runs + an environment repair (stale dev servers / corrupted `.next`) before a valid signal; documented above.
+
+### Open risks
+
+- **publish.spec service (Hearth/Lex) red — pre-existing stale seed fixture** (`e2e/helpers/seedDraft.ts` vs the 2026-06-18 lean-understanding schema). The phase's hard-invariant "service publish green" CANNOT be met without editing that out-of-scope file; the failure is provably independent of this diff (the 400 fires in the seed helper on a route this phase never touched; product publish through the SAME rewritten /api/start passes). Recommend: orchestrator authorizes a fixture update to seedDraft.ts (add `whatYouDo`, make `targetClients` an array, add `outcomes`) as a phase-6 addendum or in phase 7.
+- Product serve-path templateId `techpremium` can't be represented in the product wizard store (deviation 3) — falls back to meridian. Cosmetic until product shortlists actually emit it.
+- Manual dev end-to-end (entry → confirm → prefilled wizard on UnderstandingStep with surge) NOT run here — real-LLM QA is the plan's merge-gate item.
