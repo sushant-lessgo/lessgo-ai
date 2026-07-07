@@ -104,3 +104,32 @@ No D-A/D-D table updates needed.
 **Open risks**
 - Structural caps (multipage/bilingual) unverifiable by conformance — trust-on-declaration until a structural check exists (noted inline, plan-review #3).
 - work-core is single-template canonical (granth); revisit when a second shortlist-eligible work template lands (noted in FROZEN header).
+
+---
+
+## Phase 4 — Conformance tests (§6a/§6b)
+
+**Files changed**
+- `src/modules/templates/conformance.test.ts` (created)
+
+(`templateMeta.ts` / `coreSections.ts` NOT edited — conditional-fix never triggered.)
+
+**Test structure** (mirrors `vestria/registration.test.ts` idiom; drives entirely off `templateMeta` + `engineCoreSections`):
+- Static imports of all 8 resolvers + placeholders (hearth/lex/surge all export `resolveServiceBlock` — import-aliased per template). Keyed `RESOLVERS: Record<TemplateId, { resolve, placeholder }>`; sanity test asserts its keys === `templateIds` === `templateMeta` keys.
+- Shared `resolvesReal(templateId, sectionType)` helper: both modes (`edit`/`published`) truthy AND `!==` that template's placeholder.
+- **(a) engine-core:** `for...of templateIds`, skip `retired===true || bespoke===true`, per declared engine iterate `engineCoreSections[engine]` — one `it` per section. Covers meridian+vestria (thing, 5 each), hearth+lex+surge (trust, 7 each), granth (work, 6) = 36 section checks × 2 modes.
+- **(b) capability evidence:** `STRUCTURAL_CAPABILITIES = ['multipage','bilingual']` const with comment (page-menu/twin-field machinery, not blocks — exempt). For every declared block-backed capability: `capabilitySections` entry exists + resolves non-placeholder both modes. Runs for ALL templates incl. lumen. Covers meridian/hearth/lex lead-form→cta, vestria lead-form→contact+catalog→catalog, surge lead-form→cta+packages→packages, lumen gallery→portfolio+lead-form→contact.
+- **D-A #2 documented in code:** explicit `lumen bespoke exemption` describe — asserts lumen is bespoke + declares work + genuinely FAILS work-core (books/writing/praise → placeholder, proving the exemption is load-bearing), yet its (b) evidence resolves. Plus a `techpremium retired` shape test (empty lists) and a structural-caps-⊆-closed-vocab sanity check.
+
+**Result: PASS with ZERO metadata edits** — as expected from phase 3 re-verification (no resolver drift; all declarations true).
+
+**Verification**
+- `npx vitest run src/modules/templates/conformance.test.ts` → 51 passed.
+- `npx tsc --noEmit` → clean (exit 0).
+- `npm run test:run` → **58 passed | 1 skipped (59 files), 812 passed | 2 skipped (814 tests)** — green (+51 from conformance test).
+
+**Deviations**
+- None. Additive-only extras within the test file: RESOLVERS/meta key-parity sanity test, structural-vocab subset check, techpremium retired-shape test — strictly additional coverage, no assertion weakened.
+
+**Open risks**
+- Same structural-caps trust-on-declaration gap as phase 3 (multipage/bilingual unverifiable by block check — spec 02+).
