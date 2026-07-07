@@ -1,3 +1,11 @@
+> ⚠️ **Stale (2026-07): original build plan + manual test script, kept for context.**
+> This is the raw Sprint-8 plan/test dump, not a maintained reference. Current truth
+> lives in code: tiers/limits in `src/lib/planManager.ts` (FREE 30 · PRO 200 · AGENCY
+> 1000 · ENTERPRISE unlimited credits) and credit costs in `src/lib/creditSystem.ts`
+> (`FULL_PAGE_GENERATION=10`, `SECTION_REGENERATION=2`, `ELEMENT_REGENERATION=1`,
+> `IVOC_RESEARCH=3`, `SCRAPE_WEBSITE=1`). Ignore any `npx prisma db push` step — this
+> repo uses `npx prisma migrate dev`. See `CLAUDE.md` › "Billing, Plans & Credits".
+
 Sprint 8 Objective 1: Pricing System Implementation Plan                                                                          │
      │                                                                                                                                   │
      │ Context: Implement Stripe-based pricing with 4 tiers (Free, Pro, Agency, Enterprise). Build foundation for all but limit feature  │

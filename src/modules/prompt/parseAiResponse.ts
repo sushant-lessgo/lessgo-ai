@@ -1,3 +1,8 @@
+// modules/prompt/parseAiResponse.ts
+// Parses + validates the COPY-phase AI response (phase 2 of generation): extracts
+// JSON from the model output (tolerant of markdown fences / partial output),
+// validates section content against expected card counts, and applies
+// manual-preferred defaults. Counterpart to parseStrategyResponse.ts (phase 1).
 
 // @ts-nocheck - Temporary disable type checking due to extensive string|string[] union type issues
 import { logger } from '@/lib/logger';

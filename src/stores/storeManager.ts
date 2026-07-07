@@ -1,6 +1,11 @@
 /**
  * Store Manager - Singleton pattern for managing multiple EditStore instances
- * Handles creation, caching, and cleanup of token-scoped stores
+ * Handles creation, caching, and cleanup of token-scoped stores.
+ *
+ * One EditStore per project token, LRU-cached in memory (max 3) so switching
+ * projects stays cheap while old instances are evicted (localStorage is kept).
+ * `getEditStore(token)` is the single entry point used by the `useEditStore`
+ * hooks / `EditProvider`.
  */
 
 import { type EditStore } from '@/types/store';

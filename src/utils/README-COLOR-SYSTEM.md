@@ -2,6 +2,22 @@
 
 This directory contains the improved color selection system that replaces the fragile string-based color detection with proper color science and accessibility validation.
 
+> **Accuracy note (kept current).** The color-science utilities below are real
+> and live: `colorUtils.ts`, `backgroundAnalysis.ts`, `colorHarmony.ts`,
+> `improvedTextColors.ts`, `brandColorSystem.ts`. They feed the **legacy
+> non-template** render path (see `src/modules/Design/README.md`); template-backed
+> projects theme via their own `ThemeInjector` and don't use these.
+>
+> Two things in this doc are **aspirational / stale** — no such code exists:
+> - There is **no** `colorSystemMigration.ts`, `createColorSystemManager`, or
+>   `colorSystemMonitor`. Migration/rollout gating actually lives in
+>   `src/utils/featureFlags.ts` (+ `cssVariablePerformance.ts` for perf), consumed
+>   by `src/modules/Design/ColorSystem/VariableThemeInjector.tsx`. The
+>   "Migration with Feature Flags" and "Debug Mode" snippets below describe an API
+>   that was never built — ignore them.
+> - The CSS-variable / "variable mode" system they gate is feature-flagged **off
+>   by default** and its token generator is currently stubbed.
+
 ## 🎯 Problem Solved
 
 The original color system had several critical issues:
@@ -170,6 +186,7 @@ if (validation.isValid) {
 ```
 
 ### Migration with Feature Flags
+> ⚠️ STALE — `colorSystemMigration` / `createColorSystemManager` do not exist. Use `@/utils/featureFlags`. Snippet kept for historical intent only.
 ```typescript
 import { createColorSystemManager } from '@/utils/colorSystemMigration';
 
@@ -300,6 +317,7 @@ console.log(colorSystemMonitor.getMetrics());
 ```
 
 ### Debug Mode
+> ⚠️ STALE — `createColorSystemManager` / `colorSystemMonitor` do not exist; this API was never built.
 
 Enable detailed logging in development:
 ```typescript

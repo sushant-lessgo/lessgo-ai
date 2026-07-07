@@ -1,4 +1,10 @@
-// modules/prompt/buildPrompt.ts - Using unified schema as single source of truth
+// modules/prompt/buildPrompt.ts
+// Copy-phase (phase 2) prompt builders for the legacy /api/generate-landing
+// pipeline. buildStrategicCopyPrompt() is the main entry: it turns the parsed
+// strategy (copyStrategy + cardCounts) + the elements map into the instruction
+// that tells the AI to fill each section's elements. Also holds section/element
+// regeneration prompts and generated-JSON validation. The layout element schema
+// (../sections) is the single source of truth for what each section may contain.
 import {
   layoutElementSchema,
   isUnifiedSchema,

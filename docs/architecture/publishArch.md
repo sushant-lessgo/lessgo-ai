@@ -1,5 +1,21 @@
 # Publishing Architecture - Implementation Guide
 
+> ⚠️ **Stale in places (2026-07).** This is the original phased build log; the core
+> approach (separate `.published.tsx` files + a server-safe published renderer) is
+> still accurate, but several specifics have moved on:
+> - **Phase 2 (forms) is DONE, not planned.** `src/components/published/FormIsland.tsx`
+>   exists and published pages have working forms (the injected handler is
+>   `public/assets/form.v1.js`). Ignore the "📋 PLANNED / NOT YET CREATED" wording below.
+> - **Rendering moved out of the publish route.** Static HTML is now produced by
+>   `generateStaticHTML()` in `src/lib/staticExport/htmlGenerator.ts` via
+>   `ReactDOMServer.renderToStaticMarkup(LandingPagePublishedRenderer, …)` — not the
+>   inline `renderToString` snippet shown in the "Published Component Registry" /
+>   "Server Rendering Method" sections.
+> - **Routes renamed.** The editor is `/edit/[token]` (not `/create/…`), onboarding is
+>   `/onboarding/{product,service}/[token]`, and `InjectLandingTheme.tsx` no longer exists.
+> - The dual-renderer contract and the UIBlock conversion playbook remain the source
+>   of truth for adding published blocks. See `CLAUDE.md` for the current publish flow.
+
 ## Overview
 
 This document outlines the architecture for optimizing published landing pages in Lessgo.ai, addressing performance issues and rendering discrepancies between preview and published pages.
@@ -12,7 +28,7 @@ This document outlines the architecture for optimizing published landing pages i
 |-------|--------|-------------|
 | **Phase 1** | ✅ COMPLETE | Server-first delivery, 82% bundle reduction, 75% LCP improvement |
 | **Phase 1.1** | ✅ COMPLETE | SSR infrastructure, published primitives, conversion playbook |
-| **Phase 2** | 📋 PLANNED | Form injection & hydration for interactivity |
+| **Phase 2** | ✅ COMPLETE | Form injection & hydration (FormIsland + injected `form.v1.js`) |
 
 ---
 

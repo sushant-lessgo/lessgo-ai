@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lessgo
 
-## Getting Started
+Lessgo is a Next.js 14 app that generates, edits, publishes, and manages AI-written landing pages for founders. It is built around a **3-tier template model** (`audienceType → templateId → variant + palette`), a two-phase AI copy-generation pipeline, a visual inline editor, and a static-export publishing system (Vercel Blob + KV) with custom-domain support.
 
-First, run the development server:
+## Stack
+
+Next.js 14 (App Router) · TypeScript · TailwindCSS · Prisma / PostgreSQL (Neon) · Clerk auth · Zustand + Immer state · Stripe billing · PostHog analytics · OpenAI / Nebius for generation · Vercel Blob + KV for publishing.
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # dev server on http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Set required secrets in `.env.local` (Clerk, database URLs, OpenAI/Nebius, Stripe, Vercel Blob/KV, etc.). See `docs/architecture/STRIPE_SETUP.md` for billing setup.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev          # Dev server
+npm run build        # build:published-css → build:assets → next build (see scripts/README.md)
+npm start            # Production server
+npm run lint         # ESLint
 
-## Learn More
+npm run test:run     # Vitest unit/integration (single run)
+npm run test:e2e     # Playwright E2E (see e2e/README.md)
 
-To learn more about Next.js, take a look at the following resources:
+npx prisma migrate dev   # Local DB migrations (prefer over db push)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> `npm run build` is not just `next build` — it first runs `scripts/buildPublishedCSS.js` and `scripts/buildAssets.js` to produce the standalone CSS bundle and minified JS/fonts that ship with published pages. See `scripts/README.md`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Where to read next
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **`CLAUDE.md`** (repo root) — full architecture overview: 3-tier template model, dual-renderer pitfall, generation pipeline, publishing, billing, state management. Start here.
+- **`docs/README.md`** — index of all project docs (`architecture/`, `guides/`, `tracks/`, `product/`).

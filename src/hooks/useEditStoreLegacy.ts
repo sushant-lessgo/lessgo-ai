@@ -1,6 +1,11 @@
 /**
- * Legacy compatibility layer for useEditStore
- * Provides backward compatibility while transitioning to token-scoped stores
+ * Legacy compatibility layer for useEditStore.
+ *
+ * Despite the "Legacy" name this is the ACTIVE editor-store hook (~100+ call
+ * sites): it reads the token-scoped store instance from `EditProvider` context
+ * so components need no tokenId. `useEditStoreLegacy.getState()` gives static
+ * (non-reactive) access to the last-mounted store. Must run inside an
+ * `<EditProvider>` — throws otherwise.
  */
 
 import { useContext, createContext } from 'react';

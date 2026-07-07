@@ -1,3 +1,9 @@
+/**
+ * Component Registry (EDIT) - resolves a section to its `.tsx` block for the edit
+ * renderer. `getComponent()` dispatches by section TYPE through the dynamic
+ * template registry (never a static template import — the bundle firewall).
+ * The `.published.ts` sibling is the server-safe twin; keep resolution parallel.
+ */
 import React from 'react';
 
 import { logger } from '@/lib/logger';

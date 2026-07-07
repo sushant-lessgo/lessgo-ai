@@ -9,6 +9,31 @@ The `/edit/[token]` route is the main visual editor for landing pages in Lessgo.
 - Design system integration
 - Auto-save capabilities
 
+> **Verified layout (2026-07, branch `feature/edit-header-actions` — header actions are
+> mid-flight; treat header specifics below as the current-code snapshot, not final).**
+>
+> **Component locations:** editor components live **under the route dir**,
+> `src/app/edit/[token]/components/{layout,editor,content,selection,toolbars,modals,ui}/`,
+> **not** the app-wide `src/components/`. Path references further down that read
+> `components/layout/…` mean `src/app/edit/[token]/components/layout/…`.
+>
+> **Entry:** `page.tsx` → `EditProvider` (token-scoped store init) →
+> `EditLayoutErrorBoundary` → `ToastProvider` → `EditLayout` (`components/layout/EditLayout.tsx`).
+>
+> **Header (`components/layout/`):**
+> - `GlobalAppHeader.tsx` — app nav (logo, breadcrumb, help, Clerk profile).
+> - `EditHeader.tsx` — design controls: template-aware theme popover
+>   (`ThemePopover` / `ServiceThemePopover` / `VestriaThemePopover`, chosen via
+>   `usesTemplateModule`), a `ReviewPill`, and `EditHeaderRightPanel`.
+> - `EditHeaderRightPanel.tsx` — actions, verified in code: **Regen Copy**
+>   (confirm modal → `regenerateAllContent`, with progress + toast), **Undo/Redo**,
+>   **Reset**, **Preview**. There is **no Publish button in the editor** — publishing
+>   lives on `/preview/[token]` (SlugModal + CustomDomainModal).
+> - `PageSwitcher.tsx` — multi-page axis switcher.
+>
+> Sections below (toolbars, selection, auto-save, design tokens) remain conceptually
+> accurate; some illustrative code snippets are simplified, not verbatim.
+
 ## Architecture
 
 ### Layout Structure
@@ -63,10 +88,11 @@ The editor uses a sophisticated multi-layer layout architecture:
   - Color system button (opens ColorSystemModalMVP)
   - Typography controls dropdown
 - **Right Section (EditHeaderRightPanel)**:
+  - Regen Copy button (confirmation modal → `regenerateAllContent`, progress + toast)
   - Undo/Redo buttons
   - Reset button (with confirmation modal)
   - Preview button (opens preview in new tab)
-  - Publish button (coming soon)
+  - (Publish is NOT here — it lives on `/preview/[token]`)
 
 #### 3. LeftPanel
 **Location**: `components/layout/LeftPanel.tsx`

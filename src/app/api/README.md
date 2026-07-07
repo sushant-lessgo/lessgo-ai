@@ -1,325 +1,128 @@
-# API Routes Documentation
+# API Routes (`src/app/api/`)
 
-## Overview
+Next.js 14 App Router route handlers (one `route.ts`/`route.tsx` per directory). This
+table is the source of truth for **method · purpose · auth/credit** and is grouped by
+concern. Verify against the handler before relying on a detail — this doc is maintained
+by hand.
 
-All API routes in Lessgo follow Next.js 14 App Router conventions. Each route is defined in a `route.ts` file within its respective directory.
+## Cross-cutting conventions
 
-## API Endpoints
+- **Auth** is enforced two ways: `src/middleware.ts` runs Clerk `auth.protect()` on every
+  route **except** those in its `isPublicRoute` allowlist; handlers additionally re-check
+  ownership. Routes marked _public_ below are in that allowlist (no session required);
+  the handler still does its own gating (flags, ownership, rate limit) where noted.
+- **Ownership:** token-scoped mutations call `assertProjectOwner(clerkId, token, …)`
+  (`src/lib/security.ts`) — a token identifies a project but is **not** proof of ownership.
+- **Admin:** `/api/admin/*` gate on `requireAdmin(req)` (`src/lib/admin.ts`) — allowed via
+  `ADMIN_CLERK_IDS` or `CRON_SECRET`.
+- **Rate limiting:** handlers are wrapped by `withAIRateLimit` / `withDraftRateLimit` /
+  `withFormRateLimit` / `withPublishRateLimit` (`src/lib/rateLimit*`), noted as _RL:ai_ etc.
+- **Credits:** AI operations call `requireAICredits` + `consumeCredits` with a
+  `CREDIT_COSTS.*` cost (`src/lib/creditSystem.ts`). Cost column lists the `CREDIT_COSTS` key.
 
-### 1. Field Inference & Validation
+## Generation & copy (AI)
 
-#### `/api/infer-fields`
-**Method**: POST
-**Purpose**: Infer business fields from user's startup description
-**Request**:
-```json
-{
-  "input": "I'm building a SaaS tool for developers...",
-  "includeValidation": true
-}
-```
-**Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "raw": { "marketCategory": "SaaS", ... },
-    "validated": {
-      "marketCategory": { "value": "SaaS", "confidence": 0.92 }
-    }
-  }
-}
-```
-**Common Issues**:
-- OpenAI API timeout (increase timeout to 30s)
-- Invalid JSON from LLM (retry with better prompt)
+| Route | Method | Purpose | Auth / RL / credit |
+|-------|--------|---------|--------------------|
+| `/generate-landing` | POST | Full landing-page copy generation (strategy + copy phases) | public · RL:ai · `FULL_PAGE_GENERATION` |
+| `/audience/product/strategy` | POST | Product strategy phase (big idea + card counts) | public · RL:ai · `STRATEGY_GENERATION` |
+| `/audience/product/generate-copy` | POST | Product copy phase (fill section elements) | public · RL:ai · `GENERATE_COPY` |
+| `/audience/service/strategy` | POST | Service strategy phase | RL:ai · `STRATEGY_GENERATION` |
+| `/audience/service/generate-copy` | POST | Service copy phase | RL:ai · `GENERATE_COPY` |
+| `/regenerate-content` | POST | Regenerate content across sections | RL:ai |
+| `/regenerate-section` | POST | Regenerate one section | RL:ai · owner · `SECTION_REGENERATION` |
+| `/regenerate-element` | POST | Regenerate one element | RL:ai · `ELEMENT_REGENERATION` |
+| `/market-insights` | POST | Generate features + infer hidden copywriting fields | public |
+| `/validate-fields` | POST | Validate taxonomy field values | public · RL:ai |
+| `/generate-privacy-policy` | POST | AI-write a privacy policy for a project | RL:ai · owner · `PRIVACY_POLICY_GENERATION` |
+| `/v2/scrape-website` | POST | Product website import (SSRF-safe crawl → prefill) | RL:ai · `SCRAPE_WEBSITE` |
+| `/v2/understand` | POST | Service website import / understanding | RL:ai · `UNDERSTAND` |
 
-#### `/api/validate-fields`
-**Method**: POST
-**Purpose**: Validate individual field values
-**Request**:
-```json
-{
-  "field": "marketCategory",
-  "value": "SaaS"
-}
-```
-**Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "field": "marketCategory",
-    "validated": "SaaS",
-    "confidence": 0.95
-  }
-}
-```
+> A legacy `/api/infer-fields` is referenced in old docs/middleware but no handler exists;
+> field inference is now split across `market-insights` + `validate-fields`.
 
-### 2. Content Generation
+## Onboarding & persistence
 
-#### `/api/generate-landing`
-**Method**: POST
-**Purpose**: Generate complete landing page content
-**Request**:
-```json
-{
-  "prompt": "Full prompt with business context...",
-  "sections": ["hero", "features", "pricing"],
-  "stream": false
-}
-```
-**Response**: Large JSON with all section content
-**Timeout**: 60 seconds
-**Common Issues**:
-- Token limit exceeded (reduce sections)
-- Incomplete generation (retry with simpler prompt)
+| Route | Method | Purpose | Auth |
+|-------|--------|---------|------|
+| `/start` | GET | **Persona gate** + project bootstrap: upserts User, gates persona (→ `/onboarding/persona`), waitlists non-pilot service personas (→ `/onboarding/waitlist`), else creates Token+Project and returns the wizard URL (product vs service by `audienceType`) | Clerk (anon allowed → product) |
+| `/user/persona` | GET / POST | Read / set the user's persona | authed |
+| `/saveDraft` | POST | Persist editor draft state | public · RL:draft · owner |
+| `/loadDraft` | GET | Load saved draft by token | authed |
+| `/projects/[tokenId]` | GET | Read a project | owner |
+| `/projects/[tokenId]/published-slug` | GET | Resolve a project's published slug | authed |
+| `/subscribe` | POST | Newsletter/waitlist email capture | public |
+| `/csrf` | GET | Issue a CSRF token | authed |
 
-#### `/api/regenerate-content`
-**Method**: POST
-**Purpose**: Regenerate content for specific sections
-**Request**:
-```json
-{
-  "sectionId": "hero",
-  "context": { "validatedFields": {...} },
-  "includeDesign": false
-}
-```
+## Publishing, domains & SEO
 
-#### `/api/regenerate-element`
-**Method**: POST
-**Purpose**: Regenerate single element content
-**Request**:
-```json
-{
-  "sectionId": "hero",
-  "elementKey": "headline",
-  "currentContent": "Old headline",
-  "context": {...}
-}
-```
+| Route | Method | Purpose | Auth |
+|-------|--------|---------|------|
+| `/publish` | POST | Publish flow: create/update `PublishedPage` + immutable `PublishedPageVersion`, static-export via published renderer, Vercel Blob upload, KV route write | RL:publish · gated |
+| `/checkSlug` | GET | Slug availability check | authed |
+| `/blob-proxy` | GET | Serve published static HTML by KV route lookup (middleware rewrites custom-domain/subdomain hits here) | public |
+| `/domains/add` | POST | Add custom domain to a page (Vercel API) | authed |
+| `/domains/remove` | DELETE | Remove custom domain | authed |
+| `/domains/verify-ownership` | POST | Verify `_lessgo-verify` TXT record → add to Vercel | authed |
+| `/domains/verify-dns` | POST | Poll Vercel `getDomainConfig` until SSL live | authed |
+| `/domains/status` | GET | Current custom-domain status | authed |
+| `/seo/sitemap` · `/seo/robots` · `/seo/rss` | GET | Per-host `sitemap.xml` / `robots.txt` / `rss.xml` (middleware rewrites the pretty paths here with `?host=`) | public |
+| `/og/[slug]` | GET | Dynamic OG image (`route.tsx`, `@vercel/og`) | public |
 
-#### `/api/market-insights`
-**Method**: POST
-**Purpose**: Generate features and hidden insights
-**Request**:
-```json
-{
-  "category": "SaaS",
-  "subcategory": "Developer Tools",
-  "problem": "...",
-  "audience": "Developers"
-}
-```
-**Response**:
-```json
-{
-  "features": [
-    { "feature": "API Integration", "benefit": "..." }
-  ],
-  "hiddenInferredFields": {
-    "persona": "Technical Decision Maker",
-    "painPoints": [...]
-  }
-}
-```
+## Blog
 
-### 3. Draft Management
+| Route | Method | Purpose | Auth |
+|-------|--------|---------|------|
+| `/blog/posts` | GET / POST | List / create posts | authed · POST RL:draft |
+| `/blog/posts/[postId]` | GET / PATCH / DELETE | Read / edit / delete a post | authed |
+| `/blog/posts/[postId]/publish` | POST | Publish a post (per-post blob/KV) | authed |
+| `/blog/posts/[postId]/unpublish` | POST | Unpublish a post | authed |
+| `/blog/unsubscribe` | GET | Tokened one-click unsubscribe from notification emails | public |
 
-#### `/api/saveDraft`
-**Method**: POST
-**Purpose**: Save draft state to database
-**Request**:
-```json
-{
-  "tokenId": "abc123",
-  "state": {
-    "inputText": "...",
-    "confirmedFields": {...},
-    "validatedFields": {...},
-    "stepIndex": 3
-  }
-}
-```
-**Auto-save**: Triggered every 2 seconds of inactivity
+## Testimonials
 
-#### `/api/loadDraft`
-**Method**: GET
-**Purpose**: Load saved draft
-**Query**: `?tokenId=abc123`
-**Response**: Complete draft state or 404 if not found
+| Route | Method | Purpose | Auth |
+|-------|--------|---------|------|
+| `/testimonials` | POST | Create testimonial (owner-side) | authed |
+| `/testimonials/[id]` | PATCH / DELETE | Moderate / delete a testimonial | authed |
+| `/testimonials/collect` | POST | Public submit from a collect page | public · RL:form · flag-gated |
+| `/testimonials/collect-link` | POST / PATCH | Create / update a collect link | authed |
+| `/testimonials/apply-to-page` | POST | Feature selected testimonials on a page | authed |
 
-### 4. Publishing
+## Forms, analytics & media
 
-#### `/api/publish`
-**Method**: POST
-**Purpose**: Publish landing page
-**Request**:
-```json
-{
-  "tokenId": "abc123",
-  "slug": "my-product",
-  "pageData": {...}
-}
-```
-**Validation**:
-- Slug uniqueness check
-- Content validation
-- User permissions
+| Route | Method | Purpose | Auth |
+|-------|--------|---------|------|
+| `/forms/submit` | GET / POST | Published-page form submission → stores `FormSubmission`, runs integrations; GET path serves form config | public · POST RL:form |
+| `/analytics/event` | POST | Privacy-first analytics beacon (no raw IP/UA) | public |
+| `/upload-image` | POST | Upload image asset | public |
+| `/upload-video` | POST | Upload video asset | authed |
+| `/proxy-image` | POST | Proxy/fetch a remote image | public |
+| `/images/search` | POST | Stock image search | RL:form |
 
-#### `/api/checkSlug`
-**Method**: POST
-**Purpose**: Check if slug is available
-**Request**:
-```json
-{
-  "slug": "my-product"
-}
-```
-**Response**:
-```json
-{
-  "available": true,
-  "suggestions": ["my-product-1", "my-product-app"]
-}
-```
+## Commerce (Stripe / billing / credits)
 
-### 5. Other Endpoints
+| Route | Method | Purpose | Auth |
+|-------|--------|---------|------|
+| `/stripe/webhooks` | POST | Stripe webhook (updates plan/status, resets credits) | signature-verified |
+| `/stripe/create-checkout-session` | POST | Start checkout | authed |
+| `/stripe/create-portal-session` | POST | Open billing portal | authed |
+| `/billing/plan` | GET | Current plan/tier + limits | authed |
+| `/billing/usage` | GET | Monthly usage | authed |
+| `/credits/balance` | GET | Credit balance | authed |
 
-#### `/api/start`
-**Method**: POST
-**Purpose**: Initialize new project
-**Request**:
-```json
-{
-  "userId": "user_123"
-}
-```
-**Response**: 
-```json
-{
-  "tokenId": "generated_token",
-  "projectId": "project_id"
-}
-```
+## Admin (`requireAdmin`)
 
-#### `/api/subscribe`
-**Method**: POST
-**Purpose**: Newsletter subscription
-**Request**:
-```json
-{
-  "email": "user@example.com"
-}
-```
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/admin/kv` | GET / POST | KV route diagnostics / repair |
+| `/admin/env-check` | GET | Environment sanity check |
+| `/admin/migrate-project` | POST | Copy a project dev→prod |
+| `/admin/transfer-ownership` | POST | Transfer project ownership |
 
-#### `/api/forms/submit`
-**Method**: POST
-**Purpose**: Handle form submissions from published pages
-**Request**:
-```json
-{
-  "formId": "form_123",
-  "data": {...}
-}
-```
+## Related docs
 
-## Error Handling
-
-### Standard Error Response
-```json
-{
-  "success": false,
-  "error": "Error message",
-  "details": "Additional context"
-}
-```
-
-### HTTP Status Codes
-- `200`: Success
-- `400`: Bad Request (invalid input)
-- `401`: Unauthorized
-- `404`: Not Found
-- `429`: Rate Limited
-- `500`: Internal Server Error
-- `503`: Service Unavailable (OpenAI down)
-
-## Rate Limiting
-
-- OpenAI endpoints: 10 requests per minute
-- Draft saves: No limit (but debounced client-side)
-- Publishing: 5 per hour
-
-## Authentication
-
-Most endpoints require a valid `tokenId` that maps to a project. The token is validated against the database.
-
-## Testing with cURL
-
-### Test field inference
-```bash
-curl -X POST http://localhost:3000/api/infer-fields \
-  -H "Content-Type: application/json" \
-  -d '{"input": "SaaS for developers", "includeValidation": true}'
-```
-
-### Test draft loading
-```bash
-curl http://localhost:3000/api/loadDraft?tokenId=your_token_here
-```
-
-### Test slug availability
-```bash
-curl -X POST http://localhost:3000/api/checkSlug \
-  -H "Content-Type: application/json" \
-  -d '{"slug": "my-product"}'
-```
-
-## Common Issues & Solutions
-
-### 1. OpenAI API Errors
-**Issue**: `Request failed with status code 429`
-**Solution**: Rate limited - implement exponential backoff
-
-### 2. JSON Parse Errors
-**Issue**: `Unexpected token in JSON`
-**Solution**: LLM returned malformed JSON - add retry logic
-
-### 3. Timeout Errors
-**Issue**: `Request timeout`
-**Solution**: Increase timeout or reduce payload size
-
-### 4. Token Validation Failed
-**Issue**: `Invalid token`
-**Solution**: Check token exists in database and not expired
-
-### 5. CORS Errors
-**Issue**: `Access-Control-Allow-Origin`
-**Solution**: Check Next.js CORS configuration
-
-## Environment Variables
-
-Required in `.env.local`:
-```
-OPENAI_API_KEY=sk-...
-DATABASE_URL=postgresql://...
-CLERK_SECRET_KEY=sk_...
-```
-
-## Performance Tips
-
-1. **Use streaming** for large content generation
-2. **Implement caching** for repeated requests
-3. **Batch API calls** when possible
-4. **Use database indexes** on tokenId and slug
-5. **Add request queuing** for OpenAI calls
-
-## Monitoring
-
-Log these for debugging:
-- Request/response payloads
-- API latency
-- Error rates
-- Token usage (OpenAI)
-- Database query time
+- Publishing internals: `docs/architecture/publishArch.md`
+- Custom-domain routing: `src/lib/routing/kvRoutes.ts`, `src/middleware.ts`
+- Credit costs: `src/lib/creditSystem.ts` · plans/limits: `src/lib/planManager.ts`
+- Page routes that consume these APIs: `src/app/README.md`

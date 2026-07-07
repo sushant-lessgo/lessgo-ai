@@ -1,3 +1,12 @@
+/**
+ * LandingPageRenderer - the EDIT renderer (client component).
+ *
+ * Runs in the browser: reads sections/content/theme from the Zustand edit store,
+ * renders each section's `.tsx` block with inline-editable (contentEditable) UI,
+ * and wraps output in the template's ThemeInjector. The server-safe counterpart is
+ * LandingPagePublishedRenderer. Keep the two in lockstep — divergence is the #1
+ * "looks right in editor, wrong when published" trap (see README.md).
+ */
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';

@@ -1,6 +1,19 @@
-# MVP Native Forms Implementation
+# Native Forms
 
-This document describes the MVP implementation of native forms for the landing page builder.
+Form builder + renderer for landing pages. Components in this dir:
+`FormBuilder.tsx` (edit-time builder modal), `FormRenderer.tsx` (edit/preview render),
+`FormConnectedButton.tsx` (button → form wiring), `FormPlacementRenderer.tsx`
+(placement/positioning), `InlineFormInput.tsx` (inline field). Published pages render a
+server-safe island (`src/components/published/FormIsland.tsx` / `FormMarkupPublished.tsx`);
+runtime submit is handled by the minified `formHandler.js` → `public/assets/form.v1.js`.
+
+> **Status note:** the "submissions only logged to console" / "SMTP" wording lower in this
+> doc is **stale**. `POST /api/forms/submit` (`withFormRateLimit`, `createSecureResponse`)
+> now **persists `FormSubmission`** via Prisma, runs configured **integrations**
+> (ConvertKit live via `src/lib/integrations/convertkit.ts`, plus a `dashboard` sink and
+> `blogSubscriber` upsert), and sends a **lead-notification email** via
+> `src/lib/email/sendLeadNotification.ts` (env-gated: `RESEND_API_KEY` +
+> `LEAD_NOTIFICATION_EMAIL`). See `src/app/api/README.md`.
 
 ## Overview
 

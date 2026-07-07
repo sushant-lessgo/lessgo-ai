@@ -1,3 +1,10 @@
+// modules/sections/elementDetermination.ts
+// Builds the per-section "elements map" the copy prompt is driven from:
+// getCompleteElementsMap() walks the page's sections+layouts and, via the layout
+// element schema, lists every element (mandatory + all optional) each section can
+// hold. Optional elements are NOT pre-excluded here — the AI decides which to fill
+// at generation time (legacy scored selection removed). Also exposes section-type
+// mapping (sectionList) and content validation helpers.
 import { layoutElementSchema, getLayoutElements } from './layoutElementSchema';
 // AI decides optional elements at generation time (legacy selectOptionalElements removed)
 import { sectionList } from './sectionList';

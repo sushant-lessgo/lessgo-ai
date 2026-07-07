@@ -1,227 +1,94 @@
-# Hooks & State Management Documentation
+# `src/hooks/` — Hooks & State Stores
 
-## Overview
+Custom React hooks plus the Zustand+Immer stores that back onboarding, the
+editor, and the generation flows. The editor's core store now lives in
+`src/stores/` (token-scoped factory + manager); the hooks here either *wrap* that
+store or hold their own independent slices.
 
-This directory contains all custom React hooks and state management stores for Lessgo. The architecture uses a dual-store system that can cause synchronization issues if not properly understood.
+> **See also** `src/stores/README.md` (editStore factory, storeManager,
+> useThemeStore) and `src/hooks/editStore/` (the slice action-creators the
+> factory composes).
 
-## Store Architecture
+---
 
-### Primary Stores
+## Stores
 
-#### 1. useOnboardingStore
-**File**: `useOnboardingStore.ts`
-**Purpose**: Manages the onboarding flow and field confirmation
-**Scope**: `/create/[token]` route primarily, but also used in `/edit/[token]`
+### `useOnboardingStore.ts`
+Global (non-token) Zustand store for the **onboarding field pipeline**: `oneLiner`,
+`confirmedFields` (canonical-name → value/confidence), `validatedFields`
+(`Partial<InputVariables>`), `hiddenInferredFields`, AI features, and
+`forceManualFields`. Feeds validation/market-insights and the edit-time field
+modals. Uses `devtools` (no persist).
 
-```typescript
-// Key state
-{
-  oneLiner: string;
-  confirmedFields: Record<CanonicalFieldName, ConfirmedFieldData>;
-  validatedFields: Partial<InputVariables>;
-  hiddenInferredFields: HiddenInferredFields;
-  featuresFromAI: FeatureItem[];
-  forceManualFields: CanonicalFieldName[];
-}
-```
+### `useEditStoreLegacy.ts` — **the active editor store hook**
+Despite the name, this is the primary editor-state API (~100+ call sites across
+`src/app/edit/`, toolbars, template blocks, renderers). It reads the
+**token-scoped** store instance from `EditProvider` context (see
+`src/stores/editStore.ts`) so callers need no tokenId. Re-exported as
+`useEditStore` (both from this file and from `useEditStoreGlobal.ts`); most call
+sites write `import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy'`.
+`useEditStoreLegacy.getState()` gives static (non-reactive) access to the
+last-mounted store. State surface: sections/layouts/spacing, `content`, multi-page
+`pages`/`currentPageId`/`chrome`, theme + design tokens, UI (selection, toolbars,
+modals), forms/images, meta (audienceType/templateId/variantId/paletteId), and
+persistence/auto-save.
 
-#### 2. useEditStoreLegacy
-**File**: `useEditStoreLegacy.ts`
-**Purpose**: Main editor state management
-**Scope**: `/edit/[token]` route
+### Generation-flow stores (one per route family)
+- `useGenerationStore.ts` — the original `/create` product flow (10 steps incl.
+  vibe / IVOC research / uiblock selection). Onboarding-era; still active.
+- `useProductGenerationStore.ts` — lean **Meridian/Vestria** product onboarding
+  (`/onboarding/product/[token]`): oneLiner → understanding → goal → offer →
+  sitemap (multi-page only) → generating. Also holds imported testimonials and
+  the non-blocking vestria variant/palette/mood picks.
+- `useServiceGenerationStore.ts` — **service** onboarding
+  (`/onboarding/service/[token]`): oneLiner → understanding → goal → offer →
+  assets → style (Hearth palette) → generating → complete.
 
-```typescript
-// Key state
-{
-  sections: string[];
-  content: Record<string, any>;
-  sectionLayouts: Record<string, string>;
-  selectedSection: string | null;
-  selectedElement: ElementSelection | null;
-  theme: ThemeState;
-  autoSave: AutoSaveState;
-}
-```
+All three are plain `create()` + `devtools` + `immer` stores (no persist), keyed
+to their wizard's step array.
 
-### Supporting Stores
+### `useModalManager.ts`
+Field-edit modal orchestration for the editor: a modal queue over
+`CanonicalFieldName`s; bridges `useOnboardingStore` (field values) and the editor
+store (`useEditStoreLegacy`).
 
-#### 3. useModalManager
-**File**: `useModalManager.ts`
-**Purpose**: Orchestrates modal states and field editing
-**Dependencies**: Uses both useOnboardingStore and useEditStoreLegacy
+---
 
-#### 4. usePageGeneration
-**File**: `usePageGeneration.ts`
-**Purpose**: Manages the page generation flow
-**Dependencies**: Bridges onboarding store to edit store
+## Editor helper hooks (consume the token-scoped store)
 
-## Common State Issues & Solutions
+| Hook | Role |
+|------|------|
+| `useEditor.ts` | High-level editor actions/facade |
+| `useAutoSave.ts` | Debounced draft auto-save (`/api/saveDraft`) |
+| `useStatePersistence.ts` | Load/persist wiring around the store |
+| `useContentSerializer.ts` | Serialize editor content for save/publish |
+| `useSectionCRUD.ts` / `useElementCRUD.ts` | Add/remove/reorder sections & elements |
+| `useElementPicker.ts` / `useUniversalElements.ts` | Element insertion + universal-element schema |
+| `useSelectionPriority.ts` / `useSelectionPreserver.ts` | Selection resolution & preservation |
+| `useToolbarPositioning.ts` | Floating-toolbar placement |
+| `useImageToolbar.ts` / `useButtonConfigModal.ts` / `useAdvancedActionsMenu.ts` | Per-widget toolbar/menu state |
+| `useSmartTextColors.ts` | Contrast-aware text color resolution |
+| `useOptimizedEditStore.ts` | Selector-based reads to cut re-renders |
+| `usePerformanceMonitor.ts` | Dev render/timing instrumentation |
+| `useTransitionLock.ts` / `useGlobalAnchor.ts` | Interaction guards / anchor tracking |
 
-### Issue 1: State Not Syncing Between Stores
-**Symptom**: Changes in onboarding store don't reflect in edit store
-**Debug**:
-```javascript
-// Check both stores
-console.log('Onboarding:', useOnboardingStore.getState());
-console.log('Edit:', window.__EDIT_STORE__?.getState());
-```
-**Fix**: Ensure proper data transfer in `usePageGeneration` hook
+## Standalone hooks
+- `useCSRFToken.ts` — fetches/holds the CSRF token for mutating API calls.
+- `useReviewState.ts` — testimonial/review UI state.
+- `useSimplifiedOnboarding.ts` — simplified onboarding helper.
 
-### Issue 2: Field Updates Not Persisting
-**Symptom**: Edited fields revert to original values
-**Debug**:
-```javascript
-// Check field states
-const state = useOnboardingStore.getState();
-console.log('Confirmed:', state.confirmedFields);
-console.log('Validated:', state.validatedFields);
-console.log('Force Manual:', state.forceManualFields);
-```
-**Fix**: Check if field is in `forceManualFields` array
+---
 
-### Issue 3: Store Memory Leaks
-**Symptom**: Performance degradation over time
-**Debug**:
-```javascript
-// Check store subscriptions
-console.log('Active subscriptions:', store.listeners.size);
-```
-**Fix**: Ensure cleanup in useEffect hooks
+## `src/hooks/` vs `src/stores/`
 
-### Issue 4: Auto-save Race Conditions
-**Symptom**: Save status flickering or stuck
-**Debug**:
-```javascript
-// Check auto-save state
-const { autoSave } = useEditStore.getState();
-console.log('Auto-save:', autoSave);
-```
-**Fix**: Check debounce timing in `useAutoSave` hook
+- **`src/stores/`** owns the *editor store engine*: `editStore.ts` (the
+  token-scoped factory — the real Zustand instance), `storeManager.ts` (per-token
+  LRU cache), `useThemeStore.ts` (small landing-preview color store).
+- **`src/hooks/`** owns the *onboarding/generation stores* and every hook that
+  reads/mutates the editor store. `useEditStore.ts` here is the SSR-safe
+  token-aware hook (`useEditStore(tokenId)`); `useEditStoreLegacy.ts` /
+  `useEditStoreGlobal.ts` are the context-based no-token wrappers used everywhere.
 
-## Hook Dependencies Map
-
-```
-usePageGeneration
-  ├── useOnboardingStore
-  └── storeManager (EditStore)
-
-useModalManager
-  ├── useOnboardingStore
-  └── useEditStoreLegacy
-
-useAutoSave
-  └── useEditStoreLegacy
-
-useEditor
-  └── useEditStoreLegacy
-
-useToolbarActions
-  ├── useEditStoreLegacy
-  └── useSelectionPriority
-```
-
-## Debugging Commands
-
-### Store Inspection
-```javascript
-// Get onboarding store state
-useOnboardingStore.getState()
-
-// Get edit store state (if initialized)
-window.__EDIT_STORE__?.getState()
-
-// Reset onboarding store
-useOnboardingStore.getState().reset()
-
-// Check specific field
-useOnboardingStore.getState().validatedFields.marketCategory
-```
-
-### Store Monitoring
-```javascript
-// Subscribe to store changes
-const unsubscribe = useOnboardingStore.subscribe(
-  state => console.log('Store updated:', state)
-);
-
-// Monitor specific field
-const unsubscribe = useOnboardingStore.subscribe(
-  state => state.validatedFields,
-  validatedFields => console.log('Fields updated:', validatedFields)
-);
-```
-
-### Emergency Resets
-```javascript
-// Reset all modal states
-modalEmergencyReset.resetAllModals()
-
-// Clear formatting state
-useEditStore.getState().setFormattingInProgress(false)
-
-// Clear selection
-useEditStore.getState().clearSelection()
-```
-
-## Performance Hooks
-
-### useOptimizedEditStore
-- Uses selectors to minimize re-renders
-- Implement when experiencing performance issues
-
-### usePerformanceMonitor
-- Tracks render counts and timing
-- Enable in development for optimization
-
-## Common Bug Patterns
-
-### 1. Stale Closures
-**Issue**: Callbacks using old state values
-**Solution**: Use `getState()` directly or `useCallback` with proper dependencies
-
-### 2. Subscription Leaks
-**Issue**: Components not unsubscribing
-**Solution**: Always return cleanup function in useEffect
-
-### 3. Infinite Loops
-**Issue**: State updates triggering themselves
-**Solution**: Check effect dependencies and use proper guards
-
-### 4. Race Conditions
-**Issue**: Multiple async operations conflicting
-**Solution**: Use proper async handling and state flags
-
-## Testing Hooks
-
-### Mock Store for Testing
-```javascript
-// Create mock store
-const mockStore = {
-  oneLiner: 'Test product',
-  validatedFields: { marketCategory: 'SaaS' },
-  setOneLiner: jest.fn(),
-  reset: jest.fn()
-};
-
-// Use in tests
-jest.mock('@/hooks/useOnboardingStore', () => ({
-  useOnboardingStore: () => mockStore
-}));
-```
-
-## Best Practices
-
-1. **Always cleanup subscriptions** in useEffect
-2. **Use selectors** to minimize re-renders
-3. **Avoid direct mutations** - always create new objects
-4. **Check for mounted state** before updates
-5. **Use TypeScript** for type safety
-6. **Document complex state flows** with comments
-
-## Migration Path
-
-Currently migrating from:
-- `useEditStore` → `useEditStoreLegacy`
-- Individual stores → Unified store manager
-
-Check for deprecated patterns and update accordingly.
+The "token-scoped" migration is effectively **complete at the store layer** — the
+global store is gone; every editor call resolves to a per-token instance. Only the
+*hook naming* still carries the transitional "Legacy" label.

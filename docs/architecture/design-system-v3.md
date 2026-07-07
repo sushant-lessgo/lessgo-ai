@@ -1,5 +1,18 @@
 # V3 Design System - Implementation Guide
 
+> ⚠️ **Stale (2026-07): whole doc obsolete.** This documents the old *vibe-based
+> background system* (`generateBackgroundSystemForVibe`, `primaryBackgrounds.ts`,
+> `simpleSecondaryBackgrounds.ts`, the divider slot, and `/create/[token]/…/GeneratingStep.tsx`).
+> None of those files/routes still exist: `vibeBackgroundSystem.ts` and
+> `primaryBackgrounds.ts` were deleted, the divider slot was removed, and onboarding
+> moved to `/onboarding/{product,service}/[token]`. The current design system is the
+> **template-token model** described under "Design System v3" in `CLAUDE.md`:
+> per-template `tokens.ts`/`variants.ts`/`palettes.ts` (CSS-variable design tokens,
+> accent trio via `[data-palette]`), self-hosted fonts (`src/styles/fonts-self-hosted.css`),
+> and the legacy 30-palette background system in `src/modules/Design/background/`
+> (`palettes.ts`, `textures.ts`, `backgroundIntegration.ts`). Kept for historical
+> context only — do not follow the steps below.
+
 ## Problem
 
 All generated pages have same gray background + purple accent. Two bugs:

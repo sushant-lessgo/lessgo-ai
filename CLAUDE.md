@@ -167,7 +167,7 @@ When unset/false: prompts/responses are smart-truncated (~800/~1000 chars) but m
 
 ## Documentation (`docs/`)
 
-All project docs live under `docs/` (see `docs/README.md` for the full index):
+All project docs live under `docs/` (see `docs/README.md` for the full index). **Additionally, every major `src/` directory carries an agent-oriented `README.md`** (module purpose, key files, invariants, pitfalls) — read the local README before working in an unfamiliar dir; the full list is in `docs/README.md` under "Code-level READMEs".
 
 - `docs/architecture/` — evergreen references: `publishArch.md`, `pricingSystem.md`, `design-system-v3.md`, `newServiceOnboarding.md`, `phase11aArchitectureGaps.md` (multi-template firewall + dual-renderer notes), `TROUBLESHOOTING.md`, `STRIPE_SETUP.md`.
 - `docs/guides/` — how-to guides. (Two former guides are now skills: manual pre-launch checklist → `/manual-test` (`.claude/skills/manual-test/SKILL.md`); adding a template — clone an existing one — → `/new-template` (`.claude/skills/new-template/SKILL.md`).)

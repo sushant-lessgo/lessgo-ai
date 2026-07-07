@@ -1,3 +1,9 @@
+// Root request middleware: Clerk auth + published-host resolution.
+// - Resolves Lessgo publish subdomains and custom domains to published static HTML
+//   (KV route → /api/blob-proxy fast path; SSR /p/{slug} fallback) and per-host SEO files.
+// - Enforces Clerk auth via auth.protect() on every route NOT in isPublicRoute below.
+// Constraints: runs at the edge (KV via REST only, no Prisma); API/_next always fall
+// through to auth; keep isPublicRoute and the matcher in sync when adding public routes.
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getRouteByKeyEdge, getRedirectEdge, getSlugForHostEdge } from '@/lib/routing/kvRoutes'

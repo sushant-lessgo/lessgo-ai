@@ -7,6 +7,10 @@ import type { UIBlockTheme } from './ColorSystem/uiBlockTheme';
  * across all UIBlocks, adapting to the detected theme (warm/cool/neutral).
  *
  * Theme is detected via tags system (reuses existing shortlistTags).
+ *
+ * Template-agnostic + shared: consumed by UIBlocks on both render paths (unlike
+ * the palette/color pipeline in this dir, which is legacy non-template only).
+ * See src/modules/Design/README.md.
  */
 
 export const shadows = {

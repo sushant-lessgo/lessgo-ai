@@ -1,5 +1,9 @@
-// backgroundIntegration.ts — v3 palette-first background system
-// Position-based section mapping, no per-section config.
+// backgroundIntegration.ts — v3 palette-first background system.
+// Turns a palette + section list into a BackgroundSystem and assigns each
+// section a role (primary/secondary/neutral) by type + position, with no
+// per-section stored config. Serves the LEGACY non-template render path only —
+// template-backed projects theme via their own ThemeInjector and never call
+// this. See src/modules/Design/README.md.
 
 import { type Palette, getDefaultPaletteForVibe, getPaletteById } from './palettes';
 import { accentOptions } from '../ColorSystem/accentOptions';
