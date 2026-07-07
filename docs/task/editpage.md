@@ -11,6 +11,15 @@ Both QA runs predate the 07-07 deploys — several findings already fixed in lat
 - **Regen Copy not undoable** → ph3
 - editpage.md original items: background-settings removed, Inputs panel removed, review→guide+verify shipped
 
+## Status (2026-07-07): ALL 7 BATCHES BUILT on `feature/editpage-fixes` (7 commits, tsc+tests green). Merge = human gate.
+
+Key root causes found during impl (differ from/refine the scouted ones):
+- Corruption engine #1: `InlineTextEditorV2` rendered `{content}` as a React text child of the contentEditable — any mid-edit store write re-rendered formatted DOM as literal HTML text. Now fully uncontrolled (fixes ALL 8 template editables).
+- Corruption engine #2: regenerateSection's merge spread a string element into an object → `{0:'H',1:'e',…,type,content}` — the exact React-#31 crash object (naayom had 2 regens pre-publish). Merge now shape-preserving.
+- Element-card Delete/Duplicate/Style all routed to a V2 STUB (`console.warn`) — dead for every element, not just CTAs. Delete now = exclusion (`aiMetadata.excludedElements`); Duplicate/Style removed (can never work on fixed schema keys); publish strips exclusions for schema-less layouts.
+- First-click regen no-op + regen toast: predates edit-header-actions ph3 (deployed after QA) — verify on prod, likely already fixed.
+- QA cleanup blocked: NO delete path exists for published pages (no publishedPage.delete, projects API GET-only) — `naayomqatest.lessgo.site` needs manual removal or a proper unpublish feature (candidate for Before-Customer-2 list).
+
 ## Remaining — batches (each = one implementer pass, ordered)
 
 ### Batch 1 — P0: Publish hardening (ship-blocker, naayom §H)
