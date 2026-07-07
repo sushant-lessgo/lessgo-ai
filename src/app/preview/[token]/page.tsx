@@ -278,7 +278,10 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
   };
 
   const handlePublish = async () => {
-    if (!customSlug) return;
+    // SlugModal allows a trailing hyphen while typing — trim edges here.
+    const finalSlug = customSlug.replace(/^-+|-+$/g, '');
+    if (!finalSlug) return;
+    if (finalSlug !== customSlug) setCustomSlug(finalSlug);
 
     setPublishing(true);
     setPublishError('');
@@ -337,7 +340,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          slug: customSlug,
+          slug: finalSlug,
           htmlContent,
           title: stripHTMLTags(publishTitle || title || 'Untitled Page'),
           content: {
@@ -372,7 +375,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
 
       // Analytics
       posthog?.capture("publish_clicked", {
-        slug: customSlug,
+        slug: finalSlug,
         title: publishTitle || "",
         fromEdit: true,
       });

@@ -103,11 +103,16 @@ export function SlugModal({
               className="inline mx-1 min-w-0 flex-1"
               value={slug}
               onChange={(e) =>
+                // Keep a trailing hyphen while typing — the old `-+$` strip ran
+                // on every keystroke, so an internal hyphen could never be typed
+                // ("aureon-audio" collapsed to "aureonaudio", QA vestria K4).
+                // The final trim happens on Publish (onConfirm below).
                 onChange(
                   e.target.value
                     .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-+|-+$/g, '')
+                    .replace(/[^a-z0-9-]+/g, '-')
+                    .replace(/-{2,}/g, '-')
+                    .replace(/^-+/, '')
                 )
               }
             />
@@ -158,7 +163,7 @@ export function SlugModal({
           <Button variant="ghost" onClick={onCancel}>
             Cancel
           </Button>
-          <Button onClick={onConfirm} disabled={loading || !slug}>
+          <Button onClick={onConfirm} disabled={loading || !slug.replace(/^-+|-+$/g, '')}>
             {loading
               ? 'Publishing...'
               : existingPublished

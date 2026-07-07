@@ -199,7 +199,17 @@ export default function TechPremiumFooter({ sectionId }: Props) {
       </footer>
 
       {waHref && (
-        <a className="tp-wa-fab" href={waHref} target="_blank" rel="noopener" aria-label="WhatsApp">
+        // Edit/preview only (published pair renders its own FAB): lift above the
+        // app's floating action bar — at the default bottom offset the FAB sat on
+        // top of the preview Publish button (QA: misclicks opened WhatsApp).
+        <a
+          className="tp-wa-fab"
+          style={{ bottom: 'clamp(88px, 12vh, 110px)' }}
+          href={waHref}
+          target="_blank"
+          rel="noopener"
+          aria-label="WhatsApp"
+        >
           <MessageCircle size={24} />
           {blockContent.whatsapp_label && <span className="tp-wa-label">{blockContent.whatsapp_label}</span>}
         </a>
