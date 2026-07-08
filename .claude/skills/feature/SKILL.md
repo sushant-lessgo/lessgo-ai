@@ -22,7 +22,7 @@ your job is coordination + carrying artifacts between agents.
 > suggest the user switch to `/model opus` for the run — subagents pin their own
 > models regardless; only planner/implementer spawns should consume Fable.
 >
-> Fable fallback: planner + implementer pin `model: fable`. If Fable is
+> Fable fallback: planner pin `model: fable`. If Fable is
 > unavailable, spawn those two on Opus instead (`model: opus`) — never block the
 > run waiting on Fable. All other stages already use Opus.
 
