@@ -11,6 +11,8 @@ import {
   SERVICE_GOAL_TO_INTENT,
   LANDING_GOAL_TO_INTENT,
   legacyGoalToBriefGoal,
+  intentToBriefGoal,
+  intentToLegacyGoal,
 } from './bridge';
 import { serviceGoals } from '@/types/service';
 import { landingGoals } from '@/types/generation';
@@ -98,6 +100,7 @@ describe('briefToProductPrefill', () => {
       },
       offer: '14-day trial',
       landingGoal: 'demo',
+      goalIntent: 'request-demo',
     });
   });
 
@@ -107,6 +110,30 @@ describe('briefToProductPrefill', () => {
       'x'
     );
     expect(briefToProductPrefill(brief)?.landingGoal).toBeUndefined();
+  });
+
+  // ─── scale-05 phase 9: intent-first prefill ───
+  it('carries goalIntent verbatim (mapped intent — request-demo)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'saas', goalIntentGuess: 'request-demo' }),
+      'x'
+    );
+    expect(briefToProductPrefill(brief)?.goalIntent).toBe('request-demo');
+  });
+
+  it('carries goalIntent even when the legacy landingGoal is unmapped (book-call)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'saas', goalIntentGuess: 'book-call' }),
+      'x'
+    );
+    const prefill = briefToProductPrefill(brief);
+    expect(prefill?.landingGoal).toBeUndefined();
+    expect(prefill?.goalIntent).toBe('book-call');
+  });
+
+  it('omits goalIntent when the brief has no goal', () => {
+    const brief = buildBriefDraft(makeSignals({ goalIntentGuess: null }), 'x');
+    expect(briefToProductPrefill(brief)?.goalIntent).toBeUndefined();
   });
 });
 
@@ -140,6 +167,7 @@ describe('briefToServicePrefill', () => {
       },
       goal: 'book-call',
       importedTestimonials: ['Great advisor!'],
+      goalIntent: 'book-call',
     });
   });
 
@@ -157,6 +185,25 @@ describe('briefToServicePrefill', () => {
       'x'
     );
     expect(briefToServicePrefill(brief)?.goal).toBeUndefined();
+  });
+
+  // ─── scale-05 phase 9: intent-first prefill ───
+  it('carries goalIntent even when the legacy goal is unmapped (rsvp)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'agency', goalIntentGuess: 'rsvp' }),
+      'x'
+    );
+    const prefill = briefToServicePrefill(brief);
+    expect(prefill?.goal).toBeUndefined();
+    expect(prefill?.goalIntent).toBe('rsvp');
+  });
+
+  it('carries goalIntent verbatim for a mapped intent (book-call)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'consultant', goalIntentGuess: 'book-call' }),
+      'x'
+    );
+    expect(briefToServicePrefill(brief)?.goalIntent).toBe('book-call');
   });
 });
 
@@ -334,5 +381,64 @@ describe('legacyGoalToBriefGoal — end-to-end wizard shape (phase-6 contract)',
     expect(
       BriefSchema.safeParse({ goal: { intent: 'book-call', mechanism: 'M1' } }).success
     ).toBe(true);
+  });
+});
+
+// ─── scale-05 phase 9: intentToLegacyGoal (legacy mirror) ───
+
+describe('intentToLegacyGoal — legacy mirror with per-audience fallback', () => {
+  it('mirrors mapped intents to their legacy product goal', () => {
+    expect(intentToLegacyGoal('signup-free', 'product')).toBe('signup');
+    expect(intentToLegacyGoal('free-trial', 'product')).toBe('free-trial');
+    expect(intentToLegacyGoal('download-app', 'product')).toBe('download');
+    expect(intentToLegacyGoal('buy-via-link', 'product')).toBe('buy');
+    expect(intentToLegacyGoal('request-demo', 'product')).toBe('demo');
+    expect(intentToLegacyGoal('enquiry', 'product')).toBe('enquiry');
+    expect(intentToLegacyGoal('waitlist', 'product')).toBe('waitlist');
+  });
+
+  it('mirrors mapped intents to their legacy service goal', () => {
+    expect(intentToLegacyGoal('book-call', 'service')).toBe('book-call');
+    expect(intentToLegacyGoal('request-quote', 'service')).toBe('request-quote');
+    expect(intentToLegacyGoal('lead-magnet', 'service')).toBe('lead-magnet');
+    expect(intentToLegacyGoal('apply', 'service')).toBe('apply');
+    expect(intentToLegacyGoal('subscribe-newsletter', 'service')).toBe('subscribe-newsletter');
+  });
+
+  it("unmapped intents fall back per audience (product → 'signup', service → 'book-call')", () => {
+    // book-call has no product LandingGoal; rsvp has no service ServiceGoal.
+    expect(intentToLegacyGoal('book-call', 'product')).toBe('signup');
+    expect(intentToLegacyGoal('rsvp', 'product')).toBe('signup');
+    expect(intentToLegacyGoal('rsvp', 'service')).toBe('book-call');
+    expect(intentToLegacyGoal('free-trial', 'service')).toBe('book-call');
+  });
+
+  it('every intent yields a valid legacy goal for BOTH audiences (totality)', () => {
+    for (const intent of goalIntents) {
+      const p = intentToLegacyGoal(intent, 'product');
+      const s = intentToLegacyGoal(intent, 'service');
+      expect(landingGoals).toContain(p);
+      expect(serviceGoals).toContain(s);
+    }
+  });
+});
+
+// ─── scale-05 phase 9: intentToBriefGoal (writeback prefers the real intent) ───
+
+describe('intentToBriefGoal — intent-first writeback', () => {
+  it('composes directly from the intent, matching legacyGoalToBriefGoal for round-trippable goals', () => {
+    expect(intentToBriefGoal('download-app', { links: ['https://play.google.com/x'] }))
+      .toEqual(legacyGoalToBriefGoal('download', { links: ['https://play.google.com/x'] }));
+    expect(intentToBriefGoal('subscribe-newsletter'))
+      .toEqual({ intent: 'subscribe-newsletter', mechanism: 'M1' });
+  });
+
+  it('preserves intents that the legacy mirror would LOSE (book-me → book-call round-trip)', () => {
+    // book-me mirrors to legacy book-call; the reverse map would resolve
+    // book-call, discarding book-me. Intent-first keeps the real intent.
+    const viaIntent = intentToBriefGoal('book-me');
+    expect(viaIntent.intent).toBe('book-me');
+    const legacyMirror = intentToLegacyGoal('book-me', 'service'); // 'book-call'
+    expect(legacyGoalToBriefGoal(legacyMirror).intent).toBe('book-call');
   });
 });

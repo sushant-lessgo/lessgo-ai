@@ -29,8 +29,8 @@ Make the picked goal actually shape the page. Today the goal is a dead wire: the
 - phase 5b (NEW, follow-up, NEEDS PLANNING) form presentation: single-field forms render INLINE in hero/CTA (email+button = the CTA); multi-field forms → dedicated section moved to BOTTOM/near-CTA (not after-hero). User decision 2026-07-08; UX upgrade, not acceptance-blocking. Per-template Hero+CTA block work (both renderers) + shared inline-input component → plan before implementing.
 - phase 6 M2 whatsapp prefill: done (commit dab53e8, review loops 1)
 - phase 7 M3 store-badges shared block: done (commit c33e666, review loops 1) — NB eyeball at P10: badge SVGs hardcoded #000 (may read odd on dark surface)
-- phase 8 M4 follow-strip shared block: done (review loops 1, ship) — inferPlatform export added to goalToDestination.ts (authorized, pure export)
-- phase 9 intent-first wizard goal step: pending
+- phase 8 M4 follow-strip shared block: done (commit a8f34d5, review loops 1) — inferPlatform export added to goalToDestination.ts (authorized, pure export)
+- phase 9 intent-first wizard goal step: done (review loops 2, ship) — HUMAN GATE (UX) pending user sign-off. NB: product GoalStep lacks service's default-select mount effect (latent trap if a skip path is added later)
 - phase 10 acceptance fixtures + parity QA: pending
 
 ---

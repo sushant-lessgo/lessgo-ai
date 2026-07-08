@@ -71,6 +71,7 @@ export default function ServiceOnboardingPage() {
         s.setBusinessName(prefill.businessName);
         s.setUnderstanding(prefill.understanding);
         if (prefill.goal) s.setGoal(prefill.goal);
+        if (prefill.goalIntent) s.setGoalIntent(prefill.goalIntent);
         if (prefill.offer) s.setOffer(prefill.offer);
         if (prefill.importedTestimonials?.length) {
           // ServicePrefill carries plain quote strings; the store expects

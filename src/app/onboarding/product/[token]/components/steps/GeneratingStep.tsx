@@ -33,7 +33,7 @@ import {
 } from '@/modules/generation/multiPageAssembly';
 import type { SitemapPage } from '@/types/product';
 import { isImagesAtBirthEnabled } from '@/lib/generation/flag';
-import { legacyGoalToBriefGoal } from '@/modules/brief/bridge';
+import { legacyGoalToBriefGoal, intentToBriefGoal } from '@/modules/brief/bridge';
 import { seedGoalForm } from '@/modules/goals/seedGoalForm';
 import { injectGoalSections } from '@/modules/goals/injectGoalSections';
 import { injectImagesForPage } from '@/lib/generation/imagesAtBirth';
@@ -112,6 +112,7 @@ export default function GeneratingStep() {
   const oneLiner = useProductGenerationStore((s) => s.oneLiner);
   const understanding = useProductGenerationStore((s) => s.understanding);
   const landingGoal = useProductGenerationStore((s) => s.landingGoal);
+  const goalIntent = useProductGenerationStore((s) => s.goalIntent);
   const goalParam = useProductGenerationStore((s) => s.goalParam);
   const offer = useProductGenerationStore((s) => s.offer);
   const importedTestimonials = useProductGenerationStore((s) => s.importedTestimonials);
@@ -226,9 +227,14 @@ export default function GeneratingStep() {
     // scale-05 phase 4: M1 goals (incl. subscribe-newsletter) auto-seed an
     // on-site form, placed + wired to the CTA. No-op for non-M1 goals or when a
     // form already exists (e.g. the vestria contact form above).
-    const briefGoal = landingGoal
-      ? legacyGoalToBriefGoal(landingGoal, goalParam, { businessName: productName, offer })
-      : null;
+    // scale-05 phase 9: prefer the real captured GoalIntent; fall back to the
+    // legacy reverse-map only when the store carries no goalIntent (e.g. a
+    // resumed run or a pre-phase-9 draft).
+    const briefGoal = goalIntent
+      ? intentToBriefGoal(goalIntent, goalParam, { businessName: productName, offer })
+      : landingGoal
+        ? legacyGoalToBriefGoal(landingGoal, goalParam, { businessName: productName, offer })
+        : null;
     seedGoalForm(finalContent, briefGoal);
 
     // scale-05 phase 7/8: deterministic goal-section injection (M3 download-app
@@ -259,16 +265,27 @@ export default function GeneratingStep() {
     // Only when the store carries a goal — a RESUMED run has a reset store
     // (landingGoal null), so nothing is sent and saveDraft's shallow brief
     // merge leaves the previously persisted Brief.goal untouched.
-    const briefPatch = landingGoal
+    // scale-05 phase 9: prefer the store's real GoalIntent; legacy reverse-map
+    // is the FALLBACK when goalIntent is absent (resumed run / old draft).
+    const briefPatch = goalIntent
       ? {
           brief: {
-            goal: legacyGoalToBriefGoal(landingGoal, goalParam, {
+            goal: intentToBriefGoal(goalIntent, goalParam, {
               businessName: productName,
               offer,
             }),
           },
         }
-      : {};
+      : landingGoal
+        ? {
+            brief: {
+              goal: legacyGoalToBriefGoal(landingGoal, goalParam, {
+                businessName: productName,
+                offer,
+              }),
+            },
+          }
+        : {};
 
     // ─── Explicit template selection wins (checked BEFORE the persona branch) ───
     // ?template=vestria → store.templateId; a vestria run must never be hijacked
@@ -778,6 +795,7 @@ export default function GeneratingStep() {
   }, [
     understanding,
     landingGoal,
+    goalIntent,
     goalParam,
     productName,
     oneLiner,

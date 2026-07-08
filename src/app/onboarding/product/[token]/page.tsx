@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useProductGenerationStore } from '@/hooks/useProductGenerationStore';
 import { isResumableGeneration } from '@/modules/generation/multiPageAssembly';
-import { briefToProductPrefill } from '@/modules/brief/bridge';
+import { briefToProductPrefill, intentToLegacyGoal } from '@/modules/brief/bridge';
 import StepContainer from './components/StepContainer';
 import OneLinerStep from './components/steps/OneLinerStep';
 import UnderstandingStep from './components/steps/UnderstandingStep';
@@ -119,7 +119,19 @@ export default function ProductOnboardingPage() {
         s.setProductName(prefill.productName);
         s.setUnderstanding(prefill.understanding);
         if (prefill.offer) s.setOffer(prefill.offer);
-        if (prefill.landingGoal) s.setLandingGoal(prefill.landingGoal);
+        if (prefill.goalIntent) {
+          s.setGoalIntent(prefill.goalIntent);
+          // Always mirror the legacy enum (design call #4). The AI may guess an
+          // intent product has no INTENT_TO_LANDING_GOAL entry for (e.g.
+          // book-call), so prefill.landingGoal is null; intentToLegacyGoal is
+          // total (→ signup fallback) and keeps GeneratingStep's `landingGoal`
+          // non-null so generation proceeds instead of hard-erroring.
+          s.setLandingGoal(
+            prefill.landingGoal ?? intentToLegacyGoal(prefill.goalIntent, 'product'),
+          );
+        } else if (prefill.landingGoal) {
+          s.setLandingGoal(prefill.landingGoal);
+        }
         goToStep('understanding');
       } catch {
         /* best-effort — wizard starts empty, exactly as today */

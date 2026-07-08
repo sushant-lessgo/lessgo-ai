@@ -367,3 +367,58 @@ Both rendered as two `.lg-badge` anchors in BOTH renderers; published anchors ca
 - `npm run build` — green (published block CSS injected inline via `<style>`, no public/published.css dependency).
 
 **Open risks:** editor-side interactions (drag/reorder/delete of an injected followStrip section) not covered by an automated edit-page test (no such harness in Files-touched); relies on grep-confirmed safe defaults. Onboarding `socialProfiles` fallback is inert until a store field or edit-time caller supplies it (deviation 2).
+
+---
+
+## Phase 9 — Intent-first wizard goal step (unhide + extend)
+
+**Files changed**
+- `src/hooks/useProductGenerationStore.ts` — modified (added `goalIntent` state + `setGoalIntent`, alongside `landingGoal`)
+- `src/hooks/useServiceGenerationStore.ts` — modified (added `goalIntent` state + `setGoalIntent`, alongside `goal`)
+- `src/modules/brief/bridge.ts` — modified (`goalIntent` on both prefills from `brief.goal.intent`; new `intentToLegacyGoal(intent, audience)` legacy-mirror helper with per-audience fallback; new `intentToBriefGoal(intent, param, facts)` intent-first writeback composer that `legacyGoalToBriefGoal` now delegates to)
+- `src/app/onboarding/product/[token]/components/steps/GoalStep.tsx` — REWRITTEN (intent-first: likelyIntents OptionCards + "Other goals" inline expand)
+- `src/app/onboarding/service/[token]/components/steps/GoalStep.tsx` — REWRITTEN (same, OptionCard grid replaces the old custom list)
+- `src/app/onboarding/product/[token]/page.tsx` — modified (hydrate `goalIntent` from prefill)
+- `src/app/onboarding/service/[token]/page.tsx` — modified (hydrate `goalIntent` from prefill)
+- `src/app/onboarding/product/[token]/components/steps/GeneratingStep.tsx` — modified (writeback prefers store `goalIntent` via `intentToBriefGoal`; legacy `legacyGoalToBriefGoal(landingGoal,…)` is FALLBACK)
+- `src/app/onboarding/service/[token]/components/steps/GeneratingStep.tsx` — modified (same)
+- `src/modules/brief/bridge.test.ts` — modified (prefill goalIntent cases; `intentToLegacyGoal` totality + fallback; `intentToBriefGoal` preference/loss-prevention; updated two existing exact-match prefill assertions to include `goalIntent`)
+
+**Per-file change detail**
+- Stores: `goalIntent: GoalIntent | null` (init null) + `setGoalIntent`, added ALONGSIDE the legacy `landingGoal`/`goal` (never replacing them).
+- bridge.ts: `intentToLegacyGoal` reuses the existing `INTENT_TO_SERVICE_GOAL`/`INTENT_TO_LANDING_GOAL` forward maps; unmapped → product `signup`, service `book-call` (overloaded signatures give a precise return type per audience). `intentToBriefGoal` holds the composition body previously inside `legacyGoalToBriefGoal`; the legacy fn now just reverse-maps the enum then delegates — all existing Phase 1/6 composition tests unchanged and green.
+- GoalStep (both): options = `businessTypes[businessTypeKey].likelyIntents` rendered as `OptionCard`s (label from `goalIntentMeta`, local icon + description maps for all 18 intents). Pre-selects the store `goalIntent` (which the page hydrates from prefill = the AI guess). "Other goals" is a plain `useState` inline expand (NO modal) showing the remaining intents; it auto-opens when the pre-selected intent isn't in the likely few. On pick: `setGoalIntent(intent)` + `setLandingGoal/setGoal(intentToLegacyGoal(intent, audience))` (both set) + clears stale `goalParam` on change. `GoalParamFields` (Phase 1) renders unchanged after the pick (download-app dual-URL, subscribe-newsletter renders nothing, etc.). Product keeps auto-advance for param-less intents; service keeps the explicit Continue button + posthog events.
+
+**getServiceFormTemplate / SERVICE_FORM_TEMPLATE_GOALS grep (landmine 1)**
+Re-ran the grep. Only caller of the legacy `getServiceFormTemplate` + `SERVICE_FORM_TEMPLATE_GOALS` is `src/components/forms/FormBuilder.tsx` (:14/:15/:129/:130/:262). `getFormTemplateForIntent` is used by `src/modules/goals/seedGoalForm.ts` (:102) + the formTemplates test. Phase 9 does NOT touch the intent↔legacy form-template maps (`formTemplates.ts` untouched) — it only adds `intentToLegacyGoal`/`intentToBriefGoal`/prefill `goalIntent`. No re-key, so no silent field-drop; the legacy wrapper still covers FormBuilder.
+
+**businessType resolution per audience**
+- Product: `isManufacturerFlow(templateId) ? 'manufacturer' : 'saas'`. (The product store carries no `brief.businessType`, so the "brief-prefilled businessType wins" clause is inert here — see Deviations.)
+- Service: `understanding.serviceType` → businessType via the inverse of bridge's `BUSINESS_TYPE_TO_SERVICE_TYPE` (agency→agency, consultancy→consultant, coaching→coach; freelance/productized/local + undefined → default `agency`).
+
+**Legacy goal mirrored (downstream untouched)**
+Every pick writes BOTH `goalIntent` (real) AND the legacy `landingGoal`/`goal` (via `intentToLegacyGoal`). Copy prompts, form seed, injectors, and any legacy reader keep consuming the legacy enum exactly as before. Legacy enums (`landingGoals`/`serviceGoals`) and `vocabulary.ts` untouched (design call #4).
+
+**Writeback prefers goalIntent, legacy fallback**
+Both GeneratingSteps compose `brief.goal` from `intentToBriefGoal(goalIntent,…)` when the store carries a `goalIntent`, falling back to `legacyGoalToBriefGoal(legacyGoal,…)` only when it's absent (resumed run / pre-Phase-9 draft). Intent-first avoids the lossy legacy round-trip (e.g. `book-me`→`book-call`); a bridge test proves the preservation.
+
+**AI pre-select source**
+`goalIntentGuess` (from `/api/v2/understand` + classify) becomes `brief.goal.intent` in `classify.ts`; `briefTo{Product,Service}Prefill` now expose it as `prefill.goalIntent`; each `page.tsx` hydrates `setGoalIntent(prefill.goalIntent)` on mount; GoalStep pre-selects it. So the AI guess flows Brief → prefill → store → pre-selection; the user can override.
+
+**Verification**
+- `npx tsc --noEmit` — clean.
+- `npm run test:run -- bridge` — 39 tests pass (incl. new Phase 9 cases; two existing exact-match prefill assertions updated for the additive `goalIntent`).
+- `npm run test:e2e -- generation` — ran on `PORT=3020 E2E_PORT=3020` (port 3000 was occupied by a foreign process, so Playwright's spawned `next dev` had to bind a free port). Product pipeline test PASSED; the service pipeline test SKIPPED (auth-gated, expected default in public mock mode). The generation specs are API-driven and do not exercise the GoalStep UI, so they validate that the goal-machinery routes are unaffected, not the new wizard UI itself.
+
+**Post-review fix (blocking regression):** product `page.tsx` prefill hydration set `goalIntent` but only mirrored the legacy `landingGoal` when `prefill.landingGoal` was defined — an AI-guessed intent with no `INTENT_TO_LANDING_GOAL` entry (e.g. `book-call`) left `landingGoal=null` and hard-errored in GeneratingStep. Fixed by always mirroring via `s.setLandingGoal(prefill.landingGoal ?? intentToLegacyGoal(prefill.goalIntent, 'product'))` (total helper → `signup` fallback) whenever `goalIntent` is present, matching the service GoalStep mount-effect defense. Re-verified: `tsc` clean; `bridge generation seedGoalForm injectGoalSections whatsappPrefill` = 109 tests pass.
+
+**Deviations**
+- "brief-prefilled businessType wins" (both audiences) is only partially realized: neither generation store nor the ProductPrefill/ServicePrefill interfaces carry `brief.businessType` today, and plumbing it would require store/prefill fields not in Phase 9's Files-touched. Conservative choice: product resolves via `manufacturerFlow`, service via `serviceType`. The AI's businessType still indirectly drives the pre-selected INTENT (via `goalIntentGuess`), just not the likely-list bucket. Logged rather than expanding scope.
+- Service GoalStep's visual switched from the old bespoke 3-card list to the shared OptionCard grid (required by "rendered via goalIntentMeta labels + the existing OptionCard component"). Intended UX change under the Phase 9 human gate.
+- Added `intentToBriefGoal` to bridge.ts (within Files-touched) as the clean seam for "writeback prefers goalIntent"; `legacyGoalToBriefGoal` delegates to it, so all prior behavior/tests are preserved.
+
+**Open risks / human-gate eyeball**
+- Which intents show FIRST: manufacturer → `enquiry`, `request-quote`; SaaS → `request-demo`, `free-trial`, `signup-free`, `waitlist`; service (agency/consultant/coach) → `book-call` first (+ enquiry/request-quote or lead-magnet/enroll per type).
+- "Other goals" inline expand reveals the remaining intents (full 18 minus the likely few); auto-opens when a pre-selected intent isn't in the likely list.
+- Prefill pre-selection: a scrape-prefilled project should land on the AI-guessed intent already selected (and "Other" auto-open if that guess isn't a likely one).
+- Icons/descriptions for the 18 intents are hand-authored per file — eyeball for tone/accuracy.

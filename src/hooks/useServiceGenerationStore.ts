@@ -16,6 +16,7 @@ import type {
 import { defaultVariantForTemplate } from '@/types/service';
 import type { ScrapedTestimonial } from '@/lib/schemas';
 import type { GoalParamInput } from '@/modules/brief/bridge';
+import type { GoalIntent } from '@/modules/goals/vocabulary';
 
 /**
  * Service generation flow steps
@@ -88,6 +89,10 @@ interface ServiceGenerationState {
 
   // Step 2
   goal: ServiceGoal | null;
+  // Intent-first capture (scale-05 phase 9). The wizard captures a GoalIntent
+  // directly; `goal` is kept ALONGSIDE (mirrored via intentToLegacyGoal) so
+  // every downstream generation path stays untouched.
+  goalIntent: GoalIntent | null;
   // Goal-slot param (scale-05 phase 1) — raw capture; composed into
   // Brief.goal at save via legacyGoalToBriefGoal.
   goalParam: GoalParamInput;
@@ -130,6 +135,7 @@ interface ServiceGenerationActions {
   resetUnderstanding: () => void;
 
   setGoal: (goal: ServiceGoal) => void;
+  setGoalIntent: (intent: GoalIntent) => void;
   setGoalParam: (param: GoalParamInput) => void;
   setOffer: (offer: string) => void;
   setAssets: (assets: ServiceAssetAvailability) => void;
@@ -162,6 +168,7 @@ const initialState: ServiceGenerationState = {
   importSourceUrl: null,
   importedTestimonials: [],
   goal: null,
+  goalIntent: null,
   goalParam: {},
   offer: '',
   assets: null,
@@ -245,6 +252,10 @@ export const useServiceGenerationStore = create<ServiceGenerationStore>()(
       setGoal: (goal) =>
         set((state) => {
           state.goal = goal;
+        }),
+      setGoalIntent: (intent) =>
+        set((state) => {
+          state.goalIntent = intent;
         }),
       setGoalParam: (param) =>
         set((state) => {

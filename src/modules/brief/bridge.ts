@@ -79,6 +79,34 @@ export const LANDING_GOAL_TO_INTENT: Record<LandingGoal, GoalIntent> = {
 };
 
 /**
+ * ===== Forward map (scale-05 phase 9) — GoalIntent → legacy goal =====
+ * The intent-first wizard captures a `GoalIntent` directly, but every
+ * downstream generation path (copy prompts, form seed, injectors, writeback)
+ * still keys on the legacy `ServiceGoal`/`LandingGoal`. This helper mirrors the
+ * picked intent to its legacy enum so the store can persist BOTH — legacy
+ * enums stay alive (design call #4), nothing downstream breaks. Unmapped
+ * intents fall back per audience (product → `signup`, service → `book-call`);
+ * the writeback prefers the real `goalIntent` over this legacy mirror.
+ */
+export function intentToLegacyGoal(
+  intent: GoalIntent,
+  audience: 'product',
+): LandingGoal;
+export function intentToLegacyGoal(
+  intent: GoalIntent,
+  audience: 'service',
+): ServiceGoal;
+export function intentToLegacyGoal(
+  intent: GoalIntent,
+  audience: 'product' | 'service',
+): LandingGoal | ServiceGoal {
+  if (audience === 'service') {
+    return INTENT_TO_SERVICE_GOAL[intent] ?? 'book-call';
+  }
+  return INTENT_TO_LANDING_GOAL[intent] ?? 'signup';
+}
+
+/**
  * Raw goal-slot capture from the wizard (mirrors Brief.goal.param zod shape).
  * Plain type in a plain module so stores, GoalParamFields and GeneratingSteps
  * can all import it without firewall concerns.
@@ -141,7 +169,22 @@ export function legacyGoalToBriefGoal(
   const intent: GoalIntent =
     SERVICE_GOAL_TO_INTENT[legacyGoal as ServiceGoal] ??
     LANDING_GOAL_TO_INTENT[legacyGoal as LandingGoal];
+  return intentToBriefGoal(intent, param, facts);
+}
 
+/**
+ * Intent-first Brief.goal composer (scale-05 phase 9). Same composition rules
+ * as `legacyGoalToBriefGoal` but keyed on the REAL captured `GoalIntent` — the
+ * intent-first wizard prefers this so unmapped/lossy legacy round-trips (e.g.
+ * `book-me`→`book-call`) don't discard the picked intent. `legacyGoalToBriefGoal`
+ * delegates here after reverse-mapping the legacy enum (its FALLBACK path when
+ * the store carries no goalIntent).
+ */
+export function intentToBriefGoal(
+  intent: GoalIntent,
+  param?: GoalParamInput,
+  facts?: WhatsappFacts,
+): BriefGoal {
   // ── Intent-specific branches FIRST ──
   if (intent === 'subscribe-newsletter') {
     // Explicit M1 override — NO param, NO destination (see doc block above).
@@ -222,6 +265,8 @@ export interface ProductPrefill {
   };
   offer?: string;
   landingGoal?: LandingGoal;
+  /** Intent-first prefill (scale-05 phase 9) — raw `brief.goal.intent`. */
+  goalIntent?: GoalIntent;
 }
 
 export interface ServicePrefill {
@@ -238,6 +283,8 @@ export interface ServicePrefill {
   goal?: ServiceGoal;
   offer?: string;
   importedTestimonials?: string[];
+  /** Intent-first prefill (scale-05 phase 9) — raw `brief.goal.intent`. */
+  goalIntent?: GoalIntent;
 }
 
 export function briefToProductPrefill(brief: Brief | null | undefined): ProductPrefill | null {
@@ -245,6 +292,7 @@ export function briefToProductPrefill(brief: Brief | null | undefined): ProductP
   if (!entry) return null;
 
   const landingGoal = brief?.goal ? INTENT_TO_LANDING_GOAL[brief.goal.intent] : undefined;
+  const goalIntent = brief?.goal?.intent;
 
   return {
     oneLiner: entry.oneLiner,
@@ -257,6 +305,7 @@ export function briefToProductPrefill(brief: Brief | null | undefined): ProductP
     },
     ...(entry.offer ? { offer: entry.offer } : {}),
     ...(landingGoal ? { landingGoal } : {}),
+    ...(goalIntent ? { goalIntent } : {}),
   };
 }
 
@@ -265,6 +314,7 @@ export function briefToServicePrefill(brief: Brief | null | undefined): ServiceP
   if (!entry) return null;
 
   const goal = brief?.goal ? INTENT_TO_SERVICE_GOAL[brief.goal.intent] : undefined;
+  const goalIntent = brief?.goal?.intent;
 
   return {
     oneLiner: entry.oneLiner,
@@ -281,5 +331,6 @@ export function briefToServicePrefill(brief: Brief | null | undefined): ServiceP
     ...(goal ? { goal } : {}),
     ...(entry.offer ? { offer: entry.offer } : {}),
     ...(entry.testimonials?.length ? { importedTestimonials: entry.testimonials } : {}),
+    ...(goalIntent ? { goalIntent } : {}),
   };
 }

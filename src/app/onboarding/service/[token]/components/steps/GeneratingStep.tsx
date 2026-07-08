@@ -9,7 +9,7 @@ import ErrorRetry from '@/components/onboarding/shared/ErrorRetry';
 import type { SectionCopy } from '@/types/generation';
 import type { ServiceStrategyOutputAssembled } from '@/types/service';
 import { defaultHearthPalette } from '@/modules/templates/hearth/palettes';
-import { legacyGoalToBriefGoal } from '@/modules/brief/bridge';
+import { legacyGoalToBriefGoal, intentToBriefGoal } from '@/modules/brief/bridge';
 import { seedGoalForm } from '@/modules/goals/seedGoalForm';
 import { injectGoalSections } from '@/modules/goals/injectGoalSections';
 
@@ -36,6 +36,7 @@ export default function GeneratingStep() {
   const businessName = useServiceGenerationStore((s) => s.businessName);
   const understanding = useServiceGenerationStore((s) => s.understanding);
   const goal = useServiceGenerationStore((s) => s.goal);
+  const goalIntent = useServiceGenerationStore((s) => s.goalIntent);
   const goalParam = useServiceGenerationStore((s) => s.goalParam);
   const offer = useServiceGenerationStore((s) => s.offer);
   const assets = useServiceGenerationStore((s) => s.assets);
@@ -120,9 +121,13 @@ export default function GeneratingStep() {
 
     // scale-05 phase 4: M1 goals (incl. subscribe-newsletter) auto-seed an
     // on-site form, placed + wired to the CTA. No-op for non-M1 goals.
-    const briefGoal = goal
-      ? legacyGoalToBriefGoal(goal, goalParam, { businessName, offer })
-      : null;
+    // scale-05 phase 9: prefer the real captured GoalIntent; legacy reverse-map
+    // is the FALLBACK when goalIntent is absent (resumed run / old draft).
+    const briefGoal = goalIntent
+      ? intentToBriefGoal(goalIntent, goalParam, { businessName, offer })
+      : goal
+        ? legacyGoalToBriefGoal(goal, goalParam, { businessName, offer })
+        : null;
     seedGoalForm(finalContent, briefGoal);
 
     // scale-05 phase 7/8: deterministic goal-section injection (M3 download-app
@@ -248,11 +253,14 @@ export default function GeneratingStep() {
           title,
           paletteId: effectivePalette,
           finalContent,
-          // scale-05 phase 1: goal writeback — saveDraft's brief passthrough
+          // scale-05 phase 1/9: goal writeback — saveDraft's brief passthrough
           // shallow-merges this over any existing Brief (goal is guarded
-          // non-null at pipeline start).
+          // non-null at pipeline start). Prefer the real GoalIntent; legacy
+          // reverse-map is the FALLBACK when goalIntent is absent.
           brief: {
-            goal: legacyGoalToBriefGoal(goal, goalParam, { businessName, offer }),
+            goal: goalIntent
+              ? intentToBriefGoal(goalIntent, goalParam, { businessName, offer })
+              : legacyGoalToBriefGoal(goal, goalParam, { businessName, offer }),
           },
         }),
       });
@@ -278,6 +286,7 @@ export default function GeneratingStep() {
   }, [
     understanding,
     goal,
+    goalIntent,
     goalParam,
     assets,
     oneLiner,
