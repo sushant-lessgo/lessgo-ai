@@ -145,11 +145,40 @@ export function WizardFieldInput({
     );
   }
 
-  // free-text (default). boolean/upload fields belong to proof — not rendered here.
+  // free-text (default) + guided-chips (starters seed the same free-text box).
+  // boolean/upload fields belong to proof — not rendered here.
   const value = typeof entry?.value === 'string' ? entry.value : '';
+
+  // guided-chips: tap a starter to SEED the phrase into the editable text box.
+  // Chips are starters, not a locked multi-select — the stored value is the
+  // final free text. Append to any existing text so multiple taps compound.
+  function seedChip(phrase: string) {
+    const current = value.trim();
+    const next = current ? `${current} ${phrase}` : phrase;
+    setFieldValue(field.id, next);
+  }
+
+  const chips = field.input === 'guided-chips' ? field.chips ?? [] : [];
+
   return (
     <div className="space-y-1.5">
       <label className="text-sm font-medium text-gray-800">{copy.label}</label>
+      {chips.length > 0 && (
+        <div className="flex flex-wrap gap-2 pb-0.5">
+          {chips.map((phrase) => (
+            <button
+              key={phrase}
+              type="button"
+              onClick={() => seedChip(phrase)}
+              className="inline-flex items-center px-2 py-0.5 rounded-full bg-orange-50
+                         text-brand-accentPrimary border border-orange-200 text-sm
+                         hover:bg-orange-100 transition-colors duration-200"
+            >
+              {phrase}
+            </button>
+          ))}
+        </div>
+      )}
       <textarea
         value={value}
         onChange={(e) => setFieldValue(field.id, e.target.value)}

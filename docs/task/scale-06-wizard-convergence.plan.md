@@ -14,8 +14,9 @@ Kill the product/service wizard fork. One wizard renderer + one Brief-backed sto
 - phase 2 unified Brief-backed wizard store: done (commit c1c30fe, review loops 1, ship — 18/18 tests, tsc clean)
 - phase 3 wizard shell + entry→wizard handoff + core slots: done (commit 1884447, review loops 1, ship — tsc clean, full suite 1198 green)
 - phase 4 goal/proof/style/structure slots + product proof hard rule: done (commit 619005a, review loops 1, ship — 64/64 tests, tsc clean; WizardShell edited not page.tsx [stale filename])
-- phase 5 shared generation core + GeneratingSlot (thing): done (commit pending-sha, review loops 1, ship — 50/50 tests, tsc clean; PILOT SLICE COMPLETE)
-- phase 6 HUMAN GATE — thing pilot review: pending
+- phase 5 shared generation core + GeneratingSlot (thing): done (commit 27c5811, review loops 1, ship — 50/50 tests, tsc clean; PILOT SLICE COMPLETE)
+- phase 6 HUMAN GATE — thing pilot review: SIGNED OFF by founder. Decisions: differentiator=GUIDED CHIPS (implement now, phase 6b); numbers=require≥1 skippable-with-warning (already built); cosmetic fixes (GeneratingSlot setState) deferred to phase 10.
+- phase 6b differentiator guided chips: done (commit pending-sha, orchestrator spot-verified — all 3 engines' differentiator field [thing differentiator/trust process/work bioStory, all askCandidate:'differentiator' WHY-YOU] now guided-chips; tsc clean, 49 tests)
 - phase 7 scrape convergence (businessType-keyed extraction): pending
 - phase 8 trust engine through unified wizard: pending
 - phase 9 work engine / writer self-serve: pending
@@ -134,10 +135,10 @@ Kill the product/service wizard fork. One wizard renderer + one Brief-backed sto
 - edit `docs/task/scale-06-wizard-convergence.plan.md` (record decisions only)
 
 **Steps (founder checklist, dev server, real LLM)**
-1. URL entry + rich site ⇒ ≤3 questions asked; bare one-liner ⇒ ≤6. (Executable now: confirm → unified wizard handoff landed in phase 3.)
-2. Review-mode confirm-per-slot feels fast; fill-mode complete.
-3. Proof booleans off ⇒ sections absent on generated page (check editor AND publish preview — dual-renderer parity).
-4. Resume mid-wizard works — NET-NEW capability (old entry flow was in-memory; reload = restart). Gets dedicated test coverage in phase 11, not treated as parity.
+1. URL entry + rich site ⇒ ≤3 questions asked; bare one-liner ⇒ ≤6. (Executable now: confirm → unified wizard handoff landed in phase 3.) 1. Gave naayom.com.. wizard had 8 questions but mostly pre-filled. 2. Gave 'A growth marketing agency specializing in helping SaaS startups' it went to onboarding/service path so old wizard 3. Gave 'AI - tool to increase sales' 8 wizards.. few things pre-filled.. looks correct
+2. Review-mode confirm-per-slot feels fast; fill-mode complete. 1. Scrape - mode good info already there.. One confusing that 2 cuttons looks right and continue.. bad ux 2. manual.. partial pre-fill correct
+3. Proof booleans off ⇒ sections absent on generated page (check editor AND publish preview — dual-renderer parity). This shoud be ok. getting too many requests error now. will check later. notblocking
+4. Resume mid-wizard works — NET-NEW capability (old entry flow was in-memory; reload = restart). Gets dedicated test coverage in phase 11, not treated as parity. I restarted at 3/8 but then it wnet banck to 1/8 after refresh
 5. Resolve spec open questions: differentiator free-text vs chips; numbers-ASK skippable — adjust phase-1 defaults if overruled.
 **Do not proceed to phases 7–10 without sign-off.** (Decision gate: pilot proves the slot/waterfall architecture before 3× expansion.)
 

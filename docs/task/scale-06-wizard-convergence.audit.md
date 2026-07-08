@@ -538,3 +538,35 @@ Carry-forward notes (non-blocking):
 - **Phase 6 gate item:** `GeneratingSlot.tsx:162` calls `setGenerationError` during render (anti-pattern; no loop today but may emit "Cannot update while rendering" warning during the pilot demo). Cheap fix = move into an effect; founder decides at gate whether to fix before proceeding.
 - **Before a real manufacturer/vestria run through the unified wizard:** `buildThingInput` (`GeneratingSlot.tsx:51-79`) hardcodes `categories:[]` and omits `valueAdds`/`productCategories`/`industriesServed`/`whatYouMake` — benign for the meridian pilot (adapter remap is proven; a vestria-resolved THING runs SaaS-shaped, no 400; techpremium takes the deterministic path) but must be wired before manufacturer goes live through the wizard.
 - Minor: `thing.test.ts` `CopyRequestMirror.awareness = z.string()` is looser than the route's enum (strategy passed through untouched, low risk).
+
+## Phase 6b — differentiator guided chips
+
+**Files changed**
+- `src/modules/engines/inputContracts.ts` (modified)
+- `src/components/onboarding/wizard/SlotReviewCard.tsx` (modified)
+- `src/modules/engines/inputContracts.test.ts` (modified)
+
+**inputContracts.ts**
+- `ContractField.input` union extended: added `'guided-chips'`.
+- New optional `chips?: readonly string[]` on `ContractField` — starter phrases for a guided-chips field.
+- Three differentiator fields switched `input:'free-text'` → `'guided-chips'` + per-engine `chips`:
+  - thing `differentiator`: Faster to set up · More affordable · Easier to use · More reliable · Better support · The only one that… · Built for a specific niche · All-in-one
+  - trust `process`: More experienced · Specialized in a niche · Faster turnaround · More personal attention · Proven track record · Certified / credentialed · Transparent fixed pricing
+  - work `bioStory`: A distinct voice/style · Award-winning · Published in known outlets · A genre specialist · Bilingual · Decades of craft
+- Design-decision header comment updated (free-text → guided-chips rationale).
+- UNCHANGED: requirement/slot/group/askCandidate/section on all three — input MODE only. Still a single always-ASK differentiator, so ≤6/≤3 acceptance budget unaffected.
+
+**SlotReviewCard.tsx (WizardFieldInput)**
+- Added a `guided-chips` render path: chip starters render as tappable pill buttons ABOVE the existing free-text `<textarea>` (chip styling reused from ChipInput — orange-50 pill, orange-200 border, brand-accentPrimary text).
+- Tapping a chip SEEDS the phrase into the text value via `seedChip()` (appends to existing trimmed text so multiple taps compound). The textarea stays fully editable; stored value is the final free text.
+- `chips`/`free-text`/`chips` paths untouched; guided-chips falls through to the same textarea (chips block only shows when `input==='guided-chips'` and `chips.length>0`). `'use client'` boundary unchanged.
+
+**Phase-1 test assertion updated**
+- `inputContracts.test.ts` "differentiator is a free-text field" → "differentiator is a guided-chips field with non-empty per-engine chip starters": now asserts `input==='guided-chips'` + non-empty `chips` array for thing/trust/work. Safe: semantics unchanged (still one always-ASK converged differentiator candidate); only the input mode changed. No waterfall/acceptance test asserted the input mode.
+
+**Verification**
+- `npx tsc --noEmit` → clean (no output).
+- `npm run test:run -- src/modules/engines src/modules/wizard` → 3 files, 49 tests passed.
+
+**Deviations:** none.
+**Open risks:** none — data + one UI branch, no store/waterfall changes.

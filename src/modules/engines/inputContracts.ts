@@ -15,7 +15,10 @@
 // coreSections.ts invariant).
 //
 // Design decisions baked in (tunable at the phase-6 pilot gate — spec open Qs):
-//   • differentiator  → free-text field (never scrape-inferable → always an ASK).
+//   • differentiator  → GUIDED-CHIPS field (phase-6 gate decision: free text
+//     freezes people). Never scrape-inferable → always an ASK. Chips SEED an
+//     editable free-text box (starters, not a locked multi-select); the stored
+//     value is the final text. Per-engine chip starters live on the field.
 //   • real numbers    → satisfied by ≥1 of outcomes/credentials; modeled OPTIONAL
 //     + `skippableWithWarning` (waterfall DROPS when absent) so a bare one-liner
 //     stays within the ≤6-question acceptance budget while the ProofSlot can
@@ -78,7 +81,13 @@ export interface ContractField {
   /** One of the four converged ASK candidates (spec §8). */
   askCandidate?: AskCandidate;
   /** UI input hint (waterfall-agnostic; slot components consume it). */
-  input?: 'free-text' | 'chips' | 'boolean' | 'upload';
+  input?: 'free-text' | 'chips' | 'guided-chips' | 'boolean' | 'upload';
+  /**
+   * Starter phrases for a `guided-chips` field (differentiator only). Tapping a
+   * chip SEEDS the phrase into an editable free-text box — starters, not a
+   * locked multi-select. The stored value stays the final free text.
+   */
+  chips?: readonly string[];
   /** Numbers field: user may skip (⇒ waterfall DROP) with a trust warning. */
   skippableWithWarning?: boolean;
   /** Safe category-level inference source when no prefill exists. */
@@ -117,7 +126,14 @@ const thingContract: EngineContract = {
     { id: 'oneLiner', group: 'WHAT', slot: 'identity', tier: 'T1', requirement: 'required', prefillKey: 'oneLiner', input: 'free-text' },
     { id: 'audience', group: 'WHO', slot: 'understanding', tier: 'T1', requirement: 'required', prefillKey: 'audiences', input: 'chips' },
     { id: 'capabilities', group: 'WHAT', slot: 'understanding', tier: 'T1', requirement: 'required', prefillKey: 'offerings', section: 'features', input: 'chips' },
-    { id: 'differentiator', group: 'WHY-YOU', slot: 'understanding', tier: 'T1', requirement: 'required', askCandidate: 'differentiator', input: 'free-text' },
+    {
+      id: 'differentiator', group: 'WHY-YOU', slot: 'understanding', tier: 'T1', requirement: 'required',
+      askCandidate: 'differentiator', input: 'guided-chips',
+      chips: [
+        'Faster to set up', 'More affordable', 'Easier to use', 'More reliable',
+        'Better support', 'The only one that…', 'Built for a specific niche', 'All-in-one',
+      ],
+    },
     { id: 'objectionFacts', group: 'WHY-BELIEVE', slot: 'understanding', tier: 'T1', requirement: 'optional', input: 'free-text' },
     { id: 'offer', group: 'WHAT', slot: 'offer', tier: 'T1', requirement: 'required', prefillKey: 'offer', input: 'free-text' },
     { id: 'realNumbers', group: 'WHY-BELIEVE', slot: 'proof', tier: 'T1', requirement: 'optional', prefillKey: 'outcomes', askCandidate: 'real-numbers', skippableWithWarning: true, input: 'chips' },
@@ -138,7 +154,15 @@ const trustContract: EngineContract = {
     { id: 'oneLiner', group: 'WHAT', slot: 'identity', tier: 'T1', requirement: 'required', prefillKey: 'oneLiner', input: 'free-text' },
     { id: 'whoProblem', group: 'WHO', slot: 'understanding', tier: 'T1', requirement: 'required', prefillKey: 'audiences', input: 'chips' },
     { id: 'services', group: 'WHAT', slot: 'understanding', tier: 'T1', requirement: 'required', prefillKey: 'offerings', section: 'services', input: 'chips' },
-    { id: 'process', group: 'WHY-YOU', slot: 'understanding', tier: 'T1', requirement: 'required', askCandidate: 'differentiator', input: 'free-text' },
+    {
+      id: 'process', group: 'WHY-YOU', slot: 'understanding', tier: 'T1', requirement: 'required',
+      askCandidate: 'differentiator', input: 'guided-chips',
+      chips: [
+        'More experienced', 'Specialized in a niche', 'Faster turnaround',
+        'More personal attention', 'Proven track record', 'Certified / credentialed',
+        'Transparent fixed pricing',
+      ],
+    },
     { id: 'offer', group: 'WHAT', slot: 'offer', tier: 'T1', requirement: 'required', prefillKey: 'offer', input: 'free-text' },
     { id: 'packages', group: 'WHAT', slot: 'offer', tier: 'T2', requirement: 'optional', dropTarget: 'packages', section: 'packages', input: 'boolean' },
     { id: 'outcomes', group: 'WHY-BELIEVE', slot: 'proof', tier: 'T1', requirement: 'optional', prefillKey: 'outcomes', askCandidate: 'real-numbers', skippableWithWarning: true, input: 'chips' },
@@ -163,7 +187,14 @@ const workContract: EngineContract = {
     { id: 'whatYouTakeOn', group: 'WHO', slot: 'understanding', tier: 'T1', requirement: 'optional', prefillKey: 'audiences', input: 'chips' },
     { id: 'theWork', group: 'WHAT', slot: 'proof', tier: 'T3', requirement: 'required', prefillKey: 'offerings', section: 'books', wizardArtifact: true, input: 'upload' },
     { id: 'genresStyle', group: 'WHAT', slot: 'understanding', tier: 'T1', requirement: 'required', prefillKey: 'categories', section: 'writing', input: 'chips' },
-    { id: 'bioStory', group: 'WHY-YOU', slot: 'understanding', tier: 'T1', requirement: 'required', section: 'about', askCandidate: 'differentiator', input: 'free-text' },
+    {
+      id: 'bioStory', group: 'WHY-YOU', slot: 'understanding', tier: 'T1', requirement: 'required',
+      section: 'about', askCandidate: 'differentiator', input: 'guided-chips',
+      chips: [
+        'A distinct voice/style', 'Award-winning', 'Published in known outlets',
+        'A genre specialist', 'Bilingual', 'Decades of craft',
+      ],
+    },
     { id: 'achievements', group: 'WHY-BELIEVE', slot: 'proof', tier: 'T1', requirement: 'optional', prefillKey: 'outcomes', askCandidate: 'real-numbers', skippableWithWarning: true, input: 'chips' },
     { id: 'praise', group: 'WHY-BELIEVE', slot: 'proof', tier: 'T2', requirement: 'optional', prefillKey: 'testimonials', dropTarget: 'praise', section: 'praise', askCandidate: 'proof-artifacts', input: 'boolean' },
     { id: 'goal', group: 'ACT', slot: 'goal', tier: 'T1', requirement: 'required', resolver: 'goal', inferFrom: 'businessType-intent', askCandidate: 'goal-param' },

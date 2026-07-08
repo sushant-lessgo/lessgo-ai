@@ -81,10 +81,14 @@ describe('inputContracts — ASK candidates converge', () => {
 });
 
 describe('inputContracts — baked-in defaults', () => {
-  it('differentiator is a free-text field (spec open-Q default)', () => {
+  it('differentiator is a guided-chips field with non-empty per-engine chip starters', () => {
+    // phase-6b: free text froze people → guided chips seed an editable text box.
+    // Semantics unchanged (still a single always-ASK differentiator); input MODE only.
     for (const e of engines) {
       const diff = engineContracts[e].fields.find((f) => f.askCandidate === 'differentiator');
-      expect(diff?.input).toBe('free-text');
+      expect(diff?.input).toBe('guided-chips');
+      expect(Array.isArray(diff?.chips)).toBe(true);
+      expect(diff?.chips?.length ?? 0).toBeGreaterThan(0);
     }
   });
 
