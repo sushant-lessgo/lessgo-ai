@@ -259,8 +259,8 @@ describe('legacyGoalToBriefGoal — mechanism-generic composition', () => {
     expect(goal).toEqual({
       intent: 'enquiry',
       mechanism: 'M2',
-      destination: 'https://wa.me/15551234567',
-      param: { phone: '+1 (555) 123-4567' },
+      destination: "https://wa.me/15551234567?text=Hi%2C%20I%20found%20your%20website%20and%20I'm%20interested.",
+      param: { phone: '+1 (555) 123-4567', message: "Hi, I found your website and I'm interested." },
     });
   });
 

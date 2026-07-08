@@ -12,6 +12,7 @@ import type { GoalIntent, GoalMechanism } from '@/modules/goals/vocabulary';
 import { goalIntentMeta } from '@/modules/goals/vocabulary';
 import type { BusinessTypeKey } from '@/modules/businessTypes/config';
 import { getEntryFacts } from './classify';
+import { buildWhatsappPrefill, type WhatsappFacts } from '@/modules/goals/whatsappPrefill';
 
 /**
  * businessType → ServiceType (plan D3 — persona is dead; SERVE only happens
@@ -104,6 +105,18 @@ function waDigits(phone: string): string {
 }
 
 /**
+ * Compose a wa.me destination from a phone (any format) + optional prefilled
+ * message (scale-05 phase 6). Digits-only number; `?text=` is
+ * encodeURIComponent-encoded. Shared by the M2 writeback below and the edit-page
+ * goal modal's message recomposition — keep the format identical in both.
+ */
+export function composeWhatsappDestination(phone: string, message?: string): string {
+  const base = `https://wa.me/${waDigits(phone)}`;
+  const msg = message?.trim();
+  return msg ? `${base}?text=${encodeURIComponent(msg)}` : base;
+}
+
+/**
  * Legacy wizard goal (+ optional goal-slot param) → Brief.goal (scale-05 phase 1).
  *
  * Composition rules — INTENT-SPECIFIC BRANCHES FIRST, mechanism-generic fallback:
@@ -122,7 +135,8 @@ function waDigits(phone: string): string {
  */
 export function legacyGoalToBriefGoal(
   legacyGoal: ServiceGoal | LandingGoal,
-  param?: GoalParamInput
+  param?: GoalParamInput,
+  facts?: WhatsappFacts,
 ): BriefGoal {
   const intent: GoalIntent =
     SERVICE_GOAL_TO_INTENT[legacyGoal as ServiceGoal] ??
@@ -165,11 +179,16 @@ export function legacyGoalToBriefGoal(
   const email = param?.email?.trim();
   if (mechanisms.includes('M2') && (phone || email)) {
     if (phone) {
+      // scale-05 phase 6: materialize the deterministic WhatsApp prefill into
+      // param.message and compose destination = wa.me/{digits}?text={encoded}.
+      // NO AI — pure string from facts (see whatsappPrefill.ts). Editable later
+      // via the edit-page goal modal (which recomposes ?text= on change).
+      const message = buildWhatsappPrefill(facts);
       return {
         intent,
         mechanism: 'M2',
-        destination: `https://wa.me/${waDigits(phone)}`,
-        param: { phone },
+        destination: composeWhatsappDestination(phone, message),
+        param: { phone, message },
       };
     }
     return { intent, mechanism: 'M2', destination: `mailto:${email}`, param: { email } };

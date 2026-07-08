@@ -89,6 +89,13 @@ export function goalToDestination(
       if (!raw) return undefined;
       const dest = toDestination(raw);
       if (dest === undefined || dest === 'GOAL_REF' || !isDestination(dest)) return undefined;
+      // scale-05 phase 6: enrich a WhatsApp destination that carries no inline
+      // ?text= with the materialized param.message (covers Briefs written by
+      // other paths — e.g. classify — that set param.message but composed a
+      // plain wa.me destination). Additive: never overrides an existing msg.
+      if (dest.kind === 'whatsapp' && dest.msg === undefined && goal.param?.message) {
+        return { dest: { ...dest, msg: goal.param.message } };
+      }
       return { dest };
     }
 

@@ -119,7 +119,9 @@ export default function GeneratingStep() {
 
     // scale-05 phase 4: M1 goals (incl. subscribe-newsletter) auto-seed an
     // on-site form, placed + wired to the CTA. No-op for non-M1 goals.
-    const briefGoal = goal ? legacyGoalToBriefGoal(goal, goalParam) : null;
+    const briefGoal = goal
+      ? legacyGoalToBriefGoal(goal, goalParam, { businessName, offer })
+      : null;
     seedGoalForm(finalContent, briefGoal);
 
     return { finalContent, title };
@@ -235,7 +237,9 @@ export default function GeneratingStep() {
           // scale-05 phase 1: goal writeback — saveDraft's brief passthrough
           // shallow-merges this over any existing Brief (goal is guarded
           // non-null at pipeline start).
-          brief: { goal: legacyGoalToBriefGoal(goal, goalParam) },
+          brief: {
+            goal: legacyGoalToBriefGoal(goal, goalParam, { businessName, offer }),
+          },
         }),
       });
       if (!res.ok) {

@@ -225,7 +225,9 @@ export default function GeneratingStep() {
     // scale-05 phase 4: M1 goals (incl. subscribe-newsletter) auto-seed an
     // on-site form, placed + wired to the CTA. No-op for non-M1 goals or when a
     // form already exists (e.g. the vestria contact form above).
-    const briefGoal = landingGoal ? legacyGoalToBriefGoal(landingGoal, goalParam) : null;
+    const briefGoal = landingGoal
+      ? legacyGoalToBriefGoal(landingGoal, goalParam, { businessName: productName, offer })
+      : null;
     seedGoalForm(finalContent, briefGoal);
 
     return { finalContent };
@@ -244,7 +246,14 @@ export default function GeneratingStep() {
     // (landingGoal null), so nothing is sent and saveDraft's shallow brief
     // merge leaves the previously persisted Brief.goal untouched.
     const briefPatch = landingGoal
-      ? { brief: { goal: legacyGoalToBriefGoal(landingGoal, goalParam) } }
+      ? {
+          brief: {
+            goal: legacyGoalToBriefGoal(landingGoal, goalParam, {
+              businessName: productName,
+              offer,
+            }),
+          },
+        }
       : {};
 
     // ─── Explicit template selection wins (checked BEFORE the persona branch) ───

@@ -72,6 +72,47 @@ describe('goalToDestination', () => {
         goalToDestination(goal({ intent: 'enquiry', mechanism: 'M2' }), { forms: {} }),
       ).toBeUndefined();
     });
+
+    // scale-05 phase 6: enrichment — a plain wa.me destination (no inline
+    // ?text=) + param.message ⇒ attach the message (covers Briefs composed by
+    // other paths, e.g. classify).
+    it('attaches param.message to a plain wa.me destination without inline text', () => {
+      const result = goalToDestination(
+        goal({
+          intent: 'enquiry',
+          mechanism: 'M2',
+          destination: 'https://wa.me/15551234',
+          param: { phone: '15551234', message: 'Hi Acme, interested in X' },
+        }),
+        { forms: {} },
+      );
+      expect(result).toEqual({
+        dest: { kind: 'whatsapp', number: '15551234', msg: 'Hi Acme, interested in X' },
+      });
+    });
+
+    it('does NOT override an inline ?text= msg with param.message', () => {
+      const result = goalToDestination(
+        goal({
+          intent: 'enquiry',
+          mechanism: 'M2',
+          destination: 'https://wa.me/15551234?text=Inline%20wins',
+          param: { phone: '15551234', message: 'param loses' },
+        }),
+        { forms: {} },
+      );
+      expect(result).toEqual({
+        dest: { kind: 'whatsapp', number: '15551234', msg: 'Inline wins' },
+      });
+    });
+
+    it('leaves a plain wa.me destination untouched when no param.message present', () => {
+      const result = goalToDestination(
+        goal({ intent: 'enquiry', mechanism: 'M2', destination: 'https://wa.me/15551234' }),
+        { forms: {} },
+      );
+      expect(result).toEqual({ dest: { kind: 'whatsapp', number: '15551234' } });
+    });
   });
 
   describe('M3 — redirect out', () => {
@@ -145,11 +186,35 @@ describe('goalToDestination', () => {
   // ─── scale-05 phase 1: writeback-COMPOSED destinations resolve (wizard →
   // legacyGoalToBriefGoal → goalToDestination round trip) ───
   describe('composed destinations (legacyGoalToBriefGoal round trip)', () => {
-    it('enquiry + phone param → wa.me destination resolves as whatsapp', () => {
+    it('enquiry + phone param → wa.me destination resolves as whatsapp (phase 6: prefill msg materialized)', () => {
+      // scale-05 phase 6: the writeback now always materializes a deterministic
+      // prefill message. With no facts, the degradation string rides ?text=.
       const g = legacyGoalToBriefGoal('enquiry', { phone: '+91 98765 43210' });
       expect(goalToDestination(g, { forms: {} })).toEqual({
-        dest: { kind: 'whatsapp', number: '919876543210' },
+        dest: {
+          kind: 'whatsapp',
+          number: '919876543210',
+          msg: "Hi, I found your website and I'm interested.",
+        },
       });
+    });
+
+    it('enquiry + phone + facts → prefill template rides the resolved whatsapp msg', () => {
+      const g = legacyGoalToBriefGoal(
+        'enquiry',
+        { phone: '+1 555 123 4567' },
+        { businessName: 'Acme', offer: 'AI landing pages' },
+      );
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: {
+          kind: 'whatsapp',
+          number: '15551234567',
+          msg: 'Hi Acme, I found your website — interested in AI landing pages',
+        },
+      });
+      expect(g.param?.message).toBe(
+        'Hi Acme, I found your website — interested in AI landing pages',
+      );
     });
 
     it('enquiry + email param → mailto destination resolves as email', () => {

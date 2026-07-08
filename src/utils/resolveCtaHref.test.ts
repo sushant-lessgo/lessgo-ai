@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { resolveCtaHref, externalLinkProps, type CtaButtonConfig } from '@/utils/resolveCtaHref';
+import {
+  resolveCtaHref,
+  resolveDestination,
+  externalLinkProps,
+  type CtaButtonConfig,
+} from '@/utils/resolveCtaHref';
 
 // Byte-identical parity net for the scale-04 wrapper rewrite. Each row is the
 // exact output the pre-scale-04 `resolveCtaHref` produced.
@@ -57,6 +62,28 @@ describe('resolveCtaHref — legacy parity', () => {
 
   it('unknown/absent type → fallback', () => {
     expect(resolveCtaHref({} as CtaButtonConfig, forms)).toBe('#cta');
+  });
+});
+
+// scale-05 phase 6: a WhatsApp Destination carrying a prefilled message resolves
+// to wa.me/{digits}?text={encoded}. The message is encodeURIComponent-encoded.
+describe('resolveDestination — whatsapp prefill (phase 6)', () => {
+  it('encodes the prefilled message into ?text=', () => {
+    expect(
+      resolveDestination({
+        kind: 'whatsapp',
+        number: '15551234567',
+        msg: 'Hi Acme, I found your website — interested in AI landing pages',
+      }),
+    ).toBe(
+      'https://wa.me/15551234567?text=Hi%20Acme%2C%20I%20found%20your%20website%20%E2%80%94%20interested%20in%20AI%20landing%20pages',
+    );
+  });
+
+  it('omits ?text= when no message present', () => {
+    expect(resolveDestination({ kind: 'whatsapp', number: '15551234567' })).toBe(
+      'https://wa.me/15551234567',
+    );
   });
 });
 

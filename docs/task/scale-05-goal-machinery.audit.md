@@ -227,3 +227,50 @@ Test assertion on emitted static markup (`renderToStaticMarkup(<LeadFormPublishe
 - Confirm leadForm placement (after hero vs bottom) at the gate.
 - Manual acceptance not yet run: live published-page submit on meridian AND hearth -> `FormSubmission` row + lead email (RESEND env). Recommend running the consultant book-call wizard on both before merge.
 - Neutral styling: eyeball editor<->published parity on meridian/hearth/lex at the gate; the accent button should pick up each palette's `--accent`.
+
+---
+
+## Phase 6 — M2: deterministic WhatsApp prefill
+
+**Files changed**
+- `src/modules/goals/whatsappPrefill.ts` — NEW (pure prefill builder)
+- `src/modules/brief/bridge.ts` — modified (facts arg + `composeWhatsappDestination` export + M2 writeback materialization)
+- `src/app/onboarding/product/[token]/components/steps/GeneratingStep.tsx` — modified (pass facts)
+- `src/app/onboarding/service/[token]/components/steps/GeneratingStep.tsx` — modified (pass facts)
+- `src/modules/goals/goalToDestination.ts` — modified (M2 param.message enrichment)
+- `src/app/edit/[token]/components/modals/LandingGoalsModal.tsx` — modified (WhatsApp message textarea)
+- `src/modules/goals/whatsappPrefill.test.ts` — NEW
+- `src/modules/goals/goalToDestination.test.ts` — modified (extend: attachment + facts cases; updated the enquiry+phone case for new msg behavior)
+- `src/utils/resolveCtaHref.test.ts` — modified (extend: `resolveDestination` whatsapp prefill encode)
+
+**What changed per file**
+- `whatsappPrefill.ts`: `buildWhatsappPrefill(facts) -> string`. Pure, no imports, no AI/network. Reads `facts.businessName` / `facts.offer` (the exact keys `classify.ts` writes onto `EntryFacts` — verified: `EntryFacts.businessName`, `EntryFacts.offer`).
+- `bridge.ts`: `legacyGoalToBriefGoal` gains optional 3rd arg `facts?: WhatsappFacts`. Only the M2 phone branch uses it: sets `param.message = buildWhatsappPrefill(facts)` and `destination = composeWhatsappDestination(phone, message)`. Added exported `composeWhatsappDestination(phone, message)` (digits-only number via existing `waDigits`, `?text=` = `encodeURIComponent(message)`) — shared with the modal so both compose identically. Non-M2 branches untouched.
+- Both GeneratingSteps: pass `{ businessName, offer }` (product: `productName` as businessName) into every `legacyGoalToBriefGoal(...)` call.
+- `goalToDestination.ts`: M2 case — after shim parse, if `dest.kind==='whatsapp' && dest.msg===undefined && goal.param?.message`, attach the message. Additive; never overrides an inline `?text=`.
+- `LandingGoalsModal.tsx`: reads `goal`/`setGoal` from `useEditStoreLegacy()` (full-state hook, no selector). Shows a "Prefilled WhatsApp message" textarea only when `goal.mechanism==='M2'` and the goal is WhatsApp (param.phone OR wa.me destination). On change: `setGoal({...goal, destination: composeWhatsappDestination(number, message), param: {...param, message}})`. `setGoal` marks the store dirty -> standard auto-save round-trips `param.message` + recomposed `destination` into `Project.brief` (persistenceActions save()). Republish reads the persisted Brief, so the new text survives.
+
+**Exact template + degradation strings**
+- both: `Hi {businessName}, I found your website — interested in {offer}` (em dash U+2014)
+- no offer: `Hi {businessName}, I found your website and I'm interested.`
+- no facts / no businessName: `Hi, I found your website and I'm interested.`
+
+**classify.ts fact keys read:** `EntryFacts.businessName`, `EntryFacts.offer`.
+
+**Purity confirmation:** `whatsappPrefill.ts` has zero imports; no AI provider, no network, no randomness. Test asserts deterministic equality across 50 calls.
+
+**Sample output** (businessName="Acme", offer="AI landing pages", phone="+1 555 123 4567"):
+`https://wa.me/15551234567?text=Hi%20Acme%2C%20I%20found%20your%20website%20%E2%80%94%20interested%20in%20AI%20landing%20pages`
+
+**Verification**
+- `npx tsc --noEmit`: clean.
+- `npm run test:run -- whatsappPrefill goalToDestination resolveCtaHref bridge`: 4 files / 73 tests PASS (after bridge.test.ts fix below).
+- UPDATE (authorized scope add): `src/modules/brief/bridge.test.ts` added to Phase 6 scope by orchestrator; applied the one-assertion fix to the `enquiry + phone -> M2` case (destination now `https://wa.me/15551234567?text=Hi%2C%20I%20found%20your%20website%20and%20I'm%20interested.`, param now `{ phone, message: "Hi, I found your website and I'm interested." }`) — matches `legacyGoalToBriefGoal` output (no facts -> generic degradation message). tsc clean; all 73 tests green.
+
+**Deviations**
+- `buildWhatsappPrefill` with an offer but NO businessName falls back to the no-name string (conservative — the "Hi {name}" template needs a name). In-scope edge call, logged here.
+- `composeWhatsappDestination` exported from bridge.ts (small additive helper, not just `legacyGoalToBriefGoal`) so the modal recomposes destinations with byte-identical formatting instead of duplicating the wa.me/encode logic.
+
+**Open risks / blocker**
+- BLOCKER (out-of-scope file): `src/modules/brief/bridge.test.ts` is NOT in Phase 6 Files-touched, but the plan-mandated M2 writeback change (always materialize `param.message`) invalidates its `enquiry + phone -> M2 with composed wa.me destination (digits only)` case (line ~257). That test now must expect `destination: "https://wa.me/15551234567?text=Hi%2C%20I%20found%20your%20website%20and%20I'm%20interested."` (apostrophe stays literal — encodeURIComponent does not escape it) and `param: { phone: '+1 (555) 123-4567', message: "Hi, I found your website and I'm interested." }`. Left UNEDITED per scope rules — orchestrator must add bridge.test.ts to scope or approve the one-assertion update.
+- Modal persistence relies on the edit-store auto-save; not exercised by an automated edit-page test in this phase (no edit-page test harness in Files-touched).
