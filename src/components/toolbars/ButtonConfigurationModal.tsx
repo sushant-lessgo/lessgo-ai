@@ -17,6 +17,9 @@ import * as LucideIcons from 'lucide-react';
 import { getDisabledBehaviorOptions } from '@/utils/formPlacement';
 import { hasPrimaryCTASection } from '@/utils/sectionHelpers';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
+import { toDestination } from '@/utils/destinationShim';
+import { resolveDestination } from '@/utils/resolveCtaHref';
+import type { CTAButton, Destination } from '@/types/destination';
 
 // Some button elements are items inside a collection (pricing/package tiers):
 // their elementKey is `<collection>_cta_<id>` and the visible text lives nested at
@@ -36,6 +39,65 @@ function getCollectionCtaRef(
   if (!Array.isArray(arr)) return null;
   const item = arr.find((it: any) => it?.id === id);
   return item ? { field, id, item } : null;
+}
+
+// scale-04: reverse-map a saved CTAButton (explicit destination) back into the
+// modal's flat ButtonConfig so the form fields prefill on reopen. Icons/inputs
+// ride on the legacy buttonConfig (the new shape doesn't carry them), so we pull
+// those from `legacy` when available.
+function configFromCta(
+  cta: CTAButton,
+  text: string,
+  role: 'primary' | 'secondary',
+  legacy: any,
+): ButtonConfig {
+  const dest = cta.dest as Destination;
+  const base: ButtonConfig = {
+    type: 'link',
+    text,
+    ctaType: role,
+    leadingIcon: legacy?.leadingIcon,
+    trailingIcon: legacy?.trailingIcon,
+    iconConfig: legacy?.iconConfig || { leadingSize: 'md', trailingSize: 'md' },
+  };
+  if (cta.formId && dest?.kind === 'section' && dest.anchor === 'form-section') {
+    return { ...base, type: 'form', formId: cta.formId, behavior: legacy?.behavior || 'scrollTo' };
+  }
+  if (dest?.kind === 'page') {
+    return { ...base, type: 'page', pathSlug: dest.pathSlug };
+  }
+  // external / whatsapp / call / email / social / download → a plain link url.
+  return { ...base, type: 'link', url: dest ? resolveDestination(dest) : '' };
+}
+
+// scale-04: build the new CTAButton write from the modal state. Primary + follow
+// goal ⇒ GOAL_REF. A FORM cta ALWAYS carries `formId` (the pre-pass detects the
+// form case by formId — a form-intent cta without it is mis-mapped to a link).
+// `link-with-input` is NOT representable in the new shape (it carries inputConfig)
+// ⇒ returns undefined so the legacy buttonConfig renders it instead.
+function buildCtaButton(
+  config: ButtonConfig,
+  role: 'primary' | 'secondary',
+  followGoal: boolean,
+): CTAButton | undefined {
+  if (role === 'primary' && followGoal) {
+    return { role: 'primary', dest: 'GOAL_REF' };
+  }
+  switch (config.type) {
+    case 'form':
+      return config.formId
+        ? { role, dest: { kind: 'section', anchor: 'form-section' }, formId: config.formId }
+        : undefined;
+    case 'page':
+      return { role, dest: { kind: 'page', pathSlug: config.pathSlug ?? '' } };
+    case 'link': {
+      const d = toDestination(config.url ?? '');
+      return d && d !== 'GOAL_REF' ? { role, dest: d } : undefined;
+    }
+    case 'link-with-input':
+    default:
+      return undefined;
+  }
 }
 
 interface ButtonConfig {
@@ -83,11 +145,23 @@ export function ButtonConfigurationModal({
   const pageOptions = buildPageLinkOptions(pages);
   const availableForms = getAllForms();
 
+  // scale-04: role is DERIVED from the element key (read-only), never chosen.
+  // `cta_*` ⇒ primary, `secondary_cta_*` ⇒ secondary.
+  const role: 'primary' | 'secondary' =
+    elementSelection?.elementKey && /secondary/i.test(elementSelection.elementKey)
+      ? 'secondary'
+      : 'primary';
+
   const [config, setConfig] = useState<ButtonConfig>({
     type: 'link',
     text: '',
-    ctaType: 'primary', // Default to primary CTA
+    ctaType: role, // mirrors the derived role (kept for downstream compat)
   });
+
+  // scale-04: primary buttons default to following the project goal (GOAL_REF);
+  // "detach" flips this off so the user picks an explicit destination. Secondary
+  // buttons never follow the goal (D14).
+  const [followGoal, setFollowGoal] = useState<boolean>(role === 'primary');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSuccess, setShowSuccess] = useState(false);
@@ -117,15 +191,38 @@ export function ButtonConfigurationModal({
         // URL/form never rehydrated on reopen (#9).
         const savedConfig =
           sectionData.elementMetadata?.[elementSelection.elementKey]?.buttonConfig;
+        // scale-04: the new CTAButton shape (preferred when present).
+        const savedCta: CTAButton | undefined =
+          sectionData.elementMetadata?.[elementSelection.elementKey]?.cta;
 
-        // Seed CTA type from the element key when nothing is saved — defaulting
-        // to 'primary' made every secondary CTA (key `secondary_cta_text`) show
-        // "Primary CTA" selected (QA naayom C4).
-        const inferredCtaType: 'primary' | 'secondary' =
-          elementSelection.elementKey.includes('secondary') ? 'secondary' : 'primary';
+        const inferredCtaType: 'primary' | 'secondary' = role;
 
-        if (savedConfig) {
-          // Load saved configuration
+        if (savedCta && savedCta.dest === 'GOAL_REF') {
+          // Following the project goal — no explicit destination to prefill.
+          setFollowGoal(true);
+          setConfig({
+            type: savedConfig?.type || 'link',
+            text: buttonText,
+            url: savedConfig?.url || '',
+            pageId: savedConfig?.pageId,
+            pathSlug: savedConfig?.pathSlug,
+            formId: savedConfig?.formId || '',
+            behavior: savedConfig?.behavior || 'scrollTo',
+            ctaType: role,
+            leadingIcon: savedConfig?.leadingIcon,
+            trailingIcon: savedConfig?.trailingIcon,
+            iconConfig: savedConfig?.iconConfig || { leadingSize: 'md', trailingSize: 'md' },
+            inputConfig: savedConfig?.inputConfig,
+          });
+          logger.dev('Loaded GOAL_REF cta');
+        } else if (savedCta) {
+          // Explicit destination on the new shape — reverse-map to form fields.
+          setFollowGoal(false);
+          setConfig(configFromCta(savedCta, buttonText, role, savedConfig));
+          logger.dev('Loaded saved cta:', () => savedCta);
+        } else if (savedConfig) {
+          // Legacy buttonConfig — read via the old fields (dual-read for reopen).
+          setFollowGoal(false);
           setConfig({
             type: savedConfig.type || 'link',
             text: buttonText,
@@ -134,14 +231,16 @@ export function ButtonConfigurationModal({
             pathSlug: savedConfig.pathSlug,
             formId: savedConfig.formId || '',
             behavior: savedConfig.behavior || 'scrollTo',
-            ctaType: savedConfig.ctaType || inferredCtaType,
+            ctaType: role,
             leadingIcon: savedConfig.leadingIcon,
             trailingIcon: savedConfig.trailingIcon,
             iconConfig: savedConfig.iconConfig || { leadingSize: 'md', trailingSize: 'md' },
+            inputConfig: savedConfig.inputConfig,
           });
           logger.dev('Loaded saved button config:', () => savedConfig);
         } else {
-          // Default configuration
+          // Fresh: primary follows the goal by default; secondary picks a dest.
+          setFollowGoal(role === 'primary');
           setConfig({
             type: 'link',
             text: buttonText,
@@ -162,25 +261,29 @@ export function ButtonConfigurationModal({
       newErrors.text = 'Button text is required.';
     }
 
-    if (config.type === 'link' && !config.url?.trim()) {
-      newErrors.url = 'URL is required for external link.';
-    }
-
-    if (config.type === 'link-with-input') {
-      if (!config.url?.trim()) {
-        newErrors.url = 'URL is required for link with input.';
+    // scale-04: in goal-follow mode the destination comes from the project goal —
+    // no explicit destination to validate. Validate only when detached/secondary.
+    if (!followGoal) {
+      if (config.type === 'link' && !config.url?.trim()) {
+        newErrors.url = 'URL is required for external link.';
       }
-      if (!config.inputConfig?.queryParamName?.trim()) {
-        newErrors.queryParamName = 'Query parameter name is required.';
+
+      if (config.type === 'link-with-input') {
+        if (!config.url?.trim()) {
+          newErrors.url = 'URL is required for link with input.';
+        }
+        if (!config.inputConfig?.queryParamName?.trim()) {
+          newErrors.queryParamName = 'Query parameter name is required.';
+        }
       }
-    }
 
-    if (config.type === 'form' && !config.formId) {
-      newErrors.form = 'Please select a form or create a new one.';
-    }
+      if (config.type === 'form' && !config.formId) {
+        newErrors.form = 'Please select a form or create a new one.';
+      }
 
-    if (config.type === 'page' && !config.pathSlug?.trim()) {
-      newErrors.page = 'Please choose a page to link to.';
+      if (config.type === 'page' && !config.pathSlug?.trim()) {
+        newErrors.page = 'Please choose a page to link to.';
+      }
     }
 
     setErrors(newErrors);
@@ -257,10 +360,20 @@ export function ButtonConfigurationModal({
           updatedElements.cta_url = config.pathSlug;
         }
 
+        // scale-04: build the new CTAButton write. `cta` is the new shape the
+        // renderer pre-pass consumes; the legacy `buttonConfig` stays alongside
+        // for raw readers (form placement, icons, inputConfig). For a
+        // `link-with-input` (not representable in the new shape) `cta` is omitted
+        // so the pre-pass leaves the legacy buttonConfig — and any stale cta is
+        // dropped by not re-spreading it.
+        const cta = buildCtaButton(config, role, followGoal);
+
         // V2: Store buttonConfig in elementMetadata (separate from element)
         const updatedElementMetadata = {
           ...currentSection.elementMetadata,
-          [elementSelection.elementKey]: { buttonConfig }
+          [elementSelection.elementKey]: cta
+            ? { buttonConfig, cta }
+            : { buttonConfig },
         };
 
         setSection(elementSelection.sectionId, {
@@ -411,33 +524,58 @@ export function ButtonConfigurationModal({
             {errors.text && <p className="text-sm text-red-500 mt-1">{errors.text}</p>}
           </div>
 
-          {/* CTA Type Selection */}
+          {/* CTA Role — DERIVED from the element key, shown read-only (scale-04) */}
           <div>
-            <Label>CTA Type*</Label>
-            <RadioGroup
-              value={config.ctaType || 'primary'}
-              onValueChange={(val) => setConfig(prev => ({ ...prev, ctaType: val as 'primary' | 'secondary' }))}
-            >
-              <div className="flex items-start space-x-2">
-                <RadioGroupItem value="primary" id="cta-primary" />
-                <div>
-                  <Label htmlFor="cta-primary">Primary CTA</Label>
-                  <p className="text-sm text-gray-600">
-                    Main conversion action (e.g., "Get Started", "Sign Up")
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-2 mt-2">
-                <RadioGroupItem value="secondary" id="cta-secondary" />
-                <div>
-                  <Label htmlFor="cta-secondary">Secondary CTA</Label>
-                  <p className="text-sm text-gray-600">
-                    Alternative action (e.g., "Watch Demo", "Learn More")
-                  </p>
-                </div>
-              </div>
-            </RadioGroup>
+            <Label>CTA Role</Label>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium capitalize bg-gray-50">
+                {role} CTA
+              </span>
+              <span className="text-xs text-gray-500">
+                {role === 'primary'
+                  ? 'Main conversion action'
+                  : 'Alternative action'}
+              </span>
+            </div>
           </div>
+
+          {/* Goal-follow state (primary only) — GOAL_REF vs explicit destination */}
+          {role === 'primary' && followGoal && (
+            <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+              <div className="flex items-start gap-2">
+                <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-blue-800">
+                    Follows your project goal
+                  </div>
+                  <p className="mt-1 text-sm text-blue-700">
+                    This button points wherever your project goal points. Change the
+                    goal once and every primary button re-points automatically.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => setFollowGoal(false)}
+                  >
+                    Detach &amp; set a custom destination
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Re-attach control for a detached primary */}
+          {role === 'primary' && !followGoal && (
+            <button
+              type="button"
+              className="text-sm text-blue-600 hover:text-blue-800 underline"
+              onClick={() => setFollowGoal(true)}
+            >
+              ← Follow the project goal instead
+            </button>
+          )}
 
           {/* Icon Configuration */}
           <div className="border rounded-lg p-4 space-y-3 bg-gray-50">
@@ -540,6 +678,8 @@ export function ButtonConfigurationModal({
             </div>
           </div>
 
+          {/* Explicit destination config — hidden while following the goal. */}
+          {!followGoal && (<>
           {/* Button Action Type */}
           <div>
             <Label>Button Action*</Label>
@@ -796,6 +936,7 @@ export function ButtonConfigurationModal({
               </div>
             </div>
           )}
+          </>)}
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">

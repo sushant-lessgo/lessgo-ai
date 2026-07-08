@@ -121,10 +121,15 @@
 
       const ctaText = cta.textContent?.trim() || cta.innerText?.trim() || '';
       const ctaHref = cta.getAttribute('href') || '';
+      const role = cta.getAttribute('data-lessgo-cta-role') || 'primary';
+      const placementEl = cta.closest('[data-surface][id]');
+      const placement = (placementEl && placementEl.id) || 'unknown';
 
       trackEvent('cta_click', {
         ctaText,
         ctaHref,
+        role,
+        placement,
       });
     });
   }

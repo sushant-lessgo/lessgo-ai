@@ -35,10 +35,10 @@ export default function EngravedInvitationCTAPublished(props: EngravedInvitation
           )}
           <div className="lex-cta__actions">
             {props.cta_text && (
-              <a className="lex-btn lex-btn--accent lex-btn--lg" href={ctaHref}>{props.cta_text}</a>
+              <a className="lex-btn lex-btn--accent lex-btn--lg" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">{props.cta_text}</a>
             )}
             {props.secondary_cta_text && (
-              <a className="lex-btn lex-btn--ghost-light lex-btn--lg" href={secondaryHref}>{props.secondary_cta_text}</a>
+              <a className="lex-btn lex-btn--ghost-light lex-btn--lg" href={secondaryHref} data-lessgo-cta="" data-lessgo-cta-role="secondary">{props.secondary_cta_text}</a>
             )}
           </div>
           {props.meta && (

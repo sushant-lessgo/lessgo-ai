@@ -28,10 +28,17 @@ export function makePublishedPrimitives(): VestriaPrimitives {
     </div>
   );
 
-  const Link: React.FC<VestriaLinkProps> = ({ href, className, ariaLabel, children }) => {
+  const Link: React.FC<VestriaLinkProps> = ({ hrefKey, href, className, ariaLabel, children }) => {
     const target = href || '#';
+    // Analytics stamping (scale-04): CTA anchors carry data-lessgo-cta + role so the
+    // beacon fires cta_click. Nav LINK items (hrefKey `nav_items.*`) are NOT stamped.
+    // Role derived from the element key: `secondary_cta*` = secondary, other `*cta*` = primary.
+    const isCta = /cta/i.test(hrefKey) && !/^nav_items/.test(hrefKey);
+    const ctaAttrs = isCta
+      ? { 'data-lessgo-cta': '', 'data-lessgo-cta-role': /secondary_cta/i.test(hrefKey) ? 'secondary' : 'primary' }
+      : {};
     return (
-      <a href={target} className={className} aria-label={ariaLabel} {...externalLinkProps(target)}>
+      <a href={target} className={className} aria-label={ariaLabel} {...externalLinkProps(target)} {...ctaAttrs}>
         {children}
       </a>
     );

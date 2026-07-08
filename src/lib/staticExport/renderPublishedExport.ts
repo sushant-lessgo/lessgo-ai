@@ -3,6 +3,7 @@ import 'server-only';
 import { del } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
 import { generateStaticHTML } from './htmlGenerator';
+import { getPublishedGoal } from './getPublishedGoal';
 import { uploadStaticSite } from './blobUploader';
 import { buildPageMetadata } from './buildPageMetadata';
 import { buildStructuredData, serializeJsonLd, extractLogoUrl } from './structuredData';
@@ -87,6 +88,12 @@ export async function renderPublishedExport(
     contentData.forms = {};
   }
 
+  // scale-04 (phase 3): resolve the project goal ONCE here (self-fetch) so BOTH
+  // callers — normal publish/republish AND the custom-domain go-live republish —
+  // thread it into the renderer's normalization pre-pass with zero caller edits.
+  // Null goal → renderer's legacy GOAL_REF fallback (existing projects unchanged).
+  const goal = await getPublishedGoal(pageId);
+
   const rootMeta = buildPageMetadata({
     slug,
     pageTitle: cleanTitle,
@@ -128,6 +135,7 @@ export async function renderPublishedExport(
     paletteId,
     variantId,
     mood: mood ?? null,
+    goal,
     canonicalDomain,
     canonicalPath: '/',
   });
@@ -213,6 +221,7 @@ export async function renderPublishedExport(
         paletteId,
         variantId,
         mood: mood ?? null,
+        goal,
         canonicalDomain,
         canonicalPath: path,
       });

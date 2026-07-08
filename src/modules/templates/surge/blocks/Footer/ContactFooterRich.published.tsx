@@ -100,7 +100,7 @@ export default function ContactFooterRichPublished(props: ContactFooterRichPubli
       </footer>
 
       {waHref && (
-        <a className="sg-wa-fab" href={waHref} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+        <a className="sg-wa-fab" href={waHref} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" data-lessgo-cta="" data-lessgo-cta-role="primary">
           <WhatsAppIcon />
           {props.whatsapp_label && <span className="sg-wa-label">{props.whatsapp_label}</span>}
         </a>

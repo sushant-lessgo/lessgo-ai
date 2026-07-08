@@ -91,7 +91,9 @@ export interface SectionData {
   // V2: Direct format - elements stored as values directly (string, array, etc.)
   elements: Record<string, any>;
   // V2: Button metadata stored separately (buttonConfig, etc.)
-  elementMetadata?: Record<string, { buttonConfig?: any }>;
+  // scale-04: `cta` is the new-shape CTA (CTAButton); `buttonConfig` stays for
+  // legacy reads. Additive only — the normalization pre-pass bridges cta→buttonConfig.
+  elementMetadata?: Record<string, { buttonConfig?: any; cta?: import('@/types/destination').CTAButton }>;
   backgroundType?: BackgroundType;
   sectionBackground?: SectionBackground;
   media?: SectionMedia;

@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { DraftSaveSchema, sanitizeForLogging } from '@/lib/validation';
+import { BriefSchema } from '@/lib/schemas/brief.schema';
 import { createSecureResponse, assertProjectOwner } from '@/lib/security';
 import { withDraftRateLimit } from '@/lib/rateLimit';
 
@@ -109,8 +110,25 @@ async function saveDraftHandler(req: NextRequest) {
     // 📥 Get existing project to merge content
     const existingProject = await prisma.project.findUnique({
       where: { tokenId },
-      select: { content: true, themeValues: true, title: true }
+      select: { content: true, themeValues: true, title: true, brief: true }
     });
+
+    // scale-04: optional Brief passthrough. DraftSaveSchema strips unknown keys,
+    // so read `brief` from the raw body (same pattern as `baseline` above) and
+    // validate against BriefSchema (partial — every field optional; at minimum
+    // goal + socialProfiles). Invalid shape → skip the brief write, keep the
+    // rest of the draft save (conservative: never fail an autosave over brief).
+    // Valid → shallow-merge over any existing brief so other fields survive.
+    let updatedBrief: any = undefined;
+    if (body.brief !== undefined) {
+      const briefResult = BriefSchema.partial().safeParse(body.brief);
+      if (briefResult.success) {
+        updatedBrief = {
+          ...((existingProject?.brief as Record<string, unknown>) ?? {}),
+          ...briefResult.data,
+        };
+      }
+    }
 
     // 🔄 Merge strategy: preserve existing data, update onboarding
     const existingContent = (existingProject?.content as ProjectContent) || {};
@@ -175,6 +193,7 @@ async function saveDraftHandler(req: NextRequest) {
         paletteId: paletteId ?? null,
         templateId: templateId ?? null,
         variantId: variantId ?? null,
+        brief: updatedBrief as any,
         status: 'draft',
       },
       update: {
@@ -185,6 +204,7 @@ async function saveDraftHandler(req: NextRequest) {
         paletteId: paletteId !== undefined ? paletteId : undefined,
         templateId: templateId !== undefined ? templateId : undefined,
         variantId: variantId !== undefined ? variantId : undefined,
+        brief: updatedBrief !== undefined ? (updatedBrief as any) : undefined,
         updatedAt: new Date(),
       },
     });

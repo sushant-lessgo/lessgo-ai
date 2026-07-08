@@ -11,15 +11,26 @@
 import React from 'react';
 import { useMeridianBlock } from '../../hooks/useMeridianBlock';
 import { MeridianEditable } from '../../components/MeridianEditable';
-import { LinkTargetPopover } from '../../components/LinkTargetPopover';
+import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
+import type { Link } from '@/types/destination';
+import { isLink } from '@/types/destination';
+import { resolveDestination } from '@/utils/resolveCtaHref';
+
+// Dual-read a footer link's target: legacy raw string href passes through verbatim
+// (old pages byte-identical); a new Link object resolves via the dumb resolver.
+function resolveLinkHref(value: string | Link | undefined): string {
+  if (typeof value === 'string') return value || '#';
+  if (isLink(value)) return resolveDestination(value.dest) || '#';
+  return '#';
+}
 
 interface FooterLink {
   id: string;
   label: string;
-  href: string;
+  href: string | Link;
 }
 
 interface FooterColumn {
@@ -98,7 +109,7 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
       return { ...c, links };
     }));
   };
-  const updateLinkHref = (colId: string, linkIdx: number, href: string) => {
+  const updateLinkHref = (colId: string, linkIdx: number, href: string | Link) => {
     setColumns(columns.map((c) => {
       if (c.id !== colId) return c;
       const links = [...(c.links || [])];
@@ -247,10 +258,10 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
                         placeholder="Link"
                       />
                       <LinkTargetPopover
-                        href={link.href}
+                        value={link.href ?? '#'}
                         sectionOptions={sectionOptions}
                         pageOptions={pageOptions}
-                        onChange={(href) => updateLinkHref(col.id, linkIdx, href)}
+                        onChange={(link2) => updateLinkHref(col.id, linkIdx, link2)}
                         triggerClassName="mrd-footer__link-cfg"
                       />
                       {(col.links || []).length > 1 && (
@@ -266,7 +277,7 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
                     </li>
                   ) : (
                     <li key={link.id || linkIdx}>
-                      <a className="mrd-footer__link" href={link.href || '#'}>
+                      <a className="mrd-footer__link" href={resolveLinkHref(link.href)}>
                         {link.label}
                       </a>
                     </li>

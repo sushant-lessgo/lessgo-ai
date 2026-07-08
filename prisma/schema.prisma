@@ -249,6 +249,9 @@ model PageAnalytics {
   topReferrers  Json? // {"google.com": 234, "twitter.com": 156, ...}
   topUtmSources Json? // {"producthunt": 189, "twitter": 145, ...}
 
+  // CTA clicks by section placement + role (scale-04)
+  ctaPlacements Json? // {"hero-xxx": {"primary": 12, "secondary": 3}, ...}
+
   // Device breakdown
   desktopViews Int @default(0)
   mobileViews  Int @default(0)

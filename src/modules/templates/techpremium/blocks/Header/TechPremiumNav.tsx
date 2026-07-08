@@ -9,14 +9,15 @@
 import React from 'react';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
-import { LinkTargetPopover } from '../../components/LinkTargetPopover';
+import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
-import { buildPageLinkOptions } from '@/utils/pageLinks';
+import { buildPageLinkOptions, deriveNavLinks } from '@/utils/pageLinks';
+import type { Link } from '@/types/destination';
 import { NAV_STYLES } from './navStyles';
 
 interface NavChild { id: string; label: string; desc: string; href: string }
-interface NavItem { id: string; label: string; href: string; children?: NavChild[] }
+interface NavItem { id: string; label: string; href: string | Link; children?: NavChild[] }
 interface TechPremiumNavContent {
   logo_text: string; cta_text: string; cta_href: string;
   signin_text: string; signin_url: string; logo_image: string;
@@ -44,12 +45,32 @@ export default function TechPremiumNav({ sectionId }: Props) {
   const edit = mode === 'edit';
   const navItems = blockContent.nav_items || [];
 
-  const { sections, pages } = useEditStore();
+  const { sections, pages, socialMediaConfig, legalPages } = useEditStore();
   const uploadImage = (useEditStore() as any).uploadImage as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
+  const socialOptions = React.useMemo(
+    () => (socialMediaConfig?.items || []).map((s) => ({ value: s.url, label: s.platform })),
+    [socialMediaConfig]
+  );
+  const legalOptions = React.useMemo(
+    () => (legalPages?.privacy ? [{ value: '/privacy', label: 'Privacy Policy' }] : []),
+    [legalPages]
+  );
+
+  // scale-04 (phase 6): seed the nav from the sitemap ONCE when it has no items
+  // yet (fresh multi-page project). Seed-only — hand-edited navs are untouched.
+  const seededNavRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!edit || seededNavRef.current || navItems.length > 0) return;
+    const derived = deriveNavLinks(pages);
+    if (derived.length > 1) {
+      seededNavRef.current = true;
+      handleCollectionUpdate('nav_items', derived);
+    }
+  }, [edit, navItems.length, pages, handleCollectionUpdate]);
 
   const [logoUploading, setLogoUploading] = React.useState(false);
   const [openDrop, setOpenDrop] = React.useState<string | null>(null);
@@ -110,7 +131,7 @@ export default function TechPremiumNav({ sectionId }: Props) {
                     <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey={`nav_items_label_${item.id}`} value={item.label} onSave={(v) => patchItem(item.id, { label: v })} enterBehavior="save" placeholder="Link" />
                     {edit && (
                       <>
-                        <LinkTargetPopover href={item.href} sectionOptions={sectionOptions} pageOptions={pageOptions} onChange={(href) => patchItem(item.id, { href })} triggerClassName="tp-nav-edit-x" />
+                        <LinkTargetPopover value={item.href ?? '#'} sectionOptions={sectionOptions} pageOptions={pageOptions} legalOptions={legalOptions} socialOptions={socialOptions} onChange={(link) => patchItem(item.id, { href: link })} triggerClassName="tp-nav-edit-x" />
                         <button type="button" className="tp-nav-edit-add" onClick={() => { addChild(item.id); setOpenDrop(item.id); }} title="Make dropdown">▾</button>
                         {navItems.length > 2 && <button type="button" className="tp-nav-edit-x" onClick={() => removeItem(item.id)} aria-label="Remove">×</button>}
                       </>

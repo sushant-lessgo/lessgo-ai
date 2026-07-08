@@ -40,10 +40,10 @@ export default function PetalFramedHeroPublished(props: PetalFramedHeroPublished
             <div className="sg-hero__actions">
               <div className="sg-hero__cta-row">
                 {props.cta_text && (
-                  <a className="sg-btn sg-btn--primary" href={ctaHref} {...externalLinkProps(ctaHref)}>{props.cta_text}</a>
+                  <a className="sg-btn sg-btn--primary" href={ctaHref} {...externalLinkProps(ctaHref)} data-lessgo-cta="" data-lessgo-cta-role="primary">{props.cta_text}</a>
                 )}
                 {props.secondary_cta_text && (
-                  <a className="sg-btn sg-btn--ghost" href={secondaryHref} {...externalLinkProps(secondaryHref)}>{props.secondary_cta_text}</a>
+                  <a className="sg-btn sg-btn--ghost" href={secondaryHref} {...externalLinkProps(secondaryHref)} data-lessgo-cta="" data-lessgo-cta-role="secondary">{props.secondary_cta_text}</a>
                 )}
               </div>
               {props.meta && (

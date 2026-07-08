@@ -23,6 +23,10 @@ interface CTAButtonPublishedProps {
   textColor?: string;
   className?: string;
   href?: string;
+  /** Analytics role: 'primary' | 'secondary'. Falls back via cta.role / legacy ctaType. */
+  role?: string;
+  cta?: { role?: string };
+  ctaType?: string;
 }
 
 export function CTAButtonPublished({
@@ -30,8 +34,12 @@ export function CTAButtonPublished({
   backgroundColor,
   textColor,
   className = '',
-  href
+  href,
+  role,
+  cta,
+  ctaType
 }: CTAButtonPublishedProps) {
+  const ctaRole = role || cta?.role || ctaType || 'primary';
   const style = {
     background: backgroundColor,
     color: textColor,
@@ -46,6 +54,7 @@ export function CTAButtonPublished({
         style={style}
         className={baseClasses}
         data-lessgo-cta=""
+        data-lessgo-cta-role={ctaRole}
       >
         {text}
       </a>
@@ -57,6 +66,7 @@ export function CTAButtonPublished({
       style={style}
       className={baseClasses}
       data-lessgo-cta=""
+      data-lessgo-cta-role={ctaRole}
     >
       {text}
     </button>

@@ -9,6 +9,13 @@ export interface MeridianMockEntry {
   sectionType: string;
   layout: string;
   content: Record<string, any>;
+  // scale-04 (phase 8): optional per-element metadata carrying the NEW `cta`
+  // shape (CTAButton). Kept OUTSIDE `content` on purpose so the content-parity
+  // extractor (visibleFields) never treats a `dest`/`GOAL_REF` value as visible
+  // copy. Consumed only by the href-parity assertions (renderParity.meridian
+  // test), which run it through the phase-3 normalizeCtas pre-pass exactly as the
+  // published renderer does. The /dev gallery ignores this field.
+  elementMetadata?: Record<string, any>;
 }
 
 export const MERIDIAN_BLOCK_MOCKS: MeridianMockEntry[] = [
@@ -20,13 +27,24 @@ export const MERIDIAN_BLOCK_MOCKS: MeridianMockEntry[] = [
       signin_text: 'Sign in',
       cta_text: 'Start free',
       logo_image: '',
+      // scale-04 parity cases: n1 = a NEW Link object (source:'manual'); n5 =
+      // a string-legacy internal path; n2 = a string-legacy anchor. Both shapes
+      // must dual-read to the SAME href in edit + published (nav emits real
+      // anchors on both sides).
       nav_items: [
-        { id: 'n1', label: 'Product', href: '#' },
-        { id: 'n2', label: 'Docs', href: '#' },
+        { id: 'n1', label: 'Product', href: { dest: { kind: 'external', url: 'https://docs.meridian.dev' }, source: 'manual' } },
+        { id: 'n2', label: 'Docs', href: '#docs' },
         { id: 'n3', label: 'Customers', href: '#' },
         { id: 'n4', label: 'Changelog', href: '#' },
-        { id: 'n5', label: 'Pricing', href: '#' },
+        { id: 'n5', label: 'Pricing', href: '/pricing' },
       ],
+    },
+    // Header CTA buttons carry the NEW cta shape: primary = explicit external
+    // dest; signin (secondary) = explicit section anchor. Neither is GOAL_REF, so
+    // they resolve independent of the project goal.
+    elementMetadata: {
+      cta_text: { cta: { role: 'primary', dest: { kind: 'external', url: 'https://app.meridian.dev/signup' } } },
+      signin_text: { cta: { role: 'secondary', dest: { kind: 'section', anchor: 'signin' } } },
     },
   },
   {
@@ -124,6 +142,12 @@ export const MERIDIAN_BLOCK_MOCKS: MeridianMockEntry[] = [
       body: "Connect a repo, point it at a domain, stop thinking about it. If you've used git, you've used Meridian.",
       cta_text: 'Start free',
       secondary_cta_text: 'Talk to an engineer',
+    },
+    // Primary CTA = GOAL_REF: it follows the project goal, resolved by the
+    // phase-3 normalizeCtas pre-pass. Secondary = explicit section anchor.
+    elementMetadata: {
+      cta_text: { cta: { role: 'primary', dest: 'GOAL_REF' } },
+      secondary_cta_text: { cta: { role: 'secondary', dest: { kind: 'section', anchor: 'contact' } } },
     },
   },
   {

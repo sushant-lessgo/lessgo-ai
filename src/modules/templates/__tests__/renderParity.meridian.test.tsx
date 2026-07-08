@@ -19,6 +19,11 @@ import { createStore } from 'zustand';
 
 import { MERIDIAN_BLOCK_MOCKS } from '@/app/dev/meridian/blocks/mockContent';
 import { resolveMeridianBlock } from '@/modules/templates/meridian/resolveMeridianBlock';
+import { normalizeCtas } from '@/utils/normalizeCtas';
+import { resolveDestination } from '@/utils/resolveCtaHref';
+import { goalToDestination } from '@/modules/goals/goalToDestination';
+import type { Brief } from '@/types/brief';
+import type { CTAButton } from '@/types/destination';
 
 const h = vi.hoisted(() => ({ store: null as any }));
 
@@ -131,5 +136,126 @@ describe.each(SECTIONS)('meridian $sectionType ($layout) content parity', (s) =>
     const rendered = fields.filter((f) => publishedText.includes(f.text));
     // Guards against the parity test passing vacuously because nothing renders.
     expect(rendered.length).toBeGreaterThanOrEqual(Math.ceil(fields.length * 0.5));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// scale-04 (phase 8) — CTA href parity.
+//
+// The content-parity block above deliberately EXCLUDES href (NON_VISIBLE_KEY).
+// These assertions prove the OTHER half: the published `<a href>` a CTA renders
+// equals `resolveDestination()` of the resolved Destination — i.e. the phase-3
+// normalizeCtas pre-pass + the untouched legacy readers produce the resolver's
+// output byte-for-byte. GOAL_REF primaries resolve from the project goal here;
+// explicit dests resolve directly.
+// ---------------------------------------------------------------------------
+
+// Project goal used to resolve GOAL_REF primaries. M2 direct-channel → WhatsApp,
+// so a GOAL_REF primary must render the wa.me href (the "goal re-points every
+// primary" guarantee, exercised at render).
+const TEST_GOAL: NonNullable<Brief['goal']> = {
+  intent: 'enquiry',
+  mechanism: 'M2',
+  destination: 'https://wa.me/15551234567',
+};
+const TEST_FORMS: Record<string, unknown> = {};
+
+/** Parse an HTML string and collect every anchor with { href, role, isCta }. */
+function anchors(html: string): Array<{ href: string; role: string | null; isCta: boolean; cls: string }> {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return Array.from(div.querySelectorAll('a')).map((a) => ({
+    href: a.getAttribute('href') ?? '',
+    role: a.getAttribute('data-lessgo-cta-role'),
+    isCta: a.hasAttribute('data-lessgo-cta'),
+    cls: a.getAttribute('class') ?? '',
+  }));
+}
+
+/** The href a `cta` should resolve to: GOAL_REF → the goal's dest; else direct. */
+function expectedCtaHref(cta: CTAButton): string {
+  if (cta.dest === 'GOAL_REF') {
+    const gd = goalToDestination(TEST_GOAL, { forms: TEST_FORMS });
+    if (!gd) throw new Error('test goal did not resolve');
+    return resolveDestination(gd.dest);
+  }
+  return resolveDestination(cta.dest);
+}
+
+/** Render a section's PUBLISHED block after running the phase-3 pre-pass over
+ *  its (new-shape) elementMetadata — exactly what the published renderer does. */
+function renderPublishedWithCtas(s: (typeof SECTIONS)[number]): string {
+  const Published = resolveMeridianBlock(s.sectionType, 'published')!;
+  const rawContent: Record<string, any> = {
+    [s.sectionId]: { elementMetadata: s.elementMetadata },
+    forms: TEST_FORMS,
+  };
+  const normalized = normalizeCtas(rawContent, { goal: TEST_GOAL, forms: TEST_FORMS });
+  const meta = normalized[s.sectionId].elementMetadata;
+  return renderToStaticMarkup(
+    <Published sectionId={s.sectionId} {...s.content} content={normalized} elementMetadata={meta} />
+  );
+}
+
+const SECTIONS_WITH_CTA = SECTIONS.filter((s) => s.elementMetadata);
+
+describe.each(SECTIONS_WITH_CTA)('meridian $sectionType CTA href parity', (s) => {
+  // role → the cta a published anchor of that role must resolve to.
+  const byRole: Record<string, CTAButton> = {};
+  for (const entry of Object.values(s.elementMetadata as Record<string, any>)) {
+    const cta: CTAButton | undefined = entry?.cta;
+    if (cta) byRole[cta.role] = cta;
+  }
+
+  it('published CTA anchors carry data-lessgo-cta + role attrs (phase-7 net)', () => {
+    const ctaAnchors = anchors(renderPublishedWithCtas(s)).filter((a) => a.isCta);
+    expect(ctaAnchors.length).toBeGreaterThan(0);
+    for (const a of ctaAnchors) {
+      expect(a.role === 'primary' || a.role === 'secondary').toBe(true);
+    }
+  });
+
+  it('published CTA hrefs equal resolveDestination() of the fixture dest', () => {
+    const ctaAnchors = anchors(renderPublishedWithCtas(s)).filter((a) => a.isCta);
+    for (const a of ctaAnchors) {
+      const cta = a.role ? byRole[a.role] : undefined;
+      if (!cta) continue; // block may render more CTA anchors than the fixture seeds
+      expect(a.href, `${s.sectionType} ${a.role} CTA`).toBe(expectedCtaHref(cta));
+    }
+    // Every seeded role must appear as a resolved anchor (fixture is not dead).
+    const seenRoles = new Set(ctaAnchors.map((a) => a.role));
+    for (const role of Object.keys(byRole)) {
+      expect(seenRoles.has(role), `expected a ${role} CTA anchor`).toBe(true);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Edit↔published href equality — nav LINK items only. The header's nav renders
+// real anchors on BOTH sides (edit in preview mode + published), so a Link
+// object and a legacy string href must dual-read to the SAME href in each.
+// CTA buttons are contentEditable non-anchors in edit by design → NOT compared.
+// ---------------------------------------------------------------------------
+describe('meridian nav link edit↔published href parity', () => {
+  const header = SECTIONS.find((s) => s.sectionType === 'header')!;
+  const navHrefs = (html: string) =>
+    anchors(html)
+      .filter((a) => !a.isCta && /mrd-nav-link/.test(a.cls))
+      .map((a) => a.href);
+
+  it('nav link hrefs match between edit and published', () => {
+    const Edit = resolveMeridianBlock('header', 'edit')!;
+    const Published = resolveMeridianBlock('header', 'published')!;
+    const editHrefs = navHrefs(renderToStaticMarkup(<Edit sectionId={header.sectionId} />));
+    const publishedHrefs = navHrefs(
+      renderToStaticMarkup(<Published sectionId={header.sectionId} {...header.content} />)
+    );
+    expect(editHrefs.length).toBeGreaterThan(0);
+    expect(publishedHrefs).toEqual(editHrefs);
+    // The Link-object nav item resolves to its external url; the string-legacy
+    // items pass through verbatim (proves the dual-read on both sides).
+    expect(publishedHrefs).toContain('https://docs.meridian.dev');
+    expect(publishedHrefs).toContain('/pricing');
+    expect(publishedHrefs).toContain('#docs');
   });
 });

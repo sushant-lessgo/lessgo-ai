@@ -10,7 +10,8 @@ import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { SurgeEditable } from '../../components/SurgeEditable';
-import { LinkTargetPopover } from '../../components/LinkTargetPopover';
+import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { resolveDestination } from '@/utils/resolveCtaHref';
 import { FOOTER_STYLES } from './styles';
 import { DEFAULT_FOOTER_LINKS, type FooterLink } from './footerDefaults';
 
@@ -272,10 +273,10 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
                   {edit && (
                     <>
                       <LinkTargetPopover
-                        href={l.href}
+                        value={l.href}
                         sectionOptions={sectionOptions}
                         pageOptions={pageOptions}
-                        onChange={(href) => patchLink(l.id, { href })}
+                        onChange={(link) => patchLink(l.id, { href: resolveDestination(link.dest) })}
                         triggerClassName="sg-footer__link-cfg"
                       />
                       {footerLinks.length > 1 && (

@@ -32,6 +32,7 @@ import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary'
 import { useFeatureFlags } from '@/utils/featureFlags';
 import { SectionTracker } from '@/app/p/[slug]/components/SectionTracker';
 import { FormPlacementRenderer } from '@/components/forms/FormPlacementRenderer';
+import { normalizeCtas } from '@/utils/normalizeCtas';
 
 import { logger } from '@/lib/logger';
 
@@ -109,7 +110,7 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     sections,
     sectionLayouts,
     theme,
-    content,
+    content: rawContent,
     mode,
     errors,
     getColorTokens,
@@ -119,7 +120,17 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     variantId,
     paletteId,
     themeValues,
+    goal,
+    forms,
   } = storeState;
+
+  // scale-04 (phase 3): run the same normalization pre-pass as the published
+  // renderer so editor/preview buttons point at the resolved goal target. Store
+  // `goal` (hydrated from Brief by loadDraft); null goal → legacy fallback.
+  const content = useMemo(
+    () => normalizeCtas(rawContent, { goal, forms }),
+    [rawContent, goal, forms],
+  );
 
   const usesTemplate = usesTemplateModule(audienceType, templateId);
   const { ready: templateReady, tmpl } = useTemplateModule(audienceType, templateId);

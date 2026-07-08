@@ -40,10 +40,10 @@ export default function ProspectusHeroPublished(props: ProspectusHeroPublishedPr
             <p className="lex-hero__lede" dangerouslySetInnerHTML={{ __html: lede }} />
             <div className="lex-hero__actions">
               {props.cta_text && (
-                <a className="lex-btn lex-btn--primary lex-btn--lg" href={ctaHref}>{props.cta_text}</a>
+                <a className="lex-btn lex-btn--primary lex-btn--lg" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">{props.cta_text}</a>
               )}
               {props.secondary_cta_text && (
-                <a className="lex-btn lex-btn--quiet" href={secondaryHref}>{props.secondary_cta_text}</a>
+                <a className="lex-btn lex-btn--quiet" href={secondaryHref} data-lessgo-cta="" data-lessgo-cta-role="secondary">{props.secondary_cta_text}</a>
               )}
             </div>
           </aside>

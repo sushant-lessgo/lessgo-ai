@@ -47,7 +47,7 @@ export default function LetterheadNavPublished(props: LetterheadNavPublishedProp
           ))}
         </div>
         <div className="lex-nav__right">
-          <a className="lex-nav__cta" href={ctaHref}>{ctaText}</a>
+          <a className="lex-nav__cta" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">{ctaText}</a>
         </div>
       </nav>
     </>

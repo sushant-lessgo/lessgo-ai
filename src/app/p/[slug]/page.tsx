@@ -5,6 +5,7 @@ import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchem
 import { usesTemplateModule, type TemplateId } from '@/types/service';
 import { buildPageMetadata, flattenContent } from '@/lib/staticExport/buildPageMetadata';
 import { buildStructuredData, serializeJsonLd, extractLogoUrl } from '@/lib/staticExport/structuredData';
+import { getPublishedGoal } from '@/lib/staticExport/getPublishedGoal';
 
 // ISR configuration - revalidate every hour
 export const revalidate = 3600;
@@ -163,6 +164,11 @@ export default async function PublishedPage({ params }: PageProps) {
     imageUrl: jsonLdMeta.ogImage,
   });
 
+  // scale-04 (phase 3): resolve the project goal via the shared helper (same as
+  // the blob-bake path) so GOAL_REF primaries resolve on the SSR fallback too and
+  // don't diverge from the baked blob. Null goal → legacy fallback.
+  const goal = await getPublishedGoal(page.id);
+
   return (
     <>
       {jsonLd && (
@@ -187,6 +193,7 @@ export default async function PublishedPage({ params }: PageProps) {
         variantId={page.variantId}
         paletteId={page.paletteId}
         mood={(page.themeValues as any)?.mood ?? null}
+        goal={goal}
       />
     </>
   );

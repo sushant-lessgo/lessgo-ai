@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { GlobalButtonConfigModal } from '@/components/layout/GlobalButtonConfigModal';
 import { ProductsModal } from './ProductsModal';
 import { SeoSettingsModal } from './SeoSettingsModal';
+import { SocialProfilesPanel } from '@/components/editor/SocialProfilesPanel';
 
 // Global state for modals (outside React to persist)
 let modalState = {
@@ -10,6 +11,9 @@ let modalState = {
     isOpen: false,
   },
   seoModal: {
+    isOpen: false,
+  },
+  socialModal: {
     isOpen: false,
   },
 };
@@ -37,6 +41,20 @@ export function hideSeoModal() {
   modalEvents.dispatchEvent(new Event('stateChange'));
 }
 
+// scale-04 (phase 6, D13): site-level social profiles panel. Opened
+// programmatically or via the `lessgo:manage-social` window event (mirrors the
+// firewall-safe `lessgo:manage-products` pattern so a template footer/nav block
+// can request it without importing app code).
+export function showSocialModal() {
+  modalState.socialModal = { isOpen: true };
+  modalEvents.dispatchEvent(new Event('stateChange'));
+}
+
+export function hideSocialModal() {
+  modalState.socialModal = { isOpen: false };
+  modalEvents.dispatchEvent(new Event('stateChange'));
+}
+
 export function GlobalModals() {
   const [state, setState] = useState(modalState);
   
@@ -49,10 +67,17 @@ export function GlobalModals() {
     // Catalog block (a template module) opens the panel via a DOM event to avoid
     // importing app code across the template firewall.
     const openProducts = () => showProductsModal();
-    if (typeof window !== 'undefined') window.addEventListener('lessgo:manage-products', openProducts);
+    const openSocial = () => showSocialModal();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('lessgo:manage-products', openProducts);
+      window.addEventListener('lessgo:manage-social', openSocial);
+    }
     return () => {
       modalEvents.removeEventListener('stateChange', handleStateChange);
-      if (typeof window !== 'undefined') window.removeEventListener('lessgo:manage-products', openProducts);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('lessgo:manage-products', openProducts);
+        window.removeEventListener('lessgo:manage-social', openSocial);
+      }
     };
   }, []);
   
@@ -66,6 +91,9 @@ export function GlobalModals() {
       {state.seoModal.isOpen && (
         <SeoSettingsModal onClose={hideSeoModal} />
       )}
+
+      <SocialProfilesPanel isVisible={state.socialModal.isOpen} onClose={hideSocialModal} />
+
 
       {/* Button Configuration Modal - uses global Zustand state */}
       <GlobalButtonConfigModal />

@@ -36,6 +36,10 @@ export interface StaticHTMLOptions {
   variantId?: string | null;
   /** Neutral mood (vestria) — Project.themeValues.mood; default bone. */
   mood?: string | null;
+  /** scale-04 (phase 3): the project's Brief.goal, threaded into the renderer's
+   *  normalization pre-pass so GOAL_REF primaries resolve. OPTIONAL — blog/no-goal
+   *  callers omit it → null-goal legacy fallback. */
+  goal?: import('@/types/brief').Brief['goal'] | null;
 
   // Canonical / social URL resolution.
   // canonicalDomain: the live custom domain (no scheme) when one is active; when unset,
@@ -99,6 +103,7 @@ export async function generateStaticHTML(
       paletteId: options.paletteId ?? null,
       variantId: options.variantId ?? null,
       mood: options.mood ?? null,
+      goal: options.goal ?? null,
     })
   );
 

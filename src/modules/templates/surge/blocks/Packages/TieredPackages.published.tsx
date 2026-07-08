@@ -63,6 +63,8 @@ export default function TieredPackagesPublished(props: TieredPackagesPublishedPr
                       href={pkgHref}
                       {...externalLinkProps(pkgHref)}
                       className={`sg-btn ${p.is_featured ? 'sg-btn--primary' : 'sg-btn--soft'} sg-pkg__cta`}
+                      data-lessgo-cta=""
+                      data-lessgo-cta-role="primary"
                     >
                       {p.cta_text}
                     </a>

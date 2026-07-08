@@ -69,6 +69,8 @@ export default function TieredPackagesPublished(props: TieredPackagesPublishedPr
                   <a
                     href={resolveCtaHref(md?.[`packages_cta_${p.id}`]?.buttonConfig, forms, '#cta')}
                     className={`hearth-btn ${p.is_featured ? 'hearth-btn--primary-inverse' : 'hearth-btn--ghost'} hearth-pkg__cta`}
+                    data-lessgo-cta=""
+                    data-lessgo-cta-role="primary"
                   >
                     {p.cta_text}
                   </a>

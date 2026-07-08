@@ -59,7 +59,7 @@ export default function ThreeTierPricingPublished(props: ThreeTierPricingPublish
                 )}
                 {t.cta_text && (
                   <div className="mrd-price-card__cta-row">
-                    <a href={resolveCtaHref(md?.[`tiers_cta_${t.id}`]?.buttonConfig, forms, '#cta')} className={`mrd-btn ${t.featured ? 'mrd-btn--primary' : 'mrd-btn--ghost'} mrd-btn--arrow mrd-price-card__cta`}>
+                    <a href={resolveCtaHref(md?.[`tiers_cta_${t.id}`]?.buttonConfig, forms, '#cta')} className={`mrd-btn ${t.featured ? 'mrd-btn--primary' : 'mrd-btn--ghost'} mrd-btn--arrow mrd-price-card__cta`} data-lessgo-cta="" data-lessgo-cta-role="primary">
                       {t.cta_text}
                     </a>
                   </div>

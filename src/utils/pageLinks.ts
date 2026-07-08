@@ -4,6 +4,7 @@
 // works natively in published HTML — middleware routes it; no rewriting needed.
 
 import type { ProjectPageEntry } from '@/types/store';
+import type { Link } from '@/types/destination';
 
 export interface PageLinkOption {
   value: string; // pathSlug, e.g. '/contact'
@@ -25,4 +26,31 @@ export function buildPageLinkOptions(
       value: p.pathSlug,
       label: p.pathSlug === '/' ? p.title || 'Home' : p.title || p.pathSlug,
     }));
+}
+
+/** A nav item derived from the sitemap. `href` is a derived Link (page dest). */
+export interface DerivedNavItem {
+  id: string;
+  label: string;
+  href: Link;
+}
+
+/**
+ * scale-04 (phase 6): build nav items from the project's sitemap. Each page
+ * becomes a derived `Link` (page destination, `source: 'derived'`) so it is
+ * explicitly a sitemap-derived link — never goal-referencing, never moved by a
+ * goal change. Headers use this ONLY to SEED an empty nav (see the seed effect
+ * in each nav header); it is not a live sync — hand-edited navs are untouched.
+ */
+export function deriveNavLinks(
+  pages: Record<string, ProjectPageEntry> | undefined,
+): DerivedNavItem[] {
+  return buildPageLinkOptions(pages).map((opt) => {
+    const slug = opt.value.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '');
+    return {
+      id: `nav-page-${slug || 'home'}`,
+      label: opt.label,
+      href: { dest: { kind: 'page', pathSlug: opt.value }, source: 'derived' },
+    };
+  });
 }

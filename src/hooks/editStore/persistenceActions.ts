@@ -7,6 +7,60 @@ import { logger } from '@/lib/logger';
 
 const deepClone = <T>(v: T): T => JSON.parse(JSON.stringify(v ?? null));
 
+// ---------------------------------------------------------------------------
+// scale-04 (phase 6) — Brief.socialProfiles ({platform,url}[]) ↔ editor
+// SocialMediaConfig ({items:{id,platform,url,icon,order}[]}) bridge.
+// Load: seed the config from Brief when the editor has none (scrape-prefilled
+// profiles only live in Brief). Save: derive the Brief shape from the config so
+// panel edits round-trip into Project.brief.
+// ---------------------------------------------------------------------------
+type SocialProfile = { platform: string; url: string };
+
+const SOCIAL_ICON_BY_PLATFORM: Record<string, string> = {
+  twitter: 'FaTwitter',
+  x: 'FaTwitter',
+  'twitter/x': 'FaTwitter',
+  linkedin: 'FaLinkedin',
+  github: 'FaGithub',
+  facebook: 'FaFacebook',
+  instagram: 'FaInstagram',
+  youtube: 'FaYoutube',
+  tiktok: 'FaTiktok',
+  discord: 'FaDiscord',
+  medium: 'FaMedium',
+  dribbble: 'FaDribbble',
+};
+
+function iconForPlatform(platform: string): string {
+  return SOCIAL_ICON_BY_PLATFORM[(platform || '').trim().toLowerCase()] || 'FaGlobe';
+}
+
+function socialConfigFromProfiles(profiles: SocialProfile[]) {
+  return {
+    items: profiles
+      .filter((p) => p && p.url)
+      .map((p, i) => ({
+        id: `social-brief-${i}`,
+        platform: p.platform,
+        url: p.url,
+        icon: iconForPlatform(p.platform),
+        order: i,
+      })),
+    maxItems: 8,
+    lastUpdated: Date.now(),
+  };
+}
+
+function socialProfilesFromConfig(
+  cfg: { items?: Array<{ platform: string; url: string }> } | undefined,
+): SocialProfile[] | undefined {
+  if (!cfg?.items?.length) return undefined;
+  const out = cfg.items
+    .filter((i) => i && i.url)
+    .map((i) => ({ platform: i.platform, url: i.url }));
+  return out.length ? out : undefined;
+}
+
 /**
  * Hydration core shared by loadFromDraft AND resetToGenerated (header Reset
  * applies the stored baseline through this exact path so it inherits
@@ -244,6 +298,22 @@ export function createPersistenceActions(set: any, get: any) {
         // when this request actually shipped it.
         const shipBaseline = state.baselineDirty && state.baseline ? state.baseline : undefined;
 
+        // Project.brief mirror (scale-04): ship goal + socialProfiles when set.
+        // Undefined = saveDraft leaves the persisted Project.brief untouched
+        // (additive — never clobbers brief fields this phase doesn't own).
+        // Phase 6: the D13 social panel edits socialMediaConfig — derive the
+        // Brief shape from it so panel edits round-trip into Project.brief; fall
+        // back to the passthrough mirror when the config is empty.
+        const socialProfilesOut =
+          socialProfilesFromConfig(state.socialMediaConfig) ?? state.socialProfiles;
+        const briefPayload =
+          state.goal || socialProfilesOut
+            ? {
+                ...(state.goal ? { goal: state.goal } : {}),
+                ...(socialProfilesOut ? { socialProfiles: socialProfilesOut } : {}),
+              }
+            : undefined;
+
         // Real API call to save draft
         const response = await fetch('/api/saveDraft', {
           method: 'POST',
@@ -254,6 +324,7 @@ export function createPersistenceActions(set: any, get: any) {
             tokenId: state.tokenId,
             finalContent: exportedData,  // Changed from 'content' to 'finalContent' to match API
             ...(shipBaseline !== undefined && { baseline: shipBaseline }),
+            ...(briefPayload !== undefined && { brief: briefPayload }),
             title: state.title,
             // Service template selection (Phase 11b) — persist editor switches.
             // Null for product; saveDraft writes only when provided.
@@ -330,6 +401,12 @@ export function createPersistenceActions(set: any, get: any) {
           // round-trips the full record instead of dropping keys.
           state.themeValues = apiResponse.themeValues ?? null;
 
+          // Project.brief mirror (scale-04): loadDraft returns `brief` top-level.
+          // Hold `goal` + `socialProfiles` in store; a later save() round-trips
+          // them back into Project.brief. Null goal → GOAL_REF legacy fallback.
+          state.goal = apiResponse.brief?.goal ?? null;
+          state.socialProfiles = apiResponse.brief?.socialProfiles ?? undefined;
+
           // Dev-only override (Phase 11a): `?templateId=lex` (optionally
           // `&paletteId=counsel`) lets us exercise a template in edit/preview
           // without a DB edit, before the picker ships (11b). Forces the service
@@ -360,6 +437,19 @@ export function createPersistenceActions(set: any, get: any) {
           // globalSettings/nav/social/legal/forms/pages+chrome) — extracted
           // verbatim into applySnapshot, shared with resetToGenerated.
           applySnapshot(state, contentToLoad);
+
+          // scale-04 (phase 6) bridge: seed the editor social config from the
+          // persisted Brief ONLY when the config restored above is empty. Covers
+          // scrape-prefilled profiles that live in Brief but not yet in the
+          // richer editor config; the config (when present) always wins.
+          const briefSocial = apiResponse.brief?.socialProfiles;
+          if (
+            Array.isArray(briefSocial) &&
+            briefSocial.length &&
+            !state.socialMediaConfig?.items?.length
+          ) {
+            state.socialMediaConfig = socialConfigFromProfiles(briefSocial);
+          }
 
           // Hydrate the stored baseline (plain assignment — no export() here;
           // capture for the no-baseline case happens AFTER this producer, below).

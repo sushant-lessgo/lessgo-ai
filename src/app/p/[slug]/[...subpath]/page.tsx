@@ -5,6 +5,7 @@ import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchem
 import { usesTemplateModule, type TemplateId } from '@/types/service';
 import { resolveCanonicalURL } from '@/lib/staticExport/canonicalUrl';
 import { resolveOgImage } from '@/lib/staticExport/buildPageMetadata';
+import { getPublishedGoal } from '@/lib/staticExport/getPublishedGoal';
 
 // Multi-page subpage route. Serves content.subpages[pathSlug] from a published
 // project. The blob fast path (KV route:{host}:{path} → blob-proxy) handles most
@@ -165,6 +166,10 @@ export default async function PublishedSubpage({ params }: PageProps) {
     legalPages: content.legalPages || undefined,
   };
 
+  // scale-04 (phase 3): resolve the project goal via the shared helper so GOAL_REF
+  // primaries on subpages resolve on the SSR fallback (matching the baked blob).
+  const goal = await getPublishedGoal(page.id);
+
   return (
     <>
       <CriticalFontPreload templateId={templateId as TemplateId | null} variantId={page.variantId} />
@@ -181,6 +186,7 @@ export default async function PublishedSubpage({ params }: PageProps) {
         variantId={page.variantId}
         paletteId={page.paletteId}
         mood={(page.themeValues as any)?.mood ?? null}
+        goal={goal}
       />
     </>
   );

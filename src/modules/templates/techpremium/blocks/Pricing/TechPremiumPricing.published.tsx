@@ -66,6 +66,8 @@ export default function TechPremiumPricingPublished(props: TechPremiumPricingPub
                       <a
                         href={resolveCtaHref(md?.[`tiers_cta_${t.id}`]?.buttonConfig, forms, '#cta')}
                         className={`tp-btn ${t.featured ? 'tp-btn--fill' : 'tp-btn--line'} tp-pcard__cta`}
+                        data-lessgo-cta=""
+                        data-lessgo-cta-role="primary"
                       >{t.cta_text}</a>
                     </div>
                   )}

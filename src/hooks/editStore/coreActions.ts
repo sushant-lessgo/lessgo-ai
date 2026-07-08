@@ -245,6 +245,20 @@ export function createCoreActions(set: any, get: any) {
       }),
 
     /**
+     * ===== GOAL (scale-04) =====
+     * Sets the project goal (Brief.goal mirror). GOAL_REF primaries resolve to
+     * this via the phase-3 pre-pass; persisted into `Project.brief` by save().
+     * `socialProfiles` stays a passthrough (no setter this phase — phase 6 owns
+     * its editing UI).
+     */
+    setGoal: (goal: import('@/types/brief').Brief['goal'] | null) =>
+      set((state: EditStore) => {
+        state.goal = goal;
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
+
+    /**
      * ===== CHANGE TRACKING =====
      */
     trackChange: (change: any) => {
