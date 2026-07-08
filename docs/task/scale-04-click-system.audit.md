@@ -495,3 +495,101 @@ POST-MERGE FOLLOW-UPS (logged, non-blocking):
 1. **ctaPlacements JSON merge is non-atomic read-modify-write** (analytics/event/route.ts:224-242: findUnique then update, no txn/lock) → lost-update race under concurrent cta_click beacons. Bounded to the NEW supplementary breakdown only (all authoritative metrics stay atomic). FIX before high-traffic reliance: single atomic `prisma.$executeRaw` with `jsonb_set(COALESCE(ctaPlacements,'{}'), ARRAY[placement,role], (COALESCE((ctaPlacements->placement->>role)::int,0)+1)::text::jsonb, true)`. Row-atomic, no lock.
 2. granth buy_url (book purchase) NOT stamped (keyed *cta* rule) — QA: should book-buy clicks count as conversions?
 3. CtaBreakdown formatPlacement collapses same-type sections to one label in UI (distinct in data) — cosmetic.
+
+---
+
+# scale-04 Phase 8 — audit (automated: steps 1-3)
+
+## Files changed
+- `src/app/dev/meridian/blocks/mockContent.ts` — added optional `elementMetadata?` field to `MeridianMockEntry`; seeded header + cta entries with new-shape `cta` (CTAButton) cases; changed header `nav_items` to include a Link-object + string-legacy hrefs
+- `src/modules/templates/__tests__/renderParity.meridian.test.tsx` — added CTA href-parity + nav edit↔published href-parity describes
+- `src/modules/generatedLanding/legacyHrefShim.test.tsx` (new) — legacy-shim byte-identity golden
+
+Step 4 (human-gate manual QA) NOT executed — checklist below for the orchestrator.
+
+## Per-file
+
+### src/app/dev/meridian/blocks/mockContent.ts
+`elementMetadata` kept OUTSIDE `content` on purpose — the content-parity extractor
+(`visibleFields`) walks `content` only, so a `dest`/`GOAL_REF` value is never mistaken
+for visible copy. header: `cta_text`=explicit external dest (primary), `signin_text`=explicit
+section anchor (secondary); nav n1=Link object, n2=`#docs`, n5=`/pricing`. cta block:
+`cta_text`=GOAL_REF (primary), `secondary_cta_text`=explicit section anchor (secondary).
+The /dev gallery ignores the field (it maps `content` only) → gallery unaffected.
+
+### renderParity.meridian.test.tsx
+New assertions (the existing visibleText/NON_VISIBLE_KEY block, which EXCLUDES href, is
+untouched):
+- **CTA href parity** (`SECTIONS_WITH_CTA`): runs each section's new-shape `elementMetadata`
+  through `normalizeCtas({goal: TEST_GOAL, forms})` — exactly the phase-3 pre-pass the
+  published renderer runs — then renders the published block and asserts every
+  `a[data-lessgo-cta]` href equals `resolveDestination()` of the resolved dest. `TEST_GOAL`
+  is M2→WhatsApp, so a GOAL_REF primary must render the `wa.me` href (goal-re-points-primary,
+  proven at render). Also asserts every seeded role appears (fixture-not-dead) and every CTA
+  anchor carries `data-lessgo-cta` + a valid `data-lessgo-cta-role` (phase-7 regression net).
+- **Nav edit↔published href parity**: header nav renders real anchors on BOTH sides (edit in
+  preview mode + published); asserts the nav-link href arrays are equal, and that the
+  Link-object item resolves to its external url while string-legacy items (`/pricing`,`#docs`)
+  pass through verbatim. CTA buttons are contentEditable non-anchors in edit → deliberately
+  NOT compared edit↔published.
+
+### legacyHrefShim.test.tsx (new golden)
+OLD-shaped saved page (no `cta` field) rendered through the untouched published readers;
+hrefs asserted byte-identical to pre-scale-04 output. Golden table (2 rows/render via the
+ArcCTA primary+secondary slots):
+- `link{url:calendly}` → verbatim · `form{formId:lead1}` (present) → `#form-section`
+- `form{}` (missing formId) → `#cta` · `form{formId:ghost}` (unknown) → `#cta`  ← pinned:
+  fallback, NOT a `#form-section` link
+- `page{pathSlug:/contact}` → `/contact` · `link-with-input{url:forms.gle}` → verbatim
+- `link{url:wa.me/…?text=Hi%20there}` → verbatim (never re-canonicalized) · `link{tel:}` → verbatim
+Plus: a raw `wa.me` string nav href renders verbatim; and `normalizeCtas(legacyOnly, {goal:null})`
+returns the SAME reference (old pages = zero diff from the pre-pass).
+
+## Deviations
+- "Render through the published renderer" implemented by rendering the published BLOCK
+  components (via `resolveMeridianBlock('…','published')`), matching the existing parity
+  test's established pattern, rather than instantiating the full `LandingPagePublishedRenderer`
+  (which needs an async `preloadTemplate` + SSRTokens theme wrapper that adds nothing to the
+  href assertion). Same `resolveCtaHref`/`normalizeCtas` code paths exercised. Logged as the
+  conservative in-scope choice.
+
+## Test results
+- `npx tsc --noEmit`: clean.
+- `npm run test:run`: **985 passed | 2 skipped (987)** — was 974; +11 (4 new golden `it.each`
+  rows + nav raw-string + normalizeCtas passthrough in the new file, plus 3 new describes ×
+  cases in the extended parity file). New/extended files in isolation: 32 passed.
+- `npm run build`: **✓ Compiled successfully** (published CSS + assets + next build all green).
+
+## Open risks
+- Attribute-level render assertions cover meridian only (D-C accepted limitation); other
+  templates keep shim/normalizer unit coverage but no render-href assertion.
+- Golden pins the shim's current byte-identity contract; if a future change intentionally
+  alters a legacy mapping it must update the golden table in lockstep (that's the point).
+
+## Human-gate manual QA checklist (step 4 — orchestrator runs with user on `npm run dev`)
+1. **Goal flip re-points every primary (zero copy change).** Set project goal to an on-site
+   form → publish → every primary CTA points at `#form-section`. Change goal to WhatsApp
+   (M2) → republish → every primary now points at the `wa.me` href, headline/label text
+   unchanged.
+2. **Multi-page subpage primary re-points too.** On a multi-page project, confirm a GOAL_REF
+   primary on a SUBPAGE (not just root) re-points after the goal flip (proves the
+   `renderPublishedExport` ~L197 per-subpage threading).
+3. **Secondary / derived links unmoved.** Secondary CTAs and nav/footer links do NOT move
+   when the goal changes (only GOAL_REF primaries follow the goal).
+4. **Old project renders identically.** Open a project saved BEFORE scale-04 (raw string
+   hrefs / legacy buttonConfig, null goal) → published output byte-identical to before;
+   form-missing buttons still fall back to `#cta`, wa.me links verbatim.
+5. **Editor↔published visual parity across templates.** Spot-check 2-3 templates: the
+   editor preview and the published page render the same CTAs/links (dual-renderer trap).
+6. **Published click-through + beacon.** On a published page, click a hero primary and a
+   secondary → confirm navigation is correct AND `cta_click` fires with `role` + `placement`
+   (network beacon), `ctaPlacements` row + dashboard breakdown appear; `form_submit`
+   conversion counting unchanged.
+7. **SSR-fallback matches blob (phase-3 blocker net).** Hit `/p/{slug}` served LIVE via the
+   SSR route (canonical `lessgo.ai/p/{slug}`, not the blob-proxy) AND a subpath URL for a
+   goal-ref project → rendered primary `<a href>` equals the baked blob's (the resolved goal
+   target, not `#cta`).
+
+### Phase 8 (automated 1-3) — impl-review verdict: SHIP (loops 1)
+Tests genuine, not hollow: legacyHrefShim golden asserts HARDCODED literal hrefs (wa.me verbatim, form-missing-formId→#cta NOT #form-section, form-present→#form-section, page→pathSlug, link→url verbatim, link-with-input→url verbatim) — real golden. Parity test parses actual <a href> from published HTML + asserts data-lessgo-cta/-role present; GOAL_REF→WhatsApp resolved through REAL normalizeCtas pre-pass (not hand-fed). Edit↔published href equality scoped to nav anchors only. No src logic edited. 985 tests (+11), build green.
+REMAINING: Phase 8 step 4 = human-gate manual QA (below) — orchestrator runs with user before merge.

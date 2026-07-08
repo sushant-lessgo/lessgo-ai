@@ -16,7 +16,7 @@ Replace the two parallel click models (raw `href` strings + ad-hoc `buttonConfig
 - phase 5 shared link popover + Link objects: done (review loops 1 — ship; 6 popovers deleted; tsc clean, 974 tests pass)
 - phase 6 derived link sources + social panel (D13): done (review loops 1 — social-panel trigger fix; tsc clean, 974 tests pass)
 - phase 7 analytics attrs on 26 published blocks + role/placement pipeline: done (review loops 1 — ship; migration applied; ctaPlacements JSON-race = post-merge followup; tsc/build/974 tests green)
-- phase 8 parity tests + build + manual QA: pending
+- phase 8 parity tests + build + manual QA: automated 1-3 done (review loops 1 — ship; 985 tests, build green); step 4 manual QA = human gate PENDING
 
 ## Design decisions (resolved up front — implementers follow these, don't re-litigate)
 
