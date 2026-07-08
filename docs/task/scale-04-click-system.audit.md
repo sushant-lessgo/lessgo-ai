@@ -68,3 +68,54 @@ None. Applied the reviewer's suggested shape adapted to actual var/type names.
 
 ### Open risks
 None known — the guard is scoped to the legacy link branch only.
+
+---
+
+# scale-04 Phase 2 — audit
+
+## Files changed
+- `prisma/schema.prisma` — CONFIRM ONLY, no edit. `Project.brief Json?` present at L36, backed by migration `20260707191204_add_project_brief`. No migration generated.
+- `src/app/api/saveDraft/route.ts` — accept optional `brief`, validate against `BriefSchema.partial()`, merge over existing brief, persist to `Project.brief`.
+- `src/app/api/loadDraft/route.ts` — select + return `brief` in response.
+- `src/types/store/state.ts` — MetaSlice gains optional `goal?` + `socialProfiles?` (Brief mirrors).
+- `src/hooks/editStore/coreActions.ts` — `setGoal` action (goal setter).
+- `src/hooks/editStore/persistenceActions.ts` — `save()` ships `brief` payload; `loadFromDraft` hydrates `goal`/`socialProfiles` from `apiResponse.brief`.
+- `src/modules/goals/goalToDestination.ts` (new) — mechanism→Destination resolver (widened return).
+- `src/modules/goals/goalToDestination.test.ts` (new) — 15 per-mechanism tests.
+
+## goalToDestination mechanism mapping (D-E widened return `{ dest, formId? } | undefined`)
+- M1 on-site form → `{ dest: {kind:'section', anchor:'form-section'}, formId }` where `formId` = first key of `ctx.forms` (undefined if none — passes through to legacy reader's own forms check).
+- M2 direct channel → `toDestination(goal.destination)` (reuses the phase-1 shim string classifier): `wa.me`→whatsapp, `tel:`→call, `mailto:`→email, else external. No formId.
+- M3 redirect → `{kind:'external', url}` verbatim.
+- M4 subscribe/follow → `{kind:'social', platform: inferPlatform(url), url}`; unrecognized host → `{kind:'external', url}`.
+- M5 anchor → `{kind:'section', anchor: dest.replace(/^#/,'')}`.
+- No goal / no mechanism / missing-or-empty destination (M2–M5) → `undefined` (caller falls back to legacy).
+- Array `destination` → first non-empty string entry.
+
+## brief column confirmation
+`Project.brief Json?` pre-existed (schema L36 + migration `20260707191204_add_project_brief`). `npx prisma migrate status` → "Database schema is up to date!". NO migration created this phase.
+
+## Deviations (in-scope judgment calls)
+- **Optional MetaSlice fields.** Made `goal?`/`socialProfiles?` OPTIONAL rather than required. Required fields would force initialization in `createInitialState` (`src/stores/editStore.ts`) — a file NOT in Files-touched. Optional keeps the change fully additive within scope; loadFromDraft still assigns them explicitly (`goal` = null when absent).
+- **`setGoal` not added to `actions.ts`.** The `EditStore` action interface (`src/types/store/actions.ts`) is out of scope, so `setGoal` is present on the runtime store (spread in `editStore.ts`) but not on the typed surface. It is unused this phase (write path is phase 4), so tsc stays green. Phase 4 should add its signature to `actions.ts` when it wires the write path.
+- **Invalid `brief` is skipped, not rejected.** saveDraft validates `body.brief` and, on validation failure, silently skips the brief write (keeps the rest of the draft save) rather than returning 400 — conservative: never fail an autosave over an optional passthrough field. BriefSchema is already all-optional so `.partial()` is belt-and-suspenders matching the plan wording.
+- **`brief` read from raw `body`, not `validationResult.data`.** `DraftSaveSchema` strips unknown keys (same reason `baseline` is read from `body`), so `brief` is read from the raw body and validated separately against `BriefSchema`. No edit to `src/lib/validation.ts` (out of scope).
+
+## Test / tsc results
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 961 passed / 2 skipped (70 files). New `goalToDestination.test.ts`: 15/15 pass.
+- `npx prisma migrate status` — up to date; brief migration already present.
+
+## Round-trip reasoning (manual)
+save→load: `save()` builds `brief = { goal, socialProfiles }` (omitting empties) and POSTs it; saveDraft merges over existing `Project.brief` and persists. `loadDraft` selects+returns `brief`; `loadFromDraft` sets `state.goal = apiResponse.brief?.goal ?? null` and `state.socialProfiles = apiResponse.brief?.socialProfiles`. A saved goal round-trips. `/preview/[token]` uses the same edit-store hydration, so it inherits `brief` too (relevant to phase 3).
+
+## Open risks / notes for reviewer
+- `setGoal` is currently untyped on `EditStore` (see deviation) — phase 4 must add it to `actions.ts` before calling it type-safely.
+- M1 formId = "first form on the project" is a heuristic (goal carries no formId). Fine for the phase-3 bridge (legacy reader re-checks form existence), but if a project has multiple forms the primary always wires to the first — revisit if per-CTA form selection is needed.
+- `inferPlatform` is best-effort host matching; unrecognized socials degrade to `external` (still a working link), never throw.
+
+### Phase 2 — impl-review verdict: SHIP (loops 1)
+Non-blocking carry-forward notes:
+1. **Phase 4:** add `setGoal` signature to `src/types/store/actions.ts` when wiring the write path (currently runtime-only, dead code, tsc-green).
+2. **Phase 4/6:** `save()` builds briefPayload only when `goal || socialProfiles` truthy → setting goal back to `null` won't persist a clear. Fine now (no goal-edit UI), fix when editing lands.
+3. **Phase 3 (IMPORTANT):** `goalToDestination` M1 returns `{dest: section{form-section}, formId: undefined}` when no form resolves (key present, value undefined) whereas M2–M5 omit formId. `normalizeCtas` MUST detect form-ness via this pair shape (presence of the form-section anchor / formId key), so a missing-form M1 still maps to `{type:'form'}` (→ legacy reader's own fallback), NOT `{type:'link', url:'#form-section'}`. Per D-E: do NOT special-case the anchor string; rely on the widened-return pair.

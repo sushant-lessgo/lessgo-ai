@@ -244,6 +244,17 @@ export function createPersistenceActions(set: any, get: any) {
         // when this request actually shipped it.
         const shipBaseline = state.baselineDirty && state.baseline ? state.baseline : undefined;
 
+        // Project.brief mirror (scale-04): ship goal + socialProfiles when set.
+        // Undefined = saveDraft leaves the persisted Project.brief untouched
+        // (additive — never clobbers brief fields this phase doesn't own).
+        const briefPayload =
+          state.goal || state.socialProfiles
+            ? {
+                ...(state.goal ? { goal: state.goal } : {}),
+                ...(state.socialProfiles ? { socialProfiles: state.socialProfiles } : {}),
+              }
+            : undefined;
+
         // Real API call to save draft
         const response = await fetch('/api/saveDraft', {
           method: 'POST',
@@ -254,6 +265,7 @@ export function createPersistenceActions(set: any, get: any) {
             tokenId: state.tokenId,
             finalContent: exportedData,  // Changed from 'content' to 'finalContent' to match API
             ...(shipBaseline !== undefined && { baseline: shipBaseline }),
+            ...(briefPayload !== undefined && { brief: briefPayload }),
             title: state.title,
             // Service template selection (Phase 11b) — persist editor switches.
             // Null for product; saveDraft writes only when provided.
@@ -329,6 +341,12 @@ export function createPersistenceActions(set: any, get: any) {
           // Carries vestria's `mood`; hydrating here means a later save()
           // round-trips the full record instead of dropping keys.
           state.themeValues = apiResponse.themeValues ?? null;
+
+          // Project.brief mirror (scale-04): loadDraft returns `brief` top-level.
+          // Hold `goal` + `socialProfiles` in store; a later save() round-trips
+          // them back into Project.brief. Null goal → GOAL_REF legacy fallback.
+          state.goal = apiResponse.brief?.goal ?? null;
+          state.socialProfiles = apiResponse.brief?.socialProfiles ?? undefined;
 
           // Dev-only override (Phase 11a): `?templateId=lex` (optionally
           // `&paletteId=counsel`) lets us exercise a template in edit/preview

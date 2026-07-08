@@ -74,6 +74,7 @@ export async function GET(req: Request) {
         templateId: true,
         variantId: true,
         paletteId: true,
+        brief: true,
       },
     });
 
@@ -122,6 +123,10 @@ export async function GET(req: Request) {
       templateId: project.templateId || null,
       variantId: project.variantId || null,
       paletteId: project.paletteId || null,
+
+      // scale-04: Project.brief (goal + socialProfiles) for the edit store to
+      // mirror. Null for legacy/pre-scale-01 projects → GOAL_REF legacy fallback.
+      brief: project.brief ?? null,
 
       // Onboarding state for resume
       stepIndex: onboarding.stepIndex || 0,

@@ -10,7 +10,7 @@ Replace the two parallel click models (raw `href` strings + ad-hoc `buttonConfig
 ## Progress log
 
 - phase 1 destination types + resolver + migration shim: done (review loops 1 — whatsapp verbatim-guard fix; tsc clean, 946 tests pass)
-- phase 2 brief/goal persistence + goalToDestination: pending
+- phase 2 brief/goal persistence + goalToDestination: done (review loops 1 — ship; brief confirm-only no migration; tsc clean, 961 tests pass)
 - phase 3 cta normalization pre-pass (GOAL_REF + cta→buttonConfig bridge) in both renderers: pending
 - phase 4 CTAButton write path + role unification: pending
 - phase 5 shared link popover + Link objects: pending

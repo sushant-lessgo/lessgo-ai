@@ -347,6 +347,17 @@ export interface MetaSlice {
    *  vestria). Hydrated by loadFromDraft, persisted by save(). */
   themeValues: Record<string, any> | null;
 
+  /** Project.brief.goal mirror (scale-04). The conversion target every GOAL_REF
+   *  primary resolves to via the phase-3 normalization pre-pass. Hydrated from
+   *  loadDraft's `brief`, persisted back into `Project.brief` by save(). `null`
+   *  when the project has no goal yet (legacy / pre-scale-01) → GOAL_REF falls
+   *  back to legacy behavior. OPTIONAL so `createInitialState` need not seed it. */
+  goal?: import('@/types/brief').Brief['goal'] | null;
+  /** Project.brief.socialProfiles mirror — site-level social links. Passthrough
+   *  in this phase (hydrated/persisted alongside `goal`); phase 6's social panel
+   *  edits it. OPTIONAL for the same reason as `goal`. */
+  socialProfiles?: import('@/types/brief').Brief['socialProfiles'];
+
 
   // Onboarding Data
   onboardingData: {
