@@ -68,6 +68,7 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       headline:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Ship on Friday. Sleep on <em>Saturday</em>' },
       lede:               { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
       cta_text:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Start building' },
+      cta_subtext:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' }, // scale-05: small muted line under primary CTA (e.g. "7 days free, no credit card")
       secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       caption:            { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       hero_image:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' }, // Phase 4c: product/hardware photo in the hero art frame

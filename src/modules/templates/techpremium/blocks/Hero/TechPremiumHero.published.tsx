@@ -20,6 +20,7 @@ interface TechPremiumHeroPublishedProps {
   headline?: string;
   lede?: string;
   cta_text?: string;
+  cta_subtext?: string;
   secondary_cta_text?: string;
   caption?: string;
   hero_image?: string;
@@ -61,6 +62,7 @@ export default function TechPremiumHeroPublished(props: TechPremiumHeroPublished
                 <a className="tp-btn tp-btn--line tp-btn--lg" href={secondaryHref} data-lessgo-cta="" data-lessgo-cta-role="secondary">{props.secondary_cta_text}</a>
               )}
             </div>
+            {props.cta_subtext && <p className="tp-hero__cta-subtext">{props.cta_subtext}</p>}
             {props.audience_tag && <p className="tp-hero__who">{props.audience_tag}</p>}
           </div>
 
@@ -121,6 +123,7 @@ const STYLES = `
 .tp-hero__actions { display:flex; flex-wrap:wrap; gap:12px; }
 .tp-hero__who { font-family:var(--font-mono); font-size:12px; letter-spacing:0.10em; text-transform:uppercase; color:var(--ink-3); margin:0; }
 .tp-hero__who b { color:var(--forest); font-weight:600; }
+.tp-hero__cta-subtext { font-family:var(--font-mono); font-size:12px; color:var(--ink-3); margin:0; }
 .tp-hero__art { position:relative; }
 .tp-ph { position:relative; background:var(--paper-2); overflow:hidden; background-image:repeating-linear-gradient(135deg, oklch(0.325 0.045 158 / 0.055) 0 1px, transparent 1px 12px); border:1px solid var(--line); border-radius:var(--r-lg); }
 .tp-ph__tag { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; text-align:center; border:1px solid var(--line-2); padding:5px 10px; border-radius:var(--r); background:var(--paper); }

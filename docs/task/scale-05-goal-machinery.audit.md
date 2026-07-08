@@ -46,3 +46,44 @@
 ### Open risks
 - Product GoalStep UX changed for param goals (no auto-advance until Continue/Skip) — needs a quick manual look.
 - `briefPatch` is sent on every multi-page saveFC call (idempotent shallow merge; harmless, slightly chatty).
+
+---
+
+## Phase 2 — `cta_subtext` element (schema + hero blocks, dual-renderer)
+
+**Files changed**
+- `src/modules/audience/product/elementSchema.ts` — modified (TerminalHero hero: add `cta_subtext`)
+- `src/modules/audience/service/elementSchema.ts` — modified (PetalFramedHero hero: add `cta_subtext`)
+- `src/modules/templates/meridian/blocks/Hero/TerminalHero.tsx` — modified
+- `src/modules/templates/meridian/blocks/Hero/TerminalHero.published.tsx` — modified
+- `src/modules/templates/techpremium/blocks/Hero/TechPremiumHero.tsx` — modified
+- `src/modules/templates/techpremium/blocks/Hero/TechPremiumHero.published.tsx` — modified
+- `src/modules/templates/hearth/blocks/Hero/PetalFramedHero.tsx` — modified
+- `src/modules/templates/hearth/blocks/Hero/PetalFramedHero.published.tsx` — modified
+- `src/modules/templates/lex/blocks/Hero/ProspectusHero.tsx` — modified
+- `src/modules/templates/lex/blocks/Hero/ProspectusHero.published.tsx` — modified
+
+**What changed per file**
+- Schema: added `cta_subtext { type:'string', requirement:'optional', fillMode:'ai_generated', default:'' }` to the hero entry in each audience schema. Only ONE hero schema entry exists per audience (product=`TerminalHero`, service=`PetalFramedHero`); techpremium reuses `meridianElementSchema` and lex reuses the service schema (confirmed via `techpremium/registration.test.ts` importing `meridianElementSchema` and the shared service schema), so both templates inherit the new field with no extra schema entry. Vestria hero schema entries intentionally untouched (bespoke, out of scope).
+- Each hero pair: added `cta_subtext` to the content/props interface, rendered a small muted line directly UNDER the primary CTA (after the actions row), plus one CSS rule (inline `STYLES` in each block — these templates ship per-block styles as inline `<style>` tags, NOT via `public/published.css`).
+
+**Inline-edit pattern mirrored per template**
+- meridian: `MeridianEditable as="p"` under `.mrd-hero__actions`, class `mrd-hero__cta-subtext` — mirrors the existing `caption`/`secondary_cta_text` optional pattern.
+- techpremium: `TechPremiumEditable as="p"` after `.tp-hero__actions` (before `audience_tag`), class `tp-hero__cta-subtext` — mirrors the existing `audience_tag` optional-`<p>` pattern.
+- hearth: `HearthEditable as="p"` after `.hearth-hero__actions` inside `.hearth-hero__copy`, class `hearth-hero__cta-subtext` — mirrors `meta`/`secondary_cta_text`.
+- lex: `LexEditable as="p"` inside `.lex-hero__aside` after `.lex-hero__actions`, class `lex-hero__cta-subtext` — mirrors the aside's `lede`/`secondary_cta_text` pattern.
+
+**Identical guard + markup confirmation**
+- Both twins in every template guard on the SAME non-empty content check: edit twin `blockContent.cta_subtext`, published twin `props.cta_subtext`. The edit twin adds the standard `|| mode === 'edit'` editor escape that EVERY optional element in these heroes already carries (secondary_cta_text, caption, audience_tag, meta) — this is the established byte-parallel convention (published twin has no `mode`), not a divergence. Rendered markup is identical: same wrapper tag (`<p>`), same className, same position relative to the primary CTA in both `.tsx` and `.published.tsx`. Subtext rendered as plain text in the published twin (matches the caption/meta-line plain-text convention; only headline/lede use `dangerouslySetInnerHTML`).
+
+**Deviations**
+- None from the plan. In-scope call: used `<p>` for the subtext line across all four (block-level muted line under the CTA) and matched each template's own muted-text tokens (mono/`--bone-3` for meridian, mono/`--ink-3` for techpremium, italic display/`--ink-3`/`--ink-2` for hearth/lex).
+
+**Verification**
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run -- renderParity sanitizeContentForPublish` — 2 files, 33 tests passed.
+- `npm run build` — completed successfully (full pipeline: build:published-css → build:assets → next build; route table emitted, no errors).
+
+**Open risks**
+- `cta_subtext` has no copy population yet — that lands in Phase 3. Until then it renders nothing on existing/new projects (empty default), so no visible change without manual entry.
+- Bespoke templates (surge/lumen/granth/vestria) intentionally skipped per plan — their heroes have no subtext slot.

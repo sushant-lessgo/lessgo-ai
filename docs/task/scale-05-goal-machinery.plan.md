@@ -20,8 +20,8 @@ Make the picked goal actually shape the page. Today the goal is a dead wire: the
 
 ## Progress log
 
-- phase 1 goal param plumbing: done (review loops 1, ship)
-- phase 2 cta_subtext element: pending
+- phase 1 goal param plumbing: done (commit 1a64012, review loops 1)
+- phase 2 cta_subtext element: done (review loops 1, ship)
 - phase 3 intent→copy guidance: pending
 - phase 4 M1 form auto-seed: pending
 - phase 5 M2 whatsapp prefill: pending

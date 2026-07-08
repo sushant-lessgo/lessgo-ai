@@ -27,6 +27,7 @@ interface TerminalHeroContent {
   headline: string;
   lede: string;
   cta_text: string;
+  cta_subtext: string;
   secondary_cta_text: string;
   caption: string;
   stats: HeroStat[];
@@ -173,6 +174,20 @@ export default function TerminalHero({ sectionId }: TerminalHeroProps) {
             )}
           </div>
 
+          {(blockContent.cta_subtext || mode === 'edit') && (
+            <MeridianEditable
+              as="p"
+              mode={mode}
+              sectionId={sectionId}
+              elementKey="cta_subtext"
+              value={blockContent.cta_subtext}
+              onSave={(v) => handleContentUpdate('cta_subtext', v)}
+              enterBehavior="save"
+              className="mrd-hero__cta-subtext"
+              placeholder="7 days free · no credit card"
+            />
+          )}
+
           {(stats.length > 0 || mode === 'edit') && (
             <div className="mrd-hero__meta">
               {stats.map((s) => (
@@ -267,6 +282,7 @@ const STYLES = `
 }
 .mrd-hero__actions { display: flex; gap: 10px; margin-top: 40px; align-items: center; flex-wrap: wrap; }
 .mrd-hero__caption { font-family: var(--font-mono); font-size: 11.5px; color: var(--bone-3); margin-left: 10px; }
+.mrd-hero__cta-subtext { font-family: var(--font-mono); font-size: 12px; color: var(--bone-3); margin: 14px 0 0; }
 .mrd-hero__meta {
   margin-top: 72px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
   background: var(--line); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);

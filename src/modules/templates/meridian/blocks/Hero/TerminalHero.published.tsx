@@ -20,6 +20,7 @@ interface TerminalHeroPublishedProps {
   headline?: string;
   lede?: string;
   cta_text?: string;
+  cta_subtext?: string;
   secondary_cta_text?: string;
   caption?: string;
   stats?: HeroStat[];
@@ -65,6 +66,10 @@ export default function TerminalHeroPublished(props: TerminalHeroPublishedProps)
             )}
             {props.caption && <span className="mrd-hero__caption">{props.caption}</span>}
           </div>
+
+          {props.cta_subtext && (
+            <p className="mrd-hero__cta-subtext">{props.cta_subtext}</p>
+          )}
 
           {stats.length > 0 && (
             <div className="mrd-hero__meta">
@@ -138,6 +143,7 @@ const STYLES = `
 }
 .mrd-hero__actions { display: flex; gap: 10px; margin-top: 40px; align-items: center; flex-wrap: wrap; }
 .mrd-hero__caption { font-family: var(--font-mono); font-size: 11.5px; color: var(--bone-3); margin-left: 10px; }
+.mrd-hero__cta-subtext { font-family: var(--font-mono); font-size: 12px; color: var(--bone-3); margin: 14px 0 0; }
 .mrd-hero__meta {
   margin-top: 72px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
   background: var(--line); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);

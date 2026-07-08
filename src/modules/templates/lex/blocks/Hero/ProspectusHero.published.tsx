@@ -10,6 +10,7 @@ interface ProspectusHeroPublishedProps {
   headline?: string;
   lede?: string;
   cta_text?: string;
+  cta_subtext?: string;
   secondary_cta_text?: string;
   hero_image?: string;
   meta?: string;
@@ -46,6 +47,9 @@ export default function ProspectusHeroPublished(props: ProspectusHeroPublishedPr
                 <a className="lex-btn lex-btn--quiet" href={secondaryHref} data-lessgo-cta="" data-lessgo-cta-role="secondary">{props.secondary_cta_text}</a>
               )}
             </div>
+            {props.cta_subtext && (
+              <p className="lex-hero__cta-subtext">{props.cta_subtext}</p>
+            )}
           </aside>
         </div>
         {props.meta && (
@@ -94,6 +98,7 @@ const STYLES = `
   font-size: 21px; line-height: 1.5; color: var(--ink); max-width: 38ch; margin: 0;
 }
 .lex-hero__actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+.lex-hero__cta-subtext { font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 14px; color: var(--ink-2); margin: 0; }
 .lex-hero__ledger {
   margin-top: 96px;
   border-top: 1px solid var(--ink);

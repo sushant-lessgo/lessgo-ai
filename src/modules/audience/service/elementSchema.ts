@@ -48,6 +48,7 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       headline:          { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Brand identity that <em>stays with you</em>.' },
       lede:              { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
       cta_text:          { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Book a call' },
+      cta_subtext:       { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' }, // scale-05: small muted line under primary CTA
       secondary_cta_text:{ type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       hero_image:        { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       meta:              { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },

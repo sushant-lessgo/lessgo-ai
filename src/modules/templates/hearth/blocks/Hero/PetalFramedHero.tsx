@@ -16,6 +16,7 @@ interface PetalFramedHeroContent {
   headline: string;
   lede: string;
   cta_text: string;
+  cta_subtext: string;
   secondary_cta_text: string;
   hero_image: string;
   meta: string;
@@ -117,6 +118,20 @@ export default function PetalFramedHero({ sectionId }: PetalFramedHeroProps) {
               />
             )}
           </div>
+
+          {(blockContent.cta_subtext || mode === 'edit') && (
+            <HearthEditable
+              as="p"
+              mode={mode}
+              sectionId={sectionId}
+              elementKey="cta_subtext"
+              value={blockContent.cta_subtext}
+              onSave={(v) => handleContentUpdate('cta_subtext', v)}
+              enterBehavior="save"
+              className="hearth-hero__cta-subtext"
+              placeholder="Free consult · no obligation"
+            />
+          )}
         </div>
 
         <div className="hearth-hero__art">
@@ -181,6 +196,10 @@ const STYLES = `
 .hearth-hero__caption {
   font-family: var(--font-display); font-style: italic;
   font-size: 14px; color: var(--ink-3);
+}
+.hearth-hero__cta-subtext {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 14px; color: var(--ink-3); margin-top: 16px;
 }
 .hearth-btn--lg { padding: 18px 28px; font-size: 16.5px; }
 .hearth-btn--ghost {
