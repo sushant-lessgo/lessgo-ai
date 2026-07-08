@@ -164,7 +164,7 @@ const workContract: EngineContract = {
     { id: 'theWork', group: 'WHAT', slot: 'proof', tier: 'T3', requirement: 'required', prefillKey: 'offerings', section: 'books', wizardArtifact: true, input: 'upload' },
     { id: 'genresStyle', group: 'WHAT', slot: 'understanding', tier: 'T1', requirement: 'required', prefillKey: 'categories', section: 'writing', input: 'chips' },
     { id: 'bioStory', group: 'WHY-YOU', slot: 'understanding', tier: 'T1', requirement: 'required', section: 'about', askCandidate: 'differentiator', input: 'free-text' },
-    { id: 'achievements', group: 'WHY-BELIEVE', slot: 'proof', tier: 'T1', requirement: 'optional', prefillKey: 'outcomes', askCandidate: 'real-numbers', input: 'chips' },
+    { id: 'achievements', group: 'WHY-BELIEVE', slot: 'proof', tier: 'T1', requirement: 'optional', prefillKey: 'outcomes', askCandidate: 'real-numbers', skippableWithWarning: true, input: 'chips' },
     { id: 'praise', group: 'WHY-BELIEVE', slot: 'proof', tier: 'T2', requirement: 'optional', prefillKey: 'testimonials', dropTarget: 'praise', section: 'praise', askCandidate: 'proof-artifacts', input: 'boolean' },
     { id: 'goal', group: 'ACT', slot: 'goal', tier: 'T1', requirement: 'required', resolver: 'goal', inferFrom: 'businessType-intent', askCandidate: 'goal-param' },
   ],

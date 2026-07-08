@@ -26,6 +26,10 @@ import { Button } from '@/components/ui/button';
 import IdentitySlot from './IdentitySlot';
 import UnderstandingSlot from './UnderstandingSlot';
 import OfferSlot from './OfferSlot';
+import GoalSlot from './GoalSlot';
+import ProofSlot from './ProofSlot';
+import StyleSlot from './StyleSlot';
+import StructureSlot from './StructureSlot';
 
 interface WizardShellProps {
   tokenId: string;
@@ -45,11 +49,15 @@ const SLOT_LABELS: Record<WizardSlot, string> = {
   generating: 'Building',
 };
 
-// Slots implemented in phase 3. Others render a placeholder until phases 4/5.
+// Slots implemented in phases 3–4. `generating` lands in phase 5 (placeholder).
 const BUILT_SLOTS: Partial<Record<WizardSlot, () => JSX.Element>> = {
   identity: IdentitySlot,
   understanding: UnderstandingSlot,
+  goal: GoalSlot,
   offer: OfferSlot,
+  proof: ProofSlot,
+  style: StyleSlot,
+  structure: StructureSlot,
 };
 
 function SlotPlaceholder({ slot }: { slot: WizardSlot }) {

@@ -16,11 +16,35 @@ import { selectProductSections } from '../sectionSelection';
 import { selectProductBlocks } from '../selectBlocks';
 import { getPageArchetypesForTemplate, type PageArchetypeDef } from '../pageArchetypes';
 
+/**
+ * Proof availability booleans (scale-06 phase 4 — the PROOF HARD RULE).
+ * OPTIONAL: when ABSENT (undefined), no proof filtering runs and assembly keeps
+ * its exact pre-scale-06 behavior — this is how the OLD product wizard (which
+ * never sends proof) stays byte-identical. When PRESENT, an unpromised proof
+ * section is dropped from the assembled section list (mirrors how the service
+ * route drops `testimonials` via `selectServiceSections` asset booleans), so a
+ * proof section is NEVER generated when the founder can't back it.
+ */
+export interface ProductProofInput {
+  /** Testimonials/social-proof section (dropTarget `testimonials`). */
+  hasTestimonials?: boolean;
+}
+
+/** Section types the proof hard rule can cut, keyed by the gating boolean. */
+function proofDroppedSections(proof: ProductProofInput): Set<string> {
+  const dropped = new Set<string>();
+  // Unpromised testimonials ⇒ the testimonials section is absent (never faked).
+  if (proof.hasTestimonials !== true) dropped.add('testimonials');
+  return dropped;
+}
+
 export interface AssembleProductStrategyInput {
   llmResponse: ProductStrategyResponse | ProductStrategyWithSitemapResponse;
   /** Template-aware section/block selection. ASSEMBLY ONLY — never fed into any
    *  prompt builder (the prompt firewall forbids templateId in prompt input). */
   templateId?: string;
+  /** Proof hard rule — see ProductProofInput. Absent ⇒ current behavior. */
+  proof?: ProductProofInput;
 }
 
 interface RawSitemapPage {
@@ -115,7 +139,7 @@ export function clampSitemap(
 export function assembleProductStrategy(
   input: AssembleProductStrategyInput
 ): ProductStrategyOutput {
-  const { llmResponse, templateId } = input;
+  const { llmResponse, templateId, proof } = input;
 
   const menu = getPageArchetypesForTemplate(templateId);
 
@@ -130,6 +154,25 @@ export function assembleProductStrategy(
     sections = ['header', ...sitemap[0].sections, 'footer'];
   } else {
     sections = selectProductSections({ templateId });
+  }
+
+  // PROOF HARD RULE (scale-06 phase 4): this is the SINGLE point that emits
+  // `strategyData.sections` for BOTH the single-page (selectProductSections) and
+  // multi-page (clampSitemap) paths, so the filter lives here rather than in
+  // selectProductSections (which is only one of the two branches feeding this).
+  // Absent `proof` ⇒ no drop ⇒ old wizard behavior. Applied BEFORE block
+  // selection so unpromised sections drop from BOTH `sections` and `uiblocks`.
+  if (proof) {
+    const dropped = proofDroppedSections(proof);
+    if (dropped.size > 0) {
+      sections = sections.filter((s) => !dropped.has(s));
+      if (sitemap) {
+        sitemap = sitemap.map((p) => ({
+          ...p,
+          sections: p.sections.filter((s) => !dropped.has(s)),
+        }));
+      }
+    }
   }
 
   const { uiblocks } = selectProductBlocks({ sections, templateId });

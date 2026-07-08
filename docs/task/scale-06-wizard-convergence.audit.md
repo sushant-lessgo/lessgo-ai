@@ -309,3 +309,111 @@ sides of the handoff:
 Carry-forward notes (non-blocking):
 - **Phase 8:** `WizardFieldInput` only handles `chips`/`free-text` — trust's `packages` (`input:'boolean'`, offer slot) would render as an empty textarea. Add boolean handling (or route to proof-style UI) BEFORE trust goes live. Also add `DEFAULT_FIELD_COPY` entries for `packages`/`theWork`/`praise`/`achievements`/`credentials` (currently fall back to raw-id labels).
 - **Phase 11:** `/api/loadDraft` network-error currently drops the user to entry `input` (indistinguishable from no-brief) — reload-recoverable but consider distinguishing transient error from no-brief when adding load-detection coverage.
+
+---
+
+## Phase 4 — goal / proof / style / structure slots + product proof hard rule
+
+**Files changed**
+- `src/modules/engines/inputContracts.ts` (edited — carry-forward parity flag)
+- `src/modules/audience/product/strategy/parseStrategyProduct.ts` (edited — proof hard rule)
+- `src/app/api/audience/product/strategy/route.ts` (edited — additive proof field)
+- `src/modules/audience/product/strategy/proofFilter.test.ts` (created)
+- `src/components/onboarding/wizard/GoalSlot.tsx` (created)
+- `src/components/onboarding/wizard/ProofSlot.tsx` (created)
+- `src/components/onboarding/wizard/StyleSlot.tsx` (created)
+- `src/components/onboarding/wizard/StructureSlot.tsx` (created)
+- `src/components/onboarding/wizard/WizardShell.tsx` (edited — slot registration; see DEVIATION 1)
+- `src/app/onboarding/[token]/page.tsx` — NOT modified (in scope but no change needed; see DEVIATION 1)
+
+### Where the product section list is produced + where the proof filter went
+GREP + trace: `assembleProductStrategy` in `parseStrategyProduct.ts` is the SINGLE
+authoritative point that emits `strategyData.sections` (route.ts calls it ~163 and
+reads `strategyData.sections`). It has two branches — single-page (meridian):
+`sections = selectProductSections({templateId})`; multi-page (vestria):
+`sections = ['header', ...clampSitemap(...)[0].sections, 'footer']`.
+`selectProductSections` is only ONE branch, so filtering there misses vestria.
+I applied the proof-drop filter in `assembleProductStrategy` AFTER `sections` is
+computed and BEFORE `selectProductBlocks(sections)`, so an unpromised section
+drops from BOTH `sections` AND derived `uiblocks`, covering both template paths
+from one point (the sitemap array's page.sections are filtered in parallel).
+Mirrors service, which drops `testimonials` via `assets.hasTestimonials` inside
+`selectServiceSections` — the product analogue of that single emit point.
+
+### Back-compat of the strategy-route change
+`proof` is a NEW optional object in `ProductStrategyRequestSchema`
+(`{ hasTestimonials?: boolean }`) + a NEW optional `proof` on
+`AssembleProductStrategyInput`. ABSENT (undefined) — exactly what the OLD product
+wizard sends (verified: GeneratingStep.tsx:749 and SitemapReviewStep never send
+proof) — runs zero filter logic ⇒ byte-identical to pre-scale-06. Only a PRESENT
+`proof` triggers drops. The pre-existing top-level `hasTestimonials`/`hasSocialProof`
+flags (long "optional-but-ignored") stay ignored; the nested `proof` object is the
+sole opt-in channel, so no old caller changes behavior.
+
+### ProofSlot — contract-driven booleans + warning handling
+ProofSlot iterates `getContract(engine).fields.filter(slot === 'proof')` (NOT a
+hardcoded service list). `input:'boolean'` T2 fields → 1-tap toggles mapped to a
+`WizardProofState` boolean via `BOOLEAN_PROOF_META` keyed by contract id
+(thing.proofTestimonials / trust.testimonials / work.praise → `hasTestimonials`);
+`skippableWithWarning` fields → chips input + amber skip warning shown WHEN empty
+(the carry-forward: the waterfall otherwise DROPs real-numbers silently);
+remaining T1 fields → plain inputs; `wizardArtifact` (work.theWork T3 upload)
+excluded (phase-9 territory). Testimonial-type sub-choice appears when a
+testimonial boolean is on, writes `proof.testimonialType`, cleared when toggled
+off. Boolean OFF = unpromised proof ⇒ its `dropTarget` section cut downstream.
+
+### Reasoned verification of the proof hard rule
+- proof ABSENT ⇒ assembled `sections` CONTAINS `testimonials` (old behavior). [test 1]
+- `proof:{hasTestimonials:false}` or `{}` ⇒ `testimonials` ABSENT from `sections`
+  AND from `uiblocks` keys. [tests 2, 4]
+- `proof:{hasTestimonials:true}` ⇒ `testimonials` present. [test 3]
+
+### Deviations
+1. Slot registration went into `WizardShell.tsx`, NOT `page.tsx`. The plan named
+   `page.tsx (register the new slots in the dispatcher)`, but phase 3 built the
+   dispatcher (`BUILT_SLOTS`) inside `WizardShell.tsx`; `page.tsx` only renders
+   `<WizardShell>` with no dispatch to register into. I made the minimal additive
+   change in `WizardShell.tsx` (4 imports + 4 `BUILT_SLOTS` entries) as the direct
+   realization of the explicit instruction, and left `page.tsx` unmodified.
+   Flagged because `WizardShell.tsx` was not on the Files-touched list — the plan's
+   filename is stale, not the intent.
+2. StyleSlot mirrors ProductStylePicker's picks via subscription. HeroVariantPicker
+   is prop-controlled → bound to the wizard store (`heroVariant`). ProductStylePicker
+   is internally coupled to the OLD `useProductGenerationStore` (plan forbids editing
+   it; import-for-now). To keep the wizard store the single source of truth for the
+   phase-5 adapter WITHOUT modifying the picker, StyleSlot subscribes to the old
+   store's `variantId`/`paletteId`/`mood` and mirrors them in. Style shows only on
+   the manufacturer/vestria flow (old GeneratingStep gate); meridian gets a note.
+3. StructureSlot does NOT fire the strategy call. The old SitemapReviewStep fetched
+   strategy itself; in the unified wizard that call is owned by the phase-5 adapter
+   (`thing.ts`), which populates `useWizardStore.strategy` before this slot.
+   StructureSlot READS `strategy`/`sitemap`, writes edits via `setSitemap`; editing
+   UX ported verbatim (structure changes = scope-07). Absent strategy ⇒ neutral
+   placeholder; single-page (no menu) ⇒ "single page" note. No user trap.
+4. GoalSlot does NOT mirror legacy enums (that is phase-5 adapters). It writes only
+   `goalIntent`/`goalParam`; the store composes `brief.goal` via `intentToBriefGoal`
+   on save. ALWAYS renders + collects the param even when intent is pre-filled
+   (phase-1 carry-forward). `likelyIntents` from the resolved businessType; unknown
+   businessType ⇒ full 18-intent fallback.
+5. Contract carry-forward: added `skippableWithWarning: true` to WORK `achievements`
+   for parity with thing/trust; asserted in `proofFilter.test.ts`. Phase-1 contract
+   test only asserted thing/trust, so nothing broke.
+
+### Test results
+- `npx tsc --noEmit` → PASS (clean).
+- `npm run test:run -- src/modules/audience/product src/modules/engines src/modules/wizard`
+  → 6 files / 64 tests passed, 0 failed (incl. new `proofFilter.test.ts`, 5 tests).
+
+### Open risks
+- Slot UI render/save wiring exercised only by tsc + the phase-6 manual gate (no
+  component render tests this phase — consistent with phase 3).
+- `BOOLEAN_PROOF_META` maps work.praise → `hasTestimonials`; phase 9 should refine
+  if work needs a distinct proof key.
+- StructureSlot depends on the phase-5 adapter populating `strategy` before the
+  structure slot; until then it shows the placeholder.
+
+### Impl-review verdict: **ship** (loop 1/1) — tsc clean, 64/64 tests, proof hard rule verified (single real-LLM emit point, drops sections+uiblocks, back-compat byte-identical when proof absent). WizardShell scope deviation confirmed acceptable (stale plan filename; page.tsx has no dispatcher). No blocking issues.
+Carry-forward notes (non-blocking):
+- **Phase 5:** mock strategy path (`generateMockMeridianStrategy`, `src/modules/prompt/mockResponseGeneratorProduct.ts`) does NOT receive/honor `proof` — under mock mode / DEMO_TOKEN the testimonials section always shows regardless of proof booleans. `assembleProductStrategy` is the single REAL-LLM point, not the mock point. Cheap fix in phase 5: have the mock accept+honor `proof` so mock-mode e2e/manual QA sees proof-drop too. (Phase-6 gate is real-LLM so not blocking, but phase-11 e2e runs mock.)
+- **Phase 6 gate:** confirm StyleSlot picks (variant/palette/mood, currently mirrored out of the un-hydrated old `useProductGenerationStore` via useEffect) actually PERSIST across reload/resume — the subscription mirror is fragile; re-homed properly in phase 10.
+- Minor: request schema has a dead top-level `hasTestimonials` alongside the active `proof.hasTestimonials` — a future caller could set the wrong one; clean up in phase 10.

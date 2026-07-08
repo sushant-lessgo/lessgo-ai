@@ -12,8 +12,8 @@ Kill the product/service wizard fork. One wizard renderer + one Brief-backed sto
 
 - phase 1 engine input contracts + waterfall: done (commit a67e4ac, review loops 1, ship — 38/38 tests, tsc clean)
 - phase 2 unified Brief-backed wizard store: done (commit c1c30fe, review loops 1, ship — 18/18 tests, tsc clean)
-- phase 3 wizard shell + entry→wizard handoff + core slots: done (commit pending-sha, review loops 1, ship — tsc clean, full suite 1198 green)
-- phase 4 goal/proof/style/structure slots + product proof hard rule: pending
+- phase 3 wizard shell + entry→wizard handoff + core slots: done (commit 1884447, review loops 1, ship — tsc clean, full suite 1198 green)
+- phase 4 goal/proof/style/structure slots + product proof hard rule: done (commit pending-sha, review loops 1, ship — 64/64 tests, tsc clean; WizardShell edited not page.tsx [stale filename])
 - phase 5 shared generation core + GeneratingSlot (thing): pending
 - phase 6 HUMAN GATE — thing pilot review: pending
 - phase 7 scrape convergence (businessType-keyed extraction): pending
