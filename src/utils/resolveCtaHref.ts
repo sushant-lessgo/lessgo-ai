@@ -1,11 +1,19 @@
 // src/utils/resolveCtaHref.ts
-// Shared resolver for a published CTA's href from its element buttonConfig.
-// Single source of truth for the rule that was previously copy-pasted as
-// `resolvePrimaryHref` in ArcCTA.published / BookCallCTA.published / TerminalHero.published.
+// Shared resolver for a published CTA's href.
+//
+// scale-04: split into a core `resolveDestination(dest)` (the one dumb resolver
+// over the Destination vocabulary) plus the legacy `resolveCtaHref` wrapper,
+// which keeps its EXACT prior signature so the ~26 published block readers see
+// byte-identical href output. The wrapper handles the legacy `type:'form'` case
+// inline (with the forms-existence check) and routes everything else through
+// the migration shim → `resolveDestination`.
 //
 // buttonConfig lives at content[sectionId].elementMetadata[elementKey].buttonConfig
 // and is written by ButtonConfigurationModal. A form connection resolves to the
 // shared "#form-section" anchor (mirrors the form-builder published integration).
+
+import type { Destination } from '@/types/destination';
+import { toDestination } from '@/utils/destinationShim';
 
 export interface CtaButtonConfig {
   type?: 'link' | 'form' | 'link-with-input' | 'page';
@@ -18,25 +26,54 @@ export interface CtaButtonConfig {
   pathSlug?: string;
 }
 
+/**
+ * The single dumb resolver: a `Destination` → plain href string. Every kind
+ * maps to a canonical href; classified legacy strings round-trip verbatim.
+ */
+export function resolveDestination(dest: Destination): string {
+  switch (dest.kind) {
+    case 'section':
+      return `#${dest.anchor}`;
+    case 'page':
+      return dest.pathSlug;
+    case 'external':
+      return dest.url;
+    case 'whatsapp':
+      return `https://wa.me/${dest.number}${
+        dest.msg !== undefined ? `?text=${encodeURIComponent(dest.msg)}` : ''
+      }`;
+    case 'call':
+      return `tel:${dest.number}`;
+    case 'email':
+      return `mailto:${dest.addr}`;
+    case 'download':
+      return dest.fileUrl;
+    case 'social':
+      return dest.url;
+  }
+}
+
 export function resolveCtaHref(
   buttonConfig: CtaButtonConfig | undefined,
   forms: Record<string, any> | undefined,
   fallback: string = '#cta',
 ): string {
   if (!buttonConfig) return fallback;
-  if (buttonConfig.type === 'page') {
-    return buttonConfig.pathSlug || fallback;
-  }
-  if (buttonConfig.type === 'link' || buttonConfig.type === 'link-with-input') {
-    return buttonConfig.url || fallback;
-  }
+
+  // Form case stays in the wrapper (D-D): the forms-existence check is NOT pure,
+  // so `toDestination` never sees it. Byte-identical to the pre-scale-04 branch.
   if (buttonConfig.type === 'form') {
     if (!buttonConfig.formId) return fallback;
     const form = forms?.[buttonConfig.formId];
     if (!form) return fallback;
     return '#form-section';
   }
-  return fallback;
+
+  // Everything else: shim → resolver. `pathSlug`/`url` fall back to `fallback`
+  // when empty, matching the prior `pathSlug || fallback` / `url || fallback`.
+  const dest = toDestination(buttonConfig);
+  if (dest === undefined || dest === 'GOAL_REF') return fallback;
+  return resolveDestination(dest) || fallback;
 }
 
 /**
