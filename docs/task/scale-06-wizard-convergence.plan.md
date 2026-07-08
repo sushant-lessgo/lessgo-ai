@@ -16,8 +16,8 @@ Kill the product/service wizard fork. One wizard renderer + one Brief-backed sto
 - phase 4 goal/proof/style/structure slots + product proof hard rule: done (commit 619005a, review loops 1, ship — 64/64 tests, tsc clean; WizardShell edited not page.tsx [stale filename])
 - phase 5 shared generation core + GeneratingSlot (thing): done (commit 27c5811, review loops 1, ship — 50/50 tests, tsc clean; PILOT SLICE COMPLETE)
 - phase 6 HUMAN GATE — thing pilot review: SIGNED OFF by founder. Decisions: differentiator=GUIDED CHIPS (implement now, phase 6b); numbers=require≥1 skippable-with-warning (already built); cosmetic fixes (GeneratingSlot setState) deferred to phase 10.
-- phase 6b differentiator guided chips: done (commit pending-sha, orchestrator spot-verified — all 3 engines' differentiator field [thing differentiator/trust process/work bioStory, all askCandidate:'differentiator' WHY-YOU] now guided-chips; tsc clean, 49 tests)
-- phase 7 scrape convergence (businessType-keyed extraction): pending
+- phase 6b differentiator guided chips: done (commit 0cf803d, orchestrator spot-verified — all 3 engines' differentiator field [thing differentiator/trust process/work bioStory, all askCandidate:'differentiator' WHY-YOU] now guided-chips; tsc clean, 49 tests)
+- phase 7 scrape convergence (businessType-keyed extraction): done (commit pending-sha, review loops 1, ship — 103 tests, tsc clean; +config.test.ts fix authorized; businessType field dormant until a caller wires it [phase 8/11])
 - phase 8 trust engine through unified wizard: pending
 - phase 9 work engine / writer self-serve: pending
 - phase 10 kills, redirects, old-store retirement: pending

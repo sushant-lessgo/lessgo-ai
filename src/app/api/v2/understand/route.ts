@@ -30,6 +30,10 @@ import { isDemoMode } from '@/lib/mockMode';
 // Entry mode (scale-02 phase 3, D6): pure brief module — engine resolution +
 // Brief construction happen server-side here, never in the AI call.
 import { buildBriefDraft, type EntrySignals } from '@/modules/brief/classify';
+// scale-06 phase 7: businessType-keyed extraction. The wizard/entry path selects
+// its extraction schema by businessType (never by audienceType/templateId).
+import { businessTypeKeys, type BusinessTypeKey } from '@/modules/businessTypes/config';
+import { extractionForBusinessType, hasEntryEnrichment } from '@/lib/schemas/extraction';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +49,11 @@ const UnderstandRequestSchema = z.object({
   // route behaves byte-identically to before; true ⇒ EntryUnderstandSchema
   // + classification prompt + server-side briefDraft.
   entry: z.boolean().optional(),
+  // scale-06 phase 7: OPTIONAL businessType for the wizard/entry path. When the
+  // caller already knows the businessType (e.g. a wizard re-extraction), the
+  // entry schema is ENRICHED with that engine's extraction fields via the
+  // registry. Absent ⇒ the neutral entry base (first-touch entry) — unchanged.
+  businessType: z.enum(businessTypeKeys).optional(),
 });
 
 function buildUnderstandPrompt(oneLiner: string): string {
@@ -141,32 +150,56 @@ async function handleEntryUnderstand(
   req: NextRequest,
   oneLiner: string,
   userId: string,
-  startTime: number
+  startTime: number,
+  businessType?: BusinessTypeKey
 ): Promise<Response> {
+  // scale-06 phase 7: select the extraction by businessType key when known.
+  // The engine-specific fields ENRICH the neutral entry base; when the engine
+  // has no delta (thing/trust/work) this is byte-identical to the base path.
+  const extraction = businessType ? extractionForBusinessType(businessType) : null;
+  const enriched = !!extraction && hasEntryEnrichment(extraction);
+  const understandSchema = enriched
+    ? EntryUnderstandSchema.extend(extraction!.entryEnrichmentFields)
+    : EntryUnderstandSchema;
+
   // Demo/mock mode — agency-shaped fixture, no AI call, 0 credits.
   if (isDemoMode(req)) {
     logger.info('[understand] Using mock response (entry)');
+    const demoSignals = extraction
+      ? extraction.enrichSignals(
+          ENTRY_DEMO_SIGNALS as unknown as Record<string, unknown>,
+          ENTRY_DEMO_SIGNALS
+        )
+      : ENTRY_DEMO_SIGNALS;
     return createSecureResponse({
       success: true,
-      data: ENTRY_DEMO_SIGNALS,
-      briefDraft: buildBriefDraft(ENTRY_DEMO_SIGNALS, oneLiner),
+      data: demoSignals,
+      briefDraft: buildBriefDraft(demoSignals, oneLiner),
       creditsUsed: 0,
       creditsRemaining: 999,
     });
   }
 
-  const prompt = buildEntryUnderstandPrompt(oneLiner);
+  const enrichBlock = extraction ? extraction.entryEnrichmentPrompt() : '';
+  const prompt = enrichBlock
+    ? `${buildEntryUnderstandPrompt(oneLiner)}\n\n${enrichBlock}`
+    : buildEntryUnderstandPrompt(oneLiner);
   logger.dev('[understand] ENTRY PROMPT:', prompt);
 
   let signals: EntrySignals;
   let briefDraft;
   try {
-    signals = await generateWithSchema(
+    const raw = await generateWithSchema(
       'understand',
       [{ role: 'user', content: prompt }],
-      EntryUnderstandSchema,
+      understandSchema,
       'entry_understanding'
     );
+    // Base signals are the EntrySignals subset; enrichment folds engine
+    // fields into the existing signal fields (additive, base leads).
+    signals = extraction
+      ? extraction.enrichSignals(raw as Record<string, unknown>, raw as EntrySignals)
+      : (raw as EntrySignals);
     logger.dev('[understand] ENTRY RESPONSE:', signals);
     // Server-side Brief construction (D1/D6) — engine via code lookup; safe
     // for place/quick-yes by construction (copyEngine omitted, D2).
@@ -232,7 +265,10 @@ async function understandHandler(req: NextRequest): Promise<Response> {
       );
     }
 
-    const { oneLiner, audienceType, templateId, entry } = validation.data;
+    const { oneLiner, audienceType, templateId, entry, businessType } = validation.data;
+    // LEGACY (old-wizard) schema selection — used ONLY on the non-entry path
+    // below. The convergent wizard/entry path selects by businessType key and
+    // does NOT read isManufacturerFlow/templateId. Deleted in scale-06 phase 10.
     const isService = audienceType === 'service';
     const isManufacturer = !isService && isManufacturerFlow(templateId);
 
@@ -251,11 +287,18 @@ async function understandHandler(req: NextRequest): Promise<Response> {
 
     const userId = authCheck.userId!;
 
-    // 2a. Entry-mode branch (scale-02 phase 3). Fully additive: when the
-    // `entry` flag is absent, everything below is byte-identical to before.
+    // 2a. Entry-mode branch (scale-02 phase 3 + scale-06 phase 7 businessType
+    // enrichment). Fully additive: when the `entry` flag is absent, everything
+    // below is byte-identical to before.
     if (entry === true) {
-      return handleEntryUnderstand(req, oneLiner, userId, startTime);
+      return handleEntryUnderstand(req, oneLiner, userId, startTime, businessType);
     }
+
+    // ===== LEGACY PATH (old product/service wizards) — scale-06 phase 10 kill.
+    // Everything from here down is the pre-convergence audienceType +
+    // isManufacturerFlow(templateId) schema switch. Preserved byte-for-byte so
+    // old-wizard requests (no `entry` flag) behave exactly as before. The
+    // convergent wizard never reaches here.
 
     // 2b. Check for demo/mock mode - return mock data without AI call
     if (isDemoMode(req)) {

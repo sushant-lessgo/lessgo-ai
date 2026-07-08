@@ -6,6 +6,7 @@ import { describe, it, expect } from 'vitest';
 import { businessTypes, businessTypeKeys } from './config';
 import { copyEngines, capabilityIds, designStyles } from '@/types/brief';
 import { goalIntents } from '@/modules/goals/vocabulary';
+import { isExtractionSchemaKey } from '@/lib/schemas/extraction';
 
 describe('businessTypes v0 shape', () => {
   it('has exactly the 6 seed keys incl. manufacturer + writer', () => {
@@ -68,9 +69,9 @@ describe('businessTypes v0 shape', () => {
     }
   });
 
-  it("extractionSchemaKey is the '<key>-v0' placeholder", () => {
-    for (const [key, entry] of Object.entries(businessTypes)) {
-      expect(entry.extractionSchemaKey).toBe(`${key}-v0`);
+  it('extractionSchemaKey is a real extraction-registry key (scale-06 phase 7)', () => {
+    for (const entry of Object.values(businessTypes)) {
+      expect(isExtractionSchemaKey(entry.extractionSchemaKey)).toBe(true);
     }
   });
 });

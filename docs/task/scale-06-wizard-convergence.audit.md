@@ -570,3 +570,119 @@ Carry-forward notes (non-blocking):
 
 **Deviations:** none.
 **Open risks:** none — data + one UI branch, no store/waterfall changes.
+
+## Phase 7 — scrape convergence (businessType-keyed extraction)
+
+**Files changed**
+- `src/lib/schemas/extraction/index.ts` (created) — registry + resolver
+- `src/lib/schemas/extraction/thing.ts` (created)
+- `src/lib/schemas/extraction/trust.ts` (created)
+- `src/lib/schemas/extraction/work.ts` (created)
+- `src/lib/schemas/extraction/manufacturer.ts` (created)
+- `src/lib/schemas/extraction/extraction.test.ts` (created)
+- `src/app/api/v2/understand/route.ts` (edited)
+- `src/app/api/v2/scrape-website/route.ts` (edited)
+- `src/modules/businessTypes/config.ts` (edited — `<key>-v0` → real registry keys)
+
+### Registry shape (`extraction/index.ts`)
+`extractionSchemaKeys = ['thing','trust','work','manufacturer']`. Each entry is an
+`EngineExtraction`: `{ key, understandSchema, scrapeSchema, entryEnrichmentFields
+(ZodRawShape), entryEnrichmentPrompt(), enrichSignals(data, base) }`.
+- `getExtraction(key)` — by registry key.
+- `extractionForBusinessType(bt)` — reads `businessTypes[bt].extractionSchemaKey`,
+  validates it, returns the entry. This is how the wizard/entry path selects a
+  schema (by businessType, never by templateId).
+- `hasEntryEnrichment(e)` — true iff the engine adds fields to the entry base.
+
+businessType → registry key (config.ts): saas→`thing`, agency/consultant/coach→
+`trust`, writer→`work`, manufacturer→`manufacturer`. (manufacturer copyEngine is
+`thing` but it maps to the richer `manufacturer` key — the only key with an
+enrichment delta.)
+
+Standalone `understand/scrape` schemas per engine re-use the existing zod schemas
+(thing=Understanding/ScrapeWebsiteExtended, trust=ServiceUnderstanding/
+ScrapeWebsiteService, manufacturer=ManufacturerUnderstanding/
+ScrapeWebsiteManufacturer, work currently mirrors thing base — phase 9 extends it).
+Field coverage preserved by re-export, nothing re-typed.
+
+### Manufacturer schema added — yes
+Justified per the plan's condition ("only if manufacturer needs richer fields than
+base thing"): it carries the 4 trade-supplier keys (whatYouMake / industriesServed /
+productCategories / valueAdds) that base thing lacks. On the entry path these are an
+enrichment DELTA `.extend()`-ed onto EntryScrape/EntryUnderstand + an appended prompt
+block; `enrichSignals` folds them ADDITIVELY into existing `EntrySignals` fields
+(productCategories+valueAdds → offerings, industriesServed → audiences, whatYouMake →
+summary when empty). Base values lead and are never overwritten, so brief prefill is
+strictly ≥ the base. No `EntrySignals` shape change → no brief-module edit needed.
+
+### Wizard/entry path vs legacy branch
+- Both routes gained an OPTIONAL `businessType` request field (enum of
+  `businessTypeKeys`). When present, the entry handler selects the registry
+  extraction by businessType key and enriches the convergent entry base; when
+  absent (first-touch entry from EntryInputStep — which cannot know the type yet),
+  the base entry schema is used, BYTE-IDENTICAL to pre-phase-7. thing/trust/work
+  have no delta, so selecting them is also identical to base.
+- The manufacturer↔vestria coupling is dead on the wizard path: the entry handler
+  never reads `isManufacturerFlow`/`templateId`. Manufacturer richness is reachable
+  via `businessType:'manufacturer'`.
+- The legacy audienceType + `isManufacturerFlow(templateId)` schema switch is
+  PRESERVED verbatim on the non-entry path (gated by `entry !== true`, the existing
+  discriminator), now fenced with a `LEGACY PATH … scale-06 phase 10 kill` banner.
+  `isManufacturerFlow` itself is untouched (melts in scale-08). An old-wizard
+  request (no `entry` flag) selects the same schema and prefill as before.
+
+### differentiator stays ASK
+No extraction schema or enrichment field named `differentiator` exists (asserted in
+extraction.test.ts). The always-ASK guided-chips field (thing differentiator / trust
+process / work bioStory) is never made prefill-able.
+
+### Reasoning: prefill quality
+- A wizard/entry scrape of a SaaS URL (businessType `saas` → `thing`) or a service
+  URL (agency/consultant/coach → `trust`) selects its registry schema; both have no
+  enrichment delta, so extraction == the current convergent entry base → prefill ≥
+  before (unchanged). A manufacturer URL (→ `manufacturer`) additionally extracts the
+  4 trade-supplier fields and folds them into offerings/audiences/summary → prefill
+  strictly richer than base, with NO templateId coupling.
+- An OLD-wizard request (product/service, `entry` absent) hits the untouched legacy
+  branch → same schema, same prefill.
+
+### Verification
+- `npx tsc --noEmit` → clean (no output).
+- `npx vitest run src/lib/schemas src/modules/brief` → 5 files, 94 tests passed.
+
+### Deviations
+- **Out-of-scope test now fails (NOT edited):** `src/modules/businessTypes/config.test.ts:71-75`
+  asserts `extractionSchemaKey === '<key>-v0'` — the exact placeholder the plan
+  directed me to replace. It is not on this phase's Files-touched list, so per
+  protocol I did NOT edit it and flag it here instead. Required follow-up (one line):
+  change the assertion to `expect(isExtractionSchemaKey(entry.extractionSchemaKey)).toBe(true)`
+  (import from `@/lib/schemas/extraction`), or assert against the real keys. This is
+  the only fallout; the scoped test command does not run this file.
+- Added an OPTIONAL `businessType` request field to both routes (conservative,
+  back-compat: absent ⇒ prior behavior). No caller passes it yet (EntryInputStep /
+  wizard store are out of scope this phase); the mechanism is exercised by
+  extraction.test.ts. Wiring a wizard re-extraction caller is a later concern.
+
+### Open risks
+- `businessType` enrichment on the entry path is dormant until a caller supplies it;
+  manufacturer richness on the convergent path is proven by unit test, not yet by a
+  live wizard re-scrape.
+- Legacy branch remains live (by design) until phase 10.
+
+### Follow-up (authorized scope addition) — config.test.ts fix
+Coordinator authorized editing the flagged out-of-scope test. Updated
+`src/modules/businessTypes/config.test.ts`: replaced the `extractionSchemaKey ===
+'<key>-v0'` placeholder assertion with `expect(isExtractionSchemaKey(
+entry.extractionSchemaKey)).toBe(true)` (imported `isExtractionSchemaKey` from
+`@/lib/schemas/extraction`). Direct consequence of replacing the placeholders.
+
+Re-verified:
+- `npx tsc --noEmit` → clean.
+- `npm run test:run -- src/lib/schemas src/modules/brief src/modules/businessTypes`
+  → 6 files, 103 tests passed.
+
+### Impl-review verdict: **ship** (loop 1/1) — tsc clean, 103 tests, back-compat SOUND (legacy path gated by pre-existing `entry===true`, byte-unchanged; old-wizard requests never enter the new path), manufacturer coupling killed on wizard path only (`isManufacturerFlow` untouched for scale-08), registry resolves all 6 businessTypes, differentiator stays ASK, credits/crawl/provider untouched, config.test.ts fix meaningful. No blocking issues.
+Carry-forward notes (non-blocking):
+- **IMPORTANT wiring gap (phase 8/11):** the new `businessType` request field on `/api/v2/understand`+`/scrape-website` is DORMANT — no caller passes it yet, so businessType-keyed selection is proven only by unit test. Chicken-and-egg: businessType is DERIVED from the scrape, so keyed selection only applies to a RE-scrape after a brief exists (or when the user pre-declares type). A later phase must decide/wire this (or accept first-scrape uses the base entry schema, enrichment only on re-scrape).
+- Cosmetic: understand-path `enrichSignals(raw, raw)` leaks 4 manufacturer keys as inert extra props (scrape path derives a clean base first); harmless to `buildBriefDraft`; tidy when wiring the caller.
+- work extraction mirrors thing base (no delta) — phase-9 territory.

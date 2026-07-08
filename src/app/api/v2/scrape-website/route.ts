@@ -39,6 +39,10 @@ import type {
 import { buildBriefDraft, type EntrySignals } from '@/modules/brief/classify';
 import { buildServiceScrapePrompt } from '@/modules/audience/service/promptScrape';
 import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
+// scale-06 phase 7: businessType-keyed extraction. The wizard/entry path selects
+// its extraction schema by businessType (never by audienceType/templateId).
+import { businessTypeKeys, type BusinessTypeKey } from '@/modules/businessTypes/config';
+import { extractionForBusinessType, hasEntryEnrichment } from '@/lib/schemas/extraction';
 import { isDemoMode } from '@/lib/mockMode';
 import { scrapeSite, ScrapeError } from '@/lib/scrape/fetchSite';
 import type { ScrapedPage } from '@/lib/scrape/fetchSite';
@@ -62,6 +66,11 @@ const ScrapeRequestSchema = z.object({
   // route behaves byte-identically to before; true ⇒ EntryScrapeSchema
   // + appended classification prompt block + server-side briefDraft.
   entry: z.boolean().optional(),
+  // scale-06 phase 7: OPTIONAL businessType for the wizard/entry path. When the
+  // caller already knows the businessType (e.g. a wizard re-extraction), the
+  // entry scrape schema is ENRICHED with that engine's extraction fields via
+  // the registry. Absent ⇒ the neutral entry base (first-touch) — unchanged.
+  businessType: z.enum(businessTypeKeys).optional(),
 });
 
 function buildScrapePrompt(combinedText: string): string {
@@ -293,15 +302,34 @@ async function handleEntryScrape(
   req: NextRequest,
   url: string,
   userId: string,
-  startTime: number
+  startTime: number,
+  businessType?: BusinessTypeKey
 ): Promise<Response> {
+  // scale-06 phase 7: select the extraction by businessType key when known.
+  // Engine-specific fields ENRICH the neutral entry base; with no delta
+  // (thing/trust/work) this is byte-identical to the base entry path.
+  const extraction = businessType ? extractionForBusinessType(businessType) : null;
+  const enriched = !!extraction && hasEntryEnrichment(extraction);
+  const entryScrapeSchema = enriched
+    ? EntryScrapeSchema.extend(extraction!.entryEnrichmentFields)
+    : EntryScrapeSchema;
+
+  // Compose EntrySignals from the entry scrape extract, then fold engine
+  // enrichment additively (base signals lead, never overwritten).
+  const toSignals = (data: Omit<EntryScrapeData, 'facts' | 'excerpts'>): EntrySignals => {
+    const base = mapEntryScrapeToSignals(data);
+    return extraction
+      ? extraction.enrichSignals(data as unknown as Record<string, unknown>, base)
+      : base;
+  };
+
   // Demo/mock mode — agency-shaped fixture, no network, no AI call, 0 credits.
   if (isDemoMode(req)) {
     logger.info('[scrape-website] Using mock response (entry)');
     return createSecureResponse({
       success: true,
       data: MOCK_DATA_ENTRY,
-      briefDraft: buildBriefDraft(mapEntryScrapeToSignals(MOCK_DATA_ENTRY), url),
+      briefDraft: buildBriefDraft(toSignals(MOCK_DATA_ENTRY), url),
       creditsUsed: 0,
       creditsRemaining: 999,
     });
@@ -341,25 +369,27 @@ async function handleEntryScrape(
     );
   }
 
-  // ONE AI call: existing extraction prompt + appended entry blocks.
+  // ONE AI call: existing extraction prompt + appended entry blocks
+  // (+ engine enrichment block when a businessType was supplied).
+  const enrichBlock = extraction ? extraction.entryEnrichmentPrompt() : '';
   const prompt = `${buildScrapePrompt(combinedText)}
 
 ${entryPrefillDeltaPromptBlock()}
 
-${entryClassificationPromptBlock()}`;
+${entryClassificationPromptBlock()}${enrichBlock ? `\n\n${enrichBlock}` : ''}`;
 
   let data: EntryScrapeData;
   let briefDraft;
   try {
-    data = await generateWithSchema(
+    data = (await generateWithSchema(
       'understand',
       [{ role: 'user', content: prompt }],
-      EntryScrapeSchema,
+      entryScrapeSchema,
       'entry_scrape_website'
-    );
+    )) as EntryScrapeData;
     // Server-side Brief construction (D1/D6) — engine via code lookup; safe
     // for place/quick-yes by construction (copyEngine omitted, D2).
-    briefDraft = buildBriefDraft(mapEntryScrapeToSignals(data), url);
+    briefDraft = buildBriefDraft(toSignals(data), url);
   } catch (error: any) {
     logger.error('[scrape-website] AI entry extraction failed:', error);
     return createSecureResponse(
@@ -420,7 +450,10 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
         400
       );
     }
-    const { url, audienceType, templateId, entry } = validation.data;
+    const { url, audienceType, templateId, entry, businessType } = validation.data;
+    // LEGACY (old-wizard) schema selection — used ONLY on the non-entry path
+    // below. The convergent wizard/entry path selects by businessType key and
+    // does NOT read isManufacturerFlow/templateId. Deleted in scale-06 phase 10.
     const isService = audienceType === 'service';
     const isManufacturer = !isService && isManufacturerFlow(templateId);
 
@@ -434,11 +467,18 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
     }
     const userId = authCheck.userId!;
 
-    // 2a. Entry-mode branch (scale-02 phase 3). Fully additive: when the
-    // `entry` flag is absent, everything below is byte-identical to before.
+    // 2a. Entry-mode branch (scale-02 phase 3 + scale-06 phase 7 businessType
+    // enrichment). Fully additive: when the `entry` flag is absent, everything
+    // below is byte-identical to before.
     if (entry === true) {
-      return handleEntryScrape(req, url, userId, startTime);
+      return handleEntryScrape(req, url, userId, startTime, businessType);
     }
+
+    // ===== LEGACY PATH (old product/service wizards) — scale-06 phase 10 kill.
+    // Everything from here down is the pre-convergence audienceType +
+    // isManufacturerFlow(templateId) schema switch. Preserved byte-for-byte so
+    // old-wizard requests (no `entry` flag) behave exactly as before. The
+    // convergent wizard never reaches here.
 
     // 2b. Demo/mock mode — no network, no AI call.
     if (isDemoMode(req)) {
