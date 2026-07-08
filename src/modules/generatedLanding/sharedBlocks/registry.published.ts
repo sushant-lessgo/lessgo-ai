@@ -8,9 +8,11 @@
 
 import type React from 'react';
 import LeadFormPublished from './LeadForm/LeadForm.published';
+import StoreBadgesPublished from './StoreBadges/StoreBadges.published';
 
 export const sharedBlockPublishedRegistry: Record<string, React.ComponentType<any>> = {
   leadform: LeadFormPublished,
+  storebadges: StoreBadgesPublished,
 };
 
 export function resolveSharedBlockPublished(

@@ -610,6 +610,21 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       form_headline: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get in touch' },
     },
   },
+
+  // ===== Shared template-agnostic StoreBadges (scale-05 phase 7) =====
+  // Injected deterministically by injectGoalSections for the download-app goal;
+  // NOT AI-generated. Present so the composed layoutElementSchema resolves
+  // `SharedStoreBadges` → editor element-gating + publish sanitize keep the
+  // store URLs. Renders on every template via the shared-block registry
+  // (section type `storeBadges`).
+  SharedStoreBadges: {
+    sectionType: 'storeBadges',
+    elements: {
+      appstore_url:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      playstore_url: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      badge_label:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get the app' },
+    },
+  },
 };
 
 /**

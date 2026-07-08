@@ -1,0 +1,62 @@
+'use client';
+
+// Shared StoreBadges — EDIT twin. Renders the App Store / Google Play badge row
+// from the section's own content elements (appstore_url / playstore_url /
+// badge_label). Like the LeadForm edit twin, the edit renderer does NOT pass a
+// `content` prop (LandingPageRenderer spreads only the section's own `data`), so
+// this reads the section from the store via useEditStoreLegacy. Layout lives in
+// badgeArt.StoreBadgesCore so this is byte-parallel with the published twin.
+//
+// Anchors are inert in the editor (preventDefault) — the published twin carries
+// the real `data-lessgo-cta` beacon attrs. Both emit identical badge markup.
+
+import React from 'react';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import {
+  StoreBadgesCore,
+  resolveBadges,
+  badgeArt,
+  STORE_BADGES_DEFAULT_LABEL,
+} from './badgeArt';
+
+export default function StoreBadges({ sectionId }: { sectionId: string }) {
+  const store = useEditStore() as any;
+  const section = store.content?.[sectionId];
+  const elements = (section?.elements || {}) as Record<string, any>;
+  const badges = resolveBadges({
+    appstore_url: elements.appstore_url,
+    playstore_url: elements.playstore_url,
+  });
+  const label = elements.badge_label || STORE_BADGES_DEFAULT_LABEL;
+
+  const onHeadingBlur = (e: React.FocusEvent<HTMLHeadingElement>) => {
+    const value = (e.currentTarget.textContent || '').trim();
+    if (value !== label && typeof store.updateElementContent === 'function') {
+      store.updateElementContent(sectionId, 'badge_label', value);
+    }
+  };
+
+  const headingSlot = (
+    <h2
+      className="lg-badges__h"
+      contentEditable
+      suppressContentEditableWarning
+      onBlur={onHeadingBlur}
+    >
+      {label}
+    </h2>
+  );
+
+  const badgeNodes = badges.map((b) => (
+    <a
+      key={b.kind}
+      href={b.url}
+      className="lg-badge"
+      onClick={(e) => e.preventDefault()}
+    >
+      {badgeArt(b.kind)}
+    </a>
+  ));
+
+  return <StoreBadgesCore headingSlot={headingSlot} badgeNodes={badgeNodes} />;
+}

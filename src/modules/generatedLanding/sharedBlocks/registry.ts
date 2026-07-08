@@ -9,9 +9,11 @@
 
 import type React from 'react';
 import LeadForm from './LeadForm/LeadForm';
+import StoreBadges from './StoreBadges/StoreBadges';
 
 export const sharedBlockRegistry: Record<string, React.ComponentType<any>> = {
   leadform: LeadForm,
+  storebadges: StoreBadges,
 };
 
 export function resolveSharedBlock(sectionType: string): React.ComponentType<any> | null {

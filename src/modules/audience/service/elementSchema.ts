@@ -645,6 +645,20 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       form_headline: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get in touch' },
     },
   },
+
+  // ===== Shared template-agnostic StoreBadges (scale-05 phase 7) =====
+  // Injected deterministically by injectGoalSections for the download-app goal.
+  // Mirror of the product entry so the composed layoutElementSchema resolves
+  // `SharedStoreBadges` on the service path too. Renders on every template via
+  // the shared-block registry.
+  SharedStoreBadges: {
+    sectionType: 'storeBadges',
+    elements: {
+      appstore_url:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      playstore_url: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      badge_label:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get the app' },
+    },
+  },
 };
 
 /**

@@ -274,3 +274,50 @@ Test assertion on emitted static markup (`renderToStaticMarkup(<LeadFormPublishe
 **Open risks / blocker**
 - BLOCKER (out-of-scope file): `src/modules/brief/bridge.test.ts` is NOT in Phase 6 Files-touched, but the plan-mandated M2 writeback change (always materialize `param.message`) invalidates its `enquiry + phone -> M2 with composed wa.me destination (digits only)` case (line ~257). That test now must expect `destination: "https://wa.me/15551234567?text=Hi%2C%20I%20found%20your%20website%20and%20I'm%20interested."` (apostrophe stays literal — encodeURIComponent does not escape it) and `param: { phone: '+1 (555) 123-4567', message: "Hi, I found your website and I'm interested." }`. Left UNEDITED per scope rules — orchestrator must add bridge.test.ts to scope or approve the one-assertion update.
 - Modal persistence relies on the edit-store auto-save; not exercised by an automated edit-page test in this phase (no edit-page test harness in Files-touched).
+
+---
+
+## Phase 7 — M3: store-badges shared block
+
+**Files changed**
+- `src/modules/generatedLanding/sharedBlocks/StoreBadges/badgeArt.tsx` — NEW plain module (no 'use client')
+- `src/modules/generatedLanding/sharedBlocks/StoreBadges/StoreBadges.tsx` — NEW edit twin ('use client')
+- `src/modules/generatedLanding/sharedBlocks/StoreBadges/StoreBadges.published.tsx` — NEW published twin
+- `src/modules/generatedLanding/sharedBlocks/registry.ts` — registered `storebadges` edit twin
+- `src/modules/generatedLanding/sharedBlocks/registry.published.ts` — registered `storebadges` published twin
+- `src/modules/goals/injectGoalSections.ts` — NEW deterministic injector
+- `src/app/onboarding/product/[token]/components/steps/GeneratingStep.tsx` — call injector in buildFinalContent
+- `src/app/onboarding/service/[token]/components/steps/GeneratingStep.tsx` — same
+- `src/modules/sections/sectionList.ts` — added `storeBadges` SectionMeta
+- `src/modules/audience/product/elementSchema.ts` — added `SharedStoreBadges` entry
+- `src/modules/audience/service/elementSchema.ts` — added `SharedStoreBadges` entry
+- `src/modules/goals/injectGoalSections.test.ts` — NEW
+- `src/modules/generatedLanding/sharedBlocks/__tests__/storeBadges.parity.test.tsx` — NEW
+
+**What changed (per file)**
+- `badgeArt.tsx`: plain module holding inline "official-style" SVG badges (Google Play, App Store), the shared `StoreBadgesCore` layout (self-sets `data-surface="neutral"`, `<style>`-injected CSS mirroring the LeadForm approach), `resolveBadges()` (App Store then Google Play, empty URLs skipped) and `badgeKindForUrl()` host sniff. No public/ asset, no buildAssets change. Firewall-safe (React import only).
+- `StoreBadges.tsx` / `.published.tsx`: byte-parallel twins built on `StoreBadgesCore`. Edit twin reads the section from `useEditStoreLegacy` by `sectionId` (edit renderer spreads only section data, not `content` — same reason LeadForm.tsx reads the store), editable `badge_label` heading, inert anchors (preventDefault). Published twin reads flattened element props (`appstore_url`/`playstore_url`/`badge_label`), anchors carry `data-lessgo-cta` + `data-lessgo-cta-role="secondary"` + `externalLinkProps` (new-tab). Badge SVG markup shared via `badgeArt(kind)` → identical in both.
+- `injectGoalSections.ts`: plain module `injectGoalSections(sections, sectionLayouts, content, goal, ctx)`. For `download-app` with ≥1 `param.links` entry, host-sniffs each link, injects a `storeBadges-<uuid>` section (layout `SharedStoreBadges`) after the hero with elements `{ appstore_url, playstore_url, badge_label }`. Deterministic, idempotent (skips if a `storeBadges-` section exists), no-op for other intents / no links / unknown-host-only links. Mutates sections/sectionLayouts/content in place (matches seedGoalForm's `injectLeadFormSection`).
+- GeneratingSteps: call `injectGoalSections(finalContent.layout?.sections, finalContent.layout?.sectionLayouts, finalContent.content, briefGoal)` right after `seedGoalForm`.
+
+**Host-sniff rule:** URL contains `play.google.com` → Play badge (`playstore_url`); contains `apps.apple.com` (or `itunes.apple.com`) → App Store badge (`appstore_url`); unknown host → skipped. First match per store slot wins; order-independent. Two links (Kathaworld) → TWO badges; one → one.
+
+**Twin parity + firewall:** both twins build markup through the single-source `StoreBadgesCore`/`badgeArt` (byte-parallel section/badge DOM). `badgeArt.tsx` is a PLAIN module; the published twin imports only plain modules (`badgeArt`, `resolveCtaHref`) — no 'use client' code reaches the static-markup path. Intentional asymmetry (same as LeadForm): published anchors carry `data-lessgo-cta` beacon attrs, edit anchors do not.
+
+**Registry lowercase keys:** `storeBadges-<uuid>` → both `extractSectionType` impls lowercase to `storebadges`; both registries keyed `storebadges`. Verified via parity test resolving a real `storeBadges-abcd1234` id through both `componentRegistry` shims.
+
+**Section-type-switch grep (step 0):** re-confirmed the Phase 5 enumeration (already pre-scouted `storebadges`): `getSurfaceForSection` (not called for shared types — block self-sets `data-surface`), BackgroundPreview/SectionTypeSelector/SectionCRUD (add-section UI, never used for injected sections), collectionHelpers/pageActions/pageHelpers (match specific types only), useReviewState (header/footer only). All have safe defaults; no reader breaks on `storeBadges`. No edits required beyond `sectionList` + `elementSchema` entries.
+
+**Kathaworld two badge hrefs produced** (from `param.links = [play, appstore]`):
+- `playstore_url` = `https://play.google.com/store/apps/details?id=com.kathaworld.app`
+- `appstore_url`  = `https://apps.apple.com/us/app/kathaworld/id1234567890`
+Both rendered as two `.lg-badge` anchors in BOTH renderers; published anchors carry `data-lessgo-cta`/`role="secondary"`/`target="_blank"`.
+
+**Deviations:** none (all edits within Files-touched). `badge_label` defaults to "Get the app" (conservative, editable) since Phase 1 links carry no label.
+
+**Tests / build**
+- `npx tsc --noEmit` — clean.
+- `npm run test:run -- injectGoalSections storeBadges componentRegistry dispatch` — 3 files, 30 tests pass; `dispatch.test.ts` run explicitly = 14 pass (template-dispatch regression green).
+- `npm run build` — green (published block CSS injected inline via `<style>`, no public/published.css dependency).
+
+**Open risks:** editor-side interactions (drag/reorder/delete of an injected storeBadges section) not covered by an automated edit-page test (no such harness in Files-touched); relies on the grep-confirmed safe defaults.

@@ -11,6 +11,7 @@ import type { ServiceStrategyOutputAssembled } from '@/types/service';
 import { defaultHearthPalette } from '@/modules/templates/hearth/palettes';
 import { legacyGoalToBriefGoal } from '@/modules/brief/bridge';
 import { seedGoalForm } from '@/modules/goals/seedGoalForm';
+import { injectGoalSections } from '@/modules/goals/injectGoalSections';
 
 type Stage = 'strategy' | 'copy' | 'saving' | 'done';
 
@@ -123,6 +124,15 @@ export default function GeneratingStep() {
       ? legacyGoalToBriefGoal(goal, goalParam, { businessName, offer })
       : null;
     seedGoalForm(finalContent, briefGoal);
+
+    // scale-05 phase 7: deterministic goal-section injection (M3 download-app
+    // → store-badges row). No-op for other intents / no store links.
+    injectGoalSections(
+      finalContent.layout?.sections,
+      finalContent.layout?.sectionLayouts,
+      finalContent.content,
+      briefGoal
+    );
 
     return { finalContent, title };
   };

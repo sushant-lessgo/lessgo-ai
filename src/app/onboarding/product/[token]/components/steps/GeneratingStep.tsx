@@ -35,6 +35,7 @@ import type { SitemapPage } from '@/types/product';
 import { isImagesAtBirthEnabled } from '@/lib/generation/flag';
 import { legacyGoalToBriefGoal } from '@/modules/brief/bridge';
 import { seedGoalForm } from '@/modules/goals/seedGoalForm';
+import { injectGoalSections } from '@/modules/goals/injectGoalSections';
 import { injectImagesForPage } from '@/lib/generation/imagesAtBirth';
 // Plain data module (fields only, no component code) — safe to import statically
 // without breaching the template bundle firewall.
@@ -229,6 +230,15 @@ export default function GeneratingStep() {
       ? legacyGoalToBriefGoal(landingGoal, goalParam, { businessName: productName, offer })
       : null;
     seedGoalForm(finalContent, briefGoal);
+
+    // scale-05 phase 7: deterministic goal-section injection (M3 download-app
+    // → store-badges row; writers can ship apps too). No-op otherwise.
+    injectGoalSections(
+      finalContent.layout?.sections,
+      finalContent.layout?.sectionLayouts,
+      finalContent.content,
+      briefGoal
+    );
 
     return { finalContent };
   };
