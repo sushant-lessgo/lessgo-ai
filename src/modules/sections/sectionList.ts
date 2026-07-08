@@ -24,6 +24,7 @@ export const sectionList: SectionMeta[] = [
   { id: "hero", label: "Hero", order: 1, required: true, defaultSpacingAfter: 'spacious', contentDensity: 'medium' },
   { id: "leadForm", label: "Lead Form", order: 2, defaultSpacingAfter: 'spacious', contentDensity: 'medium' },
   { id: "storeBadges", label: "App Store Badges", order: 2, defaultSpacingAfter: 'spacious', contentDensity: 'light' },
+  { id: "followStrip", label: "Follow Strip", order: 2, defaultSpacingAfter: 'spacious', contentDensity: 'light' },
   { id: "howItWorks", label: "How It Works", order: 7, defaultSpacingAfter: 'normal', contentDensity: 'medium' },
   { id: "integrations", label: "Integrations", order: 14, defaultSpacingAfter: 'normal', contentDensity: 'light' },
   { id: "objectionHandling", label: "Objection Handling Section", order: 13, defaultSpacingAfter: 'spacious', contentDensity: 'heavy' },

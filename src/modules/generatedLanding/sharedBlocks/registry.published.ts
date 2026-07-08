@@ -9,10 +9,12 @@
 import type React from 'react';
 import LeadFormPublished from './LeadForm/LeadForm.published';
 import StoreBadgesPublished from './StoreBadges/StoreBadges.published';
+import FollowStripPublished from './FollowStrip/FollowStrip.published';
 
 export const sharedBlockPublishedRegistry: Record<string, React.ComponentType<any>> = {
   leadform: LeadFormPublished,
   storebadges: StoreBadgesPublished,
+  followstrip: FollowStripPublished,
 };
 
 export function resolveSharedBlockPublished(

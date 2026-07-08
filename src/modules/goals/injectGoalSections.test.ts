@@ -119,3 +119,102 @@ describe('injectGoalSections — no-op cases', () => {
     expect(sections).toHaveLength(4);
   });
 });
+
+// ─── scale-05 phase 8 — M4 follow-strip (follow-social ONLY) ───
+
+const INSTAGRAM_URL = 'https://instagram.com/writerhandle';
+const YOUTUBE_URL = 'https://youtube.com/@writerchannel';
+
+function followGoal(links: string[]): BriefGoal {
+  return {
+    intent: 'follow-social',
+    mechanism: 'M4',
+    param: { links },
+  } as BriefGoal;
+}
+
+function followStripId(sections: string[]): string | undefined {
+  return sections.find((id) => id.startsWith('followStrip-'));
+}
+
+describe('injectGoalSections — follow-social follow-strip (M4)', () => {
+  it('injects a strip after the hero with materialized {platform,url} links_json', () => {
+    const { sections, sectionLayouts, content } = baseLayout();
+    injectGoalSections(sections, sectionLayouts, content, followGoal([INSTAGRAM_URL, YOUTUBE_URL]));
+
+    const id = followStripId(sections);
+    expect(id).toBeDefined();
+    expect(sections.indexOf(id!)).toBe(sections.indexOf('hero-abc') + 1);
+    expect(sectionLayouts[id!]).toBe('SharedFollowStrip');
+
+    const el = content[id!].elements;
+    expect(el.strip_heading).toBe('Follow along');
+    const parsed = JSON.parse(el.links_json);
+    // First profile = the goal platform (role primary in the published twin).
+    expect(parsed).toEqual([
+      { platform: 'instagram', url: INSTAGRAM_URL },
+      { platform: 'youtube', url: YOUTUBE_URL },
+    ]);
+  });
+
+  it('writer fixture: single Instagram profile → one instagram href', () => {
+    const { sections, sectionLayouts, content } = baseLayout();
+    injectGoalSections(sections, sectionLayouts, content, followGoal([INSTAGRAM_URL]));
+    const parsed = JSON.parse(content[followStripId(sections)!].elements.links_json);
+    expect(parsed).toEqual([{ platform: 'instagram', url: INSTAGRAM_URL }]);
+  });
+
+  it('falls back to ctx.socialProfiles when the goal carries no param.links', () => {
+    const { sections, sectionLayouts, content } = baseLayout();
+    const goal = { intent: 'follow-social', mechanism: 'M4', param: {} } as BriefGoal;
+    injectGoalSections(sections, sectionLayouts, content, goal, {
+      socialProfiles: [{ platform: 'LinkedIn', url: 'https://linkedin.com/in/writer' }],
+    });
+    const parsed = JSON.parse(content[followStripId(sections)!].elements.links_json);
+    expect(parsed).toEqual([{ platform: 'linkedin', url: 'https://linkedin.com/in/writer' }]);
+  });
+
+  it('unrecognised host → website platform (still injects)', () => {
+    const { sections, sectionLayouts, content } = baseLayout();
+    injectGoalSections(sections, sectionLayouts, content, followGoal(['https://my-site.example/blog']));
+    const parsed = JSON.parse(content[followStripId(sections)!].elements.links_json);
+    expect(parsed).toEqual([{ platform: 'website', url: 'https://my-site.example/blog' }]);
+  });
+
+  it('follow-social with no links and no socialProfiles → no injection', () => {
+    const { sections, sectionLayouts, content } = baseLayout();
+    injectGoalSections(sections, sectionLayouts, content, followGoal([]));
+    expect(followStripId(sections)).toBeUndefined();
+    expect(sections).toHaveLength(4);
+  });
+
+  it('idempotent: a second call does not inject a duplicate strip', () => {
+    const { sections, sectionLayouts, content } = baseLayout();
+    const goal = followGoal([INSTAGRAM_URL]);
+    injectGoalSections(sections, sectionLayouts, content, goal);
+    injectGoalSections(sections, sectionLayouts, content, goal);
+    expect(sections.filter((id) => id.startsWith('followStrip-'))).toHaveLength(1);
+  });
+});
+
+describe('injectGoalSections — subscribe-newsletter is M1 (NO follow-strip)', () => {
+  it('subscribe-newsletter does NOT inject a follow-strip (it is an M1 form, Phases 4–5)', () => {
+    const { sections, sectionLayouts, content } = baseLayout();
+    // Even if a stray param.links were present, the intent gate must skip M4.
+    const goal = {
+      intent: 'subscribe-newsletter',
+      mechanism: 'M1',
+      param: { links: [INSTAGRAM_URL] },
+    } as BriefGoal;
+    injectGoalSections(sections, sectionLayouts, content, goal);
+    expect(followStripId(sections)).toBeUndefined();
+    expect(sections).toHaveLength(4);
+  });
+
+  it('non-follow-social intent (book-call) → no follow-strip', () => {
+    const { sections, sectionLayouts, content } = baseLayout();
+    const goal = { intent: 'book-call', mechanism: 'M1', param: {} } as BriefGoal;
+    injectGoalSections(sections, sectionLayouts, content, goal);
+    expect(followStripId(sections)).toBeUndefined();
+  });
+});

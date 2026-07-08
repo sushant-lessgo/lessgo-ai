@@ -125,13 +125,17 @@ export default function GeneratingStep() {
       : null;
     seedGoalForm(finalContent, briefGoal);
 
-    // scale-05 phase 7: deterministic goal-section injection (M3 download-app
-    // → store-badges row). No-op for other intents / no store links.
+    // scale-05 phase 7/8: deterministic goal-section injection (M3 download-app
+    // → store-badges row; M4 follow-social → follow-strip). No-op for other
+    // intents / no links. Follow-strip links come from briefGoal.param.links
+    // (the M4 capture); ctx.socialProfiles is the injector's Brief fallback —
+    // undefined here since the onboarding generation store carries no profiles.
     injectGoalSections(
       finalContent.layout?.sections,
       finalContent.layout?.sectionLayouts,
       finalContent.content,
-      briefGoal
+      briefGoal,
+      { socialProfiles: undefined }
     );
 
     return { finalContent, title };

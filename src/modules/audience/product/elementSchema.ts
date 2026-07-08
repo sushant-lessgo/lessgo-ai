@@ -625,6 +625,20 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       badge_label:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get the app' },
     },
   },
+
+  // ===== Shared template-agnostic FollowStrip (scale-05 phase 8) =====
+  // Injected deterministically by injectGoalSections for the follow-social goal;
+  // NOT AI-generated. Present so the composed layoutElementSchema resolves
+  // `SharedFollowStrip` → editor element-gating + publish sanitize keep the
+  // heading + materialized links_json. Renders on every template via the
+  // shared-block registry (section type `followStrip`).
+  SharedFollowStrip: {
+    sectionType: 'followStrip',
+    elements: {
+      strip_heading: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Follow along' },
+      links_json:    { type: 'string', requirement: 'optional', fillMode: 'system', default: '[]' },
+    },
+  },
 };
 
 /**

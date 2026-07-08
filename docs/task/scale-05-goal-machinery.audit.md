@@ -321,3 +321,49 @@ Both rendered as two `.lg-badge` anchors in BOTH renderers; published anchors ca
 - `npm run build` — green (published block CSS injected inline via `<style>`, no public/published.css dependency).
 
 **Open risks:** editor-side interactions (drag/reorder/delete of an injected storeBadges section) not covered by an automated edit-page test (no such harness in Files-touched); relies on the grep-confirmed safe defaults.
+
+---
+
+## Phase 8 — M4: follow-strip shared block
+
+**Files changed:**
+- `src/modules/generatedLanding/sharedBlocks/FollowStrip/socialIcons.tsx` — NEW plain module (no 'use client').
+- `src/modules/generatedLanding/sharedBlocks/FollowStrip/FollowStrip.tsx` — NEW edit twin ('use client').
+- `src/modules/generatedLanding/sharedBlocks/FollowStrip/FollowStrip.published.tsx` — NEW published twin.
+- `src/modules/generatedLanding/sharedBlocks/registry.ts` — registered `followstrip` edit twin.
+- `src/modules/generatedLanding/sharedBlocks/registry.published.ts` — registered `followstrip` published twin.
+- `src/modules/goals/injectGoalSections.ts` — EXTENDED: `follow-social` branch + `injectFollowStrip`; added `InjectGoalSectionsCtx` (socialProfiles fallback).
+- `src/modules/goals/goalToDestination.ts` — **DEVIATION (see below):** added `export` to the existing `inferPlatform` (one-word additive change; zero behavior change).
+- `src/app/onboarding/product/[token]/components/steps/GeneratingStep.tsx` — passed `{ socialProfiles: undefined }` ctx to the existing injector call.
+- `src/app/onboarding/service/[token]/components/steps/GeneratingStep.tsx` — same.
+- `src/modules/sections/sectionList.ts` — added `followStrip` SectionMeta entry.
+- `src/modules/audience/product/elementSchema.ts` — added `SharedFollowStrip` entry.
+- `src/modules/audience/service/elementSchema.ts` — added `SharedFollowStrip` entry.
+- `src/modules/goals/injectGoalSections.test.ts` — EXTENDED with M4 follow-strip + subscribe-newsletter negative + non-follow-social cases (storeBadges cases untouched).
+- `src/modules/generatedLanding/sharedBlocks/__tests__/followStrip.parity.test.tsx` — NEW.
+
+**Per file — what changed:**
+- `socialIcons.tsx`: inline-SVG icons (instagram, facebook, twitter/x, linkedin, youtube, tiktok, threads, pinterest, telegram, whatsapp, website fallback) using `currentColor`; `resolveProfiles(links_json)` safe JSON parse; `FOLLOW_STRIP_STYLES` (self-contained, no public/published.css dep); `FollowStripCore` single-source layout (self-sets `data-surface="neutral"`). Mirrors StoreBadges/badgeArt exactly.
+- `FollowStrip.tsx` / `.published.tsx`: byte-parallel layout via `FollowStripCore`. Edit twin reads section from `useEditStoreLegacy` (edit renderer passes no `content` prop), editable heading, inert anchors. Published twin reads flattened `strip_heading`/`links_json` props, emits `data-lessgo-cta` on every anchor, `data-lessgo-cta-role="primary"` on the FIRST profile (the goal platform / hero destination) and `secondary` on the rest, `target=_blank rel` via `externalLinkProps`.
+- `injectGoalSections.ts`: `follow-social` ONLY. Links from `goal.param.links`, falling back to `ctx.socialProfiles`. Platform inferred via the shared `inferPlatform` (unless an explicit `profile.platform` is supplied, e.g. from Brief.socialProfiles). Materialized to `links_json` at injection (renderers never read the Brief). Idempotent, after-hero placement, deterministic (no AI).
+
+**Deviations:**
+1. **`goalToDestination.ts` not in Phase 8 Files-touched but edited (added `export` to `inferPlatform`).** The orchestrator explicitly required reusing `inferPlatform` and forbade writing a second inferer; it lives as a private function in `goalToDestination.ts` and there is no other exported platform inferer in the repo. The only way to satisfy both instructions was to export it — a one-word, purely additive change with zero behavior/risk impact (the plan clearly assumed it was importable). Flagged here for review rather than duplicating the table or stopping the whole phase.
+2. **Onboarding passes `{ socialProfiles: undefined }`.** The product/service generation stores carry no `socialProfiles` field (adding one is out of Phase-8 scope). Onboarding follow-social links flow via `param.links` (the Phase-1 M4 capture); the `ctx.socialProfiles` seam is threaded but undefined in onboarding — it is the injector's Brief fallback for other callers (Phase 10 acceptance / edit-time).
+
+**inferPlatform reuse (not duplicated):** confirmed — `injectFollowStrip` imports `inferPlatform` from `@/modules/goals/goalToDestination`; no second platform table was written. `socialIcons.tsx` icon keys align with `inferPlatform`'s output labels.
+
+**follow-social-only rule + negative assertion:** the injector gates strictly on `goal.intent === 'follow-social'`. Test `subscribe-newsletter does NOT inject a follow-strip` asserts no strip even when a stray `param.links` is present (M1 form, Phases 4–5). Also `non-follow-social intent (book-call) → no follow-strip`.
+
+**Parity + firewall confirmation:** parity test asserts identical section/strip markup + classes + `data-surface` across both twins; published carries beacon attrs, edit does not. `socialIcons.tsx` is a plain module (no 'use client'); `FollowStrip.published.tsx` imports only plain modules (`socialIcons`, `resolveCtaHref`). Section-type-switch grep for `storeBadges` returned no non-registry/non-schema readers → `followStrip` needs nothing beyond sectionList + elementSchema + the two registries (shared blocks resolve before template dispatch).
+
+**Documented limitation:** later edits via SocialProfilesPanel do NOT auto-sync the strip (strip URLs are materialized once at injection, editable as the section's own `links_json`/heading elements). Noted in the injector doc comment.
+
+**Writer fixture hrefs/platforms:** for a writer with an Instagram profile `https://instagram.com/writerhandle` (goal follow-social), the injector materializes `links_json = [{"platform":"instagram","url":"https://instagram.com/writerhandle"}]`; the published strip emits a single anchor `href="https://instagram.com/writerhandle"` with `data-lessgo-cta` + `data-lessgo-cta-role="primary"` + `target="_blank" rel="noopener noreferrer"`, rendering the Instagram icon. (Multi-profile Instagram+YouTube → Instagram anchor role=primary, YouTube role=secondary.)
+
+**Verification:**
+- `npx tsc --noEmit` — clean.
+- `npm run test:run -- injectGoalSections followStrip dispatch` — 3 files, 40 tests pass (dispatch regression green).
+- `npm run build` — green (published block CSS injected inline via `<style>`, no public/published.css dependency).
+
+**Open risks:** editor-side interactions (drag/reorder/delete of an injected followStrip section) not covered by an automated edit-page test (no such harness in Files-touched); relies on grep-confirmed safe defaults. Onboarding `socialProfiles` fallback is inert until a store field or edit-time caller supplies it (deviation 2).

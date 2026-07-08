@@ -659,6 +659,19 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       badge_label:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get the app' },
     },
   },
+
+  // ===== Shared template-agnostic FollowStrip (scale-05 phase 8) =====
+  // Injected deterministically by injectGoalSections for the follow-social goal.
+  // Mirror of the product entry so the composed layoutElementSchema resolves
+  // `SharedFollowStrip` on the service path too (editor gating + publish
+  // sanitize). Renders on every template via the shared-block registry.
+  SharedFollowStrip: {
+    sectionType: 'followStrip',
+    elements: {
+      strip_heading: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Follow along' },
+      links_json:    { type: 'string', requirement: 'optional', fillMode: 'system', default: '[]' },
+    },
+  },
 };
 
 /**
