@@ -30,6 +30,7 @@ import GoalSlot from './GoalSlot';
 import ProofSlot from './ProofSlot';
 import StyleSlot from './StyleSlot';
 import StructureSlot from './StructureSlot';
+import GeneratingSlot from './GeneratingSlot';
 
 interface WizardShellProps {
   tokenId: string;
@@ -49,7 +50,7 @@ const SLOT_LABELS: Record<WizardSlot, string> = {
   generating: 'Building',
 };
 
-// Slots implemented in phases 3–4. `generating` lands in phase 5 (placeholder).
+// Slots implemented in phases 3–5.
 const BUILT_SLOTS: Partial<Record<WizardSlot, () => JSX.Element>> = {
   identity: IdentitySlot,
   understanding: UnderstandingSlot,
@@ -58,6 +59,7 @@ const BUILT_SLOTS: Partial<Record<WizardSlot, () => JSX.Element>> = {
   proof: ProofSlot,
   style: StyleSlot,
   structure: StructureSlot,
+  generating: GeneratingSlot,
 };
 
 function SlotPlaceholder({ slot }: { slot: WizardSlot }) {

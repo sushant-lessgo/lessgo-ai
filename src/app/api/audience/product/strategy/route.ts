@@ -103,6 +103,9 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
         features: data.features,
         primaryAudience: data.primaryAudience,
         templateId: data.templateId,
+        // scale-06 phase 5: honor the proof hard rule in mock mode too, so
+        // mock/DEMO_TOKEN runs agree with the real assembleProductStrategy path.
+        proof: data.proof,
       });
       return createSecureResponse({
         success: true,

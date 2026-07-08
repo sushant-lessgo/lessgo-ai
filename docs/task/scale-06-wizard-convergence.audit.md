@@ -417,3 +417,124 @@ Carry-forward notes (non-blocking):
 - **Phase 5:** mock strategy path (`generateMockMeridianStrategy`, `src/modules/prompt/mockResponseGeneratorProduct.ts`) does NOT receive/honor `proof` — under mock mode / DEMO_TOKEN the testimonials section always shows regardless of proof booleans. `assembleProductStrategy` is the single REAL-LLM point, not the mock point. Cheap fix in phase 5: have the mock accept+honor `proof` so mock-mode e2e/manual QA sees proof-drop too. (Phase-6 gate is real-LLM so not blocking, but phase-11 e2e runs mock.)
 - **Phase 6 gate:** confirm StyleSlot picks (variant/palette/mood, currently mirrored out of the un-hydrated old `useProductGenerationStore` via useEffect) actually PERSIST across reload/resume — the subscription mirror is fragile; re-homed properly in phase 10.
 - Minor: request schema has a dead top-level `hasTestimonials` alongside the active `proof.hasTestimonials` — a future caller could set the wrong one; clean up in phase 10.
+
+---
+
+## Phase 5 — shared generation core + GeneratingSlot (thing)
+
+**Files changed**
+- `src/modules/wizard/generation/finalize.ts` (created)
+- `src/modules/wizard/generation/thing.ts` (created)
+- `src/modules/wizard/generation/index.ts` (created)
+- `src/modules/wizard/generation/thing.test.ts` (created)
+- `src/components/onboarding/wizard/GeneratingSlot.tsx` (created)
+- `src/components/onboarding/wizard/WizardShell.tsx` (edited — dispatcher: register GeneratingSlot)
+- `src/modules/prompt/mockResponseGeneratorProduct.ts` (edited — mock proof parity fix)
+- `src/app/api/audience/product/strategy/route.ts` (edited — pass `data.proof` to the mock; SCOPE DEVIATION, see below)
+
+### The shared tail (`finalize.ts`) + how it stays server-safe
+`finalize.ts` is the near-identical body extracted from BOTH old GeneratingStep
+`buildFinalContent`s: assemble `${type}-${uuid}` section ids → sectionLayouts →
+per-section content (with aiMetadata) → meta → onboardingData → optional lead-form
+provisioning → `seedGoalForm` → `injectGoalSections`. Plus a thin `saveDraft(body)`
+fetch wrapper (throws on !ok). The engine-specific vestria contact form is
+generalized to a data-driven `leadForm` param (`{sectionType,name,fields,...}`) so
+the tail stays engine-agnostic (trust reuses it in phase 8).
+
+**Published/client boundary:** `finalize.ts` carries NO `'use client'` and imports
+ONLY plain modules — `@/modules/goals/{seedGoalForm,injectGoalSections}` (both
+explicitly-plain scale-05 modules) + types. It never imports `useWizardStore`, a
+React component, or a template resolver/registry/renderer, so it can never drag a
+client function toward a published renderer ("F is not a function" 500). Verified
+via `head` that every imported module is directive-free; tsc passes.
+
+### The THING adapter (`thing.ts`) payload fidelity + ported sub-paths
+Also a PLAIN module (no `'use client'`, executed client-side by the slot). It
+NEVER imports the wizard store — `GeneratingSlot` reads the store and hands the
+adapter a plain `ThingGenerationInput`. Exposes pure payload builders
+(`buildStrategyPayload`/`buildCopyPayload`/`landingGoalFor`/`briefGoalFor`) that
+produce the EXACT bodies `/api/audience/product/{strategy,generate-copy}` accept
+today — route contracts untouched except the phase-4 additive `proof` object,
+which is now populated from the store's `proof.hasTestimonials` boolean.
+Ported from the ~930-line product GeneratingStep (originals untouched):
+- single-page strategy→copy→save (`runCopyAndSave`);
+- multi-page fan-out (`runFanOut`) — skeleton save, per-page copy + per-page
+  persistence, resume-safe completed-page skip, `finalizeMultiPageGeneration`;
+- manufacturer field remap (features←valueAdds, categories←productCategories,
+  otherAudiences←industriesServed, +whatYouMake, +trade-buyer fallback);
+- manufacturer deterministic TechPremium path (`buildTechPremiumHomeFinalContent`);
+- resume-from-DB (loadDraft → `isResumableGeneration` → fan-out);
+- hero-variant + cosmetic-style application (ported `applyHeroVariantToFinalContent`).
+Result contract is `{status:'done'|'credits'|'error', redirectTo?, error?}` — the
+slot maps it to redirect/credits-UI/ErrorRetry.
+
+`index.ts` = `runGeneration(engine,input,cb)` switch: thing wired; trust/work throw
+"not yet migrated to the unified wizard" until phases 8/9. index↔thing type-only
+cycle (erased) — no runtime cycle.
+
+`GeneratingSlot.tsx` (`'use client'`) — THIN: projects the store to the adapter
+input, runs once on mount, drives the 3-stage progress UI (+ multi-page "page X of
+N"), and `router.push`es to `/edit/${tokenId}` on success. Registered in the
+`WizardShell` `BUILT_SLOTS` dispatcher (same place phase-4 slots registered; NOT
+`page.tsx` — the plan's "edit page.tsx" is the known-stale filename, confirmed
+phases 3/4; `page.tsx` untouched).
+
+### Mock parity fix
+`generateMockMeridianStrategy` now accepts `proof?:{hasTestimonials?}` and drops
+the `testimonials` section from BOTH `sections` and the mock sitemap BEFORE
+`selectProductBlocks` — identical semantics to `assembleProductStrategy`'s
+`proofDroppedSections` (unpromised ⇒ dropped). The one-line route edit passes
+`proof: data.proof` into the mock call so mock/DEMO_TOKEN runs agree with real
+runs (phase-11 e2e runs mock).
+
+### Deviations
+1. **`route.ts` edited (out of Files-touched list).** The mock cannot honor `proof`
+   unless the route passes it in; the only realization of step 5 spans the mock's
+   call site. Made the MINIMAL additive change (one field: `proof: data.proof`) and
+   flagged here rather than stopping the phase — mirrors phases 3/4 precedent of
+   editing the genuinely-required file and flagging. No contract change (route
+   already validates `proof`).
+2. **TechPremium trigger = `templateId==='techpremium'`, not the old
+   `/api/user/persona==='hardware-founder'` fetch.** Persona is dead in the unified
+   wizard (serveGate resolves templateId); techpremium is strategy-route-invalid
+   (`enum(['meridian','vestria'])`) so it can only mean the deterministic path.
+   Conservative, persona-less trigger; smoke-covered indirectly (path is a pure
+   `buildTechPremiumHomeFinalContent`→save).
+3. **Redirect = `/edit/${tokenId}`** (plan step 3 / task end-state), not the old
+   `/generate/${tokenId}` reveal route. Plan-directed.
+4. **PostHog telemetry not ported** — the old GeneratingSteps `posthog.capture` calls
+   are telemetry, not load-bearing; omitted to keep the plain adapter free of a
+   client analytics import. Progress/errors surface via callbacks instead.
+5. **`categories`/`importSourceUrl`/structured `importedTestimonials` = empty for
+   the pilot** — the THING contract collects none of these as wizard fields yet;
+   the adapter accepts them (fidelity) but the slot passes `[]`/undefined. onboarding
+   snapshot still carries the collected understanding fields.
+
+### Reasoned verification
+A THING brief → confirm → unified wizard → GeneratingSlot builds a plain input
+from the store → `runGeneration('thing', …)` fetches strategy, then copy, then
+`buildFinalContent`+`saveDraft`, then the slot redirects to `/edit/${tokenId}`.
+The smoke tests exercise this end-to-end with a mocked fetch (single-page meridian
+→ done + `/edit/tok123`; multi-page vestria → skeleton save + per-page fan-out →
+done; 402 → status:credits). Manufacturer remap asserted at the payload level. Mock
+now drops testimonials when `proof.hasTestimonials!==true` (parity with the real
+assembler).
+
+### Test results
+- `npx tsc --noEmit` → PASS (clean, no output).
+- `npm run test:run -- src/modules/wizard src/modules/audience/product` →
+  **6 files / 50 tests passed, 0 failed** (thing.test.ts = 11 tests).
+
+### Open risks
+- Adapter run path is covered by mocked-fetch smoke + tsc; the real-LLM full run is
+  the phase-6 manual gate.
+- WizardShell nav renders back/next chrome around the auto-running GeneratingSlot
+  (Continue disabled on last slot) — cosmetic; not in phase-5 scope to change.
+- The mock proof fix has no dedicated unit test (covered by tsc + phase-11 e2e per
+  plan); the real path's drop is already locked by `proofFilter.test.ts`.
+
+### Impl-review verdict: **ship** (loop 1/1) — tsc clean, 50/50 tests, published/client boundary verified clean (finalize/thing/index plain, no store import), adapter payloads match route schemas, manufacturer remap byte-faithful, mock parity correct. Old GeneratingSteps/stores byte-unchanged. route.ts deviation = 1 additive mock-only line. No blocking issues.
+Carry-forward notes (non-blocking):
+- **Phase 6 gate item:** `GeneratingSlot.tsx:162` calls `setGenerationError` during render (anti-pattern; no loop today but may emit "Cannot update while rendering" warning during the pilot demo). Cheap fix = move into an effect; founder decides at gate whether to fix before proceeding.
+- **Before a real manufacturer/vestria run through the unified wizard:** `buildThingInput` (`GeneratingSlot.tsx:51-79`) hardcodes `categories:[]` and omits `valueAdds`/`productCategories`/`industriesServed`/`whatYouMake` — benign for the meridian pilot (adapter remap is proven; a vestria-resolved THING runs SaaS-shaped, no 400; techpremium takes the deterministic path) but must be wired before manufacturer goes live through the wizard.
+- Minor: `thing.test.ts` `CopyRequestMirror.awareness = z.string()` is looser than the route's enum (strategy passed through untouched, low risk).

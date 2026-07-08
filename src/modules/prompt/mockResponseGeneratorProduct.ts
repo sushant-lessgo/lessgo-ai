@@ -22,6 +22,13 @@ export interface MockProductStrategyInput {
   primaryAudience: string;
   /** Template-aware section/block selection (vestria mock flows). */
   templateId?: string;
+  /**
+   * Proof hard rule (scale-06 phase 5 — mock parity). Mirrors the REAL path's
+   * `assembleProductStrategy({ proof })`: when present + `hasTestimonials` is not
+   * true, the testimonials section is dropped so mock-mode / DEMO_TOKEN runs
+   * agree with real runs (phase-11 e2e runs mock). Absent ⇒ current behavior.
+   */
+  proof?: { hasTestimonials?: boolean };
 }
 
 export function generateMockMeridianStrategy(
@@ -30,11 +37,25 @@ export function generateMockMeridianStrategy(
   // Multi-page templates: mock the clamped default sitemap (exercises the gate
   // UI + per-page fan-out offline). assembleProductStrategy's law applies.
   const menu = getPageArchetypesForTemplate(input.templateId);
-  const sitemap = menu ? clampSitemap(null, menu) : undefined;
+  let sitemap = menu ? clampSitemap(null, menu) : undefined;
 
-  const sections = sitemap
+  let sections = sitemap
     ? ['header', ...sitemap[0].sections, 'footer']
     : selectProductSections({ templateId: input.templateId });
+
+  // PROOF HARD RULE parity (matches parseStrategyProduct.proofDroppedSections):
+  // unpromised testimonials ⇒ section absent from BOTH sections and the sitemap,
+  // BEFORE block selection so uiblocks drop it too.
+  if (input.proof && input.proof.hasTestimonials !== true) {
+    sections = sections.filter((s) => s !== 'testimonials');
+    if (sitemap) {
+      sitemap = sitemap.map((p) => ({
+        ...p,
+        sections: p.sections.filter((s) => s !== 'testimonials'),
+      }));
+    }
+  }
+
   const { uiblocks } = selectProductBlocks({ sections, templateId: input.templateId });
 
   return {
