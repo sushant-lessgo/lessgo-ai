@@ -21,6 +21,8 @@ import type { MeridianPalette } from '@/types/product';
 // No static template import (firewall). Service template module is preloaded by
 // the caller (p/[slug] page / static export) and read from the registry cache.
 import { getLoadedTemplate } from '@/modules/templates/registry';
+import { normalizeCtas } from '@/utils/normalizeCtas';
+import type { Brief } from '@/types/brief';
 
 /**
  * Extract content fields from elements structure
@@ -48,6 +50,7 @@ interface LandingPagePublishedRendererProps {
   paletteId?: string | null;    // Template palette for template-backed projects
   variantId?: string | null;    // Template variant (Lex/Meridian token rescale)
   mood?: string | null;         // Neutral mood (vestria; Project.themeValues.mood)
+  goal?: Brief['goal'] | null;  // scale-04: resolves GOAL_REF ctas via the pre-pass
 }
 
 export function LandingPagePublishedRenderer({
@@ -64,7 +67,13 @@ export function LandingPagePublishedRenderer({
   paletteId = null,
   variantId = null,
   mood = null,
+  goal = null,
 }: LandingPagePublishedRendererProps) {
+  // scale-04 (phase 3): normalize new-shape `cta` writes into the legacy
+  // `buttonConfig` shape ONCE, before any dispatch, so the ~26 untouched readers
+  // consume them. GOAL_REF primaries resolve from the project goal here; null
+  // goal / no cta → same reference back (byte-identical legacy output).
+  content = normalizeCtas(content, { goal, forms: content?.forms });
   const usesTemplate = usesTemplateModule(audienceType, templateId);
   // Module was preloaded by the caller; read it synchronously from the cache.
   const tmpl = usesTemplate

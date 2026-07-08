@@ -119,3 +119,78 @@ Non-blocking carry-forward notes:
 1. **Phase 4:** add `setGoal` signature to `src/types/store/actions.ts` when wiring the write path (currently runtime-only, dead code, tsc-green).
 2. **Phase 4/6:** `save()` builds briefPayload only when `goal || socialProfiles` truthy → setting goal back to `null` won't persist a clear. Fine now (no goal-edit UI), fix when editing lands.
 3. **Phase 3 (IMPORTANT):** `goalToDestination` M1 returns `{dest: section{form-section}, formId: undefined}` when no form resolves (key present, value undefined) whereas M2–M5 omit formId. `normalizeCtas` MUST detect form-ness via this pair shape (presence of the form-section anchor / formId key), so a missing-form M1 still maps to `{type:'form'}` (→ legacy reader's own fallback), NOT `{type:'link', url:'#form-section'}`. Per D-E: do NOT special-case the anchor string; rely on the widened-return pair.
+
+---
+
+## Phase 3 — CTA normalization pre-pass (GOAL_REF + cta→buttonConfig bridge)
+
+**Files changed**
+- `src/utils/normalizeCtas.ts` (new) — the single new-shape→legacy bridge.
+- `src/utils/normalizeCtas.test.ts` (new) — 10 unit tests.
+- `src/lib/staticExport/getPublishedGoal.ts` (new) — shared PublishedPage→Project.brief→goal fetch.
+- `src/lib/staticExport/renderPublishedExport.ts` — self-fetch goal; pass into both generateStaticHTML calls.
+- `src/lib/staticExport/htmlGenerator.ts` — optional `goal?` on StaticHTMLOptions; forward as renderer prop.
+- `src/app/p/[slug]/page.tsx` — root SSR: fetch goal via helper, pass `goal` prop.
+- `src/app/p/[slug]/[...subpath]/page.tsx` — subpage SSR: fetch goal via helper, pass `goal` prop.
+- `src/modules/generatedLanding/LandingPagePublishedRenderer.tsx` — optional `goal` prop; run pre-pass once at entry.
+- `src/modules/generatedLanding/LandingPageRenderer.tsx` — memoized pre-pass with store `goal`/`forms`.
+
+**Form-case detection (carry-forward from phase-2 review).** In `ctaToButtonConfig`:
+- GOAL_REF → `goalToDestination(goal,{forms})` (widened `{dest, formId?}`). Form case is detected
+  by `'formId' in gd` — the M1 return literal always carries the `formId` key (value may be
+  `undefined`); M2–M5 omit it. So a missing-form M1 → `{type:'form'}` (no formId key) →
+  legacy reader's own missing-form fallback. A GOAL_REF that resolves to a plain `section`
+  anchor (M5) has no formId key → normal anchor link. No string-matching of `'form-section'`.
+- Concrete `cta.dest` → used directly; form case ONLY when `cta.formId` present AND dest is
+  `section{anchor:'form-section'}` (an explicit form dest+formId). A plain section anchor is a
+  normal anchor link.
+- Down-convert: form → `{type:'form'[,formId]}`; `page` → `{type:'page',pathSlug}`; else →
+  `{type:'link', url: resolveDestination(dest)}`.
+- Entries with no `cta`, and unresolvable GOAL_REF (null goal) → left UNTOUCHED. Clone is lazy:
+  when nothing resolves, the SAME content reference is returned (byte-identical; old pages / null
+  goal → zero diff). Input is never mutated.
+
+**Where the pre-pass sits per renderer.**
+- Published (`LandingPagePublishedRenderer`): first statement of the component body, before
+  `usesTemplate` dispatch; reads `forms` off the incoming `content.forms`, then reassigns
+  `content` to the normalized clone.
+- Edit (`LandingPageRenderer`): `content` destructured as `rawContent`; a `useMemo` over
+  `[rawContent, goal, forms]` produces the normalized `content` consumed by all downstream
+  section processing. Preview uses this same renderer so it is covered when loadDraft hydrated
+  `brief`/`goal` (phase 2).
+
+**How goal is fetched in each of the 3 render entries.**
+- Blob-bake: `renderPublishedExport` calls `getPublishedGoal(pageId)` ITSELF (self-fetch) → both
+  its callers (normal publish + custom-domain republish) covered with zero caller edits; goal passed
+  into root (~L111) AND every subpage (~L197) `generateStaticHTML`, then forwarded as the
+  `LandingPagePublishedRenderer` `goal` prop in `htmlGenerator`.
+- Root SSR (`p/[slug]/page.tsx`): `getPublishedGoal(page.id)` → `goal` prop.
+- Subpage SSR (`p/[slug]/[...subpath]/page.tsx`): `getPublishedGoal(page.id)` → `goal` prop.
+Same shared helper in all three; no duplicated fetch. Null goal → legacy fallback everywhere.
+
+**Deviations.** Concrete-dest form detection requires BOTH `formId !== undefined` AND the
+`form-section` anchor (conservative), rather than treating any concrete dest with a formId as a
+form, so a stray formId on a non-form dest can't mis-map. Phase 4 writes the `cta` shape; if it
+wires form buttons differently, revisit this predicate.
+
+**Test / tsc results.** `npx tsc --noEmit` clean. `npm run test:run` → 971 passed, 2 skipped
+(72 files). normalizeCtas suite 10/10. Parity, generation-contract, and publishBlogPost suites all
+green (proves the no-goal and goal-less blog paths are unchanged: htmlGenerator `goal?` is optional,
+so publishBlogPost's goal-less callers stay tsc-green and render byte-identical).
+
+**Manual QA needed (cannot exercise without a running server).**
+1. Publish a MULTI-PAGE project with a GOAL_REF primary on a SUBPAGE → the subpage's baked
+   HTML primary `<a href>` points at the resolved goal (proves the ~L197 threading).
+2. Hit `/p/{slug}` served LIVE via the SSR route (canonical `lessgo.ai/p/{slug}`, not the blob
+   proxy) for a goal-ref project → rendered primary `<a href>` = resolved goal target (matches the
+   baked blob), not `#cta`. Repeat for a `/p/{slug}/{subpath}` URL (subpath SSR route).
+3. `/preview/[token]` for a project whose loadDraft hydrated a goal → editor/preview primary
+   previews the same target. If a preview hydration path skips `brief`, null-goal fallback there is
+   accepted (cosmetic preview-only).
+
+### Phase 3 — impl-review verdict: SHIP (loops 1)
+Byte-identity confirmed (lazy shallow-clone returns same ref when nothing resolves; no input mutation). Form-case detection via `'formId' in gd` correct. Goal threaded to all 3 render entries via single shared `getPublishedGoal` (server-only, never throws).
+Carry-forward notes:
+1. **Phase 4 LANDMINE (normalizeCtas.ts L69-70):** concrete-dest form predicate = `formId !== undefined && section && anchor==='form-section'`. Phase 4's form-button write path MUST always set `cta.formId` for form buttons, else a concrete form CTA maps to `{type:'link', url:'#form-section'}` → `#cta` fallback instead of `{type:'form'}`. Ensure formId set, or relax predicate.
+2. getPublishedGoal re-fetches publishedPage row in SSR routes (already had it) — accepted perf tradeoff; optional projectId-first overload possible later.
+Phase 8 QA (headless-unverifiable): (a) multi-page subpage GOAL_REF primary baked href = resolved goal; (b) live SSR /p/{slug} + /p/{slug}/{subpath} primary href == baked blob (not #cta); (c) /preview/[token] goal preview parity.
