@@ -5,6 +5,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { normalizeCtas } from './normalizeCtas';
+import { intentToBriefGoal, composeWhatsappDestination } from '@/modules/brief/bridge';
 import type { CTAButton } from '@/types/destination';
 import type { Brief } from '@/types/brief';
 
@@ -118,6 +119,52 @@ describe('normalizeCtas', () => {
     normalizeCtas(content, { goal, forms: {} });
     // Original entry still carries only the cta, no injected buttonConfig.
     expect(content['hero-1'].elementMetadata.cta_primary).not.toHaveProperty('buttonConfig');
+  });
+
+  // ── scale-05 phase 10 — GOAL_REF over param-composed destinations (M1–M4).
+  // These compose the goal through the REAL writeback composer (intentToBriefGoal),
+  // then prove the GOAL_REF hero CTA down-converts to the right legacy buttonConfig
+  // — exercising the true generation→publish path, not hand-built destinations.
+  describe('GOAL_REF over param-composed destinations (M1–M4)', () => {
+    const goalRef = () => withCta('cta_primary', { role: 'primary', dest: 'GOAL_REF' });
+    const bc = (content: Record<string, any>, goal: Goal, forms: Record<string, unknown> = {}) =>
+      normalizeCtas(content, { goal, forms })['hero-1'].elementMetadata.cta_primary.buttonConfig;
+
+    it('M1 book-call (composed) + a project form → {type:"form", formId}', () => {
+      // book-call primary mechanism is M1 (on-site form).
+      const goal = intentToBriefGoal('book-call', {});
+      expect(goal.mechanism).toBe('M1');
+      expect(bc(goalRef(), goal, { 'form-xyz': {} })).toEqual({ type: 'form', formId: 'form-xyz' });
+    });
+
+    it('M2 whatsapp (composed w/ deterministic prefill) → {type:"link", url:wa.me?text}', () => {
+      const facts = { businessName: 'Acme', offer: 'a quote' };
+      const goal = intentToBriefGoal('enquiry', { phone: '+1 (555) 123-4567' }, facts);
+      expect(goal.mechanism).toBe('M2');
+      const expectedUrl = composeWhatsappDestination('15551234567', goal.param!.message!);
+      expect(bc(goalRef(), goal)).toEqual({ type: 'link', url: expectedUrl });
+    });
+
+    it('M3 free-trial (composed external redirect) → {type:"link", url}', () => {
+      const goal = intentToBriefGoal('free-trial', { url: 'https://app.example.com/signup' });
+      expect(goal.mechanism).toBe('M3');
+      expect(bc(goalRef(), goal)).toEqual({ type: 'link', url: 'https://app.example.com/signup' });
+    });
+
+    it('M3 download-app (composed, both stores) → {type:"link", url: first store link}', () => {
+      const play = 'https://play.google.com/store/apps/details?id=com.x';
+      const store = 'https://apps.apple.com/us/app/x/id123';
+      const goal = intentToBriefGoal('download-app', { links: [play, store] });
+      expect(goal.mechanism).toBe('M3');
+      expect(bc(goalRef(), goal)).toEqual({ type: 'link', url: play });
+    });
+
+    it('M4 follow-social (composed social) → {type:"link", url: profile}', () => {
+      const ig = 'https://instagram.com/some.writer';
+      const goal = intentToBriefGoal('follow-social', { links: [ig] });
+      expect(goal.mechanism).toBe('M4');
+      expect(bc(goalRef(), goal)).toEqual({ type: 'link', url: ig });
+    });
   });
 
   it('preserves other elementMetadata entries when one cta resolves', () => {

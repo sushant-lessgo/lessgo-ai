@@ -422,3 +422,53 @@ Both GeneratingSteps compose `brief.goal` from `intentToBriefGoal(goalIntent,…
 - "Other goals" inline expand reveals the remaining intents (full 18 minus the likely few); auto-opens when a pre-selected intent isn't in the likely list.
 - Prefill pre-selection: a scrape-prefilled project should land on the AI-guessed intent already selected (and "Other" auto-open if that guess isn't a likely one).
 - Icons/descriptions for the 18 intents are hand-authored per file — eyeball for tone/accuracy.
+
+---
+
+## Phase 10 — Acceptance fixtures + parity QA
+
+**Files changed**
+- `src/modules/goals/__tests__/acceptance.scale05.test.ts` — NEW fixture-driven acceptance suite (22 tests, 6 cases).
+- `src/utils/normalizeCtas.test.ts` — EXTENDED: new `describe('GOAL_REF over param-composed destinations (M1–M4)')` block (5 tests). Existing tests untouched.
+
+**What changed (per file)**
+
+`acceptance.scale05.test.ts` — encodes the spec "Acceptance" criteria, each composed through the REAL pipeline functions (no hand-authored expected content bypasses the pipeline):
+- Case 1 writer/follow-social — `intentToBriefGoal('follow-social',{links})` → `goalToDestination` resolves `{kind:'social',platform:'instagram'}`; `injectGoalSections` produces a `followStrip-<uuid>` section after hero; `FollowStripPublished` (renderToStaticMarkup) carries `data-lessgo-cta` + `data-lessgo-cta-role="primary"` on the Instagram anchor.
+- Case 2 kathaworld/download-app — `intentToBriefGoal('download-app',{links:[play,appstore]})` persists both links (Phase-1 shape); `injectGoalSections` produces `storeBadges-<uuid>`; `StoreBadgesPublished` markup has TWO badge hrefs.
+- Case 3 saas/free-trial — `goalCopyGuidance['free-trial'].subtext` + `getGuidanceForIntent` yield a subtext line; `intentToBriefGoal('free-trial',{url})` → `goalToDestination` external; hero GOAL_REF down-converts to `{type:'link',url}` via `normalizeCtas`.
+- Case 4 consultant/book-call — `intentToBriefGoal('book-call',{})` → M1; `seedGoalForm` writes `content.forms` + injects `leadForm-<uuid>`; CTA wired; hero GOAL_REF → `{type:'form',formId}`; `LeadFormPublished` markup emits `<form data-lessgo-form data-form-id …>` + seeded fields inside `id="form-section"`; `formHandler.js` source asserted to POST `/api/forms/submit`.
+- Case 5 subscribe-newsletter — `intentToBriefGoal`/`legacyGoalToBriefGoal` stamp `mechanism='M1'` (override, no param/destination); email-capture form seeded + `leadForm` section injected; NO `followStrip` even with stray `param.links`; published email form renders+submits; hero GOAL_REF → `#form-section`.
+- Case 6 whatsapp — `intentToBriefGoal('enquiry',{phone},facts)` materializes the EXACT deterministic prefill; `goal.destination` == `composeWhatsappDestination(digits,msg)`; hero GOAL_REF round-trips the encoded message via `normalizeCtas`.
+
+`normalizeCtas.test.ts` — 5 new tests composing goals through `intentToBriefGoal` across M1 (book-call→form), M2 (enquiry+phone→wa.me?text), M3 (free-trial→external, download-app→first store link), M4 (follow-social→social) and asserting the hero GOAL_REF down-converts to the correct legacy buttonConfig.
+
+**Deviations from the plan**
+- The published `<form>` markup carries no `action="/api/forms/submit"` attribute — submission is bound at runtime by `form.v1.js` (built from `src/lib/staticExport/formHandler.js`). To assert "submit target `/api/forms/submit`" honestly without a browser, the test asserts the `data-lessgo-form` contract in the markup AND reads the handler source and asserts it contains `/api/forms/submit` + `data-lessgo-form`. Conservative in-scope choice; logged here.
+- `readFileSync(new URL(..., import.meta.url))` threw `URL must be of scheme file` under vitest; switched to `resolve(process.cwd(), 'src/lib/staticExport/formHandler.js')`.
+
+**Test results**
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` (FULL suite) — 81 passed + 1 skipped files; **1142 passed + 2 skipped tests, 0 failures**. New acceptance file: 22/22; extended normalizeCtas: all pass. No pre-existing failures.
+- `npm run build` — succeeded (published-CSS + assets + next build).
+
+**Spec-acceptance traceability**
+- "goal follow-social ⇒ hero primary = Instagram Destination" → Case 1 `GOAL_REF resolves an Instagram social Destination`.
+- "follow strip renders" → Case 1 `injectGoalSections produces a followStrip section`.
+- "beacon tags conversions" → Case 1 `published FollowStrip markup carries data-lessgo-cta`.
+- "download-app ⇒ store badges render both stores" → Case 2 `published StoreBadges markup has TWO badge hrefs`.
+- "free-trial ⇒ CTA copy carries no-CC subtext" → Case 3 `goalCopyGuidance yields a cta_subtext line`.
+- "redirect out" → Case 3 `GOAL_REF resolves an external redirect`.
+- "book-call ⇒ form auto-seeded + placed + wired at generation" → Case 4 `seedGoalForm writes form + injects leadForm` / `CTA section is wired` / `hero GOAL_REF resolves #form-section`.
+- "submission → FormSubmission + lead email" → Case 4 `published LeadForm renders <form data-lessgo-form>` + `handler posts to /api/forms/submit` (markup + endpoint contract). **The live end-to-end submit → DB row + Resend lead email is MANUAL-ONLY (human gate) — not automatable here.**
+- "WhatsApp goal ⇒ prefilled message exact template, no AI call" → Case 6 `materializes the EXACT deterministic prefill string` + `resolved href is wa.me/<digits>?text=<encoded exact message>`.
+- "All dual-renderer parity green" → covered by the pre-existing `leadForm.parity` / `storeBadges.parity` / `followStrip.parity` suites (Phases 5/7/8); this phase adds the through-pipeline published-markup assertions.
+- subscribe-newsletter M1 override (design call #6, most-reviewed) → Case 5 (all 6 sub-tests) — not a spec sentence but the plan's key invariant.
+
+**Manual-only acceptance (human gate covers)**
+- Live published-page form submit → `FormSubmission` row + Resend lead email (RESEND env).
+- `wa.me` link opens with prefilled text on a real phone.
+- Editor↔published visual parity eyeball (hero subtext, leadForm, storeBadges, followStrip) on meridian + hearth.
+
+**Open risks**
+- Store-badge SVGs hardcode `#000` (noted Phase 7) — may read odd on a dark surface; visual eyeball only, not test-covered.
