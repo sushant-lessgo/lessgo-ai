@@ -632,6 +632,19 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       },
     },
   },
+
+  // ===== Shared template-agnostic LeadForm (scale-05) =====
+  // Injected deterministically by seedGoalForm for M1 goals; NOT AI-generated.
+  // Mirror of the meridianElementSchema entry so the composed layoutElementSchema
+  // resolves `SharedLeadForm` on the service path too (editor gating + publish
+  // sanitize). Renders on every template via the shared-block registry.
+  SharedLeadForm: {
+    sectionType: 'leadForm',
+    elements: {
+      form_id:       { type: 'string', requirement: 'optional', fillMode: 'system', default: '' },
+      form_headline: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get in touch' },
+    },
+  },
 };
 
 /**

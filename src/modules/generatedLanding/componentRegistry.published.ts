@@ -12,6 +12,7 @@ import React from 'react';
 // NOTE: no static template-module import (firewall). Dispatch reads the
 // dynamically-preloaded template module from the registry cache.
 import { getLoadedTemplate } from '@/modules/templates/registry';
+import { resolveSharedBlockPublished } from './sharedBlocks/registry.published';
 import type { AudienceType, TemplateId } from '@/types/service';
 import { usesTemplateModule } from '@/types/service';
 
@@ -34,6 +35,11 @@ export function getComponent(
   templateId: string | null = 'hearth'
 ): React.ComponentType<any> | null {
   const normalizedType = type.toLowerCase();
+
+  // Shared template-agnostic blocks (e.g. leadForm) resolve BEFORE template
+  // dispatch — server-safe twins only (firewall).
+  const shared = resolveSharedBlockPublished(normalizedType);
+  if (shared) return shared;
 
   // Template-backed projects (service = Hearth/Lex; product+meridian = Meridian)
   // dispatch to the selected template module (preloaded + cached via the dynamic

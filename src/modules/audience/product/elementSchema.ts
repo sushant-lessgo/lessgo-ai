@@ -596,6 +596,20 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       },
     },
   },
+
+  // ===== Shared template-agnostic LeadForm (scale-05) =====
+  // Injected deterministically by seedGoalForm for M1 goals; NOT AI-generated.
+  // Present here (and in serviceElementSchema) so the composed layoutElementSchema
+  // resolves `SharedLeadForm` → editor element-gating + publish sanitize work
+  // without relying on the unknown-layout fall-through. Renders on every template
+  // via the shared-block registry (section type `leadForm`).
+  SharedLeadForm: {
+    sectionType: 'leadForm',
+    elements: {
+      form_id:       { type: 'string', requirement: 'optional', fillMode: 'system', default: '' },
+      form_headline: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get in touch' },
+    },
+  },
 };
 
 /**

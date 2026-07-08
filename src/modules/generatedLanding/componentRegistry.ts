@@ -11,6 +11,7 @@ import { logger } from '@/lib/logger';
 // Hearth/Meridian into the product/main bundle. Template dispatch goes through
 // the dynamic template registry's preloaded cache (firewall, Phase 7.5c).
 import { getLoadedTemplate } from '@/modules/templates/registry';
+import { resolveSharedBlock } from './sharedBlocks/registry';
 import type { AudienceType, TemplateId } from '@/types/service';
 import { usesTemplateModule } from '@/types/service';
 
@@ -50,6 +51,12 @@ export function getComponent(
 ): React.ComponentType<any> | null {
   // Extract section type from section ID if needed (e.g. 'hero-123' → 'hero').
   const sectionType = extractSectionType(sectionIdOrType);
+
+  // Shared template-agnostic blocks (e.g. leadForm) resolve BEFORE template
+  // dispatch so they render identically on every template. Keyed by lowercase
+  // type (extractSectionType already lowercases).
+  const shared = resolveSharedBlock(sectionType);
+  if (shared) return shared;
 
   // Template-backed projects (service = Hearth/Lex; product+meridian = Meridian)
   // dispatch to the selected template module. The module is dynamically imported

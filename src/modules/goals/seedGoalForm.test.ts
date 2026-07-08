@@ -11,7 +11,14 @@ const FIELD_TYPES: MVPFormFieldType[] = ['text', 'email', 'tel', 'textarea', 'se
 /** A minimal finalContent with a hero + cta section (uuid-suffixed ids). */
 function makeFinalContent() {
   return {
-    layout: { sections: ['hero-aaaa1111', 'services-bbbb2222', 'cta-cccc3333'] },
+    layout: {
+      sections: ['hero-aaaa1111', 'services-bbbb2222', 'cta-cccc3333'],
+      sectionLayouts: {
+        'hero-aaaa1111': 'TerminalHero',
+        'services-bbbb2222': 'Grid',
+        'cta-cccc3333': 'ArcCTA',
+      },
+    },
     content: {
       'hero-aaaa1111': {
         id: 'hero-aaaa1111',
@@ -120,6 +127,47 @@ describe('seedGoalForm — subscribe-newsletter (email capture)', () => {
     expect(email.required).toBe(true);
     const name = form.fields.find((f: any) => f.id === 'name');
     expect(name?.required).toBe(false);
+  });
+});
+
+describe('seedGoalForm — injects a rendered leadForm section (scale-05)', () => {
+  const findLeadFormId = (fc: any): string | undefined =>
+    (fc.layout.sections as string[]).find((id) => id.startsWith('leadForm-'));
+
+  it('injects a leadForm section after the hero, wired to the seeded form', () => {
+    const fc = makeFinalContent();
+    seedGoalForm(fc as any, m1Goal('book-call'));
+
+    const formId = Object.keys((fc as any).forms)[0];
+    const leadFormId = findLeadFormId(fc);
+    expect(leadFormId).toBeTruthy();
+
+    // Positioned immediately after the hero.
+    const sections = fc.layout.sections as string[];
+    expect(sections.indexOf(leadFormId!)).toBe(sections.indexOf('hero-aaaa1111') + 1);
+
+    // sectionLayouts + content entry with the shared layout + form_id.
+    expect((fc.layout as any).sectionLayouts[leadFormId!]).toBe('SharedLeadForm');
+    const sec = (fc.content as any)[leadFormId!];
+    expect(sec.layout).toBe('SharedLeadForm');
+    expect(sec.elements.form_id).toBe(formId);
+    expect(typeof sec.elements.form_headline).toBe('string');
+    expect(sec.elements.form_headline.length).toBeGreaterThan(0);
+  });
+
+  it('injects exactly one leadForm section and is idempotent on re-seed', () => {
+    const fc = makeFinalContent();
+    seedGoalForm(fc as any, m1Goal('book-call'));
+    // Second call — a form already exists, so the whole seed (incl. injection) no-ops.
+    seedGoalForm(fc as any, m1Goal('book-call'));
+    const count = (fc.layout.sections as string[]).filter((id) => id.startsWith('leadForm-')).length;
+    expect(count).toBe(1);
+  });
+
+  it('does not inject a leadForm section for non-M1 goals', () => {
+    const fc = makeFinalContent();
+    seedGoalForm(fc as any, { intent: 'book-call', mechanism: 'M2' } as any);
+    expect(findLeadFormId(fc)).toBeUndefined();
   });
 });
 

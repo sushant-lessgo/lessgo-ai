@@ -22,6 +22,7 @@ export const sectionList: SectionMeta[] = [
   { id: "faq", label: "FAQ", order: 22, defaultSpacingAfter: 'normal', contentDensity: 'heavy' },
   { id: "founderNote", label: "Founder Note / Human Touch", order: 19, defaultSpacingAfter: 'spacious', contentDensity: 'medium' },
   { id: "hero", label: "Hero", order: 1, required: true, defaultSpacingAfter: 'spacious', contentDensity: 'medium' },
+  { id: "leadForm", label: "Lead Form", order: 2, defaultSpacingAfter: 'spacious', contentDensity: 'medium' },
   { id: "howItWorks", label: "How It Works", order: 7, defaultSpacingAfter: 'normal', contentDensity: 'medium' },
   { id: "integrations", label: "Integrations", order: 14, defaultSpacingAfter: 'normal', contentDensity: 'light' },
   { id: "objectionHandling", label: "Objection Handling Section", order: 13, defaultSpacingAfter: 'spacious', contentDensity: 'heavy' },

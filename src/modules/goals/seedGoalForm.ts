@@ -29,7 +29,27 @@ type BriefGoal = NonNullable<Brief['goal']>;
 interface SeedableFinalContent {
   content?: Record<string, any>;
   forms?: Record<string, any>;
+  layout?: {
+    sections?: string[];
+    sectionLayouts?: Record<string, string>;
+    [key: string]: any;
+  };
   [key: string]: any;
+}
+
+/** Shared LeadForm layout name (registry key = lowercased section type `leadform`). */
+const SHARED_LEAD_FORM_LAYOUT = 'SharedLeadForm';
+
+/** Short uuid suffix for a `${type}-${uuid}` section id (crypto when available). */
+function shortId(): string {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID().slice(0, 8);
+    }
+  } catch {
+    /* fall through */
+  }
+  return Math.random().toString(36).slice(2, 10);
 }
 
 /**
@@ -142,5 +162,63 @@ export function seedGoalForm(
     label: buttonText,
     variant: 'primary',
     size: 'medium',
+  };
+
+  // ── Inject a rendered leadForm section (shared block) carrying the
+  //    `#form-section` anchor the CTA scrollTo + hero GOAL_REF resolve to. ──
+  // Note: Phase 4 wrote NO FormPlacementRenderer placement record (its
+  // buttonConfig lives in `elementMetadata`, not the `elements[key].metadata`
+  // shape FormPlacementRenderer reads), so the seeded form never rendered on
+  // core templates — the pre-existing bug this closes. Because there is no
+  // surviving placement record, the new leadForm section is the SOLE renderer
+  // of the form → no double-render in the editor.
+  injectLeadFormSection(finalContent, content, formId, template.name);
+}
+
+/**
+ * Inject a `leadForm-<uuid>` section (shared LeadForm block) after the hero so
+ * the seeded form RENDERS on every template in both renderers, and the
+ * `#form-section` anchor exists in exported HTML. Idempotent: no-op when a
+ * leadForm section already exists, or when the payload has no section array.
+ */
+function injectLeadFormSection(
+  finalContent: SeedableFinalContent,
+  content: Record<string, any>,
+  formId: string,
+  headingDefault: string
+): void {
+  const sections = finalContent.layout?.sections;
+  if (!Array.isArray(sections)) return; // no ordered section array → skip.
+
+  // Idempotence: never inject a second leadForm section.
+  const already = sections.some((id) => id === 'leadForm' || id.startsWith('leadForm-'));
+  if (already) return;
+
+  const leadFormId = `leadForm-${shortId()}`;
+
+  // Position: after the hero (short scroll; matches other goal-section injectors).
+  const heroIdx = sections.findIndex((id) => id === 'hero' || id.startsWith('hero-'));
+  const insertAt = heroIdx >= 0 ? heroIdx + 1 : sections.length;
+  sections.splice(insertAt, 0, leadFormId);
+
+  if (finalContent.layout && finalContent.layout.sectionLayouts) {
+    finalContent.layout.sectionLayouts[leadFormId] = SHARED_LEAD_FORM_LAYOUT;
+  }
+
+  content[leadFormId] = {
+    id: leadFormId,
+    layout: SHARED_LEAD_FORM_LAYOUT,
+    elements: {
+      form_id: formId,
+      form_headline: headingDefault || 'Get in touch',
+    },
+    backgroundType: 'neutral',
+    aiMetadata: {
+      aiGenerated: false,
+      isCustomized: false,
+      lastGenerated: Date.now(),
+      aiGeneratedElements: [],
+      excludedElements: [],
+    },
   };
 }

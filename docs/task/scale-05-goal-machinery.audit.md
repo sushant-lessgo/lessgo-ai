@@ -178,3 +178,52 @@ Only `src/components/forms/FormBuilder.tsx` (imports both; uses `getServiceFormT
 **Open risks**
 - The render gap documented above is the material one (out-of-scope files).
 - `form-${Date.now()}` id collision is theoretically possible if two forms seed in the same ms; not a concern here (single seed per generation, guarded by the forms-empty idempotence check).
+
+---
+
+## Phase 5 — Shared-block infrastructure + M1 lead-form shared block
+
+**Files changed**
+- `src/modules/generatedLanding/sharedBlocks/registry.ts` (NEW) — edit-twin-only registry.
+- `src/modules/generatedLanding/sharedBlocks/registry.published.ts` (NEW) — published-twin-only registry.
+- `src/modules/generatedLanding/sharedBlocks/LeadForm/leadFormFields.tsx` (NEW) — plain module: field renderer + self-contained styles + `LeadFormCore` layout.
+- `src/modules/generatedLanding/sharedBlocks/LeadForm/LeadForm.tsx` (NEW) — edit twin ('use client').
+- `src/modules/generatedLanding/sharedBlocks/LeadForm/LeadForm.published.tsx` (NEW) — published twin (server-safe).
+- `src/modules/generatedLanding/componentRegistry.ts` — shared-block shim before template dispatch.
+- `src/modules/generatedLanding/componentRegistry.published.ts` — parallel shim.
+- `src/modules/goals/seedGoalForm.ts` — extended: injects a `leadForm-<uuid>` section.
+- `src/modules/sections/sectionList.ts` — `leadForm` SectionMeta entry.
+- `src/modules/audience/product/elementSchema.ts` — `SharedLeadForm` layout schema.
+- `src/modules/audience/service/elementSchema.ts` — `SharedLeadForm` layout schema (mirror).
+- `src/modules/goals/seedGoalForm.test.ts` — extended: section-injection + idempotence tests.
+- `src/modules/generatedLanding/sharedBlocks/__tests__/leadForm.parity.test.tsx` (NEW).
+
+**Per-file notes**
+- Split registries: `registry.ts` imports ONLY `LeadForm` (edit); `registry.published.ts` imports ONLY `LeadForm.published`. Neither imports the other's twin. `resolveSharedBlock`/`resolveSharedBlockPublished` key on the LOWERCASED type (`leadform`). Both componentRegistry `getComponent`s call the resolver BEFORE the `usesTemplateModule` template dispatch, so a shared block resolves on every template.
+- `leadFormFields.tsx` is a PLAIN module (no 'use client') holding the field renderer, a `LEAD_FORM_STYLES` CSS string (injected via `<style>` like Vestria's `CONTACT_STYLES` — needs no `public/published.css` change and works in any template), and `LeadFormCore` (single-source layout). Both twins render through `LeadFormCore`, so markup/classes are byte-parallel. Styling is template-agnostic: neutral fallbacks + the cross-template common vars `--accent` / `--accent-ink` / `--line` / `--font-*` (verified present in meridian/hearth/lex palettes).
+- data-lessgo-form attr set matched (cite `formHandler.js` lines 160-163 `form.dataset.*`): `data-form-id` -> formId, `data-page-id` -> pageId, `data-owner-id` -> ownerId, `data-success-message` -> successMessage. Published twin emits exactly these (identical to `VestriaLeadForm.published.tsx`). form.v1.js embeds automatically (htmlGenerator gates on `content.forms` non-empty — the M1 seed guarantees that) and submits to `/api/forms/submit`.
+- Edit twin reads the store (plan-review finding #1): the edit renderer spreads only the section's own `data` (no `content` prop), so `LeadForm.tsx` reads `useEditStoreLegacy().content?.[sectionId]?.elements` for `form_id`/`form_headline` and `...content?.forms?.[formId]` for the fields — exactly like `VestriaLeadForm.tsx`. It does NOT read a `content` prop. Heading editable via a `contentEditable` `<h2>` -> `updateElementContent(sectionId, 'form_headline', ...)` on blur.
+- #form-section anchor + scroll-margin (finding #4): `LeadFormCore` emits the inner `<div id="form-section" style={{scrollMarginTop:80}}>`; the outer type-based wrapper (`id="leadform"`) is distinct — no id collision. Hero GOAL_REF -> `goalToDestination` M1 -> `#form-section` and the seed's CTA `buttonConfig.behavior='scrollTo'` both target this node.
+- Seed rewire (finding #2): `seedGoalForm` now injects a `leadForm-<uuid>` section into `layout.sections` (after hero), `layout.sectionLayouts` (`SharedLeadForm`), and `content` (elements `{form_id, form_headline}` defaulted from the template name). Idempotent: the pre-existing forms-empty guard means a re-seed no-ops the whole thing; an internal `startsWith('leadForm-')` guard also prevents a dup. Kept the CTA `buttonConfig` wiring.
+- Old Phase-4 placement record — CONFIRMED there is none to drop. `FormPlacementRenderer` reads `element.metadata?.buttonConfig` (i.e. `section.elements[key].metadata`), but the Phase-4 seed writes `buttonConfig` into `section.elementMetadata.cta_text.buttonConfig` — a different shape. So `FormPlacementRenderer` never picked up the seed and rendered NOTHING (this is precisely the pre-existing "form doesn't render on core templates" bug). Therefore the new `leadForm` section is the SOLE renderer of the form -> no double-render in the editor. (Contrary to the Phase-4 plan text, the as-built Phase-4 code wrote no `formPlacement` record at all.)
+- Schema (finding #3): `SharedLeadForm` added to BOTH `meridianElementSchema` and `serviceElementSchema`, which are spread into the composed `layoutElementSchema` — so `getSchemaDefaults('SharedLeadForm')` (edit) and the publish sanitize gate both resolve it without relying on unknown-layout fall-through. No direct edit to `layoutElementSchema.ts` (it composes from the audience schemas; that file is not in the Files-touched list).
+
+**Section-type-switch grep (step 0) results**
+Enumerated every reader that branches on section type: `BackgroundPreview` label/bg (default cases), `SectionTypeSelector`/`EnhancedAddSection`/`SectionCRUD` (add-section UI — never used for injected sections), `getSurfaceForSection` (defaults to `cream`/template default for unknown types — verified), `collectionHelpers`/`pageActions`/`pageHelpers` (match specific types only; ignore `leadForm`), `useReviewState` (header/footer only). None break on `leadForm`; all have safe defaults. No edits required beyond `sectionList` + `elementSchema` entries. This grep also pre-scouts `storebadges`/`followstrip` for Phases 7-8 (same conclusion).
+
+**Verification**
+- `npx tsc --noEmit` — clean.
+- `npm run test:run -- seedGoalForm sharedBlocks leadForm componentRegistry dispatch normalizeCtas formPlacement` — 4 files, 46 tests passed. Includes: shared-block resolution through BOTH split registries via a real `leadForm-abcd1234` id (lowercase key); dual-renderer parity; published `<form>` emits the 5 data-lessgo-form attrs + all seeded fields + `#form-section`; seed injects the section after hero + idempotence + non-M1 no-op; template-dispatch regression green.
+- `npm run build` — succeeded (published CSS/markup + registry dispatch change). The edit twin being transitively importable into the published graph (via `sectionAnchors` -> `componentRegistry.ts` -> `registry.ts` -> `LeadForm.tsx`) did NOT break the static export — it is imported but never rendered on the published path (which dispatches to `LeadForm.published` via the split published registry).
+
+**Published form RENDERS + submits — how verified**
+Test assertion on emitted static markup (`renderToStaticMarkup(<LeadFormPublished ...>)`): the `<form data-lessgo-form data-form-id="form-123" data-page-id="page-1" data-owner-id="owner-1" data-success-message="...">` with all seeded `name=field.id` inputs + a `type="submit"` button, wrapped in `id="form-section"`. form.v1.js binds every `[data-lessgo-form]` on load and POSTs the FormData (keyed by `name`) to `/api/forms/submit` with `{formId, publishedPageId: pageId, userId: ownerId}` -> `FormSubmission` + lead email. Live end-to-end submit on a published core-template page is the manual item for the Phase 5 gate.
+
+**Deviations**
+- leadForm section placement = after hero (open question #7). Chose after-hero for consistency with the Phase 7/8 injectors and a short scroll; a lead form immediately below the hero may read oddly vs a bottom/CTA position — flagged for the gate to confirm.
+- Styling is neutral + accent-var-driven rather than full per-template token adoption (no universal foreground/surface var exists across templates). Guarantees the form renders correctly everywhere; richer per-template theming is a possible follow-up.
+
+**Open risks / gate items**
+- Confirm leadForm placement (after hero vs bottom) at the gate.
+- Manual acceptance not yet run: live published-page submit on meridian AND hearth -> `FormSubmission` row + lead email (RESEND env). Recommend running the consultant book-call wizard on both before merge.
+- Neutral styling: eyeball editor<->published parity on meridian/hearth/lex at the gate; the accent button should pick up each palette's `--accent`.
