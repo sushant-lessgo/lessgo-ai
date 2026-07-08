@@ -3,11 +3,22 @@
 
 import React from 'react';
 import MeridianNewsletterCapture from './MeridianNewsletterCapture';
+import { resolveDestination } from '@/utils/resolveCtaHref';
+import type { Link } from '@/types/destination';
+import { isLink } from '@/types/destination';
+
+// Dual-read a footer link's target: legacy raw string href passes through verbatim
+// (old pages byte-identical); a new Link object resolves via the dumb resolver.
+function resolveLinkHref(value: string | Link | undefined): string {
+  if (typeof value === 'string') return value || '#';
+  if (isLink(value)) return resolveDestination(value.dest) || '#';
+  return '#';
+}
 
 interface FooterLink {
   id?: string;
   label?: string;
-  href?: string;
+  href?: string | Link;
 }
 
 interface FooterColumn {
@@ -71,7 +82,7 @@ export default function HairlineFooterPublished(props: HairlineFooterPublishedPr
               <ul>
                 {(col.links || []).map((link, linkIdx) => (
                   <li key={link.id || linkIdx}>
-                    <a href={link.href || '#'}>{link.label || ''}</a>
+                    <a href={resolveLinkHref(link.href)}>{link.label || ''}</a>
                   </li>
                 ))}
               </ul>

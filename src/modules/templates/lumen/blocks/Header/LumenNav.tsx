@@ -11,12 +11,13 @@ import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useLumenBlock } from '../../hooks/useLumenBlock';
 import { useLumenEditLang } from '../../editLang';
 import { LumenEditable } from '../../components/LumenEditable';
-import { LinkTargetPopover } from '../../components/LinkTargetPopover';
+import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import type { Link } from '@/types/destination';
 import { HEADER_STYLES } from './styles';
 
 const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
 
-interface NavItem { id: string; label?: string; label_nl?: string; href?: string; }
+interface NavItem { id: string; label?: string; label_nl?: string; href?: string | Link; }
 interface LumenNavContent {
   logo_text: string; logo_text_nl: string;
   brand_sub: string; brand_sub_nl: string;
@@ -101,10 +102,10 @@ export default function LumenNav({ sectionId }: { sectionId: string }) {
                 {edit && (
                   <>
                     <LinkTargetPopover
-                      href={item.href || '#'}
+                      value={item.href || '#'}
                       sectionOptions={sectionOptions}
                       pageOptions={pageOptions}
-                      onChange={(href) => patchItem(item.id, { href })}
+                      onChange={(link) => patchItem(item.id, { href: link })}
                       triggerClassName="lm-nav-link-cfg"
                     />
                     {navItems.length > 2 && (

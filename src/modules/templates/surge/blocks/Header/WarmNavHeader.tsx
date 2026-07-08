@@ -9,7 +9,8 @@ import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { SurgeEditable } from '../../components/SurgeEditable';
-import { LinkTargetPopover } from '../../components/LinkTargetPopover';
+import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import type { Link } from '@/types/destination';
 import { HEADER_STYLES } from './styles';
 
 const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
@@ -17,7 +18,7 @@ const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
 interface NavItem {
   id: string;
   label: string;
-  href: string;
+  href: string | Link;
 }
 
 interface WarmNavHeaderContent {
@@ -111,10 +112,10 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
               {edit && (
                 <>
                   <LinkTargetPopover
-                    href={item.href}
+                    value={item.href ?? '#'}
                     sectionOptions={sectionOptions}
                     pageOptions={pageOptions}
-                    onChange={(href) => patchItem(item.id, { href })}
+                    onChange={(link) => patchItem(item.id, { href: link })}
                     triggerClassName="sg-nav-link-cfg"
                   />
                   {navItems.length > 2 && (

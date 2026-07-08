@@ -12,7 +12,8 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { VestriaEditable } from '../components/VestriaEditable';
-import { LinkTargetPopover } from '../components/LinkTargetPopover';
+import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { resolveDestination } from '@/utils/resolveCtaHref';
 import type {
   VestriaPrimitives, VestriaTxtProps, VestriaImgProps, VestriaLinkProps, VestriaListProps,
 } from './primitives';
@@ -117,10 +118,10 @@ const Link: React.FC<VestriaLinkProps> = ({ hrefKey, href, className, ariaLabel,
     <span className="vs-link-edit" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       <span className={className} aria-label={ariaLabel}>{children}</span>
       <LinkTargetPopover
-        href={href || ''}
+        value={href || ''}
         sectionOptions={ctx.sectionOptions}
         pageOptions={ctx.pageOptions}
-        onChange={(next) => saveField(ctx, hrefKey, next)}
+        onChange={(link) => saveField(ctx, hrefKey, resolveDestination(link.dest))}
       />
     </span>
   );

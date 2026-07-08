@@ -3,11 +3,21 @@
 // data-en/data-nl for the live language swap.
 
 import React from 'react';
-import { resolveCtaHref, externalLinkProps } from '@/utils/resolveCtaHref';
+import { resolveCtaHref, externalLinkProps, resolveDestination } from '@/utils/resolveCtaHref';
+import type { Link } from '@/types/destination';
+import { isLink } from '@/types/destination';
 import { bilingualAttrs } from '../../i18nKeys';
 import { HEADER_STYLES } from './styles';
 
-interface NavItem { id?: string; label?: string; label_nl?: string; href?: string; }
+// Dual-read a nav link's target: legacy raw string href passes through verbatim
+// (old pages byte-identical); a new Link object resolves via the dumb resolver.
+function resolveLinkHref(value: string | Link | undefined): string {
+  if (typeof value === 'string') return value || '#';
+  if (isLink(value)) return resolveDestination(value.dest) || '#';
+  return '#';
+}
+
+interface NavItem { id?: string; label?: string; label_nl?: string; href?: string | Link; }
 interface Props {
   sectionId: string;
   logo_text?: string; logo_text_nl?: string;
@@ -43,12 +53,15 @@ export default function LumenNavPublished(props: Props) {
           </a>
 
           <div className="lm-nav-links">
-            {navItems.map((item, i) => (
-              <a key={item.id || i} href={item.href || '#'} {...externalLinkProps(item.href)}
-                 {...bilingualAttrs(item.label || '', item.label_nl || '')}>
-                {item.label || ''}
-              </a>
-            ))}
+            {navItems.map((item, i) => {
+              const href = resolveLinkHref(item.href);
+              return (
+                <a key={item.id || i} href={href} {...externalLinkProps(href)}
+                   {...bilingualAttrs(item.label || '', item.label_nl || '')}>
+                  {item.label || ''}
+                </a>
+              );
+            })}
           </div>
 
           <div className="lm-nav-cta">

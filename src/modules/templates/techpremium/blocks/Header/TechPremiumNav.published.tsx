@@ -3,11 +3,21 @@
 // book-demo. Behaviors (dropdown toggle, burger, active-link) wired by naayom.v1.js.
 
 import React from 'react';
-import { resolveCtaHref } from '@/utils/resolveCtaHref';
+import { resolveCtaHref, resolveDestination } from '@/utils/resolveCtaHref';
+import type { Link } from '@/types/destination';
+import { isLink } from '@/types/destination';
 import { NAV_STYLES } from './navStyles';
 
+// Dual-read a nav link's target: legacy raw string href passes through verbatim
+// (old pages byte-identical); a new Link object resolves via the dumb resolver.
+function resolveLinkHref(value: string | Link | undefined): string {
+  if (typeof value === 'string') return value || '#';
+  if (isLink(value)) return resolveDestination(value.dest) || '#';
+  return '#';
+}
+
 interface NavChild { id?: string; label?: string; desc?: string; href?: string }
-interface NavItem { id?: string; label?: string; href?: string; children?: NavChild[] }
+interface NavItem { id?: string; label?: string; href?: string | Link; children?: NavChild[] }
 interface Props {
   sectionId: string;
   logo_text?: string; logo_image?: string;
@@ -60,7 +70,7 @@ export default function TechPremiumNavPublished(props: Props) {
                 </div>
               </div>
             ) : (
-              <a key={item.id || i} href={item.href || '#'}>{item.label || ''}</a>
+              <a key={item.id || i} href={resolveLinkHref(item.href)}>{item.label || ''}</a>
             ))}
           </div>
 
@@ -84,7 +94,7 @@ export default function TechPremiumNavPublished(props: Props) {
                 </div>
               </div>
             ) : (
-              <a key={item.id || i} href={item.href || '#'}>{item.label || ''}</a>
+              <a key={item.id || i} href={resolveLinkHref(item.href)}>{item.label || ''}</a>
             ))}
             {signinHref && signinHref !== '#' && <a href={signinHref}>{signinText}</a>}
           </div>

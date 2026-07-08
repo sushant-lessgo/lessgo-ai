@@ -13,7 +13,7 @@ Replace the two parallel click models (raw `href` strings + ad-hoc `buttonConfig
 - phase 2 brief/goal persistence + goalToDestination: done (review loops 1 — ship; brief confirm-only no migration; tsc clean, 961 tests pass)
 - phase 3 cta normalization pre-pass (GOAL_REF + cta→buttonConfig bridge) in both renderers: done (review loops 1 — ship; goal threaded 3 entries; tsc clean, 971 tests pass)
 - phase 4 CTAButton write path + role unification: done (review loops 1 — ship; dual-write safe; tsc clean, 974 tests pass)
-- phase 5 shared link popover + Link objects: pending
+- phase 5 shared link popover + Link objects: done (review loops 1 — ship; 6 popovers deleted; tsc clean, 974 tests pass)
 - phase 6 derived link sources + social panel (D13): pending
 - phase 7 analytics attrs on 26 published blocks + role/placement pipeline: pending
 - phase 8 parity tests + build + manual QA: pending

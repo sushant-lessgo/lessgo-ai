@@ -7,15 +7,26 @@
 import React from 'react';
 import { useMeridianBlock } from '../../hooks/useMeridianBlock';
 import { MeridianEditable } from '../../components/MeridianEditable';
-import { LinkTargetPopover } from '../../components/LinkTargetPopover';
+import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
+import type { Link } from '@/types/destination';
+import { isLink } from '@/types/destination';
+import { resolveDestination } from '@/utils/resolveCtaHref';
+
+// Dual-read a nav link's target: legacy raw string href passes through verbatim
+// (old pages byte-identical); a new Link object resolves via the dumb resolver.
+function resolveLinkHref(value: string | Link | undefined): string {
+  if (typeof value === 'string') return value || '#';
+  if (isLink(value)) return resolveDestination(value.dest) || '#';
+  return '#';
+}
 
 interface NavItem {
   id: string;
   label: string;
-  href: string;
+  href: string | Link;
 }
 
 interface MeridianNavHeaderContent {
@@ -50,7 +61,7 @@ export default function MeridianNavHeader({ sectionId }: MeridianNavHeaderProps)
     );
   };
 
-  const updateNavHref = (id: string, href: string) => {
+  const updateNavHref = (id: string, href: string | Link) => {
     handleCollectionUpdate(
       'nav_items',
       navItems.map((n) => (n.id === id ? { ...n, href } : n))
@@ -108,10 +119,10 @@ export default function MeridianNavHeader({ sectionId }: MeridianNavHeaderProps)
                     placeholder="Link"
                   />
                   <LinkTargetPopover
-                    href={item.href}
+                    value={item.href ?? '#'}
                     sectionOptions={sectionOptions}
                     pageOptions={pageOptions}
-                    onChange={(href) => updateNavHref(item.id, href)}
+                    onChange={(link) => updateNavHref(item.id, link)}
                     triggerClassName="mrd-nav-link-cfg"
                   />
                   {navItems.length > 2 && (
@@ -126,7 +137,7 @@ export default function MeridianNavHeader({ sectionId }: MeridianNavHeaderProps)
                   )}
                 </span>
               ) : (
-                <a key={item.id} className="mrd-nav-link" href={item.href || '#'}>
+                <a key={item.id} className="mrd-nav-link" href={resolveLinkHref(item.href)}>
                   {item.label}
                 </a>
               )

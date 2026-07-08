@@ -6,9 +6,20 @@
 import React from 'react';
 import { Facebook, Linkedin, Youtube, MessageCircle } from 'lucide-react';
 import TechPremiumNewsletterCapture from './TechPremiumNewsletterCapture';
+import { resolveDestination } from '@/utils/resolveCtaHref';
+import type { Link } from '@/types/destination';
+import { isLink } from '@/types/destination';
 import { FOOTER_STYLES } from './footerStyles';
 
-interface FooterLink { id?: string; label?: string; href?: string }
+// Dual-read a footer link's target: legacy raw string href passes through verbatim
+// (old pages byte-identical); a new Link object resolves via the dumb resolver.
+function resolveLinkHref(value: string | Link | undefined): string {
+  if (typeof value === 'string') return value || '#';
+  if (isLink(value)) return resolveDestination(value.dest) || '#';
+  return '#';
+}
+
+interface FooterLink { id?: string; label?: string; href?: string | Link }
 interface FooterColumn { id?: string; heading?: string; links?: FooterLink[] }
 interface Social { id?: string; icon?: string; url?: string }
 interface Props {
@@ -66,7 +77,7 @@ export default function TechPremiumFooterPublished(props: Props) {
           {columns.map((col, idx) => (
             <div key={col.id || idx} className="tp-footer__col">
               {col.heading && <h4>{col.heading}</h4>}
-              <ul>{(col.links || []).map((link, k) => <li key={link.id || k}><a className="tp-footer__link" href={link.href || '#'}>{link.label || ''}</a></li>)}</ul>
+              <ul>{(col.links || []).map((link, k) => <li key={link.id || k}><a className="tp-footer__link" href={resolveLinkHref(link.href)}>{link.label || ''}</a></li>)}</ul>
             </div>
           ))}
         </div>
@@ -74,7 +85,7 @@ export default function TechPremiumFooterPublished(props: Props) {
         <div className="tp-footer__bottom">
           <div>{props.copyright || '© Your Company'}{props.location ? ` · ${props.location}` : ''}</div>
           {legal.length > 0 && (
-            <div className="tp-footer__legal">{legal.map((l, i) => <a key={l.id || i} href={l.href || '#'}>{l.label}</a>)}</div>
+            <div className="tp-footer__legal">{legal.map((l, i) => <a key={l.id || i} href={resolveLinkHref(l.href)}>{l.label}</a>)}</div>
           )}
         </div>
       </footer>

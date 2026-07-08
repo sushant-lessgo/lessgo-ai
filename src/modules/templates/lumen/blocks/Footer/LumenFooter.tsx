@@ -10,7 +10,8 @@ import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useLumenBlock } from '../../hooks/useLumenBlock';
 import { LumenEditable } from '../../components/LumenEditable';
-import { LinkTargetPopover } from '../../components/LinkTargetPopover';
+import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { resolveDestination } from '@/utils/resolveCtaHref';
 import { FOOTER_STYLES } from './styles';
 import {
   DEFAULT_FOOTER_COLUMNS, DEFAULT_LEGAL_LINKS,
@@ -129,8 +130,8 @@ export default function LumenFooter({ sectionId }: { sectionId: string }) {
                       enterBehavior="save" placeholder="Link" />
                     {edit && (
                       <>
-                        <LinkTargetPopover href={l.href} sectionOptions={sectionOptions} pageOptions={pageOptions}
-                          onChange={(href) => patchColLink(col.id, l.id, { href })} triggerClassName="lm-footer-linkcfg" />
+                        <LinkTargetPopover value={l.href} sectionOptions={sectionOptions} pageOptions={pageOptions}
+                          onChange={(link) => patchColLink(col.id, l.id, { href: resolveDestination(link.dest) })} triggerClassName="lm-footer-linkcfg" />
                         <button type="button" className="lm-footer-rm" onClick={() => removeColLink(col.id, l.id)} aria-label="Remove">×</button>
                       </>
                     )}
@@ -157,8 +158,8 @@ export default function LumenFooter({ sectionId }: { sectionId: string }) {
                   enterBehavior="save" placeholder="Legal" />
                 {edit && (
                   <>
-                    <LinkTargetPopover href={l.href} sectionOptions={sectionOptions} pageOptions={pageOptions}
-                      onChange={(href) => patchLegal(l.id, { href })} triggerClassName="lm-footer-linkcfg" />
+                    <LinkTargetPopover value={l.href} sectionOptions={sectionOptions} pageOptions={pageOptions}
+                      onChange={(link) => patchLegal(l.id, { href: resolveDestination(link.dest) })} triggerClassName="lm-footer-linkcfg" />
                     <button type="button" className="lm-footer-rm" onClick={() => removeLegal(l.id)} aria-label="Remove">×</button>
                   </>
                 )}

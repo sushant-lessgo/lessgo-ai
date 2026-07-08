@@ -9,13 +9,24 @@ import React from 'react';
 import { Facebook, Linkedin, Youtube, MessageCircle } from 'lucide-react';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
-import { LinkTargetPopover } from '../../components/LinkTargetPopover';
+import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
+import type { Link } from '@/types/destination';
+import { isLink } from '@/types/destination';
+import { resolveDestination } from '@/utils/resolveCtaHref';
 import { FOOTER_STYLES } from './footerStyles';
 
-interface FooterLink { id: string; label: string; href: string }
+// Dual-read a footer link's target: legacy raw string href passes through verbatim
+// (old pages byte-identical); a new Link object resolves via the dumb resolver.
+function resolveLinkHref(value: string | Link | undefined): string {
+  if (typeof value === 'string') return value || '#';
+  if (isLink(value)) return resolveDestination(value.dest) || '#';
+  return '#';
+}
+
+interface FooterLink { id: string; label: string; href: string | Link }
 interface FooterColumn { id: string; heading: string; links: FooterLink[] }
 interface Social { id: string; icon: string; url: string }
 interface TechPremiumFooterContent {
@@ -160,11 +171,11 @@ export default function TechPremiumFooter({ sectionId }: Props) {
                 {(col.links || []).map((link, i) => edit ? (
                   <li key={link.id || i}>
                     <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey={`footer_columns_link_${col.id}_${i}`} value={link.label} onSave={(v) => patchLink(col.id, i, { label: v })} enterBehavior="save" placeholder="Link" />
-                    <LinkTargetPopover href={link.href} sectionOptions={sectionOptions} pageOptions={pageOptions} onChange={(href) => patchLink(col.id, i, { href })} triggerClassName="tp-footer__link-cfg" />
+                    <LinkTargetPopover value={link.href ?? '#'} sectionOptions={sectionOptions} pageOptions={pageOptions} onChange={(link2) => patchLink(col.id, i, { href: link2 })} triggerClassName="tp-footer__link-cfg" />
                     {(col.links || []).length > 1 && <button type="button" className="tp-footer__link-remove" onClick={() => removeLink(col.id, i)} aria-label="Remove link">×</button>}
                   </li>
                 ) : (
-                  <li key={link.id || i}><a className="tp-footer__link" href={link.href || '#'}>{link.label}</a></li>
+                  <li key={link.id || i}><a className="tp-footer__link" href={resolveLinkHref(link.href)}>{link.label}</a></li>
                 ))}
                 {edit && (col.links || []).length < 6 && <li><button type="button" className="tp-foot-add" onClick={() => addLink(col.id)}>+ link</button></li>}
               </ul>
@@ -182,7 +193,7 @@ export default function TechPremiumFooter({ sectionId }: Props) {
                   <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey={`legal_links_label_${l.id}`} value={l.label} onSave={(v) => setLegal(legal.map((x) => (x.id === l.id ? { ...x, label: v } : x)))} enterBehavior="save" placeholder="Privacy" />
                   <button type="button" onClick={() => setLegal(legal.filter((x) => x.id !== l.id))}>×</button>
                 </span>
-              ) : <a key={l.id || i} href={l.href || '#'}>{l.label}</a>)}
+              ) : <a key={l.id || i} href={resolveLinkHref(l.href)}>{l.label}</a>)}
               {edit && <button type="button" className="tp-foot-add" onClick={() => setLegal([...legal, { id: rid('lg'), label: 'Privacy', href: '#' }])}>+ legal</button>}
             </div>
           )}

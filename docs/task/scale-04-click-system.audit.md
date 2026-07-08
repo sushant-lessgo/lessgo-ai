@@ -255,3 +255,118 @@ Phase 8 QA (headless-unverifiable): (a) multi-page subpage GOAL_REF primary bake
 ### Phase 4 — impl-review verdict: SHIP (loops 1)
 Dual-write (cta + legacy buttonConfig) confirmed SAFE + justified: GOAL_REF cta bakes NO concrete href; normalizeCtas re-derives buttonConfig from cta every render (overwrites stored one), so goal change re-points all primaries. Retained legacy buttonConfig carries icon/inputConfig that raw store readers (form placement, reopen) need. Form ctas always carry formId (landmine closed). Role precedence cta.role→ctaType→key correct.
 Non-blocking (QA note): null-goal + detach→re-attach leaves stale config.url; only renders in null-goal transitional state (self-heals once any goal set). Cosmetic. ButtonConfigurationModal re-attach ~L476 / save ~L305.
+
+---
+
+# scale-04 Phase 5 — audit (ONE shared link popover + Link objects; delete ×6)
+
+## Files changed
+- `src/components/editor/LinkTargetPopover.tsx` (NEW) — the single shared popover; `onChange(link: Link)`
+- DELETED 6 per-template copies: `src/modules/templates/{meridian,techpremium,vestria,surge,lumen,granth}/components/LinkTargetPopover.tsx`
+- `src/modules/templates/vestria/blocks/editPrimitives.tsx` — import shared popover; convert Link→string on save
+- `src/modules/templates/granth/blocks/editPrimitives.tsx` — same
+- `src/modules/templates/vestria/index.ts` — comment updated (stale LinkTargetPopover re-export note)
+- `src/modules/templates/granth/index.ts` — same
+- `src/modules/templates/meridian/blocks/Header/MeridianNavHeader.tsx` + `.published.tsx` — Link store + dual-read
+- `src/modules/templates/meridian/blocks/Footer/HairlineFooter.tsx` + `.published.tsx` — Link store + dual-read
+- `src/modules/templates/techpremium/blocks/Header/TechPremiumNav.tsx` + `.published.tsx` — Link store + dual-read (top-level nav only)
+- `src/modules/templates/techpremium/blocks/Footer/TechPremiumFooter.tsx` + `.published.tsx` — Link store + dual-read (footer_columns + legal)
+- `src/modules/templates/surge/blocks/Header/WarmNavHeader.tsx` + `.published.tsx` — Link store + dual-read
+- `src/modules/templates/surge/blocks/Footer/ContactFooterRich.tsx` — store resolved string (external type); published UNCHANGED
+- `src/modules/templates/lumen/blocks/Header/LumenNav.tsx` + `.published.tsx` — Link store + dual-read
+- `src/modules/templates/lumen/blocks/Footer/LumenFooter.tsx` — store resolved string (external type); published UNCHANGED
+
+NOT changed (in Files-touched but no edit needed): `surge/.../ContactFooterRich.published.tsx`,
+`lumen/.../LumenFooter.published.tsx`, `hearth/.../WarmNavHeader.{tsx,published.tsx}`,
+`hearth/.../ContactFooterRich.{tsx,published.tsx}` — see Deviations.
+
+## Shared popover
+`src/components/editor/LinkTargetPopover.tsx` — `'use client'`. Same 3-mode UX as the deleted
+copies (radio: Scroll to section / Link to page / Custom URL), byte-identical markup/classes.
+Differences from the old copies:
+- Prop `href: string` → `value: string | Link`; read into the initial UI href via `toDestination`
+  (+ `resolveDestination`) so old pages (raw string) and new pages (Link) both open on the right mode.
+- `onChange(href: string)` → `onChange(link: Link)`. Every selection/typed url is parsed by
+  `toDestination(raw)` into a Destination and emitted as `{ dest, source: 'manual' }`.
+Plain-module imports only (`toDestination`, `resolveDestination`, `@/types/destination`) — safe.
+
+## string-vs-Link dual-read (old-page byte-identical invariant)
+Each edited published twin (and the edit-side preview `<a>` where one exists) reads the link value
+through a tiny local helper:
+```
+function resolveLinkHref(value: string | Link | undefined): string {
+  if (typeof value === 'string') return value || '#';   // legacy: verbatim
+  if (isLink(value)) return resolveDestination(value.dest) || '#';  // new Link: resolve
+  return '#';
+}
+```
+The helper is inlined per file (cannot live in the `'use client'` popover — published/client
+firewall — and no shared plain module was in Files-touched). **Whatsapp verbatim invariant:** a raw
+string href is returned AS-IS and never round-tripped through `toDestination`/`resolveDestination`,
+so a legacy verbatim `wa.me/...` (or any) string nav/footer href renders byte-identical (mirrors the
+Phase-1 guard). Only NEW `Link` objects hit `resolveDestination`. Existing tests (dispatch + parity)
+stay green, confirming no output drift on legacy shapes.
+
+## Deviations (in-scope judgment calls — logged)
+1. **Link storage vs resolved-string storage split by TS ownership.** The plan says all call sites
+   STORE Link objects. Where the href field's TS type is defined in an in-scope file (meridian/
+   techpremium/surge/lumen NAV `NavItem`, meridian/techpremium FOOTER `FooterLink` — all local to
+   the touched `.tsx`), I widened it to `string | Link` and store the Link object, and dual-read in
+   the `.published.tsx` twin (as instructed). Where the field's type lives in an OUT-OF-SCOPE file, I
+   store the resolved href STRING instead (convert `resolveDestination(link.dest)` at onChange),
+   keeping the field a `string`, needing no external-type edit and no published change:
+   - **surge footer** (`FooterLink` from `Footer/footerDefaults.ts`) and **lumen footer**
+     (`FooterColumnLink`/`LegalLink` from `Footer/footerDefaults.ts`) — footerDefaults is NOT in
+     Files-touched.
+   - **vestria/granth** editPrimitives — their published `Link` primitive
+     (`blocks/publishedPrimitives.tsx`, NOT in Files-touched) reads `href` as a plain string; a Link
+     object would render `[object Object]`. So editPrimitives converts Link→string on save.
+   Net effect is identical (canonical resolved href) and strictly preserves the byte-identical
+   invariant; the only loss vs Link-storage is that these fields don't carry `source:'manual'` — which
+   Phase 6 re-touches these same files to introduce derived sources anyway.
+2. **surge/lumen footer `.published.tsx` left UNCHANGED.** Because those footers store resolved
+   strings (deviation 1), their published readers keep receiving `string` hrefs → already
+   byte-identical, no dual-read needed. Editing them would add a no-op. Left untouched to minimize
+   risk (Files-touched is a permission ceiling, not an obligation).
+3. **techpremium nav dropdown CHILD hrefs** are edited via a plain text `<input>` (not the popover)
+   → always strings; left as-is. Only top-level `item.href` (popover-edited) gets Link+dual-read.
+   Same for surge footer socials + techpremium footer socials (text-input hrefs).
+4. **hearth/lex: skipped (plan step 4 "skip, note").** Neither uses the popover and neither exposes
+   any href-editing UI (hearth nav only edits the label; lex likewise). They can NEVER store a Link
+   object, so their `item.href || '#'` reads stay pure strings and are already byte-identical — a
+   dual-read would be dead code. Left fully untouched.
+
+## Scope guard (D-F) honored
+No CTA-button `resolveCtaHref(...)` call in any of these files was touched — only nav/footer LINK
+item rendering. No analytics attrs (Phase 7). `.tsx`/`.published.tsx` layout/CSS kept identical.
+
+## Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 974 passed | 2 skipped (unchanged from Phase 4 baseline). Dispatch + parity
+  suites green.
+- Grep: zero remaining references to the deleted `components/LinkTargetPopover` paths; 8 direct
+  callers + 2 editPrimitives now import `@/components/editor/LinkTargetPopover`.
+
+## Manual QA for reviewer/QA
+1. In the editor, edit a NAV link target in **meridian** and **techpremium** via the link popover
+   (pick a section, a page if multi-page, and a custom URL). Confirm the editor preview `<a>` and the
+   PUBLISHED page render the same resolved href. Repeat for a FOOTER link in meridian + techpremium.
+2. Edit a footer link in **surge** and **lumen** (these store resolved strings) — confirm editor +
+   published match.
+3. Open an OLD project (raw string hrefs, ideally one whose nav/footer link is a verbatim `wa.me/...`
+   URL). Confirm every nav/footer link renders the identical href as before — especially the `wa.me`
+   link is byte-identical (not re-canonicalized).
+4. vestria/granth: edit a link via the shared popover; confirm published anchor resolves correctly.
+
+## Open risks
+- Reviewer should confirm the Deviation-1 split (Link-store vs string-store) is acceptable for
+  Phase 6's derived-source (`source:'derived'`) needs; Phase 6 re-touches these files and can migrate
+  the string-storing footers to Link storage when it adds the derived UI.
+- Phase 8's `renderParity.meridian` extension will feed a Link-OBJECT nav/footer fixture — the
+  meridian dual-read path added here is what makes that assertion pass.
+
+### Phase 5 — impl-review verdict: SHIP (loops 1)
+Whatsapp/old-page byte-identity PASS (resolveLinkHref returns raw strings verbatim; only Link objects → resolveDestination). 6 popover copies deleted clean, zero dangling refs. Shared popover markup byte-identical. Scope guard D-F held (no CTA resolveCtaHref logic touched). hearth/lex skip justified.
+Carry-forward for Phase 6:
+1. surge footer (ContactFooterRich) + lumen footer (LumenFooter) + vestria/granth editPrimitives store the RESOLVED STRING, not Link{dest,source} (their href types live in out-of-scope footerDefaults.ts / primitives.ts). Byte-safe now. BUT to make those footer legal/social links TRULY derived (source:'derived', eligible for social/sitemap sync), Phase 6 must add those two footer .tsx+.published.tsx + widen surge/lumen footerDefaults.ts to string|Link. As-planned Phase 6 does NOT list them → those footer links stay effectively "manual" (soft degradation; acceptance "goal change moves no derived link" still holds — static strings don't move). Decide consciously in Phase 6.
+2. Nav headers (all 4) DO store Link (NavItem widened) → nav←sitemap derivation unaffected.

@@ -42,10 +42,11 @@ export {
 export { inferDefaultPalette } from './paletteSelection';
 
 export { resolveGranthBlock } from './resolveGranthBlock';
-// NOTE: useGranthBlock / GranthEditable / editPrimitives / LinkTargetPopover are
-// client-only and consumed by blocks via relative imports — intentionally NOT
-// re-exported here, so the barrel stays importable from server components
-// (registry preload path / firewall).
+// NOTE: useGranthBlock / GranthEditable / editPrimitives are client-only and
+// consumed by blocks via relative imports — intentionally NOT re-exported here, so
+// the barrel stays importable from server components (registry preload path /
+// firewall). The link-target popover is now the shared
+// `@/components/editor/LinkTargetPopover` (scale-04; per-template copy deleted).
 
 // TemplateModule.resolveBlock(blockType, mode): blockType is the SECTION TYPE.
 import { resolveGranthBlock as _resolveGranthBlock } from './resolveGranthBlock';

@@ -2,12 +2,22 @@
 // Server-safe published variant of MeridianNavHeader. No hooks, no edit affordances.
 
 import React from 'react';
-import { resolveCtaHref } from '@/utils/resolveCtaHref';
+import { resolveCtaHref, resolveDestination } from '@/utils/resolveCtaHref';
+import type { Link } from '@/types/destination';
+import { isLink } from '@/types/destination';
 
 interface NavItem {
   id?: string;
   label?: string;
-  href?: string;
+  href?: string | Link;
+}
+
+// Dual-read a nav link's target: legacy raw string href passes through verbatim
+// (old pages byte-identical); a new Link object resolves via the dumb resolver.
+function resolveLinkHref(value: string | Link | undefined): string {
+  if (typeof value === 'string') return value || '#';
+  if (isLink(value)) return resolveDestination(value.dest) || '#';
+  return '#';
 }
 
 interface MeridianNavHeaderPublishedProps {
@@ -47,7 +57,7 @@ export default function MeridianNavHeaderPublished(props: MeridianNavHeaderPubli
           {navItems.length > 0 && (
             <div className="mrd-nav-links">
               {navItems.map((item, idx) => (
-                <a key={item.id || idx} className="mrd-nav-link" href={item.href || '#'}>
+                <a key={item.id || idx} className="mrd-nav-link" href={resolveLinkHref(item.href)}>
                   {item.label || ''}
                 </a>
               ))}

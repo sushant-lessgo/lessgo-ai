@@ -1,14 +1,24 @@
 // Server-safe published variant of the Surge header. No hooks, flat props.
 
 import React from 'react';
-import { resolveCtaHref, externalLinkProps } from '@/utils/resolveCtaHref';
+import { resolveCtaHref, externalLinkProps, resolveDestination } from '@/utils/resolveCtaHref';
+import type { Link } from '@/types/destination';
+import { isLink } from '@/types/destination';
 import { HEADER_STYLES } from './styles';
 // externalLinkProps used for both the CTA and the nav links below.
+
+// Dual-read a nav link's target: legacy raw string href passes through verbatim
+// (old pages byte-identical); a new Link object resolves via the dumb resolver.
+function resolveLinkHref(value: string | Link | undefined): string {
+  if (typeof value === 'string') return value || '#';
+  if (isLink(value)) return resolveDestination(value.dest) || '#';
+  return '#';
+}
 
 interface NavItem {
   id?: string;
   label?: string;
-  href?: string;
+  href?: string | Link;
 }
 
 interface WarmNavHeaderPublishedProps {
@@ -44,9 +54,12 @@ export default function WarmNavHeaderPublished(props: WarmNavHeaderPublishedProp
           )}
         </div>
         <div className="sg-nav-mid">
-          {navItems.map((item, idx) => (
-            <a key={item.id || idx} href={item.href || '#'} {...externalLinkProps(item.href)}>{item.label || ''}</a>
-          ))}
+          {navItems.map((item, idx) => {
+            const href = resolveLinkHref(item.href);
+            return (
+              <a key={item.id || idx} href={href} {...externalLinkProps(href)}>{item.label || ''}</a>
+            );
+          })}
         </div>
         <div className="sg-nav-right">
           <a className="sg-btn sg-btn--primary sg-btn--sm" href={ctaHref} {...externalLinkProps(ctaHref)}>{ctaText}</a>
