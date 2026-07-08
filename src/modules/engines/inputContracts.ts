@@ -185,7 +185,10 @@ const workContract: EngineContract = {
     { id: 'name', group: 'WHO', slot: 'identity', tier: 'T1', requirement: 'required', prefillKey: 'businessName', input: 'free-text' },
     { id: 'oneLiner', group: 'WHAT', slot: 'identity', tier: 'T1', requirement: 'required', prefillKey: 'oneLiner', input: 'free-text' },
     { id: 'whatYouTakeOn', group: 'WHO', slot: 'understanding', tier: 'T1', requirement: 'optional', prefillKey: 'audiences', input: 'chips' },
-    { id: 'theWork', group: 'WHAT', slot: 'proof', tier: 'T3', requirement: 'required', prefillKey: 'offerings', section: 'books', wizardArtifact: true, input: 'upload' },
+    // No prefillKey: `theWork` is an IMAGE upload; EntryFacts.offerings is TEXT,
+    // so scrape-prefilling it would seed text into image slots (broken covers /
+    // a ≥3 guard satisfied by garbage). Starts EMPTY — requires real uploads.
+    { id: 'theWork', group: 'WHAT', slot: 'proof', tier: 'T3', requirement: 'required', section: 'books', wizardArtifact: true, input: 'upload' },
     { id: 'genresStyle', group: 'WHAT', slot: 'understanding', tier: 'T1', requirement: 'required', prefillKey: 'categories', section: 'writing', input: 'chips' },
     {
       id: 'bioStory', group: 'WHY-YOU', slot: 'understanding', tier: 'T1', requirement: 'required',

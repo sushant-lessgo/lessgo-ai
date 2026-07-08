@@ -20,6 +20,8 @@
 //
 // FIREWALL: client-only. Reads/writes `useWizardStore`; no template/renderer imports.
 
+import { useRef, useState } from 'react';
+import { Loader2, X } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { useWizardStore, type WizardProofState } from '@/hooks/useWizardStore';
 import { getContract, type ContractField } from '@/modules/engines/inputContracts';
@@ -125,6 +127,121 @@ function SkippableNumbersField({
   );
 }
 
+/** Minimum work uploads a writer must provide before generating (empty-gallery guard). */
+const MIN_WORKS = 3;
+
+/**
+ * WORK T3 exception (spec §8 / phase 9): the artifact IS the argument. Instead of
+ * deferring uploads to the editor (thing/trust), the writer uploads 3–5 works
+ * (book covers / sample images) IN the wizard via the existing `/api/upload-image`
+ * endpoint. URLs are stored on the `theWork` field value (string[]); the work
+ * generation adapter threads them onto the Granth shelf. Scraped image URLs
+ * prefill the same array (contract prefillKey 'offerings').
+ */
+function WorkUploadField({ field }: { field: ContractField }) {
+  const tokenId = useWizardStore((s) => s.tokenId);
+  const entry = useWizardStore((s) => s.fields[field.id]);
+  const setFieldValue = useWizardStore((s) => s.setFieldValue);
+  const urls = Array.isArray(entry?.value) ? (entry!.value as string[]) : [];
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const enough = urls.length >= MIN_WORKS;
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    if (!tokenId) {
+      setError('Missing project token — please restart from the beginning.');
+      return;
+    }
+    setError(null);
+    setUploading(true);
+    const added: string[] = [];
+    try {
+      for (const file of Array.from(files)) {
+        const form = new FormData();
+        form.append('file', file);
+        form.append('tokenId', tokenId);
+        const res = await fetch('/api/upload-image', { method: 'POST', body: form });
+        const json = await res.json();
+        if (!res.ok || !json?.success || !json?.url) {
+          throw new Error(json?.error || 'Upload failed');
+        }
+        added.push(json.url as string);
+      }
+      setFieldValue(field.id, [...urls, ...added]);
+    } catch (e: any) {
+      setError(e?.message || 'Could not upload one or more files.');
+      if (added.length > 0) setFieldValue(field.id, [...urls, ...added]);
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
+
+  const removeAt = (i: number) => {
+    setFieldValue(field.id, urls.filter((_, idx) => idx !== i));
+  };
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <Label className="text-gray-700">
+          Your work <span className="text-red-500">*</span>
+        </Label>
+        <p className="text-sm text-gray-500">
+          Upload {MIN_WORKS}–5 images of your work — book covers, published pieces,
+          or sample pages. These become your showcase.
+        </p>
+      </div>
+
+      {urls.length > 0 && (
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {urls.map((url, i) => (
+            <div key={`${url}-${i}`} className="relative group aspect-[3/4] rounded-md overflow-hidden border border-gray-200 bg-gray-50">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt={`Work ${i + 1}`} className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => removeAt(i)}
+                aria-label="Remove"
+                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(e) => void handleFiles(e.target.files)}
+      />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:border-gray-400 disabled:opacity-50"
+      >
+        {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+        {uploading ? 'Uploading…' : urls.length > 0 ? 'Add more' : 'Upload work'}
+      </button>
+
+      {error && <p className="text-xs text-red-600">{error}</p>}
+      <p className={`text-xs ${enough ? 'text-gray-500' : 'text-amber-600'}`}>
+        {urls.length} added{enough ? '' : ` — add at least ${MIN_WORKS} to continue`}.
+      </p>
+    </div>
+  );
+}
+
 export default function ProofSlot() {
   const engine = useWizardStore((s) => s.engine);
   const btKey = useWizardStore((s) => s.businessTypeKey);
@@ -142,12 +259,14 @@ export default function ProofSlot() {
   );
   // T1 skippable numeric proof (real-numbers) — surfaced as an ASK-with-warning.
   const numbersFields = proofFields.filter((f) => f.skippableWithWarning);
+  // WORK T3 exception: in-wizard uploads (work.theWork) — the only wizardArtifact.
+  const artifactFields = proofFields.filter((f) => f.wizardArtifact);
   // Other T1 proof fields (e.g. trust credentials) render as plain inputs.
   const otherFields = proofFields.filter(
     (f) =>
       f.input !== 'boolean' &&
       !f.skippableWithWarning &&
-      !f.wizardArtifact // T3 wizard uploads (work.theWork) are phase-9 territory
+      !f.wizardArtifact
   );
 
   const anyTestimonialOn = booleanFields.some(
@@ -212,6 +331,10 @@ export default function ProofSlot() {
           </div>
         </div>
       )}
+
+      {artifactFields.map((f) => (
+        <WorkUploadField key={f.id} field={f} />
+      ))}
 
       {numbersFields.map((f) => (
         <SkippableNumbersField key={f.id} field={f} btEntry={btEntry} />

@@ -23,6 +23,7 @@ import {
 } from '@/modules/wizard/generation';
 import type { ThingGenerationInput } from '@/modules/wizard/generation/thing';
 import type { TrustGenerationInput } from '@/modules/wizard/generation/trust';
+import type { WorkGenerationInput } from '@/modules/wizard/generation/work';
 import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
 import type { TemplateId } from '@/types/service';
 
@@ -113,9 +114,28 @@ function buildTrustInput(): TrustGenerationInput {
   };
 }
 
+/** Project the wizard store → the WORK (writer/granth) adapter input (plain data). */
+function buildWorkInput(): WorkGenerationInput {
+  const s = useWizardStore.getState();
+  const fields = s.fields as Record<string, { value: unknown }>;
+  return {
+    tokenId: s.tokenId ?? '',
+    templateId: s.templateId ?? 'granth',
+    writerName: fieldStr(fields, 'name'),
+    oneLiner: fieldStr(fields, 'oneLiner'),
+    // The 3–5 work uploads captured in ProofSlot (contract `theWork`).
+    works: fieldArr(fields, 'theWork'),
+  };
+}
+
+/** Minimum work uploads required before the writer page can be generated. */
+export const MIN_WORKS = 3;
+
 /** Project the wizard store → the engine's adapter input (plain data). */
 function buildInput(engine: NonNullable<ReturnType<typeof useWizardStore.getState>['engine']>): GenerationInput {
-  return engine === 'trust' ? buildTrustInput() : buildThingInput();
+  if (engine === 'trust') return buildTrustInput();
+  if (engine === 'work') return buildWorkInput();
+  return buildThingInput();
 }
 
 export default function GeneratingSlot() {
@@ -140,6 +160,20 @@ export default function GeneratingSlot() {
     if (!input.tokenId) {
       setError('Missing project token. Please restart from the beginning.');
       return;
+    }
+
+    // WORK empty-gallery guard: the writer profile needs at least MIN_WORKS work
+    // samples (uploaded or scraped) before we can build the shelf. Block the run
+    // and send them back to the proof step to add more.
+    if (engine === 'work') {
+      const works = (input as WorkGenerationInput).works ?? [];
+      if (works.length < MIN_WORKS) {
+        setError(
+          `Add at least ${MIN_WORKS} work samples before we build your page — ` +
+            `you currently have ${works.length}. Go back a step to add more.`
+        );
+        return;
+      }
     }
 
     let result;

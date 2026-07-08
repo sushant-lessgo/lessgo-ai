@@ -36,14 +36,15 @@ import {
 import { getEntryFacts, type ResolvedEngine } from './classify';
 
 /**
- * Launch bridges (spec §11.9): thing → product wizard, trust → service wizard.
- * NOTE: `work` has a live engine + template (granth) but NO wizard entry until
- * spec 06 — when the writer bridge lands there, DELETE the `bridge:work`
- * clause below and add `work` here.
+ * Launch bridges (spec §11.9): thing → product wizard, trust → service wizard,
+ * work → writer (granth) wizard. As of scale-06 phase 9 the writer bridge is
+ * LIVE: work routes through the unified wizard, so the `bridge:work` MANUAL
+ * clause is gone and `work` sits here alongside thing/trust.
  */
-export const BRIDGEABLE_ENGINES: Record<'thing' | 'trust', AudienceType> = {
+export const BRIDGEABLE_ENGINES: Record<'thing' | 'trust' | 'work', AudienceType> = {
   thing: 'product',
   trust: 'service',
+  work: 'writer',
 };
 
 export type ServeDecision =
@@ -121,12 +122,6 @@ export function decideServe(brief: Brief): ServeDecision {
     tags.push(`rungE:${engine}`);
   }
 
-  // bridge — engine live but unbridged (work, until spec 06). ONLY when
-  // businessType is KNOWN (unknown ⇒ suppress; rungA covers the unblock).
-  if (known && engine === 'work') {
-    tags.push('bridge:work');
-  }
-
   // rungA — businessType not in List 1.
   if (!known) {
     tags.push(`rungA:${brief.businessType ?? 'unclassified'}`);
@@ -135,7 +130,7 @@ export function decideServe(brief: Brief): ServeDecision {
   // Normal template check (scale-01 shortlist). shortlist() reads
   // brief.copyEngine internally — fine here: only consulted when copyEngine
   // is set and equals resolvedEngine (thing/trust).
-  const bridgeable = engine === 'thing' || engine === 'trust';
+  const bridgeable = engine === 'thing' || engine === 'trust' || engine === 'work';
   const sl = known && bridgeable ? shortlist(brief) : [];
 
   if (tags.length === 0 && known && bridgeable && sl.length > 0) {

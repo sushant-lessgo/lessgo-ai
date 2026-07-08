@@ -14,11 +14,15 @@
 // single line here (add 'trust', then 'work') with no other route edits, and
 // phase 10 deletes this file when every engine is unified.
 //
-// Phase 3 pilot: THING only. Phase 8: +TRUST.
+// Phase 3 pilot: THING only. Phase 8: +TRUST. Phase 9: +WORK (writer/granth).
 //
 // FIREWALL: pure data + the CopyEngine type. No stores/React/template modules.
 
 import type { CopyEngine } from '@/types/brief';
 
-/** Copy engines served by the unified wizard. Grows in phase 9 (+work), deleted in 10. */
-export const WIZARD_ENGINES: ReadonlySet<CopyEngine> = new Set<CopyEngine>(['thing', 'trust']);
+/** Copy engines served by the unified wizard. All three live as of phase 9; deleted in 10. */
+export const WIZARD_ENGINES: ReadonlySet<CopyEngine> = new Set<CopyEngine>([
+  'thing',
+  'trust',
+  'work',
+]);

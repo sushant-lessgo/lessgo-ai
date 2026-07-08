@@ -759,3 +759,77 @@ Carry-forward notes (non-blocking):
 - **Testimonial attribution (later phase, e.g. 11 or follow-up):** unified-wizard trust hydrates `importedTestimonials` from `brief.facts.entry.testimonials` which is `string[]` (quote only) — authors blank, so trust pages get UNATTRIBUTED testimonials. Verbatim quote text IS preserved (spec item 7 satisfied) and injectRealTestimonials tolerates blanks. Root cause = entry pipeline reduces testimonials to strings; enrich `EntryFacts.testimonials` to carry authors later.
 - **Surge trust delta sections:** trust proof slot collects only testimonials/outcomes/credentials; the other 5 ServiceAssetInput booleans default false with no UI. ZERO effect for hearth/lex; only Surge gates logos/casestudies on them. Phase-1 contract-scoping limitation, not a phase-8 defect. Flag if Surge trust needs proof-gated deltas.
 - Cosmetic: trust.test.ts validates `strategy` loosely vs full AssembledStrategySchema.
+
+## Phase 9 — work engine / writer self-serve
+
+**Files changed**
+- `src/modules/brief/serveGate.ts`
+- `src/modules/brief/serveGate.test.ts`
+- `src/modules/wizard/rollout.ts`
+- `src/modules/wizard/generation/work.ts` (created)
+- `src/modules/wizard/generation/index.ts`
+- `src/hooks/editStore/granthSeed.ts`
+- `src/components/onboarding/wizard/ProofSlot.tsx`
+- `src/components/onboarding/wizard/GeneratingSlot.tsx`
+- `src/app/dev/seed-writer/route.ts` (deleted)
+
+NOT edited (in Files-touched but genuine no-ops — verified, noted below):
+`src/modules/templates/templateMeta.ts`, `src/modules/templates/fit.ts`,
+`src/app/onboarding/[token]/page.tsx`, `src/app/api/brief/confirm/route.ts`.
+
+### serveGate — the 3 coordinated BLOCKING-2 edits
+1. `BRIDGEABLE_ENGINES` type widened to `Record<'thing'|'trust'|'work', AudienceType>` + `work: 'writer'` added.
+2. `bridgeable` predicate widened to include `engine === 'work'` (the easy-to-miss one — without it a served work brief never reaches the serve branch even with the map widened). TS narrows `engine` to the 3-value union via the const-boolean alias, so `BRIDGEABLE_ENGINES[engine]` typechecks against the widened Record.
+3. Deleted the `bridge:work` MANUAL clause (old lines ~124-128) and its stale header comment (per its own instruction at ~41-43).
+
+### rungC/granth hazard — resolution: NO templateMeta / fit.ts change (verified, not assumed)
+Test-first: wrote the `decideServe(writerBrief) ⇒ serve/writer/granth` assertion and ran it BEFORE any UI wiring. It passed with ONLY the 3 serveGate edits + rollout. Traced why:
+- Writer is a KNOWN businessType ⇒ `resolveEngine` returns `{engine:'work', source:'lookup'}`. rungC gallery injection is gated on `classificationSource==='tiebreaker' && tiebreaker==='portfolio-is-proof'` — `source==='lookup'` for any known writer, so rungC NEVER fires on the serve path. (A tiebreaker-classified work brief has an UNKNOWN businessType ⇒ `known===false` ⇒ rungA ⇒ manual anyway, never served.)
+- `requiredCapabilitiesFromBrief` for writer = `[]` (writer `requiredCapabilities: []`; `follow-social` ⇒ M4, not M1 ⇒ no `lead-form`; no download-app/multi). So `shortlist(brief)` = templates that fit `work` with `[]` = `['granth']` (lumen is `bespoke` ⇒ off shortlist). `pickTemplate` → granth via `businessTypes.writer.defaultStyle 'literary-quiet'` ∈ `granth.designStyles`.
+- **Deviation from plan's PREFER:** the plan preferred adding a `gallery` capability to granth. I did NOT, because (a) it is not needed for the serve path to resolve granth (proven by the passing test), and (b) `templateMeta.test.ts` (OUT of my Files-touched scope) hard-asserts `templateMeta.granth.capabilities` toEqual `[]` and `conformance.test.ts` would require a `capabilitySections` evidence entry — adding gallery would fail an out-of-scope test I may not edit. Per the "IF NEEDED / verify, don't assume" caveat this is the conservative, rule-compliant choice. `templateMeta.granth.copyEngines` already includes `'work'` (line 79) — confirmed. fit.ts confirmed unchanged (shortlist filters by copyEngines; granth fits `work` with `[]`).
+
+### work.ts — thin deterministic path + templateId guard
+Plain server-safe module (no `'use client'`, no store import). `runWorkGeneration`:
+1. Guard: fetches `/api/loadDraft`, asserts persisted `templateId === 'granth'` — THROWS (does not silently overwrite) on mismatch. serveGate resolves granth at serve time and the confirm route persists it; a mismatch is an upstream regression.
+2. Builds `buildGranthHomeFinalContent({tokenId, title, writerName, works})` — NO LLM strategy/copy fetch (the seed is the content).
+3. `saveDraft` with `paletteId:'sinduri'`, `templateId:'granth'`, `variantId:'granth'`, `finalContent`. audienceType intentionally NOT re-sent (already persisted by confirm; DraftSaveSchema strips it — guard proves it's set).
+
+### granthSeed.ts — signature extended (flagged)
+Added an OPTIONAL `works?: string[]` param (additive, back-compat). The 3–5 wizard uploads are threaded positionally onto `books.items[].cover_image` (surplus append minimal items so no upload is lost). Absent/empty ⇒ the original fictional shelf, unchanged. Verified `GranthBooks.core.tsx` reads `item.cover_image` (single-source .core.tsx ⇒ edit+published parity, no dual-renderer divergence; no block edits).
+
+### ProofSlot — WORK T3-in-wizard exception + ≥3 guard
+Added `WorkUploadField` rendered for `wizardArtifact` fields (only work's `theWork`). Uploads via the existing `/api/upload-image` (formData {file, tokenId}), stores returned URLs on `fields.theWork.value` (string[]); scraped image URLs prefill the same array. Thumbnails + remove, uploading state, per-file error, and a live count with an amber "add at least 3" hint. thing/trust unaffected (no wizardArtifact fields).
+
+### GeneratingSlot — buildWorkInput + empty-gallery guard
+Added `buildWorkInput()` (tokenId, templateId, writerName, oneLiner, works from `fields.theWork`) and wired `work` into the per-engine `buildInput` dispatch (mirrors the phase-8 trust fix). Empty-gallery guard: `run()` blocks generation for the work engine until `works.length >= MIN_WORKS (3)`, surfacing a back-to-proof error. `MIN_WORKS` exported.
+
+### seed-writer deletion
+`src/app/dev/seed-writer/route.ts` deleted (dir removed). No live code imports it (grep hits are docs/READMEs only). `src/app/README.md` still mentions it — updating it is OUT of scope (not in Files-touched); flagged, not edited.
+
+### page.tsx / confirm route — confirmed no-ops
+`page.tsx` load-detection and the confirm-route redirect both key on `WIZARD_ENGINES.has(brief.copyEngine)`. Adding `'work'` to `WIZARD_ENGINES` in rollout.ts makes both route work briefs through the unified wizard with zero edits to those files. Confirmed, not edited.
+
+### End-to-end reasoning (human-gate runnable path)
+WORK brief → entry → confirm (server `decideServe` ⇒ serve/writer/granth; persists `brief`+`audienceType:'writer'`+`templateId:'granth'`; redirect `/onboarding/{token}` since work ∈ WIZARD_ENGINES) → page.tsx load-detection sees confirmed brief, engine ∈ WIZARD_ENGINES → renders unified wizard. Work slots = all minus `structure` (contract slotSkips). ProofSlot asks 3–5 work uploads (T3-in-wizard). GeneratingSlot blocks until ≥3 works, then `runGeneration('work', …)` → work.ts asserts granth → `buildGranthHomeFinalContent` (uploads become covers) → `saveDraft` → `/edit/{token}`. thing/trust paths unchanged (buildThingInput/buildTrustInput untouched).
+
+### Deviations
+- Did NOT add a `gallery` capability to granth (plan PREFER) — not needed for serve resolution (test-proven) and would break out-of-scope `templateMeta.test.ts`/`conformance.test.ts`. Conservative choice per the plan's own "IF NEEDED / verify, don't assume".
+- `granthSeed` signature extended with optional `works?` (flagged as required by the plan) to make uploads visible on the shelf — additive/back-compat.
+- Left the stale `seed-writer` mention in `src/app/README.md` (out of scope).
+
+### Verification
+- `npx tsc --noEmit` — clean (no output).
+- `npx vitest run src/modules/brief src/modules/templates src/modules/wizard` — 22 files, 572 tests passed.
+- `npx vitest run` (full) — 88 passed | 1 skipped (89 files); 1241 passed | 2 skipped.
+
+### Open risks
+- GeneratingSlot STAGES still shows "Building strategy / Writing the copy" for work, though work.ts only fires `saving`→`done` (thin path has no LLM stages). Cosmetic; strategy/copy render as done. Could be made engine-aware in a later phase.
+
+- **Gate-prep fix (coordinator):** removed `prefillKey: 'offerings'` from the work `theWork` field in `inputContracts.ts` — it is an IMAGE upload but `EntryFacts.offerings` is TEXT, so scrape/review runs seeded text into image slots (broken covers, ≥3 guard passing on garbage). Now starts EMPTY, requiring real uploads. requirement/slot/tier/wizardArtifact/input unchanged. `tsc` clean; `test:run -- src/modules/engines src/modules/wizard` = 4 files / 64 tests passed (no ask-budget shift — theWork is a T3 upload, not a T1 ask).
+
+### Impl-review verdict: **ship** (loop 1/1) — tsc clean, FULL suite 1241 passed / 2 skipped. serveGate BLOCKING-2 all 3 edits correct + type-sound. CRITICAL question resolved: a self-serve writer (businessType 'writer' ∈ taxonomy, source:'lookup') resolves to serve/writer/granth — rungC never fires, shortlist=['granth']; MANUAL only for UNKNOWN-businessType writers (intended D2 gate, same as thing/trust). work.ts thin path throws on non-granth (no overwrite). No blocking issues.
+Gate-prep fix applied post-review: removed `theWork` `prefillKey:'offerings'` (text→image mismatch would have shown broken thumbnails/covers on a scrape writer run) — tsc clean, 64 tests, no ask-budget shift.
+Carry-forward notes (non-blocking):
+- **Phase 10:** stale `/dev/seed-writer` mentions in `src/app/README.md:85` + `src/modules/templates/granth/README.md:7` (docs only, no code import — build safe). Clean up.
+- GeneratingSlot stage labels ("Building strategy / Writing copy") are cosmetic for the thin work path (only saving→done fires).
+- Edge: a `structureHint:'multi'` writer would need a multipage cap granth lacks → shortlist empty → MANUAL. Low probability (writer profiles single-page), fails safe to demand board.
