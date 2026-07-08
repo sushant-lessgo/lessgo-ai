@@ -32,6 +32,8 @@ import {
   type MultiPageOnboardingData,
 } from '@/modules/generation/multiPageAssembly';
 import type { SitemapPage } from '@/types/product';
+import { isImagesAtBirthEnabled } from '@/lib/generation/flag';
+import { injectImagesForPage } from '@/lib/generation/imagesAtBirth';
 // Plain data module (fields only, no component code) — safe to import statically
 // without breaching the template bundle firewall.
 import {
@@ -375,6 +377,27 @@ export default function GeneratingStep() {
               successMessage: VESTRIA_LEAD_SUCCESS_MESSAGE,
             },
           });
+
+          // scale-03 (flag-gated): stock-fill stockable slots (industries cards)
+          // into THIS page's content BEFORE it is persisted (resume-safe). Pass the
+          // body-only, sectionId-keyed map for this page — for home its section
+          // objects are shared refs with fc.content, so the flat view updates too.
+          if (isImagesAtBirthEnabled()) {
+            const style = useProductGenerationStore.getState();
+            const imgPaletteId = style.stylePalettePicked
+              ? style.paletteId
+              : defaultVestriaPalette;
+            const imgCategories: string[] =
+              ob.understanding?.productCategories ?? ob.understanding?.categories ?? [];
+            const stats = await injectImagesForPage({
+              content: fc.pages[page.archetypeKey].content,
+              templateId: 'vestria',
+              paletteId: imgPaletteId,
+              categories: imgCategories,
+            });
+            posthog?.capture('images_at_birth', { ...stats, page: page.archetypeKey });
+          }
+
           await saveFC(fc); // persist THIS page before generating the next
         }
       } catch (e: any) {
@@ -564,6 +587,23 @@ export default function GeneratingStep() {
         if (explicitVestria && heroVariantPicked) {
           applyHeroVariantToFinalContent(finalContent, heroVariant);
         }
+
+        // scale-03 (flag-gated): stock-fill stockable slots before the save POST.
+        // Meridian resolves to zero specs (no-op); the single-page vestria fallback
+        // CAN carry an industries section and fills here.
+        if (isImagesAtBirthEnabled()) {
+          const imgCategories: string[] = isMfr
+            ? understanding.productCategories ?? understanding.categories ?? []
+            : understanding.categories ?? [];
+          const stats = await injectImagesForPage({
+            content: finalContent.content,
+            templateId,
+            paletteId,
+            categories: imgCategories,
+          });
+          posthog?.capture('images_at_birth', { ...stats, page: 'single-page' });
+        }
+
         const res = await fetch('/api/saveDraft', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

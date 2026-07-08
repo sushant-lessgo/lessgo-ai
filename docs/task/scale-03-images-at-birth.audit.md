@@ -84,3 +84,37 @@
 
 ### Open risks
 - None new. `fetchImagesForSpecs` has no unit-level timeout test (5s real timer) — covered indirectly via the rejection test; acceptable per plan ("timeout/error → {imageUrl:null,error}").
+
+## Phase 3 — orchestrator + GeneratingStep wiring
+
+**Files changed**
+- `src/lib/generation/imagesAtBirth.ts` (new) — `injectImagesForPage` orchestrator.
+- `src/lib/generation/imagesAtBirth.test.ts` (new) — real-assembly mocked-fetch tests.
+- `src/app/onboarding/product/[token]/components/steps/GeneratingStep.tsx` — 2 gated injection blocks + 2 import lines.
+
+**imagesAtBirth.ts**
+- `injectImagesForPage({content, templateId, paletteId, categories})` mutates `content` IN PLACE (decision 5), no `sectionLayouts` param — `expandImageSlots(content)` drives slot lookup off each entry's `.layout`.
+- Pilot allow-list `{meridian, vestria}`; meridian → empty slot map → `{requested:0,filled:0}` return. `styleKeywords`/`profile` resolved via STATIC LEAF import from `@/modules/templates/vestria/imageKeywords` (`PALETTE_IMAGE_KEYWORDS`, `PALETTE_IMAGE_PROFILES`). Unknown paletteId → `FALLBACK_PROFILE {light,neutral,#888888}` (no crash).
+- `fetchImagesForSpecs` → per result-with-candidates `pickBestImage(result, profile.mode, profile.temperature, profile.baseColor)` → flat write `content[sectionId].elements[elementPath]`; collection write finds item by `collectionWrite.itemId` in `elements[key]` array, sets `[imageField]` (skip if item vanished). Null/error/no-candidate → nothing written.
+- Whole body wrapped in try/catch → logged no-op on any throw. Wall time via `performance.now()` guard (0 if unavailable).
+- Reuses `SectionData` from `@/types/core/content` (no parallel type).
+
+**GeneratingStep.tsx — call sites (both `if (isImagesAtBirthEnabled())`)**
+- **runFanOut (multi-page vestria):** inserted AFTER `mergePageIntoFinalContent(...)`, BEFORE `await saveFC(fc)`. `content: fc.pages[page.archetypeKey].content` (home + non-home, same object).
+  - paletteId resolved to mirror the completion posthog logic (line ~400): `style.stylePalettePicked ? style.paletteId : defaultVestriaPalette`, reading `useProductGenerationStore.getState()`. Quote of the mirrored source: `paletteId: finalStyle.stylePalettePicked ? finalStyle.paletteId : defaultVestriaPalette`.
+  - categories resolved from `ob.onboardingData.understanding` matching the strategy call's manufacturer field (line ~665 `categories: isMfr ? understanding.productCategories ?? understanding.categories ?? [] : ...`): here `ob.understanding?.productCategories ?? ob.understanding?.categories ?? []`.
+- **runCopyAndSave (single-page meridian + `explicitVestria && !sitemap`):** inserted AFTER `buildFinalContent(...)`/hero-variant apply, BEFORE the `saveDraft` POST. `content: finalContent.content`, `templateId`/`paletteId` = the existing save-time locals (`templateId = explicitVestria ? 'vestria' : PILOT_TEMPLATE`, `paletteId = explicitVestria ? styleState.paletteId : PILOT_PALETTE`).
+  - categories computed from closure `isMfr`/`understanding` mirroring the strategy call: `isMfr ? understanding.productCategories ?? understanding.categories ?? [] : understanding.categories ?? []`.
+- **posthog:** matched the file's existing idiom `posthog?.capture('event', {...})`. Emitted `posthog?.capture('images_at_birth', { ...stats, page })` — `page: page.archetypeKey` (fan-out) / `page: 'single-page'` (single). Both fully inside the flag-gated block (flag-off path untouched).
+
+**Test approach**
+- Real-assembly mis-wire guard: `fc` built via REAL `buildMultiPageSkeleton` + `mergePageIntoFinalContent` (templateId 'vestria') with a fixture `SitemapPage` carrying an `industries` section + 3 generated items; read back THROUGH `fc.pages[key].content[secId].elements.industries[i].image`. (Plan line 147 named `createInitialFinalContent`, which does not exist — used `buildMultiPageSkeleton` per the resume-anchor NIT.)
+- (a) non-home industries all filled; (b) home shared-ref visible in both `fc.pages.home.content` and `fc.content`; (c) hero_image/about_image remain absent; (d) meridian deep-equal unchanged + zero fetch calls; (e) fetch rejection → unchanged, no throw.
+- Deviation: test (b) originally used paletteId `brass` (warm) and asserted the blue URL; brass scoring correctly picks the neutral-gray candidate (gray hue h=0 counts as warm). Switched (b) to `cobalt` (light/cool) so the blue candidate wins deterministically — the case only exercises the shared-ref invariant, not scoring. Logged here.
+
+**Verification**
+- `npx tsc --noEmit`: clean.
+- `npm run test:run`: 907 passed | 2 skipped (68 files); new file 5/5.
+- `npm run build`: succeeded.
+
+**Open risks:** none new beyond decision-7 accepted risks (Pexels hotlinks, ~6s resume window). Phase 4 is the human QA gate (no code).
