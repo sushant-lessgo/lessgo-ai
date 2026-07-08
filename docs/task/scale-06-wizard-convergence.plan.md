@@ -10,8 +10,8 @@ Kill the product/service wizard fork. One wizard renderer + one Brief-backed sto
 
 ## Progress log
 
-- phase 1 engine input contracts + waterfall: done (commit pending-sha, review loops 1, ship — 38/38 tests, tsc clean)
-- phase 2 unified Brief-backed wizard store: pending
+- phase 1 engine input contracts + waterfall: done (commit a67e4ac, review loops 1, ship — 38/38 tests, tsc clean)
+- phase 2 unified Brief-backed wizard store: done (commit pending-sha, review loops 1, ship — 18/18 tests, tsc clean)
 - phase 3 wizard shell + entry→wizard handoff + core slots: pending
 - phase 4 goal/proof/style/structure slots + product proof hard rule: pending
 - phase 5 shared generation core + GeneratingSlot (thing): pending

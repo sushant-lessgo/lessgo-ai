@@ -93,3 +93,88 @@ Carry-forward notes (non-blocking, act in later phases):
 - Minor: `computeDroppedSections` has no dedup (harmless until two fields share a `dropTarget`).
 
 **Phase 1 committed:** see Progress log in plan.md.
+
+---
+
+## Phase 2 — unified Brief-backed wizard store
+
+**Files changed**
+- `src/hooks/useWizardStore.ts` (created)
+- `src/hooks/useWizardStore.test.ts` (created)
+- `src/hooks/README.md` (edited — added `useWizardStore.ts` entry under Stores)
+
+### `useWizardStore.ts`
+New client (`'use client'`) Zustand+Immer singleton store (mirrors the old
+product/service generation stores' `create()(devtools(immer(...)))` shape; tokenId
+carried in state, not a per-token factory). NOTHING consumes it yet; old stores
+untouched.
+
+**State surface:**
+- Resolved identity: `tokenId`, `hydrated`, `engine` (CopyEngine|null),
+  `businessTypeKey`, `audienceType`, `templateId`.
+- `mode: 'review'|'fill'` — derived from entry source.
+- Slot machine: `slots: WizardSlot[]` (computed from contract, skips applied),
+  `currentSlot: WizardSlot`.
+- `fields: Record<string, WizardFieldEntry>` where
+  `WizardFieldEntry = { value, source: 'scraped'|'inferred'|'user', confirmed, state }`
+  (state = phase-1 waterfall FieldState).
+- Goal: `goalIntent`, `goalParam`.
+- `proof: WizardProofState` — superset of `ServiceAssetAvailability` (+ `hasPackages`);
+  a compile-time `_ProofIsSuperset` guard enforces every service key exists.
+- thing-only: `sitemap`, `strategy`, `heroVariant`(+picked), `styleVariantId`(+picked),
+  `stylePaletteId`(+picked), `styleMood`(+picked).
+- trust-only: `variantId`, `paletteId`.
+- generating: `generationProgress`, `generationError`.
+
+**Actions:** `hydrate`, `goToSlot`/`nextSlot`/`prevSlot` (slot-ID keyed),
+`setFieldValue`/`confirmField`, `setGoalIntent`/`setGoalParam`, `setProof`,
+thing style/structure setters, trust style setters, generation setters,
+`buildBriefPatch`, `save`, `reset`. Exported pure helper `deriveMode(brief)`.
+
+**Field logic not duplicated:** hydrate calls `computeFieldStates` (waterfall) +
+`getContract`/`wizardSlots` (contracts); slot list = `wizardSlots.filter(s => !slotSkips.includes(s))`.
+
+### Hydration / persistence reuse of existing APIs
+- **Hydration** is a synchronous `hydrate({ tokenId, brief, audienceType, templateId })`
+  action fed by the loadDraft response shape (`/api/loadDraft` already returns
+  `brief` + `audienceType` + `templateId`; confirmed in route). The page-level
+  fetch that calls `hydrate` lands in phase 3 (dispatcher/load-detection). No-ops
+  safely (no throw) when `brief.copyEngine` is unset (place/quick-yes never carry
+  a schema engine), mirroring the old bridge-hydrate no-op guard.
+- **Persistence** `save()` POSTs to the existing `/api/saveDraft` with
+  `{ tokenId, stepIndex: slotIndex, brief: buildBriefPatch() }`. `buildBriefPatch`
+  composes `brief.goal` via `intentToBriefGoal` (scale-05) — the same brief-passthrough
+  the old GoalStep/GeneratingStep use. No new persistence API invented.
+
+### Deviations
+- **Mode derivation heuristic:** the Brief carries no explicit URL-vs-manual flag,
+  so `deriveMode` inspects `facts.entry.rawInput` for URL-likeness (reuses
+  EntryInputStep's normalizeUrl logic). Conservative + deterministic; matches
+  "URL/scrape ⇒ review, manual ⇒ fill". Logged per in-scope-ambiguity rule.
+- **Proof superset:** ServiceAssetAvailability imported as a TYPE only (erased at
+  compile; does not "touch" the old store). Added `hasPackages` so the set is a
+  genuine superset covering the trust `packages` T2 field; other engine→proof
+  boolean mapping deferred to the phase-4/8 ProofSlot.
+- **Proof hydration** seeds only `hasTestimonials` (from `entry.testimonials`) —
+  the rest default false; full proof-boolean population is the ProofSlot's job.
+- **Field→Brief writeback** in `save()` is limited to `goal` (well-defined);
+  per-field brief mapping lands with the phase-5 adapters.
+
+### Test results
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run -- src/hooks/useWizardStore.test.ts` — **18 passed (18)**,
+  1 file passed. Covers: engine/audience/template resolution, per-field
+  waterfall population, goal hydration, testimonial seed, no-engine no-op, thing
+  full skeleton, trust/work structure skip, next/prev/clamp, goToSlot skip no-op,
+  review/fill derivation (URL / host-only / manual / no-entry), field+goal actions,
+  buildBriefPatch M2 composition, reset.
+
+### Open risks
+- `save()`/hydrate page wiring is untested until phase 3 (no consumer yet).
+- `strategy` typed `unknown` (loose) to avoid heavy product-type coupling this
+  phase; phase 5 adapters will tighten if needed.
+
+### Impl-review verdict: **ship** (loop 1/1) — tsc clean, 18/18 tests, purely additive (old stores byte-unchanged). No blocking issues.
+Carry-forward notes (non-blocking, act in later phases):
+- **Phase 3:** `save()`+hydrate→loadDraft wiring is untested (no fetch mock) — gets real coverage with the phase-3 consumer. When wiring load-detection/resume, do NOT assume old-store step-array semantics for `content.onboarding.stepIndex` — the new store writes a slot INDEX there.
+- **Phase 5:** `strategy: unknown` / `sitemap: unknown[]` intentionally loose — adapters tighten.

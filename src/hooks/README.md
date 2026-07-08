@@ -47,6 +47,24 @@ persistence/auto-save.
 All three are plain `create()` + `devtools` + `immer` stores (no persist), keyed
 to their wizard's step array.
 
+### `useWizardStore.ts` — **unified Brief-backed wizard store** (scale-06)
+Single source of truth for the ONE wizard that serves every engine — the
+convergence target that replaces the product/service fork (the three stores above
+stay untouched until scale-06 phase 10; nothing consumes `useWizardStore` yet).
+Resolves `engine`/`businessTypeKey`/`audienceType`/`templateId` from the confirmed
+`Brief` + serveGate result. Its **slot machine is keyed by slot IDs** (not indices):
+the slot list is computed from the engine contract (`getContract`,
+`src/modules/engines/inputContracts.ts`) with per-engine skips applied (trust/work
+skip `structure`); `goToSlot`/`nextSlot`/`prevSlot` operate on ids. Per-field state
+(`{ value, source: scraped|inferred|user, confirmed, state }`) comes from the pure
+phase-1 waterfall (`src/modules/wizard/waterfall.ts`) — **not duplicated here**.
+`mode: 'review' | 'fill'` is derived from the entry source (URL/scrape ⇒ review,
+manual one-liner ⇒ fill). Goal reuses scale-05 (`goalIntent`/`goalParam` +
+`intentToBriefGoal`); proof booleans are a superset of `ServiceAssetAvailability`.
+Hydrates from `Project.brief` (same loadDraft path as the entry funnel) and
+persists via the existing `/api/saveDraft` (no new persistence API). `'use client'`;
+imports only pure helpers + types (firewall-clean — no template/renderer imports).
+
 ### `useModalManager.ts`
 Field-edit modal orchestration for the editor: a modal queue over
 `CanonicalFieldName`s; bridges `useOnboardingStore` (field values) and the editor
