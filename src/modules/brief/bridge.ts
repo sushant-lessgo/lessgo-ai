@@ -8,7 +8,8 @@
 import type { Brief } from '@/types/brief';
 import type { ServiceGoal, ServiceType } from '@/types/service';
 import type { LandingGoal } from '@/types/generation';
-import type { GoalIntent } from '@/modules/goals/vocabulary';
+import type { GoalIntent, GoalMechanism } from '@/modules/goals/vocabulary';
+import { goalIntentMeta } from '@/modules/goals/vocabulary';
 import type { BusinessTypeKey } from '@/modules/businessTypes/config';
 import { getEntryFacts } from './classify';
 
@@ -49,6 +50,147 @@ const INTENT_TO_LANDING_GOAL: Partial<Record<GoalIntent, LandingGoal>> = {
   'download-app': 'download',
   'enquiry': 'enquiry',
 };
+
+/**
+ * ===== Reverse maps (scale-05 phase 1) — legacy goal enum → GoalIntent =====
+ * TOTAL by construction (Record, not Partial): every legacy goal maps to an
+ * intent so `legacyGoalToBriefGoal` can always compose a Brief.goal. Legacy
+ * enums stay alive (design call #4) — these maps only feed the Brief writeback.
+ */
+export const SERVICE_GOAL_TO_INTENT: Record<ServiceGoal, GoalIntent> = {
+  'book-call': 'book-call',
+  'request-quote': 'request-quote',
+  'lead-magnet': 'lead-magnet',
+  'apply': 'apply',
+  // Closest intent: downloading a portfolio is a gated-resource grab (M1).
+  'download-portfolio': 'lead-magnet',
+  'subscribe-newsletter': 'subscribe-newsletter',
+};
+
+export const LANDING_GOAL_TO_INTENT: Record<LandingGoal, GoalIntent> = {
+  'waitlist': 'waitlist',
+  'signup': 'signup-free',
+  'free-trial': 'free-trial',
+  'buy': 'buy-via-link',
+  'demo': 'request-demo',
+  'download': 'download-app',
+  'enquiry': 'enquiry',
+};
+
+/**
+ * Raw goal-slot capture from the wizard (mirrors Brief.goal.param zod shape).
+ * Plain type in a plain module so stores, GoalParamFields and GeneratingSteps
+ * can all import it without firewall concerns.
+ */
+export interface GoalParamInput {
+  phone?: string;
+  email?: string;
+  url?: string;
+  links?: string[];
+  date?: string;
+  message?: string;
+}
+
+type BriefGoal = NonNullable<Brief['goal']>;
+
+/** Trimmed, non-empty entries of a links array (or []). */
+function cleanLinks(links: string[] | undefined): string[] {
+  return (links ?? []).map((l) => l.trim()).filter((l) => l.length > 0);
+}
+
+/** wa.me wants bare digits (country code included, no +/spaces/dashes). */
+function waDigits(phone: string): string {
+  return phone.replace(/[^\d]/g, '');
+}
+
+/**
+ * Legacy wizard goal (+ optional goal-slot param) → Brief.goal (scale-05 phase 1).
+ *
+ * Composition rules — INTENT-SPECIFIC BRANCHES FIRST, mechanism-generic fallback:
+ * - `subscribe-newsletter` → mechanism FORCED to 'M1' (design call #6: it's an
+ *   email-capture form seeded in phase 4), NO param, NO destination — hero
+ *   GOAL_REF resolves via the existing M1 `#form-section` path. Never derive
+ *   this from goalIntentMeta (frozen vocab says M4); never edit vocabulary.ts.
+ * - `download-app` → persist `param.links` verbatim (both store URLs; phase 6's
+ *   badge injector reads exactly `brief.goal.param.links`), destination = links[0].
+ * - `rsvp` → link + date captured; link present → M3 external, else M1 form
+ *   (date is stored only — no rendering in this feature).
+ * - generic: phone/email → M2 (wa.me / mailto) when the intent allows M2;
+ *   url → M3 external when the intent allows M3; M4 → links; M1/M5 → none.
+ *   `mechanism = goalIntentMeta[intent].mechanisms[0]` unless a param upgrades
+ *   it to an allowed secondary mechanism (e.g. request-demo + Calendly → M3).
+ */
+export function legacyGoalToBriefGoal(
+  legacyGoal: ServiceGoal | LandingGoal,
+  param?: GoalParamInput
+): BriefGoal {
+  const intent: GoalIntent =
+    SERVICE_GOAL_TO_INTENT[legacyGoal as ServiceGoal] ??
+    LANDING_GOAL_TO_INTENT[legacyGoal as LandingGoal];
+
+  // ── Intent-specific branches FIRST ──
+  if (intent === 'subscribe-newsletter') {
+    // Explicit M1 override — NO param, NO destination (see doc block above).
+    return { intent, mechanism: 'M1' };
+  }
+
+  if (intent === 'download-app') {
+    const links = cleanLinks(param?.links);
+    if (links.length === 0) return { intent, mechanism: 'M3' };
+    return { intent, mechanism: 'M3', destination: links[0], param: { links } };
+  }
+
+  if (intent === 'rsvp') {
+    const url = param?.url?.trim();
+    const date = param?.date?.trim();
+    const paramOut: GoalParamInput = {
+      ...(url ? { url } : {}),
+      ...(date ? { date } : {}),
+    };
+    if (url) {
+      return { intent, mechanism: 'M3', destination: url, param: paramOut };
+    }
+    return {
+      intent,
+      mechanism: 'M1',
+      ...(date ? { param: paramOut } : {}),
+    };
+  }
+
+  // ── Mechanism-generic fallback ──
+  const mechanisms = goalIntentMeta[intent].mechanisms;
+  const primary: GoalMechanism = mechanisms[0];
+
+  const phone = param?.phone?.trim();
+  const email = param?.email?.trim();
+  if (mechanisms.includes('M2') && (phone || email)) {
+    if (phone) {
+      return {
+        intent,
+        mechanism: 'M2',
+        destination: `https://wa.me/${waDigits(phone)}`,
+        param: { phone },
+      };
+    }
+    return { intent, mechanism: 'M2', destination: `mailto:${email}`, param: { email } };
+  }
+
+  const url = param?.url?.trim();
+  if (mechanisms.includes('M3') && url) {
+    return { intent, mechanism: 'M3', destination: url, param: { url } };
+  }
+
+  if (primary === 'M4') {
+    const links = cleanLinks(param?.links);
+    if (links.length === 0) return { intent, mechanism: 'M4' };
+    return { intent, mechanism: 'M4', destination: links, param: { links } };
+  }
+
+  // M1 / M5 (and M2/M3-primary intents with no usable param): no destination —
+  // goalToDestination returns undefined for destination-less M2/M3 and the
+  // caller falls back to legacy behavior.
+  return { intent, mechanism: primary };
+}
 
 export interface ProductPrefill {
   oneLiner: string;

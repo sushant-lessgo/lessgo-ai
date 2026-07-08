@@ -6,6 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Calendar, FileText, Gift } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
 import type { ServiceGoal } from '@/types/service';
+import { SERVICE_GOAL_TO_INTENT } from '@/modules/brief/bridge';
+import GoalParamFields, {
+  intentHasParamFields,
+  intentParamSatisfied,
+} from '@/components/onboarding/shared/GoalParamFields';
 
 // Phase 8: three goals are offered — book-call (default), request-quote, and
 // lead-magnet. Other goals (apply / download-portfolio / subscribe-newsletter)
@@ -45,6 +50,8 @@ export default function GoalStep() {
   const posthog = usePostHog();
   const goal = useServiceGenerationStore((s) => s.goal);
   const setGoal = useServiceGenerationStore((s) => s.setGoal);
+  const goalParam = useServiceGenerationStore((s) => s.goalParam);
+  const setGoalParam = useServiceGenerationStore((s) => s.setGoalParam);
   const nextStep = useServiceGenerationStore((s) => s.nextStep);
 
   const [selected, setSelected] = useState<GoalOption['id']>(
@@ -66,9 +73,16 @@ export default function GoalStep() {
   }, []);
 
   const handleSelect = (id: GoalOption['id']) => {
+    if (id !== selected) setGoalParam({}); // stale params don't cross goals
     setSelected(id);
     setGoal(id);
   };
+
+  // Goal-slot param capture (scale-05 phase 1) — e.g. book-call shows an
+  // optional scheduling-link field. Composed into Brief.goal at save.
+  const selectedIntent = SERVICE_GOAL_TO_INTENT[selected];
+  const showParamFields = intentHasParamFields(selectedIntent);
+  const canProceed = intentParamSatisfied(selectedIntent, goalParam);
 
   const handleContinue = () => {
     posthog?.capture('service_onboarding_step_submit', {
@@ -125,8 +139,19 @@ export default function GoalStep() {
         })}
       </div>
 
+      {showParamFields && (
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <GoalParamFields
+            intent={selectedIntent}
+            value={goalParam}
+            onChange={setGoalParam}
+          />
+        </div>
+      )}
+
       <Button
         onClick={handleContinue}
+        disabled={!canProceed}
         className="w-full bg-brand-accentPrimary hover:bg-orange-500"
         size="lg"
       >

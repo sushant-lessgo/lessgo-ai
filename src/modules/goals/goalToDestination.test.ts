@@ -3,6 +3,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { goalToDestination } from './goalToDestination';
+import { legacyGoalToBriefGoal } from '@/modules/brief/bridge';
 import type { Brief } from '@/types/brief';
 
 type Goal = NonNullable<Brief['goal']>;
@@ -138,6 +139,64 @@ describe('goalToDestination', () => {
       expect(
         goalToDestination(goal({ intent: 'rsvp', mechanism: 'M5' }), { forms: {} }),
       ).toBeUndefined();
+    });
+  });
+
+  // ─── scale-05 phase 1: writeback-COMPOSED destinations resolve (wizard →
+  // legacyGoalToBriefGoal → goalToDestination round trip) ───
+  describe('composed destinations (legacyGoalToBriefGoal round trip)', () => {
+    it('enquiry + phone param → wa.me destination resolves as whatsapp', () => {
+      const g = legacyGoalToBriefGoal('enquiry', { phone: '+91 98765 43210' });
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: { kind: 'whatsapp', number: '919876543210' },
+      });
+    });
+
+    it('enquiry + email param → mailto destination resolves as email', () => {
+      const g = legacyGoalToBriefGoal('enquiry', { email: 'hi@acme.com' });
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: { kind: 'email', addr: 'hi@acme.com' },
+      });
+    });
+
+    it('demo + Calendly param → composed M3 destination resolves as external', () => {
+      const g = legacyGoalToBriefGoal('demo', { url: 'https://calendly.com/acme/30min' });
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: { kind: 'external', url: 'https://calendly.com/acme/30min' },
+      });
+    });
+
+    it('download-app + both store links → resolves external to links[0]', () => {
+      const play = 'https://play.google.com/store/apps/details?id=com.katha';
+      const appstore = 'https://apps.apple.com/app/katha/id123';
+      const g = legacyGoalToBriefGoal('download', { links: [play, appstore] });
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: { kind: 'external', url: play },
+      });
+      // param.links survives untouched for the phase-6 badge injector.
+      expect(g.param?.links).toEqual([play, appstore]);
+    });
+
+    it('subscribe-newsletter override → M1 #form-section anchor (NOT the M4 social path)', () => {
+      const g = legacyGoalToBriefGoal('subscribe-newsletter');
+      expect(goalToDestination(g, { forms: { 'form-news': {} } })).toEqual({
+        dest: { kind: 'section', anchor: 'form-section' },
+        formId: 'form-news',
+      });
+    });
+
+    it('social destinations still resolve for M4 goals with a profile link (follow-social shape)', () => {
+      // No legacy enum maps to follow-social; the M4 generic branch composes
+      // destination = links for direct-intent callers (phase 8).
+      const g = goal({
+        intent: 'follow-social',
+        mechanism: 'M4',
+        destination: ['https://instagram.com/acme'],
+        param: { links: ['https://instagram.com/acme'] },
+      });
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: { kind: 'social', platform: 'instagram', url: 'https://instagram.com/acme' },
+      });
     });
   });
 });

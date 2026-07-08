@@ -30,6 +30,23 @@ export const BriefSchema = z.object({
       mechanism: z.enum(goalMechanisms),
       /** e.g. a store URL, or [instagram, amazon] for follow-social writers. */
       destination: z.union([z.string(), z.array(z.string())]).optional(),
+      /**
+       * Raw wizard capture (scale-05 phase 1). `destination` stays the resolver
+       * input — writeback COMPOSES it from `param` (e.g. phone → wa.me URL,
+       * links[] → external). Additive + fully optional so existing Briefs and
+       * frozen generation-contract fixtures parse unchanged.
+       */
+      param: z
+        .object({
+          phone: z.string(),
+          email: z.string(),
+          url: z.string(),
+          links: z.array(z.string()),
+          date: z.string(),
+          message: z.string(),
+        })
+        .partial()
+        .optional(),
     })
     .optional(),
   facts: z.record(z.string(), z.unknown()).optional(),

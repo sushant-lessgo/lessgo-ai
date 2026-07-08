@@ -11,6 +11,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type { LandingGoal, UnderstandingData } from '@/types/generation';
+import type { GoalParamInput } from '@/modules/brief/bridge';
 import type {
   ProductStrategyOutput,
   SitemapPage,
@@ -72,6 +73,9 @@ interface ProductGenerationState {
 
   // Step 2
   landingGoal: LandingGoal | null;
+  // Goal-slot param (scale-05 phase 1) — raw capture (store links, booking
+  // URL, …); composed into Brief.goal at save via legacyGoalToBriefGoal.
+  goalParam: GoalParamInput;
 
   // Step 3
   offer: string;
@@ -129,6 +133,7 @@ interface ProductGenerationActions {
   resetUnderstanding: () => void;
 
   setLandingGoal: (goal: LandingGoal) => void;
+  setGoalParam: (param: GoalParamInput) => void;
   setOffer: (offer: string) => void;
 
   setImportSourceUrl: (url: string | null) => void;
@@ -161,6 +166,7 @@ const initialState: ProductGenerationState = {
   understandingLoading: false,
   understandingError: null,
   landingGoal: null,
+  goalParam: {},
   offer: '',
   importSourceUrl: null,
   importedTestimonials: [],
@@ -245,6 +251,10 @@ export const useProductGenerationStore = create<ProductGenerationStore>()(
       setLandingGoal: (goal) =>
         set((state) => {
           state.landingGoal = goal;
+        }),
+      setGoalParam: (param) =>
+        set((state) => {
+          state.goalParam = param;
         }),
       setOffer: (offer) =>
         set((state) => {

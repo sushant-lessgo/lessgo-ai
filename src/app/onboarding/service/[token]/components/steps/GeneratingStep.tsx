@@ -9,6 +9,7 @@ import ErrorRetry from '@/components/onboarding/shared/ErrorRetry';
 import type { SectionCopy } from '@/types/generation';
 import type { ServiceStrategyOutputAssembled } from '@/types/service';
 import { defaultHearthPalette } from '@/modules/templates/hearth/palettes';
+import { legacyGoalToBriefGoal } from '@/modules/brief/bridge';
 
 type Stage = 'strategy' | 'copy' | 'saving' | 'done';
 
@@ -33,6 +34,7 @@ export default function GeneratingStep() {
   const businessName = useServiceGenerationStore((s) => s.businessName);
   const understanding = useServiceGenerationStore((s) => s.understanding);
   const goal = useServiceGenerationStore((s) => s.goal);
+  const goalParam = useServiceGenerationStore((s) => s.goalParam);
   const offer = useServiceGenerationStore((s) => s.offer);
   const assets = useServiceGenerationStore((s) => s.assets);
   const importedTestimonials = useServiceGenerationStore((s) => s.importedTestimonials);
@@ -225,6 +227,10 @@ export default function GeneratingStep() {
           title,
           paletteId: effectivePalette,
           finalContent,
+          // scale-05 phase 1: goal writeback — saveDraft's brief passthrough
+          // shallow-merges this over any existing Brief (goal is guarded
+          // non-null at pipeline start).
+          brief: { goal: legacyGoalToBriefGoal(goal, goalParam) },
         }),
       });
       if (!res.ok) {
@@ -249,6 +255,7 @@ export default function GeneratingStep() {
   }, [
     understanding,
     goal,
+    goalParam,
     assets,
     oneLiner,
     businessName,

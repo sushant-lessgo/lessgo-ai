@@ -15,6 +15,7 @@ import type {
 } from '@/types/service';
 import { defaultVariantForTemplate } from '@/types/service';
 import type { ScrapedTestimonial } from '@/lib/schemas';
+import type { GoalParamInput } from '@/modules/brief/bridge';
 
 /**
  * Service generation flow steps
@@ -87,6 +88,9 @@ interface ServiceGenerationState {
 
   // Step 2
   goal: ServiceGoal | null;
+  // Goal-slot param (scale-05 phase 1) — raw capture; composed into
+  // Brief.goal at save via legacyGoalToBriefGoal.
+  goalParam: GoalParamInput;
 
   // Step 3
   offer: string;
@@ -126,6 +130,7 @@ interface ServiceGenerationActions {
   resetUnderstanding: () => void;
 
   setGoal: (goal: ServiceGoal) => void;
+  setGoalParam: (param: GoalParamInput) => void;
   setOffer: (offer: string) => void;
   setAssets: (assets: ServiceAssetAvailability) => void;
   /** Switch template — resets variant + palette to the new template's defaults
@@ -157,6 +162,7 @@ const initialState: ServiceGenerationState = {
   importSourceUrl: null,
   importedTestimonials: [],
   goal: null,
+  goalParam: {},
   offer: '',
   assets: null,
   templateId: 'hearth',
@@ -239,6 +245,10 @@ export const useServiceGenerationStore = create<ServiceGenerationStore>()(
       setGoal: (goal) =>
         set((state) => {
           state.goal = goal;
+        }),
+      setGoalParam: (param) =>
+        set((state) => {
+          state.goalParam = param;
         }),
       setOffer: (offer) =>
         set((state) => {

@@ -33,6 +33,7 @@ import {
 } from '@/modules/generation/multiPageAssembly';
 import type { SitemapPage } from '@/types/product';
 import { isImagesAtBirthEnabled } from '@/lib/generation/flag';
+import { legacyGoalToBriefGoal } from '@/modules/brief/bridge';
 import { injectImagesForPage } from '@/lib/generation/imagesAtBirth';
 // Plain data module (fields only, no component code) — safe to import statically
 // without breaching the template bundle firewall.
@@ -109,6 +110,7 @@ export default function GeneratingStep() {
   const oneLiner = useProductGenerationStore((s) => s.oneLiner);
   const understanding = useProductGenerationStore((s) => s.understanding);
   const landingGoal = useProductGenerationStore((s) => s.landingGoal);
+  const goalParam = useProductGenerationStore((s) => s.goalParam);
   const offer = useProductGenerationStore((s) => s.offer);
   const importedTestimonials = useProductGenerationStore((s) => s.importedTestimonials);
   const importSourceUrl = useProductGenerationStore((s) => s.importSourceUrl);
@@ -230,6 +232,14 @@ export default function GeneratingStep() {
     setError(null);
     setCreditsError(false);
 
+    // scale-05 phase 1: goal writeback payload for every saveDraft body below.
+    // Only when the store carries a goal — a RESUMED run has a reset store
+    // (landingGoal null), so nothing is sent and saveDraft's shallow brief
+    // merge leaves the previously persisted Brief.goal untouched.
+    const briefPatch = landingGoal
+      ? { brief: { goal: legacyGoalToBriefGoal(landingGoal, goalParam) } }
+      : {};
+
     // ─── Explicit template selection wins (checked BEFORE the persona branch) ───
     // ?template=vestria → store.templateId; a vestria run must never be hijacked
     // by the hardware-founder persona bridge below.
@@ -287,6 +297,7 @@ export default function GeneratingStep() {
           title: fc.meta?.title || title,
           ...(templateInfo ?? {}),
           ...styleInfo,
+          ...briefPatch,
           finalContent: fc,
         }),
       });
@@ -500,6 +511,7 @@ export default function GeneratingStep() {
             paletteId: defaultTechPremiumPalette,
             templateId: 'techpremium',
             variantId: defaultTechPremiumVariant,
+            ...briefPatch,
             finalContent,
           }),
         });
@@ -616,6 +628,7 @@ export default function GeneratingStep() {
             // Mood only after an explicit pick (bone = renderer default; no
             // need to write it, and skipping avoids clobbering older drafts).
             ...(explicitVestria && styleMoodPicked ? { themeValues: { mood } } : {}),
+            ...briefPatch,
             finalContent,
           }),
         });
@@ -735,6 +748,7 @@ export default function GeneratingStep() {
   }, [
     understanding,
     landingGoal,
+    goalParam,
     productName,
     oneLiner,
     offer,
