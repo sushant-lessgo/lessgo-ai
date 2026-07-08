@@ -87,3 +87,41 @@
 **Open risks**
 - `cta_subtext` has no copy population yet — that lands in Phase 3. Until then it renders nothing on existing/new projects (empty default), so no visible change without manual entry.
 - Bespoke templates (surge/lumen/granth/vestria) intentionally skipped per plan — their heroes have no subtext slot.
+
+---
+
+## Phase 3 — Intent → copy guidance (one table, both engines, strategy + copy)
+
+**Files changed**
+- `src/modules/goals/copyGuidance.ts` — NEW
+- `src/modules/goals/copyGuidance.test.ts` — NEW
+- `src/modules/audience/service/copyPrompt.ts` — modified
+- `src/modules/audience/product/copyPrompt.ts` — modified
+- `src/modules/prompt/buildStrategyPrompt.ts` — modified
+- `src/modules/audience/service/strategy/promptsService.ts` — modified
+- `src/modules/audience/product/promptBranch.test.ts` — modified (frozen baseline regenerated)
+
+**What changed**
+- `copyGuidance.ts`: plain module (no 'use client', no template imports). `goalCopyGuidance: Record<GoalIntent, { cta; subtext?; emphasis }>` — total over all 18 frozen intents (tsc-enforced via Record). Place intents (`order-via-platform`, `pay-via-link`) carry cta + emphasis only, no subtext (plain-link guidance). `getGuidanceForIntent(intent)` formats the prompt block (label line + conditional cta_subtext instruction with the hard "do NOT invent terms" rule + emphasis line). `getEmphasisForIntent(intent)` returns just the emphasis (used by strategy prompts).
+- `service/copyPrompt.ts`: `getGoalCtaGuidance(goal: ServiceGoal)` re-pointed — body now `getGuidanceForIntent(SERVICE_GOAL_TO_INTENT[goal] ?? SERVICE_GOAL_TO_INTENT['book-call'])`. Signature and book-call fallback UNCHANGED; injection site (:151) unchanged — it now emits the label+subtext+emphasis block because the function returns it. Hero example JSON gained `cta_subtext`; added an explicit "OPTIONAL / OMIT unless the offer supports it / do NOT invent terms" line in OUTPUT FORMAT.
+- `product/copyPrompt.ts`: `getGoalCtaGuidance(goal: LandingGoal)` re-pointed via `LANDING_GOAL_TO_INTENT` with `.signup` fallback (same intent the old `?? map.signup` fallback resolved to → `signup-free`). Signature/fallback preserved. Hero example JSON gained `cta_subtext: "No credit card required"`; added the same OMIT/don't-invent instruction after the accent note.
+- `buildStrategyPrompt.ts` (legacy product strategy phase): `buildBusinessContext` appends `Goal emphasis: <emphasis>` when the free-text `landingPageGoals` resolves to an intent. Added a best-effort `resolveLandingGoalIntent()` mapping taxonomy `landingGoalTypes` ids AND display labels → GoalIntent; returns null (no emphasis line appended) when unmappable — conservative, never guesses an intent the founder didn't pick.
+- `promptsService.ts` (service strategy phase): `## Landing Goal` block gained an `**Emphasis:**` line via `getEmphasisForIntent(SERVICE_GOAL_TO_INTENT[goal] ?? ...['book-call'])`.
+
+**How `getGoalCtaGuidance` was re-pointed (signatures preserved)**
+- Both functions keep their exact signature (`(goal: ServiceGoal): string` / `(goal: LandingGoal): string`) and their original fallback target (book-call / signup). Only the body changed: legacy Goal → GoalIntent (reverse map) → `getGuidanceForIntent`. No caller or call site was modified. Legacy enums (`serviceGoals`/`landingGoals`) untouched.
+
+**cta_subtext "don't invent terms" instruction**
+- The formatter emits: for subtext-bearing intents, `cta_subtext (optional …): <framing>. OMIT this element unless the offer EXPLICITLY states such terms — do NOT invent terms (no fabricated "no credit card", trial length, guarantees, or shipping claims).` For subtext-less intents: `cta_subtext: leave empty for this goal unless the offer explicitly states a supporting term — do NOT invent terms.` Both copy engines' OUTPUT FORMAT sections also carry a standalone "OMIT unless the offer explicitly supports it; do NOT invent terms" line.
+
+**Deviations**
+- `promptBranch.test.ts` frozen `COPY_SAAS_BASELINE` was REGENERATED (not just extended). The plan said "extend ONLY if guidance-line assertions already exist" — the SaaS case is a byte-exact whole-prompt `.toBe(baseline)` assertion, which inherently asserts the guidance line, so the baseline had to be updated to the new output. Regeneration was done by dumping the actual `buildProductCopyPrompt(saasCopyInput)` output and pasting it verbatim. Note: the regenerated baseline also absorbed a `cta_subtext [optional, null to exclude]` line in the hero SECTION SPEC that comes from Phase 2's `meridianElementSchema` addition (spread into `layoutElementSchema['TerminalHero']`) — Phase 2 did not update this frozen baseline, so the test was already red on this branch before Phase 3; the regeneration also fixes that. `STRATEGY_SAAS_BASELINE` is unaffected (product strategy builder `promptsProduct.ts` was not touched).
+- `buildStrategyPrompt` intent resolution is best-effort against a fuzzy free-text field; `watch-video`/"Watch Demo" is intentionally left unmapped (no strong conversion intent), so no emphasis line is appended for it. Conservative choice logged here.
+
+**Verification**
+- `npx tsc --noEmit` — clean (no output).
+- `npx vitest run copyGuidance copyPrompt promptBranch generation` — 7 files, 51 tests passed (includes generation-contract MOCK fixture, still green — `cta_subtext` is optional in output).
+
+**Open risks**
+- No block/renderer changes this phase (prompt/copy plumbing only), so no dual-renderer concern. `copyGuidance.ts` is a plain module — safe for the server-only strategy/copy builders.
+- The legacy `buildStrategyPrompt` path stores `landingPageGoals` as either a taxonomy id or display label; the resolver covers both known forms, but a custom/edited free-text goal outside the taxonomy will simply get no emphasis line (safe, not wrong).

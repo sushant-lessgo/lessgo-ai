@@ -18,6 +18,8 @@ import {
 import { formatServiceVoiceForPrompt, selectServiceVoice } from './voice';
 import { assertNoTemplateLeak } from './promptFirewall';
 import { serviceGoalLabels } from '@/types/service';
+import { getGuidanceForIntent } from '@/modules/goals/copyGuidance';
+import { SERVICE_GOAL_TO_INTENT } from '@/modules/brief/bridge';
 
 export interface ServiceCopyPromptInput {
   strategy: ServiceStrategyOutputAssembled;
@@ -67,19 +69,16 @@ function buildSectionSpec(sectionType: string, layoutName: string): string {
 /**
  * Goal-specific CTA guidance — steers the verbs/commitment level of every
  * CTA-bearing field (header.cta_text, hero.cta_text, packages[].cta_text,
- * cta.cta_text). CTA variation is copy-level on the shared BookCallCTA block —
- * there is no per-goal CTA block (Phase 9 hold).
+ * cta.cta_text) AND the optional hero cta_subtext. CTA variation is copy-level
+ * on the shared BookCallCTA block — there is no per-goal CTA block (Phase 9 hold).
+ *
+ * scale-05 phase 3: re-pointed to the shared per-intent guidance table via the
+ * SERVICE_GOAL_TO_INTENT reverse map. Signature + fallback are UNCHANGED so
+ * legacy callers compile untouched — the legacy ServiceGoal enum stays alive.
  */
 function getGoalCtaGuidance(goal: ServiceGoal): string {
-  const map: Partial<Record<ServiceGoal, string>> = {
-    'book-call':
-      'Goal = book a call. CTA copy should invite a low-pressure conversation: "Book a call", "Book a discovery call", "Start a conversation". Warm, no hard sell.',
-    'request-quote':
-      'Goal = request a quote. CTA copy should invite a scoped, custom estimate: "Request a quote", "Get a quote", "Scope your project". Signal bespoke pricing, not a fixed price tag.',
-    'lead-magnet':
-      'Goal = lead magnet. CTA copy should offer the free resource with minimal commitment: "Get the guide", "Download the resource", "Send it to me". Make the value of the resource obvious; do NOT imply a sales call.',
-  };
-  return map[goal] ?? map['book-call']!;
+  const intent = SERVICE_GOAL_TO_INTENT[goal] ?? SERVICE_GOAL_TO_INTENT['book-call'];
+  return getGuidanceForIntent(intent);
 }
 
 function getEmotionalContext(awareness: string): string {
@@ -217,7 +216,8 @@ EXAMPLE (using an unrelated niche — vintage bookbinding studio — to illustra
       "eyebrow": "BOOKBINDING SINCE 2014",
       "headline": "Library bindings that <em>outlast</em> the books inside them.",
       "lede": "A small studio for collectors and archivists who want every spine to feel as <em>considered</em> as the volume it protects.",
-      "cta_text": "Request a quote"
+      "cta_text": "Request a quote",
+      "cta_subtext": "No obligation — quotes within one day"
     }
   },
   "services": {
@@ -247,6 +247,8 @@ EXAMPLE (using an unrelated niche — vintage bookbinding studio — to illustra
 }
 
 Every "headline" and every "lede" above shows <em> wrapping. Match this PATTERN — but with words and ideas drawn from THIS provider's offering, not the bookbinding example.
+
+hero.cta_subtext is OPTIONAL — a short muted line under the primary CTA. OMIT it (null or absent) unless the offer explicitly supports it; do NOT invent terms.
 
 Optional elements may be set to null to exclude them.
 

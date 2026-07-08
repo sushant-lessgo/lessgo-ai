@@ -16,6 +16,8 @@ import {
 } from '@/modules/sections/layoutElementSchema';
 import { formatProductVoiceForPrompt, type ProductVoiceId } from './voice';
 import { assertNoTemplateLeak } from './promptFirewall';
+import { getGuidanceForIntent } from '@/modules/goals/copyGuidance';
+import { LANDING_GOAL_TO_INTENT } from '@/modules/brief/bridge';
 
 export interface ProductCopyPromptInput {
   strategy: ProductStrategyOutput;
@@ -101,26 +103,16 @@ function buildSectionSpec(sectionType: string, layoutName: string): string {
 /**
  * Goal-specific CTA guidance — steers the verbs/commitment level of every
  * CTA-bearing field (header.cta_text, hero.cta_text, tiers[].cta_text,
- * cta.cta_text). CTA variation is copy-level on the shared Meridian blocks.
+ * cta.cta_text) AND the optional hero cta_subtext. CTA variation is copy-level
+ * on the shared Meridian blocks.
+ *
+ * scale-05 phase 3: re-pointed to the shared per-intent guidance table via the
+ * LANDING_GOAL_TO_INTENT reverse map. Signature + fallback are UNCHANGED so
+ * legacy callers compile untouched — the legacy LandingGoal enum stays alive.
  */
 function getGoalCtaGuidance(goal: LandingGoal): string {
-  const map: Record<LandingGoal, string> = {
-    waitlist:
-      'Goal = join waitlist (pre-launch). CTA copy: "Join the waitlist", "Get early access", "Request access". Signal scarcity/earliness, not a live product.',
-    signup:
-      'Goal = sign up. CTA copy: "Sign up", "Create your account", "Get started". Low friction, immediate.',
-    'free-trial':
-      'Goal = start a free trial. CTA copy: "Start free", "Start your free trial", "Try it free". Emphasize no-commitment.',
-    buy:
-      'Goal = purchase. CTA copy: "Get started", "Buy now", "Start building". Confident, value-forward.',
-    demo:
-      'Goal = book a demo. CTA copy: "Book a demo", "See it in action", "Get a walkthrough". For higher-consideration/B2B.',
-    download:
-      'Goal = download. CTA copy: "Download", "Get the app", "Install now". Direct, action-first.',
-    enquiry:
-      'Goal = send an enquiry via the on-page contact form. CTA copy: "Send enquiry", "Request a quote", "Get in touch". Enquiry-driven — every CTA points to the contact form, not a signup/checkout.',
-  };
-  return map[goal] ?? map.signup;
+  const intent = LANDING_GOAL_TO_INTENT[goal] ?? LANDING_GOAL_TO_INTENT.signup;
+  return getGuidanceForIntent(intent);
 }
 
 function getEmotionalContext(awareness: string): string {
@@ -295,6 +287,7 @@ Only the hero headline carries <em>. Match this PATTERN with copy drawn from THI
       "headline": "Ship on Friday. Sleep on <em>Saturday</em>.",
       "lede": "A deploy platform for teams that ship daily and refuse to babysit infrastructure.",
       "cta_text": "Start free",
+      "cta_subtext": "No credit card required",
       "secondary_cta_text": "Read the docs",
       "stats": [
         { "id": "", "value": "18s", "label": "median deploy" },
@@ -331,7 +324,8 @@ Only the hero headline carries <em>. Match this PATTERN with copy drawn from THI
   }
 }
 
-Only the hero headline and cta headline carry <em>. Match this PATTERN with copy drawn from THIS product.`;
+Only the hero headline and cta headline carry <em>. Match this PATTERN with copy drawn from THIS product.
+hero.cta_subtext is OPTIONAL — a short muted line under the primary CTA. OMIT it (null or absent) unless the offer explicitly supports it; do NOT invent terms.`;
 
   return `${identity}
 ${pageContextBlock}

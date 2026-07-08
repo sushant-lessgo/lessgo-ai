@@ -11,6 +11,8 @@ import type {
 import { serviceGoalLabels } from '@/types/service';
 import { assertNoTemplateLeak } from '../promptFirewall';
 import { selectServiceVoice } from '../voice';
+import { getEmphasisForIntent } from '@/modules/goals/copyGuidance';
+import { SERVICE_GOAL_TO_INTENT } from '@/modules/brief/bridge';
 
 export interface ServiceStrategyPromptInput {
   oneLiner: string;
@@ -58,6 +60,7 @@ export function buildServiceStrategyPrompt(input: ServiceStrategyPromptInput): s
 
 **Primary CTA:** ${serviceGoalLabels[goal]} (id: ${goal})
 **Offer:** ${offer}
+**Emphasis:** ${getEmphasisForIntent(SERVICE_GOAL_TO_INTENT[goal] ?? SERVICE_GOAL_TO_INTENT['book-call'])}
 
 ## Assets Available
 
