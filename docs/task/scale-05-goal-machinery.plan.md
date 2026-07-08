@@ -31,7 +31,7 @@ Make the picked goal actually shape the page. Today the goal is a dead wire: the
 - phase 7 M3 store-badges shared block: done (commit c33e666, review loops 1) — NB eyeball at P10: badge SVGs hardcoded #000 (may read odd on dark surface)
 - phase 8 M4 follow-strip shared block: done (commit a8f34d5, review loops 1) — inferPlatform export added to goalToDestination.ts (authorized, pure export)
 - phase 9 intent-first wizard goal step: done (commit b339a6b, review loops 2) — HUMAN GATE (UX) pending user sign-off. NB: product GoalStep lacks service's default-select mount effect (latent trap if a skip path is added later)
-- phase 10 acceptance fixtures + parity QA: done (review loops 1, ship) — full suite 1142 pass / 0 fail; MERGE GATE pending user sign-off
+- phase 10 acceptance fixtures + parity QA: done (commit 6b23195, review loops 1) — full suite 1142 pass / 0 fail; MERGE GATE pending user sign-off
 
 ---
 
