@@ -4,6 +4,25 @@
  */
 
 import { sectionList } from '@/modules/sections/sectionList';
+import type { CTAButton } from '@/types/destination';
+
+/**
+ * scale-04 — the single source of truth for a CTA's role. Reads the new
+ * `cta.role` first, then falls back to the legacy `buttonConfig.ctaType`, then
+ * to the element-key naming convention (`secondary_*` ⇒ secondary). Keeps old
+ * saved pages classifying correctly while new writes carry `cta.role` explicitly.
+ */
+export function deriveCtaRole(opts: {
+  cta?: Pick<CTAButton, 'role'> | { role?: unknown } | undefined;
+  ctaType?: 'primary' | 'secondary' | undefined;
+  elementKey?: string | undefined;
+}): 'primary' | 'secondary' {
+  const role = opts.cta?.role;
+  if (role === 'primary' || role === 'secondary') return role;
+  if (opts.ctaType === 'primary' || opts.ctaType === 'secondary') return opts.ctaType;
+  if (opts.elementKey && /secondary/i.test(opts.elementKey)) return 'secondary';
+  return 'primary';
+}
 
 /**
  * Get the type classification of a section

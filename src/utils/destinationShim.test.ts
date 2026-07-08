@@ -120,6 +120,40 @@ describe('toDestination — new shapes', () => {
   });
 });
 
+// scale-04 phase 4 — the modal writes these CTAButton shapes; the shim reads
+// them back so re-opening an old button prefills, and edit-side clicks resolve.
+describe('toDestination — phase-4 CTAButton write shapes', () => {
+  it('form CTAButton (form-section + formId) reads back the section dest', () => {
+    // The write path ALWAYS carries formId for a form button; the pre-pass keys
+    // the form case off formId. toDestination emits only the dest (formId rides
+    // on the CTAButton and is read separately by the click handler).
+    const cta: CTAButton = {
+      role: 'primary',
+      dest: { kind: 'section', anchor: 'form-section' },
+      formId: 'f1',
+    };
+    expect(toDestination(cta)).toEqual({ kind: 'section', anchor: 'form-section' });
+    expect(cta.formId).toBe('f1');
+  });
+
+  it('detached primary external CTAButton round-trips via resolveDestination', () => {
+    const cta: CTAButton = {
+      role: 'primary',
+      dest: { kind: 'external', url: 'https://calendly.com/x' },
+    };
+    const d = toDestination(cta) as Destination;
+    expect(resolveDestination(d)).toBe('https://calendly.com/x');
+  });
+
+  it('secondary page CTAButton reads back page dest', () => {
+    const cta: CTAButton = {
+      role: 'secondary',
+      dest: { kind: 'page', pathSlug: '/pricing' },
+    };
+    expect(toDestination(cta)).toEqual({ kind: 'page', pathSlug: '/pricing' });
+  });
+});
+
 describe('resolveDestination — per kind', () => {
   const cases: Array<[Destination, string]> = [
     [{ kind: 'section', anchor: 'cta' }, '#cta'],

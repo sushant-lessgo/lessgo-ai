@@ -194,3 +194,64 @@ Carry-forward notes:
 1. **Phase 4 LANDMINE (normalizeCtas.ts L69-70):** concrete-dest form predicate = `formId !== undefined && section && anchor==='form-section'`. Phase 4's form-button write path MUST always set `cta.formId` for form buttons, else a concrete form CTA maps to `{type:'link', url:'#form-section'}` → `#cta` fallback instead of `{type:'form'}`. Ensure formId set, or relax predicate.
 2. getPublishedGoal re-fetches publishedPage row in SSR routes (already had it) — accepted perf tradeoff; optional projectId-first overload possible later.
 Phase 8 QA (headless-unverifiable): (a) multi-page subpage GOAL_REF primary baked href = resolved goal; (b) live SSR /p/{slug} + /p/{slug}/{subpath} primary href == baked blob (not #cta); (c) /preview/[token] goal preview parity.
+
+---
+
+## Phase 4 — CTAButton write path + role unification + edit-side click
+
+**Files changed**
+- `src/components/toolbars/ButtonConfigurationModal.tsx`
+- `src/utils/sectionHelpers.ts`
+- `src/utils/ctaHandler.ts`
+- `src/components/forms/FormConnectedButton.tsx`
+- `src/utils/destinationShim.test.ts`
+- `src/types/store/actions.ts`
+- (NOT modified: `src/utils/destinationShim.ts` — CTAButton read already worked from phase 1; no extension needed.)
+
+### ButtonConfigurationModal.tsx — the new `cta` write
+- Role is DERIVED from the element key (`secondary` in key ⇒ secondary, else primary) and shown READ-ONLY (the old primary/secondary RadioGroup is gone). Displayed as a pill.
+- Primary buttons default to `followGoal=true` → written as `cta: { role:'primary', dest:'GOAL_REF' }` with a blue "Follows your project goal" banner + a Detach button. Detached primary shows the explicit-destination config plus a re-attach link. Secondary buttons never follow the goal (`followGoal` starts false, no goal UI).
+- The explicit-destination config (Button Action radios + link/form/page/link-with-input fields) is hidden while `followGoal` is true; destination validation is skipped in goal mode (only button text is required).
+- cta write shape (`buildCtaButton`):
+  - primary + followGoal → `{ role:'primary', dest:'GOAL_REF' }`
+  - form → `{ role, dest:{kind:'section',anchor:'form-section'}, formId: config.formId }` — ALWAYS carries formId (the phase-3 landmine: the pre-pass detects the form case by formId; a form-intent cta without it maps to a link → `#cta`). Form validation guarantees formId is set before save.
+  - page → `{ role, dest:{kind:'page', pathSlug} }`
+  - link → `{ role, dest: toDestination(url) }` (classifies tel:/mailto:/wa.me/https)
+  - link-with-input → undefined (carries inputConfig, not representable in the new shape) → NO cta written, so the pre-pass leaves the legacy buttonConfig intact.
+- Additive write, not a replacement. Existing legacy writes (buttonConfig, section-level cta, direct cta_url/cta_embed) are UNCHANGED. The new cta is written ALONGSIDE buttonConfig into `elementMetadata[key]`: `{ buttonConfig, cta }` when a cta exists, `{ buttonConfig }` (dropping any stale cta) for link-with-input. Rationale: raw readers of `elementMetadata[key].buttonConfig` (icons, ctaType, inputConfig) keep working; the phase-3 pre-pass re-derives buttonConfig from cta at render (href-identical for link/form/page), so they never diverge because the modal always rewrites both together.
+- Reopen prefill (dual-read): reads `elementMetadata[key].cta` first — GOAL_REF ⇒ goal-follow state; explicit dest ⇒ `configFromCta` reverse-maps the Destination back to the flat form fields (icons/behavior from the sibling legacy buttonConfig). Falls back to the legacy buttonConfig fields when no cta present (old pages prefill unchanged).
+
+### Role unification — `deriveCtaRole` (sectionHelpers.ts)
+- New shared helper `deriveCtaRole({ cta, ctaType, elementKey })`: reads `cta.role` FIRST, then legacy `ctaType`, then the `secondary` element-key convention, default `primary`. `FormConnectedButton` uses it for the inline-form placement role (was `buttonConfig.ctaType || 'primary'`).
+- Interpretation note (in-scope judgment call): `findPrimaryCTASection(sections: string[])` is a section-LOCATOR (finds the `cta` section id for form-scroll), not a per-button role reader — changing its signature is out of scope and would break callers. The role unification is centralized in `deriveCtaRole`, added to the same file the plan named. `findPrimaryCTASection` behavior unchanged.
+
+### Edit-side click — one Destination model
+- `ctaHandler.ts` `createCTAClickHandler`: reads new `cta` first, then legacy `buttonConfig`, then section-level `cta`. Form case handled inline (scroll to `form-<id>` / modal log) keyed off a resolvable formId (new `cta.formId` or legacy). Everything else → `toDestination` → `resolveDestination` → `navigateToDestination`, which keys BEHAVIOR off the Destination TYPE (section ⇒ smooth-scroll, tel/mailto/page ⇒ same-tab, external/whatsapp/social/download ⇒ new tab). Replaced the old imperative window.open branching.
+- `FormConnectedButton.tsx` `handleClick`: same model. Form case kept (scroll/modal). link-with-input folds the input value into the url then routes the finalUrl string through the shim. link routes through `toDestination(buttonConfig)`.
+
+### setGoal signature (phase-2 carry-forward)
+- ADDED `setGoal: (goal: Brief['goal'] | null) => void` to `MetaActions` in `src/types/store/actions.ts` (runtime action already existed in `coreActions.ts`; `MetaActions` is part of the `EditStore` composite). Closes the deferred type hole. tsc green.
+
+### Deviations
+- Modal keeps writing the legacy buttonConfig in addition to the new cta (rather than deleting buttonConfig). Conservative choice to avoid breaking raw buttonConfig readers (form placement, icons, inputConfig) that bypass the render pre-pass. Interpreted "new shape only" as "the cta field holds only the CTAButton shape".
+- link-with-input intentionally NOT written as a cta (no inputConfig slot in the new model) — legacy path preserved. Noted as a new-model limitation.
+
+### Open risks / notes for reviewer
+- Published icons/inputConfig on new cta writes: the phase-3 pre-pass down-converts cta → minimal buttonConfig, dropping icon/inputConfig fields. Verified the 26 published template CTA readers do NOT read icons from buttonConfig (grep: no leadingIcon in template `.published.tsx`), so published href/icon output is unaffected for link/form/page. link-with-input sidesteps the pre-pass (no cta). Low risk, flagged.
+- Editor imperative click on a GOAL_REF primary resolves to `'GOAL_REF'` in the handlers (goal resolution lives in the render pre-pass, not the imperative path) → no-op/legacy fallback. Editor buttons are contentEditable and mostly don't navigate; the rendered anchor IS correct. Accepted.
+- `deriveCtaRole`'s element-key fallback isn't reachable from FormConnectedButton (no elementKey prop) — falls back to ctaType there. Fine; the key fallback is used by the modal's own key-derived role.
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 974 passed | 2 skipped (72 files). destinationShim suite extended with 3 phase-4 CTAButton write-shape read-back tests, all green.
+
+### Manual editor smoke (reviewer/QA — cannot run headless)
+1. Primary goal-ref: open a hero/CTA primary button config → confirm "Follows your project goal" banner + read-only "Primary CTA" pill (no primary/secondary radios). Save. Publish. Confirm published primary `<a href>` points at the resolved project goal (or `#cta` when no goal set).
+2. Primary detached: Detach → pick External Link (e.g. Calendly) → save/publish → published primary href = that URL (new tab). Re-open modal → prefills the URL (detached state).
+3. Secondary: open a `secondary_cta_*` button → "Secondary CTA" pill, NO goal banner → pick a section anchor / page → save/publish → href correct.
+4. Form button: configure Native Form (primary or secondary) → save/publish → clicking scrolls to form section / opens modal; confirm the written cta carries formId (not mis-mapped to `#cta`). Verify a single-field form still renders inline (role via deriveCtaRole).
+5. Old-page regression: open a pre-scale-04 project's button (legacy buttonConfig, no cta) → modal prefills from legacy fields; published href unchanged.
+
+### Phase 4 — impl-review verdict: SHIP (loops 1)
+Dual-write (cta + legacy buttonConfig) confirmed SAFE + justified: GOAL_REF cta bakes NO concrete href; normalizeCtas re-derives buttonConfig from cta every render (overwrites stored one), so goal change re-points all primaries. Retained legacy buttonConfig carries icon/inputConfig that raw store readers (form placement, reopen) need. Form ctas always carry formId (landmine closed). Role precedence cta.role→ctaType→key correct.
+Non-blocking (QA note): null-goal + detach→re-attach leaves stale config.url; only renders in null-goal transitional state (self-heals once any goal set). Cosmetic. ButtonConfigurationModal re-attach ~L476 / save ~L305.

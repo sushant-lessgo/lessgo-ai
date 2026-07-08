@@ -9,14 +9,18 @@ import { FormRenderer } from './FormRenderer';
 import { InlineFormInput } from './InlineFormInput';
 import { logger } from '@/lib/logger';
 import { determineFormPlacement } from '@/utils/formPlacement';
-import { findPrimaryCTASection } from '@/utils/sectionHelpers';
+import { findPrimaryCTASection, deriveCtaRole } from '@/utils/sectionHelpers';
+import { toDestination } from '@/utils/destinationShim';
+import { resolveDestination } from '@/utils/resolveCtaHref';
 
 interface ButtonConfig {
   type: 'link' | 'form' | 'link-with-input';
   formId?: string;
   behavior?: 'scrollTo' | 'openModal';
-  ctaType?: 'primary' | 'secondary'; // NEW: CTA type for placement logic
+  ctaType?: 'primary' | 'secondary'; // legacy role field (fallback for deriveCtaRole)
   url?: string;
+  // scale-04: new-shape role carrier (read first by deriveCtaRole).
+  cta?: { role?: 'primary' | 'secondary' };
   inputConfig?: {
     label?: string;
     placeholder?: string;
@@ -56,6 +60,32 @@ export function FormConnectedButton({
   const [inputError, setInputError] = useState('');
   const { getFormById, sections } = useEditStore();
 
+  // scale-04: navigate to a resolved Destination (or a raw href string). Behavior
+  // is keyed off the Destination TYPE — section anchors scroll, tel:/mailto: stay
+  // same-tab, everything else opens a new tab. Shared model with the resolver.
+  const navigateToDestination = (target: import('@/types/destination').Destination | string) => {
+    const dest =
+      typeof target === 'string' ? toDestination(target) : target;
+    if (dest === undefined || dest === 'GOAL_REF') return;
+    const href = resolveDestination(dest);
+    if (!href) return;
+
+    if (dest.kind === 'section') {
+      const el =
+        document.getElementById(`section-${dest.anchor}`) ||
+        document.getElementById(dest.anchor);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    if (dest.kind === 'call' || dest.kind === 'email' || dest.kind === 'page') {
+      window.location.href = href;
+      return;
+    }
+    let url = href;
+    if (/^www\./i.test(url) || !/^[a-z]+:|^\//i.test(url)) url = `https://${url}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
 
@@ -67,62 +97,60 @@ export function FormConnectedButton({
 
     if (!buttonConfig) return;
 
-    switch (buttonConfig.type) {
-      case 'link':
-        if (buttonConfig.url) {
-          window.open(buttonConfig.url, '_blank');
-        }
-        break;
+    // Form case (D-D): keep the scroll/modal behavior — the forms-existence
+    // check stays out of the pure shim.
+    if (buttonConfig.type === 'form') {
+      if (!buttonConfig.formId) return;
+      const form = getFormById(buttonConfig.formId);
+      if (!form) {
+        logger.warn('Form not found:', () => buttonConfig.formId);
+        return;
+      }
 
-      case 'link-with-input':
-        if (buttonConfig.url && buttonConfig.inputConfig?.queryParamName) {
-          let url = buttonConfig.url;
-          if (!url.match(/^https?:\/\//)) {
-            url = `https://${url}`;
-          }
-          const separator = url.includes('?') ? '&' : '?';
-          const encodedValue = encodeURIComponent(inputValue);
-          const finalUrl = `${url}${separator}${buttonConfig.inputConfig.queryParamName}=${encodedValue}`;
-          window.open(finalUrl, '_blank');
-        }
-        break;
-
-      case 'form':
-        if (buttonConfig.formId) {
-          const form = getFormById(buttonConfig.formId);
-          if (!form) {
-            logger.warn('Form not found:', () => buttonConfig.formId);
-            return;
-          }
-
-          if (buttonConfig.behavior === 'openModal') {
-            setIsModalOpen(true);
+      if (buttonConfig.behavior === 'openModal') {
+        setIsModalOpen(true);
+      } else {
+        // Scroll to primary CTA section (where full forms render)
+        const primaryCTASection = findPrimaryCTASection(sections);
+        if (primaryCTASection) {
+          const ctaSectionElement = document.getElementById(`section-${primaryCTASection}`);
+          if (ctaSectionElement) {
+            ctaSectionElement.scrollIntoView({ behavior: 'smooth' });
           } else {
-            // Scroll to primary CTA section (where full forms render)
-            const primaryCTASection = findPrimaryCTASection(sections);
-            if (primaryCTASection) {
-              const ctaSectionElement = document.getElementById(`section-${primaryCTASection}`);
-              if (ctaSectionElement) {
-                ctaSectionElement.scrollIntoView({ behavior: 'smooth' });
-              } else {
-                // Fallback: scroll to form ID
-                const formElement = document.getElementById(`form-${buttonConfig.formId}`);
-                if (formElement) {
-                  formElement.scrollIntoView({ behavior: 'smooth' });
-                }
-              }
-            }
+            const formElement = document.getElementById(`form-${buttonConfig.formId}`);
+            if (formElement) formElement.scrollIntoView({ behavior: 'smooth' });
           }
         }
-        break;
+      }
+      return;
     }
+
+    // link-with-input: fold the input value into the url, then route through the
+    // shared shim so tel:/mailto:/wa.me classify like everywhere else.
+    if (buttonConfig.type === 'link-with-input') {
+      if (buttonConfig.url && buttonConfig.inputConfig?.queryParamName) {
+        let url = buttonConfig.url;
+        if (!url.match(/^https?:\/\//)) url = `https://${url}`;
+        const separator = url.includes('?') ? '&' : '?';
+        const encodedValue = encodeURIComponent(inputValue);
+        const finalUrl = `${url}${separator}${buttonConfig.inputConfig.queryParamName}=${encodedValue}`;
+        navigateToDestination(finalUrl);
+      }
+      return;
+    }
+
+    // Everything else (link): shim → resolver → navigate by Destination type.
+    const dest = toDestination(buttonConfig);
+    if (dest === undefined || dest === 'GOAL_REF') return;
+    navigateToDestination(dest);
   };
 
   const form = buttonConfig?.formId ? getFormById(buttonConfig.formId) : null;
 
   // NEW: Check if this button should render as inline form
   if (buttonConfig?.type === 'form' && form && sectionId) {
-    const ctaType = buttonConfig.ctaType || 'primary';
+    // scale-04: unified role read — new `cta.role` first, legacy `ctaType` next.
+    const ctaType = deriveCtaRole({ cta: buttonConfig.cta, ctaType: buttonConfig.ctaType });
     const placement = determineFormPlacement(
       form,
       ctaType,

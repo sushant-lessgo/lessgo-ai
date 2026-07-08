@@ -414,6 +414,9 @@ export interface MetaActions {
 
   // Legal Pages
   setLegalPage: (kind: 'privacy', entry: { content: string; metadata?: any } | undefined) => void;
+
+  // Goal (scale-04) — Project.brief.goal mirror; GOAL_REF primaries resolve to it.
+  setGoal: (goal: import('@/types/brief').Brief['goal'] | null) => void;
 }
 
 /**
