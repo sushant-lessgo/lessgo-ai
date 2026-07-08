@@ -9,6 +9,7 @@ import MetricsCards from './components/MetricsCards'
 import TrendChart from './components/TrendChart'
 import TrafficSourcesTable from './components/TrafficSourcesTable'
 import DeviceBreakdown from './components/DeviceBreakdown'
+import CtaBreakdown from './components/CtaBreakdown'
 import ExportCSV from './components/ExportCSV'
 import EmptyState from './components/EmptyState'
 import { stripHTMLTags } from '@/utils/htmlSanitization'
@@ -169,6 +170,24 @@ export default async function AnalyticsPage({ params, searchParams }: PageProps)
     tablet: analytics.reduce((sum, d) => sum + d.tabletConversions, 0),
   }
 
+  // CTA click breakdown by section placement + role (scale-04)
+  const placementData: Record<string, { primary: number; secondary: number }> = {}
+  analytics.forEach(day => {
+    if (day.ctaPlacements) {
+      const dayPlacements = day.ctaPlacements as Record<string, { primary?: number; secondary?: number }>
+      Object.entries(dayPlacements).forEach(([placement, counts]) => {
+        if (!placementData[placement]) placementData[placement] = { primary: 0, secondary: 0 }
+        placementData[placement].primary += counts.primary || 0
+        placementData[placement].secondary += counts.secondary || 0
+      })
+    }
+  })
+  const ctaPlacements = Object.entries(placementData).map(([placement, counts]) => ({
+    placement,
+    primary: counts.primary,
+    secondary: counts.secondary,
+  }))
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-brand-text font-body">
       <Header />
@@ -248,6 +267,8 @@ export default async function AnalyticsPage({ params, searchParams }: PageProps)
                 deviceConversions={deviceConversions}
               />
             </div>
+
+            <CtaBreakdown placements={ctaPlacements} />
           </div>
         ) : (
           <EmptyState slug={params.slug} publishedPageTitle={publishedPage.title || 'Untitled Page'} />

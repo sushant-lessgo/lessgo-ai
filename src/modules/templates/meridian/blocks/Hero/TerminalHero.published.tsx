@@ -58,10 +58,10 @@ export default function TerminalHeroPublished(props: TerminalHeroPublishedProps)
 
           <div className="mrd-hero__actions">
             {props.cta_text && (
-              <a className="mrd-btn mrd-btn--primary mrd-btn--lg mrd-btn--arrow" href={ctaHref}>{props.cta_text}</a>
+              <a className="mrd-btn mrd-btn--primary mrd-btn--lg mrd-btn--arrow" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">{props.cta_text}</a>
             )}
             {props.secondary_cta_text && (
-              <a className="mrd-btn mrd-btn--ghost mrd-btn--lg" href={secondaryHref}>{props.secondary_cta_text}</a>
+              <a className="mrd-btn mrd-btn--ghost mrd-btn--lg" href={secondaryHref} data-lessgo-cta="" data-lessgo-cta-role="secondary">{props.secondary_cta_text}</a>
             )}
             {props.caption && <span className="mrd-hero__caption">{props.caption}</span>}
           </div>

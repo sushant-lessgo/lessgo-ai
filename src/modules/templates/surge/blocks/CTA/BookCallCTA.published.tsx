@@ -37,10 +37,10 @@ export default function BookCallCTAPublished(props: BookCallCTAPublishedProps) {
             )}
             <div className="sg-cta__actions">
               {props.cta_text && (
-                <a className="sg-btn sg-btn--primary" href={ctaHref} {...externalLinkProps(ctaHref)}>{props.cta_text}</a>
+                <a className="sg-btn sg-btn--primary" href={ctaHref} {...externalLinkProps(ctaHref)} data-lessgo-cta="" data-lessgo-cta-role="primary">{props.cta_text}</a>
               )}
               {props.secondary_cta_text && (
-                <a className="sg-btn sg-btn--ghost" href={secondaryHref} {...externalLinkProps(secondaryHref)}>{props.secondary_cta_text}</a>
+                <a className="sg-btn sg-btn--ghost" href={secondaryHref} {...externalLinkProps(secondaryHref)} data-lessgo-cta="" data-lessgo-cta-role="secondary">{props.secondary_cta_text}</a>
               )}
             </div>
             {props.meta && <span className="sg-cta__caption">{props.meta}</span>}

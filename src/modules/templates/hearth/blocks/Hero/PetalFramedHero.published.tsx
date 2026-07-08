@@ -46,12 +46,12 @@ export default function PetalFramedHeroPublished(props: PetalFramedHeroPublished
           />
           <div className="hearth-hero__actions">
             {props.cta_text && (
-              <a className="hearth-btn hearth-btn--primary hearth-btn--lg" href={ctaHref}>
+              <a className="hearth-btn hearth-btn--primary hearth-btn--lg" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">
                 {props.cta_text}
               </a>
             )}
             {props.secondary_cta_text && (
-              <a className="hearth-btn hearth-btn--ghost hearth-btn--lg" href={secondaryHref}>
+              <a className="hearth-btn hearth-btn--ghost hearth-btn--lg" href={secondaryHref} data-lessgo-cta="" data-lessgo-cta-role="secondary">
                 {props.secondary_cta_text}
               </a>
             )}

@@ -32,7 +32,7 @@ export default function TechPremiumCTAPublished(props: TechPremiumCTAPublishedPr
           {props.body && <p className="tp-cta__body">{props.body}</p>}
           <div className="tp-cta__actions">
             {props.cta_text && (
-              <a className="tp-btn tp-btn--lime tp-btn--lg" href={ctaHref}>{props.cta_text}</a>
+              <a className="tp-btn tp-btn--lime tp-btn--lg" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">{props.cta_text}</a>
             )}
           </div>
           {props.phone_line && <p className="tp-cta__phone" dangerouslySetInnerHTML={{ __html: props.phone_line }} />}

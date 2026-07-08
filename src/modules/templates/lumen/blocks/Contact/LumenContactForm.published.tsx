@@ -71,11 +71,13 @@ export default function LumenContactFormPublished(props: Props) {
             <div className="lm-contact-quick">
               {waHref && (
                 <a className="lm-btn lm-btn--wa" href={waHref} target="_blank" rel="noopener noreferrer"
+                   data-lessgo-cta="" data-lessgo-cta-role="primary"
                    {...bilingualAttrs(props.whatsapp_label || 'WhatsApp', props.whatsapp_label_nl || '')}>
                   {WA_ICON}<span {...bilingualAttrs(props.whatsapp_label || 'WhatsApp', props.whatsapp_label_nl || '')}>{props.whatsapp_label || 'WhatsApp'}</span>
                 </a>
               )}
               <a className="lm-btn lm-btn--line" href={bookHref} {...externalLinkProps(bookHref)}
+                 data-lessgo-cta="" data-lessgo-cta-role="secondary"
                  {...bilingualAttrs(props.book_call_label || 'Book a call', props.book_call_label_nl || '')}>{props.book_call_label || 'Book a call'}</a>
             </div>
           </div>

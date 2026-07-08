@@ -76,9 +76,9 @@ export default function TechPremiumNavPublished(props: Props) {
 
           <div className="tp-nav-cta">
             {signinHref && signinHref !== '#' && (
-              <a className="tp-nav-login" href={signinHref}><Lock /><span>{signinText}</span></a>
+              <a className="tp-nav-login" href={signinHref} data-lessgo-cta="" data-lessgo-cta-role="secondary"><Lock /><span>{signinText}</span></a>
             )}
-            <a className="tp-btn tp-btn--fill" href={ctaHref}>{ctaText}</a>
+            <a className="tp-btn tp-btn--fill" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">{ctaText}</a>
             <button type="button" className="tp-nav-burger" aria-label="Menu" aria-expanded="false"><Burger /></button>
           </div>
         </div>
@@ -96,10 +96,10 @@ export default function TechPremiumNavPublished(props: Props) {
             ) : (
               <a key={item.id || i} href={resolveLinkHref(item.href)}>{item.label || ''}</a>
             ))}
-            {signinHref && signinHref !== '#' && <a href={signinHref}>{signinText}</a>}
+            {signinHref && signinHref !== '#' && <a href={signinHref} data-lessgo-cta="" data-lessgo-cta-role="secondary">{signinText}</a>}
           </div>
           <div className="tp-nav-mobile-cta">
-            <a className="tp-btn tp-btn--fill" href={ctaHref}>{ctaText}</a>
+            <a className="tp-btn tp-btn--fill" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">{ctaText}</a>
           </div>
         </div>
       </nav>

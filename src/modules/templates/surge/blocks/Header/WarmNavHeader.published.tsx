@@ -62,7 +62,7 @@ export default function WarmNavHeaderPublished(props: WarmNavHeaderPublishedProp
           })}
         </div>
         <div className="sg-nav-right">
-          <a className="sg-btn sg-btn--primary sg-btn--sm" href={ctaHref} {...externalLinkProps(ctaHref)}>{ctaText}</a>
+          <a className="sg-btn sg-btn--primary sg-btn--sm" href={ctaHref} {...externalLinkProps(ctaHref)} data-lessgo-cta="" data-lessgo-cta-role="primary">{ctaText}</a>
         </div>
         </div>
       </nav>

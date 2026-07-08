@@ -70,6 +70,7 @@ export default function LumenNavPublished(props: Props) {
               <button type="button" data-lang="nl" aria-pressed="false">NL</button>
             </div>
             <a className="lm-btn lm-btn--fill lm-btn--sm" href={ctaHref} {...externalLinkProps(ctaHref)}
+               data-lessgo-cta="" data-lessgo-cta-role="primary"
                {...bilingualAttrs(props.cta_text || '', props.cta_text_nl || '')}>
               {props.cta_text || 'Request a quote'}
             </a>

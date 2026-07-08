@@ -51,7 +51,7 @@ export default function WarmNavHeaderPublished(props: WarmNavHeaderPublishedProp
           )}
         </div>
         <div className="hearth-nav__right">
-          <a className="hearth-btn hearth-btn--primary hearth-btn--sm" href={ctaHref}>
+          <a className="hearth-btn hearth-btn--primary hearth-btn--sm" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">
             {ctaText}
           </a>
         </div>

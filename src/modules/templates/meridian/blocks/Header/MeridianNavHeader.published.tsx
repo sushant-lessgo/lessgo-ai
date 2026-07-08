@@ -65,8 +65,8 @@ export default function MeridianNavHeaderPublished(props: MeridianNavHeaderPubli
           )}
         </div>
         <div className="mrd-nav-right">
-          <a className="mrd-btn mrd-btn--quiet mrd-btn--sm" href={signinHref}>{signinText}</a>
-          <a className="mrd-btn mrd-btn--primary mrd-btn--sm mrd-btn--arrow" href={ctaHref}>{ctaText}</a>
+          <a className="mrd-btn mrd-btn--quiet mrd-btn--sm" href={signinHref} data-lessgo-cta="" data-lessgo-cta-role="secondary">{signinText}</a>
+          <a className="mrd-btn mrd-btn--primary mrd-btn--sm mrd-btn--arrow" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">{ctaText}</a>
         </div>
       </nav>
     </>

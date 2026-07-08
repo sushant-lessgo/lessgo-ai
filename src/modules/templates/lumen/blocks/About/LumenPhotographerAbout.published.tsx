@@ -63,10 +63,12 @@ export default function LumenPhotographerAboutPublished(props: Props) {
           <div className="lm-about-actions">
             {props.cta_text && (
               <a className="lm-btn lm-btn-brass" href={ctaHref} {...externalLinkProps(ctaHref)}
+                data-lessgo-cta="" data-lessgo-cta-role="primary"
                 {...bilingualAttrs(props.cta_text, props.cta_text_nl || '')}>{props.cta_text}</a>
             )}
             {props.secondary_cta_text && (
               <a className="lm-btn lm-btn-line" href={secHref} {...externalLinkProps(secHref)}
+                data-lessgo-cta="" data-lessgo-cta-role="secondary"
                 {...bilingualAttrs(props.secondary_cta_text, props.secondary_cta_text_nl || '')}>{props.secondary_cta_text}</a>
             )}
           </div>

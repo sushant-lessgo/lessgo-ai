@@ -39,6 +39,8 @@ const AnalyticsEventSchema = z.object({
   // Event-specific data
   ctaText: z.string().optional(),
   ctaHref: z.string().optional(),
+  role: z.enum(['primary', 'secondary']).optional(),
+  placement: z.string().optional(),
   formId: z.string().optional(),
   title: z.string().optional(),
 });
@@ -215,6 +217,29 @@ export async function POST(request: NextRequest) {
         tabletConversions: event.event === 'form_submit' && deviceType === 'tablet' ? { increment: 1 } : undefined,
       },
     });
+
+    // CTA placement breakdown (scale-04): merge role counts into ctaPlacements JSON.
+    // Separate read-modify-write because Prisma cannot increment nested JSON keys.
+    // form_submit counting above is untouched — this is additive only.
+    if (event.event === 'cta_click') {
+      const placement = event.placement || 'unknown';
+      const role = event.role || 'primary';
+
+      const row = await prisma.pageAnalytics.findUnique({
+        where: { slug_date: { slug: event.slug, date: dateKey } },
+        select: { ctaPlacements: true },
+      });
+
+      const placements = (row?.ctaPlacements as Record<string, { primary?: number; secondary?: number }> | null) || {};
+      const bucket = placements[placement] || {};
+      bucket[role] = (bucket[role] || 0) + 1;
+      placements[placement] = bucket;
+
+      await prisma.pageAnalytics.update({
+        where: { slug_date: { slug: event.slug, date: dateKey } },
+        data: { ctaPlacements: placements },
+      });
+    }
 
     // Log success (dev only)
     if (process.env.NODE_ENV === 'development') {

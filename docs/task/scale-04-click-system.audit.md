@@ -433,3 +433,65 @@ Resolved the blocking issue in Deviation #3 above. D13's `SocialProfilesPanel` w
 Blocker fixed: D13 SocialProfilesPanel was mounted-but-unreachable → added one "Social" trigger in GlobalAppHeader (sibling of SEO button) → showSocialModal → panel mounts. Reachable now.
 Reviewer confirmed sound: published nav parity holds (seed persists to content via updateElementContent, published twin dual-reads Link from ph5 — no divergence, 4 .published.tsx twins correctly untouched); deriveNavLinks seed-only (guarded, no clobber); brief↔store bridge lossless round-trip (seed-when-empty); goal change moves NO derived link (derived dests never GOAL_REF); surge/lumen footer option-(a) deferral accepted.
 Non-blocking: bridge save now backfills brief.socialProfiles for any project with populated socialMediaConfig (additive, no clobber); flat /privacy legal dest (no subpath basePath).
+
+---
+
+## Phase 7 — Analytics attrs on 26 published blocks + role/placement pipeline
+
+**Files changed (35):**
+- `prisma/schema.prisma` + new migration `prisma/migrations/20260708125722_add_cta_placements/`
+- `src/components/published/CTAButtonPublished.tsx`
+- `src/lib/staticExport/analyticsGenerator.js`
+- `src/app/api/analytics/event/route.ts`
+- `src/app/dashboard/analytics/[slug]/components/CtaBreakdown.tsx` (new)
+- `src/app/dashboard/analytics/[slug]/page.tsx`
+- `public/assets/a.v1.js` (regenerated build artifact)
+- 26 published template blocks (stamped, attrs only):
+  - meridian: `CTA/ArcCTA`, `Hero/TerminalHero`, `Pricing/ThreeTierPricing`, `Header/MeridianNavHeader`
+  - techpremium: `CTA/TechPremiumCTA`, `Hero/TechPremiumHero`, `Pricing/TechPremiumPricing`, `Header/TechPremiumNav`
+  - hearth: `CTA/BookCallCTA`, `Hero/PetalFramedHero`, `Packages/TieredPackages`, `Header/WarmNavHeader`
+  - lex: `CTA/EngravedInvitationCTA`, `Hero/ProspectusHero`, `Header/LetterheadNav`
+  - surge: `CTA/BookCallCTA`, `Hero/PetalFramedHero`, `Packages/TieredPackages`, `Header/WarmNavHeader`, `Footer/ContactFooterRich`
+  - lumen: `Hero/LumenHero`, `About/LumenPhotographerAbout`, `Contact/LumenContactForm`, `Header/LumenNav`
+  - vestria: `blocks/publishedPrimitives.tsx`
+  - granth: `blocks/publishedPrimitives.tsx`
+
+**Migration:** `20260708125722_add_cta_placements` — adds nullable additive `PageAnalytics.ctaPlacements Json?` (user pre-approved). Applied to Neon dev via `prisma migrate dev`. Client types regenerated (query-engine dll rename hit EPERM due to a locked dll, but `.prisma/client/index.d.ts` contains `ctaPlacements` — tsc green, runtime engine unchanged).
+
+**Role mapping (static literals per anchor):**
+- Primary (`data-lessgo-cta-role="primary"`): main CTA/Hero/Pricing/Packages CTA anchors keyed `cta_*` / `tiers_cta_*` / `packages_cta_*`; header primary CTA (`cta_text`); surge footer WhatsApp FAB; lumen contact WhatsApp button.
+- Secondary (`data-lessgo-cta-role="secondary"`): `secondary_cta_*` anchors; header sign-in buttons (`signin_text` — meridian, techpremium desktop+mobile); lumen contact "Book a call".
+- NOT stamped: nav LINK items (`nav_items.*`), dropdown children, brand/logo links, social links, granth book `buy_url` + `socials.*`, mailto text links, and `<button type="submit">` form submit (fires form_submit, not cta_click).
+
+**Vestria/granth primitives:** both use a shared generic `Link` primitive receiving `hrefKey`. Role derived inside the primitive from the key (`/secondary_cta/`→secondary, other `/cta/`→primary; vestria excludes `nav_items.*`). No block cores edited (they were not in Files-touched and pass `hrefKey` already).
+
+**CTAButtonPublished.tsx:** added optional `role` / `cta.role` / `ctaType` props; stamps `data-lessgo-cta-role` (default `'primary'`) on both the `<a>` and `<button>` branches alongside the existing `data-lessgo-cta`. (No current block passes these — component is only re-exported — so default-primary is inert; kept the fallback chain per plan.)
+
+**Beacon (`analyticsGenerator.js`):** `initCTATracking` now reads `data-lessgo-cta-role` (default `'primary'`) and `placement = target.closest('[data-surface][id]').id` (fallback `'unknown'`), added to the `cta_click` payload. Fires for both roles via the existing `[data-lessgo-cta]` delegation.
+
+**API (`analytics/event/route.ts`):** Zod schema extended with optional `role` (enum primary|secondary) + `placement` (string) on cta_click. After the existing upsert (which still increments `ctaClicks`), a read-modify-write merges into `ctaPlacements` JSON shaped `{ [placement]: { primary, secondary } }` (Prisma can't increment nested JSON). **`form_submit` counting is UNTOUCHED** — formSubmissions / conversionRate / device `*Conversions` still driven solely by form_submit; the ctaPlacements merge is additive and only runs on cta_click.
+
+**Dashboard:** new `CtaBreakdown.tsx` (cloned DeviceBreakdown pattern) renders per-placement primary/secondary counts, sorted by total, friendly section labels. `page.tsx` aggregates `ctaPlacements` across the period's days and renders `<CtaBreakdown>` below the device/traffic row.
+
+**Deviations / judgment calls (in-scope):**
+- Header sign-in buttons (`signin_text`) stamped as `secondary` — they are button `<a>`s but not the primary CTA and not keyed `secondary_cta_*`; conservative choice so both roles fire and sign-in clicks aren't mislabeled primary.
+- Pricing/Packages tier CTAs (`tiers_cta_*` / `packages_cta_*`) stamped `primary` (not keyed `secondary_cta_*`; they are conversion buttons).
+- Surge footer WhatsApp FAB + lumen WhatsApp button stamped `primary` (primary conversion action); lumen "Book a call" `secondary`.
+- Granth book `buy_url` links NOT stamped (per-item purchase links, not keyed `*cta*`; treated like link items per the explicit key rule) — flag for QA if buy clicks should count.
+- Form submit `<button>` in lumen contact deliberately NOT stamped (fires form_submit; stamping would double-count as cta_click).
+
+**Verification:**
+- `npx tsc --noEmit` — green.
+- `npm run test:run` — 974 passed / 2 skipped (parity suites green; attrs inert, no existing assertion broke).
+- `npm run build` — green; `public/assets/a.v1.js` re-minified, confirmed contains `data-lessgo-cta-role` read + `placement` fallback.
+
+**Manual QA (cannot run headless — deferred to human gate):** publish a page per audience type (spot-check meridian/techpremium/surge/lumen), click hero primary + a secondary, confirm `cta_click` fires with role+placement, `PageAnalytics.ctaPlacements` rows populate + dashboard breakdown appears, and form_submit conversions unchanged.
+
+**Open risks:** already-published pages keep the old beacon until republished (payload additive + API backward-compatible → no break, just no placement data until republish). Legacy non-template product pages report placement `'unknown'` (accepted per D-B). ctaPlacements merge is a non-atomic read-modify-write (acceptable for analytics; rare concurrent-click races may drop a count).
+
+### Phase 7 — impl-review verdict: SHIP (loops 1)
+Migration add_cta_placements applied (nullable additive). 26 blocks stamped attr-only (provably inert, byte-identical after stripping data-attrs), .published.tsx-only. form_submit conversion counting untouched + atomic. Role stamping judgment calls all defensible (no real primary unstamped, no util link inflating conversions since conversionRate=form_submit only). Beacon closest('[data-surface][id]') resolves section wrapper reliably. Build asset regenerated with role/placement logic.
+POST-MERGE FOLLOW-UPS (logged, non-blocking):
+1. **ctaPlacements JSON merge is non-atomic read-modify-write** (analytics/event/route.ts:224-242: findUnique then update, no txn/lock) → lost-update race under concurrent cta_click beacons. Bounded to the NEW supplementary breakdown only (all authoritative metrics stay atomic). FIX before high-traffic reliance: single atomic `prisma.$executeRaw` with `jsonb_set(COALESCE(ctaPlacements,'{}'), ARRAY[placement,role], (COALESCE((ctaPlacements->placement->>role)::int,0)+1)::text::jsonb, true)`. Row-atomic, no lock.
+2. granth buy_url (book purchase) NOT stamped (keyed *cta* rule) — QA: should book-buy clicks count as conversions?
+3. CtaBreakdown formatPlacement collapses same-type sections to one label in UI (distinct in data) — cosmetic.

@@ -55,10 +55,10 @@ export default function TechPremiumHeroPublished(props: TechPremiumHeroPublished
             )}
             <div className="tp-hero__actions">
               {props.cta_text && (
-                <a className="tp-btn tp-btn--lime tp-btn--lg" href={ctaHref}>{props.cta_text}</a>
+                <a className="tp-btn tp-btn--lime tp-btn--lg" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">{props.cta_text}</a>
               )}
               {props.secondary_cta_text && (
-                <a className="tp-btn tp-btn--line tp-btn--lg" href={secondaryHref}>{props.secondary_cta_text}</a>
+                <a className="tp-btn tp-btn--line tp-btn--lg" href={secondaryHref} data-lessgo-cta="" data-lessgo-cta-role="secondary">{props.secondary_cta_text}</a>
               )}
             </div>
             {props.audience_tag && <p className="tp-hero__who">{props.audience_tag}</p>}
