@@ -6,7 +6,7 @@
 import React from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
-import { buildPageLinkOptions } from '@/utils/pageLinks';
+import { buildPageLinkOptions, deriveNavLinks } from '@/utils/pageLinks';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { SurgeEditable } from '../../components/SurgeEditable';
 import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
@@ -51,15 +51,35 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
     finally { setLogoUploading(false); }
   };
 
-  const { sections, pages } = useEditStore();
+  const { sections, pages, socialMediaConfig, legalPages } = useEditStore();
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
+  const socialOptions = React.useMemo(
+    () => (socialMediaConfig?.items || []).map((s) => ({ value: s.url, label: s.platform })),
+    [socialMediaConfig]
+  );
+  const legalOptions = React.useMemo(
+    () => (legalPages?.privacy ? [{ value: '/privacy', label: 'Privacy Policy' }] : []),
+    [legalPages]
+  );
 
   const navItems = blockContent.nav_items || [];
   const setItems = (next: NavItem[]) => handleCollectionUpdate('nav_items', next);
   const patchItem = (id: string, p: Partial<NavItem>) => setItems(navItems.map((n) => (n.id === id ? { ...n, ...p } : n)));
   const addItem = () => navItems.length < 5 && setItems([...navItems, { id: rid('nav'), label: 'Link', href: '#' }]);
   const removeItem = (id: string) => navItems.length > 2 && setItems(navItems.filter((n) => n.id !== id));
+
+  // scale-04 (phase 6): seed the nav from the sitemap ONCE when it has no items
+  // yet (fresh multi-page project). Seed-only — hand-edited navs are untouched.
+  const seededNavRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!edit || seededNavRef.current || navItems.length > 0) return;
+    const derived = deriveNavLinks(pages);
+    if (derived.length > 1) {
+      seededNavRef.current = true;
+      handleCollectionUpdate('nav_items', derived);
+    }
+  }, [edit, navItems.length, pages, handleCollectionUpdate]);
 
   return (
     <>
@@ -115,6 +135,8 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
                     value={item.href ?? '#'}
                     sectionOptions={sectionOptions}
                     pageOptions={pageOptions}
+                    legalOptions={legalOptions}
+                    socialOptions={socialOptions}
                     onChange={(link) => patchItem(item.id, { href: link })}
                     triggerClassName="sg-nav-link-cfg"
                   />

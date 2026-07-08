@@ -5,15 +5,17 @@
 // target. Replaces the 6 byte-for-byte-identical per-template copies
 // (meridian/techpremium/vestria/surge/lumen/granth) that existed before.
 //
-// Three modes:
-//   - "Scroll to section": pick an on-page section → Destination { kind: 'section' }
-//   - "Link to page":      pick a cross-page target → Destination { kind: 'page' }
-//   - "Custom URL":        type any url → parsed by toDestination (external / call /
-//                          email / whatsapp / …)
+// Modes:
+//   - "Scroll to section": pick an on-page section → Destination { kind: 'section' } (manual)
+//   - "Link" (derived):    pick a page / legal / social target → Destination + source:'derived'
+//   - "Custom URL":        type any url → parsed by toDestination (external / call / …) (manual)
 //
-// Unlike the old copies (which emitted a raw href string), this emits a `Link`
-// object — `onChange(link: Link)` — with `source: 'manual'`. Callers whose stored
-// field is a plain string convert with `resolveDestination(link.dest)`.
+// It emits a `Link` object — `onChange(link: Link)`. Hand-typed / on-page picks
+// are `source: 'manual'`; picks from a SITE SOURCE (sitemap pages, the legal
+// privacy page, site-level social profiles) are `source: 'derived'` — they are
+// never goal-referencing and a goal change never moves them (phase-6 acceptance).
+// Callers whose stored field is a plain string convert with
+// `resolveDestination(link.dest)`.
 //
 // The incoming `value` is read as `string | Link` (old saved pages pass a raw
 // string href) via `toDestination`, so the popover opens on the right mode either
@@ -29,7 +31,7 @@ import { toDestination } from '@/utils/destinationShim';
 import { resolveDestination } from '@/utils/resolveCtaHref';
 
 export interface SectionOption {
-  value: string; // e.g. "#pricing" (section) or "/contact" (page pathSlug)
+  value: string; // e.g. "#pricing" (section) or "/contact" (page pathSlug) or a social url
   label: string; // e.g. "Pricing"
 }
 
@@ -37,7 +39,11 @@ interface LinkTargetPopoverProps {
   /** Current target — a raw href string (legacy) OR a Link object (new writes). */
   value: string | Link;
   sectionOptions: SectionOption[];
-  pageOptions?: SectionOption[]; // cross-page targets (value = pathSlug)
+  pageOptions?: SectionOption[]; // cross-page targets (value = pathSlug) — DERIVED
+  /** Legal pages (e.g. the privacy page). value = path ('/privacy'). DERIVED. */
+  legalOptions?: SectionOption[];
+  /** Site-level social profiles. value = profile url, label = platform. DERIVED. */
+  socialOptions?: SectionOption[];
   onChange: (link: Link) => void;
   triggerClassName?: string;
 }
@@ -52,29 +58,69 @@ export function LinkTargetPopover({
   value,
   sectionOptions,
   pageOptions = [],
+  legalOptions = [],
+  socialOptions = [],
   onChange,
   triggerClassName,
 }: LinkTargetPopoverProps) {
   const href = toHref(value);
   const isSectionHref = !!href && href.startsWith('#');
-  const isPageHref = !!href && href.startsWith('/');
-  const [mode, setMode] = useState<'section' | 'url' | 'page'>(
+
+  // Derived options = sitemap pages + legal pages + social profiles. All resolve
+  // to a Destination and are stored with source:'derived'.
+  const hasDerived =
+    pageOptions.length > 0 || legalOptions.length > 0 || socialOptions.length > 0;
+  const derivedValues = React.useMemo(
+    () =>
+      new Set([
+        ...pageOptions.map((o) => o.value),
+        ...legalOptions.map((o) => o.value),
+        ...socialOptions.map((o) => o.value),
+      ]),
+    [pageOptions, legalOptions, socialOptions],
+  );
+  const isDerivedHref = !!href && derivedValues.has(href);
+
+  const [mode, setMode] = useState<'section' | 'url' | 'derived'>(
     isSectionHref || !href || href === '#'
       ? 'section'
-      : isPageHref && pageOptions.length
-      ? 'page'
-      : 'url'
+      : isDerivedHref && hasDerived
+      ? 'derived'
+      : 'url',
   );
-  const [urlDraft, setUrlDraft] = useState(isSectionHref || isPageHref ? '' : href === '#' ? '' : href);
+  const [urlDraft, setUrlDraft] = useState(
+    isSectionHref || isDerivedHref ? '' : href === '#' ? '' : href,
+  );
 
   const selectedSection = isSectionHref ? href : '';
-  const selectedPage = isPageHref ? href : '';
+  const selectedDerived = isDerivedHref ? href : '';
 
-  // Parse a raw href (section anchor / page path / custom url) into a manual Link.
-  const emit = (raw: string) => {
+  // Parse a raw href (section anchor / custom url) into a MANUAL Link.
+  const emitManual = (raw: string) => {
     const dest = toDestination(raw);
     if (dest && dest !== 'GOAL_REF') onChange({ dest, source: 'manual' });
   };
+
+  // A derived pick (page / legal / social) → DERIVED Link. Social profiles keep
+  // their `social` destination kind (platform + url); page/legal paths become a
+  // `page` destination.
+  const emitDerived = (rawValue: string) => {
+    const social = socialOptions.find((o) => o.value === rawValue);
+    if (social) {
+      onChange({
+        dest: { kind: 'social', platform: social.label, url: social.value },
+        source: 'derived',
+      });
+      return;
+    }
+    if (!rawValue) return;
+    onChange({ dest: { kind: 'page', pathSlug: rawValue }, source: 'derived' });
+  };
+
+  // Footers pass only page options → keep the familiar "Link to page" label; the
+  // nav headers add legal/social → generic "Link".
+  const derivedLabel =
+    legalOptions.length || socialOptions.length ? 'Link' : 'Link to page';
 
   return (
     <Popover>
@@ -104,15 +150,15 @@ export function LinkTargetPopover({
               />
               Scroll to section
             </label>
-            {pageOptions.length > 0 && (
+            {hasDerived && (
               <label className="flex items-center gap-1.5 cursor-pointer">
                 <input
                   type="radio"
                   name="link-target-mode"
-                  checked={mode === 'page'}
-                  onChange={() => setMode('page')}
+                  checked={mode === 'derived'}
+                  onChange={() => setMode('derived')}
                 />
-                Link to page
+                {derivedLabel}
               </label>
             )}
             <label className="flex items-center gap-1.5 cursor-pointer">
@@ -130,7 +176,7 @@ export function LinkTargetPopover({
             <select
               className="w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
               value={sectionOptions.some((o) => o.value === selectedSection) ? selectedSection : ''}
-              onChange={(e) => emit(e.target.value)}
+              onChange={(e) => emitManual(e.target.value)}
             >
               <option value="" disabled>
                 Choose section…
@@ -141,20 +187,42 @@ export function LinkTargetPopover({
                 </option>
               ))}
             </select>
-          ) : mode === 'page' ? (
+          ) : mode === 'derived' ? (
             <select
               className="w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-              value={pageOptions.some((o) => o.value === selectedPage) ? selectedPage : ''}
-              onChange={(e) => emit(e.target.value)}
+              value={derivedValues.has(selectedDerived) ? selectedDerived : ''}
+              onChange={(e) => emitDerived(e.target.value)}
             >
               <option value="" disabled>
-                Choose page…
+                Choose target…
               </option>
-              {pageOptions.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
+              {pageOptions.length > 0 && (
+                <optgroup label="Pages">
+                  {pageOptions.map((o) => (
+                    <option key={`p-${o.value}`} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {legalOptions.length > 0 && (
+                <optgroup label="Legal">
+                  {legalOptions.map((o) => (
+                    <option key={`l-${o.value}`} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {socialOptions.length > 0 && (
+                <optgroup label="Social">
+                  {socialOptions.map((o) => (
+                    <option key={`s-${o.value}`} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
           ) : (
             <Input
@@ -163,7 +231,7 @@ export function LinkTargetPopover({
               value={urlDraft}
               onChange={(e) => {
                 setUrlDraft(e.target.value);
-                emit(e.target.value);
+                emitManual(e.target.value);
               }}
             />
           )}

@@ -370,3 +370,66 @@ Whatsapp/old-page byte-identity PASS (resolveLinkHref returns raw strings verbat
 Carry-forward for Phase 6:
 1. surge footer (ContactFooterRich) + lumen footer (LumenFooter) + vestria/granth editPrimitives store the RESOLVED STRING, not Link{dest,source} (their href types live in out-of-scope footerDefaults.ts / primitives.ts). Byte-safe now. BUT to make those footer legal/social links TRULY derived (source:'derived', eligible for social/sitemap sync), Phase 6 must add those two footer .tsx+.published.tsx + widen surge/lumen footerDefaults.ts to string|Link. As-planned Phase 6 does NOT list them → those footer links stay effectively "manual" (soft degradation; acceptance "goal change moves no derived link" still holds — static strings don't move). Decide consciously in Phase 6.
 2. Nav headers (all 4) DO store Link (NavItem widened) → nav←sitemap derivation unaffected.
+
+---
+
+# Phase 6 — Derived link sources + social panel (D13)
+
+## Files changed
+- `src/utils/pageLinks.ts` — added `deriveNavLinks(pages)` + `DerivedNavItem` type.
+- `src/components/editor/LinkTargetPopover.tsx` — added derived `legalOptions` + `socialOptions`; combined pages/legal/social into one "derived" select (source:'derived'); section + custom URL stay 'manual'.
+- `src/components/editor/SocialProfilesPanel.tsx` (NEW) — D13 site-level social panel (wraps SocialMediaEditor).
+- `src/app/edit/[token]/components/ui/GlobalModals.tsx` — mount point: hosts SocialProfilesPanel; `showSocialModal`/`hideSocialModal` + `lessgo:manage-social` window-event open path.
+- `src/hooks/editStore/persistenceActions.ts` — Brief.socialProfiles <-> SocialMediaConfig bridge (hydrate-on-load-when-empty + derive-on-save).
+- `src/modules/templates/meridian/blocks/Header/MeridianNavHeader.tsx` — nav-seed effect + legal/social derived options.
+- `src/modules/templates/techpremium/blocks/Header/TechPremiumNav.tsx` — same.
+- `src/modules/templates/surge/blocks/Header/WarmNavHeader.tsx` — same.
+- `src/modules/templates/lumen/blocks/Header/LumenNav.tsx` — same.
+
+(NOT changed: the 4 `.published.tsx` nav twins — see Deviations. `src/types/store/state.ts` — bridge needed no new field; existing `goal`/`socialProfiles` + `socialMediaConfig` slices sufficed.)
+
+## What changed, per file
+
+**`src/utils/pageLinks.ts`** — `deriveNavLinks(pages)` maps `buildPageLinkOptions` output to `{ id, label, href: Link }[]` where each `href` is a DERIVED page `Link` (`{ dest:{kind:'page',pathSlug}, source:'derived' }`). Reuses the existing sitemap ordering (Home first, then `order`). `DerivedNavItem` is assignable to every template's `NavItem` (label:string subset of label?, href:Link subset of string|Link).
+
+**`LinkTargetPopover.tsx`** — new optional props `legalOptions` (value=path, e.g. `/privacy`) and `socialOptions` (value=profile url, label=platform). A single "derived" radio mode replaces the old page-only mode and renders optgroups Pages / Legal / Social. Any derived pick emits `source:'derived'`; social picks keep `dest.kind='social'` (platform+url), page/legal picks become `dest.kind='page'`. Section + custom-URL stay `source:'manual'`. Radio label stays "Link to page" for footers (page-only) and becomes "Link" when legal/social present, so footer UX is unchanged. Backward compatible — new props optional.
+
+**`SocialProfilesPanel.tsx`** — D13 entry point. Thin wrapper over the proven `SocialMediaEditor` (which already edits the `socialMediaConfig` store slice via existing store actions), rather than duplicating ~360 lines. Doc comment records the bridge contract.
+
+**`GlobalModals.tsx`** (mount point) — added a `socialModal` state entry, `showSocialModal`/`hideSocialModal`, and a `lessgo:manage-social` window-event listener that mirrors the existing firewall-safe `lessgo:manage-products` pattern (lets a template footer/nav block request the panel without importing app code across the template firewall). Panel is always mounted (visibility-gated), like the products/SEO modals it sits beside.
+
+**`persistenceActions.ts`** — bridge helpers `socialConfigFromProfiles` (Brief->config, with a platform->icon-name map + `FaGlobe` fallback) and `socialProfilesFromConfig` (config->Brief). Load: after `applySnapshot`, seed `socialMediaConfig` from `brief.socialProfiles` ONLY when the restored config is empty (richer config always wins; covers scrape-prefilled profiles that live only in Brief). Save: `briefPayload.socialProfiles` is now derived from `socialMediaConfig` (fallback to the `state.socialProfiles` passthrough), so panel edits round-trip into `Project.brief`.
+
+**4 nav headers** — each: (1) reads `socialMediaConfig` + `legalPages` from the store and builds `socialOptions` (from config items) + `legalOptions` (`/privacy` only when `legalPages.privacy` exists); passes both to its `LinkTargetPopover`. (2) a seed `useEffect` (edit-mode only, ref-guarded) that seeds `nav_items` via `deriveNavLinks(pages)` ONLY when the nav is empty AND the sitemap has >1 page. Seed-only: hand-edited navs floor at 2 items so are never empty -> never re-seeded; single-page projects (<=1 derived link) are left alone -> no spurious dirtying.
+
+## Carry-forward decision (surge/lumen footer): OPTION (a) — ACCEPTED DEFERRAL
+Chose (a): left surge `ContactFooterRich` and lumen `LumenFooter` storing resolved STRINGS (their href types live in out-of-scope `footerDefaults.ts`). Their footer legal/social links are therefore NOT `source:'derived'` and are not eligible for social/sitemap sync. Rationale: (1) the Phase-6 acceptance ("a goal change moves no derived link") holds trivially — static strings never move; (2) the derived legal/social REQUIREMENT is satisfied on the surfaces that DO store `Link` (the 4 nav headers, per Phase 5's NavItem widening), which is where the plan's Files-touched authorizes edits; (3) option (b) would require widening two out-of-scope `footerDefaults.ts` files + dual-read in two more `.published.tsx` twins — scope creep the default explicitly warns against. Footers still edit social via block-level `social_links` (surge/hearth) unchanged; the SITE-level panel + brief bridge are the new D13 surface.
+
+## Deviations from the plan
+1. **Published nav twins NOT edited (fewer files than Files-touched listed).** The 4 `*.published.tsx` nav headers were listed but need no change: nav-seed is an edit-store mutation that persists to `content`, and the published renderer has no `pages`/sitemap context to derive from. Published simply renders the persisted (seeded) `nav_items`, so edit<->published parity is preserved with no layout/CSS divergence. Doing render-time (non-persisting) derivation instead would break parity (published couldn't derive). Conservative choice: seed persists edit-side; published untouched.
+2. **Legal privacy stored as a fixed `/privacy` page dest.** `PrivacyPolicyLink`'s runtime basePath-prefix (window.pathname trick) is a published-runtime concern that can't be baked into a stored static `Link`; in the editor `window.pathname` is `/edit/{token}` (wrong basePath). Stored `/privacy` matches `PrivacyPolicyLink`'s canonical SSR default and the project-root privacy page. Per-page subpath basePath prefixing is not applied to stored derived legal links — accepted (privacy is a project-root page). Logged as in-scope conservative pick.
+3. **`showSocialModal` open path via window event, no new trigger button.** `SocialMediaEditor` was previously unmounted (dead); there is no existing "social settings" menu trigger. Adding a menu button would touch EditHeader/menu files outside scope. Instead the panel opens via `showSocialModal()` / `window.dispatchEvent(new Event('lessgo:manage-social'))`, mirroring the established `lessgo:manage-products` pattern — single mount file, no scope sprawl. A visible trigger can be wired in a later phase.
+
+## Test results
+- `npx tsc --noEmit`: green.
+- `npm run test:run`: 974 passed, 2 skipped (72 files) — unchanged from Phase 5 count. No new tests added (phase steps are UI/store wiring; parity/golden coverage is Phase 8).
+
+## Manual QA to run (cannot run headless)
+1. Social panel: open via `window.dispatchEvent(new Event('lessgo:manage-social'))` in the editor console; add a profile (e.g. Instagram) -> save. Reopen a nav-link popover -> the "Social" optgroup now offers Instagram; pick it -> the nav link resolves to the profile URL. Confirm `Project.brief.socialProfiles` round-trips on reload (scrape-prefilled profiles also appear).
+2. Multi-page: open a fresh multi-page project's editor -> the nav auto-seeds one link per sitemap page (derived). Hand-edit/remove one -> reload -> it is NOT re-seeded (seed-only). Single-page project -> nav is NOT seeded.
+3. Acceptance: flip the project goal (form->WhatsApp via saveDraft/DB) -> confirm NO nav/footer DERIVED link (page/legal/social) moves; only GOAL_REF primaries re-point.
+
+## Open risks
+- The social panel has no visible in-editor trigger yet (opens via event); a future phase should add a menu entry.
+- Legal-derived link uses a flat `/privacy`; subpage-relative privacy URLs on multi-page/custom-domain roots rely on the page living at project root (true today).
+
+## Phase 6 fix (2026-07-08): reachable social-panel trigger
+Resolved the blocking issue in Deviation #3 above. D13's `SocialProfilesPanel` was previously unreachable (only the `showSocialModal()` definition + `lessgo:manage-social` listener existed; nothing dispatched/called them). Added ONE reachable trigger.
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx` — imported `showSocialModal` alongside `showSeoModal`; added a sibling "Social" header button next to the "SEO" button that calls `showSocialModal`. Same styling as the SEO/Products triggers.
+- No modal-manager change needed: `showSocialModal` was already exported from `GlobalModals.tsx` (mirrors `showSeoModal`/`showProductsModal`) and already flips `modalState.socialModal` → panel mount. Verified end to end: button `onClick={showSocialModal}` → sets `socialModal.isOpen` / dispatches `stateChange` → `GlobalModals.tsx` renders `SocialProfilesPanel`.
+- Tests: `npx tsc --noEmit` green; `npm run test:run` 974 passed / 2 skipped (unchanged).
+
+### Phase 6 — impl-review verdict: SHIP (loops 1 — social-panel trigger fix)
+Blocker fixed: D13 SocialProfilesPanel was mounted-but-unreachable → added one "Social" trigger in GlobalAppHeader (sibling of SEO button) → showSocialModal → panel mounts. Reachable now.
+Reviewer confirmed sound: published nav parity holds (seed persists to content via updateElementContent, published twin dual-reads Link from ph5 — no divergence, 4 .published.tsx twins correctly untouched); deriveNavLinks seed-only (guarded, no clobber); brief↔store bridge lossless round-trip (seed-when-empty); goal change moves NO derived link (derived dests never GOAL_REF); surge/lumen footer option-(a) deferral accepted.
+Non-blocking: bridge save now backfills brief.socialProfiles for any project with populated socialMediaConfig (additive, no clobber); flat /privacy legal dest (no subpath basePath).
