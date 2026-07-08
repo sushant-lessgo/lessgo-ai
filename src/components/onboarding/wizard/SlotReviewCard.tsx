@@ -97,6 +97,36 @@ const DEFAULT_FIELD_COPY: Record<string, FieldCopy> = {
     label: 'What is the offer / next step?',
     example: 'Start a free 14-day trial',
   },
+  packages: {
+    label: 'Do you offer set packages or pricing tiers?',
+    example: 'e.g. Starter / Growth / Scale plans',
+  },
+  // proof — trust / thing numbers + credentials
+  outcomes: {
+    label: 'Concrete results you can claim? (optional)',
+    example: '3.2x average ROAS across 40+ accounts',
+  },
+  realNumbers: {
+    label: 'Concrete numbers you can claim? (optional)',
+    example: '2,000+ users; 40% faster onboarding',
+  },
+  credentials: {
+    label: 'Credentials or credibility markers? (optional)',
+    example: 'Ex-Stripe pricing lead; 60+ engagements',
+  },
+  // work
+  theWork: {
+    label: 'Your work',
+    example: 'Add 3–5 pieces (books, essays, published work)',
+  },
+  achievements: {
+    label: 'Achievements / recognition? (optional)',
+    example: 'Sahitya Akademi shortlist 2023; 3 published books',
+  },
+  praise: {
+    label: 'Praise / reviews',
+    example: 'Quotes about your work you can publish',
+  },
 };
 
 /** Prefer businessType wizardFields[field.id], else the built-in default. */
@@ -145,8 +175,44 @@ export function WizardFieldInput({
     );
   }
 
+  // boolean (T2 existence) — a 1-tap yes/no toggle. Proof-slot booleans have
+  // their own ProofToggle chrome; this handles booleans that live in a NON-proof
+  // slot (e.g. trust's `packages` in the offer slot), which would otherwise fall
+  // through to an empty textarea (phase-3 review carry-forward).
+  if (field.input === 'boolean') {
+    const on = entry?.value === true;
+    return (
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium text-gray-800">{copy.label}</label>
+        <button
+          type="button"
+          onClick={() => setFieldValue(field.id, !on)}
+          aria-pressed={on}
+          className={`w-full text-left p-4 rounded-lg border transition-all flex items-center justify-between ${
+            on
+              ? 'border-brand-accentPrimary bg-brand-accentPrimary/5'
+              : 'border-gray-200 hover:border-gray-300'
+          }`}
+        >
+          <span className="text-sm text-gray-700">{copy.example || (on ? 'Yes' : 'No')}</span>
+          <span
+            className={`w-10 h-6 rounded-full relative transition-colors flex-shrink-0 ${
+              on ? 'bg-brand-accentPrimary' : 'bg-gray-300'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                on ? 'translate-x-[18px]' : 'translate-x-0.5'
+              }`}
+            />
+          </span>
+        </button>
+      </div>
+    );
+  }
+
   // free-text (default) + guided-chips (starters seed the same free-text box).
-  // boolean/upload fields belong to proof — not rendered here.
+  // upload fields belong to proof (work) — not rendered here.
   const value = typeof entry?.value === 'string' ? entry.value : '';
 
   // guided-chips: tap a starter to SEED the phrase into the editable text box.

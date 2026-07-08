@@ -686,3 +686,76 @@ Carry-forward notes (non-blocking):
 - **IMPORTANT wiring gap (phase 8/11):** the new `businessType` request field on `/api/v2/understand`+`/scrape-website` is DORMANT — no caller passes it yet, so businessType-keyed selection is proven only by unit test. Chicken-and-egg: businessType is DERIVED from the scrape, so keyed selection only applies to a RE-scrape after a brief exists (or when the user pre-declares type). A later phase must decide/wire this (or accept first-scrape uses the base entry schema, enrichment only on re-scrape).
 - Cosmetic: understand-path `enrichSignals(raw, raw)` leaks 4 manufacturer keys as inert extra props (scrape path derives a clean base first); harmless to `buildBriefDraft`; tidy when wiring the caller.
 - work extraction mirrors thing base (no delta) — phase-9 territory.
+
+---
+
+## Phase 8 — trust engine through unified wizard
+
+**Files changed**
+- `src/modules/wizard/rollout.ts` (edit)
+- `src/modules/wizard/generation/index.ts` (edit)
+- `src/modules/wizard/generation/trust.ts` (create)
+- `src/modules/wizard/generation/trust.test.ts` (create)
+- `src/components/onboarding/shared/PaletteSwatch.tsx` (create — copy of service field cmp)
+- `src/components/onboarding/wizard/StyleSlot.tsx` (edit — trust branch)
+- `src/components/onboarding/wizard/SlotReviewCard.tsx` (edit — boolean input + default copy)
+- `src/hooks/useWizardStore.ts` (edit — importedTestimonials gap)
+- `docs/task/scale-06-wizard-convergence.audit.md` (this entry)
+
+NOT changed (verified): `src/app/api/brief/confirm/route.ts`, `src/app/onboarding/[token]/page.tsx`, `src/components/onboarding/wizard/ProofSlot.tsx` — see below.
+
+### confirm/route.ts — NO-OP (rollout-const-driven), confirmed
+Line 74-75 keys the redirect purely on `WIZARD_ENGINES.has(brief.copyEngine)`. Adding `trust` to the set in `rollout.ts` is sufficient; the route required no edit. Likewise `page.tsx` load-detection (line 84) is `WIZARD_ENGINES.has(...)`-driven — trust now renders the unified wizard / stops forwarding to the old service route with zero page edits. Both were left untouched.
+
+### rollout.ts + index.ts
+- `WIZARD_ENGINES` now `{thing, trust}`.
+- `runGeneration` dispatches `case trust -> runTrustGeneration`; `GenerationInput` widened to `ThingGenerationInput | TrustGenerationInput`; `work` still throws "not yet migrated".
+
+### trust adapter (trust.ts) — payload fidelity + ServiceUnderstanding mapping
+Ported from the ~410-line service `GeneratingStep` (old file untouched). Single-page (service has no multi-page fan-out): strategy -> copy -> save. Reuses the phase-5 shared `finalize.ts` tail (buildFinalContent -> seedGoalForm -> injectGoalSections -> saveDraft); no `leadForm` param (service core templates have no vestria contact form — the M1 goal-form seed handles capture). PLAIN module — no 'use client', no store import.
+- `buildStrategyPayload` -> EXACT `/api/audience/service/strategy` body: {oneLiner, businessName, understanding, goal, offer, assets, paletteId, templateId?}.
+- `buildCopyPayload` -> EXACT `/api/audience/service/generate-copy` body incl. realTestimonials (only when present).
+- ServiceUnderstanding mapping: serviceType = serviceTypeForBusinessType(businessTypeKey) (bridge; consultant->consultancy, coach->coaching, else agency), whatYouDo = oneLiner (bridge idiom: whatYouDo~=entry.summary, wizard's closest is the one-liner), services, targetClients (whoProblem), outcomes, deliveryModel default 'remote'.
+- ServiceGoal via intentToLegacyGoal(intent,'service') (null->book-call); Brief.goal via intentToBriefGoal.
+- assets built from the store proof booleans as a 1:1 ServiceAssetInput, reaching selectServiceSections UNCHANGED in shape (via strategy route -> assembleServiceStrategy). injectRealTestimonials path untouched.
+
+### Awareness-driven section ordering preserved (trust.test.ts)
+15 tests (all green). Beyond route-schema mirrors, the acceptance assertion feeds the adapter's buildAssets(...) output into the REAL selectServiceSections: testimonials ON keeps the frozen search-aware-comparing order; testimonials OFF drops the section (proof hard rule); other awareness states reproduce their byte-identical middle orders. Full-run smoke (mocked fetch) confirms strategy->copy->save->/edit/[token] + 402->credits.
+
+### boolean-input + default-copy fixes (SlotReviewCard.tsx)
+- Added a `boolean` case to `WizardFieldInput` (1-tap yes/no toggle) so trust's `packages` field (input:'boolean', offer slot) renders a toggle instead of the phase-3 empty-textarea fallthrough. Proof-slot booleans keep their own ProofToggle chrome.
+- Added DEFAULT_FIELD_COPY for packages, outcomes, realNumbers, credentials, theWork, achievements, praise (trust + work ids that previously fell back to raw-id labels).
+
+### trust style wiring (StyleSlot.tsx + PaletteSwatch.tsx)
+StyleSlot now branches on engine: trust -> new TrustStyleSlot (variant + palette picker for the serveGate-resolved template — templateId is LOCKED by serve, so no template switcher). Palette swatches use the COPIED shared PaletteSwatch; swatch colors/variants come from the old service-tree TEMPLATE_CATALOG (data-only picker metadata, IMPORT-for-now, re-homed phase 10 — same pattern as the thing pickers). Bound to store variantId/paletteId; seeds defaults on mount. Original service PaletteSwatch left in place.
+
+### trust proof wiring — ProofSlot NOT edited (verified working)
+The phase-4 ProofSlot is contract-driven: it already iterates getContract('trust').fields.filter(slot==='proof') and handles trust's set — testimonials (boolean via BOOLEAN_PROOF_META) + the testimonial-type sub-choice, outcomes (skippable numbers), credentials (free-text). No functional change was needed, so per the conservative principle I left it untouched (editing a correct file adds risk). The "shape service sectionSelection expects" is produced by the adapter's proof->ServiceAssetInput mapping, not by the slot.
+
+### store gaps filled (useWizardStore.ts)
+Added importedTestimonials: Array<{quote,author_name,author_role}>, hydrated from entry.testimonials (Brief carries quote strings only -> mapped with blank authors; the service copy route + injectRealTestimonials tolerate blanks). All other trust state the adapter needs already existed (fields map, proof superset, goalIntent/goalParam, variantId/paletteId, businessTypeKey).
+
+### Reasoning — end-to-end trust flow
+A trust brief -> confirm (rollout redirect -> /onboarding/[token]) -> load-detection admits trust via WIZARD_ENGINES -> WizardShell hydrates useWizardStore -> slots identity/understanding/goal/offer/proof/style (STRUCTURE SKIPPED — trust contract slotSkips:['structure'], honored by slotsForEngine) -> generating -> service strategy+copy+finalize -> /edit/[token]. Asset booleans drive service section drops via the adapter's ServiceAssetInput. Thing path unregressed (thing adapter/tests untouched; index switch only ADDS trust).
+
+### Deviations
+- ProofSlot left unedited (listed in scope): already handles trust via contract-driven rendering; no functional change required (logged above).
+- packages boolean not wired to a route-level section drop. Its contract dropTarget:'packages' would need a strategy-route change to honor, but plan D says routes stay unchanged and service drops packages via the LLM's servicePresentation.format==='quote-only'. Conservative choice: capture the boolean (now renders as a toggle) but preserve byte-identical old-service drop behavior (LLM-format-driven). Noted for a future phase if packages-drop should become deterministic.
+- whatYouDo mapped to the one-liner (no dedicated wizard field) — matches the bridge's briefToServicePrefill idiom (whatYouDo = entry.summary; the one-liner is the wizard's closest single-line description).
+
+### RESOLVED — GeneratingSlot per-engine input builder (authorized scope addition)
+The coordinator authorized editing `src/components/onboarding/wizard/GeneratingSlot.tsx` (plan Files-touched list was stale — migrating trust necessarily requires a trust run to reach `/edit`). Fix (minimal, mirrors the existing thing path):
+- Added `buildTrustInput()` — projects the wizard store to the EXACT `TrustGenerationInput` shape (`businessName`←`name`, `oneLiner`, `targetClients`←`whoProblem`, `services`, `process`, `credentials`, `offer`, `outcomes`, `goalIntent`/`goalParam`, `proof` subset read from the store, `importedTestimonials`, `paletteId`/`variantId`, `businessTypeKey`, `templateId` default `hearth`). NOT productName/features.
+- Added `buildInput(engine)` dispatch: `engine === 'trust' → buildTrustInput()`, else `buildThingInput()`. `run()` now calls `buildInput(engine)`.
+- Thing path UNREGRESSED: `buildThingInput` is byte-unchanged; a non-trust engine still routes through it. Old stores/steps untouched.
+
+### Test results
+- `npx tsc --noEmit` — clean (both before and after the GeneratingSlot fix).
+- `npm run test:run -- src/modules/wizard src/modules/audience/service src/modules/templates` — 24 files, 543 tests, all passing (incl. trust.test.ts 15/15, service sectionSelection + generation-contract + paletteSelection regressions green).
+- Post-GeneratingSlot re-run: `npm run test:run -- src/modules/wizard src/modules/audience/service` — 8 files, 80 tests, all passing.
+
+### Impl-review verdict: **ship** (loop 1/1) — tsc clean, 543 tests, trust runtime path traced end-to-end (payloads match ServiceStrategy/GenerateServiceCopy schemas, no 400/500), thing non-regression confirmed (buildThingInput byte-unchanged), service section-drop preserved (real selectServiceSections), boundaries clean, confirm/route+page genuinely no-op. GeneratingSlot per-engine fix verified. No blocking issues.
+Carry-forward notes (non-blocking):
+- **Testimonial attribution (later phase, e.g. 11 or follow-up):** unified-wizard trust hydrates `importedTestimonials` from `brief.facts.entry.testimonials` which is `string[]` (quote only) — authors blank, so trust pages get UNATTRIBUTED testimonials. Verbatim quote text IS preserved (spec item 7 satisfied) and injectRealTestimonials tolerates blanks. Root cause = entry pipeline reduces testimonials to strings; enrich `EntryFacts.testimonials` to carry authors later.
+- **Surge trust delta sections:** trust proof slot collects only testimonials/outcomes/credentials; the other 5 ServiceAssetInput booleans default false with no UI. ZERO effect for hearth/lex; only Surge gates logos/casestudies on them. Phase-1 contract-scoping limitation, not a phase-8 defect. Flag if Surge trust needs proof-gated deltas.
+- Cosmetic: trust.test.ts validates `strategy` loosely vs full AssembledStrategySchema.

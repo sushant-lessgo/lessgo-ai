@@ -22,7 +22,9 @@ import {
   type GenerationInput,
 } from '@/modules/wizard/generation';
 import type { ThingGenerationInput } from '@/modules/wizard/generation/thing';
+import type { TrustGenerationInput } from '@/modules/wizard/generation/trust';
 import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
+import type { TemplateId } from '@/types/service';
 
 interface StageDef {
   id: GenerationStage;
@@ -78,6 +80,44 @@ function buildThingInput(): ThingGenerationInput {
   };
 }
 
+/** Project the wizard store → the TRUST adapter input (plain data). */
+function buildTrustInput(): TrustGenerationInput {
+  const s = useWizardStore.getState();
+  const fields = s.fields as Record<string, { value: unknown }>;
+  return {
+    tokenId: s.tokenId ?? '',
+    templateId: (s.templateId as TemplateId | null) ?? 'hearth',
+    businessTypeKey: s.businessTypeKey ?? undefined,
+    businessName: fieldStr(fields, 'name'),
+    oneLiner: fieldStr(fields, 'oneLiner'),
+    targetClients: fieldArr(fields, 'whoProblem'),
+    services: fieldArr(fields, 'services'),
+    process: fieldStr(fields, 'process') || undefined,
+    credentials: fieldStr(fields, 'credentials') || undefined,
+    offer: fieldStr(fields, 'offer'),
+    outcomes: fieldArr(fields, 'outcomes'),
+    goalIntent: s.goalIntent,
+    goalParam: s.goalParam,
+    proof: {
+      hasTestimonials: s.proof.hasTestimonials,
+      hasClientLogos: s.proof.hasClientLogos,
+      hasOutcomes: s.proof.hasOutcomes,
+      hasCaseStudies: s.proof.hasCaseStudies,
+      hasTeamPhotos: s.proof.hasTeamPhotos,
+      hasFounderPhoto: s.proof.hasFounderPhoto,
+      testimonialType: s.proof.testimonialType,
+    },
+    importedTestimonials: s.importedTestimonials,
+    paletteId: s.paletteId ?? undefined,
+    variantId: s.variantId ?? undefined,
+  };
+}
+
+/** Project the wizard store → the engine's adapter input (plain data). */
+function buildInput(engine: NonNullable<ReturnType<typeof useWizardStore.getState>['engine']>): GenerationInput {
+  return engine === 'trust' ? buildTrustInput() : buildThingInput();
+}
+
 export default function GeneratingSlot() {
   const router = useRouter();
   const engine = useWizardStore((s) => s.engine);
@@ -96,7 +136,7 @@ export default function GeneratingSlot() {
     setStage('strategy');
     setPageProgress(null);
 
-    const input: GenerationInput = buildThingInput();
+    const input: GenerationInput = buildInput(engine);
     if (!input.tokenId) {
       setError('Missing project token. Please restart from the beginning.');
       return;

@@ -2,14 +2,15 @@
 // scale-06 phase 5 — the unified generation dispatch.
 //
 // `runGeneration(engine, input, cb)` fans out to the per-engine adapter. THING
-// is wired now (phase 5); trust/work throw "not yet migrated" until phases 8/9
-// port their adapters (`trust.ts`/`work.ts`) and register them here.
+// (phase 5) and TRUST (phase 8) are wired; work throws "not yet migrated" until
+// phase 9 ports its adapter (`work.ts`) and registers it here.
 //
 // FIREWALL: PLAIN module (no `'use client'`) — the shared result/callback
 // contract + a thin switch. Executed client-side by `GeneratingSlot`.
 
 import type { CopyEngine } from '@/types/brief';
 import { runThingGeneration, type ThingGenerationInput } from './thing';
+import { runTrustGeneration, type TrustGenerationInput } from './trust';
 
 /** Progress stages surfaced to the GeneratingSlot UI (mirror old GeneratingStep). */
 export type GenerationStage = 'strategy' | 'copy' | 'saving' | 'done';
@@ -31,8 +32,8 @@ export interface GenerationResult {
   error?: string;
 }
 
-/** Per-engine adapter input union (widened as trust/work migrate). */
-export type GenerationInput = ThingGenerationInput;
+/** Per-engine adapter input union (widened as work migrates in phase 9). */
+export type GenerationInput = ThingGenerationInput | TrustGenerationInput;
 
 export async function runGeneration(
   engine: CopyEngine,
@@ -43,6 +44,7 @@ export async function runGeneration(
     case 'thing':
       return runThingGeneration(input as ThingGenerationInput, cb);
     case 'trust':
+      return runTrustGeneration(input as TrustGenerationInput, cb);
     case 'work':
       throw new Error(`Generation for the "${engine}" engine is not yet migrated to the unified wizard.`);
     default:

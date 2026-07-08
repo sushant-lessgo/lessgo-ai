@@ -163,6 +163,12 @@ interface WizardState {
   variantId: string | null;
   paletteId: string | null;
 
+  // Verbatim testimonials imported at entry (scrape) — passed to the service
+  // copy route's realTestimonials (injectRealTestimonials). Hydrate-only: the
+  // Brief entry facts carry only quote strings, mapped to the {quote,
+  // author_name, author_role} shape the route expects (authors blank).
+  importedTestimonials: Array<{ quote: string; author_name: string; author_role: string }>;
+
   // generating slot.
   generationProgress: number;
   generationError: string | null;
@@ -317,6 +323,7 @@ const initialState: WizardState = {
   styleMoodPicked: false,
   variantId: null,
   paletteId: null,
+  importedTestimonials: [],
   generationProgress: 0,
   generationError: null,
 };
@@ -383,6 +390,15 @@ export const useWizardStore = create<WizardStore>()(
           if (entry?.testimonials && entry.testimonials.length > 0) {
             state.proof.hasTestimonials = true;
           }
+
+          // Imported testimonials (scrape) — entry facts carry quote strings;
+          // map to the {quote, author_name, author_role} shape the service copy
+          // route requires (authors blank; injectRealTestimonials tolerates it).
+          state.importedTestimonials = (entry?.testimonials ?? []).map((quote) => ({
+            quote,
+            author_name: '',
+            author_role: '',
+          }));
 
           state.hydrated = true;
         }),
