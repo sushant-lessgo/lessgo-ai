@@ -16,6 +16,26 @@ export const PALETTE_IMAGE_KEYWORDS: Record<VestriaPalette, string> = {
   indigo:    'manufacturing plant editorial denim textile industrial',
 };
 
+/**
+ * Palette → scoring scalars for `pickBestImage` (fetchImages.ts). Hand-authored so
+ * scoring is deterministic and reviewable (no runtime OKLCH→HSL conversion). Vestria
+ * pages are bone/light throughout → every entry is `mode:'light'`. Temperature follows
+ * the accent family; `baseColor` is a hex approximation of each accent.
+ */
+export const PALETTE_IMAGE_PROFILES: Record<
+  VestriaPalette,
+  { mode: 'light' | 'dark'; temperature: 'cool' | 'neutral' | 'warm'; baseColor: string }
+> = {
+  cobalt:    { mode: 'light', temperature: 'cool',    baseColor: '#2f5fe0' },
+  brass:     { mode: 'light', temperature: 'warm',    baseColor: '#b08a3c' },
+  emerald:   { mode: 'light', temperature: 'cool',    baseColor: '#1f8a5b' },
+  safety:    { mode: 'light', temperature: 'warm',    baseColor: '#e8632a' },
+  claret:    { mode: 'light', temperature: 'warm',    baseColor: '#8f2d3f' },
+  teal:      { mode: 'light', temperature: 'cool',    baseColor: '#14807f' },
+  aubergine: { mode: 'light', temperature: 'neutral', baseColor: '#5b3a5a' },
+  indigo:    { mode: 'light', temperature: 'cool',    baseColor: '#3a3f8f' },
+};
+
 export function getVestriaImageQuery(query: string, paletteId?: VestriaPalette): string {
   const phrase = paletteId ? PALETTE_IMAGE_KEYWORDS[paletteId] ?? '' : '';
   return [query, phrase].filter(Boolean).join(' ').trim();

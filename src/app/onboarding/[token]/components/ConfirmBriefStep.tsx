@@ -10,7 +10,6 @@
 // authoritative); this component only follows its verdict.
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Check, Loader2 } from 'lucide-react';
 import type { Brief } from '@/types/brief';
 import {
@@ -34,7 +33,6 @@ export default function ConfirmBriefStep({
   onDraftCorrected,
   onManual,
 }: ConfirmBriefStepProps) {
-  const router = useRouter();
   const lowConfidence = (briefDraft.confidence ?? 0) < LOW_CONFIDENCE_THRESHOLD;
   const [showChooser, setShowChooser] = useState(lowConfidence);
   const [confirming, setConfirming] = useState(false);
@@ -60,6 +58,12 @@ export default function ConfirmBriefStep({
     if (confirming) return;
     setConfirming(true);
     setError(null);
+    // NOTE: no blanket `finally` reset — the serve path navigates away, and
+    // resetting `confirming` there re-enabled the button DURING the client-side
+    // route transition (the confirm screen stays mounted until the wizard route
+    // commits). The button flipping back from spinner → enabled made the first
+    // click look like a no-op, so users clicked twice. Reset ONLY on the paths
+    // that stay on this screen (error / manual).
     try {
       const res = await fetch('/api/brief/confirm', {
         method: 'POST',
@@ -69,16 +73,22 @@ export default function ConfirmBriefStep({
       const json = await res.json();
       if (!res.ok || !json?.outcome) {
         setError(json?.error || 'Something went wrong. Please try again.');
+        setConfirming(false);
         return;
       }
       if (json.outcome === 'serve' && json.redirectTo) {
-        router.push(json.redirectTo);
-        return; // keep the spinner during navigation
+        // Hard navigation (not router.push): the entry→wizard handoff is a
+        // one-time cross-flow jump and the wizard re-hydrates the Brief from
+        // the DB (/api/brief), not from client memory — so a full page load is
+        // both correct and immune to the soft-nav drop that made the first
+        // click a no-op. Spinner + disabled button stay until the page unloads.
+        window.location.assign(json.redirectTo);
+        return;
       }
       onManual(typeof json.missing === 'string' ? json.missing : 'rungA:unclassified');
+      setConfirming(false);
     } catch {
       setError('Something went wrong. Please try again.');
-    } finally {
       setConfirming(false);
     }
   };
