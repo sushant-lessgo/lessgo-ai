@@ -9,6 +9,9 @@ import ErrorRetry from '@/components/onboarding/shared/ErrorRetry';
 import type { SectionCopy } from '@/types/generation';
 import type { ServiceStrategyOutputAssembled } from '@/types/service';
 import { defaultHearthPalette } from '@/modules/templates/hearth/palettes';
+import { legacyGoalToBriefGoal, intentToBriefGoal } from '@/modules/brief/bridge';
+import { seedGoalForm } from '@/modules/goals/seedGoalForm';
+import { injectGoalSections } from '@/modules/goals/injectGoalSections';
 
 type Stage = 'strategy' | 'copy' | 'saving' | 'done';
 
@@ -33,6 +36,8 @@ export default function GeneratingStep() {
   const businessName = useServiceGenerationStore((s) => s.businessName);
   const understanding = useServiceGenerationStore((s) => s.understanding);
   const goal = useServiceGenerationStore((s) => s.goal);
+  const goalIntent = useServiceGenerationStore((s) => s.goalIntent);
+  const goalParam = useServiceGenerationStore((s) => s.goalParam);
   const offer = useServiceGenerationStore((s) => s.offer);
   const assets = useServiceGenerationStore((s) => s.assets);
   const importedTestimonials = useServiceGenerationStore((s) => s.importedTestimonials);
@@ -85,37 +90,60 @@ export default function GeneratingStep() {
 
     const title = (businessName.trim() || oneLiner || 'Untitled Studio').slice(0, 50);
 
-    return {
-      finalContent: {
-        layout: {
-          sections: sectionIds,
-          sectionLayouts,
-          // Hearth tokens come from Project.paletteId at render time via
-          // HearthThemeInjector. No theme.colors block needed for service.
-          theme: {},
-          globalSettings: {},
-        },
-        content,
-        meta: {
-          id: tokenId,
-          title,
-          slug: '',
-          lastUpdated: Date.now(),
-          version: 1,
-          tokenId,
-        },
-        onboardingData: {
-          oneLiner,
-          businessName,
-          understanding,
-          goal,
-          offer,
-          assets,
-        },
-        generatedAt: Date.now(),
+    const finalContent = {
+      layout: {
+        sections: sectionIds,
+        sectionLayouts,
+        // Hearth tokens come from Project.paletteId at render time via
+        // HearthThemeInjector. No theme.colors block needed for service.
+        theme: {},
+        globalSettings: {},
       },
-      title,
+      content,
+      meta: {
+        id: tokenId,
+        title,
+        slug: '',
+        lastUpdated: Date.now(),
+        version: 1,
+        tokenId,
+      },
+      onboardingData: {
+        oneLiner,
+        businessName,
+        understanding,
+        goal,
+        offer,
+        assets,
+      },
+      generatedAt: Date.now(),
     };
+
+    // scale-05 phase 4: M1 goals (incl. subscribe-newsletter) auto-seed an
+    // on-site form, placed + wired to the CTA. No-op for non-M1 goals.
+    // scale-05 phase 9: prefer the real captured GoalIntent; legacy reverse-map
+    // is the FALLBACK when goalIntent is absent (resumed run / old draft).
+    const briefGoal = goalIntent
+      ? intentToBriefGoal(goalIntent, goalParam, { businessName, offer })
+      : goal
+        ? legacyGoalToBriefGoal(goal, goalParam, { businessName, offer })
+        : null;
+    seedGoalForm(finalContent, briefGoal);
+
+    // scale-05 phase 7/8: deterministic goal-section injection (M3 download-app
+    // → store-badges row; M4 follow-social → follow-strip). No-op for other
+    // intents / no links. Follow-strip links come from briefGoal.param.links
+    // (the M4 capture); ctx.socialProfiles is the injector's Brief fallback —
+    // undefined here since the onboarding generation store carries no profiles.
+    injectGoalSections(
+      finalContent.layout?.sections,
+      finalContent.layout?.sectionLayouts,
+      finalContent.content,
+      briefGoal,
+      { socialProfiles: undefined }
+    );
+
+    return { finalContent, title };
   };
 
   const runPipeline = useCallback(async () => {
@@ -225,6 +253,15 @@ export default function GeneratingStep() {
           title,
           paletteId: effectivePalette,
           finalContent,
+          // scale-05 phase 1/9: goal writeback — saveDraft's brief passthrough
+          // shallow-merges this over any existing Brief (goal is guarded
+          // non-null at pipeline start). Prefer the real GoalIntent; legacy
+          // reverse-map is the FALLBACK when goalIntent is absent.
+          brief: {
+            goal: goalIntent
+              ? intentToBriefGoal(goalIntent, goalParam, { businessName, offer })
+              : legacyGoalToBriefGoal(goal, goalParam, { businessName, offer }),
+          },
         }),
       });
       if (!res.ok) {
@@ -249,6 +286,8 @@ export default function GeneratingStep() {
   }, [
     understanding,
     goal,
+    goalIntent,
+    goalParam,
     assets,
     oneLiner,
     businessName,

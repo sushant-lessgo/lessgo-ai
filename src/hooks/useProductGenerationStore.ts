@@ -11,6 +11,8 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type { LandingGoal, UnderstandingData } from '@/types/generation';
+import type { GoalParamInput } from '@/modules/brief/bridge';
+import type { GoalIntent } from '@/modules/goals/vocabulary';
 import type {
   ProductStrategyOutput,
   SitemapPage,
@@ -72,6 +74,13 @@ interface ProductGenerationState {
 
   // Step 2
   landingGoal: LandingGoal | null;
+  // Intent-first capture (scale-05 phase 9). The wizard now captures a
+  // GoalIntent directly; `landingGoal` is kept ALONGSIDE (mirrored via
+  // intentToLegacyGoal) so every downstream generation path stays untouched.
+  goalIntent: GoalIntent | null;
+  // Goal-slot param (scale-05 phase 1) — raw capture (store links, booking
+  // URL, …); composed into Brief.goal at save via legacyGoalToBriefGoal.
+  goalParam: GoalParamInput;
 
   // Step 3
   offer: string;
@@ -129,6 +138,8 @@ interface ProductGenerationActions {
   resetUnderstanding: () => void;
 
   setLandingGoal: (goal: LandingGoal) => void;
+  setGoalIntent: (intent: GoalIntent) => void;
+  setGoalParam: (param: GoalParamInput) => void;
   setOffer: (offer: string) => void;
 
   setImportSourceUrl: (url: string | null) => void;
@@ -161,6 +172,8 @@ const initialState: ProductGenerationState = {
   understandingLoading: false,
   understandingError: null,
   landingGoal: null,
+  goalIntent: null,
+  goalParam: {},
   offer: '',
   importSourceUrl: null,
   importedTestimonials: [],
@@ -245,6 +258,14 @@ export const useProductGenerationStore = create<ProductGenerationStore>()(
       setLandingGoal: (goal) =>
         set((state) => {
           state.landingGoal = goal;
+        }),
+      setGoalIntent: (intent) =>
+        set((state) => {
+          state.goalIntent = intent;
+        }),
+      setGoalParam: (param) =>
+        set((state) => {
+          state.goalParam = param;
         }),
       setOffer: (offer) =>
         set((state) => {

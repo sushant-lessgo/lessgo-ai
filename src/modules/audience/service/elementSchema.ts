@@ -48,6 +48,7 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       headline:          { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Brand identity that <em>stays with you</em>.' },
       lede:              { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
       cta_text:          { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Book a call' },
+      cta_subtext:       { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' }, // scale-05: small muted line under primary CTA
       secondary_cta_text:{ type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       hero_image:        { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       meta:              { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
@@ -629,6 +630,46 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
           href:     { type: 'string', fillMode: 'manual_preferred', default: '#' },
         },
       },
+    },
+  },
+
+  // ===== Shared template-agnostic LeadForm (scale-05) =====
+  // Injected deterministically by seedGoalForm for M1 goals; NOT AI-generated.
+  // Mirror of the meridianElementSchema entry so the composed layoutElementSchema
+  // resolves `SharedLeadForm` on the service path too (editor gating + publish
+  // sanitize). Renders on every template via the shared-block registry.
+  SharedLeadForm: {
+    sectionType: 'leadForm',
+    elements: {
+      form_id:       { type: 'string', requirement: 'optional', fillMode: 'system', default: '' },
+      form_headline: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get in touch' },
+    },
+  },
+
+  // ===== Shared template-agnostic StoreBadges (scale-05 phase 7) =====
+  // Injected deterministically by injectGoalSections for the download-app goal.
+  // Mirror of the product entry so the composed layoutElementSchema resolves
+  // `SharedStoreBadges` on the service path too. Renders on every template via
+  // the shared-block registry.
+  SharedStoreBadges: {
+    sectionType: 'storeBadges',
+    elements: {
+      appstore_url:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      playstore_url: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      badge_label:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get the app' },
+    },
+  },
+
+  // ===== Shared template-agnostic FollowStrip (scale-05 phase 8) =====
+  // Injected deterministically by injectGoalSections for the follow-social goal.
+  // Mirror of the product entry so the composed layoutElementSchema resolves
+  // `SharedFollowStrip` on the service path too (editor gating + publish
+  // sanitize). Renders on every template via the shared-block registry.
+  SharedFollowStrip: {
+    sectionType: 'followStrip',
+    elements: {
+      strip_heading: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Follow along' },
+      links_json:    { type: 'string', requirement: 'optional', fillMode: 'system', default: '[]' },
     },
   },
 };

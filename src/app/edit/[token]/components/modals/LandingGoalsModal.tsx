@@ -5,6 +5,8 @@ import React, { useState, useEffect } from 'react';
 import BaseModal from './BaseModal';
 import TaxonomyTile from '../ui/TaxonomyTile';
 import { landingGoalTypes } from '@/modules/inference/taxonomy';
+import { useEditStoreLegacy } from '@/hooks/useEditStoreLegacy';
+import { composeWhatsappDestination } from '@/modules/brief/bridge';
 
 interface LandingGoalsModalProps {
   isOpen: boolean;
@@ -22,6 +24,38 @@ export function LandingGoalsModal({
   fieldName 
 }: LandingGoalsModalProps) {
   const [selectedGoal, setSelectedGoal] = useState<string | null>(currentValue || null);
+
+  // scale-05 phase 6: WhatsApp prefill editing. Reads/writes the project goal
+  // (Brief.goal mirror) held in the edit store; setGoal marks the store dirty so
+  // the standard auto-save round-trips param.message into Project.brief. On
+  // change we also recompose destination `?text=` so the published href updates.
+  const editStore = useEditStoreLegacy() as any;
+  const goal = editStore.goal as import('@/types/brief').Brief['goal'] | null;
+  const setGoal = editStore.setGoal as (
+    g: import('@/types/brief').Brief['goal'] | null,
+  ) => void;
+
+  const destinationStr =
+    typeof goal?.destination === 'string' ? goal.destination : undefined;
+  const isWhatsappGoal =
+    goal?.mechanism === 'M2' &&
+    (!!goal.param?.phone || (!!destinationStr && /wa\.me\//i.test(destinationStr)));
+
+  // Bare digits for recomposition: param.phone (any format) wins, else the digits
+  // already in the wa.me destination.
+  const waNumberSource =
+    goal?.param?.phone ??
+    destinationStr?.split('wa.me/')[1]?.split('?')[0] ??
+    '';
+
+  const handleMessageChange = (message: string) => {
+    if (!goal) return;
+    setGoal({
+      ...goal,
+      destination: composeWhatsappDestination(waNumberSource, message),
+      param: { ...(goal.param ?? {}), message },
+    });
+  };
 
   const handleGoalSelect = (goalId: string) => {
     setSelectedGoal(goalId);
@@ -112,6 +146,29 @@ export function LandingGoalsModal({
                 })()}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* WhatsApp prefill message (scale-05 phase 6) — only for M2/WhatsApp goals */}
+        {isWhatsappGoal && (
+          <div className="space-y-2">
+            <label
+              htmlFor="whatsapp-prefill-message"
+              className="block text-sm font-medium text-gray-900"
+            >
+              Prefilled WhatsApp message
+            </label>
+            <textarea
+              id="whatsapp-prefill-message"
+              value={goal?.param?.message ?? ''}
+              onChange={(e) => handleMessageChange(e.target.value)}
+              rows={3}
+              placeholder="Hi, I found your website and I'm interested."
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+            />
+            <p className="text-xs text-gray-500">
+              This text is pre-filled when a visitor opens WhatsApp from your CTA.
+            </p>
           </div>
         )}
 

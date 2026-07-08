@@ -33,6 +33,9 @@ import {
 } from '@/modules/generation/multiPageAssembly';
 import type { SitemapPage } from '@/types/product';
 import { isImagesAtBirthEnabled } from '@/lib/generation/flag';
+import { legacyGoalToBriefGoal, intentToBriefGoal } from '@/modules/brief/bridge';
+import { seedGoalForm } from '@/modules/goals/seedGoalForm';
+import { injectGoalSections } from '@/modules/goals/injectGoalSections';
 import { injectImagesForPage } from '@/lib/generation/imagesAtBirth';
 // Plain data module (fields only, no component code) — safe to import statically
 // without breaching the template bundle firewall.
@@ -109,6 +112,8 @@ export default function GeneratingStep() {
   const oneLiner = useProductGenerationStore((s) => s.oneLiner);
   const understanding = useProductGenerationStore((s) => s.understanding);
   const landingGoal = useProductGenerationStore((s) => s.landingGoal);
+  const goalIntent = useProductGenerationStore((s) => s.goalIntent);
+  const goalParam = useProductGenerationStore((s) => s.goalParam);
   const offer = useProductGenerationStore((s) => s.offer);
   const importedTestimonials = useProductGenerationStore((s) => s.importedTestimonials);
   const importSourceUrl = useProductGenerationStore((s) => s.importSourceUrl);
@@ -188,38 +193,64 @@ export default function GeneratingStep() {
       }
     }
 
-    return {
-      finalContent: {
-        layout: {
-          sections: sectionIds,
-          sectionLayouts,
-          // Meridian tokens come from Project.paletteId/variantId at render time
-          // via the Meridian ThemeInjector. No theme.colors block for product.
-          theme: {},
-          globalSettings: {},
-        },
-        content,
-        meta: {
-          id: tokenId,
-          title,
-          slug: '',
-          lastUpdated: Date.now(),
-          version: 1,
-          tokenId,
-        },
-        ...(forms ? { forms } : {}),
-        onboardingData: {
-          oneLiner,
-          productName,
-          understanding,
-          landingGoal,
-          offer,
-          // Durable project ↔ SiteContext link (Phase 1) + Phase 3 lookup key.
-          ...(importSourceUrl ? { importSourceUrl } : {}),
-        },
-        generatedAt: Date.now(),
+    const finalContent = {
+      layout: {
+        sections: sectionIds,
+        sectionLayouts,
+        // Meridian tokens come from Project.paletteId/variantId at render time
+        // via the Meridian ThemeInjector. No theme.colors block for product.
+        theme: {},
+        globalSettings: {},
       },
+      content,
+      meta: {
+        id: tokenId,
+        title,
+        slug: '',
+        lastUpdated: Date.now(),
+        version: 1,
+        tokenId,
+      },
+      ...(forms ? { forms } : {}),
+      onboardingData: {
+        oneLiner,
+        productName,
+        understanding,
+        landingGoal,
+        offer,
+        // Durable project ↔ SiteContext link (Phase 1) + Phase 3 lookup key.
+        ...(importSourceUrl ? { importSourceUrl } : {}),
+      },
+      generatedAt: Date.now(),
     };
+
+    // scale-05 phase 4: M1 goals (incl. subscribe-newsletter) auto-seed an
+    // on-site form, placed + wired to the CTA. No-op for non-M1 goals or when a
+    // form already exists (e.g. the vestria contact form above).
+    // scale-05 phase 9: prefer the real captured GoalIntent; fall back to the
+    // legacy reverse-map only when the store carries no goalIntent (e.g. a
+    // resumed run or a pre-phase-9 draft).
+    const briefGoal = goalIntent
+      ? intentToBriefGoal(goalIntent, goalParam, { businessName: productName, offer })
+      : landingGoal
+        ? legacyGoalToBriefGoal(landingGoal, goalParam, { businessName: productName, offer })
+        : null;
+    seedGoalForm(finalContent, briefGoal);
+
+    // scale-05 phase 7/8: deterministic goal-section injection (M3 download-app
+    // → store-badges row; M4 follow-social → follow-strip). No-op otherwise.
+    // Follow-strip links come from briefGoal.param.links (the M4 capture);
+    // ctx.socialProfiles is the injector's Brief fallback — undefined here since
+    // the onboarding generation store carries no profiles.
+    injectGoalSections(
+      finalContent.layout?.sections,
+      finalContent.layout?.sectionLayouts,
+      finalContent.content,
+      briefGoal,
+      { socialProfiles: undefined }
+    );
+
+    return { finalContent };
   };
 
   const runPipeline = useCallback(async () => {
@@ -229,6 +260,32 @@ export default function GeneratingStep() {
 
     setError(null);
     setCreditsError(false);
+
+    // scale-05 phase 1: goal writeback payload for every saveDraft body below.
+    // Only when the store carries a goal — a RESUMED run has a reset store
+    // (landingGoal null), so nothing is sent and saveDraft's shallow brief
+    // merge leaves the previously persisted Brief.goal untouched.
+    // scale-05 phase 9: prefer the store's real GoalIntent; legacy reverse-map
+    // is the FALLBACK when goalIntent is absent (resumed run / old draft).
+    const briefPatch = goalIntent
+      ? {
+          brief: {
+            goal: intentToBriefGoal(goalIntent, goalParam, {
+              businessName: productName,
+              offer,
+            }),
+          },
+        }
+      : landingGoal
+        ? {
+            brief: {
+              goal: legacyGoalToBriefGoal(landingGoal, goalParam, {
+                businessName: productName,
+                offer,
+              }),
+            },
+          }
+        : {};
 
     // ─── Explicit template selection wins (checked BEFORE the persona branch) ───
     // ?template=vestria → store.templateId; a vestria run must never be hijacked
@@ -287,6 +344,7 @@ export default function GeneratingStep() {
           title: fc.meta?.title || title,
           ...(templateInfo ?? {}),
           ...styleInfo,
+          ...briefPatch,
           finalContent: fc,
         }),
       });
@@ -500,6 +558,7 @@ export default function GeneratingStep() {
             paletteId: defaultTechPremiumPalette,
             templateId: 'techpremium',
             variantId: defaultTechPremiumVariant,
+            ...briefPatch,
             finalContent,
           }),
         });
@@ -616,6 +675,7 @@ export default function GeneratingStep() {
             // Mood only after an explicit pick (bone = renderer default; no
             // need to write it, and skipping avoids clobbering older drafts).
             ...(explicitVestria && styleMoodPicked ? { themeValues: { mood } } : {}),
+            ...briefPatch,
             finalContent,
           }),
         });
@@ -735,6 +795,8 @@ export default function GeneratingStep() {
   }, [
     understanding,
     landingGoal,
+    goalIntent,
+    goalParam,
     productName,
     oneLiner,
     offer,

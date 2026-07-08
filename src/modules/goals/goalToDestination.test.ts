@@ -3,6 +3,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { goalToDestination } from './goalToDestination';
+import { legacyGoalToBriefGoal } from '@/modules/brief/bridge';
 import type { Brief } from '@/types/brief';
 
 type Goal = NonNullable<Brief['goal']>;
@@ -71,6 +72,47 @@ describe('goalToDestination', () => {
         goalToDestination(goal({ intent: 'enquiry', mechanism: 'M2' }), { forms: {} }),
       ).toBeUndefined();
     });
+
+    // scale-05 phase 6: enrichment — a plain wa.me destination (no inline
+    // ?text=) + param.message ⇒ attach the message (covers Briefs composed by
+    // other paths, e.g. classify).
+    it('attaches param.message to a plain wa.me destination without inline text', () => {
+      const result = goalToDestination(
+        goal({
+          intent: 'enquiry',
+          mechanism: 'M2',
+          destination: 'https://wa.me/15551234',
+          param: { phone: '15551234', message: 'Hi Acme, interested in X' },
+        }),
+        { forms: {} },
+      );
+      expect(result).toEqual({
+        dest: { kind: 'whatsapp', number: '15551234', msg: 'Hi Acme, interested in X' },
+      });
+    });
+
+    it('does NOT override an inline ?text= msg with param.message', () => {
+      const result = goalToDestination(
+        goal({
+          intent: 'enquiry',
+          mechanism: 'M2',
+          destination: 'https://wa.me/15551234?text=Inline%20wins',
+          param: { phone: '15551234', message: 'param loses' },
+        }),
+        { forms: {} },
+      );
+      expect(result).toEqual({
+        dest: { kind: 'whatsapp', number: '15551234', msg: 'Inline wins' },
+      });
+    });
+
+    it('leaves a plain wa.me destination untouched when no param.message present', () => {
+      const result = goalToDestination(
+        goal({ intent: 'enquiry', mechanism: 'M2', destination: 'https://wa.me/15551234' }),
+        { forms: {} },
+      );
+      expect(result).toEqual({ dest: { kind: 'whatsapp', number: '15551234' } });
+    });
   });
 
   describe('M3 — redirect out', () => {
@@ -138,6 +180,88 @@ describe('goalToDestination', () => {
       expect(
         goalToDestination(goal({ intent: 'rsvp', mechanism: 'M5' }), { forms: {} }),
       ).toBeUndefined();
+    });
+  });
+
+  // ─── scale-05 phase 1: writeback-COMPOSED destinations resolve (wizard →
+  // legacyGoalToBriefGoal → goalToDestination round trip) ───
+  describe('composed destinations (legacyGoalToBriefGoal round trip)', () => {
+    it('enquiry + phone param → wa.me destination resolves as whatsapp (phase 6: prefill msg materialized)', () => {
+      // scale-05 phase 6: the writeback now always materializes a deterministic
+      // prefill message. With no facts, the degradation string rides ?text=.
+      const g = legacyGoalToBriefGoal('enquiry', { phone: '+91 98765 43210' });
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: {
+          kind: 'whatsapp',
+          number: '919876543210',
+          msg: "Hi, I found your website and I'm interested.",
+        },
+      });
+    });
+
+    it('enquiry + phone + facts → prefill template rides the resolved whatsapp msg', () => {
+      const g = legacyGoalToBriefGoal(
+        'enquiry',
+        { phone: '+1 555 123 4567' },
+        { businessName: 'Acme', offer: 'AI landing pages' },
+      );
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: {
+          kind: 'whatsapp',
+          number: '15551234567',
+          msg: 'Hi Acme, I found your website — interested in AI landing pages',
+        },
+      });
+      expect(g.param?.message).toBe(
+        'Hi Acme, I found your website — interested in AI landing pages',
+      );
+    });
+
+    it('enquiry + email param → mailto destination resolves as email', () => {
+      const g = legacyGoalToBriefGoal('enquiry', { email: 'hi@acme.com' });
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: { kind: 'email', addr: 'hi@acme.com' },
+      });
+    });
+
+    it('demo + Calendly param → composed M3 destination resolves as external', () => {
+      const g = legacyGoalToBriefGoal('demo', { url: 'https://calendly.com/acme/30min' });
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: { kind: 'external', url: 'https://calendly.com/acme/30min' },
+      });
+    });
+
+    it('download-app + both store links → resolves external to links[0]', () => {
+      const play = 'https://play.google.com/store/apps/details?id=com.katha';
+      const appstore = 'https://apps.apple.com/app/katha/id123';
+      const g = legacyGoalToBriefGoal('download', { links: [play, appstore] });
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: { kind: 'external', url: play },
+      });
+      // param.links survives untouched for the phase-6 badge injector.
+      expect(g.param?.links).toEqual([play, appstore]);
+    });
+
+    it('subscribe-newsletter override → M1 #form-section anchor (NOT the M4 social path)', () => {
+      const g = legacyGoalToBriefGoal('subscribe-newsletter');
+      expect(goalToDestination(g, { forms: { 'form-news': {} } })).toEqual({
+        dest: { kind: 'section', anchor: 'form-section' },
+        formId: 'form-news',
+      });
+    });
+
+    it('social destinations still resolve for M4 goals with a profile link (follow-social shape)', () => {
+      // No legacy enum maps to follow-social; the M4 generic branch composes
+      // destination = links for direct-intent callers (phase 8).
+      const g = goal({
+        intent: 'follow-social',
+        mechanism: 'M4',
+        destination: ['https://instagram.com/acme'],
+        param: { links: ['https://instagram.com/acme'] },
+      });
+      expect(goalToDestination(g, { forms: {} })).toEqual({
+        dest: { kind: 'social', platform: 'instagram', url: 'https://instagram.com/acme' },
+      });
     });
   });
 });

@@ -10,6 +10,7 @@ interface PetalFramedHeroPublishedProps {
   headline?: string;
   lede?: string;
   cta_text?: string;
+  cta_subtext?: string;
   secondary_cta_text?: string;
   hero_image?: string;
   meta?: string;
@@ -57,6 +58,10 @@ export default function PetalFramedHeroPublished(props: PetalFramedHeroPublished
             )}
             {props.meta && <span className="hearth-hero__caption">{props.meta}</span>}
           </div>
+
+          {props.cta_subtext && (
+            <p className="hearth-hero__cta-subtext">{props.cta_subtext}</p>
+          )}
         </div>
         <div className="hearth-hero__art" aria-hidden="true">
           <div
@@ -104,6 +109,10 @@ const STYLES = `
 .hearth-hero__caption {
   font-family: var(--font-display); font-style: italic;
   font-size: 14px; color: var(--ink-3);
+}
+.hearth-hero__cta-subtext {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 14px; color: var(--ink-3); margin-top: 16px;
 }
 .hearth-btn {
   display: inline-flex; align-items: center; gap: 8px;

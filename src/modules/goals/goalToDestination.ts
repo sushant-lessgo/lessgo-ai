@@ -38,8 +38,10 @@ function firstDestination(destination: Goal['destination']): string | undefined 
 }
 
 /** Best-effort social platform label from a profile URL host. Falls back to
- *  'website' when the host is unrecognized (still a valid social Destination). */
-function inferPlatform(url: string): string {
+ *  'website' when the host is unrecognized (still a valid social Destination).
+ *  Exported so the M4 follow-strip injector (scale-05 phase 8) reuses this ONE
+ *  inferer rather than duplicating a second platform table. */
+export function inferPlatform(url: string): string {
   const host = /^https?:\/\/([^/]+)/i.exec(url)?.[1]?.toLowerCase() ?? url.toLowerCase();
   const table: Array<[RegExp, string]> = [
     [/instagram/, 'instagram'],
@@ -89,6 +91,13 @@ export function goalToDestination(
       if (!raw) return undefined;
       const dest = toDestination(raw);
       if (dest === undefined || dest === 'GOAL_REF' || !isDestination(dest)) return undefined;
+      // scale-05 phase 6: enrich a WhatsApp destination that carries no inline
+      // ?text= with the materialized param.message (covers Briefs written by
+      // other paths — e.g. classify — that set param.message but composed a
+      // plain wa.me destination). Additive: never overrides an existing msg.
+      if (dest.kind === 'whatsapp' && dest.msg === undefined && goal.param?.message) {
+        return { dest: { ...dest, msg: goal.param.message } };
+      }
       return { dest };
     }
 

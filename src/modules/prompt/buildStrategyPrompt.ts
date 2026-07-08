@@ -5,6 +5,48 @@ import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { summarizeRequirementsForPrompt } from '@/modules/sections/getLayoutRequirements';
 import { layoutElementSchema, isUnifiedSchema, getCardRequirements } from '@/modules/sections/layoutElementSchema';
+import { getEmphasisForIntent } from '@/modules/goals/copyGuidance';
+import type { GoalIntent } from '@/modules/goals/vocabulary';
+
+/**
+ * scale-05 phase 3 — best-effort resolve the legacy free-text landingPageGoals
+ * (a taxonomy id OR label; see modules/inference/taxonomy landingGoalTypes) to a
+ * GoalIntent so the strategy phase can weight sections/objections by goal.
+ * Returns null when it can't map — then no emphasis line is appended (conservative;
+ * never guess an intent the founder didn't pick).
+ */
+function resolveLandingGoalIntent(raw: string | undefined): GoalIntent | null {
+  if (!raw) return null;
+  const k = raw.trim().toLowerCase();
+  const table: Record<string, GoalIntent> = {
+    // taxonomy ids
+    'waitlist': 'waitlist',
+    'early-access': 'waitlist',
+    'signup': 'signup-free',
+    'free-trial': 'free-trial',
+    'demo': 'request-demo',
+    'book-call': 'book-call',
+    'buy-now': 'buy-via-link',
+    'subscribe': 'buy-via-link',
+    'download': 'download-app',
+    'join-community': 'follow-social',
+    'contact-sales': 'enquiry',
+    // taxonomy labels (value is often stored as the display label)
+    'join waitlist': 'waitlist',
+    'get early access': 'waitlist',
+    'create free account': 'signup-free',
+    'start free trial': 'free-trial',
+    'request a demo': 'request-demo',
+    'book a strategy call': 'book-call',
+    'buy now': 'buy-via-link',
+    'subscribe to a plan': 'buy-via-link',
+    'download app / extension': 'download-app',
+    'join discord / community': 'follow-social',
+    'talk to sales': 'enquiry',
+    // watch-video / "Watch Demo" intentionally unmapped (no strong conversion intent)
+  };
+  return table[k] ?? null;
+}
 
 // Extract actual store types from Zustand stores
 type OnboardingStore = ReturnType<typeof useOnboardingStore.getState>;
@@ -53,13 +95,16 @@ function buildBusinessContext(onboardingStore: OnboardingStore, pageStore: PageS
 
   const features = featuresFromAI.map(f => `• ${f.feature}: ${f.benefit}`).join('\n');
 
+  const goalIntent = resolveLandingGoalIntent(validatedFields.landingPageGoals);
+  const goalEmphasis = goalIntent ? `\nGoal emphasis: ${getEmphasisForIntent(goalIntent)}` : '';
+
   return `BUSINESS CONTEXT:
 Product/Service: ${oneLiner}
 Target Audience: ${targetAudience || validatedFields.targetAudience || 'Not specified'}
 Market Category: ${businessType || validatedFields.marketCategory || 'Not specified'}
 Market Subcategory: ${validatedFields.marketSubcategory || 'Not specified'}
 Startup Stage: ${validatedFields.startupStage || 'Not specified'}
-Goal of the landing page: ${validatedFields.landingPageGoals || 'Not specified'}
+Goal of the landing page: ${validatedFields.landingPageGoals || 'Not specified'}${goalEmphasis}
 
 KEY FEATURES & BENEFITS:
 ${features || 'Features not available'}`;

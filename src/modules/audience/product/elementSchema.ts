@@ -68,6 +68,7 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
       headline:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Ship on Friday. Sleep on <em>Saturday</em>' },
       lede:               { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
       cta_text:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Start building' },
+      cta_subtext:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' }, // scale-05: small muted line under primary CTA (e.g. "7 days free, no credit card")
       secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       caption:            { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       hero_image:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' }, // Phase 4c: product/hardware photo in the hero art frame
@@ -593,6 +594,49 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
           sub:  { type: 'string', fillMode: 'ai_generated', default: '' },
         },
       },
+    },
+  },
+
+  // ===== Shared template-agnostic LeadForm (scale-05) =====
+  // Injected deterministically by seedGoalForm for M1 goals; NOT AI-generated.
+  // Present here (and in serviceElementSchema) so the composed layoutElementSchema
+  // resolves `SharedLeadForm` → editor element-gating + publish sanitize work
+  // without relying on the unknown-layout fall-through. Renders on every template
+  // via the shared-block registry (section type `leadForm`).
+  SharedLeadForm: {
+    sectionType: 'leadForm',
+    elements: {
+      form_id:       { type: 'string', requirement: 'optional', fillMode: 'system', default: '' },
+      form_headline: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get in touch' },
+    },
+  },
+
+  // ===== Shared template-agnostic StoreBadges (scale-05 phase 7) =====
+  // Injected deterministically by injectGoalSections for the download-app goal;
+  // NOT AI-generated. Present so the composed layoutElementSchema resolves
+  // `SharedStoreBadges` → editor element-gating + publish sanitize keep the
+  // store URLs. Renders on every template via the shared-block registry
+  // (section type `storeBadges`).
+  SharedStoreBadges: {
+    sectionType: 'storeBadges',
+    elements: {
+      appstore_url:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      playstore_url: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      badge_label:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Get the app' },
+    },
+  },
+
+  // ===== Shared template-agnostic FollowStrip (scale-05 phase 8) =====
+  // Injected deterministically by injectGoalSections for the follow-social goal;
+  // NOT AI-generated. Present so the composed layoutElementSchema resolves
+  // `SharedFollowStrip` → editor element-gating + publish sanitize keep the
+  // heading + materialized links_json. Renders on every template via the
+  // shared-block registry (section type `followStrip`).
+  SharedFollowStrip: {
+    sectionType: 'followStrip',
+    elements: {
+      strip_heading: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: 'Follow along' },
+      links_json:    { type: 'string', requirement: 'optional', fillMode: 'system', default: '[]' },
     },
   },
 };
