@@ -12,10 +12,10 @@ Wire the orphaned image machinery (`src/lib/generation/fetchImages.ts` + `src/li
 
 - phase 1 slot map re-key + flag + expansion: DONE (commit 126eb30, review loops 1, ship). Non-blocking: silhouette not expressible in ImageFetchSpec (moot, pilot has none); defensive-skip cases untested (optional).
 - phase 2 fetch/query/score refactor + palette profiles: DONE (commit de52862, review loops 1, ship; deterministic pickBestImage test in). Non-blocking: dead `useSilhouette` field; ImageFetchResult keeps legacy field names carrying sectionId/elementPath values.
-- phase 3 orchestrator + GeneratingStep wiring: DONE (commit pending-below, review loops 1, ship; tsc clean, test:run 907 pass, build green). Write-target/flag-off/firewall all verified. (NIT resolved: used buildMultiPageSkeleton; README updated in phase 2.)
-- phase 4 measurement + manual QA gate: pending
+- phase 3 orchestrator + GeneratingStep wiring: DONE (commit daf49ea, review loops 1, ship; tsc clean, test:run 907 pass, build green). Write-target/flag-off/firewall all verified. (NIT resolved: used buildMultiPageSkeleton; README updated in phase 2.)
+- phase 4 measurement + manual QA gate: PENDING HUMAN — manual run (flag on/off) + eyeball industries images + merge decision. No code.
 
-<!-- RESUME ANCHOR: Phases 1 (126eb30) + 2 (de52862) committed on feature/scale-03-images-at-birth. Next: implement Phase 3 (lines 128-151), impl-review, commit, then Phase 4 (human QA gate — no code). Pre-existing uncommitted (intentional, leave alone): .claude/agents/implementer.md (fable→opus). -->
+<!-- RESUME ANCHOR: ALL 3 code phases committed on feature/scale-03-images-at-birth — 126eb30 (p1), de52862 (p2), daf49ea (p3). tsc/test:run(907)/build all green. Remaining = Phase 4 manual QA human gate (run dev flag on/off, eyeball vestria industries images, measure Pexels req count/page) + human merge gate. NO code left. NOT merged, NOT pushed. Pre-existing uncommitted (intentional, leave alone): .claude/agents/implementer.md (fable→opus). -->
 
 
 ## Slot inventory — honest full enumeration (verified against block source)
