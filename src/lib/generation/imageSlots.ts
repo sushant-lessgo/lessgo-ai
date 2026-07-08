@@ -145,28 +145,3 @@ export function expandImageSlots(
 
   return specs;
 }
-
-/**
- * Get all image slots needed for a set of UIBlock selections.
- *
- * NOTE (scale-03): kept ONLY because `fetchImages.ts` still calls it. Deleted in Phase 2.
- *
- * @param uiblocks Map of sectionType → UIBlock name (e.g., { Hero: 'centerStacked', CTA: 'VisualCTAWithMockup' })
- * @returns Array of slots with section context
- */
-export function getImageSlotsForUIBlocks(
-  uiblocks: Record<string, string>
-): Array<{ sectionType: string; uiblock: string; slot: ImageSlot }> {
-  const slots: Array<{ sectionType: string; uiblock: string; slot: ImageSlot }> = [];
-
-  for (const [sectionType, uiblock] of Object.entries(uiblocks)) {
-    const blockSlots = UIBLOCK_IMAGE_SLOTS[uiblock];
-    if (blockSlots) {
-      for (const slot of blockSlots) {
-        slots.push({ sectionType, uiblock, slot });
-      }
-    }
-  }
-
-  return slots;
-}

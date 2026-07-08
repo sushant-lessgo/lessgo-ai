@@ -1,11 +1,11 @@
 // src/lib/generation/fetchImages.ts
 // Parallel Pexels image fetching for landing page generation
 
-import { getImageSlotsForUIBlocks, type ImageSlot } from './imageSlots';
+import type { ImageFetchSpec } from './imageSlots';
 
-const SILHOUETTE_PATH = '/silhouette-avatar.svg';
 const FETCH_TIMEOUT_MS = 5000;
 const STAGGER_DELAY_MS = 100;
+const MAX_QUERY_WORDS = 8;
 
 export interface ImageFetchResult {
   sectionType: string;
@@ -15,22 +15,20 @@ export interface ImageFetchResult {
   error?: string;
 }
 
-const VIBE_MODIFIERS: Record<string, string> = {
-  'Dark Tech':     'dark moody technology',
-  'Light Trust':   'bright clean professional',
-  'Warm Friendly': 'warm vibrant people friendly',
-  'Bold Energy':   'colorful dynamic bold modern',
-  'Calm Minimal':  'minimal clean simple white',
-};
-
 /**
- * Build search query from categories, slot modifier, and optional vibe
+ * Build a Pexels search query from categories, a spec modifier, and palette-derived
+ * style keywords. Composition: first 2 categories + modifier + styleKeywords, trimmed
+ * and capped to ~8 words to keep Pexels relevance. Empty → 'business professional'.
  */
-function buildSearchQuery(categories: string[], slot: ImageSlot, vibe?: string): string {
+export function buildSearchQuery(
+  categories: string[],
+  modifier: string,
+  styleKeywords?: string
+): string {
   const categoryPart = categories.slice(0, 2).join(' ');
-  const modifier = slot.modifier || '';
-  const vibeMod = vibe ? (VIBE_MODIFIERS[vibe] || '') : '';
-  return `${categoryPart} ${modifier} ${vibeMod}`.trim() || 'business professional';
+  const raw = `${categoryPart} ${modifier || ''} ${styleKeywords || ''}`.trim();
+  if (!raw) return 'business professional';
+  return raw.split(/\s+/).slice(0, MAX_QUERY_WORDS).join(' ');
 }
 
 /**
@@ -63,15 +61,16 @@ async function fetchWithTimeout(
 }
 
 /**
- * Fetch a single image from Pexels
+ * Fetch a single image from Pexels for one resolved spec.
+ * The result carries the spec's sectionId/elementPath in the (legacy-named)
+ * sectionType/elementKey fields so downstream logging + keying stay stable.
  */
-async function fetchSingleImage(
-  sectionType: string,
-  slot: ImageSlot,
+async function fetchSingleSpec(
+  spec: ImageFetchSpec,
   categories: string[],
-  vibe?: string
+  styleKeywords?: string
 ): Promise<ImageFetchResult> {
-  const query = buildSearchQuery(categories, slot, vibe);
+  const query = buildSearchQuery(categories, spec.queryModifier, styleKeywords);
 
   try {
     const response = await fetchWithTimeout(
@@ -81,7 +80,7 @@ async function fetchSingleImage(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query,
-          orientation: slot.orientation,
+          orientation: spec.orientation,
           per_page: 8,
         }),
       },
@@ -90,8 +89,8 @@ async function fetchSingleImage(
 
     if (!response.ok) {
       return {
-        sectionType,
-        elementKey: slot.elementKey,
+        sectionType: spec.sectionId,
+        elementKey: spec.elementPath,
         imageUrl: null,
         error: `HTTP ${response.status}`,
       };
@@ -109,15 +108,15 @@ async function fetchSingleImage(
     const imageUrl = candidates[0]?.downloadUrl || candidates[0]?.url || null;
 
     return {
-      sectionType,
-      elementKey: slot.elementKey,
+      sectionType: spec.sectionId,
+      elementKey: spec.elementPath,
       imageUrl,
       candidates,
     };
   } catch (error) {
     return {
-      sectionType,
-      elementKey: slot.elementKey,
+      sectionType: spec.sectionId,
+      elementKey: spec.elementPath,
       imageUrl: null,
       error: error instanceof Error ? error.message : 'Unknown error',
     };
@@ -125,44 +124,29 @@ async function fetchSingleImage(
 }
 
 /**
- * Fetch Pexels images in parallel for all UIBlock image slots
+ * Fetch Pexels images in parallel for a flat list of resolved image specs.
+ * Staggered (100ms) to avoid rate limits, 5s per-fetch timeout, errors swallowed
+ * into `{ imageUrl: null, error }` results (an image failure never rejects).
  *
- * @param categories Product categories (e.g., ["Invoicing", "Accounting"])
- * @param uiblocks Map of sectionType → UIBlock name
- * @returns Map of "sectionType.elementKey" → ImageFetchResult
+ * @param specs   Resolved specs from `expandImageSlots` (imageSlots.ts).
+ * @param options `categories` (product categories) + palette-derived `styleKeywords`.
+ * @returns Map of `${sectionId}.${elementPath}` → ImageFetchResult.
  */
-export async function fetchPexelsImagesParallel(
-  categories: string[],
-  uiblocks: Record<string, string>,
-  vibe?: string
+export async function fetchImagesForSpecs(
+  specs: ImageFetchSpec[],
+  options: { categories: string[]; styleKeywords?: string }
 ): Promise<Map<string, ImageFetchResult>> {
-  const slots = getImageSlotsForUIBlocks(uiblocks);
+  const { categories, styleKeywords } = options;
   const results = new Map<string, ImageFetchResult>();
 
-  // Separate silhouette slots (no API call needed)
-  const silhouetteSlots = slots.filter(s => s.slot.useSilhouette);
-  const pexelsSlots = slots.filter(s => !s.slot.useSilhouette);
-
-  // Handle silhouette slots immediately
-  for (const { sectionType, slot } of silhouetteSlots) {
-    const key = `${sectionType}.${slot.elementKey}`;
-    results.set(key, {
-      sectionType,
-      elementKey: slot.elementKey,
-      imageUrl: SILHOUETTE_PATH,
-    });
-  }
-
-  // Fetch Pexels images with staggered requests to avoid rate limits
-  const fetchPromises = pexelsSlots.map(({ sectionType, slot }, index) =>
+  const fetchPromises = specs.map((spec, index) =>
     delay(index * STAGGER_DELAY_MS).then(() =>
-      fetchSingleImage(sectionType, slot, categories, vibe)
+      fetchSingleSpec(spec, categories, styleKeywords)
     )
   );
 
   const fetchResults = await Promise.all(fetchPromises);
 
-  // Add Pexels results to map
   for (const result of fetchResults) {
     const key = `${result.sectionType}.${result.elementKey}`;
     results.set(key, result);

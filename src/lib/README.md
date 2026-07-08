@@ -97,8 +97,8 @@ open the file for detail. Sibling shared trees: `src/services/` (Pexels client) 
 |------|---------|
 | `blog/` | Blog Phase 1/P2: ownership gate, page-def synthesis, per-post publish, JSON-LD, SSR fallback, Zod. See `blog/README.md`. |
 | `testimonials/` | Collect→moderate→apply-to-page system: repo, collect-links, photo upload, apply, dark-launch flag. See `testimonials/README.md`. |
-| `generation/fetchImages.ts` | Parallel Pexels fetch during page generation. |
-| `generation/imageSlots.ts` | UIBlock → image-slot mapping. |
+| `generation/fetchImages.ts` | Parallel Pexels fetch (`fetchImagesForSpecs`) + palette scoring (`pickBestImage`) during page generation. |
+| `generation/imageSlots.ts` | Block-layout → image-slot map + `expandImageSlots` (sectionId-keyed content → fetch specs). |
 | `generation/imageColorTreatment.ts` | Palette-harmonizing CSS filter for images. |
 | `siteContext.ts` | Persisted website-scrape context (global URL-keyed `SiteContext` cache, TTL-gated). |
 | `schemas/` | Structured-output Zod schemas for v2 endpoints (understand/copy/strategy/scrape). |
