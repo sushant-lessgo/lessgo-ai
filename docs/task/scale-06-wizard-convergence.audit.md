@@ -178,3 +178,134 @@ thing style/structure setters, trust style setters, generation setters,
 Carry-forward notes (non-blocking, act in later phases):
 - **Phase 3:** `save()`+hydrate→loadDraft wiring is untested (no fetch mock) — gets real coverage with the phase-3 consumer. When wiring load-detection/resume, do NOT assume old-store step-array semantics for `content.onboarding.stepIndex` — the new store writes a slot INDEX there.
 - **Phase 5:** `strategy: unknown` / `sitemap: unknown[]` intentionally loose — adapters tighten.
+
+---
+
+## Phase 3 — wizard shell + entry→wizard handoff + core slots
+
+**Files changed**
+- `src/modules/wizard/rollout.ts` (created)
+- `src/app/api/brief/confirm/route.ts` (edited)
+- `src/app/onboarding/[token]/page.tsx` (edited)
+- `src/components/onboarding/shared/ChipInput.tsx` (created — copy of service field cmp)
+- `src/components/onboarding/wizard/WizardShell.tsx` (created)
+- `src/components/onboarding/wizard/SlotReviewCard.tsx` (created)
+- `src/components/onboarding/wizard/IdentitySlot.tsx` (created)
+- `src/components/onboarding/wizard/UnderstandingSlot.tsx` (created)
+- `src/components/onboarding/wizard/OfferSlot.tsx` (created)
+- `src/app/onboarding/[token]/components/ConfirmBriefStep.tsx` — **NOT modified** (in scope but no change needed; see below)
+
+### The exact handoff wiring
+The fork lives in ONE const. `rollout.ts` exports
+`WIZARD_ENGINES: ReadonlySet<CopyEngine> = new Set(['thing'])`, consumed by both
+sides of the handoff:
+
+1. **confirm route** (`route.ts`): on `outcome === 'serve'` it computes
+   `const unified = brief.copyEngine != null && WIZARD_ENGINES.has(brief.copyEngine)`
+   and returns `redirectTo: unified ? '/onboarding/${tokenId}' : '/onboarding/${decision.audienceType}/${tokenId}'`.
+   Keyed on the SET, not a literal `=== 'thing'`, so phases 8/9 add an engine to
+   the set with zero route edits. Project write (brief/audienceType/templateId)
+   is unchanged.
+2. **ConfirmBriefStep**: unchanged — it already reads `json.redirectTo` and does
+   the hard `window.location.assign(json.redirectTo)`. The response shape did not
+   change (still `{ outcome, redirectTo }`), so no edit was required; the hard
+   navigate is preserved exactly.
+3. **page load-detection** (`page.tsx`): `EntryStep` union extended to
+   `'input'|'confirm'|'manual'|'wizard'`. On mount an effect fetches
+   `/api/loadDraft?tokenId=...` (the same route the edit funnel uses; verified it
+   returns `brief`, `audienceType`, `templateId`). A brief is "confirmed" iff
+   `brief != null && audienceType != null && brief.copyEngine != null` (brief +
+   audienceType are written together at confirm-serve). Then:
+   - `WIZARD_ENGINES.has(brief.copyEngine)` ⇒ `setWizardData(...)` + `step='wizard'`
+     → renders `<WizardShell>`.
+   - else ⇒ `window.location.assign('/onboarding/${audienceType}/${tokenId}')`
+     (forward to the OLD wizard; never render the unified wizard) and leave
+     `checking` true because the page is unloading.
+   - no confirmed brief ⇒ `step='input'` (the in-memory entry flow, unchanged).
+   A `checking` flag holds a spinner until detection resolves, so the entry input
+   step never flashes before a confirmed brief is detected.
+
+### How the old-wizard path stays intact (trust/work)
+- Only `thing` is in `WIZARD_ENGINES`. A confirmed trust brief's confirm-serve
+  redirect uses the else-branch → `/onboarding/service/${tokenId}` (unchanged old
+  route). If a trust/work brief ever lands on `/onboarding/[token]` directly,
+  load-detection forwards it to `/onboarding/${audienceType}/${tokenId}`.
+- No old step component, store, or route was touched. `ChipInput` was COPIED into
+  `src/components/onboarding/shared/`; the service original
+  (`src/app/onboarding/service/[token]/components/fields/ChipInput.tsx`) is
+  byte-unchanged. Old product/service wizards keep working.
+
+### Firewall / dynamic-import handling
+- `page.tsx` is firewall-pure: imports only pure `@/modules/wizard/rollout`,
+  types, and `next/dynamic`. `WizardShell` (and its slot tree + ChipInput) is
+  `dynamic(() => import('.../WizardShell'), { ssr: false, loading })`, so template-
+  adjacent slot code (future StyleSlot pickers) stays out of the entry bundle.
+- `rollout.ts` is pure data (only the `CopyEngine` type import) — safe to import
+  in the API route and the page.
+
+### Slots
+- All slot components are `'use client'`, read/write `useWizardStore` only.
+- `SlotReviewCard.tsx` holds the shared primitives (leaf — imported by slots, does
+  NOT import slots, so no circular import with WizardShell): `resolveFieldCopy`
+  (businessType `wizardFields[field.id]` → built-in default fallback — contract
+  supplies shape, businessType supplies copy), `WizardFieldInput` (free-text
+  textarea / `ChipInput` for chips, bound to store), default `SlotReviewCard`
+  (one-tap confirm-per-slot fast path), and `SlotBody` (orchestrator: partitions a
+  slot's contract fields by store `state` — `drop` never renders, `ask` →
+  editable input, `scraped|inferred` → review card in review-mode / editable in
+  fill-mode; `mode` read from the store).
+- `IdentitySlot`/`UnderstandingSlot`/`OfferSlot` are thin `SlotBody` wrappers keyed
+  by their slot id; fields are pulled from the engine contract by `slot ===`
+  membership (contract-driven, not hard-coded field lists). UnderstandingSlot thus
+  covers WHO/WHAT (+ the differentiator ask, which the contract places in that
+  slot).
+- `WizardShell` hydrates the store once on mount from the props the page fetched,
+  renders progress + back/next chrome, and dispatches `currentSlot` to a built
+  slot or a "coming soon" placeholder (goal/proof/style/structure/generating land
+  in phases 4/5). `Continue` calls `save()` (existing `/api/saveDraft`) then
+  `nextSlot()`.
+
+### Reasoned verification (manual dev is the phase-6 gate, not done here)
+- (a) Confirmed THING brief: confirm route returns `redirectTo:/onboarding/${tokenId}`
+  (thing ∈ set) → hard navigate → page load-detection fetches loadDraft, sees
+  `brief.copyEngine==='thing' ∈ WIZARD_ENGINES` → renders `WizardShell` in
+  review-mode (URL-entry ⇒ `deriveMode` review). ✓
+- (b) Confirmed TRUST brief: confirm route uses else-branch →
+  `/onboarding/service/${tokenId}` (old wizard). Direct hit on `/onboarding/[token]`
+  is forwarded there by load-detection (trust ∉ set). ✓
+- (c) Reload mid-wizard: page re-mounts, load-detection re-fetches the persisted
+  brief (still thing, still confirmed) → re-renders WizardShell (net-new resume).
+  ✓ (store re-hydrates from DB, not client memory.)
+
+### Deviations
+- **ConfirmBriefStep not edited** — the plan permits editing it only "if the
+  response shape gains the branch field." The branch is entirely server-side
+  (`redirectTo` already existed), so the component needed no change; the hard
+  `window.location.assign` is preserved. Logged per the in-scope-ambiguity rule.
+- **`resolveFieldCopy` fallback map** — businessType `wizardFields` keys do NOT all
+  match contract field ids (e.g. saas has `product`/`audience`/`differentiator`;
+  the thing contract has `name`/`oneLiner`/`capabilities`/`objectionFacts`/`offer`).
+  Conservative choice: prefer `wizardFields[field.id]` when the key matches, else a
+  built-in default label/example keyed by contract field id (covers all
+  thing/trust/work ids), else the raw id. No shape invented; copy-only.
+- **`checking` flag** added to the entry state (not in the literal union) to hold a
+  spinner during load-detection so the input step never flashes. The `EntryStep`
+  union itself was extended exactly as specified (`+ 'wizard'`).
+
+### Test results
+- `npx tsc --noEmit` → PASS (clean, no output).
+- No unit tests added this phase (UI/handoff wiring; the store already has phase-2
+  coverage and the plan schedules load-detection + resume coverage for phase 11).
+
+### Open risks
+- `WizardShell.save()`/hydrate → loadDraft wiring is exercised only manually until
+  phase 11 adds fetch-mocked load-detection/resume tests (carried forward from
+  phase 2).
+- Slots goal/proof/style/structure/generating render placeholders — a full THING
+  run through generation is not possible until phases 4/5. The handoff + core-slot
+  review/fill is the phase-3 deliverable.
+
+### Impl-review verdict: **ship** (loop 1/1) — tsc clean, FULL suite 1198 passed / 2 skipped / 0 failed, no out-of-scope creep, old wizards byte-unchanged. No blocking issues. All 3 hardened handoff items verified (const-keyed redirect, no loop/flash, firewall dynamic-import).
+Carry-forward notes (non-blocking):
+- **Phase 8:** `WizardFieldInput` only handles `chips`/`free-text` — trust's `packages` (`input:'boolean'`, offer slot) would render as an empty textarea. Add boolean handling (or route to proof-style UI) BEFORE trust goes live. Also add `DEFAULT_FIELD_COPY` entries for `packages`/`theWork`/`praise`/`achievements`/`credentials` (currently fall back to raw-id labels).
+- **Phase 11:** `/api/loadDraft` network-error currently drops the user to entry `input` (indistinguishable from no-brief) — reload-recoverable but consider distinguishing transient error from no-brief when adding load-detection coverage.
