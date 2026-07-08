@@ -10,6 +10,7 @@ import type { SectionCopy } from '@/types/generation';
 import type { ServiceStrategyOutputAssembled } from '@/types/service';
 import { defaultHearthPalette } from '@/modules/templates/hearth/palettes';
 import { legacyGoalToBriefGoal } from '@/modules/brief/bridge';
+import { seedGoalForm } from '@/modules/goals/seedGoalForm';
 
 type Stage = 'strategy' | 'copy' | 'saving' | 'done';
 
@@ -87,37 +88,41 @@ export default function GeneratingStep() {
 
     const title = (businessName.trim() || oneLiner || 'Untitled Studio').slice(0, 50);
 
-    return {
-      finalContent: {
-        layout: {
-          sections: sectionIds,
-          sectionLayouts,
-          // Hearth tokens come from Project.paletteId at render time via
-          // HearthThemeInjector. No theme.colors block needed for service.
-          theme: {},
-          globalSettings: {},
-        },
-        content,
-        meta: {
-          id: tokenId,
-          title,
-          slug: '',
-          lastUpdated: Date.now(),
-          version: 1,
-          tokenId,
-        },
-        onboardingData: {
-          oneLiner,
-          businessName,
-          understanding,
-          goal,
-          offer,
-          assets,
-        },
-        generatedAt: Date.now(),
+    const finalContent = {
+      layout: {
+        sections: sectionIds,
+        sectionLayouts,
+        // Hearth tokens come from Project.paletteId at render time via
+        // HearthThemeInjector. No theme.colors block needed for service.
+        theme: {},
+        globalSettings: {},
       },
-      title,
+      content,
+      meta: {
+        id: tokenId,
+        title,
+        slug: '',
+        lastUpdated: Date.now(),
+        version: 1,
+        tokenId,
+      },
+      onboardingData: {
+        oneLiner,
+        businessName,
+        understanding,
+        goal,
+        offer,
+        assets,
+      },
+      generatedAt: Date.now(),
     };
+
+    // scale-05 phase 4: M1 goals (incl. subscribe-newsletter) auto-seed an
+    // on-site form, placed + wired to the CTA. No-op for non-M1 goals.
+    const briefGoal = goal ? legacyGoalToBriefGoal(goal, goalParam) : null;
+    seedGoalForm(finalContent, briefGoal);
+
+    return { finalContent, title };
   };
 
   const runPipeline = useCallback(async () => {

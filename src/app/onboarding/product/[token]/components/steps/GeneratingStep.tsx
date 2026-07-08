@@ -34,6 +34,7 @@ import {
 import type { SitemapPage } from '@/types/product';
 import { isImagesAtBirthEnabled } from '@/lib/generation/flag';
 import { legacyGoalToBriefGoal } from '@/modules/brief/bridge';
+import { seedGoalForm } from '@/modules/goals/seedGoalForm';
 import { injectImagesForPage } from '@/lib/generation/imagesAtBirth';
 // Plain data module (fields only, no component code) — safe to import statically
 // without breaching the template bundle firewall.
@@ -190,38 +191,44 @@ export default function GeneratingStep() {
       }
     }
 
-    return {
-      finalContent: {
-        layout: {
-          sections: sectionIds,
-          sectionLayouts,
-          // Meridian tokens come from Project.paletteId/variantId at render time
-          // via the Meridian ThemeInjector. No theme.colors block for product.
-          theme: {},
-          globalSettings: {},
-        },
-        content,
-        meta: {
-          id: tokenId,
-          title,
-          slug: '',
-          lastUpdated: Date.now(),
-          version: 1,
-          tokenId,
-        },
-        ...(forms ? { forms } : {}),
-        onboardingData: {
-          oneLiner,
-          productName,
-          understanding,
-          landingGoal,
-          offer,
-          // Durable project ↔ SiteContext link (Phase 1) + Phase 3 lookup key.
-          ...(importSourceUrl ? { importSourceUrl } : {}),
-        },
-        generatedAt: Date.now(),
+    const finalContent = {
+      layout: {
+        sections: sectionIds,
+        sectionLayouts,
+        // Meridian tokens come from Project.paletteId/variantId at render time
+        // via the Meridian ThemeInjector. No theme.colors block for product.
+        theme: {},
+        globalSettings: {},
       },
+      content,
+      meta: {
+        id: tokenId,
+        title,
+        slug: '',
+        lastUpdated: Date.now(),
+        version: 1,
+        tokenId,
+      },
+      ...(forms ? { forms } : {}),
+      onboardingData: {
+        oneLiner,
+        productName,
+        understanding,
+        landingGoal,
+        offer,
+        // Durable project ↔ SiteContext link (Phase 1) + Phase 3 lookup key.
+        ...(importSourceUrl ? { importSourceUrl } : {}),
+      },
+      generatedAt: Date.now(),
     };
+
+    // scale-05 phase 4: M1 goals (incl. subscribe-newsletter) auto-seed an
+    // on-site form, placed + wired to the CTA. No-op for non-M1 goals or when a
+    // form already exists (e.g. the vestria contact form above).
+    const briefGoal = landingGoal ? legacyGoalToBriefGoal(landingGoal, goalParam) : null;
+    seedGoalForm(finalContent, briefGoal);
+
+    return { finalContent };
   };
 
   const runPipeline = useCallback(async () => {

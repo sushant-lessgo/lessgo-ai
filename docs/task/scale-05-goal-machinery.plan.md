@@ -22,8 +22,8 @@ Make the picked goal actually shape the page. Today the goal is a dead wire: the
 
 - phase 1 goal param plumbing: done (commit 1a64012, review loops 1)
 - phase 2 cta_subtext element: done (commit b34e0d4, review loops 1)
-- phase 3 intent→copy guidance: done (review loops 1, ship)
-- phase 4 M1 form auto-seed: pending
+- phase 3 intent→copy guidance: done (commit 56894ad, review loops 1)
+- phase 4 M1 form auto-seed: done (seed DATA only; review loops 1, ship) — RENDER GAP: seeded form does not render/scroll on PUBLISHED core templates (pre-existing; manual form-wire also broken). Follow-up required — see "Render-gap decision" below.
 - phase 5 M2 whatsapp prefill: pending
 - phase 6 shared-block infra + M3 store-badges: pending
 - phase 7 M4 follow-strip: pending

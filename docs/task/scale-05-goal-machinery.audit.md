@@ -125,3 +125,56 @@
 **Open risks**
 - No block/renderer changes this phase (prompt/copy plumbing only), so no dual-renderer concern. `copyGuidance.ts` is a plain module — safe for the server-only strategy/copy builders.
 - The legacy `buildStrategyPrompt` path stores `landingPageGoals` as either a taxonomy id or display label; the resolver covers both known forms, but a custom/edited free-text goal outside the taxonomy will simply get no emphasis line (safe, not wrong).
+
+---
+
+## Phase 4 — M1: form auto-seed + place + wire at generation
+
+**Files changed**
+- `src/modules/audience/service/formTemplates.ts` — modified (re-keyed templates by `GoalIntent`; added all M1-intent templates + subscribe-newsletter; new `getFormTemplateForIntent`; legacy `getServiceFormTemplate`/`SERVICE_FORM_TEMPLATE_GOALS` retained)
+- `src/modules/goals/seedGoalForm.ts` — NEW (plain module, M1 form auto-seed)
+- `src/app/onboarding/product/[token]/components/steps/GeneratingStep.tsx` — modified (call `seedGoalForm` in `buildFinalContent`)
+- `src/app/onboarding/service/[token]/components/steps/GeneratingStep.tsx` — modified (same)
+- `src/modules/goals/seedGoalForm.test.ts` — NEW
+- `src/modules/audience/service/formTemplates.test.ts` — NEW
+
+**What changed, per file**
+
+- **formTemplates.ts** — `TEMPLATES_BY_GOAL` (ServiceGoal-keyed, 3 entries) replaced by `TEMPLATES_BY_INTENT` (`GoalIntent`-keyed, 11 entries): enquiry, request-quote, book-call, request-demo, book-me, enroll, apply, lead-magnet, waitlist, rsvp, subscribe-newsletter. `book-me` carries `event_date` (text — MVP has no `date` type) + `event_type` (select); `rsvp` carries an `attendees` select; `subscribe-newsletter` is email(required)+name(optional). New `getFormTemplateForIntent(intent)` (book-call fallback). Legacy `getServiceFormTemplate(goal: ServiceGoal)` is now a thin wrapper mapping `SERVICE_GOAL_TO_INTENT` (bridge.ts) → `getFormTemplateForIntent`; `SERVICE_FORM_TEMPLATE_GOALS` unchanged. All field `type`s ⊆ `MVPFormFieldType`.
+- **seedGoalForm.ts** — `seedGoalForm(finalContent, goal)`. Seeds only when `goal.mechanism === 'M1' || goal.intent === 'subscribe-newsletter'`, and only when `finalContent.forms` is empty (idempotent). Instantiates the intent template into `finalContent.forms[form-${Date.now()}]` (matching `formActions.createForm`: id/createdAt/updatedAt, cloned fields, + a `dashboard` integration mirroring the vestria seed). Wires the primary CTA section (found by type prefix `cta-` → `contact-` → `hero-`).
+- **GeneratingStep.tsx (both)** — `buildFinalContent` now assembles `finalContent` into a local, computes `briefGoal = legacyGoalToBriefGoal(landingGoal|goal, goalParam)` (Phase-1 helper) and calls `seedGoalForm(finalContent, briefGoal)` before returning. Vestria's own contact-form seed makes forms non-empty first, so the M1 seed no-ops there.
+
+**Exact placement-record + buttonConfig shape matched (manual path parity)**
+
+Studied `ButtonConfigurationModal.tsx` `handleSave` (lines 300–391) — the authoritative manual writer. The seed reproduces its form-CTA write byte-for-byte:
+- `elements.cta_embed = 'form:' + formId` (ButtonConfigurationModal.tsx:358).
+- `elementMetadata.cta_text = { buttonConfig, cta }` (ButtonConfigurationModal.tsx:372–377), with
+  - `buttonConfig = { type:'form', ctaType:'primary', formId, behavior:'scrollTo' }` (:305–324 form branch; icon/iconConfig omitted — undefined on a fresh wire).
+  - `cta = { role:'primary', dest:{ kind:'section', anchor:'form-section' }, formId }` (`buildCtaButton`, :86–90 form branch).
+- Section-level `cta` ctaConfig `{ type:'form', cta_text, url:undefined, formId, behavior:'scrollTo', inputConfig:undefined, label, variant:'primary', size:'medium' }` (:328–335 + :383–390).
+- The AI-written `cta_text` label is preserved (not clobbered), matching the modal which keeps `buttonText`.
+Readers that consume this shape: `FormPlacementRenderer.tsx:59` (`buttonConfig.type==='form'`+`formId`+`behavior`), `resolveCtaHref.ts:65–69` (form → `#form-section`), `determineFormPlacement`/`formPlacement.ts`. `goalToDestination.ts:76–82` resolves the hero GOAL_REF M1 case to `{ dest: section#form-section, formId: firstForm }` — the seed leaves forms empty until it writes exactly one, so the hero GOAL_REF and the CTA button resolve to the SAME formId + `#form-section`.
+
+**Is the seeded form RENDERED (not just wired)? — HONEST FINDING / OPEN RISK**
+
+The seed writes data that is byte-identical to a manual founder wire via ButtonConfigurationModal, so it renders wherever a manual wire renders. HOWEVER, while studying the render path I found a pre-existing gap OUTSIDE Phase 4's Files-touched (`formPlacement.ts`, `sectionHelpers.ts`, the CTA `.published.tsx` blocks, `LandingPagePublishedRenderer.tsx`):
+- Generated section ids are `${type}-${uuid8}` (e.g. `cta-cccc3333`), but `sectionHelpers.getSectionType`/`hasPrimaryCTASection` (sectionHelpers.ts:32–51) match the LITERAL strings `'cta'`/`'hero'`. So `determineFormPlacement` classifies a real cta section as `'other'` with `hasPrimaryCTA=false` → returns `modal`, and `shouldRenderFullForm` (requires `currentSectionId==='cta'`) is false. => `FormPlacementRenderer` does NOT render the full form for real generated ids.
+- No DOM node emits `id="form-section"` anywhere in the codebase (grepped), and the published CTA blocks (`ArcCTA.published.tsx`, `BookCallCTA.published.tsx`) render only the `#form-section` anchor link, not the form. So the hero/CTA `#form-section` scroll target currently resolves to nothing in exported HTML.
+This means the phase's "rendered, scrolled-to form" goal is NOT fully achieved by the seed alone — it needs changes to the above out-of-scope files (e.g. type-prefix-aware `getSectionType`/`hasPrimaryCTASection`, and a `form-section` render slot in the published path). Per the guardrails I did not edit files outside Phase 4's list; flagging for the orchestrator to schedule (likely a formPlacement/renderer fix in a later phase or Phase 9 acceptance). The seed DATA is correct and manual-path-compatible; the working proof today is: forms exist in `content.forms`, CTA is wired, hero stays GOAL_REF, all resolving to one shared formId + `#form-section`.
+
+**Grep results — getServiceFormTemplate / SERVICE_FORM_TEMPLATE_GOALS callers**
+Only `src/components/forms/FormBuilder.tsx` (imports both; uses `getServiceFormTemplate(goal)` at :130 and `SERVICE_FORM_TEMPLATE_GOALS` at :129/:262). No other src/e2e callers. The legacy wrapper keeps this call site compiling + behaving unchanged (verified by tsc + a wrapper test) — no silent field-drop.
+
+**fullPageRegeneration paths** — intentionally untouched. The seed runs ONLY in the two onboarding `GeneratingStep.buildFinalContent` paths; regeneration (`fullPageRegeneration`) is not wired and, given idempotence (skips when forms exist), a later regen over a seeded draft would no-op anyway.
+
+**Deviations**
+- Added a `dashboard` integration to the seeded form (templates ship `integrations: []`). Mirrors the proven vestria contact-form seed so submissions surface in the founder dashboard. Conservative, in-scope (seedGoalForm only; templates unchanged for the FormBuilder manual path).
+- Target-section fallback order `cta → contact → hero` (plan says "the CTA section"): conservative so the seed never silently drops the form when a page has no `cta` section.
+
+**Verification**
+- `npx tsc --noEmit` — clean.
+- `npm run test:run -- seedGoalForm formTemplates normalizeCtas formPlacement` — 3 files, 38 tests passed (formPlacement has no test file; normalizeCtas green). New: seedGoalForm.test.ts (M1 seed+wire, hero untouched, subscribe-newsletter email capture, M2–M5 no-op, idempotence, null tolerance, hero fallback), formTemplates.test.ts (template per M1 intent + newsletter, field types ⊆ MVPFormFieldType, legacy wrapper parity).
+
+**Open risks**
+- The render gap documented above is the material one (out-of-scope files).
+- `form-${Date.now()}` id collision is theoretically possible if two forms seed in the same ms; not a concern here (single seed per generation, guarded by the forms-empty idempotence check).
