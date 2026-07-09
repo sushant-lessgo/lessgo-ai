@@ -100,11 +100,11 @@ export interface TrustGenerationInput {
   paletteId?: string;
   variantId?: string;
 
-  // Structure (7b gate output — scale-07 phase 4). When `strategy` is present
-  // runTrustGeneration NEVER refetches (credit charge-once); when
-  // `confirmedSections` is present, sections absent from it get NO copy.
-  // GeneratingSlot's projection does not forward these yet — the module-scoped
-  // pre-gate handoff below bridges them (see runTrustStrategy).
+  // Structure (7b gate output — scale-07 phase 4/5). When `strategy` is
+  // present runTrustGeneration NEVER refetches (credit charge-once); when
+  // `confirmedSections` is present, sections absent from it get NO copy. Both
+  // are forwarded by the store's `buildTrustInput` projection (scale-07
+  // phase 5 — the phase-4 module-scoped pre-gate bridge is deleted).
   strategy?: ServiceStrategyOutputAssembled | null;
   confirmedSections?: string[] | null;
 }
@@ -234,43 +234,15 @@ export type RunTrustStrategyResult =
   | { status: 'error'; error: string };
 
 /**
- * PRE-GATE HANDOFF (deliberate bridge — see audit). `GeneratingSlot`'s trust
- * projection predates phase 4 and does not forward `strategy`/
- * `confirmedSections` (that file is outside this phase's touch list), so the
- * gate-fetched strategy and the user's confirmed structure are handed to
- * `runTrustGeneration` through this module-scoped record instead, keyed by
- * tokenId so a stale wizard session can never leak into another project.
- * Explicit `input.strategy`/`input.confirmedSections` ALWAYS win over the
- * handoff — when a later phase forwards them through the projection, this
- * bridge becomes dead code and should be deleted.
- *
- * Charge-once: `runTrustStrategy` (called exactly once by the store's
- * status-guarded `fetchStrategy`) records the strategy here; runTrustGeneration
- * finds it and NEVER refetches — including on copy-failure retries. The record
- * is PEEKED, never cleared, so a retry cannot trigger a second charged fetch.
- */
-let pregate: {
-  tokenId: string;
-  strategy: ServiceStrategyOutputAssembled;
-  confirmedSections: string[] | null;
-} | null = null;
-
-/** Store-side sync: the 7b gate's confirmed (toggled/reordered) section list. */
-export function setConfirmedTrustStructure(tokenId: string, sections: string[]): void {
-  if (pregate && pregate.tokenId === tokenId) {
-    pregate.confirmedSections = [...sections];
-  }
-}
-
-/** Test hook — clears the pre-gate handoff between fixtures. */
-export function resetTrustPregateForTest(): void {
-  pregate = null;
-}
-
-/**
  * The trust strategy call as a standalone step: SAME payload builder
  * (`buildStrategyPayload`), SAME route (server owns the credit charge), SAME
  * credit-fail detection as the previous inline call.
+ *
+ * Charge-once (scale-07 phase 5 — bridge deleted): the store's status-guarded
+ * `fetchStrategy` calls this exactly once and writes the result into the
+ * store; `buildTrustInput` forwards it as `input.strategy` (plus the gate's
+ * confirmed body as `input.confirmedSections`), so `runTrustGeneration` never
+ * refetches — including on copy-failure retries.
  */
 export async function runTrustStrategy(
   input: TrustGenerationInput
@@ -286,9 +258,7 @@ export async function runTrustStrategy(
       if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
       throw new Error(json?.message || 'Strategy generation failed');
     }
-    const strategy = json.data as ServiceStrategyOutputAssembled;
-    pregate = { tokenId: input.tokenId, strategy, confirmedSections: null };
-    return { status: 'done', strategy };
+    return { status: 'done', strategy: json.data as ServiceStrategyOutputAssembled };
   } catch (e: any) {
     return { status: 'error', error: e?.message || 'Strategy generation failed.' };
   }
@@ -306,19 +276,15 @@ export async function runTrustGeneration(
   const templateId = input.templateId ?? 'hearth';
   const variantId = input.variantId ?? defaultVariantForTemplate[templateId as TemplateId];
 
-  // ─── Strategy (PRIMARY: pre-gate fetch from the structure slot; fallback:
-  //     one self-fetch for structure-skipping/reloaded flows) ───
+  // ─── Strategy (PRIMARY: pre-gate fetch from the structure slot, forwarded
+  //     through `input.strategy` by the store's buildTrustInput projection;
+  //     fallback: one self-fetch for structure-skipping/reloaded flows) ───
   cb.onStage?.('strategy');
-  const handoff = pregate && pregate.tokenId === tokenId ? pregate : null;
-  const confirmedSections =
-    input.confirmedSections !== undefined
-      ? input.confirmedSections
-      : handoff?.confirmedSections ?? null;
+  const confirmedSections = input.confirmedSections ?? null;
   let strategy: ServiceStrategyOutputAssembled;
-  const pregateStrategy = input.strategy ?? handoff?.strategy ?? null;
-  if (pregateStrategy) {
+  if (input.strategy) {
     // Fetched (and charged) exactly once at the 7b gate — never refetch here.
-    strategy = pregateStrategy;
+    strategy = input.strategy;
   } else {
     const result = await runTrustStrategy(input);
     if (result.status === 'credits') return { status: 'credits' };
@@ -382,11 +348,6 @@ export async function runTrustGeneration(
   } catch (e: any) {
     return { status: 'error', error: e?.message || 'Could not save the draft.' };
   }
-
-  // Generation finished — drop the pre-gate handoff so a stale strategy can
-  // never leak into a later run for this token. (Error/credits paths KEEP it:
-  // a retry after a copy failure must reuse the already-charged strategy.)
-  if (pregate && pregate.tokenId === tokenId) pregate = null;
 
   cb.onStage?.('done');
   return { status: 'done', redirectTo: REDIRECT(tokenId) };

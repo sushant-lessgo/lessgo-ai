@@ -30,6 +30,15 @@ export interface BusinessTypeEntry {
   /** Registry key into src/lib/schemas/extraction (thing|trust|work|manufacturer). */
   extractionSchemaKey: string;
   likelyIntents: readonly GoalIntent[];
+  /**
+   * Default site structure for this business type (scale-07 phase 5) — one
+   * input to `isMultipage()` (pageArchetypes.ts): a Brief without an explicit
+   * `structure.mode` falls back to this. 'single' everywhere except
+   * manufacturer (the vestria multipage pilot: catalogue/industries/contact
+   * pages are the default shape). Only consulted when the resolved template
+   * declares the `multipage` capability.
+   */
+  structureDefault: 'single' | 'multi';
 }
 
 export const businessTypeKeys = [
@@ -65,6 +74,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
     },
     extractionSchemaKey: 'thing',
     likelyIntents: ['request-demo', 'free-trial', 'signup-free', 'waitlist'],
+    structureDefault: 'single',
   },
   manufacturer: {
     key: 'manufacturer',
@@ -85,6 +95,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
     },
     extractionSchemaKey: 'manufacturer',
     likelyIntents: ['enquiry', 'request-quote'],
+    structureDefault: 'multi',
   },
   agency: {
     key: 'agency',
@@ -108,6 +119,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
     },
     extractionSchemaKey: 'trust',
     likelyIntents: ['book-call', 'enquiry', 'request-quote'],
+    structureDefault: 'single',
   },
   consultant: {
     key: 'consultant',
@@ -127,6 +139,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
     },
     extractionSchemaKey: 'trust',
     likelyIntents: ['book-call', 'enquiry', 'lead-magnet'],
+    structureDefault: 'single',
   },
   coach: {
     key: 'coach',
@@ -146,6 +159,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
     },
     extractionSchemaKey: 'trust',
     likelyIntents: ['book-call', 'enroll', 'lead-magnet'],
+    structureDefault: 'single',
   },
   writer: {
     key: 'writer',
@@ -165,5 +179,6 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
     },
     extractionSchemaKey: 'work',
     likelyIntents: ['follow-social', 'buy-via-link', 'subscribe-newsletter'],
+    structureDefault: 'single',
   },
 };

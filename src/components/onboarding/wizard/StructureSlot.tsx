@@ -3,10 +3,11 @@
 // scale-06 phase 4 → scale-07 phase 4 — the universal STRUCTURE slot (7b gate).
 // thing AND trust hit it now (work keeps its skip).
 //
-// MULTIPAGE mode (page-archetype menu, vestria): ports the product
-// SitemapReviewStep sitemap-editing behavior AS-IS onto the wizard store
-// (review / rename / reorder / add / remove pages + sections). Untouched by
-// scale-07 phase 4 — detection re-key is phase 5.
+// MULTIPAGE mode (page-archetype menu): ports the product SitemapReviewStep
+// sitemap-editing behavior AS-IS onto the wizard store (review / rename /
+// reorder / add / remove pages + sections). scale-07 phase 5: detection is
+// re-keyed off the template's `multipage` CAPABILITY (+ businessType
+// structureDefault) via `isMultipage` — no vestria hardcode.
 //
 // SINGLE-PAGE mode (scale-07 phase 4, no menu — meridian + every trust
 // template): ONE section list from the fetched strategy. Required engine-core
@@ -32,6 +33,7 @@ import { useWizardStore } from '@/hooks/useWizardStore';
 import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
 import {
   getPageArchetypesForTemplate,
+  isMultipage,
   type PageArchetypeDef,
 } from '@/modules/audience/product/pageArchetypes';
 import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
@@ -69,6 +71,7 @@ const singlePageLabel = (s: string) => SINGLE_PAGE_LABELS[s] ?? SECTION_LABELS[s
 
 export default function StructureSlot() {
   const templateId = useWizardStore((s) => s.templateId);
+  const businessTypeKey = useWizardStore((s) => s.businessTypeKey);
   const engine = useWizardStore((s) => s.engine);
   const strategy = useWizardStore((s) => s.strategy) as ProductStrategyOutput | null;
   const storeSitemap = useWizardStore((s) => s.sitemap) as SitemapPage[] | null;
@@ -94,10 +97,16 @@ export default function StructureSlot() {
     if (!strategy && strategyStatus === 'idle') void fetchStrategy();
   }, [strategy, strategyStatus, fetchStrategy]);
 
-  const menu = useMemo(
-    () => getPageArchetypesForTemplate(templateId ?? undefined) ?? [],
-    [templateId]
-  );
+  // Multi vs single mode (scale-07 phase 5 re-key): decided by the template's
+  // `multipage` CAPABILITY + businessType structureDefault (an explicit Brief
+  // `structure.mode` also feeds isMultipage; the store does not retain
+  // brief.structure yet — that signal arrives with phase-6 persistence, so the
+  // businessType key is the Brief-side signal available here).
+  const menu = useMemo(() => {
+    const briefSignal = businessTypeKey ? { businessType: businessTypeKey } : undefined;
+    if (!isMultipage(templateId ?? undefined, briefSignal)) return [];
+    return getPageArchetypesForTemplate(templateId ?? undefined) ?? [];
+  }, [templateId, businessTypeKey]);
   const menuByKey = useMemo(() => new Map(menu.map((a) => [a.key, a])), [menu]);
 
   // Prefer prior edits (storeSitemap), else the strategy's proposal.

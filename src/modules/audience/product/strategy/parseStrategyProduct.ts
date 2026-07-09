@@ -15,7 +15,11 @@ import type {
 } from '@/lib/schemas/productStrategy.schema';
 import { selectProductSections } from '../sectionSelection';
 import { selectProductBlocks } from '../selectBlocks';
-import { getPageArchetypesForTemplate, type PageArchetypeDef } from '../pageArchetypes';
+import {
+  getPageArchetypesForTemplate,
+  isMultipage,
+  type PageArchetypeDef,
+} from '../pageArchetypes';
 
 /**
  * Proof availability booleans (scale-06 phase 4 — the PROOF HARD RULE).
@@ -232,7 +236,12 @@ export function assembleProductStrategy(
 ): ProductStrategyOutput {
   const { llmResponse, templateId, proof, brief, requiredCapabilities } = input;
 
-  const menu = getPageArchetypesForTemplate(templateId);
+  // scale-07 phase 5 re-key: multipage is a CAPABILITY question (template
+  // declares `multipage` + Brief structure.mode / businessType default), not a
+  // templateId hardcode.
+  const menu = isMultipage(templateId, brief)
+    ? getPageArchetypesForTemplate(templateId)
+    : null;
 
   let sections: string[];
   let sitemap: SitemapPage[] | undefined;

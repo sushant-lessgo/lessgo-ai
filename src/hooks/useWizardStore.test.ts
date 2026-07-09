@@ -21,10 +21,7 @@ import {
   clampSectionList,
 } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
-import {
-  runTrustGeneration,
-  resetTrustPregateForTest,
-} from '@/modules/wizard/generation/trust';
+import { runTrustGeneration } from '@/modules/wizard/generation/trust';
 
 /** Build a Brief with a partial EntryFacts payload at facts.entry. */
 function briefWithEntry(entry: Record<string, unknown>, extra: Partial<Brief> = {}): Brief {
@@ -446,9 +443,6 @@ const TRUST_STRATEGY = {
   },
 };
 
-/** Flush the fire-and-forget trust-bridge sync (dynamic import microtasks). */
-const flushAsync = () => new Promise((r) => setTimeout(r, 0));
-
 describe('lockedSectionsForEngine — required (non-toggleable) sections per engine', () => {
   it('thing locks hero + features; testimonials stays toggleable (dropTarget)', () => {
     expect(lockedSectionsForEngine('thing')).toEqual(['hero', 'features']);
@@ -656,7 +650,6 @@ describe('useWizardStore + trust adapter — trust 7b GA (charge-once + toggled-
 
   beforeEach(() => {
     useWizardStore.getState().reset();
-    resetTrustPregateForTest();
     useWizardStore
       .getState()
       .hydrate({ tokenId: 'tokTrust', brief: trustBrief, audienceType: 'service', templateId: 'hearth' });
@@ -685,8 +678,8 @@ describe('useWizardStore + trust adapter — trust 7b GA (charge-once + toggled-
     await useWizardStore.getState().fetchStrategy();
     expect(strategyCalls()).toBe(1);
 
-    // GeneratingSlot-equivalent projection (does NOT forward strategy fields —
-    // the pre-gate handoff in trust.ts bridges them).
+    // GeneratingSlot-equivalent projection: buildTrustInput forwards the
+    // gate-fetched strategy (scale-07 phase 5 — the trust.ts bridge is gone).
     const result = await runTrustGeneration(buildTrustInput(useWizardStore.getState()));
     expect(result.status).toBe('done');
     expect(strategyCalls()).toBe(1); // still exactly one charged strategy call
@@ -695,7 +688,6 @@ describe('useWizardStore + trust adapter — trust 7b GA (charge-once + toggled-
   it('ACCEPTANCE: testimonials toggled off ⇒ ZERO testimonial copy (absent from the copy payload)', async () => {
     await useWizardStore.getState().fetchStrategy();
     useWizardStore.getState().toggleStructureSection('testimonials');
-    await flushAsync(); // fire-and-forget bridge sync
 
     const result = await runTrustGeneration(buildTrustInput(useWizardStore.getState()));
     expect(result.status).toBe('done');
@@ -719,7 +711,8 @@ describe('useWizardStore + trust adapter — trust 7b GA (charge-once + toggled-
   });
 
   it('structure-skipping fallback: no pre-gate strategy ⇒ generation self-fetches ONCE', async () => {
-    // No fetchStrategy call (e.g. a resumed/legacy flow) — pregate is empty.
+    // No fetchStrategy call (e.g. a resumed/legacy flow) — store strategy null,
+    // so the projection forwards nothing and the adapter self-fetches once.
     const result = await runTrustGeneration(buildTrustInput(useWizardStore.getState()));
     expect(result.status).toBe('done');
     expect(strategyCalls()).toBe(1);

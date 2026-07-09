@@ -234,3 +234,101 @@ Gate list = strategy's BODY sections seeded into `structureSections`; toggles ac
 - Runtime meridian single-page lists remain 5-core until the strategy route/client passes Brief-derived capabilities (phase 5/6) — the meridian gate therefore shows no cta/pricing rows yet.
 - Manual dev pass (thing single-page + one trust flow) still owed per the plan's verification line — deferred to the phase-9 QA sweep.
 - Trust structure-slot reload re-charges strategy across sessions (parity with thing); phase-6 step 3b.
+
+## Phase 5 — Multipage keyed by capability (sitemap for all) + phase-4 carryovers
+
+**Files changed**
+- `src/modules/audience/product/pageArchetypes.ts` (edit) — `getPageArchetypesForTemplate` re-keyed off the `multipage` capability + archetype registry; new `isMultipage()` helper
+- `src/modules/businessTypes/config.ts` (edit) — `structureDefault: 'single' | 'multi'` on `BusinessTypeEntry` + all 6 entries
+- `src/app/api/audience/product/strategy/route.ts` (edit) — detection via `isMultipage`; carryover (a): optional `brief` + `requiredCapabilities` in the request schema, forwarded to `assembleProductStrategy`
+- `src/modules/audience/product/strategy/parseStrategyProduct.ts` (edit) — `assembleProductStrategy` menu detection via `isMultipage(templateId, brief)`
+- `src/components/onboarding/wizard/StructureSlot.tsx` (edit) — multi/single mode via `isMultipage` (capability + businessType signal); header comment updated
+- `src/modules/wizard/generation/thing.ts` (edit) — `explicitVestria` → `isMultipage()` check; all 7 `templateId:'vestria'` payload hardcodes → `resolvedTemplateId` (= `input.templateId ?? PILOT_TEMPLATE`); carryover (a) client side: `buildStrategyPayload` sends `brief: { goal }`
+- `src/components/onboarding/wizard/GeneratingSlot.tsx` (edit) — carryover (b): local trust projection DELETED; consolidated onto the store's exported `buildTrustInput` (which forwards `strategy` + `confirmedSections`)
+- `src/modules/wizard/generation/trust.ts` (edit) — carryover (b): module-scoped `pregate` bridge DELETED (var + `setConfirmedTrustStructure` + `resetTrustPregateForTest` + all read/write/clear sites); `runTrustGeneration` consumes `input.strategy`/`input.confirmedSections` directly
+- `src/modules/audience/product/pageArchetypes.test.ts` (new) — re-key regression suite (see below)
+- `src/app/api/audience/product/strategy/route.test.ts` (new) — carryover (a) route-level proof
+- `src/hooks/useWizardStore.ts` (edit — **out-of-list deviation, see Deviations 1**) — `buildTrustInput` forwards `strategy`/`confirmedSections`; dead `syncTrustConfirmedStructure` + its 3 call sites deleted; comments updated
+- `src/hooks/useWizardStore.test.ts` (edit — deviation 1) — `resetTrustPregateForTest` import/call + `flushAsync` bridge helper removed; stale bridge comments updated (assertions unchanged)
+- `src/modules/wizard/generation/thing.test.ts` (edit — deviation 2) — strategy-payload mirror kept in lockstep (`brief`/`requiredCapabilities`); +1 test pinning the Brief-goal forward
+
+### `isMultipage` helper shape (plan step 1)
+
+```ts
+// src/modules/audience/product/pageArchetypes.ts (data layer — imports only
+// templateMeta + businessTypes config, both pure data; firewall preserved)
+isMultipage(templateId, brief?): boolean
+  = template declares 'multipage' (templateMeta)            // hard gate
+    ∧ ( brief.structure.mode === 'multi'  ⇒ true            // explicit wins
+      | brief.structure.mode === 'single' ⇒ false
+      | businessTypes[brief.businessType].structureDefault  // 'multi' ⇒ true
+      | no Brief signal at all            ⇒ true )          // capability alone
+```
+
+- The "no Brief signal ⇒ capability decides" tail is a deliberate addition to the plan's formula: the detection sites mostly have NO brief today (thing.ts fan-out, vestria runs whose payload brief carries only `goal`), and the strict `capability ∧ (mode-multi ∨ default-multi)` reading would have flipped vestria to single-page — a behavior break the plan explicitly forbids ("behavior is identical, the KEY is now honest").
+- `getPageArchetypesForTemplate(templateId, registry?)`: `multipage` capability (templateMeta) ∧ registry entry ⇒ menu, else null. Registry keyed by owning template (`{ vestria: VESTRIA_PAGE_ARCHETYPES }`); optional `registry` param is test-injection only.
+- All 3 detection sites call it: route (`isMultipage(data.templateId, data.brief)` gates the menu + sitemap schema), `assembleProductStrategy` (`isMultipage(templateId, brief)` gates the sitemap branch), StructureSlot (`isMultipage(templateId, { businessType: businessTypeKey })` picks multi vs single mode — the store does not retain `brief.structure`, so businessType is the available Brief-side signal until phase-6 persistence). thing.ts's fan-out/style branch calls `isMultipage(input.templateId)`.
+
+### Grep-gate result (`'vestria'` literals in thing.ts + detection sites)
+
+```
+$ grep -n "'vestria'" thing.ts route.ts parseStrategyProduct.ts StructureSlot.tsx pageArchetypes.ts
+src/modules/wizard/generation/thing.ts:72:  templateId: 'meridian' | 'vestria' | 'techpremium' | null;
+src/modules/wizard/generation/thing.ts:297:  // scale-07 phase 5 re-key: was `templateId === 'vestria'`. Multipage is a
+src/app/api/audience/product/strategy/route.ts:63:  templateId: z.enum(['meridian', 'vestria']).optional(),
+```
+
+Survivors (all justified, none is detection logic):
+1. `thing.ts:72` — the `ThingGenerationInput.templateId` TYPE union (which product templates the adapter accepts). A type contract, not a branch.
+2. `thing.ts:297` — comment describing the re-key.
+3. `route.ts:63` — the request-schema templateId WHITELIST (which ids the route accepts at all) — input validation, not multipage detection; widening it is a template-catalog decision outside this phase.
+4. (unquoted) `pageArchetypes.ts` registry key `vestria:` — the menu DECLARATION owned by vestria; per-template data is exactly where the plan wants it.
+Zero `'vestria'` detection branches remain; all 7 payload hardcodes in thing.ts (selectProductBlocks / per-page copy templateId / mergePageIntoFinalContent / injectImagesForPage / skeleton saveFC / runCopyAndSave templateId trio / leadForm guard) now use `resolvedTemplateId` / `multipageTemplate`.
+
+### `structureDefault` importer re-grep (plan step 3)
+
+`businessTypes/config` importers re-grepped (23 hits): `waterfall.ts` (+test), `acceptance.test.ts`, `schemas/extraction/index.ts` (+test), `useWizardStore.ts`, `entryClassify.schema.ts`, `pageArchetypes.ts` (new, mine), `fit.ts`, `SlotReviewCard.tsx`, `ProofSlot.tsx`, `v2/understand`, `GoalSlot.tsx`, `v2/scrape-website`, `config.test.ts`, `serveGate.ts`, `playback.ts`, `classify.ts` (+test), `bridge.ts`, `structureConvergence.test.ts`, `inputContracts.ts` (comment only). None validates entry shape exhaustively or rejects extra fields (`config.test.ts` checks specific fields only); adding the required field compiled once all 6 entries set it — `tsc` clean, full suite green with zero importer edits. Entry values: `manufacturer: 'multi'` (the vestria multipage pilot — required so a manufacturer-keyed Brief keeps vestria multi), all 5 others `'single'` (plan default).
+
+### Carryover (a) proof — runtime meridian regains cta/pricing
+
+- Route: request schema gains OPTIONAL `brief` (validated by the real `BriefSchema`) + `requiredCapabilities` (enum-checked against `capabilityIds`); both forwarded to `assembleProductStrategy` (was `{llmResponse, templateId, proof}` only). Absent ⇒ old senders byte-identical (proven by the "no brief ⇒ bare engine core" route test).
+- Client: `buildStrategyPayload` (thing.ts) now sends `brief: { goal: briefGoalFor(input) }` when a goal intent exists — so a REAL meridian wizard run with an M1 goal reaches the route with the M1 Brief and regains `cta` at runtime. (`requiredCapabilities` has no runtime producer yet — phase 6's recomputed-required-set is the designed sender; route accepts it now.)
+- Test (`route.test.ts`, runs the real handler with auth/credits/AI mocked at module boundary): meridian + `brief.goal.mechanism='M1'` + `requiredCapabilities:['packages']` ⇒ sections contain **cta** AND **pricing** with real uiblock mappings, no sitemap; no-brief call ⇒ exact `[header,hero,features,testimonials,footer]`; malformed brief ⇒ 400 validation_error (never a silent drop).
+
+### Carryover (b) — pregate bridge DELETED + charge-once still 1 call
+
+- `trust.ts`: `pregate` module var, `setConfirmedTrustStructure`, `resetTrustPregateForTest`, the handoff read in `runTrustGeneration`, the write in `runTrustStrategy`, and the clear-on-done are ALL deleted (`grep pregate|setConfirmedTrustStructure|resetTrustPregate src/` ⇒ zero hits). `runTrustGeneration` now reads only `input.strategy` / `input.confirmedSections`.
+- Forwarding: the store's `buildTrustInput` (the single trust projection, per its own phase-4 consolidation note) now forwards `strategy: s.strategy` + `confirmedSections: confirmedStructureBody(s)`; GeneratingSlot's duplicate local projection is deleted and the slot calls the store export.
+- **Charge-once still green:** `useWizardStore.test.ts` "CHARGE-ONCE end-to-end: generation consumes the pre-gate strategy — zero refetch" passes with the SAME assertion (exactly 1 `/api/audience/service/strategy` call across gate fetch + generation); "toggled off ⇒ ZERO testimonial copy" and "structure-skipping fallback self-fetches ONCE" also pass unchanged (assertions untouched — only bridge-era comments/imports removed). Copy-failure retry still charge-safe: the strategy lives in the STORE (not a cleared module var), so a retry re-projects the same strategy.
+
+### multiPageAssembly / naayom collections — untouched + green
+
+- `src/modules/generation/multiPageAssembly.ts` NOT modified (git status confirms; not in my diff). `multiPageAssembly.test.ts` green in both the targeted run and the full suite. thing.ts's calls into it (`buildMultiPageSkeleton`/`mergePageIntoFinalContent`/`finalizeMultiPageGeneration`/`isResumableGeneration`) unchanged except `mergePageIntoFinalContent({ templateId })` now receives `resolvedTemplateId` — always `'vestria'` on every reachable fan-out path today (fan-out requires a sitemap, which requires a multipage template). Vestria multipage fixtures (`thing.test.ts` fan-out smoke, `clampSitemap.test.ts`) pass unchanged.
+
+### New regression coverage (`pageArchetypes.test.ts`)
+
+vestria still resolves its menu + is multi; meridian/techpremium(retired)/hearth/lex/surge/null/unknown ⇒ null + single; a HYPOTHETICAL multipage-capable template ('atlas' via mocked templateMeta + injected registry) resolves ITS archetypes with zero detection edits — capability without menu ⇒ null, menu without capability ⇒ null; explicit `structure.mode` beats businessType default; manufacturer default 'multi' / saas 'single' / unknown key ⇒ capability decides; `structureDefault` declared on all 6 entries with manufacturer the only multi.
+
+### Deviations
+
+1. **Edited `useWizardStore.ts` + `useWizardStore.test.ts` (NOT on the phase-5 Files-touched list).** Unavoidable to complete mandated carryover (b): the plan itself names "the store's `buildTrustInput`" as the forwarding vehicle (it lives in useWizardStore.ts), and deleting the bridge exports breaks compile of `syncTrustConfirmedStructure` (useWizardStore.ts — a WRITE site of the bridge) and the test file's `resetTrustPregateForTest` import. Chose full clean deletion over no-op shims (the mandate says "DELETE the pregate module var + its read/write/clear sites"; shims would leave a fake bridge). Diffs are minimal and bridge-scoped: projection forward + dead-sync removal + comment updates; no store behavior/state shape changed; charge-once/toggle-off test ASSERTIONS untouched.
+2. **Edited `thing.test.ts` (not listed):** kept the route-schema mirror in lockstep with the route's new optional fields (its stated purpose) + pinned the new Brief-goal forward. Companion test of an in-scope module; same category prior phases used.
+3. **New `route.test.ts` (not listed):** the task mandates a carryover-(a) test for "a runtime meridian strategy call"; no route test existed, and `pageArchetypes.test.ts` is the wrong home for route-handler coverage. Auth/credits/rate-limit/AI mocked at module boundary; the handler's validation→detection→assembly runs real.
+4. **`isMultipage` lives in `pageArchetypes.ts`, not "beside templateMeta/fit":** the plan's step-1 phrasing suggests `src/modules/templates/`, but no templates/ file is on the Files-touched list — placed in the listed detection-data module instead (pure data layer, imports templateMeta + businessTypes config only; firewall intact).
+5. **"No Brief signal ⇒ capability decides" tail on `isMultipage`** (see helper-shape section) — required to keep vestria multi on brief-less/goal-only calls; conservative behavior-preserving reading.
+6. **`manufacturer.structureDefault = 'multi'`** while the plan says "default `'single'`": read as the default for entries without a specific reason; manufacturer IS the multipage pilot, and 'single' there would flip vestria to single-page the moment a manufacturer-keyed Brief reaches detection (StructureSlot passes `businessTypeKey` — today 'manufacturer' on vestria flows), breaking multipage.
+7. **`buildStrategyPayload` sends only `brief: { goal }`** (not businessType/structure): `ThingGenerationInput` carries no businessType and the store retains no `brief.structure`; goal is the field that restores meridian cta at runtime (the plan's own example). Wider Brief forwarding arrives naturally with phase-6 structure persistence.
+8. Pre-existing working-tree items NOT mine: `docs/task/scale-07-structure-convergence.plan.md` (orchestrator's phase-4 commit-sha note), deleted `docs/task/scale.md`, untracked `docs/guides/collections.md` + `docs/task/scale-10-collections.spec.md`.
+
+### Test results
+
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run` — **Test Files 94 passed | 1 skipped (95) · Tests 1489 passed | 2 skipped (1491)** (phase-4 baseline 1472 + 17 new). Multipage/collections (`multiPageAssembly.test.ts`), re-key regression (`pageArchetypes.test.ts`), carryover-(a) route test, carryover-(b) charge-once end-to-end, clampSitemap, thing/trust adapters, wizard store: all green.
+- Targeted run of the 7 phase-relevant suites: 111/111 green.
+
+### Open risks
+
+- `resolvedTemplateId` falls back to `PILOT_TEMPLATE` (meridian) when `input.templateId` is null on the fan-out path — unreachable today (`buildThingInput` defaults templateId, and fan-out requires a multipage template), but a future DB-resume with a null store templateId would stamp meridian instead of the old hardcoded vestria. Flag for phase 6 (resume + persistence work).
+- StructureSlot's Brief signal is `businessTypeKey` only until phase 6 persists/rehydrates `brief.structure` — an explicit user `structure.mode` cannot influence the slot yet (no producer exists yet either).
+- Multipage style defaults in `runCopyAndSave`/fan-out (`defaultVestriaPalette`, `'tailored'`, vestria lead fields) remain vestria-SHAPED behind the now-capability-keyed flag — fine while vestria is the only multipage template; a second multipage template must generalize them (template-default lookup).
+- Route now accepts `requiredCapabilities` with no runtime sender — dormant surface until phase 6 wires the recomputed required set.

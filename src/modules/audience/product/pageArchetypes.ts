@@ -3,12 +3,24 @@
 // Phase 2). AUDIENCE-LEVEL PURE DATA (like elementSchema.ts): the strategy route
 // (server) reads this to constrain the LLM's sitemap proposal, and the review UI
 // reads it to render add/remove affordances — template modules stay behind the
-// dynamic-import firewall and are never imported here.
+// dynamic-import firewall and are never imported here (templateMeta/businessTypes
+// are pure-data siblings, firewall-safe).
 //
 // A page archetype describes what a page of that kind MAY contain (allowedSections),
 // MUST contain (requiredSections), and what it looks like by default. Section
 // types are BODY-ONLY — header/footer are shared chrome, injected at page
 // boundaries, never part of a page's section list.
+//
+// scale-07 phase 5: multipage is a CAPABILITY question, not a templateId
+// hardcode. `getPageArchetypesForTemplate` keys off the template's declared
+// `multipage` capability (templateMeta) + its archetype registry entry;
+// `isMultipage` folds in the Brief signal (structure.mode / businessType
+// structureDefault) for the detection sites.
+
+import type { Brief } from '@/types/brief';
+import type { TemplateId } from '@/types/service';
+import { templateMeta } from '@/modules/templates/templateMeta';
+import { businessTypes, type BusinessTypeKey } from '@/modules/businessTypes/config';
 
 export interface PageArchetypeDef {
   /** Stable key — persisted on ProjectPageEntry.archetypeKey. */
@@ -108,13 +120,65 @@ export const VESTRIA_PAGE_ARCHETYPES: PageArchetypeDef[] = [
 ];
 
 /**
- * Page-archetype menu for a template, or null when the template is single-page
- * (meridian/techpremium → null → the sitemap gate is SKIPPED, zero behavior
- * change for existing templates).
+ * Archetype registry — the page menus, keyed by the template that OWNS them.
+ * A template appears here iff it ships a page-archetype menu; the `multipage`
+ * capability declaration (templateMeta) is what makes the menu REACHABLE.
+ */
+const PAGE_ARCHETYPES_BY_TEMPLATE: Record<string, PageArchetypeDef[]> = {
+  vestria: VESTRIA_PAGE_ARCHETYPES,
+};
+
+/** Does this template declare the `multipage` capability (templateMeta)? */
+function hasMultipageCapability(templateId: string | null | undefined): boolean {
+  if (!templateId) return false;
+  const meta = templateMeta[templateId as TemplateId];
+  return !!meta && meta.capabilities.includes('multipage');
+}
+
+/**
+ * Page-archetype menu for a template, or null when the template is single-page.
+ * scale-07 phase 5 re-key: the template must DECLARE the `multipage` capability
+ * (templateMeta) AND ship an archetype registry entry — no templateId hardcode.
+ * Today only vestria satisfies both, so behavior is identical; the key is now
+ * honest (meridian/techpremium → null → the sitemap gate is skipped).
+ *
+ * `registry` is test-injection only (a hypothetical multipage-capable template
+ * with its own menu) — production callers use the default.
  */
 export function getPageArchetypesForTemplate(
-  templateId: string | null | undefined
+  templateId: string | null | undefined,
+  registry: Record<string, PageArchetypeDef[]> = PAGE_ARCHETYPES_BY_TEMPLATE
 ): PageArchetypeDef[] | null {
-  if (templateId === 'vestria') return VESTRIA_PAGE_ARCHETYPES;
-  return null;
+  if (!hasMultipageCapability(templateId)) return null;
+  return registry[templateId as string] ?? null;
+}
+
+/**
+ * The single multipage-detection helper (scale-07 phase 5, plan step 1) —
+ * called by all detection sites (strategy route, assembleProductStrategy,
+ * StructureSlot) and thing.ts's fan-out branch:
+ *
+ *   template `multipage` capability
+ *     ∧ ( Brief structure.mode === 'multi'
+ *         ∨ businessType structureDefault === 'multi'
+ *         ∨ no Brief signal at all )
+ *
+ * Capability is a hard gate. An explicit Brief `structure.mode` wins over the
+ * businessType default. When the caller has NO Brief signal (no brief, or a
+ * brief without structure/businessType) the capability alone decides — that is
+ * today's behavior (vestria is always multi), kept so the re-key is
+ * behavior-identical.
+ */
+export function isMultipage(
+  templateId: string | null | undefined,
+  brief?: Pick<Brief, 'structure' | 'businessType'> | null
+): boolean {
+  if (!hasMultipageCapability(templateId)) return false;
+  const mode = brief?.structure?.mode;
+  if (mode === 'multi') return true;
+  if (mode === 'single') return false;
+  const key = brief?.businessType as BusinessTypeKey | undefined;
+  const entry = key && key in businessTypes ? businessTypes[key] : undefined;
+  if (entry) return entry.structureDefault === 'multi';
+  return true; // capability alone — no Brief signal to override it
 }

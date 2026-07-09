@@ -34,6 +34,13 @@ const StrategyRequestMirror = z.object({
   whatYouMake: z.string().optional(),
   templateId: z.enum(['meridian', 'vestria']).optional(),
   proof: z.object({ hasTestimonials: z.boolean().optional() }).optional(),
+  // scale-07 phase 5 (carryover a): Brief goal + explicit capabilities reach
+  // the route (assembly-only). Route validates with BriefSchema; the mirror
+  // just pins presence/shape of what the adapter sends.
+  brief: z
+    .object({ goal: z.object({ intent: z.string(), mechanism: z.string() }).passthrough() })
+    .optional(),
+  requiredCapabilities: z.array(z.string()).optional(),
 });
 
 const CopyRequestMirror = z.object({
@@ -106,6 +113,13 @@ describe('THING adapter — strategy payload fidelity', () => {
     });
     // Absent proof ⇒ no proof key (old-wizard byte-identical behavior).
     expect('proof' in buildStrategyPayload(baseInput({ proof: undefined }))).toBe(false);
+  });
+
+  it('forwards the composed Brief goal (carryover a) — absent when no intent', () => {
+    const p = buildStrategyPayload(baseInput()) as any;
+    expect(p.brief?.goal?.intent).toBe('signup-free');
+    expect(p.brief?.goal?.mechanism).toBeTruthy();
+    expect('brief' in buildStrategyPayload(baseInput({ goalIntent: null }))).toBe(false);
   });
 
   it('maps primaryAudience / otherAudiences from the audience field', () => {

@@ -243,9 +243,10 @@ interface WizardActions {
    * Single-page 7b structure actions (scale-07 phase 4). Toggle-OFF only (no
    * adds — the list membership is fixed by the strategy proposal); locked
    * engine-core sections are refused at the STATE level, not just the UI; hero
-   * is pinned first (moves involving hero are refused). Every mutation syncs
-   * the trust pre-gate handoff so trust generation consumes the confirmed
-   * (reduced) structure.
+   * is pinned first (moves involving hero are refused). Generation consumes
+   * the confirmed (reduced) structure via the projections: `buildThingInput`
+   * clamps the strategy directly; `buildTrustInput` forwards
+   * `confirmedSections` (scale-07 phase 5 — the trust pre-gate bridge is gone).
    */
   setStructureSections: (sections: string[] | null) => void;
   toggleStructureSection: (section: string) => void;
@@ -419,14 +420,19 @@ export function buildThingInput(s: WizardState): ThingGenerationInput {
 
 /**
  * Project the wizard store state → the TRUST adapter input (plain data) —
- * scale-07 phase 4, used by the store's `fetchStrategy` for the pre-gate
- * trust strategy call. NOTE: GeneratingSlot still carries its own (older)
- * local trust projection with the same field mapping; keep the two in step
- * until it is consolidated onto this export.
+ * scale-07 phases 4/5. THE single trust projection: used by the store's
+ * `fetchStrategy` for the pre-gate trust strategy call AND by GeneratingSlot
+ * for the generation run (consolidated in phase 5; the slot's local duplicate
+ * is deleted). Forwards the gate-fetched `strategy` (charge-once: with it
+ * present, `runTrustGeneration` never refetches) and the 7b-confirmed section
+ * body (`confirmedSections` — a toggled-off section gets NO copy); the
+ * phase-4 module-scoped pre-gate bridge in trust.ts is deleted.
  */
 export function buildTrustInput(s: WizardState): TrustGenerationInput {
   const fields = s.fields as Record<string, { value: unknown }>;
   return {
+    strategy: (s.strategy as TrustGenerationInput['strategy']) ?? null,
+    confirmedSections: confirmedStructureBody(s),
     tokenId: s.tokenId ?? '',
     templateId: (s.templateId as TrustGenerationInput['templateId']) ?? 'hearth',
     businessTypeKey: s.businessTypeKey ?? undefined,
@@ -475,23 +481,6 @@ function seedStructureFromStrategy(state: WizardState): void {
     state.structureSections = strat.sections.filter((x) => x !== 'header' && x !== 'footer');
     state.structureDisabled = [];
   }
-}
-
-/**
- * Push the confirmed structure into the trust adapter's pre-gate handoff
- * (GeneratingSlot's trust projection does not forward structure fields yet —
- * see trust.ts). Fire-and-forget lazy import keeps the generation tree out of
- * the store's static graph; the module is already loaded by the time toggles
- * are possible (fetchStrategy imported it to fetch the trust strategy).
- */
-function syncTrustConfirmedStructure(s: WizardState): void {
-  if (s.engine !== 'trust' || !s.tokenId) return;
-  const confirmed = confirmedStructureBody(s);
-  if (!confirmed) return;
-  const tokenId = s.tokenId;
-  void import('@/modules/wizard/generation/trust').then((m) =>
-    m.setConfirmedTrustStructure(tokenId, confirmed)
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -670,13 +659,11 @@ export const useWizardStore = create<WizardStore>()(
         }),
 
       // ── Single-page 7b structure (scale-07 phase 4) ──
-      setStructureSections: (sections) => {
+      setStructureSections: (sections) =>
         set((state) => {
           state.structureSections = sections ? [...sections] : null;
-        });
-        syncTrustConfirmedStructure(get());
-      },
-      toggleStructureSection: (section) => {
+        }),
+      toggleStructureSection: (section) =>
         set((state) => {
           if (!state.structureSections?.includes(section)) return;
           // Required-locked enforcement lives HERE (state level), not just in
@@ -685,10 +672,8 @@ export const useWizardStore = create<WizardStore>()(
           const i = state.structureDisabled.indexOf(section);
           if (i >= 0) state.structureDisabled.splice(i, 1);
           else state.structureDisabled.push(section);
-        });
-        syncTrustConfirmedStructure(get());
-      },
-      moveStructureSection: (index, dir) => {
+        }),
+      moveStructureSection: (index, dir) =>
         set((state) => {
           const list = state.structureSections;
           if (!list) return;
@@ -699,9 +684,7 @@ export const useWizardStore = create<WizardStore>()(
           const tmp = list[index];
           list[index] = list[to];
           list[to] = tmp;
-        });
-        syncTrustConfirmedStructure(get());
-      },
+        }),
 
       fetchStrategy: async () => {
         const s = get();

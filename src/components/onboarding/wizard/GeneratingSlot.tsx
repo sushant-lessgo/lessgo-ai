@@ -14,16 +14,20 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Loader2 } from 'lucide-react';
-import { useWizardStore, buildThingInput, fieldStr, fieldArr } from '@/hooks/useWizardStore';
+import {
+  useWizardStore,
+  buildThingInput,
+  buildTrustInput,
+  fieldStr,
+  fieldArr,
+} from '@/hooks/useWizardStore';
 import ErrorRetry from '@/components/onboarding/shared/ErrorRetry';
 import {
   runGeneration,
   type GenerationStage,
   type GenerationInput,
 } from '@/modules/wizard/generation';
-import type { TrustGenerationInput } from '@/modules/wizard/generation/trust';
 import type { WorkGenerationInput } from '@/modules/wizard/generation/work';
-import type { TemplateId } from '@/types/service';
 
 interface StageDef {
   id: GenerationStage;
@@ -36,45 +40,14 @@ const STAGES: StageDef[] = [
   { id: 'saving', label: 'Saving the draft' },
 ];
 
-// buildThingInput/fieldStr/fieldArr moved to useWizardStore (scale-07 phase 3)
-// so the pre-gate strategy fetch (store fetchStrategy) and this slot share ONE
-// store→adapter projection. The strategy/sitemap the projection forwards are
-// the structure-slot-confirmed values, so `thing.ts` takes the primary
-// `input.strategy` branch (no second strategy charge) — runFanOut for
-// multipage, runCopyAndSave for single-page.
-
-/** Project the wizard store → the TRUST adapter input (plain data). */
-function buildTrustInput(): TrustGenerationInput {
-  const s = useWizardStore.getState();
-  const fields = s.fields as Record<string, { value: unknown }>;
-  return {
-    tokenId: s.tokenId ?? '',
-    templateId: (s.templateId as TemplateId | null) ?? 'hearth',
-    businessTypeKey: s.businessTypeKey ?? undefined,
-    businessName: fieldStr(fields, 'name'),
-    oneLiner: fieldStr(fields, 'oneLiner'),
-    targetClients: fieldArr(fields, 'whoProblem'),
-    services: fieldArr(fields, 'services'),
-    process: fieldStr(fields, 'process') || undefined,
-    credentials: fieldStr(fields, 'credentials') || undefined,
-    offer: fieldStr(fields, 'offer'),
-    outcomes: fieldArr(fields, 'outcomes'),
-    goalIntent: s.goalIntent,
-    goalParam: s.goalParam,
-    proof: {
-      hasTestimonials: s.proof.hasTestimonials,
-      hasClientLogos: s.proof.hasClientLogos,
-      hasOutcomes: s.proof.hasOutcomes,
-      hasCaseStudies: s.proof.hasCaseStudies,
-      hasTeamPhotos: s.proof.hasTeamPhotos,
-      hasFounderPhoto: s.proof.hasFounderPhoto,
-      testimonialType: s.proof.testimonialType,
-    },
-    importedTestimonials: s.importedTestimonials,
-    paletteId: s.paletteId ?? undefined,
-    variantId: s.variantId ?? undefined,
-  };
-}
+// buildThingInput/buildTrustInput/fieldStr/fieldArr live in useWizardStore
+// (scale-07 phases 3–5) so the pre-gate strategy fetch (store fetchStrategy)
+// and this slot share ONE store→adapter projection per engine. The
+// strategy/sitemap/confirmedSections the projections forward are the
+// structure-slot-confirmed values, so both adapters take their primary
+// `input.strategy` branch (no second strategy charge) — thing: runFanOut for
+// multipage, runCopyAndSave for single-page; trust: applyConfirmedStructure
+// then copy. The trust module-scoped pre-gate bridge is deleted (phase 5).
 
 /** Project the wizard store → the WORK (writer/granth) adapter input (plain data). */
 function buildWorkInput(): WorkGenerationInput {
@@ -95,7 +68,7 @@ export const MIN_WORKS = 3;
 
 /** Project the wizard store → the engine's adapter input (plain data). */
 function buildInput(engine: NonNullable<ReturnType<typeof useWizardStore.getState>['engine']>): GenerationInput {
-  if (engine === 'trust') return buildTrustInput();
+  if (engine === 'trust') return buildTrustInput(useWizardStore.getState());
   if (engine === 'work') return buildWorkInput();
   return buildThingInput(useWizardStore.getState());
 }
