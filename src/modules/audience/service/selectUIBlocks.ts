@@ -27,12 +27,18 @@ export interface SelectServiceUIBlocksOutput {
 /**
  * Per-template layout choices that override / extend PILOT_LAYOUT_NAMES. Each
  * entry returns the chosen layout for a section type (may pick among variants).
- * Surge registers two testimonials blocks; pick one at generation (random for
- * now — stopgap until count/type-aware selection lands).
+ *
+ * Surge registers two testimonials blocks (ReviewGrid, PullQuoteWithMark).
+ * Selection is DETERMINISTIC (no Math.random): pick by testimonial count when a
+ * hint is available, else the fixed default `ReviewGrid` (multi-proof suits the
+ * growth archetype). The full manifest-driven default + eligibility filter lands
+ * in later scale-09 phases; this only removes nondeterminism.
  */
+const SURGE_TESTIMONIALS_DEFAULT = 'ReviewGrid';
+
 function pickTemplateLayout(templateId: TemplateId | null | undefined, sectionType: string): string | null {
   if (templateId === 'surge' && sectionType === 'testimonials') {
-    return Math.random() < 0.5 ? 'ReviewGrid' : 'PullQuoteWithMark';
+    return SURGE_TESTIMONIALS_DEFAULT;
   }
   return null;
 }
