@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Lessgo** is a Next.js 14 application that generates, edits, publishes, and manages AI-written landing pages for founders. It is built around a **3-tier template model** (`audienceType → templateId → variant + palette`), a two-phase AI copy-generation pipeline, a visual inline editor, and a static-export publishing system (Vercel Blob + KV) that supports custom domains.
+**Lessgo** is a Next.js 14 application that generates, edits, publishes, and manages AI-written websites/landing pages for any business whose site's job is ONE conversion action (form / call-WhatsApp / subscribe-follow / redirect / donate-RSVP) — SaaS founders, manufacturers, consultants, photographers, writers, dentists, restaurants… (ICP per `docs/tracks/scalePlan.md` D2; self-serve SaaS, not agency). It is built around a **3-tier template model** (`audienceType → templateId → variant + palette`), a two-phase AI copy-generation pipeline, a visual inline editor, and a static-export publishing system (Vercel Blob + KV) that supports custom domains.
 
 Stack: Next.js 14 (App Router) · TypeScript · TailwindCSS · Prisma/PostgreSQL · Clerk auth · Zustand+Immer state · Stripe billing · PostHog analytics · OpenAI/Nebius for generation.
 
