@@ -148,3 +148,57 @@ Slugs are NEVER taken from AI: the extraction zod shape has no `slug` field, `En
 ### Open risks
 - Prompt-only count/no-invention enforcement (no schema clamp yet) — clamping AI-invented items to Brief entries lands in Phase 5 per plan.
 - Understand-path collection ask is wasted tokens on a one-liner (see deviation 1); acceptable, becomes a no-op cost.
+
+---
+
+## Phase 3 — Serve gate: requiredCollections + per-collection demand granularity
+
+### Files changed
+- `src/modules/businessTypes/config.ts`
+- `src/modules/brief/serveGate.ts`
+- `src/modules/brief/serveGate.test.ts`
+- `src/app/api/demand-lead/route.ts`
+- `src/app/onboarding/[token]/components/ManualOnboardStep.tsx`
+
+### Per-file changes
+
+**`src/modules/businessTypes/config.ts`** (first edit in this feature — phase 1 correctly left it untouched)
+- Imported `CollectionKey` type from `@/modules/collections/registry` (registry is pure data → no config↔registry cycle).
+- Added `requiredCollections?: readonly CollectionKey[]` to `BusinessTypeEntry`, with a doc block stating the SUPPLY-gate semantics and the DORMANT posture.
+- **Populated for NO business type.** Every entry leaves the field unset. Confirmed dormant.
+
+**`src/modules/brief/serveGate.ts`**
+- Imported `CollectionKey` (type-only).
+- Added exported pure helper `uncoveredCollectionTags(requiredCollections, shortlistCapabilities)`: for each required key, COVERED iff some shortlisted template's capability list `.includes(key)` (the collection key IS the capabilityId). Uncovered keys → `collection:<key>` tags. Vestria's flat-grid `catalog` is not a `CollectionKey`, so a template declaring only `catalog` covers nothing.
+- Wired into `decideServe`: for a KNOWN businessType with a non-empty `requiredCollections`, computes the (bridgeable) shortlist, maps to each template's `templateMeta[t].capabilities`, and pushes `uncoveredCollectionTags(...)` into `tags` immediately AFTER the rungC block. Canonical tag order is now `rungC → collection → rungE → bridge → rungA`. Header doc comment updated.
+- Gate keys on template capability SUPPLY, never on `facts.collections` data presence — empty collections still serve.
+
+**`src/modules/brief/serveGate.test.ts`**
+- New `uncoveredCollectionTags` block (5 cases): covered fixture template → no tag; uncovered → precise `collection:services`; flat-grid `catalog` does NOT cover `products`; multiple keys → one tag per uncovered key; empty required → no tags.
+- New `decideServe` wiring block (2 cases): fixture-mutates `businessTypes.saas.requiredCollections=['products']` (restored in `finally`) → manual + `missing:'collection:products'`; and asserts real config leaves it `undefined` (dormant) → still serves. Fixtures/mutation used — does not rely on real config populating the field.
+
+**`src/app/api/demand-lead/route.ts`**
+- No allowlist existed: `missing` is `z.string().min(1)` free-form, comma-joined by the serve gate. **No widening or schema/DB change needed.** Added a clarifying comment documenting that `collection:<key>` tags persist as-is (stored via existing `prisma.demandLead.create({ data: { missing } })` and surfaced in the founder email via `leadEmailData`).
+
+**`src/app/onboarding/[token]/components/ManualOnboardStep.tsx`**
+- Added `collectionReason(missing)` helper: splits the comma-joined tag string, keeps `collection:*` tags, maps each key to its registry label via `getCollectionDef`, and returns ONE readable sentence (or `null` when no collection tag → screen stays identical to out-of-icp/no-coverage). Raw tag values are never rendered.
+- Renders the sentence under the subhead in the pre-submit form only. Header comment updated.
+
+### Granular tag: produced ↔ consumed
+- **Produced:** `serveGate.decideServe` → `uncoveredCollectionTags` → `collection:<key>` in `tags`/`missing`.
+- **Consumed (persist):** onboarding flow posts `missing` to `/api/demand-lead`; route stores it verbatim (no allowlist), includes it in the founder notification email. Demand board ranks on this string ("N leads blocked on portfolio").
+- **Consumed (UI):** `ManualOnboardStep.collectionReason` turns `collection:<key>` into a friendly registry-label sentence for the lead.
+
+### Dormancy confirmation
+`requiredCollections` is populated for NO real businessType (mechanism + serve-gate logic + tests only). Both serve-gate branches are exercised solely by fixtures/temporary test mutation. Reason: no live template declares a collection-family capability, so populating (e.g. manufacturer→products, photographer→services) would route EVERY such lead to MANUAL-ONBOARD until rung-C block pairs land — a founder decision gated separately.
+
+### Verification
+- `npx tsc --noEmit`: clean (no output).
+- `npm run test:run` (full): **103 passed | 1 skipped file; 1727 passed | 3 skipped tests.** serveGate.test.ts: 20 passed. No regressions.
+
+### Open risks
+- `collection:<key>` tags share the free-form `missing` column with rung*/out-of-icp tags; demand-board aggregation (separate) must string-match the `collection:` prefix.
+- Serve-gate wiring is live-dormant: the moment a founder populates `requiredCollections`, matching leads route to manual immediately (intended demand signal).
+
+### HUMAN GATE (founder decision required)
+Which businessTypes (if any) should get `requiredCollections` populated now, accepting they route to MANUAL-ONBOARD until rung-C blocks ship? (Candidates from the plan: manufacturer→`products`, photographer→`services`. Default per plan option: populate none, keep the mechanism dormant.)

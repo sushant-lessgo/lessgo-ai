@@ -1,8 +1,11 @@
 'use client';
 
 // Entry step 3 (scale-02 phase 5, spec §5/§11.11): MANUAL-ONBOARD demand
-// capture. IDENTICAL screen for no-coverage and out-of-icp — only the internal
-// `missing` tag in the payload differs; nothing internal is ever rendered.
+// capture. Screen is the same for no-coverage and out-of-icp; the internal
+// `missing` tag in the payload differs and is never rendered raw. Exception
+// (scale-10 phase 3): a `collection:<key>` tag adds ONE graceful, readable
+// sentence (registry label, never the raw tag) so a portfolio/services lead
+// sees a reason.
 // Submit ⇒ POST /api/demand-lead (returns {id}); thank-you offers the
 // "Need it sooner?" fast-track ⇒ PATCH {id, fasttrack:true} ⇒ message
 // upgrades (spec §11.11 double-intent signal).
@@ -13,6 +16,7 @@ import type { Brief } from '@/types/brief';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getCollectionDef } from '@/modules/collections/registry';
 
 interface ManualOnboardStepProps {
   rawInput: string;
@@ -20,6 +24,28 @@ interface ManualOnboardStepProps {
   missing: string;
   leadId: string | null;
   onLeadCreated: (id: string) => void;
+}
+
+/**
+ * Graceful, user-facing reason for a missing-collection demand tag (scale-10
+ * phase 3). `missing` is a comma-joined tag string; `collection:<key>` tags mean
+ * "we don't yet build <label> pages for sites like yours". Returns a readable
+ * sentence, or null when no collection tag is present (screen stays identical to
+ * the out-of-icp/no-coverage case). Internal tag values are never rendered raw.
+ */
+function collectionReason(missing: string): string | null {
+  const labels = missing
+    .split(',')
+    .map((t) => t.trim())
+    .filter((t) => t.startsWith('collection:'))
+    .map((t) => getCollectionDef(t.slice('collection:'.length))?.label)
+    .filter((l): l is string => !!l);
+  if (labels.length === 0) return null;
+  const list =
+    labels.length === 1
+      ? labels[0]
+      : `${labels.slice(0, -1).join(', ')} and ${labels[labels.length - 1]}`;
+  return `We're still building ${list} pages for businesses like yours — that's exactly what we want to hear.`;
 }
 
 export default function ManualOnboardStep({
@@ -38,6 +64,7 @@ export default function ManualOnboardStep({
 
   const emailValid = /^\S+@\S+\.\S+$/.test(email.trim());
   const submitted = !!leadId;
+  const reason = collectionReason(missing);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,6 +167,7 @@ export default function ManualOnboardStep({
         <p className="mt-2 text-gray-600">
           Not automated yet — someone from Lessgo AI will connect with you shortly.
         </p>
+        {reason && <p className="mt-2 text-sm text-gray-500">{reason}</p>}
       </div>
 
       <div className="space-y-2">

@@ -15,8 +15,8 @@ Make collection pages (index + N item pages) generate at birth from Brief data f
 ## Progress log
 
 - phase 1 data layer (family capability ids + registry family + Brief collections reader): done (commit d032a729, review loops 1, ship) — non-blocking heads-up for phase 6: ProductsModal label fallback is `[rec.model, rec.name || p.title].filter(Boolean).join(' — ') || p.title` (inner per-field `|| p.title`); labelFields must reproduce inner+outer fallback to stay pixel-identical.
-- phase 2 scrape extraction → facts.collections: done (commit pending-below, review loops 1, ship) — thing/manufacturer→products, trust→services+case-studies, work→services+works; slugs code-derived; DROP on empty; understand-path yields empty arrays discarded by DROP.
-- phase 3 serve gate + requiredCollections + demand granularity: pending
+- phase 2 scrape extraction → facts.collections: done (commit 2f48b817, review loops 1, ship) — thing/manufacturer→products, trust→services+case-studies, work→services+works; slugs code-derived; DROP on empty; understand-path yields empty arrays discarded by DROP.
+- phase 3 serve gate + requiredCollections + demand granularity: done (commit pending-below, review loops 1, ship) — HUMAN GATE resolved: keep DORMANT (requiredCollections populated for NO businessType per founder 2026-07-10); mechanism + granular `collection:<key>` tag + ManualOnboard copy shipped; flip a type on later via one-line config when a block pair nears.
 - phase 4 structure gate 7b collection node: pending
 - phase 5 generation→collections bridge (dormant, fixture-tested): pending
 - phase 6 editor panel generalization: pending

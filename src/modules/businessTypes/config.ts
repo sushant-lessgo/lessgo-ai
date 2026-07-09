@@ -22,6 +22,7 @@
 
 import type { CopyEngine, CapabilityId, DesignStyle } from '@/types/brief';
 import type { GoalIntent } from '@/modules/goals/vocabulary';
+import type { CollectionKey } from '@/modules/collections/registry';
 
 export interface BusinessTypeEntry {
   key: BusinessTypeKey;
@@ -52,6 +53,22 @@ export interface BusinessTypeEntry {
    * declares the `multipage` capability.
    */
   structureDefault: 'single' | 'multi';
+  /**
+   * Collection families this business type NEEDS (scale-10 phase 3). The serve
+   * gate (decideServe) checks TEMPLATE capability SUPPLY: if a required key is
+   * covered by NO shortlisted template (no shortlisted template declares that
+   * collection-family capability), the lead is routed to MANUAL-ONBOARD with a
+   * granular `collection:<key>` demand tag. Gates on SUPPLY, not data presence —
+   * empty `facts.collections` still serve with an empty-state.
+   *
+   * DORMANT: intentionally UNSET for every business type today. No shipping
+   * template declares a collection-family capability (block pairs are rung-C,
+   * Scope-OUT), so populating this would route EVERY such lead to manual until
+   * those blocks land. Populating any entry is a separate founder decision.
+   * `catalog` (vestria's flat grid) is NOT a CollectionKey and never satisfies
+   * a `requiredCollections` key.
+   */
+  requiredCollections?: readonly CollectionKey[];
 }
 
 export const businessTypeKeys = [

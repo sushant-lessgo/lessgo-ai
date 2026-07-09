@@ -13,7 +13,9 @@
 // Tag emission (tests assert strict `missing` equality):
 // - `out-of-icp` is EXCLUSIVE (transactional platform ⇒ that tag alone).
 // - Otherwise collect ALL failed clauses and join in canonical order
-//   `rungC → rungE → bridge → rungA`.
+//   `rungC → collection → rungE → bridge → rungA`. `collection:<key>`
+//   (scale-10 phase 3) fires when a KNOWN businessType's requiredCollections
+//   key is covered by no shortlisted template (dormant — no type sets it yet).
 // - `bridge:<engine>` fires ONLY for a KNOWN businessType (unknown type ⇒
 //   rungA is the unblock; no derivable bridge target).
 // - `rungE:<engine>` is NOT known-gated — fires for unknown types too.
@@ -33,7 +35,32 @@ import {
   shortlist,
   requiredCapabilitiesFromBrief,
 } from '@/modules/templates/fit';
+import type { CollectionKey } from '@/modules/collections/registry';
 import { getEntryFacts, type ResolvedEngine } from './classify';
+
+/**
+ * scale-10 phase 3 — pure supply check. A businessType's `requiredCollections`
+ * key is COVERED iff some shortlisted template declares that collection-family
+ * capability (the collection key IS the capabilityId). Uncovered keys become
+ * granular `collection:<key>` demand tags. Gates on template SUPPLY, not on
+ * whether `facts.collections` carries data (empty collections still serve).
+ *
+ * Vestria's flat-grid `catalog` is NOT a CollectionKey, so a template declaring
+ * only `catalog` covers no `requiredCollections` key.
+ *
+ * @param shortlistCapabilities capability lists of the shortlisted templates.
+ */
+export function uncoveredCollectionTags(
+  requiredCollections: readonly CollectionKey[],
+  shortlistCapabilities: readonly (readonly string[])[]
+): string[] {
+  const tags: string[] = [];
+  for (const key of requiredCollections) {
+    const covered = shortlistCapabilities.some((caps) => caps.includes(key));
+    if (!covered) tags.push(`collection:${key}`);
+  }
+  return tags;
+}
 
 /**
  * Launch bridges (spec §11.9): thing → product wizard, trust → service wizard,
@@ -115,6 +142,24 @@ export function decideServe(brief: Brief): ServeDecision {
     ];
     const anyFit = templateIds.some((t) => fit(t, engine, caps));
     if (!anyFit) tags.push('rungC:gallery');
+  }
+
+  // collection supply (scale-10 phase 3) — a KNOWN businessType may declare
+  // `requiredCollections`; a required key not covered by any shortlisted
+  // template (no shortlisted template declares that collection-family
+  // capability) yields a granular `collection:<key>` demand tag. Gates on
+  // template SUPPLY, not on whether facts.collections has data. DORMANT today:
+  // no businessType sets requiredCollections, so this branch never fires in
+  // real config (fixture-tested only). Canonical order: after rungC.
+  if (known) {
+    const btEntry = businessTypes[brief.businessType as BusinessTypeKey];
+    const requiredCollections = btEntry?.requiredCollections ?? [];
+    if (requiredCollections.length > 0) {
+      const supplyBridgeable = engine === 'thing' || engine === 'trust' || engine === 'work';
+      const supplyShortlist = supplyBridgeable ? shortlist(brief) : [];
+      const shortlistCaps = supplyShortlist.map((t) => templateMeta[t].capabilities);
+      tags.push(...uncoveredCollectionTags(requiredCollections, shortlistCaps));
+    }
   }
 
   // rungE — engine not live (place/quick-yes). NOT known-type-gated.
