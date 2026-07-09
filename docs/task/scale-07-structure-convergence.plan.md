@@ -34,7 +34,7 @@ Section lists stop being template property. A new engine-owned section grammar (
 - phase 7 template swap post-gen + meridian unlock: done (commit f39fa955, review loop 1, ship, 1517 tests green; swap safety proven, zero-word-change, techpremium popover ok; open risk: surge-origin sites over-excluded from swap-away (safe direction); prior attempt died mid-run, TemplateSwapList salvaged)
 - phase 8 element list from engine contract (kill layout-name keying): done (review loop 1, ship, 1542 tests green; ⚠️ INVARIANT ONLY PARTIALLY REALIZED — engine contract is live on editor-regen + legacy /generate-landing paths, but the PRIMARY wizard copy path (thing.ts → /generate-copy → buildProductCopyPrompt → copyPrompt.ts reads layoutElementSchema[layoutName] directly) is STILL template/layout-keyed. scope #7 "invariant true in code" not fully met on new-gen copy. Founder decision pending: add phase 8b to route copyPrompt through the contract, or accept as documented debt.)
 - phase 8b wizard copy prompt through engine contract (finish §3 invariant): done (review loop 1, ship, 1546 tests green; invariant STRUCTURALLY real on buildProductCopyPrompt — meridian==vestria element spec byte-identical; all 3 consumers symmetric; non-thing fall-through no-leak; only COPY_SAAS_BASELINE re-baselined. scope #7 fully met.)
-- phase 9 acceptance QA + goldens: pending
+- phase 9 acceptance QA + goldens: done (all 8 acceptance items mapped to green tests, 1547 unit + e2e 8-pass/4-designed-skip green; e2e structure-gate wiring not needed (shell Continue = accept); build + manual QA at merge gate)
 
 ---
 

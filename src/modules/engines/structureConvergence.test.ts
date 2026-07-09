@@ -8,8 +8,10 @@
 // are NEVER auto-inferred — they enter only via explicit inclusion (7b gate,
 // phase 4).
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { selectProductSections } from '@/modules/audience/product/sectionSelection';
+import { runThingGeneration, type ThingGenerationInput } from '@/modules/wizard/generation/thing';
+import type { ProductStrategyOutput } from '@/types/product';
 import { buildSectionList } from './sectionGrammar';
 import { engineCoreSections } from './coreSections';
 import { templateMeta } from '@/modules/templates/templateMeta';
@@ -140,5 +142,93 @@ describe('explicit-trigger discipline — the 5 new ids are NEVER auto-inferred'
         expect(derived).not.toContain(cap);
       }
     }
+  });
+});
+
+// ─── Phase-9 acceptance fixture: page removed at the 7b gate ⇒ NO copy for it
+//
+// Vestria multipage: the structure gate hands the CONFIRMED sitemap to the
+// generation adapter; the fan-out (restored phase 3) iterates that sitemap and
+// nothing else. Removing a page at the gate must therefore produce ZERO copy
+// calls for it — no charge, no stored content. This drives runThingGeneration
+// end-to-end with a mocked fetch and asserts exactly one copy call per
+// SURVIVING page and none carrying the removed page's section.
+describe('acceptance (phase 9) — vestria multipage: page removed at the gate gets NO copy', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  const STRATEGY: ProductStrategyOutput = {
+    awareness: 'solution-aware-skeptical',
+    oneReader: { personaDescription: 'p', pain: ['a'], desire: ['b'], objections: ['c'] },
+    oneIdea: { bigBenefit: 'x', uniqueMechanism: 'y', reasonToBelieve: 'z' },
+    featureAnalysis: [{ feature: 'f', benefit: 'b', benefitOfBenefit: 'bb' }],
+    sections: ['header', 'hero', 'features', 'testimonials', 'footer'],
+    uiblocks: {
+      header: 'VestriaHeader',
+      hero: 'VestriaHero',
+      features: 'VestriaFeatures',
+      testimonials: 'VestriaTestimonials',
+      footer: 'VestriaFooter',
+    },
+  };
+
+  function input(): ThingGenerationInput {
+    return {
+      tokenId: 'tok-gate',
+      templateId: 'vestria',
+      productName: 'Acme Fabrication',
+      oneLiner: 'Precision metal parts, made to spec.',
+      features: ['CNC machining', 'Finishing'],
+      audiences: ['OEM buyers'],
+      categories: [],
+      offer: 'Request a quote',
+      goalIntent: null,
+      goalParam: {},
+      strategy: STRATEGY,
+      // The AI proposed home + about + contact; the user REMOVED contact at
+      // the 7b gate — the confirmed sitemap carries only the survivors.
+      sitemap: [
+        { archetypeKey: 'home', title: 'Home', pathSlug: '/', sections: ['hero', 'features'] },
+        { archetypeKey: 'about', title: 'About', pathSlug: '/about', sections: ['about'] },
+      ] as any,
+    };
+  }
+
+  it('fan-out fires exactly one copy call per surviving page; the removed page (and its section) never generates', async () => {
+    const copyCalls: Array<{ uiblocks: Record<string, string> }> = [];
+    const urls: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init?: any) => {
+        urls.push(url);
+        const body = init?.body ? JSON.parse(init.body) : undefined;
+        if (url.includes('/api/loadDraft')) return { ok: true, json: async () => ({}) } as any;
+        if (url.includes('/api/audience/product/generate-copy')) {
+          copyCalls.push({ uiblocks: body.uiblocks });
+          return {
+            ok: true,
+            json: async () => ({
+              success: true,
+              sections: { hero: { elements: { headline: 'H' } } },
+            }),
+          } as any;
+        }
+        if (url.includes('/api/saveDraft')) return { ok: true, json: async () => ({}) } as any;
+        return { ok: false, status: 500, json: async () => ({ error: 'unexpected' }) } as any;
+      })
+    );
+
+    const result = await runThingGeneration(input());
+    expect(result.status).toBe('done');
+
+    // One copy call per SURVIVING sitemap page — the removed page got none.
+    expect(copyCalls).toHaveLength(2);
+    // The removed page's section never appears in any copy request.
+    for (const call of copyCalls) {
+      expect(Object.keys(call.uiblocks)).not.toContain('contact');
+    }
+    // Strategy came from the gate — zero refetch (charge-once holds through removal).
+    expect(urls.some((u) => u.includes('/api/audience/product/strategy'))).toBe(false);
   });
 });

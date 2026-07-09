@@ -132,6 +132,14 @@ test.describe('service generation pipeline (HTTP, auth-gated)', () => {
 // steps as executable specs; the resume LOGIC is already locked green in vitest
 // (src/app/onboarding/[token]/loadDetection.test.ts — predicate + hydrate). When
 // an authed wizard project exists, drop the guard and wire the seed helper.
+//
+// scale-07 phase 9 (structure gate / 7b GA): the wizard now stops at a REAL
+// structure slot for thing AND trust (StructureSlot renders the editable
+// section list / sitemap; accept = the shell's generic Continue — there is no
+// slot-local "Looks good" button). The `/next|continue/i` role query below
+// therefore already advances through the structure gate unchanged. The
+// mock-mode `public` project never renders the wizard UI at all (HTTP smokes
+// only, above), so no mock-mode step was added — verified 2026-07-09.
 test.describe('unified wizard route — product + service + mid-wizard reload', () => {
   test.skip(!WIZARD_UI, 'Clerk-gated /onboarding UI: needs an authed session + seeded brief (E2E_WIZARD_UI=1)');
 

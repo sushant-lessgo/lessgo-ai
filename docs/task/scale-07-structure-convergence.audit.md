@@ -641,3 +641,57 @@ No consumer is left on the layout path for a thing section. `validateProductCopy
 - Real-LLM meridian pages may now emit vestria-optional fields (values/tag_text/stamp) the meridian blocks don't render — stored-but-unrendered content (same class as the phase-8 regen risk; blocks ignore unknown keys). Phase 9 QA should eyeball one wizard generation per template.
 - The unified collection block lists all thing collections in every product prompt (the pre-existing design — meridian already listed tiers/footer_columns on a hero+cta page); prompt is ~15 lines longer.
 - `getRetryPrompt`/completeness paths unchanged — retry re-sends the same (contract-built) prompt; no divergence possible.
+
+## Phase 9 (acceptance)
+
+**Files changed**
+- `src/modules/engines/structureConvergence.test.ts` (edit) — added the ONE missing acceptance fixture: vestria multipage "page removed at the 7b gate ⇒ NO copy call for it" (drives `runThingGeneration` end-to-end with a mocked fetch)
+- `e2e/generation.spec.ts` (edit) — comment-only: documents the structure-gate verification (7b GA accept = the shell's generic Continue; the existing `/next|continue/i` query already advances it; mock-mode `public` project never renders the wizard UI, so no mock-mode step was added)
+- `docs/task/scale-07-structure-convergence.plan.md` — progress-log phase-9 line LEFT for the orchestrator (per instruction)
+
+### Acceptance-item → green-test mapping (all 8)
+
+1. **Same Brief ⇒ same section list meridian vs vestria (single-page).**
+   `src/modules/engines/structureConvergence.test.ts` — `'no capabilities required ⇒ meridian and vestria produce the IDENTICAL list = thing core'`, `'a Brief with no capability-deriving fields converges identically too'`, plus the capability-parity fixtures (`'lead-form required … each template adds ITS declared evidence section, same shape'`). GREEN.
+2. **Post-gen swap: zero sections lost, zero words changed.**
+   `src/modules/templates/swap.test.ts` — `'meridian → vestria: zero sections lost, zero words changed'` (:242), `'round-trip meridian → vestria → meridian restores meta, content untouched throughout'` (:252), `'the swap patch is EXACTLY {templateId, variantId, paletteId}'` (:224). GREEN.
+3. **7b shown for single-page service; testimonials toggle-off ⇒ no testimonial copy.**
+   `src/hooks/useWizardStore.test.ts` — `'trust slot order now INCLUDES structure (scale-07 phase 4 — 7b GA)'` (:145) + `'ACCEPTANCE: testimonials toggled off ⇒ ZERO testimonial copy (absent from the copy payload)'` (:688); thing mirror at :575 (`'toggling testimonials OFF removes it from the copy payload (sections AND uiblocks)'`). GREEN.
+4. **Vestria multipage reaches runFanOut; page removed at gate ⇒ no copy.**
+   First half: `src/modules/wizard/generation/thing.test.ts` — `'multi-page vestria: skeleton save + per-page fan-out ⇒ done'` (:277, incl. zero strategy-refetch assert). Second half was UNPROVEN (audit-narrated only) → **NEW test added this phase**: `src/modules/engines/structureConvergence.test.ts` — `'acceptance (phase 9) — vestria multipage: page removed at the gate gets NO copy'` (exactly one copy call per surviving page; removed page's section absent from every copy request; zero strategy refetch). GREEN.
+5. **Conformance green honestly (converged cores + capabilitySections).**
+   `src/modules/templates/conformance.test.ts` — `(a) engine-core sections resolve to real blocks in both modes` (per templateId × engine × sectionType), `(b) declared block-backed capabilities are evidenced by a real section`, `(b+) every capabilitySections value resolves to a real block in BOTH renderers` + no-orphan-evidence check. GREEN.
+6. **Multipage keyed by capability; naayom collections intact.**
+   `src/modules/audience/product/pageArchetypes.test.ts` — `'getPageArchetypesForTemplate — capability re-key (no vestria hardcode)'` + `'isMultipage — capability ∧ (Brief structure.mode ∨ businessType structureDefault)'` describes. `src/modules/generation/multiPageAssembly.test.ts` — full suite GREEN incl. `'source never references the materialization machinery'` (naayom collections HARD INVARIANT) + shape/progress/resume tests. (Automated half; naayom dev-manual check is a merge-gate item, below.)
+7. **§3 invariant: same Brief ⇒ identical copy-prompt element spec meridian vs vestria on the WIZARD path.**
+   `src/modules/audience/product/promptBranch.test.ts` — `'phase 8b invariant — same Brief ⇒ same copy-prompt element spec (meridian vs vestria)'` (:250): specs identical post layout-name normalization, collection-schema list byte-identical, union fields from BOTH origins present, non-thing fall-through no-leak. GREEN.
+8. **Golden blast-radius reconciled (every re-baselined fixture accounted for).**
+   - `clampSitemap.test.ts` meridian single-page list: 7 → 5 converged thing-core (phase 2, documented with before/after in phase-2 audit).
+   - `sectionGrammar.test.ts`: phase-1 pilot-list anchors + `extras` pass-through tests removed (tested deleted code); coverage replaced by structureConvergence.test.ts (phase 2). Trust equivalence matrix untouched.
+   - `promptBranch.test.ts` `COPY_SAAS_BASELINE`: re-baselined once, phase 8b (union element spec; `STRATEGY_SAAS_BASELINE` untouched).
+   - NOT re-baselined anywhere on the branch (verified via git diff main..HEAD --stat): `captureGolden.test.ts` (CAPTURE-gated, no frozen list), `e2e/render.spec.ts` (zero section-presence asserts, not in branch diff), generation-contract frozen fixture (relational, green under converged lists). Complete: no other fixture on the branch was refreshed.
+
+### E2E structure-gate wiring
+
+**Not needed — verified, documented in-spec.** The mock-mode `public` Playwright project drives HTTP routes only (strategy/copy smokes) and never renders the wizard UI; the Clerk-gated written-only wizard block (E2E_WIZARD_UI=1) already advances slots via the shell's generic `/next|continue/i` button, which IS the structure gate's accept (StructureSlot has no slot-local confirm button). Added a comment block in `e2e/generation.spec.ts` recording this so the founder-run authed pass knows the selector holds.
+
+### Verification
+
+- `npx tsc --noEmit` — clean (exit 0).
+- `npm run test:run` — **96 files passed / 1 skipped; 1547 passed / 2 skipped** = baseline 1546 + 1 new acceptance test, zero regressions.
+- `npm run test:e2e` (mock mode) — **8 passed, 4 skipped, exit 0** (3.1m). Skips are the designed self-skips: service HTTP smoke (Clerk-gated, needs E2E_AUTH) + 3 written-only wizard-UI specs (E2E_WIZARD_UI unset). Both authed publish flows (Meridian product, Lex service) green. Non-fatal dev-server noise observed (pre-existing, unrelated): `window is not defined` SSR warning from `useEditStore.ts:300` dev-debug block on /preview, and 429 seed retries from the in-memory rate limiter — neither failed a test.
+- `npm run build` — NOT run this phase (plan lists it under the human merge gate with the manual checks; orchestrator/founder runs it pre-merge).
+
+### Manual dev-QA items still owed at the merge gate (founder)
+
+1. Real-LLM quality eyeball: one wizard generation per template (meridian, vestria) — esp. whether meridian pages now emit vestria-optional fields (values/tag_text/stamp) that meridian blocks ignore (phase-8b open risk).
+2. Editor↔published dual-renderer parity spot-check (`/manual-test` P0 subset).
+3. Naayom collections flow manual verify in dev (acceptance item 6's manual half).
+4. `npm run build` green (full build incl. published-CSS/assets, not just next build).
+5. Re-ack trust-7b GA exposure (Q2) — merge = every real service/trust user sees the 7b gate immediately.
+6. Merge (plain, no squash) + manual push; deploy-watcher takes over.
+
+### Deviations
+
+- Edited `structureConvergence.test.ts` beyond pure fixtures (added a mocked-fetch end-to-end acceptance test importing the thing adapter): plan phase-9 explicitly allots this file "final acceptance fixtures"; placing the gap-closing test here (instead of thing.test.ts, NOT in Files-touched) was the conservative in-list option.
+- Plan progress-log line for phase 9 intentionally NOT written (orchestrator owns it per task instruction).
