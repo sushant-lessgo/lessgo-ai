@@ -33,7 +33,7 @@ npm run postinstall          # prisma generate && prisma migrate deploy
 
 ## Feature Workflow (`/feature`)
 
-Non-trivial features run through a delegation pipeline (agents in `.claude/agents/`, orchestrated by the `/feature` skill): **discuss** (`/discuss` skill, Opus/medium, PO-style interrogation → spec) → **scout** (Opus/low, read-only explore) → **plan** (Fable/high, phased plan with a per-phase *Files touched* list + human-gate markers) → **plan-review** (Opus/high, loop ×3) → **implement** per phase (Fable/medium, edits only its Files-touched, writes an `audit.md`) → **impl-review** (Opus/high, scoped diff + `tsc`/`test:run` gate, loop ×3). Model philosophy: reserve Fable for plan + implement; everything else Opus at modest effort — token spend matters. Run the orchestrating session itself on Opus (`/model opus`).
+Non-trivial features run through a delegation pipeline (agents in `.claude/agents/`, orchestrated by the `/feature` skill): **discuss** (`/discuss` skill, Fable/high, PO-style interrogation → spec) → **scout** (Opus/low, read-only explore) → **plan** (Fable/high, phased plan with a per-phase *Files touched* list + human-gate markers) → **plan-review** (Opus/high, loop ×3) → **implement** per phase (Opus/medium, edits only its Files-touched, writes an `audit.md`) → **impl-review** (Opus/high, scoped diff + `tsc`/`test:run` gate, loop ×3). Model philosophy: reserve Fable for discuss + plan; everything else Opus — token spend matters. Run the orchestrating session itself on Opus (`/model opus`).
 
 Usage: `/discuss <idea>` → agree → it writes `docs/task/<feature>.spec.md` → run `/feature docs/task/<feature>.spec.md`. Artifacts (`spec`/`plan`/`audit`) live in `docs/task/`.
 
@@ -66,12 +66,12 @@ Every block exists as a **pair** and is rendered by one of **two renderers**:
 
 **If the two renderers diverge, a change "looks right in the editor but wrong when published" (or vice-versa).** When editing any block, update BOTH `.tsx` and `.published.tsx` and keep their layout/CSS identical. Surface tones use a template-agnostic `data-surface` attribute.
 
-### AI Generation Pipeline (`/api/generate-landing`)
+### AI Generation Pipeline (per-audience routes)
 
-Two-phase strategic generation:
+Two-phase strategic generation. (The legacy monolithic `/api/generate-landing` route and its `buildStrategyPrompt()` builder were removed in scale-08; generation now runs through the per-audience `/api/audience/{product,service}/{strategy,generate-copy}` routes with their own builders under `src/modules/audience/*`.)
 
-1. **Strategy phase** — `buildStrategyPrompt()` builds business context + brand positioning + layout requirements; AI returns `copyStrategy` (big idea) + per-section `cardCounts`. Parsed by `parseStrategyResponse()`.
-2. **Copy phase** — `buildStrategicCopyPrompt()` (in `src/modules/prompt/buildPrompt.ts`) instructs the AI to fill each section's elements per the card counts; parsed by `parseAiResponse()`, validated by the layout schema, manual-preferred defaults applied.
+1. **Strategy phase** — builds business context + brand positioning + layout requirements; AI returns `copyStrategy` (big idea) + per-section `cardCounts`. Parsed by `parseStrategyResponse()`.
+2. **Copy phase** — instructs the AI to fill each section's elements per the card counts; parsed by `parseAiResponse()`, validated by the layout schema, manual-preferred defaults applied.
 
 - **Element selection:** `getCompleteElementsMap()` (`src/modules/sections/elementDetermination.ts`) maps every section→layout→all elements and marks excluded optional elements by business context. The AI sees all elements + the exclusion map.
 - **Section selection:** Product uses a fixed section list (`src/modules/sections/sectionList.ts`). Service uses awareness-driven ordering (`src/modules/audience/service/sectionSelection.ts`).
@@ -83,7 +83,7 @@ Two-phase strategic generation:
 - Routes: `/onboarding/product/[token]` and `/onboarding/service/[token]`. `/api/start` is the persona gate (non-pilot service personas → waitlist).
 - ~5 steps (one-liner → understanding → goal → offer → generating). Product uses `useProductGenerationStore`; service uses `useServiceGenerationStore`.
 - **Website import:** `/api/v2/scrape-website` (product) and `/api/v2/understand` (service) do an SSRF-safe bounded crawl + one structured AI call to pre-fill fields (one-liner, name, categories, audiences, features, offer, **verbatim testimonials**, goal). Costs 1 credit.
-- **Field validation:** `/api/validate-fields` checks taxonomy fields. **Market insights:** `/api/market-insights` generates features + infers hidden copywriting fields; backed by IVOC research (see below).
+- (The legacy `/api/validate-fields` and `/api/market-insights` field-inference routes were removed in scale-08.)
 
 ### State Management (Zustand + Immer)
 
@@ -118,7 +118,7 @@ Flow: edit `/edit/[token]` → preview `/preview/[token]` → publish → live `
 
 - **Analytics:** `PageAnalytics` (daily per-slug aggregation: views, unique visitors, conversions, device split, top referrers/UTM). `POST /api/analytics/event` is a privacy-first beacon (no raw IP/UA stored). PostHog used app-side for tracking + feature flags.
 - **Forms:** `POST /api/forms/submit` validates + stores `FormSubmission`, runs integrations. `UserIntegration` holds encrypted API keys (ConvertKit live: `src/lib/integrations/convertkit.ts`).
-- **IVOC (Voice-of-Customer):** `IVOCCache` caches pains/desires/objections/beliefs/phrases keyed by `(categoryKey, audienceKey)`. `src/lib/tavily.ts` searches; `src/lib/ivocExtractor.ts` extracts via `gpt-4o-mini` with a GPT fallback when Tavily is unavailable.
+- **IVOC (Voice-of-Customer):** `IVOCCache` caches pains/desires/objections/beliefs/phrases keyed by `(categoryKey, audienceKey)` (table retained). The Tavily search client + `ivocExtractor` were removed in scale-08 along with the `/api/market-insights` route that drove them.
 
 ### Admin
 
@@ -145,7 +145,7 @@ Token-based project access is core to the architecture. **Use `prisma migrate de
 
 ## API Routes (`src/app/api/`)
 
-Generation/content: `generate-landing`, `regenerate-content`, `regenerate-section`, `regenerate-element`, `validate-fields`, `market-insights`, `v2/*` (scrape-website, understand). Persistence: `saveDraft`, `loadDraft`, `projects`. Publishing/domains: `publish`, `checkSlug`, `domains/*`, `blob-proxy`. Commerce: `stripe/*`, `billing/*`, `credits/*`. Other: `forms/submit`, `analytics/event`, `images`/`upload-image`/`proxy-image`, `og`, `audience`, `admin/*`, `subscribe`, `start`, `generate-privacy-policy`, `csrf`.
+Generation/content: `regenerate-content`, `regenerate-section`, `regenerate-element`, `audience/*` (per-audience strategy + generate-copy), `v2/*` (scrape-website, understand). Persistence: `saveDraft`, `loadDraft`, `projects`. Publishing/domains: `publish`, `checkSlug`, `domains/*`, `blob-proxy`. Commerce: `stripe/*`, `billing/*`, `credits/*`. Other: `forms/submit`, `analytics/event`, `images`/`upload-image`/`proxy-image`, `og`, `audience`, `admin/*`, `subscribe`, `start`, `generate-privacy-policy`, `csrf`.
 
 ## Debug Environment Variables
 
