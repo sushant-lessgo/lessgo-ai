@@ -74,4 +74,15 @@ describe('businessTypes v0 shape', () => {
       expect(isExtractionSchemaKey(entry.extractionSchemaKey)).toBe(true);
     }
   });
+
+  it('every thing-engine voiceHint is a valid ProductVoiceId; manufacturer=tailored-trade (scale-08 phase 1)', () => {
+    const PRODUCT_VOICE_IDS = ['modern-tech', 'tailored-trade'];
+    for (const entry of Object.values(businessTypes)) {
+      if (entry.copyEngine === 'thing' && entry.voiceHint !== undefined) {
+        expect(PRODUCT_VOICE_IDS).toContain(entry.voiceHint);
+      }
+    }
+    expect(businessTypes.manufacturer.voiceHint).toBe('tailored-trade');
+    expect(businessTypes.saas.voiceHint).toBe('modern-tech');
+  });
 });

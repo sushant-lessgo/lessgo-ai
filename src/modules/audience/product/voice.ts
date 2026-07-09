@@ -7,6 +7,11 @@
 // Tone: confident, precise, builder-to-builder. Technical credibility without
 // hype. The opposite of warm-editorial Hearth AND the opposite of breathless
 // SaaS marketing.
+//
+// FIREWALL: PLAIN module. `productVoiceForBusinessType` reads the businessTypes
+// config (which imports only @/types/brief + goals vocab) — no import cycle.
+
+import { businessTypes, type BusinessTypeKey } from '@/modules/businessTypes/config';
 
 export const PRODUCT_VOICE = {
   toneProfile:
@@ -102,6 +107,23 @@ export const TAILORED_TRADE_VOICE = {
 } as const;
 
 export type ProductVoiceId = 'modern-tech' | 'tailored-trade';
+
+const PRODUCT_VOICE_IDS: readonly ProductVoiceId[] = ['modern-tech', 'tailored-trade'];
+
+/**
+ * Derive the product copy-voice from a businessType key (scale-08 phase 1) —
+ * the single source of the THING engine's voice fork. Reads
+ * `businessTypes[key].voiceHint`; returns it when it's a valid `ProductVoiceId`,
+ * else falls back to `'modern-tech'` (unknown/undefined key, service entries
+ * with no voiceHint, or a garbage value). REPLACES the old
+ * `templateId === 'vestria'` fork so voice lives in config, not template id.
+ */
+export function productVoiceForBusinessType(key?: string | null): ProductVoiceId {
+  const hint = key ? businessTypes[key as BusinessTypeKey]?.voiceHint : undefined;
+  return hint && (PRODUCT_VOICE_IDS as readonly string[]).includes(hint)
+    ? (hint as ProductVoiceId)
+    : 'modern-tech';
+}
 
 /**
  * Render the voice spec as a prompt-ready Markdown block. Injected into

@@ -2,7 +2,8 @@
 // businessTypes v0 (scale track, scalePlan §7 / spec 01 D-H) — SHAPE, NOT
 // BEHAVIOR. Six seed entries so the shape is proven and downstream specs
 // (02+ serve gate, 04 wizard, 08 manufacturerFlow melt-in) have a real record
-// to read. Nothing in the app imports this yet.
+// to read. LIVE consumers now include the serve gate, wizard hydrate, and
+// (scale-08 phase 1) product copy-voice derivation via `voiceHint`.
 //
 // Entry shape is modeled on the ServiceVoiceSpec record idiom
 // (src/modules/audience/service — keyed record of frozen per-key specs).
@@ -29,6 +30,15 @@ export interface BusinessTypeEntry {
   wizardFields: Record<string, { label: string; example: string }>;
   /** Registry key into src/lib/schemas/extraction (thing|trust|work|manufacturer). */
   extractionSchemaKey: string;
+  /**
+   * Product copy-voice id consumed by the THING engine (scale-08 phase 1) —
+   * `productVoiceForBusinessType` maps this to a `ProductVoiceId`. Kept a PLAIN
+   * string (no import of the voice module) to avoid a config↔audience import
+   * cycle; a test validates it against the ProductVoiceId union. Only set on
+   * `copyEngine: 'thing'` entries; service (trust/work) voice stays
+   * archetype-keyed via `selectServiceVoice`, so those entries omit it.
+   */
+  voiceHint?: string;
   likelyIntents: readonly GoalIntent[];
   /**
    * Default site structure for this business type (scale-07 phase 5) — one
@@ -73,6 +83,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
       },
     },
     extractionSchemaKey: 'thing',
+    voiceHint: 'modern-tech',
     likelyIntents: ['request-demo', 'free-trial', 'signup-free', 'waitlist'],
     structureDefault: 'single',
   },
@@ -94,6 +105,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
       },
     },
     extractionSchemaKey: 'manufacturer',
+    voiceHint: 'tailored-trade',
     likelyIntents: ['enquiry', 'request-quote'],
     structureDefault: 'multi',
   },

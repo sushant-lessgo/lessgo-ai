@@ -23,8 +23,10 @@ import {
   ProductStrategyWithSitemapSchema,
 } from '@/lib/schemas/productStrategy.schema';
 import { buildProductStrategyPrompt } from '@/modules/audience/product/strategy/promptsProduct';
-import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
-import type { ProductVoiceId } from '@/modules/audience/product/voice';
+import {
+  productVoiceForBusinessType,
+  type ProductVoiceId,
+} from '@/modules/audience/product/voice';
 import {
   getPageArchetypesForTemplate,
   isMultipage,
@@ -137,11 +139,10 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
     const pageArchetypes = isMultipage(data.templateId, data.brief)
       ? getPageArchetypesForTemplate(data.templateId) ?? undefined
       : undefined;
-    // Voice derivation (D4) — same pattern as generate-copy: the prompt layer
-    // receives the derived VOICE, never templateId itself (firewall).
-    const voiceId: ProductVoiceId = isManufacturerFlow(data.templateId)
-      ? 'tailored-trade'
-      : 'modern-tech';
+    // Voice derivation (scale-08 phase 1) — sourced from the businessType config
+    // entry's voiceHint, never templateId. The prompt layer receives the derived
+    // VOICE, never businessType/templateId itself (firewall).
+    const voiceId: ProductVoiceId = productVoiceForBusinessType(data.brief?.businessType);
     const prompt = buildProductStrategyPrompt({
       productName: data.productName,
       oneLiner: data.oneLiner,

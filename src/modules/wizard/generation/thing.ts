@@ -70,6 +70,13 @@ export interface ThingGenerationInput {
   tokenId: string;
   /** Resolved template (serveGate). techpremium ⇒ deterministic path. */
   templateId: 'meridian' | 'vestria' | 'techpremium' | null;
+  /**
+   * businessType key (serveGate/classify) — the SINGLE source of product
+   * copy-voice (scale-08 phase 1, `productVoiceForBusinessType`). Always set on
+   * served flows (serve gate resolves a template only for a KNOWN businessType);
+   * absent only on legacy/fallback inputs (voice then defaults to modern-tech).
+   */
+  businessTypeKey?: string;
 
   // Copy facts (wizard contract fields).
   productName: string;
@@ -161,7 +168,16 @@ export function buildStrategyPayload(input: ThingGenerationInput): Record<string
     // single-page assembly re-surfaces Brief-required capability sections
     // (meridian: an M1 goal ⇒ lead-form ⇒ cta). Fed ONLY to isMultipage
     // detection + assembleProductStrategy server-side, never the prompt.
-    ...(briefGoal ? { brief: { goal: briefGoal } } : {}),
+    // scale-08 phase 1: brief now ALSO carries `businessType` (voice source) —
+    // sent whenever a goal OR a businessType key exists.
+    ...(briefGoal || input.businessTypeKey
+      ? {
+          brief: {
+            ...(briefGoal ? { goal: briefGoal } : {}),
+            ...(input.businessTypeKey ? { businessType: input.businessTypeKey } : {}),
+          },
+        }
+      : {}),
   };
 }
 
@@ -181,6 +197,8 @@ export function buildCopyPayload(
     features: effectiveFeatures(input, isMfr),
     ...(input.importedTestimonials?.length ? { realTestimonials: input.importedTestimonials } : {}),
     templateId: input.templateId ?? undefined,
+    // scale-08 phase 1: the copy route derives voice from businessType.
+    businessType: input.businessTypeKey,
   };
 }
 
@@ -204,6 +222,9 @@ function buildOnboardingData(input: ThingGenerationInput): Record<string, unknow
     landingGoal: landingGoalFor(input),
     offer: input.offer,
     ...(input.importSourceUrl ? { importSourceUrl: input.importSourceUrl } : {}),
+    // scale-08 phase 1: persist the businessType key so a resume-from-DB run
+    // (multipage fan-out) can re-derive the copy voice without the store.
+    ...(input.businessTypeKey ? { businessTypeKey: input.businessTypeKey } : {}),
   };
 }
 
@@ -364,6 +385,10 @@ export async function runThingGeneration(
               ? { realTestimonials: ob.importedTestimonials }
               : {}),
             templateId: resolvedTemplateId,
+            // scale-08 phase 1: voice source. Fan-out is multipage-only (=
+            // manufacturer today); the fallback covers in-flight resumable
+            // drafts persisted before this key existed. Transitional.
+            businessType: ob.businessTypeKey ?? 'manufacturer',
             page: {
               archetypeKey: page.archetypeKey,
               title: page.title,
@@ -560,6 +585,7 @@ export async function runThingGeneration(
         offer: input.offer,
         ...(input.importSourceUrl ? { importSourceUrl: input.importSourceUrl } : {}),
         ...(input.importedTestimonials?.length ? { importedTestimonials: input.importedTestimonials } : {}),
+        ...(input.businessTypeKey ? { businessTypeKey: input.businessTypeKey } : {}),
         sitemap: input.sitemap,
         strategy: input.strategy,
       };

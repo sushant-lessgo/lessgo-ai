@@ -25,6 +25,8 @@ export interface MultiPageOnboardingData {
   offer: string;
   importSourceUrl?: string;
   importedTestimonials?: Array<{ quote: string; author_name: string; author_role: string }>;
+  /** businessType key (scale-08 phase 1) — copy-voice source on resumed fan-out. */
+  businessTypeKey?: string;
   /** The user-AGREED sitemap (gate output). */
   sitemap: SitemapPage[];
   /** The gate's strategy — generate-copy needs it on every per-page call. */
