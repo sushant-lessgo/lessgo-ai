@@ -89,7 +89,10 @@ describe('fit — edge cases', () => {
   });
 
   it('unknown businessType contributes no requirements (gate rejects later, spec 02+)', () => {
-    const brief: Brief = { businessType: 'photographer', copyEngine: 'trust' };
+    // 'florist' is a deliberately UNKNOWN businessType (not a businessTypeKey) —
+    // was 'photographer' until scale-08 phase 3 promoted photographer to a known
+    // gallery-requiring key; repointed to keep testing the unknown-type path.
+    const brief: Brief = { businessType: 'florist', copyEngine: 'trust' };
     expect(requiredCapabilitiesFromBrief(brief)).toEqual([]);
     expect(shortlist(brief)).toEqual(['hearth', 'lex', 'surge']);
   });

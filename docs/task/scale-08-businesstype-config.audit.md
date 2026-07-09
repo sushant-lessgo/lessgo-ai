@@ -108,3 +108,85 @@ PASS. `businessTypeKey` is SET only in `useWizardStore.hydrate` (`:606`) from `b
 - `voice.ts:119`: scrubbed the backtick literal `templateId === 'vestria'` from the doc comment → now reads "REPLACES the old vestria-template voice fork so voice lives in config, not template id." Comment otherwise intact; behavior-neutral.
 - `pipelineGuards.test.ts`: deleted the `KNOWN_COMMENT_ARTIFACTS` block and its `&& !KNOWN_COMMENT_ARTIFACTS.has(r)` usage. Guard now filters on the render-layer allowlist only (`LayoutChangeModal.tsx`), which fully covers the remaining literals.
 - VERIFY: `npx tsc --noEmit` clean; `pipelineGuards.test.ts` isolated = 3 passed; full `npm run test:run` = 98 passed | 1 skipped (99 files), 1558 passed | 2 skipped (1560 tests).
+
+---
+
+## Phase 3 — photographer + app entries (config-only) — DONE
+
+### Files changed
+- `src/modules/businessTypes/config.ts` — the ONLY non-test source file changed.
+- `src/modules/businessTypes/config.test.ts`
+- `src/modules/brief/serveGate.test.ts`
+- `src/modules/templates/fit.test.ts` (scope expansion — see below)
+- `src/modules/brief/classify.test.ts` (scope expansion — see below)
+
+### Scope expansion (approved option 1)
+Adding `photographer` as a KNOWN key flips it unknown→known in
+`resolveEngine`/`requiredCapabilitiesFromBrief`. Two OUT-OF-SCOPE test files hard-coded
+`'photographer'` as their canonical UNKNOWN-type fixture and broke. The orchestrator
+approved expanding Phase-3 Files-touched to include `fit.test.ts` + `classify.test.ts`
+(test-only, intent preserved). **The Phase-3 Files-touched in the plan should be amended
+to list these two test files.**
+
+Replacement unknown-type token: **`'florist'`** — grepped across `src/` first, zero
+matches, not a `businessTypeKey`, not otherwise special. Every repointed assertion keeps
+its INTENT (unknown type → empty caps / tiebreaker-sourced engine); only the token changed.
+
+### Per-file changes
+**config.ts** — Added `'photographer'` + `'app'` to `businessTypeKeys` (now 8) and two
+entries. `photographer`: `copyEngine:'work'`, `requiredCapabilities:['gallery']` (no shipped
+template declares gallery → serve gate → demand lane, intended), `defaultStyle:'editorial-craft'`,
+`extractionSchemaKey:'work'`, `likelyIntents:['enquiry','book-call','follow-social']`,
+`structureDefault:'single'`, 2 wizardFields, NO voiceHint (work engine). `app`: `copyEngine:'thing'`,
+`requiredCapabilities:['lead-form']`, `defaultStyle:'tech-minimal'`, `voiceHint:'modern-tech'`,
+`extractionSchemaKey:'thing'`, `likelyIntents:['download-app','signup-free','waitlist']`,
+`structureDefault:'single'`, 3 wizardFields. Updated header note "Six"→"Eight" + phase-3 rationale.
+
+**config.test.ts** — "6 seed keys"→"8 seed keys" (asserts photographer+app present). New
+`describe` block asserting both new entries' full shape (key/engine/caps/style/schema/voiceHint/
+intents). Serveability asserts live in serveGate.test.ts (per plan step 2).
+
+**serveGate.test.ts** — Updated the `:133` photographer manual test: now a KNOWN work type,
+`missing='rungC:gallery'` only (tags length 1, no rungA — type is known; gallery gap surfaces
+via the latent-cap fallback since `classificationSource` is now `'lookup'`, not `'tiebreaker'`).
+Added an `app`-serveable test (serve/product), proving the config-only `app` entry rides the
+existing thing pipeline with zero new code.
+
+**fit.test.ts** — `:91-94` unknown-type fixture `'photographer'`→`'florist'`; asserts unchanged
+(empty caps, `['hearth','lex','surge']` shortlist).
+
+**classify.test.ts** — `:68-73` tiebreaker-ladder fixture and `:126-134` unknown-type test:
+`'photographer'`→`'florist'`. Assertions/intent identical. The `applyBusinessTypeCorrection`
+tests (`:143-167`) still start from a photographer draft and pass unchanged — the correction
+output is independent of whether the starting type is known.
+
+### In-scope judgment call (logged)
+`app`'s own `download-app` intent derives the UNBACKED `store-badges` cap
+(`fit.ts:66`), which would push even a serveable type to manual. That is a GOAL-level gap,
+orthogonal to the businessType — so the app-serveable test uses `goalIntentGuess:'signup-free'`
+(a backed intent) to isolate the businessType-serveability claim. Noted inline in the test.
+
+### Acceptance framing (holds)
+`config.ts` is the sole SOURCE change; the two extra test files are fixture-naming debt
+(they had appropriated `'photographer'` as an unknown-type stand-in), NOT new code paths.
+So "adding a business type touches only config + tests" holds.
+
+### Verification
+- `npx tsc --noEmit`: clean.
+- Targeted (`config serveGate fit.test classify.test`): 4 files, 69 passed.
+- Full `npm run test:run`: 98 passed | 1 skipped (99 files); **1565 passed** | 2 skipped (1567 tests). Up from 1558 (7 new asserts net).
+
+### git diff --stat
+```
+ docs/task/scale-08-businesstype-config.audit.md | 51 ++++++++++++++++++++++
+ src/modules/brief/classify.test.ts              | 15 ++++---
+ src/modules/brief/serveGate.test.ts             | 28 ++++++++++--
+ src/modules/businessTypes/config.test.ts        | 36 +++++++++++++++-
+ src/modules/businessTypes/config.ts             | 57 ++++++++++++++++++++++++-
+ src/modules/templates/fit.test.ts               |  5 ++-
+```
+Only non-test source file = `config.ts`. Everything else test files + this audit.
+
+### Open risks
+- None functional. `photographer` is deliberately non-serveable (gallery unbacked) → demand lane.
+- Orchestrator TODO: amend plan Phase-3 Files-touched to include `fit.test.ts` + `classify.test.ts`.

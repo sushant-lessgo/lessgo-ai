@@ -9,12 +9,14 @@ import { goalIntents } from '@/modules/goals/vocabulary';
 import { isExtractionSchemaKey } from '@/lib/schemas/extraction';
 
 describe('businessTypes v0 shape', () => {
-  it('has exactly the 6 seed keys incl. manufacturer + writer', () => {
+  it('has exactly the 8 seed keys incl. manufacturer + writer + phase-3 photographer/app', () => {
     const keys = Object.keys(businessTypes).sort();
     expect(keys).toEqual([...businessTypeKeys].sort());
-    expect(keys).toHaveLength(6);
+    expect(keys).toHaveLength(8);
     expect(keys).toContain('manufacturer');
     expect(keys).toContain('writer');
+    expect(keys).toContain('photographer');
+    expect(keys).toContain('app');
   });
 
   it('every entry.key matches its record key', () => {
@@ -84,5 +86,35 @@ describe('businessTypes v0 shape', () => {
     }
     expect(businessTypes.manufacturer.voiceHint).toBe('tailored-trade');
     expect(businessTypes.saas.voiceHint).toBe('modern-tech');
+  });
+});
+
+// scale-08 phase 3 — the two config-only proof entries. Shape asserts live here;
+// serveability asserts (photographer NOT serveable — gallery unbacked; app IS
+// serveable) live in serveGate.test.ts where the gate + signal helpers already
+// exist. Together they prove: a new business type is a list entry, nothing more.
+describe('businessTypes phase-3 entries (photographer + app)', () => {
+  it('photographer: work engine, requires unbacked gallery cap, editorial-craft, no voiceHint', () => {
+    const p = businessTypes.photographer;
+    expect(p.key).toBe('photographer');
+    expect(p.copyEngine).toBe('work');
+    expect(p.requiredCapabilities).toEqual(['gallery']);
+    expect(p.defaultStyle).toBe('editorial-craft');
+    expect(p.extractionSchemaKey).toBe('work');
+    expect(p.structureDefault).toBe('single');
+    expect(p.voiceHint).toBeUndefined(); // work engine keeps voice archetype-keyed
+    expect(p.likelyIntents).toEqual(['enquiry', 'book-call', 'follow-social']);
+  });
+
+  it('app: thing engine, lead-form, tech-minimal, modern-tech voiceHint', () => {
+    const a = businessTypes.app;
+    expect(a.key).toBe('app');
+    expect(a.copyEngine).toBe('thing');
+    expect(a.requiredCapabilities).toEqual(['lead-form']);
+    expect(a.defaultStyle).toBe('tech-minimal');
+    expect(a.extractionSchemaKey).toBe('thing');
+    expect(a.structureDefault).toBe('single');
+    expect(a.voiceHint).toBe('modern-tech');
+    expect(a.likelyIntents).toEqual(['download-app', 'signup-free', 'waitlist']);
   });
 });
