@@ -12,7 +12,8 @@
 //     confirmed Brief + serveGate result (persisted on the Project at confirm).
 //   • Slot machine is keyed by SLOT IDs (not indices) — the slot list is COMPUTED
 //     from the engine contract (`getContract`) with per-engine slot skips applied
-//     (trust/work skip `structure`). goToSlot/nextSlot/prevSlot operate on ids.
+//     (work skips `structure`; trust joined the 7b gate in scale-07 phase 4).
+//     goToSlot/nextSlot/prevSlot operate on ids.
 //   • Per-field state reuses the useOnboardingStore idea: `{ value, source, confirmed }`
 //     plus the phase-1 waterfall `state` (scraped|inferred|ask|drop) so slots can
 //     render ask-fields as questions and scraped/inferred as confirmable chips.
@@ -22,8 +23,9 @@
 //     entry (rawInput is URL-like) ⇒ review; a manual one-liner ⇒ fill.
 //   • Goal reuses scale-05: goalIntent/goalParam + intentToBriefGoal composer.
 //   • Proof booleans are a SUPERSET of ServiceAssetAvailability (type-guarded).
-//   • thing-only: sitemap/strategy + hero/style/mood picks. trust-only:
-//     variantId/paletteId. (State slots only — UI wiring is phases 3/4/8.)
+//   • structure: strategy + sitemap (thing multipage) / structureSections
+//     (single-page, thing AND trust — scale-07 phase 4). thing-only:
+//     hero/style/mood picks. trust-only: variantId/paletteId.
 //
 // FIREWALL: client store. Imports only pure helpers (contracts/waterfall/bridge/
 // businessTypes) + types. Never imports a template resolver/registry/renderer or
@@ -46,11 +48,15 @@ import {
 } from '@/modules/businessTypes/config';
 import {
   getContract,
+  lockedSectionsForEngine,
   wizardSlots,
   type ContractField,
   type WizardSlot,
 } from '@/modules/engines/inputContracts';
 import { computeFieldStates, type FieldState } from '@/modules/wizard/waterfall';
+// Single-page structure clamp law (scale-07 phase 4) — plain data-layer module
+// (generalized clampSitemap sibling), safe for the client store.
+import { applyConfirmedSections } from '@/modules/audience/product/strategy/parseStrategyProduct';
 // Type-only — proves WizardProofState ⊇ ServiceAssetAvailability (see guard
 // below). Canonical home is @/types/service since phase 10 retired the store.
 import type { ServiceAssetAvailability } from '@/types/service';
@@ -58,6 +64,7 @@ import type { ServiceAssetAvailability } from '@/types/service';
 // lazily inside fetchStrategy so the generation tree never enters the store's
 // static import graph).
 import type { ThingGenerationInput } from '@/modules/wizard/generation/thing';
+import type { TrustGenerationInput } from '@/modules/wizard/generation/trust';
 import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
 
 // ---------------------------------------------------------------------------
@@ -152,9 +159,23 @@ interface WizardState {
   // Proof (superset of ServiceAssetAvailability).
   proof: WizardProofState;
 
-  // thing-only — structure + style picks.
+  // Structure (thing multipage sitemap; single-page for thing AND trust).
   sitemap: unknown[] | null;
   strategy: unknown | null;
+  /**
+   * Single-page 7b structure (scale-07 phase 4): the ordered BODY section list
+   * (chrome excluded — header/footer are law-forced, never user-facing).
+   * Seeded from the fetched strategy's sections when the template is
+   * single-page; null for multipage (sitemap carries structure) and before the
+   * strategy fetch.
+   */
+  structureSections: string[] | null;
+  /**
+   * Sections the user toggled OFF at the gate (capability/gated optionals
+   * only — locked engine-core sections are refused by the toggle action).
+   * Confirmed structure = structureSections minus structureDisabled.
+   */
+  structureDisabled: string[];
   /**
    * Strategy-fetch lifecycle (scale-07 phase 3). Fired by the STRUCTURE slot on
    * mount; the guard on this status is the credit-charge-once/idempotency
@@ -218,6 +239,17 @@ interface WizardActions {
    * re-callable after `error` (retry).
    */
   fetchStrategy: () => Promise<void>;
+  /**
+   * Single-page 7b structure actions (scale-07 phase 4). Toggle-OFF only (no
+   * adds — the list membership is fixed by the strategy proposal); locked
+   * engine-core sections are refused at the STATE level, not just the UI; hero
+   * is pinned first (moves involving hero are refused). Every mutation syncs
+   * the trust pre-gate handoff so trust generation consumes the confirmed
+   * (reduced) structure.
+   */
+  setStructureSections: (sections: string[] | null) => void;
+  toggleStructureSection: (section: string) => void;
+  moveStructureSection: (index: number, dir: -1 | 1) => void;
   setHeroVariant: (v: string) => void;
   setStyleVariantId: (v: string) => void;
   setStylePaletteId: (v: string) => void;
@@ -334,9 +366,30 @@ export function fieldArr(fields: Record<string, { value: unknown }>, id: string)
   return Array.isArray(v) ? (v as string[]) : [];
 }
 
+/**
+ * Confirmed single-page structure body (order preserved, toggled-off removed);
+ * null when the single-page gate never populated (multipage / pre-fetch).
+ */
+export function confirmedStructureBody(s: WizardState): string[] | null {
+  if (!s.structureSections) return null;
+  return s.structureSections.filter((x) => !s.structureDisabled.includes(x));
+}
+
 /** Project the wizard store state → the THING adapter input (plain data). */
 export function buildThingInput(s: WizardState): ThingGenerationInput {
   const fields = s.fields as Record<string, { value: unknown }>;
+  const sitemap = (s.sitemap as SitemapPage[] | null) ?? null;
+  let strategy = (s.strategy as ProductStrategyOutput | null) ?? null;
+  // Single-page 7b confirmed structure (scale-07 phase 4): reduce the strategy
+  // through the clamp law BEFORE it reaches the adapter — a toggled-off
+  // section leaves both `sections` and `uiblocks`, so it gets NO copy call.
+  // Multipage (sitemap present) is untouched — the sitemap gate owns it.
+  if (strategy && !sitemap) {
+    const confirmed = confirmedStructureBody(s);
+    if (confirmed) {
+      strategy = applyConfirmedSections(strategy, confirmed, lockedSectionsForEngine('thing'));
+    }
+  }
   return {
     tokenId: s.tokenId ?? '',
     templateId: (s.templateId as ThingGenerationInput['templateId']) ?? 'meridian',
@@ -351,8 +404,8 @@ export function buildThingInput(s: WizardState): ThingGenerationInput {
     goalIntent: s.goalIntent,
     goalParam: s.goalParam,
     proof: { hasTestimonials: s.proof.hasTestimonials },
-    strategy: (s.strategy as ProductStrategyOutput | null) ?? null,
-    sitemap: (s.sitemap as SitemapPage[] | null) ?? null,
+    strategy,
+    sitemap,
     paletteId: s.stylePaletteId ?? undefined,
     variantId: s.styleVariantId ?? undefined,
     mood: s.styleMood ?? undefined,
@@ -362,6 +415,83 @@ export function buildThingInput(s: WizardState): ThingGenerationInput {
     stylePalettePicked: s.stylePalettePicked,
     styleMoodPicked: s.styleMoodPicked,
   };
+}
+
+/**
+ * Project the wizard store state → the TRUST adapter input (plain data) —
+ * scale-07 phase 4, used by the store's `fetchStrategy` for the pre-gate
+ * trust strategy call. NOTE: GeneratingSlot still carries its own (older)
+ * local trust projection with the same field mapping; keep the two in step
+ * until it is consolidated onto this export.
+ */
+export function buildTrustInput(s: WizardState): TrustGenerationInput {
+  const fields = s.fields as Record<string, { value: unknown }>;
+  return {
+    tokenId: s.tokenId ?? '',
+    templateId: (s.templateId as TrustGenerationInput['templateId']) ?? 'hearth',
+    businessTypeKey: s.businessTypeKey ?? undefined,
+    businessName: fieldStr(fields, 'name'),
+    oneLiner: fieldStr(fields, 'oneLiner'),
+    targetClients: fieldArr(fields, 'whoProblem'),
+    services: fieldArr(fields, 'services'),
+    process: fieldStr(fields, 'process') || undefined,
+    credentials: fieldStr(fields, 'credentials') || undefined,
+    offer: fieldStr(fields, 'offer'),
+    outcomes: fieldArr(fields, 'outcomes'),
+    goalIntent: s.goalIntent,
+    goalParam: s.goalParam,
+    proof: {
+      hasTestimonials: s.proof.hasTestimonials,
+      hasClientLogos: s.proof.hasClientLogos,
+      hasOutcomes: s.proof.hasOutcomes,
+      hasCaseStudies: s.proof.hasCaseStudies,
+      hasTeamPhotos: s.proof.hasTeamPhotos,
+      hasFounderPhoto: s.proof.hasFounderPhoto,
+      testimonialType: s.proof.testimonialType,
+    },
+    importedTestimonials: s.importedTestimonials,
+    paletteId: s.paletteId ?? undefined,
+    variantId: s.variantId ?? undefined,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Single-page structure helpers (scale-07 phase 4)
+// ---------------------------------------------------------------------------
+
+/**
+ * Seed the single-page gate list from a fetched strategy (immer draft
+ * mutator). Multipage results seed `sitemap` instead (existing behavior);
+ * single-page results (no sitemap on the strategy) seed `structureSections`
+ * with the strategy's BODY sections. Never clobbers prior user edits.
+ */
+function seedStructureFromStrategy(state: WizardState): void {
+  const strat = state.strategy as { sections?: string[]; sitemap?: unknown[] } | null;
+  if (!strat) return;
+  if (!state.sitemap && Array.isArray(strat.sitemap) && strat.sitemap.length) {
+    state.sitemap = strat.sitemap;
+  }
+  if (!strat.sitemap && !state.structureSections && Array.isArray(strat.sections)) {
+    state.structureSections = strat.sections.filter((x) => x !== 'header' && x !== 'footer');
+    state.structureDisabled = [];
+  }
+}
+
+/**
+ * Push the confirmed structure into the trust adapter's pre-gate handoff
+ * (GeneratingSlot's trust projection does not forward structure fields yet —
+ * see trust.ts). Fire-and-forget lazy import keeps the generation tree out of
+ * the store's static graph; the module is already loaded by the time toggles
+ * are possible (fetchStrategy imported it to fetch the trust strategy).
+ */
+function syncTrustConfirmedStructure(s: WizardState): void {
+  if (s.engine !== 'trust' || !s.tokenId) return;
+  const confirmed = confirmedStructureBody(s);
+  if (!confirmed) return;
+  const tokenId = s.tokenId;
+  void import('@/modules/wizard/generation/trust').then((m) =>
+    m.setConfirmedTrustStructure(tokenId, confirmed)
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -384,6 +514,8 @@ const initialState: WizardState = {
   proof: { ...initialProof },
   sitemap: null,
   strategy: null,
+  structureSections: null,
+  structureDisabled: [],
   strategyStatus: 'idle',
   strategyError: null,
   strategyCreditsError: false,
@@ -537,10 +669,45 @@ export const useWizardStore = create<WizardStore>()(
           state.strategy = strategy;
         }),
 
+      // ── Single-page 7b structure (scale-07 phase 4) ──
+      setStructureSections: (sections) => {
+        set((state) => {
+          state.structureSections = sections ? [...sections] : null;
+        });
+        syncTrustConfirmedStructure(get());
+      },
+      toggleStructureSection: (section) => {
+        set((state) => {
+          if (!state.structureSections?.includes(section)) return;
+          // Required-locked enforcement lives HERE (state level), not just in
+          // the UI: engine-core required sections can never be toggled off.
+          if (state.engine && lockedSectionsForEngine(state.engine).includes(section)) return;
+          const i = state.structureDisabled.indexOf(section);
+          if (i >= 0) state.structureDisabled.splice(i, 1);
+          else state.structureDisabled.push(section);
+        });
+        syncTrustConfirmedStructure(get());
+      },
+      moveStructureSection: (index, dir) => {
+        set((state) => {
+          const list = state.structureSections;
+          if (!list) return;
+          const to = index + dir;
+          if (index < 0 || index >= list.length || to < 0 || to >= list.length) return;
+          // Hero pinned first — any move involving hero is refused.
+          if (list[index] === 'hero' || list[to] === 'hero') return;
+          const tmp = list[index];
+          list[index] = list[to];
+          list[to] = tmp;
+        });
+        syncTrustConfirmedStructure(get());
+      },
+
       fetchStrategy: async () => {
         const s = get();
-        // Idempotency guard — the credit charge lives server-side in
-        // /api/audience/product/strategy, so "never fetch twice" IS
+        // Idempotency guard — the credit charge lives server-side in the
+        // strategy routes (/api/audience/product/strategy for thing,
+        // /api/audience/service/strategy for trust), so "never fetch twice" IS
         // "never charge twice". Back-navigation re-mounts the structure slot
         // with status 'done' ⇒ no-op. Concurrent calls: the status flips to
         // 'fetching' SYNCHRONOUSLY below, before any await, so a second call
@@ -548,32 +715,45 @@ export const useWizardStore = create<WizardStore>()(
         // proceed.
         if (s.strategyStatus === 'fetching' || s.strategyStatus === 'done') return;
         if (s.strategy) {
-          // Strategy already present (e.g. seeded externally) — mark done, no fetch.
+          // Strategy already present (e.g. seeded externally) — mark done, no
+          // fetch; seed the single-page gate list if it's still empty.
           set((state) => {
             state.strategyStatus = 'done';
+            seedStructureFromStrategy(state);
           });
           return;
         }
+        // Only structure-gated engines fetch here (work keeps its slot skip).
+        if (s.engine !== 'thing' && s.engine !== 'trust') return;
         set((state) => {
           state.strategyStatus = 'fetching';
           state.strategyError = null;
           state.strategyCreditsError = false;
         });
 
-        // Lazy-load the adapter so the generation tree stays out of the store's
-        // static import graph (firewall note at the top of this file).
-        const { runStrategy } = await import('@/modules/wizard/generation/thing');
-        const result = await runStrategy(buildThingInput(get()));
+        // Lazy-load the engine's adapter so the generation tree stays out of
+        // the store's static import graph (firewall note at the top of this
+        // file). Both runners share the {done|credits|error} result shape.
+        let result:
+          | { status: 'done'; strategy: { sections?: string[]; sitemap?: unknown[] } }
+          | { status: 'credits' }
+          | { status: 'error'; error: string };
+        if (s.engine === 'trust') {
+          const { runTrustStrategy } = await import('@/modules/wizard/generation/trust');
+          result = await runTrustStrategy(buildTrustInput(get()));
+        } else {
+          const { runStrategy } = await import('@/modules/wizard/generation/thing');
+          result = await runStrategy(buildThingInput(get()));
+        }
 
         if (result.status === 'done') {
-          const { setStrategy, setSitemap, sitemap } = get();
-          setStrategy(result.strategy);
-          // Seed the sitemap from the (server-clamped) proposal only if the
-          // user has no prior edits — never clobber an edited draft.
-          if (!sitemap && result.strategy.sitemap) {
-            setSitemap(result.strategy.sitemap);
-          }
+          const strategy = result.strategy;
           set((state) => {
+            state.strategy = strategy;
+            // Multipage: seed the sitemap from the (server-clamped) proposal;
+            // single-page: seed the gate's section list. Either way, never
+            // clobber prior user edits (seedStructureFromStrategy guards).
+            seedStructureFromStrategy(state);
             state.strategyStatus = 'done';
           });
         } else if (result.status === 'credits') {
@@ -667,6 +847,7 @@ export const useWizardStore = create<WizardStore>()(
             goalParam: {},
             fields: {},
             slots: [],
+            structureDisabled: [],
           });
         }),
     })),

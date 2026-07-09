@@ -182,3 +182,55 @@ Body is the old inline tail fetch VERBATIM: same `buildStrategyPayload(input)` b
 - The `structure` slot precedes `generating`, so a user who abandons the wizard AFTER the structure slot has paid the strategy charge (2 credits) without a generated page — same exposure the old SitemapReviewStep had; acceptable per plan (the gate must render real data).
 - Strategy status lives only in the client store: a full page reload between structure and generating loses `strategy`/`sitemap` → GeneratingSlot's fallback refetches (a second charge across SESSIONS, not within a run). Pre-existing store-lifetime semantics (old wizard identical); persistence of confirmed structure is phase 6.
 - Meridian structure slot = strategy fetch + "single-page" note only until phase 4 (known wart, cosmetic).
+
+## Phase 4 — Universal 7b gate: single-page mode + clamp law + trust GA
+
+**Files changed**
+- `src/modules/engines/inputContracts.ts` (edit) — trust `slotSkips: ['structure']` → `[]` (7b GA, founder Q2 resolved); new `lockedSectionsForEngine(engine)` helper
+- `src/modules/audience/product/strategy/parseStrategyProduct.ts` (edit) — step-0 Brief plumbing (`brief`/`requiredCapabilities` on `AssembleProductStrategyInput`, forwarded to `selectProductSections` on the single-page branch); new `clampSectionList()` (the clampSitemap law generalized to a flat single-page list) + generic `applyConfirmedSections()`
+- `src/modules/audience/service/strategy/parseStrategyService.ts` (edit) — new `applyConfirmedStructure()` (service-typed wrapper over the shared clamp law; confirmed structure filters sections + uiblocks before copy)
+- `src/modules/wizard/generation/trust.ts` (edit) — `runTrustStrategy()` extracted (mirrors phase-3's thing `runStrategy`); pre-gate handoff (module-scoped, tokenId-keyed); `TrustGenerationInput` gains optional `strategy`/`confirmedSections`; `runTrustGeneration` consumes the pre-gate strategy (never refetches) + applies confirmed structure via the clamp law
+- `src/hooks/useWizardStore.ts` (edit) — single-page structure state (`structureSections`, `structureDisabled`) + actions (`setStructureSections` / `toggleStructureSection` / `moveStructureSection`); engine-aware `fetchStrategy` (trust branch); `buildTrustInput()` exported; `buildThingInput` applies the confirmed single-page reduction; `confirmedStructureBody()` helper
+- `src/components/onboarding/wizard/StructureSlot.tsx` (edit) — SINGLE-PAGE mode UI (one section list, locked required rows, toggle-OFF-only optionals, up/down reorder with hero pinned, NO add-section, 1-tap accept via the shell's Continue); multipage (vestria) branch untouched
+- `src/hooks/useWizardStore.test.ts` (edit) — trust slot order includes structure; single-page toggle/reorder/locked fixtures; clamp-law suite; step-0 proof; trust charge-once end-to-end + toggle-off ⇒ no-copy acceptance
+
+### Step-0 Brief plumbing proof (meridian regains cta/pricing)
+
+`assembleProductStrategy` single-page branch now calls `selectProductSections({ templateId, brief, requiredCapabilities })` (was `{ templateId }` only). Test proof (useWizardStore.test.ts, "step-0 Brief plumbing"): an M1 Brief (`goal.mechanism === 'M1'` ⇒ lead-form capability) plus explicit `packages` capability under meridian yields a single-page list containing **cta** AND **pricing**, with real uiblock mappings; the no-brief baseline stays the bare 5-core (phase-2 interim behavior preserved). Scope note: the strategy ROUTE (`/api/audience/product/strategy`) is not in this phase's Files-touched (it is in phase 5's) and carries no Brief in its request today — runtime meridian generations stay 5-core until the route/client passes `brief`/`requiredCapabilities` (phase 6 recomputes requirements client-side and holds the required set in the store). The selector/assembler side is fully plumbed and tested. Service mirror (parseStrategyService.ts:41): NOT needed — trust capability sections (lead-form→cta, packages→packages) are already trust CORE sections, and surge deltas are gated by asset flags already plumbed; noted, no change.
+
+### Single-page clamp law (`clampSectionList`)
+
+Same law as `clampSitemap`, over a flat body list: unknown sections dropped (no adds), duplicates deduped (first wins), locked engine-core sections forced present at their canonical relative position, **hero forced first**, header/footer chrome forced exactly from the canonical list (never user-controlled), empty/absent proposal ⇒ canonical (default accept). Slugs: N/A single-page (no pages ⇒ nothing for the AI to name); the multipage half of the law stays in `clampSitemap`. Applied at TWO points: `buildThingInput` (thing single-page) and `runTrustGeneration` (trust), always with `lockedSectionsForEngine(engine)`.
+
+Required-locked derivation: locked = engine core minus chrome minus contract `dropTarget`s ⇒ thing `hero, features`; trust `hero, services, cta` (testimonials/packages are dropTargets, hence toggleable — consistent with the proof hard rule). Enforced in the UI (disabled toggle, "required" badge) AND at state level (`toggleStructureSection` refuses locked ids) AND at the law (forced re-insertion).
+
+### Trust GA + charge-once / idempotency trace
+
+- inputContracts trust `slotSkips` → `[]`: `slotsForEngine()` picks it up automatically ⇒ every trust user hits the 7b structure slot at merge (founder-accepted, Q2).
+- Pre-gate fetch: StructureSlot mount → store `fetchStrategy` → status guard (`fetching|done` ⇒ no-op; status flips to `fetching` synchronously before any await, so same-tick concurrent calls collapse) → trust branch lazy-imports `runTrustStrategy(buildTrustInput(state))` → server charges ONCE in `/api/audience/service/strategy` → result seeds `strategy` + `structureSections`.
+- Generation: `runTrustGeneration` prefers `input.strategy`, else the tokenId-keyed pre-gate handoff — found ⇒ **zero refetch** (test-proven: exactly 1 strategy call across gate fetch + generation). Copy-failure retries reuse the handoff (no re-charge — an improvement over the old inline flow, which refetched strategy on every retry); the handoff is cleared only on a DONE run so stale strategy can't leak into a later run. Fallback (no pre-gate, e.g. legacy/skipping flow): one self-fetch, single charge.
+- Reload between structure and generating loses the client store ⇒ refetch at the re-visited slot (a cross-SESSION second charge) — same semantics as thing since phase 3; phase-6 step 3b addresses it.
+
+### Toggle-off → no-copy mechanism
+
+Gate list = strategy's BODY sections seeded into `structureSections`; toggles accumulate in `structureDisabled` (re-enable allowed — membership never grows, so "no adds" holds). Confirmed body = sections minus disabled, in (possibly reordered) list order. THING: `buildThingInput` clamps + reduces `strategy.sections` AND `strategy.uiblocks` before the adapter — `runCopyAndSave` copies only `strategy.sections`. TRUST: every structure mutation syncs the confirmed body into the trust pre-gate handoff; `runTrustGeneration` applies `applyConfirmedStructure` before `buildCopyPayload`. Acceptance test: testimonials toggled off ⇒ the copy request's `strategy.sections` = `[header, hero, services, packages, cta, footer]` and `uiblocks` (both payload spots) lack `testimonials` ⇒ zero testimonial copy.
+
+### Deviations
+
+1. **Trust pre-gate handoff (module-scoped in trust.ts, tokenId-keyed) instead of forwarding `strategy`/`confirmedSections` through GeneratingSlot's trust projection.** `GeneratingSlot.tsx` builds `TrustGenerationInput` locally and is NOT in this phase's Files-touched, so the gate-fetched strategy + confirmed structure could not ride the input without editing it. The bridge lives entirely in trust.ts (in scope); explicit `input.strategy`/`input.confirmedSections` ALWAYS win over it, and it is documented for deletion once GeneratingSlot is consolidated onto the store's exported `buildTrustInput`. Recommended follow-up (3-line GeneratingSlot change): forward `strategy: s.strategy`, `confirmedSections: confirmedStructureBody(s)`.
+2. **`buildTrustInput` duplicated** — the store's new export mirrors GeneratingSlot's local projection (same field mapping); drift risk flagged in both docstrings; consolidate with (1).
+3. **New phase-4 tests all live in `useWizardStore.test.ts`** (the listed test file), including clamp-law, step-0 and trust end-to-end suites that arguably belong beside parseStrategyProduct/trust — kept in-list deliberately.
+4. **Handoff cleared on DONE** (not in the plan text): keeps trust.test.ts's pre-existing 402 fixture honest and prevents stale-strategy leakage between runs; error/credits paths keep it (retry charge-once preserved).
+5. **Reorder bounds**: hero pinned first (state-level refusal of any move involving hero); chrome is never user-facing; other body sections (locked included) may reorder. Conservative reading of "reorder within allowed bounds" — the clamp re-forces hero-first + chrome regardless.
+
+### Test results
+
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — **Test Files 92 passed | 1 skipped (93) · Tests 1472 passed | 2 skipped (1474)** (phase-3 baseline 1449 + 23 new). New/updated coverage: trust slot order includes `structure` (acceptance fixture drives the wizard engine directly); single-page seed/toggle/locked/reorder; clamp-law matrix (unknown / dupes / locked-forced / hero-first / chrome / empty / reorder); step-0 meridian cta+pricing; trust fetch idempotency, end-to-end charge-once (1 strategy call across gate + generation), toggle-off ⇒ no testimonial copy, fallback single self-fetch. Pre-existing trust/thing adapter + sectionSelection + clampSitemap + proofFilter suites green unchanged.
+
+### Open risks
+
+- Trust pre-gate handoff is hidden coupling (store → trust module) until GeneratingSlot forwards the fields; flag for the next phase touching GeneratingSlot.
+- Runtime meridian single-page lists remain 5-core until the strategy route/client passes Brief-derived capabilities (phase 5/6) — the meridian gate therefore shows no cta/pricing rows yet.
+- Manual dev pass (thing single-page + one trust flow) still owed per the plan's verification line — deferred to the phase-9 QA sweep.
+- Trust structure-slot reload re-charges strategy across sessions (parity with thing); phase-6 step 3b.

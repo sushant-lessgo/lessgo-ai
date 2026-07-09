@@ -27,8 +27,8 @@ Section lists stop being template property. A new engine-owned section grammar (
 
 - phase 1 engine-owned section grammar (behavior-preserving wiring): done (commit 84a43b5, review loops 1, ship, 1389 tests green; nit: import order, deferred — consts deleted in phase 2)
 - phase 2 meridian/vestria core convergence + capability mapping: done (commit 41b61233, review loop 1, ship, 1437 tests green; interim: meridian new-gen 5-core until phase-4 step-0 Brief plumbing restores pricing/cta)
-- phase 3 restore multipage fan-out + strategy-before-structure sequencing: done (review loop 1, ship, 1449 tests green; charge-once + race-safe idempotency verified; open risks → phase 6 charge-dedup step 3b)
-- phase 4 universal 7b gate (single-page mode + clamp law + trust GA): pending
+- phase 3 restore multipage fan-out + strategy-before-structure sequencing: done (commit 10372ac7, review loop 1, ship, 1449 tests green; charge-once + race-safe idempotency verified; open risks → phase 6 charge-dedup step 3b)
+- phase 4 universal 7b gate (single-page mode + clamp law + trust GA): done (review loop 1, ship, 1472 tests green; module-bridge scrutinized sound; carryovers → phase 5 (route brief-passing + GeneratingSlot consolidation))
 - phase 5 multipage keyed by capability (sitemap for all): pending
 - phase 6 structure persistence + 7b deletion relaxes hard-fit: pending
 - phase 7 template swap post-gen + meridian unlock: pending
@@ -168,6 +168,12 @@ Refresh deliberately; audit lists each diff with before/after section lists.
 - `src/components/onboarding/wizard/StructureSlot.tsx` (edit — :51 detection via new key; multi vs single mode chosen by capability + businessType default + Brief `structure.mode`)
 - `src/modules/wizard/generation/thing.ts` (edit — :249 `explicitVestria` → multipage-capability check; :294,310,332,345,436,448,509 `templateId:'vestria'` → `input.templateId`)
 - `src/modules/audience/product/pageArchetypes.test.ts` or nearest (new/edit — re-key regression: vestria still multi, meridian still single, hypothetical multipage template resolves)
+- `src/app/api/audience/product/strategy/route.ts` (edit — carryover (a): forward brief + requiredCapabilities into assembly so runtime meridian regains cta/pricing)
+- `src/components/onboarding/wizard/GeneratingSlot.tsx` (edit — carryover (b): forward strategy/confirmedSections via store `buildTrustInput`, then delete `trust.ts` pregate bridge)
+
+**Phase-4 carryovers folded in (do NOT skip):**
+- **(a) Complete step-0 at the ROUTE:** `src/app/api/audience/product/strategy/route.ts` must forward the resolved `brief` (+ derived required capabilities) into `assembleProductStrategy`/`selectProductSections` so RUNTIME meridian regains cta/pricing (phase 4 plumbed the selector/assembler side + tested it, but the route still passes `{templateId}` only ⇒ runtime meridian is 5-core until this lands). Add a test asserting a runtime meridian M1/packages strategy call yields cta/pricing.
+- **(b) Consolidate the trust bridge:** while `thing.ts`/wizard generation is open, add the 3-line forward to `GeneratingSlot.tsx` (`strategy: s.strategy`, `confirmedSections: confirmedStructureBody(s)`) via the store's `buildTrustInput`, then DELETE the module-scoped `pregate` bridge in `trust.ts`. Add `src/components/onboarding/wizard/GeneratingSlot.tsx` to Files touched for this. Keep charge-once behavior (tests must still show exactly 1 `/strategy` call end-to-end).
 
 **Steps:**
 1. Single helper `isMultipage(templateId, brief?)` (lives beside `templateMeta`/`fit`, firewalled) = template capability ∧ (Brief `structure.mode==='multi'` ∨ businessType default); all 3 detection sites + fan-out branch call it.

@@ -1,29 +1,35 @@
 'use client';
 
-// scale-06 phase 4 — the STRUCTURE slot (thing-only; trust/work skip it).
+// scale-06 phase 4 → scale-07 phase 4 — the universal STRUCTURE slot (7b gate).
+// thing AND trust hit it now (work keeps its skip).
 //
-// Ports the product SitemapReviewStep sitemap-editing behavior AS-IS onto the
-// wizard store — the HUMAN GATE on the site's shape. Structure UX changes are
-// scope-07, so this is a faithful reproduction (review / rename / reorder / add /
-// remove pages + sections), NOT a redesign.
+// MULTIPAGE mode (page-archetype menu, vestria): ports the product
+// SitemapReviewStep sitemap-editing behavior AS-IS onto the wizard store
+// (review / rename / reorder / add / remove pages + sections). Untouched by
+// scale-07 phase 4 — detection re-key is phase 5.
 //
-// SOURCING (scale-07 phase 3 — deviation RESOLVED): this slot now OWNS the
-// strategy sourcing, like the old SitemapReviewStep did. On mount, if the store
-// has no strategy yet, it fires the store's `fetchStrategy` action (which runs
-// the thing adapter's `runStrategy` step — server charges credits + clamps the
-// sitemap) and renders a loading state; the result lands in
-// `useWizardStore.strategy`/`sitemap` and the gate renders the REAL proposal.
-// The status guard in `fetchStrategy` makes back-navigation charge-safe (a
-// 'done' status never refetches). Edits still write back via `setSitemap`.
-// Single-page templates (no page-archetype menu, e.g. meridian) fetch strategy
-// here too but have no structure UI yet (phase-4 single-page mode fills it).
+// SINGLE-PAGE mode (scale-07 phase 4, no menu — meridian + every trust
+// template): ONE section list from the fetched strategy. Required engine-core
+// sections are LOCKED (hero first, cta where the core demands it);
+// capability/gated optionals toggle OFF only — NO add-section in single mode.
+// "Looks good" = the shell's Continue (default accept in 1 tap). The confirmed
+// (reduced, reordered) list is what generation copies — a toggled-off section
+// gets NO copy.
+//
+// SOURCING (scale-07 phase 3): this slot OWNS the strategy sourcing. On mount,
+// if the store has no strategy yet, it fires the store's `fetchStrategy`
+// action (engine-aware: thing → runStrategy, trust → runTrustStrategy — the
+// server charges credits + clamps) and renders a loading state. The status
+// guard in `fetchStrategy` makes back-navigation charge-safe (a 'done' status
+// never refetches).
 //
 // FIREWALL: client-only. Reads/writes `useWizardStore`; imports the data-only
-// pageArchetypes menu (no block components).
+// pageArchetypes menu + engine contract helpers (no block components).
 
 import { useEffect, useMemo } from 'react';
 import { ArrowDown, ArrowUp, Loader2, Plus, X } from 'lucide-react';
 import { useWizardStore } from '@/hooks/useWizardStore';
+import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
 import {
   getPageArchetypesForTemplate,
   type PageArchetypeDef,
@@ -44,8 +50,26 @@ const SECTION_LABELS: Record<string, string> = {
 };
 const sectionLabel = (s: string) => SECTION_LABELS[s] ?? s;
 
+// Single-page mode labels — engine-generic (the multipage map above keeps its
+// vestria-specific wording, e.g. features → "Services").
+const SINGLE_PAGE_LABELS: Record<string, string> = {
+  hero: 'Hero',
+  features: 'Features',
+  services: 'Services',
+  testimonials: 'Testimonials',
+  packages: 'Packages',
+  pricing: 'Pricing',
+  cta: 'Call to action',
+  logos: 'Client logos',
+  about: 'About',
+  casestudies: 'Case studies',
+  stats: 'Results & stats',
+};
+const singlePageLabel = (s: string) => SINGLE_PAGE_LABELS[s] ?? SECTION_LABELS[s] ?? s;
+
 export default function StructureSlot() {
   const templateId = useWizardStore((s) => s.templateId);
+  const engine = useWizardStore((s) => s.engine);
   const strategy = useWizardStore((s) => s.strategy) as ProductStrategyOutput | null;
   const storeSitemap = useWizardStore((s) => s.sitemap) as SitemapPage[] | null;
   const setSitemap = useWizardStore((s) => s.setSitemap);
@@ -53,6 +77,16 @@ export default function StructureSlot() {
   const strategyError = useWizardStore((s) => s.strategyError);
   const strategyCreditsError = useWizardStore((s) => s.strategyCreditsError);
   const fetchStrategy = useWizardStore((s) => s.fetchStrategy);
+  // Single-page mode (scale-07 phase 4).
+  const structureSections = useWizardStore((s) => s.structureSections);
+  const structureDisabled = useWizardStore((s) => s.structureDisabled);
+  const toggleStructureSection = useWizardStore((s) => s.toggleStructureSection);
+  const moveStructureSection = useWizardStore((s) => s.moveStructureSection);
+
+  const lockedSet = useMemo(
+    () => new Set(engine ? lockedSectionsForEngine(engine) : []),
+    [engine]
+  );
 
   // Strategy sourcing (scale-07 phase 3): kick the charged fetch exactly once.
   // The store's status guard makes remounts/back-navigation no-ops.
@@ -129,15 +163,115 @@ export default function StructureSlot() {
     );
   }
 
-  // Single-page template (no menu) — strategy fetched above; nothing to
-  // configure yet (phase-4 single-page mode adds the section list UI).
+  // ===== SINGLE-PAGE mode (no page-archetype menu — meridian + trust) =====
+  // One section list: required (engine-core) sections locked, optionals toggle
+  // OFF only, no adds; reorder within bounds (hero pinned first). Default
+  // accept = the shell's Continue (1 tap).
   if (!menu.length) {
+    const body = structureSections;
+    if (!body || body.length === 0) {
+      // Defensive: strategy present but no seeded list (shouldn't happen —
+      // fetchStrategy seeds it). Nothing to configure; Continue stays open.
+      return (
+        <div className="space-y-3">
+          <h1 className="text-2xl font-semibold text-gray-900">Your page plan</h1>
+          <p className="text-gray-600">
+            This is a single-page site — nothing to configure. We&apos;ll write
+            it next.
+          </p>
+        </div>
+      );
+    }
+
+    const heroFirst = body[0] === 'hero';
     return (
-      <div className="space-y-3">
-        <h1 className="text-2xl font-semibold text-gray-900">Your site plan</h1>
-        <p className="text-gray-600">
-          This is a single-page site — no extra pages to configure. We&apos;ll
-          write it next.
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Your page plan</h1>
+          <p className="mt-2 text-gray-600">
+            We suggest these sections. Turn off anything you don&apos;t need —
+            nothing is written until you approve the shape.
+          </p>
+        </div>
+
+        <ul className="space-y-1.5">
+          {body.map((sec, idx) => {
+            const locked = lockedSet.has(sec);
+            const off = structureDisabled.includes(sec);
+            const isHero = sec === 'hero';
+            const canUp = !isHero && idx > (heroFirst ? 1 : 0);
+            const canDown = !isHero && idx < body.length - 1;
+            return (
+              <li
+                key={sec}
+                className={`flex items-center gap-2 rounded-md border px-3 py-2 ${
+                  off
+                    ? 'bg-gray-50 border-gray-100 opacity-50'
+                    : 'bg-gray-50 border-gray-100'
+                }`}
+              >
+                <span className={`text-sm flex-1 ${off ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
+                  {singlePageLabel(sec)}
+                  {locked && (
+                    <span className="ml-2 text-[10px] uppercase tracking-wide text-gray-400">
+                      required
+                    </span>
+                  )}
+                  {off && (
+                    <span className="ml-2 text-[10px] uppercase tracking-wide text-gray-400 no-underline">
+                      off
+                    </span>
+                  )}
+                </span>
+                {!isHero && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => moveStructureSection(idx, -1)}
+                      disabled={!canUp}
+                      className="p-0.5 text-gray-400 hover:text-gray-700 disabled:opacity-30"
+                      title="Move up"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveStructureSection(idx, 1)}
+                      disabled={!canDown}
+                      className="p-0.5 text-gray-400 hover:text-gray-700 disabled:opacity-30"
+                      title="Move down"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                )}
+                {off ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleStructureSection(sec)}
+                    className="p-0.5 text-gray-400 hover:text-brand-accentPrimary"
+                    title="Turn back on"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => toggleStructureSection(sec)}
+                    disabled={locked}
+                    className="p-0.5 text-gray-400 hover:text-red-600 disabled:opacity-20"
+                    title={locked ? 'Required section' : 'Turn off section'}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+
+        <p className="text-sm text-gray-500">
+          Looks good? Hit Continue — we&apos;ll write the copy next.
         </p>
       </div>
     );
