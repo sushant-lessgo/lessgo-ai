@@ -54,6 +54,11 @@ import { computeFieldStates, type FieldState } from '@/modules/wizard/waterfall'
 // Type-only — proves WizardProofState ⊇ ServiceAssetAvailability (see guard
 // below). Canonical home is @/types/service since phase 10 retired the store.
 import type { ServiceAssetAvailability } from '@/types/service';
+// Type-only — the THING adapter input shape (the runtime module is loaded
+// lazily inside fetchStrategy so the generation tree never enters the store's
+// static import graph).
+import type { ThingGenerationInput } from '@/modules/wizard/generation/thing';
+import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
 
 // ---------------------------------------------------------------------------
 // Field state model
@@ -150,6 +155,15 @@ interface WizardState {
   // thing-only — structure + style picks.
   sitemap: unknown[] | null;
   strategy: unknown | null;
+  /**
+   * Strategy-fetch lifecycle (scale-07 phase 3). Fired by the STRUCTURE slot on
+   * mount; the guard on this status is the credit-charge-once/idempotency
+   * mechanism (back-navigation must never trigger a second charged fetch).
+   */
+  strategyStatus: 'idle' | 'fetching' | 'done' | 'error';
+  strategyError: string | null;
+  /** The strategy fetch failed with an out-of-credits response (402). */
+  strategyCreditsError: boolean;
   heroVariant: string | null;
   heroVariantPicked: boolean;
   styleVariantId: string | null;
@@ -196,6 +210,14 @@ interface WizardActions {
   // thing style/structure.
   setSitemap: (sitemap: unknown[] | null) => void;
   setStrategy: (strategy: unknown) => void;
+  /**
+   * Run the strategy step (scale-07 phase 3) — called by the STRUCTURE slot.
+   * Delegates to `runStrategy` (thing adapter: same payload/credit charge/clamp
+   * path as generation) and writes the result via setStrategy/setSitemap.
+   * Idempotent: no-ops while `fetching` or after `done` (no double charge);
+   * re-callable after `error` (retry).
+   */
+  fetchStrategy: () => Promise<void>;
   setHeroVariant: (v: string) => void;
   setStyleVariantId: (v: string) => void;
   setStylePaletteId: (v: string) => void;
@@ -294,6 +316,55 @@ function slotsForEngine(engine: CopyEngine): WizardSlot[] {
 }
 
 // ---------------------------------------------------------------------------
+// Store → THING adapter projection (scale-07 phase 3).
+// ONE projection shared by the store's fetchStrategy action AND GeneratingSlot
+// (which imports it) so the pre-gate strategy call and the generation run can
+// never drift apart on payload fields.
+// ---------------------------------------------------------------------------
+
+/** Read a store field value as a string (empty fallback). */
+export function fieldStr(fields: Record<string, { value: unknown }>, id: string): string {
+  const v = fields[id]?.value;
+  return typeof v === 'string' ? v : '';
+}
+
+/** Read a store field value as a string[] (empty fallback). */
+export function fieldArr(fields: Record<string, { value: unknown }>, id: string): string[] {
+  const v = fields[id]?.value;
+  return Array.isArray(v) ? (v as string[]) : [];
+}
+
+/** Project the wizard store state → the THING adapter input (plain data). */
+export function buildThingInput(s: WizardState): ThingGenerationInput {
+  const fields = s.fields as Record<string, { value: unknown }>;
+  return {
+    tokenId: s.tokenId ?? '',
+    templateId: (s.templateId as ThingGenerationInput['templateId']) ?? 'meridian',
+    productName: fieldStr(fields, 'name'),
+    oneLiner: fieldStr(fields, 'oneLiner'),
+    features: fieldArr(fields, 'capabilities'),
+    audiences: fieldArr(fields, 'audience'),
+    categories: [],
+    differentiator: fieldStr(fields, 'differentiator') || undefined,
+    objectionFacts: fieldStr(fields, 'objectionFacts') || undefined,
+    offer: fieldStr(fields, 'offer'),
+    goalIntent: s.goalIntent,
+    goalParam: s.goalParam,
+    proof: { hasTestimonials: s.proof.hasTestimonials },
+    strategy: (s.strategy as ProductStrategyOutput | null) ?? null,
+    sitemap: (s.sitemap as SitemapPage[] | null) ?? null,
+    paletteId: s.stylePaletteId ?? undefined,
+    variantId: s.styleVariantId ?? undefined,
+    mood: s.styleMood ?? undefined,
+    heroVariant: s.heroVariant ?? undefined,
+    heroVariantPicked: s.heroVariantPicked,
+    styleVariantPicked: s.styleVariantPicked,
+    stylePalettePicked: s.stylePalettePicked,
+    styleMoodPicked: s.styleMoodPicked,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Initial state
 // ---------------------------------------------------------------------------
 
@@ -313,6 +384,9 @@ const initialState: WizardState = {
   proof: { ...initialProof },
   sitemap: null,
   strategy: null,
+  strategyStatus: 'idle',
+  strategyError: null,
+  strategyCreditsError: false,
   heroVariant: null,
   heroVariantPicked: false,
   styleVariantId: null,
@@ -462,6 +536,59 @@ export const useWizardStore = create<WizardStore>()(
         set((state) => {
           state.strategy = strategy;
         }),
+
+      fetchStrategy: async () => {
+        const s = get();
+        // Idempotency guard — the credit charge lives server-side in
+        // /api/audience/product/strategy, so "never fetch twice" IS
+        // "never charge twice". Back-navigation re-mounts the structure slot
+        // with status 'done' ⇒ no-op. Concurrent calls: the status flips to
+        // 'fetching' SYNCHRONOUSLY below, before any await, so a second call
+        // in the same tick bails here too. Only 'idle' and 'error' (retry)
+        // proceed.
+        if (s.strategyStatus === 'fetching' || s.strategyStatus === 'done') return;
+        if (s.strategy) {
+          // Strategy already present (e.g. seeded externally) — mark done, no fetch.
+          set((state) => {
+            state.strategyStatus = 'done';
+          });
+          return;
+        }
+        set((state) => {
+          state.strategyStatus = 'fetching';
+          state.strategyError = null;
+          state.strategyCreditsError = false;
+        });
+
+        // Lazy-load the adapter so the generation tree stays out of the store's
+        // static import graph (firewall note at the top of this file).
+        const { runStrategy } = await import('@/modules/wizard/generation/thing');
+        const result = await runStrategy(buildThingInput(get()));
+
+        if (result.status === 'done') {
+          const { setStrategy, setSitemap, sitemap } = get();
+          setStrategy(result.strategy);
+          // Seed the sitemap from the (server-clamped) proposal only if the
+          // user has no prior edits — never clobber an edited draft.
+          if (!sitemap && result.strategy.sitemap) {
+            setSitemap(result.strategy.sitemap);
+          }
+          set((state) => {
+            state.strategyStatus = 'done';
+          });
+        } else if (result.status === 'credits') {
+          set((state) => {
+            state.strategyStatus = 'error';
+            state.strategyCreditsError = true;
+            state.strategyError = 'Out of credits.';
+          });
+        } else {
+          set((state) => {
+            state.strategyStatus = 'error';
+            state.strategyError = result.error || 'Strategy generation failed.';
+          });
+        }
+      },
       setHeroVariant: (v) =>
         set((state) => {
           state.heroVariant = v;

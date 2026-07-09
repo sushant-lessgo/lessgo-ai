@@ -14,17 +14,15 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Loader2 } from 'lucide-react';
-import { useWizardStore } from '@/hooks/useWizardStore';
+import { useWizardStore, buildThingInput, fieldStr, fieldArr } from '@/hooks/useWizardStore';
 import ErrorRetry from '@/components/onboarding/shared/ErrorRetry';
 import {
   runGeneration,
   type GenerationStage,
   type GenerationInput,
 } from '@/modules/wizard/generation';
-import type { ThingGenerationInput } from '@/modules/wizard/generation/thing';
 import type { TrustGenerationInput } from '@/modules/wizard/generation/trust';
 import type { WorkGenerationInput } from '@/modules/wizard/generation/work';
-import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
 import type { TemplateId } from '@/types/service';
 
 interface StageDef {
@@ -38,48 +36,12 @@ const STAGES: StageDef[] = [
   { id: 'saving', label: 'Saving the draft' },
 ];
 
-/** Read a store field value as a string (empty fallback). */
-function fieldStr(fields: Record<string, { value: unknown }>, id: string): string {
-  const v = fields[id]?.value;
-  return typeof v === 'string' ? v : '';
-}
-
-/** Read a store field value as a string[] (empty fallback). */
-function fieldArr(fields: Record<string, { value: unknown }>, id: string): string[] {
-  const v = fields[id]?.value;
-  return Array.isArray(v) ? (v as string[]) : [];
-}
-
-/** Project the wizard store → the THING adapter input (plain data). */
-function buildThingInput(): ThingGenerationInput {
-  const s = useWizardStore.getState();
-  const fields = s.fields as Record<string, { value: unknown }>;
-  return {
-    tokenId: s.tokenId ?? '',
-    templateId: (s.templateId as ThingGenerationInput['templateId']) ?? 'meridian',
-    productName: fieldStr(fields, 'name'),
-    oneLiner: fieldStr(fields, 'oneLiner'),
-    features: fieldArr(fields, 'capabilities'),
-    audiences: fieldArr(fields, 'audience'),
-    categories: [],
-    differentiator: fieldStr(fields, 'differentiator') || undefined,
-    objectionFacts: fieldStr(fields, 'objectionFacts') || undefined,
-    offer: fieldStr(fields, 'offer'),
-    goalIntent: s.goalIntent,
-    goalParam: s.goalParam,
-    proof: { hasTestimonials: s.proof.hasTestimonials },
-    strategy: (s.strategy as ProductStrategyOutput | null) ?? null,
-    sitemap: (s.sitemap as SitemapPage[] | null) ?? null,
-    paletteId: s.stylePaletteId ?? undefined,
-    variantId: s.styleVariantId ?? undefined,
-    mood: s.styleMood ?? undefined,
-    heroVariant: s.heroVariant ?? undefined,
-    heroVariantPicked: s.heroVariantPicked,
-    styleVariantPicked: s.styleVariantPicked,
-    stylePalettePicked: s.stylePalettePicked,
-    styleMoodPicked: s.styleMoodPicked,
-  };
-}
+// buildThingInput/fieldStr/fieldArr moved to useWizardStore (scale-07 phase 3)
+// so the pre-gate strategy fetch (store fetchStrategy) and this slot share ONE
+// store→adapter projection. The strategy/sitemap the projection forwards are
+// the structure-slot-confirmed values, so `thing.ts` takes the primary
+// `input.strategy` branch (no second strategy charge) — runFanOut for
+// multipage, runCopyAndSave for single-page.
 
 /** Project the wizard store → the TRUST adapter input (plain data). */
 function buildTrustInput(): TrustGenerationInput {
@@ -135,7 +97,7 @@ export const MIN_WORKS = 3;
 function buildInput(engine: NonNullable<ReturnType<typeof useWizardStore.getState>['engine']>): GenerationInput {
   if (engine === 'trust') return buildTrustInput();
   if (engine === 'work') return buildWorkInput();
-  return buildThingInput();
+  return buildThingInput(useWizardStore.getState());
 }
 
 export default function GeneratingSlot() {

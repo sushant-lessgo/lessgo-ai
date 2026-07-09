@@ -115,3 +115,70 @@ NOT changed (checked, no-op confirmed): `src/lib/schemas/brief.schema.ts` (capab
 
 - Meridian auto-generated pages lose pricing/cta until Brief/7b plumbing lands (phases 4/6) — intended convergence, but a real meridian generation done BETWEEN phase-2 merge and phase-4 would ship a 5-section page with the CTA capability un-triggered (M1 briefs restore `cta` once the Brief reaches the call site). Flag at the phase-9 merge gate.
 - Capability sections append AFTER the core middle (before footer) — vestria's old interleaved order (trust/industries/about before features) is not reproduced; ordering refinement belongs to the 7b gate/ordering table if the founder wants it.
+
+## Phase 3 — Restore multipage fan-out + strategy-before-structure sequencing
+
+**Files changed**
+- `src/modules/wizard/generation/thing.ts` (edit) — strategy call extracted into exported `runStrategy(input)`; `runThingGeneration` tail delegates to it (fallback only)
+- `src/modules/wizard/generation/index.ts` (edit) — re-exports `runStrategy` + `RunStrategyResult` (module surface)
+- `src/hooks/useWizardStore.ts` (edit) — `fetchStrategy` action + `strategyStatus`/`strategyError`/`strategyCreditsError` state; exported shared `buildThingInput(state)` projection (+ `fieldStr`/`fieldArr`)
+- `src/components/onboarding/wizard/StructureSlot.tsx` (edit) — fires `fetchStrategy` on mount; real loading + error/credits/retry states; header comment updated (sourcing deviation resolved)
+- `src/components/onboarding/wizard/GeneratingSlot.tsx` (edit) — local `buildThingInput`/`fieldStr`/`fieldArr` deleted; now imports the store's shared projection (behavior identical)
+- `src/modules/wizard/generation/thing.test.ts` (edit) — `runStrategy` unit tests + no-refetch assertions on the pre-gate paths
+- `src/hooks/useWizardStore.test.ts` (edit) — `fetchStrategy` populate/idempotency/concurrency/402-retry/no-clobber tests + `buildThingInput` projection test
+
+### runStrategy extraction shape
+
+`thing.ts` exports:
+
+```ts
+type RunStrategyResult =
+  | { status: 'done'; strategy: ProductStrategyOutput }
+  | { status: 'credits' }
+  | { status: 'error'; error: string };
+runStrategy(input: ThingGenerationInput): Promise<RunStrategyResult>
+```
+
+Body is the old inline tail fetch VERBATIM: same `buildStrategyPayload(input)` builder, same `/api/audience/product/strategy` POST, same `isCreditFail` (402 or /credit/i) detection. The sitemap clamp was never client-side — `clampSitemap` runs server-side inside `assembleProductStrategy` (route step 5) — so calling the SAME route preserves the clamp path unchanged. `runThingGeneration`'s `if (input.strategy)` branch is now the PRIMARY path (comment updated); the tail `runStrategy` call survives as fallback for structure-skipping flows (and returns the credits/error result shapes unchanged, so GeneratingSlot's chrome behaves as before).
+
+### Credit-charge-once proof
+
+- The charge lives SERVER-side: `/api/audience/product/strategy` route step 6 (`consumeCredits(STRATEGY_GENERATION)`) — one charge per HTTP call. So "fetch exactly once" == "charge exactly once".
+- **Where it fires now:** `useWizardStore.fetchStrategy()` (triggered by StructureSlot mount) → `runStrategy` → one route call. On success it writes `setStrategy(result)` + `setSitemap(result.strategy.sitemap)` (per plan: caller writes the store).
+- **GeneratingSlot does NOT double-charge:** `buildThingInput` forwards store `strategy`/`sitemap` → `runThingGeneration` hits `if (input.strategy)` and NEVER reaches the tail `runStrategy`. Asserted in tests: multi-page vestria run and pre-gate single-page run both assert ZERO `/strategy` calls during generation (`thing.test.ts`).
+- The tail fallback only fires when `input.strategy` is null — i.e. the pre-gate fetch never happened (or failed and the user continued past the slot); in the failure case no charge occurred at the slot, so the generation-time fetch is still the FIRST charge, not a second.
+
+### Idempotency guard mechanism
+
+`fetchStrategy` guards on `strategyStatus`:
+- `'fetching' | 'done'` ⇒ immediate return (back-navigation remounts StructureSlot; its mount effect calls `fetchStrategy` again → no-op → no refetch, no second charge).
+- Status flips to `'fetching'` SYNCHRONOUSLY before the first `await`, so concurrent same-tick calls collapse to one fetch (test: `Promise.all` double-call ⇒ 1 strategy call).
+- `'error'` re-arms the guard ⇒ the slot's Retry button works (test: 402 then retry ⇒ 2nd call allowed).
+- Pre-seeded `strategy` (non-null) ⇒ marked `'done'` with zero network.
+- Sitemap seeding respects prior user edits: `setSitemap` only when store sitemap is null (never clobbers an edited draft; tested).
+- Error path: slot shows retry (generic) or out-of-credits chrome (View plans link, mirroring GeneratingSlot's credits screen); WizardShell's Back/Continue nav stays rendered, so the user is never trapped.
+
+### Runtime flow (reasoned; dev-server QA deferred to phase 9)
+
+- **Vestria (multipage):** onboarding → structure slot mounts → `fetchStrategy` → `/strategy` route (charges once, prompt gets page-archetype menu, `clampSitemap` law applied server-side) → store `strategy`+`sitemap` populated → gate renders the REAL editable sitemap (edits via `setSitemap`) → Continue → GeneratingSlot → `buildThingInput` forwards non-null strategy+sitemap → `thing.ts` `input.strategy && input.sitemap?.length` truthy → skeleton save + `runFanOut` (per-page copy; a page removed at the gate is absent from `input.sitemap` ⇒ NO copy call for it; within a page, removed sections are absent from `page.sections` ⇒ no copy for them either).
+- **Meridian (single-page):** thing contract has `slotSkips=[]` ⇒ hits the structure slot too → strategy fetched there (menu null ⇒ no sitemap in response; store sitemap stays null) → `input.strategy` truthy, `input.sitemap?.length` falsy → `runCopyAndSave(input.strategy)` — strategy fetched once at the slot, zero fetches at GeneratingSlot. Output unchanged (same payload builder, same route).
+- **Trust/work:** untouched — they skip the structure slot (`slotSkips`), `fetchStrategy` never fires, and their adapters are unmodified.
+
+### Deviations
+
+- **Test files edited outside the printed Files-touched list** (`thing.test.ts`, `useWizardStore.test.ts`): the task's verification step explicitly requires "add/adjust tests for the new fetch action + idempotency guard"; these are the companion test files of two in-scope modules. No non-test file outside the list touched.
+- **`buildThingInput` moved from GeneratingSlot into useWizardStore (exported):** the store's `fetchStrategy` needs the store→adapter projection, and duplicating it would let the pre-gate payload drift from the generation payload (a silent double-source bug). Moving it store-side gives ONE projection; GeneratingSlot imports it (no cycle — the store never imports the slot). `fieldStr`/`fieldArr` moved+exported alongside (still used by GeneratingSlot's trust/work builders).
+- `fetchStrategy` loads the thing adapter via dynamic `import()` so the generation tree stays out of the store's static import graph (store firewall note preserved; type imports only at module top).
+- Conservative UI choice: while the strategy fetch is in flight on a single-page template (meridian), the slot shows the same loading state, then the existing "single-page site" note — the KNOWN INTERMEDIATE WART stands: meridian's structure slot fetches strategy but has no single-page structure UI until phase 4 (cosmetic; tests green).
+- StructureSlot's defensive "no draft" placeholder retained for the (theoretically unreachable) multi-page + strategy-done + no-sitemap combination.
+
+### Test results
+
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run` — `Test Files 92 passed | 1 skipped (93)` · `Tests 1449 passed | 2 skipped (1451)` (phase-2 baseline 1437 + 12 new assertions across thing.test.ts and useWizardStore.test.ts; existing multi-page smoke extended with a no-refetch assertion).
+
+### Open risks
+
+- The `structure` slot precedes `generating`, so a user who abandons the wizard AFTER the structure slot has paid the strategy charge (2 credits) without a generated page — same exposure the old SitemapReviewStep had; acceptable per plan (the gate must render real data).
+- Strategy status lives only in the client store: a full page reload between structure and generating loses `strategy`/`sitemap` → GeneratingSlot's fallback refetches (a second charge across SESSIONS, not within a run). Pre-existing store-lifetime semantics (old wizard identical); persistence of confirmed structure is phase 6.
+- Meridian structure slot = strategy fetch + "single-page" note only until phase 4 (known wart, cosmetic).

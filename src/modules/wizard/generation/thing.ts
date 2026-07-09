@@ -238,6 +238,47 @@ function isCreditFail(status: number, error: string | undefined): boolean {
   return status === 402 || /credit/i.test(error ?? '');
 }
 
+// ---------------------------------------------------------------------------
+// Strategy step (scale-07 phase 3) — extracted so the STRUCTURE slot can run
+// it PRE-gate via the wizard store's `fetchStrategy` action.
+// ---------------------------------------------------------------------------
+
+export type RunStrategyResult =
+  | { status: 'done'; strategy: ProductStrategyOutput }
+  | { status: 'credits' }
+  | { status: 'error'; error: string };
+
+/**
+ * The strategy call as a standalone step: SAME payload builder
+ * (`buildStrategyPayload`), SAME route (the server owns the credit charge AND
+ * the `clampSitemap` law over the LLM's sitemap proposal), SAME credit-fail
+ * detection as the old inline call.
+ *
+ * Charged EXACTLY ONCE per run: the primary caller is the wizard store's
+ * `fetchStrategy` action (fired when the wizard reaches the structure slot),
+ * which writes the result into the store via `setStrategy`/`setSitemap`.
+ * `runThingGeneration` then receives a non-null `input.strategy` and NEVER
+ * refetches — its tail call below survives only as a fallback for
+ * structure-skipping flows where no strategy was fetched pre-gate.
+ */
+export async function runStrategy(input: ThingGenerationInput): Promise<RunStrategyResult> {
+  try {
+    const res = await fetch('/api/audience/product/strategy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildStrategyPayload(input)),
+    });
+    const json = await res.json();
+    if (!res.ok || !json?.success) {
+      if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
+      throw new Error(json?.message || 'Strategy generation failed');
+    }
+    return { status: 'done', strategy: json.data as ProductStrategyOutput };
+  } catch (e: any) {
+    return { status: 'error', error: e?.message || 'Strategy generation failed.' };
+  }
+}
+
 export async function runThingGeneration(
   input: ThingGenerationInput,
   cb: GenerationCallbacks = {}
@@ -487,9 +528,13 @@ export async function runThingGeneration(
     return { status: 'done', redirectTo: REDIRECT(tokenId) };
   };
 
-  // ─── Strategy ───
-  // Sitemap-gated flows (vestria) already fetched strategy in the structure step
-  // — reuse it (no second charge) and honor the USER-EDITED shape.
+  // ─── Strategy (PRIMARY path: fetched pre-gate at the structure slot) ───
+  // The wizard store's fetchStrategy action already ran `runStrategy` when the
+  // user reached the structure slot, so `input.strategy` (and, for multipage,
+  // `input.sitemap`) carry the USER-CONFIRMED shape — reuse it, NO second
+  // charge. A section/page absent from the confirmed structure gets no copy
+  // call (fan-out iterates `input.sitemap`; single-page copies
+  // `strategy.sections`).
   if (input.strategy) {
     if (input.sitemap?.length) {
       const ob: MultiPageOnboardingData = {
@@ -518,23 +563,10 @@ export async function runThingGeneration(
     return runCopyAndSave(input.strategy);
   }
 
+  // ─── Fallback: no pre-gate strategy (structure-skipping flow) — fetch here ───
   cb.onStage?.('strategy');
-  let strategy: ProductStrategyOutput;
-  try {
-    const res = await fetch('/api/audience/product/strategy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(buildStrategyPayload(input)),
-    });
-    const json = await res.json();
-    if (!res.ok || !json?.success) {
-      if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
-      throw new Error(json?.message || 'Strategy generation failed');
-    }
-    strategy = json.data as ProductStrategyOutput;
-  } catch (e: any) {
-    return { status: 'error', error: e?.message || 'Strategy generation failed.' };
-  }
+  const strategyResult = await runStrategy(input);
+  if (strategyResult.status !== 'done') return strategyResult;
 
-  return runCopyAndSave(strategy);
+  return runCopyAndSave(strategyResult.strategy);
 }

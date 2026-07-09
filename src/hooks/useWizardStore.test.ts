@@ -1,11 +1,12 @@
 // src/hooks/useWizardStore.test.ts
 // scale-06 phase 2 — unified Brief-backed wizard store.
 // Covers: slot-machine transitions per engine (skips honored), hydration from
-// brief fixtures, review/fill mode derivation.
+// brief fixtures, review/fill mode derivation, and (scale-07 phase 3) the
+// structure-slot strategy fetch action + its charge-once idempotency guard.
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { Brief } from '@/types/brief';
-import { useWizardStore, deriveMode } from './useWizardStore';
+import { useWizardStore, deriveMode, buildThingInput } from './useWizardStore';
 
 /** Build a Brief with a partial EntryFacts payload at facts.entry. */
 function briefWithEntry(entry: Record<string, unknown>, extra: Partial<Brief> = {}): Brief {
@@ -230,5 +231,153 @@ describe('useWizardStore — field + goal + brief-patch actions', () => {
     expect(s.slots).toEqual([]);
     expect(s.fields).toEqual({});
     expect(s.goalIntent).toBeNull();
+    expect(s.strategyStatus).toBe('idle');
+    expect(s.strategy).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// scale-07 phase 3 — structure-slot strategy fetch (charge-once guard)
+// ---------------------------------------------------------------------------
+
+const MOCK_SITEMAP = [
+  { archetypeKey: 'home', title: 'Home', pathSlug: '/', sections: ['hero', 'contact'] },
+  { archetypeKey: 'catalog', title: 'Products', pathSlug: '/products', sections: ['catalog'] },
+];
+const MOCK_STRATEGY = {
+  awareness: 'solution-aware-skeptical',
+  oneReader: { personaDescription: 'p', pain: [], desire: [], objections: [] },
+  oneIdea: { bigBenefit: 'x', uniqueMechanism: 'y', reasonToBelieve: 'z' },
+  featureAnalysis: [],
+  sections: ['header', 'hero', 'footer'],
+  uiblocks: { header: 'H', hero: 'He', footer: 'F' },
+  sitemap: MOCK_SITEMAP,
+};
+
+/** fetch stub counting /strategy calls (the CHARGED route). */
+function stubStrategyFetch(
+  respond: () => Promise<any> = async () => ({
+    ok: true,
+    json: async () => ({ success: true, data: MOCK_STRATEGY }),
+  })
+) {
+  const spy = vi.fn(async (url: string) => {
+    if (url.includes('/api/audience/product/strategy')) return respond();
+    return { ok: true, json: async () => ({}) };
+  });
+  vi.stubGlobal('fetch', spy);
+  const strategyCalls = () =>
+    spy.mock.calls.filter(([u]) => String(u).includes('/api/audience/product/strategy')).length;
+  return { spy, strategyCalls };
+}
+
+describe('useWizardStore — fetchStrategy (structure-slot strategy sourcing)', () => {
+  beforeEach(() => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tok123', brief: richThing, audienceType: 'product', templateId: 'vestria' });
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('populates strategy + sitemap via one charged call; status → done', async () => {
+    const { strategyCalls } = stubStrategyFetch();
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+    expect(strategyCalls()).toBe(1);
+    expect(s.strategyStatus).toBe('done');
+    expect(s.strategy).toEqual(MOCK_STRATEGY);
+    expect(s.sitemap).toEqual(MOCK_SITEMAP);
+    expect(s.strategyError).toBeNull();
+  });
+
+  it('IDEMPOTENT after done: a second call (back-navigation remount) never refetches — no double charge', async () => {
+    const { strategyCalls } = stubStrategyFetch();
+    await useWizardStore.getState().fetchStrategy();
+    await useWizardStore.getState().fetchStrategy();
+    await useWizardStore.getState().fetchStrategy();
+    expect(strategyCalls()).toBe(1);
+    expect(useWizardStore.getState().strategyStatus).toBe('done');
+  });
+
+  it('IDEMPOTENT while in flight: concurrent calls collapse to one charged fetch', async () => {
+    const { strategyCalls } = stubStrategyFetch();
+    await Promise.all([
+      useWizardStore.getState().fetchStrategy(),
+      useWizardStore.getState().fetchStrategy(),
+    ]);
+    expect(strategyCalls()).toBe(1);
+  });
+
+  it('pre-seeded strategy ⇒ marks done WITHOUT any network call', async () => {
+    const { strategyCalls } = stubStrategyFetch();
+    useWizardStore.getState().setStrategy(MOCK_STRATEGY);
+    await useWizardStore.getState().fetchStrategy();
+    expect(strategyCalls()).toBe(0);
+    expect(useWizardStore.getState().strategyStatus).toBe('done');
+  });
+
+  it('never clobbers a user-edited sitemap already in the store', async () => {
+    stubStrategyFetch();
+    const edited = [{ archetypeKey: 'home', title: 'Edited', pathSlug: '/', sections: ['hero'] }];
+    useWizardStore.getState().setSitemap(edited);
+    await useWizardStore.getState().fetchStrategy();
+    expect(useWizardStore.getState().sitemap).toEqual(edited);
+  });
+
+  it('402 ⇒ status error + strategyCreditsError; retry is allowed and refetches', async () => {
+    const { strategyCalls } = stubStrategyFetch(async () => ({
+      ok: false,
+      status: 402,
+      json: async () => ({ error: 'out of credits' }),
+    }));
+    await useWizardStore.getState().fetchStrategy();
+    let s = useWizardStore.getState();
+    expect(s.strategyStatus).toBe('error');
+    expect(s.strategyCreditsError).toBe(true);
+    expect(s.strategy).toBeNull();
+
+    // Retry (error status re-arms the guard).
+    await useWizardStore.getState().fetchStrategy();
+    expect(strategyCalls()).toBe(2);
+  });
+
+  it('generic failure ⇒ status error with message; strategyCreditsError stays false', async () => {
+    stubStrategyFetch(async () => ({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: 'ai_error', message: 'AI generation failed' }),
+    }));
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+    expect(s.strategyStatus).toBe('error');
+    expect(s.strategyCreditsError).toBe(false);
+    expect(s.strategyError).toBe('AI generation failed');
+  });
+});
+
+describe('useWizardStore — buildThingInput projection (shared by fetchStrategy + GeneratingSlot)', () => {
+  beforeEach(() => {
+    useWizardStore.getState().reset();
+  });
+
+  it('projects fields + strategy/sitemap from state', () => {
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tok123', brief: richThing, audienceType: 'product', templateId: 'meridian' });
+    useWizardStore.getState().setStrategy(MOCK_STRATEGY);
+    useWizardStore.getState().setSitemap(MOCK_SITEMAP);
+
+    const input = buildThingInput(useWizardStore.getState());
+    expect(input.tokenId).toBe('tok123');
+    expect(input.templateId).toBe('meridian');
+    expect(input.productName).toBe('Acme Invoicing');
+    expect(input.audiences).toEqual(['freelance designers', 'developers']);
+    expect(input.goalIntent).toBe('free-trial');
+    expect(input.proof).toEqual({ hasTestimonials: true });
+    expect(input.strategy).toEqual(MOCK_STRATEGY);
+    expect(input.sitemap).toEqual(MOCK_SITEMAP);
   });
 });

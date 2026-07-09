@@ -26,8 +26,8 @@ Section lists stop being template property. A new engine-owned section grammar (
 ## Progress log
 
 - phase 1 engine-owned section grammar (behavior-preserving wiring): done (commit 84a43b5, review loops 1, ship, 1389 tests green; nit: import order, deferred — consts deleted in phase 2)
-- phase 2 meridian/vestria core convergence + capability mapping: done (review loop 1, ship, 1437 tests green; interim: meridian new-gen 5-core until phase-4 step-0 Brief plumbing restores pricing/cta)
-- phase 3 restore multipage fan-out + strategy-before-structure sequencing: pending
+- phase 2 meridian/vestria core convergence + capability mapping: done (commit 41b61233, review loop 1, ship, 1437 tests green; interim: meridian new-gen 5-core until phase-4 step-0 Brief plumbing restores pricing/cta)
+- phase 3 restore multipage fan-out + strategy-before-structure sequencing: done (review loop 1, ship, 1449 tests green; charge-once + race-safe idempotency verified; open risks → phase 6 charge-dedup step 3b)
 - phase 4 universal 7b gate (single-page mode + clamp law + trust GA): pending
 - phase 5 multipage keyed by capability (sitemap for all): pending
 - phase 6 structure persistence + 7b deletion relaxes hard-fit: pending
@@ -203,6 +203,7 @@ Refresh deliberately; audit lists each diff with before/after section lists.
 1. Map section → owning capability via inverted `templateMeta.capabilitySections` + capability section names from grammar; core sections map to no capability.
 2. Confirm handler: persist structure JSON via saveDraft brief patch (first real writer of `Project.brief.structure`); recompute + store required set.
 3. Structural capabilities (multipage/bilingual) stay trust-on-declaration.
+3b. **Charge-dedup (carried from phase 3 open risk):** persisting strategy/structure lets a reload-across-sessions resume the confirmed structure WITHOUT re-charging strategy credits — guard the strategy re-fetch on persisted `Project.brief.structure`/stored strategy so abandon-after-structure + reload doesn't double-charge.
 4. Guard: an autosave from elsewhere must not clobber structure — saveDraft's shallow-merge only replaces `structure` when the patch includes it (verified: merge is key-wise at `saveDraft/route.ts:126-128`); note in audit.
 
 **Verification:** tsc · `npm run test:run` (fit tests: before/after drop; brief schema parse of old `{mode,pages}` rows; single-page `{mode:'single', sections}` patch passes `BriefSchema.partial()` safeParse) · manual: confirm gate, inspect `Project.brief.structure` row in DB.
