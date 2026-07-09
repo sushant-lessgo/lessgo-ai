@@ -20,7 +20,7 @@ Key facts confirmed in code (implementer re-verifies before editing):
 - phase 2 melt thing.ts forks + delete manufacturerFlow + grep-gate: done (commit de8db516, review loops 2, tsc+1558 tests green) — HUMAN GATE: awaiting real-regen eyeball
 - phase 3 new entries photographer + app (config-only): done (commit 5da42705, review loops 1, tsc+1565 tests green; config.ts sole source change; +2 test-file fixture repoints photographer→florist)
 - phase 4 dead-legacy deletion: pending
-- phase 5 manufacturer golden + contract tests: pending
+- phase 5 manufacturer golden + contract tests: done (commit 7fd949e4, review loops 1, tsc+1568 tests green; fixture-free ENTRY-payload asserts + CAPTURE=1 vestria golden wired)
 - phase 6 admin businessTypes panel: pending
 
 ---

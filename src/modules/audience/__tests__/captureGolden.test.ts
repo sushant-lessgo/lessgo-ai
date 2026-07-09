@@ -26,7 +26,8 @@ import { buildProductCopyPrompt } from '@/modules/audience/product/copyPrompt';
 import { processServiceCopy } from '@/modules/audience/service/parseCopy';
 import { processProductCopy } from '@/modules/audience/product/parseCopy';
 import { serviceElementSchema } from '@/modules/audience/service/elementSchema';
-import { meridianElementSchema } from '@/modules/audience/product/elementSchema';
+import { meridianElementSchema, productElementSchema } from '@/modules/audience/product/elementSchema';
+import { productVoiceForBusinessType } from '@/modules/audience/product/voice';
 import {
   generateMockServiceStrategy,
 } from '@/modules/prompt/mockResponseGeneratorService';
@@ -38,7 +39,7 @@ import type { ServiceUnderstandingInput, ServiceAssetInput } from '@/types/servi
 
 const OUT_DIR = path.resolve(process.cwd(), 'e2e/fixtures/generated');
 
-function writeFixture(name: string, schema: 'service' | 'product', uiblocks: any, sections: any) {
+function writeFixture(name: string, schema: 'service' | 'product' | 'vestria', uiblocks: any, sections: any) {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const file = path.join(OUT_DIR, `${name}.json`);
   fs.writeFileSync(file, JSON.stringify({ template: name, schema, uiblocks, sections }, null, 2));
@@ -93,5 +94,39 @@ describe.skipIf(process.env.CAPTURE !== '1')('CAPTURE real-LLM golden fixtures',
     const errors = validateGeneratedContent(processed as any, strategy.uiblocks, meridianElementSchema);
     expect(errors, `real product copy failed validation:\n${JSON.stringify(errors, null, 2)}`).toEqual([]);
     writeFixture('product', 'product', strategy.uiblocks, processed);
+  }, 120_000);
+
+  // scale-08 phase 5 — manufacturer/Vestria golden. A Golden-Shadow-shaped
+  // manufacturer run regenerates through the business-type CONFIG ENTRY: the
+  // copy voice is derived from `productVoiceForBusinessType('manufacturer')`
+  // (→ 'tailored-trade') — NOT from a templateId key. The thing engine is the
+  // ONE pipeline; the vestria template is just the resolved skin. Freezes
+  // e2e/fixtures/generated/vestria.json (schema 'vestria') so the
+  // generationContract GOLDEN block revalidates it offline.
+  it('manufacturer (Vestria schema) → e2e/fixtures/generated/vestria.json', async () => {
+    const productName = 'Brasswright';
+    const oneLiner = 'Hand-finished brass hardware for premium furniture makers.';
+    // Manufacturer field remap semantics: valueAdds ARE the effective feature
+    // list the strategy/copy consume (thing.ts effectiveFeatures).
+    const valueAdds = ['Solid brass, no plating flake', 'Custom finishes at MOQ 500', 'Export-ready packing'];
+    const offer = 'Request a sample kit';
+    // Voice from the businessType config entry (businessTypeKey: 'manufacturer').
+    const voiceId = productVoiceForBusinessType('manufacturer'); // 'tailored-trade'
+    const strategy = generateMockMeridianStrategy({
+      productName, oneLiner, features: valueAdds,
+      primaryAudience: 'Furniture brands and interior contractors placing 500+ unit orders',
+      templateId: 'vestria',
+      proof: { hasTestimonials: true },
+    });
+    const prompt = buildProductCopyPrompt({
+      strategy, uiblocks: strategy.uiblocks, productName, oneLiner, offer,
+      landingGoal: 'contact' as any, features: valueAdds, voiceId,
+    });
+    const { generateRawJson } = await import('@/lib/aiClient');
+    const raw = await generateRawJson('copy', prompt, CopyResponseSchema);
+    const processed = processProductCopy(raw as any, strategy.uiblocks);
+    const errors = validateGeneratedContent(processed as any, strategy.uiblocks, productElementSchema);
+    expect(errors, `real manufacturer copy failed validation:\n${JSON.stringify(errors, null, 2)}`).toEqual([]);
+    writeFixture('vestria', 'vestria', strategy.uiblocks, processed);
   }, 120_000);
 });

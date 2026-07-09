@@ -190,3 +190,52 @@ Only non-test source file = `config.ts`. Everything else test files + this audit
 ### Open risks
 - None functional. `photographer` is deliberately non-serveable (gallery unbacked) → demand lane.
 - Orchestrator TODO: amend plan Phase-3 Files-touched to include `fit.test.ts` + `classify.test.ts`.
+
+---
+
+## Phase 5 — manufacturer golden + contract tests
+
+### Files changed
+- `src/modules/audience/__tests__/captureGolden.test.ts`
+- `src/modules/audience/__tests__/generationContract.test.ts`
+
+(`e2e/fixtures/generated/vestria.json` is NOT created here — it is a real-LLM artifact a human freezes with `CAPTURE=1`. CI never depends on it.)
+
+### captureGolden.test.ts — what changed
+- Added a third capture case inside the `CAPTURE !== '1'`-skipped block: `manufacturer (Vestria schema) → e2e/fixtures/generated/vestria.json`.
+- Mirrors the existing service/product cases: mock strategy (`generateMockMeridianStrategy` with `templateId: 'vestria'`, `proof.hasTestimonials`) → one real copy call (`buildProductCopyPrompt` + `generateRawJson`) → `processProductCopy` → validate → `writeFixture('vestria', 'vestria', …)`.
+- Manufacturer-shaped: `valueAdds` are threaded as the effective feature list; voice is derived through the CONFIG ENTRY via `productVoiceForBusinessType('manufacturer')` → `'tailored-trade'` (passed as `voiceId`). No templateId key drives voice — the businessType entry does. This is the "regenerates through the config ENTRY" acceptance.
+- New imports: `productElementSchema`, `productVoiceForBusinessType`. Stays fully skipped without `CAPTURE=1` (verified: 3 skipped).
+
+### generationContract.test.ts — what changed
+- `SCHEMAS` map: added `vestria: productElementSchema` so a captured `vestria.json` (schema label `'vestria'`) revalidates against the meridian+vestria element set in the GOLDEN `it.each` block when the fixture is present. The GOLDEN block remains `skipIf(goldenFiles.length === 0)` — no fixture, no run.
+- Added a NEW fixture-free `describe('generation contract — businessType ENTRY payloads (fixture-free)')` that runs in normal CI (no fetch, no LLM, no fixture) using the REAL exported builders `buildStrategyPayload` / `buildCopyPayload` from `thing.ts`:
+  1. **manufacturer entry** → `features === valueAdds`, `otherAudiences === industriesServed`, `categories === productCategories`, `whatYouMake` present, `brief.businessType === 'manufacturer'`, and copy payload `businessType === 'manufacturer'` + `features === valueAdds`. (Generic saas fields are deliberately populated to prove the remap ignores them.)
+  2. **saas entry** → features/categories pass through unremapped, `'whatYouMake' in payload === false` (NO leakage) on both builders, `brief.businessType === 'saas'`.
+  3. **app entry (config-only)** → same input as saas except `businessTypeKey: 'app'`; asserts identical key sets AND byte-identical payloads once the businessType tag is normalised (the only diff). Proves adding `app` rides the existing pipeline with zero new code — its remap behaviour is saas-identical because both are `extractionSchemaKey: 'thing'`.
+- New import: `buildStrategyPayload`, `buildCopyPayload` from `thing.ts` (was type-only import of `ThingGenerationInput`).
+
+### Fixture-free / green confirmation
+- Full `npm run test:run`: **1568 passed, 3 skipped (99 files)** with NO `e2e/fixtures/generated/` dir present. The 3 skipped are the CAPTURE-gated golden captures (service/product/vestria). The new ENTRY-payload asserts are among the passes.
+- `npx tsc --noEmit`: clean.
+- `generationContract.test.ts` alone: 17 passed. `captureGolden.test.ts` alone: 3 skipped.
+
+### Manufacturer golden capture wiring (human step — NOT run here)
+Human runs, with a real `OPENAI_API_KEY` in `.env.local` (1 real copy call, burns credits):
+
+```
+CAPTURE=1 npx vitest run src/modules/audience/__tests__/captureGolden.test.ts
+```
+
+This freezes `e2e/fixtures/generated/vestria.json` (+ service/product). Re-running the contract suite then validates the frozen vestria fixture against `productElementSchema` via the GOLDEN block. Eyeball for tailored-trade voice before committing.
+
+### Acceptance coverage (guard + contract together)
+- "Manufacturer regenerates through the config ENTRY, no templateId key in its pipeline path" — satisfied by BOTH: (a) the phase-2 `pipelineGuards.test.ts` bans `isManufacturerFlow` and the `templateId === 'vestria'` literal anywhere in the generation pipeline; (b) the new fixture-free manufacturer assert proves the field remap + voice are keyed on `businessTypes[key].extractionSchemaKey` / `businessTypeKey`, not the template id.
+- "Adding `app` provably rides the existing pipeline with zero new code" — the app==saas payload-identity assert here + `config.ts`'s app entry being config-only (phase 3). No code path names `app`.
+- No new code was needed to satisfy either acceptance grep — only tests.
+
+### Deviations
+- None. Scope held to the two test files; no fixture hand-written.
+
+### Open risks
+- The vestria golden only exercises its schema once a human runs `CAPTURE=1`; until then the manufacturer copy shape is guarded by the offline mock-route THING/TRUST contract tests + the new fixture-free entry asserts, not a frozen real-LLM sample. Intended (real-LLM freeze is a human eyeball step).
