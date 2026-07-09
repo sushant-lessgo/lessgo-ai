@@ -1,21 +1,45 @@
 # `src/modules/collections/` — Multi-page collection system
 
-A **collection** is a set of repeatable content pages (today: `products`): one
-**catalog** singleton page that auto-lists items + N **collectionItem** pages, each
-holding one structured record. This module fixes only the *page topology*; the
-materialize logic and editor UI live elsewhere (see below).
+A **collection** is a set of repeatable content pages: one **catalog** singleton
+page that auto-lists items + N **collectionItem** pages, each holding one
+structured record. This module fixes only the *page topology*; the materialize
+logic and editor UI live elsewhere (see below).
+
+## The collection FAMILY (`CollectionKey`)
+Valid collection keys are EXACTLY the collection-family capabilityIds
+(`@/types/brief`): **`products` · `services` · `case-studies` · `works`**
+(`locations` reserved for P3). `CollectionKey` enumerates them and
+`COLLECTIONS` is keyed by it — an invalid key can never appear.
+
+**Vestria `catalog` is NOT a collection.** Vestria's `catalog` capability is a
+FLAT GRID of plain `ai_generated` items on one page. It shares the name but is
+NOT a `CollectionKey`, has NO `CollectionDef` here by construction, and can never
+trigger the generation→collections bridge. Locked here + in `@/types/brief` +
+`templateMeta.ts` comments.
 
 ## `registry.ts` — the collection definitions (pure data)
-`COLLECTIONS: Record<string, CollectionDef>` + `getCollectionDef(key)`. Each
-`CollectionDef` declares `key`, `basePath` (`/products` — item slugs are
+`COLLECTIONS: Record<CollectionKey, CollectionDef>` + `getCollectionDef(key)`.
+Each `CollectionDef` declares `key`, `basePath` (`/products` — item slugs are
 `basePath + '/' + slug`), `label`, the archetype keys stamped on item vs catalog
-pages, and the two section types that carry data: `catalogSectionType`
-(`catalog`) and `itemSectionType` (`productdetail`).
+pages, the two section types that carry data (`catalogSectionType`,
+`itemSectionType`), and **`labelFields: string[]`** — the ordered item-record
+field names used to derive an entry's display label (first non-empty joined by
+` — `, page title as fallback). `products` uses `['model', 'name']`; this lets
+the editor panel drop hard-coded per-collection label fallbacks.
 
 **Firewall convention:** this file is PURE DATA — no store or template imports
 (same discipline as `audience/*/elementSchema.ts`), so it can be read anywhere.
 Categories are **not** defined here; they live as editable content on the catalog
 block (`categories[]`) so they stay renamable/reorderable per project.
+
+## `../brief/collections.ts` — Brief-carried collection data (pure)
+`Brief.facts.collections: { [key: CollectionKey]: CollectionEntry[] }` holds the
+entry lists (scraped verbatim, edited at the 7b gate). `CollectionEntry` =
+`{ name, slug, oneLiner?, imageUrl? }`. `getCollections(brief)` is the tolerant
+safe reader (missing/malformed facts ⇒ `{}`; unknown keys/entries dropped);
+`setCollections` / `makeCollectionEntry` are pure writers. **Slug law:** slugs
+are ALWAYS code-derived from `name` via `slugify` — never AI. `facts` is a loose
+`z.record`, so no `brief.schema.ts` change is needed.
 
 ## Where the rest lives (verified)
 The registry is small on purpose — the behavior is implemented against it:

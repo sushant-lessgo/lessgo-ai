@@ -24,6 +24,10 @@ export type CopyEngine = (typeof copyEngines)[number];
 export const capabilityIds = [
   'multipage',
   'gallery',
+  // `catalog` = vestria's FLAT-GRID capability (plain ai_generated items on one
+  // page) — it is NOT a collection and must NEVER key a CollectionDef
+  // (src/modules/collections/registry.ts). It merely shares the name with the
+  // collection concept; see the family ids below.
   'catalog',
   'map-hours',
   'bilingual',
@@ -42,6 +46,15 @@ export const capabilityIds = [
   'about',
   'materials',
   'process',
+  // scale-10 collection FAMILY (per-type collection capabilities). A template
+  // declaring one of these opts its pages into the generation→collections
+  // bridge for that key. These map 1:1 to CollectionKey / the collections
+  // registry (src/modules/collections/registry.ts). `locations` is reserved
+  // for P3 (place engine) and is intentionally NOT added yet.
+  'products',
+  'services',
+  'case-studies',
+  'works',
 ] as const;
 export type CapabilityId = (typeof capabilityIds)[number];
 

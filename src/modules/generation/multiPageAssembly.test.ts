@@ -81,7 +81,10 @@ describe('multiPageAssembly — HARD INVARIANT (no materialization, PO blocker 2
   it('vestria registers no CollectionDef (catalog items stay plain ai_generated)', async () => {
     const { COLLECTIONS } = await import('@/modules/collections/registry');
     const defs = Object.values(COLLECTIONS).map((d) => d.key);
-    expect(defs).toEqual(['products']); // naayom only — nothing vestria-shaped
+    // scale-10: the collection FAMILY is registered, but vestria's flat-grid
+    // `catalog` is NOT a registered CollectionDef (never a CollectionKey).
+    expect(defs).not.toContain('catalog');
+    expect(defs).toEqual(['products', 'services', 'case-studies', 'works']);
   });
 });
 

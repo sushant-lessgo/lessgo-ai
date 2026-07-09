@@ -65,6 +65,11 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
     capabilities: [
       'multipage',
       'lead-form',
+      // FLAT-GRID capability, NOT a collection. vestria's `catalog` renders
+      // plain ai_generated items on one page; it is NOT a CollectionKey and has
+      // no CollectionDef by construction (scale-10), so vestria can never
+      // trigger the generation→collections bridge. Distinct from the collection
+      // family (products|services|case-studies|works).
       'catalog',
       'trust',
       'industries',
