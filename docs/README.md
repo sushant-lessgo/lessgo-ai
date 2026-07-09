@@ -27,9 +27,11 @@ One line per doc. Root keeps only `CLAUDE.md` + `README.md`. Completed/stale pla
 - [writerFlownTemplate.md](tracks/writerFlownTemplate.md) — writer vertical + Granth template
 - [writerDesignBrief.md](tracks/writerDesignBrief.md) — design brief companion to the writer track
 - [i18nPlan.md](tracks/i18nPlan.md) — multilingual platform direction (**DEFERRED** — do not build yet)
+- [universePlan.md](tracks/universePlan.md) — website/landing-page universe: variant fleet per business (direction agreed 2026-07-09; specs written when queue-front)
 
 ## product/
-- [productBacklog.md](product/productBacklog.md) — product backlog
+- [productQueue.md](product/productQueue.md) — **ordered build queue** (feature · spec file · queue #) — the WHAT-comes-next source of truth
+- [productBacklog.md](product/productBacklog.md) — unordered idea parking lot (enters the queue only with a number)
 - [brandMessage.md](product/brandMessage.md) — brand/positioning brief
 
 ## Code-level READMEs (in `src/` — read these before working in a dir)
