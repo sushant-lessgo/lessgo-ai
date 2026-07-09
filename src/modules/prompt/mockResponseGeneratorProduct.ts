@@ -7,6 +7,16 @@
 //
 // Copy items intentionally carry id:"" so processProductCopy's backfill is
 // exercised (top-level AND nested footer_columns → links).
+//
+// scale-07 phase 8b: thing-layout mocks emit the ENGINE-CONTRACT element set
+// (elementContracts.ts union), not the per-template layout set — mock == prompt
+// == backfill. Concretely the meridian mock also carries vestria-union fields
+// (hero tag_text/stamp/values, features kicker, footer link_columns …) and the
+// vestria mock carries meridian-union fields (hero status/stats, footer
+// wordmark/footer_columns …), so the contract-driven id backfill on union
+// collections is exercised offline in both directions. Non-thing layouts
+// (techpremium/naayom editor-only blocks) are not produced here and keep the
+// layout path.
 
 import type { ProductStrategyOutput } from '@/types/product';
 import type { SectionCopy } from '@/types/generation';
@@ -121,6 +131,9 @@ export function generateMockMeridianCopy(
     out.header = {
       elements: {
         logo_text: 'meridian',
+        // Contract-union fields (vestria header schema, optional under thing):
+        logo_mark_text: 'Deploys',
+        util_note: 'Shipping since 2021',
         cta_text: 'Start free',
         signin_text: 'Sign in',
         nav_items: [
@@ -142,10 +155,21 @@ export function generateMockMeridianCopy(
         cta_text: 'Start free',
         secondary_cta_text: 'Read the docs',
         caption: 'No credit card required',
+        // Contract-union fields (vestria hero schema, optional under thing):
+        tag_text: 'Deploy Platform · Cloud',
+        stamp_value: '18s',
+        stamp_label: 'median deploy',
         stats: [
           { id: '', value: '18s', label: 'median deploy' },
           { id: '', value: '99.99%', label: 'uptime' },
           { id: '', value: '1', label: 'keystroke rollback' },
+        ],
+        // Contract-union collection (vestria `values`) — exercises the
+        // contract-driven id backfill on a union collection.
+        values: [
+          { id: '', kicker: '01 — Speed', title: 'Atomic Deploys', description: 'Every push reversible in one step.' },
+          { id: '', kicker: '02 — Calm', title: 'Quiet On-Call', description: 'Rollbacks are one keystroke.' },
+          { id: '', kicker: '03 — Flow', title: 'Zero YAML', description: 'Connect a repo and push.' },
         ],
       } as any,
     };
@@ -158,9 +182,10 @@ export function generateMockMeridianCopy(
         headline: 'Everything you need to ship',
         lede: 'Push a repo and watch it go live.',
         features: [
-          { id: '', title: 'Atomic deploys', description: 'Every push is reversible in one step.', icon: 'Rocket', link_text: 'read ↗' },
-          { id: '', title: 'Instant rollbacks', description: 'Roll back to any prior build instantly.', icon: 'RotateCcw', link_text: 'read ↗' },
-          { id: '', title: 'Build caching', description: 'Cached layers cut build times to seconds.', icon: 'Layers', link_text: 'read ↗' },
+          // `kicker` = contract-union field (vestria features shape).
+          { id: '', title: 'Atomic deploys', description: 'Every push is reversible in one step.', icon: 'Rocket', link_text: 'read ↗', kicker: 'CAP / 01' },
+          { id: '', title: 'Instant rollbacks', description: 'Roll back to any prior build instantly.', icon: 'RotateCcw', link_text: 'read ↗', kicker: 'CAP / 02' },
+          { id: '', title: 'Build caching', description: 'Cached layers cut build times to seconds.', icon: 'Layers', link_text: 'read ↗', kicker: 'CAP / 03' },
         ],
       } as any,
     };
@@ -224,6 +249,12 @@ export function generateMockMeridianCopy(
           { id: '', heading: 'Product', links: [ { id: '', label: 'Features', href: '#' }, { id: '', label: 'Pricing', href: '#' }, { id: '', label: 'Docs', href: '#' } ] },
           { id: '', heading: 'Company', links: [ { id: '', label: 'About', href: '#' }, { id: '', label: 'Blog', href: '#' } ] },
         ],
+        // Contract-union fields (vestria footer schema, optional under thing):
+        blurb: 'Deploys, rollbacks and caching for shipping teams.',
+        tagline: 'Ship daily. Sleep nightly.',
+        link_columns: [
+          { id: '', heading: 'Resources', links: [ { id: '', label: 'Changelog', href: '#' }, { id: '', label: 'Status', href: '#' } ] },
+        ],
       } as any,
     };
   }
@@ -249,6 +280,8 @@ function generateMockVestriaCopy(input: MockProductCopyInput): Record<string, Se
         secondary_cta_text: 'Catalogue',
         secondary_cta_href: '#catalog',
         util_note: 'Manufacturing since 2009',
+        // Contract-union field (meridian header schema, required under thing):
+        signin_text: 'Client login',
         nav_items: [
           { id: '', label: 'Industries', href: '#industries' },
           { id: '', label: 'About', href: '#about' },
@@ -271,6 +304,12 @@ function generateMockVestriaCopy(input: MockProductCopyInput): Record<string, Se
         secondary_cta_href: '#catalog',
         stamp_value: '300+',
         stamp_label: 'Projects delivered',
+        // Contract-union fields (meridian hero schema, optional under thing):
+        status_text: 'Est. 2009 · Full-service workshop',
+        stats: [
+          { id: '', value: '300+', label: 'projects delivered' },
+          { id: '', value: '2009', label: 'founded' },
+        ],
         values: [
           { id: '', kicker: '01 — Precision', title: 'Millimetre Tolerances', description: 'CNC-machined panels checked against drawings before dispatch.' },
           { id: '', kicker: '02 — Programme', title: 'On-Site On Time', description: 'Install crews scheduled around your trades.' },
@@ -326,9 +365,10 @@ function generateMockVestriaCopy(input: MockProductCopyInput): Record<string, Se
         headline: 'Services that separate us.',
         lede: 'From first sketch to final snag.',
         features: [
-          { id: '', kicker: 'SVC / 01', title: 'Design & Drawings', description: 'Shop drawings for sign-off before cutting.' },
-          { id: '', kicker: 'SVC / 02', title: 'CNC Manufacture', description: 'In-house machining with batch QC.' },
-          { id: '', kicker: 'SVC / 03', title: 'Installation', description: 'Fitted, snagged and handed over clean.' },
+          // `link_text` = contract-union field (meridian features shape).
+          { id: '', kicker: 'SVC / 01', title: 'Design & Drawings', description: 'Shop drawings for sign-off before cutting.', link_text: 'more ↗' },
+          { id: '', kicker: 'SVC / 02', title: 'CNC Manufacture', description: 'In-house machining with batch QC.', link_text: 'more ↗' },
+          { id: '', kicker: 'SVC / 03', title: 'Installation', description: 'Fitted, snagged and handed over clean.', link_text: 'more ↗' },
         ],
       } as any,
     };
@@ -422,6 +462,14 @@ function generateMockVestriaCopy(input: MockProductCopyInput): Record<string, Se
         address_heading: 'Get in Touch',
         copyright: `© ${input.productName || 'Vestria'} — All rights reserved.`,
         tagline: 'Built to outlast the lease.',
+        // Contract-union fields (meridian footer schema, required under thing):
+        wordmark: input.productName || 'Vestria',
+        footer_columns: [
+          { id: '', heading: 'Workshop', links: [
+            { id: '', label: 'About', href: '#about' },
+            { id: '', label: 'Process', href: '#process' },
+          ] },
+        ],
         link_columns: [
           { id: '', heading: 'Explore', links: [
             { id: '', label: 'Industries', href: '#industries' },

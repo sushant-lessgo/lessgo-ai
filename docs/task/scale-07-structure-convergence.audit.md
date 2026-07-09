@@ -556,3 +556,88 @@ With `DEBUG_ELEMENT_SELECTION=true`, `getCompleteElementsMap` logs per-section m
 - Editor regen prompts for meridian/vestria projects now list the unioned fields (e.g. meridian footer regen sees `link_columns`, vestria footer regen sees required `wordmark/footer_columns`) — the AI may emit fields the current template's block doesn't render; harmless at render (blocks ignore unknown keys) but stored content grows. Intended convergence; phase 9 QA should eyeball one regen.
 - The wizard copy path (copyPrompt.ts) still keys element lists off per-layout schemas (see Deviations) — the §3 invariant is true for the elementsMap generation path only until a follow-up converges the wizard prompt builder.
 - `validateSectionContent`'s `missingMandatory` for a vestria footer now includes meridian's `wordmark/copyright/footer_columns` when absent — nothing consumes that as a hard gate today (isValid drives warnings), but a future strict validator would need per-template awareness or content backfill.
+
+---
+
+## Phase 8b — Wizard copy prompt through the engine contract
+
+**Files changed**
+- `src/modules/audience/product/copyPrompt.ts` — prompt build reads the engine contract
+- `src/modules/audience/product/parseCopy.ts` — id backfill + defaults read the same contract
+- `src/modules/sections/layoutElementSchema.ts` — defaults path grew an optional contract resolver
+- `src/modules/prompt/mockResponseGeneratorProduct.ts` — thing mocks emit the contract-union set
+- `src/modules/audience/product/promptBranch.test.ts` — COPY_SAAS_BASELINE re-baselined (intended convergence) + new phase-8b invariant tests
+
+### Per-file changes
+
+**copyPrompt.ts (consumer a — prompt build)**
+- New `resolveSpecSchema(layoutName)` = `resolveEngineSectionSchema(layoutName) ?? layoutElementSchema[layoutName]` — mirrors the `elementDetermination.ts:154-157` precedent exactly. Both `getAIElements` (was :82) and `buildSectionSpec` (was :90) now go through it. `resolveEngineSectionSchema` returns `UIBlockSchemaV2` — shape-compatible with `getAllElements`/`getCardRequirements`, no adapter.
+- Replaced the two hardcoded collection-shape blocks (`getMeridianCollectionSchemas`/`getVestriaCollectionSchemas`, was :137/:158) with ONE `getThingCollectionSchemas(isTrade)`: the SET is the union of the two former blocks, matching the contract (nav_items, stats, values, features, industries, items, swatches, rows, steps, testimonials, logos, tiers, assurances, footer_columns, link_columns). The shared `features` line merges both shapes (`title/description/icon/link_text` + vestria `kicker`), exactly like the contract's field union. Only the **Notes** wording stays voice-selected (meridian NEEDS_REVIEW framing vs vestria's "do NOT emit logos/phones/addresses" policy), per the plan's "voice/tone WORDING may stay voice-selected".
+
+**parseCopy.ts (consumer b — defaults + id backfill)**
+- `backfillCollectionIds` (was :75): `resolveEngineSectionSchema(layoutName) ?? productElementSchema[layoutName]` — union collections the prompt now asks for (meridian hero `values`, meridian footer `link_columns`, vestria hero `stats`, vestria footer `footer_columns`) get their system ids backfilled; non-thing layouts unchanged.
+- `processProductCopy`: passes `resolveEngineSectionSchema` as the new resolver arg to `applyAllSchemaDefaults` — defaults read the SAME contract schema.
+
+**layoutElementSchema.ts (defaults path, contract-aware branch)**
+- `applySchemaDefaults` gained optional `schemaOverride?: UIBlockSchemaV2 | null` (null/undefined → old layout-registry lookup); `applyAllSchemaDefaults` gained optional `resolveSchema?: (layout) => UIBlockSchemaV2 | null`. **Deliberately resolver-injection, not a direct import of `engines/elementContracts`** — avoids a value-level import cycle (layoutElementSchema ← product/elementSchema ← elementContracts) and keeps the service caller (`service/parseCopy.ts`, passes nothing) byte-identical. The gate itself stays with the product caller.
+
+**mockResponseGeneratorProduct.ts (consumer c — mock seed)**
+- Meridian mock gained vestria-union fields: header `logo_mark_text`/`util_note`; hero `tag_text`/`stamp_value`/`stamp_label` + the `values[]` collection (ids `""`); features items `kicker`; footer `blurb`/`tagline` + a `link_columns[]` column with nested links (ids `""`).
+- Vestria mock gained meridian-union fields: header `signin_text`; hero `status_text` + `stats[]`; features items `link_text`; footer `wordmark` + a `footer_columns[]` column (ids `""`).
+- techpremium/vestria-editor-only mocks: none exist in this generator (it only emits generation-path layouts) — no other mock touched.
+
+### Consumer symmetry (the desync check)
+
+All THREE consumers now resolve a thing section's schema through the identical gate `resolveEngineSectionSchema(layout) ?? <layout registry>`:
+1. prompt: `resolveSpecSchema` in copyPrompt.ts;
+2. backfill: `backfillCollectionIds` in parseCopy.ts; defaults: `applyAllSchemaDefaults(…, resolveEngineSectionSchema)`;
+3. mock: hardcoded per-layout emission updated to the contract-union set (asserted end-to-end: `generationContract.test.ts`'s `assertIdsBackfilled` walks EVERY object with an `id` — the union collections the mock now emits with `id:""` (meridian `values`/`link_columns`) only pass because the contract-driven backfill fills them; before (b) they'd have stayed `""` and the test would go red).
+No consumer is left on the layout path for a thing section. `validateProductCopyCompleteness` needs no change (section-presence only, schema-free).
+
+### Re-baselined fixtures (each an INTENDED convergence diff)
+
+**`promptBranch.test.ts` → `COPY_SAAS_BASELINE`** (the only frozen copy-prompt fixture in the suite; captured by running the post-8b builder against the unchanged SaaS fixture and freezing byte-exact):
+- hero (TerminalHero) spec — BEFORE: status_text, audience_tag, headline, lede, cta_text, cta_subtext, secondary_cta_text, caption, stats.value/label/unit. AFTER: + `tag_text`, `cta_href`, `secondary_cta_href`, `stamp_value` [NEEDS_REVIEW], `stamp_label`, `values.kicker/title/description` — all `[optional]` (vestria-only fields enter demoted per Q4). Mandatory set unchanged (headline/lede/cta_text). "Items: min 0, max 4" unchanged (stats stays the first collection).
+- cta (ArcCTA) spec — byte-identical (single-template contract section, verbatim by design).
+- collection-schema block — meridian set → unified thing set (gains values/industries/items/swatches/rows/steps/assurances/link_columns lines; features line gains kicker; stats line gains the company-facts hint; notes mention link_columns nested ids).
+- `STRATEGY_SAAS_BASELINE` — UNTOUCHED (strategy prompt not in this phase).
+
+**NOT re-baselined (checked, no diff):**
+- `elementDetermination.test.ts` — all 25 pass unchanged (phase-8 contract mechanics untouched).
+- `captureGolden.test.ts` — CAPTURE=1-gated real-LLM capture, skipped in CI; no frozen expectations inside it changed. (Plan listed it at `src/modules/prompt/`; actual path is `src/modules/audience/__tests__/` — no edit needed either way.)
+- generation-contract fixtures — `e2e/fixtures/generated/` is empty (GOLDEN describe self-skips); the mock-path assertions in `generationContract.test.ts` are schema-driven, not frozen text, and pass unchanged with the union mocks.
+
+### Non-thing fixtures unchanged (fall-through proof)
+
+- techpremium editor-only: `elementDetermination.test.ts` §4 (TrustStrip/ProcessSteps/ContactForm/ProductCatalogList/ProductDetailRecord/SharedLeadForm not contract-routed) green unchanged; NEW copy-prompt fall-through test proves `ContactForm` in uiblocks specs its OWN fields (form_heading) and no VestriaLeadForm contract fields (tag_text/assurances) leak in.
+- service: `service/parseCopy.ts` calls `applyAllSchemaDefaults` with NO resolver → byte-identical path; TRUST generation-contract tests green unchanged; service copyPrompt untouched.
+- work/granth: WORK generation-contract tests green unchanged; `GranthJacketShelf` still null-resolves (§4 test).
+- Zero test files outside `promptBranch.test.ts` needed edits — the strongest tripwire evidence that nothing non-thing changed.
+
+### Invariant test (new, in promptBranch.test.ts)
+
+`phase 8b invariant — same Brief ⇒ same copy-prompt element spec (meridian vs vestria)`:
+1. builds the wizard copy prompt for the SAME Brief under meridian core uiblocks and vestria core uiblocks (voiceId tailored-trade) — the "## SECTIONS TO GENERATE" blocks are byte-identical after normalizing the display-only `(LayoutName)` handles;
+2. the collection-schema shape list (pre-Notes) is byte-identical across voices;
+3. spot-asserts union fields from BOTH origins in the shared spec;
+4. fall-through: non-thing `ContactForm` keeps the layout-name spec path.
+
+### Deviations / conservative choices
+
+- **Collection-hint granularity:** hint lines carry wording-level quantities (e.g. features "3-6") that may differ from the contract collection's min/max (features contract = meridian's 3-9); the authoritative numbers are the per-section "Items: min/max" line from `getCardRequirements(contract)`. Kept existing hint wording — SET parity was the requirement, not hint-text regeneration.
+- **`legal_links`/`socials` have no hint lines** — same as before this phase (neither voice hinted them); their ai_generated fields already appear in the footer spec itself. No SET regression vs the contract's prompt-visible fields.
+- **`logos` line + vestria "do NOT emit logos" note coexist** — pre-existing tension (meridian hinted logos though its fields are manual_preferred); kept both to preserve each voice's current guidance while unifying the SET.
+- **Mock emits representative union coverage, not every optional** — mocks never emitted every optional field before (no cta_subtext/phone_line etc.); added all union COLLECTIONS (the backfill-critical shapes) + representative union scalars in both directions. Full contract-derived mock generation would be a rewrite beyond "mock == prompt == backfill in element-SET terms".
+- Baseline test-header comments updated (they claimed "pre-branch byte-identical"); provenance note added explaining the 8b re-baseline.
+
+### Verification
+
+- `npx tsc --noEmit` — clean (exit 0).
+- `npm run test:run` — 96 files passed / 1 skipped; **1546 passed** / 2 skipped = baseline 1542 + 4 new invariant tests, zero regressions, zero non-thing fixture edits.
+- Targeted: promptBranch (13/13), elementDetermination (25/25), generationContract (14/14) all green.
+
+### Open risks (phase 8b)
+
+- Real-LLM meridian pages may now emit vestria-optional fields (values/tag_text/stamp) the meridian blocks don't render — stored-but-unrendered content (same class as the phase-8 regen risk; blocks ignore unknown keys). Phase 9 QA should eyeball one wizard generation per template.
+- The unified collection block lists all thing collections in every product prompt (the pre-existing design — meridian already listed tiers/footer_columns on a hero+cta page); prompt is ~15 lines longer.
+- `getRetryPrompt`/completeness paths unchanged — retry re-sends the same (contract-built) prompt; no divergence possible.

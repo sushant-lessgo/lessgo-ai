@@ -33,6 +33,7 @@ Section lists stop being template property. A new engine-owned section grammar (
 - phase 6 structure persistence + 7b deletion relaxes hard-fit: done (commit 2f9f84aa, review loop 1, ship, 1499 tests green; pages-optional fix proven, write fires end-to-end, drop-section→bigger-shortlist; non-blocking: empty-body [] truthy in buildStructurePatch (unreachable, no downstream break); charge-dedup fetch-skip deferred (sound); resolvedTemplateId null-resume still documented-only)
 - phase 7 template swap post-gen + meridian unlock: done (commit f39fa955, review loop 1, ship, 1517 tests green; swap safety proven, zero-word-change, techpremium popover ok; open risk: surge-origin sites over-excluded from swap-away (safe direction); prior attempt died mid-run, TemplateSwapList salvaged)
 - phase 8 element list from engine contract (kill layout-name keying): done (review loop 1, ship, 1542 tests green; ⚠️ INVARIANT ONLY PARTIALLY REALIZED — engine contract is live on editor-regen + legacy /generate-landing paths, but the PRIMARY wizard copy path (thing.ts → /generate-copy → buildProductCopyPrompt → copyPrompt.ts reads layoutElementSchema[layoutName] directly) is STILL template/layout-keyed. scope #7 "invariant true in code" not fully met on new-gen copy. Founder decision pending: add phase 8b to route copyPrompt through the contract, or accept as documented debt.)
+- phase 8b wizard copy prompt through engine contract (finish §3 invariant): done (review loop 1, ship, 1546 tests green; invariant STRUCTURALLY real on buildProductCopyPrompt — meridian==vestria element spec byte-identical; all 3 consumers symmetric; non-thing fall-through no-leak; only COPY_SAAS_BASELINE re-baselined. scope #7 fully met.)
 - phase 9 acceptance QA + goldens: pending
 
 ---
@@ -262,6 +263,43 @@ These are deliberate non-migrations, not misses; audit restates this.
 3. Both renderers unaffected structurally (element schema feeds GENERATION, not render) — but goldens must be re-run since prompts see element lists.
 
 **Verification:** tsc · `npm run test:run` (generation contract frozen-fixture, golden tests — refresh only if diff is the intended convergence, list in audit) · `DEBUG_ELEMENT_SELECTION=true` spot-check dev log for one meridian + one vestria generation.
+
+---
+
+## Phase 8b — Wizard copy prompt through the engine contract (finish the §3 invariant)
+
+**Why:** Phase 8 routed only the `getCompleteElementsMap` consumers (editor-regen + legacy generate-landing) through the engine contract. The PRIMARY wizard copy path (`thing.ts` → `/generate-copy` → `buildProductCopyPrompt` → `copyPrompt.ts` reads `layoutElementSchema[layoutName]`) is still template/layout-keyed. Founder chose (2026-07-09) to finish the invariant so new-gen copy is engine-keyed.
+
+**Intended, expected consequence (NOT a regression):** `resolveEngineSectionSchema` returns the SAME union contract for meridian and vestria of a shared section ⇒ the **meridian copy prompt gains vestria's optional elements** (and vice-versa). This is convergence working as designed: same Brief ⇒ same element spec under both templates. Golden/frozen prompt fixtures WILL change — re-baseline them deliberately as intended convergence diffs; document each before/after in the audit.
+
+**The three consumers must move together (scout-confirmed — switching only the prompt desyncs):**
+| Consumer | Reads today | Must read |
+|---|---|---|
+| (a) prompt build | `layoutElementSchema[layoutName]` (`copyPrompt.ts:82,90`) + hardcoded collection-shape blocks (`:137,:158`) | `resolveEngineSectionSchema(layout) ?? layoutElementSchema[layout]`; unify collection-shape hints for contract sections |
+| (b) defaults + id backfill | `layoutElementSchema[layoutName]`/`productElementSchema[layoutName]` (`parseCopy.ts:75`, `layoutElementSchema.ts:301`) | same contract schema for thing-covered sections |
+| (c) mock seed | hardcoded per layout-name prefix (`mockResponseGeneratorProduct.ts:114,120-435`) | contract-driven element set for thing-covered sections |
+
+**Fall-through (MANDATORY):** gate on `resolveEngineSectionSchema(layout)` returning `null` — techpremium editor-only blocks, service/`work`, granth keep the existing `layoutElementSchema[layoutName]` path. Contract covers `thing` ONLY. Mirror the precedent already in the strategy phase at `elementDetermination.ts:154-157`.
+
+**Files touched:**
+- `src/modules/audience/product/copyPrompt.ts` (re-point `buildSectionSpec`/`getAIElements` at :82,:90 to the contract-or-fallback; reconcile the hardcoded `getMeridianCollectionSchemas`/`getVestriaCollectionSchemas` (:137,:158) so union collections have shape hints for contract sections — voice/tone wording may stay voice-selected, but the SET of collections/elements must match the contract)
+- `src/modules/audience/product/parseCopy.ts` (`backfillCollectionIds` :75 + defaults path read the same contract schema for thing-covered sections; fall through otherwise)
+- `src/modules/sections/layoutElementSchema.ts` (if `applySchemaDefaults`/`applyAllSchemaDefaults` at :294-305 need a contract-aware branch for thing sections)
+- `src/modules/prompt/mockResponseGeneratorProduct.ts` (mock element sets for thing layouts driven by the contract so mock == prompt == backfill; techpremium/vestria-editor mocks untouched)
+- Regression re-baseline: `src/modules/**/promptBranch.test.ts`, `src/modules/sections/elementDetermination.test.ts`, `src/modules/prompt/captureGolden.test.ts`, generation-contract frozen fixture — update to the converged (union) element lists; each diff documented as intended.
+- New/extended test: same Brief ⇒ IDENTICAL copy-prompt element spec for meridian vs vestria on the wizard path (the invariant, now provable on the real path).
+
+**Steps:**
+1. Re-point (a) prompt: `buildSectionSpec`/`getAIElements` use `resolveEngineSectionSchema(layout) ?? layoutElementSchema[layout]`. Unify collection-shape hints so the union collections meridian now prompts for have shapes.
+2. Re-point (b) backfill/defaults to the same contract schema for thing-covered sections (symmetry — else union keys never backfill/default).
+3. Re-point (c) mock to emit the contract element set for thing layouts.
+4. Re-baseline goldens/frozen fixtures; document every diff as intended convergence (meridian gains vestria-optionals + vice-versa).
+5. Add the invariant test: meridian vs vestria wizard copy-prompt element spec deep-equal for the same Brief.
+6. Verify techpremium/work/service/granth fall through unchanged (their goldens must NOT change).
+
+**Verification:** `npx tsc --noEmit` · `npm run test:run` (goldens re-baselined ONLY where intended convergence; techpremium/work/service/granth fixtures UNCHANGED — if one of those changes it's a fall-through bug, fix the gate not the fixture) · audit lists every re-baselined fixture with before/after + confirms non-thing fixtures unchanged.
+
+**Highest-risk:** (1) keeping all three consumers symmetric (partial switch = silent desync, non-strict validation won't catch it → malformed copy); (2) fall-through correctness (a thing-contract leak into techpremium/work/service/granth changes their copy — the frozen non-thing fixtures are the tripwire); (3) the meridian-prompt change is INTENDED — don't "fix" it back.
 
 ---
 
