@@ -14,14 +14,24 @@
 
 import { UnderstandingResponseSchema } from '../understand.schema';
 import { ScrapeWebsiteExtendedSchema } from '../scrapeWebsite.schema';
+import type { CollectionKey } from '@/modules/collections/registry';
 import type { EngineExtraction } from './index';
+import {
+  collectionsEnrichmentFields,
+  collectionsEnrichmentPrompt,
+  foldCollectionsIntoSignals,
+} from './index';
+
+// scale-10 phase 2: the thing engine (SaaS / generic product) extracts a
+// `products` collection verbatim in the existing scrape call. Base prefill still
+// covers every classification/prefill field — collections are the only delta.
+const THING_COLLECTIONS: readonly CollectionKey[] = ['products'];
 
 export const thingExtraction: EngineExtraction = {
   key: 'thing',
   understandSchema: UnderstandingResponseSchema,
   scrapeSchema: ScrapeWebsiteExtendedSchema,
-  // Base entry prefill already covers thing — no engine-specific delta.
-  entryEnrichmentFields: {},
-  entryEnrichmentPrompt: () => '',
-  enrichSignals: (_data, base) => base,
+  entryEnrichmentFields: collectionsEnrichmentFields(THING_COLLECTIONS),
+  entryEnrichmentPrompt: () => collectionsEnrichmentPrompt(THING_COLLECTIONS),
+  enrichSignals: (data, base) => foldCollectionsIntoSignals(data, base, THING_COLLECTIONS),
 };

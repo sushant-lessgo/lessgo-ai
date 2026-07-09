@@ -14,14 +14,26 @@
 
 import { UnderstandingResponseSchema } from '../understand.schema';
 import { ScrapeWebsiteExtendedSchema } from '../scrapeWebsite.schema';
+import type { CollectionKey } from '@/modules/collections/registry';
 import type { EngineExtraction } from './index';
+import {
+  collectionsEnrichmentFields,
+  collectionsEnrichmentPrompt,
+  foldCollectionsIntoSignals,
+} from './index';
+
+// scale-10 phase 2: the work engine covers portfolios AND writers. Per founder
+// decision 1 a photographer's portfolio genres ARE `services` (proof = images);
+// writers' books are `works` (books ≠ services). The engine extracts both keys
+// verbatim — whichever the site actually lists fills; the other stays empty and
+// is dropped. Base prefill still covers every classification/prefill field.
+const WORK_COLLECTIONS: readonly CollectionKey[] = ['services', 'works'];
 
 export const workExtraction: EngineExtraction = {
   key: 'work',
   understandSchema: UnderstandingResponseSchema,
   scrapeSchema: ScrapeWebsiteExtendedSchema,
-  // Base entry prefill suffices for the thin work path (phase 9 extends this).
-  entryEnrichmentFields: {},
-  entryEnrichmentPrompt: () => '',
-  enrichSignals: (_data, base) => base,
+  entryEnrichmentFields: collectionsEnrichmentFields(WORK_COLLECTIONS),
+  entryEnrichmentPrompt: () => collectionsEnrichmentPrompt(WORK_COLLECTIONS),
+  enrichSignals: (data, base) => foldCollectionsIntoSignals(data, base, WORK_COLLECTIONS),
 };

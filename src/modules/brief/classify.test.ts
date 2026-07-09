@@ -13,6 +13,7 @@ import {
   type EntrySignals,
 } from './classify';
 import { businessTypeKeys, businessTypes } from '@/modules/businessTypes/config';
+import { getCollections } from '@/modules/brief/collections';
 
 function makeSignals(overrides: Partial<EntrySignals> = {}): EntrySignals {
   return {
@@ -144,7 +145,75 @@ describe('buildBriefDraft — enum engines + carrier payload', () => {
   });
 });
 
+describe('buildBriefDraft — scrape-carried collections → facts.collections (scale-10 phase 2)', () => {
+  it('writes entries VERBATIM with code-derived slugs', () => {
+    const brief = buildBriefDraft(
+      makeSignals({
+        businessTypeGuess: 'saas',
+        collections: {
+          products: [
+            { name: 'Widget One', oneLiner: 'The first widget', imageUrl: 'https://x/1.png' },
+            { name: 'Widget Two' },
+          ],
+        },
+      }),
+      'we sell widgets'
+    );
+    const cols = getCollections(brief);
+    expect(cols.products).toHaveLength(2);
+    expect(cols.products?.[0]).toEqual({
+      name: 'Widget One',
+      slug: 'widget-one', // code-derived via slugify, never from AI
+      oneLiner: 'The first widget',
+      imageUrl: 'https://x/1.png',
+    });
+    expect(cols.products?.[1]).toEqual({ name: 'Widget Two', slug: 'widget-two' });
+  });
+
+  it('DROPs empty collections — no entries ⇒ key absent', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'agency', collections: { services: [], 'case-studies': [] } }),
+      'a consultancy'
+    );
+    expect(getCollections(brief).services).toBeUndefined();
+    expect(brief.facts?.collections).toBeUndefined();
+  });
+
+  it('no collections signal at all ⇒ facts.collections unset', () => {
+    const brief = buildBriefDraft(makeSignals({ businessTypeGuess: 'saas' }), 'x');
+    expect(brief.facts?.collections).toBeUndefined();
+  });
+
+  it('drops empty-name entries but keeps the rest', () => {
+    const brief = buildBriefDraft(
+      makeSignals({
+        businessTypeGuess: 'photographer',
+        collections: { services: [{ name: 'Weddings' }, { name: '   ' }] },
+      }),
+      'wedding photographer'
+    );
+    expect(getCollections(brief).services).toEqual([{ name: 'Weddings', slug: 'weddings' }]);
+  });
+});
+
 describe('applyBusinessTypeCorrection (D7 — the single correction path)', () => {
+  it('collections persist through a businessType correction', () => {
+    const draft = buildBriefDraft(
+      makeSignals({
+        businessTypeGuess: 'photographer',
+        tiebreaker: 'portfolio-is-proof',
+        collections: { services: [{ name: 'Weddings', oneLiner: 'Full-day coverage' }] },
+      }),
+      'wedding photographer'
+    );
+    const corrected = applyBusinessTypeCorrection(draft, 'coach');
+    expect(corrected.businessType).toBe('coach');
+    // entries survive the correction (correction changes type, not collections)
+    expect(getCollections(corrected).services).toEqual([
+      { name: 'Weddings', slug: 'weddings', oneLiner: 'Full-day coverage' },
+    ]);
+  });
+
   it('photographer→coach: resets classification state, no stale tiebreaker', () => {
     const draft = buildBriefDraft(
       makeSignals({ businessTypeGuess: 'photographer', tiebreaker: 'portfolio-is-proof' }),
