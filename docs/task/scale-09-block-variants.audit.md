@@ -75,3 +75,40 @@
 
 ### Open risks
 - None for this phase. Resolver / component-identity distinctness checks are intentionally absent (phase 3). The manifest is pure data with no runtime consumers yet — first consumed by `resolveBlock` (phase 3) and the eligibility filter (phase 4).
+
+## Phase 3 — variant-aware resolveBlock (registry plumbing, parity-neutral)
+
+**Files changed**
+- `src/types/template.ts` — `resolveBlock` signature + A1 doc-comment
+- `src/modules/generatedLanding/componentRegistry.ts` — forward layout into `resolveBlock`
+- `src/modules/generatedLanding/componentRegistry.published.ts` — forward layout into `resolveBlock`
+- `src/modules/templates/meridian/resolveMeridianBlock.ts` — variant-keyed registry
+- `src/modules/templates/hearth/resolveServiceBlock.ts` — variant-keyed registry
+- `src/modules/templates/conformance.test.ts` — new per-manifest-declaration resolution + distinctness suite
+- (`blockManifest.ts` verified only — `internalDispatch: true` already present on surge-testimonials + vestria-hero from phase 2; NO change)
+
+### New resolveBlock signature + dispatch shape
+- Interface: `resolveBlock(blockType, mode, layoutName?)` — optional 3rd param. Other templates' resolvers (surge/vestria/lex/lumen/granth/techpremium) satisfy the interface unchanged (extra optional arg ignored); no `index.ts` re-typing was needed (tsc clean).
+- Both `getComponent()`s forward their existing layout arg: edit `tmpl.resolveBlock(sectionType, 'edit', layoutName)`; published `tmpl.resolveBlock(normalizedType, 'published', layout)`.
+- meridian + hearth registries refactored from `Record<sectionType, BlockEntry>` to `Record<sectionType, SectionEntry>` where `SectionEntry = { variants: Record<lowercasedLayoutName, {edit, published}>, default: lowercasedLayoutName }`. A `single(layoutName, entry)` helper builds the one-variant-per-section entries (still exactly ONE real block per section this phase — parity-neutral). Lookup: `variants[(layoutName||'').toLowerCase()] ?? variants[default]`.
+
+### How fallback preserves A1 / template-switching
+- Absent/unknown/FOREIGN layout name ⇒ `variants[layoutName]` is undefined ⇒ `?? variants[default]` returns the section's default block. So a project whose stored layout strings were authored by another template still renders this template's block for that section type — switching templates needs zero layout-name rewrites (A1 guardrail intact).
+- surge testimonials + vestria hero keep their internal dispatcher blocks: their resolvers are untouched (section-type keyed), so the forwarded layout arg is ignored and they fall back to the single section-type entry, which branches internally on `content[sectionId].layout`. Mixed dispatch model holds.
+
+### Distinctness guard structure + red-check
+- New suite `(c) scale-09: manifest variant resolution + distinctness` iterates `blockManifests`. Per declaration, both modes: (a) `resolveBlock(sectionType, mode, layoutName)` truthy + non-placeholder (extended `resolvesReal` threads the layout param); (b) for every NON-default variant, resolved component `!==` (strict identity, via `resolveComponent` getter) the default's component. `internalDispatch: true` declarations (surge testimonials, vestria hero) are instead asserted `.toBe` the default's component (they share one dispatcher). Also asserts `default ∈ variants`.
+- Note: meridian/hearth currently declare only their default variant, so the `!==` branch has no live cases yet (it auto-covers phases 6–7). The internalDispatch `.toBe` branch DOES run today for surge + vestria.
+- **Red-check performed:** temporarily added a throwaway non-default variant `ZZZBogusUnregisteredVariant` (unregistered layout name) to meridian `features`. The distinctness test went RED — `AssertionError: meridian/features ZZZBogusUnregisteredVariant (edit) resolves to the SAME component as default "HairlineFeatureGrid"` — proving the silent-fallback failure mode is caught. Reverted; tree clean.
+
+### Verification (actual output)
+- `npx tsc --noEmit` — clean, no output.
+- `npx vitest run conformance.test.ts` — 1 file, 123 tests passed.
+- `npm run test:run` (full) — 100 passed | 1 skipped files; 1651 passed | 3 skipped tests.
+- `npm run build` — success (published CSS/assets + next build all green; route table printed, no errors). Firewall/published bundle intact.
+
+### Deviations
+- None. Blog section entries (`blogpostbody`/`blogindex`) were given synthetic layout-name keys (`BlogBody`/`BlogIndex` lowercased) purely to fit the `single()` shape — they're publish-time synthesized, never dispatched by a stored layout name, so any key works; the `?? default` fallback covers them regardless.
+
+### Open risks
+- None for this phase. First real non-default variants (which will exercise the `!==` distinctness branch live) land in phases 6–7; the guard is in place ahead of them.

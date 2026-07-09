@@ -35,22 +35,36 @@ interface BlockEntry {
   published: React.ComponentType<any>;
 }
 
-// A1 (Phase 11a): keyed by SECTION TYPE, not layout name — mirrors Hearth's
-// resolveServiceBlock. The registry dispatches by section type (componentRegistry
-// passes 'hero', 'features', …), so Meridian re-resolves its own one-block-per-
-// section regardless of the stored layout string (kept in saved content, unused
-// here). One block per section per template makes this a clean 1:1 map.
-const MERIDIAN_BLOCK_REGISTRY: Record<string, BlockEntry> = {
-  header:       { edit: MeridianNavHeader,    published: MeridianNavHeaderPublished },
-  hero:         { edit: TerminalHero,         published: TerminalHeroPublished },
-  features:     { edit: HairlineFeatureGrid,  published: HairlineFeatureGridPublished },
-  testimonials: { edit: ProofWithLogoRail,    published: ProofWithLogoRailPublished },
-  pricing:      { edit: ThreeTierPricing,     published: ThreeTierPricingPublished },
-  cta:          { edit: ArcCTA,               published: ArcCTAPublished },
-  footer:       { edit: HairlineFooter,       published: HairlineFooterPublished },
+// Variant-keyed section entry (scale-09 phase 3): `variants` is keyed by the
+// LOWERCASED layout name; `default` is the layout name used when the stored
+// layout is absent/unknown/foreign. Today every section has exactly ONE variant
+// (the current default) — the real meridian variants land in phase 6.
+interface SectionEntry {
+  variants: Record<string, BlockEntry>;
+  default: string; // lowercased layout name
+}
+
+/** Build a single-variant section entry (one block per section, pre-phase-6). */
+function single(layoutName: string, entry: BlockEntry): SectionEntry {
+  const key = layoutName.toLowerCase();
+  return { variants: { [key]: entry }, default: key };
+}
+
+// Keyed by SECTION TYPE. Within a section, dispatch is
+// `variants[layoutName] ?? variants[default]`, so an unknown/foreign layout name
+// falls back to the section default block — this is the A1 guardrail (template
+// switching needs no layout-name rewrites) preserved under variant dispatch.
+const MERIDIAN_BLOCK_REGISTRY: Record<string, SectionEntry> = {
+  header:       single('MeridianNavHeader',   { edit: MeridianNavHeader,    published: MeridianNavHeaderPublished }),
+  hero:         single('TerminalHero',        { edit: TerminalHero,         published: TerminalHeroPublished }),
+  features:     single('HairlineFeatureGrid', { edit: HairlineFeatureGrid,  published: HairlineFeatureGridPublished }),
+  testimonials: single('ProofWithLogoRail',   { edit: ProofWithLogoRail,    published: ProofWithLogoRailPublished }),
+  pricing:      single('ThreeTierPricing',    { edit: ThreeTierPricing,     published: ThreeTierPricingPublished }),
+  cta:          single('ArcCTA',              { edit: ArcCTA,               published: ArcCTAPublished }),
+  footer:       single('HairlineFooter',      { edit: HairlineFooter,       published: HairlineFooterPublished }),
   // Blog (Phase 1) — publish-time synthesized pages, never generated/edited.
-  blogpostbody: { edit: BlogPostBodyBlock,    published: BlogPostBodyBlock },
-  blogindex:    { edit: BlogIndexBlock,       published: BlogIndexBlock },
+  blogpostbody: single('BlogPostBody',        { edit: BlogPostBodyBlock,    published: BlogPostBodyBlock }),
+  blogindex:    single('BlogIndex',           { edit: BlogIndexBlock,       published: BlogIndexBlock }),
 };
 
 export type MeridianBlockMode = 'edit' | 'published';
@@ -58,12 +72,18 @@ export type MeridianBlockMode = 'edit' | 'published';
 export function resolveMeridianBlock(
   sectionType: string,
   mode: MeridianBlockMode = 'edit',
+  layoutName?: string,
 ): React.ComponentType<any> | null {
   const key = (sectionType || '').toLowerCase();
-  const entry = MERIDIAN_BLOCK_REGISTRY[key];
-  if (!entry) {
+  const section = MERIDIAN_BLOCK_REGISTRY[key];
+  if (!section) {
     // Unknown section type: keep the placeholder so the renderer doesn't crash.
     return MeridianPlaceholderBlock;
   }
+  // Variant lookup with section-type fallback (A1): unknown/foreign/absent
+  // layout ⇒ the section's default block.
+  const entry =
+    section.variants[(layoutName || '').toLowerCase()] ??
+    section.variants[section.default];
   return mode === 'published' ? entry.published : entry.edit;
 }

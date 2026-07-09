@@ -38,31 +38,55 @@ interface BlockEntry {
   published: React.ComponentType<any>;
 }
 
-// Keyed by section type (A1).
-const SERVICE_BLOCK_REGISTRY: Record<string, BlockEntry> = {
-  header:       { edit: WarmNavHeader,     published: WarmNavHeaderPublished },
-  hero:         { edit: PetalFramedHero,   published: PetalFramedHeroPublished },
-  services:     { edit: IconServiceCards,  published: IconServiceCardsPublished },
-  testimonials: { edit: PullQuoteWithMark, published: PullQuoteWithMarkPublished },
-  packages:     { edit: TieredPackages,    published: TieredPackagesPublished },
-  cta:          { edit: BookCallCTA,       published: BookCallCTAPublished },
-  footer:       { edit: ContactFooterRich, published: ContactFooterRichPublished },
+// Variant-keyed section entry (scale-09 phase 3): `variants` is keyed by the
+// LOWERCASED layout name; `default` is the layout name used when the stored
+// layout is absent/unknown/foreign. Today every section has exactly ONE variant
+// (the current default) — the real hearth variants land in phase 7.
+interface SectionEntry {
+  variants: Record<string, BlockEntry>;
+  default: string; // lowercased layout name
+}
+
+/** Build a single-variant section entry (one block per section, pre-phase-7). */
+function single(layoutName: string, entry: BlockEntry): SectionEntry {
+  const key = layoutName.toLowerCase();
+  return { variants: { [key]: entry }, default: key };
+}
+
+// Keyed by SECTION TYPE. Within a section, dispatch is
+// `variants[layoutName] ?? variants[default]`, so an unknown/foreign layout name
+// falls back to the section default block — this is the A1 guardrail (template
+// switching needs no layout-name rewrites) preserved under variant dispatch.
+const SERVICE_BLOCK_REGISTRY: Record<string, SectionEntry> = {
+  header:       single('WarmNavHeader',     { edit: WarmNavHeader,     published: WarmNavHeaderPublished }),
+  hero:         single('PetalFramedHero',   { edit: PetalFramedHero,   published: PetalFramedHeroPublished }),
+  services:     single('IconServiceCards',  { edit: IconServiceCards,  published: IconServiceCardsPublished }),
+  testimonials: single('PullQuoteWithMark', { edit: PullQuoteWithMark, published: PullQuoteWithMarkPublished }),
+  packages:     single('TieredPackages',    { edit: TieredPackages,    published: TieredPackagesPublished }),
+  cta:          single('BookCallCTA',        { edit: BookCallCTA,       published: BookCallCTAPublished }),
+  footer:       single('ContactFooterRich', { edit: ContactFooterRich, published: ContactFooterRichPublished }),
   // Blog (Phase 1) — publish-time synthesized pages, never generated/edited.
-  blogpostbody: { edit: BlogPostBodyBlock, published: BlogPostBodyBlock },
-  blogindex:    { edit: BlogIndexBlock,    published: BlogIndexBlock },
+  blogpostbody: single('BlogPostBody',       { edit: BlogPostBodyBlock, published: BlogPostBodyBlock }),
+  blogindex:    single('BlogIndex',          { edit: BlogIndexBlock,    published: BlogIndexBlock }),
 };
 
 export type ServiceBlockMode = 'edit' | 'published';
 
 export function resolveServiceBlock(
   sectionType: string,
-  mode: ServiceBlockMode = 'edit'
+  mode: ServiceBlockMode = 'edit',
+  layoutName?: string,
 ): React.ComponentType<any> | null {
   const key = (sectionType || '').toLowerCase();
-  const entry = SERVICE_BLOCK_REGISTRY[key];
-  if (!entry) {
+  const section = SERVICE_BLOCK_REGISTRY[key];
+  if (!section) {
     // Unknown section type: keep the placeholder so the renderer doesn't crash.
     return ServicePlaceholderBlock;
   }
+  // Variant lookup with section-type fallback (A1): unknown/foreign/absent
+  // layout ⇒ the section's default block.
+  const entry =
+    section.variants[(layoutName || '').toLowerCase()] ??
+    section.variants[section.default];
   return mode === 'published' ? entry.published : entry.edit;
 }

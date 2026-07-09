@@ -64,11 +64,11 @@ export function getComponent(
   // (null until loaded — renderers gate on readiness).
   if (usesTemplateModule(audienceType, templateId)) {
     const tmpl = getLoadedTemplate((templateId || 'hearth') as TemplateId);
-    // A1: dispatch by SECTION TYPE, not the stored layout name. One block per
-    // section per template, so the template re-resolves its own block regardless
-    // of which template generated the stored layout string (kept in data, unused
-    // here). Lets the editor switch templates with zero layout-name rewrites.
-    return tmpl ? tmpl.resolveBlock(sectionType, 'edit') : null;
+    // Dispatch by SECTION TYPE; forward the stored layout name so the template
+    // can select a declared VARIANT (scale-09). A1 preserved: resolveBlock
+    // falls back to the section's default block for absent/unknown/foreign
+    // layout names, so switching templates needs zero layout-name rewrites.
+    return tmpl ? tmpl.resolveBlock(sectionType, 'edit', layoutName) : null;
   }
 
   // Legacy 47-block path removed in P5 (hard cutover). Any project reaching here
