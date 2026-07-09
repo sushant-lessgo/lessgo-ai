@@ -12,6 +12,7 @@ One line per doc. Root keeps only `CLAUDE.md` + `README.md`. Completed/stale pla
 - [STRIPE_SETUP.md](architecture/STRIPE_SETUP.md) — Stripe setup/config guide
 
 ## guides/ — how-tos
+- [copyQualityEval.md](guides/copyQualityEval.md) — promptfoo copy-quality suite: eval set from real Briefs, judge calibration, per-step model ablation, prompt-optimization loop, local regression gate
 - Adding a new template (clone an existing one; §12 multi-page) — now the `/new-template` skill: [.claude/skills/new-template/SKILL.md](../.claude/skills/new-template/SKILL.md)
 - Manual pre-launch checklist (P0/P1/P2; automation lives in `e2e/` + Vitest) — now the `/manual-test` skill: [.claude/skills/manual-test/SKILL.md](../.claude/skills/manual-test/SKILL.md)
 
