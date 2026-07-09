@@ -7,7 +7,7 @@
 import { describe, it, expect } from 'vitest';
 import { inferDefaultPalette as hearth } from './hearth/paletteSelection';
 import { inferDefaultPalette as lex } from './lex/paletteSelection';
-import type { ServiceUnderstanding } from '@/hooks/useServiceGenerationStore';
+import type { ServiceUnderstanding } from '@/types/service';
 
 const mk = (over: Partial<ServiceUnderstanding>): ServiceUnderstanding => ({
   serviceType: 'agency',

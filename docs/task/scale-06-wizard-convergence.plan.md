@@ -20,7 +20,7 @@ Kill the product/service wizard fork. One wizard renderer + one Brief-backed sto
 - phase 7 scrape convergence (businessType-keyed extraction): done (commit 6213c11, review loops 1, ship — 103 tests, tsc clean; +config.test.ts fix authorized; businessType field dormant until a caller wires it [phase 8/11])
 - phase 8 trust engine through unified wizard: done (commit 871a3c8, review loops 1, ship — 543 tests, tsc clean; +GeneratingSlot per-engine fix authorized; trust end-to-end)
 - phase 9 work engine / writer self-serve: done (commit f472ca8, review loops 1, ship — full suite 1241 pass; serveGate work-path + thin granth deterministic path + seed-writer deleted; +theWork prefill fix) — AWAITING FOUNDER HUMAN GATE before phase 10
-- phase 10 kills, redirects, old-store retirement: pending
+- phase 10 kills, redirects, old-store retirement: done (commit pending-sha, review loops 1, ship — tsc + 1241 tests + npm run build ALL green; old fork+3 stores deleted, types re-homed, handoff unconditional, redirect stubs) [1 impl API-error resume mid-cascade]
 - phase 11 fixtures, e2e, acceptance QA: pending
 
 ## Design decisions (binding for all phases)

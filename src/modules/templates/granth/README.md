@@ -2,10 +2,11 @@
 
 Bespoke template for the **Writer** audience — Hindi literary profile sites (author / poet /
 essayist), Devanagari-first. Default template for the `writer` audienceType. Registered +
-renderable but NOT in the onboarding picker; writer v1 has **no** generation store /
-strategy / onboarding route — projects are seeded white-glove
-(`hooks/editStore/granthSeed.ts`, dev route `/dev/seed-writer`). See `../README.md` for the
-folder anatomy + dual-renderer rules; only the quirk lives here.
+renderable but NOT in the onboarding picker. As of scale-06 the `work` engine reaches granth
+self-serve through the unified wizard (serve gate → `writer`/`granth`); the thin generation
+path seeds the home content via `hooks/editStore/granthSeed.ts`
+(`modules/wizard/generation/work.ts`). See `../README.md` for the folder anatomy +
+dual-renderer rules; only the quirk lives here.
 
 ## `.core.tsx` single-source pattern (the pilot for this pattern)
 

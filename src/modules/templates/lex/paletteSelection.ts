@@ -5,7 +5,7 @@
 
 import type { LexPalette, ServiceType } from '@/types/service';
 import { defaultLexPalette } from './palettes';
-import type { ServiceUnderstanding } from '@/hooks/useServiceGenerationStore';
+import type { ServiceUnderstanding } from '@/types/service';
 
 const PALETTE_INDUSTRY_KEYWORDS: Record<LexPalette, string[]> = {
   counsel:  ['law', 'legal', 'attorney', 'counsel', 'litigation', 'advisory'],

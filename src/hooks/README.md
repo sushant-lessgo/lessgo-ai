@@ -33,24 +33,18 @@ last-mounted store. State surface: sections/layouts/spacing, `content`, multi-pa
 modals), forms/images, meta (audienceType/templateId/variantId/paletteId), and
 persistence/auto-save.
 
-### Generation-flow stores (one per route family)
-- `useGenerationStore.ts` — the original `/create` product flow (10 steps incl.
-  vibe / IVOC research / uiblock selection). Onboarding-era; still active.
-- `useProductGenerationStore.ts` — lean **Meridian/Vestria** product onboarding
-  (`/onboarding/product/[token]`): oneLiner → understanding → goal → offer →
-  sitemap (multi-page only) → generating. Also holds imported testimonials and
-  the non-blocking vestria variant/palette/mood picks.
-- `useServiceGenerationStore.ts` — **service** onboarding
-  (`/onboarding/service/[token]`): oneLiner → understanding → goal → offer →
-  assets → style (Hearth palette) → generating → complete.
-
-All three are plain `create()` + `devtools` + `immer` stores (no persist), keyed
-to their wizard's step array.
+### Generation-flow stores
+The old per-route generation stores — `useGenerationStore.ts` (the original
+`/create` product flow), `useProductGenerationStore.ts`, and
+`useServiceGenerationStore.ts` — were **deleted in scale-06 phase 10** when the
+product/service wizard fork was retired. Their surviving types were re-homed:
+`ServiceUnderstanding` / `ServiceUnderstandingExtract` / `ServiceAssetAvailability`
+→ `src/types/service.ts`; `VestriaHeroVariant` / `VestriaLookMood` →
+`src/types/product.ts`. Everything now goes through `useWizardStore` below.
 
 ### `useWizardStore.ts` — **unified Brief-backed wizard store** (scale-06)
 Single source of truth for the ONE wizard that serves every engine — the
-convergence target that replaces the product/service fork (the three stores above
-stay untouched until scale-06 phase 10; nothing consumes `useWizardStore` yet).
+convergence target that replaced the product/service fork.
 Resolves `engine`/`businessTypeKey`/`audienceType`/`templateId` from the confirmed
 `Brief` + serveGate result. Its **slot machine is keyed by slot IDs** (not indices):
 the slot list is computed from the engine contract (`getContract`,

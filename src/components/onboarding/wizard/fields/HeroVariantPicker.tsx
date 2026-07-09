@@ -3,11 +3,14 @@
 // HeroVariantPicker — onboarding2 Phase 3 (Axis B, generation-time pick).
 // Two-card visual chooser shown NON-BLOCKINGLY while copy streams on the
 // manufacturer/vestria flow: tailored image hero vs full-bleed video hero.
-// It only writes the generation store's heroVariant; GeneratingStep applies
-// the value into the saved finalContent (content[heroId].layout — the
-// authoritative field) on every draft save. Never awaited by the pipeline.
+// Prop-controlled — the wizard StyleSlot binds it to useWizardStore.heroVariant;
+// GeneratingSlot applies the value into the saved finalContent
+// (content[heroId].layout — the authoritative field) on save.
+//
+// Re-homed from src/app/onboarding/product/[token]/components/fields/ in
+// scale-06 phase 10 (the old product wizard tree was deleted). Behavior unchanged.
 
-import type { VestriaHeroVariant } from '@/hooks/useProductGenerationStore';
+import type { VestriaHeroVariant } from '@/types/product';
 
 interface HeroVariantPickerProps {
   value: VestriaHeroVariant;

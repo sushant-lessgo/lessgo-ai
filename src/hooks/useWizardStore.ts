@@ -52,8 +52,8 @@ import {
 } from '@/modules/engines/inputContracts';
 import { computeFieldStates, type FieldState } from '@/modules/wizard/waterfall';
 // Type-only — proves WizardProofState ⊇ ServiceAssetAvailability (see guard
-// below). Importing a *type* from the service store does NOT touch it.
-import type { ServiceAssetAvailability } from '@/hooks/useServiceGenerationStore';
+// below). Canonical home is @/types/service since phase 10 retired the store.
+import type { ServiceAssetAvailability } from '@/types/service';
 
 // ---------------------------------------------------------------------------
 // Field state model

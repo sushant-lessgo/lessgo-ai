@@ -3,14 +3,14 @@
 // Universal entry flow (scale-02 phase 5, D1): input → confirm → manual, plus a
 // serve-redirect out of the confirm step. scale-06 phase 3 adds LOAD-DETECTION:
 // on mount we fetch the project; a DB-confirmed brief (Project.brief non-null +
-// audienceType set) whose copyEngine ∈ WIZARD_ENGINES renders the UNIFIED WIZARD
-// (net-new post-confirm landing AND reload/resume-mid-wizard). A confirmed brief
-// whose engine is NOT yet migrated is FORWARDED to its old per-audience wizard.
-// No persisted brief ⇒ the in-memory entry flow (input|confirm|manual).
+// audienceType set) renders the UNIFIED WIZARD (net-new post-confirm landing AND
+// reload/resume-mid-wizard). As of phase 10 EVERY engine goes through the
+// unified wizard — the old per-audience wizard fork is gone. No persisted brief
+// ⇒ the in-memory entry flow (input|confirm|manual).
 //
-// Firewall: this segment imports only pure @/modules/brief + rollout + fetch. The
-// wizard dispatcher (WizardShell + template-adjacent slot code) is DYNAMICALLY
-// imported so it never enters the entry bundle.
+// Firewall: this segment imports only pure @/modules/brief + fetch. The wizard
+// dispatcher (WizardShell + template-adjacent slot code) is DYNAMICALLY imported
+// so it never enters the entry bundle.
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -18,7 +18,6 @@ import { useParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import type { Brief } from '@/types/brief';
 import type { AudienceType, TemplateId } from '@/types/service';
-import { WIZARD_ENGINES } from '@/modules/wizard/rollout';
 import Logo from '@/components/shared/Logo';
 import EntryInputStep from './components/EntryInputStep';
 import ConfirmBriefStep from './components/ConfirmBriefStep';
@@ -81,19 +80,13 @@ export default function EntryOnboardingPage() {
         // audienceType (both written together at /api/brief/confirm serve).
         const confirmed = !!brief && !!audienceType && !!brief.copyEngine;
         if (confirmed && brief) {
-          if (WIZARD_ENGINES.has(brief.copyEngine!)) {
-            // Migrated engine → render the unified wizard here.
-            if (!cancelled) {
-              setWizardData({ brief, audienceType, templateId });
-              setStep('wizard');
-              setChecking(false);
-            }
-            return;
+          // Every engine is served by the unified wizard (phase 10) — render it.
+          if (!cancelled) {
+            setWizardData({ brief, audienceType, templateId });
+            setStep('wizard');
+            setChecking(false);
           }
-          // Not-yet-migrated (trust/work until phases 8/9) → forward to its old
-          // wizard route; NEVER render the unified wizard for it.
-          window.location.assign(`/onboarding/${audienceType}/${tokenId}`);
-          return; // leave `checking` true — the page is unloading.
+          return;
         }
         if (!cancelled) setChecking(false);
       } catch {

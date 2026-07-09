@@ -1,4 +1,7 @@
 // Onboarding-local template picker catalog (Phase 11b).
+// Re-homed from src/app/onboarding/service/[token]/components/fields/ in
+// scale-06 phase 10 (the old service wizard tree was deleted). Consumed by the
+// unified wizard's StyleSlot (trust branch). Content unchanged.
 // Aggregates the lightweight, blocks-free picker metadata (labels, palette
 // swatch colors, variants, default-palette inference) for every live service
 // template. Onboarding is NOT in the firewall-gated dirs, so static template

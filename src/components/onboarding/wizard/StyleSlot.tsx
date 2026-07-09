@@ -16,9 +16,9 @@
 // phase 10 — same IMPORT-for-now pattern as the thing pickers above).
 //
 // Store writes (thing): HeroVariantPicker is prop-controlled → bound directly to
-// the wizard store (heroVariant). ProductStylePicker is internally coupled to the
-// OLD useProductGenerationStore (unchanged), so we MIRROR its picks into the
-// wizard store's thing-only style fields via a subscription.
+// the wizard store (heroVariant). ProductStylePicker (re-homed in phase 10) now
+// writes its variant/palette/mood picks DIRECTLY to the wizard store — the old
+// useProductGenerationStore mirror subscription was deleted with that store.
 //
 // FIREWALL: client-only. The pickers/catalog import data-only palette/token
 // modules (no block components); WizardShell is already dynamically imported
@@ -26,15 +26,12 @@
 
 import { useEffect } from 'react';
 import { useWizardStore } from '@/hooks/useWizardStore';
-import {
-  useProductGenerationStore,
-  type VestriaHeroVariant,
-} from '@/hooks/useProductGenerationStore';
+import type { VestriaHeroVariant } from '@/types/product';
 import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
-import HeroVariantPicker from '@/app/onboarding/product/[token]/components/fields/HeroVariantPicker';
-import ProductStylePicker from '@/app/onboarding/product/[token]/components/fields/ProductStylePicker';
+import HeroVariantPicker from '@/components/onboarding/wizard/fields/HeroVariantPicker';
+import ProductStylePicker from '@/components/onboarding/wizard/fields/ProductStylePicker';
 import PaletteSwatch from '@/components/onboarding/shared/PaletteSwatch';
-import { TEMPLATE_CATALOG } from '@/app/onboarding/service/[token]/components/fields/templateCatalog';
+import { TEMPLATE_CATALOG } from '@/components/onboarding/wizard/fields/templateCatalog';
 import type { TemplateId } from '@/types/service';
 
 const DEFAULT_HERO_VARIANT: VestriaHeroVariant = 'VestriaTailoredHero';
@@ -135,26 +132,9 @@ function ThingStyleSlot() {
   const templateId = useWizardStore((s) => s.templateId);
   const heroVariant = useWizardStore((s) => s.heroVariant);
   const setHeroVariant = useWizardStore((s) => s.setHeroVariant);
-  const setStyleVariantId = useWizardStore((s) => s.setStyleVariantId);
-  const setStylePaletteId = useWizardStore((s) => s.setStylePaletteId);
-  const setStyleMood = useWizardStore((s) => s.setStyleMood);
 
-  // Mirror the OLD product store's cosmetic picks (written by ProductStylePicker)
-  // into the wizard store so the phase-5 adapter reads a single source of truth.
-  const oldVariantId = useProductGenerationStore((s) => s.variantId);
-  const oldPaletteId = useProductGenerationStore((s) => s.paletteId);
-  const oldMood = useProductGenerationStore((s) => s.mood);
-
-  useEffect(() => {
-    if (oldVariantId) setStyleVariantId(oldVariantId);
-  }, [oldVariantId, setStyleVariantId]);
-  useEffect(() => {
-    if (oldPaletteId) setStylePaletteId(oldPaletteId);
-  }, [oldPaletteId, setStylePaletteId]);
-  useEffect(() => {
-    if (oldMood) setStyleMood(oldMood);
-  }, [oldMood, setStyleMood]);
-
+  // ProductStylePicker writes variant/palette/mood DIRECTLY to the wizard store
+  // (single source of truth for the phase-5 adapter) — no mirror needed.
   const isMfr = isManufacturerFlow(templateId ?? undefined);
 
   return (

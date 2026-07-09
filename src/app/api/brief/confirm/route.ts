@@ -14,7 +14,6 @@ import { z } from 'zod';
 import { createSecureResponse, assertProjectOwner, validateToken } from '@/lib/security';
 import { BriefSchema } from '@/lib/schemas/brief.schema';
 import { decideServe } from '@/modules/brief/serveGate';
-import { WIZARD_ENGINES } from '@/modules/wizard/rollout';
 
 const ConfirmRequestSchema = z.object({
   tokenId: z.string(),
@@ -67,17 +66,13 @@ export async function POST(req: Request) {
           templateId: decision.templateId,
         },
       });
-      // Redirect target keyed on the ONE rollout const (NOT a literal engine
-      // check) so phases 8/9 are no-ops here: an engine migrated to the unified
-      // wizard lands on `/onboarding/${tokenId}` (load-detection re-hydrates the
-      // brief); everything else keeps the old per-audience wizard route.
-      const unified =
-        brief.copyEngine != null && WIZARD_ENGINES.has(brief.copyEngine);
+      // scale-06 phase 10: every engine is now served by the unified wizard, so
+      // the redirect is UNCONDITIONAL. Load-detection on `/onboarding/[token]`
+      // re-hydrates the brief and renders the wizard. The old per-audience
+      // wizard routes are gone (redirect stubs forward to here).
       return createSecureResponse({
         outcome: 'serve',
-        redirectTo: unified
-          ? `/onboarding/${tokenId}`
-          : `/onboarding/${decision.audienceType}/${tokenId}`,
+        redirectTo: `/onboarding/${tokenId}`,
       });
     }
 

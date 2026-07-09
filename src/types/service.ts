@@ -440,3 +440,45 @@ export interface ServiceStrategyRequestInput {
   assets: ServiceAssetInput;
   paletteId: HearthPalette;
 }
+
+/**
+ * ===== SERVICE ONBOARDING UNDERSTANDING =====
+ * Lean, de-overlapped service understanding (mirrors product's 4-field UX 1:1).
+ * serviceType is persona/Brief-seeded (no UI badge) and kept for strategy /
+ * section selection / palette fallback. The other five map onto the product
+ * shape: whatYouDo ≈ whatItDoes, services ≈ categories, targetClients ≈
+ * audiences, outcomes ≈ features. deliveryModel is service-specific.
+ *
+ * Canonical home since scale-06 phase 10 retired useServiceGenerationStore
+ * (moved here verbatim, never dropped — used by the template paletteSelection
+ * heuristics + their regression test).
+ */
+export interface ServiceUnderstanding {
+  serviceType: ServiceType;
+  whatYouDo: string;
+  services: string[];
+  targetClients: string[];
+  outcomes: string[];
+  deliveryModel: 'remote' | 'in-person' | 'hybrid';
+}
+
+/** Service-shaped AI extraction (no serviceType — that's persona/Brief-derived). */
+export interface ServiceUnderstandingExtract {
+  whatYouDo: string;
+  services: string[];
+  targetClients: string[];
+  outcomes: string[];
+  deliveryModel: 'remote' | 'in-person' | 'hybrid';
+}
+
+/** T2 proof-existence booleans collected in the wizard's ProofSlot (was the old
+ *  service store's assets step). Superset lives on useWizardStore.WizardProofState. */
+export interface ServiceAssetAvailability {
+  hasTestimonials: boolean;
+  hasClientLogos: boolean;
+  hasOutcomes: boolean;
+  hasCaseStudies: boolean;
+  hasTeamPhotos: boolean;
+  hasFounderPhoto: boolean;
+  testimonialType: 'text' | 'photos' | 'video' | 'transformation' | null;
+}

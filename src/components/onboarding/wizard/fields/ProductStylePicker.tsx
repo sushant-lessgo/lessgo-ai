@@ -3,21 +3,25 @@
 // ProductStylePicker — onboarding2 Phase 6 (Axis A, generation-time pick).
 // Cosmetic look chooser (typeface variant + accent palette + neutral mood)
 // shown NON-BLOCKINGLY while copy streams on the manufacturer/vestria flow,
-// below the Phase 3 hero-variant picker. It only writes the generation store;
-// GeneratingStep applies the values to every draft save (variantId/paletteId
-// columns + themeValues.mood) gated on the resume-safe `stylePicked` flag.
-// Never awaited by the pipeline; skipping = defaults (tailored/cobalt/bone).
+// below the hero-variant picker. GeneratingSlot applies the values to every
+// draft save (variantId/paletteId columns + themeValues.mood) gated on the
+// resume-safe `stylePicked` flags. Never awaited by the pipeline; skipping =
+// defaults (tailored/cobalt/bone).
+//
+// Re-homed from src/app/onboarding/product/[token]/components/fields/ in
+// scale-06 phase 10. Re-wired to write DIRECTLY to useWizardStore (the old
+// useProductGenerationStore mirror subscription was deleted with the store).
 //
 // Swatch strategy (service pattern, adapted): swatches read the injected
-// `[data-palette="x"]{--accent}` CSS vars — but unlike the editor popover, no
-// vestria ThemeInjector is mounted on the onboarding route, so the picker
-// mounts those variable blocks itself via serializePaletteOverrides() from the
-// vestria palettes module. That module is data-only (no block components), and
-// onboarding is not a firewall-gated dir — same precedent as the service
-// onboarding templateCatalog and GeneratingStep's contactFields import.
+// `[data-palette="x"]{--accent}` CSS vars — but no vestria ThemeInjector is
+// mounted on the onboarding route, so the picker mounts those variable blocks
+// itself via serializePaletteOverrides() from the vestria palettes module. That
+// module is data-only (no block components); WizardShell is already
+// dynamically imported (ssr:false) so this never enters the firewall-pure entry
+// bundle.
 
-import { useProductGenerationStore, type VestriaLookMood } from '@/hooks/useProductGenerationStore';
-import { vestriaPalettes, type VestriaVariant } from '@/types/product';
+import { useWizardStore } from '@/hooks/useWizardStore';
+import { vestriaPalettes, type VestriaVariant, type VestriaLookMood } from '@/types/product';
 import { serializePaletteOverrides, pilotEnabledPalettes } from '@/modules/templates/vestria/palettes';
 import { vestriaVariantDefs } from '@/modules/templates/vestria/tokens';
 
@@ -27,12 +31,12 @@ const MOODS: Array<{ id: VestriaLookMood; label: string; description: string }> 
 ];
 
 export default function ProductStylePicker() {
-  const variantId = useProductGenerationStore((s) => s.variantId);
-  const paletteId = useProductGenerationStore((s) => s.paletteId);
-  const mood = useProductGenerationStore((s) => s.mood);
-  const setStyleVariantId = useProductGenerationStore((s) => s.setStyleVariantId);
-  const setStylePaletteId = useProductGenerationStore((s) => s.setStylePaletteId);
-  const setStyleMood = useProductGenerationStore((s) => s.setStyleMood);
+  const variantId = useWizardStore((s) => s.styleVariantId);
+  const paletteId = useWizardStore((s) => s.stylePaletteId);
+  const mood = useWizardStore((s) => s.styleMood);
+  const setStyleVariantId = useWizardStore((s) => s.setStyleVariantId);
+  const setStylePaletteId = useWizardStore((s) => s.setStylePaletteId);
+  const setStyleMood = useWizardStore((s) => s.setStyleMood);
 
   return (
     <div className="mt-6 border-t border-gray-100 pt-6">

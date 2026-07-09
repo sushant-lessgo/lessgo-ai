@@ -4,7 +4,7 @@
 
 import type { LumenPalette } from '@/types/service';
 import { defaultLumenPalette } from './palettes';
-import type { ServiceUnderstanding } from '@/hooks/useServiceGenerationStore';
+import type { ServiceUnderstanding } from '@/types/service';
 
 export function inferDefaultPalette(
   _understanding: ServiceUnderstanding | null

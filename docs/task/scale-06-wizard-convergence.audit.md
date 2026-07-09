@@ -833,3 +833,81 @@ Carry-forward notes (non-blocking):
 - **Phase 10:** stale `/dev/seed-writer` mentions in `src/app/README.md:85` + `src/modules/templates/granth/README.md:7` (docs only, no code import — build safe). Clean up.
 - GeneratingSlot stage labels ("Building strategy / Writing copy") are cosmetic for the thin work path (only saving→done fires).
 - Edge: a `structureHint:'multi'` writer would need a multipage cap granth lacks → shortlist empty → MANUAL. Low probability (writer profiles single-page), fails safe to demand board.
+
+---
+
+## Phase 10 — kills, redirects, old-store retirement
+
+**Files changed**
+
+Created:
+- `src/components/onboarding/wizard/fields/HeroVariantPicker.tsx` (re-homed from old product tree)
+- `src/components/onboarding/wizard/fields/ProductStylePicker.tsx` (re-homed + re-wired to `useWizardStore`)
+- `src/components/onboarding/wizard/fields/templateCatalog.ts` (re-homed from old service tree — tsc-discovered importer of StyleSlot)
+
+Modified:
+- `src/types/product.ts` — added `VestriaHeroVariant` + `VestriaLookMood` (canonical home; moved off the deleted product store)
+- `src/types/service.ts` — added `ServiceUnderstanding` + `ServiceUnderstandingExtract` + `ServiceAssetAvailability` (canonical home; moved off the deleted service store)
+- `src/components/onboarding/wizard/StyleSlot.tsx` — re-pointed picker imports to the wizard fields dir, `VestriaHeroVariant` from `@/types/product`, `TEMPLATE_CATALOG` from the re-homed catalog; DELETED the old-store mirror subscription (ProductStylePicker now writes style picks directly to `useWizardStore`)
+- `src/app/api/brief/confirm/route.ts` — redirect now UNCONDITIONAL (`/onboarding/${tokenId}` for every serve); dropped the rollout import
+- `src/app/onboarding/[token]/page.tsx` — load-detection renders the wizard for ANY confirmed brief; dropped the rollout import + the not-yet-migrated forwarding branch
+- `src/app/onboarding/product/[token]/page.tsx` — server redirect stub -> `/onboarding/${token}`
+- `src/app/onboarding/service/[token]/page.tsx` — server redirect stub -> `/onboarding/${token}`
+- `src/modules/templates/hearth/paletteSelection.ts`, `.../lex/...`, `.../surge/...`, `.../lumen/...` — re-pointed `ServiceUnderstanding` import to `@/types/service`
+- `src/modules/templates/paletteSelection.regression.test.ts` — same re-point
+- `src/hooks/useWizardStore.ts` — re-pointed `ServiceAssetAvailability` type import to `@/types/service`
+- `src/app/api/v2/understand/route.ts` — removed the legacy audienceType/manufacturer flag-gate branch (entry path is now the only path) + its dead imports/prompt-builders; trimmed dead request-schema fields
+- `src/app/api/v2/scrape-website/route.ts` — same legacy-branch removal + dead imports/mock fixtures/manufacturer prompt-builder trimmed
+- `src/app/README.md` — onboarding route table (unified wizard + redirect stubs) + dropped `seed-writer` from `/dev/*`
+- `src/modules/templates/granth/README.md` — replaced the `/dev/seed-writer` white-glove note with the scale-06 self-serve work path
+- `src/hooks/README.md` — recorded the three store deletions + where their types re-homed
+
+Deleted:
+- `src/modules/wizard/rollout.ts` (rollout complete)
+- `src/app/onboarding/product/[token]/components/` (steps, fields, StepContainer — whole dir)
+- `src/app/onboarding/service/[token]/components/` (whole dir)
+- `src/hooks/useProductGenerationStore.ts`
+- `src/hooks/useServiceGenerationStore.ts`
+- `src/hooks/useGenerationStore.ts`
+
+**Deletion order** followed the mandate: re-home pickers -> tsc -> unconditional handoff + delete rollout -> tsc -> redirect stubs -> tsc -> re-point types -> tsc -> delete component dirs -> tsc (surfaced the `templateCatalog` importer, re-homed it) -> tsc -> delete product+service stores -> tsc -> delete `useGenerationStore` -> tsc. Green at every step.
+
+### Step 1 — pickers re-homed + StyleSlot/GeneratingSlot re-wired
+`HeroVariantPicker` + `ProductStylePicker` moved to `src/components/onboarding/wizard/fields/`. HeroVariantPicker is prop-controlled (StyleSlot binds it to `useWizardStore.heroVariant`). ProductStylePicker was internally coupled to the (now-deleted) `useProductGenerationStore` — re-wired to read/write `useWizardStore` style fields DIRECTLY (`styleVariantId`/`stylePaletteId`/`styleMood` + setters). StyleSlot's old mirror-subscription (useEffects copying old-store picks into the wizard store) was removed. **GeneratingSlot.tsx was NOT edited** — its `buildThingInput` already reads style picks from `useWizardStore` (`s.stylePaletteId`/`s.styleVariantId`/`s.styleMood`/`s.heroVariant` + `*Picked` flags) since phase 5, so the "read from useWizardStore" requirement was already satisfied. `templateCatalog.ts` (picker metadata consumed by StyleSlot's trust branch) was a tsc-discovered importer living in the deleted service tree — re-homed alongside the pickers (content unchanged; imports only data-only palette/token modules, firewall-safe).
+
+### ServiceUnderstanding + other type re-homes
+`ServiceUnderstanding`, `ServiceUnderstandingExtract`, `ServiceAssetAvailability` now live in `src/types/service.ts` (verbatim moves, never dropped). `VestriaHeroVariant`, `VestriaLookMood` now live in `src/types/product.ts`. Importers re-pointed: 4 template `paletteSelection.ts` + the regression test (ServiceUnderstanding), `useWizardStore.ts` (ServiceAssetAvailability, type-only superset guard), the two re-homed pickers (Vestria types). No type dropped to silence tsc.
+
+### serviceType kill location — NONE NEEDED (already gone)
+Grep of `serviceType`/`persona`/`ServiceType` across `src/app/api/start/route.ts` and `src/app/onboarding/persona/` found NO persona-seeded `serviceType`: `/api/start` only derives `audienceType` from persona (kept for e2e back-compat + dispatch per scale-02), and `/onboarding/persona/page.tsx` is already a `redirect('/dashboard')` stub. The persona->serviceType seed was removed back in scale-02; `serviceType` is now carried by the Brief (`businessType` -> `serviceTypeForBusinessType` in the trust adapter). No file needed editing for this step.
+
+### useGenerationStore consumer check
+Grep of `useGenerationStore` across `src/**/*.{ts,tsx}` before deletion showed references ONLY inside `useGenerationStore.ts` itself (self-references + its exported selector hooks) — ZERO external live consumers (confirming the plan's README-only note). Deleted; post-delete grep returns zero refs.
+
+### hardware->techpremium bridge — confirmed gone (no edit)
+Grep for any hardware->techpremium / hardware-founder+templateId bridge found none: `techpremium` is reached only via serveGate template resolution + the deterministic path in `thing.ts` (`input.templateId === 'techpremium'`), never a persona bridge. `hardware-founder` persists only as a persona label mapped to `audienceType:'product'` in `types/service.ts`. No template bridge exists. No edit.
+
+### Legacy scrape-schema flag-gate removal
+Both `/api/v2/understand` and `/api/v2/scrape-website` had a phase-7 `if (entry === true) {...}` branch guarding the entry path, with the pre-convergence audienceType + `isManufacturerFlow(templateId)` schema switch below it. The SOLE live caller (`EntryInputStep.tsx`) always sends `entry: true` (verified), so the legacy branch was dead. Removed the branch; both handlers now delegate unconditionally to `handleEntryUnderstand`/`handleEntryScrape` (self-contained: own mock/crawl/AI/credits). Trimmed the now-dead imports, legacy prompt-builders (`buildUnderstandPrompt`, `buildManufacturerUnderstandPrompt`, `buildManufacturerScrapePrompt`), legacy schemas, and mock fixtures (`MOCK_DATA`/`MOCK_DATA_SERVICE`/`MOCK_DATA_MANUFACTURER`). `isManufacturerFlow` core is untouched (scale-08). Request schemas keep only `oneLiner`/`url` + `businessType`; older clients' extra keys (audienceType/templateId/entry) are harmlessly stripped by the non-strict `z.object`.
+
+### Deviations
+1. **GeneratingSlot.tsx not edited** (task said re-wire it to read style from useWizardStore) — it already did since phase 5; editing a correct file adds risk. Logged, not changed.
+2. **serviceType kill = no-op** — the persona seed was already removed in scale-02; documented rather than inventing an edit.
+3. **templateCatalog.ts re-homed** — not on the plan's Files-touched list but a mandatory re-point: StyleSlot's trust branch imports it and it lived in the deleted service tree. Moved (functionality preserved), listed here.
+4. **Old-route layout.tsx files left intact** — `onboarding/{product,service}/[token]/layout.tsx` (auth + claim-on-visit) were not on the list and import nothing deleted; the redirect-stub page renders under them. Conservative (they still enforce auth before the redirect). Left as-is.
+5. **Legacy-branch dead-code trim** went slightly beyond deleting the flag-gate itself (removed orphaned mock fixtures + prompt-builders that ONLY fed the legacy branch) — in-scope hygiene, tsc + build green.
+
+### Verification (all green)
+- `npx tsc --noEmit` -> clean (no output) — re-run green at every deletion step and finally.
+- `npm run test:run` (FULL) -> **88 passed | 1 skipped (89 files); 1241 passed | 2 skipped (1243 tests)**. paletteSelection regression + generation-contract + service section-selection all green after the ServiceUnderstanding/ServiceAssetAvailability re-points.
+- `npm run build` -> **Compiled successfully**. Route table shows `/onboarding/product/[token]` + `/onboarding/service/[token]` at 353/352 B (redirect stubs) and `/onboarding/[token]` at 9.72 kB (unified wizard).
+
+### Open risks
+- Old routes redirect with token preserved (`/onboarding/product/abc` -> `/onboarding/abc`), but their `layout.tsx` still runs the auth guard first — an unauthed hit on an old route goes to `/sign-in` rather than straight to the unified route. Conservative (old routes always required auth); acceptable.
+- No dangling imports (tsc clean); the two v2 routes retain a couple of now-unused optional request fields only as stripped-by-zod back-compat for older clients.
+
+### Impl-review verdict: **ship** (loop 1/1) — ALL THREE gates green (tsc clean; full suite 1241 pass / 2 skipped; `npm run build` re-run by reviewer, compiles). Types verified BYTE-VERBATIM moves (ServiceUnderstanding*/ServiceAssetAvailability→types/service, Vestria*→types/product) — nothing dropped; paletteSelection regression + generation-contract green. No dangling imports (grep clean). Redirect stubs preserve token; layout auth-guard conservative-acceptable. Handoff safe (serve→/onboarding/${tokenId}, manual→demand; no serve outcome without destination; edge engines never carry copyEngine→always manual). Legacy scrape flag-gate cleanly removed (sole caller sends entry:true). isManufacturerFlow core untouched. No blocking issues.
+Carry-forward notes (non-blocking, phase 11 or later):
+- Orphaned-but-harmless dead code after flag-gate removal: `src/modules/audience/service/{promptUnderstand,promptScrape}.ts` no longer imported — safe to prune later (not now).
+- `templateCatalog.ts` re-home was a mandatory tsc-discovered re-point (in scope, functionality-preserving).
+- Old routes' `layout.tsx` still runs auth before the redirect stub (unauthed old-URL → /sign-in → back → redirect); conservative, left intact.
