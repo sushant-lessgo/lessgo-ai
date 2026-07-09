@@ -24,7 +24,7 @@ Give each section type 2–3 copy-compatible blocks per template, selected deter
   - CARRY TO PHASE 6/7: once a section has >1 variant, ensure the manifest's `default` layoutName string EXACTLY matches the resolver's registered default key — the distinctness test resolves default via `set.default`, and a manifest/resolver default-name divergence is NOT independently caught. Reviewer must check this when new variants land.
 - phase 4 eligibility filter + selection threading: done (commit bb1e50ba, review loops 1)
   - CARRY TO PHASE 6/7: `deriveAssetFactsFromBrief` computes `hasTestimonialPhotos` via loose substring conjunction over `proofAvailable` (can false-positive). Tighten when a real photo/testimonial-photo variant lands.
-- phase 5 editor swap generalization + card-count clamp: pending
+- phase 5 editor swap generalization + card-count clamp: done (commit 203ddbfc, review loops 1) — HUMAN GATE pending user sign-off
 - phase 6 meridian variants (3 new dual-renderer pairs): pending
 - phase 7 hearth variants (3 new dual-renderer pairs): pending
 

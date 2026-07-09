@@ -94,6 +94,19 @@ const meridianManifest: TemplateBlockManifest = {
           'cta_subtext', 'secondary_cta_text', 'caption', 'hero_image',
         ],
       },
+      // scale-09 phase 6 — photo-led hero skin (same slots as TerminalHero;
+      // hero_image is already in TerminalHero's consumes / the hero contract).
+      // Offered only once a hero image exists (requiresAssets: photos).
+      {
+        layoutName: 'EditorialPhotoHero',
+        label: 'Editorial photo hero',
+        blurb: 'Photo-led split hero — needs a hero image.',
+        consumes: [
+          'status_text', 'audience_tag', 'headline', 'lede', 'cta_text',
+          'cta_subtext', 'secondary_cta_text', 'caption', 'hero_image',
+        ],
+        requiresAssets: ['photos'],
+      },
     ],
   },
   features: {
@@ -105,6 +118,14 @@ const meridianManifest: TemplateBlockManifest = {
         consumes: ['eyebrow', 'headline', 'lede'],
         capacity: { minCards: 3, maxCards: 9 },
       },
+      // scale-09 phase 6 — full-width hairline ledger skin (same slots).
+      {
+        layoutName: 'LedgerFeatureList',
+        label: 'Ledger list',
+        blurb: 'Full-width hairline rows — reads like schematic docs.',
+        consumes: ['eyebrow', 'headline', 'lede'],
+        capacity: { minCards: 3, maxCards: 9 },
+      },
     ],
   },
   testimonials: {
@@ -113,6 +134,15 @@ const meridianManifest: TemplateBlockManifest = {
       {
         layoutName: 'ProofWithLogoRail',
         label: 'Proof with logo rail',
+        consumes: ['eyebrow', 'headline'],
+        capacity: { minCards: 1, maxCards: 3 },
+      },
+      // scale-09 phase 6 — centered editorial skin (same slots; optional
+      // stats/logos bands omit when empty).
+      {
+        layoutName: 'CenteredEditorialTestimonials',
+        label: 'Centered editorial',
+        blurb: 'One dominant pull-quote, centered, with optional stats + logos.',
         consumes: ['eyebrow', 'headline'],
         capacity: { minCards: 1, maxCards: 3 },
       },

@@ -161,6 +161,12 @@ const THING_GENERATION_LAYOUTS: ReadonlySet<string> = new Set([
   'ThreeTierPricing',
   'ArcCTA',
   'HairlineFooter',
+  // meridian block VARIANTS (scale-09 phase 6) — copy-compatible skins that a
+  // section may carry after an editor swap; each resolves the SAME contract as
+  // its default sibling (hero / features / testimonials).
+  'EditorialPhotoHero',
+  'LedgerFeatureList',
+  'CenteredEditorialTestimonials',
   // vestria generation blocks (+ the full-bleed hero variant)
   'VestriaNavHeader',
   'VestriaTailoredHero',

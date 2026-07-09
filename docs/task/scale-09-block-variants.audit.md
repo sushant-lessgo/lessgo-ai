@@ -227,3 +227,88 @@ Run against `npm run dev`, not mocked. Open the editor `/edit/[token]`.
 ### Open risks
 - Asset-fact derivation is a heuristic over element key names (regex `image|photo|video|logo|...`). A section using an unconventional collection/URL key could mis-derive facts — only matters once a live `requiresAssets` variant exists (phase 6); tighten then.
 - Clamp truncates all collections uniformly; a section with a large secondary collection (e.g. logos max 6) swapped to a maxCards-1 block would also drop logos to 1. Not reachable with current live variants; revisit if a multi-collection section gains a small-capacity variant.
+
+---
+
+## Phase 6 — meridian variants: hero/features/testimonials ×2
+
+**Files changed**
+- `src/modules/templates/meridian/blocks/Hero/EditorialPhotoHero.styles.ts` (NEW, shared plain module)
+- `src/modules/templates/meridian/blocks/Hero/EditorialPhotoHero.tsx` (NEW, edit)
+- `src/modules/templates/meridian/blocks/Hero/EditorialPhotoHero.published.tsx` (NEW, published)
+- `src/modules/templates/meridian/blocks/Features/LedgerFeatureList.styles.ts` (NEW, shared plain module)
+- `src/modules/templates/meridian/blocks/Features/LedgerFeatureList.tsx` (NEW, edit)
+- `src/modules/templates/meridian/blocks/Features/LedgerFeatureList.published.tsx` (NEW, published)
+- `src/modules/templates/meridian/blocks/Testimonials/CenteredEditorialTestimonials.styles.ts` (NEW, shared plain module)
+- `src/modules/templates/meridian/blocks/Testimonials/CenteredEditorialTestimonials.tsx` (NEW, edit)
+- `src/modules/templates/meridian/blocks/Testimonials/CenteredEditorialTestimonials.published.tsx` (NEW, published)
+- `src/modules/templates/meridian/resolveMeridianBlock.ts` (variant-map wiring: added `withVariants` helper + 3 multi-variant section entries)
+- `src/modules/audience/product/elementSchema.ts` (3 cloned schema entries)
+- `src/modules/engines/elementContracts.ts` (`THING_GENERATION_LAYOUTS` += 3 variant layout names)
+- `src/modules/templates/blockManifest.ts` (3 variant declarations added to meridian hero/features/testimonials)
+
+### The 3 dual-renderer pairs (component + layoutName → designer file)
+1. **Hero `EditorialPhotoHero`** ← `Meridian Variant - Hero (Editorial Photo).html` (`.hero-ep`). Photo-led split: copy column (border-right, faint masked dot-grid) + dominant `hero_image` in a hairline viewfinder frame with accent corner ticks + a mono `caption` chip pinned bottom-left. Same 9 slots as `TerminalHero` (incl. the existing `hero_image` key). Drops the stats band (skin difference; schema still clones the stats collection for contract parity). `requiresAssets: ['photos']`.
+2. **Features `LedgerFeatureList`** ← `Meridian Variant - Features (Ledger List).html` (`.section`/`.ledger`). Full-width hairline rows (`78px 64px 1fr 1.35fr 128px` grid) with CSS-only `:hover` (accent-dim row tint + 2px accent left edge scaleY-in + link→accent). Same slots as `HairlineFeatureGrid`. Capacity `{3,9}` (edit add/remove clamps to 3–9).
+3. **Testimonials `CenteredEditorialTestimonials`** ← `Meridian Variant - Testimonials (Centered Editorial).html` (`.te-*`). Centered head → featured pull-quote (#1, 64px accent open-quote mark) → supporting 2-col pair (#2–3) → optional stats band (`<em>`-in-value renders accent) → optional 6-col logo rail. Same slots as `ProofWithLogoRail`. Optional bands + supporting grid render conditionally on collection length.
+
+### CSS-only + accent-inherited + token-mapped
+- **CSS-only**: no JS behavior in the blocks; only CSS `:hover` (Features rows + buttons). The hero's edit-only photo upload (`<input type=file>` via `useEditStore().uploadImage`, the `TechPremiumHero` pattern) lives ONLY in the `.tsx`; `.published.tsx` renders a plain `<img>` — no editor/published markup divergence.
+- **Accent inherited, tokens mapped**: all accents use `var(--accent)`/`var(--accent-ink)`/`var(--accent-dim)`. The README's raw `oklch(...)` values were dropped and mapped onto meridian's existing token names (all confirmed present in `meridian/tokens.ts`). No hardcoded OKLCH — the only `oklch` text is `color-mix(in oklch, var(--ink) …)` (color-space keyword on a token, not a baked color).
+
+### Dual-renderer parity approach (shared styles module)
+Each pair's CSS lives in a plain, NON-`'use client'` `*.styles.ts` module (`EDITORIAL_PHOTO_HERO_STYLES` / `LEDGER_FEATURE_LIST_STYLES` / `CENTERED_EDITORIAL_TESTIMONIALS_STYLES`) imported by BOTH `.tsx` and `.published.tsx` — one source of truth for class names + CSS, so the renderers cannot drift. Satisfies the published/client-boundary rule (no function imported from a `'use client'` block into a `.published.tsx`). Class prefixes are unique per variant (`.mrd-hep__*`, `.mrd-ledger*`, `.mrd-te__*`) so they never collide with the default siblings' classes.
+
+### Registration wiring
+- **Schema clone** (`elementSchema.ts`): `EditorialPhotoHero`=clone of `TerminalHero` (elements + stats); `LedgerFeatureList`=clone of `HairlineFeatureGrid`; `CenteredEditorialTestimonials`=clone of `ProofWithLogoRail`. Keys verified EXACT vs the real siblings; contract union unchanged, so `consumes ⊆ contract` stays green.
+- **THING_GENERATION_LAYOUTS** += the 3 variant layout names — a section carrying a swapped-in variant resolves its (thing, sectionType) contract on generation/regeneration.
+- **Resolver**: added `withVariants(defaultLayoutName, ...pairs)`; hero/features/testimonials became multi-variant `SectionEntry`s keyed by lowercased layout name; `default` UNCHANGED; lookup stays `variants[layoutName] ?? variants[default]`.
+- **Manifest**: one declaration per section next to the default; `consumes` mirrors the default sibling; capacity features `{3,9}`, testimonials `{1,3}`, hero none; `requiresAssets:['photos']` ONLY on the hero variant. Carry-forward check: manifest `default` strings exactly match the resolver's registered default keys — verified.
+
+### Distinctness-test result (all 3, both modes)
+`conformance.test.ts` (c)-suite PASSED for all 3 (verbose-confirmed): `EditorialPhotoHero` DISTINCT from `TerminalHero`; `LedgerFeatureList` DISTINCT from `HairlineFeatureGrid`; `CenteredEditorialTestimonials` DISTINCT from `ProofWithLogoRail` — plus each "resolves to a real block (edit + published)". Phase-4 eligibility suite (photo hero drops when `hasPhotos=false`) stayed green.
+
+### Deviations
+- **Quote tag**: `MeridianEditable`'s `Tag` union excludes `blockquote`, so edit uses `as="div"` while published emits `<blockquote>` — the SAME div-edit/blockquote-published split the default `ProofWithLogoRail` already uses; visually identical (`.mrd-te__quote`). Matches precedent.
+- **Eyebrow numeric index dropped**: the designer HTML shows a decorative accent index (`02 —`) before the eyebrow; no content slot exists for it, so it was omitted rather than invent content or bake a meaningless static string (eyebrow renders as editable text + hairline rule, like the default siblings).
+- **Hero photo affordance** uses `useEditStore().uploadImage` (product `TechPremiumHero` pattern) rather than hearth's `useImageToolbar` overlay (meridian has no such wiring); edit-only, absent from published.
+
+### Verification (actual output)
+- `npx tsc --noEmit` — clean (after fixing 2 `blockquote` Tag errors → `div`).
+- `npx vitest run conformance.test.ts blockManifest.test.ts blockEligibility.test.ts` — 3 files, **200 passed**.
+- `npm run test:run` (full) — **102 passed | 1 skipped files; 1698 passed | 3 skipped tests** (+11 vs phase 5). No fixture drift.
+- `npm run build` — **✓ Compiled successfully**; full route table, published CSS/assets + `next build` all green.
+
+### Open risks
+- The editorial photo hero drops the `stats` band `TerminalHero` renders — intentional and copy-safe (stats stay in stored content, unrendered by this variant; swapping back re-shows them). No data loss.
+- Manual editor↔published pixel parity is not automatable — see checklist below.
+
+---
+
+## MANUAL PARITY-QA CHECKLIST (human gate — `npm run dev`, meridian product project)
+
+For EACH variant: hover section → toolbar **Layout** → pick the variant → eyeball editor, then Preview/Publish and eyeball the published page for pixel parity.
+
+**1. Hero — Editorial Photo (`EditorialPhotoHero`)**
+- On a meridian **hero** section, open **Layout**. BEFORE a hero image is uploaded, the "Editorial photo hero" card must be **ABSENT** (requiresAssets: photos gate).
+- Upload a hero image (`hero_image` set), reopen Layout → "Editorial photo hero" **APPEARS**. Select it.
+- Editor: two-column split, image dominant right inside a hairline frame with accent corner ticks; `status_text` mono line + accent dot, `audience_tag` pill, headline with accent `<em>`, lede, primary CTA (arrow) over `cta_subtext`, ghost secondary CTA, mono `caption` chip bottom-left of the image.
+- Change/remove photo controls work; remove → striped drop-target empty state returns.
+- Publish round-trip: published hero matches editor exactly; accent tracks the project palette (not baked mint).
+
+**2. Features — Ledger List (`LedgerFeatureList`)**
+- meridian **features** → Layout → "Ledger list". Full-width hairline rows: `F-0n` index · glyph box · title · description · right-aligned `read ↗`.
+- Hover a row: accent-dim tint, 2px accent left edge grows in, link → accent (CSS-only).
+- Add/remove capability clamps 3–9.
+- Publish round-trip: rows + hover identical.
+
+**3. Testimonials — Centered Editorial (`CenteredEditorialTestimonials`)**
+- meridian **testimonials** → Layout → "Centered editorial". Centered head, featured pull-quote (#1) with 64px accent mark, supporting pair (#2–3).
+- With 1 testimonial: supporting grid hidden on publish.
+- Stats: add 1–3 (try `<em>` in a value → accent, upright); 0 stats → band ABSENT on publish. Same for logo rail (0 → absent, up to 6).
+- Publish round-trip: featured/supporting/stats/logos match editor; empty optional bands omitted.
+
+### Post-review parity fixes (impl-review = ship; 2 non-blocking, in `LedgerFeatureList.published.tsx` only)
+1. **Grid-shift parity**: the fixed 5-col ledger grid has `title`/`description`/`link_text` as direct grid children. Edit always renders all three cells; published previously rendered them conditionally (`{f.title && …}`), so a card with an empty title but non-empty description would auto-place cells into the wrong columns on publish (edit≠published). FIX: render all three grid-child cells UNCONDITIONALLY (`{f.title || ''}` etc., cell element always present) → grid structurally stable regardless of empty fields, matching the edit renderer.
+2. **Decorative link href**: published rendered `read ↗` as `<a href="#">` (scrolls to top on click) while edit uses a non-navigating span. FIX: published now uses a hrefless `<span className="mrd-ledger__link">` — parity with the edit side (styling unchanged; `.mrd-ledger__link` applies to the span).
+- Re-verified: `npx tsc --noEmit` clean; `npm run test:run` 102 passed | 1 skipped files, 1698 passed | 3 skipped tests; `npm run build` ✓ Compiled successfully.
