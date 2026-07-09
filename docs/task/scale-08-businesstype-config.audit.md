@@ -239,3 +239,41 @@ This freezes `e2e/fixtures/generated/vestria.json` (+ service/product). Re-runni
 
 ### Open risks
 - The vestria golden only exercises its schema once a human runs `CAPTURE=1`; until then the manufacturer copy shape is guarded by the offline mock-route THING/TRUST contract tests + the new fixture-free entry asserts, not a frozen real-LLM sample. Intended (real-LLM freeze is a human eyeball step).
+
+---
+
+## Phase 6 — admin: read-only businessTypes panel
+
+### Files changed
+- `src/app/admin/page.tsx` — added a read-only "Business Types" `<section>` + supporting imports/computation.
+
+### What changed
+- New imports: `businessTypes`, `businessTypeKeys` (`@/modules/businessTypes/config`), `fit` (`@/modules/templates/fit`), `templateIds` (`@/types/service`) — all pure server-safe data modules (no `'use client'`, no template chunk pulled in via the fit firewall).
+- Pre-render computation `businessTypeRows`: one row per `businessTypeKeys` entry with `{ entry, serveable, missingCaps }`.
+- New `<section>` after the Demand Board, matching existing table markup/classes. Columns: Key, Label, Engine, Required capabilities, Structure, Voice hint (`undefined → '—'`), Serveability. Missing caps rendered with a red pill; serveable → emerald "serveable" pill, non-serveable → red "missing: <caps>" pill.
+
+### How serveability is computed
+Reused the pure `fit()` helper directly (NOT the full `decideServe`, which needs `facts.entry.resolvedEngine` from a hydrated brief — a bare `{ businessType: key }` brief has no entry facts, so it would report a misleading `rungE`/unclassified result). Per entry: `serveable = templateIds.some(t => fit(t, entry.copyEngine, entry.requiredCapabilities))`; `missingCaps = requiredCapabilities.filter(cap => no template fits engine+[cap])`. `fit()` already excludes bespoke/retired templates and enforces engine + full capability coverage — this is the true serve check for a config entry, independent of user goal/intent. Approach noted here per the plan's degrade-gracefully clause; this is the non-degraded fit-based result, not the cross-ref fallback.
+
+### The 8 entries' expected/rendered serveability
+- saas (thing, lead-form) → serveable (meridian)
+- manufacturer (thing, lead-form) → serveable (meridian/vestria)
+- agency (trust, lead-form) → serveable (hearth/lex/surge)
+- consultant (trust, lead-form) → serveable
+- coach (trust, lead-form) → serveable
+- writer (work, no caps) → serveable (granth)
+- photographer (work, gallery) → NON-serveable, missing: gallery (only lumen has gallery but it's bespoke → off every shortlist; granth lacks it)
+- app (thing, lead-form) → serveable (meridian)
+
+Matches the plan's expected outcome (photographer non-serveable/gallery missing; app+saas+manufacturer serveable).
+
+### Test results
+- `npx tsc --noEmit`: clean.
+- `npm run test:run`: 1568 passed, 3 skipped (98 files passed, 1 skipped) — no regressions (additive UI, no admin-page unit test exists).
+- `npm run build`: compiled successfully; `/admin` present as dynamic server route (ƒ). No server/client boundary issue from the new imports.
+
+### Deviations
+- None. Stayed within `src/app/admin/page.tsx`; did not touch the `isAdmin` gate; no new route/client JS.
+
+### Open risks
+- Panel reflects config truth at build time; entries are static (frozen-enum), so no runtime staleness. If a future template declares `gallery` non-bespoke, photographer would flip to serveable automatically (desired).

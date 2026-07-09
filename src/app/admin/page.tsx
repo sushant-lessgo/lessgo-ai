@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { isAdmin } from '@/lib/admin';
 import TransferOwnershipControl from '@/components/admin/TransferOwnershipControl';
+import { businessTypes, businessTypeKeys } from '@/modules/businessTypes/config';
+import { fit } from '@/modules/templates/fit';
+import { templateIds } from '@/types/service';
 
 export const dynamic = 'force-dynamic';
 
@@ -149,6 +152,22 @@ export default async function AdminPage() {
   const activeThisMonth = usage.length;
 
   const userOptions = users.map((u) => ({ clerkId: u.clerkId, email: u.email }));
+
+  // Business-type config panel (read-only; editing entries is a code deploy —
+  // frozen-enum philosophy). Serveability reuses the pure `fit()` helper: a type
+  // is SERVEABLE iff some non-bespoke, non-retired shipped template declares its
+  // copyEngine AND covers every requiredCapability. A capability is "missing"
+  // when no such template backs it (e.g. photographer → gallery).
+  const businessTypeRows = businessTypeKeys.map((key) => {
+    const entry = businessTypes[key];
+    const serveable = templateIds.some((t) =>
+      fit(t, entry.copyEngine, [...entry.requiredCapabilities])
+    );
+    const missingCaps = entry.requiredCapabilities.filter(
+      (cap) => !templateIds.some((t) => fit(t, entry.copyEngine, [cap]))
+    );
+    return { entry, serveable, missingCaps };
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -480,6 +499,68 @@ export default async function AdminPage() {
               </div>
             </>
           )}
+        </section>
+
+        {/* BUSINESS TYPES (read-only config) */}
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3">
+            Business Types ({businessTypeRows.length}) — config, read-only
+          </h2>
+          <div className="bg-white rounded-lg border border-slate-200 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-100 text-left text-xs uppercase text-slate-600">
+                <tr>
+                  <th className="px-3 py-2">Key</th>
+                  <th className="px-3 py-2">Label</th>
+                  <th className="px-3 py-2">Engine</th>
+                  <th className="px-3 py-2">Required capabilities</th>
+                  <th className="px-3 py-2">Structure</th>
+                  <th className="px-3 py-2">Voice hint</th>
+                  <th className="px-3 py-2">Serveability</th>
+                </tr>
+              </thead>
+              <tbody>
+                {businessTypeRows.map(({ entry, serveable, missingCaps }) => (
+                  <tr key={entry.key} className="border-t border-slate-100 hover:bg-slate-50">
+                    <td className="px-3 py-2 font-mono text-xs">{entry.key}</td>
+                    <td className="px-3 py-2">{entry.label}</td>
+                    <td className="px-3 py-2 font-mono text-xs text-slate-600">{entry.copyEngine}</td>
+                    <td className="px-3 py-2 font-mono text-xs text-slate-600">
+                      {entry.requiredCapabilities.length > 0
+                        ? entry.requiredCapabilities.map((cap) => (
+                            <span
+                              key={cap}
+                              className={
+                                missingCaps.includes(cap)
+                                  ? 'inline-block rounded bg-red-100 text-red-800 px-1.5 py-0.5 mr-1 font-semibold'
+                                  : 'inline-block rounded bg-slate-100 text-slate-700 px-1.5 py-0.5 mr-1'
+                              }
+                            >
+                              {cap}
+                            </span>
+                          ))
+                        : '—'}
+                    </td>
+                    <td className="px-3 py-2 text-xs text-slate-600">{entry.structureDefault}</td>
+                    <td className="px-3 py-2 font-mono text-xs text-slate-500">
+                      {entry.voiceHint ?? '—'}
+                    </td>
+                    <td className="px-3 py-2 text-xs">
+                      {serveable ? (
+                        <span className="inline-block rounded bg-emerald-100 text-emerald-800 px-2 py-0.5 font-semibold">
+                          serveable
+                        </span>
+                      ) : (
+                        <span className="inline-block rounded bg-red-100 text-red-800 px-2 py-0.5 font-semibold">
+                          missing: {missingCaps.join(', ') || 'no template'}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
     </div>
