@@ -6,9 +6,11 @@
 
 import type { TemplateId } from '@/types/service';
 import { templateIds } from '@/types/service';
-import type { CapabilityId } from '@/types/brief';
+import type { CapabilityId, CopyEngine } from '@/types/brief';
+import { capabilityIds } from '@/types/brief';
 import type { Brief } from '@/types/brief';
 import { templateMeta } from '@/modules/templates/templateMeta';
+import { engineCoreSections } from '@/modules/engines/coreSections';
 import { businessTypes, type BusinessTypeKey } from '@/modules/businessTypes/config';
 
 /**
@@ -65,6 +67,64 @@ export function requiredCapabilitiesFromBrief(brief: Brief): CapabilityId[] {
   if (brief.structure?.mode === 'multi') required.add('multipage');
 
   return [...required];
+}
+
+/** The confirmed 7b structure shape (Brief.structure, non-null). */
+export type ConfirmedStructure = NonNullable<Brief['structure']>;
+
+/**
+ * scale-07 phase 6 — derive the required-capability set from the USER-CONFIRMED
+ * structure (surviving sections/pages), not the raw Brief. Dropping a section
+ * at the 7b gate removes its owning capability from the requirement, so MORE
+ * templates become swap-eligible (`fit()`/`shortlist()` reused as-is by
+ * callers over this set).
+ *
+ * Derivation:
+ * - section → owning capability via the INVERTED `templateMeta.capabilitySections`
+ *   (the same evidence map the grammar consumes). When `engine` is given, only
+ *   templates declaring that engine contribute inversions — a section name that
+ *   happens to collide across engines (e.g. vestria's `about` capability section
+ *   vs surge's always-on `about` middle section) never derives a foreign-engine
+ *   capability.
+ * - engine-CORE sections map to NO capability (they are the shared skeleton,
+ *   not capability evidence — e.g. trust's core `cta`/`packages` never derive
+ *   lead-form/packages). Without an engine, the union of all engine cores is
+ *   excluded (conservative).
+ * - STRUCTURAL capabilities stay trust-on-declaration: `mode === 'multi'` ⇒
+ *   `multipage` (no section evidences it); `bilingual` has no structure signal.
+ *
+ * Result is deterministic (canonical `capabilityIds` order).
+ */
+export function requiredCapabilitiesFromStructure(
+  confirmed: ConfirmedStructure,
+  engine?: CopyEngine
+): CapabilityId[] {
+  const required = new Set<CapabilityId>();
+  if (confirmed.mode === 'multi') required.add('multipage');
+
+  // Surviving sections: single-page confirmed body + every multi-page page.
+  const surviving = new Set<string>(confirmed.sections ?? []);
+  for (const page of confirmed.pageDetails ?? []) {
+    for (const s of page.sections) surviving.add(s);
+  }
+
+  // Core sections are skeleton, never capability evidence.
+  const core = new Set<string>(
+    engine ? engineCoreSections[engine] : Object.values(engineCoreSections).flat()
+  );
+
+  // Inverted capability→section evidence map (engine-scoped when given).
+  for (const templateId of templateIds) {
+    const meta = templateMeta[templateId];
+    if (!meta?.capabilitySections) continue;
+    if (engine && !(meta.copyEngines as readonly string[]).includes(engine)) continue;
+    for (const [cap, sectionType] of Object.entries(meta.capabilitySections)) {
+      if (!sectionType || core.has(sectionType)) continue;
+      if (surviving.has(sectionType)) required.add(cap as CapabilityId);
+    }
+  }
+
+  return capabilityIds.filter((c) => required.has(c));
 }
 
 /** All template ids that hard-fit the brief (templateIds order preserved). */

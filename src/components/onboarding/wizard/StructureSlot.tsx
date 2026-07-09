@@ -24,6 +24,16 @@
 // guard in `fetchStrategy` makes back-navigation charge-safe (a 'done' status
 // never refetches).
 //
+// PERSISTENCE (scale-07 phase 6): the confirmed structure is PERSISTED to
+// `Project.brief.structure` — the shell's Continue (the confirm tap) calls the
+// store's save(), whose buildBriefPatch now carries `brief.structure` (mode +
+// sections / pageDetails) through saveDraft's key-wise brief merge. This slot
+// recomputes the required-capability set client-side on every structure edit
+// (requiredCapabilitiesFromStructure — dropping a section relaxes hard-fit for
+// the phase-7 swap shortlist) and feeds the PERSISTED `structure.mode`
+// (rehydrated by the store) into `isMultipage`, so slot UI and generation read
+// the same mode signal.
+//
 // FIREWALL: client-only. Reads/writes `useWizardStore`; imports the data-only
 // pageArchetypes menu + engine contract helpers (no block components).
 
@@ -85,6 +95,11 @@ export default function StructureSlot() {
   const structureDisabled = useWizardStore((s) => s.structureDisabled);
   const toggleStructureSection = useWizardStore((s) => s.toggleStructureSection);
   const moveStructureSection = useWizardStore((s) => s.moveStructureSection);
+  // Structure persistence + hard-fit recompute (scale-07 phase 6).
+  const briefStructureMode = useWizardStore((s) => s.briefStructureMode);
+  const recomputeRequiredCapabilities = useWizardStore(
+    (s) => s.recomputeRequiredCapabilities
+  );
 
   const lockedSet = useMemo(
     () => new Set(engine ? lockedSectionsForEngine(engine) : []),
@@ -97,16 +112,31 @@ export default function StructureSlot() {
     if (!strategy && strategyStatus === 'idle') void fetchStrategy();
   }, [strategy, strategyStatus, fetchStrategy]);
 
+  // Hard-fit recompute (scale-07 phase 6): whenever the confirmed structure
+  // changes (seed, toggle, reorder, page add/remove/edit), re-derive the
+  // required-capability set from the SURVIVING sections — a dropped section's
+  // owning capability leaves the requirement, so more templates become
+  // swap-eligible (phase 7 reads the store's `requiredCapabilities`).
+  useEffect(() => {
+    recomputeRequiredCapabilities();
+  }, [storeSitemap, structureSections, structureDisabled, recomputeRequiredCapabilities]);
+
   // Multi vs single mode (scale-07 phase 5 re-key): decided by the template's
-  // `multipage` CAPABILITY + businessType structureDefault (an explicit Brief
-  // `structure.mode` also feeds isMultipage; the store does not retain
-  // brief.structure yet — that signal arrives with phase-6 persistence, so the
-  // businessType key is the Brief-side signal available here).
+  // `multipage` CAPABILITY + businessType structureDefault + (phase 6) the
+  // PERSISTED confirmed `structure.mode` rehydrated by the store — an explicit
+  // confirmed mode wins over the businessType default inside isMultipage, so
+  // this slot and generation-side detection read the same persisted signal.
   const menu = useMemo(() => {
-    const briefSignal = businessTypeKey ? { businessType: businessTypeKey } : undefined;
+    const briefSignal =
+      businessTypeKey || briefStructureMode
+        ? {
+            ...(businessTypeKey ? { businessType: businessTypeKey } : {}),
+            ...(briefStructureMode ? { structure: { mode: briefStructureMode } } : {}),
+          }
+        : undefined;
     if (!isMultipage(templateId ?? undefined, briefSignal)) return [];
     return getPageArchetypesForTemplate(templateId ?? undefined) ?? [];
-  }, [templateId, businessTypeKey]);
+  }, [templateId, businessTypeKey, briefStructureMode]);
   const menuByKey = useMemo(() => new Map(menu.map((a) => [a.key, a])), [menu]);
 
   // Prefer prior edits (storeSitemap), else the strategy's proposal.

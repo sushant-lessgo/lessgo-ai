@@ -332,3 +332,94 @@ vestria still resolves its menu + is multi; meridian/techpremium(retired)/hearth
 - StructureSlot's Brief signal is `businessTypeKey` only until phase 6 persists/rehydrates `brief.structure` — an explicit user `structure.mode` cannot influence the slot yet (no producer exists yet either).
 - Multipage style defaults in `runCopyAndSave`/fan-out (`defaultVestriaPalette`, `'tailored'`, vestria lead fields) remain vestria-SHAPED behind the now-capability-keyed flag — fine while vestria is the only multipage template; a second multipage template must generalize them (template-default lookup).
 - Route now accepts `requiredCapabilities` with no runtime sender — dormant surface until phase 6 wires the recomputed required set.
+
+
+---
+
+## Phase 6 — Structure persistence + 7b deletion relaxes hard-fit
+
+**Files changed**
+- `src/lib/schemas/brief.schema.ts` — `BriefSchema.structure` extended additively; `pages` → OPTIONAL
+- `src/modules/templates/fit.ts` — new `requiredCapabilitiesFromStructure(confirmed, engine?)` + `ConfirmedStructure` type
+- `src/hooks/useWizardStore.ts` — `buildStructurePatch` (the persisted brief patch), `requiredCapabilities`/`briefStructureMode` state, `recomputeRequiredCapabilities` action, hydrate read-on-load of persisted structure, `buildBriefPatch` carries structure
+- `src/components/onboarding/wizard/StructureSlot.tsx` — recompute effect + persisted-mode signal into `isMultipage` + header-comment update
+- `src/modules/templates/fit.test.ts` — 10 new tests: structure-derivation fixtures (drop-gallery/drop-catalog shortlist growth, core-exclusion, engine-scoping, multi/page-drop) + BriefSchema.structure persistence contract (shallow-partial proof, back-compat, round-trip, malformed rejection)
+
+(Working-tree items NOT mine: `docs/task/scale-07-structure-convergence.plan.md` phase-5 commit-sha line (orchestrator), deleted `docs/task/scale.md`, untracked `docs/guides/collections.md` + `docs/task/scale-10-collections.spec.md` — all pre-existing, carried from phase 5.)
+
+### Schema extension (`pages` optional — the make-or-break)
+
+```ts
+structure: z.object({
+  mode: z.enum(['single', 'multi']),
+  pages: z.array(z.string()).optional(),          // <- was required; legacy classify writeback, kept for back-compat readers
+  pageDetails: z.array(z.object({
+    archetypeKey: z.string(), slug: z.string(), sections: z.array(z.string()),
+  })).optional(),                                  // <- new: multi confirmed per-page sections
+  sections: z.array(z.string()).optional(),        // <- new: single-page confirmed body
+}).optional(),
+```
+
+No migration (`brief` is a JSON column); additive only. Grep confirmed ZERO readers of `structure.pages` anywhere in `src/` (pattern `structure\??\.pages` → no matches), so relaxing it breaks no compile site; `classify.ts:171` rows (`pages: []`) still parse (tested).
+
+**safeParse-partial proof (the shallow-partial trap):** test "CRITICAL: partial().safeParse of a single-page confirm WITHOUT pages succeeds" runs the EXACT saveDraft validation — `BriefSchema.partial().safeParse({ structure: { mode:'single', sections:['hero','features'] } })` — and asserts `success === true` plus data round-trips unchanged. GREEN. Back-compat test parses old `{mode:'multi', pages:['home','about']}` and classify's `{mode:'single', pages:[]}` — GREEN.
+
+### Write path (persistence flow, traced — DB not runnable here)
+
+`/api/brief/confirm` untouched (pre-wizard serve gate). The writer: WizardShell's Continue on the structure slot (the confirm tap) → `save()` → `buildBriefPatch()` now includes `structure: buildStructurePatch(state)` → POST `/api/saveDraft` with `{ tokenId, stepIndex, brief: {goal?, structure} }` → route validates with `BriefSchema.partial()` (now passes for single-page, proven above) → key-wise shallow-merge over stored brief (`saveDraft/route.ts:126-128`) → `Project.brief.structure` written. On next load, `hydrate(brief)` reads the persisted structure (see charge-dedup below) and recomputes the required set — the load-time required set reflects the confirmed structure.
+
+- multi patch: `{mode:'multi', pages: sitemap.map(archetypeKey), pageDetails: [{archetypeKey, slug: pathSlug, sections}]}` (from the user-edited sitemap).
+- single patch: `{mode:'single', sections: confirmedStructureBody}` — toggled-off removed, order preserved, NO `pages` key.
+- pre-strategy: `buildStructurePatch` returns null → no `structure` key in the patch.
+
+**Clobber guard (step 4, verified):** saveDraft's merge is key-wise (`{...existingBrief, ...briefResult.data}` at `route.ts:126-128`) — `structure` is replaced ONLY when the patch carries the key. All other writers checked: the wizard's own pre-structure autosaves (patch has no structure key), `thing.ts:248`'s `brief:{goal}` patch, and the old-store GoalStep/GeneratingStep passthroughs all send structure-less patches → persisted structure survives every other autosave. Post-resume autosaves re-send the SAME structure (hydrate seeded it) — an idempotent rewrite of current truth, not a clobber.
+
+### Section → capability inversion (`requiredCapabilitiesFromStructure`)
+
+- Surviving sections = single `sections` ∪ every `pageDetails[].sections`.
+- Inverts `templateMeta.capabilitySections` across templates; when `engine` is given, ONLY templates declaring that engine contribute (prevents cross-engine name collisions: surge's always-on `about` middle section under trust never derives vestria's thing-scoped `about` capability — tested).
+- Engine-CORE sections (from `engineCoreSections`) map to NO capability (plan step 1): trust's core `cta`/`packages` never derive lead-form/packages even though they ARE meridian/surge capability evidence — tested. No engine ⇒ union-of-all-cores excluded (conservative).
+- Structural capabilities trust-on-declaration (step 3): `mode==='multi'` ⇒ `multipage`; `bilingual` has no structure signal, never derived.
+- Deterministic output (canonical `capabilityIds` order). `fit()`/`shortlist()` untouched, reused as-is.
+
+**Drop-gallery ⇒ bigger-shortlist proof (tests, green):**
+- gallery: `['hero','services','portfolio']` derives `gallery` (lumen's `portfolio` evidence) ⇒ 0 trust templates fit; dropping `portfolio` ⇒ derives nothing ⇒ `[hearth, lex, surge]` (0 → 3, strictly greater — asserted).
+- realistic thing analog: `['hero','features','cta','catalog']` ⇒ `['catalog','lead-form']` ⇒ `[vestria]` only; drop `catalog` ⇒ `['lead-form']` ⇒ `[meridian, vestria]` (1 → 2).
+- multi: dropping the contact page drops `lead-form` (`['multipage','lead-form','trust']` → `['multipage','trust']`).
+
+### Store + slot (confirm carries patch; required set held)
+
+- `requiredCapabilities: CapabilityId[] | null` on the store; `recomputeRequiredCapabilities()` re-derives from `buildStructurePatch(state)` + engine. StructureSlot recomputes on every structure change (seed/toggle/reorder/page edits) via an effect — the client-side recompute the plan asks for; phase 7 reads the store field.
+- fit.ts import into the client store is firewall-safe: fit is pure data-layer (templateMeta + coreSections + businessTypes data; its own header forbids template-module imports).
+
+### Charge-dedup (step 3b) — scope: read-on-load DONE, fetch-skip deliberately NOT
+
+Implemented the plan's minimum: hydrate READS `Project.brief.structure` on load — a structure carrying `sections`/`pageDetails` (a real 7b confirm; classify's bare `{mode, pages:[]}` hint is ignored so fresh-run behavior is byte-identical) seeds `structureSections` (single) or `sitemap` (multi, titles prettified from archetypeKey — titles aren't in the schema) + `briefStructureMode` + the recomputed required set. The strategy-seed guards (`seedStructureFromStrategy`) never clobber these, so the user's confirmed deletions/ordering SURVIVE a reload and re-apply through the clamp.
+
+The fetch-SKIP variant ("mark done, don't fetch") was evaluated and rejected as harmful (documented in a comment inside `fetchStrategy`): with `strategy` null it (a) degrades a multipage resume to the single-page tail path (thing.ts fan-out requires `input.strategy && input.sitemap`) and (b) bypasses `applyConfirmedSections` (needs a strategy object), silently discarding the user's confirmed reductions. Charge accounting is UNCHANGED either way: skipping merely moves the second session's single charge from the slot to thing.ts's tail fallback (total across abandon+reload = 2 in all variants). TRUE cross-session dedup requires persisting the strategy blob itself — needs thing.ts/GeneratingSlot + a content-schema home, out of this phase's Files-touched → DEFERRED (flag for phase 7/9 if resume matters before then).
+
+### Phase-5 open risks
+
+- **StructureSlot↔generation mode-signal divergence — ADDRESSED (client side):** the slot now feeds the persisted confirmed `structure.mode` (via `briefStructureMode`) into `isMultipage` alongside businessType, and `isMultipage` already prefers explicit mode over the default — slot UI and any brief-fed detection site now read the same persisted signal. Server-side strategy assembly receives `brief:{goal}` only (thing.ts payload builder — not in Files-touched); forwarding `brief.structure` there is a small follow-up when thing.ts next opens.
+- **`resolvedTemplateId` null-resume meridian stamp — DOCUMENTED, source unchanged:** `thing.ts:305` still falls back to `PILOT_TEMPLATE` when `input.templateId` is null. The store's templateId comes from hydrate (serveGate result) and generation saves persist templateId, so a wizard resume carries it; the residual risk is a hypothetical DB-resume path constructing input without a templateId — unreachable today; fixing the fallback itself needs thing.ts (out of scope).
+
+### Deviations
+
+1. **`requiredCapabilitiesFromStructure` gained an optional `engine?` param** (plan sketch: `(confirmed)`). Without engine-scoping, cross-engine section-name collisions mis-derive (surge's `about` middle section under trust would demand vestria's thing-scoped `about` capability → empty trust shortlists). Engine omitted ⇒ global inversion + union-of-cores exclusion (conservative superset), so the plan-shaped 1-arg call still works.
+2. **No separate POST in StructureSlot's confirm** — the plan's own store bullet ("confirm action carries the saveDraft brief patch") is satisfied by folding the structure patch into `buildBriefPatch`, so the shell's existing Continue→`save()` (the 1-tap confirm) is the writer; a duplicate slot-level POST would double-write per confirm. WizardShell (not in Files-touched) needed zero edits.
+3. **`pages` back-compat values = archetype keys** (multi patch) — schema comment says "page names"; archetype keys (`home`, `contact`, …) are the stable page identity (slugs live in `pageDetails`). Zero readers exist, so this defines rather than breaks the convention.
+4. **Multi resume drops user-edited page TITLES** — `pageDetails` (per plan schema) carries `archetypeKey/slug/sections` only; hydrate prettifies the key. Titles stay editable at the slot; extending the schema beyond the plan's shape was not taken.
+5. **Charge-dedup fetch-skip not implemented** — see scope section above (correctness-preserving reading of 3b's "at minimum" clause).
+6. **`requiredCapabilities` has no server sender yet** — the strategy route's dormant `requiredCapabilities` field (phase-5 carryover a) stays dormant: the recomputed set exists only AFTER the strategy fetch that would consume it (7b runs post-strategy); its real consumer is phase 7's swap shortlist.
+
+### Test results
+
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — **Test Files 94 passed | 1 skipped (95) · Tests 1499 passed | 2 skipped (1501)** (phase-5 baseline 1489 + 10 new, zero regressions). Targeted phase suites (fit, wizard store, structureConvergence) 89/89 green.
+- New coverage: shallow-partial safeParse proof (exact saveDraft payload), old-row back-compat, pageDetails round-trip + derivation, malformed rejection, drop-gallery 0→3 growth, drop-catalog 1→2 growth, core-exclusion, engine-scoping, multi page-drop, legacy `{mode,pages}` derivation.
+
+### Open risks
+
+- Persisted structure is written at EVERY post-structure `save()` (current-truth rewrite) — idempotent, but if a future slot after `structure` mutates sitemap/sections client-side, that mutation persists on its Continue too (today only `generating` follows, whose Continue is disabled).
+- Multipage resume still re-charges the strategy fetch (see charge-dedup scope) — acceptable/unchanged, but a founder-visible cost if abandon-after-confirm becomes common.
+- `briefStructureMode` is only set from a CONFIRMED structure; classify's `structureHint` still reaches detection only via businessType default — intentional (fresh-run behavior preservation), but a hypothetical future writer of a bare `{mode}` structure would not steer the slot until it also writes sections/pageDetails.

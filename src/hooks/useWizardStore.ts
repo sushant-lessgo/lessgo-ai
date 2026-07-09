@@ -35,7 +35,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import type { Brief, CopyEngine } from '@/types/brief';
+import type { Brief, CapabilityId, CopyEngine } from '@/types/brief';
 import type { AudienceType, TemplateId } from '@/types/service';
 import type { GoalIntent } from '@/modules/goals/vocabulary';
 import type { GoalParamInput } from '@/modules/brief/bridge';
@@ -57,6 +57,12 @@ import { computeFieldStates, type FieldState } from '@/modules/wizard/waterfall'
 // Single-page structure clamp law (scale-07 phase 4) — plain data-layer module
 // (generalized clampSitemap sibling), safe for the client store.
 import { applyConfirmedSections } from '@/modules/audience/product/strategy/parseStrategyProduct';
+// scale-07 phase 6 — pure data-layer hard-fit helper (templateMeta/coreSections
+// data only, no template modules; firewall-safe for the client store).
+import {
+  requiredCapabilitiesFromStructure,
+  type ConfirmedStructure,
+} from '@/modules/templates/fit';
 // Type-only — proves WizardProofState ⊇ ServiceAssetAvailability (see guard
 // below). Canonical home is @/types/service since phase 10 retired the store.
 import type { ServiceAssetAvailability } from '@/types/service';
@@ -177,6 +183,22 @@ interface WizardState {
    */
   structureDisabled: string[];
   /**
+   * The PERSISTED Brief `structure.mode` (scale-07 phase 6) — retained from a
+   * previously CONFIRMED structure at hydrate (a bare classify hint
+   * `{mode, pages: []}` without sections/pageDetails is NOT retained, so the
+   * pre-phase-6 mode signal to `isMultipage` is unchanged for fresh runs).
+   * StructureSlot feeds it into `isMultipage` so slot UI and generation read
+   * the same persisted mode (phase-5 open-risk alignment).
+   */
+  briefStructureMode: 'single' | 'multi' | null;
+  /**
+   * Required-capability set recomputed from the CONFIRMED structure (scale-07
+   * phase 6) via `requiredCapabilitiesFromStructure` — dropping a section at
+   * the 7b gate removes its owning capability, widening the swap shortlist
+   * (phase 7 consumer). Null until a structure exists to derive from.
+   */
+  requiredCapabilities: CapabilityId[] | null;
+  /**
    * Strategy-fetch lifecycle (scale-07 phase 3). Fired by the STRUCTURE slot on
    * mount; the guard on this status is the credit-charge-once/idempotency
    * mechanism (back-navigation must never trigger a second charged fetch).
@@ -251,6 +273,14 @@ interface WizardActions {
   setStructureSections: (sections: string[] | null) => void;
   toggleStructureSection: (section: string) => void;
   moveStructureSection: (index: number, dir: -1 | 1) => void;
+  /**
+   * scale-07 phase 6 — recompute `requiredCapabilities` from the CURRENT
+   * confirmed structure (single-page body or multipage sitemap). Called by
+   * StructureSlot whenever the structure changes; the persisted write itself
+   * rides `buildBriefPatch` → `save()` (the shell's Continue = the confirm
+   * tap), so confirm carries the saveDraft brief patch.
+   */
+  recomputeRequiredCapabilities: () => void;
   setHeroVariant: (v: string) => void;
   setStyleVariantId: (v: string) => void;
   setStylePaletteId: (v: string) => void;
@@ -374,6 +404,37 @@ export function fieldArr(fields: Record<string, { value: unknown }>, id: string)
 export function confirmedStructureBody(s: WizardState): string[] | null {
   if (!s.structureSections) return null;
   return s.structureSections.filter((x) => !s.structureDisabled.includes(x));
+}
+
+/**
+ * scale-07 phase 6 — the Brief `structure` patch persisted at confirm (the
+ * FIRST real runtime writer of `Project.brief.structure`). Shape mirrors the
+ * extended BriefSchema.structure:
+ * - multipage: `{ mode:'multi', pages, pageDetails }` from the (user-edited)
+ *   sitemap — `pages` kept for back-compat readers, `pageDetails` carries the
+ *   per-page surviving section lists.
+ * - single-page: `{ mode:'single', sections }` — the confirmed body (toggled-
+ *   off removed, order preserved). NO `pages` key: the schema made `pages`
+ *   optional precisely so this patch survives `BriefSchema.partial()`.
+ * - null before any structure exists (pre-strategy) so autosaves from earlier
+ *   slots never write (or clobber) structure.
+ */
+export function buildStructurePatch(s: WizardState): ConfirmedStructure | null {
+  const sitemap = s.sitemap as SitemapPage[] | null;
+  if (sitemap && sitemap.length > 0) {
+    return {
+      mode: 'multi',
+      pages: sitemap.map((p) => p.archetypeKey),
+      pageDetails: sitemap.map((p) => ({
+        archetypeKey: p.archetypeKey,
+        slug: p.pathSlug,
+        sections: [...p.sections],
+      })),
+    };
+  }
+  const body = confirmedStructureBody(s);
+  if (body) return { mode: 'single', sections: body };
+  return null;
 }
 
 /** Project the wizard store state → the THING adapter input (plain data). */
@@ -505,6 +566,8 @@ const initialState: WizardState = {
   strategy: null,
   structureSections: null,
   structureDisabled: [],
+  briefStructureMode: null,
+  requiredCapabilities: null,
   strategyStatus: 'idle',
   strategyError: null,
   strategyCreditsError: false,
@@ -594,6 +657,42 @@ export const useWizardStore = create<WizardStore>()(
             author_name: '',
             author_role: '',
           }));
+
+          // scale-07 phase 6 — READ a persisted CONFIRMED structure on load.
+          // Only a structure carrying sections/pageDetails counts as confirmed
+          // (a real 7b write); classify's bare `{mode, pages: []}` hint is
+          // ignored so fresh-run behavior is unchanged. Seeding here means a
+          // reload after confirm resumes the user's structure edits (the
+          // strategy-seed guards never clobber these), and the required set
+          // reflects the confirmed structure immediately.
+          const persisted = brief.structure;
+          const isConfirmedStructure =
+            !!persisted &&
+            ((persisted.sections?.length ?? 0) > 0 ||
+              (persisted.pageDetails?.length ?? 0) > 0);
+          if (persisted && isConfirmedStructure) {
+            state.briefStructureMode = persisted.mode;
+            if (persisted.mode === 'multi' && persisted.pageDetails?.length) {
+              state.sitemap = persisted.pageDetails.map((d) => ({
+                archetypeKey: d.archetypeKey,
+                // Title isn't persisted (schema carries key/slug/sections
+                // only) — prettify the key; the slot's title input remains
+                // editable.
+                title: d.archetypeKey.charAt(0).toUpperCase() + d.archetypeKey.slice(1),
+                pathSlug: d.slug,
+                sections: [...d.sections],
+              }));
+            } else if (persisted.mode === 'single' && persisted.sections?.length) {
+              state.structureSections = persisted.sections.filter(
+                (x) => x !== 'header' && x !== 'footer'
+              );
+              state.structureDisabled = [];
+            }
+            state.requiredCapabilities = requiredCapabilitiesFromStructure(
+              persisted,
+              engine ?? undefined
+            );
+          }
 
           state.hydrated = true;
         }),
@@ -685,6 +784,13 @@ export const useWizardStore = create<WizardStore>()(
           list[index] = list[to];
           list[to] = tmp;
         }),
+      recomputeRequiredCapabilities: () =>
+        set((state) => {
+          const patch = buildStructurePatch(state);
+          state.requiredCapabilities = patch
+            ? requiredCapabilitiesFromStructure(patch, state.engine ?? undefined)
+            : null;
+        }),
 
       fetchStrategy: async () => {
         const s = get();
@@ -697,6 +803,18 @@ export const useWizardStore = create<WizardStore>()(
         // in the same tick bails here too. Only 'idle' and 'error' (retry)
         // proceed.
         if (s.strategyStatus === 'fetching' || s.strategyStatus === 'done') return;
+        // scale-07 phase 6 (charge-dedup scope note): a reload after a
+        // persisted structure confirm re-runs this charged fetch — DELIBERATE.
+        // Skipping it would leave `strategy` null, which (a) degrades a
+        // multipage resume to the single-page tail path (fan-out needs
+        // strategy + sitemap) and (b) bypasses the confirmed-sections clamp
+        // (applyConfirmedSections needs a strategy object) — both worse than
+        // the charge. Total charges across abandon+reload are unchanged vs
+        // pre-phase-6 (the tail fallback would charge instead); what phase 6
+        // adds is that the PERSISTED structure survives the reload (hydrate
+        // seeds it; the seed guards below never clobber it). True cross-
+        // session dedup requires persisting the strategy blob itself —
+        // deferred (out of this phase's file scope).
         if (s.strategy) {
           // Strategy already present (e.g. seeded externally) — mark done, no
           // fetch; seed the single-page gate list if it's still empty.
@@ -794,10 +912,19 @@ export const useWizardStore = create<WizardStore>()(
       // Compose the Brief patch persisted on save — goal is the well-defined
       // writeback (scale-05); field→Brief mapping lands with the phase-5
       // adapters. Mirrors the old GoalStep/GeneratingStep brief passthrough.
+      //
+      // scale-07 phase 6: the CONFIRMED structure rides this patch too — the
+      // shell's Continue on the structure slot calls save(), making that tap
+      // the first real runtime writer of `Project.brief.structure` (via
+      // saveDraft's key-wise shallow brief merge). Pre-structure saves return
+      // no `structure` key, so earlier-slot autosaves can never clobber it.
       buildBriefPatch: () => {
-        const { goalIntent, goalParam } = get();
+        const state = get();
+        const { goalIntent, goalParam } = state;
         const patch: Partial<Brief> = {};
         if (goalIntent) patch.goal = intentToBriefGoal(goalIntent, goalParam);
+        const structure = buildStructurePatch(state);
+        if (structure) patch.structure = structure;
         return patch;
       },
 

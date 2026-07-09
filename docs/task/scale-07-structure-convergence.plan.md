@@ -29,8 +29,8 @@ Section lists stop being template property. A new engine-owned section grammar (
 - phase 2 meridian/vestria core convergence + capability mapping: done (commit 41b61233, review loop 1, ship, 1437 tests green; interim: meridian new-gen 5-core until phase-4 step-0 Brief plumbing restores pricing/cta)
 - phase 3 restore multipage fan-out + strategy-before-structure sequencing: done (commit 10372ac7, review loop 1, ship, 1449 tests green; charge-once + race-safe idempotency verified; open risks → phase 6 charge-dedup step 3b)
 - phase 4 universal 7b gate (single-page mode + clamp law + trust GA): done (commit 186b9323, review loop 1, ship, 1472 tests green; module-bridge scrutinized sound; carryovers → phase 5 (route brief-passing + GeneratingSlot consolidation))
-- phase 5 multipage keyed by capability (sitemap for all): done (review loop 1, ship, 1489 tests green; naayom untouched, charge-once intact post-bridge-delete, carryovers (a)+(b) complete; open risks: StructureSlot↔gen mode signal divergence + resolvedTemplateId null-resume stamp → phase 6)
-- phase 6 structure persistence + 7b deletion relaxes hard-fit: pending
+- phase 5 multipage keyed by capability (sitemap for all): done (commit 74495554, review loop 1, ship, 1489 tests green; naayom untouched, charge-once intact post-bridge-delete, carryovers (a)+(b) complete; open risks: StructureSlot↔gen mode signal divergence + resolvedTemplateId null-resume stamp → phase 6)
+- phase 6 structure persistence + 7b deletion relaxes hard-fit: done (review loop 1, ship, 1499 tests green; pages-optional fix proven, write fires end-to-end, drop-section→bigger-shortlist; non-blocking: empty-body [] truthy in buildStructurePatch (unreachable, no downstream break); charge-dedup fetch-skip deferred (sound); resolvedTemplateId null-resume still documented-only)
 - phase 7 template swap post-gen + meridian unlock: pending
 - phase 8 element list from engine contract (kill layout-name keying): pending
 - phase 9 acceptance QA + goldens: pending
