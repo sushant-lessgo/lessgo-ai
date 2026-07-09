@@ -37,8 +37,8 @@
 // FIREWALL: client-only. Reads/writes `useWizardStore`; imports the data-only
 // pageArchetypes menu + engine contract helpers (no block components).
 
-import { useEffect, useMemo } from 'react';
-import { ArrowDown, ArrowUp, Loader2, Plus, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, Loader2, Plus, X } from 'lucide-react';
 import { useWizardStore } from '@/hooks/useWizardStore';
 import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
 import {
@@ -46,6 +46,9 @@ import {
   isMultipage,
   type PageArchetypeDef,
 } from '@/modules/audience/product/pageArchetypes';
+import { businessTypes } from '@/modules/businessTypes/config';
+import { getCollectionDef, type CollectionKey } from '@/modules/collections/registry';
+import type { CollectionEntry } from '@/modules/brief/collections';
 import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
 
 const SECTION_LABELS: Record<string, string> = {
@@ -78,6 +81,159 @@ const SINGLE_PAGE_LABELS: Record<string, string> = {
   stats: 'Results & stats',
 };
 const singlePageLabel = (s: string) => SINGLE_PAGE_LABELS[s] ?? SECTION_LABELS[s] ?? s;
+
+const EMPTY_ENTRIES: CollectionEntry[] = [];
+
+// scale-10 phase 4 — the COLLECTION channel at the 7b gate. ONE collapsible row
+// per collection ("Products · 8 items"), entries editable (rename / remove /
+// add name-only) — NEVER N flat AI section rows. This is a SEPARATE row type
+// from the section/page rows above: it writes `Brief.facts.collections` via the
+// store's collection actions (buildBriefPatch → save), and never touches
+// toggleStructureSection. No waterfall change — collections are a parallel
+// whole-list channel, not per-item ASK questions (decision 2).
+function CollectionNode({ collectionKey }: { collectionKey: CollectionKey }) {
+  const entries =
+    useWizardStore((s) => s.collections[collectionKey]) ?? EMPTY_ENTRIES;
+  const addCollectionEntry = useWizardStore((s) => s.addCollectionEntry);
+  const renameCollectionEntry = useWizardStore((s) => s.renameCollectionEntry);
+  const removeCollectionEntry = useWizardStore((s) => s.removeCollectionEntry);
+
+  const def = getCollectionDef(collectionKey);
+  const label = def?.label ?? collectionKey;
+  const [open, setOpen] = useState(entries.length > 0);
+  const [addValue, setAddValue] = useState('');
+
+  const count = entries.length;
+
+  const commitAdd = () => {
+    const name = addValue.trim();
+    if (!name) return;
+    addCollectionEntry(collectionKey, name);
+    setAddValue('');
+    setOpen(true);
+  };
+
+  return (
+    <div className="rounded-lg border border-gray-200 p-4">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-2 text-left"
+      >
+        {open ? (
+          <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+        ) : (
+          <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+        )}
+        <span className="font-medium text-gray-900">{label}</span>
+        <span className="text-xs text-gray-500">
+          · {count} {count === 1 ? 'item' : 'items'}
+        </span>
+      </button>
+
+      {open && (
+        <div className="mt-3 space-y-2">
+          {count === 0 ? (
+            <p className="text-xs text-gray-500">
+              No {label.toLowerCase()} yet — add them here or later in the editor.
+            </p>
+          ) : (
+            <ul className="space-y-1.5">
+              {entries.map((entry, idx) => (
+                <li
+                  // Slug-INDEPENDENT key: the slug re-derives on every keystroke
+                  // (rename → slugify), so keying by slug would remount the input
+                  // and drop focus. Index is stable (no per-entry reorder UI;
+                  // inputs are fully store-controlled) — mirrors the sitemap
+                  // page-row pattern (stable key, derived value rendered inside).
+                  key={idx}
+                  className="flex items-center gap-2 rounded-md bg-gray-50 border border-gray-100 px-3 py-1.5"
+                >
+                  <input
+                    value={entry.name}
+                    onChange={(e) =>
+                      renameCollectionEntry(collectionKey, idx, e.target.value)
+                    }
+                    className="text-sm text-gray-800 flex-1 bg-transparent border-b border-transparent
+                               hover:border-gray-300 focus:border-brand-accentPrimary focus:outline-none min-w-0"
+                    aria-label={`${label} item name`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeCollectionEntry(collectionKey, idx)}
+                    title="Remove item"
+                    className="p-0.5 text-gray-400 hover:text-red-600"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              value={addValue}
+              onChange={(e) => setAddValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  commitAdd();
+                }
+              }}
+              placeholder={`Add ${label.toLowerCase().replace(/s$/, '')} name`}
+              className="text-sm flex-1 rounded-md border border-gray-200 px-2.5 py-1.5
+                         focus:border-brand-accentPrimary focus:outline-none min-w-0"
+              aria-label={`Add ${label} item`}
+            />
+            <button
+              type="button"
+              onClick={commitAdd}
+              disabled={!addValue.trim()}
+              className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md
+                         bg-gray-100 text-gray-600 hover:bg-orange-50 hover:text-brand-accentPrimary
+                         disabled:opacity-40 disabled:hover:bg-gray-100 disabled:hover:text-gray-600
+                         transition-colors flex-shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Renders one CollectionNode per collection present in `facts.collections` OR
+// declared by the businessType's `requiredCollections` (even when empty ⇒
+// count-only/empty node, decision 2). Zero-entry state is allowed (the index
+// page ships an empty-state later). Returns null when there are no collections
+// to show, so single-page/multipage gates without collections are unchanged.
+function CollectionNodes() {
+  const businessTypeKey = useWizardStore((s) => s.businessTypeKey);
+  const collections = useWizardStore((s) => s.collections);
+
+  const keys = useMemo(() => {
+    const required =
+      (businessTypeKey && businessTypes[businessTypeKey]?.requiredCollections) || [];
+    const present = Object.keys(collections) as CollectionKey[];
+    return Array.from(new Set<CollectionKey>([...present, ...required]));
+  }, [businessTypeKey, collections]);
+
+  if (keys.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm font-medium text-gray-700">Collections</p>
+      <div className="space-y-4">
+        {keys.map((key) => (
+          <CollectionNode key={key} collectionKey={key} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function StructureSlot() {
   const templateId = useWizardStore((s) => s.templateId);
@@ -309,6 +465,8 @@ export default function StructureSlot() {
           })}
         </ul>
 
+        <CollectionNodes />
+
         <p className="text-sm text-gray-500">
           Looks good? Hit Continue — we&apos;ll write the copy next.
         </p>
@@ -510,6 +668,8 @@ export default function StructureSlot() {
           </div>
         </div>
       )}
+
+      <CollectionNodes />
     </div>
   );
 }

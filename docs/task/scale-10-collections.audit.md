@@ -202,3 +202,69 @@ Slugs are NEVER taken from AI: the extraction zod shape has no `slug` field, `En
 
 ### HUMAN GATE (founder decision required)
 Which businessTypes (if any) should get `requiredCollections` populated now, accepting they route to MANUAL-ONBOARD until rung-C blocks ship? (Candidates from the plan: manufacturer→`products`, photographer→`services`. Default per plan option: populate none, keep the mechanism dormant.)
+
+---
+
+## Phase 4 — Structure gate (7b): collection node
+
+**Files changed**
+- `src/hooks/useWizardStore.ts`
+- `src/components/onboarding/wizard/StructureSlot.tsx`
+- `src/hooks/useWizardStore.test.ts`
+
+### `src/hooks/useWizardStore.ts`
+- New state: `briefFacts: Record<string, unknown> | null` (COMPLETE `brief.facts` snapshot taken at hydrate) and `collections: CollectionsFacts` (editable channel, seeded from `getCollections(brief)`).
+- `hydrate` seeds both BEFORE the no-engine early-return guard (`state.briefFacts = brief.facts ?? null; state.collections = getCollections(brief)`), so the snapshot is available for buildBriefPatch regardless of engine.
+- Three collection-edit actions (index-targeted, immer):
+  - `addCollectionEntry(key, name)` — trims; no-op on empty; inits absent (empty required) collection; pushes `makeCollectionEntry(name)`.
+  - `renameCollectionEntry(key, index, name)` — trims; no-op on empty; replaces the entry via `makeCollectionEntry(newName, {oneLiner, imageUrl})` so the **slug is re-derived from the new name** (never keeps old slug), preserving optional fields.
+  - `removeCollectionEntry(key, index)` — bounds-checked splice.
+  - Index targeting chosen over slug targeting (conservative — unambiguous when two names slugify alike). Logged here as an in-scope judgment call.
+- `recomputeRequiredCapabilities` is intentionally NOT invoked by these actions (code comment): collections are a parallel channel and never feed `requiredCapabilitiesFromStructure` (that derives from section topology only). `recomputeRequiredCapabilities` stays coherent — untouched.
+- `reset` override list extended with `collections: {}` + `briefFacts: null` (fresh refs, matching the existing fields/proof pattern).
+
+**Sibling-facts survival mechanism (the CRITICAL bit).** `saveDraft` merges the brief shallowly: `{ ...existingBrief, ...briefResult.data }` — a top-level `facts` key in the patch REPLACES the stored `facts` object wholesale (dropping `facts.entry` etc). So `buildBriefPatch` must carry the COMPLETE facts.
+
+Before (phase 3):
+```ts
+const patch: Partial<Brief> = {};
+if (goalIntent) patch.goal = intentToBriefGoal(goalIntent, goalParam);
+const structure = buildStructurePatch(state);
+if (structure) patch.structure = structure;
+return patch;                       // NO facts key ever emitted
+```
+After (phase 4) — appended before `return patch`:
+```ts
+if (Object.keys(state.collections).length > 0) {
+  patch.facts = {
+    ...(state.briefFacts ?? {}),     // ← ALL siblings (facts.entry, …) re-emitted
+    collections: state.collections,  // ← edited collections overlaid last
+  };
+}
+```
+`facts` is emitted ONLY when the store holds collection state, so earlier-slot autosaves (no collections) never touch persisted facts. When emitted, it is the full snapshot with `collections` overlaid — siblings survive the shallow REPLACE.
+
+### `src/components/onboarding/wizard/StructureSlot.tsx`
+- Added `CollectionNode` (one collapsible collection, per-key local `open`/`addValue` state) and `CollectionNodes` (chooses which keys to render). Rendered as `<CollectionNodes />` in BOTH the single-page gate return and the multipage gate return, styled consistently with the existing gate rows (`rounded-lg border` card; gray entry rows; page-title-style rename input; `X` remove; `+ Add` input+button).
+- **Which keys render:** union of (a) keys present in `facts.collections` (store `collections`) and (b) the businessType's `requiredCollections` (via `businessTypes[businessTypeKey]?.requiredCollections`) — so an empty required collection still shows a count-only/empty node (decision 2). `CollectionNodes` returns `null` when the union is empty (gates without collections unchanged). Zero-entry nodes render an empty-state hint + the add input (index ships empty-state later).
+- Node header shows `Label · N item(s)`; collapsible entry list; each entry is a rename `input` (calls `renameCollectionEntry`), remove `X` (`removeCollectionEntry`); footer add `input` + button / Enter (`addCollectionEntry`, name-only). SEPARATE row type — never calls `toggleStructureSection`.
+- Code comment notes: no waterfall change; collections are a parallel whole-list channel, not per-item ASK questions (decision 2).
+
+### `src/hooks/useWizardStore.test.ts`
+- New describe block `useWizardStore — 7b collection channel` with a `collectionsThing()` fixture carrying BOTH `facts.entry` (sibling) AND `facts.collections.products` (8 verbatim entries).
+- Covers: verbatim seed + code-derived slugs; remove 2 of 8 → 6; rename re-derives slug; add appends name-only entry with derived slug; add initializes an absent (empty required) collection; empty/whitespace add+rename no-ops; **buildBriefPatch round-trip carrying edits AND asserting `patch.facts.entry` survives** (sibling preservation); and buildBriefPatch omits `facts` entirely when no collections exist (`bareThing`).
+
+### Verification
+- `npx tsc --noEmit`: clean (no output).
+- `npm run test:run` (full): **103 passed | 1 skipped files; 1735 passed | 3 skipped tests.** `useWizardStore.test.ts` (extended, +8 tests), `loadDetection.test.ts` (7), `serveGate.test.ts`, `classify.test.ts`, `collections.test.ts` all green. No regressions.
+
+### Deviations
+- Collection actions target entries by **index**, not slug (conservative disambiguation). In-scope choice, no plan conflict.
+
+### Open risks / notes
+- `CollectionNodes` renders in the STRUCTURE slot only, which the work engine skips (structure slot skip) — `works` collections for writer/work leads are therefore editor-only, not gate-editable. Consistent with the existing work slot-skip; out of phase-4 scope.
+- `briefFacts` is a hydrate-time snapshot; if server-side facts changed after hydrate (not the case in the current entry→hydrate flow, since scrape precedes hydrate) a save would re-emit stale siblings. Acceptable for this wizard's lifecycle.
+
+### Fix (impl-review loop 1 — BLOCKING)
+- `StructureSlot.tsx`: the collection entry `<li>` was keyed `${entry.slug}-${idx}`. Since rename re-derives the slug (slugify) on every keystroke, the key changed each keystroke → React remounted the `<input>` → focus lost after one char. Re-keyed to stable `key={idx}` (no per-entry reorder UI; inputs fully store-controlled, so index-keying is safe across add/remove). Slug re-derivation is UNCHANGED. Mirrors the sitemap page-row pattern (stable key, derived value rendered inside). No other change.
+- Re-verified: `npx tsc --noEmit` clean; `npm run test:run` 103 passed | 1 skipped files, 1735 passed | 3 skipped tests. Green.

@@ -41,6 +41,15 @@ import type { GoalIntent } from '@/modules/goals/vocabulary';
 import type { GoalParamInput } from '@/modules/brief/bridge';
 import { intentToBriefGoal } from '@/modules/brief/bridge';
 import { getEntryFacts, type EntryFacts } from '@/modules/brief/classify';
+// scale-10 phase 4 — Brief-carried collections (parallel channel). Pure helpers
+// (slug re-derivation lives here — "slugs never AI"); NO waterfall change:
+// collections are edited as a whole-list channel, not per-item ASK questions.
+import type { CollectionKey } from '@/modules/collections/registry';
+import {
+  getCollections,
+  makeCollectionEntry,
+  type CollectionsFacts,
+} from '@/modules/brief/collections';
 import {
   businessTypes,
   type BusinessTypeEntry,
@@ -169,6 +178,20 @@ interface WizardState {
   sitemap: unknown[] | null;
   strategy: unknown | null;
   /**
+   * scale-10 phase 4 — the COMPLETE `brief.facts` snapshot taken at hydrate.
+   * `buildBriefPatch` re-emits it (with edited collections overlaid) because
+   * saveDraft REPLACES facts wholesale on the shallow `BriefSchema.partial()`
+   * merge — a partial `facts` would drop sibling keys (e.g. `facts.entry`).
+   */
+  briefFacts: Record<string, unknown> | null;
+  /**
+   * scale-10 phase 4 — the editable collection channel (`facts.collections`),
+   * seeded verbatim from the scraped brief (phase 2) and rename/remove/add-
+   * edited at the 7b gate BEFORE copy generation. Keyed by CollectionKey; slugs
+   * are always code-derived (never AI). Empty list kept = index empty-state.
+   */
+  collections: CollectionsFacts;
+  /**
    * Single-page 7b structure (scale-07 phase 4): the ordered BODY section list
    * (chrome excluded — header/footer are law-forced, never user-facing).
    * Seeded from the fetched strategy's sections when the template is
@@ -281,6 +304,18 @@ interface WizardActions {
    * tap), so confirm carries the saveDraft brief patch.
    */
   recomputeRequiredCapabilities: () => void;
+  /**
+   * scale-10 phase 4 — collection-channel edits at the 7b gate. Whole-list
+   * rename/remove/add (name-only for add); slugs are re-derived from the name
+   * via `makeCollectionEntry` (`slugify`), never taken from user/AI. Targeted
+   * by index (unambiguous when two names slugify alike). These are a SEPARATE
+   * row type from section rows — they do NOT touch `toggleStructureSection`.
+   * Edits ride `buildBriefPatch` → `save()`, so they persist to
+   * `Brief.facts.collections` BEFORE copy generation reads the brief.
+   */
+  addCollectionEntry: (key: CollectionKey, name: string) => void;
+  renameCollectionEntry: (key: CollectionKey, index: number, name: string) => void;
+  removeCollectionEntry: (key: CollectionKey, index: number) => void;
   setHeroVariant: (v: string) => void;
   setStyleVariantId: (v: string) => void;
   setStylePaletteId: (v: string) => void;
@@ -565,6 +600,8 @@ const initialState: WizardState = {
   proof: { ...initialProof },
   sitemap: null,
   strategy: null,
+  briefFacts: null,
+  collections: {},
   structureSections: null,
   structureDisabled: [],
   briefStructureMode: null,
@@ -608,6 +645,12 @@ export const useWizardStore = create<WizardStore>()(
             brief.businessType && brief.businessType in businessTypes
               ? (brief.businessType as BusinessTypeKey)
               : null;
+
+          // scale-10 phase 4 — snapshot the COMPLETE facts (so buildBriefPatch
+          // can re-emit siblings on the shallow saveDraft merge) + seed the
+          // editable collection channel verbatim from the scrape (phase 2).
+          state.briefFacts = (brief.facts as Record<string, unknown>) ?? null;
+          state.collections = getCollections(brief);
 
           // No schema engine ⇒ can't build a contract; leave the store empty
           // (mirrors the old bridge hydrate no-op guard). Never throw.
@@ -793,6 +836,37 @@ export const useWizardStore = create<WizardStore>()(
             : null;
         }),
 
+      // ── Collection channel (scale-10 phase 4) ──
+      // Required-capability recompute is intentionally NOT invoked here:
+      // collections are a parallel channel and never feed
+      // requiredCapabilitiesFromStructure (that derives from section topology).
+      addCollectionEntry: (key, name) =>
+        set((state) => {
+          const trimmed = name.trim();
+          if (!trimmed) return;
+          if (!state.collections[key]) state.collections[key] = [];
+          state.collections[key]!.push(makeCollectionEntry(trimmed));
+        }),
+      renameCollectionEntry: (key, index, name) =>
+        set((state) => {
+          const list = state.collections[key];
+          const prev = list?.[index];
+          if (!list || !prev) return;
+          const trimmed = name.trim();
+          if (!trimmed) return;
+          // Re-derive the slug from the new name (never keep the old slug).
+          list[index] = makeCollectionEntry(trimmed, {
+            oneLiner: prev.oneLiner,
+            imageUrl: prev.imageUrl,
+          });
+        }),
+      removeCollectionEntry: (key, index) =>
+        set((state) => {
+          const list = state.collections[key];
+          if (!list || index < 0 || index >= list.length) return;
+          list.splice(index, 1);
+        }),
+
       fetchStrategy: async () => {
         const s = get();
         // Idempotency guard — the credit charge lives server-side in the
@@ -926,6 +1000,18 @@ export const useWizardStore = create<WizardStore>()(
         if (goalIntent) patch.goal = intentToBriefGoal(goalIntent, goalParam);
         const structure = buildStructurePatch(state);
         if (structure) patch.structure = structure;
+        // scale-10 phase 4 — collections ride `facts.collections`. saveDraft
+        // shallow-merges the brief and REPLACES `facts` wholesale, so a partial
+        // `{ facts: { collections } }` would DROP siblings (facts.entry, …).
+        // Carry the COMPLETE facts snapshot with edited collections overlaid.
+        // Only emit `facts` when we actually hold collection state, so autosaves
+        // from earlier slots never touch (or clobber) persisted facts.
+        if (Object.keys(state.collections).length > 0) {
+          patch.facts = {
+            ...(state.briefFacts ?? {}),
+            collections: state.collections,
+          };
+        }
         return patch;
       },
 
@@ -959,6 +1045,8 @@ export const useWizardStore = create<WizardStore>()(
             fields: {},
             slots: [],
             structureDisabled: [],
+            collections: {},
+            briefFacts: null,
           });
         }),
     })),
