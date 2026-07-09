@@ -25,8 +25,8 @@ Give each section type 2–3 copy-compatible blocks per template, selected deter
 - phase 4 eligibility filter + selection threading: done (commit bb1e50ba, review loops 1)
   - CARRY TO PHASE 6/7: `deriveAssetFactsFromBrief` computes `hasTestimonialPhotos` via loose substring conjunction over `proofAvailable` (can false-positive). Tighten when a real photo/testimonial-photo variant lands.
 - phase 5 editor swap generalization + card-count clamp: done (commit 203ddbfc, review loops 1) — HUMAN GATE pending user sign-off
-- phase 6 meridian variants (3 new dual-renderer pairs): pending
-- phase 7 hearth variants (3 new dual-renderer pairs): pending
+- phase 6 meridian variants (3 new dual-renderer pairs): done (commit 4e9431c1, review loops 1 + 2 non-blocking parity fixes) — HUMAN GATE pending user parity QA
+- phase 7 hearth variants (3 new dual-renderer pairs): SKIPPED (user decision 2026-07-10 — meridian-only for now; hearth keeps single default per section; mechanism already variant-ready. Revisit when hearth designs land / demand board calls for it)
 
 ## Cross-phase invariants (Lessgo landmines)
 
