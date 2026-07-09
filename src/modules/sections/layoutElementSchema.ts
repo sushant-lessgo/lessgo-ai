@@ -158,7 +158,16 @@ export function getAllElements(schema: AnySchema): LayoutElement[] {
   return schema;
 }
 
-/** Get layout elements safely for any schema format */
+/** Get layout elements safely for any schema format.
+ *
+ * scale-07 phase 8: this is the LAYOUT-NAME path. On the GENERATION path,
+ * engine-covered sections (thing engine — meridian/vestria) are resolved via
+ * the (engine, sectionType) contract in engines/elementContracts.ts BEFORE
+ * this fallback (see elementDetermination.getRequiredElements). This function
+ * survives as-is for: work + service-legacy generation, editor-runtime callers
+ * (useElementCRUD add-element gating — no engine context at editor time), and
+ * editor-only techpremium/naayom blocks. Do not route those through the
+ * engine contract. */
 export function getLayoutElements(layoutName: string): LayoutElement[] {
   const schema = layoutElementSchema[layoutName];
   if (!schema) {

@@ -15,6 +15,20 @@
 //
 // fillMode rules (spec): copy → ai_generated; numbers/prices/stats/quotes →
 // ai_generated_needs_review; images/icons/logos → manual_preferred; ids → system.
+//
+// ── scale-07 phase 8: engine element contract ─────────────────────────────
+// These per-layout schemas are no longer the element-list KEY on the thing-
+// engine GENERATION path. src/modules/engines/elementContracts.ts unions the
+// meridian + vestria schemas per shared logical section (header/hero/features/
+// testimonials/footer) into a single (engine, sectionType)-keyed contract —
+// meridian defs win on collisions, vestria-only rendered fields enter as
+// optionals (founder divergence rule, plan Q4). Per-template divergence for
+// the SAME logical section is a defect resolved THERE, not by forking these
+// schemas further. The per-layout entries below survive for: block display
+// resolution, editor-runtime element gating, copy-parse defaults, and the
+// techpremium/naayom editor-only blocks. When adding a field to a shared
+// thing section, add it to the owning template's schema here — the contract
+// unions it in automatically.
 
 import type { UIBlockSchemaV2 } from '@/modules/sections/layoutElementSchema';
 

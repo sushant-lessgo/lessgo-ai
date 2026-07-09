@@ -493,3 +493,66 @@ Meridian product page → EditHeader now routes to the product popover (lock gon
 - The coverage check's "renderable set" = engine core ∪ declared `capabilitySections` only — templateMeta has no vocabulary for extra renderable-but-undeclared sections, so sites carrying them (surge deltas, legacy service sections) get an empty swap list. Correct-by-construction but shrinks swap availability; revisit if/when templateMeta grows a declared-sections field.
 - Mirror-strategy staleness: `pages[currentPageId]` can lag the top-level working copy between commit boundaries; the union can therefore include a just-deleted section until the next page commit — over-excludes (safe direction), never under-excludes.
 - Manual visual pass (swap meridian→vestria→meridian in dev, editor↔published parity) deferred to phase 9's QA per plan.
+
+## Phase 8 — Element list from engine contract (kill layout-name keying)
+
+**Files changed**
+- `src/modules/engines/elementContracts.ts` (new) — per-engine (engine, sectionType) → element-list contract; `thingElementContract` + `resolveEngineSectionSchema(layoutName)`
+- `src/modules/sections/elementDetermination.ts` (edit) — `getRequiredElements` resolves via engine contract first; layout param demoted to display-only on the generation path
+- `src/modules/sections/layoutElementSchema.ts` (edit) — doc-only: `getLayoutElements` annotated as the surviving layout-name fallback (editor callers + work/service legacy + editor-only blocks)
+- `src/modules/audience/product/elementSchema.ts` (edit) — doc-only: header note that per-template divergence for the SAME logical thing section is resolved in the engine contract, not by forking schemas; per-layout entries survive for display/editor/parse paths
+- `src/modules/sections/elementDetermination.test.ts` (new) — 25-test frozen-fixture guard: same Brief ⇒ same element map under meridian and vestria; layout path unchanged for non-covered callers
+
+### Contract shape + seeding (output preservation)
+
+`thingElementContract: Record<sectionType, UIBlockSchemaV2>` — built AT MODULE LOAD by unioning today's schemas (never hand-copied, so it cannot drift from the source schemas):
+
+- **Shared thing-core sections** (`header, hero, features, testimonials, footer`): `unionSchemas(meridian, vestria)` — meridian def wins on every key collision; vestria-only ELEMENTS enter demoted to `requirement:'optional'` (meridian owns the mandatory set); vestria-only COLLECTIONS keep their own requirement; vestria-only FIELDS inside a shared collection are unioned into the meridian collection def. `hero` additionally unions `VestriaFullBleedHero` (same copy keys + 3 manual_preferred video keys — kept so full-bleed pages never lose uploaded media through element gating).
+- **Single-template capability sections**: taken VERBATIM from their sole schema — byte-identical to today: meridian `pricing` (ThreeTierPricing), `cta` (ArcCTA); vestria `trust, industries, about, materials, process, catalog, contact`.
+
+Resolution mechanism: `getCompleteElementsMap()`/`createElementsMap()` → `getRequiredElements()` → `resolveEngineSectionSchema(layout)`. The layout name's ONLY remaining role on the generation path is set-membership in `THING_GENERATION_LAYOUTS` (the 7 meridian + 13 vestria generation-path layouts) to identify the (engine, sectionType) pair — the element LIST always comes from the contract. Non-members return null → old `getLayoutElements(layout)` path, unchanged.
+
+### Meridian/vestria divergences found + how the rule (Q4: meridian wins unless vestria adds rendered fields → union) resolved each
+
+Every vestria schema field is block-rendered (the schemas were derived from the blocks), so vestria-only fields union in everywhere:
+
+1. **header** — vestria adds `logo_mark_text, secondary_cta_text, secondary_cta_href, util_note, util_tel, util_whatsapp` (all → optional). `nav_items` collision: meridian def wins (max 5, `children` dropdown field kept); vestria adds no new nav fields. Meridian-only `signin_text/signin_url/cta_href` stay.
+2. **hero** — vestria adds `tag_text, cta_href, secondary_cta_href, stamp_value, stamp_label` + `values[]` collection (optional) + full-bleed `hero_video_desktop/mobile/poster` (manual_preferred, optional). Meridian-only `status_text, audience_tag, cta_subtext, caption` + `stats[]` stay. Shared required keys (`headline, lede, cta_text`): meridian defs win. Mandatory set UNCHANGED vs today's meridian: `headline, lede, cta_text` (vestria's required set was identical).
+3. **features** — element heads identical (`eyebrow, headline, lede`). `features` collection collision: meridian def wins (constraints 3-9, `icon`/`link_text` kept); vestria adds `kicker` → unioned into the collection, and because the collection is required, `features.kicker` joins the mandatory list (the ONE mandatory-set growth on the meridian side — inherent to the union rule for required collections).
+4. **testimonials** — vestria adds NOTHING (its `testimonials` collection shape is a subset; fillMode collision `ai_generated_needs_review` vs meridian's `ai_generated` → meridian wins). Contract = meridian ProofWithLogoRail verbatim (incl. meridian-only `stats[]`, `logos[]`).
+5. **footer** — vestria adds `brand_text` (vestria-REQUIRED → **demoted to optional**, the one requirement-collision judgment call: meridian owns mandates; vestria regen keeps working since the field unions in as fillable), plus `address_heading, address_html, email, tel, whatsapp, map_caption, tagline` (optional) + `link_columns[]` collection (optional). Meridian-only newsletter/socials/legal_links/contact_* stay. `whatsapp_label` collision: meridian (`ai_generated`, default 'Chat with us') wins over vestria (`manual_preferred`). Vestria sections now also see meridian's required `wordmark/copyright/footer_columns` — intended convergence (one contract per (engine, section)).
+6. **sectionType collisions with techpremium/naayom editor-only blocks** — meridian's schema record also carries `TrustStrip`('trust'), `ProcessSteps`('process'), `ContactForm`('contact'), `ProductCatalogList`('catalog'), `ProductDetailRecord`, etc. These are NEVER generation-path blocks (archetype-seeded, editor-only), so they are deliberately EXCLUDED from `THING_GENERATION_LAYOUTS` — a techpremium/naayom regen resolving `TrustStrip` keeps its own elements (regression-tested), and the contract's `trust/process/contact/catalog` entries are vestria's generation blocks only.
+
+### Non-migrations (restated per plan)
+
+- `useElementCRUD.ts:116` `getLayoutElements(layoutType)` — KEPT on the layout path (no engine context at editor add-element time); the raw per-layout entries in `layoutElementSchema` survive for exactly this caller (tested: raw `TerminalHero` lookup still excludes vestria's `tag_text`).
+- `useSectionCRUD.ts:419/:458` local hardcoded map and `editStore/validationActions.ts:853` local `getRequiredElementsForLayout` — untouched, unrelated locals.
+- `getAllPossibleElements()` (elementDetermination, "for UI purposes") — left on the layout path (editor-facing).
+- trust (service) + work (granth) engines — `elementContracts` covers `thing` only; service legacy + writer layouts return null from `resolveEngineSectionSchema` → old path (tested: `PetalFramedHero`, `GranthJacketShelf`).
+- `VESTRIA_LAYOUT_NAMES`/`MERIDIAN_LAYOUT_NAMES` maps NOT deleted; `selectBlocks.ts` and `vestria/registration.test.ts` untouched. `elementContracts.ts` does not import the maps — its layout handle set is its own explicit generation-path list.
+
+### Deviations
+
+- `src/modules/sections/elementDetermination.test.ts` was listed as "edit" in the plan but did not exist — CREATED it (the plan's own fallback was "or nearest generation-contract test"; a dedicated file is the cleaner home for the frozen fixture).
+- **Scope note (conservative reading of the goal):** the phase goal sentence targets `getCompleteElementsMap()` — that path (legacy `/api/generate-landing` + editor `regenerationActions` full-page regen) is what now routes through the contract. The wizard product copy path (`copyPrompt.ts` reading `layoutElementSchema[uiblocks[section]]`) is NOT in this phase's Files-touched list and was left as-is; its element lists are per-layout schemas which the contract is seeded from. If the §3 invariant should also cover that path, it needs a follow-up phase touching `copyPrompt.ts`/`parseCopy.ts`/mock generators (their validation is layout-schema-keyed and would go red under a blind union).
+- Requirement handling in unions was unspecified by the divergence rule — chose: vestria-only elements demote to optional (avoids new mandates on meridian content, e.g. `brand_text`); fields inside shared REQUIRED collections inherit the collection requirement (V1-conversion semantics, gives `features.kicker` mandatory). Documented above.
+
+### Golden / generation-contract diffs
+
+**NONE.** Full suite 1542 passed (baseline 1517 + 25 new), 0 refreshed fixtures: `generationContract.test.ts` and `captureGolden.test.ts` validate the wizard path (uiblocks → per-layout schemas), which is untouched this phase; the contract path is a strict superset for its consumers (union never drops a previously-present element, so `updateFromAIResponse` element gating keeps everything it kept before).
+
+### DEBUG_ELEMENT_SELECTION reasoning (dev not run)
+
+With `DEBUG_ELEMENT_SELECTION=true`, `getCompleteElementsMap` logs per-section mandatory/optional lists. A meridian page (`hero → TerminalHero`) and a vestria page (`hero → VestriaTailoredHero`) now log IDENTICAL mandatory/optional/all lists for every shared section — only the `layout` metadata field differs. This is exactly what the frozen-fixture test asserts programmatically (`it.each(SHARED_SECTIONS)` deep-equality on the three lists).
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 96 files passed, 1 skipped; **1542 passed** / 2 skipped (baseline 1517 + 25 new tests, zero regressions).
+- New `elementDetermination.test.ts`: 25/25 green (convergence, union-superset seeding, frozen mandatory sets, verbatim single-template sections, full-bleed hero media keys, editor/work/service/naayom fall-through, contract shape sanity).
+
+### Open risks (phase 8)
+
+- Editor regen prompts for meridian/vestria projects now list the unioned fields (e.g. meridian footer regen sees `link_columns`, vestria footer regen sees required `wordmark/footer_columns`) — the AI may emit fields the current template's block doesn't render; harmless at render (blocks ignore unknown keys) but stored content grows. Intended convergence; phase 9 QA should eyeball one regen.
+- The wizard copy path (copyPrompt.ts) still keys element lists off per-layout schemas (see Deviations) — the §3 invariant is true for the elementsMap generation path only until a follow-up converges the wizard prompt builder.
+- `validateSectionContent`'s `missingMandatory` for a vestria footer now includes meridian's `wordmark/copyright/footer_columns` when absent — nothing consumes that as a hard gate today (isValid drives warnings), but a future strict validator would need per-template awareness or content backfill.

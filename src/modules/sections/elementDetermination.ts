@@ -1,11 +1,21 @@
 // modules/sections/elementDetermination.ts
 // Builds the per-section "elements map" the copy prompt is driven from:
-// getCompleteElementsMap() walks the page's sections+layouts and, via the layout
-// element schema, lists every element (mandatory + all optional) each section can
-// hold. Optional elements are NOT pre-excluded here — the AI decides which to fill
-// at generation time (legacy scored selection removed). Also exposes section-type
-// mapping (sectionList) and content validation helpers.
-import { layoutElementSchema, getLayoutElements } from './layoutElementSchema';
+// getCompleteElementsMap() walks the page's sections+layouts and lists every
+// element (mandatory + all optional) each section can hold. Optional elements
+// are NOT pre-excluded here — the AI decides which to fill at generation time
+// (legacy scored selection removed). Also exposes section-type mapping
+// (sectionList) and content validation helpers.
+//
+// scale-07 phase 8 — GENERATION-path element resolution keys off
+// (engine, sectionType) via the engine contract (engines/elementContracts.ts):
+// for engine-covered sections (thing: meridian + vestria) the layout name is
+// demoted to display-only — it identifies the engine+sectionType pair, but the
+// element LIST comes from the contract, so the same Brief yields the same
+// element map under either template. Non-covered layouts (service legacy, work,
+// techpremium/naayom editor-only blocks) fall through to the layout path
+// (getLayoutElements) unchanged.
+import { layoutElementSchema, getLayoutElements, getAllElements } from './layoutElementSchema';
+import { resolveEngineSectionSchema } from '@/modules/engines/elementContracts';
 // AI decides optional elements at generation time (legacy selectOptionalElements removed)
 import { sectionList } from './sectionList';
 import type { InputVariables, HiddenInferredFields } from '@/types/core/index';
@@ -118,6 +128,12 @@ export function mapStoreToVariables(
 /**
  * Gets required elements for a specific section and layout
  * Returns ALL elements (mandatory + all optional) - AI decides which to generate
+ *
+ * scale-07 phase 8: engine-covered layouts (thing engine — meridian + vestria
+ * generation blocks) resolve via the (engine, sectionType) contract, NOT the
+ * layout name — the layout param is display-only for those sections. Everything
+ * else (service legacy, work, editor-only blocks) keeps the layout path.
+ *
  * @param sectionType - The section type (e.g., "Hero", "Features")
  * @param layout - The layout name (e.g., "leftCopyRightImage")
  * @param variables - Variables object (no longer used for element selection, kept for API compatibility)
@@ -133,8 +149,12 @@ export function getRequiredElements(
   all: string[];
   excluded: string[];
 } {
-  // Get all elements from schema - AI decides which optional elements to include
-  const layoutElements = getLayoutElements(layout);
+  // Engine contract first (GENERATION path); layout-name lookup is the fallback.
+  // AI decides which optional elements to include either way.
+  const engineSchema = resolveEngineSectionSchema(layout);
+  const layoutElements = engineSchema
+    ? getAllElements(engineSchema)
+    : getLayoutElements(layout);
 
   if (layoutElements.length === 0) {
     return { mandatory: [], optional: [], all: [], excluded: [] };
