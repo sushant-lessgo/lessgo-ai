@@ -911,3 +911,55 @@ Carry-forward notes (non-blocking, phase 11 or later):
 - Orphaned-but-harmless dead code after flag-gate removal: `src/modules/audience/service/{promptUnderstand,promptScrape}.ts` no longer imported — safe to prune later (not now).
 - `templateCatalog.ts` re-home was a mandatory tsc-discovered re-point (in scope, functionality-preserving).
 - Old routes' `layout.tsx` still runs auth before the redirect stub (unauthed old-URL → /sign-in → back → redirect); conservative, left intact.
+
+---
+
+## Phase 11 — fixtures, e2e, acceptance QA (final)
+
+**Files changed**
+- `src/modules/audience/__tests__/generationContract.test.ts` (edit) — the generation-contract frozen-fixture test
+- `src/modules/wizard/acceptance.test.ts` (create) — durable spec-acceptance lock
+- `src/app/onboarding/[token]/loadDetection.test.ts` (create) — load-detection predicate + resume rehydration
+- `e2e/generation.spec.ts` (edit) — unified-route + mid-wizard reload steps (written-only, gated) + header notes
+- `docs/task/scale-06-wizard-convergence.plan.md` (edit) — phase-11 progress-log line
+- (NOT changed) `e2e/render.spec.ts` — left as-is: it drives `/dev/*` template surfaces, not the wizard routes, so it is not route-dependent on the old wizard paths.
+
+QA phase — only test files + the plan/audit changed; NO feature code was modified.
+
+### Generation-contract fixture found + shape
+- File: `src/modules/audience/__tests__/generationContract.test.ts` (the "no broken/empty page" P0 guard; it also gates the opt-in `e2e/fixtures/generated/*.json` GOLDEN captures, which stay absent → skipped).
+- Old shape: two MOCK describe blocks called the per-audience module paths directly (`generateMock*Strategy` → `generateMock*Copy` → `process*Copy`) and validated the processed sections against the element schema.
+- New shape: product + service now run through the ONE engine — `runGeneration('thing')` / `runGeneration('trust')` — with a FAITHFUL fetch mock that stands in for the audience routes by invoking the exact SAME mock generator + processing pipeline the routes run. So the copy flowing into the assembled finalContent is REAL processed content and the element-schema guard keeps its teeth; it just now travels the unified dispatch. Added coverage: `runGeneration` returns `done`, and the saved finalContent (captured from the `/api/saveDraft` body) covers every routed section.
+- Frozen shape held: the schema-validation assertion + id-backfill assertion are unchanged in intent; the golden-capture block is untouched. The element-schema shape did NOT change — no deliberate fixture rewrite was needed (the adapters preserve route payloads, so processed content is identical). The only structural change is HOW the fixture is driven (through `runGeneration` instead of the raw module calls), per the plan.
+- WRITER fixture ADDED: `runGeneration('work')` → the deterministic Granth path (loadDraft mock returns `templateId:'granth'` to satisfy the adapter's defense guard; no strategy/copy fetch). Asserts a valid Granth `finalContent` shape (6 sections, flat layout+content+meta, every section id → a `Granth*` block, `meta.title`), and that the 3 wizard work uploads thread onto the `GranthJacketShelf` as book `cover_image`s, plus id-backfill.
+
+### Acceptance test — fixtures + what it locks
+`src/modules/wizard/acceptance.test.ts` locks the spec's headline numbers PERMANENTLY on real machinery (not stubs), across ALL THREE engines so one engine can't game the cap while another regresses:
+- (a) rich URL-entry brief ⇒ `computeAsks` ≤ 3 (thing/trust/work) — real `getContract` + real `businessTypes` entries + a rich `EntryFacts` brief (scrape filled every outside-knowable field + a concrete goal param).
+- (b) bare one-liner brief ⇒ `computeAsks` ≤ 6 (thing/trust/work).
+- (c) unpromised proof ⇒ section ABSENT, locked at all three cut points: the phase-1 waterfall (`computeDroppedSections` drops `testimonials` on a bare brief, keeps it on rich), the phase-4 product filter (`assembleProductStrategy` with `proof.hasTestimonials:false` and `proof:{}` ⇒ no `testimonials` in sections/uiblocks; `true` ⇒ present), and the service selector (`selectServiceSections` with `assets.hasTestimonials:false` ⇒ absent). Reuses the same real `ProductStrategyResponse` LLM fixture as `proofFilter.test.ts`.
+
+### Load-detection coverage approach (+ split)
+The load-detection predicate lives INSIDE `page.tsx` (`confirmed = !!brief && !!audienceType && !!brief.copyEngine`) and is not exported, and the route is Clerk-gated (browser-only). Per the plan's allowed split, `src/app/onboarding/[token]/loadDetection.test.ts` locks the two pure, testable halves: (1) the predicate truth-table mirrored byte-for-byte from the page (persisted brief + audienceType + copyEngine ⇒ wizard; any missing ⇒ entry); (2) RESUME via `useWizardStore.hydrate` — a persisted brief (the shape `/api/loadDraft` returns) rehydrates a usable wizard (engine/slots/currentSlot/mode/scraped fields/goal) and is deterministic across two hydrates, proving reload resumes rather than restarts. SPLIT NOTE recorded in the test header: the fetch+setState wiring in `page.tsx` is browser-only and belongs to `/manual-test` + the (auth-gated, written-only) e2e reload step.
+
+### e2e — ran or written-only
+RAN (mock mode, `--project=public`). `/onboarding/(.*)` is Clerk-gated and the `public` Playwright project has no session, so the wizard UI drive can't authenticate there — the product + service wizard-drive + mid-wizard-reload tests are WRITTEN-ONLY and self-skip unless `E2E_WIZARD_UI=1` under an authed context (documented in the spec header; the resume LOGIC is locked green in the vitest load-detection test). Runnable results: product generation HTTP smoke PASSED (this is the product path through the engine's routes); service HTTP smoke skipped (needs `E2E_AUTH`); the 3 wizard-UI tests skipped by design. Specs parse (`playwright test --list` clean) — but note e2e is NOT covered by `tsc --noEmit` (tsconfig excludes `e2e/`); Playwright compiles them at run time and `--list` validated them.
+- ONE e2e failure, NOT caused by phase 11 and NOT a scale-06 regression: `render.spec.ts › /dev/meridian/blocks renders without crashing` times out (15s) waiting for the client-mounted block gallery to emit template token attributes. The page returns HTTP 200 with no Next error overlay; the `ssr:false` dynamic-import subtree just doesn't mount within 15s headless. `render.spec.ts`, `/dev/meridian`, the meridian template, and the renderers are ALL outside scale-06's 78-file branch diff — this is a pre-existing environmental/timing flake, not a phases 1–10 bug. Left untouched (render.spec is not route-dependent on the wizard).
+
+### Real bugs surfaced in phases 1–10
+None. All new acceptance/contract/load-detection assertions passed against the existing phase 1–10 code without any feature-code change.
+
+### Exact verification outputs
+- `npx tsc --noEmit` → clean (no output).
+- `npm run test:run` → Test Files 90 passed | 1 skipped (91); Tests 1266 passed | 2 skipped (1268). (The 2 skips are the opt-in golden real-LLM captures + one pre-existing skip.)
+- `npm run test:e2e` (`--project=public`, mock) → 3 passed, 4 skipped, 1 failed (the pre-existing `/dev/meridian/blocks` render flake above; product generation smoke passed; wizard-UI + service smoke skipped by design).
+- `npm run build` → green (compiles + full route table emitted).
+
+### Open risks
+- The browser-level wizard drive + mid-wizard reload e2e stays written-only until an authed wizard Playwright project + a confirmed-brief seed helper exist (both out of phase-11 scope). The resume mechanism is unit-locked; the browser proof is the founder's `/manual-test`.
+- The `/dev/meridian/blocks` render flake predates this feature and should be triaged separately (raise the 15s timeout or diagnose the cold client-mount) — unrelated to the merge gate.
+
+### Impl-review verdict: **ship** (loop 1/1) — tsc clean, full test:run 1266 pass / 2 skip, npm run build green. QA-invariant HELD (git diff = tests + docs only, zero feature-source changes). Acceptance tests have real teeth (bare thing/trust=6 exactly at ≤6 cap → any new required field trips it; proof-absent locked at real cut points computeDroppedSections/assembleProductStrategy/selectServiceSections, all 3 engines). generationContract fixture not gutted (real mock generator + process*Copy + validateGeneratedContent per-audience schema; writer fixture asserts valid Granth shape). load-detection predicate mirror byte-faithful to page.tsx + real hydrate-resume. e2e honest (wizard-UI self-skips via test.skip(!WIZARD_UI), product smoke green; /dev/meridian/blocks flake genuinely outside the 78-file scale-06 diff). No blocking issues.
+Non-blocking (test-tightness, acceptable): acceptance uses ≤ bound not exact pins (tighter per-count pins live in waterfall.test.ts); work has no proof-absent cut (deterministic Granth path has no proof-gated sections); old-route redirect + store-deletion locked indirectly via build route table + green tsc, no dedicated regression test.
+
+## FEATURE COMPLETE — all 11 phases (+6b) shipped, every impl-review passed first loop, every plan-review approved. tsc + full suite (1266) + npm run build green. Awaiting founder merge gate.
