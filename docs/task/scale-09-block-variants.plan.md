@@ -18,7 +18,7 @@ Give each section type 2–3 copy-compatible blocks per template, selected deter
 
 ## Progress log
 
-- phase 1 surge deterministic default: pending
+- phase 1 surge deterministic default: done (commit 72c5a54f, review loops 1)
 - phase 2 block manifest data model + declarations: pending
 - phase 3 variant-aware resolveBlock: pending
 - phase 4 eligibility filter + selection threading: pending

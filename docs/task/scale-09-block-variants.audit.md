@@ -34,3 +34,44 @@
 
 ### Open risks
 - None for this phase. `PullQuoteWithMark` variant is now never selected at generation for surge; that becomes reachable again via the editor swap (phase 5) and the manifest default (phases 2/4).
+
+## Phase 2 — block manifest data model + explicit declarations
+
+**Files changed**
+- `src/modules/templates/blockManifest.ts` — new (pure-data manifest + types)
+- `src/modules/templates/blockManifest.test.ts` — new (conformance)
+
+### Manifest shape
+- `AssetKind = 'photos' | 'logos' | 'testimonialPhotos'`.
+- `BlockDeclaration = { layoutName; label; blurb?; consumes: string[]; capacity?: {minCards; maxCards}; requiresAssets?: AssetKind[]; internalDispatch?: boolean }`.
+- `SectionBlockSet = { default: string; variants: BlockDeclaration[] }`; `TemplateBlockManifest = Record<sectionType, SectionBlockSet>`.
+- `blockManifests: Partial<Record<TemplateId, TemplateBlockManifest>>`.
+
+### Templates / sections declared
+- **meridian** — all 7 `MERIDIAN_LAYOUT_NAMES` sections (header/hero/features/testimonials/pricing/cta/footer), one declared variant each (the current default). Capacity on features {3,9}, testimonials {1,3}, pricing {2,3}.
+- **hearth** — the 7 core `PILOT_LAYOUT_NAMES` service sections (header/hero/services/testimonials/packages/cta/footer), one variant each. Capacity on services {3,6}, packages {1,3}.
+- **surge** — testimonials ONLY: `ReviewGrid` (default) + `PullQuoteWithMark`, both `internalDispatch: true`. Makes phase-1's deterministic default declared.
+- **vestria** — hero ONLY: `VestriaTailoredHero` (default) + `VestriaFullBleedHero`, both `internalDispatch: true`. Makes the existing content-layout hero swap declared.
+- lex / lumen / granth / techpremium — NO manifest (deferred, plan Q6); they fall back to legacy name maps.
+
+### How `consumes` keys were sourced
+- HARD-CODED per declaration = the block's own top-level element keys, copied verbatim from the canonical schemas (`meridianElementSchema`/`vestriaElementSchema` in `audience/product/elementSchema.ts`; `serviceElementSchema` in `audience/service/elementSchema.ts`), cited in per-section comments.
+- Chosen over deriving via `getAllElements` at module load because deriving would make the conformance check tautological AND would add a data import to the manifest. Hard-coding keeps the manifest a leaf on the import graph and makes the test a genuine guard (a typo'd key goes red).
+- The conformance test resolves the contract independently: product/thing-engine layouts via `resolveEngineSectionSchema(layoutName)` (the meridian∪vestria union — so `VestriaFullBleedHero`'s video keys are in-contract), service layouts via the block's own schema. All `consumes` verified ⊆ contract.
+
+### Firewall verification
+- `blockManifest.ts` imports exactly ONE thing: `import type { TemplateId } from '@/types/service'` — a type-only import, erased at compile time. Zero component / `.tsx` / `'use client'` / resolver / schema imports. Confirmed importable by server-side selection code without dragging any template component into the bundle.
+
+### Deviations
+- **types stayed in `blockManifest.ts`; `src/types/template.ts` NOT touched.** The scope allowed editing `template.ts` "ONLY IF sharing warrants." Only `blockManifest.ts` + its test consume the declaration types this phase, and phase 3's `resolveBlock` signature change does not need `AssetKind`, so sharing does not warrant. Conservative: fewer files changed.
+- **No `requiresAssets` on any declaration this phase.** Considered `requiresAssets: ['photos']` on `VestriaFullBleedHero` (a video variant needing uploaded media) but dropped it: phase 2 is declarations-only, `'photos'` would mislabel a video asset need, and the asset-eligibility acceptance carrier is the meridian photo hero in phase 6. `AssetKind` type is defined for later phases.
+- **surge / vestria declared as PARTIAL manifests** (only the variant-bearing section each). Matches the plan's explicit "incl. both testimonials/hero variants" wording; their other sections fall back to name maps in phase 4 (the plan states manifest-driven pick only "when a manifest entry exists"). Minimal, in-scope.
+- **hearth manifest = the 7 core pilot sections**, excluding the surge-only delta layouts (logos/about/casestudies/stats) that also live in `PILOT_LAYOUT_NAMES` — hearth never selects those, so declaring them would be false.
+
+### Verification
+- `npx tsc --noEmit` — clean, no output.
+- `npx vitest run src/modules/templates/blockManifest.test.ts` — 42 tests passed.
+- `npm run test:run` (full) — 100 passed | 1 skipped files; 1615 passed | 3 skipped tests (+1 file, +42 tests vs phase 1). Suite green.
+
+### Open risks
+- None for this phase. Resolver / component-identity distinctness checks are intentionally absent (phase 3). The manifest is pure data with no runtime consumers yet — first consumed by `resolveBlock` (phase 3) and the eligibility filter (phase 4).
