@@ -8,6 +8,8 @@
 
 import type { PageSlice, SectionData, ProjectPageEntry } from '@/types/store';
 import { materializeIntoPages, materializeHomeTeasers } from './collectionHelpers';
+import { getCollectionDef } from '@/modules/collections/registry';
+import type { CollectionEntry } from '@/modules/brief/collections';
 
 const rid = (p: string): string => `${p}${Math.random().toString(36).slice(2, 8)}`;
 const sectionId = (type: string): string => `${type}-${Math.random().toString(36).slice(2, 10)}`;
@@ -480,6 +482,67 @@ export function buildProductDetailSlice(opts: {
       badges: [],
       features: (opts.features || []).map((t) => ({ id: rid('ft'), text: t })),
       specs: (opts.specs || []).map((s) => ({ id: rid('sp'), key: s.key, value: s.value })),
+      related: [],
+    }),
+  };
+  return slice([detail, ctaSection()]);
+}
+
+// ── Generic collection builders (scale-10 phase 5) ───────────────────────────
+// Brief/entry-driven, keyed by `collectionKey` via the registry. DELIBERATELY
+// DISTINCT from the naayom-flavored buildCatalogSlice / buildProductDetailSlice
+// above — those are called by the grandfathered buildNaayomProductPages and MUST
+// stay byte-identical, so this is NEW code, never a generalization in place.
+//
+// Blocks only exist for `products` today (rung-C adds services/case-studies/
+// works blocks). The bridge that calls these (multiPageAssembly.assembleCollectionPages)
+// only fires for a key whose TEMPLATE declares the collection-family capability,
+// and capability-evidence conformance (phase 7) guarantees those blocks resolve
+// — so a LIVE fire never hits the section-type layout fallback below. The
+// fallback only keeps the builders total for the dormant/fixture path.
+const COLLECTION_BLOCK_LAYOUTS: Record<string, { catalog: string; item: string }> = {
+  products: { catalog: 'ProductCatalogList', item: 'ProductDetailRecord' },
+};
+
+/** Generic catalog singleton slice for any collection key (+ closing cta).
+ *  `items[]` is MATERIALIZED (read-only) from the item records at the export
+ *  boundary (materializeIntoPages) — never hand-authored here. */
+export function buildCollectionCatalogSlice(collectionKey: string): PageSlice {
+  const def = getCollectionDef(collectionKey);
+  const catType = def?.catalogSectionType ?? 'catalog';
+  const catLayout = COLLECTION_BLOCK_LAYOUTS[collectionKey]?.catalog ?? catType;
+  const catId = sectionId(catType);
+  const catalog = {
+    id: catId,
+    data: section(catId, catType, catLayout, {
+      eyebrow: def?.label ?? '',
+      headline: '',
+      lede: '',
+      categories: [],
+      items: [],
+    }),
+  };
+  return slice([catalog, ctaSection()]);
+}
+
+/** Generic collection-item slice — record fields seeded VERBATIM from the Brief
+ *  entry (name / oneLiner / image slot). AI supplies only connective copy; the
+ *  clamp in the fan-out never overwrites these record fields. */
+export function buildCollectionItemSlice(collectionKey: string, entry: CollectionEntry): PageSlice {
+  const def = getCollectionDef(collectionKey);
+  const itType = def?.itemSectionType ?? 'item';
+  const itLayout = COLLECTION_BLOCK_LAYOUTS[collectionKey]?.item ?? itType;
+  const id = sectionId(itType);
+  const detail = {
+    id,
+    data: section(id, itType, itLayout, {
+      name: entry.name,
+      oneLiner: entry.oneLiner ?? '',
+      lede: '',
+      images: [{ id: rid('img'), src: entry.imageUrl ?? '', tag: entry.name }],
+      features: [],
+      specs: [],
+      badges: [],
       related: [],
     }),
   };

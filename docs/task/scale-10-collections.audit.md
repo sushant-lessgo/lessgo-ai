@@ -268,3 +268,55 @@ if (Object.keys(state.collections).length > 0) {
 ### Fix (impl-review loop 1 — BLOCKING)
 - `StructureSlot.tsx`: the collection entry `<li>` was keyed `${entry.slug}-${idx}`. Since rename re-derives the slug (slugify) on every keystroke, the key changed each keystroke → React remounted the `<input>` → focus lost after one char. Re-keyed to stable `key={idx}` (no per-entry reorder UI; inputs fully store-controlled, so index-keying is safe across add/remove). Slug re-derivation is UNCHANGED. Mirrors the sitemap page-row pattern (stable key, derived value rendered inside). No other change.
 - Re-verified: `npx tsc --noEmit` clean; `npm run test:run` 103 passed | 1 skipped files, 1735 passed | 3 skipped tests. Green.
+
+---
+
+## Phase 5 — Generation→collections bridge (registry-gated, ships DORMANT) + clamp
+
+Branch: `feature/scale-10-collections` (verified via `git branch --show-current`).
+
+### Files changed
+- `src/modules/generation/multiPageAssembly.ts` — the bridge (firing gate, page emission, clamp merge, shared fan-out) + header invariant update + `MultiPageOnboardingData.collections?`.
+- `src/hooks/editStore/archetypes.ts` — NEW generic builders `buildCollectionCatalogSlice` / `buildCollectionItemSlice` (naayom builders untouched).
+- `src/modules/wizard/generation/thing.ts` — collections fan-out in `runFanOut` (dormant); `collections?` input + persisted into onboardingData.
+- `src/modules/wizard/generation/trust.ts` — collections fan-out after save (dormant); `collections?` input.
+- `src/modules/wizard/generation/work.ts` — collections fan-out after save (dormant, no-LLM); `collections?` input.
+- `src/modules/generation/multiPageAssembly.test.ts` — NEW bridge describe block (fixture-driven); existing invariant assertions preserved.
+- `src/hooks/editStore/pageActions.test.ts` — one CRUD-compat test (bridge-produced empty collection + add-post-reveal).
+
+### The double gate + fixture injection point
+`firingCollectionKeys(declaredCapabilities)` maps declared capabilityIds → CollectionKeys via `getCollectionDef` (registry). A key fires iff BOTH hold: (a) `getCollectionDef(cap)` returns a def AND (b) that cap is in the passed `declaredCapabilities`. The caller supplies `declaredCapabilities` from `templateMeta[templateId].capabilities` — so the "meta lookup" is at the adapter call site, and the bridge functions themselves take the capability LIST as a param. That param IS the fixture injection point: tests pass `['products']` (fires) / `['catalog','lead-form','trust']` (vestria's flat-grid caps — no registry def for `catalog`, so no fire) / `[]` directly. No real template meta is mutated. `catalog` can never fire because there is no `CollectionDef` keyed `catalog` (registry closed to the family by construction, phase 1).
+
+DORMANCY confirmed: no live template declares a collection-family capability (meridian/vestria/techpremium/hearth/lex/surge/granth/lumen), so `firingCollectionKeys` returns `[]` for every real adapter run and `runCollectionFanOut` returns before touching `fc`. Verified by the preserved invariant tests (real vestria path stamps zero collectionKey/collectionItem) + the "dormant, no copy calls" fan-out test.
+
+### CLAMP mechanism (where + how)
+Two layers:
+1. **Page creation is Brief-bounded.** `assembleCollectionPages` iterates ONLY `collections[key]` (the Brief entries). AI never adds a page — item pages come from Brief entries with code-derived slugs (`def.basePath + '/' + slugify(name)`, the slug already carried on the entry from `getCollections`). Removed-at-gate entries simply aren't iterated ⇒ no page (8 remove 2 ⇒ 6).
+2. **Copy merge is slug-intersected + verbatim-guarded.** `mergeCollectionItemCopy` first checks `briefSlugs.has(plan.slug)` — an AI item whose slug is not a Brief entry is DROPPED (early return, no page mutated/created). For the surviving page, it merges AI elements into each section BUT skips `VERBATIM_ITEM_FIELDS` (`name`/`oneLiner`/`images`/`slug`) on the item-record section, so record fields stay exactly as seeded from the Brief entry; AI supplies only connective copy (headline/lede/etc). `briefSlugs` = `collectionBriefSlugs(collections, firingKeys)`. This is a hard post-parse code step, not a prompt instruction.
+
+### Naayom byte-identical
+`buildCatalogSlice` / `buildProductDetailSlice` / `buildNaayomProductPages` / `buildTechPremiumHomeFinalContent` are UNTOUCHED. The generic path is NEW functions (`buildCollectionCatalogSlice` / `buildCollectionItemSlice`) with their own layout map (`COLLECTION_BLOCK_LAYOUTS`, products → ProductCatalogList/ProductDetailRecord, section-type fallback for rung-C keys). `naayomProducts.test.ts` + `homeTeasers.test.ts` + `generationContract.test.ts` all green — no naayom drift.
+
+### Per-page persistence / resume for item pages
+`runCollectionFanOut`: after `assembleCollectionPages`, persist once (durable index + fresh item shells), then per item: skip if `generationProgress.completedPageKeys` already has the page key, else fetch copy → `mergeCollectionItemCopy` (which pushes the key onto `completedPageKeys`) → persist. `assembleCollectionPages` never overwrites an existing page key, so a resumed run keeps already-built pages. Tested: fresh run tracks `['page-alpha','page-beta']` with persist snapshots `[0,1,2]`; resume with `completedPageKeys:['page-alpha']` copies only `beta`.
+
+### Adapter wiring (all dormant today)
+- thing.ts: fan-out at the tail of `runFanOut`; `generateItemCopy` POSTs `/api/audience/product/generate-copy` with `collectionItem: plan.entry` (record in payload) + item-page uiblocks; charge FLAT (reuses the gate strategy, no new strategy call).
+- trust.ts: fan-out after the single-page `saveDraft`; POSTs `/api/audience/service/generate-copy` with the record. `fc.pages` is only created when a key fires, so single-page trust finalContent is unchanged when dormant.
+- work.ts: fan-out after save; WORK is deterministic (no LLM) so `generateItemCopy` returns empty copy — item records seeded verbatim by the bridge, connective copy left blank.
+
+### Scope confirmations
+- NO edits to `collectionHelpers.ts` / `pageHelpers.ts` (export sweep reused as-is). NO renderer (.tsx/.published.tsx) edits — page DATA only. NO DB migration. Naayom/vestria/techpremium untouchables preserved.
+- Guard kept explicit in comments: the bridge must not assume a resolvable block for services/case-studies/works until rung-C; the capability gate guarantees it today.
+
+### Verification
+- `npx tsc --noEmit`: clean (no output).
+- `npm run test:run` (full): **103 passed | 1 skipped files; 1745 passed | 3 skipped tests.** Targeted: `multiPageAssembly.test.ts` (invariant + new bridge block), `naayomProducts.test.ts`, `homeTeasers.test.ts`, `pageActions.test.ts`, `generationContract.test.ts` all green. `captureGolden.test.ts` skipped (opt-in real-LLM, CAPTURE unset) — unchanged.
+
+### Deviations
+- Shared fan-out lives IN `multiPageAssembly.ts` (in-scope, tested file) as `runCollectionFanOut`, rather than triplicated across thing/trust/work — keeps the clamp/resume logic in one tested place; adapters inject only the route call + persist closure. Conservative: concentrates real logic where the phase's tests exercise it.
+- Added optional `collections?` to each adapter input interface (in-scope files) instead of touching the store projection (out of scope) — the store does not populate it yet, reinforcing dormancy.
+
+### Open risks / notes
+- The item-copy route payloads (`collectionItem`, `collectionKey`, per-item `page`) target route contracts that do not yet handle collection items — inert today (dormant), formalized at rung-C when the routes + block pairs land.
+- Generic builders' section-type layout fallback (non-products keys) is never hit on a live fire (capability gate); it only keeps the builders total for fixture/dormant use.

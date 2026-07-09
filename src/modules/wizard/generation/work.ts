@@ -21,6 +21,9 @@
 // and hands this adapter PLAIN DATA. The published-client boundary is preserved.
 
 import { buildGranthHomeFinalContent } from '@/hooks/editStore/granthSeed';
+import { runCollectionFanOut } from '@/modules/generation/multiPageAssembly';
+import { templateMeta } from '@/modules/templates/templateMeta';
+import type { CollectionsFacts } from '@/modules/brief/collections';
 import { saveDraft } from './finalize';
 import type { GenerationCallbacks, GenerationResult } from './index';
 
@@ -38,6 +41,12 @@ export interface WorkGenerationInput {
   oneLiner: string;
   /** 3–5 work uploads (image URLs) captured in the wizard (contract `theWork`). */
   works: string[];
+
+  // scale-10 phase 5 — Brief-carried collection entries (facts.collections).
+  // Mirror of thing.ts; the collections bridge is DORMANT (granth declares no
+  // collection-family capability) — inert until rung-C. WORK is deterministic
+  // (no LLM copy), so item records are seeded VERBATIM with no connective call.
+  collections?: CollectionsFacts;
 }
 
 const REDIRECT = (tokenId: string) => `/edit/${tokenId}`;
@@ -104,6 +113,31 @@ export async function runWorkGeneration(
       variantId: GRANTH_VARIANT,
       finalContent,
     });
+
+    // scale-10 phase 5 — collections bridge (DORMANT: granth declares no
+    // collection-family capability, so runCollectionFanOut no-ops today). Mirror
+    // of thing.ts, minus the LLM: WORK is deterministic, so item records are
+    // seeded VERBATIM by the bridge and generateItemCopy returns empty connective
+    // copy. Charge stays FLAT.
+    const declaredCaps = templateMeta.granth?.capabilities ?? [];
+    const collResult = await runCollectionFanOut({
+      fc: finalContent,
+      collections: (input.collections ?? {}) as CollectionsFacts,
+      declaredCapabilities: declaredCaps,
+      persist: async (fc) => {
+        await saveDraft({
+          tokenId,
+          title: (fc.meta?.title as string) || title,
+          paletteId: GRANTH_PALETTE,
+          templateId: 'granth',
+          variantId: GRANTH_VARIANT,
+          finalContent: fc,
+        });
+      },
+      generateItemCopy: async () => ({ status: 'done', copy: {} }),
+    });
+    if (collResult.status === 'credits') return { status: 'credits' };
+    if (collResult.status === 'error') return { status: 'error', error: collResult.error };
   } catch (e: any) {
     return { status: 'error', error: e?.message || 'Could not save the draft.' };
   }

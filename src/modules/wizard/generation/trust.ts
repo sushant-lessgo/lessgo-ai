@@ -43,6 +43,9 @@ import {
 } from '@/modules/brief/bridge';
 import { applyConfirmedStructure } from '@/modules/audience/service/strategy/parseStrategyService';
 import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
+import { runCollectionFanOut } from '@/modules/generation/multiPageAssembly';
+import { templateMeta } from '@/modules/templates/templateMeta';
+import type { CollectionsFacts } from '@/modules/brief/collections';
 import { buildFinalContent, saveDraft, type BriefGoal } from './finalize';
 import type { GenerationCallbacks, GenerationResult } from './index';
 
@@ -107,6 +110,11 @@ export interface TrustGenerationInput {
   // phase 5 — the phase-4 module-scoped pre-gate bridge is deleted).
   strategy?: ServiceStrategyOutputAssembled | null;
   confirmedSections?: string[] | null;
+
+  // scale-10 phase 5 — Brief-carried collection entries (facts.collections).
+  // Mirror of thing.ts; the collections bridge is DORMANT (no service template
+  // declares a collection-family capability) — inert until rung-C.
+  collections?: CollectionsFacts;
 }
 
 // ---------------------------------------------------------------------------
@@ -345,6 +353,51 @@ export async function runTrustGeneration(
       ...briefPatch,
       finalContent,
     });
+
+    // scale-10 phase 5 — collections bridge (DORMANT: no service template
+    // declares a collection-family capability, so runCollectionFanOut no-ops
+    // today). Mirror of thing.ts: item pages carry the record; the merge CLAMPS
+    // to Brief entries + keeps record fields VERBATIM. Charge stays FLAT.
+    const declaredCaps = templateMeta[templateId as keyof typeof templateMeta]?.capabilities ?? [];
+    const collResult = await runCollectionFanOut({
+      fc: finalContent,
+      collections: (input.collections ?? {}) as CollectionsFacts,
+      declaredCapabilities: declaredCaps,
+      persist: async (fc) => {
+        await saveDraft({ tokenId, title, paletteId, templateId, variantId, ...briefPatch, finalContent: fc });
+      },
+      generateItemCopy: async (plan) => {
+        try {
+          const res = await fetch('/api/audience/service/generate-copy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              strategy,
+              uiblocks: strategy.uiblocks,
+              oneLiner: input.oneLiner,
+              businessName: input.businessName,
+              offer: input.offer,
+              goal: serviceGoalFor(input),
+              understanding: buildUnderstanding(input),
+              // Record in the payload — AI writes connective copy only; record
+              // fields are kept verbatim by the clamp on merge.
+              collectionItem: plan.entry,
+              collectionKey: plan.collectionKey,
+            }),
+          });
+          const json = await res.json();
+          if (!res.ok || !json?.success) {
+            if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
+            return { status: 'error', error: json?.message || `Copy generation failed (${plan.entry.name})` };
+          }
+          return { status: 'done', copy: json.sections as Record<string, SectionCopy> };
+        } catch (e: any) {
+          return { status: 'error', error: e?.message || 'Copy generation failed.' };
+        }
+      },
+    });
+    if (collResult.status === 'credits') return { status: 'credits' };
+    if (collResult.status === 'error') return { status: 'error', error: collResult.error };
   } catch (e: any) {
     return { status: 'error', error: e?.message || 'Could not save the draft.' };
   }
