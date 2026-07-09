@@ -6,10 +6,18 @@
 // is a later phase.
 
 import { MERIDIAN_LAYOUT_NAMES, VESTRIA_LAYOUT_NAMES } from './elementSchema';
+import { selectEligibleBlock, type AssetFacts } from '@/modules/generation/blockEligibility';
 
 export interface SelectProductBlocksInput {
   sections: string[];
   templateId?: string;
+  /**
+   * scale-09 phase 4 — OPTIONAL deterministic selection signals. When a manifest
+   * entry exists for (templateId, section) the eligibility filter uses these;
+   * absent ⇒ the section's declared default (identical to the legacy name map).
+   */
+  cardCountHints?: Record<string, number>;
+  assetFacts?: AssetFacts;
 }
 
 export interface SelectProductBlocksOutput {
@@ -31,7 +39,12 @@ export function selectProductBlocks(
     (MERIDIAN_LAYOUT_NAMES as Record<string, string>);
   const uiblocks: Record<string, string> = {};
   for (const section of input.sections) {
-    const layout = map[section];
+    // Manifest-driven pick when a declaration exists; else the legacy name map.
+    const manifestPick = selectEligibleBlock(input.templateId, section, {
+      cardCountHint: input.cardCountHints?.[section],
+      assetFacts: input.assetFacts,
+    });
+    const layout = manifestPick ?? map[section];
     if (layout) uiblocks[section] = layout;
   }
   return { uiblocks };

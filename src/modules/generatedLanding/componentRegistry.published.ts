@@ -44,10 +44,13 @@ export function getComponent(
   // Template-backed projects (service = Hearth/Lex; product+meridian = Meridian)
   // dispatch to the selected template module (preloaded + cached via the dynamic
   // registry; read synchronously here).
-  // A1: dispatch by SECTION TYPE (normalizedType), not the stored layout name.
+  // Dispatch by SECTION TYPE (normalizedType); the stored layout name selects a
+  // declared variant, with A1 fallback to the section default (scale-09).
   if (usesTemplateModule(audienceType, templateId)) {
     const tmpl = getLoadedTemplate((templateId || 'hearth') as TemplateId);
-    return tmpl ? tmpl.resolveBlock(normalizedType, 'published') : null;
+    // Forward the stored layout name for variant dispatch (scale-09); A1
+    // fallback to the section default preserves template switching.
+    return tmpl ? tmpl.resolveBlock(normalizedType, 'published', layout) : null;
   }
 
   // Legacy 47-block published path removed in P5 (hard cutover).

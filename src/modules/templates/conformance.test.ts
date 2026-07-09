@@ -20,6 +20,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { templateMeta } from './templateMeta';
+import { blockManifests } from './blockManifest';
 import { engineCoreSections } from '@/modules/engines/coreSections';
 import { templateIds, type TemplateId } from '@/types/service';
 import { capabilityIds, type CapabilityId } from '@/types/brief';
@@ -46,7 +47,7 @@ type Mode = 'edit' | 'published';
 const RESOLVERS: Record<
   TemplateId,
   {
-    resolve: (sectionType: string, mode: Mode) => unknown;
+    resolve: (sectionType: string, mode: Mode, layoutName?: string) => unknown;
     placeholder: unknown;
   }
 > = {
@@ -68,16 +69,30 @@ const STRUCTURAL_CAPABILITIES: readonly CapabilityId[] = ['multipage', 'bilingua
 
 const MODES: readonly Mode[] = ['edit', 'published'];
 
-function resolvesReal(templateId: TemplateId, sectionType: string): void {
+function resolvesReal(
+  templateId: TemplateId,
+  sectionType: string,
+  layoutName?: string
+): void {
   const { resolve, placeholder } = RESOLVERS[templateId];
+  const label = layoutName ? `${sectionType}@${layoutName}` : sectionType;
   for (const mode of MODES) {
-    const block = resolve(sectionType, mode);
-    expect(block, `${templateId}/${sectionType} (${mode}) must resolve`).toBeTruthy();
+    const block = resolve(sectionType, mode, layoutName);
+    expect(block, `${templateId}/${label} (${mode}) must resolve`).toBeTruthy();
     expect(
       block,
-      `${templateId}/${sectionType} (${mode}) must not be the placeholder`
+      `${templateId}/${label} (${mode}) must not be the placeholder`
     ).not.toBe(placeholder);
   }
+}
+
+function resolveComponent(
+  templateId: TemplateId,
+  sectionType: string,
+  mode: Mode,
+  layoutName: string
+): unknown {
+  return RESOLVERS[templateId].resolve(sectionType, mode, layoutName);
 }
 
 describe('template conformance (scalePlan §6a/§6b)', () => {
@@ -183,6 +198,67 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
         resolvesReal('lumen', sectionType!);
       }
     });
+  });
+
+  // ── (c) scale-09: variant-aware resolveBlock resolution + distinctness ─────
+  // Walks EVERY block-manifest declaration and, in BOTH modes, asserts:
+  //   (a) resolveBlock(sectionType, mode, layoutName) → real, non-placeholder;
+  //   (b) DISTINCTNESS (the critical guard): each NON-default variant resolves
+  //       to a component `!==` (strict identity) the section DEFAULT's
+  //       component. This is the ONLY automated guard for the variation
+  //       mechanism: a misregistered/misspelled variant key makes
+  //       `variants[layoutName] ?? default` silently return the default
+  //       (truthy + non-placeholder), so resolution (a) alone stays green while
+  //       the swap no-ops. Identity comparison catches that.
+  //   EXEMPTION: `internalDispatch: true` declarations (surge testimonials,
+  //       vestria hero) intentionally share ONE dispatcher component that
+  //       branches internally on the stored layout — so their variants are
+  //       asserted to be the SAME component as the default, not distinct.
+  describe('(c) scale-09: manifest variant resolution + distinctness (both modes)', () => {
+    for (const [tid, manifest] of Object.entries(blockManifests)) {
+      const templateId = tid as TemplateId;
+      describe(templateId, () => {
+        for (const [sectionType, set] of Object.entries(manifest!)) {
+          describe(sectionType, () => {
+            it('default layout is one of the declared variants', () => {
+              expect(set.variants.map((v) => v.layoutName)).toContain(set.default);
+            });
+
+            for (const variant of set.variants) {
+              it(`${variant.layoutName}: resolves to a real block (edit + published)`, () => {
+                resolvesReal(templateId, sectionType, variant.layoutName);
+              });
+
+              if (variant.layoutName === set.default) continue;
+
+              if (variant.internalDispatch) {
+                it(`${variant.layoutName}: internalDispatch ⇒ SAME component as default (both modes)`, () => {
+                  for (const mode of MODES) {
+                    const v = resolveComponent(templateId, sectionType, mode, variant.layoutName);
+                    const d = resolveComponent(templateId, sectionType, mode, set.default);
+                    expect(
+                      v,
+                      `${templateId}/${sectionType} ${variant.layoutName} (${mode}) is internalDispatch — must share the default's dispatcher component`
+                    ).toBe(d);
+                  }
+                });
+              } else {
+                it(`${variant.layoutName}: DISTINCT component from default "${set.default}" (both modes)`, () => {
+                  for (const mode of MODES) {
+                    const v = resolveComponent(templateId, sectionType, mode, variant.layoutName);
+                    const d = resolveComponent(templateId, sectionType, mode, set.default);
+                    expect(
+                      v,
+                      `${templateId}/${sectionType} ${variant.layoutName} (${mode}) resolves to the SAME component as default "${set.default}" — misregistered/misspelled variant key silently falls back to default`
+                    ).not.toBe(d);
+                  }
+                });
+              }
+            }
+          });
+        }
+      });
+    }
   });
 
   // ── retired: techpremium out of both checks by declaration shape ───────────

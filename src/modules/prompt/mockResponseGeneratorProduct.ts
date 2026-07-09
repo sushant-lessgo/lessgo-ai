@@ -66,7 +66,12 @@ export function generateMockMeridianStrategy(
     }
   }
 
-  const { uiblocks } = selectProductBlocks({ sections, templateId: input.templateId });
+  // scale-09 phase 4 — pass the deterministic card-count hint the mock input
+  // carries (feature count). No-op for existing single-variant sections; keeps
+  // mock output stable.
+  const cardCountHints: Record<string, number> = {};
+  if (input.features.length > 0) cardCountHints.features = input.features.length;
+  const { uiblocks } = selectProductBlocks({ sections, templateId: input.templateId, cardCountHints });
 
   return {
     ...(sitemap ? { sitemap } : {}),

@@ -3,7 +3,7 @@
 import React from 'react';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { LayoutChangeSelector } from './LayoutChangeSelector';
-import { VestriaHeroVariantSelector, VESTRIA_HERO_LAYOUTS } from './VestriaHeroVariantSelector';
+import { BlockVariantSelector, getVariantSetForLayout } from './BlockVariantSelector';
 import type { EditableElement } from '@/types/core';
 import { usesTemplateModule } from '@/types/service';
 
@@ -23,6 +23,12 @@ export function LayoutChangeModal() {
   const currentContentLayout = useStoreState(state =>
     state.layoutChangeModal.sectionId
       ? state.content[state.layoutChangeModal.sectionId]?.layout
+      : undefined
+  );
+  // Full section content for the variant selector (asset facts + card-count clamp).
+  const currentSectionContent = useStoreState(state =>
+    state.layoutChangeModal.sectionId
+      ? state.content[state.layoutChangeModal.sectionId]
       : undefined
   );
 
@@ -50,43 +56,37 @@ export function LayoutChangeModal() {
     return null;
   }
 
-  // Template-backed projects use a fixed 1-block-per-section library — no
-  // layout-swap UI, with ONE exception: the vestria hero, which has two
-  // variants (tailored image / full-bleed video) sharing the same copy keys.
-  // That case gets a bespoke 2-card selector — NOT the legacy
-  // LayoutChangeSelector (built for the legacy layout library).
-  // NOTE: SectionToolbar's getSectionTypeFromLayout() defaults unknown
-  // (template-module) layouts to 'hero', so sectionType alone is unreliable
-  // here — we ALSO require the section's current layout to be one of the two
-  // vestria hero layouts. Every other template module (surge/hearth/lex/
-  // lumen/meridian/techpremium) and every non-hero vestria section stays null.
+  // Template-backed projects use a fixed 1-block-per-section library — no legacy
+  // layout-swap UI. EXCEPTION: sections whose template manifest declares MORE
+  // THAN ONE copy-compatible block (variant) get the generic, manifest-driven
+  // BlockVariantSelector (scale-09). We resolve the owning section set from the
+  // section's ACTUAL stored layout name (not sectionType, which is unreliable —
+  // SectionToolbar's getSectionTypeFromLayout() defaults unknown template-module
+  // layouts to 'hero'). Vestria hero (2 hero variants) + surge testimonials (2
+  // testimonials variants) both flow through this same path; single-variant
+  // sections (meridian/hearth defaults, lex/lumen/techpremium name-map fallbacks)
+  // resolve to null → no swap UI, unchanged behavior.
   if (usesTemplateModule(audienceType, templateId)) {
     const effectiveLayout = currentContentLayout ?? layoutChangeModal.currentLayout;
-    const isVestriaHero =
-      templateId === 'vestria' &&
-      layoutChangeModal.sectionType === 'hero' &&
-      !!effectiveLayout &&
-      VESTRIA_HERO_LAYOUTS.includes(effectiveLayout);
+    const found = getVariantSetForLayout(templateId, effectiveLayout);
 
-    if (!isVestriaHero) {
+    if (!found || found.set.variants.length <= 1 || !effectiveLayout) {
       return null;
     }
 
     return (
-      <VestriaHeroVariantSelector
+      <BlockVariantSelector
         isOpen={layoutChangeModal.visible}
-        currentLayout={effectiveLayout!}
+        sectionId={layoutChangeModal.sectionId}
+        sectionType={found.sectionType}
+        templateId={templateId}
+        currentLayout={effectiveLayout}
+        sectionContent={currentSectionContent}
+        set={found.set}
         onClose={() => hideLayoutChangeModal()}
-        onSelect={(layoutId) => {
-          // Content-preserving swap: updateSectionLayout writes BOTH
-          // content[sectionId].layout and sectionLayouts[sectionId], marks
-          // dirty (autosave) and pushes undo history. No setSection call —
-          // element content (incl. uploaded hero_video_* URLs) is untouched.
-          if (layoutChangeModal.sectionId && layoutId !== effectiveLayout) {
-            updateSectionLayout(layoutChangeModal.sectionId, layoutId);
-          }
-          hideLayoutChangeModal();
-        }}
+        updateSectionLayout={updateSectionLayout}
+        setSection={setSection}
+        executeUndoableAction={executeUndoableAction}
       />
     );
   }

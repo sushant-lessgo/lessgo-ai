@@ -382,7 +382,16 @@ export async function runThingGeneration(
 
         const isHome = page.pathSlug === '/';
         const types = isHome ? ['header', ...page.sections, 'footer'] : [...page.sections];
-        const { uiblocks } = selectProductBlocks({ sections: types, templateId: resolvedTemplateId });
+        // scale-09 phase 4 — deterministic card-count hints (feature / imported-
+        // testimonial counts). Optional; no-op for existing single-variant sections.
+        const cardCountHints: Record<string, number> = {};
+        if (fanFeatures.length > 0) cardCountHints.features = fanFeatures.length;
+        if (ob.importedTestimonials?.length) cardCountHints.testimonials = ob.importedTestimonials.length;
+        const { uiblocks } = selectProductBlocks({
+          sections: types,
+          templateId: resolvedTemplateId,
+          cardCountHints,
+        });
 
         const res = await fetch('/api/audience/product/generate-copy', {
           method: 'POST',

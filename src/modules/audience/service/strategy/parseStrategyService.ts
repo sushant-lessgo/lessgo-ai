@@ -11,6 +11,7 @@ import type {
 import type { ServiceStrategyResponse } from '@/lib/schemas/strategyService.schema';
 import { selectServiceSections } from '../sectionSelection';
 import { selectServiceUIBlocks } from '@/modules/audience/service/selectUIBlocks';
+import { deriveAssetFactsFromServiceAssets } from '@/modules/generation/blockEligibility';
 // ONE clamp law for single-page structure across audiences (scale-07 phase 4):
 // the generalized `clampSitemap` sibling lives with its multipage twin in the
 // product strategy module; this module wraps it with the service type.
@@ -50,7 +51,14 @@ export function assembleServiceStrategy(
     templateId,
   });
 
-  const { uiblocks } = selectServiceUIBlocks({ sections, templateId });
+  // scale-09 phase 4 — thread asset facts (from the service typed asset
+  // booleans). No-op for existing single-variant sections; the declared default
+  // is returned either way.
+  const { uiblocks } = selectServiceUIBlocks({
+    sections,
+    templateId,
+    assetFacts: deriveAssetFactsFromServiceAssets(assets),
+  });
 
   return {
     awareness:           llmResponse.awareness,

@@ -1,6 +1,23 @@
 # Product Backlog
 
-Items deferred from MVP for future development.
+Items deferred from MVP for future development. Agreed directions below enter `productQueue.md` once a spec exists.
+
+---
+
+## Agreed directions awaiting spec (2026-07-09, rough order)
+
+1. **Pilot gate** — site 21 self-serves, founder watches hands-off (`docs/tracks/scalePlan.md` §9)
+2. **lessgo.ai main website** — built WITH Lessgo (customer zero, gap-finder)
+3. **Beta-public** — no-login create + marketing site live (scalePlan §11.10)
+4. **Universe v1** — SPECCED as track: `docs/tracks/universePlan.md` (queue #5)
+5. **Pixel placement** — user-provided conversion/tracking pixels (Meta/Google/GTM snippets) on published pages. **EXPEDITE — live demand: scalifixai.com already asking (2026-07-09)**
+
+## Backlog (universe/fleet adjacent, no commitment)
+
+- **DTR** (dynamic text replacement — one page swaps text live per ad keyword; we make N real pages instead)
+- **Ad-platform integrations** — import/sync campaigns from Google/Meta
+- **Writing the ad copy itself** — we consume ad copy, never generate it
+- CRM webhooks / GTM deeper integrations
 
 ---
 
@@ -166,3 +183,9 @@ Currently only 2 UIBlocks (CollapsedCards, SideBySideSplit). Missing angles:
 - **Single emotional statement** - Bold, large text, one pain point
 - **Cost of inaction** - What happens if you don't solve this
 - **Industry-specific problems** - Tailored by category
+
+
+===========
+
+Ask AI to do something button on edit
+Social media post writing, marketing material in general

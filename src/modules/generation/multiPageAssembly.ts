@@ -129,7 +129,14 @@ export function mergePageIntoFinalContent(opts: {
 
   const bodyTypes = [...page.sections];
   const allTypes = isHome ? ['header', ...bodyTypes, 'footer'] : bodyTypes;
-  const { uiblocks } = selectProductBlocks({ sections: allTypes, templateId });
+  // scale-09 phase 4 — deterministic card-count hints from the persisted
+  // onboarding data. Optional; no-op for existing single-variant sections.
+  const ob = fc.onboardingData as MultiPageOnboardingData | undefined;
+  const fanFeatures: string[] = ob?.understanding?.valueAdds ?? ob?.understanding?.features ?? [];
+  const cardCountHints: Record<string, number> = {};
+  if (fanFeatures.length > 0) cardCountHints.features = fanFeatures.length;
+  if (ob?.importedTestimonials?.length) cardCountHints.testimonials = ob.importedTestimonials.length;
+  const { uiblocks } = selectProductBlocks({ sections: allTypes, templateId, cardCountHints });
 
   const ids: Record<string, string> = {};
   const sectionLayouts: Record<string, string> = {};

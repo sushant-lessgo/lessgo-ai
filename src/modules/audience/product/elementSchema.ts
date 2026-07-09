@@ -104,8 +104,70 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
     },
   },
 
+  // ===== Hero — VARIANT: Editorial Photo (scale-09 phase 6) =====
+  // Photo-led skin of TerminalHero. SAME element keys + collections (a clone of
+  // TerminalHero's contract) so swapping variants never adds/removes/renames a
+  // content slot. Rendered by EditorialPhotoHero.{tsx,published.tsx}. hero_image
+  // is the dominant element; requiresAssets:['photos'] gates its offer.
+  EditorialPhotoHero: {
+    sectionType: 'hero',
+    elements: {
+      status_text:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      audience_tag:       { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Ship on Friday. Sleep on <em>Saturday</em>' },
+      lede:               { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      cta_text:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Start building' },
+      cta_subtext:        { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      caption:            { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      hero_image:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      stats: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 4 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          value: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          label: { type: 'string', fillMode: 'ai_generated', default: '' },
+          unit:  { type: 'string', fillMode: 'ai_generated', default: '' },
+          live:  { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
+    },
+  },
+
   // ===== Features =====
   HairlineFeatureGrid: {
+    sectionType: 'features',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Everything you need' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      features: {
+        requirement: 'required',
+        fillMode: 'ai_generated',
+        constraints: { min: 3, max: 9 },
+        fields: {
+          id:          { type: 'string', fillMode: 'system' },
+          title:       { type: 'string', fillMode: 'ai_generated', default: '' },
+          description: { type: 'string', fillMode: 'ai_generated', default: '' },
+          icon:        { type: 'string', fillMode: 'manual_preferred', default: 'Layers' },
+          link_text:   { type: 'string', fillMode: 'ai_generated', default: 'read ↗' },
+        },
+      },
+    },
+  },
+
+  // ===== Features — VARIANT: Ledger List (scale-09 phase 6) =====
+  // Full-width hairline-row skin of HairlineFeatureGrid. SAME element keys +
+  // features collection (a clone) so the swap is copy-neutral. Capacity 3–9
+  // (single-column ledger reads at any count). Rendered by
+  // LedgerFeatureList.{tsx,published.tsx}.
+  LedgerFeatureList: {
     sectionType: 'features',
     elements: {
       eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
@@ -138,6 +200,52 @@ export const meridianElementSchema: Record<string, UIBlockSchemaV2> = {
     },
     collections: {
       // Phase 4b: optional stat cards above the quote grid (naayom results).
+      stats: {
+        requirement: 'optional',
+        fillMode: 'ai_generated',
+        constraints: { min: 0, max: 3 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          value: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          label: { type: 'string', fillMode: 'ai_generated', default: '' },
+        },
+      },
+      testimonials: {
+        requirement: 'required',
+        fillMode: 'ai_generated',
+        constraints: { min: 1, max: 3 },
+        fields: {
+          id:          { type: 'string', fillMode: 'system' },
+          quote:       { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          author_name: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          author_role: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+        },
+      },
+      logos: {
+        requirement: 'optional',
+        fillMode: 'manual_preferred',
+        constraints: { min: 0, max: 6 },
+        fields: {
+          id:   { type: 'string', fillMode: 'system' },
+          name: { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
+    },
+  },
+
+  // ===== Testimonials — VARIANT: Centered Editorial (scale-09 phase 6) =====
+  // Centered composition skin of ProofWithLogoRail. SAME element keys +
+  // collections (a clone: eyebrow/headline + stats/testimonials/logos) so the
+  // swap is copy-neutral. testimonials 1–3 (first featured, #2–3 supporting);
+  // optional stats/logos bands omit when empty. Rendered by
+  // CenteredEditorialTestimonials.{tsx,published.tsx}.
+  CenteredEditorialTestimonials: {
+    sectionType: 'testimonials',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Loved by fast teams' },
+    },
+    collections: {
       stats: {
         requirement: 'optional',
         fillMode: 'ai_generated',

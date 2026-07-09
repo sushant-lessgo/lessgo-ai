@@ -12,6 +12,8 @@ import { logger } from '@/lib/logger';
 import { getSectionTypeFromLayout } from '@/utils/layoutSectionTypeMapping';
 import { ElementToggleModal } from '../ui/ElementToggleModal';
 import { isChromeId } from '@/hooks/editStore/pageHelpers';
+import { hasMultipleVariants } from '../ui/BlockVariantSelector';
+import { usesTemplateModule } from '@/types/service';
 
 // Shared chrome (header/footer) is site-wide: hide per-page structural actions.
 const CHROME_HIDDEN_ACTIONS = ['move-up', 'move-down', 'duplicate', 'delete'];
@@ -64,7 +66,22 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
     announceLiveRegion,
     aiGeneration,
     showLayoutChangeModal,
+    audienceType,
+    templateId,
   } = useEditStore();
+
+  // Swap-button visibility gate (scale-09 phase 5). For template-module projects
+  // the "Layout" action only makes sense when the section's manifest declares
+  // >1 variant (BlockVariantSelector); single-variant template sections have no
+  // swap UI (the modal would render null), so hide the button. Legacy (non-
+  // template) projects keep the button always — they use LayoutChangeSelector's
+  // full library. currentLayout drives the manifest lookup (unlike sectionType,
+  // it uniquely identifies the owning variant set).
+  const currentSectionLayout = sectionLayouts[sectionId];
+  const isTemplateModule = usesTemplateModule(audienceType, templateId);
+  const showChangeLayout = isTemplateModule
+    ? hasMultipleVariants(templateId, currentSectionLayout)
+    : true;
 
   // Handle layout change action
   const handleChangeLayout = (sectionId: string) => {
@@ -215,7 +232,9 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
         }
       },
     },
-  ].filter((action) => !isChromeId(sectionId) || !CHROME_HIDDEN_ACTIONS.includes(action.id));
+  ]
+    .filter((action) => !isChromeId(sectionId) || !CHROME_HIDDEN_ACTIONS.includes(action.id))
+    .filter((action) => action.id !== 'change-layout' || showChangeLayout);
 
   // Check if this specific section is being regenerated
   const isRegenerating = aiGeneration.isGenerating && 
