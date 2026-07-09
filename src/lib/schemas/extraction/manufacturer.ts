@@ -4,7 +4,7 @@
 // Manufacturer is a THING-engine business type that needs RICHER extraction
 // than the base thing schema: the 4 trade-supplier keys (whatYouMake /
 // industriesServed / productCategories / valueAdds). Pre-scale-06 this
-// richness was reached by `isManufacturerFlow(templateId)` — i.e. keyed on
+// richness was reached by a per-template manufacturer branch — i.e. keyed on
 // vestria/techpremium. That coupling DIES here: the richness is now reached by
 // the businessType `extractionSchemaKey` ('manufacturer'), never by templateId.
 //

@@ -16,12 +16,19 @@ export interface SelectProductBlocksOutput {
   uiblocks: Record<string, string>;
 }
 
+// Template dispatch as DATA (scale-08 phase 2 — no `===` literal): section→
+// layout map per product template. Any template without an entry defaults to
+// the Meridian pilot map below.
+const LAYOUTS_BY_TEMPLATE: Record<string, Record<string, string>> = {
+  vestria: VESTRIA_LAYOUT_NAMES as Record<string, string>,
+};
+
 export function selectProductBlocks(
   input: SelectProductBlocksInput
 ): SelectProductBlocksOutput {
-  const map = (input.templateId === 'vestria'
-    ? VESTRIA_LAYOUT_NAMES
-    : MERIDIAN_LAYOUT_NAMES) as Record<string, string>;
+  const map =
+    (input.templateId ? LAYOUTS_BY_TEMPLATE[input.templateId] : undefined) ??
+    (MERIDIAN_LAYOUT_NAMES as Record<string, string>);
   const uiblocks: Record<string, string> = {};
   for (const section of input.sections) {
     const layout = map[section];

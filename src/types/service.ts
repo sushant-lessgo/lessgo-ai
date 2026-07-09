@@ -73,6 +73,9 @@ export const defaultTemplateForAudience: Record<AudienceType, TemplateId | null>
  * content and must keep rendering via legacy until /create is archived (P5). Never
  * synthesize a default templateId at a gate site — gate on the stored value only.
  */
+/** Product template ids that render via a TemplateModule (not the legacy 47-block path). */
+const PRODUCT_TEMPLATE_MODULE_IDS = ['meridian', 'techpremium', 'vestria'] as const;
+
 export function usesTemplateModule(
   audienceType: AudienceType | string | null | undefined,
   templateId: string | null | undefined
@@ -81,7 +84,7 @@ export function usesTemplateModule(
     audienceType === 'service' ||
     audienceType === 'writer' ||
     (audienceType === 'product' &&
-      (templateId === 'meridian' || templateId === 'techpremium' || templateId === 'vestria'))
+      (PRODUCT_TEMPLATE_MODULE_IDS as readonly string[]).includes(templateId ?? ''))
   );
 }
 
@@ -337,15 +340,19 @@ export const templateBlurbs: Record<TemplateId, string> = {
 };
 
 /** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Surge → 9 accent-hue, Meridian → 9 accent, TechPremium → forest). */
+const PALETTES_BY_TEMPLATE: Record<TemplateId, readonly string[]> = {
+  hearth: hearthPalettes,
+  lex: lexPalettes,
+  surge: surgePalettes,
+  meridian: meridianPalettes,
+  techpremium: techPremiumPalettes,
+  lumen: lumenPalettes,
+  granth: granthPalettes,
+  vestria: vestriaPalettes,
+};
+
 export function palettesForTemplate(templateId: TemplateId): readonly string[] {
-  if (templateId === 'lex') return lexPalettes;
-  if (templateId === 'surge') return surgePalettes;
-  if (templateId === 'meridian') return meridianPalettes;
-  if (templateId === 'techpremium') return techPremiumPalettes;
-  if (templateId === 'lumen') return lumenPalettes;
-  if (templateId === 'granth') return granthPalettes;
-  if (templateId === 'vestria') return vestriaPalettes;
-  return hearthPalettes;
+  return PALETTES_BY_TEMPLATE[templateId] ?? hearthPalettes;
 }
 
 /**

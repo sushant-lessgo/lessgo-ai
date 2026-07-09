@@ -115,8 +115,8 @@ const PRODUCT_VOICE_IDS: readonly ProductVoiceId[] = ['modern-tech', 'tailored-t
  * the single source of the THING engine's voice fork. Reads
  * `businessTypes[key].voiceHint`; returns it when it's a valid `ProductVoiceId`,
  * else falls back to `'modern-tech'` (unknown/undefined key, service entries
- * with no voiceHint, or a garbage value). REPLACES the old
- * `templateId === 'vestria'` fork so voice lives in config, not template id.
+ * with no voiceHint, or a garbage value). REPLACES the old vestria-template
+ * voice fork so voice lives in config, not template id.
  */
 export function productVoiceForBusinessType(key?: string | null): ProductVoiceId {
   const hint = key ? businessTypes[key as BusinessTypeKey]?.voiceHint : undefined;

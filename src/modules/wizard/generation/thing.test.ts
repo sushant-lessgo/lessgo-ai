@@ -157,6 +157,35 @@ describe('THING adapter — strategy payload fidelity', () => {
     expect(StrategyRequestMirror.safeParse(p).success).toBe(true);
   });
 
+  it('scale-08 phase 2: vestria templateId WITHOUT businessTypeKey=manufacturer does NOT remap (key moved to config, not template)', () => {
+    const p = buildStrategyPayload(
+      baseInput({
+        templateId: 'vestria', // template says vestria...
+        businessTypeKey: 'saas', // ...but the businessType is NOT manufacturer
+        features: ['saas feature'],
+        valueAdds: ['bespoke joinery', 'CNC precision'],
+        categories: ['generic'],
+        productCategories: ['counters', 'shelving'],
+        audiences: ['founders', 'platform leads'],
+        industriesServed: ['hospitality', 'retail'],
+        whatYouMake: 'commercial joinery',
+      })
+    );
+    // No manufacturer remap: SaaS features/categories/audiences win, whatYouMake absent.
+    expect(p.features).toEqual(['saas feature']);
+    expect(p.categories).toEqual(['generic']);
+    expect(p.otherAudiences).toEqual(['platform leads']);
+    expect('whatYouMake' in p).toBe(false);
+    expect(p.primaryAudience).toBe('founders');
+    // Same holds for the copy payload's effective features.
+    expect(
+      buildCopyPayload(
+        baseInput({ templateId: 'vestria', businessTypeKey: 'saas', features: ['saas feature'], valueAdds: ['x'] }),
+        STRATEGY
+      ).features
+    ).toEqual(['saas feature']);
+  });
+
   it('carries brief.businessType (voice source) when businessTypeKey is set — scale-08 phase 1', () => {
     const p = buildStrategyPayload(baseInput({ businessTypeKey: 'manufacturer' })) as any;
     expect(p.brief?.businessType).toBe('manufacturer');

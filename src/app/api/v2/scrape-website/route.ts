@@ -321,7 +321,7 @@ async function scrapeHandler(req: NextRequest): Promise<Response> {
     const userId = authCheck.userId!;
 
     // scale-06 phase 10: every request now flows through the convergent entry
-    // scrape. The legacy audienceType + isManufacturerFlow(templateId) schema
+    // scrape. The legacy audienceType + per-template manufacturer schema
     // switch was removed with the old product/service wizards that used it —
     // the unified wizard is the only caller and always sends the entry payload.
     // businessType, when known, enriches the entry extraction via the registry.

@@ -15,7 +15,7 @@ generation and visual-template selection running in parallel.
 
 - **`product/`** — Meridian/Vestria product line.
   - `elementSchema.ts` — V2 element schemas (product copy contract; pure data, spread into the global `layoutElementSchema`).
-  - `sectionSelection.ts` — **fixed** section order (no awareness routing yet): `selectProductSections()` returns `MERIDIAN_PILOT_SECTIONS` or, for `templateId === 'vestria'`, the fuller multi-page `VESTRIA_PILOT_SECTIONS`.
+  - `sectionSelection.ts` — **fixed** section order (no awareness routing yet): `selectProductSections()` returns `MERIDIAN_PILOT_SECTIONS` or, for the Vestria template, the fuller multi-page `VESTRIA_PILOT_SECTIONS`.
   - `strategy/promptsProduct.ts` + `strategy/parseStrategyProduct.ts` — strategy prompt + assembly (`ProductStrategyOutput`; Vestria also proposes a sitemap clamped to `pageArchetypes.ts`).
   - `copyPrompt.ts` / `parseCopy.ts` — copy prompt + post-LLM defaults/backfill.
   - `voice.ts` — Meridian "Modern Tech" voice (type-level, accent-`<em>` emphasis rule).

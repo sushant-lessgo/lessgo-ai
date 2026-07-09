@@ -74,8 +74,8 @@ export type ScrapeWebsiteExtendedData = z.infer<typeof ScrapeWebsiteExtendedSche
 
 // ===== Manufacturer / trade-supplier variant (onboarding1, D2) =====
 // Parallel schema so the existing SaaS parse path (ScrapeWebsiteExtendedSchema)
-// stays byte-for-byte untouched. The scrape route picks by
-// isManufacturerFlow(templateId) (wired in Phase 2).
+// stays byte-for-byte untouched. The scrape route picks by the businessType's
+// manufacturer extraction schema.
 // The 4 manufacturer keys are REQUIRED (mirrors
 // ManufacturerUnderstandingResponseSchema): OpenAI strict structured outputs
 // can reject optional-not-in-required keys, and requiring them forces the

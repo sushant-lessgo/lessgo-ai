@@ -16,8 +16,8 @@ Key facts confirmed in code (implementer re-verifies before editing):
 
 ## Progress log
 
-- phase 1 voiceHint + voice re-key: pending
-- phase 2 melt thing.ts forks + delete manufacturerFlow + grep-gate: pending
+- phase 1 voiceHint + voice re-key: done (commit d8179081, review loops 1, tsc+1554 tests green)
+- phase 2 melt thing.ts forks + delete manufacturerFlow + grep-gate: done (commit de8db516, review loops 2, tsc+1558 tests green) — HUMAN GATE: awaiting real-regen eyeball
 - phase 3 new entries photographer + app (config-only): pending
 - phase 4 dead-legacy deletion: pending
 - phase 5 manufacturer golden + contract tests: pending
