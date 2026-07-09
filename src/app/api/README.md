@@ -24,7 +24,6 @@ by hand.
 
 | Route | Method | Purpose | Auth / RL / credit |
 |-------|--------|---------|--------------------|
-| `/generate-landing` | POST | Full landing-page copy generation (strategy + copy phases) | public · RL:ai · `FULL_PAGE_GENERATION` |
 | `/audience/product/strategy` | POST | Product strategy phase (big idea + card counts) | public · RL:ai · `STRATEGY_GENERATION` |
 | `/audience/product/generate-copy` | POST | Product copy phase (fill section elements) | public · RL:ai · `GENERATE_COPY` |
 | `/audience/service/strategy` | POST | Service strategy phase | RL:ai · `STRATEGY_GENERATION` |
@@ -32,14 +31,14 @@ by hand.
 | `/regenerate-content` | POST | Regenerate content across sections | RL:ai |
 | `/regenerate-section` | POST | Regenerate one section | RL:ai · owner · `SECTION_REGENERATION` |
 | `/regenerate-element` | POST | Regenerate one element | RL:ai · `ELEMENT_REGENERATION` |
-| `/market-insights` | POST | Generate features + infer hidden copywriting fields | public |
-| `/validate-fields` | POST | Validate taxonomy field values | public · RL:ai |
 | `/generate-privacy-policy` | POST | AI-write a privacy policy for a project | RL:ai · owner · `PRIVACY_POLICY_GENERATION` |
 | `/v2/scrape-website` | POST | Product website import (SSRF-safe crawl → prefill) | RL:ai · `SCRAPE_WEBSITE` |
 | `/v2/understand` | POST | Service website import / understanding | RL:ai · `UNDERSTAND` |
 
-> A legacy `/api/infer-fields` is referenced in old docs/middleware but no handler exists;
-> field inference is now split across `market-insights` + `validate-fields`.
+> The legacy `/api/generate-landing`, `/api/market-insights`, and `/api/validate-fields`
+> routes were removed in scale-08 (the universal serve gate + per-audience pipeline
+> supersede them). `/api/infer-fields` is likewise referenced in old docs/middleware
+> but has no handler.
 
 ## Onboarding & persistence
 

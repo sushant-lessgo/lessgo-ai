@@ -277,3 +277,75 @@ Matches the plan's expected outcome (photographer non-serveable/gallery missing;
 
 ### Open risks
 - Panel reflects config truth at build time; entries are static (frozen-enum), so no runtime staleness. If a future template declares `gallery` non-bespoke, photographer would flip to serveable automatically (desired).
+
+---
+
+## Phase 4 — dead-legacy deletion (verify-then-delete)
+
+**Files changed:**
+- DELETED: `src/app/api/generate-landing/route.ts`
+- DELETED: `src/modules/prompt/buildStrategyPrompt.ts`
+- DELETED: `src/modules/prompt/PromptForm.tsx`
+- DELETED: `src/modules/prompt/PromptPage.tsx`
+- DELETED: `src/app/api/market-insights/route.ts`
+- DELETED: `src/app/api/validate-fields/route.ts`
+- DELETED: `src/lib/tavily.ts`
+- DELETED: `src/lib/ivocExtractor.ts`
+- DELETED: `src/modules/inference/generateFeatures.ts`
+- DELETED: `src/modules/inference/inferHiddenFields.ts`
+- DELETED: `src/modules/inference/validateOutput.ts`
+- DELETED: `src/app/onboarding/persona/page.tsx`
+- EDITED: `src/middleware.ts`
+- EDITED: `src/modules/prompt/README.md`
+- EDITED: `src/app/api/README.md`
+- EDITED: `src/lib/README.md`
+- EDITED: `src/modules/inference/README.md`
+- EDITED: `src/modules/mock/README.md`
+- EDITED: `src/hooks/README.md`
+- EDITED: `CLAUDE.md`
+
+### Per-candidate pre-delete grep results
+
+| Candidate | Pre-delete importer grep | Action |
+|-----------|--------------------------|--------|
+| `generate-landing/route.ts` | route (not imported by anything; it IS the entrypoint) | DELETED |
+| `buildStrategyPrompt.ts` | only importer = `generate-landing/route.ts:4` | DELETED (0 importers after route gone) |
+| `PromptForm.tsx` | only importer = `PromptPage.tsx:4`; also self-fetches `/api/generate-landing` | DELETED |
+| `PromptPage.tsx` | 0 importers (no app route mounts it) | DELETED |
+| `buildPrompt.ts` | 3 LIVE importers: `contentActions.ts`, `regenerationActions.ts`, `regenerate-section/route.ts` | **KEPT** (as planned) |
+| `market-insights/route.ts` | no client `fetch('/api/market-insights'`; no UI/menu ref; entrypoint only | DELETED |
+| `validate-fields/route.ts` | no client `fetch('/api/validate-fields'`; no UI/menu ref; entrypoint only | DELETED |
+| `tavily.ts` | 0 importers (already orphaned before this phase) | DELETED |
+| `ivocExtractor.ts` | 0 importers (already orphaned) | DELETED |
+| `generateFeatures.ts` | only importer = `market-insights/route.ts` (stub) | DELETED (newly 0-importer) |
+| `inferHiddenFields.ts` | only importer = `market-insights/route.ts` (stub) | DELETED (newly 0-importer) |
+| `validateOutput.ts` (+ `validateInferredFields` alias) | only importer = `validate-fields/route.ts` (stub) | DELETED (newly 0-importer) |
+| `mockDataGenerators.ts` | after route deletes → 0 importers | **KEPT** (see deviation) |
+| `elementDetermination.ts` | live editor-regen callers | KEPT (unchanged) |
+| `parseAiResponse.ts` / `parseStrategyResponse.ts` / `mockResponseGenerator.ts` | live in `regenerate-*` / audience routes | KEPT (unchanged) |
+| `onboarding/persona/page.tsx` | redirect stub, not imported | DELETED |
+
+### buildPrompt.ts dead exports
+`buildStrategicCopyPrompt` + `generateCardRequirementsReport` grep-confirmed used ONLY by the deleted `generate-landing/route.ts`. Per the plan's "if unsure, leave intact" guidance and conservative discipline, I **left buildPrompt.ts fully intact** (did NOT prune the 2 now-dead exports). They are large functions with shared-helper coupling; pruning carried build risk for marginal benefit. Noted the dead status in `src/modules/prompt/README.md`.
+
+### middleware.ts lines removed
+Removed 3 public-route entries: `/api/generate-landing` (was :19), `/api/market-insights` (was :25), `/api/validate-fields` (was :26). Matched by surrounding context, not raw line numbers.
+
+### IVOCCache / credits (kept, as planned)
+- `IVOCCache` prisma model + table: KEPT, no migration.
+- `CREDIT_COSTS.IVOC_RESEARCH` + `UsageEventType.IVOC_RESEARCH` enum: KEPT. `perplexity.ts:179` still emits an `ivoc_research` usage event (raw string), so the constant remains relevant; removal was not trivially free → conservative keep per plan.
+
+### techpremium
+Confirmed no code change needed (already `retired: true` in catalog, still live-dispatched by thing.ts).
+
+### Deviations from plan
+- **`mockDataGenerators.ts` KEPT (plan-optional delete not taken).** After the two route deletions it has 0 importers, so the plan permitted deleting it. I kept it: it is a substantial multi-export file with its own module + README, and a 0-importer file contributes nothing to the bundle (never imported → tree-shaken away), so keeping it has no bundle cost while avoiding emptying a module/deleting its README (scope expansion). Its `generateMockValidationResults` / `generateMockHiddenInferredFields` exports are now inert; `src/modules/mock/README.md` updated to say so. Asymmetry vs the 3 inference stubs I deleted: those were tiny single-purpose shims explicitly documented as "kept only so importers resolve" and cleanly removable as whole files.
+- Left `buildPrompt.ts` fully intact (see above) rather than pruning its 2 dead exports — conservative.
+
+### Verification
+- `npx tsc --noEmit` — clean (exit 0).
+- `npm run test:run` — 1568 passed, 3 skipped, 98 files passed / 1 skipped. No test referenced a deleted route/lib (grep of `**/*.test.{ts,tsx}` for all deleted symbols returned 0 files); no test file touched.
+- `npm run build` — **GREEN (exit 0)**, full pipeline incl. build:published-css + build:assets + next build. Route manifest confirms `/api/generate-landing`, `/api/market-insights`, `/api/validate-fields`, `/onboarding/persona` no longer emitted (will 404 at runtime).
+
+### Open risks
+- Dead exports remain in `buildPrompt.ts` (`buildStrategicCopyPrompt`, `generateCardRequirementsReport`) and the whole of `mockDataGenerators.ts` is now inert. Harmless (0 importers) but flagged for a future tidy-up pass.

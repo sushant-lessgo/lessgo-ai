@@ -1,4 +1,4 @@
-# `modules/inference` — taxonomy + onboarding-v1 inference stubs
+# `modules/inference` — taxonomy source of truth
 
 ## Files
 
@@ -7,15 +7,11 @@
   and the copywriting taxonomies `AwarenessLevel`, `CopyIntent`, `ToneProfile`,
   `MarketSophisticationLevel`, `ProblemType`, etc. Imported by the mock generators,
   the objection-flow engine, and field validation. Edit here to change allowed values.
-- **`generateFeatures.ts`**, **`inferHiddenFields.ts`**, **`validateOutput.ts`** —
-  **stubs** left from the removed onboarding-v1 inference flow. They log a warning and
-  return empty/pass-through values; real inference now happens in the newer generation
-  system and the `/api/validate-fields` + `/api/market-insights` routes.
-  `validateOutput` is re-exported as `validateInferredFields` for the `validate-fields`
-  route's import compatibility.
+The onboarding-v1 inference stubs (`generateFeatures.ts`, `inferHiddenFields.ts`,
+`validateOutput.ts`) were **deleted in scale-08** along with their only callers, the
+`/api/market-insights` + `/api/validate-fields` routes. Real inference now happens in
+the newer generation system.
 
 ## Who calls this
 
-`taxonomy.ts` is imported broadly (mock data, prompt/section logic, validation). The
-three stub functions are legacy shims kept only so their importers still resolve —
-treat them as inert.
+`taxonomy.ts` is imported broadly (mock data, prompt/section logic, validation).

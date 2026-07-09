@@ -20,6 +20,7 @@ Via `src/lib/mockMode.ts` — `isDemoMode()` returns true when
 
 ## Who consumes it
 
-The field-inference API layer when running in demo/mock mode — notably
-`/api/validate-fields` (imports `generateMockValidationResults`) — plus tests that
-need deterministic-shaped field data without a live AI call.
+Nothing, currently. Its consumers — the `/api/market-insights` +
+`/api/validate-fields` routes (`generateMockHiddenInferredFields` /
+`generateMockValidationResults`) — were removed in scale-08, so this file is now
+inert (kept for reference; 0 importers).
