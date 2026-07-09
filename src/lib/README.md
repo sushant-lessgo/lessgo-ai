@@ -76,9 +76,7 @@ open the file for detail. Sibling shared trees: `src/services/` (Pexels client) 
 
 | File | Purpose |
 |------|---------|
-| `tavily.ts` | Tavily search client for IVOC research. |
 | `perplexity.ts` | Perplexity web-search IVOC client (alt provider). |
-| `ivocExtractor.ts` | LLM extraction of pains/desires/objections/beliefs/phrases from search snippets. |
 | `painQueryGenerator.ts` | LLM-generated focused pain-point search queries. |
 | `embeddings.ts` | OpenAI embedding generation (taxonomy semantic match). |
 | `normalize.ts` | `slugify` + `normalizeIVOCKeys` for cache-key normalization. |

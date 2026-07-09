@@ -8,8 +8,8 @@ description: >-
   docs/task/<feature>.spec.md ready for /feature. Use when the user wants to
   discuss, shape, or spec a new feature/idea BEFORE any planning. NOT for
   planning or implementation (that's /feature), and NOT for quick questions.
-model: opus
-effort: medium
+model: fable
+effort: high
 argument-hint: <feature-name or one-line idea>
 ---
 

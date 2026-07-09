@@ -27,7 +27,7 @@
 import { useEffect } from 'react';
 import { useWizardStore } from '@/hooks/useWizardStore';
 import type { VestriaHeroVariant } from '@/types/product';
-import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
+import { isMultipage } from '@/modules/audience/product/pageArchetypes';
 import HeroVariantPicker from '@/components/onboarding/wizard/fields/HeroVariantPicker';
 import ProductStylePicker from '@/components/onboarding/wizard/fields/ProductStylePicker';
 import PaletteSwatch from '@/components/onboarding/shared/PaletteSwatch';
@@ -135,7 +135,10 @@ function ThingStyleSlot() {
 
   // ProductStylePicker writes variant/palette/mood DIRECTLY to the wizard store
   // (single source of truth for the phase-5 adapter) — no mirror needed.
-  const isMfr = isManufacturerFlow(templateId ?? undefined);
+  // scale-08 phase 2 re-key: the hero + style pickers ship with the multipage
+  // pilot (vestria today). Multipage is a CAPABILITY question, not a
+  // businessType one — key off isMultipage, not the old vestria hardcode.
+  const showVestriaPickers = isMultipage(templateId ?? null);
 
   return (
     <div className="space-y-2">
@@ -146,7 +149,7 @@ function ThingStyleSlot() {
         </p>
       </div>
 
-      {isMfr ? (
+      {showVestriaPickers ? (
         <>
           <HeroVariantPicker
             value={(heroVariant as VestriaHeroVariant | null) ?? DEFAULT_HERO_VARIANT}

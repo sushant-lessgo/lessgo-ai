@@ -2,7 +2,7 @@
 // Extraction-schema registry, keyed by a businessType's `extractionSchemaKey`
 // (scale-06 phase 7). ONE place owns "which structured-output schema does this
 // engine / businessType extract with" — replacing the pre-scale-06 scatter of
-// `audienceType` + `isManufacturerFlow(templateId)` branches in the v2 routes.
+// `audienceType` + per-template manufacturer branches in the v2 routes.
 //
 // Keys are ENGINE families (thing/trust/work) plus the `manufacturer` variant
 // (a thing business type that needs 4 extra trade-supplier fields — the ONLY
@@ -64,7 +64,7 @@ export function getExtraction(key: ExtractionSchemaKey): EngineExtraction {
 /**
  * Resolve the extraction for a businessType via its `extractionSchemaKey`.
  * This is how the convergent wizard/entry path selects a schema — by
- * businessType, NOT by templateId/isManufacturerFlow.
+ * businessType, NOT by templateId.
  */
 export function extractionForBusinessType(bt: BusinessTypeKey): EngineExtraction {
   const key = businessTypes[bt].extractionSchemaKey;

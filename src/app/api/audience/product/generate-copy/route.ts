@@ -32,7 +32,10 @@ import {
 import { generateMockMeridianCopy } from '@/modules/prompt/mockResponseGeneratorProduct';
 import { landingGoals } from '@/types/generation';
 import type { SectionCopy } from '@/types/generation';
-import type { ProductVoiceId } from '@/modules/audience/product/voice';
+import {
+  productVoiceForBusinessType,
+  type ProductVoiceId,
+} from '@/modules/audience/product/voice';
 import {
   getFreshSiteContext,
   normalizeUrlKey,
@@ -92,9 +95,14 @@ const GenerateProductCopyRequestSchema = z.object({
       })
     )
     .optional(),
-  // Voice derivation only (whitelist) — stripped before prompt input; the prompt
-  // receives a copy-voice id, never template identity. vestria admin-gated.
+  // ACCEPTED-BUT-UNUSED (scale-08 phase 1): voice moved to `businessType` below;
+  // templateId never reaches the prompt (firewall) and no longer drives voice.
+  // Kept in the schema so existing senders don't break. Do not read it.
   templateId: z.enum(['meridian', 'vestria']).optional(),
+  // Copy-voice source (scale-08 phase 1) — mapped to a ProductVoiceId via
+  // `productVoiceForBusinessType`; the prompt receives the voice id, never this
+  // key (firewall). Optional: absent ⇒ modern-tech default.
+  businessType: z.string().optional(),
   // ===== Multi-page fan-out (Phase 3) — all optional; absent = single-page =====
   // Which page of the agreed sitemap THIS call writes (uiblocks then carries the
   // page's section set, body-only except home which includes chrome).
@@ -136,7 +144,7 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       landingGoal,
       features,
       realTestimonials,
-      templateId,
+      businessType,
       page,
       sitePages,
       sourceUrl,
@@ -152,8 +160,9 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
     }
     const userId = authCheck.userId!;
 
-    // Voice derivation — vestria copy runs on the tailored-trade voice.
-    const voiceId: ProductVoiceId = templateId === 'vestria' ? 'tailored-trade' : 'modern-tech';
+    // Voice derivation (scale-08 phase 1) — sourced from the businessType config
+    // entry's voiceHint, never templateId.
+    const voiceId: ProductVoiceId = productVoiceForBusinessType(businessType);
 
     // 2b. Mock mode
     const authHeader = req.headers.get('authorization');
@@ -197,7 +206,8 @@ async function productCopyHandler(req: NextRequest): Promise<Response> {
       }
     }
 
-    // 3. Build prompt (voiceId only — templateId never reaches the prompt layer)
+    // 3. Build prompt (voiceId only — businessType/templateId never reach the
+    //    prompt layer; templateId is accepted-but-unused post-re-key)
     const prompt = buildProductCopyPrompt({
       strategy: strategy as any,
       uiblocks,

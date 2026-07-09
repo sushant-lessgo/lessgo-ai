@@ -65,9 +65,12 @@ describe('resolveEngine — tiebreaker ladder (unknown type, all 5 rungs)', () =
     ['none', 'thing'],
   ] as const;
 
+  // 'florist' is a deliberately UNKNOWN businessType (not a businessTypeKey) —
+  // was 'photographer' until scale-08 phase 3 promoted photographer to a known
+  // key; repointed so this still exercises the unknown-type tiebreaker ladder.
   it.each(ladder)('%s → %s, source tiebreaker', (rung, engine) => {
     const result = resolveEngine(
-      makeSignals({ businessTypeGuess: 'photographer', tiebreaker: rung })
+      makeSignals({ businessTypeGuess: 'florist', tiebreaker: rung })
     );
     expect(result).toEqual({ engine, source: 'tiebreaker' });
   });
@@ -123,12 +126,14 @@ describe('buildBriefDraft — enum engines + carrier payload', () => {
     expect(entry?.businessName).toBe('GrowthCo');
   });
 
-  it('unknown photographer via portfolio-is-proof: copyEngine=work IS set (enum member)', () => {
+  it('unknown florist via portfolio-is-proof: copyEngine=work IS set (enum member)', () => {
+    // 'florist' = UNKNOWN businessType stand-in (was 'photographer' pre scale-08
+    // phase 3, which is now a known key resolved via lookup, not tiebreaker).
     const brief = buildBriefDraft(
-      makeSignals({ businessTypeGuess: 'photographer', tiebreaker: 'portfolio-is-proof' }),
-      'wedding photographer'
+      makeSignals({ businessTypeGuess: 'florist', tiebreaker: 'portfolio-is-proof' }),
+      'artisan florist studio'
     );
-    expect(brief.businessType).toBe('photographer');
+    expect(brief.businessType).toBe('florist');
     expect(brief.copyEngine).toBe('work');
     expect(getEntryFacts(brief)?.classificationSource).toBe('tiebreaker');
   });

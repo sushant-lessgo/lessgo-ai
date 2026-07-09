@@ -4,7 +4,7 @@ description: >-
   Runs the Lessgo feature-build pipeline for an agreed spec: scout → plan →
   plan-review (loop) → implement per phase → impl-review (loop), delegating each
   stage to a model+effort-tuned subagent (scout=Opus/low, planner=Fable/high,
-  reviewers=Opus/high, implementer=Fable/medium). Use AFTER you've discussed a
+  reviewers=Opus/high, implementer=Opus/medium). Use AFTER you've discussed a
   feature and written its spec to docs/task/<feature>.spec.md, when you want the
   plan→review→implement→review loops driven automatically instead of by hand.
   NOT for the discuss stage (that's manual chat) and NOT for one-off trivial edits.
@@ -20,10 +20,10 @@ your job is coordination + carrying artifacts between agents.
 
 > Fable-budget note: orchestration needs no Fable. If the session is on Fable,
 > suggest the user switch to `/model opus` for the run — subagents pin their own
-> models regardless; only planner/implementer spawns should consume Fable.
+> models regardless; only the planner spawn should consume Fable.
 >
 > Fable fallback: planner pin `model: fable`. If Fable is
-> unavailable, spawn those two on Opus instead (`model: opus`) — never block the
+> unavailable, spawn it on Opus instead (`model: opus`) — never block the
 > run waiting on Fable. All other stages already use Opus.
 
 **Artifacts** (all under `docs/task/`): `<feature>.spec.md` (the user, already

@@ -1,8 +1,12 @@
 // src/modules/businessTypes/config.ts
 // businessTypes v0 (scale track, scalePlan §7 / spec 01 D-H) — SHAPE, NOT
-// BEHAVIOR. Six seed entries so the shape is proven and downstream specs
+// BEHAVIOR. Eight seed entries so the shape is proven and downstream specs
 // (02+ serve gate, 04 wizard, 08 manufacturerFlow melt-in) have a real record
-// to read. Nothing in the app imports this yet.
+// to read. LIVE consumers now include the serve gate, wizard hydrate, and
+// (scale-08 phase 1) product copy-voice derivation via `voiceHint`.
+// scale-08 phase 3 added `photographer` + `app` CONFIG-ONLY (no new code paths)
+// to prove "a new business type is a list entry": photographer requires an
+// unbacked `gallery` cap (serve gate → demand lane); app rides the thing engine.
 //
 // Entry shape is modeled on the ServiceVoiceSpec record idiom
 // (src/modules/audience/service — keyed record of frozen per-key specs).
@@ -29,6 +33,15 @@ export interface BusinessTypeEntry {
   wizardFields: Record<string, { label: string; example: string }>;
   /** Registry key into src/lib/schemas/extraction (thing|trust|work|manufacturer). */
   extractionSchemaKey: string;
+  /**
+   * Product copy-voice id consumed by the THING engine (scale-08 phase 1) —
+   * `productVoiceForBusinessType` maps this to a `ProductVoiceId`. Kept a PLAIN
+   * string (no import of the voice module) to avoid a config↔audience import
+   * cycle; a test validates it against the ProductVoiceId union. Only set on
+   * `copyEngine: 'thing'` entries; service (trust/work) voice stays
+   * archetype-keyed via `selectServiceVoice`, so those entries omit it.
+   */
+  voiceHint?: string;
   likelyIntents: readonly GoalIntent[];
   /**
    * Default site structure for this business type (scale-07 phase 5) — one
@@ -48,6 +61,8 @@ export const businessTypeKeys = [
   'consultant',
   'coach',
   'writer',
+  'photographer',
+  'app',
 ] as const;
 export type BusinessTypeKey = (typeof businessTypeKeys)[number];
 
@@ -73,6 +88,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
       },
     },
     extractionSchemaKey: 'thing',
+    voiceHint: 'modern-tech',
     likelyIntents: ['request-demo', 'free-trial', 'signup-free', 'waitlist'],
     structureDefault: 'single',
   },
@@ -94,6 +110,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
       },
     },
     extractionSchemaKey: 'manufacturer',
+    voiceHint: 'tailored-trade',
     likelyIntents: ['enquiry', 'request-quote'],
     structureDefault: 'multi',
   },
@@ -179,6 +196,56 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
     },
     extractionSchemaKey: 'work',
     likelyIntents: ['follow-social', 'buy-via-link', 'subscribe-newsletter'],
+    structureDefault: 'single',
+  },
+  // scale-08 phase 3 — two CONFIG-ONLY entries proving the pattern: adding a
+  // business type touches only this record (+ tests), no new code paths.
+  photographer: {
+    key: 'photographer',
+    label: 'Photographer / studio',
+    copyEngine: 'work',
+    // gallery is REQUIRED — no shipped template declares it, so the serve gate
+    // rejects photographer to the MANUAL-ONBOARD/demand lane (intended: proves
+    // an unbacked capability is honestly non-serveable, not silently degraded).
+    requiredCapabilities: ['gallery'],
+    defaultStyle: 'editorial-craft',
+    wizardFields: {
+      work: {
+        label: 'What do you shoot?',
+        example: 'Editorial wedding photography across Rajasthan',
+      },
+      style: {
+        label: 'How would you describe your style?',
+        example: 'Candid, warm, documentary — no stiff posed portraits',
+      },
+    },
+    extractionSchemaKey: 'work',
+    likelyIntents: ['enquiry', 'book-call', 'follow-social'],
+    structureDefault: 'single',
+  },
+  app: {
+    key: 'app',
+    label: 'Mobile app',
+    copyEngine: 'thing',
+    requiredCapabilities: ['lead-form'],
+    defaultStyle: 'tech-minimal',
+    wizardFields: {
+      app: {
+        label: 'What does your app do?',
+        example: 'Habit tracker that turns daily streaks into a shared game',
+      },
+      audience: {
+        label: 'Who is it for?',
+        example: 'People who bounce off rigid productivity apps',
+      },
+      platform: {
+        label: 'Where can people get it?',
+        example: 'iOS and Android, free with an optional Pro tier',
+      },
+    },
+    extractionSchemaKey: 'thing',
+    voiceHint: 'modern-tech',
+    likelyIntents: ['download-app', 'signup-free', 'waitlist'],
     structureDefault: 'single',
   },
 };

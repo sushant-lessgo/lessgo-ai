@@ -36,8 +36,8 @@ import {
 } from '@/modules/brief/bridge';
 import { buildTechPremiumHomeFinalContent } from '@/hooks/editStore/archetypes';
 import { selectProductBlocks } from '@/modules/audience/product/selectBlocks';
-import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
 import { isMultipage } from '@/modules/audience/product/pageArchetypes';
+import { businessTypes, type BusinessTypeKey } from '@/modules/businessTypes/config';
 import {
   buildMultiPageSkeleton,
   mergePageIntoFinalContent,
@@ -70,6 +70,13 @@ export interface ThingGenerationInput {
   tokenId: string;
   /** Resolved template (serveGate). techpremium ⇒ deterministic path. */
   templateId: 'meridian' | 'vestria' | 'techpremium' | null;
+  /**
+   * businessType key (serveGate/classify) — the SINGLE source of product
+   * copy-voice (scale-08 phase 1, `productVoiceForBusinessType`). Always set on
+   * served flows (serve gate resolves a template only for a KNOWN businessType);
+   * absent only on legacy/fallback inputs (voice then defaults to modern-tech).
+   */
+  businessTypeKey?: string;
 
   // Copy facts (wizard contract fields).
   productName: string;
@@ -131,6 +138,18 @@ export function briefGoalFor(input: ThingGenerationInput): BriefGoal | null {
     : null;
 }
 
+/**
+ * Whether this run uses the manufacturer EXTRACTION-SCHEMA shape (field remap:
+ * valueAdds→features, industriesServed→otherAudiences, productCategories→
+ * categories, + whatYouMake). scale-08 phase 2: derived from the businessType
+ * config entry's `extractionSchemaKey`, NOT the templateId — the remap is a
+ * property of the business type's captured fields, not the visual template.
+ */
+function isManufacturerInput(input: ThingGenerationInput): boolean {
+  const entry = businessTypes[input.businessTypeKey as BusinessTypeKey];
+  return entry?.extractionSchemaKey === 'manufacturer';
+}
+
 /** Effective feature list — manufacturer remap (valueAdds win) else SaaS features. */
 function effectiveFeatures(input: ThingGenerationInput, isMfr: boolean): string[] {
   return isMfr ? input.valueAdds ?? input.features ?? [] : input.features ?? [];
@@ -138,7 +157,7 @@ function effectiveFeatures(input: ThingGenerationInput, isMfr: boolean): string[
 
 /** The EXACT /api/audience/product/strategy request body. */
 export function buildStrategyPayload(input: ThingGenerationInput): Record<string, unknown> {
-  const isMfr = isManufacturerFlow(input.templateId ?? undefined);
+  const isMfr = isManufacturerInput(input);
   const features = effectiveFeatures(input, isMfr);
   const audiences = input.audiences ?? [];
   const briefGoal = briefGoalFor(input);
@@ -161,7 +180,16 @@ export function buildStrategyPayload(input: ThingGenerationInput): Record<string
     // single-page assembly re-surfaces Brief-required capability sections
     // (meridian: an M1 goal ⇒ lead-form ⇒ cta). Fed ONLY to isMultipage
     // detection + assembleProductStrategy server-side, never the prompt.
-    ...(briefGoal ? { brief: { goal: briefGoal } } : {}),
+    // scale-08 phase 1: brief now ALSO carries `businessType` (voice source) —
+    // sent whenever a goal OR a businessType key exists.
+    ...(briefGoal || input.businessTypeKey
+      ? {
+          brief: {
+            ...(briefGoal ? { goal: briefGoal } : {}),
+            ...(input.businessTypeKey ? { businessType: input.businessTypeKey } : {}),
+          },
+        }
+      : {}),
   };
 }
 
@@ -170,7 +198,7 @@ export function buildCopyPayload(
   input: ThingGenerationInput,
   strategy: ProductStrategyOutput
 ): Record<string, unknown> {
-  const isMfr = isManufacturerFlow(input.templateId ?? undefined);
+  const isMfr = isManufacturerInput(input);
   return {
     strategy,
     uiblocks: strategy.uiblocks,
@@ -181,6 +209,8 @@ export function buildCopyPayload(
     features: effectiveFeatures(input, isMfr),
     ...(input.importedTestimonials?.length ? { realTestimonials: input.importedTestimonials } : {}),
     templateId: input.templateId ?? undefined,
+    // scale-08 phase 1: the copy route derives voice from businessType.
+    businessType: input.businessTypeKey,
   };
 }
 
@@ -204,6 +234,9 @@ function buildOnboardingData(input: ThingGenerationInput): Record<string, unknow
     landingGoal: landingGoalFor(input),
     offer: input.offer,
     ...(input.importSourceUrl ? { importSourceUrl: input.importSourceUrl } : {}),
+    // scale-08 phase 1: persist the businessType key so a resume-from-DB run
+    // (multipage fan-out) can re-derive the copy voice without the store.
+    ...(input.businessTypeKey ? { businessTypeKey: input.businessTypeKey } : {}),
   };
 }
 
@@ -294,11 +327,13 @@ export async function runThingGeneration(
   const title = (input.productName.trim() || input.oneLiner || 'Untitled Page').slice(0, 50);
   const briefGoal = briefGoalFor(input);
   const briefPatch = briefGoal ? { brief: { goal: briefGoal } } : {};
-  // scale-07 phase 5 re-key: was `templateId === 'vestria'`. Multipage is a
+  // scale-07 phase 5 re-key: was the vestria hardcode. Multipage is a
   // CAPABILITY question — today only vestria declares it, so behavior is
   // identical, but the key is honest. This flag also selects the multipage
   // template's style defaults + lead-form provisioning below (vestria-shaped
-  // today — the only multipage template).
+  // today — the only multipage template), plus the hero-variant + style
+  // re-apply in saveFC (scale-08 phase 2: style pickers ship with the
+  // multipage pilot — a capability question, not a businessType one).
   const multipageTemplate = isMultipage(input.templateId);
   // The resolved template for payloads/persistence on this run (never a
   // hardcoded id): the input's template, else the single-page pilot.
@@ -309,10 +344,10 @@ export async function runThingGeneration(
     fc: any,
     templateInfo?: { templateId: string; paletteId: string; variantId: string }
   ) => {
-    if (isManufacturerFlow(input.templateId ?? undefined) && input.heroVariantPicked && input.heroVariant) {
+    if (multipageTemplate && input.heroVariantPicked && input.heroVariant) {
       applyHeroVariantToFinalContent(fc, input.heroVariant);
     }
-    const styleInfo = isManufacturerFlow(input.templateId ?? undefined)
+    const styleInfo = multipageTemplate
       ? {
           ...(input.styleVariantPicked && input.variantId ? { variantId: input.variantId } : {}),
           ...(input.stylePalettePicked && input.paletteId ? { paletteId: input.paletteId } : {}),
@@ -364,6 +399,10 @@ export async function runThingGeneration(
               ? { realTestimonials: ob.importedTestimonials }
               : {}),
             templateId: resolvedTemplateId,
+            // scale-08 phase 1: voice source. Fan-out is multipage-only (=
+            // manufacturer today); the fallback covers in-flight resumable
+            // drafts persisted before this key existed. Transitional.
+            businessType: ob.businessTypeKey ?? 'manufacturer',
             page: {
               archetypeKey: page.archetypeKey,
               title: page.title,
@@ -436,7 +475,7 @@ export async function runThingGeneration(
     /* resume is best-effort — fall through to a fresh run */
   }
 
-  const isMfr = isManufacturerFlow(input.templateId ?? undefined);
+  const isMfr = isManufacturerInput(input);
 
   // ─── Manufacturer deterministic TechPremium path (persona is dead in the
   //     unified wizard: keyed on the resolved templateId instead) ───
@@ -560,6 +599,7 @@ export async function runThingGeneration(
         offer: input.offer,
         ...(input.importSourceUrl ? { importSourceUrl: input.importSourceUrl } : {}),
         ...(input.importedTestimonials?.length ? { importedTestimonials: input.importedTestimonials } : {}),
+        ...(input.businessTypeKey ? { businessTypeKey: input.businessTypeKey } : {}),
         sitemap: input.sitemap,
         strategy: input.strategy,
       };

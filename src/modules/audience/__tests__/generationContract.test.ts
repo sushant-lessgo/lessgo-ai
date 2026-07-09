@@ -26,7 +26,7 @@ import path from 'node:path';
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { validateGeneratedContent } from './contentValidator';
 import { serviceElementSchema } from '@/modules/audience/service/elementSchema';
-import { meridianElementSchema } from '@/modules/audience/product/elementSchema';
+import { meridianElementSchema, productElementSchema } from '@/modules/audience/product/elementSchema';
 import {
   generateMockServiceStrategy,
   generateMockServiceCopy,
@@ -38,7 +38,11 @@ import {
 import { processServiceCopy } from '@/modules/audience/service/parseCopy';
 import { processProductCopy } from '@/modules/audience/product/parseCopy';
 import { runGeneration } from '@/modules/wizard/generation';
-import type { ThingGenerationInput } from '@/modules/wizard/generation/thing';
+import {
+  buildStrategyPayload,
+  buildCopyPayload,
+  type ThingGenerationInput,
+} from '@/modules/wizard/generation/thing';
 import type { TrustGenerationInput } from '@/modules/wizard/generation/trust';
 import type { WorkGenerationInput } from '@/modules/wizard/generation/work';
 
@@ -62,6 +66,10 @@ function coversEverySection(finalContent: any, sectionTypes: string[]): boolean 
 const SCHEMAS = {
   service: serviceElementSchema,
   product: meridianElementSchema,
+  // scale-08 phase 5 — the manufacturer/Vestria golden (captureGolden writes
+  // schema 'vestria'). productElementSchema covers meridian + vestria layouts,
+  // so a captured vestria fixture revalidates against the right element set.
+  vestria: productElementSchema,
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -357,6 +365,126 @@ describe('generation contract — WORK via runGeneration (writer / Granth)', () 
 
   it('backfills collection ids (books / facts / quotes / socials)', () => {
     assertIdsBackfilled(cap.finalContent);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// scale-08 phase 5 — businessType ENTRY contract (fixture-free, always in CI).
+//
+// Proves the thing engine is keyed on the businessType CONFIG ENTRY, not on a
+// templateId literal:
+//  (a) a manufacturer-entry input remaps its captured fields (valueAdds→features,
+//      industriesServed→otherAudiences, productCategories→categories, +whatYouMake)
+//      and carries brief.businessType / businessType through BOTH payload builders;
+//  (b) a saas input never leaks whatYouMake (no manufacturer remap);
+//  (c) an `app` input (a scale-08 phase-3 CONFIG-ONLY entry) produces a payload
+//      shape IDENTICAL to saas — proving a new business type rides the existing
+//      pipeline with zero new code (only the businessType tag differs).
+//
+// Uses the REAL exported builders (thing.ts) — no fetch, no LLM, no fixture.
+// ---------------------------------------------------------------------------
+
+/** A SaaS-shaped thing input (extractionSchemaKey 'thing' ⇒ no manufacturer remap). */
+function saasThingInput(businessTypeKey: 'saas' | 'app'): ThingGenerationInput {
+  return {
+    tokenId: `contract-${businessTypeKey}`,
+    templateId: 'meridian',
+    businessTypeKey,
+    productName: 'Streakly',
+    oneLiner: 'A habit tracker that turns daily streaks into a shared game.',
+    features: ['Streak sharing', 'Gentle nudges', 'Weekly recap'],
+    audiences: ['People who bounce off rigid productivity apps', 'Accountability-buddy pairs'],
+    categories: ['Productivity', 'Habits'],
+    offer: 'Free with an optional Pro tier',
+    goalIntent: 'signup-free',
+    goalParam: {},
+    strategy: null,
+    sitemap: null,
+  };
+}
+
+/** A manufacturer-shaped input (extractionSchemaKey 'manufacturer' ⇒ field remap). */
+function manufacturerThingInput(): ThingGenerationInput {
+  return {
+    tokenId: 'contract-manufacturer',
+    templateId: 'vestria',
+    businessTypeKey: 'manufacturer',
+    productName: 'Brasswright',
+    oneLiner: 'Hand-finished brass hardware for premium furniture makers.',
+    // Generic SaaS fields are DELIBERATELY populated to prove the remap ignores
+    // them in favour of the manufacturer-captured fields below.
+    features: ['generic-feature-should-be-ignored'],
+    audiences: ['generic-audience-should-be-ignored'],
+    categories: ['generic-category-should-be-ignored'],
+    offer: 'Request a sample kit',
+    whatYouMake: 'Solid-brass furniture hardware',
+    valueAdds: ['No plating flake', 'Custom finishes at MOQ 500', 'Export-ready packing'],
+    industriesServed: ['Furniture brands', 'Interior contractors'],
+    productCategories: ['Pulls & knobs', 'Hinges'],
+    goalIntent: 'enquiry',
+    goalParam: {},
+    strategy: null,
+    sitemap: null,
+  };
+}
+
+/** Minimal strategy stub — buildCopyPayload only reads `.uiblocks` + passes it through. */
+const STRATEGY_STUB = { uiblocks: { hero: 'VestriaTailoredHero' } } as any;
+
+describe('generation contract — businessType ENTRY payloads (fixture-free)', () => {
+  it('manufacturer entry remaps captured fields + carries brief.businessType', () => {
+    const input = manufacturerThingInput();
+    const strat = buildStrategyPayload(input);
+    // valueAdds win over the generic feature list.
+    expect(strat.features).toEqual(input.valueAdds);
+    // industriesServed → otherAudiences; productCategories → categories.
+    expect(strat.otherAudiences).toEqual(input.industriesServed);
+    expect(strat.categories).toEqual(input.productCategories);
+    // manufacturer-only field present.
+    expect(strat.whatYouMake).toBe('Solid-brass furniture hardware');
+    // voice source carried on the brief.
+    expect((strat.brief as any)?.businessType).toBe('manufacturer');
+
+    const copy = buildCopyPayload(input, STRATEGY_STUB);
+    expect(copy.features).toEqual(input.valueAdds);
+    expect(copy.businessType).toBe('manufacturer');
+  });
+
+  it('saas entry carries businessType but NEVER leaks whatYouMake (no remap)', () => {
+    const input = saasThingInput('saas');
+    const strat = buildStrategyPayload(input);
+    expect(strat.features).toEqual(input.features);
+    expect(strat.categories).toEqual(input.categories);
+    // no manufacturer remap ⇒ no whatYouMake key at all.
+    expect('whatYouMake' in strat).toBe(false);
+    expect((strat.brief as any)?.businessType).toBe('saas');
+
+    const copy = buildCopyPayload(input, STRATEGY_STUB);
+    expect('whatYouMake' in copy).toBe(false);
+    expect(copy.businessType).toBe('saas');
+  });
+
+  it('app entry (config-only) produces a payload shape identical to saas', () => {
+    const saas = saasThingInput('saas');
+    const app = saasThingInput('app');
+    // Only the businessTypeKey differs between the two inputs.
+    const saasStrat = buildStrategyPayload(saas);
+    const appStrat = buildStrategyPayload(app);
+    const saasCopy = buildCopyPayload(saas, STRATEGY_STUB);
+    const appCopy = buildCopyPayload(app, STRATEGY_STUB);
+
+    // Same key set — no extra pipeline field appears for `app`.
+    expect(Object.keys(appStrat).sort()).toEqual(Object.keys(saasStrat).sort());
+    expect(Object.keys(appCopy).sort()).toEqual(Object.keys(saasCopy).sort());
+
+    // Byte-identical once the businessType tag is normalised — the ONLY diff.
+    const TAG = '__biz__';
+    const normStrat = (p: Record<string, unknown>) => ({
+      ...p,
+      brief: { ...(p.brief as any), businessType: TAG },
+    });
+    expect(normStrat(appStrat)).toEqual(normStrat(saasStrat));
+    expect({ ...appCopy, businessType: TAG }).toEqual({ ...saasCopy, businessType: TAG });
   });
 });
 

@@ -455,6 +455,7 @@ export function buildThingInput(s: WizardState): ThingGenerationInput {
   return {
     tokenId: s.tokenId ?? '',
     templateId: (s.templateId as ThingGenerationInput['templateId']) ?? 'meridian',
+    businessTypeKey: s.businessTypeKey ?? undefined,
     productName: fieldStr(fields, 'name'),
     oneLiner: fieldStr(fields, 'oneLiner'),
     features: fieldArr(fields, 'capabilities'),

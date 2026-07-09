@@ -17,8 +17,7 @@ store or hold their own independent slices.
 Global (non-token) Zustand store for the **onboarding field pipeline**: `oneLiner`,
 `confirmedFields` (canonical-name → value/confidence), `validatedFields`
 (`Partial<InputVariables>`), `hiddenInferredFields`, AI features, and
-`forceManualFields`. Feeds validation/market-insights and the edit-time field
-modals. Uses `devtools` (no persist).
+`forceManualFields`. Feeds the edit-time field modals. Uses `devtools` (no persist).
 
 ### `useEditStoreLegacy.ts` — **the active editor store hook**
 Despite the name, this is the primary editor-state API (~100+ call sites across

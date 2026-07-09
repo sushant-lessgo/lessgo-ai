@@ -112,6 +112,24 @@ describe('decideServe — serve paths', () => {
     }
   });
 
+  it('app (KNOWN thing type, scale-08 phase 3) IS serveable ⇒ serve / product', () => {
+    // Proves the config-only `app` entry rides the existing thing pipeline: same
+    // serve outcome as saas, zero new code. Contrast with photographer, whose
+    // unbacked gallery cap sends it to the manual/demand lane below. NOTE: goal
+    // is signup-free, not app's `download-app` intent — download-app derives the
+    // unbacked `store-badges` cap (a GOAL-level gap, orthogonal to businessType),
+    // which would push even this serveable type to manual.
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'app', goalIntentGuess: 'signup-free' }),
+      'habit-tracking mobile app'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.audienceType).toBe('product');
+    }
+  });
+
   it('writer (KNOWN, work engine) ⇒ serve / writer / granth — NO bridge:work tag (phase 9)', () => {
     const brief = buildBriefDraft(
       makeSignals({ businessTypeGuess: 'writer', goalIntentGuess: 'follow-social' }),
@@ -130,7 +148,11 @@ describe('decideServe — serve paths', () => {
 });
 
 describe('decideServe — manual paths (strict missing strings)', () => {
-  it('photographer (unknown, portfolio tiebreaker) ⇒ rungC:gallery,rungA:photographer — NO bridge:work', () => {
+  it('photographer (KNOWN work type, gallery cap unbacked) ⇒ rungC:gallery — no rungA (type is known)', () => {
+    // scale-08 phase 3: photographer is now a KNOWN businessType with a required
+    // `gallery` cap that no shipped template declares. resolveEngine → work via
+    // lookup (source 'lookup', NOT tiebreaker), so no rungA tag and the gallery
+    // gap surfaces via the latent-cap fallback ⇒ single `rungC:gallery`.
     const brief = buildBriefDraft(
       makeSignals({ businessTypeGuess: 'photographer', tiebreaker: 'portfolio-is-proof' }),
       'wedding photographer in Jaipur'
@@ -138,8 +160,8 @@ describe('decideServe — manual paths (strict missing strings)', () => {
     const decision = decideServe(brief);
     expect(decision.outcome).toBe('manual');
     if (decision.outcome === 'manual') {
-      expect(decision.missing).toBe('rungC:gallery,rungA:photographer');
-      expect(decision.tags).toHaveLength(2);
+      expect(decision.missing).toBe('rungC:gallery');
+      expect(decision.tags).toHaveLength(1);
       expect(decision.tags).not.toContain('bridge:work');
       expect(decision.outOfIcp).toBe(false);
     }

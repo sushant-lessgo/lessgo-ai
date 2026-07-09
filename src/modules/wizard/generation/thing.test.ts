@@ -38,7 +38,11 @@ const StrategyRequestMirror = z.object({
   // the route (assembly-only). Route validates with BriefSchema; the mirror
   // just pins presence/shape of what the adapter sends.
   brief: z
-    .object({ goal: z.object({ intent: z.string(), mechanism: z.string() }).passthrough() })
+    .object({
+      goal: z.object({ intent: z.string(), mechanism: z.string() }).passthrough().optional(),
+      // scale-08 phase 1: voice source.
+      businessType: z.string().optional(),
+    })
     .optional(),
   requiredCapabilities: z.array(z.string()).optional(),
 });
@@ -62,6 +66,8 @@ const CopyRequestMirror = z.object({
     .array(z.object({ quote: z.string(), author_name: z.string(), author_role: z.string() }))
     .optional(),
   templateId: z.enum(['meridian', 'vestria']).optional(),
+  // scale-08 phase 1: voice source.
+  businessType: z.string().optional(),
 });
 
 const STRATEGY: ProductStrategyOutput = {
@@ -132,6 +138,7 @@ describe('THING adapter — strategy payload fidelity', () => {
     const p = buildStrategyPayload(
       baseInput({
         templateId: 'vestria',
+        businessTypeKey: 'manufacturer',
         features: ['saas feature'],
         valueAdds: ['bespoke joinery', 'CNC precision'],
         categories: ['generic'],
@@ -149,12 +156,66 @@ describe('THING adapter — strategy payload fidelity', () => {
     expect(p.primaryAudience).toBe('trade buyers / procurement teams');
     expect(StrategyRequestMirror.safeParse(p).success).toBe(true);
   });
+
+  it('scale-08 phase 2: vestria templateId WITHOUT businessTypeKey=manufacturer does NOT remap (key moved to config, not template)', () => {
+    const p = buildStrategyPayload(
+      baseInput({
+        templateId: 'vestria', // template says vestria...
+        businessTypeKey: 'saas', // ...but the businessType is NOT manufacturer
+        features: ['saas feature'],
+        valueAdds: ['bespoke joinery', 'CNC precision'],
+        categories: ['generic'],
+        productCategories: ['counters', 'shelving'],
+        audiences: ['founders', 'platform leads'],
+        industriesServed: ['hospitality', 'retail'],
+        whatYouMake: 'commercial joinery',
+      })
+    );
+    // No manufacturer remap: SaaS features/categories/audiences win, whatYouMake absent.
+    expect(p.features).toEqual(['saas feature']);
+    expect(p.categories).toEqual(['generic']);
+    expect(p.otherAudiences).toEqual(['platform leads']);
+    expect('whatYouMake' in p).toBe(false);
+    expect(p.primaryAudience).toBe('founders');
+    // Same holds for the copy payload's effective features.
+    expect(
+      buildCopyPayload(
+        baseInput({ templateId: 'vestria', businessTypeKey: 'saas', features: ['saas feature'], valueAdds: ['x'] }),
+        STRATEGY
+      ).features
+    ).toEqual(['saas feature']);
+  });
+
+  it('carries brief.businessType (voice source) when businessTypeKey is set — scale-08 phase 1', () => {
+    const p = buildStrategyPayload(baseInput({ businessTypeKey: 'manufacturer' })) as any;
+    expect(p.brief?.businessType).toBe('manufacturer');
+    // Goal still rides alongside businessType in the same brief object.
+    expect(p.brief?.goal?.intent).toBe('signup-free');
+    // Brief is now sent even with no goal, when only businessType exists.
+    const noGoal = buildStrategyPayload(
+      baseInput({ goalIntent: null, businessTypeKey: 'manufacturer' })
+    ) as any;
+    expect(noGoal.brief?.businessType).toBe('manufacturer');
+    expect('goal' in (noGoal.brief ?? {})).toBe(false);
+    // Neither goal nor businessType ⇒ no brief key at all.
+    expect(
+      'brief' in buildStrategyPayload(baseInput({ goalIntent: null, businessTypeKey: undefined }))
+    ).toBe(false);
+  });
 });
 
 describe('THING adapter — copy payload fidelity', () => {
   it('produces a payload the copy route schema accepts', () => {
     const payload = buildCopyPayload(baseInput(), STRATEGY);
     expect(CopyRequestMirror.safeParse(payload).success).toBe(true);
+  });
+
+  it('carries businessType (voice source) — scale-08 phase 1', () => {
+    expect(buildCopyPayload(baseInput({ businessTypeKey: 'manufacturer' }), STRATEGY).businessType).toBe(
+      'manufacturer'
+    );
+    // Absent key ⇒ undefined (route defaults voice to modern-tech).
+    expect(buildCopyPayload(baseInput(), STRATEGY).businessType).toBeUndefined();
   });
 
   it('includes realTestimonials only when present', () => {
@@ -278,6 +339,7 @@ describe('THING adapter — runThingGeneration smoke', () => {
     const result = await runThingGeneration(
       baseInput({
         templateId: 'vestria',
+        businessTypeKey: 'manufacturer',
         strategy: STRATEGY,
         sitemap: [
           { archetypeKey: 'home', title: 'Home', pathSlug: '/', sections: ['hero', 'features'] },
@@ -292,7 +354,10 @@ describe('THING adapter — runThingGeneration smoke', () => {
       (c) => c.url.includes('/api/saveDraft') && c.body?.templateId === 'vestria'
     );
     expect(skeleton).toBeTruthy();
-    expect(calls.some((c) => c.url.includes('/api/audience/product/generate-copy'))).toBe(true);
+    const copyCall = calls.find((c) => c.url.includes('/api/audience/product/generate-copy'));
+    expect(copyCall).toBeTruthy();
+    // scale-08 phase 1: the fan-out copy body carries the voice source.
+    expect(copyCall!.body.businessType).toBe('manufacturer');
     // Strategy came from the structure gate — the fan-out run must NOT refetch
     // (credit-charge-once: the /strategy route charges per call).
     expect(calls.some((c) => c.url.includes('/api/audience/product/strategy'))).toBe(false);
