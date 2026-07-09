@@ -21,7 +21,7 @@ Key facts confirmed in code (implementer re-verifies before editing):
 - phase 3 new entries photographer + app (config-only): done (commit 1a7318e1, review loops 1, tsc+1565 tests green; config.ts sole source change; +2 test-file fixture repoints photographer→florist)
 - phase 4 dead-legacy deletion: pending
 - phase 5 manufacturer golden + contract tests: done (commit a749a940, review loops 1, tsc+1568 tests green; fixture-free ENTRY-payload asserts + CAPTURE=1 vestria golden wired)
-- phase 6 admin businessTypes panel: done (commit <pending>, review loops 1, tsc+1568 tests+build green; read-only fit()-based serveability panel)
+- phase 6 admin businessTypes panel: done (commit 5ecec8cb, review loops 1, tsc+1568 tests+build green; read-only fit()-based serveability panel)
 
 ---
 
