@@ -29,9 +29,9 @@ Clerk middleware wrapping custom host resolution. For non-API/non-`_next` reques
 
 | Route | File | Purpose |
 |-------|------|---------|
-| `/onboarding/[token]` | `onboarding/[token]/page.tsx` | **Universal entry** (scale-02): one-liner/URL → classify → confirm card → serve gate (`/api/brief/confirm`) routes into a wizard, or manual-onboard capture (`DemandLead`) |
-| `/onboarding/product/[token]` | `onboarding/product/[token]/page.tsx` | Product wizard (uses `useProductGenerationStore`); mount-hydrates from `Project.brief` when the serve gate routed here |
-| `/onboarding/service/[token]` | `onboarding/service/[token]/page.tsx` | Service wizard (uses `useServiceGenerationStore`); mount-hydrates from `Project.brief` when the serve gate routed here |
+| `/onboarding/[token]` | `onboarding/[token]/page.tsx` | **Universal entry + unified wizard** (scale-02 entry, scale-06 wizard): one-liner/URL → classify → confirm card → serve gate (`/api/brief/confirm`) → load-detection renders the ONE unified wizard (`components/onboarding/wizard`) for every engine (thing/trust/work), or manual-onboard capture (`DemandLead`) |
+| `/onboarding/product/[token]` | `onboarding/product/[token]/page.tsx` | **Redirect stub** → `/onboarding/[token]` (scale-06 phase 10 retired the old product wizard fork) |
+| `/onboarding/service/[token]` | `onboarding/service/[token]/page.tsx` | **Redirect stub** → `/onboarding/[token]` (scale-06 phase 10 retired the old service wizard fork) |
 | `/onboarding/persona` | `onboarding/persona/page.tsx` | Redirect → `/dashboard` (persona gate removed by scale-02; persona editing lives in `/dashboard/settings`) |
 | `/onboarding/waitlist` | `onboarding/waitlist/page.tsx` | Redirect → `/dashboard` (pilot waitlist removed by scale-02) |
 
@@ -82,7 +82,7 @@ the fast path serves static blob HTML; these SSR routes are the fallback.
 | Route | File | Purpose |
 |-------|------|---------|
 | `/admin` | `admin/page.tsx` | Admin UI (gated by `requireAdmin` on its APIs) |
-| `/dev/*` | `dev/{meridian,hearth-demo,seed-lumen,seed-writer}/…` | Template dev harnesses / seed pages — **blocked in production** by middleware |
+| `/dev/*` | `dev/{meridian,hearth-demo,seed-lumen}/…` | Template dev harnesses / seed pages — **blocked in production** by middleware |
 
 ## Root routes
 

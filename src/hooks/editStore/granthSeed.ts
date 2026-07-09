@@ -33,6 +33,14 @@ export function buildGranthHomeFinalContent(opts: {
   tokenId: string;
   title?: string;
   writerName?: string;
+  /**
+   * scale-06 phase 9 — the 3–5 work uploads captured in the unified wizard
+   * (image URLs). Applied positionally as book covers on the deterministic
+   * shelf; extra uploads beyond the default items append minimal entries so no
+   * upload is lost. Absent/empty ⇒ the fictional default shelf (dev/self-serve
+   * with no uploads keeps working unchanged).
+   */
+  works?: string[];
 }): any {
   const name = (opts.writerName || 'केशव नारायण ‘अरण्य’').trim();
   const title = opts.title || name;
@@ -67,18 +75,32 @@ export function buildGranthHomeFinalContent(opts: {
     ],
   });
 
+  const bookItems: any[] = [
+    { id: rid('bk'), title: 'वन में एकांत', kind: 'कविता-संग्रह', year: '२०२१', blurb: 'प्रकृति और स्मृति की कविताएँ', buy_url: '#', cover_image: '' },
+    { id: rid('bk'), title: 'नदी का दूसरा किनारा', kind: 'कविता-संग्रह', year: '२०१६', blurb: 'साहित्य अकादेमी से सम्मानित कृति', buy_url: '#', cover_image: '' },
+    { id: rid('bk'), title: 'शब्दों के पार', kind: 'निबंध-संग्रह', year: '२०१२', blurb: 'भाषा और साहित्य पर चिंतन', buy_url: '#', cover_image: '' },
+    { id: rid('bk'), title: 'पहला अक्षर', kind: 'कविता-संग्रह', year: '२००५', blurb: 'आरंभिक दौर की प्रतिनिधि कविताएँ', buy_url: '#', cover_image: '' },
+  ];
+
+  // scale-06 phase 9 — thread the wizard work uploads onto the shelf as covers.
+  // Positional: fill existing item covers first; append minimal entries for any
+  // surplus so no upload is dropped (founder edits titles/blurbs in the editor).
+  const uploads = (opts.works ?? []).filter((u) => typeof u === 'string' && u.trim().length > 0);
+  uploads.forEach((url, i) => {
+    if (i < bookItems.length) {
+      bookItems[i].cover_image = url;
+    } else {
+      bookItems.push({ id: rid('bk'), title: '', kind: '', year: '', blurb: '', buy_url: '#', cover_image: url });
+    }
+  });
+
   const books = section(booksId, 'books', 'GranthJacketShelf', {
     eyebrow: 'पुस्तकें',
     heading: 'प्रकाशित कृतियाँ',
     lead: 'पाँच दशकों की साहित्य-यात्रा से चुनी हुई कृतियाँ।',
     author_mark: 'अरण्य',
     buy_label: 'Amazon पर ख़रीदें →',
-    items: [
-      { id: rid('bk'), title: 'वन में एकांत', kind: 'कविता-संग्रह', year: '२०२१', blurb: 'प्रकृति और स्मृति की कविताएँ', buy_url: '#', cover_image: '' },
-      { id: rid('bk'), title: 'नदी का दूसरा किनारा', kind: 'कविता-संग्रह', year: '२०१६', blurb: 'साहित्य अकादेमी से सम्मानित कृति', buy_url: '#', cover_image: '' },
-      { id: rid('bk'), title: 'शब्दों के पार', kind: 'निबंध-संग्रह', year: '२०१२', blurb: 'भाषा और साहित्य पर चिंतन', buy_url: '#', cover_image: '' },
-      { id: rid('bk'), title: 'पहला अक्षर', kind: 'कविता-संग्रह', year: '२००५', blurb: 'आरंभिक दौर की प्रतिनिधि कविताएँ', buy_url: '#', cover_image: '' },
-    ],
+    items: bookItems,
   });
 
   const writing = section(writingId, 'writing', 'GranthFramedPage', {

@@ -7,8 +7,10 @@
 // Entry shape is modeled on the ServiceVoiceSpec record idiom
 // (src/modules/audience/service — keyed record of frozen per-key specs).
 //
-// - `extractionSchemaKey` values are '<key>-v0' PLACEHOLDERS; real extraction
-//   schemas arrive with their readers (spec 02+/08).
+// - `extractionSchemaKey` values are REAL registry keys (scale-06 phase 7) into
+//   `src/lib/schemas/extraction` — engine families thing/trust/work plus the
+//   `manufacturer` variant. Kept as a plain string here (no import) to avoid a
+//   config↔registry cycle; the registry validates the value.
 // - `manufacturer`: `catalog` is PREFERRED, not required — a manufacturer page
 //   isn't broken without collections; required flags shrink serveability
 //   (scalePlan §7.3). requiredCapabilities = ['lead-form'] only.
@@ -25,7 +27,7 @@ export interface BusinessTypeEntry {
   defaultStyle: DesignStyle;
   /** Minimal wizard prompts (2–3 per type) — copy TBD, shape frozen. */
   wizardFields: Record<string, { label: string; example: string }>;
-  /** Placeholder — real extraction schemas land spec 02+/08. */
+  /** Registry key into src/lib/schemas/extraction (thing|trust|work|manufacturer). */
   extractionSchemaKey: string;
   likelyIntents: readonly GoalIntent[];
 }
@@ -61,7 +63,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
         example: 'Set up in 2 minutes; no accounting knowledge needed',
       },
     },
-    extractionSchemaKey: 'saas-v0',
+    extractionSchemaKey: 'thing',
     likelyIntents: ['request-demo', 'free-trial', 'signup-free', 'waitlist'],
   },
   manufacturer: {
@@ -81,7 +83,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
         example: 'Furniture brands and interior contractors, 500+ unit orders',
       },
     },
-    extractionSchemaKey: 'manufacturer-v0',
+    extractionSchemaKey: 'manufacturer',
     likelyIntents: ['enquiry', 'request-quote'],
   },
   agency: {
@@ -104,7 +106,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
         example: 'D2C brands doing $50k–$500k/month',
       },
     },
-    extractionSchemaKey: 'agency-v0',
+    extractionSchemaKey: 'trust',
     likelyIntents: ['book-call', 'enquiry', 'request-quote'],
   },
   consultant: {
@@ -123,7 +125,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
         example: 'Ex-Stripe pricing lead; 60+ SaaS engagements',
       },
     },
-    extractionSchemaKey: 'consultant-v0',
+    extractionSchemaKey: 'trust',
     likelyIntents: ['book-call', 'enquiry', 'lead-magnet'],
   },
   coach: {
@@ -142,7 +144,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
         example: '8-week 1:1 program, weekly calls + async support',
       },
     },
-    extractionSchemaKey: 'coach-v0',
+    extractionSchemaKey: 'trust',
     likelyIntents: ['book-call', 'enroll', 'lead-magnet'],
   },
   writer: {
@@ -161,7 +163,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
         example: '"Reth ke Rishtey" (2023), columns in Dainik Bhaskar',
       },
     },
-    extractionSchemaKey: 'writer-v0',
+    extractionSchemaKey: 'work',
     likelyIntents: ['follow-social', 'buy-via-link', 'subscribe-newsletter'],
   },
 };

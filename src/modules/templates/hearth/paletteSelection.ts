@@ -9,7 +9,7 @@
 
 import type { HearthPalette, ServiceType } from '@/types/service';
 import { defaultHearthPalette } from './palettes';
-import type { ServiceUnderstanding } from '@/hooks/useServiceGenerationStore';
+import type { ServiceUnderstanding } from '@/types/service';
 
 const PALETTE_INDUSTRY_KEYWORDS: Record<HearthPalette, string[]> = {
   rose:       ['beauty', 'skincare', 'cosmetic', 'fashion', 'spa', 'derma'],

@@ -8,7 +8,7 @@
 
 import type { SurgePalette, ServiceType } from '@/types/service';
 import { defaultSurgePalette } from './palettes';
-import type { ServiceUnderstanding } from '@/hooks/useServiceGenerationStore';
+import type { ServiceUnderstanding } from '@/types/service';
 
 const PALETTE_INDUSTRY_KEYWORDS: Record<SurgePalette, string[]> = {
   volt:    ['growth', 'performance', 'paid', 'ads', 'ppc', 'media'],

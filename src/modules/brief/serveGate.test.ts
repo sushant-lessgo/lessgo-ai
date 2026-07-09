@@ -39,8 +39,12 @@ function makeSignals(overrides: Partial<EntrySignals> = {}): EntrySignals {
 }
 
 describe('BRIDGEABLE_ENGINES', () => {
-  it('launch bridges: thing→product, trust→service (work lands spec 06)', () => {
-    expect(BRIDGEABLE_ENGINES).toEqual({ thing: 'product', trust: 'service' });
+  it('launch bridges: thing→product, trust→service, work→writer (scale-06 phase 9)', () => {
+    expect(BRIDGEABLE_ENGINES).toEqual({
+      thing: 'product',
+      trust: 'service',
+      work: 'writer',
+    });
   });
 });
 
@@ -107,6 +111,22 @@ describe('decideServe — serve paths', () => {
       expect(decision.templateId).toBe('meridian');
     }
   });
+
+  it('writer (KNOWN, work engine) ⇒ serve / writer / granth — NO bridge:work tag (phase 9)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'writer', goalIntentGuess: 'follow-social' }),
+      'Hindi literary fiction author'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.audienceType).toBe('writer');
+      expect(decision.templateId).toBe('granth');
+      expect(decision.shortlist).toEqual(['granth']);
+      // bridge:work MANUAL clause is deleted — no such tag exists on any path.
+      expect(decision).not.toHaveProperty('tags');
+    }
+  });
 });
 
 describe('decideServe — manual paths (strict missing strings)', () => {
@@ -135,19 +155,6 @@ describe('decideServe — manual paths (strict missing strings)', () => {
     if (decision.outcome === 'manual') {
       expect(decision.missing).toBe('rungE:place,rungA:restaurant');
       expect(decision.outOfIcp).toBe(false);
-    }
-  });
-
-  it('writer (KNOWN type, work engine, no wizard bridge yet) ⇒ bridge:work', () => {
-    const brief = buildBriefDraft(
-      makeSignals({ businessTypeGuess: 'writer', goalIntentGuess: 'follow-social' }),
-      'Hindi literary fiction author'
-    );
-    const decision = decideServe(brief);
-    expect(decision.outcome).toBe('manual');
-    if (decision.outcome === 'manual') {
-      expect(decision.missing).toBe('bridge:work');
-      expect(decision.tags).toEqual(['bridge:work']);
     }
   });
 

@@ -56,6 +56,15 @@ const ProductStrategyRequestSchema = z.object({
   // Template-aware assembly (whitelist). Fed ONLY to assembleProductStrategy —
   // never to the prompt builder (firewall). vestria is admin-gated until GA metering.
   templateId: z.enum(['meridian', 'vestria']).optional(),
+  // Proof hard rule (scale-06 phase 4) — OPTIONAL + additive. Absent ⇒ current
+  // behavior (the OLD product wizard, which never sends this, is byte-identical).
+  // When present, an unpromised proof section is dropped from the assembled
+  // strategy so it is never generated. Fed ONLY to assembleProductStrategy.
+  proof: z
+    .object({
+      hasTestimonials: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 async function productStrategyHandler(req: NextRequest): Promise<Response> {
@@ -94,6 +103,9 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
         features: data.features,
         primaryAudience: data.primaryAudience,
         templateId: data.templateId,
+        // scale-06 phase 5: honor the proof hard rule in mock mode too, so
+        // mock/DEMO_TOKEN runs agree with the real assembleProductStrategy path.
+        proof: data.proof,
       });
       return createSecureResponse({
         success: true,
@@ -160,7 +172,11 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
 
     // 5. Assemble (deterministic per-template sections + block map; templateId
     //    is assembly-only — the prompt above never saw it)
-    const strategyData = assembleProductStrategy({ llmResponse, templateId: data.templateId });
+    const strategyData = assembleProductStrategy({
+      llmResponse,
+      templateId: data.templateId,
+      proof: data.proof,
+    });
     logger.info('[Product Strategy] Final sections:', strategyData.sections);
     logger.info('[Product Strategy] Final UIBlocks:', strategyData.uiblocks);
 

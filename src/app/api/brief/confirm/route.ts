@@ -66,9 +66,13 @@ export async function POST(req: Request) {
           templateId: decision.templateId,
         },
       });
+      // scale-06 phase 10: every engine is now served by the unified wizard, so
+      // the redirect is UNCONDITIONAL. Load-detection on `/onboarding/[token]`
+      // re-hydrates the brief and renders the wizard. The old per-audience
+      // wizard routes are gone (redirect stubs forward to here).
       return createSecureResponse({
         outcome: 'serve',
-        redirectTo: `/onboarding/${decision.audienceType}/${tokenId}`,
+        redirectTo: `/onboarding/${tokenId}`,
       });
     }
 

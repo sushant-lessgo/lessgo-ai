@@ -33,19 +33,31 @@ last-mounted store. State surface: sections/layouts/spacing, `content`, multi-pa
 modals), forms/images, meta (audienceType/templateId/variantId/paletteId), and
 persistence/auto-save.
 
-### Generation-flow stores (one per route family)
-- `useGenerationStore.ts` — the original `/create` product flow (10 steps incl.
-  vibe / IVOC research / uiblock selection). Onboarding-era; still active.
-- `useProductGenerationStore.ts` — lean **Meridian/Vestria** product onboarding
-  (`/onboarding/product/[token]`): oneLiner → understanding → goal → offer →
-  sitemap (multi-page only) → generating. Also holds imported testimonials and
-  the non-blocking vestria variant/palette/mood picks.
-- `useServiceGenerationStore.ts` — **service** onboarding
-  (`/onboarding/service/[token]`): oneLiner → understanding → goal → offer →
-  assets → style (Hearth palette) → generating → complete.
+### Generation-flow stores
+The old per-route generation stores — `useGenerationStore.ts` (the original
+`/create` product flow), `useProductGenerationStore.ts`, and
+`useServiceGenerationStore.ts` — were **deleted in scale-06 phase 10** when the
+product/service wizard fork was retired. Their surviving types were re-homed:
+`ServiceUnderstanding` / `ServiceUnderstandingExtract` / `ServiceAssetAvailability`
+→ `src/types/service.ts`; `VestriaHeroVariant` / `VestriaLookMood` →
+`src/types/product.ts`. Everything now goes through `useWizardStore` below.
 
-All three are plain `create()` + `devtools` + `immer` stores (no persist), keyed
-to their wizard's step array.
+### `useWizardStore.ts` — **unified Brief-backed wizard store** (scale-06)
+Single source of truth for the ONE wizard that serves every engine — the
+convergence target that replaced the product/service fork.
+Resolves `engine`/`businessTypeKey`/`audienceType`/`templateId` from the confirmed
+`Brief` + serveGate result. Its **slot machine is keyed by slot IDs** (not indices):
+the slot list is computed from the engine contract (`getContract`,
+`src/modules/engines/inputContracts.ts`) with per-engine skips applied (trust/work
+skip `structure`); `goToSlot`/`nextSlot`/`prevSlot` operate on ids. Per-field state
+(`{ value, source: scraped|inferred|user, confirmed, state }`) comes from the pure
+phase-1 waterfall (`src/modules/wizard/waterfall.ts`) — **not duplicated here**.
+`mode: 'review' | 'fill'` is derived from the entry source (URL/scrape ⇒ review,
+manual one-liner ⇒ fill). Goal reuses scale-05 (`goalIntent`/`goalParam` +
+`intentToBriefGoal`); proof booleans are a superset of `ServiceAssetAvailability`.
+Hydrates from `Project.brief` (same loadDraft path as the entry funnel) and
+persists via the existing `/api/saveDraft` (no new persistence API). `'use client'`;
+imports only pure helpers + types (firewall-clean — no template/renderer imports).
 
 ### `useModalManager.ts`
 Field-edit modal orchestration for the editor: a modal queue over

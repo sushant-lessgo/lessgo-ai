@@ -97,6 +97,17 @@ export const defaultVestriaPalette: VestriaPalette = 'cobalt';
 /** Default variant when none is picked or persisted. */
 export const defaultVestriaVariant: VestriaVariant = 'tailored';
 
+/** Vestria hero variant (onboarding2 Axis B). Picked non-blockingly while copy
+ *  streams; written into `content[heroId].layout` (the authoritative field the
+ *  renderers read) at save time. Default = tailored (existing behavior).
+ *  (Canonical home since scale-06 phase 10 retired useProductGenerationStore.) */
+export type VestriaHeroVariant = 'VestriaTailoredHero' | 'VestriaFullBleedHero';
+
+/** Vestria neutral mood (onboarding2 Axis A). Mirrors vestriaMoods in
+ *  modules/templates/vestria/tokens.ts; persisted via Project.themeValues.mood.
+ *  (Canonical home since scale-06 phase 10 retired useProductGenerationStore.) */
+export type VestriaLookMood = 'bone' | 'slate';
+
 /**
  * ===== MERIDIAN STRATEGY (P3 — generation wiring) =====
  * The assembled strategy passed from /api/audience/product/strategy into
