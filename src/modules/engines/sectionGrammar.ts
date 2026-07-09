@@ -1,23 +1,27 @@
 // src/modules/engines/sectionGrammar.ts
-// Engine-owned section grammar (scale-07 phase 1).
+// Engine-owned section grammar (scale-07 phases 1–2).
 //
 // One pure module produces a landing-page section list from
-// (engine, ordering data, gate flags). It generalizes the service pattern:
-// awareness-ordered middle sections + capability/asset-gated optionals +
-// header/footer wrap where the engine core demands it.
+// (engine, ordering data, gate flags, required capabilities). It generalizes
+// the service pattern: awareness-ordered middle sections + capability/asset-
+// gated optionals + header/footer wrap where the engine core demands it.
 //
 // FIREWALL: this module imports NO template code — no templateMeta, no
-// registry, no template modules. Awareness ordering and gate flags arrive as
-// plain data from the caller (the audience selectors), keeping template
+// registry, no template modules. Awareness ordering, gate flags, and the
+// capability→section evidence map (templateMeta.capabilitySections) all arrive
+// as plain data from the caller (the audience selectors), keeping template
 // knowledge out of the engine layer. Core section sets come from the frozen
-// `engineCoreSections` contract.
+// `engineCoreSections` contract; capability ids from the frozen closed vocab.
 //
-// Phase-1 scope: behavior-preserving wiring only. `selectProductSections` and
-// `selectServiceSections` delegate here and MUST return byte-identical output
-// (asserted exhaustively in sectionGrammar.test.ts). Brief-driven capability
-// sections land in phase 2; the `extras` escape hatch dies with them.
+// Phase-2 convergence law: same Brief ⇒ same section list under every template
+// of the same engine. The engine core is the shared skeleton; the ONLY
+// per-template additions are capability sections, and a capability section is
+// appended iff the Brief requires the capability AND the template declares an
+// evidencing section for it. The phase-1 `extras` escape hatch (pilot-list
+// passthrough) is deleted.
 
-import type { CopyEngine } from '@/types/brief';
+import type { CopyEngine, CapabilityId } from '@/types/brief';
+import { capabilityIds } from '@/types/brief';
 import { engineCoreSections } from './coreSections';
 
 /**
@@ -40,12 +44,6 @@ export interface SectionGates {
 export interface BuildSectionListInput {
   engine: CopyEngine;
   /**
-   * Reserved for phase 2 (Brief-required capability sections). Unused in
-   * phase 1 — accepted so callers can start passing it without a signature
-   * break later.
-   */
-  brief?: unknown;
-  /**
    * Middle-section order (everything between header and footer), already
    * resolved by the caller's ordering table (e.g. awareness → order map).
    * Conditional sections appear here to fix their RELATIVE position; the
@@ -55,14 +53,19 @@ export interface BuildSectionListInput {
   ordering?: readonly string[];
   gates?: SectionGates;
   /**
-   * Full-list override for the product pilot templates (meridian/vestria
-   * fixed lists). When present it is returned verbatim — no ordering, no
-   * gating, no wrap.
-   *
-   * @deprecated — removed in scale-07 phase 2 (pilot lists become engine
-   * core + Brief-required capability sections).
+   * Capability ids the Brief requires (auto-inferred via
+   * requiredCapabilitiesFromBrief + explicit 7b-gate inclusions). Resolved by
+   * the CALLER; this module never derives capabilities itself.
    */
-  extras?: readonly string[];
+  requiredCapabilities?: readonly CapabilityId[];
+  /**
+   * capabilityId → evidencing section type — the calling audience layer passes
+   * `templateMeta[templateId].capabilitySections` IN as data (firewall: this
+   * module must not import templateMeta). A required capability with no entry
+   * here contributes no section (structural capabilities like `multipage`, or
+   * a template that simply lacks the block).
+   */
+  capabilitySections?: Readonly<Partial<Record<CapabilityId, string>>>;
 }
 
 /** Sections gated by legacy asset/format flags (trust pattern). */
@@ -76,15 +79,17 @@ function passesGates(sectionType: string, gates: SectionGates | undefined): bool
 }
 
 /**
- * Build the section list for one page: `[header?, ...middle, footer?]`.
- * Header/footer wrap applies exactly where the engine core demands it (the
- * core set contains 'header'/'footer').
+ * Build the section list for one page: `[header?, ...middle, ...capability
+ * sections, footer?]`. Header/footer wrap applies exactly where the engine
+ * core demands it (the core set contains 'header'/'footer').
+ *
+ * Capability sections are appended after the ordered middle, in canonical
+ * `capabilityIds` order (deterministic regardless of caller set order), and
+ * deduped against sections already present (a capability evidenced by a core
+ * section never duplicates it).
  */
 export function buildSectionList(input: BuildSectionListInput): string[] {
-  const { engine, ordering, gates, extras } = input;
-
-  // Temporary phase-1 escape hatch — see @deprecated note on `extras`.
-  if (extras) return [...extras];
+  const { engine, ordering, gates, requiredCapabilities, capabilitySections } = input;
 
   const core = engineCoreSections[engine];
   const wrapHeader = core.includes('header');
@@ -94,6 +99,18 @@ export function buildSectionList(input: BuildSectionListInput): string[] {
     ordering ?? core.filter((s) => s !== 'header' && s !== 'footer');
 
   const body = middle.filter((sectionType) => passesGates(sectionType, gates));
+
+  if (requiredCapabilities?.length && capabilitySections) {
+    const required = new Set(requiredCapabilities);
+    for (const cap of capabilityIds) {
+      if (!required.has(cap)) continue;
+      const sectionType = capabilitySections[cap];
+      if (!sectionType) continue;
+      // Chrome is core-owned; a capability entry may never re-add it.
+      if (sectionType === 'header' || sectionType === 'footer') continue;
+      if (!body.includes(sectionType)) body.push(sectionType);
+    }
+  }
 
   return [
     ...(wrapHeader ? ['header'] : []),

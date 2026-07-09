@@ -27,12 +27,30 @@ export function fit(
 }
 
 /**
+ * EXPLICIT-TRIGGER capabilities (scale-07 phase 2, founder decision Q1):
+ * these ids are NEVER auto-inferred by `requiredCapabilitiesFromBrief` — no
+ * trigger rule exists yet (discovery-first). They enter a page ONLY via
+ * explicit inclusion at the 7b structure gate (phase 4). Do not add a
+ * derivation rule for any of them below without a founder gate.
+ * Asserted in structureConvergence.test.ts.
+ */
+export const EXPLICIT_TRIGGER_CAPABILITIES: readonly CapabilityId[] = [
+  'trust',
+  'industries',
+  'about',
+  'materials',
+  'process',
+];
+
+/**
  * §7.2 fixed derivation table, v0 scope:
  * - businessType entry's requiredCapabilities (unknown key contributes none —
  *   the SERVE GATE, spec 02+, is what rejects unknown types)
  * - mechanism M1 → lead-form; intent download-app → store-badges
  * - structure.mode === 'multi' → multipage
  * (No language field on Brief yet → no bilingual derivation; spec 02+.)
+ * (EXPLICIT_TRIGGER_CAPABILITIES are deliberately absent from this table —
+ * see the constant's doc above.)
  */
 export function requiredCapabilitiesFromBrief(brief: Brief): CapabilityId[] {
   const required = new Set<CapabilityId>();

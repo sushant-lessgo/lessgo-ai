@@ -45,8 +45,10 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
   meridian: {
     copyEngines: ['thing'],
     designStyles: ['tech-minimal'],
-    capabilities: ['lead-form'],
-    capabilitySections: { 'lead-form': 'cta' },
+    // scale-07 phase 2 convergence: meridian's ex-pilot extras map to
+    // capabilities (founder mapping): pricing→packages, cta→lead-form.
+    capabilities: ['lead-form', 'packages'],
+    capabilitySections: { 'lead-form': 'cta', packages: 'pricing' },
   },
   vestria: {
     copyEngines: ['thing'],
@@ -54,8 +56,31 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
     // NOTE (structural caps): `multipage` is trust-on-declaration — it's
     // page-menu machinery, not a block; no block-existence check covers it
     // yet (conformance exempts structural capabilities).
-    capabilities: ['multipage', 'lead-form', 'catalog'],
-    capabilitySections: { 'lead-form': 'contact', catalog: 'catalog' },
+    //
+    // scale-07 phase 2 convergence: vestria's ex-pilot extra sections map to
+    // capabilities (founder mapping, 2026-07-09). trust/industries/about/
+    // materials/process are EXPLICIT-TRIGGER only — never auto-inferred by
+    // requiredCapabilitiesFromBrief(); they enter via the 7b structure gate
+    // (phase 4). catalog + lead-form keep their existing auto-triggers.
+    capabilities: [
+      'multipage',
+      'lead-form',
+      'catalog',
+      'trust',
+      'industries',
+      'about',
+      'materials',
+      'process',
+    ],
+    capabilitySections: {
+      'lead-form': 'contact',
+      catalog: 'catalog',
+      trust: 'trust',
+      industries: 'industries',
+      about: 'about',
+      materials: 'materials',
+      process: 'process',
+    },
   },
   hearth: {
     copyEngines: ['trust'],

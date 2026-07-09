@@ -128,6 +128,30 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
     }
   });
 
+  // ── (b+) scale-07 phase 2: EVERY capabilitySections VALUE is a real block ──
+  // Stronger than (b): (b) walks declared capabilities → entry; this walks the
+  // map itself, so a stale/undeclared entry pointing at a dead section is also
+  // red. Both renderers ('edit' + 'published') via resolvesReal.
+  describe('(b+) every capabilitySections value resolves to a real block in BOTH renderers', () => {
+    for (const templateId of templateIds) {
+      const meta = templateMeta[templateId];
+      const entries = Object.entries(meta.capabilitySections ?? {});
+      if (entries.length === 0) continue;
+
+      describe(templateId, () => {
+        for (const [capability, sectionType] of entries) {
+          it(`${capability} → "${sectionType}": real block (edit + published)`, () => {
+            resolvesReal(templateId, sectionType!);
+          });
+
+          it(`${capability} → declared in the template's capabilities list (no orphan evidence)`, () => {
+            expect(meta.capabilities).toContain(capability);
+          });
+        }
+      });
+    }
+  });
+
   // ── sanity: the STRUCTURAL exemption stays inside the closed vocab ─────────
   it('structural capability list is a subset of the closed capability vocab', () => {
     for (const c of STRUCTURAL_CAPABILITIES) {

@@ -25,8 +25,8 @@ Section lists stop being template property. A new engine-owned section grammar (
 
 ## Progress log
 
-- phase 1 engine-owned section grammar (behavior-preserving wiring): done (review loops 1, ship, 1389 tests green; nit: import order, deferred — consts deleted in phase 2)
-- phase 2 meridian/vestria core convergence + capability mapping: pending
+- phase 1 engine-owned section grammar (behavior-preserving wiring): done (commit 84a43b5, review loops 1, ship, 1389 tests green; nit: import order, deferred — consts deleted in phase 2)
+- phase 2 meridian/vestria core convergence + capability mapping: done (review loop 1, ship, 1437 tests green; interim: meridian new-gen 5-core until phase-4 step-0 Brief plumbing restores pricing/cta)
 - phase 3 restore multipage fan-out + strategy-before-structure sequencing: pending
 - phase 4 universal 7b gate (single-page mode + clamp law + trust GA): pending
 - phase 5 multipage keyed by capability (sitemap for all): pending
@@ -145,6 +145,7 @@ Refresh deliberately; audit lists each diff with before/after section lists.
 - `src/hooks/useWizardStore.test.ts` or nearest wizard test file (edit — trust slot order now includes structure; single-page toggle fixtures)
 
 **Steps:**
+0. **Explicit Brief plumbing (phase-2 carryover — do NOT skip):** pass the resolved `brief` (+ derived required capabilities) into `selectProductSections` at the single-page call site `parseStrategyProduct.ts:156` (today passes `{ templateId }` only). Phase 2 made meridian `pricing`/`cta` Brief-gated capability sections; without this plumbing meridian new-gen pages stay 5-core (no pricing/cta). This step restores them: an M1/pricing Brief re-surfaces `cta`/`pricing`. Mirror for service at `parseStrategyService.ts:41` if needed.
 1. Single-page gate UI: grammar-produced list rendered with required sections locked (from engine core), capability/gated optionals toggleable off, reorder within allowed bounds, "Looks good" = default accept.
 2. Wire toggle-off into confirmed structure → grammar/copy prompt sees the reduced list (acceptance: testimonials off ⇒ zero testimonial copy generated).
 3. Clamp: single-page confirmed list passes through the same law as multipage pages.

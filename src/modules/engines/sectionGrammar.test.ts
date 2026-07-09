@@ -10,14 +10,15 @@
 import { describe, it, expect } from 'vitest';
 import { selectServiceSections } from '@/modules/audience/service/sectionSelection';
 import type { ServicePresentationFormat } from '@/modules/audience/service/sectionSelection';
-import {
-  selectProductSections,
-  MERIDIAN_PILOT_SECTIONS,
-  VESTRIA_PILOT_SECTIONS,
-} from '@/modules/audience/product/sectionSelection';
-import { buildSectionList } from './sectionGrammar';
 import { serviceAwarenessStates } from '@/types/service';
 import type { ServiceAwareness, ServiceAssetInput } from '@/types/service';
+
+// NOTE (scale-07 phase 2): the product pilot-list equivalence coverage that
+// lived here died with MERIDIAN_PILOT_SECTIONS / VESTRIA_PILOT_SECTIONS and
+// the grammar's `extras` escape hatch. Product section selection is now
+// covered by structureConvergence.test.ts (engine core + capability sections).
+// The service (trust) equivalence matrix below is unchanged — phase 2 does not
+// touch trust ordering/gating behavior.
 
 // ---------------------------------------------------------------------------
 // FROZEN reference — verbatim capture of selectServiceSections before the
@@ -138,18 +139,6 @@ describe('sectionGrammar equivalence — literal anchors', () => {
     ).toEqual(['header', 'hero', 'about', 'services', 'stats', 'cta', 'footer']);
   });
 
-  it('meridian pilot list verbatim', () => {
-    expect(selectProductSections()).toEqual([
-      'header', 'hero', 'features', 'testimonials', 'pricing', 'cta', 'footer',
-    ]);
-  });
-
-  it('vestria pilot list verbatim', () => {
-    expect(selectProductSections({ templateId: 'vestria' })).toEqual([
-      'header', 'hero', 'trust', 'industries', 'about', 'features', 'catalog',
-      'materials', 'process', 'testimonials', 'contact', 'footer',
-    ]);
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -236,28 +225,5 @@ describe('sectionGrammar equivalence — awareness fallback', () => {
       assets,
     });
     expect(out).toEqual(['header', 'hero', 'services', 'testimonials', 'packages', 'cta', 'footer']);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Product — pilot lists via the temporary `extras` escape hatch
-// ---------------------------------------------------------------------------
-
-describe('sectionGrammar equivalence — product pilot lists', () => {
-  it('meridian (default + explicit templateId) matches MERIDIAN_PILOT_SECTIONS', () => {
-    expect(selectProductSections()).toEqual([...MERIDIAN_PILOT_SECTIONS]);
-    expect(selectProductSections({})).toEqual([...MERIDIAN_PILOT_SECTIONS]);
-    expect(selectProductSections({ templateId: 'meridian' })).toEqual([...MERIDIAN_PILOT_SECTIONS]);
-    expect(selectProductSections({ templateId: 'techpremium' })).toEqual([...MERIDIAN_PILOT_SECTIONS]);
-  });
-
-  it('vestria matches VESTRIA_PILOT_SECTIONS', () => {
-    expect(selectProductSections({ templateId: 'vestria' })).toEqual([...VESTRIA_PILOT_SECTIONS]);
-  });
-
-  it('extras pass through the grammar verbatim and return a fresh array', () => {
-    const out = buildSectionList({ engine: 'thing', extras: MERIDIAN_PILOT_SECTIONS });
-    expect(out).toEqual([...MERIDIAN_PILOT_SECTIONS]);
-    expect(out).not.toBe(MERIDIAN_PILOT_SECTIONS);
   });
 });

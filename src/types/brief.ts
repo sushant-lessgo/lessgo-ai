@@ -32,6 +32,16 @@ export const capabilityIds = [
   'lead-form',
   'packages',
   'blog',
+  // scale-07 phase 2 (founder-approved extension, discovery-driven): vestria's
+  // non-mappable extra sections become EXPLICIT-TRIGGER capabilities. They are
+  // NEVER auto-inferred by requiredCapabilitiesFromBrief() (fit.ts) — they
+  // enter a page only via explicit inclusion at the 7b structure gate. See
+  // EXPLICIT_TRIGGER_CAPABILITIES in src/modules/templates/fit.ts.
+  'trust',
+  'industries',
+  'about',
+  'materials',
+  'process',
 ] as const;
 export type CapabilityId = (typeof capabilityIds)[number];
 
