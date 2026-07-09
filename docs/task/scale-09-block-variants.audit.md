@@ -112,3 +112,56 @@
 
 ### Open risks
 - None for this phase. First real non-default variants (which will exercise the `!==` distinctness branch live) land in phases 6–7; the guard is in place ahead of them.
+
+## Phase 4 — eligibility filter + selection threading
+
+**Files changed**
+- `src/modules/generation/blockEligibility.ts` — new (pure eligibility filter + derivations)
+- `src/modules/generation/blockEligibility.test.ts` — new
+- `src/modules/audience/product/selectBlocks.ts` — manifest-driven pick + optional signals
+- `src/modules/audience/service/selectUIBlocks.ts` — manifest-driven pick; deleted phase-1 `pickTemplateLayout` surge stopgap
+- `src/modules/audience/service/selectUIBlocks.test.ts` — extended (optional-signal paths)
+- `src/modules/audience/product/strategy/parseStrategyProduct.ts` — thread signals
+- `src/modules/audience/service/strategy/parseStrategyService.ts` — thread signals
+- `src/modules/wizard/generation/thing.ts` — thread hints
+- `src/modules/generation/multiPageAssembly.ts` — thread hints
+- `src/modules/prompt/mockResponseGeneratorProduct.ts` — thread hints
+- `src/modules/prompt/mockResponseGeneratorService.ts` — thread facts
+
+### AssetFacts shape + derivation sources
+- `AssetFacts = { hasPhotos, hasLogos, hasTestimonials, hasTestimonialPhotos }` (typed booleans). The AssetKind keys (photos/logos/testimonialPhotos) gate eligibility via `assetFactForKind`; `hasTestimonials` carried for derivation completeness.
+- `deriveAssetFactsFromServiceAssets(ServiceAssetInput)`: hasPhotos = hasTeamPhotos||hasFounderPhoto; hasLogos = hasClientLogos; hasTestimonials = hasTestimonials; hasTestimonialPhotos = hasTestimonials && testimonialType==='photos' (conservative — text/video/transformation excluded).
+- `deriveAssetFactsFromBrief(Brief)`: reads top-level `proofAvailable` string kinds (substring match: 'photo'/'image'/'gallery' → hasPhotos; 'logo' → hasLogos; 'testimonial' → hasTestimonials) plus `facts.entry.testimonials[]` non-empty → hasTestimonials. Read inline (no `classify.ts` import) to keep the module a leaf.
+
+### selectEligibleBlock fallback order
+- `eligible(v) = capacityFits(cardCountHint) ∧ assetNeedsMet(assetFacts)`. capacityFits: no capacity OR no hint ⇒ true, else min≤hint≤max. assetNeedsMet: no requiresAssets ⇒ true; absent assetFacts ⇒ UNMET (conservative); else every required AssetKind true.
+- `pickFromSet`: **default if eligible → else first eligible in declaration order → else default** (never fails).
+- `selectEligibleBlock(templateId, sectionType, opts)`: no manifest entry ⇒ returns `null` so callers fall back to the legacy name map (MERIDIAN/VESTRIA/PILOT_LAYOUT_NAMES). Manifest defaults were verified equal to the legacy maps (meridian 7, hearth 7 core, surge testimonials=ReviewGrid, vestria hero=VestriaTailoredHero), so existing single-variant sections return the same default with or without signals.
+
+### Call-site threadings (6)
+- `parseStrategyProduct.ts` — assetFacts from `deriveAssetFactsFromBrief(brief)` when brief in scope; `cardCountHints.features = llmResponse.featureAnalysis.length`.
+- `parseStrategyService.ts` — assetFacts from `deriveAssetFactsFromServiceAssets(assets)` (assets already in scope).
+- `thing.ts` (fan-out) — `cardCountHints.features = fanFeatures.length`, `cardCountHints.testimonials = ob.importedTestimonials.length`.
+- `multiPageAssembly.ts` (mergePageIntoFinalContent) — same hints from `fc.onboardingData` (understanding.valueAdds/features + importedTestimonials).
+- `mockResponseGeneratorProduct.ts` — `cardCountHints.features = input.features.length`.
+- `mockResponseGeneratorService.ts` — assetFacts from `deriveAssetFactsFromServiceAssets(input.assets)`.
+All signals OPTIONAL; no manifest declaration currently has `requiresAssets`, and single-variant sections always fall back to their default, so every threading is a no-op for today's output.
+
+### Firewall confirmation
+`blockEligibility.ts` imports: `blockManifests` (pure data) + type-only imports (`AssetKind`/`BlockDeclaration`/`SectionBlockSet` from blockManifest, `TemplateId`/`ServiceAssetInput` from types/service, `Brief` from types/brief — all erased at compile). ZERO component / `.tsx` / `'use client'` / resolver / element-schema imports. Server-side selection code imports it freely; tsc + full build (phase 3) confirm no bundle leak.
+
+### Fixture stability
+`generationContract.test.ts` (`src/modules/audience/__tests__/`) — 17 tests pass, fixtures byte-stable (no re-freeze). Existing template defaults unchanged.
+
+### Deviations
+- Exported `isBlockEligible` + `pickFromSet` (pure) so the ACCEPTANCE test (requiresAssets:['photos'] absent when hasPhotos=false) and the fallback-order branches can be asserted against synthetic declarations — no real manifest declares a non-default variant yet. `selectEligibleBlock` additionally tested against real manifest data (unknown⇒null, no-hint⇒default, capacity out-of-range⇒default, surge determinism).
+- Product asset facts NOT threaded from the mock (mock has `proof`, not a full Brief); only cardCountHints threaded there. In-scope conservative choice — determinism/output unaffected.
+
+### Verification (actual output)
+- `npx tsc --noEmit` — clean, no output.
+- `npx vitest run blockEligibility.test.ts selectUIBlocks.test.ts` — 2 files, 32 tests passed.
+- `npx vitest run generationContract.test.ts` — 1 file, 17 tests passed (fixtures stable).
+- `npm run test:run` (full) — 101 passed | 1 skipped files; 1678 passed | 3 skipped tests (+1 file, +27 tests vs phase 3). Suite green.
+
+### Open risks
+- None for this phase. The eligibility branches (capacity out / asset filter) have no LIVE non-default variant to exercise until phases 6–7 land real variants; the phase-4 tests prove the mechanism via synthetic declarations ahead of them.

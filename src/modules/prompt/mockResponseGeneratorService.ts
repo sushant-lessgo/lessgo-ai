@@ -14,6 +14,7 @@ import type {
 import type { SectionCopy } from '@/types/generation';
 import { selectServiceSections } from '@/modules/audience/service/sectionSelection';
 import { selectServiceUIBlocks } from '@/modules/audience/service/selectUIBlocks';
+import { deriveAssetFactsFromServiceAssets } from '@/modules/generation/blockEligibility';
 
 export interface MockServiceStrategyInput {
   oneLiner: string;
@@ -34,7 +35,13 @@ export function generateMockServiceStrategy(
     assets: input.assets,
     templateId: (input.templateId as any) ?? null,
   });
-  const { uiblocks } = selectServiceUIBlocks({ sections, templateId: (input.templateId as any) ?? null });
+  // scale-09 phase 4 — thread asset facts from the mock's typed asset booleans.
+  // No-op for existing single-variant sections; keeps mock output stable.
+  const { uiblocks } = selectServiceUIBlocks({
+    sections,
+    templateId: (input.templateId as any) ?? null,
+    assetFacts: deriveAssetFactsFromServiceAssets(input.assets),
+  });
 
   return {
     awareness: 'search-aware-comparing',

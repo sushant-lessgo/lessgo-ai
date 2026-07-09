@@ -39,3 +39,43 @@ describe('selectServiceUIBlocks — deterministic surge testimonials', () => {
     expect(Object.keys(out.uiblocks)).toHaveLength(0);
   });
 });
+
+describe('selectServiceUIBlocks — optional phase-4 selection signals', () => {
+  const ALL_ASSETS = {
+    hasPhotos: true,
+    hasLogos: true,
+    hasTestimonials: true,
+    hasTestimonialPhotos: true,
+  };
+
+  it('surge testimonials stays ReviewGrid regardless of cardCountHints', () => {
+    for (const n of [0, 1, 2, 3, 10]) {
+      const out = selectServiceUIBlocks({
+        sections: ['testimonials'],
+        templateId: 'surge',
+        cardCountHints: { testimonials: n },
+      });
+      expect(out.uiblocks.testimonials).toBe('ReviewGrid');
+    }
+  });
+
+  it('threading assetFacts does not change existing single-variant picks', () => {
+    const out = selectServiceUIBlocks({
+      sections: ['hero', 'services', 'testimonials'],
+      templateId: 'hearth',
+      assetFacts: ALL_ASSETS,
+    });
+    expect(out.uiblocks.hero).toBe(PILOT_LAYOUT_NAMES.hero);
+    expect(out.uiblocks.services).toBe(PILOT_LAYOUT_NAMES.services);
+    expect(out.uiblocks.testimonials).toBe(PILOT_LAYOUT_NAMES.testimonials);
+  });
+
+  it('hearth services capacity hint out-of-range still yields the default', () => {
+    const out = selectServiceUIBlocks({
+      sections: ['services'],
+      templateId: 'hearth',
+      cardCountHints: { services: 99 },
+    });
+    expect(out.uiblocks.services).toBe(PILOT_LAYOUT_NAMES.services);
+  });
+});

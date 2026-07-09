@@ -20,7 +20,8 @@ Give each section type 2–3 copy-compatible blocks per template, selected deter
 
 - phase 1 surge deterministic default: done (commit 72c5a54f, review loops 1)
 - phase 2 block manifest data model + declarations: done (commit 377792ed, review loops 1)
-- phase 3 variant-aware resolveBlock: pending
+- phase 3 variant-aware resolveBlock: done (commit e1ced401, review loops 1)
+  - CARRY TO PHASE 6/7: once a section has >1 variant, ensure the manifest's `default` layoutName string EXACTLY matches the resolver's registered default key — the distinctness test resolves default via `set.default`, and a manifest/resolver default-name divergence is NOT independently caught. Reviewer must check this when new variants land.
 - phase 4 eligibility filter + selection threading: pending
 - phase 5 editor swap generalization + card-count clamp: pending
 - phase 6 meridian variants (3 new dual-renderer pairs): pending

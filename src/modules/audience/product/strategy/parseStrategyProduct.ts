@@ -15,6 +15,7 @@ import type {
 } from '@/lib/schemas/productStrategy.schema';
 import { selectProductSections } from '../sectionSelection';
 import { selectProductBlocks } from '../selectBlocks';
+import { deriveAssetFactsFromBrief } from '@/modules/generation/blockEligibility';
 import {
   getPageArchetypesForTemplate,
   isMultipage,
@@ -278,7 +279,19 @@ export function assembleProductStrategy(
     }
   }
 
-  const { uiblocks } = selectProductBlocks({ sections, templateId });
+  // scale-09 phase 4 — OPTIONAL deterministic selection signals (all no-ops for
+  // existing single-variant sections; the declared default is returned either
+  // way). Card-count hint from the strategy's feature list; asset facts from the
+  // Brief's proof signals.
+  const cardCountHints: Record<string, number> = {};
+  const featureCount = llmResponse.featureAnalysis?.length ?? 0;
+  if (featureCount > 0) cardCountHints.features = featureCount;
+  const { uiblocks } = selectProductBlocks({
+    sections,
+    templateId,
+    cardCountHints,
+    ...(brief ? { assetFacts: deriveAssetFactsFromBrief(brief) } : {}),
+  });
 
   return {
     awareness: llmResponse.awareness,
