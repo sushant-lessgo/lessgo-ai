@@ -423,3 +423,73 @@ The fetch-SKIP variant ("mark done, don't fetch") was evaluated and rejected as 
 - Persisted structure is written at EVERY post-structure `save()` (current-truth rewrite) — idempotent, but if a future slot after `structure` mutates sitemap/sections client-side, that mutation persists on its Continue too (today only `generating` follows, whose Continue is disabled).
 - Multipage resume still re-charges the strategy fetch (see charge-dedup scope) — acceptable/unchanged, but a founder-visible cost if abandon-after-confirm becomes common.
 - `briefStructureMode` is only set from a CONFIRMED structure; classify's `structureHint` still reaches detection only via businessType default — intentional (fresh-run behavior preservation), but a hypothetical future writer of a bare `{mode}` structure would not steer the slot until it also writes sections/pageDetails.
+
+## Phase 7 — template swap post-gen + meridian unlock
+
+**Files changed**
+- `src/app/edit/[token]/components/ui/TemplateSwapList.tsx` (pre-existing from the aborted prior run — KEPT UNCHANGED after assessment)
+- `src/app/edit/[token]/components/layout/EditHeader.tsx` (edited)
+- `src/app/edit/[token]/components/ui/VestriaThemePopover.tsx` (edited)
+- `src/app/edit/[token]/components/ui/ServiceThemePopover.tsx` (edited)
+- `src/modules/templates/swap.test.ts` (new)
+- `docs/task/scale-07-structure-convergence.audit.md` (this appendix)
+
+Pre-existing working-tree noise NOT mine (predates this session, untouched): `docs/task/scale-07-structure-convergence.plan.md` (phase-6 commit-sha fixup), deleted `docs/task/scale.md`, untracked `docs/guides/collections.md` + `docs/task/scale-10-collections.spec.md`.
+
+### Assessment of the prior attempt's TemplateSwapList.tsx — kept as-is
+
+Reviewed line-by-line; sound and complete, zero edits needed:
+- Pure exported helpers (`deriveSwapSite`, `swapShortlist`, `buildSwapPatch`) separate from the UI — exactly what swap.test.ts needs.
+- `deriveSwapSite`: `${type}-${uuid}` → `split('-')[0].toLowerCase()` (the codebase-canonical extraction, matches componentRegistry/backgroundIntegration); unions top-level working copy + every `pages` slice (mirror-strategy conservative superset); `multipage = pages entries > 1` (home-only stored page ⇒ effectively single-page, meridian-renderable).
+- `swapShortlist`: engine from `templateMeta[current].copyEngines[0]` (retired current ⇒ `[]`); builds a `ConfirmedStructure`-equivalent → `requiredCapabilitiesFromStructure(structure, engine)` (phase-6 fn, engine-scoped) → `fit()` per candidate (same-engine + capability hard-fit + retired/bespoke exclusion) → PLUS section-coverage check: every site section ∈ engine core ∪ candidate's `capabilitySections` values. Unknown/legacy section type conservatively empties the list (swap section hides rather than offering a breaking swap).
+- `buildSwapPatch`: exactly `{templateId, variantId: incoming default, paletteId: incoming default}` — never carries outgoing ids (they may not exist on the target).
+- UI reuses ServiceThemePopover's mechanism verbatim (pending → amber confirm → `preloadTemplate` via registry dynamic loader → parent commits); bundle firewall intact (no static template import). Renders nothing when no eligible target.
+
+### Shortlist derivation (plan step 1)
+
+Store layout (`sections` + `pages` from `useEditStoreLegacy`) → deduped section types → ConfirmedStructure-equivalent (`{mode:'single', sections}` or `{mode:'multi', pageDetails:[…]}`) → `requiredCapabilitiesFromStructure` (phase 6) → `fit()` per candidate + coverage check. Multipage sites derive the `multipage` capability via `mode:'multi'`, excluding meridian automatically. Did NOT read the wizard store's phase-6 `requiredCapabilities` field — that is onboarding-state; the edit page must derive from the ACTUAL stored layout (post-gen edits/deletions included), which is what the plan's "site's ACTUAL sections" means.
+
+### File-by-file
+
+- **EditHeader.tsx** — locked-label branch (old :40-51) DELETED with its `titleCase`/`templateLabels`/`paletteId`/`variantId` supports; product template-module projects (meridian + vestria + retired techpremium) all route to `VestriaThemePopover` (meridian UNLOCK). Added branch: writer/granth (`usesTemplate` true, non-product) renders `null` — previously it hit the locked label; letting it fall to legacy `ThemePopover` (old-product color system) would be a regression, so no controls (conservative; granth is white-glove).
+- **VestriaThemePopover.tsx** — generalized from vestria-only to any product template-module project: gate = `audienceType==='product' && usesTemplateModule(...)`; variants from `getLoadedTemplate(templateId)` (vestria keeps its fallback trio; others hide the section until loaded); palettes via `palettesForTemplate` (grid cols 8/9 adaptive); mood knob vestria-only (themeValues.mood → VestriaThemeInjector). Added the `TemplateSwapList` section + `handleSwap` (updateMeta(buildSwapPatch) + posthog `template_changed` + autosave — same shape as service's).
+- **ServiceThemePopover.tsx** — inline all-templateIds switcher (rows + pending + confirm + preload) replaced by `<TemplateSwapList current site onSwap>`; the swap COMMIT (`updateMeta` defaults-reset + posthog + `triggerAutoSave` + force-rerender) stays here in `handleSwap`, so the existing mechanism/analytics/persistence are unchanged — only the list membership is now fit-filtered. Variant/palette sections untouched.
+- **swap.test.ts** — 18 tests, see below.
+
+### Zero-word-change proof
+
+Structural, not incidental: `buildSwapPatch`'s return type is exactly `{templateId, variantId, paletteId}` and both popovers commit via `updateMeta(patch)` — no code path touches `content`/`sections`. Tests pin it: patch-key-set equality (`['paletteId','templateId','variantId']`), deep-equal of `content` + `sections` before/after meridian→vestria on a converged frozen fixture, word-count invariance, and a full meridian→vestria→meridian round-trip restoring meta with content byte-identical throughout.
+
+### Exclusion proofs (the safety point)
+
+- **Cross-engine ABSENT:** thing-site shortlist contains none of hearth/lex/surge/granth/lumen (asserted per-id); trust core site → exactly `[hearth, lex, surge]`.
+- **Ineligible ABSENT:** site with `catalog` ⇒ meridian excluded (no catalog block); multipage site ⇒ meridian excluded (no multipage capability); meridian site with `cta`/`pricing` ⇒ vestria excluded (its lead-form/packages evidence sections are `contact`/`catalog`, not meridian's `cta`/`pricing` — swapping would drop rendered sections); surge site with `logos`/`casestudies`/`stats` ⇒ hearth/lex excluded.
+- **Retired/bespoke ABSENT:** techpremium + lumen never appear; retired CURRENT template (techpremium/naayom) ⇒ empty list, template section hides.
+
+### Default variant/palette handling
+
+Swap always applies the INCOMING module's `defaultVariantId`/`defaultPaletteId` (module obtained from `preloadTemplate(target)` inside TemplateSwapList before commit — no render gap, firewall-safe). Asserted: patch ids ≠ outgoing ids, = module defaults.
+
+### Deviations (conservative calls, in-scope)
+
+1. **Writer audience → `null` controls in EditHeader** (was locked label; not the legacy ThemePopover). Plan only names product; leaving writer on a deleted branch was undefined — `null` is the conservative floor.
+2. **techpremium (naayom) is no longer "locked":** the plan mandates deleting the locked branch and routing product non-vestria to the same popover. Techpremium now gets variant/palette pickers (template list stays empty — no engine ⇒ no swap targets). Its palette family is a single entry (`forest`) and variants come from the loaded module, so the practical change surface is ~nil; flagged for the phase-9 manual pass anyway.
+3. **Surge-origin (and any site carrying non-core, non-capability sections, e.g. legacy trust sites or surge's logos/about/casestudies/stats) loses swap-AWAY** — the template section hides entirely. This is the fit-filter working as specified (hearth cannot render `logos`); the pre-phase-7 popover would have offered a section-dropping swap. Behavior change is deliberate and safety-directional.
+4. **Shortlist reads store layout, not wizard-store `requiredCapabilities`** — see derivation note above.
+
+### Test results (phase 7)
+
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — **Test Files 95 passed | 1 skipped (96) · Tests 1517 passed | 2 skipped (1519)** (phase-6 baseline 1499 + 18 new swap tests, zero regressions; dispatch + paletteSelection regression suites included and green).
+- `next lint` on the 4 touched components — clean.
+- New `swap.test.ts` (18/18): deriveSwapSite (id parsing, pages union, multipage flag), same-engine, only-eligible (catalog/multipage/cta-pricing/surge-delta), retired/bespoke/unknown-section exclusion, trust-core swap preservation, patch shape, defaults-not-carryover, zero-section-loss + zero-word-change, round-trip.
+
+### Acceptance reasoning (plan verification #3)
+
+Meridian product page → EditHeader now routes to the product popover (lock gone) → Template section lists `fit()`-passed same-engine candidates over the site's actual sections: a converged (5-core) meridian site offers vestria; a meridian site still carrying `cta`/`pricing` does NOT (vestria can't render those types — safety over availability; those sites re-converge via regen or a future alias). Confirm → preload vestria chunk → `updateMeta({templateId:'vestria', variantId:'tailored', paletteId:'cobalt'})` → autosave. Content/sections untouched; both renderers resolve every core section under the new template per the standing dispatch-regression + conformance guarantees (no block edits this phase).
+
+### Open risks (phase 7)
+
+- The coverage check's "renderable set" = engine core ∪ declared `capabilitySections` only — templateMeta has no vocabulary for extra renderable-but-undeclared sections, so sites carrying them (surge deltas, legacy service sections) get an empty swap list. Correct-by-construction but shrinks swap availability; revisit if/when templateMeta grows a declared-sections field.
+- Mirror-strategy staleness: `pages[currentPageId]` can lag the top-level working copy between commit boundaries; the union can therefore include a just-deleted section until the next page commit — over-excludes (safe direction), never under-excludes.
+- Manual visual pass (swap meridian→vestria→meridian in dev, editor↔published parity) deferred to phase 9's QA per plan.

@@ -3,6 +3,12 @@
 // Service template + variant + palette picker for the editor (Phase 11b).
 // Rendered only for audienceType==='service' (product keeps ThemePopover).
 //
+// scale-07 phase 7: the template switcher list is FIT-FILTERED via the shared
+// TemplateSwapList — a target appears only if it can render every section this
+// site currently has, on the same copy engine (was: all service templateIds).
+// The swap mechanism (preload → templateId + incoming defaults, content
+// untouched) is the same one this popover always had, now extracted there.
+//
 // FIREWALL: editor code must not static-import a template module. The active
 // template module is read via getLoadedTemplate() (the renderer already
 // preloaded it); switching preloads the target via the registry's dynamic
@@ -12,17 +18,19 @@
 
 import React, { useState } from 'react';
 import { usePostHog } from 'posthog-js/react';
-import { Check, Loader2 } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import {
-  templateIds,
-  templateLabels,
-  templateBlurbs,
   palettesForTemplate,
   type TemplateId,
 } from '@/types/service';
-import { getLoadedTemplate, preloadTemplate } from '@/modules/templates/registry';
+import type { TemplateModule } from '@/types/template';
+import { getLoadedTemplate } from '@/modules/templates/registry';
+import {
+  TemplateSwapList,
+  deriveSwapSite,
+  buildSwapPatch,
+} from './TemplateSwapList';
 
 export function ServiceThemePopover() {
   const {
@@ -30,14 +38,14 @@ export function ServiceThemePopover() {
     templateId,
     variantId,
     paletteId,
+    sections,
+    pages,
     updateMeta,
     triggerAutoSave,
   } = useEditStore();
 
   const posthog = usePostHog();
   const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState<TemplateId | null>(null);
-  const [switching, setSwitching] = useState(false);
   const [, force] = useState(0);
 
   // Only service projects get this panel.
@@ -69,32 +77,22 @@ export function ServiceThemePopover() {
     persist();
   };
 
-  const confirmTemplate = async (target: TemplateId) => {
-    setSwitching(true);
-    try {
-      // Preload before committing so blocks resolve without a render gap.
-      const m = await preloadTemplate(target);
-      // Reset BOTH variant + palette to the new template's defaults (cross-
-      // template ids don't overlap — PO gap).
-      updateMeta({
-        templateId: target,
-        variantId: m.defaultVariantId,
-        paletteId: m.defaultPaletteId,
-      });
-      posthog?.register({ templateId: target, variantId: m.defaultVariantId });
-      posthog?.capture('template_changed', {
-        audienceType: 'service',
-        from: tid,
-        to: target,
-        variantId: m.defaultVariantId,
-        paletteId: m.defaultPaletteId,
-      });
-      persist();
-      setPending(null);
-      force((n) => n + 1);
-    } finally {
-      setSwitching(false);
-    }
+  // Commit a swap prepared by TemplateSwapList (target already preloaded).
+  // Reset BOTH variant + palette to the new template's defaults (cross-
+  // template ids don't overlap — PO gap); content untouched (buildSwapPatch).
+  const handleSwap = (target: TemplateId, m: TemplateModule) => {
+    const patch = buildSwapPatch(target, m);
+    updateMeta(patch);
+    posthog?.register({ templateId: target, variantId: patch.variantId });
+    posthog?.capture('template_changed', {
+      audienceType: 'service',
+      from: tid,
+      to: target,
+      variantId: patch.variantId,
+      paletteId: patch.paletteId,
+    });
+    persist();
+    force((n) => n + 1);
   };
 
   const triggerSwatch = activePalette;
@@ -117,66 +115,12 @@ export function ServiceThemePopover() {
 
       <PopoverContent side="bottom" align="start" className="w-80 p-0">
         <div className="p-4 space-y-4">
-          {/* ─── Template ─── */}
-          <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">Template</p>
-            <div className="space-y-2">
-              {templateIds.map((id) => {
-                const isActive = tid === id;
-                const isPending = pending === id;
-                return (
-                  <div key={id}>
-                    <button
-                      onClick={() => {
-                        if (isActive) return;
-                        setPending(id as TemplateId);
-                      }}
-                      aria-pressed={isActive}
-                      className={`w-full text-left rounded-lg border p-2.5 transition ${
-                        isActive
-                          ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50/40'
-                          : 'border-gray-200 hover:border-gray-400'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-900">
-                          {templateLabels[id]}
-                        </span>
-                        {isActive && <Check className="h-4 w-4 text-blue-500" />}
-                      </div>
-                      <span className="block text-xs text-gray-500 mt-0.5">
-                        {templateBlurbs[id]}
-                      </span>
-                    </button>
-
-                    {isPending && !isActive && (
-                      <div className="mt-1.5 rounded-md bg-amber-50 border border-amber-200 p-2.5 text-xs text-amber-900">
-                        Switch to {templateLabels[id]}? Your copy stays — the
-                        design re-skins and the palette resets.
-                        <div className="mt-2 flex gap-2">
-                          <button
-                            onClick={() => confirmTemplate(id as TemplateId)}
-                            disabled={switching}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-amber-600 text-white font-medium hover:bg-amber-700 disabled:opacity-60"
-                          >
-                            {switching && <Loader2 className="h-3 w-3 animate-spin" />}
-                            Switch
-                          </button>
-                          <button
-                            onClick={() => setPending(null)}
-                            disabled={switching}
-                            className="px-2.5 py-1 rounded border border-amber-300 text-amber-800 hover:bg-amber-100"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          {/* ─── Template (fit-filtered swap — hides when no eligible target) ─── */}
+          <TemplateSwapList
+            current={tid}
+            site={deriveSwapSite(sections, pages)}
+            onSwap={handleSwap}
+          />
 
           {/* ─── Variant ─── */}
           {variants.length > 0 && (
