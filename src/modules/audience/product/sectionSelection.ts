@@ -34,11 +34,19 @@ export const VESTRIA_PILOT_SECTIONS = [
   'footer',
 ] as const;
 
+import { buildSectionList } from '@/modules/engines/sectionGrammar';
+
 export interface SelectProductSectionsOptions {
   templateId?: string;
 }
 
 export function selectProductSections(opts?: SelectProductSectionsOptions): string[] {
-  if (opts?.templateId === 'vestria') return [...VESTRIA_PILOT_SECTIONS];
-  return [...MERIDIAN_PILOT_SECTIONS];
+  // scale-07 phase 1: delegate to the engine-owned section grammar. The pilot
+  // lists ride through the grammar's temporary `extras` escape hatch
+  // (@deprecated — removed in scale-07 phase 2, when the lists become engine
+  // core + Brief-required capability sections). Output is byte-identical to
+  // the pre-grammar implementation (sectionGrammar.test.ts).
+  const extras =
+    opts?.templateId === 'vestria' ? VESTRIA_PILOT_SECTIONS : MERIDIAN_PILOT_SECTIONS;
+  return buildSectionList({ engine: 'thing', extras });
 }
