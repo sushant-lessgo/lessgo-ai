@@ -165,3 +165,65 @@ All signals OPTIONAL; no manifest declaration currently has `requiresAssets`, an
 
 ### Open risks
 - None for this phase. The eligibility branches (capacity out / asset filter) have no LIVE non-default variant to exercise until phases 6–7 land real variants; the phase-4 tests prove the mechanism via synthetic declarations ahead of them.
+
+---
+
+## Phase 5 — editor swap generalization + card-count clamp
+
+**Files changed**
+- `src/app/edit/[token]/components/ui/BlockVariantSelector.tsx` (NEW)
+- `src/app/edit/[token]/components/ui/clampSectionCards.ts` (NEW, pure)
+- `src/app/edit/[token]/components/ui/clampSectionCards.test.ts` (NEW)
+- `src/app/edit/[token]/components/ui/LayoutChangeModal.tsx` (gate rewrite)
+- `src/app/edit/[token]/components/ui/VestriaHeroVariantSelector.tsx` (DELETED)
+- `src/app/edit/[token]/components/toolbars/SectionToolbar.tsx` (swap-button gate)
+
+### BlockVariantSelector (generalized from VestriaHeroVariantSelector)
+Manifest-driven card picker for ANY section whose template manifest declares >1
+variant. Reads `blockManifests[templateId]` (pure data — safe in a `'use client'` file).
+
+- **Eligible variants** = `set.variants.filter(v => v.layoutName === currentLayout || isBlockEligible(v, { assetFacts }))`. Reuses `blockEligibility.isBlockEligible` (imported, NOT edited) with **no `cardCountHint`** so its `capacityFits` is a no-op — capacity does NOT filter in the editor (spec: capacity clamps, not filters). Only `requiresAssets` gates the list. The CURRENT variant is always shown even if its assets are momentarily absent.
+- **Asset facts from CURRENT editor state** — local pure helper `deriveEditorAssetFacts(sectionContent)` scans `content[sectionId].elements`: a non-empty image/photo/video/logo/hero/cover URL string implies `hasPhotos`/`hasLogos`; a non-empty testimonials/review/quote array implies `hasTestimonials` (+ `hasTestimonialPhotos` when its items carry an image/avatar/src URL). This is the Q5 presence-proxy: the "photo variant appears after photos uploaded" case passes because uploading writes a URL into section content, flipping `hasPhotos` true. (Derivation lives in the selector, not in `blockEligibility.ts`, because that file is outside my scope — I only import its pure `isBlockEligible` + `AssetFacts`.)
+- **Apply (no clamp)**: `executeUndoableAction('section-layout-update', ..., () => updateSectionLayout(sectionId, layoutId))` — layout-only, content untouched.
+- Two shared pure helpers exported for the other two files: `getVariantSetForLayout(templateId, layoutName)` (finds the owning `{sectionType,set}` by scanning the manifest for the layout name) and `hasMultipleVariants(...)`.
+
+### Clamp semantics (`clampSectionCards.ts`, pure, no React)
+- `sectionCardCount(section)` = length of the largest top-level array in `elements` (card collections are stored as top-level array elements — the published renderer spreads `...elements` into block props).
+- `clampSectionCards(section, maxCards)` truncates EVERY top-level array element to `maxCards`, **dropping from the END** (Q7 pilot policy), returning `{ content, droppedCount }` where `droppedCount` = drop from the largest truncated collection. No-op (returns the SAME ref, droppedCount 0) when nothing exceeds capacity / no collections / empty / negative `maxCards`. Never mutates input.
+- **Wired in the selector**: on selecting a target whose `capacity.maxCards < sectionCardCount(current)`, an inline amber warning replaces the card grid ("keeps first N cards ... undo restores"); on confirm, ONE `executeUndoableAction` wraps `updateSectionLayout` + `setSection(sectionId, { elements: clampedElements })` so a single undo restores BOTH the layout and the dropped cards. No clamp needed implies layout-only swap.
+
+### LayoutChangeModal gate change
+Replaced the vestria-hero special case (`templateId==='vestria' && sectionType==='hero' && VESTRIA_HERO_LAYOUTS.includes(...)`) with a generic manifest gate: for `usesTemplateModule` projects, resolve `getVariantSetForLayout(templateId, effectiveLayout)`; render `BlockVariantSelector` iff a set is found with `variants.length > 1`, else `null`. Section owner is resolved from the ACTUAL stored layout name (not `sectionType`, which `getSectionTypeFromLayout` unreliably defaults to 'hero'). Vestria hero (2) + surge testimonials (2) now flow through the SAME generic path. Legacy (non-template) projects still use `LayoutChangeSelector` unchanged.
+
+### SectionToolbar gate change
+Verified current behavior: the toolbar previously ALWAYS rendered the "Layout" primary action (it relied on the modal returning null to no-op). Now destructures `audienceType`/`templateId` and computes `showChangeLayout = isTemplateModule ? hasMultipleVariants(templateId, sectionLayouts[sectionId]) : true`, then filters the `change-layout` action out when false. Template sections with a single manifest variant no longer show a dead "Layout" button; legacy projects keep it always.
+
+### Deleted
+`VestriaHeroVariantSelector.tsx` — folded into the generic selector (content-preserving `updateSectionLayout` semantics preserved; `VESTRIA_HERO_LAYOUTS` knowledge now comes from the vestria manifest declared in phase 2). Confirmed no remaining importers (`thing.ts` has its own unrelated local const of the same name).
+
+### Deviations from plan
+- Plan Phase-5 Files-touched lists `blockEligibility.ts` (editor-side asset-fact helper). The orchestrator scope did NOT include it, so I did NOT edit it — the editor asset-fact derivation lives inside `BlockVariantSelector.tsx` instead, importing only the pure `isBlockEligible`/`AssetFacts`. Functionally equivalent, tighter scope.
+- Clamp truncates ALL top-level collection arrays (not a single "primary" collection). Conservative pilot choice: the only live >1-variant section that can clamp is surge testimonials (ReviewGrid cap{1,3} -> PullQuote cap{1,1}); vestria hero has no capacity so never clamps. Logged as an in-scope judgment call.
+
+### Verification (actual output)
+- `npx tsc --noEmit` — clean (no output).
+- `npx vitest run clampSectionCards.test.ts` — 1 file, 9 tests passed.
+- `npm run test:run` (full) — 102 passed | 1 skipped files; 1687 passed | 3 skipped tests. Green, no fixture drift.
+
+### MANUAL-QA CHECKLIST (human gate)
+Run against `npm run dev`, not mocked. Open the editor `/edit/[token]`.
+
+1. **Vestria hero swap parity (live-customer flow, product/vestria project):**
+   - Hover the hero section, toolbar, click **Layout**. Expect the 2-card dialog "Change hero style" with **Tailored hero** + **Full-bleed video hero**, current one badged "Current".
+   - Click the other variant. Dialog closes, hero re-renders in the new style, headline/copy/uploaded media preserved (no regen). Ctrl/Cmd-Z restores the previous layout.
+2. **Surge testimonials swap + clamp (service/surge project with 3 testimonials):**
+   - Testimonials toolbar, **Layout**, dialog "Change testimonials style" with **Review grid** (current) + **Pull quote**.
+   - Pick **Pull quote** (cap maxCards 1, current count 3). Expect the amber warning "keeps the first 1 card and drops 2 at the end". Confirm **Switch & keep first 1**.
+   - Expect: block switches to PullQuote, only the first testimonial remains. **Ctrl/Cmd-Z once** restores BOTH the ReviewGrid layout AND all 3 testimonials (single undo).
+3. **Photo-appears-after-upload (needs a `requiresAssets:['photos']` variant — lands phase 6 on meridian hero):** verify the mechanism indirectly for now — before any image is uploaded the asset-requiring variant is ABSENT from the picker; after uploading a hero image (URL written into section content) reopen the picker and it APPEARS. (No such live variant exists until phase 6; this check is fully exercisable then.)
+4. **Single-variant sections show NO Layout button:** on a meridian/hearth section with only its default block (features/pricing/cta), the toolbar must NOT show a "Layout" action.
+5. **Legacy (non-template) project:** the "Layout" button still opens the full `LayoutChangeSelector` as before.
+
+### Open risks
+- Asset-fact derivation is a heuristic over element key names (regex `image|photo|video|logo|...`). A section using an unconventional collection/URL key could mis-derive facts — only matters once a live `requiresAssets` variant exists (phase 6); tighten then.
+- Clamp truncates all collections uniformly; a section with a large secondary collection (e.g. logos max 6) swapped to a maxCards-1 block would also drop logos to 1. Not reachable with current live variants; revisit if a multi-collection section gains a small-capacity variant.
