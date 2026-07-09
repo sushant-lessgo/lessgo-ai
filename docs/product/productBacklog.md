@@ -1,191 +1,26 @@
 # Product Backlog
 
-Items deferred from MVP for future development. Agreed directions below enter `productQueue.md` once a spec exists.
+Things I want to build. Unspecced — moves to `productQueue.md` once a spec exists.
 
----
-
-## Agreed directions awaiting spec (2026-07-09, rough order)
-
-1. **Pilot gate** — site 21 self-serves, founder watches hands-off (`docs/tracks/scalePlan.md` §9)
+1. Lessgo.ai.. separate the app from marketing site
+2. Branded sign up, log in page
 2. **lessgo.ai main website** — built WITH Lessgo (customer zero, gap-finder)
 3. **Beta-public** — no-login create + marketing site live (scalePlan §11.10)
 4. **Universe v1** — SPECCED as track: `docs/tracks/universePlan.md` (queue #5)
-5. **Pixel placement** — user-provided conversion/tracking pixels (Meta/Google/GTM snippets) on published pages. **EXPEDITE — live demand: scalifixai.com already asking (2026-07-09)**
-
-## Backlog (universe/fleet adjacent, no commitment)
-
-- **DTR** (dynamic text replacement — one page swaps text live per ad keyword; we make N real pages instead)
-- **Ad-platform integrations** — import/sync campaigns from Google/Meta
-- **Writing the ad copy itself** — we consume ad copy, never generate it
-- CRM webhooks / GTM deeper integrations
-
----
-
-## V1.5 (Post-Beta)
-
-### Email Continuation Pages
-**Value Proposition:** Users with existing landing page can create dedicated pages for email campaigns in 1 minute.
-
-**How it works:**
-- User pastes email content
-- System extracts: tone, offer, CTA, key message
-- Generates continuation page matching email
-- Reuses brand assets from account
-
-**Why valuable:**
-- High conversion (message continuity)
-- Low effort (just paste email)
-- Upsell existing users
-- Differentiation from competitors
-
-### Pre-built IVOC Database
-**Current MVP:** Every generation does live Tavily search + stores result.
-
-**V1.5 Enhancement:** Use accumulated database as primary lookup.
-
-```
-Audience + Category
-    ↓
-Lookup in database
-    ↓
-Found? → Use stored IVOC
-Not found? → Tavily search → Store result
-```
-
-**Benefits:**
-- Faster generation (no API call for known categories)
-- Lower cost (~$0 for cached, ~$0.05 for new)
-- Database grows organically from real usage
-- Quality improves (can curate/edit stored entries)
-
-**Database structure:**
-```json
-{
-  "key": "freelancer_invoicing",
-  "audience": "Freelancer/Solopreneur",
-  "category": "Invoicing",
-  "ivoc": {
-    "pains": [...],
-    "desires": [...],
-    "objections": [...],
-    "firmBeliefs": [...],
-    "shakableBeliefs": [...],
-    "commonPhrases": [...]
-  },
-  "source": "tavily",
-  "createdAt": "2024-01-15",
-  "usageCount": 47
-}
-```
-
----
-
-## V2
-
-### Landing Page Types
-Support different page types optimized for traffic source:
-
-| Type | Characteristics |
-|------|-----------------|
-| **Main/Generic** | Current MVP, comprehensive |
-| **Ad (PPC)** | Tight focus, no nav, single CTA |
-| **SEO** | Content-rich, keyword-optimized |
-| **Social** | Platform-specific tone |
-
-**Impact on system:**
-- Section count varies by type
-- Navigation optional for ad pages
-- Content depth varies
-- CTA intensity varies
-
-### Multi-Page Website Support
-- Separate pages: /features, /pricing, /about
-- Navigation links to routes (not anchors)
-- Shared header/footer across pages
-
-### Competitor Research
-Deep competitor research with real quotes:
-
-**Output per competitor:**
-- Idea, USP
-- Pain-focus, Desire-focus
-- Real praise quotes (from X, Reddit, G2)
-- Real complaint quotes
-
-**Sources:**
-- G2/Capterra reviews
-- Reddit threads
-- X/Twitter
-- YouTube comments
-
-### Full Live + RAG Research System
-Premium research layer (~$0.25-0.30/generation):
-
-**Architecture:**
-```
-Live Research (every generation)
-    ↓
-Quote Corpus (RAG)
-    ↓
-Merge + Rank by profile similarity
-    ↓
-Rich IVOC with real quotes
-```
-
-**Components:**
-- Tavily for search
-- Firecrawl for scraping
-- Pinecone/pgvector for quote corpus
-- Profile-based matching
-
-**Benefits:**
-- Fresh + historical data
-- Real quotes with sources
-- Improves over time (corpus grows)
-- Competitive moat
-
----
-
-## Future Considerations
-
-### Per-Section Surface Override (reimagined Background Settings)
-**Value Proposition:** Let the founder flip an individual section to a different template surface (e.g. cream/white/ink/accent) instead of the `getSurfaceForSection()` default.
-
-**How it works:**
-- Store as a per-section override
-- Honor in BOTH edit (`LandingPageRenderer`) and published (`LandingPagePublishedRenderer`) via the `data-surface` attribute
-- Requires a new template-contract method to enumerate a template's available surfaces (templates don't expose this today)
-- Requires a per-template picker UI
-
-**Why valuable:**
-- Replaces the old dead primary/neutral/custom background modal (killed 2026-07-07) with something that actually affects the template render path
-
-### A/B Testing
-- Multiple variations of same page
-- Performance tracking
-
-### Analytics Integration
-- Conversion tracking
-- Heatmaps
-
-### Custom Domain Publishing
-- User's own domain
-- SSL provisioning
-
-### Team Collaboration
-- Multiple users per account
-- Roles and permissions
-
-### Problem Section UIBlock Gaps
-Currently only 2 UIBlocks (CollapsedCards, SideBySideSplit). Missing angles:
-- **Simple bullet list** - Just pain points, no accordion
-- **Statistics-driven** - "87% of founders struggle with X" format
-- **Single emotional statement** - Bold, large text, one pain point
-- **Cost of inaction** - What happens if you don't solve this
-- **Industry-specific problems** - Tailored by category
-
-
-===========
-
-Ask AI to do something button on edit
-Social media post writing, marketing material in general
+5. **Publish-modal title cleanup** — publish modal's free-text title input now redundant with per-page SEO title (SeoSettingsModal); remove it, but `PublishedPage.title` feeds dashboard listing/smart-title/existing-publish reuse — check blast radius (2026-07-10)
+6. **DTR alternative** — instead of dynamic text replacement, generate N real pages per ad keyword
+7. **Ad-platform integrations** — import/sync campaigns from Google/Meta
+8. **Ad copy writing** — currently we consume ad copy, never generate it
+9. **CRM webhooks / deeper GTM integration**
+10. **"Ask AI to do something" button** — freeform AI command on edit page
+11. **Per-section surface override** — flip a section to a different template surface (cream/white/ink/accent) vs `getSurfaceForSection()` default; both renderers via `data-surface`; needs template-contract method to enumerate surfaces + picker UI. Replaces dead background modal (killed 2026-07-07)
+12. **Email continuation pages** — paste email → extract tone/offer/CTA → generate matching page reusing brand assets
+13. **Landing page types by traffic source** — Main (current) / Ad-PPC (no nav, single CTA) / SEO (content-rich) / Social (platform tone)
+14. **Problem section UIBlock gaps** — only 2 UIBlocks today; missing: simple bullets, statistics-driven, single emotional statement, cost-of-inaction, industry-specific
+15. **Social media post writing** — marketing material beyond the page itself
+16. **Pre-built IVOC database** — DB-first lookup keyed `(categoryKey, audienceKey)`, live search only on miss (Tavily removed scale-08, `IVOCCache` table retained)
+17. **Competitor research** — per competitor: idea, USP, pain/desire focus, real praise+complaint quotes (G2/Capterra, Reddit, X, YouTube)
+18. **Full live + RAG research layer** (~$0.25-0.30/gen) — live search + quote corpus, profile-similarity merge; premium tier
+19. **A/B testing** — page variations + performance tracking (overlaps Universe track)
+20. **Team collaboration** — multi-user accounts, roles/permissions
+21. **Heatmaps** — beyond current conversion analytics
