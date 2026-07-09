@@ -28,6 +28,7 @@
 
 import type { CopyEngine } from '@/types/brief';
 import type { EntryFacts } from '@/modules/brief/classify';
+import { engineCoreSections } from './coreSections';
 
 /**
  * ===== FACT GROUPS =====
@@ -148,7 +149,10 @@ const thingContract: EngineContract = {
 // ---------------------------------------------------------------------------
 const trustContract: EngineContract = {
   engine: 'trust',
-  slotSkips: ['structure'],
+  // scale-07 phase 4 (founder gate Q2, resolved 2026-07-09 = immediate GA):
+  // trust no longer skips the STRUCTURE slot — every service/trust user sees
+  // the universal 7b structure-confirm gate. `work` KEEPS its skip.
+  slotSkips: [],
   fields: [
     { id: 'name', group: 'WHO', slot: 'identity', tier: 'T1', requirement: 'required', prefillKey: 'businessName', input: 'free-text' },
     { id: 'oneLiner', group: 'WHAT', slot: 'identity', tier: 'T1', requirement: 'required', prefillKey: 'oneLiner', input: 'free-text' },
@@ -213,4 +217,26 @@ export const engineContracts: Record<CopyEngine, EngineContract> = {
 /** Resolve the contract for an engine (thin accessor; keeps callers off the map). */
 export function getContract(engine: CopyEngine): EngineContract {
   return engineContracts[engine];
+}
+
+/**
+ * Sections the 7b structure gate must LOCK for an engine (scale-07 phase 4):
+ * the engine-core body (chrome excluded — header/footer are forced by the
+ * clamp law, never user-facing rows) minus every section a contract field can
+ * legitimately drop (`dropTarget` — the proof hard rule already cuts these, so
+ * the user may too). Everything else in the gate's list — capability sections
+ * and gated optionals — is toggleable OFF.
+ *
+ *   thing → hero, features
+ *   trust → hero, services, cta   (testimonials/packages are dropTargets)
+ *   work  → hero, about, books, writing (praise is a dropTarget; gate unused —
+ *           work keeps its structure slotSkip)
+ */
+export function lockedSectionsForEngine(engine: CopyEngine): string[] {
+  const dropTargets = new Set(
+    engineContracts[engine].fields.map((f) => f.dropTarget).filter(Boolean) as string[]
+  );
+  return engineCoreSections[engine].filter(
+    (s) => s !== 'header' && s !== 'footer' && !dropTargets.has(s)
+  );
 }

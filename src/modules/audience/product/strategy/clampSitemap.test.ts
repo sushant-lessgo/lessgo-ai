@@ -106,10 +106,13 @@ describe('clampSitemap', () => {
 });
 
 describe('assembleProductStrategy (sitemap wiring)', () => {
-  it('meridian: no sitemap, fixed 7 sections — behavior unchanged', () => {
+  it('meridian: no sitemap, converged thing-core sections (scale-07 phase 2)', () => {
+    // Pre-convergence this asserted the fixed 7-section pilot list
+    // (…, 'pricing', 'cta', …). With no Brief plumbed to this call site,
+    // pricing/cta now enter only via the packages/lead-form capabilities.
     const out = assembleProductStrategy({ llmResponse: LLM_BASE as any, templateId: 'meridian' });
     expect(out.sitemap).toBeUndefined();
-    expect(out.sections).toEqual(['header', 'hero', 'features', 'testimonials', 'pricing', 'cta', 'footer']);
+    expect(out.sections).toEqual(['header', 'hero', 'features', 'testimonials', 'footer']);
     expect(out.uiblocks.hero).toBe('TerminalHero');
   });
 

@@ -1,11 +1,27 @@
 // src/hooks/useWizardStore.test.ts
 // scale-06 phase 2 — unified Brief-backed wizard store.
 // Covers: slot-machine transitions per engine (skips honored), hydration from
-// brief fixtures, review/fill mode derivation.
+// brief fixtures, review/fill mode derivation, (scale-07 phase 3) the
+// structure-slot strategy fetch action + its charge-once idempotency guard,
+// and (scale-07 phase 4) the universal 7b gate: single-page structure state
+// (locked/toggle/reorder), the clamp law, step-0 Brief→capability-section
+// plumbing, and the trust GA wiring (structure slot + charge-once + toggled-off
+// section ⇒ no copy).
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { Brief } from '@/types/brief';
-import { useWizardStore, deriveMode } from './useWizardStore';
+import {
+  useWizardStore,
+  deriveMode,
+  buildThingInput,
+  buildTrustInput,
+} from './useWizardStore';
+import {
+  assembleProductStrategy,
+  clampSectionList,
+} from '@/modules/audience/product/strategy/parseStrategyProduct';
+import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
+import { runTrustGeneration } from '@/modules/wizard/generation/trust';
 
 /** Build a Brief with a partial EntryFacts payload at facts.entry. */
 function briefWithEntry(entry: Record<string, unknown>, extra: Partial<Brief> = {}): Brief {
@@ -126,12 +142,19 @@ describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', (
     ]);
   });
 
-  it('trust skips the structure slot', () => {
+  it('trust slot order now INCLUDES structure (scale-07 phase 4 — 7b GA)', () => {
     useWizardStore.getState().hydrate({ brief: trustBrief, audienceType: 'service', templateId: 'surge' });
     const { slots } = useWizardStore.getState();
-    expect(slots).not.toContain('structure');
-    expect(slots).toContain('style');
-    expect(slots[0]).toBe('identity');
+    expect(slots).toEqual([
+      'identity',
+      'understanding',
+      'goal',
+      'offer',
+      'proof',
+      'style',
+      'structure',
+      'generating',
+    ]);
   });
 
   it('work skips the structure slot', () => {
@@ -163,10 +186,10 @@ describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', (
   });
 
   it('goToSlot honors membership; a skipped slot is a no-op', () => {
-    useWizardStore.getState().hydrate({ brief: trustBrief, audienceType: 'service', templateId: 'surge' });
+    useWizardStore.getState().hydrate({ brief: workBrief, audienceType: 'writer', templateId: 'granth' });
     useWizardStore.getState().goToSlot('proof');
     expect(useWizardStore.getState().currentSlot).toBe('proof');
-    // structure is skipped for trust ⇒ goToSlot must NOT move there.
+    // structure is skipped for WORK ⇒ goToSlot must NOT move there.
     useWizardStore.getState().goToSlot('structure');
     expect(useWizardStore.getState().currentSlot).toBe('proof');
   });
@@ -230,5 +253,468 @@ describe('useWizardStore — field + goal + brief-patch actions', () => {
     expect(s.slots).toEqual([]);
     expect(s.fields).toEqual({});
     expect(s.goalIntent).toBeNull();
+    expect(s.strategyStatus).toBe('idle');
+    expect(s.strategy).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// scale-07 phase 3 — structure-slot strategy fetch (charge-once guard)
+// ---------------------------------------------------------------------------
+
+const MOCK_SITEMAP = [
+  { archetypeKey: 'home', title: 'Home', pathSlug: '/', sections: ['hero', 'contact'] },
+  { archetypeKey: 'catalog', title: 'Products', pathSlug: '/products', sections: ['catalog'] },
+];
+const MOCK_STRATEGY = {
+  awareness: 'solution-aware-skeptical',
+  oneReader: { personaDescription: 'p', pain: [], desire: [], objections: [] },
+  oneIdea: { bigBenefit: 'x', uniqueMechanism: 'y', reasonToBelieve: 'z' },
+  featureAnalysis: [],
+  sections: ['header', 'hero', 'footer'],
+  uiblocks: { header: 'H', hero: 'He', footer: 'F' },
+  sitemap: MOCK_SITEMAP,
+};
+
+/** fetch stub counting /strategy calls (the CHARGED route). */
+function stubStrategyFetch(
+  respond: () => Promise<any> = async () => ({
+    ok: true,
+    json: async () => ({ success: true, data: MOCK_STRATEGY }),
+  })
+) {
+  const spy = vi.fn(async (url: string) => {
+    if (url.includes('/api/audience/product/strategy')) return respond();
+    return { ok: true, json: async () => ({}) };
+  });
+  vi.stubGlobal('fetch', spy);
+  const strategyCalls = () =>
+    spy.mock.calls.filter(([u]) => String(u).includes('/api/audience/product/strategy')).length;
+  return { spy, strategyCalls };
+}
+
+describe('useWizardStore — fetchStrategy (structure-slot strategy sourcing)', () => {
+  beforeEach(() => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tok123', brief: richThing, audienceType: 'product', templateId: 'vestria' });
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('populates strategy + sitemap via one charged call; status → done', async () => {
+    const { strategyCalls } = stubStrategyFetch();
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+    expect(strategyCalls()).toBe(1);
+    expect(s.strategyStatus).toBe('done');
+    expect(s.strategy).toEqual(MOCK_STRATEGY);
+    expect(s.sitemap).toEqual(MOCK_SITEMAP);
+    expect(s.strategyError).toBeNull();
+  });
+
+  it('IDEMPOTENT after done: a second call (back-navigation remount) never refetches — no double charge', async () => {
+    const { strategyCalls } = stubStrategyFetch();
+    await useWizardStore.getState().fetchStrategy();
+    await useWizardStore.getState().fetchStrategy();
+    await useWizardStore.getState().fetchStrategy();
+    expect(strategyCalls()).toBe(1);
+    expect(useWizardStore.getState().strategyStatus).toBe('done');
+  });
+
+  it('IDEMPOTENT while in flight: concurrent calls collapse to one charged fetch', async () => {
+    const { strategyCalls } = stubStrategyFetch();
+    await Promise.all([
+      useWizardStore.getState().fetchStrategy(),
+      useWizardStore.getState().fetchStrategy(),
+    ]);
+    expect(strategyCalls()).toBe(1);
+  });
+
+  it('pre-seeded strategy ⇒ marks done WITHOUT any network call', async () => {
+    const { strategyCalls } = stubStrategyFetch();
+    useWizardStore.getState().setStrategy(MOCK_STRATEGY);
+    await useWizardStore.getState().fetchStrategy();
+    expect(strategyCalls()).toBe(0);
+    expect(useWizardStore.getState().strategyStatus).toBe('done');
+  });
+
+  it('never clobbers a user-edited sitemap already in the store', async () => {
+    stubStrategyFetch();
+    const edited = [{ archetypeKey: 'home', title: 'Edited', pathSlug: '/', sections: ['hero'] }];
+    useWizardStore.getState().setSitemap(edited);
+    await useWizardStore.getState().fetchStrategy();
+    expect(useWizardStore.getState().sitemap).toEqual(edited);
+  });
+
+  it('402 ⇒ status error + strategyCreditsError; retry is allowed and refetches', async () => {
+    const { strategyCalls } = stubStrategyFetch(async () => ({
+      ok: false,
+      status: 402,
+      json: async () => ({ error: 'out of credits' }),
+    }));
+    await useWizardStore.getState().fetchStrategy();
+    let s = useWizardStore.getState();
+    expect(s.strategyStatus).toBe('error');
+    expect(s.strategyCreditsError).toBe(true);
+    expect(s.strategy).toBeNull();
+
+    // Retry (error status re-arms the guard).
+    await useWizardStore.getState().fetchStrategy();
+    expect(strategyCalls()).toBe(2);
+  });
+
+  it('generic failure ⇒ status error with message; strategyCreditsError stays false', async () => {
+    stubStrategyFetch(async () => ({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: 'ai_error', message: 'AI generation failed' }),
+    }));
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+    expect(s.strategyStatus).toBe('error');
+    expect(s.strategyCreditsError).toBe(false);
+    expect(s.strategyError).toBe('AI generation failed');
+  });
+});
+
+describe('useWizardStore — buildThingInput projection (shared by fetchStrategy + GeneratingSlot)', () => {
+  beforeEach(() => {
+    useWizardStore.getState().reset();
+  });
+
+  it('projects fields + strategy/sitemap from state', () => {
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tok123', brief: richThing, audienceType: 'product', templateId: 'meridian' });
+    useWizardStore.getState().setStrategy(MOCK_STRATEGY);
+    useWizardStore.getState().setSitemap(MOCK_SITEMAP);
+
+    const input = buildThingInput(useWizardStore.getState());
+    expect(input.tokenId).toBe('tok123');
+    expect(input.templateId).toBe('meridian');
+    expect(input.productName).toBe('Acme Invoicing');
+    expect(input.audiences).toEqual(['freelance designers', 'developers']);
+    expect(input.goalIntent).toBe('free-trial');
+    expect(input.proof).toEqual({ hasTestimonials: true });
+    expect(input.strategy).toEqual(MOCK_STRATEGY);
+    expect(input.sitemap).toEqual(MOCK_SITEMAP);
+  });
+});
+
+// ===========================================================================
+// scale-07 phase 4 — universal 7b gate (single-page mode + clamp law + trust GA)
+// ===========================================================================
+
+// A SINGLE-PAGE thing strategy (meridian — no sitemap key).
+const SP_STRATEGY = {
+  awareness: 'solution-aware-skeptical',
+  oneReader: { personaDescription: 'p', pain: [], desire: [], objections: [] },
+  oneIdea: { bigBenefit: 'x', uniqueMechanism: 'y', reasonToBelieve: 'z' },
+  featureAnalysis: [],
+  sections: ['header', 'hero', 'features', 'testimonials', 'footer'],
+  uiblocks: { header: 'H', hero: 'He', features: 'Fe', testimonials: 'Te', footer: 'Fo' },
+};
+
+// An assembled TRUST strategy (hearth canonical 7).
+const TRUST_STRATEGY = {
+  awareness: 'search-aware-comparing',
+  oneClient: { who: 'w', coreDesire: 'd', corePain: 'p', pains: [], desires: [], objections: [] },
+  ourPosition: { promise: 'pr', approach: 'ap', credibility: 'cr' },
+  servicePresentation: { format: 'packages', showProcess: true, showCaseStudies: false },
+  sectionDecisions: {
+    includeTransformation: false,
+    includeProblem: false,
+    includeApproach: false,
+    isHighTouch: false,
+  },
+  uiblockDecisions: {},
+  sections: ['header', 'hero', 'services', 'testimonials', 'packages', 'cta', 'footer'],
+  uiblocks: {
+    header: 'HearthHeader',
+    hero: 'HearthHero',
+    services: 'HearthServices',
+    testimonials: 'HearthTestimonials',
+    packages: 'HearthPackages',
+    cta: 'HearthCta',
+    footer: 'HearthFooter',
+  },
+};
+
+describe('lockedSectionsForEngine — required (non-toggleable) sections per engine', () => {
+  it('thing locks hero + features; testimonials stays toggleable (dropTarget)', () => {
+    expect(lockedSectionsForEngine('thing')).toEqual(['hero', 'features']);
+  });
+
+  it('trust locks hero + services + cta; testimonials/packages stay toggleable', () => {
+    expect(lockedSectionsForEngine('trust')).toEqual(['hero', 'services', 'cta']);
+  });
+});
+
+describe('clampSectionList — the single-page clamp law (clampSitemap generalized)', () => {
+  const canonical = ['header', 'hero', 'features', 'testimonials', 'footer'];
+  const locked = ['hero', 'features'];
+
+  it('drops unknown sections (no adds beyond canonical)', () => {
+    expect(clampSectionList(['hero', 'pirate', 'features'], canonical, locked)).toEqual([
+      'header', 'hero', 'features', 'footer',
+    ]);
+  });
+
+  it('dedupes duplicates (first wins)', () => {
+    expect(
+      clampSectionList(['hero', 'features', 'features', 'testimonials'], canonical, locked)
+    ).toEqual(['header', 'hero', 'features', 'testimonials', 'footer']);
+  });
+
+  it('forces locked sections present at their canonical relative position', () => {
+    expect(clampSectionList(['testimonials'], canonical, locked)).toEqual([
+      'header', 'hero', 'features', 'testimonials', 'footer',
+    ]);
+  });
+
+  it('forces hero first', () => {
+    expect(clampSectionList(['features', 'testimonials', 'hero'], canonical, locked)).toEqual([
+      'header', 'hero', 'features', 'testimonials', 'footer',
+    ]);
+  });
+
+  it('chrome is law-forced from canonical, never user-controlled', () => {
+    // Proposal tries to move footer first and drop header — both ignored.
+    expect(clampSectionList(['footer', 'hero', 'features'], canonical, locked)).toEqual([
+      'header', 'hero', 'features', 'footer',
+    ]);
+  });
+
+  it('empty/absent proposal ⇒ canonical (default accept)', () => {
+    expect(clampSectionList([], canonical, locked)).toEqual(canonical);
+    expect(clampSectionList(null, canonical, locked)).toEqual(canonical);
+  });
+
+  it('honors user reorder of non-locked sections', () => {
+    const canon7 = ['header', 'hero', 'services', 'testimonials', 'packages', 'cta', 'footer'];
+    expect(
+      clampSectionList(['hero', 'testimonials', 'services', 'packages', 'cta'], canon7, [
+        'hero', 'services', 'cta',
+      ])
+    ).toEqual(['header', 'hero', 'testimonials', 'services', 'packages', 'cta', 'footer']);
+  });
+});
+
+describe('assembleProductStrategy — step-0 Brief plumbing (meridian regains cta/pricing)', () => {
+  const LLM = {
+    awareness: 'solution-aware-skeptical',
+    oneReader: { personaDescription: 'p', pain: [], desire: [], objections: [] },
+    oneIdea: { bigBenefit: 'x', uniqueMechanism: 'y', reasonToBelieve: 'z' },
+    featureAnalysis: [],
+  } as any;
+
+  it('no brief ⇒ bare engine core (phase-2 interim behavior preserved)', () => {
+    const out = assembleProductStrategy({ llmResponse: LLM, templateId: 'meridian' });
+    expect(out.sections).toEqual(['header', 'hero', 'features', 'testimonials', 'footer']);
+  });
+
+  it('M1 Brief + packages capability ⇒ single-page list INCLUDES cta AND pricing', () => {
+    const m1Brief = {
+      businessType: 'saas',
+      copyEngine: 'thing',
+      goal: { intent: 'book-call', mechanism: 'M1' },
+    } as unknown as Brief;
+    const out = assembleProductStrategy({
+      llmResponse: LLM,
+      templateId: 'meridian',
+      brief: m1Brief,
+      requiredCapabilities: ['packages'],
+    });
+    expect(out.sections).toContain('cta'); // lead-form capability (M1) → cta
+    expect(out.sections).toContain('pricing'); // packages capability → pricing
+    // Capability sections get real block mappings too.
+    expect(out.uiblocks.cta).toBeTruthy();
+    expect(out.uiblocks.pricing).toBeTruthy();
+  });
+});
+
+describe('useWizardStore — single-page 7b structure (thing/meridian)', () => {
+  beforeEach(() => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tok123', brief: richThing, audienceType: 'product', templateId: 'meridian' });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (String(url).includes('/api/audience/product/strategy')) {
+          return { ok: true, json: async () => ({ success: true, data: SP_STRATEGY }) };
+        }
+        return { ok: true, json: async () => ({}) };
+      })
+    );
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('single-page fetch seeds structureSections (body, chrome stripped); no sitemap', async () => {
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+    expect(s.strategyStatus).toBe('done');
+    expect(s.sitemap).toBeNull();
+    expect(s.structureSections).toEqual(['hero', 'features', 'testimonials']);
+    expect(s.structureDisabled).toEqual([]);
+  });
+
+  it('locked sections (hero/features) can NOT be toggled off — state-level enforcement', async () => {
+    await useWizardStore.getState().fetchStrategy();
+    useWizardStore.getState().toggleStructureSection('hero');
+    useWizardStore.getState().toggleStructureSection('features');
+    expect(useWizardStore.getState().structureDisabled).toEqual([]);
+  });
+
+  it('toggling testimonials OFF removes it from the copy payload (sections AND uiblocks)', async () => {
+    await useWizardStore.getState().fetchStrategy();
+    useWizardStore.getState().toggleStructureSection('testimonials');
+    expect(useWizardStore.getState().structureDisabled).toEqual(['testimonials']);
+
+    const input = buildThingInput(useWizardStore.getState());
+    expect(input.strategy?.sections).toEqual(['header', 'hero', 'features', 'footer']);
+    expect(input.strategy?.uiblocks).not.toHaveProperty('testimonials');
+    expect(input.sitemap).toBeNull();
+  });
+
+  it('toggle is reversible (re-enable a proposed section — never an add)', async () => {
+    await useWizardStore.getState().fetchStrategy();
+    useWizardStore.getState().toggleStructureSection('testimonials');
+    useWizardStore.getState().toggleStructureSection('testimonials');
+    expect(useWizardStore.getState().structureDisabled).toEqual([]);
+    const input = buildThingInput(useWizardStore.getState());
+    expect(input.strategy?.sections).toEqual(SP_STRATEGY.sections);
+  });
+
+  it('unknown section toggle is a no-op (membership fixed by the proposal)', async () => {
+    await useWizardStore.getState().fetchStrategy();
+    useWizardStore.getState().toggleStructureSection('pirate');
+    expect(useWizardStore.getState().structureDisabled).toEqual([]);
+  });
+
+  it('reorder: hero pinned first; other sections swap; order reaches the payload', async () => {
+    await useWizardStore.getState().fetchStrategy();
+    useWizardStore.getState().moveStructureSection(0, 1); // hero — refused
+    expect(useWizardStore.getState().structureSections).toEqual(['hero', 'features', 'testimonials']);
+    useWizardStore.getState().moveStructureSection(2, -1); // into hero slot? no — swaps 1↔2
+    expect(useWizardStore.getState().structureSections).toEqual(['hero', 'testimonials', 'features']);
+    useWizardStore.getState().moveStructureSection(1, -1); // would displace hero — refused
+    expect(useWizardStore.getState().structureSections).toEqual(['hero', 'testimonials', 'features']);
+
+    const input = buildThingInput(useWizardStore.getState());
+    expect(input.strategy?.sections).toEqual(['header', 'hero', 'testimonials', 'features', 'footer']);
+  });
+
+  it('default accept (no edits) leaves the strategy byte-identical', async () => {
+    await useWizardStore.getState().fetchStrategy();
+    const input = buildThingInput(useWizardStore.getState());
+    expect(input.strategy?.sections).toEqual(SP_STRATEGY.sections);
+    expect(input.strategy?.uiblocks).toEqual(SP_STRATEGY.uiblocks);
+  });
+});
+
+describe('useWizardStore + trust adapter — trust 7b GA (charge-once + toggled-off ⇒ no copy)', () => {
+  let calls: Array<{ url: string; body: any }>;
+
+  const stubTrustFetch = () => {
+    calls = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init?: any) => {
+        const body = init?.body ? JSON.parse(init.body) : undefined;
+        calls.push({ url: String(url), body });
+        if (String(url).includes('/api/audience/service/strategy')) {
+          return { ok: true, json: async () => ({ success: true, data: TRUST_STRATEGY }) };
+        }
+        if (String(url).includes('/api/audience/service/generate-copy')) {
+          return {
+            ok: true,
+            json: async () => ({
+              success: true,
+              sections: { hero: { elements: { headline: 'H' } } },
+            }),
+          };
+        }
+        return { ok: true, json: async () => ({}) };
+      })
+    );
+  };
+  const strategyCalls = () =>
+    calls.filter((c) => c.url.includes('/api/audience/service/strategy')).length;
+
+  beforeEach(() => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokTrust', brief: trustBrief, audienceType: 'service', templateId: 'hearth' });
+    // The strategy/copy routes are stubbed, but keep the projection non-degenerate.
+    useWizardStore.getState().setFieldValue('services', ['Paid social']);
+    useWizardStore.getState().setFieldValue('whoProblem', ['D2C founders']);
+    useWizardStore.getState().setFieldValue('offer', 'Book a free audit');
+    stubTrustFetch();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('fetchStrategy (trust) charges once, seeds the single-page gate list, and is idempotent', async () => {
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+    expect(strategyCalls()).toBe(1);
+    expect(s.strategyStatus).toBe('done');
+    expect(s.structureSections).toEqual(['hero', 'services', 'testimonials', 'packages', 'cta']);
+
+    await useWizardStore.getState().fetchStrategy(); // back-navigation remount
+    expect(strategyCalls()).toBe(1);
+  });
+
+  it('CHARGE-ONCE end-to-end: generation consumes the pre-gate strategy — zero refetch', async () => {
+    await useWizardStore.getState().fetchStrategy();
+    expect(strategyCalls()).toBe(1);
+
+    // GeneratingSlot-equivalent projection: buildTrustInput forwards the
+    // gate-fetched strategy (scale-07 phase 5 — the trust.ts bridge is gone).
+    const result = await runTrustGeneration(buildTrustInput(useWizardStore.getState()));
+    expect(result.status).toBe('done');
+    expect(strategyCalls()).toBe(1); // still exactly one charged strategy call
+  });
+
+  it('ACCEPTANCE: testimonials toggled off ⇒ ZERO testimonial copy (absent from the copy payload)', async () => {
+    await useWizardStore.getState().fetchStrategy();
+    useWizardStore.getState().toggleStructureSection('testimonials');
+
+    const result = await runTrustGeneration(buildTrustInput(useWizardStore.getState()));
+    expect(result.status).toBe('done');
+    expect(strategyCalls()).toBe(1);
+
+    const copyCall = calls.find((c) => c.url.includes('/api/audience/service/generate-copy'));
+    expect(copyCall).toBeTruthy();
+    expect(copyCall!.body.strategy.sections).toEqual([
+      'header', 'hero', 'services', 'packages', 'cta', 'footer',
+    ]);
+    expect(copyCall!.body.strategy.uiblocks).not.toHaveProperty('testimonials');
+    expect(copyCall!.body.uiblocks).not.toHaveProperty('testimonials');
+  });
+
+  it('locked trust sections (hero/services/cta) can never be toggled off', async () => {
+    await useWizardStore.getState().fetchStrategy();
+    useWizardStore.getState().toggleStructureSection('hero');
+    useWizardStore.getState().toggleStructureSection('services');
+    useWizardStore.getState().toggleStructureSection('cta');
+    expect(useWizardStore.getState().structureDisabled).toEqual([]);
+  });
+
+  it('structure-skipping fallback: no pre-gate strategy ⇒ generation self-fetches ONCE', async () => {
+    // No fetchStrategy call (e.g. a resumed/legacy flow) — store strategy null,
+    // so the projection forwards nothing and the adapter self-fetches once.
+    const result = await runTrustGeneration(buildTrustInput(useWizardStore.getState()));
+    expect(result.status).toBe('done');
+    expect(strategyCalls()).toBe(1);
   });
 });

@@ -25,7 +25,12 @@ import {
 import { buildProductStrategyPrompt } from '@/modules/audience/product/strategy/promptsProduct';
 import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
 import type { ProductVoiceId } from '@/modules/audience/product/voice';
-import { getPageArchetypesForTemplate } from '@/modules/audience/product/pageArchetypes';
+import {
+  getPageArchetypesForTemplate,
+  isMultipage,
+} from '@/modules/audience/product/pageArchetypes';
+import { BriefSchema } from '@/lib/schemas/brief.schema';
+import { capabilityIds } from '@/types/brief';
 import { assembleProductStrategy } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { generateMockMeridianStrategy } from '@/modules/prompt/mockResponseGeneratorProduct';
 import { landingGoals } from '@/types/generation';
@@ -65,6 +70,15 @@ const ProductStrategyRequestSchema = z.object({
       hasTestimonials: z.boolean().optional(),
     })
     .optional(),
+  // scale-07 phase 5 (phase-4 carryover a) — OPTIONAL + additive. The resolved
+  // Brief (all fields optional in BriefSchema) + explicit capability inclusions
+  // are fed ONLY to isMultipage detection + assembleProductStrategy so
+  // Brief-required capability sections (meridian: M1 ⇒ lead-form ⇒ cta;
+  // packages ⇒ pricing) re-enter the single-page list. NEVER fed to the prompt
+  // builder (firewall). Absent ⇒ engine-core-only behavior (old senders are
+  // byte-identical).
+  brief: BriefSchema.optional(),
+  requiredCapabilities: z.array(z.enum(capabilityIds)).optional(),
 });
 
 async function productStrategyHandler(req: NextRequest): Promise<Response> {
@@ -115,10 +129,14 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
       });
     }
 
-    // 3. Build prompt. Multi-page templates get the page-archetype MENU
-    //    (capability data — templateId itself never reaches the prompt layer);
-    //    single-page templates (meridian) get the exact prompt as before.
-    const pageArchetypes = getPageArchetypesForTemplate(data.templateId) ?? undefined;
+    // 3. Build prompt. Multi-page runs (template declares the `multipage`
+    //    capability; Brief structure.mode / businessType default can override —
+    //    scale-07 phase 5 re-key) get the page-archetype MENU (capability data —
+    //    templateId itself never reaches the prompt layer); single-page runs
+    //    (meridian) get the exact prompt as before.
+    const pageArchetypes = isMultipage(data.templateId, data.brief)
+      ? getPageArchetypesForTemplate(data.templateId) ?? undefined
+      : undefined;
     // Voice derivation (D4) — same pattern as generate-copy: the prompt layer
     // receives the derived VOICE, never templateId itself (firewall).
     const voiceId: ProductVoiceId = isManufacturerFlow(data.templateId)
@@ -171,11 +189,15 @@ async function productStrategyHandler(req: NextRequest): Promise<Response> {
     }
 
     // 5. Assemble (deterministic per-template sections + block map; templateId
-    //    is assembly-only — the prompt above never saw it)
+    //    is assembly-only — the prompt above never saw it). brief +
+    //    requiredCapabilities (carryover a) let the single-page path re-surface
+    //    Brief-required capability sections (meridian cta/pricing).
     const strategyData = assembleProductStrategy({
       llmResponse,
       templateId: data.templateId,
       proof: data.proof,
+      brief: data.brief,
+      requiredCapabilities: data.requiredCapabilities,
     });
     logger.info('[Product Strategy] Final sections:', strategyData.sections);
     logger.info('[Product Strategy] Final UIBlocks:', strategyData.uiblocks);

@@ -2,8 +2,14 @@
 // Copy generation prompt builder for the Meridian product route (P3). Mirror of
 // audience/service/copyPrompt.ts, driven by ProductStrategyOutput
 // (oneReader/oneIdea/featureAnalysis) and the Meridian "Modern Tech" voice
-// instead of Hearth. Reads element specs from the global layoutElementSchema
-// registry (works because meridianElementSchema is spread in).
+// instead of Hearth.
+//
+// scale-07 phase 8b: element specs for thing-engine layouts (meridian + vestria
+// generation blocks) resolve via the per-engine contract
+// (resolveEngineSectionSchema) — same Brief ⇒ same element spec under both
+// templates; the layout name survives as a display handle only. Non-covered
+// layouts (techpremium editor-only, service, work/granth) fall through to the
+// global layoutElementSchema registry unchanged.
 
 import type { ProductStrategyOutput } from '@/types/product';
 import type { LandingGoal } from '@/types/generation';
@@ -14,6 +20,7 @@ import {
   type LayoutElement,
   type CardRequirements,
 } from '@/modules/sections/layoutElementSchema';
+import { resolveEngineSectionSchema } from '@/modules/engines/elementContracts';
 import { formatProductVoiceForPrompt, type ProductVoiceId } from './voice';
 import { assertNoTemplateLeak } from './promptFirewall';
 import { getGuidanceForIntent } from '@/modules/goals/copyGuidance';
@@ -78,8 +85,14 @@ function formatCardRequirements(req: CardRequirements | null): string {
   return `Items: min ${req.min}, max ${req.max}`;
 }
 
+/** Engine contract first (thing layouts); layout-name registry is the fallback
+ *  (techpremium editor-only, service, work — resolveEngineSectionSchema → null). */
+function resolveSpecSchema(layoutName: string) {
+  return resolveEngineSectionSchema(layoutName) ?? layoutElementSchema[layoutName];
+}
+
 function getAIElements(layoutName: string): LayoutElement[] {
-  const schema = layoutElementSchema[layoutName];
+  const schema = resolveSpecSchema(layoutName);
   if (!schema) return [];
   return getAllElements(schema).filter(
     (e) => e.generation === 'ai_generated' || e.generation === 'ai_generated_needs_review'
@@ -87,7 +100,7 @@ function getAIElements(layoutName: string): LayoutElement[] {
 }
 
 function buildSectionSpec(sectionType: string, layoutName: string): string {
-  const schema = layoutElementSchema[layoutName];
+  const schema = resolveSpecSchema(layoutName);
   if (!schema) return `### ${sectionType} (${layoutName})\nNo schema available`;
 
   const elements = getAIElements(layoutName);
@@ -131,50 +144,44 @@ function getEmotionalContext(awareness: string): string {
 
 /**
  * Collection field shapes (helps the LLM emit the right structure per array).
- * Replaces service's getElementSchemas with the Meridian collection set —
- * note the two NESTED shapes (tiers + footer_columns).
+ *
+ * scale-07 phase 8b: ONE unified thing-engine collection set — the union of the
+ * former meridian + vestria blocks, matching the engine element contract
+ * (elementContracts.ts). Both voices see the SAME collections/shapes (the
+ * contract's invariant); only the Notes wording stays voice-selected. Shared
+ * `features` merges both shapes (meridian title/description/icon/link_text +
+ * vestria kicker), mirroring the contract's field union.
  */
-function getMeridianCollectionSchemas(): string {
+function getThingCollectionSchemas(isTrade: boolean): string {
+  const notes = isTrade
+    ? `
+Notes:
+- "id" fields are system-generated — emit empty string "" (including NESTED link ids in footer_columns and link_columns); do NOT invent ids.
+- NEEDS_REVIEW fields (stats.value, hero stamp_value, testimonial quote/author): write realistic copy with general/honest framing — the founder verifies before publish. Do NOT fabricate exact client counts, named companies, or named people you cannot support.
+- Do NOT emit logos, images, phone numbers, or addresses — those fields are owner-supplied.`
+    : `
+Notes:
+- "id" fields are system-generated — emit empty string "" (this applies to NESTED link ids in footer_columns and link_columns too); do NOT invent ids.
+- NEEDS_REVIEW fields (stats.value, testimonial quote/author, tiers.amount): write realistic copy but use general/honest framing — the founder verifies before publish. Do NOT fabricate exact customer counts, dollar figures, or named people you cannot support.`;
+
   return `
 Collection schemas (for array fields — emit the exact shape):
 - nav_items: array of { id: "", label: string, href: string }   (2-5 items)
-- stats: array of { id: "", value: string [NEEDS_REVIEW], label: string }   (0-4 items; metric like "18s", "99.9%")
-- features: array of { id: "", title: string, description: string, icon: string, link_text: string }   (3-6 items; icon = a Lucide icon name e.g. "Layers")
-- testimonials: array of { id: "", quote: string [NEEDS_REVIEW], author_name: string [NEEDS_REVIEW], author_role: string [NEEDS_REVIEW] }   (1-3; the FIRST renders as the large raised card)
-- logos: array of { id: "", name: string }   (0-6; company names only)
-- tiers: array of { id: "", plan: string, amount: string [NEEDS_REVIEW], per: string, pitch: string, features: string[] (3-6 short phrases), cta_text: string, featured: boolean }   (2-3 tiers; set featured:true on EXACTLY ONE — the middle "most chosen" tier)
-- footer_columns: array of { id: "", heading: string, links: array of { id: "", label: string, href: string } (1-6 links) }   (1-5 columns)
-
-Notes:
-- "id" fields are system-generated — emit empty string "" (this applies to NESTED link ids in footer_columns too); do NOT invent ids.
-- NEEDS_REVIEW fields (stats.value, testimonial quote/author, tiers.amount): write realistic copy but use general/honest framing — the founder verifies before publish. Do NOT fabricate exact customer counts, dollar figures, or named people you cannot support.`;
-}
-
-/**
- * Vestria (tailored-trade) collection set. Mirrors getMeridianCollectionSchemas
- * for the manufacturing lead-gen block family. logos/images/phones are
- * manual_preferred (not listed — the AI never fills them).
- */
-function getVestriaCollectionSchemas(): string {
-  return `
-Collection schemas (for array fields — emit the exact shape):
-- nav_items: array of { id: "", label: string, href: string }   (2-6 items; labels match the page's sections e.g. "Industries", "About", "Services", "Catalogue")
-- values: array of { id: "", kicker: string, title: string, description: string }   (exactly 3; kicker like "01 — Assurance"; the three pillars of the offer)
+- stats: array of { id: "", value: string [NEEDS_REVIEW], label: string }   (0-4 items; metric like "18s", "99.9%", or company facts like founding year)
+- values: array of { id: "", kicker: string, title: string, description: string }   (0-3; kicker like "01 — Assurance"; the pillars of the offer)
+- features: array of { id: "", title: string, description: string, icon: string, link_text: string, kicker: string }   (3-6 items; icon = a Lucide icon name e.g. "Layers"; kicker like "SVC / 01")
 - industries: array of { id: "", kicker: string, title: string, description: string }   (3-6; kicker like "Sector 01"; one per sector served)
-- stats: array of { id: "", value: string [NEEDS_REVIEW], label: string }   (0-4; company facts like founding year, volume/year, clients served)
-- features: array of { id: "", kicker: string, title: string, description: string }   (3-6 services; kicker like "SVC / 01")
 - items: array of { id: "", code: string, title: string, category: string, glyph: string }   (4-8 catalogue entries; code like "C-04"; category like "Culinary · Poly-cotton"; glyph = 1-2 word item label)
 - swatches: array of { id: "", name: string, code: string }   (0-9 material colourways; code like "/ 04")
 - rows: array of { id: "", name: string, use: string }   (3-6; material name + what it's used for)
 - steps: array of { id: "", kicker: string, title: string, description: string }   (3-6 process steps; kicker like "Step 01")
-- testimonials: array of { id: "", quote: string [NEEDS_REVIEW], author_name: string [NEEDS_REVIEW], author_role: string [NEEDS_REVIEW] }   (1-3)
+- testimonials: array of { id: "", quote: string [NEEDS_REVIEW], author_name: string [NEEDS_REVIEW], author_role: string [NEEDS_REVIEW] }   (1-3; the FIRST renders as the large raised card)
+- logos: array of { id: "", name: string }   (0-6; company names only)
+- tiers: array of { id: "", plan: string, amount: string [NEEDS_REVIEW], per: string, pitch: string, features: string[] (3-6 short phrases), cta_text: string, featured: boolean }   (2-3 tiers; set featured:true on EXACTLY ONE — the middle "most chosen" tier)
 - assurances: array of { id: "", kicker: string, text: string }   (0-4; kicker "01","02"…; friction-removers like "No obligation — quotes are complimentary.")
+- footer_columns: array of { id: "", heading: string, links: array of { id: "", label: string, href: string } (1-6 links) }   (1-5 columns)
 - link_columns: array of { id: "", heading: string, links: array of { id: "", label: string, href: string } (1-6 links) }   (0-3 columns)
-
-Notes:
-- "id" fields are system-generated — emit empty string "" (including NESTED link ids in link_columns); do NOT invent ids.
-- NEEDS_REVIEW fields (stats.value, hero stamp_value, testimonial quote/author): write realistic copy with general/honest framing — the founder verifies before publish. Do NOT fabricate exact client counts, named companies, or named people you cannot support.
-- Do NOT emit logos, images, phone numbers, or addresses — those fields are owner-supplied.`;
+${notes}`;
 }
 
 export function buildProductCopyPrompt(input: ProductCopyPromptInput): string {
@@ -370,7 +377,7 @@ ${formatProductVoiceForPrompt(voiceId)}
 
 ${sectionSpecs}
 
-${isTrade ? getVestriaCollectionSchemas() : getMeridianCollectionSchemas()}
+${getThingCollectionSchemas(isTrade)}
 
 ## RULES (MUST FOLLOW)
 ${accentRule}

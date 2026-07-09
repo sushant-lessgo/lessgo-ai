@@ -37,6 +37,7 @@ import {
 import { buildTechPremiumHomeFinalContent } from '@/hooks/editStore/archetypes';
 import { selectProductBlocks } from '@/modules/audience/product/selectBlocks';
 import { isManufacturerFlow } from '@/modules/audience/product/manufacturerFlow';
+import { isMultipage } from '@/modules/audience/product/pageArchetypes';
 import {
   buildMultiPageSkeleton,
   mergePageIntoFinalContent,
@@ -140,6 +141,7 @@ export function buildStrategyPayload(input: ThingGenerationInput): Record<string
   const isMfr = isManufacturerFlow(input.templateId ?? undefined);
   const features = effectiveFeatures(input, isMfr);
   const audiences = input.audiences ?? [];
+  const briefGoal = briefGoalFor(input);
   return {
     productName: input.productName.trim() || 'Your Product',
     oneLiner: input.oneLiner,
@@ -155,6 +157,11 @@ export function buildStrategyPayload(input: ThingGenerationInput): Record<string
     // Proof hard rule (phase 4) — fed to assembleProductStrategy so an unpromised
     // testimonials section is never generated. Absent ⇒ old behavior.
     ...(input.proof ? { proof: input.proof } : {}),
+    // scale-07 phase 5 (carryover a): the Brief goal reaches the route so the
+    // single-page assembly re-surfaces Brief-required capability sections
+    // (meridian: an M1 goal ⇒ lead-form ⇒ cta). Fed ONLY to isMultipage
+    // detection + assembleProductStrategy server-side, never the prompt.
+    ...(briefGoal ? { brief: { goal: briefGoal } } : {}),
   };
 }
 
@@ -238,6 +245,47 @@ function isCreditFail(status: number, error: string | undefined): boolean {
   return status === 402 || /credit/i.test(error ?? '');
 }
 
+// ---------------------------------------------------------------------------
+// Strategy step (scale-07 phase 3) — extracted so the STRUCTURE slot can run
+// it PRE-gate via the wizard store's `fetchStrategy` action.
+// ---------------------------------------------------------------------------
+
+export type RunStrategyResult =
+  | { status: 'done'; strategy: ProductStrategyOutput }
+  | { status: 'credits' }
+  | { status: 'error'; error: string };
+
+/**
+ * The strategy call as a standalone step: SAME payload builder
+ * (`buildStrategyPayload`), SAME route (the server owns the credit charge AND
+ * the `clampSitemap` law over the LLM's sitemap proposal), SAME credit-fail
+ * detection as the old inline call.
+ *
+ * Charged EXACTLY ONCE per run: the primary caller is the wizard store's
+ * `fetchStrategy` action (fired when the wizard reaches the structure slot),
+ * which writes the result into the store via `setStrategy`/`setSitemap`.
+ * `runThingGeneration` then receives a non-null `input.strategy` and NEVER
+ * refetches — its tail call below survives only as a fallback for
+ * structure-skipping flows where no strategy was fetched pre-gate.
+ */
+export async function runStrategy(input: ThingGenerationInput): Promise<RunStrategyResult> {
+  try {
+    const res = await fetch('/api/audience/product/strategy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildStrategyPayload(input)),
+    });
+    const json = await res.json();
+    if (!res.ok || !json?.success) {
+      if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
+      throw new Error(json?.message || 'Strategy generation failed');
+    }
+    return { status: 'done', strategy: json.data as ProductStrategyOutput };
+  } catch (e: any) {
+    return { status: 'error', error: e?.message || 'Strategy generation failed.' };
+  }
+}
+
 export async function runThingGeneration(
   input: ThingGenerationInput,
   cb: GenerationCallbacks = {}
@@ -246,7 +294,15 @@ export async function runThingGeneration(
   const title = (input.productName.trim() || input.oneLiner || 'Untitled Page').slice(0, 50);
   const briefGoal = briefGoalFor(input);
   const briefPatch = briefGoal ? { brief: { goal: briefGoal } } : {};
-  const explicitVestria = input.templateId === 'vestria';
+  // scale-07 phase 5 re-key: was `templateId === 'vestria'`. Multipage is a
+  // CAPABILITY question — today only vestria declares it, so behavior is
+  // identical, but the key is honest. This flag also selects the multipage
+  // template's style defaults + lead-form provisioning below (vestria-shaped
+  // today — the only multipage template).
+  const multipageTemplate = isMultipage(input.templateId);
+  // The resolved template for payloads/persistence on this run (never a
+  // hardcoded id): the input's template, else the single-page pilot.
+  const resolvedTemplateId = input.templateId ?? PILOT_TEMPLATE;
 
   // ─── saveFC: persist a multi-page finalContent (hero/style picks re-applied) ──
   const saveFC = async (
@@ -291,7 +347,7 @@ export async function runThingGeneration(
 
         const isHome = page.pathSlug === '/';
         const types = isHome ? ['header', ...page.sections, 'footer'] : [...page.sections];
-        const { uiblocks } = selectProductBlocks({ sections: types, templateId: 'vestria' });
+        const { uiblocks } = selectProductBlocks({ sections: types, templateId: resolvedTemplateId });
 
         const res = await fetch('/api/audience/product/generate-copy', {
           method: 'POST',
@@ -307,7 +363,7 @@ export async function runThingGeneration(
             ...(page.sections.includes('testimonials') && ob.importedTestimonials?.length
               ? { realTestimonials: ob.importedTestimonials }
               : {}),
-            templateId: 'vestria',
+            templateId: resolvedTemplateId,
             page: {
               archetypeKey: page.archetypeKey,
               title: page.title,
@@ -329,7 +385,7 @@ export async function runThingGeneration(
           page,
           order: i,
           copy: json.sections,
-          templateId: 'vestria',
+          templateId: resolvedTemplateId,
           formSpec: {
             fields: DEFAULT_VESTRIA_LEAD_FIELDS,
             submitButtonText: VESTRIA_LEAD_SUBMIT_TEXT,
@@ -342,7 +398,7 @@ export async function runThingGeneration(
           const imgCategories: string[] = ob.understanding?.productCategories ?? ob.understanding?.categories ?? [];
           await injectImagesForPage({
             content: fc.pages[page.archetypeKey].content,
-            templateId: 'vestria',
+            templateId: resolvedTemplateId,
             paletteId: imgPaletteId,
             categories: imgCategories,
           });
@@ -433,9 +489,9 @@ export async function runThingGeneration(
     }
 
     cb.onStage?.('saving');
-    const templateId = explicitVestria ? 'vestria' : PILOT_TEMPLATE;
-    const paletteId = explicitVestria ? input.paletteId ?? defaultVestriaPalette : PILOT_PALETTE;
-    const variantId = explicitVestria ? input.variantId ?? 'tailored' : PILOT_VARIANT;
+    const templateId = multipageTemplate ? resolvedTemplateId : PILOT_TEMPLATE;
+    const paletteId = multipageTemplate ? input.paletteId ?? defaultVestriaPalette : PILOT_PALETTE;
+    const variantId = multipageTemplate ? input.variantId ?? 'tailored' : PILOT_VARIANT;
     try {
       const { finalContent } = buildFinalContent({
         tokenId,
@@ -445,7 +501,7 @@ export async function runThingGeneration(
         copy: copySections,
         onboardingData: buildOnboardingData(input),
         briefGoal,
-        ...(input.templateId === 'vestria'
+        ...(multipageTemplate
           ? {
               leadForm: {
                 sectionType: 'contact',
@@ -458,7 +514,7 @@ export async function runThingGeneration(
           : {}),
       });
 
-      if (explicitVestria && input.heroVariantPicked && input.heroVariant) {
+      if (multipageTemplate && input.heroVariantPicked && input.heroVariant) {
         applyHeroVariantToFinalContent(finalContent, input.heroVariant);
       }
 
@@ -475,7 +531,7 @@ export async function runThingGeneration(
         paletteId,
         templateId,
         variantId,
-        ...(explicitVestria && input.styleMoodPicked && input.mood ? { themeValues: { mood: input.mood } } : {}),
+        ...(multipageTemplate && input.styleMoodPicked && input.mood ? { themeValues: { mood: input.mood } } : {}),
         ...briefPatch,
         finalContent,
       });
@@ -487,9 +543,13 @@ export async function runThingGeneration(
     return { status: 'done', redirectTo: REDIRECT(tokenId) };
   };
 
-  // ─── Strategy ───
-  // Sitemap-gated flows (vestria) already fetched strategy in the structure step
-  // — reuse it (no second charge) and honor the USER-EDITED shape.
+  // ─── Strategy (PRIMARY path: fetched pre-gate at the structure slot) ───
+  // The wizard store's fetchStrategy action already ran `runStrategy` when the
+  // user reached the structure slot, so `input.strategy` (and, for multipage,
+  // `input.sitemap`) carry the USER-CONFIRMED shape — reuse it, NO second
+  // charge. A section/page absent from the confirmed structure gets no copy
+  // call (fan-out iterates `input.sitemap`; single-page copies
+  // `strategy.sections`).
   if (input.strategy) {
     if (input.sitemap?.length) {
       const ob: MultiPageOnboardingData = {
@@ -506,7 +566,7 @@ export async function runThingGeneration(
       const fc = buildMultiPageSkeleton({ tokenId, title, onboardingData: ob });
       try {
         await saveFC(fc, {
-          templateId: 'vestria',
+          templateId: resolvedTemplateId,
           paletteId: input.paletteId ?? defaultVestriaPalette,
           variantId: input.variantId ?? 'tailored',
         });
@@ -518,23 +578,10 @@ export async function runThingGeneration(
     return runCopyAndSave(input.strategy);
   }
 
+  // ─── Fallback: no pre-gate strategy (structure-skipping flow) — fetch here ───
   cb.onStage?.('strategy');
-  let strategy: ProductStrategyOutput;
-  try {
-    const res = await fetch('/api/audience/product/strategy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(buildStrategyPayload(input)),
-    });
-    const json = await res.json();
-    if (!res.ok || !json?.success) {
-      if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
-      throw new Error(json?.message || 'Strategy generation failed');
-    }
-    strategy = json.data as ProductStrategyOutput;
-  } catch (e: any) {
-    return { status: 'error', error: e?.message || 'Strategy generation failed.' };
-  }
+  const strategyResult = await runStrategy(input);
+  if (strategyResult.status !== 'done') return strategyResult;
 
-  return runCopyAndSave(strategy);
+  return runCopyAndSave(strategyResult.strategy);
 }

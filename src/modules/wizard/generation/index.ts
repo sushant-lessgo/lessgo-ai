@@ -12,6 +12,10 @@ import { runThingGeneration, type ThingGenerationInput } from './thing';
 import { runTrustGeneration, type TrustGenerationInput } from './trust';
 import { runWorkGeneration, type WorkGenerationInput } from './work';
 
+// Strategy-before-structure (scale-07 phase 3): the standalone strategy step,
+// run pre-gate by the wizard store's `fetchStrategy` action.
+export { runStrategy, type RunStrategyResult } from './thing';
+
 /** Progress stages surfaced to the GeneratingSlot UI (mirror old GeneratingStep). */
 export type GenerationStage = 'strategy' | 'copy' | 'saving' | 'done';
 

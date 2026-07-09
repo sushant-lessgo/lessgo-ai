@@ -11,6 +11,10 @@ import type {
 import type { ServiceStrategyResponse } from '@/lib/schemas/strategyService.schema';
 import { selectServiceSections } from '../sectionSelection';
 import { selectServiceUIBlocks } from '@/modules/audience/service/selectUIBlocks';
+// ONE clamp law for single-page structure across audiences (scale-07 phase 4):
+// the generalized `clampSitemap` sibling lives with its multipage twin in the
+// product strategy module; this module wraps it with the service type.
+import { applyConfirmedSections } from '@/modules/audience/product/strategy/parseStrategyProduct';
 
 export interface AssembleServiceStrategyInput {
   llmResponse: ServiceStrategyResponse;
@@ -58,4 +62,22 @@ export function assembleServiceStrategy(
     sections,
     uiblocks,
   };
+}
+
+/**
+ * scale-07 phase 4 — apply the user-confirmed 7b single-page structure to an
+ * assembled TRUST strategy before any copy is generated. The confirmed list
+ * passes through the SAME clamp law as multipage pages (unknown dropped, dupes
+ * deduped, `locked` engine-core sections forced present, hero first,
+ * header/footer forced), then `sections` + `uiblocks` are reduced to the
+ * survivors — a section toggled off at the gate gets NO copy. `null`/absent
+ * confirmed structure ⇒ strategy unchanged (default accept / structure-skipping
+ * flows).
+ */
+export function applyConfirmedStructure(
+  strategy: ServiceStrategyOutputAssembled,
+  confirmed: string[] | null | undefined,
+  locked: readonly string[] = []
+): ServiceStrategyOutputAssembled {
+  return applyConfirmedSections(strategy, confirmed, locked);
 }

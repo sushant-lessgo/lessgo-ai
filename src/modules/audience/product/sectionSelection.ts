@@ -1,44 +1,57 @@
 // src/modules/audience/product/sectionSelection.ts
-// Fixed pilot section list for Meridian product pages (P3).
+// Product (thing-engine) section selection — scale-07 phase 2 convergence.
 //
-// Mirror of audience/service/sectionSelection.ts, but FLAT for the pilot: no
-// awareness routing, no asset gating — the 7 Meridian blocks always render in
-// this order (docs/tracks/meridianPlan.md: "Fixed now, awareness-engine later"). The
-// awareness → section-sequence engine is re-introduced in P7. Signature kept
-// trivial so it can widen without changing call sites.
+// Same Brief ⇒ same section list under every thing template (meridian +
+// vestria, single-page). The list is the frozen thing engine core
+// (header, hero, features, testimonials, footer) plus capability sections:
+// a capability section is appended iff the Brief requires the capability AND
+// the template declares an evidencing block for it
+// (templateMeta.capabilitySections). The former MERIDIAN_PILOT_SECTIONS /
+// VESTRIA_PILOT_SECTIONS fixed lists are deleted — per-template extras now
+// exist ONLY as declared capability sections.
+//
+// Firewall note: this is the AUDIENCE layer — importing templateMeta/fit here
+// is fine; the engine grammar itself (sectionGrammar.ts) stays template-free
+// and receives the capability→section map as plain data.
+//
+// Phase-2 reality: the runtime callers (parseStrategyProduct,
+// mockResponseGeneratorProduct) pass only `templateId` — no Brief is plumbed
+// to this call site yet — so auto-generated single-page defaults are the bare
+// engine core for BOTH templates. Brief/explicit capabilities arrive with the
+// 7b structure gate (phases 4/6).
 
-export const MERIDIAN_PILOT_SECTIONS = [
-  'header',
-  'hero',
-  'features',
-  'testimonials',
-  'pricing',
-  'cta',
-  'footer',
-] as const;
-
-// Vestria (GA manufacturing/trade lead-gen) home — full mock order. Flat like
-// the Meridian pilot; the Phase-2 sitemap gate makes this per-page/editable.
-export const VESTRIA_PILOT_SECTIONS = [
-  'header',
-  'hero',
-  'trust',
-  'industries',
-  'about',
-  'features',
-  'catalog',
-  'materials',
-  'process',
-  'testimonials',
-  'contact',
-  'footer',
-] as const;
+import type { Brief, CapabilityId } from '@/types/brief';
+import type { TemplateId } from '@/types/service';
+import { buildSectionList } from '@/modules/engines/sectionGrammar';
+import { templateMeta } from '@/modules/templates/templateMeta';
+import { requiredCapabilitiesFromBrief } from '@/modules/templates/fit';
 
 export interface SelectProductSectionsOptions {
   templateId?: string;
+  /** Brief drives auto-inferred capability sections; absent ⇒ engine core only. */
+  brief?: Brief;
+  /**
+   * Explicit capability inclusions (the 7b structure gate, phase 4 — the ONLY
+   * entry path for the explicit-trigger ids trust/industries/about/materials/
+   * process). Unioned with the Brief-derived set.
+   */
+  requiredCapabilities?: readonly CapabilityId[];
 }
 
 export function selectProductSections(opts?: SelectProductSectionsOptions): string[] {
-  if (opts?.templateId === 'vestria') return [...VESTRIA_PILOT_SECTIONS];
-  return [...MERIDIAN_PILOT_SECTIONS];
+  const meta =
+    opts?.templateId && opts.templateId in templateMeta
+      ? templateMeta[opts.templateId as TemplateId]
+      : undefined;
+
+  const required = new Set<CapabilityId>(
+    opts?.brief ? requiredCapabilitiesFromBrief(opts.brief) : []
+  );
+  for (const cap of opts?.requiredCapabilities ?? []) required.add(cap);
+
+  return buildSectionList({
+    engine: 'thing',
+    requiredCapabilities: [...required],
+    capabilitySections: meta?.capabilitySections,
+  });
 }

@@ -158,7 +158,16 @@ export function getAllElements(schema: AnySchema): LayoutElement[] {
   return schema;
 }
 
-/** Get layout elements safely for any schema format */
+/** Get layout elements safely for any schema format.
+ *
+ * scale-07 phase 8: this is the LAYOUT-NAME path. On the GENERATION path,
+ * engine-covered sections (thing engine — meridian/vestria) are resolved via
+ * the (engine, sectionType) contract in engines/elementContracts.ts BEFORE
+ * this fallback (see elementDetermination.getRequiredElements). This function
+ * survives as-is for: work + service-legacy generation, editor-runtime callers
+ * (useElementCRUD add-element gating — no engine context at editor time), and
+ * editor-only techpremium/naayom blocks. Do not route those through the
+ * engine contract. */
 export function getLayoutElements(layoutName: string): LayoutElement[] {
   const schema = layoutElementSchema[layoutName];
   if (!schema) {
@@ -235,12 +244,18 @@ export function getCardRequirements(schema: AnySchema): CardRequirements | null 
 /**
  * Apply schema defaults for V2 schemas.
  * Injects manual_preferred defaults for elements not present in AI output.
+ *
+ * scale-07 phase 8b: `schemaOverride` lets the caller supply an engine-contract
+ * schema (resolveEngineSectionSchema) for thing-covered layouts, keeping the
+ * defaults path symmetric with the copy prompt + id backfill. null/undefined
+ * falls through to the layout-name registry (service, work, editor-only).
  */
 export function applySchemaDefaults(
   uiblockName: string,
-  aiElements: Record<string, any>
+  aiElements: Record<string, any>,
+  schemaOverride?: UIBlockSchemaV2 | null
 ): Record<string, any> {
-  const schema = layoutElementSchema[uiblockName];
+  const schema = schemaOverride ?? layoutElementSchema[uiblockName];
   if (!schema || !isV2Schema(schema)) {
     // Still filter nulls for non-V2 schemas
     return Object.fromEntries(
@@ -281,10 +296,16 @@ export function applySchemaDefaults(
 
 /**
  * Apply schema defaults to all sections in copy response.
+ *
+ * scale-07 phase 8b: optional `resolveSchema` (e.g. resolveEngineSectionSchema)
+ * routes engine-covered layouts through the contract schema; layouts it returns
+ * null for fall through to the layout-name registry. Callers that pass nothing
+ * (service parseCopy) are byte-identical to before.
  */
 export function applyAllSchemaDefaults(
   sections: Record<string, { elements: Record<string, any> }>,
-  uiblocks: Record<string, string>
+  uiblocks: Record<string, string>,
+  resolveSchema?: (layoutName: string) => UIBlockSchemaV2 | null
 ): Record<string, { elements: Record<string, any> }> {
   const result: Record<string, { elements: Record<string, any> }> = {};
 
@@ -292,7 +313,11 @@ export function applyAllSchemaDefaults(
     const uiblockName = uiblocks[sectionName];
     result[sectionName] = {
       elements: uiblockName
-        ? applySchemaDefaults(uiblockName, sectionCopy.elements || {})
+        ? applySchemaDefaults(
+            uiblockName,
+            sectionCopy.elements || {},
+            resolveSchema ? resolveSchema(uiblockName) : null
+          )
         : (sectionCopy.elements || {})
     };
   }

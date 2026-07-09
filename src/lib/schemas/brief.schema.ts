@@ -54,10 +54,36 @@ export const BriefSchema = z.object({
   socialProfiles: z
     .array(z.object({ platform: z.string(), url: z.string() }))
     .optional(),
+  /**
+   * Confirmed page/section structure (scale-07 phase 6 — first runtime writer
+   * is the 7b structure-gate confirm via the saveDraft partial-brief merge).
+   *
+   * `pages` is OPTIONAL by DESIGN, not style (shallow-partial trap):
+   * saveDraft validates patches with `BriefSchema.partial()`, which is SHALLOW
+   * — it makes top-level `structure` optional but does NOT relax structure's
+   * inner keys. A single-page confirm sends `{ mode:'single', sections }` with
+   * no `pages` (single-page has no page list); if `pages` were required that
+   * patch would fail safeParse and saveDraft's never-fail-autosave path would
+   * silently SKIP the brief write — structure would never persist. Existing
+   * rows stay valid either way (classify.ts writes `pages: []`).
+   */
   structure: z
     .object({
       mode: z.enum(['single', 'multi']),
-      pages: z.array(z.string()),
+      /** Page names — legacy classify writeback; kept for back-compat readers. */
+      pages: z.array(z.string()).optional(),
+      /** Multi-page confirmed structure: per-page surviving section lists. */
+      pageDetails: z
+        .array(
+          z.object({
+            archetypeKey: z.string(),
+            slug: z.string(),
+            sections: z.array(z.string()),
+          })
+        )
+        .optional(),
+      /** Single-page confirmed (surviving, ordered) body section list. */
+      sections: z.array(z.string()).optional(),
     })
     .optional(),
   designStyleHint: z.enum(designStyles).optional(),

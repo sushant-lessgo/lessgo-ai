@@ -12,7 +12,8 @@
 //     confirmed Brief + serveGate result (persisted on the Project at confirm).
 //   • Slot machine is keyed by SLOT IDs (not indices) — the slot list is COMPUTED
 //     from the engine contract (`getContract`) with per-engine slot skips applied
-//     (trust/work skip `structure`). goToSlot/nextSlot/prevSlot operate on ids.
+//     (work skips `structure`; trust joined the 7b gate in scale-07 phase 4).
+//     goToSlot/nextSlot/prevSlot operate on ids.
 //   • Per-field state reuses the useOnboardingStore idea: `{ value, source, confirmed }`
 //     plus the phase-1 waterfall `state` (scraped|inferred|ask|drop) so slots can
 //     render ask-fields as questions and scraped/inferred as confirmable chips.
@@ -22,8 +23,9 @@
 //     entry (rawInput is URL-like) ⇒ review; a manual one-liner ⇒ fill.
 //   • Goal reuses scale-05: goalIntent/goalParam + intentToBriefGoal composer.
 //   • Proof booleans are a SUPERSET of ServiceAssetAvailability (type-guarded).
-//   • thing-only: sitemap/strategy + hero/style/mood picks. trust-only:
-//     variantId/paletteId. (State slots only — UI wiring is phases 3/4/8.)
+//   • structure: strategy + sitemap (thing multipage) / structureSections
+//     (single-page, thing AND trust — scale-07 phase 4). thing-only:
+//     hero/style/mood picks. trust-only: variantId/paletteId.
 //
 // FIREWALL: client store. Imports only pure helpers (contracts/waterfall/bridge/
 // businessTypes) + types. Never imports a template resolver/registry/renderer or
@@ -33,7 +35,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import type { Brief, CopyEngine } from '@/types/brief';
+import type { Brief, CapabilityId, CopyEngine } from '@/types/brief';
 import type { AudienceType, TemplateId } from '@/types/service';
 import type { GoalIntent } from '@/modules/goals/vocabulary';
 import type { GoalParamInput } from '@/modules/brief/bridge';
@@ -46,14 +48,30 @@ import {
 } from '@/modules/businessTypes/config';
 import {
   getContract,
+  lockedSectionsForEngine,
   wizardSlots,
   type ContractField,
   type WizardSlot,
 } from '@/modules/engines/inputContracts';
 import { computeFieldStates, type FieldState } from '@/modules/wizard/waterfall';
+// Single-page structure clamp law (scale-07 phase 4) — plain data-layer module
+// (generalized clampSitemap sibling), safe for the client store.
+import { applyConfirmedSections } from '@/modules/audience/product/strategy/parseStrategyProduct';
+// scale-07 phase 6 — pure data-layer hard-fit helper (templateMeta/coreSections
+// data only, no template modules; firewall-safe for the client store).
+import {
+  requiredCapabilitiesFromStructure,
+  type ConfirmedStructure,
+} from '@/modules/templates/fit';
 // Type-only — proves WizardProofState ⊇ ServiceAssetAvailability (see guard
 // below). Canonical home is @/types/service since phase 10 retired the store.
 import type { ServiceAssetAvailability } from '@/types/service';
+// Type-only — the THING adapter input shape (the runtime module is loaded
+// lazily inside fetchStrategy so the generation tree never enters the store's
+// static import graph).
+import type { ThingGenerationInput } from '@/modules/wizard/generation/thing';
+import type { TrustGenerationInput } from '@/modules/wizard/generation/trust';
+import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
 
 // ---------------------------------------------------------------------------
 // Field state model
@@ -147,9 +165,48 @@ interface WizardState {
   // Proof (superset of ServiceAssetAvailability).
   proof: WizardProofState;
 
-  // thing-only — structure + style picks.
+  // Structure (thing multipage sitemap; single-page for thing AND trust).
   sitemap: unknown[] | null;
   strategy: unknown | null;
+  /**
+   * Single-page 7b structure (scale-07 phase 4): the ordered BODY section list
+   * (chrome excluded — header/footer are law-forced, never user-facing).
+   * Seeded from the fetched strategy's sections when the template is
+   * single-page; null for multipage (sitemap carries structure) and before the
+   * strategy fetch.
+   */
+  structureSections: string[] | null;
+  /**
+   * Sections the user toggled OFF at the gate (capability/gated optionals
+   * only — locked engine-core sections are refused by the toggle action).
+   * Confirmed structure = structureSections minus structureDisabled.
+   */
+  structureDisabled: string[];
+  /**
+   * The PERSISTED Brief `structure.mode` (scale-07 phase 6) — retained from a
+   * previously CONFIRMED structure at hydrate (a bare classify hint
+   * `{mode, pages: []}` without sections/pageDetails is NOT retained, so the
+   * pre-phase-6 mode signal to `isMultipage` is unchanged for fresh runs).
+   * StructureSlot feeds it into `isMultipage` so slot UI and generation read
+   * the same persisted mode (phase-5 open-risk alignment).
+   */
+  briefStructureMode: 'single' | 'multi' | null;
+  /**
+   * Required-capability set recomputed from the CONFIRMED structure (scale-07
+   * phase 6) via `requiredCapabilitiesFromStructure` — dropping a section at
+   * the 7b gate removes its owning capability, widening the swap shortlist
+   * (phase 7 consumer). Null until a structure exists to derive from.
+   */
+  requiredCapabilities: CapabilityId[] | null;
+  /**
+   * Strategy-fetch lifecycle (scale-07 phase 3). Fired by the STRUCTURE slot on
+   * mount; the guard on this status is the credit-charge-once/idempotency
+   * mechanism (back-navigation must never trigger a second charged fetch).
+   */
+  strategyStatus: 'idle' | 'fetching' | 'done' | 'error';
+  strategyError: string | null;
+  /** The strategy fetch failed with an out-of-credits response (402). */
+  strategyCreditsError: boolean;
   heroVariant: string | null;
   heroVariantPicked: boolean;
   styleVariantId: string | null;
@@ -196,6 +253,34 @@ interface WizardActions {
   // thing style/structure.
   setSitemap: (sitemap: unknown[] | null) => void;
   setStrategy: (strategy: unknown) => void;
+  /**
+   * Run the strategy step (scale-07 phase 3) — called by the STRUCTURE slot.
+   * Delegates to `runStrategy` (thing adapter: same payload/credit charge/clamp
+   * path as generation) and writes the result via setStrategy/setSitemap.
+   * Idempotent: no-ops while `fetching` or after `done` (no double charge);
+   * re-callable after `error` (retry).
+   */
+  fetchStrategy: () => Promise<void>;
+  /**
+   * Single-page 7b structure actions (scale-07 phase 4). Toggle-OFF only (no
+   * adds — the list membership is fixed by the strategy proposal); locked
+   * engine-core sections are refused at the STATE level, not just the UI; hero
+   * is pinned first (moves involving hero are refused). Generation consumes
+   * the confirmed (reduced) structure via the projections: `buildThingInput`
+   * clamps the strategy directly; `buildTrustInput` forwards
+   * `confirmedSections` (scale-07 phase 5 — the trust pre-gate bridge is gone).
+   */
+  setStructureSections: (sections: string[] | null) => void;
+  toggleStructureSection: (section: string) => void;
+  moveStructureSection: (index: number, dir: -1 | 1) => void;
+  /**
+   * scale-07 phase 6 — recompute `requiredCapabilities` from the CURRENT
+   * confirmed structure (single-page body or multipage sitemap). Called by
+   * StructureSlot whenever the structure changes; the persisted write itself
+   * rides `buildBriefPatch` → `save()` (the shell's Continue = the confirm
+   * tap), so confirm carries the saveDraft brief patch.
+   */
+  recomputeRequiredCapabilities: () => void;
   setHeroVariant: (v: string) => void;
   setStyleVariantId: (v: string) => void;
   setStylePaletteId: (v: string) => void;
@@ -294,6 +379,172 @@ function slotsForEngine(engine: CopyEngine): WizardSlot[] {
 }
 
 // ---------------------------------------------------------------------------
+// Store → THING adapter projection (scale-07 phase 3).
+// ONE projection shared by the store's fetchStrategy action AND GeneratingSlot
+// (which imports it) so the pre-gate strategy call and the generation run can
+// never drift apart on payload fields.
+// ---------------------------------------------------------------------------
+
+/** Read a store field value as a string (empty fallback). */
+export function fieldStr(fields: Record<string, { value: unknown }>, id: string): string {
+  const v = fields[id]?.value;
+  return typeof v === 'string' ? v : '';
+}
+
+/** Read a store field value as a string[] (empty fallback). */
+export function fieldArr(fields: Record<string, { value: unknown }>, id: string): string[] {
+  const v = fields[id]?.value;
+  return Array.isArray(v) ? (v as string[]) : [];
+}
+
+/**
+ * Confirmed single-page structure body (order preserved, toggled-off removed);
+ * null when the single-page gate never populated (multipage / pre-fetch).
+ */
+export function confirmedStructureBody(s: WizardState): string[] | null {
+  if (!s.structureSections) return null;
+  return s.structureSections.filter((x) => !s.structureDisabled.includes(x));
+}
+
+/**
+ * scale-07 phase 6 — the Brief `structure` patch persisted at confirm (the
+ * FIRST real runtime writer of `Project.brief.structure`). Shape mirrors the
+ * extended BriefSchema.structure:
+ * - multipage: `{ mode:'multi', pages, pageDetails }` from the (user-edited)
+ *   sitemap — `pages` kept for back-compat readers, `pageDetails` carries the
+ *   per-page surviving section lists.
+ * - single-page: `{ mode:'single', sections }` — the confirmed body (toggled-
+ *   off removed, order preserved). NO `pages` key: the schema made `pages`
+ *   optional precisely so this patch survives `BriefSchema.partial()`.
+ * - null before any structure exists (pre-strategy) so autosaves from earlier
+ *   slots never write (or clobber) structure.
+ */
+export function buildStructurePatch(s: WizardState): ConfirmedStructure | null {
+  const sitemap = s.sitemap as SitemapPage[] | null;
+  if (sitemap && sitemap.length > 0) {
+    return {
+      mode: 'multi',
+      pages: sitemap.map((p) => p.archetypeKey),
+      pageDetails: sitemap.map((p) => ({
+        archetypeKey: p.archetypeKey,
+        slug: p.pathSlug,
+        sections: [...p.sections],
+      })),
+    };
+  }
+  const body = confirmedStructureBody(s);
+  if (body) return { mode: 'single', sections: body };
+  return null;
+}
+
+/** Project the wizard store state → the THING adapter input (plain data). */
+export function buildThingInput(s: WizardState): ThingGenerationInput {
+  const fields = s.fields as Record<string, { value: unknown }>;
+  const sitemap = (s.sitemap as SitemapPage[] | null) ?? null;
+  let strategy = (s.strategy as ProductStrategyOutput | null) ?? null;
+  // Single-page 7b confirmed structure (scale-07 phase 4): reduce the strategy
+  // through the clamp law BEFORE it reaches the adapter — a toggled-off
+  // section leaves both `sections` and `uiblocks`, so it gets NO copy call.
+  // Multipage (sitemap present) is untouched — the sitemap gate owns it.
+  if (strategy && !sitemap) {
+    const confirmed = confirmedStructureBody(s);
+    if (confirmed) {
+      strategy = applyConfirmedSections(strategy, confirmed, lockedSectionsForEngine('thing'));
+    }
+  }
+  return {
+    tokenId: s.tokenId ?? '',
+    templateId: (s.templateId as ThingGenerationInput['templateId']) ?? 'meridian',
+    productName: fieldStr(fields, 'name'),
+    oneLiner: fieldStr(fields, 'oneLiner'),
+    features: fieldArr(fields, 'capabilities'),
+    audiences: fieldArr(fields, 'audience'),
+    categories: [],
+    differentiator: fieldStr(fields, 'differentiator') || undefined,
+    objectionFacts: fieldStr(fields, 'objectionFacts') || undefined,
+    offer: fieldStr(fields, 'offer'),
+    goalIntent: s.goalIntent,
+    goalParam: s.goalParam,
+    proof: { hasTestimonials: s.proof.hasTestimonials },
+    strategy,
+    sitemap,
+    paletteId: s.stylePaletteId ?? undefined,
+    variantId: s.styleVariantId ?? undefined,
+    mood: s.styleMood ?? undefined,
+    heroVariant: s.heroVariant ?? undefined,
+    heroVariantPicked: s.heroVariantPicked,
+    styleVariantPicked: s.styleVariantPicked,
+    stylePalettePicked: s.stylePalettePicked,
+    styleMoodPicked: s.styleMoodPicked,
+  };
+}
+
+/**
+ * Project the wizard store state → the TRUST adapter input (plain data) —
+ * scale-07 phases 4/5. THE single trust projection: used by the store's
+ * `fetchStrategy` for the pre-gate trust strategy call AND by GeneratingSlot
+ * for the generation run (consolidated in phase 5; the slot's local duplicate
+ * is deleted). Forwards the gate-fetched `strategy` (charge-once: with it
+ * present, `runTrustGeneration` never refetches) and the 7b-confirmed section
+ * body (`confirmedSections` — a toggled-off section gets NO copy); the
+ * phase-4 module-scoped pre-gate bridge in trust.ts is deleted.
+ */
+export function buildTrustInput(s: WizardState): TrustGenerationInput {
+  const fields = s.fields as Record<string, { value: unknown }>;
+  return {
+    strategy: (s.strategy as TrustGenerationInput['strategy']) ?? null,
+    confirmedSections: confirmedStructureBody(s),
+    tokenId: s.tokenId ?? '',
+    templateId: (s.templateId as TrustGenerationInput['templateId']) ?? 'hearth',
+    businessTypeKey: s.businessTypeKey ?? undefined,
+    businessName: fieldStr(fields, 'name'),
+    oneLiner: fieldStr(fields, 'oneLiner'),
+    targetClients: fieldArr(fields, 'whoProblem'),
+    services: fieldArr(fields, 'services'),
+    process: fieldStr(fields, 'process') || undefined,
+    credentials: fieldStr(fields, 'credentials') || undefined,
+    offer: fieldStr(fields, 'offer'),
+    outcomes: fieldArr(fields, 'outcomes'),
+    goalIntent: s.goalIntent,
+    goalParam: s.goalParam,
+    proof: {
+      hasTestimonials: s.proof.hasTestimonials,
+      hasClientLogos: s.proof.hasClientLogos,
+      hasOutcomes: s.proof.hasOutcomes,
+      hasCaseStudies: s.proof.hasCaseStudies,
+      hasTeamPhotos: s.proof.hasTeamPhotos,
+      hasFounderPhoto: s.proof.hasFounderPhoto,
+      testimonialType: s.proof.testimonialType,
+    },
+    importedTestimonials: s.importedTestimonials,
+    paletteId: s.paletteId ?? undefined,
+    variantId: s.variantId ?? undefined,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Single-page structure helpers (scale-07 phase 4)
+// ---------------------------------------------------------------------------
+
+/**
+ * Seed the single-page gate list from a fetched strategy (immer draft
+ * mutator). Multipage results seed `sitemap` instead (existing behavior);
+ * single-page results (no sitemap on the strategy) seed `structureSections`
+ * with the strategy's BODY sections. Never clobbers prior user edits.
+ */
+function seedStructureFromStrategy(state: WizardState): void {
+  const strat = state.strategy as { sections?: string[]; sitemap?: unknown[] } | null;
+  if (!strat) return;
+  if (!state.sitemap && Array.isArray(strat.sitemap) && strat.sitemap.length) {
+    state.sitemap = strat.sitemap;
+  }
+  if (!strat.sitemap && !state.structureSections && Array.isArray(strat.sections)) {
+    state.structureSections = strat.sections.filter((x) => x !== 'header' && x !== 'footer');
+    state.structureDisabled = [];
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Initial state
 // ---------------------------------------------------------------------------
 
@@ -313,6 +564,13 @@ const initialState: WizardState = {
   proof: { ...initialProof },
   sitemap: null,
   strategy: null,
+  structureSections: null,
+  structureDisabled: [],
+  briefStructureMode: null,
+  requiredCapabilities: null,
+  strategyStatus: 'idle',
+  strategyError: null,
+  strategyCreditsError: false,
   heroVariant: null,
   heroVariantPicked: false,
   styleVariantId: null,
@@ -400,6 +658,42 @@ export const useWizardStore = create<WizardStore>()(
             author_role: '',
           }));
 
+          // scale-07 phase 6 — READ a persisted CONFIRMED structure on load.
+          // Only a structure carrying sections/pageDetails counts as confirmed
+          // (a real 7b write); classify's bare `{mode, pages: []}` hint is
+          // ignored so fresh-run behavior is unchanged. Seeding here means a
+          // reload after confirm resumes the user's structure edits (the
+          // strategy-seed guards never clobber these), and the required set
+          // reflects the confirmed structure immediately.
+          const persisted = brief.structure;
+          const isConfirmedStructure =
+            !!persisted &&
+            ((persisted.sections?.length ?? 0) > 0 ||
+              (persisted.pageDetails?.length ?? 0) > 0);
+          if (persisted && isConfirmedStructure) {
+            state.briefStructureMode = persisted.mode;
+            if (persisted.mode === 'multi' && persisted.pageDetails?.length) {
+              state.sitemap = persisted.pageDetails.map((d) => ({
+                archetypeKey: d.archetypeKey,
+                // Title isn't persisted (schema carries key/slug/sections
+                // only) — prettify the key; the slot's title input remains
+                // editable.
+                title: d.archetypeKey.charAt(0).toUpperCase() + d.archetypeKey.slice(1),
+                pathSlug: d.slug,
+                sections: [...d.sections],
+              }));
+            } else if (persisted.mode === 'single' && persisted.sections?.length) {
+              state.structureSections = persisted.sections.filter(
+                (x) => x !== 'header' && x !== 'footer'
+              );
+              state.structureDisabled = [];
+            }
+            state.requiredCapabilities = requiredCapabilitiesFromStructure(
+              persisted,
+              engine ?? undefined
+            );
+          }
+
           state.hydrated = true;
         }),
 
@@ -462,6 +756,120 @@ export const useWizardStore = create<WizardStore>()(
         set((state) => {
           state.strategy = strategy;
         }),
+
+      // ── Single-page 7b structure (scale-07 phase 4) ──
+      setStructureSections: (sections) =>
+        set((state) => {
+          state.structureSections = sections ? [...sections] : null;
+        }),
+      toggleStructureSection: (section) =>
+        set((state) => {
+          if (!state.structureSections?.includes(section)) return;
+          // Required-locked enforcement lives HERE (state level), not just in
+          // the UI: engine-core required sections can never be toggled off.
+          if (state.engine && lockedSectionsForEngine(state.engine).includes(section)) return;
+          const i = state.structureDisabled.indexOf(section);
+          if (i >= 0) state.structureDisabled.splice(i, 1);
+          else state.structureDisabled.push(section);
+        }),
+      moveStructureSection: (index, dir) =>
+        set((state) => {
+          const list = state.structureSections;
+          if (!list) return;
+          const to = index + dir;
+          if (index < 0 || index >= list.length || to < 0 || to >= list.length) return;
+          // Hero pinned first — any move involving hero is refused.
+          if (list[index] === 'hero' || list[to] === 'hero') return;
+          const tmp = list[index];
+          list[index] = list[to];
+          list[to] = tmp;
+        }),
+      recomputeRequiredCapabilities: () =>
+        set((state) => {
+          const patch = buildStructurePatch(state);
+          state.requiredCapabilities = patch
+            ? requiredCapabilitiesFromStructure(patch, state.engine ?? undefined)
+            : null;
+        }),
+
+      fetchStrategy: async () => {
+        const s = get();
+        // Idempotency guard — the credit charge lives server-side in the
+        // strategy routes (/api/audience/product/strategy for thing,
+        // /api/audience/service/strategy for trust), so "never fetch twice" IS
+        // "never charge twice". Back-navigation re-mounts the structure slot
+        // with status 'done' ⇒ no-op. Concurrent calls: the status flips to
+        // 'fetching' SYNCHRONOUSLY below, before any await, so a second call
+        // in the same tick bails here too. Only 'idle' and 'error' (retry)
+        // proceed.
+        if (s.strategyStatus === 'fetching' || s.strategyStatus === 'done') return;
+        // scale-07 phase 6 (charge-dedup scope note): a reload after a
+        // persisted structure confirm re-runs this charged fetch — DELIBERATE.
+        // Skipping it would leave `strategy` null, which (a) degrades a
+        // multipage resume to the single-page tail path (fan-out needs
+        // strategy + sitemap) and (b) bypasses the confirmed-sections clamp
+        // (applyConfirmedSections needs a strategy object) — both worse than
+        // the charge. Total charges across abandon+reload are unchanged vs
+        // pre-phase-6 (the tail fallback would charge instead); what phase 6
+        // adds is that the PERSISTED structure survives the reload (hydrate
+        // seeds it; the seed guards below never clobber it). True cross-
+        // session dedup requires persisting the strategy blob itself —
+        // deferred (out of this phase's file scope).
+        if (s.strategy) {
+          // Strategy already present (e.g. seeded externally) — mark done, no
+          // fetch; seed the single-page gate list if it's still empty.
+          set((state) => {
+            state.strategyStatus = 'done';
+            seedStructureFromStrategy(state);
+          });
+          return;
+        }
+        // Only structure-gated engines fetch here (work keeps its slot skip).
+        if (s.engine !== 'thing' && s.engine !== 'trust') return;
+        set((state) => {
+          state.strategyStatus = 'fetching';
+          state.strategyError = null;
+          state.strategyCreditsError = false;
+        });
+
+        // Lazy-load the engine's adapter so the generation tree stays out of
+        // the store's static import graph (firewall note at the top of this
+        // file). Both runners share the {done|credits|error} result shape.
+        let result:
+          | { status: 'done'; strategy: { sections?: string[]; sitemap?: unknown[] } }
+          | { status: 'credits' }
+          | { status: 'error'; error: string };
+        if (s.engine === 'trust') {
+          const { runTrustStrategy } = await import('@/modules/wizard/generation/trust');
+          result = await runTrustStrategy(buildTrustInput(get()));
+        } else {
+          const { runStrategy } = await import('@/modules/wizard/generation/thing');
+          result = await runStrategy(buildThingInput(get()));
+        }
+
+        if (result.status === 'done') {
+          const strategy = result.strategy;
+          set((state) => {
+            state.strategy = strategy;
+            // Multipage: seed the sitemap from the (server-clamped) proposal;
+            // single-page: seed the gate's section list. Either way, never
+            // clobber prior user edits (seedStructureFromStrategy guards).
+            seedStructureFromStrategy(state);
+            state.strategyStatus = 'done';
+          });
+        } else if (result.status === 'credits') {
+          set((state) => {
+            state.strategyStatus = 'error';
+            state.strategyCreditsError = true;
+            state.strategyError = 'Out of credits.';
+          });
+        } else {
+          set((state) => {
+            state.strategyStatus = 'error';
+            state.strategyError = result.error || 'Strategy generation failed.';
+          });
+        }
+      },
       setHeroVariant: (v) =>
         set((state) => {
           state.heroVariant = v;
@@ -504,10 +912,19 @@ export const useWizardStore = create<WizardStore>()(
       // Compose the Brief patch persisted on save — goal is the well-defined
       // writeback (scale-05); field→Brief mapping lands with the phase-5
       // adapters. Mirrors the old GoalStep/GeneratingStep brief passthrough.
+      //
+      // scale-07 phase 6: the CONFIRMED structure rides this patch too — the
+      // shell's Continue on the structure slot calls save(), making that tap
+      // the first real runtime writer of `Project.brief.structure` (via
+      // saveDraft's key-wise shallow brief merge). Pre-structure saves return
+      // no `structure` key, so earlier-slot autosaves can never clobber it.
       buildBriefPatch: () => {
-        const { goalIntent, goalParam } = get();
+        const state = get();
+        const { goalIntent, goalParam } = state;
         const patch: Partial<Brief> = {};
         if (goalIntent) patch.goal = intentToBriefGoal(goalIntent, goalParam);
+        const structure = buildStructurePatch(state);
+        if (structure) patch.structure = structure;
         return patch;
       },
 
@@ -540,6 +957,7 @@ export const useWizardStore = create<WizardStore>()(
             goalParam: {},
             fields: {},
             slots: [],
+            structureDisabled: [],
           });
         }),
     })),

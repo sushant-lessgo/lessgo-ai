@@ -16,6 +16,12 @@ import { applyAllSchemaDefaults } from '@/modules/sections/layoutElementSchema';
 // Combined product schema (meridian + vestria) so layout lookups cover ALL
 // product templates — a meridian-only lookup silently skips vestria collections.
 import { productElementSchema } from './elementSchema';
+// scale-07 phase 8b: defaults + id backfill read the SAME per-engine contract
+// schema the copy prompt was built from (thing-covered layouts), so union
+// collections the prompt now asks for (e.g. hero values on a meridian page)
+// get their system ids backfilled. Null (non-thing layouts) falls through to
+// the layout-name schema unchanged.
+import { resolveEngineSectionSchema } from '@/modules/engines/elementContracts';
 import { applyAccentEmFallback } from './accentFallback';
 
 export interface ProductCopyValidationResult {
@@ -72,7 +78,10 @@ export function backfillCollectionIds(
 ): Record<string, SectionCopy> {
   for (const [sectionName, sectionCopy] of Object.entries(sections)) {
     const layoutName = uiblocks[sectionName];
-    const schema = layoutName ? productElementSchema[layoutName] : undefined;
+    // Engine contract first (thing layouts); layout-name lookup is the fallback.
+    const schema = layoutName
+      ? resolveEngineSectionSchema(layoutName) ?? productElementSchema[layoutName]
+      : undefined;
     if (!schema?.collections || !sectionCopy?.elements) continue;
 
     for (const [collectionKey, collection] of Object.entries(schema.collections)) {
@@ -224,7 +233,13 @@ export function processProductCopy(
   sections: Record<string, SectionCopy>,
   uiblocks: Record<string, string>
 ): Record<string, SectionCopy> {
-  const withDefaults = applyAllSchemaDefaults(sections, uiblocks) as Record<string, SectionCopy>;
+  // Contract-aware defaults (phase 8b): thing layouts read the engine contract,
+  // everything else the layout registry — same gate as prompt build + backfill.
+  const withDefaults = applyAllSchemaDefaults(
+    sections,
+    uiblocks,
+    resolveEngineSectionSchema
+  ) as Record<string, SectionCopy>;
   const withIds = backfillCollectionIds(withDefaults, uiblocks);
   return applyAccentEmFallback(withIds);
 }

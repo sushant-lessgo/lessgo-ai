@@ -41,6 +41,8 @@ import {
   serviceTypeForBusinessType,
   type GoalParamInput,
 } from '@/modules/brief/bridge';
+import { applyConfirmedStructure } from '@/modules/audience/service/strategy/parseStrategyService';
+import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
 import { buildFinalContent, saveDraft, type BriefGoal } from './finalize';
 import type { GenerationCallbacks, GenerationResult } from './index';
 
@@ -97,6 +99,14 @@ export interface TrustGenerationInput {
   // Style picks (trust picker) — palette/variant for the resolved template.
   paletteId?: string;
   variantId?: string;
+
+  // Structure (7b gate output — scale-07 phase 4/5). When `strategy` is
+  // present runTrustGeneration NEVER refetches (credit charge-once); when
+  // `confirmedSections` is present, sections absent from it get NO copy. Both
+  // are forwarded by the store's `buildTrustInput` projection (scale-07
+  // phase 5 — the phase-4 module-scoped pre-gate bridge is deleted).
+  strategy?: ServiceStrategyOutputAssembled | null;
+  confirmedSections?: string[] | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -212,6 +222,48 @@ function isCreditFail(status: number, error: string | undefined): boolean {
   return status === 402 || /credit/i.test(error ?? '');
 }
 
+// ---------------------------------------------------------------------------
+// Strategy step (scale-07 phase 4) — extracted so the STRUCTURE slot can run
+// it PRE-gate via the wizard store's `fetchStrategy` action (mirrors the thing
+// adapter's `runStrategy`, phase 3).
+// ---------------------------------------------------------------------------
+
+export type RunTrustStrategyResult =
+  | { status: 'done'; strategy: ServiceStrategyOutputAssembled }
+  | { status: 'credits' }
+  | { status: 'error'; error: string };
+
+/**
+ * The trust strategy call as a standalone step: SAME payload builder
+ * (`buildStrategyPayload`), SAME route (server owns the credit charge), SAME
+ * credit-fail detection as the previous inline call.
+ *
+ * Charge-once (scale-07 phase 5 — bridge deleted): the store's status-guarded
+ * `fetchStrategy` calls this exactly once and writes the result into the
+ * store; `buildTrustInput` forwards it as `input.strategy` (plus the gate's
+ * confirmed body as `input.confirmedSections`), so `runTrustGeneration` never
+ * refetches — including on copy-failure retries.
+ */
+export async function runTrustStrategy(
+  input: TrustGenerationInput
+): Promise<RunTrustStrategyResult> {
+  try {
+    const res = await fetch('/api/audience/service/strategy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildStrategyPayload(input)),
+    });
+    const json = await res.json();
+    if (!res.ok || !json?.success) {
+      if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
+      throw new Error(json?.message || 'Strategy generation failed');
+    }
+    return { status: 'done', strategy: json.data as ServiceStrategyOutputAssembled };
+  } catch (e: any) {
+    return { status: 'error', error: e?.message || 'Strategy generation failed.' };
+  }
+}
+
 export async function runTrustGeneration(
   input: TrustGenerationInput,
   cb: GenerationCallbacks = {}
@@ -224,24 +276,30 @@ export async function runTrustGeneration(
   const templateId = input.templateId ?? 'hearth';
   const variantId = input.variantId ?? defaultVariantForTemplate[templateId as TemplateId];
 
-  // ─── Strategy ───
+  // ─── Strategy (PRIMARY: pre-gate fetch from the structure slot, forwarded
+  //     through `input.strategy` by the store's buildTrustInput projection;
+  //     fallback: one self-fetch for structure-skipping/reloaded flows) ───
   cb.onStage?.('strategy');
+  const confirmedSections = input.confirmedSections ?? null;
   let strategy: ServiceStrategyOutputAssembled;
-  try {
-    const res = await fetch('/api/audience/service/strategy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(buildStrategyPayload(input)),
-    });
-    const json = await res.json();
-    if (!res.ok || !json?.success) {
-      if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
-      throw new Error(json?.message || 'Strategy generation failed');
-    }
-    strategy = json.data as ServiceStrategyOutputAssembled;
-  } catch (e: any) {
-    return { status: 'error', error: e?.message || 'Strategy generation failed.' };
+  if (input.strategy) {
+    // Fetched (and charged) exactly once at the 7b gate — never refetch here.
+    strategy = input.strategy;
+  } else {
+    const result = await runTrustStrategy(input);
+    if (result.status === 'credits') return { status: 'credits' };
+    if (result.status === 'error') return { status: 'error', error: result.error };
+    strategy = result.strategy;
   }
+
+  // Confirmed 7b structure: clamp law (unknown dropped, dupes deduped, locked
+  // trust-core sections forced, hero first, chrome forced), then reduce
+  // sections + uiblocks — a toggled-off section gets NO copy below.
+  strategy = applyConfirmedStructure(
+    strategy,
+    confirmedSections,
+    lockedSectionsForEngine('trust')
+  );
 
   // ─── Copy ───
   cb.onStage?.('copy');

@@ -15,6 +15,7 @@ import {
   landingGoalFor,
   briefGoalFor,
   runThingGeneration,
+  runStrategy,
   type ThingGenerationInput,
 } from './thing';
 import type { ProductStrategyOutput } from '@/types/product';
@@ -33,6 +34,13 @@ const StrategyRequestMirror = z.object({
   whatYouMake: z.string().optional(),
   templateId: z.enum(['meridian', 'vestria']).optional(),
   proof: z.object({ hasTestimonials: z.boolean().optional() }).optional(),
+  // scale-07 phase 5 (carryover a): Brief goal + explicit capabilities reach
+  // the route (assembly-only). Route validates with BriefSchema; the mirror
+  // just pins presence/shape of what the adapter sends.
+  brief: z
+    .object({ goal: z.object({ intent: z.string(), mechanism: z.string() }).passthrough() })
+    .optional(),
+  requiredCapabilities: z.array(z.string()).optional(),
 });
 
 const CopyRequestMirror = z.object({
@@ -105,6 +113,13 @@ describe('THING adapter — strategy payload fidelity', () => {
     });
     // Absent proof ⇒ no proof key (old-wizard byte-identical behavior).
     expect('proof' in buildStrategyPayload(baseInput({ proof: undefined }))).toBe(false);
+  });
+
+  it('forwards the composed Brief goal (carryover a) — absent when no intent', () => {
+    const p = buildStrategyPayload(baseInput()) as any;
+    expect(p.brief?.goal?.intent).toBe('signup-free');
+    expect(p.brief?.goal?.mechanism).toBeTruthy();
+    expect('brief' in buildStrategyPayload(baseInput({ goalIntent: null }))).toBe(false);
   });
 
   it('maps primaryAudience / otherAudiences from the audience field', () => {
@@ -196,6 +211,46 @@ function makeFetchMock(calls: FetchArgs[]) {
   });
 }
 
+// ─── runStrategy — the standalone strategy step (scale-07 phase 3) ───
+
+describe('THING adapter — runStrategy (pre-gate strategy step)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('POSTs the SAME buildStrategyPayload body and returns the strategy', async () => {
+    const calls: FetchArgs[] = [];
+    vi.stubGlobal('fetch', makeFetchMock(calls));
+    const result = await runStrategy(baseInput());
+    expect(result.status).toBe('done');
+    if (result.status === 'done') expect(result.strategy).toEqual(STRATEGY);
+
+    const strategyCalls = calls.filter((c) => c.url.includes('/api/audience/product/strategy'));
+    expect(strategyCalls).toHaveLength(1); // exactly one charged call
+    expect(strategyCalls[0].body).toEqual(buildStrategyPayload(baseInput()));
+  });
+
+  it('402 ⇒ status:credits', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false, status: 402, json: async () => ({ error: 'out of credits' }) }))
+    );
+    expect((await runStrategy(baseInput())).status).toBe('credits');
+  });
+
+  it('network failure ⇒ status:error with a message', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new Error('boom');
+      })
+    );
+    const result = await runStrategy(baseInput());
+    expect(result.status).toBe('error');
+    if (result.status === 'error') expect(result.error).toBe('boom');
+  });
+});
+
 describe('THING adapter — runThingGeneration smoke', () => {
   let calls: FetchArgs[];
   beforeEach(() => {
@@ -237,6 +292,16 @@ describe('THING adapter — runThingGeneration smoke', () => {
       (c) => c.url.includes('/api/saveDraft') && c.body?.templateId === 'vestria'
     );
     expect(skeleton).toBeTruthy();
+    expect(calls.some((c) => c.url.includes('/api/audience/product/generate-copy'))).toBe(true);
+    // Strategy came from the structure gate — the fan-out run must NOT refetch
+    // (credit-charge-once: the /strategy route charges per call).
+    expect(calls.some((c) => c.url.includes('/api/audience/product/strategy'))).toBe(false);
+  });
+
+  it('pre-gate strategy (single-page): runCopyAndSave with ZERO strategy calls — no second charge', async () => {
+    const result = await runThingGeneration(baseInput({ strategy: STRATEGY }));
+    expect(result.status).toBe('done');
+    expect(calls.some((c) => c.url.includes('/api/audience/product/strategy'))).toBe(false);
     expect(calls.some((c) => c.url.includes('/api/audience/product/generate-copy'))).toBe(true);
   });
 

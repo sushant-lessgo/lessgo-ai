@@ -23,6 +23,7 @@
 // authoritative key is whatever this function emits.
 
 import type { ServiceAwareness, ServiceAssetInput, ServiceGoal, TemplateId } from '@/types/service';
+import { buildSectionList } from '@/modules/engines/sectionGrammar';
 
 export type ServicePresentationFormat = 'packages' | 'quote-only' | 'hybrid';
 
@@ -83,17 +84,20 @@ export function selectServiceSections(input: ServiceSectionSelectionInput): stri
   const orderMap = isSurge ? SURGE_MIDDLE_ORDER : AWARENESS_MIDDLE_ORDER;
   const middle = orderMap[awareness] ?? orderMap['search-aware-comparing'];
 
-  const showPackages = format !== 'quote-only';
-
-  const body = middle.filter((sectionType) => {
-    if (sectionType === 'testimonials') return assets.hasTestimonials;
-    if (sectionType === 'packages') return showPackages;
-    // Surge-only delta sections, gated on the founder's available proof.
-    if (sectionType === 'logos') return assets.hasClientLogos;
-    if (sectionType === 'casestudies') return assets.hasCaseStudies;
-    // `about` and `stats` always render for Surge (identity-core).
-    return true;
+  // scale-07 phase 1: delegate to the engine-owned section grammar. The
+  // ordering maps above are the grammar's ordering DATA (resolved here so the
+  // grammar stays template-free); gates carry the exact legacy semantics
+  // (testimonials/packages/logos/casestudies filtering, about/stats always-on).
+  // Output is byte-identical to the pre-grammar implementation
+  // (sectionGrammar.test.ts equivalence matrix).
+  return buildSectionList({
+    engine: 'trust',
+    ordering: middle,
+    gates: {
+      hasTestimonials: assets.hasTestimonials,
+      showPackages: format !== 'quote-only',
+      hasClientLogos: assets.hasClientLogos,
+      hasCaseStudies: assets.hasCaseStudies,
+    },
   });
-
-  return ['header', ...body, 'footer'];
 }
