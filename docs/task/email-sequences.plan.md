@@ -13,7 +13,7 @@ Clone the social-posts pattern (prompt engine → generation route → copy-bloc
 - phase 2 archetype map + prompt engine (Show-up): done (commit 353efc14, review loops 1 → ship; tsc+1807 tests green, +22)
   - PHASE-5 CARRY: reviewer flag — real captured testimonials render quoted in prompt; if one contains a hard metric it will legitimately appear in-quote (by design, not a proof-truth violation). Human-verify at pilot copy gate.
 - phase 3 API routes + kill-switch: done (commit 32277b7f, review loops 1 → ship; tsc+1808 tests green). Notes: full-sequence output wrapped as {emails:[...]} object (aiClient object-brace extraction); GET resolves timing-label def from row.intent. .env.example is gitignored → NOT committed; kill-switch NEXT_PUBLIC_EMAIL_SEQUENCES_DISABLED documented here + must be surfaced at Phase 7 merge/deploy gate.
-- phase 4 dashboard UI + nav: pending
+- phase 4 dashboard UI + nav: done (commit e2afb796, review loops 1 → ship; tsc+1808 tests green). Server page + single client panel (per-email Copy/Regenerate, Generate/Regen-all, Delete, 3-state empty); ProjectCard "Emails" button (tokenId, kill-switch hidden). Live authed route/UI smoke deferred to Phase 5 (routes are Clerk-protected — curl-without-auth can't reach; correct by design).
 - phase 5 pilot quality gate: pending
 - phase 6 remaining 4 archetypes: pending
 - phase 7 final verification + merge: pending

@@ -150,3 +150,41 @@ Edit sites (also spans phase-2 engine + its test, per coordinator's explicit cro
 tsc green (0 errors); test:run green (1808 passed, 3 skipped — +1 new bare-array test).
 
 - GET resolves timing-label def from `row.intent` (via `getSequencePlanForIntent`), matching regenerate — not the current brief intent, so editing the project goal after generating never mangles/drops labels on the stored sequence; non-available stored intent → labels blank, stored subjects/bodies preserved. Current brief still drives the `status` field + no-row empty state.
+
+---
+
+## Phase 4 — Dashboard UI + nav entry
+
+**Files changed**
+- `src/app/dashboard/emails/[token]/page.tsx` (new) — server component
+- `src/app/dashboard/emails/[token]/EmailSequencePanel.tsx` (new) — single client component
+- `src/components/dashboard/ProjectCard.tsx` — added "Emails" nav button + kill-switch const
+
+**page.tsx (server component)**
+- `assertProjectOwner`-gated on `userId` → `notFound()`; keyed on `tokenId` (works on drafts). No sign-in → redirect. Loads `Project.title` + `brief` separately (assertProjectOwner returns no display data; `title` is the display col, no `name` column).
+- 3-state empty-state branch: `resolvePlan(brief)` runs `BriefSchema.safeParse` → `goal.intent` → `getSequencePlanForIntent`. `available = !isDisabled() && status==='available' && archetype`. Kill-switch (`NEXT_PUBLIC_EMAIL_SEQUENCES_DISABLED==='true'`), skipped, deferred, and missing-goal all collapse to the SAME clean "Email sequences aren't available for this project's goal" card — never an error/throw.
+- Available branch: header = archetype label (static `ARCHETYPE_LABELS` map) + title, copy-only note ("paste each email into Calendly Workflows or your ESP — Lessgo doesn't send them") + `<EmailSequencePanel token={tokenId} />`.
+
+**EmailSequencePanel.tsx (ONE client component)**
+- Code comment documents the simplification vs social-posts: single sequence per project → no Generator/Library split, no `window` CustomEvent; one component, one state object.
+- GET on mount (`load`); button text-label swap (no spinner): "Generating…" while busy, else "Regenerate all" if a sequence exists / "Generate sequence" if none.
+- Per-email card: `Email {position+1}` badge + static `timingLabel` badge + `purpose` + subject (bold) + body (whitespace-pre-wrap).
+- Per-email **Copy** → clipboard `Subject: {subject}\n\n{body}`, "Copied!" 2s revert keyed on position.
+- Per-email **Regenerate** → POST `{position}` to `/regenerate`; label swaps to "Regenerating…" for that card only; on success splices ONLY the returned `emails[position]` back into state (`.map` replace at position) so just that one card updates.
+- **Delete sequence** → DELETE → clears state to null (empty state returns).
+- Clean pre-generation empty state; all failures render inline red error text via `readableError` (no thrown dialogs).
+
+**ProjectCard.tsx**
+- Added module-level `EMAILS_DISABLED` const (reads `NEXT_PUBLIC_EMAIL_SEQUENCES_DISABLED`).
+- "Emails" button placed immediately after the "Social" button in the actions row, inside the same `project.tokenId &&` visibility (both Draft and Published branches see it — needs only tokenId, no slug). Hidden when `EMAILS_DISABLED`. Styling mirrors "Social" exactly (green border/bg/text). No other ProjectCard code touched.
+
+**Deviations**
+- Regenerate response returns the full updated sequence; per requirement "updates just that card" I splice only the returned `emails[position]` into existing state rather than replacing the whole sequence object. Conservative, matches the stated behavior.
+
+**Verification**
+- `npx tsc --noEmit` → 0 errors.
+- `npm run test:run` → 1808 passed | 3 skipped (unchanged from Phase 3; no regressions).
+- Dev server not started (orchestrator runs the live smoke test).
+
+**Open risks**
+- None for the wiring. Live smoke test should confirm mock + real-LLM generate, per-email copy/regenerate, delete, unmapped-intent empty state, and kill-switch hiding button + page content.
