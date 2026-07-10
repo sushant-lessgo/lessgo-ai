@@ -1,0 +1,62 @@
+{
+  "slug": "greenhealthycooking",
+  "url": "https://greenhealthycooking.com/",
+  "business": { "type_label": "healthy recipe blog + digital course/ebook seller", "icp_category": "food blogger / content publisher", "geography_hint": "US (English, Amazon Associates US)" },
+  "in_icp": false,
+  "engine": {
+    "pick": "work",
+    "ladder_reasoning": "The recipes ARE the draw and the proof — visitors browse the content itself to decide to stay/subscribe/buy. Not a defined-expertise pitch (trust), not a physical place, not a single ask (quick-yes).",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "no single action — site juggles email opt-in, external course checkout, ebook sales, and affiliate-shop clicks",
+    "mechanism": "subscribe-follow",
+    "delegated_to": "thrivecart (course), amazon (affiliate shop), none (email list)"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 21,
+    "pages": ["home", "about-me", "shop", "philosophy", "21-day-meal-plans", "recipes", "meal-prep"],
+    "archetype_note": "Content-hub blog with recipe category grids + multiple monetization funnels (course, ebooks, affiliate). Sprawling multi-page (21 visible), not a single conversion page."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Featured Recipes", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Instant Pot Recipes / Meal Prep Recipes / Salads", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "6-Week Clean Eating Program", "component": "promo-block" },
+      { "canonical": "founderNote", "observed_as": "My Story (About Lorena)", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Features (Forbes, CBC Radio, BuzzFeed)", "component": "logo-strip" },
+      { "canonical": "testimonials", "observed_as": "Reader Interactions (comment thread)", "component": "other" },
+      { "canonical": "pricing", "observed_as": "Omnivore/Summer/Vegetarian/Bundle 21-Day Meal Plans", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "SIGN UP (31 Days of Healthy Dinners)", "component": "email-form" },
+      { "canonical": "followStrip", "observed_as": "Next, join the community! + social links", "component": "text" },
+      { "canonical": "footer", "observed_as": "Footer", "component": "other" },
+      { "canonical": "miscellaneous", "observed_as": "AMAZON DISCLOSURE", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Philosophy (Real-World Approach / Consistency Over Perfection / Green Ingredient Focus / Nutritional Enjoyment / Personalized Diet Philosophy)", "why_no_fit": "A multi-part manifesto/values page — closest to founderNote/objectionHandling but it's really an editorial belief-system page with no direct conversion role", "closest": "founderNote" },
+      { "observed": "Shop (Kitchen Appliances / Storage Containers / Cookware / Utensils affiliate category grids)", "why_no_fit": "An affiliate-link category hub (no prices/cart) — not a real storefront/catalog, not features/pricing; it's a monetized link directory", "closest": "catalog" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "blog", "catalog", "packages", "lead-form"],
+    "proposed_new": [
+      { "name": "recipe-index / content-category-grid", "evidence": "Home + category pages are grids of recipe cards with 'VIEW MORE' paginated category links — a content-browsing archetype distinct from a product catalog or portfolio gallery" },
+      { "name": "affiliate-hub", "evidence": "Shop page is affiliate-link category grid with no prices/cart — monetization via outbound links, not commerce the taxonomy models" }
+    ]
+  },
+  "proof_types": ["logo-wall", "reviews"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["recipe/content card grid", "category view-more pagination", "email opt-in inline form", "media-mention logo strip", "product/ebook package cards", "affiliate link tiles"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "medium",
+    "why": "Nav/sections/CTAs captured full, but meta_description, embeds, and price data are null/empty (commerce.prices_shown false) — ebook/course pricing under-captured. Also the site is out-of-ICP (multi-funnel content publisher), so single-engine fit is inherently approximate."
+  },
+  "gap_findings": [
+    "Site's job is NOT one conversion action — it runs 4 parallel funnels (email list, external ThriveCart course, ebook sales, Amazon affiliate shop). Taxonomy assumes one primary conversion; no way to express a content-hub/blog monetized by multiple downstream paths.",
+    "Unmapped: recipe-index / content-category-grid archetype (browsing editorial content) has no canonical section — mapped loosely to hero/useCases.",
+    "Unmapped: affiliate-hub 'Shop' (link directory, no cart/prices) fits neither catalog nor pricing cleanly.",
+    "Proposed capabilities recipe-index and affiliate-hub are not in the closed vocab."
+  ]
+}

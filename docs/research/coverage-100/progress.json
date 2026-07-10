@@ -1,1 +1,42 @@
-﻿{}
+{
+  "priscillawolf": {
+    "url": "https://photography.priscillawolf.nl/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=work, multi-page. Partial scrape: /contact + /book client-rendered shells, conversion mechanism uncaptured. Gap: no canonical section for filterable portfolio/gallery page (forced onto socialProof)."
+  },
+  "morenoshairandbeauty": {
+    "url": "https://morenoshairandbeauty.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=place (runner-up work), multi-page, full capture. Gaps: proposed_new capability external-booking-redirect (Treatwell/Optios, no on-site form); unmapped in-salon retail catalog w/ discount tiers; careers/chair-rental sub-tree = second non-conversion audience."
+  },
+  "coltivar": {
+    "url": "https://www.coltivar.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=trust (runner-up thing), multi-page (10 nav, 5 captured; Kajabi). Partial: /about base64-only. Gaps: proposed_new interactive-calculators, podcast/media-hub; multi-funnel — several parallel conversion paths strain the single one_action model."
+  },
+  "greenhealthycooking": {
+    "url": "https://greenhealthycooking.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=work (runner-up quick-yes), multi-page (21). in_icp=FALSE — content publisher with 4 parallel funnels (email, ThriveCart course, ebooks, Amazon affiliate). Prices/embeds/meta null = under-captured. Gaps: proposed_new recipe-index, affiliate-hub; no way to express content-hub/blog."
+  },
+  "epiclaunch": {
+    "url": "https://www.epiclaunch.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=work (runner-up quick-yes), multi-page (5). in_icp=FALSE — personal content blog, not one-conversion. Gaps: proposed_new content-feed, affiliate-list; category/taxonomy nav has no canonical section."
+  }
+}

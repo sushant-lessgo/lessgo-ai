@@ -1,0 +1,69 @@
+{
+  "slug": "epiclaunch",
+  "url": "https://www.epiclaunch.com/",
+  "business": {
+    "type_label": "personal finance/entrepreneurship blog (content-marketing site)",
+    "icp_category": "blogger / content publisher (personal brand)",
+    "geography_hint": "none explicit (English, North America implied)"
+  },
+  "in_icp": false,
+  "engine": {
+    "pick": "work",
+    "ladder_reasoning": "No defined expertise sold and nothing to trust-hire (free content, monetized via ads/affiliate), so not trust. The published articles ARE the proof and the whole site is a browse-the-content experience, which is closest to 'work' (portfolio-as-proof). But the site's actual job is a content portal with blog inventory, not one conversion action — hence in_icp false.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "browse/read blog articles; secondary — subscribe email to the blog",
+    "mechanism": "subscribe-follow",
+    "delegated_to": "convertkit"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 5,
+    "pages": ["home", "about", "top-products", "contact", "blog"],
+    "archetype_note": "WordPress/Elementor personal blog: content-hub homepage (carousels, article grids, category lists) + About + affiliate 'Top Products' + mailto Contact + ~200-post blog. Not a landing page."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Launch Your Business, Improve Profits and Create Wealth (site title/masthead)", "component": "header" },
+      { "canonical": "socialProof", "observed_as": "Featured In (press logos)", "component": "logo-strip" },
+      { "canonical": "socialProof", "observed_as": "Domain Authority", "component": "stats" },
+      { "canonical": "followStrip", "observed_as": "Follow Us", "component": "logo-strip" },
+      { "canonical": "leadForm", "observed_as": "Join 6,472 Entrepreneurs (email subscribe)", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "Hi. I'm Jeff Wiener / The Story / About", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "Favourite Quotes (Jeff Wiener quote)", "component": "text" },
+      { "canonical": "footer", "observed_as": "Footer", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Trending in the Digital World (article carousel)", "why_no_fit": "Blog-article feed/carousel is a content-index surface; no canonical section represents a dynamic post feed", "closest": "miscellaneous" },
+      { "observed": "Featured Recent Articles / Popular Posts / Recent Posts (blog post grids)", "why_no_fit": "Repeated blog-post index grids are core content inventory, not a landing-page section", "closest": "miscellaneous" },
+      { "observed": "Categories (17 content categories with post counts)", "why_no_fit": "Taxonomy/category navigation for a blog archive; no canonical id for content taxonomy nav", "closest": "miscellaneous" },
+      { "observed": "Top Products (affiliate book list + SEM Rush referral)", "why_no_fit": "Affiliate recommendation list is a monetization surface, not features/pricing/products of the site's own offer", "closest": "miscellaneous" },
+      { "observed": "Contact (guest-post/sponsored-post mailto instructions)", "why_no_fit": "No contact form; advertising/guest-post inquiry text only — closest is a CTA but it's an editorial mailto, not conversion", "closest": "cta" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "blog"],
+    "proposed_new": [
+      { "name": "content-feed", "evidence": "Homepage is built from repeated dynamic blog-post grids/carousels (Trending, Featured Recent Articles, Popular Posts, Recent Posts) — a post-index/feed surface that 'blog' (authoring) and 'catalog' (product listing) don't capture." },
+      { "name": "affiliate-list", "evidence": "'Top Products' page is a curated affiliate/referral recommendation list (Amazon books, SEM Rush) — a monetization pattern with no capability or engine representation." }
+    ]
+  },
+  "proof_types": ["logo-wall", "stats", "certs"],
+  "design_style": {
+    "pick": "editorial/craft",
+    "none_fits_because": "Photo-heavy content/magazine layout; editorial/craft is the closest, though it leans generic-WordPress-blog rather than crafted."
+  },
+  "components_needed": ["blog-post grid", "article carousel", "category list with post counts", "affiliate link list", "email-subscribe inline form", "press logo strip", "social follow strip"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "high",
+    "why": "fetch_quality is full (4 pages captured); structure/nav/CTAs unambiguous. Slightly lower certainty only on exact section-heading wording (WebFetch-derived), but classification (out-of-ICP content blog) is clear."
+  },
+  "gap_findings": [
+    "Site is fundamentally a content portal (blog inventory + affiliate monetization + ad 'Advertise' nav), not a one-conversion landing page — falls outside ICP; the 5 copy engines do not model a content-hub whose 'conversion' is content consumption.",
+    "Proposed new capability 'content-feed' — dynamic blog-post index grids/carousels are the homepage's dominant surface and have no canonical section id (mapped to miscellaneous 4x).",
+    "Proposed new capability 'affiliate-list' — curated affiliate/referral recommendation page is an unmodeled monetization pattern.",
+    "Category/taxonomy navigation with post counts has no canonical section representation."
+  ]
+}
