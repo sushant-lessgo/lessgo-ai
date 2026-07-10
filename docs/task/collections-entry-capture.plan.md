@@ -52,7 +52,7 @@ engine declarations themselves, D9), then AFTER the call resolve the engine in-c
 - phase 1 union builders + collection-key single source: done (commit 7befdd64, review loops 1, ship; tsc+test:run green)
 - phase 2 route wiring (scrape-website + understand) + one-AI-call tests: done (commit 1adcd540, review loops 1, ship; tsc+test:run green). Understand-route FK-strip added (foreign collection keys leaked via raw-as-base). KNOWN non-blocking: understand DEMO/mock path doesn't strip base collections — harmless (agency fixture has no collections keys); revisit if that fixture gains any.
 - phase 3 7b empty-state reachability: done (commit 4e972022, review loops 1, ship; tsc+test:run green). CollectionNodes gate unions collectionKeysForBusinessType (NOT requiredCollections → serve gate untouched); null bt → present-only.
-- phase 4 live verification (human gate): pending
+- phase 4 live verification (human gate): AWAITING USER — all code phases shipped, npm run build green (after npx prisma generate refreshed stale client on untouched forms/submit route). Live pine64 check + merge pending user sign-off.
 
 ---
 
