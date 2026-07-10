@@ -21,16 +21,16 @@ import {
 } from './socialIcons';
 
 export default function FollowStrip({ sectionId }: { sectionId: string }) {
-  const store = useEditStore() as any;
-  const section = store.content?.[sectionId];
+  const section = useEditStore((s) => (s as any).content?.[sectionId]);
+  const updateElementContent = useEditStore((s) => (s as any).updateElementContent);
   const elements = (section?.elements || {}) as Record<string, any>;
   const profiles = resolveProfiles(elements.links_json);
   const heading = elements.strip_heading || FOLLOW_STRIP_DEFAULT_HEADING;
 
   const onHeadingBlur = (e: React.FocusEvent<HTMLHeadingElement>) => {
     const value = (e.currentTarget.textContent || '').trim();
-    if (value !== heading && typeof store.updateElementContent === 'function') {
-      store.updateElementContent(sectionId, 'strip_heading', value);
+    if (value !== heading && typeof updateElementContent === 'function') {
+      updateElementContent(sectionId, 'strip_heading', value);
     }
   };
 

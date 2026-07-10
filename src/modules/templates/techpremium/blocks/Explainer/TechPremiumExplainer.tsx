@@ -35,7 +35,7 @@ export default function TechPremiumExplainer({ sectionId }: Props) {
   const edit = mode === 'edit';
   const rows = blockContent.rows || [];
 
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((f: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [uploadingId, setUploadingId] = React.useState<string | null>(null);

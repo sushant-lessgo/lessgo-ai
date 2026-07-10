@@ -25,7 +25,13 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
   onClose,
   targetHeaderId,
 }) => {
-  const store = useEditStore();
+  const navigationConfig = useEditStore((s) => s.navigationConfig);
+  const sections = useEditStore((s) => s.sections);
+  const sectionLayouts = useEditStore((s) => s.sectionLayouts);
+  const updateNavItem = useEditStore((s) => s.updateNavItem);
+  const addNavItem = useEditStore((s) => s.addNavItem);
+  const removeNavItem = useEditStore((s) => s.removeNavItem);
+  const reorderNavItems = useEditStore((s) => s.reorderNavItems);
   const [editingItem, setEditingItem] = useState<NavigationItem | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState<LinkFormData>({
@@ -54,15 +60,15 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
     }
   }, [showAddForm, editingItem]);
 
-  if (!isVisible || !store.navigationConfig) return null;
+  if (!isVisible || !navigationConfig) return null;
 
-  const navItems = store.navigationConfig.items;
-  const availableSections = store.sections
+  const navItems = navigationConfig.items;
+  const availableSections = sections
     .filter(id => !id.includes('header') && !id.includes('footer'))
     .map(id => ({
       id,
-      layout: store.sectionLayouts[id] || '',
-      label: getSectionDisplayName(id, store.sectionLayouts[id] || ''),
+      layout: sectionLayouts[id] || '',
+      label: getSectionDisplayName(id, sectionLayouts[id] || ''),
     }));
 
   // Use portal to render modal at document root level to escape layout container constraints
@@ -74,13 +80,13 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
     const finalLink = `#${formData.sectionId}`;
 
     if (editingItem) {
-      store.updateNavItem(editingItem.id, {
+      updateNavItem(editingItem.id, {
         label: formData.label,
         link: finalLink,
         sectionId: formData.sectionId,
       });
     } else {
-      store.addNavItem(
+      addNavItem(
         formData.label,
         finalLink,
         formData.sectionId
@@ -102,7 +108,7 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
   };
 
   const handleDeleteItem = (itemId: string) => {
-    store.removeNavItem(itemId);
+    removeNavItem(itemId);
   };
 
   const resetForm = () => {
@@ -158,7 +164,7 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
                         onClick={() => {
                           const newOrder = [...navItems];
                           [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]];
-                          store.reorderNavItems(newOrder.map(item => item.id));
+                          reorderNavItems(newOrder.map(item => item.id));
                         }}
                         className="p-1 text-gray-400 hover:text-gray-600"
                         title="Move up"
@@ -173,7 +179,7 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
                         onClick={() => {
                           const newOrder = [...navItems];
                           [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
-                          store.reorderNavItems(newOrder.map(item => item.id));
+                          reorderNavItems(newOrder.map(item => item.id));
                         }}
                         className="p-1 text-gray-400 hover:text-gray-600"
                         title="Move down"
@@ -266,7 +272,7 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
             </div>
           )}
 
-          {!showAddForm && navItems.length < store.navigationConfig.maxItems && (
+          {!showAddForm && navItems.length < navigationConfig.maxItems && (
             <button
               onClick={() => setShowAddForm(true)}
               className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors"
@@ -275,9 +281,9 @@ const NavigationEditor: React.FC<NavigationEditorProps> = ({
             </button>
           )}
 
-          {navItems.length >= store.navigationConfig.maxItems && (
+          {navItems.length >= navigationConfig.maxItems && (
             <div className="text-sm text-gray-500 text-center py-3">
-              Maximum {store.navigationConfig.maxItems} navigation items allowed for this header type.
+              Maximum {navigationConfig.maxItems} navigation items allowed for this header type.
             </div>
           )}
         </div>

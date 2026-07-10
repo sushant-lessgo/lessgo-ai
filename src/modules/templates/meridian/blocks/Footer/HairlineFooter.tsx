@@ -60,14 +60,20 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
   // Newsletter capture: one-click auto-provisions a dashboard-backed form and
   // connects it to newsletter_cta (buttonConfig.formId). Once connected, the
   // published footer renders a live email-capture widget.
-  const { content, addForm, deleteForm, getFormById, setSection, sections, pages } = useEditStore();
+  const sectionContent = useEditStore((s) => s.content?.[sectionId]);
+  const addForm = useEditStore((s) => s.addForm);
+  const deleteForm = useEditStore((s) => s.deleteForm);
+  const getFormById = useEditStore((s) => s.getFormById);
+  const setSection = useEditStore((s) => s.setSection);
+  const sections = useEditStore((s) => s.sections);
+  const pages = useEditStore((s) => s.pages);
   const sectionOptions = React.useMemo(
     () => buildSectionLinkOptions(sections || []),
     [sections]
   );
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const newsletterFormId: string | undefined =
-    content?.[sectionId]?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
+    sectionContent?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
   const isNewsletterConnected = !!(newsletterFormId && getFormById?.(newsletterFormId));
 
   const setupNewsletter = () => {
@@ -84,7 +90,7 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
       successMessage: 'Thanks for subscribing!',
       integrations: [{ id: `int-${Date.now()}`, type: 'dashboard', name: 'Dashboard', enabled: true }],
     } as any);
-    const prevMeta = content?.[sectionId]?.elementMetadata || {};
+    const prevMeta = sectionContent?.elementMetadata || {};
     setSection(sectionId, {
       elementMetadata: { ...prevMeta, newsletter_cta: { buttonConfig: { type: 'form', formId } } },
     });

@@ -30,17 +30,14 @@ const generateElementId = (): string => {
 };
 
 export function useUniversalElements() {
-  const store = useEditStore();
-  const {
-    content,
-    updateElementContent,
-    setSection,
-  } = store;
+  const content = useEditStore((s) => s.content);
+  const updateElementContent = useEditStore((s) => s.updateElementContent);
+  const setSection = useEditStore((s) => s.setSection);
 
   // Fallbacks for methods that might not exist in legacy store
-  const trackChange = store.trackChange || (() => {});
-  const triggerAutoSave = store.triggerAutoSave || (() => {});
-  const announceLiveRegion = store.announceLiveRegion || ((message: string) => {
+  const trackChange = useEditStore((s) => s.trackChange) || (() => {});
+  const triggerAutoSave = useEditStore((s) => s.triggerAutoSave) || (() => {});
+  const announceLiveRegion = useEditStore((s) => s.announceLiveRegion) || ((message: string) => {
     logger.dev('Live region announcement:', message);
   });
 

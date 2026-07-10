@@ -141,3 +141,98 @@ The mock was the bug (it silently discarded the selector), not the hook. This fi
 - React.memo default shallow-compare relies on B1 keeping unchanged sections' `data` refs stable and phase-3 blocks being self-sufficient; if a block reads a store slice WITHOUT a selector (phase-5 stragglers) it self-updates via its own subscription, so memo does not cause staleness — it only prevents parent-prop-driven re-render. Full one-section-per-edit acceptance is a phase-5/phase-7 Profiler check.
 - Memo-A layout-stability assumption is documented in-code; a future content-only mutation that changes a section's layout would need `content` re-added to Memo-A deps.
 - Skeleton CLS: neutral bands then real content pop-in on cold load (accepted, scout-flagged low severity). Runtime-only; not unit-covered.
+
+## Phase 5 — Render-hot leaf call sites → selectors
+
+**Files changed (source, 35)**
+- `src/app/edit/[token]/components/editor/InlineTextEditorV2.tsx`
+- `src/modules/templates/meridian/blocks/Hero/EditorialPhotoHero.tsx`
+- `src/modules/templates/meridian/blocks/Header/MeridianNavHeader.tsx`
+- `src/modules/templates/meridian/blocks/Footer/HairlineFooter.tsx`
+- `src/modules/templates/techpremium/blocks/Hero/TechPremiumHero.tsx`
+- `src/modules/templates/techpremium/blocks/Header/TechPremiumNav.tsx`
+- `src/modules/templates/techpremium/blocks/Footer/TechPremiumFooter.tsx`
+- `src/modules/templates/techpremium/blocks/ProductDetail/TechPremiumProductDetail.tsx`
+- `src/modules/templates/techpremium/blocks/Gallery/TechPremiumGallery.tsx`
+- `src/modules/templates/techpremium/blocks/Explainer/TechPremiumExplainer.tsx`
+- `src/modules/templates/techpremium/blocks/Trust/TechPremiumTrust.tsx`
+- `src/modules/templates/hearth/blocks/Header/WarmNavHeader.tsx`
+- `src/modules/templates/surge/blocks/Header/WarmNavHeader.tsx`
+- `src/modules/templates/surge/blocks/Footer/ContactFooterRich.tsx`
+- `src/modules/templates/lex/blocks/Header/LetterheadNav.tsx`
+- `src/modules/templates/lumen/blocks/Header/LumenNav.tsx`
+- `src/modules/templates/lumen/blocks/Footer/LumenFooter.tsx`
+- `src/modules/templates/lumen/blocks/Hero/LumenHero.tsx`
+- `src/modules/templates/lumen/blocks/Portfolio/LumenCategoryGallery.tsx`
+- `src/modules/templates/lumen/blocks/About/LumenPhotographerAbout.tsx`
+- `src/modules/templates/vestria/blocks/Hero/VestriaTailoredHero.tsx`
+- `src/modules/templates/vestria/blocks/Contact/VestriaLeadForm.tsx`
+- `src/modules/templates/vestria/blocks/editPrimitives.tsx`
+- `src/modules/templates/granth/blocks/editPrimitives.tsx`
+- `src/modules/generatedLanding/sharedBlocks/LeadForm/LeadForm.tsx`
+- `src/modules/generatedLanding/sharedBlocks/FollowStrip/FollowStrip.tsx`
+- `src/modules/generatedLanding/sharedBlocks/StoreBadges/StoreBadges.tsx`
+- `src/components/forms/FormPlacementRenderer.tsx`
+- `src/components/forms/FormConnectedButton.tsx`
+- `src/components/ui/HeaderLogo.tsx`
+- `src/components/navigation/NavigationEditor.tsx`
+- `src/components/navigation/NavItemToolbar.tsx`
+- `src/hooks/useSmartTextColors.ts`
+- `src/hooks/useUniversalElements.ts`
+- `src/hooks/useToolbarPositioning.ts`
+
+**Files changed (test mocks, 4)** — selector-honoring one-line fix:
+- `src/modules/generatedLanding/sharedBlocks/__tests__/followStrip.parity.test.tsx`
+- `src/modules/generatedLanding/sharedBlocks/__tests__/leadForm.parity.test.tsx`
+- `src/modules/generatedLanding/sharedBlocks/__tests__/storeBadges.parity.test.tsx`
+- `src/modules/templates/vestria/blocks/Contact/VestriaLeadForm.editStore.test.tsx`
+
+### Per-file / grouped conversion
+
+| File(s) | Render-read -> selector | Handler / action -> individual selector |
+|---|---|---|
+| InlineTextEditorV2 | (none) | setTextEditingMode, showToolbar, hideToolbar — three individual action selectors (stable). NOT controlled; contentEditable/commit-on-blur-Enter (:79-95) untouched. |
+| Nav headers (Meridian, TechPremium, hearth, surge, lex, Lumen) | sections, pages, socialMediaConfig, legalPages — individual selectors (feed render useMemos / seed effect) | uploadImage (where present) |
+| Upload hero/detail/about (EditorialPhotoHero, TechPremiumHero/ProductDetail/Explainer, LumenHero/About) | (none) | uploadImage (handler-only) |
+| Footers (HairlineFooter, TechPremiumFooter) | content[sectionId] slice (own-section; render+handler read SAME slice -> replaced content?.[sectionId] with sectionContent var, pure plumbing), sections, pages | addForm, deleteForm, getFormById, setSection, uploadImage (TP) |
+| Lumen/surge footers (LumenFooter, ContactFooterRich) | sections, pages | uploadImage (ContactFooterRich) |
+| TechPremiumTrust | (none) | uploadImage |
+| TechPremiumGallery | (none) | uploadImage, save |
+| LumenCategoryGallery | (none) | uploadImage, save (save discovered at :68 — added its own selector) |
+| VestriaTailoredHero | (none) | uploadVideo, uploadImage |
+| VestriaLeadForm | forms?.[formId] — narrow single-form selector | (none) |
+| vestria/granth editPrimitives (useXxxEditCtx) | sections, pages (render useMemo) | uploadImage (returned in ctx) |
+| LeadForm/FollowStrip/StoreBadges (shared) | content[sectionId] slice; forms?.[formId] (LeadForm) | updateElementContent — handler references the selected var |
+| FormPlacementRenderer | content[sectionId] slice, sections, forms slice (reactivity) | getAllForms |
+| FormConnectedButton | sections, forms slice (reactivity for getFormById render read :148) | getFormById |
+| HeaderLogo | globalSettings | setLogoUrl |
+| NavigationEditor | navigationConfig, sections, sectionLayouts | updateNavItem, addNavItem, removeNavItem, reorderNavItems |
+| NavItemToolbar | sections, sectionLayouts | navigationConfig (handler-only here), updateNavItem, removeNavItem, reorderNavItems |
+| useSmartTextColors | theme (both hooks) | getColorTokens |
+| useUniversalElements | content (kept reactive whole-map — feeds ~30 useCallback deps) | updateElementContent, setSection, trackChange/triggerAutoSave/announceLiveRegion (with existing || fallback) |
+| useToolbarPositioning | (none) | showToolbar, hideToolbar (with || (()=>{}) fallback) |
+
+### Selector strategy notes
+- Individual selectors chosen throughout over useShallow object-picks: every selected field is a primitive, a stable slice ref, or a stable action identity, so individual picks are the narrowest subscription and avoid shallow-compare overhead. No file needed a multi-field object pick.
+- Forms reactivity preserved (FormPlacementRenderer / FormConnectedButton): getAllForms/getFormById are actions deriving from the forms slice via getState() and do NOT re-render on form edits by themselves. To keep prior whole-store behavior (re-render when a form's fields change), added `const forms = useEditStore((s) => s.forms); void forms;` alongside the action selector. Deliberate correctness subscription, not churn.
+- content in useUniversalElements left as whole-map subscription (not section-sliced): the hook's ~30 useCallbacks take content in deps and index arbitrary content[sectionId] (incl. cross-section move/copy). Narrowing would change callback identities / risk stale content in cross-section ops — out of plumbing-only scope. Whole-store -> content+actions is still a real narrowing (no longer re-renders on mode/toolbar/selection churn).
+
+### InlineTextEditorV2 (hard guardrail)
+Only the three actions re-pointed to individual selectors. No markup/logic change; DOM-as-source-of-truth contentEditable and commit-on-blur/Enter (:79-95) byte-identical. Not made controlled.
+
+### Test-mock fixes (deferred from Phase 3)
+The 4 mocks returned a fixed whole-store object, IGNORING the selector arg. Once their blocks switched to useEditStore((s) => ...), the mock handed whole state where a section slice / narrow form was expected -> would break. Applied the plan's pattern to each: wrap the state object in `useEditStoreLegacy: (selector?) => { const state = {...}; return selector ? selector(state) : state; }` (state kept lazily inside the returned fn to avoid vi.mock hoist/TDZ with referenced fixture consts). No other test-file changes. Repo-wide grep confirms only 5 mocks of useEditStoreLegacy exist; renderParity.meridian was already selector-honoring (Phase 3), the other 4 are now fixed.
+
+### Deviations
+- LumenCategoryGallery / TechPremiumGallery `save` action: read off the whole-store var beyond the single anticipated line. Added a dedicated save selector and re-pointed store.save?.() -> save?.(). In-scope plumbing.
+- `void forms;` reactive-subscription idiom in the two form components — chosen over calling getAllForms()/getFormById() inside a selector (which would mint a fresh array/return each store tick -> useSyncExternalStore loop). Preserves exact behavior.
+- content whole-map kept in useUniversalElements — narrowing deferred as behavior-risking / out of plumbing scope.
+- Footers: replaced content?.[sectionId] textual reads with a sectionContent local (= the selected slice) so one slice backs both render and handler reads. Value-identical.
+
+### Tests / typecheck
+- `npx tsc --noEmit`: green (no output). One iteration fixed: LumenCategoryGallery store.save -> save after the initial store removal.
+- `npm run test:run`: green — 127 files passed / 1 skipped; 2007 tests passed / 3 skipped (identical to Phase 4 baseline; incl. the 4 mock-fixed files).
+
+### Open risks
+- Profiler acceptance (one-section-per-edit) is a runtime check deferred to Phase 7; unit tests cannot observe subscription narrowing.
+- useUniversalElements still re-renders its host on any content edit (whole content map). Host is not per-section, so no cross-section block churn is reintroduced; a future perf pass could narrow it if profiling flags it.

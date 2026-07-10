@@ -22,8 +22,7 @@ export default function TechPremiumTrust({ sectionId }: Props) {
   const logos = blockContent.logos || [];
   const setM = (id: string, k: keyof Metric, v: string) => handleCollectionUpdate('metrics', metrics.map((m) => (m.id === id ? { ...m, [k]: v } : m)));
 
-  const store = useEditStore() as any;
-  const uploadImage = store.uploadImage as ((f: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>) | undefined;
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as ((f: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>) | undefined;
   const [uploadingId, setUploadingId] = React.useState<string | null>(null);
   const setLogo = (id: string, k: keyof Logo, v: string) => handleCollectionUpdate('logos', logos.map((l) => (l.id === id ? { ...l, [k]: v } : l)));
   const onLogoFile = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {

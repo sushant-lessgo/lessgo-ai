@@ -14,20 +14,23 @@ const APPSTORE_URL = 'https://apps.apple.com/us/app/kathaworld/id1234567890';
 
 // Mock the store BEFORE importing the edit twin.
 vi.mock('@/hooks/useEditStoreLegacy', () => ({
-  useEditStoreLegacy: () => ({
-    content: {
-      [SECTION_ID]: {
-        id: SECTION_ID,
-        layout: 'SharedStoreBadges',
-        elements: {
-          appstore_url: APPSTORE_URL,
-          playstore_url: PLAY_URL,
-          badge_label: 'Get the app',
+  useEditStoreLegacy: (selector?: (s: any) => any) => {
+    const state = {
+      content: {
+        [SECTION_ID]: {
+          id: SECTION_ID,
+          layout: 'SharedStoreBadges',
+          elements: {
+            appstore_url: APPSTORE_URL,
+            playstore_url: PLAY_URL,
+            badge_label: 'Get the app',
+          },
         },
       },
-    },
-    updateElementContent: vi.fn(),
-  }),
+      updateElementContent: vi.fn(),
+    };
+    return selector ? selector(state) : state;
+  },
 }));
 
 import StoreBadges from '../StoreBadges/StoreBadges';

@@ -62,11 +62,12 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
     useServiceBlock<ContactFooterRichContent>({ sectionId });
   const edit = mode === 'edit';
 
-  const { sections, pages } = useEditStore();
+  const sections = useEditStore((s) => s.sections);
+  const pages = useEditStore((s) => s.pages);
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
 
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [logoUploading, setLogoUploading] = React.useState(false);

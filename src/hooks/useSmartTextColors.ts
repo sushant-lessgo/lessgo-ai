@@ -21,7 +21,7 @@ interface SmartCTAColors {
  * Hook to get smart text colors for a given background type
  */
 export function useSmartTextColors(backgroundType: 'primary' | 'secondary' | 'neutral'): SmartTextColors {
-  const { theme } = useEditStore();
+  const theme = useEditStore((s) => s.theme);
   
   return useMemo(() => {
     const backgrounds = theme?.colors?.sectionBackgrounds;
@@ -95,7 +95,7 @@ export function useSmartTextColors(backgroundType: 'primary' | 'secondary' | 'ne
  * Hook to get text colors for a specific section based on its assigned background
  */
 export function useSmartTextColorsForSection(sectionId: string): SmartTextColors {
-  const { theme } = useEditStore();
+  const theme = useEditStore((s) => s.theme);
   
   // For now, we'll determine background type based on section patterns
   // In the future, this could be enhanced to track actual background assignments
@@ -127,7 +127,7 @@ export function useSmartTextColorVars(backgroundType: 'primary' | 'secondary' | 
  * Hook to get smart CTA colors that automatically update when accent colors change
  */
 export function useSmartCTAColors(): SmartCTAColors {
-  const { getColorTokens } = useEditStore();
+  const getColorTokens = useEditStore((s) => s.getColorTokens);
   
   return useMemo(() => {
     try {

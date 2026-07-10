@@ -37,7 +37,7 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
     useServiceBlock<WarmNavHeaderContent>({ sectionId });
   const edit = mode === 'edit';
 
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [logoUploading, setLogoUploading] = React.useState(false);
@@ -51,7 +51,10 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
     finally { setLogoUploading(false); }
   };
 
-  const { sections, pages, socialMediaConfig, legalPages } = useEditStore();
+  const sections = useEditStore((s) => s.sections);
+  const pages = useEditStore((s) => s.pages);
+  const socialMediaConfig = useEditStore((s) => s.socialMediaConfig);
+  const legalPages = useEditStore((s) => s.legalPages);
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const socialOptions = React.useMemo(

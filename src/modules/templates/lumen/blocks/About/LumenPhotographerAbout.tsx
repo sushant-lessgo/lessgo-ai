@@ -31,7 +31,7 @@ export default function LumenPhotographerAbout({ sectionId }: { sectionId: strin
 
   // Naayom (TechPremium) inline image-replace pattern: hidden file input +
   // uploadImage(file, {sectionId, elementKey}) — store auto-persists (no toolbar).
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [photoUploading, setPhotoUploading] = React.useState(false);

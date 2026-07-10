@@ -31,7 +31,7 @@ const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 8)}`;
 export default function TechPremiumProductDetail({ sectionId }: Props) {
   const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
     useTechPremiumBlock<Record_>({ sectionId });
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, target?: { sectionId: string; elementKey: string }) => Promise<void>)
     | undefined;
   const [uploadingId, setUploadingId] = React.useState<string | null>(null);

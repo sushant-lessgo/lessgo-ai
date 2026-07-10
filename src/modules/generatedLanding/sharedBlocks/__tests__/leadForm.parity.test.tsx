@@ -32,17 +32,20 @@ const SEEDED_FORM: MVPForm = {
 // masked F1: the edit twin read `store.content?.forms` (always undefined at
 // runtime) yet the mis-seeded mock let the test pass. Keep forms top-level.
 vi.mock('@/hooks/useEditStoreLegacy', () => ({
-  useEditStoreLegacy: () => ({
-    content: {
-      [LEAD_SECTION_ID]: {
-        id: LEAD_SECTION_ID,
-        layout: 'SharedLeadForm',
-        elements: { form_id: FORM_ID, form_headline: 'Book a call' },
+  useEditStoreLegacy: (selector?: (s: any) => any) => {
+    const state = {
+      content: {
+        [LEAD_SECTION_ID]: {
+          id: LEAD_SECTION_ID,
+          layout: 'SharedLeadForm',
+          elements: { form_id: FORM_ID, form_headline: 'Book a call' },
+        },
       },
-    },
-    forms: { [FORM_ID]: SEEDED_FORM },
-    updateElementContent: vi.fn(),
-  }),
+      forms: { [FORM_ID]: SEEDED_FORM },
+      updateElementContent: vi.fn(),
+    };
+    return selector ? selector(state) : state;
+  },
 }));
 
 import LeadForm from '../LeadForm/LeadForm';

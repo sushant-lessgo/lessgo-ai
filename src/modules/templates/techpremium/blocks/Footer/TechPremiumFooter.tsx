@@ -47,8 +47,14 @@ export default function TechPremiumFooter({ sectionId }: Props) {
     useTechPremiumBlock<TechPremiumFooterContent>({ sectionId });
   const edit = mode === 'edit';
 
-  const { content, addForm, deleteForm, getFormById, setSection, sections, pages } = useEditStore();
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const sectionContent = useEditStore((s) => s.content?.[sectionId]);
+  const addForm = useEditStore((s) => s.addForm);
+  const deleteForm = useEditStore((s) => s.deleteForm);
+  const getFormById = useEditStore((s) => s.getFormById);
+  const setSection = useEditStore((s) => s.setSection);
+  const sections = useEditStore((s) => s.sections);
+  const pages = useEditStore((s) => s.pages);
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
@@ -64,7 +70,7 @@ export default function TechPremiumFooter({ sectionId }: Props) {
     catch (err) { /* surfaced by the store */ }
     finally { setLogoUploading(false); }
   };
-  const newsletterFormId: string | undefined = content?.[sectionId]?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
+  const newsletterFormId: string | undefined = sectionContent?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
   const isNewsletterConnected = !!(newsletterFormId && getFormById?.(newsletterFormId));
 
   const setupNewsletter = () => {
@@ -75,7 +81,7 @@ export default function TechPremiumFooter({ sectionId }: Props) {
       successMessage: 'Thanks for subscribing!',
       integrations: [{ id: `int-${Date.now()}`, type: 'dashboard', name: 'Dashboard', enabled: true }],
     } as any);
-    const prevMeta = content?.[sectionId]?.elementMetadata || {};
+    const prevMeta = sectionContent?.elementMetadata || {};
     setSection(sectionId, { elementMetadata: { ...prevMeta, newsletter_cta: { buttonConfig: { type: 'form', formId } } } });
   };
   const removeNewsletter = () => { if (newsletterFormId) deleteForm(newsletterFormId); };

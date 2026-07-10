@@ -66,7 +66,9 @@ export function InlineTextEditorV2({
   const editorRef = useRef<HTMLElement>(null);
   const originalContentRef = useRef<string>(content);
 
-  const { setTextEditingMode, showToolbar, hideToolbar } = useEditStore();
+  const setTextEditingMode = useEditStore((s) => s.setTextEditingMode);
+  const showToolbar = useEditStore((s) => s.showToolbar);
+  const hideToolbar = useEditStore((s) => s.hideToolbar);
 
   // Auto-enter editing on mount when requested (double-click → edit gesture).
   useEffect(() => {

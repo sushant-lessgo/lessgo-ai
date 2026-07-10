@@ -47,7 +47,10 @@ export default function MeridianNavHeader({ sectionId }: MeridianNavHeaderProps)
 
   const navItems = blockContent.nav_items || [];
 
-  const { sections, pages, socialMediaConfig, legalPages } = useEditStore();
+  const sections = useEditStore((s) => s.sections);
+  const pages = useEditStore((s) => s.pages);
+  const socialMediaConfig = useEditStore((s) => s.socialMediaConfig);
+  const legalPages = useEditStore((s) => s.legalPages);
   const sectionOptions = React.useMemo(
     () => buildSectionLinkOptions(sections || []),
     [sections]

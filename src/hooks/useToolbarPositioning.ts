@@ -8,11 +8,9 @@ export interface PositioningOptions {
 }
 
 export function useToolbarPositioning() {
-  const store = useEditStore();
-  
   // Fallback for missing methods
-  const showToolbar = store.showToolbar || (() => {});
-  const hideToolbar = store.hideToolbar || (() => {});
+  const showToolbar = useEditStore((s) => s.showToolbar) || (() => {});
+  const hideToolbar = useEditStore((s) => s.hideToolbar) || (() => {});
 
   // Simple position calculation
   const calculatePosition = useCallback((

@@ -35,7 +35,7 @@ export default function EditorialPhotoHero({ sectionId }: EditorialPhotoHeroProp
   const { mode, blockContent, handleContentUpdate } =
     useMeridianBlock<EditorialPhotoHeroContent>({ sectionId });
 
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [photoUploading, setPhotoUploading] = React.useState(false);

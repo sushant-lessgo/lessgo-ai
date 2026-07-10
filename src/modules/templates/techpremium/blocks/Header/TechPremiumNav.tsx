@@ -45,8 +45,11 @@ export default function TechPremiumNav({ sectionId }: Props) {
   const edit = mode === 'edit';
   const navItems = blockContent.nav_items || [];
 
-  const { sections, pages, socialMediaConfig, legalPages } = useEditStore();
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const sections = useEditStore((s) => s.sections);
+  const pages = useEditStore((s) => s.pages);
+  const socialMediaConfig = useEditStore((s) => s.socialMediaConfig);
+  const legalPages = useEditStore((s) => s.legalPages);
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);

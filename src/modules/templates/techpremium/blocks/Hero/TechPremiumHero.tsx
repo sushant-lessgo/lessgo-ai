@@ -67,7 +67,7 @@ export default function TechPremiumHero({ sectionId }: TechPremiumHeroProps) {
     handleCollectionUpdate('stats', (blockContent.stats || []).filter((s) => s.id !== id));
   };
 
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [photoUploading, setPhotoUploading] = React.useState(false);

@@ -167,10 +167,9 @@ export function useVestriaEditCtx(
   update: (elementKey: string, value: any) => void,
   updateCollection: (collectionKey: string, value: any[]) => void,
 ): VestriaEditCtx {
-  const store = useEditStore() as any;
-  const sections = store.sections as string[] | undefined;
-  const pages = store.pages;
-  const uploadImage = store.uploadImage;
+  const sections = useEditStore((s) => (s as any).sections) as string[] | undefined;
+  const pages = useEditStore((s) => (s as any).pages);
+  const uploadImage = useEditStore((s) => (s as any).uploadImage);
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const contentRef = React.useRef(blockContent);

@@ -36,7 +36,10 @@ export default function LetterheadNav({ sectionId }: LetterheadNavProps) {
     useLexBlock<LetterheadNavContent>({ sectionId });
   const edit = mode === 'edit';
 
-  const { sections, pages, socialMediaConfig, legalPages } = useEditStore();
+  const sections = useEditStore((s) => s.sections);
+  const pages = useEditStore((s) => s.pages);
+  const socialMediaConfig = useEditStore((s) => s.socialMediaConfig);
+  const legalPages = useEditStore((s) => s.legalPages);
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const socialOptions = React.useMemo(

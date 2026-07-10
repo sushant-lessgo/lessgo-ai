@@ -26,8 +26,8 @@ export default function LumenCategoryGallery({ sectionId }: { sectionId: string 
     useLumenBlock<Content>({ sectionId });
   const edit = mode === 'edit';
   const cats = blockContent.categories || [];
-  const store = useEditStore() as any;
-  const uploadImage = store.uploadImage as ((f: File) => Promise<string | void>) | undefined;
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as ((f: File) => Promise<string | void>) | undefined;
+  const save = useEditStore((s) => (s as any).save) as (() => Promise<void>) | undefined;
 
   // Naayom gallery bulk-upload spec: per-category MAX cap + progress + count +
   // optional URL paste. `busy`/`urlDrafts` are keyed by category id.
@@ -66,7 +66,7 @@ export default function LumenCategoryGallery({ sectionId }: { sectionId: string 
       try { const url = await uploadImage(list[i]); if (typeof url === 'string' && url) added.push({ id: rid('im'), src: url }); } catch { /* skip failed */ }
     }
     if (added.length) patchCat(id, { images: [...existing, ...added] });
-    try { await store.save?.(); } catch { /* autosave retries */ }
+    try { await save?.(); } catch { /* autosave retries */ }
     setBusy((b) => ({ ...b, [id]: `Added ${added.length} photo${added.length === 1 ? '' : 's'}${skipped > 0 ? ` · ${skipped} skipped (${MAX_PER_CAT} max)` : ''}.` }));
   };
 

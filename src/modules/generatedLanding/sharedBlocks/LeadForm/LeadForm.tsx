@@ -20,18 +20,18 @@ import {
 import type { MVPFormField } from '@/types/core/forms';
 
 export default function LeadForm({ sectionId }: { sectionId: string }) {
-  const store = useEditStore() as any;
-  const section = store.content?.[sectionId];
+  const section = useEditStore((s) => (s as any).content?.[sectionId]);
   const elements = (section?.elements || {}) as Record<string, any>;
   const formId = elements.form_id || '';
-  const form = formId ? store.forms?.[formId] : undefined;
+  const form = useEditStore((s) => (formId ? (s as any).forms?.[formId] : undefined));
+  const updateElementContent = useEditStore((s) => (s as any).updateElementContent);
   const fields: MVPFormField[] = Array.isArray(form?.fields) ? form.fields : [];
   const headline = elements.form_headline || LEAD_FORM_DEFAULT_HEADLINE;
 
   const onHeadingBlur = (e: React.FocusEvent<HTMLHeadingElement>) => {
     const value = (e.currentTarget.textContent || '').trim();
-    if (value !== headline && typeof store.updateElementContent === 'function') {
-      store.updateElementContent(sectionId, 'form_headline', value);
+    if (value !== headline && typeof updateElementContent === 'function') {
+      updateElementContent(sectionId, 'form_headline', value);
     }
   };
 
