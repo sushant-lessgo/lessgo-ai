@@ -92,3 +92,52 @@ The mock was the bug (it silently discarded the selector), not the hook. This fi
 **Tests:** `npx tsc --noEmit` GREEN. `npm run test:run` GREEN — 126 files passed / 1 skipped; 1998 tests passed / 3 skipped.
 
 **Open risks:** none. Production path unaffected — the real hook (EditProvider + zustand `useStore`) honors selectors correctly; the only test-side gap (the meridian mock) is now fixed.
+
+## Phase 4 — Renderer: prop stabilization + memo + orderedSections split + import-gate skeleton
+
+**Files changed**
+- `src/utils/normalizeCtas.ts`
+- `src/modules/generatedLanding/LandingPageRenderer.tsx`
+- `src/utils/normalizeCtas.memo.test.ts` (NEW)
+
+### `normalizeCtas.ts`
+
+**Shared per-section helper (in-scope refactor — see Deviations):** extracted the per-section body of the pure `normalizeCtas` into a new module-private `normalizeSection(section, ctx)` that returns the SAME `section` ref when nothing resolves, else a shallow clone with `elementMetadata`/`elements` sub-objects replaced. Pure `normalizeCtas` now loops `Object.keys(content)` and calls `normalizeSection`, assembling the top-level clone exactly as before (`{ ...content }` only when a section ref changes). Output is logically byte-identical to the prior implementation (all 4 existing normalizeCtas test files stay green, incl. the `.toBe(content)` byte-identity assertions). BOTH the pure export and the memo call `normalizeSection`, so parity is structural (single source of truth), not duplicated-and-drift-prone.
+
+**Memo layer design (`createNormalizeCtasMemo`)** — additive, plain module (NO `'use client'`), editor-only:
+- Factory returns a closure holding a `Map<sectionKey, { inputSectionRef, ctxSignature, outputSection }>`.
+- Per call: compute `ctxSignature` once; for each section, reuse the cached `outputSection` iff `inputSectionRef === section` AND `ctxSignature` unchanged; else recompute via `normalizeSection` and update the cache. Top-level clone assembled only for sections whose output ref differs from input — identical shape to the pure function.
+- **Cache key:** `sectionKey` (the content map key). **ctx signature fields:** `computeCtxSignature` = `JSON.stringify({ goal, forms, currentPagePath, formPagePath })` — exactly what per-section resolution consumes (`ctaToButtonConfig` reads goal/forms/currentPagePath/formPagePath via `goalToDestination`; the flat-href bridge reads forms). Confirmed the plan-review correction: `buildNormalizeCtasContext` returns only those 4 fields (its `pages` arg is consumed to compute `formPagePath` then discarded — no live page content embedded), so the signature is content-free and stable across keystrokes.
+- **Pruning:** when `cache.size > keys.length`, delete cache keys not in the current section-id set (bounded growth across a long add/delete session).
+
+### `LandingPageRenderer.tsx`
+
+**Root selector (step 3):** replaced `const storeState = useEditStore()` + full destructure with a single `useEditStore(useShallow((s) => ({...})))` picking exactly the render-read fields: `sections, sectionLayouts, theme, content, mode, errors, getColorTokens, updateFromBackgroundSystem, audienceType, templateId, variantId, paletteId, themeValues, goal, forms, pages, currentPageId`. All are read during the render body / in memos / in effects (verified by reading the whole component). No callback-only reads exist in this component, so `useEditStoreApi` was NOT needed/imported. (The tiny in-file `MissingLayoutComponent` keeps its own no-arg `useEditStore()` — not part of the root subscription; leaving it is conservative and in phase-5's leaf-sweep scope.)
+
+**B1 wiring:** `content` memo now calls a `useRef(createNormalizeCtasMemo()).current` instance instead of the pure `normalizeCtas`. Single-page branch now also routes through `buildNormalizeCtasContext({goal,forms})` for a uniform ctx shape (equivalent output — builder with no `pages`/`formPagePath` yields `{goal,forms,currentPagePath:undefined,formPagePath:undefined}`). Multipage branch unchanged except the memoized call.
+
+**Memo-at-resolution (step 4):** added `memoizedComponentCache = useRef(new WeakMap<ComponentType, MemoExoticComponent>()).current` + `getMemoizedComponent(Comp)` that lazily wraps each resolved block in `React.memo` ONCE and caches by component identity (registry returns stable refs). `renderSection` computes `MemoLayoutComponent = getMemoizedComponent(LayoutComponent)` after the null-guard and all three render branches (template / variable-system / legacy) render `<MemoLayoutComponent .../>`. Not called inline in JSX (that would mint a fresh type each render → remount storm).
+
+**orderedSections split (B2, step 5):**
+- **Memo A `backgroundAssignments`** — `assignEnhancedBackgroundsToAllSections(sectionIds, {onboarding defaults})`, deps `[sections, sectionLayouts, validatedFields, hiddenInferredFields]`. Section-id list derives from `sections` filtered by layout presence with `content[sectionId]?.layout` only as a FALLBACK. Added a LAYOUT-STABILITY ASSUMPTION code comment: typing never adds/removes a layout (structural mutations touch `sections`/`sectionLayouts`, which ARE deps), so keying without `content` is safe; a future content-only-layout mutation must re-add `content`. Used one `eslint-disable-next-line react-hooks/exhaustive-deps` for the intentional `content` omission.
+- **Memo B `orderedSections`** — cheap per-section map to `{ id, order, background, layout, data: content[sectionId] }` incl. the `content[sectionId]?.backgroundType` manual-override read, deps `[sections, sectionLayouts, content, backgroundAssignments]`. Re-runs on edits (cheap); with B1 the `content[sectionId]` refs are stable for unchanged sections → memo'd blocks see stable `data`.
+- **`dynamicBackgroundSystem` / `theme.colors.sectionBackgrounds.secondary` DROPPED from these memos' deps:** verified they are NOT read by the computation — `dynamicBackgroundSystem` appeared only in a `logger.debug` inside the old combined memo, and `theme.colors.sectionBackgrounds.secondary` was never referenced in the memo body (only in `renderSection` + JSX debug panels, which are unaffected). Both were spurious. The debug-only log referencing `dynamicBackgroundSystem` inside the memo was removed to keep deps honest.
+
+**Import-gate skeleton (step 6):** replaced `if (!templateReady || !tmpl) return null;` with a neutral gray skeleton — up to 6 min-height bands (first 480px ≈ hero, rest 320px), alternating `#f3f4f6`/`#e5e7eb`, `aria-hidden`, NO `tmpl.ThemeInjector` / template CSS vars. All hooks run above this early return (hooks-order safe). Cold-load only; `sections` is guaranteed non-empty here (empty-state early return precedes it). Neutral bands per unresolved-Q3 assumption.
+
+**Deviations**
+- Extracted `normalizeSection` from the pure `normalizeCtas` body (the phase text said the pure export "stays UNTOUCHED"). Chose the shared-helper refactor over duplicating the intricate CTA/bridge logic because it makes memo-vs-pure parity STRUCTURAL (impossible to drift) — the conservative choice for the phase's hard constraint "memoized output MUST deep-equal pure output" and "don't break GOAL_REF/CTA resolution." The pure export's SIGNATURE and OUTPUT are unchanged (all 4 existing normalizeCtas test files, incl. byte-identity `.toBe(content)` assertions, stay green). Logged per in-scope-ambiguity rule.
+- Single-page `content` memo branch routed through `buildNormalizeCtasContext` (was a bare `{goal,forms}` literal) for a uniform ctx shape feeding the memo signature. Output-equivalent.
+
+**Test-mock fix:** NONE required. Searched for tests rendering `LandingPageRenderer` — only `normalizeCtas.parity.test.ts` references it (in a comment), none mount it. The step-3 selector conversion touched no test mock.
+
+**New test `normalizeCtas.memo.test.ts`:** PARITY (single-page GOAL_REF, M3 flat-href bridge, real-assembly multipage cross-page dest, null-goal same-ref) all deep-equal / ref-equal the pure output; REF-STABILITY (i) untouched section keeps output identity, (ii) changed-ref section gets fresh identity, (iii) goal-change and form-location-change invalidate cached output and re-point, plus no-cta same-ref and cache-pruning cases. All fixtures produced by real `stampGoalRefCtas` / real multipage assembly (false-green guard).
+
+**Tests / typecheck**
+- `npx tsc --noEmit`: green (no output).
+- `npm run test:run`: green — 127 files passed / 1 skipped (was 126, +1 for the new memo test); 2007 passed / 3 skipped.
+
+**Open risks**
+- React.memo default shallow-compare relies on B1 keeping unchanged sections' `data` refs stable and phase-3 blocks being self-sufficient; if a block reads a store slice WITHOUT a selector (phase-5 stragglers) it self-updates via its own subscription, so memo does not cause staleness — it only prevents parent-prop-driven re-render. Full one-section-per-edit acceptance is a phase-5/phase-7 Profiler check.
+- Memo-A layout-stability assumption is documented in-code; a future content-only mutation that changes a section's layout would need `content` re-added to Memo-A deps.
+- Skeleton CLS: neutral bands then real content pop-in on cold load (accepted, scout-flagged low severity). Runtime-only; not unit-covered.

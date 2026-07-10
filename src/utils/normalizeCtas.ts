@@ -192,6 +192,72 @@ function ctaToButtonConfig(
 }
 
 /**
+ * Normalize ONE section: down-convert its `elementMetadata[*].cta` entries into
+ * legacy `buttonConfig`s and bridge resolved GOAL_REF hrefs into the sibling flat
+ * `cta_href`. Returns the SAME `section` reference when nothing resolves (old
+ * pages / null-goal / non-object), else a shallow clone with the changed
+ * `elementMetadata`/`elements` sub-objects replaced.
+ *
+ * Single source of truth for the per-section pass: BOTH the pure `normalizeCtas`
+ * and the editor-only memo (`createNormalizeCtasMemo`) call it, so their output is
+ * structurally identical by construction (the memo parity test pins this).
+ */
+function normalizeSection(section: any, ctx: NormalizeCtasContext): any {
+  if (!section || typeof section !== 'object') return section;
+  const meta = section.elementMetadata;
+  if (!meta || typeof meta !== 'object') return section;
+
+  let metaClone: Record<string, any> | null = null;
+  let elementsClone: Record<string, any> | null = null;
+
+  for (const elKey of Object.keys(meta)) {
+    const entry = meta[elKey];
+    const cta: CTAButton | undefined = entry?.cta;
+    if (!cta) continue; // no cta → untouched
+
+    const buttonConfig = ctaToButtonConfig(cta, ctx);
+    if (buttonConfig === undefined) continue; // unresolvable → leave untouched
+
+    if (!metaClone) metaClone = { ...meta };
+    metaClone![elKey] = { ...entry, buttonConfig };
+
+    // goal-ref-cta phase 3.5 — bridge the resolved href into the sibling flat
+    // `cta_href` for templates that render it directly. GOAL_REF-ONLY: an
+    // explicit/detached Destination (concrete `cta.dest`) and a user-set flat
+    // href both win over the bridge (spec criterion 5). Legacy metadata-less
+    // buttons never reach here (`if (!cta) continue;` above).
+    const hrefKey = GOAL_REF_FLAT_HREF_KEYS[elKey];
+    if (hrefKey && cta.dest === 'GOAL_REF') {
+      // Same resolution the wired blocks get, minus a fallback (empty = could
+      // not resolve → do NOT touch the flat href).
+      const resolvedHref = resolveCtaHref(
+        buttonConfig,
+        ctx.forms as Record<string, any> | undefined,
+        '',
+      );
+      const existing = section.elements?.[hrefKey];
+      const isDefaultOrEmpty =
+        existing === undefined ||
+        existing === null ||
+        existing === '' ||
+        (typeof existing === 'string' && SCHEMA_DEFAULT_CTA_HREFS.has(existing));
+      if (resolvedHref && isDefaultOrEmpty && existing !== resolvedHref) {
+        if (!elementsClone) elementsClone = { ...(section.elements ?? {}) };
+        elementsClone![hrefKey] = resolvedHref;
+      }
+    }
+  }
+
+  if (metaClone || elementsClone) {
+    const nextSection: Record<string, any> = { ...section };
+    if (metaClone) nextSection.elementMetadata = metaClone;
+    if (elementsClone) nextSection.elements = elementsClone;
+    return nextSection;
+  }
+  return section;
+}
+
+/**
  * Clone `content` and down-convert every `elementMetadata[*].cta` into a legacy
  * `buttonConfig`, so the untouched published readers consume the new shape.
  *
@@ -205,59 +271,89 @@ export function normalizeCtas<T>(content: T, ctx: NormalizeCtasContext): T {
 
   for (const sectionKey of Object.keys(content as Record<string, any>)) {
     const section = (content as Record<string, any>)[sectionKey];
-    if (!section || typeof section !== 'object') continue;
-    const meta = section.elementMetadata;
-    if (!meta || typeof meta !== 'object') continue;
-
-    let metaClone: Record<string, any> | null = null;
-    let elementsClone: Record<string, any> | null = null;
-
-    for (const elKey of Object.keys(meta)) {
-      const entry = meta[elKey];
-      const cta: CTAButton | undefined = entry?.cta;
-      if (!cta) continue; // no cta → untouched
-
-      const buttonConfig = ctaToButtonConfig(cta, ctx);
-      if (buttonConfig === undefined) continue; // unresolvable → leave untouched
-
-      if (!metaClone) metaClone = { ...meta };
-      metaClone![elKey] = { ...entry, buttonConfig };
-
-      // goal-ref-cta phase 3.5 — bridge the resolved href into the sibling flat
-      // `cta_href` for templates that render it directly. GOAL_REF-ONLY: an
-      // explicit/detached Destination (concrete `cta.dest`) and a user-set flat
-      // href both win over the bridge (spec criterion 5). Legacy metadata-less
-      // buttons never reach here (`if (!cta) continue;` above).
-      const hrefKey = GOAL_REF_FLAT_HREF_KEYS[elKey];
-      if (hrefKey && cta.dest === 'GOAL_REF') {
-        // Same resolution the wired blocks get, minus a fallback (empty = could
-        // not resolve → do NOT touch the flat href).
-        const resolvedHref = resolveCtaHref(
-          buttonConfig,
-          ctx.forms as Record<string, any> | undefined,
-          '',
-        );
-        const existing = section.elements?.[hrefKey];
-        const isDefaultOrEmpty =
-          existing === undefined ||
-          existing === null ||
-          existing === '' ||
-          (typeof existing === 'string' && SCHEMA_DEFAULT_CTA_HREFS.has(existing));
-        if (resolvedHref && isDefaultOrEmpty && existing !== resolvedHref) {
-          if (!elementsClone) elementsClone = { ...(section.elements ?? {}) };
-          elementsClone![hrefKey] = resolvedHref;
-        }
-      }
-    }
-
-    if (metaClone || elementsClone) {
+    const nextSection = normalizeSection(section, ctx);
+    if (nextSection !== section) {
       if (!contentClone) contentClone = { ...(content as Record<string, any>) };
-      const nextSection: Record<string, any> = { ...section };
-      if (metaClone) nextSection.elementMetadata = metaClone;
-      if (elementsClone) nextSection.elements = elementsClone;
       contentClone[sectionKey] = nextSection;
     }
   }
 
   return (contentClone as T) ?? content;
+}
+
+/**
+ * perf-01 phase 4 (B1) — editor-only per-section memoizing wrapper over the pure
+ * `normalizeSection`. The edit renderer re-runs `normalizeCtas` on every keystroke
+ * (its `content` memo depends on `rawContent`), and the pure pass RE-CLONES every
+ * cta-bearing section each call → fresh props for header/footer/every cta section
+ * → React.memo shallow-compare fails → they re-render. This factory caches each
+ * section's normalized clone and reuses it while (a) the raw section object ref is
+ * unchanged (Immer keeps unchanged sections' refs; only the edited section gets a
+ * fresh ref) AND (b) the cta-resolution context is unchanged. Unchanged sections
+ * therefore keep a STABLE output ref across keystrokes, so the spread `data` props
+ * stay ref-equal and memo'd blocks don't re-render.
+ *
+ * Output is structurally identical to pure `normalizeCtas` — it calls the SAME
+ * `normalizeSection` and assembles the top-level clone the same way. Plain module
+ * (no 'use client'); the published renderer must keep using the pure export.
+ */
+export function createNormalizeCtasMemo() {
+  // sectionKey → last {input ref, ctx signature, output section}. Bounded by the
+  // project's section count via per-call pruning below.
+  const cache = new Map<string, { inputSectionRef: any; ctxSignature: string; outputSection: any }>();
+
+  return function normalizeCtasMemo<T>(content: T, ctx: NormalizeCtasContext): T {
+    if (!content || typeof content !== 'object') return content;
+
+    const ctxSignature = computeCtxSignature(ctx);
+    const contentObj = content as Record<string, any>;
+    const keys = Object.keys(contentObj);
+
+    // Prune cache keys no longer present in the current section set (bounded
+    // growth across a long editing session as sections are added/deleted).
+    if (cache.size > keys.length) {
+      const present = new Set(keys);
+      for (const k of cache.keys()) {
+        if (!present.has(k)) cache.delete(k);
+      }
+    }
+
+    let contentClone: Record<string, any> | null = null;
+
+    for (const sectionKey of keys) {
+      const section = contentObj[sectionKey];
+      const cached = cache.get(sectionKey);
+      let outputSection: any;
+      if (cached && cached.inputSectionRef === section && cached.ctxSignature === ctxSignature) {
+        outputSection = cached.outputSection;
+      } else {
+        outputSection = normalizeSection(section, ctx);
+        cache.set(sectionKey, { inputSectionRef: section, ctxSignature, outputSection });
+      }
+      if (outputSection !== section) {
+        if (!contentClone) contentClone = { ...contentObj };
+        contentClone[sectionKey] = outputSection;
+      }
+    }
+
+    return (contentClone as T) ?? content;
+  };
+}
+
+/**
+ * Signature of the cta-resolution context, derived ONLY from what per-section
+ * resolution consumes: `ctaToButtonConfig` reads `ctx.goal`, `ctx.forms`,
+ * `ctx.currentPagePath`, `ctx.formPagePath` (via `goalToDestination`), and the
+ * flat-href bridge reads `ctx.forms`. `buildNormalizeCtasContext` returns exactly
+ * these four fields (its `pages` arg is consumed to compute `formPagePath`, then
+ * discarded — no live page content is embedded), so the signature is content-free
+ * and stays stable across keystrokes.
+ */
+function computeCtxSignature(ctx: NormalizeCtasContext): string {
+  return JSON.stringify({
+    goal: ctx.goal ?? null,
+    forms: ctx.forms ?? null,
+    currentPagePath: ctx.currentPagePath ?? null,
+    formPagePath: ctx.formPagePath ?? null,
+  });
 }
