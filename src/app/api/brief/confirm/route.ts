@@ -5,6 +5,9 @@
 // outcome. SERVE ⇒ one Project update {brief, audienceType, templateId} +
 // wizard redirect. MANUAL ⇒ NO project write; client goes to demand capture.
 // Firewall: pure @/modules/brief + prisma only — no template resolver/registry.
+// (proof-truth phase 3) @/lib/testimonials/autoImport is firewall-compatible: a
+// plain prisma-backed lib with NO template/resolver import; it runs on the serve
+// branch to durably import scraped verbatim quotes into the Testimonial table.
 export const dynamic = 'force-dynamic';
 
 import { auth } from '@clerk/nextjs/server';
@@ -14,6 +17,16 @@ import { z } from 'zod';
 import { createSecureResponse, assertProjectOwner, validateToken } from '@/lib/security';
 import { BriefSchema } from '@/lib/schemas/brief.schema';
 import { decideServe } from '@/modules/brief/serveGate';
+import { importScrapedTestimonials } from '@/lib/testimonials/autoImport';
+
+/** Safely pull scraped verbatim quote strings from the confirmed Brief's entry facts. */
+function extractEntryTestimonials(brief: unknown): string[] {
+  const facts = (brief as { facts?: unknown } | null)?.facts;
+  const entry = (facts as { entry?: unknown } | null)?.entry;
+  const raw = (entry as { testimonials?: unknown } | null)?.testimonials;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((q): q is string => typeof q === 'string');
+}
 
 const ConfirmRequestSchema = z.object({
   tokenId: z.string(),
@@ -58,14 +71,40 @@ export async function POST(req: Request) {
     const decision = decideServe(brief);
 
     if (decision.outcome === 'serve') {
-      await prisma.project.update({
+      const updated = await prisma.project.update({
         where: { tokenId },
         data: {
           brief: brief as Prisma.InputJsonValue,
           audienceType: decision.audienceType,
           templateId: decision.templateId,
         },
+        select: { id: true },
       });
+
+      // proof-truth phase 3: durably import scraped verbatim quotes into the
+      // Testimonial table ONCE, here (single pre-generation entry point). Demo
+      // short-circuit (userRecord === null) → skip. Empty/absent testimonials →
+      // no-op. Import failure MUST NOT fail the confirm (this route's job is the
+      // serve verdict) — log + continue.
+      //
+      // Tenant key = Clerk id (`clerkId`), NOT `access.userRecord.id` (DB cuid):
+      // Testimonial.userId stores the Clerk id (prisma schema comment) and every
+      // existing testimonial route — POST /api/testimonials, apply-to-page,
+      // collect — plus the regenerate-section table read all key on the Clerk id.
+      // Writing the DB cuid here would orphan these rows from the dashboard AND
+      // from the regen re-injection (which reads by Clerk id). `access.userRecord`
+      // is used only as the not-demo guard.
+      if (access.userRecord) {
+        const quotes = extractEntryTestimonials(brief);
+        if (quotes.length > 0) {
+          try {
+            await importScrapedTestimonials(clerkId, updated.id, quotes);
+          } catch (importErr) {
+            console.error('[brief] testimonial auto-import failed (non-fatal):', importErr);
+          }
+        }
+      }
+
       // scale-06 phase 10: every engine is now served by the unified wizard, so
       // the redirect is UNCONDITIONAL. Load-detection on `/onboarding/[token]`
       // re-hydrates the brief and renders the wizard. The old per-audience

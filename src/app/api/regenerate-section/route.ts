@@ -8,6 +8,16 @@ import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAICredits } from '@/lib/middleware/planCheck';
 import { consumeCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem';
 import { assertProjectOwner } from '@/lib/security';
+import { listTestimonialsByOwner } from '@/lib/testimonials/repo';
+import { injectRealTestimonials as injectProductTestimonials } from '@/modules/audience/product/parseCopy';
+import { injectRealTestimonials as injectServiceTestimonials } from '@/modules/audience/service/parseCopy';
+
+// proof-truth phase 3: is this a testimonials section? (sectionType is the bare
+// type; sectionId is `${type}-${uuid}` — check both, normalized.)
+function isTestimonialsSection(sectionType?: string, sectionId?: string): boolean {
+  const norm = (s?: string) => String(s ?? '').toLowerCase();
+  return norm(sectionType).startsWith('testimonials') || norm(sectionId).startsWith('testimonials');
+}
 
 async function handler(req: NextRequest) {
   const startTime = Date.now();
@@ -68,6 +78,8 @@ async function handler(req: NextRequest) {
         const project = await prisma.project.findUnique({
           where: { tokenId },
           select: {
+            id: true,
+            audienceType: true,
             inputText: true,
             content: true,
             title: true
@@ -225,6 +237,41 @@ ${prompt}`;
       // If no valid content extracted, use a basic structure
       if (Object.keys(sectionContent).length === 0) {
         sectionContent = generateMockSectionContent(sectionId, sectionType);
+      }
+    }
+
+    // proof-truth phase 3 (acceptance criterion 4): real proof always wins over
+    // fresh AI inventions. When the regenerated section is testimonials-type, read
+    // the project's table-backed approved quotes (imported + collect/manual) and
+    // re-inject via injectRealTestimonials, overwriting the just-drafted quotes.
+    // Ownership is already asserted above (assertProjectOwner, non-mock path), so
+    // this cross-tenant read is owner-guarded. Table read is dark-flag-agnostic
+    // (repo has no flag gate); pre-import projects have an empty table → no-op,
+    // drafted quotes preserved (acceptable pre-existing-data gap, see plan).
+    // NOTE: table read returns createdAt DESC — quotes MAY reorder vs first-gen's
+    // entry-array order; same quotes/flags, no truth regression.
+    if (projectData && isTestimonialsSection(sectionType, sectionId)) {
+      try {
+        const rows = await listTestimonialsByOwner(userId, {
+          projectId: projectData.id,
+          status: 'approved',
+        });
+        if (rows.length > 0) {
+          const real = rows.map((t) => ({
+            quote: t.quote,
+            author_name: t.authorName ?? '',
+            author_role: t.authorRole ?? '',
+          }));
+          const wrapper = { testimonials: { elements: sectionContent } } as any;
+          if (projectData.audienceType === 'product') {
+            injectProductTestimonials(wrapper, real);
+          } else {
+            injectServiceTestimonials(wrapper, real);
+          }
+          // phase 4: set realProof provenance here (section-level marker suppression).
+        }
+      } catch (injectErr) {
+        logger.warn('Failed to re-inject real testimonials on section regen:', injectErr);
       }
     }
 

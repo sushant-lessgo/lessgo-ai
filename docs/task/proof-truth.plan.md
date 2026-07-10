@@ -24,8 +24,8 @@ Why this wins: content values stay plain strings → **zero published-path risk,
 ## Progress log
 
 - phase 1 toggle integrity (capability ≠ content): done (commit 91c283a2, review loops 1)
-- phase 2 prompt guard + fillMode audit + sentinel hardening: done (review loops 1, ship)
-- phase 3 confirm-time auto-import + table-backed regen injection: pending
+- phase 2 prompt guard + fillMode audit + sentinel hardening: done (commit 014bb06b, review loops 1; scope +promptBranch.test.ts baseline recapture)
+- phase 3 confirm-time auto-import + table-backed regen injection: done (review loops 1, ship; HUMAN GATE cleared — user OK'd dark-write; deviation: userId=clerkId fixes latent plan bug)
 - phase 4 provenance metadata + marker suppression: pending
 - phase 5 T2 count signal: pending
 - phase 6 scalePlan §8 law amendment: pending
@@ -92,7 +92,7 @@ Why this wins: content values stay plain strings → **zero published-path risk,
 
 ## Phase 3 — Confirm-time auto-import + table-backed regen injection  **[HUMAN GATE]**
 
-**Human gate rationale:** writes durable rows to the production-shared `Testimonial` table while the system is dark (`TESTIMONIALS_ENABLED` off). User signs off on the dark-accumulation decision below before this phase is implemented.
+**Human gate rationale:** writes durable rows to the production-shared `Testimonial` table while the system is dark (`TESTIMONIALS_ENABLED` off). User signs off on the dark-accumulation decision below before this phase is implemented. **GATE CLEARED 2026-07-10: user approved "write while dark" (unresolved Q1 resolved — import unconditionally at Brief-confirm; rows invisible until flag flip).**
 
 **Dark-flag decision (explicit):** auto-import WRITES while dark. The repo layer has no flag check; all HTTP readers 404 while dark, so rows are invisible until flag flip. Gating the write would silently discard the user's own verbatim scraped quotes — defeating the feature. Rows are the user's own site content (`source:'imported'`, `status:'approved'`), so accumulation is safe. Intentional; the human gate confirms it.
 
