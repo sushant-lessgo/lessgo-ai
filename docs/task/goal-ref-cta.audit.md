@@ -945,3 +945,54 @@ Non-blocking: the service-shape stamping test builds an awareness-ordered tree b
 `stampGoalRefCtas` directly rather than driving the full service `finalize` path. Genuinely service-shaped
 (header→hero→services→testimonials→cta, with `services`/`testimonials` correctly asserted CTA-less), but it
 locks the stamp writer in isolation, not end-to-end service generation.
+
+---
+
+## Phase 6 — full verification (automated half GREEN; manual gate PENDING USER)
+
+- `npx tsc --noEmit` → exit 0.
+- `npm run test:run` → **1856 passed | 3 skipped | 0 failures** (114 files passed, 1 skipped).
+- `npm run build` → **green** (full pipeline: buildPublishedCSS → buildAssets → next build). Required
+  because this feature touched the published renderer + static export.
+
+### Acceptance criteria → where each is satisfied
+1. Generation writes `dest:'GOAL_REF'` (+`role`, `formId` on M1) on every primary — hero, header, cta —
+   no resolved snapshots → phase 1 (`stampGoalRefCtas`, both generation paths; negative no-snapshot
+   assertion at the generation layer).
+2. Single-page M1: all primaries resolve to the form-section anchor → phase 1 + phase 3 tests.
+3. Multipage M1: home primaries resolve to the contact page path, published HTML verified → phase 3
+   (exporter test over real assembly) + phase 3.5 (bridge, so vestria actually renders it).
+   **Ratified spec deviation:** resolves to the BARE host-relative `/contact`, not `/p/<slug>/contact`.
+   The spec's literal value is wrong; `middleware.ts` serves host-relative paths and existing nav links
+   emit the same bare form. Asserted `not.toContain('/p/')`.
+4. M3 with param → external URL; param-less → no dead href (inert `'#'`, explicitly `!== ''`) → phase 5.
+5. Goal change re-points every GOAL_REF primary; a detached explicit Destination is untouched → phase 4
+   (both arms; detach fixture copied verbatim from `buildCtaButton`).
+6. Legacy shape renders identically via the dual-read shim → phase 2 (frozen deep-frozen pre-feature
+   fixture; `normalizeCtas` returns the SAME reference for legacy input).
+7. Edit and published renderers produce identical hrefs → phase 4, asserted at the `normalizeCtas` layer
+   (D-B). **Scope of that proof:** the shared resolution layer agrees; blocks are never mounted. Live
+   block↔block parity is what the manual gate below exists to check.
+8. `tsc` + full `test:run` green → this phase, plus `npm run build`.
+
+### Known limitations shipped (all deliberate, none regressions)
+- **granth** — primary is `cta_label`, not `cta_text`; the allowlist never stamps it, so goal wiring does
+  not reach granth. Descoped (writer track, no acceptance repro). Fix = widen allowlist + `cta_label →
+  cta_href` bridge mapping.
+- **techpremium/naayom seam** — `thing.ts:555` → `buildTechPremiumHomeFinalContent` returns before
+  `finalize.ts`/`runFanOut`, so that bespoke single-tenant path ships a metadata-less header primary.
+- **regenerate routes** — `regenerate-content/-section/-element` never re-stamp; a full-content regen can
+  drop GOAL_REF. Pre-existing (scale-05's `seedGoalForm` never ran on regen either).
+- **vestria `LinkTargetPopover` `/contact` collision** — the popover writes `elements.cta_href` while
+  leaving `cta.dest = 'GOAL_REF'`, so choosing "Contact page" (a schema default) can be re-asserted by the
+  goal. Follow-up: make the popover detach on user pick.
+- **`normalizeCtas` stamp overwrite** — `{...entry, cta}` replaces an existing `cta`. Safe today (both call
+  sites are generation-time only). **Carry into any regenerate-path fix:** do not route edited content
+  through the stamp, or a user-detached Destination gets clobbered.
+
+### Manual gate (spec's suggested gate) — NOT YET RUN, requires the user
+Against `npm run dev` (real LLM, not mock):
+- `I9HwKOYo9jsm` (single-page meridian): all primaries — hero, header, cta section — hit the form anchor;
+  editor and published agree.
+- `9knkYn8_QZpE` (multipage vestria): home primary navigates to the contact page (`/contact`, bare);
+  published HTML live-checked. This is F23's original repro.
