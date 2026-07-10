@@ -32,3 +32,24 @@
 **Open risks**
 - Flusher closures accumulate in `pendingFlushers` for the app lifetime (never removed — no teardown hook). Bounded/small: after flush `pendingWrite` is null, and store instances are few (LRU max 3, client-only editor). Acceptable per plan's "per-app-lifetime listener is fine".
 - Debounce/flush behavior is inherently runtime; unit tests don't cover the timer path. Manual dev QA (localStorage write counting, close-tab-mid-typing) is in the plan's Phase 1 verification and Phase 7 gate.
+
+## Phase 2 — Selector support in useEditStoreLegacy
+
+**Files changed**
+- `src/hooks/useEditStoreLegacy.ts`
+
+**What changed**
+- Added TS function OVERLOADS to `useEditStoreLegacy`:
+  - `export function useEditStoreLegacy(): EditStore;`
+  - `export function useEditStoreLegacy<T>(selector: (state: EditStore) => T): T;`
+  - impl: `export function useEditStoreLegacy<T>(selector?: (state: EditStore) => T): EditStore | T` — passes `useStore(store, selector)` when a selector is given, `useStore(store)` when omitted. Zero-arg behavior byte-identical.
+- Added `useEditStoreApi(): EditStoreInstance` — returns the context store INSTANCE (non-reactive) from `useEditStoreContext().store` for `.getState()` in event handlers against the correct token-scoped store. Existing static `useEditStoreLegacy.getState()` left untouched for back-compat.
+- Imported `EditStore` from `@/types/store` (the real store state type; instance type stays `EditStoreInstance` from `@/stores/editStore`).
+
+**Real state type used:** `EditStore` (from `@/types/store`). Store instance type: `EditStoreInstance`.
+
+**Deviations:** none. No caller changes (infrastructure only, per phase scope).
+
+**Tests:** `npx tsc --noEmit` green (proves zero-arg back-compat across all ~103 call sites). `npm run test:run` green — 126 files passed / 1 skipped; 1998 tests passed / 3 skipped.
+
+**Open risks:** none — purely additive. `useEditStoreApi` unused until phases 5/6 wire it in.
