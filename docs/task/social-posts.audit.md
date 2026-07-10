@@ -84,3 +84,83 @@ Every accessor is null-safe; array fields are always arrays.
 - Only `src/modules/social/brandContext.test.ts` was touched. This file now has 9
   tests (was 8). Full suite: 1766 passed / 3 skipped (was 1765/3). `tsc` clean
   aside from the known unrelated `app/page.tsx` / `founder.jpg` error.
+
+## Phase 2 — `SocialPost` schema + migration [HUMAN GATE — approved]
+
+### Files changed
+- `prisma/schema.prisma`
+- `prisma/migrations/20260710105655_social_posts/migration.sql` (new, generated then hand-edited)
+- `prisma/migrations/migration_lock.toml` (see Deviations — EOL-only artifact, content identical)
+
+### What changed in the schema
+- New model `SocialPost` (added after `FormSubmission`), following `FormSubmission`
+  conventions:
+  - `id String @id @default(cuid())`
+  - `userId String` — BARE Clerk User ID, NO `@relation` (matches `FormSubmission`; D6)
+  - `projectId String` + `project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)`
+  - `tokenId String` — bare route-key string (no relation; route resolves token→project via `assertProjectOwner`)
+  - `platform String`, `archetype String?` (null for polish mode), `mode String`,
+    `content String @db.Text`, `createdAt DateTime @default(now())`
+  - `@@index([userId, createdAt])`, `@@index([tokenId, createdAt])`
+- Reverse relation `socialPosts SocialPost[]` added on `Project` (Prisma requires the
+  back-relation for the `@relation` above to compile — an expected in-scope
+  `schema.prisma` edit per the phase brief, mirroring `blogPosts BlogPost[]`).
+- New column on `UserPlan`: `socialPostsLimit Int @default(10)` (placed after
+  `teamMembersLimit`, in the "Feature limits" group).
+
+### Migration
+- Name: `social_posts` → folder `20260710105655_social_posts`.
+- Generated with `npx prisma migrate dev --name social_posts --create-only`, then
+  hand-edited (backfill appended), then applied with `npx prisma migrate dev`.
+  Applied cleanly to the dev DB (Neon `neondb`).
+
+### Exact appended backfill SQL (verbatim, end of migration.sql)
+```
+-- these values must equal PLAN_CONFIGS[*].limits.socialPosts (see phase 7)
+UPDATE "UserPlan" SET "socialPostsLimit" = 300 WHERE "tier" = 'PRO';
+UPDATE "UserPlan" SET "socialPostsLimit" = -1 WHERE "tier" IN ('AGENCY','ENTERPRISE');
+```
+FREE keeps the schema `@default(10)`. The `-- must equal PLAN_CONFIGS` comment is
+present in the file.
+
+### Backfill verification (actual output)
+- Dev DB has 3 `UserPlan` rows, ALL `tier='FREE'`, all `socialPostsLimit = 10`
+  (correct default). There are ZERO PRO/AGENCY/ENTERPRISE rows in dev, so the two
+  backfill `UPDATE`s matched 0 rows at migration time (nothing existing to fix).
+- To PROVE the backfill SQL is itself correct, inserted temp rows (PRO/AGENCY/ENTERPRISE,
+  each defaulting to 10), ran the EXACT two backfill statements, observed:
+  - before: PRO=10, AGENCY=10, ENTERPRISE=10
+  - after:  PRO=300, AGENCY=-1, ENTERPRISE=-1
+  Then deleted the 3 temp rows (dev DB back to 3 FREE rows). So: FREE=10, PRO=300,
+  AGENCY=-1, ENTERPRISE=-1 all confirmed.
+
+### tsc / test:run / build
+- `npx tsc --noEmit`: only the known pre-existing unrelated error
+  `src/app/page.tsx(6,26): Cannot find module '@/assets/images/founder.jpg'`. No new errors.
+- `npm run test:run`: 104 files passed / 1 skipped; 1766 passed / 3 skipped. Green, no regressions.
+- `npm run build`: green.
+
+### prisma-generate / node_modules junction note
+- `prisma migrate dev` ran `prisma generate`, regenerating the client into
+  `node_modules/@prisma/client`. This worktree's `node_modules` is a JUNCTION to the
+  main repo's, so the regenerated client is SHARED with the main checkout. Expected
+  and safe here because the schema change is purely additive (new model + new nullable-
+  defaulted column); the orchestrator should be aware the main checkout now sees the
+  new `SocialPost` / `socialPostsLimit` types.
+
+### Deviations
+- `prisma/migrations/migration_lock.toml` shows as modified but the change is EOL-only
+  (LF→CRLF); content is byte-identical (`provider = "postgresql"`). This is an
+  unavoidable artifact of running the mandated `prisma migrate dev`, not a semantic
+  edit. Flagged rather than reverted (reverting would require a git checkout, which is
+  disallowed).
+
+### What phases 3-7 must know
+- `SocialPost.userId` and gating counts key on the CLERK id (D6). The Project link is
+  `projectId` (FK, cascade) + `tokenId` (route key) — NOT userId.
+- `archetype` is NULLABLE (null = polish mode) — resolves unresolved question #1 in the
+  plan (nullable chosen over a `'polish'` sentinel; conservative, matches plan step 1).
+- Cascade delete: deleting a `Project` deletes its `SocialPost` rows. This does NOT touch
+  `UsageEvent` (separate table, append-only, the gating source of truth per D4).
+- Phase 7 `PLAN_CONFIGS[*].limits.socialPosts` MUST equal the backfill: FREE 10 / PRO 300
+  / AGENCY -1 / ENTERPRISE -1.

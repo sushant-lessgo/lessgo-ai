@@ -42,6 +42,7 @@ model Project {
   testimonials Testimonial[]
   collectLink  CollectLink?
   blogPosts    BlogPost[]
+  socialPosts  SocialPost[]
 }
 
 // Blog (Phase 1). Posts have their own draft→publish lifecycle, decoupled from
@@ -213,6 +214,27 @@ model FormSubmission {
   @@index([publishedPageId])
 }
 
+// Per-project generated social posts library (social-posts feature). userId is a
+// BARE Clerk User ID (no @relation — matches FormSubmission; gating counts the
+// append-only UsageEvent ledger keyed on this same Clerk id, per plan D4/D6). The
+// Project link is carried by projectId (@relation, cascade-delete) + tokenId
+// (route key). Gating reads UsageEvent, NOT this table (delete-and-regen loophole).
+model SocialPost {
+  id        String   @id @default(cuid())
+  userId    String // Clerk User ID (owner) — bare, no @relation (matches FormSubmission)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tokenId   String // project token (route key)
+  platform  String // linkedin | x | facebook
+  archetype String? // null for polish mode
+  mode      String // archetype | archetype_context | polish
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([tokenId, createdAt])
+}
+
 model UserIntegration {
   id        String   @id @default(cuid())
   userId    String // Clerk User ID
@@ -299,6 +321,7 @@ model UserPlan {
   customDomainsLimit   Int @default(1)
   formSubmissionsLimit Int @default(100)
   teamMembersLimit     Int @default(1)
+  socialPostsLimit     Int @default(10) // social-posts feature; PRO/AGENCY/ENT backfilled in migration (see phase-2 backfill SQL)
 
   // Features enabled
   removeBranding   Boolean @default(false)
