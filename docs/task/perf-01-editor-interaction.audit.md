@@ -236,3 +236,117 @@ The 4 mocks returned a fixed whole-store object, IGNORING the selector arg. Once
 ### Open risks
 - Profiler acceptance (one-section-per-edit) is a runtime check deferred to Phase 7; unit tests cannot observe subscription narrowing.
 - useUniversalElements still re-renders its host on any content edit (whole content map). Host is not per-section, so no cross-section block churn is reintroduced; a future perf pass could narrow it if profiling flags it.
+
+---
+
+## Phase 6 — Event-handler-only call sites → getState()
+
+**Files changed (13 planned; 12 modified, 1 intentionally unchanged):**
+- `src/hooks/useSectionCRUD.ts`
+- `src/hooks/useElementCRUD.ts`
+- `src/hooks/useAutoSave.ts`
+- `src/hooks/useStatePersistence.ts`
+- `src/hooks/useElementPicker.ts`
+- `src/hooks/useImageToolbar.ts`
+- `src/hooks/useModalManager.ts`
+- `src/hooks/useSelectionPriority.ts`
+- `src/app/edit/[token]/components/ui/useUndoRedo.ts`
+- `src/app/edit/[token]/components/ui/usePaletteSwap.ts`
+- `src/app/edit/[token]/components/ui/useResetSystem.ts`
+- `src/app/edit/[token]/components/ui/usePreviewNavigation.ts`
+- `src/utils/ctaHandler.ts` — **inspected, left unchanged** (see below)
+
+### FLAGGED: autosave / statePersistence trigger findings (plan step 2)
+
+Two independent "autosave" mechanisms exist; I verified the trigger of each BEFORE converting.
+
+**`useStatePersistence.ts` — RENDER-DRIVEN trigger. Kept a reactive change-signal.**
+The auto-save effect (`if (hasChanged && editStore.isDirty) saveAuto()`) is DRIVEN by a render
+pass: its dep array was `[editStore.isDirty, editStore.lastUpdated, …]`, and `lastUpdated`
+changes on every edit → the effect re-fires each edit → schedules the save. A blind switch of
+`editStore` to `getState()` would have dropped that reactive dep and SILENTLY STOPPED autosave
+from firing on edits. Fix: kept a NARROW reactive subscription to just the change signal
+`useEditStore(useShallow(s => ({ isDirty: s.isDirty, lastUpdated: s.lastUpdated })))` → `editIsDirty`
+/ `editLastUpdated`. The effect deps now read those; payload/action reads (`export()`,
+`loadFromDraft`, `clearAutoSaveError`, `clearError`) moved to `editStoreApi.getState()`. The
+render-time `isDirty` read (return object) now uses `editIsDirty`. Whole-store subscription
+removed (no more re-render on unrelated slices) with the trigger + cadence intact. The background
+timer effect kept `editIsDirty` in its deps (preserves the original interval-recreation cadence)
+and polls `editStoreApi.getState().isDirty` at fire time. Cadence/payload logic untouched (perf-02).
+
+**`useAutoSave.ts` — TIME-DRIVEN trigger. getState is safe; narrowed for render reads.**
+Its autosave trigger is the `setInterval(1000)` that polls `persistence.isDirty` and calls
+`store.triggerAutoSave()` — it fires on a timer, NOT because a render occurred, so moving reads to
+`getState()` does NOT stop it. However this hook READS `persistence.*` + `queuedChanges` DURING
+render (the `status` memo, the snapshot/lastSaved/saveError effects) and returns `status` to UI.
+So per the plan's "render-read → narrow selector" rule I kept a reactive subscription to just
+`{ persistence, queuedChanges }` via `useShallow`, and moved all actions/methods
+(`triggerAutoSave`, `forceSave`, `export`, `loadFromDraft`, `resolveConflict`, `clearAutoSaveError`,
+`getPerformanceStats`, `tokenId`, `title`) to `storeApi.getState()`. Interval/online effects now
+poll `getState()` inside their callbacks; deps `[…, storeApi]` (stable) so the interval is created
+once instead of per-render — still fires every 1s.
+
+### Per-file conversion
+
+- **useSectionCRUD.ts** — getState. No render-time store reads (all `content`/`sections` reads are
+  inside returned callbacks/handlers). Replaced `const store = useEditStore()` with
+  `useEditStoreApi()`; snapshot stable actions once at render; each callback reads
+  `const { content } = storeApi.getState()` / `{ sections }` fresh. Dropped unused `sectionLayouts`
+  destructure. All `content`/`sections` deps replaced with `[storeApi, …]`.
+- **useElementCRUD.ts** — getState. Same shape; ~18 callbacks each read `content` fresh via
+  getState. Dropped unused `history` destructure. `content` deps → `storeApi`.
+- **useElementPicker.ts** — getState. Only `announceLiveRegion` (a stable action) was read at
+  render to build a fallback; moved that fallback + read inside `handleElementSelect`.
+- **useImageToolbar.ts** — getState. All reads were already handler-only; `const store` now read
+  from `storeApi.getState()` inside the callback.
+- **useModalManager.ts** — getState. Only `triggerAutoSave` was subscribed; now
+  `storeApi.getState().triggerAutoSave()` in the handler. (Its `useOnboardingStore` subscription is
+  a different store, out of scope, untouched.)
+- **usePreviewNavigation.ts** — getState. Handler-only `triggerAutoSave`.
+- **useUndoRedo.ts** — KEPT SELECTORS (render-time read). `canUndo()`/`canRedo()` are CALLED during
+  render to expose enabled flags, so a blind getState would freeze the buttons' enabled state.
+  Gave two narrow reactive selectors `s => s.canUndo?.()` / `s => s.canRedo?.()` (re-render only
+  when the boolean flips). Actions (`undo`/`redo`/`triggerAutoSave`) read via `storeApi.getState()`
+  in the handlers.
+- **usePaletteSwap.ts** — KEPT SELECTOR. Reads `theme.colors.textureId` at render → narrow selector
+  `s => s.theme?.colors?.textureId || 'none'`. Actions read via getState in the handler.
+- **useResetSystem.ts** — KEPT SELECTOR. Reads `onboardingData?.confirmedFields` at render → narrow
+  selector for the derived boolean. Actions via getState in the handler.
+- **useSelectionPriority.ts** — KEPT SELECTOR. Genuinely reads 6 UI-selection fields
+  (`mode/isTextEditing/textEditingElement/selectedElement/selectedSection/toolbar`) DURING render
+  (memoized selection object + effects). Narrowed the whole-store subscription to a `useShallow`
+  pick of exactly those 6. These fields don't change on content keystrokes, so the host no longer
+  re-renders on edits.
+- **ctaHandler.ts** — UNCHANGED (deviation, see below).
+
+### Deviations
+- **ctaHandler.ts left unchanged.** `createCTAClickHandler()` is a plain (non-hook) factory that
+  already uses static `useEditStore.getState()` — there is NO reactive subscription to remove (it
+  contributes zero re-renders). Converting to `useEditStoreApi().getState()` would require a React
+  hook context or a signature change to accept the store instance, rippling to its callers, none of
+  which are in this phase's Files-touched list. Conservative choice: leave the non-reactive static
+  getState as-is.
+- **useAutoSave status perf-stats reactivity.** The `status` memo previously listed
+  `store.getPerformanceStats()` (a fresh object each render) as a dep, so it recomputed every render
+  while the whole store was subscribed. It now depends on `persistence.*` + `queuedChanges` + stable
+  `storeApi`; perf numbers refresh when persistence changes (which is when saves — and thus perf
+  stats — actually change). Displayed values are behavior-equivalent; only the recompute trigger
+  narrowed. No cadence change.
+
+### Render-time reads that STAYED selectors (not getState)
+useUndoRedo (canUndo/canRedo booleans), usePaletteSwap (textureId), useResetSystem
+(hasOriginalState), useSelectionPriority (6 UI fields), plus the change-signal subscriptions in
+useStatePersistence (isDirty+lastUpdated) and useAutoSave (persistence+queuedChanges).
+
+### Tests / typecheck
+- `npx tsc --noEmit`: green (no output).
+- `npm run test:run`: green — 127 files passed / 1 skipped; 2007 tests passed / 3 skipped (identical
+  to the Phase 4/5 baseline). No test-mock fix required this phase.
+
+### Open risks
+- Autosave-fires-on-edit is verified structurally (trigger mechanics preserved) but the network-tab
+  probe (`saveDraft` request after an edit + idle) is a runtime check deferred to the Phase 7 gate.
+- The two CRUD hooks and the change-signal hooks (useStatePersistence/useAutoSave) still re-render
+  their hosts when their subscribed signal changes (lastUpdated/persistence/queuedChanges change on
+  edits) — that is inherent to change-detection design and matches prior behavior; the win is the
+  removal of the whole-store subscription so unrelated-slice mutations no longer re-render them.

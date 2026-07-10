@@ -2,6 +2,7 @@
 // Implements Steps 1, 2 & 3 from selection.md with React integration
 
 import { useMemo, useEffect, useRef } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useTransitionLock, getTransitionAwareVisibility } from '@/hooks/useTransitionLock';
 import { useGlobalAnchor } from '@/hooks/useGlobalAnchor';
@@ -19,6 +20,8 @@ import {
  * Hook to get the current editor selection state with priority resolution, transition locks, and global anchors
  */
 export function useSelectionPriority() {
+  // Render-time reads of the UI-selection fields only — narrow selector so this
+  // hook no longer re-renders its host on content-slice mutations.
   const {
     mode,
     isTextEditing,
@@ -26,7 +29,16 @@ export function useSelectionPriority() {
     selectedElement,
     selectedSection,
     toolbar,
-  } = useEditStore();
+  } = useEditStore(
+    useShallow((s) => ({
+      mode: s.mode,
+      isTextEditing: s.isTextEditing,
+      textEditingElement: s.textEditingElement,
+      selectedElement: s.selectedElement,
+      selectedSection: s.selectedSection,
+      toolbar: s.toolbar,
+    }))
+  );
   
   // STEP 2: Initialize transition lock system
   const transitionLock = useTransitionLock({

@@ -1,20 +1,16 @@
 "use client";
 
 import { useCallback } from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStoreLegacy as useEditStore, useEditStoreApi } from '@/hooks/useEditStoreLegacy';
 import { type Palette } from '@/modules/Design/background/palettes';
 import { getCompatibleTextures, compileBackground } from '@/modules/Design/background/textures';
 import { generateBackgroundSystemFromPalette } from '@/modules/Design/background/backgroundIntegration';
 
 export function usePaletteSwap() {
-  const {
-    theme,
-    updateTheme,
-    updateFromBackgroundSystem,
-    recalculateTextColors,
-  } = useEditStore();
-
-  const textureId = theme?.colors?.textureId || 'none';
+  // Render-time read: narrow selector for the current texture id.
+  const textureId = useEditStore((s) => s.theme?.colors?.textureId || 'none');
+  // Non-reactive store instance — actions read in the handler only.
+  const storeApi = useEditStoreApi();
 
   const handlePaletteSwap = useCallback(
     (newPalette: Palette) => {
@@ -25,6 +21,8 @@ export function usePaletteSwap() {
       const bgSystem = generateBackgroundSystemFromPalette(newPalette);
       const compiledPrimary = compileBackground(newPalette, finalTextureId, 'primary');
       const compiledSecondary = compileBackground(newPalette, finalTextureId, 'secondary');
+
+      const { updateFromBackgroundSystem, updateTheme, recalculateTextColors } = storeApi.getState();
 
       updateFromBackgroundSystem({
         ...bgSystem,
@@ -41,7 +39,7 @@ export function usePaletteSwap() {
 
       recalculateTextColors();
     },
-    [textureId, updateFromBackgroundSystem, updateTheme, recalculateTextColors]
+    [textureId, storeApi]
   );
 
   return handlePaletteSwap;

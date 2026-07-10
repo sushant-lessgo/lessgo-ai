@@ -15,7 +15,7 @@ Make one edit cost one section: today every store write (even toolbar toggles) r
 - phase 3 shared base block hook (stable refs): done (review loops 1, ship)
 - phase 4 renderer props stabilization + memo + skeleton: done (review loops 1, ship)
 - phase 5 render-hot leaf call sites → selectors: done (review loops 1, ship)
-- phase 6 event-handler call sites → getState: pending
+- phase 6 event-handler call sites → getState: done (review loops 1, ship)
 - phase 7 full verification + manual QA gate: pending
 
 ---

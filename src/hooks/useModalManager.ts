@@ -3,7 +3,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStoreApi } from '@/hooks/useEditStoreLegacy';
 import type { CanonicalFieldName } from '@/types/core/index';
 import { FIELD_DISPLAY_NAMES } from '@/types/core/index';
 
@@ -33,7 +33,8 @@ export function useModalManager(): ModalManagerHook {
     confirmField
   } = useOnboardingStore();
 
-  const { triggerAutoSave } = useEditStore();
+  // Non-reactive store instance — triggerAutoSave read in a handler only.
+  const storeApi = useEditStoreApi();
 
   const openFieldModal = useCallback((fieldName: CanonicalFieldName, currentValue?: string) => {
     const modalType = getModalTypeForField(fieldName);
@@ -87,11 +88,11 @@ export function useModalManager(): ModalManagerHook {
     handleFieldDependency(fieldName, value);
     
     // Trigger auto-save
-    triggerAutoSave();
-    
+    storeApi.getState().triggerAutoSave();
+
     // Close modal
     closeModal();
-  }, [modalState.fieldName, validatedFields, hiddenInferredFields, confirmField, triggerAutoSave, closeModal]);
+  }, [modalState.fieldName, validatedFields, hiddenInferredFields, confirmField, storeApi, closeModal]);
 
   const handleFieldDependency = (updatedField: CanonicalFieldName, newValue: string) => {
     // Market category change forces subcategory selection

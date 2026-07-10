@@ -1,6 +1,7 @@
 // hooks/useStatePersistence.ts - React Hook for State Persistence
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useShallow } from 'zustand/react/shallow';
+import { useEditStoreLegacy as useEditStore, useEditStoreApi } from '@/hooks/useEditStoreLegacy';
 import { 
   StatePersistenceManager, 
   getPersistenceManager,
@@ -78,9 +79,22 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
     onConflictDetected,
   } = options;
 
-  // Edit store integration
-  const editStore = useEditStore();
-  
+  // Edit store integration.
+  // TRIGGER MECHANICS: the auto-save effect below is DRIVEN by a render pass —
+  // it depends on `editIsDirty`/`editLastUpdated`, and `lastUpdated` changes on
+  // every edit. A blind switch to getState() would drop that reactive dep and
+  // SILENTLY STOP auto-save from firing on edits. So we keep a NARROW reactive
+  // subscription to just the change signal (isDirty + lastUpdated) — this both
+  // drives the trigger and feeds the render-time `isDirty` read — and use the
+  // non-reactive instance (getState) for every payload/action read. This drops
+  // the whole-store subscription (no more re-render on unrelated slices) without
+  // touching cadence/payload logic (that is perf-02 scope).
+  const editStoreApi = useEditStoreApi();
+  const { isDirty: editIsDirty, lastUpdated: editLastUpdated } = useEditStore(
+    useShallow((s) => ({ isDirty: s.isDirty, lastUpdated: s.lastUpdated }))
+  );
+
+
   // Local state
   const [persistenceState, setPersistenceState] = useState<PersistenceState>({
     isDirty: false,
@@ -143,23 +157,23 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
   // Get current edit store data for persistence
   const getCurrentEditData = useCallback(() => {
     return {
-      ...editStore.export(),
+      ...editStoreApi.getState().export(),
       tokenId,
       lastModified: Date.now(),
     };
-  }, [editStore, tokenId]);
+  }, [editStoreApi, tokenId]);
 
   // Check if edit store has changed
   const hasEditStoreChanged = useCallback(() => {
-    const currentState = editStore.export();
+    const currentState = editStoreApi.getState().export();
     const hasChanged = JSON.stringify(currentState) !== JSON.stringify(lastEditStateRef.current);
-    
+
     if (hasChanged) {
       lastEditStateRef.current = currentState;
     }
-    
+
     return hasChanged;
-  }, [editStore]);
+  }, [editStoreApi]);
 
   // Manual save action
   const saveManual = useCallback(async (description?: string): Promise<SaveResult> => {
@@ -175,7 +189,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
       
       if (result.success) {
         // Update edit store auto-save state
-        editStore.clearAutoSaveError();
+        editStoreApi.getState().clearAutoSaveError();
         onSaveSuccess?.(result);
         logger.debug('Manual save successful');
       } else {
@@ -193,7 +207,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
       onSaveError?.(errorMessage);
       throw error;
     }
-  }, [getCurrentEditData, updateLocalState, editStore, onSaveSuccess, onSaveError, onConflictDetected]);
+  }, [getCurrentEditData, updateLocalState, editStoreApi, onSaveSuccess, onSaveError, onConflictDetected]);
 
   // Force save action
   const forceSave = useCallback(async (description?: string): Promise<SaveResult> => {
@@ -208,20 +222,20 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
       updateLocalState();
       
       if (result.success) {
-        editStore.clearAutoSaveError();
+        editStoreApi.getState().clearAutoSaveError();
         onSaveSuccess?.(result);
         logger.debug('Force save successful');
       } else {
         onSaveError?.(result.error || 'Force save failed');
       }
-      
+
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Force save failed';
       onSaveError?.(errorMessage);
       throw error;
     }
-  }, [getCurrentEditData, updateLocalState, editStore, onSaveSuccess, onSaveError]);
+  }, [getCurrentEditData, updateLocalState, editStoreApi, onSaveSuccess, onSaveError]);
 
   // Auto save (triggered by edit store changes)
   const saveAuto = useCallback(() => {
@@ -247,11 +261,11 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
       
       if (result.success && result.data) {
         // Load data into edit store
-        await editStore.loadFromDraft(result.data);
-        
+        await editStoreApi.getState().loadFromDraft(result.data);
+
         // Update last edit state reference
-        lastEditStateRef.current = editStore.export();
-        
+        lastEditStateRef.current = editStoreApi.getState().export();
+
         onLoadSuccess?.(result);
         logger.debug('Load successful:', { fromCache: result.fromCache });
       } else {
@@ -264,13 +278,15 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
       onLoadError?.(errorMessage);
       throw error;
     }
-  }, [tokenId, updateLocalState, editStore, onLoadSuccess, onLoadError]);
+  }, [tokenId, updateLocalState, editStoreApi, onLoadSuccess, onLoadError]);
 
   // Clear errors action
   const clearErrors = useCallback(() => {
-    editStore.clearAutoSaveError();
-    editStore.clearError();
-    
+    const s = editStoreApi.getState();
+    s.clearAutoSaveError();
+    s.clearError();
+
+
     // Clear persistence manager errors
     if (persistenceManagerRef.current) {
       const state = persistenceManagerRef.current.getState();
@@ -278,32 +294,32 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
       state.loadError = undefined;
       updateLocalState();
     }
-  }, [editStore, updateLocalState]);
+  }, [editStoreApi, updateLocalState]);
 
   // Version control actions
   const undo = useCallback(() => {
     if (!persistenceManagerRef.current) return;
-    
+
     const snapshot = persistenceManagerRef.current.undo();
     if (snapshot) {
       // Apply snapshot data to edit store
-      editStore.loadFromDraft(snapshot.data);
+      editStoreApi.getState().loadFromDraft(snapshot.data);
       lastEditStateRef.current = snapshot.data;
       logger.debug('Undo applied:', snapshot.description);
     }
-  }, [editStore]);
+  }, [editStoreApi]);
 
   const redo = useCallback(() => {
     if (!persistenceManagerRef.current) return;
-    
+
     const snapshot = persistenceManagerRef.current.redo();
     if (snapshot) {
       // Apply snapshot data to edit store
-      editStore.loadFromDraft(snapshot.data);
+      editStoreApi.getState().loadFromDraft(snapshot.data);
       lastEditStateRef.current = snapshot.data;
       logger.debug('Redo applied:', snapshot.description);
     }
-  }, [editStore]);
+  }, [editStoreApi]);
 
   // Conflict resolution
   const getActiveConflicts = useCallback(() => {
@@ -322,7 +338,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
       
       if (result.success && result.mergedData) {
         // Apply merged data to edit store
-        await editStore.loadFromDraft(result.mergedData);
+        await editStoreApi.getState().loadFromDraft(result.mergedData);
         lastEditStateRef.current = result.mergedData;
         
         // Trigger save with resolved data
@@ -336,7 +352,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
       logger.error('Conflict resolution failed:', error);
       onSaveError?.(error instanceof Error ? error.message : 'Conflict resolution failed');
     }
-  }, [editStore, saveManual, updateLocalState, onSaveError]);
+  }, [editStoreApi, saveManual, updateLocalState, onSaveError]);
 
   // Utility functions
   const exportData = useCallback(() => {
@@ -352,18 +368,19 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
     if (!autoSaveEnabled) return;
 
     const hasChanged = hasEditStoreChanged();
-    if (hasChanged && editStore.isDirty) {
+    if (hasChanged && editIsDirty) {
       logger.debug('Edit store changed, triggering auto-save');
       saveAuto();
     }
-  }, [editStore.isDirty, editStore.lastUpdated, hasEditStoreChanged, saveAuto, autoSaveEnabled]);
+  }, [editIsDirty, editLastUpdated, hasEditStoreChanged, saveAuto, autoSaveEnabled]);
 
   // Background save effect
   useEffect(() => {
     if (!backgroundSaveEnabled) return;
 
     backgroundSaveTimerRef.current = setInterval(() => {
-      if (editStore.isDirty && !persistenceState.isSaving) {
+      // Poll dirty state non-reactively so the timer always sees the latest.
+      if (editStoreApi.getState().isDirty && !persistenceState.isSaving) {
         logger.debug('Background save triggered');
         const data = getCurrentEditData();
         persistenceManagerRef.current?.saveAuto(data);
@@ -376,7 +393,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
         clearInterval(backgroundSaveTimerRef.current);
       }
     };
-  }, [backgroundSaveEnabled, editStore.isDirty, persistenceState.isSaving, getCurrentEditData, updateLocalState, config?.autoSaveInterval]);
+  }, [backgroundSaveEnabled, editIsDirty, editStoreApi, persistenceState.isSaving, getCurrentEditData, updateLocalState, config?.autoSaveInterval]);
 
   // Subscribe to edit store changes for immediate dirty state sync
   useEffect(() => {
@@ -408,7 +425,7 @@ export function useStatePersistence(options: UseStatePersistenceOptions): UseSta
   // Return hook interface
   return {
     // State
-    isDirty: persistenceState.isDirty || editStore.isDirty,
+    isDirty: persistenceState.isDirty || editIsDirty,
     isSaving: persistenceState.isSaving,
     isLoading: persistenceState.isLoading,
     lastSaved: persistenceState.lastSaved,

@@ -2,18 +2,20 @@
 "use client";
 
 import { useCallback } from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStoreLegacy as useEditStore, useEditStoreApi } from '@/hooks/useEditStoreLegacy';
 import { useToast } from './useToast';
 import type { ResetScope } from '@/types/core';
 
 export function useResetSystem() {
-  const { resetToGenerated, triggerAutoSave, onboardingData } = useEditStore();
+  // Render-time read: narrow selector for the derived availability flag.
+  const hasOriginalState = useEditStore((s) => Boolean(s.onboardingData?.confirmedFields));
+  // Non-reactive store instance — actions read in the handler only.
+  const storeApi = useEditStoreApi();
   const { showToast } = useToast();
-
-  const hasOriginalState = Boolean(onboardingData?.confirmedFields);
 
   const handleResetConfirm = useCallback(async (scope: ResetScope) => {
     try {
+      const { resetToGenerated, triggerAutoSave } = storeApi.getState();
       resetToGenerated();
       await triggerAutoSave();
 
@@ -26,7 +28,7 @@ export function useResetSystem() {
       // console.error('Reset failed:', error);
       showToast('Reset failed. Please try again.', 'error');
     }
-  }, [resetToGenerated, triggerAutoSave, showToast]);
+  }, [storeApi, showToast]);
 
   return {
     handleResetConfirm,
