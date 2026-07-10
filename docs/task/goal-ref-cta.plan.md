@@ -16,7 +16,7 @@ Fix F5/F6/F23. The central gap: `seedGoalForm.ts:81` early-returns `if (!isM1) r
 - phase 3.5 flat-href render bridge (vestria + techpremium-header; granth descoped) — ADDED mid-run: done (commit f7a80df1, review loops 1, verdict ship)
 - phase 4 parity + re-point + detach tests (test-only): done (commit 6fa624d5, review loops 1, verdict ship — NO production code changed)
 - phase 5 M2–M5 engine matrix + cross-template allowlist coverage: done (commit dd5766a5, review loops 1, verdict ship — NO production code changed)
-- phase 6 full verification + manual repro gate: pending
+- phase 6 full verification + manual repro gate: automated half done (commit f5a24e40 — tsc/tests/build green); MANUAL GATE + merge pending user
 
 ## Verified facts (from scout + plan-review rounds 1–2; implementer verifies line numbers before editing, but do NOT re-derive these)
 
