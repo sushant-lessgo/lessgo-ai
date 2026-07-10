@@ -1,23 +1,23 @@
 {
   "slug": "podcastpro",
   "url": "https://podcastpro.pl/",
-  "business": { "type_label": "solo podcasting educator (online course + e-book)", "icp_category": "info-product / online course creator", "geography_hint": "Poland (Polish-language)" },
+  "business": { "type_label": "solo podcasting educator — online course + e-book + newsletter (Marek Jankowski)", "icp_category": "info-product / online course creator", "geography_hint": "Poland (Polish-language)" },
   "in_icp": false,
   "engine": {
-    "pick": "trust",
-    "ladder_reasoning": "Marek Jankowski sells defined expertise — a podcasting course and book — and the whole property leans on personal credibility (23-yr mic origin story, founder narrative, certificate, graduate/alumni proof). Per the ladder, sells-defined-expertise resolves to trust before thing.",
-    "runner_up": "thing"
+    "pick": "thing",
+    "ladder_reasoning": "The purchase decision hinges on evaluating a productized THING — a 6-module / 71-lesson course and a 130-page e-book — via curriculum outline, sample lessons, bonuses, tiered pricing and outcome proof. The personal brand and founder origin story function as proof, not as the primary hire-a-person decision that trust implies.",
+    "runner_up": "trust"
   },
   "goal": {
-    "one_action": "Homepage front door: capture name+email opt-in to unlock a free training video (lead magnet); deeper pages sell the course and e-book via checkout.",
+    "one_action": "Homepage front door captures name+email opt-in to unlock a free training video (lead magnet); deeper pages sell the course (3-tier) and e-book via checkout.",
     "mechanism": "form",
-    "delegated_to": "convertbox (opt-in) / tally; course+ebook checkout via malawielkafirma platform"
+    "delegated_to": "convertbox/tally (opt-in); course+ebook checkout with external login at wiedza.malawielkafirma.pl"
   },
   "structure": {
     "kind": "multi",
     "page_count": 7,
     "pages": ["home", "kurs (course)", "baza-wiedzy (knowledge base/blog)", "ksiazka-o-podcastach (e-book)", "absolwenci (graduates)", "narzedzia (tools)", "kontakt (mailto)"],
-    "archetype_note": "Info-product funnel: lead-magnet homepage feeding a paid course (3-tier checkout) + e-book purchase, plus a content blog and an alumni-outcomes showcase used as social proof."
+    "archetype_note": "Info-product funnel: lead-magnet homepage feeding a paid course (3-tier checkout) + one-time e-book sale, plus a content blog and an alumni-outcomes showcase used as social proof. Multi-job property, not one conversion action."
   },
   "sections": {
     "mapped": [
@@ -25,37 +25,38 @@
       { "canonical": "useCases", "observed_as": "Korzyści z własnego podcastu (6 benefit cards)", "component": "grid-cards" },
       { "canonical": "leadForm", "observed_as": "Zobacz nagranie... (email+name opt-in to unlock video)", "component": "form" },
       { "canonical": "followStrip", "observed_as": "Podaj dalej (social share buttons)", "component": "text" },
-      { "canonical": "testimonials", "observed_as": "single quote + Book reviews (15+ 5-star)", "component": "grid-cards" },
+      { "canonical": "testimonials", "observed_as": "single quote + Book reviews (15+ 5-star, 20 total)", "component": "grid-cards" },
       { "canonical": "problem", "observed_as": "Myślisz o własnym podcaście? / Najtrudniejsze masz już za sobą", "component": "text" },
-      { "canonical": "founderNote", "observed_as": "Ja też tego nie umiałem / About the author", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Ja też tego nie umiałem / About the author (23 yrs mic)", "component": "text" },
       { "canonical": "uniqueMechanism", "observed_as": "Dlaczego kurs PodcastPro™?", "component": "text" },
       { "canonical": "features", "observed_as": "Co wchodzi w skład kursu? (6 modules, 71 lessons) / Są też bonusy!", "component": "accordion" },
       { "canonical": "howItWorks", "observed_as": "Agenda kursu / Table of contents", "component": "accordion" },
-      { "canonical": "pricing", "observed_as": "Pakiety i ceny (Silver/Gold/Platinum)", "component": "pricing-table" },
-      { "canonical": "faq", "observed_as": "Często zadawane pytania", "component": "accordion" },
-      { "canonical": "socialProof", "observed_as": "Absolwenci kursu (200+ graduate podcasts, 12 filters)", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Zobacz przykładowe lekcje (sample lesson videos)", "component": "video" },
+      { "canonical": "pricing", "observed_as": "Pakiety i ceny (Silver 1097 / Gold 1197 / Platinum 2397 PLN)", "component": "pricing-table" },
+      { "canonical": "faq", "observed_as": "Często zadawane pytania / Ile mam czasu na przerobienie kursu?", "component": "accordion" },
+      { "canonical": "socialProof", "observed_as": "Absolwenci kursu (200+ graduate podcasts, 12 topic filters)", "component": "grid-cards" },
       { "canonical": "cta", "observed_as": "Start reading today / Dołącz do kursu", "component": "text" }
     ],
     "unmapped": [
-      { "observed": "Absolwenci — filterable directory of 200+ graduate podcasts across 12 topic categories", "why_no_fit": "Not testimonials (quotes) nor gallery/portfolio (owner's own work) nor content-index (owner's content feed) — it is a browsable directory of STUDENT outcomes used as results-proof.", "closest": "socialProof / results" }
+      { "observed": "Baza wiedzy — category-organized browsable article grid (Podstawy, Nagrywanie i sprzęt, Promocja i zarabianie, Słuchanie)", "why_no_fit": "A multi-category browsable knowledge feed is content-property scope, not a single landing-page section.", "closest": "blog / content-index" }
     ]
   },
   "capabilities": {
     "needed": ["multipage", "blog", "lead-form", "packages", "video-hero"],
     "proposed_new": [
-      { "name": "storefront-checkout", "evidence": "Course page has on-site multi-tier checkout (Silver 1097 / Gold 1197 / Platinum 2397 PLN) with package-selection + payment-method + invoice fields (BLIK/card/installments); e-book 'Kup teraz / Zamów za 149 zł' — one-time-goods checkout." },
-      { "name": "content-index", "evidence": "Baza wiedzy page is a category-organized browsable grid of articles (Podstawy podcastingu, Nagrywanie i sprzęt, Promocja i zarabianie, Słuchanie) — a feed/index, not a single blog-teaser." },
-      { "name": "alumni-showcase", "evidence": "Absolwenci page: filterable directory of 200+ course-graduate podcasts across 12 topic categories, standing as results-proof — distinct from portfolio (owner's work), content-index (owner's feed), and testimonials (quotes)." }
+      { "name": "course-curriculum", "evidence": "Paid course with a 6-module/71-lesson outline (Co wchodzi w skład kursu?), detailed Agenda kursu, sample-lesson previews, bonuses, certificate, tiered enrollment, PLUS the Absolwenci page (200+ graduate podcasts, 12 topic filters) — matches the registered canonical exactly, including its alumni/graduate-showcase clause." },
+      { "name": "storefront-checkout", "evidence": "On-site one-time-goods checkout: course tiers with package-selection + payment-method + invoice fields (BLIK/card/transfer/installments) and e-book 'Kup teraz / Zamów za 149 zł'." },
+      { "name": "content-index", "evidence": "Baza wiedzy is a category-organized browsable grid of articles (4 categories), a feed/index rather than a single blog-teaser strip." }
     ]
   },
-  "proof_types": ["testimonials", "reviews", "certs", "stats"],
-  "design_style": { "pick": "bold/performance", "none_fits_because": "Conversion-optimized info-product funnel (VWO, Meta Pixel, Google Ads, Clarity, benefit-card grids, long persuasion, tiered pricing). design_hints empty (no fonts/colors captured) so this is inferred from structure; runner-up warm/human given the solo-educator personal voice." },
-  "components_needed": ["opt-in email form (lead magnet)", "icon benefit-card grid", "pricing-table (3 tier)", "module/curriculum accordion", "video embed", "review/testimonial grid", "filterable outcome directory (category chips)", "blog category card grid"],
+  "proof_types": ["testimonials", "reviews", "certs", "portfolio", "stats"],
+  "design_style": { "pick": "bold/performance", "none_fits_because": "Conversion-optimized info-product funnel (VWO, Meta Pixel, Google Ads, Clarity, benefit-card grids, long persuasion, tiered pricing). design_hints empty (no fonts/colors captured) so inferred from structure; runner-up warm/human given the solo-educator personal voice." },
+  "components_needed": ["opt-in email form (lead magnet)", "icon benefit-card grid", "pricing-table (3-tier)", "module/curriculum accordion", "video embed", "review/testimonial grid", "filterable outcome directory (category chips)", "blog category card grid"],
   "languages": ["pl"],
-  "confidence": { "level": "medium", "why": "fetch_quality=full so section/CTA/commerce data is rich, but the ICP call is genuinely borderline (clean lead-magnet homepage vs a real 3-tier course checkout + e-book purchase pushes it out of single-conversion ICP), engine trust-vs-thing is debatable, and design_hints are empty so design_style is inferred." },
+  "confidence": { "level": "medium", "why": "fetch_quality=full so section/CTA/commerce data is rich, but the ICP call is genuinely borderline (clean lead-magnet homepage vs a real 3-tier course checkout + e-book purchase pushes it out of single-conversion ICP), engine thing-vs-trust is debatable, and design_hints are empty so design_style is inferred." },
   "gap_findings": [
-    "Mixed-job property: one domain runs a lead-magnet front door AND a course checkout AND an e-book sale AND a blog AND an alumni directory — the taxonomy assumes ONE conversion action per site; nothing expresses a multi-job funnel where the homepage is in-ICP but deeper pages transact.",
-    "Alumni/student-outcome directory as a proof form is not representable in the closed capability vocab or canonical sections (coined alumni-showcase).",
-    "Lead-magnet gated-content opt-in (email unlocks a training video) is functionally distinct from a plain contact lead-form and from newsletter subscribe, but collapses to 'form' in the mechanism taxonomy."
+    "Mixed-job property: one domain runs a lead-magnet front door AND a course checkout AND a one-time e-book sale AND a blog AND an alumni directory — the taxonomy assumes ONE conversion action per site; nothing expresses a multi-job funnel where the homepage is in-ICP but deeper pages transact.",
+    "Lead-magnet gated-content opt-in (email unlocks a training video) is functionally distinct from a plain contact lead-form and from newsletter subscribe, yet collapses to 'form' in the mechanism taxonomy.",
+    "Alumni/student-outcome directory as a proof form is only representable by folding it into course-curriculum; there is no canonical section id for a browsable outcomes/results directory."
   ]
 }

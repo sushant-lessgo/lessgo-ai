@@ -205,7 +205,7 @@
     "analyzed": true,
     "status": "done",
     "confidence": "medium",
-    "note": "engine=trust, in_icp=false, multi(7). proposed: storefront-checkout, content-index, alumni-showcase"
+    "note": "engine=thing, in_icp=false, multi(7). proposed: course-curriculum, storefront-checkout, content-index"
   },
   "priscillawolf": {
     "url": "https://photography.priscillawolf.nl/",
