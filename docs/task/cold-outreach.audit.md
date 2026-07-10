@@ -183,3 +183,53 @@
 - Manual dev-server checks in the plan's Verification (real-URL charge-once, unreachable-URL
   generic fallback, pasted-text no-charge, demo-with-URL no rows/credits) are not automated —
   deferred to the phase's manual pass / Phase 7 acceptance walk.
+
+---
+
+## Phase 5 — UI: dashboard page + panel + gated nav button
+
+### Files changed
+- `src/app/dashboard/outreach/[token]/page.tsx` (new) — server page shell.
+- `src/app/dashboard/outreach/[token]/OutreachPanel.tsx` (new) — `'use client'` single panel.
+- `src/components/dashboard/ProjectCard.tsx` (edited) — gated "Outreach" nav button.
+
+### What changed
+- **page.tsx**: cloned the email-sequences page shell. Kill-switch FIRST (`notFound()` when
+  `NEXT_PUBLIC_COLD_OUTREACH_DISABLED === 'true'`), then `auth()` → redirect, then
+  `assertProjectOwner` → `notFound()`, then loads `project.title` for the header and renders
+  `<OutreachPanel token={tokenId} />`. Unlike the email page there is no intent/archetype
+  resolution — outreach is always available for any project, so no "not available" empty state.
+- **OutreachPanel.tsx**: cloned `EmailSequencePanel` structure (single client component,
+  `readableError` map, per-card copy/regenerate lifecycle). Three sections:
+  1. Intake — `targetDescriptor` input (prefilled from GET `prefill.targetDescriptor` or the
+     saved intake row), platform checkboxes driven by `PILOT_PLATFORMS` (labels from defs, not
+     hardcoded), optional `openerContext` textarea; Save → intake POST, shows "Saved".
+  2. Prospect — Website URL | Paste text toggle with helper copy ("For LinkedIn, paste their
+     About — we never fetch LinkedIn"); Generate → generate POST with in-flight disable/spinner.
+     Sends only the currently-checked `platforms` plus the active mode's url/text (never both).
+  3. Library — message cards (platform label + `prospectLabel` chip; subject shown only when the
+     platform def `hasSubject` and a subject exists; body). Per-card Copy
+     (`navigator.clipboard.writeText`, 2s "Copied!" — includes `Subject:` line for cold_email),
+     Regenerate (splices the returned message back by id), Delete (removes by id).
+  - Grounding: batch-level amber notice after a generate whose `groundingLevel === 'generic'` or
+     that carries `groundingWarning`; plus a per-card amber notice on any message with
+     `groundingLevel === 'generic'`. No error UI for scrape failure (degrades to generic).
+  - 400 `intake_required` is surfaced via the error map as a one-line hint to save intake first.
+- **ProjectCard.tsx**: added module-level `const OUTREACH_DISABLED = ...COLD_OUTREACH_DISABLED === 'true'`
+  and an "Outreach" button after the Emails button, gated on `project.tokenId && !OUTREACH_DISABLED`,
+  `router.push('/dashboard/outreach/${project.tokenId}')`, matching the green button styling.
+
+### Deviations from plan
+- Generate sends the currently-checked `platforms` from the intake form (conservative: matches the
+  saved intake after Save, and lets the server 400 `intake_required` if intake was never saved).
+  Logged here as an in-scope UI judgment call; no scope change.
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 1843 passed | 3 skipped (109 files); no new regressions.
+- Manual dev-server walkthrough (full pilot flow, kill-switch hide/404) deferred to Phase 7 per
+  the task instruction not to start a dev server.
+
+### Open risks
+- Manual pilot walkthrough (real URL referencing a concrete prospect fact, bad-URL generic notice,
+  pasted-text path, kill-switch button-hidden + 404) not yet run — Phase 7 acceptance.

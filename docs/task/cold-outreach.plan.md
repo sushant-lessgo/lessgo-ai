@@ -14,7 +14,7 @@ Generate platform-correct cold-outreach copy grounded in a specific prospect: us
 - phase 2 prospect grounding: done (review loops 1, ship) — extraction module + scrape cache lib, tsc+test green
 - phase 3 generation engine: done (review loops 1, ship) — platforms + outreachEngine + 21 tests, tsc+test green
 - phase 4 API routes: done (review loops 1, ship) — intake/generate/regenerate, demo-first+charge-on-miss verified, tsc+test green
-- phase 5 UI: pending
+- phase 5 UI: done (review loops 1, ship) — dashboard page + OutreachPanel + gated ProjectCard button; PILOT SLICE complete e2e; tsc+test green
 - phase 6 remaining platforms + bump: pending
 - phase 7 final verification: pending
 
