@@ -53,3 +53,48 @@ Scope: Phase 1 (extraction/registry single-source + entry-union builders + post-
 - Byte-identity of the explicit manufacturer prompt (new `startsWith` test guards it, but confirm the literal in `manufacturer.ts` matches the original em-dashes/quotes).
 - `entryExtractionForSignals` deliberately does NOT route known businessTypes through `resolveEngine` (that would collapse manufacturer → thing and drop the 4 scalars) — verify this is the intended asymmetry.
 - `collectionKeysForBusinessType` is added in Phase 1 but not consumed until Phase 3; it is on the Phase 1 Files-touched list.
+
+---
+
+# collections-entry-capture — Phase 2 audit
+
+**Branch:** `feature/collections-entry-capture` (verified `git branch --show-current` before any edit).
+Scope: Phase 2 (route wiring for both entry handlers + exactly-one-AI-call route test). No extraction/registry/serve-gate/config/StructureSlot change.
+
+## Files changed
+- `src/app/api/v2/scrape-website/route.ts`
+- `src/app/api/v2/understand/route.ts`
+- `src/app/api/v2/entryCollections.test.ts` (new)
+- `docs/task/collections-entry-capture.audit.md` (this section appended)
+
+## Per-file changes
+
+### `src/app/api/v2/scrape-website/route.ts` (`handleEntryScrape`)
+- Imports: added `entryUnionEnrichment`, `entryExtractionForSignals`, `type EngineExtraction` from `@/lib/schemas/extraction`.
+- No-businessType branch now extends the schema with `entryUnionEnrichment().fields` and appends `entryUnionEnrichment().prompt`. `entryUnionEnrichment()` is called ONCE (`const union = businessType ? null : entryUnionEnrichment()`) and reused for schema + prompt. Explicit-businessType branch (`explicitExtraction = extractionForBusinessType(businessType)`) is unchanged — same `hasEntryEnrichment`-gated `.extend(entryEnrichmentFields)` / `entryEnrichmentPrompt()`.
+- `toSignals` restructured to take a resolved `foldExtraction: EngineExtraction | null` param (was closing over `extraction`).
+- Post-call: `foldExtraction = explicitExtraction ?? entryExtractionForSignals(data)`; demo path resolves from `MOCK_DATA_ENTRY` (`entryExtractionForSignals(MOCK_DATA_ENTRY)` → agency→trust). Scrape base (`mapEntryScrapeToSignals`) already builds a fresh signals object with NO `collections` field, so foreign union keys never leak here.
+
+### `src/app/api/v2/understand/route.ts` (`handleEntryUnderstand`)
+- Same import + union-once + explicit-branch-unchanged treatment, mirrored for `EntryUnderstandSchema`.
+- Demo path resolves `foldExtraction = explicitExtraction ?? entryExtractionForSignals(ENTRY_DEMO_SIGNALS)` (agency→trust) and folds via that engine.
+- Post-call: `foldExtraction = explicitExtraction ?? entryExtractionForSignals(raw)`.
+- **Deviation (see below): base-collections strip.** `raw` is used as BOTH the enrich data AND the base signals; on the union path `raw.collections` carries ALL 4 keys, and `collectionsFromSignals` (in `buildBriefDraft`) reads every present key — so foreign keys would leak into `facts.collections`. Fixed by destructuring `collections` off the base (`const { collections: _unionCollections, ...baseSignals } = raw`) and folding only the engine's keys back from the raw data. Explicit path is byte-unaffected (raw carries only that engine's keys either way).
+
+### `src/app/api/v2/entryCollections.test.ts` (new)
+Route-level test. Tests the REAL exported `POST` handlers (no pure-helper extraction needed). Mocks: `@/lib/aiClient` (`generateWithSchema` — the one-AI-call spy), `@/lib/scrape/fetchSite` (`scrapeSite` + `ScrapeError`), `@/lib/middleware/planCheck` (`requireAuth`→allowed), `@/lib/creditSystem` (`consumeCredits` + `CREDIT_COSTS`/`UsageEventType` stubs), `@/lib/rateLimit` (pass-through `withAIRateLimit`), `@/lib/mockMode` (`isDemoMode`→false, forces the AI path), `@/lib/security` (`createSecureResponse`→plain `{__body,__status}`). The pure brief/extraction/collections/businessTypes stack runs FOR REAL (that is what derives slugs and drops foreign keys). Schema assertion reads the captured 3rd arg of `generateWithSchema` (`schema.shape.collections.shape` keys).
+Asserts: (a) exactly one `generateWithSchema` call per request (both routes); (b) no-businessType scrape → union 4-key `collections` shape + saas→`products` folded with code-derived slug (`pinenote-tablet`, empty-name entry dropped); (c) saas(thing)+AI `works` → `works` absent; (d) explicit `manufacturer` → engine-only schema (`collections.shape` == `['products']`, no union-only keys) + `products` folded; (e) understand agency(trust) → `services` folds, `products` discarded.
+
+## Decisions / deviations
+- **Tested real handlers**, not extracted pure helpers (plan permitted either). The handlers imported cleanly under vitest with the module mocks above; the one-AI-call assertion rides the `generateWithSchema` mock. No helper extraction, no extra files.
+- **Understand base-collections strip (in-scope, conservative).** Discovered via test (e) failing: the plan's "foreign keys drop naturally in the fold" holds for the scrape route (fresh base) but NOT the understand route, which reuses `raw` as its base and thus carries the full union `collections` into `collectionsFromSignals`. Stripping `collections` off the understand base before the fold is the minimal correct fix, contained to `understand/route.ts` (a Files-touched file). Explicit-businessType behavior is unchanged (verified: raw carries only the engine's keys there, and the engine re-folds them from raw regardless).
+- **Prisma client was stale** at start (tsc flagged `notifiedAt`/`notifyError` in the untouched `forms/submit/route.ts`); `npx prisma generate` refreshed it (a locked-dll EPERM on the final rename did not prevent the client update). Post-regen tsc is clean. No schema/migration change.
+
+## Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 125 passed / 1 skipped files; 1990 passed / 3 skipped tests (Phase-1 baseline 124/1986 + the new file's 4 tests). New `entryCollections.test.ts` green; extraction/classify/collections/serveGate suites still green.
+
+## Reviewer scrutiny points
+- The understand base-collections strip is the one change beyond mechanical wiring — confirm it does not alter the explicit-businessType understand response (argued byte-identical; the engine re-folds its keys from `raw`).
+- One-AI-call assertion is per-request (`vi.clearAllMocks()` in `beforeEach`); each test issues a single request.
+- Slug-derivation and foreign-key-discard are exercised through the REAL `buildBriefDraft`/`setCollections`/`enrichSignals` stack (not mocked), so the tests would catch a regression there too.
