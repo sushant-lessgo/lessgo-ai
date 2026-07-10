@@ -158,3 +158,10 @@ Other assertions in the file remain green on their own logic: the manufacturer t
 ### Open risks
 - Proof-element predicate over-includes all `cases`/`reviews` subfields as proof (see §1) — verify that's acceptable vs. limiting to attribution/quote fields only.
 - Per-element guard adds tokens to every proof-bearing section prompt; negligible but noted.
+
+### Phase 2 addendum — frozen-baseline recapture (scope extension)
+
+- **Scope extension (orchestrator-approved):** `src/modules/audience/product/promptBranch.test.ts` added to Phase 2 Files-touched. Its `COPY_SAAS_BASELINE` is a deliberate-recapture frozen baseline (header: "do not hand-edit — recapture deliberately"); the plan-mandated rule-4 strengthening is exactly the intended prompt change.
+- **Recapture done mechanically:** regenerated `buildProductCopyPrompt(saasCopyInput)` from the actual builder (matching the existing SaaS fixture) and confirmed the current baseline equals the builder output byte-for-byte (both 11783 chars, 0-line diff).
+- **Diff vs pristine (git HEAD) baseline — ONLY the guard text:** exactly ONE line changed (rule 4), +304 chars. Old: `4. NO invented exact numbers, customer names, or dollar figures. Use honest framing for NEEDS_REVIEW fields — the founder verifies before publish.` → New: same + ` For any testimonial/proof content (quotes and attributions): a fictional first-name persona is acceptable, but NEVER attribute a quote to a real or invented company/brand name, and NEVER put a specific metric, percentage, or revenue/ROI figure inside a quote (e.g. "284% ROI for GlowSkin" is forbidden).` No per-element proof-guard text appears in the SaaS prompt (hero/cta carry no proof elements). No other prompt bytes changed → no unintended regression. A one-line header comment noting the rebaseline was also added.
+- **Verification (re-run):** `npx tsc --noEmit` GREEN; `npm run test:run -- src/modules/audience/product/promptBranch.test.ts` GREEN (14 passed); full `npm run test:run` GREEN — **1894 passed / 3 skipped / 0 failed**.
