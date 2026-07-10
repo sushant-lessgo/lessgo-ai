@@ -163,7 +163,7 @@ interface BlockVariantSelectorProps {
   sectionContent: ClampableSection | null | undefined;
   set: SectionBlockSet;
   onClose: () => void;
-  updateSectionLayout: (sectionId: string, layoutId: string) => void;
+  updateSectionLayout: (sectionId: string, layoutId: string, opts?: { skipHistory?: boolean }) => void;
   setSection: (sectionId: string, updates: { elements: Record<string, unknown> }) => void;
   executeUndoableAction: (actionType: any, actionName: string, action: () => void) => void;
 }
@@ -203,8 +203,8 @@ export function BlockVariantSelector({
   const currentCardCount = useMemo(() => sectionCardCount(sectionContent), [sectionContent]);
 
   const applyLayoutOnly = (layoutId: string) => {
-    executeUndoableAction('section-layout-update' as any, `Changed ${sectionType} block to ${layoutId}`, () => {
-      updateSectionLayout(sectionId, layoutId);
+    executeUndoableAction('sectionSwap', `Changed ${sectionType} block to ${layoutId}`, () => {
+      updateSectionLayout(sectionId, layoutId, { skipHistory: true });
     });
     onClose();
   };
@@ -212,8 +212,8 @@ export function BlockVariantSelector({
   const applyWithClamp = (layoutId: string, maxCards: number) => {
     const { content: clamped } = clampSectionCards(sectionContent ?? { elements: {} }, maxCards);
     const clampedElements = (clamped.elements ?? {}) as Record<string, unknown>;
-    executeUndoableAction('section-layout-update' as any, `Changed ${sectionType} block to ${layoutId}`, () => {
-      updateSectionLayout(sectionId, layoutId);
+    executeUndoableAction('sectionSwap', `Changed ${sectionType} block to ${layoutId}`, () => {
+      updateSectionLayout(sectionId, layoutId, { skipHistory: true });
       setSection(sectionId, { elements: clampedElements });
     });
     setPendingClamp(null);

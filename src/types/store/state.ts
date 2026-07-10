@@ -87,7 +87,7 @@ export interface ChangeEvent {
 }
 
 export interface EditHistoryEntry {
-  type: 'content' | 'layout' | 'theme' | 'section' | 'fullContent';
+  type: 'content' | 'layout' | 'theme' | 'section' | 'fullContent' | 'sectionSwap';
   description: string;
   timestamp: number;
   beforeState: any;

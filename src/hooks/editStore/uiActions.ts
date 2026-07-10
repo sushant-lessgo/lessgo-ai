@@ -738,6 +738,17 @@ export function createUIActions(set: any, get: any): UIActions {
             if (snap.sectionLayouts !== undefined) state.sectionLayouts = deepCopy(snap.sectionLayouts);
             if (snap.theme !== undefined) state.theme = deepCopy(snap.theme);
           }
+        } else if (lastAction.type === 'sectionSwap') {
+          // Block-variant swap undo: restore the whole-map snapshot (layout +
+          // elements + elementMetadata + clamped cards all live in these keys).
+          // Mirrors the 'fullContent' branch — deepCopy at restore time is
+          // mandatory (the capture is shallow; only Immer fresh refs make it safe).
+          const snap = lastAction.beforeState;
+          if (snap) {
+            if (snap.content !== undefined) state.content = deepCopy(snap.content);
+            if (snap.sections !== undefined) state.sections = deepCopy(snap.sections);
+            if (snap.sectionLayouts !== undefined) state.sectionLayouts = deepCopy(snap.sectionLayouts);
+          }
         }
 
         state.persistence.isDirty = true;
@@ -816,6 +827,17 @@ export function createUIActions(set: any, get: any): UIActions {
             if (snap.sectionLayouts !== undefined) state.sectionLayouts = deepCopy(snap.sectionLayouts);
             if (snap.theme !== undefined) state.theme = deepCopy(snap.theme);
           }
+        } else if (actionToRedo.type === 'sectionSwap') {
+          // Block-variant swap redo: re-apply the whole-map afterState snapshot
+          // (swapped layout AND clamped elements). Mirrors the 'fullContent' redo
+          // branch — NOT the 'section' branch (which only re-adds/removes and
+          // would not re-clamp). deepCopy at restore time is mandatory.
+          const snap = actionToRedo.afterState;
+          if (snap) {
+            if (snap.content !== undefined) state.content = deepCopy(snap.content);
+            if (snap.sections !== undefined) state.sections = deepCopy(snap.sections);
+            if (snap.sectionLayouts !== undefined) state.sectionLayouts = deepCopy(snap.sectionLayouts);
+          }
         }
 
         state.persistence.isDirty = true;
@@ -856,6 +878,7 @@ export function createUIActions(set: any, get: any): UIActions {
         type: actionType === 'background-system-change' || actionType === 'color-tokens-update' || actionType === 'typography-theme-change' || actionType === 'theme-update' ? 'theme' :
               actionType === 'section-add' || actionType === 'section-delete' ? 'section' :
               actionType === 'section-reorder' ? 'layout' :
+              actionType === 'sectionSwap' ? 'sectionSwap' :
               actionType === 'element-content-update' ? 'content' : 'theme',
         description: actionName,
         timestamp: Date.now(),

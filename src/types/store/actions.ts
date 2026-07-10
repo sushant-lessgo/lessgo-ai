@@ -29,7 +29,7 @@ export interface LayoutActions {
   duplicateSection: (sectionId: string) => string;
   setLayout: (sectionId: string, layout: string) => void;
   setSectionLayouts: (layouts: Record<string, string>) => void;
-  updateSectionLayout: (sectionId: string, newLayout: string) => void;
+  updateSectionLayout: (sectionId: string, newLayout: string, opts?: { skipHistory?: boolean }) => void;
   moveSection: (sectionId: string, direction: 'up' | 'down') => void;
   
   // Theme Management  
