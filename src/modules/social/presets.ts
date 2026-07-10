@@ -45,7 +45,7 @@ export const PLATFORM_PRESETS: Record<Platform, PlatformPreset> = {
       '0-3 relevant hashtags at the very end, only if they add reach; never stuff.',
   },
 
-  // ---- INACTIVE (typed + present; phase 6 flips ACTIVE_PLATFORMS only) ----
+  // ---- Activated in phase 6 by adding them to ACTIVE_PLATFORMS (DATA only) ----
   x: {
     label: 'X',
     maxChars: 280,
@@ -68,7 +68,7 @@ export const PLATFORM_PRESETS: Record<Platform, PlatformPreset> = {
  * The platforms a user may currently select. Phase 6 sets this to
  * `['linkedin','x','facebook']` — DATA change only, no code path added.
  */
-export const ACTIVE_PLATFORMS: Platform[] = ['linkedin'];
+export const ACTIVE_PLATFORMS: Platform[] = ['linkedin', 'x', 'facebook'];
 
 /** True when a platform is currently selectable (preset present AND active). */
 export function isPlatformActive(platform: Platform): boolean {

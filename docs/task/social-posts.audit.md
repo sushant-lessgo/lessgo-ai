@@ -453,3 +453,38 @@ green secondary button, matching the Analytics(purple)/Forms(blue) secondary-but
   BEFORE the generic mapping to render the blocking upgrade card (Free) / quiet inline soft-cap
   message (Pro), reading `data.tier` / `data.remaining`. The panel already surfaces `error` state,
   so phase 7 mainly swaps in a richer component for that one code. No structural change needed.
+
+## Phase 6 — Activate X + Facebook as preset DATA
+
+### Files changed
+- `src/modules/social/presets.ts` — set `ACTIVE_PLATFORMS = ['linkedin','x','facebook']`; refreshed the stale "INACTIVE" section comment. X + Facebook preset rows were already fully typed/filled in phase 3 (kept as-is; they read distinctly).
+- `src/modules/social/postEngine.test.ts` — added per-platform preset tests, closed carried-forward nits (a) and (b).
+- `docs/task/social-posts.audit.md` — this section.
+
+### NOT changed (deliberate — proves the design contract)
+- `src/app/dashboard/social/[token]/components/SocialPostsPanel.tsx` — **ZERO edits.** Picker is `PLATFORM_OPTIONS = ACTIVE_PLATFORMS.map(p => ({ value: p, label: PLATFORM_PRESETS[p].label }))`; no `if (platform === ...)` branch anywhere. Flipping `ACTIVE_PLATFORMS` alone lit up all three platforms in the UI. The `?? 'linkedin'` on the `useState` default is an empty-array fallback, not a hardcoded code path. **The one-engine / presets-as-DATA claim held: no UI or engine code changed.**
+- `src/modules/social/mockPosts.ts` — **not edited.** The generator is already deterministic (no `Math.random`/`Date.now`/`new Date`), includes `ctx.businessName`, and bounds every output by `preset.maxChars` via `clampToLimit` — so X naturally stays well under 280 and each platform is honored by DATA, not by a `platform ===` branch. Adding per-platform branching would have violated the contract; leaving it unedited is the conservative, contract-preserving choice. (Deviation from the literal "edit mockPosts.ts" step — the file was on the touch list as a safety valve; the requirement it targets was already met.)
+
+### The three presets, side by side
+| Platform | maxChars | tone | formatHints | hashtags |
+|----------|----------|------|-------------|----------|
+| linkedin | 1300 | professional-warm, credible, first-person, no corporate jargon or hype | hook line + short paragraphs, blank-line separated, soft reflective close, no markdown | 0-3 at end, only if additive |
+| x | 280 | punchy, conversational, one sharp idea, no filler | single tight thought, no preamble, line breaks only if they sharpen it | 0-1 max; usually none |
+| facebook | 700 | conversational-warm, personable, community-oriented | friendly opening, short blank-line paragraphs, optional question / light CTA at end | 0-2 at most; optional |
+
+Tone, format, and hashtag text are pairwise-distinct on every dimension (asserted, not eyeballed) — a table that only changed the number would fail the new test.
+
+### Facebook maxChars justification (700)
+Chosen 700 — mid of the 500-800 target band. Long enough for a warm multi-paragraph community post with an optional question-CTA; short enough to sit comfortably around Facebook's "See more" fold and not read like a LinkedIn essay. Middle-of-band avoids over-committing to either extreme while X (280) / LinkedIn (1300) bracket it with clear separation.
+
+### Carried-forward nits closed
+- **(a) clampToLimit hard-cut branch:** new test `NIT (a): over-budget input on X exercises clampToLimit hard-cut branch` feeds a 400-char space-free `freshContext` on platform `x` in `archetype_context` mode. The only spaces sit in the fixed prefix (< 70% of the 280 budget), so `lastIndexOf(' ') <= maxChars*0.7` → the `return hard;` hard-cut branch runs. Asserted: `post.length === 280` (clamp ran), `post.endsWith('X')` (mid-token cut, not a word-boundary trim), and `contains 'Acme Robotics'` (brand survives, appears early).
+- **(b) undefined-coercion trap at :107:** replaced `expect(prompt).toContain(ARCHETYPE_INSTRUCTIONS.announcement)` with `expect(prompt).toContain('Write an announcement post:')` (literal opener). **Verified red:** temporarily set `ARCHETYPE_INSTRUCTIONS.announcement = undefined as unknown as string`, ran the `archetype_context ... fresh-context` test in isolation → it FAILED at line 112 (prompt no longer contains the literal). Restored the instruction; full suite green. Also added an independent `archetype instruction text is present verbatim` guard asserting the map value is a non-empty literal that lands in the prompt.
+
+### Verification
+- `npx tsc --noEmit` → exit 0, no new errors.
+- `npm run test:run` → **1785 passed | 3 skipped** (was 1780 / 3; +5 net new tests). Social file: 19 passed.
+- `npm run build` → exit 0, green.
+
+### Open risks
+- None functional. Real-LLM per-platform quality/length spot-check (X ≤ 280 from a live model) is a manual step deferred to the plan's manual verification; mock + validator length paths are covered by tests.
