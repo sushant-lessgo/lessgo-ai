@@ -158,5 +158,21 @@
     "status": "done",
     "confidence": "high",
     "note": "[vetted] engine=work (runner-up place), multi (6), full. in_icp=FALSE — multi-job entertainer (newsletter + fan voting + tour schedule + contact + organizer press kit). Reused event-listings; coined press-kit-downloads + fan-voting. Gaps: repertoire/setlist + gallery no section id."
+  },
+  "golivehq": {
+    "url": "https://www.golivehq.co/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "[vetted] engine=trust (vetting guessed work — 4th reclassification), multi (8), full. Coined product-finder-quiz. Gaps: dual-monetization agency+store hybrid (book-a-call + $299 template checkout) breaks one-action; template shop w/ cart exceeds catalog vocab."
+  },
+  "edisontally": {
+    "url": "https://www.edisontally.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "[vetted] engine=place (runner-up trust), multi (11), full. Reused external-booking-redirect (Resy). Gaps: dining reservation has no dining-native slot; menu-list no place-engine capability; event-venue subsite = second conversion path."
   }
 }

@@ -1,0 +1,67 @@
+{
+  "slug": "edisontally",
+  "url": "https://www.edisontally.com/",
+  "business": { "type_label": "upscale restaurant & event venue", "icp_category": "restaurant/hospitality", "geography_hint": "Tallahassee, Florida, USA" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "A restaurant where the visitor decides by browsing menus, photos, hours, location and ambiance — checking a PLACE. The whole site is menu/heritage/hours/map, which IS the decision.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "Reserve a table (secondary: submit an event/catering inquiry or book a venue tour)",
+    "mechanism": "redirect",
+    "delegated_to": "resy"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 11,
+    "pages": ["home", "menus", "location", "plan-your-visit", "events", "bar", "gift-cards", "bulletin", "telegraph", "heritage", "careers"],
+    "archetype_note": "Classic multipage restaurant/venue: home hero + menus + location/hours + plan-your-visit + catering/events inquiry, with a blog (Telegraph) and dated bulletin. Reservations offloaded to Resy, ordering/gift cards to Toast."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Experience the best in Tallahassee Dining", "component": "text" },
+      { "canonical": "features", "observed_as": "BOLD LOCAL FLAVORS / CRAFTED COCKTAILS", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "DINNER / BRUNCH hours", "component": "text" },
+      { "canonical": "cta", "observed_as": "An Iconic Setting for Your Next Occasion", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "(3 Google review quotes)", "component": "other" },
+      { "canonical": "miscellaneous", "observed_as": "Bulletin (dated events/announcements)", "component": "timeline" },
+      { "canonical": "founderNote", "observed_as": "Heritage (1921 power plant history)", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Meet the Chef", "component": "team" },
+      { "canonical": "miscellaneous", "observed_as": "THE EDISON TELEGRAPH: Essays in Hospitality (blog carousel)", "component": "carousel" },
+      { "canonical": "pricing", "observed_as": "TALLAHASSEE RESTAURANT WEEK ($45 prix fixe)", "component": "pricing-table" },
+      { "canonical": "miscellaneous", "observed_as": "MENUS (brunch/dinner/bar menu-lists + PDFs)", "component": "menu-list" },
+      { "canonical": "miscellaneous", "observed_as": "Hours / contact block (Location)", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Make a Reservation (embedded Google map)", "component": "map" },
+      { "canonical": "useCases", "observed_as": "VISITING WITH A GROUP? / QUICK ACCESS grids", "component": "grid-cards" },
+      { "canonical": "faq", "observed_as": "Your Questions, Answered", "component": "accordion" },
+      { "canonical": "pricing", "observed_as": "Venue spaces (Innovation Hall, Decks, capacities)", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Let's Begin Planning Your Unforgettable Event", "component": "form" },
+      { "canonical": "socialProof", "observed_as": "TRUSTED BY COLLEGIATE ATHLETIC TEAMS (video)", "component": "video" },
+      { "canonical": "footer", "observed_as": "social links / footer", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Bulletin — dated event/announcement feed (Restaurant Week, closures, concerts)", "why_no_fit": "A standing dated announcement/event list is neither an event ticketing schedule nor a blog; sectionList has no dated-notice feed", "closest": "miscellaneous" },
+      { "observed": "SCHEDULE A TOUR — inline Calendly widget", "why_no_fit": "A single-step booking embed isn't a canonical section; behaves as a delegated form", "closest": "leadForm" },
+      { "observed": "Venue-space capacity cards (seated/standing numbers)", "why_no_fit": "Not pricing and not generic features — a venue-capacity spec grid unique to event venues", "closest": "pricing" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "blog", "lead-form", "packages", "video-hero"],
+    "proposed_new": [
+      { "name": "external-booking-redirect", "evidence": "Primary RESERVE A TABLE CTA and the top announcement banner hand off to a third-party reservation engine (Resy: resy.com/cities/tallahassee-fl/venues/the-edison); no on-site scheduling for dining reservations." }
+    ]
+  },
+  "proof_types": ["testimonials", "reviews"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["menu-list", "hours block", "venue-capacity cards", "team grid", "multi-field event-inquiry form", "map embed", "review-quote strip", "blog carousel", "prix-fixe pricing table", "dated bulletin/announcement list"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality=full; 5 pages captured in detail with CTAs, forms, embeds and proof enumerated. Restaurant place-engine read is unambiguous." },
+  "gap_findings": [
+    "Restaurant reservation redirect to Resy/Toast is a hospitality analogue of the appointment external-booking-redirect family — vocab has no dining-reservation notion.",
+    "'menu-list' (multi-menu with PDF links + hours per service) has no capability/section representation for the place engine.",
+    "Event-venue subsite (capacity-spec cards + service-style/bar-package inquiry form + Calendly tour) is a second conversion path grafted onto a place site — packages+lead-form only partly express it.",
+    "'Bulletin' dated-announcement feed and a blog (Telegraph) coexist; sectionList collapses both into miscellaneous."
+  ]
+}
