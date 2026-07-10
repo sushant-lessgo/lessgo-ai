@@ -9,7 +9,7 @@ Clone the social-posts pattern (prompt engine → generation route → copy-bloc
 
 ## Progress log
 
-- phase 1 schema + shared plumbing: pending
+- phase 1 schema + shared plumbing: done (commit 9a39b1f0, review loops 0 — trivial additive, tsc+1785 tests+migration green) | base=feature/social-posts (drift resolution); worktree has isolated node_modules
 - phase 2 archetype map + prompt engine (Show-up): pending
 - phase 3 API routes + kill-switch: pending
 - phase 4 dashboard UI + nav: pending

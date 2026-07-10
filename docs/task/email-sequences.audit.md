@@ -59,3 +59,42 @@ model EmailSequence {
 ### Open risks
 - Pre-existing unrelated tsc errors persist on the branch (missing `founder.jpg` asset; `socialPost` Prisma-client property absent until `prisma generate` runs) — none introduced here.
 - Schema left edited but unmigrated by design — dev/prod DB is out of sync with schema until the orchestrator runs the migration.
+
+## Phase 2 — Archetype map + prompt engine (Show-up only) + tests
+
+**Files changed** (all new)
+- `src/modules/email/archetypes.ts`
+- `src/modules/email/brandContext.ts`
+- `src/modules/email/sequenceEngine.ts`
+- `src/modules/email/archetypes.test.ts`
+- `src/modules/email/sequenceEngine.test.ts`
+
+### `src/modules/email/archetypes.ts`
+- Pure data module (no AI/Prisma/next/'use client' imports). Types: `EmailArchetypeId` (union of all 6 planned archetype ids for forward-compat; only `show-up` has a live def this phase), `EmailDef { key, purpose, timingLabel, promptInstructions }`, `SequenceDef { archetype, emails }`, `SequencePlan` (3-state union).
+- `SHOW_UP_SEQUENCE`: 4 emails — confirm+agenda ("Send immediately after booking") → proof ("Send 2 days before") → 24h reminder ("Send 24h before") → 1h reminder ("Send 1h before"). Timing labels are static metadata (decision #2).
+- Exhaustiveness enforced by a `const INTENT_PLAN: Record<GoalIntent, SequencePlan>` literal — the compiler rejects the file if any of the 18 frozen intents is missing. `getSequencePlanForIntent(intent)` is a pure lookup into it. 4 show-up → available; 5 no-email → skipped; remaining 9 (enquiry, request-quote, apply, lead-magnet, waitlist, subscribe-newsletter, enroll, signup-free, free-trial) → deferred.
+
+### `src/modules/email/brandContext.ts`
+- Pure defensive extractor (decision #7). `buildBrandContext(brief)` narrows `brief.facts.entry.{offer, offerings, audiences, testimonials}` + top-level `brief.proofAvailable` with `asRecord`/`str`/`strArray` helpers — never throws on missing/malformed input (tested against undefined/null/{}/`facts:'nope'`/`entry:5`). Returns `EmailBrandContext { offer?, offerings, audiences, testimonials, proofAvailable }` (array fields always arrays). `summarizeBrandContext(ctx)` → compact prompt block with a non-empty safe fallback; `hasTestimonials(ctx)` helper.
+- Wrote NEW narrowing rather than importing `getEntryFacts` from classify.ts — keeps this module self-contained and maximally defensive (classify's reader assumes a well-formed object shape).
+
+### `src/modules/email/sequenceEngine.ts`
+- Pure module. `buildSequencePrompt({def, brandContext, intent})` and `buildSingleEmailPrompt({def, position, siblings, brandContext})` — both inject `summarizeBrandContext` + `PROOF_TRUTH_FRAGMENT` (paraphrased from copyPrompt.ts, NOT imported) + a testimonial-availability note; JSON-only output instruction (array for sequence, object for single).
+- **Caps split OUT of the generateRawJson schemas (decision #10):** `sequenceOutputSchema(def)` = `z.array({subject,body}).length(def.emails.length)` and `SingleEmailOutputSchema` = `{subject,body}` — SHAPE ONLY (fields/types/length), NO subject/body max-char constraints. Length caps (`SUBJECT_MAX_CHARS=120`, `BODY_MAX_CHARS=2000`) live ONLY in `validateSequence()`/`validateSingleEmail()`, which return the `ok | invalid_shape | too_long` discriminated union (keyed on `status`). This keeps `too_long` distinguishable from `invalid_shape` for the phase-3 retry/trim contract.
+- `mockSequenceOutput(def)` / `mockSingleEmailOutput()` for mock/demo — both pass their own schema + validator.
+
+### Tests
+- `archetypes.test.ts` (7 tests): all 18 intents resolve to a known status; 3-bucket partition covers the frozen vocabulary exactly; 4 show-up → available with 4-email defs, each email has non-empty static timingLabel/key/purpose/promptInstructions; last two carry "Send 24h before"/"Send 1h before"; 5 skip → skipped; 9 deferred incl. explicit signup-free/free-trial.
+- `sequenceEngine.test.ts` (15 tests): brandContext extraction + never-throws on malformed; sequence prompt contains brand facts + proof-truth fragment + JSON instruction + intent + each email purpose/timingLabel; single-email prompt references target position ("email 2 of 4") + sibling copy + proof fragment; validate ok/invalid_shape(length mismatch + missing field)/too_long; **over-cap payload PASSES `sequenceOutputSchema`/`SingleEmailOutputSchema` but fails validator as too_long** (guards decision #10); mocks pass their own schema + validator.
+
+### Verification
+- `npx tsc --noEmit`: fully GREEN (0 errors — the prior founder.jpg/next-env issue is fixed in this worktree).
+- `npm run test:run`: GREEN — **1807 passed | 3 skipped** (was 1785; +22 new email tests). Email module isolated run: 2 files, 22 passed.
+
+### Deviations
+- `EmailArchetypeId` enumerates all 6 planned archetype ids (not just `show-up`) — forward-compat for phase 6, zero runtime effect (conservative, in-scope).
+- `sequenceOutputSchema` is exported as a factory `(def) => schema` (the array length is def-dependent) rather than a bare const; `SingleEmailOutputSchema` is a const. Both remain cap-free per decision #10.
+- Added a `hasTestimonials` helper in brandContext.ts (small, in-scope) used by both prompt builders.
+
+### Open risks
+- None specific to phase 2. Prompt copy quality is validated at the phase-5 human gate; wording tweaks land in these same two engine files.
