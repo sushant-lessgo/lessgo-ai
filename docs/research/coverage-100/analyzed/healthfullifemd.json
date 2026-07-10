@@ -1,0 +1,51 @@
+{
+  "slug": "healthfullifemd",
+  "url": "https://healthfullifemd.com/",
+  "business": { "type_label": "medical weight-loss clinic (physician-led)", "icp_category": "health/medical practice", "geography_hint": "Golden, Colorado, USA" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Visitor is deciding whether to trust a board-certified physician and her interdisciplinary practice with a long-term medical program; the page sells defined medical expertise, credentials, process and patient testimonials, which is the first rung of the ladder.",
+    "runner_up": "thing"
+  },
+  "goal": {
+    "one_action": "book a free consultation with Dr. Abby (or otherwise contact the clinic)",
+    "mechanism": "form",
+    "delegated_to": "calendly"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 9,
+    "pages": ["home", "programs", "about", "contact", "reviews-1", "team", "financial-policy", "blog", "physician-partners"],
+    "archetype_note": "Squarespace multi-page trust/lead-gen site for a medical practice: approach + program detail + testimonials + contact/booking. /cart plugin present but no commerce in use."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (Our Approach, Programs, Testimonials, Contact...)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "Freedom to live the life you want.", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "A Different Approach to Weight Loss", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "carousel of 8 patient photo testimonials", "component": "carousel" },
+      { "canonical": "cta", "observed_as": "Ready to start your journey back to living a life you love?", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "Our Customized Program (3 phases)", "component": "text" },
+      { "canonical": "features", "observed_as": "Our Online Support Group", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Dr. Abby Bleistein bio", "component": "team" },
+      { "canonical": "results", "observed_as": "patient outcomes: energy, vitality, activity, emotional well-being", "component": "text" },
+      { "canonical": "useCases", "observed_as": "client base: older adults, younger adults, injury recovery", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Contact Us form (First/Last Name, Email, Subject, Message)", "component": "form" },
+      { "canonical": "footer", "observed_as": "Contact Us! address/phone/fax/email", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "embedded Google Map on contact page", "why_no_fit": "map is a component within map-hours capability; no canonical section id for a standalone location map", "closest": "footer" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "lead-form", "blog"],
+    "proposed_new": []
+  },
+  "proof_types": ["testimonials", "certs", "case-studies"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["testimonial-carousel", "team-bio", "contact-form", "embedded-map", "calendly-embed", "success-story-cards"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "Rendered fetch confirmed the contact form and map that static missed; nav, CTAs, embeds and proof all captured clearly." },
+  "gap_findings": ["Site mixes multiple conversion mechanisms for one goal (Calendly booking embed + contact form + mailto CTAs) — no single clean mechanism; taxonomy forces one pick.", "A standalone embedded location map has no canonical section id (only the map-hours capability), so it lands in unmapped."]
+}

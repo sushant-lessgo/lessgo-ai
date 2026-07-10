@@ -1,0 +1,58 @@
+{
+  "slug": "moonrakerhotel",
+  "url": "https://moonrakerhotel.com/",
+  "business": { "type_label": "hotel / wedding & events venue", "icp_category": "place", "geography_hint": "Bradford on Avon, Wiltshire, UK" },
+  "in_icp": false,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking out a physical venue — rooms, dining, wedding spaces, history, location/parking — where photos, directions and the feel of the place ARE the decision. No single defined-expertise pitch or portfolio spine.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "book a stay / enquire about a wedding or event (multiple parallel conversion paths)",
+    "mechanism": "redirect",
+    "delegated_to": "book-secure.com (Little Hotelier), resdiary, calendly, plus on-site enquiry forms"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 9,
+    "pages": ["home", "about", "accommodation", "dining", "offers", "weddings", "celebrations", "meetings", "contact"],
+    "archetype_note": "Multi-facet hospitality venue site: one landing per revenue stream (stay/dine/weddings/celebrations/meetings), each teeing into an external booking engine or an enquiry form."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Welcome to The Moonraker", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Wedding Open Day (Sunday 26th July) promo banner", "component": "calendly-embed" },
+      { "canonical": "useCases", "observed_as": "Stay / Dine / Celebrate / Meetings at The Moonraker teasers", "component": "text" },
+      { "canonical": "features", "observed_as": "22 Unique Rooms to Choose From (room types)", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Charming Ceremonies / Wedding Breakfasts / Bridal Suite (wedding facilities)", "component": "text" },
+      { "canonical": "pricing", "observed_as": "2027 Midweek & 2026 Remaining Dates Wedding Offers (£5,950)", "component": "pricing-table" },
+      { "canonical": "testimonials", "observed_as": "Guest Testimonials", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "The History of The Moonraker (Domesday estate to Moonraker)", "component": "text" },
+      { "canonical": "cta", "observed_as": "BOOK A STAY / CHECK AVAILABILITY", "component": "external-link" },
+      { "canonical": "leadForm", "observed_as": "Enquire About Booking / Tell Us About Your Plans / BOOK A TOUR", "component": "form" },
+      { "canonical": "miscellaneous", "observed_as": "How to Find Us (address, parking, train stations)", "component": "text" },
+      { "canonical": "followStrip", "observed_as": "Facebook / Instagram links", "component": "social" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "packages", "lead-form"],
+    "proposed_new": [
+      { "name": "external-booking-redirect", "evidence": "Every primary booking CTA hands off to a third-party engine — BOOK A STAY / CHECK AVAILABILITY to book-secure.com (Little Hotelier), BOOK A TABLE to resdiary.com, BOOK HERE to Calendly; no on-site scheduling/inventory." }
+    ]
+  },
+  "proof_types": ["testimonials"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["room-type grid", "pricing-table (wedding packages)", "promo/event banner", "map-directions block", "enquiry form"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "high",
+    "why": "fetch_quality=full, 6 pages crawled with sections, CTAs, embeds and pricing captured; only form field lists are approximate (noted in oddities), which does not affect classification."
+  },
+  "gap_findings": [
+    "Multi-conversion hospitality venue: one site simultaneously drives room bookings (Little Hotelier redirect), table reservations (resdiary redirect), event-open-day (Calendly), and wedding/enquiry forms — the single-one-action ICP frame cannot express a venue with parallel revenue streams each with its own conversion mechanism.",
+    "Room-type grid with per-type 'Check Availability' handoff to an external hotel booking engine is not representable by current capability vocab except via the proposed external-booking-redirect.",
+    "A repeated cross-page dated promo/event banner (Wedding Open Day) is a recurring section pattern with no canonical section id (mapped to miscellaneous)."
+  ]
+}

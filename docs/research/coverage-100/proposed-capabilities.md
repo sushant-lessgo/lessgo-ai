@@ -27,6 +27,11 @@ This registry is APPEND-ONLY and maintained by the orchestrator between sites.
 | `blog-teaser` | A small section showing N featured/recent post previews that link into the blog | not `content-index` (full browsable grid), not `blog` itself | runnersconnect |
 | `affiliate-hub` | A page/grid of curated OUTBOUND affiliate/referral links (Amazon, SEMrush) with no cart or prices — monetization by referral | not `catalog` (own products, may have cart), not `store-badges` | greenhealthycooking, epiclaunch, olyvia |
 | `works-catalog` | A catalogue of the creator's OWN works as the site's spine (author bibliography, discography) with per-work subpages; buying is usually an off-site redirect | not `catalog` (generic product catalog), not `gallery/portfolio` (visual proof, not a purchasable list) | contractseries |
+| `event-listings` | A dated schedule of events/shows/sessions, each typically redirecting to an external ticketing page | not `catalog` (goods), not `booking-*` (per-event ticket redirect, not a scheduling flow) | fondatheatre, louisiana-ontour |
+| `press-kit-downloads` | A downloadable press/media kit (photos, riders, logos, bio) for organizers/press — a B2B secondary audience | not `lead-form`, not `catalog`; asset download, not a purchase or inquiry | louisiana-ontour |
+| `fan-voting` | An engagement widget where visitors vote/interact (fan votes, polls) — not a conversion, an engagement loop | not `lead-form` (no capture), not `followStrip` | louisiana-ontour |
+| `practitioner-profiles` | Per-person (or per-location) profile subpages for a multi-practitioner/multi-branch business — each staff member/branch gets its own bio/detail page | not `testimonials`/team grid (a single section), not `gallery/portfolio` (work, not people) | lightcrew |
+| `membership-checkout` | On-site recurring membership/subscription purchase — plan/tier configurator + cart/checkout for an ongoing plan | not `packages` (static price display), not `pricing` (a section); this transacts a recurring plan | beanstalkhq |
 
 ## Booking family note
 `booking-wizard` / `external-booking-redirect` / `booking-portal` are three

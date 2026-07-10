@@ -1,0 +1,55 @@
+{
+  "slug": "beanstalkhq",
+  "url": "https://www.beanstalkhq.com/",
+  "business": { "type_label": "family-friendly coworking + supervised playspace + cafe (physical venue)", "icp_category": "hospitality/venue", "geography_hint": "Wexford, PA, USA" },
+  "in_icp": false,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking out a physical venue — 36 gallery photos across playspace/cafe/events, hours of operation, map embed, and services describe a place you visit. Browsing the space and its amenities IS the decision.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "book a facility tour (or reserve a pass/membership)",
+    "mechanism": "form",
+    "delegated_to": "calendly"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 15,
+    "pages": ["home", "passes-and-memberships", "contact", "about-1 (Vision)", "coworking", "gallery", "supervised-playspace", "cafe", "events-and-rentals", "academic-programs", "wellness", "birthday-parties", "summer-camps", "free-trial"],
+    "archetype_note": "Multi-page local venue site with a membership/pass commerce layer (cart+checkout), tiered pricing tables, a membership builder configurator, and a Calendly tour-booking embed — more than one conversion action, so out of ICP."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "WHERE PARENTHOOD MEETS PRODUCTIVITY!", "component": "text" },
+      { "canonical": "features", "observed_as": "Our Services", "component": "grid-cards" },
+      { "canonical": "howItWorks", "observed_as": "How It Works", "component": "timeline" },
+      { "canonical": "features", "observed_as": "How Beanstalk Empowers You", "component": "grid-cards" },
+      { "canonical": "testimonials", "observed_as": "Parent Reviews", "component": "text" },
+      { "canonical": "cta", "observed_as": "Ready to reclaim your focus time?", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Drop-In Play / Consistent Care: Monthly Plans", "component": "pricing-table" },
+      { "canonical": "leadForm", "observed_as": "Pick Your Days (Calendly)", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "About Us: Our Story & Vision / Our Philosophy", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Get in touch / HOURS OF OPERATION", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Membership Builder", "why_no_fit": "An interactive tool to configure a custom membership plan (select visits/add-ons) that feeds into checkout — not a static pricing or features section", "closest": "pricing" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "packages", "lead-form"],
+    "proposed_new": [
+      { "name": "membership-checkout", "evidence": "Squarespace /cart present; tiered monthly membership plans (5/10/15/20 visits + unlimited) with sibling/coworking add-on pricing and a 'Membership Builder' configurator that leads to an on-site purchase — recurring-membership commerce beyond static 'packages' display" }
+    ]
+  },
+  "proof_types": ["testimonials", "reviews", "portfolio"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["pricing-table", "membership tier comparison table", "photo gallery grid", "step timeline", "service card grid", "hours-of-operation block", "map embed"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "Task notes fetch is partial — the Calendly tour-booking form fields sit inside a cross-origin iframe and are not enumerable; commerce/cart flow behind Membership Builder also not fully captured. Structure and engine are clear regardless." },
+  "gap_findings": [
+    "Recurring membership/subscription commerce (tiered plans + add-ons + cart checkout) has no representation in the closed vocab — 'packages' only displays plans, it cannot express on-site purchase/checkout (proposed membership-checkout).",
+    "Interactive plan configurator (Membership Builder) — a build-your-own-plan tool distinct from a static pricing table.",
+    "Multi-goal venue: tour (Calendly), pass purchase (cart), newsletter (lead-form), contact — the single-one-action model can't cleanly express a venue whose CTAs span booking + commerce + subscribe."
+  ]
+}
