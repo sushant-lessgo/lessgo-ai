@@ -315,3 +315,35 @@ Shared pure helper `testimonialCountHint(importedCount, userCount)` in BOTH modu
 - trust.ts hint is DORMANT (see asymmetry above) — the count reaches the service UIBlock choice only after a future `assembleServiceStrategy` forward. If the reviewer prefers no inert payload key, the alternative is type+helper only; the emit was chosen as the honest symmetric seam.
 - Resumed multipage drafts: the fan-out reads `input.proof?.testimonialCount` from the reconstructed input; a fully-resumed draft may not carry it, in which case the scraped count on `ob` still applies and the user count simply falls back to no-hint (conservative, matches prior behavior).
 - Not run: `npm run build` / e2e (not in the phase verification list).
+
+## Phase 6 — scalePlan §8 law amendment (docs-only)
+
+**Files changed**
+- `docs/tracks/scalePlan.md` (modified)
+- `docs/tracks/testimonialSystem.md` (modified)
+
+### scalePlan.md §8 hard-rule sentence
+
+BEFORE (final clause of the "Waterfall per field" paragraph, ~line 323):
+> Hard rule (existing practice, now law): **proof is scraped verbatim or user-given, NEVER generated; missing proof drops the section.**
+
+AFTER:
+> Amended law (proof-truth, 2026-07-10): **proof may be AI-drafted (thing/trust — the engines whose copy routes draft proof) but is ALWAYS flagged needs-review and never enters the real-proof library (the `Testimonial` table); real proof always wins over drafted. Work-engine `praise` stays manual-fill — the AI never drafts it.** See `docs/task/proof-truth.spec.md`.
+
+The waterfall + ASK sentences preceding the hard rule are untouched; only the final
+hard-rule sentence was replaced, verbatim per plan line ~204.
+
+### testimonialSystem.md note
+
+Added a new short section at the END of the doc (after Phase 4b's "Remaining"
+paragraph): `## proof-truth (2026-07-10): confirm-time auto-import + regen injection LIVE`
+— records confirm-time auto-import (`source:'imported'`, `status:'approved'`, at
+`/api/brief/confirm`, project-scoped) + table-backed section-regen injection now live;
+`Testimonial` table = single source of real proof; AI-drafted quotes flagged needs-review,
+never enter the table. Placed here (not in §3 Data Model) because the doc records
+as-built/live status in dated trailing sections, matching that structure.
+
+### Discrepancy
+
+None. The plan's quoted §8 text (line 201) matched the actual file (line 323) exactly,
+including bold/formatting. Replacement applied verbatim.

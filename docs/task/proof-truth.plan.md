@@ -27,7 +27,7 @@ Why this wins: content values stay plain strings → **zero published-path risk,
 - phase 2 prompt guard + fillMode audit + sentinel hardening: done (commit 014bb06b, review loops 1; scope +promptBranch.test.ts baseline recapture)
 - phase 3 confirm-time auto-import + table-backed regen injection: done (commit dcc3ce21, review loops 1; HUMAN GATE cleared — user OK'd dark-write; deviation: userId=clerkId fixes latent plan bug)
 - phase 4 provenance metadata + marker suppression: done (commit d419c01e, review loops 1; regen-client-read gap deferred Q4/Q6, editor-cosmetic post-un-dark only)
-- phase 5 T2 count signal: pending
+- phase 5 T2 count signal: done (commit 614267ec, review loops 1; trust.ts seam dormant/documented — follow-up to wire service-strategy forwarding)
 - phase 6 scalePlan §8 law amendment: pending
 - phase 7 fix-path CTA (rides TESTIMONIALS_ENABLED): pending
 - phase 8 live real-LLM verification (human gate): pending
