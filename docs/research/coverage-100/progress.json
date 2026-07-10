@@ -38,5 +38,21 @@
     "status": "done",
     "confidence": "high",
     "note": "engine=work (runner-up quick-yes), multi (5). in_icp=FALSE — personal content blog, not one-conversion. Gaps: proposed_new content-feed, affiliate-list; category/taxonomy nav has no canonical section."
+  },
+  "runnersconnect": {
+    "url": "https://runnersconnect.net/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=thing (runner-up trust), multi (5 of 25). First 'thing' engine — productized coaching subscription w/ tiered pricing. Multi-goal (free email magnet vs paid sub vs contact) strains one_action. Gaps: proposed_new external email-capture popup (monstercampaigns), blog-teaser; interactive goal-selector toggle no canonical fit."
+  },
+  "petsittersireland": {
+    "url": "https://www.petsittersireland.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=trust (runner-up thing), multi (5 of ~20). Real booking conversion sits in a login-gated portal invisible to crawl. Gaps: proposed_new booking-portal (login-gated stateful booking — distinct from booking-wizard + external-booking-redirect); awards-streak authority proof; no canonical office-hours/contact section; multi parallel conversions."
   }
 }

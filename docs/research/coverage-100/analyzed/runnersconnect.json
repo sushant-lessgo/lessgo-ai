@@ -1,0 +1,72 @@
+{
+  "slug": "runnersconnect",
+  "url": "https://runnersconnect.net/",
+  "business": { "type_label": "online running-coaching & training-plan membership", "icp_category": "fitness coaching / subscription program", "geography_hint": "global (English, US-oriented)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "Though coaching is expertise, it is sold as a productized subscription membership: tiered pricing, 'what's included' feature accordions, courses/tools, and 'improve 8-10%' proof-it-works stats. The visitor evaluates the PROGRAM as a thing, not a specific person/firm to hire.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "sign up for the free insider membership / free course (email capture); secondary = subscribe to a paid training plan",
+    "mechanism": "subscribe-follow",
+    "delegated_to": "monstercampaigns"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 5,
+    "pages": ["home", "training-plans", "pricing", "story", "contact"],
+    "archetype_note": "Content-marketing membership funnel: free-signup magnet up top, deep program/feature/pricing argument, blog + community. 25 pages visible in nav; 5 captured."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Want to Learn How to Stay Healthy Eat Right Run Faster", "component": "text" },
+      { "canonical": "results", "observed_as": "About RunnersConnect (867 runners... personal bests stats)", "component": "stats" },
+      { "canonical": "features", "observed_as": "Free Membership Offer", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Community Description", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "Testimonials (6 named runners)", "component": "grid-cards" },
+      { "canonical": "uniqueMechanism", "observed_as": "What Makes Us Different", "component": "stats" },
+      { "canonical": "hero", "observed_as": "We Help You Become The Best Runner You Can Be", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Help Me... (Train for a Race vs Health & Fitness toggle)", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Train for a Race / Health & Fitness benefit lists", "component": "text" },
+      { "canonical": "results", "observed_as": "Our Plans Can Help You Improve by 8-10%", "component": "stats" },
+      { "canonical": "founderNote", "observed_as": "Hi, we're the team at RunnersConnect", "component": "text" },
+      { "canonical": "features", "observed_as": "Here's a Look At Everything Included (6 accordions: schedule, injury, nutrition, strength, coaches, adjustments)", "component": "accordion" },
+      { "canonical": "testimonials", "observed_as": "Don't Take Our Word for It (6 case-study profiles)", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "Ready To Achieve Your Goals?", "component": "text" },
+      { "canonical": "objectionHandling", "observed_as": "Still Undecided? (6 differentiators)", "component": "text" },
+      { "canonical": "hero", "observed_as": "We Help You Achieve Your Goals (pricing hero)", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Monthly Ongoing Plans ($29/$99/$169)", "component": "pricing-table" },
+      { "canonical": "pricing", "observed_as": "One-Time Plans (race-specific $7.25/wk, bootcamps $69)", "component": "pricing-table" },
+      { "canonical": "hero", "observed_as": "That's us. Your team of expert coaches... (story hero)", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Our Philosophy", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Our Story (founded 2011 history)", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "How Can We Help? (contact form)", "component": "form" }
+    ],
+    "unmapped": [
+      { "observed": "Award-Winning Blog (3 featured article previews on home)", "why_no_fit": "No canonical section for a latest-posts / blog-teaser grid; it is neither testimonials nor generic content", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "packages", "lead-form", "blog"],
+    "proposed_new": [
+      { "name": "email-capture-popup / external-list-signup", "evidence": "All primary 'Get Started Free' + newsletter CTAs route off-site to app.monstercampaigns.com rather than an on-site lead-form; a subscribe-follow magnet delegated to a third-party list-builder isn't expressible by the on-site lead-form capability" },
+      { "name": "blog-teaser", "evidence": "Home 'Award-Winning Blog' shows 3 featured post previews linking into the blog; distinct from the blog capability (which is the post index itself)" }
+    ]
+  },
+  "proof_types": ["testimonials", "case-studies", "stats"],
+  "design_style": { "pick": null, "none_fits_because": "design_hints empty (no fonts, colors, or light/dark captured); cannot responsibly assign one of the 6 styles from structure alone." },
+  "components_needed": ["pricing-table", "feature-accordion", "testimonial-card-grid", "stats-counter", "goal-selector toggle cards", "blog-teaser grid"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "medium",
+    "why": "Full 5-page capture with verbatim pricing, but the site is multi-goal (free-membership email capture vs paid-subscription purchase vs contact), making the single one_action a judgment call; and no design hints were captured, forcing design_style null."
+  },
+  "gap_findings": [
+    "Multi-goal membership funnel strains the 'one conversion action' ICP: free email-capture magnet + paid tiered subscription + contact form coexist as co-equal goals.",
+    "Primary subscribe-follow CTAs delegate to an external list-builder (monstercampaigns) popup, not an on-site form — no capability expresses 'off-site email-capture magnet'.",
+    "No canonical section id for a blog-teaser / featured-posts grid on a marketing page (mapped to miscellaneous as least-bad fit).",
+    "'Help Me...' interactive goal-selector toggle (race vs health) that branches the page argument has no canonical section; mapped to useCases."
+  ]
+}
