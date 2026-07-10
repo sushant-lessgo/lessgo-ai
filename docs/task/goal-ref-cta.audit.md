@@ -785,3 +785,163 @@ importers) is untouched. Per D-B, edit blocks compute no href, so `normalizeCtas
 an href exists in both worlds. **Live block↔block parity remains the phase-6 human gate.**
 
 Dead code (`ctaHandler.ts`, `FormConnectedButton.tsx`) neither wired nor deleted, per D-B.
+
+---
+
+## Phase 5 — M2–M5 resolution matrix + cross-template allowlist coverage
+
+### Files changed
+- `src/modules/goals/goalToDestination.test.ts` — added a phase-5 closed M1–M5 resolution matrix describe block.
+- `src/modules/goals/stampGoalRefCtas.test.ts` — added (a) an end-to-end M3-through-`normalizeCtas` block (spec criterion 4) and (b) a service-shape stamping block.
+
+**No production code changed.** Every mechanism branch in `goalToDestination` was audited and found
+already correct; the allowlist already covers every in-scope template. Phase 5 is test + audit only,
+exactly as the plan's framing predicted ("Expect few or no production edits").
+
+### Step 1 — mechanism resolution matrix audit (M2–M5): all branches ALREADY CORRECT
+
+`goalToDestination` reads `goal.destination` (the resolver input the wizard COMPOSES from `goal.param`
+per `brief.schema.ts:36-38`), not `param` directly — the param→destination composition
+(`legacyGoalToBriefGoal`) is already covered by the "composed destinations" round-trip block. Audited
+each branch against the composed shapes:
+
+| Mech | Input | Resolves to | Param-less arm | Verdict |
+|---|---|---|---|---|
+| M1 | on-site form | `{kind:'section', anchor:'form-section'}` (+`formId`); cross-page → `{kind:'page', pathSlug}` | n/a (no external param) — working default anchor always resolves | already correct |
+| M2 | `wa.me` / `tel:` / `mailto:` | `{kind:'whatsapp'|'call'|'email'}` via shim; wa.me enriched with `param.message` when no inline `?text=` (`goalToDestination.ts:128`) | missing dest → `null` (D-C) | already correct |
+| M3 | external url | `{kind:'external', url}` (first entry of array) | missing url → `null` | already correct |
+| M4 | social/newsletter link | `{kind:'social', platform, url}` via `inferPlatform`, else `{kind:'external'}` fallback | missing links → `null` | already correct |
+| M5 | `#anchor` / bare name | `{kind:'section', anchor}` (leading `#` stripped) | missing dest → `undefined` (wayfinding fallback, not `null`) | already correct |
+
+whatsappPrefill interplay (task step 1): the `msg` field is handled two ways and both are already
+tested — an inline `?text=` in the wa.me URL wins (`does NOT override an inline ?text= msg`), and a
+plain wa.me + `param.message` gets enriched (`attaches param.message`). No gap.
+
+New test: a compact `phase 5 — closed per-mechanism resolution matrix` block in `goalToDestination.test.ts`
+asserting the destination KIND for each of M1–M5 plus the two degradation arms (param-less M2/M3/M4 →
+`null`; missing-dest M5 → `undefined`; M1 always resolves) in one readable table. This is a regression
+lock, not new behavior.
+
+### Step 2 — spec acceptance criterion 4 end-to-end (through `normalizeCtas`)
+
+Added `phase 5 — M3 resolves through normalizeCtas` in `stampGoalRefCtas.test.ts`. Content is stamped by
+the REAL `stampGoalRefCtas` (never hand-authored `dest:'GOAL_REF'`), then run through the real
+`normalizeCtas` + `resolveCtaHref` — the only layer where an href exists. Uses a vestria-shaped hero
+(`cta_text` label + flat `cta_href` default `#contact`) so the phase-3.5 flat-href bridge is exercised too.
+
+- **M3 with `param.url`:** `buttonConfig` down-converts to `{type:'link', url:'https://store.example/product'}`;
+  `resolveCtaHref` → that URL; the bridged flat `cta_href` is overwritten from `#contact` to the URL.
+- **Param-less M3 (inert arm):** `buttonConfig` = `{type:'link', url:'#'}`; **the bridge writes `'#'`
+  into the flat `cta_href`, NOT an empty string.** Verified by tracing `'#'` →
+  `classifyString('#')` → `{kind:'section', anchor:''}` → `resolveDestination` → `'#'`, which is a
+  known schema default so `existing !== resolvedHref` fires and writes `'#'`. Asserted `=== '#'` and
+  `!== ''` — a bridged empty href would be the defect the criterion guards against. So the inert case
+  writes `'#'` (does NOT leave the `#contact` default); this is correct (inert no-op, never a broken
+  or empty href).
+
+### Step 3 — cross-template allowlist coverage (per-template table). NO FINDING; no widening.
+
+Grepped every in-scope template's hero/header/cta `.published.tsx` (and vestria's `.core.tsx`) primary
+CTA element key. Every in-scope template's primary is `cta_text` — the sole allowlisted key. The
+guard test (`ctaKeyAllowlist.test.ts`, from phase 1) enforces this mechanically and stays green.
+
+| Template | hero | header | cta | primary key | wiring |
+|---|---|---|---|---|---|
+| meridian | TerminalHero / EditorialPhotoHero | MeridianNavHeader | ArcCTA | `cta_text` | buttonConfig (resolveCtaHref) |
+| techpremium | TechPremiumHero | TechPremiumNav | TechPremiumCTA | `cta_text` | buttonConfig; header also flat `cta_href` (phase-3.5 precedence fix + bridge) |
+| hearth | PetalFramedHero | WarmNavHeader | BookCallCTA | `cta_text` | buttonConfig |
+| lex | ProspectusHero | LetterheadNav | EngravedInvitationCTA | `cta_text` | buttonConfig |
+| surge | PetalFramedHero | WarmNavHeader | BookCallCTA | `cta_text` | buttonConfig |
+| lumen | LumenHero | LumenNav | (no cta-section block) | `cta_text` | buttonConfig |
+| vestria | VestriaTailoredHero / VestriaFullBleedHero | VestriaNavHeader | (template-shipped contact form) | `cta_text` (label) + flat `cta_href` | phase-3.5 flat-href bridge |
+| granth | GranthHero | — | — | `cta_label` (NOT `cta_text`) | flat `cta_href` — **OUT OF SCOPE (orchestrator-descoped in phase 3.5)** |
+
+No in-scope template uses a non-`cta_text` primary → the allowlist stays `['cta_text']`;
+`stampGoalRefCtas.ts` and the guard test were NOT modified. granth's `cta_label` is the only divergence
+and is already a ratified descope (writer track, no acceptance repro), so it is NOT a new FINDING and
+does NOT trigger the step-3 STOP.
+
+### Step 4 — service-side stays green + service-shape stamping case
+
+`seedGoalForm.test.ts` (not on this phase's Files-touched list — left untouched) stays green; all its
+service-intent / subscribe-newsletter / non-M1 no-op cases pass in the full run. Added a service-shape
+stamping case in `stampGoalRefCtas.test.ts` (`stamps a service (awareness-ordered) section list`): a
+header→hero→services→testimonials→cta tree; asserts the stamp reaches header/hero/cta primaries and
+leaves the CTA-less services/testimonials sections untouched.
+
+### Step 5 — `injectGoalSections.test.ts` unchanged (already green)
+
+Phase 1's write-path change did not alter this suite's fixtures (M3 `download-app` storeBadges + M4
+`follow-social` followStrip are injection concerns, independent of the `cta_text` stamp). Verified green;
+no edit needed, so the file was not modified despite being on the Files-touched list.
+
+### False-green discipline
+Every GOAL_REF fixture in the new tests is produced by the REAL `stampGoalRefCtas` and resolved by the
+REAL `normalizeCtas`/`goalToDestination`/`resolveCtaHref`; no hand-authored `dest:'GOAL_REF'`. Each new
+assertion is revert-sensitive: the M3-with-url case fails if resolution breaks; the inert case fails if
+the bridge emitted `''`; the matrix fails if any branch regresses.
+
+### Deviations from the plan
+None. `goalToDestination.ts` and `stampGoalRefCtas.ts` were on the Files-touched list only conditionally
+("only proven gaps" / "only if a template needs an allowlist extension"); neither condition held, so
+both were left untouched. `injectGoalSections.test.ts` was "assert green; update only if fixtures
+shifted" — they didn't. No files outside the phase-5 Files-touched list were modified.
+
+### Test results
+- `npx tsc --noEmit`: clean.
+- `npx vitest run src/modules/goals`: 9 files, 144 passed (was 135; +9 phase-5 cases).
+- `npm run test:run` (full): 114 passed | 1 skipped (115 files); 1856 passed | 3 skipped (1859) — up
+  from phase 4's 1847 by the 9 new phase-5 cases. 0 failures.
+- `npm run build`: NOT run (reserved for phase 6).
+
+### Open risks
+- granth (writer audience, `cta_label`) stays unbridged — tracked, out of scope, needs a follow-up if
+  writer goals ever require CTA resolution. Same register as the techpremium/naayom seam and the
+  regenerate-path gap, all carried forward from earlier phases.
+- The `SCHEMA_DEFAULT_CTA_HREFS` maintenance risk (a new template default `cta_href`) carries forward
+  from phase 3.5 unchanged.
+
+---
+
+## Phase 5 — impl-review verdict: **ship** (loop 1, no blocking issues)
+
+Gate: `npx tsc --noEmit` exit 0 · `npm run test:run` 1856 passed / 3 skipped / 0 failures (+9 vs phase 4).
+
+**No production code changed** (`git diff HEAD --stat -- src/` = two `*.test.ts` only). All five mechanism
+branches were ALREADY correct — phase 5 is a resolution matrix + coverage lock, as the plan predicted.
+`stampGoalRefCtas.ts` unmodified: allowlist stays `['cta_text']`, no widening.
+
+Reviewer-verified per mechanism (`goalToDestination.ts`):
+- **M2** — inline `?text=` wins (guarded on `dest.msg === undefined`), else enriched from `param.message`;
+  `resolveDestination` encodes once via `encodeURIComponent` → no double-encoded/malformed `wa.me` URL.
+- **M3** — `{kind:'external', url}` verbatim.
+- **M4** — `inferPlatform` → `social`; a `'website'` host correctly falls back to `external`.
+- **M5** — missing dest → `undefined` (NOT `null`). `normalizeCtas` leaves the entry untouched
+  (`continue`), so the block falls to its template default anchor (e.g. `#cta`) — a real in-page anchor,
+  not a dead href. This IS D-C's "M1/M5 keep working defaults". Correct and safe.
+- **Degradation** — M2/M3/M4 param-less → `null` → inert `{type:'link', url:'#'}`.
+
+**Spec criterion 4 verified end-to-end** through the real `normalizeCtas` + `resolveCtaHref` (content
+stamped by the real `stampGoalRefCtas`, never hand-authored): M3+param → the external URL; param-less M3 →
+inert `'#'`. The phase-3.5 bridge writes `'#'`, **not `''`** — chain confirmed in code:
+`null` → `{type:'link',url:'#'}` → `toDestination('#')` → `classifyString` → `{kind:'section', anchor:''}`
+→ `resolveDestination` → `'#'`. Vestria's `'#contact'` default is overwritten to `'#'`. Test asserts both
+`=== '#'` and explicit `!== ''` (an empty bridged href would be the dead-href defect the criterion forbids).
+
+### Allowlist coverage — no finding, no widening
+Reviewer spot-checked hero/header/cta primaries by reading the blocks (not trusting the table):
+
+| template | primary key | notes |
+|---|---|---|
+| meridian, techpremium, hearth, lex, surge | `cta_text` | `resolveCtaHref(md?.cta_text?.buttonConfig, …)` |
+| lumen | `cta_text` | hero + header; no CTA block |
+| vestria | `cta_text` label + flat `cta_href` | phase-3.5 bridge |
+| granth | `cta_label` | ratified descope (writer track) — pre-existing, not a new finding |
+
+No in-scope template uses a divergent key. Matrix tests use full `toEqual({dest:{…}})`, so they fail on any
+number/url/platform regression, not merely on `.kind`.
+
+Non-blocking: the service-shape stamping test builds an awareness-ordered tree by hand and calls
+`stampGoalRefCtas` directly rather than driving the full service `finalize` path. Genuinely service-shaped
+(header→hero→services→testimonials→cta, with `services`/`testimonials` correctly asserted CTA-less), but it
+locks the stamp writer in isolation, not end-to-end service generation.

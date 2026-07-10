@@ -307,4 +307,64 @@ describe('goalToDestination', () => {
       });
     });
   });
+
+  // ─── goal-ref-cta phase 5: the closed M1–M5 resolution matrix in one place ───
+  // The per-mechanism branches above are exhaustive; this block documents the
+  // full matrix as a single readable table (destination KIND per mechanism +
+  // the two degradation arms: param-less → null for M2/M3/M4, missing dest →
+  // undefined for M5). No new production behavior — a phase-5 regression lock.
+  describe('phase 5 — closed per-mechanism resolution matrix', () => {
+    const forms = { 'form-1': {} };
+
+    it('M1 (form) → section#form-section carrying formId', () => {
+      const r = goalToDestination(goal({ intent: 'enquiry', mechanism: 'M1' }), { forms });
+      expect(r).toEqual({ dest: { kind: 'section', anchor: 'form-section' }, formId: 'form-1' });
+    });
+
+    it('M2 direct channel → whatsapp | call | email by destination form', () => {
+      expect(
+        goalToDestination(goal({ intent: 'enquiry', mechanism: 'M2', destination: 'https://wa.me/1555' }), { forms }),
+      ).toEqual({ dest: { kind: 'whatsapp', number: '1555' } });
+      expect(
+        goalToDestination(goal({ intent: 'book-call', mechanism: 'M2', destination: 'tel:+1555' }), { forms }),
+      ).toEqual({ dest: { kind: 'call', number: '+1555' } });
+      expect(
+        goalToDestination(goal({ intent: 'enquiry', mechanism: 'M2', destination: 'mailto:a@b.com' }), { forms }),
+      ).toEqual({ dest: { kind: 'email', addr: 'a@b.com' } });
+    });
+
+    it('M3 redirect → external (url verbatim)', () => {
+      expect(
+        goalToDestination(goal({ intent: 'buy-via-link', mechanism: 'M3', destination: 'https://store.example/x' }), { forms }),
+      ).toEqual({ dest: { kind: 'external', url: 'https://store.example/x' } });
+    });
+
+    it('M4 subscribe/follow → social (platform inferred) or external fallback', () => {
+      expect(
+        goalToDestination(goal({ intent: 'follow-social', mechanism: 'M4', destination: 'https://youtube.com/@a' }), { forms }),
+      ).toEqual({ dest: { kind: 'social', platform: 'youtube', url: 'https://youtube.com/@a' } });
+      expect(
+        goalToDestination(goal({ intent: 'subscribe-newsletter', mechanism: 'M4', destination: 'https://buttondown.example' }), { forms }),
+      ).toEqual({ dest: { kind: 'external', url: 'https://buttondown.example' } });
+    });
+
+    it('M5 scroll/anchor → section (leading # stripped)', () => {
+      expect(
+        goalToDestination(goal({ intent: 'rsvp', mechanism: 'M5', destination: '#agenda' }), { forms }),
+      ).toEqual({ dest: { kind: 'section', anchor: 'agenda' } });
+    });
+
+    it('degradation: param-less M2/M3/M4 → null; missing-dest M5 → undefined; M1 always resolves', () => {
+      // null (D-C) = inert `#` no-op at normalizeCtas; undefined = leave untouched.
+      expect(goalToDestination(goal({ intent: 'enquiry', mechanism: 'M2' }), { forms })).toBeNull();
+      expect(goalToDestination(goal({ intent: 'signup-free', mechanism: 'M3' }), { forms })).toBeNull();
+      expect(goalToDestination(goal({ intent: 'follow-social', mechanism: 'M4' }), { forms })).toBeNull();
+      expect(goalToDestination(goal({ intent: 'rsvp', mechanism: 'M5' }), { forms })).toBeUndefined();
+      // M1 has no external param requirement → the working default anchor always resolves.
+      expect(goalToDestination(goal({ intent: 'apply', mechanism: 'M1' }), { forms })).toEqual({
+        dest: { kind: 'section', anchor: 'form-section' },
+        formId: 'form-1',
+      });
+    });
+  });
 });

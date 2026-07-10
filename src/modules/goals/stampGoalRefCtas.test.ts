@@ -7,6 +7,8 @@ import {
   stampSectionGoalRefCtas,
   resolveGoalFormId,
 } from './stampGoalRefCtas';
+import { normalizeCtas } from '@/utils/normalizeCtas';
+import { resolveCtaHref } from '@/utils/resolveCtaHref';
 import type { Brief } from '@/types/brief';
 
 type BriefGoal = NonNullable<Brief['goal']>;
@@ -143,6 +145,92 @@ describe('stampGoalRefCtas — stamps every primary cta_text for each mechanism'
     expect(() => stampGoalRefCtas(null, { goal: m1 })).not.toThrow();
     expect(() => stampGoalRefCtas(undefined, { goal: m1 })).not.toThrow();
     expect(() => stampGoalRefCtas({} as any, { goal: m1 })).not.toThrow();
+  });
+});
+
+// ─── goal-ref-cta phase 5: end-to-end resolution through the REAL render
+// pre-pass (spec acceptance criterion 4). Content is stamped by the REAL
+// stampGoalRefCtas (never hand-authored dest:'GOAL_REF'), then run through the
+// real normalizeCtas + resolveCtaHref, so this exercises the full generation →
+// render path for M3 (with param and param-less) at the layer where an href
+// actually exists. Uses a vestria-shaped hero (flat cta_href default `#contact`)
+// so the phase-3.5 flat-href bridge is covered too. ───
+describe('phase 5 — M3 resolves through normalizeCtas (spec criterion 4)', () => {
+  const m3WithUrl: BriefGoal = {
+    intent: 'buy-via-link',
+    mechanism: 'M3',
+    destination: 'https://store.example/product',
+  };
+  const m3ParamLess: BriefGoal = { intent: 'signup-free', mechanism: 'M3' };
+
+  /** A single vestria-shaped hero: cta_text label + flat cta_href schema default. */
+  function heroTree(): Record<string, any> {
+    return {
+      'hero-aaaa1111': {
+        id: 'hero-aaaa1111',
+        elements: { headline: 'Hi', cta_text: 'Buy now', cta_href: '#contact' },
+      },
+    };
+  }
+
+  it('M3 with param → external URL on both the buttonConfig and the bridged flat cta_href', () => {
+    const content = heroTree();
+    stampGoalRefCtas(content, { goal: m3WithUrl });
+    const out = normalizeCtas(content, { goal: m3WithUrl, forms: {} }) as Record<string, any>;
+
+    const meta = out['hero-aaaa1111'].elementMetadata.cta_text;
+    // buttonConfig down-converts to a plain link carrying the external URL.
+    expect(meta.buttonConfig).toEqual({ type: 'link', url: 'https://store.example/product' });
+    expect(resolveCtaHref(meta.buttonConfig, {}, '#cta')).toBe('https://store.example/product');
+    // phase-3.5 bridge writes the resolved href into the sibling flat cta_href
+    // (vestria reads it directly) — the default `#contact` is replaced.
+    expect(out['hero-aaaa1111'].elements.cta_href).toBe('https://store.example/product');
+  });
+
+  it('param-less M3 → inert `#` (no dead/broken href), and the bridge writes `#` not empty', () => {
+    const content = heroTree();
+    stampGoalRefCtas(content, { goal: m3ParamLess });
+    const out = normalizeCtas(content, { goal: m3ParamLess, forms: {} }) as Record<string, any>;
+
+    const meta = out['hero-aaaa1111'].elementMetadata.cta_text;
+    // D-C: goal present but required url param missing → inert `#` no-op.
+    expect(meta.buttonConfig).toEqual({ type: 'link', url: '#' });
+    // The bridged flat cta_href is the inert `#` — NOT an empty string (an empty
+    // href would be the defect the spec criterion guards against).
+    expect(out['hero-aaaa1111'].elements.cta_href).toBe('#');
+    expect(out['hero-aaaa1111'].elements.cta_href).not.toBe('');
+  });
+});
+
+// ─── goal-ref-cta phase 5: service-shape stamping. seedGoalForm/stamp are
+// shared across audiences; service pages use awareness-driven section ordering
+// (header → hero → … → cta). Assert the stamp reaches every primary on a
+// service-flavored tree. ───
+describe('phase 5 — stamps a service (awareness-ordered) section list', () => {
+  function serviceTree(): Record<string, any> {
+    return {
+      'header-svc0001': { id: 'header-svc0001', elements: { cta_text: 'Book a call' } },
+      'hero-svc0002': { id: 'hero-svc0002', elements: { headline: 'We help', cta_text: 'Get a quote' } },
+      'services-svc0003': { id: 'services-svc0003', elements: { headline: 'What we do' } },
+      'testimonials-svc0004': { id: 'testimonials-svc0004', elements: { headline: 'Loved by' } },
+      'cta-svc0005': { id: 'cta-svc0005', elements: { headline: 'Ready?', cta_text: 'Start now' } },
+    };
+  }
+
+  it('stamps GOAL_REF on header + hero + cta primaries, leaves CTA-less sections untouched', () => {
+    const content = serviceTree();
+    const goal: BriefGoal = { intent: 'book-call', mechanism: 'M1' };
+    stampGoalRefCtas(content, { goal, formId: 'form-svc' });
+
+    for (const id of ['header-svc0001', 'hero-svc0002', 'cta-svc0005']) {
+      expect(content[id].elementMetadata.cta_text.cta).toEqual({
+        role: 'primary',
+        dest: 'GOAL_REF',
+        formId: 'form-svc',
+      });
+    }
+    expect(content['services-svc0003'].elementMetadata).toBeUndefined();
+    expect(content['testimonials-svc0004'].elementMetadata).toBeUndefined();
   });
 });
 
