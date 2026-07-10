@@ -77,3 +77,30 @@
 
 ### Open risks
 - None for this phase. `getFreshProspectScrape`/`upsertProspectScrape` are Prisma-backed but exercised only via the Phase 4 route (no DB integration test at this layer, matching siteContext precedent).
+
+---
+
+## Phase 3 — Generation engine: platform map + prompts + validators + mocks
+
+### Files changed
+- `src/modules/outreach/platforms.ts` (new) — `OutreachPlatform` full union; `PlatformDef`/`PlatformCaps` interfaces; pilot defs `COLD_EMAIL_DEF` (subject, subjectMaxChars 120, bodyMaxWords 120, 1 CTA) + `LINKEDIN_NOTE_DEF` (no subject, bodyMaxChars 300, no pitch); `getPlatformDef` (→ null for unknown/not-yet-implemented) + `PILOT_PLATFORMS`.
+- `src/modules/outreach/outreachEngine.ts` (new) — PURE. Reuses `PROOF_TRUTH_FRAGMENT` + `EmailBrandContext`/`summarizeBrandContext`/`hasTestimonials` from email rail and `summarizeProspect`/`ProspectExtract` from Phase 2. `buildOutreachPrompt`, `outreachOutputSchema` (shape-only factory), `validateOutreachMessages` (caps enforced here), `buildSingleMessagePrompt` + `singleMessageOutputSchema` + `validateSingleMessage`, `mockOutreachOutput`/`mockSingleMessageOutput`.
+- `src/modules/outreach/outreachEngine.test.ts` (new) — 21 tests covering the plan's list.
+
+### What changed
+- Caps live only on `PlatformDef.caps` and are read exclusively by the validators; shape schemas (`outreachOutputSchema`, `singleMessageOutputSchema`) carry NO caps — `too_long` stays distinct from `invalid_shape` (decisions #6/#10). Word count via `body.trim().split(/\s+/).length`.
+- Shape schemas enforce array length, platform-id order match, and subject-present-iff-`hasSubject` via `superRefine`.
+- Grounding block: real grounding → `summarizeProspect` + "reference at least one concrete specific"; `grounding: null` → explicit GENERIC block with target descriptor and NO fabricated prospect facts.
+
+### Deviations from plan
+- Validator return shape follows the TASK contract `{ok:true}|{ok:false, reason, detail}` (not the email rail's `{status}`); added a `violations` array on `too_long` for the route's trim retry. In-scope choice, conservative (superset of what the plan named).
+- `SingleMessageOutputSchema` implemented as a factory `singleMessageOutputSchema(def)` (not a bare const) because subject-present-iff-hasSubject depends on the platform. Necessary for the shape guarantee; named lower-camel to match the `outreachOutputSchema`/`sequenceOutputSchema` factory convention.
+- Re-exported `PROOF_TRUTH_FRAGMENT` from the engine (single import surface for routes); source of truth stays the email module.
+
+### Test results
+- `npx tsc --noEmit`: clean.
+- `npx vitest run src/modules/outreach/outreachEngine.test.ts`: 21 passed.
+- `npm run test:run`: 1843 passed | 3 skipped (110 files). No new regressions.
+
+### Open risks
+- None. Engine is pure/unit-tested; wiring into routes is Phase 4.
