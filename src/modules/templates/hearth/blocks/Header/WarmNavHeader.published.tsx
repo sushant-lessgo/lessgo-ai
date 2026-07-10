@@ -2,12 +2,22 @@
 // Server-safe published variant of WarmNavHeader. No hooks, no edit affordances.
 
 import React from 'react';
-import { resolveCtaHref } from '@/utils/resolveCtaHref';
+import { resolveCtaHref, resolveDestination } from '@/utils/resolveCtaHref';
+import type { Link } from '@/types/destination';
+import { isLink } from '@/types/destination';
+
+// Dual-read a nav link's target: legacy raw string href passes through verbatim
+// (old pages byte-identical); a new Link object resolves via the dumb resolver.
+function resolveLinkHref(value: string | Link | undefined): string {
+  if (typeof value === 'string') return value || '#';
+  if (isLink(value)) return resolveDestination(value.dest) || '#';
+  return '#';
+}
 
 interface NavItem {
   id?: string;
   label?: string;
-  href?: string;
+  href?: string | Link;
 }
 
 interface WarmNavHeaderPublishedProps {
@@ -41,7 +51,7 @@ export default function WarmNavHeaderPublished(props: WarmNavHeaderPublishedProp
               {navItems.map((item, idx) => (
                 <a
                   key={item.id || idx}
-                  href={item.href || '#'}
+                  href={resolveLinkHref(item.href)}
                   className={idx === 0 ? 'hearth-nav__link is-active' : 'hearth-nav__link'}
                 >
                   {item.label || ''}

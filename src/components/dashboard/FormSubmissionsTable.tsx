@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Copy, Check } from 'lucide-react'
+import { ChevronDown, ChevronRight, Copy, Check, MailWarning } from 'lucide-react'
 
 interface FormSubmission {
   id: string
@@ -11,6 +11,7 @@ interface FormSubmission {
   ipAddress?: string | null
   userAgent?: string | null
   createdAt: Date | string
+  notifyError?: string | null
 }
 
 interface FormSubmissionsTableProps {
@@ -131,7 +132,18 @@ export default function FormSubmissionsTable({ submissions }: FormSubmissionsTab
                     </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDate(submission.createdAt)}
+                    <div className="flex items-center gap-2">
+                      <span>{formatDate(submission.createdAt)}</span>
+                      {submission.notifyError && (
+                        <span
+                          title={`Email notification failed: ${submission.notifyError}`}
+                          className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 border border-amber-200"
+                        >
+                          <MailWarning className="w-3 h-3" />
+                          email failed
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="space-y-1">

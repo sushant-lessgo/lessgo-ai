@@ -18,6 +18,8 @@ Updated: 2026-07-10
 | 10 | Universe v1 — variant fan-out (message-match / SEO keyword / audience), shared-edit propagation, universe view + per-variant analytics | `docs/tracks/universePlan.md` → universe-01… (spec required before /feature) | reserved, awaiting spec |
 | 11 | Campaign/offer pages — time-bound promo variants (universe v2) | universePlan.md U2 (spec required before /feature) | reserved, awaiting spec |
 | 12 | A/B testing — split traffic between variants (universe v3) | universePlan.md U2 (spec required before /feature) | reserved, awaiting spec |
+| 13 | Email sequences — goal-matched copy-only sequences (6 archetypes over 18-intent vocab), social-posts rail | `docs/task/email-sequences.spec.md` | queued (value-stack; position TBD in discussion) |
+| 14 | Cold outreach pack — per-prospect grounded messages (scraper reuse) + per-platform formats, copy-only | `docs/task/cold-outreach.spec.md` | queued (value-stack; position TBD in discussion) |
 
 ## Rules
 - Only spec files (`docs/task/*.spec.md` or a track's numbered specs) get a queue number.

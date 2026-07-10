@@ -18,7 +18,24 @@ const ROOT = path.join('docs', 'research', 'coverage-100');
 const ANALYZED = path.join(ROOT, 'analyzed');
 const OUT = path.join(ROOT, 'summary.md');
 
-const capName = c => (typeof c === 'string' ? c : c?.name ?? String(c));
+// Raw analyzer capability name -> canonical slug (see proposed-capabilities.md).
+// Collapses synonyms so the frequency count reflects concepts, not labels.
+const CAP_ALIAS = {
+  'affiliate-list': 'affiliate-hub',
+  'affiliate-resource-directory': 'affiliate-hub',
+  'content-feed': 'content-index',
+  'recipe-index': 'content-index',
+  'recipe-index / content-category-grid': 'content-index',
+  'content-category-grid': 'content-index',
+  'email-capture-popup': 'external-list-signup',
+  'email-capture-popup / external-list-signup': 'external-list-signup',
+  'podcast/media-hub': 'media-hub',
+  'bibliography': 'works-catalog',
+  'works-listing': 'works-catalog',
+  'bibliography/works-listing': 'works-catalog',
+};
+const canon = n => CAP_ALIAS[n] ?? CAP_ALIAS[n?.trim?.()] ?? n;
+const capName = c => canon(typeof c === 'string' ? c : c?.name ?? String(c));
 const esc = s => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ').trim();
 const yn = v => (v === true ? 'yes' : v === false ? '**no**' : '?');
 

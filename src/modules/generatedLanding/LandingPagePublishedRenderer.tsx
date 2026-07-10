@@ -257,7 +257,7 @@ export function LandingPagePublishedRenderer({
     {/* Analytics Script (conditionally injected) */}
     {analyticsEnabled && publishedPageId && slug && (
       <Script
-        src="https://lessgo.ai/assets/a.v1.js"
+        src="https://lessgo.ai/assets/a.v2.js"
         data-page-id={publishedPageId}
         data-slug={slug}
         strategy="afterInteractive"

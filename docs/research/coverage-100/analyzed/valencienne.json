@@ -1,0 +1,53 @@
+{
+  "slug": "valencienne",
+  "url": "https://www.valencienne.com/",
+  "business": { "type_label": "bespoke bridal salon (custom wedding gown design studio)", "icp_category": "trust", "geography_hint": "Toronto, Canada" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Site sells a defined bespoke design service (nearly four decades of expertise, a named 4-step process, commitment statement, 7 testimonials) — the visitor is deciding to trust a firm/craftspeople, not just browsing gowns. Portfolio and salon details are supporting proof, not the spine.",
+    "runner_up": "work"
+  },
+  "goal": {
+    "one_action": "Book an in-store private bridal design consultation",
+    "mechanism": "form",
+    "delegated_to": "calendly"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "theprocess", "bespoke-brides", "common-questions", "contact", "shop"],
+    "archetype_note": "Classic multi-page trust brochure funneling every page to a single Calendly consultation booking on /contact; a secondary Squarespace Shop/Cart exists but is not the primary landing conversion."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (HOME / THE PROCESS / BESPOKE BRIDES / COMMON QUESTIONS / CONTACT / Shop)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "Premier bespoke bridal salon", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "the bespoke process / The Bespoke Process (4-step timeline)", "component": "timeline" },
+      { "canonical": "founderNote", "observed_as": "nearly four decades", "component": "text" },
+      { "canonical": "features", "observed_as": "YOUR WEDDING EXPERIENCE / Our Commitment / FIT. FABRIC. EXPERIENCE.", "component": "grid-cards" },
+      { "canonical": "testimonials", "observed_as": "TESTIMONIALS (7 customer quotes)", "component": "carousel" },
+      { "canonical": "cta", "observed_as": "PRIVATE CONSULTATIONS / Your dream gown is waiting to be DESIGNED / BOOK YOURS TODAY", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "FOLLOW THE JOURNEY @valencienne1985 (Instagram embed)", "component": "gallery" },
+      { "canonical": "results", "observed_as": "BESPOKE BRIDES (portfolio of 7 named bespoke gowns)", "component": "gallery" },
+      { "canonical": "faq", "observed_as": "COMMON QUESTIONS (Boutique Services / Fabrication / Pricing / Timeline accordions)", "component": "accordion" },
+      { "canonical": "pricing", "observed_as": "Pricing FAQ (gowns start at ~$5000)", "component": "accordion" },
+      { "canonical": "leadForm", "observed_as": "BOOK A CONSULTATION (embedded Calendly widget)", "component": "form" },
+      { "canonical": "footer", "observed_as": "CONTACT / LOCATION (map) / HOURS", "component": "text" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "catalog"],
+    "proposed_new": []
+  },
+  "proof_types": ["testimonials", "portfolio"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["testimonial carousel", "process timeline / step list", "faq accordion (categorized)", "portfolio gallery grid", "instagram feed embed", "map + hours block", "calendly calendar embed"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality=rendered (not full) so capped at medium; Calendly booking is an opaque iframe (no field list obtainable) and the Squarespace Shop/Cart depth was not captured." },
+  "gap_findings": [
+    "Dual model: a trust/booking brochure with a co-resident Squarespace Shop/Cart checkout — taxonomy forces a single engine + single conversion action, but this site legitimately has two (book consult AND buy). Not fully expressible.",
+    "Pricing surfaces only inside the FAQ accordion (~$5000 starting), not a real pricing section — 'pricing' canonical maps awkwardly to a single FAQ row."
+  ]
+}

@@ -321,7 +321,7 @@ function buildHTMLDocument(params: {
   <!-- Phase 4: Analytics beacon (opt-in) -->
   ${
     analyticsOptIn
-      ? `<script src="${assetBase}/assets/a.v1.js" data-page-id="${metadata.publishedPageId}" data-slug="${metadata.slug}" defer></script>`
+      ? `<script src="${assetBase}/assets/a.v2.js" data-page-id="${metadata.publishedPageId}" data-slug="${metadata.slug}" defer></script>`
       : ''
   }
 </body>

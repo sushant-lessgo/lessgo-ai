@@ -181,14 +181,43 @@ export interface SitePageLink {
 const normLabel = (label: unknown): string =>
   typeof label === 'string' ? label.replace(/<[^>]*>/g, '').toLowerCase().trim() : '';
 
+// A BARE on-page section anchor the renderer emits — "#pricing" or "#pricing-2"
+// (first occurrence vs. repeats). Special anchors ("#form-section") and full
+// section-id anchors carry a non-numeric suffix and do NOT match, so they are
+// never mistaken for a dead section anchor.
+const SECTION_ANCHOR_RE = /^#([a-z]+)(-\d+)?$/i;
+
+/**
+ * If `href` is a bare section anchor pointing at a section TYPE that is not on
+ * the page, return that dead type; otherwise null. Common law: nav must derive
+ * from what the page actually has — an anchor to a missing section scrolls
+ * nowhere and must not ship (F7). AI-authored `#pricing`/`#about`/etc. on a page
+ * without those sections are the dead anchors this catches.
+ */
+function deadAnchorType(href: unknown, presentTypes: Set<string>): string | null {
+  if (typeof href !== 'string') return null;
+  const m = SECTION_ANCHOR_RE.exec(href.trim());
+  if (!m) return null;
+  const base = m[1].toLowerCase();
+  return presentTypes.has(base) ? null : base;
+}
+
 export function autoMapLinkHrefs(
   sections: Record<string, SectionCopy>,
   presentTypes: Set<string>,
   sitePages?: SitePageLink[]
 ): Record<string, SectionCopy> {
-  const mapLink = (link: Record<string, any>) => {
-    if (!link || typeof link !== 'object') return;
-    if (link.href && link.href !== '#') return; // user/LLM already set a real target
+  // Resolve a nav/footer link to a live target. Returns false when the link is a
+  // DEAD section anchor we could not re-map — the caller drops it (F7). A still-
+  // unset ("#") link is kept (backward compatible; it renders as "#").
+  const mapLink = (link: Record<string, any>): boolean => {
+    if (!link || typeof link !== 'object') return true;
+    const isUnset = !link.href || link.href === '#';
+    const dead = !isUnset && deadAnchorType(link.href, presentTypes) !== null;
+    // A real, live target (page path, external URL, valid on-page anchor,
+    // "#form-section") — leave it exactly as the user/LLM set it.
+    if (!isUnset && !dead) return true;
+    // Unset OR dead → (re)derive from the link's label.
     // Multi-page: a label matching a sitemap page title maps to that page's
     // path FIRST (chrome is shared across pages, so links must be site-absolute
     // paths, not on-page anchors). Fallback: on-page section anchor.
@@ -202,11 +231,48 @@ export function autoMapLinkHrefs(
         : undefined;
       if (page && page.pathSlug !== '/') {
         link.href = page.pathSlug;
-        return;
+        return true;
       }
     }
     const type = matchAnchorType(link.label);
-    if (type && presentTypes.has(type)) link.href = `#${type}`;
+    if (type && presentTypes.has(type)) {
+      link.href = `#${type}`;
+      return true;
+    }
+    // Could not resolve: a dead anchor now points nowhere → drop it. An unset
+    // ("#") link is left untouched (it was never a promise to scroll somewhere).
+    return !dead;
+  };
+
+  // F24: append a derived link (label = page title, href = pathSlug) for every
+  // non-home sitemap page not already reachable from `links`. Keeps the footer's
+  // site-nav column in sync with the sitemap the same way the header nav is —
+  // pages added at the gate (which the AI never authored a link for) appear.
+  // Idempotent by href.
+  const appendMissingPages = (links: Record<string, any>[]) => {
+    if (!sitePages?.length) return;
+    const have = new Set(links.map((l) => l?.href));
+    for (const p of sitePages) {
+      if (p.pathSlug === '/' || have.has(p.pathSlug)) continue;
+      links.push({ id: '', label: p.title, href: p.pathSlug });
+      have.add(p.pathSlug);
+    }
+  };
+
+  const pagePaths = new Set((sitePages || []).map((p) => p.pathSlug));
+  const mapColumns = (columns: unknown) => {
+    if (!Array.isArray(columns)) return;
+    for (const col of columns) {
+      const links = (col as Record<string, any>)?.links;
+      if (!Array.isArray(links)) continue;
+      const kept = links.filter((l) => mapLink(l as Record<string, any>));
+      // A column that functions as site navigation (holds ≥1 page-path link) is
+      // synced to the full sitemap; other columns (Product, Company…) are left.
+      if (kept.some((l) => pagePaths.has((l as Record<string, any>)?.href))) {
+        appendMissingPages(kept);
+      }
+      (col as Record<string, any>).links = kept;
+    }
   };
 
   for (const sectionCopy of Object.values(sections)) {
@@ -214,24 +280,13 @@ export function autoMapLinkHrefs(
     if (!elements) continue;
 
     const navItems = elements.nav_items;
-    if (Array.isArray(navItems)) navItems.forEach((it) => mapLink(it as Record<string, any>));
-
-    const footerColumns = elements.footer_columns;
-    if (Array.isArray(footerColumns)) {
-      for (const col of footerColumns) {
-        const links = (col as Record<string, any>)?.links;
-        if (Array.isArray(links)) links.forEach((l) => mapLink(l as Record<string, any>));
-      }
+    if (Array.isArray(navItems)) {
+      elements.nav_items = navItems.filter((it) => mapLink(it as Record<string, any>));
     }
 
-    // Vestria footer link columns (same nested shape, different key).
-    const linkColumns = elements.link_columns;
-    if (Array.isArray(linkColumns)) {
-      for (const col of linkColumns) {
-        const links = (col as Record<string, any>)?.links;
-        if (Array.isArray(links)) links.forEach((l) => mapLink(l as Record<string, any>));
-      }
-    }
+    // Meridian footer columns + Vestria footer link columns (same nested shape).
+    mapColumns(elements.footer_columns);
+    mapColumns(elements.link_columns);
   }
 
   return sections;

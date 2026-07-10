@@ -27,6 +27,7 @@ import {
   type GenerationStage,
   type GenerationInput,
 } from '@/modules/wizard/generation';
+import { humanizeGenerationError } from '@/modules/wizard/generation/errorMessage';
 import type { WorkGenerationInput } from '@/modules/wizard/generation/work';
 
 interface StageDef {
@@ -87,6 +88,7 @@ export default function GeneratingSlot() {
   const run = useCallback(async () => {
     if (!engine) return;
     setError(null);
+    setGenerationError(null); // clear the shell's Continue gate on (re)run
     setCreditsError(false);
     setStage('strategy');
     setPageProgress(null);
@@ -118,7 +120,9 @@ export default function GeneratingSlot() {
         onPageProgress: (p) => setPageProgress(p),
       });
     } catch (e: any) {
-      setError(e?.message || 'Generation failed.');
+      // Never surface a raw ZodError / JSON blob (F27b) — map schema failures to
+      // one human sentence; the full error is already logged server-side.
+      setError(humanizeGenerationError(e?.message));
       return;
     }
 
@@ -127,7 +131,7 @@ export default function GeneratingSlot() {
       return;
     }
     if (result.status === 'error') {
-      setError(result.error || 'Generation failed.');
+      setError(humanizeGenerationError(result.error));
       return;
     }
     // Reveal the editor.

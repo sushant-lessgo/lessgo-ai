@@ -6,13 +6,18 @@
 // (1673-1690). Binds the shared service header schema keys (A3).
 
 import React from 'react';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
+import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useLexBlock } from '../../hooks/useLexBlock';
 import { LexEditable } from '../../components/LexEditable';
+import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import type { Link } from '@/types/destination';
 
 interface NavItem {
   id: string;
   label: string;
-  href: string;
+  href: string | Link;
 }
 
 interface LetterheadNavContent {
@@ -29,15 +34,27 @@ interface LetterheadNavProps {
 export default function LetterheadNav({ sectionId }: LetterheadNavProps) {
   const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
     useLexBlock<LetterheadNavContent>({ sectionId });
+  const edit = mode === 'edit';
+
+  const { sections, pages, socialMediaConfig, legalPages } = useEditStore();
+  const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
+  const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
+  const socialOptions = React.useMemo(
+    () => (socialMediaConfig?.items || []).map((s) => ({ value: s.url, label: s.platform })),
+    [socialMediaConfig]
+  );
+  const legalOptions = React.useMemo(
+    () => (legalPages?.privacy ? [{ value: '/privacy', label: 'Privacy Policy' }] : []),
+    [legalPages]
+  );
 
   const navItems = blockContent.nav_items || [];
 
-  const updateNavLabel = (id: string, label: string) => {
-    handleCollectionUpdate(
-      'nav_items',
-      navItems.map((n) => (n.id === id ? { ...n, label } : n))
-    );
-  };
+  const setItems = (next: NavItem[]) => handleCollectionUpdate('nav_items', next);
+  const patchItem = (id: string, p: Partial<NavItem>) =>
+    setItems(navItems.map((n) => (n.id === id ? { ...n, ...p } : n)));
+
+  const updateNavLabel = (id: string, label: string) => patchItem(id, { label });
 
   return (
     <>
@@ -60,18 +77,30 @@ export default function LetterheadNav({ sectionId }: LetterheadNavProps) {
         </div>
         <div className="lex-nav__mid">
           {navItems.map((item, idx) => (
-            <LexEditable
-              key={item.id}
-              as="span"
-              mode={mode}
-              sectionId={sectionId}
-              elementKey={`nav_items_label_${item.id}`}
-              value={item.label}
-              onSave={(v) => updateNavLabel(item.id, v)}
-              enterBehavior="save"
-              className={idx === 0 ? 'lex-nav__link is-active' : 'lex-nav__link'}
-              placeholder="Link"
-            />
+            <span key={item.id} className="lex-nav__link-wrap">
+              <LexEditable
+                as="span"
+                mode={mode}
+                sectionId={sectionId}
+                elementKey={`nav_items_label_${item.id}`}
+                value={item.label}
+                onSave={(v) => updateNavLabel(item.id, v)}
+                enterBehavior="save"
+                className={idx === 0 ? 'lex-nav__link is-active' : 'lex-nav__link'}
+                placeholder="Link"
+              />
+              {edit && (
+                <LinkTargetPopover
+                  value={item.href ?? '#'}
+                  sectionOptions={sectionOptions}
+                  pageOptions={pageOptions}
+                  legalOptions={legalOptions}
+                  socialOptions={socialOptions}
+                  onChange={(link) => patchItem(item.id, { href: link })}
+                  triggerClassName="lex-nav__link-cfg"
+                />
+              )}
+            </span>
           ))}
         </div>
         <div className="lex-nav__right">
@@ -117,6 +146,9 @@ const STYLES = `
   font-size: 18px; color: var(--trust); flex-shrink: 0;
 }
 .lex-nav__mid { display: flex; align-items: center; gap: 0; padding: 0 8px; }
+.lex-nav__link-wrap { display: inline-flex; align-items: center; gap: 4px; }
+.lex-nav__link-cfg { display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--ink-3); cursor: pointer; padding: 0; }
+.lex-nav__link-cfg:hover { color: var(--trust); }
 .lex-nav__link {
   font-size: 13px; font-weight: 500; padding: 0 22px;
   display: inline-flex; align-items: center; color: var(--ink-2);

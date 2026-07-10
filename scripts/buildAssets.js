@@ -6,6 +6,26 @@
  *
  * Usage: node scripts/buildAssets.js
  * Install terser: npm install --save-dev terser
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * VERSIONING CONTRACT — a shipped asset filename NEVER changes semantics.
+ *
+ * Published blobs are immutable HTML that hardcode an asset URL
+ * (e.g. `<script src="https://lessgo.ai/assets/a.v1.js">`). Those blobs are never
+ * rewritten. So if you change what `a.v1.js` *does* and redeploy, every historical
+ * blob silently switches to the new behaviour with no handshake — the F9 drift.
+ *
+ * RULE: any semantic change to a beacon/form/behaviour script → emit it under a
+ * NEW filename (a.v2.js, form.v2.js, …) and repoint htmlGenerator.ts + the SSR
+ * published renderer at the new name for NEW publishes only. The old filename keeps
+ * shipping its ORIGINAL bytes for old blobs — build it from a frozen legacy source
+ * under scripts/legacy/ so a source-file edit can't leak into it. Never overwrite.
+ *
+ * Current mapping:
+ *   a.v1.js  ← scripts/legacy/a.v1.src.js            (FROZEN pre-scale-04 beacon)
+ *   a.v2.js  ← src/lib/staticExport/analyticsGenerator.js  (live: role+placement, v:2)
+ *   form.v1.js ← src/lib/staticExport/formHandler.js  (unchanged since 2026-01, still v1)
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 const fs = require('fs');
@@ -23,11 +43,15 @@ try {
 
 // Paths
 const srcDir = path.join(__dirname, '../src/lib/staticExport');
+const legacyDir = path.join(__dirname, 'legacy');
 const outDir = path.join(__dirname, '../public/assets');
 
+// `dir` defaults to srcDir; frozen legacy artifacts pin their own source dir so an
+// edit to the live source can never leak into a shipped-versioned filename.
 const files = [
   { src: 'formHandler.js', out: 'form.v1.js' },
-  { src: 'analyticsGenerator.js', out: 'a.v1.js' },
+  { src: 'a.v1.src.js', out: 'a.v1.js', dir: legacyDir }, // FROZEN pre-scale-04 beacon (see contract above)
+  { src: 'analyticsGenerator.js', out: 'a.v2.js' },       // live beacon: role+placement, v:2
   { src: 'naayomBehaviors.js', out: 'naayom.v1.js' }, // Phase 4: TechPremium behaviors
   { src: 'lumenBehaviors.js', out: 'lumen.v1.js' },   // Lumen: lightbox + reveal + EN/NL toggle/geo
 ];
@@ -48,7 +72,7 @@ async function build() {
   console.log('🔨 Building static assets...\n');
 
   for (const file of files) {
-    const srcPath = path.join(srcDir, file.src);
+    const srcPath = path.join(file.dir || srcDir, file.src);
     const outPath = path.join(outDir, file.out);
 
     // Read source

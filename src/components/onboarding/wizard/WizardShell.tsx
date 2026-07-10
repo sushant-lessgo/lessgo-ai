@@ -121,6 +121,12 @@ export default function WizardShell({
   const goalIntent = useWizardStore((s) => s.goalIntent);
   const goalParam = useWizardStore((s) => s.goalParam);
   const goalParamSkipped = useWizardStore((s) => s.goalParamSkipped);
+  // Step-7 FAILURE gate (F27b): a failed strategy fetch on the structure slot,
+  // or a failed copy generation on the generating slot, must not let the user
+  // Continue past it into a broken editor. `Try again` / `Skip to editor` stay
+  // available inside the slot; only the shell's Continue is blocked.
+  const strategyStatus = useWizardStore((s) => s.strategyStatus);
+  const generationError = useWizardStore((s) => s.generationError);
 
   // Hydrate once from the DB-confirmed brief (load-detection already fetched it).
   useEffect(() => {
@@ -143,6 +149,14 @@ export default function WizardShell({
 
   // Per-slot Continue gate.
   const gateBlocked = (() => {
+    // Structure step (7): a failed strategy fetch blocks Continue — the user
+    // retries in place rather than walking a missing site plan forward (F27b).
+    if (currentSlot === 'structure' && strategyStatus === 'error') return true;
+    // Generating step (8): a failed generation blocks Continue. This slot is
+    // terminal (isLast already disables Continue), but gate explicitly so the
+    // rule holds if the slot order ever changes. `Skip to editor` inside the
+    // slot remains the deliberate escape hatch.
+    if (currentSlot === 'generating' && generationError) return true;
     // Goal step: a REQUIRED, empty goal param blocks unless explicitly skipped
     // (F14). The pre-selected default intent is always set, so goalIntent is
     // non-null here in practice.
