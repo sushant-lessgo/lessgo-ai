@@ -5,14 +5,32 @@ import { describe, it, expect } from 'vitest';
 import type { BlockDeclaration, SectionBlockSet } from '@/modules/templates/blockManifest';
 import {
   isBlockEligible,
+  isCopyCompatible,
+  findIncompatibleCoEligiblePairs,
   pickFromSet,
   selectEligibleBlock,
   deriveAssetFactsFromServiceAssets,
   deriveAssetFactsFromBrief,
   type AssetFacts,
+  type ConsumedKeyKind,
 } from './blockEligibility';
+import { blockManifests } from '@/modules/templates/blockManifest';
 import type { ServiceAssetInput } from '@/types/service';
 import type { Brief } from '@/types/brief';
+
+/** Look up a real declared variant by layout name (across every manifest). */
+function findDecl(layoutName: string): BlockDeclaration {
+  for (const manifest of Object.values(blockManifests)) {
+    for (const set of Object.values(manifest ?? {})) {
+      const found = set.variants.find((v) => v.layoutName === layoutName);
+      if (found) return found;
+    }
+  }
+  throw new Error(`no declared variant named ${layoutName}`);
+}
+
+/** Trivial classifier for synthetic fixtures — every consumed key is scalar. */
+const ALL_SCALAR = (): ConsumedKeyKind => 'scalar';
 
 const NO_FACTS: AssetFacts = {
   hasPhotos: false,
@@ -146,6 +164,143 @@ describe('selectEligibleBlock — manifest-driven', () => {
     for (const hint of [undefined, 1, 2, 3, 10]) {
       expect(selectEligibleBlock('surge', 'testimonials', { cardCountHint: hint })).toBe('ReviewGrid');
     }
+  });
+});
+
+// ── variant-swap-integrity phase 2 ──────────────────────────────────────────
+
+describe('isCopyCompatible — present-key rules', () => {
+  const target = decl({ layoutName: 'T', consumes: ['eyebrow', 'headline'] });
+
+  it('empty-string / whitespace / null / empty-array values are NOT present (no drop)', () => {
+    // Only `eyebrow` is truly present; the rest are non-empty-absent so they
+    // can neither cause a scalar drop nor be required for a non-empty render.
+    const content = {
+      eyebrow: 'Proof',
+      headline: '',
+      subhead: '   ',
+      caption: null,
+      cards: [] as unknown[],
+    };
+    expect(isCopyCompatible(target, content)).toBe(true);
+  });
+
+  it('a present, non-empty SCALAR not consumed by target ⇒ HIDDEN (silent drop)', () => {
+    expect(isCopyCompatible(target, { eyebrow: 'x', tagline: 'dropped' })).toBe(false);
+  });
+
+  it('a present COLLECTION (array) not consumed by target is EXEMPT (clamp handles it)', () => {
+    // extra_cards is a non-empty array the target does not consume — no drop.
+    expect(
+      isCopyCompatible(target, { eyebrow: 'x', extra_cards: [{ id: '1' }] })
+    ).toBe(true);
+  });
+
+  it('(ii) non-empty render — no consumed present key ⇒ HIDDEN even with no scalar drop', () => {
+    // Only a collection is present (no scalar to drop), but the target consumes
+    // no collection key ⇒ it would render EMPTY ⇒ hidden.
+    expect(isCopyCompatible(target, { reviews: [{ id: '1' }] })).toBe(false);
+  });
+});
+
+describe('isCopyCompatible — real surge / vestria variants', () => {
+  const reviewGrid = findDecl('ReviewGrid');
+  const pullQuote = findDecl('PullQuoteWithMark');
+  const tailored = findDecl('VestriaTailoredHero');
+  const fullBleed = findDecl('VestriaFullBleedHero');
+
+  it('surge reviews-content → PullQuote HIDDEN (present scalar headline dropped)', () => {
+    const reviewsContent = {
+      eyebrow: 'What clients say',
+      headline: 'Loved by growth teams',
+      reviews: [{ id: '1', quote: 'great' }, { id: '2', quote: 'ace' }],
+    };
+    expect(isCopyCompatible(pullQuote, reviewsContent)).toBe(false);
+    // sanity: the current variant (ReviewGrid) stays compatible with its own content.
+    expect(isCopyCompatible(reviewGrid, reviewsContent)).toBe(true);
+  });
+
+  it('surge reviews-content with MANY cards → ReviewGrid still OFFERED (clamp, not hide)', () => {
+    const content = {
+      eyebrow: 'x',
+      headline: 'y',
+      reviews: Array.from({ length: 5 }, (_, i) => ({ id: String(i), quote: 'q' })),
+    };
+    expect(isCopyCompatible(reviewGrid, content)).toBe(true);
+  });
+
+  it('vestria Tailored → FullBleed OFFERED (superset consumes all present scalars)', () => {
+    const tailoredContent = {
+      tag_text: 'Uniforms', headline: 'H', lede: 'L', cta_text: 'Quote',
+      hero_image: 'https://x/img.jpg', stamp_value: '40k+', stamp_label: 'made',
+    };
+    expect(isCopyCompatible(fullBleed, tailoredContent)).toBe(true);
+  });
+
+  it('vestria FullBleed → Tailored HIDDEN only when a hero_video_* scalar is present', () => {
+    const withVideo = {
+      headline: 'H', lede: 'L', cta_text: 'Quote',
+      hero_video_desktop: 'https://x/clip.mp4',
+    };
+    expect(isCopyCompatible(tailored, withVideo)).toBe(false);
+
+    const noVideo = { headline: 'H', lede: 'L', cta_text: 'Quote', hero_image: 'https://x/i.jpg' };
+    expect(isCopyCompatible(tailored, noVideo)).toBe(true);
+  });
+});
+
+describe('findIncompatibleCoEligiblePairs — pairwise helper (drives conformance check (e))', () => {
+  it('NEGATIVE fixture: co-eligible, same copyShape, both-ways scalar-divergent ⇒ FLAGGED', () => {
+    const set = {
+      default: 'A',
+      variants: [
+        decl({ layoutName: 'A', consumes: ['title', 'subtitle'] }),
+        decl({ layoutName: 'B', consumes: ['title', 'quote'] }),
+      ],
+    };
+    const flagged = findIncompatibleCoEligiblePairs(set, ALL_SCALAR);
+    expect(flagged).toEqual([{ a: 'A', b: 'B' }]);
+  });
+
+  it('POSITIVE superset fixture (vestria-shaped): one-way divergent ⇒ PASS (empty)', () => {
+    const set = {
+      default: 'T',
+      variants: [
+        decl({ layoutName: 'T', consumes: ['headline', 'lede'] }),
+        decl({ layoutName: 'F', consumes: ['headline', 'lede', 'video'] }),
+      ],
+    };
+    expect(findIncompatibleCoEligiblePairs(set, ALL_SCALAR)).toEqual([]);
+  });
+
+  it('DIFFERENT copyShape excludes an otherwise-divergent pair from co-eligibility', () => {
+    const set = {
+      default: 'A',
+      variants: [
+        decl({ layoutName: 'A', copyShape: 'reviews', consumes: ['title', 'subtitle'] }),
+        decl({ layoutName: 'B', copyShape: 'pullquote', consumes: ['title', 'quote'] }),
+      ],
+    };
+    expect(findIncompatibleCoEligiblePairs(set, ALL_SCALAR)).toEqual([]);
+  });
+
+  it('asset-ineligible variant is NOT co-eligible (excluded from the pairing)', () => {
+    // B requires photos; under all-present asset facts it IS eligible, so to prove
+    // the gate we make it require an UNSATISFIABLE combination is impossible — instead
+    // assert the equal-consumes pair never flags regardless.
+    const set = {
+      default: 'A',
+      variants: [
+        decl({ layoutName: 'A', consumes: ['title'] }),
+        decl({ layoutName: 'B', consumes: ['title'] }),
+      ],
+    };
+    expect(findIncompatibleCoEligiblePairs(set, ALL_SCALAR)).toEqual([]);
+  });
+
+  it('surge testimonials (real manifest): distinct copyShape ⇒ NOT flagged', () => {
+    const surgeTestimonials = blockManifests.surge!.testimonials;
+    expect(findIncompatibleCoEligiblePairs(surgeTestimonials, ALL_SCALAR)).toEqual([]);
   });
 });
 

@@ -19,8 +19,8 @@ manifest via one minimal new field.
 
 ## Progress log
 
-- phase 1 undo snapshot fix: pending
-- phase 2 compatibility filter + conformance test: pending
+- phase 1 undo snapshot fix: done (commit 90b05c63, review loops 1) — ship
+- phase 2 compatibility filter + conformance test: done (commit pending, review loops 1) — ship
 
 ---
 

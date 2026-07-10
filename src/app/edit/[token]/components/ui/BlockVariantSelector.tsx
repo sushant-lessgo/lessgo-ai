@@ -34,7 +34,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { blockManifests, type BlockDeclaration, type SectionBlockSet } from '@/modules/templates/blockManifest';
-import { isBlockEligible, type AssetFacts } from '@/modules/generation/blockEligibility';
+import { isBlockEligible, isCopyCompatible, type AssetFacts } from '@/modules/generation/blockEligibility';
 import { clampSectionCards, sectionCardCount, type ClampableSection } from './clampSectionCards';
 
 // ── manifest lookup helpers (shared with LayoutChangeModal + SectionToolbar) ──
@@ -65,12 +65,35 @@ export function hasMultipleVariants(
 }
 
 /**
- * Count the variants that are actually ELIGIBLE for a section given its current
- * content — i.e. what the picker would show. Mirrors the modal's own filter
- * (`deriveEditorAssetFacts` + `isBlockEligible`, current variant always counted).
- * Used to hide the "Layout" button when the picker would show a single, dead
- * one-card modal (F18): a section can declare >1 variant yet have only one meet
- * its `requiresAssets` needs (e.g. meridian hero without a photo).
+ * SINGLE source of truth for "is this variant OFFERED in the picker" — shared by
+ * the visible list AND eligibleVariantCount so the F18 count can never disagree
+ * with what actually renders. The CURRENT variant is always offered (escape
+ * hatch). A NON-current variant is offered iff ALL hold:
+ *   • asset-eligible (`isBlockEligible`, no cardCountHint — capacity CLAMPS, not filters);
+ *   • same `copyShape` group as the current variant (content-exclusive variants hidden);
+ *   • copy-compatible with the section's LIVE content (`isCopyCompatible` —
+ *     would not silently drop a present scalar nor render empty).
+ */
+function isVariantOffered(
+  variant: BlockDeclaration,
+  currentLayout: string | null | undefined,
+  currentShape: string | undefined,
+  assetFacts: AssetFacts,
+  elements: Record<string, unknown>
+): boolean {
+  if (variant.layoutName === currentLayout) return true; // escape hatch
+  if (!isBlockEligible(variant, { assetFacts })) return false;
+  if ((variant.copyShape ?? undefined) !== currentShape) return false;
+  return isCopyCompatible(variant, elements);
+}
+
+/**
+ * Count the variants that are actually OFFERED for a section given its current
+ * content — i.e. what the picker would show. Mirrors the picker's own filter
+ * (asset facts + copyShape + live-content copy-compat, current variant always
+ * counted). Used to hide the "Layout" button when the picker would show a
+ * single, dead one-card modal (F18): a section can declare >1 variant yet have
+ * only one that is asset-eligible AND copy-compatible with the live content.
  */
 export function eligibleVariantCount(
   templateId: string | null | undefined,
@@ -80,8 +103,10 @@ export function eligibleVariantCount(
   const found = getVariantSetForLayout(templateId, layoutName);
   if (!found) return 0;
   const assetFacts = deriveEditorAssetFacts(section);
+  const elements = section?.elements ?? {};
+  const currentShape = found.set.variants.find((v) => v.layoutName === layoutName)?.copyShape;
   return found.set.variants.filter(
-    (v) => v.layoutName === layoutName || isBlockEligible(v, { assetFacts })
+    (v) => isVariantOffered(v, layoutName, currentShape, assetFacts, elements)
   ).length;
 }
 
@@ -191,14 +216,22 @@ export function BlockVariantSelector({
   const [pendingClamp, setPendingClamp] = useState<{ layoutId: string; dropped: number; keep: number } | null>(null);
 
   const assetFacts = useMemo(() => deriveEditorAssetFacts(sectionContent), [sectionContent]);
+  const currentShape = useMemo(
+    () => set.variants.find((v) => v.layoutName === currentLayout)?.copyShape,
+    [set, currentLayout]
+  );
 
-  // Eligible variants = asset-facts pass (capacity ignored: no cardCountHint) OR
-  // the currently-selected variant (always shown). Declaration order preserved.
+  // Offered variants = asset-eligible AND same copyShape group AND copy-compatible
+  // with the LIVE content (would not silently drop a present scalar / render
+  // empty) — OR the currently-selected variant (always shown as the escape
+  // hatch). Shared with eligibleVariantCount via isVariantOffered so the F18
+  // count and the visible list can never diverge. Declaration order preserved.
   const variants = useMemo(() => {
+    const elements = sectionContent?.elements ?? {};
     return set.variants.filter(
-      (v) => v.layoutName === currentLayout || isBlockEligible(v, { assetFacts })
+      (v) => isVariantOffered(v, currentLayout, currentShape, assetFacts, elements)
     );
-  }, [set, currentLayout, assetFacts]);
+  }, [set, currentLayout, currentShape, assetFacts, sectionContent]);
 
   const currentCardCount = useMemo(() => sectionCardCount(sectionContent), [sectionContent]);
 

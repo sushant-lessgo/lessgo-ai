@@ -119,6 +119,128 @@ export function selectEligibleBlock(
   return pickFromSet(set, input);
 }
 
+// ── copy-compatibility (variant-swap-integrity phase 2) ─────────────────────
+// Editor variant swaps must never silently drop a present copy value or render
+// an empty block. Two guards, ONE home (this module) so the picker's runtime
+// filter and the conformance check cannot drift apart:
+//   • isCopyCompatible — RUNTIME predicate over a section's LIVE elements.
+//   • findIncompatibleCoEligiblePairs — STATIC pairwise helper for the
+//     conformance test (which injects a schema-based classifier).
+
+/** A present element value is non-empty (arrays iff length>0, strings iff trimmed non-empty). */
+function isPresentValue(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'string') return value.trim().length > 0;
+  return true; // non-nullish number / boolean / object
+}
+
+/**
+ * RUNTIME copy-compat predicate (ASYMMETRIC). Given a section's LIVE elements,
+ * decide whether swapping the section to target block `decl` is safe. Target is
+ * OFFERED iff BOTH:
+ *   (i)  NO SILENT SCALAR DROP — every present, non-empty SCALAR (non-array) key
+ *        of the section ∈ consumes(decl). Array/collection keys are EXEMPT.
+ *   (ii) NON-EMPTY RENDER — consumes(decl) ∩ presentKeys ≠ ∅ (renders ≥1 present key).
+ * There is deliberately NO `consumes(decl) ⊆ present` condition — that would
+ * wrongly hide superset-consumes variants (e.g. vestria Tailored → FullBleed,
+ * whose extra hero_video_* keys are optional-and-absent).
+ *
+ * Array-key exemption: safe today because clampSectionCards truncates every
+ * top-level array on swap and no current pair renders a DIFFERENT collection key
+ * — a future pair reading a different collection key would silently non-render
+ * it, at which point collection-key handling must be added here.
+ *
+ * NOTE: this runtime classification judges arrayness by VALUE (Array.isArray),
+ * whereas the static conformance check (findIncompatibleCoEligiblePairs) judges
+ * it by SCHEMA. The two methods are intentionally distinct and are bridged by
+ * check (e)'s consistency assertion.
+ *
+ * FIREWALL-safe: pure data logic; no component/schema imports.
+ */
+export function isCopyCompatible(
+  decl: BlockDeclaration,
+  sectionElements: Record<string, unknown> | null | undefined
+): boolean {
+  const elements = sectionElements ?? {};
+  const consumes = new Set(decl.consumes);
+  const presentKeys: string[] = [];
+
+  for (const [key, value] of Object.entries(elements)) {
+    if (!isPresentValue(value)) continue;
+    presentKeys.push(key);
+    const isCollection = Array.isArray(value);
+    // (i) present, non-empty SCALAR not consumed by target ⇒ silent copy drop.
+    if (!isCollection && !consumes.has(key)) return false;
+  }
+
+  // (ii) non-empty render: at least one present key is consumed by the target.
+  return presentKeys.some((k) => consumes.has(k));
+}
+
+/** Classification of a consumed element key, injected by the static test. */
+export type ConsumedKeyKind = 'scalar' | 'collection';
+
+/** A both-ways scalar-divergent co-eligible variant pair (conformance failure). */
+export interface IncompatibleVariantPair {
+  a: string;
+  b: string;
+}
+
+/** Asset facts with every kind present — used to gate STATIC co-eligibility. */
+const ALL_ASSETS_PRESENT: AssetFacts = {
+  hasPhotos: true,
+  hasLogos: true,
+  hasTestimonials: true,
+  hasTestimonialPhotos: true,
+};
+
+/**
+ * STATIC conformance helper (drives conformance check (e)). For ONE
+ * SectionBlockSet, return every CO-ELIGIBLE variant pair that is BOTH-WAYS
+ * scalar-divergent — i.e. genuinely incompatible (no lossless swap in either
+ * direction). Such a pair MUST be split by distinct `copyShape` tags.
+ *
+ * Co-eligible = SAME `copyShape` group AND both pass `isBlockEligible` under
+ * identical (all-present) asset facts (`internalDispatch` is NOT exempt).
+ * Both-ways scalar-divergent = A consumes a SCALAR key ∉ consumes(B) AND B
+ * consumes a SCALAR key ∉ consumes(A). Superset/equal pairs are one-way (or
+ * zero-way) divergent and PASS.
+ *
+ * `classify(layoutName, key)` reports whether a consumed key is scalar or a
+ * collection per the STATIC element schema. It is injected by the caller (the
+ * test) so THIS runtime module imports no schema — the firewall stays intact.
+ */
+export function findIncompatibleCoEligiblePairs(
+  set: SectionBlockSet,
+  classify: (layoutName: string, key: string) => ConsumedKeyKind
+): IncompatibleVariantPair[] {
+  const variants = set.variants;
+  const out: IncompatibleVariantPair[] = [];
+
+  const scalarConsumes = (decl: BlockDeclaration): string[] =>
+    decl.consumes.filter((k) => classify(decl.layoutName, k) === 'scalar');
+
+  for (let i = 0; i < variants.length; i++) {
+    for (let j = i + 1; j < variants.length; j++) {
+      const A = variants[i];
+      const B = variants[j];
+
+      // Co-eligibility gate: same copyShape group + both asset-eligible.
+      if ((A.copyShape ?? undefined) !== (B.copyShape ?? undefined)) continue;
+      if (!isBlockEligible(A, { assetFacts: ALL_ASSETS_PRESENT })) continue;
+      if (!isBlockEligible(B, { assetFacts: ALL_ASSETS_PRESENT })) continue;
+
+      const aConsumes = new Set(A.consumes);
+      const bConsumes = new Set(B.consumes);
+      const aDropsIntoB = scalarConsumes(A).some((k) => !bConsumes.has(k));
+      const bDropsIntoA = scalarConsumes(B).some((k) => !aConsumes.has(k));
+      if (aDropsIntoB && bDropsIntoA) out.push({ a: A.layoutName, b: B.layoutName });
+    }
+  }
+  return out;
+}
+
 /** Normalized asset facts from the service typed asset booleans. */
 export function deriveAssetFactsFromServiceAssets(assets: ServiceAssetInput): AssetFacts {
   return {
