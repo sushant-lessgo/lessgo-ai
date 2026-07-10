@@ -663,3 +663,125 @@ Granth hero's primary is `cta_label` + `cta_href` (`writer/elementSchema.ts:25-2
 Deliberately out of scope: widening the global allowlist would change stamping for the entire **writer**
 audience (different track, no acceptance repro, goal typically not a form — default `#books`). Fixing it
 means widening the allowlist + a `cta_label → cta_href` bridge mapping.
+
+---
+
+## Phase 4 — Parity + re-point + detach tests (test-only)
+
+### Files changed
+- `src/utils/normalizeCtas.parity.test.ts` (new) — the three lock tests.
+
+**No production code changed.** This phase is test-only by design: the three acceptance criteria are
+already satisfied by existing machinery (`normalizeCtas` + `buildNormalizeCtasContext` +
+`goalToDestination` + the phase-3.5 flat bridge; `getPublishedGoal` re-reads the goal fresh at publish;
+`ButtonConfigurationModal.buildCtaButton` writes the detach shape). Nothing needed building — confirmed by
+finding all three criteria resolvable at the `normalizeCtas` layer without touching a production file.
+
+### What each test proves
+
+**1. Parity (spec criterion 7 / D-B).** Builds a multipage fc through the REAL assembly
+(`buildMultiPageSkeleton` + `mergePageIntoFinalContent` + `finalizeMultiPageGeneration(fc, M1)`) with a
+sitemap where HOME does NOT hold the form (sections `['hero','cta']`) and `/contact` does — forcing the
+cross-page `page` dest. The fixtures enter UNSTAMPED; the real stamp writes `dest:'GOAL_REF'` (asserted as a
+guard). Then it constructs the EDIT ctx exactly as `LandingPageRenderer.tsx:142-152` does (passing `pages`,
+scanned via `findFormPagePath` inside the builder) and the PUBLISHED ctx exactly as
+`renderPublishedExport.ts:156-157` → `LandingPagePublishedRenderer.tsx:85-88` does (passing a precomputed
+`formPagePath`). Asserts the whole normalized tree is `.toEqual` across both ctx, and — per hero/cta/header
+primary — the `buttonConfig` (`{type:'page', pathSlug:'/contact'}`), the bridged flat `cta_href`, and
+`resolveCtaHref(...)` (`/contact`, `not.toContain('/p/')`) are all identical.
+
+- **What the parity test PROVES:** the shared resolution layer (normalizeCtas + buildNormalizeCtasContext +
+  goalToDestination + the phase-3.5 flat bridge) produces identical hrefs for edit-shaped vs published-shaped
+  ctx inputs — i.e. the two renderers' divergent ctx-construction (edit scans `pages`; published passes a
+  precomputed `formPagePath`) converge to the same result.
+- **What it does NOT PROVE (stated plainly):** it does NOT exercise block-level rendering — the `.tsx` /
+  `.published.tsx` component pairs are never mounted — nor the dead edit click path (`src/utils/ctaHandler.ts`,
+  zero importers). Per D-B the edit `.tsx` blocks compute no href (they render editable text), so the only
+  layer where an href exists in BOTH worlds is `normalizeCtas`; that is the ratified parity layer. Live
+  editor↔published block parity is the phase-6 human gate, not this test.
+
+**2. Re-point (spec criterion 5, first half).** ONE GOAL_REF-stamped hero (stamped by the REAL
+`stampGoalRefCtas`, not hand-authored) resolved under three goal contexts: M1 single-page → `#form-section`
+(`{type:'form'}`); M1 multipage, form on `/contact` → BARE `/contact` (`{type:'page'}`, `not.toContain('/p/')`);
+M3 external → the URL (`{type:'link'}`). Asserts all three hrefs differ (`Set(...).size === 3`), the bridged
+flat `cta_href` re-points too, and — proving render-time-only — the source content JSON is byte-identical
+after all three calls and the output is a fresh clone (`out !== content`). The stamp carries an M1 `formId`;
+the test documents/relies on the fact that GOAL_REF resolution reads `ctx.goal`, never the stamped formId, so
+the same content re-points as the goal changes.
+
+**3. Detach (spec criterion 5, second half).** A page carries BOTH a GOAL_REF primary (real stamp) AND a
+detached primary whose `cta.dest` is `{kind:'page', pathSlug:'/pricing'}` — the exact shape
+`buildCtaButton`'s `case 'page'` writes (read from `ButtonConfigurationModal.tsx:91-92`, not invented).
+Resolved under M1 and M3: the GOAL_REF primary re-points (hrefs differ), while the detached primary's
+`buttonConfig` (`{type:'page', pathSlug:'/pricing'}`) is identical under both goals AND its flat `cta_href`
+stays `#contact` — the phase-3.5 bridge is GOAL_REF-only and skips it. The GOAL_REF-vs-detached contrast in
+ONE fixture is what makes the assertion feature-locking (it fails if goal resolution breaks OR if the bridge
+clobbers a detached href).
+
+### False-green discipline
+Every GOAL_REF fixture is produced by real machinery — the parity case via full multipage assembly +
+`finalizeMultiPageGeneration`, re-point/detach via a direct `stampGoalRefCtas` call — never by hand-authoring
+`dest:'GOAL_REF'`. The detach fixture's explicit `Destination` is the sole hand-authored `cta`, and it is
+copied verbatim from `buildCtaButton`'s output shape (per the phase instruction). Each assertion would fail
+under a revert: parity would break if the two ctx-builders diverged; re-point would collapse (all three
+hrefs equal) if GOAL_REF stopped following `ctx.goal`; detach would fail if the bridge lost its GOAL_REF-only
+guard.
+
+### Deviations from the plan
+None. Files-touched limited to the single new test file. No production code required a change (the whole
+point of the phase); no STOP condition arose — all three criteria were reachable at the `normalizeCtas`
+layer as the plan predicted. (Non-blocking note from the phase-1 review — "no direct normalizeCtas-layer test
+for the null→`#` inert mapping" — was NOT in scope for phase 4 and is left to phase 5's param-less matrix;
+this phase covers only parity/re-point/detach.)
+
+### Test results
+- `npx tsc --noEmit`: clean.
+- `npx vitest run src/utils/normalizeCtas.parity.test.ts`: 3 passed.
+- `npx vitest run src/utils`: 9 files, 113 passed.
+- `npm run test:run` (full): 114 passed | 1 skipped (115 files); 1847 passed | 3 skipped (1850) — up from
+  phase-3.5's 1844 by the 3 new parity/re-point/detach cases. 0 failures.
+- `npm run build`: NOT run (reserved for phase 6).
+
+### Open risks
+- The parity test proves layer-level (normalizeCtas) agreement, not block-render agreement — the residual
+  block↔block risk is covered only by the phase-6 manual gate on `I9HwKOYo9jsm` / `9knkYn8_QZpE`.
+- Carried-forward, unchanged by this phase: the vestria popover `/contact` collision (phase-3.5 follow-up),
+  granth descope, the techpremium/naayom seam, and the regenerate-path gap — all out of scope here.
+
+---
+
+## Phase 4 — impl-review verdict: **ship** (loop 1, no blocking issues)
+
+Gate: `npx tsc --noEmit` exit 0 · `npm run test:run` 1847 passed / 3 skipped / 0 failures (+3 vs phase 3.5).
+
+Test-only phase confirmed: `git diff HEAD --stat -- src/` empty; one new file
+(`src/utils/normalizeCtas.parity.test.ts`). No production code changed — i.e. all three criteria really
+were satisfied by existing machinery, as the plan predicted.
+
+Revert-sensitivity verified per test (the only thing that matters in a test-only phase):
+- **Parity** — per-primary `{type:'page', pathSlug:'/contact'}` + `resolveCtaHref === '/contact'` fail if
+  phase 3's cross-page dest is reverted. The whole-tree `toEqual` is NOT tautological: the edit ctx derives
+  `formPagePath` via the real `findFormPagePath(pages,'/')` (mirroring `LandingPageRenderer.tsx:142-152`)
+  while the published ctx uses the exporter's precomputed `formPagePath` (`renderPublishedExport.ts:157` →
+  `LandingPagePublishedRenderer.tsx:85-88`). If the scan ever disagreed with the exporter, `toEqual` fails.
+  That two-sided agreement IS the parity risk.
+- **Re-point** — three goals → `#form-section` / bare `/contact` / external URL; `Set(hrefs).size === 3`
+  collapses if GOAL_REF stopped reading `ctx.goal`. Source JSON asserted byte-identical after all three
+  resolutions (+ `out !== content`), pinning render-time-only resolution.
+- **Detach** — fixture copies `buildCtaButton`'s `case 'page'` shape verbatim
+  (`ButtonConfigurationModal.tsx:91-92`). Detached href stays `#contact` under both goals, which fails if
+  the bridge's `cta.dest === 'GOAL_REF'` guard (`normalizeCtas.ts:232`) were removed. Asserts BOTH
+  `buttonConfig` and the flat `cta_href`.
+
+Fixtures enter UNSTAMPED through real machinery (`buildMultiPageSkeleton` → `mergePageIntoFinalContent` →
+`finalizeMultiPageGeneration`); GOAL_REF produced by the real `stampGoalRefCtas`. The only hand-authored
+`cta` is the detach `Destination`, correctly sourced from `buildCtaButton`.
+
+### What the parity test does NOT prove (stated so phase 6's gate knows what's still unverified)
+It proves the shared resolution layer (`normalizeCtas` + `buildNormalizeCtasContext` + `goalToDestination`
++ the phase-3.5 bridge) agrees for edit-shaped vs published-shaped ctx. It does NOT mount any block:
+`.tsx` / `.published.tsx` pairs are never rendered, and the dead edit click path (`ctaHandler.ts`, zero
+importers) is untouched. Per D-B, edit blocks compute no href, so `normalizeCtas` is the only layer where
+an href exists in both worlds. **Live block↔block parity remains the phase-6 human gate.**
+
+Dead code (`ctaHandler.ts`, `FormConnectedButton.tsx`) neither wired nor deleted, per D-B.
