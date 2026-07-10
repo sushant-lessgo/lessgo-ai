@@ -270,3 +270,48 @@ Route-level tests: NEITHER confirm nor regenerate-section has test precedent (no
 - Dual-renderer: deliberately NO `.tsx`/`.published.tsx`/registry edits — provenance is metadata read by no block. The grep gate + published-output test ARE the enforcement.
 - The regenerate-section provenance is a scope-forced partial (see delta above): route response carries the flag; the edit-store client does not yet read it. Common real-proof-on-regen case works via existing-aiMetadata preservation; the drafted→later-real edge case needs the follow-up `aiActions.ts` one-liner.
 - In-scope conservative choice logged: rather than fight the exclusion mechanism, the published-output test runs the true publish path (`sanitizeContentForPublish` then `generateStaticHTML`) because `generateStaticHTML` does not sanitize on its own.
+
+## Phase 5 — T2 count signal (approximate testimonial count → UIBlock choice)
+
+**Files changed**
+- `src/hooks/useWizardStore.ts` (modified)
+- `src/hooks/useWizardStore.test.ts` (modified)
+- `src/components/onboarding/wizard/ProofSlot.tsx` (modified)
+- `src/modules/wizard/generation/thing.ts` (modified)
+- `src/modules/wizard/generation/thing.test.ts` (modified)
+- `src/modules/wizard/generation/trust.ts` (modified)
+- `src/modules/wizard/generation/trust.test.ts` (modified)
+
+### State field + init
+`WizardProofState.testimonialCount: number | null` added; `initialProof.testimonialCount = null`. Buckets are UX only; the STORED value is a representative hint number. Bucket→number: **1–2→2, 3–5→4, 6+→8** (`TESTIMONIAL_COUNTS` in ProofSlot). `null` = no answer = no hint = prior behavior.
+
+### ProofSlot chip UI
+`'use client'` component (unchanged, still client-safe — no server imports added). New chip row mirrors the existing `testimonialType` sub-choice block exactly (same button/ring classes, `grid grid-cols-3`). Gated on `anyTestimonialOn && proof.testimonialType` (only after ON + type chosen). Labelled "(optional)"; clicking the selected chip toggles it back to `null` (skippable). Turning a testimonials boolean OFF now clears BOTH `testimonialType` and `testimonialCount`.
+
+### buildBriefPatch carry (the two proof projections)
+Carried wherever `proof.hasTestimonials`/`testimonialType` already flow:
+- `buildThingInput` — `proof.testimonialCount` added CONDITIONALLY (omitted when `null`) so `input.proof` stays `{ hasTestimonials }` on the default path (keeps existing `toEqual` assertions byte-identical).
+- `buildTrustInput` — `proof.testimonialCount` added always (matches that projection's style of emitting `testimonialType` even when null).
+
+### Hint precedence — thing.ts vs trust.ts (ASYMMETRY — reviewer note)
+Shared pure helper `testimonialCountHint(importedCount, userCount)` in BOTH modules: SCRAPED (`importedTestimonials.length`, >0) wins → else user-answered count (>0) → else `undefined`.
+- **thing.ts (LIVE):** used in the multipage fan-out at the existing `cardCountHints` build site (`ob.importedTestimonials?.length` OR `input.proof?.testimonialCount`), feeding `selectProductBlocks` → the real `cardCountHint` eligibility seam. Single-page thing has no count seam (uses `strategy.uiblocks`), unchanged.
+- **trust.ts (DORMANT — asymmetry):** trust builds NO `cardCountHints` today. The service seam `selectServiceUIBlocks` (selectUIBlocks.ts:49-50) is fed by `assembleServiceStrategy` (parseStrategyService.ts) which passes ONLY `assetFacts`, never `cardCountHints` — and that assembler + the service strategy route are OUT of this phase's Files-touched. So the minimal in-scope equivalent (authorized by the task's "if trust builds hints differently or not at all, implement the minimal equivalent + note the asymmetry"): `buildStrategyPayload` now emits `cardCountHints: { testimonials: n }` (same precedence) when a hint exists. The service strategy route zod is non-strict → strips the extra key today, so it is **forward-compatible plumbing, currently inert**. Activating it needs a follow-up: `assembleServiceStrategy` to forward `cardCountHints` into `selectServiceUIBlocks`. NOTE: even the SCRAPED service count is not wired to block selection today — this phase does not regress that; it establishes the symmetric seam.
+
+### Tests added
+- `useWizardStore.test.ts`: `testimonialCount` defaults null + omitted from thing patch; set→carried into thing patch, clear→dropped; carried into trust proof projection (null default).
+- `thing.test.ts`: `testimonialCountHint` precedence (scraped>user>none).
+- `trust.test.ts`: `buildStrategyPayload` emits no `cardCountHints` on the no-count path (byte-identical), emits user count when no scraped quotes, scraped WINS over user; plus the precedence helper unit.
+
+### Optionality / no-count guarantee
+`null`/skip ⇒ thing omits `testimonialCount` from `input.proof` AND emits no `cardCountHints`; trust emits no `cardCountHints`. Proven by the "byte-identical" tests in both suites.
+
+### Verification
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run -- src/hooks/useWizardStore.test.ts src/modules/wizard/generation` — 3 files, 101 passed.
+- Full `npm run test:run` — **1918 passed / 3 skipped / 0 failed** (baseline 1908 + 10 new; no unrelated failures).
+
+### Open risks / reviewer notes
+- trust.ts hint is DORMANT (see asymmetry above) — the count reaches the service UIBlock choice only after a future `assembleServiceStrategy` forward. If the reviewer prefers no inert payload key, the alternative is type+helper only; the emit was chosen as the honest symmetric seam.
+- Resumed multipage drafts: the fan-out reads `input.proof?.testimonialCount` from the reconstructed input; a fully-resumed draft may not carry it, in which case the scraped count on `ob` still applies and the user count simply falls back to no-hint (conservative, matches prior behavior).
+- Not run: `npm run build` / e2e (not in the phase verification list).

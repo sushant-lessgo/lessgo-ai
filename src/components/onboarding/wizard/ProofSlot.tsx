@@ -61,6 +61,18 @@ const TESTIMONIAL_TYPES: Array<{ value: TestimonialType; label: string }> = [
   { value: 'transformation', label: 'Transformation stories' },
 ];
 
+/**
+ * proof-truth phase 5 — OPTIONAL approximate-count buckets. Buckets are the UX;
+ * the STORED value is a representative hint number (1–2→2, 3–5→4, 6+→8) that
+ * feeds the `cardCountHint` eligibility seam on the manual path. Skippable ⇒
+ * `testimonialCount` stays `null` ⇒ no hint ⇒ current behavior.
+ */
+const TESTIMONIAL_COUNTS: Array<{ value: number; label: string }> = [
+  { value: 2, label: '1–2' },
+  { value: 4, label: '3–5' },
+  { value: 8, label: '6+' },
+];
+
 function businessTypeEntryFor(key: BusinessTypeKey | null): BusinessTypeEntry | null {
   return key && key in businessTypes ? businessTypes[key] : null;
 }
@@ -298,8 +310,11 @@ export default function ProofSlot() {
                 onToggle={() => {
                   const next = !value;
                   const patch: Partial<WizardProofState> = { [meta.proofKey]: next };
-                  // Turning a testimonial boolean off clears the sub-choice.
-                  if (meta.testimonial && !next) patch.testimonialType = null;
+                  // Turning a testimonial boolean off clears the sub-choices.
+                  if (meta.testimonial && !next) {
+                    patch.testimonialType = null;
+                    patch.testimonialCount = null;
+                  }
                   setProof(patch);
                 }}
               />
@@ -321,6 +336,35 @@ export default function ProofSlot() {
                 onClick={() => setProof({ testimonialType: value })}
                 className={`px-3 py-2 rounded-md border text-sm transition-all ${
                   proof.testimonialType === value
+                    ? 'border-brand-accentPrimary bg-brand-accentPrimary/5 text-brand-accentPrimary ring-2 ring-brand-accentPrimary/20'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {anyTestimonialOn && proof.testimonialType && (
+        <div className="space-y-2">
+          <Label className="text-gray-700">
+            Roughly how many can you publish?{' '}
+            <span className="text-sm font-normal text-gray-400">(optional)</span>
+          </Label>
+          <div className="grid grid-cols-3 gap-2">
+            {TESTIMONIAL_COUNTS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() =>
+                  setProof({
+                    testimonialCount: proof.testimonialCount === value ? null : value,
+                  })
+                }
+                className={`px-3 py-2 rounded-md border text-sm transition-all ${
+                  proof.testimonialCount === value
                     ? 'border-brand-accentPrimary bg-brand-accentPrimary/5 text-brand-accentPrimary ring-2 ring-brand-accentPrimary/20'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}

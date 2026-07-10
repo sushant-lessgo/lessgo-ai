@@ -16,6 +16,7 @@ import {
   briefGoalFor,
   runThingGeneration,
   runStrategy,
+  testimonialCountHint,
   type ThingGenerationInput,
 } from './thing';
 import type { ProductStrategyOutput } from '@/types/product';
@@ -225,6 +226,24 @@ describe('THING adapter — copy payload fidelity', () => {
       STRATEGY
     );
     expect(withT.realTestimonials).toHaveLength(1);
+  });
+});
+
+// proof-truth phase 5 — testimonials card-count hint precedence.
+describe('THING adapter — testimonialCountHint precedence (scraped > user > none)', () => {
+  it('scraped count (importedTestimonials.length) WINS over the user count', () => {
+    expect(testimonialCountHint(5, 2)).toBe(5);
+  });
+
+  it('user count is used ONLY when there are no scraped quotes', () => {
+    expect(testimonialCountHint(undefined, 4)).toBe(4);
+    expect(testimonialCountHint(0, 4)).toBe(4);
+  });
+
+  it('neither ⇒ undefined (no hint key ⇒ current behavior)', () => {
+    expect(testimonialCountHint(undefined, null)).toBeUndefined();
+    expect(testimonialCountHint(undefined, undefined)).toBeUndefined();
+    expect(testimonialCountHint(0, 0)).toBeUndefined();
   });
 });
 
