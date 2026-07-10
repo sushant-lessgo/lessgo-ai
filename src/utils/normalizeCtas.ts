@@ -35,7 +35,31 @@
 import type { CTAButton, Destination } from '@/types/destination';
 import type { Brief } from '@/types/brief';
 import { goalToDestination } from '@/modules/goals/goalToDestination';
-import { resolveDestination, type CtaButtonConfig } from '@/utils/resolveCtaHref';
+import { resolveDestination, resolveCtaHref, type CtaButtonConfig } from '@/utils/resolveCtaHref';
+
+// goal-ref-cta phase 3.5 — FLAT-HREF RENDER BRIDGE.
+// Some templates (vestria hero/header, granth hero) render a FLAT `elements.cta_href`
+// and do NOT read `elementMetadata[key].buttonConfig` (published `Link` takes the
+// href prop verbatim). The GOAL_REF stamp + resolution therefore never reach them —
+// dead wiring. This map wires each ALLOWLISTED primary metadata key (matches
+// stampGoalRefCtas' allowlist) to the sibling flat href ELEMENT key it must also
+// populate, so a resolved goal destination lands where those blocks actually read.
+const GOAL_REF_FLAT_HREF_KEYS: Record<string, string> = { cta_text: 'cta_href' };
+
+// Known schema-default `cta_href` values across templates (vestria `#contact`,
+// granth `#books`, techpremium `/contact`, plus the generic inert `#`). The bridge
+// overwrites a flat `cta_href` ONLY when it is absent/empty OR EXACTLY one of these
+// — i.e. never a value a human typed via the editor's LinkTargetPopover
+// (editPrimitives.tsx writes `elements.cta_href` directly). A flat href present AND
+// not in this set = user-set → left untouched.
+//
+// TRADEOFF (ratified): kept as a LOCAL constant rather than derived from the
+// per-audience `elementSchema` modules. normalizeCtas is a plain firewall-safe util
+// with no per-section template/block context (it sees generic `sectionId`s), and
+// importing the audience schemas to reverse-map a default would add coupling and
+// import surface for no render benefit. If a template ever adds a new default
+// `cta_href` value, add it here (see audit).
+const SCHEMA_DEFAULT_CTA_HREFS = new Set(['#contact', '#books', '/contact', '#']);
 
 export interface NormalizeCtasContext {
   goal?: Brief['goal'] | null;
@@ -186,6 +210,7 @@ export function normalizeCtas<T>(content: T, ctx: NormalizeCtasContext): T {
     if (!meta || typeof meta !== 'object') continue;
 
     let metaClone: Record<string, any> | null = null;
+    let elementsClone: Record<string, any> | null = null;
 
     for (const elKey of Object.keys(meta)) {
       const entry = meta[elKey];
@@ -197,11 +222,40 @@ export function normalizeCtas<T>(content: T, ctx: NormalizeCtasContext): T {
 
       if (!metaClone) metaClone = { ...meta };
       metaClone![elKey] = { ...entry, buttonConfig };
+
+      // goal-ref-cta phase 3.5 — bridge the resolved href into the sibling flat
+      // `cta_href` for templates that render it directly. GOAL_REF-ONLY: an
+      // explicit/detached Destination (concrete `cta.dest`) and a user-set flat
+      // href both win over the bridge (spec criterion 5). Legacy metadata-less
+      // buttons never reach here (`if (!cta) continue;` above).
+      const hrefKey = GOAL_REF_FLAT_HREF_KEYS[elKey];
+      if (hrefKey && cta.dest === 'GOAL_REF') {
+        // Same resolution the wired blocks get, minus a fallback (empty = could
+        // not resolve → do NOT touch the flat href).
+        const resolvedHref = resolveCtaHref(
+          buttonConfig,
+          ctx.forms as Record<string, any> | undefined,
+          '',
+        );
+        const existing = section.elements?.[hrefKey];
+        const isDefaultOrEmpty =
+          existing === undefined ||
+          existing === null ||
+          existing === '' ||
+          (typeof existing === 'string' && SCHEMA_DEFAULT_CTA_HREFS.has(existing));
+        if (resolvedHref && isDefaultOrEmpty && existing !== resolvedHref) {
+          if (!elementsClone) elementsClone = { ...(section.elements ?? {}) };
+          elementsClone![hrefKey] = resolvedHref;
+        }
+      }
     }
 
-    if (metaClone) {
+    if (metaClone || elementsClone) {
       if (!contentClone) contentClone = { ...(content as Record<string, any>) };
-      contentClone[sectionKey] = { ...section, elementMetadata: metaClone };
+      const nextSection: Record<string, any> = { ...section };
+      if (metaClone) nextSection.elementMetadata = metaClone;
+      if (elementsClone) nextSection.elements = elementsClone;
+      contentClone[sectionKey] = nextSection;
     }
   }
 

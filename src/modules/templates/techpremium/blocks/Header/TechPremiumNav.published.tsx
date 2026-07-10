@@ -39,7 +39,15 @@ export default function TechPremiumNavPublished(props: Props) {
 
   const md = props.content?.[props.sectionId]?.elementMetadata;
   const forms = props.content?.forms;
-  const ctaHref = props.cta_href || resolveCtaHref(md?.cta_text?.buttonConfig, forms, '/contact');
+  // goal-ref-cta phase 3.5 — precedence fix. Previously `props.cta_href || resolve(...)`
+  // let a stale/default flat `cta_href` SHADOW a resolved goal destination. When a
+  // resolved buttonConfig exists (GOAL_REF stamped + normalizeCtas-resolved, or a
+  // ButtonConfigurationModal-set config), it now WINS, with the flat prop only as its
+  // fallback; with no buttonConfig, the flat prop is used unchanged (legacy parity).
+  const ctaButtonConfig = md?.cta_text?.buttonConfig;
+  const ctaHref = ctaButtonConfig
+    ? resolveCtaHref(ctaButtonConfig, forms, props.cta_href || '/contact')
+    : (props.cta_href || '/contact');
   const signinHref = props.signin_url || resolveCtaHref(md?.signin_text?.buttonConfig, forms, '#');
   const hasChildren = (it: NavItem) => Array.isArray(it.children) && it.children.length > 0;
 

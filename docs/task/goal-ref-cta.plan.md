@@ -12,8 +12,8 @@ Fix F5/F6/F23. The central gap: `seedGoalForm.ts:81` early-returns `if (!isM1) r
 
 - phase 1 GOAL_REF stamping for ALL mechanisms on BOTH generation paths: done (commit c70aa37e, review loops 1, verdict ship)
 - phase 2 dual-read shim coverage + legacy fixture + reader-impact analysis: done (commit 1dfc2d9c, review loops 1, verdict ship — NO production code changed; shim already complete)
-- phase 3 multipage M1 page dest + chrome/header reach + shared ctx builder (F23): done (commit <pending>, review loops 1, verdict ship)
-- phase 3.5 flat-href render bridge (vestria/granth/techpremium-header) — ADDED mid-run, see below: pending
+- phase 3 multipage M1 page dest + chrome/header reach + shared ctx builder (F23): done (commit e7cd8db9, review loops 1, verdict ship)
+- phase 3.5 flat-href render bridge (vestria + techpremium-header; granth descoped) — ADDED mid-run: done (commit <pending>, review loops 1, verdict ship)
 - phase 4 parity + re-point + detach tests (test-only): pending
 - phase 5 M2–M5 engine matrix + cross-template allowlist coverage: pending
 - phase 6 full verification + manual repro gate: pending
@@ -222,7 +222,7 @@ destination, in BOTH renderers, without touching any template block or `.core.ts
 
 **Files touched:**
 - `src/utils/normalizeCtas.ts`
-- `src/modules/templates/techpremium/blocks/Nav/TechPremiumNav.published.tsx` (+ its `.tsx` pair if it shares the precedence)
+- `src/modules/templates/techpremium/blocks/Header/TechPremiumNav.published.tsx` (`.tsx` pair NOT touched — verified it computes no href, so it does not share the precedence bug)
 - `src/utils/normalizeCtas.bridge.test.ts` (new)
 - `src/lib/staticExport/__tests__/multipageGoalRef.test.ts` (extend: vestria case)
 
