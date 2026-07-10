@@ -25,7 +25,7 @@ Why this wins: content values stay plain strings → **zero published-path risk,
 
 - phase 1 toggle integrity (capability ≠ content): done (commit 91c283a2, review loops 1)
 - phase 2 prompt guard + fillMode audit + sentinel hardening: done (commit 014bb06b, review loops 1; scope +promptBranch.test.ts baseline recapture)
-- phase 3 confirm-time auto-import + table-backed regen injection: done (review loops 1, ship; HUMAN GATE cleared — user OK'd dark-write; deviation: userId=clerkId fixes latent plan bug)
+- phase 3 confirm-time auto-import + table-backed regen injection: done (commit dcc3ce21, review loops 1; HUMAN GATE cleared — user OK'd dark-write; deviation: userId=clerkId fixes latent plan bug)
 - phase 4 provenance metadata + marker suppression: pending
 - phase 5 T2 count signal: pending
 - phase 6 scalePlan §8 law amendment: pending
