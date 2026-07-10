@@ -4,9 +4,14 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { isAdmin } from '@/lib/admin';
 import TransferOwnershipControl from '@/components/admin/TransferOwnershipControl';
-import { businessTypes, businessTypeKeys } from '@/modules/businessTypes/config';
+import {
+  businessTypes,
+  businessTypeKeys,
+  type BusinessTypeKey,
+} from '@/modules/businessTypes/config';
 import { fit } from '@/modules/templates/fit';
 import { templateIds } from '@/types/service';
+import { serveabilityMatrix, type ServeMatrixRow } from '@/modules/brief/serveMatrix';
 
 export const dynamic = 'force-dynamic';
 
@@ -154,19 +159,23 @@ export default async function AdminPage() {
   const userOptions = users.map((u) => ({ clerkId: u.clerkId, email: u.email }));
 
   // Business-type config panel (read-only; editing entries is a code deploy —
-  // frozen-enum philosophy). Serveability reuses the pure `fit()` helper: a type
-  // is SERVEABLE iff some non-bespoke, non-retired shipped template declares its
-  // copyEngine AND covers every requiredCapability. A capability is "missing"
-  // when no such template backs it (e.g. photographer → gallery).
+  // frozen-enum philosophy). Serveability is the REAL gate: serveabilityMatrix()
+  // runs decideServe per businessType × likelyIntent, so this table can never
+  // disagree with the live gate (serve-gate-v2 phase 3). The caps column still
+  // uses the pure `fit()` helper to flag which requiredCapability is unbacked
+  // (e.g. photographer → gallery).
+  const intentsByType = new Map<BusinessTypeKey, ServeMatrixRow[]>();
+  for (const row of serveabilityMatrix()) {
+    const list = intentsByType.get(row.businessType) ?? [];
+    list.push(row);
+    intentsByType.set(row.businessType, list);
+  }
   const businessTypeRows = businessTypeKeys.map((key) => {
     const entry = businessTypes[key];
-    const serveable = templateIds.some((t) =>
-      fit(t, entry.copyEngine, [...entry.requiredCapabilities])
-    );
     const missingCaps = entry.requiredCapabilities.filter(
       (cap) => !templateIds.some((t) => fit(t, entry.copyEngine, [cap]))
     );
-    return { entry, serveable, missingCaps };
+    return { entry, missingCaps, intents: intentsByType.get(key) ?? [] };
   });
 
   return (
@@ -520,7 +529,7 @@ export default async function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {businessTypeRows.map(({ entry, serveable, missingCaps }) => (
+                {businessTypeRows.map(({ entry, missingCaps, intents }) => (
                   <tr key={entry.key} className="border-t border-slate-100 hover:bg-slate-50">
                     <td className="px-3 py-2 font-mono text-xs">{entry.key}</td>
                     <td className="px-3 py-2">{entry.label}</td>
@@ -546,15 +555,22 @@ export default async function AdminPage() {
                       {entry.voiceHint ?? '—'}
                     </td>
                     <td className="px-3 py-2 text-xs">
-                      {serveable ? (
-                        <span className="inline-block rounded bg-emerald-100 text-emerald-800 px-2 py-0.5 font-semibold">
-                          serveable
-                        </span>
-                      ) : (
-                        <span className="inline-block rounded bg-red-100 text-red-800 px-2 py-0.5 font-semibold">
-                          missing: {missingCaps.join(', ') || 'no template'}
-                        </span>
-                      )}
+                      <div className="flex flex-col gap-1">
+                        {intents.map(({ intent, decision }) => (
+                          <div key={intent} className="flex items-center gap-2">
+                            <span className="font-mono text-slate-500 min-w-[7rem]">{intent}</span>
+                            {decision.outcome === 'serve' ? (
+                              <span className="inline-block rounded bg-emerald-100 text-emerald-800 px-2 py-0.5 font-semibold">
+                                serve → {decision.templateId}
+                              </span>
+                            ) : (
+                              <span className="inline-block rounded bg-red-100 text-red-800 px-2 py-0.5 font-semibold font-mono">
+                                {decision.missing}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </td>
                   </tr>
                 ))}

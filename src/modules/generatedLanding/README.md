@@ -96,6 +96,21 @@ projects instead compute an explicit `sectionBackgroundCSS` from `theme.colors`.
 | `EditableText.tsx` | `contentEditable` text primitive used inside edit-mode blocks. |
 | `EditableWrapper.tsx` | Hover/pencil affordance wrapper for editable elements (edit mode only). |
 
+## Shared blocks (`sharedBlocks/`)
+
+A handful of blocks (`LeadForm`, `StoreBadges`, `FollowStrip`) render **identically on
+every template** — the component registries consult `resolveSharedBlock*()` BEFORE
+template dispatch. Each is a dual-renderer pair with its own lowercased registry key
+(`leadForm-<uuid>` → `leadform`) in `registry.ts` (edit) and `registry.published.ts`
+(published).
+
+**When you add a new shared block you MUST also declare its serve-gate capability in
+`sharedBlocks/capabilities.ts`** — map its lowercased key to a `CapabilityId`, or to an
+explicit `null` if no capability id fits it today. `capabilities.ts` is PURE DATA (no
+React/component imports) so the serve gate (`src/modules/templates/fit.ts`) can import
+it without breaking its bundle firewall. `capabilities.test.ts` fails CI if the
+declaration and the two component registries ever fall out of sync.
+
 ## Consumers
 
 - Edit renderer → `/edit/[token]` and `/preview/[token]`.

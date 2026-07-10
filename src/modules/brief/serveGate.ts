@@ -4,8 +4,16 @@
 // (templateMeta, businessTypes, fit) — never a template module, block,
 // resolver, or the registry loaders.
 //
-// Gate rule (D2): SERVE iff businessType KNOWN (∈ businessTypes) AND in-ICP
-// AND facts.entry.resolvedEngine ∈ {thing,trust} AND shortlist non-empty.
+// Gate rule (D2, serve-gate-v2): SERVE iff businessType KNOWN (∈ businessTypes)
+// AND in-ICP AND facts.entry.resolvedEngine ∈ {thing,trust,work} AND shortlist
+// non-empty. A required capability is satisfied by the template's own
+// capabilities OR by a SHARED BLOCK (`fit()` — shared blocks render on every
+// template, so `lead-form`/`store-badges` needs no longer reject a
+// granth/meridian-only brief). Capabilities with NO backing template AND no
+// shared block (today: `gallery`) are still unsatisfiable ⇒ still reject.
+// AI-INFERRED `structure.mode==='multi'` is a SOFT signal: it never rejects and
+// only acts as a style-subordinate pick tiebreak (see pickTemplate) — the hard
+// `multipage` requirement lives on the USER-CONFIRMED 7b structure only.
 // Everything else ⇒ MANUAL with explicit `missing` tags. Engine clauses read
 // facts.entry.resolvedEngine, NEVER brief.copyEngine (unset for
 // place/quick-yes).
@@ -90,24 +98,46 @@ export type ServeDecision =
     };
 
 /**
- * D3 template pick, hardened: style-match the shortlist against
- * templateMeta.designStyles (ARRAY — `.includes`, not scalar equality) trying
- * brief.designStyleHint FIRST; hint null/off-list ⇒ retry with
- * businessTypes[bt].defaultStyle (bt always KNOWN on serve paths per D2);
- * THAT misses too ⇒ shortlist[0].
+ * D3 template pick, hardened + serve-gate-v2 soft-multipage tiebreak. STYLE
+ * ALWAYS WINS (D6 — machine decides facts, user decides taste): style-match the
+ * shortlist against templateMeta.designStyles (ARRAY — `.includes`, not scalar
+ * equality) trying brief.designStyleHint FIRST; hint null/off-list ⇒ retry with
+ * businessTypes[bt].defaultStyle (bt always KNOWN on serve paths per D2).
+ *
+ * Multipage is ONLY a same-style tiebreak, NEVER a candidate restriction: when a
+ * style match resolves to a SET of >1 template AND the brief carries an inferred
+ * `structure.mode === 'multi'`, prefer a multipage-capable one within that set.
+ * A style match is never overridden by multipage; the candidate pool is never
+ * narrowed. Both misses ⇒ shortlist[0].
+ *
+ * DORMANT under today's config: no two same-engine templates share a design
+ * style, so a style match is always a singleton and the multipage tiebreak
+ * branch never fires. This is deliberate, not dead code — it is the documented
+ * behavior for a future config where two same-style templates coexist and one
+ * is multipage-capable. Do NOT "fix" it by restricting candidates.
  */
 function pickTemplate(brief: Brief, sl: TemplateId[]): TemplateId {
+  const preferMultipage = (matches: TemplateId[]): TemplateId => {
+    if (matches.length > 1 && brief.structure?.mode === 'multi') {
+      const multi = matches.find((t) =>
+        templateMeta[t].capabilities.includes('multipage')
+      );
+      if (multi) return multi;
+    }
+    return matches[0];
+  };
+
   const hint = brief.designStyleHint;
   if (hint) {
-    const byHint = sl.find((t) => templateMeta[t].designStyles.includes(hint));
-    if (byHint) return byHint;
+    const byHint = sl.filter((t) => templateMeta[t].designStyles.includes(hint));
+    if (byHint.length > 0) return preferMultipage(byHint);
   }
   const entry = businessTypes[brief.businessType as BusinessTypeKey];
   if (entry) {
-    const byDefault = sl.find((t) =>
+    const byDefault = sl.filter((t) =>
       templateMeta[t].designStyles.includes(entry.defaultStyle)
     );
-    if (byDefault) return byDefault;
+    if (byDefault.length > 0) return preferMultipage(byDefault);
   }
   return sl[0];
 }
@@ -131,7 +161,9 @@ export function decideServe(brief: Brief): ServeDecision {
   // (it recomputes caps internally and would drop the injected 'gallery');
   // run fit() per-template with the augmented list and
   // facts.entry.resolvedEngine as the engine arg (D2 — NOT brief.copyEngine).
-  // Runs INDEPENDENTLY of the engine/bridge clauses.
+  // Runs INDEPENDENTLY of the engine/bridge clauses. serve-gate-v2: `gallery`
+  // has NO backing template AND no shared block, so fit() still can't satisfy
+  // it — this rung still rejects (unlike lead-form/store-badges, now shared).
   if (
     entry?.classificationSource === 'tiebreaker' &&
     entry.tiebreaker === 'portfolio-is-proof'
@@ -187,11 +219,15 @@ export function decideServe(brief: Brief): ServeDecision {
     };
   }
 
-  // Fallback (latent-gap guard): a KNOWN thing/trust type whose required caps
-  // no shortlisted template covers would otherwise reach here with zero tags
-  // ⇒ missing===''. Emit a generic shortlist-empty tag so `missing` is never
-  // empty on a manual outcome. The six acceptance fixtures all collect a tag
-  // above, so this never fires for them.
+  // Fallback (latent-gap guard): a KNOWN thing/trust/work type whose required
+  // caps no template AND no shared block covers would otherwise reach here with
+  // zero tags ⇒ missing===''. Emit a generic tag so `missing` is never empty on
+  // a manual outcome. serve-gate-v2 narrowed WHAT reaches here: lead-form and
+  // store-badges are now shared-block-satisfied (so download-app serves), and
+  // inferred multi no longer derives an unsatisfiable multipage. `gallery`
+  // (photographer) is the live path that still lands here via the rungC probe;
+  // this generic guard remains the never-empty backstop for any future
+  // unsatisfiable cap.
   if (tags.length === 0) {
     const caps = requiredCapabilitiesFromBrief(brief);
     const firstUnmet =

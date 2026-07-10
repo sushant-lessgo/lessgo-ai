@@ -106,19 +106,35 @@ describe('structure convergence — same Brief ⇒ same section list (thing sing
   });
 
   it('structural capability (multipage) contributes no section (no capabilitySections entry)', () => {
+    // INTENT: multipage is a STRUCTURAL capability — it drives page machinery,
+    // not any section, so it has no capabilitySections entry and never adds a
+    // section to the list. Assert that directly by forcing the requirement.
+    expect(
+      selectProductSections({ templateId: 'vestria', requiredCapabilities: ['multipage'] })
+    ).toEqual(THING_CORE);
+  });
+
+  it('serve-gate-v2: inferred structure.mode=multi NO LONGER emits multipage from requiredCapabilitiesFromBrief', () => {
+    // The brief-level derivation dropped inferred-multi → multipage (it is a
+    // soft signal that must never reject). So an inferred-multi brief adds no
+    // section either (it never even reaches the structural cap here). The
+    // USER-CONFIRMED 7b path (requiredCapabilitiesFromStructure) is where
+    // multipage still hardens — covered in fit.test.ts.
     const brief: Brief = {
       copyEngine: 'thing',
       structure: { mode: 'multi', pages: ['home'] },
     };
-    expect(requiredCapabilitiesFromBrief(brief)).toContain('multipage');
+    expect(requiredCapabilitiesFromBrief(brief)).not.toContain('multipage');
     expect(selectProductSections({ templateId: 'vestria', brief })).toEqual(THING_CORE);
   });
 });
 
 describe('explicit-trigger discipline — the 5 new ids are NEVER auto-inferred', () => {
-  // requiredCapabilitiesFromBrief's only sources: businessType entry caps,
-  // mechanism M1, intent download-app, structure.mode multi. Exercise the
-  // maximal derivation for every businessType and assert none of the 5 leak.
+  // requiredCapabilitiesFromBrief's only sources (serve-gate-v2): businessType
+  // entry caps, mechanism M1 (→ lead-form), intent download-app (→ store-badges).
+  // The inferred structure.mode==='multi' → multipage derivation was DELETED
+  // (soft signal). Exercise the maximal derivation for every businessType and
+  // assert none of the 5 explicit-trigger ids leak.
   for (const businessType of businessTypeKeys) {
     it(`${businessType} + M1 + download-app + multi derives none of trust/industries/about/materials/process`, () => {
       const brief: Brief = {
