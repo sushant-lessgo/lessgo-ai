@@ -14,8 +14,9 @@
 
 import { z } from 'zod';
 import type { EntrySignals, CollectionEntryDraft } from '@/modules/brief/classify';
+import { resolveEngine } from '@/modules/brief/classify';
 import type { CollectionKey } from '@/modules/collections/registry';
-import { getCollectionDef } from '@/modules/collections/registry';
+import { getCollectionDef, allEntryCollectionKeys } from '@/modules/collections/registry';
 import { businessTypes, type BusinessTypeKey } from '@/modules/businessTypes/config';
 import { thingExtraction } from './thing';
 import { trustExtraction } from './trust';
@@ -40,6 +41,21 @@ export interface EngineExtraction {
   entryEnrichmentFields: z.ZodRawShape;
   /** Prompt block describing the enrichment fields; '' when there are none. */
   entryEnrichmentPrompt: () => string;
+  /**
+   * Non-collection scalar enrichment fields (manufacturer's 4 trade-supplier
+   * keys today; no other engine declares any). Split out from
+   * `entryEnrichmentFields` so the entry UNION builder can merge scalar folds
+   * across engines separately from the shared `collections` object. Absent when
+   * the engine has no scalar enrichment (thing/trust/work).
+   */
+  entryScalarFields?: z.ZodRawShape;
+  /**
+   * Prompt block for `entryScalarFields`, VERBATIM (no conditional framing). The
+   * entry-union builder wraps it with a "only if applicable; else empty"
+   * conditional; the explicit-businessType path embeds it as-is. Absent when the
+   * engine has no scalar enrichment.
+   */
+  entryScalarPrompt?: () => string;
   /**
    * Fold enrichment-field values into EntrySignals additively (base values
    * lead, never overwritten). Identity for engines with no enrichment.
@@ -164,4 +180,75 @@ export function foldCollectionsIntoSignals(
   }
   if (!any) return base;
   return { ...base, collections: { ...base.collections, ...folded } };
+}
+
+// ===== Entry UNION enrichment + post-call resolver (entry-capture phase 1) =====
+// F19: on a REAL entry the single AI call both CLASSIFIES and EXTRACTS, so no
+// businessType is known when the schema/prompt is built. To capture collections
+// on that call we extend the entry schema/prompt with the UNION of every
+// engine's enrichment declarations (built MECHANICALLY from the registry — never
+// hand-listed, D9), then AFTER the call resolve the guessed engine in-code and
+// fold ONLY its fields (foreign keys drop naturally in foldCollectionsIntoSignals
+// / the engine's enrichSignals). The explicit-businessType path is untouched.
+//
+// TDZ/cycle note (see index:100-104): these are hoisted FUNCTION DECLARATIONS
+// that read `extractionRegistry` / `allEntryCollectionKeys` LAZILY at call time.
+// They must NEVER be module-level consts — a const would sit in the TDZ during
+// the index⇄engine cyclic import.
+
+/**
+ * The UNION entry-enrichment delta for the no-businessType (real entry) path:
+ *   fields = every engine's `entryScalarFields` merged + the shared
+ *            `collections` object over ALL distinct entry collection keys;
+ *   prompt = each engine's `entryScalarPrompt` (conditionally framed —
+ *            "only if applicable; else empty") + the union collections block.
+ * Built from the registry so a new engine's declarations flow in automatically.
+ */
+export function entryUnionEnrichment(): { fields: z.ZodRawShape; prompt: string } {
+  const scalarFields: z.ZodRawShape = {};
+  const scalarPromptBlocks: string[] = [];
+  for (const key of extractionSchemaKeys) {
+    const e = extractionRegistry[key];
+    if (e.entryScalarFields) {
+      for (const [k, v] of Object.entries(e.entryScalarFields)) scalarFields[k] = v;
+    }
+    if (e.entryScalarPrompt) {
+      scalarPromptBlocks.push(
+        `The following fields apply ONLY if this business makes or supplies physical goods; otherwise leave them empty ("" or []):\n${e.entryScalarPrompt()}`
+      );
+    }
+  }
+  const fields: z.ZodRawShape = {
+    ...scalarFields,
+    ...collectionsEnrichmentFields(allEntryCollectionKeys),
+  };
+  const prompt = [...scalarPromptBlocks, collectionsEnrichmentPrompt(allEntryCollectionKeys)].join(
+    '\n\n'
+  );
+  return { fields, prompt };
+}
+
+/**
+ * Resolve WHICH engine's enrichment to fold AFTER the entry call classifies.
+ * - KNOWN `businessTypeGuess` ⇒ `extractionForBusinessType()` (via
+ *   `extractionSchemaKey`, so manufacturer keeps its 4 scalar folds — resolving
+ *   through `resolveEngine` would collapse it to the 'thing' copyEngine and DROP
+ *   them).
+ * - UNKNOWN guess (rung A) ⇒ the tiebreaker ladder's engine family
+ *   (`expertise`→trust, `portfolio-is-proof`→work, `none`→thing). The ladder is
+ *   shared with `resolveEngine` (single source). `browsing-place`→place and
+ *   `offer-already-understood`→quick-yes have NO extraction ⇒ null (no fold).
+ */
+export function entryExtractionForSignals(
+  signals: Pick<EntrySignals, 'businessTypeGuess' | 'tiebreaker'>
+): EngineExtraction | null {
+  const guess = signals.businessTypeGuess;
+  if (guess && guess in businessTypes) {
+    return extractionForBusinessType(guess as BusinessTypeKey);
+  }
+  const { engine } = resolveEngine(signals);
+  if (engine === 'thing' || engine === 'trust' || engine === 'work') {
+    return getExtraction(engine);
+  }
+  return null;
 }
