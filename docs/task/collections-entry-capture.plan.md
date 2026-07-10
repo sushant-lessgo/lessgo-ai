@@ -50,8 +50,8 @@ engine declarations themselves, D9), then AFTER the call resolve the engine in-c
 ## Progress log
 
 - phase 1 union builders + collection-key single source: done (commit 7befdd64, review loops 1, ship; tsc+test:run green)
-- phase 2 route wiring (scrape-website + understand) + one-AI-call tests: done (review loops 1, ship; tsc+test:run green 1990 passed/3 skipped). Understand-route FK-strip added (foreign collection keys leaked via raw-as-base). KNOWN non-blocking: understand DEMO/mock path doesn't strip base collections — harmless (agency fixture has no collections keys); revisit if that fixture gains any.
-- phase 3 7b empty-state reachability: pending
+- phase 2 route wiring (scrape-website + understand) + one-AI-call tests: done (commit 1adcd540, review loops 1, ship; tsc+test:run green). Understand-route FK-strip added (foreign collection keys leaked via raw-as-base). KNOWN non-blocking: understand DEMO/mock path doesn't strip base collections — harmless (agency fixture has no collections keys); revisit if that fixture gains any.
+- phase 3 7b empty-state reachability: done (review loops 1, ship; tsc+test:run green 1998 passed/3 skipped). CollectionNodes gate unions collectionKeysForBusinessType (NOT requiredCollections → serve gate untouched); null bt → present-only.
 - phase 4 live verification (human gate): pending
 
 ---

@@ -98,3 +98,43 @@ Asserts: (a) exactly one `generateWithSchema` call per request (both routes); (b
 - The understand base-collections strip is the one change beyond mechanical wiring — confirm it does not alter the explicit-businessType understand response (argued byte-identical; the engine re-folds its keys from `raw`).
 - One-AI-call assertion is per-request (`vi.clearAllMocks()` in `beforeEach`); each test issues a single request.
 - Slug-derivation and foreign-key-discard are exercised through the REAL `buildBriefDraft`/`setCollections`/`enrichSignals` stack (not mocked), so the tests would catch a regression there too.
+
+---
+
+# collections-entry-capture — Phase 3 audit
+
+**Branch:** `feature/collections-entry-capture` (verified `git branch --show-current` before any edit).
+Scope: Phase 3 (7b collection-node empty-state reachability). No config/serve-gate/store-SOURCE/extraction change.
+
+## Files changed
+- `src/components/onboarding/wizard/StructureSlot.tsx`
+- `src/modules/collections/registry.test.ts` (new)
+- `src/hooks/useWizardStore.test.ts` (test-only addition; store SOURCE untouched)
+- `docs/task/collections-entry-capture.audit.md` (this section appended)
+
+## Per-file changes
+
+### `src/components/onboarding/wizard/StructureSlot.tsx` (`CollectionNodes`)
+- Import: added `collectionKeysForBusinessType` alongside the existing `getCollectionDef`/`CollectionKey` from `@/modules/collections/registry`.
+- `keys` memo now unions THREE sources: present-in-store (`Object.keys(collections)`), the dormant `requiredCollections` (left as-is — still `[]` in config, serve-gate coupling untouched), and `collectionKeysForBusinessType(businessTypeKey)` (the engine-declared family keys). Dedup via `Set`, unchanged.
+- Updated the block comment to document the engine-key union + the null-bt fallback.
+- Empty-state / `commitAdd` / `addCollectionEntry` path (`CollectionNode`) untouched, per scope.
+
+### `src/modules/collections/registry.test.ts` (new)
+- Tests `collectionKeysForBusinessType`: saas→`[products]`, app→`[products]`, consultant→`[services,case-studies]`, photographer→`[services,works]`, manufacturer→`[products]`, unknown→`[]`, null/undefined→`[]`. (7 tests.)
+
+### `src/hooks/useWizardStore.test.ts` (test-only)
+- Added ONE P3 round-trip test in the existing `useWizardStore — 7b collection channel` describe: hydrates a bare one-liner `bareThing` (no site → no extraction → `collections.products` undefined), calls `addCollectionEntry('products', 'Widget -- Co')`, then asserts `buildBriefPatch().facts.collections.products` === `[{ name: 'Widget -- Co', slug: 'widget-co' }]` (code-derived, F28 slug-collapse). Proves the manual add→Brief path end-to-end.
+
+## Decisions / notes
+- **Null-businessType fallback** requires no explicit branch: `collectionKeysForBusinessType(null)` returns `[]` (Phase-1 guard), so for an unclassified rung-A entry the union collapses to present-only — unchanged behavior, no empty nodes surfaced. Same for `requiredCollections` (`[]`). The node still returns null when the resulting `keys` is empty.
+- **Round-trip test placement:** put in `useWizardStore.test.ts` (not the registry/collections test) because the round-trip exercises the STORE actions (`addCollectionEntry` + `buildBriefPatch`) which only exist on the wizard store; that file already owns the 7b collection-channel describe with `bareThing`/`buildBriefPatch` fixtures in scope. Store SOURCE was not modified — test addition only (permitted per phase brief).
+- `businessTypes` import in StructureSlot is still used (dormant `requiredCollections` read), left in place.
+
+## Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 126 passed / 1 skipped files; 1998 passed / 3 skipped tests (Phase-2 baseline 125/1990 + new `registry.test.ts` 7 tests + 1 round-trip test). Targeted run of `registry.test.ts` + `useWizardStore.test.ts` + `serveGate.test.ts` = 3 files / 101 tests green. `serveGate.test.ts` green confirms the reachability fix did NOT re-activate the dormant serve-gate branch (`requiredCollections` untouched).
+
+## Reviewer scrutiny points
+- The fix reads engine keys from the collections registry (`collectionKeysForBusinessType`), NOT from `requiredCollections` — deliberate per plan decision #4 (populating `requiredCollections` would route leads to MANUAL-ONBOARD via the serve gate). `config.ts` / `serveGate.ts` were not touched.
+- Empty nodes now render for ALL collection-capable classified businessTypes (e.g. consultant → empty Services + Case Studies), per resolved-question #2 (accepted).

@@ -861,4 +861,27 @@ describe('useWizardStore — 7b collection channel', () => {
     const patch = useWizardStore.getState().buildBriefPatch();
     expect(patch.facts).toBeUndefined();
   });
+
+  // collections-entry-capture phase 3 (P3) — the one-liner reachability round-trip.
+  // A bare manual entry has NO site → NO extraction → empty `facts.collections`.
+  // The 7b node still surfaces an empty engine-declared node (StructureSlot union),
+  // so a hand `+ Add` (addCollectionEntry) must survive buildBriefPatch into
+  // `facts.collections` with a code-derived slug — proving the manual add→Brief
+  // path end-to-end without the human gate.
+  it('P3 round-trip: manual add on an empty one-liner entry reaches facts.collections with a derived slug', () => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokP3', brief: bareThing, audienceType: 'product', templateId: 'meridian' });
+
+    // Nothing seeded (no site → no extraction).
+    expect(useWizardStore.getState().collections.products).toBeUndefined();
+
+    // The manual `+ Add` the empty 7b node exposes.
+    useWizardStore.getState().addCollectionEntry('products', 'Widget -- Co');
+
+    const patch = useWizardStore.getState().buildBriefPatch();
+    const products = (patch.facts as any)?.collections?.products;
+    expect(products).toEqual([{ name: 'Widget -- Co', slug: 'widget-co' }]);
+  });
 });
