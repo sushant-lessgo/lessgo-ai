@@ -11,7 +11,7 @@ Per-project on-brand social post generator: user opens `/dashboard/social/[token
 ## Progress log
 
 ```
-phase 1 brand-context accessor: done (commit <pending>, review loops 1)
+phase 1 brand-context accessor: done (commit 25200178, review loops 1)
 phase 2 SocialPost schema + migration: pending
 phase 3 post engine (LinkedIn preset, 3 modes, mock): pending
 phase 4 API routes (generate/list/delete): pending
