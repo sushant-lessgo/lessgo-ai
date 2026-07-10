@@ -374,3 +374,54 @@ Verified in `pageActions.ts`: `addCollectionItem(key, {title})` calls `ensureCat
 ### Open risks
 - Stale module key on the catalog-block window-event path (see Deviations) — dormant today, resolve at rung-C in GlobalModals.
 - `singularNoun` is a display heuristic; correct for the four family labels but would mislabel an oddly-pluralized future label — cosmetic only.
+
+## Phase 7 — Conformance test: declared collection capability ⇒ block pair (ships vacuous)
+
+Branch: `feature/scale-10-collections` (verified via `git branch --show-current`).
+
+### Files changed (complete)
+- `src/modules/templates/conformance.test.ts` — added the collection block-pair contract (check `(d)`), the dormancy lock, the vestria regression lock, and two contained negative fixtures.
+- `src/modules/templates/blockManifest.test.ts` — **NOT touched.** No manifest-covered template declares a collection-family capability, so the fixture approach (self-contained in conformance.test.ts) never needed it. Confirmed untouched.
+
+### The exact assertion added
+New `describe('(d) scale-10: declared collection-family capability ⇒ block pair …')`, driven by a helper:
+
+```
+assertCollectionCapabilityBacked(templateId, capabilities, capabilitySections):
+  for capability in capabilities:
+    if capability not in COLLECTION_FAMILY: continue        // family = Object.keys(COLLECTIONS)
+    def = getCollectionDef(capability)                       // must exist
+    Object.values(capabilitySections) MUST contain def.catalogSectionType
+    Object.values(capabilitySections) MUST contain def.itemSectionType
+    resolvesReal(templateId, def.catalogSectionType)         // real block, edit + published
+    resolvesReal(templateId, def.itemSectionType)            // real block, edit + published
+```
+
+Quantified over `templateIds × COLLECTION_FAMILY`: one `it` per template runs the helper against that template's real `capabilities` / `capabilitySections`. The family is derived from the registry (`Object.keys(COLLECTIONS)` = products · services · case-studies · works), so `catalog` (no CollectionDef) is structurally excluded — mirrors the phase-1 firewall. Reuses the file's existing `resolvesReal` (both-mode, non-placeholder) and `RESOLVERS`.
+
+### Vacuous today → live at rung-C
+No shipping template lists a collection-family capabilityId in `templateMeta.capabilities` (techpremium retired with empty lists; naayom grandfathered via `buildNaayomProductPages`; vestria declares only flat-grid `catalog`). So the per-template loop body never executes — every template's `it` passes with zero assertions run. The check becomes LIVE the instant a rung-C template adds e.g. `products` to its `capabilities`: the loop body fires and demands both the `catalog`+`item` block-pair section types be declared in `capabilitySections` and resolve non-placeholder in edit+published, or the test goes red.
+
+### Explicit dormancy + vestria regression locks
+- `DORMANT: no shipping template declares a collection-family capability` — iterates every template × family key asserting `.not.toContain(cap)`. Makes the vacuity a hard fact: if a rung-C template declares a family cap this flips red, forcing the block pair.
+- `vestria stays flat-grid: declares 'catalog', NEVER a collection-family capability` — locks plan-review issue-1: asserts `vestria.capabilities` contains `catalog` and contains NONE of the family keys. Prevents the flat grid being pulled into the collections bridge.
+
+### Negative fixtures (added; contained; do NOT fail the suite)
+Two `expect(() => assertCollectionCapabilityBacked(...)).toThrow()` cases feed FAKE metadata to the same helper — no real template is mutated:
+1. `products` declared with `{}` capabilitySections → the coverage `toContain` fails → proves the coverage half bites.
+2. `services` declared with capabilitySections listing its `servicecatalog`/`servicedetail` section types (which no shipping template resolves) → coverage passes but `resolvesReal` hits the meridian placeholder → proves the resolve half bites.
+Both are wrapped in `.toThrow()`, so the inner assertion failure is caught and the suite stays green — this demonstrates the assertion is not silently vacuous.
+
+### blockManifest.test.ts
+Untouched. The negative fixtures are self-contained in conformance.test.ts (fake capability lists passed directly to the helper), so no manifest fixture was required.
+
+### Verification
+- `npx tsc --noEmit`: clean (no output).
+- `npx vitest run src/modules/templates/conformance.test.ts`: 141 passed (includes the new `(d)` per-template loop, dormancy lock, vestria lock, both negative fixtures).
+- `npm run test:run` (full): **103 passed | 1 skipped files; 1757 passed | 3 skipped tests.** conformance, dispatch, blockManifest, registration, coreParity, plus all phase 1–6 suites green. No source/renderer/registry changes — test-only phase.
+
+### Deviations
+- The per-template `it` also asserts `Array.isArray(declaredFamily)` — a trivial informational anchor so the block-pair `it` always runs (and would immediately exercise the helper once a template declares a family cap); it is not load-bearing.
+
+### Open risks
+- The check trusts `capabilitySections` VALUES to carry both section types (a template could satisfy coverage via two unrelated capability entries). Acceptable: the resolve half still requires real block pairs, and the `(b)`/`(b+)` checks already bind capability→section evidence. Full topology binding lands with rung-C blocks.
