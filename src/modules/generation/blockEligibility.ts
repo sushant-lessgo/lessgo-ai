@@ -143,10 +143,28 @@ export function deriveAssetFactsFromBrief(brief: Brief | null | undefined): Asse
   const entryTestimonials =
     factsEntry && Array.isArray(factsEntry.testimonials) ? factsEntry.testimonials : [];
 
+  // ── capability ≠ content (proof-truth spec, acceptance criterion 3) ──────────
+  // `proofAvailable` is a CAPABILITY-HINT list ("what assets does this business
+  // have"), NOT evidence that proof CONTENT exists. Per-field decisions:
+  //
+  //  • hasPhotos / hasLogos — pure LAYOUT-capability hints. They only pick which
+  //    block variant renders (photo-led vs text-led, logo-wall); they do NOT make
+  //    the AI fabricate a proof CLAIM. Reading the capability-hint list here is
+  //    correct → LEFT AS capability hints.
+  //  • hasTestimonials — CONTENT-claiming (real verbatim quotes). It must derive
+  //    ONLY from actually-captured quotes (`facts.entry.testimonials`), NEVER from
+  //    `proofAvailable`. The user's *conscious* proof toggle is carried separately
+  //    by the route-level `proof` object (section-inclusion gate — sectionGrammar.ts:74
+  //    / parseStrategyProduct.ts:43); it does NOT reach this Brief seam (BriefSchema
+  //    has no confirmed-proof boolean), so we derive from captured quotes only and
+  //    do NOT invent new plumbing in this phase.
+  //  • hasTestimonialPhotos — gates the photo-testimonial variant; also CONTENT-
+  //    claiming (a fabricated person WITH a photo). Same rule: require real captured
+  //    testimonials; `photo` stays a capability hint for the photo dimension.
   return {
     hasPhotos: proofHas('photo') || proofHas('image') || proofHas('gallery'),
     hasLogos: proofHas('logo'),
-    hasTestimonials: proofHas('testimonial') || entryTestimonials.length > 0,
-    hasTestimonialPhotos: proofHas('testimonial') && proofHas('photo'),
+    hasTestimonials: entryTestimonials.length > 0,
+    hasTestimonialPhotos: entryTestimonials.length > 0 && proofHas('photo'),
   };
 }
