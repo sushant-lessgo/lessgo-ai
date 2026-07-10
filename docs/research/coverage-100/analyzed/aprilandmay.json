@@ -1,0 +1,66 @@
+{
+  "slug": "aprilandmay",
+  "url": "https://www.aprilandmay.com/",
+  "business": {
+    "type_label": "creative studio for interior & garden design (with workshops + online shop)",
+    "icp_category": "design-studio-services",
+    "geography_hint": "Niedorp, Netherlands (NL; KvK 80011861)"
+  },
+  "in_icp": false,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Studio sells defined design expertise (garden design, interior design, styling) fronted by named people (Mark & Vivian) and an explicit 3-tier process ('Onze werkwijze'); trusting the firm's craft is the decision, so trust wins the ladder before work/place.",
+    "runner_up": "work"
+  },
+  "goal": {
+    "one_action": "Book a workshop / design session, or contact the studio (secondary: buy shop products, subscribe newsletter)",
+    "mechanism": "redirect",
+    "delegated_to": "calendly"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 5,
+    "pages": ["studio (home)", "workshops & wandelingen", "winkel (shop)", "tuinontwerp (garden-design)", "contact"],
+    "archetype_note": "Hybrid: services studio + bookable workshops (calendly) + transactional online store (cart/checkout) + blog + contact/newsletter — multiple distinct conversion paths, not one action."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Wat doen wij?", "component": "text" },
+      { "canonical": "useCases", "observed_as": "workshops & brainstormsessies", "component": "grid-cards" },
+      { "canonical": "pricing", "observed_as": "Shop onze favorieten", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "tuinontwerp / styling / interieur ontwerp teasers", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "Onze werkwijze (brainstorm > schets > tuinontwerp)", "component": "timeline" },
+      { "canonical": "pricing", "observed_as": "Ritme van het Land | workshopreeks (tiered pricing)", "component": "pricing-table" },
+      { "canonical": "socialProof", "observed_as": "Instagram feed embed", "component": "gallery" },
+      { "canonical": "leadForm", "observed_as": "CONTACT (form + studio details)", "component": "form" },
+      { "canonical": "followStrip", "observed_as": "Schrijf je nu in (newsletter) + Pinterest/Instagram links", "component": "form" }
+    ],
+    "unmapped": [
+      { "observed": "WINKEL product catalog with category filters + cart/checkout", "why_no_fit": "Canonical sections have no transactional storefront/catalog-with-checkout section; 'pricing' understates a browsable multi-category shop with cart", "closest": "pricing" },
+      { "observed": "Outdoor furniture & Garden blog (brand-featuring posts)", "why_no_fit": "Blog index isn't a canonical section id", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "gallery/portfolio", "packages", "blog", "bilingual"],
+    "proposed_new": [
+      { "name": "external-booking-redirect", "evidence": "All workshop/session/brainstorm/walk CTAs ('Boek hier een workshop of brainstorm', 'boek een kruiden wandeling', 'Boek hier jou sessie') hand off to Calendly; no on-site scheduling." },
+      { "name": "storefront-checkout", "evidence": "WINKEL is a real transactional store: commerce.cart_or_checkout=true, category filters (ceramics, furniture, lighting, outdoor…), and ~15 fixed product prices (€39.50–€2,090.00) with on-site purchase — beyond a browse-only catalog and not the recurring membership-checkout." }
+    ]
+  },
+  "proof_types": ["stats"],
+  "design_style": {
+    "pick": "editorial/craft",
+    "none_fits_because": ""
+  },
+  "components_needed": ["service-tier cards", "pricing-table", "process timeline", "product grid with category filters", "instagram feed embed", "contact form", "newsletter signup", "blog post grid"],
+  "languages": ["nl", "en"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality=rendered (not full) — capped at medium per rules; contact form only surfaced via render pass, and portfolio/blog counts are unresolved (portfolio 'being photographed', blog post_count null)."
+  },
+  "gap_findings": [
+    "Multi-job site (services + bookable workshops + transactional store + blog + newsletter) has no single conversion action — the 5-engine model can only name one; real business is a hybrid the taxonomy can't hold whole.",
+    "A full on-site product store with cart/checkout has no canonical capability (closed vocab 'catalog' = browse-only; 'membership-checkout' = recurring) — proposed storefront-checkout.",
+    "No canonical section for a transactional storefront/catalog block or a blog index."
+  ]
+}

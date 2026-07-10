@@ -1,0 +1,54 @@
+{
+  "slug": "7adire",
+  "url": "https://7adire.be/",
+  "business": { "type_label": "amateur storytelling collective (spoken-word performance group)", "icp_category": "arts/culture nonprofit", "geography_hint": "Brussels (Marolles), Belgium" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Not selling defined expertise (no trust), no portfolio-as-proof, and no goods to browse; the visitor is checking a recurring live event/venue — what it is, when/where (Bibliothèque Bruegel, dated shows), and whether to attend — which is the place decision.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "reserve a free seat for an upcoming storytelling show",
+    "mechanism": "donate-RSVP",
+    "delegated_to": "tally"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 3,
+    "pages": ["home", "about", "event-series"],
+    "archetype_note": "Static Zola blog/collective site: homepage blends narrative posts + an upcoming-shows table; About covers origin + membership; a third page details the SEPT À NEUF show series. Contact is an off-domain Tally link, not a page."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "Accueil / À propos / Contact nav", "component": "nav" },
+      { "canonical": "hero", "observed_as": "le collectif 7àDire", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Les SEPT À NEUF de 7àDire (announcement post)", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Qui sommes-nous ? (origin story of 7 founders)", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "Pourquoi SEPT À NEUF ? (show format explained)", "component": "text" },
+      { "canonical": "pricing", "observed_as": "membership: €10/year, free activities, Friday rehearsals", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "photo gallery (logo, group, posters, seniors show)", "component": "gallery" },
+      { "canonical": "cta", "observed_as": "Réserver / Reserve seats", "component": "button" },
+      { "canonical": "footer", "observed_as": "no-cookies/no-data notice", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Prochains spectacles — dated list of 3 upcoming shows (Oct 28, Nov 25, Jan 20, 7PM) each with a reserve link", "why_no_fit": "No canonical section expresses a dated event schedule / upcoming-shows table; it is neither results, pricing, nor a generic list.", "closest": "cta" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "blog"],
+    "proposed_new": [
+      { "name": "event-listings", "evidence": "Prochains spectacles renders a dated schedule of upcoming shows, each with a reserve link handing off to an external Tally RSVP." }
+    ]
+  },
+  "proof_types": [],
+  "design_style": { "pick": "literary/quiet", "none_fits_because": "" },
+  "components_needed": ["event-schedule list (date/time/venue rows)", "photo gallery", "narrative post blocks", "membership-fee note"],
+  "languages": ["fr"],
+  "confidence": { "level": "high", "why": "fetch_quality=full; site content and intent are clear. Only caveat: RSVP/Contact forms are off-domain Tally embeds so field-level detail is unseen — does not affect classification." },
+  "gap_findings": [
+    "No canonical section for a dated event schedule / upcoming-shows list (mapped to event-listings capability, unmapped as a section).",
+    "Goal is RSVP-to-attend a FREE cultural event with an optional 'panier libre' donation basket — sits between donate-RSVP and form; the taxonomy has no clean 'attend a free event' conversion.",
+    "The €10/year membership fee is not a saleable offer/pricing tier — pricing section is a poor fit for a nonprofit membership note."
+  ]
+}

@@ -33,6 +33,9 @@ This registry is APPEND-ONLY and maintained by the orchestrator between sites.
 | `practitioner-profiles` | Per-person (or per-location) profile subpages for a multi-practitioner/multi-branch business — each staff member/branch gets its own bio/detail page | not `testimonials`/team grid (a single section), not `gallery/portfolio` (work, not people) | lightcrew |
 | `membership-checkout` | On-site recurring membership/subscription purchase — plan/tier configurator + cart/checkout for an ongoing plan | not `packages` (static price display), not `pricing` (a section); this transacts a recurring plan | beanstalkhq |
 | `product-finder-quiz` | An interactive quiz/wizard that asks questions and recommends a product/plan/package | not `interactive-calculators` (computes a number), not `faq`; it routes to an offer | golivehq |
+| `storefront-checkout` | An on-site cart + checkout selling one-time goods (products, templates, prints) | not `membership-checkout` (recurring plan), not `catalog` (browse only, no cart), not `affiliate-hub` (outbound links) | aprilandmay |
+| `app-signup` | Primary CTA is create-account / register into the product app itself (freemium self-serve SaaS) — conversion is app registration, not a lead form or newsletter | not `lead-form` (inquiry), not `subscribe-follow`; the CTA enters the product | PROVISIONAL — coined for mediamodifier/reloop but both final analyses settled on membership-checkout/external-list-signup; 0 disk citations. Keep as vocab for future SaaS. |
+| `course-curriculum` | An online-course offer: curriculum/module outline + enrollment, often with an alumni/graduate showcase | not `packages` (a price grid), not `faq`; sells structured course content | podcastpro |
 
 ## Booking family note
 `booking-wizard` / `external-booking-redirect` / `booking-portal` are three

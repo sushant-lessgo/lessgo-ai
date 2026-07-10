@@ -1,139 +1,19 @@
 {
-  "priscillawolf": {
-    "url": "https://photography.priscillawolf.nl/",
+  "7adire": {
+    "url": "https://7adire.be/",
     "scraped": true,
     "analyzed": true,
     "status": "done",
     "confidence": "high",
-    "note": "RE-SCRAPED w/ renderPage.mjs (rendered). engine=work, multi (7). in_icp=FALSE — render revealed primary CTA is a 4-step on-site booking wizard (pkg -> studio&date -> details -> confirm; EUR 495/1495/2495 ALL-IN), not the /contact lead-form. Static scrape had wrongly recorded in_icp=true. Gaps: proposed_new booking-wizard (scheduling inventory); filterable portfolio has no canonical section."
+    "note": "engine=place, in_icp=true, multi(3). proposed: event-listings"
   },
-  "morenoshairandbeauty": {
-    "url": "https://morenoshairandbeauty.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=place (runner-up work), multi (6), full capture. Gaps: proposed_new external-booking-redirect (Treatwell/Optios, no on-site form); unmapped in-salon retail catalog w/ discount tiers; careers/chair-rental sub-tree = second non-conversion audience."
-  },
-  "coltivar": {
-    "url": "https://www.coltivar.com/",
+  "aprilandmay": {
+    "url": "https://www.aprilandmay.com/",
     "scraped": true,
     "analyzed": true,
     "status": "done",
     "confidence": "medium",
-    "note": "RE-SCRAPED w/ renderPage.mjs (rendered). engine=trust (runner-up thing), multi (6 of ~10 nav captured; Kajabi). Gaps: proposed_new interactive-calculators (13 live tools), media-hub (podcast/YouTube); /schedule-your-call is a single-step calendar = delegated form, explicitly NOT booking-wizard (no inventory/multi-step). Multi-funnel strain mild (one_action=book-a-call); standalone health-check quiz inexpressible. Residual: 4 nav pages uncrawled."
-  },
-  "greenhealthycooking": {
-    "url": "https://greenhealthycooking.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=work (runner-up quick-yes), multi (21). in_icp=FALSE — content publisher, 4 parallel funnels (email, ThriveCart course, ebooks, Amazon affiliate). Prices/embeds/meta null = under-captured (pre-render scrape). Gaps: proposed_new recipe-index, affiliate-hub; content-hub/blog inexpressible."
-  },
-  "epiclaunch": {
-    "url": "https://www.epiclaunch.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=work (runner-up quick-yes), multi (5). in_icp=FALSE — personal content blog, not one-conversion. Gaps: proposed_new content-feed, affiliate-list; category/taxonomy nav has no canonical section."
-  },
-  "runnersconnect": {
-    "url": "https://runnersconnect.net/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=thing (runner-up trust), multi (5 of 25). First 'thing' engine — productized coaching subscription w/ tiered pricing. Multi-goal (free email magnet vs paid sub vs contact) strains one_action. Gaps: proposed_new external email-capture popup (monstercampaigns), blog-teaser; interactive goal-selector toggle no canonical fit."
-  },
-  "petsittersireland": {
-    "url": "https://www.petsittersireland.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=trust (runner-up thing), multi (5 of ~20). Real booking conversion sits in a login-gated portal invisible to crawl. Gaps: proposed_new booking-portal (login-gated stateful booking — distinct from booking-wizard + external-booking-redirect); awards-streak authority proof; no canonical office-hours/contact section; multi parallel conversions."
-  },
-  "juliedawnfox": {
-    "url": "https://juliedawnfox.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=trust (runner-up thing), multi (6). in_icp=FALSE — three parallel funnels (Calendly consult + ConvertKit newsletter + WooCommerce checkout). fetch_quality=rendered (contact page revealed hidden ConvertKit opt-in). Gaps: WooCommerce multi-SKU catalog+checkout no canonical section/engine; blog/content-funnel not a first-class engine; Google-reviews widget + award logos collapse two proofs into one socialProof."
-  },
-  "olyvia": {
-    "url": "https://olyvia.co/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=trust (runner-up quick-yes), multi (4). in_icp=true (analyzer judged the ConvertKit opt-in a single valid action) but flagged multi-goal friction (subscribe + Gumroad redirect + affiliate) + legacy/unmaintained ~2017 blog. Gaps: affiliate resource directory no fit; homepage blog-feed no section id; virtual office-hours unmapped."
-  },
-  "contractseries": {
-    "url": "https://www.contractseries.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=work (runner-up quick-yes), multi (Wix ~12, 5 crawled). fetch_quality=partial — all pages rendered; /books stayed shell-only, contact form is unreadable iframe. Gaps: no engine/section for author bibliography of purchasable novels; split conversion (external-store redirect + newsletter) two co-equal goals; no capability for off-site book/product listings."
-  },
-  "fondatheatre": {
-    "url": "https://fondatheatre.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "[vetted] engine=place (runner-up quick-yes), multi (11), rendered. Gaps: proposed_new event-listings (schedule w/ per-event external ticket redirect); multi-goal venue (ticket redirect + rental lead + subscribe); standalone virtual-tour video unmodeled."
-  },
-  "lightcrew": {
-    "url": "https://www.lightcrew.jp/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "[vetted] engine=trust (vetting guessed place), multi, rendered (Tally form). Gaps: proposed_new practitioner-profiles (multi-practitioner/location profile subpages); off-site Tally form sits between lead-form and external-* siblings; cross-page pricing unmodeled."
-  },
-  "pariwana-hostel": {
-    "url": "https://pariwana-hostel.com/en/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "[vetted] engine=place, multi, full. Reused external-booking-redirect (no new coined). Gaps: multi-property/per-location place hub unmodeled (practitioner-profiles is per-person only); trilingual > bilingual; room-listing straddles catalog/pricing; What's-Nearby local-attractions no canonical section."
-  },
-  "coppi": {
-    "url": "https://www.coppi.co.uk/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "[vetted] engine=place, multi (6), rendered (ResDiary widget post-render). Reused external-booking-redirect, no new coined. Gaps: no menu-list capability/component for priced restaurant menus; no home for PDF menu-variant sets; no announcement-banner section."
-  },
-  "moonrakerhotel": {
-    "url": "https://moonrakerhotel.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "[vetted] engine=place, multi (6). in_icp=FALSE — multi-conversion hospitality (parallel room/table/event/wedding paths). Reused external-booking-redirect. Gaps: recurring cross-page promo banner no canonical section (2nd site w/ this, cf coppi)."
-  },
-  "valencienne": {
-    "url": "https://www.valencienne.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "[vetted] engine=trust (vetting guessed place), multi (6), rendered (Calendly). No new coined. Gaps: dual model (trust-booking brochure + resident Squarespace Shop/Cart = two conversion actions); pricing only in a FAQ row."
-  },
-  "healthfullifemd": {
-    "url": "https://healthfullifemd.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "[vetted] engine=trust (vetting guessed place — 3rd such reclassification), multi (9), rendered. No new coined. Gaps: multiple mechanisms (Calendly + contact form + mailto) collapsed into one goal; standalone embedded map no canonical section id."
+    "note": "engine=trust, in_icp=false, multi(5). proposed: external-booking-redirect, storefront-checkout"
   },
   "beanstalkhq": {
     "url": "https://www.beanstalkhq.com/",
@@ -141,31 +21,39 @@
     "analyzed": true,
     "status": "done",
     "confidence": "medium",
-    "note": "[vetted] engine=place, multi (6). Coined membership-checkout (recurring subscription checkout + plan configurator). Gaps: multi-goal venue (tour + cart + subscribe) breaks single-action model."
+    "note": "engine=place, in_icp=false, multi(15). proposed: membership-checkout"
   },
-  "thebelltoweron34th": {
-    "url": "https://thebelltoweron34th.com/",
+  "brettlair": {
+    "url": "https://www.brettlair.ca/",
     "scraped": true,
     "analyzed": true,
     "status": "done",
-    "confidence": "high",
-    "note": "[vetted] engine=place (runner-up work), multi (6), rendered. No new coined. Gaps: no section for event-type packages (weddings/galas/quinceaneras parallel offerings); 'starting at' pricing no fit; tour-request is qualifying multi-field lead form beyond simple contact. NOTE: analyzed clobbered by scraper re-fire race, re-analyzed successfully."
+    "confidence": "medium",
+    "note": "engine=work, in_icp=true, multi(5). no new caps"
   },
-  "louisiana-ontour": {
-    "url": "http://louisiana-ontour.de/",
+  "coltivar": {
+    "url": "https://www.coltivar.com/",
     "scraped": true,
     "analyzed": true,
     "status": "done",
-    "confidence": "high",
-    "note": "[vetted] engine=work (runner-up place), multi (6), full. in_icp=FALSE — multi-job entertainer (newsletter + fan voting + tour schedule + contact + organizer press kit). Reused event-listings; coined press-kit-downloads + fan-voting. Gaps: repertoire/setlist + gallery no section id."
+    "confidence": "medium",
+    "note": "engine=trust, in_icp=true, multi(6). proposed: interactive-calculators, media-hub"
   },
-  "golivehq": {
-    "url": "https://www.golivehq.co/",
+  "contractseries": {
+    "url": "https://www.contractseries.com/",
     "scraped": true,
     "analyzed": true,
     "status": "done",
-    "confidence": "high",
-    "note": "[vetted] engine=trust (vetting guessed work — 4th reclassification), multi (8), full. Coined product-finder-quiz. Gaps: dual-monetization agency+store hybrid (book-a-call + $299 template checkout) breaks one-action; template shop w/ cart exceeds catalog vocab."
+    "confidence": "medium",
+    "note": "engine=work, in_icp=true, multi(12). proposed: bibliography/works-listing"
+  },
+  "coppi": {
+    "url": "https://www.coppi.co.uk/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=place, in_icp=true, multi(6). proposed: external-booking-redirect"
   },
   "edisontally": {
     "url": "https://www.edisontally.com/",
@@ -173,6 +61,206 @@
     "analyzed": true,
     "status": "done",
     "confidence": "high",
-    "note": "[vetted] engine=place (runner-up trust), multi (11), full. Reused external-booking-redirect (Resy). Gaps: dining reservation has no dining-native slot; menu-list no place-engine capability; event-venue subsite = second conversion path."
+    "note": "engine=place, in_icp=true, multi(11). proposed: external-booking-redirect"
+  },
+  "epiclaunch": {
+    "url": "https://www.epiclaunch.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=work, in_icp=false, multi(5). proposed: content-feed, affiliate-list"
+  },
+  "fabiola-ferrero": {
+    "url": "http://fabiola-ferrero.squarespace.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=work, in_icp=true, multi(17). no new caps"
+  },
+  "fondatheatre": {
+    "url": "https://fondatheatre.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=place, in_icp=true, multi(11). proposed: event-listings"
+  },
+  "golivehq": {
+    "url": "https://www.golivehq.co/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=trust, in_icp=false, multi(8). proposed: product-finder-quiz"
+  },
+  "greenhealthycooking": {
+    "url": "https://greenhealthycooking.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=work, in_icp=false, multi(21). proposed: recipe-index / content-category-grid, affiliate-hub"
+  },
+  "healthfullifemd": {
+    "url": "https://healthfullifemd.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=trust, in_icp=true, multi(9). no new caps"
+  },
+  "insideoutcolouranddesign": {
+    "url": "https://www.insideoutcolouranddesign.com.au/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=trust, in_icp=true, multi(9). no new caps"
+  },
+  "juliedawnfox": {
+    "url": "https://juliedawnfox.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=trust, in_icp=false, multi(6). no new caps"
+  },
+  "lightcrew": {
+    "url": "https://www.lightcrew.jp/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=trust, in_icp=true, multi(14). proposed: practitioner-profiles"
+  },
+  "louisiana-ontour": {
+    "url": "http://louisiana-ontour.de/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=work, in_icp=false, multi(6). proposed: event-listings, press-kit-downloads, fan-voting"
+  },
+  "mediamodifier": {
+    "url": "https://mediamodifier.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=thing, in_icp=true, multi(5). proposed: membership-checkout"
+  },
+  "moonrakerhotel": {
+    "url": "https://moonrakerhotel.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=place, in_icp=false, multi(9). proposed: external-booking-redirect"
+  },
+  "morenoshairandbeauty": {
+    "url": "https://morenoshairandbeauty.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=place, in_icp=true, multi(6). proposed: external-booking-redirect"
+  },
+  "olyvia": {
+    "url": "https://olyvia.co/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=trust, in_icp=true, multi(4). proposed: affiliate-resource-directory"
+  },
+  "pariwana-hostel": {
+    "url": "https://pariwana-hostel.com/en/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=place, in_icp=true, multi(6). proposed: external-booking-redirect"
+  },
+  "pasikuikka": {
+    "url": "https://pasikuikka.fi/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=thing, in_icp=true, multi(11). proposed: interactive-calculators"
+  },
+  "petsittersireland": {
+    "url": "https://www.petsittersireland.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=trust, in_icp=true, multi(5). proposed: booking-portal"
+  },
+  "podcastpro": {
+    "url": "https://podcastpro.pl/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=trust, in_icp=false, multi(7). proposed: storefront-checkout, content-index, alumni-showcase"
+  },
+  "priscillawolf": {
+    "url": "https://photography.priscillawolf.nl/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=work, in_icp=false, multi(7). proposed: booking-wizard"
+  },
+  "reloop": {
+    "url": "https://www.reloop.me/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "high",
+    "note": "engine=thing, in_icp=true, multi(10). proposed: external-list-signup"
+  },
+  "runnersconnect": {
+    "url": "https://runnersconnect.net/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=thing, in_icp=true, multi(5). proposed: email-capture-popup / external-list-signup, blog-teaser"
+  },
+  "seao2": {
+    "url": "https://www.seao2.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=thing, in_icp=true, multi(8). proposed: blog-teaser"
+  },
+  "sugoikanban": {
+    "url": "https://sugoikanban.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=thing, in_icp=true, multi(6). no new caps"
+  },
+  "thebelltoweron34th": {
+    "url": "https://thebelltoweron34th.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=place, in_icp=true, multi(6). no new caps"
+  },
+  "valencienne": {
+    "url": "https://www.valencienne.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=trust, in_icp=true, multi(6). no new caps"
   }
 }

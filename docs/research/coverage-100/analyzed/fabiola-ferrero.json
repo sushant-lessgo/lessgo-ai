@@ -1,0 +1,48 @@
+{
+  "slug": "fabiola-ferrero",
+  "url": "http://fabiola-ferrero.squarespace.com/",
+  "business": { "type_label": "documentary photojournalist portfolio", "icp_category": "photographer", "geography_hint": "Based between Paris and Caracas" },
+  "in_icp": true,
+  "engine": {
+    "pick": "work",
+    "ladder_reasoning": "Visitor browses the photography itself — the full-bleed grid of project galleries IS the proof; awards and press credits merely reinforce work that stands on its own.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "browse the photo projects and then get in touch (newsletter signup / email for assignments & prints)",
+    "mechanism": "subscribe-follow",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 17,
+    "pages": ["home", "projects", "reinas", "education", "published", "about", "contact"],
+    "archetype_note": "Squarespace photographer portfolio: full-bleed image-tile home grid linking into per-project essay+gallery pages, plus about/published/contact; Projects and Education are dropdown parents."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Full-bleed homepage image-tile grid", "component": "gallery" },
+      { "canonical": "founderNote", "observed_as": "Fabiola Ferrero bio (EN/ES)", "component": "text" },
+      { "canonical": "results", "observed_as": "Awards list (Carmignac, World Press Photo, Deloitte Grant)", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Published — press/publication credits (TIME, NYT, Guardian, Nat Geo)", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Subscribe! newsletter signup", "component": "form" },
+      { "canonical": "cta", "observed_as": "Contact: assignment/print inquiry email + Instagram", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "REINAS project essay", "component": "text" },
+      { "canonical": "footer", "observed_as": "Based between Paris and Caracas / mailto / Instagram", "component": "text" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "bilingual", "lead-form"],
+    "proposed_new": []
+  },
+  "proof_types": ["certs", "portfolio", "stats"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["image-tile gallery grid", "project essay + gallery page", "awards list", "press-credit link list", "newsletter email capture"],
+  "languages": ["en", "es"],
+  "confidence": { "level": "high", "why": "fetch_quality=full; clear photographer portfolio archetype; nav and sections captured. Minor: only 5 of 6 allowed non-home pages sampled (Education/Private Mentoring uncrawled), but core intent unambiguous." },
+  "gap_findings": [
+    "The 'Published' page is an outbound list of press/publication credits acting as proof (where her work appeared) — currently expressible only as socialProof/text; a 'press-credits' proof pattern (distinct from logo-wall imagery) is a mild gap.",
+    "Education > Private Mentoring is a secondary offering (Calendly single-step embed) grafted onto a portfolio site — a portfolio that also sells a service/mentoring is a dual-intent shape the single-action model does not cleanly capture."
+  ]
+}
