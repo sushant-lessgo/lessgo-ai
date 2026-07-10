@@ -16,14 +16,25 @@ import {
   ServiceUnderstandingResponseSchema,
 } from '../understandService.schema';
 import { ScrapeWebsiteServiceSchema } from '../scrapeWebsiteService.schema';
+import type { CollectionKey } from '@/modules/collections/registry';
 import type { EngineExtraction } from './index';
+import {
+  collectionsEnrichmentFields,
+  collectionsEnrichmentPrompt,
+  foldCollectionsIntoSignals,
+} from './index';
+
+// scale-10 phase 2: the trust engine (agencies / consultants / coaches) extracts
+// two collections verbatim — `services` (service lines) and `case-studies`
+// (owner-authored client stories, decision 4). Base prefill still covers every
+// classification/prefill field — collections are the only delta.
+const TRUST_COLLECTIONS: readonly CollectionKey[] = ['services', 'case-studies'];
 
 export const trustExtraction: EngineExtraction = {
   key: 'trust',
   understandSchema: ServiceUnderstandingResponseSchema,
   scrapeSchema: ScrapeWebsiteServiceSchema,
-  // Base entry prefill already covers trust — no engine-specific delta.
-  entryEnrichmentFields: {},
-  entryEnrichmentPrompt: () => '',
-  enrichSignals: (_data, base) => base,
+  entryEnrichmentFields: collectionsEnrichmentFields(TRUST_COLLECTIONS),
+  entryEnrichmentPrompt: () => collectionsEnrichmentPrompt(TRUST_COLLECTIONS),
+  enrichSignals: (data, base) => foldCollectionsIntoSignals(data, base, TRUST_COLLECTIONS),
 };

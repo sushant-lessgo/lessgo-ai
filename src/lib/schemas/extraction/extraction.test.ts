@@ -81,20 +81,24 @@ describe('businessType → extraction schema key mapping', () => {
 });
 
 describe('entry enrichment', () => {
-  it('thing/trust/work carry NO entry enrichment (base prefill suffices)', () => {
-    for (const key of ['thing', 'trust', 'work'] as const) {
-      expect(hasEntryEnrichment(getExtraction(key))).toBe(false);
-      expect(getExtraction(key).entryEnrichmentPrompt()).toBe('');
+  it('every engine now carries the scale-10 collections enrichment (prompt + field)', () => {
+    for (const key of extractionSchemaKeys) {
+      const ex = getExtraction(key);
+      expect(hasEntryEnrichment(ex)).toBe(true);
+      expect(Object.keys(ex.entryEnrichmentFields)).toContain('collections');
+      expect(ex.entryEnrichmentPrompt()).toContain('COLLECTION ENTRIES');
     }
   });
 
-  it('manufacturer carries the 4 trade-supplier enrichment fields', () => {
+  it('manufacturer carries the 4 trade-supplier fields PLUS collections', () => {
     const ex = getExtraction('manufacturer');
     expect(hasEntryEnrichment(ex)).toBe(true);
     expect(Object.keys(ex.entryEnrichmentFields).sort()).toEqual(
-      ['industriesServed', 'productCategories', 'valueAdds', 'whatYouMake'].sort()
+      ['collections', 'industriesServed', 'productCategories', 'valueAdds', 'whatYouMake'].sort()
     );
-    expect(ex.entryEnrichmentPrompt().length).toBeGreaterThan(0);
+    // trade-supplier prompt survives alongside the collections block
+    expect(ex.entryEnrichmentPrompt()).toContain('TRADE-SUPPLIER');
+    expect(ex.entryEnrichmentPrompt()).toContain('COLLECTION ENTRIES');
   });
 
   it('manufacturer entry schema extends the entry base and parses the delta', () => {
@@ -153,6 +157,90 @@ describe('enrichSignals', () => {
       { ...baseSignals, summary: 'existing summary' }
     );
     expect(out.summary).toBe('existing summary');
+  });
+});
+
+describe('collection extraction (scale-10 phase 2)', () => {
+  // Which engine extracts which collection key(s).
+  const expectedKeys: Record<string, string[]> = {
+    thing: ['products'],
+    manufacturer: ['products'],
+    trust: ['services', 'case-studies'],
+    work: ['services', 'works'],
+  };
+
+  it('each engine declares its collections shape with the right keys', () => {
+    for (const key of extractionSchemaKeys) {
+      const ex = getExtraction(key);
+      const collectionsField = ex.entryEnrichmentFields['collections'] as {
+        shape: Record<string, unknown>;
+      };
+      expect(Object.keys(collectionsField.shape).sort()).toEqual(expectedKeys[key].sort());
+    }
+  });
+
+  it('entry schema parses a fixture WITH collection entries (thing → products)', () => {
+    const ex = getExtraction('thing');
+    const schema = EntryScrapeSchema.extend(ex.entryEnrichmentFields).pick({ collections: true });
+    const parsed = schema.parse({
+      collections: {
+        products: [
+          { name: 'Widget A', oneLiner: 'A great widget', imageUrl: 'https://x/a.png' },
+          { name: 'Widget B', oneLiner: 'Another widget', imageUrl: '' },
+        ],
+      },
+    });
+    expect((parsed.collections as { products: unknown[] }).products).toHaveLength(2);
+  });
+
+  it('entry schema parses a fixture WITHOUT collection entries (empty arrays)', () => {
+    const ex = getExtraction('trust');
+    const schema = EntryScrapeSchema.extend(ex.entryEnrichmentFields).pick({ collections: true });
+    const parsed = schema.parse({ collections: { services: [], 'case-studies': [] } });
+    expect((parsed.collections as { services: unknown[] }).services).toHaveLength(0);
+  });
+
+  it('enrichSignals folds extracted entries onto EntrySignals.collections (verbatim, empty names dropped)', () => {
+    const out = getExtraction('thing').enrichSignals(
+      {
+        collections: {
+          products: [
+            { name: 'Widget A', oneLiner: 'A great widget', imageUrl: 'https://x/a.png' },
+            { name: '  ', oneLiner: 'no name', imageUrl: '' }, // dropped
+          ],
+        },
+      },
+      baseSignals
+    );
+    const products = out.collections?.products ?? [];
+    expect(products).toHaveLength(1);
+    expect(products[0]).toEqual({
+      name: 'Widget A',
+      oneLiner: 'A great widget',
+      imageUrl: 'https://x/a.png',
+    });
+    // no slug on the draft carrier — slugs are derived later in buildBriefDraft
+    expect('slug' in products[0]).toBe(false);
+  });
+
+  it('enrichSignals returns base unchanged when the engine sees no collections', () => {
+    const out = getExtraction('work').enrichSignals({}, baseSignals);
+    expect(out).toBe(baseSignals);
+  });
+
+  it('trust folds services and case-studies independently', () => {
+    const out = getExtraction('trust').enrichSignals(
+      {
+        collections: {
+          services: [{ name: 'SEO Audit', oneLiner: '', imageUrl: '' }],
+          'case-studies': [{ name: 'Acme turnaround', oneLiner: '3x pipeline', imageUrl: '' }],
+        },
+      },
+      baseSignals
+    );
+    expect(out.collections?.services).toHaveLength(1);
+    expect(out.collections?.['case-studies']).toHaveLength(1);
+    expect(out.collections?.['case-studies']?.[0].oneLiner).toBe('3x pipeline');
   });
 });
 

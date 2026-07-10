@@ -24,6 +24,7 @@ import { blockManifests } from './blockManifest';
 import { engineCoreSections } from '@/modules/engines/coreSections';
 import { templateIds, type TemplateId } from '@/types/service';
 import { capabilityIds, type CapabilityId } from '@/types/brief';
+import { COLLECTIONS, getCollectionDef, type CollectionKey } from '@/modules/collections/registry';
 
 import { resolveMeridianBlock } from './meridian/resolveMeridianBlock';
 import { MeridianPlaceholderBlock } from './meridian/MeridianPlaceholderBlock';
@@ -259,6 +260,130 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
         }
       });
     }
+  });
+
+  // ── (d) scale-10: declared collection-family capability ⇒ block PAIR ───────
+  // The collection contract that lets block pairs ship demand-gated (rung C).
+  // The collection FAMILY = exactly the CollectionKeys (registry) = the
+  // per-type collection capabilityIds (products · services · case-studies ·
+  // works). vestria's flat-grid `catalog` is deliberately NOT in this family
+  // (no CollectionDef keyed `catalog` by construction — phase-1 firewall), so
+  // it never triggers this check.
+  //
+  // Assertion (quantified over templates × the family): IF a template declares
+  // a collection-family capability K, THEN its capabilitySections must expose
+  // BOTH the def's catalogSectionType AND itemSectionType, and each must
+  // resolve to a REAL (non-placeholder) block in BOTH modes ('edit' +
+  // 'published'). That is the block PAIR (catalog + item) that rung-C ships.
+  //
+  // DORMANT TODAY: no shipping template declares a family capability
+  // (techpremium retired; naayom grandfathered; vestria = flat-grid catalog
+  // only), so the per-template loop body never executes → the assertion is
+  // VACUOUSLY TRUE and green. It becomes LIVE the moment a rung-C template
+  // declares K in templateMeta — at which point a missing block pair goes red.
+  const COLLECTION_FAMILY = Object.keys(COLLECTIONS) as CollectionKey[];
+
+  function assertCollectionCapabilityBacked(
+    templateId: TemplateId,
+    capabilities: readonly string[],
+    capabilitySections: Partial<Record<string, string>> | undefined
+  ): void {
+    const declaredSectionTypes = Object.values(capabilitySections ?? {});
+    for (const capability of capabilities) {
+      if (!COLLECTION_FAMILY.includes(capability as CollectionKey)) continue;
+      const def = getCollectionDef(capability);
+      expect(
+        def,
+        `${templateId} declares collection-family "${capability}" but the collections registry has no CollectionDef for it`
+      ).toBeTruthy();
+
+      expect(
+        declaredSectionTypes,
+        `${templateId} declares collection "${capability}" but capabilitySections is missing its catalog section "${def!.catalogSectionType}"`
+      ).toContain(def!.catalogSectionType);
+      expect(
+        declaredSectionTypes,
+        `${templateId} declares collection "${capability}" but capabilitySections is missing its item section "${def!.itemSectionType}"`
+      ).toContain(def!.itemSectionType);
+
+      // The block PAIR must resolve non-placeholder in BOTH renderers.
+      resolvesReal(templateId, def!.catalogSectionType);
+      resolvesReal(templateId, def!.itemSectionType);
+    }
+  }
+
+  describe('(d) scale-10: declared collection-family capability ⇒ block pair (edit + published)', () => {
+    // Quantified assertion — vacuous today (no template declares a family cap).
+    for (const templateId of templateIds) {
+      const meta = templateMeta[templateId];
+      const declaredFamily = meta.capabilities.filter((c) =>
+        COLLECTION_FAMILY.includes(c as CollectionKey)
+      );
+      it(`${templateId}: every declared collection capability has a resolvable catalog+item pair`, () => {
+        assertCollectionCapabilityBacked(
+          templateId,
+          meta.capabilities,
+          meta.capabilitySections
+        );
+        // Records the dormancy fact for this template (informational).
+        expect(Array.isArray(declaredFamily)).toBe(true);
+      });
+    }
+
+    // Dormancy lock: NO shipping template declares a collection-family
+    // capability today (the whole check ships vacuous). If a rung-C template
+    // adds one, this flips red and the implementer must supply the block pair.
+    it('DORMANT: no shipping template declares a collection-family capability (whole check is vacuous)', () => {
+      for (const templateId of templateIds) {
+        for (const cap of COLLECTION_FAMILY) {
+          expect(
+            templateMeta[templateId].capabilities,
+            `${templateId} declares collection-family "${cap}" — the (d) check is no longer dormant; ensure its catalog+item block pair resolves`
+          ).not.toContain(cap);
+        }
+      }
+    });
+
+    // Regression lock (plan-review issue-1): vestria's flat-grid `catalog`
+    // stays OUT of the collection family. It must keep `catalog` and never
+    // gain a family capability — otherwise the flat grid would (wrongly) be
+    // pulled into the generation→collections bridge.
+    it('vestria stays flat-grid: declares `catalog`, NEVER a collection-family capability', () => {
+      expect(templateMeta.vestria.capabilities).toContain('catalog');
+      for (const cap of COLLECTION_FAMILY) {
+        expect(
+          templateMeta.vestria.capabilities,
+          `vestria declares collection-family "${cap}" — flat-grid catalog must stay out of the family`
+        ).not.toContain(cap);
+      }
+    });
+
+    // Negative fixture — proves the assertion BITES (fails) rather than being
+    // silently vacuous. Fully self-contained: it feeds FAKE template metadata
+    // to the same assertion helper and asserts it THROWS, so the real suite
+    // never goes red. No real template is mutated.
+    describe('negative fixtures (assertion bites — contained, never fails the suite)', () => {
+      it('declaring `products` with NO capabilitySections evidence throws', () => {
+        expect(() =>
+          assertCollectionCapabilityBacked('meridian', ['products'], {})
+        ).toThrow();
+      });
+
+      it('declaring `services` whose section types resolve to a PLACEHOLDER throws', () => {
+        // The `services` def's section types (servicecatalog/servicedetail) are
+        // rung-C placeholders that NO shipping template resolves. Listing them
+        // in capabilitySections satisfies the coverage check but the block-pair
+        // resolution still fails — proving the resolve half of the assertion
+        // bites, not just the coverage half.
+        const services = getCollectionDef('services')!;
+        expect(() =>
+          assertCollectionCapabilityBacked('meridian', ['services'], {
+            services: services.catalogSectionType,
+            'services-item': services.itemSectionType,
+          })
+        ).toThrow();
+      });
+    });
   });
 
   // ── retired: techpremium out of both checks by declaration shape ───────────

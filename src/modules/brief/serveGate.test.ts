@@ -10,7 +10,8 @@ import {
   applyBusinessTypeCorrection,
   type EntrySignals,
 } from './classify';
-import { decideServe, BRIDGEABLE_ENGINES } from './serveGate';
+import { decideServe, BRIDGEABLE_ENGINES, uncoveredCollectionTags } from './serveGate';
+import { businessTypes } from '@/modules/businessTypes/config';
 
 function makeSignals(overrides: Partial<EntrySignals> = {}): EntrySignals {
   return {
@@ -220,6 +221,76 @@ describe('decideServe — manual paths (strict missing strings)', () => {
       expect(decision.missing).toBe('rungC:store-badges');
       expect(decision.missing).not.toBe('');
     }
+  });
+});
+
+describe('uncoveredCollectionTags — pure supply check (scale-10 phase 3)', () => {
+  it('required collection COVERED by a shortlisted template (declares the capability) ⇒ no tag', () => {
+    // Fixture template declares `products` as a collection-family capability.
+    const tags = uncoveredCollectionTags(['products'], [['lead-form', 'products']]);
+    expect(tags).toEqual([]);
+  });
+
+  it('required collection UNCOVERED (no shortlisted template declares it) ⇒ precise collection:<key> tag', () => {
+    const tags = uncoveredCollectionTags(['services'], [['lead-form']]);
+    expect(tags).toEqual(['collection:services']);
+  });
+
+  it('vestria flat-grid `catalog` capability does NOT cover the `products` collection key', () => {
+    // catalog is not a CollectionKey — a template declaring only catalog covers
+    // no requiredCollections key.
+    const tags = uncoveredCollectionTags(['products'], [['lead-form', 'catalog']]);
+    expect(tags).toEqual(['collection:products']);
+  });
+
+  it('multiple required keys ⇒ one tag per uncovered key, covered keys omitted', () => {
+    const tags = uncoveredCollectionTags(
+      ['products', 'services'],
+      [['lead-form', 'products']]
+    );
+    expect(tags).toEqual(['collection:services']);
+  });
+
+  it('empty requiredCollections ⇒ no tags', () => {
+    expect(uncoveredCollectionTags([], [['lead-form']])).toEqual([]);
+  });
+});
+
+describe('decideServe — requiredCollections wiring (fixture-mutated, dormant in real config)', () => {
+  // Real config sets requiredCollections for NO businessType (dormant). To
+  // exercise the wiring we temporarily populate one entry and restore it.
+  it('KNOWN serveable type + UNCOVERED requiredCollections ⇒ manual + collection:<key> tag', () => {
+    const orig = businessTypes.saas.requiredCollections;
+    // saas shortlists to meridian (caps lead-form+packages) — declares no
+    // `products` collection capability ⇒ uncovered.
+    (businessTypes.saas as { requiredCollections?: readonly string[] }).requiredCollections = [
+      'products',
+    ];
+    try {
+      const brief = buildBriefDraft(
+        makeSignals({ businessTypeGuess: 'saas', goalIntentGuess: 'free-trial' }),
+        'invoicing tool for freelancers'
+      );
+      const decision = decideServe(brief);
+      expect(decision.outcome).toBe('manual');
+      if (decision.outcome === 'manual') {
+        expect(decision.missing).toBe('collection:products');
+        expect(decision.tags).toEqual(['collection:products']);
+        expect(decision.outOfIcp).toBe(false);
+      }
+    } finally {
+      (businessTypes.saas as { requiredCollections?: readonly string[] }).requiredCollections =
+        orig;
+    }
+  });
+
+  it('real config leaves saas.requiredCollections unset (dormant) ⇒ still serves', () => {
+    expect(businessTypes.saas.requiredCollections).toBeUndefined();
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'saas', goalIntentGuess: 'free-trial' }),
+      'invoicing tool for freelancers'
+    );
+    expect(decideServe(brief).outcome).toBe('serve');
   });
 });
 

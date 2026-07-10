@@ -23,6 +23,10 @@ import type { Brief } from '@/types/brief';
 const CreateLeadSchema = z.object({
   input: z.string().min(1).max(2000),
   briefDraft: BriefSchema,
+  // Free-form demand tag(s), comma-joined by the serve gate — NO allowlist, so
+  // scale-10 phase 3's granular `collection:<key>` tags (e.g. `collection:services`)
+  // are stored as-is alongside rung*/out-of-icp tags. The demand board ranks on
+  // this string; widening was unnecessary (no schema/DB change).
   missing: z.string().min(1),
   email: z.string().email(),
   phone: z.string().max(50).optional(),

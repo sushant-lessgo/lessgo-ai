@@ -43,8 +43,11 @@ import {
   mergePageIntoFinalContent,
   finalizeMultiPageGeneration,
   isResumableGeneration,
+  runCollectionFanOut,
   type MultiPageOnboardingData,
 } from '@/modules/generation/multiPageAssembly';
+import { templateMeta } from '@/modules/templates/templateMeta';
+import type { CollectionsFacts } from '@/modules/brief/collections';
 import { isImagesAtBirthEnabled } from '@/lib/generation/flag';
 import { injectImagesForPage } from '@/lib/generation/imagesAtBirth';
 import {
@@ -107,6 +110,13 @@ export interface ThingGenerationInput {
   // Structure (multi-page gate output) — from StructureSlot / gate.
   strategy?: ProductStrategyOutput | null;
   sitemap?: SitemapPage[] | null;
+
+  // scale-10 phase 5 — Brief-carried collection entries (facts.collections).
+  // Threaded into the persisted onboardingData so the (DORMANT) collections
+  // bridge can build index + item pages. Not populated by the store projection
+  // yet — the bridge is inert until a product template declares a collection-
+  // family capability (rung-C).
+  collections?: CollectionsFacts;
 
   // Style picks (vestria only) — mirrors the old generation-store picks.
   paletteId?: string;
@@ -458,6 +468,60 @@ export async function runThingGeneration(
       return { status: 'error', error: e?.message || 'Copy generation failed.' };
     }
 
+    // scale-10 phase 5 — collections bridge (DORMANT: no product template
+    // declares a collection-family capability, so runCollectionFanOut no-ops
+    // today). Item pages POST with the record; the merge CLAMPS to Brief entries
+    // + keeps record fields VERBATIM. Charge stays FLAT (no extra strategy call);
+    // item page keys ride completedPageKeys for per-page persistence/resume.
+    const declaredCaps = templateMeta[resolvedTemplateId as keyof typeof templateMeta]?.capabilities ?? [];
+    const collResult = await runCollectionFanOut({
+      fc,
+      collections: (ob.collections ?? {}) as CollectionsFacts,
+      declaredCapabilities: declaredCaps,
+      persist: saveFC,
+      generateItemCopy: async (plan) => {
+        const itemPage = fc.pages[plan.pageKey];
+        const types: string[] = (itemPage?.sections ?? []).map(
+          (id: string) => itemPage.content?.[id]?.type ?? id.split('-')[0]
+        );
+        const { uiblocks } = selectProductBlocks({ sections: types, templateId: resolvedTemplateId });
+        try {
+          const res = await fetch('/api/audience/product/generate-copy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              strategy: fanStrategy,
+              uiblocks,
+              productName: (ob.productName || '').trim() || 'Your Product',
+              oneLiner: ob.oneLiner,
+              offer: ob.offer,
+              landingGoal: ob.landingGoal,
+              features: fanFeatures,
+              templateId: resolvedTemplateId,
+              businessType: ob.businessTypeKey ?? 'manufacturer',
+              // Record in the payload — AI writes connective copy only; record
+              // fields are kept verbatim by the clamp on merge.
+              collectionItem: plan.entry,
+              collectionKey: plan.collectionKey,
+              page: { archetypeKey: plan.pageKey, title: plan.entry.name, pathSlug: plan.pathSlug, isHome: false },
+              sitePages,
+              ...(ob.importSourceUrl ? { sourceUrl: ob.importSourceUrl } : {}),
+            }),
+          });
+          const json = await res.json();
+          if (!res.ok || !json?.success) {
+            if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
+            return { status: 'error', error: json?.message || `Copy generation failed (${plan.entry.name})` };
+          }
+          return { status: 'done', copy: json.sections as Record<string, SectionCopy> };
+        } catch (e: any) {
+          return { status: 'error', error: e?.message || 'Copy generation failed.' };
+        }
+      },
+    });
+    if (collResult.status === 'credits') return { status: 'credits' };
+    if (collResult.status === 'error') return { status: 'error', error: collResult.error };
+
     cb.onStage?.('saving');
     try {
       finalizeMultiPageGeneration(fc);
@@ -609,6 +673,7 @@ export async function runThingGeneration(
         ...(input.importSourceUrl ? { importSourceUrl: input.importSourceUrl } : {}),
         ...(input.importedTestimonials?.length ? { importedTestimonials: input.importedTestimonials } : {}),
         ...(input.businessTypeKey ? { businessTypeKey: input.businessTypeKey } : {}),
+        ...(input.collections ? { collections: input.collections } : {}),
         sitemap: input.sitemap,
         strategy: input.strategy,
       };

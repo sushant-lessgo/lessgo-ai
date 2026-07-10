@@ -5,6 +5,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createEditStore } from '@/stores/editStore';
+import { assembleCollectionPages } from '@/modules/generation/multiPageAssembly';
 
 type Store = ReturnType<typeof createEditStore>;
 
@@ -381,6 +382,39 @@ describe('collection system', () => {
     const ex: any = store.getState().export();
     const img = ex.pages[a].content[pdSid].elements.images[0];
     expect(img.src).toBe('https://blob/x.webp'); // full export carries the image into pages
+  });
+
+  it('bridge-produced empty collection: add-post-reveal works under existing CRUD', () => {
+    // scale-10 phase 5: a DORMANT-path fixture — the generation bridge emits an
+    // EMPTY products collection (index only). It must behave under the editor's
+    // existing collection CRUD (findCatalogPage / addCollectionItem).
+    const fc: any = {
+      sections: ['hero-1'],
+      sectionLayouts: { 'hero-1': 'LayoutA' },
+      content: { 'hero-1': { id: 'hero-1', layout: 'LayoutA', elements: {} } },
+      theme: {},
+      pages: {
+        home: {
+          id: 'home', archetypeKey: 'home', pathSlug: '/', title: 'Home', order: 0,
+          sections: ['hero-1'], sectionLayouts: { 'hero-1': 'LayoutA' }, sectionSpacing: {},
+          content: { 'hero-1': { id: 'hero-1', layout: 'LayoutA', elements: {} } },
+        },
+      },
+      homeId: 'home',
+      currentPageId: 'home',
+    };
+    assembleCollectionPages({ fc, collections: { products: [] }, declaredCapabilities: ['products'] });
+
+    const s2 = createEditStore('tok-bridge');
+    s2.getState().loadFromDraft({ tokenId: 'tok-bridge', title: 'T', finalContent: fc }, 'tok-bridge');
+    // Bridge catalog page hydrated + empty.
+    expect(catalogOf(s2)!.items.length).toBe(0);
+    // Add-post-reveal via the panel's store action.
+    const id = s2.getState().addCollectionItem('products', { title: 'Fresh' });
+    const cat = catalogOf(s2)!;
+    expect(cat.items.length).toBe(1);
+    expect(cat.items[0].name).toBe('Fresh');
+    expect(s2.getState().pages[id].collectionKey).toBe('products');
   });
 
   it('setCollectionCategories rehomes orphans to the first remaining category (Bug 6)', () => {

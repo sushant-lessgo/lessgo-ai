@@ -21,7 +21,17 @@ import { z } from 'zod';
 import { ManufacturerUnderstandingResponseSchema } from '../understand.schema';
 import { ScrapeWebsiteManufacturerSchema } from '../scrapeWebsite.schema';
 import type { EntrySignals } from '@/modules/brief/classify';
+import type { CollectionKey } from '@/modules/collections/registry';
 import type { EngineExtraction } from './index';
+import {
+  collectionsEnrichmentFields,
+  collectionsEnrichmentPrompt,
+  foldCollectionsIntoSignals,
+} from './index';
+
+// scale-10 phase 2: manufacturer (a thing variant) ALSO extracts a `products`
+// collection verbatim — layered on top of the 4 trade-supplier fields below.
+const MANUFACTURER_COLLECTIONS: readonly CollectionKey[] = ['products'];
 
 // Engine-specific entry-enrichment fields. Kept strict-json-schema friendly
 // (no numeric min/max — ranges are prompt-enforced, like the entry base) so
@@ -56,26 +66,34 @@ export const manufacturerExtraction: EngineExtraction = {
   key: 'manufacturer',
   understandSchema: ManufacturerUnderstandingResponseSchema,
   scrapeSchema: ScrapeWebsiteManufacturerSchema,
-  entryEnrichmentFields: manufacturerEnrichmentFields,
+  // Trade-supplier fields + the scale-10 `products` collection delta.
+  entryEnrichmentFields: {
+    ...manufacturerEnrichmentFields,
+    ...collectionsEnrichmentFields(MANUFACTURER_COLLECTIONS),
+  },
   entryEnrichmentPrompt: () =>
     `MANUFACTURER / TRADE-SUPPLIER FIELDS (this business makes or supplies physical goods):
 - whatYouMake: one clear sentence describing what this business manufactures or supplies (the physical goods, not the mission)
 - industriesServed: 1-3 END-CUSTOMER verticals this business sells into (e.g., ["Hospitality", "Healthcare", "Security"]) — NEVER vague groups like "businesses" or "professionals"
 - productCategories: 1-8 CONCRETE product types they make (e.g., ["Chef coats", "Scrubs", "Hi-vis jackets"]) — actual orderable products, NOT synonyms/restatements of the business
 - valueAdds: 1-8 CONCRETE differentiators (e.g., ["Custom embroidery", "Low MOQ", "48h dispatch", "In-house dyeing"]) — NEVER quality-platitudes like "attention to detail" or "customer satisfaction"
-- Extract only what is stated or strongly implied — do NOT invent.`,
+- Extract only what is stated or strongly implied — do NOT invent.
+
+${collectionsEnrichmentPrompt(MANUFACTURER_COLLECTIONS)}`,
   // Additive fold: manufacturer specifics enrich the neutral prefill, never
   // overwrite it. Existing base values are preserved and lead the merged lists.
+  // Then the `products` collection is folded onto EntrySignals.collections.
   enrichSignals: (data: Record<string, unknown>, base: EntrySignals): EntrySignals => {
     const productCategories = asStringArray(data.productCategories);
     const valueAdds = asStringArray(data.valueAdds);
     const industriesServed = asStringArray(data.industriesServed);
     const whatYouMake = typeof data.whatYouMake === 'string' ? data.whatYouMake : '';
-    return {
+    const enriched: EntrySignals = {
       ...base,
       summary: base.summary || whatYouMake,
       offerings: dedupe([...base.offerings, ...productCategories, ...valueAdds]),
       audiences: dedupe([...base.audiences, ...industriesServed]),
     };
+    return foldCollectionsIntoSignals(data, enriched, MANUFACTURER_COLLECTIONS);
   },
 };

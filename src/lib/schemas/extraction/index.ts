@@ -12,8 +12,10 @@
 // Firewall: pure zod + type modules only; no template/registry/renderer
 // imports. Consumed server-side by /api/v2/{understand,scrape-website}.
 
-import type { z } from 'zod';
-import type { EntrySignals } from '@/modules/brief/classify';
+import { z } from 'zod';
+import type { EntrySignals, CollectionEntryDraft } from '@/modules/brief/classify';
+import type { CollectionKey } from '@/modules/collections/registry';
+import { getCollectionDef } from '@/modules/collections/registry';
 import { businessTypes, type BusinessTypeKey } from '@/modules/businessTypes/config';
 import { thingExtraction } from './thing';
 import { trustExtraction } from './trust';
@@ -79,4 +81,87 @@ export function extractionForBusinessType(bt: BusinessTypeKey): EngineExtraction
 /** True when the engine adds engine-specific fields to the entry base. */
 export function hasEntryEnrichment(e: EngineExtraction): boolean {
   return Object.keys(e.entryEnrichmentFields).length > 0;
+}
+
+// ===== Collection-entry extraction (scale-10 phase 2) =====
+// Founder decision 2: the EXISTING single scrape call also extracts collection
+// entries VERBATIM (names + one-liners only; imageUrl string iff the same crawl
+// saw one). No extra scrape, no image processing here. The extracted entries
+// ride an EngineExtraction's `entryEnrichmentFields`/`entryEnrichmentPrompt`/
+// `enrichSignals` hooks (same wiring the routes already call — no route edit),
+// fold onto `EntrySignals.collections`, and are written to `facts.collections`
+// with CODE-DERIVED slugs by buildBriefDraft. Slugs are NEVER taken from AI.
+//
+// Which engine extracts which collection key(s) — the family lives in the
+// collections registry (products · services · case-studies · works):
+//   thing/manufacturer → products · trust → services + case-studies ·
+//   work → services (photographer portfolio = services, decision 1) + works.
+//
+// NOTE: these helpers are exported FUNCTION DECLARATIONS (hoisted, so the
+// engine modules can call them during the index⇄engine cyclic import) and build
+// their zod shapes inline (no module-level const — a const would sit in the TDZ
+// during that cycle). Strict-json-schema friendly: no min/max/regex; counts and
+// the verbatim/no-invention rule are prompt-enforced.
+
+/**
+ * `entryEnrichmentFields` delta carrying one array per collection key:
+ * `{ collections: { <key>: [{ name, oneLiner, imageUrl }] } }`. Required-shape
+ * (OpenAI strict outputs); empty strings/arrays stand in for "none".
+ */
+export function collectionsEnrichmentFields(keys: readonly CollectionKey[]): z.ZodRawShape {
+  const entry = z.object({
+    name: z.string(),
+    oneLiner: z.string(),
+    imageUrl: z.string(),
+  });
+  const shape: z.ZodRawShape = {};
+  for (const key of keys) shape[key] = z.array(entry);
+  return { collections: z.object(shape) };
+}
+
+/** Prompt block instructing verbatim collection extraction for the given keys. */
+export function collectionsEnrichmentPrompt(keys: readonly CollectionKey[]): string {
+  const lines = keys.map((key) => {
+    const label = getCollectionDef(key)?.label ?? key;
+    return `- collections.${key}: the ${label} this business lists on the crawled pages. Return an array of { name, oneLiner, imageUrl }. Copy each item's name and one-line description WORD-FOR-WORD from the site — do NOT invent, merge, rename, or add items that are not actually listed. name = the item's exact name; oneLiner = its short description ("" if none is shown); imageUrl = the absolute image URL IF one clearly appears for that item on a page you saw, else "". Return an empty array when the site lists none.`;
+  });
+  return `COLLECTION ENTRIES (repeatable items — extract ONLY what the crawled pages actually list, verbatim):\n${lines.join('\n')}`;
+}
+
+/**
+ * Fold extracted collection entries onto `EntrySignals.collections` additively
+ * (existing carrier keys preserved). Tolerates missing/malformed data. Empty
+ * names and empty per-key lists are dropped; returns `base` unchanged (same ref)
+ * when nothing folds in. Slug derivation happens later in buildBriefDraft.
+ */
+export function foldCollectionsIntoSignals(
+  data: Record<string, unknown>,
+  base: EntrySignals,
+  keys: readonly CollectionKey[]
+): EntrySignals {
+  const raw = data['collections'];
+  if (!raw || typeof raw !== 'object') return base;
+  const folded: Partial<Record<CollectionKey, CollectionEntryDraft[]>> = {};
+  let any = false;
+  for (const key of keys) {
+    const list = (raw as Record<string, unknown>)[key];
+    if (!Array.isArray(list)) continue;
+    const entries: CollectionEntryDraft[] = [];
+    for (const item of list) {
+      if (!item || typeof item !== 'object') continue;
+      const r = item as Record<string, unknown>;
+      const name = typeof r['name'] === 'string' ? r['name'].trim() : '';
+      if (!name) continue;
+      const e: CollectionEntryDraft = { name };
+      if (typeof r['oneLiner'] === 'string' && r['oneLiner'].trim()) e.oneLiner = r['oneLiner'];
+      if (typeof r['imageUrl'] === 'string' && r['imageUrl'].trim()) e.imageUrl = r['imageUrl'];
+      entries.push(e);
+    }
+    if (entries.length > 0) {
+      folded[key] = entries;
+      any = true;
+    }
+  }
+  if (!any) return base;
+  return { ...base, collections: { ...base.collections, ...folded } };
 }

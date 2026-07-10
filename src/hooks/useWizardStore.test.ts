@@ -718,3 +718,118 @@ describe('useWizardStore + trust adapter — trust 7b GA (charge-once + toggled-
     expect(strategyCalls()).toBe(1);
   });
 });
+
+// ===========================================================================
+// scale-10 phase 4 — 7b collection channel (rename / remove / add + patch)
+// ===========================================================================
+
+// A thing brief carrying BOTH a sibling fact (facts.entry) AND a scraped
+// products collection (facts.collections.products). Eight verbatim entries.
+const PRODUCT_NAMES = [
+  'Alpha Sensor',
+  'Beta Sensor',
+  'Gamma Hub',
+  'Delta Relay',
+  'Epsilon Node',
+  'Zeta Gateway',
+  'Eta Bridge',
+  'Theta Module',
+];
+function collectionsThing(): Brief {
+  return {
+    facts: {
+      entry: {
+        rawInput: 'https://hw.io',
+        businessName: 'HW Co',
+        oneLiner: 'industrial IoT sensors',
+      },
+      collections: {
+        products: PRODUCT_NAMES.map((name) => ({ name })),
+      },
+    },
+    businessType: 'manufacturer',
+    copyEngine: 'thing',
+    confidence: 0.9,
+  } as unknown as Brief;
+}
+
+describe('useWizardStore — 7b collection channel', () => {
+  beforeEach(() => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokC', brief: collectionsThing(), audienceType: 'product', templateId: 'meridian' });
+  });
+
+  it('seeds collections from facts.collections verbatim, slugs code-derived', () => {
+    const { collections } = useWizardStore.getState();
+    expect(collections.products).toHaveLength(8);
+    expect(collections.products?.[0]).toEqual({ name: 'Alpha Sensor', slug: 'alpha-sensor' });
+  });
+
+  it('removeCollectionEntry: removing 2 of 8 leaves 6', () => {
+    const api = useWizardStore.getState();
+    api.removeCollectionEntry('products', 0);
+    api.removeCollectionEntry('products', 0);
+    expect(useWizardStore.getState().collections.products).toHaveLength(6);
+    expect(useWizardStore.getState().collections.products?.[0].name).toBe('Gamma Hub');
+  });
+
+  it('renameCollectionEntry re-derives the slug from the new name', () => {
+    useWizardStore.getState().renameCollectionEntry('products', 0, 'Omega Sensor Pro');
+    const e = useWizardStore.getState().collections.products?.[0];
+    expect(e).toEqual({ name: 'Omega Sensor Pro', slug: 'omega-sensor-pro' });
+  });
+
+  it('addCollectionEntry appends a name-only entry with a derived slug', () => {
+    useWizardStore.getState().addCollectionEntry('products', 'New Widget');
+    const list = useWizardStore.getState().collections.products!;
+    expect(list).toHaveLength(9);
+    expect(list[8]).toEqual({ name: 'New Widget', slug: 'new-widget' });
+  });
+
+  it('addCollectionEntry initializes an absent (empty required) collection', () => {
+    useWizardStore.getState().addCollectionEntry('services', 'Consulting');
+    expect(useWizardStore.getState().collections.services).toEqual([
+      { name: 'Consulting', slug: 'consulting' },
+    ]);
+  });
+
+  it('empty/whitespace add + rename are no-ops', () => {
+    const api = useWizardStore.getState();
+    api.addCollectionEntry('products', '   ');
+    expect(useWizardStore.getState().collections.products).toHaveLength(8);
+    api.renameCollectionEntry('products', 0, '  ');
+    expect(useWizardStore.getState().collections.products?.[0].name).toBe('Alpha Sensor');
+  });
+
+  it('buildBriefPatch carries edited collections AND preserves sibling facts.entry', () => {
+    const api = useWizardStore.getState();
+    api.removeCollectionEntry('products', 0);
+    api.renameCollectionEntry('products', 0, 'Beta Sensor v2');
+    api.addCollectionEntry('products', 'New Widget');
+
+    const patch = useWizardStore.getState().buildBriefPatch();
+    // Sibling fact survives the shallow BriefSchema.partial() saveDraft merge.
+    expect(patch.facts).toBeDefined();
+    expect((patch.facts as any).entry).toEqual({
+      rawInput: 'https://hw.io',
+      businessName: 'HW Co',
+      oneLiner: 'industrial IoT sensors',
+    });
+    // Edited collections ride the same facts object.
+    const products = (patch.facts as any).collections.products;
+    expect(products).toHaveLength(8); // 8 − 1 removed + 1 added
+    expect(products[0]).toEqual({ name: 'Beta Sensor v2', slug: 'beta-sensor-v2' });
+    expect(products[7]).toEqual({ name: 'New Widget', slug: 'new-widget' });
+  });
+
+  it('buildBriefPatch omits facts when there are no collections (siblings untouched)', () => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokB', brief: bareThing, audienceType: 'product', templateId: 'meridian' });
+    const patch = useWizardStore.getState().buildBriefPatch();
+    expect(patch.facts).toBeUndefined();
+  });
+});

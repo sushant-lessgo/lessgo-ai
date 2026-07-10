@@ -20,6 +20,12 @@ import {
   businessTypes,
   type BusinessTypeKey,
 } from '@/modules/businessTypes/config';
+import type { CollectionKey } from '@/modules/collections/registry';
+import {
+  makeCollectionEntry,
+  setCollections,
+  type CollectionsFacts,
+} from '@/modules/brief/collections';
 
 /** Chooser renders upfront below this classification confidence (plan D7). */
 export const LOW_CONFIDENCE_THRESHOLD = 0.6;
@@ -37,6 +43,18 @@ export type TiebreakerRung =
 export type ClassificationSource = 'lookup' | 'tiebreaker';
 
 export type PlatformNeeds = 'none' | 'checkout' | 'ordering' | 'booking-payments';
+
+/**
+ * One collection entry as extracted verbatim from the scrape (scale-10 phase 2).
+ * Carries only what the AI is allowed to emit — name + optional one-liner/image.
+ * The `slug` is NOT here: it is derived in code (buildBriefDraft) via slugify,
+ * never taken from AI output ("slugs never AI").
+ */
+export interface CollectionEntryDraft {
+  name: string;
+  oneLiner?: string;
+  imageUrl?: string;
+}
 
 /**
  * Raw AI output shape from the entry-mode understand/scrape call (phase 3
@@ -64,6 +82,11 @@ export interface EntrySignals {
   proofAvailable: string[];
   socialProfiles: { platform: string; url: string }[];
   testimonials: string[];
+  // scale-10 phase 2: collection entries extracted verbatim in the SAME scrape
+  // call (folded here by the engine's enrichSignals). Optional/absent when the
+  // engine has no collection or the crawl saw none — buildBriefDraft DROPs empty
+  // keys and code-derives slugs when writing facts.collections.
+  collections?: Partial<Record<CollectionKey, CollectionEntryDraft[]>>;
 }
 
 /**
@@ -128,6 +151,32 @@ function isSchemaEngine(engine: ResolvedEngine): engine is CopyEngine {
 }
 
 /**
+ * Map the signal-carried collection drafts → a `facts.collections` payload with
+ * CODE-DERIVED slugs (via makeCollectionEntry → slugify). Empty names and empty
+ * per-key lists are DROPPED (no key ⇒ no collection). Returns null when nothing
+ * survives, so buildBriefDraft leaves `facts.collections` unset entirely.
+ */
+function collectionsFromSignals(signals: EntrySignals): CollectionsFacts | null {
+  if (!signals.collections) return null;
+  const facts: CollectionsFacts = {};
+  let any = false;
+  for (const [key, drafts] of Object.entries(signals.collections) as [
+    CollectionKey,
+    CollectionEntryDraft[] | undefined,
+  ][]) {
+    if (!Array.isArray(drafts)) continue;
+    const entries = drafts
+      .map((d) => makeCollectionEntry(d.name, { oneLiner: d.oneLiner, imageUrl: d.imageUrl }))
+      .filter((e) => e.name.length > 0);
+    if (entries.length > 0) {
+      facts[key] = entries;
+      any = true;
+    }
+  }
+  return any ? facts : null;
+}
+
+/**
  * Build the Brief draft from raw signals (plan step 1). Validated via
  * BriefSchema.parse — safe by construction for place/quick-yes because
  * copyEngine is OMITTED for non-enum engines (D2).
@@ -173,7 +222,12 @@ export function buildBriefDraft(signals: EntrySignals, rawInput: string): Brief 
     confidence: signals.businessTypeConfidence,
   };
 
-  return BriefSchema.parse(draft);
+  const parsed = BriefSchema.parse(draft);
+  // scale-10 phase 2: write scrape-carried collection entries to
+  // facts.collections VERBATIM, slugs code-derived (setCollections re-derives via
+  // slugify). Absent/all-empty ⇒ leave facts.collections unset (DROP).
+  const collections = collectionsFromSignals(signals);
+  return collections ? setCollections(parsed, collections) : parsed;
 }
 
 /**

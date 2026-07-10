@@ -1,37 +1,84 @@
 'use client';
 
-// Products panel (Phase 3 collection system). Manage the `products` collection:
-// add / edit / delete / reorder products and assign their category. Each product
-// is a /products/{slug} page; the catalog auto-lists them. Opened from PageSwitcher.
+// Collection panel (Phase 3 collection system, generalized scale-10 phase 6).
+// ONE panel, N collections: keyed by `collectionKey`, with label / basePath /
+// section-types / labelFields read from the collections registry. Manage a
+// collection: add / edit / delete / reorder items and assign their category.
+// Each item is a `{def.basePath}/{slug}` page; the catalog auto-lists them.
+// Opened from PageSwitcher (products entry point + per-collection entries).
+//
+// SCOPE GUARD: the panel only opens for collections that are PRESENT in the
+// project's pages (PageSwitcher gates via `collectionKeysInPages`, which the
+// generation capability gate bounds). It therefore never assumes a resolvable
+// block exists for `services`/`case-studies`/`works` defs — those have no live
+// template/pages until rung-C block pairs land. recordOf / categories read by
+// section TYPE and degrade to {} / [] when the section is absent, so a def with
+// no matching pages renders harmlessly.
 
 import React from 'react';
 import { useEditStore } from '@/hooks/useEditStoreLegacy';
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
+import { getCollectionDef, type CollectionDef } from '@/modules/collections/registry';
 import { confirmDialog, promptDialog } from '@/components/ui/ConfirmDialog';
 
-const COLLECTION = 'products';
+// Module-scoped "payload" channel: PageSwitcher sets the desired collection key
+// before opening the modal (the GlobalModals open path carries no payload). The
+// component reads this when no explicit `collectionKey` prop is passed. Defaults
+// to 'products' so the grandfathered products flow is unaffected.
+let _panelCollectionKey = 'products';
+export function setPanelCollectionKey(key: string) { _panelCollectionKey = key; }
+export function getPanelCollectionKey(): string { return _panelCollectionKey; }
 
 interface Cat { id: string; title: string; label?: string }
 
-function recordOf(entry: any): Record<string, any> {
+// Display-only singularizer for the item noun (e.g. "Products" → "product").
+// Handles the family labels exactly: Products→product, Services→service,
+// Works→work, Case Studies→case study. Products yields "product" so the
+// products panel copy stays byte-identical to the pre-generalization strings.
+function singularNoun(label: string): string {
+  return label.toLowerCase().replace(/ies$/, 'y').replace(/s$/, '');
+}
+
+function recordOf(entry: any, itemSectionType: string): Record<string, any> {
   for (const sid of entry?.sections ?? []) {
-    if (extractSectionType(sid) === 'productdetail') return entry.content?.[sid]?.elements ?? {};
+    if (extractSectionType(sid) === itemSectionType) return entry.content?.[sid]?.elements ?? {};
   }
   return {};
 }
 
-export function ProductsModal({ onClose }: { onClose: () => void }) {
+// Derive an item's display label from the def's ordered labelFields. Generic
+// rule that degrades EXACTLY to the old products fallback
+// `[rec.model, rec.name || p.title].filter(Boolean).join(' — ') || p.title`:
+// the LAST labelField gets the inner `|| p.title` fallback (products' last field
+// is `name`), then filter non-empty, join ' — ', outer `|| p.title`. For
+// products (labelFields ['model','name']) this is byte-identical.
+function deriveLabel(def: CollectionDef, rec: Record<string, any>, title: string): string {
+  const parts = def.labelFields.map((f, i) =>
+    i === def.labelFields.length - 1 ? (rec[f] || title) : rec[f],
+  );
+  return parts.filter(Boolean).join(' — ') || title;
+}
+
+export function ProductsModal({ onClose, collectionKey }: { onClose: () => void; collectionKey?: string }) {
   const store = useEditStore();
   const pages = store.pages || {};
 
+  const key = collectionKey ?? getPanelCollectionKey();
+  const def = getCollectionDef(key);
+  if (!def) return null; // no registry def → nothing to manage (guard, should not happen)
+
+  const noun = singularNoun(def.label);
+  const Noun = noun.charAt(0).toUpperCase() + noun.slice(1);
+  const labelLower = def.label.toLowerCase();
+
   // Categories live on the catalog page's catalog section.
   const catalogPage: any = Object.values(pages).find(
-    (p: any) => p.kind === 'singleton' && p.collectionKey === COLLECTION,
+    (p: any) => p.kind === 'singleton' && p.collectionKey === key,
   );
   const categories: Cat[] = (() => {
     if (!catalogPage) return [];
     for (const sid of catalogPage.sections ?? []) {
-      if (extractSectionType(sid) === 'catalog') {
+      if (extractSectionType(sid) === def.catalogSectionType) {
         const cats = catalogPage.content?.[sid]?.elements?.categories;
         return Array.isArray(cats) ? cats : [];
       }
@@ -39,13 +86,13 @@ export function ProductsModal({ onClose }: { onClose: () => void }) {
     return [];
   })();
 
-  const items: any[] = store.getCollectionItems ? store.getCollectionItems(COLLECTION) : [];
+  const items: any[] = store.getCollectionItems ? store.getCollectionItems(key) : [];
 
   const handleAdd = async () => {
-    const title = await promptDialog({ title: 'Product name', defaultValue: 'New product' });
+    const title = await promptDialog({ title: `${Noun} name`, defaultValue: `New ${noun}` });
     if (title === null) return;
-    const id = store.addCollectionItem(COLLECTION, { title: title.trim() || 'New product' });
-    if (id) onClose(); // navigate to the new product to fill its record
+    const id = store.addCollectionItem(key, { title: title.trim() || `New ${noun}` });
+    if (id) onClose(); // navigate to the new item to fill its record
   };
 
   const move = (index: number, dir: -1 | 1) => {
@@ -53,7 +100,7 @@ export function ProductsModal({ onClose }: { onClose: () => void }) {
     const j = index + dir;
     if (j < 0 || j >= order.length) return;
     [order[index], order[j]] = [order[j], order[index]];
-    store.reorderCollection(COLLECTION, order);
+    store.reorderCollection(key, order);
   };
 
   return (
@@ -61,11 +108,11 @@ export function ProductsModal({ onClose }: { onClose: () => void }) {
       <div className="w-full max-w-2xl max-h-[80vh] overflow-auto rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Products</h2>
-            <p className="text-sm text-gray-500">Each product is a <code>/products/…</code> page; the catalog lists them automatically.</p>
+            <h2 className="text-lg font-semibold text-gray-900">{def.label}</h2>
+            <p className="text-sm text-gray-500">Each {noun} is a <code>{def.basePath}/…</code> page; the catalog lists them automatically.</p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={handleAdd} className="rounded-md bg-gray-900 px-3 py-1.5 text-sm text-white hover:bg-gray-700">+ Add product</button>
+            <button onClick={handleAdd} className="rounded-md bg-gray-900 px-3 py-1.5 text-sm text-white hover:bg-gray-700">+ Add {noun}</button>
             <button onClick={onClose} aria-label="Close" className="rounded-md px-2 py-1.5 text-gray-400 hover:bg-gray-100">✕</button>
           </div>
         </div>
@@ -73,13 +120,13 @@ export function ProductsModal({ onClose }: { onClose: () => void }) {
         <div className="p-4">
           {items.length === 0 ? (
             <div className="rounded-lg border border-dashed p-10 text-center text-gray-500">
-              No products yet. Click <strong>+ Add product</strong> to create one.
+              No {labelLower} yet. Click <strong>+ Add {noun}</strong> to create one.
             </div>
           ) : (
             <ul className="divide-y">
               {items.map((p, i) => {
-                const rec = recordOf(p);
-                const label = [rec.model, rec.name || p.title].filter(Boolean).join(' — ') || p.title;
+                const rec = recordOf(p, def.itemSectionType);
+                const label = deriveLabel(def, rec, p.title);
                 return (
                   <li key={p.id} className="flex items-center gap-3 py-2.5">
                     <div className="flex flex-col">
@@ -93,37 +140,37 @@ export function ProductsModal({ onClose }: { onClose: () => void }) {
                     {categories.length > 0 && (
                       <select
                         value={rec.category || categories[0]?.id}
-                        onChange={(e) => store.setCollectionItemCategory(COLLECTION, p.id, e.target.value)}
+                        onChange={(e) => store.setCollectionItemCategory(key, p.id, e.target.value)}
                         className="rounded-md border px-2 py-1 text-sm"
                       >
                         {categories.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
                       </select>
                     )}
                     <button onClick={() => { store.setCurrentPage(p.id); onClose(); }} className="rounded-md border px-2.5 py-1 text-sm text-gray-700 hover:bg-gray-50">Edit</button>
-                    <button onClick={async () => { if (await confirmDialog({ title: 'Delete product', message: 'Delete this product?', confirmLabel: 'Delete', destructive: true })) store.deletePage(p.id); }} className="rounded-md px-2 py-1 text-sm text-gray-400 hover:text-red-600">Delete</button>
+                    <button onClick={async () => { if (await confirmDialog({ title: `Delete ${noun}`, message: `Delete this ${noun}?`, confirmLabel: 'Delete', destructive: true })) store.deletePage(p.id); }} className="rounded-md px-2 py-1 text-sm text-gray-400 hover:text-red-600">Delete</button>
                   </li>
                 );
               })}
             </ul>
           )}
 
-          <CategoriesSection store={store} categories={categories} />
+          <CategoriesSection store={store} categories={categories} collectionKey={key} />
         </div>
       </div>
     </div>
   );
 }
 
-function CategoriesSection({ store, categories }: { store: any; categories: Cat[] }) {
+function CategoriesSection({ store, categories, collectionKey }: { store: any; categories: Cat[]; collectionKey: string }) {
   const [cats, setCats] = React.useState<Cat[]>(categories);
   // Re-seed when the structural signature changes (e.g. edited inline on the page).
   const sig = categories.map((c) => c.id).join('|');
   React.useEffect(() => { setCats(categories); /* eslint-disable-next-line */ }, [sig]);
 
-  const apply = (next: Cat[]) => { setCats(next); store.setCollectionCategories(COLLECTION, next); };
+  const apply = (next: Cat[]) => { setCats(next); store.setCollectionCategories(collectionKey, next); };
   const editLocal = (id: string, key: 'title' | 'label', v: string) =>
     setCats((cs) => cs.map((c) => (c.id === id ? { ...c, [key]: v } : c)));
-  const commit = () => store.setCollectionCategories(COLLECTION, cats);
+  const commit = () => store.setCollectionCategories(collectionKey, cats);
   const add = () => apply([...cats, { id: `cat-${Math.random().toString(36).slice(2, 8)}`, title: 'New category', label: '' }]);
   const remove = (id: string) => apply(cats.filter((c) => c.id !== id));
   const move = (i: number, dir: -1 | 1) => {
