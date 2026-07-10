@@ -30,7 +30,7 @@ Why this wins: content values stay plain strings → **zero published-path risk,
 - phase 5 T2 count signal: done (commit 614267ec, review loops 1; trust.ts seam dormant/documented — follow-up to wire service-strategy forwarding)
 - phase 6 scalePlan §8 law amendment: done (commit 71f985c3, self-verified docs diff)
 - phase 7 fix-path CTA (rides TESTIMONIALS_ENABLED): done (commit bde80ce6, review loops 1)
-- phase 8 live real-LLM verification (human gate): PENDING USER — manual checklist below
+- phase 8 live real-LLM verification (human gate): RELEASED by user at merge gate (2026-07-10; user chose to merge, comprehension check declined). Live checklist remains below for post-merge QA.
 - phase 8 live real-LLM verification (human gate): pending
 
 > **Merge coupling:** phases 3+4 MUST land in the same merge. Between them there is a half-shipped window (real injected quotes still marker-flagged, because fillMode flags everything until phase-4 suppression exists). Fine across feature-branch commits; never merge phase 3 to main without phase 4.
