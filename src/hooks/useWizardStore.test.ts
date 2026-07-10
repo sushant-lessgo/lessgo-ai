@@ -402,6 +402,34 @@ describe('useWizardStore — buildThingInput projection (shared by fetchStrategy
     expect(input.strategy).toEqual(MOCK_STRATEGY);
     expect(input.sitemap).toEqual(MOCK_SITEMAP);
   });
+
+  // proof-truth phase 5 — approximate testimonial count (manual path).
+  it('defaults testimonialCount to null and omits it from the thing proof patch', () => {
+    useWizardStore.getState().hydrate({ brief: bareThing, audienceType: 'product', templateId: 'meridian' });
+    expect(useWizardStore.getState().proof.testimonialCount).toBeNull();
+    const input = buildThingInput(useWizardStore.getState());
+    expect('testimonialCount' in (input.proof ?? {})).toBe(false);
+  });
+
+  it('carries a set testimonialCount into the thing proof patch; clearing to null drops it', () => {
+    useWizardStore.getState().hydrate({ brief: bareThing, audienceType: 'product', templateId: 'meridian' });
+    useWizardStore.getState().setProof({ hasTestimonials: true, testimonialCount: 4 });
+    expect(useWizardStore.getState().proof.testimonialCount).toBe(4);
+    expect(buildThingInput(useWizardStore.getState()).proof).toEqual({
+      hasTestimonials: true,
+      testimonialCount: 4,
+    });
+
+    useWizardStore.getState().setProof({ testimonialCount: null });
+    expect('testimonialCount' in (buildThingInput(useWizardStore.getState()).proof ?? {})).toBe(false);
+  });
+
+  it('carries testimonialCount into the trust proof projection (always present, null default)', () => {
+    useWizardStore.getState().hydrate({ brief: bareThing, audienceType: 'service', templateId: 'hearth' });
+    expect(buildTrustInput(useWizardStore.getState()).proof.testimonialCount).toBeNull();
+    useWizardStore.getState().setProof({ testimonialCount: 8 });
+    expect(buildTrustInput(useWizardStore.getState()).proof.testimonialCount).toBe(8);
+  });
 });
 
 // ===========================================================================

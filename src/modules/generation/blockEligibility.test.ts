@@ -186,10 +186,12 @@ describe('deriveAssetFactsFromServiceAssets', () => {
 });
 
 describe('deriveAssetFactsFromBrief', () => {
-  it('reads proofAvailable kinds', () => {
+  it('reads proofAvailable capability hints (photos/logos), but NOT testimonials-as-content', () => {
+    // proofAvailable is a capability-hint list — logos/photos are layout hints
+    // (leave alone), but 'testimonials' capability must NOT flip hasTestimonials.
     const brief: Brief = { proofAvailable: ['testimonials', 'client logos'] };
     const facts = deriveAssetFactsFromBrief(brief);
-    expect(facts.hasTestimonials).toBe(true);
+    expect(facts.hasTestimonials).toBe(false); // capability ≠ content
     expect(facts.hasLogos).toBe(true);
     expect(facts.hasPhotos).toBe(false);
   });
@@ -202,5 +204,38 @@ describe('deriveAssetFactsFromBrief', () => {
   it('facts.entry.testimonials satisfies hasTestimonials', () => {
     const brief = { facts: { entry: { testimonials: ['great work'] } } } as unknown as Brief;
     expect(deriveAssetFactsFromBrief(brief).hasTestimonials).toBe(true);
+  });
+
+  // ── capability ≠ content regression (proof-truth spec, acceptance criterion 3) ──
+  it('proofAvailable testimonials capability with ZERO captured quotes ⇒ hasTestimonials false', () => {
+    const brief = {
+      proofAvailable: ['testimonials', 'case studies'],
+      facts: { entry: { testimonials: [] } },
+    } as unknown as Brief;
+    expect(deriveAssetFactsFromBrief(brief).hasTestimonials).toBe(false);
+  });
+
+  it('2 verbatim captured testimonials ⇒ hasTestimonials true (real content wins)', () => {
+    const brief = {
+      proofAvailable: ['testimonials', 'case studies'],
+      facts: { entry: { testimonials: ['loved it', 'best ever'] } },
+    } as unknown as Brief;
+    expect(deriveAssetFactsFromBrief(brief).hasTestimonials).toBe(true);
+  });
+
+  it('hasTestimonialPhotos requires REAL captured testimonials, not just the capability hint', () => {
+    // capability hint only (testimonial + photo) but no captured quotes ⇒ false
+    const capabilityOnly = {
+      proofAvailable: ['testimonials', 'photos'],
+      facts: { entry: { testimonials: [] } },
+    } as unknown as Brief;
+    expect(deriveAssetFactsFromBrief(capabilityOnly).hasTestimonialPhotos).toBe(false);
+
+    // real captured testimonials + photo capability ⇒ true
+    const realWithPhoto = {
+      proofAvailable: ['testimonials', 'photos'],
+      facts: { entry: { testimonials: ['great work'] } },
+    } as unknown as Brief;
+    expect(deriveAssetFactsFromBrief(realWithPhoto).hasTestimonialPhotos).toBe(true);
   });
 });

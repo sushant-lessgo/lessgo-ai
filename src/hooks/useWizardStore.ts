@@ -114,6 +114,14 @@ export interface WizardProofState {
   /** Superset addition — trust `packages` T2 boolean. */
   hasPackages: boolean;
   testimonialType: 'text' | 'photos' | 'video' | 'transformation' | null;
+  /**
+   * proof-truth phase 5 — approximate testimonial count the user picks in the
+   * wizard (bucket chips → representative hint number, e.g. 1–2→2, 3–5→4, 6+→8).
+   * OPTIONAL: `null` ⇒ no hint ⇒ current behavior. Feeds the existing
+   * `cardCountHint` eligibility seam ONLY on the manual (non-URL) path — a
+   * scraped `importedTestimonials.length` always wins (see thing.ts/trust.ts).
+   */
+  testimonialCount: number | null;
 }
 
 // Compile-time guard: every ServiceAssetAvailability key MUST exist on
@@ -133,6 +141,7 @@ const initialProof: WizardProofState = {
   hasFounderPhoto: false,
   hasPackages: false,
   testimonialType: null,
+  testimonialCount: null,
 };
 
 // ---------------------------------------------------------------------------
@@ -508,7 +517,14 @@ export function buildThingInput(s: WizardState): ThingGenerationInput {
     offer: fieldStr(fields, 'offer'),
     goalIntent: s.goalIntent,
     goalParam: s.goalParam,
-    proof: { hasTestimonials: s.proof.hasTestimonials },
+    proof: {
+      hasTestimonials: s.proof.hasTestimonials,
+      // proof-truth phase 5 — carry the user-answered count when set (manual
+      // path). Null ⇒ omitted ⇒ byte-identical to prior behavior.
+      ...(s.proof.testimonialCount != null
+        ? { testimonialCount: s.proof.testimonialCount }
+        : {}),
+    },
     strategy,
     sitemap,
     paletteId: s.stylePaletteId ?? undefined,
@@ -558,6 +574,9 @@ export function buildTrustInput(s: WizardState): TrustGenerationInput {
       hasTeamPhotos: s.proof.hasTeamPhotos,
       hasFounderPhoto: s.proof.hasFounderPhoto,
       testimonialType: s.proof.testimonialType,
+      // proof-truth phase 5 — user-answered count (manual path). Scraped
+      // `importedTestimonials.length` still wins in trust.ts's hint precedence.
+      testimonialCount: s.proof.testimonialCount,
     },
     importedTestimonials: s.importedTestimonials,
     paletteId: s.paletteId ?? undefined,

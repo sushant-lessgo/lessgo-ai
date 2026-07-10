@@ -22,6 +22,7 @@ import { productElementSchema } from './elementSchema';
 // get their system ids backfilled. Null (non-thing layouts) falls through to
 // the layout-name schema unchanged.
 import { resolveEngineSectionSchema } from '@/modules/engines/elementContracts';
+import { flattenReviewSentinel } from '@/lib/schemas/copy.schema';
 import { applyAccentEmFallback } from './accentFallback';
 
 export interface ProductCopyValidationResult {
@@ -112,6 +113,17 @@ export interface RealTestimonial {
  * - No-ops (with a warn) if no testimonials section was produced — the Meridian
  *   pilot set always includes one, so this is a defensive guard, not a path we
  *   expect to hit.
+ * - Sets `section.realProof = true` (proof-truth phase 4) — a post-parse
+ *   provenance annotation carried into aiMetadata by multiPageAssembly and read
+ *   by useReviewState to suppress needs-review markers. All-or-nothing per
+ *   section: this overwrites the whole testimonials[] array with only real
+ *   items, so the section is entirely real when the flag is set.
+ *
+ * KNOWN GAP (proof-truth unresolved Q3): `regenerate-element` on a single real
+ * quote element overwrites it with a fresh AI invention and does NOT clear this
+ * section-level flag, so provenance is inaccurate after element-level regen.
+ * Acceptance criterion 4 is section-level (section-regen re-injects from the
+ * table); element-level re-injection is deferred, not implemented here.
  */
 export function injectRealTestimonials(
   sections: Record<string, SectionCopy>,
@@ -130,6 +142,7 @@ export function injectRealTestimonials(
     author_name: t.author_name,
     author_role: t.author_role,
   }));
+  section.realProof = true;
 
   return sections;
 }
@@ -233,6 +246,9 @@ export function processProductCopy(
   sections: Record<string, SectionCopy>,
   uiblocks: Record<string, string>
 ): Record<string, SectionCopy> {
+  // Sentinel hardening: flatten any {value, needsReview} object BEFORE assembly
+  // so no object-shaped value can survive into content (→ no [object Object]).
+  flattenReviewSentinel(sections);
   // Contract-aware defaults (phase 8b): thing layouts read the engine contract,
   // everything else the layout registry — same gate as prompt build + backfill.
   const withDefaults = applyAllSchemaDefaults(
