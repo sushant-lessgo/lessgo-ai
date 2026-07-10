@@ -10,7 +10,7 @@ Rewrite the serve-gate law so it answers "can we serve this conversion job with 
 
 ## Progress log
 
-- phase 1 shared-block capability declaration: pending
+- phase 1 shared-block capability declaration: done (commit afca06ee, review loops 1)
 - phase 2 gate law rewrite (fit satisfaction + soft multipage) + test rewrite: pending
 - phase 3 admin serveability matrix unification: pending
 

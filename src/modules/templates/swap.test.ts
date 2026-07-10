@@ -15,6 +15,21 @@
 //
 // Pure helpers under test live in TemplateSwapList.tsx (deriveSwapSite /
 // swapShortlist / buildSwapPatch) — the same functions both popovers use.
+//
+// serve-gate-v2 note — WHY widening fit() (shared-block capability satisfaction)
+// is SAFE for swap, with ZERO assertion change here:
+//   (a) swapShortlist has an INDEPENDENT section-coverage check
+//       (TemplateSwapList.tsx:96-103): a candidate is offered only if it can
+//       render every section the site already has, regardless of fit(). A
+//       shared-block-satisfied capability never smuggles in a template that
+//       would drop a rendered section.
+//   (b) shared blocks (lead-form/store-badges) render on EVERY template — they
+//       resolve before template dispatch — so a shared-block-satisfied
+//       capability is genuinely available on any swap target.
+//   (c) swapShortlist derives requirements from requiredCapabilitiesFromStructure
+//       (USER-CONFIRMED structure), which is UNCHANGED — multipage still hardens
+//       there, so the multipage-exclusion tests below still hold.
+// The suite was re-run after the law change and needed no re-baseline.
 
 import { describe, it, expect } from 'vitest';
 import {
