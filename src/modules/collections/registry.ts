@@ -17,6 +17,8 @@
 // CollectionKey and there is no def keyed `catalog` here by construction, so
 // vestria can never trigger the generation→collections bridge.
 
+import { businessTypes, type BusinessTypeKey } from '@/modules/businessTypes/config';
+
 /** The closed set of collection keys — 1:1 with the collection-family capabilityIds. */
 export type CollectionKey = 'products' | 'services' | 'case-studies' | 'works';
 
@@ -80,4 +82,55 @@ export const COLLECTIONS: Record<CollectionKey, CollectionDef> = {
 
 export function getCollectionDef(collectionKey: string): CollectionDef | undefined {
   return (COLLECTIONS as Record<string, CollectionDef>)[collectionKey];
+}
+
+// ===== Extraction → collection-key families (entry-capture phase 1) =====
+// Single source of truth for "which collection key(s) does each extraction
+// engine family extract". The extraction engine modules
+// (src/lib/schemas/extraction/{thing,trust,work,manufacturer}.ts) consume THIS
+// map instead of each keeping a duplicate local `*_COLLECTIONS` const — one
+// place declares the family→keys mapping (D9: union built from declarations).
+//
+// The family keys are typed locally as a plain string-literal union (mirror of
+// extraction's `ExtractionSchemaKey`) so this PURE-DATA registry never imports
+// from src/lib/schemas/extraction — which imports back — avoiding a
+// registry↔extraction runtime cycle.
+
+/** Extraction engine families — mirror of ExtractionSchemaKey, kept local to avoid a cycle. */
+export type ExtractionFamilyKey = 'thing' | 'trust' | 'work' | 'manufacturer';
+
+export const extractionCollections: Record<ExtractionFamilyKey, readonly CollectionKey[]> = {
+  thing: ['products'],
+  trust: ['services', 'case-studies'],
+  work: ['services', 'works'],
+  manufacturer: ['products'],
+};
+
+/** Deduped flat union of every extraction family's collection keys (first-seen order). */
+export const allEntryCollectionKeys: readonly CollectionKey[] = (() => {
+  const seen = new Set<CollectionKey>();
+  const out: CollectionKey[] = [];
+  for (const keys of Object.values(extractionCollections)) {
+    for (const k of keys) {
+      if (!seen.has(k)) {
+        seen.add(k);
+        out.push(k);
+      }
+    }
+  }
+  return out;
+})();
+
+/**
+ * The collection key(s) an engine-declared businessType extracts, resolved via
+ * its `extractionSchemaKey` → `extractionCollections`. Unknown/undefined bt ⇒ [].
+ * Pure registry lookup — used by the 7b structure node to render an empty
+ * collection state for collection-capable business types (serve gate untouched).
+ */
+export function collectionKeysForBusinessType(
+  bt: string | null | undefined
+): readonly CollectionKey[] {
+  if (!bt || !(bt in businessTypes)) return [];
+  const key = businessTypes[bt as BusinessTypeKey].extractionSchemaKey;
+  return (extractionCollections as Record<string, readonly CollectionKey[]>)[key] ?? [];
 }

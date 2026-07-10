@@ -49,7 +49,11 @@ import {
 import { filterSectionsByProof } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { humanizeGenerationError } from '@/modules/wizard/generation/errorMessage';
 import { businessTypes } from '@/modules/businessTypes/config';
-import { getCollectionDef, type CollectionKey } from '@/modules/collections/registry';
+import {
+  getCollectionDef,
+  collectionKeysForBusinessType,
+  type CollectionKey,
+} from '@/modules/collections/registry';
 import type { CollectionEntry } from '@/modules/brief/collections';
 import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
 
@@ -207,11 +211,16 @@ function CollectionNode({ collectionKey }: { collectionKey: CollectionKey }) {
   );
 }
 
-// Renders one CollectionNode per collection present in `facts.collections` OR
-// declared by the businessType's `requiredCollections` (even when empty ⇒
-// count-only/empty node, decision 2). Zero-entry state is allowed (the index
-// page ships an empty-state later). Returns null when there are no collections
-// to show, so single-page/multipage gates without collections are unchanged.
+// Renders one CollectionNode per collection present in `facts.collections`,
+// declared by the businessType's `requiredCollections` (dormant — serve-gate
+// coupling, none set today), OR declared by the businessType's ENGINE extraction
+// family (`collectionKeysForBusinessType`). The engine-key union is what makes a
+// one-liner entry (no site → no extraction → empty `facts.collections`) still
+// reach an empty collection node + its `+ Add` path (F19). Zero-entry state is
+// allowed (count-only/empty node, decision 2). For an UNCLASSIFIED entry (rung A,
+// `businessTypeKey` null) the engine union is `[]`, so we fall back to present-only
+// and never surface empty nodes. Returns null when there are no collections to
+// show, so single-page/multipage gates without collections are unchanged.
 function CollectionNodes() {
   const businessTypeKey = useWizardStore((s) => s.businessTypeKey);
   const collections = useWizardStore((s) => s.collections);
@@ -219,8 +228,11 @@ function CollectionNodes() {
   const keys = useMemo(() => {
     const required =
       (businessTypeKey && businessTypes[businessTypeKey]?.requiredCollections) || [];
+    const engineKeys = collectionKeysForBusinessType(businessTypeKey);
     const present = Object.keys(collections) as CollectionKey[];
-    return Array.from(new Set<CollectionKey>([...present, ...required]));
+    return Array.from(
+      new Set<CollectionKey>([...present, ...required, ...engineKeys])
+    );
   }, [businessTypeKey, collections]);
 
   if (keys.length === 0) return null;

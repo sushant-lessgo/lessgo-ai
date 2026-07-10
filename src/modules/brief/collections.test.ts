@@ -90,6 +90,14 @@ describe('makeCollectionEntry — slug never AI', () => {
     expect(e.oneLiner).toBe('people');
     expect(e.imageUrl).toBe('u');
   });
+
+  it('collapses runs of separators/punctuation to a single hyphen (F28)', () => {
+    // "Widget -- Co" must slug to "widget-co", never "widget--co".
+    const e = makeCollectionEntry('Widget -- Co');
+    expect(e.slug).toBe('widget-co');
+    expect(e.slug).toBe(slugify('Widget -- Co'));
+    expect(e.slug).not.toContain('--');
+  });
 });
 
 describe('setCollections — pure writer round-trip', () => {
