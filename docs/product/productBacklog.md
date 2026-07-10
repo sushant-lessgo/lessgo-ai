@@ -4,6 +4,7 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 
 1. Lessgo.ai.. separate the app from marketing site
 2. Branded sign up, log in page
+3. Engine coverage
 2. **lessgo.ai main website** — built WITH Lessgo (customer zero, gap-finder)
 3. **Beta-public** — no-login create + marketing site live (scalePlan §11.10)
 4. **Universe v1** — SPECCED as track: `docs/tracks/universePlan.md` (queue #5)

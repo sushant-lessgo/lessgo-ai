@@ -75,3 +75,5 @@ design_handoff_naayom/
 # Template design mockups (local reference only)
 template-design/
 .claude/settings.local.json
+
+docs/research/coverage-100/raw/
