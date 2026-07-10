@@ -36,6 +36,29 @@ import { createPageActions } from '../hooks/editStore/pageActions';
 // Import storage utilities
 import { getStorageKey, trackProjectAccess, isStorageAvailable } from '@/utils/storage';
 
+// --- Debounced localStorage persist (perf-01) ---
+// Each store instance registers a flush fn here; a single set of window
+// listeners (attached once, app lifetime) flushes ALL pending writes on
+// tab teardown so no draft is lost. Per-instance pending state (below, in
+// createEditStore) avoids cross-project flush bleed in the token-scoped factory.
+const pendingFlushers = new Set<() => void>();
+let flushListenersAttached = false;
+
+function attachFlushListeners() {
+  if (flushListenersAttached || typeof window === 'undefined') return;
+  flushListenersAttached = true;
+  const flushAll = () => {
+    pendingFlushers.forEach((fn) => fn());
+  };
+  // beforeunload + pagehide cover tab close / navigation; visibility→hidden is
+  // belt-and-braces (mobile/bfcache) where unload events may not fire.
+  window.addEventListener('beforeunload', flushAll);
+  window.addEventListener('pagehide', flushAll);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushAll();
+  });
+}
+
 /**
  * Default theme configuration
  */
@@ -339,7 +362,31 @@ export function createEditStore(tokenId: string) {
   }
 
   const storageKey = getStorageKey(tokenId);
-  
+
+  // Per-instance debounce state (token-scoped → no cross-project bleed).
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let pendingWrite: { name: string; value: unknown } | null = null;
+
+  const writeNow = () => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
+    if (!pendingWrite) return;
+    const { name, value } = pendingWrite;
+    pendingWrite = null;
+    try {
+      localStorage.setItem(name, JSON.stringify(value));
+    } catch (error) {
+      logger.error(`Failed to store data for ${name}:`, () => error);
+      // Could implement storage quota handling here
+    }
+  };
+
+  // Register this instance's flush for teardown events (dedup'd, app-lifetime).
+  pendingFlushers.add(writeNow);
+  attachFlushListeners();
+
   const store = create<EditStore>()(
     devtools(
       subscribeWithSelector(
@@ -464,14 +511,23 @@ export function createEditStore(tokenId: string) {
                 }
               },
               setItem: (name, value) => {
-                try {
-                  localStorage.setItem(name, JSON.stringify(value));
-                } catch (error) {
-                  logger.error(`Failed to store data for ${name}:`, () => error);
-                  // Could implement storage quota handling here
-                }
+                // Debounce: keep only the LATEST pending value; each write
+                // resets a trailing ~1000ms idle timer. Flushed synchronously
+                // on tab teardown (writeNow) so no keystrokes are lost.
+                pendingWrite = { name, value };
+                if (debounceTimer) clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(writeNow, 1000);
               },
-              removeItem: (name) => localStorage.removeItem(name),
+              removeItem: (name) => {
+                // Cancel any pending write so a debounced setItem can't
+                // resurrect just-removed data.
+                pendingWrite = null;
+                if (debounceTimer) {
+                  clearTimeout(debounceTimer);
+                  debounceTimer = null;
+                }
+                localStorage.removeItem(name);
+              },
             },
           }
         )
