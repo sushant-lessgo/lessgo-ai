@@ -1,59 +1,76 @@
 {
   "slug": "coltivar",
   "url": "https://www.coltivar.com/",
-  "business": { "type_label": "fractional CFO / financial strategy advisory firm", "icp_category": "consulting/professional-services", "geography_hint": "US (English, USD figures, Google reviews)" },
+  "business": {
+    "type_label": "fractional-CFO / financial advisory firm (builds a financial operating system for $5M+ businesses)",
+    "icp_category": "consulting/professional-services (finance)",
+    "geography_hint": "US (Duke Fuqua, Ernst & Young, KKR background; USD financials, Google reviews)"
+  },
   "in_icp": true,
   "engine": {
     "pick": "trust",
-    "ladder_reasoning": "Visitor is deciding whether to trust a firm/person (Steve Coughran, Coltivar) with defined financial expertise — the page sells credentialed advisory service, leaning on testimonials, results stats, and a proven process/system. Sells defined expertise → trust, first rung of the ladder.",
+    "ladder_reasoning": "Visitor is deciding whether to trust a firm/person with their business finances — decision rests on founder credentials (Steve Coughran: started a business at 16, CPA/MBA Duke Fuqua, E&Y, KKR), a named process (build a financial OS in 30 days), testimonials and case studies. Sells defined expertise, first rung of the ladder.",
     "runner_up": "thing"
   },
   "goal": {
-    "one_action": "apply for a free financial health check (or book a 20-minute strategy call) — a lead/booking conversion for the advisory engagement",
+    "one_action": "book a free 20-minute financial-review call (secondary: take the free Business Health Check)",
     "mechanism": "form",
-    "delegated_to": "none"
+    "delegated_to": "scheduling-widget (unbranded, likely Kajabi-native or Calendly)"
   },
   "structure": {
     "kind": "multi",
-    "page_count": 10,
-    "pages": ["home", "about", "customers", "tools", "workshops"],
-    "archetype_note": "Nav shows 10 top-level items (Workshops, Financial Literacy, Why Coltivar?, Customers, Tools, Articles, Videos, Books, Client Portal, Get Started); only 5 captured. Kajabi-built content-marketing hub wrapping a lead-gen advisory site."
+    "page_count": 6,
+    "pages": ["home", "about (Why Coltivar?)", "customers", "tools", "workshops", "schedule-your-call"],
+    "archetype_note": "Consultancy content-hub: home + founder/why + proof (customers) + lead-gen funnel (schedule-your-call) + supporting content (tools calculators, workshops). Nav lists ~10 items incl. Articles, Videos, Books, Client Portal (mycoltivar.com) not crawled under 6-page cap."
   },
   "sections": {
     "mapped": [
       { "canonical": "hero", "observed_as": "We show you where your money is. And how to make more of it.", "component": "text" },
-      { "canonical": "problem", "observed_as": "The Problem", "component": "grid-cards" },
+      { "canonical": "problem", "observed_as": "Revenue is up. Cash is tight. Why?", "component": "grid-cards" },
       { "canonical": "howItWorks", "observed_as": "Free to start. Clear from day one.", "component": "timeline" },
-      { "canonical": "results", "observed_as": "Results", "component": "grid-cards" },
-      { "canonical": "miscellaneous", "observed_as": "Watch This (embedded explainer video)", "component": "video" },
-      { "canonical": "socialProof", "observed_as": "Strategy Meets Finance (podcast stats + platform logos)", "component": "stats" },
-      { "canonical": "closeSection", "observed_as": "The cash is there...", "component": "text" },
-      { "canonical": "leadForm", "observed_as": "Newsletter signup (free Cash Flow book)", "component": "form" },
-      { "canonical": "testimonials", "observed_as": "Video Testimonials / More From Those Who Have Worked With Us", "component": "carousel" },
-      { "canonical": "socialProof", "observed_as": "15+ Years Guiding Growth / Client Revenue $33B", "component": "stats" },
-      { "canonical": "features", "observed_as": "Key Features (workshops)", "component": "text" }
+      { "canonical": "testimonials", "observed_as": "What clients find when they finally see their numbers.", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "The 3 numbers that tell you if your business is in trouble. (video teaser)", "component": "video" },
+      { "canonical": "socialProof", "observed_as": "The podcast for owners who want to understand their numbers. (200+ eps, 1.3M+ downloads)", "component": "stats" },
+      { "canonical": "cta", "observed_as": "The cash is there. Let us show you where.", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "newsletter capture — free digital copy of book Cash Flow", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "I started a business at 16. I know what it feels like to run blind. (Steve Coughran bio)", "component": "timeline" },
+      { "canonical": "uniqueMechanism", "observed_as": "We do not advise. We build systems. (done-for-you OS in 30 days)", "component": "grid-cards" },
+      { "canonical": "results", "observed_as": "Our Results Speak for Themselves (4 case-study cards)", "component": "grid-cards" },
+      { "canonical": "socialProof", "observed_as": "Financial Health Check sample metrics + Google 4.9/5 badge + $33B/$203M client stats", "component": "stats" },
+      { "canonical": "faq", "observed_as": "Common questions about the call. (5-item accordion on /schedule-your-call)", "component": "accordion" },
+      { "canonical": "leadForm", "observed_as": "Choose a time that works for you. (embedded scheduling widget)", "component": "form" },
+      { "canonical": "features", "observed_as": "Key Features (workshops)", "component": "text" },
+      { "canonical": "footer", "observed_as": "large resource menu (Articles, Benchmarks, Calculators, Podcast, Store, Videos...)", "component": "" }
     ],
     "unmapped": [
-      { "observed": "Business Calculators — 13 interactive financial calculator tools", "why_no_fit": "Interactive utility tools are a content/product surface, not a persuasion section; no canonical id covers self-serve calculators", "closest": "miscellaneous" },
-      { "observed": "More Resources — downloadable lead-magnet guides (Growth Roadmap, Cash Flow Blueprint)", "why_no_fit": "Gated downloadable asset cards don't map cleanly to any section id", "closest": "miscellaneous" },
-      { "observed": "Podcast promotion (Strategy Meets Finance, 200+ episodes, 1.3M downloads, listen platforms)", "why_no_fit": "Owned-media promo block; partially proof, partially a distinct content channel", "closest": "socialProof" }
+      { "observed": "Business Calculators — 13 interactive financial calculators (job costing, margin, cash-flow) on /tools", "why_no_fit": "Interactive computational tools producing user-specific outputs; not a static persuasion section — no canonical id or block models live calculators.", "closest": "features / miscellaneous (weak — neither captures interactivity)" },
+      { "observed": "Podcast promotion + external podcast.coltivar.com hub (200+ eps, 1.3M downloads, Spotify/Apple embeds)", "why_no_fit": "A recurring media property used as authority/lead magnet; socialProof captures the stats but not the media-hub function (episode list, platform subscribe).", "closest": "socialProof (stats only)" },
+      { "observed": "Financial Health Check quiz funnel (/financial-check, /check) — a separate scored assessment path", "why_no_fit": "A distinct interactive assessment conversion parallel to the booking funnel; no section/capability models a self-assessment quiz.", "closest": "cta (only the entry button is expressible)" }
     ]
   },
   "capabilities": {
-    "needed": ["multipage", "lead-form", "blog", "video-hero"],
+    "needed": ["multipage", "video-hero", "lead-form", "blog"],
     "proposed_new": [
-      { "name": "interactive-calculators", "evidence": "Tools page lists 13 business calculators 'built to help you understand your numbers' — interactive utilities, not expressible in the closed capability vocab" },
-      { "name": "podcast/media-hub", "evidence": "Dedicated podcast (podcast.coltivar.com) with episode/download stats and Spotify/Apple embeds; footer resource menu spans Articles, Videos, Books, Benchmarks — a media hub beyond a landing page" }
+      { "name": "interactive-calculators", "evidence": "/tools lists 13 named financial calculators described as interactive tools to 'understand your numbers, close performance gaps, and drive business value'. RE-CONFIRMED against fuller capture — genuine gap, not shoehornable into the closed vocab." },
+      { "name": "media-hub", "evidence": "Podcast property (200+ episodes, 1.3M+ downloads) on external subdomain + YouTube channel, plus footer Articles/Videos/Books/Benchmarks, used as top-of-funnel authority. RE-CONFIRMED as gap (generalized from prior 'podcast/media-hub')." }
     ]
   },
-  "proof_types": ["testimonials", "reviews", "stats"],
-  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
-  "components_needed": ["email-capture form", "testimonial carousel", "stats/counter row", "video embed", "calculator-tool card grid", "process timeline", "downloadable resource cards"],
+  "proof_types": ["testimonials", "reviews", "case-studies", "stats", "certs"],
+  "design_style": {
+    "pick": "authority/professional",
+    "none_fits_because": "design_hints empty in capture (no fonts/colors), but content register — CPA/finance credentials, $33B stats, sober metric dashboards — reads authority/professional; pick inferred from copy tone, not visual data."
+  },
+  "components_needed": ["process timeline / steps", "case-study card grid", "video embed", "stats/counter band", "faq accordion", "testimonial cards + carousel", "embedded scheduling calendar", "newsletter email capture", "downloadable resource cards"],
   "languages": ["en"],
-  "confidence": { "level": "medium", "why": "fetch_quality is partial: /about (the trust-establishing 'Why Coltivar?' page) returned only base64 image data with no extractable text, and only 5 of 10 nav pages captured. Home/customers/tools/workshops captured well, so engine + goal are clear, but section depth on the founder-story page is unverified." },
+  "confidence": {
+    "level": "medium",
+    "why": "Capture is 'rendered' (not 'full') and covers 6 of ~10 nav pages — /financial-check quiz, Client Portal, Articles/Videos/Books uncrawled. Founder bio (/about) and booking funnel (/schedule-your-call) now render fully, resolving prior blind spots; engine and goal are clear. Capped at medium per fetch_quality + partial-crawl rule."
+  },
   "gap_findings": [
-    "Interactive business calculators (13 tools) have no capability in the closed vocab — proposed 'interactive-calculators'.",
-    "Podcast + full media/content hub (Articles, Videos, Books, Benchmarks) exceeds landing-page scope — proposed 'podcast/media-hub'.",
-    "Site runs multiple parallel conversion paths (health-check lead form, book-a-call scheduling, newsletter/book download, gated guide downloads) — the single one_action model underrepresents a multi-funnel advisory hub."
+    "interactive-calculators: 13 live financial calculators (/tools) have no section or capability representation — RE-CONFIRMED as real gap after fuller capture.",
+    "media-hub: podcast (200+ eps, external subdomain) + YouTube used as authority/lead-gen; socialProof stats capture the numbers but not the media-property function.",
+    "Scheduling widget on /schedule-your-call is a simple embedded 'pick a time' calendar (Kajabi/Calendly-style single-step booking) — NOT the multi-step 'booking-wizard' proposed by priscillawolf: no inventory, service-selection, or multi-page flow. It behaves as leadForm + calendar embed; treat as delegated form, do not force a booking-wizard match.",
+    "Multi-funnel strain RE-ASSESSED with fuller capture: site runs 3+ parallel conversion paths (book-a-call, financial-health-check quiz, newsletter capture) plus a client portal. The one_action model still resolves cleanly to 'book a call' as primary, so this is mild strain, NOT a breakage — the health-check QUIZ is the one genuinely separate scored-assessment conversion the model cannot express.",
+    "Content-marketing hub scope (calculators, podcast, articles, videos, books, benchmarks) exceeds single-landing-page assumptions; a consultancy at this maturity needs a hub/resource-library structure beyond the section list."
   ]
 }

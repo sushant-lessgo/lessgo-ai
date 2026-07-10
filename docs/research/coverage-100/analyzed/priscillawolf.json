@@ -1,15 +1,15 @@
 {
   "slug": "priscillawolf",
   "url": "https://photography.priscillawolf.nl/",
-  "business": { "type_label": "portrait photographer (pregnancy/family/beauty/business)", "icp_category": "photographer", "geography_hint": "Nederland (NL)" },
-  "in_icp": true,
+  "business": { "type_label": "portrait photographer (pregnancy/family/beauty/business), owner of Wolf Studios", "icp_category": "photographer", "geography_hint": "Almere, Nederland (NL)" },
+  "in_icp": false,
   "engine": {
     "pick": "work",
-    "ladder_reasoning": "A photographer whose portfolio (17 images, gallery pages, photo-heavy hero) IS the proof the visitor evaluates before booking; packages/prices support but do not replace the visual decision.",
+    "ladder_reasoning": "A photographer whose portfolio (17 filterable images, gallery pages, photo-heavy hero) IS the proof the visitor evaluates before booking; the priced packages and studio/hours support the decision but the visual work is what is browsed.",
     "runner_up": "trust"
   },
   "goal": {
-    "one_action": "book a photography session (or contact the photographer)",
+    "one_action": "book a photography session via the on-site 4-step booking wizard (secondary: send a contact-form message / call)",
     "mechanism": "form",
     "delegated_to": "none"
   },
@@ -17,36 +17,42 @@
     "kind": "multi",
     "page_count": 7,
     "pages": ["home", "prices", "studio", "portfolio", "about", "contact", "book"],
-    "archetype_note": "Nav exposes 7 pages; 5 crawled (home, about, portfolio, contact, book). /contact and /book are client-rendered 'Laden...' shells so form/booking-widget content was not captured. Prices and Studio pages not crawled but package/pricing content appears inline on home."
+    "archetype_note": "Nav exposes 7 pages; rendered capture recovered /contact (real form + Google Maps embed + hours) and /book (4-step booking wizard: PAKKET / STUDIO & DATUM / GEGEVENS / BEVESTIGING). Prices and Studio pages not crawled; package/pricing content also appears inline on home."
   },
   "sections": {
     "mapped": [
       { "canonical": "hero", "observed_as": "TIMELESS EFFORTLESS ICONIC", "component": "text" },
       { "canonical": "howItWorks", "observed_as": "Jouw Ervaring (Your Experience)", "component": "grid-cards" },
       { "canonical": "pricing", "observed_as": "The Essence Session / The Signature Experience / The Full Experience / Business & Branding", "component": "pricing-table" },
-      { "canonical": "socialProof", "observed_as": "Portfolio teaser", "component": "gallery" },
-      { "canonical": "testimonials", "observed_as": "Wat Klanten Zeggen", "component": "testimonials" },
+      { "canonical": "socialProof", "observed_as": "Portfolio teaser + filterable Portfolio page (17 items)", "component": "gallery" },
+      { "canonical": "testimonials", "observed_as": "Wat Klanten Zeggen (2 client testimonials w/ Instagram handles)", "component": "testimonials" },
       { "canonical": "faq", "observed_as": "Veelgestelde Vragen", "component": "accordion" },
       { "canonical": "cta", "observed_as": "Klaar Om Jouw Verhaal Te Vertellen?", "component": "text" },
       { "canonical": "founderNote", "observed_as": "About me (bio narrative, owner of Wolf Studios)", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "STUUR ONS EEN BERICHT (naam/e-mail/onderwerp/bericht)", "component": "form" },
+      { "canonical": "miscellaneous", "observed_as": "CONTACTGEGEVENS + OPENINGSTIJDEN + ONZE LOCATIE (address, hours, Google Maps embed)", "component": "map" },
       { "canonical": "footer", "observed_as": "Navigatie + Contact block", "component": "other" }
     ],
     "unmapped": [
-      { "observed": "Portfolio page with category filters (Alles/Pregnancy/Family/Beauty)", "why_no_fit": "A full filterable gallery page is the core work-showcase surface but the section vocab has no dedicated 'portfolio/gallery' section id — 'socialProof' is the nearest but understates it as the primary proof surface.", "closest": "socialProof" }
+      { "observed": "/book 4-step booking wizard (PAKKET → STUDIO & DATUM → GEGEVENS → BEVESTIGING) with per-package SELECTEER and date/studio selection", "why_no_fit": "No canonical section id represents a multi-step, stateful on-site booking/scheduling flow. It is not a leadForm (single submit) nor a pricing table (it selects date + studio inventory and confirms a booking). The section vocab assumes static persuasion sections, not an interactive booking engine.", "closest": "leadForm" },
+      { "observed": "Filterable Portfolio page (Alles/Pregnancy/Family/Beauty tabs, 17 images)", "why_no_fit": "The primary work-proof surface for a work-engine site, but no dedicated 'portfolio/gallery' section id exists; socialProof understates it as the core decision surface.", "closest": "socialProof" }
     ]
   },
   "capabilities": {
-    "needed": ["multipage", "gallery/portfolio", "packages", "bilingual", "lead-form"],
-    "proposed_new": []
+    "needed": ["multipage", "gallery/portfolio", "packages", "bilingual", "lead-form", "map-hours"],
+    "proposed_new": [
+      { "name": "booking-wizard", "evidence": "/book is a confirmed on-site 4-step wizard (package selection → studio & date scheduling → customer details → confirmation) with priced ALL-IN packages (€495/€1495/€2495). No existing capability (lead-form, packages) expresses stateful multi-step booking with date/studio inventory selection." }
+    ]
   },
   "proof_types": ["testimonials", "portfolio"],
   "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
-  "components_needed": ["pricing-table", "package cards", "gallery grid with category filters", "testimonial cards", "faq accordion"],
+  "components_needed": ["multi-step booking wizard (package/date/studio/confirmation)", "pricing-table / package cards", "gallery grid with category filters", "testimonial cards", "faq accordion", "contact form", "map + hours block"],
   "languages": ["nl", "en"],
-  "confidence": { "level": "medium", "why": "fetch_quality is partial: /contact and /book render client-side 'Laden...' shells so the actual booking widget and contact form fields were not captured — the conversion mechanism (form vs embedded booking engine vs Calendly) is inferred, not observed. Design hints (fonts/colors) also empty." },
+  "confidence": { "level": "high", "why": "fetch_quality is 'rendered'; /contact (form + map + hours) and /book (booking wizard structure + step 1 packages) were recovered via headless render. Only wizard steps 2-4 (behind interaction) and design hints (fonts/colors empty) remain uncaptured — neither changes the classification." },
   "gap_findings": [
-    "A dedicated portfolio/gallery page (filterable, category-tabbed) is the primary proof surface for a work-engine site but has no canonical section id — it maps awkwardly onto socialProof.",
-    "Booking mechanism is client-rendered and uncaptured; cannot confirm whether it is a simple lead-form (in ICP) or an inventory/scheduling booking engine (would push toward in_icp:false). Classified in_icp:true on the assumption of a session-request form.",
-    "Packages/pricing tiers (€495/€1.495/€2.495 + no-price business tier) sit on a work-engine photography site — 'packages' capability covers it, but the mix of work-proof + explicit price ladder blends work and trust engines."
+    "PRIMARY GAP: the confirmed on-site 4-step booking wizard (package → studio & date → details → confirmation) is a booking engine with scheduling/inventory selection. It exceeds the 'one conversion action' ICP definition and no existing capability or section id can express it — hence in_icp:false. 'lead-form' and 'packages' both undershoot it; proposed capability 'booking-wizard'.",
+    "The site actually offers TWO conversion paths: a simple /contact lead-form (which alone WOULD be in-ICP) and the dominant /book booking wizard (out of scope). The primary CTA everywhere ('Boek Een Sessie') routes to the wizard, so the site's real job is the booking engine.",
+    "A dedicated filterable portfolio/gallery page — the primary proof surface for a work engine — has no canonical section id and maps awkwardly onto socialProof.",
+    "Explicit price ladder (€495/€1495/€2495 + no-price business tier) on a work-engine photography site blends work-proof with trust-style package selling; 'packages' capability covers the display but not the wizard that consumes it."
   ]
 }

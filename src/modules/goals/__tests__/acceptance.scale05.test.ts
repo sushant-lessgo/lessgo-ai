@@ -56,8 +56,10 @@ function makePage() {
       id: 'hero-abc12345',
       layout: 'TerminalHero',
       elements: { headline: 'Hello', cta_text: 'Get started' },
-      // Hero primary is a GOAL_REF — the real generation writes this so publish
-      // resolves the picked goal (scale-04).
+      // Hero primary is a GOAL_REF. goal-ref-cta phase 1 made this TRUE at
+      // generation time: stampGoalRefCtas (finalize.ts / finalizeMultiPageGeneration)
+      // now writes exactly this `cta` on every primary (hero/header/cta), so
+      // publish resolves the picked goal. This fixture mirrors that stamp.
       elementMetadata: { cta_text: { cta: { role: 'primary', dest: 'GOAL_REF' } as CTAButton } },
     },
     'features-xyz': { id: 'features-xyz', elements: {} },

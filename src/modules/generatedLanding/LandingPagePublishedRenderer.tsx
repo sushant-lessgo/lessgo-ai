@@ -21,7 +21,7 @@ import type { MeridianPalette } from '@/types/product';
 // No static template import (firewall). Service template module is preloaded by
 // the caller (p/[slug] page / static export) and read from the registry cache.
 import { getLoadedTemplate } from '@/modules/templates/registry';
-import { normalizeCtas } from '@/utils/normalizeCtas';
+import { normalizeCtas, buildNormalizeCtasContext } from '@/utils/normalizeCtas';
 import type { Brief } from '@/types/brief';
 
 /**
@@ -51,6 +51,11 @@ interface LandingPagePublishedRendererProps {
   variantId?: string | null;    // Template variant (Lex/Meridian token rescale)
   mood?: string | null;         // Neutral mood (vestria; Project.themeValues.mood)
   goal?: Brief['goal'] | null;  // scale-04: resolves GOAL_REF ctas via the pre-pass
+  // goal-ref-cta phase 3 (F23): the page being rendered + the page holding the
+  // conversion form (both precomputed by the exporter, which alone holds every
+  // page). Multipage only; single-page omits both → M1 same-page anchor.
+  currentPagePath?: string;
+  formPagePath?: string;
 }
 
 export function LandingPagePublishedRenderer({
@@ -68,12 +73,19 @@ export function LandingPagePublishedRenderer({
   variantId = null,
   mood = null,
   goal = null,
+  currentPagePath,
+  formPagePath,
 }: LandingPagePublishedRendererProps) {
   // scale-04 (phase 3): normalize new-shape `cta` writes into the legacy
   // `buttonConfig` shape ONCE, before any dispatch, so the ~26 untouched readers
   // consume them. GOAL_REF primaries resolve from the project goal here; null
   // goal / no cta → same reference back (byte-identical legacy output).
-  content = normalizeCtas(content, { goal, forms: content?.forms });
+  // goal-ref-cta phase 3 (F23): currentPagePath/formPagePath (precomputed by the
+  // exporter) let M1 emit a cross-page `page` dest when the form is on another page.
+  content = normalizeCtas(
+    content,
+    buildNormalizeCtasContext({ goal, forms: content?.forms, currentPagePath, formPagePath }),
+  );
   const usesTemplate = usesTemplateModule(audienceType, templateId);
   // Module was preloaded by the caller; read it synchronously from the cache.
   const tmpl = usesTemplate
