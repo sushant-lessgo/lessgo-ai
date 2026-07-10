@@ -11,7 +11,7 @@ Generate platform-correct cold-outreach copy grounded in a specific prospect: us
 ## Progress log
 
 - phase 1 data layer: done (review loops 1, ship) — migration 20260710202106_cold_outreach, tsc+test green
-- phase 2 prospect grounding: pending
+- phase 2 prospect grounding: done (review loops 1, ship) — extraction module + scrape cache lib, tsc+test green
 - phase 3 generation engine: pending
 - phase 4 API routes: pending
 - phase 5 UI: pending

@@ -52,3 +52,28 @@
 - The shared Prisma client is stale relative to this stacked branch (pre-social-posts/email-sequences).
   A `prisma generate` (post-lock) is required before any runtime/tsc use of the new models — deferred
   to phases 2+ which actually consume them.
+
+---
+
+## Phase 2 — Prospect grounding: extraction module + scrape cache lib
+
+### Files changed
+- `src/modules/outreach/prospectExtraction.ts` (new) — PURE extraction core.
+- `src/lib/prospectScrape.ts` (new) — project-scoped ProspectScrape cache lib.
+- `src/modules/outreach/prospectExtraction.test.ts` (new) — schema/prompt/summarize tests.
+- `src/modules/outreach/README.md` (new) — agent-oriented module README.
+
+### What changed
+- **prospectExtraction.ts**: `ProspectExtractSchema` (`{ name: string|null, whatTheyDo, whoFor, specifics: string[] }`) — constraint-light per decision #6: `name` is `.nullable()`, NO `.min()`/`.max()` on any field (strict-structured-outputs safe). `buildProspectExtractionPrompt(combinedText)` — proof-truth extraction: facts only from `## PAGE:`-marked text, no inference/invention, "2–6 short specifics" in prompt text, JSON-only output. `summarizeProspect(grounding)` renders either a `ProspectExtract` (PROSPECT FACTS block, omits empty fields) or `{rawText}` (verbatim PROSPECT-PROVIDED TEXT). `mockProspectExtract` fixture. No Prisma/next/AI imports.
+- **prospectScrape.ts**: `normalizeProspectUrlKey` (lowercase host, strip www — origin-level, mirrors siteContext), `PROSPECT_SCRAPE_TTL_MS = 7 days` (exported), `getFreshProspectScrape(projectId, urlKey)` (row iff within TTL else null), `upsertProspectScrape({...})` (upsert on `[projectId, urlKey]`, never throws). No fetching. Composite-key accessor `projectId_urlKey`.
+- **README.md**: purpose, key files (platforms/outreachEngine noted as Phase 3), invariants (pure module, constraint-light schema, caps-outside-schemas, proof-truth both sides, crawler reused/SSRF inherited), pitfalls (demo-first ordering, cache-charge contract, never re-scrape on regen).
+
+### Deviations
+- None. Note: `normalizeProspectUrlKey` strips www + drops path (origin-level host key) which subsumes the plan's "strip trailing slash" — identical behavior to `siteContext.normalizeUrlKey` as instructed. Logged for transparency.
+
+### Verification
+- Had to run `npx prisma generate` first: tsc initially failed on `prospectScrape` AND pre-existing `emailSequence`/`socialPost` (stale generated client). After generate: `npx tsc --noEmit` clean.
+- `npm run test:run`: 1822 passed | 3 skipped (108 files + 1 skipped). New `prospectExtraction.test.ts` green. No new regressions.
+
+### Open risks
+- None for this phase. `getFreshProspectScrape`/`upsertProspectScrape` are Prisma-backed but exercised only via the Phase 4 route (no DB integration test at this layer, matching siteContext precedent).
