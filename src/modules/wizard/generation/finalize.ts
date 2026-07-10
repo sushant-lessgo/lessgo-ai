@@ -14,6 +14,7 @@
 import type { SectionCopy } from '@/types/generation';
 import type { Brief } from '@/types/brief';
 import { seedGoalForm } from '@/modules/goals/seedGoalForm';
+import { stampGoalRefCtas, resolveGoalFormId } from '@/modules/goals/stampGoalRefCtas';
 import { injectGoalSections } from '@/modules/goals/injectGoalSections';
 import type { InjectGoalSectionsCtx } from '@/modules/goals/injectGoalSections';
 
@@ -139,6 +140,18 @@ export function buildFinalContent(params: BuildFinalContentParams): { finalConte
   // form, placed + wired to the CTA. No-op for non-M1 goals or when a form
   // already exists (e.g. the lead form above).
   seedGoalForm(finalContent, briefGoal);
+
+  // goal-ref-cta phase 1: stamp `dest:'GOAL_REF'` on every primary CTA
+  // (hero/header/cta `cta_text`) for EVERY mechanism M1–M5 — the F5 fix. Runs
+  // AFTER seedGoalForm so the M1 formId points at the form it just created
+  // (read back from finalContent.forms; seedGoalForm returns void). Outside any
+  // mechanism gate; no-op when briefGoal is null. On the single-page path the
+  // header is an ordinary section inside finalContent.content, so this one call
+  // covers hero/header/cta alike.
+  stampGoalRefCtas(finalContent.content, {
+    goal: briefGoal,
+    formId: resolveGoalFormId(finalContent.forms, briefGoal),
+  });
 
   // scale-05 phase 7/8: deterministic goal-section injection (M3 download-app →
   // store-badges row; M4 follow-social → follow-strip). No-op otherwise.

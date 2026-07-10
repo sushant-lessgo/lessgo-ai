@@ -11,8 +11,14 @@
 // `{type:'form', formId}` buttonConfig; M2–M5 omit formId.
 //
 // Unresolvable input (no goal, no mechanism, or a mechanism whose destination is
-// missing/unusable) → `undefined`: the caller falls back to legacy behavior
+// unusable/malformed) → `undefined`: the caller falls back to legacy behavior
 // (form section / `#cta`), so every existing project renders unchanged.
+//
+// goal-ref-cta (D-C): a goal that EXISTS but is missing its required param
+// (M2 phone/email, M3 url, M4 links — the F14 "Skip for now" case) → `null`,
+// which normalizeCtas maps to an inert `#` no-op (never a dead/broken href).
+// `null` (param-less) is deliberately distinct from `undefined` (leave the
+// entry untouched → template fallback). M1/M5 keep their working defaults.
 
 import type { Brief } from '@/types/brief';
 import type { Destination } from '@/types/destination';
@@ -71,7 +77,7 @@ export function inferPlatform(url: string): string {
 export function goalToDestination(
   goal: Brief['goal'] | null | undefined,
   ctx: { forms?: Record<string, unknown> | undefined },
-): GoalDestination | undefined {
+): GoalDestination | null | undefined {
   if (!goal || !goal.mechanism) return undefined;
 
   switch (goal.mechanism) {
@@ -87,8 +93,10 @@ export function goalToDestination(
     case 'M2': {
       // Direct channel: parse the destination string (wa.me → whatsapp,
       // tel: → call, mailto: → email; anything else → external) via the shim.
+      // D-C: required param (phone/email) missing → `null` (inert `#` no-op at
+      // normalizeCtas), distinct from `undefined` (leave the entry untouched).
       const raw = firstDestination(goal.destination);
-      if (!raw) return undefined;
+      if (!raw) return null;
       const dest = toDestination(raw);
       if (dest === undefined || dest === 'GOAL_REF' || !isDestination(dest)) return undefined;
       // scale-05 phase 6: enrich a WhatsApp destination that carries no inline
@@ -103,16 +111,18 @@ export function goalToDestination(
 
     case 'M3': {
       // Redirect out: external URL verbatim (store badge, Amazon, Calendly, …).
+      // D-C: missing url param → `null` (inert `#` no-op).
       const raw = firstDestination(goal.destination);
-      if (!raw) return undefined;
+      if (!raw) return null;
       return { dest: { kind: 'external', url: raw } };
     }
 
     case 'M4': {
       // Subscribe / follow: a social profile link (platform inferred) or, when
       // the host is unrecognized, an external redirect. No formId.
+      // D-C: missing links param → `null` (inert `#` no-op).
       const raw = firstDestination(goal.destination);
-      if (!raw) return undefined;
+      if (!raw) return null;
       const platform = inferPlatform(raw);
       if (platform === 'website') return { dest: { kind: 'external', url: raw } };
       return { dest: { kind: 'social', platform, url: raw } };

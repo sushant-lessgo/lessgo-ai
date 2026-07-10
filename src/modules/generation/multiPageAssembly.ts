@@ -21,6 +21,12 @@
 
 import type { SectionCopy } from '@/types/generation';
 import type { SitemapPage } from '@/types/product';
+import type { Brief } from '@/types/brief';
+import {
+  stampGoalRefCtas,
+  stampSectionGoalRefCtas,
+  resolveGoalFormId,
+} from '@/modules/goals/stampGoalRefCtas';
 import { selectProductBlocks } from '@/modules/audience/product/selectBlocks';
 import { getCollectionDef, type CollectionKey } from '@/modules/collections/registry';
 import type { CollectionEntry, CollectionsFacts } from '@/modules/brief/collections';
@@ -232,11 +238,48 @@ export function mergePageIntoFinalContent(opts: {
   }
 }
 
-/** Generation complete — drop the in-progress marker (draft becomes final). */
-export function finalizeMultiPageGeneration(fc: any): void {
+/**
+ * Generation complete — drop the in-progress marker (draft becomes final).
+ *
+ * goal-ref-cta phase 1 (D-F): the multipage path runs NO finalize tail, so this
+ * single choke point is where GOAL_REF stamping happens for it. When a goal
+ * exists, stamp every primary CTA (`cta_text`) across ALL content trees:
+ *   • every page body      `fc.pages[*].content` (incl. collection item pages),
+ *   • the chrome header    `fc.chrome.header.data`  (relocated into each page at
+ *     publish by injectChromeIntoPage — must carry its OWN stamp),
+ *   • the chrome footer    `fc.chrome.footer.data`  (allowlist-driven → a
+ *     harmless no-op unless a template ever puts `cta_text` there),
+ *   • the flat home        `fc.content`.
+ * These trees SHARE section references in memory (mergePageIntoFinalContent's
+ * shallow `fc.content = {...content}`), so some writes are redundant — that's
+ * fine: stamping is idempotent, and post-JSON-persistence the refs de-alias, so
+ * each tree must carry its own stamp. `briefGoal` is optional so existing
+ * callers/tests (no-goal) stay green (no stamp).
+ */
+export function finalizeMultiPageGeneration(
+  fc: any,
+  briefGoal?: NonNullable<Brief['goal']> | null,
+): void {
   delete fc.generationProgress;
   fc.generatedAt = Date.now();
   fc.meta.lastUpdated = Date.now();
+
+  if (briefGoal) {
+    const formId = resolveGoalFormId(fc.forms, briefGoal);
+    const opts = { goal: briefGoal, formId };
+    if (fc.pages && typeof fc.pages === 'object') {
+      for (const key of Object.keys(fc.pages)) {
+        stampGoalRefCtas(fc.pages[key]?.content, opts);
+      }
+    }
+    if (fc.chrome?.header?.data) {
+      stampSectionGoalRefCtas(fc.chrome.header.data, briefGoal, formId);
+    }
+    if (fc.chrome?.footer?.data) {
+      stampSectionGoalRefCtas(fc.chrome.footer.data, briefGoal, formId);
+    }
+    stampGoalRefCtas(fc.content, opts);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

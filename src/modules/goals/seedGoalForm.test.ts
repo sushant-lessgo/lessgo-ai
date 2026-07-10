@@ -78,12 +78,11 @@ describe('seedGoalForm — M1 seeds a placed + wired form', () => {
       behavior: 'scrollTo',
     });
 
-    const newCta = cta.elementMetadata.cta_text.cta;
-    expect(newCta).toEqual({
-      role: 'primary',
-      dest: { kind: 'section', anchor: 'form-section' },
-      formId,
-    });
+    // goal-ref-cta phase 1: seedGoalForm no longer writes a RESOLVED snapshot
+    // `cta` here — it keeps only the form `buttonConfig`. The GOAL_REF `cta`
+    // (`{ role:'primary', dest:'GOAL_REF', formId }`) is written separately by
+    // stampGoalRefCtas (run right after seedGoalForm in finalize.ts).
+    expect(cta.elementMetadata.cta_text.cta).toBeUndefined();
 
     // Section-level ctaConfig mirrors the modal write.
     expect(cta.cta).toMatchObject({

@@ -9,8 +9,10 @@
 // than teach every reader to dual-read (or thread goal context into every call
 // site), this pre-pass clones the content and, for each `cta`:
 //   1. `dest:'GOAL_REF'` → `goalToDestination(goal, {forms})` (widened
-//      `{ dest, formId? }` return); null/unresolvable → leave the entry
-//      UNTOUCHED (keeps any legacy buttonConfig, or absent → reader's `#cta`).
+//      `{ dest, formId? }` return); `undefined` (unresolvable / no goal) →
+//      leave the entry UNTOUCHED (keeps any legacy buttonConfig, or absent →
+//      reader's `#cta`); `null` (D-C: goal present but required param missing)
+//      → an inert `{ type:'link', url:'#' }` no-op (never a dead/broken href).
 //   2. Concrete `cta.dest` → the Destination directly (`cta.formId` carried).
 //   3. The resulting Destination(+formId) is down-converted into a legacy
 //      `buttonConfig` written into the clone:
@@ -54,7 +56,11 @@ function ctaToButtonConfig(
 
   if (cta.dest === 'GOAL_REF') {
     const gd = goalToDestination(ctx.goal, { forms: ctx.forms });
-    if (!gd) return undefined; // null/unresolvable goal → leave entry untouched
+    // D-C: `null` = goal exists but its required param is missing (F14 "Skip for
+    // now") → an inert `#` no-op, never a dead/broken href. `undefined` =
+    // unresolvable / no goal → leave the entry untouched (template fallback).
+    if (gd === null) return { type: 'link', url: '#' };
+    if (!gd) return undefined;
     dest = gd.dest;
     formId = gd.formId;
     // M1 form case is marked by the WIDENED return carrying the formId KEY

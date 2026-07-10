@@ -67,10 +67,12 @@ describe('goalToDestination', () => {
       expect(result).toEqual({ dest: { kind: 'email', addr: 'hi@x.com' } });
     });
 
-    it('returns undefined when destination is missing', () => {
+    it('returns null (param-less degradation, D-C) when destination is missing', () => {
+      // goal-ref-cta D-C: a goal that EXISTS but lacks its required param → null
+      // (inert `#` no-op at normalizeCtas), distinct from undefined (untouched).
       expect(
         goalToDestination(goal({ intent: 'enquiry', mechanism: 'M2' }), { forms: {} }),
-      ).toBeUndefined();
+      ).toBeNull();
     });
 
     // scale-05 phase 6: enrichment — a plain wa.me destination (no inline
@@ -132,10 +134,10 @@ describe('goalToDestination', () => {
       expect(result).toEqual({ dest: { kind: 'external', url: 'https://apps.apple.com/a' } });
     });
 
-    it('returns undefined when destination is missing', () => {
+    it('returns null (param-less degradation, D-C) when destination is missing', () => {
       expect(
         goalToDestination(goal({ intent: 'signup-free', mechanism: 'M3' }), { forms: {} }),
-      ).toBeUndefined();
+      ).toBeNull();
     });
   });
 
@@ -156,6 +158,12 @@ describe('goalToDestination', () => {
         { forms: {} },
       );
       expect(result).toEqual({ dest: { kind: 'external', url: 'https://newsletter.example.com' } });
+    });
+
+    it('returns null (param-less degradation, D-C) when the links param is missing', () => {
+      expect(
+        goalToDestination(goal({ intent: 'follow-social', mechanism: 'M4' }), { forms: {} }),
+      ).toBeNull();
     });
   });
 

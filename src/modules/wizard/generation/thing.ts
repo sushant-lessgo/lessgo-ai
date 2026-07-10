@@ -524,7 +524,7 @@ export async function runThingGeneration(
 
     cb.onStage?.('saving');
     try {
-      finalizeMultiPageGeneration(fc);
+      finalizeMultiPageGeneration(fc, briefGoal);
       await saveFC(fc);
     } catch (e: any) {
       return { status: 'error', error: e?.message || 'Could not save the draft.' };
