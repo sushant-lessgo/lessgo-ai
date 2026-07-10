@@ -1,0 +1,57 @@
+{
+  "slug": "curacell",
+  "url": "https://www.curacell.ch/",
+  "business": { "type_label": "physiotherapy & natural-therapy clinic", "icp_category": "health practitioner / clinic", "geography_hint": "Locarno, Ticino, Switzerland" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Visitor is deciding whether to trust a named practitioner (Dott. Ernest Schoenmaker) and his 36-year clinic — the page leads with credentials, professional memberships, philosophy, insurance reimbursement and a testimonial. That is selling defined expertise, so trust wins on the first rung.",
+    "runner_up": "place"
+  },
+  "goal": {
+    "one_action": "book an appointment (or phone the clinic)",
+    "mechanism": "redirect",
+    "delegated_to": "cituro"
+  },
+  "structure": { "kind": "multi", "page_count": 10, "pages": ["home","chi-siamo","sintomi-e-patologie","fisioterapia-locarno","medicina-alternativa","specialita-terapie","analisi","blog","documenti","contatti"], "archetype_note": "Multi-page local clinic site: rich home overview + about/team, condition & service detail pages, blog, and a contact/hours/map page. Conversion (booking) is handed off to external Cituro system." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Over Thirty Years of Experience in Physiotherapy and Natural Therapies", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Dott. Ernest Schoenmaker", "component": "team" },
+      { "canonical": "features", "observed_as": "Specialized in Alternative Medicine and Complementary Care", "component": "text" },
+      { "canonical": "hero", "observed_as": "Watch Our Presentation Video", "component": "video" },
+      { "canonical": "features", "observed_as": "Professionisti Esperti (4 feature boxes)", "component": "grid-cards" },
+      { "canonical": "objectionHandling", "observed_as": "Our Care is Reimbursable Through Health Insurance", "component": "text" },
+      { "canonical": "useCases", "observed_as": "I Nostri Servizi", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Sintomi E Patologie", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Latest News From Our Blog", "component": "text" },
+      { "canonical": "cta", "observed_as": "Prenota Un Appuntamento", "component": "text" },
+      { "canonical": "followStrip", "observed_as": "Iscriviti Alla Nostra Newsletter", "component": "form" },
+      { "canonical": "faq", "observed_as": "Do you have questions?", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "Testimonial (Andrea Clerici)", "component": "text" },
+      { "canonical": "closeSection", "observed_as": "Our Objective Is To Help You Feel Better Naturally", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Orario Di Apertura (opening hours)", "component": "table" },
+      { "canonical": "footer", "observed_as": "Dove Siamo (address + map)", "component": "map" },
+      { "canonical": "howItWorks", "observed_as": "Timeline (1985-2022 service development)", "component": "timeline" }
+    ],
+    "unmapped": [
+      { "observed": "Orario Di Apertura opening-hours table", "why_no_fit": "No canonical id for a local-business opening-hours block; folded into miscellaneous but it is really a map-hours capability signal", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "blog", "bilingual", "video-hero", "lead-form"],
+    "proposed_new": [
+      { "name": "external-booking-redirect", "evidence": "Primary 'Prenota Un Appuntamento' CTA hands off to the external Cituro online booking system; no on-site scheduling flow" }
+    ]
+  },
+  "proof_types": ["testimonials", "certs"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["team/practitioner bio", "hours table", "map embed", "service-category card grid", "condition card grid", "timeline", "blog-teaser list", "newsletter signup"],
+  "languages": ["it", "en", "de"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; clear trust archetype, credentials, testimonial, and an external booking handoff all legible from the raw capture." },
+  "gap_findings": [
+    "Trilingual (IT/EN/DE) exceeds the closed 'bilingual' capability — vocab has no >2-language expression.",
+    "Opening-hours table has no canonical section id (only the map-hours capability captures it).",
+    "External booking handoff (Cituro) is captured only via the proposed external-booking-redirect capability, not by any goal-mechanism nuance."
+  ]
+}

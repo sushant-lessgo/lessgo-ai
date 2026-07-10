@@ -1,0 +1,61 @@
+{
+  "slug": "elbosc",
+  "url": "https://elbosc.com/home/",
+  "business": { "type_label": "hotel-restaurant with event/celebration venue", "icp_category": "place", "geography_hint": "Penedès, Catalonia, Spain" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor decides by browsing photos, menu, wine selection, room descriptions, hours and directions of a physical hotel-restaurant — the place itself is what's being evaluated.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Reserve a table / room (or a weekend/romantic package) at the hotel-restaurant",
+    "mechanism": "redirect",
+    "delegated_to": "avaibook"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 11,
+    "pages": ["home", "restaurant", "menu", "the-wine", "calcotadas", "hotel", "garden-pool", "feast", "groups", "activities", "contact"],
+    "archetype_note": "Classic multi-page hospitality brochure: separate pages per facet (restaurant, hotel, menu, wine, events) plus contact; primary CTA 'Reserva ara' redirects to Avaibook, phone numbers and a contact form as secondary paths."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (11 items)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "Eating, resting and experiencing are the three verbs", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Celebrations (weddings/communions/corporate, up to 150 guests)", "component": "text" },
+      { "canonical": "features", "observed_as": "The Hotel / Pool & Garden / Accommodations", "component": "text" },
+      { "canonical": "features", "observed_as": "Wine Selection (160+ Penedès references)", "component": "text" },
+      { "canonical": "packages", "observed_as": "Cap de Setmana al Bosc / Romantic Night Package (gift boxes)", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Owner & Wine Program — Jordi Raventós, sommelier, 2008 Golden Nose", "component": "text" },
+      { "canonical": "team", "observed_as": "Team (young dedicated staff)", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Facebook feed widget (broken token)", "component": "other" },
+      { "canonical": "miscellaneous", "observed_as": "Menu / Seasonal cuisine / Calçotades", "component": "menu-list" },
+      { "canonical": "miscellaneous", "observed_as": "Gallery (six dining photos)", "component": "gallery" },
+      { "canonical": "miscellaneous", "observed_as": "Operating Hours / Opening hours", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Maps (Google Maps embed)", "component": "map" },
+      { "canonical": "leadForm", "observed_as": "Contact Form (name/email/subject/message)", "component": "form" },
+      { "canonical": "cta", "observed_as": "Reserva ara / phone numbers", "component": "cta" }
+    ],
+    "unmapped": [
+      { "observed": "Menu list (dishes without prices)", "why_no_fit": "No canonical section id for a restaurant dish/menu listing; menu is a place-specific structural block", "closest": "pricing" },
+      { "observed": "Map + hours block", "why_no_fit": "map-hours is a capability but there is no canonical section id for a location/hours block", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "bilingual", "packages", "lead-form"],
+    "proposed_new": [
+      { "name": "external-booking-redirect", "evidence": "Primary 'Reserva ara' CTA hands off to the Avaibook third-party booking engine; no on-site scheduling inventory — rooms/tables/rates all handled externally" }
+    ]
+  },
+  "proof_types": ["certs"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["menu-list", "gallery", "map embed", "package cards", "hours block", "contact form", "team blurb"],
+  "languages": ["ca", "es"],
+  "confidence": { "level": "high", "why": "fetch_quality full; clear multi-page hospitality structure, CTAs, forms and embeds all captured" },
+  "gap_findings": [
+    "No canonical section id for a restaurant menu/dish list (prices absent here) — recurring place-type gap",
+    "No canonical section for a location/opening-hours block despite map-hours being a capability",
+    "Place engine juggles three co-equal conversion paths (external booking redirect + tel + contact form); taxonomy's single one_action forces a primary pick that understates the multi-CTA reality of hospitality sites"
+  ]
+}

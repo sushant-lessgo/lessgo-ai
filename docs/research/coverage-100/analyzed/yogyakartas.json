@@ -1,0 +1,41 @@
+{
+  "slug": "yogyakartas",
+  "url": "https://yogyakartas.com/",
+  "business": { "type_label": "custom packaging / paper-bag manufacturer (WooCommerce store)", "icp_category": "manufacturer", "geography_hint": "Yogyakarta & Purwokerto, Indonesia" },
+  "in_icp": false,
+  "engine": { "pick": "thing", "ladder_reasoning": "Sells a defined manufacturing capability with a full product catalog, prices and cart — the visitor evaluates the packaging product/producer (features, proof, price), which is a THING evaluation, not trusting a named person or browsing a portfolio.", "runner_up": "trust" },
+  "goal": { "one_action": "get a quote / order custom packaging (browse catalog then WhatsApp CS or add-to-cart checkout)", "mechanism": "call-WhatsApp", "delegated_to": "whatsapp" },
+  "structure": { "kind": "multi", "page_count": 10, "pages": ["home", "profile", "layanan", "product", "portofolio", "klien", "faq", "blog", "contact", "corporate-order"], "archetype_note": "Full WooCommerce e-commerce site with cart/checkout/wishlist/login plus a marketing/company shell — not a single-conversion landing site." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Produsen Kemasan Berpengalaman & Terpercaya", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Free Desain Untuk Semua Order", "component": "promo-banner" },
+      { "canonical": "features", "observed_as": "Kemasan Custom", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Product Showcase / Kategori Produk", "component": "grid-cards" },
+      { "canonical": "socialProof", "observed_as": "Klien (logo wall)", "component": "logo-strip" },
+      { "canonical": "testimonials", "observed_as": "Executive quote (M. Gondo Kuswanto)", "component": "text" },
+      { "canonical": "results", "observed_as": "APA YANG KAMI LAKUKAN — 5000+ brands", "component": "stats" },
+      { "canonical": "founderNote", "observed_as": "PT. YOGYAKARTAS MEGA GRAFIKA / VISI DAN MISI", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Instagram Feed", "component": "gallery" },
+      { "canonical": "miscellaneous", "observed_as": "Blog/Articles", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Contact form (Get In Touch)", "component": "form" },
+      { "canonical": "cta", "observed_as": "Customer Service Yogyakarta/Purwokerto WhatsApp CTAs", "component": "text" },
+      { "canonical": "footer", "observed_as": "Footer + Bantuan help links", "component": "other" }
+    ],
+    "unmapped": [
+      { "observed": "Kategori Produk with per-category counts + add-to-cart / prices (Box 412, Paper Bag 282…)", "why_no_fit": "A real e-commerce catalog with SKUs, prices and cart is not a marketing section — no canonical id covers a shoppable product grid", "closest": "pricing" },
+      { "observed": "You may like it (recommended products with prices, Select options, View cart/Checkout)", "why_no_fit": "WooCommerce upsell/recommendation + cart flow — outside the single-conversion section model", "closest": "pricing" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage", "catalog", "map-hours", "blog", "gallery/portfolio", "lead-form"], "proposed_new": [ { "name": "storefront-checkout", "evidence": "WooCommerce with prices (Rp 600, Rp900/piece), add-to-cart, Select options, View cart / Checkout, wishlist and login/register — an on-site cart+checkout selling one-time goods" } ] },
+  "proof_types": ["logo-wall", "testimonials", "stats"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["catalog-grid", "product-card", "pricing-table", "logo-wall", "map-embed", "instagram-feed", "blog-card-grid", "contact-form", "whatsapp-cta"],
+  "languages": ["id"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; 4 of 10 pages captured but nav, CTAs, commerce and proof signals are unambiguous — clearly an e-commerce manufacturer store." },
+  "gap_findings": [
+    "Site's job is not one conversion action — it is a full WooCommerce storefront (cart/checkout/wishlist/account), so in_icp:false; the taxonomy has no engine or mechanism for browse-and-buy commerce.",
+    "Multi-branch structure: two offices each with own address, map embed, and dedicated WhatsApp CS agents — no canonical section for per-branch contact blocks.",
+    "Shoppable catalog with live prices and add-to-cart cannot be expressed by the canonical section list (mapped to pricing/miscellaneous only approximately)."
+  ]
+}

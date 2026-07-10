@@ -1,0 +1,46 @@
+{
+  "slug": "drycreekvineyard",
+  "url": "https://drycreekvineyard.com/",
+  "business": { "type_label": "winery / wine-tasting venue with online wine shop, tasting reservations, and wine-club memberships", "icp_category": "place / hospitality-venue", "geography_hint": "Dry Creek Valley, Sonoma County, CA, USA" },
+  "in_icp": false,
+  "engine": { "pick": "place", "ladder_reasoning": "Visitor is checking a PLACE (a winery to visit): photos, tasting experiences, location in Dry Creek Valley, hours, and directions drive the decision. Browsing the venue/experiences IS the decision, before dentist-style credentials or a portfolio.", "runner_up": "thing" },
+  "goal": { "one_action": "get the visitor to book a tasting reservation and/or buy wine / join the wine club", "mechanism": "redirect", "delegated_to": "tock" },
+  "structure": { "kind": "multi", "page_count": 5, "pages": ["home","visit","our-story","memberships","shop"], "archetype_note": "Full winery site with several parallel conversion paths (visit/reserve, shop, memberships) rather than one action — reservations via Tock embed, wine e-commerce with cart/checkout, and recurring club/subscription memberships." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Wet your whistle / Voted the Bay Area's Best Winery", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "A Family Legacy Over 50 Years in the Making", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Family Owned & Sustainably Farmed Since 1972", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Located in the Heart and Soul of Dry Creek Valley", "component": "text" },
+      { "canonical": "cta", "observed_as": "The flagship winery of dry creek valley", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Plan Your Visit (Guided Tastings, Estate Flight & Picnic, Vineyard Stroll, Bocce, Bold Dreams)", "component": "grid-cards" },
+      { "canonical": "pricing", "observed_as": "Experience cards with per-guest prices ($30-$150)", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Book Your Reservation (Tock)", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "Our Story / Dry Creek Vineyard from stem to stern (Kim Stare Wallace)", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Wine Clubs (20-25% savings) / Signature Wines Subscriptions", "component": "text" },
+      { "canonical": "comparisonTable", "observed_as": "Which is Right for You?", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "CCSW Certified / SF Gate Best Winery 2026", "component": "text" },
+      { "canonical": "closeSection", "observed_as": "Visit Our Family Winery", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "ALL ABOARD! newsletter sign-up", "component": "form" }
+    ],
+    "unmapped": [
+      { "observed": "Shop Our Wines category-filtered product grid (All/White/Red/Winery Exclusives/90+ Point/Gift Sets…)", "why_no_fit": "A filterable e-commerce wine catalog with cart/checkout is not a landing-page section; it's a storefront", "closest": "catalog / pricing" },
+      { "observed": "Claudine's Wine Garden & Private Events venue detail links", "why_no_fit": "Sub-venue/event-space detail pages, deeper than a single section", "closest": "useCases" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage","catalog","map-hours","packages","blog","store-badges"], "proposed_new": [
+    { "name": "external-booking-redirect", "evidence": "All 'BOOK A TASTING' / 'Book Your Reservation' CTAs hand off to a third-party Tock reservations embed; no on-site scheduling" },
+    { "name": "storefront-checkout", "evidence": "Shop page has a category-filtered wine product grid with prices and cart/checkout (WooCommerce-likely) selling one-time goods" },
+    { "name": "membership-checkout", "evidence": "Wine Clubs (20-25% savings) and Signature Wines Subscriptions are recurring purchase plans with a plan configurator" }
+  ] },
+  "proof_types": ["testimonials","certs","reviews","stats"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["experience/pricing card grid","menu-list (tasting experiences with prices)","product catalog grid with category filters","reservation embed (Tock)","map + hours block","membership comparison table","newsletter email capture"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality is 'rendered' not 'full', and the shop product grid never rendered (prices/SKUs unreadable via AJAX); Tock booking fields not inspectable. Overall structure and engine are clear but commerce detail is partial." },
+  "gap_findings": [
+    "Multi-conversion-path venue: one page simultaneously drives reserve (Tock), buy-wine (checkout), and join-club (recurring) — the 5 closed engines assume ONE action; 'place' captures the visit intent but not the parallel commerce.",
+    "Third-party reservation embeds (Tock) and hosted wine e-commerce sit outside the form/call/subscribe/redirect/donate mechanism set except as generic 'redirect'.",
+    "Recurring wine-club/subscription membership has no capability expression beyond the proposed membership-checkout."
+  ]
+}

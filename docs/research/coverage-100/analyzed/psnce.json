@@ -1,0 +1,57 @@
+{
+  "slug": "psnce",
+  "url": "http://psnce.com/",
+  "business": { "type_label": "Tata Hitachi construction machinery dealer", "icp_category": "heavy-equipment dealership", "geography_hint": "Karnataka, India" },
+  "in_icp": true,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "The visitor is evaluating construction machinery (excavators, loaders, dump trucks) via product-category tiles and per-model spec tables — the decision is about the machines' features/specs, not about trusting a named professional's expertise. Company history/mission are dealer credibility, but the spine is a product catalog.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "submit a product enquiry (name, mobile, email, subject, message)",
+    "mechanism": "form",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "about", "products-services", "product-category (excavators)", "news-events", "career", "contact"],
+    "archetype_note": "Classic multipage dealer brochure: home hero + product grid + news + testimonials, About company story, per-category product spec pages, and a contact enquiry form."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "We Offer Smarter & More Affordable Construction Machineries", "component": "text" },
+      { "canonical": "features", "observed_as": "PRODUCTS", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "NEWS & EVENTS", "component": "grid-cards" },
+      { "canonical": "testimonials", "observed_as": "TESTIMONIALS", "component": "carousel" },
+      { "canonical": "hero", "observed_as": "BUILD TO LAST / Engineered to perform", "component": "text" },
+      { "canonical": "results", "observed_as": "Key Features (stat counters)", "component": "stats" },
+      { "canonical": "founderNote", "observed_as": "Company History / CURRENT OPERATIONS", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "MILESTONES", "component": "timeline" },
+      { "canonical": "miscellaneous", "observed_as": "MISSION / VISION / VALUES", "component": "text" },
+      { "canonical": "features", "observed_as": "Construction Excavators MODELS (spec cards)", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "ENQUIRY", "component": "form" },
+      { "canonical": "footer", "observed_as": "social links (facebook/linkedin/youtube)", "component": "footer" }
+    ],
+    "unmapped": [
+      { "observed": "NEWS & EVENTS (dealership award, office inauguration, Bhoomi Pooja)", "why_no_fit": "A dated dealer-activity news feed is neither a blog article index nor socialProof; it is company-activity announcements", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "lead-form"],
+    "proposed_new": []
+  },
+  "proof_types": ["testimonials", "stats"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["product-category grid", "spec-table (model specs)", "stat-counter row", "milestone timeline", "testimonial carousel", "enquiry form"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality is partial and the homepage HTML is compromised with ~114 injected spam links; the underlying legitimate dealer structure is clear across pages, but capture safety/completeness is capped."
+  },
+  "gap_findings": [
+    "Product-category → per-model spec-table catalog (excavators with RPM/power/operating-weight specs) is a browse-then-enquire pattern; 'catalog' covers browse but the spec-table-per-model detail component is unrepresented.",
+    "A dated company NEWS & EVENTS feed (awards, inaugurations, ceremonies) has no canonical section id — mapped to miscellaneous but is a recurring SMB-brochure pattern."
+  ]
+}

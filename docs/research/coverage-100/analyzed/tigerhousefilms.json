@@ -1,0 +1,53 @@
+{
+  "slug": "tigerhousefilms",
+  "url": "https://tigerhousefilms.com/",
+  "business": { "type_label": "video production company", "icp_category": "creative production studio", "geography_hint": "Los Angeles, USA (LA/NY/SF, productions worldwide)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "work",
+    "ladder_reasoning": "A 60+ item portfolio of commercials/branded/celebrity/fashion films is the site's spine and the proof; visitors decide by browsing the work itself, not by reading credentials or a service pitch.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "get the visitor to submit a production inquiry via the contact form",
+    "mechanism": "form",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 5,
+    "pages": ["home", "our-work", "about", "contact", "blog"],
+    "archetype_note": "Classic studio portfolio site: home overview + dedicated portfolio grid + about + contact form + blog; sister AI studio cross-promoted externally."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "socialProof", "observed_as": "Our Clients / named client roster (Netflix, TikTok, Grammys, Old Spice, McDonald's, Warner Bros.)", "component": "text" },
+      { "canonical": "results", "observed_as": "1 Billion + Web Views", "component": "stats" },
+      { "canonical": "features", "observed_as": "Full Creative Team 24/7 / Totally Production Ready Team / We Go The Extra Mile", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Commercials / Brand Videos / New Media / UGC Videos", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Tiger House Studios (Creative AI Studio) cross-promo", "component": "other" },
+      { "canonical": "followStrip", "observed_as": "Stay Connected / Our Instagram", "component": "logo-strip / gallery" },
+      { "canonical": "cta", "observed_as": "Want To Know More?", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Contact Us Today", "component": "form" },
+      { "canonical": "footer", "observed_as": "Our L.A. Headquarters / Productions Worldwide", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "About Us / BORN IN LA (history since 2011, founder Jason Kent Carpenter)", "component": "text" },
+      { "canonical": "hero", "observed_as": "Beautiful Production Locations... headline", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Portfolio grid of ~60+ category-tagged entries linking to individual portfolio_page items", "why_no_fit": "sectionList has no portfolio/work-grid id; it is the core work showcase, best captured by the gallery/portfolio capability rather than a canonical section", "closest": "results" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "lead-form", "blog"],
+    "proposed_new": []
+  },
+  "proof_types": ["portfolio", "stats"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["portfolio grid with category filters", "stat callout", "contact form", "instagram embed strip", "service category cards"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality full; all pages, nav, CTAs, forms and proof clearly captured — unambiguous work/portfolio studio site." },
+  "gap_findings": [
+    "No canonical section id for a portfolio/work grid — the defining element of work-engine sites is expressed only via the gallery/portfolio capability, not the section taxonomy.",
+    "Named-client social proof appears as narrative prose with no logos/logo-wall, so it doesn't fit socialProof's typical logo-grid expectation."
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "slug": "amplainformatica",
+  "url": "https://amplainformatica.com.br/",
+  "business": { "type_label": "business management software & IT automation vendor (ERP)", "icp_category": "software/IT services firm", "geography_hint": "São José do Rio Preto, Brazil (pt-BR)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "A 35-year firm selling its expertise to provide/customize business-management software; the page persuades via service categories, partner logos, Google reviews and FAQ rather than product feature proof (no screenshots/demos), so the visitor is deciding whether to trust the vendor.",
+    "runner_up": "thing"
+  },
+  "goal": {
+    "one_action": "Message the company on WhatsApp to request a free demo / talk to a consultant",
+    "mechanism": "call-WhatsApp",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "single",
+    "page_count": 1,
+    "pages": ["home"],
+    "archetype_note": "Single-page WordPress site with #anchor nav (Serviços/Parcerias/Contato); no crawlable subpages exist. Área do Cliente is an external login portal, not a marketing page."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Há mais de 35 anos agilizando a gestão da sua empresa...", "component": "text" },
+      { "canonical": "features", "observed_as": "Serviços", "component": "grid-cards" },
+      { "canonical": "socialProof", "observed_as": "Parcerias", "component": "logo-strip" },
+      { "canonical": "testimonials", "observed_as": "Avaliações no Google", "component": "carousel" },
+      { "canonical": "faq", "observed_as": "Perguntas Frequentes", "component": "accordion" },
+      { "canonical": "cta", "observed_as": "Contato", "component": "map" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": {
+    "needed": ["map-hours"],
+    "proposed_new": []
+  },
+  "proof_types": ["reviews", "testimonials", "logo-wall"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["service-card grid", "partner logo strip", "review carousel", "faq accordion", "map embed", "whatsapp cta button"],
+  "languages": ["pt-BR"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; single-page structure, CTAs, proof and sections all captured verbatim." },
+  "gap_findings": [
+    "'Área do Cliente' is an external customer login portal (secondary audience/existing-customer flow) — sits outside the one-conversion-action model but is a common IT-vendor nav item; not expressible in current vocab, though not the site's conversion goal.",
+    "Google-reviews rating widget (aggregate star score + count) is proof beyond plain testimonials; captured as reviews proof-type but has no dedicated section id."
+  ]
+}

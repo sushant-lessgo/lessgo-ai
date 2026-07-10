@@ -1,0 +1,31 @@
+{
+  "slug": "notaryassist",
+  "url": "https://notaryassist.com/",
+  "business": { "type_label": "SaaS for notaries (business-management app)", "icp_category": "vertical SaaS / business software", "geography_hint": "US (949 area code, USD pricing)" },
+  "in_icp": true,
+  "engine": { "pick": "thing", "ladder_reasoning": "Visitor is evaluating a software product — feature grid (Business Center, Analytics, Calendar, Expenses, Mileage), pricing tiers, and FAQ carry the persuasion; not trusting a person, browsing work, or checking a place.", "runner_up": "quick-yes" },
+  "goal": { "one_action": "Register for a free account in the NotaryAssist app", "mechanism": "redirect", "delegated_to": "app.notaryassist.com (own app)" },
+  "structure": { "kind": "single", "page_count": 2, "pages": ["home", "video-highlights"], "archetype_note": "Long single-scroll home with anchor sections + a secondary video-resources page; store badges + app-register CTA are the spine." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "NotaryAssist® Software", "component": "text" },
+      { "canonical": "features", "observed_as": "Business Center / Auto Import / Calendar / Customers / Expenses / Mileage / Notarial Acts", "component": "grid-cards" },
+      { "canonical": "results", "observed_as": "Analytics", "component": "stats" },
+      { "canonical": "features", "observed_as": "Reporting", "component": "table" },
+      { "canonical": "closeSection", "observed_as": "The Ultimate Organizational Tool", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Pricing Plan", "component": "pricing-table" },
+      { "canonical": "faq", "observed_as": "Frequently Asked Questions", "component": "accordion" },
+      { "canonical": "miscellaneous", "observed_as": "Video Highlights (Educational / Shorts)", "component": "video" },
+      { "canonical": "storeBadges", "observed_as": "Download iOS / Download Android", "component": "store-badge" },
+      { "canonical": "cta", "observed_as": "Get Started / Start FREE Today", "component": "external-link" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": { "needed": ["multipage", "store-badges", "packages", "video-hero"], "proposed_new": [ { "name": "app-signup", "evidence": "Every primary CTA (Get Started, Start FREE Today) routes to app.notaryassist.com/account/register — freemium self-serve SaaS where conversion is app registration, not a lead form or newsletter." } ] },
+  "proof_types": ["testimonials", "stats"],
+  "design_style": { "pick": "tech/minimal", "none_fits_because": "" },
+  "components_needed": ["pricing-table", "feature-grid", "faq-accordion", "stats-band", "video-gallery", "store-badge-row"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality is partial (static WebFetch only, renderPage not run); form fields for 'Send a Testimonial'/'Ask Us A Question' under-captured, but core structure, CTAs, pricing, and proof are clear." },
+  "gap_findings": ["app-signup (register-into-product-app) is the true conversion but the closed vocab/engines model it only as a generic redirect; 'packages' capability captures the pricing table but not the freemium free-tier register handoff."]
+}

@@ -1,0 +1,57 @@
+{
+  "slug": "houndstoothcoffee",
+  "url": "https://houndstoothcoffee.com/",
+  "business": { "type_label": "specialty coffee shop chain (8 cafes)", "icp_category": "place", "geography_hint": "Austin & Dallas, TX, USA" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking a PLACE — which cafe is near them, its address, phone and hours — and deciding whether to visit or order. Browsing locations/hours IS the decision, so place wins over quick-yes despite the redirect CTAs.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Get the visitor to find a nearby cafe (and its hours) or tap 'Order Online' to order coffee",
+    "mechanism": "redirect",
+    "delegated_to": "linktree"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 8,
+    "pages": ["home", "locations", "catering & consulting", "offsite cafes", "about", "press", "contact", "shop"],
+    "archetype_note": "Brand/place site for a multi-location coffee chain; home teases locations + an external Order Online link, contact page carries the address/phone/hours tables, shop redirects to external Square/Tweed stores."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "THE PATTERN Of Coffee and people", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Cafe Locations", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "Order Online", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "About", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Core Philosophy", "component": "text" },
+      { "canonical": "features", "observed_as": "Barista Standards", "component": "text" },
+      { "canonical": "features", "observed_as": "Product Quality", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Additional Services", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Contact Form", "component": "form" },
+      { "canonical": "miscellaneous", "observed_as": "Dallas Locations", "component": "table" },
+      { "canonical": "miscellaneous", "observed_as": "Austin Locations", "component": "table" },
+      { "canonical": "storeBadges", "observed_as": "Shop Products / Shop Coffee", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Cafe Locations grid + Dallas/Austin address-phone-hours tables", "why_no_fit": "There is no canonical 'locations' section; a multi-branch listing with address/phone/hours is core to a place-of-business site but maps only loosely to miscellaneous", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours"],
+    "proposed_new": []
+  },
+  "proof_types": [],
+  "design_style": { "pick": "warm/human", "none_fits_because": "No design hints captured (fonts/colors empty); warm/human inferred from a community-oriented coffee-shop brand, low certainty" },
+  "components_needed": ["location cards grid", "address/phone/hours table", "contact form"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality is partial (rendered_pages empty, submit-button and HQ contact details not captured); core structure, engine and goal are clear from verbatim sections but design/proof signals are thin"
+  },
+  "gap_findings": [
+    "No canonical section expresses a multi-location address/phone/hours listing — a place-business staple; currently forced into miscellaneous. map-hours capability exists but there is no matching sectionList id.",
+    "Site has several parallel redirect CTAs (Order Online → Linktree, Shop Products → Square, Shop Coffee → Tweed) — the single-'one_action' model does not cleanly capture a place site that fans out to multiple external ordering/commerce destinations."
+  ]
+}

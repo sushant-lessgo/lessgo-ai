@@ -1,0 +1,58 @@
+{
+  "slug": "bookskubrick",
+  "url": "http://bookskubrick.jp/",
+  "business": { "type_label": "independent bookstore (multi-branch, w/ cafe/gallery & bakery)", "icp_category": "place", "geography_hint": "Fukuoka, Japan (Keyaki-dori & Hakozaki)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking out a physical bookstore — store news, curated shelf picks, in-store events, best-seller ranking, locations and hours are the decision; browsing the place's offerings IS what closes the visit, so place beats work/thing.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Get visitors to know the shop and either visit a branch or hop to the online bookstore",
+    "mechanism": "redirect",
+    "delegated_to": "store"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 11,
+    "pages": ["home", "about", "keyaki-branch", "hakozaki-branch", "cafe-gallery", "bk-bakery", "online-shop", "media", "delivery-cases", "consignment", "careers", "contact"],
+    "archetype_note": "Brochure hub for a small independent bookstore with multiple branches/sub-brands; home is a store-news + recommendations + events + ranking feed; commerce is offloaded to an external shop subdomain."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "founderNote", "observed_as": "店主挨拶 / 代表（大井実）プロフィール", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "会社概要 (company overview) / ブックスキューブリック10の常識", "component": "text" },
+      { "canonical": "cta", "observed_as": "オンラインショップ", "component": "external-link" },
+      { "canonical": "leadForm", "observed_as": "お問合せ (form under adjustment, email fallback)", "component": "text" },
+      { "canonical": "footer", "observed_as": "会社概要 address/phone block", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "News (list of 9 dated store/event announcements)", "why_no_fit": "A dated store-news feed on home; no canonical id for a running news/announcements list", "closest": "miscellaneous" },
+      { "observed": "KUBRICK Recommendations (8 featured books w/ title, author, publisher)", "why_no_fit": "Curated own-inventory showcase grid, not marketing features or portfolio proof", "closest": "features" },
+      { "observed": "Events (upcoming talk events & art exhibitions with dates)", "why_no_fit": "Dated in-store event schedule; no canonical section for event listings", "closest": "miscellaneous" },
+      { "observed": "Best Sellers Ranking (top-10 books w/ yen prices, table)", "why_no_fit": "Priced ranked product list without cart; not pricing tiers, not results/stats", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "blog", "catalog", "map-hours"],
+    "proposed_new": [
+      { "name": "event-listings", "evidence": "Home 'Events' section lists dated in-store talk events and art exhibitions — a standing dated schedule the closed vocab cannot express" },
+      { "name": "practitioner-profiles", "evidence": "Nav exposes per-branch/sub-brand pages (けやき通り店, 箱崎店, CAFE&GALLERY, BK BAKERY) — each location/sub-brand gets its own detail page, the multi-branch pattern" }
+    ]
+  },
+  "proof_types": [],
+  "design_style": { "pick": null, "none_fits_because": "No design hints captured (empty fonts/colors, dark_or_light null); cannot judge visual style from the raw record" },
+  "components_needed": ["news-feed list", "book-recommendation grid", "event schedule list", "best-seller ranking table", "store-info/hours block", "company-overview table"],
+  "languages": ["ja"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality is full but only 3 of 11 pages captured (branch/shop/cafe/careers pages missing, one guessed URL 404'd) and design hints are empty — engine/place read is clear, but structure and design detail are partial"
+  },
+  "gap_findings": [
+    "No canonical section for a dated store-news feed or an in-store event schedule (both live on the home page here).",
+    "A priced, ranked own-inventory list (best-seller ranking) with no on-site cart has no clean home in the section list or capability vocab — 'catalog' implies browse but not ranking/curation.",
+    "Multi-branch / multi-sub-brand place businesses (bookstore + cafe/gallery + bakery, two locations) aren't expressible: closed vocab has no location-hub/branch-profiles concept — maps onto proposed practitioner-profiles.",
+    "Primary conversion is an external shop redirect while the contact form is disabled — the on-site job is diffuse (know us / visit / shop off-site), straining the 'one conversion action' framing."
+  ]
+}

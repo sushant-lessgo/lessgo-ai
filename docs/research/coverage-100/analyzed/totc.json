@@ -1,0 +1,58 @@
+{
+  "slug": "totc",
+  "url": "https://totc.ca/",
+  "business": { "type_label": "Caribbean cultural festival (annual, Montreal)", "icp_category": "place", "geography_hint": "Montreal, QC, Canada" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is deciding whether to attend a festival — the decision is made by browsing photos, festival zones/experiences, dates, free-entry, and directions to the venue. That is checking out a PLACE, not evaluating a thing or trusting a firm.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Get people to attend the festival — driving to directions/schedule and, secondarily, buying external concert/after-party tickets and downloading the festival app",
+    "mechanism": "redirect",
+    "delegated_to": "google-maps, JPM Events ticket gateway, app store"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 20,
+    "pages": ["home", "schedule", "contact", "festival (dropdown)", "projects", "media", "vendors", "one-love", "kids"],
+    "archetype_note": "Multi-page WordPress festival site; home is a long zone/experience showcase, plus schedule, contact (departmental mailto directory), and section pages for zones/projects."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Celebrate Caribbean Culture in Montreal!", "component": "text" },
+      { "canonical": "useCases", "observed_as": "What to Expect at Taste of the Caribbean?", "component": "text" },
+      { "canonical": "features", "observed_as": "Festival Zones & Experiences - Where to Join the Fun? (Concert/Latin/Soccer/Movie/Rum/Kids zones)", "component": "grid-cards" },
+      { "canonical": "storeBadges", "observed_as": "FESTIVAL APP / DOWNLOAD", "component": "text" },
+      { "canonical": "cta", "observed_as": "NEW Concert Zone, every evening! (ticket links Thu-Sun)", "component": "text" },
+      { "canonical": "objectionHandling", "observed_as": "Why You Shouldn't Miss Taste of the Caribbean?", "component": "text" },
+      { "canonical": "followStrip", "observed_as": "Stay Connected! / Follow Us", "component": "logo-strip" },
+      { "canonical": "socialProof", "observed_as": "attendance stat in hero", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Photo Booth (photo gallery)", "component": "gallery" },
+      { "canonical": "miscellaneous", "observed_as": "Festival Schedule 2026 / INFO COMING SOON", "component": "text" },
+      { "canonical": "cta", "observed_as": "Buy Tickets (external JPM Events)", "component": "text" },
+      { "canonical": "footer", "observed_as": "Festival Site Address + map + departmental contacts", "component": "map" }
+    ],
+    "unmapped": [
+      { "observed": "Departmental contact directory (Production & Bookings, Internship Programs, Marketing/Sponsorship/Media, Vendors/Kiosks, Volunteers — each a separate mailto)", "why_no_fit": "A multi-audience B2B contact routing list (partners, vendors, volunteers, press) is not a single lead/contact block; it segments inquiries by department", "closest": "cta" },
+      { "observed": "One Love Project promo (community/social-impact initiative with View More)", "why_no_fit": "A cause/community-project promo tile is neither a product feature nor testimonial proof", "closest": "features" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "bilingual", "store-badges", "blog"],
+    "proposed_new": [
+      { "name": "event-listings", "evidence": "Nightly concert zone with per-day ticket links (Thu-Sun) and a Buy Tickets CTA routing to the external JPM Events gateway; a dated schedule of shows each handing off to external ticketing." }
+    ]
+  },
+  "proof_types": ["stats"],
+  "design_style": { "pick": "bold/performance", "none_fits_because": "" },
+  "components_needed": ["zone/experience card grid", "photo gallery", "embedded map with directions", "app-download badges", "departmental contact directory", "dated event/ticket list", "language toggle (EN/FR)"],
+  "languages": ["en", "fr"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; all 3 core pages captured with rich sections, CTAs, nav, social, and embeds — clear festival/place archetype." },
+  "gap_findings": [
+    "Festival/event sites have MANY parallel CTAs (directions, tickets, app download, per-department contact, follow) — the single one_action model must accommodate an event whose primary conversion is 'attend' with several equal secondary redirects.",
+    "A multi-audience departmental contact directory (vendors, volunteers, sponsors, press, internships) is a recurring pattern not expressible as a single contact/leadForm section.",
+    "event-listings (dated ticket-redirect schedule) remains outside the closed capability vocab."
+  ]
+}

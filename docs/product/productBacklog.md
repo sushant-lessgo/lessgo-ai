@@ -26,5 +26,7 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 19. **A/B testing** — page variations + performance tracking (overlaps Universe track)
 20. **Team collaboration** — multi-user accounts, roles/permissions
 21. **Heatmaps** — beyond current conversion analytics
-22. **SEO value-stack** — tiered brainstorm in `docs/tracks/seoPlan.md` §9 (alt text, llms.txt, FAQPage schema, keyword-mode regen, backlink outreach copy, SEO report card…); copywriting-shaped items = moat (2026-07-10)
-23. **Entity / AI-search pack** — entity stacking: sameAs JSON-LD, entity kit (NAP+bios), per-platform profile copy, entity-rich About; `docs/tracks/seoPlan.md` §10 (2026-07-10)
+22. **SEO value-stack** — see `docs/tracks/seoPlan.md` §9
+23. **Entity / AI-search pack** — see `docs/tracks/seoPlan.md` §10
+24. **Lead enrichment** — lead submits form → scrape their domain → lead brief + drafted reply in the lead-notification email. Copy-only, no CRM
+25. **Free-tools TOF** — flagship: landing-page analyzer (email-gated results + launch distribution); programmatic per-category fan-out as experiment only (founderpal data: tools convert, his SEO didn't — audience drove it)

@@ -1,0 +1,66 @@
+{
+  "slug": "palestrauniverso",
+  "url": "https://palestrauniverso.it/",
+  "business": {
+    "type_label": "multi-location gym / fitness chain",
+    "icp_category": "place",
+    "geography_hint": "Tuscany, Italy (Prato, Montemurlo, Pistoia, Empoli, Versilia)"
+  },
+  "in_icp": false,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "A gym is a PLACE you check out — 5 physical locations with addresses, phone, hours and maps, 80+ browsable classes, and location filters are the decision surface; browsing where/what/hours IS the choice, not evaluating a product or trusting a named expert.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "get the visitor to contact/visit a gym location — request a PT consultation, grab a coupon, or come in to sign up for a membership",
+    "mechanism": "form",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 9,
+    "pages": ["home", "servizi", "sedi", "attivita", "fidelity", "contatti", "orari", "opus.22", "blog", "eventi", "digital-gym", "shop"],
+    "archetype_note": "Sprawling multi-page WordPress/Elementor gym-chain site: locations, activities catalog, membership pricing, services, careers, blog, merch shop with cart, and events — many jobs, not one conversion action."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Benvenuti in PALESTRE UNIVERSO", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Chi Siamo", "component": "text" },
+      { "canonical": "features", "observed_as": "Opus.22 / Universo Online & Outdoor", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Scegli il tuo abbonamento mensile (9 membership tiers)", "component": "pricing-table" },
+      { "canonical": "howItWorks", "observed_as": "Come si accede all'abbonamento?", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Tutte le attività / Obiettivi", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Dove vuoi allenarti? (location filter)", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Parla con un Personal Trainer / Lavora con noi", "component": "form" },
+      { "canonical": "cta", "observed_as": "SCEGLI ADESSO IL TUO FIDELITY CLUB!", "component": "text" },
+      { "canonical": "footer", "observed_as": "SEDI / LINK UTILI / CONTATTACI", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Tutte le Sedi (5 location cards, each with address/phone/hours/embedded map)", "why_no_fit": "No canonical id for a multi-location map/hours directory; closest is a repeated map-hours block", "closest": "miscellaneous" },
+      { "observed": "Shop (branded merch teaser + cart)", "why_no_fit": "No canonical section for an e-commerce storefront within a lead/place page", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "catalog", "packages", "blog", "lead-form"],
+    "proposed_new": [
+      { "name": "storefront-checkout", "evidence": "Branded merchandise Shop with a cart showing €0.00 — an on-site cart selling one-time goods, distinct from the membership pricing table (which is in-club signup)." }
+    ]
+  },
+  "proof_types": [],
+  "design_style": {
+    "pick": "bold/performance",
+    "none_fits_because": ""
+  },
+  "components_needed": ["pricing-table", "location cards with map + hours", "class/activity filter grid", "goal filter grid", "lead form", "cv-upload job application form", "merch product grid"],
+  "languages": ["it"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality is partial (Fidelity Club page 403'd, /attivita 404'd, requiring URL discovery; 80+ classes summarized not enumerated); design colors/fonts empty so style is inferred from gym/photo-heavy context."
+  },
+  "gap_findings": [
+    "in_icp:false — this is a multi-purpose gym-chain site (5 locations + membership pricing + merch shop w/ cart + blog + events + careers), not a single conversion action; taxonomy's single-CTA framing cannot express it.",
+    "Membership pricing (9 tiers) is display-only with signup completed in-club — sits between 'packages' (static display) and 'membership-checkout' (on-site recurring transaction); neither cleanly fits an off-site/in-person plan signup.",
+    "Multi-location map-hours directory (repeated per branch with own phone/email/hours) has no dedicated canonical section id."
+  ]
+}

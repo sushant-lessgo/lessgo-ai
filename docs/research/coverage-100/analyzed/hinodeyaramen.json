@@ -1,0 +1,61 @@
+{
+  "slug": "hinodeyaramen",
+  "url": "https://hinodeyaramen.com/",
+  "business": { "type_label": "Japanese ramen restaurant chain (multi-location)", "icp_category": "restaurant", "geography_hint": "San Francisco / Los Angeles / Dallas, USA (11 locations)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "A restaurant where the decision is made by browsing photos, the menu, and finding a nearby location with hours/directions — browsing the place IS the decision, which sits above quick-yes and thing on the ladder.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Order online (or visit/call a nearby location)",
+    "mechanism": "redirect",
+    "delegated_to": "owner.com (restaurant ordering platform)"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 4,
+    "pages": ["home", "menu", "story", "contact-us"],
+    "archetype_note": "Multi-location restaurant marketing site wrapped around an owner.com ordering/rewards backend; nav also exposes Catering, Locations, Gift Cards, Hiring, Sign-in (not separately rendered)."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Best Ramen in Town", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Welcome To HINODEYA Ramen & Bar", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Where Craft Meets Comfort", "component": "text" },
+      { "canonical": "features", "observed_as": "Thoughtfully Crafted Sips", "component": "text" },
+      { "canonical": "cta", "observed_as": "Order From Our Website", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Catering For Every Occasion", "component": "text" },
+      { "canonical": "features", "observed_as": "A Place For Everyone", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "What our guests are saying", "component": "carousel" },
+      { "canonical": "socialProof", "observed_as": "Featuring (amenity icon strip)", "component": "logo-strip" },
+      { "canonical": "faq", "observed_as": "Frequently Asked Questions", "component": "accordion" },
+      { "canonical": "miscellaneous", "observed_as": "Our locations / Visit Us Today", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Contact Us", "component": "form" }
+    ],
+    "unmapped": [
+      { "observed": "Image gallery / A Visual Feast To Savour (two photo galleries)", "why_no_fit": "Canonical section list has no gallery section id; galleries are a capability, not a section", "closest": "miscellaneous" },
+      { "observed": "Menu pages (Most ordered, Ramen, Extras, Rice, Soft Drink, Appetizer, Spicy, Merchandise — priced menu-lists with add-to-cart)", "why_no_fit": "A priced, orderable restaurant menu is not a pricing tier grid nor a section id", "closest": "pricing" },
+      { "observed": "HINODEYA Ramen Rewards loyalty program (Join Rewards -> login)", "why_no_fit": "A points/loyalty rewards enrollment behind account login is not expressible as any canonical section", "closest": "cta" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "catalog", "map-hours", "lead-form"],
+    "proposed_new": [
+      { "name": "menu-ordering", "evidence": "Priced menu with modifiers/allergens, 'Order online' CTA opens a cart/checkout flow (dialogState=orderDetails, cart_or_checkout=true) powered by owner.com; distinct from storefront-checkout (goods/prints) — this is a food-ordering flow with delivery/takeout/dine-in options" },
+      { "name": "loyalty-rewards", "evidence": "'HINODEYA Ramen Rewards' points program with 'Join Rewards' CTA routing to account login — an ongoing rewards/membership loop, not a lead form, subscribe, or checkout" }
+    ]
+  },
+  "proof_types": ["testimonials", "reviews"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["menu-list (priced items with descriptions)", "location cards with address/hours/directions", "review carousel", "faq accordion", "photo gallery", "contact form", "amenity icon strip"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality is 'rendered' (Cloudflare challenge blocked static fetch), and Catering/Locations subpages plus the owner.com ordering/rewards/login backend were not fully rendered — capped at medium per capture-quality rule" },
+  "gap_findings": [
+    "Restaurant online-ordering (menu -> cart -> checkout with delivery/takeout/dine-in) has no engine/section/capability today; delegated to owner.com but core to conversion",
+    "Multi-location chain (11 branches, each an expandable card with own address/hours/phone/order CTA) exceeds map-hours; closer to a per-location branch directory, not covered by practitioner-profiles (those are subpages)",
+    "Loyalty/rewards program enrollment (account-gated) is unrepresentable in the current goal mechanisms",
+    "Native mobile app download link ('Open the Hinodeya Ramen App') has no capability (store-badges is app-store badges, this is a direct download-app link)"
+  ]
+}

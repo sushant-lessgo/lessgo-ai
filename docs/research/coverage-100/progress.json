@@ -1,266 +1,108 @@
 {
-  "7adire": {
-    "url": "https://7adire.be/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=place, in_icp=true, multi(3). proposed: event-listings"
-  },
-  "aprilandmay": {
-    "url": "https://www.aprilandmay.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=trust, in_icp=false, multi(5). proposed: external-booking-redirect, storefront-checkout"
-  },
-  "beanstalkhq": {
-    "url": "https://www.beanstalkhq.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=place, in_icp=false, multi(15). proposed: membership-checkout"
-  },
-  "brettlair": {
-    "url": "https://www.brettlair.ca/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=work, in_icp=true, multi(5). no new caps"
-  },
-  "coltivar": {
-    "url": "https://www.coltivar.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=trust, in_icp=true, multi(6). proposed: interactive-calculators, media-hub"
-  },
-  "contractseries": {
-    "url": "https://www.contractseries.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=work, in_icp=true, multi(12). proposed: bibliography/works-listing"
-  },
-  "coppi": {
-    "url": "https://www.coppi.co.uk/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=place, in_icp=true, multi(6). proposed: external-booking-redirect"
-  },
-  "edisontally": {
-    "url": "https://www.edisontally.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=place, in_icp=true, multi(11). proposed: external-booking-redirect"
-  },
-  "epiclaunch": {
-    "url": "https://www.epiclaunch.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=work, in_icp=false, multi(5). proposed: content-feed, affiliate-list"
-  },
-  "fabiola-ferrero": {
-    "url": "http://fabiola-ferrero.squarespace.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=work, in_icp=true, multi(17). no new caps"
-  },
-  "fondatheatre": {
-    "url": "https://fondatheatre.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=place, in_icp=true, multi(11). proposed: event-listings"
-  },
-  "golivehq": {
-    "url": "https://www.golivehq.co/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=trust, in_icp=false, multi(8). proposed: product-finder-quiz"
-  },
-  "greenhealthycooking": {
-    "url": "https://greenhealthycooking.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=work, in_icp=false, multi(21). proposed: recipe-index / content-category-grid, affiliate-hub"
-  },
-  "healthfullifemd": {
-    "url": "https://healthfullifemd.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=trust, in_icp=true, multi(9). no new caps"
-  },
-  "insideoutcolouranddesign": {
-    "url": "https://www.insideoutcolouranddesign.com.au/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=trust, in_icp=true, multi(9). no new caps"
-  },
-  "juliedawnfox": {
-    "url": "https://juliedawnfox.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=trust, in_icp=false, multi(6). no new caps"
-  },
-  "lightcrew": {
-    "url": "https://www.lightcrew.jp/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=trust, in_icp=true, multi(14). proposed: practitioner-profiles"
-  },
-  "louisiana-ontour": {
-    "url": "http://louisiana-ontour.de/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=work, in_icp=false, multi(6). proposed: event-listings, press-kit-downloads, fan-voting"
-  },
-  "mediamodifier": {
-    "url": "https://mediamodifier.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=thing, in_icp=true, multi(5). proposed: membership-checkout"
-  },
-  "moonrakerhotel": {
-    "url": "https://moonrakerhotel.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=place, in_icp=false, multi(9). proposed: external-booking-redirect"
-  },
-  "morenoshairandbeauty": {
-    "url": "https://morenoshairandbeauty.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=place, in_icp=true, multi(6). proposed: external-booking-redirect"
-  },
-  "olyvia": {
-    "url": "https://olyvia.co/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=trust, in_icp=true, multi(4). proposed: affiliate-resource-directory"
-  },
-  "pariwana-hostel": {
-    "url": "https://pariwana-hostel.com/en/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=place, in_icp=true, multi(6). proposed: external-booking-redirect"
-  },
-  "pasikuikka": {
-    "url": "https://pasikuikka.fi/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=thing, in_icp=true, multi(11). proposed: interactive-calculators"
-  },
-  "petsittersireland": {
-    "url": "https://www.petsittersireland.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=trust, in_icp=true, multi(5). proposed: booking-portal"
-  },
-  "podcastpro": {
-    "url": "https://podcastpro.pl/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=thing, in_icp=false, multi(7). proposed: course-curriculum, storefront-checkout, content-index"
-  },
-  "priscillawolf": {
-    "url": "https://photography.priscillawolf.nl/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=work, in_icp=false, multi(7). proposed: booking-wizard"
-  },
-  "reloop": {
-    "url": "https://www.reloop.me/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "high",
-    "note": "engine=thing, in_icp=true, multi(10). proposed: external-list-signup"
-  },
-  "runnersconnect": {
-    "url": "https://runnersconnect.net/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=thing, in_icp=true, multi(5). proposed: email-capture-popup / external-list-signup, blog-teaser"
-  },
-  "seao2": {
-    "url": "https://www.seao2.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=thing, in_icp=true, multi(8). proposed: blog-teaser"
-  },
-  "sugoikanban": {
-    "url": "https://sugoikanban.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=thing, in_icp=true, multi(6). no new caps"
-  },
-  "thebelltoweron34th": {
-    "url": "https://thebelltoweron34th.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=place, in_icp=true, multi(6). no new caps"
-  },
-  "valencienne": {
-    "url": "https://www.valencienne.com/",
-    "scraped": true,
-    "analyzed": true,
-    "status": "done",
-    "confidence": "medium",
-    "note": "engine=trust, in_icp=true, multi(6). no new caps"
-  }
+  "7adire": { "url": "https://7adire.be/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(3). proposed: event-listings" },
+  "aprilandmay": { "url": "https://www.aprilandmay.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=false, multi(5). proposed: external-booking-redirect, storefront-checkout" },
+  "beanstalkhq": { "url": "https://www.beanstalkhq.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=false, multi(15). proposed: membership-checkout" },
+  "brettlair": { "url": "https://www.brettlair.ca/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=work, in_icp=true, multi(5). no new caps" },
+  "coltivar": { "url": "https://www.coltivar.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=true, multi(6). proposed: interactive-calculators, media-hub" },
+  "contractseries": { "url": "https://www.contractseries.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=work, in_icp=true, multi(12). proposed: bibliography/works-listing" },
+  "coppi": { "url": "https://www.coppi.co.uk/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(6). proposed: external-booking-redirect" },
+  "edisontally": { "url": "https://www.edisontally.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(11). proposed: external-booking-redirect" },
+  "epiclaunch": { "url": "https://www.epiclaunch.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=work, in_icp=false, multi(5). proposed: content-feed, affiliate-list" },
+  "fabiola-ferrero": { "url": "http://fabiola-ferrero.squarespace.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=work, in_icp=true, multi(17). no new caps" },
+  "fondatheatre": { "url": "https://fondatheatre.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(11). proposed: event-listings" },
+  "golivehq": { "url": "https://www.golivehq.co/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=false, multi(8). proposed: product-finder-quiz" },
+  "greenhealthycooking": { "url": "https://greenhealthycooking.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=work, in_icp=false, multi(21). proposed: recipe-index / content-category-grid, affiliate-hub" },
+  "healthfullifemd": { "url": "https://healthfullifemd.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(9). no new caps" },
+  "insideoutcolouranddesign": { "url": "https://www.insideoutcolouranddesign.com.au/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(9). no new caps" },
+  "juliedawnfox": { "url": "https://juliedawnfox.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=false, multi(6). no new caps" },
+  "lightcrew": { "url": "https://www.lightcrew.jp/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=true, multi(14). proposed: practitioner-profiles" },
+  "louisiana-ontour": { "url": "http://louisiana-ontour.de/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=work, in_icp=false, multi(6). proposed: event-listings, press-kit-downloads, fan-voting" },
+  "mediamodifier": { "url": "https://mediamodifier.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=thing, in_icp=true, multi(5). proposed: membership-checkout" },
+  "moonrakerhotel": { "url": "https://moonrakerhotel.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=false, multi(9). proposed: external-booking-redirect" },
+  "morenoshairandbeauty": { "url": "https://morenoshairandbeauty.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(6). proposed: external-booking-redirect" },
+  "olyvia": { "url": "https://olyvia.co/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=true, multi(4). proposed: affiliate-resource-directory" },
+  "pariwana-hostel": { "url": "https://pariwana-hostel.com/en/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(6). proposed: external-booking-redirect" },
+  "pasikuikka": { "url": "https://pasikuikka.fi/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=thing, in_icp=true, multi(11). proposed: interactive-calculators" },
+  "petsittersireland": { "url": "https://www.petsittersireland.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=true, multi(5). proposed: booking-portal" },
+  "podcastpro": { "url": "https://podcastpro.pl/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=thing, in_icp=false, multi(7). proposed: course-curriculum, storefront-checkout, content-index" },
+  "priscillawolf": { "url": "https://photography.priscillawolf.nl/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=work, in_icp=false, multi(7). proposed: booking-wizard" },
+  "reloop": { "url": "https://www.reloop.me/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=thing, in_icp=true, multi(10). proposed: external-list-signup" },
+  "runnersconnect": { "url": "https://runnersconnect.net/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=thing, in_icp=true, multi(5). proposed: email-capture-popup / external-list-signup, blog-teaser" },
+  "seao2": { "url": "https://www.seao2.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=thing, in_icp=true, multi(8). proposed: blog-teaser" },
+  "sugoikanban": { "url": "https://sugoikanban.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=thing, in_icp=true, multi(6). no new caps" },
+  "thebelltoweron34th": { "url": "https://thebelltoweron34th.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(6). no new caps" },
+  "valencienne": { "url": "https://www.valencienne.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=true, multi(6). no new caps" },
+
+  "drcynthiahawver": { "url": "https://www.drcynthiahawver.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(6). reused media-hub" },
+  "kristenyarker": { "url": "https://kristenyarker.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(4). no new caps" },
+  "coffeefinance": { "url": "https://www.coffeefinance.com.au/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(5). no new caps" },
+  "bores": { "url": "https://www.bores.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=true, multi(4). no new caps" },
+  "shemmassianconsulting": { "url": "https://www.shemmassianconsulting.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=true, multi(5). no new caps" },
+  "financialgym": { "url": "https://financialgym.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(4). no new caps" },
+  "travelitalianstyle": { "url": "https://www.travelitalianstyle.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(6). reused media-hub" },
+  "sommeliercompany": { "url": "https://www.sommeliercompany.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=true, multi(6). proposed: geo-landing-network; reused interactive-calculators" },
+  "studioduerre": { "url": "http://www.studioduerre.it/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust(runner place), in_icp=false, multi(6). proposed: inventory-search (real-estate MLS)" },
+  "nassimbelouar": { "url": "https://nassimbelouar.com/en/home/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(8). no new caps" },
+  "whatsdev": { "url": "https://www.whatsdev.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=quick-yes, in_icp=true, single. no new caps" },
+  "katbyles": { "url": "https://www.katbyles.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(4). reused storefront-checkout" },
+
+  "trianglehairorganic": { "url": "https://trianglehairorganic.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi. no new caps" },
+  "curacell": { "url": "https://www.curacell.ch/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(3). reused external-booking-redirect" },
+  "motherkellys": { "url": "https://motherkellys.co.uk/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(5). reused external-list-signup, event-listings" },
+  "rsalislam": { "url": "https://www.rsalislam.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=true, multi(6). reused practitioner-profiles" },
+  "sportsofallsortsky": { "url": "https://sportsofallsortsky.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(5). no new caps" },
+  "donlealpizzaria": { "url": "https://donlealpizzaria.com.br/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(4). proposed: location-directory, franchise-recruitment" },
+  "elbosc": { "url": "https://elbosc.com/home/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(5). reused external-booking-redirect" },
+  "flyingsushi": { "url": "http://flyingsushi.com.br/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(6). proposed: menu-display; reused practitioner-profiles" },
+  "gokyuzurestaurant": { "url": "https://gokyuzurestaurant.co.uk/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(4). reused practitioner-profiles" },
+  "angello-pizza-rennes": { "url": "https://www.angello-pizza-rennes.fr/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(5). proposed: external-order-redirect" },
+  "palestrauniverso": { "url": "https://palestrauniverso.it/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(6). reused storefront-checkout" },
+  "circle-cafe": { "url": "https://www.circle-cafe.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(3). proposed: online-ordering-redirect" },
+  "airsafaris": { "url": "https://airsafaris.co.nz/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(3). reused external-booking-redirect" },
+  "empoweredvolleyball": { "url": "https://empoweredvolleyball.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(5). reused event-listings" },
+  "chiho-international-academy": { "url": "https://chiho-international-academy.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=true, multi(5). no new caps" },
+  "drycreekvineyard": { "url": "https://drycreekvineyard.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(5). reused external-booking-redirect, storefront-checkout, membership-checkout" },
+  "houndstoothcoffee": { "url": "https://houndstoothcoffee.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(4). no new caps" },
+  "precinctdtla": { "url": "https://precinctdtla.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(4). reused event-listings" },
+  "lowbrowpalace": { "url": "https://lowbrowpalace.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(5). reused event-listings" },
+  "hinodeyaramen": { "url": "http://hinodeyaramen.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(4). proposed: menu-ordering, loyalty-rewards" },
+  "kwadratowa": { "url": "https://kwadratowa.pl/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(5). reused event-listings" },
+  "beststopinscott": { "url": "https://www.beststopinscott.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(5). proposed: store-locator" },
+  "bookskubrick": { "url": "http://bookskubrick.jp/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(3). reused event-listings, practitioner-profiles" },
+  "tokyo-okutama-otsunaturegarden": { "url": "https://tokyo-okutama-otsunaturegarden.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(10). reused external-booking-redirect" },
+
+  "easybooking": { "url": "https://www.easybooking.eu/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=thing, in_icp=true, multi(3). reused interactive-calculators" },
+  "boutiquedeluz": { "url": "https://www.boutiquedeluz.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place(runner thing), in_icp=false, multi(6). reused storefront-checkout (WooCommerce)" },
+  "sekrondigital": { "url": "https://sekrondigital.cl/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=trust, in_icp=true, multi. proposed: external-lead-form" },
+  "sagungseto": { "url": "http://sagungseto.co.id/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place(runner thing), in_icp=true, multi(5). reused storefront-checkout" },
+  "jadesummer": { "url": "https://jadesummer.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=work, in_icp=true, multi(5). reused works-catalog" },
+  "nesplas": { "url": "https://nesplas.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=thing, in_icp=true, multi(5). proposed: quote-cart" },
+  "diabetna": { "url": "https://diabetna.vn/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=thing, in_icp=true, multi(3). proposed: stockist-locator" },
+  "amplainformatica": { "url": "https://amplainformatica.com.br/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, single. no new caps" },
+  "metatex": { "url": "http://metatex.com.br/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=thing(runner place), in_icp=false, multi(5). reused storefront-checkout" },
+  "ecorevolution": { "url": "https://ecorevolution.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=thing, in_icp=true, multi(6). no new caps" },
+  "thietbivesinhtoto": { "url": "https://thietbivesinhtoto.vn/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place(runner thing), in_icp=false, multi(3). reused storefront-checkout" },
+  "lite-tek": { "url": "https://lite-tek.com.mx/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=thing, in_icp=true, multi(3). proposed: software-downloads" },
+  "psnce": { "url": "http://psnce.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=thing, in_icp=true, multi(4). no new caps; site spam-compromised (ignored)" },
+  "deliciasdotrigo": { "url": "https://deliciasdotrigo.com.br/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=thing(runner place), in_icp=true, multi(4). reused content-index" },
+  "goodspiritgraphics": { "url": "http://goodspiritgraphics.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "low", "note": "engine=thing, in_icp=false, multi. proposed: community-forum; defunct/spam-compromised" },
+  "notaryassist": { "url": "https://notaryassist.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=thing, in_icp=true, single(2). reused app-signup" },
+  "babygiftretail": { "url": "https://www.babygiftretail.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi. reused storefront-checkout" },
+  "harmonylife": { "url": "http://harmonylife.co.th/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place(runner thing), in_icp=false, multi(6). reused storefront-checkout (WooCommerce)" },
+  "maestrokomputer": { "url": "https://www.maestrokomputer.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=place, in_icp=true, multi(3). no new caps" },
+  "namlin": { "url": "https://namlin.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=thing, in_icp=true, multi(3). no new caps" },
+  "yogyakartas": { "url": "https://yogyakartas.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=thing, in_icp=false, multi(4). reused storefront-checkout (WooCommerce)" },
+  "conlancongnghiep": { "url": "https://conlancongnghiep.vn/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=thing(runner trust), in_icp=true, multi(6). no new caps" },
+
+  "david-velasco": { "url": "https://www.david-velasco.net/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=work, in_icp=true, multi(3). proposed: progress-tracker; reused works-catalog" },
+  "osbornewoodcare": { "url": "https://www.osbornewoodcare.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust, in_icp=true, multi(6). no new caps" },
+  "tomecano7": { "url": "https://tomecano7.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=work, in_icp=true, multi(5). reused storefront-checkout" },
+  "design-plus": { "url": "https://design-plus.co.za/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust(runner work), in_icp=true, multi(5). no new caps" },
+  "tigerhousefilms": { "url": "https://tigerhousefilms.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=work, in_icp=true, multi(4). no new caps" },
+  "lenivastudio": { "url": "https://lenivastudio.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=trust(runner work), in_icp=true, multi(5). no new caps" },
+  "storiesinsound": { "url": "https://storiesinsound.ca/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=work, in_icp=true, multi(3). reused media-hub" },
+  "rabbleboy": { "url": "https://www.rabbleboy.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "medium", "note": "engine=work, in_icp=true, multi(5). reused works-catalog" },
+  "adriantofei": { "url": "https://adriantofei.com/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=work, in_icp=true, multi(5). reused works-catalog" },
+
+  "totc": { "url": "https://totc.ca/", "scraped": true, "analyzed": true, "status": "done", "confidence": "high", "note": "engine=place, in_icp=true, multi(3). reused event-listings" }
 }

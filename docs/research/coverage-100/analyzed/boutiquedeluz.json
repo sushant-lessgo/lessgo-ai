@@ -1,0 +1,40 @@
+{
+  "slug": "boutiquedeluz",
+  "url": "https://www.boutiquedeluz.com/",
+  "business": { "type_label": "lighting store (e-commerce, WooCommerce)", "icp_category": "retail / online store", "geography_hint": "Argentina (AR phone codes +54 9 11, Spanish, ARS prices)" },
+  "in_icp": false,
+  "engine": { "pick": "place", "ladder_reasoning": "No defined expertise sold and no portfolio-as-proof; the decision is browsing a shop's products/prices/promos and where to buy — a shop reads as 'place' among the closed engines. But the real job is a transactional catalog with cart/checkout, which the engines don't cover.", "runner_up": "thing" },
+  "goal": { "one_action": "buy lighting products (add to cart / checkout, or contact sales via WhatsApp to purchase)", "mechanism": "redirect", "delegated_to": "store" },
+  "structure": { "kind": "multi", "page_count": 6, "pages": ["home", "donde-estamos", "ilumina-por-categoria", "comentarios-de-clientes", "contacto", "superofertas"], "archetype_note": "Full WooCommerce storefront: paginated product catalog (983 items), category grids, cart/checkout, plus shipping-cost, reviews and contact info pages. Not a single-conversion landing site." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Bienvenido a Boutique de Luz", "component": "text" },
+      { "canonical": "cta", "observed_as": "¿Podemos ayudarte a iluminar tus ambientes? / Hacé click acá", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Somos especialistas en iluminación y amamos el diseño", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Iluminación por categoría (techo, pared, mesa, piso, led)", "component": "grid-cards" },
+      { "canonical": "pricing", "observed_as": "15% de descuento / 3 cuotas sin interés / Superofertas", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Costos de envío por Vía Cargo o Buspack", "component": "table" },
+      { "canonical": "map-hours", "observed_as": "Dónde estamos (address and hours)", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "CÓMO COMPRAR", "component": "text" },
+      { "canonical": "objectionHandling", "observed_as": "PORQUÉ COMPRAR CON NOSOTROS", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "QUIENES SOMOS", "component": "text" },
+      { "canonical": "useCases", "observed_as": "PROFESIONALES Y EMPRESAS (B2B program)", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "COMENTARIOS DE NUESTROS CLIENTES (5 reviews)", "component": "text" },
+      { "canonical": "cta", "observed_as": "Contacto / WhatsApp channels", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Paginated product catalog with filters by type/quantity of lights/price range, cards with Comprar + Vista Rápida (983 products, 62 pages)", "why_no_fit": "The section list has no id for a transactional product catalog / shop grid with filtering and add-to-cart — it is the site's spine, not a landing section", "closest": "features" }
+    ]
+  },
+  "capabilities": { "needed": ["catalog", "multipage", "map-hours"], "proposed_new": [ { "name": "storefront-checkout", "evidence": "WooCommerce cart_or_checkout=true, 983 products with Comprar/Vista Rápida, ARS prices ($16.000–$2.975.000), installment + cash-discount payment terms — an on-site cart+checkout selling one-time goods" } ] },
+  "proof_types": ["testimonials", "reviews"],
+  "design_style": { "pick": null, "none_fits_because": "Capture returned no fonts, colors, or dark/light signal (design_hints empty aside from photo-heavy image density); cannot assign a style confidently." },
+  "components_needed": ["product-catalog grid with filters", "product card (thumbnail + price + buy/quick-view)", "pricing/promo banner", "shipping-cost table", "testimonial list", "store address + hours block"],
+  "languages": ["es"],
+  "confidence": { "level": "high", "why": "fetch_quality=full; commerce, nav, CTAs, proof and section order all captured clearly. Store nature is unambiguous." },
+  "gap_findings": [
+    "Transactional e-commerce (cart/checkout + 983-product filtered catalog) is outside the one-conversion-action model — engines and section list cannot express a shopping storefront.",
+    "Sale/purchase happens via WooCommerce cart OR via three role-split WhatsApp numbers (pre-sales x2, post-sales) — the goal mechanism vocab can't represent a hybrid cart+WhatsApp purchase path.",
+    "map-hours capability is claimed via listed address/hours but there is no actual map embed — capability vocab conflates 'has hours' with 'has interactive map'."
+  ]
+}

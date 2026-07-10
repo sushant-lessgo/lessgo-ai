@@ -1,0 +1,37 @@
+{
+  "slug": "design-plus",
+  "url": "https://design-plus.co.za/",
+  "business": { "type_label": "interior design firm (custom kitchens/interiors, showroom)", "icp_category": "interior design / home-improvement services", "geography_hint": "George, South Africa" },
+  "in_icp": true,
+  "engine": { "pick": "trust", "ladder_reasoning": "The firm sells defined expertise (custom design + manufacture + installation, turnkey projects) and leans on 30+ years of experience, testimonials, trust/value statements and partnerships to win the hire; the galleries support that argument rather than being the whole decision.", "runner_up": "work" },
+  "goal": { "one_action": "submit the contact form (or call/email) to inquire about a custom interior design project", "mechanism": "form", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 5, "pages": ["home", "brand-story", "collections", "services", "contact"], "archetype_note": "Classic multi-page design-firm site: home overview → services → gallery/collections → contact form. Brand Story nav page not captured." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "DESIGNING SPACES ELEVATING EXPERIENCES", "component": "text" },
+      { "canonical": "useCases", "observed_as": "COLLECTIONS (featured collection links)", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "CUSTOM DESIGN", "component": "text" },
+      { "canonical": "features", "observed_as": "SERVICES", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "COMPLETE BATHROOM & LIGHTING SOLUTIONS", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "TESTIMONIALS", "component": "carousel" },
+      { "canonical": "founderNote", "observed_as": "EMPOWERING SUCCESS TOGETHER (brand/partnership statement)", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "Design + Manufacture | Installation", "component": "text" },
+      { "canonical": "results", "observed_as": "30+ Years of Experience", "component": "stats" },
+      { "canonical": "socialProof", "observed_as": "High-End Partnerships", "component": "text" },
+      { "canonical": "objectionHandling", "observed_as": "Trust / Innovation Meets Craftsmanship", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Our Gallery / Contemporary / Classic / Commercial / Corporate / EXCLUSIVE INTERIORS galleries", "component": "gallery" },
+      { "canonical": "leadForm", "observed_as": "GET IN TOUCH (contact form)", "component": "form" },
+      { "canonical": "cta", "observed_as": "GET IN TOUCH (contact info block)", "component": "text" },
+      { "canonical": "footer", "observed_as": "Trading Hours / address / phone", "component": "text" },
+      { "canonical": "followStrip", "observed_as": "Instagram + Facebook links", "component": "text" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": { "needed": ["multipage", "gallery/portfolio", "lead-form", "map-hours"], "proposed_new": [] },
+  "proof_types": ["testimonials", "portfolio", "stats"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["gallery/portfolio grid", "testimonial carousel", "service card grid", "stat highlight", "contact form with services dropdown", "trading-hours block"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; 4 of 5 pages captured with clear sections, CTAs, form fields and proof counts. Only the Brand Story page was not captured, which does not change the classification." },
+  "gap_findings": ["Interior-design firms straddle trust and work: strong expertise/testimonial argument AND a large 60-item gallery spine. Current engine set forces one; the galleries were mapped to miscellaneous since there is no dedicated portfolio/gallery canonical section id."]
+}
