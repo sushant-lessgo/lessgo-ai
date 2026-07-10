@@ -9,6 +9,14 @@ findings — never forced to fit.
 
 **N = 101** · scraped 101 / analyzed 101 / 0 failures · confidence: 56 high · 44 medium · 1 low.
 
+> **Cross-checked & canonicalized.** An independent second pass over `raw/` only (2026-07-10)
+> agreed with this report on every strategic conclusion and on 82/101 per-site engine picks.
+> The 19 disagreements clustered into 4 taxonomy ambiguities, since **ruled** in
+> `docs/tracks/templatePlan.md` (T1 designers→work, ladder reordered · T2 salons→trust ·
+> T3 storefronts→upfront self-selection · T4 courses split solo→trust/product-led→thing).
+> The cross-check's additional catches are folded in as §10 below. This file is the single
+> canonical record of the experiment; decisions derived from it live in templatePlan.md.
+
 ---
 
 ## 1. ICP verdict
@@ -209,5 +217,31 @@ commerce engine. Chasing checkout would optimize for the 26% we deliberately exc
 
 ---
 
-*Source data: `analyzed/*.json` (101 files). Aggregation: `scratchpad/aggregate.js` → `agg.json`.
-Per-site status: `progress.json`.*
+## 10. Independent cross-check additions (folded 2026-07-11)
+
+From the second pass over `raw/` (script aggregation, no analyzed/ reuse):
+
+- **`team` deserves canonical-section status — 24 sites** render a staff/practitioner grid.
+  This pass had folded team into miscellaneous/founderNote (founderNote ≈75 sites is inflated
+  by about/team/story mappings; the 61-item miscellaneous overflow corroborates). → Ruled into
+  contract patch wave 1 (templatePlan T7).
+- **Certs/awards band — 42 sites**, distinct proof grammar from logo walls (23). → wave 1.
+- **Style supply mismatch corroborated from raw data:** only **5/101 dark sites**; 74%
+  photo-heavy. Image-pipeline quality is a bigger lever than another dark tech template.
+- **Google-reviews widget — 15 sites** → `reviews-widget` capability (wave 1).
+- **Forms stay simple:** avg 3.2 fields (name/email/message dominate) — form sophistication is
+  NOT a gap; WhatsApp/tel prominence (SEA/EU cohorts) matters more.
+- **Dropdown navs on 53%** — nav is a real component, not a link row.
+- Engine-count deltas explained: this report's place=36 vs cross-check's 28 came from
+  retail-with-cart and salon edge cases — resolved by T2/T3 rulings (salons→trust,
+  storefronts→self-selection); true place cohort is the venue-IS-the-product set.
+
+Post-rulings status of §8 priorities: superseded as a decision list by `templatePlan.md`
+(place engine committed ASAP per T5/T6, not trigger-gated; wave-1 vs wave-2 capability split
+per T7). §8 remains the evidence ranking.
+
+---
+
+*Source data: `analyzed/*.json` (101 files) + `raw/*.json` cross-check. Aggregation:
+`scratchpad/aggregate.js` → `agg.json`. Per-site status: `progress.json`. Decisions:
+`docs/tracks/templatePlan.md` T1–T8.*
