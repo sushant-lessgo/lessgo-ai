@@ -6,6 +6,7 @@
 
 import type { SectionCopy } from '@/types/generation';
 import { applyAllSchemaDefaults } from '@/modules/sections/layoutElementSchema';
+import { flattenReviewSentinel } from '@/lib/schemas/copy.schema';
 import { serviceElementSchema } from './elementSchema';
 import { applyItalicEmFallback } from './italicAccentFallback';
 import { logger } from '@/lib/logger';
@@ -153,6 +154,9 @@ export function processServiceCopy(
   sections: Record<string, SectionCopy>,
   uiblocks: Record<string, string>
 ): Record<string, SectionCopy> {
+  // Sentinel hardening: flatten any {value, needsReview} object BEFORE assembly
+  // so no object-shaped value can survive into content (→ no [object Object]).
+  flattenReviewSentinel(sections);
   const withDefaults = applyAllSchemaDefaults(sections, uiblocks) as Record<string, SectionCopy>;
   const withIds = backfillCollectionIds(withDefaults, uiblocks);
   return applyItalicEmFallback(withIds);

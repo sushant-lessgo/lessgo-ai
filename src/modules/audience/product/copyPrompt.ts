@@ -72,11 +72,28 @@ ${depth}
 Nav/footer link labels may point at page paths from the site list above.`;
 }
 
+// proof-truth phase 2: proof-shaped elements (testimonial quote/author fields,
+// trust review/case fields) get an inline plausible-generic guard. Match on the
+// actual element keys the schema emits — collection subfields arrive as
+// `<collection>.<field>` (see getAllElements), flat fields as bare keys.
+const PROOF_COLLECTIONS = new Set(['testimonials', 'reviews', 'cases']);
+const PROOF_FIELDS = new Set(['quote', 'author_name', 'author_role', 'author_company']);
+const PROOF_ELEMENT_GUARD =
+  '[PROOF — plausible-generic only: a fictional first-name persona is OK, but NEVER attribute the quote to a real or invented company/brand name, and NEVER put a specific number, percentage, or revenue/ROI claim inside the quote]';
+
+function isProofElement(name: string): boolean {
+  const dot = name.indexOf('.');
+  const collection = dot >= 0 ? name.slice(0, dot) : '';
+  const field = dot >= 0 ? name.slice(dot + 1) : name;
+  return PROOF_COLLECTIONS.has(collection) || PROOF_FIELDS.has(field);
+}
+
 function formatElement(element: LayoutElement): string {
   const parts: string[] = [`- ${element.element}`];
   if (element.charLimit) parts.push(`(max ${element.charLimit} chars)`);
   parts.push(element.mandatory ? '[REQUIRED]' : '[optional, null to exclude]');
   if (element.generation === 'ai_generated_needs_review') parts.push('[NEEDS_REVIEW]');
+  if (isProofElement(element.element)) parts.push(PROOF_ELEMENT_GUARD);
   return parts.join(' ');
 }
 
@@ -384,7 +401,7 @@ ${getThingCollectionSchemas(isTrade)}
 ${accentRule}
 2. Respect character limits and array min/max strictly.
 3. NO placeholder text — every field must be real, usable copy.
-4. NO invented exact numbers, customer names, or dollar figures. Use honest framing for NEEDS_REVIEW fields — the founder verifies before publish.
+4. NO invented exact numbers, customer names, or dollar figures. Use honest framing for NEEDS_REVIEW fields — the founder verifies before publish. For any testimonial/proof content (quotes and attributions): a fictional first-name persona is acceptable, but NEVER attribute a quote to a real or invented company/brand name, and NEVER put a specific metric, percentage, or revenue/ROI figure inside a quote (e.g. "284% ROI for GlowSkin" is forbidden).
 ${pricingRule}6. Footer: each footer/link column has a "links" array of { id: "", label, href } — emit empty "" for every id, including nested link ids.
 7. Output EVERY section listed above — no omissions (${sectionList}). Each as a key with a complete "elements" object.
 8. Use the ${voiceRuleName} voice — concrete, precise, no hype. Avoid the forbidden words ANYWHERE, including the brand/wordmark (logo_text, wordmark, brand_text), copyright line, and testimonial quotes.

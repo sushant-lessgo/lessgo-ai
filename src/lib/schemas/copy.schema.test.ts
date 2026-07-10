@@ -6,7 +6,7 @@
 // generation dies. These tests lock in the narrow coercion.
 
 import { describe, it, expect } from 'vitest';
-import { CopyResponseSchema } from './copy.schema';
+import { CopyResponseSchema, flattenReviewSentinel } from './copy.schema';
 
 describe('CopyResponseSchema — tolerant array coercion (F27)', () => {
   it('coerces a lone object in a collection element to a single-element array', () => {
@@ -92,5 +92,79 @@ describe('CopyResponseSchema — tolerant array coercion (F27)', () => {
     expect(parsed.hero.elements.headline).toBe('Ship faster');
     expect(parsed.hero.elements.bullets).toEqual(['a', 'b', 'c']);
     expect(parsed.hero.elements.eyebrow).toBeNull();
+  });
+});
+
+// proof-truth phase 2 — the sentinel is DEAD but defended: if a model ever emits
+// `{ value, needsReview: true }`, the flatten normalizer must reduce it to the
+// plain string BEFORE content assembly so no object-shaped value reaches a block
+// (→ no `[object Object]` on a published page).
+describe('flattenReviewSentinel — object-shaped value in → plain string out', () => {
+  it('flattens a top-level element sentinel to its plain string', () => {
+    const sections = {
+      hero: {
+        elements: {
+          headline: { value: 'Ship faster', needsReview: true as const },
+          lede: 'A plain string',
+          eyebrow: null,
+        },
+      },
+    };
+
+    const out = flattenReviewSentinel(sections);
+    expect(out.hero.elements.headline).toBe('Ship faster');
+    expect(out.hero.elements.lede).toBe('A plain string');
+    expect(out.hero.elements.eyebrow).toBeNull();
+  });
+
+  it('flattens a sentinel nested inside a collection item field', () => {
+    const sections = {
+      testimonials: {
+        elements: {
+          testimonials: [
+            { id: 't1', quote: { value: 'Loved it', needsReview: true as const }, author_name: 'Alex' },
+          ],
+        },
+      },
+    };
+
+    const out = flattenReviewSentinel(sections);
+    const item = (out.testimonials.elements.testimonials as any[])[0];
+    expect(item.quote).toBe('Loved it');
+    expect(item.author_name).toBe('Alex');
+  });
+
+  it('leaves plain strings, arrays and null untouched (idempotent)', () => {
+    const sections = {
+      hero: {
+        elements: {
+          headline: 'Ship faster',
+          bullets: ['a', 'b'],
+          eyebrow: null,
+        },
+      },
+    };
+
+    const out = flattenReviewSentinel(sections);
+    expect(out.hero.elements.headline).toBe('Ship faster');
+    expect(out.hero.elements.bullets).toEqual(['a', 'b']);
+    expect(out.hero.elements.eyebrow).toBeNull();
+    // Re-running changes nothing.
+    expect(flattenReviewSentinel(out)).toEqual(sections);
+  });
+
+  it('guarantees no object-shaped value survives (the [object Object] guard)', () => {
+    const sections = {
+      cta: {
+        elements: {
+          headline: { value: 'Book now', needsReview: true as const },
+        },
+      },
+    };
+
+    const out = flattenReviewSentinel(sections);
+    const v = out.cta.elements.headline;
+    expect(typeof v).toBe('string');
+    expect(String(v)).not.toBe('[object Object]');
   });
 });

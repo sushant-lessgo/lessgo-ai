@@ -23,8 +23,8 @@ Why this wins: content values stay plain strings → **zero published-path risk,
 
 ## Progress log
 
-- phase 1 toggle integrity (capability ≠ content): done (review loops 1, ship)
-- phase 2 prompt guard + fillMode audit + sentinel hardening: pending
+- phase 1 toggle integrity (capability ≠ content): done (commit 91c283a2, review loops 1)
+- phase 2 prompt guard + fillMode audit + sentinel hardening: done (review loops 1, ship)
 - phase 3 confirm-time auto-import + table-backed regen injection: pending
 - phase 4 provenance metadata + marker suppression: pending
 - phase 5 T2 count signal: pending
@@ -78,6 +78,7 @@ Why this wins: content values stay plain strings → **zero published-path risk,
 - `src/lib/schemas/copy.schema.ts` (shared flatten helper, if chosen over per-parseCopy)
 - `src/lib/schemas/copy.schema.test.ts`
 - `src/modules/audience/__tests__/generationContract.test.ts`
+- `src/modules/audience/product/promptBranch.test.ts` (orchestrator addition: byte-frozen `COPY_SAAS_BASELINE` must be RE-CAPTURED — the plan's global-RULES rule-4 change intentionally alters the product copy prompt; the baseline's own header says "recapture deliberately". Delta must be ONLY the proof-guard text; reviewer confirms no unintended drift.)
 
 **Verification:**
 - `npx tsc --noEmit`

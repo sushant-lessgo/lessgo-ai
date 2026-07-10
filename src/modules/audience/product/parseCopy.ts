@@ -22,6 +22,7 @@ import { productElementSchema } from './elementSchema';
 // get their system ids backfilled. Null (non-thing layouts) falls through to
 // the layout-name schema unchanged.
 import { resolveEngineSectionSchema } from '@/modules/engines/elementContracts';
+import { flattenReviewSentinel } from '@/lib/schemas/copy.schema';
 import { applyAccentEmFallback } from './accentFallback';
 
 export interface ProductCopyValidationResult {
@@ -233,6 +234,9 @@ export function processProductCopy(
   sections: Record<string, SectionCopy>,
   uiblocks: Record<string, string>
 ): Record<string, SectionCopy> {
+  // Sentinel hardening: flatten any {value, needsReview} object BEFORE assembly
+  // so no object-shaped value can survive into content (→ no [object Object]).
+  flattenReviewSentinel(sections);
   // Contract-aware defaults (phase 8b): thing layouts read the engine contract,
   // everything else the layout registry — same gate as prompt build + backfill.
   const withDefaults = applyAllSchemaDefaults(
