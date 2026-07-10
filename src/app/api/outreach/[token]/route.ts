@@ -89,6 +89,8 @@ const GenerateSchema = z
     platforms: z.array(z.enum(KNOWN_PLATFORMS)).min(1, 'select at least one platform'),
     prospectUrl: z.string().trim().min(1).optional(),
     prospectText: z.string().trim().min(1).optional(),
+    // ONE optional follow-up bump per platform (Scope OUT: no cadence).
+    includeBump: z.boolean().optional(),
   })
   .refine((v) => !(v.prospectUrl && v.prospectText), {
     message: 'provide a prospect URL or pasted text, not both',
@@ -260,7 +262,7 @@ async function generateHandler(
         400,
       );
     }
-    const { platforms: platformIds, prospectUrl, prospectText } = parsed.data;
+    const { platforms: platformIds, prospectUrl, prospectText, includeBump } = parsed.data;
 
     // Resolve platform defs (unknown / not-yet-implemented → not available).
     const platformDefs: PlatformDef[] = [];
@@ -286,20 +288,45 @@ async function generateHandler(
     //    even when prospectUrl/prospectText is present (decisions #11/#12).
     if (access.isDemo || !clerkId) {
       const mock = mockOutreachOutput(platformDefs);
+      const demoRows: Array<{
+        id: string;
+        platform: string;
+        kind: 'initial' | 'bump';
+        groundingLevel: string;
+        prospectLabel: string | null;
+        subject: string | null;
+        body: string;
+        createdAt: Date;
+      }> = mock.messages.map((m, i) => ({
+        id: `demo-ephemeral-${i}`,
+        platform: m.platform,
+        kind: 'initial',
+        groundingLevel: 'generic',
+        prospectLabel: null,
+        subject: m.subject ?? null,
+        body: m.body,
+        createdAt: new Date(),
+      }));
+      if (includeBump) {
+        const bumpMock = mockOutreachOutput(platformDefs);
+        bumpMock.messages.forEach((m, i) => {
+          demoRows.push({
+            id: `demo-ephemeral-bump-${i}`,
+            platform: m.platform,
+            kind: 'bump',
+            groundingLevel: 'generic',
+            prospectLabel: null,
+            subject: m.subject ?? null,
+            body: m.body,
+            createdAt: new Date(),
+          });
+        });
+      }
       return createSecureResponse({
         success: true,
         persisted: false,
         groundingLevel: 'generic',
-        messages: mock.messages.map((m, i) => ({
-          id: `demo-ephemeral-${i}`,
-          platform: m.platform,
-          kind: 'initial',
-          groundingLevel: 'generic',
-          prospectLabel: null,
-          subject: m.subject ?? null,
-          body: m.body,
-          createdAt: new Date(),
-        })),
+        messages: demoRows,
       });
     }
 
@@ -437,27 +464,58 @@ async function generateHandler(
       }
     }
 
+    // 5b. Optional ONE bump per platform (Scope OUT: no cadence). One AI call over
+    //     all platforms with the just-generated initial messages as prior context.
+    let bumpMessages: OutreachMessageItem[] = [];
+    if (includeBump) {
+      if (envMock) {
+        bumpMessages = mockOutreachOutput(platformDefs).messages;
+      } else {
+        const bumpPrompt = buildOutreachPrompt({
+          platforms: platformDefs,
+          brandContext,
+          intake,
+          grounding,
+          kind: 'bump',
+          priorMessages: messages,
+        });
+        logger.dev('[outreach:generate] BUMP PROMPT:', bumpPrompt);
+        try {
+          bumpMessages = await generateOutreach(bumpPrompt, platformDefs);
+        } catch (err) {
+          // A bump failure must not lose the initial messages — degrade to no bump.
+          logger.warn('[outreach:generate] bump generation failed, shipping initial only:', err as Error);
+          bumpMessages = [];
+        }
+      }
+    }
+
     // 6. Persist message rows + creditsUsed:0 ledger row in ONE $transaction.
     const groundingJson: Prisma.InputJsonValue | undefined = groundingSnapshot
       ? (groundingSnapshot as unknown as Prisma.InputJsonValue)
       : undefined;
 
-    const createOps = messages.map((m) =>
+    const makeCreate = (m: OutreachMessageItem, kind: 'initial' | 'bump') =>
       prisma.outreachMessage.create({
         data: {
           userId: clerkId,
           projectId: project.id,
           tokenId,
           platform: m.platform,
-          kind: 'initial',
+          kind,
           groundingLevel,
           ...(groundingJson !== undefined ? { grounding: groundingJson } : {}),
           prospectLabel,
           subject: typeof m.subject === 'string' ? m.subject : null,
           body: m.body,
         },
-      }),
-    );
+      });
+
+    const createOps = [
+      ...messages.map((m) => makeCreate(m, 'initial')),
+      ...bumpMessages.map((m) => makeCreate(m, 'bump')),
+    ];
+    const persistedCount = createOps.length;
 
     const results = await prisma.$transaction([
       ...createOps,
@@ -472,6 +530,7 @@ async function generateHandler(
             platforms: platformIds,
             groundingLevel,
             messageCount: messages.length,
+            bumpCount: bumpMessages.length,
           },
           endpoint: ENDPOINT,
           duration: Date.now() - startTime,
@@ -480,7 +539,7 @@ async function generateHandler(
       }),
     ]);
 
-    const rows = results.slice(0, messages.length) as MessageRow[];
+    const rows = results.slice(0, persistedCount) as MessageRow[];
 
     return createSecureResponse({
       success: true,

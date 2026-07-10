@@ -73,15 +73,40 @@ function groundingBlock(grounding: OutreachGrounding, targetDescriptor: string):
   );
 }
 
-function platformSlotBlock(def: PlatformDef): string {
+/** initial = first-touch message; bump = one optional follow-up (Scope OUT: no cadence). */
+export type OutreachKind = 'initial' | 'bump';
+
+/**
+ * Resolve the per-platform instructions for a given kind. A bump uses the def's
+ * `bumpInstructions` when present, falling back to the initial instructions (so a
+ * platform without a bump template still produces a sane follow-up).
+ */
+function instructionsFor(def: PlatformDef, kind: OutreachKind): string {
+  if (kind === 'bump' && def.bumpInstructions) return def.bumpInstructions;
+  return def.promptInstructions;
+}
+
+/** Render one initial message as bump context ("the first message you already sent"). */
+function priorMessageBlock(prior: OutreachSibling): string {
+  return (
+    'FIRST MESSAGE ALREADY SENT (the prospect has NOT replied — your follow-up must ' +
+    'reference it lightly, never repeat it verbatim):\n' +
+    (prior.subject ? `Subject: ${prior.subject}\n` : '') +
+    prior.body
+  );
+}
+
+function platformSlotBlock(def: PlatformDef, kind: OutreachKind, prior?: OutreachSibling): string {
   const subjectNote = def.hasSubject
     ? 'This channel HAS a subject line — provide both a "subject" and a "body".'
     : 'This channel has NO subject line — provide a "body" only, and OMIT "subject".';
-  return [
+  const lines = [
     `Platform: ${def.id} (${def.label})`,
     subjectNote,
-    `Instructions: ${def.promptInstructions}`,
-  ].join('\n');
+    `Instructions: ${instructionsFor(def, kind)}`,
+  ];
+  if (kind === 'bump' && prior) lines.push(priorMessageBlock(prior));
+  return lines.join('\n');
 }
 
 export interface BuildOutreachPromptArgs {
@@ -89,6 +114,14 @@ export interface BuildOutreachPromptArgs {
   brandContext: EmailBrandContext;
   intake: OutreachIntakeContext;
   grounding: OutreachGrounding;
+  /** 'initial' (default) or 'bump' — a bump follow-up per platform. */
+  kind?: OutreachKind;
+  /**
+   * For `kind: 'bump'` — the already-sent initial message per platform, in the SAME
+   * ORDER as `platforms`. Ignored for 'initial'. A missing entry degrades gracefully
+   * (bump written without prior-message context).
+   */
+  priorMessages?: OutreachSibling[];
 }
 
 /**
@@ -99,18 +132,27 @@ export interface BuildOutreachPromptArgs {
  * platform order.
  */
 export function buildOutreachPrompt(args: BuildOutreachPromptArgs): string {
-  const { platforms, brandContext, intake, grounding } = args;
+  const { platforms, brandContext, intake, grounding, kind = 'initial', priorMessages = [] } = args;
   const brand = summarizeBrandContext(brandContext);
 
-  const slots = platforms.map((def) => platformSlotBlock(def)).join('\n\n');
+  const slots = platforms
+    .map((def, i) => platformSlotBlock(def, kind, priorMessages[i]))
+    .join('\n\n');
 
   const parts: string[] = [];
 
   parts.push(
-    'You are an expert cold-outreach copywriter writing short, personalized, ' +
-      "platform-correct outreach messages in the sender's own voice: warm, concrete, " +
-      'and free of hype. The sender will paste each message into their own tool, so ' +
-      'keep every message self-contained.',
+    kind === 'bump'
+      ? 'You are an expert cold-outreach copywriter writing ONE short follow-up ("bump") ' +
+          "message per platform in the sender's own voice: warm, concrete, and free of " +
+          'hype. Each follow-up goes to a prospect who did NOT reply to the first message ' +
+          '(provided per platform below). Reference the first message lightly, add a small ' +
+          'reason to reply, and NEVER guilt-trip or pressure. The sender will paste each ' +
+          'message into their own tool, so keep every message self-contained.'
+      : 'You are an expert cold-outreach copywriter writing short, personalized, ' +
+          "platform-correct outreach messages in the sender's own voice: warm, concrete, " +
+          'and free of hype. The sender will paste each message into their own tool, so ' +
+          'keep every message self-contained.',
   );
 
   if (intake.openerContext && intake.openerContext.trim()) {
@@ -158,6 +200,13 @@ export interface BuildSingleMessagePromptArgs {
   brandContext: EmailBrandContext;
   intake: OutreachIntakeContext;
   grounding: OutreachGrounding;
+  /** 'initial' (default) or 'bump' — regenerate a follow-up bump message. */
+  kind?: OutreachKind;
+  /**
+   * For `kind: 'bump'` — the corresponding initial message this bump follows up on,
+   * injected as context so the rewrite stays grounded in the first touch.
+   */
+  priorMessage?: OutreachSibling;
 }
 
 /**
@@ -166,15 +215,21 @@ export interface BuildSingleMessagePromptArgs {
  * contract as the full prompt.
  */
 export function buildSingleMessagePrompt(args: BuildSingleMessagePromptArgs): string {
-  const { platformDef, siblings, brandContext, intake, grounding } = args;
+  const { platformDef, siblings, brandContext, intake, grounding, kind = 'initial', priorMessage } = args;
   const brand = summarizeBrandContext(brandContext);
 
   const parts: string[] = [];
 
   parts.push(
-    'You are an expert cold-outreach copywriter rewriting ONE outreach message for a ' +
-      "specific platform, in the sender's own voice: warm, concrete, and free of hype. " +
-      'Produce a fresh, paste-ready alternative.',
+    kind === 'bump'
+      ? 'You are an expert cold-outreach copywriter rewriting ONE short follow-up ("bump") ' +
+          "message for a specific platform, in the sender's own voice: warm, concrete, and " +
+          'free of hype. It goes to a prospect who did NOT reply to the first message ' +
+          '(provided below). Reference the first message lightly, never guilt-trip. Produce ' +
+          'a fresh, paste-ready alternative.'
+      : 'You are an expert cold-outreach copywriter rewriting ONE outreach message for a ' +
+          "specific platform, in the sender's own voice: warm, concrete, and free of hype. " +
+          'Produce a fresh, paste-ready alternative.',
   );
 
   if (intake.openerContext && intake.openerContext.trim()) {
@@ -195,7 +250,8 @@ export function buildSingleMessagePrompt(args: BuildSingleMessagePromptArgs): st
       (platformDef.hasSubject
         ? 'This channel HAS a subject line — provide both a "subject" and a "body".'
         : 'This channel has NO subject line — provide a "body" only.') +
-      `\nInstructions: ${platformDef.promptInstructions}`,
+      `\nInstructions: ${instructionsFor(platformDef, kind)}` +
+      (kind === 'bump' && priorMessage ? '\n' + priorMessageBlock(priorMessage) : ''),
   );
 
   if (siblings.length > 0) {
@@ -416,15 +472,37 @@ export function validateSingleMessage(raw: unknown, def: PlatformDef): ValidateS
 // ---- mock outputs (NEXT_PUBLIC_USE_MOCK_GPT + demo) --------------------------
 
 function mockBodyFor(def: PlatformDef): string {
-  if (def.id === 'linkedin_note') {
-    // Must fit within 300 chars.
-    return 'Loved what your team is building — the specifics on your site really stood out. Would be glad to connect and follow along.';
+  switch (def.id) {
+    case 'linkedin_note':
+      // Must fit within 300 chars.
+      return 'Loved what your team is building — the specifics on your site really stood out. Would be glad to connect and follow along.';
+    case 'linkedin_inmail':
+      // Within 600 chars.
+      return (
+        'Hi — the work you highlight on your site really caught my eye. We help teams ' +
+        'like yours get more out of exactly that, and it tends to pay back fast. ' +
+        'Worth a quick chat to see if it fits?'
+      );
+    case 'whatsapp':
+      // Within 400 chars, 2–3 casual lines.
+      return (
+        'Hey! Came across your work and really liked the specifics you focus on.\n' +
+        'Think we could help you get more from it — mind if I share a quick idea?'
+      );
+    case 'instagram_dm':
+      // Within 500 chars, content-first.
+      return (
+        'Been enjoying your posts — the stuff you share really stands out.\n' +
+        'We help folks doing what you do get more reach from it. Open to a quick idea?'
+      );
+    case 'cold_email':
+    default:
+      return (
+        'Hi there — I came across your work and the specifics you highlight stood out to me. ' +
+        'I think there is a clear way we could help you get more from it. ' +
+        'Open to a quick reply if this is useful?'
+      );
   }
-  return (
-    'Hi there — I came across your work and the specifics you highlight stood out to me. ' +
-    'I think there is a clear way we could help you get more from it. ' +
-    'Open to a quick reply if this is useful?'
-  );
 }
 
 /**

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { PILOT_PLATFORMS, getPlatformDef } from '@/modules/outreach/platforms'
+import { ALL_PLATFORMS, getPlatformDef } from '@/modules/outreach/platforms'
 
 // SINGLE client component for the whole cold-outreach rail (clones EmailSequencePanel).
 // Three stacked sections: intake (single upserted row) → prospect input + Generate →
@@ -58,6 +58,7 @@ export default function OutreachPanel({ token }: { token: string }) {
   const [prospectMode, setProspectMode] = useState<'url' | 'text'>('url')
   const [prospectUrl, setProspectUrl] = useState('')
   const [prospectText, setProspectText] = useState('')
+  const [includeBump, setIncludeBump] = useState(false)
 
   // Library + lifecycle state.
   const [messages, setMessages] = useState<OutreachMessage[]>([])
@@ -143,9 +144,10 @@ export default function OutreachPanel({ token }: { token: string }) {
     setGenerating(true)
     setError(null)
     try {
-      const body: { platforms: string[]; prospectUrl?: string; prospectText?: string } = { platforms }
+      const body: { platforms: string[]; prospectUrl?: string; prospectText?: string; includeBump?: boolean } = { platforms }
       if (prospectMode === 'url' && prospectUrl.trim()) body.prospectUrl = prospectUrl.trim()
       if (prospectMode === 'text' && prospectText.trim()) body.prospectText = prospectText.trim()
+      if (includeBump) body.includeBump = true
 
       const res = await fetch(`/api/outreach/${encodeURIComponent(token)}`, {
         method: 'POST',
@@ -262,7 +264,7 @@ export default function OutreachPanel({ token }: { token: string }) {
 
         <label className="block text-xs font-medium text-gray-600 mb-1">Channels</label>
         <div className="flex flex-wrap gap-3 mb-3">
-          {PILOT_PLATFORMS.map((def) => (
+          {ALL_PLATFORMS.map((def) => (
             <label key={def.id} className="flex items-center gap-2 text-sm text-gray-800">
               <input
                 type="checkbox"
@@ -356,6 +358,17 @@ export default function OutreachPanel({ token }: { token: string }) {
           </>
         )}
 
+        <label className="mt-4 flex items-center gap-2 text-sm text-gray-800">
+          <input
+            type="checkbox"
+            checked={includeBump}
+            onChange={(e) => setIncludeBump(e.target.checked)}
+            className="rounded border-gray-300"
+          />
+          Include follow-up bump
+          <span className="text-xs text-gray-400">(one gentle follow-up per channel)</span>
+        </label>
+
         <div className="mt-4">
           <button
             onClick={generate}
@@ -398,6 +411,11 @@ export default function OutreachPanel({ token }: { token: string }) {
                       <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-700">
                         {label}
                       </span>
+                      {message.kind === 'bump' && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded bg-purple-50 text-purple-700">
+                          Follow-up
+                        </span>
+                      )}
                       {message.prospectLabel && (
                         <span className="text-xs font-medium px-2 py-0.5 rounded bg-blue-50 text-blue-700">
                           {message.prospectLabel}

@@ -258,6 +258,31 @@ async function regenerateHandler(
       body: s.body,
     }));
 
+    // For a bump row: find the initial message it follows up on (same platform +
+    // prospect) so the rewrite stays grounded in the first touch. Never a cadence —
+    // just the single initial-message context (Scope OUT).
+    const kind: 'initial' | 'bump' = row.kind === 'bump' ? 'bump' : 'initial';
+    let priorMessage: OutreachSibling | undefined;
+    if (kind === 'bump') {
+      const initialRow = await prisma.outreachMessage.findFirst({
+        where: {
+          tokenId,
+          userId: clerkId,
+          platform: row.platform,
+          kind: 'initial',
+          ...(row.prospectLabel !== null ? { prospectLabel: row.prospectLabel } : {}),
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (initialRow) {
+        priorMessage = {
+          platform: initialRow.platform,
+          ...(initialRow.subject ? { subject: initialRow.subject } : {}),
+          body: initialRow.body,
+        };
+      }
+    }
+
     // Generate — env-mock short-circuit vs real LLM with the retry contract.
     let regenerated: OutreachMessageItem;
     const envMock = process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true';
@@ -265,7 +290,7 @@ async function regenerateHandler(
       logger.info('[outreach:regenerate] env mock mode');
       regenerated = mockSingleMessageOutput(def);
     } else {
-      const prompt = buildSingleMessagePrompt({ platformDef: def, siblings, brandContext, intake, grounding });
+      const prompt = buildSingleMessagePrompt({ platformDef: def, siblings, brandContext, intake, grounding, kind, priorMessage });
       logger.dev('[outreach:regenerate] PROMPT:', prompt);
       try {
         regenerated = await regenerateMessage(prompt, def);

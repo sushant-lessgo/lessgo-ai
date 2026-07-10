@@ -233,3 +233,76 @@
 ### Open risks
 - Manual pilot walkthrough (real URL referencing a concrete prospect fact, bad-URL generic notice,
   pasted-text path, kill-switch button-hidden + 404) not yet run — Phase 7 acceptance.
+
+---
+
+## Phase 6 — Remaining platforms + bump messages
+
+### Files changed
+- `src/modules/outreach/platforms.ts` — 3 new platform defs + `bumpInstructions` on all 5 + new exports.
+- `src/modules/outreach/outreachEngine.ts` — `kind: 'initial' | 'bump'` on both prompt builders; new-platform mocks.
+- `src/modules/outreach/outreachEngine.test.ts` — cap-validator + bump-prompt + one-optional-bump tests.
+- `src/app/api/outreach/[token]/route.ts` — optional `includeBump` → generate + persist bump rows.
+- `src/app/api/outreach/[token]/regenerate/route.ts` — regenerate bump rows via stored `kind` + initial context.
+- `src/app/dashboard/outreach/[token]/OutreachPanel.tsx` — 5-channel checkboxes + bump toggle + Follow-up badge.
+
+### What changed
+- **platforms.ts**: added `LINKEDIN_INMAIL_DEF` (`bodyMaxChars: 600`), `WHATSAPP_DEF`
+  (`bodyMaxChars: 400`, no link-dump), `INSTAGRAM_DM_DEF` (`bodyMaxChars: 500`, content-first);
+  all three `hasSubject: false`. Added `bumpInstructions` to all 5 defs (short follow-up, references
+  first message, explicit no-guilt-trip; cold_email bump gets its OWN fresh subject). Registered all
+  five in `PLATFORM_DEFS` so `getPlatformDef` no longer returns null for any union member. New
+  exports: `LINKEDIN_INMAIL_DEF`, `WHATSAPP_DEF`, `INSTAGRAM_DM_DEF`, `EXTENDED_PLATFORMS`,
+  `ALL_PLATFORMS`. `PILOT_PLATFORMS` unchanged (still the two).
+- **outreachEngine.ts**: `buildOutreachPrompt`/`buildSingleMessagePrompt` accept `kind` (default
+  `'initial'`). Bump path swaps `promptInstructions` → `bumpInstructions` (falls back to initial if a
+  def lacked one) and injects a `FIRST MESSAGE ALREADY SENT` prior-message block per platform
+  (`priorMessages[]` for the multi-platform builder, `priorMessage` for regen). Cap enforcement is
+  untouched and fully generic over `PlatformDef.caps` — the new platforms validate through the SAME
+  `checkCaps` path, no special-casing (confirmed). Mock bodies added for the 3 new platforms, each
+  within its cap.
+- **route.ts (generate)**: `includeBump?: boolean` added to `GenerateSchema`. When true, after the
+  initial batch a SINGLE bump AI call runs (`kind: 'bump'`, `priorMessages` = the just-generated
+  initial messages) and bump rows persist with `kind: 'bump'` in the SAME `$transaction` as the
+  initial rows (one bump per platform — no cadence). A bump-generation failure degrades to
+  initial-only (never loses the initial batch). Demo short-circuit returns ephemeral bump mocks too
+  when requested; still persists nothing. Ledger metadata gains `bumpCount`.
+- **regenerate/route.ts**: reads `row.kind`; for a bump it looks up the most-recent `initial` row of
+  the same platform (+ same `prospectLabel` when set) and passes it as `priorMessage` with
+  `kind: 'bump'` into `buildSingleMessagePrompt`. Initial rows unchanged.
+- **OutreachPanel.tsx**: channel checkboxes now map `ALL_PLATFORMS` (5 channels). Added an "Include
+  follow-up bump" checkbox that sends `includeBump`. Bump cards get a distinct purple "Follow-up"
+  badge (`message.kind === 'bump'`). Generic notice + Copy/Regenerate/Delete behavior unchanged.
+
+### New platform caps chosen
+- `linkedin_inmail`: `bodyMaxChars: 600` (short pitch + proof + soft CTA, no subject).
+- `whatsapp`: `bodyMaxChars: 400` (2–3 casual lines, no link-dump, no subject).
+- `instagram_dm`: `bodyMaxChars: 500` (reference content first then bridge, no subject).
+- Boundary tests assert at-cap → ok, cap+1 → too_long for each.
+
+### Bump wiring
+- ADDITIVE only — no schema/table/migration change; reuses the existing `OutreachMessage.kind`
+  column (`initial` default) from Phase 1.
+- Generate: one extra AI call for all bumps, persisted in the initial `$transaction`.
+- Regenerate: bump rows rebuilt with bump prompt + the corresponding initial message as context;
+  grounding still rebuilt from the row's own snapshot (never re-scrapes).
+- One optional bump per platform enforced by the shape schema (array length = platforms.length);
+  test asserts two messages for a single-platform selection → shape failure (no cadence).
+
+### Deviations from plan
+- Added `ALL_PLATFORMS`/`EXTENDED_PLATFORMS` exports (not named in the plan) — needed so the panel
+  and tests iterate all five channels without hardcoding. In-scope, additive to the phase's file.
+- Bump-generation failure degrades to initial-only rather than failing the whole request —
+  conservative (protects the already-generated initial batch). Logged as an in-scope judgment call.
+
+### Verification
+- `npx prisma generate` — run first (client was stale).
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 1856 passed | 3 skipped (109 files); outreach suite 46 passed; no new regressions.
+- Manual WhatsApp/IG/InMail + bump-toggle dev walkthrough deferred to Phase 7 (no dev server per task).
+
+### Open risks
+- Bump quality on real prospects (no guilt-trip, references first message) unvalidated until the
+  Phase 7 manual pilot walkthrough.
+- Multi-channel + bump = up to 10 rows per generate; UI is a flat list (no grouping) — acceptable
+  for pilot, noted for future polish.

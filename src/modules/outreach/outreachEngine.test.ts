@@ -5,7 +5,16 @@ import { describe, it, expect } from 'vitest';
 import type { Brief } from '@/types/brief';
 import { buildBrandContext } from '@/modules/email/brandContext';
 import type { ProspectExtract } from './prospectExtraction';
-import { COLD_EMAIL_DEF, LINKEDIN_NOTE_DEF, PILOT_PLATFORMS } from './platforms';
+import {
+  COLD_EMAIL_DEF,
+  LINKEDIN_NOTE_DEF,
+  LINKEDIN_INMAIL_DEF,
+  WHATSAPP_DEF,
+  INSTAGRAM_DM_DEF,
+  PILOT_PLATFORMS,
+  ALL_PLATFORMS,
+  getPlatformDef,
+} from './platforms';
 import {
   buildOutreachPrompt,
   buildSingleMessagePrompt,
@@ -135,6 +144,111 @@ describe('schemas carry NO caps (decision #10)', () => {
   it('single-message shape schema also carries no caps', () => {
     const raw = { platform: 'cold_email', subject: 'ok', body: words(500) };
     expect(singleMessageOutputSchema(COLD_EMAIL_DEF).safeParse(raw).success).toBe(true);
+  });
+});
+
+describe('phase 6 — new platform caps (boundary: at-cap ok, over-cap too_long)', () => {
+  const cases: Array<{ def: typeof COLD_EMAIL_DEF; cap: number }> = [
+    { def: LINKEDIN_INMAIL_DEF, cap: 600 },
+    { def: WHATSAPP_DEF, cap: 400 },
+    { def: INSTAGRAM_DM_DEF, cap: 500 },
+  ];
+
+  for (const { def, cap } of cases) {
+    it(`${def.id}: body at ${cap} chars → ok`, () => {
+      const raw = { messages: [{ platform: def.id, body: 'x'.repeat(cap) }] };
+      expect(validateOutreachMessages(raw, [def]).ok).toBe(true);
+    });
+
+    it(`${def.id}: body at ${cap + 1} chars → too_long`, () => {
+      const raw = { messages: [{ platform: def.id, body: 'x'.repeat(cap + 1) }] };
+      const result = validateOutreachMessages(raw, [def]);
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.reason).toBe('too_long');
+    });
+  }
+
+  it('all five platforms now resolve via getPlatformDef (no null)', () => {
+    for (const p of ['cold_email', 'linkedin_note', 'linkedin_inmail', 'whatsapp', 'instagram_dm']) {
+      expect(getPlatformDef(p)).not.toBeNull();
+    }
+  });
+
+  it('every platform def carries bumpInstructions', () => {
+    for (const def of ALL_PLATFORMS) {
+      expect(typeof def.bumpInstructions).toBe('string');
+      expect(def.bumpInstructions!.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('mockOutreachOutput passes validators for all five platforms', () => {
+    const raw = mockOutreachOutput(ALL_PLATFORMS);
+    expect(outreachOutputSchema(ALL_PLATFORMS).safeParse(raw).success).toBe(true);
+    expect(validateOutreachMessages(raw, ALL_PLATFORMS).ok).toBe(true);
+  });
+});
+
+describe('phase 6 — bump prompt', () => {
+  const priorMessages = [
+    { platform: 'cold_email', subject: 'Quick idea for Acme', body: 'FIRST TOUCH BODY about Cart-X.' },
+    { platform: 'linkedin_note', body: 'FIRST NOTE reason to connect.' },
+  ];
+
+  const bumpPrompt = buildOutreachPrompt({
+    platforms: PILOT_PLATFORMS,
+    brandContext: ctx,
+    intake,
+    grounding: extract,
+    kind: 'bump',
+    priorMessages,
+  });
+
+  it('injects the initial message bodies as prior context', () => {
+    expect(bumpPrompt).toContain('FIRST TOUCH BODY about Cart-X.');
+    expect(bumpPrompt).toContain('FIRST NOTE reason to connect.');
+    expect(bumpPrompt).toContain('FIRST MESSAGE ALREADY SENT');
+  });
+
+  it('uses the bump instructions (follow-up framing, no guilt-trip)', () => {
+    expect(bumpPrompt).toContain('follow-up');
+    expect(bumpPrompt).toContain('did NOT reply');
+  });
+
+  it('still ONE bump per platform — no cadence (Scope OUT)', () => {
+    // The output schema expects exactly platforms.length messages: one bump each,
+    // never a multi-step sequence.
+    const oneEach = {
+      messages: [
+        { platform: 'cold_email', subject: 'Following up', body: 'bump body' },
+        { platform: 'linkedin_note', body: 'bump note' },
+      ],
+    };
+    expect(validateOutreachMessages(oneEach, PILOT_PLATFORMS).ok).toBe(true);
+    const twoForOne = {
+      messages: [
+        { platform: 'cold_email', subject: 'a', body: 'b' },
+        { platform: 'cold_email', subject: 'c', body: 'd' },
+      ],
+    };
+    // Two messages for a single-platform selection → shape violation (no cadence).
+    expect(validateOutreachMessages(twoForOne, [COLD_EMAIL_DEF]).ok).toBe(false);
+  });
+});
+
+describe('phase 6 — single-message bump prompt (regen)', () => {
+  const prompt = buildSingleMessagePrompt({
+    platformDef: COLD_EMAIL_DEF,
+    siblings: [],
+    brandContext: ctx,
+    intake,
+    grounding: extract,
+    kind: 'bump',
+    priorMessage: { platform: 'cold_email', subject: 'Quick idea', body: 'ORIGINAL EMAIL BODY.' },
+  });
+
+  it('injects the corresponding initial message as prior context', () => {
+    expect(prompt).toContain('ORIGINAL EMAIL BODY.');
+    expect(prompt).toContain('FIRST MESSAGE ALREADY SENT');
   });
 });
 
