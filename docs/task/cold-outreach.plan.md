@@ -16,7 +16,7 @@ Generate platform-correct cold-outreach copy grounded in a specific prospect: us
 - phase 4 API routes: done (review loops 1, ship) — intake/generate/regenerate, demo-first+charge-on-miss verified, tsc+test green
 - phase 5 UI: done (review loops 1, ship) — dashboard page + OutreachPanel + gated ProjectCard button; PILOT SLICE complete e2e; tsc+test green
 - phase 6 remaining platforms + bump: done (review loops 1, ship) — inmail/whatsapp/ig + optional bump, additive; tsc+test green (1856)
-- phase 7 final verification: pending
+- phase 7 final verification: done — tsc + test:run (1856) + `npm run build` all green (exit 0). Real-LLM prospect-quality walkthrough = remaining MANUAL QA (pilot validation).
 
 ## Key design decisions (locked for implementers)
 
