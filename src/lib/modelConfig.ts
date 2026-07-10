@@ -2,7 +2,7 @@
 // cheap = testing/development, production = quality
 
 export type ModelTier = 'cheap' | 'production';
-export type Endpoint = 'understand' | 'strategy' | 'uiblock' | 'copy' | 'privacy' | 'social-posts' | 'emailSequence';
+export type Endpoint = 'understand' | 'strategy' | 'uiblock' | 'copy' | 'privacy' | 'social-posts' | 'emailSequence' | 'cold-outreach';
 
 interface ModelConfig {
   primary: string;
@@ -27,6 +27,8 @@ const MODELS: Record<ModelTier, Record<Endpoint, ModelConfig>> = {
     'social-posts': { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
     // Email sequences: OpenAI-only (spec constraint) — no Anthropic backup.
     emailSequence: { primary: GPT_4O_MINI, backup: null },
+    // Cold outreach: OpenAI/Nebius path (spec constraint) — no Anthropic backup.
+    'cold-outreach': { primary: GPT_4O_MINI, backup: null },
   },
   production: {
     understand: { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
@@ -39,6 +41,8 @@ const MODELS: Record<ModelTier, Record<Endpoint, ModelConfig>> = {
     'social-posts': { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
     // Email sequences: OpenAI-only (spec constraint) — no Anthropic backup.
     emailSequence: { primary: GPT_4O_MINI, backup: null },
+    // Cold outreach: OpenAI/Nebius path (spec constraint) — no Anthropic backup.
+    'cold-outreach': { primary: GPT_4O_MINI, backup: null },
   },
 };
 

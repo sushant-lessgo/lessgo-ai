@@ -21,6 +21,8 @@ export const CREDIT_COSTS = {
   SCRAPE_WEBSITE: 1,
   // Legal pages
   PRIVACY_POLICY_GENERATION: 2,
+  // Cold outreach: prospect scrape (fetch + one extraction call). Charged only on cache-miss/stale.
+  OUTREACH_SCRAPE: 1,
 } as const;
 
 // Event types for usage tracking
@@ -43,6 +45,10 @@ export enum UsageEventType {
   SOCIAL_POST_GENERATION = 'social_post_generation',
   // Email sequences (credits-free; ledger row only, see email-sequences feature)
   EMAIL_SEQUENCE_GENERATION = 'email_sequence_generation',
+  // Cold outreach: prospect scrape (charged 1 credit on cache-miss/stale only)
+  OUTREACH_SCRAPE = 'outreach_scrape',
+  // Cold outreach generation (credits-free; this ledger row IS the gating source of truth, sibling precedent)
+  OUTREACH_GENERATION = 'outreach_generation',
 }
 
 // Usage event interface
