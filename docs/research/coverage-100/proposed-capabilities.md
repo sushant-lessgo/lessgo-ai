@@ -1,0 +1,45 @@
+# Proposed-capability registry (coverage-100)
+
+Canonical names for capabilities observed in the wild that the CLOSED capability
+vocab (multipage · gallery/portfolio · catalog · map-hours · bilingual ·
+video-hero · store-badges · lead-form · packages · blog) cannot express.
+
+**site-analyzer MUST read this before emitting `proposed_new`.** If an
+observation matches a canonical below, reuse its EXACT slug. Only coin a NEW slug
+when the observation is genuinely distinct from every entry here — and then
+follow the house style: one kebab-case slug, no slashes, no "a / b" alternates,
+no trailing "-hub/-grid" synonyms for a concept already listed. Call out any new
+slug you coined in your final message so it can be registered.
+
+This registry is APPEND-ONLY and maintained by the orchestrator between sites.
+
+## Canonical capabilities
+
+| slug | definition | distinct from | seen on |
+|------|-----------|---------------|---------|
+| `booking-wizard` | On-site, multi-step booking flow with scheduling inventory (package → date/slot → details → confirm), conversion completes on the site | not `external-booking-redirect` (off-site), not `booking-portal` (login-gated) | priscillawolf |
+| `external-booking-redirect` | Every booking CTA hands off to a third-party appointment engine (Treatwell, Optios, Fresha…); no on-site scheduling | not `booking-wizard` (on-site), not generic `store-badges` | morenoshairandbeauty |
+| `booking-portal` | Booking requires register/login into a stateful account portal (My Info/My Pets/My Schedule); conversion is gated behind auth | not `booking-wizard` (anonymous, on-page), not `external-booking-redirect` (stateless handoff) | petsittersireland |
+| `external-list-signup` | Primary email/list-capture CTA routes to an off-site tool (monstercampaigns, external ConvertKit page) instead of an on-page form | not `lead-form` (on-page), sibling of `external-booking-redirect` for email not booking | runnersconnect |
+| `interactive-calculators` | Live computational tools producing user-specific outputs (cost/margin/cash-flow calculators) | not a static `features` section — it computes | coltivar |
+| `media-hub` | An owned podcast / video / episode library, usually on a subdomain or external channel, as a standing content property | not `blog` (article posts), not `content-index` (card grid) | coltivar |
+| `content-index` | A browsable/paginated grid of content cards (recipes, articles) on home or category pages — the page IS a feed/index | not `blog` (the capability of having posts), not `blog-teaser` (a small featured strip) | greenhealthycooking, epiclaunch |
+| `blog-teaser` | A small section showing N featured/recent post previews that link into the blog | not `content-index` (full browsable grid), not `blog` itself | runnersconnect |
+| `affiliate-hub` | A page/grid of curated OUTBOUND affiliate/referral links (Amazon, SEMrush) with no cart or prices — monetization by referral | not `catalog` (own products, may have cart), not `store-badges` | greenhealthycooking, epiclaunch, olyvia |
+| `works-catalog` | A catalogue of the creator's OWN works as the site's spine (author bibliography, discography) with per-work subpages; buying is usually an off-site redirect | not `catalog` (generic product catalog), not `gallery/portfolio` (visual proof, not a purchasable list) | contractseries |
+
+## Booking family note
+`booking-wizard` / `external-booking-redirect` / `booking-portal` are three
+DISTINCT capabilities, not synonyms. They split on WHERE and HOW conversion
+completes (on-site anonymous / off-site handoff / login-gated portal). Do not
+collapse them and do not coin a fourth synonym — pick the matching one. A plain
+single-step "pick a time" calendar embed with no inventory/multi-step is NOT any
+of these; treat it as a delegated `form`/`redirect` mechanism, not a proposed
+capability (per the coltivar /schedule-your-call decision).
+
+## Alias history (raw name → canonical) — for the aggregation count
+- affiliate-list, affiliate-resource-directory → `affiliate-hub`
+- content-feed, recipe-index, content-category-grid → `content-index`
+- email-capture-popup → `external-list-signup`
+- podcast/media-hub → `media-hub`
+- bibliography, works-listing → `works-catalog`

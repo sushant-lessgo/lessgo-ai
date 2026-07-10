@@ -33,19 +33,16 @@ The live signal. A capability seen once is an anecdote; the count is what matter
 
 | capability | n | seen on |
 |------------|---|---------|
-| `affiliate-hub` | 1 | `greenhealthycooking` |
-| `affiliate-list` | 1 | `epiclaunch` |
-| `affiliate-resource-directory` | 1 | `olyvia` |
-| `bibliography/works-listing` | 1 | `contractseries` |
+| `affiliate-hub` | 3 | `epiclaunch`, `greenhealthycooking`, `olyvia` |
+| `content-index` | 2 | `epiclaunch`, `greenhealthycooking` |
 | `blog-teaser` | 1 | `runnersconnect` |
 | `booking-portal` | 1 | `petsittersireland` |
 | `booking-wizard` | 1 | `priscillawolf` |
-| `content-feed` | 1 | `epiclaunch` |
-| `email-capture-popup / external-list-signup` | 1 | `runnersconnect` |
 | `external-booking-redirect` | 1 | `morenoshairandbeauty` |
+| `external-list-signup` | 1 | `runnersconnect` |
 | `interactive-calculators` | 1 | `coltivar` |
 | `media-hub` | 1 | `coltivar` |
-| `recipe-index / content-category-grid` | 1 | `greenhealthycooking` |
+| `works-catalog` | 1 | `contractseries` |
 
 ## Existing capabilities exercised
 
