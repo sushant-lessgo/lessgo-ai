@@ -2,7 +2,7 @@
 // cheap = testing/development, production = quality
 
 export type ModelTier = 'cheap' | 'production';
-export type Endpoint = 'understand' | 'strategy' | 'uiblock' | 'copy' | 'privacy' | 'social-posts';
+export type Endpoint = 'understand' | 'strategy' | 'uiblock' | 'copy' | 'privacy' | 'social-posts' | 'emailSequence';
 
 interface ModelConfig {
   primary: string;
@@ -25,6 +25,8 @@ const MODELS: Record<ModelTier, Record<Endpoint, ModelConfig>> = {
     privacy: { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
     // Social posts are short text — cheap tier in every environment.
     'social-posts': { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
+    // Email sequences: OpenAI-only (spec constraint) — no Anthropic backup.
+    emailSequence: { primary: GPT_4O_MINI, backup: null },
   },
   production: {
     understand: { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
@@ -35,6 +37,8 @@ const MODELS: Record<ModelTier, Record<Endpoint, ModelConfig>> = {
     privacy: { primary: CLAUDE_SONNET, backup: GPT_4O },
     // Social posts stay on the cheap model even in production (short text, high volume).
     'social-posts': { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
+    // Email sequences: OpenAI-only (spec constraint) — no Anthropic backup.
+    emailSequence: { primary: GPT_4O_MINI, backup: null },
   },
 };
 

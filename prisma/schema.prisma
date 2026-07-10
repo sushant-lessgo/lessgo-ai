@@ -43,6 +43,7 @@ model Project {
   collectLink  CollectLink?
   blogPosts    BlogPost[]
   socialPosts  SocialPost[]
+  emailSequence EmailSequence?
 }
 
 // Blog (Phase 1). Posts have their own draft→publish lifecycle, decoupled from
@@ -233,6 +234,23 @@ model SocialPost {
 
   @@index([userId, createdAt])
   @@index([tokenId, createdAt])
+}
+
+model EmailSequence {
+  id        String   @id @default(cuid())
+  userId    String // Clerk User ID (owner) — bare, no @relation (matches FormSubmission)
+  projectId String   @unique
+  tokenId   String // project token (route key)
+  intent    String // brief.goal.intent (frozen vocabulary)
+  archetype String // resolved email archetype id
+  emails    Json // [{position, key, subject, body}]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenId])
 }
 
 model UserIntegration {

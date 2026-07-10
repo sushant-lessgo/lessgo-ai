@@ -41,6 +41,8 @@ export enum UsageEventType {
   PRIVACY_POLICY_GENERATION = 'privacy_policy_generation',
   // Social posts (credits-free; this ledger row IS the gating source of truth, see social-posts feature)
   SOCIAL_POST_GENERATION = 'social_post_generation',
+  // Email sequences (credits-free; ledger row only, see email-sequences feature)
+  EMAIL_SEQUENCE_GENERATION = 'email_sequence_generation',
 }
 
 // Usage event interface
