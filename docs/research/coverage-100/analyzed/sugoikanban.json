@@ -1,0 +1,66 @@
+{
+  "slug": "sugoikanban",
+  "url": "https://sugoikanban.com/",
+  "business": {
+    "type_label": "LED-sign maker (custom LED/neon signage manufacturer, DELIGHT)",
+    "icp_category": "manufacturer / custom-fabrication B2B",
+    "geography_hint": "Japan (Osaka Moriguchi HQ; ja-language)"
+  },
+  "in_icp": true,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "Visitor is evaluating a THING (custom LED signs) via feature/value arguments — 3 pillars (price/speed/quality), 6 lighting types with specs, ordering process. Portfolio is present but functions as supporting proof for the product argument, not as the primary decision object.",
+    "runner_up": "work"
+  },
+  "goal": {
+    "one_action": "submit an inquiry / request a quote for a custom LED sign",
+    "mechanism": "form",
+    "delegated_to": "tally (inquiry) + form-mailer.jp (instant-quote tool)"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "company", "strengths", "portfolio", "flow", "contact-form"],
+    "archetype_note": "Multi-page manufacturer site (14 nav items visible w/ dropdowns); crawl captured home + strengths + portfolio index + flow + company + off-site Tally form. Conversion handed off to two separate external form tools."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "DELIGHTは、イメージ通りのLEDサインをご提案します", "component": "text" },
+      { "canonical": "features", "observed_as": "価格・短納期・ハイクオリティー (3-pillar value prop)", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "選べる発光タイプ / Light emitting face (6 lighting types)", "component": "grid-cards" },
+      { "canonical": "uniqueMechanism", "observed_as": "選ばれる理由 / 低価格の秘密・圧倒的なスピード (why chosen, low-cost secret)", "component": "text" },
+      { "canonical": "results", "observed_as": "制作事例 (500+ installed locations)", "component": "gallery" },
+      { "canonical": "testimonials", "observed_as": "お客様の声 (SAUNA BUG)", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "ご注文の流れ / Flow (5-step ordering)", "component": "timeline" },
+      { "canonical": "miscellaneous", "observed_as": "コラム (LED-signage technical column/blog)", "component": "grid-cards" },
+      { "canonical": "founderNote", "observed_as": "企業理念 / Philosophy — 最適解まで、設計する。", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "会社概要 / Company Profile + 特定商取引法表記 (legal commerce-act disclosure)", "component": "table" },
+      { "canonical": "leadForm", "observed_as": "お問合せフォーム (Tally-hosted inquiry form)", "component": "form" },
+      { "canonical": "cta", "observed_as": "10秒見積 / 自動見積はコチラ (instant-quote CTA)", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "特定商取引法に基づく表記 (Japan Specified-Commercial-Transactions-Act legal disclosure table: cancellation-fee schedule, returns/defect, 1-yr warranty)", "why_no_fit": "A jurisdiction-mandated legal-commerce disclosure table; not marketing/objection content — closest canonical is a catch-all", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "lead-form", "blog"],
+    "proposed_new": []
+  },
+  "proof_types": ["testimonials", "portfolio", "stats"],
+  "design_style": {
+    "pick": "bold/performance",
+    "none_fits_because": ""
+  },
+  "components_needed": ["value-prop pillar cards", "lighting-type spec grid", "portfolio gallery (category-tabbed)", "process timeline", "company-profile table", "legal-disclosure table", "blog card grid"],
+  "languages": ["ja"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality=rendered (not full) so confidence capped at medium; engine/goal are clear from captured sections and CTAs, but full nav (14 items, /製品情報 product-info subtree) was only partially crawled."
+  },
+  "gap_findings": [
+    "Two SEPARATE off-domain conversion handoffs on one site: a Tally-hosted inquiry form AND a form-mailer.jp automated instant-quote (10秒見積) tool. Current lead-form capability assumes an on-page form; both are off-site tools (like external-list-signup, but for inquiry and for auto-quote respectively).",
+    "The automated instant-quote/estimate tool ('10秒見積/自動見積') is a self-serve computed-price generator — resembles interactive-calculators but is an external quoting tool and is a second parallel primary CTA alongside the inquiry form; the taxonomy has no clean way to express dual-primary-CTA (inquiry vs instant-quote).",
+    "Japan legal 特定商取引法 disclosure table has no canonical section id (mapped to miscellaneous) — likely recurs across JP commerce sites.",
+    "EN subheadings on JA content is decorative, not true bilingual — languages stays [ja]; taxonomy's bilingual flag could be falsely triggered by decorative romanized headings."
+  ]
+}

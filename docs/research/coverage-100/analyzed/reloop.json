@@ -1,0 +1,71 @@
+{
+  "slug": "reloop",
+  "url": "https://www.reloop.me/",
+  "business": {
+    "type_label": "capability-intelligence SaaS/productized-analysis for careers & hiring",
+    "icp_category": "software/analytics product (career + hiring intelligence)",
+    "geography_hint": "EU (EU labor market, GDPR, EU Pay Transparency Directive 2023/970)"
+  },
+  "in_icp": true,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "Visitor is evaluating a THING — two productized 'Intel' reads (Role Intel, Profile Intel) plus an in-development Capability Index — via features, deliverables ('What you get'), methodology and sample outputs. It is a product/tool being assessed, not a person being trusted or work being browsed.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "join the private-beta waitlist / request early access",
+    "mechanism": "form",
+    "delegated_to": "tally"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 10,
+    "pages": ["home", "about", "profile-intel", "role-intel", "b2b", "methodology", "the-read", "resources", "faq", "support"],
+    "archetype_note": "Multi-page productized-SaaS site: home overview + per-product deep pages (Role Intel / Profile Intel), a B2B/teams page carrying pricing, a methodology credibility page, and support/resources. Converges on a single external waitlist form."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Job titles say less every year.", "component": "text" },
+      { "canonical": "features", "observed_as": "Role Intel / Profile Intel / Role × Profile", "component": "text" },
+      { "canonical": "useCases", "observed_as": "When to Use It / Who it's for / Best for", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "No dashboard. No onboarding. Just the read. / How a ReLoop'd Read is produced", "component": "timeline" },
+      { "canonical": "uniqueMechanism", "observed_as": "The method behind the read / Why it holds", "component": "text" },
+      { "canonical": "problem", "observed_as": "Two forces collided / The starting point / Why now", "component": "text" },
+      { "canonical": "objectionHandling", "observed_as": "Isn't this just AI prompting? / What IT IS — WHAT IT ISN'T / Transparency boundary", "component": "accordion" },
+      { "canonical": "comparisonTable", "observed_as": "Signal Interpretations Table (market assumption vs ReLoop interpretation)", "component": "table" },
+      { "canonical": "pricing", "observed_as": "Reads the job €7 / Reads the candidate €17 (on /b2b)", "component": "pricing-table" },
+      { "canonical": "founderNote", "observed_as": "Who's Behind It — Ligia Adam bio", "component": "team" },
+      { "canonical": "faq", "observed_as": "Questions / The skeptic's questions", "component": "accordion" },
+      { "canonical": "security", "observed_as": "EU-built. Human-calibrated. Structured data your team owns. (GDPR)", "component": "text" },
+      { "canonical": "closeSection", "observed_as": "Beta Mechanics / Private beta", "component": "text" },
+      { "canonical": "cta", "observed_as": "Join the private beta waitlist", "component": "form" }
+    ],
+    "unmapped": [
+      { "observed": "Sample preview: PI-2207 / Sample preview (Head of Digital) — a shortened example of the actual report deliverable", "why_no_fit": "Canonical list has no 'example-output / sample deliverable' section; it is neither results (real customer outcomes) nor features (it IS the product's output rendered)", "closest": "results" },
+      { "observed": "Current State · Private Beta — status roadmap (LIVE/BETA vs in-development per module)", "why_no_fit": "No canonical section expresses a product-status/roadmap matrix; it's a maturity ledger, not features or results", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "lead-form", "packages"],
+    "proposed_new": [
+      { "name": "external-list-signup", "evidence": "Every primary conversion CTA ('Join the waitlist', 'Join the private beta') routes to off-site Tally forms (tally.so/r/aQkONB, tally.so/r/Ek81zA) rather than an on-page form; list/beta capture is delegated off-site." }
+    ]
+  },
+  "proof_types": ["certs", "stats"],
+  "design_style": {
+    "pick": "tech/minimal",
+    "none_fits_because": ""
+  },
+  "components_needed": ["pricing-table", "faq-accordion", "process-timeline", "feature/deliverable card grid", "comparison table", "sample-report preview card", "product-status matrix"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "high",
+    "why": "fetch_quality=full with all 6 crawled pages, nav, CTAs, forms and pricing captured; engine and goal are unambiguous. Tally form fields not inspectable, but that does not affect classification."
+  },
+  "gap_findings": [
+    "Pre-launch/beta product with a mix of LIVE and 'in-development' modules — the taxonomy has no way to express a product-status/roadmap section (Current State · Private Beta).",
+    "'Sample preview' of the actual deliverable (an example report) is a distinct proof mechanism — the productized output shown as proof — that maps to neither features, results, nor testimonials cleanly.",
+    "Pricing (€7/€17) lives only on the /b2b page while the individual product pages omit it — 'packages' capability assumes pricing co-located with the offer; split-audience pricing (self-serve vs teams) isn't expressible.",
+    "Waitlist/beta conversion is entirely delegated to external Tally forms (external-list-signup), so on-page lead-form capability under-describes the real handoff."
+  ]
+}
