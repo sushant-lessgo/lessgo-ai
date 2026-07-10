@@ -12,12 +12,12 @@ Per-project on-brand social post generator: user opens `/dashboard/social/[token
 
 ```
 phase 1 brand-context accessor: done (commit 25200178, review loops 1)
-phase 2 SocialPost schema + migration: pending
-phase 3 post engine (LinkedIn preset, 3 modes, mock): pending
-phase 4 API routes (generate/list/delete): pending
-phase 5 dashboard UI: pending
-phase 6 X + Facebook presets: pending
-phase 7 gating/caps + upgrade wall: pending
+phase 2 SocialPost schema + migration: done (commit 9378fffe, review loops 1, human gate APPROVED by user; migration 20260710105655_social_posts; backfill matched 0 rows on dev — 0 PRO rows exist — and will apply on prod at `migrate deploy`)
+phase 3 post engine (LinkedIn preset, 3 modes, mock): done (commit acb1e58b, review loops 1)
+phase 4 API routes (generate/list/delete): done (commit efc4985d, review loops 1)
+phase 5 dashboard UI: done (commit e789d449, review loops 1; phase-6 simulation passed — zero UI edits needed)
+phase 6 X + Facebook presets: done (commit eec2c0d7, review loops 1; UI needed ZERO edits — contract held; mockPosts.ts deliberately unedited, invariant beats plan step)
+phase 7 gating/caps + upgrade wall: DEFERRED (PO call 2026-07-10) — blocked on docs/task/pricing-v2.spec.md; do NOT merge/deploy phases 1-6 without it or a kill-switch (Free = unlimited posts until then). Plan §Phase 7 is complete and ready to implement as-is.
 ```
 
 ## Decisions (restated — do not relitigate)
@@ -35,6 +35,25 @@ phase 7 gating/caps + upgrade wall: pending
 - **D7 — Mock-mode ledger requires a REAL clerkId.** Two mock triggers exist and they are NOT equivalent: (a) `NEXT_PUBLIC_USE_MOCK_GPT==='true'` with a real signed-in user → real `auth()` clerkId → full atomic persist+ledger path (this is the path gating tests and manual cap verification MUST use); (b) demo bearer `lessgodemomockdata` → `assertProjectOwner` short-circuits with `userRecord: null, isDemo: true` (`security.ts:63-64`), NO real clerkId → the demo-token path must NOT write a `SocialPost` row or a `UsageEvent` ledger row (returns an ephemeral, non-persisted mock post only). A null/empty `userId` ledger row would poison gating counts and prove nothing.
 
 Scope OUT enforced throughout: no scheduling/auto-post/OAuth, no images, no calendar, no other platforms, no analytics/hashtags, no folders/tags/search.
+
+## ⚠️ CURRENT STATE — phases 1-6 done, phase 7 DEFERRED (2026-07-10)
+
+**The feature is BUILT and UNGATED.** The POST route has NO `checkLimit` call; `PLAN_CONFIGS` has no `socialPosts` entry; the Social button is live on every project card. Merging/deploying this branch as-is gives every Free user unlimited AI post generation (~$0.002/post COGS, but unbounded).
+
+Phase 7 is deferred behind `docs/task/pricing-v2.spec.md` (PO call). Its plan section below is complete and implementable as written; the schema it depends on (`SocialPost`, `UserPlan.socialPostsLimit`, and the PRO→300 / AGENCY,ENTERPRISE→-1 backfill) ALREADY SHIPPED in phase 2's migration `20260710105655_social_posts`. Note this means existing `UserPlan` rows already carry a `socialPostsLimit` value that nothing currently reads.
+
+**To resume:** implement plan §Phase 7 verbatim (it survived 3 plan-review rounds), or add a kill-switch first if the branch must merge sooner (see "Merge options" below).
+
+**Merge options while phase 7 is deferred:**
+1. Leave `feature/social-posts` unmerged (safest; nothing deploys).
+2. Merge behind a kill-switch: env flag gating the POST route + hiding the ProjectCard button. Small, but it IS a code change and needs its own review.
+3. Merge ungated — only acceptable if generation is otherwise unreachable in prod.
+
+## Known, accepted, out-of-scope for this feature
+
+- **Orphan-project generation (inherited, NOT introduced here).** `assertProjectOwner` without `claimIfOrphan` returns `ok:true` for a project whose `userId` is `null`, so any authenticated user can generate/list posts on an unowned draft. This matches existing platform behavior for other token-scoped routes (see the deferred "Class B unauth compute-spend routes"). Self-limiting: posts persist under the GENERATOR's clerkId, so they consume the generator's own allowance, and DELETE remains self-scoped (`post.userId === clerkId`). Flagged by phase-4 impl-review; not a phase-4 regression; fix belongs to the authz track, not social-posts.
+- **Residual `toContain(<map-lookup>)` coercion traps** in `postEngine.test.ts` (~lines 145/146/155/156/171/176): `toContain(PLATFORM_PRESETS.x.tone)` falsely passes if the field were ever `undefined` (builder emits `"Tone: undefined"`; `toContain(undefined)` → `.includes("undefined")`). Low severity — the Set-size distinctness test guards the real copy-paste risk, and these are literal data in the same file. Fix pattern: the verbatim-guard test at ~line 187 does it right via an `instruction.length > 0` precondition. Also line 142's `toContain('X')` is trivially satisfied by `'characters MAX'`. Cosmetic; not worth a review round. Flagged by phase-6 impl-review.
+- **Env-mock output bypasses `validatePostOutput`.** `getMockPost` self-clamps to `maxChars`; the route trusts that. Implicit coupling, harmless — noted so a future mock change knows it must keep clamping.
 
 ## Phase-1 findings (verified against real code — correct earlier plan guesses)
 
@@ -175,6 +194,9 @@ Steps:
 1. Edit `src/modules/social/presets.ts`: fill X preset (maxChars 280, punchy/conversational, no hashtag stuffing, single-thought format) + Facebook preset (~500-800 chars target, conversational-warm, short paras, optional question-CTA). Set `ACTIVE_PLATFORMS = ['linkedin','x','facebook']`.
 2. Edit `src/modules/social/mockPosts.ts`: per-platform mock variants honoring maxChars (X mock < 280).
 3. Extend `src/modules/social/postEngine.test.ts`: X preset prompt includes 280 constraint; `validatePostOutput` rejects 281-char X output; presets visibly differ (tone/length assertions); Facebook prompt sane.
+   **Also close two phase-3 impl-review test nits (carried forward):**
+   - (a) `clampToLimit`'s hard-cut branch is never exercised — the archetype mock body (~160 chars) never exceeds X's 280. Add a case feeding an over-budget input (long `freshContext` or `draft`) so the trim branch is actually covered.
+   - (b) `postEngine.test.ts:107` asserts `toContain(ARCHETYPE_INSTRUCTIONS.announcement)`. If that map were emptied the lookup is `undefined`, the builder emits the literal `"undefined"`, and `.toContain(undefined)` coerces to `.includes("undefined")` → **the test still passes**. Replace with an assertion on the literal instruction text so an emptied archetype map goes red.
 4. UI/route pick platforms up automatically from `ACTIVE_PLATFORMS` — expect ZERO changes; `SocialPostsPanel.tsx` listed only as safety valve if a hardcode slipped in phase 5.
 
 **Files touched:**
