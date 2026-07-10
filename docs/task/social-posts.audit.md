@@ -164,3 +164,83 @@ present in the file.
   `UsageEvent` (separate table, append-only, the gating source of truth per D4).
 - Phase 7 `PLAN_CONFIGS[*].limits.socialPosts` MUST equal the backfill: FREE 10 / PRO 300
   / AGENCY -1 / ENTERPRISE -1.
+
+## Phase 3 — Post engine: presets (LinkedIn), 3-mode prompt assembly, mock
+
+### Files changed
+- `src/modules/social/presets.ts` (new)
+- `src/modules/social/postEngine.ts` (new)
+- `src/modules/social/mockPosts.ts` (new)
+- `src/modules/social/postEngine.test.ts` (new)
+- `src/modules/social/README.md` (updated — added the phase-3 generation-core section)
+
+### What was built
+Pure, testable generation core. No AI call, no Prisma, no `next/*`, no
+`'use client'` imports — a plain module a server route imports in phase 4.
+
+- **`presets.ts`** — `PLATFORM_PRESETS: Record<Platform, PlatformPreset>` where
+  `PlatformPreset = { label, maxChars, tone, formatHints, hashtagGuidance }`.
+  LinkedIn fully populated (`maxChars 1300`, professional-warm, short paras +
+  blank-line breaks, 0-3 hashtags). X (`maxChars 280`) and Facebook (`maxChars 700`)
+  rows are typed + present but INACTIVE via `ACTIVE_PLATFORMS: Platform[] = ['linkedin']`.
+  Also exports `isPlatformActive(platform)`. Phase 6 activates X/Facebook by editing
+  `ACTIVE_PLATFORMS` DATA only — never a new code path.
+- **`postEngine.ts`** — single mode-conditional `buildSocialPostPrompt(...)`,
+  `socialPostOutputSchema` (zod `{ post: string }`), `validatePostOutput(raw, preset)`,
+  and the exported `ARCHETYPE_INSTRUCTIONS` data map.
+- **`mockPosts.ts`** — deterministic `getMockPost(...)` (no `Math.random`, no
+  `Date.now`), always includes `ctx.businessName`, always clamps to `preset.maxChars`.
+
+### Archetype instruction map (DATA, `ARCHETYPE_INSTRUCTIONS`)
+- `inspirational` — belief/lesson/mission grounded in what the business stands for.
+- `product_spotlight` — one concrete capability/offer + its tangible benefit.
+- `testimonial_quote` — social-proof post centered on customer results (base snippet;
+  the builder then appends a testimonial-presence-conditional clause, see below).
+- `tip` — one genuinely useful, specific, expertise-tied piece of advice.
+- `announcement` — news/launch/milestone, exciting but credible and concrete.
+
+### `testimonial_quote` with ZERO testimonials — handling
+The builder is conditional (never fabricates a quote):
+- **Has testimonials** → appends "Draw on a real testimonial from the brand context…
+  you may quote or closely paraphrase it, and attribute it as given."
+- **No testimonials** → appends "No customer testimonials are available, so DO NOT
+  fabricate a quote or attribute words to a named customer. Instead, speak to the
+  results and value the business delivers…". The `Testimonials:` heading is absent
+  from the brand block entirely because `summarizeBrandContext` omits empty sections.
+A real customer quote is never hallucinated. Tests assert both branches (the
+no-testimonial prompt contains "DO NOT fabricate a quote" and NOT the heading).
+
+### `validatePostOutput` retry contract (phase 4 consumes this)
+Signature: `validatePostOutput(raw: unknown, preset: PlatformPreset): ValidatePostResult`
+where `ValidatePostResult =`
+- `{ ok: true; post: string }` — use `post` (trimmed).
+- `{ ok: false; reason: 'invalid_shape'; error: string }` — zod parse failed OR empty
+  post; treat as a parse failure (retry/error, NOT a trim).
+- `{ ok: false; reason: 'too_long'; post: string; length: number; maxChars: number }` —
+  over the limit; **never thrown**. Phase 4 retries once with a stricter instruction,
+  else trims at a sentence boundary. `post` is still returned so the route can trim it.
+
+### Verification
+- `npx tsc --noEmit`: clean, no output, no new errors. (The `founder.jpg` error noted in
+  earlier phases did not surface this run — regardless, no NEW errors from phase 3.)
+- `npx vitest run src/modules/social/postEngine.test.ts`: 14 passed.
+- `npm run test:run`: 105 files passed / 1 skipped; **1780 passed / 3 skipped** (was
+  1766/3 → +14 new). No regressions.
+- `git status`: only the 5 allowed files created/modified. `docs/task/social-posts.plan.md`
+  shows a pre-existing 1-line progress-log edit made by the orchestrator (NOT phase 3).
+
+### Deviations
+- None materially. In-scope choice: Facebook `maxChars` set to 700 now (the plan's
+  phase-6 range was 500-800); a fact-ish placeholder while inactive — phase 6 owns the
+  final value. `mockPosts.getMockPost` clamps on a word boundary only when it keeps
+  ≥70% of the budget, else hard-cuts, guaranteeing the limit is never exceeded.
+
+### What phases 4 / 6 must know
+- **Phase 4** imports `buildSocialPostPrompt`, `validatePostOutput`,
+  `socialPostOutputSchema` from `postEngine.ts`; `getMockPost` from `mockPosts.ts`;
+  `PLATFORM_PRESETS`, `ACTIVE_PLATFORMS`, `isPlatformActive` from `presets.ts`. Body
+  validation must enforce `platform ∈ ACTIVE_PLATFORMS`. The retry-once loop keys off
+  `validatePostOutput(...).reason === 'too_long'`.
+- **Phase 6** activates X + Facebook by editing `ACTIVE_PLATFORMS` (and refining the two
+  preset rows + mock variants) — no engine/route/UI code path changes. The 280 X limit
+  is already correct and already unit-tested via `validatePostOutput`.
