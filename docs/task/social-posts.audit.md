@@ -359,3 +359,97 @@ suffix (actual length + hard maxChars); still too long → `trimToSentence` (sen
   already-resolved `clerkId` (post-`assertProjectOwner`, post-null-guard). The ledger write
   is already load-bearing — do NOT duplicate it. Insert the gate AFTER the `access.isDemo`
   early-return (demo posts are free + uncounted by design).
+
+## Phase 5 — Dashboard UI: `/dashboard/social/[token]` + entry point
+
+### Files changed
+- `src/app/dashboard/social/[token]/page.tsx` (new)
+- `src/app/dashboard/social/[token]/components/SocialPostsPanel.tsx` (new)
+- `src/app/dashboard/social/[token]/components/PostLibrary.tsx` (new)
+- `src/components/dashboard/ProjectCard.tsx` (edit)
+
+### What was built
+- **`page.tsx`** (server component): Clerk `auth()` → redirect `/sign-in` if unauth;
+  `assertProjectOwner(userId, tokenId, { action: 'social-posts.view' })` gate → `notFound()`
+  on `!ok`. Then a SEPARATE `prisma.project.findUnique({ where: { tokenId }, select: { title: true } })`
+  for display (⚠️ `title`, NOT `name` — `Project` has no `name` column). Chrome mirrors the blog
+  page: `Header` + `Footer` + back-to-dashboard `ArrowLeft` link. Renders the panel + library
+  side-by-side in a `lg:grid-cols-2`. Keyed on `tokenId` (D1 — works on drafts; no publish/slug
+  requirement).
+- **`SocialPostsPanel.tsx`** (`'use client'`): platform picker, 3 mode tabs, archetype select,
+  conditional fresh-context / draft textareas, generate button with loading state, result card
+  with copy-to-clipboard.
+- **`PostLibrary.tsx`** (`'use client'`): GET list, newest-first cards (platform + archetype
+  badge + created date), copy + delete-with-Dialog-confirm.
+- **`ProjectCard.tsx`**: added a "Social" button.
+
+### How the platform list is derived (proof of NO hardcoding)
+`SocialPostsPanel` builds `PLATFORM_OPTIONS` = `ACTIVE_PLATFORMS.map(p => ({ value: p, label: PLATFORM_PRESETS[p].label }))`.
+The string `'linkedin'` appears ONLY as the `useState` fallback default (`PLATFORM_OPTIONS[0]?.value ?? 'linkedin'`)
+to satisfy the `Platform` type when the array is momentarily read — the rendered buttons and the
+selected value come entirely from `ACTIVE_PLATFORMS`. Phase 6 flips `ACTIVE_PLATFORMS` to
+`['linkedin','x','facebook']` and X/Facebook buttons appear with ZERO edits to this file — the
+design contract holds. Archetype options are likewise derived, not retyped: `Object.keys(ARCHETYPE_INSTRUCTIONS)`
+(the engine's exported map) → title-cased labels. Result-card + library badges resolve the platform
+label via `PLATFORM_PRESETS[p].label` too.
+
+### How the library refreshes after generate
+Both components are siblings under a server-component page, so there is no shared client parent to
+lift state into (adding one is out of the Files-touched scope). Instead the panel exports a constant
+`SOCIAL_POST_CREATED_EVENT` and, on a successful **persisted** generate
+(`data.persisted !== false`), dispatches `window.dispatchEvent(new CustomEvent(SOCIAL_POST_CREATED_EVENT))`.
+`PostLibrary` registers a `window.addEventListener` for that event and re-runs its `load()` GET.
+Demo-ephemeral results (`persisted:false`) do NOT fire the event (nothing was saved) and the panel
+shows "Demo preview — this post was not saved to your library." Delete also optimistically removes
+the row from local state after a `{ success:true }` response.
+
+### How each API error shape surfaces
+`readableError(status, data)` in the panel maps the route's real shapes to human text (never a raw
+JSON dump):
+- `validation_error` (400) → "Please fill in the required fields before generating."
+- `platform_inactive` (400) → "That platform isn’t available yet."
+- `generation_failed` (500) → "The generator had trouble. Please try again in a moment."
+- `internal_error` (500) → generic retry message.
+- ownership `Unauthorized`(401)/403/404 → access / not-found messages (by code AND by status
+  fallback, since `assertProjectOwner` returns `{ error: access.error }` with varying strings).
+- 429 (rate-limit wrapper) → "Too many requests…".
+- Unknown code → `data.message` if present, else the raw code, else a generic fallback.
+Network failures (fetch throw) → "Couldn’t reach the server." The library surfaces its own GET/DELETE
+failures inline. No `alert()`, no `window.confirm()`, no unhandled rejection — every `fetch` is
+try/caught and `res.json()` is `.catch(() => null)`-guarded.
+
+### What `ProjectCard` needed to expose `tokenId`
+Nothing new — `ProjectCard`'s `Project` type already carries `tokenId: string | null`. The new
+"Social" button renders whenever `project.tokenId` is truthy, OUTSIDE the `status === 'Published'`
+conditional that gates Analytics/Forms — so it shows for BOTH drafts and published cards (D1). It
+navigates via the existing `router.push('/dashboard/social/${project.tokenId}')`. Styled as a
+green secondary button, matching the Analytics(purple)/Forms(blue) secondary-button idiom.
+
+### Verification
+- `npx tsc --noEmit`: clean, no new errors.
+- `npm run test:run`: **1780 passed / 3 skipped** (unchanged — no unit tests added; UI is a
+  manual-verification surface).
+- `npm run build`: green. Route list registers `ƒ /dashboard/social/[token]` (8.39 kB) plus the
+  phase-4 `ƒ /api/social/[token]/posts` and `ƒ /api/social/[token]/posts/[postId]`.
+- `git status`: only `src/components/dashboard/ProjectCard.tsx` (M) and the new
+  `src/app/dashboard/social/` tree. (`plan.md` shows a pre-existing orchestrator progress-log edit,
+  NOT mine.)
+
+### Deviations
+- **Delete confirmation uses the repo `Dialog`** (not `window.confirm`), per the brief's preference.
+- **Cross-component refresh via a `window` CustomEvent** rather than lifting state — chosen because
+  a shared client parent would be a new file outside Files-touched. Conservative, self-contained to
+  the two client files. Logged here as an in-scope design call.
+- The `'linkedin'` literal exists once as a type-satisfying `useState` fallback only (see platform
+  derivation above); it is not a rendered/selectable hardcode. Same for the `'inspirational'`
+  archetype fallback.
+
+### What phases 6-7 must know
+- **Phase 6**: activating X/Facebook needs NO edit to `SocialPostsPanel.tsx` — the picker is
+  data-driven off `ACTIVE_PLATFORMS`. The plan lists this file as a phase-6 safety valve only; it
+  should stay untouched.
+- **Phase 7 upgrade wall slots into `SocialPostsPanel.generate()`**: the `!res.ok || !data?.success`
+  branch already funnels through `readableError`. Add a `data?.error === 'limit_reached'` check
+  BEFORE the generic mapping to render the blocking upgrade card (Free) / quiet inline soft-cap
+  message (Pro), reading `data.tier` / `data.remaining`. The panel already surfaces `error` state,
+  so phase 7 mainly swaps in a richer component for that one code. No structural change needed.

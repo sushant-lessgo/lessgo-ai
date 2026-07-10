@@ -112,6 +112,16 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
           </button>
         )}
 
+        {/* Social posts: available on drafts AND published (D1 — no publish required) */}
+        {project.tokenId && (
+          <button
+            onClick={() => router.push(`/dashboard/social/${project.tokenId}`)}
+            className="border border-green-200 bg-green-50 text-green-700 text-sm px-3 py-1 rounded-md hover:bg-green-100 transition"
+          >
+            Social
+          </button>
+        )}
+
         {/* Published projects: Edit + View Live + Analytics + Forms */}
         {project.status === 'Published' && project.tokenId && (
           <>
