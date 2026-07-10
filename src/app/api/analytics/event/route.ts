@@ -12,38 +12,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { AnalyticsEventSchema } from './schema';
 
 // Force Node.js runtime for DB access
 export const runtime = 'nodejs';
-
-// Event validation schema
-const AnalyticsEventSchema = z.object({
-  event: z.enum(['pageview', 'cta_click', 'form_submit']),
-  pageId: z.string().min(1),
-  slug: z.string().min(1),
-  timestamp: z.string().datetime(),
-  url: z.string().url(),
-  referrer: z.string().url().optional(),
-  sessionId: z.string().optional(),
-  deviceType: z.enum(['desktop', 'mobile', 'tablet']).optional(),
-
-  // UTM parameters
-  utm_source: z.string().optional(),
-  utm_medium: z.string().optional(),
-  utm_campaign: z.string().optional(),
-  utm_content: z.string().optional(),
-  utm_term: z.string().optional(),
-
-  // Event-specific data
-  ctaText: z.string().optional(),
-  ctaHref: z.string().optional(),
-  role: z.enum(['primary', 'secondary']).optional(),
-  placement: z.string().optional(),
-  formId: z.string().optional(),
-  title: z.string().optional(),
-});
 
 // CORS headers for custom domains
 const corsHeaders = {

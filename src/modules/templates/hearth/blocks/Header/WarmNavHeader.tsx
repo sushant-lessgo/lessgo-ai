@@ -5,13 +5,18 @@
 // Reference: Hearth - Warm Service.html lines 1376-1387, .nav (274-298), .btn (301-323).
 
 import React from 'react';
+import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
+import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { HearthEditable } from '../../components/HearthEditable';
+import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import type { Link } from '@/types/destination';
 
 interface NavItem {
   id: string;
   label: string;
-  href: string;
+  href: string | Link;
 }
 
 interface WarmNavHeaderContent {
@@ -28,15 +33,27 @@ interface WarmNavHeaderProps {
 export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
   const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
     useServiceBlock<WarmNavHeaderContent>({ sectionId });
+  const edit = mode === 'edit';
+
+  const { sections, pages, socialMediaConfig, legalPages } = useEditStore();
+  const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
+  const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
+  const socialOptions = React.useMemo(
+    () => (socialMediaConfig?.items || []).map((s) => ({ value: s.url, label: s.platform })),
+    [socialMediaConfig]
+  );
+  const legalOptions = React.useMemo(
+    () => (legalPages?.privacy ? [{ value: '/privacy', label: 'Privacy Policy' }] : []),
+    [legalPages]
+  );
 
   const navItems = blockContent.nav_items || [];
 
-  const updateNavLabel = (id: string, label: string) => {
-    handleCollectionUpdate(
-      'nav_items',
-      navItems.map((n) => (n.id === id ? { ...n, label } : n))
-    );
-  };
+  const setItems = (next: NavItem[]) => handleCollectionUpdate('nav_items', next);
+  const patchItem = (id: string, p: Partial<NavItem>) =>
+    setItems(navItems.map((n) => (n.id === id ? { ...n, ...p } : n)));
+
+  const updateNavLabel = (id: string, label: string) => patchItem(id, { label });
 
   return (
     <>
@@ -60,18 +77,30 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
           </div>
           <div className="hearth-nav__links">
             {navItems.map((item, idx) => (
-              <HearthEditable
-                key={item.id}
-                as="span"
-                mode={mode}
-                sectionId={sectionId}
-                elementKey={`nav_items_label_${item.id}`}
-                value={item.label}
-                onSave={(v) => updateNavLabel(item.id, v)}
-                enterBehavior="save"
-                className={idx === 0 ? 'hearth-nav__link is-active' : 'hearth-nav__link'}
-                placeholder="Link"
-              />
+              <span key={item.id} className="hearth-nav__link-wrap">
+                <HearthEditable
+                  as="span"
+                  mode={mode}
+                  sectionId={sectionId}
+                  elementKey={`nav_items_label_${item.id}`}
+                  value={item.label}
+                  onSave={(v) => updateNavLabel(item.id, v)}
+                  enterBehavior="save"
+                  className={idx === 0 ? 'hearth-nav__link is-active' : 'hearth-nav__link'}
+                  placeholder="Link"
+                />
+                {edit && (
+                  <LinkTargetPopover
+                    value={item.href ?? '#'}
+                    sectionOptions={sectionOptions}
+                    pageOptions={pageOptions}
+                    legalOptions={legalOptions}
+                    socialOptions={socialOptions}
+                    onChange={(link) => patchItem(item.id, { href: link })}
+                    triggerClassName="hearth-nav__link-cfg"
+                  />
+                )}
+              </span>
             ))}
           </div>
         </div>
@@ -114,6 +143,9 @@ const STYLES = `
   font-family: var(--font-display); font-style: italic; font-size: 16px;
 }
 .hearth-nav__links { display: flex; gap: 32px; font-size: 15px; color: var(--ink-2); }
+.hearth-nav__link-wrap { display: inline-flex; align-items: center; gap: 4px; }
+.hearth-nav__link-cfg { display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; color: var(--ink-3); cursor: pointer; padding: 0; }
+.hearth-nav__link-cfg:hover { color: var(--accent-deep); }
 .hearth-nav__link { position: relative; padding: 4px 0; cursor: pointer; }
 .hearth-nav__link.is-active { color: var(--ink); }
 .hearth-nav__link.is-active::after {

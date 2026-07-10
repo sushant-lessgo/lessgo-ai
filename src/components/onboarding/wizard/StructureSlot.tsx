@@ -47,6 +47,7 @@ import {
   type PageArchetypeDef,
 } from '@/modules/audience/product/pageArchetypes';
 import { filterSectionsByProof } from '@/modules/audience/product/strategy/parseStrategyProduct';
+import { humanizeGenerationError } from '@/modules/wizard/generation/errorMessage';
 import { businessTypes } from '@/modules/businessTypes/config';
 import { getCollectionDef, type CollectionKey } from '@/modules/collections/registry';
 import type { CollectionEntry } from '@/modules/brief/collections';
@@ -303,9 +304,10 @@ export default function StructureSlot() {
   // Prefer prior edits (storeSitemap), else the strategy's proposal.
   const draft: SitemapPage[] | null = storeSitemap ?? strategy?.sitemap ?? null;
 
-  // Strategy fetch failed — retry, never trap (the shell's Continue stays
-  // available; GeneratingSlot's fallback fetch would then surface the same
-  // failure with its own chrome).
+  // Strategy fetch failed — retry, never trap. The shell GATES Continue while
+  // this error state is showing (F27b): the user can't walk a failed strategy
+  // into a broken editor. `Try again` re-rolls; the escape hatch stays the
+  // wizard Back button (single-page/skip paths are unaffected).
   if (strategyStatus === 'error') {
     return (
       <div className="space-y-4">
@@ -334,7 +336,9 @@ export default function StructureSlot() {
         ) : (
           <>
             <p className="text-gray-600">
-              {strategyError || 'We couldn’t draft your site plan.'}
+              {strategyError
+                ? humanizeGenerationError(strategyError)
+                : 'We couldn’t draft your site plan.'}
             </p>
             <button
               type="button"

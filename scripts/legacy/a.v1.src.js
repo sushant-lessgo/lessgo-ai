@@ -1,4 +1,19 @@
 /**
+ * ⚠️ FROZEN LEGACY ARTIFACT — DO NOT EDIT.
+ *
+ * This is the pre-scale-04 analytics beacon source (git 5a769d02^), vendored so
+ * `scripts/buildAssets.js` can keep emitting `public/assets/a.v1.js` with its
+ * ORIGINAL semantics. Every landing-page blob published before scale-04 hardcodes
+ *   <script src="https://lessgo.ai/assets/a.v1.js" …>
+ * and expects the payload shape produced here (no `role`, no `placement`, no `v`).
+ * Rebuilding `a.v1.js` from the *current* source would silently change beacon
+ * behaviour for all those historical blobs — the exact drift F9 documented.
+ *
+ * The live/new-format beacon is `a.v2.js`, built from
+ * `src/lib/staticExport/analyticsGenerator.js`. Never point new publishes at this
+ * file, and never change a shipped asset filename's semantics — bump the version.
+ *
+ * ---------------------------------------------------------------------------
  * Lessgo Analytics - Lightweight Beacon Script
  * Tracks pageviews, CTA clicks, and form submissions on static published pages
  *
@@ -92,7 +107,6 @@
   function trackEvent(event, customData = {}) {
     const eventData = {
       event,
-      v: 2, // Beacon format version. v2 (scale-04) adds role+placement to cta_click.
       pageId: config.pageId,
       slug: config.slug,
       timestamp: new Date().toISOString(),
@@ -122,15 +136,10 @@
 
       const ctaText = cta.textContent?.trim() || cta.innerText?.trim() || '';
       const ctaHref = cta.getAttribute('href') || '';
-      const role = cta.getAttribute('data-lessgo-cta-role') || 'primary';
-      const placementEl = cta.closest('[data-surface][id]');
-      const placement = (placementEl && placementEl.id) || 'unknown';
 
       trackEvent('cta_click', {
         ctaText,
         ctaHref,
-        role,
-        placement,
       });
     });
   }
