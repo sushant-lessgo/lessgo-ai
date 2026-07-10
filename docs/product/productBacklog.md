@@ -26,3 +26,5 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 19. **A/B testing** — page variations + performance tracking (overlaps Universe track)
 20. **Team collaboration** — multi-user accounts, roles/permissions
 21. **Heatmaps** — beyond current conversion analytics
+22. **SEO value-stack** — tiered brainstorm in `docs/tracks/seoPlan.md` §9 (alt text, llms.txt, FAQPage schema, keyword-mode regen, backlink outreach copy, SEO report card…); copywriting-shaped items = moat (2026-07-10)
+23. **Entity / AI-search pack** — entity stacking: sameAs JSON-LD, entity kit (NAP+bios), per-platform profile copy, entity-rich About; `docs/tracks/seoPlan.md` §10 (2026-07-10)
