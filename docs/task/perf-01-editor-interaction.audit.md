@@ -53,3 +53,42 @@
 **Tests:** `npx tsc --noEmit` green (proves zero-arg back-compat across all ~103 call sites). `npm run test:run` green — 126 files passed / 1 skipped; 1998 tests passed / 3 skipped.
 
 **Open risks:** none — purely additive. `useEditStoreApi` unused until phases 5/6 wire it in.
+
+## Phase 3 — Shared base block hook (stable refs)
+
+**Files changed**
+- `src/modules/templates/shared/useTemplateBlock.ts` (NEW — base hook)
+- `src/modules/templates/meridian/hooks/useMeridianBlock.ts`
+- `src/modules/templates/techpremium/hooks/useTechPremiumBlock.ts`
+- `src/modules/templates/hearth/hooks/useServiceBlock.ts`
+- `src/modules/templates/surge/hooks/useServiceBlock.ts`
+- `src/modules/templates/lex/hooks/useLexBlock.ts`
+- `src/modules/templates/lumen/hooks/useLumenBlock.ts`
+- `src/modules/templates/granth/hooks/useGranthBlock.ts`
+- `src/modules/templates/vestria/hooks/useVestriaBlock.ts`
+- `src/modules/templates/__tests__/renderParity.meridian.test.tsx` (test-mock fix — added to Phase 3 by coordinator approval)
+
+**Base hook — selector strategy + memo deps**
+- Three narrow selector subscriptions (NO whole-store): `useEditStore(s => s.content[sectionId])` (stable slice ref), `useEditStore(s => s.mode)`, `useEditStore(s => s.updateElementContent)` (stable action identity). No `useShallow` needed — each pick is a primitive or a stable ref, so individual selectors avoid needless shallow overhead.
+- `blockContent = useMemo(..., [sectionContent, layout, sectionId, logTag])`. The `elements` (`|| {}`) and `excludedElements` (`Array.isArray ? : []`) fallbacks + `getSchemaDefaults` + `extractLayoutContent` are computed INSIDE the memo body so they don't mint fresh refs each render. Derivation matches the originals byte-for-byte (same warn log on missing schema, same `{}` fallback) → identical output, just stable identity when `content[sectionId]` is unchanged.
+- `handleContentUpdate` / `handleCollectionUpdate` wrapped in `useCallback` keyed `[sectionId, updateElementContent]`. `isExcluded` wrapped in `useCallback` keyed `[sectionContent]` (recomputes the exclusions array internally; result identical to originals).
+
+**'use client' decision:** all 8 originals had `'use client'`; base hook keeps `'use client'`. Plain client hook module — imports nothing `.published.*`, imported by no published renderer.
+
+**Per-clone difference discovered (scout's "byte-identical except log tag" was INACCURATE):** the 8 hooks have THREE distinct return shapes, not one:
+- Shape A (meridian, techpremium, hearth, lex): `{ sectionId, mode, blockContent, handleContentUpdate, handleCollectionUpdate }`.
+- Shape B (surge, granth, vestria): Shape A + `layout` + `isExcluded`.
+- Shape C (lumen): Shape B + `editLang` (from an extra `useLumenEditLang()` subscription).
+The base hook returns the Shape-B superset (`+layout +isExcluded`). Wrappers keep their EXACT original exported interface names (`UseXxxBlockProps`/`UseXxxBlockReturn`) and function signatures unchanged; each returns the base result typed to its own narrower return interface (Shapes A/B just structurally narrow the superset — extra runtime props are harmless, blocks destructure only what they read). Lumen additionally spreads `{ ...base, editLang }`, preserving its `useLumenEditLang` import. Log tags preserved (`useMeridianBlock`, `useTechPremiumBlock`, `useServiceBlock` ×2, `useLexBlock`, `useLumenBlock`, `useGranthBlock`, `useVestriaBlock`).
+
+**Return-object identity:** wrappers still build a fresh return object per render (as originals did) — the stability wins are on `blockContent` + the handlers, which is where prop-churn matters.
+
+**Test-mock fix (`renderParity.meridian.test.tsx`, coordinator-approved into Phase 3):** the mock was `useEditStoreLegacy: () => h.store.getState()`, which IGNORED the selector arg and always returned whole state. That worked with the pre-Phase-3 no-arg destructure; once the base hook subscribes via selectors, the mock handed whole state where the section slice was expected → `sectionContent.layout`/`.elements` undefined → empty blockContent → 8 parity divergences. Fixed the mock to honor the selector:
+`useEditStoreLegacy: (selector?) => selector ? selector(h.store.getState()) : h.store.getState()`.
+The mock was the bug (it silently discarded the selector), not the hook. This file does not stub `useEditStoreApi` or the static `.getState` (the EditProvider mock supplies the store to `useIsElementExcluded` separately), so no further mock changes were needed here.
+
+**Other files with the same selector-ignoring pattern (NOT touched — deferred to Phase 5 per coordinator):** `sharedBlocks/__tests__/{followStrip,leadForm,storeBadges}.parity.test.tsx` and `vestria/blocks/Contact/VestriaLeadForm.editStore.test.tsx`. They currently PASS because the blocks they exercise still read whole-store; those blocks convert to selectors in Phase 5, at which point each needs the same one-line mock fix.
+
+**Tests:** `npx tsc --noEmit` GREEN. `npm run test:run` GREEN — 126 files passed / 1 skipped; 1998 tests passed / 3 skipped.
+
+**Open risks:** none. Production path unaffected — the real hook (EditProvider + zustand `useStore`) honors selectors correctly; the only test-side gap (the meridian mock) is now fixed.
