@@ -39,6 +39,8 @@ export enum UsageEventType {
   SCRAPE_WEBSITE = 'scrape_website',
   // Legal pages
   PRIVACY_POLICY_GENERATION = 'privacy_policy_generation',
+  // Social posts (credits-free; this ledger row IS the gating source of truth, see social-posts feature)
+  SOCIAL_POST_GENERATION = 'social_post_generation',
 }
 
 // Usage event interface

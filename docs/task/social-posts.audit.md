@@ -244,3 +244,118 @@ where `ValidatePostResult =`
 - **Phase 6** activates X + Facebook by editing `ACTIVE_PLATFORMS` (and refining the two
   preset rows + mock variants) — no engine/route/UI code path changes. The 280 X limit
   is already correct and already unit-tested via `validatePostOutput`.
+
+## Phase 4 — API routes: generate / list / delete
+
+### Files changed
+- `src/lib/modelConfig.ts` — added the `'social-posts'` endpoint config.
+- `src/lib/creditSystem.ts` — `UsageEventType.SOCIAL_POST_GENERATION` enum member ONLY.
+- `src/app/api/social/[token]/posts/route.ts` (new) — POST (generate) + GET (library list).
+- `src/app/api/social/[token]/posts/[postId]/route.ts` (new) — DELETE.
+
+### modelConfig endpoint key
+- Endpoint key: **`'social-posts'`** (added to the `Endpoint` union AND to BOTH the
+  `cheap` and `production` maps). Both tiers use `{ primary: GPT_4O_MINI, backup: CLAUDE_HAIKU }`
+  — social posts stay on the cheap model even in production (short text, high volume).
+  Callers pass `generateRawJson('social-posts', prompt, socialPostOutputSchema)`.
+
+### creditSystem enum
+- `SOCIAL_POST_GENERATION = 'social_post_generation'` (value follows the sibling
+  snake-case convention). Enum member only; `deductCredits`'s switch has no `default`
+  and is non-exhaustive so tsc-safe. All writes/counts reference the enum member.
+
+### Routes + contracts (what phase 5's UI must speak)
+
+**POST `/api/social/[token]/posts`** (generate) — wrapped in `withAIRateLimit`.
+- Request JSON: `{ platform: 'linkedin'|'x'|'facebook', mode: 'archetype'|'archetype_context'|'polish', archetype?, freshContext?, draft? }`.
+  - Cross-field (zod superRefine): `archetype` required unless `mode==='polish'`;
+    `draft` required (non-empty) for `polish`; `freshContext` required (non-empty) for
+    `archetype_context`.
+  - `platform` must be in `ACTIVE_PLATFORMS` (currently `['linkedin']`) — inactive
+    platforms rejected with `{ success:false, error:'platform_inactive' }` (400).
+  - `Archetype` values: `inspirational | product_spotlight | testimonial_quote | tip | announcement`.
+- Success JSON: `{ success:true, persisted:boolean, post }` where `post` is the full
+  `SocialPost` row (`id, userId, projectId, tokenId, platform, archetype, mode, content, createdAt`)
+  for the persisted path, or an ephemeral `{ id:'demo-ephemeral', platform, archetype, mode, content, createdAt }` for the demo-bearer path.
+- Error JSON (no 402): `{ success:false, error }` with `validation_error` (400, +`details`),
+  `platform_inactive` (400), ownership 401/403/404 (from `assertProjectOwner`),
+  `Project not found` (404), `generation_failed` (500, +`message`,`recoverable`),
+  `internal_error` (500). Rate-limit exhaustion → the wrapper's 429.
+
+**GET `/api/social/[token]/posts`** — owner-gated. `{ success:true, posts: SocialPost[] }`,
+`orderBy createdAt desc`, `where { tokenId }`. Demo bearer → `{ success:true, posts:[] }`.
+
+**DELETE `/api/social/[token]/posts/[postId]`** — owner-gated; verifies
+`post.tokenId === token` AND `post.userId === clerkId` before delete (else 404
+`Post not found`). Deletes the `SocialPost` row ONLY — the `UsageEvent` ledger row is left
+intact (append-only; gating depends on it). Success `{ success:true, deleted:true }`.
+
+### Atomic transaction structure (D4/D5)
+`prisma.$transaction([ tx.socialPost.create({...}), tx.usageEvent.create({...}) ])` — a
+two-element array, so BOTH rows commit or NEITHER does; a persisted post can never lack its
+ledger row. `tx.usageEvent.create` is called DIRECTLY (mirroring `logUsageEvent()`'s field
+shape) — NOT `logUsageEvent()`, which uses the module-level prisma client and swallows
+errors without rethrow so cannot join a `$transaction` (a route comment records this).
+UsageEvent fields: `userId: clerkId, eventType: UsageEventType.SOCIAL_POST_GENERATION,
+creditsUsed: 0, projectId, metadata: { tokenId, platform, mode, archetype }, endpoint,
+duration, success: true`.
+
+### ID space (D6) — clerkId vs internalUserId
+- `clerkId` (from `auth()`) → BOTH `SocialPost.userId` AND `UsageEvent.userId`, and the
+  delete-ownership check.
+- `internalUserId` (= `access.userRecord?.id`, the `Project.userId` FK space) is captured
+  into a distinctly-named local and deliberately NOT used for ledger/persist
+  (`void internalUserId`) so a future misuse reads wrong at the call site.
+- After `assertProjectOwner` returns `ok && !isDemo`, an explicit `if (!clerkId) return 401`
+  guard proves non-null to tsc and defends the invariant.
+
+### Mock-path behavior (D7) — two NON-equivalent paths
+- **Env mock** (`NEXT_PUBLIC_USE_MOCK_GPT==='true'`, real signed-in user): real `auth()`
+  clerkId → `getMockPost(...)` goes through the SAME atomic persist+ledger path. WRITES a
+  `SocialPost` AND a `UsageEvent` row. This is the path gating/library verification uses.
+- **Demo bearer** (`lessgodemomockdata`): `assertProjectOwner` short-circuits
+  `isDemo:true, userRecord:null` → NO real clerkId → EPHEMERAL post (`persisted:false`,
+  `id:'demo-ephemeral'`), NO `SocialPost`, NO `UsageEvent`. Ctx = `buildBrandContext({})`.
+  GET → `[]`, DELETE → 404.
+- Detection is explicit/separate: `access.isDemo` gates the ephemeral branch;
+  `NEXT_PUBLIC_USE_MOCK_GPT==='true'` gates mock-content-but-persist. The shared
+  `requireAuth`/`isDemoMode` helper is NOT used for the ledger id (it returns a fake
+  `'demo-user'` in env-mock) — we call `auth()` directly for the REAL clerkId.
+
+### Retry / trim behavior
+`generatePostText(prompt, preset)`: attempt 1 → `validatePostOutput` (LLM/parse errors
+folded into `invalid_shape`). On `too_long` → retry ONCE with a stricter `=== RETRY ===`
+suffix (actual length + hard maxChars); still too long → `trimToSentence` (sentence-ending
+`.!?` past 50% of budget, else word boundary, never exceeds maxChars). On `invalid_shape`
+→ retry ONCE; still bad → throw → route returns `generation_failed` (500), persists NOTHING.
+
+### Verification
+- `npx tsc --noEmit`: clean, no new errors.
+- `npm run test:run`: **1780 passed / 3 skipped** (unchanged — routes are integration
+  surfaces covered by manual verification; no new unit tests this phase).
+- `npm run build`: green; both routes registered
+  (`ƒ /api/social/[token]/posts`, `ƒ /api/social/[token]/posts/[postId]`).
+- `git status`: only the 4 allowed files + this audit. `plan.md` shows a pre-existing
+  orchestrator progress-log edit (NOT mine).
+
+### Deviations
+- **Rate-limit + params binding:** `withAIRateLimit` drops the `(req, ctx)` second arg, so
+  `POST` is a thin wrapper `POST(req, ctx) => withAIRateLimit((r) => generateHandler(r, ctx))(req)`
+  — exactly the pattern in `src/app/api/blog/posts/[postId]/route.ts`. GET/DELETE are not
+  rate-limited (cheap, no LLM), matching the blog precedent.
+- **Response envelope:** added `persisted: boolean` to the POST success body (not named in
+  the plan) so phase 5 distinguishes a demo-ephemeral post from a saved one without a second
+  call. Additive, conservative.
+- Plan step 5's optional `remaining?` error field belongs to phase 7 gating
+  (`limit_reached`), not implemented here; not emitted.
+
+### What phases 5-7 must know
+- **Phase 5 UI** request/response shapes are above. Generate = POST; list = GET; delete =
+  DELETE `/api/social/[token]/posts/[postId]`. All return `{ success, ... }`; on `!success`
+  read `error` (+`details` for validation).
+- **Phase 7** inserts the gate in POST BEFORE generation
+  (`countSocialPostGenerations(clerkId, window)` → `checkLimit(clerkId, 'socialPosts', count)`),
+  returning `{ success:false, error:'limit_reached', remaining:0, tier }`. Reuse the
+  already-resolved `clerkId` (post-`assertProjectOwner`, post-null-guard). The ledger write
+  is already load-bearing — do NOT duplicate it. Insert the gate AFTER the `access.isDemo`
+  early-return (demo posts are free + uncounted by design).
