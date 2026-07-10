@@ -1,0 +1,62 @@
+{
+  "slug": "golivehq",
+  "url": "https://www.golivehq.co/",
+  "business": { "type_label": "Squarespace web-design agency + template shop", "icp_category": "web design / creative agency", "geography_hint": "US (English, USD pricing)" },
+  "in_icp": false,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Sells a defined expertise (strategic Squarespace design service) — the whole spine is credentials, team, process/Design Sprint, testimonials and celebrity logo wall persuading you to trust the firm. Portfolio is heavy but supports the trust argument rather than being the sole proof-of-sale.",
+    "runner_up": "work"
+  },
+  "goal": {
+    "one_action": "Book a free discovery call to hire the design team (secondary: buy a $299 template)",
+    "mechanism": "form",
+    "delegated_to": "calendly"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 8,
+    "pages": ["home","website-design","shop","about","clients","how-it-works","template-showcase","get-support"],
+    "archetype_note": "Agency site with a dual monetization: high-ticket done-for-you service (book-a-call) AND a self-serve template store with cart/checkout ($299 x 40+). Two conversion jobs, not one — hence out of ICP."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "It's Time Your Website Caught Up With Your Reputation", "component": "text" },
+      { "canonical": "results", "observed_as": "Recent Client Launches / Favorite Client Launches (traffic/revenue/bookings gains)", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Two Design Paths, Same Strategic Sprint", "component": "grid-cards" },
+      { "canonical": "testimonials", "observed_as": "Rave Reviews from GoLive Clients", "component": "carousel" },
+      { "canonical": "founderNote", "observed_as": "We help you show up online like the expert you are", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Trusted by Business Owners You Know and Love (logo wall)", "component": "logo-strip" },
+      { "canonical": "features", "observed_as": "Start with a Template. Look Like You Didn't / Every Website Design Includes", "component": "grid-cards" },
+      { "canonical": "closeSection", "observed_as": "You Shouldn't Be Your Industry's Best-Kept Secret / Level-Up Your Website", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Grab our Free Step-by-Step Homepage Guide", "component": "form" },
+      { "canonical": "howItWorks", "observed_as": "The Path to Your Dream Website / Our Fast, Focused Website Design Process / HERE'S HOW IT WORKS", "component": "timeline" },
+      { "canonical": "pricing", "observed_as": "Semi-Custom Design $5,400 / Custom Design $10,000", "component": "pricing-table" },
+      { "canonical": "faq", "observed_as": "Frequently Asked Questions", "component": "accordion" },
+      { "canonical": "uniqueMechanism", "observed_as": "Most agencies take months. We take days. (5-10 day Design Sprint)", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "Dream Team Behind The Screen (team profiles)", "component": "team" },
+      { "canonical": "cta", "observed_as": "BOOK A FREE CALL", "component": "calendly-embed" },
+      { "canonical": "followStrip", "observed_as": "JOIN 50K ENTREPRENEURS FOLLOWING ALONG ON INSTAGRAM", "component": "gallery" }
+    ],
+    "unmapped": [
+      { "observed": "Shop Our Premium Squarespace Website Templates (grid of 25+ purchasable templates at $299, cart/checkout)", "why_no_fit": "A transactable product store grid with checkout is not a persuasion section — it's a catalog/commerce surface the section list has no id for", "closest": "pricing" },
+      { "observed": "Match Me to a Template / TAKE THE QUIZ (typeform product-recommender)", "why_no_fit": "An interactive recommendation quiz that routes visitors to a matching product is neither a lead-form nor a static section", "closest": "leadForm" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage","gallery/portfolio","catalog","packages","lead-form","blog"],
+    "proposed_new": [
+      { "name": "product-finder-quiz", "evidence": "\"TAKE THE QUIZ\" / \"Match Me to a Template\" CTA opens a typeform quiz that recommends a matching template — an interactive product-matching flow, distinct from a static lead-form or catalog grid." }
+    ]
+  },
+  "proof_types": ["testimonials","logo-wall","portfolio","case-studies","stats"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["pricing-table","timeline (process)","team grid","logo wall","testimonial carousel","portfolio/case-study grid","product catalog grid with price + buy","faq accordion","instagram feed embed","lead-magnet email form"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality=full; all 5 pages captured with ordered sections, CTAs, forms, embeds, commerce and proof counts." },
+  "gap_findings": [
+    "Site combines two conversion jobs (high-ticket book-a-call service + self-serve $299 template store with checkout) — the one-action model and single-engine pick cannot express a dual-monetization agency+store hybrid.",
+    "A template SHOP with real cart/checkout is beyond the closed 'catalog' vocab (catalog implies browse; here it transacts) — commerce/checkout has no section id or in-ICP handling.",
+    "'Become an Affiliate' recruits affiliates INBOUND (an affiliate-program signup) — distinct from registry's affiliate-hub (outbound curated links); not captured as a capability."
+  ]
+}

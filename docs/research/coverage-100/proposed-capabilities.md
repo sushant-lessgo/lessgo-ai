@@ -32,6 +32,7 @@ This registry is APPEND-ONLY and maintained by the orchestrator between sites.
 | `fan-voting` | An engagement widget where visitors vote/interact (fan votes, polls) — not a conversion, an engagement loop | not `lead-form` (no capture), not `followStrip` | louisiana-ontour |
 | `practitioner-profiles` | Per-person (or per-location) profile subpages for a multi-practitioner/multi-branch business — each staff member/branch gets its own bio/detail page | not `testimonials`/team grid (a single section), not `gallery/portfolio` (work, not people) | lightcrew |
 | `membership-checkout` | On-site recurring membership/subscription purchase — plan/tier configurator + cart/checkout for an ongoing plan | not `packages` (static price display), not `pricing` (a section); this transacts a recurring plan | beanstalkhq |
+| `product-finder-quiz` | An interactive quiz/wizard that asks questions and recommends a product/plan/package | not `interactive-calculators` (computes a number), not `faq`; it routes to an offer | golivehq |
 
 ## Booking family note
 `booking-wizard` / `external-booking-redirect` / `booking-portal` are three
