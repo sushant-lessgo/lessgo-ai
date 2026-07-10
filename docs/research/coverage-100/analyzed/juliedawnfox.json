@@ -1,0 +1,44 @@
+{
+  "slug": "juliedawnfox",
+  "url": "https://juliedawnfox.com/",
+  "business": { "type_label": "Portugal travel-planning advisor (independent consultant + digital-guide shop + blog)", "icp_category": "consultant/expert-services", "geography_hint": "Portugal (advisor based there since 2007); audience = English-speaking travellers planning Portugal trips" },
+  "in_icp": false,
+  "engine": { "pick": "trust", "ladder_reasoning": "Julie sells defined expertise (paid Portugal trip-planning consultation) and the whole site leans on credentials, Google reviews, awards and testimonials to make the visitor trust the PERSON — first rung of the ladder, sells defined expertise → trust.", "runner_up": "thing" },
+  "goal": { "one_action": "Book a paid trip-planning consultation call (secondary: grab the free starter pack, buy a DIY guide)", "mechanism": "call-WhatsApp", "delegated_to": "calendly" },
+  "structure": { "kind": "multi", "page_count": 6, "pages": ["home", "about", "contact", "trip-planning-consultation", "shop", "blog"], "archetype_note": "Content-marketing expert site: blog + destination guides feed a services funnel (booked consultation) alongside a WooCommerce digital-product shop and a ConvertKit newsletter — three parallel conversion paths, not one." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Portugal travel planning, guided by experience", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Discover Portugal, from the Inside / Hi, I'm Julie, a Portugal-based travel planning advisor", "component": "text" },
+      { "canonical": "cta", "observed_as": "GET EXPERT HELP WITH YOUR PORTUGAL PLANS", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Featured Content Areas", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Services Offered / What you get with a Portugal Trip Planning Consultation", "component": "grid-cards" },
+      { "canonical": "testimonials", "observed_as": "Testimonials / What travellers value most about working with me", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Featured Blog Posts", "component": "grid-cards" },
+      { "canonical": "socialProof", "observed_as": "Google Reviews", "component": "other" },
+      { "canonical": "socialProof", "observed_as": "Industry recognition (BTL Travel Blogger Awards 2018) / Invited speaker at international travel conferences", "component": "logo-strip" },
+      { "canonical": "objectionHandling", "observed_as": "This tends to work well if: / Why this can save you time, money and second-guessing", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "How does a Portugal Trip Planning Consultation work?", "component": "timeline" },
+      { "canonical": "pricing", "observed_as": "Cost — EUR175 for up to 60 minutes", "component": "pricing-table" },
+      { "canonical": "faq", "observed_as": "FAQs", "component": "accordion" },
+      { "canonical": "closeSection", "observed_as": "Ready to move forward with confidence?", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Stress-Free Portugal Planning Starts Here / Free. Instant download. (first name + email)", "component": "form" },
+      { "canonical": "miscellaneous", "observed_as": "Office Hours / Working Together / Suggestions and Complaints (contact page)", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Shop product grid — 12+ downloadable guides EUR9-EUR64 each with Add to basket", "why_no_fit": "A priced, add-to-cart digital-product catalog is a store/checkout surface; no canonical section models a purchasable product listing (pricing = a single offer's price table, not a multi-SKU catalog).", "closest": "pricing" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage", "blog", "catalog", "lead-form", "packages"], "proposed_new": [] },
+  "proof_types": ["testimonials", "reviews", "certs"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["pricing-table", "faq-accordion", "process-timeline", "product-catalog-grid", "testimonial-list", "review-widget-embed", "lead-form (first-name+email)", "blog-post-grid"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality=rendered (only contact page raw-rendered); home/about/consultation/shop captured via WebFetch and summarized by an intermediate model, so section text is paraphrase-level. Engine and multi-goal shape are clear, but section-level fidelity is soft." },
+  "gap_findings": [
+    "Site's job is NOT one conversion action: three parallel goals coexist (Calendly-booked paid consultation, ConvertKit newsletter starter-pack, WooCommerce digital-product checkout) — outside the single-conversion ICP.",
+    "WooCommerce-style shop with a multi-SKU priced catalog + cart/checkout has no canonical section or engine expression; 'catalog' capability flags it but taxonomy cannot render a purchasable product listing.",
+    "Content-marketing/blog-funnel archetype (blog + destination guides driving a services page) isn't a first-class engine — trust engine captures the persuasion but not the top-of-funnel content role.",
+    "Google-reviews embed + awards logo-strip both map to socialProof, collapsing two distinct proof mechanisms (live review widget vs. award badge) into one id."
+  ]
+}

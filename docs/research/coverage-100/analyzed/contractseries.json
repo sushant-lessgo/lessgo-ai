@@ -1,0 +1,59 @@
+{
+  "slug": "contractseries",
+  "url": "https://www.contractseries.com/",
+  "business": { "type_label": "fiction author / novelist personal site", "icp_category": "writer", "geography_hint": "Australia (author in country Victoria; publisher Shawline Publishing AU)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "work",
+    "ladder_reasoning": "An author showcasing her book series — the books ARE the proof; visitor browses the works (series blurbs, blog, bio) to decide to buy/follow. Not selling defined expertise (trust) and no menu/place-visit decision (place).",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "buy the featured book (Order Now) and/or sign up to the author newsletter",
+    "mechanism": "redirect",
+    "delegated_to": "store"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 12,
+    "pages": ["home", "books", "bio", "contact", "blog", "news-events", "projects", "per-series subpages"],
+    "archetype_note": "Wix author site; nav shows ~12 pages (HOME/BOOKS/BIO/CONTACT/BLOG + NEWS & EVENTS, per-series subpages, plus empty 'New Page'/'Projects' stubs). Homepage aggregates 4 series blurbs; commerce is fully delegated to external publisher/BookDepository."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (HOME/BOOKS/BIO/CONTACT/BLOG...)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "M.K. JACOBS", "component": "text" },
+      { "canonical": "features", "observed_as": "IN THE SHADE OF THE MOUNTAIN (featured book blurb + Order Now)", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Contract Series / Claire Lane Series / Vera Lawson Series / Roberto Zanchini Series blurbs", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "ABOUT ME (author bio)", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Sign Up (newsletter for free book offers & store discounts)", "component": "form" },
+      { "canonical": "miscellaneous", "observed_as": "BLOG (Clunes Booktown Festival, travel-grant posts, etc.)", "component": "text" },
+      { "canonical": "followStrip", "observed_as": "Facebook page plugin / social links", "component": "embed" },
+      { "canonical": "cta", "observed_as": "Order Now / International Orders external links", "component": "link" }
+    ],
+    "unmapped": [
+      { "observed": "Book-series catalogue (a series of novels, each an ordered/standalone title with 'Also Available' / 'Also Coming Soon' status)", "why_no_fit": "No canonical section expresses a browsable body-of-work / bibliography where each item is a purchasable creative title routed to an external store; forced into features/useCases here", "closest": "useCases" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "blog", "lead-form"],
+    "proposed_new": [
+      { "name": "bibliography/works-listing", "evidence": "Multiple book series + per-series subpages + a dedicated /books listing page; the site's spine is a catalogue of creative works, distinct from a gallery/portfolio of images or a product catalog with on-site checkout" }
+    ]
+  },
+  "proof_types": ["stats"],
+  "design_style": { "pick": "literary/quiet", "none_fits_because": "" },
+  "components_needed": ["book-series list", "featured-book card with external buy links", "newsletter signup", "blog post list", "author bio block"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality=partial: /books never hydrated past nav shell (series content reconstructed from homepage) and the CONTACT sign-up is an unreadable Wix iframe embed, so exact form fields and full bibliography could not be verified. Engine/structure judgement is otherwise clear."
+  },
+  "gap_findings": [
+    "No copy engine/section cleanly models a fiction AUTHOR whose 'work' is a bibliography of purchasable books — 'work' engine fits browse-the-work intent but its portfolio sections assume images/case-studies, not titled novels routed to external stores.",
+    "Conversion is split and ambiguous: primary purchase is a REDIRECT to third-party stores (publisher + BookDepository) while a secondary newsletter form is subscribe-follow; single-one_action model can't cleanly hold two co-equal goals (buy elsewhere + subscribe).",
+    "No capability expresses an external-storefront book/product listing (buy links off-site, no on-site cart) — sits between 'catalog', 'store-badges', and 'gallery/portfolio' without matching any.",
+    "Blog + NEWS & EVENTS author-activity content is present but only 'blog' capability exists; events/appearances have no home in the taxonomy.",
+    "Capture limits (partial): unread iframe form fields prevent confirming whether CONTACT is pure newsletter vs richer contact form."
+  ]
+}

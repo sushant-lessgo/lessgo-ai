@@ -54,5 +54,29 @@
     "status": "done",
     "confidence": "medium",
     "note": "engine=trust (runner-up thing), multi (5 of ~20). Real booking conversion sits in a login-gated portal invisible to crawl. Gaps: proposed_new booking-portal (login-gated stateful booking — distinct from booking-wizard + external-booking-redirect); awards-streak authority proof; no canonical office-hours/contact section; multi parallel conversions."
+  },
+  "juliedawnfox": {
+    "url": "https://juliedawnfox.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=trust (runner-up thing), multi (6). in_icp=FALSE — three parallel funnels (Calendly consult + ConvertKit newsletter + WooCommerce checkout). fetch_quality=rendered (contact page revealed hidden ConvertKit opt-in). Gaps: WooCommerce multi-SKU catalog+checkout no canonical section/engine; blog/content-funnel not a first-class engine; Google-reviews widget + award logos collapse two proofs into one socialProof."
+  },
+  "olyvia": {
+    "url": "https://olyvia.co/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=trust (runner-up quick-yes), multi (4). in_icp=true (analyzer judged the ConvertKit opt-in a single valid action) but flagged multi-goal friction (subscribe + Gumroad redirect + affiliate) + legacy/unmaintained ~2017 blog. Gaps: affiliate resource directory no fit; homepage blog-feed no section id; virtual office-hours unmapped."
+  },
+  "contractseries": {
+    "url": "https://www.contractseries.com/",
+    "scraped": true,
+    "analyzed": true,
+    "status": "done",
+    "confidence": "medium",
+    "note": "engine=work (runner-up quick-yes), multi (Wix ~12, 5 crawled). fetch_quality=partial — all pages rendered; /books stayed shell-only, contact form is unreadable iframe. Gaps: no engine/section for author bibliography of purchasable novels; split conversion (external-store redirect + newsletter) two co-equal goals; no capability for off-site book/product listings."
   }
 }
