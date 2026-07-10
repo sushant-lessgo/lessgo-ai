@@ -12,7 +12,7 @@ Rewrite the serve-gate law so it answers "can we serve this conversion job with 
 
 - phase 1 shared-block capability declaration: done (commit afca06ee, review loops 1)
 - phase 2 gate law rewrite (fit satisfaction + soft multipage) + test rewrite: done (commit cb6f9534, review loops 1)
-- phase 3 admin serveability matrix unification: pending
+- phase 3 admin serveability matrix unification: done (commit 93ddd62b, review loops 1) — HUMAN GATE pending
 
 ## Spec-acceptance correction (orchestrator ruling, binding)
 
