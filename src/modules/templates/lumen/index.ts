@@ -48,6 +48,6 @@ export { resolveLumenBlock } from './resolveLumenBlock';
 
 // TemplateModule.resolveBlock(blockType, mode): blockType is the SECTION TYPE.
 import { resolveLumenBlock as _resolveLumenBlock } from './resolveLumenBlock';
-export function resolveBlock(blockType: string, mode: 'edit' | 'published') {
-  return _resolveLumenBlock(blockType, mode);
+export function resolveBlock(blockType: string, mode: 'edit' | 'published', layoutName?: string) {
+  return _resolveLumenBlock(blockType, mode, layoutName);
 }

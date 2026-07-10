@@ -44,6 +44,6 @@ export { defaultMeridianVariant } from '@/types/product';
 // so `blockType` is the section type ('hero', 'features', …). Meridian's resolver
 // is now section-type-keyed, so pass it straight through.
 import { resolveMeridianBlock } from './resolveMeridianBlock';
-export function resolveBlock(blockType: string, mode: 'edit' | 'published') {
-  return resolveMeridianBlock(blockType, mode);
+export function resolveBlock(blockType: string, mode: 'edit' | 'published', layoutName?: string) {
+  return resolveMeridianBlock(blockType, mode, layoutName);
 }

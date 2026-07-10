@@ -181,6 +181,7 @@ Collection schemas (for array fields — emit the exact shape):
 - assurances: array of { id: "", kicker: string, text: string }   (0-4; kicker "01","02"…; friction-removers like "No obligation — quotes are complimentary.")
 - footer_columns: array of { id: "", heading: string, links: array of { id: "", label: string, href: string } (1-6 links) }   (1-5 columns)
 - link_columns: array of { id: "", heading: string, links: array of { id: "", label: string, href: string } (1-6 links) }   (0-3 columns)
+- legal_links: array of { id: "", label: string, href: string }   (0-4 items; legal/policy links like "Privacy Policy", "Terms of Service", "Cookie Policy")
 ${notes}`;
 }
 

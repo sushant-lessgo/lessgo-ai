@@ -21,7 +21,7 @@ export default function VestriaLeadForm({ sectionId }: { sectionId: string }) {
 
   const store = useEditStore() as any;
   const formId = blockContent.form_id || '';
-  const form = formId ? store.content?.forms?.[formId] : undefined;
+  const form = formId ? store.forms?.[formId] : undefined;
   const fields: MVPFormField[] =
     Array.isArray(form?.fields) && form.fields.length ? form.fields : DEFAULT_VESTRIA_LEAD_FIELDS;
 

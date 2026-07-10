@@ -64,6 +64,27 @@ export function hasMultipleVariants(
   return !!found && found.set.variants.length > 1;
 }
 
+/**
+ * Count the variants that are actually ELIGIBLE for a section given its current
+ * content — i.e. what the picker would show. Mirrors the modal's own filter
+ * (`deriveEditorAssetFacts` + `isBlockEligible`, current variant always counted).
+ * Used to hide the "Layout" button when the picker would show a single, dead
+ * one-card modal (F18): a section can declare >1 variant yet have only one meet
+ * its `requiresAssets` needs (e.g. meridian hero without a photo).
+ */
+export function eligibleVariantCount(
+  templateId: string | null | undefined,
+  layoutName: string | null | undefined,
+  section: ClampableSection | null | undefined
+): number {
+  const found = getVariantSetForLayout(templateId, layoutName);
+  if (!found) return 0;
+  const assetFacts = deriveEditorAssetFacts(section);
+  return found.set.variants.filter(
+    (v) => v.layoutName === layoutName || isBlockEligible(v, { assetFacts })
+  ).length;
+}
+
 // ── editor-side asset facts (presence proxy over current section content) ─────
 
 const isNonEmptyUrl = (v: unknown): boolean => typeof v === 'string' && v.trim().length > 0;

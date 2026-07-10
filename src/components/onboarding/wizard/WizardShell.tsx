@@ -20,8 +20,12 @@ import { useEffect } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { Brief } from '@/types/brief';
 import type { AudienceType, TemplateId } from '@/types/service';
-import type { WizardSlot } from '@/modules/engines/inputContracts';
+import { getContract, type WizardSlot } from '@/modules/engines/inputContracts';
 import { useWizardStore } from '@/hooks/useWizardStore';
+import {
+  intentParamRequired,
+  intentParamSatisfied,
+} from '@/components/onboarding/shared/GoalParamFields';
 import { Button } from '@/components/ui/button';
 import IdentitySlot from './IdentitySlot';
 import UnderstandingSlot from './UnderstandingSlot';
@@ -62,6 +66,28 @@ const BUILT_SLOTS: Partial<Record<WizardSlot, () => JSX.Element>> = {
   generating: GeneratingSlot,
 };
 
+// Contract field ids the strategy API enforces with a min(1) guard
+// (ProductStrategyRequestSchema in api/audience/product/strategy/route.ts + the
+// trust equivalent). An empty value dead-ends at the strategy call with an
+// unrecoverable "Strategy generation failed" (F21), so the wizard gates Continue
+// while any of these — on the current slot — is empty. Non-API-required fields
+// (differentiator, objectionFacts, packages…) are intentionally NOT gated.
+const STRATEGY_REQUIRED_FIELD_IDS = new Set([
+  'name', // productName / businessName
+  'oneLiner',
+  'offer',
+  'capabilities', // thing features
+  'audience', // thing primaryAudience
+  'services', // trust features
+  'whoProblem', // trust primaryAudience
+]);
+
+function isWizardFieldEmpty(value: unknown): boolean {
+  if (Array.isArray(value)) return value.length === 0;
+  if (typeof value === 'string') return value.trim().length === 0;
+  return value == null;
+}
+
 function SlotPlaceholder({ slot }: { slot: WizardSlot }) {
   return (
     <div className="space-y-3">
@@ -89,6 +115,13 @@ export default function WizardShell({
   const currentSlot = useWizardStore((s) => s.currentSlot);
   const engine = useWizardStore((s) => s.engine);
 
+  // Slices read for per-slot Continue gating (F14 goal param, F21 required copy
+  // facts). Subscribed unconditionally so the gate re-derives as the user types.
+  const fields = useWizardStore((s) => s.fields);
+  const goalIntent = useWizardStore((s) => s.goalIntent);
+  const goalParam = useWizardStore((s) => s.goalParam);
+  const goalParamSkipped = useWizardStore((s) => s.goalParamSkipped);
+
   // Hydrate once from the DB-confirmed brief (load-detection already fetched it).
   useEffect(() => {
     hydrate({ tokenId, brief, audienceType, templateId });
@@ -108,7 +141,32 @@ export default function WizardShell({
   const isLast = index === slots.length - 1;
   const SlotComponent = BUILT_SLOTS[currentSlot];
 
+  // Per-slot Continue gate.
+  const gateBlocked = (() => {
+    // Goal step: a REQUIRED, empty goal param blocks unless explicitly skipped
+    // (F14). The pre-selected default intent is always set, so goalIntent is
+    // non-null here in practice.
+    if (currentSlot === 'goal') {
+      return (
+        !!goalIntent &&
+        intentParamRequired(goalIntent) &&
+        !goalParamSkipped &&
+        !intentParamSatisfied(goalIntent, goalParam)
+      );
+    }
+    // Copy-fact slots: any strategy-API-required field left empty would 400 the
+    // strategy call (F21). Gate here so the user fixes it in place.
+    if (!engine) return false;
+    for (const f of getContract(engine).fields) {
+      if (f.slot !== currentSlot) continue;
+      if (!STRATEGY_REQUIRED_FIELD_IDS.has(f.id)) continue;
+      if (isWizardFieldEmpty(fields[f.id]?.value)) return true;
+    }
+    return false;
+  })();
+
   const handleNext = () => {
+    if (gateBlocked) return;
     void save();
     nextSlot();
   };
@@ -152,7 +210,7 @@ export default function WizardShell({
         <Button
           type="button"
           onClick={handleNext}
-          disabled={isLast}
+          disabled={isLast || gateBlocked}
           className="bg-brand-accentPrimary hover:bg-orange-500 transition-all duration-200"
         >
           Continue

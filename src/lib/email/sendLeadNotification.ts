@@ -13,6 +13,7 @@
 // single-customer pilot. To go multi-tenant, pass an owner-scoped `to` here
 // (resolve from the page owner) instead of reading LEAD_NOTIFICATION_EMAIL.
 
+import * as Sentry from '@sentry/nextjs';
 import { logger } from '@/lib/logger';
 import type { MVPFormField } from '@/types/core/forms';
 
@@ -94,6 +95,13 @@ export async function sendLeadNotification(args: SendLeadNotificationArgs): Prom
     if (!res.ok) {
       const body = await res.text().catch(() => '');
       logger.warn(`sendLeadNotification: Resend responded ${res.status}`, () => body.slice(0, 300));
+      // A dropped lead notification is otherwise invisible (F30): surface it to
+      // Sentry so a silently-failing inbox is observable. No-op when DSN unset.
+      Sentry.captureException(new Error(`sendLeadNotification: Resend responded ${res.status}`), {
+        level: 'warning',
+        tags: { area: 'email', op: 'sendLeadNotification' },
+        extra: { status: res.status, body: body.slice(0, 300), pageId: args.pageId, formName: args.formName },
+      });
     }
   } catch (err) {
     // Never let an email failure affect the saved lead / response.

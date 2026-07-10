@@ -13,6 +13,7 @@
 // token link — CAN-SPAM/GDPR basics). Cap guards a runaway list; batch API is
 // a post-pilot upgrade.
 
+import * as Sentry from '@sentry/nextjs';
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 
@@ -103,6 +104,18 @@ export async function sendBlogPostNotification(args: BlogPostNotificationArgs): 
       if (!res.ok) {
         const body = await res.text().catch(() => '');
         logger.warn(`sendBlogPostNotification: Resend responded ${res.status}`, () => body.slice(0, 300));
+        // Surface a dropped subscriber notification to Sentry (F30). Recipient
+        // email is PII — omitted; publishedPageId + post slug are enough to trace.
+        Sentry.captureException(new Error(`sendBlogPostNotification: Resend responded ${res.status}`), {
+          level: 'warning',
+          tags: { area: 'email', op: 'sendBlogPostNotification' },
+          extra: {
+            status: res.status,
+            body: body.slice(0, 300),
+            publishedPageId: args.publishedPageId,
+            postSlug: args.post.slug,
+          },
+        });
       }
     }
   } catch (err) {

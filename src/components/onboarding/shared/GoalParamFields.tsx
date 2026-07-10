@@ -47,12 +47,42 @@ export function intentHasParamFields(intent: GoalIntent): boolean {
 }
 
 /**
- * True when the intent REQUIRES at least one param entry before proceeding.
- * Today only download-app (≥1 store link). Everything else is optional.
+ * Whether this intent's param is REQUIRED (the primary CTA can't resolve
+ * without it) vs. an optional convenience field. Optional cases: rsvp (both
+ * fields optional) and M1-primary intents whose destination field is offered
+ * only as a convenience (e.g. request-demo → Calendly). Required cases:
+ * download-app (store links), and M2/M3/M4-primary intents whose primary
+ * button IS the destination. Used by the goal step to gate Continue / offer a
+ * "Skip for now" (scale-05 audit: "param goals pause with Continue (gated) +
+ * 'Skip for now'").
+ */
+export function intentParamRequired(intent: GoalIntent): boolean {
+  if (!intentHasParamFields(intent)) return false;
+  if (intent === 'rsvp') return false; // both fields optional
+  const primary = goalIntentMeta[intent].mechanisms[0];
+  if (primary === 'M1') return false; // optional destination convenience field
+  return true; // M2 / M3 / M4 primary, download-app
+}
+
+/**
+ * True when the intent's REQUIRED param has been supplied. Non-required intents
+ * are always satisfied. download-app needs ≥1 store link; M2 needs a phone or
+ * email; M3 needs a destination URL; M4 needs a profile/platform link.
  */
 export function intentParamSatisfied(intent: GoalIntent, value: GoalParamInput): boolean {
   if (intent === 'download-app') {
     return (value.links ?? []).some((l) => l.trim().length > 0);
+  }
+  if (!intentParamRequired(intent)) return true;
+  const primary = goalIntentMeta[intent].mechanisms[0];
+  if (primary === 'M2') {
+    return (value.phone?.trim().length ?? 0) > 0 || (value.email?.trim().length ?? 0) > 0;
+  }
+  if (primary === 'M3') {
+    return (value.url?.trim().length ?? 0) > 0;
+  }
+  if (primary === 'M4') {
+    return (value.links?.[0]?.trim().length ?? 0) > 0;
   }
   return true;
 }

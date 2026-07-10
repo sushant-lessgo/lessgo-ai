@@ -223,14 +223,16 @@ function buildHTMLDocument(params: {
 }): string {
   const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms, usesNaayom, usesLumen } = params;
 
-  // Asset origin for the injected fonts/scripts. ALWAYS absolute https://lessgo.ai:
-  // these platform assets only live on the lessgo.ai CDN, and published HTML is
-  // served from prod subdomains AND custom domains (where a relative /assets/*
-  // would 404). NOTE: a dev-relative shim here is a footgun — when publishing to a
-  // real subdomain from `npm run dev`, validateAndResolveAssetURLs rewrites the
-  // relative src to the local baseURL (http://localhost:3000), freezing a broken
-  // localhost URL into the static HTML. So keep it absolute regardless of env.
-  const assetBase = 'https://lessgo.ai';
+  // Asset origin for the injected fonts/scripts. Absolute origin (NOT relative):
+  // these platform assets are served from prod subdomains AND custom domains
+  // (where a relative /assets/* would 404). NOTE: a dev-relative shim here is a
+  // footgun — when publishing to a real subdomain from `npm run dev`,
+  // validateAndResolveAssetURLs rewrites the relative src to the local baseURL
+  // (http://localhost:3000), freezing a broken localhost URL into the static
+  // HTML. So keep it absolute regardless of env. Env-driven so a local publish
+  // loads the local build of the beacon/form JS instead of production's copy;
+  // falls back to https://lessgo.ai in prod where NEXT_PUBLIC_APP_URL points there.
+  const assetBase = process.env.NEXT_PUBLIC_APP_URL || 'https://lessgo.ai';
 
   // Generate CSS variables style tag
   const cssVariablesStyle = generateCSSVariablesStyle(cssVariables);

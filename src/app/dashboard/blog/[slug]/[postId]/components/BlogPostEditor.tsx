@@ -7,6 +7,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { publishedSubdomainHost } from '@/lib/domains/hosts'
+import { slugify as canonicalSlugify } from '@/lib/normalize'
 import BlogRichTextEditor from './BlogRichTextEditor'
 
 interface EditorPost {
@@ -21,13 +22,9 @@ interface EditorPost {
   seo: { title?: string; description?: string; ogImage?: string; noIndex?: boolean }
 }
 
+// Canonical slugifier (F28) + blog's 80-char slug cap.
 function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80)
+  return canonicalSlugify(s).slice(0, 80)
 }
 
 export default function BlogPostEditor({

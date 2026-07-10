@@ -25,7 +25,12 @@ const SEEDED_FORM: MVPForm = {
   successMessage: 'Booked — see you soon.',
 } as MVPForm;
 
-// Mock the store BEFORE importing the edit twin.
+// Mock the store BEFORE importing the edit twin. NOTE: forms live at the
+// store's TOP LEVEL (`state.forms`, the FormsSlice) — NOT under `content` —
+// exactly as the real edit store (formActions.ts writes `state.forms[id]`).
+// A previous version of this mock nested forms under `content.forms`, which
+// masked F1: the edit twin read `store.content?.forms` (always undefined at
+// runtime) yet the mis-seeded mock let the test pass. Keep forms top-level.
 vi.mock('@/hooks/useEditStoreLegacy', () => ({
   useEditStoreLegacy: () => ({
     content: {
@@ -34,8 +39,8 @@ vi.mock('@/hooks/useEditStoreLegacy', () => ({
         layout: 'SharedLeadForm',
         elements: { form_id: FORM_ID, form_headline: 'Book a call' },
       },
-      forms: { [FORM_ID]: SEEDED_FORM },
     },
+    forms: { [FORM_ID]: SEEDED_FORM },
     updateElementContent: vi.fn(),
   }),
 }));
@@ -105,6 +110,20 @@ describe('shared LeadForm — published <form> contract (form.v1.js)', () => {
 
   it('carries the #form-section anchor (hero GOAL_REF + CTA scrollTo target)', () => {
     expect(publishedMarkup()).toContain('id="form-section"');
+  });
+});
+
+describe('shared LeadForm — edit twin reads the top-level FormsSlice (F1 regression)', () => {
+  it('renders one field per seeded form field against a top-level-seeded store', () => {
+    const edit = renderToStaticMarkup(<LeadForm sectionId={LEAD_SECTION_ID} />);
+    // Each MVP field renders exactly one `<div class="lg-fld">` wrapper.
+    const fieldCount = (edit.match(/class="lg-fld"/g) || []).length;
+    expect(fieldCount).toBe(SEEDED_FORM.fields.length);
+    // …and NOT the empty-form fallback the bug produced (0 fields + "Submit").
+    expect(fieldCount).toBeGreaterThan(0);
+    // Uses the seeded submit label, not the fallback — the "Submit" tell of F1.
+    expect(edit).toContain('Book a call');
+    expect(edit).not.toContain('>Submit<');
   });
 });
 

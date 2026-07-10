@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger';
 import { getSectionTypeFromLayout } from '@/utils/layoutSectionTypeMapping';
 import { ElementToggleModal } from '../ui/ElementToggleModal';
 import { isChromeId } from '@/hooks/editStore/pageHelpers';
-import { hasMultipleVariants } from '../ui/BlockVariantSelector';
+import { eligibleVariantCount } from '../ui/BlockVariantSelector';
 import { usesTemplateModule } from '@/types/service';
 
 // Shared chrome (header/footer) is site-wide: hide per-page structural actions.
@@ -71,16 +71,18 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
   } = useEditStore();
 
   // Swap-button visibility gate (scale-09 phase 5). For template-module projects
-  // the "Layout" action only makes sense when the section's manifest declares
-  // >1 variant (BlockVariantSelector); single-variant template sections have no
-  // swap UI (the modal would render null), so hide the button. Legacy (non-
+  // the "Layout" action only makes sense when the section has >1 ELIGIBLE variant
+  // (BlockVariantSelector). A section can declare >1 variant yet have only one
+  // meet its `requiresAssets` needs (e.g. meridian hero without a photo) — the
+  // picker would then show a single, dead one-card modal (F18), so gate on the
+  // eligible count (post-asset-filter), not the declared count. Legacy (non-
   // template) projects keep the button always — they use LayoutChangeSelector's
   // full library. currentLayout drives the manifest lookup (unlike sectionType,
   // it uniquely identifies the owning variant set).
   const currentSectionLayout = sectionLayouts[sectionId];
   const isTemplateModule = usesTemplateModule(audienceType, templateId);
   const showChangeLayout = isTemplateModule
-    ? hasMultipleVariants(templateId, currentSectionLayout)
+    ? eligibleVariantCount(templateId, currentSectionLayout, content[sectionId]) > 1
     : true;
 
   // Handle layout change action

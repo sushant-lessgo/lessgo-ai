@@ -4,8 +4,8 @@
 // published page LeadForm.published.tsx renders a real <form data-lessgo-form>.
 // Per plan-review finding #1 the edit renderer does NOT pass a `content` prop
 // (LandingPageRenderer spreads only the section's own `data`), so — like
-// VestriaLeadForm.tsx — this reads the form from the store:
-// useEditStoreLegacy().content?.forms?.[form_id], with form_id / form_headline
+// VestriaLeadForm.tsx — this reads the form from the store's top-level
+// FormsSlice: useEditStoreLegacy().forms?.[form_id], with form_id / form_headline
 // pulled from the section's own elements. Layout lives in leadFormFields so this
 // is byte-parallel with the published twin.
 
@@ -24,7 +24,7 @@ export default function LeadForm({ sectionId }: { sectionId: string }) {
   const section = store.content?.[sectionId];
   const elements = (section?.elements || {}) as Record<string, any>;
   const formId = elements.form_id || '';
-  const form = formId ? store.content?.forms?.[formId] : undefined;
+  const form = formId ? store.forms?.[formId] : undefined;
   const fields: MVPFormField[] = Array.isArray(form?.fields) ? form.fields : [];
   const headline = elements.form_headline || LEAD_FORM_DEFAULT_HEADLINE;
 

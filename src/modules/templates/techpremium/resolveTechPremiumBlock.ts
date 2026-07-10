@@ -96,6 +96,8 @@ export type TechPremiumBlockMode = 'edit' | 'published';
 export function resolveTechPremiumBlock(
   sectionType: string,
   mode: TechPremiumBlockMode = 'edit',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _layoutName?: string, // one block per section; accepted for TemplateModule contract parity
 ): React.ComponentType<any> | null {
   const key = (sectionType || '').toLowerCase();
   const entry = TECHPREMIUM_BLOCK_REGISTRY[key];

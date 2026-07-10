@@ -444,8 +444,9 @@ const TRUST_STRATEGY = {
 };
 
 describe('lockedSectionsForEngine — required (non-toggleable) sections per engine', () => {
-  it('thing locks hero + features; testimonials stays toggleable (dropTarget)', () => {
-    expect(lockedSectionsForEngine('thing')).toEqual(['hero', 'features']);
+  it('thing locks hero + features + cta; testimonials stays toggleable (dropTarget)', () => {
+    // cta locked at the gate (F8) though it is not in the frozen thing engine-core.
+    expect(lockedSectionsForEngine('thing')).toEqual(['hero', 'features', 'cta']);
   });
 
   it('trust locks hero + services + cta; testimonials/packages stay toggleable', () => {

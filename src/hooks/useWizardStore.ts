@@ -170,6 +170,12 @@ interface WizardState {
   // Goal (scale-05 machinery).
   goalIntent: GoalIntent | null;
   goalParam: GoalParamInput;
+  /**
+   * The user explicitly chose "Skip for now" past a REQUIRED goal param (F14) —
+   * unblocks the goal-step Continue without a destination. Reset whenever the
+   * selected intent changes (a new intent re-arms the gate).
+   */
+  goalParamSkipped: boolean;
 
   // Proof (superset of ServiceAssetAvailability).
   proof: WizardProofState;
@@ -269,6 +275,7 @@ interface WizardActions {
   // Goal.
   setGoalIntent: (intent: GoalIntent) => void;
   setGoalParam: (param: GoalParamInput) => void;
+  setGoalParamSkipped: (skipped: boolean) => void;
 
   // Proof.
   setProof: (patch: Partial<WizardProofState>) => void;
@@ -597,6 +604,7 @@ const initialState: WizardState = {
   fields: {},
   goalIntent: null,
   goalParam: {},
+  goalParamSkipped: false,
   proof: { ...initialProof },
   sitemap: null,
   strategy: null,
@@ -780,11 +788,18 @@ export const useWizardStore = create<WizardStore>()(
 
       setGoalIntent: (intent) =>
         set((state) => {
+          // A new intent re-arms the param gate (F14) — a prior "Skip for now"
+          // must not carry over to a different goal.
+          if (intent !== state.goalIntent) state.goalParamSkipped = false;
           state.goalIntent = intent;
         }),
       setGoalParam: (param) =>
         set((state) => {
           state.goalParam = param;
+        }),
+      setGoalParamSkipped: (skipped) =>
+        set((state) => {
+          state.goalParamSkipped = skipped;
         }),
 
       setProof: (patch) =>
@@ -1042,6 +1057,7 @@ export const useWizardStore = create<WizardStore>()(
             ...initialState,
             proof: { ...initialProof },
             goalParam: {},
+            goalParamSkipped: false,
             fields: {},
             slots: [],
             structureDisabled: [],

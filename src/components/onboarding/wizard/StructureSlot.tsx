@@ -46,6 +46,7 @@ import {
   isMultipage,
   type PageArchetypeDef,
 } from '@/modules/audience/product/pageArchetypes';
+import { filterSectionsByProof } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { businessTypes } from '@/modules/businessTypes/config';
 import { getCollectionDef, type CollectionKey } from '@/modules/collections/registry';
 import type { CollectionEntry } from '@/modules/brief/collections';
@@ -251,6 +252,10 @@ export default function StructureSlot() {
   const structureDisabled = useWizardStore((s) => s.structureDisabled);
   const toggleStructureSection = useWizardStore((s) => s.toggleStructureSection);
   const moveStructureSection = useWizardStore((s) => s.moveStructureSection);
+  // Proof hard rule (scale 1-10 F22): the SAME proof signal the strategy path
+  // feeds `assembleProductStrategy`, read client-side so a page ADDED at the gate
+  // (and its addable-section chips) can never seed an unpromised proof section.
+  const hasTestimonials = useWizardStore((s) => s.proof.hasTestimonials);
   // Structure persistence + hard-fit recompute (scale-07 phase 6).
   const briefStructureMode = useWizardStore((s) => s.briefStructureMode);
   const recomputeRequiredCapabilities = useWizardStore(
@@ -490,6 +495,10 @@ export default function StructureSlot() {
   // ===== draft edits (write straight to the store) =====
   const commit = (next: SitemapPage[]) => setSitemap(next);
 
+  // Proof hard rule at the seed path (F22): unpromised proof sections are cut
+  // from BOTH the added-page default sections AND the addable-section chips.
+  const proofInput = { hasTestimonials };
+
   const updatePage = (idx: number, next: SitemapPage) =>
     commit(draft.map((p, i) => (i === idx ? next : p)));
 
@@ -502,7 +511,7 @@ export default function StructureSlot() {
         archetypeKey: def.key,
         title: def.title,
         pathSlug: def.pathSlug,
-        sections: [...def.defaultSections],
+        sections: filterSectionsByProof([...def.defaultSections], proofInput),
       },
     ]);
 
@@ -551,9 +560,10 @@ export default function StructureSlot() {
         {draft.map((page, pageIdx) => {
           const def = menuByKey.get(page.archetypeKey);
           const isHome = !!def?.required;
-          const available = (def?.allowedSections ?? []).filter(
-            (s) => !page.sections.includes(s)
-          );
+          const available = filterSectionsByProof(
+            def?.allowedSections ?? [],
+            proofInput
+          ).filter((s) => !page.sections.includes(s));
           return (
             <div key={page.archetypeKey} className="rounded-lg border border-gray-200 p-4">
               <div className="flex items-center justify-between gap-3 mb-1">

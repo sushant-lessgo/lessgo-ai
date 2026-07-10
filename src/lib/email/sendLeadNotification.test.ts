@@ -1,7 +1,10 @@
 // Tests for the env-gated lead-notification email helper.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import * as Sentry from '@sentry/nextjs';
 import { sendLeadNotification } from './sendLeadNotification';
 import type { MVPFormField } from '@/types/core/forms';
+
+vi.mock('@sentry/nextjs', () => ({ captureException: vi.fn() }));
 
 const FIELDS: MVPFormField[] = [
   { id: 'name', type: 'text', label: 'Name', required: true },
@@ -72,6 +75,20 @@ describe('sendLeadNotification', () => {
     const payload = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(payload.reply_to).toBeUndefined();
     expect(payload.from).toBe('onboarding@resend.dev'); // default sender
+  });
+
+  it('captures a non-OK Resend response to Sentry (F30 observability)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 403, text: async () => 'validation_error' });
+    vi.stubGlobal('fetch', fetchMock);
+    vi.stubEnv('RESEND_API_KEY', 're_test');
+    vi.stubEnv('LEAD_NOTIFICATION_EMAIL', 'owner@naayom.com');
+
+    await sendLeadNotification({ formName: 'Contact', data: DATA, fields: FIELDS, pageId: 'page-1' });
+
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    const [, opts] = (Sentry.captureException as any).mock.calls[0];
+    expect(opts.tags).toMatchObject({ area: 'email', op: 'sendLeadNotification' });
+    expect(opts.extra).toMatchObject({ status: 403, pageId: 'page-1' });
   });
 
   it('never throws when fetch rejects', async () => {
