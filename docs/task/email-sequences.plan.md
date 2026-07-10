@@ -10,8 +10,9 @@ Clone the social-posts pattern (prompt engine → generation route → copy-bloc
 ## Progress log
 
 - phase 1 schema + shared plumbing: done (commit 9a39b1f0, review loops 0 — trivial additive, tsc+1785 tests+migration green) | base=feature/social-posts (drift resolution); worktree has isolated node_modules
-- phase 2 archetype map + prompt engine (Show-up): pending
-- phase 3 API routes + kill-switch: pending
+- phase 2 archetype map + prompt engine (Show-up): done (commit 353efc14, review loops 1 → ship; tsc+1807 tests green, +22)
+  - PHASE-5 CARRY: reviewer flag — real captured testimonials render quoted in prompt; if one contains a hard metric it will legitimately appear in-quote (by design, not a proof-truth violation). Human-verify at pilot copy gate.
+- phase 3 API routes + kill-switch: done (commit 32277b7f, review loops 1 → ship; tsc+1808 tests green). Notes: full-sequence output wrapped as {emails:[...]} object (aiClient object-brace extraction); GET resolves timing-label def from row.intent. .env.example is gitignored → NOT committed; kill-switch NEXT_PUBLIC_EMAIL_SEQUENCES_DISABLED documented here + must be surfaced at Phase 7 merge/deploy gate.
 - phase 4 dashboard UI + nav: pending
 - phase 5 pilot quality gate: pending
 - phase 6 remaining 4 archetypes: pending

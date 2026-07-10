@@ -93,12 +93,13 @@ export function buildSequencePrompt(args: BuildSequencePromptArgs): string {
 
   parts.push(
     '=== OUTPUT ===\n' +
-      'Respond with ONLY a JSON array of exactly ' +
+      'Respond with ONLY a JSON object of the form ' +
+      '{"emails": [{"subject": "...", "body": "..."}, ...]}, where "emails" is an array of ' +
+      'exactly ' +
       def.emails.length +
-      ' objects, in order, of the form ' +
-      '[{"subject": "...", "body": "..."}]. Each "subject" is the email subject line and ' +
-      'each "body" is the full email body (plain text, paste-ready). No commentary, no ' +
-      'markdown fences, no timing labels — subject and body only.',
+      ' objects, in order. Each "subject" is the email subject line and each "body" is the ' +
+      'full email body (plain text, paste-ready). No commentary, no markdown fences, no ' +
+      'timing labels — an object with an "emails" array only.',
   );
 
   return parts.join('\n\n');
@@ -182,9 +183,16 @@ export type EmailItem = z.infer<typeof emailItemSchema>;
 /**
  * Full-sequence output schema — a factory because the array length is checked
  * against the def. SHAPE ONLY: fields, types, and length. NO char caps here.
+ *
+ * Wrapped as `{ emails: [...] }` (an OBJECT, not a bare array) so aiClient's
+ * `generateRawJson` object-brace extraction (`/(\{[\s\S]*\})/`) handles unfenced
+ * responses — a bare top-level array would not match. Pattern-consistent with
+ * social-posts' `{ post }`.
  */
 export function sequenceOutputSchema(def: SequenceDef) {
-  return z.array(emailItemSchema).length(def.emails.length);
+  return z.object({
+    emails: z.array(emailItemSchema).length(def.emails.length),
+  });
 }
 
 /** Single-email output schema — SHAPE ONLY, no char caps. */
@@ -237,7 +245,7 @@ export function validateSequence(raw: unknown, def: SequenceDef): ValidateSequen
     return { status: 'invalid_shape', error: parsed.error.issues.map((i) => i.message).join('; ') };
   }
 
-  const emails = parsed.data.map((e) => ({ subject: e.subject.trim(), body: e.body.trim() }));
+  const emails = parsed.data.emails.map((e) => ({ subject: e.subject.trim(), body: e.body.trim() }));
 
   for (let i = 0; i < emails.length; i++) {
     if (emails[i].subject.length === 0 || emails[i].body.length === 0) {
@@ -276,18 +284,20 @@ export function validateSingleEmail(raw: unknown): ValidateSingleEmailResult {
 // ---- mock outputs (NEXT_PUBLIC_USE_MOCK_GPT + demo) --------------------------
 
 /**
- * Mock full-sequence output. Shape matches `sequenceOutputSchema(def)` (array of
- * {subject, body}, length === def.emails.length) and stays within the caps, so
- * `validateSequence(mockSequenceOutput(def), def)` returns `ok`.
+ * Mock full-sequence output. Shape matches `sequenceOutputSchema(def)` — an OBJECT
+ * `{ emails: [...] }` whose array length === def.emails.length and stays within the
+ * caps, so `validateSequence(mockSequenceOutput(def), def)` returns `ok`.
  */
-export function mockSequenceOutput(def: SequenceDef): EmailItem[] {
-  return def.emails.map((email, i) => ({
-    subject: `[Mock] ${email.purpose}`.slice(0, SUBJECT_MAX_CHARS),
-    body:
-      `This is a mock email ${i + 1} of ${def.emails.length} (${email.key}).\n\n` +
-      `${email.promptInstructions}\n\n` +
-      `Timing: ${email.timingLabel}.`,
-  }));
+export function mockSequenceOutput(def: SequenceDef): { emails: EmailItem[] } {
+  return {
+    emails: def.emails.map((email, i) => ({
+      subject: `[Mock] ${email.purpose}`.slice(0, SUBJECT_MAX_CHARS),
+      body:
+        `This is a mock email ${i + 1} of ${def.emails.length} (${email.key}).\n\n` +
+        `${email.promptInstructions}\n\n` +
+        `Timing: ${email.timingLabel}.`,
+    })),
+  };
 }
 
 /** Mock single-email output — matches `SingleEmailOutputSchema`, within caps. */

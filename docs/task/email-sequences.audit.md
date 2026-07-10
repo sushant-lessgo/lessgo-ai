@@ -98,3 +98,55 @@ model EmailSequence {
 
 ### Open risks
 - None specific to phase 2. Prompt copy quality is validated at the phase-5 human gate; wording tweaks land in these same two engine files.
+
+---
+
+## Phase 3 — API routes + kill-switch
+
+**Files changed**
+- `src/app/api/email-sequences/[token]/route.ts` (new) — GET, POST, DELETE
+- `src/app/api/email-sequences/[token]/regenerate/route.ts` (new) — POST {position}
+- `.env.example` (new — did not exist; see Deviations)
+
+### `[token]/route.ts` — handlers
+- **GET**: kill-switch → auth/`assertProjectOwner` → load `Project.brief` → `resolvePlan()` (BriefSchema.safeParse → intent → `getSequencePlanForIntent`) → returns `{sequence, status}`. Demo bearer or no persisted row → `{sequence:null, status}`. Persisted row → emails merged with static `timingLabel`+`purpose` from the archetype def via `withTimingLabels()`. `findFirst({where:{tokenId}})` (tokenId is not `@unique`; only `projectId` is).
+- **POST** (generate whole sequence): kill-switch → auth/owner → load brief → `resolvePlan()`; `status !== 'available'` OR missing goal/def/intent → **409 JSON** `{error:'not_available', status}` (no throw). Demo bearer → ephemeral `mockSequenceOutput`, persists nothing. Else `NEXT_PUBLIC_USE_MOCK_GPT` → mock; real path → `generateSequenceEmails()`. Persist via `prisma.$transaction([ emailSequence.upsert({where:{projectId}}), usageEvent.create({eventType: EMAIL_SEQUENCE_GENERATION, creditsUsed:0}) ])`. Stored emails = `{position, key, subject, body}` (key from def slot). `clerkId` (not internal id) into both `userId` fields. Wrapped in `withAIRateLimit`.
+- **DELETE**: kill-switch → auth/owner → `findFirst` row, verify `row.userId === clerkId` → `emailSequence.delete`. Demo/no-row → 404.
+
+### `[token]/regenerate/route.ts` — handler
+- **POST** `{position}`: kill-switch → validate body (`z.number().int().min(0)`) → auth/owner → load existing sequence (`findFirst`; 404 if none or not owner) → resolve def from `row.intent` via `getSequencePlanForIntent` (409 if no longer available) → range-check position → load brief for brand context → build `siblings` (all stored emails except target) → mock or `buildSingleEmailPrompt` + `regenerateEmail()`. Read-modify-write: `nextEmails` = stored with ONLY `emails[position]` replaced (key/position preserved). `$transaction([ update, usageEvent.create ])` — same `EMAIL_SEQUENCE_GENERATION` type, metadata `{regen:true, position, ...}`. Wrapped in `withAIRateLimit`.
+
+### Retry / validate split wiring (decisions #9 + #10)
+- `generateRawJson('emailSequence', prompt, sequenceOutputSchema(def) | SingleEmailOutputSchema)` runs the SHAPE-only schema's `.parse` internally. The returned object is then passed to `validateSequence()` / `validateSingleEmail()` which enforce the char caps and return a discriminated `{status: ok | invalid_shape | too_long}`.
+- `attemptSequence`/`attemptSingle`: LLM throw → `invalid_shape`. Then one retry: `too_long` appends a stricter length instruction; `invalid_shape` re-sends the same prompt. After retry: `ok` → emails; `too_long` → trim via `trimToSentence` (subject cap 120, body cap 2000); `invalid_shape` → throw → route returns **500 `generation_failed`**. This keeps `too_long` distinguishable because caps are NOT in the generateRawJson schema.
+
+### Tx shape
+- Both routes use a `prisma.$transaction([...])` array of raw client writes (upsert/update + `usageEvent.create`) — NOT `logUsageEvent` (it can't join a tx), mirroring the social route. Either both rows persist or neither.
+
+### Kill-switch placement
+- `isDisabled()` = `process.env.NEXT_PUBLIC_EMAIL_SEQUENCES_DISABLED === 'true'` is the **FIRST statement** in every handler: GET, POST (both the exported `POST` wrapper AND the inner `generateHandler`), DELETE, and regenerate's exported `POST` + inner `regenerateHandler`. Returns 404-style JSON `{success:false, error:'not_found'}`.
+- Demo bearer path: `access.isDemo` → POST returns ephemeral `mockSequenceOutput` (persist nothing); GET returns `{sequence:null, status}`; DELETE/regenerate return 404.
+
+### Deviations
+- **`.env.example` did not exist and is gitignored** (`.gitignore` line 34: `.env*`). Created it with the single documented kill-switch var per the Files-touched list. Because `.env*` is gitignored it won't be committed unless force-added; the var is still documented for anyone who opts to track the file. Conservative in-scope choice (file was on the list).
+- **Missing `goal.intent` → status `'skipped'`** in `resolvePlan()` (one of the three enumerated statuses), so GET/POST render the same clean not-available state. POST returns 409 for it (no throw), matching the plan's "missing goal → 409/404".
+- **`tokenId` lookups use `findFirst`, not `findUnique`** — only `projectId` carries `@unique` on EmailSequence; tokenId is a plain (indexed) column. Functionally 1:1.
+
+### Test results
+- `npx tsc --noEmit` — green (0 errors).
+- `npm run test:run` — 1807 passed, 3 skipped (unchanged from phase 2; no new tests this phase).
+
+### Open risks
+- `generateRawJson`'s JSON extraction regex (`aiClient.ts`) captures `{...}` objects; a bare (un-fenced) JSON **array** response for the full sequence could mis-extract. Not exercised under mock; real-LLM path is validated at the phase-5 gate. Out of scope (aiClient not in Files touched).
+
+### Phase 3 follow-up — full-sequence output wrapped in an object (coordinator correctness fix)
+Wrapped full-sequence output in a `{emails:[...]}` object so aiClient's object-brace extraction (`/(\{[\s\S]*\})/`, src/lib/aiClient.ts:229-231) handles unfenced responses — a bare top-level array would not match. Pattern-consistent with social-posts' `{post}`. Single-email output was already object-shaped and is unchanged.
+
+Edit sites (also spans phase-2 engine + its test, per coordinator's explicit cross-phase instruction):
+- `src/modules/email/sequenceEngine.ts`: `sequenceOutputSchema(def)` now `z.object({ emails: z.array(...).length(...) })` (still cap-free, decision #10 intact); `buildSequencePrompt` OUTPUT block now demands `{"emails":[...]}`; `validateSequence` reads `.emails`; `mockSequenceOutput` returns `{ emails: [...] }`.
+- `src/modules/email/sequenceEngine.test.ts`: full-sequence tests updated to the `{emails:[...]}` shape (schema parse, ok/invalid_shape/too_long incl. over-cap-passes-schema, mock); added a bare-array → invalid_shape case; prompt-output assertion now checks `JSON object` + `"emails"`. Single-email tests unchanged.
+- `src/app/api/email-sequences/[token]/route.ts` POST: mock/demo paths read `.emails` from `mockSequenceOutput(def)`. Real path unchanged (`generateSequenceEmails` still returns `EmailItem[]` from `validateSequence().emails`).
+
+tsc green (0 errors); test:run green (1808 passed, 3 skipped — +1 new bare-array test).
+
+- GET resolves timing-label def from `row.intent` (via `getSequencePlanForIntent`), matching regenerate — not the current brief intent, so editing the project goal after generating never mangles/drops labels on the stored sequence; non-available stored intent → labels blank, stored subjects/bodies preserved. Current brief still drives the `status` field + no-row empty state.

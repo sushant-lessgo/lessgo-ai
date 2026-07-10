@@ -65,9 +65,10 @@ describe('buildSequencePrompt', () => {
     expect(prompt).toContain('They doubled our pipeline in a quarter.');
   });
 
-  it('includes the proof-truth fragment and JSON-only output instruction', () => {
+  it('includes the proof-truth fragment and JSON-object output instruction', () => {
     expect(prompt).toContain(PROOF_TRUTH_FRAGMENT);
-    expect(prompt).toContain('JSON array');
+    expect(prompt).toContain('JSON object');
+    expect(prompt).toContain('"emails"');
   });
 
   it('references the intent and every email purpose', () => {
@@ -105,21 +106,28 @@ describe('validateSequence', () => {
     if (result.status === 'ok') expect(result.emails).toHaveLength(4);
   });
 
-  it('returns invalid_shape when the array length mismatches the def', () => {
-    const raw = [{ subject: 's', body: 'b' }]; // 1, not 4
+  it('returns invalid_shape when a bare array is passed instead of an {emails} object', () => {
+    const raw = [{ subject: 's', body: 'b' }]; // bare array — not the {emails:[...]} object
+    expect(validateSequence(raw, SHOW_UP_SEQUENCE).status).toBe('invalid_shape');
+  });
+
+  it('returns invalid_shape when the emails array length mismatches the def', () => {
+    const raw = { emails: [{ subject: 's', body: 'b' }] }; // 1, not 4
     expect(validateSequence(raw, SHOW_UP_SEQUENCE).status).toBe('invalid_shape');
   });
 
   it('returns invalid_shape when an item is missing a field', () => {
-    const raw = SHOW_UP_SEQUENCE.emails.map(() => ({ subject: 'only subject' }));
+    const raw = { emails: SHOW_UP_SEQUENCE.emails.map(() => ({ subject: 'only subject' })) };
     expect(validateSequence(raw, SHOW_UP_SEQUENCE).status).toBe('invalid_shape');
   });
 
   it('over-cap subject/body PASSES the SHAPE schema but validateSequence flags too_long (decision #10)', () => {
-    const raw = SHOW_UP_SEQUENCE.emails.map((_, i) => ({
-      subject: i === 0 ? 'x'.repeat(SUBJECT_MAX_CHARS + 5) : 'ok subject',
-      body: i === 1 ? 'y'.repeat(BODY_MAX_CHARS + 5) : 'ok body',
-    }));
+    const raw = {
+      emails: SHOW_UP_SEQUENCE.emails.map((_, i) => ({
+        subject: i === 0 ? 'x'.repeat(SUBJECT_MAX_CHARS + 5) : 'ok subject',
+        body: i === 1 ? 'y'.repeat(BODY_MAX_CHARS + 5) : 'ok body',
+      })),
+    };
 
     // The cap-free SHAPE schema must accept the over-cap payload.
     expect(sequenceOutputSchema(SHOW_UP_SEQUENCE).safeParse(raw).success).toBe(true);
