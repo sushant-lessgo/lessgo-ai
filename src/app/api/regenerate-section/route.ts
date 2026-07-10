@@ -250,6 +250,7 @@ ${prompt}`;
     // drafted quotes preserved (acceptable pre-existing-data gap, see plan).
     // NOTE: table read returns createdAt DESC — quotes MAY reorder vs first-gen's
     // entry-array order; same quotes/flags, no truth regression.
+    let reinjectedRealProof = false;
     if (projectData && isTestimonialsSection(sectionType, sectionId)) {
       try {
         const rows = await listTestimonialsByOwner(userId, {
@@ -268,7 +269,11 @@ ${prompt}`;
           } else {
             injectServiceTestimonials(wrapper, real);
           }
-          // phase 4: set realProof provenance here (section-level marker suppression).
+          // proof-truth phase 4: injectRealTestimonials set wrapper.testimonials
+          // .realProof = true. Mirror multiPageAssembly — surface it as section
+          // provenance so the persisted section carries aiMetadata.realProof and
+          // useReviewState suppresses needs-review markers for the real quotes.
+          reinjectedRealProof = wrapper.testimonials?.realProof === true;
         }
       } catch (injectErr) {
         logger.warn('Failed to re-inject real testimonials on section regen:', injectErr);
@@ -288,6 +293,15 @@ ${prompt}`;
       sectionId,
       originalContent: currentContent,
       regenerationType: 'section',
+      // proof-truth phase 4: provenance for a re-injected real-proof section.
+      // Real-proof sections keep their first-generation aiMetadata.realProof
+      // across regen already (the edit store preserves existing aiMetadata via
+      // spread), so markers stay suppressed for the common path. This field
+      // carries the flag when the table re-injected real quotes; full client
+      // application of a NEWLY-gained flag (drafted section that later acquired
+      // approved rows) is a follow-up (see audit — regen client does not yet
+      // read this field).
+      ...(reinjectedRealProof ? { aiMetadata: { realProof: true } } : {}),
       creditsUsed: CREDIT_COSTS.SECTION_REGENERATION,
       creditsRemaining: consumption.remaining
     });

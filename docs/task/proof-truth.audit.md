@@ -216,3 +216,57 @@ Route-level tests: NEITHER confirm nor regenerate-section has test precedent (no
 - **regenerate-section injection shape nuance:** the route's `sectionContent` is a flat element map, and `injectRealTestimonials` (product) sets `elements.testimonials` to a plain `[{quote,author_name,author_role}]` array (collection shape, correct for product templates); service sets flat `quote`/`author_name`/`author_role`/`author_company` as plain strings (not `{content}` wrappers). This path is DARK (TESTIMONIALS_ENABLED off) and the table is empty until import runs, so it is exercised only post-un-dark; flagged for phase-8 live check.
 - **Ownership assertion already present** in regenerate-section (not added).
 - **No route-level tests** for confirm/regenerate-section (no precedent) — manual checks documented.
+
+---
+
+## Phase 4 — Provenance metadata + marker suppression (real quotes UNflagged)
+
+**Files changed**
+- `src/types/generation.ts` (modified)
+- `src/modules/audience/product/parseCopy.ts` (modified)
+- `src/modules/audience/service/parseCopy.ts` (modified)
+- `src/modules/generation/multiPageAssembly.ts` (modified)
+- `src/hooks/useReviewState.ts` (modified)
+- `src/hooks/useReviewState.test.ts` (modified)
+- `src/lib/staticExport/__tests__/realProofPublishedOutput.test.ts` (new)
+- `src/app/api/regenerate-section/route.ts` (modified — small delta)
+
+### Where `realProof` is SET (producers)
+- `src/types/generation.ts`: added optional `realProof?: true` to `SectionCopy` — a post-parse annotation, NOT in any zod schema (injection runs after validation).
+- `product/parseCopy.ts` `injectRealTestimonials`: sets `section.realProof = true` after overwriting the `testimonials[]` array with real items.
+- `service/parseCopy.ts` `injectRealTestimonials`: sets `section.realProof = true` after overwriting the flat `quote/author_name/author_role` fields (+ cleared `author_company`).
+- Flag goes on the `SectionCopy` object, NOT inside `elements`/content — content stays plain strings (no published leak).
+
+### Where `realProof` is CARRIED (persistence seam)
+- `multiPageAssembly.ts` section-data build (`mergePageIntoFinalContent`): spreads `...(copy[type]?.realProof ? { realProof: true } : {})` into the section's `aiMetadata` — same envelope as `aiGeneratedElements`/`excludedElements` (survives saveDraft/loadDraft).
+- `multiPageAssembly.ts` collection-item seam (`mergeCollectionItemCopy`): after the element merge, sets `sec.aiMetadata.realProof = true` when `copy[type]?.realProof`.
+
+### Where `realProof` is CONSUMED
+- `useReviewState.ts` `deriveReviewState`: per-section `const suppressNeedsReview = !!sectionData.aiMetadata?.realProof`. Both the top-level element scan and the collection scan skip pushing an item when `status === 'needs_review' && suppressNeedsReview`. Other statuses (stock_image, unconfigured, etc.) are untouched. Because `items` excludes the suppressed entries, BOTH `needsReviewItems` and `activeMarkers` (derived from `items`) are empty for real-proof sections.
+
+### regenerate-section delta
+- Phase-3 placeholder comment replaced: after `injectProductTestimonials`/`injectServiceTestimonials` on the re-inject path, `reinjectedRealProof = wrapper.testimonials?.realProof === true` captures the flag; the response includes `...(reinjectedRealProof ? { aiMetadata: { realProof: true } } : {})`.
+- **Scope-forced partial (documented):** the route only RETURNS content; the edit-store consumer (`src/hooks/editStore/aiActions.ts`, NOT in this phase's Files-touched) applies the response. That consumer merges `data.content` into elements and sets `aiMetadata = { ...existingAiMetadata, lastGenerated, isCustomized }` — it does NOT read `data.aiMetadata`. Consequence: a section that first-generated as REAL keeps its `aiMetadata.realProof` across regen via the existing-aiMetadata spread (markers stay suppressed — the common, correct path). A section that first-generated DRAFTED and only later acquired approved rows would gain real quotes on regen but NOT the newly-set flag client-side. Fully wiring that requires an out-of-scope edit to `aiActions.ts` to read `data.aiMetadata.realProof` — left as a follow-up (open risk below). The route response field is in place so the client change is a one-liner later.
+
+### Published-path invariant enforced
+- The plan's CORRECT invariant: `sanitizeContentForPublish` does NOT strip `aiMetadata` — it rebuilds only `section.elements` (`layoutElementSchema.ts:473-511`); `aiMetadata` is a sibling that survives and is spread into published block props via `extractContentFields` `...systemProps`. So `realProof` DOES ride into published block props unchanged. The safety guarantee is that **NO block/published-path code READS `aiMetadata.realProof`**, so React drops the unread object prop → never in DOM/HTML.
+- **Grep gate (5a) — PASS:** `grep -rn "realProof" src/modules/templates/` → zero hits; `grep -rn "realProof"` in `LandingPagePublishedRenderer.tsx` / `componentRegistry.published.ts` / `htmlGenerator.ts` → zero hits. All `realProof` refs in `src/` are the writers (parseCopy x2, multiPageAssembly, regenerate-section), the consumer (`useReviewState.ts`), the type (`generation.ts`), and tests only.
+- **Published-output test (5b) — NEW** `src/lib/staticExport/__tests__/realProofPublishedOutput.test.ts`: builds a meridian `ProofWithLogoRail` testimonials section with `aiMetadata = { realProof: true, excludedElements: ['eyebrow'] }` + two real quotes; runs the REAL publish path (`sanitizeContentForPublish` then `generateStaticHTML`). Asserts rendered HTML CONTAINS both quote strings, contains NO `realProof`, no `[object Object]`, no marker artifacts (`needs_review`/`needsReview`/`data-needs-review`), and the excluded eyebrow text is absent. Also asserts (mid-helper) that `aiMetadata.realProof` SURVIVES sanitize — proving the invariant is "unread", not "stripped". Does NOT assert on sanitize's return value per the plan. Note: `generateStaticHTML` does not itself sanitize (the publish route does), so the test calls `sanitizeContentForPublish` first to mirror the real flow.
+
+### Known gap (documented, NOT fixed) — unresolved Q3
+- `regenerate-element` on a single real-quote element overwrites it with a fresh AI invention and does NOT clear the section-level `realProof` flag → provenance becomes inaccurate after element-level regen. A one-line guard note was added to BOTH `injectRealTestimonials` doc comments. Acceptance criterion 4 is section-level (section-regen re-injects from the table), so this is deferred; element-level re-injection is NOT implemented.
+
+### Test additions
+- `useReviewState.test.ts` (+4 tests): drafted section → markers ACTIVE; realProof section → ZERO needs-review markers (quote + author fields); reload-shaped state (content from `JSON.parse(JSON.stringify(...))` incl. aiMetadata) keeps suppression + asserts `aiMetadata.realProof` survives the round-trip (saveDraft→loadDraft shape); realProof suppresses ONLY the flagged section, a sibling drafted section still flags.
+- `realProofPublishedOutput.test.ts` (+1 test, new file): the published-output guard above.
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npx vitest run src/hooks/useReviewState.test.ts src/lib/staticExport` — 8 files / 89 tests passed.
+- Grep gate — PASS (zero hits under templates/ + published renderer/htmlGenerator/registry).
+- Full `npm run test:run` — **1908 passed / 3 skipped / 0 failed** (baseline 1903 + 5 new phase-4 tests). No unrelated failures.
+
+### For the reviewer
+- Dual-renderer: deliberately NO `.tsx`/`.published.tsx`/registry edits — provenance is metadata read by no block. The grep gate + published-output test ARE the enforcement.
+- The regenerate-section provenance is a scope-forced partial (see delta above): route response carries the flag; the edit-store client does not yet read it. Common real-proof-on-regen case works via existing-aiMetadata preservation; the drafted→later-real edge case needs the follow-up `aiActions.ts` one-liner.
+- In-scope conservative choice logged: rather than fight the exclusion mechanism, the published-output test runs the true publish path (`sanitizeContentForPublish` then `generateStaticHTML`) because `generateStaticHTML` does not sanitize on its own.

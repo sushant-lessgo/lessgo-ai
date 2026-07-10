@@ -180,6 +180,11 @@ export function mergePageIntoFinalContent(opts: {
         lastGenerated: Date.now(),
         aiGeneratedElements: Object.keys(elements),
         excludedElements: [],
+        // proof-truth phase 4: carry the post-parse provenance flag set by
+        // injectRealTestimonials into persisted aiMetadata (survives
+        // saveDraft/loadDraft). Read by useReviewState to suppress needs-review
+        // markers; read by NO block/published-path code.
+        ...(copy[type]?.realProof ? { realProof: true as const } : {}),
       },
     };
   }
@@ -416,6 +421,12 @@ export function mergeCollectionItemCopy(opts: {
     for (const [field, value] of Object.entries(ai)) {
       if (def && type === def.itemSectionType && VERBATIM_ITEM_FIELDS.has(field)) continue;
       sec.elements[field] = value;
+    }
+    // proof-truth phase 4: carry the post-parse provenance flag into persisted
+    // aiMetadata (survives saveDraft/loadDraft; read by useReviewState only).
+    if (copy[type]?.realProof) {
+      if (!sec.aiMetadata) sec.aiMetadata = {};
+      sec.aiMetadata.realProof = true;
     }
   }
   const gp = fc.generationProgress;
