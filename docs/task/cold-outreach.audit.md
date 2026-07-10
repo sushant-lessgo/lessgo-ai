@@ -104,3 +104,82 @@
 
 ### Open risks
 - None. Engine is pure/unit-tested; wiring into routes is Phase 4.
+
+---
+
+## Phase 4 — API routes: intake, generate, regenerate (all kill-switch-gated)
+
+### Files changed
+- `src/app/api/outreach/[token]/intake/route.ts` (new) — GET intake/prefill + POST upsert.
+- `src/app/api/outreach/[token]/route.ts` (new) — GET library + POST generate + DELETE one message.
+- `src/app/api/outreach/[token]/regenerate/route.ts` (new) — POST regenerate one message in place.
+
+(Prisma client was stale — ran `npx prisma generate`; no schema/source change.)
+
+### What changed
+- **intake/route.ts**: kill-switch FIRST → auth → `assertProjectOwner`. GET loads the project,
+  computes `prefill.targetDescriptor` from the Brief ICP via `BriefSchema.safeParse` +
+  `buildBrandContext(...).audiences.join(', ')`; returns the stored row (`toIntakeView`) or
+  `{ intake: null, prefill }`. POST validates body with zod (`targetDescriptor` non-empty,
+  `platforms` ⊆ the known 5-member union, `openerContext` optional) then upserts the single row
+  keyed `projectId`. NOT an AI/spend op → no rate-limit wrapper. Demo bearer persists nothing
+  (GET → null + prefill; POST → ephemeral echo).
+- **route.ts (generate)**: exact order — (1) parse+validate body (url XOR text enforced via zod
+  `.refine`), resolve platform defs (unknown → 409); (2) auth + `assertProjectOwner`;
+  (3) **DEMO/MOCK SHORT-CIRCUIT** (`access.isDemo || !clerkId`) returns ephemeral
+  `mockOutreachOutput` with `groundingLevel:'generic'` — NO scrape/charge/persist, even with a
+  prospectUrl/Text present; (4) load intake (400 `intake_required` if missing) + Brief →
+  `buildBrandContext`; (5) grounding ladder; (6) generate with retry contract; (7) persist rows +
+  `usageEvent.create(OUTREACH_GENERATION, creditsUsed:0)` in ONE `$transaction`; (8) respond
+  `{messages, groundingLevel, groundingWarning?}`. Grounding ladder: URL →
+  `normalizeProspectUrlKey` (malformed → generic + `scrape_failed`, no charge) →
+  `getFreshProspectScrape` hit → cached extract, NO charge; miss →
+  `checkCredits(OUTREACH_SCRAPE)` **BEFORE** `scrapeSite` (0-credit → 402 pre-network) →
+  `scrapeSite` → `generateWithSchema('cold-outreach', [msg], ProspectExtractSchema,
+  'prospect_extract')` → `upsertProspectScrape` → `consumeCredits(OUTREACH_SCRAPE)` (charge ONLY
+  this success path); `ScrapeError`/extract-fail caught → `grounding=null`,
+  `groundingWarning:'scrape_failed'`, NOT an error, NO charge. Pasted text → `{rawText}` verbatim,
+  never fetched. Neither → null. GET returns library desc by createdAt (demo → empty). DELETE
+  validates `{messageId}`, owner+token checked, then deletes.
+- **regenerate/route.ts**: kill-switch → auth → owner → **DEMO SHORT-CIRCUIT FIRST** (404, no
+  load/AI). Loads the row (404 if not owner/token), resolves its platform def, rebuilds grounding
+  from the row's denormalized `grounding` snapshot via `groundingFromSnapshot` (NEVER re-scrapes),
+  siblings = same-platform recent messages (take 5), `buildSingleMessagePrompt` → generate (same
+  retry/trim contract) → UPDATE subject/body in place + `OUTREACH_GENERATION` creditsUsed:0 ledger
+  in one `$transaction` → returns the full updated message. FOLDED-IN defensive check: rejects the
+  regenerated message with a 500 when `regenerated.platform !== def.id` (guards a wrong-platform
+  model response the single validator doesn't check).
+
+### Generate handler order of operations (proof)
+1. parse/validate body + resolve platform defs → 2. auth + assertProjectOwner →
+   3. **DEMO short-circuit (mock, no scrape/charge/persist)** → 4. load intake+Brief →
+   5. grounding ladder (**cache-hit = no charge; miss = checkCredits BEFORE scrapeSite; charge
+   consumeCredits ONLY after a successful miss scrape+extract; scrape/extract fail = generic, no
+   charge, not an error**) → 6. generate (retry) → 7. persist rows + creditsUsed:0 ledger in one
+   $transaction → 8. respond `{messages, groundingLevel, groundingWarning?}`.
+
+### Deviations from the plan (in-scope judgment calls)
+- **Intake POST demo handling**: plan didn't specify a demo path for intake POST. Chose the
+  conservative email-rail invariant (demo persists nothing) → ephemeral echo, no write.
+- **Env-mock (`NEXT_PUBLIC_USE_MOCK_GPT`) skips the grounding ladder** entirely (grounding null /
+  generic) so mock mode stays fully offline (no real scrape / extraction AI). Real-user demo path
+  is separate and unaffected.
+- **too_long final fallback trims `attempt.raw.messages`** (the shape-valid parsed output) to caps
+  via `trimMessage`, because `validateOutreachMessages` does not return messages on a `too_long`
+  result (unlike the email validator). `generateRawJson` already schema-parses, so `raw` is the
+  parsed `{messages}` object — no re-parse needed.
+- **Prefill `targetDescriptor`** derives from `buildBrandContext(...).audiences` (the Brief's
+  captured ICP audiences), joined by `', '` — the Brief has no single dedicated ICP string field.
+- **`intake_required` → 400** when generate is called before intake is saved (plan: "400 if
+  missing").
+
+### Test results
+- `npx prisma generate` — ok (client was stale; regenerated).
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 1843 passed | 3 skipped (109 files); no new tests added this phase (per
+  plan) and no regressions.
+
+### Open risks
+- Manual dev-server checks in the plan's Verification (real-URL charge-once, unreachable-URL
+  generic fallback, pasted-text no-charge, demo-with-URL no rows/credits) are not automated —
+  deferred to the phase's manual pass / Phase 7 acceptance walk.
