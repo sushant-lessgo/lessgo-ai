@@ -115,3 +115,82 @@ Non-blocking, carried forward (NOT fixed in phase 2):
   Behavior is correct and the invariant IS asserted. Fix options if picked up later:
   reword the comment, or add a synthetic fixture (known bridgeable type whose
   businessType-derived cap is unsatisfiable with an empty shortlist) to exercise it.
+
+---
+
+## Phase 3 — admin serveability matrix unification
+
+**Files changed**
+- `src/modules/brief/serveMatrix.ts` (created)
+- `src/modules/brief/serveMatrix.test.ts` (created)
+- `src/app/admin/page.tsx` (edited)
+
+### `src/modules/brief/serveMatrix.ts` (created)
+Pure, firewall-safe module (no React, no component imports). Exports:
+- `interface ServeMatrixRow { businessType: BusinessTypeKey; intent: GoalIntent; decision: ServeDecision }`
+- `serveabilityMatrix(): ServeMatrixRow[]` — for each `businessTypeKeys` × `entry.likelyIntents`, builds synthetic `EntrySignals` → `buildBriefDraft(signals, entry.label)` → `decideServe`. `structureHint` = `entry.structureDefault`.
+
+**EXACT full `EntrySignals` field list mirrored from `makeSignals` (serveGate.test.ts:16-40)** — all 21 fields:
+1. `businessTypeGuess` = key (meaningful)
+2. `businessTypeConfidence` = 0.9 (high)
+3. `category` = null
+4. `goalIntentGuess` = intent (meaningful)
+5. `tiebreaker` = 'none'
+6. `structureHint` = entry.structureDefault (single/multi)
+7. `designStyleHint` = null
+8. `platformNeeds` = 'none'
+9. `summary` = 'A business.'
+10. `businessName` = 'Acme'
+11. `offerings` = []
+12. `audiences` = []
+13. `categories` = []
+14. `outcomes` = []
+15. `deliveryModel` = null
+16. `offer` = ''
+17. `oneLiner` = 'We do things.'
+18. `proofAvailable` = []
+19. `socialProfiles` = []
+20. `testimonials` = []
+
+(`makeSignals` has exactly these 20 keys; verified 1:1 against serveGate.test.ts — none omitted. tsc would have flagged a missing required field.)
+
+### `src/modules/brief/serveMatrix.test.ts` (created)
+Tests: matrix covers every businessType × likelyIntent (count check); writer serves; writer×lead-magnet(synthetic) → serve/writer/granth; app×download-app → serve/product; all app intents serve; every photographer intent → manual `rungC:gallery`; every row a valid ServeDecision shape (manual `missing` non-empty); structureHint single-vs-multi invariance (identical decision per row). Has a local `makeSignals` mirror for direct off-matrix probes (writer×lead-magnet is not in writer.likelyIntents). 8 tests pass.
+
+### Observed matrix rows (from `serveabilityMatrix()`)
+- writer: follow-social / buy-via-link / subscribe-newsletter → all `serve→granth`
+- app: download-app / signup-free / waitlist → all `serve→meridian`
+- photographer: enquiry / book-call / follow-social → all `manual:rungC:gallery`
+- (full: saas→meridian ×4, manufacturer→vestria ×2, agency→surge ×3, consultant→lex ×3, coach→hearth ×3)
+
+### `src/app/admin/page.tsx` (edited)
+- Added `BusinessTypeKey` type + `serveabilityMatrix`/`ServeMatrixRow` imports.
+- Replaced the `fit()`-based `businessTypeRows` (blanket `serveable` boolean) with a matrix grouped by businessType: `intentsByType` map from `serveabilityMatrix()`, and per-row `{ entry, missingCaps, intents }`.
+- Kept `missingCaps` (via `fit`/`templateIds`) for the caps-column red highlight — engine/caps/style/fields columns unchanged (per "keep the rest as-is").
+- Serveability column reworked into per-intent cells INSIDE the existing businessType row (binding orchestrator decision — not a sub-table): intent label + green `serve → <templateId>` badge, or red `missing` string on manual.
+
+### Deviations
+- Kept the `fit`/`templateIds` imports and the `missingCaps` computation in `admin/page.tsx`. The plan step 3 says "replace businessTypeRows with serveabilityMatrix()" but also "keep the caps column as-is"; the caps column's red-highlight depends on `missingCaps`. Conservative reading: preserve the caps column exactly (still uses `fit`) and drive ONLY the Serveability column from the matrix. All within the one allowed file.
+- serveMatrix passes `entry.label` as `buildBriefDraft`'s `rawInput`. `makeSignals` callers pass a descriptive string; `rawInput` only affects raw-text heuristics, and the structureHint-invariance + explicit serve/manual assertions confirm rows are stable regardless. Logged as a judgment call.
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 116 passed | 1 skipped (117 files); 1885 passed | 3 skipped. Full suite green.
+- Admin page compiles as a server component (tsc clean; only pure module + existing server imports added — no client/hook imports).
+
+### Open risks
+- Admin matrix is untested at the render level (no component test exists for admin/page.tsx; consistent with the rest of the file). Logic is fully covered by serveMatrix.test.ts.
+- Human gate (dev repro Briefs + eyeball /admin) still pending per plan.
+
+### Phase 3 — impl-review verdict: ship (1 loop)
+
+Non-blocking, not fixed:
+- `serveMatrix.test.ts:40` title says "writer × lead-magnet ⇒ SERVE" but the assertion
+  probes `follow-social` (inline comment acknowledges). Rename for accuracy.
+- `serveMatrix.test.ts:135` duplicates `makeSignals` instead of importing serveGate.test.ts's
+  copy. tsc catches shape drift, but neutral VALUES could silently diverge.
+
+Reviewer confirmed the retained `fit()`/`missingCaps` in admin/page.tsx drives only the
+"Required capabilities" column highlight (a capability-backing claim, not a serveability
+claim). The old row-level `serveable = templateIds.some(t => fit(...))` boolean is GONE,
+not dead code. Serveability column is 100% real-gate output, rendered per-intent.
