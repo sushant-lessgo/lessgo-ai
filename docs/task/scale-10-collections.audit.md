@@ -320,3 +320,57 @@ Two layers:
 ### Open risks / notes
 - The item-copy route payloads (`collectionItem`, `collectionKey`, per-item `page`) target route contracts that do not yet handle collection items — inert today (dormant), formalized at rung-C when the routes + block pairs land.
 - Generic builders' section-type layout fallback (non-products keys) is never hit on a live fire (capability gate); it only keeps the builders total for fixture/dormant use.
+
+## Phase 6 — Editor panel generalization
+
+Branch: `feature/scale-10-collections` (verified via `git branch --show-current`).
+
+**Files changed**
+- `src/app/edit/[token]/components/ui/ProductsModal.tsx`
+- `src/app/edit/[token]/components/layout/PageSwitcher.tsx`
+
+No rename (kept `ProductsModal.tsx` — safest per plan; no shim needed). GlobalModals.tsx NOT touched (see Deviations — payload carried via a module-scoped key channel instead of widening the GlobalModals signature).
+
+### ProductsModal.tsx
+- Removed `const COLLECTION='products'`. Panel now keyed by an optional `collectionKey` prop; when absent it reads a module-scoped `_panelCollectionKey` (default `'products'`) via `getPanelCollectionKey()`. Exposed `setPanelCollectionKey()` / `getPanelCollectionKey()`.
+- Reads `label`/`basePath`/`itemSectionType`/`catalogSectionType`/`labelFields` from `getCollectionDef(key)`. Guard `if (!def) return null`.
+- `recordOf` now takes `itemSectionType` (was hard-coded `'productdetail'`); categories lookup uses `def.catalogSectionType` (was `'catalog'`). Store calls (`getCollectionItems`/`addCollectionItem`/`reorderCollection`/`setCollectionItemCategory`/`setCollectionCategories`) all pass `key`. `CategoriesSection` takes a `collectionKey` prop.
+- Copy generalized while preserving products byte-identical (see below).
+
+**Pixel-identical products label derivation.** Old:
+`[rec.model, rec.name || p.title].filter(Boolean).join(' — ') || p.title` — note the INNER `rec.name || p.title` on the last field AND the outer `|| p.title`.
+Generic rule (`deriveLabel`): map `def.labelFields`, giving the LAST field the inner `|| title` fallback, others raw; then `.filter(Boolean).join(' — ') || title`:
+```
+parts = labelFields.map((f,i) => i===last ? (rec[f] || title) : rec[f])
+return parts.filter(Boolean).join(' — ') || title
+```
+For products (`labelFields: ['model','name']`, last = `name`) this expands to exactly `[rec.model, rec.name || p.title].filter(Boolean).join(' — ') || p.title` — byte-identical, including the `model present / name empty → "model — title"` case the naive "join non-empty" would have regressed to `"model"`.
+
+**Pixel-identical products copy.** Introduced `singularNoun(label)` = `label.toLowerCase().replace(/ies$/,'y').replace(/s$/,'')`. `'Products'→'product'`, so every string renders identically for products: heading `{def.label}`="Products"; sub `Each {noun} is a <code>{def.basePath}/…</code> page; the catalog lists them automatically.`="Each product is a `/products/…` page…"; button `+ Add {noun}`="+ Add product"; prompt `${Noun} name`/`New ${noun}`="Product name"/"New product"; empty state `No {labelLower} yet. Click + Add {noun} to create one.`="No products yet…"; delete `Delete ${noun}`/`Delete this ${noun}?`. (Singularizer also handles family: Services→service, Works→work, Case Studies→case study.)
+
+**Non-resolvable-block guard.** Header comment documents that the panel only opens for collections PRESENT in pages (bounded by the generation capability gate); `recordOf`/categories read by section type and degrade to `{}`/`[]` when absent, so a `services`/`case-studies`/`works` def never assumes a resolvable block until rung-C.
+
+### PageSwitcher.tsx
+- Added `openCollectionPanel(key)` = `setPanelCollectionKey(key); showProductsModal()`.
+- The techpremium "+ Products" creation button now calls `openCollectionPanel('products')` — behaviorally identical (module key = 'products', panel already defaults to products).
+- Added a loop over `collectionKeysInPages(pages).filter(k => k !== 'products')` rendering a "Manage {def.label}" entry per present NON-products collection, keyed-open via `openCollectionPanel(key)`. Products is EXCLUDED so its UI stays pixel-identical (it keeps its existing "+ Products" button + catalog-block window event; a duplicate "Manage Products" tab would be a visible change). Today no template births non-products collection pages, so this renders nothing — the mechanism is wired for rung-C without touching the products flow.
+
+### How the panel is keyed + opened per collection
+Keyed by `collectionKey` (prop or module-scoped `_panelCollectionKey`). Opened per collection via `openCollectionPanel(key)`, which sets the module key then triggers the existing `showProductsModal()`. Present collections are enumerated by `collectionKeysInPages(pages)`.
+
+### Empty-collection add-post-reveal path
+Verified in `pageActions.ts`: `addCollectionItem(key, {title})` calls `ensureCatalogDraft` internally before creating the item, so opening the panel on an empty collection and clicking "+ Add {noun}" materializes the catalog page then the first item. `handleAdd` routes through this unchanged. Covered green by `pageActions.test.ts`.
+
+### Deviations
+- **GlobalModals.tsx not edited (payload via module channel).** The plan's PageSwitcher note says "widen the modal-manager signature if it currently carries no payload." The modal manager is `GlobalModals.tsx`, which is NOT in the Phase 6 Files-touched list. To respect the hard file-scope rule, instead of widening the GlobalModals open signature I carry the `collectionKey` through a module-scoped variable on ProductsModal (`setPanelCollectionKey`), set by PageSwitcher immediately before `showProductsModal()`. Net effect is equivalent for opening a keyed panel; both edited files stay in scope; no new import cycle (ProductsModal does not import GlobalModals). Residual risk: the catalog-block `lessgo:manage-products` window event opens via `showProductsModal()` without resetting the module key — harmless today (only products collections exist; default is 'products') but if a rung-C non-products panel is opened then closed and the products catalog block is used without an intervening products open, the stale key could surface. Resetting that event to 'products' lives in GlobalModals (out of scope) — flag for rung-C.
+- **Copy uses `singularNoun`, not the plan's example `"Add {def.label} item"`.** The plan's `{def.label}` example ("Add Products item") would have CHANGED the products button text ("+ Add product"), violating the pixel-identical requirement. Chose the conservative option that preserves products byte-for-byte.
+- **Products excluded from the per-collection manage loop** (rationale above) — conservative choice to avoid a visible products UI change.
+
+### Verification
+- `npx tsc --noEmit`: clean.
+- `npm run test:run`: 1745 passed, 3 skipped (104 files); `pageActions.test.ts` (incl. add-post-reveal) and `naayomProducts.test.ts` green.
+- UI reasoning (units can't cover render): products path is unchanged in value — same store actions with `'products'`, same section types (`productdetail`/`catalog`), same label derivation (proven byte-identical above), same copy strings (proven via singularizer), same entry point ("+ Products" → products key). The only new PageSwitcher output is the non-products manage loop, which is empty for all current projects.
+
+### Open risks
+- Stale module key on the catalog-block window-event path (see Deviations) — dormant today, resolve at rung-C in GlobalModals.
+- `singularNoun` is a display heuristic; correct for the four family labels but would mislabel an oddly-pluralized future label — cosmetic only.

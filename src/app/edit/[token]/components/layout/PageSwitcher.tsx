@@ -7,8 +7,11 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import { useEditStore } from '@/hooks/useEditStoreLegacy';
 import { showProductsModal } from '../ui/GlobalModals';
+import { setPanelCollectionKey } from '../ui/ProductsModal';
 import { confirmDialog, promptDialog } from '@/components/ui/ConfirmDialog';
 import { usesTemplateModule } from '@/types/service';
+import { collectionKeysInPages } from '@/hooks/editStore/collectionHelpers';
+import { getCollectionDef } from '@/modules/collections/registry';
 
 // Blog (Phase 1): link to the dashboard blog manager for this project's
 // published site. Blog-after-publish is a P1 constraint (per-post publish needs
@@ -81,6 +84,22 @@ export function PageSwitcher() {
   // entry only until that page exists; after that it's a normal tab.
   const hasArchetype = (key: string) => Object.values(pages).some((p: any) => p.archetypeKey === key);
 
+  // Open the generalized collection panel keyed by `collectionKey`. The GlobalModals
+  // open path carries no payload, so we set the module-scoped key on ProductsModal
+  // just before opening (defaults to 'products' → grandfathered flow unchanged).
+  const openCollectionPanel = (collectionKey: string) => {
+    setPanelCollectionKey(collectionKey);
+    showProductsModal();
+  };
+
+  // Per-collection management entries for any NON-products collection present in the
+  // project's pages (products keeps its existing entry points — the "+ Products"
+  // creation button below + the catalog-block window event — so its UI stays
+  // pixel-identical; adding a duplicate "Manage Products" tab would be a visible
+  // change). Today no template births non-products collection pages, so this renders
+  // nothing; it wires the mechanism for rung-C without touching the products flow.
+  const managedCollectionKeys = collectionKeysInPages(pages).filter((k) => k !== 'products');
+
   const handleAdd = async () => {
     const title = await promptDialog({ title: 'Page name', defaultValue: 'New page' });
     if (title === null) return;
@@ -149,7 +168,7 @@ export function PageSwitcher() {
       })}
       {isTechPremium && !hasCatalog && (
         <button
-          onClick={() => showProductsModal()}
+          onClick={() => openCollectionPanel('products')}
           className="px-3 py-1 rounded-md text-sm text-gray-500 hover:bg-gray-100"
           aria-label="Add products"
           title="Add a products catalog"
@@ -157,6 +176,21 @@ export function PageSwitcher() {
           + Products
         </button>
       )}
+      {managedCollectionKeys.map((key) => {
+        const def = getCollectionDef(key);
+        if (!def) return null;
+        return (
+          <button
+            key={key}
+            onClick={() => openCollectionPanel(key)}
+            className="px-3 py-1 rounded-md text-sm text-gray-500 hover:bg-gray-100"
+            aria-label={`Manage ${def.label}`}
+            title={`Manage ${def.label}`}
+          >
+            {def.label}
+          </button>
+        );
+      })}
       {isTechPremium && !hasArchetype('gallery') && (
         <button
           onClick={() => store.addArchetypePage('gallery')}
