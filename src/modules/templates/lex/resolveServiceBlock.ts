@@ -56,7 +56,6 @@ export type LexBlockMode = 'edit' | 'published';
 export function resolveServiceBlock(
   sectionType: string,
   mode: LexBlockMode = 'edit',
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _layoutName?: string, // one block per section; accepted for TemplateModule contract parity
 ): React.ComponentType<any> | null {
   const key = (sectionType || '').toLowerCase();

@@ -67,7 +67,6 @@ export type ServiceBlockMode = 'edit' | 'published';
 export function resolveServiceBlock(
   sectionType: string,
   mode: ServiceBlockMode = 'edit',
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _layoutName?: string, // one block per section; variant switching (testimonials) is internalDispatch
 ): React.ComponentType<any> | null {
   const key = (sectionType || '').toLowerCase();

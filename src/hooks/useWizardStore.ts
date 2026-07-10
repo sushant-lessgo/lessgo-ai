@@ -129,7 +129,6 @@ export interface WizardProofState {
 type _ProofIsSuperset = keyof ServiceAssetAvailability extends keyof WizardProofState
   ? true
   : never;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _proofSupersetCheck: _ProofIsSuperset = true;
 
 const initialProof: WizardProofState = {
