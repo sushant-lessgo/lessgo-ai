@@ -14,8 +14,8 @@ Clone the social-posts pattern (prompt engine → generation route → copy-bloc
   - PHASE-5 CARRY: reviewer flag — real captured testimonials render quoted in prompt; if one contains a hard metric it will legitimately appear in-quote (by design, not a proof-truth violation). Human-verify at pilot copy gate.
 - phase 3 API routes + kill-switch: done (commit 32277b7f, review loops 1 → ship; tsc+1808 tests green). Notes: full-sequence output wrapped as {emails:[...]} object (aiClient object-brace extraction); GET resolves timing-label def from row.intent. .env.example is gitignored → NOT committed; kill-switch NEXT_PUBLIC_EMAIL_SEQUENCES_DISABLED documented here + must be surfaced at Phase 7 merge/deploy gate.
 - phase 4 dashboard UI + nav: done (commit e2afb796, review loops 1 → ship; tsc+1808 tests green). Server page + single client panel (per-email Copy/Regenerate, Generate/Regen-all, Delete, 3-state empty); ProjectCard "Emails" button (tokenId, kill-switch hidden). Live authed route/UI smoke deferred to Phase 5 (routes are Clerk-protected — curl-without-auth can't reach; correct by design).
-- phase 5 pilot quality gate: pending
-- phase 6 remaining 4 archetypes: pending
+- phase 5 pilot quality gate: SKIPPED by user (2026-07-10) — build all archetypes, validate together before merge gate. Show-up real-LLM copy NOT yet human-validated; fold quality check + PHASE-5 CARRY testimonial-metric flag into Phase 7 pre-merge review.
+- phase 6 remaining 4 archetypes: done (commit 048cecda, review loops 1 → ship; tsc+1810 tests green). 4 defs added, 7 intents flipped deferred→available (now 11 available / 2 deferred / 5 skipped). Data-only, no route/UI/engine change.
 - phase 7 final verification + merge: pending
 
 ## Key design decisions (bind all phases)
@@ -143,7 +143,7 @@ Clone the social-posts pattern (prompt engine → generation route → copy-bloc
 
 **Steps**
 1. Add sequence defs + per-email `promptInstructions` + timing labels: Follow-up nurture (enquiry, request-quote, apply — 4: instant reply → proof → objection-killer → direct CTA), Lead-magnet delivery (lead-magnet — 4: deliver → consume nudge → related proof → offer), Waitlist warm-keeper (waitlist — 3: you're in → update/story → early-access offer), Welcome series (subscribe-newsletter, enroll — 3: welcome+expectations → best content/story → soft offer). Flip those intents from `deferred` → `available`. Activation (signup-free, free-trial) STAYS deferred; the 5 skip intents stay skipped.
-2. Update `archetypes.test.ts`: 13 intents now available with correct email counts/timing labels; skip/deferred cases unchanged. No route/UI/engine changes needed (rail is archetype-agnostic).
+2. Update `archetypes.test.ts`: 11 intents now available with correct email counts/timing labels; skip/deferred cases unchanged. No route/UI/engine changes needed (rail is archetype-agnostic).
 
 **Verification:** `npm run test:run` green; manual mock generate for one intent per new archetype (e.g. enquiry, lead-magnet, waitlist, subscribe-newsletter) on dev.
 

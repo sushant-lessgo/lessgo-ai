@@ -188,3 +188,39 @@ tsc green (0 errors); test:run green (1808 passed, 3 skipped — +1 new bare-arr
 
 **Open risks**
 - None for the wiring. Live smoke test should confirm mock + real-LLM generate, per-email copy/regenerate, delete, unmapped-intent empty state, and kill-switch hiding button + page content.
+
+---
+
+## Phase 6 — Remaining 4 archetypes
+
+**Files changed**
+- `src/modules/email/archetypes.ts`
+- `src/modules/email/archetypes.test.ts`
+
+### `src/modules/email/archetypes.ts`
+Added 4 new `SequenceDef`s (mirroring `SHOW_UP_SEQUENCE` — each email has `key`, `purpose`, static `timingLabel`, proof-truth `promptInstructions`) and flipped their intents `deferred → available` in `INTENT_PLAN`:
+
+| Archetype | Intents | Emails | Timing labels |
+|---|---|---|---|
+| `follow-up-nurture` | enquiry, request-quote, apply | 4: acknowledge → proof → objection-killer → direct-cta | Send immediately / Send day 2 / Send day 4 / Send day 6 |
+| `lead-magnet-delivery` | lead-magnet | 4: deliver → consume-nudge → related-proof → offer | Send immediately / Send day 1 / Send day 3 / Send day 5 |
+| `waitlist-warm-keeper` | waitlist | 3: youre-in → update-story → early-access-offer | Send immediately / Send day 7 / Send at launch |
+| `welcome-series` | subscribe-newsletter, enroll | 3: welcome-expectations → best-content-story → soft-offer | Send immediately / Send day 2 / Send day 5 |
+
+- `promptInstructions` written in the same voice as SHOW_UP, each carrying proof-truth guidance (no invented company names / hard metrics / quotes) and pulling from Brief facts (offer / ICP / proof).
+- Also refreshed the top-of-file phase comment, the `INTENT_PLAN` doc block, and the `EmailArchetypeId` doc comment to reflect the phase-6 state (5 archetypes live).
+
+**KEPT unchanged (verified):** Activation (`signup-free`, `free-trial`) stays `deferred`; the 5 skip intents (`follow-social`, `buy-via-link`, `order-via-platform`, `pay-via-link`, `download-app`) stay `skipped`. Map remains `Record<GoalIntent, SequencePlan>` (compile-time exhaustive over all 18 intents).
+
+### `src/modules/email/archetypes.test.ts`
+Rewrote to phase-6 expectations: a data-driven `AVAILABLE_INTENTS` table (11 intents) asserts each resolves to `available` with the correct archetype + email count (Show-up 4, Follow-up 4, Lead-magnet 4, Waitlist 3, Welcome 3), and every available email has non-empty `key`/`purpose`/`timingLabel`/`promptInstructions`. Retained: 18-intent exhaustiveness assertion, 3-bucket partition (no gaps/overlap), Show-up 24h/1h reminder labels. Added a waitlist "Send at launch" label check. Skip (5) still `skipped`; Activation (2) still `deferred`.
+
+**Deviations from plan:** none.
+
+**Test results**
+- `npx tsc --noEmit` → 0 errors.
+- `npx vitest run src/modules/email/archetypes.test.ts` → 8 passed.
+- `npm run test:run` → 1810 passed | 3 skipped (up from 1808; +2 net from the reworked archetype file, no regressions).
+
+**Open risks**
+- Data-only change; the rail is archetype-agnostic so no route/UI/engine edits were required. Live mock-generate smoke per new archetype (enquiry, lead-magnet, waitlist, subscribe-newsletter) is left to the orchestrator per the plan.
