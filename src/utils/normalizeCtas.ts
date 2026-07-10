@@ -40,6 +40,82 @@ import { resolveDestination, type CtaButtonConfig } from '@/utils/resolveCtaHref
 export interface NormalizeCtasContext {
   goal?: Brief['goal'] | null;
   forms?: Record<string, unknown> | undefined;
+  /** goal-ref-cta phase 3 (F23): path of the page being rendered ('/', '/contact').
+   *  Multipage only; single-page omits it → M1 resolves to the same-page anchor. */
+  currentPagePath?: string;
+  /** goal-ref-cta phase 3 (F23): path of the page that holds the conversion form.
+   *  When it differs from currentPagePath, M1 resolves cross-page (page dest). */
+  formPagePath?: string;
+}
+
+/** One page's identity + section-content map, for the form-bearing-page scan.
+ *  Template- and store-agnostic (the two callers hold sitemaps in different
+ *  shapes; both normalize down to this before calling buildNormalizeCtasContext). */
+export interface CtaPageInput {
+  path: string;
+  content: Record<string, any> | undefined;
+}
+
+/** True when a page's content map contains the conversion form section. Pinned
+ *  predicate (structural, works on the published shape which has no archetypeKey):
+ *  a section whose id starts with `leadForm-` (single-page seeded form), OR any
+ *  section carrying a non-empty `elements.form_id` (multipage template-shipped
+ *  contact form — set by mergePageIntoFinalContent on the `contact` section). */
+function pageHasFormSection(content: Record<string, any> | undefined): boolean {
+  if (!content || typeof content !== 'object') return false;
+  for (const sectionId of Object.keys(content)) {
+    if (sectionId.startsWith('leadForm-')) return true;
+    const section = content[sectionId];
+    const formId = section?.elements?.form_id;
+    if (typeof formId === 'string' && formId.length > 0) return true;
+  }
+  return false;
+}
+
+/**
+ * Find the path of the page that holds the conversion form. Prefers the CURRENT
+ * page when it holds a form (→ same-page anchor); otherwise the first page that
+ * does (→ cross-page page dest). `undefined` when no page holds a form (M1 then
+ * degrades to the same-page anchor, matching single-page behavior).
+ */
+export function findFormPagePath(
+  pages: CtaPageInput[],
+  currentPagePath?: string,
+): string | undefined {
+  const current = pages.find((p) => p.path === currentPagePath);
+  if (current && pageHasFormSection(current.content)) return current.path;
+  const formPage = pages.find((p) => pageHasFormSection(p.content));
+  return formPage?.path;
+}
+
+/**
+ * Build the render-time CTA-resolution context shared by BOTH renderers (edit +
+ * published) and consumed by the parity test. Plain module — no client-store or
+ * template imports — so the published exporter reaches it firewall-safely.
+ *
+ * `pages` (edit store) → the form-bearing page is scanned here via findFormPagePath.
+ * `formPagePath` (published exporter) → precomputed by the exporter (which alone
+ * holds every page) and passed straight through. Single-page callers pass neither
+ * → ctx degrades to `{goal, forms}` and M1 resolves to the same-page anchor.
+ */
+export function buildNormalizeCtasContext(args: {
+  goal?: Brief['goal'] | null;
+  forms?: Record<string, unknown> | undefined;
+  currentPagePath?: string;
+  /** Precomputed (published exporter). Ignored when `pages` is provided. */
+  formPagePath?: string;
+  /** All pages (edit store) — scanned for the form-bearing page. */
+  pages?: CtaPageInput[];
+}): NormalizeCtasContext {
+  const formPagePath = args.pages
+    ? findFormPagePath(args.pages, args.currentPagePath)
+    : args.formPagePath;
+  return {
+    goal: args.goal,
+    forms: args.forms,
+    currentPagePath: args.currentPagePath,
+    formPagePath,
+  };
 }
 
 /**
@@ -55,7 +131,11 @@ function ctaToButtonConfig(
   let isForm: boolean;
 
   if (cta.dest === 'GOAL_REF') {
-    const gd = goalToDestination(ctx.goal, { forms: ctx.forms });
+    const gd = goalToDestination(ctx.goal, {
+      forms: ctx.forms,
+      currentPagePath: ctx.currentPagePath,
+      formPagePath: ctx.formPagePath,
+    });
     // D-C: `null` = goal exists but its required param is missing (F14 "Skip for
     // now") → an inert `#` no-op, never a dead/broken href. `undefined` =
     // unresolvable / no goal → leave the entry untouched (template fallback).

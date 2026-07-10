@@ -11,8 +11,9 @@ Fix F5/F6/F23. The central gap: `seedGoalForm.ts:81` early-returns `if (!isM1) r
 ## Progress log
 
 - phase 1 GOAL_REF stamping for ALL mechanisms on BOTH generation paths: done (commit c70aa37e, review loops 1, verdict ship)
-- phase 2 dual-read shim coverage + legacy fixture + reader-impact analysis: done (commit <pending>, review loops 1, verdict ship — NO production code changed; shim already complete)
-- phase 3 multipage M1 page dest + chrome/header reach + shared ctx builder (F23): pending
+- phase 2 dual-read shim coverage + legacy fixture + reader-impact analysis: done (commit 1dfc2d9c, review loops 1, verdict ship — NO production code changed; shim already complete)
+- phase 3 multipage M1 page dest + chrome/header reach + shared ctx builder (F23): done (commit <pending>, review loops 1, verdict ship)
+- phase 3.5 flat-href render bridge (vestria/granth/techpremium-header) — ADDED mid-run, see below: pending
 - phase 4 parity + re-point + detach tests (test-only): pending
 - phase 5 M2–M5 engine matrix + cross-template allowlist coverage: pending
 - phase 6 full verification + manual repro gate: pending
@@ -175,6 +176,59 @@ The multipage path never runs the finalize tail (verified fact above), so the st
 - `npx tsc --noEmit`
 - `npm run test:run`
 - Acceptance mapped: "multipage M1 home primaries resolve to the contact page path (bare `pathSlug`), published HTML verified at unit level against REAL-assembly input; live check at phase 6 gate." Header CTA asserted in exported subpage HTML.
+
+## Phase 3.5 — Flat-href render bridge (ADDED mid-run after a confirmed phase-3 finding)
+
+**Why this exists.** Phase 3's impl-review independently verified that **no vestria block reads
+`buttonConfig`** — vestria's hero (`VestriaTailoredHero.core.tsx:48`) and header
+(`VestriaNavHeader.core.tsx:89`) render a flat `elements.cta_href` (hardcoded default `#contact`)
+through `E.Link`, and published `Link` (`publishedPrimitives.tsx:31-32`) takes the prop verbatim.
+So the GOAL_REF stamp + resolution are **dead wiring** on flat-`*_href` templates, and F23 is NOT
+fixed on its own repro (`9knkYn8_QZpE`, vestria). The spec's diagnosis ("snapshot resolver guesses
+`#contact`") was a misdiagnosis: `#contact` is the block's schema default.
+
+Per-template wiring (verified): meridian = wired everywhere; techpremium = hero/cta wired but the
+**header prefers the flat prop** (`TechPremiumNav.published.tsx:42`: `props.cta_href || resolveCtaHref(...)`);
+vestria = flat hero+header; granth = flat hero.
+
+**Goal:** one template-agnostic render-time bridge so flat-`*_href` blocks pick up the resolved goal
+destination, in BOTH renderers, without touching any template block or `.core.tsx`.
+
+**Design (pinned):**
+- Bridge lives in `normalizeCtas` (the single chokepoint both renderers already call). For each
+  allowlisted primary key that carries a resolved `cta`, ALSO write the resolved href into the
+  sibling flat href element: `cta_text` → `elements.cta_href`.
+- **Only bridge when the element's `cta.dest` is `'GOAL_REF'`.** An explicit (detached) `Destination`
+  must NOT overwrite a flat href — and neither must a user-set `cta_href` (vestria's
+  `LinkTargetPopover` at `editPrimitives.tsx:124` writes `elements.cta_href` directly). Detach and
+  manual-href both win over the bridge. This preserves spec criterion 5.
+- Bridge writes into the transient `normalizeCtas` clone only — never persisted (same contract as the
+  existing `buttonConfig` down-conversion).
+- Legacy no-migration contract unchanged: `if (!cta) continue;` — an element with no `cta` is never bridged.
+
+**Steps:**
+1. Verify the stamp actually lands on vestria/granth: phase 1 stamps a key only when it exists in
+   `section.elements` or existing metadata (no phantom stamps). Confirm vestria hero/header sections
+   carry a `cta_text` element (label) alongside `cta_href`. **If `cta_text` is absent, the stamp never
+   fires and the bridge has nothing to read — STOP and report**, because the fix would then need a
+   different key source (do not improvise a phantom stamp).
+2. Implement the bridge in `normalizeCtas.ts` with the GOAL_REF-only guard above.
+3. Fix the techpremium header precedence (`TechPremiumNav.published.tsx:42`) so a bridged/resolved
+   destination is not shadowed by a stale flat `cta_href`. Keep the dual-renderer pair in sync
+   (`.tsx` + `.published.tsx`) per the dual-renderer law.
+4. Tests: vestria + granth multipage → home hero/header emit `href="/contact"` (bare); single-page →
+   `#form-section`; detached explicit `Destination` and a user-set `cta_href` both survive un-bridged;
+   legacy metadata-less content unchanged (reuse the frozen fixture).
+
+**Files touched:**
+- `src/utils/normalizeCtas.ts`
+- `src/modules/templates/techpremium/blocks/Nav/TechPremiumNav.published.tsx` (+ its `.tsx` pair if it shares the precedence)
+- `src/utils/normalizeCtas.bridge.test.ts` (new)
+- `src/lib/staticExport/__tests__/multipageGoalRef.test.ts` (extend: vestria case)
+
+**Verification:**
+- `npx tsc --noEmit`; `npm run test:run` (1834+ stay green)
+- Acceptance mapped: criterion 3 (multipage vestria repro) now actually achievable at the render layer.
 
 ## Phase 4 — Parity + re-point + detach tests (test-only)
 

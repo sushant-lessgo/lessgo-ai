@@ -39,6 +39,41 @@ describe('goalToDestination', () => {
         formId: undefined,
       });
     });
+
+    // goal-ref-cta phase 3 (F23) — multipage M1 cross-page resolution.
+    it('stays a same-page anchor when the form is on the CURRENT page', () => {
+      const result = goalToDestination(
+        goal({ intent: 'book-call', mechanism: 'M1' }),
+        { forms: { 'form-abc': {} }, currentPagePath: '/contact', formPagePath: '/contact' },
+      );
+      expect(result).toEqual({
+        dest: { kind: 'section', anchor: 'form-section' },
+        formId: 'form-abc',
+      });
+    });
+
+    it('emits a cross-page `page` dest (bare pathSlug, NO formId key) when the form is on another page', () => {
+      const result = goalToDestination(
+        goal({ intent: 'book-call', mechanism: 'M1' }),
+        { forms: { 'form-abc': {} }, currentPagePath: '/', formPagePath: '/contact' },
+      );
+      // Bare host-relative pathSlug — middleware/KV serve it (Spec deviation): NOT /p/<slug>/contact.
+      expect(result).toEqual({ dest: { kind: 'page', pathSlug: '/contact' } });
+      // NO formId key — a page dest is navigation, not an on-site form connection,
+      // so normalizeCtas down-converts it to {type:'page'}, never {type:'form'}.
+      expect(result).not.toHaveProperty('formId');
+    });
+
+    it('falls back to the same-page anchor when only currentPagePath is known (no form page)', () => {
+      const result = goalToDestination(
+        goal({ intent: 'book-call', mechanism: 'M1' }),
+        { forms: { 'form-abc': {} }, currentPagePath: '/' },
+      );
+      expect(result).toEqual({
+        dest: { kind: 'section', anchor: 'form-section' },
+        formId: 'form-abc',
+      });
+    });
   });
 
   describe('M2 — direct channel', () => {

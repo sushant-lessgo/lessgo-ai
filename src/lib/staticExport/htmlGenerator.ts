@@ -40,6 +40,13 @@ export interface StaticHTMLOptions {
    *  normalization pre-pass so GOAL_REF primaries resolve. OPTIONAL — blog/no-goal
    *  callers omit it → null-goal legacy fallback. */
   goal?: import('@/types/brief').Brief['goal'] | null;
+  /** goal-ref-cta phase 3 (F23): the path of THIS page ('/', '/contact') and the
+   *  path of the page that holds the conversion form. Both derived once by
+   *  renderPublishedExport (which holds every page); threaded into the renderer's
+   *  normalization pre-pass so multipage M1 primaries emit a cross-page `page`
+   *  dest. Single-page callers omit both → same-page anchor. */
+  currentPagePath?: string;
+  formPagePath?: string;
 
   // Canonical / social URL resolution.
   // canonicalDomain: the live custom domain (no scheme) when one is active; when unset,
@@ -104,6 +111,8 @@ export async function generateStaticHTML(
       variantId: options.variantId ?? null,
       mood: options.mood ?? null,
       goal: options.goal ?? null,
+      currentPagePath: options.currentPagePath,
+      formPagePath: options.formPagePath,
     })
   );
 

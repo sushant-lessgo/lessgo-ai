@@ -340,3 +340,106 @@ guide task not-done). Accepted; no longer tracked as a behavior change.
 
 Non-blocking note: the frozen fixture is representative, not exhaustive — raw `tel:`/`mailto:`/`wa.me`
 string branches are covered by `destinationShim.test.ts` rather than the render fixture. Accepted.
+
+---
+
+## Phase 3 — Multipage M1 cross-page `page` dest + chrome/header reach + shared ctx builder (F23 resolution half)
+
+### Files changed
+- `src/modules/goals/goalToDestination.ts` — M1 branch: cross-page `page` dest when the form is on another page.
+- `src/utils/normalizeCtas.ts` — widened `NormalizeCtasContext`; added `CtaPageInput`, `findFormPagePath`, `buildNormalizeCtasContext`; threaded the new fields into `goalToDestination`.
+- `src/modules/generatedLanding/LandingPagePublishedRenderer.tsx` — new `currentPagePath`/`formPagePath` props, ctx built via `buildNormalizeCtasContext`.
+- `src/modules/generatedLanding/LandingPageRenderer.tsx` — derive active-page path + form-page from the store's `pages`/`currentPageId`, ctx via `buildNormalizeCtasContext`; single-page (<=1 page) degrades to `{goal,forms}`.
+- `src/lib/staticExport/htmlGenerator.ts` — `StaticHTMLOptions` gains `currentPagePath`/`formPagePath`; passed to the renderer.
+- `src/lib/staticExport/renderPublishedExport.ts` — one-time page scan; per-render `currentPagePath` + `findFormPagePath(...)` at root + subpage sites.
+- `src/modules/goals/goalToDestination.test.ts` — M1 same-page vs cross-page + fragment-less page dest cases.
+- `src/lib/staticExport/__tests__/multipageGoalRef.test.ts` (new) — exporter-level test on REAL assembly.
+
+### Pinned form-bearing-page predicate (`pageHasFormSection`, normalizeCtas.ts)
+A page holds the conversion form when its content map has EITHER a section whose id starts with `leadForm-` (single-page seeded lead form), OR any section carrying a non-empty `elements.form_id` string. `form_id` is the multipage marker: `mergePageIntoFinalContent` sets `content[contactId].elements.form_id` on the `contact` section when a page's `bodyTypes.includes('contact')` (`multiPageAssembly.ts:189-192`). Structural (no `archetypeKey`), so it works on the published shape. `findFormPagePath(pages, currentPagePath)` PREFERS the current page when it holds a form (same-page anchor), else the first page that does (cross-page dest), else `undefined` (M1 same-page anchor = single-page behavior). Verified asymmetry (plan section 5): `seedGoalForm` injects into the HOME array and is idempotent when a form already ships, so the genuine cross-page case is a TEMPLATE-shipped contact form — the F23 repro shape (form only on `/contact`).
+
+### Exact `NormalizeCtasContext` shape settled
+`{ goal?, forms?, currentPagePath?: string, formPagePath?: string }` — template- and store-agnostic (no `PageAxisState`, no `subpages` shape leaks in). The two callers converge via `buildNormalizeCtasContext({ goal, forms, currentPagePath, formPagePath?, pages? })`: the edit renderer passes `pages` (scanned here via `findFormPagePath` — the DRY predicate); the published exporter passes a precomputed `formPagePath` (it alone holds every page). `CtaPageInput = { path: string; content: Record<string,any> | undefined }` is the normalized scan input both sides build. M1 resolution (goalToDestination): `formPagePath && currentPagePath && formPagePath !== currentPagePath` yields `{ dest:{kind:'page', pathSlug: formPagePath} }` with **NO `formId` key** (a page dest is navigation, so normalizeCtas' `'formId' in gd` form-detection stays false => `{type:'page'}`, never `{type:'form'}`). Else `{ dest:{kind:'section', anchor:'form-section'}, formId }`.
+
+### Edit-side chrome/header finding (section 8) — NO STOP required
+The edit path DOES re-merge chrome into the top-level `content` that `normalizeCtas(rawContent)` consumes. `loadPageIntoActive` (`pageHelpers.ts:129`) builds the working copy via `withChrome(body, state.chrome)` (`pageHelpers.ts:82-100`), which puts `chrome.header.id` -> `content[header.id] = chrome.header.data` at the front of the active page. So the stamped header section is present in the edit-side `content`; `normalizeCtas` covers it. Inverse of the `persistenceActions.ts:218+` split, exactly as the plan anticipated. No bypass; no scope addition needed.
+
+### Deviation (logged) + STOP-FLAG finding
+**The F23 repro template `vestria` does NOT consume the GOAL_REF/`buttonConfig` resolution — its render is UNAFFECTED by this fix.** Vestria's hero (`VestriaTailoredHero.core.tsx:48`) and header (`VestriaNavHeader.core.tsx:89`) render `content.cta_href` — a FLAT `ai_generated` element (schema default `#contact`, `product/elementSchema.ts:788`) — through `publishedPrimitives.tsx` `Link` (which takes `href` verbatim, never calls `resolveCtaHref`). Phase 1 stamps `elementMetadata.cta_text.cta`; normalizeCtas down-converts it to `elementMetadata.cta_text.buttonConfig`; but vestria reads NEITHER — so its primary CTA href stays the flat `cta_href` (`#contact`). That flat `#contact` default IS the F23 "scrolls nowhere" symptom (the spec's "snapshot resolver guesses `#contact`" was a misdiagnosis — it is the schema default, not a resolved snapshot). Granth reads flat `cta_href` the same way; techpremium is mixed.
+
+Consequence: **this plan (phases 1+3) does NOT fix F23 on vestria at the render layer.** The resolution IS correct and template-agnostic for every template whose blocks consume `buttonConfig` via `resolveCtaHref` (meridian hero/header/cta, hearth, shared blocks). Wiring vestria's flat-`cta_href` blocks to the goal resolution (or a `*_href`-from-`elementMetadata[key].buttonConfig` bridge in the render path) is OUTSIDE phase 3's Files-touched — flagged to the orchestrator, NOT edited here.
+
+Because of this, the exporter test (plan step 6 / non-negotiable 11) uses **meridian** (fully `buttonConfig`-wired) instead of vestria, so the HTML assertion is real: on a vestria fixture the same test would assert nothing (vestria emits `#contact` regardless). The test still drives REAL assembly (unstamped copy in -> `finalizeMultiPageGeneration(fc, goal)` -> stamp out), the exporter's real HTML producer (`generateStaticHTML`), and the real `findFormPagePath` scan — a false-green fixture pre-carrying `{kind:'page'}` is not used. `'server-only'` is mocked to an empty module so the exporter runs under vitest (jsdom); no precedent test exercised `generateStaticHTML` live.
+
+### Non-negotiable 11 mapping (meridian, real assembly)
+- Home hero + header + cta primaries -> `href="/contact"` (bare pathSlug; asserted >=3 occurrences; asserted NOT `/p/acme/contact`).
+- Contact page (the form page) own primary -> `href="#form-section"` (asserted; asserted NOT `/contact`).
+- Single-page (no pages/formPagePath, form on the page) -> `href="#form-section"` — no regression.
+- Unstamped-in guard: assembled fc has no `elementMetadata` before finalize, and `findFormPagePath([home], '/')` is `undefined` (home holds no form).
+
+### Test results
+- `npx tsc --noEmit`: clean.
+- `npx vitest run src/lib/staticExport src/modules/goals src/utils/normalizeCtas.test.ts`: 16 files, 203 passed.
+- `npm run test:run` (full): 112 passed | 1 skipped (113 files); 1834 passed | 3 skipped (1837) — up from phase 2's 1827 by 4 exporter + 3 goalToDestination cases. 0 failures.
+- `npm run build`: NOT run (reserved for phase 6).
+
+### Open risks
+- **F23 NOT fixed for vestria/granth/flat-`cta_href` templates** (STOP-flag above) — needs a follow-up to wire those blocks to the goal resolution; the phase-6 manual gate on `9knkYn8_QZpE` (vestria) will FAIL until then.
+- "Identical header href in root + subpage" (plan step 6 wording): per-page resolution makes the shared header CTA resolve to `/contact` on home but `#form-section` on the contact page — both correct (both lead to the form), but the strings DIFFER by design. The test follows non-negotiable 11 (home->`/contact`, contact->`#form-section`), not the looser "identical" phrasing.
+- Multi-form pages: `findFormPagePath` prefers the current page, so a page with its own form always self-anchors; a project with forms on several non-current pages resolves to the FIRST — acceptable for the single-conversion model, revisit if multi-form sites arrive.
+
+---
+
+## Phase 3 — impl-review verdict: **ship** (loop 1, no blocking issues)
+
+Gate: `npx tsc --noEmit` exit 0 · `npm run test:run` 1834 passed / 3 skipped / 0 failures (+7 vs phase 2).
+
+Shipped: `NormalizeCtasContext` widened to `{goal?, forms?, currentPagePath?, formPagePath?}` (store- and
+template-agnostic); `buildNormalizeCtasContext` + `findFormPagePath` exported from `normalizeCtas.ts`
+(plain module); `goalToDestination` M1 emits `{kind:'page', pathSlug}` (no `formId`) when the form page
+differs from the current page, else the same-page `#form-section` anchor; threaded through both renderers,
+`htmlGenerator` (`StaticHTMLOptions`), and `renderPublishedExport` (root + subpage sites).
+
+Form-page predicate (pinned): section id starts with `leadForm-`, OR a section has non-empty
+`elements.form_id`. `findFormPagePath` prefers current page → first form page → `undefined`.
+Reviewer: false-positive surface low (newsletter captures store formId in a different container —
+`elementMetadata.newsletter_cta.buttonConfig.formId`).
+
+§8 edit-side chrome finding — NO STOP: `loadPageIntoActive` → `withChrome` (`pageHelpers.ts:88/91`)
+re-merges `chrome.header.data` into top-level `content`, so edit-side `normalizeCtas` sees the stamped header.
+
+Spec deviation honored: tests assert the bare host-relative `/contact`, and
+`not.toContain('/p/acme/contact')`. `resolveDestination` untouched.
+
+Exporter test uses meridian, not vestria — reviewer judged this CORRECT, not defect-hiding: meridian is
+buttonConfig-wired so the HTML assertion actually exercises resolution, whereas a vestria fixture would
+emit `#contact` regardless of the fix (that would be the true false-green). Test drives real assembly with
+an explicit unstamped-in guard. `vi.mock('server-only')` is a sound harness move (build-time bundling
+guard, not a runtime boundary).
+
+### ⚠ CONFIRMED SCOPE GAP — F23 is NOT yet fixed on its own repro template
+
+Independently verified by the reviewer (implementer's STOP-flag was correct):
+- **No vestria block reads `buttonConfig` or calls `resolveCtaHref`.** Grep across `templates/vestria`
+  yields only `externalLinkProps` (for `target=_blank`) and a `resolveDestination` inside
+  `editPrimitives.tsx:124` `LinkTargetPopover.onChange` — a user-driven href WRITE, never a render read.
+- Vestria's primary href is a **flat element**: `VestriaTailoredHero.core.tsx:48` and
+  `VestriaNavHeader.core.tsx:89` both do `<E.Link hrefKey="cta_href" href={content.cta_href || '#contact'}>`.
+  Published `Link` (`publishedPrimitives.tsx:31-32`) is `const target = href || '#'` — verbatim.
+- Holds for BOTH edit and published paths. **No bridge exists** from `elementMetadata[*].buttonConfig`
+  into `elements.cta_href` (grep-confirmed).
+- **The spec misdiagnosed F23.** `#contact` is the block's hardcoded schema default, NOT a resolved
+  snapshot. "Snapshot resolver guesses same-page anchor" was wrong about the mechanism.
+
+**Per-template primary-CTA wiring (reviewer-verified):**
+| template | hero | header | cta |
+|---|---|---|---|
+| meridian | wired | wired | wired |
+| techpremium | wired | **flat prop takes PRECEDENCE** (`TechPremiumNav.published.tsx:42`: `props.cta_href \|\| resolveCtaHref(...)`) | wired |
+| vestria | flat `cta_href` | flat `cta_href` | — |
+| granth | flat (`GranthHero.core.tsx:56`) | — | — |
+
+Consequence: stamping + resolution are correct and template-agnostic for buttonConfig-consuming templates,
+but are **dead wiring for flat-`*_href` templates**. Phase 6's manual gate on `9knkYn8_QZpE` (vestria)
+would fail. → **New phase 3.5 added** (render-time href bridge). Not a phase-3 defect; phase-3 code is
+correct and correctly scoped.

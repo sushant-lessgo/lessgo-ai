@@ -8,6 +8,7 @@ import { uploadStaticSite } from './blobUploader';
 import { buildPageMetadata } from './buildPageMetadata';
 import { buildStructuredData, serializeJsonLd, extractLogoUrl } from './structuredData';
 import { isReservedBlogPath } from '@/utils/reservedPaths';
+import { findFormPagePath, type CtaPageInput } from '@/utils/normalizeCtas';
 
 /**
  * Render + upload a published page (root + all subpages) and advance its version pointer.
@@ -94,6 +95,22 @@ export async function renderPublishedExport(
   // Null goal → renderer's legacy GOAL_REF fallback (existing projects unchanged).
   const goal = await getPublishedGoal(pageId);
 
+  // goal-ref-cta phase 3 (F23): this fn alone holds EVERY page, so it scans the
+  // root + subpage bodies ONCE for the page that carries the conversion form
+  // (a `leadForm-*` section or a `contact` section with `elements.form_id`).
+  // formPagePath is derived per render page (below) so an M1 primary on a page
+  // that does NOT hold the form emits a cross-page `page` dest (bare pathSlug),
+  // while the form page's own primary keeps the same-page `#form-section` anchor.
+  const subpagesForScan =
+    contentData.subpages && typeof contentData.subpages === 'object' ? contentData.subpages : {};
+  const pageInputsForScan: CtaPageInput[] = [
+    { path: '/', content: contentData },
+    ...(Object.entries(subpagesForScan) as Array<[string, any]>).map(([rawPath, sub]) => ({
+      path: rawPath.startsWith('/') ? rawPath : `/${rawPath}`,
+      content: sub?.content,
+    })),
+  ];
+
   const rootMeta = buildPageMetadata({
     slug,
     pageTitle: cleanTitle,
@@ -136,6 +153,8 @@ export async function renderPublishedExport(
     variantId,
     mood: mood ?? null,
     goal,
+    currentPagePath: '/',
+    formPagePath: findFormPagePath(pageInputsForScan, '/'),
     canonicalDomain,
     canonicalPath: '/',
   });
@@ -222,6 +241,8 @@ export async function renderPublishedExport(
         variantId,
         mood: mood ?? null,
         goal,
+        currentPagePath: path,
+        formPagePath: findFormPagePath(pageInputsForScan, path),
         canonicalDomain,
         canonicalPath: path,
       });

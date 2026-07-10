@@ -32,7 +32,7 @@ import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary'
 import { useFeatureFlags } from '@/utils/featureFlags';
 import { SectionTracker } from '@/app/p/[slug]/components/SectionTracker';
 import { FormPlacementRenderer } from '@/components/forms/FormPlacementRenderer';
-import { normalizeCtas } from '@/utils/normalizeCtas';
+import { normalizeCtas, buildNormalizeCtasContext } from '@/utils/normalizeCtas';
 
 import { logger } from '@/lib/logger';
 
@@ -122,15 +122,36 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     themeValues,
     goal,
     forms,
+    pages,
+    currentPageId,
   } = storeState;
 
   // scale-04 (phase 3): run the same normalization pre-pass as the published
   // renderer so editor/preview buttons point at the resolved goal target. Store
   // `goal` (hydrated from Brief by loadDraft); null goal → legacy fallback.
-  const content = useMemo(
-    () => normalizeCtas(rawContent, { goal, forms }),
-    [rawContent, goal, forms],
-  );
+  // goal-ref-cta phase 3 (F23): on multipage, derive the active page path + the
+  // form-bearing page (from the same PageAxisState the sitemap nav reads) so an M1
+  // primary on a page that does NOT hold the form resolves cross-page — identical
+  // to the published exporter (both feed buildNormalizeCtasContext). Single-page
+  // (≤1 page) degrades to {goal, forms} → same-page anchor (no regression).
+  const content = useMemo(() => {
+    const pageList = pages ? Object.values(pages) : [];
+    if (pageList.length <= 1) {
+      return normalizeCtas(rawContent, { goal, forms });
+    }
+    const ctx = buildNormalizeCtasContext({
+      goal,
+      forms,
+      currentPagePath: pages[currentPageId]?.pathSlug,
+      // The active page's live working copy is the top-level `rawContent` (which
+      // includes injected chrome); other pages use their stored body-only content.
+      pages: pageList.map((p) => ({
+        path: p.pathSlug,
+        content: p.id === currentPageId ? rawContent : p.content,
+      })),
+    });
+    return normalizeCtas(rawContent, ctx);
+  }, [rawContent, goal, forms, pages, currentPageId]);
 
   const usesTemplate = usesTemplateModule(audienceType, templateId);
   const { ready: templateReady, tmpl } = useTemplateModule(audienceType, templateId);
