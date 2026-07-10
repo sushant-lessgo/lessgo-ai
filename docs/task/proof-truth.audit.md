@@ -347,3 +347,43 @@ as-built/live status in dated trailing sections, matching that structure.
 
 None. The plan's quoted §8 text (line 201) matched the actual file (line 323) exactly,
 including bold/formatting. Replacement applied verbatim.
+
+## Phase 7 — Fix-path CTA on markers (rides `TESTIMONIALS_ENABLED`)
+
+**Files changed**
+- `src/app/edit/[token]/components/selection/SelectionSystem.tsx`
+
+**What changed**
+- Added imports: `Link` (next/link) and `isTestimonialsEnabledPublic` (`@/lib/testimonials/flag`).
+- Added a small co-located predicate `isProofElement(sectionId, elementKey)`: returns true when
+  `sectionId.startsWith('testimonials')` (section id form `testimonials-<uuid>`) OR the elementKey's
+  leaf segment is one of the trust engine's flat quote keys (`quote`/`author_name`/`author_role`/
+  `author_company`). Dotted collection keys (`collName.itemId.fieldName`) match on the last segment.
+- In `VerifyMarkerControls` (the only consumer of `activeMarkers`/needs_review markers), each marker
+  position now renders inside a `React.Fragment`. When the flag is ON **and** the element is a proof
+  element, an additional `Link` "Replace with a real testimonial" → `/dashboard/testimonials` renders
+  positioned just below the existing "leave as-is" dismiss control. Navigation only — no data mutation.
+
+**Proof-element detection:** section-type prefix `testimonials` OR trust flat quote-key leaf
+(`quote`/`author_name`/`author_role`/`author_company`). Uses the real `sectionId`/`elementKey`
+available on each computed marker position.
+
+**Flag-off no-op confirmation:** `const testimonialsEnabled = isTestimonialsEnabledPublic();` is
+computed once; the link is guarded by `{testimonialsEnabled && isProofElement(p.sectionId, p.elementKey) && ( ...Link... )}`.
+`isTestimonialsEnabledPublic()` reads `NEXT_PUBLIC_TESTIMONIALS_ENABLED === 'true'` (build-inlined,
+client-safe). Flag OFF → the guard short-circuits, zero link JSX is emitted, and the existing dismiss
+button is byte-for-byte unchanged (same class/title/style/handlers) — a true UI no-op, system stays dark.
+
+**Test / manual check:** No test precedent for `SelectionSystem.tsx` (no sibling `.test.tsx`), so per
+plan step 3 no unit test was added. Manual check documented: with `NEXT_PUBLIC_TESTIMONIALS_ENABLED=true`
+in `.env.local`, a marker on a drafted testimonial quote shows the library link; unset → no link, marker
+otherwise identical (verified by reading the guarded conditional).
+
+**Verification**
+- `npx tsc --noEmit` → clean (no output).
+- `npm run test:run` → 1918 passed / 3 skipped / 0 failed (matches baseline; 118 files passed, 1 skipped).
+
+**Open risks:** Link uses `position: fixed` at `top: p.top + 12` — on very short flagged elements the
+link could visually sit near the next element's dismiss control; cosmetic only, does not affect the
+flag-off dark state. `/dashboard/testimonials` route is itself server-gated by `isTestimonialsEnabled()`
+(authoritative), so the client link can never expose a dark page.
