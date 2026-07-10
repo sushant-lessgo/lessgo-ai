@@ -176,3 +176,167 @@ Non-blocking notes carried forward:
    `goalToDestination` level). Phase 4 parity tests should cover it.
 3. Untracked `docs/task/serve-gate-v2.spec.md` + `scripts/renderPage.mjs` are concurrent work,
    outside this phase's scope — deliberately NOT committed with phase 1.
+
+---
+
+## Phase 2 — Dual-read shim coverage + legacy fixture regression + reader-impact analysis
+
+### Files changed
+- `src/utils/__fixtures__/legacyCta.fixture.ts` (new) — frozen pre-feature content blob + expected hrefs.
+- `src/utils/normalizeCtas.legacy.test.ts` (new) — frozen-fixture regression test.
+
+**No production code changed.** `destinationShim.ts` was audited and needed NO edit (see below); the four reader-impact call sites were read-only checks and needed no edit.
+
+### Shim coverage audit — every matrix case already covered (test, not code)
+
+Audited `src/utils/destinationShim.ts` (`toDestination` `:107`, `LegacyButtonConfig` `:22`,
+`classifyString` `:49`, `parseWhatsapp` `:70`) against the spec migration matrix. Result: **all
+cases already covered; no gaps; no code added.**
+
+| Legacy shape | Handled at | Covered? | Existing test |
+|---|---|---|---|
+| raw `#x` -> `{kind:'section'}` | `classifyString:50` | already | `destinationShim.test.ts:7` |
+| raw `/x` -> `{kind:'page'}` | `classifyString:53` | already | `:13` |
+| absolute `https?://` url -> `{kind:'external'}` | `classifyString:65` | already | `:51` |
+| raw `tel:` -> `{kind:'call'}` | `classifyString:56` | already | `:19` |
+| raw `mailto:` -> `{kind:'email'}` | `classifyString:59` | already | `:25` |
+| raw `wa.me/...` / `api.whatsapp.com/send` -> `{kind:'whatsapp'}` | `classifyString:62` -> `parseWhatsapp` | already | `:31`,`:37`,`:43` |
+| unrecognized string -> `{kind:'external'}` verbatim | `classifyString:66` | already | `:57` |
+| legacy `buttonConfig {type:'page'}` | `toDestination:127` | already | `:65` |
+| legacy `{type:'link'|'link-with-input'}` (url reparsed) | `toDestination:129` | already | `:70`,`:81` |
+| legacy `{type:'form'}` -> `undefined` (wrapper owns it) | `toDestination:139` | already | `:92` |
+| unknown/absent type -> `undefined` | `toDestination:142` | already | `:96` |
+
+Because coverage is complete, I did **not** touch `destinationShim.ts` or the existing
+comprehensive `destinationShim.test.ts` (plan lists both as touch-only-if-gap / create-if-absent;
+neither condition held). Newly-added shim cases: **none.** Everything in the matrix was pre-covered
+by scale-04.
+
+### No-migration contract verified (`normalizeCtas.ts:113`, `if (!cta) continue;`)
+
+Confirmed in code: `normalizeCtas` (`:97-129`) iterates `elementMetadata`, and any entry without a
+`cta` key hits `if (!cta) continue;` (`:113`) — never cloned, never touched. With NO `cta` key
+anywhere in the fixture, `contentClone` stays `null` and the function returns the SAME reference
+(`:128`). The new regression test asserts `normalizeCtas(fixture) === fixture` (identity) under both
+an active M1 goal and a null goal, plus a `JSON.stringify` byte-equality assertion and a negative
+assertion that no `GOAL_REF`/`cta` string is ever injected into legacy content. No-migration
+contract locked; a future "helpful" GOAL_REF upgrade of legacy content fails the test.
+
+### Reader-impact analysis (code evidence)
+
+**1. `persistenceActions.ts:202` — orphaned-form audit. No change.** Reads
+`element?.metadata?.buttonConfig` where `element` iterates `section.elements` (`:201`) — i.e. the
+`elements[key].metadata` shape. The phase-1 stamps write to `section.elementMetadata[key].cta` — a
+DIFFERENT, sibling map (`elementMetadata` != `elements[key].metadata`). Two independent reasons the
+stamp is invisible: (a) wrong container, (b) the audit only matches `buttonConfig.type==='form'` and
+stamps write `cta`, never a persisted `buttonConfig`. So GOAL_REF stamps neither false-positive the
+orphan warning nor get detected by it. Matches the plan's expected conclusion.
+
+**2. `useReviewState.ts:258` (`isPrimaryCtaLinked`) — plan's premise did NOT materialize; benign.**
+The plan feared a GOAL_REF primary under an external-url goal (M3) would down-convert to
+`{type:'link',url}` and newly register as "linked". Traced the data flow and the premise does not
+hold: `normalizeCtas` is called ONLY inside the two renderers (`LandingPageRenderer.tsx:131`,
+`LandingPagePublishedRenderer.tsx:76`), each producing a TRANSIENT render clone that is never
+written back to the store. `useReviewState.initFromContent` is fed `updatedState.content` — the RAW
+store content (`EditProvider.tsx:190-198`). In raw store content a GOAL_REF stamp is
+`elementMetadata[key].cta` with NO `buttonConfig`, so `isPrimaryCtaLinked` (`:258`, reads
+`elementMetadata[key].buttonConfig`) sees `undefined` -> returns false. Net: the down-conversion is
+never visible to this reader, so no reclassification to "linked" occurs.
+- Verdict: **benign, no user-visible wrong state** — no STOP. Since stamps write `cta` not
+  `buttonConfig`, a GOAL_REF primary is classified NOT-linked, same bucket as a form-connected
+  primary (`type:'form'` also fails the `type==='link'` check). Effect: the "Link your CTA buttons"
+  guide task can show not-done for a primary that is in fact goal-linked — a minor nudge quirk, not
+  a broken href or corrupted state, and essentially unchanged from pre-feature (hero/header had no
+  metadata at all -> already not-linked). Recorded as accepted known behavior. (Refines the phase-1
+  open risk that flagged this item as unevaluated.)
+
+**3. `formActions.ts:65-68` — form-disconnect. Green, no change.** Iterates
+`section.elementMetadata[key].buttonConfig.formId === id` and rewrites that `buttonConfig`. Stamps
+write `cta`, not `buttonConfig`, so a GOAL_REF stamp is never matched/mutated. `seedGoalForm` still
+writes the M1 form `buttonConfig` on its target section (phase 1 kept it), so real form-disconnect
+behavior is unchanged.
+
+**4. `sectionHelpers.ts:20-24` (`deriveCtaRole`) — green, no change.** Reads `cta.role`; a stamped
+`cta.role:'primary'` classifies primary — correct, and consistent with D-A (deriveCtaRole is a
+secondary guard, never the stamping enumerator).
+
+**5. `FormPlacementRenderer.tsx:59-76` — green, no change.** Reads `element.metadata?.buttonConfig`
+(the `elements[key].metadata` shape, same container distinction as #1). GOAL_REF stamps live in
+`elementMetadata`, so they do not reach this scanner; template-shipped form buttons (real
+`buttonConfig type:'form'`) still render as before.
+
+All five checks were read-only; none required an edit, so no scope expansion.
+
+### `form-section` anchor constant
+
+Untouched and unaffected by phase 2 (no goalToDestination/leadFormFields edits). The frozen fixture
+exercises a legacy `{type:'form'}` button resolving to `#form-section` via `resolveCtaHref` — the
+constant is asserted in the frozen expected hrefs.
+
+### Boundary law
+
+Both new files are plain modules: the fixture imports nothing; the test imports only `normalizeCtas`,
+`resolveCtaHref`, types, and the fixture. No `'use client'`, no client-store imports.
+
+### Deviations from the plan
+None. `destinationShim.ts` and `destinationShim.test.ts` were on the Files-touched list only as
+conditional ("if gaps found" / "create if absent"); coverage was complete and the test file already
+existed and is comprehensive, so both were left untouched. No files outside the phase-2
+Files-touched list were modified.
+
+### Test results
+- `npx tsc --noEmit`: clean.
+- `npx vitest run src/utils`: 7 files, 103 tests passed.
+- `npm run test:run` (full): 111 passed | 1 skipped (112 files); 1827 passed | 3 skipped (1830) — up
+  from phase 1's 1817 by the 10 new legacy-fixture cases; phase-1 suites stay green. 0 failures.
+- `npm run build`: NOT run (reserved for phase 6).
+
+### Open risks
+- The `useReviewState` guide-task quirk (a goal-linked primary can show as "Link your CTA buttons"
+  not-done) is benign and accepted; if a future phase routes normalized content into review state,
+  re-evaluate `isPrimaryCtaLinked`.
+- The frozen fixture is representative, not exhaustive (5 buttons across hero/cta/header/features/
+  footer). It covers every shim branch reachable via `buttonConfig`; raw string branches
+  (tel/mailto/wa.me) are locked by the existing `destinationShim.test.ts`.
+
+---
+
+## Phase 2 — impl-review verdict: **ship** (loop 1, no blocking issues)
+
+Gate: `npx tsc --noEmit` exit 0 · `npm run test:run` 1827 passed / 3 skipped / 0 failures
+(+10 vs phase 1; all phase-1 suites green).
+
+Reviewer-verified independently:
+- "No production code changed" is TRUE (`git diff HEAD --stat`: audit + plan progress-log SHA only;
+  fixture + legacy test untracked-new).
+- Shim coverage claim is HONEST, not skipped work: every migration-matrix cell has BOTH code and an
+  existing test (`#x`→section, `/x`→page, url→external, `tel:`→call, `mailto:`→email,
+  `wa.me`/`api.whatsapp.com`→whatsapp, unknown→external verbatim, + legacy buttonConfig types).
+  No cell lacks both. Zero shim edits needed.
+- Frozen fixture is genuinely PRE-feature (no `cta` key, no `GOAL_REF`), deep-frozen, and exercises
+  raw `#pricing` / `/contact` / external-url / legacy `{type:'form'}` / fully metadata-less button.
+- Legacy test is meaningful, not decorative: reference-identity is load-bearing because
+  `normalizeCtas` clones ONLY when it finds a `cta`. A "helpful" legacy→GOAL_REF upgrade would fail
+  (clone breaks identity, deep-freeze throws, substring assertions catch it).
+
+### Retired risk: the `useReviewState` behavior change does NOT exist
+Round-1 plan review recorded that an M3 GOAL_REF primary would down-convert to `{type:'link',url}`
+and newly register as "linked" at `useReviewState.ts:258`. **Verified false, end-to-end:**
+- `EditProvider.tsx:190-198` feeds `initFromContent` the RAW store content.
+- `normalizeCtas(` has exactly two production call sites (`LandingPageRenderer.tsx:131`,
+  `LandingPagePublishedRenderer.tsx:76`) — both transient render clones, never persisted, never
+  passed to review state.
+- `isPrimaryCtaLinked` reads `elementMetadata[key].buttonConfig` + section-level `sectionData.cta`,
+  never the element-level `elementMetadata[key].cta` a stamp writes → returns false.
+Remaining effect is a benign classification quirk (a goal-linked primary may leave the "Link CTAs"
+guide task not-done). Accepted; no longer tracked as a behavior change.
+
+### Reader-impact conclusions (code-verified)
+- `persistenceActions.ts:202` reads `elements[key].metadata.buttonConfig` — a DIFFERENT container
+  from the written `elementMetadata[key].cta`, and only matches `type:'form'`. Stamps are invisible
+  to the orphaned-form audit: no false positives, and no detection either.
+- `formActions.ts:65-68`, `sectionHelpers.ts` `deriveCtaRole`, `FormPlacementRenderer.tsx:59-76`:
+  green, no edits.
+
+Non-blocking note: the frozen fixture is representative, not exhaustive — raw `tel:`/`mailto:`/`wa.me`
+string branches are covered by `destinationShim.test.ts` rather than the render fixture. Accepted.

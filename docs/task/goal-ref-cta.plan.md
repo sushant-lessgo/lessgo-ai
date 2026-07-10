@@ -10,8 +10,8 @@ Fix F5/F6/F23. The central gap: `seedGoalForm.ts:81` early-returns `if (!isM1) r
 
 ## Progress log
 
-- phase 1 GOAL_REF stamping for ALL mechanisms on BOTH generation paths: done (commit <pending>, review loops 1, verdict ship)
-- phase 2 dual-read shim coverage + legacy fixture + reader-impact analysis: pending
+- phase 1 GOAL_REF stamping for ALL mechanisms on BOTH generation paths: done (commit c70aa37e, review loops 1, verdict ship)
+- phase 2 dual-read shim coverage + legacy fixture + reader-impact analysis: done (commit <pending>, review loops 1, verdict ship — NO production code changed; shim already complete)
 - phase 3 multipage M1 page dest + chrome/header reach + shared ctx builder (F23): pending
 - phase 4 parity + re-point + detach tests (test-only): pending
 - phase 5 M2–M5 engine matrix + cross-template allowlist coverage: pending
