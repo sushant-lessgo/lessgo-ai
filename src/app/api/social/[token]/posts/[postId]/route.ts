@@ -8,6 +8,9 @@ export const runtime = 'nodejs';
  * Deletes the `SocialPost` row ONLY — NEVER the `UsageEvent` ledger row: the
  * ledger is append-only and the Free lifetime cap (phase 7) counts it, so
  * delete-and-regenerate must NOT restore allowance.
+ *
+ * Kill-switch (phase 7): NEXT_PUBLIC_SOCIAL_POSTS_DISABLED checked FIRST in every
+ * handler — mirrors the email-sequences kill-switch.
  */
 import type { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
@@ -15,10 +18,23 @@ import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { createSecureResponse, assertProjectOwner } from '@/lib/security';
 
+// ---- kill-switch -------------------------------------------------------------
+
+function isDisabled(): boolean {
+  return process.env.NEXT_PUBLIC_SOCIAL_POSTS_DISABLED === 'true';
+}
+
+/** 404-style JSON returned when the feature is killed. */
+function disabledResponse(): Response {
+  return createSecureResponse({ success: false, error: 'not_found' }, 404);
+}
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { token: string; postId: string } },
 ): Promise<Response> {
+  if (isDisabled()) return disabledResponse();
+
   const { token: tokenId, postId } = params;
   try {
     // clerkId is the id space for ownership of the SocialPost row (D6).

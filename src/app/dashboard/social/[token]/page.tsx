@@ -12,9 +12,15 @@ import PostLibrary from './components/PostLibrary'
 
 // Social posts manager: per-project on-brand post generator + minimal library.
 // Keyed on tokenId (NOT a published slug) so drafts work too (D1).
+// Kill-switch (phase 7): NEXT_PUBLIC_SOCIAL_POSTS_DISABLED → clean "not available"
+// state (never an error) — mirrors the email-sequences kill-switch.
 
 interface PageProps {
   params: { token: string }
+}
+
+function isDisabled(): boolean {
+  return process.env.NEXT_PUBLIC_SOCIAL_POSTS_DISABLED === 'true'
 }
 
 export default async function SocialManagerPage({ params }: PageProps) {
@@ -48,19 +54,36 @@ export default async function SocialManagerPage({ params }: PageProps) {
           </Link>
         </div>
 
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
-            Social posts — {title}
-          </h1>
-          <p className="text-sm text-gray-500">
-            Generate on-brand posts from this project&apos;s data. Copy and paste them where you post.
-          </p>
-        </div>
+        {isDisabled() ? (
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">Social posts — {title}</h1>
+            <div className="mt-6 rounded-lg border border-gray-200 bg-white p-8 text-center">
+              <p className="text-base font-medium text-gray-900 mb-1">
+                Social posts aren&apos;t available right now
+              </p>
+              <p className="text-sm text-gray-500">
+                This feature is temporarily unavailable. You can still edit and publish this
+                project as usual.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                Social posts — {title}
+              </h1>
+              <p className="text-sm text-gray-500">
+                Generate on-brand posts from this project&apos;s data. Copy and paste them where you post.
+              </p>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <SocialPostsPanel tokenId={tokenId} />
-          <PostLibrary tokenId={tokenId} />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <SocialPostsPanel tokenId={tokenId} />
+              <PostLibrary tokenId={tokenId} />
+            </div>
+          </>
+        )}
       </main>
       <Footer />
     </div>

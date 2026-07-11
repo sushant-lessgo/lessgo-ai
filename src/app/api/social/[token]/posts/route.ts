@@ -12,6 +12,9 @@ export const runtime = 'nodejs';
  * ID SPACE (D6): `clerkId` from auth() (NOT the internal `userRecord.id` returned
  * by assertProjectOwner) goes into BOTH `SocialPost.userId` and `UsageEvent.userId`.
  * Variables are named `clerkId` / `internalUserId` so a swap reads wrong here.
+ *
+ * Kill-switch (phase 7): NEXT_PUBLIC_SOCIAL_POSTS_DISABLED checked FIRST in every
+ * handler — mirrors the email-sequences kill-switch.
  */
 import type { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
@@ -33,6 +36,17 @@ import { getMockPost } from '@/modules/social/mockPosts';
 import { PLATFORM_PRESETS, ACTIVE_PLATFORMS, type PlatformPreset } from '@/modules/social/presets';
 
 const ENDPOINT = '/api/social/[token]/posts';
+
+// ---- kill-switch -------------------------------------------------------------
+
+function isDisabled(): boolean {
+  return process.env.NEXT_PUBLIC_SOCIAL_POSTS_DISABLED === 'true';
+}
+
+/** 404-style JSON returned when the feature is killed. */
+function disabledResponse(): Response {
+  return createSecureResponse({ success: false, error: 'not_found' }, 404);
+}
 
 // ---- request validation ------------------------------------------------------
 
@@ -140,6 +154,8 @@ async function generateHandler(
   req: NextRequest,
   { params }: { params: { token: string } },
 ): Promise<Response> {
+  if (isDisabled()) return disabledResponse();
+
   const startTime = Date.now();
   const tokenId = params.token;
 
@@ -288,6 +304,7 @@ export async function POST(
   req: NextRequest,
   ctx: { params: { token: string } },
 ): Promise<Response> {
+  if (isDisabled()) return disabledResponse();
   return withAIRateLimit((r) => generateHandler(r, ctx))(req);
 }
 
@@ -297,6 +314,8 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { token: string } },
 ): Promise<Response> {
+  if (isDisabled()) return disabledResponse();
+
   const tokenId = params.token;
   try {
     const { userId: clerkId } = await auth();

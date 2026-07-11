@@ -27,6 +27,10 @@ type Props = {
 // feature is disabled via env. NEXT_PUBLIC_ so the client reads it inline.
 const EMAILS_DISABLED = process.env.NEXT_PUBLIC_EMAIL_SEQUENCES_DISABLED === 'true'
 
+// Kill-switch (social-posts phase 7): hide the Social nav button when the
+// feature is disabled via env. NEXT_PUBLIC_ so the client reads it inline.
+const SOCIAL_DISABLED = process.env.NEXT_PUBLIC_SOCIAL_POSTS_DISABLED === 'true'
+
 export default function ProjectCard({ project, onEdit, onPreview }: Props) {
   const router = useRouter()
 
@@ -117,7 +121,7 @@ export default function ProjectCard({ project, onEdit, onPreview }: Props) {
         )}
 
         {/* Social posts: available on drafts AND published (D1 — no publish required) */}
-        {project.tokenId && (
+        {project.tokenId && !SOCIAL_DISABLED && (
           <button
             onClick={() => router.push(`/dashboard/social/${project.tokenId}`)}
             className="border border-green-200 bg-green-50 text-green-700 text-sm px-3 py-1 rounded-md hover:bg-green-100 transition"
