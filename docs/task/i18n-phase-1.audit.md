@@ -511,3 +511,44 @@ NOT edited. `decideServe` consumes `fit` + `requiredCapabilitiesFromBrief` from 
 ### Open risks
 - The two plan path errors mean the reviewer's scoped diff will include `src/lib/schemas/brief.schema.ts` and `src/modules/templates/fit.ts` in place of the plan's named paths — confirm these are the intended targets.
 - D5 limitation stands: platform-satisfied ≠ proven per-template NL render fidelity (manual gate, first at atelier build).
+
+## Phase 8 — Docs + final pre-merge green check (automatable part)
+
+Manual acceptance sweep (browser click-through, spec boxes) is the FOUNDER's gate — NOT done here.
+This phase's automatable scope = the docs update + the final full build/test green check.
+
+**Files changed**
+- `docs/tracks/i18nPlan.md`
+
+### docs update landed
+`docs/tracks/i18nPlan.md` updated (only file touched):
+- STATUS header flipped to **PHASE 1 BUILT 2026-07-11** (branch `feature/i18n-phase-1`; plan + audit
+  pointers); notes full atelier/Kundius end-to-end acceptance lands in the atelier template build.
+- Staged-phases Phase 1 entry marked BUILT with the "what shipped" summary (locale-overlay content
+  model, locale-aware saveDraft/loadDraft clear-contract, editor toggle + Languages UI +
+  locale-aware writes/reads/undo-redo, per-locale pre-rendered `/{locale}` docs + hreflang +
+  self-canonical + `switcher.v1.js`, `bilingual` queryable + honesty test).
+- New **"Phase 1 — key decisions (D1–D5, LOCKED)"** block (overlay content shape; per-locale
+  pre-render; hreflang in v1; `/nl` path-prefix founder-locked; JSON localeConfig / no migration).
+- **Lumen twin-field supersession** noted (retired-in-place; declaration stays, mechanism NOT
+  migrated).
+- New **"Phase 1 — v1 limitations / deferred"** block (assisted translation → Phase 2; per-locale
+  meta deferred; RTL out; nav labels + per-collection-item card text not localizable; default-locale
+  LOCKED; switcher first-segment assumption / no `/p/{slug}`; regen disabled on non-default locale;
+  per-template NL render fidelity = manual gate first exercised in the atelier build).
+- Original decision-gates list annotated with the D-resolutions.
+
+No src changes (no bug found in the automatable pass).
+
+### FINAL pre-merge verification (whole branch, exact summary lines)
+- `npx tsc --noEmit` — clean (exit 0, no output).
+- `npm run test:run` — `Test Files  135 passed | 1 skipped (136)`; `Tests  2091 passed | 3 skipped (2094)`.
+- `npm run build` — completed successfully (exit 0). buildAssets → next build both succeeded;
+  confirmed `public/assets/switcher.v1.js` (2175 B) emitted and `public/published.css` present; full
+  Next build printed the route table with no errors.
+
+### Not done (founder's gate, per plan Phase 8 steps 1–4)
+Manual acceptance sweep: editor toggle round-trip + autosave/reload + undo-redo across a locale
+switch; publish; live switcher + geo default + persistence; both locales fully rendered; hreflang
+present; multi-page spot-check; single-locale regression eyeball; per-locale editor↔published
+parity. These require a real browser + founder sign-off and are the merge gate.
