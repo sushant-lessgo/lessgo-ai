@@ -53,39 +53,6 @@ const getBackgroundTypeFromSection = (sectionId: string): 'primary' | 'secondary
   return 'neutral';
 };
 
-// Enhanced component wrapper that adds selection attributes
-const SelectableElementWrapper: React.FC<{
-  elementKey: string;
-  children: React.ReactNode;
-  mode: 'edit' | 'preview';
-  onClick?: (event: React.MouseEvent) => void;
-  className?: string;
-}> = ({ elementKey, children, mode, onClick, className = '' }) => {
-  
-  if (mode !== 'edit') {
-    return <>{children}</>;
-  }
-
-  return (
-    <div
-      data-element-key={elementKey}
-      className={`selectable-element ${className}`}
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      aria-label={`Edit ${elementKey}`}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick?.(e as any);
-        }
-      }}
-    >
-      {children}
-    </div>
-  );
-};
-
 export function EditablePageRenderer({
   sectionId,
   sectionData,
