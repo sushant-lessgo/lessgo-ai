@@ -2,8 +2,41 @@
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore, useEditStoreApi } from './useEditStoreLegacy';
-import type { AutoSaveState } from '@/middleware/autoSaveMiddleware';
-import type { ChangeEvent } from '@/middleware/autoSaveMiddleware';
+
+// perf-02 phase 5: the dead autoSaveMiddleware module was deleted; the two type
+// shapes this hook still needs are relocated here (AutoSaveState is used by
+// getPerformanceStats's return type; ChangeEvent backs its queuedChanges field).
+interface ChangeEvent {
+  id: string;
+  type: 'content' | 'layout' | 'theme' | 'meta';
+  sectionId?: string;
+  elementKey?: string;
+  field?: string;
+  oldValue: any;
+  newValue: any;
+  timestamp: number;
+  userId?: string;
+  source: 'user' | 'ai' | 'system';
+}
+
+interface AutoSaveState {
+  isDirty: boolean;
+  isSaving: boolean;
+  lastSaved?: number;
+  saveError?: string;
+  queuedChanges: ChangeEvent[];
+  conflictResolution: {
+    hasConflict: boolean;
+    conflictData?: any;
+    resolveStrategy: 'manual' | 'auto-merge' | 'latest-wins';
+  };
+  performance: {
+    saveCount: number;
+    averageSaveTime: number;
+    lastSaveTime: number;
+    failedSaves: number;
+  };
+}
 
 /**
  * ===== EVENT-DRIVEN AUTOSAVE TUNABLES (perf-02 phase 2) =====

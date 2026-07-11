@@ -17,8 +17,8 @@ The editor does constant background work while idle and leaks memory over long s
 - phase 1 debug strip & gate: done (commit dbd6fde6, review loops 1, ship; non-blocking: harmless dead-undo-step in unreachable itemId-not-found path, 1 residual plan-compliant logger.debug)
 - phase 2 autosave event-driven debounce: done (commit 983801bf, review loops 2, ship; blocker fixed = spurious save-on-open via load/clean-bump baseline re-sync; known-accepted parity gap: lastUpdated-silent edit during already-dirty in-flight save can drop, equal-not-worse vs old poll)
 - phase 3 overlay fleet removal: done (commit 0d5eacc1, review loops 1, ship; overlay confirmed dead via live-route trace, no double-fire, 296 deletions; manual single-fire/hover QA pending at merge gate)
-- phase 4 VersionManager removal from live path: done (review loops 1, ship; human gate cleared = user approved DELETE; phase-2 machinery byte-identical intact, tsc/test/build green; heap-flat 10min QA pending at merge)
-- phase 5 dead persistence cluster deletion: pending
+- phase 4 VersionManager removal from live path: done (commit 913a5a8f, review loops 1, ship; human gate cleared = user approved DELETE; phase-2 machinery byte-identical intact, tsc/test/build green; heap-flat 10min QA pending at merge)
+- phase 5 dead persistence cluster deletion: done (review loops 1, ship; verify-first passed, 4 files/~2519 lines deleted, autoSaveDraft.ts excluded+intact, tsc/test/build green; orchestrator fixed src/utils/README.md dangling refs; NOTE phase-1 debug strings survive in bundle but never execute — acceptance met at runtime)
 
 ## Scope guards (all phases)
 

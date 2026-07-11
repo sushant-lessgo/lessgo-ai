@@ -71,7 +71,6 @@ store (`useEditStoreLegacy`).
 |------|------|
 | `useEditor.ts` | High-level editor actions/facade |
 | `useAutoSave.ts` | Debounced draft auto-save (`/api/saveDraft`) |
-| `useStatePersistence.ts` | Load/persist wiring around the store |
 | `useContentSerializer.ts` | Serialize editor content for save/publish |
 | `useSectionCRUD.ts` / `useElementCRUD.ts` | Add/remove/reorder sections & elements |
 | `useElementPicker.ts` / `useUniversalElements.ts` | Element insertion + universal-element schema |

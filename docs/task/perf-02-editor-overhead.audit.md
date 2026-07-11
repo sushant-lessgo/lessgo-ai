@@ -230,3 +230,55 @@ Edit-side only. Published renderer (`LandingPagePublishedRenderer` / `componentR
 **Open risks / human QA**
 - Heap-flat check (acceptance criterion 3: DevTools Memory, ~10-min continuous edit on naayom, heap flat ±10%) is a human/QA gate — not automatable here.
 - Manual dev smoke (editor loads, edits save via phase-2 debounce, Ctrl+Z/Ctrl+Y undo/redo via editStore history) pending at merge gate.
+
+---
+
+# perf-02 — Phase 5 (dead persistence cluster deletion) — audit
+
+**Branch:** `feature/perf-02-editor-overhead` (verified via `git branch --show-current` before any edit).
+
+**Outcome: PROCEEDED WITH DELETION.** All three verify-first checks passed — the cluster has no runtime caller and the `autoSaveDraft.ts` exclusion is honored. Cap-to-5 fallback NOT triggered.
+
+## Files changed
+- `src/hooks/useStatePersistence.ts` (DELETED — 578 lines)
+- `src/utils/statePersistence.ts` (DELETED — 770 lines)
+- `src/utils/versionManager.ts` (DELETED — 665 lines)
+- `src/middleware/autoSaveMiddleware.ts` (DELETED — 506 lines)
+- `src/types/store/index.ts` (removed dead `StatePersistenceManager` re-export)
+- `src/hooks/useAutoSave.ts` (relocated `AutoSaveState`/`ChangeEvent` type shapes local; dropped the two middleware type-imports)
+- `src/hooks/README.md` (dropped the `useStatePersistence.ts` row)
+
+`src/app/edit/[token]/README.md` was in the plan's touched set but had ZERO references to any deleted file (grep-confirmed) — left unchanged.
+
+## Verify-first grep results (run BEFORE any deletion — all PASS)
+
+**Group 1 — mounted-editor save path / import chain:**
+- `useStatePersistence` referenced only in its own file (self + specialized-hook call sites :466/:485/:503/:523 all internal) + `src/hooks/README.md:74`. No external runtime consumer. Sole component consumer `PersistenceStatusIndicator` already deleted in phase 4.
+- `StatePersistenceManager` type: only `statePersistence.ts` (def), `useStatePersistence.ts` (consumer), `types/store/index.ts:399` (re-export). No external runtime consumer.
+- `autoSaveMiddleware` importers: `versionManager.ts:2` (type-only, also being deleted), `useAutoSave.ts:5-6` (type-only), `types/store/index.ts:398` (already commented out). PASS.
+
+**Group 2 — `getPersistenceManager` / `globalPersistenceManager`:**
+- All hits inside `statePersistence.ts` (definition + debug util) and `useStatePersistence.ts` (consumer) — both in the deletion set. Zero callers outside. PASS.
+
+**Group 3 — EXCLUDED `autoSaveDraft.ts` exclusion honored:**
+- `rg "autoSaveDraft|completeSaveDraft" src` hits = the file itself + the 3 dynamic-import call sites (`regenerationActions.ts:138/:329`, `aiActions.ts:173-175`) + the dying importers (`statePersistence.ts:3/:258`, `autoSaveMiddleware.ts:4/:186/:266/:268`) + a comment mention in `persistenceActions.ts:552` + `utils/README.md:26`.
+- Dynamic-import sweep `rg "import\(['\"]@/utils/(autoSaveDraft|statePersistence|versionManager)"` = only the 3 `autoSaveDraft` dynamic imports; ZERO dynamic imports of `statePersistence`/`versionManager`. PASS — exclusion complete.
+
+## Type relocation
+`useAutoSave.ts` dropped `import type { AutoSaveState }` / `import type { ChangeEvent }` from the (deleted) `@/middleware/autoSaveMiddleware`. Both interface shapes inlined locally at the top of the file (byte-identical to the originals). `AutoSaveState` backs `getPerformanceStats(): AutoSaveState['performance']` (:62); `ChangeEvent` backs `AutoSaveState.queuedChanges`. Phase-2 debounce/dispatch machinery untouched — diff on this file is limited to the import removal + the two local interface defs.
+
+## TS fallout
+Zero. `npx tsc --noEmit` was clean immediately after the 4 deletions + `types/store/index.ts` re-export removal + the type relocation. No hidden readers surfaced.
+
+## Verification results
+- `npx tsc --noEmit`: green (no output).
+- `npm run test:run`: 2007 passed, 3 skipped (127 files passed, 1 skipped).
+- `npm run build`: green (build completed; published path clean).
+- `git diff --stat` confirms `src/utils/autoSaveDraft.ts` is NOT listed — the live regen save path is unchanged.
+
+## Deviations
+- `src/app/edit/[token]/README.md`: no edit made — it contained no references to the deleted files (would have been a no-op). In-scope, conservative.
+
+## Open risks
+- `src/utils/README.md:25-26` still references the now-deleted `statePersistence.ts` — this file is OUTSIDE the plan's Files-touched list, so it was intentionally left unedited (out-of-scope). Its `statePersistence.ts` reference is now stale; recommend a follow-up README fix outside this phase. (The `autoSaveDraft.ts` reference on the same line stays correct.)
+- Regen smoke (regenerate section → reload → content present, proving the excluded `completeSaveDraft` path survived) is human/QA — cannot run a browser here. tsc/build confirm the dynamic-import targets still resolve.
