@@ -9,6 +9,7 @@
  * Rollout flag: `NEXT_PUBLIC_DASHBOARD_URL` (app-host origin). Unset → every
  * apex→app decision returns null, so behaviour is unchanged (decision D1/D4).
  */
+import { publishedSubdomainHost } from './hosts';
 
 /** Apex marketing hosts (exact, port-stripped, lowercased). */
 export const APEX_HOSTS = ['lessgo.ai', 'www.lessgo.ai'] as const;
@@ -95,4 +96,35 @@ export function getApexToAppRedirect(
   const pathname = (pathAndSearch || '').split('?')[0].split('#')[0];
   if (!isAppPath(pathname)) return null;
   return `${origin}${pathAndSearch}`;
+}
+
+/**
+ * True only for the exact app prod host (`app.lessgo.ai`) — the host whose
+ * responses must carry `X-Robots-Tag: noindex, nofollow`. Apex / localhost /
+ * *.vercel.app → false (they must stay indexable / unaffected). D6: the caller
+ * attaches the header ONLY post-auth; this is a pure host classifier.
+ */
+export function shouldNoindex(host: string | null | undefined): boolean {
+  return isAppProdHost(host);
+}
+
+/**
+ * Target URL for an apex `/p/{slug}` → published-subdomain 301, or null.
+ *
+ * When `host` is an exact apex prod host AND `pathname` is `/p/{slug}` or
+ * `/p/{slug}/{subpath}`, return `https://{slug}.lessgo.site{/subpath}` (host
+ * from `publishedSubdomainHost()`, so `LESSGO_PUBLISH_HOST` is respected). Else
+ * null. localhost / *.vercel.app / non-`/p` paths → null (D4 untouched).
+ */
+export function getApexPublishRedirect(
+  host: string | null | undefined,
+  pathname: string,
+): string | null {
+  if (!isApexProdHost(host)) return null;
+  const p = (pathname || '').split('?')[0].split('#')[0];
+  const m = /^\/p\/([^/]+)(\/.*)?$/.exec(p);
+  if (!m) return null;
+  const slug = m[1];
+  const subpath = m[2] || '';
+  return `https://${publishedSubdomainHost(slug)}${subpath}`;
 }

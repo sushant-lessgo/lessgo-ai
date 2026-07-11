@@ -1,7 +1,7 @@
 # app-subdomain — implementation plan
 
-- **Branch:** `feature/app-subdomain`
-- **Worktree root:** `C:/Users/susha/lessgo-ai/.claude/worktrees/feature-app-subdomain`
+- **Branch:** `feature/app-subdomain-2` (slice-1 merged to main; slice-2 continues on this fresh branch/worktree — original `feature/app-subdomain` cleaned up)
+- **Worktree root:** `C:/Users/susha/lessgo-ai/.claude/worktrees/feature-app-subdomain-2`
 - All Files-touched paths below are under that worktree root. Implementers/reviewers run there.
 - Spec: `C:/Users/susha/lessgo-ai/.claude/worktrees/feature-app-subdomain/docs/task/app-subdomain.spec.md`
 
@@ -14,8 +14,8 @@ Move the product app to `app.lessgo.ai`; apex `lessgo.ai` becomes marketing-only
 - phase 1 host guards + appSplit helper: done (commit f3c6d4db, review loops 1)
 - phase 2 env split (NEXT_PUBLIC_DASHBOARD_URL): done (commit 17543df2, review loops 1)
 - phase 3 middleware apex→app redirects + Clerk prop: done (commit 13c4436a, review loops 1)
-- phase 4 HUMAN GATE — Vercel/DNS/Clerk/env cutover + live verify: user approved merge-to-main (no env vars set yet; DNS/Clerk/Vercel-domain still user-pending). Slice-1 merged to main.
-- phase 5 app-host noindex + apex /p 301: pending
+- phase 4 HUMAN GATE — Vercel/DNS/Clerk/env cutover + live verify: DONE (slice-1 merged to main + pushed; cutover live + verified per orchestrator 2026-07-12)
+- phase 5 app-host noindex + apex /p 301: done (review loops 1, ship) — commit pending
 - phase 6 apex customer-#0 KV branch: pending
 - phase 7 reserved-slug hardening + asset-base regression guard: pending
 - phase 8 HUMAN GATE — slice-2 live verify: pending

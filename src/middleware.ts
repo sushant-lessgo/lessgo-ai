@@ -8,7 +8,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getRouteByKeyEdge, getRedirectEdge, getSlugForHostEdge } from '@/lib/routing/kvRoutes'
 import { isLessgoAppHost, matchPublishSubdomain } from '@/lib/domains/hosts'
-import { getApexToAppRedirect } from '@/lib/domains/appSplit'
+import { getApexToAppRedirect, getApexPublishRedirect, shouldNoindex } from '@/lib/domains/appSplit'
 import * as Sentry from '@sentry/nextjs'
 
 const isPublicRoute = createRouteMatcher([
@@ -42,6 +42,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/blob-proxy',
   '/api/seo/(.*)', // per-host sitemap.xml/robots.txt/rss.xml rewrites (SEO Phase 4 + blog P2)
   '/api/blog/unsubscribe', // tokened one-click unsubscribe from notification emails (blog P2)
+  '/robots.txt', // app-host disallow-all served pre-auth; belt-and-braces so protect() can't intercept crawlers
 ])
 
 export default clerkMiddleware(async (auth, req) => {
@@ -67,6 +68,16 @@ export default clerkMiddleware(async (auth, req) => {
   const isApiOrNext = url.pathname.startsWith('/api/') || url.pathname.startsWith('/_next/')
 
   if (!isApiOrNext) {
+    // App-host /robots.txt — the SOLE pass-through early return allowed pre-auth
+    // (D6): a fixed public disallow-all body, never an app page. shouldNoindex is
+    // true only for the exact app prod host (app.lessgo.ai). Keeps the product app
+    // out of search indexes; apex/localhost/vercel are unaffected (helper → false).
+    if (shouldNoindex(host) && url.pathname === '/robots.txt') {
+      return new NextResponse('User-agent: *\nDisallow: /', {
+        headers: { 'content-type': 'text/plain', 'x-robots-tag': 'noindex, nofollow' },
+      })
+    }
+
     // Per-host sitemap.xml / robots.txt (SEO Phase 4) — resolved BEFORE the
     // redirect/KV/SSR fallbacks in both published branches below.
     const seoRewrite =
@@ -154,6 +165,14 @@ export default clerkMiddleware(async (auth, req) => {
       return new NextResponse('Not Found', { status: 404 })
     }
 
+    // Apex /p/{slug} → published-subdomain 301 (permanent — spec). Apex hosts
+    // reach this fall-through (isLessgoAppHost → skip Branch A/B). A /p path is
+    // not an app-path, so this is independent of the 307 below; kept first per
+    // plan ordering. Redirect early-return only — D6-safe (never NextResponse.next
+    // here). Inert on localhost/vercel (helper → null), so D4 render path untouched.
+    const pubRedirect = getApexPublishRedirect(host, url.pathname)
+    if (pubRedirect) return NextResponse.redirect(pubRedirect, 301)
+
     // Apex → app redirect. Apex hosts (lessgo.ai / www.lessgo.ai) are
     // isLessgoAppHost, so they skip Branch A/B and reach this fall-through.
     // App-path prefixes (/dashboard, /edit, /admin, /sign-in, …) forward to
@@ -170,6 +189,18 @@ export default clerkMiddleware(async (auth, req) => {
 
   if (!isPublicRoute(req)) {
     await auth.protect()
+  }
+
+  // App-host noindex header — STRICTLY POST-AUTH (D6). This runs only after
+  // auth.protect() above has passed (or the route is public): an unauthenticated
+  // non-public request never reaches here (protect throws Clerk's redirect). The
+  // header rides a NextResponse.next() so clerkMiddleware merges its session/
+  // handshake headers onto it — sessions survive. Apex/localhost return undefined
+  // (Clerk default) → no such header. MUST NOT be an early return pre-auth.
+  if (shouldNoindex(host)) {
+    const res = NextResponse.next()
+    res.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    return res
   }
 },
 )

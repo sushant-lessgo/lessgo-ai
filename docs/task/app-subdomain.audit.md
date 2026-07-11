@@ -167,3 +167,57 @@ route silently staying un-redirected on apex. Imported `APP_PATH_PREFIXES` for t
 - Everything remains inert until `NEXT_PUBLIC_DASHBOARD_URL` is set (Phase 4 human gate):
   helper returns null and the Clerk app origin is filtered out, so localhost/e2e/pre-cutover
   behavior is unchanged.
+
+## Phase 5 — app-host noindex + apex `/p/{slug}` 301
+
+**Files changed**
+- `src/lib/domains/appSplit.ts` (edit — two pure helpers)
+- `src/lib/domains/appSplit.test.ts` (edit — helper tests)
+- `src/middleware.ts` (edit — apex `/p` 301, app-host `/robots.txt`, post-auth noindex header)
+
+### appSplit.ts
+Added `import { publishedSubdomainHost } from './hosts'` and two pure helpers:
+- `shouldNoindex(host)` — thin wrapper over `isAppProdHost` (exact `app.lessgo.ai`; apex/localhost/vercel → false).
+- `getApexPublishRedirect(host, pathname)` — null unless `isApexProdHost(host)` AND pathname matches `/^\/p\/([^/]+)(\/.*)?$/`; returns `https://${publishedSubdomainHost(slug)}${subpath}` (subpath from capture group 2, `''` when absent). So `/p/foo` → `https://foo.lessgo.site` (no trailing slash; `NextResponse.redirect` normalizes to `.../` on the wire), `/p/foo/gallery` → `https://foo.lessgo.site/gallery`. Respects `LESSGO_PUBLISH_HOST` via `publishedSubdomainHost`.
+
+### middleware.ts — three changes, ordering preserved (D6)
+1. `isPublicRoute`: added `'/robots.txt'` (belt-and-braces; the app-host early return precedes `auth.protect()` anyway).
+2. Import extended: `getApexToAppRedirect, getApexPublishRedirect, shouldNoindex`.
+3. Inside `if (!isApiOrNext)`, FIRST statement — app-host `/robots.txt` SOLE pass-through early return: `if (shouldNoindex(host) && url.pathname === '/robots.txt') return new NextResponse('User-agent: *\nDisallow: /', { headers: { 'content-type':'text/plain','x-robots-tag':'noindex, nofollow' } })`. Fixed public body, never an app page — D6-safe.
+4. In the apex fall-through, BEFORE the phase-3 app-path 307: `const pubRedirect = getApexPublishRedirect(host, url.pathname); if (pubRedirect) return NextResponse.redirect(pubRedirect, 301)`. Redirect-only early return — D6-safe. (A `/p` path is not an app-path, so order vs the 307 is independent; kept first per plan.)
+
+**Terminal-block restructure (the critical D6 fix) — exact ordering:**
+```
+if (!isPublicRoute(req)) {
+  await auth.protect()            // (i) FIRST, unchanged, ALL hosts
+}
+if (shouldNoindex(host)) {        // (ii) STRICTLY POST-AUTH
+  const res = NextResponse.next()
+  res.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  return res
+}
+// (iii) apex/localhost fall past → return undefined (Clerk default), no header
+```
+An unauthenticated non-public request never reaches (ii): `auth.protect()` throws Clerk's control-flow response first. Confirmed empirically — app-host `/dashboard` (no cookie) carries NO `X-Robots-Tag` (protect short-circuited before the noindex block).
+
+**Clerk header preservation:** header is mutated on `NextResponse.next()` (not a fabricated bare response), so `clerkMiddleware` merges its session/handshake headers onto it. Confirmed sessions survive — authed `publish.spec.ts` (Hearth/Lex/Meridian) + `edit-persistence.spec.ts` all pass on the app-default path.
+
+### Verification run + results
+- `npx tsc --noEmit`: clean except one PRE-EXISTING error `src/app/page.tsx(6,26): Cannot find module '@/assets/images/founder.jpg'` — reproduced on the stashed clean tree (missing asset in this worktree, not touched by this phase). Zero new errors from Phase 5 files.
+- `npm run test:run`: **147 files / 2257 tests passed, 3 skipped** (incl. the 25 appSplit tests). No i18nHonesty flake this run.
+- `npm run test:e2e` (mock): first run had 1 flake — `publish service / Lex` timed out at the "Page Published" toast (Blob/KV local-dev timeout + a seed 429). RE-RAN `publish.spec.ts` → all 4 authed publish tests PASS (Hearth/Lex/Meridian). Authed publish + edit-persistence green = Clerk sessions survive the middleware restructure; `/p/*` render specs green = D4 localhost untouched.
+- Local Host-header curls (dev on :3123, `NEXT_PUBLIC_DASHBOARD_URL=https://app.lessgo.ai`):
+  - `Host: app.lessgo.ai /thanks` → `200` + `x-robots-tag: noindex, nofollow`. PASS
+  - `Host: app.lessgo.ai /robots.txt` → body `User-agent: *\nDisallow: /`, `content-type: text/plain`, `x-robots-tag` present. PASS
+  - `Host: lessgo.ai /` → `200`, NO `x-robots-tag`. PASS
+  - `Host: lessgo.ai /p/foo` → `301`, `location: https://foo.lessgo.site/`. PASS
+  - **AUTH-BYPASS (mandatory):** `Host: app.lessgo.ai /dashboard` no cookie → Clerk `protect-rewrite` (`x-clerk-auth-status: signed-out`), NOT a 200 dashboard, NO `x-robots-tag`. **PASS.** Baseline `Host: localhost /dashboard` gives the identical `signed-out` protect response → confirms this is standard Clerk protection, unchanged by this phase. (Raw curl yields Clerk's dev protect-rewrite 404 rather than a 3xx to accounts.clerk because there's no dev-browser cookie for the handshake; production turns this into the sign-in redirect. Sign-off criterion — NOT a 200 dashboard — is met.)
+  - `Host: app.lessgo.ai /sign-in` (public) → reaches post-auth block, carries `x-robots-tag`. Confirms public routes on app host get noindex.
+
+### Deviations
+- Added `'/robots.txt'` to `isPublicRoute` (plan called this belt-and-braces optional) — conservative; the early return precedes auth anyway.
+- Did NOT touch `docs/task/app-subdomain.plan.md` (a pre-existing orchestrator edit updating branch/phase-4 status was already present in the worktree — left as-is; outside my Files-touched).
+
+### Open risks
+- Pre-existing `founder.jpg` tsc error is unrelated but means `tsc --noEmit` is not zero-exit in this worktree; reviewer should confirm the asset is present on main/CI.
+- Prod auth-bypass shape (3xx to accounts.clerk vs dev protect-rewrite 404) is deferred to the Phase 8 live gate — local curl can only prove "not a 200 dashboard + Clerk intercepted", which it does.
