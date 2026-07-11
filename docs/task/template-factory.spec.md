@@ -81,6 +81,10 @@ named LOOKS — hundreds of visibly different starting points from few skeletons
 
 ## Editor-basics contract (added 2026-07-11 — founder: "logo upload missing, link
 ## configure missing — have we defined the basics?")
+> **Superseded in mechanism by `docs/tracks/editorPlan.md` (2026-07-11):** the list below stays
+> the WHAT; the HOW is editorPlan's edit-primitive vocabulary (templates declare per-slot
+> primitives, never implement editing; kit emits assignments; conformance asserts per slot;
+> extension law for new edit needs). editorPlan phases 0–3 are a dependency of this build.
 The universal editor affordances EVERY template must support, frozen as a list and
 enforced in `templateConformance()` (machine-checkable part) + `/manual-test` (the
 rest). Today these live only as skill prose (§3f) — skippable, hence the recurring
