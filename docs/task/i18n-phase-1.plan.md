@@ -17,8 +17,8 @@ storage/behavior diff — locale machinery is invisible until a project declares
 ## Progress log
 
 - phase 1 content-model types + locale resolver: done (commit 78891443, review loops 1). Carry-forward → 3b: guard `resolveLocaleElements` empty-overlay reference churn (perf-01/02 memo). See audit.
-- phase 2 persistence (saveDraft/loadDraft locale-aware): done (review loops 1, ship). Schema lives in `src/lib/validation.ts` (not route.ts). Carry-forward → 3a: (i) full-map export invariant is load-bearing (partial map WIPES omitted locales); (ii) loadDraft emits `localeConfig: null` for legacy — hydration must OMIT the key on save, never send null (schema `.optional()` rejects null → 400); (iii) mirror test(f) `declaredLocalesFullyPresent` shape for the store-side flush assertion.
-- phase 3a editor store state layer (activeLocale, writes, history, persistence): pending
+- phase 2 persistence (saveDraft/loadDraft locale-aware): done (commit 1df7756c, review loops 1). Schema lives in `src/lib/validation.ts` (not route.ts). Carry-forward → 3a: (i) full-map export invariant is load-bearing (partial map WIPES omitted locales); (ii) loadDraft emits `localeConfig: null` for legacy — hydration must OMIT the key on save, never send null (schema `.optional()` rejects null → 400); (iii) mirror test(f) `declaredLocalesFullyPresent` shape for the store-side flush assertion.
+- phase 3a editor store state layer (activeLocale, writes, history, persistence): done (review loops 1, ship). Store types live in `src/types/store/{state,actions}.ts` (not storeTypes.ts); undo/redo restore lives in `src/hooks/editStore/uiActions.ts` (both added to scope). Locale-aware undo/redo COMPLETE. Reviewer finding #1 (base-write undo mis-route for locale-shared collection edits) FIXED in-phase — Phase-4 precondition discharged (base-write history entries stamp default-locale, not activeLocale).
 - phase 3b editor read-site threading (enumerated read-site list): pending
 - phase 4 editor language toggle + locale config UI: pending
 - phase 5 static export per-locale + hreflang + switcher asset: pending
@@ -245,7 +245,8 @@ Steps:
 
 **Files touched:**
 - `src/stores/editStore.ts`
-- `src/hooks/editStore/storeTypes.ts`
+- `src/types/store/state.ts` + `src/types/store/actions.ts` (store types actually live here; plan's `storeTypes.ts` does not exist)
+- `src/hooks/editStore/uiActions.ts` (holds the undo/redo content-restore — added to scope during 3a to complete locale-aware undo/redo)
 - `src/hooks/editStore/coreActions.ts` (shadowed-copy comment on `updateElementContent`;
   setSection caller-proof scope; NO locale branching here unless step 3's grep finds a text-edit
   caller)

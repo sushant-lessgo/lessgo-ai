@@ -18,13 +18,17 @@ export interface ContentHistorySnapshot {
 }
 
 /** A 'content' history entry carrying raw-value snapshots. `elementKey` is the
- * ORIGINAL (full dotted, for collection edits) key — the coalesce identity. */
+ * ORIGINAL (full dotted, for collection edits) key — the coalesce identity.
+ * `locale` (i18n-phase-1 3a) tags the authoring locale; uiActions.undo/redo routes
+ * the restore to base (default locale) vs `localeContent[locale]` (non-default) by
+ * it. Both default- and non-default-locale edits push history. */
 export interface ContentHistoryEntry extends EditHistoryEntry {
   type: 'content';
   sectionId: string;
   elementKey: string;
   beforeState: ContentHistorySnapshot;
   afterState: ContentHistorySnapshot;
+  locale?: string;
 }
 
 /** Whole-page content snapshot for a 'fullContent' entry (Regen Copy).
@@ -91,14 +95,25 @@ export function pushHistoryEntry(state: any, entry: EditHistoryEntry): void {
 export function pushContentHistoryEntry(state: any, entry: ContentHistoryEntry): void {
   if (!state.history) return;
 
+  // i18n-phase-1 (3a): stamp the authoring locale so uiActions.undo/redo can route
+  // the restore to base (default) vs the overlay (non-default). The overlay TEXT
+  // branch (contentActions) sets `locale` EXPLICITLY to the active locale. Every
+  // OTHER pusher is a BASE write (incl. locale-shared collection object-array edits
+  // that fall through to base even under a non-default active locale) — those must
+  // default to the DEFAULT locale so undo routes back to base, NOT the overlay.
+  // Defaulting to activeLocale here would mis-route a locale-shared base edit's undo
+  // into the text-only overlay (correctness bug once a Phase-4 toggle exists).
+  if (entry.locale === undefined) entry.locale = state.localeConfig?.defaultLocale ?? 'en';
+
   const { undoStack } = state.history;
-  const top = undoStack[undoStack.length - 1] as (EditHistoryEntry & { elementKey?: string }) | undefined;
+  const top = undoStack[undoStack.length - 1] as (EditHistoryEntry & { elementKey?: string; locale?: string }) | undefined;
 
   if (
     top &&
     top.type === 'content' &&
     top.sectionId === entry.sectionId &&
     top.elementKey === entry.elementKey &&
+    top.locale === entry.locale &&
     entry.timestamp - top.timestamp <= COALESCE_WINDOW_MS
   ) {
     // Coalesce: keep original beforeState, advance afterState + timestamp.

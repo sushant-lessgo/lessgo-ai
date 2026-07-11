@@ -93,6 +93,12 @@ export interface EditHistoryEntry {
   beforeState: any;
   afterState: any;
   sectionId?: string;
+  /** i18n-phase-1 (3a): the locale this entry was authored under. Drives locale-aware
+   *  undo/redo restore in uiActions.undo/redo (base for the default locale,
+   *  `localeContent[locale]` for a non-default one). Overlay text edits stamp the
+   *  active locale explicitly; base writes default to the DEFAULT locale (so a
+   *  locale-shared base edit's undo routes to base, never the overlay). */
+  locale?: string;
 }
 
 export interface APIRequest {
@@ -191,6 +197,21 @@ export interface LayoutSlice {
 export interface ContentSlice {
   // Section Content Data
   content: Record<string, SectionData>;
+
+  // ===== i18n-phase-1 (3a): content-language state layer =====
+  // All defaulted so a legacy single-locale store is byte-identical (activeLocale
+  // always === default, localeContent empty, localeConfig null → omitted on save).
+  /** Project locale declaration (D4). `null`/undefined ⇒ legacy single-locale.
+   *  NEVER serialized as `null` to saveDraft (schema `.optional()` rejects null —
+   *  contract ii); save() omits the key when this is falsy. */
+  localeConfig?: import('@/types/core/content').LocaleConfig | null;
+  /** The editor's active authoring locale. Defaults to `localeConfig.defaultLocale`
+   *  (or `'en'`). Project-global (one toggle; survives page switches). */
+  activeLocale: string;
+  /** Non-default-locale text overlay (D1). Project-GLOBAL, keyed by globally-unique
+   *  sectionId (`${type}-${uuid}`) so it spans all pages without a per-page split
+   *  (matches the committed Phase-2 single-map contract). Empty ⇒ no translations. */
+  localeContent: import('@/types/core/content').LocaleContentOverlay;
 }
 
 /**

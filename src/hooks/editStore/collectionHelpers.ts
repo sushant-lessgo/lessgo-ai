@@ -10,6 +10,14 @@
 // `commitActivePage` has flushed the active page's edits into `pages` — every
 // caller honors this. Materialize fully replaces the arrays (never appends), so
 // it is idempotent and safe to re-run at the export boundary.
+//
+// i18n-phase-1 (3a) VERDICT (deliverable #1): every write here (catalog `items`,
+// per-item `related`, home `lineup`/`gallerypreview`) is DERIVED, locale-SHARED
+// structure — materialized read-only from base product/gallery records into base
+// `content`, never an authored text edit. They are therefore NOT locale-branched
+// and always target base, regardless of `activeLocale` (D1: structure/media are
+// locale-shared). The per-locale display of these cards' text (name/oneLiner) is
+// a Phase-3b READ concern (resolve records through the overlay before extract).
 
 import type { ProjectPageEntry } from '@/types/store';
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';

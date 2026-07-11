@@ -1,6 +1,13 @@
 // /app/edit/[token]/components/ui/useUndoRedo.ts
 "use client";
 
+// i18n-phase-1 (3a) NOTE: undo/redo is locale-AWARE. Each 'content' history entry
+// carries `entry.locale` (stamped in historyHelpers.pushContentHistoryEntry); the
+// restore in uiActions.undo/redo routes to base `state.content` for default-locale
+// entries and to `state.localeContent[locale]` for non-default ones. History is
+// therefore PRESERVED across a locale switch — a mixed EN/NL undo stack replays
+// each entry against its own locale's target.
+
 import { useCallback } from 'react';
 import { useEditStoreLegacy as useEditStore, useEditStoreApi } from '@/hooks/useEditStoreLegacy';
 import { useToast } from './useToast';

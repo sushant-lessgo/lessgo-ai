@@ -94,6 +94,12 @@ export interface ContentActions {
   setSectionBackground: (sectionId: string, sectionBackground: SectionBackground) => void;
   markAsCustomized: (sectionId: string) => void;
   setSection: (sectionId: string, data: Partial<SectionData>) => void;
+
+  // i18n-phase-1 (3a): switch the active authoring locale. Text writers branch on
+  // `activeLocale`; structure/media stay locale-shared (base). History is PRESERVED
+  // across a switch — undo/redo restore is locale-aware (each entry carries
+  // `entry.locale`; uiActions routes to base vs the overlay).
+  setActiveLocale: (locale: string) => void;
   
   // AI Generation
   regenerateSection: (sectionId: string, userGuidance?: string, options?: { suppressHistory?: boolean }) => Promise<void>;

@@ -160,6 +160,15 @@ function createInitialState(tokenId: string): EditStore {
     // Content Slice
     content: {} as Record<string, SectionData>,
 
+    // i18n-phase-1 (3a): content-language state layer. Defaults make a legacy
+    // single-locale store byte-identical (activeLocale === default 'en',
+    // localeContent empty, localeConfig null → OMITTED on save, never sent as
+    // null — contract ii). localeContent is project-global (keyed by unique
+    // sectionId), so it needs no per-page split and survives page switches.
+    localeConfig: null as import('@/types/core/content').LocaleConfig | null,
+    activeLocale: 'en' as string,
+    localeContent: {} as import('@/types/core/content').LocaleContentOverlay,
+
     // Page Axis (multi-page) — `pages` holds every page's slice; the top-level
     // layout/content fields above are the live working copy of `currentPageId`.
     pages: {} as Record<string, import('@/types/store').ProjectPageEntry>,
@@ -451,6 +460,13 @@ export function createEditStore(tokenId: string) {
               sectionLayouts: state.sectionLayouts,
               sectionSpacing: state.sectionSpacing,
               content: state.content,
+              // i18n-phase-1 (3a): persist the locale layer so the pre-loadDraft
+              // rehydration window is consistent. loadFromDraft re-derives
+              // activeLocale = defaultLocale on load, so this is a brief-window
+              // convenience only; legacy stores carry null config + empty map.
+              localeConfig: state.localeConfig,
+              activeLocale: state.activeLocale,
+              localeContent: state.localeContent,
               pages: state.pages,
               currentPageId: state.currentPageId,
               chrome: state.chrome,
