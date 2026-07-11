@@ -1,0 +1,56 @@
+{
+  "slug": "circle-cafe",
+  "url": "https://www.circle-cafe.com/",
+  "business": { "type_label": "multi-branch cafe / breakfast restaurant", "icp_category": "restaurant / food & beverage", "geography_hint": "Dubai, UAE" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "The visitor is checking a physical eatery — the decision is driven by menu categories, branch locations, hours, and directions. Browsing photos/menu and finding a nearby branch IS the decision, so place beats quick-yes/thing.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Order food online (redirect to delivery platforms) or find/visit a branch",
+    "mechanism": "redirect",
+    "delegated_to": "store"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 3,
+    "pages": ["home", "menu", "locations"],
+    "archetype_note": "Restaurant microsite: home (offer + menu teaser + featured branches + contact), a menu category page that links out to ordering, and a full locations directory with maps/hours/directions."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "All YOU CAN EAT", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "BREAKFAST", "component": "text" },
+      { "canonical": "cta", "observed_as": "VISIT OUR LOCATIONS", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "JOIN OUR CIRCLE COMMUNITY", "component": "text" },
+      { "canonical": "features", "observed_as": "Our Food / Breakfast Items / Lunch and Dinner / Desserts / Beverages", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Our Locations", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Contact Us", "component": "form" },
+      { "canonical": "footer", "observed_as": "Links", "component": "text" },
+      { "canonical": "followStrip", "observed_as": "Follow Us On", "component": "logo-strip" }
+    ],
+    "unmapped": [
+      { "observed": "Our Locations (branch cards with address, phone, hours, directions link + google-maps embeds)", "why_no_fit": "No canonical section expresses a multi-branch location/hours/directions directory; it is the spine of a place site but sectionList has no map-hours/locations id.", "closest": "miscellaneous" },
+      { "observed": "JOIN OUR CIRCLE COMMUNITY (Kitopi loyalty/cashback app promo)", "why_no_fit": "A loyalty-program/app enrollment promo is neither a standard feature block nor storeBadges (no app-store badge captured); it is a distinct offer type.", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "map-hours"],
+    "proposed_new": [
+      { "name": "online-ordering-redirect", "evidence": "Every primary CTA ('ORDER NOW', 'Order from Circle Menu', 'Order from Supper Club Now', 'Order from Bakers Table Now') and the menu category cards hand off to third-party food-delivery/ordering platforms (Deliveroo and a link aggregator of several), with no on-site cart or prices. Distinct from external-booking-redirect (appointments) and from catalog (on-site browse)." }
+    ]
+  },
+  "proof_types": [],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["menu-category grid", "location/branch cards with hours + directions", "map embed", "contact form", "social follow strip", "loyalty-app promo banner"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality is partial — menu item detail/prices were never actually rendered (base64 placeholder noise), only inferred absent; section headings and structure were readable so classification is solid, but capped at medium per capture quality." },
+  "gap_findings": [
+    "No canonical section for a multi-branch locations/hours/directions directory (a core place-site block).",
+    "map-hours capability exists in vocab but the taxonomy has no matching section id to place branch cards.",
+    "Restaurant online-ordering handoff to external delivery aggregators is not expressible in the closed capability vocab (only store-badges/catalog exist), motivating the proposed online-ordering-redirect.",
+    "Loyalty/rewards-app enrollment promo has no home in either the section list or capability vocab."
+  ]
+}

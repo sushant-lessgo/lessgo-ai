@@ -439,3 +439,89 @@ describe('dismiss / dismissedReviewFlags (Phase 6)', () => {
     expect(activeKeys().has(`${sec}::quote`)).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// proof-truth Phase 4 — aiMetadata.realProof suppresses needs-review markers
+// ---------------------------------------------------------------------------
+
+describe('realProof marker suppression (proof-truth phase 4)', () => {
+  // VestriaQuotes: `testimonials` collection with dotted needs_review fields.
+  const COLL_LAYOUT = 'VestriaQuotes';
+
+  function activeKeys(): Set<string> {
+    return new Set(
+      useReviewState.getState().activeMarkers.map((i) => `${i.sectionId}::${i.elementKey}`)
+    );
+  }
+  function needsReviewKeys(): Set<string> {
+    return new Set(
+      useReviewState.getState().needsReviewItems.map((i) => `${i.sectionId}::${i.elementKey}`)
+    );
+  }
+
+  // A section shaped like a persisted collection quote block; aiMetadata is the
+  // SAME envelope saveDraft/loadDraft round-trips (carries excludedElements today).
+  const mkSection = (quote: string, aiMetadata?: Record<string, unknown>) => ({
+    elements: { testimonials: [{ id: 't1', quote, author_name: 'Ada', author_role: 'CTO' }] },
+    ...(aiMetadata ? { aiMetadata } : {}),
+  });
+
+  it('DRAFTED section (no realProof) → needs-review markers ACTIVE', () => {
+    const sec = 'testimonials-rp1';
+    const layouts = { [sec]: COLL_LAYOUT };
+    const content = { [sec]: mkSection('drafted quote') };
+    // baseline == content so the marker is unedited → would be active.
+    const baseline = { content };
+    useReviewState.getState().initFromContent(content, layouts, [sec], {}, baseline, null);
+
+    expect(activeKeys().has(`${sec}::testimonials.t1.quote`)).toBe(true);
+    expect(needsReviewKeys().has(`${sec}::testimonials.t1.author_name`)).toBe(true);
+  });
+
+  it('realProof section → ZERO needs-review markers (quote + author fields suppressed)', () => {
+    const sec = 'testimonials-rp2';
+    const layouts = { [sec]: COLL_LAYOUT };
+    const content = { [sec]: mkSection('REAL imported quote', { realProof: true }) };
+    const baseline = { content }; // unchanged → would be active WITHOUT suppression
+    useReviewState.getState().initFromContent(content, layouts, [sec], {}, baseline, null);
+
+    // No needs_review item is produced for the section at all.
+    expect(needsReviewKeys().has(`${sec}::testimonials.t1.quote`)).toBe(false);
+    expect(needsReviewKeys().has(`${sec}::testimonials.t1.author_name`)).toBe(false);
+    expect(needsReviewKeys().has(`${sec}::testimonials.t1.author_role`)).toBe(false);
+    expect(activeKeys().size).toBe(0);
+  });
+
+  it('reload-shaped state (content from persisted JSON incl. aiMetadata) keeps suppression', () => {
+    const sec = 'testimonials-rp3';
+    const layouts = { [sec]: COLL_LAYOUT };
+    const live = { [sec]: mkSection('REAL imported quote', { realProof: true, excludedElements: [] }) };
+    // Simulate saveDraft → loadDraft: content is serialized then rehydrated.
+    const reloaded = JSON.parse(JSON.stringify(live));
+    // Round-trip preserves the flag on the SAME aiMetadata envelope.
+    expect(reloaded[sec].aiMetadata.realProof).toBe(true);
+
+    const baseline = { content: reloaded };
+    useReviewState.getState().initFromContent(reloaded, layouts, [sec], {}, baseline, null);
+
+    expect(needsReviewKeys().size).toBe(0);
+    expect(activeKeys().size).toBe(0);
+  });
+
+  it('realProof suppresses ONLY needs_review; other statuses on other sections unaffected', () => {
+    const rp = 'testimonials-rp4';
+    const drafted = 'testimonials-rp5';
+    const layouts = { [rp]: COLL_LAYOUT, [drafted]: COLL_LAYOUT };
+    const content = {
+      [rp]: mkSection('real quote', { realProof: true }),
+      [drafted]: mkSection('drafted quote'),
+    };
+    const baseline = { content };
+    useReviewState.getState().initFromContent(content, layouts, [rp, drafted], {}, baseline, null);
+
+    // realProof section: suppressed.
+    expect(needsReviewKeys().has(`${rp}::testimonials.t1.quote`)).toBe(false);
+    // Sibling drafted section: still flagged.
+    expect(needsReviewKeys().has(`${drafted}::testimonials.t1.quote`)).toBe(true);
+  });
+});

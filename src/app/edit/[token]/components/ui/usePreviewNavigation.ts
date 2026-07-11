@@ -3,13 +3,13 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStoreApi } from '@/hooks/useEditStoreLegacy';
 import { useToast } from './useToast';
 import { getTabManager, cleanupTabManager } from '@/utils/tabManager';
 
 export function usePreviewNavigation(tokenId: string) {
   const [isNavigating, setIsNavigating] = useState(false);
-  const { triggerAutoSave } = useEditStore();
+  const storeApi = useEditStoreApi();
   const router = useRouter();
   const { showToast } = useToast();
   const [tabManager, setTabManager] = useState<ReturnType<typeof getTabManager> | null>(null);
@@ -28,8 +28,8 @@ export function usePreviewNavigation(tokenId: string) {
     try {
       setIsNavigating(true);
       
-      await triggerAutoSave();
-      
+      await storeApi.getState().triggerAutoSave();
+
       const previewUrl = `/preview/${tokenId}`;
       
       // Store the source tab ID in sessionStorage for the preview page to reference
@@ -46,7 +46,7 @@ export function usePreviewNavigation(tokenId: string) {
       showToast('Failed to save changes. Please try again.', 'error');
       setIsNavigating(false);
     }
-  }, [tokenId, triggerAutoSave, router, showToast]);
+  }, [tokenId, storeApi, router, showToast]);
 
   return {
     handlePreviewClick,

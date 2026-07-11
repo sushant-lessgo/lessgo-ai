@@ -1,0 +1,59 @@
+{
+  "slug": "katbyles",
+  "url": "https://www.katbyles.com/",
+  "business": { "type_label": "business coach / retreat facilitator (True Business model)", "icp_category": "consultant-coach", "geography_hint": "Antigua / UK (£ pricing)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Visitor is deciding whether to trust Kat as a coach/mentor — the page leans on her 30-year comms credentials, career-pivot story, process, and six client testimonials. Sells defined expertise, so top rung of the ladder = trust.",
+    "runner_up": "thing"
+  },
+  "goal": {
+    "one_action": "Book a discovery / retreat-alignment session with Kat",
+    "mechanism": "form",
+    "delegated_to": "calendly"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 8,
+    "pages": ["home", "about", "retreat", "course", "book", "shop", "cart", "contact"],
+    "archetype_note": "Multi-page consultant hub fronting several offers (1:1 retreat, PR course, book) that all funnel to a Calendly discovery call; book sold via a separate Squarespace shop/cart."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "The Antigua Retreat", "component": "text" },
+      { "canonical": "useCases", "observed_as": "PR with Heart Course", "component": "text" },
+      { "canonical": "features", "observed_as": "Creative Happy Work (book promo)", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Hello I'm Kat", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "Testimonials Section", "component": "other" },
+      { "canonical": "cta", "observed_as": "Begin with a Retreat Alignment Session", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Join me under a mango tree (photo gallery)", "component": "gallery" },
+      { "canonical": "results", "observed_as": "What emerges in Antigua", "component": "text" },
+      { "canonical": "useCases", "observed_as": "The Antigua Retreat is designed for you", "component": "text" },
+      { "canonical": "features", "observed_as": "What's included?", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Investment (£9,999 + payment plan)", "component": "pricing-table" },
+      { "canonical": "footer", "observed_as": "Connect", "component": "text" },
+      { "canonical": "closeSection", "observed_as": "Create", "component": "text" },
+      { "canonical": "problem", "observed_as": "Hello, I'm Kat (slower/simpler/purposeful philosophy)", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "My Business Roots / I followed my heart to Antigua", "component": "text" },
+      { "canonical": "features", "observed_as": "What I offer to visionaries and creatives", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Get in touch (mailto + Calendly, no fields)", "component": "text" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "packages"],
+    "proposed_new": [
+      { "name": "storefront-checkout", "evidence": "Squarespace Shop + Cart selling Kat's book as a one-time purchase (commerce.cart_or_checkout=true), running alongside the Calendly booking funnel." }
+    ]
+  },
+  "proof_types": ["testimonials"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["pricing-table", "testimonial carousel", "founder/bio block", "photo gallery", "offer grid-cards"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality=full; four pages captured with clear section order, CTAs, proof counts, and pricing." },
+  "gap_findings": [
+    "Multi-offer consultant hub: one site fronts three distinct offers (retreat, course, book) plus a shop/cart — not a single clean conversion; the trust engine + section list assume one funnel, not a hub routing to several.",
+    "Mixed model: trust-led booking (Calendly discovery call) coexists with a real e-commerce cart/checkout for the book — engine 'trust' + capability 'storefront-checkout' both apply to the same site, which the single-engine model can't express."
+  ]
+}

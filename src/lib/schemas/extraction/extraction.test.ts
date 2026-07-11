@@ -10,10 +10,23 @@ import {
   extractionForBusinessType,
   hasEntryEnrichment,
   isExtractionSchemaKey,
+  entryUnionEnrichment,
+  entryExtractionForSignals,
 } from './index';
 import { businessTypes, businessTypeKeys } from '@/modules/businessTypes/config';
+import { allEntryCollectionKeys } from '@/modules/collections/registry';
 import { EntryScrapeSchema } from '../entryClassify.schema';
 import type { EntrySignals } from '@/modules/brief/classify';
+
+// Exact trade-supplier scalar block — mirrors manufacturer.ts. A byte-drift into
+// the EXPLICIT businessType prompt path fails the assertion below (stronger than
+// the existing `.toContain('TRADE-SUPPLIER')` substring check).
+const EXPECTED_MANUFACTURER_SCALAR = `MANUFACTURER / TRADE-SUPPLIER FIELDS (this business makes or supplies physical goods):
+- whatYouMake: one clear sentence describing what this business manufactures or supplies (the physical goods, not the mission)
+- industriesServed: 1-3 END-CUSTOMER verticals this business sells into (e.g., ["Hospitality", "Healthcare", "Security"]) — NEVER vague groups like "businesses" or "professionals"
+- productCategories: 1-8 CONCRETE product types they make (e.g., ["Chef coats", "Scrubs", "Hi-vis jackets"]) — actual orderable products, NOT synonyms/restatements of the business
+- valueAdds: 1-8 CONCRETE differentiators (e.g., ["Custom embroidery", "Low MOQ", "48h dispatch", "In-house dyeing"]) — NEVER quality-platitudes like "attention to detail" or "customer satisfaction"
+- Extract only what is stated or strongly implied — do NOT invent.`;
 
 const baseSignals: EntrySignals = {
   businessTypeGuess: 'manufacturer',
@@ -241,6 +254,119 @@ describe('collection extraction (scale-10 phase 2)', () => {
     expect(out.collections?.services).toHaveLength(1);
     expect(out.collections?.['case-studies']).toHaveLength(1);
     expect(out.collections?.['case-studies']?.[0].oneLiner).toBe('3x pipeline');
+  });
+});
+
+describe('entry UNION enrichment (entry-capture phase 1)', () => {
+  it('allEntryCollectionKeys is the 4 distinct keys, no duplicate services', () => {
+    expect([...allEntryCollectionKeys].sort()).toEqual(
+      ['case-studies', 'products', 'services', 'works'].sort()
+    );
+    expect(allEntryCollectionKeys).toHaveLength(4);
+  });
+
+  it('union fields = the 4 distinct collection keys + manufacturer scalars', () => {
+    const { fields } = entryUnionEnrichment();
+    expect(Object.keys(fields).sort()).toEqual(
+      ['collections', 'industriesServed', 'productCategories', 'valueAdds', 'whatYouMake'].sort()
+    );
+    const collShape = (fields['collections'] as { shape: Record<string, unknown> }).shape;
+    expect(Object.keys(collShape).sort()).toEqual(
+      ['case-studies', 'products', 'services', 'works'].sort()
+    );
+    // `services` (shared by trust+work) appears exactly once — deduped.
+    expect(Object.keys(collShape).filter((k) => k === 'services')).toHaveLength(1);
+  });
+
+  it('scalar-key collision guard: non-collections union keys are unique across engines', () => {
+    const seen = new Map<string, string>();
+    for (const key of extractionSchemaKeys) {
+      const sf = getExtraction(key).entryScalarFields;
+      if (!sf) continue;
+      for (const k of Object.keys(sf)) {
+        // Fails loudly if a future engine declares a colliding scalar key.
+        expect(seen.has(k)).toBe(false);
+        seen.set(k, key);
+      }
+    }
+  });
+
+  it('union prompt frames scalar fields conditionally + carries the collections block', () => {
+    const { prompt } = entryUnionEnrichment();
+    expect(prompt).toContain('apply ONLY if this business makes or supplies physical goods');
+    expect(prompt).toContain('TRADE-SUPPLIER');
+    expect(prompt).toContain('COLLECTION ENTRIES');
+  });
+
+  it('EntryScrapeSchema.extend(union.fields) parses a fully-populated fixture', () => {
+    const { fields } = entryUnionEnrichment();
+    const schema = EntryScrapeSchema.extend(fields).pick({
+      whatYouMake: true,
+      industriesServed: true,
+      productCategories: true,
+      valueAdds: true,
+      collections: true,
+    });
+    const parsed = schema.parse({
+      whatYouMake: 'We make brass hardware',
+      industriesServed: ['Furniture'],
+      productCategories: ['Handles'],
+      valueAdds: ['Low MOQ'],
+      collections: {
+        products: [{ name: 'Handle A', oneLiner: 'brass', imageUrl: '' }],
+        services: [{ name: 'Custom finishing', oneLiner: '', imageUrl: '' }],
+        'case-studies': [{ name: 'Acme fit-out', oneLiner: '', imageUrl: '' }],
+        works: [{ name: 'Portfolio 1', oneLiner: '', imageUrl: '' }],
+      },
+    });
+    expect((parsed.collections as { products: unknown[] }).products).toHaveLength(1);
+    expect(parsed.productCategories).toEqual(['Handles']);
+  });
+});
+
+describe('entryExtractionForSignals resolver (entry-capture phase 1)', () => {
+  it('known businessType routes through extractionForBusinessType (manufacturer keeps scalars)', () => {
+    const ex = entryExtractionForSignals({ businessTypeGuess: 'manufacturer', tiebreaker: 'none' });
+    expect(ex?.key).toBe('manufacturer');
+    expect(ex?.entryScalarFields).toBeDefined();
+    expect(entryExtractionForSignals({ businessTypeGuess: 'saas', tiebreaker: 'none' })?.key).toBe(
+      'thing'
+    );
+    expect(entryExtractionForSignals({ businessTypeGuess: 'agency', tiebreaker: 'none' })?.key).toBe(
+      'trust'
+    );
+  });
+
+  it('unknown guess falls to the tiebreaker engine family', () => {
+    expect(
+      entryExtractionForSignals({ businessTypeGuess: 'restaurant', tiebreaker: 'expertise' })?.key
+    ).toBe('trust');
+    expect(
+      entryExtractionForSignals({ businessTypeGuess: null, tiebreaker: 'portfolio-is-proof' })?.key
+    ).toBe('work');
+    expect(entryExtractionForSignals({ businessTypeGuess: null, tiebreaker: 'none' })?.key).toBe(
+      'thing'
+    );
+  });
+
+  it('browsing-place / offer-already-understood rungs fold nothing (null)', () => {
+    expect(
+      entryExtractionForSignals({ businessTypeGuess: null, tiebreaker: 'browsing-place' })
+    ).toBeNull();
+    expect(
+      entryExtractionForSignals({
+        businessTypeGuess: 'venue',
+        tiebreaker: 'offer-already-understood',
+      })
+    ).toBeNull();
+  });
+});
+
+describe('explicit-path manufacturer prompt stays byte-identical (no conditional framing)', () => {
+  it('begins with the exact trade-supplier block; no union framing leaked in', () => {
+    const p = getExtraction('manufacturer').entryEnrichmentPrompt();
+    expect(p.startsWith(EXPECTED_MANUFACTURER_SCALAR + '\n\n')).toBe(true);
+    expect(p).not.toContain('apply ONLY if this business');
   });
 });
 

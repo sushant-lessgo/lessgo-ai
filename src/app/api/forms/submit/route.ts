@@ -203,16 +203,31 @@ async function formSubmitHandler(request: NextRequest) {
 
         // Email notification to the configured inbox (env-gated; no-op + never
         // throws when unset). Double-guarded so a send failure can't 500 a saved lead.
+        // Await-then-flag: record the notify outcome on the row so a silently-failing
+        // inbox is visible in the dashboard (F30). The send never affects form success.
         try {
-          await sendLeadNotification({
+          const outcome = await sendLeadNotification({
             formName,
             data: data as Record<string, string>,
             fields: formConfig?.fields,
             replyTo: (data as any)?.email,
             pageId: publishedPageId,
           });
-        } catch {
-          // helper already swallows; defensive only
+          if (outcome.status === 'sent') {
+            await prisma.formSubmission.update({
+              where: { id: submission.id },
+              data: { notifiedAt: new Date() },
+            });
+          } else if (outcome.status === 'failed') {
+            await prisma.formSubmission.update({
+              where: { id: submission.id },
+              data: { notifyError: outcome.error.slice(0, 300) },
+            });
+          }
+          // 'skipped' → leave notifiedAt/notifyError null (feature unconfigured)
+        } catch (notifyErr) {
+          // Helper never throws; a failed status-write must not 500 a saved lead.
+          console.warn('[forms/submit] notify outcome write failed (non-fatal):', notifyErr);
         }
 
         // A09: Security Logging - Safe success logging

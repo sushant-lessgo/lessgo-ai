@@ -50,9 +50,8 @@ export default function TechPremiumGallery({ sectionId }: Props) {
   };
 
   // ── Bulk import (Phase 4c) ────────────────────────────────────────────────
-  const store = useEditStore() as any;
-  const uploadImage = store.uploadImage as ((f: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>) | undefined;
-  const save = store.save as (() => Promise<void>) | undefined;
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as ((f: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>) | undefined;
+  const save = useEditStore((s) => (s as any).save) as (() => Promise<void>) | undefined;
   const [importing, setImporting] = React.useState(false);
   const [importMsg, setImportMsg] = React.useState('');
   const [batchCat, setBatchCat] = React.useState('');
@@ -184,7 +183,7 @@ export default function TechPremiumGallery({ sectionId }: Props) {
             {images.map((im) => (
               <div key={im.id} className="tp-gitem" data-cat={im.category}>
                 <div className="tp-ph on-dark">
-                  {im.src ? <img src={im.src} alt={im.tag} /> : <span className="tp-tag">{im.tag || 'Photo'}</span>}
+                  {im.src ? <img src={im.src} alt={im.tag} loading="lazy" decoding="async" /> : <span className="tp-tag">{im.tag || 'Photo'}</span>}
                 </div>
                 <span className="tp-ghover"><Search /></span>
                 {edit && (

@@ -1,0 +1,39 @@
+{
+  "slug": "david-velasco",
+  "url": "https://www.david-velasco.net/",
+  "business": { "type_label": "author / gamebook & novel writer personal site", "icp_category": "writer", "geography_hint": "Spain (Málaga); Spanish-language, ES/EN/IT" },
+  "in_icp": true,
+  "engine": { "pick": "work", "ladder_reasoning": "A writer showcasing a body of published works (gamebooks, novels, solo RPGs) — the bibliography itself is the proof and the reason to buy/subscribe, so browsing the WORK is the decision.", "runner_up": "quick-yes" },
+  "goal": { "one_action": "Subscribe to the author's newsletter (Boletín); secondarily click through to buy a featured book", "mechanism": "subscribe-follow", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 6, "pages": ["home","bio","obras","blog","catalogo","contacto"], "archetype_note": "Author-brand bibliography site: home features individual works as cards, plus stats, WIP dashboard and newsletter; buying happens off-site (external '¡Lo quiero!' links to expedienteanunnaki.com / huge-gamebooks.com)." },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "nav: Inicio/Bio/Obras/Blog/Catálogo/Contacto", "component": "nav" },
+      { "canonical": "features", "observed_as": "Oreikhalkos / #CódiceSalomón / Portal Ouija / Nueva Tokio 2130 / Expediente Anunnaki / Solo RPG featured works", "component": "grid-cards" },
+      { "canonical": "results", "observed_as": "site stats: 38 books, 20 gamebooks, 3,009 IG followers, 3,783 teas", "component": "stats" },
+      { "canonical": "leadForm", "observed_as": "Boletín", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "David Velasco (Bio page)", "component": "text" },
+      { "canonical": "cta", "observed_as": "Contacto — email-only (info@david-velasco.net)", "component": "mailto" }
+    ],
+    "unmapped": [
+      { "observed": "dashboard of in-progress projects with completion percentages 30-100%", "why_no_fit": "A live status/progress widget of unreleased works — not proof, not a feature list, not a CTA; it is an engagement/anticipation device with no canonical section", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "blog", "bilingual"],
+    "proposed_new": [
+      { "name": "works-catalog", "evidence": "Home is a spine of the creator's OWN works (gamebooks, novels, solo RPGs) as cards, each buying off-site via external '¡Lo quiero!' links — matches the registry works-catalog pattern (per-work redirect, not a generic product catalog)." },
+      { "name": "progress-tracker", "evidence": "Dedicated dashboard showing completion percentages (30-100%) of in-progress/unreleased works — a standing progress-status widget distinct from any listed capability." }
+    ]
+  },
+  "proof_types": ["stats", "portfolio"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["works-card-grid", "stats-counter-strip", "progress-bar-dashboard", "newsletter-signup"],
+  "languages": ["es", "en", "it"],
+  "confidence": { "level": "medium", "why": "fetch_quality is partial; /catalogo returned 404, no forms captured, bio page mixed generic WordPress sidebar into extraction — spine and engine are clear but the primary conversion (newsletter vs off-site buy) is inferred." },
+  "gap_findings": [
+    "works-catalog with per-work OFF-SITE purchase (external '¡Lo quiero!' redirects to other domains) is not expressible by closed catalog/gallery vocab.",
+    "The WIP progress-dashboard (completion % of unreleased works) has no section or capability — an anticipation/engagement device the taxonomy cannot represent.",
+    "Trilingual (ES/EN/IT) exceeds the binary 'bilingual' capability slug."
+  ]
+}

@@ -11,8 +11,14 @@
 // `{type:'form', formId}` buttonConfig; M2–M5 omit formId.
 //
 // Unresolvable input (no goal, no mechanism, or a mechanism whose destination is
-// missing/unusable) → `undefined`: the caller falls back to legacy behavior
+// unusable/malformed) → `undefined`: the caller falls back to legacy behavior
 // (form section / `#cta`), so every existing project renders unchanged.
+//
+// goal-ref-cta (D-C): a goal that EXISTS but is missing its required param
+// (M2 phone/email, M3 url, M4 links — the F14 "Skip for now" case) → `null`,
+// which normalizeCtas maps to an inert `#` no-op (never a dead/broken href).
+// `null` (param-less) is deliberately distinct from `undefined` (leave the
+// entry untouched → template fallback). M1/M5 keep their working defaults.
 
 import type { Brief } from '@/types/brief';
 import type { Destination } from '@/types/destination';
@@ -70,25 +76,49 @@ export function inferPlatform(url: string): string {
  */
 export function goalToDestination(
   goal: Brief['goal'] | null | undefined,
-  ctx: { forms?: Record<string, unknown> | undefined },
-): GoalDestination | undefined {
+  ctx: {
+    forms?: Record<string, unknown> | undefined;
+    /** goal-ref-cta phase 3 (F23): path of the page being rendered ('/', '/contact').
+     *  Single-page → undefined. */
+    currentPagePath?: string;
+    /** goal-ref-cta phase 3 (F23): path of the page that holds the conversion form.
+     *  When it differs from currentPagePath, M1 resolves to a cross-page `page`
+     *  dest instead of a same-page anchor. undefined → same-page anchor (single
+     *  page / no form page). */
+    formPagePath?: string;
+  },
+): GoalDestination | null | undefined {
   if (!goal || !goal.mechanism) return undefined;
 
   switch (goal.mechanism) {
     case 'M1': {
-      // On-site form → the shared #form-section anchor + the connected formId.
-      // formId is the first form on the project (if any); a missing formId still
-      // returns the anchor pair — normalizeCtas emits {type:'form'} and the
-      // legacy reader's own forms check falls back, identical either way.
+      // On-site form. formId is the first form on the project (if any); a missing
+      // formId still returns the anchor pair — normalizeCtas emits {type:'form'}
+      // and the legacy reader's own forms check falls back, identical either way.
       const formId = ctx.forms ? Object.keys(ctx.forms)[0] : undefined;
+      // F23: multipage — the form lives on a DIFFERENT page than the one being
+      // rendered → a cross-page `page` dest (bare pathSlug; middleware/KV serve it
+      // on the published host — same mechanism as nav page-links). NO formId key:
+      // a page dest is a navigation, not an on-site form connection, so
+      // normalizeCtas must down-convert it to {type:'page'}, never {type:'form'}.
+      if (
+        ctx.formPagePath &&
+        ctx.currentPagePath &&
+        ctx.formPagePath !== ctx.currentPagePath
+      ) {
+        return { dest: { kind: 'page', pathSlug: ctx.formPagePath } };
+      }
+      // Form on the CURRENT page (or single-page) → the shared #form-section anchor.
       return { dest: { kind: 'section', anchor: 'form-section' }, formId };
     }
 
     case 'M2': {
       // Direct channel: parse the destination string (wa.me → whatsapp,
       // tel: → call, mailto: → email; anything else → external) via the shim.
+      // D-C: required param (phone/email) missing → `null` (inert `#` no-op at
+      // normalizeCtas), distinct from `undefined` (leave the entry untouched).
       const raw = firstDestination(goal.destination);
-      if (!raw) return undefined;
+      if (!raw) return null;
       const dest = toDestination(raw);
       if (dest === undefined || dest === 'GOAL_REF' || !isDestination(dest)) return undefined;
       // scale-05 phase 6: enrich a WhatsApp destination that carries no inline
@@ -103,16 +133,18 @@ export function goalToDestination(
 
     case 'M3': {
       // Redirect out: external URL verbatim (store badge, Amazon, Calendly, …).
+      // D-C: missing url param → `null` (inert `#` no-op).
       const raw = firstDestination(goal.destination);
-      if (!raw) return undefined;
+      if (!raw) return null;
       return { dest: { kind: 'external', url: raw } };
     }
 
     case 'M4': {
       // Subscribe / follow: a social profile link (platform inferred) or, when
       // the host is unrecognized, an external redirect. No formId.
+      // D-C: missing links param → `null` (inert `#` no-op).
       const raw = firstDestination(goal.destination);
-      if (!raw) return undefined;
+      if (!raw) return null;
       const platform = inferPlatform(raw);
       if (platform === 'website') return { dest: { kind: 'external', url: raw } };
       return { dest: { kind: 'social', platform, url: raw } };

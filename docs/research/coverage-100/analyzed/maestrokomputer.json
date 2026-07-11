@@ -1,0 +1,50 @@
+{
+  "slug": "maestrokomputer",
+  "url": "https://www.maestrokomputer.com/",
+  "business": { "type_label": "local computer & IT hardware shop", "icp_category": "place", "geography_hint": "Dumai, Indonesia" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "No defined expertise sold and no portfolio of work; the site is a presence page for a physical computer shop — founder story, an Instagram photo feed, and a 'Find Us' block with address/phone/WhatsApp/hours ARE the decision (should I visit/contact this store).",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Get in touch with / visit the shop (contact via WhatsApp/phone or the linktr.ee hub)",
+    "mechanism": "call-WhatsApp",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 3,
+    "pages": ["home", "blog", "threads"],
+    "archetype_note": "WordPress presence site; nav also lists an off-domain 'Contact' pointing to linktr.ee. Blog has 1 post, Threads page is nearly empty; sidebar (About This Site + Find Us) repeats site-wide."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "founderNote", "observed_as": "Welcome", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "maestrokom", "component": "gallery" },
+      { "canonical": "miscellaneous", "observed_as": "About This Site", "component": "text" },
+      { "canonical": "cta", "observed_as": "Find Us", "component": "text" },
+      { "canonical": "footer", "observed_as": "Find Us (address/phone/WhatsApp/hours)", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Threads (empty page)", "why_no_fit": "Titled nav page with no unique body content beyond repeated sidebar widgets", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "bilingual", "blog"],
+    "proposed_new": []
+  },
+  "proof_types": [],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["instagram-feed embed", "address/hours block", "founder-story text block"],
+  "languages": ["id", "en"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality is full, but the site is unusually thin/inconsistent (empty Threads page, 1 blog post, prices found in raw HTML from an inner product page not crawled) and the primary contact CTA is split between an off-domain linktr.ee redirect and the on-page WhatsApp/phone, making the true conversion mechanism ambiguous."
+  },
+  "gap_findings": [
+    "Primary CTA is a link-in-bio (linktr.ee) redirect that aggregates all contact channels off-domain — sits between 'redirect' and 'call-WhatsApp' and isn't cleanly one mechanism.",
+    "Live embedded Instagram social feed is mapped to gallery/portfolio, but a running social-media feed widget (auto-updating, not a curated portfolio) is arguably a distinct capability the closed vocab can't cleanly express."
+  ]
+}

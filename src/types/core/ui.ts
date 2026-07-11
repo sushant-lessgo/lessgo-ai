@@ -3024,6 +3024,7 @@ export type UndoableAction =
   | 'section-delete'
   | 'element-content-update'
   | 'theme-update'
+  | 'sectionSwap'
   | 'reset-to-generated';
 
 /**

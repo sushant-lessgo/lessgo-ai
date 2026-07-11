@@ -1,0 +1,58 @@
+{
+  "slug": "gokyuzurestaurant",
+  "url": "https://gokyuzurestaurant.co.uk/",
+  "business": { "type_label": "Turkish/Mediterranean restaurant group (6 London venues)", "icp_category": "place", "geography_hint": "London, UK" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is deciding on a PLACE to eat — photos, menus, locations, hours and authenticity ('EAT TÜRKİYE', 'Experience the Heart of Türkiye') are the proof. No defined expertise sold and no portfolio of work; browsing the venue/menu IS the decision.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Reserve/book a table (or pick a location to dine at)",
+    "mechanism": "redirect",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 5,
+    "pages": ["home", "about", "locations", "menu", "contact"],
+    "archetype_note": "Multi-location restaurant group site: home pitch → about/story → per-location grid → per-location PDF menus → contact form. RESERVE/BOOK NOW CTAs funnel to /locations rather than an on-site booking engine."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "Nav (Home/About/Locations/Menu/Contact)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "EAT TÜRKİYE", "component": "text" },
+      { "canonical": "hero", "observed_as": "Experience the Heart of Türkiye in London", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Our Story", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Awards", "component": "text" },
+      { "canonical": "features", "observed_as": "Unique Flavours", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Our Locations", "component": "grid-cards" },
+      { "canonical": "pricing", "observed_as": "Menu (per-location PDF menus)", "component": "grid-cards" },
+      { "canonical": "testimonials", "observed_as": "Customer testimonial quote", "component": "text" },
+      { "canonical": "cta", "observed_as": "Deliveroo delivery callout", "component": "text" },
+      { "canonical": "faq", "observed_as": "Frequently Asked Questions", "component": "accordion" },
+      { "canonical": "leadForm", "observed_as": "Contact form (location + query type)", "component": "form" },
+      { "canonical": "followStrip", "observed_as": "Facebook / TikTok / Twitter links", "component": "social" }
+    ],
+    "unmapped": [
+      { "observed": "Menu section that is a grid of six per-location downloadable PDF menus (no on-page dishes/prices)", "why_no_fit": "Not a pricing table or menu-list — it is a set of downloadable per-venue PDF documents standing in for the menu", "closest": "pricing" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "blog"],
+    "proposed_new": [
+      { "name": "practitioner-profiles", "evidence": "Six London venues each with their own location card/subpage (Green Lanes, Park Royal, Kentish Town, Walthamstow, Finchley, Chingford), per-location addresses/phones/booking — a multi-branch per-location profile pattern the closed vocab cannot express." }
+    ]
+  },
+  "proof_types": ["testimonials", "certs"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["location-cards grid", "menu-download list (per-location PDF links)", "faq-accordion", "contact-form with location/query-type selectors", "social-strip"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality is partial — per-location addresses/phones/hours/booking links and map embeds were genuinely absent from the static fetch (menu is PDF downloads, location detail subpages not crawled), so the reservation mechanism and map-hours capability are inferred rather than observed." },
+  "gap_findings": [
+    "Multi-location restaurant group: one brand, N venues each with own address/hours/menu/booking — closest registry match is practitioner-profiles but that was coined for staff/branch bios, not a food-venue chain.",
+    "Menu-as-downloadable-PDF-per-location has no clean section id (mapped to pricing) — restaurants without on-page menus are common; a menu-download pattern is under-expressed.",
+    "Reservation CTA funnels to a location chooser with no captured on-site or delegated booking engine — the actual booking mechanism (per-venue) is indeterminate from this fetch."
+  ]
+}

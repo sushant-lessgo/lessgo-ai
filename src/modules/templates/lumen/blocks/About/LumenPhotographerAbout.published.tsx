@@ -34,7 +34,7 @@ export default function LumenPhotographerAboutPublished(props: Props) {
         <div className="lm-about-portrait">
           <div className="lm-ph" style={{ aspectRatio: '4 / 5' }}>
             {props.about_image ? (
-              <img src={props.about_image} alt={props.fig_caption || 'Portrait'} />
+              <img src={props.about_image} alt={props.fig_caption || 'Portrait'} loading="lazy" decoding="async" />
             ) : (
               <span className="lm-ph-tag">Portrait of the photographer</span>
             )}

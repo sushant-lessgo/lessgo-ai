@@ -1,6 +1,6 @@
 // hooks/useImageToolbar.ts - Robust image toolbar hook
 import React from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStoreApi } from '@/hooks/useEditStoreLegacy';
 
 import { logger } from '@/lib/logger';
 /**
@@ -8,12 +8,13 @@ import { logger } from '@/lib/logger';
  * Handles cases where showImageToolbar might not be available in the store
  */
 export function useImageToolbar() {
-  // Get store instance
-  const store = useEditStore();
-  
+  // Non-reactive store instance (handler-only reads via getState — no whole-store subscription)
+  const storeApi = useEditStoreApi();
+
   // Robust image toolbar function
   const handleImageToolbar = React.useCallback((imageId: string, position: { x: number; y: number }) => {
     try {
+      const store = storeApi.getState();
       // Try multiple approaches to show the image toolbar
       if (store.showImageToolbar && typeof store.showImageToolbar === 'function') {
         store.showImageToolbar(imageId, position);
@@ -24,7 +25,7 @@ export function useImageToolbar() {
         store.showElementToolbar(imageId, position);
       } else {
         // Last resort: try to access the raw store state and call any available function
-        const storeState = useEditStore.getState();
+        const storeState = storeApi.getState();
         if (storeState?.showImageToolbar) {
           storeState.showImageToolbar(imageId, position);
         } else if (storeState?.showToolbar) {
@@ -37,7 +38,7 @@ export function useImageToolbar() {
       logger.error('Error showing image toolbar:', error);
       logger.warn('Falling back to console log for image toolbar request:', { imageId, position });
     }
-  }, [store]);
+  }, [storeApi]);
 
   return handleImageToolbar;
 }

@@ -14,7 +14,7 @@
 
 import { UnderstandingResponseSchema } from '../understand.schema';
 import { ScrapeWebsiteExtendedSchema } from '../scrapeWebsite.schema';
-import type { CollectionKey } from '@/modules/collections/registry';
+import { extractionCollections } from '@/modules/collections/registry';
 import type { EngineExtraction } from './index';
 import {
   collectionsEnrichmentFields,
@@ -27,7 +27,8 @@ import {
 // writers' books are `works` (books ≠ services). The engine extracts both keys
 // verbatim — whichever the site actually lists fills; the other stays empty and
 // is dropped. Base prefill still covers every classification/prefill field.
-const WORK_COLLECTIONS: readonly CollectionKey[] = ['services', 'works'];
+// Keys sourced from the registry single-source (entry-capture phase 1).
+const WORK_COLLECTIONS = extractionCollections.work;
 
 export const workExtraction: EngineExtraction = {
   key: 'work',

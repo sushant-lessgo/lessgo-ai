@@ -1,0 +1,32 @@
+{
+  "slug": "deliciasdotrigo",
+  "url": "https://deliciasdotrigo.com.br/",
+  "business": { "type_label": "packaged-bread / bakery-goods manufacturer (brand catalog site)", "icp_category": "food & beverage manufacturer", "geography_hint": "Brazil (pt-BR, area code 35 — Minas Gerais)" },
+  "in_icp": true,
+  "engine": { "pick": "thing", "ladder_reasoning": "No defined expertise sold (not trust), no portfolio-as-proof (not work), and it is a packaged-goods manufacturer brand rather than a venue you visit or a menu you browse to decide (not place). Visitor is evaluating the product lines, so thing.", "runner_up": "place" },
+  "goal": { "one_action": "Contact the company via the customer-service/commercial/careers form (or phone), after browsing product lines and recipe videos", "mechanism": "form", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 4, "pages": ["home", "produtos", "quem-somos", "contato"], "archetype_note": "Classic brand + product-catalog site for a food manufacturer: hero banner, recipe video showcase, product-line grid (no prices/cart), company history, contact form. Brochureware, not e-commerce." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "RECEITAS PERFEITAS PARA TODAS AS OCASIÕES", "component": "text banner" },
+      { "canonical": "cta", "observed_as": "VER MAIS RECEITAS", "component": "link button to /produtos/" },
+      { "canonical": "useCases", "observed_as": "6 embedded YouTube recipe videos", "component": "video grid" },
+      { "canonical": "features", "observed_as": "SELECIONE UM DE NOSSOS PRODUTOS! (7 product-line cards)", "component": "grid-cards" },
+      { "canonical": "founderNote", "observed_as": "QUEM SOMOS / A nossa história", "component": "timeline" },
+      { "canonical": "leadForm", "observed_as": "FALE CONOSCO contact form", "component": "form" },
+      { "canonical": "cta", "observed_as": "ATENDIMENTO AO CLIENTE (phone + address)", "component": "contact block" },
+      { "canonical": "footer", "observed_as": "Empresa / Fale conosco footer columns", "component": "footer" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": { "needed": ["multipage", "catalog", "lead-form"], "proposed_new": [ { "name": "content-index", "evidence": "Home shows a grid of 6 embedded YouTube recipe videos and the product/recipes area functions as a browsable recipe feed — a content index, not blog posts." } ] },
+  "proof_types": [],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["product-line card grid", "video embed grid", "history timeline", "department-routing contact form (with resume upload)"],
+  "languages": ["pt-BR"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; all 4 pages, nav, forms, CTAs, and proof/commerce flags captured clearly. Brand-catalog archetype is unambiguous." },
+  "gap_findings": [
+    "Catalog with product-line subcategory drill-down but NO prices and NO cart — brochure catalog, distinct from storefront-checkout; closed vocab 'catalog' covers browse-only, adequate.",
+    "Contact form doubles as a job-application form (Departamento dropdown incl. 'RH - Vagas' + resume upload) — a single form serving multiple intents (SAC/commercial/marketing/careers); current lead-form capability does not express department-routing or careers intent."
+  ]
+}

@@ -396,6 +396,14 @@ function deriveReviewState(
     const elements = sectionData.elements || {};
     const excluded: string[] = sectionData.aiMetadata?.excludedElements || [];
 
+    // proof-truth phase 4: sections whose quotes were injected from the real
+    // (imported/table-backed) proof set carry aiMetadata.realProof. Suppress
+    // needs-review markers for those sections — the quotes are real, not
+    // AI-drafted. Section-level suppression is exact: injectRealTestimonials
+    // overwrites the whole quote set (all-or-nothing per section). Other
+    // statuses (stock_image, unconfigured, etc.) are unaffected.
+    const suppressNeedsReview = !!sectionData.aiMetadata?.realProof;
+
     const effectiveExclusions = new Set(excluded);
     for (const [key, def] of Object.entries(schema.elements)) {
       if (def.toggleGroup && effectiveExclusions.has(def.toggleGroup)) {
@@ -416,7 +424,7 @@ function deriveReviewState(
       }
 
       const status = getStatusForElement(def.fillMode, key, elements[key], def.default);
-      if (status) {
+      if (status && !(status === 'needs_review' && suppressNeedsReview)) {
         items.push({
           sectionId,
           elementKey: key,
@@ -482,7 +490,7 @@ function deriveReviewState(
               item[fieldName],
               fieldDef.default
             );
-            if (status) {
+            if (status && !(status === 'needs_review' && suppressNeedsReview)) {
               items.push({
                 sectionId,
                 elementKey,

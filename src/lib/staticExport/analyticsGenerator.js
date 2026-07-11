@@ -92,6 +92,7 @@
   function trackEvent(event, customData = {}) {
     const eventData = {
       event,
+      v: 2, // Beacon format version. v2 (scale-04) adds role+placement to cta_click.
       pageId: config.pageId,
       slug: config.slug,
       timestamp: new Date().toISOString(),

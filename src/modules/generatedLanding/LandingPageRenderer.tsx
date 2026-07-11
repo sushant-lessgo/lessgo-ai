@@ -9,6 +9,7 @@
  */
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'next/navigation';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { sectionList } from '@/modules/sections/sectionList';
@@ -32,9 +33,10 @@ import { CSSVariableErrorBoundary } from '@/components/CSSVariableErrorBoundary'
 import { useFeatureFlags } from '@/utils/featureFlags';
 import { SectionTracker } from '@/app/p/[slug]/components/SectionTracker';
 import { FormPlacementRenderer } from '@/components/forms/FormPlacementRenderer';
-import { normalizeCtas } from '@/utils/normalizeCtas';
+import { buildNormalizeCtasContext, createNormalizeCtasMemo } from '@/utils/normalizeCtas';
 
 import { logger } from '@/lib/logger';
+import { EDITOR_DEBUG } from '@/lib/debugFlags';
 
 // ... (types remain the same)
 type SectionBackground = 'neutral' | 'primary-highlight' | 'secondary-highlight';
@@ -104,8 +106,11 @@ export default function LandingPageRenderer({ className = '', tokenId, published
   const params = useParams();
   const effectiveTokenId = tokenId || (params?.token as string) || 'default';
 
-  // ✅ Get full state from store to ensure reactivity to nested changes
-  const storeState = useEditStore();
+  // perf-01 phase 4 (step 3): narrow the root subscription to exactly the fields
+  // this render body reads (over-selecting is safe; under-selecting breaks render).
+  // `useShallow` re-renders only when one of these picks changes shallowly, so a
+  // store write that touches an unrelated slice no longer re-renders the renderer.
+  // Store actions (getColorTokens/updateFromBackgroundSystem) are stable identities.
   const {
     sections,
     sectionLayouts,
@@ -122,15 +127,61 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     themeValues,
     goal,
     forms,
-  } = storeState;
+    pages,
+    currentPageId,
+  } = useEditStore(
+    useShallow((s) => ({
+      sections: s.sections,
+      sectionLayouts: s.sectionLayouts,
+      theme: s.theme,
+      content: s.content,
+      mode: s.mode,
+      errors: s.errors,
+      getColorTokens: s.getColorTokens,
+      updateFromBackgroundSystem: s.updateFromBackgroundSystem,
+      audienceType: s.audienceType,
+      templateId: s.templateId,
+      variantId: s.variantId,
+      paletteId: s.paletteId,
+      themeValues: s.themeValues,
+      goal: s.goal,
+      forms: s.forms,
+      pages: s.pages,
+      currentPageId: s.currentPageId,
+    })),
+  );
 
   // scale-04 (phase 3): run the same normalization pre-pass as the published
   // renderer so editor/preview buttons point at the resolved goal target. Store
   // `goal` (hydrated from Brief by loadDraft); null goal → legacy fallback.
-  const content = useMemo(
-    () => normalizeCtas(rawContent, { goal, forms }),
-    [rawContent, goal, forms],
-  );
+  // goal-ref-cta phase 3 (F23): on multipage, derive the active page path + the
+  // form-bearing page (from the same PageAxisState the sitemap nav reads) so an M1
+  // primary on a page that does NOT hold the form resolves cross-page — identical
+  // to the published exporter (both feed buildNormalizeCtasContext). Single-page
+  // (≤1 page) degrades to {goal, forms} → same-page anchor (no regression).
+  // perf-01 phase 4 (B1): per-section memoizing normalizer, one instance per
+  // renderer mount. Keeps unchanged sections' normalized refs stable across
+  // keystrokes so memo'd blocks don't re-render on unrelated edits. Output is
+  // structurally identical to the pure `normalizeCtas` (memo parity test pins it).
+  const normalizeCtasMemo = useRef(createNormalizeCtasMemo()).current;
+  const content = useMemo(() => {
+    const pageList = pages ? Object.values(pages) : [];
+    if (pageList.length <= 1) {
+      return normalizeCtasMemo(rawContent, buildNormalizeCtasContext({ goal, forms }));
+    }
+    const ctx = buildNormalizeCtasContext({
+      goal,
+      forms,
+      currentPagePath: pages[currentPageId]?.pathSlug,
+      // The active page's live working copy is the top-level `rawContent` (which
+      // includes injected chrome); other pages use their stored body-only content.
+      pages: pageList.map((p) => ({
+        path: p.pathSlug,
+        content: p.id === currentPageId ? rawContent : p.content,
+      })),
+    });
+    return normalizeCtasMemo(rawContent, ctx);
+  }, [rawContent, goal, forms, pages, currentPageId, normalizeCtasMemo]);
 
   const usesTemplate = usesTemplateModule(audienceType, templateId);
   const { ready: templateReady, tmpl } = useTemplateModule(audienceType, templateId);
@@ -227,92 +278,83 @@ export default function LandingPageRenderer({ className = '', tokenId, published
   sectionLayouts: sectionLayouts
 });
   
-  const orderedSections = useMemo(() => {
+  // perf-01 phase 4 (B2): SPLIT the former combined `orderedSections` memo so a
+  // text edit does not re-run the background-assignment pass.
+  //
+  // Memo A — background assignments. Keyed on [sections, sectionLayouts,
+  // validatedFields, hiddenInferredFields] and INTENTIONALLY NOT on `content`.
+  // The section-id list derives from `sections` filtered by layout presence, with
+  // `content[sectionId]?.layout` only as a FALLBACK when `sectionLayouts[id]` is
+  // absent. LAYOUT-STABILITY ASSUMPTION: typing/text edits never add or remove a
+  // section's layout (structural mutations touch `sections`/`sectionLayouts`, which
+  // ARE deps) → the id set is stable across content-only edits, so keying without
+  // `content` is safe. If a future content-only mutation can change a section's
+  // layout, add `content` back to these deps or this memo will serve a stale id set.
+  // (`dynamicBackgroundSystem`/`theme.colors.sectionBackgrounds.secondary` were on
+  //  the old combined deps but are NOT read by this computation — dropped.)
+  const backgroundAssignments = useMemo(() => {
+    if (!sections || sections.length === 0) return {} as Record<string, string>;
+    const sectionIds = sections
+      .map((sectionId: string) => ({
+        id: sectionId,
+        layout: sectionLayouts[sectionId] || content[sectionId]?.layout,
+      }))
+      .filter((s) => s.layout !== undefined && typeof s.layout === 'string')
+      .map((s) => s.id);
+    return assignEnhancedBackgroundsToAllSections(sectionIds, {
+      // Required InputVariables fields with defaults
+      marketCategory: validatedFields.marketCategory || 'Business Productivity Tools',
+      marketSubcategory: validatedFields.marketSubcategory || 'Project & Task Management',
+      targetAudience: validatedFields.targetAudience || 'early-stage-founders',
+      keyProblem: validatedFields.keyProblem || '',
+      startupStage: validatedFields.startupStage || 'mvp-development',
+      landingPageGoals: validatedFields.landingPageGoals || 'signup',
+      pricingModel: validatedFields.pricingModel || 'freemium',
+      // Optional HiddenInferredFields
+      ...hiddenInferredFields,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sections, sectionLayouts, validatedFields, hiddenInferredFields]);
+
+  // Memo B — cheap per-section mapping to the render shape (incl. `data:
+  // content[sectionId]` and the manual `backgroundType` override read). Re-runs on
+  // edits (cheap), but with the B1 memoizer above `content[sectionId]` refs are
+  // stable for unchanged sections → memo'd blocks see stable `data`.
+  const orderedSections = useMemo<OrderedSection[]>(() => {
     if (!sections || sections.length === 0) {
       return [];
     }
 
-    logger.debug('🔄 Processing sections with EDIT MODE ORDER preserved:', {
-      hasDynamicSystem: !!dynamicBackgroundSystem,
-      totalSections: sections.length,
-      editModeOrder: sections,
-      preservedOrder: 'Using edit mode positions instead of sectionList metadata order'
-    });
+    const finalSections: OrderedSection[] = sections
+      .map((sectionId: string, index: number) => {
+        const sectionData = content[sectionId];
+        const layout = sectionLayouts[sectionId] || sectionData?.layout;
+        return { id: sectionId, order: index, layout, data: sectionData };
+      })
+      .filter((section): section is typeof section & { layout: string } => {
+        return section.layout !== undefined && typeof section.layout === 'string';
+      })
+      .map((section) => {
+        const { id: sectionId, order, layout, data } = section;
 
-  const processedSections = sections
-  .map((sectionId: string, index: number) => {
-    const sectionMeta = sectionList.find((s: any) => s.id === sectionId);
-    const sectionData = content[sectionId];
-    const layout = sectionLayouts[sectionId] || sectionData?.layout;
-    
-    return {
-      id: sectionId,
-      order: index, // ✅ Use edit mode position instead of sectionMeta.order
-      metaOrder: sectionMeta?.order ?? 999, // Keep metadata order for debugging
-      layout,
-      data: sectionData,
-      sectionMeta
-    };
-  })
-  .filter((section: any): section is typeof section & { layout: string } => {
-    return section.layout !== undefined && typeof section.layout === 'string';
-  });
-  // ✅ REMOVED the sort() - preserve edit mode order
+        // ✅ Manual user override wins over auto-calculated assignment.
+        const manualBackgroundType = content[sectionId]?.backgroundType;
+        const effectiveBackgroundType = manualBackgroundType || backgroundAssignments[sectionId];
 
-    // ✅ NOW APPLY ALTERNATING LOGIC to preserve edit mode order
-    // ✅ Use batch assignment instead of individual calls
-const allSectionIds = processedSections.map((s: any) => s.id);
-const backgroundAssignments = assignEnhancedBackgroundsToAllSections(allSectionIds, {
-  // Required InputVariables fields with defaults
-  marketCategory: validatedFields.marketCategory || 'Business Productivity Tools',
-  marketSubcategory: validatedFields.marketSubcategory || 'Project & Task Management',
-  targetAudience: validatedFields.targetAudience || 'early-stage-founders',
-  keyProblem: validatedFields.keyProblem || '',
-  startupStage: validatedFields.startupStage || 'mvp-development',
-  landingPageGoals: validatedFields.landingPageGoals || 'signup',
-  pricingModel: validatedFields.pricingModel || 'freemium',
-  
-  // Optional HiddenInferredFields
-  ...hiddenInferredFields
-});
+        // Map to SectionBackground format
+        let background: SectionBackground;
+        switch (effectiveBackgroundType) {
+          case 'primary': background = 'primary-highlight'; break;
+          case 'secondary': background = 'secondary-highlight'; break;
+          case 'custom': background = 'neutral'; break; // ✅ Handle custom backgrounds
+          default: background = 'neutral';
+        }
 
-const finalSections: OrderedSection[] = processedSections
-.filter((section: any) => section.layout !== undefined && typeof section.layout === 'string')
-.map((section: any, index: number) => {
-  const { id: sectionId, order, layout, data } = section;
-
-  // ✅ Check for manual user override first
-  const manualBackgroundType = content[sectionId]?.backgroundType;
-
-  // ✅ Use manual override if exists, otherwise use auto-calculated
-  const effectiveBackgroundType = manualBackgroundType || backgroundAssignments[sectionId];
-
-  // ✅ Debug logging for manual overrides
-  if (manualBackgroundType && manualBackgroundType !== backgroundAssignments[sectionId]) {
-    logger.debug(`🎨 ${sectionId} using MANUAL background:`, {
-      manual: manualBackgroundType,
-      wouldBeAuto: backgroundAssignments[sectionId]
-    });
-  }
-
-  // Map to SectionBackground format
-  let background: SectionBackground;
-  switch(effectiveBackgroundType) {
-    case 'primary': background = 'primary-highlight'; break;
-    case 'secondary': background = 'secondary-highlight'; break;
-    case 'custom': background = 'neutral'; break; // ✅ Handle custom backgrounds
-    default: background = 'neutral';
-  }
-
-  return { id: sectionId, order, background, layout, data };
-});
-    // ✅ Log the final alternating pattern
-    logger.debug('🎨 Final alternating background pattern:', 
-      finalSections.map(s => `${s.id}: ${s.background}${s.alternatingInfo?.wasAlternated ? ' (alternated)' : ''}`).join(' → ')
-    );
+        return { id: sectionId, order, background, layout, data };
+      });
 
     return finalSections;
-  }, [sections, sectionLayouts, content, dynamicBackgroundSystem, theme.colors.sectionBackgrounds.secondary, validatedFields, hiddenInferredFields]);
+  }, [sections, sectionLayouts, content, backgroundAssignments]);
 
   // Stable in-page anchor ids (dedup-aware) so nav/footer "#<type>" links resolve in
   // preview too (smooth-scroll itself runs only on the published page).
@@ -321,10 +363,28 @@ const finalSections: OrderedSection[] = processedSections
     [orderedSections]
   );
 
+  // perf-01 phase 4 (step 4): wrap each resolved block component in React.memo
+  // ONCE, cached by the resolved component's identity (registry returns stable
+  // component refs). This lets a renderer re-render skip unchanged blocks whose
+  // now-ref-stable spread `data` props are unchanged (steps 1+5) while phase-3
+  // self-subscription still re-renders a block when its own slice changes. Wrapping
+  // inline in JSX would mint a fresh component type every render → remount storm.
+  const memoizedComponentCache = useRef(
+    new WeakMap<React.ComponentType<any>, React.MemoExoticComponent<React.ComponentType<any>>>()
+  ).current;
+  const getMemoizedComponent = (Comp: React.ComponentType<any>) => {
+    let memoized = memoizedComponentCache.get(Comp);
+    if (!memoized) {
+      memoized = React.memo(Comp);
+      memoizedComponentCache.set(Comp, memoized);
+    }
+    return memoized;
+  };
+
   // ✅ Enhanced render section with alternating debug info
   const renderSection = (section: OrderedSection) => {
     const { id: sectionId, background, layout, data, alternatingInfo } = section;
-    
+
     // Get the appropriate component from registry
     const LayoutComponent = getComponent(sectionId, layout, audienceType, templateId);
 
@@ -332,13 +392,16 @@ const finalSections: OrderedSection[] = processedSections
     if (!LayoutComponent) {
       logger.warn(`Layout component not found: ${sectionId}.${layout}`);
       return (
-        <MissingLayoutComponent 
+        <MissingLayoutComponent
           key={sectionId}
-          sectionId={sectionId} 
+          sectionId={sectionId}
           layout={layout}
         />
       );
     }
+
+    // Stable per-component React.memo wrapper (see getMemoizedComponent note).
+    const MemoLayoutComponent = getMemoizedComponent(LayoutComponent as React.ComponentType<any>);
 
     // Map background type
     const backgroundType = backgroundTypeMapping[background] || 'neutral';
@@ -384,29 +447,31 @@ const finalSections: OrderedSection[] = processedSections
       : undefined;
 
     // Enhanced background logging
-    if (backgroundType === 'secondary') {
-      logger.debug(`🎨 Rendering secondary section ${sectionId}:`, {
-        backgroundCSS: sectionBackgroundCSS,
-        themeSecondary: theme.colors.sectionBackgrounds.secondary,
-        isFromAccentOptions: theme.colors.sectionBackgrounds.secondary?.includes('gradient'),
-        accentColor: theme.colors.accentColor,
-        baseColor: theme.colors.baseColor,
-        alternatingInfo
-      });
-    }
+    if (EDITOR_DEBUG) {
+      if (backgroundType === 'secondary') {
+        logger.debug(`🎨 Rendering secondary section ${sectionId}:`, {
+          backgroundCSS: sectionBackgroundCSS,
+          themeSecondary: theme.colors.sectionBackgrounds.secondary,
+          isFromAccentOptions: theme.colors.sectionBackgrounds.secondary?.includes('gradient'),
+          accentColor: theme.colors.accentColor,
+          baseColor: theme.colors.baseColor,
+          alternatingInfo
+        });
+      }
 
-    // Enhanced logging for alternated sections
-    if (alternatingInfo?.wasAlternated) {
-      logger.debug(`🔄 Rendering alternated section ${sectionId}:`, {
-        originallyWouldBe: 'secondary',
-        actuallyIs: backgroundType,
-        actualCSS: sectionBackgroundCSS,
-        previousSection: alternatingInfo.previousSection,
-        reason: 'Previous section was secondary, so this became neutral for visual break'
-      });
+      // Enhanced logging for alternated sections
+      if (alternatingInfo?.wasAlternated) {
+        logger.debug(`🔄 Rendering alternated section ${sectionId}:`, {
+          originallyWouldBe: 'secondary',
+          actuallyIs: backgroundType,
+          actualCSS: sectionBackgroundCSS,
+          previousSection: alternatingInfo.previousSection,
+          reason: 'Previous section was secondary, so this became neutral for visual break'
+        });
+      }
+
+      logger.debug(`🎨 Section ${sectionId} CSS class:`, sectionBackgroundCSS);
     }
-    
-    logger.debug(`🎨 Section ${sectionId} CSS class:`, sectionBackgroundCSS);
 
     // Handle section-specific errors
     const sectionError = errors[sectionId];
@@ -435,7 +500,7 @@ const finalSections: OrderedSection[] = processedSections
     // Render the actual component with feature flag-controlled wrapper
     try {
       // Debug logging for hero section
-      if (sectionId === 'hero') {
+      if (EDITOR_DEBUG && sectionId === 'hero') {
         logger.debug('🎯 Rendering hero section with data:', {
           mode,
           isEditable: mode !== 'preview',
@@ -468,7 +533,7 @@ const finalSections: OrderedSection[] = processedSections
               className={`relative ${isHeaderSection ? 'sticky top-0 z-50' : ''}`}
               style={{ scrollMarginTop: 80 }}
             >
-              <LayoutComponent
+              <MemoLayoutComponent
                 sectionId={sectionId}
                 className=""
                 isEditable={mode !== 'preview'}
@@ -501,7 +566,7 @@ const finalSections: OrderedSection[] = processedSections
               }}
               data-background-type={backgroundType}
             >
-              <LayoutComponent
+              <MemoLayoutComponent
                 sectionId={sectionId}
                 backgroundType={backgroundType}
                 sectionBackgroundCSS={sectionBackgroundCSS}
@@ -537,7 +602,7 @@ const finalSections: OrderedSection[] = processedSections
               customBackgroundStyle={customBackgroundStyle}
               className=""
             >
-              <LayoutComponent
+              <MemoLayoutComponent
                 sectionId={sectionId}
                 backgroundType={backgroundType}
                 sectionBackgroundCSS={sectionBackgroundCSS}
@@ -863,7 +928,27 @@ const finalSections: OrderedSection[] = processedSections
   // product theme injectors entirely — template tokens come from CSS vars on
   // :root. Gate render until the dynamically-loaded template module is ready.
   if (usesTemplate) {
-    if (!templateReady || !tmpl) return null;
+    // perf-01 phase 4 (step 6): cold-load import gate. While the template module
+    // dynamic-imports, show a neutral gray skeleton approximating section rhythm
+    // instead of `return null` (which flashed a blank page then popped content in).
+    // No `tmpl.ThemeInjector` / template CSS vars (those are what's loading). All
+    // hooks run above this point, so the hooks order is unchanged. Cold-load only —
+    // the warm nav path never hits this branch.
+    if (!templateReady || !tmpl) {
+      return (
+        <div className="landing-page-skeleton" aria-hidden="true">
+          {(sections ?? []).slice(0, 6).map((id: string, i: number) => (
+            <div
+              key={id ?? i}
+              style={{
+                minHeight: i === 0 ? 480 : 320,
+                backgroundColor: i % 2 === 0 ? '#f3f4f6' : '#e5e7eb',
+              }}
+            />
+          ))}
+        </div>
+      );
+    }
     const ThemeInjector = tmpl.ThemeInjector;
     return (
       <ThemeInjector

@@ -35,7 +35,7 @@ export default function TechPremiumExplainer({ sectionId }: Props) {
   const edit = mode === 'edit';
   const rows = blockContent.rows || [];
 
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((f: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [uploadingId, setUploadingId] = React.useState<string | null>(null);
@@ -108,7 +108,7 @@ export default function TechPremiumExplainer({ sectionId }: Props) {
                 <div className="tp-explain-media">
                   <div className="tp-ph">
                     {r.image
-                      ? <img src={r.image} alt={r.title} />
+                      ? <img src={r.image} alt={r.title} loading="lazy" decoding="async" />
                       : embed
                         ? <iframe className="tp-explain-video" src={embed} title={r.title || 'Video'} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                         : <span className="tp-tag">{r.eyebrow || 'Photo / video'}</span>}

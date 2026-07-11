@@ -71,16 +71,13 @@ store (`useEditStoreLegacy`).
 |------|------|
 | `useEditor.ts` | High-level editor actions/facade |
 | `useAutoSave.ts` | Debounced draft auto-save (`/api/saveDraft`) |
-| `useStatePersistence.ts` | Load/persist wiring around the store |
 | `useContentSerializer.ts` | Serialize editor content for save/publish |
 | `useSectionCRUD.ts` / `useElementCRUD.ts` | Add/remove/reorder sections & elements |
 | `useElementPicker.ts` / `useUniversalElements.ts` | Element insertion + universal-element schema |
-| `useSelectionPriority.ts` / `useSelectionPreserver.ts` | Selection resolution & preservation |
-| `useToolbarPositioning.ts` | Floating-toolbar placement |
-| `useImageToolbar.ts` / `useButtonConfigModal.ts` / `useAdvancedActionsMenu.ts` | Per-widget toolbar/menu state |
+| `useSelectionPriority.ts` / `useSelectionPreserver.ts` | Selection resolution & preservation (priority = pure resolver; the `ToolbarShell` owns positioning/visibility since editor phase-3) |
+| `useImageToolbar.ts` / `useButtonConfigModal.ts` | Per-widget toolbar/menu state |
 | `useSmartTextColors.ts` | Contrast-aware text color resolution |
 | `useOptimizedEditStore.ts` | Selector-based reads to cut re-renders |
-| `useTransitionLock.ts` / `useGlobalAnchor.ts` | Interaction guards / anchor tracking |
 
 ## Standalone hooks
 - `useCSRFToken.ts` — fetches/holds the CSRF token for mutating API calls.

@@ -2,7 +2,10 @@
 // Hard-fit helpers (scale track, scalePlan §7.2 / spec 01 D-G). Pure data-layer
 // queries over templateMeta + businessTypes — this file must NEVER import a
 // template module, block, resolver, or the registry loaders (bundle firewall).
-// No app code imports this yet (readers arrive spec 02+).
+// The ONE cross-module import that touches shared-block machinery is
+// `sharedBlocks/capabilities` — but that is PURE DATA (a Record<key, CapabilityId
+// | null> + derived id list), with NO React/component/registry imports, so the
+// firewall holds (see that file's header). serve-gate-v2 phase 2 wired it in.
 
 import type { TemplateId } from '@/types/service';
 import { templateIds } from '@/types/service';
@@ -12,10 +15,27 @@ import type { Brief } from '@/types/brief';
 import { templateMeta } from '@/modules/templates/templateMeta';
 import { engineCoreSections } from '@/modules/engines/coreSections';
 import { businessTypes, type BusinessTypeKey } from '@/modules/businessTypes/config';
+import { sharedBlockCapabilities } from '@/modules/generatedLanding/sharedBlocks/capabilities';
 
 /**
  * Pure hard-fit: template serves `engine` and covers every `required`
  * capability. Retired and bespoke templates never fit (off every shortlist).
+ *
+ * serve-gate-v2 phase 2: a required capability is satisfied EITHER by the
+ * template's own `meta.capabilities` OR by a shared block (a shared block
+ * renders on EVERY template, resolving before template dispatch, so the
+ * capability it backs — `lead-form`, `store-badges` — is available regardless
+ * of the picked template). Retired/bespoke exclusion and engine match are still
+ * checked FIRST and are unaffected by shared blocks.
+ *
+ * i18n-phase-1 D5: `bilingual` is a PLATFORM-LEVEL capability — the content
+ * locale layer (overlay resolver + per-locale export + shared `switcher.v1.js`)
+ * is template-agnostic and works on ANY non-retired template, so `fit()` treats
+ * it as satisfied everywhere via `PLATFORM_CAPABILITIES` (same "available
+ * regardless of pick" pattern as shared blocks, but backed by the platform i18n
+ * machinery rather than a block). This REPLACES Lumen's trust-on-declaration:
+ * any template can now serve a bilingual Brief. The machinery is asserted by
+ * `src/lib/i18n/i18nHonesty.test.ts`.
  */
 export function fit(
   templateId: TemplateId,
@@ -25,8 +45,24 @@ export function fit(
   const meta = templateMeta[templateId];
   if (!meta || meta.retired || meta.bespoke) return false;
   if (!engine || !(meta.copyEngines as readonly string[]).includes(engine)) return false;
-  return required.every((cap) => meta.capabilities.includes(cap));
+  return required.every(
+    (cap) =>
+      meta.capabilities.includes(cap) ||
+      sharedBlockCapabilities.includes(cap) ||
+      PLATFORM_CAPABILITIES.includes(cap)
+  );
 }
+
+/**
+ * PLATFORM-satisfied capabilities (i18n-phase-1 D5): backed by platform-level
+ * machinery that runs on every non-retired template rather than by a template
+ * block or a shared block. `bilingual` = the content-locale layer (overlay
+ * resolver, per-locale static export, reciprocal hreflang, shared
+ * `switcher.v1.js`). Kept separate from `sharedBlockCapabilities` (that map is
+ * provably in sync with the shared-block component registries — bilingual is
+ * NOT a shared block). Honesty check: `src/lib/i18n/i18nHonesty.test.ts`.
+ */
+export const PLATFORM_CAPABILITIES: readonly CapabilityId[] = ['bilingual'];
 
 /**
  * EXPLICIT-TRIGGER capabilities (scale-07 phase 2, founder decision Q1):
@@ -49,10 +85,20 @@ export const EXPLICIT_TRIGGER_CAPABILITIES: readonly CapabilityId[] = [
  * - businessType entry's requiredCapabilities (unknown key contributes none —
  *   the SERVE GATE, spec 02+, is what rejects unknown types)
  * - mechanism M1 → lead-form; intent download-app → store-badges
- * - structure.mode === 'multi' → multipage
- * (No language field on Brief yet → no bilingual derivation; spec 02+.)
+ * - i18n-phase-1 D5: `brief.locales.length > 1` → bilingual (platform-satisfied
+ *   by every non-retired template via PLATFORM_CAPABILITIES, so this derivation
+ *   narrows nothing — it just records the requirement for queryability).
  * (EXPLICIT_TRIGGER_CAPABILITIES are deliberately absent from this table —
  * see the constant's doc above.)
+ *
+ * serve-gate-v2 phase 2: the `structure.mode === 'multi' → multipage`
+ * derivation was DELETED here. AI-INFERRED multi is a SOFT signal — it must
+ * never reject a brief (a mis-inferred multi used to narrow the shortlist to
+ * multipage-capable templates and reject engines that have none). `multipage`
+ * hardening now lives ONLY in `requiredCapabilitiesFromStructure()` below,
+ * which runs on the USER-CONFIRMED 7b structure — the pick's soft multipage
+ * tiebreak (serveGate.pickTemplate) is the only other place `structure.mode`
+ * is read pre-7b.
  */
 export function requiredCapabilitiesFromBrief(brief: Brief): CapabilityId[] {
   const required = new Set<CapabilityId>();
@@ -64,7 +110,11 @@ export function requiredCapabilitiesFromBrief(brief: Brief): CapabilityId[] {
 
   if (brief.goal?.mechanism === 'M1') required.add('lead-form');
   if (brief.goal?.intent === 'download-app') required.add('store-badges');
-  if (brief.structure?.mode === 'multi') required.add('multipage');
+
+  // i18n-phase-1 D5: a Brief declaring >1 content locale requires `bilingual`
+  // (platform-satisfied everywhere, see fit()/PLATFORM_CAPABILITIES). ≤1 locale
+  // (or absent) contributes nothing — legacy single-locale Briefs unaffected.
+  if ((brief.locales?.length ?? 0) > 1) required.add('bilingual');
 
   return [...required];
 }
@@ -90,8 +140,10 @@ export type ConfirmedStructure = NonNullable<Brief['structure']>;
  *   not capability evidence — e.g. trust's core `cta`/`packages` never derive
  *   lead-form/packages). Without an engine, the union of all engine cores is
  *   excluded (conservative).
- * - STRUCTURAL capabilities stay trust-on-declaration: `mode === 'multi'` ⇒
- *   `multipage` (no section evidences it); `bilingual` has no structure signal.
+ * - STRUCTURAL: `mode === 'multi'` ⇒ `multipage` (no section evidences it).
+ *   `bilingual` is NOT derived here — it has no 7b-structure signal; its
+ *   requirement comes from `brief.locales` in requiredCapabilitiesFromBrief
+ *   (i18n-phase-1 D5) and is platform-satisfied by fit() (PLATFORM_CAPABILITIES).
  *
  * Result is deterministic (canonical `capabilityIds` order).
  */

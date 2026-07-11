@@ -1,7 +1,10 @@
 // Tests for the env-gated lead-notification email helper.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import * as Sentry from '@sentry/nextjs';
 import { sendLeadNotification } from './sendLeadNotification';
 import type { MVPFormField } from '@/types/core/forms';
+
+vi.mock('@sentry/nextjs', () => ({ captureException: vi.fn() }));
 
 const FIELDS: MVPFormField[] = [
   { id: 'name', type: 'text', label: 'Name', required: true },
@@ -20,12 +23,13 @@ describe('sendLeadNotification', () => {
     vi.unstubAllEnvs();
   });
 
-  it('does NOT call fetch when env is unconfigured', async () => {
+  it('does NOT call fetch when env is unconfigured (returns skipped)', async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
     // no RESEND_API_KEY / LEAD_NOTIFICATION_EMAIL
-    await sendLeadNotification({ formName: 'Contact', data: DATA, fields: FIELDS });
+    const outcome = await sendLeadNotification({ formName: 'Contact', data: DATA, fields: FIELDS });
     expect(fetchMock).not.toHaveBeenCalled();
+    expect(outcome).toEqual({ status: 'skipped' });
   });
 
   it('does NOT call fetch when only the API key is set (no recipient)', async () => {
@@ -43,7 +47,8 @@ describe('sendLeadNotification', () => {
     vi.stubEnv('LEAD_NOTIFICATION_EMAIL', 'owner@naayom.com');
     vi.stubEnv('LEAD_NOTIFICATION_FROM', 'leads@naayom.com');
 
-    await sendLeadNotification({ formName: 'Contact', data: DATA, fields: FIELDS, replyTo: DATA.email, pageId: 'page-1' });
+    const outcome = await sendLeadNotification({ formName: 'Contact', data: DATA, fields: FIELDS, replyTo: DATA.email, pageId: 'page-1' });
+    expect(outcome).toEqual({ status: 'sent' });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0];
@@ -74,14 +79,28 @@ describe('sendLeadNotification', () => {
     expect(payload.from).toBe('onboarding@resend.dev'); // default sender
   });
 
-  it('never throws when fetch rejects', async () => {
+  it('captures a non-OK Resend response to Sentry (F30 observability)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 403, text: async () => 'validation_error' });
+    vi.stubGlobal('fetch', fetchMock);
+    vi.stubEnv('RESEND_API_KEY', 're_test');
+    vi.stubEnv('LEAD_NOTIFICATION_EMAIL', 'owner@naayom.com');
+
+    const outcome = await sendLeadNotification({ formName: 'Contact', data: DATA, fields: FIELDS, pageId: 'page-1' });
+    expect(outcome).toEqual({ status: 'failed', error: 'Resend responded 403' });
+
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    const [, opts] = (Sentry.captureException as any).mock.calls[0];
+    expect(opts.tags).toMatchObject({ area: 'email', op: 'sendLeadNotification' });
+    expect(opts.extra).toMatchObject({ status: 403, pageId: 'page-1' });
+  });
+
+  it('never throws when fetch rejects (returns failed outcome)', async () => {
     const fetchMock = vi.fn().mockRejectedValue(new Error('network'));
     vi.stubGlobal('fetch', fetchMock);
     vi.stubEnv('RESEND_API_KEY', 're_test');
     vi.stubEnv('LEAD_NOTIFICATION_EMAIL', 'owner@naayom.com');
 
-    await expect(
-      sendLeadNotification({ formName: 'Contact', data: DATA, fields: FIELDS })
-    ).resolves.toBeUndefined();
+    const outcome = await sendLeadNotification({ formName: 'Contact', data: DATA, fields: FIELDS });
+    expect(outcome).toEqual({ status: 'failed', error: 'send failed: network' });
   });
 });

@@ -22,8 +22,7 @@ export default function TechPremiumTrust({ sectionId }: Props) {
   const logos = blockContent.logos || [];
   const setM = (id: string, k: keyof Metric, v: string) => handleCollectionUpdate('metrics', metrics.map((m) => (m.id === id ? { ...m, [k]: v } : m)));
 
-  const store = useEditStore() as any;
-  const uploadImage = store.uploadImage as ((f: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>) | undefined;
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as ((f: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>) | undefined;
   const [uploadingId, setUploadingId] = React.useState<string | null>(null);
   const setLogo = (id: string, k: keyof Logo, v: string) => handleCollectionUpdate('logos', logos.map((l) => (l.id === id ? { ...l, [k]: v } : l)));
   const onLogoFile = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +68,7 @@ export default function TechPremiumTrust({ sectionId }: Props) {
             <div className="tp-trust__logos">
             {logos.map((l) => (
               <span key={l.id} className={`tp-trust__logo${edit ? ' is-edit' : ''}`}>
-                {l.image ? <img src={l.image} alt={l.name} /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
+                {l.image ? <img src={l.image} alt={l.name} loading="lazy" decoding="async" /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
                 {edit && (
                   <span className="tp-trust__logo-edit">
                     <label className="tp-trust__logo-up">

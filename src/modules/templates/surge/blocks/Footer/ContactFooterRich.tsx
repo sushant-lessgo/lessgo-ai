@@ -62,11 +62,12 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
     useServiceBlock<ContactFooterRichContent>({ sectionId });
   const edit = mode === 'edit';
 
-  const { sections, pages } = useEditStore();
+  const sections = useEditStore((s) => s.sections);
+  const pages = useEditStore((s) => s.pages);
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
 
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [logoUploading, setLogoUploading] = React.useState(false);
@@ -120,7 +121,7 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
           <div className="sg-footer__brand">
             <div className="sg-footer__brand-row">
               {blockContent.logo_image ? (
-                <img className="sg-footer__img" src={blockContent.logo_image} alt="Logo" />
+                <img className="sg-footer__img" src={blockContent.logo_image} alt="Logo" loading="lazy" decoding="async" />
               ) : (
                 <>
                   <span className="sg-footer__mark" />

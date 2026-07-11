@@ -79,7 +79,30 @@ named LOOKS — hundreds of visibly different starting points from few skeletons
 - Compounds multiplicatively with scale-09 block variants: 3 heroes × 5
   palettes × 3 looks = 45 distinct salons from one skeleton.
 
-## Parity QA automation
+## Editor-basics contract (added 2026-07-11 — founder: "logo upload missing, link
+## configure missing — have we defined the basics?")
+> **Superseded in mechanism by `docs/tracks/editorPlan.md` (2026-07-11):** the list below stays
+> the WHAT; the HOW is editorPlan's edit-primitive vocabulary (templates declare per-slot
+> primitives, never implement editing; kit emits assignments; conformance asserts per slot;
+> extension law for new edit needs). editorPlan phases 0–3 are a dependency of this build.
+The universal editor affordances EVERY template must support, frozen as a list and
+enforced in `templateConformance()` (machine-checkable part) + `/manual-test` (the
+rest). Today these live only as skill prose (§3f) — skippable, hence the recurring
+misses. The v0 contract:
+1. Header logo upload (change/remove, wordmark fallback, `logo_image` element).
+2. Every contract text element wrapped in the template's Editable (no dead text).
+3. Every image slot wired to `uploadImage`/`bulkUploadImages` (replace/remove).
+4. Every button/CTA opens Button Settings (link/goal configure, GOAL_REF).
+5. Nav + footer links editable via `LinkTargetPopover`.
+6. Collections (cards, gallery items, list rows): add / remove / reorder.
+7. Social links editable.
+8. Form blocks accept the form-builder field config.
+9. Palette/variant/knob switching live without breaking edited content.
+Enforcement split decided at build: items assertable by rendering edit-blocks in
+jsdom (Editable wrappers present per contract element, logo/img/button wiring)
+go into `templateConformance()`; visual/interactive rest goes into the parity QA
++ a `/manual-test` editor-basics subsection. Conformance failure = template not
+done (designer's bar extends to the EDITOR, not just the render).
 Playwright screenshot-diff: render each block edit-mode vs published, pixel-
 diff. Automates the #1 trap (dual-renderer parity); shrinks the human gate to
 a visual taste pass. Highest-leverage single build for template throughput.
@@ -167,7 +190,8 @@ a visual taste pass. Highest-leverage single build for template throughput.
 ## Acceptance criteria
 - [ ] Decision gate documented; skill refuses "new template" when capability
       path fits (per §7 table).
-- [ ] Design kit generated from engine contract for trust + thing engines;
+- [ ] Design kit generated from engine contract for trust + thing + work
+      engines (work-engine grammar formalized by the atelier spec feeds it);
       contains sections/slots/capacities/format/knob-ranges; regenerating after
       a contract change updates it (derived, not hand-written).
 - [ ] Anchor library exists with ≥15 anchors + banned-list derivation from
@@ -176,24 +200,32 @@ a visual taste pass. Highest-leverage single build for template throughput.
       missing required slot).
 - [ ] `templateConformance(templateId)` single call covers: core-set coverage,
       consumes ⊆ contract, resolve + distinctness both modes, capability
-      honesty, published/client boundary, standard knob set.
+      honesty, published/client boundary, standard knob set, **editor-basics
+      contract (machine-checkable subset)**.
 - [ ] Standard knob set tokenized on ≥1 flagship; ≥3 named looks presented in
       picker; look swap = zero copy change, both renderers correct.
 - [ ] Screenshot parity diff runs against one template and fails on a seeded
       parity break.
 - [ ] `/new-template` rewritten thin (gate + workflow + evergreen landmines;
       zero code-derivable facts).
-- [ ] End-to-end drill: ONE new template (salon-style, trust engine) from
-      demand signal → live, ≤1 week wall-clock, founder time = taste-pick +
-      2 gates only.
+- [ ] End-to-end drill: ONE new template from demand signal → live, founder
+      time = taste-pick + 2 gates only. **Drill = `atelier` (work engine,
+      Kundius — templatePlan on-demand queue #1), replacing the hypothetical
+      salon/trust drill.** Executed via `docs/task/atelier-template.spec.md`
+      AFTER this build; this spec's deliverables (kit, lint, conformance,
+      parity diff) must be ready for it. ≤1-week wall-clock measured on the
+      atelier port phase only (its i18n dependency doesn't count against the
+      pipeline claim).
 
 ## Pilot / smallest slice
 Two thin slices, either order:
 1. **Knobs pilot:** tokenize button-shape + density on hearth, 3 named looks,
    picker presents them. Proves flexibility mechanism + look storage.
-2. **Pipeline drill:** run the salon template end-to-end through kit → design →
+2. **Pipeline drill:** run the drill template end-to-end through kit → design →
    lint → agent port → conformance. Proves the ~1-week claim + the kit/lint
-   artifacts.
+   artifacts. (Drill = atelier, per acceptance criteria — design step already
+   done via the KP direction tiles; lint runs retroactively over the approved
+   HTML.)
 Decision gate after both: measure "10 generated same-niche sites — any two
 same at thumbnail?" → invest in more variants/knobs vs more templates based on
 the answer, not feeling.

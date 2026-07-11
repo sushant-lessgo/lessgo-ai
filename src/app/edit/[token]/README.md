@@ -207,16 +207,15 @@ All editable elements receive data attributes:
 **Triggers**: When image elements are selected
 **Features**:
 - Image replacement
-- Alt text editing
 - Sizing controls
 
-### Form Toolbar
-**Location**: `components/toolbars/FormToolbar.tsx`
-**Triggers**: When form elements are selected
-**Features**:
-- Form field configuration
-- Validation rules
-- Submission settings
+> Alt-text editing removed 2026-07-11 (control was a silent no-op — no published renderer reads
+> a user alt field). Returns as part of the phase-3 image primitive (`docs/tracks/editorPlan.md`).
+
+### Form editing
+FormToolbar was deleted 2026-07-11 (~90% stubbed, and unreachable — its show action had no
+callers). The form-builder modal remains reachable via ButtonConfigurationModal ("Create New
+Form"). Form-editing UX returns after scale §6 (goal→form) defines it.
 
 ## Editing Features
 

@@ -1,0 +1,60 @@
+{
+  "slug": "donlealpizzaria",
+  "url": "https://donlealpizzaria.com.br/",
+  "business": { "type_label": "multi-location pizzeria chain", "icp_category": "place", "geography_hint": "Rio de Janeiro lakes region, Brazil (pt-BR)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking out a restaurant: browsing menu category photos, scanning the 10 unit locations with addresses/hours, then deciding to order or reserve. Browsing photos/menu/locations IS the decision, so place over quick-yes despite ordering being an external redirect.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "order pizza (via delivery site) or reserve a table (via linktr.ee) at one of the units",
+    "mechanism": "redirect",
+    "delegated_to": "store (donlealdelivery.com.br + linktr.ee reservations); WhatsApp per-unit; google-forms/on-page form for franchise/event inquiries"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 5,
+    "pages": ["home", "menu", "franquias", "eventos", "unidades/sobre/contato (nav)"],
+    "archetype_note": "Consumer restaurant site (menu + locations + events) fused with a B2B franchise-recruitment page (market stats + opportunity + interest form). Menu page shows only category photos, no item names/prices; ordering + reservations happen off-site."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (Unidades/Sobre Nós/Menu/Eventos/Seja um Franqueado/Contato)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "BORA COMER PIZZA?", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "PEÇA PELO NOSSO SITE / OU FAÇA A RESERVA DA SUA VISITA", "component": "text" },
+      { "canonical": "features", "observed_as": "BORA COMER PIZZA? four highlights (quality, delivery, handmade, satisfaction)", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "NÓS SABEMOS QUE VOCÊ QUER VER O CARDÁPIO! / menu category galleries SALGADAS/DOCES/MASSAS", "component": "gallery" },
+      { "canonical": "map-hours", "observed_as": "CONHEÇA NOSSAS UNIDADES / Funcionamento Pizzaria (10 locations, addresses, hours)", "component": "grid-cards" },
+      { "canonical": "founderNote", "observed_as": "NOS CONHEÇA MELHOR (13+ years heritage)", "component": "text" },
+      { "canonical": "results", "observed_as": "O MERCADO DA PIZZA NO BRASIL / OPORTUNIDADE DE NEGÓCIO (franchise market stats)", "component": "stats" },
+      { "canonical": "uniqueMechanism", "observed_as": "NOSSOS DIFERENCIAIS (franchise differentiators)", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Entre em Contato (franchise + event inquiry forms)", "component": "form" },
+      { "canonical": "socialProof", "observed_as": "ABF franchising association badge", "component": "cert-badge" },
+      { "canonical": "followStrip", "observed_as": "Siga as nossas redes sociais", "component": "logo-strip" },
+      { "canonical": "footer", "observed_as": "footer social + hours", "component": "footer" }
+    ],
+    "unmapped": [
+      { "observed": "SEJA UM FRANQUEADO / QUEM SOMOS — full franchise-recruitment argument (market data, opportunity, differentiators, ABF badge, interest form) targeting a B2B franchisee audience", "why_no_fit": "Section list has no notion of a distinct secondary B2B recruitment funnel bolted onto a consumer place site; individual sub-parts map to results/uniqueMechanism/leadForm but the page as a whole is a different offer to a different audience", "closest": "features + leadForm" },
+      { "observed": "CONHEÇA NOSSAS UNIDADES — directory of 10 physical locations each with own address/phone/WhatsApp", "why_no_fit": "map-hours implies a single location's map+hours; a multi-branch location directory with per-unit contact CTAs is structurally more than one place block", "closest": "map-hours" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "lead-form"],
+    "proposed_new": [
+      { "name": "location-directory", "evidence": "CONHEÇA NOSSAS UNIDADES / repeated 'Unidade [city]' cards: a grid of 10 branch locations each with its own address, phone, and WhatsApp link — a multi-branch directory, not a single map-hours block" },
+      { "name": "franchise-recruitment", "evidence": "/franquias page: 'SEJA UM FRANQUEADO' B2B funnel with market stats (O MERCADO DA PIZZA), business-opportunity data, NOSSOS DIFERENCIAIS, ABF badge, and an interest form/google-form — a franchise-sales secondary audience distinct from the consumer restaurant offer" }
+    ]
+  },
+  "proof_types": ["certs", "stats"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["menu-category gallery", "multi-location directory cards (address/phone/WhatsApp)", "stats blocks", "contact form", "cert badge", "social follow strip"],
+  "languages": ["pt-BR"],
+  "confidence": { "level": "high", "why": "fetch_quality full; all 4 pages, sections, CTAs, forms, embeds and proof captured verbatim" },
+  "gap_findings": [
+    "Multi-branch businesses need a location-directory capability (N units each with own address/phone/WhatsApp) — map-hours only models one place.",
+    "A consumer place site can carry a bolt-on B2B franchise-recruitment funnel (market stats + opportunity + interest form) that engines/sections cannot express as a distinct secondary audience/offer.",
+    "Menu is photo-category-only with no item names or prices, and ordering/reservation are external redirects — a place whose menu is non-transactional and whose conversion is fully delegated off-site."
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "slug": "adriantofei",
+  "url": "https://adriantofei.com/",
+  "business": { "type_label": "filmmaker & actor personal/portfolio site", "icp_category": "creative professional (film)", "geography_hint": "Romania" },
+  "in_icp": true,
+  "engine": {
+    "pick": "work",
+    "ladder_reasoning": "A filmmaker/actor: the films, roles, festival selections and critical praise ARE the proof; the visitor evaluates the body of work, not a defined service package to hire or a product to buy.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "subscribe to the newsletter / follow to keep up with his films (secondary: pre-order the film, donate)",
+    "mechanism": "subscribe-follow",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 10,
+    "pages": ["home","bio","cv","movies","news","interviews","method","fest-lists","gallery","linktree","contact"],
+    "archetype_note": "Personal creative-brand hub: bio/CV credibility spine + per-film subpages + newsletter + social/linktree/donate outlets. Not a single-action business site; conversion is diffuse."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Adrian Țofei • Official Site – Filmmaker & Actor", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "About / Bio", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "Critical praise / Critical Quotes", "component": "text" },
+      { "canonical": "results", "observed_as": "Awards / Acting & Filmmaking Highlights", "component": "stats" },
+      { "canonical": "socialProof", "observed_as": "88% Rotten Tomatoes Fresh / press mentions", "component": "stats" },
+      { "canonical": "miscellaneous", "observed_as": "CV: Film Credits / Festivals, Awards & Nominations / Education", "component": "table" },
+      { "canonical": "leadForm", "observed_as": "Subscribe to receive the latest news / Contact Adrian", "component": "form" },
+      { "canonical": "followStrip", "observed_as": "Share this: (social share icon row)", "component": "other" }
+    ],
+    "unmapped": [
+      { "observed": "Share this: (Facebook/X/Reddit/WhatsApp/Bluesky… share buttons on every page)", "why_no_fit": "followStrip is about following the brand's own accounts; this is an outbound content-SHARING widget (visitor amplifies the page), a distinct engagement affordance", "closest": "followStrip" },
+      { "observed": "Festivals, Awards & Nominations 2015-2026 (dated timeline)", "why_no_fit": "no canonical timeline section id; it is a chronological credit ledger, richer than results/testimonials", "closest": "results" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "video-hero", "blog"],
+    "proposed_new": [
+      { "name": "works-catalog", "evidence": "Movies nav opens per-film subpages (Be My Cat, We Put the World to Sleep) presenting the creator's OWN films — poster, trailer, awards, pre-order link — as the site spine, matching the registered works-catalog concept (author bibliography/discography analog for a filmmaker)." }
+    ]
+  },
+  "proof_types": ["testimonials", "reviews", "stats", "portfolio", "certs"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["credit/filmography table", "festival timeline", "pull-quote/critical-praise block", "video embed", "newsletter signup", "social share row"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality full; page structure, forms, CTAs, embeds and proof all captured clearly; only design tokens (fonts/colors) missing so design_style is inferred." },
+  "gap_findings": [
+    "Personal creative hub has NO single conversion action — it fans out to newsletter, film pre-order (Vimeo VOD), Patreon, PayPal donate, Linktree, and social follows; the 5-engine/one-action model must pick a dominant intent it doesn't truly have.",
+    "The ubiquitous 'Share this:' outbound social-sharing widget has no canonical section — followStrip is the nearest but semantically inverted (amplify vs follow).",
+    "A dated festival/awards timeline is a recurring creative-professional need with no canonical section id (mapped to results/miscellaneous)."
+  ]
+}

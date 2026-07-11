@@ -12,7 +12,7 @@ export default function ThankYouPage() {
 
         <div className="space-y-4">
   <a
-    href="https://lessgo.ai/dashboard"
+    href={`${process.env.NEXT_PUBLIC_DASHBOARD_URL ?? ''}/dashboard`}
     className="inline-block bg-brand-logo text-white font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-accentPrimary transition"
   >
     Try Lessgo.ai Now!

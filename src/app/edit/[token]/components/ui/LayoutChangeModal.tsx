@@ -37,12 +37,12 @@ export function LayoutChangeModal() {
 
     // Use the store actions
     executeUndoableAction(
-      'section-layout-update' as any,
+      'sectionSwap',
       `Changed layout to ${layoutId}`,
       () => {
-        // Update the layout
-        updateSectionLayout(layoutChangeModal.sectionId!, layoutId);
-        
+        // Update the layout (skipHistory: the outer sectionSwap owns the single undo entry)
+        updateSectionLayout(layoutChangeModal.sectionId!, layoutId, { skipHistory: true });
+
         // Update the section content with migrated data
         setSection(layoutChangeModal.sectionId!, { elements: migratedData });
       }

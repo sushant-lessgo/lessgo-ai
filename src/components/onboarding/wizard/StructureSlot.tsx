@@ -46,8 +46,14 @@ import {
   isMultipage,
   type PageArchetypeDef,
 } from '@/modules/audience/product/pageArchetypes';
+import { filterSectionsByProof } from '@/modules/audience/product/strategy/parseStrategyProduct';
+import { humanizeGenerationError } from '@/modules/wizard/generation/errorMessage';
 import { businessTypes } from '@/modules/businessTypes/config';
-import { getCollectionDef, type CollectionKey } from '@/modules/collections/registry';
+import {
+  getCollectionDef,
+  collectionKeysForBusinessType,
+  type CollectionKey,
+} from '@/modules/collections/registry';
 import type { CollectionEntry } from '@/modules/brief/collections';
 import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
 
@@ -205,11 +211,16 @@ function CollectionNode({ collectionKey }: { collectionKey: CollectionKey }) {
   );
 }
 
-// Renders one CollectionNode per collection present in `facts.collections` OR
-// declared by the businessType's `requiredCollections` (even when empty ⇒
-// count-only/empty node, decision 2). Zero-entry state is allowed (the index
-// page ships an empty-state later). Returns null when there are no collections
-// to show, so single-page/multipage gates without collections are unchanged.
+// Renders one CollectionNode per collection present in `facts.collections`,
+// declared by the businessType's `requiredCollections` (dormant — serve-gate
+// coupling, none set today), OR declared by the businessType's ENGINE extraction
+// family (`collectionKeysForBusinessType`). The engine-key union is what makes a
+// one-liner entry (no site → no extraction → empty `facts.collections`) still
+// reach an empty collection node + its `+ Add` path (F19). Zero-entry state is
+// allowed (count-only/empty node, decision 2). For an UNCLASSIFIED entry (rung A,
+// `businessTypeKey` null) the engine union is `[]`, so we fall back to present-only
+// and never surface empty nodes. Returns null when there are no collections to
+// show, so single-page/multipage gates without collections are unchanged.
 function CollectionNodes() {
   const businessTypeKey = useWizardStore((s) => s.businessTypeKey);
   const collections = useWizardStore((s) => s.collections);
@@ -217,8 +228,11 @@ function CollectionNodes() {
   const keys = useMemo(() => {
     const required =
       (businessTypeKey && businessTypes[businessTypeKey]?.requiredCollections) || [];
+    const engineKeys = collectionKeysForBusinessType(businessTypeKey);
     const present = Object.keys(collections) as CollectionKey[];
-    return Array.from(new Set<CollectionKey>([...present, ...required]));
+    return Array.from(
+      new Set<CollectionKey>([...present, ...required, ...engineKeys])
+    );
   }, [businessTypeKey, collections]);
 
   if (keys.length === 0) return null;
@@ -251,6 +265,10 @@ export default function StructureSlot() {
   const structureDisabled = useWizardStore((s) => s.structureDisabled);
   const toggleStructureSection = useWizardStore((s) => s.toggleStructureSection);
   const moveStructureSection = useWizardStore((s) => s.moveStructureSection);
+  // Proof hard rule (scale 1-10 F22): the SAME proof signal the strategy path
+  // feeds `assembleProductStrategy`, read client-side so a page ADDED at the gate
+  // (and its addable-section chips) can never seed an unpromised proof section.
+  const hasTestimonials = useWizardStore((s) => s.proof.hasTestimonials);
   // Structure persistence + hard-fit recompute (scale-07 phase 6).
   const briefStructureMode = useWizardStore((s) => s.briefStructureMode);
   const recomputeRequiredCapabilities = useWizardStore(
@@ -298,9 +316,10 @@ export default function StructureSlot() {
   // Prefer prior edits (storeSitemap), else the strategy's proposal.
   const draft: SitemapPage[] | null = storeSitemap ?? strategy?.sitemap ?? null;
 
-  // Strategy fetch failed — retry, never trap (the shell's Continue stays
-  // available; GeneratingSlot's fallback fetch would then surface the same
-  // failure with its own chrome).
+  // Strategy fetch failed — retry, never trap. The shell GATES Continue while
+  // this error state is showing (F27b): the user can't walk a failed strategy
+  // into a broken editor. `Try again` re-rolls; the escape hatch stays the
+  // wizard Back button (single-page/skip paths are unaffected).
   if (strategyStatus === 'error') {
     return (
       <div className="space-y-4">
@@ -329,7 +348,9 @@ export default function StructureSlot() {
         ) : (
           <>
             <p className="text-gray-600">
-              {strategyError || 'We couldn’t draft your site plan.'}
+              {strategyError
+                ? humanizeGenerationError(strategyError)
+                : 'We couldn’t draft your site plan.'}
             </p>
             <button
               type="button"
@@ -490,6 +511,10 @@ export default function StructureSlot() {
   // ===== draft edits (write straight to the store) =====
   const commit = (next: SitemapPage[]) => setSitemap(next);
 
+  // Proof hard rule at the seed path (F22): unpromised proof sections are cut
+  // from BOTH the added-page default sections AND the addable-section chips.
+  const proofInput = { hasTestimonials };
+
   const updatePage = (idx: number, next: SitemapPage) =>
     commit(draft.map((p, i) => (i === idx ? next : p)));
 
@@ -502,7 +527,7 @@ export default function StructureSlot() {
         archetypeKey: def.key,
         title: def.title,
         pathSlug: def.pathSlug,
-        sections: [...def.defaultSections],
+        sections: filterSectionsByProof([...def.defaultSections], proofInput),
       },
     ]);
 
@@ -551,9 +576,10 @@ export default function StructureSlot() {
         {draft.map((page, pageIdx) => {
           const def = menuByKey.get(page.archetypeKey);
           const isHome = !!def?.required;
-          const available = (def?.allowedSections ?? []).filter(
-            (s) => !page.sections.includes(s)
-          );
+          const available = filterSectionsByProof(
+            def?.allowedSections ?? [],
+            proofInput
+          ).filter((s) => !page.sections.includes(s));
           return (
             <div key={page.archetypeKey} className="rounded-lg border border-gray-200 p-4">
               <div className="flex items-center justify-between gap-3 mb-1">

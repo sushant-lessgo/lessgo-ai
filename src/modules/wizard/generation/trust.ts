@@ -94,6 +94,16 @@ export interface TrustGenerationInput {
     hasTeamPhotos: boolean;
     hasFounderPhoto: boolean;
     testimonialType: 'text' | 'photos' | 'video' | 'transformation' | null;
+    /**
+     * proof-truth phase 5 — user-answered approximate testimonial count (manual
+     * path). Mirrors thing.ts. Feeds the `cardCountHints.testimonials` seam that
+     * selectServiceUIBlocks reads (selectUIBlocks.ts:49-50) ONLY when no scraped
+     * `importedTestimonials` exist. NOTE (asymmetry): the service strategy route
+     * + assembleServiceStrategy do NOT yet forward cardCountHints to
+     * selectServiceUIBlocks, so this hint is plumbed into the strategy payload
+     * but DORMANT until that (out-of-scope) forward lands.
+     */
+    testimonialCount?: number | null;
   };
 
   /** Verbatim testimonials imported from the user's site (injectRealTestimonials). */
@@ -120,6 +130,20 @@ export interface TrustGenerationInput {
 // ---------------------------------------------------------------------------
 // Payload builders — the fidelity surface asserted by trust.test.ts.
 // ---------------------------------------------------------------------------
+
+/**
+ * proof-truth phase 5 — testimonials card-count hint precedence, mirror of
+ * thing.ts: SCRAPED (`importedTestimonials.length`) wins → else the
+ * user-answered approximate count → else undefined (no hint).
+ */
+export function testimonialCountHint(
+  importedCount: number | undefined,
+  userCount: number | null | undefined
+): number | undefined {
+  if (importedCount && importedCount > 0) return importedCount;
+  if (userCount && userCount > 0) return userCount;
+  return undefined;
+}
 
 /** Legacy ServiceGoal the routes require (derived from the captured intent). */
 export function serviceGoalFor(input: TrustGenerationInput): ServiceGoal {
@@ -188,6 +212,17 @@ export function buildStrategyPayload(input: TrustGenerationInput): Record<string
     // section types (Surge). Server passes it to section selection, NEVER to a
     // prompt builder (firewall preserved).
     ...(input.templateId ? { templateId: input.templateId } : {}),
+    // proof-truth phase 5 — deterministic testimonials card-count hint (scraped
+    // count wins, else user-answered). Emitted only when a hint exists ⇒ the
+    // no-count path is byte-identical. DORMANT until the service route +
+    // assembleServiceStrategy forward it to selectServiceUIBlocks (out of scope).
+    ...(() => {
+      const tHint = testimonialCountHint(
+        input.importedTestimonials?.length,
+        input.proof.testimonialCount
+      );
+      return tHint ? { cardCountHints: { testimonials: tHint } } : {};
+    })(),
   };
 }
 

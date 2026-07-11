@@ -29,7 +29,7 @@ export interface LayoutActions {
   duplicateSection: (sectionId: string) => string;
   setLayout: (sectionId: string, layout: string) => void;
   setSectionLayouts: (layouts: Record<string, string>) => void;
-  updateSectionLayout: (sectionId: string, newLayout: string) => void;
+  updateSectionLayout: (sectionId: string, newLayout: string, opts?: { skipHistory?: boolean }) => void;
   moveSection: (sectionId: string, direction: 'up' | 'down') => void;
   
   // Theme Management  
@@ -58,6 +58,8 @@ getTypographyForSection: (sectionId: string) => FontTheme;
   
   // Logo Management
   setLogoUrl: (url: string) => void;
+  // editor phase-3 (phase 5): DARK-surface logo asset (footer). Mirrors setLogoUrl.
+  setLogoUrlDark: (url: string) => void;
   clearLogo: () => void;
   
   // Color System Integration
@@ -89,11 +91,22 @@ getTypographyForSection: (sectionId: string) => FontTheme;
 export interface ContentActions {
   // Basic Content Operations
   updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) => void;
+  // editor phase-3 (phase 6): canonical per-item alt writer for imageCollection
+  // slots. Writes `content[sectionId].elementMetadata[collectionKey].alt[itemId]`
+  // (the phase-4 alt-text law shape). Add/remove/reorder/bulk-add ride the existing
+  // whole-array updateElementContent path; only alt lives in elementMetadata.
+  setItemAlt: (sectionId: string, collectionKey: string, itemId: string, alt: string) => void;
   bulkUpdateSection: (sectionId: string, elements: Record<string, string | string[]>) => void;
   setBackgroundType: (sectionId: string, backgroundType: BackgroundType) => void;
   setSectionBackground: (sectionId: string, sectionBackground: SectionBackground) => void;
   markAsCustomized: (sectionId: string) => void;
   setSection: (sectionId: string, data: Partial<SectionData>) => void;
+
+  // i18n-phase-1 (3a): switch the active authoring locale. Text writers branch on
+  // `activeLocale`; structure/media stay locale-shared (base). History is PRESERVED
+  // across a switch — undo/redo restore is locale-aware (each entry carries
+  // `entry.locale`; uiActions routes to base vs the overlay).
+  setActiveLocale: (locale: string) => void;
   
   // AI Generation
   regenerateSection: (sectionId: string, userGuidance?: string, options?: { suppressHistory?: boolean }) => Promise<void>;

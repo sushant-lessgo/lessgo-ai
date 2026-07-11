@@ -31,7 +31,13 @@ import { buildBriefDraft, type EntrySignals } from '@/modules/brief/classify';
 // scale-06 phase 7: businessType-keyed extraction. The wizard/entry path selects
 // its extraction schema by businessType (never by audienceType/templateId).
 import { businessTypeKeys, type BusinessTypeKey } from '@/modules/businessTypes/config';
-import { extractionForBusinessType, hasEntryEnrichment } from '@/lib/schemas/extraction';
+import {
+  extractionForBusinessType,
+  hasEntryEnrichment,
+  entryUnionEnrichment,
+  entryExtractionForSignals,
+  type EngineExtraction,
+} from '@/lib/schemas/extraction';
 import { isDemoMode } from '@/lib/mockMode';
 import { scrapeSite, ScrapeError } from '@/lib/scrape/fetchSite';
 
@@ -163,31 +169,44 @@ async function handleEntryScrape(
   startTime: number,
   businessType?: BusinessTypeKey
 ): Promise<Response> {
-  // scale-06 phase 7: select the extraction by businessType key when known.
-  // Engine-specific fields ENRICH the neutral entry base; with no delta
-  // (thing/trust/work) this is byte-identical to the base entry path.
-  const extraction = businessType ? extractionForBusinessType(businessType) : null;
-  const enriched = !!extraction && hasEntryEnrichment(extraction);
-  const entryScrapeSchema = enriched
-    ? EntryScrapeSchema.extend(extraction!.entryEnrichmentFields)
-    : EntryScrapeSchema;
+  // scale-06 phase 7: when the businessType is KNOWN, select that engine's
+  // extraction and ENRICH the neutral entry base with its delta (byte-identical
+  // explicit path). F19 (entry-capture): when it is ABSENT — the real
+  // first-touch entry where the SAME call both classifies AND extracts — extend
+  // with the UNION of every engine's enrichment (built mechanically from the
+  // registry) and resolve the fold engine in-code AFTER the call. Union is
+  // computed ONCE and reused for schema + prompt.
+  const explicitExtraction = businessType ? extractionForBusinessType(businessType) : null;
+  const union = businessType ? null : entryUnionEnrichment();
+  const entryScrapeSchema = explicitExtraction
+    ? hasEntryEnrichment(explicitExtraction)
+      ? EntryScrapeSchema.extend(explicitExtraction.entryEnrichmentFields)
+      : EntryScrapeSchema
+    : EntryScrapeSchema.extend(union!.fields);
 
-  // Compose EntrySignals from the entry scrape extract, then fold engine
-  // enrichment additively (base signals lead, never overwritten).
-  const toSignals = (data: Omit<EntryScrapeData, 'facts' | 'excerpts'>): EntrySignals => {
+  // Compose EntrySignals from the entry scrape extract, then fold the resolved
+  // engine's enrichment additively (base signals lead, never overwritten).
+  // Foreign union keys drop naturally in enrichSignals / foldCollectionsIntoSignals.
+  const toSignals = (
+    data: Omit<EntryScrapeData, 'facts' | 'excerpts'>,
+    foldExtraction: EngineExtraction | null
+  ): EntrySignals => {
     const base = mapEntryScrapeToSignals(data);
-    return extraction
-      ? extraction.enrichSignals(data as unknown as Record<string, unknown>, base)
+    return foldExtraction
+      ? foldExtraction.enrichSignals(data as unknown as Record<string, unknown>, base)
       : base;
   };
 
   // Demo/mock mode — agency-shaped fixture, no network, no AI call, 0 credits.
   if (isDemoMode(req)) {
     logger.info('[scrape-website] Using mock response (entry)');
+    // Resolve the fold engine from the fixture's guess ('agency' → trust) on the
+    // no-businessType path; explicit path uses its known engine.
+    const foldExtraction = explicitExtraction ?? entryExtractionForSignals(MOCK_DATA_ENTRY);
     return createSecureResponse({
       success: true,
       data: MOCK_DATA_ENTRY,
-      briefDraft: buildBriefDraft(toSignals(MOCK_DATA_ENTRY), url),
+      briefDraft: buildBriefDraft(toSignals(MOCK_DATA_ENTRY, foldExtraction), url),
       creditsUsed: 0,
       creditsRemaining: 999,
     });
@@ -227,9 +246,10 @@ async function handleEntryScrape(
     );
   }
 
-  // ONE AI call: existing extraction prompt + appended entry blocks
-  // (+ engine enrichment block when a businessType was supplied).
-  const enrichBlock = extraction ? extraction.entryEnrichmentPrompt() : '';
+  // ONE AI call: existing extraction prompt + appended entry blocks. The
+  // enrichment block is the explicit engine's prompt when a businessType was
+  // supplied, else the UNION prompt (real first-touch entry).
+  const enrichBlock = explicitExtraction ? explicitExtraction.entryEnrichmentPrompt() : union!.prompt;
   const prompt = `${buildScrapePrompt(combinedText)}
 
 ${entryPrefillDeltaPromptBlock()}
@@ -245,9 +265,12 @@ ${entryClassificationPromptBlock()}${enrichBlock ? `\n\n${enrichBlock}` : ''}`;
       entryScrapeSchema,
       'entry_scrape_website'
     )) as EntryScrapeData;
+    // Resolve the fold engine AFTER the call: explicit engine when known, else
+    // from the just-classified guess (foreign union keys drop in the fold).
+    const foldExtraction = explicitExtraction ?? entryExtractionForSignals(data);
     // Server-side Brief construction (D1/D6) — engine via code lookup; safe
     // for place/quick-yes by construction (copyEngine omitted, D2).
-    briefDraft = buildBriefDraft(toSignals(data), url);
+    briefDraft = buildBriefDraft(toSignals(data, foldExtraction), url);
   } catch (error: any) {
     logger.error('[scrape-website] AI entry extraction failed:', error);
     return createSecureResponse(

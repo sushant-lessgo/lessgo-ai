@@ -110,9 +110,8 @@ function FullBleedMediaChrome({
   sectionId: string;
   content: VestriaFullBleedHeroContent;
 }) {
-  const store = useEditStore() as any;
-  const uploadVideo = store.uploadVideo as MediaUploadFn | undefined;
-  const uploadImage = store.uploadImage as MediaUploadFn | undefined;
+  const uploadVideo = useEditStore((s) => (s as any).uploadVideo) as MediaUploadFn | undefined;
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as MediaUploadFn | undefined;
 
   const pickVideo = (elementKey: string) => async (file: File) => {
     if (!uploadVideo) throw new Error('Video upload unavailable');

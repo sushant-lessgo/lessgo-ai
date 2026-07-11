@@ -1,0 +1,45 @@
+{
+  "slug": "sommeliercompany",
+  "url": "https://www.sommeliercompany.com/",
+  "business": { "type_label": "sommelier services firm (private/corporate wine & whiskey tasting events, wine consulting, wine evaluation)", "icp_category": "professional-services", "geography_hint": "USA nationwide + international cities (New York, Miami, Chicago, Dallas, LA, Las Vegas, London, Singapore, Hong Kong, Shanghai)" },
+  "in_icp": true,
+  "engine": { "pick": "trust", "ladder_reasoning": "Sells defined expertise — credentialed sommeliers (MW/MS/CWE/DipWSET), an advisory board, and 'The Authority on Wine' positioning; the visitor is deciding whether to trust this firm/its experts to run their event, not evaluating a packaged product or browsing a gallery.", "runner_up": "thing" },
+  "goal": { "one_action": "get the visitor to request a quote / contact the company to hire sommelier services for an event", "mechanism": "form", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 40, "pages": ["home", "private-tasting-overview", "consulting", "wine-scoring", "instant-quote", "contact/about/careers", "~40 city landing pages"], "archetype_note": "Squarespace multi-page authority site with a large network of SEO-targeted city landing pages; core nav is service-by-service (events, consulting, scoring) funneling to an instant-quote tool and a contact form." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Your Nationwide Resource for Wine Expertise and Sommelier-Guided Private Tasting Events", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Sommelier-Guided Wine and Whiskey Tasting Events / Independent Wine Evaluation / Wine Consulting Assignments", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "We have been featured in... / Recent corporate event clients", "component": "logo-strip" },
+      { "canonical": "features", "observed_as": "Overview of Wine & Whiskey Event Tasting Formats (5 formats: seminars, tasting stations, pairing dinners, team building, country excursions)", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "We have teams of experts in every major population center (coverage map)", "component": "map" },
+      { "canonical": "founderNote", "observed_as": "About The Sommelier Company", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "ADVISORY BOARD (6 credentialed members)", "component": "team" },
+      { "canonical": "leadForm", "observed_as": "THE SOMMELIER COMPANY / CONTACT FORM (popup)", "component": "form" },
+      { "canonical": "cta", "observed_as": "Click Here to Visualize Your Event and CREATE an instant quote", "component": "text" },
+      { "canonical": "footer", "observed_as": "Careers / Ownership / pricing PDFs", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Event Quote Visualizer (interactive instant-quote tool that produces a per-event price estimate)", "why_no_fit": "No canonical section represents a live quote/price configurator; it computes a user-specific output rather than displaying static pricing", "closest": "pricing" },
+      { "observed": "Careers blurb (apply via email)", "why_no_fit": "Recruiting content is a secondary audience not covered by conversion-oriented section ids", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "lead-form", "packages"],
+    "proposed_new": [
+      { "name": "interactive-calculators", "evidence": "The 'Event Quote Visualizer' / 'Instant Quote' tool builds a user-specific event price estimate — a live computational tool, not a static pricing section (did not hydrate in render, treated as unverified)." },
+      { "name": "geo-landing-network", "evidence": "Site nav exposes ~40 city-specific SEO landing pages plus ~15 international city pages — a programmatic near-duplicate geo-targeted landing-page network, distinct from generic multipage/multi-location profiles." }
+    ]
+  },
+  "proof_types": ["logo-wall", "certs", "stats"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["logo-wall", "coverage-map", "advisory-board team grid", "event-format cards", "quote configurator/calculator", "contact popup form"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality is 'rendered' not 'full'; the instant-quote tool never hydrated, contact form fields are behind an un-clicked popup, and pricing exists only in un-captured PDFs — key conversion mechanics are inferred, not verified." },
+  "gap_findings": [
+    "A programmatic geo-landing-page network (~55 city pages) has no representation in the capability vocab — Lessgo assumes a single conversion site, not an SEO page fleet.",
+    "Instant-quote / event-cost configurator tool cannot be expressed by any section id or capability (interactive-calculators proposed).",
+    "Pricing delivered as downloadable PDFs (WineTastingPricing.pdf etc.) rather than an on-page pricing section — no canonical pattern for gated/downloadable price sheets.",
+    "Advisory-board / credentialed-team-as-proof pattern maps awkwardly to socialProof; a dedicated credentialed-team proof section would fit better."
+  ]
+}

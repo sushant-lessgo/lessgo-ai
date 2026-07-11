@@ -41,10 +41,14 @@ export function publishSubdomainHosts(slug: string): string[] {
   return PUBLISH_SUFFIXES.map((s) => `${slug}.${s}`);
 }
 
+// Labels that are never a published slug on either suffix. `app` is reserved so
+// `app.lessgo.ai` (the product app host) is not swallowed by Branch A as a slug.
+const RESERVED_PUBLISH_LABELS = new Set(['www', 'lessgo', 'app']);
+
 /**
  * Middleware Branch-A matcher: if `host` is a single-label published subdomain
  * (`{slug}.lessgo.site` or legacy `{slug}.lessgo.ai`), return the slug label,
- * else null. Reserved labels (`www`, apex `lessgo`) return null.
+ * else null. Reserved labels (`www`, apex `lessgo`, app `app`) return null.
  */
 export function matchPublishSubdomain(host?: string | null): string | null {
   if (!host) return null;
@@ -53,6 +57,6 @@ export function matchPublishSubdomain(host?: string | null): string | null {
   const suffix = PUBLISH_SUFFIXES.find((s) => h.endsWith(`.${s}`));
   if (!suffix) return null;
   const label = h.slice(0, h.length - suffix.length - 1);
-  if (!label || label.includes('.') || label === 'www' || label === 'lessgo') return null;
+  if (!label || label.includes('.') || RESERVED_PUBLISH_LABELS.has(label)) return null;
   return label;
 }

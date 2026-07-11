@@ -46,6 +46,8 @@ import { goalIntents, goalIntentMeta, type GoalIntent } from '@/modules/goals/vo
 import OptionCard from '@/components/onboarding/shared/OptionCard';
 import GoalParamFields, {
   intentHasParamFields,
+  intentParamRequired,
+  intentParamSatisfied,
 } from '@/components/onboarding/shared/GoalParamFields';
 
 const goalIntentIcons: Record<GoalIntent, React.ReactNode> = {
@@ -94,8 +96,10 @@ export default function GoalSlot() {
   const businessTypeKey = useWizardStore((s) => s.businessTypeKey);
   const goalIntent = useWizardStore((s) => s.goalIntent);
   const goalParam = useWizardStore((s) => s.goalParam);
+  const goalParamSkipped = useWizardStore((s) => s.goalParamSkipped);
   const setGoalIntent = useWizardStore((s) => s.setGoalIntent);
   const setGoalParam = useWizardStore((s) => s.setGoalParam);
+  const setGoalParamSkipped = useWizardStore((s) => s.setGoalParamSkipped);
 
   // likelyIntents from the resolved businessType; fall back to the full list
   // when the businessType is unknown (never trap the user without options).
@@ -105,8 +109,12 @@ export default function GoalSlot() {
   const fallbackFirst = likelyIntents[0] ?? goalIntents[0];
   const selectedIntent: GoalIntent = goalIntent ?? fallbackFirst;
 
+  // Always keep a card VISIBLY selected (F20): when the businessType has no
+  // likelyIntents to render, expand the full list so the pre-selected default
+  // is on screen instead of silently defaulting behind an "Other goals…" link.
   const [showAll, setShowAll] = useState<boolean>(
-    goalIntent !== null && !likelyIntents.includes(goalIntent)
+    (goalIntent !== null && !likelyIntents.includes(goalIntent)) ||
+      likelyIntents.length === 0
   );
 
   // Default the store to the current selection so a user who never taps still
@@ -119,6 +127,12 @@ export default function GoalSlot() {
 
   const otherIntents = goalIntents.filter((i) => !likelyIntents.includes(i));
   const showParamFields = intentHasParamFields(selectedIntent);
+  // A REQUIRED, still-empty param blocks Continue (gated in WizardShell) unless
+  // the user explicitly skips it (F14).
+  const paramGateOpen =
+    intentParamRequired(selectedIntent) &&
+    !intentParamSatisfied(selectedIntent, goalParam) &&
+    !goalParamSkipped;
 
   const handleSelect = (intent: GoalIntent) => {
     if (intent !== goalIntent) setGoalParam({}); // stale params don't cross intents
@@ -174,12 +188,21 @@ export default function GoalSlot() {
       )}
 
       {showParamFields && (
-        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3">
           <GoalParamFields
             intent={selectedIntent}
             value={goalParam}
             onChange={setGoalParam}
           />
+          {paramGateOpen && (
+            <button
+              type="button"
+              onClick={() => setGoalParamSkipped(true)}
+              className="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors"
+            >
+              Skip for now
+            </button>
+          )}
         </div>
       )}
     </div>

@@ -16,7 +16,7 @@ import {
   ServiceUnderstandingResponseSchema,
 } from '../understandService.schema';
 import { ScrapeWebsiteServiceSchema } from '../scrapeWebsiteService.schema';
-import type { CollectionKey } from '@/modules/collections/registry';
+import { extractionCollections } from '@/modules/collections/registry';
 import type { EngineExtraction } from './index';
 import {
   collectionsEnrichmentFields,
@@ -28,7 +28,8 @@ import {
 // two collections verbatim — `services` (service lines) and `case-studies`
 // (owner-authored client stories, decision 4). Base prefill still covers every
 // classification/prefill field — collections are the only delta.
-const TRUST_COLLECTIONS: readonly CollectionKey[] = ['services', 'case-studies'];
+// Keys sourced from the registry single-source (entry-capture phase 1).
+const TRUST_COLLECTIONS = extractionCollections.trust;
 
 export const trustExtraction: EngineExtraction = {
   key: 'trust',

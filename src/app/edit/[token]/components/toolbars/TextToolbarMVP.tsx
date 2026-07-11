@@ -3,8 +3,8 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
 import { logger } from '@/lib/logger';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { useSelectionPreserver } from '@/hooks/useSelectionPreserver';
 import {
   formatSelectedText,
@@ -17,8 +17,6 @@ import {
 
 interface TextToolbarMVPProps {
   elementSelection: any;
-  position: { x: number; y: number };
-  contextActions: any[];
 }
 
 // MVP Feature Set (as agreed)
@@ -61,49 +59,21 @@ const COLOR_PALETTE = [
   { value: '#f97316', label: 'Orange Accent', group: 'accent' },
 ];
 
-let globalRenderCount = 0;
-
-// Outer gate: visibility priority + valid-selection checks only. Split from the
-// inner component so the early returns sit above zero hooks (rules-of-hooks);
-// hidden ⇒ inner unmounted ⇒ no format/selection effects run — same behavior as
-// the old early returns. Inner receives elementSelection guaranteed non-null.
+// Phase-3: the ToolbarShell decides visibility and owns positioning. This outer
+// gate keeps only the valid-selection check (above zero hooks, rules-of-hooks);
+// the inner is a dumb child of the shell's floating container.
 export function TextToolbarMVP(props: TextToolbarMVPProps) {
-  // Step 3: Global anchor positioning with MVP sizing
-  const {
-    isVisible,
-    position: anchorPosition,
-    hasValidPosition,
-  } = useToolbarVisibility('text', { width: 320, height: 52 }); // Widened for sparkle button
-
-  // Priority-based early return
-  if (!isVisible) {
-    return null;
-  }
-
   if (!props.elementSelection || !props.elementSelection.sectionId || !props.elementSelection.elementKey) {
     logger.warn('TextToolbarMVP: Invalid elementSelection', props.elementSelection);
     return null;
   }
 
-  return (
-    <TextToolbarMVPInner
-      {...props}
-      anchorPosition={anchorPosition}
-      hasValidPosition={hasValidPosition}
-    />
-  );
+  return <TextToolbarMVPInner {...props} />;
 }
 
 function TextToolbarMVPInner({
   elementSelection,
-  position,
-  contextActions,
-  anchorPosition,
-  hasValidPosition,
-}: TextToolbarMVPProps & { anchorPosition: any; hasValidPosition: boolean }) {
-  const currentRender = ++globalRenderCount;
-  const renderTime = Date.now();
-
+}: TextToolbarMVPProps) {
   const [formatState, setFormatState] = useState<MVPFormatState>({
     bold: false,
     italic: false,
@@ -121,6 +91,9 @@ function TextToolbarMVPInner({
   const fontSizePickerRef = useRef<HTMLDivElement>(null);
   const variationsRef = useRef<HTMLDivElement>(null);
 
+  // Narrow selector: pull ONLY the fields/actions this toolbar reads (actions are
+  // stable refs). `setFormattingInProgress` is read imperatively below via
+  // getState() — deliberately NOT subscribed.
   const {
     updateElementContent,
     regenerateElementWithVariations,
@@ -130,7 +103,26 @@ function TextToolbarMVPInner({
     setVariationSelection,
     aiGeneration,
     announceLiveRegion,
-  } = useEditStore();
+    activeLocale,
+    localeConfig,
+  } = useEditStore(
+    useShallow((s) => ({
+      updateElementContent: s.updateElementContent,
+      regenerateElementWithVariations: s.regenerateElementWithVariations,
+      elementVariations: s.elementVariations,
+      applyVariation: s.applyVariation,
+      hideElementVariations: s.hideElementVariations,
+      setVariationSelection: s.setVariationSelection,
+      aiGeneration: s.aiGeneration,
+      announceLiveRegion: s.announceLiveRegion,
+      activeLocale: s.activeLocale,
+      localeConfig: s.localeConfig,
+    })),
+  );
+  // i18n-phase-1 (Phase 4): AI variations write DEFAULT-locale base copy only;
+  // disable the sparkle on a non-default locale (store guard also no-ops it).
+  const regenLocaleLocked =
+    !!localeConfig && activeLocale !== localeConfig.defaultLocale;
   const setFormattingInProgress = useEditStore.getState().setFormattingInProgress; // Get directly, no subscription
   const { saveSelection, restoreSelection, hasSelection, cleanup: cleanupSelection } = useSelectionPreserver();
 
@@ -494,31 +486,20 @@ function TextToolbarMVPInner({
       // Perform hard cleanup of selection state
       cleanupSelection();
       hideElementVariations();
-      logger.dev('TextToolbarMVP cleanup completed');
     };
   }, [debouncedFormat, cleanupSelection, hideElementVariations]);
 
-  // Use anchor positioning or fallback
-  const finalPosition = hasValidPosition && anchorPosition ? anchorPosition : position;
-  const showArrow = hasValidPosition && anchorPosition?.arrow;
-
   return (
     <>
-      <div 
+      <div
         ref={toolbarRef}
-        className="fixed z-50 bg-white border border-gray-300 rounded-lg shadow-lg transition-all duration-200"
+        className="bg-white border border-gray-300 rounded-lg shadow-lg"
         style={{
-          left: finalPosition.x,
-          top: finalPosition.y,
           height: '52px', // Fixed MVP height
           whiteSpace: 'nowrap',
-          // Inner only mounts when the outer visibility gate passes.
-          opacity: 1,
-          pointerEvents: 'auto',
           userSelect: 'none', // Prevent text selection on toolbar
         }}
         data-toolbar-type="text-mvp"
-        data-anchor-positioned={hasValidPosition}
         data-editor-id={elementSelection ? `editor-${elementSelection.sectionId}-${elementSelection.elementKey}` : ''}
         onMouseDown={(e) => {
           e.preventDefault();
@@ -529,22 +510,6 @@ function TextToolbarMVPInner({
           e.stopPropagation();
         }}
       >
-        {/* Arrow */}
-        {showArrow && anchorPosition.arrow && (
-          <div 
-            className={`absolute w-2 h-2 bg-white border border-gray-300 transform rotate-45 ${
-              anchorPosition.arrow.direction === 'down' ? 'border-t-0 border-l-0 -bottom-1' :
-              anchorPosition.arrow.direction === 'up' ? 'border-b-0 border-r-0 -top-1' :
-              anchorPosition.arrow.direction === 'right' ? 'border-l-0 border-b-0 -right-1' :
-              'border-r-0 border-t-0 -left-1'
-            }`}
-            style={{
-              left: anchorPosition.arrow.direction === 'up' || anchorPosition.arrow.direction === 'down' ? anchorPosition.arrow.x - 4 : undefined,
-              top: anchorPosition.arrow.direction === 'left' || anchorPosition.arrow.direction === 'right' ? anchorPosition.arrow.y - 4 : undefined,
-            }}
-          />
-        )}
-        
         <div className="flex items-center justify-between px-3 py-2 h-full">
           {/* Format Controls */}
           <div className="flex items-center space-x-1">
@@ -803,15 +768,17 @@ function TextToolbarMVPInner({
                 e.stopPropagation();
               }}
               onClick={handleSparkle}
-              disabled={aiGeneration.isGenerating}
+              disabled={aiGeneration.isGenerating || regenLocaleLocked}
               className={`p-1.5 rounded transition-colors select-none ${
-                aiGeneration.isGenerating
+                regenLocaleLocked
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : aiGeneration.isGenerating
                   ? 'text-yellow-500 bg-yellow-50 animate-pulse'
                   : elementVariations.visible
                     ? 'bg-purple-100 text-purple-700 border border-purple-200'
                     : 'text-gray-600 hover:bg-gray-100'
               }`}
-              title="AI text variations"
+              title={regenLocaleLocked ? 'Switch to the default language to regenerate.' : 'AI text variations'}
             >
               <SparkleIcon />
             </button>
@@ -823,10 +790,11 @@ function TextToolbarMVPInner({
       {elementVariations.visible && (
         <div
           ref={variationsRef}
-          className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg"
+          className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg"
           style={{
-            left: finalPosition.x,
-            top: (finalPosition.y || 0) + 60,
+            top: '100%',
+            left: 0,
+            marginTop: 8,
             width: 380,
             maxHeight: 300,
           }}

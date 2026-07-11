@@ -1,0 +1,65 @@
+{
+  "slug": "olyvia",
+  "url": "https://olyvia.co/",
+  "business": {
+    "type_label": "personal-brand blog / reputation & marketing consultant for entrepreneurs + bloggers",
+    "icp_category": "consultant / solo expert (content-led list building)",
+    "geography_hint": "US (MST office hours), English"
+  },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Visitor is deciding whether to trust a named person (Erika Madden) with their email based on her stated expertise and 11+ yr credentials — sells defined expertise, which sits first on the ladder. Not quick-yes because the page does real persuading (bio, blog excerpts, value prop) before the ask.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Opt into the email list via the free 31-page ebook / free 21-day course lead magnet",
+    "mechanism": "subscribe-follow",
+    "delegated_to": "convertkit"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 4,
+    "pages": ["home", "about", "contact", "resources"],
+    "archetype_note": "Content-led list-building personal brand. Books nav links off-domain to Gumroad (not crawled). Same hero + opt-in blocks repeat verbatim across pages (theme-wide sidebar pattern, not per-page content)."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Start rocking your reputation!", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "DOWNLOAD MY FREE 31-PAGE EBOOK...", "component": "form" },
+      { "canonical": "leadForm", "observed_as": "Start! (free 21-day email course opt-in)", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "Welcome / About Erika", "component": "text" },
+      { "canonical": "cta", "observed_as": "Contact", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Contact Form", "component": "form" },
+      { "canonical": "miscellaneous", "observed_as": "Shop (Gumroad books)", "component": "grid-cards" }
+    ],
+    "unmapped": [
+      { "observed": "Homepage blog-post excerpt feed (5 recent posts)", "why_no_fit": "No canonical 'latest-posts / blog-feed' section id; blog is a capability, not a homepage section, and these are not testimonials/socialProof/features", "closest": "miscellaneous" },
+      { "observed": "Resources page: 'Tools I Love' + 12 categories of affiliate grid-cards (tools, themes, gear, books)", "why_no_fit": "An affiliate resource directory is neither features, pricing, catalog (not the site's own products), nor integrations; it is a curated outbound-link directory the taxonomy has no id for", "closest": "miscellaneous" },
+      { "observed": "Office Hours (8:30am-3:30pm MST, 24-business-hr response commitment)", "why_no_fit": "map-hours capability is oriented to physical-place opening hours; this is virtual support availability with no canonical section", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "blog", "lead-form"],
+    "proposed_new": [
+      { "name": "affiliate-resource-directory", "evidence": "Entire Resources page is 12 categorized grids of outbound affiliate recommendations — a distinct page type from catalog/gallery/portfolio" }
+    ]
+  },
+  "proof_types": [],
+  "design_style": {
+    "pick": "warm/human",
+    "none_fits_because": "Friendly first-person personal brand ('be delightful online', photo-heavy, light) reads warm/human rather than authority/professional despite the consultant framing."
+  },
+  "components_needed": ["email opt-in form", "blog post excerpt card grid", "affiliate resource link-card grid", "founder bio block", "contact form"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality is full, but the site is a legacy/unmaintained blog (footer '2014-2017', 'for 2017'), the off-domain Gumroad shop was not crawled, and repeated hero/opt-in blocks + mixed purposes (list-building + blog + affiliate directory + book shop) blur the single-conversion read."
+  },
+  "gap_findings": [
+    "Affiliate resource directory (Resources page) has no canonical section or capability fit — not features/pricing/catalog/integrations; forced to miscellaneous.",
+    "Homepage blog-post excerpt feed has no 'latest-posts / blog-feed' section id (blog is only a capability).",
+    "Office Hours / virtual support-availability has no section; map-hours capability is physical-place oriented, not virtual hours.",
+    "Multi-goal site: primary subscribe-follow (ConvertKit) coexists with secondary redirect to Gumroad book shop and affiliate redirects — taxonomy assumes one goal mechanism per site."
+  ]
+}

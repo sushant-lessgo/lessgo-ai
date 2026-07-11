@@ -46,6 +46,18 @@ export interface BlockDeclaration {
    * another template contributed; it may NOT invent keys.
    */
   consumes: string[];
+  /**
+   * Copy-shape group (variant-swap-integrity phase 2). Variants in one section
+   * that carry DIFFERENT `copyShape` values are declared CONTENT-EXCLUSIVE:
+   * they read fundamentally different copy (e.g. a multi-review grid vs a single
+   * pull-quote) so swapping between them would drop scalar copy in BOTH
+   * directions. Such pairs are NEVER co-offered at runtime (picker copyShape
+   * filter) and are excluded from the conformance both-ways-divergence check (e).
+   * `undefined` = the set's default group. Tag ONLY genuinely both-ways-scalar-
+   * divergent pairs (surge testimonials); superset-compatible pairs (vestria
+   * hero, meridian skins) stay untagged and freely swappable.
+   */
+  copyShape?: string;
   /** Card-count capacity of the block's primary collection (deterministic-selection hint). */
   capacity?: { minCards: number; maxCards: number };
   /** Asset facts required for this variant to be eligible at selection. */
@@ -286,6 +298,10 @@ const surgeManifest: TemplateBlockManifest = {
         layoutName: 'ReviewGrid',
         label: 'Review grid',
         blurb: 'Multi-proof grid — best when you have several quotes.',
+        // copyShape 'reviews': section-scalar copy is eyebrow/headline + a
+        // reviews[] collection. Both-ways scalar-divergent from PullQuote
+        // (headline ∉ PullQuote; quote/author_* ∉ ReviewGrid) → content-exclusive.
+        copyShape: 'reviews',
         consumes: ['eyebrow', 'headline'],
         capacity: { minCards: 1, maxCards: 3 },
         internalDispatch: true,
@@ -294,6 +310,9 @@ const surgeManifest: TemplateBlockManifest = {
         layoutName: 'PullQuoteWithMark',
         label: 'Pull quote',
         blurb: 'One standout quote with a mark.',
+        // copyShape 'pullquote': a single quote + author scalars — no headline,
+        // no collection. Distinct group from ReviewGrid (see above).
+        copyShape: 'pullquote',
         consumes: [
           'eyebrow', 'quote', 'author_name', 'author_role',
           'author_company', 'author_photo', 'meta',

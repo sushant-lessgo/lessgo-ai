@@ -1,0 +1,30 @@
+{
+  "slug": "nassimbelouar", "url": "https://nassimbelouar.com/en/home/",
+  "business": { "type_label": "AI consultant & corporate trainer (solo)", "icp_category": "consultant", "geography_hint": "Paris, France; remote (French market, CPF/OPCO funding)" },
+  "in_icp": true,
+  "engine": { "pick": "trust", "ladder_reasoning": "Sells a person's defined expertise (AI consulting, training, audits, keynotes) — the visitor is deciding whether to trust the individual, evidenced by credentials, service framing, and process/funding reassurance.", "runner_up": "thing" },
+  "goal": { "one_action": "get the visitor to submit the contact form (request a quote / discuss a training project) or start the free AI audit", "mechanism": "form", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 8, "pages": ["home","services","formations","secteurs","villes","outils","about","contact"], "archetype_note": "Consultant multi-page: home value-prop + service/formation catalogs + SEO-oriented sectors/cities/tools pages, converging on one contact form." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "AI Consultant & Trainer · Lecturer", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Why choose me as your AI partner", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "AI Training Offerings", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Expertise Areas", "component": "grid-cards" },
+      { "canonical": "pricing", "observed_as": "5 services to embed AI in your company", "component": "grid-cards" },
+      { "canonical": "pricing", "observed_as": "6 formations IA pour vos équipes", "component": "grid-cards" },
+      { "canonical": "objectionHandling", "observed_as": "CPF, OPCO, plan formation : on s'occupe de tout", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Contact", "component": "form" },
+      { "canonical": "footer", "observed_as": "Email / LinkedIn / Location", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "#7 World CEO of the Year 2024 (ceoranking.com) badge", "component": "text" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": { "needed": ["multipage","bilingual","lead-form","packages","blog"], "proposed_new": [] },
+  "proof_types": ["certs"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["service-cards","course-list (formation cards with duration/level)","contact-form","credential-badge"],
+  "languages": ["fr","en"],
+  "confidence": { "level": "high", "why": "fetch_quality full; clear consultant trust archetype with single form conversion, service/training catalogs, bilingual FR/EN." },
+  "gap_findings": ["Formation cards carry duration/level metadata (1-5 day, beginner/advanced) — closer to a structured course-list than the generic 'packages' price grid, but no prices shown; still expressible.","Site is SEO-forward with Secteurs/Villes/Outils landing pages (programmatic local/vertical SEO pages) — multipage covers structure but not the SEO-fan-out intent."]
+}

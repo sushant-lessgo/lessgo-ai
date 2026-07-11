@@ -1,0 +1,68 @@
+{
+  "slug": "nesplas",
+  "url": "https://nesplas.com/",
+  "business": {
+    "type_label": "plastic container manufacturer (WooCommerce catalog + quote-cart)",
+    "icp_category": "manufacturer",
+    "geography_hint": "Dominican Republic (Santo Domingo, Zona Norte)"
+  },
+  "in_icp": false,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "Visitor is evaluating physical products (plastic jars, bottles, caps) — features, materials, capacity, quality policy — so it's a THING evaluation, not trusting a person or checking a place. Catalog browsing supports product selection rather than being visual-proof portfolio.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "browse the 307-product catalog, add items to a quote cart, and request a quotation / custom-container info",
+    "mechanism": "form",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "productos", "sobre-nosotros", "sostenibilidad", "contacto", "se-parte-de-nosotros"],
+    "archetype_note": "Manufacturer catalog site on WordPress/WooCommerce with a request-for-quote cart (RD$0.00 placeholder prices, 'Ver Cotización'/'Finalizar cotización'), plus a filterable product catalog, industry landing pages, CSR gallery, and multiple contact/job forms."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Política de Calidad y Seguridad de Productos", "component": "text" },
+      { "canonical": "features", "observed_as": "¿Por qué elegir nuestros productos y servicios?", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Asesoría en tienda / Diseño exclusivo", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Industrias", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Productos recientes / Productos / Productos seleccionados", "component": "grid-cards" },
+      { "canonical": "founderNote", "observed_as": "Misión / Visión / Valores / Quiénes somos", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Acciones de Responsabilidad Social Empresarial (CSR: beach cleanups, sidewalk rebuild, waste collection)", "component": "gallery" },
+      { "canonical": "security", "observed_as": "certification badge images on Sobre Nosotros (3, unlabeled)", "component": "image" },
+      { "canonical": "leadForm", "observed_as": "Solicitar información / Envía tus datos (CV) / Buscar productos", "component": "form" },
+      { "canonical": "cta", "observed_as": "WhatsApp Santo Domingo / WhatsApp Zona Norte", "component": "whatsapp" },
+      { "canonical": "footer", "observed_as": "Contacto — three office locations, hours, phone, fax", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Productos catalog with quote-cart (Ver Cotización / Finalizar cotización, add-to-cart, wishlist, RD$0.00 prices)", "why_no_fit": "No canonical section models a browsable product catalog wired to a request-for-quote cart/checkout; 'pricing' implies price display and 'features' is a copy section, neither captures inventory + cart mechanics.", "closest": "pricing" },
+      { "observed": "Buscar productos filter sidebar (reference, capacity, color, material, product type)", "why_no_fit": "A faceted catalog filter is a catalog-app affordance, not a persuasion section.", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "gallery/portfolio", "lead-form"],
+    "proposed_new": [
+      { "name": "quote-cart", "evidence": "WooCommerce catalog with add-to-cart ('Select options', 'Agregar a lista de deseos') and 'Ver Cotización' → /cart → 'Finalizar cotización' → /checkout, all prices RD$0.00 — a request-for-quotation cart flow with no payment, distinct from storefront-checkout (which transacts one-time goods with real prices)." }
+    ]
+  },
+  "proof_types": ["certs"],
+  "design_style": {
+    "pick": null,
+    "none_fits_because": "design_hints capture is empty (no fonts, colors, or light/dark); insufficient signal to assign one of the six styles. Manufacturer content leans authority/professional but not evidenced."
+  },
+  "components_needed": ["product-catalog-grid", "catalog-filter-sidebar", "quote-cart", "industry-category-grid", "csr-gallery", "contact-locations-list", "job-application-form", "info-request-form"],
+  "languages": ["es"],
+  "confidence": {
+    "level": "high",
+    "why": "fetch_quality is full with all 6 pages, forms, CTAs, and commerce state captured; classification is unambiguous (catalog + quote-cart manufacturer, not a single-action page)."
+  },
+  "gap_findings": [
+    "in_icp false: the site's job is catalog browsing + a request-for-quote cart/checkout across 307 products, not one conversion action — engines/sections cannot express faceted catalog + quote-cart.",
+    "The quote-cart pattern (cart/checkout that produces a quotation, not a payment, with RD$0.00 placeholder prices) is a distinct commerce mode not covered by storefront-checkout or catalog.",
+    "Multiple distinct forms on one page (info request, job application w/ CV upload, catalog filter) exceed the single leadForm section model.",
+    "Multi-location contact block (3 offices, no map embed) + dual-region WhatsApp lines is a map-hours-adjacent need not represented in proof/section vocab."
+  ]
+}

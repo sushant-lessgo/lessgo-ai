@@ -46,7 +46,8 @@ export async function GET(
       select: {
         slug: true,
         updatedAt: true,
-        title: true
+        title: true,
+        analyticsEnabled: true
       },
       orderBy: { updatedAt: 'desc' } // Get most recent if multiple
     });
@@ -62,7 +63,8 @@ export async function GET(
       published: true,
       slug: publishedPage.slug,
       title: publishedPage.title,
-      publishedAt: publishedPage.updatedAt.toISOString()
+      publishedAt: publishedPage.updatedAt.toISOString(),
+      analyticsEnabled: publishedPage.analyticsEnabled
     });
 
   } catch (error) {

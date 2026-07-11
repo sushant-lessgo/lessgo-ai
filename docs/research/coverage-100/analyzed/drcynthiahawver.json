@@ -1,0 +1,37 @@
+{
+  "slug": "drcynthiahawver",
+  "url": "https://www.drcynthiahawver.com/",
+  "business": { "type_label": "solo clinical psychologist / therapist (niche: narcissistic relationships, burnout, high-conflict divorce)", "icp_category": "trust-based professional service", "geography_hint": "USA (PSYPACT multi-state telehealth; Scranton/NEPA roots)" },
+  "in_icp": true,
+  "engine": { "pick": "trust", "ladder_reasoning": "Visitor is deciding whether to trust a specific licensed professional; the page sells defined clinical expertise via credentials (Psy.D., forensic training, 20yr practice), personal lived-experience narrative, and media/press proof.", "runner_up": "thing" },
+  "goal": { "one_action": "Submit the 'Work With Dr. Cynthia' inquiry form to start working with her (secondary: opt in for the free burnout guide)", "mechanism": "form", "delegated_to": "tally" },
+  "structure": { "kind": "multi", "page_count": 6, "pages": ["home", "about", "media", "podcast", "free-guide", "blog"], "archetype_note": "Practitioner authority site: home pitch + about/credentials + media proof + owned podcast + lead-magnet + blog, all funneling to one Tally inquiry form." },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "Nav: HOME/ABOUT/BLOG/PODCAST/MEDIA/WORK WITH DR. CYNTHIA", "component": "nav" },
+      { "canonical": "hero", "observed_as": "If You're Here, Something Isn't Adding Up.", "component": "text" },
+      { "canonical": "problem", "observed_as": "Helping Women Navigate Narcissistic Relationships, Partner Addiction, Burnout, and High-Conflict Divorce.", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Dr. Cynthia's Areas of Expertise", "component": "grid-cards" },
+      { "canonical": "uniqueMechanism", "observed_as": "A Different Kind of Clinical Perspective", "component": "text" },
+      { "canonical": "objectionHandling", "observed_as": "You Don't Have To Do This Alone", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Is your relationship fueling your burnout? (free-guide opt-in)", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "On A Personal Note (lived-experience narrative)", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "RECENT MEDIA CONTRIBUTIONS + media logo wall", "component": "logo-strip" },
+      { "canonical": "cta", "observed_as": "You Don't Have To Figure This Out Alone / WORK WITH DR. CYNTHIA", "component": "text" },
+      { "canonical": "footer", "observed_as": "Bio/credential block, PSYPACT + PPA badges, Psychology Today link", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "The Mama Shrink Podcast — 6 embedded episode entries (DARVO, trauma bonding, divorce recovery)", "why_no_fit": "An owned standing podcast library is a content property, not a one-off section; no canonical section id covers an episode index", "closest": "media-hub (capability)" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "blog", "lead-form"],
+    "proposed_new": [ { "name": "media-hub", "evidence": "Dedicated /mama-shrink-podcast page hosting an owned podcast with 6+ dated episode entries — a standing content property beyond a blog." } ]
+  },
+  "proof_types": ["logo-wall", "certs"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["expertise/service card grid", "logo-wall", "lead-form (name+email opt-in)", "podcast episode list", "credential/bio block with certification badges"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; clear trust-engine practitioner site. Minor gap: primary Tally form fields not exposed in static markup, but mechanism (form) and intent are unambiguous." },
+  "gap_findings": ["Owned podcast library (media-hub) has no canonical section or closed-vocab capability.", "Squarespace /cart commerce assets load with no products/pricing shown — likely theme leftover, not a real capability."]
+}

@@ -58,7 +58,8 @@ export type LumenBlockMode = 'edit' | 'published';
 
 export function resolveLumenBlock(
   sectionType: string,
-  mode: LumenBlockMode = 'edit'
+  mode: LumenBlockMode = 'edit',
+  _layoutName?: string, // one block per section; accepted for TemplateModule contract parity
 ): React.ComponentType<any> | null {
   const key = (sectionType || '').toLowerCase();
   const entry = LUMEN_BLOCK_REGISTRY[key];

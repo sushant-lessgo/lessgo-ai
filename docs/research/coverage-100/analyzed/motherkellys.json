@@ -1,0 +1,38 @@
+{
+  "slug": "motherkellys",
+  "url": "https://motherkellys.co.uk/",
+  "business": { "type_label": "independent multi-venue craft-beer taprooms & bottleshops", "icp_category": "place", "geography_hint": "London, UK (Bethnal Green, Vauxhall, Homerton, Stoke Newington, Stratford, Tottenham, Barking)" },
+  "in_icp": true,
+  "engine": { "pick": "place", "ladder_reasoning": "Visitor is checking PLACES — physical taprooms/bottleshops with location cards, per-venue feature taglines and downloadable beer/food menus; browsing the venues and their menus IS the decision, so place over any thing/trust argument.", "runner_up": "quick-yes" },
+  "goal": { "one_action": "get visitors to pick a nearby venue (view its menu) and/or sign up to the newsletter to stay in the loop", "mechanism": "subscribe-follow", "delegated_to": "mailchimp" },
+  "structure": { "kind": "multi", "page_count": 9, "pages": ["home","about","locations (per-venue: bethnal-green, vauxhall, stratford, tottenham...)","merch (external)","events","jobs"], "archetype_note": "WordPress multi-location venue site built on blog-post templates; sprawling informational hub (locations, menus, events, jobs, merch) rather than a single tight funnel — primary explicit CTA is the outbound newsletter signup." },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "nav (About Us, Locations, Merch, Events, Jobs)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "Mother Kelly's Taprooms & Bottleshops brand banner", "component": "text" },
+      { "canonical": "useCases", "observed_as": "(location cards) grid linking to per-venue pages", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "SIGN UP TO OUR NEWSLETTER", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "About Us company/brand story", "component": "text" },
+      { "canonical": "features", "observed_as": "1 Railway Arch ∙ 22 Taps ∙ Craft Drinks ∙ 6 Huge Fridges (per-venue tagline)", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Living Wage Employer badge", "component": "cert" },
+      { "canonical": "footer", "observed_as": "social links (Instagram, Twitter, Facebook, TikTok, YouTube, Linktree)", "component": "followStrip" }
+    ],
+    "unmapped": [
+      { "observed": "View Beer Menu / View Food Menu — per-location downloadable PDF menus", "why_no_fit": "Menus are location-specific downloadable PDF files, not an on-page menu-list; no canonical section for offer-as-downloadable-asset", "closest": "pricing" },
+      { "observed": "VACANCIES — job listings (Supervisor, General Manager, Bartenders...)", "why_no_fit": "Careers/recruiting listings serve a secondary audience (job seekers); no canonical section for job vacancies", "closest": "miscellaneous" },
+      { "observed": "Events — blog-style feed of dated event posts (e.g. Pohjala party at Vauxhall)", "why_no_fit": "A dated schedule of one-off venue events; no canonical section captures an events feed", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage","map-hours","catalog","blog"], "proposed_new": [ { "name": "external-list-signup", "evidence": "Primary newsletter CTA 'SIGN UP TO OUR NEWSLETTER' routes off-site to a Mailchimp subscribe page rather than an on-page form" }, { "name": "event-listings", "evidence": "Events page is a blog-style feed of individual dated event posts per venue" } ] },
+  "proof_types": ["certs"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["location cards grid","per-venue detail page","menu download links (PDF)","events feed","job-vacancy list","newsletter signup","social/follow strip"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "Capture is full, but static-HTML extraction is thin (no h1s, no embedded menu content, no map embed) so per-venue detail and hours are under-represented; design tone (only Roboto/photo-heavy, no colors/dark-light) is ambiguous, so design_style is inferred." },
+  "gap_findings": [
+    "Multi-location venue business has NO on-page map/hours and NO booking/reservation — the 'place' engine assumes visitable-location info (address, hours, directions, map) that this capture lacks; map-hours is needed but absent.",
+    "Offer (the menu) is delivered as per-location downloadable PDFs, not an expressible menu-list — no canonical section or capability for offer-as-downloadable-asset.",
+    "Goal is genuinely diffuse across newsletter / menu-view / events / jobs / merch-store redirect; the single-conversion-action model can't cleanly represent a multi-audience venue hub.",
+    "Careers/vacancies is a recurring secondary-audience page type (like press-kit/jobs) with no taxonomy home."
+  ]
+}

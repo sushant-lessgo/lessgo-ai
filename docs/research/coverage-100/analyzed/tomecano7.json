@@ -1,0 +1,33 @@
+{
+  "slug": "tomecano7",
+  "url": "https://tomecano7.com/",
+  "business": { "type_label": "photography & video studio", "icp_category": "photographer/creative", "geography_hint": "Canary Islands, Spain (Tenerife)" },
+  "in_icp": false,
+  "engine": { "pick": "work", "ladder_reasoning": "A photographer whose galleries/portfolio across communions, weddings, boudoir, newborn ARE the proof; the visitor browses the work to decide. Sells creative service, but the imagery — not credentials — is the decision driver.", "runner_up": "trust" },
+  "goal": { "one_action": "browse portfolio then contact the studio to book a session (or buy prints/albums in the WooCommerce shop)", "mechanism": "form", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 6, "pages": ["home", "sesiones", "reportajes", "business", "sobre-mi", "opiniones", "tienda", "contacta"], "archetype_note": "Portfolio-led photographer site with an added WooCommerce storefront (cart/checkout for prints, albums, sessions) — a hybrid gallery + e-commerce shop, not a single-conversion page." },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav with dropdowns (Home, Sesiones, Reportajes, Business, Nosotros, Tienda, Contacta)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "Creamos los mejores recuerdos... + Descubre CTA", "component": "text" },
+      { "canonical": "features", "observed_as": "photo carousel across categories (Pregnancy, Boudoir, Wedding)", "component": "carousel" },
+      { "canonical": "cta", "observed_as": "¿Cómo podemos ayudarte? QR/contact prompt", "component": "other" },
+      { "canonical": "leadForm", "observed_as": "contact form name/email/message + math captcha", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "Sobre mí — Baltasar Mendoza bio, 20+ years, Canarian heritage", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Tienda product category grid with price ranges (€99–€1,490)", "component": "grid-cards" },
+      { "canonical": "results", "observed_as": "aggregate ratings table Google 4.8, Bodas.net 4.9, Facebook 4.6", "component": "stats" },
+      { "canonical": "testimonials", "observed_as": "4 named customer quotes (Juan Francisco, Virginia, Saray, Laura)", "component": "text" },
+      { "canonical": "footer", "observed_as": "contact info, hours, social links, visit counter", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Tienda product category grid + individual priced products with cart/checkout", "why_no_fit": "Full WooCommerce storefront (browsable priced catalog + cart) exceeds a static pricing/packages section — it is a transacting shop", "closest": "pricing" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage", "gallery/portfolio", "catalog", "packages", "lead-form", "map-hours", "blog"], "proposed_new": [ { "name": "storefront-checkout", "evidence": "WooCommerce tienda sells one-time goods (prints, albums, sessions) with prices €99–€1,490, product category grid, and cart_or_checkout=true" } ] },
+  "proof_types": ["testimonials", "reviews", "portfolio", "stats"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["gallery/carousel", "product-grid", "pricing-table", "testimonial-list", "review-rating-strip", "contact-form", "map-hours block"],
+  "languages": ["es"],
+  "confidence": { "level": "high", "why": "fetch_quality=full; clear multi-page structure, explicit CTAs, forms, commerce and proof all captured" },
+  "gap_findings": ["Hybrid photographer-portfolio + WooCommerce storefront: engine 'work' captures the gallery-as-proof spine but not the on-site cart/checkout that makes this NOT a single-conversion site — 'storefront-checkout' capability needed to express the transacting shop layered atop the portfolio."]
+}

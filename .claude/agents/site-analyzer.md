@@ -62,6 +62,23 @@ authority/professional · bold/performance · literary/quiet.
 }
 ```
 
+## Normalize proposed_new against the registry (MANDATORY)
+Before you write `proposed_new`, READ
+`docs/research/coverage-100/proposed-capabilities.md`. It is the canonical list
+of capabilities earlier sites already proposed.
+- If your observation matches a canonical entry, reuse its **EXACT slug** — do
+  not coin a synonym. (e.g. an outbound affiliate-link page is `affiliate-hub`,
+  never "affiliate-list" or "affiliate-directory".)
+- Only coin a NEW slug when the observation is genuinely distinct from every
+  entry. Then follow house style: ONE kebab-case slug, no slashes, no "a / b"
+  alternates, no `-hub`/`-grid`/`-listing` restyling of a listed concept.
+- Mind the booking family: `booking-wizard` (on-site multi-step w/ inventory) vs
+  `external-booking-redirect` (off-site handoff) vs `booking-portal` (login-gated)
+  are distinct — pick the right one, never a fourth synonym. A plain single-step
+  calendar embed is NOT a proposed capability (it's a delegated form/redirect).
+- In your final message, explicitly list any NEW slug you coined (or "none") so
+  the orchestrator can register it for the next site.
+
 Rules:
 - `unmapped` sections and `proposed_new` capabilities are the EXPERIMENT'S MOST
   VALUABLE OUTPUT — record honestly, never shoehorn into a bad fit.
@@ -71,4 +88,5 @@ Rules:
   (`fetch_quality != full`), cap confidence at `medium` and say so.
 - No re-fetching, no code reading beyond the raw file, no editing anything else.
 
-Final message: one line — slug, engine pick, single/multi, confidence, path written.
+Final message: one line — slug, engine pick, single/multi, confidence, path
+written — plus a second line `new capabilities coined: <slugs or "none">`.

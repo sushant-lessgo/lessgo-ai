@@ -36,59 +36,30 @@ export type ToolbarType = 'text' | 'element' | 'section' | 'image' | 'form' | nu
  * 3. Section selection (when section is selected)
  * 4. None (fallback)
  */
-// Cache for getActiveToolbar to prevent excessive logging
-const toolbarCache = new Map<string, { result: ToolbarType; timestamp: number }>();
-const CACHE_TTL = 100; // 100ms cache
-
 export function getActiveToolbar(selection: EditorSelection): ToolbarType {
-  // Create cache key from selection state (include toolbarType)
-  const cacheKey = `${selection.mode}-${selection.isTextEditing}-${selection.textEditingElement?.elementKey}-${selection.selectedElement?.elementKey}-${selection.selectedSection}-${selection.toolbarType}`;
-  
-  // Check cache
-  const cached = toolbarCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.result;
-  }
-  
   // Not in edit mode - no toolbar
   if (selection.mode !== 'edit') {
-    toolbarCache.set(cacheKey, { result: null, timestamp: Date.now() });
     return null;
   }
-  
-  let result: ToolbarType = null;
-  
+
   // Priority 1: Text editing always wins
   if (selection.isTextEditing && selection.textEditingElement) {
-    result = 'text';
+    return 'text';
   }
   // Priority 2: Check explicit toolbar type for specialized toolbars (image, form)
-  else if (selection.toolbarType === 'image' || selection.toolbarType === 'form') {
-    result = selection.toolbarType;
+  if (selection.toolbarType === 'image' || selection.toolbarType === 'form') {
+    return selection.toolbarType;
   }
   // Priority 3: Element selection - generic element toolbar
-  else if (selection.selectedElement) {
-    result = 'element';
+  if (selection.selectedElement) {
+    return 'element';
   }
   // Priority 4: Section selection
-  else if (selection.selectedSection) {
-    result = 'section';
+  if (selection.selectedSection) {
+    return 'section';
   }
-  
-  // Cache result
-  toolbarCache.set(cacheKey, { result, timestamp: Date.now() });
-  
-  // Clean old cache entries periodically
-  if (toolbarCache.size > 50) {
-    const now = Date.now();
-    for (const [key, value] of toolbarCache.entries()) {
-      if (now - value.timestamp > CACHE_TTL * 10) {
-        toolbarCache.delete(key);
-      }
-    }
-  }
-  
-  return result;
+
+  return null;
 }
 
 /**
@@ -115,38 +86,11 @@ export function createEditorSelection(storeState: {
 /**
  * Helper to determine if a toolbar should be visible
  */
-// Cache for shouldShowToolbar
-const showCache = new Map<string, { result: boolean; timestamp: number }>();
-
 export function shouldShowToolbar(
-  targetType: ToolbarType, 
+  targetType: ToolbarType,
   currentSelection: EditorSelection
 ): boolean {
-  const cacheKey = `${targetType}-${currentSelection.mode}-${currentSelection.isTextEditing}-${currentSelection.textEditingElement?.elementKey}-${currentSelection.selectedElement?.elementKey}-${currentSelection.selectedSection}-${currentSelection.toolbarType}`;
-  
-  // Check cache
-  const cached = showCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.result;
-  }
-  
-  const activeToolbar = getActiveToolbar(currentSelection);
-  const shouldShow = activeToolbar === targetType;
-  
-  // Cache result
-  showCache.set(cacheKey, { result: shouldShow, timestamp: Date.now() });
-  
-  // Clean cache periodically
-  if (showCache.size > 50) {
-    const now = Date.now();
-    for (const [key, value] of showCache.entries()) {
-      if (now - value.timestamp > CACHE_TTL * 10) {
-        showCache.delete(key);
-      }
-    }
-  }
-  
-  return shouldShow;
+  return getActiveToolbar(currentSelection) === targetType;
 }
 
 /**

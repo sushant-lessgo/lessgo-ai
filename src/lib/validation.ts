@@ -1,6 +1,7 @@
 // lib/validation.ts - OWASP Input Validation
 import { z } from 'zod';
 import { templateIds } from '@/types/service';
+import { META_PIXEL_ID_RE, GA4_MEASUREMENT_ID_RE } from '@/lib/staticExport/headTags';
 
 // A03: Injection Prevention - Input validation schemas
 export const FormSubmissionSchema = z.object({
@@ -38,6 +39,25 @@ export const DraftSaveSchema = z.object({
   paletteId: z.string().max(50).optional(),
   templateId: z.enum(templateIds as unknown as [string, ...string[]]).optional(),
   variantId: z.string().max(50).optional(),
+  // i18n-phase-1 (D4): per-project locale declaration — a TOP-LEVEL sibling of
+  // finalContent/baseline (`{ locales, defaultLocale }`, matches LocaleConfig).
+  // CLEAR-CONTRACT (Phase-4 fix): `.nullable().optional()` — absent ⇒ preserve
+  // stored (legacy-safe, unchanged); explicit `null` ⇒ CLEAR the stored config
+  // (a locale removed back to single-locale); object ⇒ wholesale-replace.
+  // Wholesale-replaced/cleared in the route (mirrors `baseline`), never deep-merged.
+  //
+  // NOTE — `localeContent` (the D1 text overlay) is intentionally NOT declared
+  // here: it rides INSIDE `finalContent` (which is `z.unknown()`), so it passes
+  // through this schema untouched and merges via the existing `...finalContent`
+  // shallow spread in the route (an explicit `{}` there CLEARS the stored map).
+  // Declaring it top-level would be wrong. See the saveDraft route merge sites.
+  localeConfig: z
+    .object({
+      locales: z.array(z.string().max(20)).max(50),
+      defaultLocale: z.string().max(20),
+    })
+    .nullable()
+    .optional(),
 });
 
 // Per-page SEO overrides (SEO track, Phase 2). These are user-controlled strings
@@ -58,6 +78,10 @@ export const PageSeoSchema = z
     ogImage: HttpsUrl.optional(),
     noIndex: z.boolean().optional(),
     faviconUrl: HttpsUrl.optional(),
+    // Tracking pixels (site-level, root entry only). Strict shared regexes from
+    // headTags.ts — the SAME source the snippet builders re-check against.
+    metaPixelId: z.string().regex(META_PIXEL_ID_RE).optional(),
+    ga4MeasurementId: z.string().regex(GA4_MEASUREMENT_ID_RE).optional(),
     structuredDataType: z
       .enum(['auto', 'none', 'Organization', 'LocalBusiness', 'Product', 'Service'])
       .optional(),

@@ -125,6 +125,12 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
         label: 'Who buys from you?',
         example: 'Furniture brands and interior contractors, 500+ unit orders',
       },
+      // F11 — per-type offer copy: the shared default ("Start a free 14-day
+      // trial") is SaaS-only and leaks nonsense into other engines.
+      offer: {
+        label: 'What is the offer / next step?',
+        example: 'Send us your drawings for a quote',
+      },
     },
     extractionSchemaKey: 'manufacturer',
     voiceHint: 'tailored-trade',
@@ -150,6 +156,10 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
         label: 'Who is your ideal client?',
         example: 'D2C brands doing $50k–$500k/month',
       },
+      offer: {
+        label: 'What is the offer / next step?',
+        example: 'Book a free strategy call',
+      },
     },
     extractionSchemaKey: 'trust',
     likelyIntents: ['book-call', 'enquiry', 'request-quote'],
@@ -169,6 +179,10 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
       credibility: {
         label: 'Why should they trust you?',
         example: 'Ex-Stripe pricing lead; 60+ SaaS engagements',
+      },
+      offer: {
+        label: 'What is the offer / next step?',
+        example: 'Book a free strategy call',
       },
     },
     extractionSchemaKey: 'trust',
@@ -190,6 +204,10 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
         label: 'How do you work with people?',
         example: '8-week 1:1 program, weekly calls + async support',
       },
+      offer: {
+        label: 'What is the offer / next step?',
+        example: 'Book a free intro call',
+      },
     },
     extractionSchemaKey: 'trust',
     likelyIntents: ['book-call', 'enroll', 'lead-magnet'],
@@ -209,6 +227,10 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
       books: {
         label: 'Your books / notable work?',
         example: '"Reth ke Rishtey" (2023), columns in Dainik Bhaskar',
+      },
+      offer: {
+        label: 'What is the offer / next step?',
+        example: 'Read a sample or subscribe for new work',
       },
     },
     extractionSchemaKey: 'work',
@@ -234,6 +256,10 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
       style: {
         label: 'How would you describe your style?',
         example: 'Candid, warm, documentary — no stiff posed portraits',
+      },
+      offer: {
+        label: 'What is the offer / next step?',
+        example: 'Check availability for your date',
       },
     },
     extractionSchemaKey: 'work',

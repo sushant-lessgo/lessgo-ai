@@ -9,6 +9,7 @@ import TechPremiumNewsletterCapture from './TechPremiumNewsletterCapture';
 import { resolveDestination } from '@/utils/resolveCtaHref';
 import type { Link } from '@/types/destination';
 import { isLink } from '@/types/destination';
+import { resolveLogo } from '@/modules/editing/resolveLogo';
 import { FOOTER_STYLES } from './footerStyles';
 
 // Dual-read a footer link's target: legacy raw string href passes through verbatim
@@ -46,13 +47,21 @@ export default function TechPremiumFooterPublished(props: Props) {
   const wa = (props.whatsapp_number || '').replace(/[^0-9]/g, '');
   const waHref = wa ? `https://wa.me/${wa}${props.whatsapp_prefill ? `?text=${encodeURIComponent(props.whatsapp_prefill)}` : ''}` : '';
 
+  // Site-scoped logo (editor phase-3) on the DARK footer surface: resolved
+  // identically to the edit renderer. globalSettings rides on the root content.
+  const logo = resolveLogo(
+    props.content?.globalSettings,
+    { logo_image: props.logo_image, wordmark: props.wordmark },
+    'dark',
+  );
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: FOOTER_STYLES }} />
       <footer className="tp-footer">
         <div className="tp-footer__top">
           <div className="tp-footer__brand">
-            <span className="tp-footer__brand-wm">{props.logo_image ? <img className="tp-footer__img" src={props.logo_image} alt={props.wordmark || 'Logo'} /> : <><span className="tp-footer__mk" aria-hidden="true" />{props.wordmark || ''}</>}</span>
+            <span className="tp-footer__brand-wm">{logo.kind === 'image' ? <img className="tp-footer__img" src={logo.url} alt={props.wordmark || 'Logo'} loading="lazy" decoding="async" /> : <><span className="tp-footer__mk" aria-hidden="true" />{props.wordmark || ''}</>}</span>
             {(props.blurb || props.tag) && <p className="tp-footer__blurb">{props.blurb || props.tag}</p>}
             {(props.contact_address || props.contact_tel || props.contact_email) && (
               <div className="tp-footer__contact">

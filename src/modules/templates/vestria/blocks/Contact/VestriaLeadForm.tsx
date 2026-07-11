@@ -19,9 +19,8 @@ export default function VestriaLeadForm({ sectionId }: { sectionId: string }) {
     useVestriaBlock<VestriaLeadFormContent>({ sectionId });
   const ctx = useVestriaEditCtx(sectionId, blockContent, handleContentUpdate, handleCollectionUpdate);
 
-  const store = useEditStore() as any;
   const formId = blockContent.form_id || '';
-  const form = formId ? store.content?.forms?.[formId] : undefined;
+  const form = useEditStore((s) => (formId ? (s as any).forms?.[formId] : undefined));
   const fields: MVPFormField[] =
     Array.isArray(form?.fields) && form.fields.length ? form.fields : DEFAULT_VESTRIA_LEAD_FIELDS;
 

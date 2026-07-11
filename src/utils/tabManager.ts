@@ -16,6 +16,7 @@ interface TabMessage {
 
 class TabManager {
   private channel: BroadcastChannel | null = null;
+  private channelClosed = false;
   private tabId: string;
   private tabInfo: TabInfo;
   private activeTabs: Map<string, TabInfo> = new Map();
@@ -137,8 +138,16 @@ class TabManager {
   }
 
   private sendMessage(message: TabMessage): void {
-    if (this.channel) {
+    // Guard against posting on a closed channel. On page unload `destroy()`
+    // closes the channel; any in-flight/subsequent post throws
+    // InvalidStateError ("Channel is closed"), which Sentry then reports as
+    // noise. Skip when closed, and narrowly swallow the race where close()
+    // lands between the flag check and postMessage.
+    if (!this.channel || this.channelClosed) return;
+    try {
       this.channel.postMessage(message);
+    } catch {
+      // Channel closed underneath us — nothing to do.
     }
   }
 
@@ -194,11 +203,12 @@ class TabManager {
 
   // Cleanup on destroy
   public destroy(): void {
-    if (this.channel) {
+    if (this.channel && !this.channelClosed) {
       this.sendMessage({
         type: 'unregister',
         tabInfo: this.tabInfo
       });
+      this.channelClosed = true;
       this.channel.close();
     }
 

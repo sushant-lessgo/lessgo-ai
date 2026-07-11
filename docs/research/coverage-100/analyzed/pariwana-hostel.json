@@ -1,0 +1,60 @@
+{
+  "slug": "pariwana-hostel",
+  "url": "https://pariwana-hostel.com/en/",
+  "business": { "type_label": "backpacker hostel chain (Lima & Cusco)", "icp_category": "hospitality / lodging", "geography_hint": "Peru (Lima, Cusco)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking out a physical hostel — deciding by photos, room types, amenities, map/location and what's nearby. Browsing the place IS the decision; the site only marks the argument and hands booking off elsewhere.",
+    "runner_up": "thing"
+  },
+  "goal": {
+    "one_action": "click Book now / START YOUR TRIP to reserve a bed/room (or make a group inquiry)",
+    "mechanism": "redirect",
+    "delegated_to": "cloudbeds"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "book-now", "lima", "cusco", "group-reservations", "blog"],
+    "archetype_note": "Multi-property place site: home hub → per-location property pages (rooms/amenities/map/FAQ) → thin book-now destination-picker that redirects per location to external Cloudbeds engine; separate group-inquiry form path."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Where adventure takes flight", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Our hostels / Pariwana Cusco / Pariwana Lima", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Live It Up at Pariwana! / Free Features / Additional Features / Enjoy Pariwana", "component": "grid-cards" },
+      { "canonical": "pricing", "observed_as": "Private Rooms / Shared Rooms (room-type listings)", "component": "grid-cards" },
+      { "canonical": "socialProof", "observed_as": "Our Awards", "component": "logo-strip" },
+      { "canonical": "miscellaneous", "observed_as": "Explore, Discover, Enjoy (lifestyle gallery)", "component": "gallery" },
+      { "canonical": "miscellaneous", "observed_as": "Check Our Great Location / What's Nearby / How to Get There", "component": "map" },
+      { "canonical": "cta", "observed_as": "Your next adventure starts here", "component": "text" },
+      { "canonical": "faq", "observed_as": "Travel FAQs / Quick Answer / Frequently asked questions", "component": "accordion" },
+      { "canonical": "leadForm", "observed_as": "Make an inquiry! (group booking form)", "component": "form" },
+      { "canonical": "howItWorks", "observed_as": "What happens next? (group inquiry follow-up)", "component": "timeline" },
+      { "canonical": "closeSection", "observed_as": "Select a destination / Have questions before booking?", "component": "grid-cards" },
+      { "canonical": "footer", "observed_as": "Contact Us / Socials", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Pariwana Travel Guides", "component": "grid-cards" }
+    ],
+    "unmapped": [
+      { "observed": "What's Nearby (nearby attractions list per property)", "why_no_fit": "A local-attractions/things-to-do list is a place-specific content type with no canonical section; part travel-guide, part local SEO — not features/useCases/map cleanly.", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "catalog", "map-hours", "bilingual", "lead-form", "blog"],
+    "proposed_new": [
+      { "name": "external-booking-redirect", "evidence": "Every Book now / START YOUR TRIP CTA hands off per-location to the external Cloudbeds reservation engine (hotels.cloudbeds.com/reservation/...); the thin on-site book-now page is a 716-char destination picker with no on-site inventory or checkout." }
+    ]
+  },
+  "proof_types": ["certs"],
+  "design_style": { "pick": "bold/performance", "none_fits_because": "" },
+  "components_needed": ["room-type card grid", "amenities/features grid", "location map + nearby-list", "faq accordion", "group-inquiry multi-field form", "next-steps timeline", "awards logo strip", "language switcher"],
+  "languages": ["en", "es", "pt"],
+  "confidence": { "level": "high", "why": "fetch_quality=full; all 5 core pages, CTAs, forms and embeds captured. Cloudbeds handoff and thin book-now page confirmed via both static and rendered fetch." },
+  "gap_findings": [
+    "Multi-property (per-location) place site: home hub linking to N property subpages each with own rooms/map/FAQ — closest existing capability is practitioner-profiles but that's per-person; a per-location/property variant is unmodeled.",
+    "'What's Nearby' local-attractions list has no canonical section (falls to miscellaneous).",
+    "Trilingual (en/es/pt) exceeds the bilingual capability's two-language framing.",
+    "Room-type listing without on-site prices (rates only behind Cloudbeds) sits awkwardly between catalog and pricing sections."
+  ]
+}

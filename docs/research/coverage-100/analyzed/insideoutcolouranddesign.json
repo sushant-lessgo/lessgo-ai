@@ -1,0 +1,34 @@
+{
+  "slug": "insideoutcolouranddesign",
+  "url": "https://www.insideoutcolouranddesign.com.au/",
+  "business": { "type_label": "interior designer & colour consultant (solo practice)", "icp_category": "consultant/professional-services", "geography_hint": "Sydney / North Shore, Australia (also Brisbane)" },
+  "in_icp": true,
+  "engine": { "pick": "trust", "ladder_reasoning": "Sells a defined professional expertise (21-yr designer, MDIA/KBDI credentials, priced consultation services); the visitor is deciding to trust a person/firm, so credentials + testimonials + process carry the sale, not the portfolio alone.", "runner_up": "work" },
+  "goal": { "one_action": "Book (or call for) an initial paid design/colour consultation", "mechanism": "call-WhatsApp", "delegated_to": "calendly" },
+  "structure": { "kind": "multi", "page_count": 9, "pages": ["home","about","services","testimonials","portfolio","contact-us","faqs","blog","booking"], "archetype_note": "Classic multi-page consultant brochure: home → about (founder bio+credentials) → services (priced) → testimonials → portfolio (category galleries) → contact/booking. Calendly is the booking handoff; a site-wide newsletter form is the recurring secondary capture." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Professional Interior Designer Creating Harmonious Environments", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Why us?", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Jennifer French, MDIA (founder bio)", "component": "text" },
+      { "canonical": "security", "observed_as": "DIA (MDIA) & KBDI memberships / credentials", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Our Services (priced service list: Interior Design, Colour Consulting, Bathroom/Kitchen Design, Sourcing, Window Coverings)", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "Testimonials (4 named client quotes with suburbs)", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Selected Projects / Portfolio (10 category galleries)", "component": "gallery" },
+      { "canonical": "leadForm", "observed_as": "Interested in Interiors? (newsletter signup, site-wide)", "component": "form" },
+      { "canonical": "cta", "observed_as": "We'd love to work with you / Ready to get started?", "component": "text" },
+      { "canonical": "footer", "observed_as": "Contact info + social links", "component": "text" },
+      { "canonical": "faq", "observed_as": "FAQs (nav item, not crawled)", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Portfolio organized as 10 room/category galleries each opening a project gallery", "why_no_fit": "sectionList has no dedicated portfolio/gallery section id; mapped to miscellaneous", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage","gallery/portfolio","packages","lead-form","blog"], "proposed_new": [] },
+  "proof_types": ["testimonials","certs","portfolio"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["pricing-table","gallery-grid","testimonial-list","team/founder-bio","newsletter-signup-form","calendly-embed"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality=full; 6 of 9 pages crawled with clear sections, CTAs, priced services, credentials and testimonials; only FAQs/Blog uncrawled, which don't change the engine or goal." },
+  "gap_findings": ["Primary CTA 'Call or Book Now' is dual (tel + Calendly booking) plus a site-wide newsletter form — the single-mechanism goal model doesn't cleanly express a page whose conversion splits across call, external booking, and list-capture.", "Portfolio-as-category-galleries has no first-class section id (forced into miscellaneous)."]
+}

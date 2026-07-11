@@ -43,6 +43,8 @@ export interface PageSeo {
   ogImage?: string; // absolute https URL; wins over previewImage + auto /api/og
   noIndex?: boolean; // -> <meta name="robots" content="noindex,nofollow">
   faviconUrl?: string; // site-wide; only meaningful on the root (home) entry
+  metaPixelId?: string; // site-wide; only meaningful on the root (home) entry
+  ga4MeasurementId?: string; // site-wide; only meaningful on the root (home) entry
   structuredDataType?: StructuredDataType; // default 'auto'
 }
 

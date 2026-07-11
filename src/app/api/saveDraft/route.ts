@@ -78,7 +78,8 @@ async function saveDraftHandler(req: NextRequest) {
       finalContent,
       paletteId,
       templateId,
-      variantId
+      variantId,
+      localeConfig
     } = validationResult.data;
 
     const isDemo = tokenId === DEMO_TOKEN;
@@ -158,10 +159,21 @@ async function saveDraftHandler(req: NextRequest) {
     };
 
     // ✅ CRITICAL FIX: Save the actual page data if provided
+    //
+    // i18n-phase-1 (D1) — localeContent MERGE MECHANISM #1 (spread-ride):
+    // The locale text overlay (`finalContent.localeContent`) lives INSIDE
+    // finalContent and rides this shallow `...finalContent` spread. Consequence:
+    //  - payload OMITS `localeContent`  ⇒ key absent from spread ⇒ the stored map
+    //    is PRESERVED (an autosave that doesn't touch locales can't wipe it);
+    //  - payload INCLUDES `localeContent` ⇒ the WHOLE map is REPLACED.
+    // This is safe ONLY because of the store-side invariant (Phase 3a): every
+    // save that includes localeContent exports the COMPLETE map — all locales,
+    // all pages' overlays. Do NOT add per-locale deep-merge here; correctness
+    // depends on the overlay riding this existing spread verbatim.
     if (finalContent) {
       updatedContent.finalContent = {
         ...existingContent.finalContent,
-        ...finalContent,
+        ...(finalContent as Record<string, unknown>),
         lastSaved: new Date().toISOString(),
       };
       
@@ -178,6 +190,23 @@ async function saveDraftHandler(req: NextRequest) {
     // baseline carries the same trust level as finalContent (z.unknown()).
     if (body.baseline !== undefined) {
       updatedContent.baseline = body.baseline;
+    }
+
+    // i18n-phase-1 (D4) — localeConfig MERGE MECHANISM #2 (top-level). CLEAR-
+    // CONTRACT (Phase-4 fix, REVISES the original absent-preserve-only rule):
+    //   undefined ⇒ PRESERVE the stored config (via the `...existingContent`
+    //               spread — legacy autosaves that don't touch locales, unchanged);
+    //   null      ⇒ CLEAR (assign null; a locale removed back to single-locale
+    //               must not resurrect on reload) — schema is `.nullable().optional()`;
+    //   object    ⇒ REPLACE wholesale (like `baseline`, never deep-merged).
+    // The `!== undefined` guard already distinguishes all three: null falls into
+    // the assign branch and overwrites with null. Validated by DraftSaveSchema, so
+    // read the parsed value (not raw body). (The paired localeContent CLEAR — an
+    // explicit `{}` — rides the finalContent spread above and replaces the stored
+    // map; loadDraft returns `localeConfig ?? null`, so a cleared config reads back
+    // as null = legacy.)
+    if (localeConfig !== undefined) {
+      updatedContent.localeConfig = localeConfig;
     }
 
     // 💾 Upsert project with merged content

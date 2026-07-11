@@ -42,6 +42,6 @@ export { defaultTechPremiumVariant } from '@/types/product';
 // TemplateModule.resolveBlock(blockType, mode): the renderer dispatches by SECTION
 // TYPE, so `blockType` is the section type ('hero', 'features', …).
 import { resolveTechPremiumBlock } from './resolveTechPremiumBlock';
-export function resolveBlock(blockType: string, mode: 'edit' | 'published') {
-  return resolveTechPremiumBlock(blockType, mode);
+export function resolveBlock(blockType: string, mode: 'edit' | 'published', layoutName?: string) {
+  return resolveTechPremiumBlock(blockType, mode, layoutName);
 }

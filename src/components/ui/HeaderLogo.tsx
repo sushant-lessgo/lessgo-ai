@@ -15,7 +15,8 @@ const HeaderLogo: React.FC<HeaderLogoProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Get logo from Zustand store
-  const { globalSettings, setLogoUrl } = useEditStore();
+  const globalSettings = useEditStore((s) => s.globalSettings);
+  const setLogoUrl = useEditStore((s) => s.setLogoUrl);
   const logoUrl = globalSettings?.logoUrl || '';
 
   // Simple placeholder SVG that shows "LOGO" text

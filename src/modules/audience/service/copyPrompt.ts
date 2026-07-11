@@ -31,11 +31,28 @@ export interface ServiceCopyPromptInput {
   understanding: ServiceUnderstandingInput;
 }
 
+// proof-truth phase 2: proof-shaped elements (testimonial quote/author fields,
+// trust review/case fields) get an inline plausible-generic guard. Match on the
+// actual element keys the schema emits — collection subfields arrive as
+// `<collection>.<field>` (see getAllElements), flat fields as bare keys.
+const PROOF_COLLECTIONS = new Set(['testimonials', 'reviews', 'cases']);
+const PROOF_FIELDS = new Set(['quote', 'author_name', 'author_role', 'author_company']);
+const PROOF_ELEMENT_GUARD =
+  '[PROOF — plausible-generic only: a fictional first-name persona is OK, but NEVER attribute the quote to a real or invented company/brand name, and NEVER put a specific number, percentage, or revenue/ROI claim inside the quote]';
+
+function isProofElement(name: string): boolean {
+  const dot = name.indexOf('.');
+  const collection = dot >= 0 ? name.slice(0, dot) : '';
+  const field = dot >= 0 ? name.slice(dot + 1) : name;
+  return PROOF_COLLECTIONS.has(collection) || PROOF_FIELDS.has(field);
+}
+
 function formatElement(element: LayoutElement): string {
   const parts: string[] = [`- ${element.element}`];
   if (element.charLimit) parts.push(`(max ${element.charLimit} chars)`);
   parts.push(element.mandatory ? '[REQUIRED]' : '[optional, null to exclude]');
   if (element.generation === 'ai_generated_needs_review') parts.push('[NEEDS_REVIEW]');
+  if (isProofElement(element.element)) parts.push(PROOF_ELEMENT_GUARD);
   return parts.join(' ');
 }
 
@@ -191,7 +208,7 @@ ${getElementSchemas()}
 2. Respect character limits and array min/max strictly.
 3. NO placeholder text — every field must be real, usable copy.
 4. NO invented exact numbers, client names, or dollar figures. Use ranges or "experienced in X" framing.
-5. NEEDS_REVIEW elements (price_display, quote, author_*): write realistic copy but use general framing — founder will verify.
+5. NEEDS_REVIEW elements (price_display, quote, author_*): write realistic copy but use general framing — founder will verify. For any testimonial/review/case proof: a fictional first-name persona is acceptable, but NEVER attribute a quote to a real or invented company/brand name (author_company / cases[].client), and NEVER put a specific metric, percentage, or revenue/ROI figure inside a quote (e.g. "284% ROI for GlowSkin" is forbidden).
 6. For arrays: return the actual array, respecting min/max.
 7. Return ONLY valid JSON. No markdown, no commentary.
 8. **Output EVERY section listed above — no omissions.** Include each section key (header, hero, services, testimonials, packages, cta, footer — whichever are listed) with a complete "elements" object. Do not drop trailing sections like testimonials or footer.

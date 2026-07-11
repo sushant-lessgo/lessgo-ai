@@ -13,9 +13,10 @@ import { validateAndResolveAssetURLs } from './assetResolver';
 import { renderLessgoBadge } from './lessgoBadge';
 import { resolveCanonicalURL } from './canonicalUrl';
 import { resolveOgImage } from './buildPageMetadata';
-import { escapeHTML, robotsMetaTag, faviconLinkTag, jsonLdScriptTag } from './headTags';
+import { escapeHTML, robotsMetaTag, faviconLinkTag, jsonLdScriptTag, metaPixelSnippet, ga4Snippet } from './headTags';
 import { usesTemplateModule } from '@/types/service';
 import type { PageSeo } from '@/types/store/pages';
+import type { LocaleConfig } from '@/types/core/content';
 
 export interface StaticHTMLOptions {
   // Content
@@ -40,6 +41,13 @@ export interface StaticHTMLOptions {
    *  normalization pre-pass so GOAL_REF primaries resolve. OPTIONAL — blog/no-goal
    *  callers omit it → null-goal legacy fallback. */
   goal?: import('@/types/brief').Brief['goal'] | null;
+  /** goal-ref-cta phase 3 (F23): the path of THIS page ('/', '/contact') and the
+   *  path of the page that holds the conversion form. Both derived once by
+   *  renderPublishedExport (which holds every page); threaded into the renderer's
+   *  normalization pre-pass so multipage M1 primaries emit a cross-page `page`
+   *  dest. Single-page callers omit both → same-page anchor. */
+  currentPagePath?: string;
+  formPagePath?: string;
 
   // Canonical / social URL resolution.
   // canonicalDomain: the live custom domain (no scheme) when one is active; when unset,
@@ -54,6 +62,11 @@ export interface StaticHTMLOptions {
   // buildPageMetadata. faviconUrl is resolved separately (root seo cascades).
   seo?: PageSeo | null;
   faviconUrl?: string;
+  // Tracking pixels (site-level, threaded by the caller like faviconUrl — root
+  // seo cascades to every page). Absent/invalid ⇒ builder returns '' ⇒
+  // byte-identical head.
+  metaPixelId?: string;
+  ga4MeasurementId?: string;
   // JSON-LD (Phase 3): pre-serialized (script-breakout-safe) structured data;
   // the caller builds it via structuredData.ts — root page only.
   jsonLd?: string;
@@ -61,6 +74,17 @@ export interface StaticHTMLOptions {
   // Configuration
   analyticsOptIn?: boolean;
   baseURL?: string;
+
+  // i18n (Phase 5) — all OPTIONAL. Absent ⇒ single-locale byte-identical output.
+  /** The locale THIS doc renders (for `<html lang>`). Defaults to 'en' when absent. */
+  locale?: string;
+  /** Project locale declaration. Presence WITH >1 locale triggers hreflang +
+   *  switcher emission; single/absent ⇒ none of it (legacy output unchanged). */
+  localeConfig?: LocaleConfig;
+  /** Reciprocal hreflang set (every locale + x-default), precomputed by
+   *  renderPublishedExport from the SAME resolveCanonicalURL source as canonical
+   *  so the self-canonical and self-alternate always agree. */
+  localeAlternates?: Array<{ hreflang: string; href: string }>;
 }
 
 export interface StaticHTMLResult {
@@ -104,6 +128,8 @@ export async function generateStaticHTML(
       variantId: options.variantId ?? null,
       mood: options.mood ?? null,
       goal: options.goal ?? null,
+      currentPagePath: options.currentPagePath,
+      formPagePath: options.formPagePath,
     })
   );
 
@@ -133,12 +159,17 @@ export async function generateStaticHTML(
       ogImageOverride: options.seo?.ogImage,
       noIndex: !!options.seo?.noIndex,
       faviconUrl: options.faviconUrl,
+      metaPixelId: options.metaPixelId,
+      ga4MeasurementId: options.ga4MeasurementId,
       jsonLd: options.jsonLd,
     },
     analyticsOptIn: options.analyticsOptIn || false,
     hasForms,
     usesNaayom,
     usesLumen,
+    locale: options.locale,
+    localeConfig: options.localeConfig,
+    localeAlternates: options.localeAlternates,
   });
 
   // 5. Validate and resolve asset URLs
@@ -214,23 +245,64 @@ function buildHTMLDocument(params: {
     ogImageOverride?: string;
     noIndex?: boolean;
     faviconUrl?: string;
+    metaPixelId?: string;
+    ga4MeasurementId?: string;
     jsonLd?: string;
   };
   analyticsOptIn: boolean;
   hasForms: boolean;
   usesNaayom: boolean;
   usesLumen: boolean;
+  locale?: string;
+  localeConfig?: LocaleConfig;
+  localeAlternates?: Array<{ hreflang: string; href: string }>;
 }): string {
   const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms, usesNaayom, usesLumen } = params;
 
-  // Asset origin for the injected fonts/scripts. ALWAYS absolute https://lessgo.ai:
-  // these platform assets only live on the lessgo.ai CDN, and published HTML is
-  // served from prod subdomains AND custom domains (where a relative /assets/*
-  // would 404). NOTE: a dev-relative shim here is a footgun — when publishing to a
-  // real subdomain from `npm run dev`, validateAndResolveAssetURLs rewrites the
-  // relative src to the local baseURL (http://localhost:3000), freezing a broken
-  // localhost URL into the static HTML. So keep it absolute regardless of env.
-  const assetBase = 'https://lessgo.ai';
+  // i18n (Phase 5): multi-locale head/script emission. When the project declares
+  // only one locale (or none), NONE of this fires and the document is
+  // byte-identical to legacy output (back-compat law at the publish layer).
+  const multiLocale =
+    !!params.localeConfig &&
+    Array.isArray(params.localeConfig.locales) &&
+    params.localeConfig.locales.length > 1;
+  // <html lang>: the locale THIS doc renders (fixes the old hardcoded "en").
+  // Single-locale ⇒ 'en' ⇒ byte-identical.
+  const lang = params.locale || 'en';
+  const alternates = params.localeAlternates || [];
+  // (b) reciprocal hreflang for ALL locales + (c) x-default — self-canonical (a)
+  // is the existing <link rel="canonical"> below (its canonicalPath is already the
+  // locale-prefixed path for non-default docs).
+  const hreflangTags =
+    multiLocale && alternates.length
+      ? `\n\n  <!-- i18n hreflang alternates -->` +
+        alternates
+          .map(
+            (a) =>
+              `\n  <link rel="alternate" hreflang="${escapeHTML(a.hreflang)}" href="${a.href}">`
+          )
+          .join('')
+      : '';
+  // Inline locale config (drives switcher.v1.js) + the shared switcher asset.
+  // `<` escaped to < so a stray locale code can't break out of the script.
+  const localeJson = multiLocale
+    ? JSON.stringify({
+        locales: params.localeConfig!.locales,
+        defaultLocale: params.localeConfig!.defaultLocale,
+        current: lang,
+      }).replace(/</g, '\\u003c')
+    : '';
+
+  // Asset origin for the injected fonts/scripts. Absolute origin (NOT relative):
+  // these platform assets are served from prod subdomains AND custom domains
+  // (where a relative /assets/* would 404). NOTE: a dev-relative shim here is a
+  // footgun — when publishing to a real subdomain from `npm run dev`,
+  // validateAndResolveAssetURLs rewrites the relative src to the local baseURL
+  // (http://localhost:3000), freezing a broken localhost URL into the static
+  // HTML. So keep it absolute regardless of env. Env-driven so a local publish
+  // loads the local build of the beacon/form JS instead of production's copy;
+  // falls back to https://lessgo.ai in prod where NEXT_PUBLIC_APP_URL points there.
+  const assetBase = process.env.NEXT_PUBLIC_APP_URL || 'https://lessgo.ai';
 
   // Generate CSS variables style tag
   const cssVariablesStyle = generateCSSVariablesStyle(cssVariables);
@@ -256,8 +328,13 @@ function buildHTMLDocument(params: {
     canonicalPath: metadata.canonicalPath,
   });
 
+  // Switcher tag block (needs assetBase, resolved above). Empty for single-locale.
+  const switcherTags = multiLocale
+    ? `\n\n  <!-- i18n locale switcher (multi-locale) -->\n  <script>window.__lessgoLocales=${localeJson}</script>\n  <script src="${assetBase}/assets/switcher.v1.js" defer></script>`
+    : '';
+
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${escapeHTML(lang)}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -267,7 +344,7 @@ function buildHTMLDocument(params: {
   <meta name="description" content="${escapeHTML(metadata.description)}">
 
   <!-- Canonical URL -->
-  <link rel="canonical" href="${canonicalURL}">${robotsMetaTag(metadata.noIndex)}${faviconLinkTag(metadata.faviconUrl)}
+  <link rel="canonical" href="${canonicalURL}">${robotsMetaTag(metadata.noIndex)}${faviconLinkTag(metadata.faviconUrl)}${hreflangTags}
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
@@ -292,7 +369,7 @@ function buildHTMLDocument(params: {
   <link rel="stylesheet" href="/assets/published.css">
 
   <!-- Theme CSS Variables (inline, per-page) -->
-  ${cssVariablesStyle}${jsonLdScriptTag(metadata.jsonLd)}
+  ${cssVariablesStyle}${jsonLdScriptTag(metadata.jsonLd)}${metaPixelSnippet(metadata.metaPixelId)}${ga4Snippet(metadata.ga4MeasurementId)}
 </head>
 <body>
   ${bodyHTML}
@@ -305,12 +382,12 @@ function buildHTMLDocument(params: {
   ${usesNaayom ? `<script src="${assetBase}/assets/naayom.v1.js" defer></script>` : ''}
 
   <!-- Lumen behaviors (lightbox + reveal + EN·NL toggle/geo) -->
-  ${usesLumen ? `<script src="${assetBase}/assets/lumen.v1.js" defer></script>` : ''}
+  ${usesLumen ? `<script src="${assetBase}/assets/lumen.v1.js" defer></script>` : ''}${switcherTags}
 
   <!-- Phase 4: Analytics beacon (opt-in) -->
   ${
     analyticsOptIn
-      ? `<script src="${assetBase}/assets/a.v1.js" data-page-id="${metadata.publishedPageId}" data-slug="${metadata.slug}" defer></script>`
+      ? `<script src="${assetBase}/assets/a.v2.js" data-page-id="${metadata.publishedPageId}" data-slug="${metadata.slug}" defer></script>`
       : ''
   }
 </body>

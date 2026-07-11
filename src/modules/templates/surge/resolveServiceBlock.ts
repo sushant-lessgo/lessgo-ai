@@ -66,7 +66,8 @@ export type ServiceBlockMode = 'edit' | 'published';
 
 export function resolveServiceBlock(
   sectionType: string,
-  mode: ServiceBlockMode = 'edit'
+  mode: ServiceBlockMode = 'edit',
+  _layoutName?: string, // one block per section; variant switching (testimonials) is internalDispatch
 ): React.ComponentType<any> | null {
   const key = (sectionType || '').toLowerCase();
   const entry = SERVICE_BLOCK_REGISTRY[key];

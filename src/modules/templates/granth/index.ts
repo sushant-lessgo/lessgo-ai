@@ -50,6 +50,6 @@ export { resolveGranthBlock } from './resolveGranthBlock';
 
 // TemplateModule.resolveBlock(blockType, mode): blockType is the SECTION TYPE.
 import { resolveGranthBlock as _resolveGranthBlock } from './resolveGranthBlock';
-export function resolveBlock(blockType: string, mode: 'edit' | 'published') {
-  return _resolveGranthBlock(blockType, mode);
+export function resolveBlock(blockType: string, mode: 'edit' | 'published', layoutName?: string) {
+  return _resolveGranthBlock(blockType, mode, layoutName);
 }

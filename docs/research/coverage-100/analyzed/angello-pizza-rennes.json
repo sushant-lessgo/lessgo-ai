@@ -1,0 +1,54 @@
+{
+  "slug": "angello-pizza-rennes",
+  "url": "https://www.angello-pizza-rennes.fr/",
+  "business": { "type_label": "Italian pizzeria / restaurant (two locations)", "icp_category": "restaurant", "geography_hint": "Rennes, France" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor decides by browsing menu, prices, photos, locations, hours, and directions — checking a physical eatery. No expertise sold, no portfolio; the place (food + venue) is the decision.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "reserve a table or order takeaway from one of the two restaurants",
+    "mechanism": "redirect",
+    "delegated_to": "1001menus (reservation) | toctok (takeaway order) | uber-eats/les-coursiers (delivery)"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 5,
+    "pages": ["home", "carte", "a-emporter", "reservation", "nos-restaurants"],
+    "archetype_note": "Classic multi-location restaurant site: home intro + philosophy, full menu, takeaway menu, reservation page, locations page. All transactions handed off to third-party platforms."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Angello, pizzerias & restaurants italiens à Rennes", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Nous fabriquons notre pâte à pizza et nos pâtes fraîches sur place avec une farine biologique en provenance d'Italie", "component": "text" },
+      { "canonical": "features", "observed_as": "Des produits frais / La tradition italienne / L'art de la panification", "component": "grid-cards" },
+      { "canonical": "founderNote", "observed_as": "Yann Dayer, l'Italie au coeur", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Nos restaurants (location cards with address/phone/hours)", "component": "grid-cards" },
+      { "canonical": "pricing", "observed_as": "Formules / Antipasti / Pâtes fraîches / Pizzas / Desserts (menu with prices)", "component": "menu-list" },
+      { "canonical": "faq", "observed_as": "Allergènes / Les Traductions (allergen list + menu glossary)", "component": "text" },
+      { "canonical": "cta", "observed_as": "Chez Angello (ordering channels: online, phone, delivery)", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Champion de France de pizza 2014 + TripAdvisor", "component": "badge/widget" }
+    ],
+    "unmapped": [
+      { "observed": "Formules / menu-list sections (structured multi-category menu with size-tiered prices)", "why_no_fit": "No canonical menu section id; mapped to 'pricing' as closest but a restaurant menu is a distinct component, not a SaaS price table", "closest": "pricing" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "catalog"],
+    "proposed_new": [
+      { "name": "external-order-redirect", "evidence": "Every takeaway/online-order CTA hands off to a third-party food-ordering platform (angello.toctok.fr, Uber Eats, Les Coursiers Rennais); no native order form or cart — the food-ordering analogue of external-booking-redirect (which covers the 1001menus table-reservation handoff here)." }
+    ]
+  },
+  "proof_types": ["certs", "reviews"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["menu-list (size-tiered prices)", "location cards (address/phone/hours)", "feature grid (3-card)", "map embed", "chef bio block", "allergen/glossary list"],
+  "languages": ["fr"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; all pages, menus, CTAs, ordering channels, and proof captured clearly." },
+  "gap_findings": [
+    "No canonical 'menu' section id — restaurant menus (categorized, size/price tiered) are forced into 'pricing', a poor fit for the place engine.",
+    "Two distinct external-handoff patterns coexist: table reservation (external-booking-redirect) and food ordering (external-order-redirect) — vocab currently only has the booking side.",
+    "Multi-location single-brand (two venues with different hours/phones/ordering setups) has no clean structural expression beyond a location-card grid."
+  ]
+}

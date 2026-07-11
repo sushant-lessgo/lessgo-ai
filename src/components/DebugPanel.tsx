@@ -148,6 +148,9 @@ export function DebugPanel({
         </div>
       )}
 
+      {/* i18n-phase-1: the 3b dev-only locale switch was removed in Phase 4 —
+          the real LanguageToggle + LocaleSettings in the editor header replace it. */}
+
       {/* Storage Monitor */}
       <StorageMonitor position="bottom-right" collapsed={true} />
     </div>

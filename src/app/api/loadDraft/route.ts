@@ -142,6 +142,15 @@ export async function GET(req: Request) {
       // the editor backfills by capturing load-time state (loadFromDraft).
       baseline: content.baseline ?? null,
 
+      // i18n-phase-1 (D4): per-project locale declaration. This top-level
+      // response object WHITELISTS keys, so localeConfig must be passed through
+      // explicitly (mirrors `baseline`) or it would be silently stripped. Null
+      // for legacy single-locale projects ⇒ locale machinery stays invisible.
+      // NOTE: the D1 text overlay `localeContent` needs NO line here — it rides
+      // INSIDE `finalContent` (returned whole above), so it passes through
+      // untouched with no key-stripping.
+      localeConfig: content.localeConfig ?? null,
+
       // Metadata
       lastUpdated: project.updatedAt,
     };

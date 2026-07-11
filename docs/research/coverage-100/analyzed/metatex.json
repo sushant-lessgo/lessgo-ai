@@ -1,0 +1,40 @@
+{
+  "slug": "metatex",
+  "url": "http://metatex.com.br/",
+  "business": { "type_label": "textile manufacturer / knit-fabric wholesaler (B2B)", "icp_category": "manufacturer", "geography_hint": "São Paulo, Brazil (pt-BR)" },
+  "in_icp": false,
+  "engine": { "pick": "thing", "ladder_reasoning": "Visitor is evaluating physical products (knit fabrics) — categories, materials (Pima cotton, Modal, BCI cotton), prices and proof of variety. It sells THINGS, not a person's expertise nor a browsable-photos-are-the-decision place.", "runner_up": "place" },
+  "goal": { "one_action": "browse the fabric catalog and place a wholesale order / contact sales to buy (min 1 roll ~12.5kg)", "mechanism": "call-WhatsApp", "delegated_to": "store" },
+  "structure": { "kind": "multi", "page_count": 6, "pages": ["home","empresa/sobre-nos","produtos","lancamentos","cartelas-de-cores","como-comprar","contato"], "archetype_note": "WooCommerce B2B wholesale storefront: multi-page catalog with prices + cart/checkout + how-to-buy/payment terms + contact form. Job is commerce (inventory + checkout), not one conversion action → out of ICP." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Metatex – Tecno Malhas", "component": "text" },
+      { "canonical": "features", "observed_as": "Lançamentos", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Categorias / Produtos", "component": "grid-cards" },
+      { "canonical": "uniqueMechanism", "observed_as": "Sobre nós / Materiais em destaque (Pima, Modal, BCI cotton)", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Sobre Nós (founded 1987, own factory, 60+ machines, 100 employees)", "component": "text" },
+      { "canonical": "security", "observed_as": "Sustentabilidade (recycled PET, BCI-certified cotton)", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "Como Comprar / Formas de Pagamento / Entrega", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Boleto Bancário financing terms table", "component": "table" },
+      { "canonical": "leadForm", "observed_as": "Fale conosco (contact form)", "component": "form" },
+      { "canonical": "cta", "observed_as": "WhatsApp Vendas / vendas@metatex.com.br", "component": "cta" },
+      { "canonical": "footer", "observed_as": "Contato (phone, address, hours, social)", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Todos os Produtos — full 330+ SKU product grid with price ranges", "why_no_fit": "A live purchasable product catalog with per-item prices and cart is commerce, not a marketing section; no canonical section id expresses an inventory-backed storefront listing", "closest": "features/useCases" },
+      { "observed": "Minimum purchase notice (1 closed roll ~12.5kg) & delivery-weight-minimum rules", "why_no_fit": "Wholesale order-constraint / logistics terms — no canonical section captures B2B MOQ/delivery rules", "closest": "objectionHandling" },
+      { "observed": "Cartelas de Cores (color swatch charts nav item)", "why_no_fit": "A color-swatch/reference resource for fabric buyers is not a marketing section", "closest": "gallery" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage","catalog","map-hours","lead-form"], "proposed_new": [ { "name": "storefront-checkout", "evidence": "WooCommerce cart/checkout with prices_shown + cart_or_checkout true across 330+ SKUs; on-site transaction, not browse-only catalog" } ] },
+  "proof_types": ["certs","stats"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["product-catalog-grid","pricing-table","payment-terms-table","contact-form","map-embed","category-tiles"],
+  "languages": ["pt-BR"],
+  "confidence": { "level": "high", "why": "fetch_quality full; 6 pages captured with sections, forms, CTAs, commerce flags and oddities all consistent with a B2B WooCommerce wholesale storefront" },
+  "gap_findings": [
+    "Out of ICP: site's job is inventory-backed commerce (cart/checkout + 330 SKUs), not one conversion action — engines/sections cannot express a storefront listing.",
+    "B2B wholesale MOQ / delivery-weight-minimum / boleto financing terms have no canonical section — recurring for manufacturer/wholesaler ICP.",
+    "storefront-checkout (registry canonical) is the operative capability; catalog alone understates that this transacts on-site."
+  ]
+}

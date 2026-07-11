@@ -277,19 +277,19 @@ export function createLayoutActions(set: any, get: any): LayoutActions {
       }),
 
       // Enhanced updateSectionLayout with proper integration
-updateSectionLayout: (sectionId: string, newLayout: string) =>
+updateSectionLayout: (sectionId: string, newLayout: string, opts?: { skipHistory?: boolean }) =>
   set((state: EditStore) => {
     const oldLayout = state.sectionLayouts[sectionId];
-    
+
     if (oldLayout !== newLayout) {
       state.sectionLayouts[sectionId] = newLayout;
-      
+
       // Update section content layout property
       if (state.content[sectionId]) {
         state.content[sectionId].layout = newLayout;
       }
-      
-      // Track change
+
+      // Track change (autosave/queuedChanges path stays intact regardless of skipHistory)
       state.queuedChanges.push({
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         type: 'layout',
@@ -299,21 +299,25 @@ updateSectionLayout: (sectionId: string, newLayout: string) =>
         timestamp: Date.now(),
         source: 'user',
       });
-      
+
       state.persistence.isDirty = true;
       state.lastUpdated = Date.now();
-      
-      // Add to history
-      state.history.undoStack.push({
-        type: 'layout',
-        description: `Changed section layout to ${newLayout}`,
-        timestamp: Date.now(),
-        beforeState: { sectionId, layout: oldLayout },
-        afterState: { sectionId, layout: newLayout },
-        sectionId,
-      });
-      
-      state.history.redoStack = [];
+
+      // Add to history — UNLESS an outer executeUndoableAction (e.g. a block-variant
+      // swap) owns the single undo entry. skipHistory suppresses both the internal
+      // 'layout' push and the redo-clear so the swap is one atomic undo entry.
+      if (!opts?.skipHistory) {
+        state.history.undoStack.push({
+          type: 'layout',
+          description: `Changed section layout to ${newLayout}`,
+          timestamp: Date.now(),
+          beforeState: { sectionId, layout: oldLayout },
+          afterState: { sectionId, layout: newLayout },
+          sectionId,
+        });
+
+        state.history.redoStack = [];
+      }
     }
   }),
 
@@ -699,7 +703,14 @@ getTypographyForSection: (sectionId: string) => {
       set((state: EditStore) => {
         state.globalSettings.logoUrl = url;
       }),
-    
+
+    // editor phase-3 (phase 5): DARK-surface logo (footer). Mirrors setLogoUrl —
+    // empty string clears (resolveLogo treats '' as unset → falls back to logoUrl).
+    setLogoUrlDark: (url: string) =>
+      set((state: EditStore) => {
+        state.globalSettings.logoUrlDark = url;
+      }),
+
     clearLogo: () =>
       set((state: EditStore) => {
         state.globalSettings.logoUrl = undefined;

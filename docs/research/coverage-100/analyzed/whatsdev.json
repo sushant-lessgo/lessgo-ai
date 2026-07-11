@@ -1,0 +1,19 @@
+{
+  "slug": "whatsdev", "url": "https://www.whatsdev.com/",
+  "business": { "type_label": "AI/growth consulting (1-1 growth sprint)", "icp_category": "consultant", "geography_hint": "unknown (en, no location cues)" },
+  "in_icp": true,
+  "engine": { "pick": "quick-yes", "ladder_reasoning": "Single hero: one headline, one paragraph, one button to an external Tally form. There is essentially no persuasion apparatus (no credentials, process, or proof) — the page only ASKS for the one action, which is the quick-yes signature.", "runner_up": "trust" },
+  "goal": { "one_action": "apply for a 1-1 Growth Sprint by filling the external Tally form", "mechanism": "form", "delegated_to": "tally" },
+  "structure": { "kind": "single", "page_count": 1, "pages": ["home"], "archetype_note": "Unrouted single page, no title/meta/nav/footer; one hero block + one outbound CTA. Link-in-bio-grade minimalism." },
+  "sections": {
+    "mapped": [ { "canonical": "hero", "observed_as": "Build AI Systems that Power Growth", "component": "headline + GIF + pitch paragraph + CTA" } ],
+    "unmapped": []
+  },
+  "capabilities": { "needed": [], "proposed_new": [] },
+  "proof_types": [],
+  "design_style": { "pick": "tech/minimal", "none_fits_because": "" },
+  "components_needed": ["hero with single CTA button"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality is full but the page is extremely thin (one hero, no proof/nav) — quick-yes vs trust hinges on the near-total absence of persuasion; capture is complete so classification is clear but sparse." },
+  "gap_findings": ["CTA hands off to an off-site Tally application form (redirect to external form tool); expressible as delegated 'form' mechanism, no new capability needed"]
+}

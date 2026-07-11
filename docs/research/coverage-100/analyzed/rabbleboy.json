@@ -1,0 +1,67 @@
+{
+  "slug": "rabbleboy",
+  "url": "https://www.rabbleboy.com/",
+  "business": {
+    "type_label": "author / illustrator personal hub (children's books, graphic novels)",
+    "icp_category": "creator / author-illustrator",
+    "geography_hint": "Las Vegas, USA"
+  },
+  "in_icp": true,
+  "engine": {
+    "pick": "work",
+    "ladder_reasoning": "A creator site where the books, illustrations, videos and free comics ARE the proof — visitors browse the body of work to decide to follow/buy. Not selling defined expertise-for-hire (trust) and not a place; the portfolio is the argument.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Join Ken's mailing list (and secondarily buy his books off-site) to become a follower of the author",
+    "mechanism": "subscribe-follow",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 12,
+    "pages": ["home", "books", "about-me", "resources", "contact", "author-visits", "faq", "blog"],
+    "archetype_note": "Sprawling WordPress author hub: home is a long scroll (intro, crowdfund status, book grid, bio, blog teaser, multiple video embeds, free-comic promos, newsletter form). Buying happens off-site on Gumroad; on-domain conversion is the mailing-list form. One nav item (/about-ken-lamug/) is broken (HTTP 500); real About lives at /about-me/."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (Books, About Me, Resources, Contact)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "Howdy! / Welcome to the website of Ken Lamug", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Meet Ken / About Ken Lamug", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Mentions in... (Kirkus, NPR, Publishers Weekly, SCBWI)", "component": "logo-strip" },
+      { "canonical": "miscellaneous", "observed_as": "Learn how to draw Petro / Book design & publishing / Ghastly Ghosts trailer / Petro Book 2 demo (embedded videos)", "component": "video" },
+      { "canonical": "miscellaneous", "observed_as": "Did you know... (quirky-facts image gallery)", "component": "gallery" },
+      { "canonical": "leadForm", "observed_as": "Get updates, join my mailing list", "component": "form" },
+      { "canonical": "footer", "observed_as": "social links (Twitter, Facebook, YouTube, Instagram, Linktree)", "component": "followStrip" }
+    ],
+    "unmapped": [
+      { "observed": "Get My Books! + My Books grid (19 titles, each links to a detail page, no prices, purchase off-site on Gumroad)", "why_no_fit": "No canonical section expresses an author's own-works bibliography/catalog with per-work subpages and off-site buying", "closest": "features" },
+      { "observed": "Crowdfund Status (status of a live crowdfunding campaign)", "why_no_fit": "No canonical section for a campaign-progress / crowdfund status callout", "closest": "miscellaneous" },
+      { "observed": "The Blog (recent-post teaser grid)", "why_no_fit": "blog-teaser strip has no dedicated canonical id", "closest": "miscellaneous" },
+      { "observed": "Free: Talbot Toluca / Spooky / 2-in-1 Comic (free downloadable comic lead-magnets via Gumroad)", "why_no_fit": "Free giveaway content used to grow audience is neither a product nor a standard section", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "video-hero", "blog", "lead-form"],
+    "proposed_new": [
+      { "name": "works-catalog", "evidence": "'My Books' page = grid of 19 book titles, each linking to a per-work detail page, no prices, buying redirects off-site to Gumroad/retailers — the creator's own bibliography as the site's spine." }
+    ]
+  },
+  "proof_types": ["portfolio", "logo-wall"],
+  "design_style": {
+    "pick": "editorial/craft",
+    "none_fits_because": ""
+  },
+  "components_needed": ["book-catalog grid (cover cards linking to detail pages)", "video-embed grid", "newsletter signup form", "image gallery", "press-mention logo strip", "blog teaser card list", "crowdfund-status callout"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality is partial (only /about-ken-lamug/ headless-rendered, and that page is a 500 error); section lists for other pages captured but not fully rendered. Structure and intent are clear enough, but capped at medium per capture quality."
+  },
+  "gap_findings": [
+    "Diffuse creator hub with NO single dominant conversion: mailing-list form (on-site), buy-books (off-site Gumroad redirect), send-coffee donate (buymeacoffee), follow (Linktree/social), author-visit booking, and free-comic downloads all compete. The 'one conversion action' assumption strains here.",
+    "works-catalog (own bibliography, per-work subpages, off-site buying) not expressible in the closed capability vocab.",
+    "Free downloadable lead-magnet comics (freebie-for-signup pattern) have no capability or section representation — distinct from press-kit-downloads (B2B) and from catalog.",
+    "'Send coffee' (buymeacoffee) is a donate mechanism that co-exists with subscribe as a secondary tip jar — engine model assumes a single goal mechanism."
+  ]
+}

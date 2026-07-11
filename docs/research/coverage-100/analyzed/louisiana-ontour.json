@@ -1,0 +1,62 @@
+{
+  "slug": "louisiana-ontour",
+  "url": "http://louisiana-ontour.de/",
+  "business": { "type_label": "live country/line-dance band", "icp_category": "performer/entertainment", "geography_hint": "Rhein-Main-Gebiet, Germany" },
+  "in_icp": false,
+  "engine": {
+    "pick": "work",
+    "ladder_reasoning": "A performing band is judged by its work — the promo video, band photos (~54 images), line-up, and repertoire ARE the proof; there's no defined expertise being sold nor a physical place to visit.",
+    "runner_up": "place"
+  },
+  "goal": {
+    "one_action": "get fans/organizers to engage — see tour dates & attend, subscribe to the newsletter, submit song-request votes, or contact for booking",
+    "mechanism": "subscribe-follow",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "tour(anchor)", "taenze-songs", "programm(anchor)", "bilder", "band(anchor)", "kontakt", "veranstalter"],
+    "archetype_note": "Band/entertainer site with multiple parallel jobs (fan engagement + tour schedule + organizer resources); not a single-conversion funnel — hence in_icp:false."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "1st-Class Country- und Linedanceband aus dem Rhein-Main-Gebiet!", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Newsletter (Bestellen/Abbestellen)", "component": "form" },
+      { "canonical": "leadForm", "observed_as": "Schreibe hier deinen Wunschsong (Song + Künstler/Band)", "component": "form" },
+      { "canonical": "hero", "observed_as": "embedded band promo video (Louisiana.mp4)", "component": "video" },
+      { "canonical": "miscellaneous", "observed_as": "LINE UP (5 band member tiles)", "component": "team" },
+      { "canonical": "faq", "observed_as": "Programm (no requests; setlist published ~7 days before event)", "component": "text" },
+      { "canonical": "closeSection", "observed_as": "Kontakt intro + contact form", "component": "form" },
+      { "canonical": "footer", "observed_as": "direct contact block (Elke und Dirk, phone, email)", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Votings table linking two external Tally.so song-request/poll forms + past voting-result pages", "why_no_fit": "Fan-voting/poll engagement is neither a lead form nor social proof — no canonical section for recurring fan polls", "closest": "miscellaneous" },
+      { "observed": "Tour 2026 date table (~16 rows, city/venue/ticket-contact/time, past rows struck through)", "why_no_fit": "A dated schedule of shows is not results/testimonials/pricing — no canonical events/schedule section", "closest": "miscellaneous" },
+      { "observed": "Veranstalter page: Pressebild + Logo + Technical Rider + stage-plan Download buttons", "why_no_fit": "Downloadable EPK/press-kit assets for event organizers have no canonical section", "closest": "miscellaneous" },
+      { "observed": "Tänze/Songs large repertoire table (song title / original artist, dozens of rows)", "why_no_fit": "A setlist/repertoire catalogue is not a feature list or pricing — no canonical section", "closest": "miscellaneous" },
+      { "observed": "Bilder gallery (~54 band photos)", "why_no_fit": "sectionList has no gallery id; the gallery is the visual proof of a performer", "closest": "socialProof" },
+      { "observed": "inline embedded PDF (event flyer) via iframe", "why_no_fit": "Ad-hoc embedded document, no canonical fit", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "video-hero", "lead-form"],
+    "proposed_new": [
+      { "name": "event-listings", "evidence": "'Tour 2026' dated table of shows with per-date city/venue and ticket-order contact — matches canonical event-listings (dated schedule of shows)." },
+      { "name": "press-kit-downloads", "evidence": "Dedicated 'Veranstalter' page offering downloadable press photo, logo, technical rider and stage-plan PDFs for event organizers — an EPK asset pack, distinct from gallery/catalog." },
+      { "name": "fan-voting", "evidence": "'Votings' table routing to external Tally.so song-request/poll forms plus published 'Ergebnisse der Votings' result pages — recurring audience-voting engagement, not list capture or a lead form." }
+    ]
+  },
+  "proof_types": ["portfolio"],
+  "design_style": { "pick": "bold/performance", "none_fits_because": "" },
+  "components_needed": ["team grid", "event/tour date table", "repertoire/setlist table", "photo gallery", "video embed", "download-asset list", "newsletter subscribe form"],
+  "languages": ["de"],
+  "confidence": { "level": "high", "why": "fetch_quality=full, static HTML fully captured across all 6 pages incl. forms, CTAs, embeds and oddities." },
+  "gap_findings": [
+    "Not one conversion action — band site juggles newsletter subscribe, fan voting, tour schedule, contact, and organizer press kit in parallel; the 5-engine/single-goal model cannot represent this multi-job entertainer archetype.",
+    "event-listings (tour dates) is a canonical CAPABILITY but has no canonical SECTION id — dated show schedules keep landing in miscellaneous.",
+    "No canonical section for a performer's repertoire/setlist catalogue.",
+    "sectionList lacks a 'gallery' id despite gallery/portfolio being a core capability — visual proof sections fall through.",
+    "Newsletter subscribe + fan-voting via external Tally are distinct from lead-form/external-list-signup (voting/results, not email list capture)."
+  ]
+}

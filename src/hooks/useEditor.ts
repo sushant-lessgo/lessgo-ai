@@ -452,7 +452,7 @@ export function useEditor() {
     // Element positioning verified
     
     // Instead of disabling pointer events, we need to make the wrapper have text cursor too
-    const selectableWrapper = element.closest('.selectable-element');
+    const selectableWrapper = element.closest('[data-element-key]');
     if (selectableWrapper) {
       // Don't disable pointer events - we need them for text selection
       // selectableWrapper.style.pointerEvents = 'none';
@@ -470,7 +470,7 @@ export function useEditor() {
       styleElement.textContent = `
         .force-text-cursor,
         .force-text-cursor *,
-        .force-text-cursor .selectable-element,
+        .force-text-cursor [data-element-key],
         .force-text-cursor .inline-text-editor {
           cursor: text !important;
           user-select: text !important;
@@ -710,7 +710,7 @@ export function useEditor() {
     }
     
     // Restore wrapper styles
-    const selectableWrapper = element.closest('.selectable-element');
+    const selectableWrapper = element.closest('[data-element-key]');
     if (selectableWrapper) {
       selectableWrapper.classList.remove('force-text-cursor');
       

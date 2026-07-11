@@ -389,6 +389,13 @@ export type ElementValue = string | string[] | null | ElementValueReview | Recor
 // Section copy output
 export interface SectionCopy {
   elements: Record<string, ElementValue>;
+  // Provenance annotation set AFTER zod validation by injectRealTestimonials
+  // (proof-truth phase 4) when ≥1 real/imported quote is injected into this
+  // section. NOT part of any AI-response schema. Carried into the section's
+  // persisted aiMetadata by multiPageAssembly; consumed by useReviewState to
+  // suppress needs-review markers for real-proof-backed sections. Read by NO
+  // block/published-path code → never reaches DOM/HTML.
+  realProof?: true;
 }
 
 // Copy generation request

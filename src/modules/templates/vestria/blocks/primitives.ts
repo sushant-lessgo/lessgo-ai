@@ -37,6 +37,8 @@ export interface VestriaImgProps {
   className?: string;     // wrapper
   imgClassName?: string;  // the <img>
   placeholder?: React.ReactNode;
+  /** Above-fold/LCP image: render loading="eager". Default (omitted) = lazy. */
+  eager?: boolean;
 }
 
 /** Outbound/anchor link. `hrefKey` is where the href STRING is stored (scalar key
@@ -64,6 +66,17 @@ export interface VestriaListProps {
   addLabel?: string;
   className?: string;     // wrapper (the grid/row)
   itemClassName?: string;
+  // editor phase-3 (phase 6) — imageCollection declarations. The slot DECLARES the
+  // capability; the primitive IMPLEMENTS it (templates declare, never implement).
+  /** Enable drag-reorder of items (delegates the edit chrome to
+   *  EditableImageCollection). Order is the array order in both renderers. */
+  reorderable?: boolean;
+  /** The item field bulk-upload writes the returned URL into (e.g. 'image').
+   *  Declaring it turns the edit List into an imageCollection editor. */
+  imageField?: string;
+  /** Optional per-item caption field (item-stored, whole-array write). When set,
+   *  the edit chrome shows a caption input per item. */
+  captionField?: string;
 }
 
 export interface VestriaPrimitives {

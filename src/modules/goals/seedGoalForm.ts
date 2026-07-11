@@ -9,13 +9,14 @@
 // path persists so the same renderer/resolver code consumes it:
 //   • form in `finalContent.forms[formId]`   (mirrors formActions.createForm)
 //   • elements.cta_embed = `form:${formId}`  (ButtonConfigurationModal marker)
-//   • elementMetadata.cta_text = { buttonConfig, cta }
+//   • elementMetadata.cta_text = { buttonConfig }   (form wiring only)
 //       buttonConfig = { type:'form', ctaType:'primary', formId, behavior:'scrollTo' }
-//       cta          = { role:'primary', dest:{ kind:'section', anchor:'form-section' }, formId }
 //   • section.cta = ctaConfig (form) with label/variant/size
-// The hero primary is intentionally LEFT as GOAL_REF — for M1 it resolves to the
-// shared `#form-section` anchor + the first project form (goalToDestination M1),
-// which is exactly the form seeded here.
+// goal-ref-cta phase 1: seedGoalForm NO LONGER writes the resolved `cta`
+// snapshot. The mechanism-agnostic `stampGoalRefCtas` (finalize.ts, right after
+// this) writes `cta = { role:'primary', dest:'GOAL_REF', formId }` on THIS
+// section's cta_text AND on the hero/header primaries (the F5/F6 fix). For M1 it
+// resolves at render to the shared `#form-section` anchor + the seeded form.
 //
 // Idempotent: no-op when the goal is not M1, or when `finalContent.forms`
 // already holds a form (so a resume/regeneration never double-seeds).
@@ -140,16 +141,17 @@ export function seedGoalForm(
     formId,
     behavior: 'scrollTo' as const,
   };
-  const cta = {
-    role: 'primary' as const,
-    dest: { kind: 'section' as const, anchor: 'form-section' as const },
-    formId,
-  };
 
+  // goal-ref-cta phase 1: seedGoalForm no longer writes a RESOLVED snapshot
+  // `cta` here (the F6 bug — a resolved dest can never re-point). It keeps the
+  // form wiring (buttonConfig / cta_embed / section.cta); the mechanism-agnostic
+  // `stampGoalRefCtas` (run right after this in finalize.ts) writes the single
+  // source of truth `cta = { role:'primary', dest:'GOAL_REF', formId }` for this
+  // AND every other primary CTA (hero/header) — the F5 fix.
   if (!section.elementMetadata || typeof section.elementMetadata !== 'object') {
     section.elementMetadata = {};
   }
-  section.elementMetadata.cta_text = { buttonConfig, cta };
+  section.elementMetadata.cta_text = { buttonConfig };
 
   // Section-level ctaConfig (HeroSection/CTA compatibility, mirrors the modal).
   section.cta = {

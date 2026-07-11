@@ -212,6 +212,8 @@ model FormSubmission {
   ipAddress       String? // Optional - visitor's IP
   userAgent       String? // Optional - visitor's browser
   createdAt       DateTime @default(now())
+  notifiedAt      DateTime? // When the lead-notification email was sent successfully (null = not sent / skipped)
+  notifyError     String? // Short reason the lead-notification email failed (null = no failure recorded)
 
   @@index([userId])
   @@index([formId])

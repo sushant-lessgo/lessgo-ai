@@ -1,0 +1,52 @@
+{
+  "slug": "shemmassianconsulting",
+  "url": "https://www.shemmassianconsulting.com/",
+  "business": { "type_label": "academic admissions consulting firm (medical school + college)", "icp_category": "consultant/advisory", "geography_hint": "USA (America's top colleges, med schools)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Visitor is deciding whether to trust a person/firm with a high-stakes expert service (getting into med school/college): the page leans on founder credentials, advisor bios, 20+ years, 90%+ success rate, and 14 testimonials. Sells defined expertise → trust, first rung of the ladder.",
+    "runner_up": "thing"
+  },
+  "goal": {
+    "one_action": "book a complimentary consultation (or submit contact form) to enter the 1:1 consulting funnel",
+    "mechanism": "form",
+    "delegated_to": "calendly"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "about", "medical-school-admissions", "college-admissions", "contact", "blog/free-resources"],
+    "archetype_note": "Multi-page consultancy: home routes to three pathways (1:1 consulting, free resource libraries, downloadable guides); two deep service landing pages (med / college) each carry full trust argument + pricing table + FAQ; contact page offers form + Calendly."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "socialProof", "observed_as": "Featured in / Spoken at", "component": "logo-strip" },
+      { "canonical": "founderNote", "observed_as": "Our Founder", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Next Steps / Option 1 / Option 2 / Option 3", "component": "grid-cards" },
+      { "canonical": "hero", "observed_as": "Looking for a trusted advisor to help you get into medical school?", "component": "text" },
+      { "canonical": "features", "observed_as": "How we can help you get into medical school", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "What differentiates us from other med school admissions consultants", "component": "grid-cards" },
+      { "canonical": "howItWorks", "observed_as": "How we support our students", "component": "text" },
+      { "canonical": "results", "observed_as": "Some of the med schools to which our students have been accepted / acceptance messages", "component": "logo-strip" },
+      { "canonical": "testimonials", "observed_as": "Medical school admissions testimonials", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Our comprehensive service plans", "component": "pricing-table" },
+      { "canonical": "cta", "observed_as": "Ready to learn which comprehensive plan is right for you? / What to do next", "component": "form" },
+      { "canonical": "faq", "observed_as": "Frequently asked questions", "component": "accordion" },
+      { "canonical": "leadForm", "observed_as": "Option 3 / Send me the guide", "component": "form" }
+    ],
+    "unmapped": [
+      { "observed": "Meet some of our medical school / college admissions advisors", "why_no_fit": "A team/advisor profile grid; closest canonical is a team block but sectionList has no dedicated team id", "closest": "founderNote" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "lead-form", "packages", "blog"],
+    "proposed_new": []
+  },
+  "proof_types": ["testimonials", "logo-wall", "stats"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["pricing-table", "team grid", "faq accordion", "logo wall", "lead-form (guide download)", "calendly embed"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality is partial — contact/booking form fields and Calendly/Google-Form embeds were not rendered/readable, so exact conversion-surface fields are inferred, not observed. Section/engine classification is otherwise well-supported by the captured page structure." },
+  "gap_findings": ["Team/advisor profile grid ('Meet our advisors') has no canonical section id; mapped to founderNote as closest but it is really a multi-person credential block distinct from a single founder note.", "Pricing shown ($7,999-$24,999) but no checkout — high-ticket consultancy where pricing is displayed for qualification, then conversion is a booked consultation; 'packages' capability covers the display but the display-price-without-cart pattern for services is a recurring shape."]
+}

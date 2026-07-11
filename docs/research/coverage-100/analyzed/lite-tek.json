@@ -1,0 +1,55 @@
+{
+  "slug": "lite-tek",
+  "url": "https://lite-tek.com.mx/",
+  "business": { "type_label": "lighting/AV equipment maker + distributor (with DELUX control software)", "icp_category": "manufacturer/distributor", "geography_hint": "Mexico (es-MX, distribuidores en todo México)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "Visitor is evaluating THINGS — a product line of lighting/AV gear and the DELUX control software — via product grid, project proof, catalogs and downloads. Not trusting a named expert, browsing a portfolio-as-proof, or checking a place.",
+    "runner_up": "work"
+  },
+  "goal": {
+    "one_action": "get an equipment buyer/reseller to send the distributor contact form (or download the DELUX software/catalogs)",
+    "mechanism": "form",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 3,
+    "pages": ["home", "downloads", "about"],
+    "archetype_note": "B2B product/distributor site: home pitches software+products, a dedicated downloads/resources page (installers, control libraries, PDF catalogs), and an about page; two identical distributor-contact forms."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "DELUX", "component": "text" },
+      { "canonical": "features", "observed_as": "NUESTROS PRODUCTOS", "component": "grid-cards" },
+      { "canonical": "results", "observed_as": "PROYECTOS", "component": "gallery" },
+      { "canonical": "features", "observed_as": "ENERGÍA QUE PROTEGE TU ESPECTÁCULO", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "CATÁLOGOS", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "DISTRIBUIDORES EN TODO MÉXICO", "component": "form" },
+      { "canonical": "hero", "observed_as": "¡Descarga, instala y lleva tu producción al siguiente nivel!", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "LIBRERÍAS / PANTALLAS (downloads)", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "CONTÁCTANOS", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "LITE-TEK (company intro, NOSOTROS)", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Downloads center (Windows/Mac installer + control-library ZIPs)", "why_no_fit": "No canonical section represents a software/resource download bay; storeBadges is for app-store links, miscellaneous is a weak catch-all", "closest": "storeBadges" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "gallery/portfolio", "map-hours", "lead-form"],
+    "proposed_new": [
+      { "name": "software-downloads", "evidence": "Dedicated DESCARGAS page + home CTAs serving software installers (setup_win_litetek.rar, mac_litetek.zip), control-library ZIPs, and screen resources — direct-download assets, not a purchase, catalog, or press kit" }
+    ]
+  },
+  "proof_types": ["case-studies"],
+  "design_style": { "pick": "bold/performance", "none_fits_because": "" },
+  "components_needed": ["product-category grid", "catalog/PDF download list", "software-download buttons", "project video gallery (YouTube)", "distributor contact form", "static map image"],
+  "languages": ["es-MX"],
+  "confidence": { "level": "high", "why": "fetch_quality full; all 3 pages, CTAs, forms and embeds captured; clear B2B distributor+software intent" },
+  "gap_findings": [
+    "Software/resource download center (installers, control libraries) has no canonical section or closed-vocab capability — proposed as software-downloads",
+    "Distributor-recruitment form is a channel/reseller lead-gen variant, not a standard consumer inquiry — lead-form captures mechanism but not the B2B channel intent",
+    "PROYECTOS acts as case-study proof but proof.portfolio_items/case_studies counters read 0 (proof lives as external YouTube playlists)"
+  ]
+}

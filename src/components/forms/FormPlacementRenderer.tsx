@@ -36,11 +36,15 @@ export function FormPlacementRenderer({
   pageSlug,
   colorTokens,
 }: FormPlacementRendererProps) {
-  const { content, getAllForms, sections } = useEditStore();
+  const section = useEditStore((s) => s.content[sectionId]);
+  const sections = useEditStore((s) => s.sections);
+  const getAllForms = useEditStore((s) => s.getAllForms);
+  // Subscribe to the forms slice so form edits re-render (getAllForms derives from it).
+  const forms = useEditStore((s) => s.forms);
+  void forms;
 
   // Get all forms and current section
   const allForms = getAllForms();
-  const section = content[sectionId];
 
   if (!section?.elements) {
     return null;

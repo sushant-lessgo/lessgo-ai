@@ -8,6 +8,16 @@ import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAICredits } from '@/lib/middleware/planCheck';
 import { consumeCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem';
 import { assertProjectOwner } from '@/lib/security';
+import { listTestimonialsByOwner } from '@/lib/testimonials/repo';
+import { injectRealTestimonials as injectProductTestimonials } from '@/modules/audience/product/parseCopy';
+import { injectRealTestimonials as injectServiceTestimonials } from '@/modules/audience/service/parseCopy';
+
+// proof-truth phase 3: is this a testimonials section? (sectionType is the bare
+// type; sectionId is `${type}-${uuid}` — check both, normalized.)
+function isTestimonialsSection(sectionType?: string, sectionId?: string): boolean {
+  const norm = (s?: string) => String(s ?? '').toLowerCase();
+  return norm(sectionType).startsWith('testimonials') || norm(sectionId).startsWith('testimonials');
+}
 
 async function handler(req: NextRequest) {
   const startTime = Date.now();
@@ -68,6 +78,8 @@ async function handler(req: NextRequest) {
         const project = await prisma.project.findUnique({
           where: { tokenId },
           select: {
+            id: true,
+            audienceType: true,
             inputText: true,
             content: true,
             title: true
@@ -228,6 +240,46 @@ ${prompt}`;
       }
     }
 
+    // proof-truth phase 3 (acceptance criterion 4): real proof always wins over
+    // fresh AI inventions. When the regenerated section is testimonials-type, read
+    // the project's table-backed approved quotes (imported + collect/manual) and
+    // re-inject via injectRealTestimonials, overwriting the just-drafted quotes.
+    // Ownership is already asserted above (assertProjectOwner, non-mock path), so
+    // this cross-tenant read is owner-guarded. Table read is dark-flag-agnostic
+    // (repo has no flag gate); pre-import projects have an empty table → no-op,
+    // drafted quotes preserved (acceptable pre-existing-data gap, see plan).
+    // NOTE: table read returns createdAt DESC — quotes MAY reorder vs first-gen's
+    // entry-array order; same quotes/flags, no truth regression.
+    let reinjectedRealProof = false;
+    if (projectData && isTestimonialsSection(sectionType, sectionId)) {
+      try {
+        const rows = await listTestimonialsByOwner(userId, {
+          projectId: projectData.id,
+          status: 'approved',
+        });
+        if (rows.length > 0) {
+          const real = rows.map((t) => ({
+            quote: t.quote,
+            author_name: t.authorName ?? '',
+            author_role: t.authorRole ?? '',
+          }));
+          const wrapper = { testimonials: { elements: sectionContent } } as any;
+          if (projectData.audienceType === 'product') {
+            injectProductTestimonials(wrapper, real);
+          } else {
+            injectServiceTestimonials(wrapper, real);
+          }
+          // proof-truth phase 4: injectRealTestimonials set wrapper.testimonials
+          // .realProof = true. Mirror multiPageAssembly — surface it as section
+          // provenance so the persisted section carries aiMetadata.realProof and
+          // useReviewState suppresses needs-review markers for the real quotes.
+          reinjectedRealProof = wrapper.testimonials?.realProof === true;
+        }
+      } catch (injectErr) {
+        logger.warn('Failed to re-inject real testimonials on section regen:', injectErr);
+      }
+    }
+
     // Consume credits for successful section regeneration
     const consumption = await consumeCredits(userId, UsageEventType.SECTION_REGEN, CREDIT_COSTS.SECTION_REGENERATION, {
       endpoint: '/api/regenerate-section',
@@ -241,6 +293,15 @@ ${prompt}`;
       sectionId,
       originalContent: currentContent,
       regenerationType: 'section',
+      // proof-truth phase 4: provenance for a re-injected real-proof section.
+      // Real-proof sections keep their first-generation aiMetadata.realProof
+      // across regen already (the edit store preserves existing aiMetadata via
+      // spread), so markers stay suppressed for the common path. This field
+      // carries the flag when the table re-injected real quotes; full client
+      // application of a NEWLY-gained flag (drafted section that later acquired
+      // approved rows) is a follow-up (see audit — regen client does not yet
+      // read this field).
+      ...(reinjectedRealProof ? { aiMetadata: { realProof: true } } : {}),
       creditsUsed: CREDIT_COSTS.SECTION_REGENERATION,
       creditsRemaining: consumption.remaining
     });

@@ -1,0 +1,53 @@
+{
+  "slug": "storiesinsound",
+  "url": "https://storiesinsound.ca/",
+  "business": { "type_label": "film/media music composer (personal studio)", "icp_category": "work", "geography_hint": "Toronto, Ontario, Canada" },
+  "in_icp": true,
+  "engine": {
+    "pick": "work",
+    "ladder_reasoning": "A film composer whose demo reel and Netflix-title credits (Clara, Marmaduke) ARE the proof; visitor is browsing the work/sound, not evaluating a product or vetting credentials. Portfolio-is-proof beats trust.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "get the visitor to license/stream his music or email for custom-music inquiries",
+    "mechanism": "redirect",
+    "delegated_to": "linktree, spotify"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 3,
+    "pages": ["home", "about", "soundtrack-demo-reel"],
+    "archetype_note": "Bare WordPress.com site; homepage is an empty shell, substance lives on about + demo-reel pages; most nav items (license/stream/production) are external Linktree/Spotify redirects rather than on-site pages."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "HOME", "component": "bare heading + scroll-down prompt" },
+      { "canonical": "founderNote", "observed_as": "ABOUT", "component": "composer bio + contact email" },
+      { "canonical": "results", "observed_as": "DEMO REEL", "component": "password-protected video reel + Netflix credits" },
+      { "canonical": "followStrip", "observed_as": "SHARE THIS:", "component": "social share links (X, Facebook)" },
+      { "canonical": "miscellaneous", "observed_as": "Leave a comment", "component": "WordPress.com native comment form" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": {
+    "needed": ["multipage", "video-hero"],
+    "proposed_new": [
+      { "name": "media-hub", "evidence": "Primary nav routes to owned external music properties — 'license music'/'stream music' (Linktree) and 'music production for artists' (Spotify playlist), plus YouTube channel — a standing discography/content library living off-site, not an on-page section." }
+    ]
+  },
+  "proof_types": ["case-studies"],
+  "design_style": {
+    "pick": null,
+    "none_fits_because": "Default WordPress.com chrome, no deliberate visual design (empty fonts/colors, text-heavy, WP.com sign-up/log-in shell); no craft or authority styling to classify."
+  },
+  "components_needed": ["video embed (password-gated reel)", "bio block", "social share strip", "external link buttons"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality is 'rendered' not 'full'; the core demo-reel video is password-protected and did not render, so the primary proof asset could not be inspected. Structure and intent are otherwise clear."
+  },
+  "gap_findings": [
+    "Site's spine is a set of OUTBOUND redirects to owned external music channels (Linktree licensing/streaming, Spotify, YouTube) — closest is the proposed media-hub, but that concept was coined for owned podcast/episode libraries; here it's a link-router to external distribution/licensing, which strains the definition.",
+    "The demo-reel 'proof' is password-gated video for named Netflix titles — a credentialing-via-credits pattern (worked-on famous titles) that neither results nor testimonials cleanly captures for a creative-services creator."
+  ]
+}

@@ -31,7 +31,7 @@ const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 8)}`;
 export default function TechPremiumProductDetail({ sectionId }: Props) {
   const { mode, blockContent, handleContentUpdate, handleCollectionUpdate } =
     useTechPremiumBlock<Record_>({ sectionId });
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, target?: { sectionId: string; elementKey: string }) => Promise<void>)
     | undefined;
   const [uploadingId, setUploadingId] = React.useState<string | null>(null);
@@ -84,7 +84,7 @@ export default function TechPremiumProductDetail({ sectionId }: Props) {
               <div className="tp-pd-stage">
                 {images.map((im, i) => (
                   <div key={im.id} className={`tp-pd-slide${i === idx ? ' is-active' : ''}`}>
-                    {im.src ? <img src={im.src} alt={im.tag} /> : <span className="tp-pd-ph">{im.tag || `Image ${i + 1}`}</span>}
+                    {im.src ? <img src={im.src} alt={im.tag} loading="lazy" decoding="async" /> : <span className="tp-pd-ph">{im.tag || `Image ${i + 1}`}</span>}
                   </div>
                 ))}
                 {images.length > 1 && (
@@ -100,7 +100,7 @@ export default function TechPremiumProductDetail({ sectionId }: Props) {
                 <div className="tp-pd-thumbs">
                   {images.map((im, i) => (
                     <button key={im.id} type="button" className={`tp-pd-thumb${i === idx ? ' is-active' : ''}`} onClick={() => setActive(i)}>
-                      {im.src ? <img src={im.src} alt="" /> : <span className="tp-pd-ph sm">{i + 1}</span>}
+                      {im.src ? <img src={im.src} alt="" loading="lazy" decoding="async" /> : <span className="tp-pd-ph sm">{i + 1}</span>}
                     </button>
                   ))}
                 </div>
@@ -200,7 +200,7 @@ export default function TechPremiumProductDetail({ sectionId }: Props) {
                   const wprops = mode === 'edit' ? {} : { href: r.href };
                   return (
                     <Wrapper key={r.id} className="tp-pcard" {...wprops}>
-                      <div className="tp-pshot">{r.image ? <img src={r.image} alt={r.name} /> : <span className="tp-pshot__ph">{r.model || 'Product'}</span>}</div>
+                      <div className="tp-pshot">{r.image ? <img src={r.image} alt={r.name} loading="lazy" decoding="async" /> : <span className="tp-pshot__ph">{r.model || 'Product'}</span>}</div>
                       <div className="tp-pbody">
                         {r.model && <span className="tp-pmodel">{r.model}</span>}
                         <h4 className="tp-ph4">{r.name}</h4>

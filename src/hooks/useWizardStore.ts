@@ -114,6 +114,14 @@ export interface WizardProofState {
   /** Superset addition — trust `packages` T2 boolean. */
   hasPackages: boolean;
   testimonialType: 'text' | 'photos' | 'video' | 'transformation' | null;
+  /**
+   * proof-truth phase 5 — approximate testimonial count the user picks in the
+   * wizard (bucket chips → representative hint number, e.g. 1–2→2, 3–5→4, 6+→8).
+   * OPTIONAL: `null` ⇒ no hint ⇒ current behavior. Feeds the existing
+   * `cardCountHint` eligibility seam ONLY on the manual (non-URL) path — a
+   * scraped `importedTestimonials.length` always wins (see thing.ts/trust.ts).
+   */
+  testimonialCount: number | null;
 }
 
 // Compile-time guard: every ServiceAssetAvailability key MUST exist on
@@ -121,7 +129,6 @@ export interface WizardProofState {
 type _ProofIsSuperset = keyof ServiceAssetAvailability extends keyof WizardProofState
   ? true
   : never;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _proofSupersetCheck: _ProofIsSuperset = true;
 
 const initialProof: WizardProofState = {
@@ -133,6 +140,7 @@ const initialProof: WizardProofState = {
   hasFounderPhoto: false,
   hasPackages: false,
   testimonialType: null,
+  testimonialCount: null,
 };
 
 // ---------------------------------------------------------------------------
@@ -170,6 +178,12 @@ interface WizardState {
   // Goal (scale-05 machinery).
   goalIntent: GoalIntent | null;
   goalParam: GoalParamInput;
+  /**
+   * The user explicitly chose "Skip for now" past a REQUIRED goal param (F14) —
+   * unblocks the goal-step Continue without a destination. Reset whenever the
+   * selected intent changes (a new intent re-arms the gate).
+   */
+  goalParamSkipped: boolean;
 
   // Proof (superset of ServiceAssetAvailability).
   proof: WizardProofState;
@@ -269,6 +283,7 @@ interface WizardActions {
   // Goal.
   setGoalIntent: (intent: GoalIntent) => void;
   setGoalParam: (param: GoalParamInput) => void;
+  setGoalParamSkipped: (skipped: boolean) => void;
 
   // Proof.
   setProof: (patch: Partial<WizardProofState>) => void;
@@ -501,7 +516,14 @@ export function buildThingInput(s: WizardState): ThingGenerationInput {
     offer: fieldStr(fields, 'offer'),
     goalIntent: s.goalIntent,
     goalParam: s.goalParam,
-    proof: { hasTestimonials: s.proof.hasTestimonials },
+    proof: {
+      hasTestimonials: s.proof.hasTestimonials,
+      // proof-truth phase 5 — carry the user-answered count when set (manual
+      // path). Null ⇒ omitted ⇒ byte-identical to prior behavior.
+      ...(s.proof.testimonialCount != null
+        ? { testimonialCount: s.proof.testimonialCount }
+        : {}),
+    },
     strategy,
     sitemap,
     paletteId: s.stylePaletteId ?? undefined,
@@ -551,6 +573,9 @@ export function buildTrustInput(s: WizardState): TrustGenerationInput {
       hasTeamPhotos: s.proof.hasTeamPhotos,
       hasFounderPhoto: s.proof.hasFounderPhoto,
       testimonialType: s.proof.testimonialType,
+      // proof-truth phase 5 — user-answered count (manual path). Scraped
+      // `importedTestimonials.length` still wins in trust.ts's hint precedence.
+      testimonialCount: s.proof.testimonialCount,
     },
     importedTestimonials: s.importedTestimonials,
     paletteId: s.paletteId ?? undefined,
@@ -597,6 +622,7 @@ const initialState: WizardState = {
   fields: {},
   goalIntent: null,
   goalParam: {},
+  goalParamSkipped: false,
   proof: { ...initialProof },
   sitemap: null,
   strategy: null,
@@ -780,11 +806,18 @@ export const useWizardStore = create<WizardStore>()(
 
       setGoalIntent: (intent) =>
         set((state) => {
+          // A new intent re-arms the param gate (F14) — a prior "Skip for now"
+          // must not carry over to a different goal.
+          if (intent !== state.goalIntent) state.goalParamSkipped = false;
           state.goalIntent = intent;
         }),
       setGoalParam: (param) =>
         set((state) => {
           state.goalParam = param;
+        }),
+      setGoalParamSkipped: (skipped) =>
+        set((state) => {
+          state.goalParamSkipped = skipped;
         }),
 
       setProof: (patch) =>
@@ -1042,6 +1075,7 @@ export const useWizardStore = create<WizardStore>()(
             ...initialState,
             proof: { ...initialProof },
             goalParam: {},
+            goalParamSkipped: false,
             fields: {},
             slots: [],
             structureDisabled: [],

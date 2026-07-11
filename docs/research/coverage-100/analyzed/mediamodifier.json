@@ -1,0 +1,60 @@
+{
+  "slug": "mediamodifier",
+  "url": "https://mediamodifier.com/",
+  "business": { "type_label": "online mockup & visual generator SaaS", "icp_category": "design/creative SaaS tool", "geography_hint": "global (Estonia-based, EAS grant); English-only" },
+  "in_icp": true,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "Visitor is evaluating a THING — a web app that generates mockups — via feature grids (device/social/print/product mockups), pricing, API and plugin pitches, and proof. Not selling a person's expertise (trust) and the mockup grids showcase product capability, not a creator's portfolio.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "create a free account / launch the mockup editor (top-of-funnel self-serve signup)",
+    "mechanism": "form",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 5,
+    "pages": ["home", "pricing", "contact", "mockups (dropdown)", "designs (dropdown)", "blog"],
+    "archetype_note": "Classic self-serve SaaS marketing shell (home + pricing + contact) fronting an in-app editor; subscription checkout + login portal live behind the signup CTA."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Create inspirational visuals and product mockups without a hassle", "component": "text" },
+      { "canonical": "cta", "observed_as": "Visualize your design / Create a design", "component": "action-tabs" },
+      { "canonical": "features", "observed_as": "Technology / Social media / Print / Products / Logo / Image effects", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Featured mockups", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Publish your content directly to social media", "component": "feature-form" },
+      { "canonical": "miscellaneous", "observed_as": "Mediamodifier guides", "component": "grid-cards" },
+      { "canonical": "pricing", "observed_as": "Stop wasting hours on visuals / Prices (Starter/Professional/Team)", "component": "pricing-table" },
+      { "canonical": "leadForm", "observed_as": "Design your way to the top (free eBook lead magnet)", "component": "lead-magnet" },
+      { "canonical": "integrations", "observed_as": "Bring ideas to life with Instant Mockups (Mockup API) / Turn Your Print Website into an Automated Store (POD plugin)", "component": "text" },
+      { "canonical": "faq", "observed_as": "What is Mediamodifier? / pricing FAQs", "component": "accordion" },
+      { "canonical": "socialProof", "observed_as": "Trusted by global brands", "component": "logo-strip" },
+      { "canonical": "leadForm", "observed_as": "Have questions or feedback? Write us a message", "component": "form" },
+      { "canonical": "footer", "observed_as": "Products / Use Cases / Customers / ModifAI / Company", "component": "nav-columns" }
+    ],
+    "unmapped": [
+      { "observed": "Technology / Social media / Print / Products / Image effects category grids linking into browsable template libraries", "why_no_fit": "These are entry tiles into a large browsable template catalog (15071 templates), not a static features section nor a purchasable product catalog — closest canonical is features but under-captures the browsable-library nature", "closest": "features" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "video-hero", "blog", "packages", "lead-form", "catalog"],
+    "proposed_new": [
+      { "name": "membership-checkout", "evidence": "commerce.cart_or_checkout=true with recurring subscription tiers (Starter free / Professional $8.25-15.83 mo / Team $37.50 mo billed yearly) purchased on-site — on-site recurring plan configurator + checkout, matching the registry's membership-checkout." }
+    ]
+  },
+  "proof_types": ["testimonials", "logo-wall", "certs"],
+  "design_style": { "pick": "tech/minimal", "none_fits_because": "" },
+  "components_needed": ["pricing-table", "faq-accordion", "logo-wall", "category-card-grid", "template-gallery-grid", "lead-magnet-card"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "high",
+    "why": "fetch_quality=full; three pages captured with sections, CTAs, forms, pricing and proof. Pricing discrepancy across pages noted as A/B/stale but does not affect classification."
+  },
+  "gap_findings": [
+    "Site is a self-serve SaaS with an in-app editor, recurring subscription checkout, and login portal — the marketing shell's job is a single signup action (fits thing/form), but the full product transacts recurring plans (membership-checkout) which the closed vocab cannot express.",
+    "Homepage category grids act as entry points into a very large browsable template library (15071 templates) — 'catalog' is the nearest closed-vocab fit but it implies purchasable goods, not a free tool's template gallery; a browsable-template-library notion is under-served."
+  ]
+}

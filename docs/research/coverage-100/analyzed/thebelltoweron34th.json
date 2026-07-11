@@ -1,0 +1,61 @@
+{
+  "slug": "thebelltoweron34th",
+  "url": "https://thebelltoweron34th.com/",
+  "business": { "type_label": "wedding & special-event venue", "icp_category": "place", "geography_hint": "Houston, TX, USA" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "A venue is a PLACE the visitor evaluates by browsing spaces, galleries, floorplans, capacities and location/map — the physical rooms and photos ARE the decision. Heavy trust/testimonial content supports but doesn't replace 'is this the right room for my event'.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "submit the 'Check Availability' inquiry form for an event date (secondary: schedule an on-site tour via Calendly)",
+    "mechanism": "form",
+    "delegated_to": "leadconnectorhq"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "weddings", "event-spaces", "tour", "pricing", "check-availability"],
+    "archetype_note": "Multi-page venue site: home + audience/space pages funnel to a lead-capture availability form and a Calendly tour scheduler. Footer exposes more pages (FAQ, Blog, Team, Reviews, History) not in main nav."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Wedding Venue and Special Event Venue in Houston, TX", "component": "text" },
+      { "canonical": "problem", "observed_as": "What matters most when choosing a venue / Why Some Weddings Feel Effortless And Others Don't", "component": "text" },
+      { "canonical": "objectionHandling", "observed_as": "Relax. No more decision overload!", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "The Leading Houston Event Venue: A Legacy of Reliability and Excellence / What makes us different", "component": "text" },
+      { "canonical": "features", "observed_as": "Timeless Venue, Exquisite Cuisine, Esteemed Service", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Beautiful Spaces for Every Style of Celebration / For Weddings / For Corporate Events", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Elegant and Timeless Indoor and Outdoor Spaces / individual space profiles (Waterwall, Campanile, Carillon...)", "component": "gallery" },
+      { "canonical": "comparisonTable", "observed_as": "Compare Our Event Spaces (Ballroom Comparison image)", "component": "table" },
+      { "canonical": "socialProof", "observed_as": "Winning Awards for almost 20 years / Trusted By Over 1,000 Houston Couples", "component": "logo-strip" },
+      { "canonical": "testimonials", "observed_as": "testimonials block, 12+ reviews", "component": "carousel" },
+      { "canonical": "results", "observed_as": "Experience and Excellence - Our Venue's Training and Affiliations", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Venue Pricing & Event Packages / What to Expect Investment-Wise / Timing and Seasonal Pricing", "component": "table" },
+      { "canonical": "faq", "observed_as": "Common questions (quick answers) / Does checking availability commit me to booking?", "component": "accordion" },
+      { "canonical": "leadForm", "observed_as": "Start Here (embedded availability form)", "component": "form" },
+      { "canonical": "cta", "observed_as": "Ready for clarity in one visit? / Not Sure Which Space Fits Your Event?", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Located Just Minutes from Downtown Houston (map embed)", "component": "map" },
+      { "canonical": "footer", "observed_as": "footer with extended page links + social", "component": "footer" }
+    ],
+    "unmapped": [
+      { "observed": "Combine Spaces for a Seamless Experience", "why_no_fit": "cross-sell/upsell of combining multiple rooms — not a standard section id", "closest": "useCases" },
+      { "observed": "Tour walkthrough page (Why touring is the smartest next step / What happens During your Tour)", "why_no_fit": "a whole page devoted to selling/explaining the tour appointment step before the Calendly embed — a pre-booking rationale sub-funnel with no clean canonical id", "closest": "howItWorks" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "lead-form", "packages", "blog"],
+    "proposed_new": []
+  },
+  "proof_types": ["testimonials", "certs", "stats", "portfolio"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["gallery / space-profile blocks", "space comparison table", "seasonal-pricing table", "faq accordion", "map embed", "embedded lead-form (iframe)", "calendly scheduler embed", "testimonial carousel"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality=rendered and the primary conversion form is an opaque leadconnectorhq/GoHighLevel iframe (fields not inspectable); appointments page title looks like a post-submit state, hinting at session-dependent capture. Section intent is clear, so classification is solid but form/goal detail is inferred." },
+  "gap_findings": [
+    "Venue 'place' sites carry a strong secondary trust/expertise argument (in-house catering, chef-led cuisine, event coordination) plus a bookable-space catalog — the single-engine 'place' pick doesn't capture that it's simultaneously selling a coordinated service.",
+    "A dedicated pre-booking 'why tour' rationale page (a mini-funnel step between browse and Calendly) has no clean canonical section; it collapses awkwardly into howItWorks.",
+    "Custom-quote / 'we don't publish final prices' pricing model (ranges + seasonal tiers + deposit terms) is only loosely served by 'packages', which implies fixed price display."
+  ]
+}

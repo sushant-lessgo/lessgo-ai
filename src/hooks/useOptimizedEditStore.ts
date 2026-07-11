@@ -223,25 +223,6 @@ export function usePersistenceActions() {
  * Computed/derived state with memoization
  */
 
-// Check if toolbar should be visible
-export function useToolbarVisibility() {
-  const mode = useEditMode();
-  const toolbar = useToolbarState();
-  
-  return useMemo(() => {
-    return mode !== 'preview' && toolbar.visible && toolbar.type && toolbar.targetId;
-  }, [mode, toolbar.visible, toolbar.type, toolbar.targetId]);
-}
-
-// Get available actions for current toolbar
-export function useToolbarAvailableActions() {
-  const toolbar = useToolbarState();
-  
-  return useMemo(() => {
-    return toolbar.actions || [];
-  }, [toolbar.actions]);
-}
-
 // Check if any content exists
 export function useHasContent() {
   const sections = useSections();

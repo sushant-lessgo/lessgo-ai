@@ -13,6 +13,7 @@
 // single-customer pilot. To go multi-tenant, pass an owner-scoped `to` here
 // (resolve from the page owner) instead of reading LEAD_NOTIFICATION_EMAIL.
 
+import * as Sentry from '@sentry/nextjs';
 import { logger } from '@/lib/logger';
 import type { MVPFormField } from '@/types/core/forms';
 
@@ -25,6 +26,15 @@ interface SendLeadNotificationArgs {
   replyTo?: string;
   pageId?: string;
 }
+
+// Outcome so the caller (/api/forms/submit) can flag the FormSubmission row:
+//   'skipped' — feature unconfigured (no row flag)
+//   'sent'    — Resend accepted (set notifiedAt)
+//   'failed'  — non-OK response / network error (set notifyError)
+export type LeadNotifyOutcome =
+  | { status: 'skipped' }
+  | { status: 'sent' }
+  | { status: 'failed'; error: string };
 
 function isValidEmail(email: unknown): email is string {
   return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -44,7 +54,7 @@ function labelFor(key: string, fields?: MVPFormField[]): string {
   return f?.label || key;
 }
 
-export async function sendLeadNotification(args: SendLeadNotificationArgs): Promise<void> {
+export async function sendLeadNotification(args: SendLeadNotificationArgs): Promise<LeadNotifyOutcome> {
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.LEAD_NOTIFICATION_EMAIL;
   const from = process.env.LEAD_NOTIFICATION_FROM || 'onboarding@resend.dev';
@@ -52,7 +62,7 @@ export async function sendLeadNotification(args: SendLeadNotificationArgs): Prom
   // Gate: feature is opt-in per environment. Silent no-op when unconfigured.
   if (!apiKey || !to) {
     logger.dev('sendLeadNotification: skipped (RESEND_API_KEY / LEAD_NOTIFICATION_EMAIL not set)');
-    return;
+    return { status: 'skipped' };
   }
 
   try {
@@ -94,9 +104,20 @@ export async function sendLeadNotification(args: SendLeadNotificationArgs): Prom
     if (!res.ok) {
       const body = await res.text().catch(() => '');
       logger.warn(`sendLeadNotification: Resend responded ${res.status}`, () => body.slice(0, 300));
+      // A dropped lead notification is otherwise invisible (F30): surface it to
+      // Sentry so a silently-failing inbox is observable. No-op when DSN unset.
+      Sentry.captureException(new Error(`sendLeadNotification: Resend responded ${res.status}`), {
+        level: 'warning',
+        tags: { area: 'email', op: 'sendLeadNotification' },
+        extra: { status: res.status, body: body.slice(0, 300), pageId: args.pageId, formName: args.formName },
+      });
+      return { status: 'failed', error: `Resend responded ${res.status}`.slice(0, 300) };
     }
+    return { status: 'sent' };
   } catch (err) {
     // Never let an email failure affect the saved lead / response.
-    logger.warn('sendLeadNotification: send failed', () => (err instanceof Error ? err.message : String(err)));
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.warn('sendLeadNotification: send failed', () => msg);
+    return { status: 'failed', error: `send failed: ${msg}`.slice(0, 300) };
   }
 }

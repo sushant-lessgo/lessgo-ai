@@ -1,0 +1,27 @@
+{
+  "slug": "babygiftretail",
+  "url": "https://www.babygiftretail.com/",
+  "business": { "type_label": "baby & mom products retail store (e-commerce)", "icp_category": "ecommerce-retail", "geography_hint": "Thailand (Thai-language, ฿ THB pricing)" },
+  "in_icp": false,
+  "engine": { "pick": "place", "ladder_reasoning": "It is a shop the visitor browses — categories, brands, product grids ARE the decision surface; closest fit is 'checking a shop'. But it is really a full storefront, not a one-thing evaluation.", "runner_up": "thing" },
+  "goal": { "one_action": "browse the catalog and buy products (add to cart → checkout)", "mechanism": "redirect", "delegated_to": "store" },
+  "structure": { "kind": "multi", "page_count": 7, "pages": ["home","babygift-care","promotions","coupons","news-event","all-categories","all-brands"], "archetype_note": "WooCommerce/Elementor storefront on WordPress; homepage is a catalog storefront (new arrivals, bestsellers, categories, brands), not a landing page." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "ร้านสินค้าแม่และเด็กที่คัดสรรนวัตกรรมของใช้แม่และเด็ก", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "All Brands (70+ brand logos)", "component": "logo-strip" },
+      { "canonical": "features", "observed_as": "BabyGift Care (delivery/on-site/repair/cleaning services)", "component": "text" },
+      { "canonical": "faq", "observed_as": "เตรียมให้พร้อมก่อนใช้งาน (manuals, safety, FAQs, e-catalog)", "component": "accordion" }
+    ],
+    "unmapped": [
+      { "observed": "New Arrivals / Bestsellers / All Categories product grids", "why_no_fit": "Live shoppable product-card grids with sale prices and Add-to-Cart — the canonical sectionList has no product-catalog/shop-grid section (closest 'features' is descriptive, not transactional)", "closest": "features" }
+    ]
+  },
+  "capabilities": { "needed": ["catalog","multipage","blog","map-hours"], "proposed_new": [ { "name": "storefront-checkout", "evidence": "WooCommerce cart + checkout selling one-time physical goods; prices_shown + cart_or_checkout true, Add-to-Cart CTAs" } ] },
+  "proof_types": ["logo-wall"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["product-card grid","category-browse grid","brand logo strip","price/sale badge","cart button","accordion FAQ"],
+  "languages": ["th"],
+  "confidence": { "level": "medium", "why": "fetch_quality is partial — only 2 of 7 pages crawled, meta description missing; but commerce signals (cart/checkout, prices) are unambiguous." },
+  "gap_findings": ["Full e-commerce storefront is out of ICP (job is browse-and-checkout across many SKUs, not one conversion action) — engines/sections cannot express a shoppable catalog with cart; matches storefront-checkout capability.", "No canonical section id exists for a transactional product-grid / catalog-shop block."]
+}

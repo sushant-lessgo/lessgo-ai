@@ -1,0 +1,57 @@
+{
+  "slug": "flyingsushi",
+  "url": "https://flyingsushi.com.br/",
+  "business": { "type_label": "Japanese rodízio restaurant chain (multi-location)", "icp_category": "restaurant / food service", "geography_hint": "São Paulo, Brazil (pt-BR)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor decides by browsing photos, the menu, promos, locations and hours of a physical restaurant — checking a PLACE is the whole page job. No defined expertise sold, no portfolio-as-proof, offer not pre-understood.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Reserve a table (or place an order) at a Flying Sushi location",
+    "mechanism": "redirect",
+    "delegated_to": "google-forms (reservation), linktree (ordering), whatsapp"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 12,
+    "pages": ["home", "about (flying-sushi)", "menu (cardapio)", "promotions", "events", "franchise (franquia)", "locations (unidades)", "per-location (butanta + 5)", "reserva (external)", "pedido (external)"],
+    "archetype_note": "Multi-page restaurant-chain site: home + menu + promotions + per-location profile pages, with a secondary B2B franchise-inquiry lead form and all transactional CTAs (reserve/order) handed off to third-party tools."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (Início, Cardápio, Promoções, Reserva, Faça seu pedido, Seja um franqueado...)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "Todo o sabor que você gosta está aqui!", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Flying Sushi: amor, sabor e dedicação (25+ years about)", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Seja um franqueado (franchise inquiry: Nome/E-mail/telefone/Mensagem)", "component": "form" },
+      { "canonical": "cta", "observed_as": "Faça a sua reserva! / Faça seu pedido", "component": "button" },
+      { "canonical": "footer", "observed_as": "social links (Facebook, Linktree)", "component": "footer" }
+    ],
+    "unmapped": [
+      { "observed": "Promotions (kids free, TPM women's Tuesday, birthday coupon MEUNIVERNOFLYING, Valentine's) with prices & coupon codes", "why_no_fit": "Recurring restaurant promo/offer blocks with coupons and exact prices are not features/pricing/useCases in the landing-page vocab", "closest": "miscellaneous" },
+      { "observed": "Encontre o Flying Sushi perto de você! — grid of 6 locations with address/hours/phone", "why_no_fit": "No canonical 'locations' section; this is a branch directory, not testimonials/socialProof", "closest": "miscellaneous" },
+      { "observed": "Cardápio — course-grouped dish lists (Entrada, Temakis, Sashimis...) with no prices", "why_no_fit": "A restaurant menu is the defining place artifact; no canonical menu section exists and it is not pricing (no prices) nor features", "closest": "miscellaneous" },
+      { "observed": "Horário de funcionamento (operating-hours table)", "why_no_fit": "No canonical hours section", "closest": "miscellaneous" },
+      { "observed": "Butantã single-location page (address, hours, phone, map)", "why_no_fit": "Per-branch detail/profile page, not a landing section", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "lead-form"],
+    "proposed_new": [
+      { "name": "practitioner-profiles", "evidence": "6 near-identical /unidades/<bairro>/ per-location profile subpages (each with own address/hours/phone/map) for a multi-branch business — the per-location variant of the registered practitioner-profiles capability." },
+      { "name": "menu-display", "evidence": "Cardápio page: course-grouped dish lists (Entrada, Pratos quentes, Temakis, Hossomakis, Uramakis, Niguiri, Sashimis) with no prices and no cart — a restaurant menu, the core place artifact, which the closed vocab (catalog implies products/cart) cannot express." }
+    ]
+  },
+  "proof_types": [],
+  "design_style": { "pick": null, "none_fits_because": "Capture recorded no fonts, colors, or dark/light; only 'photo-heavy'. Insufficient signal to assign one of the six styles." },
+  "components_needed": ["menu-list (course-grouped)", "location/branch card grid", "operating-hours table", "promo/offer cards with coupon codes", "map embed", "franchise contact form"],
+  "languages": ["pt-BR"],
+  "confidence": { "level": "medium", "why": "fetch_quality is 'rendered' not 'full' (franquia form only confirmed via rendered fallback; only 1 of 6 location pages sampled) — capped at medium per rules. Engine and structure are nonetheless clear." },
+  "gap_findings": [
+    "No canonical section for a restaurant MENU (course-grouped dish list, no prices, no cart) — closest closed capability 'catalog' implies purchasable products.",
+    "No canonical section for restaurant PROMOTIONS/OFFERS (coupon codes, day-of-week deals, birthday/kids pricing) — a defining place-engine content type.",
+    "No canonical section for a LOCATIONS/branch directory nor operating-hours; map-hours capability covers the data but there is no section id to place it.",
+    "Place-engine restaurants routinely fan multiple transactional CTAs (reserve / order / WhatsApp) out to different third-party tools — the single 'one_action' model flattens a genuinely multi-CTA intent."
+  ]
+}

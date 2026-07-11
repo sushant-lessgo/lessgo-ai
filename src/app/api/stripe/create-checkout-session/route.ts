@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create success and cancel URLs
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
+    const baseUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
     const successUrl = `${baseUrl}/dashboard/billing?session_id={CHECKOUT_SESSION_ID}&success=true`;
     const cancelUrl = `${baseUrl}/pricing?canceled=true`;
 

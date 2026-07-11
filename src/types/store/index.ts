@@ -394,6 +394,5 @@ export type {
   CanonicalFieldName,
 } from '@/types/core/index';
 
-// Re-export middleware types that might be used elsewhere
-// export type { AutoSaveMiddlewareState } from '@/middleware/autoSaveMiddleware';
-export type { StatePersistenceManager } from '@/utils/statePersistence';
+// perf-02 phase 5: removed dead re-exports of AutoSaveMiddlewareState and
+// StatePersistenceManager (their source modules were deleted; no runtime callers).

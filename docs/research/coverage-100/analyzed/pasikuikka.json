@@ -1,0 +1,56 @@
+{
+  "slug": "pasikuikka",
+  "url": "https://pasikuikka.fi/",
+  "business": { "type_label": "portable toilet / construction-site cabin & fence rental company", "icp_category": "equipment rental / local service", "geography_hint": "Uusimaa (Helsinki region) & Pirkanmaa (Tampere), Finland" },
+  "in_icp": true,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "Visitor is evaluating a defined rental product line (WC models with specs, use-cases, prices) backed by a features/use-case argument, not trusting a named expert nor browsing a portfolio; the store-redirect-style quote button sits atop a full product argument, so it is thing not quick-yes.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "request a price quote for WC rental (via calculator lead form or contact form), or call to rent",
+    "mechanism": "form",
+    "delegated_to": "tally"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 11,
+    "pages": ["home", "tuotteet/mallisto", "tarina", "huoltosopimus", "vastuullisuus", "laskuri", "yhteystiedot"],
+    "archetype_note": "Static multi-page Bootstrap site; product lineup + interactive quote calculator + contact/quote forms; two regional sub-brands (PasiKuikka Oy / Pispis) on one domain."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "LAADUKKAAT VUOKRA-WC:T TILAISUUKSIIN JA TYÖMAILLE", "component": "text" },
+      { "canonical": "features", "observed_as": "Laadukas, täyden palvelun WC-vuokraus", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Toimitamme vuokra-WC:t nopealla aikataululla!", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Rakennustyömaille / Festivaaleille ja tapahtumiin / Yksityishenkilöille", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "TUTUSTU PASIKUIKKA OY:N YRITYSVIDEOON! (company video)", "component": "video" },
+      { "canonical": "miscellaneous", "observed_as": "WC-VUOKRAUS HELSINKI, ESPOO... / Tampere ja Pirkanmaa (served-area SEO blocks)", "component": "text" },
+      { "canonical": "pricing", "observed_as": "TARJOUSLASKURI calculator + PasiKuikka Pro/Special/Talvimalli prices", "component": "form" },
+      { "canonical": "leadForm", "observed_as": "PYYDÄ TARJOUS quote form (Nimi, Toimitusosoite, Sähköposti...)", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "TUTUSTU PASIKUIKAN TARINAAN (founder Tomi Kuikka story)", "component": "text" },
+      { "canonical": "cta", "observed_as": "OTA YHTEYTTÄ PYYTÄÄKSEKSI TARJOUS", "component": "text" },
+      { "canonical": "footer", "observed_as": "YHTEYSTIEDOT company legal info + regional contacts", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "TARJOUSLASKURI — live JS pricing calculator (months/qty/model → computed total) feeding the lead form", "why_no_fit": "canonical sections have no id for an interactive computational quote tool; 'pricing' captures the price display but not the compute-user-input behaviour", "closest": "pricing" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "packages", "bilingual", "lead-form"],
+    "proposed_new": [
+      { "name": "interactive-calculators", "evidence": "laskuri.html is a real JS-driven quote calculator: months/quantity selectors + model dropdowns compute a live total (e.g. 373€ + alv, 218€ + alv) before the lead form" }
+    ]
+  },
+  "proof_types": ["stats"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["pricing-calculator", "product/model card grid", "use-case card grid", "quote lead-form", "embedded video block", "contact block with regional numbers"],
+  "languages": ["fi", "en"],
+  "confidence": { "level": "medium", "why": "fetch_quality=rendered (not full); Tally contact-form fields are inside an iframe and not enumerable, and dropdown/calculator internals only partially observable" },
+  "gap_findings": [
+    "No taxonomy slot for an interactive price/quote calculator that computes user-specific totals then hands off to a lead form (matches proposed interactive-calculators).",
+    "Single domain hosts two regional sub-brands (PasiKuikka Oy / Pispis) with separate phones/emails — no capability expresses a multi-brand-per-site split.",
+    "A product-catalog rental line with per-model packages+prices whose goal is a quote (not checkout) sits awkwardly between catalog/packages and lead-form."
+  ]
+}
