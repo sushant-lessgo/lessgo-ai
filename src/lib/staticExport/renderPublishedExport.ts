@@ -54,6 +54,11 @@ export interface RenderPublishedExportInput {
    * this from the project content and passes it here.
    */
   localeConfig?: LocaleConfig | null;
+  /** pricing-v2 (phase 2): suppress the "Made with Lessgo" badge when the page
+   *  owner's plan has the `removeBranding` feature (Pro/LTD). Threaded into EVERY
+   *  generateStaticHTML call (root, subpages, locale docs). Fail-closed: absent/
+   *  false ⇒ badge shown. Resolved by each caller (publish route, verify-dns). */
+  removeBranding?: boolean;
 }
 
 export interface RenderPublishedExportResult {
@@ -85,6 +90,7 @@ export async function renderPublishedExport(
     baseUrl,
     canonicalDomain,
     localeConfig,
+    removeBranding,
   } = input;
 
   // i18n (Phase 5): locale fan-out gate. Single/absent ⇒ everything below runs
@@ -192,6 +198,7 @@ export async function renderPublishedExport(
     ga4MeasurementId,
     jsonLd: rootJsonLd ? serializeJsonLd(rootJsonLd) : undefined,
     analyticsOptIn: analyticsEnabled || false, // Phase 4
+    removeBranding, // pricing-v2 (phase 2): badge suppression for Pro/LTD owners
     baseURL: baseUrl,
     audienceType,
     templateId,
@@ -288,6 +295,7 @@ export async function renderPublishedExport(
         metaPixelId,
         ga4MeasurementId,
         analyticsOptIn: analyticsEnabled || false,
+        removeBranding, // pricing-v2 (phase 2): badge suppression for Pro/LTD owners
         baseURL: baseUrl,
         audienceType,
         templateId,
@@ -445,6 +453,7 @@ export async function renderPublishedExport(
             ga4MeasurementId,
             jsonLd: jsonLd ? serializeJsonLd(jsonLd) : undefined,
             analyticsOptIn: analyticsEnabled || false,
+            removeBranding, // pricing-v2 (phase 2): badge suppression for Pro/LTD owners
             baseURL: baseUrl,
             audienceType,
             templateId,

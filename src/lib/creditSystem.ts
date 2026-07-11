@@ -120,6 +120,15 @@ export async function getUserUsage(userId: string) {
 
 /**
  * Check if user has sufficient credits
+ *
+ * pricing-v2 decision 1 (block AI ops ONLY at 0 credits): this gate — and the
+ * `requireCredits`/`consumeCredits` wrappers in lib/middleware/planCheck.ts — are
+ * invoked ONLY by AI-spend routes (regenerate-section/-element, v2/scrape-website,
+ * v2/understand, audience {product,service}/{strategy,generate-copy},
+ * generate-privacy-policy, outreach). Non-AI persistence routes (/api/saveDraft,
+ * /api/publish) deliberately never call it, so a FREE user who hits 0 credits can
+ * still save drafts and publish/republish — only new AI generation is blocked.
+ * Do NOT add a credit gate to save/publish.
  */
 export async function checkCredits(
   userId: string,

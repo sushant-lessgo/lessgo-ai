@@ -11,6 +11,7 @@ import { checkDomainRateLimit } from '@/lib/rateLimit';
 import { writeRedirect, atomicPublishWithRetry, writeSlugForHost } from '@/lib/routing/kvRoutes';
 import { publishSubdomainHosts } from '@/lib/domains/hosts';
 import { renderPublishedExport } from '@/lib/staticExport/renderPublishedExport';
+import { getUserPlan, getPlanConfig, PlanTier } from '@/lib/planManager';
 import { isAdmin, logAdminOverride } from '@/lib/admin';
 import * as Sentry from '@sentry/nextjs';
 
@@ -111,6 +112,18 @@ export async function POST(req: NextRequest) {
   // actually published; a regen failure must NOT block go-live (status is already 'live').
   let rebuilt: Awaited<ReturnType<typeof renderPublishedExport>> | null = null;
   if (page.currentVersion) {
+    // pricing-v2 (phase 2): keep the badge decision consistent with the publish
+    // route on this go-live republish — resolve the OWNER's (page.userId, not the
+    // acting admin's) removeBranding flag config-derived (NOT hasFeature, which
+    // fails open on boolean-false). Custom domains are Pro-only, so this is
+    // normally true; fail-closed to branded on any error.
+    let removeBranding = false;
+    try {
+      const ownerPlan = await getUserPlan(page.userId);
+      removeBranding = getPlanConfig(ownerPlan.tier as PlanTier)?.features.removeBranding === true;
+    } catch (brandingErr) {
+      console.warn('[verify-dns] removeBranding lookup failed (defaulting to branded):', brandingErr);
+    }
     try {
       rebuilt = await renderPublishedExport({
         pageId: page.id,
@@ -129,6 +142,7 @@ export async function POST(req: NextRequest) {
         mood: (page.themeValues as any)?.mood ?? null,
         baseUrl: 'https://lessgo.ai',
         canonicalDomain: customHost,
+        removeBranding,
       });
     } catch (e) {
       console.error('[verify-dns] canonical regen failed (non-fatal)', e);
