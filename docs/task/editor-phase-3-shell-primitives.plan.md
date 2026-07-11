@@ -19,7 +19,10 @@ exactly one editor and dual-renderer divergence stays structurally impossible).
 
 - phase 1 floating-ui shell + priority slim-down: done (commit 1a9a187e, review loops 2 — remount defect fixed, ship)
 - phase 2 action sets + selector-ize: done (commit c1a7c80a, review loops 1 — clean, ship; 6 bare subs not 7 per phase-1 drift)
-- phase 3 DELETE list + parity sign-off: code done (commit pending-sha, review loops 1 — clean, ship, net -2336 LOC src/) — ⛔ AWAITING HUMAN GATE (founder toolbar parity QA + 6× idle trace + edit-persistence e2e) before phase 4
+- phase 3 DELETE list + parity sign-off: done (commit b65a0d48, review loops 1 — clean, ship, net -2336 LOC src/); HUMAN GATE PASSED 2026-07-11 (founder: parity holds, proceed)
+- phase 4 primitive interface: pending
+- phase 5 logo: pending — founder requirement 2026-07-11: header=light surface, footer=dark surface → logo needs light/dark variant handling (one asset assumption is WRONG). Primitive type carries optional dark variant; store-persistence mechanism (2nd field vs CSS invert) confirmed at phase-5 gate.
+- phase 6 imageCollection: pending
 - phase 4 primitive interface: pending
 - phase 5 logo primitive (techpremium proving): pending
 - phase 6 imageCollection primitive + alt law (vestria proving): pending
@@ -229,6 +232,13 @@ Steps:
    `PrimitiveKind` union (per editorPlan table), slot declaration shape
    (`{ kind, min?, max?, aspect? }`), `ImageCollectionItem` (`{ id, url, alt?, caption? }`),
    logo value shape. Templates DECLARE primitives per slot; primitives own all editing UI.
+   **Logo surface variants (founder req 2026-07-11):** the logo VALUE type must carry an
+   optional dark-surface variant — header renders on a LIGHT surface, footer on a DARK surface,
+   so one asset does not suffice. Type shape: `LogoValue = { url?: string; darkUrl?: string;
+   wordmark?: string }` (primary = light-surface asset; `darkUrl` = optional dark-surface asset,
+   footer falls back to `url` if unset). This phase only defines the TYPE — the store-field vs
+   CSS-invert persistence mechanism is decided at the phase-5 gate; keep the type expressive
+   enough to support either without a later breaking change.
 2. Extend `elementMetadata` (`src/types/core/content.ts:133` — currently
    `Record<string, { buttonConfig?; cta? }>`): add
    `alt?: string | Record<string, string>` — string for single-image slots, itemId-keyed map
@@ -260,12 +270,29 @@ saveDraft/publish payload and already consumed by `src/components/ui/HeaderLogo.
 `LogoPublished.tsx`, and `extractLogoUrl` on the publish path (structured data / OG). NO new
 `brand.logo` field, NO Prisma migration, no re-gate needed on persistence.
 
-Resolution order in a plain shared module `resolveLogo`:
-`globalSettings.logoUrl` → per-section `content[sectionId].elements.logo_image` (existing
-techpremium value, `TechPremiumNav.tsx:113` upload path today) → wordmark
-(`elements.logo_text`). New uploads write ONLY `globalSettings.logoUrl` (via `setLogoUrl`) →
-header + footer converge going forward; **naayom's live logo can never blank** — it renders
-byte-identical from the `logo_image` fallback until the founder touches the logo.
+**Surface-variant requirement (founder 2026-07-11, MUST handle):** header renders on a LIGHT
+surface, footer on a DARK surface. A single logo asset does NOT work on both — a dark-colored
+logo vanishes on the dark footer. `resolveLogo` therefore takes the target SURFACE
+(`'light'|'dark'`, read from the block's `data-surface`) and returns the surface-appropriate
+asset. Mechanism to CONFIRM at this phase's gate (bring both options to the founder):
+  - **(A) explicit dark asset** — add `globalSettings.logoUrlDark` (a NEW globalSettings field;
+    reopens the "no new field" simplification, but is the safe default for colored logos).
+    Footer uses `logoUrlDark ?? logoUrl`; header uses `logoUrl`. Editor exposes an optional
+    "logo on dark background" upload in the primitive.
+  - **(B) CSS treatment** — one asset, footer applies `filter:brightness(0) invert(1)` (or a
+    template-provided inverted token) on `data-surface="dark"`. Zero new field, but only looks
+    right for monochrome marks — wrong for colored/photographic logos.
+  Default recommendation = (A) for correctness (naayom is a hardware brand, likely colored
+  mark); the primitive `LogoValue.darkUrl` type from phase 4 already models it.
+
+Resolution order in a plain shared module `resolveLogo(globalSettings, sectionContent, surface)`:
+primary chain `globalSettings.logoUrl` → per-section `content[sectionId].elements.logo_image`
+(existing techpremium value, `TechPremiumNav.tsx:113` upload path today) → wordmark
+(`elements.logo_text`); when `surface==='dark'`, prefer the dark asset (mechanism A: `logoUrlDark`
+before falling to the primary chain; mechanism B: primary chain + invert class). New uploads
+write ONLY `globalSettings.logoUrl` (via `setLogoUrl`) / the dark field → header + footer
+converge going forward; **naayom's live logo can never blank** — it renders byte-identical from
+the `logo_image` fallback until the founder touches the logo.
 Reconciliation note: templates already using `HeaderLogo` read `globalSettings.logoUrl`
 directly — `resolveLogo`'s FIRST read is that same source, so they stay consistent and
 unchanged (no edits to `HeaderLogo.tsx`).
@@ -308,11 +335,13 @@ published). **Back-compat check:** load a project with ONLY legacy `logo_image` 
 `globalSettings.logoUrl`) → renders unchanged in edit + published. **HeaderLogo templates
 check:** a template using `HeaderLogo` still shows its logo (no source change for them).
 
-**⛔ HUMAN GATE (spec gate 3):** founder confirms proving template (techpremium = naayom's)
-and the globalSettings.logoUrl + read-through fallback approach BEFORE implementation of
-this phase — it changes rendering on the live paying project. Also re-confirm naayom's
-header vs footer logos are intended-identical (if they differ, converge only on next edit,
-which this design guarantees).
+**⛔ HUMAN GATE (spec gate 3):** founder confirms BEFORE implementation of this phase (it
+changes rendering on the live paying project): (1) proving template (techpremium = naayom's);
+(2) the globalSettings.logoUrl + read-through fallback approach; (3) **the light/dark
+surface-variant mechanism — (A) explicit `logoUrlDark` field vs (B) CSS invert** (founder req
+2026-07-11: header light-surface, footer dark-surface; default reco = A). Also re-confirm
+naayom's header vs footer are intended to share one primary asset (differ only by surface
+variant), converging on next edit — which this design guarantees.
 
 ---
 
@@ -412,6 +441,6 @@ Min/max enforced (add disabled at 8, remove disabled at 4). Single-editor grep:
 
 ## Unresolved questions
 
-1. naayom header vs footer logo today — identical asset? If different, converge-on-next-edit OK?
+1. Logo light/dark surface mechanism (founder 2026-07-11: header light, footer dark) — mechanism (A) explicit `logoUrlDark` field [reco] vs (B) CSS invert? Confirm at phase-5 gate. naayom header vs footer = same primary asset, differ only by surface variant?
 2. imageCollection caption: store on item (`caption`) like planned, or also elementMetadata? (plan = on item; alt only in metadata per law)
 3. Toolbar parity QA (gate 2): founder pass solo, or want a recorded checklist from `/manual-test` first?
