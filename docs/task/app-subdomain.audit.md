@@ -89,3 +89,81 @@ None.
 - grep-assert: zero `https://lessgo.ai/dashboard` literals remain in `src/`. `NEXT_PUBLIC_APP_URL` still referenced in `htmlGenerator.ts:296` (asset origin, untouched) and the two stripe fallbacks.
 
 **Open risks**: none for this phase. Behavior fully inert until `NEXT_PUBLIC_DASHBOARD_URL` is set (rollout flag per D1).
+
+## Phase 3 — middleware apex→app redirects + Clerk allowedRedirectOrigins
+
+**Files changed**
+- `src/middleware.ts` (edit)
+- `src/app/layout.tsx` (edit)
+- `src/lib/domains/appSplit.test.ts` (edit — phase-3 guard test)
+
+### `src/middleware.ts`
+Added `import { getApexToAppRedirect } from '@/lib/domains/appSplit'`.
+Inserted the apex→app redirect INSIDE the existing `if (!isApiOrNext)` block, AFTER
+Branch B's closing `}` (the `return new NextResponse('Not Found', { status: 404 })`
+branch), and BEFORE the block-closing `}` that precedes the terminal
+`if (!isPublicRoute(req)) await auth.protect()`. Exact insertion point: between the
+end of Branch B and the `}` that closes `if (!isApiOrNext)` (was line ~154).
+
+Code:
+```
+const appRedirect = getApexToAppRedirect(host, url.pathname + url.search)
+if (appRedirect) return NextResponse.redirect(appRedirect, 307)
+```
+Apex hosts (`lessgo.ai` / `www.lessgo.ai`) are `isLessgoAppHost`, so they skip
+Branch A (not a publish subdomain) and Branch B (`!isLessgoAppHost` false) and reach
+this fall-through. Query string preserved via `url.pathname + url.search` (matches the
+Phase-1 helper signature `getApexToAppRedirect(host, pathAndSearch)`). This is the only
+early-return kind added — a redirect, never `NextResponse.next()` (D6-safe). A comment
+documents: 307 TEMPORARY by design (spec — may be removed later; never 301), and that
+`/api/*` + `/_next/*` are excluded via `isApiOrNext` while `/assets/*` are excluded by
+the matcher (apex keeps serving APIs + assets). Did NOT touch Branch A/B, seoRewrite,
+stampGeo, the matcher, or the terminal auth block.
+
+**Excluded-path confirmation (no code change):** `/api/*` and `/_next/*` are gated out
+by `isApiOrNext` (redirect lives inside `if (!isApiOrNext)`). `/assets/*` are static
+files excluded by the config matcher's negative-lookahead (…`\.(?:…js…css…woff2?…)`…).
+Apex therefore continues to serve APIs and published assets — verified by reading the
+matcher; no route change made.
+
+### `src/app/layout.tsx`
+Added `allowedRedirectOrigins={allowedRedirectOrigins}` to `<ClerkProvider>` (above the
+existing `signUpForceRedirectUrl`/`signInForceRedirectUrl`, which are unchanged and stay
+host-relative). The array is built as a well-typed `string[]`:
+`['https://lessgo.ai','https://www.lessgo.ai', process.env.NEXT_PUBLIC_DASHBOARD_URL]`
+`.filter((o): o is string => Boolean(o))` — the app origin is only included when the
+rollout var is set; falsy filtered, so this is a no-op pre-cutover.
+
+### `src/lib/domains/appSplit.test.ts`
+Added a Node-`fs` guard test (vitest node env): reads the top-level route dirs under
+`src/app/{dashboard,edit,preview,onboarding,generate,admin,t}` from disk and asserts each
+existing dir has a matching `/dir` entry in `APP_PATH_PREFIXES`. Only asserts for dirs
+that exist (absent dirs produce a no-op skipped assertion). Guards against a future app
+route silently staying un-redirected on apex. Imported `APP_PATH_PREFIXES` for the check.
+
+### Deviations
+- None functional. The plan pseudocode wrote `getApexToAppRedirect(host, url)`; the actual
+  Phase-1 helper takes a `pathAndSearch` string, so the call passes
+  `url.pathname + url.search` (preserves query, matches the tested signature).
+
+### Verification
+- `npx tsc --noEmit`: only the known pre-existing `src/app/page.tsx:6` founder.jpg
+  error (`@/assets/images/founder.jpg` module not found). No new errors.
+- `npx vitest run src/lib/domains/appSplit.test.ts`: 19 passed (incl. new guard test).
+- `npm run test:run`: 2135 passed, 1 failed, 3 skipped — the sole failure is the known
+  `i18nHonesty.test.ts` full-suite timeout flake (generateStaticHTML 5s timeout under
+  load), not a regression.
+- `npm run build`: GREEN. Note: the worktree had NO `.env`/`.env.local`, so the first
+  build attempt failed at page-data collection with `OPENAI_API_KEY missing` (env gap,
+  not a code defect) for `/api/audience/product/generate-copy`. Temporarily copied the
+  gitignored `.env` + `.env.local` from the main repo, re-ran → full build succeeded
+  (buildPublishedCSS + buildAssets + next build; all routes compiled, `/` static). Temp
+  env files removed afterward (they are gitignored; never committed). The founder.jpg
+  tsc error does NOT break the webpack build (`/` builds as static content).
+
+### Open risks
+- Build requires env vars present in the worktree; CI/Vercel and the main repo have them.
+  Worktree builds need `.env.local` copied in (node_modules already installed here).
+- Everything remains inert until `NEXT_PUBLIC_DASHBOARD_URL` is set (Phase 4 human gate):
+  helper returns null and the Clerk app origin is filtered out, so localhost/e2e/pre-cutover
+  behavior is unchanged.

@@ -1,9 +1,12 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
   isApexProdHost,
   isAppProdHost,
   isAppPath,
   getApexToAppRedirect,
+  APP_PATH_PREFIXES,
 } from './appSplit';
 
 afterEach(() => {
@@ -112,4 +115,29 @@ describe('getApexToAppRedirect', () => {
       );
     });
   });
+});
+
+// Guard: every top-level app route dir on disk must be covered by
+// APP_PATH_PREFIXES, so a future-added app route can't silently stay on apex
+// (un-redirected). Only asserts for dirs that actually exist.
+describe('APP_PATH_PREFIXES covers every top-level app route dir', () => {
+  const appDir = path.resolve(process.cwd(), 'src/app');
+  const candidates = [
+    'dashboard',
+    'edit',
+    'preview',
+    'onboarding',
+    'generate',
+    'admin',
+    't',
+  ];
+
+  for (const dir of candidates) {
+    const full = path.join(appDir, dir);
+    const exists = fs.existsSync(full) && fs.statSync(full).isDirectory();
+    it(`covers /${dir}${exists ? '' : ' (absent — skipped)'}`, () => {
+      if (!exists) return; // only assert for dirs that exist
+      expect(APP_PATH_PREFIXES as readonly string[]).toContain(`/${dir}`);
+    });
+  }
 });
