@@ -1,6 +1,7 @@
 // app/edit/[token]/components/toolbars/ImageToolbar.tsx - Complete Image Toolbar
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM, { createPortal } from 'react-dom';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
@@ -32,21 +33,30 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const uploaderRef = useRef<HTMLInputElement>(null);
 
-  const store = useEditStore();
+  // Narrow selector: pull ONLY the fields/actions this toolbar reads (actions are
+  // stable refs). `uploadImageFromObjectUrl` is a store adapter that uploads an
+  // ephemeral data:/blob: URL to permanent storage (delegates to uploadImage);
+  // accessed via cast — its type declaration lives in the store types module,
+  // which is out of this phase's edit scope. `audienceType` was destructured but
+  // never used by the main component (StockPhotosPanel reads it separately) → dropped.
   const {
     updateElementContent,
     uploadImage,
     hideElementToolbar,
     tokenId,
-    audienceType,
-  } = store;
-  // Store adapter that uploads an ephemeral data:/blob: URL to permanent storage
-  // (delegates to uploadImage). Accessed via cast — its type declaration lives in
-  // the store types module, which is out of this phase's edit scope.
-  const uploadImageFromObjectUrl = (store as any).uploadImageFromObjectUrl as (
-    objectUrl: string,
-    targetElement: { sectionId: string; elementKey: string },
-  ) => Promise<string>;
+    uploadImageFromObjectUrl,
+  } = useEditStore(
+    useShallow((s) => ({
+      updateElementContent: s.updateElementContent,
+      uploadImage: s.uploadImage,
+      hideElementToolbar: s.hideElementToolbar,
+      tokenId: s.tokenId,
+      uploadImageFromObjectUrl: (s as any).uploadImageFromObjectUrl as (
+        objectUrl: string,
+        targetElement: { sectionId: string; elementKey: string },
+      ) => Promise<string>,
+    })),
+  );
 
   // Helper function to parse targetId and extract section/element info
   const parseTargetId = (targetId: string) => {
@@ -325,7 +335,6 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
 
   return (
     <>
-      {logger.dev(() => '🖼️ ImageToolbar JSX rendering now!')}
       <div
         ref={toolbarRef}
         className="bg-white border border-gray-200 rounded-lg shadow-lg"
@@ -366,7 +375,6 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
       {/* Stock Photos Panel */}
       {showStockPhotos && typeof window !== 'undefined' && (
         <>
-          {logger.dev('🎨 Rendering stock photos portal, showStockPhotos:', () => showStockPhotos)}
           {createPortal(
             <StockPhotosPanel
           position={{
@@ -471,7 +479,15 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
   onClose: () => void;
   onSelectImage: (stockPhoto: StockPhoto) => void;
 }) {
-  const { audienceType, templateId, paletteId } = useEditStore();
+  // Narrow selector: this portal only needs the template-identity fields to
+  // resolve the palette mood phrase for stock-photo queries.
+  const { audienceType, templateId, paletteId } = useEditStore(
+    useShallow((s) => ({
+      audienceType: s.audienceType,
+      templateId: s.templateId,
+      paletteId: s.paletteId,
+    })),
+  );
   const usesTemplate = usesTemplateModule(audienceType, templateId);
 
   // Resolve the active template's palette mood phrase from the preloaded module

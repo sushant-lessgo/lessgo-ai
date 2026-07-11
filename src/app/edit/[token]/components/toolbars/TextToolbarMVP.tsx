@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
 import { logger } from '@/lib/logger';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useSelectionPreserver } from '@/hooks/useSelectionPreserver';
 import {
@@ -58,8 +59,6 @@ const COLOR_PALETTE = [
   { value: '#f97316', label: 'Orange Accent', group: 'accent' },
 ];
 
-let globalRenderCount = 0;
-
 // Phase-3: the ToolbarShell decides visibility and owns positioning. This outer
 // gate keeps only the valid-selection check (above zero hooks, rules-of-hooks);
 // the inner is a dumb child of the shell's floating container.
@@ -75,9 +74,6 @@ export function TextToolbarMVP(props: TextToolbarMVPProps) {
 function TextToolbarMVPInner({
   elementSelection,
 }: TextToolbarMVPProps) {
-  const currentRender = ++globalRenderCount;
-  const renderTime = Date.now();
-
   const [formatState, setFormatState] = useState<MVPFormatState>({
     bold: false,
     italic: false,
@@ -95,6 +91,9 @@ function TextToolbarMVPInner({
   const fontSizePickerRef = useRef<HTMLDivElement>(null);
   const variationsRef = useRef<HTMLDivElement>(null);
 
+  // Narrow selector: pull ONLY the fields/actions this toolbar reads (actions are
+  // stable refs). `setFormattingInProgress` is read imperatively below via
+  // getState() — deliberately NOT subscribed.
   const {
     updateElementContent,
     regenerateElementWithVariations,
@@ -106,7 +105,20 @@ function TextToolbarMVPInner({
     announceLiveRegion,
     activeLocale,
     localeConfig,
-  } = useEditStore();
+  } = useEditStore(
+    useShallow((s) => ({
+      updateElementContent: s.updateElementContent,
+      regenerateElementWithVariations: s.regenerateElementWithVariations,
+      elementVariations: s.elementVariations,
+      applyVariation: s.applyVariation,
+      hideElementVariations: s.hideElementVariations,
+      setVariationSelection: s.setVariationSelection,
+      aiGeneration: s.aiGeneration,
+      announceLiveRegion: s.announceLiveRegion,
+      activeLocale: s.activeLocale,
+      localeConfig: s.localeConfig,
+    })),
+  );
   // i18n-phase-1 (Phase 4): AI variations write DEFAULT-locale base copy only;
   // disable the sparkle on a non-default locale (store guard also no-ops it).
   const regenLocaleLocked =
@@ -474,7 +486,6 @@ function TextToolbarMVPInner({
       // Perform hard cleanup of selection state
       cleanupSelection();
       hideElementVariations();
-      logger.dev('TextToolbarMVP cleanup completed');
     };
   }, [debouncedFormat, cleanupSelection, hideElementVariations]);
 

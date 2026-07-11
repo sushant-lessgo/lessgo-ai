@@ -31,10 +31,7 @@ import { useSelectionPriority } from '@/hooks/useSelectionPriority';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import type { ToolbarType } from '@/utils/selectionPriority';
 
-import { SectionToolbar } from './SectionToolbar';
-import { ElementToolbar } from './ElementToolbar';
-import { TextToolbarMVP } from './TextToolbarMVP';
-import { ImageToolbar } from './ImageToolbar';
+import { actionSets } from './actionSets';
 
 const ARROW_HEIGHT = 8;
 const GAP = 8;
@@ -166,44 +163,24 @@ export function ToolbarShell() {
     return null;
   }
 
-  // Resolve the toolbar body inline so its element type stays STABLE across
-  // re-renders — a locally-defined component rendered as JSX (`<ToolbarBody/>`)
-  // gets a fresh function reference each render, forcing React to unmount +
-  // remount the whole toolbar subtree and reset its local useState (perf-04
-  // class of silent state-loss). Rendering the concrete <SectionToolbar/> etc.
-  // directly keeps element identity stable.
-  let toolbarBody: React.ReactNode = null;
-  switch (activeToolbar) {
-    case 'section':
-      toolbarBody = editorSelection.selectedSection ? (
-        <SectionToolbar sectionId={editorSelection.selectedSection} />
-      ) : null;
-      break;
-    case 'element':
-      toolbarBody = editorSelection.selectedElement ? (
-        <ElementToolbar elementSelection={editorSelection.selectedElement} />
-      ) : null;
-      break;
-    case 'text': {
-      const sel = editorSelection.textEditingElement || editorSelection.selectedElement;
-      toolbarBody = sel ? <TextToolbarMVP elementSelection={sel} /> : null;
-      break;
-    }
-    case 'image':
-      toolbarBody = toolbarTarget.targetId ? (
-        <ImageToolbar targetId={toolbarTarget.targetId} />
-      ) : null;
-      break;
-    default:
-      toolbarBody = null;
-  }
+  // Resolve the toolbar body from the config map (phase-3 step 2). `entry.component`
+  // is a module-level constant reference, so `React.createElement(component, props)`
+  // keeps the element TYPE stable across shell re-renders — no unmount/remount of
+  // the active toolbar (which would reset its local useState, the perf-04 class of
+  // silent state-loss). A locally-defined component rendered as JSX would get a
+  // fresh reference each render and force a remount; the registry avoids that.
+  const entry = activeToolbar ? actionSets[activeToolbar] : undefined;
+  const toolbarProps = entry ? entry.resolveProps(editorSelection, toolbarTarget) : null;
 
-  // No matching toolbar body (e.g. `form`, or a case whose selection is absent):
+  // No matching entry (e.g. `form`, or a selection the resolver can't satisfy):
   // do NOT open an empty floating container — that would render a bare arrow
   // bubble. Match prior behavior (nothing rendered).
-  if (!toolbarBody) {
+  if (!entry || !toolbarProps) {
     return null;
   }
+
+  const ToolbarComponent = entry.component;
+  const toolbarBody = React.createElement(ToolbarComponent, toolbarProps);
 
   return (
     <div

@@ -149,3 +149,109 @@ phase-1 files.
 - `npm run test:run` — green: 135 files passed / 1 skipped; 2091 tests passed / 3 skipped.
 - grep `<ToolbarBody` in ToolbarShell.tsx — only a comment mention remains; no JSX usage.
 - grep `useEditStore()` in ToolbarShell.tsx — none; shell sub is now a `useShallow` selector.
+
+## Phase 2 — action sets as config + selector-ize all toolbar store access
+
+### Files changed
+
+- `src/app/edit/[token]/components/toolbars/actionSets.tsx` — NEW: the per-type toolbar registry.
+- `src/app/edit/[token]/components/toolbars/ToolbarShell.tsx` — consumes `actionSets` instead of the phase-1 inline switch.
+- `src/app/edit/[token]/components/toolbars/SectionToolbar.tsx` — selector-ized store sub.
+- `src/app/edit/[token]/components/toolbars/ElementToolbar.tsx` — selector-ized store sub.
+- `src/app/edit/[token]/components/toolbars/TextToolbarMVP.tsx` — selector-ized store sub + hygiene.
+- `src/app/edit/[token]/components/toolbars/ImageToolbar.tsx` — selector-ized BOTH store subs + hygiene.
+
+### actionSets config shape
+
+`actionSets: Partial<Record<NonNullable<ToolbarType>, ActionSetEntry>>` with the 4
+renderable types (`section`/`element`/`text`/`image`). Each entry:
+`{ component: React.ComponentType<any>, size: 'sm'|'md'|'lg', resolveProps(selection, target) => Record<string,unknown> | null }`.
+`component` is a module-level import reference; `resolveProps` is a pure function
+turning the current `EditorSelection` + resolver `ToolbarTarget` into the concrete
+props each toolbar needs, or `null` when the selection can't satisfy it. `form`/null
+are intentionally absent → the shell's lookup misses and renders nothing (preserves
+the phase-1 empty-bubble guard). `size` is metadata (width-class hint) — no functional
+gating today; carried per the plan's `{ component, size }` shape.
+
+### How the shell keeps stable element identity
+
+`ToolbarShell` looks up `entry = actionSets[activeToolbar]`, computes
+`toolbarProps = entry.resolveProps(editorSelection, toolbarTarget)`, guards
+`if (!entry || !toolbarProps) return null;`, then renders
+`React.createElement(entry.component, toolbarProps)`. Because `entry.component` is a
+module-level constant, the produced element's TYPE is stable across shell re-renders
+for a given `activeToolbar` — React reconciles in place, no unmount/remount, so the
+toolbar's local `useState` (ImageToolbar's `showStockPhotos`/`showEditor`/`isUploading`,
+variations dropdowns) survives (the perf-04 silent state-loss class stays fixed). This
+matches the phase-1 review-fix intent (stable type, not a locally-defined component).
+The empty-bubble guard is preserved by the `!entry || !toolbarProps` early return.
+
+### The 7 selector conversions (fields each `useShallow` selector pulls)
+
+1. **TextToolbarMVP.tsx** (was `useEditStore()`): `updateElementContent`,
+   `regenerateElementWithVariations`, `elementVariations`, `applyVariation`,
+   `hideElementVariations`, `setVariationSelection`, `aiGeneration`, `announceLiveRegion`,
+   `activeLocale`, `localeConfig`. (`setFormattingInProgress` stays imperative via
+   `getState()` — deliberately unsubscribed, unchanged.)
+2. **SectionToolbar.tsx** (was `useEditStore()`): `content`, `sections`, `sectionLayouts`,
+   `announceLiveRegion`, `aiGeneration`, `showLayoutChangeModal`, `audienceType`, `templateId`.
+3. **ElementToolbar.tsx** (was ONE `useEditStore()` — the plan's second ~:45 sub was
+   already consolidated into this single one by phase-1 edits; grep confirmed only one
+   bare sub present): `regenerateElementWithVariations`, `elementVariations`,
+   `applyVariation`, `hideElementVariations`, `setVariationSelection`, `content`,
+   `announceLiveRegion`, `setSection`, `selectElement`, `activeLocale`, `localeConfig`.
+   Dropped `updateElementContent` (destructured but never used).
+4. **ImageToolbar.tsx main component** (was `const store = useEditStore()`):
+   `updateElementContent`, `uploadImage`, `hideElementToolbar`, `tokenId`,
+   `uploadImageFromObjectUrl` (via `(s as any)` cast, same as before). Dropped
+   `audienceType` (destructured but unused in the main component; StockPhotosPanel reads
+   it via its own sub).
+5. **ImageToolbar.tsx StockPhotosPanel** (was `useEditStore()`): `audienceType`,
+   `templateId`, `paletteId`. Stays a `createPortal` per plan Q4 — only its store access
+   was narrowed.
+
+None of the components changed WHAT they do — only how they subscribe. No visibility
+re-resolution was reintroduced: `useSelectionPriority(` has exactly ONE caller among
+toolbars/ component files (`ToolbarShell.tsx`).
+
+### Hygiene: removed vs kept
+
+Removed:
+- `ImageToolbar.tsx`: two `logger.dev(...)` calls rendered inside JSX (the `🖼️
+  ImageToolbar JSX rendering now!` fragment child and the `🎨 Rendering stock photos
+  portal` fragment child).
+- `TextToolbarMVP.tsx`: module-global render counter `let globalRenderCount = 0;` plus
+  the per-render `const currentRender = ++globalRenderCount;` and
+  `const renderTime = Date.now();` (both unused). Also the `logger.dev('TextToolbarMVP
+  cleanup completed')` in the unmount effect (debug noise; the plan's ~:503 hint drifted —
+  the only `logger.dev` in the file was this cleanup log).
+
+Kept (judged load-bearing — noted per instruction):
+- `ImageToolbar.tsx` `getPanelAnchor()` → `toolbarRef.current?.getBoundingClientRect()`:
+  reads the toolbar bar's live position to place the StockPhotosPanel PORTAL (which is
+  attached to `document.body`, NOT positioned by the shell per Q4). Runs only while the
+  panel is open, not per idle render. FUNCTIONAL, kept.
+- `ImageToolbar.tsx` `targetElement` = `document.querySelector([data-image-id=…])`: seeds
+  SimpleImageEditor with current src/alt (per phase-1 audit). FUNCTIONAL, kept.
+- `ImageToolbar.tsx` delete-image `document.querySelector([data-image-id=…]).remove()`:
+  immediate DOM feedback on delete. FUNCTIONAL, kept.
+- `TextToolbarMVP.tsx` querySelector/getComputedStyle in the format-detection effect and
+  `applyFormatInternal`/`handleApplyVariation`: read/write element formatting, not
+  positioning. FUNCTIONAL, kept.
+- No `logger.dev` in SectionToolbar/ElementToolbar; no module-global counters elsewhere.
+
+### Verification
+
+- `npx tsc --noEmit` — GREEN (no output).
+- `npm run test:run` — GREEN: 135 files passed / 1 skipped; 2091 tests passed / 3 skipped.
+- ACCEPTANCE grep `rg "useEditStore(Legacy)?\(\s*\)" toolbars/` — ZERO hits.
+- `useSelectionPriority(` among toolbars/ component files — exactly ONE call site
+  (`ToolbarShell.tsx:78`; the other hit is a comment on :4). No second authority added.
+- `setInterval|MutationObserver|ResizeObserver` under toolbars/ — ZERO hits (none added).
+
+### Open risks
+
+- Behavior is unchanged by design; the manual toolbar-QA gate (phase 3) still covers
+  select/flip/dismiss/edge cases. `useShallow` object selectors re-render only when a
+  pulled field changes by shallow-equality — actions are stable refs, so typing in one
+  element no longer re-renders another element's open toolbar (the phase-2 manual check).

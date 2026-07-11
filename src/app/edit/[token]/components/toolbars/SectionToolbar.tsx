@@ -1,5 +1,6 @@
 // app/edit/[token]/components/toolbars/SectionToolbar.tsx - Priority-Resolved Section Toolbar
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { AddSectionButton } from '../content/SectionCRUD';
@@ -25,6 +26,9 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
   const [showElementToggle, setShowElementToggle] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
 
+  // Narrow selector: pull ONLY the fields/actions this toolbar reads. Actions are
+  // stable refs; the state slices (content/sections/sectionLayouts/aiGeneration)
+  // are the ones this component genuinely renders from.
   const {
     content,
     sections,
@@ -34,7 +38,18 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
     showLayoutChangeModal,
     audienceType,
     templateId,
-  } = useEditStore();
+  } = useEditStore(
+    useShallow((s) => ({
+      content: s.content,
+      sections: s.sections,
+      sectionLayouts: s.sectionLayouts,
+      announceLiveRegion: s.announceLiveRegion,
+      aiGeneration: s.aiGeneration,
+      showLayoutChangeModal: s.showLayoutChangeModal,
+      audienceType: s.audienceType,
+      templateId: s.templateId,
+    })),
+  );
 
   // Swap-button visibility gate (scale-09 phase 5). For template-module projects
   // the "Layout" action only makes sense when the section has >1 ELIGIBLE variant

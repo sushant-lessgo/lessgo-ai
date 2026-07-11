@@ -1,6 +1,7 @@
 // app/edit/[token]/components/toolbars/ElementToolbar.tsx - Priority-Resolved Element Toolbar
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useEditor } from '@/hooks/useEditor';
 
@@ -19,20 +20,35 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const variationsRef = useRef<HTMLDivElement>(null);
 
+  // Narrow selector: pull ONLY the fields/actions this toolbar reads (actions are
+  // stable refs). `updateElementContent` was destructured but never used → dropped.
   const {
     regenerateElementWithVariations,
     elementVariations,
     applyVariation,
     hideElementVariations,
     setVariationSelection,
-    updateElementContent,
     content,
     announceLiveRegion,
     setSection,
     selectElement,
     activeLocale,
     localeConfig,
-  } = useEditStore();
+  } = useEditStore(
+    useShallow((s) => ({
+      regenerateElementWithVariations: s.regenerateElementWithVariations,
+      elementVariations: s.elementVariations,
+      applyVariation: s.applyVariation,
+      hideElementVariations: s.hideElementVariations,
+      setVariationSelection: s.setVariationSelection,
+      content: s.content,
+      announceLiveRegion: s.announceLiveRegion,
+      setSection: s.setSection,
+      selectElement: s.selectElement,
+      activeLocale: s.activeLocale,
+      localeConfig: s.localeConfig,
+    })),
+  );
 
   // i18n-phase-1 (Phase 4): regen writes DEFAULT-locale base copy only (store
   // guard no-ops it on other locales). Disable the button off the default locale.
