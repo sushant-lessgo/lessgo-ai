@@ -1,6 +1,7 @@
 // lib/validation.ts - OWASP Input Validation
 import { z } from 'zod';
 import { templateIds } from '@/types/service';
+import { META_PIXEL_ID_RE, GA4_MEASUREMENT_ID_RE } from '@/lib/staticExport/headTags';
 
 // A03: Injection Prevention - Input validation schemas
 export const FormSubmissionSchema = z.object({
@@ -77,6 +78,10 @@ export const PageSeoSchema = z
     ogImage: HttpsUrl.optional(),
     noIndex: z.boolean().optional(),
     faviconUrl: HttpsUrl.optional(),
+    // Tracking pixels (site-level, root entry only). Strict shared regexes from
+    // headTags.ts — the SAME source the snippet builders re-check against.
+    metaPixelId: z.string().regex(META_PIXEL_ID_RE).optional(),
+    ga4MeasurementId: z.string().regex(GA4_MEASUREMENT_ID_RE).optional(),
     structuredDataType: z
       .enum(['auto', 'none', 'Organization', 'LocalBusiness', 'Product', 'Service'])
       .optional(),

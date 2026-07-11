@@ -13,7 +13,7 @@ import { validateAndResolveAssetURLs } from './assetResolver';
 import { renderLessgoBadge } from './lessgoBadge';
 import { resolveCanonicalURL } from './canonicalUrl';
 import { resolveOgImage } from './buildPageMetadata';
-import { escapeHTML, robotsMetaTag, faviconLinkTag, jsonLdScriptTag } from './headTags';
+import { escapeHTML, robotsMetaTag, faviconLinkTag, jsonLdScriptTag, metaPixelSnippet, ga4Snippet } from './headTags';
 import { usesTemplateModule } from '@/types/service';
 import type { PageSeo } from '@/types/store/pages';
 import type { LocaleConfig } from '@/types/core/content';
@@ -62,6 +62,11 @@ export interface StaticHTMLOptions {
   // buildPageMetadata. faviconUrl is resolved separately (root seo cascades).
   seo?: PageSeo | null;
   faviconUrl?: string;
+  // Tracking pixels (site-level, threaded by the caller like faviconUrl — root
+  // seo cascades to every page). Absent/invalid ⇒ builder returns '' ⇒
+  // byte-identical head.
+  metaPixelId?: string;
+  ga4MeasurementId?: string;
   // JSON-LD (Phase 3): pre-serialized (script-breakout-safe) structured data;
   // the caller builds it via structuredData.ts — root page only.
   jsonLd?: string;
@@ -154,6 +159,8 @@ export async function generateStaticHTML(
       ogImageOverride: options.seo?.ogImage,
       noIndex: !!options.seo?.noIndex,
       faviconUrl: options.faviconUrl,
+      metaPixelId: options.metaPixelId,
+      ga4MeasurementId: options.ga4MeasurementId,
       jsonLd: options.jsonLd,
     },
     analyticsOptIn: options.analyticsOptIn || false,
@@ -238,6 +245,8 @@ function buildHTMLDocument(params: {
     ogImageOverride?: string;
     noIndex?: boolean;
     faviconUrl?: string;
+    metaPixelId?: string;
+    ga4MeasurementId?: string;
     jsonLd?: string;
   };
   analyticsOptIn: boolean;
@@ -360,7 +369,7 @@ function buildHTMLDocument(params: {
   <link rel="stylesheet" href="/assets/published.css">
 
   <!-- Theme CSS Variables (inline, per-page) -->
-  ${cssVariablesStyle}${jsonLdScriptTag(metadata.jsonLd)}
+  ${cssVariablesStyle}${jsonLdScriptTag(metadata.jsonLd)}${metaPixelSnippet(metadata.metaPixelId)}${ga4Snippet(metadata.ga4MeasurementId)}
 </head>
 <body>
   ${bodyHTML}
