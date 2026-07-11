@@ -75,7 +75,10 @@ assisted translation · lumen migration/deletion (retires as bespoke-off, untouc
 
 ## Acceptance
 - [ ] `templateConformance('atelier')` green (core-set coverage, consumes ⊆ contract, resolve +
-      distinctness both modes, capability honesty, published/client boundary, knob set).
+      distinctness both modes, capability honesty, published/client boundary, knob set, **editor
+      basics** — logo upload, all text editable, image slots wired, button/link configure, nav +
+      footer links, collection add/remove/reorder, social links, form config, knob switching;
+      per factory spec's editor-basics contract).
 - [ ] Screenshot parity diff green; founder parity sign-off.
 - [ ] Serve gate: photographer Brief → atelier offered (fit() passes); non-fitting Brief doesn't.
 - [ ] Knob/palette axes switch live in-app with zero copy change, both renderers correct.

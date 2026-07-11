@@ -79,7 +79,26 @@ named LOOKS — hundreds of visibly different starting points from few skeletons
 - Compounds multiplicatively with scale-09 block variants: 3 heroes × 5
   palettes × 3 looks = 45 distinct salons from one skeleton.
 
-## Parity QA automation
+## Editor-basics contract (added 2026-07-11 — founder: "logo upload missing, link
+## configure missing — have we defined the basics?")
+The universal editor affordances EVERY template must support, frozen as a list and
+enforced in `templateConformance()` (machine-checkable part) + `/manual-test` (the
+rest). Today these live only as skill prose (§3f) — skippable, hence the recurring
+misses. The v0 contract:
+1. Header logo upload (change/remove, wordmark fallback, `logo_image` element).
+2. Every contract text element wrapped in the template's Editable (no dead text).
+3. Every image slot wired to `uploadImage`/`bulkUploadImages` (replace/remove).
+4. Every button/CTA opens Button Settings (link/goal configure, GOAL_REF).
+5. Nav + footer links editable via `LinkTargetPopover`.
+6. Collections (cards, gallery items, list rows): add / remove / reorder.
+7. Social links editable.
+8. Form blocks accept the form-builder field config.
+9. Palette/variant/knob switching live without breaking edited content.
+Enforcement split decided at build: items assertable by rendering edit-blocks in
+jsdom (Editable wrappers present per contract element, logo/img/button wiring)
+go into `templateConformance()`; visual/interactive rest goes into the parity QA
++ a `/manual-test` editor-basics subsection. Conformance failure = template not
+done (designer's bar extends to the EDITOR, not just the render).
 Playwright screenshot-diff: render each block edit-mode vs published, pixel-
 diff. Automates the #1 trap (dual-renderer parity); shrinks the human gate to
 a visual taste pass. Highest-leverage single build for template throughput.
@@ -177,7 +196,8 @@ a visual taste pass. Highest-leverage single build for template throughput.
       missing required slot).
 - [ ] `templateConformance(templateId)` single call covers: core-set coverage,
       consumes ⊆ contract, resolve + distinctness both modes, capability
-      honesty, published/client boundary, standard knob set.
+      honesty, published/client boundary, standard knob set, **editor-basics
+      contract (machine-checkable subset)**.
 - [ ] Standard knob set tokenized on ≥1 flagship; ≥3 named looks presented in
       picker; look swap = zero copy change, both renderers correct.
 - [ ] Screenshot parity diff runs against one template and fails on a seeded
