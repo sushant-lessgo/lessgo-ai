@@ -18,6 +18,7 @@ import { useMemo, useCallback } from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { extractLayoutContent, type StoreElementTypes } from '@/types/storeTypes';
 import { getSchemaDefaults } from '@/modules/sections/layoutElementSchema';
+import { resolveLocaleElements } from '@/lib/i18n/localeContent';
 import { logger } from '@/lib/logger';
 
 export interface UseTemplateBlockReturn<T> {
@@ -42,14 +43,37 @@ export function useTemplateBlock<T = Record<string, any>>(
   const mode = useEditStore((s) => s.mode);
   const updateElementContent = useEditStore((s) => s.updateElementContent);
 
+  // i18n-phase-1 (3b): NARROW locale selectors — the active authoring locale and
+  // ONLY this section's overlay slice (never the whole `localeContent` map). For a
+  // legacy single-locale store `activeLocale === 'en'` and this returns `undefined`
+  // (stable), so the deps below and the resolve fast-path add ZERO extra renders /
+  // ZERO ref churn (perf-01/02 memo width preserved).
+  const activeLocale = useEditStore((s) => s.activeLocale);
+  const sectionOverlay = useEditStore((s) => s.localeContent?.[s.activeLocale]?.[sectionId]);
+
   const layout = sectionContent?.layout;
 
-  // Keyed on the STABLE content[sectionId] ref (+ layout id). The `|| {}` /
-  // `Array.isArray ? : []` fallbacks are computed INSIDE the memo so they don't
-  // mint fresh refs every render and invalidate needlessly.
+  // Keyed on the STABLE content[sectionId] ref (+ layout id + narrow locale slice).
+  // The `|| {}` / `Array.isArray ? : []` fallbacks are computed INSIDE the memo so
+  // they don't mint fresh refs every render and invalidate needlessly.
   const blockContent = useMemo<T>(() => {
-    const elements = (sectionContent?.elements || {}) as Partial<StoreElementTypes>;
-    const storedExclusions = sectionContent?.aiMetadata?.excludedElements;
+    // Parity-ordering invariant (D1): resolve the overlay FIRST via the shared
+    // `resolveLocaleElements` helper (never a per-call-site merge), THEN
+    // extractLayoutContent — the SAME helper + order the published export uses.
+    // No overlay for this section (legacy or untranslated) ⇒ `resolvedSection` is
+    // the SAME reference as `sectionContent` (helper no-op fast path), so extract
+    // runs on identical input → zero behavior diff.
+    const resolvedSection =
+      sectionOverlay && sectionContent
+        ? resolveLocaleElements(
+            { [sectionId]: sectionContent },
+            { [activeLocale]: { [sectionId]: sectionOverlay } },
+            activeLocale,
+          )[sectionId]
+        : sectionContent;
+
+    const elements = (resolvedSection?.elements || {}) as Partial<StoreElementTypes>;
+    const storedExclusions = resolvedSection?.aiMetadata?.excludedElements;
     const excludedElements: string[] = Array.isArray(storedExclusions) ? storedExclusions : [];
 
     const schema = layout ? getSchemaDefaults(layout) : null;
@@ -58,7 +82,7 @@ export function useTemplateBlock<T = Record<string, any>>(
       return {} as T;
     }
     return extractLayoutContent(elements, schema as any, layout, excludedElements) as T;
-  }, [sectionContent, layout, sectionId, logTag]);
+  }, [sectionContent, sectionOverlay, activeLocale, layout, sectionId, logTag]);
 
   const isExcluded = useCallback(
     (elementKey: string) => {

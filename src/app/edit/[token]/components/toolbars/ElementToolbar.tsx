@@ -40,7 +40,14 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     announceLiveRegion,
     setSection,
     selectElement,
+    activeLocale,
+    localeConfig,
   } = useEditStore();
+
+  // i18n-phase-1 (Phase 4): regen writes DEFAULT-locale base copy only (store
+  // guard no-ops it on other locales). Disable the button off the default locale.
+  const regenLocaleLocked =
+    !!localeConfig && activeLocale !== localeConfig.defaultLocale;
 
   const { enterTextEditMode } = useEditor();
 
@@ -198,6 +205,8 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
       label: 'Regenerate',
       icon: 'refresh',
       handler: handleRegenerate,
+      disabled: regenLocaleLocked,
+      disabledTitle: 'Switch to the default language to regenerate.',
     },
     // 'Style' and 'Duplicate' removed: both routed to a stub (never implemented
     // in V2) and schema blocks render fixed element keys, so a duplicated key
@@ -258,30 +267,41 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
           </div>
           
           {/* Primary Actions */}
-          {primaryActions.map((action, index) => (
+          {primaryActions.map((action, index) => {
+            const actionDisabled = (action as any).disabled === true;
+            return (
             <React.Fragment key={action.id}>
               {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
               <button
                 onClick={(e) => {
+                  if (actionDisabled) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    return;
+                  }
                   if (action.id === 'edit-text' || action.id === 'button-config') {
                     e.stopPropagation();
                     e.preventDefault();
                   }
                   action.handler(e);
                 }}
+                disabled={actionDisabled}
                 className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
-                  action.id === 'edit-text' 
-                    ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                  actionDisabled
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : action.id === 'edit-text'
+                    ? 'bg-blue-500 text-white hover:bg-blue-600'
                     : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                 }`}
-                title={action.label}
+                title={actionDisabled ? (action as any).disabledTitle || action.label : action.label}
                 aria-haspopup={action.id === 'button-config' ? 'dialog' : undefined}
               >
                 <ElementIcon icon={action.icon} />
                 <span>{action.label}</span>
               </button>
             </React.Fragment>
-          ))}
+            );
+          })}
         </div>
       </div>
 

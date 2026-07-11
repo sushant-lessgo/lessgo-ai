@@ -11,6 +11,7 @@
 
 import React from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { getEffectiveElementValue } from '@/lib/i18n/localeContent';
 import {
   LeadFormCore,
   renderLeadField,
@@ -26,7 +27,22 @@ export default function LeadForm({ sectionId }: { sectionId: string }) {
   const form = useEditStore((s) => (formId ? (s as any).forms?.[formId] : undefined));
   const updateElementContent = useEditStore((s) => (s as any).updateElementContent);
   const fields: MVPFormField[] = Array.isArray(form?.fields) ? form.fields : [];
-  const headline = elements.form_headline || LEAD_FORM_DEFAULT_HEADLINE;
+  // i18n-phase-1 (3b): resolve the editable heading through the shared helper,
+  // keyed on the active locale. Narrow selectors (activeLocale + this section's
+  // overlay slice only). Legacy store ⇒ overlay undefined ⇒ base value.
+  // `form_id`, `form.fields`, submit text = form-slice/structure = locale-shared.
+  const activeLocale = useEditStore((s) => (s as any).activeLocale as string | undefined);
+  const sectionOverlay = useEditStore(
+    (s) => (s as any).localeContent?.[(s as any).activeLocale]?.[sectionId],
+  );
+  const headline =
+    (getEffectiveElementValue(
+      { [sectionId]: section } as any,
+      activeLocale ? { [activeLocale]: { [sectionId]: sectionOverlay || {} } } : undefined,
+      activeLocale,
+      sectionId,
+      'form_headline',
+    ) as string) || LEAD_FORM_DEFAULT_HEADLINE;
 
   const onHeadingBlur = (e: React.FocusEvent<HTMLHeadingElement>) => {
     const value = (e.currentTarget.textContent || '').trim();

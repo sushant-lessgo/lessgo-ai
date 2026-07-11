@@ -704,9 +704,21 @@ export function createUIActions(set: any, get: any): UIActions {
         } else if (lastAction.type === 'content') {
           if (lastAction.sectionId && lastAction.beforeState) {
             const section = state.content[lastAction.sectionId];
+            // i18n-phase-1 (3a): locale-aware restore. A locale-tagged entry
+            // (activeLocale != default when authored) restores into the
+            // project-global OVERLAY target, never base — so undo of an NL edit
+            // leaves EN base untouched. Default-locale entries restore base as before.
+            const def = state.localeConfig?.defaultLocale ?? 'en';
+            const entryLoc = (lastAction as any).locale;
+            if (entryLoc && entryLoc !== def && lastAction.beforeState.storageKey !== undefined) {
+              if (!state.localeContent) state.localeContent = {};
+              if (!state.localeContent[entryLoc]) state.localeContent[entryLoc] = {};
+              if (!state.localeContent[entryLoc][lastAction.sectionId]) state.localeContent[entryLoc][lastAction.sectionId] = {};
+              state.localeContent[entryLoc][lastAction.sectionId][lastAction.beforeState.storageKey] = deepCopy(lastAction.beforeState.value);
+            }
             // NEW raw-value shape { storageKey, value }: assign the raw stored
             // value back (V2 stores raw strings/arrays/collection arrays).
-            if (section && lastAction.beforeState.storageKey !== undefined) {
+            else if (section && lastAction.beforeState.storageKey !== undefined) {
               section.elements[lastAction.beforeState.storageKey] = deepCopy(lastAction.beforeState.value);
             } else if (section && lastAction.beforeState.elementKey) {
               // LEGACY branch: synthesizes a wrapped {content,type,isEditable,editMode}
@@ -795,9 +807,20 @@ export function createUIActions(set: any, get: any): UIActions {
         } else if (actionToRedo.type === 'content') {
           if (actionToRedo.sectionId && actionToRedo.afterState) {
             const section = state.content[actionToRedo.sectionId];
+            // i18n-phase-1 (3a): locale-aware re-apply — mirror of the undo branch.
+            // Locale-tagged entries re-apply into the overlay target; default
+            // entries re-apply base.
+            const def = state.localeConfig?.defaultLocale ?? 'en';
+            const entryLoc = (actionToRedo as any).locale;
+            if (entryLoc && entryLoc !== def && actionToRedo.afterState.storageKey !== undefined) {
+              if (!state.localeContent) state.localeContent = {};
+              if (!state.localeContent[entryLoc]) state.localeContent[entryLoc] = {};
+              if (!state.localeContent[entryLoc][actionToRedo.sectionId]) state.localeContent[entryLoc][actionToRedo.sectionId] = {};
+              state.localeContent[entryLoc][actionToRedo.sectionId][actionToRedo.afterState.storageKey] = deepCopy(actionToRedo.afterState.value);
+            }
             // NEW raw-value shape { storageKey, value }: assign the raw stored
             // value back (V2 stores raw strings/arrays/collection arrays).
-            if (section && actionToRedo.afterState.storageKey !== undefined) {
+            else if (section && actionToRedo.afterState.storageKey !== undefined) {
               section.elements[actionToRedo.afterState.storageKey] = deepCopy(actionToRedo.afterState.value);
             } else if (section && actionToRedo.afterState.elementKey) {
               // LEGACY branch: synthesizes a wrapped {content,type,isEditable,editMode}

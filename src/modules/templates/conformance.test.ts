@@ -74,9 +74,14 @@ const RESOLVERS: Record<
 };
 
 // Structural capabilities are NOT block-backed: `multipage` is page-menu
-// machinery and `bilingual` is twin-field machinery — no single section/block
-// evidences them, so they are exempt from the capability-evidence check (D-B).
-// They remain trust-on-declaration until a structural check exists (spec 02+).
+// machinery and `bilingual` is the platform content-locale layer — no single
+// section/block evidences them, so they are exempt from the capability-evidence
+// check (D-B) here.
+// `bilingual` is no longer trust-on-declaration: its machinery (overlay
+// resolver, per-locale static export, switcher asset, hreflang) is asserted
+// STRUCTURALLY by `src/lib/i18n/i18nHonesty.test.ts` (i18n-phase-1 D5) — that
+// is the "structural check" this exemption comment previously deferred to
+// "spec 02+". `multipage`'s structural check remains a future gap.
 const STRUCTURAL_CAPABILITIES: readonly CapabilityId[] = ['multipage', 'bilingual'];
 
 const MODES: readonly Mode[] = ['edit', 'published'];

@@ -7,6 +7,32 @@ import { logger } from '@/lib/logger';
 
 const deepClone = <T>(v: T): T => JSON.parse(JSON.stringify(v ?? null));
 
+// ===== i18n-phase-1 (3a): FULL-MAP EXPORT INVARIANT (contract i) =====
+// saveDraft replaces `finalContent.localeContent` WHOLESALE when the key is
+// present, so a partial map WIPES omitted locales. export() ships the COMPLETE
+// project-global map (state.localeContent). This dev-mode assertion catches any
+// future refactor that emits a filtered map: every locale the STORE holds with
+// authored overlays must be present + non-empty in the EMITTED map. Mirrors the
+// shape of Phase-2 test(f)'s `declaredLocalesFullyPresent`.
+function assertFullLocaleExport(
+  storeMap: Record<string, any> | undefined,
+  emitted: Record<string, any> | undefined,
+): void {
+  if (process.env.NODE_ENV === 'production') return;
+  const authored = Object.keys(storeMap || {}).filter(
+    (l) => storeMap![l] && Object.keys(storeMap![l]).length > 0,
+  );
+  const missing = authored.filter(
+    (l) => !emitted?.[l] || Object.keys(emitted[l]).length === 0,
+  );
+  if (missing.length) {
+    console.error(
+      `[i18n] FULL-MAP EXPORT VIOLATION: export dropped authored locale(s): ` +
+        `${missing.join(', ')}. A save with this partial map would WIPE them.`,
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // scale-04 (phase 6) — Brief.socialProfiles ({platform,url}[]) ↔ editor
 // SocialMediaConfig ({items:{id,platform,url,icon,order}[]}) bridge.
@@ -87,6 +113,14 @@ export function applySnapshot(state: EditStore, payload: any): void {
     state.sectionLayouts = sectionLayouts;
     state.sectionSpacing = sectionSpacing;
     state.content = payload.content || {};
+
+    // i18n-phase-1 (3a): the project-global overlay rides INSIDE finalContent
+    // (Phase-2 D1, single map keyed by unique sectionId). Restore it here so it
+    // travels through BOTH loadFromDraft (contentToLoad) AND resetToGenerated
+    // (baseline snapshot, which is an export() payload). Absent ⇒ empty map
+    // (legacy single-locale). Deep-clone: applySnapshot may run against committed
+    // state (baseline) and must not alias it.
+    state.localeContent = payload?.localeContent ? deepClone(payload.localeContent) : {};
 
     // Migrate blob URLs to placeholders
     let blobUrlsFound = 0;
@@ -325,6 +359,20 @@ export function createPersistenceActions(set: any, get: any) {
             finalContent: exportedData,  // Changed from 'content' to 'finalContent' to match API
             ...(shipBaseline !== undefined && { baseline: shipBaseline }),
             ...(briefPayload !== undefined && { brief: briefPayload }),
+            // i18n-phase-1 localeConfig is TOP-LEVEL (D4 wholesale-replace), NOT
+            // inside finalContent. CLEAR-CONTRACT (Phase-4 fix, REVISES the
+            // Phase-2 absent-preserve rule): the route reads
+            //   undefined ⇒ preserve stored · null ⇒ CLEAR · object ⇒ replace.
+            //  - config present  → send it (replace).
+            //  - falsy + engaged → send `null` EXPLICITLY so the route CLEARS the
+            //    stored config (a locale removed back to single-locale must not
+            //    resurrect on reload). Requires schema `.nullable().optional()`.
+            //  - falsy + never engaged (pure legacy) → OMIT → zero storage diff.
+            ...(state.localeConfig
+              ? { localeConfig: state.localeConfig }
+              : state.localeEngaged
+              ? { localeConfig: null }
+              : {}),
             title: state.title,
             // Service template selection (Phase 11b) — persist editor switches.
             // Null for product; saveDraft writes only when provided.
@@ -401,6 +449,16 @@ export function createPersistenceActions(set: any, get: any) {
           // round-trips the full record instead of dropping keys.
           state.themeValues = apiResponse.themeValues ?? null;
 
+          // i18n-phase-1 (3a): restore the locale layer. loadDraft returns
+          // `localeConfig` TOP-LEVEL (null for legacy projects — Phase 2). Store
+          // null as-is; save() OMITS the key entirely when falsy so we never send
+          // `null` (schema `.optional()` rejects null → 400, contract ii).
+          // activeLocale ALWAYS re-derives to the default on load (plan 3a step 1:
+          // init = defaultLocale) — a persisted non-default editing locale never
+          // survives a reload. The overlay map itself is restored in applySnapshot.
+          state.localeConfig = apiResponse.localeConfig ?? null;
+          state.activeLocale = state.localeConfig?.defaultLocale ?? 'en';
+
           // Project.brief mirror (scale-04): loadDraft returns `brief` top-level.
           // Hold `goal` + `socialProfiles` in store; a later save() round-trips
           // them back into Project.brief. Null goal → GOAL_REF legacy fallback.
@@ -436,7 +494,17 @@ export function createPersistenceActions(set: any, get: any) {
           // Hydration core (sections/layouts/spacing/content/theme/
           // globalSettings/nav/social/legal/forms/pages+chrome) — extracted
           // verbatim into applySnapshot, shared with resetToGenerated.
+          // (also restores state.localeContent from the payload overlay.)
           applySnapshot(state, contentToLoad);
+
+          // Phase-4 fix: mark the locale system "engaged" if this project loaded
+          // WITH a config or overlay — so a later clear (remove back to single
+          // locale) is sent as an explicit null/{} rather than omitted (which the
+          // route would treat as "preserve" → stale-data resurrection). A pure
+          // legacy project (no config, empty overlay) stays NOT engaged → omitted.
+          state.localeEngaged =
+            !!state.localeConfig ||
+            (!!state.localeContent && Object.keys(state.localeContent).length > 0);
 
           // scale-04 (phase 6) bridge: seed the editor social config from the
           // persisted Brief ONLY when the config restored above is empty. Covers
@@ -527,6 +595,20 @@ export function createPersistenceActions(set: any, get: any) {
         version: state.version,
       };
 
+      // i18n-phase-1: ship the COMPLETE project-global overlay INSIDE finalContent
+      // so it rides saveDraft's `...finalContent` spread (Phase-2 D1). CLEAR-CONTRACT
+      // (Phase-4 fix): the spread reads absent ⇒ preserve · present ⇒ replace.
+      //  - overlays exist   → emit the full map (replace; full-map invariant asserted).
+      //  - empty + engaged  → emit `{}` EXPLICITLY so the spread REPLACES the stored
+      //    map with empty (a removed locale's overlay must not resurrect on reload).
+      //  - empty + never engaged (legacy) → OMIT → byte-identical, no key at all.
+      const localeContent = state.localeContent;
+      if (localeContent && Object.keys(localeContent).length > 0) {
+        (exportData as any).localeContent = localeContent;
+        assertFullLocaleExport(localeContent, (exportData as any).localeContent);
+      } else if (state.localeEngaged) {
+        (exportData as any).localeContent = {};
+      }
 
       return exportData;
     },

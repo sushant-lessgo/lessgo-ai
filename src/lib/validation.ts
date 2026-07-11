@@ -38,6 +38,25 @@ export const DraftSaveSchema = z.object({
   paletteId: z.string().max(50).optional(),
   templateId: z.enum(templateIds as unknown as [string, ...string[]]).optional(),
   variantId: z.string().max(50).optional(),
+  // i18n-phase-1 (D4): per-project locale declaration — a TOP-LEVEL sibling of
+  // finalContent/baseline (`{ locales, defaultLocale }`, matches LocaleConfig).
+  // CLEAR-CONTRACT (Phase-4 fix): `.nullable().optional()` — absent ⇒ preserve
+  // stored (legacy-safe, unchanged); explicit `null` ⇒ CLEAR the stored config
+  // (a locale removed back to single-locale); object ⇒ wholesale-replace.
+  // Wholesale-replaced/cleared in the route (mirrors `baseline`), never deep-merged.
+  //
+  // NOTE — `localeContent` (the D1 text overlay) is intentionally NOT declared
+  // here: it rides INSIDE `finalContent` (which is `z.unknown()`), so it passes
+  // through this schema untouched and merges via the existing `...finalContent`
+  // shallow spread in the route (an explicit `{}` there CLEARS the stored map).
+  // Declaring it top-level would be wrong. See the saveDraft route merge sites.
+  localeConfig: z
+    .object({
+      locales: z.array(z.string().max(20)).max(50),
+      defaultLocale: z.string().max(20),
+    })
+    .nullable()
+    .optional(),
 });
 
 // Per-page SEO overrides (SEO track, Phase 2). These are user-controlled strings

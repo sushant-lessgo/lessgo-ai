@@ -14,6 +14,8 @@ import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchem
 import { publishedSubdomainHost, publishSubdomainHosts } from '@/lib/domains/hosts';
 import { isAdmin, logAdminOverride } from '@/lib/admin';
 import { injectChromeIntoPage } from '@/lib/staticExport/injectChrome';
+import { findLocaleSubpageCollision } from '@/lib/i18n/localeSlugCollision';
+import type { LocaleConfig } from '@/types/core/content';
 import * as Sentry from '@sentry/nextjs';
 
 // Force Node.js runtime for ReactDOMServer support
@@ -91,8 +93,39 @@ async function publishHandler(req: NextRequest) {
     // template/variant/palette so service projects ship with the right tokens).
     const project = await prisma.project.findUnique({
       where: { tokenId },
-      select: { id: true, audienceType: true, templateId: true, variantId: true, paletteId: true, themeValues: true }
+      select: { id: true, audienceType: true, templateId: true, variantId: true, paletteId: true, themeValues: true, content: true }
     });
+
+    // i18n-phase-1 (D4/Phase 6): the AUTHORITATIVE locale declaration + text
+    // overlay live in Project.content (top-level `localeConfig`, and the overlay
+    // at `finalContent.localeContent`) — exactly where saveDraft persists them,
+    // and preview force-saves before publishing so this read is fresh. The
+    // publish REQUEST `content` (built from the store's page export) carries
+    // neither key, so we source both from the DB here. Absent ⇒ legacy
+    // single-locale ⇒ renderPublishedExport runs its single default-locale pass
+    // exactly as before (byte-identical, no locale docs, no extra routes).
+    const projectContent = (project?.content ?? null) as any;
+    const localeConfig: LocaleConfig | null = projectContent?.localeConfig ?? null;
+    const projectLocaleContent = projectContent?.finalContent?.localeContent;
+
+    // i18n-phase-1 (Phase 6): reserved-path collision guard. A multi-page subpage
+    // slug that equals a declared NON-DEFAULT locale code would collide with that
+    // locale's `/{loc}` doc on the same KV route key. Reject the publish with a
+    // clear error. No-op for single-locale projects (guard is gated on
+    // isMultiLocale inside the helper), so existing publishes are unaffected.
+    {
+      const subs = (content as any)?.subpages;
+      const subpagePaths = subs && typeof subs === 'object' ? Object.keys(subs) : [];
+      const collision = findLocaleSubpageCollision(subpagePaths, localeConfig);
+      if (collision) {
+        return createSecureResponse(
+          {
+            error: `The subpage path "/${collision}" conflicts with the "${collision}" language route. Rename that page or remove the language.`,
+          },
+          400,
+        );
+      }
+    }
 
     const audienceType: 'product' | 'service' | 'writer' =
       project?.audienceType === 'service' ? 'service'
@@ -266,6 +299,16 @@ async function publishHandler(req: NextRequest) {
       const { renderPublishedExport } = await import('@/lib/staticExport/renderPublishedExport');
       const { cleanupOldVersions } = await import('@/lib/staticExport/versionCleanup');
 
+      // i18n (Phase 6): the non-default-locale text overlay lives in the DB
+      // (Project.content.finalContent.localeContent), NOT in the publish request
+      // `content`. renderPublishedExport reads it off `content.localeContent`
+      // (project-global, keyed by unique sectionId) when resolving each locale
+      // doc, so seed it here. Only set when present ⇒ single-locale publishes
+      // stay byte-identical (no key added).
+      if (projectLocaleContent && content && typeof content === 'object') {
+        (content as any).localeContent = projectLocaleContent;
+      }
+
       const { version, blobKey, blobUrl, sizeBytes, extraRoutes } = await renderPublishedExport({
         pageId,
         userId,
@@ -281,6 +324,9 @@ async function publishHandler(req: NextRequest) {
         mood: projectMood,
         baseUrl,
         canonicalDomain,
+        // i18n (Phase 6): drives the per-locale fan-out. Absent/single-locale ⇒
+        // renderPublishedExport's single default-locale pass (byte-identical).
+        localeConfig,
       });
 
       // For the outer catch's rollback: if a step AFTER generation (KV wiring) fails, the

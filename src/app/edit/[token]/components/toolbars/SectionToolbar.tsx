@@ -68,7 +68,14 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
     showLayoutChangeModal,
     audienceType,
     templateId,
+    activeLocale,
+    localeConfig,
   } = useEditStore();
+
+  // i18n-phase-1 (Phase 4): section regen writes DEFAULT-locale base copy only
+  // (store guard no-ops it elsewhere) — disable the menu item off the default.
+  const regenLocaleLocked =
+    !!localeConfig && activeLocale !== localeConfig.defaultLocale;
 
   // Swap-button visibility gate (scale-09 phase 5). For template-module projects
   // the "Layout" action only makes sense when the section has >1 ELIGIBLE variant
@@ -276,13 +283,15 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
   const advancedActions = [
     {
       id: 'regenerate-section',
-      label: 'Regenerate Content',
+      label: regenLocaleLocked
+        ? 'Regenerate Content (default language only)'
+        : 'Regenerate Content',
       icon: 'refresh',
       handler: () => {
         // TODO: Implement regenerate section handler
         logger.warn('Regenerate section not yet implemented');
       },
-      disabled: isRegenerating,
+      disabled: isRegenerating || regenLocaleLocked,
     },
   ];
 
