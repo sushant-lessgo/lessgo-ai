@@ -163,3 +163,76 @@ Undo of the FIRST NL edit restores `undefined` into the overlay key → readers 
 - Empty-overlay reference-churn guard (Phase 1 carry-forward): writers NEVER persist empty section maps — `writeOverlayText` only creates a `localeContent[locale][sectionId]` node when a value is actually written; `export()`/`save()` only emit `localeContent` when non-empty. So `resolveLocaleElements` keeps its no-op fast path (returns `base` by identity) for untranslated sections — 3b's `useTemplateBlock` memo must key on a NARROW `localeContent?.[activeLocale]?.[sectionId]` selector (+ `activeLocale`), never the whole map, to preserve the perf-01/02 win.
 - Regen in NL is fully blocked (guards); Phase 4 adds the UI disable.
 - Undo/redo is locale-aware and complete (no follow-up needed): the restore routing lives in `uiActions.undo`/`redo`, keyed on `entry.locale`.
+
+## Phase 3b — Editor read-site threading
+
+**Files changed**
+- `src/modules/templates/shared/useTemplateBlock.ts` — THREADED (central block funnel).
+- `src/modules/generatedLanding/sharedBlocks/LeadForm/LeadForm.tsx` — THREADED (`form_headline`).
+- `src/modules/generatedLanding/sharedBlocks/FollowStrip/FollowStrip.tsx` — THREADED (`strip_heading`).
+- `src/modules/generatedLanding/sharedBlocks/StoreBadges/StoreBadges.tsx` — THREADED (`badge_label`).
+- `src/hooks/editStore/collectionHelpers.ts` — READ-side verdict comment only (LEAVE, documented limitation).
+- `src/components/DebugPanel.tsx` — dev-only locale switch (flag-gated, throwaway; Phase-4 removal).
+
+No other files edited. Named readers that turned out NOT to need a code change are recorded below with their LEAVE verdict + reason.
+
+### DELIVERABLE — full read-site enumeration
+
+Grep of `state.content` / `s.content` / `.elements[` / `content[sectionId]` across `src/app/edit/`, `src/hooks/`, `src/modules/generatedLanding/`, `src/components/`, `src/modules/templates/shared/`.
+
+THREAD = locale-relevant text reader routed through the shared resolver keyed on `activeLocale`. LEAVE = structural / media / metadata / prop-driven reader (reason given).
+
+| # | Read site | Verdict | Reason |
+|---|-----------|---------|--------|
+| 1 | `src/modules/templates/shared/useTemplateBlock.ts:41` (`s.content[sectionId]`) | THREAD | The ONE block-resolution funnel; every per-template block hook (useMeridianBlock/useVestriaBlock/useTechPremiumBlock/useServiceBlock/useLexBlock/useLumenBlock/useGranthBlock) delegates here — threading it localizes ALL template blocks' text. |
+| 2 | `sharedBlocks/LeadForm/LeadForm.tsx:23` | THREAD | Reads editable heading `form_headline` directly from `content[sectionId]` (does NOT use useTemplateBlock). `form_id`/`form.fields`/submit text live in the forms slice = locale-shared -> left. |
+| 3 | `sharedBlocks/FollowStrip/FollowStrip.tsx:24` | THREAD | Editable `strip_heading`. `links_json` = social URL structure -> left. |
+| 4 | `sharedBlocks/StoreBadges/StoreBadges.tsx:23` | THREAD | Editable `badge_label`. `appstore_url`/`playstore_url` = media/structure -> left. |
+| 5 | `src/hooks/useUniversalElements.ts:33,99,132,...` | LEAVE | Element-CRUD / retrieval / search / validation hook. Not the canvas text-render path (that is useTemplateBlock). Its ops operate on base element STRUCTURE by key; localizing here would corrupt structural operations and the (sectionId,key) address space. |
+| 6 | `src/hooks/editStore/collectionHelpers.ts` (`recordOf`/`cardFromEntry`) | LEAVE (documented) | Materialized catalog/related/home-teaser cards. Per-collection-ITEM text (`name`/`oneLiner`/`cardSpec`) sits inside an `items[]`/`related[]` object array; `resolveLocaleElements` merges per whole TOP-LEVEL elementKey and cannot patch an array item from a dotted overlay key (Phase-1 limitation). Cards render default-locale text in every locale in v1. Verdict comment added in-file; no read change. |
+| 7 | `src/components/navigation/NavigationEditor.tsx:28,65` (`navigationConfig.items`) | LEAVE | Nav labels live in the `navigationConfig` store slice, NOT in the sectionId-keyed content overlay. 3a created NO per-locale write path for nav labels (`updateNavItem` not branched), so there is nothing to resolve. Nav labels are locale-shared in v1 (documented limitation). |
+| 8 | `src/components/ui/HeaderLogo.tsx:18` (`globalSettings.logoUrl`) | LEAVE | Reads the logo IMAGE url = media = locale-shared (D1). No text. |
+| 9 | `src/components/forms/FormPlacementRenderer.tsx:39,62` | LEAVE | Scans `element.metadata.buttonConfig` (button->form bindings) for placement — reads METADATA, not localizable text. Form field/label text comes from the forms slice (not overlaid in v1). Structural. |
+| 10 | `src/app/edit/[token]/components/editor/InlineTextEditorV2.tsx` | LEAVE | Fully PROP-driven (`content` prop). Does not read `state.content`; its caller (useTemplateBlock-backed block) passes overlay-resolved text, and its `onContentChange`->`updateElementContent` is locale-branched (3a). Flipping `activeLocale` re-extracts upstream -> new `content` prop via its existing sync effect. |
+| 11 | `src/modules/generatedLanding/LandingPageRenderer.tsx:300,330,341` | LEAVE | Reads section data for the background-assignment pass, layout resolution, and a section-level `data` spread. Text extraction is delegated to blocks via useTemplateBlock (header comment confirms blocks own the store-read/extract). Section-level/structural reader. |
+| 12 | `src/hooks/useElementCRUD.ts` (many `section.elements[key]`) | LEAVE | Element structural CRUD (position/props/move/duplicate). Same class as #5. |
+| 13 | `src/components/EditProvider.tsx:155-156` (`...elements.center_hero_image`) | LEAVE | Reads the hero IMAGE for LCP preload = media. |
+| 14 | `src/components/toolbars/ButtonConfigurationModal.tsx:38,175,303,343` | LEAVE | Button-config editing (metadata/config), not localizable body text. |
+| 15 | `src/components/DebugPanel.tsx:191` (`storeState.content[key].elements`) | LEAVE | Debug element-count readout (structural). (Also the dev-switch host — see below.) |
+| 16 | `src/app/edit/[token]/components/ui/ElementToggleModal.tsx:128` (`v2.elements[key]`) | LEAVE | Reads the layout-element SCHEMA defaults, not store content. |
+| 17 | `src/hooks/useReviewState.ts` (JSDoc reference) | LEAVE | Comment/JSDoc only; not a live content read for display. |
+
+Net THREAD set = 4 code sites (#1–#4); #1 covers every template block. All named-from-review readers appear (useUniversalElements #5, useTemplateBlock #1, shared blocks #2–#4, NavigationEditor #7, HeaderLogo #8, FormPlacementRenderer #9, InlineTextEditorV2 #10, collectionHelpers #6). Post-inspection verdicts (several LEAVE) justified above.
+
+### Threading approach (parity-ordering invariant, D1)
+Every threaded site resolves overlay FIRST via the SHARED helper, THEN extracts — never a hand-rolled merge:
+- useTemplateBlock wraps the single section into `{ [sectionId]: sectionContent }` + `{ [activeLocale]: { [sectionId]: sectionOverlay } }`, calls `resolveLocaleElements(...)`, pulls `[sectionId]`, and only THEN runs the existing `extractLayoutContent`. Same helper + same order the Phase-5 published export will use.
+- LeadForm / FollowStrip / StoreBadges use `getEffectiveElementValue(base, overlay, locale, sectionId, key)` for their single editable heading (`form_headline` / `strip_heading` / `badge_label`).
+
+### Perf guard (perf-01/02 — reviewer will check subscription width)
+useTemplateBlock adds exactly TWO narrow selectors:
+- `useEditStore((s) => s.activeLocale)` — a string primitive.
+- `useEditStore((s) => s.localeContent?.[s.activeLocale]?.[sectionId])` — ONLY this section's overlay slice, NOT the whole `localeContent` map, NOT the whole store.
+
+Both added to the `blockContent` memo deps (alongside the pre-existing `sectionContent` ref). For a legacy store `activeLocale==='en'` and `localeContent==={}`, so the second selector returns `undefined` every render (referentially stable), memo deps don't change, and inside the memo the `sectionOverlay && sectionContent` guard is false -> `resolvedSection === sectionContent` (same reference, helper never invoked) -> extract runs on identical input. Result: ZERO extra renders, ZERO ref churn, byte-identical output vs pre-3b. Shared blocks apply the same narrow-selector pattern. Preserves the perf-01/02 win (memo on stable slice refs, no whole-store subscription).
+
+### Dotted-collection-key handling decision
+ACCEPTED Phase-1's whole-top-level-key limitation (did NOT special-case dotted keys). A non-default-locale edit of a V2 collection field is stored under a verbatim dotted key (e.g. `localeContent.nl[sectionId]["features.f1.visual"]`); `resolveLocaleElements` merges it as a NEW top-level element key rather than patching the `features` array item, so `extractLayoutContent` (reads `features`) does not pick it up. Per-item collection text is NOT localized in v1 (whole top-level string/string[] elementKeys ARE). Conservative, consistent-with-Phase-1 choice; collectionHelpers comment (#6) documents the same for materialized cards. Fixing needs an overlay-type extension (later phase) — out of 3b scope.
+
+### Dev-only locale switch (named)
+Location: `src/components/DebugPanel.tsx` — a flag-gated `DevLocaleSwitch` block + subcomponent, rendered only when `EDITOR_DEBUG` (`NEXT_PUBLIC_DEBUG_EDITOR==='true'`), so dead-code-eliminated in prod. DebugPanel is the existing editor debug surface the Files-touched entry anticipates ("a guarded block in an existing editor debug surface"). Renders one pill per declared locale (or `en`/`nl` for a legacy back-compat check) and calls `setActiveLocale`. CLEARLY marked for Phase-4 removal (real `LanguageToggle` replaces it). Re-renders with the store via DebugPanel's existing `store.subscribe` metrics loop.
+
+### Verification
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run` — Test Files 131 passed | 1 skipped (132); Tests 2056 passed | 3 skipped (2059) — IDENTICAL count to post-3a; zero regressions. No new test file added: the only new logic is the shared resolver, whose merge/fallback/no-op-identity semantics are already fully covered by Phase-1's `localeContent.test.ts` (including the single-section overlay shape + base-fallback the threaded sites rely on).
+- Manual (reasoned + partial): back-compat proven by construction — legacy store (`activeLocale='en'`, `localeContent={}`, `localeConfig=null`) makes both narrow selectors return `undefined`, the resolve guard short-circuits to the base reference, extract runs unchanged -> zero visual/behavior diff (matches the null full-suite delta). The dev switch (DebugPanel, `NEXT_PUBLIC_DEBUG_EDITOR=true`) is wired so a tester can flip en<->nl and confirm template blocks (#1) + the three shared blocks (#2–#4) show overlay copy with base fallback, flip back -> EN intact; legacy project -> no diff. Full interactive click-through of a seeded 2-locale project needs the Phase-4 toggle/locale-config UI to declare locales through the app (no acceptance UI in 3b); the resolve logic itself is exercised by the Phase-1 unit tests.
+
+### Deviations
+- Several named-set readers -> LEAVE (not THREAD) after inspection: NavigationEditor (#7, nav labels in a separate slice with no 3a overlay write path), HeaderLogo (#8, media), FormPlacementRenderer (#9, buttonConfig metadata), InlineTextEditorV2 (#10, prop-driven), useUniversalElements (#5, structural CRUD), collectionHelpers (#6, per-item text unsupported by the overlay shape). Chose the conservative option (leave + document) rather than force-thread a reader whose data is not in the overlay or would corrupt structure. Each enumerated above with reason.
+- Dev switch hosted in `DebugPanel.tsx` rather than a standalone new file: a standalone component would be dead code (nothing mounts it) without editing an out-of-scope editor host; the Files-touched entry explicitly permits "a guarded block in an existing editor debug surface," and DebugPanel is that surface. No editor header/layout file (Phase-4 territory) touched.
+- No new test file: 3b introduced no new merge logic (uses Phase-1's tested helpers); avoided creating a test file not on the Files-touched list.
+
+### Notes for Phase 4 / 5
+- Phase 4 must REMOVE the `DevLocaleSwitch` block in `DebugPanel.tsx` (and its `EDITOR_DEBUG` import if unused) when the real `LanguageToggle` lands.
+- Phase 5 export must resolve via the SAME `resolveLocaleElements` at the SAME point (overlay-first, then extract) — parity mirrors useTemplateBlock exactly.
+- Known v1 LEAVE gaps to surface to the founder (Phase 4/8 or later): (a) nav labels locale-shared (no overlay path); (b) per-collection-item card text locale-shared (overlay-shape limitation); (c) form field labels + logo/media locale-shared. None are regressions (never localizable) — they bound "what NL mode translates" in v1.

@@ -16,8 +16,17 @@
 // structure — materialized read-only from base product/gallery records into base
 // `content`, never an authored text edit. They are therefore NOT locale-branched
 // and always target base, regardless of `activeLocale` (D1: structure/media are
-// locale-shared). The per-locale display of these cards' text (name/oneLiner) is
-// a Phase-3b READ concern (resolve records through the overlay before extract).
+// locale-shared).
+//
+// i18n-phase-1 (3b) READ-SIDE VERDICT: LEAVE (base) — the card text
+// (`name`/`oneLiner`/`cardSpec`) is materialized into a nested `items[]`/`related[]`
+// object array. Per-collection-item text CANNOT be localized with the current
+// overlay shape: `resolveLocaleElements` merges per whole TOP-LEVEL elementKey and
+// will not patch an item inside an object array from a dotted overlay key (Phase-1
+// documented limitation, restated in the 3a audit). So `recordOf`/`cardFromEntry`
+// intentionally read BASE records only; the catalog/related/home-teaser cards
+// render default-locale text in every locale in v1. Localizing collection-item
+// text requires extending the overlay type (a later phase), NOT a read change here.
 
 import type { ProjectPageEntry } from '@/types/store';
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
