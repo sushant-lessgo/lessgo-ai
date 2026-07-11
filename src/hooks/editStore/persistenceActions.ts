@@ -586,6 +586,7 @@ export function createPersistenceActions(set: any, get: any) {
         }
         state.formData[formId].fields.push(field);
         state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
       }),
 
     removeFormField: (formId: string, fieldId: string) =>
@@ -595,6 +596,7 @@ export function createPersistenceActions(set: any, get: any) {
             field => field.id !== fieldId
           );
           state.persistence.isDirty = true;
+          state.lastUpdated = Date.now();
         }
       }),
 
@@ -607,6 +609,7 @@ export function createPersistenceActions(set: any, get: any) {
           if (fieldIndex !== -1) {
             Object.assign(state.formData[formId].fields[fieldIndex], updates);
             state.persistence.isDirty = true;
+            state.lastUpdated = Date.now();
           }
         }
       }),
@@ -618,6 +621,7 @@ export function createPersistenceActions(set: any, get: any) {
           if (field) {
             field.required = !field.required;
             state.persistence.isDirty = true;
+            state.lastUpdated = Date.now();
           }
         }
       }),
@@ -642,6 +646,7 @@ export function createPersistenceActions(set: any, get: any) {
         }
         state.images.assets[imageId] = asset;
         state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
       }),
 
     removeImageAsset: (imageId: string) =>
@@ -649,6 +654,7 @@ export function createPersistenceActions(set: any, get: any) {
         if (state.images.assets) {
           delete state.images.assets[imageId];
           state.persistence.isDirty = true;
+          state.lastUpdated = Date.now();
         }
       }),
 
@@ -713,6 +719,7 @@ export function createPersistenceActions(set: any, get: any) {
       set((state: EditStore) => {
         state.sections = newOrder;
         state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
       }),
 
     // Auto-save middleware actions

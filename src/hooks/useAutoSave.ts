@@ -7,6 +7,17 @@ import type { AutoSaveState } from '@/middleware/autoSaveMiddleware';
 import type { ChangeEvent } from '@/middleware/autoSaveMiddleware';
 
 /**
+ * ===== EVENT-DRIVEN AUTOSAVE TUNABLES (perf-02 phase 2) =====
+ * Trailing debounce replaces the old 1s setInterval poll. Every server save is
+ * dispatched through `dispatchSave()` (the single choke point), gated on the
+ * OR-form `lastUpdated > lastSavedUpdatedRef || isDirty` (never `lastUpdated`
+ * alone — dozens of mutation sites set isDirty without bumping lastUpdated).
+ */
+const DEBOUNCE_MS = 1000;        // trailing debounce (parity with old ≤1s poll)
+const RETRY_BASE_MS = 2000;      // bounded failure retry: 2s → 4s → 8s
+const MAX_RETRY_ATTEMPTS = 3;
+
+/**
  * ===== HOOK TYPES =====
  */
 // NOTE: the content-serialization layer (SerializationConfig/Status/Actions,
@@ -94,19 +105,48 @@ export interface UseAutoSaveReturn {
  */
 
 export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSaveReturn => {
-  // Configuration with defaults
-  const finalConfig: AutoSaveHookConfig = {
-  enableAutoSave: true,
-  enableVersioning: true,
-  snapshotInterval: 5,
-  conflictResolution: 'prompt',
-  ...config,
-};
+  // Configuration with defaults.
+  // perf-02 phase 2: memoize keyed on the INDIVIDUAL config fields so the
+  // object identity is stable across renders (callers passing primitive-only
+  // config get a frozen finalConfig) — stops the online/snapshot/callback
+  // effects below from re-subscribing every render.
+  const {
+    enableAutoSave: cfgEnableAutoSave = true,
+    enableVersioning: cfgEnableVersioning = true,
+    snapshotInterval: cfgSnapshotInterval = 5,
+    conflictResolution: cfgConflictResolution = 'prompt',
+    onSaveSuccess: cfgOnSaveSuccess,
+    onSaveError: cfgOnSaveError,
+    onConflictDetected: cfgOnConflictDetected,
+    onVersionCreated: cfgOnVersionCreated,
+  } = config;
+  const finalConfig: AutoSaveHookConfig = useMemo(
+    () => ({
+      enableAutoSave: cfgEnableAutoSave,
+      enableVersioning: cfgEnableVersioning,
+      snapshotInterval: cfgSnapshotInterval,
+      conflictResolution: cfgConflictResolution,
+      onSaveSuccess: cfgOnSaveSuccess,
+      onSaveError: cfgOnSaveError,
+      onConflictDetected: cfgOnConflictDetected,
+      onVersionCreated: cfgOnVersionCreated,
+    }),
+    [
+      cfgEnableAutoSave,
+      cfgEnableVersioning,
+      cfgSnapshotInterval,
+      cfgConflictResolution,
+      cfgOnSaveSuccess,
+      cfgOnSaveError,
+      cfgOnConflictDetected,
+      cfgOnVersionCreated,
+    ]
+  );
   // Store integration.
-  // TRIGGER MECHANICS: this hook's auto-save trigger is the TIME-BASED
-  // setInterval below (polls persistence.isDirty every 1s) — it is NOT driven by
-  // a render pass, so moving reads to getState() does NOT stop auto-save from
-  // firing. But the `status` memo + several effects READ persistence/queuedChanges
+  // TRIGGER MECHANICS (perf-02 phase 2): the 1s setInterval poll is gone. The
+  // auto-save trigger is now an event-driven trailing debounce armed by a
+  // mount-once storeApi.subscribe() listener (below) — not driven by a render
+  // pass. The `status` memo + several effects READ persistence/queuedChanges
   // DURING render, so we keep a NARROW reactive subscription to just those slices
   // (removing the whole-store subscription that re-rendered on unrelated edits)
   // and read actions/methods non-reactively via storeApi.getState().
@@ -132,15 +172,92 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
   const changeCountRef = useRef(0);
   const isOnlineRef = useRef(navigator.onLine);
 
-  // Online/offline detection
+  // ===== EVENT-DRIVEN AUTOSAVE STATE (perf-02 phase 2) =====
+  // lastSavedUpdatedRef: the `state.lastUpdated` value the last DISPATCHED save
+  //   captured — the OR-gate's `lastUpdated > ref` term compares against it.
+  // lastSeenUpdatedRef: the last `state.lastUpdated` the store-subscription
+  //   listener observed — drives per-keystroke (re)arm of the trailing debounce.
+  const lastSavedUpdatedRef = useRef<number>(storeApi.getState().lastUpdated ?? 0);
+  const lastSeenUpdatedRef = useRef<number>(storeApi.getState().lastUpdated ?? 0);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryAttemptRef = useRef(0);
+  // enableAutoSave read non-reactively by the stable dispatchSave gate.
+  const enableAutoSaveRef = useRef(finalConfig.enableAutoSave);
+  enableAutoSaveRef.current = finalConfig.enableAutoSave;
+
+  // Stable dispatchSave holder — captured by the mount-once subscribe listener
+  // and the online/visibility/pagehide effects (they read `.current`), so a
+  // stale closure can never silently break mid-flight re-arm or the retry path.
+  const dispatchSaveRef = useRef<() => void>(() => {});
+
+  // The SINGLE choke point for every server save this hook fires (timer,
+  // mid-flight re-arm, all flushes, online recovery, failure retry). Stable
+  // (deps: storeApi only) — reads all live state via getState()/refs.
+  const dispatchSave = useCallback(async () => {
+    const s = storeApi.getState();
+    // Uniform OR-gate everywhere. NEVER gate solely on lastUpdated: dozens of
+    // mutation sites set isDirty without bumping lastUpdated.
+    const hasUnsaved =
+      s.lastUpdated > lastSavedUpdatedRef.current || s.persistence.isDirty;
+    if (
+      !enableAutoSaveRef.current ||
+      !isOnlineRef.current ||
+      !hasUnsaved ||
+      s.persistence.isSaving
+    ) {
+      return;
+    }
+
+    // Capture-at-dispatch BEFORE awaiting — edits landing during the flight
+    // then satisfy `lastUpdated > lastSavedUpdatedRef` and re-arm.
+    const prev = lastSavedUpdatedRef.current;
+    lastSavedUpdatedRef.current = s.lastUpdated;
+
+    try {
+      // Dispatch via save() DIRECTLY (not triggerAutoSave, which re-gates on
+      // isDirty and would no-op mid-flight/teardown flushes per :349 clobber).
+      await s.save();
+      retryAttemptRef.current = 0; // success resets the bounded-retry counter
+    } catch {
+      // save() threw and has ALREADY set persistence.saveError. Restore the ref
+      // so arm/flush gates still see the edit as unsaved, then schedule a
+      // BOUNDED retry (2s → 4s → 8s, max 3). The mid-flight guard is gated off
+      // saveError and never re-arms on failure — this catch SOLELY owns failure
+      // re-arming.
+      lastSavedUpdatedRef.current = prev;
+      if (retryAttemptRef.current < MAX_RETRY_ATTEMPTS) {
+        const backoff = RETRY_BASE_MS * Math.pow(2, retryAttemptRef.current);
+        retryAttemptRef.current += 1;
+        if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = setTimeout(() => {
+          retryTimeoutRef.current = null;
+          dispatchSaveRef.current();
+        }, backoff);
+      }
+      // After the cap: stop, leave saveError surfaced; the next edit / visibility
+      // / online event re-arms through the normal gates.
+    }
+  }, [storeApi]);
+  dispatchSaveRef.current = dispatchSave;
+
+  // (Re)arm the trailing debounce timer → fires dispatchSave once ~1s after the
+  // LAST arm signal.
+  const armDebounce = useCallback(() => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null;
+      dispatchSaveRef.current();
+    }, DEBOUNCE_MS);
+  }, []);
+
+  // Online/offline detection + online-recovery flush (re-pointed to dispatchSave
+  // so lastSavedUpdatedRef stays consistent; its old isDirty read is subsumed by
+  // dispatchSave's OR-gate). Mount-once (reads refs only).
   useEffect(() => {
     const handleOnline = () => {
       isOnlineRef.current = true;
-      // Trigger save when coming back online if there are changes
-      const s = storeApi.getState();
-      if (s.persistence.isDirty && finalConfig.enableAutoSave) {
-        s.triggerAutoSave();
-      }
+      dispatchSaveRef.current();
     };
 
     const handleOffline = () => {
@@ -154,22 +271,88 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [storeApi, finalConfig.enableAutoSave]);
+  }, []);
 
-  // Auto-save enablement effect
+  // ===== STORE-SUBSCRIPTION TRAILING DEBOUNCE (replaces the 1s poll) =====
+  // Mount-once. Cheap field compares only; arms/re-arms the debounce timer.
   useEffect(() => {
-    if (finalConfig.enableAutoSave && isOnlineRef.current) {
-      // Enable auto-save when conditions are met
-      const interval = setInterval(() => {
-        const s = storeApi.getState();
-        if (s.persistence.isDirty && !s.persistence.isSaving) {
-          s.triggerAutoSave();
-        }
-      }, 1000); // Check every second
+    const init = storeApi.getState();
+    lastSeenUpdatedRef.current = init.lastUpdated ?? 0;
 
-      return () => clearInterval(interval);
-    }
-  }, [finalConfig.enableAutoSave, storeApi]);
+    const unsubscribe = storeApi.subscribe((state: any, prevState: any) => {
+      // lastUpdated advance → distinguish a real edit from a load/programmatic
+      // bump via isDirty AT THIS set(). A real user edit sets isDirty=true in the
+      // same set() that bumps lastUpdated → record + (re)arm (per-keystroke
+      // trailing) + reset the retry counter. A load/programmatic bump (e.g.
+      // loadFromDraft) lands with isDirty=false → record the seen ref AND advance
+      // the clean baseline (lastSavedUpdatedRef) so no save is owed, then do NOT
+      // arm — this kills the spurious save on editor open.
+      if ((state.lastUpdated ?? 0) > lastSeenUpdatedRef.current) {
+        lastSeenUpdatedRef.current = state.lastUpdated;
+        if (state.persistence.isDirty) {
+          retryAttemptRef.current = 0;
+          armDebounce();
+        } else {
+          lastSavedUpdatedRef.current = state.lastUpdated;
+        }
+      }
+
+      // isDirty false→true → ALSO arm (plain OR semantics, NO saveError clause).
+      // Only arm signal for the lastUpdated-silent mutation sites (section
+      // reorder, form/image, nav/social). Double-arm is harmless (same timer).
+      if (state.persistence.isDirty && !prevState.persistence.isDirty) {
+        retryAttemptRef.current = 0;
+        armDebounce();
+      }
+
+      // Mid-flight guard: isSaving true→false. Re-arm ONLY on success
+      // transitions — the `&& !saveError` applies to THIS guard alone. On
+      // failure the catch's bounded retry solely owns re-arming.
+      if (prevState.persistence.isSaving && !state.persistence.isSaving) {
+        const hasUnsaved =
+          (state.lastUpdated ?? 0) > lastSavedUpdatedRef.current ||
+          state.persistence.isDirty;
+        if (hasUnsaved && !state.persistence.saveError) {
+          armDebounce();
+        }
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+      // Effect cleanup (unmount / SPA route change away): one last flush; its
+      // own OR-gate decides whether anything is outstanding.
+      dispatchSaveRef.current();
+    };
+  }, [storeApi, armDebounce]);
+
+  // ===== TEARDOWN FLUSH TRIGGERS ===== (mount-once, best-effort while alive)
+  useEffect(() => {
+    const flush = () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+      dispatchSaveRef.current();
+    };
+    // visibility→hidden is the PRIMARY teardown guarantee (page alive, normal
+    // fetch OK).
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') flush();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    // pagehide + beforeunload: immediate dispatch, explicitly best-effort.
+    window.addEventListener('pagehide', flush);
+    window.addEventListener('beforeunload', flush);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('pagehide', flush);
+      window.removeEventListener('beforeunload', flush);
+    };
+  }, []);
 
   // Version snapshot creation effect
   useEffect(() => {
@@ -256,10 +439,10 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
    */
   
   const triggerSave = useCallback(() => {
-    if (finalConfig.enableAutoSave && isOnlineRef.current) {
-      storeApi.getState().triggerAutoSave();
-    }
-  }, [storeApi, finalConfig.enableAutoSave]);
+    // perf-02 phase 2: route through dispatchSave() → save() directly (its
+    // OR-gate + online + !isSaving guards apply); never triggerAutoSave().
+    dispatchSaveRef.current();
+  }, []);
 
   // Enhanced forceSave implementation to replace existing:
 const forceSave = useCallback(async () => {
