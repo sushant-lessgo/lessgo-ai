@@ -63,7 +63,7 @@ export function VestriaNavHeaderCore({ content, E }: { content: VestriaHeaderCon
           <span className="vs-brand">
             {content.logo_image ? (
               <E.Img elementKey="logo_image" src={content.logo_image} alt={content.logo_text || 'logo'}
-                className="vs-brand__logo" />
+                className="vs-brand__logo" eager />
             ) : (
               <E.Txt elementKey="logo_text" value={content.logo_text} as="b" placeholder="Brand" />
             )}

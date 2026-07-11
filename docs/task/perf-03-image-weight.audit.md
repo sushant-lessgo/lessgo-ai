@@ -264,3 +264,55 @@ attribute parity confirmed for every pair.
 - `npm run build` — green (full build incl. published CSS/assets recompile; route table printed).
 
 **Open risks:** None. Attrs-only, edit/published parity identical for all 4 pairs, layout/CSS unchanged. Live Kundius page unaffected visually.
+
+---
+
+## Phase 6 — shared Img primitive: granth + vestria
+
+**Files changed**
+- `src/modules/templates/granth/blocks/primitives.ts` — added `eager?: boolean` to `GranthImgProps`.
+- `src/modules/templates/granth/blocks/editPrimitives.tsx` — `Img` renders `loading={eager?'eager':'lazy'}` + `decoding="async"`.
+- `src/modules/templates/granth/blocks/publishedPrimitives.tsx` — same img attrs as edit (parity).
+- `src/modules/templates/granth/blocks/Hero/GranthHero.core.tsx` — `portrait_image` Img passes `eager`.
+- `src/modules/templates/vestria/blocks/primitives.ts` — added `eager?: boolean` to `VestriaImgProps`.
+- `src/modules/templates/vestria/blocks/editPrimitives.tsx` — `Img` renders `loading={eager?'eager':'lazy'}` + `decoding="async"`.
+- `src/modules/templates/vestria/blocks/publishedPrimitives.tsx` — same img attrs as edit (parity).
+- `src/modules/templates/vestria/blocks/Hero/VestriaFullBleedHero.core.tsx` — `poster` Img passes `eager`.
+- `src/modules/templates/vestria/blocks/Hero/VestriaTailoredHero.core.tsx` — `hero_image` Img passes `eager`.
+- `src/modules/templates/vestria/blocks/Header/VestriaNavHeader.core.tsx` — `logo_image` Img passes `eager`.
+
+No CSS/aspect-ratio files edited (see aspect-ratio findings below) — none needed.
+
+**Img usage enumeration (grep of `E.Img` across `*.core.tsx`):**
+
+granth (2 usages):
+- `Hero/GranthHero.core.tsx:49` `portrait_image` → EAGER (above-fold LCP).
+- `Books/GranthBooks.core.tsx:52` `items.<id>.cover_image` → LAZY (below-fold, default).
+
+vestria (6 usages):
+- `Hero/VestriaFullBleedHero.core.tsx:48` `poster` → EAGER (above-fold hero media).
+- `Hero/VestriaTailoredHero.core.tsx:60` `hero_image` → EAGER (above-fold hero media).
+- `Header/VestriaNavHeader.core.tsx:65` `logo_image` → EAGER (above-fold nav logo).
+- `About/VestriaAboutStats.core.tsx:35` `about_image` → LAZY (below-fold, default).
+- `Industries/VestriaIndustriesGrid.core.tsx:50` `industries.<id>.image` → LAZY (below-fold, default).
+- `Catalog/VestriaCatalogueGrid.core.tsx:60` `items.<id>.image` → LAZY (below-fold, default).
+
+Only one hero per vestria page renders (FullBleed OR Tailored variant); both marked eager is correct.
+
+**Primitive-impl parity:** For BOTH templates, edit and published `Img` `<img>` now carry the identical `loading={eager ? 'eager' : 'lazy'}` + `decoding="async"` attribute logic. Single-source `.core.tsx` blocks feed both renderers via one shared `Img` — parity by construction. Default (no `eager`) = lazy; safe because all above-fold usages pass `eager` (steps 1-3 landed together).
+
+**Aspect-ratio findings (below-fold wrappers reserve space — no additions needed):**
+- granth `.gr-cover` — `aspect-ratio:2/3` (Books/styles.ts:11).
+- vestria `.vs-prod__ph` — `aspect-ratio:4/5` (Catalog/styles.ts:14).
+- vestria `.vs-about__frame` — fixed `height:clamp(340px,44vw,480px)` (About/styles.ts:13).
+- vestria `.vs-ind__media` — fixed `height:300px` (Industries/styles.ts:12).
+All reserve height already; no CSS files joined the Files-touched list.
+
+**Deviations:** None.
+
+**Test results:**
+- `npx tsc --noEmit` — green (no output).
+- `npm run test:run` — green (2016 passed, 3 skipped; dispatch/regression suites incl. granth/vestria pass).
+- `npm run build` — green (full build incl. published CSS/asset recompile).
+
+**Open risks:** None. Attrs-only change, edit/published parity identical, layout/CSS unchanged. No width/height attrs added. Load-timing only.

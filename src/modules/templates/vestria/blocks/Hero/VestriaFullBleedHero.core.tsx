@@ -46,7 +46,7 @@ export function VestriaFullBleedHeroCore({ content, E }: { content: VestriaFullB
       <section className="vs-heroFull">
         <div className="vs-heroFull__media" aria-hidden="true">
           <E.Img elementKey={posterKey} src={poster} alt=""
-            className="vs-heroFull__bg" imgClassName="vs-heroFull__img" placeholder={MEDIA_PH} />
+            className="vs-heroFull__bg" imgClassName="vs-heroFull__img" placeholder={MEDIA_PH} eager />
           {desktopClip && (
             <video
               className={`vs-heroFull__video${mobileClip ? ' vs-heroFull__video--desktop' : ''}`}

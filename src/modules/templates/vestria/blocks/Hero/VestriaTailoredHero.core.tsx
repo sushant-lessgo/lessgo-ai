@@ -58,7 +58,7 @@ export function VestriaTailoredHeroCore({ content, E }: { content: VestriaHeroCo
             </div>
             <div className="vs-hero__media">
               <E.Img elementKey="hero_image" src={content.hero_image} alt={content.tag_text || ''}
-                className="vs-hero__frame" placeholder={MEDIA_PH} />
+                className="vs-hero__frame" placeholder={MEDIA_PH} eager />
               {(content.stamp_value || content.stamp_label) && (
                 <div className="vs-hero__stamp">
                   <E.Txt elementKey="stamp_value" value={content.stamp_value} as="b"

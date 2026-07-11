@@ -22,9 +22,9 @@ export function makePublishedPrimitives(): GranthPrimitives {
       : <Tag className={className} style={style}>{shown}</Tag>;
   };
 
-  const Img: React.FC<GranthImgProps> = ({ src, alt, className, imgClassName, placeholder }) => (
+  const Img: React.FC<GranthImgProps> = ({ src, alt, className, imgClassName, placeholder, eager }) => (
     <div className={className}>
-      {src ? <img src={src} alt={alt || ''} className={imgClassName} /> : placeholder}
+      {src ? <img src={src} alt={alt || ''} className={imgClassName} loading={eager ? 'eager' : 'lazy'} decoding="async" /> : placeholder}
     </div>
   );
 
