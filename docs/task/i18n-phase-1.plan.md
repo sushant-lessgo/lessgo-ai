@@ -16,8 +16,8 @@ storage/behavior diff — locale machinery is invisible until a project declares
 
 ## Progress log
 
-- phase 1 content-model types + locale resolver: done (review loops 1, ship). Carry-forward → 3b: guard `resolveLocaleElements` empty-overlay reference churn (perf-01/02 memo). See audit.
-- phase 2 persistence (saveDraft/loadDraft locale-aware): pending
+- phase 1 content-model types + locale resolver: done (commit 78891443, review loops 1). Carry-forward → 3b: guard `resolveLocaleElements` empty-overlay reference churn (perf-01/02 memo). See audit.
+- phase 2 persistence (saveDraft/loadDraft locale-aware): done (review loops 1, ship). Schema lives in `src/lib/validation.ts` (not route.ts). Carry-forward → 3a: (i) full-map export invariant is load-bearing (partial map WIPES omitted locales); (ii) loadDraft emits `localeConfig: null` for legacy — hydration must OMIT the key on save, never send null (schema `.optional()` rejects null → 400); (iii) mirror test(f) `declaredLocalesFullyPresent` shape for the store-side flush assertion.
 - phase 3a editor store state layer (activeLocale, writes, history, persistence): pending
 - phase 3b editor read-site threading (enumerated read-site list): pending
 - phase 4 editor language toggle + locale config UI: pending

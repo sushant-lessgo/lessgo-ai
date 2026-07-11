@@ -78,7 +78,8 @@ async function saveDraftHandler(req: NextRequest) {
       finalContent,
       paletteId,
       templateId,
-      variantId
+      variantId,
+      localeConfig
     } = validationResult.data;
 
     const isDemo = tokenId === DEMO_TOKEN;
@@ -158,10 +159,21 @@ async function saveDraftHandler(req: NextRequest) {
     };
 
     // ✅ CRITICAL FIX: Save the actual page data if provided
+    //
+    // i18n-phase-1 (D1) — localeContent MERGE MECHANISM #1 (spread-ride):
+    // The locale text overlay (`finalContent.localeContent`) lives INSIDE
+    // finalContent and rides this shallow `...finalContent` spread. Consequence:
+    //  - payload OMITS `localeContent`  ⇒ key absent from spread ⇒ the stored map
+    //    is PRESERVED (an autosave that doesn't touch locales can't wipe it);
+    //  - payload INCLUDES `localeContent` ⇒ the WHOLE map is REPLACED.
+    // This is safe ONLY because of the store-side invariant (Phase 3a): every
+    // save that includes localeContent exports the COMPLETE map — all locales,
+    // all pages' overlays. Do NOT add per-locale deep-merge here; correctness
+    // depends on the overlay riding this existing spread verbatim.
     if (finalContent) {
       updatedContent.finalContent = {
         ...existingContent.finalContent,
-        ...finalContent,
+        ...(finalContent as Record<string, unknown>),
         lastSaved: new Date().toISOString(),
       };
       
@@ -178,6 +190,18 @@ async function saveDraftHandler(req: NextRequest) {
     // baseline carries the same trust level as finalContent (z.unknown()).
     if (body.baseline !== undefined) {
       updatedContent.baseline = body.baseline;
+    }
+
+    // i18n-phase-1 (D4) — localeConfig MERGE MECHANISM #2 (top-level wholesale
+    // replace): localeConfig is a TOP-LEVEL sibling of finalContent/baseline, so
+    // — unlike localeContent above — it does NOT ride the finalContent spread.
+    // It is replaced wholesale exactly like `baseline`: present in payload ⇒
+    // overwrite; absent ⇒ preserved automatically by the `...existingContent`
+    // spread at updatedContent's construction. Never deep-merged (it's a small
+    // authoritative declaration). Validated by DraftSaveSchema, so read the
+    // parsed value (not raw body).
+    if (localeConfig !== undefined) {
+      updatedContent.localeConfig = localeConfig;
     }
 
     // 💾 Upsert project with merged content
