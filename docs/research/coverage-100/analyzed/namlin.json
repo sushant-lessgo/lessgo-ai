@@ -1,0 +1,53 @@
+{
+  "slug": "namlin",
+  "url": "https://namlin.com/",
+  "business": { "type_label": "premium brass/gold faucet retailer", "icp_category": "home-fixtures product store", "geography_hint": "Thailand (Thai-language, ฿ pricing)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "The page argues a physical PRODUCT — 7 features, brass advantages, installation guide, durability claims plus testimonials as proof it works. No defined-expertise service (not trust), the product photos support a feature argument rather than being self-proving portfolio, and there is a full persuasive body rather than a bare ask.",
+    "runner_up": "place"
+  },
+  "goal": {
+    "one_action": "contact the shop via Line / phone (or visit) to inquire/buy faucets",
+    "mechanism": "call-WhatsApp",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 8,
+    "pages": ["home", "products", "about", "contact", "blog"],
+    "archetype_note": "WordPress multi-page product-showcase catalog; prices shown but no cart — conversion is off-page contact via Line/phone/map."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "NAMLIN GOLD FAUCET - แหล่งรวม ก๊อกน้ำและอุปกรณ์ทองเหลืองแท้", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Product Showcase (featured collections)", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Key Selling Points", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Brass Advantages", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "Installation Guide", "component": "text" },
+      { "canonical": "features", "observed_as": "7 Key Features", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Faucet Type Categories", "component": "grid-cards" },
+      { "canonical": "testimonials", "observed_as": "Customer Testimonials", "component": "text" },
+      { "canonical": "objectionHandling", "observed_as": "Why Replace Old Faucets", "component": "text" },
+      { "canonical": "footer", "observed_as": "Footer", "component": "text" },
+      { "canonical": "cta", "observed_as": "Contact/Map (address, phone, embedded Google map)", "component": "map" }
+    ],
+    "unmapped": [
+      { "observed": "Product grid pages (10-item catalog on /gold-home-applicances/ with ฿ prices, no cart)", "why_no_fit": "sectionList has no product-catalog/listing section; closest are useCases/features which do not capture a priced product grid", "closest": "features" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "map-hours", "bilingual", "blog"],
+    "proposed_new": []
+  },
+  "proof_types": ["testimonials"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["product-grid with price", "feature-icon grid", "installation-steps diagram", "testimonial list", "map-embed"],
+  "languages": ["th", "en"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; all pages, CTAs, proof, commerce and nav captured cleanly." },
+  "gap_findings": [
+    "Priced product-catalog grid (own goods, prices shown, no cart) has no canonical section id — repeatedly forced into features/useCases; a catalog/product-listing section is the recurring gap.",
+    "Line messaging is the primary contact channel (Thai market equivalent of WhatsApp) — mapped to call-WhatsApp mechanism, which fits."
+  ]
+}

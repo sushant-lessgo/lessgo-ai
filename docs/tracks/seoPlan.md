@@ -250,6 +250,70 @@ once the customer sees the fix + editing controls.
 
 ---
 
+## 9. SEO value-stack brainstorm (2026-07-10, unspecced)
+
+Direction: SEO = universal customer need; every item — however small — is one more
+point on the Pro value-stack (same motion as social-posts + email-sequences).
+Copywriting-shaped items are the moat; infra items stack the "look how much you
+get" list. Status column reflects phases 0–5 above.
+
+### Tier 0 — free rides (surface + market, zero build)
+| # | Need | Our help | Status |
+|---|---|---|---|
+| V1 | Page speed / CWV | Static export already fast → show Lighthouse score badge in dashboard ("your site scores 98") | not surfaced |
+| V2 | Mobile-friendly, clean HTML | Display the claim | not surfaced |
+
+### Tier 1 — tiny (hours–days, mostly from data we already have)
+| # | Need | Our help | Status |
+|---|---|---|---|
+| V3 | Meta title/description | AI-WRITTEN suggestions (keyword-aware, CTR-optimized) inside existing SEO panel | panel BUILT; AI suggest not |
+| V4 | OG / social preview | — | BUILT (phases 2b+5) |
+| V5 | sitemap.xml + robots.txt | — | BUILT (phase 4) |
+| V6 | Structured data | Extend beyond Organization: FAQPage from FAQ section (rich results = visible win), LocalBusiness/Service/Breadcrumb from Brief | Organization BUILT; rest not |
+| V7 | Image alt text | AI-generate on upload (a11y + SEO) | not |
+| V8 | GSC setup | Verification meta-tag input + hand-holding guide | not |
+| V9 | AI-search readiness (AEO) | Emit llms.txt; "AI-search ready" marketing line | not |
+| V10 | Slug-change 301s | Auto redirects on slug rename | subdomain→custom 301 exists; slug-change not |
+
+### Tier 2 — medium (copywriting-shaped — the moat)
+| # | Need | Our help |
+|---|---|---|
+| V11 | Keyword targeting | AI proposes keywords per page from Brief category/ICP; user picks → "SEO mode" regen aligns H1/title/meta |
+| V12 | Content/blog | Topic-cluster proposals + AI drafts (blog track) + auto internal links to money page |
+| V13 | Backlinks | We write the outreach: guest-post pitches, directory descriptions, HARO responses, partner-swap emails. Link-building framed as a copy problem — nobody else does this |
+| V14 | Knowing what to fix | SEO report card: one-click audit (title/meta/H1/alt/schema/speed), score + fix buttons; monthly retention loop |
+
+### Tier 3 — big / strategic
+| # | Need | Our help |
+|---|---|---|
+| V15 | Local/programmatic SEO | "[service] in [city]" variants = Universe track (noindex/SEO split already designed); THE use case for dentists/photographers |
+| V16 | Real search data | GSC API: queries/clicks in dashboard, feeds V11–V12 |
+
+## 10. Entity stacking (AEO adjacency, unspecced)
+
+Entity stacking = making the business a recognized *entity* (Google Knowledge
+Graph, AI-search corpora) via consistent cross-corroborating presence: site ↔
+GBP ↔ socials ↔ directories all telling the same story.
+
+| # | Need | Our help | Effort |
+|---|---|---|---|
+| E1 | Machine-readable entity home | Extend built JSON-LD with **sameAs** array linking every profile (GBP, LinkedIn, Instagram, X, YouTube, directories) — site becomes the entity anchor | tiny (profile URLs partly in Brief/follow-strip) |
+| E2 | Consistent NAP + boilerplate | **Entity kit**: canonical name/address/phone block + bios (50/150/300 words) + one-liner — identical facts everywhere; consistency IS the signal, and it's pure copywriting | tiny-medium |
+| E3 | Per-platform profile copy | Paste-ready descriptions: GBP, LinkedIn, directories, Crunchbase (overlaps GBP-pack idea) | medium |
+| E4 | Entity-rich About page | About/founder copy stating entity facts explicitly (who, where, since when, credentials) — what knowledge graphs + LLMs parse | tiny |
+| E5 | Where to stack | Personalized directory/profile checklist by category+geo, with prefilled copy per item | medium |
+| E6 | Knowledge panel | Guide: claiming GBP/knowledge panel, Wikidata basics | content only |
+
+Fit: E1+E2+E4 = days of work off Brief data; + llms.txt (V9) → bundle as
+**"entity / AI-search pack"** — a value-stack point almost no competitor names.
+
+### Track relationships
+- Universe → V15 programmatic local pages · Blog → V12 clusters
+- social-posts / email-sequences → same "Brief → paste-ready copy" rail
+- Ladder naming: **SEO pack** + **entity/AI-search pack**
+
+---
+
 ## Unresolved questions
 
 1. Scope now: just Phase 0 fix, or full plan build-out? Pilot-first (P0 + P2 UI) vs all?

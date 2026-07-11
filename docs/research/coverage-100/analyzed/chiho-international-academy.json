@@ -1,0 +1,34 @@
+{
+  "slug": "chiho-international-academy",
+  "url": "https://chiho-international-academy.com/",
+  "business": { "type_label": "divination & psychological-counseling salon (also calligraphy classes)", "icp_category": "personal-service practitioner", "geography_hint": "Tokyo (Aoyama / Azabu-juban / Akihabara), Japan" },
+  "in_icp": true,
+  "engine": { "pick": "trust", "ladder_reasoning": "Visitor is deciding whether to trust a person — the reader/counselor CHIHO — evidenced by the founder profile, WHO-gatekeeper instructor certification, non-judgmental approach statements, and 'first-time visitor' reassurance. The service is defined expertise sold on credibility, not a browsable product or portfolio.", "runner_up": "place" },
+  "goal": { "one_action": "phone the salon to book a divination/counseling session", "mechanism": "call-WhatsApp", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 9, "pages": ["home","first (初めての方へ)","academy (サロン紹介)","access (教室案内)","price (コース・料金)","blog","+category pages"], "archetype_note": "WordPress multipage practitioner site; content/blog-heavy, phone-only conversion, pricing page not in main nav; mixes divination-counseling with calligraphy classes and unrelated ventures." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "占術鑑定で、お悩みを紐解く", "component": "text" },
+      { "canonical": "features", "observed_as": "青山で、占術鑑定とカウンセリング", "component": "text" },
+      { "canonical": "problem", "observed_as": "こんな悩みはありませんか？", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "多国の占術を使ってケア / 決めつけない", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "代表CHIHO プロフィール", "component": "team" },
+      { "canonical": "socialProof", "observed_as": "海外活動 (international activities / embassy visits)", "component": "gallery" },
+      { "canonical": "pricing", "observed_as": "コース・料金", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "サロン紹介 (3 locations w/ hours/access)", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Letest Blog Posts / ブログ", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "お問い合わせはコチラ (tel)", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "教室案内 (calligraphy / sutra-copying / money-flower class offerings)", "why_no_fit": "A distinct second service line (classes) unrelated to the divination-counseling funnel; not a section of the primary offer but a parallel business advertised on the same site", "closest": "useCases" },
+      { "observed": "コンテンツ (category links: 夢叶メッセージ, 海外活動, ゲートキーパー)", "why_no_fit": "Content-taxonomy link strip, not a persuasion section", "closest": "footer" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage","blog","map-hours"], "proposed_new": [] },
+  "proof_types": ["certs"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["team/founder bio card","location cards with hours + embedded map","blog card grid","pricing statement block"],
+  "languages": ["ja"],
+  "confidence": { "level": "medium", "why": "fetch_quality is full, but the site conflates multiple unrelated service lines (divination salon, calligraphy classes, cafe venture) making the single conversion intent fuzzy; primary action inferred as the phone CTA since there is no form." },
+  "gap_findings": ["Site advertises multiple parallel businesses on one domain (divination-counseling + calligraphy classroom + antique/cafe) — the taxonomy assumes ONE offer/one conversion; no clean way to express a multi-service-line practitioner site.","Blog/content is a major surface (20 posts, category strips) yet conversion is a single phone call — the 'trust' engine has no slot for content-marketing-as-proof beyond blog capability."]
+}

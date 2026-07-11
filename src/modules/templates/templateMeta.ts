@@ -113,9 +113,13 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
   lumen: {
     copyEngines: ['work'],
     designStyles: ['editorial-craft'],
-    // NOTE (structural caps): `bilingual` is trust-on-declaration — twin-field
-    // machinery, not a block; no block-existence check covers it yet
-    // (conformance exempts structural capabilities).
+    // NOTE (i18n-phase-1 D5): `bilingual` is now a PLATFORM-LEVEL capability —
+    // fit() satisfies it for EVERY non-retired template via PLATFORM_CAPABILITIES
+    // (the content-locale layer is template-agnostic), superseding Lumen's old
+    // trust-on-declaration. This declaration stays (harmless — Lumen is bespoke/
+    // retired-in-place); it no longer uniquely grants bilingual. Structural-cap
+    // machinery is asserted by src/lib/i18n/i18nHonesty.test.ts (conformance
+    // still exempts it from the block-evidence check).
     capabilities: ['bilingual', 'gallery', 'lead-form'],
     capabilitySections: { gallery: 'portfolio', 'lead-form': 'contact' },
     bespoke: true,

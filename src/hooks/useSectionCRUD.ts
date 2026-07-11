@@ -1,6 +1,6 @@
 // hooks/useSectionCRUD.ts - Section CRUD operations hook
 import { useCallback } from 'react';
-import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
+import { useEditStoreApi } from './useEditStoreLegacy';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import type { ValidationResult } from '@/types/store';
 import type { BackgroundType } from '@/types/sectionBackground';
@@ -61,11 +61,14 @@ export interface SectionTemplate {
 }
 
 export function useSectionCRUD() {
-  const store = useEditStore();
+  // Non-reactive store instance — this hook only READS in callbacks, so it no
+  // longer subscribes to the whole store (which re-rendered its host on every
+  // edit). Store ACTIONS have stable identities across the store's life, so we
+  // snapshot them once at render; DATA (sections/content) is read fresh via
+  // storeApi.getState() inside each callback.
+  const storeApi = useEditStoreApi();
+  const store = storeApi.getState();
   const {
-    sections,
-    content,
-    sectionLayouts,
     addSection: storeAddSection,
     removeSection: storeRemoveSection,
     duplicateSection: storeDuplicateSection,
@@ -75,7 +78,7 @@ export function useSectionCRUD() {
     triggerAutoSave,
     announceLiveRegion,
   } = store;
-  
+
   const moveSectionUp = (store as any).moveSectionUp;
   const moveSectionDown = (store as any).moveSectionDown;
   const validateSection = (store as any).validateSection;
@@ -165,8 +168,9 @@ export function useSectionCRUD() {
 
   // Add section
   const addSection = useCallback(async (options: AddSectionOptions): Promise<string> => {
+    const { content } = storeApi.getState();
     const { position, copyFromSection, templateId } = options;
-    
+
     let sectionData;
     let newSectionId = generateSectionId(options.sectionType);
 
@@ -215,7 +219,7 @@ export function useSectionCRUD() {
 
     return newSectionId;
   }, [
-    generateSectionId, content, createDefaultSection, storeAddSection, 
+    storeApi, generateSectionId, createDefaultSection, storeAddSection,
     setSection, trackChange, triggerAutoSave, announceLiveRegion
   ]);
 
@@ -247,7 +251,8 @@ export function useSectionCRUD() {
     options: RemoveSectionOptions
   ): Promise<boolean> => {
     const { saveBackup = true } = options;
-    
+
+    const { content } = storeApi.getState();
     const sectionData = content[sectionId];
     if (!sectionData) return false;
 
@@ -272,7 +277,7 @@ export function useSectionCRUD() {
     announceLiveRegion(`Removed section ${sectionId}`);
 
     return true;
-  }, [content, storeRemoveSection, trackChange, triggerAutoSave, announceLiveRegion]);
+  }, [storeApi, storeRemoveSection, trackChange, triggerAutoSave, announceLiveRegion]);
 
   // Duplicate section
   const duplicateSection = useCallback(async (
@@ -280,7 +285,8 @@ export function useSectionCRUD() {
     options: DuplicateSectionOptions = {}
   ): Promise<string> => {
     const { targetPosition, includeElements = true, preserveLayouts = true } = options;
-    
+
+    const { content } = storeApi.getState();
     const sourceSection = content[sectionId];
     if (!sourceSection) throw new Error(`Section ${sectionId} not found`);
 
@@ -321,12 +327,13 @@ export function useSectionCRUD() {
 
     return newSectionId;
   }, [
-    content, generateSectionId, getDefaultLayout, storeDuplicateSection,
+    storeApi, generateSectionId, getDefaultLayout, storeDuplicateSection,
     setSection, trackChange, triggerAutoSave, announceLiveRegion
   ]);
 
   // Move section to position
   const moveSectionToPosition = useCallback((sectionId: string, targetPosition: number): boolean => {
+    const { sections } = storeApi.getState();
     const currentIndex = sections.indexOf(sectionId);
     if (currentIndex === -1) return false;
 
@@ -346,11 +353,12 @@ export function useSectionCRUD() {
 
     triggerAutoSave();
     return true;
-  }, [sections, reorderSections, trackChange, triggerAutoSave]);
+  }, [storeApi, reorderSections, trackChange, triggerAutoSave]);
 
 
   // Batch update sections
   const batchUpdateSections = useCallback((updates: SectionUpdate[]): void => {
+    const { content } = storeApi.getState();
     updates.forEach(({ sectionId, field, value, metadata }) => {
       if (content[sectionId]) {
         setSection(sectionId, { [field]: value });
@@ -368,7 +376,7 @@ export function useSectionCRUD() {
 
     triggerAutoSave();
     announceLiveRegion(`Updated ${updates.length} sections`);
-  }, [content, setSection, trackChange, triggerAutoSave, announceLiveRegion]);
+  }, [storeApi, setSection, trackChange, triggerAutoSave, announceLiveRegion]);
 
   // Batch delete sections
   const batchDeleteSections = useCallback(async (sectionIds: string[]): Promise<boolean> => {
@@ -392,6 +400,7 @@ export function useSectionCRUD() {
 
   // Validate section
   const validateSectionEnhanced = useCallback((sectionId: string): SectionValidationResult => {
+    const { content } = storeApi.getState();
     const sectionData = content[sectionId];
     if (!sectionData) {
       return {
@@ -452,7 +461,7 @@ export function useSectionCRUD() {
       missingElements,
       hasRequiredContent,
     };
-  }, [content, validateSection]);
+  }, [storeApi, validateSection]);
 
   // Get required elements for section type
   const getRequiredElements = useCallback((sectionType: SectionType): string[] => {
@@ -469,11 +478,13 @@ export function useSectionCRUD() {
 
   // Validate all sections
   const validateAllSections = useCallback((): SectionValidationResult[] => {
+    const { sections } = storeApi.getState();
     return sections.map((sectionId: string) => validateSectionEnhanced(sectionId));
-  }, [sections, validateSectionEnhanced]);
+  }, [storeApi, validateSectionEnhanced]);
 
   // Save section as template
   const saveAsTemplate = useCallback(async (sectionId: string, templateName: string): Promise<SectionTemplate> => {
+    const { content } = storeApi.getState();
     const sectionData = content[sectionId];
     if (!sectionData) throw new Error(`Section ${sectionId} not found`);
 
@@ -495,7 +506,7 @@ export function useSectionCRUD() {
     
     announceLiveRegion(`Saved section as template: ${templateName}`);
     return template;
-  }, [content, announceLiveRegion]);
+  }, [storeApi, announceLiveRegion]);
 
   // Load from template
   const loadFromTemplate = useCallback(async (template: SectionTemplate, position?: number): Promise<string> => {
@@ -588,6 +599,7 @@ export function useSectionCRUD() {
     },
     
     getSectionsByType: (sectionType: SectionType) => {
+      const { sections, content } = storeApi.getState();
       return sections.filter((sectionId: string) => (content[sectionId] as any)?.type === sectionType);
     },
     

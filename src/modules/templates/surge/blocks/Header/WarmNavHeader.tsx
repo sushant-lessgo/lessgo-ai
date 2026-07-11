@@ -37,7 +37,7 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
     useServiceBlock<WarmNavHeaderContent>({ sectionId });
   const edit = mode === 'edit';
 
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [logoUploading, setLogoUploading] = React.useState(false);
@@ -51,7 +51,10 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
     finally { setLogoUploading(false); }
   };
 
-  const { sections, pages, socialMediaConfig, legalPages } = useEditStore();
+  const sections = useEditStore((s) => s.sections);
+  const pages = useEditStore((s) => s.pages);
+  const socialMediaConfig = useEditStore((s) => s.socialMediaConfig);
+  const legalPages = useEditStore((s) => s.legalPages);
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const socialOptions = React.useMemo(
@@ -88,7 +91,7 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
         <div className="sg-nav-in">
         <div className="sg-brand">
           {blockContent.logo_image ? (
-            <img className="sg-brand__img" src={blockContent.logo_image} alt={blockContent.logo_text || 'Logo'} />
+            <img className="sg-brand__img" src={blockContent.logo_image} alt={blockContent.logo_text || 'Logo'} loading="eager" decoding="async" />
           ) : (
             <>
               <span className="sg-brand__mark" />

@@ -1,0 +1,60 @@
+{
+  "slug": "ecorevolution",
+  "url": "https://ecorevolution.com/",
+  "business": { "type_label": "custom eco-friendly straw & disposables manufacturer (B2B)", "icp_category": "manufacturer", "geography_hint": "multi-country (Europe-based family business, sells globally)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "Visitor is evaluating a physical PRODUCT line (compostable straws/cups) via material types, specs, certifications and sustainability proof — features + proof it works, not a person's expertise or a browsable visual portfolio. Store-redirect-flavored 'order in one click' CTAs sit atop a full feature/differentiator argument, so still thing.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "request a custom bulk quote (B2B order inquiry with volume + logo upload)",
+    "mechanism": "form",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "our-products", "sustainability", "about-us", "get-a-quote", "contact"],
+    "archetype_note": "Classic multi-page B2B manufacturer brochure: home pitch → product catalog with spec table → sustainability proof → company timeline → dedicated quote form."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Custom Eco-Friendly Straws for the World", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "About Us", "component": "text" },
+      { "canonical": "features", "observed_as": "Unique straws for your brand!", "component": "grid-cards" },
+      { "canonical": "socialProof", "observed_as": "Companies that trust in our products", "component": "logo-strip" },
+      { "canonical": "uniqueMechanism", "observed_as": "We care about sustainability.", "component": "text" },
+      { "canonical": "features", "observed_as": "Quality Assurance / Certifications / Exclusivity", "component": "grid-cards" },
+      { "canonical": "security", "observed_as": "Certifications", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "Ready to buy? / Transform Your Brand with Eco Revolution's Straws!", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Innovative Solutions for Your Company", "component": "text" },
+      { "canonical": "features", "observed_as": "Polylactide / Wood Fiber / Compostable & Reusable / Polypropylene / Paper Straws", "component": "grid-cards" },
+      { "canonical": "comparisonTable", "observed_as": "Straws Specifications", "component": "table" },
+      { "canonical": "problem", "observed_as": "Say Goodbye to Single-Use Plastics", "component": "stats" },
+      { "canonical": "results", "observed_as": "plastic-pollution & compostability stats", "component": "stats" },
+      { "canonical": "features", "observed_as": "Why Choose Eco Revolution?", "component": "grid-cards" },
+      { "canonical": "howItWorks", "observed_as": "Our Journey Begins / 1985 / 2000 / 2015 / 2020 timeline", "component": "timeline" },
+      { "canonical": "leadForm", "observed_as": "Get a quote & order now! / Contact", "component": "form" },
+      { "canonical": "followStrip", "observed_as": "Join our Newsletter", "component": "form" },
+      { "canonical": "footer", "observed_as": "Quick links / Our countries", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Company timeline (1985→2020 milestone stops)", "why_no_fit": "A dated company-history timeline is heritage/credibility storytelling; mapped to howItWorks as closest but it isn't a process — it's a chronology", "closest": "howItWorks / founderNote" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "lead-form"],
+    "proposed_new": []
+  },
+  "proof_types": ["logo-wall", "certs", "stats"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["spec-comparison-table", "product-type grid", "logo strip", "history/milestone timeline", "stats band", "multi-field B2B quote form (with file upload)"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality full, all 6 pages captured with sections, forms and proof detailed; unambiguous product/manufacturer lead-gen archetype." },
+  "gap_findings": [
+    "B2B bulk-quote form has volume tiers (+50k to +100m units) and a logo-upload field — richer than the generic lead-form capability implies, but still expressible as a multi-field form.",
+    "Heritage milestone timeline (founding-year chronology) has no dedicated canonical section; forced into howItWorks."
+  ]
+}

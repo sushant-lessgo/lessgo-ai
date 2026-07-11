@@ -103,7 +103,10 @@ export interface ThingGenerationInput {
   goalParam?: GoalParamInput;
 
   // Proof hard rule (phase-4 additive) — populated from proof booleans.
-  proof?: { hasTestimonials?: boolean };
+  // proof-truth phase 5: `testimonialCount` is the user-answered approximate
+  // count (manual path); feeds the fan-out `cardCountHints.testimonials` seam
+  // ONLY when no scraped `importedTestimonials` exist (scraped stays authoritative).
+  proof?: { hasTestimonials?: boolean; testimonialCount?: number | null };
   importedTestimonials?: Array<{ quote: string; author_name: string; author_role: string }>;
   importSourceUrl?: string;
 
@@ -136,6 +139,21 @@ export interface ThingGenerationInput {
 /** Legacy LandingGoal enum the routes require (derived from the captured intent). */
 export function landingGoalFor(input: ThingGenerationInput): LandingGoal {
   return input.goalIntent ? intentToLegacyGoal(input.goalIntent, 'product') : 'signup';
+}
+
+/**
+ * proof-truth phase 5 — precedence for the testimonials card-count hint:
+ * SCRAPED (`importedTestimonials.length`) wins → else the user-answered
+ * approximate count → else undefined (no hint ⇒ current behavior). Pure so
+ * both the fan-out and tests share the exact rule.
+ */
+export function testimonialCountHint(
+  importedCount: number | undefined,
+  userCount: number | null | undefined
+): number | undefined {
+  if (importedCount && importedCount > 0) return importedCount;
+  if (userCount && userCount > 0) return userCount;
+  return undefined;
 }
 
 /** Composed Brief.goal — seeds the M1 form + goal sections in the shared tail. */
@@ -396,7 +414,13 @@ export async function runThingGeneration(
         // testimonial counts). Optional; no-op for existing single-variant sections.
         const cardCountHints: Record<string, number> = {};
         if (fanFeatures.length > 0) cardCountHints.features = fanFeatures.length;
-        if (ob.importedTestimonials?.length) cardCountHints.testimonials = ob.importedTestimonials.length;
+        // proof-truth phase 5 — scraped count wins; user-answered count only
+        // when no scraped quotes exist; neither ⇒ no hint (prior behavior).
+        const tHint = testimonialCountHint(
+          ob.importedTestimonials?.length,
+          input.proof?.testimonialCount
+        );
+        if (tHint) cardCountHints.testimonials = tHint;
         const { uiblocks } = selectProductBlocks({
           sections: types,
           templateId: resolvedTemplateId,
@@ -524,7 +548,7 @@ export async function runThingGeneration(
 
     cb.onStage?.('saving');
     try {
-      finalizeMultiPageGeneration(fc);
+      finalizeMultiPageGeneration(fc, briefGoal);
       await saveFC(fc);
     } catch (e: any) {
       return { status: 'error', error: e?.message || 'Could not save the draft.' };

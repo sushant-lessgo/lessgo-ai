@@ -13,6 +13,7 @@
 
 import React from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { getEffectiveElementValue } from '@/lib/i18n/localeContent';
 import {
   FollowStripCore,
   resolveProfiles,
@@ -21,16 +22,29 @@ import {
 } from './socialIcons';
 
 export default function FollowStrip({ sectionId }: { sectionId: string }) {
-  const store = useEditStore() as any;
-  const section = store.content?.[sectionId];
+  const section = useEditStore((s) => (s as any).content?.[sectionId]);
+  const updateElementContent = useEditStore((s) => (s as any).updateElementContent);
   const elements = (section?.elements || {}) as Record<string, any>;
-  const profiles = resolveProfiles(elements.links_json);
-  const heading = elements.strip_heading || FOLLOW_STRIP_DEFAULT_HEADING;
+  const profiles = resolveProfiles(elements.links_json); // links_json = structure (locale-shared)
+  // i18n-phase-1 (3b): resolve the editable heading via the shared helper, keyed
+  // on the active locale. Narrow selectors; legacy ⇒ base value (zero diff).
+  const activeLocale = useEditStore((s) => (s as any).activeLocale as string | undefined);
+  const sectionOverlay = useEditStore(
+    (s) => (s as any).localeContent?.[(s as any).activeLocale]?.[sectionId],
+  );
+  const heading =
+    (getEffectiveElementValue(
+      { [sectionId]: section } as any,
+      activeLocale ? { [activeLocale]: { [sectionId]: sectionOverlay || {} } } : undefined,
+      activeLocale,
+      sectionId,
+      'strip_heading',
+    ) as string) || FOLLOW_STRIP_DEFAULT_HEADING;
 
   const onHeadingBlur = (e: React.FocusEvent<HTMLHeadingElement>) => {
     const value = (e.currentTarget.textContent || '').trim();
-    if (value !== heading && typeof store.updateElementContent === 'function') {
-      store.updateElementContent(sectionId, 'strip_heading', value);
+    if (value !== heading && typeof updateElementContent === 'function') {
+      updateElementContent(sectionId, 'strip_heading', value);
     }
   };
 

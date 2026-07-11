@@ -330,3 +330,11 @@ Still **dark**. Commits: P1 `8ffd3b1`, P2 `b4c3f07`, P2.5 `cbe51c4`, P3 `dbb63c9
 **Remaining:** optional auto-publish; product photo/company-on-card template change; **un-dark**
 (flip `TESTIMONIALS_ENABLED` + `NEXT_PUBLIC_TESTIMONIALS_ENABLED` in Vercel prod) when ready to ship —
 after a live end-to-end validation. Concurrent-editor race note (open a fresh editor) already in the dialog.
+
+## proof-truth (2026-07-10): confirm-time auto-import + regen injection LIVE
+
+Two seams beyond Phase 4 are now live (proof-truth track): scraped/user-given testimonials
+auto-import into the `Testimonial` table at `/api/brief/confirm` (`source:'imported'`,
+`status:'approved'`, project-scoped), and section-regen now injects table-backed real proof.
+The `Testimonial` table is the **single source of real proof**; AI-drafted quotes are flagged
+needs-review and **never** enter the table (real proof always wins).

@@ -1,0 +1,74 @@
+{
+  "slug": "morenoshairandbeauty",
+  "url": "https://morenoshairandbeauty.com/",
+  "business": { "type_label": "hair & beauty salon", "icp_category": "place / local service venue", "geography_hint": "Haarlem, Netherlands (Paarlaarsteeg 6)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking a physical salon: browsing style-gallery photos, scanning a treatments price list, and confirming location/map is the decision. It is a place you visit, not a defined expertise being sold (trust) nor a portfolio-as-product (work).",
+    "runner_up": "work"
+  },
+  "goal": {
+    "one_action": "book an appointment at the salon",
+    "mechanism": "redirect",
+    "delegated_to": "treatwell / optios (external booking)"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "about", "treatments", "products", "gallery", "contact"],
+    "archetype_note": "Classic multi-page local-salon site: home hub + about/team, priced treatments menu, retail product catalog, photo gallery, contact/map. All conversion (booking) funnels off-site to Treatwell/Optios."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "More than just Hair & Beauty.", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "About Us (home intro blurb)", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Space for Rent", "component": "text" },
+      { "canonical": "map-hours", "observed_as": "Location (embedded Google Map + address)", "component": "map" },
+      { "canonical": "miscellaneous", "observed_as": "Explore Our Style Gallery (carousel)", "component": "carousel" },
+      { "canonical": "testimonials", "observed_as": "What our Clients Say About Us", "component": "text" },
+      { "canonical": "cta", "observed_as": "Treat yourself / Haarlem's Top Hairdresser (BOOK AN APPOINTMENT)", "component": "text" },
+      { "canonical": "map-hours", "observed_as": "OPENING HOURS (points to Google listing)", "component": "text" },
+      { "canonical": "footer", "observed_as": "Visit Us + Quick Links", "component": "text" },
+      { "canonical": "followStrip", "observed_as": "Newsletter (footer signup)", "component": "form" },
+      { "canonical": "testimonials", "observed_as": "Meet The team / Our Stylists / Our Assistant", "component": "team" },
+      { "canonical": "pricing", "observed_as": "WASH CUT & BLOWDRY / COLOURING / TREATMENTS price lists", "component": "menu-list" },
+      { "canonical": "miscellaneous", "observed_as": "Products catalog grid + December Discount", "component": "grid-cards" }
+    ],
+    "unmapped": [
+      {
+        "observed": "Products page: full retail catalog grid (~14 named product cards, discount tiers) but explicitly in-salon pickup only, no prices/cart",
+        "why_no_fit": "A browse-catalog-without-purchase retail block on an otherwise conversion-single site; not features/pricing/gallery — it is a product-showcase-only catalog that drives no on-page action.",
+        "closest": "features / pricing"
+      },
+      {
+        "observed": "Careers submenu under About with per-role job listings (Junior/Mid/Senior stylist, Chair for Rent)",
+        "why_no_fit": "Recruitment/hiring content and chair-rental leasing are a second audience (job seekers / renters), not the visitor-books-appointment conversion; no canonical section covers hiring.",
+        "closest": "miscellaneous"
+      }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "catalog", "map-hours", "bilingual"],
+    "proposed_new": [
+      {
+        "name": "external-booking-redirect",
+        "evidence": "Every booking CTA (Book now, Book Online Now, per-category Book) leaves the site to Treatwell.nl or booking.optios.net; there is no on-site form/calendar. Distinct from generic 'store-badges' redirect — it is an appointment engine handoff."
+      }
+    ]
+  },
+  "proof_types": ["testimonials", "portfolio", "certs"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["menu-list (priced treatments)", "team grid", "image carousel / lightbox gallery", "product card grid", "embedded map", "newsletter signup"],
+  "languages": ["en-GB", "nl"],
+  "confidence": {
+    "level": "high",
+    "why": "fetch_quality is full, all 6 pages server-rendered with sections, CTAs, prices, and proof captured; classification is unambiguous (local salon = place)."
+  },
+  "gap_findings": [
+    "Booking is entirely delegated to external engines (Treatwell/Optios) — taxonomy 'redirect' mechanism fits but there is no capability expressing an appointment-booking handoff (proposed external-booking-redirect).",
+    "Retail catalog with discount tiers but no e-commerce (in-salon pickup only) has no clean canonical section — sits between features/pricing/catalog.",
+    "Careers/chair-rental sub-tree is a second, non-conversion audience the single-action model does not express.",
+    "Unstructured bilingual EN/NL (mixed testimonials/bios + a hidden /nl/ page) — 'bilingual' capability captures intent but not the ad-hoc, partial nature."
+  ]
+}

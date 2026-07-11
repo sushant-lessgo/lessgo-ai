@@ -14,6 +14,8 @@ import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { VestriaEditable } from '../components/VestriaEditable';
 import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
 import { resolveDestination } from '@/utils/resolveCtaHref';
+import { EditableImageCollection } from '@/app/edit/[token]/components/primitives/EditableImageCollection';
+import { resolveAlt } from '@/modules/editing/altText';
 import type {
   VestriaPrimitives, VestriaTxtProps, VestriaImgProps, VestriaLinkProps, VestriaListProps,
 } from './primitives';
@@ -24,6 +26,11 @@ export interface VestriaEditCtx {
   updateCollection: (collectionKey: string, value: any[]) => void;
   getCollection: (collectionKey: string) => any[];
   uploadImage?: (file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>;
+  // editor phase-3 (phase 6) — per-item alt (imageCollection). Backed by the store
+  // `setItemAlt` writer + a read of this section's elementMetadata; canonical store
+  // is elementMetadata[collKey].alt[itemId] (2026-07-11 law).
+  getItemAlt: (collectionKey: string, itemId: string) => string | undefined;
+  setItemAlt: (collectionKey: string, itemId: string, alt: string) => void;
   sectionOptions: { value: string; label: string }[];
   pageOptions: { value: string; label: string }[];
 }
@@ -80,9 +87,18 @@ const Txt: React.FC<VestriaTxtProps> = ({ elementKey, value, as = 'span', classN
   );
 };
 
-const Img: React.FC<VestriaImgProps> = ({ elementKey, src, alt, className, imgClassName, placeholder }) => {
+const Img: React.FC<VestriaImgProps> = ({ elementKey, src, alt, className, imgClassName, placeholder, eager }) => {
   const ctx = useCtx();
   const [uploading, setUploading] = React.useState(false);
+  // editor phase-3 (phase 6): the alt input is owned HERE (the image affordance) so
+  // it serves both single-image slots and collection items, and stays colocated with
+  // the image it describes. Canonical store = elementMetadata (via ctx.setItemAlt);
+  // the `alt` prop is the SIBLING FALLBACK (e.g. item.title). The chrome
+  // (EditableImageCollection) deliberately does NOT render an alt input — single alt
+  // editor per image.
+  const path = parsePath(elementKey);
+  const metaAlt = path ? ctx.getItemAlt(path.coll, path.id) : undefined;
+  const shownAlt = resolveAlt(metaAlt, path?.id, alt);
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -98,9 +114,12 @@ const Img: React.FC<VestriaImgProps> = ({ elementKey, src, alt, className, imgCl
     finally { setUploading(false); }
   };
   const clear = () => saveField(ctx, elementKey, '');
+  const onAlt = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (path) ctx.setItemAlt(path.coll, path.id, e.target.value);
+  };
   return (
     <div className={className} style={{ position: 'relative' }}>
-      {src ? <img src={src} alt={alt || ''} className={imgClassName} /> : placeholder}
+      {src ? <img src={src} alt={shownAlt} className={imgClassName} loading={eager ? 'eager' : 'lazy'} decoding="async" /> : placeholder}
       <span className="vs-img-edit">
         <label className="vs-img-edit__btn">
           {uploading ? '…' : (src ? 'Replace' : '↥ Image')}
@@ -108,6 +127,14 @@ const Img: React.FC<VestriaImgProps> = ({ elementKey, src, alt, className, imgCl
         </label>
         {src && <button type="button" className="vs-img-edit__x" onClick={clear}>Remove</button>}
       </span>
+      {path && src && (
+        <input
+          className="vs-img-alt"
+          value={metaAlt ?? ''}
+          placeholder={alt ? `Alt (fallback: ${alt})` : 'Describe this image (alt text)'}
+          onChange={onAlt}
+        />
+      )}
     </div>
   );
 };
@@ -127,8 +154,32 @@ const Link: React.FC<VestriaLinkProps> = ({ hrefKey, href, className, ariaLabel,
   );
 };
 
-const List: React.FC<VestriaListProps> = ({ collectionKey, items, render, makeItem, min = 0, max = 99, addLabel = '+ Add', className, itemClassName }) => {
+const List: React.FC<VestriaListProps> = ({ collectionKey, items, render, makeItem, min = 0, max = 99, addLabel = '+ Add', className, itemClassName, reorderable, imageField, captionField }) => {
   const ctx = useCtx();
+  // editor phase-3 (phase 6): an imageCollection slot (declares reorderable and/or
+  // imageField) DELEGATES its entire edit chrome to the shared EditableImageCollection
+  // — the existing add/remove branch below is NOT used for these lists, so there is
+  // exactly ONE editor for the collection. All chrome mutations still flow through
+  // ctx.updateCollection (the single whole-array writer).
+  if (reorderable || imageField) {
+    return (
+      <EditableImageCollection
+        collectionKey={collectionKey}
+        items={items}
+        imageField={imageField || 'image'}
+        onChange={(next) => ctx.updateCollection(collectionKey, next)}
+        makeItem={makeItem}
+        min={min}
+        max={max}
+        reorderable={!!reorderable}
+        captionField={captionField}
+        render={render}
+        className={className}
+        itemClassName={itemClassName}
+        addLabel={addLabel}
+      />
+    );
+  }
   const add = () => {
     if (!makeItem || items.length >= max) return;
     ctx.updateCollection(collectionKey, [...items, { id: genId(collectionKey), ...makeItem() }]);
@@ -167,20 +218,37 @@ export function useVestriaEditCtx(
   update: (elementKey: string, value: any) => void,
   updateCollection: (collectionKey: string, value: any[]) => void,
 ): VestriaEditCtx {
-  const store = useEditStore() as any;
-  const sections = store.sections as string[] | undefined;
-  const pages = store.pages;
-  const uploadImage = store.uploadImage;
+  const sections = useEditStore((s) => (s as any).sections) as string[] | undefined;
+  const pages = useEditStore((s) => (s as any).pages);
+  const uploadImage = useEditStore((s) => (s as any).uploadImage);
+  // editor phase-3 (phase 6): thread this section's elementMetadata + the store
+  // setItemAlt writer into the ctx so E.Img can read/write per-item alt. Narrow
+  // selector (only this section's metadata) — legacy blocks with no alt read undefined.
+  const elementMetadata = useEditStore(
+    (s) => (s as any).content?.[sectionId]?.elementMetadata as
+      | Record<string, { alt?: string | Record<string, string> }>
+      | undefined,
+  );
+  const setItemAltAction = useEditStore((s) => (s as any).setItemAlt) as
+    | ((sectionId: string, collectionKey: string, itemId: string, alt: string) => void)
+    | undefined;
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const contentRef = React.useRef(blockContent);
   contentRef.current = blockContent;
+  const metaRef = React.useRef(elementMetadata);
+  metaRef.current = elementMetadata;
   return {
     sectionId,
     update,
     updateCollection,
     getCollection: (k) => (contentRef.current?.[k] as any[]) || [],
     uploadImage,
+    getItemAlt: (collKey, itemId) => {
+      const alt = metaRef.current?.[collKey]?.alt;
+      return alt && typeof alt === 'object' ? alt[itemId] : undefined;
+    },
+    setItemAlt: (collKey, itemId, alt) => setItemAltAction?.(sectionId, collKey, itemId, alt),
     sectionOptions,
     pageOptions,
   };
@@ -196,6 +264,13 @@ export const EDIT_AFFORDANCE_STYLES = `
 .vs-img-edit__x{ font-family:var(--ff-mono); font-size:11px; color:#fff; background:var(--accent-deep); border:none; border-radius:var(--r); padding:5px 8px; cursor:pointer; }
 .vs-list-x{ position:absolute; top:-8px; right:-8px; z-index:4; width:20px; height:20px; line-height:1; font-size:14px; color:#fff; background:var(--accent-deep); border:none; border-radius:999px; cursor:pointer; opacity:0; transition:opacity .15s; }
 .vs-list-x:hover, *:hover > .vs-list-x{ opacity:1; }
-.vs-list-add{ font-family:var(--ff-mono); font-size:12px; letter-spacing:.06em; color:var(--accent-deep); background:transparent; border:1px dashed var(--line); border-radius:var(--r); padding:10px 16px; cursor:pointer; }
+.vs-list-add{ font-family:var(--ff-mono); font-size:12px; letter-spacing:.06em; color:var(--accent-deep); background:transparent; border:1px dashed var(--line); border-radius:var(--r); padding:10px 16px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
 .vs-list-add:hover{ border-color:var(--accent); }
+.vs-ic-add{ display:inline-flex; gap:8px; align-items:center; }
+.vs-ic-drag{ position:absolute; top:-8px; left:-8px; z-index:4; width:20px; height:20px; line-height:1; font-size:12px; color:#fff; background:var(--ink); border:none; border-radius:999px; cursor:grab; opacity:0; transition:opacity .15s; touch-action:none; }
+.vs-ic-drag:active{ cursor:grabbing; }
+.vs-ic-drag:hover, *:hover > .vs-ic-drag{ opacity:1; }
+.vs-img-alt{ position:absolute; left:8px; bottom:8px; right:8px; z-index:3; font-family:var(--ff-mono); font-size:11px; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:4px 7px; opacity:0; transition:opacity .15s; }
+*:hover > .vs-img-alt, .vs-img-alt:focus{ opacity:1; }
+.vs-ic-caption{ display:block; width:100%; margin-top:6px; font-family:var(--ff-mono); font-size:11px; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:4px 7px; }
 `;

@@ -1,0 +1,63 @@
+{
+  "slug": "lightcrew",
+  "url": "https://www.lightcrew.jp/",
+  "business": {
+    "type_label": "spiritual healing salon & therapist training school",
+    "icp_category": "wellness/healing services + practitioner training",
+    "geography_hint": "Japan (Tokyo, Saitama, Osaka)"
+  },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Sells defined expertise delivered by named, credentialed practitioners (channeling, hypnotherapy, reiki) plus certification training; the decision is trusting these therapists, carried by 18 outcome testimonials, founder lineage, and certification framing rather than a browsable body of work.",
+    "runner_up": "work"
+  },
+  "goal": {
+    "one_action": "submit a contact/inquiry (about a session or a course) via the linked form; direct reservation is otherwise made by contacting a therapist",
+    "mechanism": "form",
+    "delegated_to": "tally"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 14,
+    "pages": ["home", "menu-price", "school", "contact", "voice/testimonials", "faq", "founder-history", "therapist-tokyo", "therapist-saitama", "therapist-osaka", "tally-form"],
+    "archetype_note": "Practitioner-collective site: shared brand hub plus one branded subpage per therapist/location; pricing centralized on menu-price, proof centralized on voice, conversion funneled to a single external Tally contact form."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "miscellaneous", "observed_as": "News - お知らせ", "component": "news-feed" },
+      { "canonical": "hero", "observed_as": "心と魂を癒すヒーリングサロン 〜受け継がれた光の叡智〜", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Therapists - セラピストの紹介", "component": "team-grid" },
+      { "canonical": "miscellaneous", "observed_as": "Gallery - 活動風景", "component": "gallery" },
+      { "canonical": "pricing", "observed_as": "Menu - セッション内容・料金 / メニュー＆料金 pricing tables", "component": "pricing-table" },
+      { "canonical": "features", "observed_as": "School - 講座内容・料金 / 受講できるセラピーとコース内容", "component": "text" },
+      { "canonical": "cta", "observed_as": "Reservation - ご予約", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "お問合せ / Tally inquiry form", "component": "form" },
+      { "canonical": "testimonials", "observed_as": "体験談 (金運/人間関係/恋愛/仕事/健康 お客様の声)", "component": "testimonial-list" },
+      { "canonical": "faq", "observed_as": "よくある質問", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "上本先生HISTORY", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Per-therapist / per-location branded subpages (LC 東京 佐和, LC埼玉 実貴恵, LC大阪 村上 悠子)", "why_no_fit": "Closed section list has no id for a set of individual practitioner profile pages within a collective; it is structural (many subpages), not a single on-page section.", "closest": "socialProof" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "packages", "blog", "lead-form"],
+    "proposed_new": [
+      { "name": "practitioner-profiles", "evidence": "Nav and homepage introduce three named therapists across Tokyo/Saitama/Osaka, each with its own branded subpage (/sawa, /mikie, /murakami) plus a founder-history page; reservations route to individual therapists. A multi-practitioner directory with per-person subpages is not expressible via team-less closed vocab." }
+    ]
+  },
+  "proof_types": ["testimonials"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["pricing-table", "team grid", "gallery", "testimonial list", "faq accordion", "news feed"],
+  "languages": ["ja"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality=rendered (not full) and therapist subpages + FAQ page were not individually crawled (6-page cap), so per-practitioner detail is inferred from nav; core engine/goal/pricing evidence is solid."
+  },
+  "gap_findings": [
+    "No capability expresses a multi-practitioner / multi-location profile set (each therapist a branded subpage, reservation delegated per-person) — proposed practitioner-profiles.",
+    "Conversion is a plain external Tally contact form: a delegated `form` mechanism, not a booking capability — but the closed vocab's `lead-form` implies an ON-page form, so an off-site contact-form handoff sits between lead-form and external-* siblings without an exact fit.",
+    "Pricing lives on one page while the courses it prices live on another (school page shows no prices) — no section model links a features/course page to a remote pricing table."
+  ]
+}

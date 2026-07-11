@@ -1,0 +1,57 @@
+{
+  "slug": "sportsofallsortsky",
+  "url": "https://sportsofallsortsky.com/",
+  "business": { "type_label": "youth sports & fitness facility (gym / leagues / camps)", "icp_category": "place-local-recreation", "geography_hint": "Kentucky, USA (Louisville area)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking a physical PLACE: hours of operation, address/directions, programs offered, and upcoming events are the decision content. No sold expertise (not trust), the program tiles document offerings not a proof-portfolio, and the offer is not pre-understood enough for quick-yes.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "get the visitor to join/enroll — either tap through to the gym's Linktree or contact a trainer/staff",
+    "mechanism": "redirect",
+    "delegated_to": "linktree"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 40,
+    "pages": ["home", "contact", "personal-training", "hours-of-operation", "specials-fitness", "about", "upcoming-leagues", "birthdays-field-trips", "sports-leagues", "camps-training", "fitness", "league-updates"],
+    "archetype_note": "Sprawling WordPress facility site (~40 pages via dropdown nav): programs/leagues, camps, fitness, events, hours. Home is a hub linking out to promos, Linktree, and a contact form."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Unlock Your Best Self This Fall – Join Our Gym Today!", "component": "text banner" },
+      { "canonical": "miscellaneous", "observed_as": "What's New at Our Gym?", "component": "news blurb" },
+      { "canonical": "miscellaneous", "observed_as": "OUR NORMAL HOURS OF OPERATION ARE", "component": "hours table" },
+      { "canonical": "miscellaneous", "observed_as": "Upcoming Events", "component": "events list" },
+      { "canonical": "features", "observed_as": "(portfolio grid) program tiles: basketball, bowling, camps, fitness center, flag football, flag rugby, soccer, volleyball", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Get in Touch", "component": "contact form (Name, E-Mail, Subject, Message)" },
+      { "canonical": "miscellaneous", "observed_as": "Where you can find us", "component": "address + (disabled) google map link" },
+      { "canonical": "features", "observed_as": "Why Choose Us?", "component": "4 value-prop bullets" },
+      { "canonical": "cta", "observed_as": "Membership Special / Personal Training", "component": "promo blurb (no price)" }
+    ],
+    "unmapped": [
+      { "observed": "OUR NORMAL HOURS OF OPERATION ARE (dedicated hours table, its own page + homepage block)", "why_no_fit": "No canonical section id for an opening-hours table; it is core PLACE decision content, not miscellaneous filler", "closest": "miscellaneous" },
+      { "observed": "Upcoming Events (community announcements: scholarship, Wall of Fame)", "why_no_fit": "Non-ticketed community announcements repeated across pages; not testimonials/socialProof and not a dated ticketed schedule", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "gallery/portfolio", "lead-form", "blog"],
+    "proposed_new": []
+  },
+  "proof_types": ["portfolio"],
+  "design_style": { "pick": null, "none_fits_because": "Raw capture recorded no fonts, colors, or dark/light signal; insufficient evidence to assign one of the six styles." },
+  "components_needed": ["hours-table", "program-tile-grid", "contact-form", "map-address block", "events-announcement list", "value-prop bullets"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "high",
+    "why": "fetch_quality is full with clear multi-page structure; PLACE classification unambiguous. Minor goal ambiguity (Linktree redirect vs on-site contact form both act as primary), but does not affect engine."
+  },
+  "gap_findings": [
+    "Opening-hours table is central PLACE content but has no canonical section id (maps only to miscellaneous).",
+    "Primary hero CTA hands off to a Linktree link-aggregator — a redirect target the taxonomy has no dedicated capability for (treated as generic redirect).",
+    "Recurring non-ticketed community 'Upcoming Events' announcements are neither event-listings (ticketed) nor socialProof — no clean home.",
+    "Promo pages ('Membership Special', 'Personal Training Special') promise perks/pricing but show no prices — a place-offer with deferred pricing the pricing section cannot represent."
+  ]
+}

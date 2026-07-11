@@ -1,0 +1,44 @@
+{
+  "slug": "jadesummer",
+  "url": "https://jadesummer.com/",
+  "business": { "type_label": "coloring-book brand / illustration studio", "icp_category": "creator works catalog", "geography_hint": "US (Amazon/Etsy/Lulu, English)" },
+  "in_icp": true,
+  "engine": { "pick": "work", "ladder_reasoning": "The site's spine is browsing 100+ coloring books whose cover art and interior sample galleries ARE the proof; the illustrators' work sells the purchase, no credential/feature argument. Portfolio-is-proof → work.", "runner_up": "thing" },
+  "goal": { "one_action": "Pick a coloring book and buy it on an external marketplace (Amazon/Etsy/Lulu)", "mechanism": "redirect", "delegated_to": "store" },
+  "structure": { "kind": "multi", "page_count": 5, "pages": ["home", "about", "support", "books (catalog)", "product"], "archetype_note": "Home = curated grids of releases/categories; Books = full 100+ catalog; per-book product pages with description + sample gallery + related grids; buying always offloads off-site. No prices or checkout anywhere." },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (Books/About/Support + update/community/video CTAs)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "New Releases", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Cozy / Bold and Easy / Color by Number Coloring Books", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Coming in 2026 / Featured", "component": "grid-cards" },
+      { "canonical": "socialProof", "observed_as": "Featured Artists (five professional illustrators)", "component": "team" },
+      { "canonical": "miscellaneous", "observed_as": "Audiences / Styles / Series / Categories directory", "component": "text" },
+      { "canonical": "faq", "observed_as": "FAQ (how to download purchases)", "component": "accordion" },
+      { "canonical": "cta", "observed_as": "View All Coloring Books / Buy on Amazon", "component": "button" },
+      { "canonical": "leadForm", "observed_as": "Get New Release Updates (email)", "component": "form" },
+      { "canonical": "followStrip", "observed_as": "Join Our Coloring Community / Watch Coloring Videos", "component": "social-links" },
+      { "canonical": "footer", "observed_as": "repeated footer link cluster (Paperbacks/Digital Editions/Legal/Licensing/Amazon Associates)", "component": "footer" }
+    ],
+    "unmapped": [
+      { "observed": "Jade Summer Collection — full grid of 100+ books, newest-to-oldest, no prices", "why_no_fit": "A browsable own-works catalog page is the site's spine; no canonical section id for a paginated works listing", "closest": "features / miscellaneous" },
+      { "observed": "Product page: description + sample gallery + three related-books grids", "why_no_fit": "A per-work detail page (own product with off-site buy) has no canonical section — closest is a hero+gallery combo but it functions as a store detail page", "closest": "gallery / hero" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "gallery/portfolio", "lead-form", "blog"],
+    "proposed_new": [
+      { "name": "works-catalog", "evidence": "Site is a catalogue of the creator's OWN coloring books (100+) as its spine, with per-book subpages, and every buy CTA redirects off-site to Amazon/Etsy/Lulu; no on-site cart or prices." }
+    ]
+  },
+  "proof_types": ["portfolio"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["catalog grid (cover + title cards)", "sample-art gallery", "team/artist grid", "faq accordion", "inline email-capture", "social follow strip", "related-items carousel"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality=full; 5 representative pages incl. home/catalog/product/about/support with clear CTAs, forms, embeds, and commerce=offloaded signals." },
+  "gap_findings": [
+    "works-catalog: the whole site is a 100+ own-works catalog whose conversion is an off-site marketplace redirect — closed vocab 'catalog' implies own on-site commerce and doesn't capture the redirect-to-store spine.",
+    "No canonical section id for a full browsable catalog/works listing page or for a product-detail page (description + gallery + related) — these are core to catalog/works sites yet get shoehorned into features/gallery/miscellaneous.",
+    "Multiple redirect destinations per item (Amazon/Etsy/Lulu) — goal mechanism 'redirect' can't express fan-out to several stores; delegated_to='store' collapses three marketplaces."
+  ]
+}

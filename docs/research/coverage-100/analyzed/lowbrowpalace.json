@@ -1,0 +1,54 @@
+{
+  "slug": "lowbrowpalace",
+  "url": "https://lowbrowpalace.com/",
+  "business": { "type_label": "live music venue", "icp_category": "place / entertainment venue", "geography_hint": "El Paso, TX, USA" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking a PLACE — a concert venue — deciding via the show schedule, prices, ages, address/parking. No expertise sold (not trust), no portfolio-as-proof (not work); browsing the show listings IS the decision.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Buy tickets to an upcoming show (or, secondarily, join the genre-segmented mailing list)",
+    "mechanism": "redirect",
+    "delegated_to": "seetickets"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 5,
+    "pages": ["shows", "about", "faq", "partners", "signup"],
+    "archetype_note": "Venue site: home = dated show grid with per-event ticket redirects; About (history + crew), FAQ (policies), Partners; mailing-list form recurs on multiple pages."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Shows", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Shows (event listings)", "component": "grid-cards" },
+      { "canonical": "founderNote", "observed_as": "ABOUT (venue history)", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "VENUE SPECS", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "MEET THE CREW (team grid)", "component": "team" },
+      { "canonical": "faq", "observed_as": "Location & Parking / Venue Policies / Tickets & Payment", "component": "accordion" },
+      { "canonical": "leadForm", "observed_as": "Subscribe to our mailing list", "component": "form" },
+      { "canonical": "cta", "observed_as": "Buy Tickets / Sign Up", "component": "button" },
+      { "canonical": "followStrip", "observed_as": "Facebook / Instagram links", "component": "social-links" },
+      { "canonical": "footer", "observed_as": "CONTACT / Partners", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Shows — dated schedule of 30+ upcoming events, each with date/genre/price/age/lineup and a per-event ticket redirect", "why_no_fit": "The canonical section list has no dated event/showtime schedule primitive; useCases/hero only approximate it", "closest": "useCases" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "lead-form", "map-hours"],
+    "proposed_new": [
+      { "name": "event-listings", "evidence": "Home page is a dated schedule of 30+ shows, each redirecting to a seetickets.com per-event ticketing page — a venue show calendar, not a catalog or booking flow." }
+    ]
+  },
+  "proof_types": [],
+  "design_style": { "pick": "bold/performance", "none_fits_because": "" },
+  "components_needed": ["event-listing cards (date/genre/price/age/lineup)", "genre-checkbox mailing-list form", "team grid", "faq accordion", "external ticket button (Buy Tickets / Sold Out states)"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; multi-page structure, CTAs, forms, embeds and off-site ticketing all clearly captured." },
+  "gap_findings": [
+    "No canonical section expresses a dated event/showtime schedule with per-item external ticket redirect — recurring gap for venues/theatres (event-listings).",
+    "Genre-preference-segmented newsletter signup (interest checkboxes driving list segmentation) is richer than a plain lead-form but has no dedicated expression."
+  ]
+}

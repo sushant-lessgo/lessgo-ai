@@ -37,11 +37,26 @@ export interface ProductProofInput {
 }
 
 /** Section types the proof hard rule can cut, keyed by the gating boolean. */
-function proofDroppedSections(proof: ProductProofInput): Set<string> {
+export function proofDroppedSections(proof: ProductProofInput): Set<string> {
   const dropped = new Set<string>();
   // Unpromised testimonials ⇒ the testimonials section is absent (never faked).
   if (proof.hasTestimonials !== true) dropped.add('testimonials');
   return dropped;
+}
+
+/**
+ * Apply the proof hard rule to a section list (order-preserving). THE single
+ * shared implementation — used by strategy assembly (`assembleProductStrategy`)
+ * AND the 7b structure gate's page-seed / add-section paths (StructureSlot), so
+ * a page ADDED at the gate can never seed an unpromised proof section (scale
+ * 1-10 F22). Absent-drop is a no-op (returns the same list).
+ */
+export function filterSectionsByProof(
+  sections: string[],
+  proof: ProductProofInput
+): string[] {
+  const dropped = proofDroppedSections(proof);
+  return dropped.size ? sections.filter((s) => !dropped.has(s)) : sections;
 }
 
 export interface AssembleProductStrategyInput {
@@ -267,15 +282,12 @@ export function assembleProductStrategy(
   // Absent `proof` ⇒ no drop ⇒ old wizard behavior. Applied BEFORE block
   // selection so unpromised sections drop from BOTH `sections` and `uiblocks`.
   if (proof) {
-    const dropped = proofDroppedSections(proof);
-    if (dropped.size > 0) {
-      sections = sections.filter((s) => !dropped.has(s));
-      if (sitemap) {
-        sitemap = sitemap.map((p) => ({
-          ...p,
-          sections: p.sections.filter((s) => !dropped.has(s)),
-        }));
-      }
+    sections = filterSectionsByProof(sections, proof);
+    if (sitemap) {
+      sitemap = sitemap.map((p) => ({
+        ...p,
+        sections: filterSectionsByProof(p.sections, proof),
+      }));
     }
   }
 

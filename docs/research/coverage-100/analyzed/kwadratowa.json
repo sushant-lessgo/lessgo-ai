@@ -1,0 +1,58 @@
+{
+  "slug": "kwadratowa",
+  "url": "https://kwadratowa.pl/",
+  "business": { "type_label": "student party club / event venue", "icp_category": "place", "geography_hint": "Trójmiasto / Gdańsk, Poland" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking out a physical nightlife venue — the decision is driven by event photos, party galleries, ticket prices, lodge layouts, hours and directions. Browsing the place IS the decision.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Get visitors to see upcoming events and come to the club (or reserve a lodge / buy entry), with every reservation happening off-site via Facebook",
+    "mechanism": "redirect",
+    "delegated_to": "facebook"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 7,
+    "pages": ["home", "kontakt", "rezerwacja", "galeria", "faq", "wydarzenia", "aktualnosci", "regulamin"],
+    "archetype_note": "Venue microsite: home hero + event carousel + social feeds, plus dedicated contact, reservation (tickets + lodges), gallery, FAQ pages. No native forms — all reservations/sign-ups route to Facebook."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Najlepsze imprezy w Trójmieście", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Imprezy w Kwadratowej w każdy piątek i sobotę", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Najbliższe wydarzenia", "component": "carousel" },
+      { "canonical": "socialProof", "observed_as": "Zobacz jak się bawimy", "component": "gallery" },
+      { "canonical": "followStrip", "observed_as": "Zobacz co słychać na Instagramie", "component": "logo-strip" },
+      { "canonical": "followStrip", "observed_as": "Zobacz co słychać na Tiktoku", "component": "logo-strip" },
+      { "canonical": "cta", "observed_as": "Kontakt", "component": "text" },
+      { "canonical": "footer", "observed_as": "E-mail / Biuro / Gastronomia", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Bilety (student vs general entry prices)", "component": "pricing-table" },
+      { "canonical": "miscellaneous", "observed_as": "Zarezerwuj lożę na imprezę / Dostępne loże", "component": "gallery" },
+      { "canonical": "miscellaneous", "observed_as": "Galeria (Facebook photo albums grid)", "component": "gallery" },
+      { "canonical": "faq", "observed_as": "Najczęściej zadawane pytania", "component": "accordion" }
+    ],
+    "unmapped": [
+      { "observed": "Najbliższe wydarzenia — dated event carousel pulled from Facebook events, each linking to an external FB event page", "why_no_fit": "No canonical section expresses a dated, externally-fed schedule of upcoming events/shows", "closest": "miscellaneous" },
+      { "observed": "Dostępne loże — lodge/room layout gallery reserved via Facebook private message", "why_no_fit": "It is venue-inventory browsing (rooms) leading to an off-site reservation, not a portfolio or pricing section", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "bilingual", "packages", "blog"],
+    "proposed_new": [
+      { "name": "event-listings", "evidence": "Home carousel 'Najbliższe wydarzenia' is a dated schedule of upcoming parties fed from Facebook events, each CTA ('Zobacz wydarzenia', 'lista FB') redirecting to the external FB event/ticket page" }
+    ]
+  },
+  "proof_types": ["reviews", "portfolio"],
+  "design_style": { "pick": "bold/performance", "none_fits_because": "" },
+  "components_needed": ["event carousel", "pricing-table (ticket tiers)", "photo gallery grid", "social feed embed (Instagram/TikTok)", "faq accordion", "map-hours block"],
+  "languages": ["pl", "en"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; all pages, sections, CTAs, prices and embeds are captured, and the venue/redirect pattern is unambiguous" },
+  "gap_findings": [
+    "event-listings (dated event schedule feeding external ticketing/Facebook) has no canonical section or closed-vocab capability",
+    "Venue-inventory browsing (bookable lodges/rooms with layout photos) reserved off-site via Facebook message is not expressible — sits between gallery, pricing, and external-booking-redirect",
+    "Entire conversion path (tickets, lodge reservation, free-entry lists) is delegated to Facebook events + private message with zero on-site forms; 'redirect to social' is the real mechanism but under-specified vs a store/booking redirect"
+  ]
+}

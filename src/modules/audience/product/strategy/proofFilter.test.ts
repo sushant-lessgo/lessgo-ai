@@ -8,7 +8,11 @@
 // ⇒ present. Plus the phase-1 carry-forward parity flag on WORK `achievements`.
 
 import { describe, it, expect } from 'vitest';
-import { assembleProductStrategy } from './parseStrategyProduct';
+import {
+  assembleProductStrategy,
+  filterSectionsByProof,
+} from './parseStrategyProduct';
+import { VESTRIA_PAGE_ARCHETYPES } from '../pageArchetypes';
 import type { ProductStrategyResponse } from '@/lib/schemas/productStrategy.schema';
 import { engineContracts } from '@/modules/engines/inputContracts';
 
@@ -66,6 +70,45 @@ describe('proof hard rule — assembleProductStrategy (meridian single-page)', (
       proof: {},
     });
     expect(out.sections).not.toContain('testimonials');
+  });
+});
+
+// scale 1-10 F22 — the SAME proof rule must govern the 7b add-page/seed path
+// (StructureSlot). `filterSectionsByProof` is the single shared implementation
+// used by both the strategy assembly above AND the gate's seed/add chips.
+describe('proof hard rule — filterSectionsByProof (7b seed/add path)', () => {
+  it('proof off ⇒ testimonials cut from an added page’s default sections', () => {
+    const industries = VESTRIA_PAGE_ARCHETYPES.find((a) => a.key === 'industries')!;
+    expect(industries.defaultSections).toContain('testimonials'); // menu still offers it
+    const seeded = filterSectionsByProof(
+      [...industries.defaultSections],
+      { hasTestimonials: false }
+    );
+    expect(seeded).not.toContain('testimonials');
+    expect(seeded).toContain('industries'); // non-proof sections untouched
+  });
+
+  it('proof off ⇒ testimonials cut from the addable allowedSections chips', () => {
+    const about = VESTRIA_PAGE_ARCHETYPES.find((a) => a.key === 'about')!;
+    expect(about.allowedSections).toContain('testimonials');
+    const addable = filterSectionsByProof([...about.allowedSections], {
+      hasTestimonials: false,
+    });
+    expect(addable).not.toContain('testimonials');
+  });
+
+  it('proof on ⇒ testimonials survives the seed', () => {
+    const industries = VESTRIA_PAGE_ARCHETYPES.find((a) => a.key === 'industries')!;
+    const seeded = filterSectionsByProof(
+      [...industries.defaultSections],
+      { hasTestimonials: true }
+    );
+    expect(seeded).toContain('testimonials');
+  });
+
+  it('empty proof object (no key) ⇒ unpromised ⇒ testimonials cut', () => {
+    const seeded = filterSectionsByProof(['industries', 'testimonials'], {});
+    expect(seeded).not.toContain('testimonials');
   });
 });
 

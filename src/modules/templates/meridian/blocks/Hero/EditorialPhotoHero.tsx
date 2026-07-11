@@ -35,7 +35,7 @@ export default function EditorialPhotoHero({ sectionId }: EditorialPhotoHeroProp
   const { mode, blockContent, handleContentUpdate } =
     useMeridianBlock<EditorialPhotoHeroContent>({ sectionId });
 
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [photoUploading, setPhotoUploading] = React.useState(false);
@@ -158,7 +158,7 @@ export default function EditorialPhotoHero({ sectionId }: EditorialPhotoHeroProp
           <div className="mrd-hep__frame">
             <div className="mrd-hep__img">
               {blockContent.hero_image ? (
-                <img src={blockContent.hero_image} alt="" />
+                <img src={blockContent.hero_image} alt="" loading="eager" decoding="async" />
               ) : (
                 <span className="mrd-hep__slot-lbl">
                   <b>hero_image</b><br />product shot / team / dashboard — 4:5 or wider

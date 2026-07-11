@@ -7,6 +7,9 @@ import { ServiceThemePopover } from '../ui/ServiceThemePopover';
 import { VestriaThemePopover } from '../ui/VestriaThemePopover';
 import { EditHeaderRightPanel } from './EditHeaderRightPanel';
 import { ReviewPill } from '../ui/ReviewPill';
+import { SaveStateChip } from '../ui/SaveStateChip';
+import { LanguageToggle } from '../editor/LanguageToggle';
+import { LocaleSettings } from '../editor/LocaleSettings';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useReviewState } from '@/hooks/useReviewState';
 import { usesTemplateModule } from '@/types/service';
@@ -48,9 +51,14 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
     <header
       className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 relative z-50"
     >
-      {/* Left Section - Design System (see designControls selection above). */}
-      <div className="flex items-center space-x-4">
+      {/* Left Section - Design System (see designControls selection above) +
+          i18n language controls. LanguageToggle is invisible until the project
+          declares a 2nd locale; LocaleSettings is the "Languages" declaration
+          entry point. */}
+      <div className="flex items-center space-x-3">
         {designControls}
+        <LanguageToggle />
+        <LocaleSettings />
       </div>
 
       {/* Center: Setup guide pill (hidden once every guide task is done) */}
@@ -58,8 +66,11 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
         {!allComplete && <ReviewPill />}
       </div>
 
-      {/* Right Section - Action Controls */}
-      <EditHeaderRightPanel tokenId={tokenId} />
+      {/* Right Section - Save-state chip + Action Controls */}
+      <div className="flex items-center space-x-4">
+        <SaveStateChip />
+        <EditHeaderRightPanel tokenId={tokenId} />
+      </div>
     </header>
   );
 }

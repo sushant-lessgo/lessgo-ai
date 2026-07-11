@@ -13,6 +13,7 @@ import { extractSectionType } from '@/modules/generatedLanding/componentRegistry
 import { DEFAULT_CONTACT_FIELDS, CONTACT_SUBMIT_TEXT, CONTACT_SUCCESS_MESSAGE } from '@/modules/templates/techpremium/blocks/Contact/contactFields';
 import { logger } from '@/lib/logger';
 import { isReservedBlogPath } from '@/utils/reservedPaths';
+import { slugify } from '@/lib/normalize';
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v ?? null));
 
@@ -72,14 +73,6 @@ function ensureContactForm(state: any): string {
 
 function genPageId(): string {
   return `page-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function slugify(s: string): string {
-  return (s || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
 }
 
 /** A pathSlug under basePath that collides with no existing page (append -2/-3…). */

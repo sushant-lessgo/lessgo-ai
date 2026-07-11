@@ -139,14 +139,22 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
                     placeholder="Platform"
                   />
                   {mode === 'edit' && (
-                    <button
-                      type="button"
-                      className="hearth-footer__social-remove"
-                      onClick={() => removeSocial(s.id)}
-                      aria-label="Remove link"
-                    >
-                      ×
-                    </button>
+                    <>
+                      <input
+                        className="hearth-footer__social-url"
+                        value={s.href || ''}
+                        onChange={(e) => updateSocial(s.id, 'href', e.target.value)}
+                        placeholder="https://…"
+                      />
+                      <button
+                        type="button"
+                        className="hearth-footer__social-remove"
+                        onClick={() => removeSocial(s.id)}
+                        aria-label="Remove link"
+                      >
+                        ×
+                      </button>
+                    </>
                   )}
                 </li>
               ))}
@@ -214,6 +222,12 @@ const STYLES = `
   background: transparent; border: none; color: var(--ink-3);
   font-size: 14px; cursor: pointer; line-height: 1;
 }
+.hearth-footer__social-url {
+  width: 130px; padding: 3px 6px; border-radius: var(--r-sm);
+  border: 1px solid var(--line); background: transparent;
+  color: var(--ink-2); font-size: 12px; font-family: var(--font-body);
+}
+.hearth-footer__social-url::placeholder { color: var(--ink-3); }
 .hearth-footer__social-add {
   background: transparent; border: 1px dashed var(--sand);
   color: var(--ink-2); padding: 4px 10px; border-radius: var(--r-sm);

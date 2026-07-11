@@ -1,0 +1,51 @@
+{
+  "slug": "trianglehairorganic",
+  "url": "https://trianglehairorganic.com/",
+  "business": { "type_label": "organic hair salon", "icp_category": "place", "geography_hint": "Chigasaki, Japan" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "A physical hair salon whose visitor decides by browsing the space, menu/prices, treatment photos and location — checking a PLACE. Not selling defined expertise as the spine, and photos/menu/access ARE the decision.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "Book an appointment via LINE (or phone) reservation",
+    "mechanism": "call-WhatsApp",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 8,
+    "pages": ["home", "for-first-time-visitors", "profile", "treatment-examples-customer-voices", "five-steps", "menu-pricing", "organic-column", "line-reservation"],
+    "archetype_note": "WordPress salon site; homepage is a full single-scroll pitch, nav exposes ~8 sub-pages plus outbound LINE reservation and external shopping site."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Beautiful Hair Organic Hair Salon Triangle Chigasaki", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Delivering \"Beauty, Health & Vitality\"", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Our Commitments", "component": "text" },
+      { "canonical": "features", "observed_as": "Three Original Methods", "component": "grid-cards" },
+      { "canonical": "testimonials", "observed_as": "Treatment Examples & Customer Voices", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "Five Steps to Beautiful Hair", "component": "timeline" },
+      { "canonical": "pricing", "observed_as": "Menu & Pricing", "component": "pricing-table" },
+      { "canonical": "cta", "observed_as": "Reservations & Contact", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Access", "component": "map" },
+      { "canonical": "miscellaneous", "observed_as": "Latest News from Our Salon", "component": "text" },
+      { "canonical": "followStrip", "observed_as": "Instagram", "component": "gallery" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "packages", "blog", "gallery/portfolio"],
+    "proposed_new": []
+  },
+  "proof_types": ["testimonials"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["menu-list", "pricing-table", "process-timeline", "map-embed", "instagram-feed"],
+  "languages": ["ja"],
+  "confidence": {
+    "level": "high",
+    "why": "fetch_quality full; homepage content rich and clearly a physical salon with menu, access, testimonials and LINE/phone booking."
+  },
+  "gap_findings": []
+}

@@ -1,0 +1,55 @@
+{
+  "slug": "empoweredvolleyball",
+  "url": "https://empoweredvolleyball.com/",
+  "business": { "type_label": "youth volleyball club / training academy", "icp_category": "sports-training", "geography_hint": "Warsaw / Fort Wayne area, US (Parkview Sports Medicine, Leo HS references)" },
+  "in_icp": false,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Parents/athletes are deciding whether to trust a coaching organization with a player's development — the proof is founder credentials (pro player, HS head coach), Master Coaches, and a wall of college-commitment alumni. Sells defined coaching expertise, so trust wins on the first rung of the ladder.",
+    "runner_up": "place"
+  },
+  "goal": {
+    "one_action": "register for a tryout / clinic / program (or subscribe to the email list secondarily)",
+    "mechanism": "redirect",
+    "delegated_to": "leagueapps"
+  },
+  "structure": { "kind": "multi", "page_count": 30, "pages": ["home","about-us","training-lessons","recruiting/commits-alumni","clinics","girls","boys","warsaw","jr-beach","tournaments","adult","become-a-coach","lessons","developmental-league","volleytots"], "archetype_note": "Program-hub sports club: many program pages fan out from a home overview, with tryout/clinic registration handed off to LeagueApps/Club Automation, prices and cart/checkout present — a registration engine with inventory, not a single conversion page." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "2027 CLUB SEASON TRYOUTS", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Boys Tryouts (2026-27)", "component": "text" },
+      { "canonical": "features", "observed_as": "DROP-IN CLINICS", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Competitive Beach", "component": "text" },
+      { "canonical": "features", "observed_as": "DEVELOPMENTAL LEAGUE", "component": "text" },
+      { "canonical": "features", "observed_as": "VOLLEYTOTS", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Why the Right Club Fit Matters More Than the Team Number", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Empowering The Mind Body & Soul of Champions (founder bios + mission)", "component": "team" },
+      { "canonical": "results", "observed_as": "Our Alumni and Commitments / All Commits and Alumni", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "Become a Coach", "component": "text" },
+      { "canonical": "features", "observed_as": "Lessons", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Sponsor logo wall (JVA, Parkview Ortho, Truitt Law...)", "component": "logo-wall" },
+      { "canonical": "miscellaneous", "observed_as": "Hours (operating hours table)", "component": "table" },
+      { "canonical": "leadForm", "observed_as": "Subscribe (email)", "component": "form" },
+      { "canonical": "footer", "observed_as": "Connect / Who we are / What we do / Training", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Upcoming Clinics (dated session list: Boys All-Skills, Controlled Scrimmage, Setting & Defense — each with date + price + external Register)", "why_no_fit": "A dated schedule of sessions each redirecting to external registration is a recurring pattern the canonical section list has no id for; closest results/useCases both miss the dated-schedule-with-redirect nature.", "closest": "useCases" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "packages", "blog", "map-hours"],
+    "proposed_new": [
+      { "name": "event-listings", "evidence": "Tryouts and clinics are dated sessions (July 23 boys tryout, dated Upcoming Clinics) whose Register/Learn-More CTAs hand off to LeagueApps external registration/ticketing — a dated schedule redirecting per-event, not a scheduling wizard." }
+    ]
+  },
+  "proof_types": ["stats", "portfolio", "logo-wall", "certs"],
+  "design_style": { "pick": "bold/performance", "none_fits_because": "" },
+  "components_needed": ["program cards grid", "dated event/session list", "team grid (founders)", "athlete-commitment card grid", "hours table", "sponsor logo wall", "email subscribe inline"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality full; nav, ctas, forms, commerce and proof all captured. Clear multi-page club with external registration and cart/checkout." },
+  "gap_findings": [
+    "Registration/commerce runs entirely through 3rd-party LeagueApps/Club Automation with cart+checkout and per-session prices — the site's job is program registration with inventory, not a single conversion action, so it falls outside single-CTA ICP.",
+    "The dated tryout/clinic schedule → external-registration pattern needs an event-listings capability; the canonical section vocab lacks an id for a dated-session-with-redirect block.",
+    "Athlete college-commitment wall (~120 cards, filterable by category) is a proof-of-results archetype that maps only loosely to results/socialProof — a roster/outcome showcase distinct from testimonials or portfolio."
+  ]
+}

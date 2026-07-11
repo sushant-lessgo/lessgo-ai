@@ -1,0 +1,53 @@
+{
+  "slug": "lenivastudio",
+  "url": "https://lenivastudio.com/",
+  "business": { "type_label": "communication strategy & branding/design studio", "icp_category": "creative-agency", "geography_hint": "Poland (Polish default, English available)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Studio sells defined expertise (strategy, branding, digital, communication) and leans on manifesto, process pillars, team bios and personality to earn trust in the firm; portfolio supports but is not the whole argument.",
+    "runner_up": "work"
+  },
+  "goal": {
+    "one_action": "book a consultation / contact the studio about a project",
+    "mechanism": "form",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 5,
+    "pages": ["home", "services", "studio", "works", "blog(magazyn)"],
+    "archetype_note": "Agency/studio site: manifesto + services + case studies + team/process, contact via consultation form; contact is an in-page anchor rather than a standalone route."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "founderNote", "observed_as": "Manifest", "component": "text" },
+      { "canonical": "results", "observed_as": "Wybrane Projekty", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Oto, co możemy dla Ciebie zrobić", "component": "grid-cards" },
+      { "canonical": "howItWorks", "observed_as": "Oto, jak to robimy / Koherencja, Rezonans, Funkcjonalność", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "Jak pracujemy?", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "Poznaj zespół / Nie wahaj się odezwać", "component": "team" },
+      { "canonical": "miscellaneous", "observed_as": "Jesteśmy mili. Ale nie za mili.", "component": "text/gallery" },
+      { "canonical": "cta", "observed_as": "Gotowi do startu? / Zbudujmy razem markę...", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Szukasz czegoś podobnego, ale innego?", "component": "form" },
+      { "canonical": "followStrip", "observed_as": "A przy okazji / newsletter signup", "component": "form" },
+      { "canonical": "miscellaneous", "observed_as": "Znajdź coś do poczytania / Zobacz, co o tym piszemy (blog teaser)", "component": "grid-cards" }
+    ],
+    "unmapped": [
+      { "observed": "Chcesz dołączyć do zespołu? — Aplikuj (recruitment/careers CTA)", "why_no_fit": "A jobs/hiring call directed at a job-seeker audience, not a customer conversion; no canonical section expresses careers recruitment", "closest": "cta" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "blog", "bilingual", "lead-form"],
+    "proposed_new": []
+  },
+  "proof_types": ["case-studies", "portfolio"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["portfolio project grid", "case-study card grid", "service category cards", "team grid with contacts", "blog teaser grid", "newsletter signup form", "consultation/contact form"],
+  "languages": ["pl", "en"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; five pages captured with clear section order, CTAs, forms and proof counts." },
+  "gap_findings": [
+    "Site carries several co-equal conversion actions the single-goal model can't fully hold: consultation/contact form, newsletter subscribe, and a careers 'Aplikuj' recruitment CTA — the recruitment path targets a job-seeker audience, not a customer.",
+    "Manifesto section is a studio-philosophy statement that maps only loosely to founderNote; a dedicated 'manifesto/positioning statement' section would fit agency archetypes better."
+  ]
+}

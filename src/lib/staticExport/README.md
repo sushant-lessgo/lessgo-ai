@@ -38,8 +38,12 @@ Returns `{ html, metadata: { size, cssVariableCount } }`.
     — self-hosted font faces.
   - `<script src="https://lessgo.ai/assets/form.v1.js">` — only when the page has
     forms.
-  - `<script src="…/a.v1.js" data-page-id data-slug>` — analytics beacon, only
-    when analytics is opted in.
+  - `<script src="…/a.v2.js" data-page-id data-slug>` — analytics beacon, only
+    when analytics is opted in. **New publishes use `a.v2.js`** (adds `role` +
+    `placement` to `cta_click`, and `v: 2` to every payload). Blobs published
+    before scale-04 hardcode the frozen `a.v1.js`, which keeps its original
+    (no-role/placement) semantics forever — see the versioning contract in
+    `scripts/buildAssets.js`. A filename never changes semantics; bump the version.
   - `<script src="…/naayom.v1.js">` (TechPremium) / `lumen.v1.js` (Lumen) —
     template behavior bundles, gated by `templateId`.
 
@@ -55,9 +59,11 @@ runs, in order:
 1. **`scripts/buildPublishedCSS.js`** → compiles `public/published.css`
    (the standalone bundle referenced as `/assets/published.css`).
 2. **`scripts/buildAssets.js`** → minifies the source JS in *this directory*
-   (`formHandler.js → form.v1.js`, `analyticsGenerator.js → a.v1.js`,
+   (`formHandler.js → form.v1.js`, `analyticsGenerator.js → a.v2.js`,
    `naayomBehaviors.js → naayom.v1.js`, `lumenBehaviors.js → lumen.v1.js`) into
-   `public/assets/`, and copies `fonts-self-hosted.css` verbatim.
+   `public/assets/`, and copies `fonts-self-hosted.css` verbatim. It also emits the
+   frozen `a.v1.js` from `scripts/legacy/a.v1.src.js` (pre-scale-04 beacon, kept
+   for old blobs — never rebuilt from the live source).
 3. `next build`.
 
 So the runtime `.js` behavior sources live here as plain files (`formHandler.js`,
@@ -97,6 +103,6 @@ routing, version cleanup, or blob rollback — those stay in the callers. Full f
 | `injectChrome.ts` | Multi-page: injects shared header/footer chrome into a page (idempotent). |
 | `versionCleanup.ts` | Prunes old `PublishedPageVersion` blobs. |
 | `formHandler.js` | Runtime source → minified to `public/assets/form.v1.js` (published-page form submit). |
-| `analyticsGenerator.js` | Runtime source → minified to `public/assets/a.v1.js` (analytics beacon). |
+| `analyticsGenerator.js` | Runtime source → minified to `public/assets/a.v2.js` (live analytics beacon: role/placement + `v:2`). The frozen pre-scale-04 `a.v1.js` is built separately from `scripts/legacy/a.v1.src.js`. |
 | `naayomBehaviors.js` | Runtime source → `naayom.v1.js` (TechPremium behaviors: nav/lightbox/gallery). |
 | `lumenBehaviors.js` | Runtime source → `lumen.v1.js` (Lumen behaviors: lightbox/reveal/EN·NL toggle). |

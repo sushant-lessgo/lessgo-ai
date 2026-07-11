@@ -20,7 +20,18 @@
 import { describe, it, expect } from 'vitest';
 
 import { templateMeta } from './templateMeta';
-import { blockManifests } from './blockManifest';
+import { blockManifests, type BlockDeclaration } from './blockManifest';
+import {
+  isCopyCompatible,
+  isBlockEligible,
+  findIncompatibleCoEligiblePairs,
+  type AssetFacts,
+  type ConsumedKeyKind,
+} from '@/modules/generation/blockEligibility';
+import { resolveEngineSectionSchema } from '@/modules/engines/elementContracts';
+import { productElementSchema } from '@/modules/audience/product/elementSchema';
+import { serviceElementSchema } from '@/modules/audience/service/elementSchema';
+import { isV2Schema, type UIBlockSchemaV2 } from '@/modules/sections/layoutElementSchema';
 import { engineCoreSections } from '@/modules/engines/coreSections';
 import { templateIds, type TemplateId } from '@/types/service';
 import { capabilityIds, type CapabilityId } from '@/types/brief';
@@ -63,9 +74,14 @@ const RESOLVERS: Record<
 };
 
 // Structural capabilities are NOT block-backed: `multipage` is page-menu
-// machinery and `bilingual` is twin-field machinery — no single section/block
-// evidences them, so they are exempt from the capability-evidence check (D-B).
-// They remain trust-on-declaration until a structural check exists (spec 02+).
+// machinery and `bilingual` is the platform content-locale layer — no single
+// section/block evidences them, so they are exempt from the capability-evidence
+// check (D-B) here.
+// `bilingual` is no longer trust-on-declaration: its machinery (overlay
+// resolver, per-locale static export, switcher asset, hreflang) is asserted
+// STRUCTURALLY by `src/lib/i18n/i18nHonesty.test.ts` (i18n-phase-1 D5) — that
+// is the "structural check" this exemption comment previously deferred to
+// "spec 02+". `multipage`'s structural check remains a future gap.
 const STRUCTURAL_CAPABILITIES: readonly CapabilityId[] = ['multipage', 'bilingual'];
 
 const MODES: readonly Mode[] = ['edit', 'published'];
@@ -383,6 +399,128 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
           })
         ).toThrow();
       });
+    });
+  });
+
+  // ── (e) variant-swap-integrity: no both-ways-scalar-divergent co-eligible pair ─
+  // A block-variant swap must never silently drop scalar copy in BOTH
+  // directions. For every SectionBlockSet, every CO-ELIGIBLE variant pair (same
+  // copyShape group + both asset-eligible under identical all-present facts,
+  // internalDispatch INCLUDED) must NOT be both-ways scalar-divergent. Any such
+  // pair is genuinely content-incompatible and must be split by distinct
+  // `copyShape` tags — surge testimonials (ReviewGrid vs PullQuote) is the
+  // corrected case; meridian/hearth/vestria pairs are superset/equal ⇒ PASS.
+  //
+  // Static SCALAR/COLLECTION classification comes from the ELEMENT SCHEMA (tests
+  // may import schemas — the firewall is a runtime-bundle rule only), injected
+  // into the shared helper as `classify` so blockEligibility.ts imports no schema.
+  // This is intentionally a DIFFERENT method from the runtime predicate's
+  // value-arrayness classification; check (e)'s consistency assertion bridges the two.
+  describe('(e) variant-swap-integrity: no both-ways-scalar-divergent co-eligible pair', () => {
+    // Reuse the blockManifest.test contract seam: thing-engine (meridian/vestria)
+    // sections resolve to the unioned contract; service sections to the own schema.
+    function contractFor(layoutName: string): UIBlockSchemaV2 | null {
+      const engine = resolveEngineSectionSchema(layoutName);
+      if (engine) return engine;
+      const own = productElementSchema[layoutName] ?? serviceElementSchema[layoutName];
+      return (own as UIBlockSchemaV2) ?? null;
+    }
+
+    // Schema-based classifier. FAILS LOUDLY (throws) rather than guessing when a
+    // consumed key's arrayness cannot be resolved from the contract.
+    function classify(layoutName: string, key: string): ConsumedKeyKind {
+      const schema = contractFor(layoutName);
+      if (!schema || !isV2Schema(schema)) {
+        throw new Error(`(e) classify: no V2 element contract for layout "${layoutName}"`);
+      }
+      if (schema.elements[key]) return 'scalar';
+      if (schema.collections?.[key]) return 'collection';
+      const [collName] = key.split('.');
+      if (key.includes('.') && schema.collections?.[collName]) return 'collection';
+      throw new Error(
+        `(e) classify: cannot classify consumed key "${key}" in layout "${layoutName}" (not in elements or collections)`
+      );
+    }
+
+    const ALL_ASSETS: AssetFacts = {
+      hasPhotos: true,
+      hasLogos: true,
+      hasTestimonials: true,
+      hasTestimonialPhotos: true,
+    };
+
+    // MAIN assertion — per (template, section): the both-ways-divergent pair list is EMPTY.
+    for (const [tid, manifest] of Object.entries(blockManifests)) {
+      describe(tid, () => {
+        for (const [sectionType, set] of Object.entries(manifest!)) {
+          it(`${sectionType}: no co-eligible pair drops scalar copy both ways`, () => {
+            const bad = findIncompatibleCoEligiblePairs(set, classify);
+            expect(
+              bad,
+              `${tid}/${sectionType} has both-ways-scalar-divergent co-eligible pair(s): ${bad
+                .map((p) => `${p.a}↔${p.b}`)
+                .join(', ')} — split them with distinct copyShape tags`
+            ).toEqual([]);
+          });
+        }
+      });
+    }
+
+    // CONSISTENCY assertion — copyShape-exclusion and the runtime filter must not
+    // drift: every DIFFERENT-copyShape but asset-co-eligible pair must ALSO be
+    // runtime-hidden by isCopyCompatible when fed content synthesized from the
+    // OTHER variant's consumes (proves surge PullQuote is hidden from a
+    // reviews-shaped section by the scalar-drop rule alone, not only by copyShape).
+    function synthContent(decl: BlockDeclaration): Record<string, unknown> {
+      const el: Record<string, unknown> = {};
+      for (const k of decl.consumes) {
+        el[k] = classify(decl.layoutName, k) === 'collection' ? [{ id: '1' }] : 'x';
+      }
+      return el;
+    }
+
+    for (const [tid, manifest] of Object.entries(blockManifests)) {
+      for (const [sectionType, set] of Object.entries(manifest!)) {
+        const variants = set.variants;
+        for (let i = 0; i < variants.length; i++) {
+          for (let j = i + 1; j < variants.length; j++) {
+            const A = variants[i];
+            const B = variants[j];
+            const sameShape = (A.copyShape ?? undefined) === (B.copyShape ?? undefined);
+            const bothEligible =
+              isBlockEligible(A, { assetFacts: ALL_ASSETS }) &&
+              isBlockEligible(B, { assetFacts: ALL_ASSETS });
+            if (sameShape || !bothEligible) continue; // only DIFFERENT-copyShape, asset-co-eligible pairs
+            it(`${tid}/${sectionType}: ${A.layoutName} ⇄ ${B.layoutName} are runtime-hidden from each other's content`, () => {
+              expect(
+                isCopyCompatible(B, synthContent(A)),
+                `${B.layoutName} should be HIDDEN from ${A.layoutName}-shaped content`
+              ).toBe(false);
+              expect(
+                isCopyCompatible(A, synthContent(B)),
+                `${A.layoutName} should be HIDDEN from ${B.layoutName}-shaped content`
+              ).toBe(false);
+            });
+          }
+        }
+      }
+    }
+
+    // HYGIENE (plan-review non-blocking guidance): a copyShape tag must never
+    // collide with a consumed element-key name (keeps the group label distinct
+    // from content keys, avoiding accidental semantic overlap).
+    it('copyShape (when set) never collides with a consumed key name', () => {
+      for (const [tid, manifest] of Object.entries(blockManifests)) {
+        for (const [sectionType, set] of Object.entries(manifest!)) {
+          for (const v of set.variants) {
+            if (v.copyShape === undefined) continue;
+            expect(
+              v.consumes,
+              `${tid}/${sectionType}/${v.layoutName}: copyShape "${v.copyShape}" collides with a consumed key`
+            ).not.toContain(v.copyShape);
+          }
+        }
+      }
     });
   });
 

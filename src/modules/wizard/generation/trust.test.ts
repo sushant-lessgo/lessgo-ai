@@ -26,6 +26,7 @@ import {
   briefGoalFor,
   effectivePalette,
   runTrustGeneration,
+  testimonialCountHint,
   type TrustGenerationInput,
 } from './trust';
 
@@ -168,6 +169,42 @@ describe('TRUST adapter — strategy payload fidelity', () => {
     expect(effectivePalette(baseInput({ paletteId: 'moss' }))).toBe('moss');
     // hearth default palette family (first entry).
     expect(effectivePalette(baseInput({ paletteId: undefined, templateId: 'hearth' }))).toBe('terracotta');
+  });
+
+  // proof-truth phase 5 — testimonials card-count hint plumbed into the payload.
+  it('emits NO cardCountHints when neither scraped nor user count exists (byte-identical)', () => {
+    expect('cardCountHints' in buildStrategyPayload(baseInput())).toBe(false);
+  });
+
+  it('emits the user-answered count when there are no scraped quotes', () => {
+    const p = buildStrategyPayload(
+      baseInput({ proof: { ...baseInput().proof, testimonialCount: 4 } })
+    ) as any;
+    expect(p.cardCountHints).toEqual({ testimonials: 4 });
+  });
+
+  it('scraped count WINS over the user count in the emitted hint', () => {
+    const p = buildStrategyPayload(
+      baseInput({
+        proof: { ...baseInput().proof, testimonialCount: 2 },
+        importedTestimonials: [
+          { quote: 'q1', author_name: 'a', author_role: 'r' },
+          { quote: 'q2', author_name: 'b', author_role: 'r' },
+          { quote: 'q3', author_name: 'c', author_role: 'r' },
+        ],
+      })
+    ) as any;
+    expect(p.cardCountHints).toEqual({ testimonials: 3 });
+  });
+});
+
+// proof-truth phase 5 — precedence helper (mirror of thing.ts).
+describe('TRUST adapter — testimonialCountHint precedence (scraped > user > none)', () => {
+  it('scraped wins, else user, else undefined', () => {
+    expect(testimonialCountHint(3, 2)).toBe(3);
+    expect(testimonialCountHint(undefined, 4)).toBe(4);
+    expect(testimonialCountHint(0, 4)).toBe(4);
+    expect(testimonialCountHint(undefined, null)).toBeUndefined();
   });
 });
 

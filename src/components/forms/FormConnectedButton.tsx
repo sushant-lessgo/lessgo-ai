@@ -58,7 +58,11 @@ export function FormConnectedButton({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [inputError, setInputError] = useState('');
-  const { getFormById, sections } = useEditStore();
+  const getFormById = useEditStore((s) => s.getFormById);
+  const sections = useEditStore((s) => s.sections);
+  // Subscribe to the forms slice so form edits re-render (getFormById derives from it).
+  const forms = useEditStore((s) => s.forms);
+  void forms;
 
   // scale-04: navigate to a resolved Destination (or a raw href string). Behavior
   // is keyed off the Destination TYPE — section anchors scroll, tel:/mailto: stay

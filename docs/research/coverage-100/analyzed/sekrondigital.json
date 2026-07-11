@@ -1,0 +1,51 @@
+{
+  "slug": "sekrondigital",
+  "url": "https://sekrondigital.cl/",
+  "business": { "type_label": "electronic security & home-automation systems provider/installer", "icp_category": "security-systems-installer", "geography_hint": "Chile (es)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Sells defined expertise — installing/monitoring electronic security & domotics for homes and industry (banks, retail, clinics, schools). The 'thinking of switching providers?' pitch frames the decision as trusting this firm as your security provider, not buying a single product.",
+    "runner_up": "thing"
+  },
+  "goal": {
+    "one_action": "contact the company to get a security solution / free month, or subscribe to the newsletter",
+    "mechanism": "form",
+    "delegated_to": "google-forms"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 12,
+    "pages": ["home", "Seguridad para el Hogar", "Seguridad Industria", "Equipos y Productos", "Acceso Clientes"],
+    "archetype_note": "WordPress/Elementor/WooCommerce security firm; home is a solution-pitch splash, deeper pages are segment (home/industry) + product catalog + client login. Primary lead CTAs hand off to external Google Forms; one Linktree CTA for business benefits."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Seguridad y Domótica Hogar", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Seguridad Industria, Bancos, Retail y Comercio", "component": "grid-cards" },
+      { "canonical": "objectionHandling", "observed_as": "¿Pensando en cambiar de proveedor?", "component": "text" },
+      { "canonical": "features", "observed_as": "¿Quieres respaldar algunas cámaras en otro sitio?", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Seguridad y Domótica", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Suscríbete a nuestro Newsletter", "component": "form" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "lead-form"],
+    "proposed_new": [
+      { "name": "external-lead-form", "evidence": "Primary contact/quote CTAs ('Contáctenos', 'Consigue tu Mes Gratis') route to off-site Google Forms rather than an on-page inquiry form; only the newsletter capture is on-site." }
+    ]
+  },
+  "proof_types": [],
+  "design_style": { "pick": null, "none_fits_because": "No design hints captured (no fonts, colors, or dark/light); cannot assign a style with confidence." },
+  "components_needed": ["industry-solution card grid", "newsletter signup form", "catalog/product grid"],
+  "languages": ["es"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality is full but only the home page was crawled; catalog (Equipos y Productos), segment, and client-access pages were not visited, and primary CTAs point to external tools whose form fields are unknown."
+  },
+  "gap_findings": [
+    "Primary lead conversion is delegated off-site to Google Forms (contact + free-month) — the closed vocab's on-page 'lead-form' cannot express an external lead handoff; sibling of external-list-signup but for lead inquiry not email list.",
+    "WooCommerce catalog coexists with a lead/contact-driven site: mixed transactional (catalog) + inquiry (forms) intent under one roof, hard to pin to a single engine."
+  ]
+}

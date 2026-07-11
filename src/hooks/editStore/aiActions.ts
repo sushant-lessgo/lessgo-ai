@@ -3,6 +3,26 @@ import type { EditStore } from '@/types/store';
 
 import { logger } from '@/lib/logger';
 import { deepCopy, pushHistoryEntry } from './historyHelpers';
+
+// i18n-phase-1 (3a) REGEN GUARD: AI (re)generation writes must never target a
+// non-default-locale overlay in v1. When the editor is on a non-default locale,
+// every regenerate/generate entry point no-ops with a warning (UI disable lands
+// in Phase 4). Paired with the generationActions.updateFromAIResponse guard, this
+// makes it impossible for an AI write to land in — or clobber base from — a
+// non-default-locale session (regenerationActions funnels through that same guard).
+function regenBlockedForLocale(get: () => any): boolean {
+  const s = get();
+  const def = s?.localeConfig?.defaultLocale ?? 'en';
+  if (s?.activeLocale && s.activeLocale !== def) {
+    console.warn(
+      '[i18n] Regeneration is disabled while editing a non-default language. ' +
+        'Switch to the default language to regenerate.',
+    );
+    return true;
+  }
+  return false;
+}
+
 /**
  * Consolidated AI actions for content generation and regeneration
  */
@@ -16,6 +36,7 @@ export function createAIActions(set: any, get: any) {
       userGuidance?: string,
       options?: { suppressHistory?: boolean }
     ) => {
+      if (regenBlockedForLocale(get)) return; // i18n-phase-1 (3a) regen guard
       set((state: EditStore) => {
         state.aiGeneration.isGenerating = true;
         state.aiGeneration.currentOperation = 'section';
@@ -196,6 +217,7 @@ export function createAIActions(set: any, get: any) {
     },
 
     regenerateElement: async (sectionId: string, elementKey: string, variationCount: number = 1) => {
+      if (regenBlockedForLocale(get)) return; // i18n-phase-1 (3a) regen guard
       set((state: EditStore) => {
         state.aiGeneration.isGenerating = true;
         state.aiGeneration.currentOperation = 'element';
@@ -237,6 +259,7 @@ export function createAIActions(set: any, get: any) {
 
     // Unified regenerate function that always returns variations
     regenerateElementWithVariations: async (sectionId: string, elementKey: string, variationCount: number = 5) => {
+      if (regenBlockedForLocale(get)) return []; // i18n-phase-1 (3a) regen guard
       set((state: EditStore) => {
         state.aiGeneration.isGenerating = true;
         state.aiGeneration.currentOperation = 'element';
@@ -331,6 +354,7 @@ export function createAIActions(set: any, get: any) {
     },
 
     generateVariations: async (sectionId: string, elementKey: string, count: number = 5) => {
+      if (regenBlockedForLocale(get)) return []; // i18n-phase-1 (3a) regen guard
       set((state: EditStore) => {
         state.aiGeneration.isGenerating = true;
         state.aiGeneration.currentOperation = 'element';

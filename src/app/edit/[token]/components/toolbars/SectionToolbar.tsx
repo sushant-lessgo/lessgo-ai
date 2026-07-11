@@ -1,10 +1,8 @@
 // app/edit/[token]/components/toolbars/SectionToolbar.tsx - Priority-Resolved Section Toolbar
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
-import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
-import { calculateArrowPosition } from '@/utils/toolbarPositioning';
-import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import { AddSectionButton } from '../content/SectionCRUD';
 import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import type { SectionType } from '@/types/core/content';
@@ -12,7 +10,7 @@ import { logger } from '@/lib/logger';
 import { getSectionTypeFromLayout } from '@/utils/layoutSectionTypeMapping';
 import { ElementToggleModal } from '../ui/ElementToggleModal';
 import { isChromeId } from '@/hooks/editStore/pageHelpers';
-import { hasMultipleVariants } from '../ui/BlockVariantSelector';
+import { eligibleVariantCount } from '../ui/BlockVariantSelector';
 import { usesTemplateModule } from '@/types/service';
 
 // Shared chrome (header/footer) is site-wide: hide per-page structural actions.
@@ -20,45 +18,17 @@ const CHROME_HIDDEN_ACTIONS = ['move-up', 'move-down', 'duplicate', 'delete'];
 
 interface SectionToolbarProps {
   sectionId: string;
-  position: { x: number; y: number };
-  contextActions: any[];
 }
 
-// Outer gate: visibility-priority check only. Split from the inner component so
-// the early return sits above zero hooks (rules-of-hooks); hidden ⇒ inner
-// unmounted ⇒ no state/effects run — same behavior as the old early return.
-export function SectionToolbar(props: SectionToolbarProps) {
-  // STEP 1: Check toolbar visibility priority
-  const { isVisible } = useToolbarVisibility('section');
-  if (!isVisible) {
-    return null;
-  }
-  return <SectionToolbarInner {...props} />;
-}
-
-function SectionToolbarInner({ sectionId, position, contextActions }: SectionToolbarProps) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
+// Phase-3: the ToolbarShell decides visibility and owns positioning. This
+// component is a dumb child of the shell's floating container.
+export function SectionToolbar({ sectionId }: SectionToolbarProps) {
   const [showElementToggle, setShowElementToggle] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
-  const advancedRef = useRef<HTMLDivElement>(null);
-  const advancedTriggerRef = useRef<HTMLButtonElement>(null);
 
-  // Debug instance
-  const instanceId = useRef(Math.random().toString(36).substr(2, 9));
-
-  // Debug mounting/unmounting
-  useEffect(() => {
-    logger.dev(`🟢 SectionToolbar[${instanceId.current}] MOUNTED for section:`, () => sectionId);
-    return () => {
-      logger.dev(`🔴 SectionToolbar[${instanceId.current}] UNMOUNTING for section:`, () => sectionId);
-    };
-  }, []);
-  
-  // Debug state changes
-  useEffect(() => {
-    logger.dev(`🔍 SectionToolbar[${instanceId.current}] - showAdvanced changed to:`, () => showAdvanced);
-  }, [showAdvanced]);
-
+  // Narrow selector: pull ONLY the fields/actions this toolbar reads. Actions are
+  // stable refs; the state slices (content/sections/sectionLayouts/aiGeneration)
+  // are the ones this component genuinely renders from.
   const {
     content,
     sections,
@@ -68,19 +38,32 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
     showLayoutChangeModal,
     audienceType,
     templateId,
-  } = useEditStore();
+  } = useEditStore(
+    useShallow((s) => ({
+      content: s.content,
+      sections: s.sections,
+      sectionLayouts: s.sectionLayouts,
+      announceLiveRegion: s.announceLiveRegion,
+      aiGeneration: s.aiGeneration,
+      showLayoutChangeModal: s.showLayoutChangeModal,
+      audienceType: s.audienceType,
+      templateId: s.templateId,
+    })),
+  );
 
   // Swap-button visibility gate (scale-09 phase 5). For template-module projects
-  // the "Layout" action only makes sense when the section's manifest declares
-  // >1 variant (BlockVariantSelector); single-variant template sections have no
-  // swap UI (the modal would render null), so hide the button. Legacy (non-
+  // the "Layout" action only makes sense when the section has >1 ELIGIBLE variant
+  // (BlockVariantSelector). A section can declare >1 variant yet have only one
+  // meet its `requiresAssets` needs (e.g. meridian hero without a photo) — the
+  // picker would then show a single, dead one-card modal (F18), so gate on the
+  // eligible count (post-asset-filter), not the declared count. Legacy (non-
   // template) projects keep the button always — they use LayoutChangeSelector's
   // full library. currentLayout drives the manifest lookup (unlike sectionType,
   // it uniquely identifies the owning variant set).
   const currentSectionLayout = sectionLayouts[sectionId];
   const isTemplateModule = usesTemplateModule(audienceType, templateId);
   const showChangeLayout = isTemplateModule
-    ? hasMultipleVariants(templateId, currentSectionLayout)
+    ? eligibleVariantCount(templateId, currentSectionLayout, content[sectionId]) > 1
     : true;
 
   // Handle layout change action
@@ -150,32 +133,6 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
       hasRequiredContent: true,
     };
   }, [sectionId, section?.editMetadata]);
-
-  // Calculate arrow position
-  const targetElement = document.querySelector(`[data-section-id="${sectionId}"]`);
-  const arrowInfo = targetElement ? calculateArrowPosition(
-    position,
-    targetElement.getBoundingClientRect(),
-    { width: 400, height: 48 }
-  ) : null;
-
-  // Close advanced menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        advancedRef.current &&
-        !advancedRef.current.contains(event.target as Node) &&
-        !toolbarRef.current?.contains(event.target as Node)
-      ) {
-        setShowAdvanced(false);
-      }
-    };
-
-    if (showAdvanced) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showAdvanced]);
 
   // Primary Actions with enhanced functionality
   const primaryActions = [
@@ -270,20 +227,6 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
     prevIsRegeneratingRef.current = isRegenerating;
   }, [isRegenerating, announceLiveRegion]);
 
-  // Enhanced Advanced Actions
-  const advancedActions = [
-    {
-      id: 'regenerate-section',
-      label: 'Regenerate Content',
-      icon: 'refresh',
-      handler: () => {
-        // TODO: Implement regenerate section handler
-        logger.warn('Regenerate section not yet implemented');
-      },
-      disabled: isRegenerating,
-    },
-  ];
-
   return (
     <>
       {/* Show loading bar when regenerating this section */}
@@ -326,30 +269,10 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
       
       {/* Original toolbar - only show when not regenerating */}
       {!isRegenerating && !showCompletionMessage && (
-        <div 
+        <div
           ref={toolbarRef}
-          className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
-          style={{
-            left: position.x,
-            top: position.y,
-          }}
+          className="bg-white border border-gray-200 rounded-lg shadow-lg"
         >
-        {/* Arrow */}
-        {arrowInfo && (
-          <div 
-            className={`absolute w-2 h-2 bg-white border transform rotate-45 ${
-              arrowInfo.direction === 'up' ? 'border-t-0 border-l-0 -bottom-1' :
-              arrowInfo.direction === 'down' ? 'border-b-0 border-r-0 -top-1' :
-              arrowInfo.direction === 'left' ? 'border-l-0 border-b-0 -right-1' :
-              'border-r-0 border-t-0 -left-1'
-            }`}
-            style={{
-              left: arrowInfo.direction === 'up' || arrowInfo.direction === 'down' ? arrowInfo.x - 4 : undefined,
-              top: arrowInfo.direction === 'left' || arrowInfo.direction === 'right' ? arrowInfo.y - 4 : undefined,
-            }}
-          />
-        )}
-        
         <div className="flex items-center px-3 py-2">
           {/* Section Indicator with Validation */}
           <div className="flex items-center space-x-2 mr-3">
@@ -393,43 +316,8 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
               </button>
             </React.Fragment>
           ))}
-          
-          {/* Advanced Actions Trigger */}
-          <div className="w-px h-6 bg-gray-200 mx-1" />
-          <button
-            ref={advancedTriggerRef}
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              setShowAdvanced(!showAdvanced);
-            }}
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
-              showAdvanced 
-                ? 'bg-gray-100 text-gray-900' 
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-            }`}
-            title="More actions"
-          >
-            <span>⋯</span>
-          </button>
         </div>
       </div>
-      )}
-
-      {/* Advanced Actions Menu - Using the dedicated component */}
-      {showAdvanced && advancedTriggerRef.current && !isRegenerating && (
-        <AdvancedActionsMenu
-          ref={advancedRef}
-          actions={advancedActions}
-          triggerElement={advancedTriggerRef.current}
-          onClose={() => setShowAdvanced(false)}
-          toolbarType="section"
-          isVisible={showAdvanced}
-        />
       )}
 
       <ElementToggleModal

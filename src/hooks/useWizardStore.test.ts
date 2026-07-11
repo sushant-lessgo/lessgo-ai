@@ -402,6 +402,34 @@ describe('useWizardStore — buildThingInput projection (shared by fetchStrategy
     expect(input.strategy).toEqual(MOCK_STRATEGY);
     expect(input.sitemap).toEqual(MOCK_SITEMAP);
   });
+
+  // proof-truth phase 5 — approximate testimonial count (manual path).
+  it('defaults testimonialCount to null and omits it from the thing proof patch', () => {
+    useWizardStore.getState().hydrate({ brief: bareThing, audienceType: 'product', templateId: 'meridian' });
+    expect(useWizardStore.getState().proof.testimonialCount).toBeNull();
+    const input = buildThingInput(useWizardStore.getState());
+    expect('testimonialCount' in (input.proof ?? {})).toBe(false);
+  });
+
+  it('carries a set testimonialCount into the thing proof patch; clearing to null drops it', () => {
+    useWizardStore.getState().hydrate({ brief: bareThing, audienceType: 'product', templateId: 'meridian' });
+    useWizardStore.getState().setProof({ hasTestimonials: true, testimonialCount: 4 });
+    expect(useWizardStore.getState().proof.testimonialCount).toBe(4);
+    expect(buildThingInput(useWizardStore.getState()).proof).toEqual({
+      hasTestimonials: true,
+      testimonialCount: 4,
+    });
+
+    useWizardStore.getState().setProof({ testimonialCount: null });
+    expect('testimonialCount' in (buildThingInput(useWizardStore.getState()).proof ?? {})).toBe(false);
+  });
+
+  it('carries testimonialCount into the trust proof projection (always present, null default)', () => {
+    useWizardStore.getState().hydrate({ brief: bareThing, audienceType: 'service', templateId: 'hearth' });
+    expect(buildTrustInput(useWizardStore.getState()).proof.testimonialCount).toBeNull();
+    useWizardStore.getState().setProof({ testimonialCount: 8 });
+    expect(buildTrustInput(useWizardStore.getState()).proof.testimonialCount).toBe(8);
+  });
 });
 
 // ===========================================================================
@@ -444,8 +472,9 @@ const TRUST_STRATEGY = {
 };
 
 describe('lockedSectionsForEngine — required (non-toggleable) sections per engine', () => {
-  it('thing locks hero + features; testimonials stays toggleable (dropTarget)', () => {
-    expect(lockedSectionsForEngine('thing')).toEqual(['hero', 'features']);
+  it('thing locks hero + features + cta; testimonials stays toggleable (dropTarget)', () => {
+    // cta locked at the gate (F8) though it is not in the frozen thing engine-core.
+    expect(lockedSectionsForEngine('thing')).toEqual(['hero', 'features', 'cta']);
   });
 
   it('trust locks hero + services + cta; testimonials/packages stay toggleable', () => {
@@ -831,5 +860,28 @@ describe('useWizardStore — 7b collection channel', () => {
       .hydrate({ tokenId: 'tokB', brief: bareThing, audienceType: 'product', templateId: 'meridian' });
     const patch = useWizardStore.getState().buildBriefPatch();
     expect(patch.facts).toBeUndefined();
+  });
+
+  // collections-entry-capture phase 3 (P3) — the one-liner reachability round-trip.
+  // A bare manual entry has NO site → NO extraction → empty `facts.collections`.
+  // The 7b node still surfaces an empty engine-declared node (StructureSlot union),
+  // so a hand `+ Add` (addCollectionEntry) must survive buildBriefPatch into
+  // `facts.collections` with a code-derived slug — proving the manual add→Brief
+  // path end-to-end without the human gate.
+  it('P3 round-trip: manual add on an empty one-liner entry reaches facts.collections with a derived slug', () => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokP3', brief: bareThing, audienceType: 'product', templateId: 'meridian' });
+
+    // Nothing seeded (no site → no extraction).
+    expect(useWizardStore.getState().collections.products).toBeUndefined();
+
+    // The manual `+ Add` the empty 7b node exposes.
+    useWizardStore.getState().addCollectionEntry('products', 'Widget -- Co');
+
+    const patch = useWizardStore.getState().buildBriefPatch();
+    const products = (patch.facts as any)?.collections?.products;
+    expect(products).toEqual([{ name: 'Widget -- Co', slug: 'widget-co' }]);
   });
 });

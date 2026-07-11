@@ -16,6 +16,8 @@ import { buildPageLinkOptions } from '@/utils/pageLinks';
 import type { Link } from '@/types/destination';
 import { isLink } from '@/types/destination';
 import { resolveDestination } from '@/utils/resolveCtaHref';
+import { resolveLogo } from '@/modules/editing/resolveLogo';
+import { EditableLogo } from '@/app/edit/[token]/components/primitives/EditableLogo';
 import { FOOTER_STYLES } from './footerStyles';
 
 // Dual-read a footer link's target: legacy raw string href passes through verbatim
@@ -47,24 +49,25 @@ export default function TechPremiumFooter({ sectionId }: Props) {
     useTechPremiumBlock<TechPremiumFooterContent>({ sectionId });
   const edit = mode === 'edit';
 
-  const { content, addForm, deleteForm, getFormById, setSection, sections, pages } = useEditStore();
-  const uploadImage = (useEditStore() as any).uploadImage as
-    | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
-    | undefined;
+  const sectionContent = useEditStore((s) => s.content?.[sectionId]);
+  const addForm = useEditStore((s) => s.addForm);
+  const deleteForm = useEditStore((s) => s.deleteForm);
+  const getFormById = useEditStore((s) => s.getFormById);
+  const setSection = useEditStore((s) => s.setSection);
+  const sections = useEditStore((s) => s.sections);
+  const pages = useEditStore((s) => s.pages);
+  const globalSettings = useEditStore((s) => s.globalSettings);
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
 
-  const [logoUploading, setLogoUploading] = React.useState(false);
-  const onLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file || !uploadImage) return;
-    setLogoUploading(true);
-    try { await uploadImage(file, { sectionId, elementKey: 'logo_image' }); }
-    catch (err) { /* surfaced by the store */ }
-    finally { setLogoUploading(false); }
-  };
-  const newsletterFormId: string | undefined = content?.[sectionId]?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
+  // Site-scoped logo (editor phase-3) on the DARK footer surface: resolved
+  // identically on edit + published (logoUrlDark → logoUrl → legacy logo_image).
+  const logo = resolveLogo(
+    globalSettings,
+    { logo_image: blockContent.logo_image, wordmark: blockContent.wordmark },
+    'dark',
+  );
+  const newsletterFormId: string | undefined = sectionContent?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
   const isNewsletterConnected = !!(newsletterFormId && getFormById?.(newsletterFormId));
 
   const setupNewsletter = () => {
@@ -75,7 +78,7 @@ export default function TechPremiumFooter({ sectionId }: Props) {
       successMessage: 'Thanks for subscribing!',
       integrations: [{ id: `int-${Date.now()}`, type: 'dashboard', name: 'Dashboard', enabled: true }],
     } as any);
-    const prevMeta = content?.[sectionId]?.elementMetadata || {};
+    const prevMeta = sectionContent?.elementMetadata || {};
     setSection(sectionId, { elementMetadata: { ...prevMeta, newsletter_cta: { buttonConfig: { type: 'form', formId } } } });
   };
   const removeNewsletter = () => { if (newsletterFormId) deleteForm(newsletterFormId); };
@@ -104,18 +107,12 @@ export default function TechPremiumFooter({ sectionId }: Props) {
         <div className="tp-footer__top">
           <div className="tp-footer__brand">
             <span className="tp-footer__brand-wm">
-              {blockContent.logo_image ? <img className="tp-footer__img" src={blockContent.logo_image} alt={blockContent.wordmark || 'Logo'} /> : <span className="tp-footer__mk" aria-hidden="true" />}
-              {!blockContent.logo_image && (
+              {logo.kind === 'image' ? <img className="tp-footer__img" src={logo.url} alt={blockContent.wordmark || 'Logo'} loading="lazy" decoding="async" /> : <span className="tp-footer__mk" aria-hidden="true" />}
+              {logo.kind === 'wordmark' && (
                 <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey="wordmark" value={blockContent.wordmark} onSave={(v) => handleContentUpdate('wordmark', v)} enterBehavior="save" placeholder="Brand" />
               )}
               {edit && (
-                <span className="tp-flogo-edit">
-                  <label className="tp-flogo-edit__btn">
-                    {logoUploading ? 'Uploading…' : (blockContent.logo_image ? 'Change' : '↥ Logo')}
-                    <input type="file" accept="image/*" onChange={onLogoFile} hidden disabled={logoUploading} />
-                  </label>
-                  {blockContent.logo_image && <button type="button" className="tp-flogo-edit__x" onClick={() => handleContentUpdate('logo_image', '')}>remove</button>}
-                </span>
+                <EditableLogo surface="dark" classNames={{ wrap: 'tp-flogo-edit', btn: 'tp-flogo-edit__btn', remove: 'tp-flogo-edit__x' }} />
               )}
             </span>
             {(blockContent.blurb || blockContent.tag || edit) && (

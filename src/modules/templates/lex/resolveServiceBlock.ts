@@ -55,7 +55,8 @@ export type LexBlockMode = 'edit' | 'published';
 
 export function resolveServiceBlock(
   sectionType: string,
-  mode: LexBlockMode = 'edit'
+  mode: LexBlockMode = 'edit',
+  _layoutName?: string, // one block per section; accepted for TemplateModule contract parity
 ): React.ComponentType<any> | null {
   const key = (sectionType || '').toLowerCase();
   const entry = LEX_BLOCK_REGISTRY[key];

@@ -34,7 +34,7 @@ export default function TechPremiumGalleryPreviewPublished(props: Props) {
               {images.map((im, idx) => (
                 <div key={im.id || idx} className="tp-gitem">
                   <div className="tp-ph on-dark">
-                    {im.src ? <img src={im.src} alt={im.tag || ''} /> : <span className="tp-tag">{im.tag || 'Photo'}</span>}
+                    {im.src ? <img src={im.src} alt={im.tag || ''} loading="lazy" decoding="async" /> : <span className="tp-tag">{im.tag || 'Photo'}</span>}
                   </div>
                   <div className="tp-ghover"><Search /></div>
                 </div>

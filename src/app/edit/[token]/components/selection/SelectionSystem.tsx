@@ -1,8 +1,20 @@
 // app/edit/[token]/components/selection/SelectionSystem.tsx
 import React, { useEffect } from 'react';
+import Link from 'next/link';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useReviewState } from '@/hooks/useReviewState';
+import { isTestimonialsEnabledPublic } from '@/lib/testimonials/flag';
 // Removed useSelection - functionality now in unified useEditor system
+
+// Proof-element predicate (co-located with the marker UI). A needs-review marker sits on a
+// "proof element" when it's in a testimonials section (id `testimonials-<uuid>`) OR on one of the
+// trust engine's flat quote keys. elementKey may be dotted (collName.itemId.fieldName) → match the leaf.
+const TRUST_QUOTE_KEYS = new Set(['quote', 'author_name', 'author_role', 'author_company']);
+function isProofElement(sectionId: string, elementKey: string): boolean {
+  if (sectionId.startsWith('testimonials')) return true;
+  const leaf = elementKey.includes('.') ? elementKey.split('.').pop()! : elementKey;
+  return TRUST_QUOTE_KEYS.has(leaf);
+}
 
 interface SelectionSystemProps {
   children: React.ReactNode;
@@ -231,36 +243,53 @@ function VerifyMarkerControls({ mode }: { mode: string }) {
 
   if (mode === 'preview' || positions.length === 0) return null;
 
+  // Phase 7 (proof-truth): the fix-path CTA rides the testimonial system's dark-launch gate. When
+  // the flag is OFF this is `false`, no link JSX is rendered at all, and the marker UI below is
+  // byte-for-byte identical to today (true no-op — the system stays fully dark).
+  const testimonialsEnabled = isTestimonialsEnabledPublic();
+
   return (
     <>
       {positions.map((p) => (
-        <button
-          key={p.key}
-          type="button"
-          className="ai-verify-dismiss"
-          title="Leave this value as-is (hide the verify marker)"
-          style={{ position: 'fixed', top: p.top - 10, left: p.left - 66, zIndex: 1000 }}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={(e) => {
-            e.stopPropagation();
-            dismiss(p.sectionId, p.elementKey);
-            // Mark dirty (status indicators) + persist the dismiss immediately. trackChange only
-            // flips persistence.isDirty / lastUpdated — the concrete fields are otherwise unused.
-            try {
-              trackChange?.({
-                type: 'content',
-                sectionId: p.sectionId,
-                elementKey: p.elementKey,
-                oldValue: null,
-                newValue: null,
-                source: 'user',
-              });
-            } catch { /* noop */ }
-            void persistDismissedFlags(tokenId);
-          }}
-        >
-          leave as-is
-        </button>
+        <React.Fragment key={p.key}>
+          <button
+            type="button"
+            className="ai-verify-dismiss"
+            title="Leave this value as-is (hide the verify marker)"
+            style={{ position: 'fixed', top: p.top - 10, left: p.left - 66, zIndex: 1000 }}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.stopPropagation();
+              dismiss(p.sectionId, p.elementKey);
+              // Mark dirty (status indicators) + persist the dismiss immediately. trackChange only
+              // flips persistence.isDirty / lastUpdated — the concrete fields are otherwise unused.
+              try {
+                trackChange?.({
+                  type: 'content',
+                  sectionId: p.sectionId,
+                  elementKey: p.elementKey,
+                  oldValue: null,
+                  newValue: null,
+                  source: 'user',
+                });
+              } catch { /* noop */ }
+              void persistDismissedFlags(tokenId);
+            }}
+          >
+            leave as-is
+          </button>
+          {testimonialsEnabled && isProofElement(p.sectionId, p.elementKey) && (
+            <Link
+              href="/dashboard/testimonials"
+              className="ai-verify-replace-proof"
+              title="Replace this drafted proof with a real testimonial from your library"
+              style={{ position: 'fixed', top: p.top + 12, left: p.left - 66, zIndex: 1000 }}
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              Replace with a real testimonial
+            </Link>
+          )}
+        </React.Fragment>
       ))}
     </>
   );

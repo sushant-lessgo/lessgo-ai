@@ -1,0 +1,36 @@
+{
+  "slug": "travelitalianstyle",
+  "url": "https://www.travelitalianstyle.com/",
+  "business": { "type_label": "bespoke Italy travel-planning consultancy", "icp_category": "consultant/service", "geography_hint": "US-based (USD pricing), serving travel to Italy" },
+  "in_icp": true,
+  "engine": { "pick": "trust", "ladder_reasoning": "Sells defined expertise (custom Italy itinerary planning + paid consulting calls) built on a named founder's story, process, and testimonials — the visitor is trusting a person/firm, not evaluating a product or browsing a gallery.", "runner_up": "place" },
+  "goal": { "one_action": "book a call / get in touch to start custom trip planning (or book a paid consulting call)", "mechanism": "form", "delegated_to": "calendly" },
+  "structure": { "kind": "multi", "page_count": 11, "pages": ["home", "meet-cassandra", "company-vision", "custom-planning", "consulting-calls", "gift-certificates", "faq", "trip-ideas", "podcast", "blog", "contact"], "archetype_note": "Classic trust/consultant multipage: founder story + service explainer + process + tiered paid calls + FAQ + contact, all funneling to a Calendly booking." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Italian Travel - Bespoke Travel Planning - Personalized Tours", "component": "text" },
+      { "canonical": "problem", "observed_as": "Have you always dreamed of experiencing 'the real' Italy?", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Ciao, I'm Cassandra Lena Santoro / This is how Italy became my story...", "component": "text" },
+      { "canonical": "features", "observed_as": "Every custom itinerary includes:", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Our Planning Style: See Italy. Experience Italy. Live Italy", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "How it Works:", "component": "text" },
+      { "canonical": "useCases", "observed_as": "What We Can Help You With", "component": "text" },
+      { "canonical": "pricing", "observed_as": "30 Minutes call – Quick Tips / 60 Minute Calls – FULL ITINERARY REVIEW / 60 Minute Call with ACCOMMODATION Suggestions", "component": "pricing-table" },
+      { "canonical": "testimonials", "observed_as": "WHAT OUR CLIENTS SAY", "component": "text" },
+      { "canonical": "faq", "observed_as": "What do you offer? (20-question FAQ)", "component": "text" },
+      { "canonical": "cta", "observed_as": "Your Italian adventure awaits.", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Speaking and Event Requests for Cassandra", "component": "form" }
+    ],
+    "unmapped": [
+      { "observed": "GIVE THE GIFT OF ITALY TRAVEL PLANNING (gift certificate promo)", "why_no_fit": "A gift-certificate purchase promo isn't a canonical section id nor a straightforward pricing tier", "closest": "pricing" },
+      { "observed": "When to Visit: Experience Italy Year-Round (seasonal guidance)", "why_no_fit": "Educational/advisory content block with no direct canonical analog", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage", "blog", "packages"], "proposed_new": [ { "name": "media-hub", "evidence": "'Rediscover Italy Podcast' is a standing owned podcast content property linked from nav" } ] },
+  "proof_types": ["testimonials"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["pricing-table", "faq-accordion", "founder-bio", "testimonial-block", "process-steps"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; all pages returned readable text, clear engine/goal/structure signals" },
+  "gap_findings": ["Gift-certificate purchase is a distinct monetization path (buy a giftable service voucher) that neither packages nor storefront-checkout cleanly expresses when there is no on-site cart", "Paid consulting calls at fixed tiers booked via Calendly blur 'packages' (price display) with a delegated booking mechanism — the taxonomy has no clean 'paid single-session booking' expression short of a full booking-wizard"]
+}

@@ -65,27 +65,62 @@ describe('fit — edge cases', () => {
     expect(shortlist(briefWork)).toEqual(['granth']);
   });
 
-  it('M1 derives lead-form', () => {
+  it('M1 derives lead-form (requirement stays modeled)', () => {
     const brief: Brief = { copyEngine: 'trust', goal: { intent: 'enquiry', mechanism: 'M1' } };
     expect(requiredCapabilitiesFromBrief(brief)).toContain('lead-form');
   });
 
-  it("structure.mode='multi' derives multipage: thing + multi → [vestria]", () => {
+  it("serve-gate-v2: inferred structure.mode='multi' NO LONGER derives multipage (soft signal)", () => {
+    // AI-inferred multi must never reject: it is dropped from the brief-level
+    // requirement set entirely, so the shortlist is NOT narrowed to
+    // multipage-capable templates pre-7b. thing + inferred multi ⇒ full thing
+    // shortlist (both meridian and vestria), not vestria-only.
     const brief: Brief = {
       copyEngine: 'thing',
       structure: { mode: 'multi', pages: ['home', 'products'] },
     };
-    expect(requiredCapabilitiesFromBrief(brief)).toContain('multipage');
-    expect(shortlist(brief)).toEqual(['vestria']);
+    expect(requiredCapabilitiesFromBrief(brief)).not.toContain('multipage');
+    expect(shortlist(brief)).toEqual(['meridian', 'vestria']);
+    // The 7b law is intact: USER-CONFIRMED multi still hardens multipage.
+    expect(
+      requiredCapabilitiesFromStructure({ mode: 'multi', pages: ['home', 'products'] }, 'thing')
+    ).toContain('multipage');
   });
 
-  it('download-app derives store-badges → 0 matches (nobody declares it)', () => {
+  it('serve-gate-v2: download-app STILL derives store-badges, but a SHARED BLOCK satisfies it ⇒ shortlist NON-empty', () => {
+    // The requirement stays modeled (a future mechanism may lack a shared
+    // block); only SATISFACTION changed — the store-badges shared block renders
+    // on every template, so both thing templates now fit.
     const brief: Brief = {
       copyEngine: 'thing',
       goal: { intent: 'download-app', mechanism: 'M3' },
     };
     expect(requiredCapabilitiesFromBrief(brief)).toContain('store-badges');
-    expect(shortlist(brief)).toEqual([]);
+    expect(shortlist(brief)).toEqual(['meridian', 'vestria']);
+  });
+
+  it('serve-gate-v2: lead-form (no native template declaration) is satisfied by the shared block on the work engine', () => {
+    // granth declares NO capabilities, yet a work brief requiring lead-form
+    // fits granth — the lead-form shared block backs it. This is the F15 win.
+    const brief: Brief = { copyEngine: 'work', goal: { intent: 'lead-magnet', mechanism: 'M1' } };
+    expect(requiredCapabilitiesFromBrief(brief)).toContain('lead-form');
+    expect(fit('granth', 'work', ['lead-form'])).toBe(true);
+    expect(shortlist(brief)).toEqual(['granth']);
+  });
+
+  it('serve-gate-v2: gallery is NOT satisfied by any shared block ⇒ still unsatisfiable everywhere', () => {
+    for (const t of ALL_TEMPLATES) {
+      expect(fit(t, 'work', ['gallery'])).toBe(false);
+      expect(fit(t, 'trust', ['gallery'])).toBe(false);
+    }
+  });
+
+  it('serve-gate-v2: retired/bespoke STILL never fit, even with a shared-block-satisfiable requirement', () => {
+    // techpremium (retired) + lumen (bespoke) are excluded FIRST, before the
+    // capability check — widening satisfaction cannot resurrect them.
+    expect(fit('techpremium', 'thing', ['lead-form'])).toBe(false);
+    expect(fit('lumen', 'work', ['lead-form'])).toBe(false);
+    expect(fit('lumen', 'work', ['store-badges'])).toBe(false);
   });
 
   it('unknown businessType contributes no requirements (gate rejects later, spec 02+)', () => {

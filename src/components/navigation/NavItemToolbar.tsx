@@ -21,7 +21,12 @@ const NavItemToolbar: React.FC<NavItemToolbarProps> = ({
   navItem,
   onClose,
 }) => {
-  const store = useEditStore();
+  const sections = useEditStore((s) => s.sections);
+  const sectionLayouts = useEditStore((s) => s.sectionLayouts);
+  const navigationConfig = useEditStore((s) => s.navigationConfig);
+  const updateNavItem = useEditStore((s) => s.updateNavItem);
+  const removeNavItem = useEditStore((s) => s.removeNavItem);
+  const reorderNavItems = useEditStore((s) => s.reorderNavItems);
   const [showEditor, setShowEditor] = useState(false);
   const [showLinkMenu, setShowLinkMenu] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -56,16 +61,16 @@ const NavItemToolbar: React.FC<NavItemToolbarProps> = ({
 
   if (!isVisible || !navItem) return null;
 
-  const availableSections = store.sections
+  const availableSections = sections
     .filter(id => !id.includes('header') && !id.includes('footer'))
     .map(id => ({
       id,
-      layout: store.sectionLayouts[id] || '',
-      label: getSectionDisplayName(id, store.sectionLayouts[id] || ''),
+      layout: sectionLayouts[id] || '',
+      label: getSectionDisplayName(id, sectionLayouts[id] || ''),
     }));
 
   const handleUpdateLink = (newLink: string, sectionId?: string) => {
-    store.updateNavItem(navItem.id, {
+    updateNavItem(navItem.id, {
       link: newLink,
       sectionId: sectionId,
     });
@@ -74,28 +79,28 @@ const NavItemToolbar: React.FC<NavItemToolbarProps> = ({
   };
 
   const handleDeleteItem = () => {
-    store.removeNavItem(navItem.id);
+    removeNavItem(navItem.id);
     onClose();
   };
 
   const handleMoveUp = () => {
-    const navItems = store.navigationConfig?.items || [];
+    const navItems = navigationConfig?.items || [];
     const currentIndex = navItems.findIndex(item => item.id === navItem.id);
     if (currentIndex > 0) {
       const newOrder = [...navItems];
       [newOrder[currentIndex], newOrder[currentIndex - 1]] = [newOrder[currentIndex - 1], newOrder[currentIndex]];
-      store.reorderNavItems(newOrder.map(item => item.id));
+      reorderNavItems(newOrder.map(item => item.id));
     }
     onClose();
   };
 
   const handleMoveDown = () => {
-    const navItems = store.navigationConfig?.items || [];
+    const navItems = navigationConfig?.items || [];
     const currentIndex = navItems.findIndex(item => item.id === navItem.id);
     if (currentIndex < navItems.length - 1) {
       const newOrder = [...navItems];
       [newOrder[currentIndex], newOrder[currentIndex + 1]] = [newOrder[currentIndex + 1], newOrder[currentIndex]];
-      store.reorderNavItems(newOrder.map(item => item.id));
+      reorderNavItems(newOrder.map(item => item.id));
     }
     onClose();
   };

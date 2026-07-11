@@ -22,9 +22,9 @@ Purpose: single source of truth for coverage planning (template-factory continuo
 | 08 | **Pulse** — Creator & Personal Brand | writers / podcasters / founders / coaches | work/trust | Voice · Operator · Coach | ink | face-forward, portrait+name+claim, "where I publish" strip, /now | 🎨 design-only |
 | 09 | **Vital** — Healthcare & Wellness | clinics / therapists / dentists / telehealth | trust (+map-hours, booking-CTA caps) | Practice · Modern Clinic · Specialty | sage | clinical-warm, bookable-not-browsable calendar hero, conditions-not-features | 🎨 design-only |
 | 10 | **Stockroom** — E-commerce & Retail | DTC apparel / home / beauty | thing (+catalog cap; redirect action — no checkout, in ICP) | Boutique · Catalog · Marketplace | ink | product-photo-first, price visible, product grid w/ badges+swatches | 🎨 design-only |
-| 11 | **Comet** — Consumer App & Mobile | consumer mobile apps (habit/money/fitness) | thing (+store-badges; quick-yes candidate) | Bright · Calm · Bold | coral | PRODUCT LINE; device-frame hero w/ CSS app screens, bright+rounded, `--h` hue | 🎨 design-only, ⚠ NOT in local template-design/ |
+| 11 | **Comet** — Consumer App & Mobile | consumer mobile apps (habit/money/fitness) | thing (+store-badges; quick-yes candidate) | Bright · Calm · Bold | coral | PRODUCT LINE; device-frame hero w/ CSS app screens, bright+rounded, `--h` hue | 🎨 design-only (local ✓ designer-workspace/) |
 | 12 | **Surge** — Growth & Perf Marketing | growth / paid-media agencies | trust | Performance · Editorial · Bold | volt | metrics-as-hero, dashboard hero, green/red semantics, `--h` | ✅ IN CODE |
-| 13 | **Vector** — Career Transition & Cohort Ed | bootcamps / cohort courses / career pivots | trust/thing (course) | Roadmap · Mentor · Brief | indigo | trajectory-track motif (milestone nodes), proof-comparison table, image-slot.js | 🎨 design-only, ⚠ NOT in local template-design/ |
+| 13 | **Vector** — Career Transition & Cohort Ed | bootcamps / cohort courses / career pivots | trust/thing (course) | Roadmap · Mentor · Brief | indigo | trajectory-track motif (milestone nodes), proof-comparison table, image-slot.js | 🎨 design-only (local ✓ designer-workspace/) |
 | — | **Vestria** — Uniform Manufacturing (v1/v2/Cobalt, post-CONTEXT, 4d ago) | manufacturers / B2B industrial | thing | (own axes) | cobalt | editorial/craft, full-bleed hero (v2) | ✅ IN CODE (newGeneration pilot) |
 
 Also in code, NOT from this design project: **Granth** (writer/work engine, from WRDirection1) · **Lumen** (Kundius bespoke §13) · **TechPremium** (retired §11.4). Local-only unported writer directions: WRDirection2Patrika, WRDirection3Nishant.
@@ -53,7 +53,11 @@ Runners-up held: **Civic** · **Stadium**. Library convention: "breadth before d
 - 9-palette × 3-variant axes per design ≈ template-factory knob ranges already designed — port them as `[data-palette]`/`[data-variant]` tokens, don't flatten.
 - Switcher panel / localStorage / `aria-pressed` bits are design-file chrome — drop on port.
 - Vol-number collision: Surge & Vector both stamp "Volume XII" (Vector should be XIII) — cosmetic, fix in design project.
-- Comet + Vector HTML not yet downloaded locally — pull from design project before any port.
+- ~~Comet + Vector HTML not yet downloaded locally~~ — RESOLVED 2026-07-11: full designer
+  export lives at `template-design/designer-workspace/` (folder map: `template-design/MAPPING.md`).
+  Includes designer-built MULTI-PAGE deliveries not previously inventoried: `surge/` 6-pager
+  (page-hero chrome + case-study detail), `atelier/` 5-pager + style-system, Vestria
+  multi-page addendum HTML, naayom (newer than handoff), vishwas blog site.
 
 ## Client builds in same project (NOT templates; bespoke precedents)
 - **Kundius** (photographer, EN/NL): 3 directions — Lumen (ported §13) / Atelier / Kontur. Source of truth `delivery/`.

@@ -87,12 +87,18 @@ export interface ChangeEvent {
 }
 
 export interface EditHistoryEntry {
-  type: 'content' | 'layout' | 'theme' | 'section' | 'fullContent';
+  type: 'content' | 'layout' | 'theme' | 'section' | 'fullContent' | 'sectionSwap';
   description: string;
   timestamp: number;
   beforeState: any;
   afterState: any;
   sectionId?: string;
+  /** i18n-phase-1 (3a): the locale this entry was authored under. Drives locale-aware
+   *  undo/redo restore in uiActions.undo/redo (base for the default locale,
+   *  `localeContent[locale]` for a non-default one). Overlay text edits stamp the
+   *  active locale explicitly; base writes default to the DEFAULT locale (so a
+   *  locale-shared base edit's undo routes to base, never the overlay). */
+  locale?: string;
 }
 
 export interface APIRequest {
@@ -181,7 +187,11 @@ export interface LayoutSlice {
     sectionSpacing: string; // Default global spacing (fallback)
     deviceMode: 'desktop' | 'mobile';
     zoomLevel: number;
-    logoUrl?: string; // Logo URL for global branding
+    logoUrl?: string; // Logo URL for global branding (LIGHT surface — header)
+    // editor phase-3 (phase 5): optional DARK-surface logo asset (footer). Footer
+    // resolves logoUrlDark → logoUrl; header uses logoUrl. Rides the same whole-object
+    // globalSettings serialize path as logoUrl (no Prisma migration — JSON field).
+    logoUrlDark?: string;
   };
 }
 
@@ -191,6 +201,29 @@ export interface LayoutSlice {
 export interface ContentSlice {
   // Section Content Data
   content: Record<string, SectionData>;
+
+  // ===== i18n-phase-1 (3a): content-language state layer =====
+  // All defaulted so a legacy single-locale store is byte-identical (activeLocale
+  // always === default, localeContent empty, localeConfig null → omitted on save).
+  /** Project locale declaration (D4). `null`/undefined ⇒ legacy single-locale.
+   *  CLEAR-CONTRACT (Phase-4 fix, REVISES Phase-2/D1 absent-preserve): a falsy
+   *  value is sent to saveDraft as EXPLICIT `null` (to CLEAR the stored config)
+   *  ONLY when `localeEngaged` is true; a pure-legacy store (never engaged) OMITS
+   *  the key entirely (byte-identical). Schema is now `.nullable().optional()`. */
+  localeConfig?: import('@/types/core/content').LocaleConfig | null;
+  /** The editor's active authoring locale. Defaults to `localeConfig.defaultLocale`
+   *  (or `'en'`). Project-global (one toggle; survives page switches). */
+  activeLocale: string;
+  /** Non-default-locale text overlay (D1). Project-GLOBAL, keyed by globally-unique
+   *  sectionId (`${type}-${uuid}`) so it spans all pages without a per-page split
+   *  (matches the committed Phase-2 single-map contract). Empty ⇒ no translations. */
+  localeContent: import('@/types/core/content').LocaleContentOverlay;
+  /** Locale-system "engaged" flag (Phase-4 fix). True once a project has EVER had
+   *  a locale config/overlay this session (loaded with one, or the user added/
+   *  removed a locale). Drives the omit-vs-explicit-clear decision in save()/export():
+   *  engaged + empty ⇒ send `null`/`{}` to CLEAR stored data; never-engaged + empty
+   *  ⇒ omit (legacy byte-identical). Session-scoped, re-derived on each load. */
+  localeEngaged: boolean;
 }
 
 /**

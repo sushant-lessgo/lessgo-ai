@@ -6,10 +6,7 @@
 // Lumen-scoped edit-language flag (EN/NL) so blocks + LumenEditable can route
 // twin `_nl` fields (bilingual is Lumen-contained — no shared store change).
 
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
-import { extractLayoutContent, type StoreElementTypes } from '@/types/storeTypes';
-import { getSchemaDefaults } from '@/modules/sections/layoutElementSchema';
-import { logger } from '@/lib/logger';
+import { useTemplateBlock } from '@/modules/templates/shared/useTemplateBlock';
 import { useLumenEditLang, type LumenEditLang } from '../editLang';
 
 export interface UseLumenBlockProps {
@@ -33,44 +30,11 @@ export interface UseLumenBlockReturn<T> {
 export function useLumenBlock<T = Record<string, any>>({
   sectionId,
 }: UseLumenBlockProps): UseLumenBlockReturn<T> {
-  const { content, mode, updateElementContent } = useEditStore();
+  const base = useTemplateBlock<T>(sectionId, 'useLumenBlock');
   const { editLang } = useLumenEditLang();
 
-  const sectionContent = content[sectionId];
-  const elements = (sectionContent?.elements || {}) as Partial<StoreElementTypes>;
-  const layout = sectionContent?.layout;
-
-  const storedExclusions = sectionContent?.aiMetadata?.excludedElements;
-  const excludedElements: string[] = Array.isArray(storedExclusions) ? storedExclusions : [];
-
-  const schema = layout ? getSchemaDefaults(layout) : null;
-
-  let blockContent: T;
-  if (!schema) {
-    logger.warn(`[useLumenBlock] No schema for ${sectionId} (layout=${layout}); rendering empty.`);
-    blockContent = {} as T;
-  } else {
-    blockContent = extractLayoutContent(elements, schema as any, layout, excludedElements) as T;
-  }
-
-  const handleContentUpdate = (elementKey: string, value: any) => {
-    updateElementContent(sectionId, elementKey, value);
-  };
-
-  const handleCollectionUpdate = <C,>(collectionKey: string, value: C) => {
-    updateElementContent(sectionId, collectionKey, value as any);
-  };
-
-  const isExcluded = (elementKey: string) => excludedElements.includes(elementKey);
-
   return {
-    sectionId,
-    mode: mode as 'edit' | 'preview' | 'published',
-    layout,
-    blockContent,
+    ...base,
     editLang,
-    isExcluded,
-    handleContentUpdate,
-    handleCollectionUpdate,
   };
 }

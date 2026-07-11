@@ -1,0 +1,30 @@
+{
+  "slug": "harmonylife",
+  "url": "https://harmonylife.co.th/",
+  "business": { "type_label": "organic farm online shop, restaurant & agriculture training", "icp_category": "ecommerce / organic food producer-retailer", "geography_hint": "Thailand (Japanese-owned; JP/EN/TH audience)" },
+  "in_icp": false,
+  "engine": { "pick": "place", "ladder_reasoning": "Homepage and product pages are grids of organic products with photos and prices; browsing the catalogue and shop/restaurant offering IS the visitor's decision. It is really a storefront, so browsing-as-decision maps to place over thing.", "runner_up": "thing" },
+  "goal": { "one_action": "browse and buy organic products (add to cart / checkout)", "mechanism": "redirect", "delegated_to": "store" },
+  "structure": { "kind": "multi", "page_count": 6, "pages": ["home", "about-message", "organic-products", "shop-restaurant", "agriculture-training", "news", "contact"], "archetype_note": "WooCommerce catalog+checkout with founder/philosophy About branch and a contact form; classic producer-storefront, not a single conversion page." },
+  "sections": {
+    "mapped": [
+      { "canonical": "features", "observed_as": "Recommended Products", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Product Categories", "component": "grid-cards" },
+      { "canonical": "socialProof", "observed_as": "Popular Products", "component": "grid-cards" },
+      { "canonical": "founderNote", "observed_as": "About the Organic Farm / メッセージ / Founder message", "component": "text+team" },
+      { "canonical": "footer", "observed_as": "Company Information", "component": "other" },
+      { "canonical": "leadForm", "observed_as": "お問い合わせ (Contact Us)", "component": "form" },
+      { "canonical": "security", "observed_as": "organic certification (referenced)", "component": "cert-reference" }
+    ],
+    "unmapped": [
+      { "observed": "Recommended / Popular / Featured Products grids with live prices + cart", "why_no_fit": "Canonical sections have no product-catalogue-with-checkout concept; these are commerce listings, not marketing sections", "closest": "features" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage", "catalog", "blog", "map-hours", "bilingual"], "proposed_new": [ { "name": "storefront-checkout", "evidence": "WooCommerce cart(0), sign in/sign up account, prices shown (120–1,400 ฿), on-site checkout for one-time organic goods" } ] },
+  "proof_types": ["certs"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["product-grid", "category-tiles", "price-cards", "cart", "contact-form", "founder-message", "language-switcher"],
+  "languages": ["ja", "en", "th"],
+  "confidence": { "level": "high", "why": "fetch_quality full; commerce, forms, nav, and languages all captured clearly" },
+  "gap_findings": ["site's job is a storefront (browse catalog + cart + checkout + account login), not one conversion action — falls outside the 5-engine single-action model", "trilingual (ja/en/th) exceeds the binary 'bilingual' capability", "shop-and-restaurant + agriculture-training are secondary offers with their own destinations, unrepresentable as one page's single CTA"]
+}

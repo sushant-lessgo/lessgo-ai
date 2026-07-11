@@ -1,0 +1,39 @@
+{
+  "slug": "brettlair", "url": "https://www.brettlair.ca/",
+  "business": { "type_label": "freelance brand identity & packaging designer", "icp_category": "designer / creative freelancer", "geography_hint": "Canada (.ca), serves CA/US/AU/SE/IE/UK" },
+  "in_icp": true,
+  "engine": { "pick": "work", "ladder_reasoning": "A solo designer whose home nav is literally 'Work' and leads with a 21-tile portfolio grid — the work itself is the proof. Sells defined expertise too, but the portfolio is the spine of the decision, so work over trust.", "runner_up": "trust" },
+  "goal": { "one_action": "start a project inquiry (submit the contact form)", "mechanism": "form", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 5, "pages": ["home/work", "about", "services", "working-together", "contact"], "archetype_note": "Classic freelance-creative multipage: portfolio home + about + services + process + contact form. Contact offers 3 channels (email, Calendly, form) but the on-page form is primary." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Brand design that transforms ambitious businesses into unforgettable brands.", "component": "text" },
+      { "canonical": "problem", "observed_as": "Your brand has about three seconds to make an impression...", "component": "text" },
+      { "canonical": "results", "observed_as": "portfolio grid of 21 client project tiles", "component": "gallery" },
+      { "canonical": "testimonials", "observed_as": "4 client testimonials", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "media/press logo strip (Dieline, Pentawards, Packaging of the World, WBDS)", "component": "logo-strip" },
+      { "canonical": "cta", "observed_as": "Become unforgettable. / Let's get to work", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Hey, I'm Brett! (bio)", "component": "text" },
+      { "canonical": "features", "observed_as": "Services (Logo Design, Brand Identity, Packaging, Strategy)", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Who do I work with?", "component": "text" },
+      { "canonical": "objectionHandling", "observed_as": "Commitment / Direct Access / Quality / Professionalism / Reliability", "component": "text" },
+      { "canonical": "howItWorks", "observed_as": "My Process (Documents, Discovery, Design, Deploy)", "component": "timeline" },
+      { "canonical": "leadForm", "observed_as": "contact form (Start a Project)", "component": "form" },
+      { "canonical": "miscellaneous", "observed_as": "referral program / finder's fee blurb", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "'Ready to start?' fill-in-the-blank email template with prompted fields (project type, timeline, budget, shopping others)", "why_no_fit": "A guided email-drafting scaffold that primes the visitor's outreach; not a form (no capture) and not standard cta copy", "closest": "leadForm / cta" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage", "gallery/portfolio", "lead-form"], "proposed_new": [] },
+  "proof_types": ["testimonials", "portfolio", "logo-wall"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["portfolio grid", "testimonial cards", "press logo strip", "process timeline", "services list", "contact form"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "Content and structure are clear and coherent, but fetch_quality is 'rendered' not 'full' (design_hints empty, one page beyond crawl cap uncrawled), so capped at medium per rules." },
+  "gap_findings": [
+    "Portfolio-as-proof has no dedicated canonical section id (sectionList lacks a 'portfolio'/'work-grid' section); mapped imperfectly to results.",
+    "Multi-channel contact intent (on-page form + mailto + single-step Calendly embed) — Calendly is a delegated scheduling handoff, not a proposed capability per the coltivar rule, but the coexistence of three parallel conversion channels isn't expressible as one mechanism.",
+    "Guided email-template scaffold (prompted fields for the visitor to draft their own inquiry email) is a distinctive lead-priming pattern with no section/capability fit."
+  ]
+}

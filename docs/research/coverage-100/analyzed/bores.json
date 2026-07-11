@@ -1,0 +1,48 @@
+{
+  "slug": "bores",
+  "url": "https://www.bores.com/",
+  "business": { "type_label": "cybersecurity & information-security consultancy", "icp_category": "trust", "geography_hint": "UK (English, security_bore handle)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "A firm selling defined expertise (security advisory, compliance/certification, due diligence, intruder testing) — visitor is deciding whether to trust these people, proven via team bios (track record since 1988), named testimonials, and a description of the process/offerings.",
+    "runner_up": "thing"
+  },
+  "goal": {
+    "one_action": "get the visitor to send a contact inquiry (or book a call) about security consulting",
+    "mechanism": "form",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 12,
+    "pages": ["home", "about", "advisory", "contact", "services", "solutions", "training", "blog"],
+    "archetype_note": "Multi-page consultancy: home menu of services/solutions/training → detail pages (e.g. advisory) → about with team → contact form. Squarespace commerce module present but unused."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "We are here to help you with any questions, concerns, or requests you may have.", "component": "text" },
+      { "canonical": "features", "observed_as": "Services (4 cards)", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "Training (2 cards)", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Solutions (3 cards)", "component": "grid-cards" },
+      { "canonical": "founderNote", "observed_as": "Welcome! intro text", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "quotes with headshots (Jonathan Slater, Adele Anderson)", "component": "other" },
+      { "canonical": "testimonials", "observed_as": "About: Welcome to Bores (track record since 1988)", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "About: 5 team profiles with bios", "component": "team" },
+      { "canonical": "cta", "observed_as": "Get in touch today for help dealing with your security and technology headaches.", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Contact Us", "component": "form" },
+      { "canonical": "followStrip", "observed_as": "LinkedIn / Facebook / Twitter links", "component": "social" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": {
+    "needed": ["multipage", "lead-form", "blog"],
+    "proposed_new": []
+  },
+  "proof_types": ["testimonials"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["service-card grid", "team grid", "testimonial quotes with headshots", "contact form"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality is 'rendered' not 'full', so capped at medium; design_hints empty and blog post count 0, but page structure and CTAs are clear." },
+  "gap_findings": ["Blog is present but shows 0 posts — 'blog' capability applies but content-index/blog-teaser not evidenced.", "Dormant Squarespace /cart module present but unused; not a real commerce capability."]
+}

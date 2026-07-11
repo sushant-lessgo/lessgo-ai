@@ -1,0 +1,34 @@
+{
+  "slug": "thietbivesinhtoto",
+  "url": "https://thietbivesinhtoto.vn/",
+  "business": { "type_label": "TOTO sanitary-ware reseller e-commerce store (SEABIG)", "icp_category": "ecommerce-retail", "geography_hint": "Hanoi, Vietnam" },
+  "in_icp": false,
+  "engine": { "pick": "place", "ladder_reasoning": "Closest fit: browsing a catalog of products (photos, prices, discounts) IS the decision, akin to browsing a shop; but it is truly an e-commerce storefront with cart/checkout, not a single-conversion landing page.", "runner_up": "thing" },
+  "goal": { "one_action": "Browse the TOTO product catalog and buy sanitary ware (add to cart / checkout), or call/Zalo for a quote", "mechanism": "call-WhatsApp", "delegated_to": "store" },
+  "structure": { "kind": "multi", "page_count": 8, "pages": ["home", "toilets-category", "washbasins-category", "faucets-category", "bathtubs-category", "urinals-category", "accessories", "promotions-combo", "news-blog", "contact"], "archetype_note": "E-commerce catalog CMS with category pages, product grids, cart/checkout, newsletter, and multi-showroom contact page." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "THIẾT BỊ VỆ SINH TOTO CHÍNH HÃNG, GIÁ RẺ NHẤT 2025", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Sản phẩm TOTO bán chạy nhất (best-selling products grid w/ prices & discounts)", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Tin tức thiết bị vệ sinh toto (news/blog feed)", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "LIÊN HỆ / phone / Zalo chat", "component": "text" },
+      { "canonical": "map-hours", "observed_as": "SHOWROOM ... HÀ NỘI (3 showroom addresses + hours)", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Đăng ký (newsletter signup)", "component": "form" },
+      { "canonical": "footer", "observed_as": "company intro / phones / email", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Product category listing pages with filters (Bồn cầu TOTO etc.)", "why_no_fit": "Canonical section list has no 'product catalog / category grid' section — sectionList is landing-page oriented, not a shoppable catalog", "closest": "features" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage", "catalog", "map-hours", "bilingual", "blog"], "proposed_new": [ { "name": "storefront-checkout", "evidence": "commerce.cart_or_checkout=true; product grids show prices with -18% to -31% discounts (5.896.000 ₫ from 7.157.000 ₫); on-site cart + checkout selling one-time goods" } ] },
+  "proof_types": ["certs"],
+  "design_style": { "pick": "bold/performance", "none_fits_because": "Discount-driven, photo-heavy retail promo layout emphasizing prices/savings; closest to bold/performance among the six." },
+  "components_needed": ["product-grid", "category-filter", "price-discount-badge", "product-card", "showroom-address-block", "newsletter-signup", "news-card-feed"],
+  "languages": ["vi", "en"],
+  "confidence": { "level": "high", "why": "fetch_quality=full; commerce flags and section structure clearly indicate an e-commerce storefront, not a single-action landing page." },
+  "gap_findings": [
+    "Site is an e-commerce catalog with cart/checkout — not one conversion action; outside ICP (in_icp:false).",
+    "No canonical section expresses a shoppable product category/listing grid with filters.",
+    "storefront-checkout capability reused from registry — closed capability vocab has 'catalog' (browse only) but no cart/checkout notion."
+  ]
+}

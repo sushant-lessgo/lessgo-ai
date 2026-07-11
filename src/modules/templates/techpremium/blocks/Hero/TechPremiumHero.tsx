@@ -67,7 +67,7 @@ export default function TechPremiumHero({ sectionId }: TechPremiumHeroProps) {
     handleCollectionUpdate('stats', (blockContent.stats || []).filter((s) => s.id !== id));
   };
 
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [photoUploading, setPhotoUploading] = React.useState(false);
@@ -204,7 +204,7 @@ export default function TechPremiumHero({ sectionId }: TechPremiumHeroProps) {
           <div className="tp-hero__art">
             <div className="tp-ph tp-ph--unit">
               {blockContent.hero_image
-                ? <img className="tp-hero__photo" src={blockContent.hero_image} alt="" />
+                ? <img className="tp-hero__photo" src={blockContent.hero_image} alt="" loading="eager" decoding="async" />
                 : <span className="tp-ph__tag" aria-hidden="true">Product / hardware photo</span>}
               {mode === 'edit' && (
                 <span className="tp-hero__photo-edit">

@@ -1,9 +1,53 @@
 // hooks/useAutoSave.ts - React Hook for Auto-Save Integration
 import { useCallback, useEffect, useRef, useMemo } from 'react';
-import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
-import { VersionManager, type ConflictResolution } from '@/utils/versionManager';
-import type { AutoSaveState } from '@/middleware/autoSaveMiddleware';
-import type { ChangeEvent } from '@/middleware/autoSaveMiddleware';
+import { useShallow } from 'zustand/react/shallow';
+import { useEditStoreLegacy as useEditStore, useEditStoreApi } from './useEditStoreLegacy';
+
+// perf-02 phase 5: the dead autoSaveMiddleware module was deleted; the two type
+// shapes this hook still needs are relocated here (AutoSaveState is used by
+// getPerformanceStats's return type; ChangeEvent backs its queuedChanges field).
+interface ChangeEvent {
+  id: string;
+  type: 'content' | 'layout' | 'theme' | 'meta';
+  sectionId?: string;
+  elementKey?: string;
+  field?: string;
+  oldValue: any;
+  newValue: any;
+  timestamp: number;
+  userId?: string;
+  source: 'user' | 'ai' | 'system';
+}
+
+interface AutoSaveState {
+  isDirty: boolean;
+  isSaving: boolean;
+  lastSaved?: number;
+  saveError?: string;
+  queuedChanges: ChangeEvent[];
+  conflictResolution: {
+    hasConflict: boolean;
+    conflictData?: any;
+    resolveStrategy: 'manual' | 'auto-merge' | 'latest-wins';
+  };
+  performance: {
+    saveCount: number;
+    averageSaveTime: number;
+    lastSaveTime: number;
+    failedSaves: number;
+  };
+}
+
+/**
+ * ===== EVENT-DRIVEN AUTOSAVE TUNABLES (perf-02 phase 2) =====
+ * Trailing debounce replaces the old 1s setInterval poll. Every server save is
+ * dispatched through `dispatchSave()` (the single choke point), gated on the
+ * OR-form `lastUpdated > lastSavedUpdatedRef || isDirty` (never `lastUpdated`
+ * alone — dozens of mutation sites set isDirty without bumping lastUpdated).
+ */
+const DEBOUNCE_MS = 1000;        // trailing debounce (parity with old ≤1s poll)
+const RETRY_BASE_MS = 2000;      // bounded failure retry: 2s → 4s → 8s
+const MAX_RETRY_ATTEMPTS = 3;
 
 /**
  * ===== HOOK TYPES =====
@@ -12,15 +56,13 @@ import type { ChangeEvent } from '@/middleware/autoSaveMiddleware';
 // useContentSerializer) was deleted — its serialize() path dropped pages/chrome
 // (multi-page-UNSAFE per docs/task/edit-guide-and-verify.audit.md) and was never
 // invoked. Saves go through store.forceSave()/triggerAutoSave() only.
+// perf-02 phase 4: the dead VersionManager machinery (snapshot retention,
+// undo/redo/conflict methods) was removed from this hook — real editor undo/redo
+// is editStore's own history stack (uiActions.ts), never touched here.
 export interface AutoSaveHookConfig {
   enableAutoSave: boolean;
-  enableVersioning: boolean;
-  snapshotInterval: number; // Create snapshot every N changes
-  conflictResolution: 'auto' | 'manual' | 'prompt';
   onSaveSuccess?: (duration: number) => void;
   onSaveError?: (error: string) => void;
-  onConflictDetected?: (conflict: ConflictResolution) => void;
-  onVersionCreated?: (versionId: string) => void;
 }
 
 export interface AutoSaveStatus {
@@ -29,22 +71,12 @@ export interface AutoSaveStatus {
   isSaving: boolean;
   lastSaved?: Date;
   saveError?: string;
-  
+
   // Performance
   saveCount: number;
   averageSaveTime: number;
   lastSaveTime: number;
-  
-  // Version Control
-  canUndo: boolean;
-  canRedo: boolean;
-  currentVersion: number;
-  totalVersions: number;
-  
-  // Conflicts
-  hasActiveConflicts: boolean;
-  conflictCount: number;
-  
+
   // Queue Status
   queuedChanges: number;
   isOnline: boolean;
@@ -53,39 +85,26 @@ export interface AutoSaveActions {
   // Save Operations
   triggerSave: () => void;
   forceSave: () => Promise<void>;
-  
-  // Version Control
-  undo: () => Promise<boolean>;
-  redo: () => Promise<boolean>;
-  createSnapshot: (description: string) => string;
-  
-  // Conflict Resolution
-  resolveConflict: (conflictId: string, strategy: 'local' | 'server' | 'merge', resolutions?: Record<string, any>) => void;
-  getActiveConflicts: () => ConflictResolution[];
-  
+
   // Manual Controls
   enableAutoSave: () => void;
   disableAutoSave: () => void;
   clearSaveError: () => void;
-  
+
   // Development/Debug
   getPerformanceStats: () => AutoSaveState['performance'];
-  exportHistory: () => any;
 }
 
 export interface UseAutoSaveReturn {
   status: AutoSaveStatus;
   actions: AutoSaveActions;
-  
+
   // Convenience functions for common operations
   saveNow: () => Promise<void>;
-  undoLastChange: () => Promise<boolean>;
-  redoLastUndo: () => Promise<boolean>;
-  
+
   // Component helpers
   getSaveStatusMessage: () => string;
   getSaveStatusColor: () => 'green' | 'yellow' | 'red' | 'gray';
-  getConflictSummary: () => string;
 }
 
 /**
@@ -93,41 +112,129 @@ export interface UseAutoSaveReturn {
  */
 
 export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSaveReturn => {
-  // Configuration with defaults
-  const finalConfig: AutoSaveHookConfig = {
-  enableAutoSave: true,
-  enableVersioning: true,
-  snapshotInterval: 5,
-  conflictResolution: 'prompt',
-  ...config,
-};
-  // Store integration
-  const store = useEditStore();
-  
-  // Version manager instance (persists across renders)
-  const versionManagerRef = useRef<VersionManager | null>(null);
-  
-  // Initialize version manager
-  if (!versionManagerRef.current && finalConfig.enableVersioning) {
-    versionManagerRef.current = new VersionManager({
-      maxSnapshots: 50,
-      autoSnapshotInterval: finalConfig.snapshotInterval,
-      enableCompression: true,
-    });
-  }
+  // Configuration with defaults.
+  // perf-02 phase 2: memoize keyed on the INDIVIDUAL config fields so the
+  // object identity is stable across renders (callers passing primitive-only
+  // config get a frozen finalConfig) — stops the online/callback effects below
+  // from re-subscribing every render.
+  const {
+    enableAutoSave: cfgEnableAutoSave = true,
+    onSaveSuccess: cfgOnSaveSuccess,
+    onSaveError: cfgOnSaveError,
+  } = config;
+  const finalConfig: AutoSaveHookConfig = useMemo(
+    () => ({
+      enableAutoSave: cfgEnableAutoSave,
+      onSaveSuccess: cfgOnSaveSuccess,
+      onSaveError: cfgOnSaveError,
+    }),
+    [
+      cfgEnableAutoSave,
+      cfgOnSaveSuccess,
+      cfgOnSaveError,
+    ]
+  );
+  // Store integration.
+  // TRIGGER MECHANICS (perf-02 phase 2): the 1s setInterval poll is gone. The
+  // auto-save trigger is now an event-driven trailing debounce armed by a
+  // mount-once storeApi.subscribe() listener (below) — not driven by a render
+  // pass. The `status` memo + several effects READ persistence/queuedChanges
+  // DURING render, so we keep a NARROW reactive subscription to just those slices
+  // (removing the whole-store subscription that re-rendered on unrelated edits)
+  // and read actions/methods non-reactively via storeApi.getState().
+  const storeApi = useEditStoreApi();
+  const { persistence, queuedChanges } = useEditStore(
+    useShallow((s) => ({ persistence: s.persistence, queuedChanges: s.queuedChanges }))
+  );
 
-  // Track change count for auto-snapshots
-  const changeCountRef = useRef(0);
   const isOnlineRef = useRef(navigator.onLine);
 
-  // Online/offline detection
+  // ===== EVENT-DRIVEN AUTOSAVE STATE (perf-02 phase 2) =====
+  // lastSavedUpdatedRef: the `state.lastUpdated` value the last DISPATCHED save
+  //   captured — the OR-gate's `lastUpdated > ref` term compares against it.
+  // lastSeenUpdatedRef: the last `state.lastUpdated` the store-subscription
+  //   listener observed — drives per-keystroke (re)arm of the trailing debounce.
+  const lastSavedUpdatedRef = useRef<number>(storeApi.getState().lastUpdated ?? 0);
+  const lastSeenUpdatedRef = useRef<number>(storeApi.getState().lastUpdated ?? 0);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryAttemptRef = useRef(0);
+  // enableAutoSave read non-reactively by the stable dispatchSave gate.
+  const enableAutoSaveRef = useRef(finalConfig.enableAutoSave);
+  enableAutoSaveRef.current = finalConfig.enableAutoSave;
+
+  // Stable dispatchSave holder — captured by the mount-once subscribe listener
+  // and the online/visibility/pagehide effects (they read `.current`), so a
+  // stale closure can never silently break mid-flight re-arm or the retry path.
+  const dispatchSaveRef = useRef<() => void>(() => {});
+
+  // The SINGLE choke point for every server save this hook fires (timer,
+  // mid-flight re-arm, all flushes, online recovery, failure retry). Stable
+  // (deps: storeApi only) — reads all live state via getState()/refs.
+  const dispatchSave = useCallback(async () => {
+    const s = storeApi.getState();
+    // Uniform OR-gate everywhere. NEVER gate solely on lastUpdated: dozens of
+    // mutation sites set isDirty without bumping lastUpdated.
+    const hasUnsaved =
+      s.lastUpdated > lastSavedUpdatedRef.current || s.persistence.isDirty;
+    if (
+      !enableAutoSaveRef.current ||
+      !isOnlineRef.current ||
+      !hasUnsaved ||
+      s.persistence.isSaving
+    ) {
+      return;
+    }
+
+    // Capture-at-dispatch BEFORE awaiting — edits landing during the flight
+    // then satisfy `lastUpdated > lastSavedUpdatedRef` and re-arm.
+    const prev = lastSavedUpdatedRef.current;
+    lastSavedUpdatedRef.current = s.lastUpdated;
+
+    try {
+      // Dispatch via save() DIRECTLY (not triggerAutoSave, which re-gates on
+      // isDirty and would no-op mid-flight/teardown flushes per :349 clobber).
+      await s.save();
+      retryAttemptRef.current = 0; // success resets the bounded-retry counter
+    } catch {
+      // save() threw and has ALREADY set persistence.saveError. Restore the ref
+      // so arm/flush gates still see the edit as unsaved, then schedule a
+      // BOUNDED retry (2s → 4s → 8s, max 3). The mid-flight guard is gated off
+      // saveError and never re-arms on failure — this catch SOLELY owns failure
+      // re-arming.
+      lastSavedUpdatedRef.current = prev;
+      if (retryAttemptRef.current < MAX_RETRY_ATTEMPTS) {
+        const backoff = RETRY_BASE_MS * Math.pow(2, retryAttemptRef.current);
+        retryAttemptRef.current += 1;
+        if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = setTimeout(() => {
+          retryTimeoutRef.current = null;
+          dispatchSaveRef.current();
+        }, backoff);
+      }
+      // After the cap: stop, leave saveError surfaced; the next edit / visibility
+      // / online event re-arms through the normal gates.
+    }
+  }, [storeApi]);
+  dispatchSaveRef.current = dispatchSave;
+
+  // (Re)arm the trailing debounce timer → fires dispatchSave once ~1s after the
+  // LAST arm signal.
+  const armDebounce = useCallback(() => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null;
+      dispatchSaveRef.current();
+    }, DEBOUNCE_MS);
+  }, []);
+
+  // Online/offline detection + online-recovery flush (re-pointed to dispatchSave
+  // so lastSavedUpdatedRef stays consistent; its old isDirty read is subsumed by
+  // dispatchSave's OR-gate). Mount-once (reads refs only).
   useEffect(() => {
     const handleOnline = () => {
       isOnlineRef.current = true;
-      // Trigger save when coming back online if there are changes
-      if (store.persistence.isDirty && finalConfig.enableAutoSave) {
-        store.triggerAutoSave();
-      }
+      dispatchSaveRef.current();
     };
 
     const handleOffline = () => {
@@ -141,110 +248,142 @@ export const useAutoSave = (config: Partial<AutoSaveHookConfig> = {}): UseAutoSa
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [store, finalConfig.enableAutoSave]);
+  }, []);
 
-  // Auto-save enablement effect
+  // ===== STORE-SUBSCRIPTION TRAILING DEBOUNCE (replaces the 1s poll) =====
+  // Mount-once. Cheap field compares only; arms/re-arms the debounce timer.
   useEffect(() => {
-    if (finalConfig.enableAutoSave && isOnlineRef.current) {
-      // Enable auto-save when conditions are met
-      const interval = setInterval(() => {
-        if (store.persistence.isDirty && !store.persistence.isSaving) {
-          store.triggerAutoSave();
+    const init = storeApi.getState();
+    lastSeenUpdatedRef.current = init.lastUpdated ?? 0;
+
+    const unsubscribe = storeApi.subscribe((state: any, prevState: any) => {
+      // lastUpdated advance → distinguish a real edit from a load/programmatic
+      // bump via isDirty AT THIS set(). A real user edit sets isDirty=true in the
+      // same set() that bumps lastUpdated → record + (re)arm (per-keystroke
+      // trailing) + reset the retry counter. A load/programmatic bump (e.g.
+      // loadFromDraft) lands with isDirty=false → record the seen ref AND advance
+      // the clean baseline (lastSavedUpdatedRef) so no save is owed, then do NOT
+      // arm — this kills the spurious save on editor open.
+      if ((state.lastUpdated ?? 0) > lastSeenUpdatedRef.current) {
+        lastSeenUpdatedRef.current = state.lastUpdated;
+        if (state.persistence.isDirty) {
+          retryAttemptRef.current = 0;
+          armDebounce();
+        } else {
+          lastSavedUpdatedRef.current = state.lastUpdated;
         }
-      }, 1000); // Check every second
-
-      return () => clearInterval(interval);
-    }
-  }, [finalConfig.enableAutoSave, store]);
-
-  // Version snapshot creation effect
-  useEffect(() => {
-    if (!finalConfig.enableVersioning || !versionManagerRef.current) return;
-
-    // Create snapshot when significant changes accumulate
-    if ((store.queuedChanges || []).length > 0) {
-      changeCountRef.current += 1;
-      
-      if (versionManagerRef.current.shouldCreateAutoSnapshot(changeCountRef.current)) {
-        const snapshot = versionManagerRef.current.createSnapshot(
-          store.export(),
-          `Auto-snapshot after ${changeCountRef.current} changes`,
-          'auto-save',
-          store.queuedChanges || []
-        );
-        
-        changeCountRef.current = 0; // Reset counter
-        finalConfig.onVersionCreated?.(snapshot);
       }
-    }
-  }, [store.queuedChanges || [], finalConfig, store]);
+
+      // isDirty false→true → ALSO arm (plain OR semantics, NO saveError clause).
+      // Only arm signal for the lastUpdated-silent mutation sites (section
+      // reorder, form/image, nav/social). Double-arm is harmless (same timer).
+      if (state.persistence.isDirty && !prevState.persistence.isDirty) {
+        retryAttemptRef.current = 0;
+        armDebounce();
+      }
+
+      // Mid-flight guard: isSaving true→false. Re-arm ONLY on success
+      // transitions — the `&& !saveError` applies to THIS guard alone. On
+      // failure the catch's bounded retry solely owns re-arming.
+      if (prevState.persistence.isSaving && !state.persistence.isSaving) {
+        const hasUnsaved =
+          (state.lastUpdated ?? 0) > lastSavedUpdatedRef.current ||
+          state.persistence.isDirty;
+        if (hasUnsaved && !state.persistence.saveError) {
+          armDebounce();
+        }
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+      // Effect cleanup (unmount / SPA route change away): one last flush; its
+      // own OR-gate decides whether anything is outstanding.
+      dispatchSaveRef.current();
+    };
+  }, [storeApi, armDebounce]);
+
+  // ===== TEARDOWN FLUSH TRIGGERS ===== (mount-once, best-effort while alive)
+  useEffect(() => {
+    const flush = () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+      dispatchSaveRef.current();
+    };
+    // visibility→hidden is the PRIMARY teardown guarantee (page alive, normal
+    // fetch OK).
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') flush();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    // pagehide + beforeunload: immediate dispatch, explicitly best-effort.
+    window.addEventListener('pagehide', flush);
+    window.addEventListener('beforeunload', flush);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('pagehide', flush);
+      window.removeEventListener('beforeunload', flush);
+    };
+  }, []);
 
   // Save success/error callbacks
   useEffect(() => {
-    if (store.persistence.lastSaved && finalConfig.onSaveSuccess) {
-      finalConfig.onSaveSuccess(store.getPerformanceStats().lastSaveTime);
+    if (persistence.lastSaved && finalConfig.onSaveSuccess) {
+      finalConfig.onSaveSuccess(storeApi.getState().getPerformanceStats().lastSaveTime);
     }
-  }, [store.persistence.lastSaved, finalConfig]);
+  }, [persistence.lastSaved, finalConfig, storeApi]);
 
  useEffect(() => {
-    if (store.persistence.saveError && finalConfig.onSaveError) {
-      finalConfig.onSaveError(store.persistence.saveError);
+    if (persistence.saveError && finalConfig.onSaveError) {
+      finalConfig.onSaveError(persistence.saveError);
     }
-  }, [store.persistence.saveError, finalConfig]);
+  }, [persistence.saveError, finalConfig]);
 
   /**
    * ===== STATUS COMPUTATION =====
    */
   const status: AutoSaveStatus = useMemo(() => {
-    const versionManager = versionManagerRef.current;
-    const conflicts = versionManager?.getActiveConflicts() || [];
-    const historySummary = versionManager?.getHistorySummary();
+    const perfStats = storeApi.getState().getPerformanceStats();
 
     return {
       // Save State
-      isDirty: store.persistence.isDirty,
-      isSaving: store.persistence.isSaving,
-      lastSaved: store.persistence.lastSaved ? new Date(store.persistence.lastSaved) : undefined,
-      saveError: store.persistence.saveError,
-      
+      isDirty: persistence.isDirty,
+      isSaving: persistence.isSaving,
+      lastSaved: persistence.lastSaved ? new Date(persistence.lastSaved) : undefined,
+      saveError: persistence.saveError,
+
       // Performance
-      saveCount: store.getPerformanceStats().saveCount,
-      averageSaveTime: store.getPerformanceStats().averageSaveTime,
-      lastSaveTime: store.getPerformanceStats().lastSaveTime,
-      
-      // Version Control
-      canUndo: historySummary?.canUndo || false,
-      canRedo: historySummary?.canRedo || false,
-      currentVersion: historySummary?.currentVersion || 0,
-      totalVersions: historySummary?.totalSnapshots || 0,
-      
-      // Conflicts
-      hasActiveConflicts: conflicts.length > 0,
-      conflictCount: conflicts.length,
-      
+      saveCount: perfStats.saveCount,
+      averageSaveTime: perfStats.averageSaveTime,
+      lastSaveTime: perfStats.lastSaveTime,
+
       // Queue Status
-      queuedChanges: (store.queuedChanges || []).length,
+      queuedChanges: (queuedChanges || []).length,
       isOnline: isOnlineRef.current,
     };
   }, [
-    store.persistence.isDirty,
-    store.persistence.isSaving,
-    store.persistence.lastSaved,
-    store.persistence.saveError,
-    store.getPerformanceStats(),
-    (store.queuedChanges || []).length,
-    versionManagerRef.current,
+    persistence.isDirty,
+    persistence.isSaving,
+    persistence.lastSaved,
+    persistence.saveError,
+    queuedChanges,
+    storeApi,
   ]);
 
   /**
    * ===== ACTION IMPLEMENTATIONS =====
    */
-  
+
   const triggerSave = useCallback(() => {
-    if (finalConfig.enableAutoSave && isOnlineRef.current) {
-      store.triggerAutoSave();
-    }
-  }, [store, finalConfig.enableAutoSave]);
+    // perf-02 phase 2: route through dispatchSave() → save() directly (its
+    // OR-gate + online + !isSaving guards apply); never triggerAutoSave().
+    dispatchSaveRef.current();
+  }, []);
 
   // Enhanced forceSave implementation to replace existing:
 const forceSave = useCallback(async () => {
@@ -252,135 +391,8 @@ const forceSave = useCallback(async () => {
     throw new Error('Cannot save while offline');
   }
 
-  try {
-    await store.forceSave();
-
-    // Create version snapshot on manual save
-    if (finalConfig.enableVersioning && versionManagerRef.current) {
-      const snapshot = versionManagerRef.current.createSnapshot(
-        store.export(),
-        'Manual save',
-        'user'
-      );
-      finalConfig.onVersionCreated?.(snapshot);
-    }
-  } catch (error) {
-    throw error;
-  }
-}, [store, finalConfig]);
-
-  const undo = useCallback(async (): Promise<boolean> => {
-    if (!finalConfig.enableVersioning || !versionManagerRef.current) {
-      return false;
-    }
-
-    const snapshot = versionManagerRef.current.undo();
-    if (!snapshot) {
-      return false;
-    }
-
-    try {
-      // Apply the snapshot to the store
-      await store.loadFromDraft({
-        finalContent: snapshot.data,
-        tokenId: store.tokenId,
-        title: store.title,
-      });
-
-      // Create a snapshot of the current state before undo for redo
-      changeCountRef.current = 0; // Reset change counter
-      
-      return true;
-    } catch (error) {
-      // Revert the undo in version manager
-      versionManagerRef.current.redo();
-      return false;
-    }
-  }, [store, finalConfig.enableVersioning]);
-
-  const redo = useCallback(async (): Promise<boolean> => {
-    if (!finalConfig.enableVersioning || !versionManagerRef.current) {
-      return false;
-    }
-
-    const snapshot = versionManagerRef.current.redo();
-    if (!snapshot) {
-      return false;
-    }
-
-    try {
-      // Apply the snapshot to the store
-      await store.loadFromDraft({
-        finalContent: snapshot.data,
-        tokenId: store.tokenId,
-        title: store.title,
-      });
-
-      changeCountRef.current = 0; // Reset change counter
-      
-      return true;
-    } catch (error) {
-      // Revert the redo in version manager
-      versionManagerRef.current.undo();
-      return false;
-    }
-  }, [store, finalConfig.enableVersioning]);
-
-  const createSnapshot = useCallback((description: string): string => {
-    if (!finalConfig.enableVersioning || !versionManagerRef.current) {
-      return '';
-    }
-
-    const snapshot = versionManagerRef.current.createSnapshot(
-      store.export(),
-      description,
-      'user',
-      store.queuedChanges
-    );
-
-    finalConfig.onVersionCreated?.(snapshot);
-    return snapshot;
-  }, [store, finalConfig, versionManagerRef.current]);
-
-  const resolveConflict = useCallback((
-    conflictId: string,
-    strategy: 'local' | 'server' | 'merge',
-    resolutions?: Record<string, any>
-  ) => {
-    if (!versionManagerRef.current) return;
-
-    let resolvedData;
-
-    switch (strategy) {
-      case 'local':
-        store.resolveConflict('latest-wins', 'local');
-        break;
-      case 'server':
-        store.resolveConflict('auto-merge', 'server');
-        break;
-      case 'merge':
-        if (resolutions) {
-          resolvedData = versionManagerRef.current.manualResolveConflict(conflictId, resolutions);
-        } else {
-          resolvedData = versionManagerRef.current.autoResolveConflicts(conflictId);
-        }
-        
-        if (resolvedData) {
-          // Apply merged data to store
-          store.loadFromDraft({
-            finalContent: resolvedData,
-            tokenId: store.tokenId,
-            title: store.title,
-          });
-        }
-        break;
-    }
-
-  }, [store, versionManagerRef.current]);
-
-  const getActiveConflicts = useCallback((): ConflictResolution[] => {
-    return versionManagerRef.current?.getActiveConflicts() || [];
-  }, [versionManagerRef.current]);
+  await storeApi.getState().forceSave();
+}, [storeApi]);
 
   const enableAutoSave = useCallback(() => {
     // This would update the config - simplified implementation
@@ -391,16 +403,12 @@ const forceSave = useCallback(async () => {
   }, []);
 
   const clearSaveError = useCallback(() => {
-    store.clearAutoSaveError();
-  }, [store]);
+    storeApi.getState().clearAutoSaveError();
+  }, [storeApi]);
 
   const getPerformanceStats = useCallback(() => {
-    return store.getPerformanceStats();
-  }, [store]);
-
-  const exportHistory = useCallback(() => {
-    return versionManagerRef.current?.exportHistory() || null;
-  }, [versionManagerRef.current]);
+    return storeApi.getState().getPerformanceStats();
+  }, [storeApi]);
 
   /**
    * ===== CONVENIENCE FUNCTIONS =====
@@ -410,35 +418,27 @@ const forceSave = useCallback(async () => {
     await forceSave();
   }, [forceSave]);
 
-  const undoLastChange = useCallback(async () => {
-    return await undo();
-  }, [undo]);
-
-  const redoLastUndo = useCallback(async () => {
-    return await redo();
-  }, [redo]);
-
   const getSaveStatusMessage = useCallback((): string => {
     if (status.saveError) {
       return `Save failed: ${status.saveError}`;
     }
-    
+
     if (status.isSaving) {
       return 'Saving...';
     }
-    
+
     if (!status.isOnline) {
       return 'Offline - changes will save when online';
     }
-    
+
     if (status.isDirty) {
       return 'Unsaved changes';
     }
-    
+
     if (status.lastSaved) {
       const now = Date.now();
       const diff = now - status.lastSaved.getTime();
-      
+
       if (diff < 60000) { // Less than 1 minute
         return 'Saved just now';
       } else if (diff < 3600000) { // Less than 1 hour
@@ -448,7 +448,7 @@ const forceSave = useCallback(async () => {
         return `Saved at ${status.lastSaved.toLocaleTimeString()}`;
       }
     }
-    
+
     return 'No changes yet';
   }, [status]);
 
@@ -460,103 +460,24 @@ const forceSave = useCallback(async () => {
     return 'green';
   }, [status]);
 
-  const getConflictSummary = useCallback((): string => {
-    if (!status.hasActiveConflicts) {
-      return '';
-    }
-    
-    const conflicts = getActiveConflicts();
-    const conflictTypes = conflicts.map(c => c.conflictType);
-    const uniqueTypes = [...new Set(conflictTypes)];
-
- 
-    
-    return `${status.conflictCount} conflict(s): ${uniqueTypes.join(', ')}`;
-  }, [status, getActiveConflicts]);
-
   /**
    * ===== RETURN OBJECT =====
    */
   const actions: AutoSaveActions = {
     triggerSave,
     forceSave,
-    undo,
-    redo,
-    createSnapshot,
-    resolveConflict,
-    getActiveConflicts,
     enableAutoSave,
     disableAutoSave,
     clearSaveError,
     getPerformanceStats,
-    exportHistory,
   };
 
   return {
     status,
     actions,
     saveNow,
-    undoLastChange,
-    redoLastUndo,
     getSaveStatusMessage,
     getSaveStatusColor,
-    getConflictSummary,
-  };
-};
-
-/**
- * ===== SPECIALIZED HOOKS =====
- */
-
-// Hook for just save status (lighter weight)
-export const useSaveStatus = () => {
-  const { status, getSaveStatusMessage, getSaveStatusColor } = useAutoSave({
-    enableVersioning: false,
-  });
-
-  return {
-    isDirty: status.isDirty,
-    isSaving: status.isSaving,
-    saveError: status.saveError,
-    lastSaved: status.lastSaved,
-    isOnline: status.isOnline,
-    message: getSaveStatusMessage(),
-    color: getSaveStatusColor(),
-  };
-};
-
-// Hook for version control only
-export const useVersionControl = () => {
-  const { status, actions } = useAutoSave({
-    enableAutoSave: false,
-    enableVersioning: true,
-  });
-
-  return {
-    canUndo: status.canUndo,
-    canRedo: status.canRedo,
-    currentVersion: status.currentVersion,
-    totalVersions: status.totalVersions,
-    undo: actions.undo,
-    redo: actions.redo,
-    createSnapshot: actions.createSnapshot,
-  };
-};
-
-// Hook for conflict management
-export const useConflictResolution = () => {
-  const { status, actions, getConflictSummary } = useAutoSave({
-    enableAutoSave: false,
-    enableVersioning: true,
-    conflictResolution: 'manual',
-  });
-
-  return {
-    hasConflicts: status.hasActiveConflicts,
-    conflictCount: status.conflictCount,
-    getActiveConflicts: actions.getActiveConflicts,
-    resolveConflict: actions.resolveConflict,
-    conflictSummary: getConflictSummary(),
   };
 };
 

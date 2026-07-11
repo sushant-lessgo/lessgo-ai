@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useElementCRUD } from './useElementCRUD';
-import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
+import { useEditStoreApi } from './useEditStoreLegacy';
 import type { UniversalElementType } from '@/types/universalElements';
 import { logger } from '@/lib/logger';
 
@@ -59,12 +59,8 @@ export function useElementPicker() {
   }, [setState]);
 
   const { addElement } = useElementCRUD();
-  const store = useEditStore();
-  
-  // Fallback for announceLiveRegion if it doesn't exist
-  const announceLiveRegion = store.announceLiveRegion || ((message: string) => {
-    logger.dev('Live region announcement:', message);
-  });
+  // Non-reactive store instance — announceLiveRegion read in a handler only.
+  const storeApi = useEditStoreApi();
 
   // Show element picker
   const showElementPicker = useCallback((
@@ -104,6 +100,11 @@ export function useElementPicker() {
   const handleElementSelect = useCallback(async (elementType: string) => {
     if (!state.sectionId) return;
 
+    // Fallback for announceLiveRegion if it doesn't exist
+    const announceLiveRegion = storeApi.getState().announceLiveRegion || ((message: string) => {
+      logger.dev('Live region announcement:', message);
+    });
+
     try {
       const elementKey = await addElement(state.sectionId, elementType, state.options);
       hideElementPicker();
@@ -113,7 +114,7 @@ export function useElementPicker() {
       logger.error('Failed to add element:', error);
       announceLiveRegion('Failed to add element');
     }
-  }, [state.sectionId, state.options, addElement, hideElementPicker, announceLiveRegion]);
+  }, [state.sectionId, state.options, addElement, hideElementPicker, storeApi]);
 
   // Toggle element picker
   const toggleElementPicker = useCallback((

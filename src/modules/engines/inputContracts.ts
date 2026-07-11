@@ -236,7 +236,17 @@ export function lockedSectionsForEngine(engine: CopyEngine): string[] {
   const dropTargets = new Set(
     engineContracts[engine].fields.map((f) => f.dropTarget).filter(Boolean) as string[]
   );
-  return engineCoreSections[engine].filter(
+  const locked = engineCoreSections[engine].filter(
     (s) => s !== 'header' && s !== 'footer' && !dropTargets.has(s)
   );
+  // F8 (scale 1-10): the conversion CTA must stay locked at the 7b gate, like
+  // trust's. thing's FROZEN engine-core omits `cta` on purpose — vestria's CTA
+  // is its `contact` lead-form, so cta can't be an engine-wide guarantee — but
+  // meridian's single-page thing list DOES carry `cta`, and it was wrongly
+  // removable. Adding it here (NOT to engineCoreSections, which would break
+  // vestria conformance) locks it only where present: clampSectionList/toggle
+  // only act on a locked section that's actually in the list, so vestria (no
+  // cta section) is a no-op.
+  if (engine === 'thing' && !locked.includes('cta')) locked.push('cta');
+  return locked;
 }

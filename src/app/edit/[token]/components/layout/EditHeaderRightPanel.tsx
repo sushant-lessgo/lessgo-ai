@@ -65,10 +65,15 @@ function RegenCopyConfirmModal({
 }
 
 export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
-  const { regenerateAllContent, aiGeneration, sections } = useEditStore();
+  const { regenerateAllContent, aiGeneration, sections, activeLocale, localeConfig } = useEditStore();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const isGenerating = aiGeneration?.isGenerating ?? false;
+  // i18n-phase-1 (Phase 4): regen only writes the DEFAULT-locale base copy
+  // (store guard no-ops it elsewhere). Disable the entry point on a non-default
+  // locale so the author isn't offered a silent no-op.
+  const regenLocaleLocked =
+    !!localeConfig && activeLocale !== localeConfig.defaultLocale;
   const progress = aiGeneration?.progress ?? 0;
   const totalSections = sections?.length ?? 0;
   const completedSections = Math.round((progress / 100) * totalSections);
@@ -104,9 +109,9 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
         {/* Regen Copy */}
         <button
           onClick={() => setShowConfirm(true)}
-          disabled={isGenerating}
+          disabled={isGenerating || regenLocaleLocked}
           className={`flex items-center space-x-1.5 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed ${isGenerating ? 'animate-pulse bg-amber-50 border-amber-200' : ''}`}
-          title="Regenerate all page copy"
+          title={regenLocaleLocked ? 'Switch to the default language to regenerate.' : 'Regenerate all page copy'}
         >
           {isGenerating ? (
             <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">

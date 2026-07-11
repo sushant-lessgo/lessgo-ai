@@ -40,6 +40,14 @@ export default function MeridianNavHeaderPublished(props: MeridianNavHeaderPubli
   const forms = props.content?.forms;
   const ctaHref = resolveCtaHref(md?.cta_text?.buttonConfig, forms, '#cta');
   const signinHref = resolveCtaHref(md?.signin_text?.buttonConfig, forms, '#signin');
+  // Sign in is wayfinding (existing-user login) by default — no beacon attrs, so it
+  // never pollutes the CTA click breakdown (F7). An EXPLICITLY configured CTA on this
+  // element (cta/buttonConfig metadata) is a user decision and keeps beacon attrs (D15).
+  const signinRole: string | undefined =
+    md?.signin_text?.cta?.role ?? md?.signin_text?.buttonConfig?.ctaType;
+  const signinCtaAttrs = signinRole
+    ? { 'data-lessgo-cta': '', 'data-lessgo-cta-role': signinRole }
+    : {};
 
   return (
     <>
@@ -48,7 +56,7 @@ export default function MeridianNavHeaderPublished(props: MeridianNavHeaderPubli
         <div className="mrd-nav__left">
           <div className="mrd-brand">
             {props.logo_image ? (
-              <img className="mrd-brand-img" src={props.logo_image} alt="" />
+              <img className="mrd-brand-img" src={props.logo_image} alt="" loading="eager" decoding="async" />
             ) : (
               <div className="mrd-brand-mark" aria-hidden="true" />
             )}
@@ -65,7 +73,7 @@ export default function MeridianNavHeaderPublished(props: MeridianNavHeaderPubli
           )}
         </div>
         <div className="mrd-nav-right">
-          <a className="mrd-btn mrd-btn--quiet mrd-btn--sm" href={signinHref} data-lessgo-cta="" data-lessgo-cta-role="secondary">{signinText}</a>
+          <a className="mrd-btn mrd-btn--quiet mrd-btn--sm" href={signinHref} {...signinCtaAttrs}>{signinText}</a>
           <a className="mrd-btn mrd-btn--primary mrd-btn--sm mrd-btn--arrow" href={ctaHref} data-lessgo-cta="" data-lessgo-cta-role="primary">{ctaText}</a>
         </div>
       </nav>

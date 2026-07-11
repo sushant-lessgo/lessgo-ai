@@ -42,7 +42,8 @@ export type GranthBlockMode = 'edit' | 'published';
 
 export function resolveGranthBlock(
   sectionType: string,
-  mode: GranthBlockMode = 'edit'
+  mode: GranthBlockMode = 'edit',
+  _layoutName?: string, // one block per section; accepted for TemplateModule contract parity
 ): React.ComponentType<any> | null {
   const key = (sectionType || '').toLowerCase();
   const entry = GRANTH_BLOCK_REGISTRY[key];

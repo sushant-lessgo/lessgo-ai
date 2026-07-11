@@ -80,7 +80,7 @@ const Txt: React.FC<GranthTxtProps> = ({ elementKey, value, as = 'span', classNa
   );
 };
 
-const Img: React.FC<GranthImgProps> = ({ elementKey, src, alt, className, imgClassName, placeholder }) => {
+const Img: React.FC<GranthImgProps> = ({ elementKey, src, alt, className, imgClassName, placeholder, eager }) => {
   const ctx = useCtx();
   const [uploading, setUploading] = React.useState(false);
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +100,7 @@ const Img: React.FC<GranthImgProps> = ({ elementKey, src, alt, className, imgCla
   const clear = () => saveField(ctx, elementKey, '');
   return (
     <div className={className} style={{ position: 'relative' }}>
-      {src ? <img src={src} alt={alt || ''} className={imgClassName} /> : placeholder}
+      {src ? <img src={src} alt={alt || ''} className={imgClassName} loading={eager ? 'eager' : 'lazy'} decoding="async" /> : placeholder}
       <span className="gr-img-edit">
         <label className="gr-img-edit__btn">
           {uploading ? '…' : (src ? 'बदलें' : '↥ चित्र')}
@@ -167,10 +167,9 @@ export function useGranthEditCtx(
   update: (elementKey: string, value: any) => void,
   updateCollection: (collectionKey: string, value: any[]) => void,
 ): GranthEditCtx {
-  const store = useEditStore() as any;
-  const sections = store.sections as string[] | undefined;
-  const pages = store.pages;
-  const uploadImage = store.uploadImage;
+  const sections = useEditStore((s) => (s as any).sections) as string[] | undefined;
+  const pages = useEditStore((s) => (s as any).pages);
+  const uploadImage = useEditStore((s) => (s as any).uploadImage);
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const contentRef = React.useRef(blockContent);

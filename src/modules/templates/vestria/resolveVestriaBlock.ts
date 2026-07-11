@@ -59,7 +59,8 @@ export type VestriaBlockMode = 'edit' | 'published';
 
 export function resolveVestriaBlock(
   sectionType: string,
-  mode: VestriaBlockMode = 'edit'
+  mode: VestriaBlockMode = 'edit',
+  _layoutName?: string, // one block per section; variant switching (hero) is internalDispatch
 ): React.ComponentType<any> | null {
   const key = (sectionType || '').toLowerCase();
   const entry = VESTRIA_BLOCK_REGISTRY[key];

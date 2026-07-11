@@ -1,7 +1,7 @@
 // hooks/useElementCRUD.ts - Element CRUD operations hook
 
 import { useCallback } from 'react';
-import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
+import { useEditStoreApi } from './useEditStoreLegacy';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
 import { getLayoutElements } from '@/modules/sections/layoutElementSchema';
@@ -54,14 +54,17 @@ const getDefaultOptionalContent = (elementName: string): string | string[] => {
 };
 
 export function useElementCRUD() {
+  // Non-reactive store instance — this hook only READS `content` inside
+  // callbacks, so it no longer subscribes to the whole store (which re-rendered
+  // its host on every edit). Store ACTIONS have stable identities, so snapshot
+  // them once; `content` is read fresh via storeApi.getState() per callback.
+  const storeApi = useEditStoreApi();
   const {
-    content,
     setSection,
     trackChange,
     announceLiveRegion,
     triggerAutoSave,
-    history
-  } = useEditStore();
+  } = storeApi.getState();
 
   // Create element instance
   const createElement = useCallback((
@@ -107,6 +110,7 @@ export function useElementCRUD() {
     elementName: string,
     options?: AddElementOptions
   ) => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     const layoutType = section?.layout;
 
@@ -172,7 +176,7 @@ export function useElementCRUD() {
         warnings: [],
       },
     };
-  }, [content]);
+  }, [storeApi]);
 
   // Add element to section
   const addElement = useCallback(async (
@@ -180,6 +184,7 @@ export function useElementCRUD() {
     elementType: string, // Changed to accept string for optional elements
     options?: AddElementOptions
   ): Promise<string> => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section) {
       throw new Error(`Section ${sectionId} not found`);
@@ -266,7 +271,7 @@ export function useElementCRUD() {
     }
 
     return element.elementKey;
-  }, [content, setSection, createElement, createOptionalElement, trackChange, triggerAutoSave, announceLiveRegion]);
+  }, [storeApi, setSection, createElement, createOptionalElement, trackChange, triggerAutoSave, announceLiveRegion]);
 
   // Remove element from section
   const removeElement = useCallback(async (
@@ -274,6 +279,7 @@ export function useElementCRUD() {
     elementKey: string, 
     options?: RemoveElementOptions
   ): Promise<boolean> => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section || !section.elements[elementKey]) {
       return false;
@@ -338,7 +344,7 @@ export function useElementCRUD() {
 
     announceLiveRegion(`Deleted ${element.type} element`);
     return true;
-  }, [content, setSection, trackChange, announceLiveRegion]);
+  }, [storeApi, setSection, trackChange, announceLiveRegion]);
 
   // Duplicate element
   const duplicateElement = useCallback(async (
@@ -346,6 +352,7 @@ export function useElementCRUD() {
     elementKey: string, 
     options?: DuplicateElementOptions
   ): Promise<string> => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section || !section.elements[elementKey]) {
       throw new Error(`Element ${elementKey} not found in section ${sectionId}`);
@@ -423,10 +430,11 @@ export function useElementCRUD() {
 
     announceLiveRegion(`Duplicated ${originalElement.type} element`);
     return newElementKey;
-  }, [content, setSection, trackChange, announceLiveRegion]);
+  }, [storeApi, setSection, trackChange, announceLiveRegion]);
 
   // Reorder elements
   const reorderElements = useCallback((sectionId: string, newOrder: string[]) => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section) return;
 
@@ -455,16 +463,17 @@ export function useElementCRUD() {
     });
 
     announceLiveRegion(`Reordered ${newOrder.length} elements`);
-  }, [content, trackChange, announceLiveRegion]);
+  }, [storeApi, trackChange, announceLiveRegion]);
 
   // Move element up
   const moveElementUp = useCallback((sectionId: string, elementKey: string): boolean => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section || !section.elements[elementKey]) return false;
 
     const element = section.elements[elementKey];
     const currentPosition = element.metadata?.position || 0;
-    
+
     if (currentPosition <= 0) return false;
 
     // Find element at position above
@@ -493,16 +502,17 @@ export function useElementCRUD() {
     }
 
     return false;
-  }, [content, trackChange, announceLiveRegion]);
+  }, [storeApi, trackChange, announceLiveRegion]);
 
   // Move element down
   const moveElementDown = useCallback((sectionId: string, elementKey: string): boolean => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section || !section.elements[elementKey]) return false;
 
     const element = section.elements[elementKey];
     const currentPosition = element.metadata?.position || 0;
-    
+
     // Find element at position below
     const elements = Object.values(section.elements);
     const elementBelow = elements.find((el: any) => 
@@ -529,14 +539,15 @@ export function useElementCRUD() {
     }
 
     return false;
-  }, [content, trackChange, announceLiveRegion]);
+  }, [storeApi, trackChange, announceLiveRegion]);
 
   // Move element to specific position
   const moveElementToPosition = useCallback((
-    sectionId: string, 
-    elementKey: string, 
+    sectionId: string,
+    elementKey: string,
     targetPosition: number
   ): boolean => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section || !section.elements[elementKey]) return false;
 
@@ -607,15 +618,16 @@ export function useElementCRUD() {
 
     announceLiveRegion(`Moved ${element.type} element to position ${targetPosition + 1}`);
     return true;
-  }, [content, setSection, trackChange, announceLiveRegion]);
+  }, [storeApi, setSection, trackChange, announceLiveRegion]);
 
   // Move element to different section
   const moveElementToSection = useCallback((
-    fromSectionId: string, 
-    toSectionId: string, 
-    elementKey: string, 
+    fromSectionId: string,
+    toSectionId: string,
+    elementKey: string,
     position?: number
   ): boolean => {
+    const { content } = storeApi.getState();
     const fromSection = content[fromSectionId];
     const toSection = content[toSectionId];
     
@@ -649,15 +661,16 @@ export function useElementCRUD() {
 
     announceLiveRegion(`Moved ${element.type} element to different section`);
     return true;
-  }, [content, trackChange, announceLiveRegion]);
+  }, [storeApi, trackChange, announceLiveRegion]);
 
   // Copy element to different section
   const copyElementToSection = useCallback((
-    fromSectionId: string, 
-    toSectionId: string, 
-    elementKey: string, 
+    fromSectionId: string,
+    toSectionId: string,
+    elementKey: string,
     position?: number
   ): string => {
+    const { content } = storeApi.getState();
     const fromSection = content[fromSectionId];
     const toSection = content[toSectionId];
     
@@ -705,14 +718,15 @@ export function useElementCRUD() {
 
     announceLiveRegion(`Copied ${copy.type} element to different section`);
     return newElementKey;
-  }, [content, trackChange, announceLiveRegion]);
+  }, [storeApi, trackChange, announceLiveRegion]);
 
   // Convert element type
   const convertElementType = useCallback((
-    sectionId: string, 
-    elementKey: string, 
+    sectionId: string,
+    elementKey: string,
     newType: UniversalElementType
   ): boolean => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section || !section.elements[elementKey]) return false;
 
@@ -750,13 +764,14 @@ export function useElementCRUD() {
 
     announceLiveRegion(`Converted ${oldType} to ${newType}`);
     return true;
-  }, [content, trackChange, announceLiveRegion]);
+  }, [storeApi, trackChange, announceLiveRegion]);
 
   // Batch update elements
   const batchUpdateElements = useCallback((
-    sectionId: string, 
+    sectionId: string,
     updates: ElementUpdate[]
   ) => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section) return;
 
@@ -792,13 +807,14 @@ export function useElementCRUD() {
 
       announceLiveRegion(`Updated ${changes.length} elements`);
     }
-  }, [content, trackChange, announceLiveRegion]);
+  }, [storeApi, trackChange, announceLiveRegion]);
 
   // Batch delete elements
   const batchDeleteElements = useCallback(async (
-    sectionId: string, 
+    sectionId: string,
     elementKeys: string[]
   ): Promise<boolean> => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section) return false;
 
@@ -834,12 +850,13 @@ export function useElementCRUD() {
     }
 
     return true;
-  }, [content, trackChange, announceLiveRegion]);
+  }, [storeApi, trackChange, announceLiveRegion]);
 
   // Search elements
   const searchElements = useCallback((criteria: ElementSearchCriteria): UniversalElementInstance[] => {
+    const { content } = storeApi.getState();
     const results: UniversalElementInstance[] = [];
-    
+
     const searchSections = criteria.sectionId ? [criteria.sectionId] : Object.keys(content);
     
     searchSections.forEach(sectionId => {
@@ -889,32 +906,35 @@ export function useElementCRUD() {
     });
 
     return results;
-  }, [content]);
+  }, [storeApi]);
 
   // Filter elements by type
   const filterElementsByType = useCallback((
-    sectionId: string, 
+    sectionId: string,
     types: UniversalElementType[]
   ): UniversalElementInstance[] => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section) return [];
 
-    return Object.values(section.elements).filter((element: any) => 
+    return Object.values(section.elements).filter((element: any) =>
       types.includes(element.type)
     ) as unknown as UniversalElementInstance[];
-  }, [content]);
+  }, [storeApi]);
 
   // Get element
   const getElement = useCallback((
-    sectionId: string, 
+    sectionId: string,
     elementKey: string
   ): UniversalElementInstance | null => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     return (section?.elements[elementKey] as unknown as UniversalElementInstance) || null;
-  }, [content]);
+  }, [storeApi]);
 
   // Get all elements in section
   const getAllElements = useCallback((sectionId: string): UniversalElementInstance[] => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section) return [];
 
@@ -924,13 +944,14 @@ export function useElementCRUD() {
         const bPos = b.metadata?.position || 0;
         return aPos - bPos;
       }) as unknown as UniversalElementInstance[];
-  }, [content]);
+  }, [storeApi]);
 
   // Get elements by type
   const getElementsByType = useCallback((
-    sectionId: string, 
+    sectionId: string,
     type: UniversalElementType
   ): UniversalElementInstance[] => {
+    const { content } = storeApi.getState();
     const section = content[sectionId];
     if (!section) return [];
 
@@ -941,7 +962,7 @@ export function useElementCRUD() {
         const bPos = b.metadata?.position || 0;
         return aPos - bPos;
       }) as unknown as UniversalElementInstance[];
-  }, [content]);
+  }, [storeApi]);
 
   // Validate element
   const validateElement = useCallback((

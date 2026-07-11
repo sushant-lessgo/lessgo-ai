@@ -1,0 +1,57 @@
+{
+  "slug": "tokyo-okutama-otsunaturegarden",
+  "url": "https://tokyo-okutama-otsunaturegarden.com/",
+  "business": { "type_label": "rural guesthouse / auto-camp / day-use BBQ & river-play venue", "icp_category": "place", "geography_hint": "Akikawa valley, Akiruno / Okutama, Tokyo, Japan" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor decides by browsing photos, room types, rates, access/directions and hours of a physical lodging/BBQ destination — checking the PLACE is the decision. No defined expertise sold and no work-portfolio-as-proof.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "book a stay / day-use BBQ (or phone/email to inquire) for the venue",
+    "mechanism": "redirect",
+    "delegated_to": "reserva / asoview / jalan (external booking platforms), plus tel/email"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 10,
+    "pages": ["home", "day-use-bbq", "new-villa-room", "river-sound-room", "auto-camp", "access", "activities-workshops", "faq", "cafe", "site-map"],
+    "archetype_note": "Classic multi-page destination/lodging site: home + per-offer pages (rooms, day-use, camp, cafe, activities) + access/directions + FAQ, each carrying a gallery and Facebook embed."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "nav メニュー/Menu", "component": "nav" },
+      { "canonical": "hero", "observed_as": "瀬音の湯至近！！奥多摩の秋川渓谷スタイルを味わえる宿", "component": "text" },
+      { "canonical": "cta", "observed_as": "お問い合わせ (phone/email contact block)", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "お知らせ (announcements/news)", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "About us / OtsuNatureGardenと周辺の紹介", "component": "text" },
+      { "canonical": "useCases", "observed_as": "客室『川の音』/ 日帰りBBQ,川遊び (room types & day-use offers)", "component": "text" },
+      { "canonical": "pricing", "observed_as": "◇料金◇ seasonal per-person rates, parking, river-play fees", "component": "pricing-table" },
+      { "canonical": "socialProof", "observed_as": "Facebook embedded feed", "component": "other" },
+      { "canonical": "miscellaneous", "observed_as": "ONGギャラリー (photo gallery)", "component": "gallery" },
+      { "canonical": "howItWorks", "observed_as": "アクセス/access/方向 (directions by train/bus/bike/taxi)", "component": "text" },
+      { "canonical": "faq", "observed_as": "よくある質問/Q&A (14 items)", "component": "accordion" },
+      { "canonical": "footer", "observed_as": "site map 場内図,館内/Map", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "低炭素交通 (low-carbon transport ranking / eco-transport encouragement)", "why_no_fit": "A values/sustainability advisory block ranking transport modes by environmental impact — not persuasion of the offer, an ethos statement tied to their eco-lodge membership", "closest": "founderNote" },
+      { "observed": "Tattoo policy / cash-only / auto-camp suspended notices", "why_no_fit": "Operational policy & availability notices; partly FAQ, partly announcement — not a persuasion section", "closest": "faq" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "bilingual", "packages", "blog"],
+    "proposed_new": [
+      { "name": "external-booking-redirect", "evidence": "All reservation CTAs (RESERVA予約, アソビュー体験, じゃらん体験) hand off to third-party appointment/booking engines; no on-site scheduling or checkout." }
+    ]
+  },
+  "proof_types": ["certs"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["pricing-table", "photo-gallery/slideshow", "faq-accordion", "map-embed", "directions/access list", "language-toggle (inline JP/EN)", "facebook-feed embed"],
+  "languages": ["ja", "en"],
+  "confidence": { "level": "high", "why": "fetch_quality full; multi-page structure, CTAs, pricing, proof and embeds all captured. Minor gap: new-villa room page and cafe/camp/activities pages not crawled in depth, but the archetype is unambiguous." },
+  "gap_findings": [
+    "The low-carbon transport ranking block is an ethos/values section with no canonical home — an eco/sustainability statement tied to the venue's ecolodge-association membership.",
+    "Booking is fully delegated to multiple external platforms (RESERVA/Asoview/Jalan) — captured only via the proposed external-booking-redirect capability; the closed vocab cannot express multi-platform off-site booking handoff."
+  ]
+}

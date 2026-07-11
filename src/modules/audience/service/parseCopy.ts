@@ -6,6 +6,7 @@
 
 import type { SectionCopy } from '@/types/generation';
 import { applyAllSchemaDefaults } from '@/modules/sections/layoutElementSchema';
+import { flattenReviewSentinel } from '@/lib/schemas/copy.schema';
 import { serviceElementSchema } from './elementSchema';
 import { applyItalicEmFallback } from './italicAccentFallback';
 import { logger } from '@/lib/logger';
@@ -109,6 +110,18 @@ export function normalizeServiceCopy(
  *
  * No-op (with a warn) if no testimonials section was produced — defensive guard;
  * import pre-checks `hasTestimonials` so the section is normally present.
+ *
+ * Sets `section.realProof = true` (proof-truth phase 4) when it injects — a
+ * post-parse provenance annotation carried into aiMetadata by multiPageAssembly
+ * and read by useReviewState to suppress needs-review markers. All-or-nothing
+ * per section: the flat quote fields are overwritten wholesale with the single
+ * best real quote.
+ *
+ * KNOWN GAP (proof-truth unresolved Q3): `regenerate-element` on the real quote
+ * element overwrites it with a fresh AI invention and does NOT clear this
+ * section-level flag, so provenance is inaccurate after element-level regen.
+ * Acceptance criterion 4 is section-level (section-regen re-injects from the
+ * table); element-level re-injection is deferred, not implemented here.
  */
 function pickBestTestimonial(real: ScrapedTestimonial[]): ScrapedTestimonial {
   // Prefer an attributed, substantial quote over an anonymous/thin one.
@@ -138,6 +151,7 @@ export function injectRealTestimonials(
   el.author_role = best.author_role;
   // Clear AI-guessed company so a real quote isn't paired with a fabricated one.
   el.author_company = '';
+  section.realProof = true;
 
   return sections;
 }
@@ -153,6 +167,9 @@ export function processServiceCopy(
   sections: Record<string, SectionCopy>,
   uiblocks: Record<string, string>
 ): Record<string, SectionCopy> {
+  // Sentinel hardening: flatten any {value, needsReview} object BEFORE assembly
+  // so no object-shaped value can survive into content (→ no [object Object]).
+  flattenReviewSentinel(sections);
   const withDefaults = applyAllSchemaDefaults(sections, uiblocks) as Record<string, SectionCopy>;
   const withIds = backfillCollectionIds(withDefaults, uiblocks);
   return applyItalicEmFallback(withIds);

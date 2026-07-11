@@ -28,7 +28,12 @@ import { buildBriefDraft, type EntrySignals } from '@/modules/brief/classify';
 // scale-06 phase 7: businessType-keyed extraction. The wizard/entry path selects
 // its extraction schema by businessType (never by audienceType/templateId).
 import { businessTypeKeys, type BusinessTypeKey } from '@/modules/businessTypes/config';
-import { extractionForBusinessType, hasEntryEnrichment } from '@/lib/schemas/extraction';
+import {
+  extractionForBusinessType,
+  hasEntryEnrichment,
+  entryUnionEnrichment,
+  entryExtractionForSignals,
+} from '@/lib/schemas/extraction';
 
 export const dynamic = 'force-dynamic';
 
@@ -108,20 +113,28 @@ async function handleEntryUnderstand(
   startTime: number,
   businessType?: BusinessTypeKey
 ): Promise<Response> {
-  // scale-06 phase 7: select the extraction by businessType key when known.
-  // The engine-specific fields ENRICH the neutral entry base; when the engine
-  // has no delta (thing/trust/work) this is byte-identical to the base path.
-  const extraction = businessType ? extractionForBusinessType(businessType) : null;
-  const enriched = !!extraction && hasEntryEnrichment(extraction);
-  const understandSchema = enriched
-    ? EntryUnderstandSchema.extend(extraction!.entryEnrichmentFields)
-    : EntryUnderstandSchema;
+  // scale-06 phase 7: when the businessType is KNOWN, select that engine's
+  // extraction and ENRICH the neutral entry base (byte-identical explicit path).
+  // F19 (entry-capture): when it is ABSENT — the real first-touch entry where the
+  // SAME call both classifies AND extracts — extend with the UNION of every
+  // engine's enrichment and resolve the fold engine in-code AFTER the call. Union
+  // is computed ONCE and reused for schema + prompt.
+  const explicitExtraction = businessType ? extractionForBusinessType(businessType) : null;
+  const union = businessType ? null : entryUnionEnrichment();
+  const understandSchema = explicitExtraction
+    ? hasEntryEnrichment(explicitExtraction)
+      ? EntryUnderstandSchema.extend(explicitExtraction.entryEnrichmentFields)
+      : EntryUnderstandSchema
+    : EntryUnderstandSchema.extend(union!.fields);
 
   // Demo/mock mode — agency-shaped fixture, no AI call, 0 credits.
   if (isDemoMode(req)) {
     logger.info('[understand] Using mock response (entry)');
-    const demoSignals = extraction
-      ? extraction.enrichSignals(
+    // Resolve the fold engine from the fixture's guess ('agency' → trust) on the
+    // no-businessType path; explicit path uses its known engine.
+    const foldExtraction = explicitExtraction ?? entryExtractionForSignals(ENTRY_DEMO_SIGNALS);
+    const demoSignals = foldExtraction
+      ? foldExtraction.enrichSignals(
           ENTRY_DEMO_SIGNALS as unknown as Record<string, unknown>,
           ENTRY_DEMO_SIGNALS
         )
@@ -135,7 +148,8 @@ async function handleEntryUnderstand(
     });
   }
 
-  const enrichBlock = extraction ? extraction.entryEnrichmentPrompt() : '';
+  // Enrichment block: explicit engine's prompt when known, else the UNION prompt.
+  const enrichBlock = explicitExtraction ? explicitExtraction.entryEnrichmentPrompt() : union!.prompt;
   const prompt = enrichBlock
     ? `${buildEntryUnderstandPrompt(oneLiner)}\n\n${enrichBlock}`
     : buildEntryUnderstandPrompt(oneLiner);
@@ -150,11 +164,22 @@ async function handleEntryUnderstand(
       understandSchema,
       'entry_understanding'
     );
+    // Resolve the fold engine AFTER the call: explicit engine when known, else
+    // from the just-classified guess.
+    const foldExtraction =
+      explicitExtraction ?? entryExtractionForSignals(raw as EntrySignals);
+    // Base must NOT carry the raw `collections` object: on the no-businessType
+    // path the AI returns ALL union keys, and only the resolved engine's keys may
+    // fold in. collectionsFromSignals reads every present key, so a foreign key
+    // left on the base would leak into facts.collections. Strip it, then let the
+    // engine's enrichSignals fold ONLY its keys back from the raw data. (Explicit
+    // path is unaffected: raw carries only that engine's keys either way.)
+    const { collections: _unionCollections, ...baseSignals } = raw as EntrySignals;
     // Base signals are the EntrySignals subset; enrichment folds engine
     // fields into the existing signal fields (additive, base leads).
-    signals = extraction
-      ? extraction.enrichSignals(raw as Record<string, unknown>, raw as EntrySignals)
-      : (raw as EntrySignals);
+    signals = foldExtraction
+      ? foldExtraction.enrichSignals(raw as Record<string, unknown>, baseSignals as EntrySignals)
+      : (baseSignals as EntrySignals);
     logger.dev('[understand] ENTRY RESPONSE:', signals);
     // Server-side Brief construction (D1/D6) — engine via code lookup; safe
     // for place/quick-yes by construction (copyEngine omitted, D2).

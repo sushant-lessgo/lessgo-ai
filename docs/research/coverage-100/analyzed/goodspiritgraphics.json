@@ -1,0 +1,34 @@
+{
+  "slug": "goodspiritgraphics",
+  "url": "http://goodspiritgraphics.com/",
+  "business": { "type_label": "3D animation plugin software vendor (MochaBlend, 2D-to-3D tracking-data plugins for C4D/Blender/Maya)", "icp_category": "software/tools", "geography_hint": "none (global software product)" },
+  "in_icp": false,
+  "engine": { "pick": "thing", "ladder_reasoning": "Visitor is evaluating a THING — a suite of plugins — via a feature/version comparison table and product intro pages; not trusting a person, browsing a portfolio, or checking a place.", "runner_up": "quick-yes" },
+  "goal": { "one_action": "get the visitor to buy the MochaBlend plugin (e-store) or inquire via contact form", "mechanism": "redirect", "delegated_to": "store" },
+  "structure": { "kind": "multi", "page_count": 25, "pages": ["home", "questions", "software", "graphics", "forum", "contact", "store"], "archetype_note": "Legacy WordPress software-vendor site with many jobs (product docs, e-store, image gallery, Q&A/forum, contact) — not a single-conversion landing page; hence out of ICP." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "MochaBlend is a suite of plugins that allows you to import mocha's 2D tracking-data into 3D animation programs.", "component": "text" },
+      { "canonical": "comparisonTable", "observed_as": "Feature", "component": "table" },
+      { "canonical": "features", "observed_as": "Intro (MochaBlend C4D product intro)", "component": "text" },
+      { "canonical": "faq", "observed_as": "CM Answers / Questions", "component": "accordion" },
+      { "canonical": "leadForm", "observed_as": "Contact", "component": "form" },
+      { "canonical": "pricing", "observed_as": "GSG e-Store", "component": "other" },
+      { "canonical": "miscellaneous", "observed_as": "GSG Images (gallery)", "component": "gallery" },
+      { "canonical": "followStrip", "observed_as": "Twitter link", "component": "social" }
+    ],
+    "unmapped": [
+      { "observed": "FORUM (community discussion board nav item)", "why_no_fit": "A user-generated discussion forum is a standing community property, not any canonical marketing section", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage", "catalog", "gallery/portfolio", "blog"], "proposed_new": [ { "name": "community-forum", "evidence": "Dedicated FORUM nav item plus a CM Answers Q&A page — a user-generated discussion/community board, distinct from blog (owned posts) and faq (static section)." } ] },
+  "proof_types": [],
+  "design_style": { "pick": "tech/minimal", "none_fits_because": "" },
+  "components_needed": ["comparison-table", "faq-accordion", "contact-form", "gallery-grid", "product-catalog-list"],
+  "languages": ["en"],
+  "confidence": { "level": "low", "why": "fetch_quality is 'partial'; real body content on store/gallery/answers/product pages is obscured/interspersed with heavy injected spam and not deeply parsed, and the site is a defunct/compromised legacy WordPress install, so section and goal signals are weak." },
+  "gap_findings": [
+    "Site has MULTIPLE conversion jobs (buy plugin via e-store, ask via contact form, browse gallery, participate in forum) — the taxonomy assumes one conversion action; this is a legacy multi-purpose product site, not a single-action landing page (in_icp:false).",
+    "A user-generated community FORUM / Q&A board is not expressible in the current section list or capability vocab (proposed community-forum)."
+  ]
+}

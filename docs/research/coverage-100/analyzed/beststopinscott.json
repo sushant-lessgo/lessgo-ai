@@ -1,0 +1,56 @@
+{
+  "slug": "beststopinscott",
+  "url": "https://www.beststopinscott.com/",
+  "business": { "type_label": "Cajun meat market / boudin supermarket (multi-location brand)", "icp_category": "place", "geography_hint": "Scott, LA (plus locations across LA & TX)" },
+  "in_icp": false,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking a physical Cajun meat market/supermarket — products, store hours, locations, directions and family-heritage story ARE the decision; browsing the place is the conversion driver, not a defined-expertise sale or portfolio.",
+    "runner_up": "thing"
+  },
+  "goal": {
+    "one_action": "Get the visitor to buy/eat the food — visit a store, shop the online store, order catering, or find products nearby",
+    "mechanism": "redirect",
+    "delegated_to": "store"
+  },
+  "structure": { "kind": "multi", "page_count": 12, "pages": ["home","about","supermarket","locations","contact","recipes","cooking-guide","shop","best-stop-to-geaux","partner-with-us","order-catering","wholesale"], "archetype_note": "Multi-page local-food-brand site: brand/heritage story + product grids + multi-location finder + multiple outbound commerce handoffs (shop, catering, wholesale)." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Boudin / 'Faith, Family, and good Cajun Food'", "component": "text" },
+      { "canonical": "features", "observed_as": "Our Seasonings & Sauces", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Specialty Meats", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "Best Stop To-Geaux", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "Locations (preview)", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "The Best Stop Shop", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Products (featured listing)", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Newsletter", "component": "form" },
+      { "canonical": "footer", "observed_as": "Contact / Hot Links / Policies", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "A Link from the Past (founding story, 1986)", "component": "text" },
+      { "canonical": "problem", "observed_as": "The BEST STOPS in The Best Stop History", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "What's the Secret Recipe? / At the Root of It All, There is Faith", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "team (Cormier family profiles)", "component": "team" },
+      { "canonical": "socialProof", "observed_as": "USDA-certified manufacturing facility", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Store Hours", "component": "table" }
+    ],
+    "unmapped": [
+      { "observed": "Locations page — ZIP/address + radius store-finder form returning nearby stores", "why_no_fit": "Not a lead capture or map-hours single-location block; it's an interactive multi-location search widget", "closest": "leadForm / map-hours" },
+      { "observed": "Locations grid where most cards link OUT to partner-operated store websites", "why_no_fit": "Not a section id — a franchise/partner-location directory pattern", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "map-hours", "blog", "lead-form", "gallery/portfolio"],
+    "proposed_new": [
+      { "name": "store-locator", "evidence": "/locations page has a ZIP/address input + radius selector to find nearby stores, plus a top-nav 'Find Products Near You' CTA — a searchable multi-location finder, distinct from single-location map-hours" }
+    ]
+  },
+  "proof_types": ["certs", "testimonials"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["product-card grid", "team grid", "store-hours table", "location cards", "store-locator search (zip + radius)", "newsletter signup form", "contact form"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality full; 5 pages captured with sections, nav, CTAs, forms, proof all present and consistent" },
+  "gap_findings": [
+    "Store-locator (ZIP + radius search across many locations) is not expressible by closed vocab — map-hours only covers a single place's hours/directions.",
+    "Multi-goal local brand: parallel outbound commerce handoffs (Shop Now → online store, Order Catering → EZCater, Wholesale portal, Best Stop To-Geaux) mean the site is NOT one conversion action — in_icp false; taxonomy assumes a single dominant goal.",
+    "Partner/franchise location cards that redirect to independently-operated store sites are a distinct pattern from own-location listings."
+  ]
+}

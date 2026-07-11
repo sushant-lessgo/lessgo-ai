@@ -48,6 +48,6 @@ export { resolveServiceBlock } from './resolveServiceBlock';
 // TemplateModule.resolveBlock(blockType, mode): blockType is the SECTION TYPE
 // (A1 — section-type dispatch). Forwards straight to the resolver.
 import { resolveServiceBlock as _resolveServiceBlock } from './resolveServiceBlock';
-export function resolveBlock(blockType: string, mode: 'edit' | 'published') {
-  return _resolveServiceBlock(blockType, mode);
+export function resolveBlock(blockType: string, mode: 'edit' | 'published', layoutName?: string) {
+  return _resolveServiceBlock(blockType, mode, layoutName);
 }

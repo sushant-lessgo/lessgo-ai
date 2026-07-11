@@ -1,0 +1,53 @@
+{
+  "slug": "diabetna",
+  "url": "https://diabetna.vn/",
+  "business": { "type_label": "diabetes health supplement (TPBVSK) brand", "icp_category": "consumer health product / supplement", "geography_hint": "Vietnam (nationwide, North/Central/South)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "Visitor is evaluating a physical product — the page argues via '5 outstanding advantages', standardized-extract mechanism, GMP/government certs, and product lineup with prices. No defined-expertise person to trust, no portfolio, no place to browse; it's a THING being proven.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "place an order for the supplement (via on-page order form or by calling the hotline)",
+    "mechanism": "form",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "products", "news", "faq", "store-locator", "order"],
+    "archetype_note": "Product/DTC supplement site: home sells the argument, /san-pham order form is the conversion, /diem-ban is a stockist directory; hotline tel is a parallel order path."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Hỗ trợ giảm đường huyết, hỗ trợ giảm HbA1c", "component": "text" },
+      { "canonical": "hero", "observed_as": "Hỗ trợ giảm nguy cơ biến chứng của tiểu đường", "component": "text" },
+      { "canonical": "features", "observed_as": "5 ƯU ĐIỂM VƯỢT TRỘI CỦA TPBVSK DIABETNA", "component": "grid-cards" },
+      { "canonical": "pricing", "observed_as": "BỘ SẢN PHẨM CỦA DIABETNA (product lineup with prices)", "component": "grid-cards" },
+      { "canonical": "faq", "observed_as": "HỎI ĐÁP", "component": "accordion" },
+      { "canonical": "miscellaneous", "observed_as": "TIN TỨC (news teaser grid)", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Đặt hàng trực tuyến - Giao hàng tận nhà (order form)", "component": "form" },
+      { "canonical": "socialProof", "observed_as": "GMP certification / government notification badge", "component": "badge" },
+      { "canonical": "footer", "observed_as": "CHÍNH SÁCH CÔNG TY (company info/policies)", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "XEM ĐIỂM BÁN GẦN NHẤT — regional directory of pharmacy stockists (North/Central/South)", "why_no_fit": "Not a single place's map+hours; it's a browsable multi-region list of retail points where the product is sold", "closest": "map-hours" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "lead-form", "blog"],
+    "proposed_new": [
+      { "name": "stockist-locator", "evidence": "/diem-ban page is a regional directory table of pharmacy retail points across North/Central/South Vietnam where the product can be bought — a 'where to buy' stockist list, distinct from map-hours (one venue's map+hours) and catalog (own products)." }
+    ]
+  },
+  "proof_types": ["certs"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["product-order-form with quantity/price calculator", "product-price cards", "faq accordion", "stockist directory table", "blog/news teaser grid", "cert badge row"],
+  "languages": ["vi"],
+  "confidence": { "level": "high", "why": "fetch_quality full; clear DTC product structure, forms, ctas, proof, and commerce all captured." },
+  "gap_findings": [
+    "A 'where-to-buy' stockist/retail-point directory (multi-region pharmacy list) has no capability slug — map-hours only covers a single venue.",
+    "Order form doubles as a lightweight price-calculator order path with hotline (tel) as a parallel conversion; form mechanism captures it but the tel-order duality is worth noting."
+  ]
+}

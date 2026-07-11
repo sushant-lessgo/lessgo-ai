@@ -1,0 +1,53 @@
+{
+  "slug": "coppi",
+  "url": "https://www.coppi.co.uk/",
+  "business": { "type_label": "Italian restaurant", "icp_category": "restaurant / hospitality", "geography_hint": "Belfast city centre, Northern Ireland (UK)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking a physical restaurant — dish/interior photos, menu with prices, opening hours and address ARE the decision. Not selling defined expertise (not trust) and no portfolio-as-proof (not work).",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Book a table (reservation); secondary: view menu / join mailing list",
+    "mechanism": "form",
+    "delegated_to": "resdiary"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "current-menu", "book-now", "contact-us", "gifts", "jobs"],
+    "archetype_note": "Restaurant brochure: home (story + gallery), menu page with prices + PDF menu links, ResDiary reservation page, contact/hours. Newsletter capture repeated across pages."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Contemporary Italian Cooking in Belfast City Centre", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "A bit about us", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "4 photos of dishes/interior/dining", "component": "gallery" },
+      { "canonical": "leadForm", "observed_as": "Want More Mail?", "component": "form" },
+      { "canonical": "footer", "observed_as": "OPENING HOURS / address / phone-email", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "RESERVATIONS (ResDiary widget)", "component": "form" },
+      { "canonical": "pricing", "observed_as": "Menu sections Cicchetti/Starters/Pasta/Mains/Contorni/Dolce with prices", "component": "menu-list" }
+    ],
+    "unmapped": [
+      { "observed": "Menu page links to 6 downloadable PDF menus (Low Gluten, Full Menu Spring 2026, Kids, Drinks, Plant Based, Set)", "why_no_fit": "A cluster of downloadable document variants of the menu — no canonical section for a PDF document set; not features/faq", "closest": "miscellaneous" },
+      { "observed": "Top promo banner: 'Graduation Menu Now Available! Click here'", "why_no_fit": "Sitewide announcement/promo bar, no canonical section id", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "lead-form"],
+    "proposed_new": [
+      { "name": "external-booking-redirect", "evidence": "Primary BOOK NOW CTA loads a third-party ResDiary reservation widget (hidden input name='rdwidgeturl'); scheduling inventory/conversion happens in the embedded off-site engine, not native to the site." }
+    ]
+  },
+  "proof_types": [],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["menu-list", "photo gallery/grid", "opening-hours table", "announcement/promo bar", "newsletter signup", "embedded reservation widget", "PDF menu link list"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality=rendered (capped at medium); book-now form fields only materialized after render via ResDiary embed, so booking flow inferred from rendered widget rather than clean static capture." },
+  "gap_findings": [
+    "No canonical capability/component for a restaurant MENU with priced sections — mapped to pricing but it is a menu-list, not a pricing/packages table. A 'menu' component/capability is missing from the closed vocab.",
+    "Downloadable PDF menu variants (dietary/kids/drinks/set) have no home in sections or capabilities — a document/PDF-set pattern recurs for restaurants.",
+    "Sitewide promo/announcement banner has no canonical section."
+  ]
+}

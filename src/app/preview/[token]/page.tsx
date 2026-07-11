@@ -110,6 +110,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     slug: string;
     title: string;
     publishedAt: string;
+    analyticsEnabled?: boolean;
   } | null>(null);
 
   // Set mode to preview on mount and initialize tab manager
@@ -136,8 +137,14 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
             setExistingPublished({
               slug: data.slug,
               title: data.title,
-              publishedAt: data.publishedAt
+              publishedAt: data.publishedAt,
+              analyticsEnabled: data.analyticsEnabled
             });
+            // F29: seed the republish dialog's analytics checkbox from the page's
+            // stored setting so republishing doesn't silently flip it off. The DB
+            // column is a non-nullable Boolean @default(false), so this mirrors the
+            // stored state; the `?? false` fallback only guards a missing field.
+            setAnalyticsEnabled(data.analyticsEnabled ?? false);
           }
         }
       } catch (error) {

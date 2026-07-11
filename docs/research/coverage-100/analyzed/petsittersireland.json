@@ -1,0 +1,66 @@
+{
+  "slug": "petsittersireland",
+  "url": "https://www.petsittersireland.com/",
+  "business": { "type_label": "pet sitting & dog walking service company", "icp_category": "local service business", "geography_hint": "Ireland (nationwide; Dublin emphasis)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Visitor is entrusting their pet/home to a firm; the page sells defined expertise via credentials (16+ yrs, awards), testimonials (124 Google reviews) and a clear process. First rung of ladder (sells defined expertise) fires.",
+    "runner_up": "thing"
+  },
+  "goal": {
+    "one_action": "get the visitor to request a quote / contact / start a booking for pet care",
+    "mechanism": "form",
+    "delegated_to": "none"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 5,
+    "pages": ["home", "dog-walking (service)", "pricing (pet-sitter-cost)", "contact-us", "book-online"],
+    "archetype_note": "Marketing/lead-gen shell (home + service + pricing + contact + book) fronting a separate login-gated booking portal; ~20 pages visible in nav incl. Areas We Cover, Academy, Blog."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Professional Pet Sitting & Dog Walking Services...", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Awards", "component": "logo-strip" },
+      { "canonical": "features", "observed_as": "Services Offered", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Nose of Tralee", "component": "other" },
+      { "canonical": "testimonials", "observed_as": "What Others Say (Google Reviews 4.8/5, 124)", "component": "carousel" },
+      { "canonical": "leadForm", "observed_as": "Free Download (Pet Owner's Guide ebook)", "component": "form" },
+      { "canonical": "socialProof", "observed_as": "As Featured In (media logos)", "component": "logo-strip" },
+      { "canonical": "footer", "observed_as": "Footer", "component": "other" },
+      { "canonical": "useCases", "observed_as": "WHY CHOOSE US TO WALK YOUR DOG?", "component": "grid-cards" },
+      { "canonical": "howItWorks", "observed_as": "WHEN YOU DECIDE TO BOOK A DOG WALK WITH US (4 steps)", "component": "timeline" },
+      { "canonical": "faq", "observed_as": "Frequently Asked Questions about hiring a dog walker", "component": "accordion" },
+      { "canonical": "cta", "observed_as": "Ready to Hire A Dog Walker? / Ready to book a local dog walker?", "component": "text" },
+      { "canonical": "pricing", "observed_as": "Pet Sitting Prices / Cat Sitting Prices / Dog Walking Prices", "component": "pricing-table" },
+      { "canonical": "objectionHandling", "observed_as": "Why Price Isn't the Only Thing That Matters / Why Our Pricing Reflects Quality Care", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "How to Get an Exact Quote / GET IN TOUCH (contact form)", "component": "form" },
+      { "canonical": "followStrip", "observed_as": "Join Our Pet Lovers Community (email signup)", "component": "form" }
+    ],
+    "unmapped": [
+      { "observed": "Book Online page (Instructions to Register / Instructions to Book Now - My Info/My Pets/My Schedule)", "why_no_fit": "Describes a login-gated booking portal handoff; no canonical section models an off-site booking-engine instruction/registration page", "closest": "howItWorks" },
+      { "observed": "Office Hours (Mon-Fri 10-6, service 24/7)", "why_no_fit": "Hours block on a service page; canonical set has no hours/contact-details section (map-hours is a capability, not a section)", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "packages", "lead-form", "blog"],
+    "proposed_new": [
+      { "name": "booking-portal", "evidence": "Book Online page instructs visitors to register and submit My Info/My Pets/My Schedule to a login-gated scheduling portal for office approval - a stateful booking engine beyond form/redirect capability vocab" }
+    ]
+  },
+  "proof_types": ["testimonials", "reviews", "certs", "logo-wall", "stats"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["pricing-table", "faq-accordion", "service-grid cards", "process-timeline (steps)", "reviews-carousel", "awards/logo strip", "lead-form", "newsletter-signup"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "medium",
+    "why": "Full 5-page capture, but the actual conversion (booking) lives in a login-gated portal not visible in the static crawl, so the true primary mechanism is inferred; also verbatim pricing inconsistency (9 vs 19 euro/walk) and unknown contact-form submit text add ambiguity."
+  },
+  "gap_findings": [
+    "Site runs MULTIPLE parallel conversion actions (quote/contact form, tel call, login-gated booking portal, ebook lead-magnet download via ConvertKit, newsletter signup) - the taxonomy assumes ONE conversion action; no clean single-goal fit.",
+    "Login-gated booking portal (register -> My Info/My Pets/My Schedule -> submit for office approval) is a stateful booking engine that neither 'form' nor 'redirect' mechanism, nor any capability in the closed vocab, expresses.",
+    "Awards-as-proof and media 'As Featured In' logo walls both map to socialProof/certs but the four-award streak (Business of the Year x multiple years) is a distinct authority signal worth a dedicated proof treatment.",
+    "No canonical section for an office-hours / contact-details block that appears on service pages."
+  ]
+}

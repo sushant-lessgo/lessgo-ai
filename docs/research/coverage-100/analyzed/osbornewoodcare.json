@@ -1,0 +1,39 @@
+{
+  "slug": "osbornewoodcare",
+  "url": "https://www.osbornewoodcare.com/",
+  "business": { "type_label": "wood floor sanding & restoration tradesperson", "icp_category": "local trade / home services", "geography_hint": "Hertfordshire & London, UK" },
+  "in_icp": true,
+  "engine": { "pick": "trust", "ladder_reasoning": "Visitor is deciding whether to trust a skilled tradesperson/firm with their home floors — the page sells defined expertise via 'why choose us', vetting advice, founder intro (Meet Ben), quality assurance, and 5.0 Google reviews. Portfolio photos exist but support trust, they aren't the primary decision spine.", "runner_up": "work" },
+  "goal": { "one_action": "request a floor-restoration quote (or call the number)", "mechanism": "form", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 6, "pages": ["home", "floorboard-sanding", "contact-us", "services", "faq", "blog"], "archetype_note": "WordPress local-trade site: long persuasive home page + per-service pages + dedicated contact/quote form page" },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Wooden Floor Sanding and Refinishing", "component": "text" },
+      { "canonical": "features", "observed_as": "Professional Wood Floor Sanding and Restoration", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Osborne Woodcare is one of the leading names in wooden floor restoration", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Floor sanding in Hertfordshire since 2012 (Meet Ben)", "component": "text" },
+      { "canonical": "features", "observed_as": "Why Choose Osborne Woodcare?", "component": "grid-cards" },
+      { "canonical": "objectionHandling", "observed_as": "Be critical in your search for a wood floor restoration company", "component": "text" },
+      { "canonical": "objectionHandling", "observed_as": "We never cut corners with our floor restoration services", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Our Work (and more!) — Instagram feed", "component": "gallery" },
+      { "canonical": "problem", "observed_as": "Why choose wood floor restoration?", "component": "text" },
+      { "canonical": "results", "observed_as": "Hardwood flooring is a lifetime investment", "component": "text" },
+      { "canonical": "results", "observed_as": "The long-term benefits of floor sanding", "component": "text" },
+      { "canonical": "faq", "observed_as": "Wood Floor Sanding and Restoration FAQ", "component": "accordion" },
+      { "canonical": "miscellaneous", "observed_as": "We Serve These Areas!", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Ready to receive your quote?", "component": "form" },
+      { "canonical": "cta", "observed_as": "Request A Quote", "component": "button" },
+      { "canonical": "footer", "observed_as": "Address / Email / Phone / Opening Times", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "We Serve These Areas!", "why_no_fit": "Service-area coverage list is a recurring local-trade section (which towns/postcodes served) with no clean canonical id — mapped to miscellaneous but is a distinct pattern", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage", "lead-form", "gallery/portfolio", "map-hours", "blog"], "proposed_new": [] },
+  "proof_types": ["reviews", "testimonials", "portfolio"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["lead-form (name/address/email/phone/floor-details)", "reasons grid", "faq accordion", "instagram feed embed", "service-area list", "contact/hours block"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality full; clear trade-service intent, one conversion action (quote form / call), sections and CTAs unambiguous" },
+  "gap_findings": ["Service-area coverage list ('We Serve These Areas!') is a common local-trade section with no canonical section id — currently absorbed into miscellaneous", "Google Reviews shown via external widget (79 reviews / 5.0) rather than on-page testimonials — proof is a third-party review-widget embed, only loosely covered by socialProof"]
+}

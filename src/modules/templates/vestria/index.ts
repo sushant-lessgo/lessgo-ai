@@ -51,6 +51,6 @@ export { resolveVestriaBlock } from './resolveVestriaBlock';
 
 // TemplateModule.resolveBlock(blockType, mode): blockType is the SECTION TYPE.
 import { resolveVestriaBlock as _resolveVestriaBlock } from './resolveVestriaBlock';
-export function resolveBlock(blockType: string, mode: 'edit' | 'published') {
-  return _resolveVestriaBlock(blockType, mode);
+export function resolveBlock(blockType: string, mode: 'edit' | 'published', layoutName?: string) {
+  return _resolveVestriaBlock(blockType, mode, layoutName);
 }

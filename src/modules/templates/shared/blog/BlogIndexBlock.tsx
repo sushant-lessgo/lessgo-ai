@@ -38,7 +38,7 @@ export default function BlogIndexBlock(props: BlogIndexBlockProps) {
               return (
                 <a key={post.slug || i} className="lg-blogix__card" href={`/blog/${post.slug}`}>
                   {post.heroImage && (
-                    <img className="lg-blogix__img" src={post.heroImage} alt="" loading="lazy" />
+                    <img className="lg-blogix__img" src={post.heroImage} alt="" loading="lazy" decoding="async" />
                   )}
                   <div className="lg-blogix__card-body">
                     {date && (

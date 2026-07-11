@@ -1,0 +1,35 @@
+{
+  "slug": "sagungseto",
+  "url": "http://sagungseto.co.id/",
+  "business": { "type_label": "medical & healthcare bookstore (buku kedokteran & alkes) with online shop", "icp_category": "ecommerce/retail", "geography_hint": "Indonesia (id, .co.id)" },
+  "in_icp": false,
+  "engine": { "pick": "place", "ladder_reasoning": "It's a shop: the visitor's decision is made by browsing the book catalog and specialty categories, so catalog-browsing IS the conversion much like checking a store. Not selling one defined thing or expertise.", "runner_up": "thing" },
+  "goal": { "one_action": "browse the book catalog and order (via on-site checkout, WhatsApp, or marketplaces)", "mechanism": "redirect", "delegated_to": "store" },
+  "structure": { "kind": "multi", "page_count": 5, "pages": ["home","kontak","katalog-category","product-listing","product-detail"], "archetype_note": "WooCommerce storefront: home value-prop + blog teasers, category/catalog listings with pagination, product-detail pages, contact gateway routing to WhatsApp/Tokopedia/Shopee." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Order Online Lebih Mudah", "component": "text" },
+      { "canonical": "stats", "observed_as": "Ribuan buku / Ratusan Penulis / Pemesanan Mudah", "component": "stats" },
+      { "canonical": "miscellaneous", "observed_as": "Blog teaser cards (Tips dekorasi, 5 teknologi kedokteran, 5 perpustakaan)", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Kontak Kami email form", "component": "form" },
+      { "canonical": "footer", "observed_as": "contact/social links (Instagram, Linktree, marketplaces)", "component": "other" }
+    ],
+    "unmapped": [
+      { "observed": "Buku Kedokteran / Medical Books category grids with per-specialty item counts and pagination (1..54)", "why_no_fit": "canonical sectionList has no product-catalog/category-listing section — it's a shop browse surface, not a marketing section", "closest": "features" },
+      { "observed": "Single product page (author/publisher/year/SKU, Stok habis, Detil/Beli)", "why_no_fit": "no product-detail section in the canonical list", "closest": "pricing" },
+      { "observed": "Find Book search box", "why_no_fit": "catalog search is a store utility, no canonical id", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage","catalog","blog"], "proposed_new": [ { "name": "storefront-checkout", "evidence": "WooCommerce cart + Checkout page (checkout-2) selling one-time book goods with Beli/add-to-cart buttons; commerce.cart_or_checkout true" } ] },
+  "proof_types": ["stats"],
+  "design_style": { "pick": null, "none_fits_because": "design_hints empty (no fonts/colors captured); only light theme known — insufficient to assign one of the six styles" },
+  "components_needed": ["product-catalog grid","category/specialty sidebar list","product-detail card","search box","blog-teaser cards","value-prop stat trio"],
+  "languages": ["id"],
+  "confidence": { "level": "high", "why": "fetch_quality full; clear WooCommerce storefront with catalog, checkout, and multi-channel ordering — plainly outside the single-conversion-action ICP" },
+  "gap_findings": [
+    "Site is a full ecommerce storefront (catalog + cart + checkout + product/category pages) — outside the one-conversion-action ICP; taxonomy engines can't express a browse-and-buy shop.",
+    "No canonical section ids for product-category listing, product-detail, or catalog search.",
+    "Ordering is fragmented across on-site checkout, WhatsApp, Tokopedia, Shopee, Instagram — a multi-channel-order pattern not captured by the single goal mechanism.",
+    "Prices hidden on all sampled catalog/product pages (possible login/quote-gated pricing) — an ambiguity the goal model doesn't represent."
+  ]
+}

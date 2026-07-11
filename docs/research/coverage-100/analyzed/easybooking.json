@@ -1,0 +1,41 @@
+{
+  "slug": "easybooking", "url": "https://www.easybooking.eu/",
+  "business": { "type_label": "hotel/vacation-rental management SaaS", "icp_category": "SaaS / software product", "geography_hint": "DACH region (Innsbruck AT + Berlin DE)" },
+  "in_icp": true,
+  "engine": { "pick": "thing", "ladder_reasoning": "Visitor is evaluating a software product (hotel software) via its features, compliance/security proof, and testimonials — no personal expertise sold, no portfolio, no place to browse. Full feature/testimonial argument makes it a thing.", "runner_up": "trust" },
+  "goal": { "one_action": "request a personalized price quote (via unit-count/postal-code calculator) or book a consultation", "mechanism": "form", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 6, "pages": ["home", "preise", "kontakt", "funktionen", "wissen", "services", "ueber-uns"], "archetype_note": "Feature-led SaaS marketing site; pricing fully lead-gated behind a quote calculator, no public tiers." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Die einfache Hotelsoftware für kleine Hotels und Ferienwohnungen", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Optimiert für den DACH-Raum", "component": "text" },
+      { "canonical": "problem", "observed_as": "Digitale, automatisierte & cloudbasierte Verwaltung für Hotels und Ferienwohnungen", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Die moderne Hotelsoftware für erfolgreiche Vermietung", "component": "text" },
+      { "canonical": "features", "observed_as": "Buchungskanäle zentral im Griff", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Automatische Gästekommunikation", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Zimmerplan & Buchbarkeit", "component": "grid-cards" },
+      { "canonical": "security", "observed_as": "Rechtssicherheit", "component": "grid-cards" },
+      { "canonical": "integrations", "observed_as": "Zahlungen & Kassensysteme", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Schließsysteme", "component": "grid-cards" },
+      { "canonical": "closeSection", "observed_as": "Du kümmerst dich um deine Gäste, wir um den Rest!", "component": "text" },
+      { "canonical": "founderNote", "observed_as": "Hinter den Kulissen von easybooking", "component": "gallery" },
+      { "canonical": "results", "observed_as": "Hotelsoftware für Gastgeber:innen und Tourismusregionen seit 2006", "component": "stats" },
+      { "canonical": "testimonials", "observed_as": "Was sagen unsere Kund:innen über die Hotelsoftware?", "component": "carousel" },
+      { "canonical": "socialProof", "observed_as": "Hand in Hand mit starken Partner:innen", "component": "logo-strip" },
+      { "canonical": "miscellaneous", "observed_as": "Unsere Standorte", "component": "text" },
+      { "canonical": "faq", "observed_as": "Fragen & Antworten", "component": "accordion" },
+      { "canonical": "pricing", "observed_as": "Mit wenigen Klicks deinen Preis berechnen lassen", "component": "form" },
+      { "canonical": "leadForm", "observed_as": "Deine Kontaktdaten", "component": "form" },
+      { "canonical": "footer", "observed_as": "Hilfreiches / Wichtiges / Produkte / Login", "component": "other" }
+    ],
+    "unmapped": [
+      { "observed": "Einen Notfall melden (emergency support form)", "why_no_fit": "A dedicated emergency/support intake form for existing customers — not a conversion CTA, a post-sale support channel", "closest": "leadForm" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage", "bilingual", "lead-form", "blog"], "proposed_new": [ { "name": "interactive-calculators", "evidence": "Preise page: dynamic price calculator computes a user-specific quote from unit count + postal code before routing to email quote" } ] },
+  "proof_types": ["testimonials", "logo-wall", "certs", "stats"],
+  "design_style": { "pick": "tech/minimal", "none_fits_because": "" },
+  "components_needed": ["feature-grid", "testimonial-carousel", "logo-wall", "stats-band", "faq-accordion", "price-calculator", "lead-form"],
+  "languages": ["de", "en"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; clear feature-led SaaS with lead-gated pricing, structure and CTAs well captured" },
+  "gap_findings": ["Pricing is fully lead-gated behind a compute-a-quote calculator (no public tiers) — the canonical `pricing` section assumes displayed prices; a quote-calculator-as-pricing pattern isn't cleanly expressible.", "Emergency/support intake form is a post-sale customer channel with no taxonomy slot (conversion model assumes prospect capture only)."] }

@@ -46,10 +46,11 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
-    // Authenticated publish flow.
+    // Authenticated flows (publish + throttled edit-persistence). Serial, shared
+    // Clerk session from `setup`.
     {
       name: 'authed',
-      testMatch: /publish\.spec\.ts/,
+      testMatch: [/publish\.spec\.ts/, /edit-persistence\.spec\.ts/],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
     },

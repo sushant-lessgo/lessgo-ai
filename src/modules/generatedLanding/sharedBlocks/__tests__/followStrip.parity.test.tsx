@@ -19,19 +19,22 @@ const LINKS_JSON = JSON.stringify([
 
 // Mock the store BEFORE importing the edit twin.
 vi.mock('@/hooks/useEditStoreLegacy', () => ({
-  useEditStoreLegacy: () => ({
-    content: {
-      [SECTION_ID]: {
-        id: SECTION_ID,
-        layout: 'SharedFollowStrip',
-        elements: {
-          strip_heading: 'Follow along',
-          links_json: LINKS_JSON,
+  useEditStoreLegacy: (selector?: (s: any) => any) => {
+    const state = {
+      content: {
+        [SECTION_ID]: {
+          id: SECTION_ID,
+          layout: 'SharedFollowStrip',
+          elements: {
+            strip_heading: 'Follow along',
+            links_json: LINKS_JSON,
+          },
         },
       },
-    },
-    updateElementContent: vi.fn(),
-  }),
+      updateElementContent: vi.fn(),
+    };
+    return selector ? selector(state) : state;
+  },
 }));
 
 import FollowStrip from '../FollowStrip/FollowStrip';

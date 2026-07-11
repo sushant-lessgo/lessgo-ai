@@ -1,0 +1,33 @@
+{
+  "slug": "precinctdtla", "url": "https://precinctdtla.com/",
+  "business": { "type_label": "bar / restaurant (DTLA gastropub)", "icp_category": "place", "geography_hint": "Los Angeles (357 S Broadway, DTLA)" },
+  "in_icp": true,
+  "engine": { "pick": "place", "ladder_reasoning": "Visitor is deciding whether to visit a physical venue — the menu, prices, hours, happy-hour times, address and events ARE the decision; browsing photos/menu is the choice, not evaluating a product or trusting a firm.", "runner_up": "quick-yes" },
+  "goal": { "one_action": "get visitors to come eat/drink at the bar (view menu/hours/address, reserve, sign up for event news)", "mechanism": "subscribe-follow", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 4, "pages": ["home", "menu", "calendar", "lostandfound"], "archetype_note": "Info-hub venue site: home aggregates hours/happy-hour/address/contact + teasers; dedicated Menu and Calendar pages; reservations and shop offloaded to external links (Linktree, shop subdomain)." },
+  "sections": {
+    "mapped": [
+      { "canonical": "miscellaneous", "observed_as": "HOURS", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "HAPPY HOUR", "component": "text" },
+      { "canonical": "footer", "observed_as": "ADDRESS", "component": "text" },
+      { "canonical": "cta", "observed_as": "CONTACT", "component": "text" },
+      { "canonical": "features", "observed_as": "EAT & DRINK", "component": "text" },
+      { "canonical": "storeBadges", "observed_as": "MERCH", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Stay updated on our events", "component": "form" },
+      { "canonical": "pricing", "observed_as": "FOOD MENU", "component": "menu-list" },
+      { "canonical": "pricing", "observed_as": "Happy Hour Food Specials", "component": "menu-list" },
+      { "canonical": "pricing", "observed_as": "BEVERAGE MENU", "component": "menu-list" },
+      { "canonical": "pricing", "observed_as": "HAPPY HOUR PRICING", "component": "pricing-table" }
+    ],
+    "unmapped": [
+      { "observed": "THIS MONTH / NEXT MONTH (calendar of events, rendered as images)", "why_no_fit": "A dated event schedule is not a canonical section; closest is a generic content block but it is fundamentally an events listing.", "closest": "miscellaneous" }
+    ]
+  },
+  "capabilities": { "needed": ["multipage", "map-hours", "catalog", "store-badges", "lead-form"], "proposed_new": [ { "name": "event-listings", "evidence": "Dedicated /calendar page with THIS MONTH / NEXT MONTH event schedule; reservations CTA also redirects off-site (Linktree)." } ] },
+  "proof_types": [],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["menu-list", "pricing-table", "hours-block", "event-calendar", "newsletter-form", "address/map block"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality full; venue archetype unambiguous (menu, hours, happy-hour, address, calendar). Only soft spot: primary conversion is diffuse (newsletter vs reservations-redirect vs visit)." },
+  "gap_findings": ["Venue's real 'conversion' is a physical visit — no single on-site action captures it; taxonomy forces a proxy (newsletter subscribe).", "event-listings (dated calendar) and external Linktree reservations redirect are not expressible in the closed vocab.", "The FOOD/BEVERAGE menu is a priced menu-list, not truly 'pricing' — canonical sections lack a menu concept, so it maps awkwardly to pricing."]
+}

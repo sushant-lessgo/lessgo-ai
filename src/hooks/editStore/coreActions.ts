@@ -137,6 +137,9 @@ export function createCoreActions(set: any, get: any) {
     /**
      * ===== CONTENT ACTIONS =====
      */
+    // i18n-phase-1 (3a) — shadowed by contentActions.setSection — not the live impl
+    // (contentActions spreads AFTER coreActions in editStore.ts, so it wins). The
+    // locale-shared-structure invariant + caller proof live on the live copy.
     setSection: (sectionId: string, updates: Partial<SectionData>) =>
       set((state: EditStore) => {
         if (state.content[sectionId]) {
@@ -146,6 +149,9 @@ export function createCoreActions(set: any, get: any) {
         }
       }),
 
+    // i18n-phase-1 (3a) — shadowed by contentActions — not the live impl.
+    // The live updateElementContent (contentActions.ts) owns the locale-branched
+    // text write; this dead copy is intentionally NOT branched.
     updateElementContent: (sectionId: string, elementKey: string, content: any) =>
       set((state: EditStore) => {
         const section = state.content[sectionId];

@@ -12,6 +12,7 @@
 
 import React from 'react';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { getEffectiveElementValue } from '@/lib/i18n/localeContent';
 import {
   StoreBadgesCore,
   resolveBadges,
@@ -20,19 +21,32 @@ import {
 } from './badgeArt';
 
 export default function StoreBadges({ sectionId }: { sectionId: string }) {
-  const store = useEditStore() as any;
-  const section = store.content?.[sectionId];
+  const section = useEditStore((s) => (s as any).content?.[sectionId]);
+  const updateElementContent = useEditStore((s) => (s as any).updateElementContent);
   const elements = (section?.elements || {}) as Record<string, any>;
   const badges = resolveBadges({
-    appstore_url: elements.appstore_url,
+    appstore_url: elements.appstore_url, // store URLs = media/structure (locale-shared)
     playstore_url: elements.playstore_url,
   });
-  const label = elements.badge_label || STORE_BADGES_DEFAULT_LABEL;
+  // i18n-phase-1 (3b): resolve the editable label via the shared helper, keyed on
+  // the active locale. Narrow selectors; legacy ⇒ base value (zero diff).
+  const activeLocale = useEditStore((s) => (s as any).activeLocale as string | undefined);
+  const sectionOverlay = useEditStore(
+    (s) => (s as any).localeContent?.[(s as any).activeLocale]?.[sectionId],
+  );
+  const label =
+    (getEffectiveElementValue(
+      { [sectionId]: section } as any,
+      activeLocale ? { [activeLocale]: { [sectionId]: sectionOverlay || {} } } : undefined,
+      activeLocale,
+      sectionId,
+      'badge_label',
+    ) as string) || STORE_BADGES_DEFAULT_LABEL;
 
   const onHeadingBlur = (e: React.FocusEvent<HTMLHeadingElement>) => {
     const value = (e.currentTarget.textContent || '').trim();
-    if (value !== label && typeof store.updateElementContent === 'function') {
-      store.updateElementContent(sectionId, 'badge_label', value);
+    if (value !== label && typeof updateElementContent === 'function') {
+      updateElementContent(sectionId, 'badge_label', value);
     }
   };
 

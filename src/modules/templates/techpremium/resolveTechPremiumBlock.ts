@@ -96,6 +96,7 @@ export type TechPremiumBlockMode = 'edit' | 'published';
 export function resolveTechPremiumBlock(
   sectionType: string,
   mode: TechPremiumBlockMode = 'edit',
+  _layoutName?: string, // one block per section; accepted for TemplateModule contract parity
 ): React.ComponentType<any> | null {
   const key = (sectionType || '').toLowerCase();
   const entry = TECHPREMIUM_BLOCK_REGISTRY[key];

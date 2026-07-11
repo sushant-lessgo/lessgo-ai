@@ -56,7 +56,7 @@ export default function TechPremiumGalleryPreview({ sectionId }: Props) {
             {images.map((im) => (
               <div key={im.id} className="tp-gitem">
                 <div className="tp-ph on-dark">
-                  {im.src ? <img src={im.src} alt={im.tag} /> : <span className="tp-tag">{im.tag || 'Photo'}</span>}
+                  {im.src ? <img src={im.src} alt={im.tag} loading="lazy" decoding="async" /> : <span className="tp-tag">{im.tag || 'Photo'}</span>}
                 </div>
                 <div className="tp-ghover"><Search /></div>
               </div>

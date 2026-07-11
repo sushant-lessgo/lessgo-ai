@@ -121,6 +121,25 @@ export function createGenerationActions(set: any, get: any) {
 
   // ✅ AI Response Processing from PageStore (adapted for EditStore structure)
   updateFromAIResponse: (aiResponse: any, elementsMap?: any) => {
+    // i18n-phase-1 (3a): this is the SINGLE AI-content write funnel (initial
+    // generation + regenerationActions.regenerateContentOnly/regenerateDesignAndCopy
+    // both land here). It writes BASE `state.content` unconditionally (never an
+    // overlay). Initial generation always runs at the default locale, so this is a
+    // no-op there; the guard below only fires for a regen attempted from a
+    // non-default-locale session — preventing an AI write from clobbering base EN
+    // copy while the author is translating. Net effect (with the aiActions guards):
+    // no AI write can land in an overlay OR mutate base from a non-default locale.
+    {
+      const cur = get();
+      const def = cur?.localeConfig?.defaultLocale ?? 'en';
+      if (cur?.activeLocale && cur.activeLocale !== def) {
+        console.warn(
+          '[i18n] AI content application skipped: editor is on a non-default ' +
+            'language (regeneration is disabled — switch to the default language).',
+        );
+        return;
+      }
+    }
     logger.debug('🔍 updateFromAIResponse RAW INPUT:', JSON.stringify(aiResponse, null, 2));
 
     // Debug logging for elementsMap

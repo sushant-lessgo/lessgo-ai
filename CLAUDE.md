@@ -155,6 +155,7 @@ Set in `.env.local` for enhanced AI debugging (logs are verbose — disable in p
 DEBUG_AI_PROMPTS=true           # Full strategy + copy generation prompts
 DEBUG_AI_RESPONSES=true         # Full AI responses with token usage / parsing steps
 DEBUG_ELEMENT_SELECTION=true    # Element scoring, rule evaluation, included/excluded decisions
+NEXT_PUBLIC_DEBUG_EDITOR=true   # Editor per-commit/per-render debug logs (stack capture, section render meta). Client-side, so MUST be NEXT_PUBLIC_*; off by default → dead-code-eliminated in prod. Flag in src/lib/debugFlags.ts.
 ```
 
 When unset/false: prompts/responses are smart-truncated (~800/~1000 chars) but metadata is still logged; element selection runs silently.

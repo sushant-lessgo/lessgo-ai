@@ -129,14 +129,22 @@ export default function ColophonFooter({ sectionId }: ColophonFooterProps) {
                     placeholder="Platform"
                   />
                   {mode === 'edit' && (
-                    <button
-                      type="button"
-                      className="lex-footer__social-remove"
-                      onClick={() => removeSocial(s.id)}
-                      aria-label="Remove link"
-                    >
-                      ×
-                    </button>
+                    <>
+                      <input
+                        className="lex-footer__social-url"
+                        value={s.href || ''}
+                        onChange={(e) => updateSocial(s.id, 'href', e.target.value)}
+                        placeholder="https://…"
+                      />
+                      <button
+                        type="button"
+                        className="lex-footer__social-remove"
+                        onClick={() => removeSocial(s.id)}
+                        aria-label="Remove link"
+                      >
+                        ×
+                      </button>
+                    </>
                   )}
                 </li>
               ))}
@@ -204,6 +212,12 @@ const STYLES = `
   background: transparent; border: none; color: var(--ink-3);
   font-size: 14px; cursor: pointer; line-height: 1;
 }
+.lex-footer__social-url {
+  width: 130px; padding: 3px 6px; border-radius: 2px;
+  border: 1px solid var(--rule); background: transparent;
+  color: var(--ink-2); font-size: 11px; font-family: var(--font-mono);
+}
+.lex-footer__social-url::placeholder { color: var(--ink-3); }
 .lex-footer__social-add {
   background: transparent; border: 1px dashed var(--rule-strong);
   color: var(--ink-2); padding: 4px 10px; border-radius: 2px;

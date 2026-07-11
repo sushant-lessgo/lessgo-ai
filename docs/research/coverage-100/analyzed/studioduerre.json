@@ -1,0 +1,56 @@
+{
+  "slug": "studioduerre",
+  "url": "http://www.studioduerre.it/",
+  "business": { "type_label": "real-estate agency (agenzia immobiliare)", "icp_category": "trust", "geography_hint": "Como, Italy" },
+  "in_icp": false,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "A real-estate agency sells brokerage expertise — the thin about/servizi copy leans on client-first service, discretion, professionalism, free consultation and dedicated mortgage staff, i.e. trusting a firm. The listings grid is browse inventory, not the persuasion argument.",
+    "runner_up": "place"
+  },
+  "goal": {
+    "one_action": "get the visitor to search/browse listings and then contact the agency (call, contact form, or request a free valuation) about buying/selling",
+    "mechanism": "form",
+    "delegated_to": "tally"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "about (Studio Immobiliare Duerre)", "servizi", "vendita (listings)", "affitto (listings)", "contatti"],
+    "archetype_note": "Real-estate MLS/CMS portal (Web-Burning.it platform): every page carries a multi-facet property-search widget; VENDITA/AFFITTO are paginated live-inventory listing grids (~50+ properties). Marketing copy is thin; the search engine and inventory are the spine."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (HOME / STUDIO / SERVIZI / VENDITA / AFFITTO / CONTATTI)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "STUDIO IMMOBILIARE DUERRE + property search widget", "component": "form" },
+      { "canonical": "founderNote", "observed_as": "STUDIO IMMOBILIARE DUERRE about paragraph (client-first, discretion, free consultation)", "component": "text" },
+      { "canonical": "features", "observed_as": "Servizi (free valuations, negotiation/discretion, dedicated mortgage staff)", "component": "text" },
+      { "canonical": "cta", "observed_as": "VALUTAZIONI GRATUITE (link to Tally free-valuation form)", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Richiesta Informazioni contact form", "component": "form" },
+      { "canonical": "miscellaneous", "observed_as": "Contatti: office address + 3 phones + email + Google Maps embed", "component": "map" },
+      { "canonical": "footer", "observed_as": "VAT/REA registration, privacy/cookies/sitemap/rss/admin, platform credit", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Ricerca Immobili — multi-field property search widget (contract type, property type, comune, locality, code, rooms, price range) filtering live inventory, repeated on every page", "why_no_fit": "Not a lead-form (no capture/inquiry) and not a hero CTA — it is a faceted search engine over listing inventory; no canonical section id represents an inventory-search facet", "closest": "hero / leadForm" },
+      { "observed": "Immobili in Vendita — paginated grid of 12 listing cards/page x5 pages, each with price/type/town/size/rooms", "why_no_fit": "A browsable inventory result set with pagination, not a fixed marketing pricing/features grid", "closest": "pricing / useCases" },
+      { "observed": "Tipologie Immobiliari — ~24 property-type category links", "why_no_fit": "Category taxonomy navigation into inventory, not a canonical marketing section", "closest": "useCases" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "catalog", "map-hours", "lead-form"],
+    "proposed_new": [
+      { "name": "inventory-search", "evidence": "A multi-facet search widget (contract type, property type, comune, locality, code, rooms, price range) filtering a live real-estate inventory, repeated on every page, driving paginated result grids over ~50+ properties — a faceted search engine over inventory, distinct from a static browsable catalog." }
+    ]
+  },
+  "proof_types": [],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["multi-facet property-search form", "paginated listing-card grid", "property-type category link list", "contact form (reason dropdown + captcha + privacy consent)", "map embed", "click-to-call phone buttons"],
+  "languages": ["it"],
+  "confidence": { "level": "medium", "why": "fetch_quality is 'rendered' not 'full' (curl was WAF-blocked); content captured well but design hints (fonts/colors/theme) are empty, so design_style is inferred. Business function and structure are clear." },
+  "gap_findings": [
+    "This is a real-estate listings PORTAL with a faceted search over live inventory and paginated result pages — not a single-conversion-action site; the 5 closed engines assume one page arguing one offer and cannot express a browse-search-inquire MLS.",
+    "Closed capability 'catalog' captures a static browsable list but not a multi-field inventory SEARCH engine (contract type/comune/price/rooms) that filters and paginates live listings — hence proposed 'inventory-search'.",
+    "No canonical section id exists for a repeated inventory-search facet or a paginated listings result grid; both were logged unmapped.",
+    "Zero proof of any kind (no testimonials/certs/reviews) despite being a trust-engine business — a real-estate trust site with no trust signals."
+  ]
+}

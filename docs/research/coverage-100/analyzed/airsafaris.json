@@ -1,0 +1,54 @@
+{
+  "slug": "airsafaris",
+  "url": "https://airsafaris.co.nz/",
+  "business": { "type_label": "scenic flight tour operator", "icp_category": "tourism / experience operator", "geography_hint": "New Zealand (Mackenzie / West Coast, Lake Tekapo & Franz Josef)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "The decision is driven by browsing scenic imagery, flight routes/maps, base locations and per-flight pricing — you're checking out an experience-place, not evaluating a SaaS feature set or trusting an individual's credentials.",
+    "runner_up": "thing"
+  },
+  "goal": {
+    "one_action": "book a scenic flight (or send an enquiry about one)",
+    "mechanism": "redirect",
+    "delegated_to": "external-booking-system"
+  },
+  "structure": { "kind": "multi", "page_count": 20, "pages": ["home","scenic-flights","gift-vouchers","weddings","commercial","locations","about","contact","the-grand-traverse"], "archetype_note": "Photo-led tourism marketing site: category flight pages with pricing tables + route maps, contact/enquiry page, booking handed off to a separate /book-now/ engine." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Experience the famous Grand Traverse", "component": "text" },
+      { "canonical": "header", "observed_as": "Nature (full-bleed hero imagery band)", "component": "other" },
+      { "canonical": "miscellaneous", "observed_as": "Air Safaris (brand intro block)", "component": "text" },
+      { "canonical": "problem", "observed_as": "Air Safaris: Spectacular Scenic Flights New Zealand (intro copy)", "component": "text" },
+      { "canonical": "features", "observed_as": "Why Fly Air Safaris? (every seat a window seat, alpine pilots, family-owned since 1970)", "component": "grid-cards" },
+      { "canonical": "useCases", "observed_as": "HERE'S MORE TO Inspire You (flight product/inspiration cards)", "component": "grid-cards" },
+      { "canonical": "pricing", "observed_as": "Price List (adult/child by route)", "component": "pricing-table" },
+      { "canonical": "features", "observed_as": "The highlights of the Grand Traverse flight include", "component": "text" },
+      { "canonical": "gallery", "observed_as": "Grand Traverse Flight Maps", "component": "gallery" },
+      { "canonical": "leadForm", "observed_as": "Enquire Now (contact form)", "component": "form" },
+      { "canonical": "socialProof", "observed_as": "TripAdvisor reviews", "component": "other" },
+      { "canonical": "followStrip", "observed_as": "follow us. (social strip)", "component": "logo-strip" },
+      { "canonical": "footer", "observed_as": "Contact / Air Safaris & Services (NZ) Ltd", "component": "text" }
+    ],
+    "unmapped": [
+      { "observed": "Downloadable Flight Guides (PDF route guides)", "why_no_fit": "Customer-facing downloadable assets attached to a product page; no canonical section id covers an asset-download block", "closest": "miscellaneous" },
+      { "observed": "Lake Tekapo / Franz Josef base location blocks with embedded maps", "why_no_fit": "Multi-base map+hours blocks are a capability, not a distinct section beyond footer/contact", "closest": "footer" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "packages", "bilingual"],
+    "proposed_new": [
+      { "name": "external-booking-redirect", "evidence": "Primary 'Book Now' CTA hands off to a separate off-site /book-now/ booking system; main site has no cart/checkout or on-site scheduling (oddities note)." }
+    ]
+  },
+  "proof_types": ["testimonials", "reviews"],
+  "design_style": { "pick": "editorial/craft", "none_fits_because": "" },
+  "components_needed": ["pricing-table", "feature-card-grid", "map-embed", "image-gallery", "lead-form", "download-list"],
+  "languages": ["en", "zh", "ja"],
+  "confidence": { "level": "high", "why": "fetch_quality full; clear multi-page tourism site with explicit CTAs, forms, pricing and external-booking oddity captured." },
+  "gap_findings": [
+    "Booking conversion is delegated to a separate off-site engine — matches proposed external-booking-redirect (not expressible by closed vocab).",
+    "Trilingual site (EN/ZH/JA) exceeds the binary 'bilingual' capability — coverage vocab has no multilingual (3+) flag.",
+    "Customer-facing PDF download list (flight guides) has no canonical section/component."
+  ]
+}

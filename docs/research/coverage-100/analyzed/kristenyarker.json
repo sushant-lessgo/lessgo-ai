@@ -1,0 +1,51 @@
+{
+  "slug": "kristenyarker",
+  "url": "https://kristenyarker.com/",
+  "business": { "type_label": "registered-dietitian clinic (multi-practitioner)", "icp_category": "health/nutrition professional services", "geography_hint": "Victoria & Nanaimo, British Columbia, Canada" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Visitor is deciding whether to trust licensed professionals with their health; the page sells defined expertise (Registered Dietitians), leads with credentials, team bios, process and testimonials/reviews. That is the top rung of the ladder.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Book a free phone/consultation call with a dietitian",
+    "mechanism": "form",
+    "delegated_to": "calendly"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 6,
+    "pages": ["home", "about-us", "services", "contact", "health-professionals", "speaking", "nutrition-videos"],
+    "archetype_note": "Classic multi-page trust site: home overview + services + about/team + contact, with a persistent free-consult booking CTA and newsletter capture in the footer. Nav lists 6 items (Nutrition Videos not crawled)."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (About Us, Services, Health Professionals, Speaking, Nutrition Videos, Contact)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "Licensed Dietitians Victoria BC & Nanaimo / Online Nutrition Support Across British Columbia", "component": "text" },
+      { "canonical": "cta", "observed_as": "Ready to get personalized nutrition support from a registered dietitian?", "component": "text" },
+      { "canonical": "useCases", "observed_as": "How Our Dietitians Support Your Nutrition Goals (service category cards: adults, sports, kids, workplaces)", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Adult / Family & Child / Sports nutrition service descriptions", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "What People Are Saying About Our Dietitians", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Leave a Review / Google reviews widget", "component": "review-widget" },
+      { "canonical": "founderNote", "observed_as": "Meet Our Licensed Dietitians / Meet the Dietitian Team", "component": "team" },
+      { "canonical": "faq", "observed_as": "Frequently Asked Questions About Working with a Dietitian; What is the difference between a dietitian and a nutritionist?", "component": "accordion" },
+      { "canonical": "pricing", "observed_as": "Nutritional Insight Session / service offering descriptions (no prices shown)", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Nutrition Newsletter signup (First/Last name, email)", "component": "form" },
+      { "canonical": "miscellaneous", "observed_as": "Where we're located / Nutrition Services in Victoria, Nanaimo & Across BC (service area + office map + hours)", "component": "map+table" },
+      { "canonical": "closeSection", "observed_as": "Not sure which service is for you? Book an information call (free)", "component": "text" },
+      { "canonical": "footer", "observed_as": "Kristen Yarker Dietitians Agency footer brand block + social links", "component": "text" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "lead-form", "blog"],
+    "proposed_new": []
+  },
+  "proof_types": ["testimonials", "reviews", "certs"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["team grid", "service-category card grid", "faq accordion", "hours table", "map embed", "calendly embed", "newsletter form"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality is full; clear trust-engine service business with credentials, team, reviews, FAQ; single conversion action (book free consult via Calendly)." },
+  "gap_findings": ["Persistent free-consult Calendly CTA is a single-step calendar embed (delegated form/redirect per the coltivar decision) — no on-site inventory/multi-step, so not a proposed capability; noted so it is not mistaken for a booking-* engine.", "Multiple secondary audiences in nav (Health Professionals, Speaking) that a single conversion-action model does not express, but they fall outside the crawled/primary path."]
+}

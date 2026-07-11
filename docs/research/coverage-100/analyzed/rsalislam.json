@@ -1,0 +1,64 @@
+{
+  "slug": "rsalislam",
+  "url": "https://www.rsalislam.com/",
+  "business": { "type_label": "Islamic general hospital (rumah sakit)", "icp_category": "healthcare / hospital", "geography_hint": "Bandung, Indonesia" },
+  "in_icp": false,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Visitor is trusting a healthcare institution and its practitioners — the site sells defined medical expertise via accreditation/halal certs, director's note, and named specialist-doctor profiles, which lands on 'trust' at the top of the ladder.",
+    "runner_up": "place"
+  },
+  "goal": {
+    "one_action": "Register online for care (via the hospital's registration app) or reach a service line by phone/WhatsApp",
+    "mechanism": "redirect",
+    "delegated_to": "store"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 40,
+    "pages": ["home", "about/history", "my-doctors", "featured-services", "women-surgery", "medical-check-up", "contact", "services", "research", "faq"],
+    "archetype_note": "Sprawling institutional hospital portal (40 visible pages): service detail pages, doctor directory, separate schedule/registration engines, blog. Not a single-conversion landing page."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Paripurna & Halal", "component": "carousel" },
+      { "canonical": "storeBadges", "observed_as": "Pendaftaran Online", "component": "logo-strip" },
+      { "canonical": "features", "observed_as": "service highlight blocks (cardiac cath, MCU, home care)", "component": "grid-cards" },
+      { "canonical": "founderNote", "observed_as": "director's quote with photo", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "director's quote/testimonial", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "4 featured doctor profile cards", "component": "team" },
+      { "canonical": "socialProof", "observed_as": "Our Partners (insurance/company logos)", "component": "logo-strip" },
+      { "canonical": "miscellaneous", "observed_as": "recent blog post cards", "component": "grid-cards" },
+      { "canonical": "footer", "observed_as": "about/quick links/contact/social footer", "component": "other" },
+      { "canonical": "useCases", "observed_as": "Layanan Operasi / Women care SURGERY service detail", "component": "text" },
+      { "canonical": "pricing", "observed_as": "PAKET MCU package tiers (no prices)", "component": "grid-cards" },
+      { "canonical": "howItWorks", "observed_as": "OUR PROCESS (MCU steps)", "component": "timeline" },
+      { "canonical": "map-hours", "observed_as": "Lokasi dan Kontak / Jam Besuk", "component": "map" },
+      { "canonical": "cta", "observed_as": "Tanya RSAI / Hubungi MCU WhatsApp", "component": "text" },
+      { "canonical": "security", "observed_as": "Sertifikat (KARS accreditation, DSN MUI halal)", "component": "logo-strip" }
+    ],
+    "unmapped": [
+      { "observed": "Multiple purpose-specific WhatsApp service lines (Customer Care, NersQ post-admission, Tele Farmasi medication ordering)", "why_no_fit": "Not a single CTA — a directory of role-segmented contact channels, closer to a service switchboard than any canonical section", "closest": "cta" },
+      { "observed": "DOKTERKU doctor directory + separate JADWAL DOKTER schedule engine", "why_no_fit": "A browsable practitioner directory + external scheduling portal, not a proof section or a single team grid", "closest": "socialProof" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "store-badges", "packages", "map-hours", "bilingual", "blog"],
+    "proposed_new": [
+      { "name": "practitioner-profiles", "evidence": "DOKTERKU directory of general/specialist/sub-specialist/dental doctors plus per-specialty doctor lists across service pages — per-person profiles as a browsable property, matching the registry's practitioner-profiles slug." }
+    ]
+  },
+  "proof_types": ["testimonials", "logo-wall", "certs", "stats"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["team grid", "package-tier list", "map embed", "process timeline", "logo strip", "app-store badge row", "blog card grid"],
+  "languages": ["id", "en"],
+  "confidence": {
+    "level": "medium",
+    "why": "Capture is full, but the site is a 40-page institution with a fragmented set of conversion channels (app registration, multiple WhatsApp lines, external schedule engine) and the schedule/registration pages weren't crawled, so the single 'primary action' is genuinely ambiguous."
+  },
+  "gap_findings": [
+    "Site's job is not one conversion action: it spans an off-site app registration flow, a separate doctor-schedule engine, and multiple role-segmented WhatsApp lines — outside the single-conversion ICP.",
+    "Role-segmented contact switchboard (Customer Care / post-admission / tele-pharmacy WhatsApp lines) has no canonical section — cta collapses distinct service intents into one.",
+    "packages capability lists MCU tiers but the site deliberately shows NO prices — a common trust-sector pattern the packages/pricing sections assume prices for."
+  ]
+}

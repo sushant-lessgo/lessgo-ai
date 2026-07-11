@@ -1,0 +1,48 @@
+{
+  "slug": "coffeefinance",
+  "url": "https://www.coffeefinance.com.au/",
+  "business": { "type_label": "mortgage brokerage / finance broker", "icp_category": "professional services (finance)", "geography_hint": "Newcastle, Australia" },
+  "in_icp": true,
+  "engine": {
+    "pick": "trust",
+    "ladder_reasoning": "Visitor is choosing to trust a finance broker with their loan; the page sells defined expertise via credentials (Australian Credit Licence), team profiles, service breakdown, and customer stories. That is 'sells defined expertise', the first rung.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "book a 15-min call with a broker",
+    "mechanism": "form",
+    "delegated_to": "calendly"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 8,
+    "pages": ["home", "services", "testimonials", "team", "contact", "blog"],
+    "archetype_note": "Classic multi-page brokerage: home positioning + service breakdown + team credibility + video testimonials + contact, all funneling to a single Calendly booking."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "finance for your story.", "component": "text" },
+      { "canonical": "problem", "observed_as": "a fresh finance experience.", "component": "text" },
+      { "canonical": "useCases", "observed_as": "your story matters. (4 service category buttons + testimonial)", "component": "grid-cards" },
+      { "canonical": "cta", "observed_as": "schedule a call with Laurie (Calendly embed)", "component": "form" },
+      { "canonical": "features", "observed_as": "Residential / Commercial / Car & Equipment / SMSF service descriptions", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "testimonials (6 video customer-story tiles)", "component": "gallery" },
+      { "canonical": "socialProof", "observed_as": "our team (6 member profiles)", "component": "team" },
+      { "canonical": "footer", "observed_as": "get in touch (phone/email/address, map, credit licence)", "component": "map" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": {
+    "needed": ["multipage", "gallery/portfolio", "map-hours", "blog"],
+    "proposed_new": []
+  },
+  "proof_types": ["testimonials", "certs", "portfolio"],
+  "design_style": { "pick": "warm/human", "none_fits_because": "" },
+  "components_needed": ["team grid", "video-testimonial tiles", "service-category cards", "calendly embed", "google-map embed"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality full; clear brokerage archetype with unambiguous trust signals and single Calendly conversion path." },
+  "gap_findings": [
+    "Testimonials are video-only (YouTube tiles) with no verbatim text quotes — a video-testimonial section shape differs from the quote-based testimonials the platform assumes, though 'gallery/portfolio' + testimonials mostly covers it.",
+    "All conversion routed through a single-step Calendly embed with zero on-site lead form — per registry, this is a delegated form, not a new capability."
+  ]
+}

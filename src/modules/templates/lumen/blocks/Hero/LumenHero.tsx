@@ -29,7 +29,7 @@ export default function LumenHero({ sectionId }: { sectionId: string }) {
 
   // Naayom (TechPremium) inline image-replace pattern: hidden file input +
   // uploadImage(file, {sectionId, elementKey}) — store auto-persists (no toolbar).
-  const uploadImage = (useEditStore() as any).uploadImage as
+  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
     | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
     | undefined;
   const [photoUploading, setPhotoUploading] = React.useState(false);
@@ -88,7 +88,7 @@ export default function LumenHero({ sectionId }: { sectionId: string }) {
           <div className="lm-hero-art">
             <div className="lm-ph lm-shot port on-dark">
               {blockContent.hero_image ? (
-                <img src={blockContent.hero_image} alt={blockContent.badge_text || 'Hero portrait'} />
+                <img src={blockContent.hero_image} alt={blockContent.badge_text || 'Hero portrait'} loading="eager" decoding="async" />
               ) : (
                 <span className="lm-ph__tag">Hero portrait — executive, on-brand</span>
               )}

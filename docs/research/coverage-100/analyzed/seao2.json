@@ -1,0 +1,61 @@
+{
+  "slug": "seao2",
+  "url": "https://www.seao2.com/",
+  "business": { "type_label": "cleantech / carbon-removal (Direct Ocean Capture) startup", "icp_category": "cleantech startup", "geography_hint": "Netherlands (Amsterdam HQ, Breezanddijk R&D; Delft/Wetsus origin)" },
+  "in_icp": true,
+  "engine": {
+    "pick": "thing",
+    "ladder_reasoning": "Visitor is evaluating a TECHNOLOGY/product (electrochemical Direct Ocean Capture and its two output products, CDR credits and green CO2): the site argues via mechanism, features, how-it-works, MRV verification and scaling vision. Not selling a named person's expertise, not a portfolio, not a browsable place, and the offer is not pre-understood.",
+    "runner_up": "trust"
+  },
+  "goal": {
+    "one_action": "book a call to buy carbon-removal credits / order green CO2 (secondary: subscribe to newsletter, become a partner, apply to careers)",
+    "mechanism": "form",
+    "delegated_to": "calendly"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 8,
+    "pages": ["home", "about", "technology", "mrv", "ocean-health", "sites-projects", "news", "careers"],
+    "archetype_note": "Deep-tech B2B company site: home + tech deep-dives (technology, MRV) + about/team + projects/map + blog/careers. Conversion diffused across several book-a-call and subscribe CTAs rather than one action."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (Home/About/Technology/MRV/Ocean Health/Sites & Projects/News/Careers)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "Giga-ton scalable Carbon Dioxide Removal Technology", "component": "text" },
+      { "canonical": "problem", "observed_as": "Our Ocean's Carbon Removal Power", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Electrochemical Direct Ocean Capture (DOC)", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Our Products (CDR / Utilisation)", "component": "grid-cards" },
+      { "canonical": "howItWorks", "observed_as": "HOW IT WORKS / Our Direct Ocean Capture process", "component": "text" },
+      { "canonical": "features", "observed_as": "compact, chemical-free, energy efficient", "component": "text" },
+      { "canonical": "results", "observed_as": "Carbon Removal Milestones (1 gigaton by 2045)", "component": "stats" },
+      { "canonical": "founderNote", "observed_as": "'It is easier to extract CO2 from water than from the air.' — David Vermaas, Scientific Co-founder", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Meet the Team (~20 staff, LinkedIn) + Our Partners", "component": "team" },
+      { "canonical": "security", "observed_as": "MRV page (monitoring, reporting & verification of removals, LCA, storage durability)", "component": "text" },
+      { "canonical": "faq", "observed_as": "Frequently Asked Questions", "component": "accordion" },
+      { "canonical": "miscellaneous", "observed_as": "Our latest news (blog/news teaser)", "component": "grid-cards" },
+      { "canonical": "leadForm", "observed_as": "Subscribe (email newsletter)", "component": "form" },
+      { "canonical": "footer", "observed_as": "social links, mailto contacts", "component": "footer" }
+    ],
+    "unmapped": [
+      { "observed": "Sites & Projects (project locations gallery + office locations on Google Maps)", "why_no_fit": "Mixes a project-showcase gallery with an office-locations map; neither the deployment-sites showcase nor the dual R&D/office map is a single canonical section", "closest": "gallery + map-hours" },
+      { "observed": "MRV verification-methodology page", "why_no_fit": "A standalone third-party-verifiability/measurement-credibility deep page; 'security' is the nearest but understates a carbon-integrity proof page", "closest": "security" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "blog", "map-hours", "gallery/portfolio", "lead-form"],
+    "proposed_new": [
+      { "name": "blog-teaser", "evidence": "'Our latest news' strip on home shows recent posts linking into the News blog (reused canonical slug)" }
+    ]
+  },
+  "proof_types": ["testimonials", "stats", "portfolio"],
+  "design_style": { "pick": "tech/minimal", "none_fits_because": "" },
+  "components_needed": ["product-pathway cards (grid)", "team grid", "stats/milestone block", "faq accordion", "process flow diagram", "map/office-locations block", "newsletter email form", "calendly embed"],
+  "languages": ["en"],
+  "confidence": { "level": "medium", "why": "fetch_quality=full and structure is clear, but the conversion goal is genuinely diffuse — Calendly (buy credits / order CO2), a separate Google Calendar partner scheduler, newsletter subscribe, and careers all compete, so 'one_action' is a judgement call rather than obvious." },
+  "gap_findings": [
+    "Multi-offer B2B deep-tech company: two product pathways (CDR credit sales vs green-CO2 ordering) each with its own book-a-call CTA, plus partner scheduling, newsletter, and careers — engines assume ONE conversion action; here 4-5 compete with no single dominant one.",
+    "Two different scheduling backends coexist (Calendly for buyers, Google Calendar appointments for partners) — 'delegated_to' can only name one.",
+    "MRV / carbon-integrity verification is a load-bearing proof page for cleantech buyers that no copy engine or canonical section names (mapped to 'security' as nearest fit)."
+  ]
+}

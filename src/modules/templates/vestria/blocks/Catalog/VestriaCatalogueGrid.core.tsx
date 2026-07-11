@@ -51,6 +51,7 @@ export function VestriaCatalogueGridCore({ content, E }: { content: VestriaCatal
           <E.List collectionKey="items" items={items} className="vs-prod-grid" itemClassName="vs-prod"
             makeItem={() => ({ code: '', title: '', category: '', glyph: '', image: '' })}
             min={4} max={8} addLabel="+ Item"
+            reorderable imageField="image"
             render={(item: VestriaCatalogueItem) => (
               <>
                 <div className="vs-prod__ph">

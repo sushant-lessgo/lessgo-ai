@@ -7,17 +7,9 @@ import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineT
 import { promptDialog } from '@/components/ui/ConfirmDialog';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { usesTemplateModule } from '@/types/service';
-import type { TextFormatState } from '@/utils/textFormatting';
-
-// Simple TextSelection type (was from old InlineTextEditor)
-interface TextSelection {
-  isCollapsed: boolean;
-  start: number;
-  end: number;
-  containerElement: HTMLElement;
-}
 
 import { logger } from '@/lib/logger';
+import { EDITOR_DEBUG } from '@/lib/debugFlags';
 import { isHexColor } from '@/utils/colorUtils';
 interface EditablePageRendererProps {
   sectionId: string;
@@ -25,8 +17,6 @@ interface EditablePageRendererProps {
   layout: string;
   mode: 'edit' | 'preview';
   isSelected: boolean;
-  onElementClick: (sectionId: string, elementKey: string, event: React.MouseEvent) => void;
-  onContentUpdate: (sectionId: string, elementKey: string, value: string) => void;
   colorTokens: any;
   globalSettings: any;
 }
@@ -63,47 +53,12 @@ const getBackgroundTypeFromSection = (sectionId: string): 'primary' | 'secondary
   return 'neutral';
 };
 
-// Enhanced component wrapper that adds selection attributes
-const SelectableElementWrapper: React.FC<{
-  elementKey: string;
-  children: React.ReactNode;
-  mode: 'edit' | 'preview';
-  onClick?: (event: React.MouseEvent) => void;
-  className?: string;
-}> = ({ elementKey, children, mode, onClick, className = '' }) => {
-  
-  if (mode !== 'edit') {
-    return <>{children}</>;
-  }
-
-  return (
-    <div
-      data-element-key={elementKey}
-      className={`selectable-element ${className}`}
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      aria-label={`Edit ${elementKey}`}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick?.(e as any);
-        }
-      }}
-    >
-      {children}
-    </div>
-  );
-};
-
 export function EditablePageRenderer({
   sectionId,
   sectionData,
   layout,
   mode,
   isSelected,
-  onElementClick,
-  onContentUpdate,
   colorTokens,
   globalSettings
 }: EditablePageRendererProps) {
@@ -123,21 +78,6 @@ export function EditablePageRenderer({
     : undefined;
 
   const LayoutComponent = getComponent(sectionId, layout, audienceType, templateId);
-
-  // Enhanced element click handler
-  const handleElementClick = React.useCallback((elementKey: string) => {
-    return (event: React.MouseEvent) => {
-      event.stopPropagation();
-      onElementClick(sectionId, elementKey, event);
-    };
-  }, [sectionId, onElementClick]);
-
-  // Enhanced content update handler
-  const handleContentUpdate = React.useCallback((elementKey: string) => {
-    return (value: string) => {
-      onContentUpdate(sectionId, elementKey, value);
-    };
-  }, [sectionId, onContentUpdate]);
 
   // Template module still loading — avoid flashing the missing-layout
   // fallback before the dynamically-imported blocks are available.
@@ -191,8 +131,6 @@ export function EditablePageRenderer({
           sectionData={sectionData}
           backgroundType={backgroundType}
           mode={mode}
-          onElementClick={handleElementClick}
-          onContentUpdate={handleContentUpdate}
           colorTokens={colorTokens}
           globalSettings={globalSettings}
         />
@@ -258,8 +196,6 @@ const EnhancedLayoutWrapper: React.FC<{
   sectionData: any;
   backgroundType: string;
   mode: 'edit' | 'preview';
-  onElementClick: (elementKey: string) => (event: React.MouseEvent) => void;
-  onContentUpdate: (elementKey: string) => (value: string) => void;
   colorTokens: any;
   globalSettings: any;
 }> = ({
@@ -268,8 +204,6 @@ const EnhancedLayoutWrapper: React.FC<{
   sectionData,
   backgroundType,
   mode,
-  onElementClick,
-  onContentUpdate,
   colorTokens,
   globalSettings,
 }) => {
@@ -285,13 +219,15 @@ const EnhancedLayoutWrapper: React.FC<{
   // Build userContext from taxonomy data if available
   const userContext = React.useMemo(() => {
     if (!validatedFields || !hiddenFields) {
-      console.log('🔍 EditablePageRenderer: No validatedFields or hiddenFields found', {
-        sectionId,
-        hasOnboardingData: !!onboardingData,
-        hasValidatedFields: !!validatedFields,
-        hasHiddenFields: !!hiddenFields,
-        onboardingDataKeys: onboardingData ? Object.keys(onboardingData) : []
-      });
+      if (EDITOR_DEBUG) {
+        console.log('🔍 EditablePageRenderer: No validatedFields or hiddenFields found', {
+          sectionId,
+          hasOnboardingData: !!onboardingData,
+          hasValidatedFields: !!validatedFields,
+          hasHiddenFields: !!hiddenFields,
+          onboardingDataKeys: onboardingData ? Object.keys(onboardingData) : []
+        });
+      }
       return undefined;
     }
 
@@ -304,13 +240,6 @@ const EnhancedLayoutWrapper: React.FC<{
       awarenessLevel: hiddenFields.awarenessLevel,
       pricingModel: validatedFields.pricingModel,
     };
-
-    console.log('✅ EditablePageRenderer: Built userContext', {
-      sectionId,
-      context,
-      validatedFieldsKeys: Object.keys(validatedFields),
-      hiddenFieldsKeys: Object.keys(hiddenFields)
-    });
 
     return context;
   }, [validatedFields, hiddenFields, sectionId, onboardingData]);
@@ -344,195 +273,14 @@ const EnhancedLayoutWrapper: React.FC<{
   );
 
   // Simplified rendering - no universal elements needed
-  // All elements are handled by their native UIBlock components
+  // All elements are handled by their native UIBlock components.
+  // Element selection / inline editing is handled by the unified useEditor
+  // document click listener + InlineTextEditorV2 (no per-element overlay).
   return (
     <div className={mode !== 'preview' ? 'relative' : ''} data-section-id={sectionId}>
       {RenderedLayout}
-      
-      {/* Editing overlay for each element - with delay to ensure DOM is ready */}
-      {sectionData?.elements && Object.entries(sectionData.elements).map(([elementKey, elementData]: [string, any]) => {
-        //   type: elementData.type,
-        //   content: typeof elementData.content === 'string' ? elementData.content.slice(0, 50) : typeof elementData.content,
-        //   hasContent: !!elementData.content,
-        //   isTextElement: elementData.type === 'text' || elementData.type === 'headline' || elementData.type === 'subheadline'
-        // });
-        
-        return (
-          <ElementEditingOverlay
-            key={elementKey}
-            sectionId={sectionId}
-            elementKey={elementKey}
-            elementData={elementData}
-            onElementClick={onElementClick(elementKey)}
-            onContentUpdate={onContentUpdate(elementKey)}
-            mode={mode}
-          />
-        );
-      })}
     </div>
   );
-};
-
-// Component to handle editing overlay for individual elements
-const ElementEditingOverlay: React.FC<{
-  sectionId: string;
-  elementKey: string;
-  elementData: any;
-  onElementClick: (event: React.MouseEvent) => void;
-  onContentUpdate: (value: string) => void;
-  mode: 'edit' | 'preview';
-}> = ({ sectionId, elementKey, elementData, onElementClick, onContentUpdate, mode }) => {
-  const [targetElement, setTargetElement] = React.useState<HTMLElement | null>(null);
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [editValue, setEditValue] = React.useState(elementData.content || '');
-  const [formatState, setFormatState] = React.useState<TextFormatState>({
-    bold: false,
-    italic: false,
-    underline: false,
-    color: '#000000',
-    fontSize: '16px',
-    fontFamily: 'inherit',
-    textAlign: 'left',
-    lineHeight: '1.5',
-    letterSpacing: 'normal',
-    textTransform: 'none',
-  });
-  
-  // Get showTextToolbar from the store
-  const { showTextToolbar } = useEditStore();
-  
-  // Debug: Log overlay mount
-  React.useEffect(() => {
-    //   type: elementData.type,
-    //   content: elementData.content,
-    //   mode
-    // });
-  }, []);
-  
-  // Find the actual DOM element using cascading selectors with delay
-  React.useEffect(() => {
-    // Add a small delay to ensure the layout component has rendered
-    const timer = setTimeout(() => {
-      // Try multiple selector strategies
-      const selectors = [
-        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"]`,
-        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] h1`,
-        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] h2`,
-        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] h3`,
-        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] p`,
-        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] span`,
-        `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"] div`,
-      ];
-      
-      let element: HTMLElement | null = null;
-      for (const selector of selectors) {
-        element = document.querySelector(selector) as HTMLElement;
-        if (element) break;
-      }
-      
-      const availableElements = Array.from(document.querySelectorAll(`[data-section-id="${sectionId}"]`)).map(el => ({
-        tag: el.tagName,
-        content: el.textContent?.slice(0, 30),
-        hasElementKey: !!el.getAttribute('data-element-key'),
-        elementKey: el.getAttribute('data-element-key')
-      }));
-      
-      //   found: !!element,
-      //   selector: selectors.find(s => document.querySelector(s)),
-      //   elementTag: element?.tagName,
-      //   elementContent: element?.textContent?.slice(0, 50),
-      //   allSelectorsChecked: selectors.map(s => ({ selector: s, found: !!document.querySelector(s) })),
-      //   availableElements,
-      //   searchingFor: elementKey,
-      //   sectionSelector: `[data-section-id="${sectionId}"]`,
-      //   elementSelector: `[data-element-key="${elementKey}"]`
-      // });
-      
-      setTargetElement(element);
-    }, 100); // 100ms delay to ensure DOM is ready
-    
-    return () => clearTimeout(timer);
-  }, [sectionId, elementKey]);
-  
-  // Handle text selection changes
-  const handleSelectionChange = React.useCallback((selection: TextSelection | null) => {
-    
-    if (selection && !selection.isCollapsed) {
-      // Calculate position for the text toolbar
-      const rect = selection.containerElement.getBoundingClientRect();
-      const position = {
-        x: rect.left + rect.width / 2,
-        y: rect.top - 10
-      };
-      
-      
-      // DISABLED: Using unified toolbar system from useEditor instead
-      // showTextToolbar(position);
-    }
-  }, []);
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    // DISABLED: Don't set isEditing here - let useEditor handle all text editing
-    // This prevents conflicts between editing systems
-    
-    onElementClick(e);
-  };
-  
-  const handleSave = () => {
-    setIsEditing(false);
-    if (editValue !== elementData.content) {
-      onContentUpdate(editValue);
-    }
-  };
-  
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSave();
-    }
-    if (e.key === 'Escape') {
-      setEditValue(elementData.content);
-      setIsEditing(false);
-    }
-  };
-  
-  // Add click handler directly to the target element - MUST be before early return
-  React.useEffect(() => {
-    const handleElementClick = (e: MouseEvent) => {
-      e.stopPropagation();
-      handleClick(e as any);
-    };
-
-    if (targetElement && !isEditing) {
-      targetElement.addEventListener('click', handleElementClick);
-      targetElement.style.cursor = 'pointer';
-      targetElement.classList.add('hover:bg-blue-50', 'hover:bg-opacity-50', 'transition-colors', 'rounded');
-      
-      return () => {
-        targetElement.removeEventListener('click', handleElementClick);
-        targetElement.style.cursor = '';
-        targetElement.classList.remove('hover:bg-blue-50', 'hover:bg-opacity-50', 'transition-colors', 'rounded');
-      };
-    }
-  }, [targetElement, isEditing]);
-  
-  // Don't render overlay if we can't find the target element
-  if (!targetElement) {
-    return null;
-  }
-  
-  // DISABLED: Use the unified text editing system from useEditor hook instead
-  // The ElementEditingOverlay conflicts with the useEditor system
-  // Let the useEditor handle all text editing to avoid conflicts
-  
-  // Don't render the overlay editor - let useEditor system handle it
-  if (isEditing && targetElement) {
-    return null;
-  }
-  
-  return null;
 };
 
 // Editable content components

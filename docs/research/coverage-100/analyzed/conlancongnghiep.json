@@ -1,0 +1,36 @@
+{
+  "slug": "conlancongnghiep",
+  "url": "https://conlancongnghiep.vn/",
+  "business": { "type_label": "industrial roller & conveyor manufacturer (custom machining)", "icp_category": "manufacturer", "geography_hint": "Southern Vietnam (TP.HCM)" },
+  "in_icp": true,
+  "engine": { "pick": "thing", "ladder_reasoning": "Visitor is evaluating a physical product line (steel/plastic/stainless rollers, conveyor systems) via specs, load capacity, applications and a production process — the argument is about the thing working, not trusting a named practitioner or browsing a portfolio.", "runner_up": "trust" },
+  "goal": { "one_action": "request a technical consultation / price quote for rollers or custom machining", "mechanism": "call-WhatsApp", "delegated_to": "none" },
+  "structure": { "kind": "multi", "page_count": 6, "pages": ["home","about","con-lan-thep (product)","dich-vu (service)","contact","blog (Kiến thức ngành)"], "archetype_note": "Multi-page B2B manufacturer site: overview + product-type pages + custom-machining service + contact, repeated tel/zalo/form quote CTAs." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Sitewide sticky bar 'UY TÍN – KINH NGHIỆM HƠN 10 NĂM...'", "component": "sticky-bar" },
+      { "canonical": "founderNote", "observed_as": "Company Overview / Về chúng tôi", "component": "text" },
+      { "canonical": "features", "observed_as": "Roller Types / Sản phẩm tiêu biểu", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "Đặc điểm nổi bật (spec highlights)", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Industrial Applications / Ứng dụng", "component": "video" },
+      { "canonical": "howItWorks", "observed_as": "Production Process / Quy trình gia công và lắp đặt", "component": "timeline" },
+      { "canonical": "comparisonTable", "observed_as": "Cấu tạo và thông số kỹ thuật (sizing table)", "component": "table" },
+      { "canonical": "results", "observed_as": "Key Metrics (10+ yrs, 50+ staff, 1000+ projects)", "component": "stats" },
+      { "canonical": "uniqueMechanism", "observed_as": "Tại sao khách hàng tin chọn Việt Thống / Giá trị cốt lõi", "component": "grid-cards" },
+      { "canonical": "objectionHandling", "observed_as": "Technical Consultation (free advice, 2h quote, on-site survey)", "component": "text" },
+      { "canonical": "socialProof", "observed_as": "Đối tác – Khách hàng tiêu biểu", "component": "logo-strip" },
+      { "canonical": "faq", "observed_as": "FAQ (11 questions)", "component": "accordion" },
+      { "canonical": "leadForm", "observed_as": "Thông tin liên hệ / contact form", "component": "form" },
+      { "canonical": "cta", "observed_as": "Gọi kỹ thuật ngay / TƯ VẤN & BÁO GIÁ NGAY!", "component": "tel-cta" },
+      { "canonical": "footer", "observed_as": "SẢN PHẨM NỔI BẬT / CON LĂN / VỀ CHÚNG TÔI", "component": "footer" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": { "needed": ["multipage","lead-form","catalog","blog","video-hero"], "proposed_new": [] },
+  "proof_types": ["stats","certs","logo-wall"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["spec/sizing table","process timeline","stats band","product-category card grid","contact form","sticky tel/zalo bar","faq accordion"],
+  "languages": ["vi"],
+  "confidence": { "level": "medium", "why": "fetch_quality is 'rendered' not 'full', so some page bodies (blog posts, exact CTA targets) are partial; but structure, engine, and goal are unambiguous." },
+  "gap_findings": ["Multiple parallel conversion mechanisms (tel hotline + Zalo quote + two Elementor lead forms) coexist as co-primary — taxonomy forces one 'mechanism' pick though B2B manufacturers genuinely lead with phone/Zalo AND form simultaneously.", "Product-type pages (con-lan-thep etc.) are catalog-like category pages with specs but no prices/cart — sits between 'features' section and 'catalog' capability."]
+}

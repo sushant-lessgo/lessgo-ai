@@ -1,0 +1,32 @@
+{
+  "slug": "financialgym", "url": "https://financialgym.com/",
+  "business": { "type_label": "financial advisory firm (RIA)", "icp_category": "consultant/professional-services", "geography_hint": "US (SEC-registered RIA)" },
+  "in_icp": true,
+  "engine": { "pick": "trust", "ladder_reasoning": "Visitor is deciding whether to trust a financial-advisory firm with their money — sells defined expertise (life planning, tax, investing) backed by credentials (RIA/SEC), a decade of history, and named client testimonials. That is the top rung of the ladder.", "runner_up": "thing" },
+  "goal": { "one_action": "book/request a consultation call with an advisor", "mechanism": "form", "delegated_to": "calendly" },
+  "structure": { "kind": "multi", "page_count": 6, "pages": ["home","for-clients","for-advisors","resources","about","talk-to-an-advisor"], "archetype_note": "Classic multi-page advisory site: home pitch → for-clients services → about/leadership → dedicated contact/booking page with Calendly embed. Also a for-advisors audience split + resources/blog." },
+  "sections": {
+    "mapped": [
+      { "canonical": "hero", "observed_as": "Simpler Finances. Purposeful Life.", "component": "text" },
+      { "canonical": "stats", "observed_as": "Impact metrics", "component": "stats" },
+      { "canonical": "features", "observed_as": "Service Offerings", "component": "grid-cards" },
+      { "canonical": "problem", "observed_as": "Money should feel empowering, not overwhelming.", "component": "text" },
+      { "canonical": "useCases", "observed_as": "Client Aspirations", "component": "text" },
+      { "canonical": "testimonials", "observed_as": "Testimonials", "component": "grid-cards" },
+      { "canonical": "footer", "observed_as": "Footer", "component": "text" },
+      { "canonical": "uniqueMechanism", "observed_as": "Core Differentiators", "component": "text" },
+      { "canonical": "cta", "observed_as": "Talk to an Advisor / Book a call", "component": "form" },
+      { "canonical": "socialProof", "observed_as": "Social Proof (Trustpilot)", "component": "grid-cards" },
+      { "canonical": "founderNote", "observed_as": "Our Story / Leadership & Founding", "component": "team" },
+      { "canonical": "leadForm", "observed_as": "Book a call (Calendly embed)", "component": "form" }
+    ],
+    "unmapped": []
+  },
+  "capabilities": { "needed": ["multipage","blog","lead-form"], "proposed_new": [] },
+  "proof_types": ["testimonials","reviews","certs","stats"],
+  "design_style": { "pick": "authority/professional", "none_fits_because": "" },
+  "components_needed": ["team grid", "stats strip", "testimonial cards", "calendly embed", "service card grid"],
+  "languages": ["en"],
+  "confidence": { "level": "high", "why": "fetch_quality full; clear multi-page advisory trust site with unambiguous single conversion action (book a call). Minor gaps (stat numbers, Calendly field list) noted in oddities but do not affect classification." },
+  "gap_findings": ["Booking here is a single-step Calendly embed (no inventory/multi-step) — correctly treated as a delegated form mechanism, not a booking-* capability, per the coltivar precedent.", "Dual-audience nav (For Clients / For Advisors) — the taxonomy has no explicit way to express a secondary B2B audience split, but it did not force an unmapped section here."]
+}

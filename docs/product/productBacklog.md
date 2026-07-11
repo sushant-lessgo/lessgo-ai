@@ -4,7 +4,9 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 
 1. Lessgo.ai.. separate the app from marketing site
 2. Branded sign up, log in page
-3. Engine coverage
+3. Engine coverage — RULED 2026-07-11: all 4 engines before beta; work then place; see `docs/tracks/templatePlan.md` T5/T6
+4. **Place engine** — restaurants/hotels/venues; build ASAP after work engine, before beta; bundles menu/multi-location/events capabilities (templatePlan T5, wave 2)
+4. should be able to download something after filling a form
 2. **lessgo.ai main website** — built WITH Lessgo (customer zero, gap-finder)
 3. **Beta-public** — no-login create + marketing site live (scalePlan §11.10)
 4. **Universe v1** — SPECCED as track: `docs/tracks/universePlan.md` (queue #5)
@@ -25,3 +27,7 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 19. **A/B testing** — page variations + performance tracking (overlaps Universe track)
 20. **Team collaboration** — multi-user accounts, roles/permissions
 21. **Heatmaps** — beyond current conversion analytics
+22. **SEO value-stack** — see `docs/tracks/seoPlan.md` §9
+23. **Entity / AI-search pack** — see `docs/tracks/seoPlan.md` §10
+24. **Lead enrichment** — lead submits form → scrape their domain → lead brief + drafted reply in the lead-notification email. Copy-only, no CRM
+25. **Free-tools TOF** — flagship: landing-page analyzer (email-gated results + launch distribution); programmatic per-category fan-out as experiment only (founderpal data: tools convert, his SEO didn't — audience drove it)

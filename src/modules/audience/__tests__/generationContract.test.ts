@@ -37,6 +37,9 @@ import {
 } from '@/modules/prompt/mockResponseGeneratorProduct';
 import { processServiceCopy } from '@/modules/audience/service/parseCopy';
 import { processProductCopy } from '@/modules/audience/product/parseCopy';
+import { buildProductCopyPrompt } from '@/modules/audience/product/copyPrompt';
+import { buildServiceCopyPrompt } from '@/modules/audience/service/copyPrompt';
+import type { ServiceUnderstandingInput, ServiceAssetInput } from '@/types/service';
 import { runGeneration } from '@/modules/wizard/generation';
 import {
   buildStrategyPayload,
@@ -485,6 +488,89 @@ describe('generation contract — businessType ENTRY payloads (fixture-free)', (
     });
     expect(normStrat(appStrat)).toEqual(normStrat(saasStrat));
     expect({ ...appCopy, businessType: TAG }).toEqual({ ...saasCopy, businessType: TAG });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// proof-truth phase 2 — the copy prompt must forbid named companies / hard
+// metrics in AI-drafted proof, both per-element (on proof-shaped fields) and as
+// a global RULE. Asserts the guard text on the thing (product) + trust (service)
+// prompts for a proof-bearing section.
+// ---------------------------------------------------------------------------
+
+// A distinctive slice of the per-element guard appended in formatElement().
+const PER_ELEMENT_GUARD_MARK = 'plausible-generic only';
+// A distinctive slice of the global RULES prohibition (the F2 repro class).
+const GLOBAL_GUARD_MARK = '284% ROI for GlowSkin';
+
+describe('proof-truth phase 2 — prompt forbids named companies / hard metrics in proof', () => {
+  it('THING (product) copy prompt carries per-element + global proof guards', () => {
+    const strategy = generateMockMeridianStrategy({
+      productName: 'Meridian',
+      oneLiner: 'A deploy platform for teams that ship daily.',
+      features: ['Auto deploys', 'Instant rollbacks'],
+      primaryAudience: 'Staff engineers',
+      proof: { hasTestimonials: true }, // ⇒ testimonials section present
+    });
+    // Sanity: the proof section actually routed (else the per-element guard can't fire).
+    expect(Object.keys(strategy.uiblocks)).toContain('testimonials');
+
+    const prompt = buildProductCopyPrompt({
+      strategy,
+      uiblocks: strategy.uiblocks,
+      productName: 'Meridian',
+      oneLiner: 'A deploy platform for teams that ship daily.',
+      offer: 'Free to start',
+      landingGoal: 'signup' as any,
+      features: ['Auto deploys', 'Instant rollbacks'],
+    });
+
+    expect(prompt).toContain(PER_ELEMENT_GUARD_MARK);
+    expect(prompt).toContain(GLOBAL_GUARD_MARK);
+  });
+
+  it('TRUST (service) copy prompt carries per-element + global proof guards', () => {
+    const understanding: ServiceUnderstandingInput = {
+      serviceType: 'agency',
+      whatYouDo: 'Brand and web studio for DTC founders',
+      services: ['Brand identity', 'Packaging'],
+      targetClients: ['DTC founders'],
+      outcomes: ['Launch-ready in 4 weeks'],
+      deliveryModel: 'remote',
+    };
+    const assets: ServiceAssetInput = {
+      hasTestimonials: true,
+      hasClientLogos: true,
+      hasOutcomes: false,
+      hasCaseStudies: true,
+      hasTeamPhotos: false,
+      hasFounderPhoto: true,
+      testimonialType: 'text',
+    };
+    const oneLiner = 'A six-week brand studio for DTC founders.';
+    const offer = 'Fixed-price brand identity in six weeks';
+    const strategy = generateMockServiceStrategy({
+      oneLiner,
+      understanding,
+      goal: 'book-call',
+      offer,
+      assets,
+    });
+    // Sanity: a proof-bearing section (testimonials / casestudies) routed.
+    const secs = Object.keys(strategy.uiblocks);
+    expect(secs.some((s) => s === 'testimonials' || s === 'casestudies')).toBe(true);
+
+    const prompt = buildServiceCopyPrompt({
+      strategy,
+      uiblocks: strategy.uiblocks,
+      oneLiner,
+      offer,
+      goal: 'book-call',
+      understanding,
+    });
+
+    expect(prompt).toContain(PER_ELEMENT_GUARD_MARK);
+    expect(prompt).toContain(GLOBAL_GUARD_MARK);
   });
 });
 

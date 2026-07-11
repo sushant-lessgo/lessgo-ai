@@ -1,14 +1,13 @@
 // app/edit/[token]/components/toolbars/ImageToolbar.tsx - Complete Image Toolbar
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM, { createPortal } from 'react-dom';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
-import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
-import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import type { StockPhoto } from '@/services/pexelsApi';
-import { TextInputModal } from '../modals/TextInputModal';
 import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
+import { isForbiddenImageSrc } from '@/hooks/editStore/imageWriteGuard';
 import { logger } from '@/lib/logger';
 // Palette mood phrase comes from the preloaded template module (no static
 // template import in the shared editor bundle — firewall, 7.5d). The query
@@ -20,42 +19,44 @@ import { usesTemplateModule } from '@/types/service';
 
 interface ImageToolbarProps {
   targetId: string;
-  position: { x: number; y: number };
-  contextActions: any[];
 }
 
-export function ImageToolbar({ targetId, position, contextActions }: ImageToolbarProps) {
-  logger.dev('🖼️🖼️🖼️ ImageToolbar component initialized with props:', () => ({
-    targetId,
-    position, 
-    contextActions
-  }));
-
-  const [showAdvanced, setShowAdvanced] = useState(false);
+// Phase-3: the ToolbarShell decides visibility and owns positioning. This
+// component is a dumb child of the shell's floating container.
+export function ImageToolbar({ targetId }: ImageToolbarProps) {
   const [showUploader, setShowUploader] = useState(false);
   const [showStockPhotos, setShowStockPhotos] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
-  const [showAltTextModal, setShowAltTextModal] = useState(false);
-  const [currentAltText, setCurrentAltText] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  
+
   const toolbarRef = useRef<HTMLDivElement>(null);
-  const advancedRef = useRef<HTMLDivElement>(null);
   const uploaderRef = useRef<HTMLInputElement>(null);
 
+  // Narrow selector: pull ONLY the fields/actions this toolbar reads (actions are
+  // stable refs). `uploadImageFromObjectUrl` is a store adapter that uploads an
+  // ephemeral data:/blob: URL to permanent storage (delegates to uploadImage);
+  // accessed via cast — its type declaration lives in the store types module,
+  // which is out of this phase's edit scope. `audienceType` was destructured but
+  // never used by the main component (StockPhotosPanel reads it separately) → dropped.
   const {
     updateElementContent,
     uploadImage,
     hideElementToolbar,
     tokenId,
-    audienceType,
-  } = useEditStore();
-
-  // Stub executeAction (removed in V2 refactor)
-  const executeAction = (action: string, params: any) => {
-    console.warn('Advanced action not implemented in V2:', action);
-  };
+    uploadImageFromObjectUrl,
+  } = useEditStore(
+    useShallow((s) => ({
+      updateElementContent: s.updateElementContent,
+      uploadImage: s.uploadImage,
+      hideElementToolbar: s.hideElementToolbar,
+      tokenId: s.tokenId,
+      uploadImageFromObjectUrl: (s as any).uploadImageFromObjectUrl as (
+        objectUrl: string,
+        targetElement: { sectionId: string; elementKey: string },
+      ) => Promise<string>,
+    })),
+  );
 
   // Helper function to parse targetId and extract section/element info
   const parseTargetId = (targetId: string) => {
@@ -170,36 +171,20 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     return null;
   };
 
-  // Calculate arrow position
-  const targetElement = document.querySelector(`[data-image-id="${targetId}"]`);
-  logger.dev('🖼️ Looking for target element with selector:', () => `[data-image-id="${targetId}"]`);
-  
-  const arrowInfo = targetElement ? calculateArrowPosition(
-    position,
-    targetElement.getBoundingClientRect(),
-    { width: 340, height: 48 }
-  ) : null;
-  
+  // Secondary panels (stock-photos portal) anchor to the toolbar bar's live
+  // position rather than a passed-in coordinate — the shell owns the bar's
+  // placement now. Read at render time; the bar is already mounted whenever a
+  // panel is open.
+  const getPanelAnchor = () => {
+    const rect = toolbarRef.current?.getBoundingClientRect();
+    if (!rect) return { x: 20, y: 20 };
+    return { x: rect.left, y: rect.bottom };
+  };
 
-
-
-  // Close advanced menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        advancedRef.current &&
-        !advancedRef.current.contains(event.target as Node) &&
-        !toolbarRef.current?.contains(event.target as Node)
-      ) {
-        setShowAdvanced(false);
-      }
-    };
-
-    if (showAdvanced) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showAdvanced]);
+  // The target image node — used to seed the image editor with the current src/alt.
+  const targetElement = typeof document !== 'undefined'
+    ? document.querySelector(`[data-image-id="${targetId}"]`)
+    : null;
 
   // Handle file upload
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -246,28 +231,39 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     setShowEditor(true);
   };
 
-  const handleImageEditorSave = (editedImageUrl: string) => {
-    // Update the element content so the image actually displays
+  const handleImageEditorSave = async (editedImageUrl: string) => {
     const targetInfo = parseTargetId(targetId);
-    if (targetInfo) {
-      updateElementContent(targetInfo.sectionId, targetInfo.elementKey, editedImageUrl);
-    } else {
+    setShowEditor(false);
+
+    if (!targetInfo) {
       // console.error('❌ Could not parse targetId for edited image:', targetId);
+      return;
     }
 
-    setShowEditor(false);
-  };
+    // SimpleImageEditor hands back an ephemeral blob: object URL (canvas.toBlob).
+    // Persisting that directly dies on reload, so upload it to permanent storage
+    // via the store adapter — uploadImage writes the permanent URL back through
+    // updateElementContent. Non-forbidden (https/relative) srcs pass straight
+    // through. Keep the old value on failure and surface an error toast.
+    if (isForbiddenImageSrc(editedImageUrl)) {
+      setUploadError(null);
+      setIsUploading(true);
+      try {
+        await uploadImageFromObjectUrl(editedImageUrl, {
+          sectionId: targetInfo.sectionId,
+          elementKey: targetInfo.elementKey,
+        });
+      } catch (error) {
+        setUploadError(
+          error instanceof Error ? error.message : 'Failed to save edited image. Please try again.',
+        );
+      } finally {
+        setIsUploading(false);
+      }
+      return;
+    }
 
-  // Handle alt text editing
-  const handleAltText = () => {
-    const currentAlt = targetElement?.getAttribute('alt') || '';
-    setCurrentAltText(currentAlt);
-    setShowAltTextModal(true);
-  };
-
-  const handleAltTextSave = (newAltText: string) => {
-    executeAction('update-alt-text', { imageId: targetId, altText: newAltText });
-    setShowAltTextModal(false);
+    updateElementContent(targetInfo.sectionId, targetInfo.elementKey, editedImageUrl);
   };
 
   // MVP Actions - Essential & Important only
@@ -307,12 +303,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       handler: handleImageEditor,
     },
     {
-      id: 'alt-text',
-      label: 'Alt Text',
-      icon: 'accessibility',
-      handler: handleAltText,
-    },
-    {
       id: 'delete-image',
       label: 'Delete',
       icon: 'trash',
@@ -345,32 +335,10 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
   return (
     <>
-      {logger.dev(() => '🖼️ ImageToolbar JSX rendering now!')}
-      <div 
+      <div
         ref={toolbarRef}
-        className="fixed bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
-        style={{
-          left: position.x,
-          top: position.y,
-          zIndex: 10000,
-        }}
+        className="bg-white border border-gray-200 rounded-lg shadow-lg"
       >
-        {/* Arrow */}
-        {arrowInfo && (
-          <div 
-            className={`absolute w-2 h-2 bg-white border transform rotate-45 ${
-              arrowInfo.direction === 'up' ? 'border-t-0 border-l-0 -bottom-1' :
-              arrowInfo.direction === 'down' ? 'border-b-0 border-r-0 -top-1' :
-              arrowInfo.direction === 'left' ? 'border-l-0 border-b-0 -right-1' :
-              'border-r-0 border-t-0 -left-1'
-            }`}
-            style={{
-              left: arrowInfo.direction === 'up' || arrowInfo.direction === 'down' ? arrowInfo.x - 4 : undefined,
-              top: arrowInfo.direction === 'left' || arrowInfo.direction === 'right' ? arrowInfo.y - 4 : undefined,
-            }}
-          />
-        )}
-        
         <div className="flex items-center px-3 py-2">
           {/* Image Indicator */}
           <div className="flex items-center space-x-1 mr-3">
@@ -407,12 +375,11 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       {/* Stock Photos Panel */}
       {showStockPhotos && typeof window !== 'undefined' && (
         <>
-          {logger.dev('🎨 Rendering stock photos portal, showStockPhotos:', () => showStockPhotos)}
           {createPortal(
             <StockPhotosPanel
           position={{
-            x: Math.max(10, Math.min(position.x, window.innerWidth - 420)),
-            y: Math.max(10, Math.min(position.y + 60, window.innerHeight - 320)),
+            x: Math.max(10, Math.min(getPanelAnchor().x, window.innerWidth - 420)),
+            y: Math.max(10, Math.min(getPanelAnchor().y + 8, window.innerHeight - 320)),
           }}
           onClose={() => {
             setShowStockPhotos(false);
@@ -450,10 +417,11 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
       {/* Upload Progress */}
       {isUploading && (
-        <div className="fixed z-60 bg-white border border-gray-200 rounded-lg shadow-lg p-3"
+        <div className="absolute z-60 bg-white border border-gray-200 rounded-lg shadow-lg p-3"
           style={{
-            left: position.x,
-            top: position.y + 60,
+            top: '100%',
+            left: 0,
+            marginTop: 8,
           }}
         >
           <div className="flex items-center space-x-2">
@@ -465,10 +433,11 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
       {/* Upload Error */}
       {uploadError && (
-        <div className="fixed z-60 bg-red-50 border border-red-200 rounded-lg shadow-lg p-3"
+        <div className="absolute z-60 bg-red-50 border border-red-200 rounded-lg shadow-lg p-3"
           style={{
-            left: position.x,
-            top: position.y + 60,
+            top: '100%',
+            left: 0,
+            marginTop: 8,
             maxWidth: 280,
           }}
         >
@@ -488,17 +457,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
           </div>
         </div>
       )}
-
-      {/* Alt Text Modal */}
-      <TextInputModal
-        isOpen={showAltTextModal}
-        onClose={() => setShowAltTextModal(false)}
-        onSelect={handleAltTextSave}
-        currentValue={currentAltText}
-        fieldName="Alt Text"
-        placeholder="Describe this image for screen readers..."
-        description="Alt text helps screen readers describe images to visually impaired users. Be descriptive but concise."
-      />
 
       {/* Image Editor */}
       {showEditor && (
@@ -521,7 +479,15 @@ function StockPhotosPanel({ position, onClose, onSelectImage }: {
   onClose: () => void;
   onSelectImage: (stockPhoto: StockPhoto) => void;
 }) {
-  const { audienceType, templateId, paletteId } = useEditStore();
+  // Narrow selector: this portal only needs the template-identity fields to
+  // resolve the palette mood phrase for stock-photo queries.
+  const { audienceType, templateId, paletteId } = useEditStore(
+    useShallow((s) => ({
+      audienceType: s.audienceType,
+      templateId: s.templateId,
+      paletteId: s.paletteId,
+    })),
+  );
   const usesTemplate = usesTemplateModule(audienceType, templateId);
 
   // Resolve the active template's palette mood phrase from the preloaded module

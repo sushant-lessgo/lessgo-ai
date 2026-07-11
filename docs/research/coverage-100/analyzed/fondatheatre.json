@@ -1,0 +1,66 @@
+{
+  "slug": "fondatheatre",
+  "url": "https://fondatheatre.com/",
+  "business": { "type_label": "live-music concert venue / event theater", "icp_category": "place", "geography_hint": "Hollywood Blvd, Los Angeles, CA, USA" },
+  "in_icp": true,
+  "engine": {
+    "pick": "place",
+    "ladder_reasoning": "Visitor is checking a PLACE (a concert venue): what shows are on, seating floor-vs-balcony, hours, directions, parking, prohibited items. Photos/schedule/logistics ARE the decision, not evaluating a thing or trusting a firm.",
+    "runner_up": "quick-yes"
+  },
+  "goal": {
+    "one_action": "Find an upcoming show and buy tickets (secondary jobs: submit a rental inquiry, subscribe to the announce list)",
+    "mechanism": "redirect",
+    "delegated_to": "store"
+  },
+  "structure": {
+    "kind": "multi",
+    "page_count": 11,
+    "pages": ["home", "shows", "ticket-info", "venue-info", "rental-info", "tiki-bar", "100th-anniversary"],
+    "archetype_note": "Venue site: home event feed + full shows schedule + ticket/venue/rental logistics pages. Every ticket CTA hands off to AXS.com external checkout; no on-site cart."
+  },
+  "sections": {
+    "mapped": [
+      { "canonical": "header", "observed_as": "top nav (Ticket Info / Venue Info / Shows / Rental Info / Tiki Bar)", "component": "nav" },
+      { "canonical": "hero", "observed_as": "Upcoming Events", "component": "grid-cards" },
+      { "canonical": "miscellaneous", "observed_as": "Just Announced", "component": "carousel" },
+      { "canonical": "features", "observed_as": "Features (bar, balcony)", "component": "grid-cards" },
+      { "canonical": "features", "observed_as": "The Jayne Bar", "component": "text" },
+      { "canonical": "features", "observed_as": "Premium Balcony Couch", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "Be the First to Know (email + mobile newsletter signup)", "component": "form" },
+      { "canonical": "miscellaneous", "observed_as": "SHOWS (full chronological concert listing w/ ticket buttons)", "component": "table" },
+      { "canonical": "objectionHandling", "observed_as": "Floor vs Balcony Tickets / Purchase Online / In-Person / By Phone", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "DIRECTIONS / PARKING / PUBLIC TRANSPORTATION", "component": "text" },
+      { "canonical": "leadForm", "observed_as": "CONTACT US (emails + contact form)", "component": "form" },
+      { "canonical": "faq", "observed_as": "PROHIBITED ITEMS (30+ item list)", "component": "text" },
+      { "canonical": "useCases", "observed_as": "RENTAL INFO (award ceremonies, film shoots, corporate, parties, capacity table)", "component": "text" },
+      { "canonical": "miscellaneous", "observed_as": "VIRTUAL TOUR", "component": "video" },
+      { "canonical": "leadForm", "observed_as": "LET'S CONNECT (sales contact card + inquiry form)", "component": "form" },
+      { "canonical": "socialProof", "observed_as": "CHECK OUT OUR OTHER VENUES! (Roxy, El Rey sister-venue links)", "component": "logo-strip" },
+      { "canonical": "followStrip", "observed_as": "social links (fb/ig/twitter/youtube) + curator.io social feed", "component": "social-embed" }
+    ],
+    "unmapped": [
+      { "observed": "SHOWS chronological concert schedule with per-event date/doors/support-act and external GET TICKETS buttons", "why_no_fit": "Not a product catalog, gallery, or pricing table — it is a time-ordered event schedule whose rows redirect to third-party ticketing. No canonical section id models an events calendar.", "closest": "miscellaneous" },
+      { "observed": "Rental capacity table (Concert 900 / Balcony 155 / Roof 250 / Banquet 306 / Theater 400-621)", "why_no_fit": "Configuration/capacity matrix, not pricing or comparison of plans", "closest": "comparisonTable" }
+    ]
+  },
+  "capabilities": {
+    "needed": ["multipage", "map-hours", "lead-form"],
+    "proposed_new": [
+      { "name": "event-listings", "evidence": "Home 'Upcoming Events' feed + dedicated /shows page = a chronological schedule of dated concerts, each with artist/support/doors/status and a per-event external ticket-buy redirect (AXS). Not catalog (no own products/cart), not gallery (schedule, not visual proof), not works-catalog (third-party events, not the owner's own body of work)." }
+    ]
+  },
+  "proof_types": ["logo-wall"],
+  "design_style": { "pick": "bold/performance", "none_fits_because": "" },
+  "components_needed": ["event-schedule list/table (date, artist, doors, ticket-CTA, cancelled state)", "capacity matrix table", "directions/map + transit block", "newsletter signup form (email + mobile)", "rental inquiry form + sales-rep contact card", "social-feed strip"],
+  "languages": ["en"],
+  "confidence": {
+    "level": "medium",
+    "why": "fetch_quality=rendered, not full: the rental-info and venue-info inquiry form fields never rendered in the DOM snapshot (fields marked unknown), and 'Just Announced' + /100th-anniversary were not independently verified. Overall structure and primary jobs are clear, so medium not low."
+  },
+  "gap_findings": [
+    "No canonical section id or closed capability expresses an EVENT SCHEDULE / concert calendar with per-event external ticket redirect — coined event-listings.",
+    "Multi-goal venue site: three competing conversion actions (ticket redirect to AXS, rental lead form, announce-list subscribe) plus a Resy tiki-bar reservation embed — the taxonomy assumes ONE conversion action; place+redirect captures the dominant job but under-represents the rental-lead and subscribe jobs.",
+    "Virtual-tour video embed is not video-hero (it is deep on the rental page); no capability vocab term for a standalone venue walkthrough tour."
+  ]
+}

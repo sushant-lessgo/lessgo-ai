@@ -12,11 +12,33 @@ import type { ImageAsset } from '@/types/core/images';
 import type { SectionType } from '@/types/core/content';
 
 import { logger } from '@/lib/logger';
+import { EDITOR_DEBUG } from '@/lib/debugFlags';
+import { isForbiddenImageSrc } from './imageWriteGuard';
 /**
  * ===== UTILITY FUNCTIONS =====
  */
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+// ===== i18n-phase-1 (3a): active-locale write routing helpers =====
+// The default locale writes the flat `state.content` map exactly as today; a
+// non-default active locale writes TEXT into the project-global overlay
+// (`state.localeContent[locale][sectionId][key]`, keyed by globally-unique
+// sectionId). Structure/media (setSection, collections, image src) stay base.
+const localeDefaultOf = (state: EditStore): string => state.localeConfig?.defaultLocale ?? 'en';
+const isNonDefaultLocale = (state: EditStore): boolean =>
+  !!state.activeLocale && state.activeLocale !== localeDefaultOf(state);
+/** True for overlay-eligible TEXT values (string or all-string array). Collection
+ *  object-arrays are NOT text → they stay base (locale-shared structure). */
+const isOverlayText = (v: unknown): v is string | string[] =>
+  typeof v === 'string' || (Array.isArray(v) && v.every((x) => typeof x === 'string'));
+/** Immer-draft: write a text value into the project-global overlay for `locale`. */
+function writeOverlayText(state: EditStore, locale: string, sectionId: string, key: string, value: string | string[]): void {
+  if (!state.localeContent) state.localeContent = {};
+  if (!state.localeContent[locale]) state.localeContent[locale] = {};
+  if (!state.localeContent[locale][sectionId]) state.localeContent[locale][sectionId] = {};
+  state.localeContent[locale][sectionId][key] = value;
+}
 
 // Validation helper
 const validateSection = (section: any): string[] => {
@@ -58,17 +80,37 @@ export function createContentActions(set: any, get: any): ContentActions {
     updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) =>
       set((state: EditStore) => {
         const updateTime = Date.now();
-        logger.debug(`🔄 [${updateTime}] updateElementContent CALLED:`, {
-          sectionId,
-          elementKey,
-          contentType: typeof content,
-          contentLength: Array.isArray(content) ? content.length : content?.length,
-          contentPreview: Array.isArray(content)
-            ? JSON.stringify(content[0])?.substring(0, 50)
-            : content?.toString().substring(0, 50),
-          callStack: new Error().stack?.split('\n')[2]?.trim()
-        });
-        
+        if (EDITOR_DEBUG) {
+          logger.debug(`🔄 [${updateTime}] updateElementContent CALLED:`, {
+            sectionId,
+            elementKey,
+            contentType: typeof content,
+            contentLength: Array.isArray(content) ? content.length : content?.length,
+            contentPreview: Array.isArray(content)
+              ? JSON.stringify(content[0])?.substring(0, 50)
+              : content?.toString().substring(0, 50),
+            callStack: new Error().stack?.split('\n')[2]?.trim()
+          });
+        }
+
+        // Defense-in-depth (perf-03): never persist an ephemeral/inlined image
+        // src (`data:image/...` base64 or a `blob:` object URL) into content —
+        // these bloat the draft and die on reload. The correct path uploads to
+        // permanent storage via the store `uploadImage` action, which writes the
+        // returned URL back through here. Cheap prefix check; guards strings only,
+        // so text/URL content is untouched. Refuse the write (keep old value).
+        // i18n-phase-1 (3a): locale-AGNOSTIC — a forbidden image src is refused
+        // regardless of active locale (media is locale-shared, never overlaid).
+        if (typeof content === 'string' && isForbiddenImageSrc(content)) {
+          if (process.env.NODE_ENV !== 'production') {
+            console.warn(
+              `[imageWriteGuard] Refused forbidden image src for ${sectionId}.${elementKey} ` +
+                `(data:/blob: not allowed in content — upload via uploadImage first).`,
+            );
+          }
+          return;
+        }
+
         if (!state.content[sectionId]) {
           logger.warn(`🔄 [${updateTime}] Section ${sectionId} not found`);
           return;
@@ -77,6 +119,38 @@ export function createContentActions(set: any, get: any): ContentActions {
         // Check if element exists and handle different content structures
         if (!state.content[sectionId].elements) {
           logger.warn(`Elements not found in section ${sectionId}`);
+          return;
+        }
+
+        // i18n-phase-1 (3a): NON-DEFAULT LOCALE text write → project-global overlay.
+        // Text only (string / all-string array, incl. dotted V2 collection-field
+        // strings) is overlaid; the key is stored verbatim (dotted keys included —
+        // 3b readers resolve them). Collection OBJECT-arrays fall through to the
+        // base write below (locale-shared structure/media). A locale-TAGGED history
+        // entry is pushed (raw-value snapshot under the elementKey storage key);
+        // uiActions.undo/redo routes the restore into localeContent[locale] via
+        // `entry.locale`, so undo of an NL edit never touches EN base.
+        if (isNonDefaultLocale(state) && isOverlayText(content)) {
+          const loc = state.activeLocale;
+          const oldValue = state.localeContent?.[loc]?.[sectionId]?.[elementKey];
+          writeOverlayText(state, loc, sectionId, elementKey, content);
+          if (JSON.stringify(oldValue) !== JSON.stringify(content)) {
+            pushContentHistoryEntry(state, {
+              type: 'content',
+              description: `Edited ${elementKey} (${loc})`,
+              timestamp: Date.now(),
+              sectionId,
+              elementKey,
+              locale: loc,
+              beforeState: { storageKey: elementKey, value: deepCopy(oldValue) },
+              afterState: { storageKey: elementKey, value: deepCopy(content) },
+            });
+          }
+          if (state.content[sectionId].editMetadata) {
+            state.content[sectionId].editMetadata.lastModified = updateTime;
+          }
+          state.persistence.isDirty = true;
+          state.lastUpdated = updateTime;
           return;
         }
 
@@ -97,8 +171,11 @@ export function createContentActions(set: any, get: any): ContentActions {
               (state.content[sectionId].elements as Record<string, any>)[collectionName] = updatedCollection;
 
               // History: raw collection-array snapshot under the collection's storage key.
-              // Skip when nothing actually changed. elementKey = full dotted key (coalesce identity).
-              if (JSON.stringify(oldCollection) !== JSON.stringify(updatedCollection)) {
+              // Skip when nothing actually changed. Direct field compare (no serialization):
+              // locate the target item by id and compare only the edited field.
+              // elementKey = full dotted key (coalesce identity).
+              const oldItem = oldCollection.find(item => item.id === itemId);
+              if (oldItem?.[fieldName] !== content) {
                 pushContentHistoryEntry(state, {
                   type: 'content',
                   description: `Edited ${elementKey}`,
@@ -279,6 +356,37 @@ export function createContentActions(set: any, get: any): ContentActions {
         });
       }),
 
+    // editor phase-3 (phase 6): per-item alt writer for imageCollection slots.
+    // Canonical alt store (2026-07-11 law): the itemId-keyed map lives under the
+    // COLLECTION key — content[sectionId].elementMetadata[collectionKey].alt[itemId].
+    // Additive: never touches elements/collections (those ride updateElementContent).
+    // Locale-agnostic (alt is media-adjacent metadata, not overlaid text).
+    setItemAlt: (sectionId: string, collectionKey: string, itemId: string, alt: string) =>
+      set((state: EditStore) => {
+        const section = state.content[sectionId];
+        if (!section) return;
+        if (!section.elementMetadata) section.elementMetadata = {};
+        if (!section.elementMetadata[collectionKey]) section.elementMetadata[collectionKey] = {};
+        const entry = section.elementMetadata[collectionKey];
+        const altMap =
+          entry.alt && typeof entry.alt === 'object' ? (entry.alt as Record<string, string>) : {};
+        altMap[itemId] = alt;
+        entry.alt = altMap;
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
+
+    // i18n-phase-1 (3a): switch active authoring locale (project-global). Text
+    // writers branch on this; structure/media stay base. History is PRESERVED
+    // across a locale switch — undo/redo restore is locale-aware (each 'content'
+    // entry carries `entry.locale`; uiActions routes to base vs the overlay), so a
+    // mixed EN/NL undo stack replays each entry against its own locale's target.
+    setActiveLocale: (locale: string) =>
+      set((state: EditStore) => {
+        if (state.activeLocale === locale) return;
+        state.activeLocale = locale;
+      }),
+
     // Include all section CRUD actions
     ...sectionCRUDActions,
 
@@ -288,7 +396,16 @@ export function createContentActions(set: any, get: any): ContentActions {
      * ===== SECTION DATA MANAGEMENT =====
      */
 
-    setSection: (sectionId: string, sectionData: Partial<any>) => 
+    // i18n-phase-1 (3a) — LIVE setSection (wins over coreActions copy). Deliberately
+    // LOCALE-SHARED: writes always target base `state.content`, regardless of
+    // activeLocale. Deliverable #2 proof (see Phase 3a audit): every setSection
+    // caller passes STRUCTURE — element-map replacements from element CRUD
+    // (add/remove/duplicate/reorder/move/props/position), variant-swap clamped
+    // maps, layout-migrated maps, aiMetadata/elementMetadata/buttonConfig, or a
+    // whole new sectionData. NONE pass an inline text edit (those exclusively use
+    // updateElementContent). Structural ops preserve element KEYS, so the overlay
+    // (keyed by sectionId+key) stays valid across them.
+    setSection: (sectionId: string, sectionData: Partial<any>) =>
       set((state: EditStore) => {
         if (state.content[sectionId]) {
           const oldSection = { ...state.content[sectionId] };
@@ -451,15 +568,28 @@ export function createContentActions(set: any, get: any): ContentActions {
           return;
         }
 
+        // i18n-phase-1 (3a): non-default locale → route TEXT values into the
+        // overlay (never base). Non-text values are skipped (structure/media are
+        // shared). No history push (locale undo deferred).
+        if (isNonDefaultLocale(state)) {
+          const loc = state.activeLocale;
+          Object.entries(elements).forEach(([elementKey, content]) => {
+            if (isOverlayText(content)) writeOverlayText(state, loc, sectionId, elementKey, content);
+          });
+          state.persistence.isDirty = true;
+          state.lastUpdated = Date.now();
+          return;
+        }
+
         const section = state.content[sectionId];
-        
+
         // Update all elements in bulk
         Object.entries(elements).forEach(([elementKey, content]) => {
           if (section.elements[elementKey]) {
             section.elements[elementKey].content = content;
           }
         });
-        
+
         // Mark as customized
         section.aiMetadata.isCustomized = true;
         state.persistence.isDirty = true;

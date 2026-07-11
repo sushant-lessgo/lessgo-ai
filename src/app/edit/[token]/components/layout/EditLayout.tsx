@@ -64,10 +64,9 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   // Initialize unified editor system
   const editor = useEditor();
 
-  const { status, actions } = useAutoSave({
-  enableAutoSave: true,
-  enableVersioning: true,
-});
+  useAutoSave({
+    enableAutoSave: true,
+  });
 
   const colorTokens = getColorTokens ? getColorTokens() : {};
   

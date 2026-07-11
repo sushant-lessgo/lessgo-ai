@@ -59,6 +59,39 @@ export interface AssetAvailability {
  * ===== CONTENT HIERARCHY =====
  */
 
+/**
+ * ===== i18n CONTENT-LANGUAGE LAYER (i18n-phase-1, D1) =====
+ *
+ * Independent-authoring locale model: the flat `content` map above IS the
+ * default locale (zero migration). Non-default locales live in a sibling
+ * OVERLAY carrying text values only — structure (sections/layouts/metadata)
+ * is never duplicated, so locales cannot structurally diverge.
+ *
+ * Both fields are OPTIONAL: legacy single-locale content omits them and sees
+ * zero storage/behavior diff (back-compat law).
+ */
+
+/** Per-project locale declaration. Absent ⇒ legacy single-locale project. */
+export interface LocaleConfig {
+  /** All declared locale codes (default included). e.g. ['en','nl']. */
+  locales: string[];
+  /** The locale whose copy lives in the flat `content` map. e.g. 'en'. */
+  defaultLocale: string;
+}
+
+/**
+ * Locale-keyed text overlay: locale → sectionId → elementKey → text value.
+ * Overlay values are text only (`string | string[]`); an absent key falls
+ * back to the default-locale copy in the flat `content` map.
+ */
+export interface LocaleContentOverlay {
+  [locale: string]: {
+    [sectionId: string]: {
+      [elementKey: string]: string | string[];
+    };
+  };
+}
+
 export interface LandingPageContent {
   id: string;
   token: string;
@@ -69,6 +102,10 @@ export interface LandingPageContent {
   metadata: PageMetadata;
   createdAt: Date;
   updatedAt: Date;
+  /** i18n (D1): non-default-locale text overlay. Absent ⇒ single-locale. */
+  localeContent?: LocaleContentOverlay;
+  /** i18n (D4): project locale declaration. Absent ⇒ single-locale. */
+  localeConfig?: LocaleConfig;
 }
 
 export type SectionType = 
@@ -93,7 +130,11 @@ export interface SectionData {
   // V2: Button metadata stored separately (buttonConfig, etc.)
   // scale-04: `cta` is the new-shape CTA (CTAButton); `buttonConfig` stays for
   // legacy reads. Additive only — the normalization pre-pass bridges cta→buttonConfig.
-  elementMetadata?: Record<string, { buttonConfig?: any; cta?: import('@/types/destination').CTAButton }>;
+  // editor phase-3 (phase 4): `alt` is the canonical user-authored alt store
+  // (2026-07-11 law). `string` for single-image slots; itemId-keyed map for
+  // collections (keyed by the COLLECTION key, e.g. elementMetadata.items.alt[itemId]).
+  // Additive + optional — existing buttonConfig/cta readers are unaffected.
+  elementMetadata?: Record<string, { buttonConfig?: any; cta?: import('@/types/destination').CTAButton; alt?: string | Record<string, string> }>;
   backgroundType?: BackgroundType;
   sectionBackground?: SectionBackground;
   media?: SectionMedia;
