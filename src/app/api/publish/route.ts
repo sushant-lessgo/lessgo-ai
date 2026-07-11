@@ -159,9 +159,22 @@ async function publishHandler(req: NextRequest) {
       typeof (project?.themeValues as any)?.mood === 'string'
         ? (project!.themeValues as any).mood
         : null;
-    const publishedThemeValues = projectMood
+    // Knob selection (template-factory phase 9) lives in Project.themeValues.knobs
+    // (hybrid look storage — no flat column). The client publish payload themeValues
+    // is the legacy color record and doesn't carry it, so read it off the project and
+    // (a) feed it into the static-export render and (b) persist it on PublishedPage so
+    // the SSR fallback + verify-dns regeneration bake the same knob CSS. Unset drafts
+    // (no knobs key) stay byte-identical — default knob values emit no CSS.
+    const projectKnobs: import('@/types/template').KnobSelection | null =
+      project?.themeValues && typeof (project.themeValues as any).knobs === 'object' && (project.themeValues as any).knobs !== null
+        ? (project.themeValues as any).knobs
+        : null;
+    const themeValuesWithMood = projectMood
       ? { ...((themeValues as Record<string, any> | undefined) ?? {}), mood: projectMood }
       : themeValues;
+    const publishedThemeValues = projectKnobs
+      ? { ...((themeValuesWithMood as Record<string, any> | undefined) ?? {}), knobs: projectKnobs }
+      : themeValuesWithMood;
 
     // Phase 2: No longer generating htmlContent - using dynamic rendering
     // Published pages now render on-demand via React Server Components
@@ -339,6 +352,7 @@ async function publishHandler(req: NextRequest) {
         variantId,
         paletteId,
         mood: projectMood,
+        knobs: projectKnobs,
         baseUrl,
         canonicalDomain,
         // i18n (Phase 6): drives the per-locale fan-out. Absent/single-locale ⇒

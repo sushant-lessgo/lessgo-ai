@@ -30,6 +30,28 @@
 
 import type { TemplateId } from '@/types/service';
 import type { CopyEngine, CapabilityId, DesignStyle } from '@/types/brief';
+import type { KnobSelection } from '@/types/template';
+
+/**
+ * A named "look" (template-factory phase 8) — a curated bundle of a knob
+ * selection + the flat variant/palette refs, surfaced as a one-click preset in
+ * the picker (phase 9). Looks are List-3 DATA: they reference ONLY declared knob
+ * axes/values and real palette/variant ids (enforced by the looks-truthfulness
+ * conformance rule). `knobs` persist to `Project.themeValues.knobs`; `variantId`/
+ * `paletteId` keep being written to their flat columns (no migration, back-compat
+ * with serve gate / swap / analytics).
+ */
+export interface TemplateLook {
+  id: string;
+  label: string;
+  blurb: string;
+  /** Knob bundle — axes/values MUST be declared in the template's `knobs`. */
+  knobs: KnobSelection;
+  /** Flat variant ref — MUST be a real template variant id. */
+  variantId: string;
+  /** Flat palette ref — MUST be a real template palette id. */
+  paletteId: string;
+}
 
 export interface TemplateMeta {
   copyEngines: readonly CopyEngine[];
@@ -37,6 +59,8 @@ export interface TemplateMeta {
   designStyles: readonly DesignStyle[];
   /** Block-backed capability → section type that evidences it (conformance §6b). */
   capabilitySections?: Partial<Record<CapabilityId, string>>;
+  /** Named looks (phase 8; only knob-tokenized templates ship them). */
+  looks?: readonly TemplateLook[];
   retired?: true;
   bespoke?: true;
 }
@@ -92,6 +116,45 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
     designStyles: ['warm-human'],
     capabilities: ['lead-form'],
     capabilitySections: { 'lead-form': 'cta' },
+    // Named looks (phase 8). Each references ONLY declared hearth knob axes/values
+    // (see hearthKnobs) + real hearth palettes (palettes.ts) + real variants
+    // (hearthVariants). Visibly distinct across palette + density + button shape.
+    // "Warm Studio" is the DEFAULT look — all-default knobs + baked palette/variant,
+    // so selecting it is byte-identical to an unstyled hearth draft.
+    looks: [
+      {
+        id: 'warm-studio',
+        label: 'Warm Studio',
+        blurb: 'Soft cream warmth, generous rhythm — the classic hearth.',
+        knobs: { buttonShape: 'rounded', density: 'comfortable' },
+        variantId: 'classic',
+        paletteId: 'terracotta',
+      },
+      {
+        id: 'calm-sage',
+        label: 'Calm Sage',
+        blurb: 'Tighter, restful green rhythm for a composed feel.',
+        knobs: { buttonShape: 'rounded', density: 'compact' },
+        variantId: 'condensed',
+        paletteId: 'sage',
+      },
+      {
+        id: 'editorial-ochre',
+        label: 'Editorial Ochre',
+        blurb: 'Magazine spacing with crisp, square-cut corners.',
+        knobs: { buttonShape: 'square', density: 'spacious' },
+        variantId: 'editorial',
+        paletteId: 'ochre',
+      },
+      {
+        id: 'bold-plum',
+        label: 'Bold Plum',
+        blurb: 'Fully rounded, confident, jewel-toned.',
+        knobs: { buttonShape: 'pill', density: 'comfortable' },
+        variantId: 'classic',
+        paletteId: 'plum',
+      },
+    ],
   },
   lex: {
     copyEngines: ['trust'],

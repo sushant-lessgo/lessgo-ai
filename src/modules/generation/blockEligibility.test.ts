@@ -138,6 +138,85 @@ describe('pickFromSet — fallback order', () => {
   });
 });
 
+// ── template-factory phase 10 — seeded spread among eligible variants ─────────
+
+describe('pickFromSet — seeded spread (phase 10)', () => {
+  const twoEligible: SectionBlockSet = {
+    default: 'A',
+    variants: [decl({ layoutName: 'A' }), decl({ layoutName: 'B' })],
+  };
+
+  it('NO seed ⇒ legacy path (default-first), byte-identical', () => {
+    expect(pickFromSet(twoEligible, {})).toBe('A');
+  });
+
+  it('same seed twice ⇒ identical pick (reproducible)', () => {
+    expect(pickFromSet(twoEligible, { seed: 'tok-abc' })).toBe(
+      pickFromSet(twoEligible, { seed: 'tok-abc' })
+    );
+  });
+
+  it('spread: distinct seeds cover BOTH eligible variants', () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 20; i++) seen.add(pickFromSet(twoEligible, { seed: `tok-${i}` }));
+    expect(seen).toEqual(new Set(['A', 'B']));
+  });
+
+  it('seeded pick is always an ELIGIBLE (or default) name — never invalid', () => {
+    // C requires photos ⇒ ineligible without facts; seeded pool = {A,B} only.
+    const set: SectionBlockSet = {
+      default: 'A',
+      variants: [
+        decl({ layoutName: 'A' }),
+        decl({ layoutName: 'B' }),
+        decl({ layoutName: 'C', requiresAssets: ['photos'] }),
+      ],
+    };
+    for (let i = 0; i < 20; i++) {
+      const pick = pickFromSet(set, { seed: `t-${i}` });
+      expect(['A', 'B']).toContain(pick);
+    }
+  });
+
+  it('single eligible variant ⇒ seeded pick returns it (spread is a no-op)', () => {
+    const set: SectionBlockSet = { default: 'A', variants: [decl({ layoutName: 'A' })] };
+    expect(pickFromSet(set, { seed: 'anything' })).toBe('A');
+  });
+
+  it('nothing eligible under seed ⇒ default (never fail)', () => {
+    const set: SectionBlockSet = {
+      default: 'A',
+      variants: [
+        decl({ layoutName: 'A', requiresAssets: ['photos'] }),
+        decl({ layoutName: 'B', requiresAssets: ['logos'] }),
+      ],
+    };
+    expect(pickFromSet(set, { seed: 'x', assetFacts: NO_FACTS })).toBe('A');
+  });
+});
+
+describe('selectEligibleBlock — seeded spread over real meridian manifest (phase 10)', () => {
+  it('meridian features spreads between its two co-eligible variants across seeds', () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 20; i++) {
+      seen.add(selectEligibleBlock('meridian', 'features', { seed: `tok-${i}` })!);
+    }
+    expect(seen).toEqual(new Set(['HairlineFeatureGrid', 'LedgerFeatureList']));
+  });
+
+  it('meridian hero WITHOUT photos stays TerminalHero under any seed (asset-gated variant excluded)', () => {
+    for (let i = 0; i < 10; i++) {
+      expect(selectEligibleBlock('meridian', 'hero', { seed: `tok-${i}` })).toBe('TerminalHero');
+    }
+  });
+
+  it('same token → identical block across sections (reproducible)', () => {
+    const a = selectEligibleBlock('meridian', 'features', { seed: 'proj-42' });
+    const b = selectEligibleBlock('meridian', 'features', { seed: 'proj-42' });
+    expect(a).toBe(b);
+  });
+});
+
 describe('selectEligibleBlock — manifest-driven', () => {
   it('unknown (template, section) ⇒ null (legacy fallback)', () => {
     expect(selectEligibleBlock('lex', 'hero')).toBeNull();

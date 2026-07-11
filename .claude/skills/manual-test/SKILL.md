@@ -68,6 +68,20 @@ For **each** of Meridian / Hearth / Lex, run onboarding end-to-end with real inp
 - [ ] Switching palette/variant re-renders instantly — does **not** re-generate copy
 - [ ] Choice persists after save + reload; **published** page reflects it (`data-palette` / `data-variant`)
 
+### 5b. Editor-basics affordances  *(the human half of the editor-basics v0 contract)*
+Source of truth: the **editor-basics v0 contract** in `docs/task/template-factory.spec.md`.
+Its machine-checkable half (Editable wrappers per contract slot, button/logo/img
+marker wiring) is asserted in `templateConformance()`; these are the items jsdom
+**can't** drive, so a human signs them off per template. Run per template you're QA'ing.
+- [ ] **Header logo upload** — change AND remove the logo; wordmark fallback shows when removed (`logo_image` element)
+- [ ] **Image slots** — every image replaces AND removes via `uploadImage`/`bulkUploadImages` (no raw-URL inputs); collection-item images upload too
+- [ ] **Collections** (cards / gallery / list rows) — add, remove, AND reorder each collection; seeded defaults present (no silently-dropped designed element)
+- [ ] **Button Settings** — every button/CTA opens the Button-Settings popover; link + goal (GOAL_REF) configure and take effect on the published page
+- [ ] **Nav + footer links** — editable via `LinkTargetPopover` (scroll-to-section / page / custom URL); add/remove works; single-page hides the "Link to page" radio
+- [ ] **Social links** — add/edit/remove; published anchors correct (new-tab on external)
+- [ ] **Form blocks** — form-builder field config works; submission lands (see #3)
+- [ ] **Live palette / variant / knob / look switching** — switch each without breaking or clobbering edited content; copy JSON unchanged (no regen); editor AND published both reflect it
+
 ### 6. Failure / edge cases
 - [ ] Out of credits → graceful screen (no crash)
 - [ ] Generation failure → retry path works

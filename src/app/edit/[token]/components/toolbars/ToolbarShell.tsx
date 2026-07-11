@@ -136,7 +136,11 @@ export function ToolbarShell() {
     middleware: [
       offset(GAP + ARROW_HEIGHT),
       flip({ padding: 8 }),
-      shift({ padding: 8 }),
+      // crossAxis: a viewport-spanning section (tall hero mid-scroll) overflows
+      // BOTH top and bottom placements — flip gives up and the toolbar lands
+      // off-screen above the section. Cross-axis shift pulls it back into the
+      // viewport instead of leaving it unreachable.
+      shift({ padding: 8, crossAxis: true }),
       arrow({ element: arrowRef }),
     ],
   });

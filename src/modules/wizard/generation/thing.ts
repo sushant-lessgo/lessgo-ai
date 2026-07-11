@@ -27,7 +27,10 @@ import {
   defaultTechPremiumPalette,
   defaultTechPremiumVariant,
   defaultVestriaPalette,
+  meridianPalettes,
 } from '@/types/product';
+import { selectEligibleBlock } from '@/modules/generation/blockEligibility';
+import { pickSeeded } from '@/modules/generation/spread';
 import type { GoalIntent } from '@/modules/goals/vocabulary';
 import {
   intentToBriefGoal,
@@ -131,6 +134,18 @@ export interface ThingGenerationInput {
   styleVariantPicked?: boolean;
   stylePalettePicked?: boolean;
   styleMoodPicked?: boolean;
+
+  /**
+   * template-factory phase 10 — DETERMINISTIC generation spread signal. When the
+   * user made NO explicit style pick (meridian pilot has no picker), the wizard
+   * slot sets this to spread the STARTING palette + block-variants deterministically
+   * from the project token (same token → same start; different tokens vary). An
+   * explicit `paletteId`/`variantId` ALWAYS wins over spread. Absent/false ⇒ the
+   * pilot-locked defaults (mint / declared blocks) — byte-identical to today; the
+   * mechanism is threaded-but-DORMANT until the slot feeds this flag (mirrors the
+   * cardCountHints / collections seams).
+   */
+  styleAutoAssign?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -295,6 +310,43 @@ function applyHeroVariantToFinalContent(fc: any, variant: string): void {
       applyTo(page?.content, page?.sectionLayouts);
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Generation spread (template-factory phase 10) — meridian single-page only.
+// Reproducible variety from the project token; an explicit user pick wins.
+// ---------------------------------------------------------------------------
+
+/** Spread applies only when the user made NO explicit style pick AND the wizard
+ * signalled auto-assign. An explicit palette/variant is honoured (never spread). */
+function shouldSpreadMeridian(input: ThingGenerationInput): boolean {
+  if (input.paletteId || input.variantId) return false;
+  return input.styleAutoAssign === true;
+}
+
+/** Seeded meridian starting palette (else the pilot default 'mint'). */
+function spreadMeridianPalette(token: string): string {
+  return pickSeeded(meridianPalettes, token, 'palette') ?? PILOT_PALETTE;
+}
+
+/**
+ * Re-pick each section's block among its ELIGIBLE variants, seeded by the token.
+ * Keys of `uiblocks` are section TYPES. No asset facts ⇒ asset-gated variants
+ * (e.g. EditorialPhotoHero) stay ineligible, so the hero keeps its declared
+ * default; only same-contract variants (features/testimonials) spread. Sections
+ * with no manifest entry keep their incoming layout name. Copy is unchanged —
+ * spread only swaps among co-eligible, same-consumes blocks.
+ */
+function spreadMeridianBlocks(
+  uiblocks: Record<string, string>,
+  token: string
+): Record<string, string> {
+  const out: Record<string, string> = { ...uiblocks };
+  for (const sectionType of Object.keys(uiblocks)) {
+    const pick = selectEligibleBlock(PILOT_TEMPLATE, sectionType, { seed: token });
+    if (pick) out[sectionType] = pick;
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -629,7 +681,14 @@ export async function runThingGeneration(
   }
 
   // ─── Copy + Save (shared tail; strategy from the gate or the fetch below) ───
-  const runCopyAndSave = async (strategy: ProductStrategyOutput): Promise<GenerationResult> => {
+  const runCopyAndSave = async (rawStrategy: ProductStrategyOutput): Promise<GenerationResult> => {
+    // phase 10 — meridian single-page block-variant spread (seeded, reproducible).
+    // Multipage/vestria unaffected; explicit picks honoured via shouldSpreadMeridian.
+    const strategy: ProductStrategyOutput =
+      !multipageTemplate && shouldSpreadMeridian(input)
+        ? { ...rawStrategy, uiblocks: spreadMeridianBlocks(rawStrategy.uiblocks, tokenId) }
+        : rawStrategy;
+
     cb.onStage?.('copy');
     let copySections: Record<string, SectionCopy>;
     try {
@@ -657,7 +716,10 @@ export async function runThingGeneration(
 
     cb.onStage?.('saving');
     const templateId = multipageTemplate ? resolvedTemplateId : PILOT_TEMPLATE;
-    const paletteId = multipageTemplate ? input.paletteId ?? defaultVestriaPalette : PILOT_PALETTE;
+    // phase 10 — meridian STARTING palette spread (seeded) when no explicit pick.
+    const paletteId = multipageTemplate
+      ? input.paletteId ?? defaultVestriaPalette
+      : input.paletteId ?? (shouldSpreadMeridian(input) ? spreadMeridianPalette(tokenId) : PILOT_PALETTE);
     const variantId = multipageTemplate ? input.variantId ?? 'tailored' : PILOT_VARIANT;
     try {
       const { finalContent } = buildFinalContent({
