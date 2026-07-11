@@ -263,3 +263,68 @@ NOT run against live KV. Only one KV instance is configured in `.env.local` (`KV
 
 ### Open risks
 - Live customer #0 serve path unproven until the Phase 8 prod dry-run (KV write → curl apex `/` → delete). Code path is identical to Branch B, which is live.
+
+## Phase 7 — reserved-slug hardening + asset-base regression guard
+
+**Files changed**
+- `src/app/api/checkSlug/route.ts` — reserved/format guard before DB check
+- `src/lib/staticExport/assetBase.guard.test.ts` (new) — D5 apex-origin regression guard
+
+(`src/lib/security.ts` NOT touched — `validateSlug` was already exported.)
+
+### `src/app/api/checkSlug/route.ts`
+Added `import { validateSlug } from "@/lib/security"`. After the empty-slug 400
+guard and BEFORE the `prisma.publishedPage.findUnique` existence check, run
+`validateSlug(slug)`; if `!valid`, return `{ available: false, reason }` (matches
+the route's `{ available }` shape, adds the existing validator's `error` as an
+optional `reason`). Net effect: `app`, `dashboard`, `admin`, `api`, `www`, `mail`,
+`ftp`, `ssl` (security.ts:205 reserved list) — plus any malformed slug (uppercase,
+leading/trailing hyphen, illegal chars) — now report unavailable up-front instead
+of letting a user burn a publish attempt on a slug the publish path rejects.
+- `/api/checkSlug?slug=app` → `{ available: false, reason: "Slug is reserved" }`.
+- `validateSlug` is the same validator the publish path uses, so UI + publish agree.
+
+### `src/lib/staticExport/assetBase.guard.test.ts` (new)
+Renders a form-bearing, analytics-enabled published page through the real
+`generateStaticHTML` exporter (meridian hero with `form_id`, `content.forms`
+present → gates form.v1.js; `analyticsOptIn: true` → gates a.v2.js). `vi.mock('server-only')`
+neutralized so the exporter runs under jsdom (same pattern as the sibling
+realProof/multipage staticExport tests). Three assertions on the rendered HTML:
+1. `https://lessgo.ai/assets/fonts-self-hosted.css`
+2. `https://lessgo.ai/assets/form.v1.js`
+3. `https://lessgo.ai/assets/a.v2.js`
+Plus a negative: `https://app.lessgo.ai/assets/` never appears.
+
+Pins BOTH origin sources named in D5: htmlGenerator's `assetBase`
+(`NEXT_PUBLIC_APP_URL || 'https://lessgo.ai'`, now at htmlGenerator.ts:305) and
+the hardcoded `https://lessgo.ai/assets/{form.v1.js,a.v2.js}` literals in
+LandingPagePublishedRenderer.tsx:252,260.
+
+### Deviations
+- The plan says stub `NEXT_PUBLIC_DASHBOARD_URL` only. I ALSO stub
+  `NEXT_PUBLIC_APP_URL=''` (via `vi.stubEnv`) so `assetBase` deterministically
+  falls back to the apex default regardless of ambient test env (.env.local sets
+  `NEXT_PUBLIC_APP_URL=https://lessgo.ai`, but vitest doesn't load NEXT_PUBLIC_*
+  reliably). Conservative: forces the hermetic apex default and strengthens the
+  pin. Both stubs cleaned up in `afterEach` via `vi.unstubAllEnvs()`.
+- No `security.ts` change was needed (validator already exported) — Files-touched
+  listed it as conditional; left untouched.
+
+### tracking-pixels asset-base check
+Verified htmlGenerator.ts:305 is still `process.env.NEXT_PUBLIC_APP_URL || 'https://lessgo.ai'`
+(plan referenced :296; tracking-pixels' head-tag/meta-pixel additions shifted the
+line to :305 but did NOT change the expression). Renderer literals at
+LandingPagePublishedRenderer.tsx:252,260 unchanged. Guard holds; nothing to flag.
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 2261 passed | 3 skipped (149 files); new guard test passes;
+  i18nHonesty did NOT flake this run.
+- `npx vitest run src/lib/staticExport/assetBase.guard.test.ts` — 1 passed (isolated).
+- `npm run build` — green (~full slice-2 gate; middleware 81.8 kB, all routes built).
+- Manual dev curl not run; checkSlug change code-verified above (reviewer can spot
+  `/api/checkSlug?slug=app` → unavailable/reserved).
+
+### Open risks
+- None new. checkSlug is a GET availability probe; the authoritative publish-time
+  reject already existed via the same `validateSlug` — this only surfaces it earlier.
