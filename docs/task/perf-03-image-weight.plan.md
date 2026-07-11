@@ -23,7 +23,7 @@ Key design decisions (from scout + plan review):
 - phase 2 write-layer base64/blob guard: DONE (review loops 1, ship). Pure isForbiddenImageSrc + updateElementContent guard + uploadImageFromObjectUrl adapter + ImageToolbar reload-death fix. tsc+2016 tests green. Follow-up nit: declare uploadImageFromObjectUrl in types/store/actions.ts (currently `as any` read; benign).
 - phase 3 pilot — techpremium img attrs: code DONE (review loops 1, ship). 10 blocks × 2 renderers, eager Hero+Nav / lazy rest, all reservation pre-existing (GalleryPreview masonry intentionally no aspect-ratio). tsc+build+tests green. PILOT gate CLEARED 2026-07-11 (commit ff8e2ad8, user Option B — accept green gates + parity review, skip empirical LCP check).
 - phase 4 sweep — meridian + surge + shared blog blocks: DONE (review loops 1, ship). meridian Hero+Nav eager, surge Nav eager / Footer lazy, blog blocks +decoding (single-file, no .published pair). tsc+build+tests green.
-- phase 5 sweep — lumen: pending
+- phase 5 sweep — lumen: DONE (review loops 1, ship). Hero+Nav eager, Portfolio+About lazy. LumenAbout STOP guard did NOT trip (published renders <img>, pure no-op). All reservation pre-existing. tsc+build+tests green.
 - phase 6 shared Img primitive — granth + vestria: pending
 - phase 7 final verification + acceptance: pending
 

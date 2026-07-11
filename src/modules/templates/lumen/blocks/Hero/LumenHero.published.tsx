@@ -63,7 +63,7 @@ export default function LumenHeroPublished(props: Props) {
           <div className="lm-hero-art">
             <div className="lm-ph lm-shot port on-dark">
               {props.hero_image ? (
-                <img src={props.hero_image} alt={props.badge_text || 'Hero portrait'} />
+                <img src={props.hero_image} alt={props.badge_text || 'Hero portrait'} loading="eager" decoding="async" />
               ) : (
                 <span className="lm-ph__tag">Hero portrait</span>
               )}

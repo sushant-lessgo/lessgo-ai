@@ -85,7 +85,7 @@ export default function LumenNav({ sectionId }: { sectionId: string }) {
         <div className="lm-nav-in">
           <span className="lm-brand">
             {blockContent.logo_image ? (
-              <img className="lm-brand__img" src={blockContent.logo_image} alt={blockContent.logo_text || 'Logo'} />
+              <img className="lm-brand__img" src={blockContent.logo_image} alt={blockContent.logo_text || 'Logo'} loading="eager" decoding="async" />
             ) : (
               <>
                 <LumenEditable

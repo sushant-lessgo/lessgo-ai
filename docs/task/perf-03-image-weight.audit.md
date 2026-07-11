@@ -228,3 +228,39 @@ attribute parity confirmed for every pair.
 - `npm run build` — green (full build incl. published CSS/assets recompile completed, route table printed).
 
 **Open risks:** None. Attrs-only changes, edit/published parity confirmed identical for every pair, layout/CSS unchanged.
+
+---
+
+## Phase 5 — sweep: lumen
+
+**Files changed** (all under `src/modules/templates/lumen/blocks/`):
+- `Hero/LumenHero.tsx`
+- `Hero/LumenHero.published.tsx`
+- `Header/LumenNav.tsx`
+- `Header/LumenNav.published.tsx`
+- `Portfolio/LumenCategoryGallery.tsx`
+- `Portfolio/LumenCategoryGallery.published.tsx`
+- `About/LumenPhotographerAbout.tsx`
+- `About/LumenPhotographerAbout.published.tsx`
+
+**What changed** — attrs-only, one `<img>` per file, edit/published sets IDENTICAL:
+
+| Block | img site | attrs added | wrapper reservation |
+|---|---|---|---|
+| Hero (LCP) | hero_image | `loading="eager" decoding="async"` | `.lm-ph.lm-shot.port` → `.lm-shot.port{aspect-ratio:4/5}` (pre-existing) |
+| Header/Nav (above-fold logo) | logo_image `.lm-brand__img` | `loading="eager" decoding="async"` | logo, no aspect wrapper needed (no CLS target) |
+| Portfolio (below-fold grid) | cover_image | `loading="lazy" decoding="async"` | `.lm-ph.lm-shot.{land\|port}` → `.lm-shot{aspect-ratio:3/2 \| 4/5}` (pre-existing, Portfolio/styles.ts:22) |
+| About (portrait, below-fold) | about_image | `loading="lazy" decoding="async"` | `.lm-about-portrait .lm-ph{aspect-ratio:4/5}` (pre-existing, About/styles.ts:9); published also has inline `style={{aspectRatio:'4 / 5'}}` |
+
+- Eager: Hero + Nav. Lazy: Portfolio + About.
+- No aspect-ratio added anywhere — every lazied img's CSS wrapper already reserves space (verified in `Portfolio/styles.ts` and `About/styles.ts`). No width/height attrs added.
+
+**LumenAbout STOP-guard result:** VISUAL NO-OP confirmed, landed. The published renderer already renders `<img>` when `about_image` is present (`LumenPhotographerAbout.published.tsx:36-40`) inside `.lm-ph` — no structural edit/published divergence. Edit and published now carry the identical `loading="lazy" decoding="async"` attr set. STOP guard did NOT trip: no conditional-render or structural difference; only attrs added. (Pre-existing note, not introduced here: published `.lm-ph` also carries an inline `aspectRatio:'4 / 5'` belt-and-suspenders over the CSS rule; edit relies on the CSS rule only. This divergence predates Phase 5 and was left untouched — attrs-only scope.)
+
+**Deviations from plan:** None.
+
+**Test results:**
+- `npx tsc --noEmit` — green (no output).
+- `npm run build` — green (full build incl. published CSS/assets recompile; route table printed).
+
+**Open risks:** None. Attrs-only, edit/published parity identical for all 4 pairs, layout/CSS unchanged. Live Kundius page unaffected visually.

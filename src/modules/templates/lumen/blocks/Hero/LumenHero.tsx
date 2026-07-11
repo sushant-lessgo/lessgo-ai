@@ -88,7 +88,7 @@ export default function LumenHero({ sectionId }: { sectionId: string }) {
           <div className="lm-hero-art">
             <div className="lm-ph lm-shot port on-dark">
               {blockContent.hero_image ? (
-                <img src={blockContent.hero_image} alt={blockContent.badge_text || 'Hero portrait'} />
+                <img src={blockContent.hero_image} alt={blockContent.badge_text || 'Hero portrait'} loading="eager" decoding="async" />
               ) : (
                 <span className="lm-ph__tag">Hero portrait — executive, on-brand</span>
               )}

@@ -66,7 +66,7 @@ export default function LumenCategoryGalleryPublished(props: Props) {
                         data-lumen-images={JSON.stringify(srcs)}
                       >
                         <div className={`lm-ph lm-shot ${c.ratio === 'port' ? 'port' : 'land'}`}>
-                          {c.cover_image ? <img src={c.cover_image} alt={c.name || ''} /> : <span className="lm-ph__tag">{(c.name || 'Category')} — cover</span>}
+                          {c.cover_image ? <img src={c.cover_image} alt={c.name || ''} loading="lazy" decoding="async" /> : <span className="lm-ph__tag">{(c.name || 'Category')} — cover</span>}
                           <span className="open">Open gallery</span>
                         </div>
                         <div className="lm-fig">
