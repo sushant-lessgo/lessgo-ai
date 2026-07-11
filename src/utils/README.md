@@ -17,13 +17,12 @@ not exhaustive.
 
 ## Editor lifecycle / state
 `editorActivityState.ts`, `readinessDetection.ts`, `hydrationDetection.ts`,
-`strictModeSafeListeners.ts`, `trackEdit.ts`, `unifiedModeSelector.ts`,
-`versionManager.ts`.
+`strictModeSafeListeners.ts`, `trackEdit.ts`, `unifiedModeSelector.ts`.
 
 ## Persistence & storage
 `storage.ts` (per-token storage keys, project access tracking),
-`storageManager.ts` (maintenance/quota cleanup), `statePersistence.ts`,
-`autoSaveDraft.ts`.
+`storageManager.ts` (maintenance/quota cleanup), `autoSaveDraft.ts`
+(live regen save path — `completeSaveDraft`, dynamic-imported by regen/ai actions).
 
 ## Content / text / formatting
 `contentSerialization.ts`, `textFormatting.ts`, `formatUtils.ts`,

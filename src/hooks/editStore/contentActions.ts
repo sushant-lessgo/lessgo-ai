@@ -12,6 +12,7 @@ import type { ImageAsset } from '@/types/core/images';
 import type { SectionType } from '@/types/core/content';
 
 import { logger } from '@/lib/logger';
+import { EDITOR_DEBUG } from '@/lib/debugFlags';
 /**
  * ===== UTILITY FUNCTIONS =====
  */
@@ -58,17 +59,19 @@ export function createContentActions(set: any, get: any): ContentActions {
     updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) =>
       set((state: EditStore) => {
         const updateTime = Date.now();
-        logger.debug(`🔄 [${updateTime}] updateElementContent CALLED:`, {
-          sectionId,
-          elementKey,
-          contentType: typeof content,
-          contentLength: Array.isArray(content) ? content.length : content?.length,
-          contentPreview: Array.isArray(content)
-            ? JSON.stringify(content[0])?.substring(0, 50)
-            : content?.toString().substring(0, 50),
-          callStack: new Error().stack?.split('\n')[2]?.trim()
-        });
-        
+        if (EDITOR_DEBUG) {
+          logger.debug(`🔄 [${updateTime}] updateElementContent CALLED:`, {
+            sectionId,
+            elementKey,
+            contentType: typeof content,
+            contentLength: Array.isArray(content) ? content.length : content?.length,
+            contentPreview: Array.isArray(content)
+              ? JSON.stringify(content[0])?.substring(0, 50)
+              : content?.toString().substring(0, 50),
+            callStack: new Error().stack?.split('\n')[2]?.trim()
+          });
+        }
+
         if (!state.content[sectionId]) {
           logger.warn(`🔄 [${updateTime}] Section ${sectionId} not found`);
           return;
@@ -97,8 +100,11 @@ export function createContentActions(set: any, get: any): ContentActions {
               (state.content[sectionId].elements as Record<string, any>)[collectionName] = updatedCollection;
 
               // History: raw collection-array snapshot under the collection's storage key.
-              // Skip when nothing actually changed. elementKey = full dotted key (coalesce identity).
-              if (JSON.stringify(oldCollection) !== JSON.stringify(updatedCollection)) {
+              // Skip when nothing actually changed. Direct field compare (no serialization):
+              // locate the target item by id and compare only the edited field.
+              // elementKey = full dotted key (coalesce identity).
+              const oldItem = oldCollection.find(item => item.id === itemId);
+              if (oldItem?.[fieldName] !== content) {
                 pushContentHistoryEntry(state, {
                   type: 'content',
                   description: `Edited ${elementKey}`,
