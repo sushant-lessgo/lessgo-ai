@@ -431,6 +431,27 @@ export interface PersistenceSlice {
    *  cleared on a successful save that carried it. NEVER in `partialize`. */
   baselineDirty: boolean;
 
+  /** data-capture Phase 3 — regen re-freeze accumulator: normalized element
+   *  text queued by section/element regen to become the NEW AI baseline on the
+   *  next save (`{ [sectionId]: { [elementKey]: normalizedText } }`). Rides the
+   *  save payload as `aiBaselinePatch` alongside `baseline`; the server
+   *  deep-merges it over `Project.aiBaseline` (patch wins). NEVER in `partialize`. */
+  aiBaselinePatch: Record<string, Record<string, string>> | null;
+  /** Queue a regen re-freeze. `mode='replace'` (section regen) overwrites the
+   *  section's queued map; `mode='merge'` (element-variation accept, default)
+   *  layers one element into it. Values must already be normalized (extractElementText). */
+  queueAiBaselinePatch: (
+    sectionId: string,
+    elements: Record<string, string>,
+    mode?: 'replace' | 'merge',
+  ) => void;
+  /** Selective clear after a save SUCCESS: removes only accumulator sections whose
+   *  CURRENT value deep-equals the shipped snapshot's — sections queued/overwritten
+   *  after the snapshot survive to ship next. NEVER blanket-clears. */
+  clearShippedAiBaselinePatch: (
+    shipped: Record<string, Record<string, string>> | null | undefined,
+  ) => void;
+
   // Persistence State
   persistence: {
     isDirty: boolean;

@@ -88,3 +88,72 @@
 ### Open risks
 - Element shapes not covered by `extractElementText` (number/boolean values, object-array card structures) get no baseline and are silently excluded from capture — matches the plan (text-only). No corruption risk (same on both sides).
 - Legacy projects with no `aiBaseline` freeze current (possibly already-edited) text as baseline on first post-deploy save (plan Unresolved question — accepted for minimum build).
+
+## Phase 3 — Regen re-freeze plumbing + regen PostHog events
+
+### Files changed
+- `src/types/store/state.ts` — added `aiBaselinePatch` state field + `queueAiBaselinePatch` / `clearShippedAiBaselinePatch` action-type signatures to `PersistenceSlice` (colocated with `baseline`/`baselineDirty`; `EditStore extends StoreState` ⇒ methods land on the store type).
+- `src/stores/editStore.ts` — `aiBaselinePatch: null` initial state (in `createInitialState`, beside `baseline`); the two action implementations in the "Token-specific actions" inline block.
+- `src/hooks/editStore/aiActions.ts` — regen re-freeze queue calls + the 2 PostHog emits + module-scoped attempt counters + `trackRegen` helper.
+- `src/utils/autoSaveDraft.ts` — ship `payload.aiBaselinePatch` (deep snapshot) in the baseline ship block; selective clear on save success.
+- `src/hooks/editStore/persistenceActions.ts` — **UNTOUCHED** (see below).
+
+### Patch queue / ship / clear wiring
+- **Queue (aiActions.ts).**
+  - `regenerateSection` success: after `data.content` is applied, read the applied `content[sectionId].elements` back from `get()`, normalize each with `extractElementText` (imported from `@/lib/editDelta/capture` — the SAME server extractor, so the re-frozen string is byte-identical to the server-side diff's `collectElements` output), and `queueAiBaselinePatch(sectionId, normalized, 'replace')`. Runs BEFORE the `completeSaveDraft` autosave so the patch ships in that save.
+  - `regenerateElementWithVariations`: emits `element_regenerated` on the REQUEST (variations returned); no re-freeze here (per plan).
+  - `applyVariation` (accept): `queueAiBaselinePatch(sectionId, { [elementKey]: variation })` — element-level merge; `variation` is already a string (normalized). Rides the autosave triggered by `updateElementContent`.
+  - `queueAiBaselinePatch(sectionId, elements, mode='merge')`: `mode='replace'` (section regen) overwrites the section's queued map; `mode='merge'` (default, element accept) layers one element in. Filters to string values only. The optional `mode` param is the faithful implementation of plan step 3's "section-level replace, element-level merge" (the two call sites need distinct semantics; a single unconditional merge would leave orphaned keys on section regen, a single unconditional replace would drop a prior element-accept in the same section between saves).
+- **Ship (autoSaveDraft.ts).** In the same `try` block as the `baseline` ship: if `aiBaselinePatch` is non-empty, `JSON.parse(JSON.stringify(...))` deep-snapshots it into a function-scoped `shippedAiBaselinePatch` and assigns the snapshot to `payload.aiBaselinePatch`. The deep snapshot is the crux — a `queueAiBaselinePatch` that lands after this read (immer produces a fresh object, but the snapshot is fully detached regardless) cannot mutate either what we ship or what we later clear.
+- **Selective clear (deep-equal).** On the save-success path only (the `catch` returns without clearing → failure re-ships the whole accumulator), `clearShippedAiBaselinePatch(shippedAiBaselinePatch)` iterates the shipped snapshot's sections; for each, if the CURRENT accumulator section exists and deep-equals the shipped section (same key set + identical string values), it `delete`s that section; otherwise it survives. When the accumulator empties it is set to `null`. A section overwritten after the snapshot (regen-B while save-A in flight) has a different value ⇒ survives ⇒ ships on the next save. This is the exact anti-corruption guarantee: never blanket-clear, so no section's re-freeze is dropped and no regen masquerades as a giant user edit vs a stale baseline.
+
+### persistenceActions.ts left untouched (deliberate)
+The clear-after-save hook belongs in `autoSaveDraft.ts` (where the snapshot lives), NOT in `persistenceActions.save()`. Regen paths save via `completeSaveDraft` → `autoSaveDraft` (section regen calls it explicitly; element accept goes through `updateElementContent`'s autosave). `persistenceActions.save()` is a separate payload builder that does not ship (and never clears) `aiBaselinePatch`; if a save happens to go through it while a patch is queued, the patch is simply NOT dropped (never blanket-cleared) and ships on the next `autoSaveDraft` save. No data loss, so no edit needed there — matches the plan's "ONLY if the clear hook belongs there, else leave untouched".
+
+### Same-store-instance evidence
+Mirrors the proven `baseline`/`baselineDirty` round-trip through these exact files:
+- **State** added in `editStore.ts` `createInitialState` + inline actions → part of the single token-scoped store instance built by `createEditStore(tokenId)`.
+- **Queue** in `aiActions.ts` uses the store's own `get()` (the immer closure's getter) — definitionally the same instance the actions belong to. The autosave it triggers is keyed by `currentState.tokenId` (that same store's tokenId).
+- **Ship + clear** in `autoSaveDraft.ts` resolve the store via `storeManager.getEditStore(tokenId).getState()` — the identical accessor the working `baseline` read (L184) and `markBaselineSaved()` clear (L289) already use. `storeManager.getEditStore` returns the per-token singleton, so the same `tokenId` yields the same instance the queue wrote to. Since `baseline` (which uses this identical wiring across all three files) already ships and clears correctly in Phase 1/2, `aiBaselinePatch` inherits the same guarantee.
+
+### PostHog events (props + sources)
+- `section_regenerated` `{ sectionType, attemptNumber, templateId, audienceType }` — emitted in `regenerateSection` success after the re-freeze. `sectionType` = `sectionId.split('-')[0]` (in scope as `sectionType`); `attemptNumber` from module-scoped `sectionAttempts` Map keyed `${sectionId}`; `templateId`/`audienceType` from the edit-store meta (`get().templateId`/`.audienceType`, same token-scoped store).
+- `element_regenerated` `{ sectionType, elementKey, attemptNumber, templateId, audienceType }` — emitted in `regenerateElementWithVariations` after the variations response (the REQUEST). `attemptNumber` from `elementAttempts` Map keyed `${sectionId}.${elementKey}`; other props from store meta.
+- Both via `trackRegen(event, props)` — a fire-and-forget wrapper (`posthog.capture` in try/catch, pattern from `src/utils/trackEdit.ts`) so a posthog failure never breaks a regen. `posthog-js` statically imported (same as `trackEdit.ts`); these actions only execute client-side.
+
+### Deviations / judgment calls (in-scope)
+- **`mode` param on `queueAiBaselinePatch`** (see above) — added to faithfully implement "section-level replace, element-level merge"; the plan's shorthand signature `(sectionId, elements)` is extended with an optional `mode?: 'replace'|'merge'` (default merge). Section regen passes `'replace'`.
+- **`applyVariation` re-freezes unconditionally** (including index 0 = "keep current"). Implemented per the plan's explicit instruction (`applyVariation → queueAiBaselinePatch(sectionId, { [elementKey]: variation })`, no index guard). NUANCE noted for the human gate: index 0 is the current (possibly user-edited) content prepended by `regenerateElementWithVariations`; accepting it re-freezes the baseline to the current text, which would zero out a prior EditDelta for that element. This is defensible (the user actively re-selected that text) and matches the plan literally; flagging it in case the PO wants an index-!==-0 guard later.
+
+### Verification results
+- `npx tsc --noEmit`: only the known pre-existing `src/app/page.tsx` `@/assets/images/founder.jpg` error; zero errors from the changed files.
+- `npm run test:run`: GREEN — 140 files passed / 1 skipped; 2143 tests passed / 3 skipped. No failures (the known `i18nHonesty` env-flake passed this run; no re-run needed).
+
+### Deferred / not done
+- **Focused `clearShippedAiBaselinePatch` deep-equal unit test NOT added.** None of Phase 3's Files-touched are test files, and creating a new test file is outside the phase's Files-touched list (hard scope rule). Noted per the task's "or note why not". The deep-equal selective-clear logic is small and fully described above; recommend the orchestrator authorize a follow-up micro-scope (`src/hooks/editStore/aiBaselinePatch.test.ts`) to add the queue-A → snapshot-A → queue-B → clear(A) ⇒ B-survives/A-gone assertion as the automated race proof.
+- Live regen→save re-freeze check + two-regens-in-flight race check + PostHog debug prop check: DEFERRED to the final human gate (no browser run attempted), per task.
+
+### Open risks
+- Index-0 variation-accept re-freeze (see Deviations) can erase a prior edit delta — accepted per plan, flagged for PO.
+- `attemptNumber` is session/in-memory (module-scoped Map) — resets on reload; acceptable per plan (reasons inferred from inter-attempt deltas later).
+
+### Phase 3 follow-up (coordinator-authorized, post-review)
+Two small additions authorized by the coordinator after Phase 3 passed review:
+
+1. **New test file `src/hooks/editStore/aiBaselinePatch.test.ts`** (coordinator authorized this single scope-expansion) — drives the REAL token-scoped store (`createEditStore('tok-aibp')`, same pattern as `setItemAlt.test.ts`) so it exercises the actual `queueAiBaselinePatch` / `clearShippedAiBaselinePatch` implementations (not a reimplementation). 9 cases proving:
+   - (a) queue A → ship snapshot(A) → queue B (other section) → `clearShipped(A)` ⇒ B survives, A gone (the in-flight-race guarantee).
+   - (b) ship(A `{headline:'v'}`) → re-queue same section `{headline:'v2'}` (replace) → `clearShipped(A)` ⇒ A' survives (deep-equal fails).
+   - (b2) element-level merge into a shipped section (adds a key) also defeats deep-equal ⇒ that section survives whole.
+   - (c) save FAILURE (clear never called) ⇒ A retained for re-ship.
+   - clearing the last matching section ⇒ accumulator back to `null`.
+   - matching section dropped while a non-shipped section is kept; `clearShipped(null/undefined/{})` no-ops; `replace` overwrites vs `merge` layers.
+   This is the automated regression guard for the feature's core corruption-prevention mechanism (previously inspection-only). `npx vitest run src/hooks/editStore/aiBaselinePatch.test.ts` → 9/9 pass.
+
+2. **Cast cleanup** — dropped the two `(get() as any).queueAiBaselinePatch(...)` casts in `aiActions.ts` (section regen + `applyVariation`), now `(get() as EditStore).queueAiBaselinePatch(...)` since the method is typed on `PersistenceSlice`. `EditStore` cast retained (that's the store's own type; `get()` is untyped `any` in the factory closure). tsc stays clean.
+
+**Verification (follow-up):**
+- `npx tsc --noEmit`: only the known `src/app/page.tsx` `founder.jpg` error; nothing from the new test or cast changes.
+- `npx vitest run src/hooks/editStore/aiBaselinePatch.test.ts`: 9/9 pass.
+- `npm run test:run`: 141 files passed / 1 failed / 1 skipped — 2151 passed / 1 failed / 3 skipped. The single failure is the known env-flake `src/lib/i18n/i18nHonesty.test.ts` (`generateStaticHTML` hitting the 5000ms `testTimeout` under full-suite load) — re-ran ISOLATED and it passed 15/15 in 3.72s. No NEW failures introduced; the new `aiBaselinePatch.test.ts` passed within the full run.
+
+Files changed in this follow-up: `src/hooks/editStore/aiBaselinePatch.test.ts` (new), `src/hooks/editStore/aiActions.ts` (cast cleanup only).

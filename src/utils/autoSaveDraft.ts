@@ -140,6 +140,11 @@ export async function autoSaveDraft(params: AutoSaveDraftParams): Promise<AutoSa
       ...(lastSaved && { lastSaved }),
     };
 
+    // data-capture Phase 3 — deep snapshot of the aiBaselinePatch this save ships.
+    // Function-scoped so the success handler can selectively clear exactly what
+    // was shipped (entries queued AFTER the snapshot survive). null = nothing shipped.
+    let shippedAiBaselinePatch: Record<string, Record<string, string>> | null = null;
+
 
 // Step 3: Include page data with serialization support
    let pageData: any = null;
@@ -183,6 +188,17 @@ if (includePageData) {
     const editStoreState = storeManager.getEditStore(tokenId).getState();
     if (editStoreState.baselineDirty && editStoreState.baseline) {
       payload.baseline = editStoreState.baseline;
+    }
+
+    // data-capture Phase 3 — ship the regen re-freeze accumulator (same block as
+    // baseline). Deep-snapshot (structuredClone-by-JSON) so a queue that lands
+    // AFTER this read does not mutate what we ship OR what we later selectively
+    // clear on success. Cleared via clearShippedAiBaselinePatch() only on success.
+    const patch = editStoreState.aiBaselinePatch;
+    if (patch && Object.keys(patch).length > 0) {
+      const snap = JSON.parse(JSON.stringify(patch)) as Record<string, Record<string, string>>;
+      payload.aiBaselinePatch = snap;
+      shippedAiBaselinePatch = snap;
     }
   } catch (error) {
     logger.warn('⚠️ Could not read baseline for save:', error);
@@ -289,6 +305,19 @@ if (includePageData) {
         storeManager.getEditStore(tokenId).getState().markBaselineSaved();
       } catch (error) {
         logger.warn('⚠️ Could not clear baseline dirty flag:', error);
+      }
+    }
+
+    // data-capture Phase 3 — this save shipped a re-freeze patch → selectively
+    // clear ONLY the sections that still deep-equal the shipped snapshot. A patch
+    // queued while this save was in flight (different value) survives to re-ship.
+    // Runs on SUCCESS only (this block is skipped by the catch → failure re-ships).
+    if (shippedAiBaselinePatch !== null) {
+      try {
+        const { storeManager } = await import('@/stores/storeManager');
+        storeManager.getEditStore(tokenId).getState().clearShippedAiBaselinePatch(shippedAiBaselinePatch);
+      } catch (error) {
+        logger.warn('⚠️ Could not clear shipped aiBaselinePatch:', error);
       }
     }
 

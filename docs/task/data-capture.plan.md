@@ -11,8 +11,8 @@ Build the minimum data-capture layer before private beta: (1) an `EditDelta` tab
 ## Progress log
 
 - phase 1 Prisma migration + edit-distance util: done (review loops 1, ship; migration applied via db-execute + migrate-resolve due to held-branch shared-DB drift; commit 29efec07)
-- phase 2 server-side baseline freeze + delta capture in saveDraft: done (review loops 1, ship; parity invariant traced end-to-end + holds; demo-token capture skip added; commit pending-sha)
-- phase 3 regen re-freeze plumbing + regen PostHog events: pending
+- phase 2 server-side baseline freeze + delta capture in saveDraft: done (review loops 1, ship; parity invariant traced end-to-end + holds; demo-token capture skip added; commit 3720a0a8)
+- phase 3 regen re-freeze plumbing + regen PostHog events: done (review loops 1, ship; pinned deep-equal selective clear + 9/9 race unit test; boundary-safe capture import; commit pending-sha)
 - phase 4 failure telemetry (PostHog): pending
 
 ## Coordination constraints (from PO — non-negotiable)
