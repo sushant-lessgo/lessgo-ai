@@ -277,6 +277,10 @@ export function buildDesignKit(engine: CopyEngine): DesignKit {
       'Surface tones (light/dark bands) selected with the template-agnostic `[data-surface]` attribute — never per-template surface classes.',
       'Every element class prefixed `lg-<templateId>-` to avoid collision across templates.',
       'Only the self-hosted fonts above (see `src/styles/fonts-self-hosted.css`).',
+      // HANDOFF MARKER CONVENTION — the handoff lint (`src/modules/templates/handoffLint.ts`,
+      // `npm run kit:lint`) checks the output against exactly these two markers; keep in sync.
+      'Each required section above is ONE container carrying `data-section="<sectionType>"` (values = the section names listed above).',
+      'Each contract slot is representable by `data-slot="<slotKey>"` OR a real editable element `data-element-key="<slotKey>"`, placed INSIDE its section container.',
     ],
   };
 

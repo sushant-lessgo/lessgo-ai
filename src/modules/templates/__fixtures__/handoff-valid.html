@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!-- template-factory phase 5 — MINIMAL PASSING handoff fixture (thing engine).
+     Self-contained: no external stylesheet/script/font URLs. Declares every
+     required section (data-section) + every required slot (data-slot) and the
+     structural axes (:root, [data-palette], [data-variant], data-knob-*). Fonts
+     are self-hosted only. See src/modules/templates/handoffLint.ts. -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  :root {
+    --font-heading: 'Fraunces', serif;
+    --font-body: 'Inter', sans-serif;
+    --accent: #2b2b2b;
+    --btn-radius: 8px;
+  }
+  [data-palette="ink"] { --accent: #111827; }
+  [data-variant="editorial"] { --font-body: 'Inter Tight', sans-serif; }
+  [data-knob-buttonShape="pill"] { --btn-radius: 999px; }
+  [data-surface="dark"] { background: #0b0b0b; color: #fafafa; }
+  .lg-x-headline { font-family: var(--font-heading); }
+</style>
+</head>
+<body data-palette="ink" data-variant="editorial" data-knob-buttonShape="pill">
+
+  <header data-section="header">
+    <span data-slot="logo_text">Acme</span>
+    <a data-slot="cta_text">Get started</a>
+    <a data-slot="signin_text">Sign in</a>
+    <nav>
+      <a data-slot="nav_items.label" data-slot-2="nav_items.href">Product</a>
+      <span data-slot="nav_items.href">/product</span>
+      <span data-slot="nav_items.children">More</span>
+    </nav>
+  </header>
+
+  <section data-section="hero">
+    <h1 data-slot="headline">Build faster</h1>
+    <p data-slot="lede">The fastest way to ship.</p>
+    <a data-slot="cta_text">Start now</a>
+  </section>
+
+  <section data-section="features">
+    <h2 data-slot="headline">What you get</h2>
+    <div data-element-key="features.kicker">Fast</div>
+    <div data-slot="features.title">Speed</div>
+    <div data-slot="features.description">Ship in minutes.</div>
+    <div data-slot="features.icon">bolt</div>
+    <a data-slot="features.link_text">Learn more</a>
+  </section>
+
+  <section data-section="testimonials">
+    <h2 data-slot="headline">Loved by teams</h2>
+    <blockquote data-slot="testimonials.quote">It just works.</blockquote>
+    <span data-slot="testimonials.author_name">Jane Doe</span>
+    <span data-slot="testimonials.author_role">CTO</span>
+  </section>
+
+  <footer data-section="footer">
+    <span data-slot="wordmark">Acme</span>
+    <span data-slot="copyright">© 2026 Acme</span>
+    <span data-slot="footer_columns.heading">Company</span>
+    <a data-slot="footer_columns.links">About</a>
+  </footer>
+
+</body>
+</html>

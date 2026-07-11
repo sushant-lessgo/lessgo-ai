@@ -335,3 +335,58 @@ variants come straight from the live `blockManifest`.)
 ## Phase 4 — impl-review verdict
 - Verdict: **ship** (loop 1). Reviewer confirmed: derived from live maps (engineCoreSections + elementContracts/layoutElementSchema via getAllElements/getCardRequirements + blockManifests + STANDARD_KNOB_AXES), test re-derives liveKeys (no frozen golden); firewall intact (traced transitive imports — all type-only/pure-data, no .tsx/blocks/resolver); all 3 engines generate (thing=contract, trust/work=legacy-layout fallback via resolveEngineSectionSchema, sections labeled with source); heuristic `inferPrimitive` honestly labeled as hint in code + audit; outputs not committed. Gate: tsc clean, test:run 2223 passed/11 skipped/0 failed.
 - Non-blocking (deferred polish, not fixed this phase): (1) rendered markdown prints inferred `primitive` column without an "inferred hint, not contract" legend — add a footnote in renderDesignKitMarkdown; borderline vs spec's don't-present-guesses-as-truth. (2) `inferPrimitive` misses bare `socials.href`→text (suffix rule only matches `_href`). (3) dead ternary scripts/generateDesignKit.ts:38-40. (4) `kit:generate` uses `npx tsx` w/ no local devDep. → capture in a phase-11 or cleanup pass.
+
+## Phase 5 — handoff lint
+
+**Files changed**
+- `src/modules/templates/handoffLint.ts` (new — pure lint core + `formatLintResult`)
+- `src/modules/templates/handoffLint.test.ts` (new — 8 tests, acceptance criterion)
+- `src/modules/templates/__fixtures__/handoff-valid.html` (new — minimal passing, thing engine)
+- `src/modules/templates/__fixtures__/handoff-broken.html` (new — missing testimonials section + missing hero.headline required slot)
+- `src/modules/engines/designKit.ts` (cross-edit — 2 marker-convention rules added to the kit format block)
+- `scripts/lintHandoff.ts` (new — thin CLI)
+- `package.json` (new `kit:lint` script only)
+
+### Marker convention (defined in lint doc header + stated in kit format block)
+- **Section:** one container per required engine section carrying `data-section="<sectionType>"` (values = the engine contract's section names).
+- **Slot:** representable two ways, both accepted — `data-slot="<slotKey>"` (explicit handoff marker) OR `data-element-key="<slotKey>"` (a real editable element, the same attr the editor emits). Slot markers are **section-scoped**: a slot counts only inside its section's container region (slot keys like `headline` recur across sections, so a global check would be unsound — proven by a dedicated test).
+
+### designKit.ts cross-edit
+Needed: **yes**. Phase-4's format block stated tokens/palette/variant/knob/surface/font/prefix rules but NOT the two handoff markers. Added exactly two rules to `format.rules` (`data-section` per section, `data-slot`/`data-element-key` per slot) with a pointer comment to `handoffLint.ts` so kit and lint stay in sync. Minimal; no shape/type change; no test asserted an exact rule count so nothing regressed.
+
+### Checks implemented
+1. **missing-section** — every `engineCoreSections[engine]` section must have a `data-section="<type>"` marker.
+2. **missing-required-slot** — every required slot (from `buildDesignKit(engine)`, derived, not hardcoded) must be representable inside its PRESENT section's region (absent sections are covered by check 1, not double-counted).
+3. **axis** — `:root` block present; `[data-palette]`, `[data-variant]`, and at least one `data-knob-*` selector present.
+4. **font** — every literal `font-family` / `--*font*` family ⊆ `SELF_HOSTED_FONTS` (generics + `var()` refs skipped).
+5. **self-contained** — no external stylesheet `<link>`, `<script src>`, `@import`, or `url()` (http(s):// or protocol-relative //). Content anchors are intentionally NOT flagged.
+
+Required sections/slots are DERIVED via phase-4 `buildDesignKit(engine)` — no section/slot list in the lint, so it can't rot.
+
+### CLI output on the broken fixture
+```
+FAIL — src/modules/templates/__fixtures__/handoff-broken.html (engine: thing): 2 finding(s).
+  [missing-section] 1
+    - Missing required section: data-section="testimonials" not found.
+  [missing-required-slot] 1
+    - Section "hero": required slot "headline" not representable (data-slot="headline" or data-element-key="headline").
+```
+Exit code 1 on broken, 0 on valid (`PASS — ... no findings.`).
+
+### Verification
+- `npx tsc --noEmit` — clean (exit 0).
+- `npx vitest run src/modules/templates/handoffLint.test.ts` — 8 passed. The broken fixture fails on BOTH `missing-section` AND `missing-required-slot` as two distinct findings (acceptance criterion); the valid fixture passes with zero findings.
+- `npm run test:run` — 2231 passed | 11 skipped | 0 failed (was 2223 pre-phase; +8 new). No regressions.
+- CLI run on both fixtures — output above.
+
+### Deviations
+- "Marker or matching element": implemented `data-slot` as the explicit marker and `data-element-key` as the "matching element" (the editor's real attr). Conservative, testable, and matches the phase-4 emitter convention. Logged here per in-scope-ambiguity rule.
+- Fixture engine = `thing` (meridian, contract source — fully populated required slots) so the fixtures exercise real required slots. Lint itself is engine-agnostic (`--engine` flag, defaults thing).
+
+### Open risks
+- Section-region extraction assumes one top-level `data-section` container per section (nested `data-section` would truncate a region early). Stated as the handoff convention in the lint doc header + kit format block; acceptable for a pre-build lint. No nested-section fixture exercised.
+- Font extraction is regex over declarations; exotic CSS (e.g. font shorthand `font: 14px 'X'`) isn't parsed — only `font-family` / `--*font*` custom props. Non-blocking for the handoff format (kit mandates `:root` custom-property tokens).
+
+## Phase 5 — impl-review verdict
+- Verdict: **ship** (loop 1). Reviewer confirmed acceptance criterion: broken fixture seeds TWO genuinely distinct defects (testimonials section omitted + hero present-but-missing-headline), test asserts both distinct finding types + independence (present-but-slotless ≠ missing-section; slot check section-scoped); valid fixture zero findings. Derived from buildDesignKit (no hardcoded lists); marker convention (data-section/data-slot/data-element-key) agrees kit↔lint with keep-in-sync pointer; all 5 checks real+tested (missing-section/missing-slot/axis/font/self-contained); designKit cross-edit minimal (2 rules + comment, no shape/import change), firewall intact. Gate: tsc clean, test:run 2231 passed/11 skipped/0 failed.
+- Non-blocking (logged in audit as known risks): (1) sectionRegions assumes one top-level data-section per section — nested would truncate; kit mandates ONE container. (2) font extraction parses font-family/--*font* props not `font:` shorthand; kit mandates :root tokens.
