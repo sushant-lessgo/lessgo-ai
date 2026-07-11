@@ -250,6 +250,7 @@ export async function renderPublishedExport(
         ...(sub?.content || {}),
         forms: contentData.forms || {},
         legalPages: contentData.legalPages,
+        globalSettings: contentData.globalSettings,
       };
       const subMeta = buildPageMetadata({
         slug,
@@ -362,6 +363,7 @@ export async function renderPublishedExport(
           ...(sub?.content || {}),
           forms: contentData.forms || {},
           legalPages: contentData.legalPages,
+          globalSettings: contentData.globalSettings,
         };
         // Overlays are PROJECT-GLOBAL: the entire localeContent map (root AND
         // subpage sections) lives in the ROOT content, keyed by globally-unique

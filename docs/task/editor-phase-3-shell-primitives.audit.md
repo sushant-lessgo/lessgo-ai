@@ -363,3 +363,106 @@ Empty-string metadata (author cleared alt) is treated as unset by design so the 
 ### Open risks
 
 - None. Additive contract only; no consumer wired yet (phases 5/6 consume it).
+
+---
+
+## Phase 5 — `logo` primitive + techpremium proving case
+
+### Files changed
+
+- `src/modules/editing/resolveLogo.ts` — NEW. Plain surface-aware logo resolver (no 'use client').
+- `src/modules/editing/resolveLogo.test.ts` — NEW. 8 unit tests (both surfaces, dark to light fallback, legacy logo_image fallback, wordmark, empty-string-as-unset).
+- `src/app/edit/[token]/components/primitives/EditableLogo.tsx` — NEW. 'use client' logo editing primitive (two upload slots + removes).
+- `src/types/store/state.ts` — added `globalSettings.logoUrlDark?: string`.
+- `src/types/store/actions.ts` — added `setLogoUrlDark` to the actions type.
+- `src/hooks/editStore/layoutActions.ts` — added `setLogoUrlDark` action mirroring `setLogoUrl`.
+- `src/modules/templates/techpremium/blocks/Header/TechPremiumNav.tsx` — logo render via `resolveLogo('light')` + `EditableLogo` affordance.
+- `src/modules/templates/techpremium/blocks/Header/TechPremiumNav.published.tsx` — logo render via `resolveLogo('light')`, globalSettings from `props.content`.
+- `src/modules/templates/techpremium/blocks/Footer/TechPremiumFooter.tsx` — logo render via `resolveLogo('dark')` + `EditableLogo` affordance.
+- `src/modules/templates/techpremium/blocks/Footer/TechPremiumFooter.published.tsx` — logo render via `resolveLogo('dark')`, globalSettings from `props.content`.
+
+### Gate decision implemented — MECHANISM A (separate dark asset)
+
+New JSON field `globalSettings.logoUrlDark` (no Prisma migration). Footer resolves `logoUrlDark -> logoUrl -> legacy logo_image -> wordmark`; header resolves `logoUrl -> legacy logo_image -> wordmark`.
+
+### setLogoUrlDark choice
+
+Chose the parallel `setLogoUrlDark` action mirroring `setLogoUrl` (the lower-risk option, not generalizing `setLogoUrl` with a variant param). It sets `state.globalSettings.logoUrlDark = url` inside the same immer `set`. Empty string clears (resolveLogo treats '' as unset, falls back to `logoUrl`), matching the existing `setLogoUrl`/`clearLogo` discipline. Typed in `src/types/store/actions.ts` next to `setLogoUrl`.
+
+### resolveLogo return shape + fallback chains
+
+Return: `{ kind: 'image'; url: string } | { kind: 'wordmark'; text: string }` — the block renders `<img>` for `image`, its mk-span + wordmark for `wordmark`. Empty/non-string values are unset (`firstNonEmpty`).
+
+- `surface === 'light'` (header): `globalSettings.logoUrl` -> `sectionContent.logo_image` -> wordmark.
+- `surface === 'dark'` (footer): `globalSettings.logoUrlDark` -> `globalSettings.logoUrl` -> `sectionContent.logo_image` -> wordmark.
+
+`sectionContent` carries `{ logo_image, wordmark }`; each block maps its own text field into `wordmark` (header uses `logo_text`, footer uses `wordmark`). Alt text stays block-computed (`logo_text`/`wordmark` || 'Logo') so parity with today is exact.
+
+### globalSettings persistence confirmation
+
+`globalSettings` is serialized as a WHOLE object, so `logoUrlDark` rides the existing path automatically — CONFIRMED:
+- Save/publish payload: `export()` (`persistenceActions.ts:588`) emits `globalSettings: state.globalSettings` at the top level of `exportData`. `save()` and `/api/publish` both send this object; a new field is included with zero payload-path edits.
+- Reload: `loadFromDraft`/`applySnapshot` (`persistenceActions.ts:178-181`) does `Object.assign(state.globalSettings, payload.globalSettings)` — restores `logoUrlDark` with the rest.
+- No Prisma migration (Project.content / globalSettings is JSON).
+
+### How globalSettings reaches the published blocks
+
+The published renderer (`LandingPagePublishedRenderer`) passes `content={content}` to every block, and the publish `content` object carries `globalSettings` at its root (from `export()`'s top-level `globalSettings`; `renderPublishedExport` flattens `content.content` into root but leaves `globalSettings` intact). So the published blocks read `props.content?.globalSettings` — NO new prop threaded through the renderer/htmlGenerator/export (all out of Files-touched). The edit blocks read `useEditStore((s) => s.globalSettings)` directly (site-scoped store; works on all pages in the editor).
+
+### Edit vs published diffs per block (parity proof)
+
+Logo render is identical logic in both renderers (same `resolveLogo` call, same markup):
+
+- Header — image branch: `<img className="tp-brand__img" src={logo.url} alt={logo_text||'Logo'} loading="eager" decoding="async" />`; wordmark branch: `tp-brand__mk` span + wordmark (`tp-brand__wm`). Edit's wordmark is a `TechPremiumEditable` (contentEditable) span, published's is a static `tp-brand__wm` span — same tag/class, pre-existing pattern. Edit adds the edit-only `<EditableLogo surface="light">` affordance (published has none — same as the old `tp-logo-edit` span was edit-only).
+- Footer — image branch: `<img className="tp-footer__img" src={logo.url} alt={wordmark||'Logo'} loading="lazy" decoding="async" />`; wordmark branch: `tp-footer__mk` span + wordmark. Edit adds `<EditableLogo surface="dark">` (edit-only, replacing the old `tp-flogo-edit` span).
+
+The image-vs-wordmark decision is made ONLY by `resolveLogo`, called identically on both sides, so it is structurally impossible to diverge on the choice.
+
+### Back-compat reasoning (naayom safety)
+
+A techpremium project with ONLY the legacy per-section `logo_image` (no `globalSettings.logoUrl`/`logoUrlDark`) resolves to that image on BOTH surfaces via the chain's `sectionContent.logo_image` fallback, byte-identical `<img>` to pre-phase-5. Header alt = `logo_text||'Logo'`, footer alt = `wordmark||'Logo'` unchanged. If no image and no globalSettings, falls to the wordmark exactly as before. The live logo can never blank. Covered by two dedicated tests (light + dark legacy fallback) and the empty-string tests.
+
+### EditableLogo affordance behavior
+
+- Primary "Logo" slot (writes `logoUrl` via `setLogoUrl`, remove via `clearLogo`) shown on BOTH surfaces.
+- Optional "Logo on dark background" slot (writes `logoUrlDark` via `setLogoUrlDark`, remove clears it) shown ONLY on the dark surface (footer) — the only place the dark asset matters. Keeps the header UX one-button (unchanged feel).
+- Upload reuses store `uploadImage(file)` with NO targetElement, returns the permanent https URL (writes nothing to per-section content), then `setLogoUrl`/`setLogoUrlDark` + `save()`. `imageWriteGuard` still blocks data:/blob:. Template class names are passed in via `classNames` so the primitive stays template-agnostic while matching each block's chrome CSS (`tp-logo-edit*` / `tp-flogo-edit*`, unchanged).
+
+### Deviations
+
+- Wordmark editing stays block-level (the existing `TechPremiumEditable` in each block), NOT moved into `EditableLogo`. Rationale: the primitive is template-agnostic and cannot host the template-styled `TechPremiumEditable` contentEditable without coupling, and moving it risks edit/published parity. The primitive owns the novel image-upload editing (two slots); the wordmark fallback remains editable inline exactly as before. Conservative, parity-preserving.
+- Legacy per-section `logo_image` removal is no longer exposed in the UI. The old edit affordance had a "remove" that cleared the per-section `logo_image`; `EditableLogo` manages only the site-scoped `globalSettings` values. Legacy `logo_image` is now a read-only migration fallback (shadowed the moment a site logo is uploaded). Acceptable per the "site-scoped ONE value" law; the live logo cannot blank.
+- Dark-slot labels use generic text ("Change dark logo" / "Dark-bg logo") vs the footer's former "Change" — clearer, minor.
+
+### Verification
+
+- `npx tsc --noEmit`: green.
+- `npm run test:run`: green — 137 files, 2106 passed / 3 skipped (incl. new `resolveLogo.test.ts`, 8 passed).
+- `npm run build`: green (published-CSS + assets + full next build).
+- Boundary grep: `EditableLogo` imported by exactly the two edit-side blocks (`TechPremiumNav.tsx`, `TechPremiumFooter.tsx`) + its own file; ZERO `.published.tsx` importers (only a doc-comment mention in `resolveLogo.ts`).
+- Manual/live browser verification (change logo, dark-bg logo, remove, legacy-only unchanged, publish parity) — DEFERRED to the founder's manual human-gate pass (cannot run live here).
+
+### Open risks
+
+- Multipage subpages do not receive `globalSettings` on the published path. `renderPublishedExport` builds subpage `subFlat` as `{ ...sub.content, forms, legalPages }` — no `globalSettings` (that file is OUT of this phase's Files-touched, so not edited). Effect: on the ROOT published page the new site logo shows in header+footer; on SUBPAGE published headers/footers `props.content.globalSettings` is undefined, so resolveLogo falls back to the legacy per-section `logo_image` (or wordmark). naayom is multipage, so a newly-uploaded site logo would appear on the homepage but NOT on subpages until a small follow-up threads `globalSettings` into `subFlat`. Recommend a one-line follow-up in `renderPublishedExport.ts` (add `globalSettings: contentData.globalSettings` to `subFlat`). Back-compat is unaffected (subpages fall to today's `logo_image`, byte-identical). Flagged for founder + orchestrator.
+- Edit renderer is unaffected by the above (store is site-scoped, so all pages show the site logo in the editor); the gap is published-subpage only.
+
+### Phase 5 — review fix (subpage globalSettings)
+
+**Files changed:** `src/lib/staticExport/renderPublishedExport.ts`
+
+Blocking defect: multipage published subpages built a fresh `subFlat` object without `globalSettings`, so subpage headers/footers fell back to the legacy per-section logo while the root rendered the new `globalSettings.logoUrl` — an editor-right/published-wrong divergence.
+
+Fix (purely additive, one field into both `subFlat` literals):
+- Line 253 (main subpage loop): added `globalSettings: contentData.globalSettings,`
+- Line 366 (locale-variant subpage loop): added `globalSettings: contentData.globalSettings,`
+
+Source expression: `contentData.globalSettings` — same root object the root page renders via `content: contentData` (line 174), so root and subpages now read identical globalSettings. Legacy pages with no root globalSettings get `undefined` → byte-identical fallback to per-section logo.
+
+Verification:
+- `npx tsc --noEmit` — green (no output).
+- `npm run test:run` — green (2106 passed | 3 skipped, 137 files).
+- `npm run build` — green (published-export path compiled).
+- Grep confirms BOTH construction sites (lines 253, 366) include `globalSettings: contentData.globalSettings`.
+
+Deviations: none. Open risks: none — additive, back-compat preserved.

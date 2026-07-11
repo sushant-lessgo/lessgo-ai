@@ -187,7 +187,11 @@ export interface LayoutSlice {
     sectionSpacing: string; // Default global spacing (fallback)
     deviceMode: 'desktop' | 'mobile';
     zoomLevel: number;
-    logoUrl?: string; // Logo URL for global branding
+    logoUrl?: string; // Logo URL for global branding (LIGHT surface — header)
+    // editor phase-3 (phase 5): optional DARK-surface logo asset (footer). Footer
+    // resolves logoUrlDark → logoUrl; header uses logoUrl. Rides the same whole-object
+    // globalSettings serialize path as logoUrl (no Prisma migration — JSON field).
+    logoUrlDark?: string;
   };
 }
 

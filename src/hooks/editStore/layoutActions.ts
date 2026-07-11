@@ -703,7 +703,14 @@ getTypographyForSection: (sectionId: string) => {
       set((state: EditStore) => {
         state.globalSettings.logoUrl = url;
       }),
-    
+
+    // editor phase-3 (phase 5): DARK-surface logo (footer). Mirrors setLogoUrl —
+    // empty string clears (resolveLogo treats '' as unset → falls back to logoUrl).
+    setLogoUrlDark: (url: string) =>
+      set((state: EditStore) => {
+        state.globalSettings.logoUrlDark = url;
+      }),
+
     clearLogo: () =>
       set((state: EditStore) => {
         state.globalSettings.logoUrl = undefined;

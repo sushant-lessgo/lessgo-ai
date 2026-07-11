@@ -58,6 +58,8 @@ getTypographyForSection: (sectionId: string) => FontTheme;
   
   // Logo Management
   setLogoUrl: (url: string) => void;
+  // editor phase-3 (phase 5): DARK-surface logo asset (footer). Mirrors setLogoUrl.
+  setLogoUrlDark: (url: string) => void;
   clearLogo: () => void;
   
   // Color System Integration

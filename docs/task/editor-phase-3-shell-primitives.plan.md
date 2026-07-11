@@ -21,7 +21,7 @@ exactly one editor and dual-renderer divergence stays structurally impossible).
 - phase 2 action sets + selector-ize: done (commit c1a7c80a, review loops 1 — clean, ship; 6 bare subs not 7 per phase-1 drift)
 - phase 3 DELETE list + parity sign-off: done (commit b65a0d48, review loops 1 — clean, ship, net -2336 LOC src/); HUMAN GATE PASSED 2026-07-11 (founder: parity holds, proceed)
 - phase 4 primitive interface: done (commit pending-sha, review loops 1 — clean, ship; primitiveTypes {PrimitiveKind×8, PrimitiveSlot, ImageCollectionItem, LogoValue{url,darkUrl,wordmark}, Surface}, elementMetadata.alt additive, resolveAlt + 7 tests)
-- phase 5 logo primitive (techpremium proving): pending — ⛔ HUMAN GATE BEFORE IMPL. founder req 2026-07-11: header=light surface, footer=dark surface → logo needs light/dark variant (one-asset assumption WRONG). LogoValue type carries darkUrl; store-persistence mechanism (A: globalSettings.logoUrlDark field [reco] vs B: CSS invert) confirmed at gate.
+- phase 5 logo primitive (techpremium proving): done (commit pending-sha, review loops 2 — subpage globalSettings gap fixed, ship). MECHANISM A: globalSettings.logoUrlDark; resolveLogo surface-aware + 8 tests; EditableLogo 2 slots; techpremium Nav(light)+Footer(dark) both renderers; renderPublishedExport threads globalSettings to subpages (naayom multipage). ⚠ FOUNDER MANUAL LOGO QA still pending (live: change logo→header+footer, dark-bg logo, remove→wordmark, legacy-only unchanged, publish parity) — do before merge.
 - phase 6 imageCollection primitive + alt law (vestria proving): pending
 
 ## Spec unresolved questions — answered
