@@ -191,3 +191,40 @@ attribute parity confirmed for every pair.
 ### Open risks
 - Minor CLS possible on the GalleryPreview masonry grid on scroll (below-fold), unchanged in
   character from pre-existing masonry behavior — flagged above for the human parity/LCP gate.
+
+## Phase 4 — sweep: meridian + surge + shared blog blocks
+
+**Files changed**
+- src/modules/templates/meridian/blocks/Hero/EditorialPhotoHero.tsx
+- src/modules/templates/meridian/blocks/Hero/EditorialPhotoHero.published.tsx
+- src/modules/templates/meridian/blocks/Header/MeridianNavHeader.tsx
+- src/modules/templates/meridian/blocks/Header/MeridianNavHeader.published.tsx
+- src/modules/templates/surge/blocks/Header/WarmNavHeader.tsx
+- src/modules/templates/surge/blocks/Header/WarmNavHeader.published.tsx
+- src/modules/templates/surge/blocks/Footer/ContactFooterRich.tsx
+- src/modules/templates/surge/blocks/Footer/ContactFooterRich.published.tsx
+- src/modules/templates/shared/blog/BlogPostBodyBlock.tsx
+- src/modules/templates/shared/blog/BlogIndexBlock.tsx
+
+**Per-block changes (attrs only, no markup/layout/CSS changes):**
+
+| Block | img | eager/lazy | decoding | reservation | parity |
+|-------|-----|-----------|----------|-------------|--------|
+| meridian EditorialPhotoHero (hero_image, LCP) | :161 / pub:69 | eager (added) | async (added) | pre-existing wrapper; eager so N/A | edit+published identical |
+| meridian MeridianNavHeader (logo_image) | :116 / pub:59 | eager (added) | async (added) | above-fold logo, eager | edit+published identical |
+| surge WarmNavHeader (logo_image) | :94 / pub:48 | eager (added) | async (added) | above-fold logo, eager | edit+published identical |
+| surge ContactFooterRich (logo_image, below-fold) | :124 / pub:53 | lazy (added) | async (added) | .sg-footer__img fixed height:30px reserves space (pre-existing) | edit+published identical |
+| shared BlogPostBodyBlock (heroImage) | :67 | lazy (pre-existing, kept) | async (added) | pre-existing (was already lazy) | single-file (no .published.tsx) |
+| shared BlogIndexBlock (heroImage) | :41 | lazy (pre-existing, kept) | async (added) | pre-existing (was already lazy) | single-file (no .published.tsx) |
+
+**Blog block .published.tsx check:** Verified on disk — `src/modules/templates/shared/blog/` contains ONLY `BlogIndexBlock.tsx` and `BlogPostBodyBlock.tsx`. No `.published.tsx` pair exists for either; single file covers both render paths. Decoding added; existing `loading="lazy"` preserved.
+
+**Aspect-ratio:** No `aspect-ratio` additions needed. Only newly-lazied img is the surge footer logo, whose `.sg-footer__img` CSS already fixes `height: 30px` (space reserved). Both blog imgs were already lazy pre-change (reservation pre-existing, unchanged). Eager images (heroes, nav logos) load immediately so need no reservation. `styles.ts` untouched (out of scope, and unneeded).
+
+**Deviations from plan:** None.
+
+**Test results:**
+- `npx tsc --noEmit` — green (no output).
+- `npm run build` — green (full build incl. published CSS/assets recompile completed, route table printed).
+
+**Open risks:** None. Attrs-only changes, edit/published parity confirmed identical for every pair, layout/CSS unchanged.

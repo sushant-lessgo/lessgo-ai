@@ -45,7 +45,7 @@ export default function WarmNavHeaderPublished(props: WarmNavHeaderPublishedProp
         <div className="sg-nav-in">
         <div className="sg-brand">
           {props.logo_image ? (
-            <img className="sg-brand__img" src={props.logo_image} alt={logoText} />
+            <img className="sg-brand__img" src={props.logo_image} alt={logoText} loading="eager" decoding="async" />
           ) : (
             <>
               <span className="sg-brand__mark" />

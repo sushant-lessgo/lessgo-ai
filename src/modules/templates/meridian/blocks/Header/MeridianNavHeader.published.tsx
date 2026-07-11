@@ -56,7 +56,7 @@ export default function MeridianNavHeaderPublished(props: MeridianNavHeaderPubli
         <div className="mrd-nav__left">
           <div className="mrd-brand">
             {props.logo_image ? (
-              <img className="mrd-brand-img" src={props.logo_image} alt="" />
+              <img className="mrd-brand-img" src={props.logo_image} alt="" loading="eager" decoding="async" />
             ) : (
               <div className="mrd-brand-mark" aria-hidden="true" />
             )}

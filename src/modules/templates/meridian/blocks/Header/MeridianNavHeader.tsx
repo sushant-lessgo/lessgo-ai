@@ -113,7 +113,7 @@ export default function MeridianNavHeader({ sectionId }: MeridianNavHeaderProps)
         <div className="mrd-nav__left">
           <div className="mrd-brand">
             {blockContent.logo_image ? (
-              <img className="mrd-brand-img" src={blockContent.logo_image} alt="" data-element-key="logo_image" />
+              <img className="mrd-brand-img" src={blockContent.logo_image} alt="" data-element-key="logo_image" loading="eager" decoding="async" />
             ) : (
               <div className="mrd-brand-mark" aria-hidden="true" />
             )}
