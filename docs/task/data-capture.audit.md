@@ -42,3 +42,49 @@
 ### Open risks
 - The 3 held-branch migrations remain in the shared dev DB but absent from this branch's local migrations dir. `migrate status` currently reports clean, but a future `migrate dev` on this branch could re-surface the drift until those branches merge to main. Not a Phase 1 blocker.
 - Legacy projects with no `aiBaseline`: first save will freeze current (possibly already-edited) text as baseline — a Phase 2 concern, noted in the plan's Unresolved questions.
+
+## Phase 2 — Server-side baseline freeze + delta capture in saveDraft
+
+### Files changed
+- `src/lib/editDelta/capture.ts` (new) — `extractElementText`, `collectElements`, `computeNextBaseline`, `captureEditDeltas` + the parity-invariant documentation comment.
+- `src/lib/editDelta/capture.test.ts` (new) — 20 vitest cases incl. the parity fixture.
+- `src/app/api/saveDraft/route.ts` — wired baseline freeze + delta capture.
+- `src/lib/admin.ts` — added exported `isAdminClerkId(clerkId)` (delegates to existing `isAdmin`; no `requireAdmin` change).
+
+(Not mine: `docs/task/data-capture.plan.md` carries a pre-existing uncommitted 1-line progress-log edit from Phase 1 — SHA backfill `pending-sha → 29efec07` — left untouched.)
+
+### PARITY EVIDENCE — the two element serializations found (statically traced)
+- **Freeze side** — `finalContent.content[id].elements` (`finalize.ts:76` `elements = copy[type].elements`; multipage merge `multiPageAssembly.ts:423` `sec.elements[field] = value`). After `parseAiResponse` (`result.content[key] = processedElement.value`, parseAiResponse.ts:530) each value that actually reaches finalContent is a plain **`string`** (headline/subheadline/…) or **`string[]`** (pipe/collection fields, e.g. `feature_titles`). `form_id` etc. are plain strings. The `SectionCopy.elements` *type* (generation.ts:387) also admits `{ value, needsReview }` (ElementValueReview) and `Record<string,unknown>[]`, but those don't survive the parser into finalContent.
+- **Diff side** — editor store `export()` (`persistenceActions.ts:569` → `autoSaveDraft.ts:155`). `SectionData.elements` (content.ts:129) is the **V2 direct format**: `contentActions.ts:306` writes `elements[key] = <string>` and list writes keep `<string[]>` — no wrapper. So the common path is ALSO `string | string[]` ⇒ parity holds trivially. The legacy flattened→legacy rebuild (`flattenedState.ts:256`) can emit `{ content, type, isEditable }` wrappers.
+- **How the extractor unifies them:** `extractElementText` normalizes BOTH to one string — `string`→as-is, `string[]`→join `'\n'`, `{ content }`→recurse `.content` (legacy editor wrapper), `{ value }`→recurse `.value` (defensive, freeze-side review wrapper), everything else/empty→`null` (skipped). Because the SAME extractor runs on both the frozen baseline text and the current export text, differing wrappers are harmless as long as inner strings match. Proven by the automated parity fixture: a generate-copy-shaped section and its editor-export-shaped equivalent (incl. one `{ content }`-wrapped field + array field) `collectElements` to identical `{elementKey → text}` maps ⇒ `captureEditDeltas` writes ZERO upserts.
+
+### What was wired in saveDraft
+- Extended the `findUnique` select with `aiBaseline`, `templateId`, `audienceType`. **Owner clerkId NOT selected** — `assertProjectOwner` guarantees the saver is the project owner (or first-writer orphan-claim), so the authed `clerkId` already equals the owner's clerkId; `isFounderEdit = isAdminClerkId(clerkId)`. Cheapest option, documented in code.
+- Read `body.aiBaselinePatch` from the RAW body (same pattern/comment as `baseline`; `DraftSaveSchema` untouched).
+- Compute next baseline when `finalContent` OR a patch is present; write the `aiBaseline` column in BOTH upsert branches **only when `changed === true`** (skips large-JSON rewrites on no-op autosaves). Patch-only saves still merge + persist.
+- After the upsert: `captureEditDeltas` in try/catch that logs-and-continues (`logger.warn`) — a capture failure never fails the autosave. Only invoked when `finalContent` produced collected elements. Effective `templateId = body.templateId ?? stored ?? null`; `audienceType = stored ?? null`.
+
+### Key decisions / deviations
+- `collectElements` single-walk: walks `pages[*].content` when `pages` is present & non-empty, ELSE top-level `content` — never both (avoids double-processing home on multipage). Global-unique section IDs ⇒ no page nesting in the baseline. Empty-skeleton pages (`content: {}`) yield nothing; `localeContent` (top-level i18n overlay) is never walked; a `META_KEYS` guard defensively skips non-section top-level keys if a flattened blob is ever passed.
+- `EditDeltaPrisma` mock interface uses `any` (not `unknown`) arg types so the real Prisma client's precisely-typed `upsert`/`deleteMany` stay assignable (arg contravariance). Conservative in-scope call.
+- `extractElementText` also unwraps `.value` (beyond the plan's `.content`): the freeze-side type explicitly allows `{ value, needsReview }`, so covering it improves parity robustness at zero risk. Logged here per the in-scope-ambiguity rule.
+- Revert cleanup: one `deleteMany` over all at-baseline keys (idempotent; deletes 0 when no row exists), only when candidates exist.
+
+### Verification results
+- `npx tsc --noEmit`: only the known pre-existing `src/app/page.tsx` `@/assets/images/founder.jpg` error; zero errors from the new/edited files.
+- `npx vitest run src/lib/editDelta/capture.test.ts`: 20/20 pass.
+- `npm run test:run`: 2142 passed / 3 skipped; the ONLY failure was the known env-flake `src/lib/i18n/i18nHonesty.test.ts` (its `generateStaticHTML` case hitting the hard 5000ms `testTimeout` under full-suite load). Confirmed environmental: with my `saveDraft`/`admin` edits stashed it passed in 2.86s, and with them restored it passed again (2.85s) — that test does not import any file I touched; the timeout is pure machine-load timing variance.
+
+### Deferred to the final human gate (Phase 4 gate)
+- **Live-dev zero-row acceptance check** (`npm run dev` → fresh real-LLM generate → no edits → autosave → 0 EditDelta rows via SQL) is intentionally NOT run here. The automated parity fixture in `capture.test.ts` is the rigorous proof of the invariant for Phase 2; the live end-to-end check remains pending for the final gate.
+
+### Post-review follow-up (demo-token skip)
+- **Demo-token capture skip added** (reviewer follow-up): the `lessgodemomockdata` demo path bypasses `assertProjectOwner` but previously still ran freeze + capture on the shared demo project — dataset noise. Guard: the baseline-compute block now gates on `!isDemo && (finalContent || aiBaselinePatch !== undefined)`. Because `nextAiBaseline` stays `undefined` when skipped, both the `aiBaseline` column write (`aiBaselineChanged` stays false) and `captureEditDeltas` (guarded by `nextAiBaseline && collectedElements.length > 0`) are naturally bypassed — one condition, no other change. `tsc` clean (only the known `founder.jpg` error); `capture.test.ts` 20/20 still pass.
+
+### Accepted non-blocking items (NOT fixed — deliberate, beta-acceptable)
+- **Revert `deleteMany` OR-fan-out:** on a fresh unedited page every at-baseline element becomes a revert candidate → one `deleteMany` with a large `OR` list per autosave (deletes 0 rows). Minor perf only, bounded by page element count (~tens); acceptable for beta volume.
+- **`aiBaselinePatch` raw cast unvalidated:** read from raw body and cast (like the existing `baseline`/`brief` passthroughs). It is owner-scoped (post-`assertProjectOwner`) and defensively filtered inside `computeNextBaseline` (only `typeof val === 'string'` entries merge), so a malformed patch can't corrupt the baseline — consistent with the existing raw-body pattern. No schema change.
+
+### Open risks
+- Element shapes not covered by `extractElementText` (number/boolean values, object-array card structures) get no baseline and are silently excluded from capture — matches the plan (text-only). No corruption risk (same on both sides).
+- Legacy projects with no `aiBaseline` freeze current (possibly already-edited) text as baseline on first post-deploy save (plan Unresolved question — accepted for minimum build).
