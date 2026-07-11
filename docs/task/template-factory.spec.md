@@ -167,7 +167,8 @@ a visual taste pass. Highest-leverage single build for template throughput.
 ## Acceptance criteria
 - [ ] Decision gate documented; skill refuses "new template" when capability
       path fits (per §7 table).
-- [ ] Design kit generated from engine contract for trust + thing engines;
+- [ ] Design kit generated from engine contract for trust + thing + work
+      engines (work-engine grammar formalized by the atelier spec feeds it);
       contains sections/slots/capacities/format/knob-ranges; regenerating after
       a contract change updates it (derived, not hand-written).
 - [ ] Anchor library exists with ≥15 anchors + banned-list derivation from
@@ -183,17 +184,24 @@ a visual taste pass. Highest-leverage single build for template throughput.
       parity break.
 - [ ] `/new-template` rewritten thin (gate + workflow + evergreen landmines;
       zero code-derivable facts).
-- [ ] End-to-end drill: ONE new template (salon-style, trust engine) from
-      demand signal → live, ≤1 week wall-clock, founder time = taste-pick +
-      2 gates only.
+- [ ] End-to-end drill: ONE new template from demand signal → live, founder
+      time = taste-pick + 2 gates only. **Drill = `atelier` (work engine,
+      Kundius — templatePlan on-demand queue #1), replacing the hypothetical
+      salon/trust drill.** Executed via `docs/task/atelier-template.spec.md`
+      AFTER this build; this spec's deliverables (kit, lint, conformance,
+      parity diff) must be ready for it. ≤1-week wall-clock measured on the
+      atelier port phase only (its i18n dependency doesn't count against the
+      pipeline claim).
 
 ## Pilot / smallest slice
 Two thin slices, either order:
 1. **Knobs pilot:** tokenize button-shape + density on hearth, 3 named looks,
    picker presents them. Proves flexibility mechanism + look storage.
-2. **Pipeline drill:** run the salon template end-to-end through kit → design →
+2. **Pipeline drill:** run the drill template end-to-end through kit → design →
    lint → agent port → conformance. Proves the ~1-week claim + the kit/lint
-   artifacts.
+   artifacts. (Drill = atelier, per acceptance criteria — design step already
+   done via the KP direction tiles; lint runs retroactively over the approved
+   HTML.)
 Decision gate after both: measure "10 generated same-niche sites — any two
 same at thumbnail?" → invest in more variants/knobs vs more templates based on
 the answer, not feeling.

@@ -1,10 +1,10 @@
 # Multilingual (i18n) — Platform Track Plan
 
-> **STATUS: DEFERRED — do not build yet.** Implement only when **more users require bilingual**
-> (trigger: a 2nd+ paying customer beyond Lumen/naayom asks for it, or it becomes a sales blocker).
-> Lumen ships bilingual NOW via a **Lumen-contained** twin-field + header toggle (PO-approved 2026-06-29);
-> it is **not** on this platform layer yet and will migrate onto it when this is built.
-> Set 2026-06-25.
+> **STATUS: PHASE 1 UN-DEFERRED 2026-07-11** (founder ruling; evidence: coverage-100 — bilingual
+> needed 21/101, 28/101 non-English, findings §8 platform priority #4). Spec:
+> `docs/task/i18n-phase-1.spec.md`. **Pilot changed: atelier/Kundius EN/NL** (Lumen retires
+> bespoke-off — its twin-field hack is superseded, NOT migrated). Phases 2–3 stay deferred.
+> Originally deferred 2026-06-25.
 
 ## Why this is a real platform bet (not gold-plating)
 

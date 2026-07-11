@@ -33,6 +33,12 @@ venue-IS-the-product businesses only (restaurants, hotels, venues, facilities); 
 gyms-as-coaching are trust + location capabilities. Wave-2 contract bundle (menu, multi-location,
 events-calendar) lands with this build. Templates ready: Mill (fully designed) + Cabin (DNA).
 
+## On-demand queue (rulings via scalePlan §7 table)
+
+| # | Demand signal | Gate verdict | Build path | Status |
+|---|---|---|---|---|
+| 1 | **kundiousphotography** (anchor customer; rejected Lumen's feel; picked Atelier layout × Kontur skin + hero slider) | **D** (new template — no fitting work-engine flagship, C unavailable) + **A** (`photographer` entry) | `atelier` work-engine visual-portfolio template = **the factory drill** (replaces salon). Execution order: `i18n-phase-1` → `template-factory` (FULL, one go — founder ruling) → `atelier-template`. Specs in docs/task/. Pulls: tiered packages (T7 w1) · work-engine grammar formalization (step-4 grammar only, no copy gen) · **i18n Phase 1 UN-DEFERRED** (founder 2026-07-11; bilingual 21/101 + 28 non-EN, findings §8 #4). Lumen → retired bespoke-off. Designer brief: `template-design/atelierKonturBrief.md` (tiles → pick → 5-page expansion). | 🔨 SPECCED 2026-07-11 |
+
 ## Roadmap (post-Step-0; REORDERED 2026-07-11 — demand-first)
 
 **Ruling: first-20 on-demand work takes precedence over corpus-derived priorities.** The piled-up
