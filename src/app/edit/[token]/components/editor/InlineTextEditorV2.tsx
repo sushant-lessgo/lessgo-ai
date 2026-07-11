@@ -65,6 +65,10 @@ export function InlineTextEditorV2({
   const [isEditing, setIsEditing] = useState(false);
   const editorRef = useRef<HTMLElement>(null);
   const originalContentRef = useRef<string>(content);
+  // Mirrors of live state/handler for the native beforeunload/visibilitychange
+  // flush listeners (registered once, so they can't close over stale values).
+  const isEditingRef = useRef(false);
+  const saveContentRef = useRef<() => void>(() => {});
 
   const setTextEditingMode = useEditStore((s) => s.setTextEditingMode);
   const showToolbar = useEditStore((s) => s.showToolbar);
@@ -138,6 +142,36 @@ export function InlineTextEditorV2({
       // Keep content in DOM even if save fails
     }
   };
+
+  // Keep the mirrors current every render so the once-registered native flush
+  // listeners always see the latest editing state + save closure.
+  isEditingRef.current = isEditing;
+  saveContentRef.current = saveContent;
+
+  // Flush-on-exit safety net (editor-trust-truth, editorPlan law #2).
+  // If the tab is being unloaded or backgrounded WHILE this element is in
+  // text-editing mode, the normal blur commit never fires — the DOM text would
+  // be lost. Commit it synchronously to the STORE (saveContent → onContentChange
+  // → updateElementContent, a synchronous zustand set). Store write only: no
+  // network is attempted here (beforeunload forbids it, and persistence is the
+  // autosave layer's job). Registered once (empty deps) and driven by refs so it
+  // can never sit behind a starvable/clearable timer.
+  useEffect(() => {
+    const flush = () => {
+      if (isEditingRef.current) {
+        saveContentRef.current();
+      }
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') flush();
+    };
+    window.addEventListener('beforeunload', flush);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      window.removeEventListener('beforeunload', flush);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, []);
 
   // Enter editing mode
   const handleFocus = () => {

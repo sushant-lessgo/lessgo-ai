@@ -4,7 +4,6 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
-import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import { AddSectionButton } from '../content/SectionCRUD';
 import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import type { SectionType } from '@/types/core/content';
@@ -37,27 +36,8 @@ export function SectionToolbar(props: SectionToolbarProps) {
 }
 
 function SectionToolbarInner({ sectionId, position, contextActions }: SectionToolbarProps) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [showElementToggle, setShowElementToggle] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
-  const advancedRef = useRef<HTMLDivElement>(null);
-  const advancedTriggerRef = useRef<HTMLButtonElement>(null);
-
-  // Debug instance
-  const instanceId = useRef(Math.random().toString(36).substr(2, 9));
-
-  // Debug mounting/unmounting
-  useEffect(() => {
-    logger.dev(`🟢 SectionToolbar[${instanceId.current}] MOUNTED for section:`, () => sectionId);
-    return () => {
-      logger.dev(`🔴 SectionToolbar[${instanceId.current}] UNMOUNTING for section:`, () => sectionId);
-    };
-  }, []);
-  
-  // Debug state changes
-  useEffect(() => {
-    logger.dev(`🔍 SectionToolbar[${instanceId.current}] - showAdvanced changed to:`, () => showAdvanced);
-  }, [showAdvanced]);
 
   const {
     content,
@@ -68,14 +48,7 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
     showLayoutChangeModal,
     audienceType,
     templateId,
-    activeLocale,
-    localeConfig,
   } = useEditStore();
-
-  // i18n-phase-1 (Phase 4): section regen writes DEFAULT-locale base copy only
-  // (store guard no-ops it elsewhere) — disable the menu item off the default.
-  const regenLocaleLocked =
-    !!localeConfig && activeLocale !== localeConfig.defaultLocale;
 
   // Swap-button visibility gate (scale-09 phase 5). For template-module projects
   // the "Layout" action only makes sense when the section has >1 ELIGIBLE variant
@@ -167,24 +140,6 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
     targetElement.getBoundingClientRect(),
     { width: 400, height: 48 }
   ) : null;
-
-  // Close advanced menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        advancedRef.current &&
-        !advancedRef.current.contains(event.target as Node) &&
-        !toolbarRef.current?.contains(event.target as Node)
-      ) {
-        setShowAdvanced(false);
-      }
-    };
-
-    if (showAdvanced) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showAdvanced]);
 
   // Primary Actions with enhanced functionality
   const primaryActions = [
@@ -278,22 +233,6 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
     // Update the previous state
     prevIsRegeneratingRef.current = isRegenerating;
   }, [isRegenerating, announceLiveRegion]);
-
-  // Enhanced Advanced Actions
-  const advancedActions = [
-    {
-      id: 'regenerate-section',
-      label: regenLocaleLocked
-        ? 'Regenerate Content (default language only)'
-        : 'Regenerate Content',
-      icon: 'refresh',
-      handler: () => {
-        // TODO: Implement regenerate section handler
-        logger.warn('Regenerate section not yet implemented');
-      },
-      disabled: isRegenerating || regenLocaleLocked,
-    },
-  ];
 
   return (
     <>
@@ -404,43 +343,8 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
               </button>
             </React.Fragment>
           ))}
-          
-          {/* Advanced Actions Trigger */}
-          <div className="w-px h-6 bg-gray-200 mx-1" />
-          <button
-            ref={advancedTriggerRef}
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              setShowAdvanced(!showAdvanced);
-            }}
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
-              showAdvanced 
-                ? 'bg-gray-100 text-gray-900' 
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-            }`}
-            title="More actions"
-          >
-            <span>⋯</span>
-          </button>
         </div>
       </div>
-      )}
-
-      {/* Advanced Actions Menu - Using the dedicated component */}
-      {showAdvanced && advancedTriggerRef.current && !isRegenerating && (
-        <AdvancedActionsMenu
-          ref={advancedRef}
-          actions={advancedActions}
-          triggerElement={advancedTriggerRef.current}
-          onClose={() => setShowAdvanced(false)}
-          toolbarType="section"
-          isVisible={showAdvanced}
-        />
       )}
 
       <ElementToggleModal
