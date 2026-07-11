@@ -179,3 +179,54 @@ Edit-side only. Published renderer (`LandingPagePublishedRenderer` / `componentR
 - Hover affordance present + visually equivalent.
 - Performance tab: no 100ms setTimeout burst / querySelector sweeps on mount; idle 60s clean.
 - Editor↔published parity smoke on one section (edit-only change, expected unchanged).
+
+---
+
+## Phase 4 — VersionManager removal from live path
+
+**Human gate:** CLEARED — user approved DELETE (not cap-to-5). No restore path surfaced during implementation (VersionManager methods `undo/redo/exportHistory/getActiveConflicts` were only surfaced through the deleted indicators; editStore's own history stack in `uiActions.ts` is the real undo/redo and was never touched).
+
+**Files changed**
+- `src/hooks/useAutoSave.ts` (modified)
+- `src/app/edit/[token]/components/layout/EditLayout.tsx` (modified)
+- `src/components/ui/SaveStatusIndicator.tsx` (DELETED)
+- `src/components/ui/PersistenceStatusIndicator.tsx` (DELETED)
+
+**What was removed from `useAutoSave.ts`**
+- `VersionManager` + `ConflictResolution` import from `@/utils/versionManager`.
+- `versionManagerRef` + its `new VersionManager({ maxSnapshots: 50, ... })` instantiation.
+- `changeCountRef`.
+- The version-snapshot-creation `useEffect` (was gated on `enableVersioning` + `queuedChanges`).
+- Manager-dependent actions: `undo`, `redo`, `createSnapshot`, `resolveConflict` (+ its manager branches), `getActiveConflicts`, `exportHistory`.
+- Convenience fns: `undoLastChange`, `redoLastUndo`, `getConflictSummary`.
+- The versioning snapshot block inside `forceSave` (manual-save snapshot).
+- `AutoSaveStatus`: dropped `canUndo/canRedo/currentVersion/totalVersions/hasActiveConflicts/conflictCount`.
+- `AutoSaveHookConfig`: dropped `enableVersioning/snapshotInterval/conflictResolution` AND the now-orphaned `onConflictDetected/onVersionCreated` callbacks (the latter two were only fired by deleted code and `onConflictDetected` referenced the removed `ConflictResolution` type).
+- `AutoSaveActions`: dropped `undo/redo/createSnapshot/resolveConflict/getActiveConflicts/exportHistory`.
+- `UseAutoSaveReturn`: dropped `undoLastChange/redoLastUndo/getConflictSummary`.
+- Specialized hooks `useSaveStatus`, `useVersionControl`, `useConflictResolution` — all DELETED.
+
+**`useSaveStatus` decision: DELETED.** Grep confirmed its sole consumer was `SaveStatusIndicator.tsx` (deleted this phase). Same for `useVersionControl`/`useConflictResolution` (the useAutoSave copies). Note: `useStatePersistence.ts` defines its OWN `useVersionControl`/`useConflictResolution` (different signatures — take `tokenId`); those are separate and untouched (phase 5's blast radius).
+
+**`EditLayout.tsx`:** the `useAutoSave({ enableAutoSave: true, enableVersioning: true })` call had `{ status, actions }` destructured but never read (scout-confirmed). Replaced with a bare `useAutoSave({ enableAutoSave: true })` (no destructure, no versioning config).
+
+**Grep results (no stragglers)**
+- `SaveStatusIndicator|PersistenceStatusIndicator|CompactSaveStatus|DetailedSaveStatus|FloatingSaveStatus|HeaderSaveStatus` across `src/` → 0 files after deletion.
+- `from '@/hooks/useAutoSave'` across `src/` → only `EditLayout.tsx` (imports `useAutoSave` only).
+- No remaining import of `useSaveStatus`/`useVersionControl`/`useConflictResolution` from `useAutoSave`.
+
+**Phase-2 machinery intact (confirmed):** the event-driven `dispatchSave()` choke point (OR-gate + capture-at-dispatch + bounded 2/4/8s retry), `armDebounce`, the mount-once `storeApi.subscribe` trailing-debounce listener (lastUpdated advance / isDirty false→true arm / mid-flight `!saveError` success re-arm), the teardown visibility/pagehide/beforeunload flush, the online-recovery flush, and the `finalConfig` `useMemo` were all preserved verbatim (memo key just lost the versioning fields). Diff shows only VersionManager/versioning/conflict code removed; the debounce/dispatchSave path is byte-identical.
+
+**Not touched (per plan):** `src/utils/versionManager.ts`, `statePersistence.ts`, `useStatePersistence.ts` (phase 5), `src/utils/autoSaveDraft.ts` (live regen path). Left the two dead-but-harmless `type` imports (`AutoSaveState`, `ChangeEvent`) from `autoSaveMiddleware` in place — `AutoSaveState` is still used by `getPerformanceStats`'s return type; `ChangeEvent` was already unused pre-phase (no `noUnusedLocals` error) and its relocation is explicitly phase 5's step.
+
+**Verification**
+- `npx tsc --noEmit` → green (no output).
+- `npm run test:run` → green (2007 passed | 3 skipped, 127 files).
+- `npm run build` → green (full build incl. published-css/assets + next build).
+
+**Deviations**
+- Also removed `onConflictDetected`/`onVersionCreated` config callbacks (beyond the three config fields the plan named) — forced because they were orphaned versioning callbacks and `onConflictDetected` typed against the removed `ConflictResolution` import. Conservative, in-scope (versioning removal). Logged here.
+
+**Open risks / human QA**
+- Heap-flat check (acceptance criterion 3: DevTools Memory, ~10-min continuous edit on naayom, heap flat ±10%) is a human/QA gate — not automatable here.
+- Manual dev smoke (editor loads, edits save via phase-2 debounce, Ctrl+Z/Ctrl+Y undo/redo via editStore history) pending at merge gate.
