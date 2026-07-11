@@ -57,3 +57,34 @@ None. Stayed within the Files-touched list. Did not touch planManager, publish r
 **Deviations:** none. No DB column / migration added (per plan). `hasFeature` left untouched.
 
 **Open risks:** the i18n full-suite timeout flake is orthogonal but worth noting for CI stability.
+
+## Phase 3 — SEO modal: Tracking section, validation, Pro lock/upsell
+
+**Files changed**
+- `src/app/edit/[token]/components/ui/SeoSettingsModal.tsx`
+
+**What changed**
+- Added imports: `Link` from `next/link`, and `META_PIXEL_ID_RE` / `GA4_MEASUREMENT_ID_RE` from `@/lib/staticExport/headTags` (plain module, safe client import — regexes reused, not redefined).
+- Modal title: `SEO & Social` → `SEO & Tracking` (exact JSX string: `SEO &amp; Tracking`). Subtitle/social copy left unchanged.
+- Plan awareness: `useEffect` + `fetch('/api/billing/plan')` mirroring `CreditBadge`. Reads `data.features.trackingPixels` into `trackingEnabled`; `planLoading` gates it. `trackingLocked = planLoading || !trackingEnabled` (loading treated as locked = fail-closed UX).
+- New "Tracking" section rendered INSIDE the existing `isRoot` gate (root/home page only, same as favicon/structured-data). Two inputs: "Meta Pixel ID" (placeholder `1234567890123456`) and "GA4 measurement ID" (placeholder `G-XXXXXXXXXX`).
+- Helper copy under the section label: "Applies to every page of your site. Changes take effect after you republish."
+- Pro lock: both inputs `disabled={trackingLocked}` with `disabled:` Tailwind styling; upsell note + `<Link href="/pricing">Upgrade to Pro →</Link>` shown when locked and not loading.
+
+**Validation + store-write wiring**
+- Raw local state (`metaRaw`/`ga4Raw`) holds the in-progress/invalid text so it stays visible without ever reaching the store; re-synced from `page.seo` via `useEffect` keyed on `selectedId` + the two seo values.
+- `onMetaChange`: empty → `patch({ metaPixelId: undefined })`; matches `META_PIXEL_ID_RE` → `patch({ metaPixelId: raw })`; else → set inline red error, NO patch.
+- `onGa4Change`: uppercases input first (display + validate + store), then same empty/valid/invalid branching against `GA4_MEASUREMENT_ID_RE`.
+- Only valid or cleared(→undefined) values ever hit `store.updatePageSeo` (the existing `patch` path); auto-save fires on modal close via existing `handleClose`. This guarantees `sanitizeSeo` never sees a bad value that would drop the whole seo blob.
+
+**tsc / tests**
+- `npx tsc --noEmit`: clean except the known pre-existing `src/app/page.tsx` `@/assets/images/founder.jpg` error.
+- `npm run test:run`: 2126 passed, 3 skipped; only failure = pre-existing `i18nHonesty.test.ts` timeout flake (unrelated, noted in task). No new modal test added (not required).
+
+**Deviations**
+- Title: plan specified `SEO & Social` → `SEO & Tracking`; current title was already `SEO & Social`, so applied verbatim.
+- Error message strings are my own concise wording (plan left exact copy open).
+- `trackingLocked` includes `planLoading` so inputs are disabled during the fetch (conservative fail-closed UX); upsell note is suppressed while loading to avoid flashing the Pro pitch before the plan is known.
+
+**Open risks**
+- None functional. Client lock is UX-only by design; the Phase 2 publish-time server strip remains the real gate.
