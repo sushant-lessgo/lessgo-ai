@@ -12,6 +12,16 @@ export {
   type HearthBaseTokens,
 } from './tokens';
 
+// Knob surface (template-factory phase 8) — hearth is the first knob-tokenized
+// template. `hearthKnobs` is the TemplateModule.knobs declaration; the token map
+// + shared stylesheet builder are consumed by the two renderers.
+export {
+  hearthKnobs,
+  hearthKnobTokenMap,
+  serializeHearthKnobOverrides,
+  buildHearthStylesheet,
+} from './tokens';
+
 export {
   hearthPaletteConfigs,
   pilotEnabledPalettes,

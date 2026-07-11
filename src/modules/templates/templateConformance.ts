@@ -52,7 +52,8 @@ import {
 import { engineCoreSections } from '@/modules/engines/coreSections';
 import { type TemplateId } from '@/types/service';
 import { type CapabilityId } from '@/types/brief';
-import { type TemplateKnobDeclaration } from '@/types/template';
+import { type TemplateKnobDeclaration, type KnobAxis } from '@/types/template';
+import { type TemplateLook } from './templateMeta';
 import { STANDARD_KNOB_AXES, KNOB_AXES } from './knobs';
 import { COLLECTIONS, getCollectionDef, type CollectionKey } from '@/modules/collections/registry';
 
@@ -598,9 +599,9 @@ export function assertEditorBasics(templateId: TemplateId): void {
 // `undefined` records the not-declared fact with a single green test, so a
 // knob-unaware template stays green when/if enrolled.
 //
-// The looks-truthfulness half (a look must reference declared axes/values) is
-// DEFERRED to phase 8, when `templateMeta.looks` lands — noted here so the rule's
-// scope is explicit.
+// The looks-truthfulness half (a look must reference declared axes/values +
+// real variant/palette refs) landed in phase 8 as `assertLooksConformance`
+// (below), enrolled alongside this rule in conformance.test.ts.
 export function assertKnobConformance(
   templateId: TemplateId,
   knobs: TemplateKnobDeclaration | undefined,
@@ -643,6 +644,84 @@ export function assertKnobConformance(
             knobs.axes[axis] ?? [],
             `${templateId}/${axis}: tokenizes the axis but omits its default "${def.default}"`,
           ).toContain(def.default);
+        });
+      });
+    }
+  });
+}
+
+// ── looks-truthfulness conformance: CONDITIONAL (template-factory phase 8) ─────
+// A named look is a curated bundle; every reference it makes MUST be TRUE:
+//   1. it declares an id + label + blurb;
+//   2. every knob axis it sets is one the template TOKENIZES (`knobs.axes`), and
+//      every value is in that axis' declared subset (which is itself a subset of
+//      the standard vocabulary — checked by assertKnobConformance);
+//   3. its `variantId` is a real template variant id;
+//   4. its `paletteId` is a real template palette id.
+// A look that references an undeclared axis/value or a phantom variant/palette is
+// a lie that would silently resolve to the default at render time — this rule
+// makes it red instead.
+//
+// EXPORTED + enrolled per template (phase 8, in conformance.test.ts). The valid
+// variant/palette id sets are passed IN from the enrolling test (which can import
+// the template's pure id lists) so this module stays free of template-module
+// imports. Passing `undefined` looks records the not-declared fact and stays green.
+export function assertLooksConformance(
+  templateId: TemplateId,
+  looks: readonly TemplateLook[] | undefined,
+  knobs: TemplateKnobDeclaration | undefined,
+  validVariantIds: readonly string[],
+  validPaletteIds: readonly string[],
+): void {
+  describe(`looks-truthfulness conformance (${templateId})`, () => {
+    if (!looks || looks.length === 0) {
+      it('declares no looks (nothing to check)', () => {
+        expect(looks ?? []).toEqual([]);
+      });
+      return;
+    }
+
+    it('a template with looks must also declare knobs (looks reference knob axes)', () => {
+      expect(knobs, `${templateId} declares looks but no knobs`).toBeTruthy();
+    });
+
+    const declaredAxes = (knobs?.axes ?? {}) as Partial<Record<KnobAxis, readonly string[]>>;
+
+    for (const look of looks) {
+      describe(`look "${look.id}"`, () => {
+        it('declares id + label + blurb', () => {
+          expect(look.id, 'look id').toBeTruthy();
+          expect(look.label, `${look.id}: label`).toBeTruthy();
+          expect(look.blurb, `${look.id}: blurb`).toBeTruthy();
+        });
+
+        it('every knob axis/value it sets is declared by the template', () => {
+          for (const [axis, value] of Object.entries(look.knobs)) {
+            if (value === undefined) continue;
+            const supported = declaredAxes[axis as KnobAxis];
+            expect(
+              supported,
+              `${templateId}/${look.id}: sets undeclared knob axis "${axis}"`,
+            ).toBeTruthy();
+            expect(
+              supported,
+              `${templateId}/${look.id}: knob "${axis}=${value}" not in the template's declared values [${(supported ?? []).join(', ')}]`,
+            ).toContain(value);
+          }
+        });
+
+        it(`references a real variant id ("${look.variantId}")`, () => {
+          expect(
+            validVariantIds,
+            `${templateId}/${look.id}: variantId "${look.variantId}" is not a real template variant`,
+          ).toContain(look.variantId);
+        });
+
+        it(`references a real palette id ("${look.paletteId}")`, () => {
+          expect(
+            validPaletteIds,
+            `${templateId}/${look.id}: paletteId "${look.paletteId}" is not a real template palette`,
+          ).toContain(look.paletteId);
         });
       });
     }

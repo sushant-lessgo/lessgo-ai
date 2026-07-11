@@ -63,8 +63,8 @@ wiring editor-basics assertions.
 - phase 4 design-kit generator: done (commit 0dd9b186, review loops 1; derived not-frozen, firewall intact, 3 engines generate w/ source labels, primitive=labeled hint; tsc clean, 2223 tests)
 - phase 5 handoff lint: done (commit 2237fc5b, review loops 1; broken fixture fails both distinct findings, derived from kit, marker convention agrees kit<->lint, all 5 checks real; tsc clean, 2231 tests)
 - phase 6 anchor library: done (commit 51d9baae, review loops 1; 21 anchors/6 groups, guard imports live templateMeta + red-on-removal verified, 5 default bans; tsc clean, 2235 tests 0 failed. Anchor taste = phase-11 founder gate)
-- phase 7 screenshot parity harness + diff: done (commit PENDING, review loops 1, ship; reviewer RAN spec: meridian/hearth ≤1.297% < 3% thresh < 6.409% parityBreak, bands-to-each-other no baselines, preview renders 2 distinct components, old URL mounts; tsc clean, parity 6 passed. Orphans MeridianBlocksClient.tsx+mockContent.ts flagged for cleanup)
-- phase 8 hearth knobs pilot + looks data: pending
+- phase 7 screenshot parity harness + diff: done (commit cccd30f6, review loops 1; reviewer RAN spec: meridian/hearth ≤1.297% < 3% thresh < 6.409% parityBreak, bands-to-each-other no baselines, preview renders 2 distinct components, old URL mounts; tsc clean, parity 6 passed. Orphans MeridianBlocksClient.tsx+mockContent.ts flagged for cleanup)
+- phase 8 hearth knobs pilot + looks data: done (commit PENDING, review loops 2 [loop1=race false-negative, not a real fix]; ship — default byte-identical + :root untouched, both renderers consume knobs, looks rule bites live, tsc/2265 tests/parity ≤0.249%/build all green). **HUMAN GATE OPEN: founder no-visual-change sign-off on a real hearth draft before phase 9.** Runtime wiring (registry/LandingPageRenderer/publish caller) MOVED INTO phase 9 scope.
 - phase 9 looks in picker: pending
 - phase 10 generation spread: pending
 - phase 11 skill rewrite + manual-test subsection: pending
@@ -375,11 +375,19 @@ assert content JSON untouched).
 **Human gate:** founder approves the picker UX (tile presentation, look names, fallback-row
 placement) on dev before merge-on.
 
+**Runtime-wiring dependency (surfaced by phase-8 impl — MUST land in phase 9, else picker writes looks that don't render):** phase 8 wired the knob MECHANISM + conformance but NOT the live render path. Before/with the picker:
+- `src/modules/templates/registry.ts` — hearth loader must expose `knobs: m.hearthKnobs` so `mod.knobs` is populated at runtime (edit + published dispatch).
+- `src/modules/generatedLanding/LandingPageRenderer.tsx` — edit side must pass `knobs={themeValues?.knobs}` to the template ThemeInjector.
+- Publish path: the `generateStaticHTML` caller (publish route) must EXTRACT `themeValues.knobs` and pass it as the `knobs` option (the phase-3 seam is threaded but inert — nothing feeds it yet). Trace from `src/app/api/publish` → `generateStaticHTML`.
+
 **Files touched**
 - `src/components/onboarding/wizard/StyleSlot.tsx` (look tiles in the trust-path branch)
 - `src/components/onboarding/wizard/fields/templateCatalog.ts` (surface looks metadata if catalog feeds the slot)
 - `src/app/edit/[token]/components/ui/ServiceThemePopover.tsx` (Looks section)
 - `src/app/api/saveDraft/route.ts` (expected NO edit — read-only schema confirmation; listed in case DraftSaveSchema needs a key allowance)
+- `src/modules/templates/registry.ts` (expose hearth `knobs` on the module surface — runtime dependency above)
+- `src/modules/generatedLanding/LandingPageRenderer.tsx` (edit-side: thread `themeValues.knobs` → ThemeInjector — runtime dependency above)
+- publish route / `generateStaticHTML` caller (extract `themeValues.knobs` → `knobs` option — runtime dependency above; confirm exact file when scoping phase 9)
 
 **Verification:** `npx tsc --noEmit`; `npm run test:run`; `npm run test:e2e`
 (edit-persistence + publish specs green); manual: pick each hearth look → editor + published

@@ -23,6 +23,8 @@
 // Static imports of resolvers/placeholders/schemas are fine: test files never
 // enter the app bundle (vitest-only), so the registry firewall is unaffected.
 
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect, vi } from 'vitest';
 
 // ── editor-basics store mock (template-factory phase 2) ──────────────────────
@@ -56,6 +58,12 @@ import { LumenPlaceholderBlock } from './lumen/LumenPlaceholderBlock';
 import { createHarnessStore } from './blockMocks/harness';
 import { ALL_BLOCK_MOCK_SECTIONS } from './blockMocks';
 
+// Hearth knob/looks pilot (template-factory phase 8). Pure data imports (tokens /
+// palettes / service types) — no template-module (client) surface pulled in.
+import { hearthKnobs, hearthVariants, buildHearthStylesheet } from './hearth/tokens';
+import { hearthPalettes } from '@/types/service';
+import { HearthSSRTokens } from './hearth/components/HearthSSRTokens';
+
 import {
   templateConformance,
   RESOLVERS,
@@ -63,6 +71,8 @@ import {
   COLLECTION_FAMILY,
   assertCollectionCapabilityBacked,
   assertEditorBasics,
+  assertKnobConformance,
+  assertLooksConformance,
   resolvesReal,
 } from './templateConformance';
 
@@ -87,6 +97,73 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
   // hearth). surge/vestria/lex/etc. deferred (plan Q6) — they carry no mocks yet.
   assertEditorBasics('meridian');
   assertEditorBasics('hearth');
+
+  // ── KNOB + LOOKS conformance (template-factory phase 8) ────────────────────
+  // hearth is the FIRST template to opt into knobs (dormant rules from phase 3
+  // activate here). The valid variant/palette id sets are passed in from hearth's
+  // pure data so templateConformance stays free of template-module imports.
+  const HEARTH_VARIANT_IDS = hearthVariants.map((v) => v.id);
+  assertKnobConformance('hearth', hearthKnobs);
+  assertLooksConformance(
+    'hearth',
+    templateMeta.hearth.looks,
+    hearthKnobs,
+    HEARTH_VARIANT_IDS,
+    [...hearthPalettes],
+  );
+
+  // ── HUMAN-GATE EVIDENCE (template-factory phase 8): back-compat by construction
+  // Proves the two claims the founder checks at the gate:
+  //   1. DEFAULT emits nothing → a knob-unaware (or all-default) hearth render is
+  //      BYTE-IDENTICAL to the pre-phase-8 stylesheet + wrapper.
+  //   2. A NON-DEFAULT knob produces CSS + a data-attr present in BOTH renderers
+  //      (same shared builder), i.e. HearthSSRTokens CONSUMES the knob prop —
+  //      it does not silently no-op while the editor shows a change.
+  describe('phase-8 back-compat gate evidence (hearth knobs)', () => {
+    // The pre-phase-8 stylesheet = base + palette + variant, with NO knob layer.
+    const baselineStylesheet = buildHearthStylesheet();
+
+    it('default: no knobs / all-default knobs emit NOTHING (byte-identical stylesheet)', () => {
+      expect(buildHearthStylesheet()).toBe(baselineStylesheet);
+      expect(buildHearthStylesheet(null)).toBe(baselineStylesheet);
+      expect(buildHearthStylesheet({})).toBe(baselineStylesheet);
+      // Explicit axis DEFAULTS still emit nothing (default = :root).
+      expect(
+        buildHearthStylesheet({ buttonShape: 'rounded', density: 'comfortable' }),
+      ).toBe(baselineStylesheet);
+      // The baseline contains NO knob selectors at all.
+      expect(baselineStylesheet).not.toContain('data-knob-');
+    });
+
+    it('default: HearthSSRTokens published markup carries NO data-knob-* attr and NO knob CSS', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(HearthSSRTokens, { paletteId: 'terracotta' as any }),
+      );
+      expect(html).not.toContain('data-knob-');
+    });
+
+    it('non-default: a knob emits scoped CSS AND a wrapper attr in the published renderer', () => {
+      // Stylesheet gains the scoped knob block (shared builder = same string the
+      // edit-side HearthThemeInjector injects).
+      const css = buildHearthStylesheet({ buttonShape: 'pill' });
+      expect(css).toContain('[data-knob-buttonShape="pill"]');
+      expect(css).toContain('--r-md:999px');
+      expect(css.length).toBeGreaterThan(baselineStylesheet.length);
+
+      // HearthSSRTokens CONSUMES it: the wrapper carries the data-attr AND the
+      // <style> inlines the same scoped block — no silent published no-op.
+      const html = renderToStaticMarkup(
+        React.createElement(HearthSSRTokens, {
+          paletteId: 'terracotta' as any,
+          knobs: { buttonShape: 'pill', density: 'compact' },
+        }),
+      );
+      expect(html).toContain('data-knob-buttonShape="pill"');
+      expect(html).toContain('data-knob-density="compact"');
+      expect(html).toContain('[data-knob-buttonShape="pill"]');
+      expect(html).toContain('[data-knob-density="compact"]');
+    });
+  });
 
   // ── GLOBAL sanity: at least one manifest declaration exists to check ───────
   it('block manifests declare at least one variant to check', () => {

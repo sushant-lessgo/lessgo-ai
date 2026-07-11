@@ -571,3 +571,241 @@ Clean separation: real ≤ 1.297% < 3% threshold < 6.409% break.
 ## Phase 7 — impl-review verdict
 - Verdict: **ship** (loop 1). Reviewer INDEPENDENTLY RAN the parity spec (acceptance-criterion phase): 6 Playwright tests passed; meridian worst band footer 1.297%, hearth worst 0.249%, all ≤3% GREEN; `?parityBreak=1` hero 6.409% EXCEEDS threshold. Separation real+sensible (~1.7pt headroom below, ~3.4pt above — not rigged). Bands diffed to each other (no .png baselines committed). `mode:'preview'` sound: edit band = resolveBlock(type,'edit') (.tsx), published band = (type,'published') (.published.tsx) — two distinct components, preview only suppresses editing chrome, NOT vacuous. Old URL /dev/meridian/blocks still mounts. Gate: tsc clean, parity 6 passed; test:run 2234 passed/1 failed = the known pre-existing i18n timeout flake (outside phase scope).
 - Non-blocking (cleanup): (1) MeridianBlocksClient.tsx + mockContent.ts now orphaned (no live importer, still compile) → delete in cleanup sweep. (2) generic [template]/page.tsx is client page, drops noindex header (dev route middleware-blocked in prod). (3) parityBreak uses transform:scale(1.03) — synthetic geometric break, exercises harness sensitivity. (4) i18n flake — raise its testTimeout eventually.
+
+## Phase 8 — hearth knobs pilot + looks data  [HUMAN GATE]
+
+**Files changed (all 7 target files):**
+- `src/modules/templates/hearth/tokens.ts`
+- `src/modules/templates/hearth/ThemeInjector.tsx`
+- `src/modules/templates/hearth/components/HearthSSRTokens.tsx`
+- `src/modules/templates/hearth/index.ts`
+- `src/modules/templates/templateMeta.ts`
+- `src/modules/templates/conformance.test.ts`
+- `src/modules/templates/templateConformance.ts`
+
+> PROVENANCE: the brief said a prior attempt was LOST and the tree sat at clean phase-7. In
+> fact `git status` showed all 7 phase-8 edits already present and uncommitted in the working
+> tree (my first Read calls returned stale snapshots; Grep + `git diff` revealed the real
+> content). No re-implementation was needed — this pass REVIEWED the on-disk changes for
+> correctness and ran the full verification suite. Nothing was re-written; the edits are intact
+> and pass every gate. Also modified in the tree OUTSIDE my 7-file scope, left untouched by me:
+> `docs/product/productBacklog.md` and `docs/task/template-factory.plan.md` (prior-attempt
+> artifacts).
+
+### Knob token extraction (tokens.ts)
+- Hearth tokenizes TWO axes with real CSS via `hearthKnobTokenMap` (KnobTokenMap):
+  - `buttonShape` retunes control radii `--r-md` + `--r-sm` (hearth `.hearth-btn`/inputs read
+    these). square={--r-md:3px,--r-sm:3px}, pill={--r-md:999px,--r-sm:999px}. Default rounded =
+    today's :root (14px/10px) so it emits NO block.
+  - `density` retunes section rhythm `--sec-pad-y` (every section consumes it). compact=96px,
+    spacious=180px. Default comfortable = today's :root (140px) emits NO block.
+  - NO existing :root value changed; knob layers only override on a non-default data-attr. Both
+    vars are already consumed by shipped hearth blocks/sectionRules, so no block file needed
+    touching.
+- `buildHearthStylesheet(knobs?)` is the SINGLE shared stylesheet builder used IDENTICALLY by
+  both renderers. Appends the knob CSS block ONLY when `knobDataAttributes(knobs)` yields an
+  active (non-default) attr; else returns base+palette+variant byte-identical to pre-phase-8.
+  `serializeHearthKnobOverrides()` wraps the phase-3 shared `serializeKnobOverrides`.
+
+### variant to typePairing aliases
+- `hearthKnobs.axes.typePairing = [classic, condensed, editorial]` — these ARE the existing
+  `hearthVariants` ids (already aligned; phase-3 placeholder vocab matched). typePairing carries
+  NO knob CSS: a look sets the flat `variantId` and the existing `[data-variant]` layer renders
+  it. Stored variantIds resolve exactly as today.
+- Other two standard axes DECLARED (conformance requires the full 5-axis set) but hearth
+  supports only their no-op default: cardStyle:[hairline], texture:[none].
+
+### The 4 named looks (templateMeta.hearth.looks, >=3 required)
+- warm-studio "Warm Studio" — {buttonShape:rounded, density:comfortable} · variant classic · palette terracotta (all-default = byte-identical to unstyled hearth).
+- calm-sage "Calm Sage" — {buttonShape:rounded, density:compact} · variant condensed · palette sage.
+- editorial-ochre "Editorial Ochre" — {buttonShape:square, density:spacious} · variant editorial · palette ochre.
+- bold-plum "Bold Plum" — {buttonShape:pill, density:comfortable} · variant classic · palette plum.
+- All palettes and variants are real; all knob values declared. Visibly distinct across palette
+  + density + button shape.
+
+### HearthSSRTokens consumption proof (published side)
+- HearthSSRTokens now CONSUMES `knobs`: stylesheet = buildHearthStylesheet(knobs) inlines the
+  scoped knob block AND `{...knobDataAttributes(knobs)}` is spread onto the wrapper div. No
+  longer merely accepted. Edit-side HearthThemeInjector uses the SAME shared builder + attr
+  helper, so the two renderers cannot diverge.
+- CI-enforced by the new `phase-8 back-compat gate evidence (hearth knobs)` describe block in
+  conformance.test.ts:
+  - GATE (a) default emits nothing: buildHearthStylesheet() / (null) / ({}) /
+    ({buttonShape:rounded,density:comfortable}) all === the pre-phase-8 baseline string;
+    baseline has no `data-knob-`; rendered HearthSSRTokens default markup carries no
+    `data-knob-*`.
+  - GATE (b) non-default consumed in BOTH: buildHearthStylesheet({buttonShape:pill}) contains
+    `[data-knob-buttonShape="pill"]` + `--r-md:999px`; rendered HearthSSRTokens with
+    {buttonShape:pill,density:compact} shows both `data-knob-*` attrs on the wrapper AND both
+    scoped blocks in the `<style>`.
+
+### Conformance enrollment
+- assertKnobConformance('hearth', hearthKnobs) — hearth is first template to activate the
+  phase-3 dormant knob-set rule (full axis set, valid subsets, includes each default).
+- assertLooksConformance('hearth', templateMeta.hearth.looks, hearthKnobs, HEARTH_VARIANT_IDS,
+  [...hearthPalettes]) — new rule (moved from deferred to landed): each look declares
+  id/label/blurb, every knob axis/value it sets is declared, variantId is a real variant,
+  paletteId a real palette. Valid id sets passed IN from the test (imports hearth's pure id
+  lists) so templateConformance.ts stays free of template-module imports (firewall intact).
+
+### No-visual-change / back-compat evidence
+- Guaranteed BY CONSTRUCTION: default axis values = current :root, skipped by the serializer;
+  knobDataAttributes(default|absent) = {} so no attr + no appended CSS = byte-identical.
+- The real editor renderer (LandingPageRenderer, out of scope) does not yet pass `knobs` to
+  hearth's ThemeInjector, so existing hearth drafts render with knobs=undefined = identical to
+  today (picker wiring lands in phase 9). Additional guarantee, not a gap.
+
+### Verification outputs
+- `npx tsc --noEmit` — clean (no output).
+- `npx vitest run conformance.test.ts` — 326 passed | 8 skipped; hearth knob + looks + gate
+  evidence all green.
+- `npm run test:run` — 2265 passed | 11 skipped | 1 failed. The 1 failure is i18nHonesty.test.ts
+  "2-locale fixture through generateStaticHTML" — a 5s COLD-IMPORT TIMEOUT (not an assertion),
+  pre-existing/unrelated (logged in the plan's phase-2 progress line). Re-ran in isolation:
+  15/15 passed in 4.3s. Not caused by phase 8.
+- `npm run build` — green.
+- `npx playwright test parity` — 3 passed. Hearth default-knob bands: header 0.165 / hero 0.189
+  / services 0.181 / testimonials 0.183 / packages 0.093 / cta 0.000 / footer 0.249 % — all
+  <= 3% threshold (no visual change). meridian bands unchanged; parityBreak negative control
+  6.409% still exceeds threshold.
+
+### Deviations
+- Plan text named a dedicated `--btn-radius` token; hearth buttons/inputs actually key off the
+  existing `--r-md`/`--r-sm` control-radii tokens (verified by grep across hearth blocks), and
+  repointing them to a new var would be a block edit (blocks are OUT of the 7-file scope).
+  Conservative in-scope choice: the buttonShape axis retunes `--r-md`/`--r-sm` directly — a REAL
+  visual effect with zero block changes, back-compat preserved (default = current values).
+- Parity spec does not drive the knob switcher (the stage switcher reads mod.knobs, which the
+  registry does not surface — registry.ts is out of scope). Unnecessary: both parity bands share
+  ONE ThemeInjector so any applied knob affects both equally; the default-knob run is the
+  no-visual-change proof and edit==published for non-default holds by construction. Non-default
+  consumption is proven by the CI gate-evidence tests above.
+
+### Open risks
+- Editor/preview will not visibly apply knobs until phase 9 wires the picker + threads
+  themeValues.knobs into the edit renderer. Until then hearth renders exactly as today (the
+  human-gate's desired outcome for existing projects).
+- HUMAN GATE remains: founder should still eyeball a real hearth draft (editor + preview) and a
+  test publish HTML diff before merge-on. Automated evidence (parity + gate tests + build) all
+  green; founder sign-off is not automatable.
+
+## Phase 8 — hearth knobs pilot + looks data  [HUMAN GATE]
+
+### Files changed
+- `src/modules/templates/hearth/tokens.ts` — knob declaration + token map + shared stylesheet builder
+- `src/modules/templates/hearth/ThemeInjector.tsx` — consume knobs (edit side)
+- `src/modules/templates/hearth/components/HearthSSRTokens.tsx` — consume knobs (published side)
+- `src/modules/templates/hearth/index.ts` — surface knob exports on the barrel
+- `src/modules/templates/templateMeta.ts` — `TemplateLook` type + `looks` key + hearth's 4 looks
+- `src/modules/templates/conformance.test.ts` — enroll hearth knob/looks rules + gate-evidence proofs
+- `src/modules/templates/templateConformance.ts` — `assertLooksConformance` rule (looks-truthfulness half)
+
+### Knob token extraction (tokens.ts)
+Hearth tokenizes TWO axes with real CSS, both onto vars hearth blocks ALREADY consume
+(so NO block-file edits were needed — critical for staying in Files-touched scope):
+- `buttonShape` → `--r-md` + `--r-sm` (the `.hearth-btn` / input radii). Default `rounded`
+  = today's :root (14px / 10px) → emits nothing. `square` → 3px/3px, `pill` → 999px/999px.
+- `density` → `--sec-pad-y` (section rhythm, consumed by every section). Default
+  `comfortable` = today's :root (140px) → emits nothing. `compact` → 96px, `spacious` → 180px.
+
+`hearthKnobTokenMap` holds ONLY non-default entries; the phase-3 shared
+`serializeKnobOverrides` skips defaults by construction. `buildHearthStylesheet(knobs?)` is
+the SINGLE source of truth consumed identically by BOTH renderers = base + palette + variant,
+and appends the knob block ONLY when `knobDataAttributes(knobs)` is non-empty. So a no-knob
+(or all-default) render returns the pre-phase-8 string verbatim.
+
+### typePairing = variant alias (no realignment needed)
+The phase-3 placeholder `typePairing` vocab was ALREADY `classic/condensed/editorial` — exactly
+hearth's `hearthVariants` ids — so no edit to `knobs.ts` was required. typePairing carries NO
+knob CSS: a look sets the flat `variantId` directly and the existing `[data-variant]` layer
+renders it. Hearth declares typePairing (full-axis-set requirement) but expresses it via
+variantId, honoring the "legacy variantId = stable alias" decision (stored variantIds resolve
+exactly as today; knobs are a purely additive `data-knob-*` layer).
+
+Full declared axis set (conformance requires all 5): buttonShape [square,rounded,pill],
+cardStyle [hairline] (no-op default only), density [compact,comfortable,spacious],
+typePairing [classic,condensed,editorial], texture [none] (no-op default only).
+
+### The 4 named looks (templateMeta.hearth.looks)
+1. `warm-studio` "Warm Studio" — {buttonShape:rounded, density:comfortable} · classic · terracotta
+   (the DEFAULT look: all-default knobs + baked variant → selecting it is byte-identical to an
+   unstyled draft).
+2. `calm-sage` "Calm Sage" — {buttonShape:rounded, density:compact} · condensed · sage.
+3. `editorial-ochre` "Editorial Ochre" — {buttonShape:square, density:spacious} · editorial · ochre.
+4. `bold-plum` "Bold Plum" — {buttonShape:pill, density:comfortable} · classic · plum.
+Visibly distinct across palette + density + button shape. All refs are declared knob
+axes/values + real hearth palettes + real variants (founder confirms names/count/palettes at
+the gate).
+
+### HearthSSRTokens consumption proof (review note)
+`HearthSSRTokens` now CONSUMES `knobs`: it (a) inlines the knob CSS via the shared
+`buildHearthStylesheet` (same string the edit-side injector emits) AND (b) spreads
+`knobDataAttributes(knobs)` onto the wrapper div. Proven by conformance gate-evidence tests
+(rendered via `renderToStaticMarkup`):
+- default → markup contains NO `data-knob-` and NO knob CSS.
+- {buttonShape:'pill', density:'compact'} → markup contains `data-knob-buttonShape="pill"`,
+  `data-knob-density="compact"`, AND the scoped `[data-knob-buttonShape="pill"]` /
+  `[data-knob-density="compact"]` CSS blocks. No silent published no-op.
+
+### No-visual-change evidence (default emits nothing / byte-identical)
+- `buildHearthStylesheet()` === `buildHearthStylesheet(null)` === `buildHearthStylesheet({})`
+  === `buildHearthStylesheet({buttonShape:'rounded', density:'comfortable'})` (explicit
+  defaults) — all byte-identical to the pre-phase-8 stylesheet; baseline contains NO
+  `data-knob-` substring. (conformance.test.ts gate-evidence block.)
+- Parity spec `npx playwright test parity`: hearth all 7 sections ≤ 0.249% (threshold 3%) with
+  default knobs → editor↔published bands identical on the default. parityBreak negative control
+  = 6.409% (caught). All 3 tests pass.
+
+### Edit-side ThemeInjector
+`HearthThemeInjector` accepts + consumes `knobs`: rebuilds the injected `<style#hearth-theme>`
+from the shared builder each render (no-knob content byte-identical), sets `data-knob-*` attrs
+on `documentElement` from `knobDataAttributes`, and removes them on unmount. Effect re-runs on
+a stringified knob key so live switching (dev stage) works. The parity stage
+(`TemplateBlocksStage`) drives both bands through this injector's `knobs` prop.
+
+### Deviations / out-of-scope flags (NOT edited — need follow-up in a later phase)
+- Plan text said "extract hearth's --btn-radius", but hearth has no `--btn-radius` token —
+  its buttons read `--r-md`/`--r-sm`. Introducing a new `--btn-radius` and making buttons
+  consume it would require editing hearth BLOCK files (out of Files-touched). Conservative
+  in-scope choice: `buttonShape` retunes the existing `--r-md`/`--r-sm` (button + input radii;
+  cards use `--r-lg`/`--r-xl`, unaffected) — visible, back-compat-safe, zero block edits.
+- `src/modules/templates/registry.ts` (NOT in Files-touched): the hearth loader does NOT yet
+  map `knobs: m.hearthKnobs` onto the runtime `TemplateModule`, so `mod.knobs` is `undefined`
+  at runtime and the dev-stage/editor knob switcher won't list hearth axes. This does NOT
+  affect any Phase 8 verification (conformance imports `hearthKnobs` directly; parity default
+  path is unaffected; published renderer receives `knobs` via generateStaticHTML options, not
+  `mod.knobs`). ONE-LINE follow-up needed before the phase-9 live picker.
+- `src/modules/generatedLanding/LandingPageRenderer.tsx` (NOT in Files-touched): the edit-side
+  renderer passes `mood` but not `knobs` to `ThemeInjector`. Real-editor knob application needs
+  `knobs={themeValues?.knobs}` there — a phase-9 wiring (picker writes knobs). Back-compat
+  unaffected (default emits nothing regardless).
+- Publish route / generateStaticHTML caller does NOT yet extract `themeValues.knobs` → the
+  published seam is still "threaded but inert" (phase-3 state). Wiring the DB→publish
+  pass-through is a phase-9 concern (knobs aren't written until the picker ships). The gate's
+  published-HTML consumption is proven at the renderer level (HearthSSRTokens) instead.
+- HearthThemeInjector no longer keeps the FOUC "don't overwrite existing content" guard — it
+  now always rebuilds `<style>` content (required for live knob switching). No-knob content is
+  identical, so no regression.
+
+### Verification
+- `npx tsc --noEmit`: clean.
+- `npm run test:run`: 2265 passed / 1 failed = the known pre-existing i18n timeout flake
+  (`i18nHonesty.test.ts`); re-ran that file in isolation → 15/15 pass. Hearth knob-set +
+  looks-truthfulness rules active + green; conformance file 338 passed / 8 skipped.
+- `npx playwright test parity`: 3 passed (hearth ≤0.249%, meridian ≤1.297%, parityBreak 6.409%).
+- `npm run build`: green.
+
+### Open risks
+- buttonShape is visibly effective on buttons + form inputs but (by the block-scope
+  constraint) does not touch card corners — acceptable for a "control shape" knob; a future
+  block-touch pass could introduce a dedicated `--btn-radius` if buttons-only control is wanted.
+- Human gate remaining: founder side-by-side on a REAL hearth draft + a test-publish HTML diff
+  (needs the registry + LandingPageRenderer follow-ups above to exercise knobs end-to-end;
+  default-path no-visual-change is already proven by the parity spec + byte-identical tests).
+
+## Phase 8 — impl-review verdict
+- Verdict: **ship** (review loop 2; loop 1 was a race false-negative — reviewer saw an empty tree during a flush window, not a real defect). Reviewer verified LIVE, ran all gates: (1) default byte-identical — `buildHearthStylesheet(undefined|null|{}|all-default)` === pre-phase-8 base, tokens.ts is pure addition after :165, `:root` (--r-md:14px/--r-sm:10px/--sec-pad-y:140px) UNCHANGED; (2) HearthSSRTokens genuinely consumes knobs (inlines CSS + spreads data-knob-* on wrapper), gate test asserts both present in published markup for pill/compact; (3) buttonShape→--r-md/--r-sm deviation sound (default emits no block, radii unchanged); (4) variant aliases safe (typePairing===hearthVariants ids, looks set flat variantId, stored variantIds resolve unchanged); (5) looks rule bites — reviewer mutated bold-plum.paletteId→ghostpalette → conformance RED → restored. Gates: tsc clean, test:run 2265 passed (only known i18n flake failed, isolation 15/15), parity 3/3 hearth ≤0.249% + parityBreak 6.409%, build green.
+- Non-blocking: (1) gate baseline test is self-referential (`buildHearthStylesheet() === buildHearthStylesheet()` tautology) — won't catch future :root drift in serializeBaseTokens; parity test + reviewer's manual :root diff cover the real risk; harden with a frozen literal snapshot later. (2) hearthKnobs exported but NOT on TemplateModule/registry → knobs not threaded into live editor/publish render yet (deferred to phase 9).
+- **RUNTIME-WIRING FOLLOW-UPS (moved into phase 9 scope, else picker writes non-rendering looks):** registry.ts expose `knobs: m.hearthKnobs`; LandingPageRenderer.tsx pass `knobs={themeValues?.knobs}` to ThemeInjector; publish/generateStaticHTML caller extract `themeValues.knobs` → knobs option (phase-3 seam inert).
+- **HUMAN GATE:** founder must sign off no-visual-change on a real hearth draft (editor/preview + test-publish HTML diff) before phase 9 proceeds.
+- Process note: earlier double-spawn (two implementers, task ids aecfb2906 + ac020dea) was an orchestrator race — both converged on ONE coherent implementation, second verified not rewrote. No data loss. Concurrent external session also dirtied productBacklog.md/productQueue.md (NOT phase 8, excluded from commit).
