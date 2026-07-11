@@ -402,3 +402,64 @@ All also appear in `allBlobs` (`{path, blobKey, blobUrl, sizeBytes}`) inside the
 - `npm run build` — FULL build ran green earlier (buildPublishedCSS + buildAssets + next build all completed; published CSS unaffected). Not re-run after the fix (no buildAssets/asset change; only renderPublishedExport.ts logic + a test).
 - `npm run test:run` — Test Files 133 passed | 1 skipped (134); Tests 2069 passed | 3 skipped (2072). +4 vs pre-Phase-5 2065 (3 generateStaticHTML tests + 1 loop-level test). Includes single-locale byte-identical snapshot, hreflang reciprocity, resolve-before-render, and the multi-page subpage-overlay loop test; all prior suites green, zero regressions.
 - NOT browser-driven: live switcher boot/redirect/pill + geo default are exercised at the Phase-6 human gate (real publish of a 2-locale project).
+
+## Phase 6 — Publish route + KV locale paths ⚠ HUMAN GATE
+
+**Files changed**
+- `src/app/api/publish/route.ts` (modified) — read `localeConfig` + overlay from Project.content, collision guard, wire `localeConfig`/overlay into `renderPublishedExport`.
+- `src/lib/i18n/localeSlugCollision.ts` (new) — pure reserved-path collision-guard helper (this is the "slug/subpage validation site" the plan told me to locate; created as a plain server-safe module so it is unit-testable in isolation).
+- `src/lib/i18n/localeSlugCollision.test.ts` (new) — focused unit tests for the guard.
+
+### How localeConfig (and the overlay) is read + passed
+
+Plan step 1 says read `localeConfig` from "the project content … the same place saveDraft persists it". Traced the persistence: saveDraft writes `localeConfig` at `Project.content.localeConfig` (top level) and the text overlay at `Project.content.finalContent.localeContent` (route.ts merge sites; loadDraft:152 mirrors this). The publish REQUEST body `content` (built by `src/app/preview/[token]/page.tsx` from the store's page export) carries NEITHER key — it only spreads `layout/content/forms/subpages/chrome/seo`. So both are sourced from the DB, which is fresh because preview `await save()`s before publishing.
+
+Implementation (publish route):
+- Added `content: true` to the existing `prisma.project.findUnique` select (route.ts ~line 94).
+- Derived `localeConfig = projectContent?.localeConfig ?? null` and `projectLocaleContent = projectContent?.finalContent?.localeContent` (route.ts ~line 97-107).
+- Passed `localeConfig` to `renderPublishedExport({... localeConfig})` (route.ts ~line 293).
+- Seeded the overlay onto the render input via `(content as any).localeContent = projectLocaleContent` (only when present) BEFORE the call, because `renderPublishedExport` reads it off `contentData.localeContent` (renderPublishedExport.ts:325/372) and has no overlay input param (route.ts ~line 275-283).
+
+**DEVIATION (logged):** Plan step 1 literally names only `localeConfig`. I ALSO source + inject `localeContent` from the DB. Reason: without the overlay the non-default locale docs would render, but with default-locale (EN) copy — the feature would silently ship empty translations and the founder gate would fail. The publish request payload does not carry the overlay (confirmed by reading the preview publish payload), and the preview page is out of my Files-touched scope, so injecting from the DB inside the publish route (my one in-scope file) is the conservative fix that makes the feature actually work without touching an out-of-scope file. Both keys are only set/passed when present ⇒ single-locale publishes are byte-identical.
+
+### Per-locale extraRoutes flow through the existing atomicPublish/KV path (unchanged)
+
+Confirmed by reading, no edit:
+- `renderPublishedExport` returns non-default locale docs in `extraRoutes` as `extraRoutes['/{loc}'] = blobUrl` and `extraRoutes['/{loc}/{sub}'] = blobUrl` (renderPublishedExport.ts:464), identical shape to subpage entries.
+- Publish route already threads `extraRoutes` into `atomicPublishWithRetry(pageId, domains, version, blobUrl, { ..., extraRoutes })` (route.ts ~line 309-315) — UNCHANGED by me.
+- `atomicPublishWithRetry` builds `pathBlobs = { '/': blobUrl, ...extraRoutes }` (kvRoutes.ts:220) and writes/verifies a `route:{domain}:{path}` key for every path × domain (kvRoutes.ts:139-142 write in `atomicPublish`; :241-243 verify). So `route:{host}:/nl` + `route:{host}:/nl/{sub}` keys are written for FREE — no middleware / blob-proxy / kvRoutes change (Scout B confirmed; verified, not edited).
+
+### cleanupOldVersions verification (verify-only, no edit)
+
+`cleanupOldVersions` (versionCleanup.ts) is version-scoped: `findMany({ where:{publishedPageId}, orderBy:{createdAt:'desc'}, skip:keepCount })` then, per old version, deletes EVERY blob in `version.metadata.blobs[]` (versionCleanup.ts:39-47) with a fallback to the primary `blobKey`. `renderPublishedExport` records all locale docs into `metadata.blobs` via `allBlobs` (renderPublishedExport.ts:458-463, 490). There is NO per-version blob cap and NO single-doc assumption — more blobs per version (incl. locale docs) are handled by iterating the array. No edit needed.
+
+### Collision guard — where + how
+
+Guard = new pure helper `findLocaleSubpageCollision(subpagePaths, localeConfig)` in `src/lib/i18n/localeSlugCollision.ts`, called in the publish route right after `localeConfig` is derived and BEFORE any DB mutation (route.ts ~line 109-124). On collision it returns a 400 with a clear message ("The subpage path /{loc} conflicts with the {loc} language route…").
+
+Guards against `localeConfig.locales` **minus the default locale** (the NON-DEFAULT declared set) — NOT all `SUPPORTED_LOCALES`. Rationale (documented in the helper): only non-default declared locales emit a `/{loc}` route, so that is the exact collision set. Guarding against all `SUPPORTED_LOCALES` would REJECT an existing single-locale project that happens to have a subpage coincidentally named like a locale code (e.g. `/de`), a back-compat regression — the guard is gated on `isMultiLocale` so single-locale publishes are NEVER newly rejected (back-compat law holds). The default locale is excluded because it stays at root and emits no `/{loc}` route (so an `/en` subpage on an en-default project is harmless). Collision is checked on the FIRST path segment so `/nl/pricing` also collides with locale `nl`.
+
+### Test-covered vs verified-by-reading
+
+- **Test-covered (unit, `localeSlugCollision.test.ts`, 7 cases, green):** single-locale/absent config → null (back-compat); subpage == non-default locale → reject; nested `/nl/pricing` first-segment collision; case-insensitivity (both sides); default-locale subpage NOT rejected; non-colliding slugs pass; first-of-multiple collision.
+- **Verified-by-reading (no publish-route test harness exists; standing one up = Clerk auth + prisma + blob + KV mocks, heavy — plan permits reading+tracing):** localeConfig/overlay DB read path; overlay injection onto `content.localeContent`; `localeConfig` reaching `renderPublishedExport`; extraRoutes → atomicPublishWithRetry → `route:{host}:/{loc}` KV keys; cleanupOldVersions handling the larger blob set; single-locale byte-identical behavior (both keys only set when present + guard gated on isMultiLocale).
+
+### Verification results
+
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — Test Files 134 passed | 1 skipped (135); Tests 2076 passed | 3 skipped (2079). Includes the new 7-case collision-guard suite; zero regressions.
+- Did NOT run a real publish to prod/blob/KV — that is the founder live gate (below).
+
+### Open risks
+
+- The overlay-source assumption: relies on `Project.content.finalContent.localeContent` being fresh at publish (preview `await save()` best-effort; wrapped in try/catch that continues on failure). If that save fails, locale docs could render slightly-stale/base copy — non-fatal, republish fixes it.
+- Switcher path-prefix caveat carried from Phase 5 (see below).
+
+### FOUNDER LIVE-GATE CHECKLIST (run on `npm run dev` or a deploy)
+
+1. Publish a real 2-locale project (declare `[en, nl]`, author NL for hero + 2-3 sections via the editor toggle, publish). Verify BOTH docs serve: `/p/{slug}` (EN) and `/p/{slug}/nl` (NL) — NL doc shows the authored Dutch copy (base EN fallback only where NL is unauthored).
+2. Switcher pill visible on the published page; geo default + `localStorage['lessgo.lang']` persistence + toggle navigation all work.
+3. View-source on BOTH docs shows reciprocal `hreflang` alternates (all locales + `x-default`) and a self-referencing canonical.
+4. Regression: publish an EXISTING single-locale project → routes + HTML unchanged vs before the branch (no switcher script, no hreflang, no `/nl` route). The automated single-locale byte-identical snapshot (Phase 5) is the law; this is the belt-and-suspenders manual pass.
+
+**Known caveat (Phase 5, carried):** the switcher's path-prefix swap assumes locale = the FIRST path segment — true on the custom-domain / lessgo subdomain serve surface. On the `/p/{slug}` preview surface the prefix is NOT first-segment, so verify the switcher navigation on the REAL published host (custom domain / lessgo subdomain), and note that `/p/{slug}/nl` may need manual URL entry to view.

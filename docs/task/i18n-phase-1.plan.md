@@ -22,7 +22,7 @@ storage/behavior diff — locale machinery is invisible until a project declares
 - phase 3b editor read-site threading (enumerated read-site list): done (commit 991defd9, review loops 1). 17 sites enumerated: 4 threaded (useTemplateBlock funnel covers all 8 template block hooks + LeadForm/FollowStrip/StoreBadges), 13 LEAVE (verified). Dev locale switch = flag-gated block in `src/components/DebugPanel.tsx` (Phase 4 must REMOVE it). **V1 LOCALIZATION LIMITS (surface at founder gate): nav labels (navigationConfig slice + template nav_items collection) + per-collection-item card text are NOT localizable in v1** — overlay is whole-top-level-elementKey only.
 - phase 4 editor language toggle + locale config UI: done (commit 8e65989f, review loops 2). Header host = `EditHeader.tsx`; 4 regen controls disabled on non-default locale; dev switch removed. Fixed 2 blocking data bugs via **clear-contract (absent=preserve, explicit null/{}=clear) + `localeEngaged` store flag**; validation.ts localeConfig now `.nullable().optional()`. REVISES Phase-2/D1 merge contract. Default-locale LOCKED for v1; unauthored-field affordance TODO'd. **Founder-gate notes:** always-visible globe "Languages" button in single-locale header (minor back-compat-law deviation, minimal entry point); once-engaged-then-cleared project retains harmless null/{} storage markers.
 - phase 5 static export per-locale + hreflang + switcher asset: done (review loops 1, ship). Single-locale byte-identical; hreflang/canonical use real published host (resolveCanonicalURL); resolve-then-extract parity; switcher.v1.js (2.12KB) template-agnostic pill + geo/localStorage redirect w/ loop guard. Fixed blocking bug: subpage locale docs must resolve from project-global root `localeContent` map (not subFlat) — now tested at loop level. **extraRoutes per-locale shape (Phase 6): `/{loc}` + `/{loc}/{sub}` = blobUrl, same as subpage entries.** **Founder-gate caveat:** switcher prefix-swap assumes locale = first path segment (true for custom-domain/subdomain serve; not `/p/{slug}` SSR fallback).
-- phase 6 publish route + KV locale paths: pending
+- phase 6 publish route + KV locale paths: done (review loops 1, ship) — **CODE done; FOUNDER LIVE GATE PENDING.** localeConfig+overlay read from DB Project.content; per-locale extraRoutes flow through existing atomicPublish/KV (no middleware edits); collision guard rejects subpage slug == declared non-default locale. Single-locale byte-identical. **Non-blocking:** base=payload / overlay=DB consistent via preview save-then-export (best-effort save; if it fails, overlay 1 autosave stale → older NL / EN fallback, republish fixes). Live-gate checklist in audit.
 - phase 7 bilingual queryable + honesty test: pending
 - phase 8 generic en/nl pilot + docs: pending
 
@@ -488,8 +488,9 @@ green on the branch before merge. **Founder sign-off = gate.**
 
 ## Unresolved questions
 
-1. **MUST DECIDE BEFORE PHASE 6 GATE:** locale URL scheme `/nl` prefix locks permanently once a
-   customer publishes — confirm prefix, or want `?lang=`/subdomain weighed first?
+1. ~~MUST DECIDE BEFORE PHASE 6 GATE: locale URL scheme~~ **RESOLVED 2026-07-11 (founder): `/nl`
+   path prefix** (non-default at `/{loc}` + `/{loc}/{sub}`; default stays at root). Matches Phase 5
+   build; no rework. Globe "Languages" button: **RESOLVED — keep in header** for all projects.
 2. Switcher pill = script-rendered floating UI (template-agnostic, generic look) — acceptable
    for v1, or must templates restyle/host it (bigger)?
 3. Regen disabled on non-default locale (v1) — fine, or need regen-into-locale now?
