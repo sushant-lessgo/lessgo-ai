@@ -17,7 +17,7 @@ exactly one editor and dual-renderer divergence stays structurally impossible).
 
 ## Progress log
 
-- phase 1 floating-ui shell + priority slim-down: pending
+- phase 1 floating-ui shell + priority slim-down: done (commit pending-sha, review loops 2 — remount defect fixed, ship)
 - phase 2 action sets + selector-ize: pending
 - phase 3 DELETE list + parity sign-off: pending
 - phase 4 primitive interface: pending

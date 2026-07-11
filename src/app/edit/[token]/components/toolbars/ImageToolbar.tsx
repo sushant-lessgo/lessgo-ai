@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM, { createPortal } from 'react-dom';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
-import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import type { StockPhoto } from '@/services/pexelsApi';
 import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
@@ -19,17 +18,11 @@ import { usesTemplateModule } from '@/types/service';
 
 interface ImageToolbarProps {
   targetId: string;
-  position: { x: number; y: number };
-  contextActions: any[];
 }
 
-export function ImageToolbar({ targetId, position, contextActions }: ImageToolbarProps) {
-  logger.dev('🖼️🖼️🖼️ ImageToolbar component initialized with props:', () => ({
-    targetId,
-    position, 
-    contextActions
-  }));
-
+// Phase-3: the ToolbarShell decides visibility and owns positioning. This
+// component is a dumb child of the shell's floating container.
+export function ImageToolbar({ targetId }: ImageToolbarProps) {
   const [showUploader, setShowUploader] = useState(false);
   const [showStockPhotos, setShowStockPhotos] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
@@ -168,18 +161,20 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     return null;
   };
 
-  // Calculate arrow position
-  const targetElement = document.querySelector(`[data-image-id="${targetId}"]`);
-  logger.dev('🖼️ Looking for target element with selector:', () => `[data-image-id="${targetId}"]`);
-  
-  const arrowInfo = targetElement ? calculateArrowPosition(
-    position,
-    targetElement.getBoundingClientRect(),
-    { width: 340, height: 48 }
-  ) : null;
-  
+  // Secondary panels (stock-photos portal) anchor to the toolbar bar's live
+  // position rather than a passed-in coordinate — the shell owns the bar's
+  // placement now. Read at render time; the bar is already mounted whenever a
+  // panel is open.
+  const getPanelAnchor = () => {
+    const rect = toolbarRef.current?.getBoundingClientRect();
+    if (!rect) return { x: 20, y: 20 };
+    return { x: rect.left, y: rect.bottom };
+  };
 
-
+  // The target image node — used to seed the image editor with the current src/alt.
+  const targetElement = typeof document !== 'undefined'
+    ? document.querySelector(`[data-image-id="${targetId}"]`)
+    : null;
 
   // Handle file upload
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -331,31 +326,10 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
   return (
     <>
       {logger.dev(() => '🖼️ ImageToolbar JSX rendering now!')}
-      <div 
+      <div
         ref={toolbarRef}
-        className="fixed bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
-        style={{
-          left: position.x,
-          top: position.y,
-          zIndex: 10000,
-        }}
+        className="bg-white border border-gray-200 rounded-lg shadow-lg"
       >
-        {/* Arrow */}
-        {arrowInfo && (
-          <div 
-            className={`absolute w-2 h-2 bg-white border transform rotate-45 ${
-              arrowInfo.direction === 'up' ? 'border-t-0 border-l-0 -bottom-1' :
-              arrowInfo.direction === 'down' ? 'border-b-0 border-r-0 -top-1' :
-              arrowInfo.direction === 'left' ? 'border-l-0 border-b-0 -right-1' :
-              'border-r-0 border-t-0 -left-1'
-            }`}
-            style={{
-              left: arrowInfo.direction === 'up' || arrowInfo.direction === 'down' ? arrowInfo.x - 4 : undefined,
-              top: arrowInfo.direction === 'left' || arrowInfo.direction === 'right' ? arrowInfo.y - 4 : undefined,
-            }}
-          />
-        )}
-        
         <div className="flex items-center px-3 py-2">
           {/* Image Indicator */}
           <div className="flex items-center space-x-1 mr-3">
@@ -396,8 +370,8 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
           {createPortal(
             <StockPhotosPanel
           position={{
-            x: Math.max(10, Math.min(position.x, window.innerWidth - 420)),
-            y: Math.max(10, Math.min(position.y + 60, window.innerHeight - 320)),
+            x: Math.max(10, Math.min(getPanelAnchor().x, window.innerWidth - 420)),
+            y: Math.max(10, Math.min(getPanelAnchor().y + 8, window.innerHeight - 320)),
           }}
           onClose={() => {
             setShowStockPhotos(false);
@@ -435,10 +409,11 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
       {/* Upload Progress */}
       {isUploading && (
-        <div className="fixed z-60 bg-white border border-gray-200 rounded-lg shadow-lg p-3"
+        <div className="absolute z-60 bg-white border border-gray-200 rounded-lg shadow-lg p-3"
           style={{
-            left: position.x,
-            top: position.y + 60,
+            top: '100%',
+            left: 0,
+            marginTop: 8,
           }}
         >
           <div className="flex items-center space-x-2">
@@ -450,10 +425,11 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
       {/* Upload Error */}
       {uploadError && (
-        <div className="fixed z-60 bg-red-50 border border-red-200 rounded-lg shadow-lg p-3"
+        <div className="absolute z-60 bg-red-50 border border-red-200 rounded-lg shadow-lg p-3"
           style={{
-            left: position.x,
-            top: position.y + 60,
+            top: '100%',
+            left: 0,
+            marginTop: 8,
             maxWidth: 280,
           }}
         >
