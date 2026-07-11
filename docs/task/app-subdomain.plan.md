@@ -11,8 +11,8 @@ Move the product app to `app.lessgo.ai`; apex `lessgo.ai` becomes marketing-only
 
 ## Progress log
 
-- phase 1 host guards + appSplit helper: done (review loops 1, ship) — commit pending
-- phase 2 env split (NEXT_PUBLIC_DASHBOARD_URL): pending
+- phase 1 host guards + appSplit helper: done (commit f3c6d4db, review loops 1)
+- phase 2 env split (NEXT_PUBLIC_DASHBOARD_URL): done (review loops 1, ship) — commit pending
 - phase 3 middleware apex→app redirects + Clerk prop: pending
 - phase 4 HUMAN GATE — Vercel/DNS/Clerk/env cutover + live verify: pending
 - phase 5 app-host noindex + apex /p 301: pending

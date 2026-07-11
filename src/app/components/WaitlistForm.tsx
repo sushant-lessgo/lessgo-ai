@@ -57,7 +57,7 @@ export default function WaitlistForm({ formPosition }: WaitlistFormProps) {
           <p className="mb-2">Check your inbox and <strong>confirm your email</strong> to activate early access.<br/>
           <span className="text-sm text-gray-600">(Look for: “Confirm your spot at Lessgo.ai” – it might be in Promotions)</span></p>
 
-          <a href="https://lessgo.ai/dashboard" className="inline-block mt-4 px-5 py-2 bg-brand-logo text-white font-semibold rounded-lg hover:bg-brand-accentPrimary transition">
+          <a href={`${process.env.NEXT_PUBLIC_DASHBOARD_URL ?? ''}/dashboard`} className="inline-block mt-4 px-5 py-2 bg-brand-logo text-white font-semibold rounded-lg hover:bg-brand-accentPrimary transition">
           Try Lessgo.ai Now
           </a>
 

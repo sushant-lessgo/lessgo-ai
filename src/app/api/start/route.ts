@@ -72,6 +72,6 @@ export async function GET() {
   // Universal entry: one-liner/URL → classify → confirm → serve gate routes
   // into the product/service wizard (or manual-onboard capture).
   return NextResponse.json({
-    url: `${process.env.NEXT_PUBLIC_SITE_URL}/onboarding/${tokenValue}`,
+    url: `${process.env.NEXT_PUBLIC_DASHBOARD_URL || process.env.NEXT_PUBLIC_SITE_URL}/onboarding/${tokenValue}`,
   });
 }

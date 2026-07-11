@@ -62,3 +62,30 @@ None.
 ### Open risks
 - `APP_HOST` is fixed at module load, so it won't reflect a mid-process `vi.stubEnv` — acceptable
   (not on any tested/redirect path; the runtime flag is `appOrigin()`).
+
+## Phase 2 — env split (NEXT_PUBLIC_DASHBOARD_URL consumers)
+
+**Files changed**
+- src/app/api/stripe/create-checkout-session/route.ts
+- src/app/api/stripe/create-portal-session/route.ts
+- src/app/api/start/route.ts
+- src/app/thanks/page.tsx
+- src/app/components/WaitlistForm.tsx
+
+**Per-file changes**
+- create-checkout-session/route.ts (:74): baseUrl now `process.env.NEXT_PUBLIC_DASHBOARD_URL || process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin`. Var unset → identical pre-cutover behavior.
+- create-portal-session/route.ts (:32): same treatment as checkout.
+- api/start/route.ts (:75): onboarding redirect base now `process.env.NEXT_PUBLIC_DASHBOARD_URL || process.env.NEXT_PUBLIC_SITE_URL`. SITE_URL preserved as deprecated fallback.
+- thanks/page.tsx (:15): hardcoded `https://lessgo.ai/dashboard` → `` href={`${process.env.NEXT_PUBLIC_DASHBOARD_URL ?? ''}/dashboard`} `` (unset → relative `/dashboard`).
+- WaitlistForm.tsx (:60): same treatment as thanks.
+
+**.env.example**: NOT present in repo (glob found no file). Per plan ("if present; else skip — do NOT create env files with secrets"), skipped. No env doc changes made.
+
+**Deviations**: none.
+
+**Verification**
+- `npx tsc --noEmit`: clean except the known pre-existing baseline error `src/app/page.tsx(6,26): Cannot find module '@/assets/images/founder.jpg'` — unrelated, not touched by this phase.
+- `npm run test:run`: 140 passed | 1 skipped files; 2129 passed | 3 skipped tests. No failures.
+- grep-assert: zero `https://lessgo.ai/dashboard` literals remain in `src/`. `NEXT_PUBLIC_APP_URL` still referenced in `htmlGenerator.ts:296` (asset origin, untouched) and the two stripe fallbacks.
+
+**Open risks**: none for this phase. Behavior fully inert until `NEXT_PUBLIC_DASHBOARD_URL` is set (rollout flag per D1).
