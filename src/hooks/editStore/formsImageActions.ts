@@ -405,6 +405,27 @@ export function createFormsImageActions(set: any, get: any): FormsImageActions {
       }
     },
     
+    // Adapter (perf-03): convert an ephemeral `data:`/`blob:` object URL into a
+    // File and delegate to the existing `uploadImage` action, which owns the
+    // FormData + `tokenId` handshake with /api/upload-image (400s without tokenId)
+    // and writes the permanent Blob URL back via updateElementContent. This is the
+    // sanctioned path for anything that would otherwise try to persist a forbidden
+    // src (e.g. SimpleImageEditor's canvas blob URL). Returns the permanent URL.
+    uploadImageFromObjectUrl: async (
+      objectUrl: string,
+      targetElement: { sectionId: string; elementKey: string },
+    ) => {
+      const response = await fetch(objectUrl);
+      if (!response.ok) {
+        throw new Error('Could not read the edited image. Please try again.');
+      }
+      const blob = await response.blob();
+      const type = blob.type || 'image/jpeg';
+      const ext = (type.split('/')[1] || 'jpg').split('+')[0];
+      const file = new File([blob], `edited-${Date.now()}.${ext}`, { type });
+      return get().uploadImage(file, targetElement);
+    },
+
     uploadVideo: async (file: File, targetElement: { sectionId: string; elementKey: string }) => {
       const videoId = generateId();
 

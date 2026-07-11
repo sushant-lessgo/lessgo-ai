@@ -110,7 +110,7 @@ export default function TechPremiumFooter({ sectionId }: Props) {
         <div className="tp-footer__top">
           <div className="tp-footer__brand">
             <span className="tp-footer__brand-wm">
-              {blockContent.logo_image ? <img className="tp-footer__img" src={blockContent.logo_image} alt={blockContent.wordmark || 'Logo'} /> : <span className="tp-footer__mk" aria-hidden="true" />}
+              {blockContent.logo_image ? <img className="tp-footer__img" src={blockContent.logo_image} alt={blockContent.wordmark || 'Logo'} loading="lazy" decoding="async" /> : <span className="tp-footer__mk" aria-hidden="true" />}
               {!blockContent.logo_image && (
                 <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey="wordmark" value={blockContent.wordmark} onSave={(v) => handleContentUpdate('wordmark', v)} enterBehavior="save" placeholder="Brand" />
               )}

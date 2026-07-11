@@ -13,6 +13,7 @@ import type { SectionType } from '@/types/core/content';
 
 import { logger } from '@/lib/logger';
 import { EDITOR_DEBUG } from '@/lib/debugFlags';
+import { isForbiddenImageSrc } from './imageWriteGuard';
 /**
  * ===== UTILITY FUNCTIONS =====
  */
@@ -70,6 +71,22 @@ export function createContentActions(set: any, get: any): ContentActions {
               : content?.toString().substring(0, 50),
             callStack: new Error().stack?.split('\n')[2]?.trim()
           });
+        }
+
+        // Defense-in-depth (perf-03): never persist an ephemeral/inlined image
+        // src (`data:image/...` base64 or a `blob:` object URL) into content —
+        // these bloat the draft and die on reload. The correct path uploads to
+        // permanent storage via the store `uploadImage` action, which writes the
+        // returned URL back through here. Cheap prefix check; guards strings only,
+        // so text/URL content is untouched. Refuse the write (keep old value).
+        if (typeof content === 'string' && isForbiddenImageSrc(content)) {
+          if (process.env.NODE_ENV !== 'production') {
+            console.warn(
+              `[imageWriteGuard] Refused forbidden image src for ${sectionId}.${elementKey} ` +
+                `(data:/blob: not allowed in content — upload via uploadImage first).`,
+            );
+          }
+          return;
         }
 
         if (!state.content[sectionId]) {

@@ -58,7 +58,7 @@ export default function TechPremiumLineup({ sectionId }: Props) {
             {items.map((it) => (
               <div key={it.id} className="tp-pcard tp-lineup-card">
                 <div className="tp-pshot">
-                  {it.image ? <img src={it.image} alt={it.name} /> : <span className="tp-pshot__ph">{it.model || 'Product photo'}</span>}
+                  {it.image ? <img src={it.image} alt={it.name} loading="lazy" decoding="async" /> : <span className="tp-pshot__ph">{it.model || 'Product photo'}</span>}
                 </div>
                 <div className="tp-pbody">
                   {it.model && <span className="tp-pmodel">{it.model}</span>}

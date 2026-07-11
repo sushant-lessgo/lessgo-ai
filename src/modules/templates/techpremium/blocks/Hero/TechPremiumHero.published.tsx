@@ -69,7 +69,7 @@ export default function TechPremiumHeroPublished(props: TechPremiumHeroPublished
           <div className="tp-hero__art">
             <div className="tp-ph tp-ph--unit" aria-hidden="true">
               {props.hero_image
-                ? <img className="tp-hero__photo" src={props.hero_image} alt="" />
+                ? <img className="tp-hero__photo" src={props.hero_image} alt="" loading="eager" decoding="async" />
                 : <span className="tp-ph__tag">Product / hardware photo</span>}
             </div>
             <span className="tp-hero__corner" aria-hidden="true" />

@@ -121,7 +121,7 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
           <div className="sg-footer__brand">
             <div className="sg-footer__brand-row">
               {blockContent.logo_image ? (
-                <img className="sg-footer__img" src={blockContent.logo_image} alt="Logo" />
+                <img className="sg-footer__img" src={blockContent.logo_image} alt="Logo" loading="lazy" decoding="async" />
               ) : (
                 <>
                   <span className="sg-footer__mark" />

@@ -66,7 +66,7 @@ export default function EditorialPhotoHeroPublished(props: EditorialPhotoHeroPub
           <div className="mrd-hep__frame">
             <div className="mrd-hep__img">
               {props.hero_image ? (
-                <img src={props.hero_image} alt="" />
+                <img src={props.hero_image} alt="" loading="eager" decoding="async" />
               ) : (
                 <span className="mrd-hep__slot-lbl">
                   <b>hero_image</b><br />product shot / team / dashboard — 4:5 or wider

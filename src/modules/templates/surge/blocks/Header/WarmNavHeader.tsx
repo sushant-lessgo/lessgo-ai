@@ -91,7 +91,7 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
         <div className="sg-nav-in">
         <div className="sg-brand">
           {blockContent.logo_image ? (
-            <img className="sg-brand__img" src={blockContent.logo_image} alt={blockContent.logo_text || 'Logo'} />
+            <img className="sg-brand__img" src={blockContent.logo_image} alt={blockContent.logo_text || 'Logo'} loading="eager" decoding="async" />
           ) : (
             <>
               <span className="sg-brand__mark" />

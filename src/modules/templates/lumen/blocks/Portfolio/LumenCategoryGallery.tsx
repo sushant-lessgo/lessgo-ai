@@ -124,7 +124,7 @@ export default function LumenCategoryGallery({ sectionId }: { sectionId: string 
                   {groupCats.map((c) => (
                     <div key={c.id} className="lm-pf-card-edit">
                       <div className={`lm-ph lm-shot ${c.ratio === 'port' ? 'port' : 'land'}`}>
-                        {c.cover_image ? <img src={c.cover_image} alt={c.name || ''} /> : <span className="lm-ph__tag">{(c.name || 'Category')} — cover</span>}
+                        {c.cover_image ? <img src={c.cover_image} alt={c.name || ''} loading="lazy" decoding="async" /> : <span className="lm-ph__tag">{(c.name || 'Category')} — cover</span>}
                       </div>
                       <div className="lm-fig">
                         <span className="n">{`Fig. ${c.fig || '—'}`}</span>

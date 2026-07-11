@@ -64,7 +64,7 @@ export default function BlogPostBodyBlock(props: BlogPostBodyBlockProps) {
         </header>
 
         {post.heroImage && (
-          <img className="lg-blog__hero" src={post.heroImage} alt={post.title || ''} loading="lazy" />
+          <img className="lg-blog__hero" src={post.heroImage} alt={post.title || ''} loading="lazy" decoding="async" />
         )}
 
         <div className="lg-blog__body">

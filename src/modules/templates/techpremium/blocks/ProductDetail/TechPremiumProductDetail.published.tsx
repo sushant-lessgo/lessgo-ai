@@ -44,7 +44,7 @@ export default function TechPremiumProductDetailPublished(props: Props) {
               <div className="tp-pd-stage">
                 {images.map((im, i) => (
                   <div key={i} className={`tp-pd-slide${i === 0 ? ' is-active' : ''}`} data-cap={im.tag || ''}>
-                    {im.src ? <img src={im.src} alt={im.tag || ''} /> : <span className="tp-pd-ph">{im.tag || `Image ${i + 1}`}</span>}
+                    {im.src ? <img src={im.src} alt={im.tag || ''} loading="lazy" decoding="async" /> : <span className="tp-pd-ph">{im.tag || `Image ${i + 1}`}</span>}
                   </div>
                 ))}
                 {multi && (
@@ -60,7 +60,7 @@ export default function TechPremiumProductDetailPublished(props: Props) {
                 <div className="tp-pd-thumbs">
                   {images.map((im, i) => (
                     <button key={i} type="button" className={`tp-pd-thumb${i === 0 ? ' is-active' : ''}`} data-thumb={i} aria-label={`Image ${i + 1}`}>
-                      {im.src ? <img src={im.src} alt="" /> : <span className="tp-pd-ph sm">{i + 1}</span>}
+                      {im.src ? <img src={im.src} alt="" loading="lazy" decoding="async" /> : <span className="tp-pd-ph sm">{i + 1}</span>}
                     </button>
                   ))}
                 </div>
@@ -109,7 +109,7 @@ export default function TechPremiumProductDetailPublished(props: Props) {
               <div className="tp-pcards">
                 {related.map((r, i) => (
                   <a key={i} className="tp-pcard" href={r.href || '#'}>
-                    <div className="tp-pshot">{r.image ? <img src={r.image} alt={r.name || ''} /> : <span className="tp-pshot__ph">{r.model || 'Product'}</span>}</div>
+                    <div className="tp-pshot">{r.image ? <img src={r.image} alt={r.name || ''} loading="lazy" decoding="async" /> : <span className="tp-pshot__ph">{r.model || 'Product'}</span>}</div>
                     <div className="tp-pbody">
                       {r.model && <span className="tp-pmodel">{r.model}</span>}
                       {r.name && <h4 className="tp-ph4">{r.name}</h4>}

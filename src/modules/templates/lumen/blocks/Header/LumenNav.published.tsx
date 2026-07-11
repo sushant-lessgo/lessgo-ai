@@ -40,7 +40,7 @@ export default function LumenNavPublished(props: Props) {
         <div className="lm-nav-in">
           <a className="lm-brand" href="#top" aria-label={`${logoText} home`}>
             {props.logo_image ? (
-              <img className="lm-brand__img" src={props.logo_image} alt={logoText} />
+              <img className="lm-brand__img" src={props.logo_image} alt={logoText} loading="eager" decoding="async" />
             ) : (
               <>
                 <span className="lm-brand__wm" {...bilingualAttrs(logoText, props.logo_text_nl || '')}

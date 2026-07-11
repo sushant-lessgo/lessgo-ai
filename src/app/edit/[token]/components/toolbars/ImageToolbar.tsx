@@ -9,6 +9,7 @@ import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import type { StockPhoto } from '@/services/pexelsApi';
 import { TextInputModal } from '../modals/TextInputModal';
 import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
+import { isForbiddenImageSrc } from '@/hooks/editStore/imageWriteGuard';
 import { logger } from '@/lib/logger';
 // Palette mood phrase comes from the preloaded template module (no static
 // template import in the shared editor bundle — firewall, 7.5d). The query
@@ -44,13 +45,21 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
   const advancedRef = useRef<HTMLDivElement>(null);
   const uploaderRef = useRef<HTMLInputElement>(null);
 
+  const store = useEditStore();
   const {
     updateElementContent,
     uploadImage,
     hideElementToolbar,
     tokenId,
     audienceType,
-  } = useEditStore();
+  } = store;
+  // Store adapter that uploads an ephemeral data:/blob: URL to permanent storage
+  // (delegates to uploadImage). Accessed via cast — its type declaration lives in
+  // the store types module, which is out of this phase's edit scope.
+  const uploadImageFromObjectUrl = (store as any).uploadImageFromObjectUrl as (
+    objectUrl: string,
+    targetElement: { sectionId: string; elementKey: string },
+  ) => Promise<string>;
 
   // Stub executeAction (removed in V2 refactor)
   const executeAction = (action: string, params: any) => {
@@ -246,16 +255,39 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     setShowEditor(true);
   };
 
-  const handleImageEditorSave = (editedImageUrl: string) => {
-    // Update the element content so the image actually displays
+  const handleImageEditorSave = async (editedImageUrl: string) => {
     const targetInfo = parseTargetId(targetId);
-    if (targetInfo) {
-      updateElementContent(targetInfo.sectionId, targetInfo.elementKey, editedImageUrl);
-    } else {
+    setShowEditor(false);
+
+    if (!targetInfo) {
       // console.error('❌ Could not parse targetId for edited image:', targetId);
+      return;
     }
 
-    setShowEditor(false);
+    // SimpleImageEditor hands back an ephemeral blob: object URL (canvas.toBlob).
+    // Persisting that directly dies on reload, so upload it to permanent storage
+    // via the store adapter — uploadImage writes the permanent URL back through
+    // updateElementContent. Non-forbidden (https/relative) srcs pass straight
+    // through. Keep the old value on failure and surface an error toast.
+    if (isForbiddenImageSrc(editedImageUrl)) {
+      setUploadError(null);
+      setIsUploading(true);
+      try {
+        await uploadImageFromObjectUrl(editedImageUrl, {
+          sectionId: targetInfo.sectionId,
+          elementKey: targetInfo.elementKey,
+        });
+      } catch (error) {
+        setUploadError(
+          error instanceof Error ? error.message : 'Failed to save edited image. Please try again.',
+        );
+      } finally {
+        setIsUploading(false);
+      }
+      return;
+    }
+
+    updateElementContent(targetInfo.sectionId, targetInfo.elementKey, editedImageUrl);
   };
 
   // Handle alt text editing

@@ -24,7 +24,7 @@ function Card({ item }: { item: CatalogItem }) {
   return (
     <a className="tp-pcard" href={item.href || '#'}>
       <div className="tp-pshot">
-        {item.image ? <img src={item.image} alt={item.name || ''} /> : <span className="tp-pshot__ph">{item.model || 'Product'}</span>}
+        {item.image ? <img src={item.image} alt={item.name || ''} loading="lazy" decoding="async" /> : <span className="tp-pshot__ph">{item.model || 'Product'}</span>}
       </div>
       <div className="tp-pbody">
         {item.model && <span className="tp-pmodel">{item.model}</span>}

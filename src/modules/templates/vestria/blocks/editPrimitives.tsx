@@ -80,7 +80,7 @@ const Txt: React.FC<VestriaTxtProps> = ({ elementKey, value, as = 'span', classN
   );
 };
 
-const Img: React.FC<VestriaImgProps> = ({ elementKey, src, alt, className, imgClassName, placeholder }) => {
+const Img: React.FC<VestriaImgProps> = ({ elementKey, src, alt, className, imgClassName, placeholder, eager }) => {
   const ctx = useCtx();
   const [uploading, setUploading] = React.useState(false);
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +100,7 @@ const Img: React.FC<VestriaImgProps> = ({ elementKey, src, alt, className, imgCl
   const clear = () => saveField(ctx, elementKey, '');
   return (
     <div className={className} style={{ position: 'relative' }}>
-      {src ? <img src={src} alt={alt || ''} className={imgClassName} /> : placeholder}
+      {src ? <img src={src} alt={alt || ''} className={imgClassName} loading={eager ? 'eager' : 'lazy'} decoding="async" /> : placeholder}
       <span className="vs-img-edit">
         <label className="vs-img-edit__btn">
           {uploading ? '…' : (src ? 'Replace' : '↥ Image')}

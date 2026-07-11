@@ -183,7 +183,7 @@ export default function TechPremiumGallery({ sectionId }: Props) {
             {images.map((im) => (
               <div key={im.id} className="tp-gitem" data-cat={im.category}>
                 <div className="tp-ph on-dark">
-                  {im.src ? <img src={im.src} alt={im.tag} /> : <span className="tp-tag">{im.tag || 'Photo'}</span>}
+                  {im.src ? <img src={im.src} alt={im.tag} loading="lazy" decoding="async" /> : <span className="tp-tag">{im.tag || 'Photo'}</span>}
                 </div>
                 <span className="tp-ghover"><Search /></span>
                 {edit && (

@@ -37,6 +37,8 @@ export interface VestriaImgProps {
   className?: string;     // wrapper
   imgClassName?: string;  // the <img>
   placeholder?: React.ReactNode;
+  /** Above-fold/LCP image: render loading="eager". Default (omitted) = lazy. */
+  eager?: boolean;
 }
 
 /** Outbound/anchor link. `hrefKey` is where the href STRING is stored (scalar key

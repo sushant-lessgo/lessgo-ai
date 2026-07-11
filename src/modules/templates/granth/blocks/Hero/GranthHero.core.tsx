@@ -47,7 +47,7 @@ export function GranthHeroCore({ content, E }: { content: GranthHeroContent; E: 
         <div className="gr-orn"><span>❖</span></div>
 
         <E.Img elementKey="portrait_image" src={content.portrait_image} alt={content.name}
-          className="gr-frame" placeholder={PORTRAIT_PH} />
+          className="gr-frame" placeholder={PORTRAIT_PH} eager />
 
         <E.Txt elementKey="quote" value={content.quote} as="blockquote"
           className="gr-quote" multiline placeholder="एक पंक्ति — लेखक के अपने शब्द।" />

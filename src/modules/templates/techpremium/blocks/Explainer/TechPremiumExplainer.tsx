@@ -108,7 +108,7 @@ export default function TechPremiumExplainer({ sectionId }: Props) {
                 <div className="tp-explain-media">
                   <div className="tp-ph">
                     {r.image
-                      ? <img src={r.image} alt={r.title} />
+                      ? <img src={r.image} alt={r.title} loading="lazy" decoding="async" />
                       : embed
                         ? <iframe className="tp-explain-video" src={embed} title={r.title || 'Video'} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                         : <span className="tp-tag">{r.eyebrow || 'Photo / video'}</span>}
