@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create return URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
+    const baseUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
     const returnUrl = `${baseUrl}/dashboard/billing`;
 
     // Create Stripe portal session
