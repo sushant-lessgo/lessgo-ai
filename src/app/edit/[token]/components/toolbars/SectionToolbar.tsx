@@ -1,9 +1,8 @@
 // app/edit/[token]/components/toolbars/SectionToolbar.tsx - Priority-Resolved Section Toolbar
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
-import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
-import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { AddSectionButton } from '../content/SectionCRUD';
 import LoadingButtonBar from '@/components/shared/LoadingButtonBar';
 import type { SectionType } from '@/types/core/content';
@@ -19,26 +18,17 @@ const CHROME_HIDDEN_ACTIONS = ['move-up', 'move-down', 'duplicate', 'delete'];
 
 interface SectionToolbarProps {
   sectionId: string;
-  position: { x: number; y: number };
-  contextActions: any[];
 }
 
-// Outer gate: visibility-priority check only. Split from the inner component so
-// the early return sits above zero hooks (rules-of-hooks); hidden ⇒ inner
-// unmounted ⇒ no state/effects run — same behavior as the old early return.
-export function SectionToolbar(props: SectionToolbarProps) {
-  // STEP 1: Check toolbar visibility priority
-  const { isVisible } = useToolbarVisibility('section');
-  if (!isVisible) {
-    return null;
-  }
-  return <SectionToolbarInner {...props} />;
-}
-
-function SectionToolbarInner({ sectionId, position, contextActions }: SectionToolbarProps) {
+// Phase-3: the ToolbarShell decides visibility and owns positioning. This
+// component is a dumb child of the shell's floating container.
+export function SectionToolbar({ sectionId }: SectionToolbarProps) {
   const [showElementToggle, setShowElementToggle] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
 
+  // Narrow selector: pull ONLY the fields/actions this toolbar reads. Actions are
+  // stable refs; the state slices (content/sections/sectionLayouts/aiGeneration)
+  // are the ones this component genuinely renders from.
   const {
     content,
     sections,
@@ -48,7 +38,18 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
     showLayoutChangeModal,
     audienceType,
     templateId,
-  } = useEditStore();
+  } = useEditStore(
+    useShallow((s) => ({
+      content: s.content,
+      sections: s.sections,
+      sectionLayouts: s.sectionLayouts,
+      announceLiveRegion: s.announceLiveRegion,
+      aiGeneration: s.aiGeneration,
+      showLayoutChangeModal: s.showLayoutChangeModal,
+      audienceType: s.audienceType,
+      templateId: s.templateId,
+    })),
+  );
 
   // Swap-button visibility gate (scale-09 phase 5). For template-module projects
   // the "Layout" action only makes sense when the section has >1 ELIGIBLE variant
@@ -132,14 +133,6 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
       hasRequiredContent: true,
     };
   }, [sectionId, section?.editMetadata]);
-
-  // Calculate arrow position
-  const targetElement = document.querySelector(`[data-section-id="${sectionId}"]`);
-  const arrowInfo = targetElement ? calculateArrowPosition(
-    position,
-    targetElement.getBoundingClientRect(),
-    { width: 400, height: 48 }
-  ) : null;
 
   // Primary Actions with enhanced functionality
   const primaryActions = [
@@ -276,30 +269,10 @@ function SectionToolbarInner({ sectionId, position, contextActions }: SectionToo
       
       {/* Original toolbar - only show when not regenerating */}
       {!isRegenerating && !showCompletionMessage && (
-        <div 
+        <div
           ref={toolbarRef}
-          className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
-          style={{
-            left: position.x,
-            top: position.y,
-          }}
+          className="bg-white border border-gray-200 rounded-lg shadow-lg"
         >
-        {/* Arrow */}
-        {arrowInfo && (
-          <div 
-            className={`absolute w-2 h-2 bg-white border transform rotate-45 ${
-              arrowInfo.direction === 'up' ? 'border-t-0 border-l-0 -bottom-1' :
-              arrowInfo.direction === 'down' ? 'border-b-0 border-r-0 -top-1' :
-              arrowInfo.direction === 'left' ? 'border-l-0 border-b-0 -right-1' :
-              'border-r-0 border-t-0 -left-1'
-            }`}
-            style={{
-              left: arrowInfo.direction === 'up' || arrowInfo.direction === 'down' ? arrowInfo.x - 4 : undefined,
-              top: arrowInfo.direction === 'left' || arrowInfo.direction === 'right' ? arrowInfo.y - 4 : undefined,
-            }}
-          />
-        )}
-        
         <div className="flex items-center px-3 py-2">
           {/* Section Indicator with Validation */}
           <div className="flex items-center space-x-2 mr-3">

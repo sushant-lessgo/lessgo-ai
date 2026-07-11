@@ -1,48 +1,54 @@
 // app/edit/[token]/components/toolbars/ElementToolbar.tsx - Priority-Resolved Element Toolbar
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { useEditor } from '@/hooks/useEditor';
 
-import { useToolbarVisibility } from '@/hooks/useSelectionPriority';
-import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { useButtonConfigModal } from '@/hooks/useButtonConfigModal';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface ElementToolbarProps {
   elementSelection: any;
-  position: { x: number; y: number };
-  contextActions: any[];
 }
 
-export function ElementToolbar({ elementSelection, position, contextActions }: ElementToolbarProps) {
-  // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL RETURNS
-  
-  // STEP 1: Check toolbar visibility priority
-  const { isVisible, reason } = useToolbarVisibility('element');
-  
+// Phase-3: the ToolbarShell decides visibility and owns positioning. This
+// component is a dumb child of the shell's floating container.
+export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
   const { openModal } = useButtonConfigModal();
-  
-  // Get the current toolbar state to check if image/form toolbar is active
-  const { toolbar } = useEditStore();
-  
+
   const toolbarRef = useRef<HTMLDivElement>(null);
   const variationsRef = useRef<HTMLDivElement>(null);
 
+  // Narrow selector: pull ONLY the fields/actions this toolbar reads (actions are
+  // stable refs). `updateElementContent` was destructured but never used → dropped.
   const {
     regenerateElementWithVariations,
     elementVariations,
     applyVariation,
     hideElementVariations,
     setVariationSelection,
-    updateElementContent,
     content,
     announceLiveRegion,
     setSection,
     selectElement,
     activeLocale,
     localeConfig,
-  } = useEditStore();
+  } = useEditStore(
+    useShallow((s) => ({
+      regenerateElementWithVariations: s.regenerateElementWithVariations,
+      elementVariations: s.elementVariations,
+      applyVariation: s.applyVariation,
+      hideElementVariations: s.hideElementVariations,
+      setVariationSelection: s.setVariationSelection,
+      content: s.content,
+      announceLiveRegion: s.announceLiveRegion,
+      setSection: s.setSection,
+      selectElement: s.selectElement,
+      activeLocale: s.activeLocale,
+      localeConfig: s.localeConfig,
+    })),
+  );
 
   // i18n-phase-1 (Phase 4): regen writes DEFAULT-locale base copy only (store
   // guard no-ops it on other locales). Disable the button off the default locale.
@@ -89,30 +95,6 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     }
   }, [elementVariations.visible, hideElementVariations]);
 
-  // NOW WE CAN DO CONDITIONAL RETURNS AFTER ALL HOOKS ARE CALLED
-  
-  // STEP 1: Priority-based early returns
-  //   isVisible,
-  //   reason,
-  //   condition: !isVisible
-  // });
-  
-  if (!isVisible) {
-    return null;
-  }
-  
-  // Don't show element toolbar if image or form toolbar is explicitly active
-  //   toolbarType: toolbar?.type,
-  //   toolbarVisible: toolbar?.visible,
-  //   toolbarTargetId: toolbar?.targetId,
-  //   fullToolbarState: toolbar
-  // });
-  
-  if (toolbar?.type === 'image' || toolbar?.type === 'form') {
-    return null;
-  }
-  
-
   // Enter text editing mode using unified system
   const handleEditText = (e?: React.MouseEvent) => {
     if (e) {
@@ -121,15 +103,6 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
     }
     enterTextEditMode(elementSelection.elementKey, elementSelection.sectionId);
   };
-
-  // Calculate arrow position
-  const targetSelector = `[data-section-id="${elementSelection.sectionId}"] [data-element-key="${elementSelection.elementKey}"]`;
-  const targetElement = document.querySelector(targetSelector);
-  const arrowInfo = targetElement ? calculateArrowPosition(
-    position,
-    targetElement.getBoundingClientRect(),
-    { width: 380, height: 48 }
-  ) : null;
 
   // Handle unified regeneration with variations
   const handleRegenerate = async () => {
@@ -232,31 +205,11 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
 
   return (
     <>
-      <div 
+      <div
         ref={toolbarRef}
-        className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-200"
+        className="bg-white border border-gray-200 rounded-lg shadow-lg"
         data-toolbar-type="element"
-        style={{
-          left: position.x,
-          top: position.y,
-        }}
       >
-        {/* Arrow */}
-        {arrowInfo && (
-          <div 
-            className={`absolute w-2 h-2 bg-white border transform rotate-45 ${
-              arrowInfo.direction === 'up' ? 'border-t-0 border-l-0 -bottom-1' :
-              arrowInfo.direction === 'down' ? 'border-b-0 border-r-0 -top-1' :
-              arrowInfo.direction === 'left' ? 'border-l-0 border-b-0 -right-1' :
-              'border-r-0 border-t-0 -left-1'
-            }`}
-            style={{
-              left: arrowInfo.direction === 'up' || arrowInfo.direction === 'down' ? arrowInfo.x - 4 : undefined,
-              top: arrowInfo.direction === 'left' || arrowInfo.direction === 'right' ? arrowInfo.y - 4 : undefined,
-            }}
-          />
-        )}
-        
         <div className="flex items-center px-3 py-2">
           {/* Element Indicator */}
           <div className="flex items-center space-x-1 mr-3">
@@ -310,10 +263,11 @@ export function ElementToolbar({ elementSelection, position, contextActions }: E
       {elementVariations.visible && (
         <div
           ref={variationsRef}
-          className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg"
+          className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg"
           style={{
-            left: position.x,
-            top: position.y + 60,
+            top: '100%',
+            left: 0,
+            marginTop: 8,
             width: 380,
             maxHeight: 300,
           }}

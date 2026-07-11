@@ -14,6 +14,8 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions, deriveNavLinks } from '@/utils/pageLinks';
 import type { Link } from '@/types/destination';
+import { resolveLogo } from '@/modules/editing/resolveLogo';
+import { EditableLogo } from '@/app/edit/[token]/components/primitives/EditableLogo';
 import { NAV_STYLES } from './navStyles';
 
 interface NavChild { id: string; label: string; desc: string; href: string }
@@ -49,9 +51,7 @@ export default function TechPremiumNav({ sectionId }: Props) {
   const pages = useEditStore((s) => s.pages);
   const socialMediaConfig = useEditStore((s) => s.socialMediaConfig);
   const legalPages = useEditStore((s) => s.legalPages);
-  const uploadImage = useEditStore((s) => (s as any).uploadImage) as
-    | ((file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>)
-    | undefined;
+  const globalSettings = useEditStore((s) => s.globalSettings);
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const socialOptions = React.useMemo(
@@ -75,17 +75,13 @@ export default function TechPremiumNav({ sectionId }: Props) {
     }
   }, [edit, navItems.length, pages, handleCollectionUpdate]);
 
-  const [logoUploading, setLogoUploading] = React.useState(false);
   const [openDrop, setOpenDrop] = React.useState<string | null>(null);
-  const onLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file || !uploadImage) return;
-    setLogoUploading(true);
-    try { await uploadImage(file, { sectionId, elementKey: 'logo_image' }); }
-    catch (err) { /* surfaced by the store */ }
-    finally { setLogoUploading(false); }
-  };
+  // Site-scoped logo (editor phase-3): resolved identically on edit + published.
+  const logo = resolveLogo(
+    globalSettings,
+    { logo_image: blockContent.logo_image, wordmark: blockContent.logo_text },
+    'light',
+  );
 
   const setItems = (next: NavItem[]) => handleCollectionUpdate('nav_items', next);
   const patchItem = (id: string, p: Partial<NavItem>) => setItems(navItems.map((n) => (n.id === id ? { ...n, ...p } : n)));
@@ -110,18 +106,12 @@ export default function TechPremiumNav({ sectionId }: Props) {
       <nav className="tp-nav" data-section-id={sectionId} data-edit={edit ? '1' : undefined}>
         <div className="tp-nav-in">
           <span className="tp-brand">
-            {blockContent.logo_image ? <img className="tp-brand__img" src={blockContent.logo_image} alt={blockContent.logo_text || 'Logo'} loading="eager" decoding="async" /> : <span className="tp-brand__mk" aria-hidden="true" />}
-            {!blockContent.logo_image && (
+            {logo.kind === 'image' ? <img className="tp-brand__img" src={logo.url} alt={blockContent.logo_text || 'Logo'} loading="eager" decoding="async" /> : <span className="tp-brand__mk" aria-hidden="true" />}
+            {logo.kind === 'wordmark' && (
               <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey="logo_text" value={blockContent.logo_text} onSave={(v) => handleContentUpdate('logo_text', v)} enterBehavior="save" className="tp-brand__wm" placeholder="Brand" />
             )}
             {edit && (
-              <span className="tp-logo-edit">
-                <label className="tp-logo-edit__btn">
-                  {logoUploading ? 'Uploading…' : (blockContent.logo_image ? 'Change logo' : '↥ Logo')}
-                  <input type="file" accept="image/*" onChange={onLogoFile} hidden disabled={logoUploading} />
-                </label>
-                {blockContent.logo_image && <button type="button" className="tp-logo-edit__x" onClick={() => handleContentUpdate('logo_image', '')}>remove</button>}
-              </span>
+              <EditableLogo surface="light" classNames={{ wrap: 'tp-logo-edit', btn: 'tp-logo-edit__btn', remove: 'tp-logo-edit__x' }} />
             )}
           </span>
 

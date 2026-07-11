@@ -6,6 +6,7 @@ import React from 'react';
 import { resolveCtaHref, resolveDestination } from '@/utils/resolveCtaHref';
 import type { Link } from '@/types/destination';
 import { isLink } from '@/types/destination';
+import { resolveLogo } from '@/modules/editing/resolveLogo';
 import { NAV_STYLES } from './navStyles';
 
 // Dual-read a nav link's target: legacy raw string href passes through verbatim
@@ -34,6 +35,13 @@ const Burger = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
 export default function TechPremiumNavPublished(props: Props) {
   const navItems = Array.isArray(props.nav_items) ? props.nav_items : [];
   const logoText = props.logo_text || 'Brand';
+  // Site-scoped logo (editor phase-3): resolved identically to the edit renderer.
+  // globalSettings rides on the root content object (see resolveLogo back-compat).
+  const logo = resolveLogo(
+    props.content?.globalSettings,
+    { logo_image: props.logo_image, wordmark: props.logo_text },
+    'light',
+  );
   const ctaText = props.cta_text || 'Book a demo';
   const signinText = props.signin_text || 'Platform login';
 
@@ -57,8 +65,8 @@ export default function TechPremiumNavPublished(props: Props) {
       <nav className="tp-nav">
         <div className="tp-nav-in">
           <a className="tp-brand" href="/">
-            {props.logo_image ? (
-              <img className="tp-brand__img" src={props.logo_image} alt={logoText} loading="eager" decoding="async" />
+            {logo.kind === 'image' ? (
+              <img className="tp-brand__img" src={logo.url} alt={logoText} loading="eager" decoding="async" />
             ) : (
               <>
                 <span className="tp-brand__mk" aria-hidden="true" />
