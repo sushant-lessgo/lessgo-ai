@@ -61,8 +61,8 @@ wiring editor-basics assertions.
 - phase 2 editor-basics conformance subset: done (commit 530105f8, review loops 1; markers no-leak verified, mocks relocated, negative control red-then-reverted; tsc clean, 2200 tests pass; i18n flake pre-existing/unrelated)
 - phase 3 knob mechanism: done (commit 89132c3d, review loops 1; default-emits-nothing proven both fns, seam threaded+inert all 3 call sites, rule dormant, firewall intact; tsc clean, 2212 tests, build green)
 - phase 4 design-kit generator: done (commit 0dd9b186, review loops 1; derived not-frozen, firewall intact, 3 engines generate w/ source labels, primitive=labeled hint; tsc clean, 2223 tests)
-- phase 5 handoff lint: done (commit PENDING, review loops 1, ship; broken fixture fails both distinct findings, derived from kit, marker convention agrees kit<->lint, all 5 checks real; tsc clean, 2231 tests)
-- phase 6 anchor library: pending
+- phase 5 handoff lint: done (commit 2237fc5b, review loops 1; broken fixture fails both distinct findings, derived from kit, marker convention agrees kit<->lint, all 5 checks real; tsc clean, 2231 tests)
+- phase 6 anchor library: done (commit PENDING, review loops 1, ship; 21 anchors/6 groups, guard imports live templateMeta + red-on-removal verified, 5 default bans; tsc clean, 2235 tests 0 failed. Anchor taste = phase-11 founder gate)
 - phase 7 screenshot parity harness + diff: pending
 - phase 8 hearth knobs pilot + looks data: pending
 - phase 9 looks in picker: pending

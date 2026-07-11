@@ -390,3 +390,61 @@ Exit code 1 on broken, 0 on valid (`PASS — ... no findings.`).
 ## Phase 5 — impl-review verdict
 - Verdict: **ship** (loop 1). Reviewer confirmed acceptance criterion: broken fixture seeds TWO genuinely distinct defects (testimonials section omitted + hero present-but-missing-headline), test asserts both distinct finding types + independence (present-but-slotless ≠ missing-section; slot check section-scoped); valid fixture zero findings. Derived from buildDesignKit (no hardcoded lists); marker convention (data-section/data-slot/data-element-key) agrees kit↔lint with keep-in-sync pointer; all 5 checks real+tested (missing-section/missing-slot/axis/font/self-contained); designKit cross-edit minimal (2 rules + comment, no shape/import change), firewall intact. Gate: tsc clean, test:run 2231 passed/11 skipped/0 failed.
 - Non-blocking (logged in audit as known risks): (1) sectionRegions assumes one top-level data-section per section — nested would truncate; kit mandates ONE container. (2) font extraction parses font-family/--*font* props not `font:` shorthand; kit mandates :root tokens.
+
+## Phase 6 — anchor library
+
+### Files changed
+- `docs/product/anchorLibrary.md` (new) — curated anchor reference library + banned list.
+- `src/modules/templates/anchorLibrary.test.ts` (new) — derived guard over the md.
+
+### What changed
+- **anchorLibrary.md:** 18 concrete anchors (≥15 required), grouped into 6 groups for tile
+  divergence: A Swiss/Modernist grid (4), B Industrial/Utilitarian/Hardware (4), C
+  Editorial/Print/Literary (4), D Warm/Craft/Human (3), E Bold/Expressive/Maximal (3), F
+  Concrete software product refs (3). Each anchor = named site/movement/system + 1-line why
+  + typeface/token cues (anchors, not adjectives), tagged with an `<!-- anchor -->` marker
+  for unambiguous counting. Header states the how-to-use art-direction step (pull 3–5 from
+  ≥3 different groups) and the guard-enforced maintenance rule.
+- **Banned-list section (`## Banned fingerprints`):** (a) DERIVATION RULE — banned set
+  includes every live `templateMeta.designStyles` value; rule stated so new templates
+  auto-extend it, with current concrete values named: `tech-minimal` (meridian),
+  `editorial-craft` (vestria, lumen), `warm-human` (hearth), `authority-professional`
+  (lex), `bold-performance` (surge), `literary-quiet` (granth). techpremium retired/empty →
+  contributes nothing. (b) 5 default-mode bans: Inter, purple gradients, glassmorphism,
+  rounded-2xl card grids, emoji icons.
+- **anchorLibrary.test.ts:** imports `templateMeta` (never hardcodes the expected set —
+  so the guard bites on new templates), dedupes designStyles across all templates, extracts
+  the `## Banned fingerprints` section, and asserts: banned ⊇ live designStyles; the 5
+  default bans present (word-boundary `\bInter\b` to avoid matching "international" etc.);
+  `<!-- anchor -->` count ≥15.
+
+### Live designStyles the banned list covers
+tech-minimal, editorial-craft, warm-human, authority-professional, bold-performance,
+literary-quiet (6 distinct; editorial-craft shared by vestria+lumen, deduped in test).
+
+### Guard red-on-removal demonstration
+Temporarily replaced `- `bold-performance` (surge)`` in the md with a placeholder →
+`npx vitest run src/modules/templates/anchorLibrary.test.ts` FAILED with:
+"designStyle \"bold-performance\" is live in templateMeta but MISSING from the banned list
+in anchorLibrary.md" (1 failed | 3 passed). Restored the line → 4 passed. Guard bites.
+
+### Verification
+- `npx tsc --noEmit` — clean (no output).
+- `npx vitest run src/modules/templates/anchorLibrary.test.ts` — 4/4 pass.
+- `npm run test:run` — 2234 passed | 11 skipped | 1 failed. The one failure is
+  `src/lib/i18n/i18nHonesty.test.ts` (generateStaticHTML 2-locale fixture) — a 5s TIMEOUT,
+  unrelated to this phase and already documented as a pre-existing flake in the phase-2
+  progress-log entry. Anchor-library changes touch only a docs file + a new isolated test;
+  no shared code path affects i18n.
+
+### Deviations
+- None. Files-touched list honored exactly.
+
+### Open risks
+- Anchor QUALITY / taste (genuine distinctness, cue usefulness) is NOT machine-checked —
+  deferred to the phase-11 founder gate per the plan (reviewed with the `/new-template`
+  skill rewrite). The guard only protects the banned list from rotting + enforces count.
+
+## Phase 6 — impl-review verdict
+- Verdict: **ship** (loop 1). Reviewer verified guard non-vacuous: test imports live templateMeta, derives expected via `Object.values(templateMeta).flatMap(m=>m.designStyles)` (nothing hardcoded); red-on-removal reproduced (removing `bold-performance` → "live in templateMeta but MISSING from banned list", restored → 4/4). All 6 live designStyles + 5 default bans present (word-boundary regexes). Anchors concrete (Swiss Style, Teenage Engineering, Stripe, Aesop — real systems w/ typeface+token cues, no placeholder adjectives). i18n flake did not fire this run; full suite 2235 passed/0 failed; tsc clean.
+- CORRECTION: actual anchor count is **21** (not 18 as narrated above) — guard asserts ≥15, passes. Anchor TASTE review deferred to phase-11 founder gate.
