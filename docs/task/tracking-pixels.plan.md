@@ -14,7 +14,7 @@ because they're baked into HTML; with no IDs set the published head stays byte-i
 
 ## Progress log
 
-- phase 1 storage + snippet builders + head injection + fan-out: pending
+- phase 1 storage + snippet builders + head injection + fan-out: done (commit 913eefdf, review loops 1, verdict ship)
 - phase 2 Pro gating (plan flag + API exposure + publish-time strip): pending
 - phase 3 SEO modal Tracking UI (inputs, validation, Pro lock/upsell): pending
 - phase 4 post-merge live verification (scalifixai.com): pending — HUMAN GATE

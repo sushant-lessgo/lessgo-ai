@@ -31,3 +31,29 @@ None. Stayed within the Files-touched list. Did not touch planManager, publish r
 ### Open risks
 - Blog-post export path (`publishBlogPost.ts`) still calls `generateStaticHTML` without these options → its output stays unchanged (intentionally out of pilot scope; absent options → `''`).
 - No gating yet — any tier's stored IDs would render until Phase 2 adds the publish-time strip.
+
+## Phase 2 — Pro gating: plan flag, API exposure, publish-time strip
+
+**Files changed**
+- `src/lib/planManager.ts`
+- `src/app/api/billing/plan/route.ts`
+- `src/app/api/publish/route.ts`
+- `src/lib/planManager.test.ts` (new)
+
+**Per-file changes**
+- `planManager.ts`: added `trackingPixels: boolean` to `PlanConfig['features']` with a config-only comment (deliberately not a DB column; create/upgrade/downgrade writers left untouched). Added the flag to all four `PLAN_CONFIGS` entries (FREE=false; PRO/AGENCY/ENTERPRISE=true). Added exported `hasTrackingPixels(userId)` — resolves tier via `getUserPlan` then reads `PLAN_CONFIGS[tier].features.trackingPixels === true`; fail-closed (false) on error/unknown tier. Comment explains why it does NOT use `hasFeature` (fail-open on missing DB column). `hasFeature` unchanged.
+- `billing/plan/route.ts`: imported `PLAN_CONFIGS`/`PlanTier`; added `trackingPixels: PLAN_CONFIGS[plan.tier as PlanTier]?.features.trackingPixels ?? false` to the returned `features` object (config-derived, same source as server gate).
+- `publish/route.ts`: imported `hasTrackingPixels`; added the Pro gate immediately AFTER the sanitizeSeo block and BEFORE the chrome-injection block / DB write. When `!(await hasTrackingPixels(userId))`, it deletes `metaPixelId`/`ga4MeasurementId` from `c.seo` and from every `sub.seo`. Strip only — never rejects/throws.
+- `planManager.test.ts`: new suite mocking `@/lib/prisma` (`userPlan.findUnique`) and `@/lib/logger`. Drives tier through the findUnique stub. Cases: FREE→false, PRO→true, AGENCY→true, ENTERPRISE→true, DB-error→false, garbage-tier→false, plus a direct `PLAN_CONFIGS` mapping assertion.
+
+**Publish-strip positioning:** mutates `content.seo` (root) and each `content.subpages[*].seo`, in place, right after sanitizeSeo and before the chrome injection + DB write — so every downstream republish path inherits clean content.
+
+**Test mocking resolution:** mocked `getUserPlan`'s dependency (`prisma.userPlan.findUnique`) rather than the function itself — matches the sibling pattern in `src/app/api/forms/submit/route.test.ts`. `getUserPlan` returns the stubbed row directly; `hasTrackingPixels` maps its tier through `PLAN_CONFIGS`.
+
+**tsc:** clean except the known pre-existing `src/app/page.tsx` missing `@/assets/images/founder.jpg` error (unrelated).
+
+**Tests:** `npm run test:run` → 2126 passed, 3 skipped, 1 failed. The single failure (`i18nHonesty.test.ts` — generateStaticHTML 5s timeout) is a pre-existing flake under full-suite load; it PASSES in isolation (15/15) and is unrelated to Phase 2 (touches no Phase 2 files). New `planManager.test.ts`: 7/7 pass.
+
+**Deviations:** none. No DB column / migration added (per plan). `hasFeature` left untouched.
+
+**Open risks:** the i18n full-suite timeout flake is orthogonal but worth noting for CI stability.
