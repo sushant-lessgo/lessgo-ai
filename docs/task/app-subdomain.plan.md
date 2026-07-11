@@ -15,8 +15,8 @@ Move the product app to `app.lessgo.ai`; apex `lessgo.ai` becomes marketing-only
 - phase 2 env split (NEXT_PUBLIC_DASHBOARD_URL): done (commit 17543df2, review loops 1)
 - phase 3 middleware apex→app redirects + Clerk prop: done (commit 13c4436a, review loops 1)
 - phase 4 HUMAN GATE — Vercel/DNS/Clerk/env cutover + live verify: DONE (slice-1 merged to main + pushed; cutover live + verified per orchestrator 2026-07-12)
-- phase 5 app-host noindex + apex /p 301: done (review loops 1, ship) — commit pending
-- phase 6 apex customer-#0 KV branch: pending
+- phase 5 app-host noindex + apex /p 301: done (commit 5ff80d0c, review loops 1)
+- phase 6 apex customer-#0 KV branch: done (review loops 1, ship) — commit pending
 - phase 7 reserved-slug hardening + asset-base regression guard: pending
 - phase 8 HUMAN GATE — slice-2 live verify: pending
 

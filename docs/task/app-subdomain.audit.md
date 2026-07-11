@@ -221,3 +221,45 @@ An unauthenticated non-public request never reaches (ii): `auth.protect()` throw
 ### Open risks
 - Pre-existing `founder.jpg` tsc error is unrelated but means `tsc --noEmit` is not zero-exit in this worktree; reviewer should confirm the asset is present on main/CI.
 - Prod auth-bypass shape (3xx to accounts.clerk vs dev protect-rewrite 404) is deferred to the Phase 8 live gate — local curl can only prove "not a 200 dashboard + Clerk intercepted", which it does.
+
+## Phase 6 — apex as customer #0 (KV branch)
+
+**Files changed**
+- `src/lib/domains/appSplit.ts`
+- `src/lib/domains/appSplit.test.ts`
+- `src/middleware.ts`
+
+### appSplit.ts
+Added pure `isApexPublishCandidate(host, pathname): boolean` — true iff `isApexProdHost(host)` AND `pathname === '/'`. Root-only, deliberate: avoids a KV GET on every `/privacy`/`/blog`/`/pricing` marketing hit. Code comment notes to widen to per-path (mirroring Branch B's path-aware fast path) when multi-page apex dogfood lands. localhost / *.vercel.app / app host → false.
+
+### middleware.ts
+Inserted the KV branch in the apex `!isApiOrNext` fall-through, AFTER the phase-3 app-path 307. Apex ordering is now:
+1. Branch A/B skipped (apex is isLessgoAppHost).
+2. Apex `/p/*` 301 (phase 5) — `getApexPublishRedirect`.
+3. App-path 307 (phase 3) — `getApexToAppRedirect`.
+4. **`isApexPublishCandidate` KV branch (THIS PHASE)** — on true, `getRouteByKeyEdge('route:{host}:/')`; hit → rewrite to `/api/blob-proxy` with `rk` + `v` params + `stampGeo` (copied EXACTLY from Branch B fast path); miss OR error → fall through (no return, never 404). Errors logged + Sentry-tagged (`op: 'apexKvLookup'`) like Branch B, never thrown.
+5. Fall through → `isPublicRoute`/`auth.protect()` + phase-5 noindex tail.
+
+Copied Branch-B fast-path shape verbatim: `url.pathname = '/api/blob-proxy'`, `url.searchParams.set('rk', routeKey)`, `url.searchParams.set('v', route.version)`, `return stampGeo(NextResponse.rewrite(url))`. It is a REWRITE to public published content (D6-safe: `/` is a public route, no auth bypass).
+
+**Deliberate omissions (commented in code):**
+- NO `getSlugForHostEdge` SSR fallback — a `slug-for:lessgo.ai` key would shadow every apex path. Route-key check only.
+- NO `seoRewrite` on apex — sitemap/robots stay Next.js routes.
+- No publish-flow change: assigning `lessgo.ai` as a domain already writes `route:lessgo.ai:/` via `kvRoutes.atomicPublish`.
+
+### Deviations
+None. Followed plan steps 1-6 exactly.
+
+### Fall-through safety (code-verified)
+`getRouteByKeyEdge` returns `null` on KV miss AND on HTTP error (its own try/catch; middleware also wraps in try/catch). On miss → `if (route)` skipped → block exits with no return → reaches `if (!isPublicRoute(req))`; `/` is public so no `auth.protect()`; `shouldNoindex(apex)` is false → Clerk default → Next.js marketing homepage renders. **Apex `/` with no KV key falls through to marketing — confirmed. The live homepage cannot break from an empty KV.**
+
+### Dry-run
+NOT run against live KV. Only one KV instance is configured in `.env.local` (`KV_REST_API_URL`/`KV_REST_API_TOKEN`), and writing `route:lessgo.ai:/` there could briefly hijack the real live apex homepage (root-only scope) — a production-touch risk. Chose the conservative option: code-verified the fall-through (above) and defer the live dry-run to the Phase 8 human gate (which explicitly lists the optional prod KV dry-run). Reviewer note: the KV-hit path is a byte-for-byte copy of Branch B's exercised fast path.
+
+### Verification
+- `npx tsc --noEmit` — clean (no output).
+- `npx vitest run src/lib/domains/appSplit.test.ts` — 28 passed (5 new `isApexPublishCandidate` assertions incl. the required true/false cases).
+- `npm run test:run` — 2259 passed, 1 failed = i18nHonesty full-suite timeout (KNOWN FLAKE); isolation `npx vitest run src/lib/i18n/i18nHonesty.test.ts` → 15 passed. No other regressions.
+
+### Open risks
+- Live customer #0 serve path unproven until the Phase 8 prod dry-run (KV write → curl apex `/` → delete). Code path is identical to Branch B, which is live.

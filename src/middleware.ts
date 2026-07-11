@@ -8,7 +8,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getRouteByKeyEdge, getRedirectEdge, getSlugForHostEdge } from '@/lib/routing/kvRoutes'
 import { isLessgoAppHost, matchPublishSubdomain } from '@/lib/domains/hosts'
-import { getApexToAppRedirect, getApexPublishRedirect, shouldNoindex } from '@/lib/domains/appSplit'
+import { getApexToAppRedirect, getApexPublishRedirect, isApexPublishCandidate, shouldNoindex } from '@/lib/domains/appSplit'
 import * as Sentry from '@sentry/nextjs'
 
 const isPublicRoute = createRouteMatcher([
@@ -185,6 +185,38 @@ export default clerkMiddleware(async (auth, req) => {
     // (D6: never NextResponse.next() in this region — that would skip auth.protect()).
     const appRedirect = getApexToAppRedirect(host, url.pathname + url.search)
     if (appRedirect) return NextResponse.redirect(appRedirect, 307)
+
+    // Apex customer #0 (KV branch). ROOT-ONLY (isApexPublishCandidate: apex prod
+    // host AND pathname === '/'), so this fires at most ONE KV GET per apex `/`
+    // hit — never on /privacy, /blog, /pricing (those stay Next.js marketing
+    // routes and skip KV entirely). If a `route:{host}:/` key exists (i.e. the
+    // dogfood homepage was published by assigning lessgo.ai as a domain), rewrite
+    // to the blob-proxy fast path — copied EXACTLY from Branch B (rk + v params +
+    // stampGeo). This is a REWRITE to PUBLIC published content, so it's D6-safe
+    // (no auth bypass: `/` is a public route anyway). On KV MISS or ERROR we do
+    // NOT 404 — we fall through so apex `/` keeps rendering the Next.js homepage
+    // (the critical safety property: an empty KV must never break the live home).
+    //
+    // Deliberately NO getSlugForHostEdge SSR fallback here (unlike Branch B): a
+    // `slug-for:lessgo.ai` key would shadow EVERY apex path. Route-key check only.
+    // Deliberately NO seoRewrite here either — apex sitemap/robots stay Next routes.
+    if (isApexPublishCandidate(host, url.pathname)) {
+      try {
+        const routeKey = `route:${host}:${url.pathname || '/'}`
+        const route = await getRouteByKeyEdge(routeKey)
+        if (route) {
+          url.pathname = '/api/blob-proxy'
+          url.searchParams.set('rk', routeKey)
+          url.searchParams.set('v', route.version)
+          return stampGeo(NextResponse.rewrite(url))
+        }
+        // KV miss → fall through to marketing homepage (no early return).
+      } catch (error) {
+        console.error('[Middleware] apex KV lookup error:', error)
+        Sentry.captureException(error, { level: 'warning', tags: { area: 'middleware', op: 'apexKvLookup' }, extra: { host } })
+        // KV error → fall through to marketing homepage (never 404).
+      }
+    }
   }
 
   if (!isPublicRoute(req)) {

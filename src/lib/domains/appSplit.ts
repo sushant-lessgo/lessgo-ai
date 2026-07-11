@@ -128,3 +128,24 @@ export function getApexPublishRedirect(
   const subpath = m[2] || '';
   return `https://${publishedSubdomainHost(slug)}${subpath}`;
 }
+
+/**
+ * True when an apex request should attempt a KV `route:{host}:/` publish lookup
+ * (customer #0 / dogfood takeover). ROOT-ONLY by design: `isApexProdHost(host)`
+ * AND `pathname === '/'`. Restricting to `/` avoids a KV GET on every
+ * `/privacy` / `/blog` / `/pricing` marketing hit (those stay Next.js routes).
+ *
+ * When multi-page apex dogfood actually lands, widen this to per-path (mirroring
+ * Branch B's path-aware `route:{host}:{path}` fast path) so subpages can serve
+ * their own published blobs. Until then, root-only.
+ *
+ * localhost / *.vercel.app / app host → false (D4 render path untouched).
+ */
+export function isApexPublishCandidate(
+  host: string | null | undefined,
+  pathname: string,
+): boolean {
+  if (!isApexProdHost(host)) return false;
+  const p = (pathname || '').split('?')[0].split('#')[0];
+  return p === '/';
+}

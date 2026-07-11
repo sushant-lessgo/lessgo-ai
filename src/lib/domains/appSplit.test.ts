@@ -8,6 +8,7 @@ import {
   getApexToAppRedirect,
   shouldNoindex,
   getApexPublishRedirect,
+  isApexPublishCandidate,
   APP_PATH_PREFIXES,
 } from './appSplit';
 
@@ -160,6 +161,28 @@ describe('getApexPublishRedirect', () => {
     expect(getApexPublishRedirect('lessgo.ai', '/paint')).toBe(null);
     expect(getApexPublishRedirect('lessgo.ai', '/')).toBe(null);
     expect(getApexPublishRedirect('lessgo.ai', '/dashboard')).toBe(null);
+  });
+});
+
+describe('isApexPublishCandidate', () => {
+  it('is true only for apex root (customer #0 KV branch)', () => {
+    expect(isApexPublishCandidate('lessgo.ai', '/')).toBe(true);
+    expect(isApexPublishCandidate('www.lessgo.ai', '/')).toBe(true);
+  });
+
+  it('is false for non-root apex paths (root-only scope — no KV GET)', () => {
+    expect(isApexPublishCandidate('lessgo.ai', '/some-page')).toBe(false);
+    expect(isApexPublishCandidate('lessgo.ai', '/privacy')).toBe(false);
+    expect(isApexPublishCandidate('lessgo.ai', '/blog')).toBe(false);
+    expect(isApexPublishCandidate('lessgo.ai', '/dashboard')).toBe(false);
+    expect(isApexPublishCandidate('lessgo.ai', '/p/foo')).toBe(false);
+  });
+
+  it('is false off apex, even at root (app host / localhost / vercel)', () => {
+    expect(isApexPublishCandidate('app.lessgo.ai', '/')).toBe(false);
+    expect(isApexPublishCandidate('localhost:3000', '/')).toBe(false);
+    expect(isApexPublishCandidate('lessgo-ai.vercel.app', '/')).toBe(false);
+    expect(isApexPublishCandidate(null, '/')).toBe(false);
   });
 });
 
