@@ -132,6 +132,13 @@ export async function renderPublishedExport(
   // Null goal → renderer's legacy GOAL_REF fallback (existing projects unchanged).
   const goal = await getPublishedGoal(pageId);
 
+  // Tracking pixels (site-level): resolve ONCE from root content.seo and thread the
+  // SAME values into every generateStaticHTML call (root, subpages, locale docs) —
+  // subpage/locale content objects do NOT carry these site-level keys, so we never
+  // read from sub.seo / p.seo (mirrors the favicon rootSeo cascade).
+  const metaPixelId = contentData.seo?.metaPixelId;
+  const ga4MeasurementId = contentData.seo?.ga4MeasurementId;
+
   // goal-ref-cta phase 3 (F23): this fn alone holds EVERY page, so it scans the
   // root + subpage bodies ONCE for the page that carries the conversion form
   // (a `leadForm-*` section or a `contact` section with `elements.form_id`).
@@ -181,6 +188,8 @@ export async function renderPublishedExport(
     previewImage: previewImage ?? undefined,
     seo: contentData.seo,
     faviconUrl: rootMeta.faviconUrl,
+    metaPixelId,
+    ga4MeasurementId,
     jsonLd: rootJsonLd ? serializeJsonLd(rootJsonLd) : undefined,
     analyticsOptIn: analyticsEnabled || false, // Phase 4
     baseURL: baseUrl,
@@ -276,6 +285,8 @@ export async function renderPublishedExport(
         previewImage: previewImage ?? undefined,
         seo: sub?.seo,
         faviconUrl: subMeta.faviconUrl,
+        metaPixelId,
+        ga4MeasurementId,
         analyticsOptIn: analyticsEnabled || false,
         baseURL: baseUrl,
         audienceType,
@@ -430,6 +441,8 @@ export async function renderPublishedExport(
             previewImage: previewImage ?? undefined,
             seo: p.seo ?? undefined,
             faviconUrl: meta.faviconUrl,
+            metaPixelId,
+            ga4MeasurementId,
             jsonLd: jsonLd ? serializeJsonLd(jsonLd) : undefined,
             analyticsOptIn: analyticsEnabled || false,
             baseURL: baseUrl,

@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 // api/billing/plan/route.ts - Get user's plan information
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { getUserPlan } from '@/lib/planManager';
+import { getUserPlan, PLAN_CONFIGS, PlanTier } from '@/lib/planManager';
 import { logger } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
@@ -35,6 +35,9 @@ export async function GET(req: NextRequest) {
         formIntegrations: plan.formIntegrations,
         analytics: plan.analytics,
         prioritySupport: plan.prioritySupport,
+        // Derived from config, not the DB row (no such column) — same source as
+        // the server gate hasTrackingPixels().
+        trackingPixels: PLAN_CONFIGS[plan.tier as PlanTier]?.features.trackingPixels ?? false,
       },
     });
   } catch (error: any) {

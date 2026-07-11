@@ -84,8 +84,21 @@ export default function RootLayout({
 
 
 
+  // Cross-origin redirect allowance for the apex→app split: Clerk strips
+  // redirect_urls whose origin isn't allow-listed, so the hosted portal must be
+  // told app.lessgo.ai (NEXT_PUBLIC_DASHBOARD_URL) and the apex origins are OK.
+  // Includes the app origin only when the rollout var is set; falsy entries
+  // filtered so this is a no-op pre-cutover. Relative force-redirect URLs below
+  // stay host-relative (correct on whichever host serves the page).
+  const allowedRedirectOrigins: string[] = [
+    'https://lessgo.ai',
+    'https://www.lessgo.ai',
+    process.env.NEXT_PUBLIC_DASHBOARD_URL,
+  ].filter((o): o is string => Boolean(o))
+
   return (
     <ClerkProvider
+      allowedRedirectOrigins={allowedRedirectOrigins}
       signUpForceRedirectUrl="/dashboard"
       signInForceRedirectUrl="/dashboard"
     >

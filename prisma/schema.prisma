@@ -44,6 +44,11 @@ model Project {
   collectLink  CollectLink?
   blogPosts    BlogPost[]
   editDeltas   EditDelta[]
+  socialPosts  SocialPost[]
+  emailSequence EmailSequence?
+  outreachIntake  OutreachIntake?
+  prospectScrapes ProspectScrape[]
+  outreachMessages OutreachMessage[]
 }
 
 // Data-capture: records "AI wrote X, user changed it to Y" per element. Upserted
@@ -239,6 +244,103 @@ model FormSubmission {
   @@index([publishedPageId])
 }
 
+// Per-project generated social posts library (social-posts feature). userId is a
+// BARE Clerk User ID (no @relation — matches FormSubmission; gating counts the
+// append-only UsageEvent ledger keyed on this same Clerk id, per plan D4/D6). The
+// Project link is carried by projectId (@relation, cascade-delete) + tokenId
+// (route key). Gating reads UsageEvent, NOT this table (delete-and-regen loophole).
+model SocialPost {
+  id        String   @id @default(cuid())
+  userId    String // Clerk User ID (owner) — bare, no @relation (matches FormSubmission)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tokenId   String // project token (route key)
+  platform  String // linkedin | x | facebook
+  archetype String? // null for polish mode
+  mode      String // archetype | archetype_context | polish
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([tokenId, createdAt])
+}
+
+model EmailSequence {
+  id        String   @id @default(cuid())
+  userId    String // Clerk User ID (owner) — bare, no @relation (matches FormSubmission)
+  projectId String   @unique
+  tokenId   String // project token (route key)
+  intent    String // brief.goal.intent (frozen vocabulary)
+  archetype String // resolved email archetype id
+  emails    Json // [{position, key, subject, body}]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenId])
+}
+
+// Cold outreach (feature/cold-outreach). Intake = single-row per project (upsert-replace, mirrors EmailSequence).
+model OutreachIntake {
+  id               String   @id @default(cuid())
+  userId           String // Clerk User ID (owner) — bare, no @relation (matches FormSubmission)
+  projectId        String   @unique
+  tokenId          String // project token (route key)
+  targetDescriptor String   @db.Text
+  platforms        Json // string[] of selected platform ids
+  openerContext    String?  @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenId])
+}
+
+// Project-scoped prospect-scrape cache (mirrors siteContext normalization + TTL, but per-project owned).
+model ProspectScrape {
+  id        String   @id @default(cuid())
+  userId    String // Clerk User ID (owner)
+  projectId String
+  tokenId   String // project token (route key)
+  urlKey    String // normalized: lowercase host, strip www + trailing slash
+  urlRaw    String
+  pages     Json // bounded ScrapedPage[]
+  extract   Json // prospect extraction payload
+  model     String   @default("gpt-4o-mini")
+  scrapedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, urlKey])
+  @@index([tokenId])
+}
+
+// Generated outreach messages — many-row library per project (mirrors SocialPost).
+model OutreachMessage {
+  id             String   @id @default(cuid())
+  userId         String // Clerk User ID (owner)
+  projectId      String
+  tokenId        String // project token (route key)
+  platform       String // cold_email | linkedin_note | ...
+  kind           String   @default("initial") // initial | bump
+  groundingLevel String // prospect | generic
+  grounding      Json? // denormalized snapshot: extracted facts or {rawText} summary
+  prospectLabel  String? // display: host or "pasted text"
+  subject        String?
+  body           String   @db.Text
+  createdAt      DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([tokenId, createdAt])
+}
+
 model UserIntegration {
   id        String   @id @default(cuid())
   userId    String // Clerk User ID
@@ -325,6 +427,7 @@ model UserPlan {
   customDomainsLimit   Int @default(1)
   formSubmissionsLimit Int @default(100)
   teamMembersLimit     Int @default(1)
+  socialPostsLimit     Int @default(10) // social-posts feature; PRO/AGENCY/ENT backfilled in migration (see phase-2 backfill SQL)
 
   // Features enabled
   removeBranding   Boolean @default(false)

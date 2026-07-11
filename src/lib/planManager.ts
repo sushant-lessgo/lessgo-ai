@@ -43,6 +43,11 @@ export interface PlanConfig {
     whiteLabel: boolean;
     analytics: 'none' | 'basic' | 'full';
     prioritySupport: boolean;
+    // Tracking pixels (Meta Pixel / GA4) in the published <head>. CONFIG-ONLY:
+    // deliberately NOT persisted to a UserPlan DB column (no migration). The
+    // create/upgrade/downgrade writers below do not write this field; enforcement
+    // is derived from the tier via hasTrackingPixels(). See design decision 4.
+    trackingPixels: boolean;
   };
   rateLimit: {
     maxRequests: number;
@@ -75,6 +80,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       whiteLabel: false,
       analytics: 'basic',
       prioritySupport: false,
+      trackingPixels: false,
     },
     rateLimit: {
       maxRequests: 5,
@@ -104,6 +110,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       whiteLabel: false,
       analytics: 'full',
       prioritySupport: true,
+      trackingPixels: true,
     },
     rateLimit: {
       maxRequests: 10,
@@ -133,6 +140,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       whiteLabel: true,
       analytics: 'full',
       prioritySupport: true,
+      trackingPixels: true,
     },
     rateLimit: {
       maxRequests: 20,
@@ -162,6 +170,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       whiteLabel: true,
       analytics: 'full',
       prioritySupport: true,
+      trackingPixels: true,
     },
     rateLimit: {
       maxRequests: 50,
@@ -394,6 +403,28 @@ export async function hasFeature(userId: string, feature: keyof PlanConfig['feat
     return (userPlan as any)[feature] === true || (userPlan as any)[feature] !== 'none';
   } catch (error) {
     logger.error('Error checking feature access:', error);
+    return false;
+  }
+}
+
+/**
+ * Check if user's plan allows tracking pixels (Meta Pixel / GA4) in the
+ * published <head>.
+ *
+ * CONFIG-DERIVED ON PURPOSE — do NOT route this through hasFeature(). hasFeature
+ * reads the feature off the DB UserPlan row ((userPlan as any)[feature]) and its
+ * test (`=== true || !== 'none'`) returns true for a MISSING column
+ * (`undefined !== 'none'`). Since trackingPixels is intentionally not a DB column
+ * (no migration), hasFeature('trackingPixels') would fail OPEN for everyone.
+ * Instead we resolve the tier and read the flag straight from PLAN_CONFIGS.
+ * Any error / unknown tier → false (fail-closed). See design decision 4.
+ */
+export async function hasTrackingPixels(userId: string): Promise<boolean> {
+  try {
+    const userPlan = await getUserPlan(userId);
+    return PLAN_CONFIGS[userPlan.tier as PlanTier]?.features.trackingPixels === true;
+  } catch (error) {
+    logger.error('Error checking tracking pixels access:', error);
     return false;
   }
 }
