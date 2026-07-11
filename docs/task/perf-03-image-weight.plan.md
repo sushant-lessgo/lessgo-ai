@@ -18,9 +18,9 @@ Key design decisions (from scout + plan review):
 
 ## Progress log
 
-- phase 1 prod base64 scan: script done+shipped (review loops 1); dev DB clean of base64 (0 data:image; 5 blob: → phase-2 territory); PROD scan + decision = OPEN human gate
-- phase 1b base64 migration (conditional): pending
-- phase 2 write-layer base64/blob guard: pending
+- phase 1 prod base64 scan: DONE (commit 36399e3a, review loops 1). Dev clean of base64 (5 blob: only). PROD scan 2026-07-11: 34 projects, 0 base64, 0 blob:. Gate CLEARED clean.
+- phase 1b base64 migration (conditional): SKIPPED — prod scan clean, nothing to migrate
+- phase 2 write-layer base64/blob guard: DONE (review loops 1, ship). Pure isForbiddenImageSrc + updateElementContent guard + uploadImageFromObjectUrl adapter + ImageToolbar reload-death fix. tsc+2016 tests green. Follow-up nit: declare uploadImageFromObjectUrl in types/store/actions.ts (currently `as any` read; benign).
 - phase 3 pilot — techpremium img attrs: pending
 - phase 4 sweep — meridian + surge + shared blog blocks: pending
 - phase 5 sweep — lumen: pending
