@@ -16,6 +16,7 @@ import { resolveOgImage } from './buildPageMetadata';
 import { escapeHTML, robotsMetaTag, faviconLinkTag, jsonLdScriptTag } from './headTags';
 import { usesTemplateModule } from '@/types/service';
 import type { PageSeo } from '@/types/store/pages';
+import type { LocaleConfig } from '@/types/core/content';
 
 export interface StaticHTMLOptions {
   // Content
@@ -68,6 +69,17 @@ export interface StaticHTMLOptions {
   // Configuration
   analyticsOptIn?: boolean;
   baseURL?: string;
+
+  // i18n (Phase 5) — all OPTIONAL. Absent ⇒ single-locale byte-identical output.
+  /** The locale THIS doc renders (for `<html lang>`). Defaults to 'en' when absent. */
+  locale?: string;
+  /** Project locale declaration. Presence WITH >1 locale triggers hreflang +
+   *  switcher emission; single/absent ⇒ none of it (legacy output unchanged). */
+  localeConfig?: LocaleConfig;
+  /** Reciprocal hreflang set (every locale + x-default), precomputed by
+   *  renderPublishedExport from the SAME resolveCanonicalURL source as canonical
+   *  so the self-canonical and self-alternate always agree. */
+  localeAlternates?: Array<{ hreflang: string; href: string }>;
 }
 
 export interface StaticHTMLResult {
@@ -148,6 +160,9 @@ export async function generateStaticHTML(
     hasForms,
     usesNaayom,
     usesLumen,
+    locale: options.locale,
+    localeConfig: options.localeConfig,
+    localeAlternates: options.localeAlternates,
   });
 
   // 5. Validate and resolve asset URLs
@@ -229,8 +244,45 @@ function buildHTMLDocument(params: {
   hasForms: boolean;
   usesNaayom: boolean;
   usesLumen: boolean;
+  locale?: string;
+  localeConfig?: LocaleConfig;
+  localeAlternates?: Array<{ hreflang: string; href: string }>;
 }): string {
   const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms, usesNaayom, usesLumen } = params;
+
+  // i18n (Phase 5): multi-locale head/script emission. When the project declares
+  // only one locale (or none), NONE of this fires and the document is
+  // byte-identical to legacy output (back-compat law at the publish layer).
+  const multiLocale =
+    !!params.localeConfig &&
+    Array.isArray(params.localeConfig.locales) &&
+    params.localeConfig.locales.length > 1;
+  // <html lang>: the locale THIS doc renders (fixes the old hardcoded "en").
+  // Single-locale ⇒ 'en' ⇒ byte-identical.
+  const lang = params.locale || 'en';
+  const alternates = params.localeAlternates || [];
+  // (b) reciprocal hreflang for ALL locales + (c) x-default — self-canonical (a)
+  // is the existing <link rel="canonical"> below (its canonicalPath is already the
+  // locale-prefixed path for non-default docs).
+  const hreflangTags =
+    multiLocale && alternates.length
+      ? `\n\n  <!-- i18n hreflang alternates -->` +
+        alternates
+          .map(
+            (a) =>
+              `\n  <link rel="alternate" hreflang="${escapeHTML(a.hreflang)}" href="${a.href}">`
+          )
+          .join('')
+      : '';
+  // Inline locale config (drives switcher.v1.js) + the shared switcher asset.
+  // `<` escaped to < so a stray locale code can't break out of the script.
+  const localeJson = multiLocale
+    ? JSON.stringify({
+        locales: params.localeConfig!.locales,
+        defaultLocale: params.localeConfig!.defaultLocale,
+        current: lang,
+      }).replace(/</g, '\\u003c')
+    : '';
 
   // Asset origin for the injected fonts/scripts. Absolute origin (NOT relative):
   // these platform assets are served from prod subdomains AND custom domains
@@ -267,8 +319,13 @@ function buildHTMLDocument(params: {
     canonicalPath: metadata.canonicalPath,
   });
 
+  // Switcher tag block (needs assetBase, resolved above). Empty for single-locale.
+  const switcherTags = multiLocale
+    ? `\n\n  <!-- i18n locale switcher (multi-locale) -->\n  <script>window.__lessgoLocales=${localeJson}</script>\n  <script src="${assetBase}/assets/switcher.v1.js" defer></script>`
+    : '';
+
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${escapeHTML(lang)}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -278,7 +335,7 @@ function buildHTMLDocument(params: {
   <meta name="description" content="${escapeHTML(metadata.description)}">
 
   <!-- Canonical URL -->
-  <link rel="canonical" href="${canonicalURL}">${robotsMetaTag(metadata.noIndex)}${faviconLinkTag(metadata.faviconUrl)}
+  <link rel="canonical" href="${canonicalURL}">${robotsMetaTag(metadata.noIndex)}${faviconLinkTag(metadata.faviconUrl)}${hreflangTags}
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
@@ -316,7 +373,7 @@ function buildHTMLDocument(params: {
   ${usesNaayom ? `<script src="${assetBase}/assets/naayom.v1.js" defer></script>` : ''}
 
   <!-- Lumen behaviors (lightbox + reveal + EN·NL toggle/geo) -->
-  ${usesLumen ? `<script src="${assetBase}/assets/lumen.v1.js" defer></script>` : ''}
+  ${usesLumen ? `<script src="${assetBase}/assets/lumen.v1.js" defer></script>` : ''}${switcherTags}
 
   <!-- Phase 4: Analytics beacon (opt-in) -->
   ${

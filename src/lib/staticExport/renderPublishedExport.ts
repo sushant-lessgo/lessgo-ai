@@ -9,6 +9,9 @@ import { buildPageMetadata } from './buildPageMetadata';
 import { buildStructuredData, serializeJsonLd, extractLogoUrl } from './structuredData';
 import { isReservedBlogPath } from '@/utils/reservedPaths';
 import { findFormPagePath, type CtaPageInput } from '@/utils/normalizeCtas';
+import { resolveCanonicalURL } from './canonicalUrl';
+import { resolveLocaleElements, isMultiLocale } from '@/lib/i18n/localeContent';
+import type { LocaleConfig } from '@/types/core/content';
 
 /**
  * Render + upload a published page (root + all subpages) and advance its version pointer.
@@ -42,6 +45,15 @@ export interface RenderPublishedExportInput {
   baseUrl: string;
   /** Live custom domain (no scheme) to bake into canonical/og:url; undefined → subdomain. */
   canonicalDomain?: string;
+  /**
+   * i18n (Phase 5): project locale declaration. Absent or single-locale ⇒ today's
+   * exact behavior (default locale at `/`, byte-identical, no locale docs). When it
+   * declares >1 locale, the default locale still publishes at `/` and each
+   * non-default locale is rendered at `/{locale}` (+ `/{locale}/{subpath}`) with its
+   * overlay resolved BEFORE render (parity-ordering invariant, D1). Phase 6 reads
+   * this from the project content and passes it here.
+   */
+  localeConfig?: LocaleConfig | null;
 }
 
 export interface RenderPublishedExportResult {
@@ -72,7 +84,32 @@ export async function renderPublishedExport(
     mood,
     baseUrl,
     canonicalDomain,
+    localeConfig,
   } = input;
+
+  // i18n (Phase 5): locale fan-out gate. Single/absent ⇒ everything below runs
+  // exactly as before (default locale only, no locale docs, byte-identical).
+  const multiLocale = isMultiLocale(localeConfig);
+  const locales = multiLocale ? localeConfig!.locales : [];
+  const defaultLocale = multiLocale ? localeConfig!.defaultLocale : 'en';
+
+  // Reciprocal hreflang set for a logical page (identified by its DEFAULT-locale
+  // "bare" path, '/' or '/about'). Built from the SAME resolveCanonicalURL source
+  // as the self-canonical so self-referencing tags agree exactly. Includes every
+  // declared locale + x-default → default locale. Empty when single-locale.
+  const buildAlternates = (
+    barePath: string
+  ): Array<{ hreflang: string; href: string }> => {
+    if (!multiLocale) return [];
+    const pathFor = (loc: string) =>
+      loc === defaultLocale ? barePath : barePath === '/' ? `/${loc}` : `/${loc}${barePath}`;
+    const hrefFor = (loc: string) =>
+      resolveCanonicalURL({ slug, canonicalDomain, canonicalPath: pathFor(loc) });
+    return [
+      ...locales.map((loc) => ({ hreflang: loc, href: hrefFor(loc) })),
+      { hreflang: 'x-default', href: hrefFor(defaultLocale) },
+    ];
+  };
 
   // Extract description from hero section
   const contentData = input.content as any;
@@ -157,6 +194,11 @@ export async function renderPublishedExport(
     formPagePath: findFormPagePath(pageInputsForScan, '/'),
     canonicalDomain,
     canonicalPath: '/',
+    // i18n: default-locale root still lives at '/'. When multi-locale it also
+    // carries hreflang + switcher; single-locale ⇒ all undefined ⇒ byte-identical.
+    locale: multiLocale ? defaultLocale : undefined,
+    localeConfig: multiLocale ? localeConfig! : undefined,
+    localeAlternates: multiLocale ? buildAlternates('/') : undefined,
   });
 
   // Upload to blob with timeout protection
@@ -245,6 +287,11 @@ export async function renderPublishedExport(
         formPagePath: findFormPagePath(pageInputsForScan, path),
         canonicalDomain,
         canonicalPath: path,
+        // i18n: default-locale subpage keeps its '/{subpage}' path; hreflang +
+        // switcher only when multi-locale. Single-locale ⇒ byte-identical.
+        locale: multiLocale ? defaultLocale : undefined,
+        localeConfig: multiLocale ? localeConfig! : undefined,
+        localeAlternates: multiLocale ? buildAlternates(path) : undefined,
       });
 
       const subUpload = await uploadStaticSite({
@@ -260,6 +307,166 @@ export async function renderPublishedExport(
     } catch (subErr) {
       // A failed subpage must not block the rest of the publish.
       console.error('[Phase 2] Subpage render/upload failed:', rawPath, subErr);
+    }
+  }
+
+  // === i18n (Phase 5): NON-DEFAULT LOCALE DOCS ===
+  // For every declared locale other than the default, render the root + each
+  // subpage with its overlay RESOLVED before render (resolve-then-extract, D1
+  // parity-ordering invariant — same helper the editor read path uses), at
+  // `/{locale}` (+ `/{locale}/{subpath}`). These share the primary's version and
+  // land in extraRoutes. Nothing here runs for single-locale projects.
+  if (multiLocale) {
+    for (const loc of locales) {
+      if (loc === defaultLocale) continue;
+
+      // Localized root: resolveLocaleElements copies non-section keys (layout,
+      // forms, subpages, seo…) by reference and overlays only the section elements.
+      const locRoot = resolveLocaleElements(
+        contentData,
+        contentData.localeContent,
+        loc
+      );
+
+      // Assemble every localized page for THIS locale ONCE, so CTA form-page
+      // detection and rendering share the same content + locale-prefixed paths.
+      type LocalePage = {
+        path: string; // locale-prefixed served path, e.g. '/nl' or '/nl/about'
+        bare: string; // default-locale bare path, e.g. '/' or '/about'
+        flat: any;
+        sections: string[];
+        theme: any;
+        title: string;
+        seo: any;
+        isRoot: boolean;
+      };
+      const locPages: LocalePage[] = [
+        {
+          path: `/${loc}`,
+          bare: '/',
+          flat: locRoot,
+          sections: contentData.layout.sections,
+          theme: contentData.layout.theme,
+          title: cleanTitle,
+          seo: undefined, // root seo rides locRoot.seo (as the default root does)
+          isRoot: true,
+        },
+      ];
+      for (const [rawPath, sub] of Object.entries(subpages) as Array<[string, any]>) {
+        const bare = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
+        if (bare === '/') continue;
+        if (isReservedBlogPath(bare)) continue;
+        const subSections: string[] = sub?.layout?.sections || [];
+        const subTheme = sub?.layout?.theme || contentData.layout.theme;
+        const subFlat = {
+          ...(sub?.content || {}),
+          forms: contentData.forms || {},
+          legalPages: contentData.legalPages,
+        };
+        // Overlays are PROJECT-GLOBAL: the entire localeContent map (root AND
+        // subpage sections) lives in the ROOT content, keyed by globally-unique
+        // sectionId. Subpage ProjectPage.content carries NO localeContent key —
+        // so feed the ROOT map here. Because sectionIds are globally unique and
+        // subFlat only holds this subpage's section keys, only this subpage's own
+        // sections get overlaid (no cross-page contamination).
+        const locSub = resolveLocaleElements(subFlat, contentData.localeContent, loc);
+        locPages.push({
+          path: `/${loc}${bare}`,
+          bare,
+          flat: locSub,
+          sections: subSections,
+          theme: subTheme,
+          title: sub?.title || cleanTitle,
+          seo: sub?.seo,
+          isRoot: false,
+        });
+      }
+
+      // CTA form-page scan within THIS locale (localized content, locale-prefixed
+      // paths) so a primary CTA on a locale page targets the SAME locale's form
+      // page instead of the default-locale one.
+      const locPageInputs: CtaPageInput[] = locPages.map((p) => ({
+        path: p.path,
+        content: p.flat,
+      }));
+
+      for (const p of locPages) {
+        try {
+          const meta = buildPageMetadata({
+            slug,
+            pageTitle: p.title,
+            content: { ...p.flat, layout: { sections: p.sections } },
+            previewImage,
+            canonicalDomain,
+            canonicalPath: p.path,
+            baseUrl,
+            seo: p.seo,
+            rootSeo: contentData.seo,
+          });
+
+          const jsonLd = p.isRoot
+            ? buildStructuredData({
+                type: contentData.seo?.structuredDataType,
+                audienceType,
+                name: meta.title,
+                description: meta.description,
+                url: meta.canonicalURL,
+                logoUrl: extractLogoUrl(p.flat),
+                imageUrl: meta.ogImage,
+              })
+            : null;
+
+          const locHtml = await generateStaticHTML({
+            sections: p.sections,
+            content: p.flat,
+            theme: p.theme,
+            publishedPageId: pageId,
+            pageOwnerId: userId,
+            slug,
+            title: meta.title,
+            description: meta.description,
+            previewImage: previewImage ?? undefined,
+            seo: p.seo ?? undefined,
+            faviconUrl: meta.faviconUrl,
+            jsonLd: jsonLd ? serializeJsonLd(jsonLd) : undefined,
+            analyticsOptIn: analyticsEnabled || false,
+            baseURL: baseUrl,
+            audienceType,
+            templateId,
+            paletteId,
+            variantId,
+            mood: mood ?? null,
+            goal,
+            currentPagePath: p.path,
+            formPagePath: findFormPagePath(locPageInputs, p.path),
+            canonicalDomain,
+            canonicalPath: p.path,
+            locale: loc,
+            localeConfig: localeConfig!,
+            localeAlternates: buildAlternates(p.bare),
+          });
+
+          const pageName = p.path.replace(/^\//, ''); // 'nl' | 'nl/about'
+          const locUpload = await uploadStaticSite({
+            pageId,
+            html: locHtml.html,
+            assetBundleVersion: 'v1',
+            version, // share the primary (default-locale root) version
+            pageName,
+          });
+
+          allBlobs.push({
+            path: p.path,
+            blobKey: locUpload.blobKey,
+            blobUrl: locUpload.blobUrl,
+            sizeBytes: locUpload.sizeBytes,
+          });
+          extraRoutes[p.path] = locUpload.blobUrl;
+        } catch (locErr) {
+          // A failed locale doc must not block the rest of the publish.
+          console.error('[Phase 5] Locale doc render/upload failed:', p.path, locErr);
+        }
+      }
     }
   }
 

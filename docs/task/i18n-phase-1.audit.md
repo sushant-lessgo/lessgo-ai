@@ -348,3 +348,57 @@ This REVISES the Phase-2/D1 `localeContent`/`localeConfig` merge contract: the o
 - `npx tsc --noEmit` — clean.
 - `npm run test:run` — Test Files 131 passed | 1 skipped (132); Tests 2065 passed | 3 skipped (2068). +9 vs the pre-fix 2056 (3 route + 6 store). Phase-2 (a)-(f) and all prior suites green; zero regressions.
 - Still not browser-driven; the Phase-6 human gate should eyeball the declare->translate->remove->reload cycle live.
+
+## Phase 5 — Static export: per-locale docs + hreflang + `switcher.v1.js`
+
+**Files changed:**
+- `src/lib/staticExport/htmlGenerator.ts` — head/script multi-locale emission
+- `src/lib/staticExport/renderPublishedExport.ts` — per-locale render loop + hreflang URL builder
+- `src/lib/staticExport/switcherBehaviors.js` (new) — shared template-agnostic switcher IIFE
+- `scripts/buildAssets.js` — added `switcherBehaviors.js` -> `switcher.v1.js` to the file map
+- `src/lib/staticExport/__tests__/i18nStaticExport.test.ts` (new) — Phase 5 tests
+
+### htmlGenerator.ts — head-tag emission logic (multi vs single)
+`StaticHTMLOptions` gained 3 OPTIONAL fields: `locale`, `localeConfig`, `localeAlternates`.
+`buildHTMLDocument` computes `multiLocale = localeConfig && locales.length > 1`.
+- `<html lang="{escapeHTML(locale || 'en')}">` — replaces the hardcoded `"en"`. Single-locale (no `locale`) resolves to `en` -> byte-identical.
+- MULTI-LOCALE only: (a) self-canonical is the EXISTING `<link rel="canonical">` (its `canonicalPath` is already the locale-prefixed path for non-default docs — so it self-references correctly with no new code); (b) reciprocal `<link rel="alternate" hreflang=...>` for every locale + (c) `x-default` are appended to the canonical line via `hreflangTags` (fed from `localeAlternates`); switcher = inline `<script>window.__lessgoLocales={locales,defaultLocale,current}</script>` (with `<`->unicode-escape guard) + `<script src="{assetBase}/assets/switcher.v1.js" defer>`, appended to the existing lumen script line via `switcherTags`.
+- SINGLE-LOCALE (absent/1-locale config): `hreflangTags` and `switcherTags` are BOTH empty and are appended to already-present lines, adding ZERO bytes -> output byte-identical to pre-change (proven by test 3, which asserts `withConfig.html === baseline.html`).
+- Injection points are appended to EXISTING interpolations (canonical line, lumen line) precisely so the empty single-locale case introduces no new whitespace/comment bytes.
+
+### renderPublishedExport.ts — locale loop shape + resolve-then-extract
+- Input gained `localeConfig?: LocaleConfig | null`. `multiLocale = isMultiLocale(localeConfig)`; `locales`/`defaultLocale` derived. When single/absent, ALL new code is skipped or passes `undefined` locale opts -> default path byte-identical.
+- `buildAlternates(barePath)` closure builds the reciprocal set from the SAME `resolveCanonicalURL({slug,canonicalDomain,canonicalPath})` the self-canonical uses (imported into this file). Per-locale path: default -> `barePath`; non-default -> `/{loc}` or `/{loc}{barePath}`. Returns `[...locales, x-default->default]`. That is how per-locale absolute URLs are derived — single source, so self-canonical and self-alternate agree.
+- The EXISTING default-locale root + subpage `generateStaticHTML` calls were left structurally intact; they only additionally pass `locale/localeConfig/localeAlternates` guarded by `multiLocale ? ... : undefined` (default root uses `buildAlternates('/')`, default subpage `buildAlternates(path)`).
+- NEW block (runs only when `multiLocale`): outer loop over non-default locales x inner loop over pages (root + subpages). For each locale it FIRST resolves the overlay — `resolveLocaleElements(contentData, contentData.localeContent, loc)` for root and `resolveLocaleElements(subFlat, subFlat.localeContent, loc)` for each subpage — THEN feeds the resolved content into `buildPageMetadata` (extract) and `generateStaticHTML` (render). This is the D1 parity-ordering invariant: same helper + same resolve->extract order as the editor read path. Docs land at `/{loc}` (pageName `loc`) and `/{loc}{bare}` (pageName `loc/sub`), share the primary's `version`, and are pushed into `allBlobs` + `extraRoutes[path]`. Each doc is wrapped in try/catch (a failed locale doc can't block the rest).
+- Overlay source (CORRECTED after review): overlays are PROJECT-GLOBAL. The entire `localeContent` map (root AND subpage sections) lives in the ROOT `finalContent.localeContent`, keyed by globally-unique sectionId; subpage `ProjectPage.content` carries NO `localeContent` key. So BOTH the root branch AND the subpage branch feed the SAME `contentData.localeContent` map to `resolveLocaleElements`. Because sectionIds are globally unique and `subFlat` only holds that subpage's section keys, only that subpage's own sections get overlaid (no cross-page contamination). If a project has no overlay for a locale, `resolveLocaleElements` returns base -> that locale renders default copy at its path (acceptable; not an error).
+  - REVIEW FIX (blocking bug): the subpage branch originally read `resolveLocaleElements(subFlat, subFlat.localeContent, loc)` where `subFlat.localeContent` is always `undefined` -> non-default SUBPAGE docs silently rendered English. Corrected to `resolveLocaleElements(subFlat, contentData.localeContent, loc)`.
+- CONSERVATIVE CALL (logged): CTA form-page detection for locale docs uses a locale-scoped `locPageInputs` (localized content, locale-PREFIXED paths) so a primary CTA on a locale page targets the SAME locale's form page, not the default-locale one.
+
+### switcher IIFE (switcherBehaviors.js) — boot/redirect/guard
+- Idempotent boot guard `window.__lessgoSwitcherBooted`. Reads `window.__lessgoLocales`; no-op if `<2` locales.
+- Boot resolution order: `localStorage['lessgo.lang']` -> `geo-country` cookie (lowercased, accepted only if it names a declared locale — imperfect ISO-country heuristic by design) -> `navigator.language` (first subtag). If the resolved locale is in the list AND != `current`, `location.replace` to the sibling path (`segAt` strips a leading non-default-locale segment to get the bare path, `buildPath` re-prefixes; query+hash preserved).
+- Redirect-loop guard: `sessionStorage['lessgo.langRedirected']` set BEFORE the redirect (once per session); plus the `resolved === current` short-circuit means the redirected doc will not bounce (target doc's `current` equals the resolved locale). Only ever redirects to a locale in the embedded list (page guaranteed to exist).
+- Renders its OWN fixed-position pill (bottom-right, inline styles, one button/locale) — template-agnostic, no template markup dependency (D2). Click persists `localStorage['lessgo.lang']` + `location.href` navigates to that locale's path. Crawler-safe because the same doc ships reciprocal hreflang + self-canonical (D3).
+- CAVEAT: prefix swap assumes the locale segment is the FIRST path segment (true for custom-domain / `{slug}.lessgo.site` served blobs — the canonical published surface). On the `/p/{slug}` SSR-fallback path the segment is not first; not handled in v1 (note for the Phase-6 human gate, which tests a real publish).
+
+### buildAssets.js
+Added `{ src: 'switcherBehaviors.js', out: 'switcher.v1.js' }` (NEW filename per the immutable-asset versioning contract; never mutated an existing asset). Verified `public/assets/switcher.v1.js` emits (2.12 KB minified).
+
+### extraRoutes shape — PHASE 6 MUST HONOR
+Per-locale entries added to `extraRoutes` use the SAME shape as subpage entries: key = the served path string with leading slash, value = blob URL. Concretely:
+- default locale: `/` (primary, NOT in extraRoutes — it is the version pointer) and `/{subpage}` (existing).
+- non-default locale root: key `"/{loc}"` (e.g. `"/nl"`).
+- non-default locale subpage: key `"/{loc}/{subpath}"` (e.g. `"/nl/about"`).
+All also appear in `allBlobs` (`{path, blobKey, blobUrl, sizeBytes}`) inside the version metadata. Phase 6's `atomicPublishWithRetry` writes `route:{domain}:{path}` keys straight from `extraRoutes` exactly as it does for subpages — NO new key shape. Phase 6 must (a) pass `localeConfig` (read from project content) into `renderPublishedExport`, and (b) add the reserved-path collision guard so a subpage slug cannot equal a declared locale code (a `/nl` locale doc vs a `nl` subpage would collide on the same KV key).
+
+### Review fix + added test (post-review)
+- BLOCKING BUG fixed: subpage locale docs read the overlay from the wrong source (`subFlat.localeContent`, always undefined) so translated subpages published in English. One-line fix: feed the project-global root map — `resolveLocaleElements(subFlat, contentData.localeContent, loc)`.
+- NEW loop-level test `src/lib/staticExport/__tests__/renderPublishedExportI18n.test.ts`: drives `renderPublishedExport` itself (mocking the blobUploader/prisma/blob/getPublishedGoal boundaries, real `generateStaticHTML`) with a root+subpage, 2-locale project whose nl overlay carries BOTH a root and a subpage section in the single root `localeContent` map. Asserts `/nl` renders the root overlay, `/nl/about` renders the SUBPAGE overlay (the previously-broken path), `/` and `/about` stay English, and `extraRoutes` = `{/about, /nl, /nl/about}`.
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `node scripts/buildAssets.js` — emits `switcher.v1.js` (2.12 KB); all other assets unchanged.
+- `npm run build` — FULL build ran green earlier (buildPublishedCSS + buildAssets + next build all completed; published CSS unaffected). Not re-run after the fix (no buildAssets/asset change; only renderPublishedExport.ts logic + a test).
+- `npm run test:run` — Test Files 133 passed | 1 skipped (134); Tests 2069 passed | 3 skipped (2072). +4 vs pre-Phase-5 2065 (3 generateStaticHTML tests + 1 loop-level test). Includes single-locale byte-identical snapshot, hreflang reciprocity, resolve-before-render, and the multi-page subpage-overlay loop test; all prior suites green, zero regressions.
+- NOT browser-driven: live switcher boot/redirect/pill + geo default are exercised at the Phase-6 human gate (real publish of a 2-locale project).

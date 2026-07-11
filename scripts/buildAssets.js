@@ -54,6 +54,7 @@ const files = [
   { src: 'analyticsGenerator.js', out: 'a.v2.js' },       // live beacon: role+placement, v:2
   { src: 'naayomBehaviors.js', out: 'naayom.v1.js' }, // Phase 4: TechPremium behaviors
   { src: 'lumenBehaviors.js', out: 'lumen.v1.js' },   // Lumen: lightbox + reveal + EN/NL toggle/geo
+  { src: 'switcherBehaviors.js', out: 'switcher.v1.js' }, // i18n: shared template-agnostic locale switcher pill + geo redirect
 ];
 
 // Static CSS copied verbatim (no minify) into public/assets for published pages.
