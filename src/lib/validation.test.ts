@@ -50,4 +50,31 @@ describe('sanitizeSeo', () => {
     expect(sanitizeSeo({})).toBeUndefined();
     expect(sanitizeSeo({ title: undefined })).toBeUndefined();
   });
+
+  // Tracking pixels (site-level, root entry). Valid IDs survive; a single invalid
+  // ID poisons the whole blob (existing safeParse behavior); a blob without any
+  // tracking fields is unchanged (regression — no field-drop for legacy content).
+  it('passes valid tracking IDs through', () => {
+    const seo = {
+      title: 'ok',
+      metaPixelId: '1234567890123456',
+      ga4MeasurementId: 'G-ABC1234',
+    };
+    expect(sanitizeSeo(seo)).toEqual(seo);
+  });
+
+  it('drops the whole blob when a tracking ID is invalid', () => {
+    expect(sanitizeSeo({ title: 'ok', metaPixelId: '123"><script>' })).toBeUndefined();
+    expect(sanitizeSeo({ title: 'ok', metaPixelId: '1234' })).toBeUndefined();
+    expect(sanitizeSeo({ title: 'ok', ga4MeasurementId: 'g-abc123' })).toBeUndefined();
+  });
+
+  it('round-trips a legacy seo blob without tracking fields unchanged', () => {
+    const seo = {
+      title: 'My SEO Title',
+      description: 'A snippet.',
+      faviconUrl: 'https://cdn.example.com/f.ico',
+    };
+    expect(sanitizeSeo(seo)).toEqual(seo);
+  });
 });

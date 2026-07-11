@@ -7,8 +7,10 @@
 // is exactly what publishes (single source of truth, no drift).
 
 import React from 'react';
+import Link from 'next/link';
 import { useEditStore } from '@/hooks/useEditStoreLegacy';
 import { buildPageMetadata } from '@/lib/staticExport/buildPageMetadata';
+import { META_PIXEL_ID_RE, GA4_MEASUREMENT_ID_RE } from '@/lib/staticExport/headTags';
 import type { PageSeo, ProjectPageEntry } from '@/types/store';
 
 const TITLE_IDEAL = 60;
@@ -34,11 +36,77 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
   const [uploading, setUploading] = React.useState<null | 'ogImage' | 'faviconUrl'>(null);
   const [uploadError, setUploadError] = React.useState<string | null>(null);
 
+  // Pro gate (UX only — the real enforcement is the publish-time server strip).
+  // Mirror CreditBadge's plan fetch; treat loading as locked (fail-closed UI).
+  const [trackingEnabled, setTrackingEnabled] = React.useState(false);
+  const [planLoading, setPlanLoading] = React.useState(true);
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/billing/plan');
+        if (res.ok) {
+          const data = await res.json();
+          if (!cancelled) setTrackingEnabled(!!data?.features?.trackingPixels);
+        }
+      } catch {
+        // fail-closed: leave trackingEnabled false
+      } finally {
+        if (!cancelled) setPlanLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const trackingLocked = planLoading || !trackingEnabled;
+
   const page = pages.find((p) => p.id === selectedId);
   const seo: PageSeo = page?.seo || {};
   const isRoot = page?.pathSlug === '/';
 
   const patch = (p: Partial<PageSeo>) => page && store.updatePageSeo(page.id, p);
+
+  // Tracking-ID inputs keep raw local state so an in-progress/invalid value stays
+  // visible without ever reaching the store (an invalid value would make
+  // sanitizeSeo drop the WHOLE seo blob at publish). Only valid or cleared
+  // (→ undefined) values are written. Re-sync when the selected page changes.
+  const [metaRaw, setMetaRaw] = React.useState('');
+  const [ga4Raw, setGa4Raw] = React.useState('');
+  const [metaErr, setMetaErr] = React.useState<string | null>(null);
+  const [ga4Err, setGa4Err] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    setMetaRaw(page?.seo?.metaPixelId || '');
+    setGa4Raw(page?.seo?.ga4MeasurementId || '');
+    setMetaErr(null);
+    setGa4Err(null);
+  }, [selectedId, page?.seo?.metaPixelId, page?.seo?.ga4MeasurementId]);
+
+  const onMetaChange = (raw: string) => {
+    setMetaRaw(raw);
+    if (raw === '') {
+      setMetaErr(null);
+      patch({ metaPixelId: undefined });
+    } else if (META_PIXEL_ID_RE.test(raw)) {
+      setMetaErr(null);
+      patch({ metaPixelId: raw });
+    } else {
+      setMetaErr('Numeric ID only (e.g. 1234567890123456).');
+    }
+  };
+  const onGa4Change = (raw: string) => {
+    const val = raw.toUpperCase();
+    setGa4Raw(val);
+    if (val === '') {
+      setGa4Err(null);
+      patch({ ga4MeasurementId: undefined });
+    } else if (GA4_MEASUREMENT_ID_RE.test(val)) {
+      setGa4Err(null);
+      patch({ ga4MeasurementId: val });
+    } else {
+      setGa4Err('Format: G- followed by letters/numbers (e.g. G-XXXXXXXXXX).');
+    }
+  };
 
   const handleClose = () => {
     store.triggerAutoSave?.();
@@ -86,7 +154,7 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
       <div className="w-full max-w-3xl max-h-[85vh] overflow-auto rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">SEO &amp; Social</h2>
+            <h2 className="text-lg font-semibold text-gray-900">SEO &amp; Tracking</h2>
             <p className="text-sm text-gray-500">How each page appears in Google and when shared. Empty fields fall back to your page content.</p>
           </div>
           <button onClick={handleClose} aria-label="Close" className="rounded-md px-2 py-1.5 text-gray-400 hover:bg-gray-100">✕</button>
@@ -210,6 +278,50 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
                   {seo.structuredDataType === 'Product' && (
                     <p className="mt-1 text-xs text-amber-600">
                       Product markup without prices/reviews can trigger Google Search Console warnings.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {isRoot && (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Tracking</label>
+                  <p className="mb-2 text-xs text-gray-400">Applies to every page of your site. Changes take effect after you republish.</p>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label htmlFor="seo-meta-pixel" className="mb-1 block text-xs font-medium text-gray-600">Meta Pixel ID</label>
+                      <input
+                        id="seo-meta-pixel"
+                        value={metaRaw}
+                        disabled={trackingLocked}
+                        onChange={(e) => onMetaChange(e.target.value)}
+                        placeholder="1234567890123456"
+                        className="w-full rounded-md border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
+                      />
+                      {metaErr && <p className="mt-1 text-xs text-red-600">{metaErr}</p>}
+                    </div>
+
+                    <div>
+                      <label htmlFor="seo-ga4" className="mb-1 block text-xs font-medium text-gray-600">GA4 measurement ID</label>
+                      <input
+                        id="seo-ga4"
+                        value={ga4Raw}
+                        disabled={trackingLocked}
+                        onChange={(e) => onGa4Change(e.target.value)}
+                        placeholder="G-XXXXXXXXXX"
+                        className="w-full rounded-md border px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
+                      />
+                      {ga4Err && <p className="mt-1 text-xs text-red-600">{ga4Err}</p>}
+                    </div>
+                  </div>
+
+                  {trackingLocked && !planLoading && (
+                    <p className="mt-2 text-xs text-gray-500">
+                      Tracking pixels are a Pro feature.{' '}
+                      <Link href="/pricing" className="font-semibold text-gray-900 underline hover:text-gray-700">
+                        Upgrade to Pro →
+                      </Link>
                     </p>
                   )}
                 </div>

@@ -8,7 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { PublishSchema, sanitizeForLogging, sanitizeSeo } from '@/lib/validation';
 import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectAccess } from '@/lib/security';
 import { withPublishRateLimit } from '@/lib/rateLimit';
-import { getUserPlan, checkLimit } from '@/lib/planManager';
+import { getUserPlan, checkLimit, hasTrackingPixels } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 import { publishedSubdomainHost, publishSubdomainHosts } from '@/lib/domains/hosts';
@@ -62,6 +62,23 @@ async function publishHandler(req: NextRequest) {
       const subs = c.subpages && typeof c.subpages === 'object' ? c.subpages : {};
       for (const sub of Object.values(subs) as any[]) {
         if (sub && typeof sub === 'object') sub.seo = sanitizeSeo(sub.seo);
+      }
+    }
+
+    // Tracking pixels Pro gate — strip, don't fail; runs before the DB write so
+    // all republish paths (custom-domain go-live etc.) inherit the clean content.
+    if (content && typeof content === 'object' && !(await hasTrackingPixels(userId))) {
+      const c = content as any;
+      if (c.seo && typeof c.seo === 'object') {
+        delete c.seo.metaPixelId;
+        delete c.seo.ga4MeasurementId;
+      }
+      const subs = c.subpages && typeof c.subpages === 'object' ? c.subpages : {};
+      for (const sub of Object.values(subs) as any[]) {
+        if (sub?.seo && typeof sub.seo === 'object') {
+          delete sub.seo.metaPixelId;
+          delete sub.seo.ga4MeasurementId;
+        }
       }
     }
 

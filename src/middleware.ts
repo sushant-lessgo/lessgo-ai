@@ -8,6 +8,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getRouteByKeyEdge, getRedirectEdge, getSlugForHostEdge } from '@/lib/routing/kvRoutes'
 import { isLessgoAppHost, matchPublishSubdomain } from '@/lib/domains/hosts'
+import { getApexToAppRedirect } from '@/lib/domains/appSplit'
 import * as Sentry from '@sentry/nextjs'
 
 const isPublicRoute = createRouteMatcher([
@@ -152,6 +153,19 @@ export default clerkMiddleware(async (auth, req) => {
       }
       return new NextResponse('Not Found', { status: 404 })
     }
+
+    // Apex → app redirect. Apex hosts (lessgo.ai / www.lessgo.ai) are
+    // isLessgoAppHost, so they skip Branch A/B and reach this fall-through.
+    // App-path prefixes (/dashboard, /edit, /admin, /sign-in, …) forward to
+    // NEXT_PUBLIC_DASHBOARD_URL; query string preserved. Inert until that env
+    // var is set (helper returns null), so localhost/e2e/pre-cutover unchanged.
+    // /api/* and /_next/* are excluded above via isApiOrNext (apex keeps serving
+    // APIs); /assets/* are static files excluded by the matcher — both untouched.
+    // 307 TEMPORARY by design (spec — may be removed later; NEVER 301). This is
+    // a redirect early-return, the only pass-through kind allowed here pre-auth
+    // (D6: never NextResponse.next() in this region — that would skip auth.protect()).
+    const appRedirect = getApexToAppRedirect(host, url.pathname + url.search)
+    if (appRedirect) return NextResponse.redirect(appRedirect, 307)
   }
 
   if (!isPublicRoute(req)) {
