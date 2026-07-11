@@ -18,6 +18,7 @@ interface TextSelection {
 }
 
 import { logger } from '@/lib/logger';
+import { EDITOR_DEBUG } from '@/lib/debugFlags';
 import { isHexColor } from '@/utils/colorUtils';
 interface EditablePageRendererProps {
   sectionId: string;
@@ -285,13 +286,15 @@ const EnhancedLayoutWrapper: React.FC<{
   // Build userContext from taxonomy data if available
   const userContext = React.useMemo(() => {
     if (!validatedFields || !hiddenFields) {
-      console.log('🔍 EditablePageRenderer: No validatedFields or hiddenFields found', {
-        sectionId,
-        hasOnboardingData: !!onboardingData,
-        hasValidatedFields: !!validatedFields,
-        hasHiddenFields: !!hiddenFields,
-        onboardingDataKeys: onboardingData ? Object.keys(onboardingData) : []
-      });
+      if (EDITOR_DEBUG) {
+        console.log('🔍 EditablePageRenderer: No validatedFields or hiddenFields found', {
+          sectionId,
+          hasOnboardingData: !!onboardingData,
+          hasValidatedFields: !!validatedFields,
+          hasHiddenFields: !!hiddenFields,
+          onboardingDataKeys: onboardingData ? Object.keys(onboardingData) : []
+        });
+      }
       return undefined;
     }
 
@@ -304,13 +307,6 @@ const EnhancedLayoutWrapper: React.FC<{
       awarenessLevel: hiddenFields.awarenessLevel,
       pricingModel: validatedFields.pricingModel,
     };
-
-    console.log('✅ EditablePageRenderer: Built userContext', {
-      sectionId,
-      context,
-      validatedFieldsKeys: Object.keys(validatedFields),
-      hiddenFieldsKeys: Object.keys(hiddenFields)
-    });
 
     return context;
   }, [validatedFields, hiddenFields, sectionId, onboardingData]);

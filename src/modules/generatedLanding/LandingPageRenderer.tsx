@@ -36,6 +36,7 @@ import { FormPlacementRenderer } from '@/components/forms/FormPlacementRenderer'
 import { buildNormalizeCtasContext, createNormalizeCtasMemo } from '@/utils/normalizeCtas';
 
 import { logger } from '@/lib/logger';
+import { EDITOR_DEBUG } from '@/lib/debugFlags';
 
 // ... (types remain the same)
 type SectionBackground = 'neutral' | 'primary-highlight' | 'secondary-highlight';
@@ -446,29 +447,31 @@ export default function LandingPageRenderer({ className = '', tokenId, published
       : undefined;
 
     // Enhanced background logging
-    if (backgroundType === 'secondary') {
-      logger.debug(`🎨 Rendering secondary section ${sectionId}:`, {
-        backgroundCSS: sectionBackgroundCSS,
-        themeSecondary: theme.colors.sectionBackgrounds.secondary,
-        isFromAccentOptions: theme.colors.sectionBackgrounds.secondary?.includes('gradient'),
-        accentColor: theme.colors.accentColor,
-        baseColor: theme.colors.baseColor,
-        alternatingInfo
-      });
-    }
+    if (EDITOR_DEBUG) {
+      if (backgroundType === 'secondary') {
+        logger.debug(`🎨 Rendering secondary section ${sectionId}:`, {
+          backgroundCSS: sectionBackgroundCSS,
+          themeSecondary: theme.colors.sectionBackgrounds.secondary,
+          isFromAccentOptions: theme.colors.sectionBackgrounds.secondary?.includes('gradient'),
+          accentColor: theme.colors.accentColor,
+          baseColor: theme.colors.baseColor,
+          alternatingInfo
+        });
+      }
 
-    // Enhanced logging for alternated sections
-    if (alternatingInfo?.wasAlternated) {
-      logger.debug(`🔄 Rendering alternated section ${sectionId}:`, {
-        originallyWouldBe: 'secondary',
-        actuallyIs: backgroundType,
-        actualCSS: sectionBackgroundCSS,
-        previousSection: alternatingInfo.previousSection,
-        reason: 'Previous section was secondary, so this became neutral for visual break'
-      });
+      // Enhanced logging for alternated sections
+      if (alternatingInfo?.wasAlternated) {
+        logger.debug(`🔄 Rendering alternated section ${sectionId}:`, {
+          originallyWouldBe: 'secondary',
+          actuallyIs: backgroundType,
+          actualCSS: sectionBackgroundCSS,
+          previousSection: alternatingInfo.previousSection,
+          reason: 'Previous section was secondary, so this became neutral for visual break'
+        });
+      }
+
+      logger.debug(`🎨 Section ${sectionId} CSS class:`, sectionBackgroundCSS);
     }
-    
-    logger.debug(`🎨 Section ${sectionId} CSS class:`, sectionBackgroundCSS);
 
     // Handle section-specific errors
     const sectionError = errors[sectionId];
@@ -497,7 +500,7 @@ export default function LandingPageRenderer({ className = '', tokenId, published
     // Render the actual component with feature flag-controlled wrapper
     try {
       // Debug logging for hero section
-      if (sectionId === 'hero') {
+      if (EDITOR_DEBUG && sectionId === 'hero') {
         logger.debug('🎯 Rendering hero section with data:', {
           mode,
           isEditable: mode !== 'preview',
