@@ -448,3 +448,126 @@ in anchorLibrary.md" (1 failed | 3 passed). Restored the line → 4 passed. Guar
 ## Phase 6 — impl-review verdict
 - Verdict: **ship** (loop 1). Reviewer verified guard non-vacuous: test imports live templateMeta, derives expected via `Object.values(templateMeta).flatMap(m=>m.designStyles)` (nothing hardcoded); red-on-removal reproduced (removing `bold-performance` → "live in templateMeta but MISSING from banned list", restored → 4/4). All 6 live designStyles + 5 default bans present (word-boundary regexes). Anchors concrete (Swiss Style, Teenage Engineering, Stripe, Aesop — real systems w/ typeface+token cues, no placeholder adjectives). i18n flake did not fire this run; full suite 2235 passed/0 failed; tsc clean.
 - CORRECTION: actual anchor count is **21** (not 18 as narrated above) — guard asserts ≥15, passes. Anchor TASTE review deferred to phase-11 founder gate.
+
+## Phase 7 — screenshot parity harness + diff
+
+**Files changed**
+- `src/app/dev/blocks/TemplateBlocksStage.tsx` (new) — generic per-template block gallery + parity stage.
+- `src/app/dev/blocks/[template]/page.tsx` (new) — `/dev/blocks/<templateId>` route (client page, dynamic ssr:false).
+- `src/app/dev/meridian/blocks/MeridianBlocksStage.tsx` — slimmed to a thin `dynamic({ssr:false})` wrapper over the generic stage (meridian-pinned).
+- `src/app/dev/meridian/blocks/page.tsx` — re-pointed to render the slimmed wrapper (drops the old MeridianBlocksClient shell); metadata kept.
+- `e2e/parity.spec.ts` (new) — visual/CSS parity pixel-diff spec (meridian + hearth + parityBreak negative control).
+- `playwright.config.ts` — enrolled `parity.spec.ts` in the existing `public` (no-auth) project's testMatch.
+- `package.json` — devDeps `pixelmatch@^7.2.0` + `pngjs@^7.0.0`; script `test:parity`.
+
+### Generalization approach
+`MeridianBlocksStage` (Meridian-only, static `resolveMeridianBlock` import, edit-mode
+store) became `TemplateBlocksStage({templateId})`:
+- Async-loads the template module via `preloadTemplate(templateId)` (registry) → uses
+  `mod.resolveBlock(type, mode, layout)`, `mod.ThemeInjector`, `mod.variants`,
+  `mod.defaultPaletteId/VariantId`, `mod.paletteImageKeywords`, `mod.knobs`.
+- Content comes from the phase-2 `BLOCK_MOCKS[templateId]` registry (per-section
+  sectionId/layout/content); the store is seeded exactly as before (loadFromDraft).
+- Switcher is now generic: palette list = `Object.keys(paletteImageKeywords)`, variant
+  chips = `mod.variants`, and a knob dropdown per `mod.knobs.axes` axis (empty until a
+  template declares knobs — lights up for hearth in phase 8).
+- Store mode is **`preview`** (was `edit`). Rationale below.
+- The heavy subtree (ThemeInjector + EditProvider + store) is loaded via
+  `dynamic({ssr:false})` from BOTH page wrappers, so the edit-store module (which
+  touches `window` at eval time) never enters the SSR graph.
+
+Both routes reach ONE component: `/dev/blocks/meridian` (new) and the historical
+`/dev/meridian/blocks` (via the slimmed wrapper — kept mounting for
+`e2e/render.spec.ts`).
+
+### Store mode: preview, not edit (in-scope decision, logged)
+The old gallery seeded `mode:'edit'`, which renders editing chrome (add/remove
+collection affordances, edit-only nav "add" buttons, contentEditable). Those appear in
+the edit band but never in published → they would be a FALSE parity divergence. The edit
+blocks' `mode !== 'edit'` path (mode:'preview') renders the static, marker-emitting HTML
+that is the fair visual match to `.published.tsx` — the same path `renderParity.meridian`
+uses for content parity. So the stage seeds `preview`. This changes the /dev gallery from
+an interactive-edit demo to a static visual/parity gallery (acceptable — the gallery's job
+is block verification, and interactive editing is exercised elsewhere).
+
+### Band selectors + parityBreak
+Each section stacks two wrapper nodes:
+- `[data-parity-band="edit"][data-parity-section="<type>"]` → the edit block (preview).
+- `[data-parity-band="published"][data-parity-section="<type>"]` → the `.published` block.
+Attrs are pixel-neutral. The switcher carries `data-parity-switcher` (hidden by injected
+CSS before shots).
+
+`?parityBreak=1` (read from `window.location.search`, default off) applies
+`PARITY_BREAK_STYLE = { transform: 'scale(1.03)' }` to the EDIT band ONLY — a PERMANENT
+negative control. `scale` displaces every pixel proportionally to its distance from the
+origin, so it produces a large, band-wide signal even on the mostly-uniform (dark) hero
+band. (A wrapper `background` tint was tried first and rejected: the block paints its own
+opaque surface over the wrapper, so a tint is a visual no-op — noted in code.)
+
+### Diff method + threshold
+`e2e/parity.spec.ts` screenshots the two band nodes and diffs them TO EACH OTHER via
+`pixelmatch` (per-pixel threshold 0.1) over `pngjs` buffers, cropped to their overlapping
+top-left region (`cropTo`) so minor height deltas don't abort the diff. No stored baseline
+(sidesteps OS-pinned snapshots). Before shots: `document.fonts.ready`, animations/transitions
+off, `caret-color: transparent`, switcher hidden. Sections are DISCOVERED from the DOM
+(`data-parity-section` on every edit band), so enrolling a template = adding its mocks.
+
+`PASS_THRESHOLD = 0.03` (3% of compared pixels). Chosen from observed values (below) — it
+sits comfortably above the worst real band (1.297%) and comfortably below the seeded break
+(6.409%).
+
+### Parity run summary (observed diff %, headless Chromium, mock dev server)
+```
+meridian/header       0.932%
+meridian/hero         0.018%
+meridian/features     0.000%
+meridian/testimonials 0.624%
+meridian/pricing      0.979%
+meridian/cta          0.167%
+meridian/footer       1.297%   ← worst real band
+hearth/header         0.165%
+hearth/hero           0.189%
+hearth/services       0.181%
+hearth/testimonials   0.183%
+hearth/packages       0.093%
+hearth/cta            0.000%
+hearth/footer         0.249%
+PARITY BREAK meridian/hero  6.409%   ← negative control, > 3% threshold
+```
+All meridian + hearth sections ≤ 3% (GREEN). parityBreak exceeds threshold (caught).
+Clean separation: real ≤ 1.297% < 3% threshold < 6.409% break.
+
+### Verification
+- `npx tsc --noEmit` — clean. (e2e is excluded from tsc per tsconfig, so pngjs' missing
+  bundled types don't affect the typecheck; pixelmatch@7 ships its own `.d.ts`.)
+- `npm run test:run` — 2235 passed | 11 skipped, 0 failed (i18n flake did not fire).
+- `npx playwright test render parity --project=public` — 6 passed: parity (meridian,
+  hearth, parityBreak) + the 3 render.spec smokes incl. `/dev/meridian/blocks` (old URL
+  still mounts, no error overlay).
+- `pixelmatch` + `pngjs` install added only 2 packages (no heavy transitive deps).
+
+### Deviations
+- Store mode `edit`→`preview` (see above; conservative — required for true visual parity).
+- Generic route `[template]/page.tsx` is a **client** page (needs `dynamic({ssr:false})`),
+  so it cannot export `metadata` — the `robots:noindex` header is dropped there. Defensible:
+  `/dev/*` is middleware-blocked in production regardless. Meridian's page stays a server
+  component and keeps its metadata (renders the client wrapper).
+- `MeridianBlocksClient.tsx` and `src/app/dev/meridian/blocks/mockContent.ts` are now
+  ORPHANED (no importer) after the re-point. Left in place (not on the Files-touched list);
+  they still compile. Flagging for a future cleanup sweep.
+- parityBreak divergence went through three iterations (bg tint → translate → scale) to get
+  a robust margin above threshold; final `scale(1.03)` yields 6.409% on hero.
+- Added lightweight `console.log` of each section's diff % + the break % in the spec —
+  informational (aids future margin diagnosis), does not affect assertions.
+
+### Open risks
+- Threshold is calibrated on headless Chromium at Desktop-Chrome viewport; a different
+  browser/DPI could shift anti-aliasing noise. Only Chromium is used by the `public`
+  project, so this is stable for the current suite.
+- surge/vestria/lex not enrolled (no mocks yet — plan Q6 defer). Adding them later = add
+  their `blockMocks` entry; the harness + spec pick them up with zero code change if added
+  to the `TEMPLATES` list in the spec.
+
+## Phase 7 — impl-review verdict
+- Verdict: **ship** (loop 1). Reviewer INDEPENDENTLY RAN the parity spec (acceptance-criterion phase): 6 Playwright tests passed; meridian worst band footer 1.297%, hearth worst 0.249%, all ≤3% GREEN; `?parityBreak=1` hero 6.409% EXCEEDS threshold. Separation real+sensible (~1.7pt headroom below, ~3.4pt above — not rigged). Bands diffed to each other (no .png baselines committed). `mode:'preview'` sound: edit band = resolveBlock(type,'edit') (.tsx), published band = (type,'published') (.published.tsx) — two distinct components, preview only suppresses editing chrome, NOT vacuous. Old URL /dev/meridian/blocks still mounts. Gate: tsc clean, parity 6 passed; test:run 2234 passed/1 failed = the known pre-existing i18n timeout flake (outside phase scope).
+- Non-blocking (cleanup): (1) MeridianBlocksClient.tsx + mockContent.ts now orphaned (no live importer, still compile) → delete in cleanup sweep. (2) generic [template]/page.tsx is client page, drops noindex header (dev route middleware-blocked in prod). (3) parityBreak uses transform:scale(1.03) — synthetic geometric break, exercises harness sensitivity. (4) i18n flake — raise its testTimeout eventually.
