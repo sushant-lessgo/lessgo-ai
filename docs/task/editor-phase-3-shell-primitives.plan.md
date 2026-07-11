@@ -20,11 +20,8 @@ exactly one editor and dual-renderer divergence stays structurally impossible).
 - phase 1 floating-ui shell + priority slim-down: done (commit 1a9a187e, review loops 2 — remount defect fixed, ship)
 - phase 2 action sets + selector-ize: done (commit c1a7c80a, review loops 1 — clean, ship; 6 bare subs not 7 per phase-1 drift)
 - phase 3 DELETE list + parity sign-off: done (commit b65a0d48, review loops 1 — clean, ship, net -2336 LOC src/); HUMAN GATE PASSED 2026-07-11 (founder: parity holds, proceed)
-- phase 4 primitive interface: pending
-- phase 5 logo: pending — founder requirement 2026-07-11: header=light surface, footer=dark surface → logo needs light/dark variant handling (one asset assumption is WRONG). Primitive type carries optional dark variant; store-persistence mechanism (2nd field vs CSS invert) confirmed at phase-5 gate.
-- phase 6 imageCollection: pending
-- phase 4 primitive interface: pending
-- phase 5 logo primitive (techpremium proving): pending
+- phase 4 primitive interface: done (commit pending-sha, review loops 1 — clean, ship; primitiveTypes {PrimitiveKind×8, PrimitiveSlot, ImageCollectionItem, LogoValue{url,darkUrl,wordmark}, Surface}, elementMetadata.alt additive, resolveAlt + 7 tests)
+- phase 5 logo primitive (techpremium proving): pending — ⛔ HUMAN GATE BEFORE IMPL. founder req 2026-07-11: header=light surface, footer=dark surface → logo needs light/dark variant (one-asset assumption WRONG). LogoValue type carries darkUrl; store-persistence mechanism (A: globalSettings.logoUrlDark field [reco] vs B: CSS invert) confirmed at gate.
 - phase 6 imageCollection primitive + alt law (vestria proving): pending
 
 ## Spec unresolved questions — answered

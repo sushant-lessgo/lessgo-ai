@@ -306,3 +306,60 @@ Edited (3):
 - `src/hooks/README.md` still lists 4 deleted files (`useToolbarPositioning.ts`, `useAdvancedActionsMenu.ts`, `useTransitionLock.ts`, `useGlobalAnchor.ts`) in its hook table. It is OUT OF SCOPE (not on Files-touched, no `toolbarWatchdog` mention) and non-breaking (doc-only). Flagged for a follow-up doc edit; not touched this phase.
 - `e2e/edit-persistence.spec.ts` NOT run — requires a live dev server + Clerk auth session/browser not available in this headless agent environment; deferred to the human toolbar-QA gate (spec gate 2).
 - 6× idle-CPU throttle trace is browser-manual — deferred to the human toolbar-QA gate per instruction.
+
+---
+
+## Phase 4 — edit-primitive interface (types + shared modules scaffold)
+
+Additive TYPES + shared-modules scaffold. Zero behavior change; no existing code re-pointed.
+
+### Files changed
+
+- NEW `src/modules/editing/primitiveTypes.ts` — primitive contract (plain, published-safe, no `'use client'`).
+- NEW `src/modules/editing/altText.ts` — `resolveAlt` fallback resolver (plain, read by both renderers).
+- NEW `src/modules/editing/altText.test.ts` — Vitest unit tests for `resolveAlt`.
+- `src/types/core/content.ts` — extended `SectionData.elementMetadata` (additive optional `alt`).
+
+### primitiveTypes.ts exported shapes
+
+- `PrimitiveKind = 'text' | 'image' | 'imageCollection' | 'logo' | 'button' | 'link' | 'collection' | 'form'` — full closed vocabulary per editorPlan §"The edit-primitive vocabulary" table (broader than the 4-kind guess in the task brief; followed editorPlan, which lists all 8 slot-level primitives — section-level/site-level are toolbar surfaces, not slot primitives, so excluded).
+- `PrimitiveSlot = { kind: PrimitiveKind; min?: number; max?: number; aspect?: string }` — a template's per-slot declaration (templates DECLARE, primitives IMPLEMENT).
+- `ImageCollectionItem = { id: string; url: string; alt?: string; caption?: string }`.
+- `Surface = 'light' | 'dark'` — target render surface (header=light, footer=dark); `resolveLogo` consumes it in phase 5.
+- `LogoValue = { url?: string; darkUrl?: string; wordmark?: string }` — models the founder light/dark requirement: `url` = light-surface asset (header), `darkUrl` = optional dark-surface asset (footer falls back to `url` when unset), `wordmark` = text fallback. TYPE ONLY this phase; expressive enough for either an explicit-dark-field or CSS-treatment persistence mechanism (decided at phase-5 gate) without a breaking change.
+
+### elementMetadata extension diff
+
+Before:
+`elementMetadata?: Record<string, { buttonConfig?: any; cta?: CTAButton }>;`
+
+After (additive `alt?` only; buttonConfig/cta untouched):
+`elementMetadata?: Record<string, { buttonConfig?: any; cta?: CTAButton; alt?: string | Record<string, string> }>;`
+
+`string` = single-image slot alt; `Record<string,string>` = itemId-keyed map keyed by the COLLECTION key (e.g. `elementMetadata.items.alt[itemId]`). Canonical alt store per the locked 2026-07-11 law. Purely additive + optional → all ~26 buttonConfig readers keep working (tsc green confirms).
+
+### resolveAlt signature + fallback rules
+
+`resolveAlt(metadataAlt: string | Record<string,string> | undefined, itemId: string | undefined, siblingFallback: string | undefined): string`
+
+Rules:
+1. `metadataAlt` is a non-empty string → return it (single-image slot).
+2. `metadataAlt` is a string and empty → treat as UNSET, fall through to sibling.
+3. `metadataAlt` is a record + `itemId` given + `metadataAlt[itemId]` non-empty → return it.
+4. record with missing/empty per-item value, or no `itemId` → fall through to sibling.
+5. sibling fallback used when non-empty; else final fallback `''`.
+
+Empty-string metadata (author cleared alt) is treated as unset by design so the sibling fallback (e.g. `item.title`) applies rather than forcing an empty alt.
+
+### Verification
+
+- `npx tsc --noEmit` — GREEN (no errors; confirms elementMetadata change is purely additive).
+- `npm run test:run` — GREEN: 136 files passed / 1 skipped; 2098 tests passed / 3 skipped. New `altText.test.ts` (7 cases: string wins, record+itemId, missing itemId, empty string metadata, empty per-item, no-meta+no-fallback→'', undefined+sibling) all pass.
+
+### Deviations
+
+- `PrimitiveKind` includes the full 8-kind vocabulary from editorPlan (text/image/imageCollection/logo/button/link/collection/form), not just the 4 kinds named as a minimum in the task brief. The brief said "check editorPlan for the full set and include what it lists" — followed editorPlan. Section-level/site-level rows are toolbar surfaces (not slot primitives) so excluded from the kind union.
+
+### Open risks
+
+- None. Additive contract only; no consumer wired yet (phases 5/6 consume it).

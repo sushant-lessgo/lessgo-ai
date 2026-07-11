@@ -130,7 +130,11 @@ export interface SectionData {
   // V2: Button metadata stored separately (buttonConfig, etc.)
   // scale-04: `cta` is the new-shape CTA (CTAButton); `buttonConfig` stays for
   // legacy reads. Additive only — the normalization pre-pass bridges cta→buttonConfig.
-  elementMetadata?: Record<string, { buttonConfig?: any; cta?: import('@/types/destination').CTAButton }>;
+  // editor phase-3 (phase 4): `alt` is the canonical user-authored alt store
+  // (2026-07-11 law). `string` for single-image slots; itemId-keyed map for
+  // collections (keyed by the COLLECTION key, e.g. elementMetadata.items.alt[itemId]).
+  // Additive + optional — existing buttonConfig/cta readers are unaffected.
+  elementMetadata?: Record<string, { buttonConfig?: any; cta?: import('@/types/destination').CTAButton; alt?: string | Record<string, string> }>;
   backgroundType?: BackgroundType;
   sectionBackground?: SectionBackground;
   media?: SectionMedia;
