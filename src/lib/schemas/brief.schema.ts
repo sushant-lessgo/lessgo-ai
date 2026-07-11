@@ -89,6 +89,13 @@ export const BriefSchema = z.object({
   designStyleHint: z.enum(designStyles).optional(),
   templateShortlist: z.array(z.enum(templateIds)).optional(),
   confidence: z.number().min(0).max(1).optional(),
+  /**
+   * i18n-phase-1 D5 — declared content locales. >1 entry derives the
+   * `bilingual` capability at the serve gate (requiredCapabilitiesFromBrief,
+   * fit.ts). Optional + additive: existing Briefs and frozen
+   * generation-contract fixtures parse unchanged (single-locale ⇒ absent/≤1).
+   */
+  locales: z.array(z.string()).optional(),
 });
 
 export type Brief = z.infer<typeof BriefSchema>;

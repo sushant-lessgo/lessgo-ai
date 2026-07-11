@@ -463,3 +463,51 @@ Guards against `localeConfig.locales` **minus the default locale** (the NON-DEFA
 4. Regression: publish an EXISTING single-locale project → routes + HTML unchanged vs before the branch (no switcher script, no hreflang, no `/nl` route). The automated single-locale byte-identical snapshot (Phase 5) is the law; this is the belt-and-suspenders manual pass.
 
 **Known caveat (Phase 5, carried):** the switcher's path-prefix swap assumes locale = the FIRST path segment — true on the custom-domain / lessgo subdomain serve surface. On the `/p/{slug}` preview surface the prefix is NOT first-segment, so verify the switcher navigation on the REAL published host (custom domain / lessgo subdomain), and note that `/p/{slug}/nl` may need manual URL entry to view.
+
+---
+
+## Phase 7 — `bilingual` queryable + honesty test
+
+**Files changed**
+- `src/lib/schemas/brief.schema.ts` — added optional `locales?: string[]` to `BriefSchema` (the actual home of `type Brief`; see Deviation below).
+- `src/modules/templates/fit.ts` — bilingual derivation clause + `PLATFORM_CAPABILITIES` satisfaction set + comment updates (see Deviation re: path).
+- `src/modules/templates/templateMeta.ts` — Lumen `bilingual` comment update (bilingual now platform-satisfied; no behavior change).
+- `src/modules/templates/conformance.test.ts` — `STRUCTURAL_CAPABILITIES` exemption comment now points at the honesty test.
+- `src/lib/i18n/i18nHonesty.test.ts` — NEW honesty/conformance test.
+
+### What changed, per file
+
+**`src/lib/schemas/brief.schema.ts`** — added `locales: z.array(z.string()).optional()` after `confidence`. Additive + optional so existing Briefs and the frozen generation-contract fixtures parse unchanged. `type Brief` is `z.infer<typeof BriefSchema>`, re-exported by `@/types/brief` — so this IS the "add `locales?` to Brief" the plan asked for.
+
+**`src/modules/templates/fit.ts`**
+- DERIVATION: in `requiredCapabilitiesFromBrief`, added `if ((brief.locales?.length ?? 0) > 1) required.add('bilingual');`. ≤1 or absent contributes nothing.
+- SATISFACTION MECHANISM: added `export const PLATFORM_CAPABILITIES: readonly CapabilityId[] = ['bilingual']` and made `fit()`'s `required.every(...)` also accept `PLATFORM_CAPABILITIES.includes(cap)` (alongside `meta.capabilities` and `sharedBlockCapabilities`). Since `fit()` still short-circuits on `retired`/`bespoke` and engine-match FIRST, bilingual is satisfied for every ACTIVE template but retired/bespoke templates still don't fit. This replaces Lumen's trust-on-declaration — any active template now serves a bilingual Brief.
+- WHY a new set rather than adding to `sharedBlockCapabilities`: that list is derived from `sharedBlockCapability` (a map provably in sync with the two shared-block component registries via `capabilities.test.ts`); bilingual is NOT a shared block, and `capabilities.ts` is not in this phase's Files-touched. A local `PLATFORM_CAPABILITIES` const in fit.ts is the cleanest in-scope mechanism and keeps semantics honest (platform layer, not a block).
+- Comments at the old fit.ts:65 ("No language field on Brief yet") and fit.ts:114 ("bilingual has no structure signal") replaced to describe the new derivation + platform satisfaction.
+
+**`src/modules/templates/templateMeta.ts`** — comment-only. Lumen's `capabilities: ['bilingual', ...]` stays; note now says bilingual is platform-satisfied everywhere and Lumen's declaration is harmless/no-longer-unique.
+
+**`src/modules/templates/conformance.test.ts`** — comment-only above `STRUCTURAL_CAPABILITIES`. `bilingual` stays in the list (still exempt from the block-evidence check), but the comment now points at `src/lib/i18n/i18nHonesty.test.ts` as the structural check that backs it, closing the "until a structural check exists (spec 02+)" gap for bilingual. `multipage`'s structural gap is explicitly noted as still open. No assertion changed.
+
+**`src/lib/i18n/i18nHonesty.test.ts`** (new) — 4 assertion groups (the plan's "5" folded (a)+(b) checks into the file; groups below map 1:1 to the plan's a–e intent):
+- (a) `bilingual` ∈ `capabilityIds`.
+- (b) DERIVATION: 2-locale Brief → requires bilingual; 1-locale and no-locales Briefs → do not.
+- (c) SATISFACTION: `fit(t, <engine>, ['bilingual'])` === true for EVERY active (non-retired, non-bespoke) template, iterated from `templateMeta`; plus a negative assertion that retired (techpremium) + bespoke (lumen) are NOT auto-satisfied (firewall intact).
+- (d) MACHINERY EXISTS: `resolveLocaleElements` exported + merges overlay over base without mutating base; `switcherBehaviors.js` source file exists AND is registered (`switcher.v1.js`) in `scripts/buildAssets.js` (read as text); a 2-locale fixture through `generateStaticHTML` emits per-locale `<html lang>`, the `switcher.v1.js` script, reciprocal hreflang (all locales + x-default) on both docs, and the NL overlay copy on the nl doc.
+- D5 LIMITATION stated as a prominent file-header comment: proves the MACHINERY, not per-template NL render fidelity (fixed-width text, hardcoded English strings in blocks, overflow) — that stays a MANUAL per-template gate (first exercised in the atelier build).
+
+### serveGate
+NOT edited. `decideServe` consumes `fit` + `requiredCapabilitiesFromBrief` from fit.ts, so both the derivation and the platform satisfaction flow through automatically. No bilingual-specific clause needed. Verified: serveGate.test.ts + serveMatrix.test.ts pass unchanged.
+
+### Deviations from the plan
+1. **File path: Brief field.** Plan Files-touched named `src/types/brief.ts` for the `locales?` field, but `type Brief` is inferred from the zod `BriefSchema` in `src/lib/schemas/brief.schema.ts` (brief.ts only re-exports the type). The field cannot be added in brief.ts. Edited the schema — the true, single-source-of-truth home of the Brief type — as the faithful implementation of the plan's intent. Low-risk, additive, optional field. Flagged for reviewer.
+2. **File path: fit.ts.** Plan Files-touched named `src/modules/brief/fit.ts`; the real (and only) fit.ts is `src/modules/templates/fit.ts` (matches the scouting context and the exact functions/comments the plan references). Edited that file.
+3. **Satisfaction set.** Plan suggested possibly adding bilingual to `sharedBlockCapabilities`; chose a dedicated `PLATFORM_CAPABILITIES` const in fit.ts instead (conservative — avoids editing the out-of-scope `capabilities.ts` and its registry-sync test, and keeps semantics honest). Documented above.
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 135 passed | 1 skipped (136 files); 2091 passed | 3 skipped tests. Includes new `i18nHonesty.test.ts`, `conformance.test.ts`, `fit.test.ts`, `serveGate.test.ts`, `serveMatrix.test.ts`, `structureConvergence.test.ts`, `capabilities.test.ts` — all green.
+
+### Open risks
+- The two plan path errors mean the reviewer's scoped diff will include `src/lib/schemas/brief.schema.ts` and `src/modules/templates/fit.ts` in place of the plan's named paths — confirm these are the intended targets.
+- D5 limitation stands: platform-satisfied ≠ proven per-template NL render fidelity (manual gate, first at atelier build).
