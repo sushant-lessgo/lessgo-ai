@@ -22,7 +22,7 @@ exactly one editor and dual-renderer divergence stays structurally impossible).
 - phase 3 DELETE list + parity sign-off: done (commit b65a0d48, review loops 1 — clean, ship, net -2336 LOC src/); HUMAN GATE PASSED 2026-07-11 (founder: parity holds, proceed)
 - phase 4 primitive interface: done (commit pending-sha, review loops 1 — clean, ship; primitiveTypes {PrimitiveKind×8, PrimitiveSlot, ImageCollectionItem, LogoValue{url,darkUrl,wordmark}, Surface}, elementMetadata.alt additive, resolveAlt + 7 tests)
 - phase 5 logo primitive (techpremium proving): done (commit pending-sha, review loops 2 — subpage globalSettings gap fixed, ship). MECHANISM A: globalSettings.logoUrlDark; resolveLogo surface-aware + 8 tests; EditableLogo 2 slots; techpremium Nav(light)+Footer(dark) both renderers; renderPublishedExport threads globalSettings to subpages (naayom multipage). ⚠ FOUNDER MANUAL LOGO QA still pending (live: change logo→header+footer, dark-bg logo, remove→wordmark, legacy-only unchanged, publish parity) — do before merge.
-- phase 6 imageCollection primitive + alt law (vestria proving): pending
+- phase 6 imageCollection primitive + alt law (vestria proving): done (commit pending-sha, review loops 1 — clean, ship). EditableImageCollection shared chrome (bulk-upload + @dnd-kit reorder + remove + caption); E.List delegates (single writer on items); setItemAlt → elementMetadata[coll].alt[itemId] + 5 tests; edit+published E.Img resolve alt identically via resolveAlt; boundary/single-writer/idle greps clean. editorPlan phase-3 row marked BUILT. ⚠ FOUNDER MANUAL QA pending (bulk-add/reorder/remove/alt-persist/publish-order + min-max).
 
 ## Spec unresolved questions — answered
 

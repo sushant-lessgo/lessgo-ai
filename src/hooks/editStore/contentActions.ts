@@ -356,6 +356,26 @@ export function createContentActions(set: any, get: any): ContentActions {
         });
       }),
 
+    // editor phase-3 (phase 6): per-item alt writer for imageCollection slots.
+    // Canonical alt store (2026-07-11 law): the itemId-keyed map lives under the
+    // COLLECTION key — content[sectionId].elementMetadata[collectionKey].alt[itemId].
+    // Additive: never touches elements/collections (those ride updateElementContent).
+    // Locale-agnostic (alt is media-adjacent metadata, not overlaid text).
+    setItemAlt: (sectionId: string, collectionKey: string, itemId: string, alt: string) =>
+      set((state: EditStore) => {
+        const section = state.content[sectionId];
+        if (!section) return;
+        if (!section.elementMetadata) section.elementMetadata = {};
+        if (!section.elementMetadata[collectionKey]) section.elementMetadata[collectionKey] = {};
+        const entry = section.elementMetadata[collectionKey];
+        const altMap =
+          entry.alt && typeof entry.alt === 'object' ? (entry.alt as Record<string, string>) : {};
+        altMap[itemId] = alt;
+        entry.alt = altMap;
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      }),
+
     // i18n-phase-1 (3a): switch active authoring locale (project-global). Text
     // writers branch on this; structure/media stay base. History is PRESERVED
     // across a locale switch — undo/redo restore is locale-aware (each 'content'

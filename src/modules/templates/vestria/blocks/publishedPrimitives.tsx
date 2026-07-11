@@ -6,13 +6,31 @@
 
 import React from 'react';
 import { externalLinkProps } from '@/utils/resolveCtaHref';
+import { resolveAlt } from '@/modules/editing/altText';
 import type {
   VestriaPrimitives, VestriaTxtProps, VestriaImgProps, VestriaLinkProps, VestriaListProps,
 } from './primitives';
 
 const isHtml = (s?: string) => !!s && /<[^>]*>/.test(s);
 
-export function makePublishedPrimitives(): VestriaPrimitives {
+/** Parse a collection-item path 'coll.<id>.field' → parts, or null for a scalar key.
+ *  Mirrors the edit-side parser so both renderers key alt identically. */
+function parsePath(key: string): { coll: string; id: string; field: string } | null {
+  const i = key.indexOf('.');
+  if (i < 0) return null;
+  const j = key.indexOf('.', i + 1);
+  if (j < 0) return null;
+  return { coll: key.slice(0, i), id: key.slice(i + 1, j), field: key.slice(j + 1) };
+}
+
+/** Per-section elementMetadata (alt-text law): elementMetadata[collKey].alt is a
+ *  string (single image) or an itemId-keyed map (collection). */
+export interface PublishedPrimitiveOptions {
+  elementMetadata?: Record<string, { alt?: string | Record<string, string> }>;
+}
+
+export function makePublishedPrimitives(opts: PublishedPrimitiveOptions = {}): VestriaPrimitives {
+  const { elementMetadata } = opts;
   const Txt: React.FC<VestriaTxtProps> = ({ value, as = 'span', className, style, placeholder }) => {
     const Tag = as as any;
     const shown = value || placeholder || '';
@@ -22,11 +40,20 @@ export function makePublishedPrimitives(): VestriaPrimitives {
       : <Tag className={className} style={style}>{shown}</Tag>;
   };
 
-  const Img: React.FC<VestriaImgProps> = ({ src, alt, className, imgClassName, placeholder, eager }) => (
-    <div className={className}>
-      {src ? <img src={src} alt={alt || ''} className={imgClassName} loading={eager ? 'eager' : 'lazy'} decoding="async" /> : placeholder}
-    </div>
-  );
+  const Img: React.FC<VestriaImgProps> = ({ elementKey, src, alt, className, imgClassName, placeholder, eager }) => {
+    // editor phase-3 (phase 6): resolve alt from the canonical elementMetadata store
+    // (2026-07-11 law) with the sibling `alt` prop as fallback. Collection items key
+    // the alt map by itemId (parsed from elementKey); single-image slots use the
+    // string form. Byte-identical to the edit-side E.Img alt resolution.
+    const path = parsePath(elementKey);
+    const metaAlt = path ? elementMetadata?.[path.coll]?.alt : elementMetadata?.[elementKey]?.alt;
+    const resolvedAlt = resolveAlt(metaAlt, path?.id, alt);
+    return (
+      <div className={className}>
+        {src ? <img src={src} alt={resolvedAlt} className={imgClassName} loading={eager ? 'eager' : 'lazy'} decoding="async" /> : placeholder}
+      </div>
+    );
+  };
 
   const Link: React.FC<VestriaLinkProps> = ({ hrefKey, href, className, ariaLabel, children }) => {
     const target = href || '#';

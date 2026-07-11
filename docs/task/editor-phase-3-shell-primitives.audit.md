@@ -466,3 +466,81 @@ Verification:
 - Grep confirms BOTH construction sites (lines 253, 366) include `globalSettings: contentData.globalSettings`.
 
 Deviations: none. Open risks: none — additive, back-compat preserved.
+
+## Phase 6 — imageCollection primitive + alt law (vestria catalogue grid)
+
+**Files changed:**
+- `src/types/store/actions.ts` — added `setItemAlt` to `ContentActions`.
+- `src/hooks/editStore/contentActions.ts` — implemented `setItemAlt` action.
+- `src/modules/templates/vestria/blocks/primitives.ts` — extended `VestriaListProps` with `reorderable?`, `imageField?`, `captionField?`.
+- NEW `src/app/edit/[token]/components/primitives/EditableImageCollection.tsx` — shared 'use client' collection chrome (bulk upload · drag-reorder · add-blank · remove · optional caption).
+- `src/modules/templates/vestria/blocks/editPrimitives.tsx` — E.List delegates to the chrome for imageCollection slots; E.Img gains alt input; `VestriaEditCtx`+`useVestriaEditCtx` extended with `getItemAlt`/`setItemAlt`; new affordance CSS.
+- `src/modules/templates/vestria/blocks/publishedPrimitives.tsx` — `makePublishedPrimitives({ elementMetadata })`; published E.Img resolves alt via `resolveAlt`.
+- `src/modules/templates/vestria/blocks/Catalog/VestriaCatalogueGrid.core.tsx` — E.List declares `reorderable imageField="image"`.
+- `src/modules/templates/vestria/blocks/Catalog/VestriaCatalogueGrid.published.tsx` — forwards `props.elementMetadata` into the factory.
+- NEW `src/hooks/editStore/setItemAlt.test.ts` — 5 unit tests for the alt store path.
+- `docs/tracks/editorPlan.md` — phase-3 row marked BUILT.
+
+**Single-editor proof (E.List → EditableImageCollection).** The vestria core edits `items`
+solely via the injected `E.List`. E.List now branches: when the slot declares
+`reorderable`/`imageField` it renders `EditableImageCollection` and the legacy add/remove
+branch is NOT reached (`return` before it) — exactly one editor for the collection. Every
+mutation (bulk-add, reorder, remove, add-blank, caption) flows through the single injected
+`onChange={(next) => ctx.updateCollection(collectionKey, next)}` whole-array write. No second
+store path was introduced. The chrome is `'use client'` and is imported ONLY by
+`editPrimitives.tsx`; it is never mounted by a wrapper/core/published renderer (LAW comment in
+the file).
+
+**setItemAlt store path.** `setItemAlt(sectionId, collectionKey, itemId, alt)` writes
+`content[sectionId].elementMetadata[collectionKey].alt[itemId]` (the phase-4 itemId-keyed map
+under the COLLECTION key). It is additive: it never touches the items array or sibling
+metadata (buttonConfig/cta), and marks the draft dirty. Add/remove/reorder/bulk-add need no
+new store op — they ride the existing whole-array write.
+
+**elementMetadata → published E.Img (forwarding chain).**
+`LandingPagePublishedRenderer.extractContentFields` already spreads the section's
+`elementMetadata` into block props → `VestriaCatalogueGrid.published.tsx` reads
+`props.elementMetadata` and passes it to `makePublishedPrimitives({ elementMetadata })` →
+published E.Img parses its `elementKey` (`items.<id>.image`, same parser as edit) and renders
+`alt = resolveAlt(elementMetadata?.[coll]?.alt, itemId, altProp)`. Edit E.Img resolves alt the
+same way from the store-backed `ctx.getItemAlt`, so edit and published are byte-identical. The
+`alt` prop (`item.title`) is the sibling fallback in both.
+
+**Alt ownership (deviation from the plan's dual mention).** The plan listed a per-item alt
+input in BOTH the chrome (step 2) and E.Img (step 3). To keep a single alt editor, I put the
+alt input ONLY in E.Img (colocated with the image it describes; also serves single-image
+slots). The chrome renders NO alt input. Caption (a per-item, whole-array item field) stays in
+the chrome, gated on a declared `captionField`. These write two distinct stores (alt →
+elementMetadata; caption → item) with one writer each — no conflict.
+
+**Contract deviation.** Added `captionField?: string` to `VestriaListProps` (plan step 1
+enumerated only `reorderable`/`imageField`). Additive + optional; needed so the chrome's
+declared-caption support is reachable end-to-end. The catalogue grid does not declare it, so
+behavior is unchanged there.
+
+**@dnd-kit containment.** First @dnd-kit integration in `src/`, fully contained in
+`EditableImageCollection.tsx` (`DndContext` + `SortableContext` + `useSortable`,
+`PointerSensor`+`KeyboardSensor`, `arrayMove`, `rectSortingStrategy`). Sensors/listeners are
+active only while the collection is mounted in the editor and a drag is in progress; a
+dedicated drag handle (`.vs-ic-drag`, `touch-action:none`, `distance:6` activation) carries
+the listeners so inline text/image editing is not hijacked. Idle-observer grep confirms zero
+`setInterval`/`MutationObserver`/`ResizeObserver` outside the contained dnd-kit usage.
+
+**Verification.**
+- `npx tsc --noEmit` — green.
+- `npm run test:run` — green (2111 passed | 3 skipped, 138 files; +5 new setItemAlt tests).
+- `npm run build` — green (published path compiled — parity/boundary intact).
+- Boundary grep: `EditableImageCollection` imported ONLY by `editPrimitives.tsx`; zero hits in
+  `*.published.tsx` / `publishedPrimitives.tsx` / `*.core.tsx`.
+- Single-writer grep: all vestria `items` writes go through `ctx.updateCollection` (E.Img src,
+  legacy add/remove, delegated onChange) — no second write path.
+- Idle-observer grep: clean (no timers/observers outside dnd-kit, active only during drag).
+
+**Deferred (founder manual pass):** live bulk-add (multi-file) · drag-reorder · remove ·
+per-item alt → reload persists → publish shows correct ORDER + `alt` attributes · min(4)/max(8)
+enforcement. Code is correct + parity-identical by construction (single-source core; edit vs
+published differ only by injected primitive impl).
+
+**Open risks:** none structural. Bulk upload appends `{ id, [imageField]: url }` items with no
+other item fields populated (code/title/category/glyph empty) — expected; the author fills them
+via the inline text primitives after upload.

@@ -91,6 +91,11 @@ getTypographyForSection: (sectionId: string) => FontTheme;
 export interface ContentActions {
   // Basic Content Operations
   updateElementContent: (sectionId: string, elementKey: string, content: string | string[]) => void;
+  // editor phase-3 (phase 6): canonical per-item alt writer for imageCollection
+  // slots. Writes `content[sectionId].elementMetadata[collectionKey].alt[itemId]`
+  // (the phase-4 alt-text law shape). Add/remove/reorder/bulk-add ride the existing
+  // whole-array updateElementContent path; only alt lives in elementMetadata.
+  setItemAlt: (sectionId: string, collectionKey: string, itemId: string, alt: string) => void;
   bulkUpdateSection: (sectionId: string, elements: Record<string, string | string[]>) => void;
   setBackgroundType: (sectionId: string, backgroundType: BackgroundType) => void;
   setSectionBackground: (sectionId: string, sectionBackground: SectionBackground) => void;
