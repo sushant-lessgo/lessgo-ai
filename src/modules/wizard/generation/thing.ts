@@ -57,6 +57,7 @@ import {
 } from '@/modules/templates/vestria/blocks/Contact/contactFields';
 import { buildFinalContent, saveDraft, type BriefGoal } from './finalize';
 import type { GenerationCallbacks, GenerationResult } from './index';
+import { trackFailure, failureEventName } from '@/utils/trackTelemetry';
 
 // Pilot locks — single-page THING (meridian). Style pickers only affect vestria.
 const PILOT_PALETTE = defaultMeridianPalette; // 'mint'
@@ -339,6 +340,13 @@ export async function runStrategy(input: ThingGenerationInput): Promise<RunStrat
     const json = await res.json();
     if (!res.ok || !json?.success) {
       if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
+      // data-capture phase 4 — non-credit strategy failure (fire-and-forget).
+      trackFailure(failureEventName(json?.message), {
+        reason: json?.error ?? json?.message ?? null,
+        stage: 'strategy',
+        templateId: input.templateId ?? null,
+        audienceType: 'product',
+      });
       throw new Error(json?.message || 'Strategy generation failed');
     }
     return { status: 'done', strategy: json.data as ProductStrategyOutput };
@@ -459,6 +467,14 @@ export async function runThingGeneration(
         const json = await res.json();
         if (!res.ok || !json?.success) {
           if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
+          // data-capture phase 4 — non-credit per-page copy failure.
+          trackFailure(failureEventName(json?.message), {
+            reason: json?.error ?? json?.message ?? null,
+            stage: 'copy',
+            templateId: resolvedTemplateId,
+            audienceType: 'product',
+            pageKey: page.archetypeKey,
+          });
           throw new Error(json?.message || `Copy generation failed (${page.title})`);
         }
 
@@ -535,6 +551,14 @@ export async function runThingGeneration(
           const json = await res.json();
           if (!res.ok || !json?.success) {
             if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
+            // data-capture phase 4 — non-credit collection-item copy failure.
+            trackFailure(failureEventName(json?.message), {
+              reason: json?.error ?? json?.message ?? null,
+              stage: 'copy',
+              templateId: resolvedTemplateId,
+              audienceType: 'product',
+              pageKey: plan.pageKey,
+            });
             return { status: 'error', error: json?.message || `Copy generation failed (${plan.entry.name})` };
           }
           return { status: 'done', copy: json.sections as Record<string, SectionCopy> };
@@ -617,6 +641,13 @@ export async function runThingGeneration(
       const json = await res.json();
       if (!res.ok || !json?.success) {
         if (isCreditFail(res.status, json?.error)) return { status: 'credits' };
+        // data-capture phase 4 — non-credit single-page copy failure.
+        trackFailure(failureEventName(json?.message), {
+          reason: json?.error ?? json?.message ?? null,
+          stage: 'copy',
+          templateId: resolvedTemplateId,
+          audienceType: 'product',
+        });
         throw new Error(json?.message || 'Copy generation failed');
       }
       copySections = json.sections as Record<string, SectionCopy>;

@@ -14,6 +14,17 @@ import type { Brief } from '@/types/brief';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { trackFailure } from '@/utils/trackTelemetry';
+
+/** Hostname-only (privacy: never emit the full URL). null for the text path. */
+function hostOf(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return null;
+  }
+}
 
 const examples = [
   'AI note taker for sales calls',
@@ -101,6 +112,20 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
       });
       const json = await res.json();
       if (!res.ok || !json?.success || !json?.briefDraft) {
+        // data-capture phase 4 — scrape/understand failure (fire-and-forget,
+        // side-effect-only). These v2 routes have no credit-blocking branch
+        // (credits are consumed post-hoc), so every non-2xx here is a real
+        // failure. audienceType is unresolved at the unified entry step (serve
+        // gate runs later) ⇒ null; templateId is not known yet ⇒ null.
+        if (res.status !== 402) {
+          trackFailure('scrape_failed', {
+            reason: json?.error ?? json?.message ?? null,
+            provider: json?.provider ?? null,
+            sourceUrl_host: hostOf(normalizedUrl),
+            audienceType: null,
+            templateId: null,
+          });
+        }
         setError(
           json?.message ||
             (isUrl
@@ -111,6 +136,14 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
       }
       onSuccess(isUrl ? normalizedUrl : value.trim(), json.briefDraft as Brief);
     } catch {
+      // data-capture phase 4 — transport/parse failure (no server code available).
+      trackFailure('scrape_failed', {
+        reason: 'network_error',
+        provider: null,
+        sourceUrl_host: hostOf(normalizedUrl),
+        audienceType: null,
+        templateId: null,
+      });
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);

@@ -157,3 +157,69 @@ Two small additions authorized by the coordinator after Phase 3 passed review:
 - `npm run test:run`: 141 files passed / 1 failed / 1 skipped — 2151 passed / 1 failed / 3 skipped. The single failure is the known env-flake `src/lib/i18n/i18nHonesty.test.ts` (`generateStaticHTML` hitting the 5000ms `testTimeout` under full-suite load) — re-ran ISOLATED and it passed 15/15 in 3.72s. No NEW failures introduced; the new `aiBaselinePatch.test.ts` passed within the full run.
 
 Files changed in this follow-up: `src/hooks/editStore/aiBaselinePatch.test.ts` (new), `src/hooks/editStore/aiActions.ts` (cast cleanup only).
+
+## Phase 4 — Failure telemetry (PostHog)
+
+### Files changed
+- `src/utils/trackTelemetry.ts` (new) — `trackFailure(event, props)` fire-and-forget wrapper + `failureEventName(message)` parse/generation classifier.
+- `src/modules/wizard/generation/thing.ts` — 4 emit sites (product strategy + 3 copy branches).
+- `src/modules/wizard/generation/trust.ts` — 3 emit sites (service strategy + 2 copy branches).
+- `src/app/onboarding/[token]/components/EntryInputStep.tsx` — 2 `scrape_failed` emit sites (server-error branch + network catch) + `hostOf()` hostname helper.
+
+### Server error codes VERIFIED (and how each maps to the event NAME)
+Key finding: **the audience routes never return a literal `parse_failed` error CODE.** The `error` field is `generation_failed` / `ai_error` / `internal_error`; a parse/schema failure surfaces ONLY inside the `message`. So the parse-vs-generation split is a **message-signature** decision, not a code decision (documented in `trackTelemetry.ts`).
+
+Exact codes found:
+- **product generate-copy** (`route.ts` L247-257): `error: 'generation_failed'`, `message: lastError` (the AI-loop error). Outer catch L305-316: `error: 'internal_error'`.
+- **service generate-copy** (`route.ts` L198-208): `error: 'generation_failed'`, `message: lastError`. Outer catch L254+: `error: 'internal_error'`.
+- **product strategy** (`route.ts` L179-190): AI-call catch → `error: 'ai_error'`, `message: aiError.message`. Outer catch L232-237: `error: 'internal_error'`. Also `validation_error` (L95), `unauthorized` (L105).
+- **service strategy** (`route.ts` L143 region): `error: 'ai_error'`; outer catch `error: 'internal_error'`; `validation_error`/`unauthorized`.
+- The AI-loop `message` originates in `src/lib/aiClient.ts` `generateRawJson`: `'No JSON found in response'` (L234), native `JSON.parse` SyntaxErrors (contain "JSON" / "Unexpected token"), or a zod `schema.parse` ZodError (message is a JSON issues array, i.e. starts with `[`).
+
+**Event-name mapping (`failureEventName`)** — `reason` prop always carries the server `error` code (or `message` fallback); the event NAME is chosen by the message:
+- message matches `/no json found|json|unexpected token/i` OR starts with `[` (zod issues array) → **`parse_failed`**.
+- otherwise (generic `'AI generation failed'`, `'Failed to generate copy after multiple attempts'`, `'Empty response from Claude'`, network errors, etc.) → **`generation_failed`**.
+- The generic generation fallbacks were checked to contain NONE of the parse markers, so the split is precise. Regex `/json/i` is safe because no non-parse fallback message contains "json".
+
+### Emit sites + props
+All emits are placed AFTER the `isCreditFail` early-return and BEFORE the existing `throw`/`return` — side-effect-only, control flow unchanged.
+
+**thing.ts (product, `audienceType: 'product'`):**
+1. `runStrategy` inline failure branch — `failureEventName(json.message)`; `{ reason: json.error ?? json.message ?? null, stage: 'strategy', templateId: input.templateId ?? null, audienceType: 'product' }`.
+2. `runFanOut` per-page copy loop — `{ reason, stage: 'copy', templateId: resolvedTemplateId, audienceType: 'product', pageKey: page.archetypeKey }`.
+3. `runCollectionFanOut` `generateItemCopy` (DORMANT — no product template declares a collection capability) — same shape, `pageKey: plan.pageKey`.
+4. `runCopyAndSave` single-page copy — `{ reason, stage: 'copy', templateId: resolvedTemplateId, audienceType: 'product' }`.
+
+**trust.ts (service, `audienceType: 'service'`):**
+5. `runTrustStrategy` inline failure — `{ reason, stage: 'strategy', templateId: input.templateId ?? null, audienceType: 'service' }`.
+6. `runTrustGeneration` single-page copy — `{ reason, stage: 'copy', templateId: input.templateId ?? null, audienceType: 'service' }`.
+7. `runCollectionFanOut` `generateItemCopy` (DORMANT) — `{ reason, stage: 'copy', templateId: input.templateId ?? null, audienceType: 'service', pageKey: plan.pageKey }`.
+
+**EntryInputStep.tsx (`scrape_failed`):**
+8. Server-error branch (`!res.ok || !json.success || !json.briefDraft`) — `{ reason: json.error ?? json.message ?? null, provider: json.provider ?? null, sourceUrl_host: hostOf(normalizedUrl), audienceType: null, templateId: null }`. Guarded by `res.status !== 402` (defensive; these v2 routes have no 402/credit branch anyway).
+9. Network `catch` — `{ reason: 'network_error', provider: null, sourceUrl_host: hostOf(normalizedUrl), audienceType: null, templateId: null }`.
+
+`sourceUrl_host` is **hostname only** (`new URL(url).hostname` via `hostOf`, try/catch-guarded) — never the full URL (privacy). For the text/`understand` path `normalizedUrl` is null ⇒ host null.
+
+### Credit-failures EXCLUDED — confirmed
+- Every generation/copy emit sits AFTER `if (isCreditFail(res.status, json?.error)) return { status: 'credits' }`, so credit/insufficient-credit failures never emit. No emit was added to any credit branch.
+- The save-draft failure branches (`'Could not save the draft.'`) are NOT generation/parse failures and get NO emit (out of the event table's scope).
+- The v2 scrape/understand routes have **no credit-blocking branch** (credits consumed post-hoc, warn-only per `route.ts` L306/213), so no credit exclusion applies there; a defensive `res.status !== 402` guard is included regardless.
+
+### Deviations (in-scope judgment calls)
+- **No server `parse_failed` code exists** — plan assumed a distinct code in the parse-catch branches. Verified there is none (codes are `generation_failed`/`ai_error`/`internal_error`). Conservative resolution: route the event NAME by the VERIFIED message signature while keeping `reason` = the real server code. Documented inline in `trackTelemetry.ts`.
+- **`scrape_failed.audienceType = null`** — the unified entry step runs before the serve gate resolves an audience; `EntryInputStep` has no audience in scope (props are only `onSuccess`). Passing null is the honest, corruption-free value (vs guessing from the url/text endpoint choice, which does not equal audience in the unified wizard). templateId also null (per plan).
+- **`provider` is always null in practice** — verified neither v2 route returns a `provider` field; `json?.provider` reads defensively (plan: "when present") and yields null.
+- **Emit placed at the inline `!res.ok || !json.success` branch, not the outer catch** — that is the single point where BOTH the server `error` code (for `reason`) and `message` (for the parse split) are in scope, giving exactly one emit per server-reported failure with full data. The surrounding catch (which only sees a generic re-thrown/network message) does NOT re-emit, avoiding double-emits. Genuine transport errors reaching the catch are not server-reported generation failures and intentionally do not emit in the wizard adapters (EntryInputStep's catch DOES emit `scrape_failed` with `reason: 'network_error'` per the plan's explicit "error branches" instruction).
+
+### Verification results
+- `npx tsc --noEmit`: only the known pre-existing `src/app/page.tsx` `@/assets/images/founder.jpg` error; zero errors from the new/edited files.
+- `npx vitest run src/modules/wizard`: 5 files / 69 tests pass (thing/trust adapter tests unaffected — emits are side-effect-only).
+- `npm run test:run`: GREEN — 141 files passed / 1 skipped; 2152 passed / 3 skipped. No failures (the known `i18nHonesty` 5s env-flake did not surface this run).
+
+### Deferred to the final human gate
+- Live emit checks (force a scrape failure with a bogus URL → `scrape_failed` in PostHog debug; code-review the generation failure branches). The exact code→event mapping above lets the gate verify: a real AI JSON-parse/schema failure ⇒ `parse_failed`; a generic/empty/network generation failure ⇒ `generation_failed`.
+
+### Open risks
+- Parse classification is message-signature based (no server code); if a future aiClient change alters the throw message wording, a parse failure could be miscounted as `generation_failed`. Bounded — `reason` still carries the true server code for later SQL/analysis reclassification.
+- `posthog-js` is statically imported by `trackTelemetry.ts` (client-only). Consumers (`thing.ts`/`trust.ts` run by `GeneratingSlot`, `EntryInputStep` a client component) are all client-side and never imported by a published renderer, so the boundary holds — same as `trackEdit.ts` / the phase-3 `trackRegen`.
