@@ -5,94 +5,123 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { Check, Zap } from 'lucide-react';
 
-const PRICING_TIERS = [
+// Founding LTD cohort counter — STATIC placeholder until phase 7 wires the
+// live `/api/billing/ltd-availability` route. Do NOT treat as real inventory.
+const LTD_SEATS_LEFT_PLACEHOLDER = '20 of 20 left';
+
+// Agency is contact-only (spec decision 7) — no self-serve checkout.
+const AGENCY_CONTACT_EMAIL = 'hello@lessgo.ai';
+
+type Tier = {
+  name: string;
+  tier: 'FREE' | 'PRO' | 'LTD' | 'AGENCY';
+  // How the price block renders per tier (toggle only affects PRO).
+  kind: 'free' | 'subscription' | 'onetime' | 'contact';
+  description: string;
+  creditsLabel: string;
+  features: string[];
+  limits: string[];
+  cta: string;
+  ctaDisabled?: boolean;
+  popular?: boolean;
+  // subscription
+  priceMonthly?: number;
+  priceAnnualPerYear?: number;
+  // onetime (LTD)
+  ltdNote?: string;
+  ltdSeats?: string;
+};
+
+const PRICING_TIERS: Tier[] = [
   {
-    name: 'Launch',
+    name: 'Free',
     tier: 'FREE',
-    price: { monthly: 0, annual: 0 },
-    description: 'Perfect for getting started',
-    credits: 30,
+    kind: 'free',
+    description: 'The trial is the product. No card required.',
+    creditsLabel: '20 one-time credits',
     features: [
-      '30 AI credits/month',
-      '1 published landing page',
-      '3 draft projects',
+      '1 site on a lessgo.site subdomain',
+      '20 one-time credits (no monthly refill)',
+      'Website import (scrape) + audience research included',
       'Basic analytics',
-      'Community support',
+      'Up to 25 form submissions / month',
     ],
     limits: [
+      '“Made with Lessgo” badge',
       'No custom domains',
-      'Lessgo branding',
-      'No form integrations',
+      'No integrations',
     ],
-    cta: 'Get Started Free',
+    cta: 'Start free',
     popular: false,
   },
   {
     name: 'Pro',
     tier: 'PRO',
-    price: { monthly: 39, annual: 29 },
-    description: 'For serious founders',
-    credits: 200,
+    kind: 'subscription',
+    description: 'For founders shipping real sites.',
+    creditsLabel: '200 credits / month',
+    priceMonthly: 29,
+    priceAnnualPerYear: 290,
     features: [
-      '200 AI credits/month',
-      '10 published landing pages',
-      'Unlimited drafts',
-      '3 custom domains',
-      'Remove Lessgo branding',
-      'Form integrations (ConvertKit, etc.)',
+      '3 sites with custom domains',
+      '200 credits / month',
+      'No Lessgo badge',
       'Full analytics dashboard',
-      'Priority support',
-      '14-day free trial',
+      'Form integrations (ConvertKit, etc.)',
+      'Testimonials + blog',
+      '14-day money-back guarantee',
     ],
     limits: [],
-    cta: 'Start Free Trial',
+    cta: 'Upgrade to Pro',
     popular: true,
   },
   {
-    name: 'Scale',
-    tier: 'AGENCY',
-    price: { monthly: 129, annual: 99 },
-    description: 'For agencies & teams',
-    credits: 1000,
+    name: 'Founding LTD',
+    tier: 'LTD',
+    kind: 'onetime',
+    description: 'Everything in Pro, forever. 60 seats, then it never returns.',
+    creditsLabel: '600-credit lifetime pool',
+    ltdNote: '$69 → $99 → $129 as seats fill',
+    ltdSeats: LTD_SEATS_LEFT_PLACEHOLDER,
     features: [
-      '1,000 AI credits/month',
-      'Unlimited published pages',
-      'Unlimited drafts',
-      'Unlimited custom domains',
-      'White-label mode',
-      'Export HTML',
-      'Form integrations',
-      'Full analytics',
-      '5 team members',
+      'Pro features as they exist today — for life',
+      '600-credit lifetime pool (not monthly)',
+      '3 sites with custom domains',
+      'No Lessgo badge',
+      'Beta-only — 60 seats total, never comes back',
+    ],
+    limits: [],
+    cta: 'Coming at launch',
+    ctaDisabled: true,
+    popular: false,
+  },
+  {
+    name: 'Agency',
+    tier: 'AGENCY',
+    kind: 'contact',
+    description: 'Team, white-label, done-for-you.',
+    creditsLabel: 'Custom',
+    features: [
+      'Everything in Pro',
+      'Multiple sites & seats',
+      'Done-for-you custom template',
       'Priority support',
     ],
     limits: [],
-    cta: 'Coming Soon',
+    cta: 'Talk to us',
     popular: false,
-    comingSoon: true,
-  },
-  {
-    name: 'Custom',
-    tier: 'ENTERPRISE',
-    price: { monthly: 299, annual: 299 },
-    description: 'Enterprise-grade solution',
-    credits: -1,
-    features: [
-      'Unlimited AI credits',
-      'Unlimited everything',
-      'Dedicated account manager',
-      'Custom integrations',
-      'SLA guarantees',
-      'On-premise option',
-      'Advanced security',
-      'Custom contracts',
-    ],
-    limits: [],
-    cta: 'Contact Sales',
-    popular: false,
-    comingSoon: true,
   },
 ];
+
+// Credit costs — pulled from CREDIT_COSTS in src/lib/creditSystem.ts.
+// Kept in sync manually; if those change, update here.
+const CREDIT_COST_LINES = [
+  ['Full page generation', 10],
+  ['Website import (scrape)', 1],
+  ['Audience research', 3],
+  ['Section regeneration', 2],
+  ['Element variation', 1],
+] as const;
 
 export default function PricingPage() {
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('monthly');
@@ -100,36 +129,38 @@ export default function PricingPage() {
   const router = useRouter();
   const { isSignedIn } = useAuth();
 
-  const handleUpgrade = async (tier: string) => {
-    if (tier === 'FREE') {
-      router.push('/dashboard');
+  const handleCta = async (tier: Tier) => {
+    if (tier.tier === 'FREE') {
+      router.push(isSignedIn ? '/dashboard' : '/sign-up?redirect=/dashboard');
       return;
     }
 
+    if (tier.tier === 'AGENCY') {
+      window.location.href = `mailto:${AGENCY_CONTACT_EMAIL}?subject=${encodeURIComponent(
+        'Lessgo AI — Agency plan'
+      )}`;
+      return;
+    }
+
+    if (tier.tier === 'LTD') {
+      // Disabled until phase 7 wires LTD checkout. No-op guard.
+      return;
+    }
+
+    // PRO — existing checkout flow (price IDs updated later in phase 6).
     if (!isSignedIn) {
       router.push('/sign-in?redirect=/pricing');
       return;
     }
 
-    if (tier !== 'PRO') {
-      // Coming soon or contact sales
-      return;
-    }
-
     setIsLoading(true);
-
     try {
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tier: 'PRO',
-          billingInterval,
-        }),
+        body: JSON.stringify({ tier: 'PRO', billingInterval }),
       });
-
       const data = await response.json();
-
       if (data.url) {
         window.location.href = data.url;
       } else {
@@ -142,6 +173,62 @@ export default function PricingPage() {
     }
   };
 
+  const renderPrice = (tier: Tier) => {
+    switch (tier.kind) {
+      case 'free':
+        return (
+          <div className="flex items-baseline">
+            <span className="text-5xl font-bold text-gray-900">$0</span>
+            <span className="text-gray-600 ml-2">forever</span>
+          </div>
+        );
+      case 'subscription': {
+        const monthly = tier.priceMonthly ?? 0;
+        const annualPerYear = tier.priceAnnualPerYear ?? 0;
+        if (billingInterval === 'annual') {
+          return (
+            <>
+              <div className="flex items-baseline">
+                <span className="text-5xl font-bold text-gray-900">${annualPerYear}</span>
+                <span className="text-gray-600 ml-2">/year</span>
+              </div>
+              <p className="text-sm text-green-600 mt-1 font-medium">
+                2 months free vs. monthly
+              </p>
+            </>
+          );
+        }
+        return (
+          <>
+            <div className="flex items-baseline">
+              <span className="text-5xl font-bold text-gray-900">${monthly}</span>
+              <span className="text-gray-600 ml-2">/month</span>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">or ${annualPerYear}/yr (2 months free)</p>
+          </>
+        );
+      }
+      case 'onetime':
+        return (
+          <>
+            <div className="flex items-baseline">
+              <span className="text-5xl font-bold text-gray-900">$69</span>
+              <span className="text-gray-600 ml-2">one-time</span>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">{tier.ltdNote}</p>
+            <p className="text-sm font-semibold text-amber-600 mt-1">{tier.ltdSeats}</p>
+          </>
+        );
+      case 'contact':
+      default:
+        return (
+          <div className="flex items-baseline">
+            <span className="text-4xl font-bold text-gray-900">Talk to us</span>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -151,7 +238,7 @@ export default function PricingPage() {
             Simple, Transparent Pricing
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Choose the plan that fits your needs. Upgrade or downgrade anytime.
+            Start free — no card, no trial clock. Upgrade when you&apos;re ready to ship.
           </p>
 
           {/* Billing Toggle */}
@@ -176,14 +263,14 @@ export default function PricingPage() {
             >
               Annual
               <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
-                25% off
+                2 mo free
               </span>
             </button>
           </div>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
           {PRICING_TIERS.map((tier) => (
             <div
               key={tier.tier}
@@ -202,53 +289,31 @@ export default function PricingPage() {
                 </div>
               )}
 
-              {tier.comingSoon && (
-                <div className="absolute top-4 right-4">
-                  <span className="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">
-                    Coming Soon
-                  </span>
-                </div>
-              )}
-
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">{tier.name}</h3>
                 <p className="text-gray-600 text-sm">{tier.description}</p>
               </div>
 
-              <div className="mb-6">
-                <div className="flex items-baseline">
-                  <span className="text-5xl font-bold text-gray-900">
-                    ${billingInterval === 'monthly' ? tier.price.monthly : tier.price.annual}
-                  </span>
-                  {tier.price.monthly > 0 && (
-                    <span className="text-gray-600 ml-2">/month</span>
-                  )}
-                </div>
-                {billingInterval === 'annual' && tier.price.annual !== tier.price.monthly && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    ${tier.price.annual * 12}/year (save ${(tier.price.monthly - tier.price.annual) * 12})
-                  </p>
-                )}
-              </div>
+              <div className="mb-6 min-h-[92px]">{renderPrice(tier)}</div>
 
               <div className="mb-6">
                 <div className="text-sm font-semibold text-gray-900 mb-2">
-                  {tier.credits === -1 ? 'Unlimited AI Credits' : `${tier.credits} AI Credits/month`}
+                  {tier.creditsLabel}
                 </div>
               </div>
 
               <button
-                onClick={() => handleUpgrade(tier.tier)}
-                disabled={isLoading || tier.comingSoon}
+                onClick={() => handleCta(tier)}
+                disabled={isLoading || tier.ctaDisabled}
                 className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors mb-6 ${
-                  tier.popular
-                    ? 'bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-300'
-                    : tier.comingSoon
+                  tier.ctaDisabled
                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    : tier.popular
+                    ? 'bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-300'
                     : 'bg-gray-900 text-white hover:bg-gray-800 disabled:bg-gray-300'
                 }`}
               >
-                {isLoading ? 'Loading...' : tier.cta}
+                {isLoading && tier.tier === 'PRO' ? 'Loading...' : tier.cta}
               </button>
 
               <div className="space-y-3">
@@ -269,6 +334,12 @@ export default function PricingPage() {
           ))}
         </div>
 
+        {/* Top-up footnote (real top-up CTA lives on the billing page) */}
+        <p className="text-center text-sm text-gray-500 mb-16">
+          Need more credits? Top-ups are $9 for 100 credits — buy them any time from your
+          billing dashboard.
+        </p>
+
         {/* FAQ Section */}
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
@@ -278,21 +349,88 @@ export default function PricingPage() {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                What are AI credits?
+                Is there a free trial?
               </h3>
               <p className="text-gray-600">
-                AI credits power all content generation. Full page generation costs 10 credits,
-                section regeneration costs 2 credits, and element variations cost 1 credit each.
+                There&apos;s no trial clock — the Free plan <em>is</em> the trial. Build a real
+                site, generate copy, publish it on a lessgo.site subdomain, all without a card.
+                Upgrade to Pro whenever you need custom domains or more credits.
               </p>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Do unused credits roll over?
+                What are credits?
               </h3>
               <p className="text-gray-600">
-                No, credits reset at the start of each billing cycle. This keeps pricing simple
-                and predictable.
+                Credits power AI generation. Typical costs:
+              </p>
+              <ul className="mt-2 space-y-1 text-gray-600">
+                {CREDIT_COST_LINES.map(([label, cost]) => (
+                  <li key={label} className="flex justify-between max-w-xs">
+                    <span>{label}</span>
+                    <span className="font-medium text-gray-900">
+                      {cost} credit{cost === 1 ? '' : 's'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-gray-600">
+                Free gives you 20 one-time credits — enough to import a site, research your
+                audience, and generate a full page with room to iterate. Pro refills 200 every
+                month.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Do unused Pro credits roll over?
+              </h3>
+              <p className="text-gray-600">
+                No — your 200 monthly credits reset each billing cycle. Any top-up credits you
+                buy don&apos;t expire and carry over.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Can I get a refund on Pro?
+              </h3>
+              <p className="text-gray-600">
+                Yes. Pro comes with a 14-day money-back guarantee — if it&apos;s not for you,
+                email us within 14 days of your first payment and we&apos;ll refund it, no
+                questions asked.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                What&apos;s the Founding LTD deal?
+              </h3>
+              <p className="text-gray-600">
+                A one-time payment for Pro features as they exist today — for life — plus a
+                600-credit lifetime pool. It&apos;s a beta-only offer: 60 seats total, priced
+                $69 → $99 → $129 as they fill, and it never comes back. Checkout opens at
+                launch.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Which AI model does Lessgo AI use?
+              </h3>
+              <p className="text-gray-600">
+                We route generation to the best available model for the job and upgrade it over
+                time — so your copy keeps getting better without you changing anything.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                What currency is pricing in?
+              </h3>
+              <p className="text-gray-600">
+                All prices are in US dollars (USD).
               </p>
             </div>
 
@@ -301,29 +439,8 @@ export default function PricingPage() {
                 Can I cancel anytime?
               </h3>
               <p className="text-gray-600">
-                Yes! Cancel anytime from your billing dashboard. You'll keep access until the end
-                of your current billing period, then automatically downgrade to the free plan.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                What happens during the 14-day trial?
-              </h3>
-              <p className="text-gray-600">
-                Pro trial gives you full access to 200 credits and all Pro features. We'll ask
-                for your card upfront but won't charge until the trial ends. Cancel anytime
-                during the trial with no charge.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Can I upgrade or downgrade my plan?
-              </h3>
-              <p className="text-gray-600">
-                Yes! Upgrade anytime to get more credits and features. Downgrades take effect at
-                the end of your current billing period.
+                Yes. Cancel Pro anytime from your billing dashboard — you keep access until the
+                end of the current period, then drop back to Free.
               </p>
             </div>
           </div>
