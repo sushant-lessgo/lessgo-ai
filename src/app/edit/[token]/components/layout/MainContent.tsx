@@ -70,12 +70,9 @@ export function MainContent({ tokenId }: MainContentProps) {
   // Get actions from store
   const storeState = store?.getState();
   const {
-    selectElement,
-    updateElementContent,
     addSection,
     reorderSections,
     setActiveSection,
-    showElementToolbar,
     showSectionToolbar,
     getColorTokens,
     trackPerformance,
@@ -151,16 +148,10 @@ export function MainContent({ tokenId }: MainContentProps) {
   // Removed useToolbarContext and useSelection - now using unified editor system
   // Simple stubs for backward compatibility
   const handleContextualClick = (event?: any, target?: any) => {};
-  const analyzeElementContext = (element?: HTMLElement) => ({ 
-    elementType: 'text',
-    toolbarType: 'text',
-    capabilities: []
-  });
   const showContextualToolbars = () => {};
   const currentContext = { capabilities: [] };
   const getContextualActions = () => [{ id: 'dummy', enabled: true, name: 'dummy' }];
   const hasCapability = (actionId?: string) => true;
-  const isMultiToolbarMode = false;
   const clearSelection = () => {};
   const navigateToElement = () => {};
   const clearSelectionCache = () => {};
@@ -262,62 +253,9 @@ React.useEffect(() => {
     announceLiveRegion?.(`Selected section ${sectionId}`);
   };
 
-// Enhanced element click handler with smart positioning
-// Enhanced element click handler with full context analysis
-  const handleElementClick = (sectionId: string, elementKey: string, event: React.MouseEvent) => {
-    if (mode !== 'edit') return;
-
-    const startTime = performance.now();
-    
-    event.stopPropagation();
-    
-    // Get the actual DOM element for context analysis
-    const targetElement = event.currentTarget as HTMLElement;
-    const elementSelector = `[data-section-id="${sectionId}"] [data-element-key="${elementKey}"]`;
-    const actualElement = document.querySelector(elementSelector) as HTMLElement || targetElement;
-    
-    // Analyze element context to determine appropriate toolbar
-    const elementContext = analyzeElementContext(actualElement);
-    
-    // Calculate position for toolbar
-    const rect = actualElement.getBoundingClientRect();
-    const position = {
-      x: rect.left + rect.width / 2,
-      y: rect.top - 10
-    };
-
-    // Update store with element selection
-    selectElement?.({
-      sectionId,
-      elementKey,
-      type: elementContext.elementType as any,
-      editMode: 'inline',
-    });
-
-    // Multi-selection disabled for MVP
-
-    // Show element toolbar with calculated position (use timeout to avoid infinite loop)
-    const elementId = `${sectionId}.${elementKey}`;
-    setTimeout(() => {
-      if (typeof showElementToolbar === 'function') {
-        showElementToolbar?.(elementId, position);
-      } else {
-        logger.error('❌ showElementToolbar is not a function:', typeof showElementToolbar);
-      }
-    }, 0);
-
-
-    trackPerformance?.('element-selection', startTime);
-    
-    // Enhanced announcement with context information
-    const toolbarInfo = elementContext.toolbarType;
-    const capabilityCount = elementContext.capabilities.length;
-    const multiToolbarInfo = isMultiToolbarMode ? ' (multi-toolbar)' : '';
-    
-    announceLiveRegion?.(
-      `Selected ${elementKey} - ${toolbarInfo} toolbar with ${capabilityCount} actions${multiToolbarInfo}`
-    );
-  };
+  // Element selection + toolbar are handled by the unified useEditor document
+  // click listener (data-element-key → selectElement + showToolbar). The old
+  // per-element overlay path was removed in perf-02 phase 3.
 
   // Enhanced generic click handler for complex scenarios
   const handleAdvancedClick = (event: React.MouseEvent) => {
@@ -408,17 +346,6 @@ React.useEffect(() => {
   // Announce action execution
   announceLiveRegion?.(`Executed ${action.name}`);
 };
-
-  // Enhanced content update handler
-  const handleContentUpdate = (sectionId: string, elementKey: string, value: string) => {
-    const startTime = performance.now();
-    
-    updateElementContent?.(sectionId, elementKey, value);
-    trackPerformance?.('content-update', startTime);
-    
-    // Announce change for screen readers
-    announceLiveRegion?.(`Updated ${elementKey} content`);
-  };
 
   // Handle add section
 const handleAddSection = (afterSectionId?: string) => {
@@ -655,8 +582,6 @@ const handleAddSection = (afterSectionId?: string) => {
                         layout={sectionLayouts[sectionId] || content[sectionId]?.layout || getSectionFallbackLayout(sectionId)}  // ← Gets correct layout
                         mode={mode}
                         isSelected={selectedSection === sectionId}
-                        onElementClick={handleElementClick}
-                        onContentUpdate={handleContentUpdate}
                         colorTokens={colorTokens}
                         globalSettings={globalSettings}
                       />

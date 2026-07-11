@@ -122,3 +122,60 @@ The `:294` `isDirty` false→true arm clause and the `:302` mid-flight `isSaving
 **Verification:** `npx tsc --noEmit` green; `npm run test:run` 127 files passed / 1 skipped, 2007 tests passed / 3 skipped — green.
 
 **KNOWN ACCEPTED parity gap (reviewer non-blocking note #1):** a `lastUpdated`-silent mutation (isDirty false→true, no lastUpdated bump) landing DURING an already-dirty in-flight save can be dropped. This is identical to the old 1s poll's behavior (equal-not-worse), and is out of perf-02 scope.
+
+---
+
+# perf-02 — Phase 3 (overlay fleet removal) — audit
+
+**Branch:** `feature/perf-02-editor-overhead` (verified via `git branch --show-current` before any edit).
+
+## Files changed
+- `src/app/edit/[token]/components/ui/EditablePageRenderer.tsx`
+- `src/app/edit/[token]/components/layout/MainContent.tsx`
+
+(NOT touched: `ElementDetector.tsx` — no hover gap found; `src/types/core/ui.ts` — its `EditablePageRendererProps` copy is not the one imported.)
+
+## Step-1 live-route check (result)
+Traced the click/inline-edit path. The live selection + inline-edit route is `useEditor.ts`, NOT overlay state:
+- `useEditor.ts:384` registers a document-level bubble-phase `click` listener (`handleEditorClick`) that resolves the nearest `data-element-key` via `.closest()` (`:76`), then calls `selectElement(...)` + `showToolbar(...)` (`:286`/`:294`). This is the single live selection path.
+- Inline text editing runs through `useEditor`'s `enterTextEditMode` (`:394`) + `InlineTextEditorV2`.
+- The overlay's `isEditing`/`showTextToolbar` state was DEAD: `isEditing` was never set true (its `handleClick` comment: "DISABLED: Don't set isEditing here — let useEditor handle all text editing"; the component always `return null`). `showTextToolbar` (from store) appeared only in a commented-out call. The overlay's one live side effect was a native `click` listener on the DOM target that duplicated the store path (via MainContent's `handleElementClick`) plus `cursor:pointer` + blue-tint hover classes.
+Conclusion: overlay state is NOT a live edit route → safe to delete. No STOP/re-plan needed.
+
+## Per-file changes
+
+### `EditablePageRenderer.tsx`
+- Deleted the `ElementEditingOverlay` component (~160 lines) and its per-element `.map()` mount inside `EnhancedLayoutWrapper`'s return. Return now renders just `{RenderedLayout}` inside the kept `data-section-id` wrapper div. `RenderedLayout` untouched.
+- Removed orphaned props `onElementClick`/`onContentUpdate` from the local `EditablePageRendererProps` interface (the one in use — line 14, NOT `ui.ts:3079`), from the function destructure, from `EnhancedLayoutWrapper`'s prop type + destructure, and from the props passed to `EnhancedLayoutWrapper`.
+- Removed the now-orphaned `handleElementClick`/`handleContentUpdate` `useCallback` wrappers (their sole consumer was the deleted overlay map).
+- Removed orphaned `import type { TextFormatState }` and the local `TextSelection` interface (both had the overlay as their ONLY consumer — verified via grep).
+- **Intentionally KEPT** (out of scope / not orphaned by this phase): pre-existing unused `import { InlineTextEditorV2 }` (was already unused before this change — not made orphaned by overlay removal); the dead `SelectableElementWrapper` / `EditableTextContent` / `EditableButtonContent` / `EditableImageContent` / `EditableListContent` components (pre-existing dead code, unrelated to the overlay); `useEditStore`, `logger`, `EDITOR_DEBUG`, `isHexColor`, `promptDialog` imports (all still consumed elsewhere in the file).
+
+### `MainContent.tsx`
+- Removed the `onElementClick={handleElementClick}` / `onContentUpdate={handleContentUpdate}` wiring at the `<EditablePageRenderer>` call site (~:652).
+- Removed the now-orphaned `handleElementClick` and `handleContentUpdate` handler defs (their only consumer was the removed wiring; grep-verified no other callers).
+- Removed the store-actions they solely consumed from the destructure (`selectElement`, `updateElementContent`, `showElementToolbar`) and the two stub helpers they solely used (`analyzeElementContext`, `isMultiToolbarMode`) to avoid introducing unused-var noise. All grep-verified to have no other consumers. `trackPerformance`/`announceLiveRegion` KEPT (used by other handlers).
+
+## Hover-affordance decision (step 4)
+No CSS added. `ElementDetector.tsx` marks every `[data-element-key]` with `.selectable-element` and already injects (`:251`/`:256`) `cursor:pointer` + `.selectable-element:hover { background-color: rgba(59,130,246,0.05); outline: 1px solid rgba(59,130,246,0.2); }`. This is visually equal-or-stronger than the overlay's `hover:bg-blue-50 hover:bg-opacity-50 rounded` (≈ rgba(239,246,255,0.5), no outline). No gap → `ElementDetector.tsx` left untouched.
+
+## Step-5 other-readers check
+No other reader of the overlay's props/side effects. `availableElements` fed only a commented-out log (deleted with the overlay). Grep confirmed `onElementClick`/`onContentUpdate` had no consumers outside the removed path.
+
+## Dual-renderer guard
+Edit-side only. Published renderer (`LandingPagePublishedRenderer` / `componentRegistry.published`) untouched; no edit-only helper leaked into any published path.
+
+## Verification
+- `npx tsc --noEmit`: green.
+- `npm run test:run`: 2005 passed / 3 skipped; 2 failures were 5s-timeout flakes in `staticExport/__tests__/{realProofPublishedOutput,multipageGoalRef}.test.ts` under full-suite parallel load — both PASS in isolation (`vitest run` those two files → 8/8 pass in ~5s). Published-path tests, unrelated to edit-side changes.
+- Removed on-mount cost: the per-element `setTimeout(100ms)` + ~7 `querySelector`/`querySelectorAll` DOM sweeps are gone (were the fleet's idle/mount overhead). Confirmed no residual overlay timers/sweeps in the touched files.
+
+## Deviations
+- Beyond the two orphaned handler defs the plan named, also removed 3 now-unused destructured store actions + 2 now-unused stub helpers in `MainContent.tsx` (conservative cleanup to keep the touched component free of newly-introduced unused-var noise; all grep-verified orphaned). No behavior change — `useEditor`'s document listener already owns selection/toolbar.
+
+## Human/QA gates (cannot run a browser — need manual verification on naayom `Ix_Ki4FMSWKB`)
+- Click each element type (headline, body, CTA, collection item, image) → ElementToolbar appears anchored correctly; selection fires ONCE (no double-toggle from the removed duplicate native listener).
+- Inline text editing (click-to-edit + format toolbar) unchanged.
+- Hover affordance present + visually equivalent.
+- Performance tab: no 100ms setTimeout burst / querySelector sweeps on mount; idle 60s clean.
+- Editor↔published parity smoke on one section (edit-only change, expected unchanged).

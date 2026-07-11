@@ -15,8 +15,8 @@ The editor does constant background work while idle and leaks memory over long s
 ## Progress log
 
 - phase 1 debug strip & gate: done (commit dbd6fde6, review loops 1, ship; non-blocking: harmless dead-undo-step in unreachable itemId-not-found path, 1 residual plan-compliant logger.debug)
-- phase 2 autosave event-driven debounce: done (review loops 2, ship; blocker fixed = spurious save-on-open via load/clean-bump baseline re-sync; known-accepted parity gap: lastUpdated-silent edit during already-dirty in-flight save can drop, equal-not-worse vs old poll)
-- phase 3 overlay fleet removal: pending
+- phase 2 autosave event-driven debounce: done (commit 983801bf, review loops 2, ship; blocker fixed = spurious save-on-open via load/clean-bump baseline re-sync; known-accepted parity gap: lastUpdated-silent edit during already-dirty in-flight save can drop, equal-not-worse vs old poll)
+- phase 3 overlay fleet removal: done (review loops 1, ship; overlay confirmed dead via live-route trace, no double-fire, 296 deletions; manual single-fire/hover QA pending at merge gate)
 - phase 4 VersionManager removal from live path: pending
 - phase 5 dead persistence cluster deletion: pending
 
