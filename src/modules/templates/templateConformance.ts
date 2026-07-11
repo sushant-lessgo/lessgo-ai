@@ -27,9 +27,12 @@
 // ever imported by vitest files (never enters the app bundle), so the registry
 // firewall is unaffected — same idiom as vestria/registration.test.ts.
 
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
 
 import { templateMeta } from './templateMeta';
+import { BLOCK_MOCKS } from './blockMocks';
 import { blockManifests, type BlockDeclaration } from './blockManifest';
 import {
   isCopyCompatible,
@@ -462,6 +465,119 @@ export function templateConformance(templateId: TemplateId): void {
           }
         }
       });
+    });
+  });
+}
+
+// ── editor-basics: machine-checkable subset (template-factory phase 2) ────────
+// The spec's editor-basics v0 contract, machine-checkable part. Templates DECLARE
+// a slot's edit primitive; the platform primitive OWNS the editing UI. The signal
+// this asserts is the `data-edit-primitive` marker the template Editable wrappers
+// (MeridianEditable / HearthEditable) emit alongside data-element-key/-section-id
+// in the PREVIEW render path (jsdom can't drive contentEditable, so `mode:'edit'`
+// is unreachable here — preview renders the same static wrapper path + marker).
+//
+// This is EXPORTED (not folded into templateConformance) and enrolled explicitly
+// per template in conformance.test.ts, because only meridian + hearth ship the
+// `editBasics` mocks this consumes (surge/vestria/lex deferred — plan Q6).
+//
+// CALLER CONTRACT: the enrolling test file MUST (a) `vi.mock`
+// '@/hooks/useEditStoreLegacy' (selector-honoring `useEditStoreLegacy` +
+// `useEditStoreApi`) and '@/components/EditProvider' (`useEditStoreContext`) onto
+// a single vanilla store, and (b) seed that store from `ALL_BLOCK_MOCK_SECTIONS`
+// (blockMocks/harness) so every `sectionId` below resolves content. Edit blocks
+// read the store via those two entry points; published `.published.tsx` blocks do
+// NOT, so the marker never reaches published HTML.
+export function assertEditorBasics(templateId: TemplateId): void {
+  const sections = BLOCK_MOCKS[templateId] ?? [];
+
+  describe(`editor-basics edit-primitive markers (${templateId})`, () => {
+    if (sections.length === 0) {
+      it('no editor-basics mocks enrolled (deferred template)', () => {
+        expect(sections).toEqual([]);
+      });
+      return;
+    }
+
+    for (const s of sections) {
+      describe(`${s.sectionType} (${s.layout})`, () => {
+        const Edit = RESOLVERS[templateId].resolve(s.sectionType, 'edit') as
+          | React.ComponentType<{ sectionId: string }>
+          | null;
+
+        // Parse a FRESH render each assertion (cheap; keeps assertions isolated).
+        const render = (): HTMLElement => {
+          const div = document.createElement('div');
+          div.innerHTML = renderToStaticMarkup(
+            React.createElement(Edit as React.ComponentType<{ sectionId: string }>, {
+              sectionId: s.sectionId,
+            })
+          );
+          return div;
+        };
+
+        it('resolves a real (non-placeholder) edit block', () => {
+          expect(Edit).toBeTruthy();
+          expect(Edit).not.toBe(RESOLVERS[templateId].placeholder);
+        });
+
+        // TEXT: every contract text slot → exactly one text-primitive marker.
+        for (const key of s.editBasics.text) {
+          it(`text slot "${key}" → exactly one [data-edit-primitive="text"]`, () => {
+            const hits = render().querySelectorAll(
+              `[data-edit-primitive="text"][data-element-key="${key}"]`
+            );
+            expect(hits.length, `"${key}": expected 1 text marker, got ${hits.length}`).toBe(1);
+          });
+        }
+
+        // BUTTON: every CTA slot → exactly one button-primitive marker (the
+        // isButton wiring that makes Button Settings reachable).
+        for (const key of s.editBasics.button) {
+          it(`button slot "${key}" → exactly one [data-edit-primitive="button"]`, () => {
+            const hits = render().querySelectorAll(
+              `[data-edit-primitive="button"][data-element-key="${key}"]`
+            );
+            expect(hits.length, `"${key}": expected 1 button marker, got ${hits.length}`).toBe(1);
+          });
+        }
+
+        // COLLECTIONS: N mock items → N item roots, pinned to a concrete per-item
+        // marker prefix (one representative field rendered once per item).
+        for (const coll of s.editBasics.collections) {
+          it(`collection "${coll.key}" → ${coll.items} item roots ([data-element-key^="${coll.countPrefix}"])`, () => {
+            const roots = render().querySelectorAll(
+              `[data-element-key^="${coll.countPrefix}"]`
+            );
+            expect(
+              roots.length,
+              `"${coll.key}": expected ${coll.items} item roots, got ${roots.length}`
+            ).toBe(coll.items);
+          });
+        }
+
+        // NO-ORPHAN: every emitted marker maps to a declared slot (scalar) or a
+        // collection item prefix — catches dead/undeclared markers, so the text
+        // check can't pass vacuously.
+        it('every emitted edit-primitive marker maps to a declared slot', () => {
+          const allowedExact = new Set([...s.editBasics.text, ...s.editBasics.button]);
+          const allowedPrefixes = s.editBasics.collections.flatMap((c) => c.itemPrefixes);
+          const orphans = Array.from(render().querySelectorAll('[data-edit-primitive]'))
+            .map((m) => m.getAttribute('data-element-key') || '')
+            .filter((k) => !allowedExact.has(k) && !allowedPrefixes.some((p) => k.startsWith(p)));
+          expect(orphans, `undeclared edit-primitive markers: ${orphans.join(', ')}`).toEqual([]);
+        });
+      });
+    }
+
+    // Explicitly NOT machine-checked in jsdom — DECLARED skipped-with-reason (not
+    // silently absent). These land in the /manual-test editor-basics subsection
+    // (phase 11) + parity QA.
+    describe('NOT machine-checked in jsdom (→ /manual-test editor-basics, phase 11)', () => {
+      it.skip('image-upload wiring (per-block inline uploadImage — no shared image primitive to mark yet)', () => {});
+      it.skip('logo primitive interaction', () => {});
+      it.skip('collection add/remove/reorder affordances (edit-only, absent in preview)', () => {});
+      it.skip('Button-Settings popover actually opening', () => {});
     });
   });
 }

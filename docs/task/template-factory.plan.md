@@ -57,8 +57,8 @@ wiring editor-basics assertions.
 
 ## Progress log
 
-- phase 1 templateConformance consolidation: done (review loops 1, ship; tsc clean, 2103 tests pass) — commit pending below
-- phase 2 editor-basics conformance subset: pending
+- phase 1 templateConformance consolidation: done (commit c8523046, review loops 1; tsc clean, 2103 tests pass)
+- phase 2 editor-basics conformance subset: done (commit PENDING, review loops 1, ship; markers no-leak verified, mocks relocated, negative control red-then-reverted; tsc clean, 2200 tests pass; i18n flake pre-existing/unrelated)
 - phase 3 knob mechanism: pending
 - phase 4 design-kit generator: pending
 - phase 5 handoff lint: pending

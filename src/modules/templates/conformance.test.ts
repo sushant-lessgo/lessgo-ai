@@ -23,7 +23,26 @@
 // Static imports of resolvers/placeholders/schemas are fine: test files never
 // enter the app bundle (vitest-only), so the registry firewall is unaffected.
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// ── editor-basics store mock (template-factory phase 2) ──────────────────────
+// The editor-basics subset (assertEditorBasics) renders edit blocks in
+// mode:'preview' to observe the `data-edit-primitive` markers. Edit blocks read
+// the store via `useEditStoreLegacy`/`useEditStoreApi` (block hooks + image
+// toolbar) and `useEditStoreContext` (element-exclusion) — mock all three onto
+// one vanilla store seeded from the shared block mocks. Per-file hoisted `vi.mock`
+// shims (can't move to the harness); the store SHAPE builder lives in the harness.
+const h = vi.hoisted(() => ({ store: null as any }));
+
+vi.mock('@/hooks/useEditStoreLegacy', () => ({
+  useEditStoreLegacy: (selector?: (s: any) => any) =>
+    selector ? selector(h.store.getState()) : h.store.getState(),
+  useEditStoreApi: () => h.store,
+}));
+
+vi.mock('@/components/EditProvider', () => ({
+  useEditStoreContext: () => ({ store: h.store, isReady: true, isInitialized: true, error: null }),
+}));
 
 import { templateMeta } from './templateMeta';
 import { blockManifests } from './blockManifest';
@@ -34,6 +53,8 @@ import { getCollectionDef } from '@/modules/collections/registry';
 
 import { resolveLumenBlock } from './lumen/resolveLumenBlock';
 import { LumenPlaceholderBlock } from './lumen/LumenPlaceholderBlock';
+import { createHarnessStore } from './blockMocks/harness';
+import { ALL_BLOCK_MOCK_SECTIONS } from './blockMocks';
 
 import {
   templateConformance,
@@ -41,8 +62,12 @@ import {
   STRUCTURAL_CAPABILITIES,
   COLLECTION_FAMILY,
   assertCollectionCapabilityBacked,
+  assertEditorBasics,
   resolvesReal,
 } from './templateConformance';
+
+// Seed the shared store from EVERY enrolled section so all sectionIds resolve.
+h.store = createHarnessStore(ALL_BLOCK_MOCK_SECTIONS);
 
 describe('template conformance (scalePlan §6a/§6b)', () => {
   // ── GLOBAL: registry / meta key parity (drives every per-template check) ────
@@ -56,6 +81,12 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
   for (const templateId of templateIds) {
     templateConformance(templateId);
   }
+
+  // ── EDITOR-BASICS subset (template-factory phase 2) ────────────────────────
+  // Enrolled explicitly for the templates that ship editBasics mocks (meridian +
+  // hearth). surge/vestria/lex/etc. deferred (plan Q6) — they carry no mocks yet.
+  assertEditorBasics('meridian');
+  assertEditorBasics('hearth');
 
   // ── GLOBAL sanity: at least one manifest declaration exists to check ───────
   it('block manifests declare at least one variant to check', () => {
