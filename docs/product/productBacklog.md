@@ -20,7 +20,6 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 12. **Email continuation pages** — paste email → extract tone/offer/CTA → generate matching page reusing brand assets
 13. **Landing page types by traffic source** — Main (current) / Ad-PPC (no nav, single CTA) / SEO (content-rich) / Social (platform tone)
 14. **Problem section UIBlock gaps** — only 2 UIBlocks today; missing: simple bullets, statistics-driven, single emotional statement, cost-of-inaction, industry-specific
-15. **Social media post writing** — marketing material beyond the page itself
 16. **Pre-built IVOC database** — DB-first lookup keyed `(categoryKey, audienceKey)`, live search only on miss (Tavily removed scale-08, `IVOCCache` table retained)
 17. **Competitor research** — per competitor: idea, USP, pain/desire focus, real praise+complaint quotes (G2/Capterra, Reddit, X, YouTube)
 18. **Full live + RAG research layer** (~$0.25-0.30/gen) — live search + quote corpus, profile-similarity merge; premium tier
