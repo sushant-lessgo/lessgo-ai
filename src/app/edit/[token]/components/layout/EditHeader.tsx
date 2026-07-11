@@ -7,6 +7,7 @@ import { ServiceThemePopover } from '../ui/ServiceThemePopover';
 import { VestriaThemePopover } from '../ui/VestriaThemePopover';
 import { EditHeaderRightPanel } from './EditHeaderRightPanel';
 import { ReviewPill } from '../ui/ReviewPill';
+import { SaveStateChip } from '../ui/SaveStateChip';
 import { LanguageToggle } from '../editor/LanguageToggle';
 import { LocaleSettings } from '../editor/LocaleSettings';
 import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
@@ -65,8 +66,11 @@ export function EditHeader({ tokenId }: EditHeaderProps) {
         {!allComplete && <ReviewPill />}
       </div>
 
-      {/* Right Section - Action Controls */}
-      <EditHeaderRightPanel tokenId={tokenId} />
+      {/* Right Section - Save-state chip + Action Controls */}
+      <div className="flex items-center space-x-4">
+        <SaveStateChip />
+        <EditHeaderRightPanel tokenId={tokenId} />
+      </div>
     </header>
   );
 }

@@ -5,9 +5,7 @@ import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
 
 import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
-import { AdvancedActionsMenu } from './AdvancedActionsMenu';
 import type { StockPhoto } from '@/services/pexelsApi';
-import { TextInputModal } from '../modals/TextInputModal';
 import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
 import { isForbiddenImageSrc } from '@/hooks/editStore/imageWriteGuard';
 import { logger } from '@/lib/logger';
@@ -32,17 +30,13 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     contextActions
   }));
 
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
   const [showStockPhotos, setShowStockPhotos] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
-  const [showAltTextModal, setShowAltTextModal] = useState(false);
-  const [currentAltText, setCurrentAltText] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  
+
   const toolbarRef = useRef<HTMLDivElement>(null);
-  const advancedRef = useRef<HTMLDivElement>(null);
   const uploaderRef = useRef<HTMLInputElement>(null);
 
   const store = useEditStore();
@@ -60,11 +54,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     objectUrl: string,
     targetElement: { sectionId: string; elementKey: string },
   ) => Promise<string>;
-
-  // Stub executeAction (removed in V2 refactor)
-  const executeAction = (action: string, params: any) => {
-    console.warn('Advanced action not implemented in V2:', action);
-  };
 
   // Helper function to parse targetId and extract section/element info
   const parseTargetId = (targetId: string) => {
@@ -192,24 +181,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
 
 
 
-  // Close advanced menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        advancedRef.current &&
-        !advancedRef.current.contains(event.target as Node) &&
-        !toolbarRef.current?.contains(event.target as Node)
-      ) {
-        setShowAdvanced(false);
-      }
-    };
-
-    if (showAdvanced) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showAdvanced]);
-
   // Handle file upload
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -290,18 +261,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
     updateElementContent(targetInfo.sectionId, targetInfo.elementKey, editedImageUrl);
   };
 
-  // Handle alt text editing
-  const handleAltText = () => {
-    const currentAlt = targetElement?.getAttribute('alt') || '';
-    setCurrentAltText(currentAlt);
-    setShowAltTextModal(true);
-  };
-
-  const handleAltTextSave = (newAltText: string) => {
-    executeAction('update-alt-text', { imageId: targetId, altText: newAltText });
-    setShowAltTextModal(false);
-  };
-
   // MVP Actions - Essential & Important only
   const primaryActions = [
     {
@@ -337,12 +296,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
       label: 'Edit',
       icon: 'edit',
       handler: handleImageEditor,
-    },
-    {
-      id: 'alt-text',
-      label: 'Alt Text',
-      icon: 'accessibility',
-      handler: handleAltText,
     },
     {
       id: 'delete-image',
@@ -520,17 +473,6 @@ export function ImageToolbar({ targetId, position, contextActions }: ImageToolba
           </div>
         </div>
       )}
-
-      {/* Alt Text Modal */}
-      <TextInputModal
-        isOpen={showAltTextModal}
-        onClose={() => setShowAltTextModal(false)}
-        onSelect={handleAltTextSave}
-        currentValue={currentAltText}
-        fieldName="Alt Text"
-        placeholder="Describe this image for screen readers..."
-        description="Alt text helps screen readers describe images to visually impaired users. Be descriptive but concise."
-      />
 
       {/* Image Editor */}
       {showEditor && (

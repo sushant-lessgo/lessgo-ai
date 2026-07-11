@@ -54,6 +54,7 @@ templates are data and many. (The ×6 LinkTargetPopover duplication is what viol
 |---|---|---|---|
 | `text` | headlines, sublines, captions, labels | inline contentEditable + text toolbar | `setText(section, key, value, locale)` |
 | `image` | single slots, portraits, screenshots | image toolbar: upload/stock/edit/alt/remove | `setImage(key, assetRef)` |
+| | | ⚠ alt-text (2026-07-11 finding): NO published renderer reads a user alt field today (all hardcode `alt=""` or derive from sibling text); dead toolbar control removed in phase 2. Alt = REQUIRED part of `image`/`imageCollection` primitives in phase 3: canonical store = `elementMetadata[key].alt`, BOTH renderers read it via shared primitives (fallback: sibling-derived), never 40 hand-edited blocks. | |
 | `imageCollection` | hero slider · portfolio grid · gallery · logo wall | collection panel: bulk upload, drag-reorder, remove, per-item alt/caption/category; min/max from block capacity | `collectionOp(add/remove/reorder/replaceItem)` |
 | `logo` | header/footer logo — **site-scoped** (one value, nav+footer derive) | upload/remove + wordmark fallback | `setLogo(assetRef)` |
 | `button` | CTAs | inline text + Button Settings modal (§5 GOAL_REF/Destination) | `setButtonConfig` |

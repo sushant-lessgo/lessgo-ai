@@ -1,20 +1,14 @@
 // app/edit/[token]/components/ui/FloatingToolbars.tsx - Priority-Resolved Toolbar System
-import React, { useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import React from 'react';
 import { useStoreState } from '@/components/EditProvider';
 import { useSelectionPriority } from '@/hooks/useSelectionPriority';
-// Removed complex positioning hooks - using simple React-based positioning
-import { calculateArrowPosition } from '@/utils/toolbarPositioning';
 
 // Import action handlers
 import { SectionToolbar } from '../toolbars/SectionToolbar';
 import { TextToolbarMVP } from '../toolbars/TextToolbarMVP'; // Step 4: MVP Implementation
 import { ElementToolbar } from '../toolbars/ElementToolbar';
 import { ImageToolbar } from '../toolbars/ImageToolbar';
-import { FormToolbar } from '../toolbars/FormToolbar';
-import { AdvancedActionsMenu } from '../toolbars/AdvancedActionsMenu';
 
-import { logger } from '@/lib/logger';
 export function FloatingToolbars() {
   // STEP 3: Use Priority Resolver with Global Anchor Management
   const {
@@ -23,30 +17,11 @@ export function FloatingToolbars() {
     editorSelection,
     shouldShowToolbar,
     hasActiveToolbar,
-    globalAnchor,
   } = useSelectionPriority();
   
   // Keep legacy toolbar state for fallback compatibility
   const toolbar = useStoreState((state) => state.toolbar);
   
-  // Debug logging - only on actual changes
-  useEffect(() => {
-    //   activeToolbar,
-    //   hasActiveToolbar,
-    //   toolbarTarget,
-    //   editorSelection,
-    //   toolbar
-    // });
-    // Preserve function calls but remove logging
-    shouldShowToolbar('section');
-    shouldShowToolbar('element'); 
-    shouldShowToolbar('text');
-    shouldShowToolbar('image');
-    shouldShowToolbar('form');
-  }, [activeToolbar, hasActiveToolbar, toolbar, toolbarTarget, editorSelection, shouldShowToolbar]);
-
-
-  // No longer need these hooks - they were removed
 
   // React-only positioning - no DOM manipulation
   // Position is calculated when toolbar is shown and stored in state
@@ -118,14 +93,6 @@ export function FloatingToolbars() {
             contextActions={contextActions}
           />
         </>
-      )}
-
-      {shouldShowToolbar('form') && toolbarTarget.targetId && activeToolbar === 'form' && (
-        <FormToolbar
-          targetId={toolbarTarget.targetId}
-          position={position}
-          contextActions={contextActions}
-        />
       )}
 
     </>
