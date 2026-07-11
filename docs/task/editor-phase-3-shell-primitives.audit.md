@@ -255,3 +255,54 @@ Kept (judged load-bearing — noted per instruction):
   select/flip/dismiss/edge cases. `useShallow` object selectors re-render only when a
   pulled field changes by shallow-equality — actions are stable refs, so typing in one
   element no longer re-renders another element's open toolbar (the phase-2 manual check).
+
+## Phase 3 — DELETE list (dead toolbar machinery)
+
+### Files changed
+
+Deleted (8):
+- `src/hooks/useGlobalAnchor.ts` (incl. its re-exported `useToolbarPositioning`)
+- `src/hooks/useTransitionLock.ts`
+- `src/hooks/useToolbarPositioning.ts` (compat shim)
+- `src/utils/toolbarSingleton.ts`
+- `src/utils/singletonAnchorRegistry.ts`
+- `src/utils/toolbarPositioning.ts` (incl. `calculateArrowPosition`)
+- `src/app/edit/[token]/components/toolbars/AdvancedActionsMenu.tsx`
+- `src/hooks/useAdvancedActionsMenu.ts`
+
+Edited (3):
+- `src/hooks/useOptimizedEditStore.ts` — removed the duplicate `useToolbarVisibility` (:227) and its `toolbar.actions` reader `useToolbarAvailableActions` (:237/:241).
+- `src/hooks/useSelectionPriority.ts` — removed the dead `useToolbarVisibility` and `useTextEditingState` exports (kept the `useSelectionPriority` hook + its `.lastSelectionKey` debug prop; `ToolbarType` import still used by the `shouldShowToolbar` helper).
+- `src/utils/README.md` — removed stale references to the four now-nonexistent files in the "Editor selection & toolbars" list.
+
+### Scout results (live-importer check before each delete)
+
+- The six util/hook files: only importer of any was `singletonAnchorRegistry.ts` importing `AnchorInfo` from `useGlobalAnchor.ts` — both deleted together. Zero external live importers (`rg 'from @/utils/toolbarPositioning|toolbarSingleton|singletonAnchorRegistry|@/hooks/useGlobalAnchor|useTransitionLock|useToolbarPositioning'` → only that one intra-deleted hit).
+- `calculateArrowPosition` — only self-defined in the deleted `toolbarPositioning.ts`.
+- `useToolbarVisibility` (both defs) / `useTextEditingState` / `useToolbarAvailableActions` — zero callers repo-wide (definitions only).
+
+### AdvancedActionsMenu hook decision: DELETED (not type-inlined)
+
+`useAdvancedActionsMenu.ts`'s ONLY consumer was `AdvancedActionsMenu.tsx` (the component being deleted); no other consumer exists → per plan step 2 "if NONE, delete the hook too." Deleted the hook. The `AdvancedActionItem`/`AdvancedActionGroup` types had no other reader, so no inlining was needed.
+
+### Store untouched (Q2)
+
+`showToolbar`/`hideToolbar`/`toolbar.position` store fields + writers left intact; `toolbar.position` remains vestigial (phase-4 territory). `useToolbarState`/`useEditMode` in `useOptimizedEditStore.ts` are now unused-internally but left as exported (out of scope; may have external readers).
+
+### Verification
+
+- `npx tsc --noEmit` — GREEN (no output).
+- `npm run test:run` — GREEN: 135 files passed / 1 skipped; 2091 tests passed / 3 skipped.
+- `npm run build` — GREEN (includes buildPublishedCSS + buildAssets steps; full route table compiled).
+- All-symbols grep across `src/` (`useGlobalAnchor|useTransitionLock|useToolbarPositioning|toolbarSingleton|singletonAnchorRegistry|calculateArrowPosition|toolbarWatchdog|AdvancedActionsMenu|useToolbarVisibility|useTextEditingState|useAdvancedActionsMenu`) — ZERO code hits. Only 3 remaining hits, all documentation, all in `src/hooks/README.md` (a stale table listing `useToolbarPositioning.ts`, `useAdvancedActionsMenu.ts`, `useTransitionLock.ts`, `useGlobalAnchor.ts`). That README is NOT on the phase-3 Files-touched list, so it was left untouched — see Deviations/open item.
+- `git diff main --stat -- src/`: **19 files changed, 460 insertions(+), 2796 deletions(-)** → net **-2336 LOC** (acceptance: negative — MET). (Counts include phases 1–2 which are committed on this branch.)
+
+### Deviations
+
+- `src/utils/README.md`: plan step 4 named only the `toolbarWatchdog` mention, but the same "Editor selection & toolbars" line listed three other files I deleted (`singletonAnchorRegistry.ts`, `toolbarPositioning.ts`, `toolbarSingleton.ts`). Conservatively removed all four dead references (in-scope file) so the README doesn't point at nonexistent files.
+
+### Open items / risks
+
+- `src/hooks/README.md` still lists 4 deleted files (`useToolbarPositioning.ts`, `useAdvancedActionsMenu.ts`, `useTransitionLock.ts`, `useGlobalAnchor.ts`) in its hook table. It is OUT OF SCOPE (not on Files-touched, no `toolbarWatchdog` mention) and non-breaking (doc-only). Flagged for a follow-up doc edit; not touched this phase.
+- `e2e/edit-persistence.spec.ts` NOT run — requires a live dev server + Clerk auth session/browser not available in this headless agent environment; deferred to the human toolbar-QA gate (spec gate 2).
+- 6× idle-CPU throttle trace is browser-manual — deferred to the human toolbar-QA gate per instruction.

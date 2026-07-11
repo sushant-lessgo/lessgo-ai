@@ -18,8 +18,8 @@ exactly one editor and dual-renderer divergence stays structurally impossible).
 ## Progress log
 
 - phase 1 floating-ui shell + priority slim-down: done (commit 1a9a187e, review loops 2 — remount defect fixed, ship)
-- phase 2 action sets + selector-ize: done (commit pending-sha, review loops 1 — clean, ship; 6 bare subs not 7 per phase-1 drift)
-- phase 3 DELETE list + parity sign-off: pending
+- phase 2 action sets + selector-ize: done (commit c1a7c80a, review loops 1 — clean, ship; 6 bare subs not 7 per phase-1 drift)
+- phase 3 DELETE list + parity sign-off: code done (commit pending-sha, review loops 1 — clean, ship, net -2336 LOC src/) — ⛔ AWAITING HUMAN GATE (founder toolbar parity QA + 6× idle trace + edit-persistence e2e) before phase 4
 - phase 4 primitive interface: pending
 - phase 5 logo primitive (techpremium proving): pending
 - phase 6 imageCollection primitive + alt law (vestria proving): pending

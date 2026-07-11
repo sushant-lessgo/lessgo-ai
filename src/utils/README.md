@@ -11,8 +11,7 @@ not exhaustive.
 
 ## Editor selection & toolbars
 `selectionPriority.ts`, `selectionSnapshot.ts`, `selectionStability.ts`,
-`domNodeSelectionManager.ts`, `singletonAnchorRegistry.ts`, `sectionAnchors.ts`,
-`toolbarPositioning.ts`, `toolbarSingleton.ts`, `toolbarWatchdog.ts`,
+`domNodeSelectionManager.ts`, `sectionAnchors.ts`,
 `modalEmergencyReset.ts`, `bodyScrollLock.ts`, `tabManager.ts`.
 
 ## Editor lifecycle / state
