@@ -42,6 +42,11 @@ export interface RenderPublishedExportInput {
   /** Neutral mood (vestria; Project.themeValues.mood). Optional — omitting it
    *  renders the default (bone). */
   mood?: string | null;
+  /** Knob selection (template-factory phase 3; Project.themeValues.knobs).
+   *  Optional — absent/all-default ⇒ no `data-knob-*` attrs, no knob CSS ⇒
+   *  byte-identical published output. Threaded unchanged into every
+   *  generateStaticHTML render (root, subpage, locale). */
+  knobs?: import('@/types/template').KnobSelection | null;
   baseUrl: string;
   /** Live custom domain (no scheme) to bake into canonical/og:url; undefined → subdomain. */
   canonicalDomain?: string;
@@ -82,6 +87,7 @@ export async function renderPublishedExport(
     variantId,
     paletteId,
     mood,
+    knobs,
     baseUrl,
     canonicalDomain,
     localeConfig,
@@ -189,6 +195,7 @@ export async function renderPublishedExport(
     paletteId,
     variantId,
     mood: mood ?? null,
+    knobs: knobs ?? null,
     goal,
     currentPagePath: '/',
     formPagePath: findFormPagePath(pageInputsForScan, '/'),
@@ -283,6 +290,7 @@ export async function renderPublishedExport(
         paletteId,
         variantId,
         mood: mood ?? null,
+        knobs: knobs ?? null,
         goal,
         currentPagePath: path,
         formPagePath: findFormPagePath(pageInputsForScan, path),
@@ -438,6 +446,7 @@ export async function renderPublishedExport(
             paletteId,
             variantId,
             mood: mood ?? null,
+            knobs: knobs ?? null,
             goal,
             currentPagePath: p.path,
             formPagePath: findFormPagePath(locPageInputs, p.path),

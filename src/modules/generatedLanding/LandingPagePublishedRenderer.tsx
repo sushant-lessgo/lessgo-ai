@@ -23,6 +23,7 @@ import type { MeridianPalette } from '@/types/product';
 import { getLoadedTemplate } from '@/modules/templates/registry';
 import { normalizeCtas, buildNormalizeCtasContext } from '@/utils/normalizeCtas';
 import type { Brief } from '@/types/brief';
+import type { KnobSelection } from '@/types/template';
 
 /**
  * Extract content fields from elements structure
@@ -50,6 +51,7 @@ interface LandingPagePublishedRendererProps {
   paletteId?: string | null;    // Template palette for template-backed projects
   variantId?: string | null;    // Template variant (Lex/Meridian token rescale)
   mood?: string | null;         // Neutral mood (vestria; Project.themeValues.mood)
+  knobs?: KnobSelection | null; // Knob selection (phase 3; Project.themeValues.knobs)
   goal?: Brief['goal'] | null;  // scale-04: resolves GOAL_REF ctas via the pre-pass
   // goal-ref-cta phase 3 (F23): the page being rendered + the page holding the
   // conversion form (both precomputed by the exporter, which alone holds every
@@ -72,6 +74,7 @@ export function LandingPagePublishedRenderer({
   paletteId = null,
   variantId = null,
   mood = null,
+  knobs = null,
   goal = null,
   currentPagePath,
   formPagePath,
@@ -214,7 +217,7 @@ export function LandingPagePublishedRenderer({
   return (
     <>
     {usesTemplate && tmpl ? (
-      <tmpl.SSRTokens paletteId={effectivePalette} variantId={effectiveVariant} mood={mood ?? undefined}>
+      <tmpl.SSRTokens paletteId={effectivePalette} variantId={effectiveVariant} mood={mood ?? undefined} knobs={knobs ?? undefined}>
         {sectionsTree}
       </tmpl.SSRTokens>
     ) : (

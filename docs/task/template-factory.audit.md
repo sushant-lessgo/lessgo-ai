@@ -181,3 +181,63 @@ FAIL editor-basics edit-primitive markers (meridian) > header (MeridianNavHeader
 ## Phase 2 — impl-review verdict
 - Verdict: **ship** (loop 1). Independent reviewer confirmed: `data-edit-primitive` emitted ONLY edit-side (zero `.published.tsx` refs — dual-renderer safe); text→exactly-one `[data-edit-primitive="text"][data-element-key]`, button→"button", collections→`[data-element-key^=prefix]` count===N (concrete, non-vacuous); 4 not-machine-checked items are `it.skip` with reasons; negative control genuinely red on marker-absence; mock re-export keeps old path working, renderParity re-pointed with assertions unchanged, harness extracted w/ vi.mock shims left inline; hearth mocks cover all 7 manifest blocks. Gate: `tsc` clean, `test:run` 2200 passed/11 skipped/0 failed.
 - Non-blocking: (1) i18n `i18nHonesty.test.ts:122` 5s-timeout flake surfaces more under heavier suite load — pre-existing, NOT Phase 2 (touches no i18n/staticExport); owner=i18n, bump that test's testTimeout separately. (2) per-collection-item marker verified indirectly (via scalar negative control + no-orphan), acceptable per brief.
+
+## Phase 3 — knob mechanism (data-attr axes, tokens, injection)
+
+**Files changed**
+- `src/types/template.ts` — added `KnobAxis`/`KnobValue`/`KnobSelection`/`TemplateKnobDeclaration` types; extended `ThemeInjector` + `SSRTokens` prop signatures with optional `knobs?: KnobSelection`; added optional `TemplateModule.knobs?`.
+- `src/modules/templates/knobs.ts` (new) — standard axis registry (pure data leaf).
+- `src/modules/templates/shared/knobCss.ts` (new) — serializer + attr-apply helpers.
+- `src/modules/templates/shared/knobCss.test.ts` (new) — 12 unit tests.
+- `src/lib/staticExport/htmlGenerator.ts` — thread `knobs` option → published renderer.
+- `src/lib/staticExport/renderPublishedExport.ts` — `knobs?` input + threaded into all 3 `generateStaticHTML` calls (root/subpage/locale).
+- `src/modules/generatedLanding/LandingPagePublishedRenderer.tsx` — `knobs` prop → `tmpl.SSRTokens`.
+- `src/modules/templates/templateConformance.ts` — exported conditional `assertKnobConformance` (dormant this phase).
+
+### Axis registry (`knobs.ts`)
+`STANDARD_KNOB_AXES` (pure data, type-only import from `types/template`, NO template imports → firewall-safe):
+
+| axis | attr | values | default (emits nothing) |
+|------|------|--------|--------------------------|
+| buttonShape | `data-knob-buttonShape` | square · rounded · pill | rounded |
+| cardStyle | `data-knob-cardStyle` | hairline · shadow · flat | hairline |
+| density | `data-knob-density` | compact · comfortable · spacious | comfortable |
+| typePairing | `data-knob-typePairing` | classic · condensed · editorial | classic (aliases variant axis) |
+| texture | `data-knob-texture` | none · grain · paper | none (subsumes mood) |
+
+`knobAttr(axis)` is the single source of truth for the `data-knob-<axis>` convention. Helpers: `isValidKnobValue`, `isDefaultKnobValue`, `KNOB_AXES`. The registry holds VOCABULARY only — the CSS values each value emits are template-provided (tokens.ts, phase 8), mirroring how `serializeVariantOverrides` is per-template while the format is standard.
+
+### Serializer contract (`shared/knobCss.ts`) — default-emits-nothing proof
+Two halves, both upholding "default = `:root`":
+1. `serializeKnobOverrides(tokenMap)` → CSS text. For each axis/value with declarations, emits `[data-knob-<axis>="<value>"]{--var:val;…}` (scoped on the wrapper attr, NOT `html[...]`, so it applies at any depth — identical scoping law to `serializeVariantOverrides`). **DEFAULT value is `continue`-skipped**; empty token map → `''`; values with no declarations skipped; deterministic STANDARD axis order.
+2. `knobDataAttributes(selection)` → wrapper attr object. Emits `data-knob-<axis>` ONLY for a selected value that is (a) truthy, (b) non-default, (c) in the axis vocabulary. Null/undefined/`{}` selection → `{}` (no attrs). Stale/hostile values ignored (never thrown).
+
+Test proof (12 tests, all green): empty map → `''`; default value → `''`; non-default → exact scoped block `[data-knob-buttonShape="pill"]{\n  --btn-radius:999px;\n}`; no `html` in output; multi-var/multi-value with default skipped; empty-decl skip; axis-order; and the attr helper mirror-cases (null/default → `{}`, non-default → attr, invalid ignored, mixed selection skips default axis). This is the byte-identical guarantee for knob-unaware / all-default projects.
+
+### Published-seam threading (exact)
+Mirrors the `mood` flow verified in the plan:
+- `StaticHTMLOptions.knobs?: KnobSelection | null` (htmlGenerator.ts) → passed as `knobs: options.knobs ?? null` into `LandingPagePublishedRenderer` alongside `mood`.
+- `RenderPublishedExportInput.knobs?` → destructured → `knobs: knobs ?? null` added to ALL THREE `generateStaticHTML` call sites (root L~198, subpage L~292, locale-fanout L~447).
+- `LandingPagePublishedRenderer`: new `knobs?: KnobSelection | null` prop (default `null`) → `<tmpl.SSRTokens … knobs={knobs ?? undefined}>`.
+- Edit side: `ThemeInjector`/`SSRTokens` prop signatures both carry optional `knobs?` in `types/template.ts`; `knobDataAttributes` is the shared helper both a future ThemeInjector and SSRTokens use to apply attrs identically. NO template SSRTokens/ThemeInjector wired this phase (that is phase 8) — knob-unaware templates simply ignore the extra prop, so output is byte-neutral.
+- No caller of `renderPublishedExport`/`generateStaticHTML` passes `knobs` yet (optional → `undefined`/`null` everywhere), so published output is unchanged this phase.
+
+### Conformance rule (conditional, dormant)
+`assertKnobConformance(templateId, knobs)` exported (NOT auto-fired inside `templateConformance`, same pattern as `assertEditorBasics`). When `knobs` is `undefined` → single green "does not declare knobs" test. When declared → asserts the FULL standard axis set is covered, each axis' declared values are a non-empty subset of the standard vocabulary AND include the axis default. Looks-truthfulness half deferred to phase 8 (needs `templateMeta.looks`). No template declares knobs yet and the helper is not enrolled in `conformance.test.ts` this phase → suite stays green (2212 passed / 11 skipped).
+
+### DraftSaveSchema confirmation (read-only, no edit)
+`src/lib/validation.ts:32` — `themeValues: z.record(z.string(), z.unknown()).optional()`. Fully permissive; `themeValues.knobs` passes through unchanged. saveDraft route persists `themeValues` as-is (`route.ts:221/232`). No edit made or needed.
+
+### Verification
+- `npx tsc --noEmit` — clean (no output).
+- `npx vitest run …/knobCss.test.ts` — 12 passed.
+- `npm run test:run` — 2212 passed | 11 skipped (138 files pass, 1 skipped); no failures.
+- `npm run build` — green (build:published-css → build:assets → next build all succeeded; route table emitted; grep for error/failed → none). Published CSS path unaffected.
+
+### Deviations
+- Axis value vocabularies + per-axis defaults are pragmatic/semantic picks (documented in `knobs.ts`). They are inert this phase (no template opts in). Conservative note recorded: a template opting in (phase 8) MUST align its `:root` with each axis default so all-default renders stay byte-identical — stated in the `knobs.ts` header LAW comment.
+- `typePairing` is defined with generic archetype values (classic/condensed/editorial) as a placeholder vocabulary; phase 8 will map hearth's stored variantIds to these as aliases. Flagged so phase 8 can adjust the vocabulary if hearth's variant names differ.
+
+## Phase 3 — impl-review verdict
+- Verdict: **ship** (loop 1). Reviewer confirmed dormant + byte-neutral: default value emits NO CSS on BOTH `serializeKnobOverrides` (knobCss.ts:49) and `knobDataAttributes` (:78-80), asserted in tests; published seam threaded as optional `knobs` option through all 3 `generateStaticHTML` call sites (renderPublishedExport.ts:198/293/449) → LandingPagePublishedRenderer → `tmpl.SSRTokens`, no template SSRTokens/ThemeInjector wired; `assertKnobConformance` defined-but-not-enrolled (single green "does not declare knobs" test); firewall intact (type-only + data imports, no template components); serializer wrapper-scoped `[data-knob-*]` not `html[...]` (test asserts). Gates re-run: tsc clean, test:run 2212 passed/11 skipped, build green.
+- Non-blocking: (1) `typePairing` placeholder vocab (classic/condensed/editorial) → phase 8 realigns to hearth's real variantIds. (2) serializer/attr helpers consumed only by tests this phase (dormant mechanism) — land for phase 8.

@@ -52,6 +52,8 @@ import {
 import { engineCoreSections } from '@/modules/engines/coreSections';
 import { type TemplateId } from '@/types/service';
 import { type CapabilityId } from '@/types/brief';
+import { type TemplateKnobDeclaration } from '@/types/template';
+import { STANDARD_KNOB_AXES, KNOB_AXES } from './knobs';
 import { COLLECTIONS, getCollectionDef, type CollectionKey } from '@/modules/collections/registry';
 
 import { resolveMeridianBlock } from './meridian/resolveMeridianBlock';
@@ -579,5 +581,70 @@ export function assertEditorBasics(templateId: TemplateId): void {
       it.skip('collection add/remove/reorder affordances (edit-only, absent in preview)', () => {});
       it.skip('Button-Settings popover actually opening', () => {});
     });
+  });
+}
+
+// ── knob-set conformance: CONDITIONAL (template-factory phase 3) ──────────────
+// A template that declares `knobs` (TemplateModule.knobs) must cover the FULL
+// standard axis set (`STANDARD_KNOB_AXES`), and each axis' declared values must
+// be a non-empty subset of that axis' standard vocabulary AND include the axis
+// default (the default value is what emits `:root` — a template can't tokenize an
+// axis while dropping its no-op baseline). This is the "declaration must be TRUE"
+// bar applied to knobs.
+//
+// EXPORTED + enrolled per template (phase 8, in conformance.test.ts) exactly like
+// `assertEditorBasics` — NOT auto-fired inside `templateConformance`, because no
+// shipping template declares knobs yet (phase 3 lands the mechanism only). Passing
+// `undefined` records the not-declared fact with a single green test, so a
+// knob-unaware template stays green when/if enrolled.
+//
+// The looks-truthfulness half (a look must reference declared axes/values) is
+// DEFERRED to phase 8, when `templateMeta.looks` lands — noted here so the rule's
+// scope is explicit.
+export function assertKnobConformance(
+  templateId: TemplateId,
+  knobs: TemplateKnobDeclaration | undefined,
+): void {
+  describe(`knob-set conformance (${templateId})`, () => {
+    if (!knobs) {
+      it('does not declare knobs (mechanism-only; nothing to check)', () => {
+        expect(knobs).toBeUndefined();
+      });
+      return;
+    }
+
+    it('declares the FULL standard knob axis set', () => {
+      const declared = Object.keys(knobs.axes).sort();
+      const standard = [...KNOB_AXES].sort();
+      expect(
+        declared,
+        `${templateId} declares knobs but is missing standard axes: ${standard
+          .filter((a) => !declared.includes(a))
+          .join(', ')}`,
+      ).toEqual(standard);
+    });
+
+    for (const axis of KNOB_AXES) {
+      describe(`axis "${axis}"`, () => {
+        const def = STANDARD_KNOB_AXES[axis];
+
+        it('declares a non-empty value subset of the standard vocabulary', () => {
+          const values = knobs.axes[axis] ?? [];
+          expect(values.length, `${templateId}/${axis}: declares no values`).toBeGreaterThan(0);
+          const invalid = values.filter((v) => !def.values.includes(v));
+          expect(
+            invalid,
+            `${templateId}/${axis}: declares values outside the standard vocabulary: ${invalid.join(', ')}`,
+          ).toEqual([]);
+        });
+
+        it(`includes the axis default "${def.default}" (its no-op :root baseline)`, () => {
+          expect(
+            knobs.axes[axis] ?? [],
+            `${templateId}/${axis}: tokenizes the axis but omits its default "${def.default}"`,
+          ).toContain(def.default);
+        });
+      });
+    }
   });
 }
