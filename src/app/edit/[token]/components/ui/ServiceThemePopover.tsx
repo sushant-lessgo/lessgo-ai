@@ -26,6 +26,9 @@ import {
 } from '@/types/service';
 import type { TemplateModule } from '@/types/template';
 import { getLoadedTemplate } from '@/modules/templates/registry';
+// templateMeta is pure List-3 data (type-only imports; no template modules) —
+// firewall-safe to read directly. `looks` is the hybrid-look catalog (phase 9).
+import { templateMeta } from '@/modules/templates/templateMeta';
 import {
   TemplateSwapList,
   deriveSwapSite,
@@ -38,6 +41,7 @@ export function ServiceThemePopover() {
     templateId,
     variantId,
     paletteId,
+    themeValues,
     sections,
     pages,
     updateMeta,
@@ -58,6 +62,13 @@ export function ServiceThemePopover() {
   const activePalette = paletteId || tmpl?.defaultPaletteId || palettes[0];
   const activeVariant = variantId || tmpl?.defaultVariantId || variants[0]?.id;
 
+  // Named looks (phase 9) — only knob-tokenized templates ship them (hearth today).
+  // A look bundles knobs + variant + palette; picking one is render-side only
+  // (zero copy-regen). The active look id is the hybrid-stored themeValues.lookId.
+  const looks = templateMeta[tid]?.looks ?? [];
+  const tv = (themeValues as Record<string, any> | null) ?? null;
+  const activeLookId = typeof tv?.lookId === 'string' ? tv.lookId : undefined;
+
   // Reuse the existing autosave path (PO call: no explicit save).
   const persist = () => {
     void triggerAutoSave();
@@ -74,6 +85,27 @@ export function ServiceThemePopover() {
     updateMeta({ variantId: id });
     posthog?.register({ variantId: id });
     posthog?.capture('variant_changed', { audienceType: 'service', templateId: tid, variantId: id });
+    persist();
+  };
+
+  // Pick a named look: resolve its bundle → flat variantId/paletteId (back-compat
+  // columns) + hybrid themeValues { lookId, knobs }. RENDER-SIDE ONLY — content JSON
+  // is never touched, so a look swap costs zero copy-regen. Default knob values emit
+  // no CSS, so the default look is byte-identical to an unstyled draft.
+  const handleLook = (look: (typeof looks)[number]) => {
+    updateMeta({
+      variantId: look.variantId,
+      paletteId: look.paletteId,
+      themeValues: { ...(tv ?? {}), lookId: look.id, knobs: look.knobs },
+    });
+    posthog?.register({ variantId: look.variantId, paletteId: look.paletteId });
+    posthog?.capture('look_changed', {
+      audienceType: 'service',
+      templateId: tid,
+      lookId: look.id,
+      variantId: look.variantId,
+      paletteId: look.paletteId,
+    });
     persist();
   };
 
@@ -122,7 +154,42 @@ export function ServiceThemePopover() {
             onSwap={handleSwap}
           />
 
-          {/* ─── Variant ─── */}
+          {/* ─── Looks (primary — curated bundles; only look-bearing templates) ─── */}
+          {looks.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-gray-500 mb-2">Looks</p>
+              <div className="grid grid-cols-1 gap-1.5">
+                {looks.map((look) => {
+                  const isActive = activeLookId === look.id;
+                  return (
+                    <button
+                      key={look.id}
+                      onClick={() => handleLook(look)}
+                      aria-pressed={isActive}
+                      title={look.blurb}
+                      className={`flex items-center gap-2 rounded-md border px-2 py-1.5 text-left transition ${
+                        isActive
+                          ? 'border-blue-500 ring-2 ring-blue-200'
+                          : 'border-gray-200 hover:border-gray-400'
+                      }`}
+                    >
+                      <span
+                        data-palette={look.paletteId}
+                        className="w-4 h-4 rounded-sm flex-shrink-0"
+                        style={{ background: 'var(--accent, #ccc)' }}
+                      />
+                      <span className="min-w-0">
+                        <span className="block text-xs font-medium text-gray-900">{look.label}</span>
+                        <span className="block text-[11px] text-gray-500 truncate">{look.blurb}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ─── Variant (fallback/advanced row — kept below looks, no removal) ─── */}
           {variants.length > 0 && (
             <div>
               <p className="text-xs font-medium text-gray-500 mb-2">Layout variant</p>

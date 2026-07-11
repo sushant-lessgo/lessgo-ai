@@ -809,3 +809,52 @@ a stringified knob key so live switching (dev stage) works. The parity stage
 - **RUNTIME-WIRING FOLLOW-UPS (moved into phase 9 scope, else picker writes non-rendering looks):** registry.ts expose `knobs: m.hearthKnobs`; LandingPageRenderer.tsx pass `knobs={themeValues?.knobs}` to ThemeInjector; publish/generateStaticHTML caller extract `themeValues.knobs` → knobs option (phase-3 seam inert).
 - **HUMAN GATE:** founder must sign off no-visual-change on a real hearth draft (editor/preview + test-publish HTML diff) before phase 9 proceeds.
 - Process note: earlier double-spawn (two implementers, task ids aecfb2906 + ac020dea) was an orchestrator race — both converged on ONE coherent implementation, second verified not rewrote. No data loss. Concurrent external session also dirtied productBacklog.md/productQueue.md (NOT phase 8, excluded from commit).
+
+## Phase 9 — looks in picker + runtime wiring
+
+**Files changed**
+- `src/modules/templates/registry.ts` (runtime wiring)
+- `src/modules/generatedLanding/LandingPageRenderer.tsx` (runtime wiring)
+- `src/app/api/publish/route.ts` (runtime wiring — the `generateStaticHTML` caller; publish route calls `renderPublishedExport` → `generateStaticHTML`)
+- `src/app/edit/[token]/components/ui/ServiceThemePopover.tsx` (picker — editor Looks section)
+- `src/components/onboarding/wizard/StyleSlot.tsx` (picker — onboarding look tiles)
+- `src/components/onboarding/wizard/fields/templateCatalog.ts` (surface looks metadata)
+- (`src/app/api/saveDraft/route.ts` — NOT edited; schema `z.record(z.string(), z.unknown())` in `src/lib/validation.ts:32/109` already passes `themeValues.knobs` through, permissive as phase-3 predicted.)
+
+### Part A — runtime wiring (load-bearing; done FIRST)
+- **registry.ts**: hearth loader now surfaces `knobs: m.hearthKnobs` on the module surface, mirroring `variants`/`palettes`. `mod.knobs` is now populated at runtime for both edit + published dispatch (also flips the conditional `assertKnobConformance` rule to active on the live module).
+- **LandingPageRenderer.tsx**: edit-side ThemeInjector now receives `knobs={(themeValues)?.knobs}`, mirroring the existing `mood={themeValues?.mood}` line. Knob-unaware templates ignore the extra prop; default knob values emit no CSS (byte-neutral).
+- **publish route (`src/app/api/publish/route.ts`)**: the `generateStaticHTML` caller is the publish route via `renderPublishedExport` (which already threaded a `knobs` option through to `generateStaticHTML` in phase 3, but nothing fed it). Added `projectKnobs` extraction from `project.themeValues.knobs` (parallel to the existing `projectMood`), passed it as `knobs: projectKnobs` into the `renderPublishedExport` call, and merged it into `publishedThemeValues` persisted on `PublishedPage` (so SSR fallback / verify-dns regeneration bake the same knob CSS). Unset drafts stay byte-identical (no knobs key → null → default emits nothing).
+
+### Part B — looks in picker
+- **ServiceThemePopover.tsx** (editor, full fidelity): added a primary "Looks" section above the variant/palette rows (kept below as fallback/advanced — no removal). Reads `templateMeta[tid].looks` (pure List-3 data, firewall-safe — type-only imports). `handleLook` = `updateMeta({ variantId, paletteId, themeValues: { ...prev, lookId, knobs } })` → existing `triggerAutoSave()` (`/api/saveDraft`). Active look = `themeValues.lookId`. PostHog `look_changed` event added.
+- **StyleSlot.tsx** (onboarding trust branch): added a primary "Looks" tile grid above the raw Layout-variant + Palette rows (fallback kept). Tiles read `catalog.looks`. Swatch color sourced from `catalog.swatch()` (explicit hex — onboarding has no injected `[data-palette]{--accent}` CSS, unlike the editor). Active look = tile whose variant+palette both match the current pick.
+- **templateCatalog.ts**: added a `looks: readonly TemplateLook[]` field to `TemplateCatalogEntry`, sourced from `templateMeta.{hearth,lex,surge}.looks ?? []` (only hearth ships looks today).
+
+### End-to-end published-knob proof
+Wrote a temporary vitest (`src/lib/staticExport/__tests__/_phase9KnobProof.temp.test.ts`, run then DELETED — not committed) driving the exact runtime path the publish route now feeds: `generateStaticHTML({ templateId:'hearth', knobs: editorial-ochre.knobs {buttonShape:'square',density:'spacious'} , … })`. Asserted on the produced published HTML:
+- `preloadTemplate('hearth').knobs` is populated (`axes.buttonShape` ⊇ `square`) — registry wiring live;
+- HTML contains `data-knob-buttonShape="square"` + `data-knob-density="spacious"` AND the scoped CSS selectors `[data-knob-buttonShape="square"]{…}` / `[data-knob-density="spacious"]{…}` — the knob layer reaches published output through the runtime path, not just the phase-8 component unit test;
+- with `knobs: null` the HTML contains NO `data-knob-` substring — byte-neutral default preserved.
+All 3 assertions green (3 passed). This proves the previously-inert phase-3 seam is now fed end-to-end.
+
+### Zero-copy-regen proof
+Airtight by construction: `handleLook`'s `updateMeta` patch is exactly `{ variantId, paletteId, themeValues }`; `updateMeta` (persistenceActions.ts:791) does `Object.assign(state, meta)` — `content`/`sections`/`pages`/`elements` are never in the patch and never mutated. `save()` then re-sends the unchanged `state.content`. A look swap therefore touches only variantId/paletteId/themeValues; the content JSON is byte-identical before/after. (Same holds for the onboarding StyleSlot tiles, which only call `setVariantId`/`setPaletteId`.)
+
+### Deviations
+- **saveDraft/route.ts NOT edited** — schema already permissive (confirmed, as the plan anticipated).
+- **Onboarding StyleSlot applies variant+palette only, not knobs (conservative, in-scope).** The onboarding wizard store (`useWizardStore`) is NOT in the phase-9 files-touched list and exposes only `setVariantId`/`setPaletteId` for the trust branch — no knob/themeValues persistence field, and the trust generation `saveDraft` call (`trust.ts:382`) does not send `themeValues` at all (mood isn't persisted from onboarding either). Adding knob persistence to onboarding would require editing `useWizardStore` + `trust.ts` (both out of scope). So onboarding look tiles apply the look's variant + palette (the dominant visual signal — palette + typography/spacing variant); the look's knob refinements (buttonShape/density) + hybrid `lookId` are applied at FULL fidelity in the editor `ServiceThemePopover`. Conservative, breaks nothing (default knobs emit no CSS). Flagged for the founder gate / a follow-up if onboarding-side full-fidelity looks are wanted.
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 141 files passed | 1 skipped; 2266 passed | 11 skipped | 0 failed (i18n flake did not trip this run).
+- `npx playwright test parity render` — 6 passed: meridian ≤1.297%, hearth ≤0.249% (< 3% thresh), parityBreak 6.409% (negative control caught), all 3 render specs (old `/dev/meridian/blocks` URL unaffected).
+- `npm run build` — green.
+- End-to-end published-knob proof — green (3/3, temp test deleted).
+
+Human gate: founder approval of picker UX (tile presentation, look names, fallback-row placement) on dev pending — orchestrator handles the gate + commit. Not committed.
+
+## Phase 9 — impl-review verdict
+- Verdict: **ship** (loop 1). Reviewer RE-PROVED the runtime loop himself (throwaway generateStaticHTML test, deleted after): registry.ts:26 surfaces `knobs: m.hearthKnobs` (mod.knobs populated at runtime); LandingPageRenderer.tsx:960 passes `knobs={themeValues?.knobs}`; publish/route.ts:150-160,338 extracts projectKnobs from project.themeValues.knobs → renderPublishedExport/generateStaticHTML + merges into persisted publishedThemeValues. Published HTML for editorial-ochre look contains data-knob-buttonShape=square + data-knob-density=spacious + scoped CSS; knobs:null → no data-knob; default knobs → no data-knob (byte-neutral). Zero copy-regen (handleLook patches only variantId/paletteId/themeValues). Back-compat: null projectKnobs falls through to prior themeValuesWithMood (identical), looks.length>0 guards pickers. Gates: tsc clean, test:run 2266 passed/0 failed, parity+render 6 passed, build green.
+- Non-blocking: (1) onboarding StyleSlot look tiles apply variant+palette only, not knobs (useWizardStore/trust.ts out of scope; trust-path saveDraft omits themeValues) — JUDGED ACCEPTABLE: all 4 hearth looks have distinct (variant,palette) pairs so none collapse; full knob fidelity in editor popover; minimal follow-up = persist themeValues.knobs from onboarding (needs useWizardStore+trust.ts). (2) CLEANUP: knob attr is camelCase `data-knob-buttonShape` (knobAttr) → React "does not recognize prop" warning under SSR; works because HTML attr/CSS matching is ASCII case-insensitive; pre-existing phase 3/8. Recommend kebab-case (data-knob-button-shape) in a cleanup pass.
+- **HUMAN GATE:** founder picker-UX sign-off (tile presentation, look names, fallback-row placement, editor Looks section) before phase 10.

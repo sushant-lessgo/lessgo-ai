@@ -23,6 +23,10 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       variants: m.hearthVariants,
       defaultVariantId: m.defaultHearthVariant,
       paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
+      // template-factory phase 8/9 — hearth is the first knob-tokenized template.
+      // Surfacing `knobs` here populates `mod.knobs` at runtime for both edit +
+      // published dispatch (enables the conditional conformance rule + render path).
+      knobs: m.hearthKnobs,
     };
   },
   lex: async () => {
