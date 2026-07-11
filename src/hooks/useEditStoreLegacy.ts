@@ -37,21 +37,23 @@ export function useEditStoreLegacy<T>(selector?: (state: EditStore) => T): EditS
   // Try to get from new context first
   const editContext = useEditStoreContext();
 
-  if (editContext.store) {
-    // Update global reference for static access
-    globalStoreRef = editContext.store;
-
-    // Use useStore hook to get reactive state and actions
-    return selector
-      ? useStore(editContext.store, selector)
-      : useStore(editContext.store);
+  // Guard first, so the useStore hook below runs unconditionally on every render
+  // (react-hooks/rules-of-hooks). Within an EditProvider the store is always set;
+  // absence is an invariant violation, hence the throw.
+  if (!editContext.store) {
+    throw new Error(
+      'useEditStore must be used within an EditProvider context. ' +
+      'Please wrap your component with <EditProvider tokenId={tokenId}>'
+    );
   }
 
-  // Fallback error
-  throw new Error(
-    'useEditStore must be used within an EditProvider context. ' +
-    'Please wrap your component with <EditProvider tokenId={tokenId}>'
-  );
+  // Update global reference for static access
+  globalStoreRef = editContext.store;
+
+  // Use useStore hook to get reactive state and actions. A missing selector maps
+  // to an identity selector → the whole EditStore, matching the zero-arg overload.
+  const resolvedSelector = (selector ?? ((state: EditStore) => state)) as (state: EditStore) => T;
+  return useStore(editContext.store, resolvedSelector);
 }
 
 /**
