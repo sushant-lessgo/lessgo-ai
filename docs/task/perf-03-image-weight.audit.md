@@ -316,3 +316,48 @@ All reserve height already; no CSS files joined the Files-touched list.
 - `npm run build` — green (full build incl. published CSS/asset recompile).
 
 **Open risks:** None. Attrs-only change, edit/published parity identical, layout/CSS unchanged. No width/height attrs added. Load-timing only.
+
+---
+
+## Phase 7 — final verification + acceptance + script cleanup
+
+**Files changed**
+- `scripts/scanBase64Content.ts` (DELETED — phase-1 read-only scratch script, per no-long-term-scratch docs policy)
+
+No source edits — both sanity greps came back clean (no missed `<img>`).
+
+### Gate results (all three GREEN)
+- `npx tsc --noEmit` — GREEN (exit 0, no output).
+- `npm run test:run` — GREEN. **128 files passed | 1 skipped (129); 2016 tests passed | 3 skipped (2019).** Duration 48s.
+- `npm run build` — GREEN (exit 0; buildPublishedCSS + buildAssets + next build all completed, full route table emitted).
+
+### Sanity greps (enforcing acceptance criterion 1)
+Both greps run against `src/modules/templates`:
+- `<img` LACKING `loading=` → 5 hits, all FALSE POSITIVES (documentation prose, not JSX tags):
+  - `granth/blocks/primitives.ts:31` + `:38` — doc comment / type annotation text mentioning `<img>`.
+  - `techpremium/blocks/shared/sharedStyles.ts:6` — comment `Real <img> overrides it.`.
+  - `vestria/blocks/primitives.ts:31` + `:38` — same doc/type-annotation prose as granth.
+- `<img` LACKING `decoding=` → same 5 false-positive hits, identical explanation.
+
+Every actual JSX `<img>` in template blocks carries BOTH `loading=` and `decoding="async"` (verified in the full-content grep): heroes/nav = `loading="eager"`, all below-fold = `loading="lazy"`, all = `decoding="async"`. granth/vestria route through the shared `Img` primitive whose `<img>` renders `loading={eager?'eager':'lazy'} decoding="async"`. hearth/lex have no block `<img>`. Shared blog blocks covered. **ZERO real misses — no fix required.**
+
+### Script cleanup
+- `scripts/scanBase64Content.ts` — DELETED (confirmed absent after `rm`).
+- `scripts/migrateBase64Images.ts` — never existed (phase 1b skipped: prod scan clean). Nothing to delete.
+
+### Deviations from plan
+- None. No source edits were needed (plan anticipated "no source edits expected"). Phase-7 steps 2 (`/manual-test` parity) and 3 (Lighthouse LCP) are human merge-gate steps and were intentionally NOT run here per instructions.
+
+### Acceptance-criteria checklist (spec §Acceptance criteria → evidence)
+| Spec criterion | Status | Evidence |
+|---|---|---|
+| All non-hero block images: `loading="lazy"` + `decoding="async"` + dimensions (or aspect-ratio reservation) in BOTH renderers | MET | Phases 3–6 sweep (techpremium/meridian/surge/lumen + shared blog + granth/vestria primitive). Phase-7 dual greps confirm zero raw `<img>` missing either attr. Aspect-ratio reservation pre-existing per each phase's wrapper table (GalleryPreview masonry documented exception). |
+| Hero/LCP eager; published Lighthouse LCP not regressed on naayom-scale page | PARTIAL — code MET, empirical PENDING | Heroes/nav = `loading="eager"` (phases 3–6, verified in grep). LCP-regression measurement is human/empirical → PENDING orchestrator/merge gate (phase-3 pilot already cleared under user Option B: green gates + parity review, skip empirical LCP). |
+| New base64 image values cannot enter content JSON (rejected or auto-uploaded) | MET | Phase 2: pure `isForbiddenImageSrc` reject at `updateElementContent` chokepoint + `uploadImageFromObjectUrl` store adapter + ImageToolbar reload-death fix. 9 unit tests green. |
+| Editor↔published parity pass (manual-test) on lumen + techpremium | PENDING (human/empirical) | Attribute-level edit/published parity confirmed identical in every phase's per-file review. `/manual-test` browser parity pass is a human merge-gate step → PENDING orchestrator. |
+| tsc, test:run, build green | MET | Phase-7 gates above: all three GREEN. |
+
+Two criteria (Lighthouse LCP empirical, `/manual-test` browser parity) are human/empirical and remain PENDING the orchestrator/merge gate — all code-side criteria are MET and all automated gates are GREEN.
+
+### Open risks
+- None new. Carried from earlier phases: GalleryPreview masonry has pre-existing (unchanged-character) CLS behavior; phase-2 `uploadImageFromObjectUrl` type-declaration gap (accessed via cast, low risk). Both flagged for the human parity/LCP gate.

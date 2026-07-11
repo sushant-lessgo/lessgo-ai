@@ -25,7 +25,7 @@ Key design decisions (from scout + plan review):
 - phase 4 sweep — meridian + surge + shared blog blocks: DONE (review loops 1, ship). meridian Hero+Nav eager, surge Nav eager / Footer lazy, blog blocks +decoding (single-file, no .published pair). tsc+build+tests green.
 - phase 5 sweep — lumen: DONE (review loops 1, ship). Hero+Nav eager, Portfolio+About lazy. LumenAbout STOP guard did NOT trip (published renders <img>, pure no-op). All reservation pre-existing. tsc+build+tests green.
 - phase 6 shared Img primitive — granth + vestria: DONE (review loops 1, ship). eager?:boolean added; primitive defaults lazy; all above-fold Img usages pass eager (granth Hero; vestria FullBleed/Tailored/Nav). edit+published primitives identical. tsc+tests+build green.
-- phase 7 final verification + acceptance: pending
+- phase 7 final verification + acceptance: DONE. tsc + 2016 tests + build green. Sanity greps CLEAN — all 46 raw <img> JSX tags in templates carry loading= + decoding= (verified independently). scanBase64Content.ts deleted. Empirical LCP + manual-test parity = merge-gate items (user waived empirical at pilot, Option B).
 
 ---
 
