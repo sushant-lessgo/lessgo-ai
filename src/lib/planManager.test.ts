@@ -62,3 +62,42 @@ describe('PLAN_CONFIGS trackingPixels mapping (config source of truth)', () => {
     expect(PLAN_CONFIGS[PlanTier.ENTERPRISE].features.trackingPixels).toBe(true);
   });
 });
+
+describe('PLAN_CONFIGS pricing v2 numbers', () => {
+  it('FREE tier matches spec', () => {
+    const free = PLAN_CONFIGS[PlanTier.FREE];
+    // Display value diverges from DB creditsLimit=0 by design (creditPool, later phase).
+    expect(free.credits).toBe(20);
+    expect(free.limits.publishedPages).toBe(1);
+    expect(free.limits.draftProjects).toBe(3);
+    expect(free.limits.customDomains).toBe(0);
+    expect(free.limits.formSubmissions).toBe(25);
+    expect(free.limits.teamMembers).toBe(1);
+    expect(free.features.customDomains).toBe(false);
+    expect(free.features.removeBranding).toBe(false);
+    expect(free.features.analytics).toBe('basic');
+  });
+
+  it('PRO tier matches spec', () => {
+    const pro = PLAN_CONFIGS[PlanTier.PRO];
+    expect(pro.price.monthly).toBe(29);
+    expect(pro.price.annual).toBe(24);
+    expect(pro.credits).toBe(200);
+    expect(pro.limits.publishedPages).toBe(3);
+    expect(pro.limits.customDomains).toBe(3);
+    expect(pro.limits.draftProjects).toBe(-1);
+    expect(pro.limits.formSubmissions).toBe(1000);
+    expect(pro.features.removeBranding).toBe(true);
+    expect(pro.features.customDomains).toBe(true);
+    expect(pro.features.formIntegrations).toBe(true);
+    expect(pro.features.prioritySupport).toBe(true);
+    expect(pro.features.trackingPixels).toBe(true);
+    expect(pro.features.analytics).toBe('full');
+  });
+
+  it('FREE published-pages limit is below PRO (no inversion)', () => {
+    expect(PLAN_CONFIGS[PlanTier.FREE].limits.publishedPages).toBeLessThan(
+      PLAN_CONFIGS[PlanTier.PRO].limits.publishedPages,
+    );
+  });
+});

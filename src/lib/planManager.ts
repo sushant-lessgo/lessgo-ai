@@ -59,22 +59,26 @@ export interface PlanConfig {
 export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
   [PlanTier.FREE]: {
     tier: PlanTier.FREE,
-    name: 'Launch',
+    name: 'Free',
     price: {
       monthly: 0,
       annual: 0,
     },
-    credits: 30,
+    // Display value 20 INTENTIONALLY diverges from DB creditsLimit=0. The 20
+    // one-time credits live in UserPlan.creditPool (seeded once at plan creation,
+    // never refills — added in a later phase), while the monthly limit is
+    // deliberately 0 (new periods seed 0). Do NOT "fix" this to write creditsLimit=20.
+    credits: 20,
     limits: {
-      publishedPages: 20,
+      publishedPages: 1,
       draftProjects: 3,
-      customDomains: 1,
-      formSubmissions: 100,
+      customDomains: 0,
+      formSubmissions: 25,
       teamMembers: 1,
     },
     features: {
       removeBranding: false,
-      customDomains: true,
+      customDomains: false,
       formIntegrations: false,
       exportHTML: false,
       whiteLabel: false,
@@ -91,12 +95,12 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
     tier: PlanTier.PRO,
     name: 'Pro',
     price: {
-      monthly: 39,
-      annual: 29, // $348/year = $29/month
+      monthly: 29,
+      annual: 24, // $290/year ≈ $24/month (pricing page displays "$290/yr")
     },
     credits: 200,
     limits: {
-      publishedPages: 10,
+      publishedPages: 3,
       draftProjects: -1, // unlimited
       customDomains: 3,
       formSubmissions: 1000,
@@ -327,6 +331,10 @@ export async function downgradePlan(userId: string, newTier: PlanTier = PlanTier
 
 /**
  * Start trial period
+ *
+ * UNUSED (spec decision 3): pricing v2 has no trials — the free tier is the trial,
+ * with a 14-day money-back guarantee instead. Kept in place (not deleted) to avoid
+ * touching callers/exports; do not wire into new flows.
  */
 export async function startTrial(userId: string, tier: PlanTier, trialDays: number = 14) {
   try {
@@ -370,6 +378,9 @@ export async function startTrial(userId: string, tier: PlanTier, trialDays: numb
 
 /**
  * End trial period (convert or revert)
+ *
+ * UNUSED (spec decision 3): see startTrial — pricing v2 has no trials. Retained,
+ * not deleted.
  */
 export async function endTrial(userId: string, convert: boolean = false) {
   try {
