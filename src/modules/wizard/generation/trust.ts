@@ -44,7 +44,8 @@ import {
 import { applyConfirmedStructure } from '@/modules/audience/service/strategy/parseStrategyService';
 import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
 import { runCollectionFanOut } from '@/modules/generation/multiPageAssembly';
-import { templateMeta } from '@/modules/templates/templateMeta';
+import { templateMeta, type TemplateLook } from '@/modules/templates/templateMeta';
+import { pickSeeded } from '@/modules/generation/spread';
 import type { CollectionsFacts } from '@/modules/brief/collections';
 import { buildFinalContent, saveDraft, type BriefGoal } from './finalize';
 import type { GenerationCallbacks, GenerationResult } from './index';
@@ -112,6 +113,18 @@ export interface TrustGenerationInput {
   // Style picks (trust picker) — palette/variant for the resolved template.
   paletteId?: string;
   variantId?: string;
+
+  /**
+   * template-factory phase 10 — DETERMINISTIC generation spread signal. When the
+   * user made NO explicit style pick, the wizard slot sets this to spread the
+   * STARTING LOOK for look-bearing templates (hearth): a seeded look bundles
+   * palette + variant + knobs, written to the flat columns + `themeValues`
+   * (lookId/knobs). Same token → same look (reproducible); different tokens
+   * spread across the named looks. An explicit `paletteId`/`variantId` ALWAYS
+   * wins. Absent/false ⇒ the template's default palette/variant — byte-identical
+   * to today; threaded-but-DORMANT until the slot feeds this flag.
+   */
+  styleAutoAssign?: boolean;
 
   // Structure (7b gate output — scale-07 phase 4/5). When `strategy` is
   // present runTrustGeneration NEVER refetches (credit charge-once); when
@@ -186,6 +199,23 @@ export function buildAssets(input: TrustGenerationInput): ServiceAssetInput {
     hasFounderPhoto: p.hasFounderPhoto,
     testimonialType: p.testimonialType,
   };
+}
+
+/**
+ * template-factory phase 10 — seeded STARTING look for look-bearing templates.
+ * Returns a look ONLY when: the user made no explicit palette/variant pick, the
+ * wizard signalled auto-assign, and the resolved template declares `looks`
+ * (hearth). Deterministic per token; spreads across the named looks. `undefined`
+ * ⇒ no spread (the effectivePalette default + declared variant apply — today's
+ * behaviour). An explicit pick is honoured here (returns undefined).
+ */
+export function spreadLook(input: TrustGenerationInput): TemplateLook | undefined {
+  if (input.paletteId || input.variantId) return undefined; // explicit pick wins
+  if (input.styleAutoAssign !== true) return undefined; // dormant until slot signals
+  const templateId = input.templateId ?? 'hearth';
+  const looks = templateMeta[templateId as keyof typeof templateMeta]?.looks;
+  if (!looks || looks.length === 0) return undefined;
+  return pickSeeded(looks, input.tokenId, 'look');
 }
 
 /** Effective palette — the picked value, else the template's first palette. */
@@ -315,9 +345,14 @@ export async function runTrustGeneration(
   const title = (input.businessName.trim() || input.oneLiner || 'Untitled Studio').slice(0, 50);
   const briefGoal = briefGoalFor(input);
   const briefPatch = briefGoal ? { brief: { goal: briefGoal } } : {};
-  const paletteId = effectivePalette(input);
   const templateId = input.templateId ?? 'hearth';
-  const variantId = input.variantId ?? defaultVariantForTemplate[templateId as TemplateId];
+  // phase 10 — seeded starting look (hearth) when no explicit pick. The look's
+  // palette/variant write to the flat columns; its knobs + lookId to themeValues.
+  const look = spreadLook(input);
+  const paletteId = look?.paletteId ?? effectivePalette(input);
+  const variantId =
+    look?.variantId ?? input.variantId ?? defaultVariantForTemplate[templateId as TemplateId];
+  const lookPatch = look ? { themeValues: { lookId: look.id, knobs: look.knobs } } : {};
 
   // ─── Strategy (PRIMARY: pre-gate fetch from the structure slot, forwarded
   //     through `input.strategy` by the store's buildTrustInput projection;
@@ -385,6 +420,7 @@ export async function runTrustGeneration(
       paletteId,
       templateId,
       variantId,
+      ...lookPatch,
       ...briefPatch,
       finalContent,
     });
@@ -399,7 +435,7 @@ export async function runTrustGeneration(
       collections: (input.collections ?? {}) as CollectionsFacts,
       declaredCapabilities: declaredCaps,
       persist: async (fc) => {
-        await saveDraft({ tokenId, title, paletteId, templateId, variantId, ...briefPatch, finalContent: fc });
+        await saveDraft({ tokenId, title, paletteId, templateId, variantId, ...lookPatch, ...briefPatch, finalContent: fc });
       },
       generateItemCopy: async (plan) => {
         try {

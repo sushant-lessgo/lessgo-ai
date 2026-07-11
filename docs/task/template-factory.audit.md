@@ -858,3 +858,49 @@ Human gate: founder approval of picker UX (tile presentation, look names, fallba
 - Verdict: **ship** (loop 1). Reviewer RE-PROVED the runtime loop himself (throwaway generateStaticHTML test, deleted after): registry.ts:26 surfaces `knobs: m.hearthKnobs` (mod.knobs populated at runtime); LandingPageRenderer.tsx:960 passes `knobs={themeValues?.knobs}`; publish/route.ts:150-160,338 extracts projectKnobs from project.themeValues.knobs → renderPublishedExport/generateStaticHTML + merges into persisted publishedThemeValues. Published HTML for editorial-ochre look contains data-knob-buttonShape=square + data-knob-density=spacious + scoped CSS; knobs:null → no data-knob; default knobs → no data-knob (byte-neutral). Zero copy-regen (handleLook patches only variantId/paletteId/themeValues). Back-compat: null projectKnobs falls through to prior themeValuesWithMood (identical), looks.length>0 guards pickers. Gates: tsc clean, test:run 2266 passed/0 failed, parity+render 6 passed, build green.
 - Non-blocking: (1) onboarding StyleSlot look tiles apply variant+palette only, not knobs (useWizardStore/trust.ts out of scope; trust-path saveDraft omits themeValues) — JUDGED ACCEPTABLE: all 4 hearth looks have distinct (variant,palette) pairs so none collapse; full knob fidelity in editor popover; minimal follow-up = persist themeValues.knobs from onboarding (needs useWizardStore+trust.ts). (2) CLEANUP: knob attr is camelCase `data-knob-buttonShape` (knobAttr) → React "does not recognize prop" warning under SSR; works because HTML attr/CSS matching is ASCII case-insensitive; pre-existing phase 3/8. Recommend kebab-case (data-knob-button-shape) in a cleanup pass.
 - **HUMAN GATE:** founder picker-UX sign-off (tile presentation, look names, fallback-row placement, editor Looks section) before phase 10.
+
+---
+
+## Phase 10 — generation spread
+
+### Files changed
+- `src/modules/generation/spread.ts` (NEW) — seeded RNG + pick helpers (pure, self-contained).
+- `src/modules/generation/spread.test.ts` (NEW) — determinism + spread-distribution tests.
+- `src/modules/generation/blockEligibility.ts` — `EligibilityInput.seed?`; `pickFromSet` seeded-pick among eligible.
+- `src/modules/generation/blockEligibility.test.ts` — seeded spread + determinism cases (synthetic + real meridian manifest).
+- `src/modules/wizard/generation/thing.ts` — meridian palette + block-variant spread hookup (guarded).
+- `src/modules/wizard/generation/trust.ts` — hearth starting-look spread hookup (guarded).
+
+### Seed derivation
+- Seed source = the **project token** (`input.tokenId`), stable for the project's life → re-running generation for the same project yields the SAME start (reproducible).
+- `hashToken` = FNV-1a 32-bit; `makeRng` = mulberry32; `seedFor(token, salt)` namespaces each pick point (`'palette'`, `'look'`, `'block:<default>'`) so palette/look/block are INDEPENDENT draws from one token. No `Math.random()` anywhere (forbidden — non-reproducible). Firewall: spread.ts imports nothing (pure data); no template-component imports on the generation path.
+
+### The three spread points
+- (a) **block-variant** — `blockEligibility.pickFromSet`: when `input.seed` present, picks a seeded choice among ALL eligible variants (salted by `set.default`); absent seed ⇒ legacy default-first path byte-identical. `selectEligibleBlock` forwards the seed unchanged. Always returns a VALID eligible/default name (asset-gated variants like EditorialPhotoHero stay excluded with no asset facts, so hero keeps its default; features/testimonials spread among co-eligible same-consumes variants ⇒ copy unchanged).
+- (b) **starting palette** — thing.ts `spreadMeridianPalette(token)` = `pickSeeded(meridianPalettes, token, 'palette')`; trust.ts look bundles the palette.
+- (c) **starting look** — trust.ts `spreadLook(input)` = `pickSeeded(templateMeta.hearth.looks, token, 'look')`; the look's palette/variant write to the flat columns, its `lookId`/`knobs` to `themeValues` (hybrid storage per Decisions block, no migration).
+
+### Explicit-pick guard (spread never overrides a user choice)
+- thing.ts `shouldSpreadMeridian`: `if (input.paletteId || input.variantId) return false;` — an explicit pick short-circuits BEFORE any seed is consulted. Palette computation also keeps `input.paletteId ??` ahead of the spread branch.
+- trust.ts `spreadLook`: first line `if (input.paletteId || input.variantId) return undefined;` — explicit pick ⇒ no look; `paletteId = look?.paletteId ?? effectivePalette(input)` and `variantId = look?.variantId ?? input.variantId ?? default` both keep the explicit value ahead of spread.
+
+### Determinism + distribution results
+- `spread.test.ts`: hashToken/makeRng/seedFor determinism; pickSeeded in-range + reproducible; **acceptance** — startingTuple(palette, meridian features block, hearth look) over 10 distinct tokens: same token twice ⇒ identical tuple; 10 tokens ⇒ ≥7 distinct tuples (asserted); every field a real id.
+- `blockEligibility.test.ts`: no-seed ⇒ legacy default-first; same seed twice ⇒ identical; 20 seeds cover BOTH eligible variants; seeded pick always eligible/default (asset-gated excluded); single-eligible ⇒ no-op; nothing-eligible ⇒ default; real meridian `features` spreads {HairlineFeatureGrid, LedgerFeatureList}, `hero` (no photos) stays TerminalHero under all seeds.
+
+### Verification
+- `npx tsc --noEmit` — clean (no output).
+- Targeted: `vitest run spread + blockEligibility + thing.test + trust.test` — 4 files, 100 tests passed.
+- `npm run test:run` — 142 files passed | 1 skipped; 2285 passed | 11 skipped; 0 failed (i18n flake did not fire this run). Existing generation-contract / thing.test (meridian smoke) / trust.test (hearth terracotta smoke) all green.
+
+### Deviations
+- **Wizard-slot wiring threaded-but-DORMANT behind `styleAutoAssign`.** The plan says "spread when the user made no explicit pick." The existing (untouchable, not in Files-touched) `trust.test.ts` runs a no-pick input and asserts the saved `paletteId === 'terracotta'` (today's default). Firing look-spread by default on that input would break it. To honour "existing generation-contract tests still green" AND the phase intent, the spread MECHANISM is fully live + tested, but the HOOKUP is gated on a new opt-in `styleAutoAssign?: boolean` (default/undefined ⇒ no spread) that the wizard GeneratingSlot (out of phase-10 scope) sets when the user skips the picker. This mirrors the codebase's pervasive "threaded-but-dormant until the out-of-scope caller feeds it" pattern (cardCountHints, collections bridge, phase-3 knob seam). Both smoke tests stay byte-identical; spread distribution/determinism is proven via spread.test.ts fixtures calling the real spread.ts + seeded eligibility + templateMeta looks + meridianPalettes. Conservative choice logged per the in-scope-ambiguity rule.
+- **Block spread scoped to meridian single-page** (per plan "block-variant spread hookup (meridian)"): applied in `runCopyAndSave` non-multipage branch only; multipage/vestria fan-out untouched.
+
+### Open risks
+- Until the wizard slot sets `styleAutoAssign`, spread has NO production effect (dormant). Activating it is a one-line slot change in a future phase; recommend a founder gate at activation since it changes the starting look/palette of new meridian+hearth sites.
+- Meridian block spread uses NO asset facts (thing.ts single-page has none wired), so only asset-free co-eligible variants (features/testimonials) ever spread; hero stays default. Acceptable — matches server-side selection which also has no facts on this path.
+
+## Phase 10 — impl-review verdict
+- Verdict: **ship** (loop 1). Reviewer confirmed: determinism+distribution genuine (spread.ts FNV-1a hashToken → mulberry32 makeRng, salted seedFor per pick; zero Math.random; spread.test.ts same-token→identical + 10 tokens→≥7 distinct, ran green); explicit-pick guard real (thing.ts shouldSpreadMeridian short-circuits on input.paletteId||variantId; trust.ts spreadLook returns undefined on explicit pick, user value kept ahead of spread); dormant styleAutoAssign flag is a REAL toggle (both branches traced — true+no-pick routes through real spreadMeridianBlocks→selectEligibleBlock(seed) + spreadMeridianPalette + trust pickSeeded look; activation = 1-line slot change; honestly disclosed, default-OFF correct back-compat); firewall intact (spread.ts imports nothing, block spread runs BEFORE copy gen so no copy corruption); blockEligibility seedless path byte-identical (seeded branch gated behind `if input.seed !== undefined`). Gates: tsc clean, test:run 2285 passed/0 failed.
+- Non-blocking (for the future activation phase): (1) meridian block spread hero-inert without assetFacts on single-page path — only asset-free co-eligible sections spread until asset facts wired. (2) trust.ts lookPatch writes whole themeValues (replace not merge) — safe at creation-only, flag for activation. (3) activation of styleAutoAssign changes new meridian+hearth starting look/palette → its own founder gate recommended.
