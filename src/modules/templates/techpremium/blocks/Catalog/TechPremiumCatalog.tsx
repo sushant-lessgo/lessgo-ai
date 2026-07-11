@@ -31,7 +31,7 @@ function ProductCard({ item, edit }: { item: CatalogItem; edit: boolean }) {
   return (
     <Wrapper className="tp-pcard" {...wprops}>
       <div className="tp-pshot">
-        {item.image ? <img src={item.image} alt={item.name} /> : <span className="tp-pshot__ph">{item.model || 'Product photo'}</span>}
+        {item.image ? <img src={item.image} alt={item.name} loading="lazy" decoding="async" /> : <span className="tp-pshot__ph">{item.model || 'Product photo'}</span>}
       </div>
       <div className="tp-pbody">
         {item.model && <span className="tp-pmodel">{item.model}</span>}

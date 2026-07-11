@@ -44,7 +44,7 @@ export default function TechPremiumTrustPublished({ sectionId, headline, metrics
                 {[0, 1].map((copy) =>
                   ls.map((l) => (
                     <span key={`${copy}-${l.id}`} className="tp-trust__logo" aria-hidden={copy === 1 || undefined}>
-                      {l.image ? <img src={l.image} alt={copy === 0 ? l.name : ''} /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
+                      {l.image ? <img src={l.image} alt={copy === 0 ? l.name : ''} loading="lazy" decoding="async" /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
                     </span>
                   ))
                 )}

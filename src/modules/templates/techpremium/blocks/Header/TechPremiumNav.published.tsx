@@ -58,7 +58,7 @@ export default function TechPremiumNavPublished(props: Props) {
         <div className="tp-nav-in">
           <a className="tp-brand" href="/">
             {props.logo_image ? (
-              <img className="tp-brand__img" src={props.logo_image} alt={logoText} />
+              <img className="tp-brand__img" src={props.logo_image} alt={logoText} loading="eager" decoding="async" />
             ) : (
               <>
                 <span className="tp-brand__mk" aria-hidden="true" />

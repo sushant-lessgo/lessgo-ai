@@ -110,7 +110,7 @@ export default function TechPremiumNav({ sectionId }: Props) {
       <nav className="tp-nav" data-section-id={sectionId} data-edit={edit ? '1' : undefined}>
         <div className="tp-nav-in">
           <span className="tp-brand">
-            {blockContent.logo_image ? <img className="tp-brand__img" src={blockContent.logo_image} alt={blockContent.logo_text || 'Logo'} /> : <span className="tp-brand__mk" aria-hidden="true" />}
+            {blockContent.logo_image ? <img className="tp-brand__img" src={blockContent.logo_image} alt={blockContent.logo_text || 'Logo'} loading="eager" decoding="async" /> : <span className="tp-brand__mk" aria-hidden="true" />}
             {!blockContent.logo_image && (
               <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey="logo_text" value={blockContent.logo_text} onSave={(v) => handleContentUpdate('logo_text', v)} enterBehavior="save" className="tp-brand__wm" placeholder="Brand" />
             )}

@@ -124,3 +124,70 @@ callers, and `blob:`/`createObjectURL` in ImageToolbar. Findings:
 ### Open risks
 - The type-declaration gap (deviation above) means callers get no compile-time signature for
   `uploadImageFromObjectUrl`; only ImageToolbar uses it and does so via cast. Low risk.
+
+## Phase 3 — PILOT: techpremium img attrs (both renderers)
+
+**Files changed** (all under `src/modules/templates/techpremium/blocks/`)
+- `Hero/TechPremiumHero.tsx` + `Hero/TechPremiumHero.published.tsx`
+- `Header/TechPremiumNav.tsx` + `Header/TechPremiumNav.published.tsx`
+- `Footer/TechPremiumFooter.tsx` + `Footer/TechPremiumFooter.published.tsx`
+- `Trust/TechPremiumTrust.tsx` + `Trust/TechPremiumTrust.published.tsx`
+- `Explainer/TechPremiumExplainer.tsx` + `Explainer/TechPremiumExplainer.published.tsx`
+- `Gallery/TechPremiumGallery.tsx` + `Gallery/TechPremiumGallery.published.tsx`
+- `GalleryPreview/TechPremiumGalleryPreview.tsx` + `GalleryPreview/TechPremiumGalleryPreview.published.tsx`
+- `Lineup/TechPremiumLineup.tsx` + `Lineup/TechPremiumLineup.published.tsx`
+- `Catalog/TechPremiumCatalog.tsx` + `Catalog/TechPremiumCatalog.published.tsx`
+- `ProductDetail/TechPremiumProductDetail.tsx` + `ProductDetail/TechPremiumProductDetail.published.tsx`
+
+No CSS/styles files were modified (no aspect-ratio additions needed — see per-block table).
+
+### What changed — per block
+
+Attribute sets are IDENTICAL between each `.tsx` (edit) and its `.published.tsx` (published) sibling. Only `loading` + `decoding` attrs were added; `src`/`alt`/`className` and all layout/markup unchanged.
+
+| Block | img(s) | attrs added | aspect-ratio wrapper |
+|-------|--------|-------------|----------------------|
+| Hero | `.tp-hero__photo` (LCP) | `loading="eager" decoding="async"` | `.tp-ph--unit` aspect-ratio:4/4.4 — pre-existing (unchanged, eager) |
+| Header/Nav | `.tp-brand__img` (above-fold logo) | `loading="eager" decoding="async"` | fixed logo size — n/a (eager) |
+| Footer | `.tp-footer__img` (logo) | `loading="lazy" decoding="async"` | `.tp-footer__img { height:32px }` fixed height — pre-existing reservation |
+| Trust | logo row img | `loading="lazy" decoding="async"` | `.tp-trust__logo img { height:60px }` fixed height — pre-existing reservation |
+| Explainer | `.tp-ph` media img | `loading="lazy" decoding="async"` | `.tp-explain-media .tp-ph { aspect-ratio:4/3 }` — pre-existing |
+| Gallery | `.tp-ph` grid img | `loading="lazy" decoding="async"` | `.tp-ggrid .tp-gitem .tp-ph { aspect-ratio:1/1 }` — pre-existing |
+| GalleryPreview | `.tp-ph` masonry img | `loading="lazy" decoding="async"` | masonry (variable natural ratios) — NO aspect added (see Deviations) |
+| Lineup | `.tp-pshot` img | `loading="lazy" decoding="async"` | `.tp-pshot { aspect-ratio:4/3 }` — pre-existing |
+| Catalog | `.tp-pshot` img | `loading="lazy" decoding="async"` | `.tp-pshot { aspect-ratio:4/3 }` — pre-existing |
+| ProductDetail | stage img | `loading="lazy" decoding="async"` | `.tp-pd-stage { aspect-ratio:4/3 }` — pre-existing |
+| ProductDetail | thumb img | `loading="lazy" decoding="async"` | `.tp-pd-thumb { aspect-ratio:1/1 }` — pre-existing |
+| ProductDetail | related img | `loading="lazy" decoding="async"` | `.tp-pshot { aspect-ratio:4/3 }` — pre-existing |
+
+All 12 `<img>` sites (2 eager + 10 lazy; ProductDetail carries 3) covered. Grep of the
+techpremium block dirs confirmed no additional `<img>` beyond those listed. Edit/published
+attribute parity confirmed for every pair.
+
+### Deviations
+
+- **GalleryPreview masonry — no aspect-ratio added (in-scope judgment call).** The
+  GalleryPreview grid is CSS `column-count` masonry (`.tp-masonry`), where each `.tp-ph`
+  intentionally renders at the image's *natural, variable* aspect ratio (that is the whole
+  point of masonry). There is no single "current rendered ratio" to reserve; forcing a fixed
+  `aspect-ratio` on `.tp-ph` would crop/reshape every tile — a real VISUAL change, which the
+  phase forbids. Masonry already reflows as images load today (pre-change), independent of the
+  `loading` attr; `loading="lazy"` only shifts *when* that load happens, not whether reflow
+  occurs. Per the conservative rule I kept the lazy attr (explicitly required by the plan) and
+  did NOT fabricate an aspect-ratio. Net: no visual change; no NEW layout-shift character
+  beyond what masonry already has. (The full `Gallery` block, by contrast, uses a fixed
+  `.tp-ggrid` 1/1 grid and IS reserved.)
+- Note: ProductDetail's first stage image is set lazy per the explicit plan list (all
+  ProductDetail imgs lazy). On a standalone product-detail subpage this stage image could be
+  near-top; the plan intentionally treats ProductDetail as below-fold, so I followed it.
+
+### Verification
+- `npx tsc --noEmit` — GREEN (no output).
+- `npm run build` — GREEN (buildPublishedCSS + buildAssets + next build all completed; full
+  route table emitted). Published CSS/assets recompiled so editor/published parity is trustworthy.
+- Editor↔published `<img>` attribute sets confirmed identical for all 10 block pairs.
+- Lighthouse/LCP + visual-parity gate deferred to orchestrator/human per phase instructions (not run here).
+
+### Open risks
+- Minor CLS possible on the GalleryPreview masonry grid on scroll (below-fold), unchanged in
+  character from pre-existing masonry behavior — flagged above for the human parity/LCP gate.

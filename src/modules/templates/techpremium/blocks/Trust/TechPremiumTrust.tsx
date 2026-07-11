@@ -68,7 +68,7 @@ export default function TechPremiumTrust({ sectionId }: Props) {
             <div className="tp-trust__logos">
             {logos.map((l) => (
               <span key={l.id} className={`tp-trust__logo${edit ? ' is-edit' : ''}`}>
-                {l.image ? <img src={l.image} alt={l.name} /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
+                {l.image ? <img src={l.image} alt={l.name} loading="lazy" decoding="async" /> : <span className="tp-trust__logoph">{l.name || 'Logo'}</span>}
                 {edit && (
                   <span className="tp-trust__logo-edit">
                     <label className="tp-trust__logo-up">
