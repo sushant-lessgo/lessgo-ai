@@ -1,639 +1,201 @@
 ---
 name: new-template
 description: >-
-  Guide for adding a brand-new visual template (the middle tier of
-  audienceType → templateId → variant+palette) for an EXISTING audience
-  (product or service) in the Lessgo landing-page app. Use when the user
-  wants to add/create/clone a template, port a designer's static HTML into
-  a template module (tokens/palettes/variants/blocks + dual-renderer pairs),
-  wire it into the registry/picker, or build a bespoke single-client
-  (photographer/naayom-style) template. Covers the module contract, the
-  dual-renderer parity trap, the two-identifier (type vs LayoutName)
-  discipline, fonts, interactive behaviors, and audience-extension (§12) vs
-  skin. NOT for standing up a new audience type.
+  Decision gate + build workflow for template work in Lessgo (the middle tier of
+  audienceType → templateId → variant+palette). Use FIRST when a lead/business
+  can't be served for a design/style/capability reason, to decide whether the
+  answer is a capability block-pair on an existing flagship (path C), a brand-new
+  template (path D), or an engine build (path E) — and to refuse "new template"
+  when a capability path fits. Then guides the shared build core: design kit →
+  art-direction/tiles → founder taste-pick → design → handoff lint → agent port
+  via /feature → templateConformance → screenshot parity → parity QA. Covers the
+  evergreen dual-renderer landmines tests can't fully catch. NOT for standing up a
+  new audience type.
 ---
 
-# Adding a New Template
+# Template work — decide first, then build
 
-> **Audience of this skill:** a dev agent adding a brand-new visual **template** (the middle tier of
-> `audienceType → templateId → variant+palette`) for an **existing audience type**
-> (`product` or `service`). This is how **Lex** was added under `service` (a clone of Hearth).
-> **Out of scope:** standing up a new *audience type* (new onboarding flow + store + copy
-> prompts). See the final appendix for a pointer.
-
-> **Golden rule:** a new template is, by default, a **skin** — new *tokens, palettes, variants,
-> and block components* that **consume the audience's existing content contract** (no `audience/**`
-> edits). This is the common case and the fastest path; do this unless you have a reason not to.
->
-> **But a template MAY also extend the audience** — add new section types, multi-page, collections,
-> interactivity (TechPremium/naayom did all four). That is **deliberate, AI-first** work: new
-> section types flow through the audience's **AI generation** (schema + section selection + copy
-> prompt) so the model produces them — you do **not** hardcode page copy. Multi-page is now a
-> **standard** capability, not an exception. See **§12** before you touch `src/modules/audience/**`
-> or the multi-page store — going there by accident is still a mistake; going there on purpose,
-> following §12, is supported.
+This skill is thin ON PURPOSE. Everything derivable from code (layout maps, export
+names, schema locations, section lists, contract keys) lives in the code and its
+generated design kit — pointers below. Prose that mirrors code rots every scale
+phase; the kit and conformance suite are the live source of truth.
 
 ---
 
-## 0. Mental model
+## 1. Decision gate — run this BEFORE proposing any template
 
-A landing page is rendered from three orthogonal inputs:
+A business fails the serve gate for exactly one diagnosable reason. The gate's
+failed clause tells you WHICH rung to build (`docs/tracks/scalePlan.md` §7 build
+ladder). **Never jump to a new template when a cheaper rung serves.**
 
-| Tier | What it is | Where it's chosen |
-|---|---|---|
-| `audienceType` | `product` \| `service` \| `ecommerce` | persona at `/onboarding` |
-| `templateId` | the visual system (e.g. `meridian`, `hearth`, `lex`, **your new one**) | onboarding picker (service) / locked (product pilot) |
-| `palette` + `variant` | accent colors + font/spacing variation **within** a template | picker, or template defaults |
+| Rung | Failed clause (what's missing) | Build action | Cost |
+|---|---|---|---|
+| A | businessType entry missing | config list entry | hours, no code |
+| B | goal.mechanism machinery missing | platform feature (click system) — all templates benefit | days, once ever |
+| **C** | **capability missing, engine HAS a template** | **block pair(s) on that engine's FLAGSHIP + declare the capability** | days/block |
+| **D** | **engine has a template but accumulated STYLE demand, or engine has NO template** | **new template (this skill's build core)** | weeks |
+| E | copyEngine not live | new engine | biggest, rare — separate decision/escalate |
 
-A **template module** lives at `src/modules/templates/<id>/`. It exposes a fixed contract
-(below) that the global **registry** loads lazily. The renderers are **generic** — they call
-`tmpl.resolveBlock(sectionType, mode)`, `tmpl.ThemeInjector`, `tmpl.SSRTokens`,
-`tmpl.getSurfaceForSection(...)` — so once your module satisfies the contract and you register
-it, edit / preview / published / static-export all "just work."
+**The refusal rule (scalePlan §7, D7): never D when C works.** A capability gap
+(gallery, catalog, video-hero, store-badges, blog, packages, map-hours, bilingual,
+lead-form, multipage) is a BLOCK CONTRACT — add the block pair to the engine's
+flagship template and declare the capability in `templateMeta`/manifest (kept
+honest by `templateConformance`). Do NOT build a "photographer template" for a
+gallery gap. If someone asks for a new template, first prove the need is a genuine
+STYLE gap, not a capability gap:
 
-**Three render surfaces, two component variants per block:**
-- **Edit** (`/edit/[token]`) and **Preview** (`/preview/[token]`) → `LandingPageRenderer` → your block's **`.tsx`** (client, editable).
-- **Published** (`/p/[slug]`) and **static export** → `LandingPagePublishedRenderer` → your block's **`.published.tsx`** (server-safe, no hooks).
-- **Dual-renderer parity is the #1 trap.** Every block is a *pair*; they must render the same
-  layout/colors. A mismatch = "looks right in editor, wrong when published" (or vice-versa).
+- **Capability gap** (empty capability, engine already has ≥1 template) → **path C**.
+  Add block pair(s) to the flagship; done. STOP — do not create a template.
+- **Style gap** (an empty `designStyle` cell / a demand-board style signal the
+  existing templates can't satisfy) → **path D**, the build core below.
+- **Engine missing** (`copyEngine` not live) → **path E**. Out of this skill —
+  escalate as a separate engine decision; do not build a template on a dead engine.
 
-**A project can hold multiple pages.** Multi-page is standard: one project = one site, with a Home
-plus optional subpages (`/gallery`, `/contact`, `/products/{slug}`, …) routed at `/p/{slug}/{path}`.
-Shared header/footer ("chrome") is edited once and injected into every page at publish. A pure skin
-needs to know none of this — the renderers handle it. A template that *adds* page types or
-collections does (see **§12** + `docs/tracks/multiPagePlan.md`).
+When in doubt between C and D, C wins. The demand board ranks *capability gaps, not
+template counts* — one capability build unblocks several business types.
 
 ---
 
-## 1. The designer handoff: a single static HTML file
+## 2. The build core (paths C and D share it)
 
-A template starts as one self-contained HTML file from the designer, e.g.
-`Folio - Editorial Minimalist.html` (compare `Meridian - Modern Tech.html`). It encodes the
-**whole design system** and maps almost 1:1 onto the module files. Read its `<head>` first.
+Both a flagship capability block-pair (C) and a whole new template (D) go through
+the same pipeline. D runs all of it; C runs the subset that touches the flagship
+(design kit → lint the added markup → port → conformance → parity) without the
+full art-direction/taste-pick unless the new blocks introduce a style.
 
-```html
-<html lang="en" data-palette="bone" data-variant="mixed">   <!-- the two configurable axes -->
-<link href="...fonts.googleapis.com/css2?family=Source+Serif+4...&family=Manrope...">  <!-- fonts -->
-<style>
-:root {
-  --accent: ...; --accent-deep: ...; --accent-ink: ...;     /* PALETTE axis  → palettes.ts */
-  --paper: ...; --paper-1: ...; --paper-2: ...;             /* SURFACES      → sectionRules.ts */
-  --ink: ...; --ink-2: ...; --ink-3: ...;                   /* base tokens   → tokens.ts */
-  --rule: ...; --font-display: ...; --font-body: ...;       /* base tokens   → tokens.ts */
-  --s-1..--s-10; --r-sm..--r-xl; --sec-pad-y; --max-w;      /* base tokens   → tokens.ts */
-}
-[data-variant="editorial"] { --font-display: ...; --r-md: 0; }   /* VARIANT axis → variants.ts */
-[data-palette="forest"]    { --accent: ...; --accent-deep: ...; } /* PALETTE blocks → palettes.ts */
-[data-surface="paper-1"]   { background: var(--paper-1); }        /* surfaces → tokens.ts serialize */
-</style>
-...
-<section class="hero">...</section>   <!-- each SECTION → one block pair (.tsx + .published.tsx) -->
-```
+1. **Design kit** — `npm run kit:generate` (thin CLI over `src/modules/engines/designKit.ts`).
+   Derives, from the LIVE contract, the sections-in-order, every required slot +
+   card capacities, knob ranges to design, edit-primitive per slot, and the
+   self-contained format/axes/class-prefix/font constraints the designer must hit.
+   Derived, not hand-written — regenerate after any contract change. This replaces
+   every layout map / element list this skill used to hardcode.
+2. **Art-direction** — pull references from the anchor library
+   (`docs/product/anchorLibrary.md`): concrete named anchors, plus the BANNED list
+   (existing template fingerprints + default-mode bans — Inter, purple gradients,
+   glassmorphism, rounded-2xl grids, emoji icons). A new template must not collide
+   with a shipped template's fingerprint.
+3. **Hero style tiles** — 3–5 hero-only style tiles, each from a DIFFERENT anchor
+   (divergence, not variations of one). Designer produces static HTML per the kit's
+   format block.
+4. **Founder taste-pick** — human gate. Founder picks one tile. Taste is human by
+   design (D6: machine facts, human taste); no AI auto-pick.
+5. **Full design expansion** — the picked tile → the full design system as ONE
+   self-contained static HTML (Meridian precedent; instructed to plain HTML/CSS,
+   never Tailwind/React), covering every section the kit lists + all axes
+   (`:root` tokens, `[data-palette]`/`[data-variant]`/`data-knob-*`/`[data-surface]`).
+6. **Handoff lint** — `npm run kit:lint <file.html>` (over `src/modules/templates/handoffLint.ts`)
+   BEFORE any port: all engine core sections present, every required contract slot
+   representable, axes structured, fonts ⊆ self-hosted, fully self-contained (no
+   external stylesheet/script/font URLs). Fix reds before building.
+7. **Port / build via `/feature`** — the module port (HTML → tokens/palettes/
+   variants/blocks + dual-renderer pairs + registry/picker wiring) is a normal
+   phased `/feature` build, not hand-work in this skill. The kit + the module
+   contract (pointers in §4) are the build's inputs.
+8. **`templateConformance(templateId)` green** — the designer's bar gate
+   (scalePlan §11.3: no partial templates). One call asserts block-pair resolution,
+   variant distinctness, collection families, knob-set truthfulness, looks
+   truthfulness, and the editor-basics machine-checkable subset. Add one line to
+   enroll a template.
+9. **Screenshot parity spec** — `e2e/parity.spec.ts` pixel-diffs edit-band vs
+   published-band per section (the #1 dual-renderer trap, automated). Green +
+   the seeded `?parityBreak=1` negative control fires.
+10. **Parity QA sign-off** — human gate, per template, permanent. The `/manual-test`
+    editor-basics subsection covers the visual/interactive affordances jsdom can't
+    assert (logo/image upload, collection add/remove/reorder, Button Settings, nav/
+    footer/social links, form config, live palette/variant/knob/look switching).
 
-**Mapping cheat-sheet:**
+**Flexibility surface** (design to these, don't hardcode them):
+- **Knobs** — `src/modules/templates/knobs.ts` (standard axes: buttonShape,
+  cardStyle, density, typePairing, texture/mood). A knob = `data-knob-<axis>` attr
+  → CSS var; **blocks NEVER branch on a knob** (CSS-token only → dual-renderer safe
+  by construction). Default value emits NO CSS (byte-identical for knob-unaware
+  projects). The kit lists the ranges to design.
+- **Named looks** — `templateMeta.looks` (id, label, blurb, knob bundle + palette/
+  variant refs). ≥3 curated looks per knob-bearing template surface in the picker;
+  one skeleton × palettes × looks = many distinct sites. Zero copy-regen on swap
+  (render-side only).
+- **Generation spread** — deterministic seeded variety (block-variant, starting
+  palette tie-break, starting look) across same-niche sites; copy untouched.
 
-| In the HTML | Goes to |
+---
+
+## 3. Evergreen landmines — KEEP these in your head (tests can't fully catch them)
+
+These are hard-won and only partially machine-checkable. Everything else in this
+skill points at code; THESE are the judgment you carry into the build.
+
+- **Dual-renderer discipline (the #1 trap).** Every block is a PAIR: `.tsx` (edit,
+  `'use client'`, hooks/contentEditable) and `.published.tsx` (server-safe, no
+  hooks, flat props). They MUST render identical layout/CSS. A mismatch = "right in
+  editor, wrong when published" (or vice-versa). Update both, always. The parity
+  spec (step 9) catches CSS drift; `renderParity.meridian.test.tsx` catches content
+  drift — but write them right the first time.
+- **Published/client boundary.** NEVER import a non-component value (a `*_STYLES`
+  string, a helper fn) from a `'use client'` `.tsx` into a `.published.tsx`. On the
+  server it resolves to a client reference, not the value → empty published CSS or a
+  500. Fails SILENTLY (build stays green, only the live `/p/[slug]` breaks). See
+  [[project_published_client_boundary]]; the global
+  `publishedClientBoundary.test.ts` walks every published import graph.
+- **Per-block CSS in a PLAIN `styles.ts`.** Put block CSS in `<Block>/styles.ts`
+  (a plain module, NO `'use client'`), import into BOTH files. Never `export const
+  STYLES` from the `'use client'` `.tsx` — same boundary bug as above.
+- **Prefix every ported class** (e.g. `tp-`). Bare `.nav`/`.btn`/`.card` collide
+  with the editor's own UI in edit mode and silently restyle toolbars.
+- **Margin-collapse through `data-surface`.** The published renderer wraps each
+  section in a `data-surface` div. Use padding INSIDE the surface, never
+  `margin: Npx 0` on the outer element — margins collapse through the wrapper and
+  expose the page background as a seam. Blocks must NOT paint their own full-bleed
+  section background; let the surface wrapper do it.
+- **Self-hosted fonts only** (CSP blocks Google Fonts). New family → woff2 in
+  `public/fonts/` + `@font-face` in `src/styles/fonts-self-hosted.css`; verify
+  ZERO `fonts.googleapis.com`/`gstatic.com` on the live page. Variable families:
+  use the axis-preserving variable woff2 (a static instance kills the opsz axis).
+- **Behaviors = ONE shared minified asset**, not per-block `<script>`s. Port
+  designer JS into `src/lib/staticExport/<template>Behaviors.js` → `buildAssets.js`
+  → `<template>.v1.js`, injected by `htmlGenerator.ts` gated on templateId. Blocks
+  emit only markup + hook attrs. Behaviors run on PUBLISHED only — verify on
+  `/p/[slug]`, not `/preview`.
+- **Two-identifier discipline (the #1 silent build-green/runtime-broken source).**
+  Each section carries a lowercase `type` (section-id prefix, `resolveBlock` key,
+  `sectionRules` key, schema `sectionType`) AND a PascalCase `LayoutName`
+  (`elementSchema` key, section `layout` field). Wrong `type` → placeholder block;
+  wrong `LayoutName` → empty block. Neither throws. Keep `type` a single lowercase
+  word (compound/camelCase gets mangled by `extractSectionType`). Prefix bespoke
+  `LayoutName`s (layout names are GLOBAL across the merged schema and PRODUCT WINS
+  TIES — a reused name is silently shadowed). Guard with a registration smoke test.
+- **Bespoke §13 mode.** A template for ONE paying client (hand-written copy + real
+  photos, never reused): register the id + a `registry.ts` loader entry so it
+  renders, but do NOT add it to the picker catalog/order (keeps it unselectable);
+  set `templateId` on that project by hand (bypasses the persona gate); seed copy +
+  every `manual_preferred` image project-scoped — NEVER bake a seed into a shared
+  persona/template default. Skip picker + AI-generation wiring; you still need the
+  full module + every boundary rule above. See [[project_before_customer_2]].
+
+---
+
+## 4. Pointers — the live sources (do NOT restate these in prose; they rot)
+
+Read these when you build; they replace the code-derived tables this skill used to
+carry.
+
+| Need | Live source |
 |---|---|
-| `:root { ... }` (the non-accent vars) | `tokens.ts` → `serializeBaseTokens()` |
-| `[data-palette="x"] { --accent... }` blocks | `palettes.ts` → `serializePaletteOverrides()` + palette id union in `types/service.ts` |
-| `[data-variant="x"] { ... }` blocks | `tokens.ts`/`variants.ts` → `serializeVariantOverrides()` |
-| `[data-surface="x"] { background... }` | emitted inside `serializeBaseTokens()`; section→surface map in `sectionRules.ts` |
-| `[data-palette] em { ... }` accent rule | emitted inside `serializeBaseTokens()` |
-| `<link href="fonts.googleapis...">` | self-host into `fonts-self-hosted.css` (§7) |
-| each `<section>` | a block pair under `blocks/<Section>/` |
-
-> The design file often has a "spec doc" reading column at the top (`.doc*` classes) explaining
-> the system — that is **documentation, not a section**. The real sections come after it.
-
----
-
-## 2. Decide name + audience, then clone the closest template
-
-1. **Pick an id** (lowercase, kebab-free): e.g. `folio`. Used as the dir name, registry key, and `templateId`.
-2. **Pick the audience** it belongs to: `service` or `product`. (Your scope = existing audience.)
-3. **Clone the closest existing template of that audience** and rename. This is the fastest,
-   lowest-miss path (Lex was a clone of Hearth):
-   - **service** → clone `src/modules/templates/hearth/`
-   - **product** → clone `src/modules/templates/meridian/`
-   ```bash
-   cp -r src/modules/templates/hearth src/modules/templates/folio
-   ```
-4. Inside the clone, rename every `Hearth*`/`hearth*` identifier and file to `Folio*`/`folio*`
-   (ThemeInjector, SSRTokens, tokens, palettes, hook, editable wrapper, resolver). Keep the
-   **structure and the generic export names** the registry expects (§6).
-
-> **Required block set (your audience's full section list).** You must implement **every**
-> section type the audience can emit — confirm the authoritative list from the audience's
-> layout-name map, **not** by guessing:
-> - service → `PILOT_LAYOUT_NAMES` in `src/modules/audience/service/elementSchema.ts`
-> - product → `MERIDIAN_LAYOUT_NAMES` in `src/modules/audience/product/elementSchema.ts`
-> Every key there (header, hero, services/features, testimonials, packages/pricing, cta, footer, …)
-> needs an edit `.tsx` **and** a `.published.tsx`. Missing ones fall back to a placeholder block on
-> real pages — not acceptable (you chose full coverage).
-
----
-
-## 3. The module files (translate the HTML → module)
-
-Paths below are relative to `src/modules/templates/folio/`.
-
-### 3a. `tokens.ts` — base tokens + surface rules + accent-em
-Translate `:root` (minus the `--accent*` palette vars) into a typed token object and a
-serializer. Mirror the cloned template exactly; only values change.
-- Export: `folioBaseTokens`, `type FolioBaseTokens`, `serializeBaseTokens()`,
-  `folioVariants`, `defaultFolioVariant`, `serializeVariantOverrides()`.
-- `serializeBaseTokens()` must emit, in this order:
-  1. `:root{ --font-display:…; --font-body:…; --ink:…; --s-1:…; --sec-pad-y:…; … }`
-  2. the `[data-surface="…"]{ background:var(--…); }` rules (one per surface tone)
-  3. the accent-em convention: `[data-palette] em{ font-style:…; color:var(--accent-…); }`
-- `serializeVariantOverrides()` emits one `[data-variant="x"]{ … }` block **per non-default
-  variant** (omit the default — it's the `:root` baseline). Translate each `[data-variant]`
-  block from the HTML.
-
-### 3b. `palettes.ts` — the accent axis
-Translate each `[data-palette="x"]{ --accent…; --accent-deep…; --accent-wash…; }` block.
-- Export: a `PaletteConfig`-shaped record (`folioPaletteConfigs`), `defaultFolioPalette`,
-  `pilotEnabledPalettes` (which palettes the picker offers — usually all), and
-  `serializePaletteOverrides()` which emits `[data-palette="x"]{ --accent:…; … }` per palette.
-- The **palette id union/type lives in `types/service.ts`**, not here (see §5). `palettes.ts`
-  imports `folioPalettes`/`FolioPalette` from `@/types/service`.
-
-### 3c. `sectionRules.ts` — section → surface
-- Export `type FolioSurface` (the surface tones, e.g. `'paper' | 'paper-1' | 'paper-2'`),
-  `folioSectionSurfaces: Record<string, FolioSurface>` (section type → surface, the alternation
-  rhythm), and `getSurfaceForSection(sectionType): FolioSurface` (lookup + sane fallback).
-- The published renderer wraps each section in `<div data-surface={getSurfaceForSection(type)}>`
-  automatically — so **blocks must NOT paint their own full-bleed section background**; let the
-  surface wrapper do it (avoids edit/published divergence).
-
-### 3d. `ThemeInjector.tsx` (client) + `components/FolioSSRTokens.tsx` (server)
-Both inject the **same** stylesheet
-`serializeBaseTokens() + serializePaletteOverrides() + serializeVariantOverrides()` and set
-`data-palette`/`data-variant`:
-- `ThemeInjector` ('use client'): in a `useEffect`, `ensureStyleTag()` (`<style id="folio-theme">`),
-  then `document.documentElement.dataset.palette/variant = …`; clean up the data attrs on unmount.
-- `FolioSSRTokens` (server, no 'use client'): renders `<style id="folio-theme" dangerouslySetInnerHTML=…>`
-  + `<div data-palette=… data-variant=…>{children}</div>`.
-- **No font `<link>` here** — fonts are global and self-hosted (§7).
-
-### 3e. `components/FolioEditable.tsx` + `components/FolioAddImageOverlay.tsx` + `hooks/useFolioBlock.ts`
-Clone + rename from the source template; these are near-identical across templates:
-- `FolioEditable` — the inline-text wrapper. Props: `value, mode, sectionId, elementKey, as,
-  onSave, className, style, placeholder, enterBehavior, multiline, isButton`. In edit mode with
-  `isButton`, single click selects (so the element toolbar / "Button Settings" appears), double
-  click edits text. In non-edit mode it renders static HTML (preserves `<em>`).
-- `useFolioBlock<T>({ sectionId })` → `{ sectionId, mode, blockContent, handleContentUpdate,
-  handleCollectionUpdate }`. It reads `content[sectionId]` and runs
-  `extractLayoutContent(elements, getSchemaDefaults(layout), …)` — **this is how a block gets the
-  audience's content**. (Generic; just renamed.)
-- `FolioAddImageOverlay` — the "Add image" affordance over empty image slots (`pointerEvents:none`).
-
-### 3f. `blocks/<Section>/` — the block pairs (the bulk of the work)
-For **every** section type in the audience layout map (§2), create
-`blocks/<Section>/<ComponentName>.tsx` and `<ComponentName>.published.tsx`.
-
-**Edit block (`.tsx`, 'use client') rules:**
-- `export default function <Name>({ sectionId })`. Get content via `useFolioBlock<TContent>({ sectionId })`.
-- Wrap each text element in `<FolioEditable elementKey="…" value={blockContent.…} onSave={…}>`.
-- **Consume the audience's element keys exactly** (§4) — `headline`, `cta_text`,
-  `secondary_cta_text`, collections like `services[]` / `packages[]` / `testimonials[]`
-  (`{ id, … }`), etc. If the generator doesn't produce a field, your block won't get it.
-- CTAs: pass `isButton` + the correct `elementKey` (`cta_text`, `secondary_cta_text`,
-  `signin_text`, tier `…_cta_${id}`) so Button Settings can target them.
-- Collections: keep stable `id`s; mirror the add/remove/update pattern from the cloned block.
-
-**Published block (`.published.tsx`, server-safe — NO hooks, NO 'use client') rules:**
-- `export default function <Name>Published(props)`. Content arrives as **flat props**
-  (`headline`, `cta_text`, `services`, …) plus `content`, `sectionId`, `publishedPageId`,
-  `pageOwnerId` (the renderer passes these to every block).
-- **Resolve CTA hrefs from buttonConfig**, do not hardcode `#cta`. Reuse the shared util:
-  ```ts
-  import { resolveCtaHref } from '@/utils/resolveCtaHref';
-  const md = props.content?.[props.sectionId]?.elementMetadata;
-  const ctaHref = resolveCtaHref(md?.cta_text?.buttonConfig, props.content?.forms, '#cta');
-  ```
-  (Per-tier CTAs: key `tiers_cta_${id}` / `packages_cta_${id}`.)
-- **Parity:** same CSS/markup as the edit block. Put the block's `<style>` once (string constant)
-  and reuse it in both files, or keep them byte-aligned.
-- **No collapsing section margins** — use padding inside the surface, not `margin: Npx 0` on the
-  outer element (margin collapses through the `data-surface` wrapper and exposes the page bg).
-
-**Porting raw designer CSS (TechPremium learnings):**
-- **🔴 Per-block CSS lives in a PLAIN `styles.ts` module — never in the `'use client'` `.tsx`.** Put
-  the const in `<Block>/styles.ts` (a plain module, **no `'use client'`**), export it, and `import`
-  it into BOTH `<Block>.tsx` and `<Block>.published.tsx`, each rendering
-  `<style dangerouslySetInnerHTML={{ __html: STYLES }} />`. **Why this exact placement:** if you
-  `export const STYLES` from the `'use client'` `.tsx` and import it into `.published.tsx` (server),
-  the value resolves to a **client reference, not the string** → the published `<style>` emits
-  **empty** → the live page has no CSS (invisible in `/edit`, where inline styles work regardless —
-  it only breaks on `/p/[slug]`). This is a real P0 that shipped (same class as the
-  `'use client']` 500 bug — see [[project_published_client_boundary]]). Composed styles may import
-  shared consts from a plain `shared/styles.ts` (safe — plain module). Block CSS is **inline**, not
-  in `published.css`, so no CSS rebuild is needed for block styling.
-- **Prefix every ported class** (TechPremium used `tp-`). The designer's bare `.nav`/`.btn`/`.card`
-  will collide with the **editor's own UI** in edit mode and silently restyle toolbars/menus. A
-  template-unique prefix is mandatory, not cosmetic.
-- **Images via the store, not raw URL inputs.** For image elements/collections call
-  `useEditStore().uploadImage(file, { sectionId, elementKey })` (Sharp→WebP→Blob, auto-saves);
-  for collection items the key is the **nested dotted path** `images.{item.id}.src` (call
-  `uploadImage` directly — the `ImageToolbar` parser only splits the first two dot-parts and mangles
-  4-part keys). For many photos use `bulkUploadImages(files: FileList)`. The store's save serializes
-  the **full** multi-page draft (pages + chrome) — don't hand-roll a partial save.
-
-**Established editable affordances (proven on TechPremium/Surge — port, don't reinvent).** All keep
-edit/published parity (update both files; CSS in the plain `styles.ts`):
-- **Logo upload (header):** schema already has `logo_image` (`manual_preferred`). Edit `.tsx`: a hidden
-  `<input type=file>` + "Change / Remove logo" button calling
-  `uploadImage(file, { sectionId, elementKey: 'logo_image' })`; when set, render `<img class="…__img">`
-  **instead of** the wordmark/mark. Published: render `<img>` when `logo_image` present, else the mark.
-  Pattern source: `techpremium/blocks/Header/TechPremiumNav.tsx`.
-- **WhatsApp FAB (footer):** add optional schema keys `whatsapp_number`, `whatsapp_label`,
-  `whatsapp_prefill` (`manual_preferred`, default `''`). Render a fixed-position anchor after
-  `</footer>` when a number is set, `href = https://wa.me/{digitsOnly}?text={encoded prefill}`, inline
-  SVG icon, hardcoded green `#25D366`. **Pure anchor, no JS.** Source: `TechPremiumFooter`.
-- **Configurable nav / footer links:** the `LinkTargetPopover` (scroll-to-section / page / custom URL)
-  + add/remove affordances. Copy `LinkTargetPopover` into your template's `components/` (it's
-  `'use client'` — import it ONLY in edit `.tsx`, never `.published.tsx`); feed it
-  `buildSectionLinkOptions` (`@/utils/sectionAnchors`) + `buildPageLinkOptions` (`@/utils/pageLinks`).
-  Single-page templates → `pageOptions` is empty and the "Link to page" radio auto-hides. Published:
-  render `<a href={item.href} {...externalLinkProps(item.href)}>` (new-tab on external —
-  `@/utils/resolveCtaHref`). Source: `TechPremiumNav` / `TechPremiumFooter`.
-- **When converting hardcoded designer content (e.g. a fixed footer column) to an editable collection,
-  SEED defaults** — an empty collection + "hide when empty" silently drops the designed element.
-- **Adding template-specific OPTIONAL keys to a SHARED layout is safe** when `manual_preferred`
-  + `default ''` (other templates ignore them; the AI never fills `manual_preferred`). This is how
-  Surge added `whatsapp_*`/`footer_links` to the shared `ContactFooterRich` without affecting Hearth.
-
-### 3g. `resolveFolioBlock.ts` + the `resolveBlock` export
-Map **section type (lowercase) → `{ edit, published }`** component pair:
-```ts
-const FOLIO_BLOCK_REGISTRY: Record<string, { edit: ComponentType<any>; published: ComponentType<any> }> = {
-  header: { edit: FolioNav, published: FolioNavPublished },
-  hero:   { edit: FolioHero, published: FolioHeroPublished },
-  // …every section type in the audience layout map…
-};
-export function resolveFolioBlock(sectionType: string, mode: 'edit' | 'published') { … }  // fallback → placeholder
-```
-> Note: for template projects the renderer dispatches by **section type + templateId** (via
-> `resolveBlock`), **not** by the stored `layout` name. The `layout` name is used only for the
-> audience content schema/defaults. So your registry is keyed by section type.
-
-> ⚠️ **Two-identifier discipline — the #1 silent-failure source** (build stays green, runtime breaks).
-> Each section carries **two** names that must each stay consistent across several places:
-> - **lowercase `type`** — the section-id prefix (`hero-…`), the `resolveBlock` key, the
->   `sectionRules` key, and the schema's internal `sectionType` field. **Wrong → placeholder block.**
-> - **PascalCase `LayoutName`** — the `elementSchema` object KEY, the section's `layout` field, and
->   `sectionLayouts[id]`; `getSchemaDefaults(LayoutName)` drives content. **Wrong → block renders empty.**
->
-> Neither mismatch throws a TS or build error. Two recurring traps:
-> 1. **Don't confuse the component name with either.** `TechPremiumResults` is the *component*; the
->    `type` is `testimonials` and the `LayoutName` is `ProofWithLogoRail`. Registry/schema/builders
->    use `type`/`LayoutName`, never the component name.
-> 2. **Section-id prefixes must be single all-lowercase tokens.** `extractSectionType` lowercases the
->    prefix and runs a small `typeMap` in `componentRegistry.ts` — a compound/camelCase name gets
->    mangled or collides (`howitworks` → `howItWorks`). TechPremium used **`process`** instead of
->    `howitworks` to dodge it. Keep `type` a clean lowercase word.
->
-> 3. **Layout names are GLOBAL across the merged `layoutElementSchema`, and PRODUCT WINS TIES.**
->    `serviceElementSchema` is spread first, `meridianElementSchema` last (`layoutElementSchema.ts`
->    ~`:331/:335`), so a service/template layout that reuses a product layout NAME (e.g. a bare
->    `ContactForm`, which already exists in `meridianElementSchema`) is **silently shadowed** by the
->    product entry → your block gets the wrong schema defaults, build stays green. **Prefix bespoke /
->    template-specific layout names** (`Lumen*`, `TechPremium*`) so they're globally unique. (Lumen
->    learned this — PO review 2026-06-29.)
->
-> **Guard it with a smoke test** (TechPremium's `registration.test.ts`): for every section type assert
-> `resolveBlock(type) ≠ placeholder`, a surface band exists, the schema `sectionType` matches, and
-> `extractSectionType('type-x') === 'type'`. For archetype-seeded sections, also run the builder and
-> assert `getSchemaDefaults(layout) ≠ null`. This is the **only** thing that catches casing drift.
-
-### 3h. `index.ts` — the module barrel (exact export names the registry consumes)
-Re-export with the **generic alias names** the registry loader maps (§6). At minimum:
-```ts
-export { FolioThemeInjector as ThemeInjector } from './ThemeInjector';
-export { FolioSSRTokens   as SSRTokens }      from './components/FolioSSRTokens';
-export { resolveFolioBlock as resolveBlock }   from './resolveFolioBlock'; // or a local resolveBlock(blockType,mode) wrapper
-export { defaultFolioPalette }  from './palettes';
-export { folioVariants, defaultFolioVariant } from './tokens';
-export { getSurfaceForSection } from './sectionRules';
-export { PALETTE_IMAGE_KEYWORDS } from './imageKeywords';   // optional but expected by the loader
-// plus serializeBaseTokens / serializePaletteOverrides / serializeVariantOverrides used internally
-```
-- `imageKeywords.ts` (`PALETTE_IMAGE_KEYWORDS`, `getFolioImageQuery`) and `paletteSelection.ts`
-  (`inferDefaultPalette(understanding)`) are cloned + retuned. The loader reads `PALETTE_IMAGE_KEYWORDS`;
-  the picker uses `inferDefaultPalette`.
-- **Firewall:** keep block/client code out of anything imported by audience-level modules. The
-  registry's dynamic `import()` is what keeps the template out of the main bundle — don't break it
-  by importing your template module from `src/modules/audience/**` or shared server code.
-
----
-
-## 4. The content contract (what your blocks must read) — you do NOT edit it
-
-Copy generation is **audience-scoped and already done**. Your blocks must consume the element
-keys it produces. Treat the audience element schema as the **contract**:
-- **service** → `src/modules/audience/service/elementSchema.ts` (`serviceElementSchema`, keyed by
-  layout name; `PILOT_LAYOUT_NAMES` = section→layout).
-- **product** → `src/modules/audience/product/elementSchema.ts` (`meridianElementSchema`,
-  `MERIDIAN_LAYOUT_NAMES`).
-
-For each section type, open the schema entry for its layout to see the exact element keys + their
-shapes (strings vs collections-with-`{id,…}`). Your edit block must `<FolioEditable elementKey=…>`
-those keys; your published block reads them as flat props. **Do not invent fields** the schema
-doesn't define — they won't be generated.
-
-You do **not** touch: `elementSchema.ts`, `parseCopy.ts`, `copyPrompt.ts`, `selectUIBlocks.ts`/
-`selectBlocks.ts`, the `strategy` route, or the section-selection logic. (Lex added zero lines
-there.) If your design genuinely needs a *new* content field, that's an audience-schema change —
-see Appendix B.
-
----
-
-## 5. Register the template id + palette/variant types — `src/types/service.ts`
-
-(Service-audience palettes/variants live here; product palettes live in `src/types/product.ts`.)
-Add/extend:
-1. `templateIds` const: add `'folio'`. (Drives `TemplateId`, request validation, picker loop.)
-2. `defaultVariantForTemplate`: `folio: '<your default variant id>'`.
-3. Palette id union (service templates): add
-   ```ts
-   export const folioPalettes = ['bone','forest', …] as const;
-   export type FolioPalette = (typeof folioPalettes)[number];
-   ```
-4. `palettesForTemplate(templateId)`: add `if (templateId === 'folio') return folioPalettes;`.
-5. `templateLabels`: `folio: 'Folio'`. `templateBlurbs`: `folio: 'Editorial minimalist — …'`.
-6. **Only if** your template is the first for a new audience (out of scope): update
-   `defaultTemplateForAudience` and the `usesTemplateModule(...)` gate. For an existing audience,
-   leave both alone — `usesTemplateModule` already returns true for all `service`, and for
-   `product && templateId==='meridian'` (so a new *product* template would need a gate clause).
-
----
-
-## 6. Register the loader — `src/modules/templates/registry.ts`
-
-Add an entry to `templateRegistry` (the lazy `import()` map). The keys on the right are the
-**contract**; map your module's exports to them:
-```ts
-folio: async () => {
-  const m = await import('@/modules/templates/folio');
-  return {
-    resolveBlock: m.resolveBlock,
-    ThemeInjector: m.ThemeInjector,
-    SSRTokens: m.SSRTokens,
-    getSurfaceForSection: m.getSurfaceForSection,
-    defaultPaletteId: m.defaultFolioPalette,
-    variants: m.folioVariants,
-    defaultVariantId: m.defaultFolioVariant,
-    paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
-  };
-},
-```
-The renderers (`LandingPageRenderer`, `LandingPagePublishedRenderer`), `useTemplateModule`,
-`componentRegistry(.published)`, `ServiceThemePopover`, `StyleStep`, `EditHeader`, request
-`validation.ts`, and static export are all **generic** off this registry + `templateIds` — no edits.
-
----
-
-## 7. Fonts (only if the design introduces a new family)
-
-Self-hosted only (CSP blocks Google Fonts). Existing self-hosted families: Inter, Inter Tight,
-JetBrains Mono, DM Sans, Fraunces (var), Source Serif 4 (var), Lora, EB Garamond. Folio uses
-Source Serif 4 + JetBrains Mono (already present) and **Manrope (new)**.
-
-For each **new** family the design needs:
-1. Drop latin `woff2` into `public/fonts/<family>/` (match existing naming, e.g. `manrope-v…-latin-400-normal.woff2`).
-   - Static weights: one file per weight (+ italic if used).
-   - **Variable** family (opsz/wght axes): use the **axis-preserving variable** woff2 (normal +
-     italic) — a static instance silently kills the optical-size axis.
-2. Append `@font-face` rules to `src/styles/fonts-self-hosted.css` (use `font-display:swap`;
-   variable fonts use a weight **range**, e.g. `font-weight: 300 600;`).
-3. `tokens.ts` already references the family by name in `--font-display/-body/-mono` — make sure the
-   `@font-face` `font-family` name matches exactly (incl. quotes).
-4. **Optional preload** in `src/app/p/layout.tsx` — only for a near-body face shared across
-   templates; don't preload template-specific or large variable files (rely on swap).
-5. CSP: `src/lib/security.ts` `font-src 'self'` already covers same-origin woff2 — **no change**
-   for self-hosted. Only touch CSP if you (don't) add an external font origin.
-
----
-
-## 7.5 Interactive behaviors (published JS) — one shared asset, not per-block scripts
-
-If the design needs JS (nav dropdowns, mobile menu, image gallery/lightbox, gallery filters, live
-tickers), do **not** scatter inline `<script>` tags per block. Port the designer's JS into **one
-minified asset**, like the existing `form.v1.js` / `a.v1.js`:
-1. New `src/lib/staticExport/<template>Behaviors.js` — the designer JS, selectors renamed to your
-   `tp-`-style prefix, each behavior a no-op when its markup is absent, with an idempotent boot guard.
-2. `scripts/buildAssets.js` — add `{ src: '<template>Behaviors.js', out: '<template>.v1.js' }` (the
-   build minifies it into `public/assets/`).
-3. `src/lib/staticExport/htmlGenerator.ts` — inject `<script src="…/<template>.v1.js" defer>` gated
-   on `templateId === '<id>'` (mirror the `form.v1.js` injection).
-4. Blocks emit only **markup + hook attributes/classes** (e.g. `[data-tp-lightbox-group]`,
-   `.tp-gfilter`); the asset wires them. In **edit** mode use minimal React (`useState`) instead.
-
-Pitfalls: the asset's selectors must match block markup **exactly** — a renamed class is a silent
-no-op. Behaviors run on **published only** — `/preview` uses the edit renderer and won't show them,
-so **verify on the live `/p/[slug]` URL**, not preview. Bump `…v2.js` only on breaking markup changes.
-
-For **forms** (a contact/lead block), don't write a bespoke submit — reuse the platform pipeline:
-seed an `MVPForm` into `state.forms`, render `<form data-lessgo-form data-form-id data-page-id
-data-owner-id>` with `name={field.id}` inputs; `form.v1.js` (auto-injected when `content.forms` is
-non-empty) POSTs to `/api/forms/submit`. The published renderer passes `publishedPageId`/`pageOwnerId`
-to every block for the data-attributes.
-
----
-
-## 8. Picker wiring (you opted in) — show the template + its palettes/variants
-
-**Service** (onboarding StyleStep + editor ServiceThemePopover read a catalog):
-`src/app/onboarding/service/[token]/components/fields/templateCatalog.ts`
-1. Add a `TEMPLATE_CATALOG.folio` entry:
-   ```ts
-   folio: {
-     id: 'folio',
-     label: templateLabels.folio,
-     blurb: templateBlurbs.folio,
-     palettes: palettesForTemplate('folio'),
-     enabled: folioPilotEnabledPalettes,      // from folio/palettes.ts
-     swatch: (p) => { const c = folioPaletteConfigs[p]; return { accent: c?.accent, accentDeep: c?.accentDeep, wash: c?.accentWash }; },
-     variants: folioVariants,                  // from folio/tokens.ts
-     inferDefaultPalette: (u) => inferFolioPalette(u),  // from folio/paletteSelection.ts
-   },
-   ```
-2. Add `'folio'` to `TEMPLATE_ORDER` (display order).
-`StyleStep.tsx`, `ServiceThemePopover.tsx`, and `EditHeader.tsx` then pick it up automatically
-(they iterate `templateIds`/read the catalog + `templateLabels`).
-
-**Product** is pilot-locked (no picker): a product template is hardcoded in
-`onboarding/product/[token]/components/steps/GeneratingStep.tsx` (`PILOT_TEMPLATE`,
-`PILOT_PALETTE`, `PILOT_VARIANT`). To ship a product template you'd swap those (and the
-`EditHeader` shows a static label, not a picker, until product picker work lands).
-
----
-
-## 9. Hardcoded-default gotchas (audit these)
-
-These default to Hearth and only bite when `paletteId`/`templateId` is null (shouldn't happen if
-onboarding persisted them, but verify for your template):
-- `LandingPageRenderer.tsx` — `effectivePalette … ?? 'terracotta'`.
-- `LandingPagePublishedRenderer.tsx` — `… ?? 'terracotta'` and surface `… ?? 'cream'`.
-- `src/app/p/[slug]/page.tsx` — service `templateId` falls back to `'hearth'`.
-- `src/lib/staticExport/htmlGenerator.ts` — `preloadTemplate(templateId || 'hearth')`.
-Leave them if your projects always persist `templateId`+`paletteId`; otherwise generalize to read
-`defaultTemplateForAudience` / `tmpl.defaultPaletteId`.
-
----
-
-## 10. Verification (run before declaring done)
-
-1. **Build/typecheck:** `npm run build` green (and `npx tsc --noEmit`).
-2. **Every section renders, both renderers:**
-   - `npm run dev`, create a project on your template (service: pick it in StyleStep).
-   - `/edit/[token]`: every section renders with correct fonts/colors; background matches the
-     design; hero/headers don't overlap; CTAs selectable (Button Settings opens).
-   - `/preview/[token]`: same.
-   - **Publish → `/p/[slug]`: pixel-parity with the editor** (the dual-renderer check). No
-     placeholder/"missing component" blocks. No light seams between sections.
-3. **Palette + variant switching** (picker): re-renders instantly, no copy regen; persists across
-   save + reload; published page reflects `data-palette`/`data-variant`.
-4. **CTAs:** set a link on header/hero/closing/secondary/tier CTAs → publish → each navigates to
-   its own target.
-5. **Fonts:** on `/p/[slug]`, Network shows woff2 from `/fonts/...` only — **zero**
-   `fonts.googleapis.com` / `gstatic.com`. Variable display font shows non-default
-   `font-variation-settings` (opsz) on a heading.
-6. **Picker:** the template appears in StyleStep + ServiceThemePopover with its palettes/variants;
-   EditHeader shows it.
-7. **Grep:** no leftover `Hearth`/`hearth` (or whatever you cloned) identifiers in
-   `src/modules/templates/folio/**`.
-8. **Registration smoke test** (esp. if you added section types): a `registration.test.ts` that, per
-   type, asserts non-placeholder resolve + surface + schema `sectionType` match + `extractSectionType`
-   round-trip (+ `getSchemaDefaults(layout) ≠ null` for archetype sections). Build-green ≠ correct —
-   this is the only catch for the two-identifier/casing traps (§3g).
-9. **Behaviors on the live URL, not preview:** any JS (§7.5) only runs on published — hard-refresh
-   `/p/[slug]` (and subpaths) and confirm dropdowns/lightbox/filters/forms actually work.
-10. **`'use client'` boundary guard (commit it):** a test/grep asserting no `*.published.tsx` imports
-    a non-component value (CSS `*_STYLES`, helpers) from a `'use client'` sibling. This bug class has
-    shipped **twice** (functions → 500; CSS strings → empty published styles) and fails **silently** —
-    `npm run build` stays green, only the live page breaks. Inline-CSS templates especially: confirm
-    the actual published HTML carries the rules (`curl /p/[slug] | grep '.your-class'`), since `/edit`
-    looks correct regardless. See [[project_published_client_boundary]].
-
----
-
-## 11. Quick checklist
-
-- [ ] Read the designer HTML; identify palette vars, variant blocks, surfaces, fonts, sections.
-- [ ] `cp -r` the closest same-audience template → `src/modules/templates/folio/`; rename all identifiers.
-- [ ] `tokens.ts` (base + surfaces + accent-em + variants), `palettes.ts`, `sectionRules.ts`.
-- [ ] `ThemeInjector.tsx` + `components/FolioSSRTokens.tsx` (same stylesheet, set data-palette/variant).
-- [ ] Clone `FolioEditable`, `FolioAddImageOverlay`, `useFolioBlock`.
-- [ ] Build **every** section's `.tsx` + `.published.tsx` (full audience set); consume audience element keys; `resolveCtaHref` for hrefs.
-- [ ] `resolveFolioBlock.ts` (section type → pair) + `index.ts` barrel (alias exports).
-- [ ] `imageKeywords.ts` + `paletteSelection.ts` retuned.
-- [ ] `types/service.ts`: `templateIds`, `defaultVariantForTemplate`, palette union + `palettesForTemplate`, `templateLabels`, `templateBlurbs`.
-- [ ] `registry.ts`: loader entry.
-- [ ] Fonts: woff2 + `@font-face` in `fonts-self-hosted.css` (+ optional preload) for any new family.
-- [ ] Picker: `templateCatalog.ts` entry + `TEMPLATE_ORDER` (service). **Bespoke/exclusive (§13): SKIP this** so it stays unselectable; set `templateId` on the client's project by hand instead.
-- [ ] Block CSS in a **plain `styles.ts`** imported by both files (never exported from the `'use client'` `.tsx` → empty published CSS); **prefix all ported classes** (e.g. `tp-`); images via `uploadImage`/`bulkUploadImages` (§3f).
-- [ ] Reuse the proven affordances where needed: logo upload, WhatsApp FAB, `LinkTargetPopover` nav/footer links; seed defaults when making hardcoded content editable (§3f).
-- [ ] Commit the `'use client'` boundary guard test (§10.10); verify published HTML actually carries block CSS via `curl`.
-- [ ] Two-identifier discipline (lowercase `type` vs PascalCase `LayoutName`); single-lowercase id prefixes; add a `registration.test.ts` smoke guard (§3g/§10.8).
-- [ ] If interactive: one minified `<template>.v1.js` behaviors asset wired via `buildAssets.js` + `htmlGenerator.ts` (§7.5) — verify on the published URL.
-- [ ] If adding section types / pages: follow **§12** (AI generation, not hardcoded copy) + `docs/tracks/multiPagePlan.md`.
-- [ ] Audit §9 hardcoded defaults.
-- [ ] Run §10 verification end-to-end (esp. edit==published parity + zero Google font calls).
-
----
-
-## 12. Extending the audience — new section types & multi-page (beyond a skin)
-
-A skin reuses the audience's existing sections. A richer template (TechPremium/naayom) **adds**
-section types, pages, and collections. That is an **audience-level** change — it affects every
-template of that audience and touches the AI generation pipeline, so **coordinate with a PO** and
-read this before editing `src/modules/audience/**`.
-
-**Principle: AI-first, never hardcoded copy.** New section types must be wired so the **AI generates**
-their content through the normal `onboarding → strategy → copy` flow. (TechPremium shipped a
-deterministic 12-section copy seed as a one-off launch bridge for naayom — that was **removed and is
-not the pattern**. Don't reintroduce a hardcoded-copy default for a persona/template.)
-
-**A new section type, end-to-end** (all must use the same lowercase `type` / PascalCase `LayoutName`
-per §3g):
-1. **Schema (contract):** add `meridianElementSchema['<LayoutName>']` / `serviceElementSchema[...]`
-   with `sectionType: '<type>'` + its elements/collections (`src/modules/audience/<a>/elementSchema.ts`).
-2. **Generation (so the AI actually emits it — the point):**
-   - Section selection: product = `MERIDIAN_PILOT_SECTIONS` / `selectProductSections`
-     (`audience/product/sectionSelection.ts`); service = `selectServiceSections`
-     (`audience/service/sectionSelection.ts`, awareness-driven). The new type must be able to appear.
-   - Element map: `getCompleteElementsMap` / `getAllPossibleElements` (`modules/sections/elementDetermination.ts`).
-   - Prompts: `buildStrategyPrompt.ts` (cardCounts) + `buildPrompt.ts` (copy) must teach the model the
-     new section + its elements.
-3. **Render (your template):** `resolveBlock` pair + `sectionRules` surface (§3f/§3g).
-4. **Guard:** extend `registration.test.ts` (§10.8). If the generation work for a type isn't done yet,
-   that's generation work to finish — not a reason to hardcode its copy.
-
-**Multi-page & collections are standard** (`docs/tracks/multiPagePlan.md` is the authority — don't duplicate it):
-- The page axis (store `pages` + mirror), shared **chrome** (header/footer injected at publish),
-  **collections** (catalog + repeatable detail pages, materialized), and **subpath publish/serve**
-  are generic. Your template supplies the *blocks*; the machinery is shared.
-- Template-specific pages are added via **archetype builders + page actions** (e.g.
-  `buildHomeSlice`/`buildGallerySlice` + `addArchetypePage`), not the generic section picker (which is
-  inert for template audiences). Keep insertion generic and mirror-safe (reuse the existing
-  `commitActivePage → mutate pages[id] → loadPageIntoActive` pattern; never assign `state.sections`
-  directly — it drops injected chrome).
-
----
-
-## 13. Bespoke / single-use templates (hard-coded, client-exclusive)
-
-Some templates are built for **one paying client** — hand-written copy + real photos, never offered
-to anyone else (naayom on product; a photographer on service). This is a legitimate mode: don't force
-the AI-generation path (§12) on a site you'll never reuse. Rules:
-
-- **Exclusivity = register, but don't list in the picker.** Add the id to `templateIds`
-  (`types/service.ts`) + a `registry.ts` loader entry (so it renders), but **do NOT** add it to
-  `TEMPLATE_CATALOG`/`TEMPLATE_ORDER` (`templateCatalog.ts`). The onboarding picker loops
-  `TEMPLATE_ORDER` (`StyleStep.tsx`), so omitting it there keeps it **unselectable** by other users.
-  Precedent: `techpremium`/`meridian` are in `templateIds` but not the service `TEMPLATE_ORDER`.
-- **Set the template on the client's project by hand** — a deterministic seed or the
-  admin/transfer-ownership flow sets `audienceType` + `templateId` directly on the project. This
-  **bypasses the `/api/start` persona/waitlist gate entirely**, so the client's persona is irrelevant
-  and you don't add one. (For reference: a photographer is `service`; the *conceptual* persona is
-  `freelancer`/`local-service`, but those are pilot-waitlisted in `PILOT_SERVICE_PERSONAS` — another
-  reason bespoke skips the persona route. Only whitelist them if you later want self-serve onboarding.)
-- **Hard-code via a seed scoped to that project.** Copy + every `manual_preferred` image is seeded
-  (the AI fills none of it). **Never** bake the seed into a shared persona/template default a future
-  customer could inherit — keep it project-scoped (see [[project_before_customer_2]]).
-- **Skip the reusable-template wiring you don't need:** the picker (§8) and the AI-generation tie-in
-  (§12). You still need the module (blocks/tokens, §1–§7) and **all** the §3f CSS-boundary rules.
-- **Plan to retire/decouple, don't duplicate.** When done, leave it registered (inert, picker-less)
-  or remove it — don't fork the whole module "to keep a clean copy."
-
----
-
-## Appendix A — Contract reference (what the registry/renderers require)
-
-| Contract key (registry) | Your module must export | Used by |
-|---|---|---|
-| `resolveBlock(sectionType, mode)` | `resolveBlock` (alias) | both renderers / componentRegistry |
-| `ThemeInjector` | `ThemeInjector` (alias, client) | LandingPageRenderer / EditLayout |
-| `SSRTokens` | `SSRTokens` (alias, server) | LandingPagePublishedRenderer |
-| `getSurfaceForSection(type)` | `getSurfaceForSection` | published per-section `data-surface` |
-| `defaultPaletteId` | `defaultFolioPalette` | renderers' fallback, picker |
-| `variants` | `folioVariants` (`{id,label,blurb}[]`) | picker |
-| `defaultVariantId` | `defaultFolioVariant` | renderers' fallback, picker |
-| `paletteImageKeywords` | `PALETTE_IMAGE_KEYWORDS` | image query hints |
-
-Every block also implicitly receives (published): `sectionId`, `content`, `publishedPageId`,
-`pageOwnerId`, plus flattened content fields. Wrap-level `data-palette`/`data-variant` come from
-`SSRTokens`/`ThemeInjector`; per-section `data-surface` from the renderer.
-
-## Appendix B — Out of scope: new content fields or a new audience type
-
-- **New content field a block needs** (e.g. a field the audience schema doesn't have): that's an
-  **audience-schema** change — edit `src/modules/audience/<audience>/elementSchema.ts` (+ the copy
-  prompt's collection spec + `parseCopy` defaults). Coordinate with a PO; it affects *all*
-  templates of that audience. Avoid for a pure skin; if your template genuinely needs new sections
-  or fields, that's the **§12** path (AI-first), not a one-off.
-- **A brand-new audience type** (e.g. `ecommerce`): much larger — new onboarding flow + store +
-  strategy/copy routes + element schema + `defaultTemplateForAudience` + `usesTemplateModule`
-  gate. Separate plan; not covered here.
+| Sections in order + slots + capacities + format + knob ranges | `npm run kit:generate` → `src/modules/engines/designKit.ts` |
+| Block-pair map, capacities, requiresAssets, variants (pure data) | `src/modules/templates/blockManifest.ts` |
+| The content contract each block must read (element keys/shapes) | `src/modules/engines/elementContracts.ts` (+ audience `elementSchema.ts` for legacy-layout engines) |
+| Registry loader / contract keys the module must export | `src/modules/templates/registry.ts` |
+| Standard knob axes + values | `src/modules/templates/knobs.ts` |
+| Template registration data (capabilities, designStyles, `looks`) | `src/modules/templates/templateMeta.ts` |
+| Handoff HTML validation before build | `npm run kit:lint` → `src/modules/templates/handoffLint.ts` |
+| The designer's-bar gate (single call per template) | `templateConformance(templateId)` (`src/modules/templates/templateConformance.ts`) |
+| Dual-renderer visual/CSS parity | `e2e/parity.spec.ts` (+ `?parityBreak=1` negative control) |
+| Dual-renderer content parity | `src/modules/templates/__tests__/renderParity.meridian.test.tsx` |
+| Anchors + banned fingerprints | `docs/product/anchorLibrary.md` |
+| Build ladder / decision gate authority | `docs/tracks/scalePlan.md` §7 |
+| Manual editor-basics + parity QA checklist | `.claude/skills/manual-test/SKILL.md` (editor-basics subsection) |
+
+**Audience extension (beyond a skin) and new audience types are OUT of scope here.**
+Adding section types / multi-page / collections is an audience-level, AI-first
+change to `src/modules/audience/**` (coordinate with the PO; `docs/tracks/multiPagePlan.md`
+is the authority). A brand-new audience type (e.g. `ecommerce`) is a separate,
+larger plan. Neither belongs in the template build core above.

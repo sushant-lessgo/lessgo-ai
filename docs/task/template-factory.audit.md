@@ -904,3 +904,90 @@ Human gate: founder approval of picker UX (tile presentation, look names, fallba
 ## Phase 10 — impl-review verdict
 - Verdict: **ship** (loop 1). Reviewer confirmed: determinism+distribution genuine (spread.ts FNV-1a hashToken → mulberry32 makeRng, salted seedFor per pick; zero Math.random; spread.test.ts same-token→identical + 10 tokens→≥7 distinct, ran green); explicit-pick guard real (thing.ts shouldSpreadMeridian short-circuits on input.paletteId||variantId; trust.ts spreadLook returns undefined on explicit pick, user value kept ahead of spread); dormant styleAutoAssign flag is a REAL toggle (both branches traced — true+no-pick routes through real spreadMeridianBlocks→selectEligibleBlock(seed) + spreadMeridianPalette + trust pickSeeded look; activation = 1-line slot change; honestly disclosed, default-OFF correct back-compat); firewall intact (spread.ts imports nothing, block spread runs BEFORE copy gen so no copy corruption); blockEligibility seedless path byte-identical (seeded branch gated behind `if input.seed !== undefined`). Gates: tsc clean, test:run 2285 passed/0 failed.
 - Non-blocking (for the future activation phase): (1) meridian block spread hero-inert without assetFacts on single-page path — only asset-free co-eligible sections spread until asset facts wired. (2) trust.ts lookPatch writes whole themeValues (replace not merge) — safe at creation-only, flag for activation. (3) activation of styleAutoAssign changes new meridian+hearth starting look/palette → its own founder gate recommended.
+
+## Phase 11 — /new-template skill rewrite + manual-test editor-basics subsection **[HUMAN GATE]**
+
+### Files changed
+- `.claude/skills/new-template/SKILL.md` (thin rewrite: 640 → 201 lines)
+- `.claude/skills/manual-test/SKILL.md` (new §5b editor-basics subsection: 94 → 107 lines)
+
+### New skill structure (4 parts, decision gate FIRST)
+1. **Decision gate** (leads the skill) — scalePlan §7 build-ladder table (A–E) reproduced;
+   explicit refusal rule "never D when C works": capability gap → path C block-pair on the
+   engine flagship + declare capability; style gap (empty designStyle cell / demand signal) →
+   path D new template; engine missing → path E, escalate as separate engine decision. Skill
+   REFUSES "new template" when C fits ("If someone asks for a new template, first prove the
+   need is a genuine STYLE gap, not a capability gap").
+2. **Build core** (paths C+D share it) — 10 steps: kit (`npm run kit:generate`) →
+   art-direction (anchor library + banned list) → 3–5 hero tiles from DIFFERENT anchors →
+   founder taste-pick (human gate) → full design expansion (one self-contained HTML) →
+   handoff lint (`npm run kit:lint`) → port via `/feature` → `templateConformance(id)` green →
+   parity spec (`e2e/parity.spec.ts` + `?parityBreak=1`) → parity QA sign-off (human gate).
+   Plus flexibility surface: knobs (`knobs.ts`), named looks (`templateMeta.looks`), generation spread.
+3. **Evergreen landmines** (kept — see keep-list below).
+4. **Pointers table** — live sources replacing all code-derived prose.
+
+### Evergreen keep-list retained (from spec "Skill rewrite (thin)")
+dual-renderer discipline (.tsx ↔ .published.tsx parity) · published/client boundary (silent
+500/empty-CSS) · plain `styles.ts` rule · class prefixing · margin-collapse through `data-surface`
+· self-hosted fonts (+ variable-font opsz caveat) · behaviors = one shared asset · two-identifier
+discipline (lowercase `type` vs PascalCase `LayoutName`, product-wins-ties shadowing) · bespoke §13
+mode. (All 8 spec-named landmines present; boundary rule kept as its own landmine since it's the
+mechanism behind the plain-styles.ts rule.)
+
+### Code-derivable facts DELETED → now point to live source
+- Old §0/§3 mapping cheat-sheet + `:root`/`[data-palette]`/`[data-variant]`/`[data-surface]` →
+  file table → NOW: `npm run kit:generate` (designKit.ts) emits format/axes; pointer table.
+- Old §2 "Required block set" hardcoding `PILOT_LAYOUT_NAMES`/`MERIDIAN_LAYOUT_NAMES` section
+  lists → NOW: `blockManifest.ts` + kit sections-in-order.
+- Old §3a–3h per-file export-name lists (`folioBaseTokens`, `serializeBaseTokens`,
+  `defaultFolioPalette`, resolveBlock registry shape, index.ts alias exports) → NOW: pointer to
+  `registry.ts` (contract keys) + `blockManifest.ts`.
+- Old §4 content-contract schema locations (`serviceElementSchema`/`meridianElementSchema` paths)
+  → NOW: pointer to `elementContracts.ts` (+ audience elementSchema for legacy engines).
+- Old §5/§6/§8 types/service.ts + registry.ts + templateCatalog.ts step-by-step edit recipes →
+  NOW: single pointer rows (registry.ts, templateMeta.ts).
+- Old Appendix A contract-key table → NOW: "registry loader / contract keys" pointer row.
+- Old §9 hardcoded-default grep list, §10 verification enumeration, §11 checklist → collapsed
+  into build-core steps 8–10 (conformance + parity + QA) which are the live gates.
+
+### manual-test §5b subsection items (EXACTLY the phase-2 not-machine-checked set + the spec's
+### human-half items)
+Header logo upload (change/remove, wordmark fallback) · image slots replace/remove (incl.
+collection-item images) · collections add/remove/reorder (+ seeded defaults) · Button-Settings
+popover opening (link + goal/GOAL_REF config) · nav/footer links via LinkTargetPopover ·
+social links · form-builder field config · live palette/variant/knob/look switching (no content
+clobber, no copy regen, editor+published both reflect). Framed as a P1 checklist consistent with
+the file's P0/P1/P2 style; points at `docs/task/template-factory.spec.md` editor-basics v0 contract
+as source of truth and names `templateConformance()` as owner of the machine half.
+
+### Self-check (founder gate)
+- **Zero code-derivable facts remain:** confirmed — no layout maps, no export-name lists, no
+  schema-location prose. All such content replaced by the §4 pointer table + `npm run kit:*`
+  commands. (grep of rewritten file for `folioBaseTokens`/`serializeBaseTokens`/`PILOT_LAYOUT_NAMES`/
+  `MERIDIAN_LAYOUT_NAMES`/`resolveFolioBlock` → none.)
+- **Decision-gate table matches scalePlan §7:** confirmed — same A–E rungs, same failed-clause →
+  build-action mapping, same "never D when C works" (D7) rule; C = block pair on flagship + declare
+  capability (conformance-honest); E = separate/escalate.
+- **manual-test subsection = exactly phase-2 skip list + spec human-half:** cross-referenced
+  phase-2 audit skip list (image-upload wiring · logo primitive interaction · collection
+  add/remove/reorder · Button-Settings popover) — all 4 present, PLUS the spec's remaining
+  human-only v0 items not in the jsdom subset (nav/footer links, social links, form-builder config,
+  live palette/variant/knob/look switching). No item outside the editor-basics v0 contract added.
+
+### Before/after line count
+- `new-template/SKILL.md`: **640 → 201 lines** (−69%).
+- `manual-test/SKILL.md`: 94 → 107 lines (+13, one subsection).
+
+### Verification
+- `npm run test:run` — 2284 passed | 11 skipped | 1 failed. The 1 failure is the known
+  `i18nHonesty.test.ts` 2-locale generateStaticHTML 5s test-timeout flake under full-suite load
+  (pre-existing, unrelated — docs-only change, no code touched; passes in isolation per prior phases).
+  No regressions attributable to phase 11. tsc not run (zero code changed).
+
+### Deviations
+- None. Both files were on the Files-touched list; no out-of-scope file needed.
+
+## Phase 11 — impl-review verdict
+- Verdict: **ship** (loop 1). Reviewer verified all 5 claims: (1) zero code-derivable facts — deleted identifiers (folioBaseTokens/serializeBaseTokens/PILOT_LAYOUT_NAMES/MERIDIAN_LAYOUT_NAMES/resolveFolioBlock/defaultFolioPalette/*ElementSchema) grep to 0 hits; all derivable content is a pointer. (2) All 14 file pointers verified live-existing + npm scripts present + templateConformance exported + templateMeta.looks present + knob axis names match STANDARD_KNOB_AXES. (3) Decision gate leads §1, A–E table matches scalePlan §7 line-for-line, "never D when C works" refusal present. (4) All 8 evergreen landmines retained + published/client boundary. (5) manual-test §5b covers exactly phase-2 not-machine-checked skip list + spec editor-basics v0 human items, P1 style. new-template SKILL 640→201 lines (−69%). Gate: test:run 2284 passed (only known i18n flake).
+- Non-blocking: (1) capability-gap example list (SKILL.md:42-43) mixes real + prospective capabilities — reads illustrative, pointer to templateMeta is source of truth; optional "(examples)" label. (2) manual-test title scope "(Hearth+Lex+Meridian)" stale — pre-existing, out of scope.
