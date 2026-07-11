@@ -168,6 +168,10 @@ function createInitialState(tokenId: string): EditStore {
     localeConfig: null as import('@/types/core/content').LocaleConfig | null,
     activeLocale: 'en' as string,
     localeContent: {} as import('@/types/core/content').LocaleContentOverlay,
+    // Phase-4 fix: engaged flag (omit-vs-explicit-clear). False for legacy stores
+    // → both locale keys omitted on save (byte-identical). Set true on load-with-
+    // config/overlay and on add/remove locale.
+    localeEngaged: false as boolean,
 
     // Page Axis (multi-page) — `pages` holds every page's slice; the top-level
     // layout/content fields above are the live working copy of `currentPageId`.
@@ -467,6 +471,7 @@ export function createEditStore(tokenId: string) {
               localeConfig: state.localeConfig,
               activeLocale: state.activeLocale,
               localeContent: state.localeContent,
+              localeEngaged: state.localeEngaged,
               pages: state.pages,
               currentPageId: state.currentPageId,
               chrome: state.chrome,

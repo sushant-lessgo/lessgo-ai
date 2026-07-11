@@ -192,14 +192,19 @@ async function saveDraftHandler(req: NextRequest) {
       updatedContent.baseline = body.baseline;
     }
 
-    // i18n-phase-1 (D4) — localeConfig MERGE MECHANISM #2 (top-level wholesale
-    // replace): localeConfig is a TOP-LEVEL sibling of finalContent/baseline, so
-    // — unlike localeContent above — it does NOT ride the finalContent spread.
-    // It is replaced wholesale exactly like `baseline`: present in payload ⇒
-    // overwrite; absent ⇒ preserved automatically by the `...existingContent`
-    // spread at updatedContent's construction. Never deep-merged (it's a small
-    // authoritative declaration). Validated by DraftSaveSchema, so read the
-    // parsed value (not raw body).
+    // i18n-phase-1 (D4) — localeConfig MERGE MECHANISM #2 (top-level). CLEAR-
+    // CONTRACT (Phase-4 fix, REVISES the original absent-preserve-only rule):
+    //   undefined ⇒ PRESERVE the stored config (via the `...existingContent`
+    //               spread — legacy autosaves that don't touch locales, unchanged);
+    //   null      ⇒ CLEAR (assign null; a locale removed back to single-locale
+    //               must not resurrect on reload) — schema is `.nullable().optional()`;
+    //   object    ⇒ REPLACE wholesale (like `baseline`, never deep-merged).
+    // The `!== undefined` guard already distinguishes all three: null falls into
+    // the assign branch and overwrites with null. Validated by DraftSaveSchema, so
+    // read the parsed value (not raw body). (The paired localeContent CLEAR — an
+    // explicit `{}` — rides the finalContent spread above and replaces the stored
+    // map; loadDraft returns `localeConfig ?? null`, so a cleared config reads back
+    // as null = legacy.)
     if (localeConfig !== undefined) {
       updatedContent.localeConfig = localeConfig;
     }

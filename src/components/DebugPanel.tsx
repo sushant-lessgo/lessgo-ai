@@ -10,7 +10,6 @@ import { useEditStoreContext } from './EditProvider';
 import { storeManager } from '@/stores/storeManager';
 import { storageManager } from '@/utils/storageManager';
 import { getStorageStats } from '@/utils/storage';
-import { EDITOR_DEBUG } from '@/lib/debugFlags';
 import StorageMonitor from './StorageMonitor';
 
 interface DebugPanelProps {
@@ -149,47 +148,11 @@ export function DebugPanel({
         </div>
       )}
 
-      {/* i18n-phase-1 (3b) DEV-ONLY locale switch — THROWAWAY, remove/absorb in
-          Phase 4 (real LanguageToggle). Flag-gated (NEXT_PUBLIC_DEBUG_EDITOR) so it
-          is dead-code-eliminated in prod. Lets a tester flip `activeLocale` NOW to
-          exercise 3b read-threading parity/back-compat before Phase 4 ships the UI.
-          Uses the project's declared locales when present, else en/nl for a legacy
-          back-compat check (flip → base fallback, flip back → EN intact). */}
-      {EDITOR_DEBUG && <DevLocaleSwitch storeState={storeState} />}
+      {/* i18n-phase-1: the 3b dev-only locale switch was removed in Phase 4 —
+          the real LanguageToggle + LocaleSettings in the editor header replace it. */}
 
       {/* Storage Monitor */}
       <StorageMonitor position="bottom-right" collapsed={true} />
-    </div>
-  );
-}
-
-/**
- * i18n-phase-1 (3b) dev-only locale switch. REMOVE in Phase 4.
- */
-function DevLocaleSwitch({ storeState }: { storeState: any }) {
-  const activeLocale: string = storeState?.activeLocale || 'en';
-  const setActiveLocale = storeState?.setActiveLocale as ((l: string) => void) | undefined;
-  const declared: string[] = storeState?.localeConfig?.locales;
-  const locales = Array.isArray(declared) && declared.length > 1 ? declared : ['en', 'nl'];
-  if (typeof setActiveLocale !== 'function') return null;
-  return (
-    <div className="mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-2 text-xs">
-      <div className="text-gray-500 mb-1">🌐 locale (dev)</div>
-      <div className="flex gap-1">
-        {locales.map((loc) => (
-          <button
-            key={loc}
-            onClick={() => setActiveLocale(loc)}
-            className={`px-2 py-1 rounded font-mono ${
-              loc === activeLocale
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {loc}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

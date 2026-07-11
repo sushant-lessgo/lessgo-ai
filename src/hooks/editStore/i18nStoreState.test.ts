@@ -296,6 +296,90 @@ describe('i18n Phase 3a — store state layer', () => {
     });
   });
 
+  // ===== Phase-4 fix: engaged flag + clear-contract emission + dirty gate =====
+  describe('engaged flag / clear-contract (Phase 4)', () => {
+    const realFetch = global.fetch;
+    afterEach(() => { global.fetch = realFetch; });
+
+    async function captureSaveBody(s: Store): Promise<any> {
+      const fetchMock = vi.fn(async () => ({ ok: true, json: async () => ({}) }) as any);
+      global.fetch = fetchMock as any;
+      await s.getState().save();
+      const call = fetchMock.mock.calls.find((c: any) => String(c[0]).includes('/api/saveDraft'));
+      return call ? JSON.parse((call[1] as any).body) : null;
+    }
+
+    it('loadFromDraft with a config/overlay marks the store localeEngaged', () => {
+      // beforeEach seeds CONFIG_EN_NL → engaged
+      expect(store.getState().localeEngaged).toBe(true);
+    });
+
+    it('legacy hydrate leaves localeEngaged false (never engaged)', () => {
+      const legacy = createEditStore('tok-legacy-engaged');
+      seed(legacy); // no config, no overlay
+      expect(legacy.getState().localeEngaged).toBe(false);
+    });
+
+    it('clearing config while engaged sends EXPLICIT null localeConfig + empty {} localeContent (so the route clears both)', async () => {
+      // simulate LocaleSettings.removeLocale dropping back to single-locale
+      store.setState((s: any) => {
+        s.localeConfig = null;
+        s.localeContent = {};
+        s.localeEngaged = true;
+        s.persistence.isDirty = true;
+      });
+      const body = await captureSaveBody(store);
+      expect(body.localeConfig).toBeNull();               // explicit clear signal
+      expect(body.finalContent.localeContent).toEqual({}); // explicit map replace
+    });
+
+    it('never-engaged legacy save OMITS both keys (byte-identical)', async () => {
+      const legacy = createEditStore('tok-legacy-omit');
+      seed(legacy);
+      expect(legacy.getState().localeEngaged).toBe(false);
+      const body = await captureSaveBody(legacy);
+      expect('localeConfig' in body).toBe(false);
+      expect(body.finalContent.localeContent).toBeUndefined();
+    });
+
+    it('export() emits localeContent:{} when engaged-but-empty, omits it when never engaged', () => {
+      store.setState((s: any) => { s.localeContent = {}; s.localeEngaged = true; });
+      expect((store.getState().export() as any).localeContent).toEqual({});
+
+      const legacy = createEditStore('tok-legacy-export');
+      seed(legacy);
+      expect('localeContent' in (legacy.getState().export() as any)).toBe(false);
+    });
+
+    it('dirty gate: a locale change marks isDirty so the debounced triggerAutoSave fires (declare-then-leave persists)', async () => {
+      const proj = createEditStore('tok-dirty');
+      seed(proj); // isDirty=false after load
+      // simulate LocaleSettings.addLocale (config + engaged + the CRITICAL isDirty)
+      proj.setState((s: any) => {
+        s.localeConfig = { locales: ['en', 'nl'], defaultLocale: 'en' };
+        s.localeEngaged = true;
+        s.persistence.isDirty = true;
+      });
+      expect(proj.getState().persistence.isDirty).toBe(true); // the #1 fix
+
+      // The live triggerAutoSave (uiActions) debounces via setTimeout(2000) and
+      // only schedules when isDirty — so without the isDirty set it would no-op.
+      vi.useFakeTimers();
+      const fetchMock = vi.fn(async () => ({ ok: true, json: async () => ({}) }) as any);
+      global.fetch = fetchMock as any;
+      try {
+        proj.getState().triggerAutoSave();
+        await vi.advanceTimersByTimeAsync(2100);
+      } finally {
+        vi.useRealTimers();
+      }
+      const call = fetchMock.mock.calls.find((c: any) => String(c[0]).includes('/api/saveDraft'));
+      expect(call).toBeTruthy(); // the debounced save actually fired (was isDirty)
+      const body = JSON.parse((call![1] as any).body);
+      expect(body.localeConfig).toEqual({ locales: ['en', 'nl'], defaultLocale: 'en' });
+    });
+  });
+
   // ===== hydrate / back-compat =====
   describe('hydrate', () => {
     it('loadFromDraft restores localeConfig, activeLocale=default, and the overlay', () => {

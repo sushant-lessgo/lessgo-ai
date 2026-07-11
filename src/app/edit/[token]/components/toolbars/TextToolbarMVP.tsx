@@ -130,7 +130,13 @@ function TextToolbarMVPInner({
     setVariationSelection,
     aiGeneration,
     announceLiveRegion,
+    activeLocale,
+    localeConfig,
   } = useEditStore();
+  // i18n-phase-1 (Phase 4): AI variations write DEFAULT-locale base copy only;
+  // disable the sparkle on a non-default locale (store guard also no-ops it).
+  const regenLocaleLocked =
+    !!localeConfig && activeLocale !== localeConfig.defaultLocale;
   const setFormattingInProgress = useEditStore.getState().setFormattingInProgress; // Get directly, no subscription
   const { saveSelection, restoreSelection, hasSelection, cleanup: cleanupSelection } = useSelectionPreserver();
 
@@ -803,15 +809,17 @@ function TextToolbarMVPInner({
                 e.stopPropagation();
               }}
               onClick={handleSparkle}
-              disabled={aiGeneration.isGenerating}
+              disabled={aiGeneration.isGenerating || regenLocaleLocked}
               className={`p-1.5 rounded transition-colors select-none ${
-                aiGeneration.isGenerating
+                regenLocaleLocked
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : aiGeneration.isGenerating
                   ? 'text-yellow-500 bg-yellow-50 animate-pulse'
                   : elementVariations.visible
                     ? 'bg-purple-100 text-purple-700 border border-purple-200'
                     : 'text-gray-600 hover:bg-gray-100'
               }`}
-              title="AI text variations"
+              title={regenLocaleLocked ? 'Switch to the default language to regenerate.' : 'AI text variations'}
             >
               <SparkleIcon />
             </button>

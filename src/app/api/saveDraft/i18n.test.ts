@@ -217,3 +217,64 @@ describe('saveDraft/loadDraft i18n (Phase 2)', () => {
     expect(declaredLocalesFullyPresent(cfg, {})).toBe(false);
   });
 });
+
+// ===== Phase 4 clear-contract (REVISES Phase-2 absent-preserve) =====
+// absent key ⇒ preserve (legacy-safe); explicit null localeConfig / explicit {}
+// localeContent ⇒ CLEAR. Schema is now `.nullable().optional()`.
+describe('saveDraft/loadDraft i18n clear-contract (Phase 4)', () => {
+  // (g) DECLARE → REMOVE → RELOAD: config + overlay both gone, no resurrection.
+  it('(g) declare then remove clears BOTH config and overlay across a reload', async () => {
+    // declare NL (config + overlay)
+    await save({
+      finalContent: { ...LEGACY_FINAL, localeContent: NL_OVERLAY },
+      localeConfig: { locales: ['en', 'nl'], defaultLocale: 'en' },
+    });
+    expect(store.content.localeConfig).toEqual({ locales: ['en', 'nl'], defaultLocale: 'en' });
+    expect(store.content.finalContent.localeContent.nl['hero-1'].headline).toBe('Hallo');
+
+    // remove NL → drop to single-locale: the store sends explicit null + {} (the
+    // engaged-flag emission). null CLEARS the config; {} REPLACES the stored map.
+    await save({
+      finalContent: { ...LEGACY_FINAL, localeContent: {} },
+      localeConfig: null,
+    });
+    expect(store.content.localeConfig).toBeNull();
+    expect(store.content.finalContent.localeContent).toEqual({});
+
+    // reload → no config, no NL overlay → fresh reload is single-locale again.
+    const loaded = await load();
+    expect(loaded.localeConfig).toBeNull();
+    expect(loaded.finalContent.localeContent).toEqual({});
+  });
+
+  // (h) LEGACY BYTE-IDENTICAL still holds under the nullable schema: a never-
+  // engaged project (omits both keys) grows ZERO locale keys.
+  it('(h) nullable schema does not break the zero-locale-keys law for legacy', async () => {
+    await save({ finalContent: LEGACY_FINAL });
+    const loaded = await load();
+    await save({ finalContent: loaded.finalContent }); // re-export, omits both keys
+    const keys = deepFindKeys(store.content, ['localeContent', 'localeConfig']);
+    expect(keys).toEqual([]);
+  });
+
+  // (i) MULTI → MULTI removal: removing one of three locales keeps the other two
+  // (full remaining map), removed overlay gone; config stays multi.
+  it('(i) removing one of three locales preserves the remaining two overlays', async () => {
+    const THREE_OVERLAY = {
+      nl: { 'hero-1': { headline: 'Hallo' } },
+      de: { 'hero-1': { headline: 'Hallo DE' } },
+    };
+    await save({
+      finalContent: { ...LEGACY_FINAL, localeContent: THREE_OVERLAY },
+      localeConfig: { locales: ['en', 'nl', 'de'], defaultLocale: 'en' },
+    });
+    // remove 'de' → store sends the COMPLETE remaining map (nl only) + 2-locale config
+    await save({
+      finalContent: { ...LEGACY_FINAL, localeContent: { nl: { 'hero-1': { headline: 'Hallo' } } } },
+      localeConfig: { locales: ['en', 'nl'], defaultLocale: 'en' },
+    });
+    expect(store.content.localeConfig).toEqual({ locales: ['en', 'nl'], defaultLocale: 'en' });
+    expect(store.content.finalContent.localeContent.nl['hero-1'].headline).toBe('Hallo');
+    expect(store.content.finalContent.localeContent.de).toBeUndefined();
+  });
+});

@@ -359,12 +359,20 @@ export function createPersistenceActions(set: any, get: any) {
             finalContent: exportedData,  // Changed from 'content' to 'finalContent' to match API
             ...(shipBaseline !== undefined && { baseline: shipBaseline }),
             ...(briefPayload !== undefined && { brief: briefPayload }),
-            // i18n-phase-1 (3a): localeConfig is TOP-LEVEL (D4 wholesale-replace),
-            // NOT inside finalContent. OMIT the key when there's no config — the
-            // schema is `.optional()` and REJECTS null (contract ii); a legacy
-            // project sends nothing → zero storage diff. (localeContent rides
-            // inside finalContent via export(), above.)
-            ...(state.localeConfig ? { localeConfig: state.localeConfig } : {}),
+            // i18n-phase-1 localeConfig is TOP-LEVEL (D4 wholesale-replace), NOT
+            // inside finalContent. CLEAR-CONTRACT (Phase-4 fix, REVISES the
+            // Phase-2 absent-preserve rule): the route reads
+            //   undefined ⇒ preserve stored · null ⇒ CLEAR · object ⇒ replace.
+            //  - config present  → send it (replace).
+            //  - falsy + engaged → send `null` EXPLICITLY so the route CLEARS the
+            //    stored config (a locale removed back to single-locale must not
+            //    resurrect on reload). Requires schema `.nullable().optional()`.
+            //  - falsy + never engaged (pure legacy) → OMIT → zero storage diff.
+            ...(state.localeConfig
+              ? { localeConfig: state.localeConfig }
+              : state.localeEngaged
+              ? { localeConfig: null }
+              : {}),
             title: state.title,
             // Service template selection (Phase 11b) — persist editor switches.
             // Null for product; saveDraft writes only when provided.
@@ -486,7 +494,17 @@ export function createPersistenceActions(set: any, get: any) {
           // Hydration core (sections/layouts/spacing/content/theme/
           // globalSettings/nav/social/legal/forms/pages+chrome) — extracted
           // verbatim into applySnapshot, shared with resetToGenerated.
+          // (also restores state.localeContent from the payload overlay.)
           applySnapshot(state, contentToLoad);
+
+          // Phase-4 fix: mark the locale system "engaged" if this project loaded
+          // WITH a config or overlay — so a later clear (remove back to single
+          // locale) is sent as an explicit null/{} rather than omitted (which the
+          // route would treat as "preserve" → stale-data resurrection). A pure
+          // legacy project (no config, empty overlay) stays NOT engaged → omitted.
+          state.localeEngaged =
+            !!state.localeConfig ||
+            (!!state.localeContent && Object.keys(state.localeContent).length > 0);
 
           // scale-04 (phase 6) bridge: seed the editor social config from the
           // persisted Brief ONLY when the config restored above is empty. Covers
@@ -577,15 +595,19 @@ export function createPersistenceActions(set: any, get: any) {
         version: state.version,
       };
 
-      // i18n-phase-1 (3a): ship the COMPLETE project-global overlay INSIDE
-      // finalContent so it rides saveDraft's `...finalContent` spread (Phase-2 D1).
-      // Only emit the key when overlays exist → legacy single-locale export stays
-      // byte-identical (no `localeContent` key at all). Full-map invariant enforced
-      // by the dev-mode assertion (contract i).
+      // i18n-phase-1: ship the COMPLETE project-global overlay INSIDE finalContent
+      // so it rides saveDraft's `...finalContent` spread (Phase-2 D1). CLEAR-CONTRACT
+      // (Phase-4 fix): the spread reads absent ⇒ preserve · present ⇒ replace.
+      //  - overlays exist   → emit the full map (replace; full-map invariant asserted).
+      //  - empty + engaged  → emit `{}` EXPLICITLY so the spread REPLACES the stored
+      //    map with empty (a removed locale's overlay must not resurrect on reload).
+      //  - empty + never engaged (legacy) → OMIT → byte-identical, no key at all.
       const localeContent = state.localeContent;
       if (localeContent && Object.keys(localeContent).length > 0) {
         (exportData as any).localeContent = localeContent;
         assertFullLocaleExport(localeContent, (exportData as any).localeContent);
+      } else if (state.localeEngaged) {
+        (exportData as any).localeContent = {};
       }
 
       return exportData;

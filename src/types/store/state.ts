@@ -202,8 +202,10 @@ export interface ContentSlice {
   // All defaulted so a legacy single-locale store is byte-identical (activeLocale
   // always === default, localeContent empty, localeConfig null → omitted on save).
   /** Project locale declaration (D4). `null`/undefined ⇒ legacy single-locale.
-   *  NEVER serialized as `null` to saveDraft (schema `.optional()` rejects null —
-   *  contract ii); save() omits the key when this is falsy. */
+   *  CLEAR-CONTRACT (Phase-4 fix, REVISES Phase-2/D1 absent-preserve): a falsy
+   *  value is sent to saveDraft as EXPLICIT `null` (to CLEAR the stored config)
+   *  ONLY when `localeEngaged` is true; a pure-legacy store (never engaged) OMITS
+   *  the key entirely (byte-identical). Schema is now `.nullable().optional()`. */
   localeConfig?: import('@/types/core/content').LocaleConfig | null;
   /** The editor's active authoring locale. Defaults to `localeConfig.defaultLocale`
    *  (or `'en'`). Project-global (one toggle; survives page switches). */
@@ -212,6 +214,12 @@ export interface ContentSlice {
    *  sectionId (`${type}-${uuid}`) so it spans all pages without a per-page split
    *  (matches the committed Phase-2 single-map contract). Empty ⇒ no translations. */
   localeContent: import('@/types/core/content').LocaleContentOverlay;
+  /** Locale-system "engaged" flag (Phase-4 fix). True once a project has EVER had
+   *  a locale config/overlay this session (loaded with one, or the user added/
+   *  removed a locale). Drives the omit-vs-explicit-clear decision in save()/export():
+   *  engaged + empty ⇒ send `null`/`{}` to CLEAR stored data; never-engaged + empty
+   *  ⇒ omit (legacy byte-identical). Session-scoped, re-derived on each load. */
+  localeEngaged: boolean;
 }
 
 /**

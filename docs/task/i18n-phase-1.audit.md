@@ -236,3 +236,115 @@ Location: `src/components/DebugPanel.tsx` — a flag-gated `DevLocaleSwitch` blo
 - Phase 4 must REMOVE the `DevLocaleSwitch` block in `DebugPanel.tsx` (and its `EDITOR_DEBUG` import if unused) when the real `LanguageToggle` lands.
 - Phase 5 export must resolve via the SAME `resolveLocaleElements` at the SAME point (overlay-first, then extract) — parity mirrors useTemplateBlock exactly.
 - Known v1 LEAVE gaps to surface to the founder (Phase 4/8 or later): (a) nav labels locale-shared (no overlay path); (b) per-collection-item card text locale-shared (overlay-shape limitation); (c) form field labels + logo/media locale-shared. None are regressions (never localizable) — they bound "what NL mode translates" in v1.
+
+## Phase 4 — Editor language toggle + locale config UI
+
+**Files changed**
+- `src/app/edit/[token]/components/editor/LanguageToggle.tsx` (new) — the EN<->NL toggle pills.
+- `src/app/edit/[token]/components/editor/LocaleSettings.tsx` (new) — the "Languages" declaration popover.
+- `src/app/edit/[token]/components/layout/EditHeader.tsx` — hosts both new components in the header's left cluster.
+- `src/app/edit/[token]/components/layout/EditHeaderRightPanel.tsx` — regen disable on the "Regen Copy" (regenerate-all) button.
+- `src/app/edit/[token]/components/toolbars/ElementToolbar.tsx` — regen disable on the element "Regenerate" button.
+- `src/app/edit/[token]/components/toolbars/TextToolbarMVP.tsx` — regen disable on the AI sparkle (text variations) button.
+- `src/app/edit/[token]/components/toolbars/SectionToolbar.tsx` — regen disable on the section "Regenerate Content" menu item.
+- `src/components/DebugPanel.tsx` — removed the Phase-3b dev-only `DevLocaleSwitch` block + its `EDITOR_DEBUG` import.
+
+### Header host
+The editor top bar is `src/app/edit/[token]/components/layout/EditHeader.tsx`. `LanguageToggle` + `LocaleSettings` were added to its left cluster (after `designControls`). `LanguageToggle` is invisible until `isMultiLocale(localeConfig)`; `LocaleSettings` is a small globe "Languages" button always present (the declaration entry point).
+
+### LanguageToggle
+- Visible ONLY when `isMultiLocale(localeConfig)`. Renders one pill per `localeConfig.locales` labelled by uppercased code (display-name via a small `LOCALE_DISPLAY_NAMES` map: en->English, nl->Nederlands, ...). Active pill highlighted; default locale's pill title notes "(default)".
+- Click -> `setActiveLocale(loc)` (3a action). 3b threaded all readers on `activeLocale`, so every Editable re-points to the clicked locale — ONE toggle, no side-by-side (spec decision 3).
+- Uses narrow selectors (`s.localeConfig`, `s.activeLocale`, `s.setActiveLocale`) — no whole-store subscription.
+
+### LocaleSettings ("Languages" popover)
+- Globe button + click-outside popover. Lists declared locales (default badged, non-default get Remove) and an "Add a language" grid of `SUPPORTED_LOCALES` minus already-declared minus the default.
+- **Writes via `useEditStoreApi().setState((s) => ...)` (immer recipe) + `triggerAutoSave()`** — there is NO `setLocaleConfig` store action, and adding one would touch `contentActions.ts`/`actions.ts` (outside this phase's Files-touched). The direct-setState pattern is already used elsewhere (`PublishedPageClient.tsx`) and the immer middleware supports recipe-style `store.setState`. In-scope decision.
+- **First add:** `localeConfig` seeded `{ locales: [existingDefault, added], defaultLocale: existingDefault }`; `existingDefault = cfg?.defaultLocale || activeLocale || 'en'` (legacy single-locale => 'en').
+- **Remove:** `confirmDialog` warns that it deletes that locale's translations, then removes it from `locales` AND `delete s.localeContent[code]`. If that drops to <=1 locale, `s.localeConfig = null` and `activeLocale` reset to default; if the removed locale was active (still multi), `activeLocale` reset to default.
+- Add doesn't auto-switch `activeLocale` (author declares first, then toggles to translate).
+
+### Default-locale-change decision: LOCKED (v1)
+Default is fixed to the original/base language and cannot be changed in the UI (badged "Default", no control). Reason: the flat `content` map IS the default locale's copy (D1); making a different locale the default would require swapping base<->overlay (heavier, error-prone). Conservative + safe for v1; noted in the panel helper text and here.
+
+### Null-config safety (CRITICAL)
+- Store field `localeConfig` may be `null` (legacy) or a valid config; it is NEVER left as a single-locale config after a removal — dropping to one locale sets it to `null`.
+- `persistenceActions.save()` (line ~367) emits the key only when truthy: `...(state.localeConfig ? { localeConfig } : {})`. So `null`/absent => the payload OMITS the key, never `localeConfig: null` (which the `DraftSave` `.optional()` schema would 400 on). A legacy/single-locale project emits no `localeConfig` on save — consistent with the Phase-2 zero-locale-keys law (still green).
+
+### Regen disable (minimal set, 4 controls)
+All disabled when `!!localeConfig && activeLocale !== localeConfig.defaultLocale` (pairs with 3a's store-level regen guard that no-ops + warns):
+1. `EditHeaderRightPanel.tsx` — "Regen Copy" (regenerate-all) button: `disabled`, tooltip "Switch to the default language to regenerate."
+2. `ElementToolbar.tsx` — element "Regenerate" button: `disabled` + greyed + tooltip; onClick early-returns when disabled.
+3. `TextToolbarMVP.tsx` — AI sparkle (text variations): `disabled` + greyed + tooltip.
+4. `SectionToolbar.tsx` — "Regenerate Content" advanced-menu item: `disabled` (menu renderer already greys disabled items) + label suffix "(default language only)". (Pre-existing TODO stub, but disabling keeps the surface consistent.)
+Keyboard-driven regen in `MainContent.tsx` was left to 3a's store guard (not a button/menu item) to keep the set minimal.
+
+### Unauthored-field affordance: DEFERRED (TODO)
+Step 4 (subtle marker on base-fallback fields in a non-default locale) was NOT shipped. It needs per-field overlay-presence checks inside the read/render sites (`InlineTextEditorV2.tsx` / block renderers), which are Phase-3b files outside this phase's Files-touched — implementing it would expand scope. Left a `// TODO(i18n)` in `LanguageToggle.tsx`.
+
+### Dev switch removal
+The Phase-3b `DevLocaleSwitch` block, its `{EDITOR_DEBUG && ...}` render site, and the now-unused `import { EDITOR_DEBUG }` were removed from `src/components/DebugPanel.tsx` (replaced by the real toggle). A one-line comment marks where it was.
+
+### Deviations
+- **No new store action.** localeConfig writes go through `setState` from the UI rather than a dedicated action, to stay inside Files-touched. Conservative; documented above.
+- **"Languages" button is a new header element for single-locale projects.** The plan's regression note says a single-locale project shows "no toggle, no UI diff." The LanguageToggle (pills) honors that (invisible until a 2nd locale is declared) and the editing/canvas/toolbar behavior is byte-identical. But the task's step 2 explicitly requires a header-reachable "Languages" entry point to DECLARE a 2nd locale (acceptance #1 needs it) — unavoidably one new small control. Interpreted "no UI diff" as the editing surface / toggle, added a minimal globe button. Flagged for the founder at the Phase-6 gate.
+- **Unauthored-field affordance TODO'd** (see above).
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — Test Files 131 passed | 1 skipped (132); Tests 2056 passed | 3 skipped (2059). Identical to post-3a/3b — zero regressions. No new test file added (Phase 4 is UI wiring over already-tested store/resolver logic; a test file would be outside Files-touched).
+- **Manual:** could not drive a real browser in this environment. Verified by code reasoning:
+  - (a) 2-locale round-trip: adding a locale sets a 2-locale `localeConfig` (save persists it, line 367); NL text edits go to `state.localeContent` via 3a's locale branch; `export()` emits the overlay inside finalContent; on reload `activeLocale` re-derives to default, `localeConfig` restores, toggle reappears, both overlays present -> both locales survive. Clicking a pill calls 3a's `setActiveLocale`, which 3b's threaded readers observe -> all Editables re-point.
+  - (b) single-locale/legacy: `isMultiLocale(null)` false -> no toggle pills; every write takes the base branch; `save()` omits `localeConfig` (line 367) -> no `localeConfig: null`; only new element is the globe button (see deviation).
+  - (c) regen disabled on non-default locale: all four controls compute `regenLocaleLocked` from `activeLocale !== localeConfig.defaultLocale`.
+  - **Needs a human at the Phase-6 gate:** actual browser click-through (toggle flip visually re-points text, autosave+reload persistence, regen tooltip render, single-locale no-visible-diff eyeball).
+
+## Phase 4 — REVIEW FIX (two blocking data-integrity bugs)
+
+Post-review fix for the localeConfig persistence path. REVISES the Phase-2/D1 merge contract: absent-preserve now has a null/{}-CLEAR counterpart.
+
+**Additional files changed (this fix)**
+- `src/lib/validation.ts` — `DraftSaveSchema.localeConfig`: `.optional()` -> `.nullable().optional()` (accepts explicit null = clear-signal; absent still preserves).
+- `src/app/api/saveDraft/route.ts` — comment-only: documented the clear-contract (undefined=preserve / null=clear / object=replace); the existing `if (localeConfig !== undefined)` guard already assigns null correctly.
+- `src/types/store/state.ts` — added `localeEngaged: boolean` to `ContentSlice`; revised the `localeConfig` doc to the clear-contract.
+- `src/stores/editStore.ts` — init `localeEngaged: false`; added it to `partialize` (localStorage rehydration path).
+- `src/hooks/editStore/persistenceActions.ts` — `loadFromDraft` sets `localeEngaged` from the loaded config/overlay; `save()` emits `localeConfig: null` when falsy-but-engaged (omits when never engaged); `export()` emits `localeContent: {}` when empty-but-engaged (omits when never engaged).
+- `src/app/edit/[token]/components/editor/LocaleSettings.tsx` — add/remove recipes now set `s.persistence.isDirty = true` and `s.localeEngaged = true`; header comment updated to the clear-contract.
+- `src/app/api/saveDraft/i18n.test.ts` — added route tests (g),(h),(i).
+- `src/hooks/editStore/i18nStoreState.test.ts` — added a "Phase-4 engaged flag / clear-contract" block (6 tests: engaged derivation on load, explicit null/{} clear emission, never-engaged omit, export()-empty-engaged, and the isDirty dirty-gate via the debounced triggerAutoSave).
+
+### BLOCKING #1 — config writes never marked the store dirty
+`LocaleSettings.addLocale`/`removeLocale` mutated via `setState` but never set `persistence.isDirty`. The LIVE `triggerAutoSave` is the uiActions one (wins by spread order) which debounces via `setTimeout(2000)` and only schedules WHEN `isDirty` — and `loadFromDraft` resets `isDirty=false` on mount. So a declare-then-leave never persisted. FIX: both recipes now set `s.persistence.isDirty = true` (matching how the store's own actions flip it), so the existing `triggerAutoSave()` schedules the save. Store test proves the dirty-gate fires (fake timers advance past the 2s debounce -> `/api/saveDraft` called).
+
+### BLOCKING #2 — locale REMOVAL was unrepresentable ("absent=preserve" can't express "clear")
+Dropping to single-locale set `localeConfig=null` + deleted the overlay, but `save()` OMITTED falsy localeConfig and `export()` OMITTED empty localeContent, while the route PRESERVES on absent -> the DB kept the stale config+overlay, which resurrected on reload.
+
+FIX — explicit clear-contract, **absent = preserve (unchanged, legacy-safe); explicit `null`/`{}` = clear**:
+- Schema `.nullable().optional()` (accepts the null signal).
+- Route: `if (localeConfig !== undefined) updatedContent.localeConfig = localeConfig` already assigns null on null (verified; comment added). localeContent's explicit `{}` rides the `...finalContent` spread and replaces the stored map. loadDraft already returns `localeConfig ?? null` (cleared reads back as null=legacy).
+- Store emission decided by the **engaged flag** (below).
+
+### Engaged-flag mechanism (chosen)
+`localeEngaged: boolean` on the store. Semantics: the project is "engaged" if it currently has a config/overlay OR ever had one this session.
+- Set true in `loadFromDraft` when the loaded payload has a non-null `localeConfig` OR a non-empty `localeContent` (computed right after `applySnapshot`, which restores the overlay).
+- Set true in `LocaleSettings.addLocale`/`removeLocale` (same recipe as the isDirty fix).
+- Restored via `partialize` on the localStorage rehydration path (no separate derivation needed — the persisted flag rides).
+- Emission rule (save()/export()):
+  * `localeConfig` truthy -> send it (replace). Falsy + engaged -> send `null` EXPLICITLY (clear). Falsy + never-engaged (pure legacy) -> OMIT (byte-identical).
+  * `localeContent` non-empty -> send full map (replace; full-map invariant asserted). Empty + engaged -> send `{}` EXPLICITLY (clear). Empty + never-engaged -> OMIT.
+Net: a removed locale's config + overlay are actively cleared in the DB; a legacy project that never touched the locale system still emits ZERO locale keys (Phase-2 zero-locale-keys law intact — the engaged flag is false).
+
+### Multi->multi removal (unbroken)
+`removeLocale` on a 3+-locale project keeps the config multi and sends the COMPLETE remaining overlay map (3a full-map invariant), so no surviving locale is wiped. Route test (i) proves nl survives, de is gone.
+
+### Contract revision note
+This REVISES the Phase-2/D1 `localeContent`/`localeConfig` merge contract: the original "absent key = preserve; present = replace" now has an explicit clear counterpart — `null` (localeConfig) / `{}` (localeContent) = CLEAR. The route comments, schema comment, and store `state.ts` doc all state this. Absent still means preserve, so every legacy path is unchanged.
+
+### Tests
+- Route `i18n.test.ts`: (g) declare->remove->reload clears BOTH config and overlay (no resurrection); (h) nullable schema keeps the zero-locale-keys law for legacy; (i) multi->multi removal preserves the remaining overlays. Phase-2 (a)-(f) all still pass.
+- Store `i18nStoreState.test.ts`: engaged derivation on load (config -> true, legacy -> false); clear-emission (engaged+empty sends `null`+`{}`); never-engaged omits both; export() empty-engaged -> `{}`, never-engaged -> omit; dirty-gate (isDirty set -> debounced triggerAutoSave fires with the config).
+
+### Verification (post-fix)
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — Test Files 131 passed | 1 skipped (132); Tests 2065 passed | 3 skipped (2068). +9 vs the pre-fix 2056 (3 route + 6 store). Phase-2 (a)-(f) and all prior suites green; zero regressions.
+- Still not browser-driven; the Phase-6 human gate should eyeball the declare->translate->remove->reload cycle live.
