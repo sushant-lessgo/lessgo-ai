@@ -85,3 +85,23 @@ Headline restored & verified char-exact; draft verified clean of test strings (`
 4. Timer-attribution wrapper adds ~µs/fire — negligible.
 5. Preview "first hit" was ISR-cached (not true cold), same as after-run.
 6. Paint API returned empty on preview (automated-tab artifact); DCL/load are the signal.
+
+---
+
+## POST-FIX VERIFICATION (perf-04 deployed, same day — merge 0ffe11f3)
+
+Same rig: prod lessgo.ai · DevTools CPU 6× · same project/page · fresh session.
+
+| Check | Before perf-04 | After perf-04 | Verdict |
+|---|---|---|---|
+| Idle busy ratio (60–100 s window) | 430 tasks / 46.4 s / 60.6 s = **77%** | **2 tasks / 854 ms / 99.9 s = 0.85%** | ✅ PASS (target <10%) |
+| Timer attribution | sT(100) MutationObserver 581 fires / 30.7 s CPU | **absent**; residue = PostHog 3 s beacons + sI(100) @ 74 ms total | ✅ loop gone |
+| Edit-loss repro | edit visible in DOM, 0 store writes, 0 POSTs, lost on reload (3/3 lost) | **6/6 commits persisted** — draft updated + exactly 1 POST @ 63.5 KB each | ✅ FIXED — no perf-05 needed |
+| Edit-page load (throttled) | heap 500 MB at load, ~2 min settling, 35 s long task | heap **53 MB**, settled immediately | ✅ |
+| DOM nodes | 1855 | **1379** (hint elements gone) | ✅ |
+| Selection/toolbar QA | — | section select + label, element outline, text toolbar renders/positions; inline edit enter/exit clean ×6 | ✅ |
+
+**Conclusion:** the ElementDetector MutationObserver loop was the root cause of BOTH perf-02's
+idle-saturation failure AND the silent edit-loss (commit path starvation). perf-04 closes both.
+Editor-track phase 1 (trust) proceeds as planned but as hardening (sync-flush guarantee + save
+chip + throttled persistence e2e), not as an open data-loss bug.
