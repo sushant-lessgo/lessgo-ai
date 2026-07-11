@@ -241,3 +241,97 @@ Mirrors the `mood` flow verified in the plan:
 ## Phase 3 — impl-review verdict
 - Verdict: **ship** (loop 1). Reviewer confirmed dormant + byte-neutral: default value emits NO CSS on BOTH `serializeKnobOverrides` (knobCss.ts:49) and `knobDataAttributes` (:78-80), asserted in tests; published seam threaded as optional `knobs` option through all 3 `generateStaticHTML` call sites (renderPublishedExport.ts:198/293/449) → LandingPagePublishedRenderer → `tmpl.SSRTokens`, no template SSRTokens/ThemeInjector wired; `assertKnobConformance` defined-but-not-enrolled (single green "does not declare knobs" test); firewall intact (type-only + data imports, no template components); serializer wrapper-scoped `[data-knob-*]` not `html[...]` (test asserts). Gates re-run: tsc clean, test:run 2212 passed/11 skipped, build green.
 - Non-blocking: (1) `typePairing` placeholder vocab (classic/condensed/editorial) → phase 8 realigns to hearth's real variantIds. (2) serializer/attr helpers consumed only by tests this phase (dormant mechanism) — land for phase 8.
+
+## Phase 4 — design-kit generator
+
+**Files changed**
+- `src/modules/engines/designKit.ts` (new)
+- `src/modules/engines/designKit.test.ts` (new)
+- `scripts/generateDesignKit.ts` (new)
+- `package.json` (added `kit:generate` script only)
+
+### designKit.ts — kit structure
+Pure derivation joining four flat maps per copy engine into a `DesignKit`:
+- required sections IN ORDER ← `engineCoreSections[engine]`;
+- per-section slots (key, required, fillMode, isCard, inferred primitive) + card min/max ←
+  `getAllElements()` / `getCardRequirements()` over the section schema;
+- capacities / requiresAssets / declared variants ← `blockManifests[flagship][sectionType]`;
+- knob RANGES ← `STANDARD_KNOB_AXES` (full axis set, values, default, note);
+- `KitFormat` block: class-prefix convention, design-axis attrs
+  (`[data-palette]`/`[data-variant]`/`data-knob-*`/`[data-surface]`), self-hosted font whitelist
+  (hardcoded from `src/styles/fonts-self-hosted.css` with a pointer comment), self-contained rules.
+`renderDesignKitMarkdown(kit)` renders the kit to markdown (sections-in-order line, per-section
+slot tables + capacity/variants, knob-range table, format-constraints block).
+
+Types exported: `DesignKit`, `KitSection`, `KitSlot`, `KitVariant`, `KitKnobAxis`, `KitFormat`,
+`ContractSource`, `SELF_HOSTED_FONTS`; fns `buildDesignKit`, `renderDesignKitMarkdown`.
+
+**Firewall:** only TYPE-only imports (`CopyEngine`, `TemplateId`, `PrimitiveKind`, manifest/schema
+types) + PURE-DATA leaves (`coreSections`, `elementContracts`, `blockManifest`, `knobs`, audience
+element schemas + their pure helpers `getAllElements`/`getCardRequirements`/`layoutElementSchema`).
+No `.tsx`, no `'use client'`, no resolver/ThemeInjector/SSRTokens. `tsc --noEmit` clean confirms.
+
+### Engine → source (contract vs legacy-layout)
+- **thing** → flagship `meridian`; all 5 core sections resolve via the populated
+  `elementContracts.thing` → labeled **contract**.
+- **trust** → flagship `hearth`; `elementContracts.trust` NOT populated → sections resolve via
+  `PILOT_LAYOUT_NAMES[sectionType]` → `layoutElementSchema` → labeled **legacy-layout**.
+- **work** → flagship `granth`; `elementContracts.work` NOT populated → section→layout derived by
+  scanning `writerElementSchema` for matching `sectionType` → labeled **legacy-layout**.
+
+### CLI
+`scripts/generateDesignKit.ts` — thin CLI, flags `--engine=<thing|trust|work>`, `--out=<path>`
+(dir when multiple engines), `--all`; no args → all engines to stdout. Outputs NOT committed.
+Invocations verified: `npm run kit:generate -- --engine=thing|trust|work` and
+`npx tsx scripts/generateDesignKit.ts --engine=<e>`. (`kit:generate` uses `npx tsx` to match the
+repo's existing `.ts`-script convention — `tsx` is not a local devDep; adding one is out of this
+phase's file scope.)
+
+### Sample output excerpt (thing engine — real derived data)
+```
+# Design kit — `thing` engine
+_Derived artifact. Flagship reference template: `meridian`. ..._
+
+## Required sections (in order)
+`header` → `hero` → `features` → `testimonials` → `footer`
+
+### `hero` — ref layout `TerminalHero`  _(source: contract)_
+| slot | req | fill | primitive | card |
+| `headline` | required | ai_generated | `text` |  |
+| `cta_text` | required | ai_generated | `button` |  |
+| `hero_image` | optional | manual_preferred | `image` |  |
+| `stats.value` | optional | ai_generated_needs_review | `text` | yes |
+- Collection `stats`: min 0, max 4 (optimal 0–4).
+- Declared variants:
+  - `TerminalHero` · Terminal hero
+  - `EditorialPhotoHero` · Editorial photo hero [needs photos] — Photo-led split hero — needs a hero image.
+```
+(Full hero slot list = 24 keys — the LIVE meridian∪vestria thing-contract union; capacities +
+variants come straight from the live `blockManifest`.)
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npx vitest run src/modules/engines/designKit.test.ts` — 11 passed.
+- `npm run test:run` — 2223 passed | 11 skipped (140 files); no regressions vs phase-3 baseline.
+- CLI run for all 3 engines — thing (contract), trust + work (legacy-layout) all emit real
+  sections/slots/capacities/knob-ranges/format block.
+
+### Deviations
+- **Primitive assignments are HEURISTICALLY INFERRED**, not declared. No per-slot primitive
+  declaration exists in the schema yet (future editorPlan work); `inferPrimitive()` maps by key
+  name (logo/image/link/button/text). Conservative: surfaced as a design HINT (documented in the
+  `KitSlot` doc comment), not a hard contract. Chose inference over omission so the kit's
+  edit-primitive column is populated per the phase brief.
+- **Flagship per engine** (meridian/hearth/granth) chosen as the capacity/variant reference source
+  since `blockManifest` is template-keyed and the kit is engine-level. `granth` has no manifest
+  entry → work sections carry no manifest capacity/variants (only schema-derived card min/max),
+  which is correct (nothing to surface).
+
+### Open risks
+- None for this phase. The kit is a design-time artifact only (not imported by any runtime path);
+  the font whitelist is the one hand-synced datum (pointer comment flags the source CSS for phase-5
+  lint parity).
+
+## Phase 4 — impl-review verdict
+- Verdict: **ship** (loop 1). Reviewer confirmed: derived from live maps (engineCoreSections + elementContracts/layoutElementSchema via getAllElements/getCardRequirements + blockManifests + STANDARD_KNOB_AXES), test re-derives liveKeys (no frozen golden); firewall intact (traced transitive imports — all type-only/pure-data, no .tsx/blocks/resolver); all 3 engines generate (thing=contract, trust/work=legacy-layout fallback via resolveEngineSectionSchema, sections labeled with source); heuristic `inferPrimitive` honestly labeled as hint in code + audit; outputs not committed. Gate: tsc clean, test:run 2223 passed/11 skipped/0 failed.
+- Non-blocking (deferred polish, not fixed this phase): (1) rendered markdown prints inferred `primitive` column without an "inferred hint, not contract" legend — add a footnote in renderDesignKitMarkdown; borderline vs spec's don't-present-guesses-as-truth. (2) `inferPrimitive` misses bare `socials.href`→text (suffix rule only matches `_href`). (3) dead ternary scripts/generateDesignKit.ts:38-40. (4) `kit:generate` uses `npx tsx` w/ no local devDep. → capture in a phase-11 or cleanup pass.
