@@ -75,6 +75,7 @@ gap-audit of the 13 designs runs when a demand signal points at one of them.
 template. Everything else agent-executable.
 
 ## References
+- `docs/research/coverage-100/templateMapping.md` — per-site template fit + gap rollup (2026-07-11): 36% servable in-code, place bucket 35%, empty cells = trust×editorial (4) + thing×warm (2); designer ask-list §Gist
 - `docs/task/template-factory.spec.md` — factory spec (kit/lint/conformance/parity/skill-rewrite)
 - `docs/research/coverage-100/findings.md` — canonical experiment findings (N=101)
 - `docs/product/templateLibrary.md` — design-system inventory (13 built + 4 DNA + port status)
