@@ -106,7 +106,7 @@ describe('buildPageMetadata', () => {
     const m = buildPageMetadata({ ...base, content: flatContent, canonicalPath: '/' });
     expect(m.description).toBe('Founders launch in minutes, not weeks.');
     expect(m.title).toBe('Acme');
-    expect(m.siteName).toBe('Lessgo.ai');
+    expect(m.siteName).toBe('Lessgo AI');
     expect(m.ogType).toBe('website');
   });
 

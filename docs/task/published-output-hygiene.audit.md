@@ -217,3 +217,60 @@ Re-verification after the fixture fix:
   `src/app/page.tsx(6,26) TS2307 @/assets/images/founder.jpg`.
 - `renderParity.meridian.test.tsx` + `conformance.test.ts`: 497 passed | 12 skipped, 0 failed.
 - Full `npm run test:run`: **164 files passed | 1 skipped; 2790 tests passed | 15 skipped; 0 failures.**
+
+---
+
+# published-output-hygiene — Phase 3 audit
+
+## Files changed
+- `src/lib/staticExport/lessgoBadge.ts`
+- `src/lib/staticExport/lessgoBadge.test.ts`
+- `src/lib/staticExport/htmlGenerator.ts`
+- `src/lib/staticExport/buildPageMetadata.ts`
+- `src/lib/staticExport/buildPageMetadata.test.ts`
+- `src/app/p/[slug]/[...subpath]/page.tsx`
+- `src/app/p/[slug]/blog/page.tsx`
+- `src/app/p/[slug]/blog/[postSlug]/page.tsx`
+- `docs/task/published-output-hygiene.audit.md` (this file)
+
+## Goal
+Brand consistency in PUBLISHED output only: "Lessgo AI" everywhere; never
+"Lessgo.ai"/"Lessgo.AI". App-shell/marketing strings out of scope. URLs
+(`lessgo.ai` hostnames + UTM) intentionally unchanged.
+
+## Per-string changes (file:line, before → after)
+- `lessgoBadge.ts:13` aria-label `"Proudly built by Lessgo.ai"` → `"Proudly built by Lessgo AI"`
+- `lessgoBadge.ts:15` visible text `Lessgo.ai` → `Lessgo AI`
+  - href `https://lessgo.ai/?ref=badge&utm_source=published&utm_medium=badge` UNCHANGED (URL, not brand copy).
+- `lessgoBadge.test.ts:1` comment `"Proudly built by Lessgo.ai"` → `"Proudly built by Lessgo AI"` (in-scope file, kept accurate)
+- `lessgoBadge.test.ts:10` `expect(html).toContain('Lessgo.ai')` → `'Lessgo AI'`
+- `htmlGenerator.ts:374` `og:site_name content="Lessgo.ai"` → `content="Lessgo AI"`
+- `buildPageMetadata.ts:169` `siteName: 'Lessgo.ai'` → `'Lessgo AI'`
+- `buildPageMetadata.test.ts:109` `expect(m.siteName).toBe('Lessgo.ai')` → `'Lessgo AI'`
+- `src/app/p/[slug]/[...subpath]/page.tsx:121` `siteName: 'Lessgo.ai'` → `'Lessgo AI'`
+- `src/app/p/[slug]/blog/page.tsx:40` `siteName: 'Lessgo.ai'` → `'Lessgo AI'`
+- `src/app/p/[slug]/blog/[postSlug]/page.tsx:66` `siteName: 'Lessgo.ai'` → `'Lessgo AI'`
+
+## Sweep-grep result (step 5)
+`rg -n "Lessgo\.(ai|AI)|© 202[0-5]"` over `src/lib/staticExport`, `src/modules/templates`,
+`src/modules/generatedLanding`, `src/app/p`. After edits, remaining hits (all acceptable):
+- `src/modules/templates/shared/footerHygiene.test.ts` — `© 2020–2024` / `© 2024` are
+  test FIXTURES for the phase-2 year-normalizer (year RANGE untouched assertion). Expected.
+- `src/modules/templates/shared/footerHygiene.ts:14` — CODE COMMENT describing the range rule.
+- No `Lessgo.ai`/`Lessgo.AI` brand-copy stragglers remain in the published surface.
+- No `src/app/p` hits at all.
+
+## Deviations
+- Updated `lessgoBadge.test.ts:1` header comment (not strictly required, but the old
+  wording was now inaccurate and the file was already in the Files-touched list).
+
+## Test / tsc results
+- `npx tsc --noEmit`: only pre-existing unrelated `src/app/page.tsx(6,26)` TS2307
+  (`founder.jpg`) — acceptable/out-of-scope. No new errors.
+- `npm run test:run`: 164 files passed / 1 skipped; 2790 tests passed / 15 skipped.
+  lessgoBadge + buildPageMetadata suites green.
+
+## Open risks
+- None in code. Live-output confirmation deferred to phase 4 (human gate).
+- Published pages ship via `npm run build` (buildPublishedCSS/buildAssets + next build);
+  changes take effect on rebuild/republish, not dev server alone.

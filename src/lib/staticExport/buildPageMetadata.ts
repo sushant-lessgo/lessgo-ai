@@ -166,7 +166,7 @@ export function buildPageMetadata(input: BuildPageMetadataInput): PageMetadata {
     description: cleanDescription,
     canonicalURL,
     ogImage,
-    siteName: 'Lessgo.ai',
+    siteName: 'Lessgo AI',
     ogType: 'website',
     noIndex: !!seo?.noIndex,
     faviconUrl: seo?.faviconUrl || input.rootSeo?.faviconUrl || DEFAULT_FAVICON_URL,

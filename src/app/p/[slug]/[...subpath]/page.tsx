@@ -118,7 +118,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: pageTitle,
       description,
       url: canonicalURL,
-      siteName: 'Lessgo.ai',
+      siteName: 'Lessgo AI',
       images: [{ url: ogImageUrl, width: 1200, height: 630, alt: pageTitle }],
       type: 'website',
     },
