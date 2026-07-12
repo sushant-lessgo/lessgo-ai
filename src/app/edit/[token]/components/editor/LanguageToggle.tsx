@@ -9,7 +9,7 @@
 'use client';
 
 import React from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { isMultiLocale } from '@/lib/i18n/localeContent';
 
 // Minimal display-name map for the supported locales (LanguageToggle +

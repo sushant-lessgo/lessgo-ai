@@ -8,7 +8,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { buildPageMetadata } from '@/lib/staticExport/buildPageMetadata';
 import { META_PIXEL_ID_RE, GA4_MEASUREMENT_ID_RE } from '@/lib/staticExport/headTags';
 import type { PageSeo, ProjectPageEntry } from '@/types/store';

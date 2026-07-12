@@ -2,7 +2,7 @@
 "use client";
 
 import { useCallback } from 'react';
-import { useEditStoreLegacy as useEditStore, useEditStoreApi } from '@/hooks/useEditStoreLegacy';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { useToast } from './useToast';
 import type { ResetScope } from '@/types/core';
 

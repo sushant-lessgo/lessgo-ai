@@ -5,7 +5,7 @@
 // founder authors both languages inline (bilingual is Lumen-contained).
 
 import React from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions, deriveNavLinks } from '@/utils/pageLinks';
 import { useLumenBlock } from '../../hooks/useLumenBlock';

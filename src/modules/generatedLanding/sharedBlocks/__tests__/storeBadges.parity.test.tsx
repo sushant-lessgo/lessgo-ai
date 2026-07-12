@@ -1,7 +1,7 @@
 // scale-05 phase 7 — shared StoreBadges block: dual-renderer parity +
 // firewall-split registry resolution + href + beacon (data-lessgo-cta) attrs.
 //
-// The edit twin reads useEditStoreLegacy → we mock it (tests aren't in the
+// The edit twin reads useEditStore → we mock it (tests aren't in the
 // published path, so importing the edit twin here is fine).
 
 import React from 'react';
@@ -13,8 +13,8 @@ const PLAY_URL = 'https://play.google.com/store/apps/details?id=com.kathaworld.a
 const APPSTORE_URL = 'https://apps.apple.com/us/app/kathaworld/id1234567890';
 
 // Mock the store BEFORE importing the edit twin.
-vi.mock('@/hooks/useEditStoreLegacy', () => ({
-  useEditStoreLegacy: (selector?: (s: any) => any) => {
+vi.mock('@/hooks/useEditStore', () => ({
+  useEditStore: (selector?: (s: any) => any) => {
     const state = {
       content: {
         [SECTION_ID]: {

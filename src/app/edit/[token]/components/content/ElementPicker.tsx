@@ -2,7 +2,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useUniversalElements } from '@/hooks/useUniversalElements';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import type { UniversalElementType, UniversalElementConfig } from '@/types/universalElements';
 import type { ElementPickerOptions } from '@/types/elementRestrictions';
 import { filterElementsByRestrictions } from '@/utils/elementRestrictions';

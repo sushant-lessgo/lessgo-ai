@@ -1,5 +1,5 @@
 // utils/ctaHandler.ts - Utility function for handling CTA button clicks
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 
 import { logger } from '@/lib/logger';
 import { toDestination } from '@/utils/destinationShim';

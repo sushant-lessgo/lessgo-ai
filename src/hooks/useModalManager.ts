@@ -3,7 +3,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
-import { useEditStoreApi } from '@/hooks/useEditStoreLegacy';
+import { useEditStoreApi } from '@/hooks/useEditStore';
 import type { CanonicalFieldName } from '@/types/core/index';
 import { FIELD_DISPLAY_NAMES } from '@/types/core/index';
 

@@ -7,7 +7,7 @@
 import React from 'react';
 import { useLumenBlock } from '../../hooks/useLumenBlock';
 import { LumenEditable } from '../../components/LumenEditable';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { HERO_STYLES } from './styles';
 
 interface LumenHeroContent {

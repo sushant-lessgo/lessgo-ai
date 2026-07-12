@@ -1,6 +1,6 @@
 // hooks/useSmartTextColors.ts - Hook for smart text colors based on background
 import { useMemo } from 'react';
-import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
+import { useEditStore } from './useEditStore';
 import { getSmartTextColor, hasGoodContrast } from '@/utils/improvedTextColors';
 
 interface SmartTextColors {

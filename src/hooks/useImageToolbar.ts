@@ -1,6 +1,6 @@
 // hooks/useImageToolbar.ts - Robust image toolbar hook
 import React from 'react';
-import { useEditStoreApi } from '@/hooks/useEditStoreLegacy';
+import { useEditStoreApi } from '@/hooks/useEditStore';
 
 import { logger } from '@/lib/logger';
 /**

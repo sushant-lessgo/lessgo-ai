@@ -18,7 +18,7 @@
 // on both surfaces.
 
 import React from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import type { Surface } from '@/modules/editing/primitiveTypes';
 
 interface EditableLogoProps {

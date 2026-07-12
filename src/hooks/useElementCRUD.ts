@@ -1,7 +1,7 @@
 // hooks/useElementCRUD.ts - Element CRUD operations hook
 
 import { useCallback } from 'react';
-import { useEditStoreApi } from './useEditStoreLegacy';
+import { useEditStoreApi } from './useEditStore';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import { UNIVERSAL_ELEMENTS } from '@/types/universalElements';
 import { getLayoutElements } from '@/modules/sections/layoutElementSchema';

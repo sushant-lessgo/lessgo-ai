@@ -7,7 +7,7 @@ import React from 'react';
 import { TRUST_STYLES } from './styles';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 
 interface Metric { id: string; value: string; label: string }
 interface Logo { id: string; name: string; image: string }

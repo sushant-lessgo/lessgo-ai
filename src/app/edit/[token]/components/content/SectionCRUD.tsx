@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { promptDialog } from '@/components/ui/ConfirmDialog';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import type { SectionType } from '@/types/core/content';
 import type { AddSectionOptions } from '@/hooks/useSectionCRUD';
 

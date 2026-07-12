@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM, { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import type { StockPhoto } from '@/services/pexelsApi';

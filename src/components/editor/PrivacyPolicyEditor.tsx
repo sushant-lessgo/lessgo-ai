@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { useEditStoreLegacy } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 
 const JURISDICTIONS = ['US', 'EU', 'UK', 'Global'] as const;
 type Jurisdiction = typeof JURISDICTIONS[number];
@@ -24,7 +24,7 @@ interface Props {
 type Phase = 'form' | 'editing';
 
 export function PrivacyPolicyEditor({ isOpen, onClose, companyName: initialName }: Props) {
-  const store = useEditStoreLegacy();
+  const store = useEditStore();
   const existing = store.legalPages?.privacy;
 
   const [phase, setPhase] = useState<Phase>(existing ? 'editing' : 'form');

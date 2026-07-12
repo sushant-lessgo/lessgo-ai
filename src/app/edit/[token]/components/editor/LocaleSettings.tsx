@@ -23,9 +23,9 @@
 
 import React from 'react';
 import {
-  useEditStoreLegacy as useEditStore,
+  useEditStore,
   useEditStoreApi,
-} from '@/hooks/useEditStoreLegacy';
+} from '@/hooks/useEditStore';
 import { SUPPORTED_LOCALES } from '@/lib/i18n/localeContent';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import { localeLabel } from './LanguageToggle';

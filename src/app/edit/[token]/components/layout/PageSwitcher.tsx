@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { showProductsModal } from '../ui/GlobalModals';
 import { setPanelCollectionKey } from '../ui/ProductsModal';
 import { confirmDialog, promptDialog } from '@/components/ui/ConfirmDialog';

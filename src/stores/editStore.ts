@@ -3,7 +3,7 @@
  * Converts the previous global store into isolated per-project stores.
  *
  * This IS the live editor store (one instance per project token). Components do
- * not import it directly — they reach it through `useEditStoreLegacy` +
+ * not import it directly — they reach it through `useEditStore` +
  * `EditProvider`, and instances are created/cached by `storeManager`.
  * Actions are composed from the slice creators in `../hooks/editStore/*`.
  * `partialize` persists a subset to localStorage under a per-token storage key.

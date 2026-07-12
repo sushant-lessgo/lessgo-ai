@@ -11,7 +11,7 @@ import { layoutElementSchema, getAllElements } from '@/modules/sections/layoutEl
 import { logger } from '@/lib/logger';
 import { sectionList } from '@/modules/sections/sectionList';
 import type { EditableElement } from '@/types/core/content';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { usesTemplateModule } from '@/types/service';
 
 interface EnhancedAddSectionProps {

@@ -1,7 +1,7 @@
 // hooks/useUniversalElements.ts - Universal element management system
 
 import { useCallback, useMemo } from 'react';
-import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
+import { useEditStore } from './useEditStore';
 import type {
   UniversalElementType,
   UniversalElementInstance,

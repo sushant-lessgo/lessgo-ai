@@ -9,7 +9,7 @@
 // each entry against its own locale's target.
 
 import { useCallback } from 'react';
-import { useEditStoreLegacy as useEditStore, useEditStoreApi } from '@/hooks/useEditStoreLegacy';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { useToast } from './useToast';
 
 export function useUndoRedo() {

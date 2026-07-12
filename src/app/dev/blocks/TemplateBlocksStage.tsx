@@ -26,7 +26,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { EditProvider, EditStoreGate } from '@/components/EditProvider';
-import { useEditStoreLegacy } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { preloadTemplate } from '@/modules/templates/registry';
 import type { TemplateModule, KnobSelection } from '@/types/template';
 import type { TemplateId } from '@/types/service';
@@ -69,7 +69,7 @@ function buildMockDraft(sections: BlockMockSection[]) {
 
 /** Seeds the edit store with every section (mode:'preview'), then renders. */
 function StoreSeed({ sections, tokenId, children }: { sections: BlockMockSection[]; tokenId: string; children: React.ReactNode }) {
-  const { loadFromDraft, setMode } = useEditStoreLegacy();
+  const { loadFromDraft, setMode } = useEditStore();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {

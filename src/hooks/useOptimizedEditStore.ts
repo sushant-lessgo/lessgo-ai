@@ -1,7 +1,7 @@
 // hooks/useOptimizedEditStore.ts - Memoized selectors and actions for better performance
 
 import { useMemo, useCallback } from 'react';
-import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
+import { useEditStore } from './useEditStore';
 import type { EditStore } from '@/types/store';
 
 /**

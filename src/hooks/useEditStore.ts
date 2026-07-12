@@ -7,14 +7,10 @@
  * `<EditProvider>` — throws otherwise.
  */
 
-import { useContext, createContext } from 'react';
 import { useStore } from 'zustand';
 import { useEditStoreContext } from '@/components/EditProvider';
 import type { EditStoreInstance } from '@/stores/editStore';
 import type { EditStore } from '@/types/store';
-
-// Legacy context for providing store without token parameter
-const LegacyEditStoreContext = createContext<EditStoreInstance | null>(null);
 
 // Global store reference for static access pattern
 let globalStoreRef: EditStoreInstance | null = null;

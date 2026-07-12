@@ -5,7 +5,7 @@ import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 import { sectionList } from '@/modules/sections/sectionList';
 import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineTextEditorV2';
 import { promptDialog } from '@/components/ui/ConfirmDialog';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { usesTemplateModule } from '@/types/service';
 
 import { logger } from '@/lib/logger';

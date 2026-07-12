@@ -10,7 +10,7 @@ import { ReviewPill } from '../ui/ReviewPill';
 import { SaveStateChip } from '../ui/SaveStateChip';
 import { LanguageToggle } from '../editor/LanguageToggle';
 import { LocaleSettings } from '../editor/LocaleSettings';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useReviewState } from '@/hooks/useReviewState';
 import { usesTemplateModule } from '@/types/service';
 

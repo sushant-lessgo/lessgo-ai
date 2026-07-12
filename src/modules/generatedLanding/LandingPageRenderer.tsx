@@ -10,7 +10,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useShallow } from 'zustand/react/shallow';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import { sectionList } from '@/modules/sections/sectionList';
 import { getComponent, extractSectionType as extractSectionTypeRaw } from '@/modules/generatedLanding/componentRegistry';

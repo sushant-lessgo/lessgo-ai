@@ -16,7 +16,7 @@
 // no matching pages renders harmlessly.
 
 import React from 'react';
-import { useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
 import { getCollectionDef, type CollectionDef } from '@/modules/collections/registry';
 import { confirmDialog, promptDialog } from '@/components/ui/ConfirmDialog';

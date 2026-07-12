@@ -7,7 +7,7 @@
 //
 // ── Extraction caveat (plan review note) ────────────────────────────────────
 // `vi.mock` / `vi.hoisted` are PER-FILE hoisted and CANNOT live here — each test
-// file keeps its own tiny `vi.mock('@/hooks/useEditStoreLegacy', …)` +
+// file keeps its own tiny `vi.mock('@/hooks/useEditStore', …)` +
 // `vi.mock('@/components/EditProvider', …)` shims that read a hoisted store ref.
 // This module extracts ONLY the store SHAPE builder (`buildStoreState`) and the
 // store factory (`createHarnessStore`) — the parts that are pure and reusable.

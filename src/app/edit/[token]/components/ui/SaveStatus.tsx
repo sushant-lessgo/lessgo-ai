@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 
 export function SaveStatus() {
   const { persistence } = useEditStore();

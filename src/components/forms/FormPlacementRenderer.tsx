@@ -1,6 +1,6 @@
 'use client';
 
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { FormRenderer } from './FormRenderer';
 import { InlineFormInput } from './InlineFormInput';
 import type { MVPForm } from '@/types/core/forms';

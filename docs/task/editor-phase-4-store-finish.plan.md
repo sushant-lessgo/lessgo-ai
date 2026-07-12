@@ -9,10 +9,10 @@ Collapse the editor store's **four** access layers (`useEditStore.ts` token hook
 
 ## Progress log
 
-- phase 1 Step A dead-export removal: pending
-- phase 2 Step A façade unification: pending
-- phase 3 Step A import sweep + legacy delete: pending
-- phase 3G HUMAN GATE A (Step-A merge + editor verify): pending
+- phase 1 Step A dead-export removal: done (commit 25a5082a, review loops 1)
+- phase 2 Step A façade unification: done (commit 14c4f3e9, review loops 1)
+- phase 3 Step A import sweep + legacy delete: done (commit 91883aff, review loops 1) — 106 files swept; NOTE bare-call count = 73 (scout est ~30 undershot; Step B batches must absorb the extra — no new bare introduced)
+- phase 3G HUMAN GATE A (Step-A merge + editor verify): AWAITING FOUNDER
 - phase 4 Step B baseline probe: pending
 - phase 5 batch B1 useOptimizedEditStore: pending
 - phase 6 batch B2 renderer/selection hot path: pending

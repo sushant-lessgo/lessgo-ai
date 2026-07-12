@@ -5,7 +5,7 @@
 // LumenFooter layout. Bilingual twins routed by the active edit-language.
 
 import React from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useLumenBlock } from '../../hooks/useLumenBlock';

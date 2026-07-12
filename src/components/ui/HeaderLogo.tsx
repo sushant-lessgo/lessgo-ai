@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 
 interface HeaderLogoProps {
   mode: 'edit' | 'preview';

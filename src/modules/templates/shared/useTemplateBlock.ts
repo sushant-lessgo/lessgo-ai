@@ -15,7 +15,7 @@
 // `.published.*` renderer.
 
 import { useMemo, useCallback } from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { extractLayoutContent, type StoreElementTypes } from '@/types/storeTypes';
 import { getSchemaDefaults } from '@/modules/sections/layoutElementSchema';
 import { resolveLocaleElements } from '@/lib/i18n/localeContent';

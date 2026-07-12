@@ -3,7 +3,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import { usePreviewNavigation } from './usePreviewNavigation';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 
 interface PreviewButtonProps {
   tokenId: string;

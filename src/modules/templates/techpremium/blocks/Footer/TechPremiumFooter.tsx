@@ -10,7 +10,7 @@ import { Facebook, Linkedin, Youtube, MessageCircle } from 'lucide-react';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
 import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import type { Link } from '@/types/destination';
