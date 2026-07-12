@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ACTIVE_PLATFORMS, PLATFORM_PRESETS } from '@/modules/social/presets'
 import { ARCHETYPE_INSTRUCTIONS } from '@/modules/social/postEngine'
 import type { Platform, Archetype, Mode } from '@/modules/social/types'
@@ -62,7 +63,15 @@ interface GeneratedPost {
   content: string
 }
 
+// Which tiers get a lifetime cap (blocking upgrade wall) vs a monthly soft cap
+// (quiet inline note). FREE is the only lifetime tier — mirrors gating.getSocialPostWindow.
+interface LimitState {
+  tier: string
+  window?: string
+}
+
 export default function SocialPostsPanel({ tokenId }: { tokenId: string }) {
+  const router = useRouter()
   const [platform, setPlatform] = useState<Platform>(PLATFORM_OPTIONS[0]?.value ?? 'linkedin')
   const [mode, setMode] = useState<Mode>('archetype')
   const [archetype, setArchetype] = useState<Archetype>(ARCHETYPE_OPTIONS[0]?.value ?? 'inspirational')
@@ -71,6 +80,7 @@ export default function SocialPostsPanel({ tokenId }: { tokenId: string }) {
 
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [limitHit, setLimitHit] = useState<LimitState | null>(null)
   const [result, setResult] = useState<GeneratedPost | null>(null)
   const [persisted, setPersisted] = useState(true)
   const [copied, setCopied] = useState(false)
@@ -78,6 +88,7 @@ export default function SocialPostsPanel({ tokenId }: { tokenId: string }) {
   const generate = async () => {
     setBusy(true)
     setError(null)
+    setLimitHit(null)
     setResult(null)
     setCopied(false)
     try {
@@ -92,6 +103,11 @@ export default function SocialPostsPanel({ tokenId }: { tokenId: string }) {
         body: JSON.stringify(payload),
       })
       const data = await res.json().catch(() => null)
+      if (data?.error === 'limit_reached') {
+        // Upgrade wall (Free lifetime cap) or quiet soft-cap note (paid monthly cap).
+        setLimitHit({ tier: String(data.tier ?? ''), window: data.window })
+        return
+      }
       if (!res.ok || !data?.success) {
         setError(readableError(res.status, data))
         return
@@ -227,6 +243,32 @@ export default function SocialPostsPanel({ tokenId }: { tokenId: string }) {
         <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </div>
+      )}
+
+      {limitHit && (
+        limitHit.window === 'monthly' ? (
+          // Paid soft cap — quiet, informational; invisible until hit (per spec).
+          <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            You’ve reached this month’s social-post limit. It resets at the start of next month.
+          </div>
+        ) : (
+          // Free lifetime cap — blocking upgrade wall (local component; billing
+          // components are NOT edited). Visual idiom follows OutOfCreditsModal.
+          <div className="mt-4 rounded-lg border-2 border-blue-500 bg-blue-50 p-5">
+            <h3 className="text-base font-semibold text-gray-900 mb-1">You’ve used all your free posts</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              The free plan includes a limited number of social posts. Upgrade to Pro to keep
+              generating on-brand posts for your projects.
+            </p>
+            <button
+              type="button"
+              onClick={() => router.push('/pricing')}
+              className="w-full bg-blue-500 text-white py-2.5 rounded-lg font-semibold text-sm hover:bg-blue-600 transition-colors"
+            >
+              Upgrade to Pro
+            </button>
+          </div>
+        )
       )}
 
       {result && (

@@ -34,6 +34,10 @@ export interface PlanConfig {
     customDomains: number;
     formSubmissions: number;
     teamMembers: number;
+    // social-posts feature cap. FREE = 10 lifetime, PRO = 300/mo soft cap,
+    // AGENCY/ENTERPRISE = -1 (unlimited). MUST equal the phase-2 backfill SQL in
+    // migration 20260710105655_social_posts (SQL cannot import TS — keep in sync).
+    socialPosts: number;
   };
   features: {
     removeBranding: boolean;
@@ -75,6 +79,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       customDomains: 0,
       formSubmissions: 25,
       teamMembers: 1,
+      socialPosts: 10, // lifetime cap (FREE)
     },
     features: {
       removeBranding: false,
@@ -105,6 +110,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       customDomains: 3,
       formSubmissions: 1000,
       teamMembers: 1,
+      socialPosts: 300, // monthly soft cap (PRO)
     },
     features: {
       removeBranding: true,
@@ -135,6 +141,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       customDomains: -1, // unlimited
       formSubmissions: -1, // unlimited
       teamMembers: 5,
+      socialPosts: -1, // unlimited (AGENCY)
     },
     features: {
       removeBranding: true,
@@ -165,6 +172,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       customDomains: -1, // unlimited
       formSubmissions: -1, // unlimited
       teamMembers: -1, // unlimited
+      socialPosts: -1, // unlimited (ENTERPRISE)
     },
     features: {
       removeBranding: true,
@@ -205,6 +213,15 @@ export async function getUserPlan(userId: string) {
 }
 
 /**
+ * ⚠️ LIMIT-COLUMN WRITER-COMPLETENESS GUARD (durable): the *Limit DB columns are
+ * written by FIVE functions — createDefaultPlan, upgradePlan, downgradePlan,
+ * grantLifetimeDeal, and startTrial. Adding ANY new `*Limit` column requires
+ * writing it in ALL FIVE (grep `socialPostsLimit` to see the pattern). The Prisma
+ * `update`/`create` calls do NOT require every column, so `tsc` CANNOT catch a
+ * missing writer — a stale row would silently carry the wrong cap.
+ */
+
+/**
  * Create default FREE plan for new user
  */
 export async function createDefaultPlan(userId: string) {
@@ -229,6 +246,7 @@ export async function createDefaultPlan(userId: string) {
         customDomainsLimit: config.limits.customDomains,
         formSubmissionsLimit: config.limits.formSubmissions,
         teamMembersLimit: config.limits.teamMembers,
+        socialPostsLimit: config.limits.socialPosts,
         removeBranding: config.features.removeBranding,
         customDomains: config.features.customDomains,
         formIntegrations: config.features.formIntegrations,
@@ -280,6 +298,7 @@ export async function upgradePlan(
         customDomainsLimit: config.limits.customDomains,
         formSubmissionsLimit: config.limits.formSubmissions,
         teamMembersLimit: config.limits.teamMembers,
+        socialPostsLimit: config.limits.socialPosts,
         removeBranding: config.features.removeBranding,
         customDomains: config.features.customDomains,
         formIntegrations: config.features.formIntegrations,
@@ -326,6 +345,7 @@ export async function downgradePlan(userId: string, newTier: PlanTier = PlanTier
         customDomainsLimit: config.limits.customDomains,
         formSubmissionsLimit: config.limits.formSubmissions,
         teamMembersLimit: config.limits.teamMembers,
+        socialPostsLimit: config.limits.socialPosts,
         removeBranding: config.features.removeBranding,
         customDomains: config.features.customDomains,
         formIntegrations: config.features.formIntegrations,
@@ -378,6 +398,7 @@ export async function grantLifetimeDeal(
         customDomainsLimit: config.limits.customDomains,
         formSubmissionsLimit: config.limits.formSubmissions,
         teamMembersLimit: config.limits.teamMembers,
+        socialPostsLimit: config.limits.socialPosts,
         removeBranding: config.features.removeBranding,
         customDomains: config.features.customDomains,
         formIntegrations: config.features.formIntegrations,
@@ -430,6 +451,7 @@ export async function startTrial(userId: string, tier: PlanTier, trialDays: numb
         customDomainsLimit: config.limits.customDomains,
         formSubmissionsLimit: config.limits.formSubmissions,
         teamMembersLimit: config.limits.teamMembers,
+        socialPostsLimit: config.limits.socialPosts,
         removeBranding: config.features.removeBranding,
         customDomains: config.features.customDomains,
         formIntegrations: config.features.formIntegrations,
