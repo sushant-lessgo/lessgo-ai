@@ -230,70 +230,6 @@ export function useEditStore(
 }
 
 /**
- * Hook for getting the current store instance (for components that already have a store)
- * Useful when you need direct store access without re-initialization
- */
-export function useCurrentEditStore(tokenId: string) {
-  const [store, setStore] = useState<EditStoreInstance | null>(null);
-  
-  useEffect(() => {
-    if (typeof window !== 'undefined' && tokenId) {
-      // Get existing store from manager (won't create new one)
-      try {
-        const existingStore = storeManager.getEditStore(tokenId);
-        setStore(existingStore);
-      } catch (error) {
-        logger.warn('Failed to get current store:', error);
-        setStore(null);
-      }
-    }
-  }, [tokenId]);
-
-  return store;
-}
-
-/**
- * Hook for subscribing to specific store state changes
- * Optimized for performance with selective subscriptions
- */
-export function useEditStoreSelector<T>(
-  tokenId: string,
-  selector: (state: EditStore) => T,
-  equalityFn?: (a: T, b: T) => boolean
-): T | undefined {
-  const { store, isInitialized } = useEditStore(tokenId);
-  const [selectedState, setSelectedState] = useState<T | undefined>();
-
-  useEffect(() => {
-    if (!store || !isInitialized) {
-      setSelectedState(undefined);
-      return;
-    }
-
-    // Initial value
-    const initialValue = selector(store.getState());
-    setSelectedState(initialValue);
-
-    // Subscribe to changes
-    const unsubscribe = store.subscribe((state: any) => {
-      const newValue = selector(state);
-      setSelectedState(current => {
-        // Use custom equality function if provided
-        if (equalityFn && current !== undefined) {
-          return equalityFn(current, newValue) ? current : newValue;
-        }
-        // Default equality check
-        return current === newValue ? current : newValue;
-      });
-    });
-
-    return unsubscribe;
-  }, [store, isInitialized, selector, equalityFn]);
-
-  return selectedState;
-}
-
-/**
  * Development utilities
  */
 if (process.env.NODE_ENV === 'development') {
@@ -309,17 +245,3 @@ if (process.env.NODE_ENV === 'development') {
 
 // Export types for consumer components
 export type { EditStore, EditStoreInstance };
-
-// Legacy compatibility - export the factory function with warning
-export const createEditStore = (tokenId?: string) => {
-  logger.warn(
-    'Direct createEditStore usage is deprecated. Use useEditStore hook instead.',
-    'If you need direct store access, use storeManager.getEditStore(tokenId)'
-  );
-  if (!tokenId) throw new Error('tokenId is required');
-  return storeManager.getEditStore(tokenId);
-};
-
-// Legacy compatibility - for components that use useEditStore() without tokenId
-// This will use the legacy compatibility layer
-export { useEditStoreLegacy as useEditStoreCompat } from './useEditStoreLegacy';
