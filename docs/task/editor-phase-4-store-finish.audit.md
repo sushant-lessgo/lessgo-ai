@@ -623,3 +623,92 @@ Dev server stopped after probe (:3021 no longer LISTEN; :3000 untouched).
 - None. Store-subscription lines only; no persist/commit path, no renderer/dual-pair,
   no ad-hoc `set()`, named-op discipline intact. `ThemeSelector.handleColorChange` was
   already fully commented-out dead code before this change (unrelated to the conversion).
+
+## Phase 9 (Batch B5) — modals + forms (cold)
+
+### Files changed (11, resolved paths confirmed via rg)
+- `src/components/toolbars/ButtonConfigurationModal.tsx` (bare site @143)
+- `src/components/forms/FormBuilder.tsx` (@44)
+- `src/components/layout/GlobalFormBuilder.tsx` (@7)
+- `src/components/social/SocialMediaEditor.tsx` (@45)
+- `src/app/edit/[token]/components/ui/ProductsModal.tsx` (@63)
+- `src/app/edit/[token]/components/ui/ElementToggleModal.tsx` (@40)
+- `src/app/edit/[token]/components/ui/CountdownConfigModal.tsx` (@31)
+- `src/app/edit/[token]/components/ui/SeoSettingsModal.tsx` (@31)
+- `src/app/edit/[token]/components/modals/TaxonomyModalManager.tsx` (@41)
+- `src/app/edit/[token]/components/modals/LandingGoalsModal.tsx` (@32)
+- `src/app/edit/[token]/components/content/ElementPicker.tsx` (@37)
+
+### Per-file classification + field-enumeration (D4.2: subscribed vs render-read)
+
+| File | Classification | Subscribed (selector) | Render-read | Action-only (via getState) |
+|---|---|---|---|---|
+| TaxonomyModalManager.tsx | **action-only** (`useEditStoreApi()`) | — (no edit-store subscription) | — | `updateOnboardingData`, `triggerAutoSave` |
+| GlobalFormBuilder.tsx | render-read (useShallow) | `formBuilderOpen`, `editingFormId`, `hideFormBuilder` | `formBuilderOpen`, `editingFormId` | `hideFormBuilder` (stable ref, passed as `onClose` prop) |
+| FormBuilder.tsx | render-read (single-field) + getState | `forms` | `forms` (edit-load effect dep) | `addForm`, `updateForm` (dropped 5 dead destructures: deleteForm/addFormField/updateFormField/removeFormField/reorderFormFields — unused) |
+| ButtonConfigurationModal.tsx | render-read (useShallow) + getState | `getAllForms`, `content`, `sections`, `pages`, `forms` | `content` (init effect + save read), `sections` (hasPrimaryCTASection), `pages` (pageOptions), `forms` (keeps `getAllForms()` dropdown reactive) | `setSection`, `showFormBuilder` |
+| CountdownConfigModal.tsx | render-read (single-field) + getState | `content[sectionId]` | `section` (load effect dep) | `updateElementContent` |
+| ElementPicker.tsx | render-read (single-field) + getState | `content[sectionId]` | `sectionData` (layout → restriction memo) | `announceLiveRegion` |
+| ElementToggleModal.tsx | render-read (useShallow) + getState | `content`, `sections`, `sectionLayouts` | `content` (sectionData), `sections`+`sectionLayouts` (requirements memo) | `setSection`, `updateElementContent` |
+| LandingGoalsModal.tsx | render-read (single-field) + getState | `goal` | `goal` (WhatsApp-prefill fields) | `setGoal` |
+| SocialMediaEditor.tsx | render-read (single-field) + getState | `socialMediaConfig` | `socialMediaConfig` (whole panel) | `initializeSocialMedia`, `updateSocialMediaItem`, `addSocialMediaItem`, `removeSocialMediaItem`, `reorderSocialMediaItems` |
+| ProductsModal.tsx | render-read (single-field) + getState | `pages` | `pages` (categories/catalog; items derived via `getCollectionItems`) | `getCollectionItems`, `addCollectionItem`, `reorderCollection`, `setCollectionItemCategory`, `setCurrentPage`, `deletePage`, `setCollectionCategories` |
+| SeoSettingsModal.tsx | render-read (useShallow) + getState | `pages`(getPagesList), `currentPageId`, `sections`, `content`, `slug`, `title` | all 6 (page tabs + live preview meta) | `updatePageSeo`, `triggerAutoSave`, `uploadImage` |
+
+**Classification summary:** 1 pure action-only (`TaxonomyModalManager` → `useEditStoreApi()`, zero subscription); 10 render-read (each subscribes exactly the fields it renders, actions moved to `useEditStoreApi().getState()` in handlers).
+
+**Scout-note correction (in-scope judgment, logged under Deviations):** the scout flagged
+`SocialMediaEditor`, `SeoSettingsModal`, `ProductsModal`, `LandingGoalsModal` as action-only.
+On inspection all four READ store state to render (socialMediaConfig / pages+preview-set /
+pages / goal respectively), so they were converted as render-read (narrow selector) —
+conservative, avoids an over-narrow that would freeze the panel. Only `TaxonomyModalManager`
+was truly action-only.
+
+**Over-narrowing guard:** no render-read field dropped from any subscription. `forms` is
+explicitly subscribed in ButtonConfigurationModal (via a `void forms` subscription marker)
+so the `getAllForms()` dropdown stays reactive to form additions even though the value is
+consumed through the stable `getAllForms` ref.
+
+### Deviations
+- FormBuilder: removed 5 destructured-but-unused store actions (deleteForm, addFormField,
+  updateFormField, removeFormField, reorderFormFields) — the component uses local
+  `setFormData` handlers instead; verified dead before removal.
+- ProductsModal `CategoriesSection` helper prop `store` → `storeApi` (calls
+  `storeApi.getState().setCollectionCategories`) — same-file private subcomponent, no
+  external callers.
+- Scout mis-classification of 4 files corrected to render-read (see above).
+
+### Grep-zero
+All 11 files → `rg -c "useEditStore\(\s*\)"` = 0.
+
+### Verification
+- `npx tsc --noEmit`: clean.
+- `npm run test:run`: 2508 passed | 11 skipped (158 files pass | 1 skip).
+- `npm run lint` (scoped to the 11 files): 0 errors, 4 warnings — all pre-existing
+  `react-hooks/exhaustive-deps` (TaxonomyModalManager 56/130, ProductsModal 173, 
+  ButtonConfigurationModal 262) whose missing-dep sets predate this change; none
+  introduced by the selector conversion.
+
+### renderProbe smoke (authed, worktree :3021, NEXT_PUBLIC_DEBUG_EDITOR=true, seeded meridian)
+`PROBE_URL=http://localhost:3021 --smoke=modal,select,palette,undo,redo` → `allPassed: true`.
+
+| Smoke | Result |
+|---|---|
+| modal (discriminating) | PASS — theme popover open; active swatch reflects store paletteId |
+| select | PASS — store.textEditing + text-mvp toolbar visible |
+| palette | PASS — mint→cyan, 4 React re-commits (≤ baseline 4–5) |
+| undo | PASS — reverted headline edit |
+| redo | PASS — reapplied |
+
+- Perf: run 1 burst=8 / 0.4-per-key looked high, but burst measures headline typing
+  (touches ZERO B5 files — all cold modals/forms). Re-ran → burst=6 / 0.3-per-key =
+  baseline exactly, confirming the run-1 value was environmental noise. commitsOnBlur=3,
+  storeMutations=1, heapDelta 0.76–1.02 MB (baseline +0.6–0.9 range) → flat.
+- Note: the probe's generic `modal` subcommand exercises the theme popover, not the B5
+  modals directly (no probe hooks for them); reactivity of the B5 selectors is covered by
+  tsc + the render-read field audit above. Dev server stopped (:3021 free; :3000 untouched).
+
+### Open risks
+- None functional. Only store-subscription lines changed; no persist/commit path, no
+  renderer/dual-pair, no ad-hoc `set()`, named-op discipline intact. B5 modals are cold
+  surfaces off the typing hot path.

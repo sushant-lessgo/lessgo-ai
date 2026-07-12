@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, X, GripVertical, Settings } from 'lucide-react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import type { MVPForm, MVPFormField, MVPFormFieldType, MVPFormIntegration } from '@/types/core/forms';
 import {
   getServiceFormTemplate,
@@ -32,16 +32,10 @@ const FIELD_TYPES: { value: MVPFormFieldType; label: string; description: string
 ];
 
 export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps) {
-  const {
-    forms,
-    addForm,
-    updateForm,
-    deleteForm,
-    addFormField,
-    updateFormField,
-    removeFormField,
-    reorderFormFields,
-  } = useEditStore();
+  // Render-read: `forms` drives the edit-load effect below.
+  const forms = useEditStore((s) => s.forms);
+  // Actions read in handlers only (addForm/updateForm) — non-reactive.
+  const storeApi = useEditStoreApi();
 
   const [formData, setFormData] = useState<Partial<MVPForm>>({
     name: '',
@@ -109,6 +103,7 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
 
     setIsSaving(true);
     try {
+      const { addForm, updateForm } = storeApi.getState();
       if (editingFormId) {
         // Update existing form
         updateForm(editingFormId, formData as Partial<MVPForm>);

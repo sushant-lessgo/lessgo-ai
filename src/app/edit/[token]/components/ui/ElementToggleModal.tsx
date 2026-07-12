@@ -8,8 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useShallow } from 'zustand/react/shallow';
 import { Switch } from '@/components/ui/switch';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
 import {
   getSectionElementRequirements,
@@ -31,13 +32,16 @@ export function ElementToggleModal({
   open,
   onOpenChange,
 }: ElementToggleModalProps) {
-  const {
-    content,
-    sections,
-    sectionLayouts,
-    setSection,
-    updateElementContent,
-  } = useEditStore();
+  // Render-read: content (section data), sections + sectionLayouts (element-
+  // requirements memo). setSection/updateElementContent are handler-only.
+  const { content, sections, sectionLayouts } = useEditStore(
+    useShallow((s) => ({
+      content: s.content,
+      sections: s.sections,
+      sectionLayouts: s.sectionLayouts,
+    })),
+  );
+  const storeApi = useEditStoreApi();
   const onboardingStore = useOnboardingStore();
 
   const sectionData = content[sectionId];
@@ -102,6 +106,7 @@ export function ElementToggleModal({
 
   const handleToggle = useCallback(
     (elementName: string, checked: boolean) => {
+      const { setSection, updateElementContent } = storeApi.getState();
       const meta = sectionData?.aiMetadata || {};
       const currentExcluded = Array.isArray(meta.excludedElements) ? [...meta.excludedElements] : [];
       const schema = layoutElementSchema[layoutType || ''];
@@ -170,7 +175,7 @@ export function ElementToggleModal({
         setSection(sectionId, { aiMetadata: { ...meta, excludedElements: currentExcluded } });
       }
     },
-    [sectionId, sectionData, setSection, updateElementContent, layoutType]
+    [sectionId, sectionData, storeApi, layoutType]
   );
 
   return (

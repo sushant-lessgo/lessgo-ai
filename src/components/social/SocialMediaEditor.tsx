@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import type { SocialMediaItem } from '@/types/store/state';
 import { FaTwitter, FaLinkedin, FaGithub, FaFacebook, FaInstagram, FaYoutube, FaTiktok, FaDiscord, FaMedium, FaDribbble, FaGlobe } from 'react-icons/fa';
 import { processSocialMediaUrl, getDisplayUrl } from '@/utils/urlHelpers';
@@ -42,7 +42,10 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
   onClose,
   targetFooterId,
 }) => {
-  const store = useEditStore();
+  // Render-read: socialMediaConfig drives the whole panel. All mutating actions
+  // (init/add/update/remove/reorder) run through storeApi.getState() in handlers.
+  const socialMediaConfig = useEditStore((s) => s.socialMediaConfig);
+  const storeApi = useEditStoreApi();
   const [editingItem, setEditingItem] = useState<SocialMediaItem | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState<SocialFormData>({
@@ -74,14 +77,14 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
 
   // Initialize social media config if needed
   useEffect(() => {
-    if (isVisible && !store.socialMediaConfig) {
-      store.initializeSocialMedia();
+    if (isVisible && !socialMediaConfig) {
+      storeApi.getState().initializeSocialMedia();
     }
-  }, [isVisible, store]);
+  }, [isVisible, socialMediaConfig, storeApi]);
 
-  if (!isVisible || !store.socialMediaConfig) return null;
+  if (!isVisible || !socialMediaConfig) return null;
 
-  const socialItems = store.socialMediaConfig.items;
+  const socialItems = socialMediaConfig.items;
 
   // Use portal to render modal at document root level
   if (typeof document === 'undefined') return null;
@@ -102,13 +105,13 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
     }
 
     if (editingItem) {
-      store.updateSocialMediaItem(editingItem.id, {
+      storeApi.getState().updateSocialMediaItem(editingItem.id, {
         platform: formData.platform,
         url: normalizedUrl,
         icon: formData.icon,
       });
     } else {
-      store.addSocialMediaItem(
+      storeApi.getState().addSocialMediaItem(
         formData.platform,
         normalizedUrl,
         formData.icon
@@ -130,7 +133,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
   };
 
   const handleDeleteItem = (itemId: string) => {
-    store.removeSocialMediaItem(itemId);
+    storeApi.getState().removeSocialMediaItem(itemId);
   };
 
   const handlePlatformChange = (platformName: string) => {
@@ -210,7 +213,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
                           onClick={() => {
                             const newOrder = [...socialItems];
                             [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]];
-                            store.reorderSocialMediaItems(newOrder.map(item => item.id));
+                            storeApi.getState().reorderSocialMediaItems(newOrder.map(item => item.id));
                           }}
                           className="p-1 text-gray-400 hover:text-gray-600"
                           title="Move up"
@@ -225,7 +228,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
                           onClick={() => {
                             const newOrder = [...socialItems];
                             [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
-                            store.reorderSocialMediaItems(newOrder.map(item => item.id));
+                            storeApi.getState().reorderSocialMediaItems(newOrder.map(item => item.id));
                           }}
                           className="p-1 text-gray-400 hover:text-gray-600"
                           title="Move down"
@@ -336,7 +339,7 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
             </div>
           )}
 
-          {!showAddForm && socialItems.length < store.socialMediaConfig.maxItems && (
+          {!showAddForm && socialItems.length < socialMediaConfig.maxItems && (
             <button
               onClick={() => setShowAddForm(true)}
               className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors"
@@ -345,9 +348,9 @@ const SocialMediaEditor: React.FC<SocialMediaEditorProps> = ({
             </button>
           )}
 
-          {socialItems.length >= store.socialMediaConfig.maxItems && (
+          {socialItems.length >= socialMediaConfig.maxItems && (
             <div className="text-sm text-gray-500 text-center py-3">
-              Maximum {store.socialMediaConfig.maxItems} social media links allowed.
+              Maximum {socialMediaConfig.maxItems} social media links allowed.
             </div>
           )}
         </div>

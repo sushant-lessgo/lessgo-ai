@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { logger } from '@/lib/logger';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useShallow } from 'zustand/react/shallow';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { Plus, X, AlertCircle, Info } from 'lucide-react';
 import type { ElementSelection } from '@/types/store/state';
 import IconPicker from '@/components/ui/IconPicker';
@@ -133,17 +134,24 @@ export function ButtonConfigurationModal({
   onClose, 
   elementSelection 
 }: ButtonConfigurationModalProps) {
-  const {
-    getAllForms,
-    showFormBuilder,
-    content,
-    setSection,
-    sections, // NEW: Get sections for placement logic
-    pages, // multi-page: cross-page link targets
-  } = useEditStore();
+  // Render-read: content (init effect + save read), sections (CTA-section check),
+  // pages (link targets), forms (drives the available-forms dropdown). getAllForms
+  // is a stable action ref called at render; `forms` is subscribed so the dropdown
+  // stays reactive to form additions. showFormBuilder/setSection are handler-only.
+  const { getAllForms, content, sections, pages, forms } = useEditStore(
+    useShallow((s) => ({
+      getAllForms: s.getAllForms,
+      content: s.content,
+      sections: s.sections,
+      pages: s.pages,
+      forms: s.forms,
+    })),
+  );
+  const storeApi = useEditStoreApi();
 
   const pageOptions = buildPageLinkOptions(pages);
   const availableForms = getAllForms();
+  void forms; // subscription-only: keeps availableForms reactive to form changes
 
   // scale-04: role is DERIVED from the element key (read-only), never chosen.
   // `cta_*` ⇒ primary, `secondary_cta_*` ⇒ secondary.
@@ -376,7 +384,7 @@ export function ButtonConfigurationModal({
             : { buttonConfig },
         };
 
-        setSection(elementSelection.sectionId, {
+        storeApi.getState().setSection(elementSelection.sectionId, {
           elements: updatedElements,
           elementMetadata: updatedElementMetadata,
           // Also save ctaConfig at section level for easy access by CTA handler.
@@ -475,7 +483,7 @@ export function ButtonConfigurationModal({
   };
 
   const handleCreateNewForm = () => {
-    showFormBuilder();
+    storeApi.getState().showFormBuilder();
     // Don't close the button config modal yet - let user create the form first
   };
 

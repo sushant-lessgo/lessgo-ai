@@ -2,7 +2,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useUniversalElements } from '@/hooks/useUniversalElements';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import type { UniversalElementType, UniversalElementConfig } from '@/types/universalElements';
 import type { ElementPickerOptions } from '@/types/elementRestrictions';
 import { filterElementsByRestrictions } from '@/utils/elementRestrictions';
@@ -34,10 +34,12 @@ export function ElementPicker({
 }: ElementPickerProps) {
 
   const { elementConfigs } = useUniversalElements();
-  const { announceLiveRegion, content } = useEditStore();
-  
+  // Render-read: this section's content feeds the layout/restriction memo.
+  // announceLiveRegion is handler-only.
+  const sectionData = useEditStore((s) => s.content[sectionId]);
+  const storeApi = useEditStoreApi();
+
   // Get section information for restrictions
-  const sectionData = content[sectionId];
   const sectionType = sectionId || 'content';
   const layoutType = sectionData?.layout;
 
@@ -98,8 +100,8 @@ export function ElementPicker({
     onElementSelect(elementType);
     // Try to get label from element configs, otherwise format the element name
     const label = elementConfigs[elementType as UniversalElementType]?.label || formatElementLabel(elementType);
-    announceLiveRegion(`Added ${label} element`);
-  }, [onElementSelect, elementConfigs, announceLiveRegion]);
+    storeApi.getState().announceLiveRegion(`Added ${label} element`);
+  }, [onElementSelect, elementConfigs, storeApi]);
 
   if (!isVisible) return null;
 

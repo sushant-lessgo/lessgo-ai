@@ -8,7 +8,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useShallow } from 'zustand/react/shallow';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { buildPageMetadata } from '@/lib/staticExport/buildPageMetadata';
 import { META_PIXEL_ID_RE, GA4_MEASUREMENT_ID_RE } from '@/lib/staticExport/headTags';
 import type { PageSeo, ProjectPageEntry } from '@/types/store';
@@ -28,8 +29,20 @@ function CharMeter({ len, ideal, max }: { len: number; ideal: number; max: numbe
 }
 
 export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
-  const store = useEditStore();
-  const pages: ProjectPageEntry[] = store.getPagesList ? store.getPagesList() : [];
+  // Render-read: pages (tabs + per-page seo), and the active-page working set
+  // (currentPageId/sections/content/slug/title) that feeds the live preview meta.
+  // updatePageSeo/triggerAutoSave/uploadImage are handler-only.
+  const { pages, currentPageId, sections, content, slug, title } = useEditStore(
+    useShallow((s) => ({
+      pages: (s.getPagesList ? s.getPagesList() : []) as ProjectPageEntry[],
+      currentPageId: s.currentPageId,
+      sections: s.sections,
+      content: s.content,
+      slug: s.slug,
+      title: s.title,
+    })),
+  );
+  const storeApi = useEditStoreApi();
   const [selectedId, setSelectedId] = React.useState<string>(
     () => pages.find((p) => p.pathSlug === '/')?.id || pages[0]?.id || ''
   );
@@ -65,7 +78,7 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
   const seo: PageSeo = page?.seo || {};
   const isRoot = page?.pathSlug === '/';
 
-  const patch = (p: Partial<PageSeo>) => page && store.updatePageSeo(page.id, p);
+  const patch = (p: Partial<PageSeo>) => page && storeApi.getState().updatePageSeo(page.id, p);
 
   // Tracking-ID inputs keep raw local state so an in-progress/invalid value stays
   // visible without ever reaching the store (an invalid value would make
@@ -109,7 +122,7 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
   };
 
   const handleClose = () => {
-    store.triggerAutoSave?.();
+    storeApi.getState().triggerAutoSave?.();
     onClose();
   };
 
@@ -118,7 +131,7 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
     setUploading(field);
     setUploadError(null);
     try {
-      const url = await store.uploadImage(file);
+      const url = await storeApi.getState().uploadImage(file);
       if (typeof url === 'string' && url) patch({ [field]: url });
     } catch (e: any) {
       setUploadError(e?.message || 'Upload failed');
@@ -130,18 +143,18 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
   // Preview inputs: the ACTIVE page's live copy is the top-level working set
   // (mirror strategy) — its entry in `pages` is only reconciled at commit
   // boundaries, so read the working set for it and the entry for the rest.
-  const isActive = page && store.currentPageId === page.id;
+  const isActive = page && currentPageId === page.id;
   const previewContent = page
     ? {
-        layout: { sections: (isActive ? store.sections : page.sections) || [] },
-        ...((isActive ? store.content : page.content) || {}),
+        layout: { sections: (isActive ? sections : page.sections) || [] },
+        ...((isActive ? content : page.content) || {}),
       }
     : { layout: { sections: [] } };
-  const previewSlug = store.slug || 'your-page';
+  const previewSlug = slug || 'your-page';
   const meta = page
     ? buildPageMetadata({
         slug: previewSlug,
-        pageTitle: page.title || store.title || '',
+        pageTitle: page.title || title || '',
         content: previewContent,
         seo,
         canonicalPath: page.pathSlug,

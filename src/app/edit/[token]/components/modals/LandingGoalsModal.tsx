@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import BaseModal from './BaseModal';
 import TaxonomyTile from '../ui/TaxonomyTile';
 import { landingGoalTypes } from '@/modules/inference/taxonomy';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { composeWhatsappDestination } from '@/modules/brief/bridge';
 
 interface LandingGoalsModalProps {
@@ -29,11 +29,14 @@ export function LandingGoalsModal({
   // (Brief.goal mirror) held in the edit store; setGoal marks the store dirty so
   // the standard auto-save round-trips param.message into Project.brief. On
   // change we also recompose destination `?text=` so the published href updates.
-  const editStore = useEditStore() as any;
-  const goal = editStore.goal as import('@/types/brief').Brief['goal'] | null;
-  const setGoal = editStore.setGoal as (
-    g: import('@/types/brief').Brief['goal'] | null,
-  ) => void;
+  // Render-read: the project goal (Brief.goal mirror) drives the WhatsApp-prefill
+  // fields. setGoal is handler-only.
+  const goal = useEditStore((s) => (s as any).goal) as
+    | import('@/types/brief').Brief['goal']
+    | null;
+  const storeApi = useEditStoreApi();
+  const setGoal = (g: import('@/types/brief').Brief['goal'] | null): void =>
+    (storeApi.getState() as any).setGoal(g);
 
   const destinationStr =
     typeof goal?.destination === 'string' ? goal.destination : undefined;

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { Clock, Calendar, Timer, AlertCircle } from 'lucide-react';
 import { logger } from '@/lib/logger';
 
@@ -28,8 +28,10 @@ interface CountdownConfigModalProps {
 export function CountdownConfigModal({ isOpen, onClose, sectionId }: CountdownConfigModalProps) {
   logger.dev('🕐 CountdownConfigModal render:', () => ({ isOpen, sectionId }));
   
-  const { content, updateElementContent } = useEditStore();
-  const section = content[sectionId];
+  // Render-read: this section's content drives the load effect. updateElementContent
+  // is handler-only.
+  const section = useEditStore((s) => s.content[sectionId]);
+  const storeApi = useEditStoreApi();
   
   const [config, setConfig] = useState<CountdownConfig>({
     countdown_end_date: '',
@@ -136,6 +138,7 @@ export function CountdownConfigModal({ isOpen, onClose, sectionId }: CountdownCo
       };
 
       // Update section content using individual element updates
+      const { updateElementContent } = storeApi.getState();
       Object.entries(updateData).forEach(([key, value]) => {
         updateElementContent(sectionId, key, value || '');
       });

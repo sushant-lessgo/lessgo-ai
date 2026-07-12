@@ -3,7 +3,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useOnboardingStore } from '@/hooks/useOnboardingStore';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreApi } from '@/hooks/useEditStore';
 import type { CanonicalFieldName, HiddenFieldName, AnyFieldName } from '@/types/core/index';
 import { HIDDEN_FIELD_NAMES, HIDDEN_FIELD_DISPLAY_NAMES } from '@/types/core/index';
 
@@ -38,7 +38,8 @@ export function TaxonomyModalManager() {
     // updateHiddenField 
   } = useOnboardingStore();
 
-  const { triggerAutoSave, updateOnboardingData } = useEditStore();
+  // Action-only: non-reactive store instance — actions read in the handler only.
+  const storeApi = useEditStoreApi();
 
   const openFieldModal = useCallback((fieldName: AnyFieldName, currentValue?: string) => {
     // Remove this field from the queue if it's there (prevents duplicate opening)
@@ -112,6 +113,7 @@ export function TaxonomyModalManager() {
     handleFieldDependency(fieldName as any, value);
 
     // Immediately sync to edit store for left panel reactivity
+    const { updateOnboardingData, triggerAutoSave } = storeApi.getState();
     const updatedOnboardingState = useOnboardingStore.getState();
     updateOnboardingData({
       validatedFields: updatedOnboardingState.validatedFields,
@@ -125,7 +127,7 @@ export function TaxonomyModalManager() {
     
     // Close modal
     closeModal();
-  }, [modalState.fieldName, validatedFields, hiddenInferredFields, confirmField, updateOnboardingData, triggerAutoSave, closeModal]);
+  }, [modalState.fieldName, validatedFields, hiddenInferredFields, confirmField, storeApi, closeModal]);
 
   const handleFieldDependency = (updatedField: CanonicalFieldName, newValue: string) => {
     // Market category change forces subcategory selection

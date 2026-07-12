@@ -16,7 +16,7 @@
 // no matching pages renders harmlessly.
 
 import React from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { extractSectionType } from '@/modules/generatedLanding/componentRegistry';
 import { getCollectionDef, type CollectionDef } from '@/modules/collections/registry';
 import { confirmDialog, promptDialog } from '@/components/ui/ConfirmDialog';
@@ -60,8 +60,11 @@ function deriveLabel(def: CollectionDef, rec: Record<string, any>, title: string
 }
 
 export function ProductsModal({ onClose, collectionKey }: { onClose: () => void; collectionKey?: string }) {
-  const store = useEditStore();
-  const pages = store.pages || {};
+  // Render-read: pages drives categories/catalog derivation; collection items are
+  // derived from pages via getCollectionItems (subscribed reactively). All mutating
+  // actions run through storeApi.getState() in handlers.
+  const pages = useEditStore((s) => s.pages || {});
+  const storeApi = useEditStoreApi();
 
   const key = collectionKey ?? getPanelCollectionKey();
   const def = getCollectionDef(key);
@@ -86,12 +89,14 @@ export function ProductsModal({ onClose, collectionKey }: { onClose: () => void;
     return [];
   })();
 
-  const items: any[] = store.getCollectionItems ? store.getCollectionItems(key) : [];
+  // Derived from `pages` (subscribed above) → recomputes on every pages change.
+  const s = storeApi.getState();
+  const items: any[] = s.getCollectionItems ? s.getCollectionItems(key) : [];
 
   const handleAdd = async () => {
     const title = await promptDialog({ title: `${Noun} name`, defaultValue: `New ${noun}` });
     if (title === null) return;
-    const id = store.addCollectionItem(key, { title: title.trim() || `New ${noun}` });
+    const id = storeApi.getState().addCollectionItem(key, { title: title.trim() || `New ${noun}` });
     if (id) onClose(); // navigate to the new item to fill its record
   };
 
@@ -100,7 +105,7 @@ export function ProductsModal({ onClose, collectionKey }: { onClose: () => void;
     const j = index + dir;
     if (j < 0 || j >= order.length) return;
     [order[index], order[j]] = [order[j], order[index]];
-    store.reorderCollection(key, order);
+    storeApi.getState().reorderCollection(key, order);
   };
 
   return (
@@ -140,37 +145,37 @@ export function ProductsModal({ onClose, collectionKey }: { onClose: () => void;
                     {categories.length > 0 && (
                       <select
                         value={rec.category || categories[0]?.id}
-                        onChange={(e) => store.setCollectionItemCategory(key, p.id, e.target.value)}
+                        onChange={(e) => storeApi.getState().setCollectionItemCategory(key, p.id, e.target.value)}
                         className="rounded-md border px-2 py-1 text-sm"
                       >
                         {categories.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
                       </select>
                     )}
-                    <button onClick={() => { store.setCurrentPage(p.id); onClose(); }} className="rounded-md border px-2.5 py-1 text-sm text-gray-700 hover:bg-gray-50">Edit</button>
-                    <button onClick={async () => { if (await confirmDialog({ title: `Delete ${noun}`, message: `Delete this ${noun}?`, confirmLabel: 'Delete', destructive: true })) store.deletePage(p.id); }} className="rounded-md px-2 py-1 text-sm text-gray-400 hover:text-red-600">Delete</button>
+                    <button onClick={() => { storeApi.getState().setCurrentPage(p.id); onClose(); }} className="rounded-md border px-2.5 py-1 text-sm text-gray-700 hover:bg-gray-50">Edit</button>
+                    <button onClick={async () => { if (await confirmDialog({ title: `Delete ${noun}`, message: `Delete this ${noun}?`, confirmLabel: 'Delete', destructive: true })) storeApi.getState().deletePage(p.id); }} className="rounded-md px-2 py-1 text-sm text-gray-400 hover:text-red-600">Delete</button>
                   </li>
                 );
               })}
             </ul>
           )}
 
-          <CategoriesSection store={store} categories={categories} collectionKey={key} />
+          <CategoriesSection storeApi={storeApi} categories={categories} collectionKey={key} />
         </div>
       </div>
     </div>
   );
 }
 
-function CategoriesSection({ store, categories, collectionKey }: { store: any; categories: Cat[]; collectionKey: string }) {
+function CategoriesSection({ storeApi, categories, collectionKey }: { storeApi: any; categories: Cat[]; collectionKey: string }) {
   const [cats, setCats] = React.useState<Cat[]>(categories);
   // Re-seed when the structural signature changes (e.g. edited inline on the page).
   const sig = categories.map((c) => c.id).join('|');
   React.useEffect(() => { setCats(categories); /* eslint-disable-next-line */ }, [sig]);
 
-  const apply = (next: Cat[]) => { setCats(next); store.setCollectionCategories(collectionKey, next); };
+  const apply = (next: Cat[]) => { setCats(next); storeApi.getState().setCollectionCategories(collectionKey, next); };
   const editLocal = (id: string, key: 'title' | 'label', v: string) =>
     setCats((cs) => cs.map((c) => (c.id === id ? { ...c, [key]: v } : c)));
-  const commit = () => store.setCollectionCategories(collectionKey, cats);
+  const commit = () => storeApi.getState().setCollectionCategories(collectionKey, cats);
   const add = () => apply([...cats, { id: `cat-${Math.random().toString(36).slice(2, 8)}`, title: 'New category', label: '' }]);
   const remove = (id: string) => apply(cats.filter((c) => c.id !== id));
   const move = (i: number, dir: -1 | 1) => {
