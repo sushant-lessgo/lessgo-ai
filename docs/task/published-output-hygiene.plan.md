@@ -14,7 +14,7 @@ Published pages ship "looks fake" defects that contradict the publish-ready prom
 - phase 1 SEO meta HTML strip: done (review loops 1, ship) — buildPageMetadata + subpath route inline strip; tsc/2779 tests green
 - phase 2 footer fixes (year + empty columns + dead links): done (review loops 1, ship) — footerHygiene.ts helper; year-wrap all 9 footers; column/link filter meridian+techpremium; fixture meridian.ts hrefs realistic; tsc clean, 2790 tests green
 - phase 3 brand-string sweep (published output): done (review loops 1, ship) — 10 "Lessgo.ai"→"Lessgo AI" (badge, og:site_name, 4 siteNames); URLs/UTM untouched; sweep clean; tsc/2790 tests green
-- phase 4 build + live verification: pending
+- phase 4 build + live verification: build GREEN (npm run build EXIT=0 — published-css + assets + next build all pass; /p subpath+blog routes compile); LIVE-VERIFY + user sign-off pending (human gate)
 
 ## Parity ruling (read before reviewing phase 2)
 
