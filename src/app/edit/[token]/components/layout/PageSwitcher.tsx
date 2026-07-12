@@ -5,7 +5,8 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useShallow } from 'zustand/react/shallow';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { showProductsModal } from '../ui/GlobalModals';
 import { setPanelCollectionKey } from '../ui/ProductsModal';
 import { confirmDialog, promptDialog } from '@/components/ui/ConfirmDialog';
@@ -52,15 +53,26 @@ function BlogButton() {
 }
 
 export function PageSwitcher() {
-  const store = useEditStore();
-  const pages = store.pages || {};
-  const currentPageId = store.currentPageId;
+  // Render-read: pages + currentPageId (tabs/active), audienceType + templateId
+  // (blog/techpremium gating), getPagesList (stable getter, derived from pages).
+  // All page-axis mutations are handler-only via storeApi.getState().
+  const { pages: pagesRaw, currentPageId, audienceType, templateId, getPagesList } = useEditStore(
+    useShallow((s) => ({
+      pages: s.pages,
+      currentPageId: s.currentPageId,
+      audienceType: s.audienceType,
+      templateId: s.templateId,
+      getPagesList: s.getPagesList,
+    })),
+  );
+  const storeApi = useEditStoreApi();
+  const pages = pagesRaw || {};
 
   // Blog is a template-module capability (legacy 47-block product pages can't
   // render the shared blog blocks).
-  const showBlog = usesTemplateModule(store.audienceType as any, store.templateId as any);
+  const showBlog = usesTemplateModule(audienceType as any, templateId as any);
 
-  const list = store.getPagesList ? store.getPagesList() : Object.values(pages);
+  const list = getPagesList ? getPagesList() : Object.values(pages);
   if (list.length <= 1 && Object.keys(pages).length === 0) {
     // No page axis yet (single-page project) — still surface the blog entry.
     return showBlog ? (
@@ -76,7 +88,7 @@ export function PageSwitcher() {
   // Products is a TechPremium-only capability. Show a single "+ Products" creation
   // entry ONLY until the catalog page exists; after that the catalog shows as a tab
   // and products are managed from that page (no duplicate "Products" in the header).
-  const isTechPremium = store.templateId === 'techpremium';
+  const isTechPremium = templateId === 'techpremium';
   const hasCatalog = Object.values(pages).some(
     (p: any) => p.kind === 'singleton' && p.collectionKey === 'products',
   );
@@ -110,7 +122,7 @@ export function PageSwitcher() {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
-    store.addPage({ title: title.trim() || 'New page', pathSlug: slug || `/page-${list.length}` });
+    storeApi.getState().addPage({ title: title.trim() || 'New page', pathSlug: slug || `/page-${list.length}` });
   };
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
@@ -121,13 +133,13 @@ export function PageSwitcher() {
       confirmLabel: 'Delete',
       destructive: true,
     });
-    if (confirmed) store.deletePage(id);
+    if (confirmed) storeApi.getState().deletePage(id);
   };
 
   const handleRename = async (e: React.MouseEvent, id: string, current: string) => {
     e.stopPropagation();
     const title = await promptDialog({ title: 'Rename page', defaultValue: current });
-    if (title) store.renamePage(id, title.trim());
+    if (title) storeApi.getState().renamePage(id, title.trim());
   };
 
   // (Phase 4c) The "Apply Home layout" button was retired — new TechPremium projects
@@ -143,7 +155,7 @@ export function PageSwitcher() {
             <button
               role="tab"
               aria-selected={isActive}
-              onClick={() => store.setCurrentPage(p.id)}
+              onClick={() => storeApi.getState().setCurrentPage(p.id)}
               onDoubleClick={(e) => !isHome && handleRename(e, p.id, p.title)}
               title={p.pathSlug}
               className={`px-3 py-1 rounded-md text-sm transition-colors ${
@@ -193,7 +205,7 @@ export function PageSwitcher() {
       })}
       {isTechPremium && !hasArchetype('gallery') && (
         <button
-          onClick={() => store.addArchetypePage('gallery')}
+          onClick={() => storeApi.getState().addArchetypePage('gallery')}
           className="px-3 py-1 rounded-md text-sm text-gray-500 hover:bg-gray-100"
           aria-label="Add gallery page"
           title="Add the naayom Gallery page"
@@ -203,7 +215,7 @@ export function PageSwitcher() {
       )}
       {isTechPremium && !hasArchetype('contact') && (
         <button
-          onClick={() => store.addArchetypePage('contact')}
+          onClick={() => storeApi.getState().addArchetypePage('contact')}
           className="px-3 py-1 rounded-md text-sm text-gray-500 hover:bg-gray-100"
           aria-label="Add contact page"
           title="Add the naayom Contact page"

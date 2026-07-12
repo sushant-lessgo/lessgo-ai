@@ -2,7 +2,8 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useShallow } from 'zustand/react/shallow';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { UndoRedoButtons } from '../ui/UndoRedoButtons';
 import { ResetButton } from '../ui/ResetButton';
 import { PreviewButton } from '../ui/PreviewButton';
@@ -65,7 +66,17 @@ function RegenCopyConfirmModal({
 }
 
 export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
-  const { regenerateAllContent, aiGeneration, sections, activeLocale, localeConfig } = useEditStore();
+  // Render-read: aiGeneration (spinner/progress/toast), sections (total count),
+  // activeLocale + localeConfig (regen-lock). regenerateAllContent is handler-only.
+  const { aiGeneration, sections, activeLocale, localeConfig } = useEditStore(
+    useShallow((s) => ({
+      aiGeneration: s.aiGeneration,
+      sections: s.sections,
+      activeLocale: s.activeLocale,
+      localeConfig: s.localeConfig,
+    })),
+  );
+  const storeApi = useEditStoreApi();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const isGenerating = aiGeneration?.isGenerating ?? false;
@@ -97,11 +108,11 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
   const handleRegenConfirm = useCallback(async () => {
     setShowConfirm(false);
     try {
-      await regenerateAllContent();
+      await storeApi.getState().regenerateAllContent();
     } catch {
       // Error handled by store
     }
-  }, [regenerateAllContent]);
+  }, [storeApi]);
 
   return (
     <>

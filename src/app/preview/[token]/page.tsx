@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useShallow } from 'zustand/react/shallow';
 import { EditProvider } from '@/components/EditProvider';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SlugModal } from '@/components/SlugModal';
@@ -45,22 +46,30 @@ export default function PreviewPage() {
 function PreviewPageContent({ tokenId }: { tokenId: string }) {
   const router = useRouter();
 
-  // Edit store state (after migration)
+  // Render-read: sections/content/theme/title/onboardingData (validation +
+  // debug effects, publish payload), pages/currentPageId (default-to-home effect).
+  // Handler-only (forms, legalPages, setMode, export, save, setCurrentPage) are
+  // read one-shot via storeApi.getState() inside the effects/handlers below.
   const {
     sections,
     content,
-    forms,
     theme,
     title,
     onboardingData,
-    legalPages,
-    setMode,
-    export: exportState,
-    save,
     pages,
     currentPageId,
-    setCurrentPage,
-  } = useEditStore();
+  } = useEditStore(
+    useShallow((s) => ({
+      sections: s.sections,
+      content: s.content,
+      theme: s.theme,
+      title: s.title,
+      onboardingData: s.onboardingData,
+      pages: s.pages,
+      currentPageId: s.currentPageId,
+    })),
+  );
+  const storeApi = useEditStoreApi();
 
   // Multi-page preview defaults to the Home page (the preview has no page switcher
   // yet, so without this it would open stuck on whatever page was last active in the
@@ -73,9 +82,9 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     const list = pages ? Object.values(pages) : [];
     if (list.length === 0) return; // draft not loaded yet
     const home = list.find((p: any) => p?.pathSlug === '/') as any;
-    if (home && currentPageId !== home.id) setCurrentPage(home.id);
+    if (home && currentPageId !== home.id) storeApi.getState().setCurrentPage(home.id);
     didDefaultToHome.current = true;
-  }, [pages, currentPageId, setCurrentPage]);
+  }, [pages, currentPageId, storeApi]);
 
   // Validate preview data loaded correctly
   useEffect(() => {
@@ -115,7 +124,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
 
   // Set mode to preview on mount and initialize tab manager
   useEffect(() => {
-    setMode('preview');
+    storeApi.getState().setMode('preview');
 
     // Initialize tab manager for preview page
     const manager = getTabManager('preview', tokenId);
@@ -124,7 +133,7 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
     return () => {
       cleanupTabManager('preview', tokenId);
     };
-  }, [setMode, tokenId]);
+  }, [storeApi, tokenId]);
 
   // Fetch existing published slug
   useEffect(() => {
@@ -292,6 +301,10 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
 
     setPublishing(true);
     setPublishError('');
+
+    // Handler-only one-shot reads (non-reactive): forms/legalPages payload +
+    // save/export actions.
+    const { forms, legalPages, save, export: exportState } = storeApi.getState();
 
     try {
       // Persist the full draft (finalContent.pages + chrome) to the DB BEFORE

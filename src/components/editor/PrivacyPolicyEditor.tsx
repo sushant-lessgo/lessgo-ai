@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useShallow } from 'zustand/react/shallow';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 
 const JURISDICTIONS = ['US', 'EU', 'UK', 'Global'] as const;
 type Jurisdiction = typeof JURISDICTIONS[number];
@@ -24,15 +25,20 @@ interface Props {
 type Phase = 'form' | 'editing';
 
 export function PrivacyPolicyEditor({ isOpen, onClose, companyName: initialName }: Props) {
-  const store = useEditStore();
-  const existing = store.legalPages?.privacy;
+  // Render-read: legalPages (existing policy → phase/effect) + title (default name).
+  // tokenId, setLegalPage, triggerAutoSave are handler-only via storeApi.getState().
+  const { legalPages, title } = useEditStore(
+    useShallow((s) => ({ legalPages: s.legalPages, title: s.title })),
+  );
+  const storeApi = useEditStoreApi();
+  const existing = legalPages?.privacy;
 
   const [phase, setPhase] = useState<Phase>(existing ? 'editing' : 'form');
   const [mobileTab, setMobileTab] = useState<'edit' | 'preview'>('edit');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const [form, setForm] = useState({
-    companyName: initialName || store.title || '',
+    companyName: initialName || title || '',
     jurisdiction: (existing?.metadata?.jurisdiction as Jurisdiction) || 'Global',
     dataCollected: existing?.metadata?.dataCollected || ['email'],
     cookiesUsed: existing?.metadata?.cookiesUsed ?? false,
@@ -76,7 +82,7 @@ export function PrivacyPolicyEditor({ isOpen, onClose, companyName: initialName 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          token: store.tokenId,
+          token: storeApi.getState().tokenId,
           jurisdiction: form.jurisdiction,
           dataCollected: form.dataCollected,
           cookiesUsed: form.cookiesUsed,
@@ -110,7 +116,8 @@ export function PrivacyPolicyEditor({ isOpen, onClose, companyName: initialName 
       alert('Privacy policy cannot be empty.');
       return;
     }
-    store.setLegalPage('privacy', {
+    const s = storeApi.getState();
+    s.setLegalPage('privacy', {
       content: markdown,
       metadata: {
         jurisdiction: form.jurisdiction,
@@ -120,17 +127,18 @@ export function PrivacyPolicyEditor({ isOpen, onClose, companyName: initialName 
         contactEmail: form.contactEmail,
       },
     });
-    if (typeof store.triggerAutoSave === 'function') {
-      try { store.triggerAutoSave(); } catch {}
+    if (typeof s.triggerAutoSave === 'function') {
+      try { s.triggerAutoSave(); } catch {}
     }
     onClose();
   };
 
   const removePolicy = () => {
     if (!confirm('Remove the privacy policy from this project?')) return;
-    store.setLegalPage('privacy', undefined);
-    if (typeof store.triggerAutoSave === 'function') {
-      try { store.triggerAutoSave(); } catch {}
+    const s = storeApi.getState();
+    s.setLegalPage('privacy', undefined);
+    if (typeof s.triggerAutoSave === 'function') {
+      try { s.triggerAutoSave(); } catch {}
     }
     onClose();
   };

@@ -26,7 +26,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { EditProvider, EditStoreGate } from '@/components/EditProvider';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreApi } from '@/hooks/useEditStore';
 import { preloadTemplate } from '@/modules/templates/registry';
 import type { TemplateModule, KnobSelection } from '@/types/template';
 import type { TemplateId } from '@/types/service';
@@ -69,21 +69,23 @@ function buildMockDraft(sections: BlockMockSection[]) {
 
 /** Seeds the edit store with every section (mode:'preview'), then renders. */
 function StoreSeed({ sections, tokenId, children }: { sections: BlockMockSection[]; tokenId: string; children: React.ReactNode }) {
-  const { loadFromDraft, setMode } = useEditStore();
+  // Action-only: loadFromDraft/setMode are one-shot seed calls in the effect —
+  // non-reactive access via the store API (no whole-store subscription).
+  const storeApi = useEditStoreApi();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      await loadFromDraft(buildMockDraft(sections), tokenId);
+      await storeApi.getState().loadFromDraft(buildMockDraft(sections), tokenId);
       // Preview (not 'edit'): renders the static, marker-emitting path with NO
       // editing chrome (add/remove affordances, contentEditable carets) — the
       // only render that is a fair VISUAL match to the published block.
-      setMode('preview');
+      storeApi.getState().setMode('preview');
       if (!cancelled) setReady(true);
     })();
     return () => { cancelled = true; };
-  }, [loadFromDraft, setMode, sections, tokenId]);
+  }, [storeApi, sections, tokenId]);
 
   if (!ready) return <div style={{ padding: 32, color: 'var(--bone-3)', fontFamily: 'var(--font-mono)' }}>Seeding store…</div>;
   return <>{children}</>;

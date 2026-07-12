@@ -712,3 +712,121 @@ All 11 files → `rg -c "useEditStore\(\s*\)"` = 0.
 - None functional. Only store-subscription lines changed; no persist/commit path, no
   renderer/dual-pair, no ad-hoc `set()`, named-op discipline intact. B5 modals are cold
   surfaces off the typing hot path.
+
+## Phase 10 (Batch B6) — header/chrome + preview + dev (cold, FINAL batch)
+
+### Files changed (12, resolved paths confirmed via rg)
+- `src/app/edit/[token]/components/layout/EditHeader.tsx` (bare site @22)
+- `src/app/edit/[token]/components/layout/EditHeaderRightPanel.tsx` (@68)
+- `src/app/edit/[token]/components/layout/PageSwitcher.tsx` (@55)
+- `src/app/edit/[token]/components/ui/EnhancedAddSection.tsx` (@34)
+- `src/app/edit/[token]/components/ui/AddSectionButton.tsx` (@11)
+- `src/app/edit/[token]/components/ui/PreviewButton.tsx` (@14)
+- `src/app/edit/[token]/components/ui/DeviceToggle.tsx` (@8)
+- `src/app/edit/[token]/components/ui/SaveStatus.tsx` (@8)
+- `src/app/preview/[token]/page.tsx` (@63)
+- `src/app/preview/[token]/privacy/page.tsx` (@39)
+- `src/components/editor/PrivacyPolicyEditor.tsx` (@27)
+- `src/app/dev/blocks/TemplateBlocksStage.tsx` (@72 — FIXED via narrow API, not exempted, per D2)
+
+(Note: TemplateBlocksStage bare call resolved at line **72** post-merge, not the
+plan's ~168 estimate — line drift; it is the `StoreSeed` inner component.)
+
+### Per-file classification + field-enumeration (D4.2: subscribed vs render-read)
+
+| File | Classification | Subscribed (selector) | Render-read | Action / one-shot (via getState) |
+|---|---|---|---|---|
+| EditHeader.tsx | render-read (useShallow) | `audienceType`, `templateId` | both (designControls popover selection + isService) | — |
+| EnhancedAddSection.tsx | render-read (useShallow) | `audienceType`, `templateId` | both (`usesTemplateModule` gate to early return) | — |
+| AddSectionButton.tsx | render-read (single-field) | `getColorTokens` (stable getter ref) | `getColorTokens()` called at render (value currently unused; behavior preserved 1:1) | — |
+| PreviewButton.tsx | render-read (single-field) | `getColorTokens` (stable getter ref) | `getColorTokens()` at render (value unused; preserved) | — |
+| DeviceToggle.tsx | render-read (single-field) | `globalSettings` | `globalSettings.deviceMode` (active-device highlight) | — |
+| SaveStatus.tsx | render-read (single-field) | `persistence` | `persistence.isSaving/isDirty/saveError` | — |
+| EditHeaderRightPanel.tsx | render-read (useShallow) + getState | `aiGeneration`, `sections`, `activeLocale`, `localeConfig` | `aiGeneration` (spinner/progress/toast effect), `sections` (total count), `activeLocale`+`localeConfig` (regen-lock) | `regenerateAllContent` (handleRegenConfirm) |
+| PageSwitcher.tsx | render-read (useShallow) + getState | `pages`, `currentPageId`, `audienceType`, `templateId`, `getPagesList` | `pages` (tabs/catalog/managed keys), `currentPageId` (active tab), `audienceType`+`templateId` (blog/techpremium gates), `getPagesList` (stable getter to list) | `addPage`, `deletePage`, `renamePage`, `setCurrentPage`, `addArchetypePage` (all in onClick handlers) |
+| preview/[token]/page.tsx | render-read (useShallow) + getState | `sections`, `content`, `theme`, `title`, `onboardingData`, `pages`, `currentPageId` | `sections`/`content`/`theme`/`title`/`onboardingData` (validation + debug effects, publish payload), `pages`+`currentPageId` (default-to-home effect) | `setMode`, `setCurrentPage` (effects); `forms`, `legalPages`, `save`, `export` (handlePublish one-shot reads) |
+| preview/[token]/privacy/page.tsx | render-read (useShallow) | `legalPages`, `theme`, `title` | all three (privacy content + page colors + byline) | — |
+| PrivacyPolicyEditor.tsx | render-read (useShallow) + getState | `legalPages`, `title` | `legalPages.privacy` (phase init + effect dep), `title` (default company name in useState initializer) | `tokenId` (generate fetch), `setLegalPage`+`triggerAutoSave` (save/removePolicy) |
+| TemplateBlocksStage.tsx | **action-only** (`useEditStoreApi()`) | — (no subscription) | — | `loadFromDraft`, `setMode` (one-shot seed in effect) |
+
+**Classification summary:** 11 render-read (6 single-field/useShallow render subscribers,
+5 mixed render-read + getState-for-handlers); 1 pure action-only (`TemplateBlocksStage` to
+`useEditStoreApi()`, zero subscription — the D2 "fix not exempt" target).
+
+**Over-narrowing guard:** no render-read field dropped from any subscription. Every field
+read on a render path is in that file's selector; only handler/effect one-shot reads and
+stable action refs were moved to `storeApi.getState()`.
+
+### Deviations
+- `AddSectionButton` / `PreviewButton`: `getColorTokens()` is called at render but its
+  result (`colorTokens`) is currently unused by the JSX (hardcoded Tailwind classes).
+  Converted to a single-field selector of the stable getter ref (conservative — preserves
+  the exact call behavior without a whole-store subscription) rather than deleting the dead
+  read, which would be an out-of-scope behavior edit.
+- `preview/[token]/page.tsx`: the two page-mount effects (setMode; default-to-home) and
+  `handlePublish` moved their action/data reads (`setMode`, `setCurrentPage`, `forms`,
+  `legalPages`, `save`, `export`) to `storeApi.getState()`; effect dep arrays updated
+  (`setCurrentPage`/`setMode` to `storeApi`, stable) — no functional change, lint clean.
+- `PrivacyPolicyEditor` / `PageSwitcher`: replaced the whole-store `store` local with a
+  narrow selector + `storeApi`; every `store.X` handler mutation re-pointed to
+  `storeApi.getState().X`.
+
+### Grep-zero (touched files)
+All 12 files → `rg -c "useEditStore\(\s*\)"` = 0.
+
+### FULL SWEEP GREP (the zero-bare gate)
+`rg -n "useEditStore\(\s*\)" src/ -g "*.ts" -g "*.tsx"` → exactly **3 surviving hits, ALL
+non-code** (no real call expression remains anywhere in `src/`):
+
+| Hit | Disposition |
+|---|---|
+| `src/hooks/useEditStore.ts:23` — `*   useEditStore()  -> whole EditStore …` | **JSDoc example** (comment in the hook doc block) |
+| `src/hooks/useEditStore.ts:29` — `export function useEditStore(): EditStore;` | **TS overload declaration** (a function signature, NOT a CallExpression — the D3 AST lint rule ignores it) |
+| `src/modules/generatedLanding/sharedBlocks/LeadForm/LeadForm.tsx:8` — `// FormsSlice: useEditStore().forms?.[form_id] …` | **explanatory comment** (the code below uses a selector) |
+
+These are the 3 permanent non-code matches called out in D2's re-scope note. Zero real
+bare call sites remain — the whole ~70-site Step-B conversion (B1–B6) is complete.
+
+### Verification
+- `npx tsc --noEmit`: clean.
+- `npm run test:run`: **2508 passed | 11 skipped** (158 files pass | 1 skip).
+- `npx next lint` (scoped to the 12 files): **No ESLint warnings or errors**.
+- `npm run lint` (repo-wide): 0 errors; only pre-existing `no-img-element` /
+  `exhaustive-deps` warnings, none in the touched files.
+- `npm run build`: success (full pipeline — published-css + assets + next build).
+
+### renderProbe smoke (authed, worktree :3021, NEXT_PUBLIC_DEBUG_EDITOR=true + MOCK_GPT, seeded meridian)
+`PROBE_URL=http://localhost:3021 --smoke=select,type,undo,redo,palette,modal` →
+`allPassed: true`.
+
+| Smoke | Result |
+|---|---|
+| select | PASS — store.textEditing + text-mvp toolbar visible |
+| type | PASS — DOM updated live with typed marker before commit |
+| undo | PASS — reverted committed headline edit |
+| redo | PASS — reapplied |
+| palette | PASS — mint to cyan, 4 React re-commits (<= baseline 4–5) |
+| modal | PASS — theme popover open; active swatch reflects store paletteId |
+
+### FINAL PERF CHECKPOINT (post-phase-10, all batches done)
+Recorded into `editor-phase-4-store-finish.baseline.md` as the post-phase-10 row.
+
+| Metric | Baseline | Post-7 | Post-10 | Verdict |
+|---|---|---|---|---|
+| Commits during 20-char burst | 6 | 6 | 6 | flat |
+| Commits / keystroke | 0.3 | 0.3 | 0.3 | flat |
+| Commits on blur | 3 | 3 | 3 | flat |
+| Store mutations observed | 1 | 1 | 1 | flat |
+| JS heap delta (post-GC) | +0.6–0.9 MB | +0.667 MB | +0.671 MB | flat |
+| Palette-swap re-commits | 4–5 | 4 | 4 | <= baseline |
+
+### Authed edit-persistence E2E
+`E2E_PORT=3021 npx playwright test edit-persistence --reporter=line` → **2/2 pass**
+(auth setup + throttled-edit-persists-to-store/server/reload, no silent loss). Dev
+server stopped afterward (:3021 free; :3000 untouched throughout).
+
+### Open risks
+- None functional. Only store-subscription lines changed; no persist/commit path, no
+  renderer/dual-pair edit, no ad-hoc `set()`, named-op discipline intact. All B6 surfaces
+  are cold (header chrome, preview pages, dev-only stage) off the typing hot path. The
+  ESLint rule flip (phase 12) can now proceed with target exemption list = empty.

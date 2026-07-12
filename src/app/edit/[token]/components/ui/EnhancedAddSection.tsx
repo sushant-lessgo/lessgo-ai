@@ -11,6 +11,7 @@ import { layoutElementSchema, getAllElements } from '@/modules/sections/layoutEl
 import { logger } from '@/lib/logger';
 import { sectionList } from '@/modules/sections/sectionList';
 import type { EditableElement } from '@/types/core/content';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStore } from '@/hooks/useEditStore';
 import { usesTemplateModule } from '@/types/service';
 
@@ -31,7 +32,10 @@ interface EnhancedAddSectionProps {
 // Split from the inner component so the guard's early return sits above zero
 // hooks (rules-of-hooks) while hidden ⇒ inner unmounted ⇒ no state/effects.
 export function EnhancedAddSection(props: EnhancedAddSectionProps) {
-  const { audienceType, templateId } = useEditStore();
+  // Render-read: audienceType + templateId gate the à-la-carte add-section UI.
+  const { audienceType, templateId } = useEditStore(
+    useShallow((s) => ({ audienceType: s.audienceType, templateId: s.templateId })),
+  );
   if (usesTemplateModule(audienceType, templateId)) return null;
   return <EnhancedAddSectionInner {...props} />;
 }

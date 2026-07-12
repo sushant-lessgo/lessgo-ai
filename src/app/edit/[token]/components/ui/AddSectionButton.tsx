@@ -8,7 +8,8 @@ interface AddSectionButtonProps {
 }
 
 export function AddSectionButton({ onAdd, position }: AddSectionButtonProps) {
-  const { getColorTokens } = useEditStore();
+  // Single-field selector: stable getter ref (no whole-store subscription).
+  const getColorTokens = useEditStore((s) => s.getColorTokens);
   const colorTokens = getColorTokens();
 
   const getButtonStyles = () => {

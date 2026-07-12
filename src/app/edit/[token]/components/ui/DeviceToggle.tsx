@@ -5,7 +5,8 @@ import React from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
 
 export function DeviceToggle() {
-  const { globalSettings, /* setGlobalSettings */ } = useEditStore();
+  // Render-read: globalSettings.deviceMode drives the active-device highlight.
+  const globalSettings = useEditStore((s) => s.globalSettings);
 
   const devices = [
     { id: 'desktop', label: 'Desktop', icon: '🖥️', width: '100%' },

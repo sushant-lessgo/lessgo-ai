@@ -3,6 +3,7 @@
 import React from 'react';
 import { useParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import { useShallow } from 'zustand/react/shallow';
 import { EditProvider } from '@/components/EditProvider';
 import { useEditStore } from '@/hooks/useEditStore';
 
@@ -36,7 +37,10 @@ export default function PreviewPrivacyPage() {
 }
 
 function PrivacyContent({ tokenId }: { tokenId: string }) {
-  const { legalPages, theme, title } = useEditStore();
+  // Render-read: legalPages (privacy content), theme (page colors), title (byline).
+  const { legalPages, theme, title } = useEditStore(
+    useShallow((s) => ({ legalPages: s.legalPages, theme: s.theme, title: s.title })),
+  );
   const privacy = legalPages?.privacy;
 
   const themeColors = (theme?.colors as any) || {};

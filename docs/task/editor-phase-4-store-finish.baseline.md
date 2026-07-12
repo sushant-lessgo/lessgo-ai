@@ -95,3 +95,26 @@ All 6 reactivity smokes PASS (`allPassed: true`): type, select, undo, redo, pale
 modal. Authed edit-persistence E2E: **2/2 pass** (auth setup + throttled-edit-persists).
 Commit counts ≤ baseline, heap flat — matches the phase-7 expectation. This is the
 number Gate B reviews for the hot-path half.
+
+## Post-phase-10 (all batches done) — FINAL perf checkpoint
+
+Recorded after Batch B6 (header/chrome + preview + dev) — **all Step-B batches
+(B1–B6) now applied; ZERO real bare `useEditStore()` call sites remain**. Same
+probe/dev-server/method as baseline (worktree :3021, `NEXT_PUBLIC_DEBUG_EDITOR=true
+NEXT_PUBLIC_USE_MOCK_GPT=true`, product/Meridian, authed). Single full run
+(`--smoke=select,type,undo,redo,palette,modal`).
+
+| Metric | Baseline | Post-phase-7 | Post-phase-10 (all done) | Verdict |
+|---|---|---|---|---|
+| React commits during 20-char burst | 6 | 6 | 6 | flat |
+| React commits / keystroke | 0.3 | 0.3 | 0.3 | flat |
+| React commits on commit (blur) | 3 | 3 | 3 | flat |
+| Store mutations observed (burst+commit) | 1 | 1 | 1 | flat |
+| JS heap delta (post-GC) | +0.6 – +0.9 MB | +0.667 MB | +0.671 MB | flat (in range) |
+| Palette-swap re-commits | 4–5 | 4 | 4 | ≤ baseline |
+
+All 6 reactivity smokes PASS (`allPassed: true`): select, type, undo, redo, palette,
+modal. Authed edit-persistence E2E: **2/2 pass** (auth setup + throttled-edit-persists).
+Commit counts ≤ baseline, heap flat across the whole selector-ization. This is the
+final number Gate B reviews (baseline vs post-7 vs post-10). Dev server stopped
+(:3021 free; :3000 untouched).

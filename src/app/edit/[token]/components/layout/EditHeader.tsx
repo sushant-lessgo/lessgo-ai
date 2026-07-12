@@ -10,6 +10,7 @@ import { ReviewPill } from '../ui/ReviewPill';
 import { SaveStateChip } from '../ui/SaveStateChip';
 import { LanguageToggle } from '../editor/LanguageToggle';
 import { LocaleSettings } from '../editor/LocaleSettings';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStore } from '@/hooks/useEditStore';
 import { useReviewState } from '@/hooks/useReviewState';
 import { usesTemplateModule } from '@/types/service';
@@ -19,7 +20,10 @@ interface EditHeaderProps {
 }
 
 export function EditHeader({ tokenId }: EditHeaderProps) {
-  const { audienceType, templateId } = useEditStore();
+  // Render-read: audienceType + templateId select which design-control popover renders.
+  const { audienceType, templateId } = useEditStore(
+    useShallow((s) => ({ audienceType: s.audienceType, templateId: s.templateId })),
+  );
   const { allComplete } = useReviewState();
   const isService = audienceType === 'service';
   const usesTemplate = usesTemplateModule(audienceType, templateId);

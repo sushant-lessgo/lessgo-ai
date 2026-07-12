@@ -5,7 +5,8 @@ import React from 'react';
 import { useEditStore } from '@/hooks/useEditStore';
 
 export function SaveStatus() {
-  const { persistence } = useEditStore();
+  // Render-read: persistence (isSaving/isDirty/saveError) drives the status chip.
+  const persistence = useEditStore((s) => s.persistence);
 
   if (persistence.isSaving) {
     return (

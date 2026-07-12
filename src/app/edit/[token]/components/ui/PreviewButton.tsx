@@ -11,7 +11,8 @@ interface PreviewButtonProps {
 
 export function PreviewButton({ tokenId }: PreviewButtonProps) {
   const { handlePreviewClick, isNavigating } = usePreviewNavigation(tokenId);
-  const { getColorTokens } = useEditStore();
+  // Single-field selector: stable getter ref (no whole-store subscription).
+  const getColorTokens = useEditStore((s) => s.getColorTokens);
   const buttonRef = useRef<HTMLButtonElement>(null);
   
   const colorTokens = getColorTokens();
