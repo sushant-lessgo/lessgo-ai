@@ -226,3 +226,38 @@ seed-normalization test (step 2 changed nothing).
 ### Open risks
 - `router.prefetch` is best-effort; if it fails/no-ops the navigation still works,
   just without the warm-route speedup. No functional dependency on it.
+
+## Phase 6 — Understanding step: keep the niche
+
+**Files changed**
+- `src/lib/schemas/entryClassify.schema.ts`
+- `src/app/api/v2/scrape-website/route.ts`
+- `src/app/api/v2/understand/route.ts`
+
+PROMPT-STRING-ONLY phase. No schema/enum/logic changes; `classify.ts` and engine resolution untouched.
+
+**Exact prompt-line changes:**
+
+1. `entryClassify.schema.ts` — `entryPrefillDeltaPromptBlock()`, `summary:` line only:
+   - was: `- summary: one neutral paragraph describing the business.`
+   - now: appended `Preserve the business's OWN niche/specialty words (e.g. "GST invoicing for Indian freelancers"); never generalize to a broader category label (e.g. "accounting software").`
+   - The `outcomes:` line in this same block was LEFT UNTOUCHED (shared cross-engine field per Phase 1's warning). Confirmed only the `summary` line changed.
+
+2. `entryClassify.schema.ts` — `entryClassificationPromptBlock()`, `category:` line:
+   - was: `- category: a short market category (e.g. "Performance marketing", "Wedding photography"), or null.`
+   - now: `- category: the SPECIFIC niche category in the business's OWN terms (e.g. "GST invoicing for Indian freelancers", "Wedding photography"), NOT the parent industry ("Accounting software", "Photography"). Keep the source's niche wording; do not broaden it. Use null only if unclear.`
+   - `businessTypeGuess` (~line 138) LEFT UNTOUCHED — it feeds `resolveEngine`/serve and stays on the closed vocabulary.
+
+3. `scrape-website/route.ts` — `buildScrapePrompt` `oneLiner:` line:
+   - appended `Keep the specific niche terms from the source; do not substitute broader category words.`
+   - Phase 1's `offer:` anti-name guard (different line) untouched.
+
+4. `understand/route.ts` — `buildEntryUnderstandPrompt` `oneLiner:` line:
+   - appended `Keep the specific niche terms from the source; do not substitute broader category words.`
+   - Phase 1's `offer:` anti-name guard (different line) untouched.
+
+**Verification:**
+- `npx tsc --noEmit`: green except the known pre-existing unrelated error `src/app/page.tsx(6,26): error TS2307` (founder.jpg) — ignored per plan. No other errors.
+- `npm run test:run`: 163 passed | 1 skipped (164 files); 2783 passed | 15 skipped (2798 tests). No fixture/golden breakage (expected — prompt strings only).
+
+**Open risks / load-bearing manual step:** This phase is entirely prompt-string changes; fixture/golden tests CANNOT assert AI behavior drift. Manual real-LLM verification is load-bearing, not optional: enter a niche one-liner AND a niche site URL on `npm run dev` → confirm the Understanding step's summary/category (and oneLiner rephrase) retain the niche wording across 2-3 runs (e.g. "GST invoicing for Indian freelancers" must NOT collapse to "accounting software").

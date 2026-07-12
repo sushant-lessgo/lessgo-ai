@@ -63,7 +63,7 @@ function buildEntryUnderstandPrompt(oneLiner: string): string {
 Return a JSON object with ALL of the following fields.
 
 NEUTRAL BUSINESS FIELDS:
-- oneLiner: one clear sentence describing what the business offers and who it's for (may lightly rephrase the input)
+- oneLiner: one clear sentence describing what the business offers and who it's for (may lightly rephrase the input). Keep the specific niche terms from the source; do not substitute broader category words.
 - businessName: the business/brand name, or "" if not stated
 - categories: 1-3 market categories
 - audiences: 1-3 target audiences/clients

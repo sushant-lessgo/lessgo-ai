@@ -65,7 +65,7 @@ ${combinedText}
 """
 
 Return a JSON object:
-- oneLiner: one clear sentence describing what the business offers and who it's for (>= 10 chars)
+- oneLiner: one clear sentence describing what the business offers and who it's for (>= 10 chars). Keep the specific niche terms from the source; do not substitute broader category words.
 - productName: the business/product name, or "" if not clearly stated
 - categories: 1-3 market categories
 - audiences: 1-3 target audiences
