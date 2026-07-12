@@ -94,3 +94,95 @@ No GeneratingSlot/StructureSlot test file exists, so the dispatch gate (e) is pr
 ### Phase 2 — impl-review verdict: SHIP (1 loop)
 No blocking issues. Gates green: tsc exit 0, hooks+wizard 259/259. Scope = 6 files, no creep. Granth byte-unchanged invariant verified against actual code paths (skip retained, fetchStrategy falls to unchanged early-return, MIN_WORKS + writer generator still reached).
 Non-blocking carried: (1) slot-inclusion uses full `brief` signal, fetchStrategy/dispatch use `briefSignalFromState(store)` — coincide for granth; phase 5 must prove atelier's two derivations agree. (2) `buildWorkInput` projects `pages` unconditionally — harmless (granth generator ignores it). (3) `selectProductBlocks` product-only → atelier sections fall to 'default' UNTIL phase-4 `blockManifests['atelier']` manifestPick resolves them (runtime-inert now, cleanly fixable).
+
+---
+
+## Phase 3 — Work-grammar generalization (G1, granth-safe) — ⚠️ STOPPED, blast radius outside Files-touched
+
+### Files changed (in-scope edits made)
+- `src/modules/engines/coreSections.ts` — `engineCoreSections.work` changed from `['hero','about','books','writing','praise','footer']` to `['hero','work','about','footer']`; rewrote the "revisit work-core" comment (atelier = the anticipated second shortlist-eligible work template; notes granth resolves `work` via alias, visuals byte-unchanged).
+- `src/modules/templates/granth/resolveGranthBlock.ts` — added string-keyed `work` alias entry → granth's existing books/portfolio pair (`GranthBooks` / `GranthBooksPublished`), both edit + published. No union surgery; no new granth visuals.
+- `src/modules/templates/templateMeta.test.ts` — updated the work-core freeze assertion (~:87) to the new 4-item list.
+
+### New core list (exact)
+`work: ['hero', 'work', 'about', 'footer']`
+
+### Granth alias mechanism
+`GRANTH_BLOCK_REGISTRY['work'] = { edit: GranthBooks, published: GranthBooksPublished }` — the same component pair as `books`. So `resolveGranthBlock('work','edit')` and `('work','published')` return granth's real books/portfolio (work-showcase) components, NON-placeholder. Granth already resolves `hero`/`about`/`footer` (existing registry entries), so only `work` is new. **Granth-safety PROVEN:** conformance group (a) for granth (requires resolving every section in the new core in both modes) passes — see test results below (templates suite fully green).
+
+### Grep results — all `engineCoreSections.work` readers
+- `templateMeta.test.ts:87` — hard-coded work-core assertion → **UPDATED** (now green).
+- `conformance.test.ts:192` — filters over `.work` to prove lumen fails core (lumen has no `work` key → still in `missing`, `missing.length > 0` holds) → **verify-only, still green.** (Stale explanatory comment "granth's canonical 6 — lumen has no books/writing/praise" left untouched — out of files-touched; non-load-bearing.)
+- `templateConformance.ts:251` — generic loop → verify-only, green.
+- `fit.ts:165` — flattens all cores → verify-only, green.
+- `sectionGrammar.ts:94` — generic → verify-only, green.
+- `TemplateSwapList.tsx:91` — `engineCoreSections[engine] ?? []` → verify-only, green.
+- `swap.test.ts`, `structureConvergence.test.ts`, `designKit.test.ts:118` — reference `.thing`/`.trust` only → unaffected.
+- **`inputContracts.ts:239` (`lockedSectionsForEngine`)** — generic filter → itself fine.
+- **`inputContracts.test.ts:48-62` ("core-section alignment") — BREAKS. See blocker below.**
+
+### 🛑 BLOCKER — requires edit outside Files-touched (STOPPED per phase instructions)
+`inputContracts.test.ts` asserts every work-engine CONTRACT field's `section`/`dropTarget` is ⊆ `engineCoreSections.work`. The **work engine contract (`workContract` in `inputContracts.ts`)** — the granth WRITER wizard contract — still keys fields to the removed writer sections:
+- `theWork.section = 'books'` (line 195)
+- `genresStyle.section = 'writing'` (line 196)
+- `praise.section = 'praise'` + `praise.dropTarget = 'praise'` (line 206)
+
+Removing `books`/`writing`/`praise` from core makes these fields no longer ⊆ core → **2 tests fail**:
+- `work field sections are ⊆ engine core sections` (:52)
+- `work dropTargets are ⊆ engine core sections` (:59)
+
+This is NOT union surgery and NOT a hard-coded old-core fixture — the test invariant is legitimate; the true fix is editing **`src/modules/engines/inputContracts.ts`** (production data: the writer wizard's field→section mapping), which is **outside this phase's Files-touched list** and would alter granth's writer wizard drop-target/section wiring (behavior risk to granth). Per instructions I did NOT edit it and did NOT apply the fallback.
+
+**Key finding — the plan's documented fallback does NOT resolve this.** Shrinking core to `['hero','about','footer']` (plan's fallback) ALSO omits `books`/`writing`/`praise`, so the SAME two contract-alignment assertions still fail. The failure is independent of which generalized core is chosen; it stems from the work engine contract being coupled to the old writer-shaped section names. Both plan-review and the phase-3 "verify-only" classification of `inputContracts.ts`+its test missed this coupling.
+
+### Options for orchestrator (not applied — decision needed)
+1. **Add `inputContracts.ts` + `inputContracts.test.ts` to Phase 3 Files-touched** and re-key the writer contract's field sections to the generalized core (e.g. `theWork.section: 'books'→'work'`, `praise` section/dropTarget → `'work'` or drop, `genresStyle.section: 'writing'` → drop/`'work'`). Requires care: these feed granth's wizard drop-targets and section rendering — must prove granth writer flow unchanged. This is the cleanest but expands scope into production data.
+2. **Relax the invariant** so contract field sections may reference engine-specific sections beyond the generalized core (granth's `books`/`writing`/`praise` are legit granth sections, just not conformance-core). Smaller code change, but weakens a real guard; still needs `inputContracts.test.ts` in scope.
+3. Decouple: keep a separate "writer contract sections" set from the conformance core. Largest change.
+
+### designKit / slotless `work`
+Did NOT edit `designKit.ts` (pure derivation). Did NOT yet run `npm run kit:generate` (deferred pending the blocker resolution, since the emitted work brief depends on the final core shape). Per key decision, the new `work` sectionType has no granth layout → `designKit(work)` will emit it **slotless**; consequence: handoff lint has no required data-slots for the showcase section (accepted — gallery capabilitySections + parity cover it). No committed granth kit/golden fixture found asserting the section list (`designKit.test.ts` loops generically; kit markdown lives in gitignored `template-design/`). Will confirm the slotless eyeball once core shape is final.
+
+### Commands
+- `npx tsc --noEmit` → **PASS (exit 0)** with all in-scope edits.
+- `npm run test:run -- src/modules/templates` → **PASS** (granth auto-enrolled conformance + templateMeta work-core green against new core; alias proven).
+- `npm run test:run -- src/modules/engines` → **FAIL: 2 tests** in `inputContracts.test.ts` (the blocker above); 975 passed, 8 skipped otherwise.
+- `npm run kit:generate` → deferred (see above).
+
+### Status
+In-scope edits complete and green in isolation (templates suite). Phase cannot finish green because closing the engines suite requires an out-of-scope edit to `inputContracts.ts`. Edits left in place on-branch (uncommitted) for orchestrator review; awaiting decision on option 1/2/3.
+
+---
+
+### Phase 3 — RESOLVED (orchestrator ruling: Option 2, invariant relaxation)
+
+**Ruling applied:** `src/modules/engines/inputContracts.ts` kept BYTE-UNCHANGED (granth writer flow untouched). Confirmed: `git diff src/modules/engines/inputContracts.ts` = empty; `git status` shows it NOT modified. The `workContract` field→section mappings (`theWork→books`, `genresStyle→writing`, `praise→praise`/dropTarget `praise`) are granth's WRITER-wizard sections — legitimate granth sections that atelier need not render (atelier uses the phase-2 skeleton path, never these copy fields). Only the stale test invariant was fixed.
+
+**Files changed (this resolution): `src/modules/engines/inputContracts.test.ts` only.**
+- Relaxed the "core-section alignment" invariant. Added a documented per-engine allowlist constant inside the describe:
+  ```
+  const CONTRACT_EXTRA_SECTIONS: Record<CopyEngine, readonly string[]> = {
+    thing: [], trust: [], work: ['books', 'writing', 'praise'],
+  };
+  ```
+- Both `it.each` checks (field `section` and `dropTarget`) now assert membership in `new Set([...engineCoreSections[engine], ...CONTRACT_EXTRA_SECTIONS[engine]])` instead of core alone.
+- **WHY:** `engineCoreSections.work` is now the minimal, template-agnostic conformance core (every work template must resolve `hero/work/about/footer`). The old invariant was written under the OLD semantics where the work core WAS granth's full writer section list — now stale. Consistent with existing codebase precedent (coreSections.ts note: "pricing and cta are meridian-specific extras, not engine guarantees"). Typo-catching value preserved: anything outside core∪extras still fails.
+
+**Final phase-3 Files-touched set (all in scope):**
+- `src/modules/engines/coreSections.ts`
+- `src/modules/templates/granth/resolveGranthBlock.ts`
+- `src/modules/templates/templateMeta.test.ts`
+- `src/modules/engines/inputContracts.test.ts` (invariant relaxation — NOT inputContracts.ts)
+
+**Verification (all green):**
+- `npx tsc --noEmit` → EXIT 0.
+- `npm run test:run -- src/modules/templates` → 23 files, 802 passed / 8 skipped (granth conformance + templateMeta green).
+- `npm run test:run -- src/modules/engines` → 4 files, 175 passed (ALL green, incl. inputContracts.test.ts).
+- `npm run kit:generate` → eyeballed. Granth brief emits `### \`work\`  _(source: legacy-layout)_` with `_No slots derivable (unmapped section)._` — slotless `work` section is PRESENT and expected/accepted (new work sectionType has no granth layout mapping; gallery capabilitySections + parity cover it). No new out-of-scope edit forced.
+
+**inputContracts.ts diff confirmation:** empty (byte-unchanged, granth writer flow intact).
+
+---
+### Phase 3 — impl-review verdict: SHIP (1 loop + 1 orchestrator ruling)
+No blocking issues. Gates green: tsc exit 0; templates+engines 977 passed/8 skipped. Scope = 4 source files, inputContracts.ts confirmed byte-unchanged. Granth-safety proven: 'work' alias→GranthBooks/GranthBooksPublished (real pair); granth's GENERATED section list comes from granthSeed not engineCoreSections (reviewer gate-6 trace), so unaffected. Allowlist work:['books','writing','praise'] exactly matches workContract's beyond-core refs — not over/under-broad; typos still fail.
+Non-blocking: slotless 'work' kit section (accepted per ruling — designer-handoff artifact, not runtime).

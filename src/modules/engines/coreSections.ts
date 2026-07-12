@@ -15,17 +15,19 @@
 //   machinery for zero v0 benefit.)
 // - trust: hearth's canonical 7; lex has the identical 7; surge has these 7
 //   plus delta sections (logos/about/casestudies/stats). No tension.
-// - work: granth's canonical 6. granth(6) ∩ lumen(9) is only
-//   `hero, about, footer` — too thin to mean anything — and lumen is D4
-//   bespoke/off-funnel (never shortlisted), so it is EXEMPT from engine-core
-//   conformance via `bespoke: true` in templateMeta (it still gets the
-//   capability-evidence check). Revisit work-core when a second
-//   shortlist-eligible work template lands.
+// - work: generalized from granth's writer-shaped 6 to the template-agnostic
+//   `hero, work, about, footer` (4) now that atelier — the anticipated second
+//   shortlist-eligible work template (visual-portfolio) — lands. `work` is the
+//   generic showcase section; granth resolves it via a resolver alias to its
+//   existing books/portfolio block pair (resolveGranthBlock.ts), so granth's
+//   visuals are byte-for-byte unchanged. lumen(9) is D4 bespoke/off-funnel
+//   (never shortlisted), EXEMPT from engine-core conformance via `bespoke: true`
+//   in templateMeta (it still gets the capability-evidence check).
 
 import type { CopyEngine } from '@/types/brief';
 
 export const engineCoreSections: Record<CopyEngine, readonly string[]> = {
   thing: ['header', 'hero', 'features', 'testimonials', 'footer'],
   trust: ['header', 'hero', 'services', 'testimonials', 'packages', 'cta', 'footer'],
-  work: ['hero', 'about', 'books', 'writing', 'praise', 'footer'],
+  work: ['hero', 'work', 'about', 'footer'],
 } as const;

@@ -85,7 +85,7 @@ describe('engineCoreSections', () => {
       'header', 'hero', 'services', 'testimonials', 'packages', 'cta', 'footer',
     ]);
     expect(engineCoreSections.work).toEqual([
-      'hero', 'about', 'books', 'writing', 'praise', 'footer',
+      'hero', 'work', 'about', 'footer',
     ]);
   });
 });
