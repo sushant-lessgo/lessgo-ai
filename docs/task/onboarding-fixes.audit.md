@@ -173,3 +173,56 @@ seed-normalization test (step 2 changed nothing).
 ### Open risks
 - None functional. The empty-node rule keys on `extractionSchemaKey`/`requiredCollections`;
   a future catalog-shaped businessType must set one of those to surface an empty node.
+
+## Phase 5 — Building step: honest finalize, no disabled Continue
+
+**Files changed**
+- `src/components/onboarding/wizard/GeneratingSlot.tsx`
+- `src/components/onboarding/wizard/WizardShell.tsx`
+
+### GeneratingSlot.tsx
+- Added local `redirecting` state (default false).
+- Both success paths now set `redirecting` and call `router.push` immediately
+  (removed the 600 ms `setTimeout` wrappers):
+  - work-skeleton path (~line 136): `setRedirecting(true); router.push(skelResult.redirectTo || /edit/${input.tokenId})`.
+  - main path (~line 177): `setRedirecting(true); router.push(result.redirectTo || /edit/${input.tokenId})`.
+  Existing `redirectTo` fallback logic preserved in both.
+- Added a prefetch effect right after the run effect: once `tokenId` is known
+  (guarded `if (!tokenId) return;`), `router.prefetch(/edit/${tokenId})` warms the
+  heavy editor route while generation runs. Deps `[tokenId, router]`.
+- Redirecting UI: rendered under the green `<ol>` checklist in the main return —
+  a `Loader2` spinner + "Opening your editor — this can take a few seconds."
+  It only mounts when `redirecting` is true. Because App Router keeps this slot
+  mounted through the client navigation into `/edit/[token]`, the spinner shows
+  for the entire 5–10 s stall, then the editor route replaces it. The green
+  checklist stays visible above the spinner (all stages already `done`).
+
+### WizardShell.tsx
+- Nav: wrapped the Continue `<Button>` in `{currentSlot !== 'generating' && ( … )}`
+  so it is not rendered at all on the Building step (previously it rendered
+  permanently disabled via `isLast`). Back button unchanged (still `disabled={isFirst}`).
+- `gateBlocked` and its `generationError` branch left intact (now moot on this
+  slot since Continue is gone, but harmless). Phase 4's drafting-gate additions to
+  `gateBlocked` were read and left untouched — this change is additive and only
+  touches the JSX render of the Continue button.
+
+### Deviations from plan
+- None. The plan said "drop or shorten" the 600 ms timeout; chose to drop it
+  entirely (conservative: no artificial delay before revealing the honest state).
+
+### Test results
+- `npx tsc --noEmit`: only the known pre-existing unrelated error
+  `src/app/page.tsx(6,26)` (founder.jpg module). No new errors.
+- `npm run test:run`: 163 passed | 1 skipped file; 2783 passed | 15 skipped tests. Green.
+
+### Manual dev checks (to run against `npm run dev`, not automatable)
+- Full product generation → stages go green → "Opening your editor…" spinner
+  appears under the checklist → editor at `/edit/[token]` lands.
+- Step 8 (Building) shows NO Continue button (disabled or otherwise); Back still present.
+- Error path: still renders `ErrorRetry` (Try again / Skip to editor) — no spinner.
+- Out-of-credits path: still renders the "Out of credits" UI with View plans /
+  Continue to editor without copy.
+
+### Open risks
+- `router.prefetch` is best-effort; if it fails/no-ops the navigation still works,
+  just without the warm-route speedup. No functional dependency on it.

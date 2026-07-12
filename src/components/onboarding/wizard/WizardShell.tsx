@@ -233,15 +233,21 @@ export default function WizardShell({
           <ArrowLeft className="w-4 h-4" />
           Back
         </button>
-        <Button
-          type="button"
-          onClick={handleNext}
-          disabled={isLast || gateBlocked}
-          className="bg-brand-accentPrimary hover:bg-orange-500 transition-all duration-200"
-        >
-          Continue
-          <ArrowRight className="w-4 h-4 ml-1.5" />
-        </Button>
+        {/* Building step (8) is terminal: GeneratingSlot drives the redirect into
+            the editor itself, so a Continue button here would only ever render
+            permanently disabled (via isLast). Omit it entirely on this slot;
+            other slots keep the gated Continue. */}
+        {currentSlot !== 'generating' && (
+          <Button
+            type="button"
+            onClick={handleNext}
+            disabled={isLast || gateBlocked}
+            className="bg-brand-accentPrimary hover:bg-orange-500 transition-all duration-200"
+          >
+            Continue
+            <ArrowRight className="w-4 h-4 ml-1.5" />
+          </Button>
+        )}
       </div>
     </div>
   );

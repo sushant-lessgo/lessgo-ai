@@ -97,6 +97,11 @@ export default function GeneratingSlot() {
   const [pageProgress, setPageProgress] = useState<{ done: number; total: number } | null>(null);
   const [creditsError, setCreditsError] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Honest finalize state: generation succeeded and we've fired router.push into
+  // the heavy /edit/[token] route. App Router navigation keeps this slot mounted
+  // through the (5–10 s) client-side transition, so we show a persistent
+  // "opening your editor" spinner for the whole stall instead of a silent freeze.
+  const [redirecting, setRedirecting] = useState(false);
   const hasRun = useRef(false);
 
   const run = useCallback(async () => {
@@ -133,7 +138,9 @@ export default function GeneratingSlot() {
         setError(humanizeGenerationError(skelResult.error));
         return;
       }
-      setTimeout(() => router.push(skelResult.redirectTo || `/edit/${input.tokenId}`), 600);
+      // Reveal the editor immediately, with an honest "opening…" state (below).
+      setRedirecting(true);
+      router.push(skelResult.redirectTo || `/edit/${input.tokenId}`);
       return;
     }
 
@@ -173,8 +180,9 @@ export default function GeneratingSlot() {
       setError(humanizeGenerationError(result.error));
       return;
     }
-    // Reveal the editor.
-    setTimeout(() => router.push(result.redirectTo || `/edit/${input.tokenId}`), 600);
+    // Reveal the editor immediately, with an honest "opening…" state (below).
+    setRedirecting(true);
+    router.push(result.redirectTo || `/edit/${input.tokenId}`);
   }, [engine, router]);
 
   useEffect(() => {
@@ -184,6 +192,13 @@ export default function GeneratingSlot() {
   }, [run]);
 
   const tokenId = useWizardStore.getState().tokenId ?? '';
+
+  // Warm the heavy /edit/[token] route while generation runs so the post-success
+  // client navigation lands faster (esp. on prod cold routes). Guard on tokenId.
+  useEffect(() => {
+    if (!tokenId) return;
+    router.prefetch(`/edit/${tokenId}`);
+  }, [tokenId, router]);
 
   if (creditsError) {
     return (
@@ -272,6 +287,13 @@ export default function GeneratingSlot() {
           );
         })}
       </ol>
+
+      {redirecting && (
+        <div className="mt-8 flex items-center justify-center gap-2 text-sm text-gray-600">
+          <Loader2 className="w-4 h-4 animate-spin text-brand-accentPrimary" />
+          <span>Opening your editor — this can take a few seconds.</span>
+        </div>
+      )}
     </div>
   );
 }
