@@ -18,7 +18,7 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 14. **Email continuation pages** — paste email → extract tone/offer/CTA → generate matching page reusing brand assets
 15. **Landing page types by traffic source** — Main (current) / Ad-PPC (no nav, single CTA) / SEO (content-rich) / Social (platform tone)
 16. **Problem section UIBlock gaps** — only 2 UIBlocks today; missing: simple bullets, statistics-driven, single emotional statement, cost-of-inaction, industry-specific
-17. **Social-posts phase 7 (caps + upgrade wall)** — feature MERGED DARK w/ kill-switch 2026-07-12; before un-flag: real-LLM QA + phase-7 limits (`socialPosts` FREE 10 / PRO 300; plan §Phase 7, spec `docs/task/social-posts.spec.md`)
+17. **Dark-trio un-flag rollout** — QA done (`docs/temp/qa-pilot-darktrio.md`): social SHIP-ready but needs phase-7 caps first (`socialPosts` FREE 10 / PRO 300, plan §Phase 7); email needs Email-4 dead pseudo-link fix; outreach needs off-ICP mismatch handling
 18. **Pre-built IVOC database** — DB-first lookup keyed `(categoryKey, audienceKey)`, live search only on miss (Tavily removed scale-08, `IVOCCache` table retained)
 19. **Competitor research** — per competitor: idea, USP, pain/desire focus, real praise+complaint quotes (G2/Capterra, Reddit, X, YouTube)
 20. **Full live + RAG research layer** (~$0.25-0.30/gen) — live search + quote corpus, profile-similarity merge; premium tier
