@@ -16,6 +16,22 @@ Updated: 2026-07-12
 
 Shipped 2026-07-11→12 (removed from queue): template-factory, tracking-pixels, app-subdomain, data-capture, pricing-v2, social-posts + email-sequences + cold-outreach (dark; un-flag work tracked in backlog).
 
+## App-UI beta readiness (added 2026-07-12)
+
+From `docs/reports/app-ui-ux-assessment.md` (live signup→publish audit). Whole report carved into the specs below. **Most contain public-beta blockers → prioritize the P0s before beta-public; exact interleave with #0–#6 = orchestrator's call.** Independent of each other except where noted.
+
+| Feature | Spec file | Beta-blocker? | Notes |
+|---------|-----------|---------------|-------|
+| App entry — signed-out landing on app subdomain + resolve `/sign-in` `/sign-up` + branded 404 | `docs/task/app-entry.spec.md` | **Yes (P0)** | builds on shipped app-subdomain |
+| Dashboard lifecycle — own-projects/kill orphan badge + delete + **unpublish** + real URL (+ rename/dup/search) | `docs/task/dashboard-lifecycle.spec.md` | **Yes (P0)** | unpublish = new capability; authz + publish-teardown gates |
+| Onboarding fixes — style-step stub + offer/proof seeds + goal skip + togglable sections | `docs/task/onboarding-fixes.spec.md` | Partial (style-step P0-ish, rest P1) | reuse editor Style controls |
+| Publish UX — modal defaults (slug/title from business, analytics ON) + custom-domain explainer + preflight | `docs/task/publish-ux.spec.md` | **Yes (P0.3)** | preflight detects; content fixes live in hygiene spec |
+| Published-output hygiene — SEO HTML-strip + footer year/empty-columns/dead-links + brand/date | `docs/task/published-output-hygiene.spec.md` | **Yes (P0.4/P0.5)** | dual-renderer; rebuild to verify. Terminal-mock OUT → backlog #27 |
+| In-app plan/credits surface — counter + costs + plan display + block-with-upgrade message | `docs/task/plan-credits-surface.spec.md` | **Yes (P0.7)** | depends on shipped pricing-v2 |
+| Editor chrome — kill debug chips + human rail labels + styled add-page/social modals + toolbar overlap | `docs/task/editor-chrome.spec.md` | No (P1 polish) | coordinate w/ editor track (#0) |
+
+Terminal-mock hero filler → `productBacklog.md` #27 (template-content work, out of app-UI scope).
+
 ## Rules
 - Only spec files (`docs/task/*.spec.md` or a track's numbered specs) get a queue number.
 - New idea → `productBacklog.md`; agreed direction → `/discuss` → spec → enters queue.
