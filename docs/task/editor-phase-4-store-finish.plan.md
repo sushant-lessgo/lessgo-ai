@@ -20,7 +20,7 @@ Collapse the editor store's **four** access layers (`useEditStore.ts` token hook
 - phase 8 batch B4 theme surfaces: done (review loops 1) — 6 files, 1:1 field-preserving selectors; probe palette=4 ≤base
 - phase 9 batch B5 modals/forms: done (review loops 1) — 11 files (10 render-read incl 4 scout-misclassified, 1 action-only); no dropped fields; probe green
 - phase 10 batch B6 header/chrome/preview/dev: done (review loops 1) — 12 sites; ZERO real bare sites remain (only 3 non-code); build+probe 6/6+E2E 2/2; final perf flat/≤base
-- phase 11G HUMAN GATE B (Step-B reactivity + perf sign-off): pending
+- phase 11G HUMAN GATE B (Step-B reactivity + perf sign-off): AWAITING FOUNDER — all 70 sites converted, zero bare remain; probe 6/6 every batch + edit-persistence 2/2 at both checkpoints; perf flat/≤base (heap flat). Founder /manual-test editor-interactions pass needed (esp. B5 modals — probe doesn't hook them). Reported to mailbox.
 - phase 12 lint rule flip (+ HUMAN GATE C confirm): pending
 - phase 13 docs close-out: pending
 - phase 13G HUMAN GATE D (final merge to main): pending
