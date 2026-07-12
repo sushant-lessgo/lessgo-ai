@@ -229,8 +229,26 @@ describe('useWizardStore — proof prefill numeric filter (phase 1)', () => {
 });
 
 describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', () => {
-  it('thing keeps the full slot skeleton including structure', () => {
+  // onboarding-fixes phase 2 — thing templates WITHOUT real style controls skip
+  // the `style` slot (no dead step); vestria (real pickers) keeps it.
+  it('thing + a non-vestria template (meridian) SKIPS the style slot', () => {
     useWizardStore.getState().hydrate({ brief: richThing, audienceType: 'product', templateId: 'meridian' });
+    const { slots } = useWizardStore.getState();
+    expect(slots).toEqual([
+      'identity',
+      'understanding',
+      'goal',
+      'offer',
+      'proof',
+      'structure',
+      'generating',
+    ]);
+    expect(slots).not.toContain('style');
+    expect(slots).toHaveLength(7);
+  });
+
+  it('thing + vestria INCLUDES the style slot (real pickers)', () => {
+    useWizardStore.getState().hydrate({ brief: richThing, audienceType: 'product', templateId: 'vestria' });
     const { slots } = useWizardStore.getState();
     expect(slots).toEqual([
       'identity',
@@ -242,6 +260,8 @@ describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', (
       'structure',
       'generating',
     ]);
+    expect(slots).toContain('style');
+    expect(slots).toHaveLength(8);
   });
 
   it('trust slot order now INCLUDES structure (scale-07 phase 4 — 7b GA)', () => {
@@ -257,11 +277,18 @@ describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', (
       'structure',
       'generating',
     ]);
+    // onboarding-fixes phase 2 — trust keeps style (real pickers); count unchanged.
+    expect(slots).toContain('style');
+    expect(slots).toHaveLength(8);
   });
 
-  it('work skips the structure slot', () => {
+  it('work skips the structure slot but KEEPS style (thing-only style skip)', () => {
     useWizardStore.getState().hydrate({ brief: workBrief, audienceType: 'writer', templateId: 'granth' });
-    expect(useWizardStore.getState().slots).not.toContain('structure');
+    const { slots } = useWizardStore.getState();
+    expect(slots).not.toContain('structure');
+    // onboarding-fixes phase 2 — the style skip is thing-only; work is unchanged.
+    expect(slots).toContain('style');
+    expect(slots).toHaveLength(7);
   });
 
   // atelier phase 2 — the structure skip is now TEMPLATE-aware for work.
