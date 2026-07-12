@@ -15,7 +15,7 @@ Targeted fixes to the 8-step wizard (`src/components/onboarding/wizard/`, store 
 - phase 3 goal step — prominent skip: done (commit 7349e36c, review loops 1)
 - phase 4 structure step — toggles, collections, drafting gate: done (commit f872becd, review loops 1) [step-2 required-flag: NOT a bug, no change]
 - phase 5 building step — honest finalize, no dead Continue: done (commit beb51d38, review loops 1)
-- phase 6 understanding — keep niche specificity in prompts: done (commit pending, review loops 1)
+- phase 6 understanding — keep niche specificity in prompts: done (commit 89de5817, review loops 1)
 
 ---
 
