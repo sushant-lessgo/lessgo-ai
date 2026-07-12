@@ -720,3 +720,85 @@ Element TYPE decision: the service schema has no `richtext`/`image`/`link` types
 ### Phase 11b — impl-review verdict: SHIP (1 loop)
 No blocking issues. Gates green: tsc exit 0; templates+service = 1055 passed/12 skipped (was 1047). Verified: COMPLETENESS — grepped all elementKey=/hrefKey=/collectionKey= across 8 cores; every consumed key now schema-backed in its Atelier* layout (Footer closer_*/legal_text/footer_links, Contact location/instagram, About press/studio + press_items, Quote headline+quotes, Work more_*, Hero slides+cta_hrefs, Packages per-card image/cta_href) — no still-leaking key; only marquee_items deferred (decorative, no elementKey). TYPES correct (service schema string/collection convention; item-field schemas match core iteration). Round-trip real + non-vacuous (positive survives, negative __not_a_schema_key__ dropped). Atelier-scoped (hearth/lex/generation untouched). consumes⊆contract holds. Leak CLOSED.
 Non-blocking (→phase-12 manual QA): collection round-trip only marker-count-tested (scalars round-trip-asserted); collections work for works/packages/social already.
+
+---
+### Phase 12 (automated parity enrollment) — STOP: real header divergence found
+
+**Files changed**
+- `e2e/parity.spec.ts` — added `'atelier'` to `TEMPLATES` (:18); added an atelier `?parityBreak=1` negative-control test (+ a comment documenting the dot-injection resolution).
+- `src/modules/templates/atelier/renderParity.atelier.test.tsx` (new) — jsdom content-parity (edit vs published visible-text) over `BLOCK_MOCKS.atelier`, modeled on `renderParity.meridian.test.tsx`.
+
+**TemplateBlocksStage — NOT touched (by design).** `src/app/dev/blocks/TemplateBlocksStage.tsx` is fully GENERIC — it renders `BLOCK_MOCKS[templateId]` with no per-template switch, and `/dev/blocks/[template]/page.tsx` gates on `templateId in templateRegistry`. Atelier was already registered in `BLOCK_MOCKS` (phase 11) and in the registry, so `/dev/blocks/atelier` renders every atelier edit+published band with zero stage edits. Confirmed live: `/dev/blocks/atelier` returned HTTP 200; the parity run enumerated all atelier sections.
+
+**Dot-injection resolution (phase-10 CARRY) = OPTION (b), single-slide hero — and it is HONEST.** The hero mock ships NO `slides` array, so `AtelierHeroCore` renders ONE static fallback slide. Both the editor `.tsx` effect (`AtelierHero.tsx:36` `if (slides.length < 2) return;`) and the published `slider.v1.js` asset bail on `<2` slides, so NEITHER side injects `.lg-atelier-dot` into the empty `[data-atl-dots]`. Editor-static and published-static therefore compare the SAME intended final state (no dots) — exactly what a real single-slide hero ships live. No dots were deleted to force a match; the editor correctly no-ops dots for <2 slides (verified — no editor bug). Documented inline in the spec above the atelier negative control. Multi-slide dot behavior (the actual crossfade/dots on the live page) remains a founder/manual+e2e runtime item, unchanged.
+
+**Content parity (jsdom) — GREEN.** `npm run test:run -- renderParity.atelier` gave 1 file, 31 passed (enrollment guard + 10 sections x 3 assertions: has-fields / no-one-sided-field / fixture-not-dead). Edit render reads real `serviceElementSchema` via `useAtelierBlock` -> `extractLayoutContent`; published takes flat props — so this would catch any chrome key dropped by the schema (phase-11b fix holds; none dropped). Visible text matches on both sides for all 10 atelier sections.
+
+**Screenshot parity (Playwright, real Chromium) — RAN, and it caught a REAL divergence.** Ran `npx playwright test parity --project=public` against a warm dev server (see env note). Results:
+- Negative controls BOTH fire (permanent proof the harness detects divergence): `PARITY BREAK meridian/hero: 6.409%` PASS (>3%); `PARITY BREAK atelier/hero: 6.739%` PASS (>3%).
+- meridian: all 7 sections < 3% (green). hearth: all 7 < 3% (green).
+- atelier: FAILS at `header` — edit-vs-published diff = 4.99% > 3% threshold. The per-section loop bails on the first failure, so hero/work/packages/about/quote/contact/footer were not measured this run.
+
+**Root cause of the atelier/header divergence (REAL editor-vs-published bug, NOT a threshold-calibration issue).** Atelier's shared `Link` edit primitive (`src/modules/templates/atelier/blocks/editPrimitives.tsx`, the `Link` component ~:134) renders its editing chrome UNCONDITIONALLY — a `<span class="lg-atelier-link-edit" style="display:inline-flex; gap:6">` wrapper PLUS an always-present `<LinkTargetPopover>` trigger (a lucide Link2 icon button) — with NO `mode` gate. The published `E.Link` renders a plain `<a>`. In the parity harness's `mode:'preview'` (which is supposed to render NO editing chrome, per the stage's own contract), atelier still paints the popover triggers + inline-flex layout. The header is the worst case (4 nav links + 1 CTA all wrapped), hence 4.99%.
+- Precedent that atelier violates: meridian gates the identical control behind `mode === 'edit'` (`MeridianNavHeader.tsx:133`) -> preview renders plain `<a>` -> meridian/header = 0.93%. Atelier's `E.Txt` (via `AtelierEditable`) DOES respect preview mode; only `E.Link` (and, latently, `E.Img`'s always-visible "Image"/"Replace" overlay button in `EDIT_AFFORDANCE_STYLES`, which lacks `opacity:0`) do not.
+- Blast radius (latent, not yet measured — loop bailed at header): every atelier section using `E.Link` has the same divergence source — hero CTAs, about CTA, footer closer/links CTA, work "more" link, packages CTAs — and image-bearing sections (work) may also diverge via the always-visible image-upload affordance. These need re-measuring after the header fix.
+
+**Why I STOPPED (did not fix, did not threshold around).** The fix lives in `src/modules/templates/atelier/blocks/editPrimitives.tsx` (gate the `Link` affordance — and likely the `Img` overlay — on `ctx.mode === 'edit'`, mirroring meridian: plain wrapper/anchor in preview/published, popover only in edit). That file is OUTSIDE this phase's Files-touched list, and the orchestrator guardrail is explicit: a REAL edit-not-equal-published failure beyond threshold is a genuine bug to report, not to threshold around. The harness wiring is CORRECT — it did its job by catching this. I left `atelier` enrolled (do NOT remove it) so the fix can be verified green.
+
+**Recommended follow-up (scoped, for the orchestrator to dispatch):** a small atelier-module phase touching `src/modules/templates/atelier/blocks/editPrimitives.tsx` — mode-gate `Link` (render children in a mode-neutral wrapper + only mount `LinkTargetPopover` when `ctx.mode === 'edit'`) and give the `Img` affordance buttons `opacity:0` default with hover/focus reveal (or mode-gate them) so preview is pixel-neutral. Then re-run `npm run test:parity`; expect atelier header + all sections < 3% with both negative controls still firing.
+
+**Commands + results**
+- `npx tsc --noEmit` -> exit 0 (PASS).
+- `npm run test:run -- renderParity.atelier` -> 31 passed (PASS).
+- `npm run test:run -- src/modules/templates` -> 26 files, 1037 passed | 12 skipped (PASS — nothing else broke).
+- `npx playwright test parity --project=public` -> 4 passed, 1 FAILED (atelier/header 4.99% > 3%). Negative controls: meridian 6.41% PASS, atelier 6.74% PASS. Meridian + hearth sections all green.
+
+**Environment note (screenshot parity is runnable here, with a caveat).** `npm run test:parity`'s default invocation timed out: `playwright.config.ts` runs a `globalSetup` (Clerk network) + a `webServer: npm run dev` cold build for ALL projects — the cold Next build blows the 10-min bound. Worked around WITHOUT editing the config (out of scope): started `npm run dev` myself, warm-compiled `/dev/blocks/atelier` (HTTP 200), then ran `--project=public` which reused the warm server (`reuseExistingServer:true`) and skips the authed/setup projects. That produced the real results above.
+
+**Still open for the FOUNDER manual sign-off (separate human gate, NOT done here):**
+- Slider RUNTIME on the live published page: autoplay crossfade, arrows, JS-injected dots (>=2 slides), and the no-JS static first-slide fallback (harness cannot exercise `slider.v1.js` behavior).
+- Bilingual: editor language toggle, published `/{loc}` docs + hreflang, geo/localStorage boot via `switcher.v1.js`.
+- Knob + palette live-switch parity across BOTH renderers (the /dev switcher exercises it visually; eyeball needed).
+- D5 Dutch typography fidelity ("first exercised in the atelier build" — i18nHonesty note).
+- The design-vs-implementation eyeballs called out in the phase-9b CARRY: About collapsing design's 3 surfaces (bio/press/studio) into 1 section; Contact single-col vs design 2-col; `buttonShape` zero-knob default = rounded (platform law) not-equal Kontur square (per-project `square` seed?); Bricolage `opsz` axis rendering.
+- BLOCKING the sign-off: the atelier/header (and likely other `E.Link`/`E.Img`) edit-vs-published parity fix above must land + `npm run test:parity` go fully green first.
+
+---
+### Phase 12 (continued) — divergence FIXED, screenshot parity fully GREEN
+
+**Files changed (this follow-up; Files-touched EXPANDED by orchestrator ruling to add `editPrimitives.tsx`)**
+- `src/modules/templates/atelier/blocks/editPrimitives.tsx` — mode-gated the affordance-bearing primitives (`Link`, `Img`, `List`) so a non-edit (preview/parity) render emits the SAME static DOM as `publishedPrimitives.tsx`. Edit-mode (`ctx.mode === 'edit'`) behavior is UNCHANGED.
+- `e2e/parity.spec.ts` — main per-section loop now pairs edit↔published bands BY INDEX (`editBands.nth(i)` ↔ `publishedBands.nth(i)`) instead of by `data-parity-section`, because atelier enrolls three `packages` sections (2/3/4 cards) → the attribute isn't unique (Playwright strict-mode violation). More correct (per-instance pairing), not thresholding.
+
+**The mode-gate (mirrors Meridian's `mode === 'edit'` gating).** All three primitives read `ctx.mode` (already threaded via `useAtelierEditCtx`, same source phase-11 used for `Txt`):
+- **Link**: non-edit renders a plain `<a href className aria-label {...externalLinkProps(target)} {...ctaAttrs}>` — byte-identical to `publishedPrimitives.Link` (same CTA analytics attrs: `data-lessgo-cta` + role for `*cta*` non-`nav_items` keys). Edit renders the `lg-atelier-link-edit` inline-flex wrapper + `LinkTargetPopover` as before. This was the header's 4.99% (4 nav links + CTA each rendering an inline popover trigger + inline-flex wrapper in preview).
+- **Img**: non-edit renders `<div className>{src ? <img …/> : placeholder}</div>` — identical to `publishedPrimitives.Img` (no upload/alt overlay, no `position:relative` wrapper). The `useState` hook stays above the early return (rules-of-hooks preserved). This was the latent work/gallery + about image divergence.
+- **List**: non-edit renders `<div className>{items.map(i => <div className={itemClassName}>{render}</div>)}</div>` — identical to `publishedPrimitives.List` (no `EditableImageCollection` chrome, no add/remove buttons). Inner `render()` uses the now-gated `Txt`/`Img`/`Link`, so the whole subtree matches published in non-edit. This fixed the work gallery band (4.99% loop would have hit it next).
+
+**Boundary + behavior safety.** `editPrimitives.tsx` stays `'use client'` and is imported only by the edit `.tsx` wrappers — never by `.core`/`.published` (unchanged). Edit-mode is untouched, so the `data-edit-primitive` marker path (owned by `AtelierEditable` in the `mode === 'edit'` and `mode !== 'edit'` Txt branches — NOT the gated Link/Img/List) and editor-basics collection counts (render() runs per item in both branches) are unaffected — conformance stayed green.
+
+**Screenshot parity — FULLY GREEN (real Chromium, warm-server + `--project=public`).** All 5 tests pass. Per-section atelier diffs (all < 3%):
+- header 1.717% · hero 0.737% · work 0.136% · packages(2) 0.242% · packages(3) 0.070% · packages(4) 0.004% · about 0.130% · quote 0.000% · contact 0.055% · footer 0.866%.
+- meridian: header 0.932% / hero 0.018% / features 0.000% / testimonials 0.624% / pricing 0.979% / cta 0.167% / footer 1.297% (green — unchanged by the index-pairing refactor).
+- hearth: all 7 < 0.25% (green).
+- Negative controls BOTH still fire >3%: `PARITY BREAK meridian/hero: 6.409%`, `PARITY BREAK atelier/hero: 6.714%`.
+- No DIFFERENT atelier section exceeds 3% for a new reason — nothing to STOP on.
+
+**Commands + results (all PASS)**
+- `npx tsc --noEmit` → exit 0.
+- `npm run test:run -- src/modules/templates renderParity.atelier` → 26 files, 1037 passed | 12 skipped (coreParity, conformance/editor-basics, content parity all green — mode-gate did not break the marker path or collection counts).
+- `npx playwright test parity --project=public` → **5 passed, 0 failed** (all atelier sections < 3%; both negative controls fire).
+
+**Net Phase-12 file set (supersedes the STOP above):**
+- `e2e/parity.spec.ts` (atelier enrolled + atelier negative control + index-pairing)
+- `src/modules/templates/atelier/renderParity.atelier.test.tsx` (new)
+- `src/modules/templates/atelier/blocks/editPrimitives.tsx` (mode-gate Link/Img/List)
+
+Automated parity enrollment is COMPLETE and green. The FOUNDER manual sign-off items listed above (slider runtime, bilingual toggle, knob/palette live-switch, Dutch typography, the About/Contact/buttonShape/opsz eyeballs) remain the separate human gate.
+
+---
+### Phase 12 (automated) — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; templates+renderParity = 1037 passed/12 skipped; screenshot parity all atelier sections <3% (header 1.72→footer 0.87), both negative controls >6.4%. Parity harness CAUGHT a real divergence (Link/Img/List edit primitives rendered chrome unconditionally vs published plain) → FIXED by mode-gating on ctx.mode==='edit' (non-edit branch byte-matches publishedPrimitives, verified line-by-line incl CTA analytics attrs); edit-mode affordances + phase-11 data-edit-primitive marker intact; hooks above early-returns; boundary clean. Enrollment sound (index-pairing for 3 packages sections, equivalent for unique-section templates; renderParity non-vacuous). Dot-injection option-(b) single-slide mock honest.
+Non-blocking nits: Img alt source differs edit(store) vs published(metadata) — non-visible, intended; bandDiff selects non-unique data-parity-section (fine, controls target unique hero).
+
+## ⏸️ HUMAN GATE — founder parity sign-off pending (see plan phase-12 line). Automated parity fully green.

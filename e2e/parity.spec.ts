@@ -15,7 +15,7 @@ import { PNG } from 'pngjs';
 // control, which injects a small style break into the edit band only.
 
 // Templates enrolled in the parity harness (their mocks exist in blockMocks/).
-const TEMPLATES = ['meridian', 'hearth'] as const;
+const TEMPLATES = ['meridian', 'hearth', 'atelier'] as const;
 
 // Fraction of compared pixels allowed to differ. Edit-preview and published render
 // the same HTML/CSS, so real parity sits far below this; the seeded break lands
@@ -81,22 +81,26 @@ for (const template of TEMPLATES) {
     await page.goto(`/dev/blocks/${template}`, { waitUntil: 'load' });
     await settle(page);
 
+    // Pair edit ↔ published bands BY INDEX, not by data-parity-section: a template
+    // can enroll several sections of the SAME sectionType (atelier ships packages at
+    // 2/3/4 cards), so the attribute is not unique. The stage renders each section's
+    // edit band immediately followed by its published band in section order, so
+    // editBands.nth(i) ↔ publishedBands.nth(i) is the correct per-instance pair.
     const editBands = page.locator('[data-parity-band="edit"]');
+    const publishedBands = page.locator('[data-parity-band="published"]');
     const count = await editBands.count();
     expect(count, `${template} rendered no edit bands`).toBeGreaterThan(0);
+    expect(await publishedBands.count(), `${template} edit/published band count mismatch`).toBe(count);
 
-    const sections: string[] = [];
     for (let i = 0; i < count; i++) {
-      const s = await editBands.nth(i).getAttribute('data-parity-section');
-      if (s) sections.push(s);
-    }
-
-    for (const section of sections) {
-      const ratio = await bandDiff(page, section);
-      console.log(`PARITY ${template}/${section}: ${(ratio * 100).toFixed(3)}%`);
+      const section = (await editBands.nth(i).getAttribute('data-parity-section')) ?? `#${i}`;
+      const editBuf = await editBands.nth(i).screenshot();
+      const pubBuf = await publishedBands.nth(i).screenshot();
+      const ratio = diffRatio(editBuf, pubBuf);
+      console.log(`PARITY ${template}/${section} [#${i}]: ${(ratio * 100).toFixed(3)}%`);
       expect(
         ratio,
-        `${template}/${section}: edit↔published diff ${(ratio * 100).toFixed(2)}% exceeds ${(PASS_THRESHOLD * 100).toFixed(0)}%`,
+        `${template}/${section} [#${i}]: edit↔published diff ${(ratio * 100).toFixed(2)}% exceeds ${(PASS_THRESHOLD * 100).toFixed(0)}%`,
       ).toBeLessThanOrEqual(PASS_THRESHOLD);
     }
   });
@@ -109,6 +113,30 @@ test('parityBreak negative control: seeded divergence exceeds threshold', async 
   // hero is a large, content-rich band — the injected tint + 6px shift covers it.
   const ratio = await bandDiff(page, 'hero');
   console.log(`PARITY BREAK meridian/hero: ${(ratio * 100).toFixed(3)}%`);
+  expect(
+    ratio,
+    `seeded break not caught: diff ${(ratio * 100).toFixed(2)}% did not exceed ${(PASS_THRESHOLD * 100).toFixed(0)}%`,
+  ).toBeGreaterThan(PASS_THRESHOLD);
+});
+
+// Per-template proof that the harness can detect a divergence on ATELIER too — the
+// permanent negative control for the atelier enrollment (atelier-template phase 12).
+//
+// Atelier hero dot-injection note (phase-10 CARRY, RESOLVED here = option b): the
+// hero mock ships NO `slides` array, so the Hero core renders ONE static fallback
+// slide. Both the editor `.tsx` effect and the published `slider.v1.js` asset bail
+// on `slides.length < 2` (AtelierHero.tsx:36 / the asset's guard), so NEITHER side
+// injects `.lg-atelier-dot` into the empty `[data-atl-dots]`. Editor-static and
+// published-static therefore compare the SAME intended final state (no dots) — the
+// exact state a real single-slide hero ships live. Honest parity, no dots deleted.
+test('atelier parityBreak negative control: seeded divergence exceeds threshold', async ({ page }) => {
+  await page.goto('/dev/blocks/atelier?parityBreak=1', { waitUntil: 'load' });
+  await settle(page);
+
+  // hero is atelier's largest content band (cover slider + marquee) — the seeded
+  // scale(1.03) on the edit band shifts every content edge well past the threshold.
+  const ratio = await bandDiff(page, 'hero');
+  console.log(`PARITY BREAK atelier/hero: ${(ratio * 100).toFixed(3)}%`);
   expect(
     ratio,
     `seeded break not caught: diff ${(ratio * 100).toFixed(2)}% did not exceed ${(PASS_THRESHOLD * 100).toFixed(0)}%`,

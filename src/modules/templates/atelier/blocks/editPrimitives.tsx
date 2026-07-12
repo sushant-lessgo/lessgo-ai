@@ -13,7 +13,7 @@ import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { AtelierEditable } from '../components/AtelierEditable';
 import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
-import { resolveDestination } from '@/utils/resolveCtaHref';
+import { resolveDestination, externalLinkProps } from '@/utils/resolveCtaHref';
 import { EditableImageCollection } from '@/app/edit/[token]/components/primitives/EditableImageCollection';
 import { resolveAlt } from '@/modules/editing/altText';
 import type {
@@ -93,6 +93,16 @@ const Img: React.FC<AtelierImgProps> = ({ elementKey, src, alt, className, imgCl
   const path = parsePath(elementKey);
   const metaAlt = path ? ctx.getItemAlt(path.coll, path.id) : undefined;
   const shownAlt = resolveAlt(metaAlt, path?.id, alt);
+  // Non-edit (preview/parity): render the SAME static DOM as publishedPrimitives.Img
+  // — no upload/alt affordances, no relative-positioned wrapper — so edit-static ==
+  // published (mode-gated, mirroring Meridian). Editing UI only exists in 'edit'.
+  if (ctx.mode !== 'edit') {
+    return (
+      <div className={className}>
+        {src ? <img src={src} alt={shownAlt} className={imgClassName} loading={eager ? 'eager' : 'lazy'} decoding="async" /> : placeholder}
+      </div>
+    );
+  }
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -133,6 +143,22 @@ const Img: React.FC<AtelierImgProps> = ({ elementKey, src, alt, className, imgCl
 
 const Link: React.FC<AtelierLinkProps> = ({ hrefKey, href, className, ariaLabel, children }) => {
   const ctx = useCtx();
+  // Non-edit (preview/parity): render the SAME static <a> as publishedPrimitives.Link
+  // — no lg-atelier-link-edit wrapper, no LinkTargetPopover trigger — so edit-static
+  // == published (mode-gated, mirroring MeridianNavHeader.tsx:133). The href-editing
+  // control only exists in 'edit'. CTA analytics attrs mirror the published primitive.
+  if (ctx.mode !== 'edit') {
+    const target = href || '#';
+    const isCta = /cta/i.test(hrefKey) && !/^nav_items/.test(hrefKey);
+    const ctaAttrs = isCta
+      ? { 'data-lessgo-cta': '', 'data-lessgo-cta-role': /secondary_cta/i.test(hrefKey) ? 'secondary' : 'primary' }
+      : {};
+    return (
+      <a href={target} className={className} aria-label={ariaLabel} {...externalLinkProps(target)} {...ctaAttrs}>
+        {children}
+      </a>
+    );
+  }
   return (
     <span className="lg-atelier-link-edit" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       <span className={className} aria-label={ariaLabel}>{children}</span>
@@ -148,6 +174,20 @@ const Link: React.FC<AtelierLinkProps> = ({ hrefKey, href, className, ariaLabel,
 
 const List: React.FC<AtelierListProps> = ({ collectionKey, items, render, makeItem, min = 0, max = 99, addLabel = '+ Add', className, itemClassName, reorderable, imageField, captionField }) => {
   const ctx = useCtx();
+  // Non-edit (preview/parity): render the SAME static list DOM as
+  // publishedPrimitives.List — no EditableImageCollection chrome, no add/remove
+  // buttons — so edit-static == published (mode-gated). Collection editing UI only
+  // exists in 'edit'. Inner render() uses the (now mode-gated) Txt/Img/Link, so the
+  // whole subtree matches published in non-edit.
+  if (ctx.mode !== 'edit') {
+    return (
+      <div className={className}>
+        {items.map((item, i) => (
+          <div key={item.id ?? i} className={itemClassName}>{render(item, i)}</div>
+        ))}
+      </div>
+    );
+  }
   if (reorderable || imageField) {
     return (
       <EditableImageCollection
