@@ -68,6 +68,10 @@ const SECTION_LABELS: Record<string, string> = {
   process: 'Process',
   testimonials: 'Testimonials',
   contact: 'Quote form',
+  // atelier phase 2 — work-grammar sections (served work→multipage skeleton).
+  work: 'Work',
+  packages: 'Packages',
+  'quote-band': 'Quote',
 };
 const sectionLabel = (s: string) => SECTION_LABELS[s] ?? s;
 
@@ -567,8 +571,9 @@ export default function StructureSlot() {
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Your site plan</h1>
         <p className="mt-2 text-gray-600">
-          We suggest these pages. Adjust anything — nothing is written until you
-          approve the shape.
+          {engine === 'work'
+            ? "We suggest these pages. Adjust anything — we'll set up an empty page for each so you can fill it in the editor."
+            : 'We suggest these pages. Adjust anything — nothing is written until you approve the shape.'}
         </p>
       </div>
 

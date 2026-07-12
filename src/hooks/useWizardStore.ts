@@ -65,7 +65,17 @@ import {
 import { computeFieldStates, type FieldState } from '@/modules/wizard/waterfall';
 // Single-page structure clamp law (scale-07 phase 4) — plain data-layer module
 // (generalized clampSitemap sibling), safe for the client store.
-import { applyConfirmedSections } from '@/modules/audience/product/strategy/parseStrategyProduct';
+import {
+  applyConfirmedSections,
+  filterSectionsByProof,
+} from '@/modules/audience/product/strategy/parseStrategyProduct';
+// atelier phase 2 — pure audience-level DATA (templateMeta/businessTypes siblings,
+// firewall-safe): the multipage-capability gate + page-archetype menu that the
+// served work→multipage skeleton path seeds its sitemap from.
+import {
+  getPageArchetypesForTemplate,
+  isMultipage,
+} from '@/modules/audience/product/pageArchetypes';
 // scale-07 phase 6 — pure data-layer hard-fit helper (templateMeta/coreSections
 // data only, no template modules; firewall-safe for the client store).
 import {
@@ -422,10 +432,38 @@ function businessTypeEntryFor(brief: Brief): BusinessTypeEntry | null {
   return key && key in businessTypes ? businessTypes[key] : null;
 }
 
-/** Slot skeleton minus this engine's skips, preserving canonical slot order. */
-function slotsForEngine(engine: CopyEngine): WizardSlot[] {
-  const { slotSkips } = getContract(engine);
-  return wizardSlots.filter((s) => !slotSkips.includes(s));
+/**
+ * The multipage brief-signal (businessType + persisted structure.mode) the
+ * capability gate reads. Mirrors StructureSlot's `briefSignal` so slot inclusion,
+ * fetchStrategy seeding, and generation dispatch all key off the SAME signal.
+ */
+export function briefSignalFromState(
+  s: Pick<WizardState, 'businessTypeKey' | 'briefStructureMode'>,
+): Pick<Brief, 'structure' | 'businessType'> | undefined {
+  if (!s.businessTypeKey && !s.briefStructureMode) return undefined;
+  return {
+    ...(s.businessTypeKey ? { businessType: s.businessTypeKey } : {}),
+    ...(s.briefStructureMode ? { structure: { mode: s.briefStructureMode } } : {}),
+  } as Pick<Brief, 'structure' | 'businessType'>;
+}
+
+/**
+ * Slot skeleton minus this engine's skips, preserving canonical slot order.
+ * atelier phase 2: work keeps its structure skip UNLESS the PICKED template is
+ * multipage — a served work→multipage brief (e.g. atelier) goes THROUGH the
+ * structure slot's page-archetype menu. Granth declares no `multipage`
+ * capability, so `isMultipage` is false for it and its skip is retained.
+ */
+function slotsForEngine(
+  engine: CopyEngine,
+  templateId: TemplateId | null | undefined,
+  briefSignal?: Pick<Brief, 'structure' | 'businessType'> | null,
+): WizardSlot[] {
+  const skips = new Set<WizardSlot>(getContract(engine).slotSkips);
+  if (engine === 'work' && isMultipage(templateId ?? undefined, briefSignal)) {
+    skips.delete('structure');
+  }
+  return wizardSlots.filter((s) => !skips.has(s));
 }
 
 // ---------------------------------------------------------------------------
@@ -689,7 +727,9 @@ export const useWizardStore = create<WizardStore>()(
           state.mode = deriveMode(brief);
 
           const contract = getContract(engine);
-          state.slots = slotsForEngine(engine);
+          // atelier phase 2 — slot inclusion is now template-aware for work
+          // (multipage picked template ⇒ the structure slot is NOT skipped).
+          state.slots = slotsForEngine(engine, templateId ?? null, brief);
           state.currentSlot = state.slots[0] ?? 'identity';
 
           // Per-field state via the phase-1 waterfall (logic NOT duplicated here).
@@ -932,7 +972,36 @@ export const useWizardStore = create<WizardStore>()(
           });
           return;
         }
-        // Only structure-gated engines fetch here (work keeps its slot skip).
+        // atelier phase 2 — Work + a multipage picked template (e.g. atelier)
+        // seeds the sitemap from the page-archetype menu defaults with ZERO
+        // LLM fetch / ZERO credit charge (work copy-gen stays OUT — the served
+        // skeleton path fills copy manually in the editor). Shaped like the
+        // "strategy already present" early-exit above: mark done, no fetch.
+        // Granth (work + single-page — no `multipage` capability) falls through
+        // to the early return below unchanged.
+        if (s.engine === 'work' && isMultipage(s.templateId ?? undefined, briefSignalFromState(s))) {
+          set((state) => {
+            if (!state.sitemap) {
+              const menu = getPageArchetypesForTemplate(state.templateId) ?? [];
+              state.sitemap = menu
+                .filter((a) => a.defaultIncluded)
+                .map((a) => ({
+                  archetypeKey: a.key,
+                  title: a.title,
+                  pathSlug: a.pathSlug,
+                  // Proof hard rule (F22) — same filter StructureSlot's addPage
+                  // uses: an unpromised proof section can't be seeded.
+                  sections: filterSectionsByProof([...a.defaultSections], {
+                    hasTestimonials: state.proof.hasTestimonials,
+                  }),
+                }));
+            }
+            state.strategyStatus = 'done';
+          });
+          return;
+        }
+        // Only structure-gated engines fetch here (work single-page keeps its
+        // slot skip; work multipage is handled chargeless above).
         if (s.engine !== 'thing' && s.engine !== 'trust') return;
         set((state) => {
           state.strategyStatus = 'fetching';

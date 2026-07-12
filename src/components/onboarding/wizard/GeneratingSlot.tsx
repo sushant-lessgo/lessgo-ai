@@ -18,6 +18,7 @@ import {
   useWizardStore,
   buildThingInput,
   buildTrustInput,
+  briefSignalFromState,
   fieldStr,
   fieldArr,
 } from '@/hooks/useWizardStore';
@@ -28,7 +29,9 @@ import {
   type GenerationInput,
 } from '@/modules/wizard/generation';
 import { humanizeGenerationError } from '@/modules/wizard/generation/errorMessage';
-import type { WorkGenerationInput } from '@/modules/wizard/generation/work';
+import { runWorkSkeleton, type WorkGenerationInput } from '@/modules/wizard/generation/work';
+import { isMultipage } from '@/modules/audience/product/pageArchetypes';
+import type { SitemapPage } from '@/types/product';
 
 interface StageDef {
   id: GenerationStage;
@@ -61,7 +64,18 @@ function buildWorkInput(): WorkGenerationInput {
     oneLiner: fieldStr(fields, 'oneLiner'),
     // The 3–5 work uploads captured in ProofSlot (contract `theWork`).
     works: fieldArr(fields, 'theWork'),
+    // atelier phase 2 — the confirmed sitemap pages for the SKELETON path.
+    // Ignored by the granth generator (single-page work has no sitemap → []).
+    pages: (s.sitemap as SitemapPage[] | null) ?? [],
   };
+}
+
+/** True when the picked WORK template is multipage (atelier) → SKELETON path.
+ *  Keys on `isMultipage(templateId)` — the picked template's capability — never
+ *  on `engine === 'work'` alone, so granth (no `multipage`) is always false. */
+function isWorkMultipage(): boolean {
+  const s = useWizardStore.getState();
+  return isMultipage(s.templateId ?? undefined, briefSignalFromState(s));
 }
 
 /** Minimum work uploads required before the writer page can be generated. */
@@ -99,9 +113,34 @@ export default function GeneratingSlot() {
       return;
     }
 
+    // atelier phase 2 — WORK + multipage (e.g. atelier): SKELETON path. Build an
+    // EMPTY multipage draft for manual fill (zero LLM, zero credits, zero copy) —
+    // NOT buildWorkInput()/runGeneration('work'), and NOT the MIN_WORKS guard
+    // below (that's the writer/granth generator's contract, not the skeleton's).
+    // Granth (work + single-page) never enters here: isWorkMultipage() is false.
+    if (engine === 'work' && isWorkMultipage()) {
+      setStage('saving');
+      let skelResult;
+      try {
+        skelResult = await runWorkSkeleton(input as WorkGenerationInput, {
+          onStage: (st) => setStage(st),
+        });
+      } catch (e: any) {
+        setError(humanizeGenerationError(e?.message));
+        return;
+      }
+      if (skelResult.status === 'error') {
+        setError(humanizeGenerationError(skelResult.error));
+        return;
+      }
+      setTimeout(() => router.push(skelResult.redirectTo || `/edit/${input.tokenId}`), 600);
+      return;
+    }
+
     // WORK empty-gallery guard: the writer profile needs at least MIN_WORKS work
     // samples (uploaded or scraped) before we can build the shelf. Block the run
-    // and send them back to the proof step to add more.
+    // and send them back to the proof step to add more. GENERATOR PATH ONLY —
+    // the skeleton path above returns before this.
     if (engine === 'work') {
       const works = (input as WorkGenerationInput).works ?? [];
       if (works.length < MIN_WORKS) {

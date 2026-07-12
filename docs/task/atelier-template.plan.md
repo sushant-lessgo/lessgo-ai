@@ -27,8 +27,8 @@ Build `atelier`, the first on-demand work-engine template (visual-portfolio; anc
 
 ## Progress log
 
-- phase 1 audienceType ruling + serve-route reconciliation: done (commit pending-below, review loops 1, verdict ship) — carry to phase 4: parity test `engineOfTemplate` hand-feeds lumen:'trust' (real engine 'work') + techpremium rows (harmless/dead, but fix by deriving engine from templateMeta.copyEngines + skip bespoke/retired); lumen ALREADY deviates (work→service) so atelier isn't the first — fix that note when adding atelier:'service' to the map + parity table
-- phase 2 served work→multipage skeleton wizard path: pending
+- phase 1 audienceType ruling + serve-route reconciliation: done (commit 2697cbee, review loops 1, verdict ship) — carry to phase 4: parity test `engineOfTemplate` hand-feeds lumen:'trust' (real engine 'work') + techpremium rows (harmless/dead, but fix by deriving engine from templateMeta.copyEngines + skip bespoke/retired); lumen ALREADY deviates (work→service) so atelier isn't the first — fix that note when adding atelier:'service' to the map + parity table
+- phase 2 served work→multipage skeleton wizard path: done (commit pending-below, review loops 1, verdict ship) — CARRY: (phase 5) slot-inclusion keys off full `brief` while fetchStrategy/GeneratingSlot key off `briefSignalFromState(store)` — prove atelier's two derivations AGREE (else structure slot shows but skeleton dispatch declines, or vice-versa); (phase 4/5) `selectProductBlocks` is product-only (`LAYOUTS_BY_TEMPLATE={vestria}`) so atelier work/packages/quote-band sections fall to layout 'default' UNLESS phase-4 ships a real `blockManifests['atelier']` whose manifestPick resolves atelier layout names ahead of the fallback — verify at phase 5
 - phase 3 work-grammar generalization (G1, granth-safe): pending
 - phase 4 atelier registration + service element schema + provisional-block scaffold + serve-flip tests: pending
 - phase 5 page archetypes + multipage + photographer multi default: pending

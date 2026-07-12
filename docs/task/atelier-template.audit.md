@@ -44,3 +44,53 @@ No photographer flip / SERVE case added (atelier not declared yet — photograph
 ### Phase 1 — impl-review verdict: SHIP (1 loop)
 No blocking issues. Gates green: tsc exit 0, brief suite 122/122. Scope clean (service.ts untouched).
 Non-blocking (carry to phase 4): parity test `engineOfTemplate` hand-feeds lumen:'trust' (lumen real engine = 'work', templateMeta.ts:177) + techpremium rows → those 2 rows self-satisfy the parity assertion (harmless: both bespoke/retired, excluded by fit(), never picked). Stronger form = derive engine from templateMeta.copyEngines + skip bespoke/retired. Also: lumen already deviates (work→service) today, so atelier is NOT the first deviation — fix that framing when adding atelier:'service'.
+
+---
+
+## Phase 2 — Served work→multipage skeleton wizard path
+
+### Files changed
+- `src/hooks/useWizardStore.ts` — template-aware structure skip + fetchStrategy work+multipage seed branch + exported `briefSignalFromState`.
+- `src/hooks/useWizardStore.test.ts` — slot-inclusion cases + phase-2 skeleton-path describe.
+- `src/components/onboarding/wizard/GeneratingSlot.tsx` — skeleton dispatch gate + `pages` projection + `isWorkMultipage`.
+- `src/components/onboarding/wizard/StructureSlot.tsx` — work-grammar SECTION_LABELS + work-engine microcopy.
+- `src/components/onboarding/wizard/StyleSlot.tsx` — vestria-picker gate re-keyed to `templateId === 'vestria'`.
+- `src/modules/wizard/generation/work.ts` — `WorkGenerationInput.pages` + new `runWorkSkeleton`.
+
+### What changed + why (and how each gate keys on isMultipage → granth-unchanged)
+Every new branch is gated on `isMultipage(templateId, briefSignal)` — the PICKED template's `multipage` capability — never on `engine === 'work'`. Granth declares no `multipage` (templateMeta), so `isMultipage('granth', …)` is `false` and each gate below is inert for granth.
+
+1. **`slotsForEngine(engine, templateId, briefSignal)`** — was pure engine → `getContract(engine).slotSkips`. Now builds a `Set` of skips and, for `engine === 'work' && isMultipage(...)`, deletes `'structure'`. Granth: gate false → skip retained → structure still absent from `slots`. Called once (hydrate), which now passes `templateId` + the full `brief` as the signal. Comment updated ("work keeps its skip UNLESS the picked template is multipage").
+2. **`fetchStrategy` work+multipage branch** — inserted BEFORE the `engine !== 'thing' && 'trust'` early-return, AFTER the existing `if (s.strategy)` early-exit. For `work + isMultipage`: seeds `sitemap` from `getPageArchetypesForTemplate(templateId)` `defaultIncluded` pages (proof-filtered via `filterSectionsByProof`, mirroring StructureSlot.addPage), sets `strategyStatus='done'`, NO fetch, NO charge, and returns. Idempotent via the existing top-of-fn `'done'` guard. Granth: gate false → falls through to the unchanged `engine !== thing/trust` early return (byte-for-byte). `strategy` stays `null` on this path (copy-gen stays OUT).
+3. **StructureSlot** — verified the strategy-less path: mount effect fires `fetchStrategy` only on `'idle'`; after seeding, `strategyStatus==='done'` + `strategy===null` + `sitemap` set means the `:323` error guard, `:370` loading guard (`!strategy && (idle|fetching)` → false), and `:500` `!draft` guard all pass through to the multipage editor (draft = storeSitemap). Only additions: `work`/`packages`/`quote-band` in `SECTION_LABELS`; the multipage header `<p>` is now `engine === 'work'`-aware ("we'll set up an empty page for each so you can fill it in the editor") for the no-copy path.
+4. **GeneratingSlot** — new gate at the top of `run()` (after the tokenId guard): `engine === 'work' && isWorkMultipage()` → `setStage('saving')` → `runWorkSkeleton(input, {onStage})` → route to `result.redirectTo || /edit/${tokenId}`. The MIN_WORKS guard now sits BELOW this branch (generator path only). Granth: `isWorkMultipage()` false → skips skeleton → MIN_WORKS guard + `runGeneration('work')` exactly as before. Did NOT touch the credits-error "Continue without copy" bare redirect.
+5. **StyleSlot** — `showVestriaPickers` changed from `isMultipage(templateId)` to `templateId === 'vestria'`. Rationale: HeroVariantPicker/ProductStylePicker are `VestriaHeroVariant`-typed and vestria-only; a multipage WORK template (atelier) must not surface them. vestria=true / granth=false unchanged; atelier=false (falls to the "clean default theme" note). Removed the now-unused `isMultipage` import.
+6. **work.ts `runWorkSkeleton`** — plain module (no store import; slot hands it plain data). Builds the draft via the EXISTING `buildMultiPageSkeleton`, then `mergePageIntoFinalContent` per confirmed page with `copy: {}` (empty elements; home gets header/footer chrome + flat top-level), then `finalizeMultiPageGeneration(fc)` to drop the in-progress marker so the draft loads as an ordinary editable multipage draft (not a resumable generation), then `saveDraft`. Returns the shared `{status, redirectTo}`. Existing `runWorkGeneration` untouched. No templateId-guard (unlike the granth generator) — the skeleton materializes whatever confirmed template+pages carry.
+
+### WorkGenerationInput extension shape
+Added one optional field: `pages?: SitemapPage[]` (imported `type SitemapPage` from `@/types/product`). GeneratingSlot's `buildWorkInput()` projects `pages: (s.sitemap as SitemapPage[] | null) ?? []`. The granth generator ignores it (single-page work has null sitemap → `[]`). Chose to EXTEND the existing input (not a separate type) so the slot's single `buildInput`/`buildWorkInput` projection feeds both paths.
+
+### Uploads-seeding choice (unresolved Q#6)
+IGNORED `theWork` uploads on the skeleton path — the Work page's gallery is left EMPTY for manual fill in the editor. Rationale: conservative + the skeleton is a "manual-fill now" deliverable; the gallery collection is authored in the editor. `runWorkSkeleton` does not read `input.works`. If founder wants uploads pre-seeded into the Work-page gallery collection, that is an additive follow-up (would require the atelier Work section's collection contract, which lands phase 4/5).
+
+### Deviations
+- None material. StructureSlot needed NO guard-logic change (guards already tolerated `strategy===null` + `strategyStatus==='done'`), so the change there was limited to labels + microcopy — narrower than "verify guards" might have implied.
+
+### Test (e) realization
+No GeneratingSlot/StructureSlot test file exists, so the dispatch gate (e) is proven at the DECISION level in `useWizardStore.test.ts`: `isMultipage(templateId, briefSignalFromState(state))` = true for work+vestria, false for work+granth — the exact expression GeneratingSlot's `isWorkMultipage()` evaluates.
+
+### Commands + results
+- `npx tsc --noEmit` → EXIT 0 (clean; no Prisma-client errors surfaced this run).
+- `npm run test:run -- src/hooks src/modules/wizard` → PASS: 15 files, 259 tests.
+- Manual smoke (writer/granth onboarding) not run in this session; granth-path regression covered by unit tests (slot skip retained, fetchStrategy early-return unchanged, dispatch gate false).
+
+### For phases 4 & 5 (must know)
+- **This path goes LIVE the moment atelier declares `multipage` in templateMeta (phase 4) + registers `ATELIER_PAGE_ARCHETYPES` (phase 5).** Until then, no template is work+multipage, so every gate is inert and runtime behavior is identical everywhere (tests use vestria as a synthetic stand-in).
+- **Layout resolution gap:** `runWorkSkeleton` → `mergePageIntoFinalContent` → `selectProductBlocks`, whose `LAYOUTS_BY_TEMPLATE` is product-only (vestria) and falls back to `MERIDIAN_LAYOUT_NAMES`, then to `'default'` per section. For atelier (service) sections (`work`/`packages`/`quote-band`), layout names will resolve to `'default'` unless phase 4/5 wires atelier layout mappings into the block-selection path so the skeleton's sections map to real atelier blocks. Flag for phase 5 (multipage machinery wiring).
+- **Test fixtures to update in phase 4:** the phase-2 tests use `vestria` as the synthetic work+multipage template. Once `atelier` exists, add atelier-based assertions (and phase 5 adds the reachable-path cases c/d against the real archetype menu).
+- `briefSignalFromState` is now exported from useWizardStore — reuse it (don't re-inline) in any further served-path detection.
+
+---
+### Phase 2 — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0, hooks+wizard 259/259. Scope = 6 files, no creep. Granth byte-unchanged invariant verified against actual code paths (skip retained, fetchStrategy falls to unchanged early-return, MIN_WORKS + writer generator still reached).
+Non-blocking carried: (1) slot-inclusion uses full `brief` signal, fetchStrategy/dispatch use `briefSignalFromState(store)` — coincide for granth; phase 5 must prove atelier's two derivations agree. (2) `buildWorkInput` projects `pages` unconditionally — harmless (granth generator ignores it). (3) `selectProductBlocks` product-only → atelier sections fall to 'default' UNTIL phase-4 `blockManifests['atelier']` manifestPick resolves them (runtime-inert now, cleanly fixable).

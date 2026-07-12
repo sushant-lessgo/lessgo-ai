@@ -15,7 +15,9 @@ import {
   deriveMode,
   buildThingInput,
   buildTrustInput,
+  briefSignalFromState,
 } from './useWizardStore';
+import { isMultipage } from '@/modules/audience/product/pageArchetypes';
 import {
   assembleProductStrategy,
   clampSectionList,
@@ -62,6 +64,15 @@ const trustBrief = briefWithEntry(
 const workBrief = briefWithEntry(
   { rawInput: 'author of hindi fiction', oneLiner: 'author of hindi fiction' },
   { businessType: 'writer', copyEngine: 'work' },
+);
+
+// atelier phase 2 — a served WORK brief WITHOUT a businessType so `isMultipage`
+// is decided by the picked template's capability alone. Paired with a multipage
+// template (vestria, synthetic — atelier doesn't exist until phase 4) it stands
+// in for a work+multipage combo; paired with granth it stays single-page.
+const workNoBizBrief = briefWithEntry(
+  { rawInput: 'kundius photography', oneLiner: 'portrait photographer' },
+  { copyEngine: 'work' },
 );
 
 beforeEach(() => {
@@ -160,6 +171,19 @@ describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', (
   it('work skips the structure slot', () => {
     useWizardStore.getState().hydrate({ brief: workBrief, audienceType: 'writer', templateId: 'granth' });
     expect(useWizardStore.getState().slots).not.toContain('structure');
+  });
+
+  // atelier phase 2 — the structure skip is now TEMPLATE-aware for work.
+  it('work + a NON-multipage template (granth) STILL skips structure — granth unchanged', () => {
+    useWizardStore.getState().hydrate({ brief: workNoBizBrief, audienceType: 'writer', templateId: 'granth' });
+    expect(useWizardStore.getState().slots).not.toContain('structure');
+  });
+
+  it('work + a multipage template (vestria, synthetic) INCLUDES structure', () => {
+    // vestria declares the `multipage` capability; the brief has no businessType,
+    // so capability alone decides ⇒ isMultipage true ⇒ the skip is dropped.
+    useWizardStore.getState().hydrate({ brief: workNoBizBrief, audienceType: 'service', templateId: 'vestria' });
+    expect(useWizardStore.getState().slots).toContain('structure');
   });
 
   it('nextSlot / prevSlot walk the slot IDs', () => {
@@ -883,5 +907,97 @@ describe('useWizardStore — 7b collection channel', () => {
     const patch = useWizardStore.getState().buildBriefPatch();
     const products = (patch.facts as any)?.collections?.products;
     expect(products).toEqual([{ name: 'Widget -- Co', slug: 'widget-co' }]);
+  });
+});
+
+// ===========================================================================
+// atelier phase 2 — served work→multipage SKELETON path
+// ===========================================================================
+// The gate everywhere is `isMultipage(templateId, briefSignal)` — the PICKED
+// template's multipage capability — NEVER `engine === 'work'` alone. Granth
+// declares no `multipage`, so every new gate is false for it and its served
+// writer flow (structure skip + fetchStrategy early-return) is byte-for-byte
+// unchanged. These tests prove both sides of each gate.
+describe('useWizardStore — served work→multipage skeleton path (atelier phase 2)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('(gate) isMultipage is FALSE for granth and TRUE for a multipage template — the dispatch key', () => {
+    // GeneratingSlot dispatch + slot inclusion + fetchStrategy all key on this.
+    expect(isMultipage('granth', undefined)).toBe(false);
+    expect(isMultipage('vestria', undefined)).toBe(true);
+  });
+
+  it('fetchStrategy (work + multipage) seeds the sitemap from archetype defaults with ZERO fetch/charge', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokW', brief: workNoBizBrief, audienceType: 'service', templateId: 'vestria' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+
+    expect(spy).not.toHaveBeenCalled(); // no LLM, no credit charge
+    expect(s.strategyStatus).toBe('done');
+    expect(s.strategy).toBeNull(); // copy-gen stays OUT — no strategy object
+    expect(Array.isArray(s.sitemap)).toBe(true);
+    expect((s.sitemap as unknown[]).length).toBeGreaterThan(0);
+    expect((s.sitemap as any[])[0].archetypeKey).toBe('home');
+  });
+
+  it('fetchStrategy (work + multipage) is idempotent — a second call never re-seeds or charges', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokW', brief: workNoBizBrief, audienceType: 'service', templateId: 'vestria' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const firstMap = useWizardStore.getState().sitemap;
+    await useWizardStore.getState().fetchStrategy();
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(useWizardStore.getState().sitemap).toBe(firstMap); // same reference
+    expect(useWizardStore.getState().strategyStatus).toBe('done');
+  });
+
+  it('fetchStrategy (work + SINGLE-PAGE granth) still early-returns — no seed, no fetch, status stays idle', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokG', brief: workBrief, audienceType: 'writer', templateId: 'granth' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(s.sitemap).toBeNull();
+    expect(s.strategyStatus).toBe('idle'); // work single-page never reaches 'done' here
+  });
+
+  it('(dispatch) work + multipage ⇒ skeleton path; work + single-page ⇒ writer generator', () => {
+    // Mirrors GeneratingSlot's `engine === 'work' && isWorkMultipage()` decision.
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokW', brief: workNoBizBrief, audienceType: 'service', templateId: 'vestria' });
+    const multi = useWizardStore.getState();
+    expect(isMultipage(multi.templateId ?? undefined, briefSignalFromState(multi))).toBe(true);
+
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokG', brief: workBrief, audienceType: 'writer', templateId: 'granth' });
+    const single = useWizardStore.getState();
+    expect(isMultipage(single.templateId ?? undefined, briefSignalFromState(single))).toBe(false);
   });
 });

@@ -21,9 +21,15 @@
 // and hands this adapter PLAIN DATA. The published-client boundary is preserved.
 
 import { buildGranthHomeFinalContent } from '@/hooks/editStore/granthSeed';
-import { runCollectionFanOut } from '@/modules/generation/multiPageAssembly';
+import {
+  runCollectionFanOut,
+  buildMultiPageSkeleton,
+  mergePageIntoFinalContent,
+  finalizeMultiPageGeneration,
+} from '@/modules/generation/multiPageAssembly';
 import { templateMeta } from '@/modules/templates/templateMeta';
 import type { CollectionsFacts } from '@/modules/brief/collections';
+import type { SitemapPage } from '@/types/product';
 import { saveDraft } from './finalize';
 import type { GenerationCallbacks, GenerationResult } from './index';
 
@@ -47,6 +53,13 @@ export interface WorkGenerationInput {
   // collection-family capability) — inert until rung-C. WORK is deterministic
   // (no LLM copy), so item records are seeded VERBATIM with no connective call.
   collections?: CollectionsFacts;
+
+  // atelier phase 2 — the CONFIRMED sitemap pages for the SKELETON path (a
+  // served work→multipage template, e.g. atelier). Projected from the store's
+  // `sitemap` by GeneratingSlot. Undefined/[] on the granth generator path
+  // (single-page work ignores it). WorkGenerationInput can't import the store
+  // (firewall), so the slot carries the page list in as plain data.
+  pages?: SitemapPage[];
 }
 
 const REDIRECT = (tokenId: string) => `/edit/${tokenId}`;
@@ -140,6 +153,79 @@ export async function runWorkGeneration(
     if (collResult.status === 'error') return { status: 'error', error: collResult.error };
   } catch (e: any) {
     return { status: 'error', error: e?.message || 'Could not save the draft.' };
+  }
+
+  cb.onStage?.('done');
+  return { status: 'done', redirectTo: REDIRECT(tokenId) };
+}
+
+// ---------------------------------------------------------------------------
+// atelier phase 2 — SKELETON path (served work → multipage, e.g. atelier)
+// ---------------------------------------------------------------------------
+// A served work-engine brief whose picked template declares `multipage` builds
+// an EMPTY multipage draft for MANUAL FILL — zero LLM calls, zero credits, zero
+// copy — instead of running the writer/granth generator above (buildWorkInput /
+// runWorkGeneration). This path is NEVER taken by granth (no `multipage`
+// capability → GeneratingSlot's dispatch gate is false), so the writer flow is
+// byte-for-byte unchanged.
+//
+// Reuses the EXISTING multipage assembly helpers (multiPageAssembly.ts) with an
+// EMPTY per-page copy map, so each confirmed sitemap page becomes real section
+// ids (`${type}-${uuid}`) + layout mappings + empty content elements. No
+// templateId-guard/overwrite check (unlike runWorkGeneration): the skeleton just
+// materializes whatever template + pages the confirmed structure carries.
+export async function runWorkSkeleton(
+  input: WorkGenerationInput,
+  cb: GenerationCallbacks = {}
+): Promise<GenerationResult> {
+  const { tokenId } = input;
+  const pages = input.pages ?? [];
+  const title = (input.writerName.trim() || input.oneLiner || 'Your site').slice(0, 50);
+
+  cb.onStage?.('saving');
+  try {
+    const fc = buildMultiPageSkeleton({
+      tokenId,
+      title,
+      onboardingData: {
+        oneLiner: input.oneLiner,
+        productName: input.writerName,
+        understanding: {},
+        landingGoal: null,
+        offer: '',
+        sitemap: pages,
+        strategy: null,
+      },
+    });
+
+    // One EMPTY page entry per CONFIRMED sitemap page. `copy: {}` ⇒ every
+    // section gets empty elements; home carries header/footer chrome. Layout
+    // names resolve via the shared selectProductBlocks map (falls back to
+    // 'default' for a not-yet-registered template — phases 4/5 register the
+    // real atelier block/layout mappings).
+    pages.forEach((page, order) => {
+      mergePageIntoFinalContent({
+        fc,
+        page,
+        order,
+        copy: {},
+        templateId: input.templateId ?? 'atelier',
+      });
+    });
+
+    // The skeleton IS the deliverable — drop the in-progress generation marker
+    // so the draft loads as an ordinary editable multipage draft (NOT a
+    // resumable generation). No goal stamping (no goal on this path).
+    finalizeMultiPageGeneration(fc);
+
+    await saveDraft({
+      tokenId,
+      title: (fc.meta?.title as string) || title,
+      ...(input.templateId ? { templateId: input.templateId } : {}),
+      finalContent: fc,
+    });
+  } catch (e: any) {
+    return { status: 'error', error: e?.message || 'Could not build the skeleton.' };
   }
 
   cb.onStage?.('done');
