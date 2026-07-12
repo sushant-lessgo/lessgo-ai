@@ -71,7 +71,7 @@ Return a JSON object:
 - audiences: 1-3 target audiences
 - whatItDoes: a single clear sentence describing the core function
 - features: 3-6 key features/services (short phrases)
-- offer: the main call-to-action / offer the visitor gets (e.g. "Contact sales", "Free trial"), or "" if none is evident
+- offer: the action or deal the VISITOR takes or gets — phrased as that action (e.g. "Start a free 14-day trial", "Book a demo", "Contact sales"). This must NEVER be the business or product name. If no offer is evident, return "".
 - landingGoal: best-guess primary goal — one of waitlist | signup | free-trial | buy | demo | download — or null if unclear
 - testimonials: up to 3 REAL customer testimonials found anywhere in the text, each { quote, author_name, author_role }
 - facts: 10-25 ATOMIC claims about the business, each { fact, topic, confidence }.

@@ -173,6 +173,61 @@ describe('useWizardStore — hydration resolves engine/audience/template from Br
   });
 });
 
+describe('useWizardStore — proof prefill numeric filter (phase 1)', () => {
+  // thing `realNumbers` (field.id) is the ONLY field the numeric-or-empty rule
+  // applies to. The shared `outcomes` prefillKey feeding trust/work stays raw.
+  it('realNumbers prefill drops non-numeric entries, keeps numeric ones', () => {
+    const brief = briefWithEntry(
+      {
+        rawInput: 'https://acme.app',
+        businessName: 'Acme',
+        oneLiner: 'invoicing software for freelancers',
+        outcomes: ['cut churn by 30%', 'ISO 9001 certified', 'days to minutes', 'trusted by teams'],
+      },
+      { businessType: 'saas', copyEngine: 'thing', confidence: 0.9 },
+    );
+    useWizardStore.getState().hydrate({ brief, audienceType: 'product', templateId: 'meridian' });
+    // Keeps entries containing a digit; drops purely qualitative ones.
+    expect(useWizardStore.getState().fields.realNumbers.value).toEqual([
+      'cut churn by 30%',
+      'ISO 9001 certified',
+    ]);
+  });
+
+  it('realNumbers prefill with empty outcomes → []', () => {
+    const brief = briefWithEntry(
+      {
+        rawInput: 'https://acme.app',
+        businessName: 'Acme',
+        oneLiner: 'invoicing software for freelancers',
+        outcomes: [],
+      },
+      { businessType: 'saas', copyEngine: 'thing', confidence: 0.9 },
+    );
+    useWizardStore.getState().hydrate({ brief, audienceType: 'product', templateId: 'meridian' });
+    expect(useWizardStore.getState().fields.realNumbers.value).toEqual([]);
+  });
+
+  it('trust `outcomes` prefill passes through UNFILTERED (shared field, qualitative)', () => {
+    const brief = briefWithEntry(
+      {
+        rawInput: 'https://studio.co',
+        businessName: 'Studio Co',
+        oneLiner: 'growth marketing agency',
+        outcomes: ['helped clients grow', 'award-winning creative team'],
+      },
+      { businessType: 'agency', copyEngine: 'trust', confidence: 0.9 },
+    );
+    useWizardStore.getState().hydrate({ brief, audienceType: 'service', templateId: 'surge' });
+    // No digit in either entry, yet both survive — the filter is scoped to
+    // field.id === 'realNumbers' (thing), never the shared prefillKey.
+    expect(useWizardStore.getState().fields.outcomes.value).toEqual([
+      'helped clients grow',
+      'award-winning creative team',
+    ]);
+  });
+});
+
 describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', () => {
   it('thing keeps the full slot skeleton including structure', () => {
     useWizardStore.getState().hydrate({ brief: richThing, audienceType: 'product', templateId: 'meridian' });

@@ -416,9 +416,27 @@ function prefillValueFor(
     return raw != null;
   }
   if (field.input === 'chips' || field.input === 'upload') {
-    return Array.isArray(raw) ? (raw as string[]) : emptyValueFor(field);
+    if (!Array.isArray(raw)) return emptyValueFor(field);
+    return applyPrefillArrayFilter(field, raw as string[]);
   }
   return typeof raw === 'string' ? raw : emptyValueFor(field);
+}
+
+/**
+ * The ONLY place the numeric-or-empty rule for proof lives. The thing engine's
+ * `realNumbers` field wants claims with an ACTUAL number; the shared `outcomes`
+ * entry field that feeds it (also consumed by trust/work, qualitatively) must
+ * stay untouched — so we filter client-side, scoped by `field.id` (unique per
+ * engine), never by `prefillKey` (shared as `outcomes`). Known tradeoff: the
+ * "contains a digit" test drops non-numeric proof like "cut onboarding from
+ * days to minutes" and keeps numeric-adjacent non-metrics like "ISO 9001
+ * certified" — matches the spec's "actual numbers" intent, not a bug.
+ */
+function applyPrefillArrayFilter(field: ContractField, values: string[]): string[] {
+  if (field.id === 'realNumbers') {
+    return values.filter((v) => /\d/.test(v));
+  }
+  return values;
 }
 
 function sourceForState(state: FieldState): FieldSource {
