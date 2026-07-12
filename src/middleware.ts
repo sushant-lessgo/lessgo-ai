@@ -39,6 +39,9 @@ const isPublicRoute = createRouteMatcher([
   '/thanks',
   '/privacy',
   '/terms',
+  '/pricing', // marketing page — must be visible logged-out
+  '/blog(.*)', // public blog listing + posts (marketing/SEO surface)
+  '/sitemap.xml', // crawlers pre-auth, same rationale as robots.txt below
   '/api/blob-proxy',
   '/api/seo/(.*)', // per-host sitemap.xml/robots.txt/rss.xml rewrites (SEO Phase 4 + blog P2)
   '/api/blog/unsubscribe', // tokened one-click unsubscribe from notification emails (blog P2)
