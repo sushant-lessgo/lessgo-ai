@@ -6,7 +6,7 @@
 // real <form data-lessgo-form> wired to form.v1.js → /api/forms/submit.
 
 import React from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useAtelierBlock } from '../../hooks/useAtelierBlock';
 import { AtelierEditProvider, editPrimitives, useAtelierEditCtx } from '../editPrimitives';
 import { AtelierContactCore, type AtelierContactContent } from './AtelierContact.core';

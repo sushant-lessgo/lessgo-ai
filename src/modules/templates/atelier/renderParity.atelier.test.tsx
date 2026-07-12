@@ -9,7 +9,7 @@
 // meridian's lives under templates/__tests__/ — same shape, atelier-scoped here).
 //
 // The edit `.tsx` blocks read the store via useAtelierBlock (→ useTemplateBlock,
-// useEditStoreLegacy) + useIsElementExcluded (→ useEditStoreContext), so BOTH
+// useEditStore) + useIsElementExcluded (→ useEditStoreContext), so BOTH
 // store entry points are mocked onto one vanilla zustand store seeded from the
 // shared BLOCK_MOCKS.atelier fixtures (the same the /dev/blocks/atelier gallery +
 // screenshot-parity harness use). Store mode is 'preview' so the AtelierEditable
@@ -34,11 +34,11 @@ import { resolveAtelierBlock } from '@/modules/templates/atelier/resolveAtelierB
 
 const h = vi.hoisted(() => ({ store: null as any }));
 
-vi.mock('@/hooks/useEditStoreLegacy', () => ({
+vi.mock('@/hooks/useEditStore', () => ({
   // Honor the selector arg (block hooks subscribe via selectors, not a whole-store
   // destructure) — otherwise the whole state is handed where a section slice is
   // expected and blockContent comes back empty.
-  useEditStoreLegacy: (selector?: (s: any) => any) =>
+  useEditStore: (selector?: (s: any) => any) =>
     selector ? selector(h.store.getState()) : h.store.getState(),
 }));
 
