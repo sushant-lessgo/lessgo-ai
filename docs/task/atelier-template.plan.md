@@ -27,7 +27,7 @@ Build `atelier`, the first on-demand work-engine template (visual-portfolio; anc
 
 ## Progress log
 
-- phase 1 audienceType ruling + serve-route reconciliation: pending
+- phase 1 audienceType ruling + serve-route reconciliation: done (commit pending-below, review loops 1, verdict ship) — carry to phase 4: parity test `engineOfTemplate` hand-feeds lumen:'trust' (real engine 'work') + techpremium rows (harmless/dead, but fix by deriving engine from templateMeta.copyEngines + skip bespoke/retired); lumen ALREADY deviates (work→service) so atelier isn't the first — fix that note when adding atelier:'service' to the map + parity table
 - phase 2 served work→multipage skeleton wizard path: pending
 - phase 3 work-grammar generalization (G1, granth-safe): pending
 - phase 4 atelier registration + service element schema + provisional-block scaffold + serve-flip tests: pending

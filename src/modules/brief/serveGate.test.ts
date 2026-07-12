@@ -10,8 +10,9 @@ import {
   applyBusinessTypeCorrection,
   type EntrySignals,
 } from './classify';
-import { decideServe, BRIDGEABLE_ENGINES, uncoveredCollectionTags } from './serveGate';
+import { decideServe, BRIDGEABLE_ENGINES, TEMPLATE_AUDIENCE, uncoveredCollectionTags } from './serveGate';
 import { businessTypes } from '@/modules/businessTypes/config';
+import { templateIds } from '@/types/service';
 
 function makeSignals(overrides: Partial<EntrySignals> = {}): EntrySignals {
   return {
@@ -204,6 +205,61 @@ describe('decideServe — serve paths', () => {
       expect(decision.shortlist).toEqual(['granth']);
       // bridge:work MANUAL clause is deleted — no such tag exists on any path.
       expect(decision).not.toHaveProperty('tags');
+    }
+  });
+});
+
+describe('TEMPLATE_AUDIENCE — served audience derives from picked template (atelier phase 1)', () => {
+  it('mirrors engine→audience today: thing→product, trust→service, work-granth→writer', () => {
+    expect(TEMPLATE_AUDIENCE).toEqual({
+      hearth: 'service',
+      lex: 'service',
+      surge: 'service',
+      lumen: 'service',
+      meridian: 'product',
+      techpremium: 'product',
+      vestria: 'product',
+      granth: 'writer',
+    });
+  });
+
+  it('is total over templateIds so tsc forces future entries (atelier arrives phase 4)', () => {
+    for (const id of templateIds) {
+      expect(TEMPLATE_AUDIENCE[id]).toBeDefined();
+    }
+  });
+
+  it('derivation matches BRIDGEABLE_ENGINES for every current template (byte-identical behavior)', () => {
+    // Today the served audienceType still equals the engine bridge for every
+    // shipped template — the picked-template map introduces NO observable change.
+    const engineOfTemplate: Record<string, 'thing' | 'trust' | 'work'> = {
+      hearth: 'trust',
+      lex: 'trust',
+      surge: 'trust',
+      lumen: 'trust',
+      meridian: 'thing',
+      techpremium: 'thing',
+      vestria: 'thing',
+      granth: 'work',
+    };
+    for (const id of templateIds) {
+      expect(TEMPLATE_AUDIENCE[id]).toBe(BRIDGEABLE_ENGINES[engineOfTemplate[id]]);
+    }
+  });
+
+  it('served work brief that picks granth still yields audienceType "writer" (unchanged)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'writer', goalIntentGuess: 'follow-social' }),
+      'Hindi literary fiction author'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.templateId).toBe('granth');
+      // derived via TEMPLATE_AUDIENCE['granth'], not BRIDGEABLE_ENGINES['work']
+      // directly — but the value is identical.
+      expect(decision.audienceType).toBe('writer');
+      expect(decision.audienceType).toBe(TEMPLATE_AUDIENCE.granth);
     }
   });
 });
