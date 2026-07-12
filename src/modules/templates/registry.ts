@@ -123,6 +123,10 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       variants: m.atelierVariantDefs,
       defaultVariantId: m.defaultAtelierVariant,
       paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
+      // template-factory phase 6/11 — atelier declares all 5 knob axes. Surfacing
+      // `knobs` here populates `mod.knobs` at runtime so editor knob-switching can
+      // read `getLoadedTemplate('atelier').knobs` (mirrors hearth).
+      knobs: m.atelierKnobs,
     };
   },
   // Bespoke §13 (Writer vertical) — registered + renderable, but absent from the

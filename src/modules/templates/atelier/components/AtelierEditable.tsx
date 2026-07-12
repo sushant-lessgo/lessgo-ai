@@ -48,6 +48,15 @@ export function AtelierEditable({
   const isHtml = /<[^>]*>/.test(value || '');
   const [editing, setEditing] = React.useState(false);
   const isElExcluded = useIsElementExcluded(sectionId, elementKey);
+  // Edit-primitive marker (template-factory phase 2): templates DECLARE a slot's
+  // edit primitive; the platform primitive OWNS the editing UI. `text` by default,
+  // `button` when `isButton` (the CTA wiring that makes Button Settings reachable).
+  // Emitted alongside data-section-id/-element-key in the static (button-select +
+  // preview) paths so wrapper presence is machine-observable (templateConformance
+  // editor-basics subset asserts it in preview). Published `.published.tsx` blocks
+  // NEVER import this wrapper, so the marker never reaches published HTML; it is
+  // pixel-neutral for the parity diff. Mirrors MeridianEditable / HearthEditable.
+  const editPrimitive = isButton ? 'button' : 'text';
   if (mode === 'edit' && isElExcluded) return null;
 
   if (mode === 'edit' && isButton && !editing) {
@@ -56,6 +65,7 @@ export function AtelierEditable({
       style,
       'data-section-id': sectionId,
       'data-element-key': elementKey,
+      'data-edit-primitive': editPrimitive,
       role: 'button' as const,
       tabIndex: 0,
       title: 'Click for button settings · double-click to edit text',
@@ -75,6 +85,7 @@ export function AtelierEditable({
       style,
       'data-section-id': sectionId,
       'data-element-key': elementKey,
+      'data-edit-primitive': editPrimitive,
     };
     return /<[^>]*>/.test(shown || '') ? (
       <Tag {...common} dangerouslySetInnerHTML={{ __html: shown }} />

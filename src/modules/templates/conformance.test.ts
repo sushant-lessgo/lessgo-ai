@@ -102,6 +102,10 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
   // hearth). surge/vestria/lex/etc. deferred (plan Q6) — they carry no mocks yet.
   assertEditorBasics('meridian');
   assertEditorBasics('hearth');
+  // atelier (atelier-template phase 11) — 8 blocks, incl. the works image
+  // collection (add/remove/reorder) + packages at 2/3/4 cards. Mocks in
+  // blockMocks/index.ts; non-vacuous (empty mocks → the deferred-template branch).
+  assertEditorBasics('atelier');
 
   // ── KNOB + LOOKS conformance (template-factory phase 8) ────────────────────
   // hearth is the FIRST template to opt into knobs (dormant rules from phase 3

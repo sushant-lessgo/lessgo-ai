@@ -22,6 +22,9 @@ import type {
 
 export interface AtelierEditCtx {
   sectionId: string;
+  /** Store render mode — threaded into AtelierEditable so preview renders the
+   *  static (marker-emitting) path, matching Meridian/Hearth. */
+  mode: 'edit' | 'preview' | 'published';
   update: (elementKey: string, value: any) => void;
   updateCollection: (collectionKey: string, value: any[]) => void;
   getCollection: (collectionKey: string) => any[];
@@ -69,7 +72,7 @@ const Txt: React.FC<AtelierTxtProps> = ({ elementKey, value, as = 'span', classN
   return (
     <AtelierEditable
       as={as}
-      mode="edit"
+      mode={ctx.mode}
       sectionId={ctx.sectionId}
       content={{ [elementKey]: value ?? '' }}
       elementKey={elementKey}
@@ -201,6 +204,7 @@ export function useAtelierEditCtx(
   update: (elementKey: string, value: any) => void,
   updateCollection: (collectionKey: string, value: any[]) => void,
 ): AtelierEditCtx {
+  const mode = useEditStore((s) => (s as any).mode) as 'edit' | 'preview' | 'published' | undefined;
   const sections = useEditStore((s) => (s as any).sections) as string[] | undefined;
   const pages = useEditStore((s) => (s as any).pages);
   const uploadImage = useEditStore((s) => (s as any).uploadImage);
@@ -220,6 +224,7 @@ export function useAtelierEditCtx(
   metaRef.current = elementMetadata;
   return {
     sectionId,
+    mode: mode ?? 'edit',
     update,
     updateCollection,
     getCollection: (k) => (contentRef.current?.[k] as any[]) || [],

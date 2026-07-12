@@ -18,7 +18,11 @@ export {
 
 // Knob surface (template-factory standard axes). `atelierKnobs` is the
 // TemplateModule.knobs declaration; the token map + shared stylesheet builder are
-// consumed by the two renderers. Surfaced on the registry loader via `m.atelierKnobs`.
+// consumed by the two renderers. The registry loader (registry.ts) surfaces
+// `knobs: m.atelierKnobs` on the loaded module (phase 11) so editor knob-switching
+// reads `getLoadedTemplate('atelier').knobs`. (The render path itself threads
+// `knobs` directly from `themeValues.knobs` into the injector props — it does NOT
+// read `mod.knobs`.)
 export {
   atelierKnobs,
   atelierKnobTokenMap,
