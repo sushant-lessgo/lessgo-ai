@@ -26,3 +26,47 @@ Server component at `src/app/welcome/page.tsx`:
 - Expected behavior per plan: a signed-out dev hit to `/welcome` will bounce to Clerk until phase 4 adds `/welcome` to `isPublicRoute`. Full manual rendering check is deferred to phase 4/5. This is by design.
 - No published-renderer / dual-renderer involvement (no block edits).
 - Links to `/sign-up` and `/sign-in` intentionally point at pages that don't exist yet (phase 2 creates them).
+
+## Phase 2 — Clerk sign-in/sign-up routes + provider config
+
+**Files changed:**
+- `src/app/sign-in/[[...sign-in]]/page.tsx` (created)
+- `src/app/sign-up/[[...sign-up]]/page.tsx` (created)
+- `src/app/layout.tsx` (edited — ClerkProvider props only)
+- `.env.local` (edited — added two Clerk URL vars)
+
+### What was created / edited
+- Two catch-all server-component pages rendering `<SignIn />` / `<SignUp />` (from `@clerk/nextjs`), centered in a minimal branded wrapper matching the `/welcome` shell (logo `/logo.svg`, brand "Lessgo AI", footer `© {year} Lessgo AI`, year via `new Date().getFullYear()`).
+- `layout.tsx` `<ClerkProvider>`: added `signInUrl="/sign-in"` and `signUpUrl="/sign-up"`. `allowedRedirectOrigins` + both `*ForceRedirectUrl="/dashboard"` props left untouched.
+- `.env.local`: added the two Clerk URL vars right after the existing `CLERK_SECRET_KEY` line (per orchestrator decision, `.env.local` not `.env`).
+
+### Exact `.env.local` lines added (after `CLERK_SECRET_KEY`, line 43)
+```
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+```
+
+### ClerkProvider prop diff
+```
+     <ClerkProvider
+       allowedRedirectOrigins={allowedRedirectOrigins}
++      signInUrl="/sign-in"
++      signUpUrl="/sign-up"
+       signUpForceRedirectUrl="/dashboard"
+       signInForceRedirectUrl="/dashboard"
+     >
+```
+
+### Unused-import note
+`SignInButton` / `SignUpButton` remain imported in `src/app/layout.tsx` but are unused (no modal buttons render in the layout body). Left in place per phase scope — NOT removed. The new `/sign-in` and `/sign-up` pages are the actual CTA surfaces.
+
+### Deviations
+- Per explicit orchestrator decision, env vars added to `.env.local` (where the existing `NEXT_PUBLIC_CLERK_*` keys live) rather than `.env` as the plan text originally stated.
+
+### Verification
+- `npx tsc --noEmit`: only the KNOWN pre-existing error in untouched `src/app/page.tsx(6,26)` (`@/assets/images/founder.jpg` image type decl) — no new errors from touched files.
+- `npm run test:run`: 163 passed | 1 skipped (164 files); 2775 passed | 15 skipped (2790 tests). Green.
+- Route compile: sign-in/sign-up are standard Clerk catch-all pages; tsc typechecked the new files with no errors — no separate dev-browser check performed (human gate handled by orchestrator). Gate = tsc + tests.
+
+### Open risks
+- Vercel env vars (`NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `NEXT_PUBLIC_CLERK_SIGN_UP_URL`) still need setting post-merge; without them prod `auth.protect()` reverts to the hosted Account Portal. (Already tracked as a post-merge deploy action in the plan.)

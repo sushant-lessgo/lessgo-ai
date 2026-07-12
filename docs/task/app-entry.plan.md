@@ -19,7 +19,7 @@ Signed-out visitors to `app.lessgo.ai/` currently get the old pre-launch waitlis
 ## Progress log
 
 - phase 1 entry page /welcome: done (review loops 1, ship)
-- phase 2 clerk sign-in/sign-up routes + provider config: pending
+- phase 2 clerk sign-in/sign-up routes + provider config: done (review loops 1, ship) — HUMAN GATE pending
 - phase 3 appSplit pure helpers + tests: pending
 - phase 4 middleware app-root wiring: pending
 - phase 5 branded 404 + brand/year polish + full build: pending

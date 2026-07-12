@@ -99,6 +99,8 @@ export default function RootLayout({
   return (
     <ClerkProvider
       allowedRedirectOrigins={allowedRedirectOrigins}
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
       signUpForceRedirectUrl="/dashboard"
       signInForceRedirectUrl="/dashboard"
     >
