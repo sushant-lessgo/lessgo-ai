@@ -61,8 +61,8 @@ const MissingLayoutComponent: React.FC<{ sectionId: string; layout: string }> = 
   sectionId, 
   layout 
 }) => {
-  const { mode } = useEditStore();
-  
+  const mode = useEditStore((s) => s.mode);
+
   return (
     <section className="py-16 px-4 bg-yellow-50 border-2 border-yellow-200">
       <div className="max-w-6xl mx-auto text-center">

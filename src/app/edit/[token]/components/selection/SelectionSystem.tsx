@@ -1,7 +1,8 @@
 // app/edit/[token]/components/selection/SelectionSystem.tsx
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useShallow } from 'zustand/react/shallow';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { useReviewState } from '@/hooks/useReviewState';
 import { isTestimonialsEnabledPublic } from '@/lib/testimonials/flag';
 // Removed useSelection - functionality now in unified useEditor system
@@ -51,9 +52,15 @@ async function persistDismissedFlags(tokenId: string): Promise<void> {
 }
 
 export function SelectionSystem({ children }: SelectionSystemProps) {
-  const { mode } = useEditStore();
   // Selection state now comes from unified editor system
-  const { selectedSection, selectedElement, multiSelection } = useEditStore();
+  const { mode, selectedSection, selectedElement, multiSelection } = useEditStore(
+    useShallow((s) => ({
+      mode: s.mode,
+      selectedSection: s.selectedSection,
+      selectedElement: s.selectedElement,
+      multiSelection: s.multiSelection,
+    })),
+  );
 
   // Setup accessibility attributes
   useEffect(() => {
@@ -197,7 +204,8 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
 function VerifyMarkerControls({ mode }: { mode: string }) {
   const activeMarkers = useReviewState((s) => s.activeMarkers);
   const dismiss = useReviewState((s) => s.dismiss);
-  const { tokenId, trackChange } = useEditStore();
+  // Non-reactive store instance — tokenId/trackChange are read in the click handler only.
+  const storeApi = useEditStoreApi();
 
   const [positions, setPositions] = React.useState<
     Array<{ key: string; sectionId: string; elementKey: string; top: number; left: number }>
@@ -261,6 +269,7 @@ function VerifyMarkerControls({ mode }: { mode: string }) {
             onClick={(e) => {
               e.stopPropagation();
               dismiss(p.sectionId, p.elementKey);
+              const { tokenId, trackChange } = storeApi.getState();
               // Mark dirty (status indicators) + persist the dismiss immediately. trackChange only
               // flips persistence.isDirty / lastUpdated — the concrete fields are otherwise unused.
               try {
@@ -398,7 +407,13 @@ function SelectionStyles() {
 
 // Visual indicators for selections
 function SelectionIndicators() {
-  const { selectedSection, selectedElement, multiSelection } = useEditStore();
+  const { selectedSection, selectedElement, multiSelection } = useEditStore(
+    useShallow((s) => ({
+      selectedSection: s.selectedSection,
+      selectedElement: s.selectedElement,
+      multiSelection: s.multiSelection,
+    })),
+  );
 
   return (
     <>
@@ -484,7 +499,7 @@ function SelectionBadge({ targetSelector, type, label }: SelectionBadgeProps) {
 
 // Keyboard navigation helper
 export function KeyboardNavigationHelper() {
-  const { mode } = useEditStore();
+  const mode = useEditStore((s) => s.mode);
   const [showHelp, setShowHelp] = React.useState(false);
 
   useEffect(() => {

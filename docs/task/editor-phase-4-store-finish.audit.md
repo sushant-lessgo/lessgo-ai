@@ -359,3 +359,82 @@ over-broad selector churn.
 - None functional. B1 only narrows subscriptions; no persist/commit path touched.
   The palette combined-run count contamination is a measurement artifact of the
   probe's fixed-window counter, not a code regression (isolated = 4 ≤ baseline).
+
+---
+
+## Phase 6 (Batch B2) — renderer + selection hot path
+
+**Files changed:**
+- `src/modules/generatedLanding/LandingPageRenderer.tsx`
+- `src/app/edit/[token]/components/ui/EditablePageRenderer.tsx`
+- `src/app/edit/[token]/components/selection/SelectionSystem.tsx`
+- `src/app/edit/[token]/components/selection/ElementDetector.tsx`
+
+11 bare `useEditStore()` sites converted to narrow selectors / `useEditStoreApi()`.
+Phase-3-done narrow selector at `LandingPageRenderer.tsx:132` (useShallow) NOT retouched.
+
+### LandingPageRenderer.tsx — 1 site
+
+| Site | Component | Subscribed | Fields read on render path | Disposition |
+|---|---|---|---|---|
+| `MissingLayoutComponent` | `mode` | `mode` (JSX conditional line ~78) | `useEditStore((s) => s.mode)` |
+
+### EditablePageRenderer.tsx — 2 sites
+
+| Site | Component | Subscribed | Fields read on render path | Disposition |
+|---|---|---|---|---|
+| ~67 | `EditablePageRenderer` | `audienceType, templateId` | `audienceType`+`templateId` → useTemplateModule, usesTemplateModule, getComponent | `useShallow` object selector |
+| ~215 | (inner render fn) | `onboardingData, theme` | `onboardingData` → validatedFields/hiddenFields/userContext memo/debug; `theme` → `theme?.uiBlockTheme` in originalProps memo + dep array | `useShallow` object selector |
+
+### ElementDetector.tsx — 3 sites
+
+| Site | Component | Subscribed | Fields read on render path | Disposition |
+|---|---|---|---|---|
+| ~17 | `ElementDetector` | `mode` | `mode` → JSX className/conditional (106,111), effect deps (100), handler guard | `useEditStore((s) => s.mode)` |
+| ~21 | `ElementDetector` | `selectedElement, selectedSection` | both → selection-feedback effect deps (46) | `useShallow` object selector |
+| ~157 | `ElementBoundaryVisualizer` | `mode` | `mode` → effect deps (194), early-return + render (209) | `useEditStore((s) => s.mode)` |
+
+### SelectionSystem.tsx — 5 sites (the trap file)
+
+Full component-body field enumeration done before narrowing. Handling of the 5 destructures:
+
+| # | Orig line | Component | Orig destructure | Every field's usage (whole body) | Disposition |
+|---|---|---|---|---|---|
+| 1 | 54 | `SelectionSystem` | `{ mode }` | mode → a11y effect (60,109 deps), verify-marker effect (125,147 deps), focus effect (167,172 deps), JSX (179,183) | **consolidated** with #2 |
+| 2 | 56 | `SelectionSystem` | `{ selectedSection, selectedElement, multiSelection }` | selectedSection → a11y effect (72) + deps; selectedElement → a11y (100) + focus (152) + deps; multiSelection → a11y (80) + deps | **consolidated** into one `useShallow({mode,selectedSection,selectedElement,multiSelection})` — all four are render-subscribed via effect deps, so a single wide selector preserves reactivity exactly |
+| 3 | 200 | `VerifyMarkerControls` | `{ tokenId, trackChange }` | tokenId → onClick only (`persistDismissedFlags(tokenId)`); trackChange → onClick only | **handler-only → `useEditStoreApi()`**; `const { tokenId, trackChange } = storeApi.getState()` inside onClick. No render subscription (correct — neither is read at render) |
+| 4 | 401 | `SelectionIndicators` | `{ selectedSection, selectedElement, multiSelection }` | ALL THREE UNUSED — the component's JSX (405–423) is entirely commented out | **conservative:** kept the same 3-field subscription via `useShallow` (preserves exact prior behavior/subscription set; lint status unchanged — vars were already unused-destructured under the bare call). Not dropped, to avoid any behavior change in a hot-path file. Logged as Deviation. |
+| 5 | 487 | `KeyboardNavigationHelper` | `{ mode }` | mode → keydown effect (491,506 deps), early-return + render (508) | `useEditStore((s) => s.mode)` |
+
+**SelectionSystem consolidation summary:** 5 destructures → main component's #1+#2 merged into ONE wide `useShallow` selector (all four selection/mode fields, every one render-subscribed via effect deps — merging is behavior-identical and avoids two store subscriptions); #3 moved to non-reactive `useEditStoreApi().getState()` (handler-only); #4 kept as-is (conservative, unused-but-preserved); #5 single-field selector. Selection state (selectedSection/selectedElement/multiSelection/mode) stays subscribed wherever the component renders/effects from it — no over-narrowing.
+
+### Deviations
+
+- **SelectionIndicators (#4):** its three subscribed selection fields are dead (JSX commented out). Conservative choice per in-scope-ambiguity rule: preserved the identical subscription via `useShallow` rather than dropping the vars, keeping behavior/lint byte-equivalent to pre-change. A future cleanup could drop them, but that is out of this batch's no-behavior-change mandate.
+
+### Grep-zero per file
+
+`rg "useEditStore\(\s*\)"` on all 4 touched files → 0 matches (exit 1).
+
+### Verification
+
+- `npx tsc --noEmit` → exit 0.
+- `npm run test:run` → 2508 passed, 11 skipped (158 files) → exit 0.
+- `npm run lint` → exit 0 (only pre-existing `no-img-element`/`exhaustive-deps` warnings; none in touched files).
+- **renderProbe smoke** (authed, worktree dev server PORT=3021, `NEXT_PUBLIC_DEBUG_EDITOR=true`, mock-GPT; never :3000): `--smoke=select,type,undo,redo,palette,modal` → **all 6 PASS** (`allPassed: true`). Discriminating checks: `select` PASS (toolbar[text-mvp] visible), `undo` PASS (reverted), `redo` PASS (reapplied).
+
+**Commit counts vs baseline (all ≤ baseline):**
+
+| Metric | Baseline | Post-B2 | Δ |
+|---|---|---|---|
+| Commits during 20-char burst | 6 | 6 | flat |
+| Commits on commit (blur) | 3 | 3 | flat |
+| Store mutations observed | 1 | 1 | flat |
+| Palette-swap re-commits | 4–5 | 4 | ≤ |
+| Heap delta (post-GC) | +0.6–0.9 MB | +0.647 MB | flat |
+
+Dev server stopped after probe (PID killed, :3021 → 000; :3000 never touched, confirmed 000/not running).
+
+### Open risks
+
+- None functional. Only store-subscription lines changed; no persist/commit/renderer-layout/dual-pair edits. SelectionSystem #4 dead-var subscription intentionally preserved (see Deviations).

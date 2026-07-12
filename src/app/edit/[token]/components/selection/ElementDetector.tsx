@@ -1,5 +1,6 @@
 // app/edit/[token]/components/selection/ElementDetector.tsx
 import React, { useEffect, useRef, useCallback, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStore } from '@/hooks/useEditStore';
 
 interface ElementDetectorProps {
@@ -14,11 +15,13 @@ interface ElementDetectorProps {
 // observer) that saturated the main thread on slow machines — see
 // reports/perf-editor-throttled6x-2026-07-11.md and docs/task/perf-04-elementdetector-loop.spec.md.
 export function ElementDetector({ sectionId, children }: ElementDetectorProps) {
-  const { mode } = useEditStore();
+  const mode = useEditStore((s) => s.mode);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   // Handle selection visual feedback
-  const { selectedElement, selectedSection } = useEditStore();
+  const { selectedElement, selectedSection } = useEditStore(
+    useShallow((s) => ({ selectedElement: s.selectedElement, selectedSection: s.selectedSection })),
+  );
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -154,7 +157,7 @@ function ElementDetectorStyles() {
 
 // Element boundary visualization (debug mode)
 export function ElementBoundaryVisualizer({ sectionId }: { sectionId: string }) {
-  const { mode } = useEditStore();
+  const mode = useEditStore((s) => s.mode);
   const [showBoundaries, setShowBoundaries] = useState(false);
   const [boundaries, setBoundaries] = useState<any[]>([]);
 

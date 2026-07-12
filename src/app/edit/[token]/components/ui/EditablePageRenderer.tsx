@@ -1,5 +1,6 @@
 // app/edit/[token]/components/ui/EditablePageRenderer.tsx - Enhanced with selection attributes
 import React from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { getComponent, extractSectionType } from '@/modules/generatedLanding/componentRegistry';
 import { useTemplateModule } from '@/modules/templates/useTemplateReady';
 import { sectionList } from '@/modules/sections/sectionList';
@@ -64,7 +65,9 @@ export function EditablePageRenderer({
 }: EditablePageRendererProps) {
 
   const backgroundType = getBackgroundTypeFromSection(sectionId);
-  const { audienceType, templateId } = useEditStore();
+  const { audienceType, templateId } = useEditStore(
+    useShallow((s) => ({ audienceType: s.audienceType, templateId: s.templateId })),
+  );
   const { ready: templateReady, tmpl } = useTemplateModule(audienceType, templateId);
 
   // Template-backed projects: paint the section's surface in edit so it matches
@@ -212,7 +215,9 @@ const EnhancedLayoutWrapper: React.FC<{
   // Regular AI-generated elements are handled by their native UIBlock components
 
   // ✅ NEW: Extract taxonomy data from store for theme detection
-  const { onboardingData, theme } = useEditStore();
+  const { onboardingData, theme } = useEditStore(
+    useShallow((s) => ({ onboardingData: s.onboardingData, theme: s.theme })),
+  );
   const validatedFields = onboardingData?.validatedFields;
   const hiddenFields = onboardingData?.hiddenInferredFields;
 
