@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { UserButton, useUser } from '@clerk/nextjs';
 import Logo from '@/components/shared/Logo';
 import { PageSwitcher } from './PageSwitcher';

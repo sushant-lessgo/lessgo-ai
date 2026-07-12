@@ -1,7 +1,7 @@
 // hooks/useAutoSave.ts - React Hook for Auto-Save Integration
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { useEditStoreLegacy as useEditStore, useEditStoreApi } from './useEditStoreLegacy';
+import { useEditStore, useEditStoreApi } from './useEditStore';
 
 // perf-02 phase 5: the dead autoSaveMiddleware module was deleted; the two type
 // shapes this hook still needs are relocated here (AutoSaveState is used by

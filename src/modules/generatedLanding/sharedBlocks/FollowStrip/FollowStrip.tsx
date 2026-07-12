@@ -5,14 +5,14 @@
 // {platform,url} materialized at injection). Like the StoreBadges edit twin, the
 // edit renderer does NOT pass a `content` prop (LandingPageRenderer spreads only
 // the section's own `data`), so this reads the section from the store via
-// useEditStoreLegacy. Layout lives in socialIcons.FollowStripCore so this is
+// useEditStore. Layout lives in socialIcons.FollowStripCore so this is
 // byte-parallel with the published twin.
 //
 // Anchors are inert in the editor (preventDefault) — the published twin carries
 // the real `data-lessgo-cta` beacon attrs. Both emit identical strip markup.
 
 import React from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { getEffectiveElementValue } from '@/lib/i18n/localeContent';
 import {
   FollowStripCore,

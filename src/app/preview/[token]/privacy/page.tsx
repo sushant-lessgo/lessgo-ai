@@ -4,7 +4,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { EditProvider } from '@/components/EditProvider';
-import { useEditStoreLegacy } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 
 export default function PreviewPrivacyPage() {
   const params = useParams();
@@ -36,7 +36,7 @@ export default function PreviewPrivacyPage() {
 }
 
 function PrivacyContent({ tokenId }: { tokenId: string }) {
-  const { legalPages, theme, title } = useEditStoreLegacy();
+  const { legalPages, theme, title } = useEditStore();
   const privacy = legalPages?.privacy;
 
   const themeColors = (theme?.colors as any) || {};

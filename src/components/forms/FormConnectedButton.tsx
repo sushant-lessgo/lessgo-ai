@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { FormRenderer } from './FormRenderer';
 import { InlineFormInput } from './InlineFormInput';
 import { logger } from '@/lib/logger';

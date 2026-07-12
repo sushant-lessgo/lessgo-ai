@@ -1,7 +1,7 @@
 // app/edit/[token]/components/selection/SelectionSystem.tsx
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useReviewState } from '@/hooks/useReviewState';
 import { isTestimonialsEnabledPublic } from '@/lib/testimonials/flag';
 // Removed useSelection - functionality now in unified useEditor system

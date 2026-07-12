@@ -1,7 +1,7 @@
 // app/edit/[token]/components/toolbars/SectionToolbar.tsx - Priority-Resolved Section Toolbar
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { AddSectionButton } from '../content/SectionCRUD';
 import LoadingButtonBar from '@/components/shared/LoadingButtonBar';

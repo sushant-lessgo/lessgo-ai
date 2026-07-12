@@ -4,7 +4,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { StyleBrowserModal } from './StyleBrowserModal';
 import { usePaletteSwap } from './usePaletteSwap';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import {
   getPaletteById,
   getSiblingPalettes,

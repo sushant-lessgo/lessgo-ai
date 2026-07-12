@@ -75,14 +75,14 @@ export async function POST(req: NextRequest) {
     const successUrl = `${baseUrl}/dashboard/billing?session_id={CHECKOUT_SESSION_ID}&success=true`;
     const cancelUrl = `${baseUrl}/pricing?canceled=true`;
 
-    // Create Stripe checkout session with 14-day trial
+    // Create Stripe checkout session — pricing-v2: NO trial (free tier is the
+    // trial; 14-day money-back refund instead). trialDays omitted → charged now.
     const session = await createCheckoutSession({
       userId,
       userEmail,
       priceId,
       successUrl,
       cancelUrl,
-      trialDays: 14, // As specified: 14-day free trial with card required
     });
 
     logger.info(`Checkout session created for user ${userId}:`, {

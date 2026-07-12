@@ -30,14 +30,14 @@ import { describe, it, expect, vi } from 'vitest';
 // ── editor-basics store mock (template-factory phase 2) ──────────────────────
 // The editor-basics subset (assertEditorBasics) renders edit blocks in
 // mode:'preview' to observe the `data-edit-primitive` markers. Edit blocks read
-// the store via `useEditStoreLegacy`/`useEditStoreApi` (block hooks + image
+// the store via `useEditStore`/`useEditStoreApi` (block hooks + image
 // toolbar) and `useEditStoreContext` (element-exclusion) — mock all three onto
 // one vanilla store seeded from the shared block mocks. Per-file hoisted `vi.mock`
 // shims (can't move to the harness); the store SHAPE builder lives in the harness.
 const h = vi.hoisted(() => ({ store: null as any }));
 
-vi.mock('@/hooks/useEditStoreLegacy', () => ({
-  useEditStoreLegacy: (selector?: (s: any) => any) =>
+vi.mock('@/hooks/useEditStore', () => ({
+  useEditStore: (selector?: (s: any) => any) =>
     selector ? selector(h.store.getState()) : h.store.getState(),
   useEditStoreApi: () => h.store,
 }));

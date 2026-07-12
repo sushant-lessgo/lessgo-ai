@@ -6,6 +6,7 @@ import { BLOG_SUBSCRIBE_FORM_ID } from '@/lib/blog/buildBlogPages';
 import { FormSubmissionSchema, sanitizeForLogging } from '@/lib/validation';
 import { createSecureResponse } from '@/lib/security';
 import { withFormRateLimit } from '@/lib/rateLimit';
+import { checkLimit } from '@/lib/planManager';
 import { z } from 'zod';
 
 // Force dynamic rendering - prevent caching to avoid 405 errors
@@ -84,6 +85,35 @@ async function formSubmitHandler(request: NextRequest) {
 
     if (userId) {
       try {
+        // pricing-v2 (phase 2): monthly form-submission cap. FormSubmission.userId
+        // is the page OWNER, so counting this owner's rows in the current calendar
+        // month (UTC) covers every page they own; gate that count against their
+        // plan's formSubmissions limit (FREE 25 / PRO 1000 / AGENCY+ENT -1 = never
+        // trips). Over limit → 429 with a stable error code the embedded form
+        // handler surfaces to the visitor (never silently dropped). This is the
+        // per-owner monthly cap; the existing per-IP rate-limit (withFormRateLimit)
+        // is orthogonal and still applies.
+        const now = new Date();
+        const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+        const monthlySubmissionCount = await prisma.formSubmission.count({
+          where: { userId, createdAt: { gte: monthStart } },
+        });
+        const submissionLimit = await checkLimit(userId, 'formSubmissions', monthlySubmissionCount);
+        if (!submissionLimit.allowed) {
+          console.warn('[forms/submit] monthly submission cap reached:', {
+            userId: userId.substring(0, 8) + '...',
+            current: submissionLimit.current,
+            limit: submissionLimit.limit,
+          });
+          return createSecureResponse(
+            {
+              error: 'form_submission_limit_reached',
+              message: 'This form is temporarily unavailable. Please try again later.',
+            },
+            429
+          );
+        }
+
         // Get the form configuration from the user's forms
         // Since forms are stored in project content, we need to find the form
         const projects = await prisma.project.findMany({

@@ -1,7 +1,7 @@
 // scale-05 phase 5 — shared LeadForm block: dual-renderer parity + firewall-split
 // registry resolution + published <form data-lessgo-form> contract.
 //
-// The edit twin reads useEditStoreLegacy → we mock it (tests aren't in the
+// The edit twin reads useEditStore → we mock it (tests aren't in the
 // published path, so importing the edit twin here is fine).
 
 import React from 'react';
@@ -31,8 +31,8 @@ const SEEDED_FORM: MVPForm = {
 // A previous version of this mock nested forms under `content.forms`, which
 // masked F1: the edit twin read `store.content?.forms` (always undefined at
 // runtime) yet the mis-seeded mock let the test pass. Keep forms top-level.
-vi.mock('@/hooks/useEditStoreLegacy', () => ({
-  useEditStoreLegacy: (selector?: (s: any) => any) => {
+vi.mock('@/hooks/useEditStore', () => ({
+  useEditStore: (selector?: (s: any) => any) => {
     const state = {
       content: {
         [LEAD_SECTION_ID]: {

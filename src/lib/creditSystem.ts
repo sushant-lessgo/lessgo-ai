@@ -49,6 +49,11 @@ export enum UsageEventType {
   OUTREACH_SCRAPE = 'outreach_scrape',
   // Cold outreach generation (credits-free; this ledger row IS the gating source of truth, sibling precedent)
   OUTREACH_GENERATION = 'outreach_generation',
+  // Pricing v2: persistent credit pool grants (DB eventType is a plain String, so
+  // these new values need no migration). CREDIT_TOPUP = paid $9/100 top-up;
+  // LTD_GRANT = 600-credit lifetime-deal seed.
+  CREDIT_TOPUP = 'credit_topup',
+  LTD_GRANT = 'ltd_grant',
 }
 
 // Usage event interface
@@ -120,6 +125,15 @@ export async function getUserUsage(userId: string) {
 
 /**
  * Check if user has sufficient credits
+ *
+ * pricing-v2 decision 1 (block AI ops ONLY at 0 credits): this gate — and the
+ * `requireCredits`/`consumeCredits` wrappers in lib/middleware/planCheck.ts — are
+ * invoked ONLY by AI-spend routes (regenerate-section/-element, v2/scrape-website,
+ * v2/understand, audience {product,service}/{strategy,generate-copy},
+ * generate-privacy-policy, outreach). Non-AI persistence routes (/api/saveDraft,
+ * /api/publish) deliberately never call it, so a FREE user who hits 0 credits can
+ * still save drafts and publish/republish — only new AI generation is blocked.
+ * Do NOT add a credit gate to save/publish.
  */
 export async function checkCredits(
   userId: string,
@@ -132,12 +146,15 @@ export async function checkCredits(
   }
 
   try {
+    // pricing-v2: available = current-period monthly remaining + persistent pool.
     const usage = await getUserUsage(userId);
-    const allowed = usage.creditsRemaining >= creditsRequired;
+    const userPlan = await getUserPlan(userId);
+    const available = usage.creditsRemaining + (userPlan.creditPool ?? 0);
+    const allowed = available >= creditsRequired;
 
     return {
       allowed,
-      remaining: usage.creditsRemaining,
+      remaining: available,
       required: creditsRequired,
     };
   } catch (error) {
@@ -179,15 +196,27 @@ export async function deductCredits(
         throw new Error('Usage record not found');
       }
 
-      // Check if sufficient credits
-      if (usage.creditsRemaining < creditsToDeduct) {
+      // pricing-v2: credits = monthly allotment (this period's creditsRemaining)
+      // PLUS the persistent pool on UserPlan. The OLD guard checked only
+      // creditsRemaining, so FREE/LTD users (monthly creditsLimit=0 →
+      // creditsRemaining=0) threw "Insufficient credits" BEFORE the pool was ever
+      // consulted. New guard checks the combined balance; we then drain the
+      // monthly allotment FIRST and take the remainder from the pool.
+      const userPlan = await tx.userPlan.findUnique({ where: { userId } });
+      const poolBalance = userPlan?.creditPool ?? 0;
+
+      if (usage.creditsRemaining + poolBalance < creditsToDeduct) {
         throw new Error('Insufficient credits');
       }
 
-      // Update usage counters based on event type
+      const fromMonthly = Math.min(usage.creditsRemaining, creditsToDeduct);
+      const fromPool = creditsToDeduct - fromMonthly;
+
+      // Update usage counters based on event type. creditsUsed records the TOTAL
+      // consumed (monthly + pool); creditsRemaining tracks only the monthly bucket.
       const updateData: any = {
         creditsUsed: usage.creditsUsed + creditsToDeduct,
-        creditsRemaining: usage.creditsRemaining - creditsToDeduct,
+        creditsRemaining: usage.creditsRemaining - fromMonthly,
       };
 
       switch (eventType) {
@@ -216,14 +245,25 @@ export async function deductCredits(
         data: updateData,
       });
 
-      return updatedUsage;
+      // Drain the pool for the remainder (if any).
+      let newPoolBalance = poolBalance;
+      if (fromPool > 0) {
+        const updatedPlan = await tx.userPlan.update({
+          where: { userId },
+          data: { creditPool: { decrement: fromPool } },
+        });
+        newPoolBalance = updatedPlan.creditPool;
+      }
+
+      // Total available after deduction = remaining monthly + remaining pool.
+      return { remaining: updatedUsage.creditsRemaining + newPoolBalance };
     });
 
-    logger.dev(`Deducted ${creditsToDeduct} credits from user ${userId}. Remaining: ${result.creditsRemaining}`);
+    logger.dev(`Deducted ${creditsToDeduct} credits from user ${userId}. Remaining: ${result.remaining}`);
 
     return {
       success: true,
-      remaining: result.creditsRemaining,
+      remaining: result.remaining,
     };
   } catch (error: any) {
     logger.error('Error deducting credits:', error);
@@ -232,6 +272,47 @@ export async function deductCredits(
       remaining: 0,
       error: error.message || 'Failed to deduct credits',
     };
+  }
+}
+
+/**
+ * Add credits to the user's persistent pool (pricing-v2).
+ *
+ * The pool is a balance on UserPlan that NEVER resets (survives period rollover
+ * and resetCredits). Used for FREE one-time credits, LTD lifetime seed, and $9/100
+ * top-ups. Atomically increments UserPlan.creditPool and writes a UsageEvent ledger
+ * row. `metadata` may carry Stripe dedupe keys (e.g. { stripeSessionId }) so
+ * repeatable grants like top-ups can be made idempotent by the caller.
+ */
+export async function addPoolCredits(
+  userId: string,
+  amount: number,
+  reason: UsageEventType.CREDIT_TOPUP | UsageEventType.LTD_GRANT,
+  metadata?: any
+): Promise<{ success: boolean; poolRemaining: number; error?: string }> {
+  try {
+    const updatedPlan = await prisma.userPlan.update({
+      where: { userId },
+      data: { creditPool: { increment: amount } },
+    });
+
+    // Ledger entry. creditsUsed is negative to denote a GRANT (credits added),
+    // keeping the ledger sum-consistent with debits recorded as positive.
+    await prisma.usageEvent.create({
+      data: {
+        userId,
+        eventType: reason,
+        creditsUsed: -amount,
+        metadata,
+        success: true,
+      },
+    });
+
+    logger.info(`Added ${amount} pool credits to user ${userId} (${reason}). Pool: ${updatedPlan.creditPool}`);
+    return { success: true, poolRemaining: updatedPlan.creditPool };
+  } catch (error: any) {
+    logger.error('Error adding pool credits:', error);
+    return { success: false, poolRemaining: 0, error: error.message || 'Failed to add pool credits' };
   }
 }
 
@@ -437,14 +518,26 @@ export async function getCreditBalance(userId: string) {
     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const daysUntilReset = Math.ceil((nextMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
+    const poolRemaining = userPlan.creditPool ?? 0;
+    const monthlyRemaining = usage.creditsRemaining;
+    // pricing-v2: guard the division — FREE has creditsLimit=0, so used/limit is
+    // NaN/Infinity. Report 0% when there is no monthly allotment.
+    const percentUsed =
+      usage.creditsLimit > 0 ? (usage.creditsUsed / usage.creditsLimit) * 100 : 0;
+
     return {
+      // Back-compat fields (existing consumers: CreditBadge, dashboard).
       used: usage.creditsUsed,
       remaining: usage.creditsRemaining,
       limit: usage.creditsLimit,
-      percentUsed: (usage.creditsUsed / usage.creditsLimit) * 100,
+      percentUsed,
       daysUntilReset,
       nextResetDate: nextMonth,
       tier: userPlan.tier,
+      // pricing-v2 pool-aware fields.
+      monthlyRemaining,
+      poolRemaining,
+      totalAvailable: monthlyRemaining + poolRemaining,
     };
   } catch (error) {
     logger.error('Error getting credit balance:', error);
@@ -472,12 +565,22 @@ export async function getUsageStats(userId: string, period?: string) {
       return null;
     }
 
+    // pricing-v2: fold in the persistent pool + guard the zero-limit division.
+    const userPlan = await getUserPlan(userId);
+    const poolRemaining = userPlan.creditPool ?? 0;
+    const percentUsed =
+      usage.creditsLimit > 0 ? (usage.creditsUsed / usage.creditsLimit) * 100 : 0;
+
     return {
       period: targetPeriod,
       credits: {
         used: usage.creditsUsed,
         remaining: usage.creditsRemaining,
         limit: usage.creditsLimit,
+        percentUsed,
+        monthlyRemaining: usage.creditsRemaining,
+        poolRemaining,
+        totalAvailable: usage.creditsRemaining + poolRemaining,
       },
       operations: {
         fullPageGenerations: usage.fullPageGens,

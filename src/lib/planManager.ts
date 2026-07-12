@@ -34,6 +34,10 @@ export interface PlanConfig {
     customDomains: number;
     formSubmissions: number;
     teamMembers: number;
+    // social-posts feature cap. FREE = 10 lifetime, PRO = 300/mo soft cap,
+    // AGENCY/ENTERPRISE = -1 (unlimited). MUST equal the phase-2 backfill SQL in
+    // migration 20260710105655_social_posts (SQL cannot import TS — keep in sync).
+    socialPosts: number;
   };
   features: {
     removeBranding: boolean;
@@ -59,22 +63,27 @@ export interface PlanConfig {
 export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
   [PlanTier.FREE]: {
     tier: PlanTier.FREE,
-    name: 'Launch',
+    name: 'Free',
     price: {
       monthly: 0,
       annual: 0,
     },
-    credits: 30,
+    // Display value 20 INTENTIONALLY diverges from DB creditsLimit=0. The 20
+    // one-time credits live in UserPlan.creditPool (seeded once at plan creation,
+    // never refills — added in a later phase), while the monthly limit is
+    // deliberately 0 (new periods seed 0). Do NOT "fix" this to write creditsLimit=20.
+    credits: 20,
     limits: {
-      publishedPages: 20,
+      publishedPages: 1,
       draftProjects: 3,
-      customDomains: 1,
-      formSubmissions: 100,
+      customDomains: 0,
+      formSubmissions: 25,
       teamMembers: 1,
+      socialPosts: 10, // lifetime cap (FREE)
     },
     features: {
       removeBranding: false,
-      customDomains: true,
+      customDomains: false,
       formIntegrations: false,
       exportHTML: false,
       whiteLabel: false,
@@ -91,16 +100,17 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
     tier: PlanTier.PRO,
     name: 'Pro',
     price: {
-      monthly: 39,
-      annual: 29, // $348/year = $29/month
+      monthly: 29,
+      annual: 24, // $290/year ≈ $24/month (pricing page displays "$290/yr")
     },
     credits: 200,
     limits: {
-      publishedPages: 10,
+      publishedPages: 3,
       draftProjects: -1, // unlimited
       customDomains: 3,
       formSubmissions: 1000,
       teamMembers: 1,
+      socialPosts: 300, // monthly soft cap (PRO)
     },
     features: {
       removeBranding: true,
@@ -131,6 +141,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       customDomains: -1, // unlimited
       formSubmissions: -1, // unlimited
       teamMembers: 5,
+      socialPosts: -1, // unlimited (AGENCY)
     },
     features: {
       removeBranding: true,
@@ -161,6 +172,7 @@ export const PLAN_CONFIGS: Record<PlanTier, PlanConfig> = {
       customDomains: -1, // unlimited
       formSubmissions: -1, // unlimited
       teamMembers: -1, // unlimited
+      socialPosts: -1, // unlimited (ENTERPRISE)
     },
     features: {
       removeBranding: true,
@@ -201,23 +213,41 @@ export async function getUserPlan(userId: string) {
 }
 
 /**
+ * ⚠️ LIMIT-COLUMN WRITER-COMPLETENESS GUARD (durable): the *Limit DB columns are
+ * written by SIX writers — FIVE in this file (createDefaultPlan, upgradePlan,
+ * downgradePlan, grantLifetimeDeal, startTrial) plus ONE outside planManager: the
+ * comped_pro branch of `src/app/api/admin/grant-plan/route.ts`. Adding ANY new
+ * `*Limit` column requires writing it in ALL SIX (grep `socialPostsLimit` to see
+ * the pattern). The Prisma `update`/`create` calls do NOT require every column, so
+ * `tsc` CANNOT catch a missing writer — a stale row would silently carry the wrong cap.
+ */
+
+/**
  * Create default FREE plan for new user
  */
 export async function createDefaultPlan(userId: string) {
   try {
     const config = PLAN_CONFIGS[PlanTier.FREE];
 
+    // pricing-v2: FREE monthly allotment is DELIBERATELY 0 (new periods seed 0), and
+    // the displayed 20 credits are ONE-TIME — seeded into the persistent creditPool
+    // exactly ONCE, here at plan creation. They never refill (resetCredits / the
+    // lazy period seed never touch the pool). Do NOT write config.credits into
+    // creditsLimit for FREE. This creation path is the ONLY place the 20-pool is
+    // seeded; existing FREE rows are intentionally left untouched (Q7).
     const userPlan = await prisma.userPlan.create({
       data: {
         userId,
         tier: config.tier,
         status: PlanStatus.ACTIVE,
-        creditsLimit: config.credits,
+        creditsLimit: 0,
+        creditPool: config.credits, // one-time 20
         publishedPagesLimit: config.limits.publishedPages,
         draftProjectsLimit: config.limits.draftProjects,
         customDomainsLimit: config.limits.customDomains,
         formSubmissionsLimit: config.limits.formSubmissions,
         teamMembersLimit: config.limits.teamMembers,
+        socialPostsLimit: config.limits.socialPosts,
         removeBranding: config.features.removeBranding,
         customDomains: config.features.customDomains,
         formIntegrations: config.features.formIntegrations,
@@ -252,6 +282,8 @@ export async function upgradePlan(
   try {
     const config = PLAN_CONFIGS[newTier];
 
+    // pricing-v2: PRO monthly allotment = config.credits (200). creditPool is
+    // deliberately NOT written here, so any top-up balance survives an upgrade.
     const userPlan = await prisma.userPlan.update({
       where: { userId },
       data: {
@@ -267,6 +299,7 @@ export async function upgradePlan(
         customDomainsLimit: config.limits.customDomains,
         formSubmissionsLimit: config.limits.formSubmissions,
         teamMembersLimit: config.limits.teamMembers,
+        socialPostsLimit: config.limits.socialPosts,
         removeBranding: config.features.removeBranding,
         customDomains: config.features.customDomains,
         formIntegrations: config.features.formIntegrations,
@@ -292,6 +325,12 @@ export async function downgradePlan(userId: string, newTier: PlanTier = PlanTier
   try {
     const config = PLAN_CONFIGS[newTier];
 
+    // pricing-v2: FREE monthly allotment is 0 (config.credits=20 is a DISPLAY value
+    // living in the pool). Crucially, downgrade does NOT re-seed the 20-credit pool —
+    // that seed happens once at plan creation only, so users can't farm free credits
+    // by cycling upgrade→downgrade. creditPool is deliberately left untouched here.
+    const monthlyLimit = newTier === PlanTier.FREE ? 0 : config.credits;
+
     const userPlan = await prisma.userPlan.update({
       where: { userId },
       data: {
@@ -301,12 +340,13 @@ export async function downgradePlan(userId: string, newTier: PlanTier = PlanTier
         stripeSubscriptionId: null,
         currentPeriodStart: null,
         currentPeriodEnd: null,
-        creditsLimit: config.credits,
+        creditsLimit: monthlyLimit,
         publishedPagesLimit: config.limits.publishedPages,
         draftProjectsLimit: config.limits.draftProjects,
         customDomainsLimit: config.limits.customDomains,
         formSubmissionsLimit: config.limits.formSubmissions,
         teamMembersLimit: config.limits.teamMembers,
+        socialPostsLimit: config.limits.socialPosts,
         removeBranding: config.features.removeBranding,
         customDomains: config.features.customDomains,
         formIntegrations: config.features.formIntegrations,
@@ -326,7 +366,69 @@ export async function downgradePlan(userId: string, newTier: PlanTier = PlanTier
 }
 
 /**
+ * Grant a lifetime deal (pricing-v2 LTD / bespoke).
+ *
+ * LTD is modeled as tier=PRO + lifetimeDeal=true (+ ltdCohort/ltdPricePaid). Monthly
+ * allotment is 0 (no subscription ever fires resetCredits for them); the value comes
+ * from a one-time 600-credit pool seed via addPoolCredits. Gets full PRO feature
+ * limits. Used by the phase-6 webhook and the phase-8 admin grant route.
+ *
+ * `ltdCohort = 0` is reserved for pre-cohort bespoke grants (hidden from the public
+ * 1–3 cohort counter).
+ */
+export async function grantLifetimeDeal(
+  userId: string,
+  cohort: number,
+  pricePaidCents: number
+) {
+  try {
+    const config = PLAN_CONFIGS[PlanTier.PRO];
+
+    const userPlan = await prisma.userPlan.update({
+      where: { userId },
+      data: {
+        tier: PlanTier.PRO,
+        status: PlanStatus.ACTIVE,
+        lifetimeDeal: true,
+        ltdCohort: cohort,
+        ltdPricePaid: pricePaidCents,
+        // Monthly allotment 0 — the 600 credits live in the persistent pool below.
+        creditsLimit: 0,
+        publishedPagesLimit: config.limits.publishedPages,
+        draftProjectsLimit: config.limits.draftProjects,
+        customDomainsLimit: config.limits.customDomains,
+        formSubmissionsLimit: config.limits.formSubmissions,
+        teamMembersLimit: config.limits.teamMembers,
+        socialPostsLimit: config.limits.socialPosts,
+        removeBranding: config.features.removeBranding,
+        customDomains: config.features.customDomains,
+        formIntegrations: config.features.formIntegrations,
+        exportHTML: config.features.exportHTML,
+        whiteLabel: config.features.whiteLabel,
+        analytics: config.features.analytics,
+        prioritySupport: config.features.prioritySupport,
+      },
+    });
+
+    // Seed the 600-credit lifetime pool. Dynamic import avoids a top-level circular
+    // dependency (creditSystem imports getUserPlan from this module).
+    const { addPoolCredits, UsageEventType } = await import('./creditSystem');
+    await addPoolCredits(userId, 600, UsageEventType.LTD_GRANT, { cohort, pricePaidCents });
+
+    logger.info(`Granted lifetime deal to user ${userId} (cohort ${cohort}, ${pricePaidCents}c)`);
+    return userPlan;
+  } catch (error) {
+    logger.error('Error granting lifetime deal:', error);
+    throw error;
+  }
+}
+
+/**
  * Start trial period
+ *
+ * UNUSED (spec decision 3): pricing v2 has no trials — the free tier is the trial,
+ * with a 14-day money-back guarantee instead. Kept in place (not deleted) to avoid
+ * touching callers/exports; do not wire into new flows.
  */
 export async function startTrial(userId: string, tier: PlanTier, trialDays: number = 14) {
   try {
@@ -350,6 +452,7 @@ export async function startTrial(userId: string, tier: PlanTier, trialDays: numb
         customDomainsLimit: config.limits.customDomains,
         formSubmissionsLimit: config.limits.formSubmissions,
         teamMembersLimit: config.limits.teamMembers,
+        socialPostsLimit: config.limits.socialPosts,
         removeBranding: config.features.removeBranding,
         customDomains: config.features.customDomains,
         formIntegrations: config.features.formIntegrations,
@@ -370,6 +473,9 @@ export async function startTrial(userId: string, tier: PlanTier, trialDays: numb
 
 /**
  * End trial period (convert or revert)
+ *
+ * UNUSED (spec decision 3): see startTrial — pricing v2 has no trials. Retained,
+ * not deleted.
  */
 export async function endTrial(userId: string, convert: boolean = false) {
   try {

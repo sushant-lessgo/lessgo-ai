@@ -23,6 +23,12 @@ export async function GET(req: NextRequest) {
       tier: plan.tier,
       status: plan.status,
       creditsLimit: plan.creditsLimit,
+      // pricing-v2: persistent pool + LTD identity. FREE has creditsLimit=0 and its
+      // 20 one-time credits live in creditPool, so a reader that shows only
+      // creditsLimit would render "0 credits" — expose the pool + lifetime flags.
+      creditPool: plan.creditPool ?? 0,
+      lifetimeDeal: plan.lifetimeDeal ?? false,
+      ltdCohort: plan.ltdCohort ?? null,
       currentPeriodStart: plan.currentPeriodStart,
       currentPeriodEnd: plan.currentPeriodEnd,
       isTrialing: plan.isTrialing,

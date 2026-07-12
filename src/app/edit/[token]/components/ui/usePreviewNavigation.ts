@@ -3,7 +3,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEditStoreApi } from '@/hooks/useEditStoreLegacy';
+import { useEditStoreApi } from '@/hooks/useEditStore';
 import { useToast } from './useToast';
 import { getTabManager, cleanupTabManager } from '@/utils/tabManager';
 

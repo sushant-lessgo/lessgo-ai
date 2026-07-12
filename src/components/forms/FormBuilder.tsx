@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, X, GripVertical, Settings } from 'lucide-react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import type { MVPForm, MVPFormField, MVPFormFieldType, MVPFormIntegration } from '@/types/core/forms';
 import {
   getServiceFormTemplate,

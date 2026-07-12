@@ -24,7 +24,7 @@
 import React, { useState } from 'react';
 import { usePostHog } from 'posthog-js/react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import {
   usesTemplateModule,
   palettesForTemplate,

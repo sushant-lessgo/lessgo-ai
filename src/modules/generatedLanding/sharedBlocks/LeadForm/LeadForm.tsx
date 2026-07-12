@@ -5,12 +5,12 @@
 // Per plan-review finding #1 the edit renderer does NOT pass a `content` prop
 // (LandingPageRenderer spreads only the section's own `data`), so — like
 // VestriaLeadForm.tsx — this reads the form from the store's top-level
-// FormsSlice: useEditStoreLegacy().forms?.[form_id], with form_id / form_headline
+// FormsSlice: useEditStore().forms?.[form_id], with form_id / form_headline
 // pulled from the section's own elements. Layout lives in leadFormFields so this
 // is byte-parallel with the published twin.
 
 import React from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { getEffectiveElementValue } from '@/lib/i18n/localeContent';
 import {
   LeadFormCore,

@@ -18,7 +18,10 @@ Any file in the audit list that is NOT in the plan list is out-of-scope creep:
 report it (Blocking if it changes behavior).
 
 Read the plan, the audit, and the scoped diff. Hunt for what the audit does NOT
-mention within scope. Then run the gate: `npx tsc --noEmit` and `npm run test:run`
+mention within scope. Registration-list landmines (Blocking if missed): a new
+page under `src/app/` meant to be public → must be in `isPublicRoute`
+(`src/middleware.ts`); a new/edited block component → BOTH `componentRegistry.ts`
+and `componentRegistry.published.ts` and both `.tsx`/`.published.tsx` halves. Then run the gate: `npx tsc --noEmit` and `npm run test:run`
 — any failure is a Blocking issue (paste the failing output).
 
 Report EXACTLY three sections:

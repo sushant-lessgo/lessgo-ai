@@ -23,9 +23,9 @@
 import React, { useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import {
-  useEditStoreLegacy as useEditStore,
+  useEditStore,
   useEditStoreApi,
-} from '@/hooks/useEditStoreLegacy';
+} from '@/hooks/useEditStore';
 
 type SaveStatus = 'saved' | 'saving' | 'error';
 

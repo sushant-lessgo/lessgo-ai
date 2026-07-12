@@ -4,14 +4,14 @@
 // from the section's own content elements (appstore_url / playstore_url /
 // badge_label). Like the LeadForm edit twin, the edit renderer does NOT pass a
 // `content` prop (LandingPageRenderer spreads only the section's own `data`), so
-// this reads the section from the store via useEditStoreLegacy. Layout lives in
+// this reads the section from the store via useEditStore. Layout lives in
 // badgeArt.StoreBadgesCore so this is byte-parallel with the published twin.
 //
 // Anchors are inert in the editor (preventDefault) — the published twin carries
 // the real `data-lessgo-cta` beacon attrs. Both emit identical badge markup.
 
 import React from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { getEffectiveElementValue } from '@/lib/i18n/localeContent';
 import {
   StoreBadgesCore,

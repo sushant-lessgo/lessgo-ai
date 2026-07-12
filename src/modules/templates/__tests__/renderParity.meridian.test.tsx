@@ -31,11 +31,11 @@ import type { CTAButton } from '@/types/destination';
 
 const h = vi.hoisted(() => ({ store: null as any }));
 
-vi.mock('@/hooks/useEditStoreLegacy', () => ({
+vi.mock('@/hooks/useEditStore', () => ({
   // Honor the selector arg (block hooks now subscribe via selectors, not a
   // whole-store destructure) — otherwise the whole state is handed where a
   // section slice is expected and blockContent comes back empty.
-  useEditStoreLegacy: (selector?: (s: any) => any) =>
+  useEditStore: (selector?: (s: any) => any) =>
     selector ? selector(h.store.getState()) : h.store.getState(),
 }));
 

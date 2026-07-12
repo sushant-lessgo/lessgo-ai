@@ -51,8 +51,8 @@ vi.mock('./VestriaLeadForm.core', () => ({
 }));
 
 // forms live at the store TOP LEVEL — the whole point of F1.
-vi.mock('@/hooks/useEditStoreLegacy', () => ({
-  useEditStoreLegacy: (selector?: (s: any) => any) => {
+vi.mock('@/hooks/useEditStore', () => ({
+  useEditStore: (selector?: (s: any) => any) => {
     const state = { forms: { [FORM_ID]: SEEDED_FORM } };
     return selector ? selector(state) : state;
   },

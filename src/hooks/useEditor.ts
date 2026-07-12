@@ -1,6 +1,6 @@
 // hooks/useEditor.ts - Unified editor interaction system
 import { useCallback, useEffect } from 'react';
-import { useEditStoreLegacy as useEditStore } from './useEditStoreLegacy';
+import { useEditStore } from './useEditStore';
 
 import { logger } from '@/lib/logger';
 export interface ClickTarget {

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { UndoRedoButtons } from '../ui/UndoRedoButtons';
 import { ResetButton } from '../ui/ResetButton';
 import { PreviewButton } from '../ui/PreviewButton';

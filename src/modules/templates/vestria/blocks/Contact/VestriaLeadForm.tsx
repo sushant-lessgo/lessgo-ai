@@ -6,7 +6,7 @@
 // becomes a real <form data-lessgo-form> wired to form.v1.js → /api/forms/submit.
 
 import React from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useVestriaBlock } from '../../hooks/useVestriaBlock';
 import { VestriaEditProvider, editPrimitives, useVestriaEditCtx } from '../editPrimitives';
 import { VestriaLeadFormCore, type VestriaLeadFormContent } from './VestriaLeadForm.core';

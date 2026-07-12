@@ -28,7 +28,7 @@ import {
   useInteractions,
 } from '@floating-ui/react';
 import { useSelectionPriority } from '@/hooks/useSelectionPriority';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import type { ToolbarType } from '@/utils/selectionPriority';
 
 import { actionSets } from './actionSets';

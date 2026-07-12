@@ -2,7 +2,7 @@
 // Eliminates cursor jumping by using DOM as source of truth during editing
 
 import React, { useRef, useState, useEffect } from 'react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 
 // Place the caret at the end of a contenteditable element.
 function placeCaretAtEnd(el: HTMLElement) {

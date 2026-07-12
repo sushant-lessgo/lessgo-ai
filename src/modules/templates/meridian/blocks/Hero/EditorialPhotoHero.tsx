@@ -12,7 +12,7 @@
 import React from 'react';
 import { useMeridianBlock } from '../../hooks/useMeridianBlock';
 import { MeridianEditable } from '../../components/MeridianEditable';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { EDITORIAL_PHOTO_HERO_STYLES } from './EditorialPhotoHero.styles';
 
 interface EditorialPhotoHeroContent {

@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useElementCRUD } from './useElementCRUD';
-import { useEditStoreApi } from './useEditStoreLegacy';
+import { useEditStoreApi } from './useEditStore';
 import type { UniversalElementType } from '@/types/universalElements';
 import { logger } from '@/lib/logger';
 

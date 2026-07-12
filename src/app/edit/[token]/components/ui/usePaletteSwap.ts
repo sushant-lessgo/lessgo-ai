@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from 'react';
-import { useEditStoreLegacy as useEditStore, useEditStoreApi } from '@/hooks/useEditStoreLegacy';
+import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { type Palette } from '@/modules/Design/background/palettes';
 import { getCompatibleTextures, compileBackground } from '@/modules/Design/background/textures';
 import { generateBackgroundSystemFromPalette } from '@/modules/Design/background/backgroundIntegration';

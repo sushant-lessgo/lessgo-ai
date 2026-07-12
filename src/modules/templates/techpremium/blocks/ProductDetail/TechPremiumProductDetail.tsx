@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { ChevronLeft, ChevronRight, Expand, Check, Upload } from 'lucide-react';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
 import { PD_STYLES } from './styles';

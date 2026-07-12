@@ -8,7 +8,7 @@ import React from 'react';
 import { useMeridianBlock } from '../../hooks/useMeridianBlock';
 import { MeridianEditable } from '../../components/MeridianEditable';
 import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions, deriveNavLinks } from '@/utils/pageLinks';
 import type { Link } from '@/types/destination';

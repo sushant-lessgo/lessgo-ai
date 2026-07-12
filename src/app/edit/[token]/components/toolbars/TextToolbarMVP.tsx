@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { debounce } from 'lodash';
 import { logger } from '@/lib/logger';
 import { useShallow } from 'zustand/react/shallow';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useSelectionPreserver } from '@/hooks/useSelectionPreserver';
 import {
   formatSelectedText,

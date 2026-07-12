@@ -488,7 +488,7 @@ export function templateConformance(templateId: TemplateId): void {
 // `editBasics` mocks this consumes (surge/vestria/lex deferred — plan Q6).
 //
 // CALLER CONTRACT: the enrolling test file MUST (a) `vi.mock`
-// '@/hooks/useEditStoreLegacy' (selector-honoring `useEditStoreLegacy` +
+// '@/hooks/useEditStore' (selector-honoring `useEditStore` +
 // `useEditStoreApi`) and '@/components/EditProvider' (`useEditStoreContext`) onto
 // a single vanilla store, and (b) seed that store from `ALL_BLOCK_MOCK_SECTIONS`
 // (blockMocks/harness) so every `sectionId` below resolves content. Edit blocks

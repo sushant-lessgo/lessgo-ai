@@ -1,7 +1,7 @@
 'use client';
 
 import { FormBuilder } from '@/components/forms/FormBuilder';
-import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy';
+import { useEditStore } from '@/hooks/useEditStore';
 
 export function GlobalFormBuilder() {
   const { formBuilderOpen, editingFormId, hideFormBuilder } = useEditStore();

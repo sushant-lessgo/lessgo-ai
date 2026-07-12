@@ -79,6 +79,11 @@ export interface StaticHTMLOptions {
   // Configuration
   analyticsOptIn?: boolean;
   baseURL?: string;
+  /** pricing-v2 (phase 2): suppress the "Made with Lessgo" badge. Only true when
+   *  the page owner's plan has the `removeBranding` feature (Pro/LTD). Default
+   *  false ⇒ badge shown — FAIL-CLOSED to branded so a missing/failed plan lookup
+   *  never silently drops branding on a free page. */
+  removeBranding?: boolean;
 
   // i18n (Phase 5) — all OPTIONAL. Absent ⇒ single-locale byte-identical output.
   /** The locale THIS doc renders (for `<html lang>`). Defaults to 'en' when absent. */
@@ -174,6 +179,7 @@ export async function generateStaticHTML(
       jsonLd: options.jsonLd,
     },
     analyticsOptIn: options.analyticsOptIn || false,
+    removeBranding: options.removeBranding || false,
     hasForms,
     usesNaayom,
     usesLumen,
@@ -261,6 +267,7 @@ function buildHTMLDocument(params: {
     jsonLd?: string;
   };
   analyticsOptIn: boolean;
+  removeBranding: boolean;
   hasForms: boolean;
   usesNaayom: boolean;
   usesLumen: boolean;
@@ -269,7 +276,7 @@ function buildHTMLDocument(params: {
   localeConfig?: LocaleConfig;
   localeAlternates?: Array<{ hreflang: string; href: string }>;
 }): string {
-  const { bodyHTML, cssVariables, metadata, analyticsOptIn, hasForms, usesNaayom, usesLumen, usesAtelier } = params;
+  const { bodyHTML, cssVariables, metadata, analyticsOptIn, removeBranding, hasForms, usesNaayom, usesLumen, usesAtelier } = params;
 
   // i18n (Phase 5): multi-locale head/script emission. When the project declares
   // only one locale (or none), NONE of this fires and the document is
@@ -385,7 +392,7 @@ function buildHTMLDocument(params: {
 </head>
 <body>
   ${bodyHTML}
-  ${renderLessgoBadge()}
+  ${removeBranding ? '' : renderLessgoBadge()}
 
   <!-- Phase 4: Form handler (loaded if page has forms) -->
   ${hasForms ? `<script src="${assetBase}/assets/form.v1.js" defer></script>` : ''}

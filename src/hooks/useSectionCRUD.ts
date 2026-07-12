@@ -1,6 +1,6 @@
 // hooks/useSectionCRUD.ts - Section CRUD operations hook
 import { useCallback } from 'react';
-import { useEditStoreApi } from './useEditStoreLegacy';
+import { useEditStoreApi } from './useEditStore';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import type { ValidationResult } from '@/types/store';
 import type { BackgroundType } from '@/types/sectionBackground';

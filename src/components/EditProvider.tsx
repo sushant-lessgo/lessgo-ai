@@ -6,7 +6,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { useEditStore } from '@/hooks/useEditStore';
+import { useEditStoreBootstrap } from '@/hooks/useEditStoreBootstrap';
 import type { EditStoreInstance } from '@/stores/editStore';
 import type { EditStore } from '@/types/store';
 import { EditErrorBoundary } from './EditErrorBoundary';
@@ -108,7 +108,7 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
     content,
     theme,
     retryInitialization,
-  } = useEditStore(tokenId, {
+  } = useEditStoreBootstrap(tokenId, {
     suspense,
     preload,
     resetOnTokenChange,
