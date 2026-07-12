@@ -214,11 +214,12 @@ export async function getUserPlan(userId: string) {
 
 /**
  * ⚠️ LIMIT-COLUMN WRITER-COMPLETENESS GUARD (durable): the *Limit DB columns are
- * written by FIVE functions — createDefaultPlan, upgradePlan, downgradePlan,
- * grantLifetimeDeal, and startTrial. Adding ANY new `*Limit` column requires
- * writing it in ALL FIVE (grep `socialPostsLimit` to see the pattern). The Prisma
- * `update`/`create` calls do NOT require every column, so `tsc` CANNOT catch a
- * missing writer — a stale row would silently carry the wrong cap.
+ * written by SIX writers — FIVE in this file (createDefaultPlan, upgradePlan,
+ * downgradePlan, grantLifetimeDeal, startTrial) plus ONE outside planManager: the
+ * comped_pro branch of `src/app/api/admin/grant-plan/route.ts`. Adding ANY new
+ * `*Limit` column requires writing it in ALL SIX (grep `socialPostsLimit` to see
+ * the pattern). The Prisma `update`/`create` calls do NOT require every column, so
+ * `tsc` CANNOT catch a missing writer — a stale row would silently carry the wrong cap.
  */
 
 /**

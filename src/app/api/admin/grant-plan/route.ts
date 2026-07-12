@@ -103,6 +103,7 @@ export async function POST(req: NextRequest) {
           customDomainsLimit: config.limits.customDomains,
           formSubmissionsLimit: config.limits.formSubmissions,
           teamMembersLimit: config.limits.teamMembers,
+          socialPostsLimit: config.limits.socialPosts,
           removeBranding: config.features.removeBranding,
           customDomains: config.features.customDomains,
           formIntegrations: config.features.formIntegrations,

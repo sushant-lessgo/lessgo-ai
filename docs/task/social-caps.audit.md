@@ -92,6 +92,25 @@ No schema change (phase-2 migration already carries `SocialPost` + `UserPlan.soc
   `downgradePlan`, `startTrial`, `grantLifetimeDeal`, plus the `checkLimit` read path (via the
   `${limitType}Limit` lookup) and the interface + tier configs.
 
+## Fix loop (post-review)
+Reviewer found a SIXTH direct limit-column writer missed by the original phase: the
+`comped_pro` branch of `src/app/api/admin/grant-plan/route.ts` (~L91-114) does a direct
+`prisma.userPlan.update` seeding limits from `PLAN_CONFIGS[PRO]` but omitted
+`socialPostsLimit`, leaving comped-PRO users at the schema default 10 instead of 300.
+- **What:** added `socialPostsLimit: config.limits.socialPosts,` to that update (now 300 for
+  comped-PRO, matching real PRO). Corrected the planManager.ts guard comment from "FIVE
+  functions" to SIX writers, explicitly noting the sixth lives outside planManager at
+  `src/app/api/admin/grant-plan/route.ts`.
+- **Why:** completeness — the guard's own invariant (every `*Limit` writer sets every column)
+  was violated; `tsc` cannot catch a missing Prisma-update column.
+- **Test:** no grant-plan test file exists; per fix-loop scope no new test infra created.
+  Existing gating/route/planManager tests re-run (see Fix-loop verification).
+
+## Fix-loop verification
+- `npx tsc --noEmit`: clean except the same pre-existing unrelated `founder.jpg` error.
+- `gating.test.ts`, social `route.test.ts`, planManager tests: pass (see below).
+- `npm run test:run`: all green.
+
 ## Open risks
 - **HUMAN GATE (plan §Phase 7):** the `planManager.ts` plan-limits edit is a billing surface —
   user sign-off on the values (FREE 10 / PRO 300 / AGENCY -1 / ENTERPRISE -1, equal to the phase-2
