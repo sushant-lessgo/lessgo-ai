@@ -538,3 +538,56 @@ compact: {
 Loop 1 = fix-first: density=compact editor↔published parity divergence (--space multiplier resolved at :root declaring-scope; published wrapper is a :root descendant so section rhythm didn't compress there). Loop 2 = ship after fix (compact block redeclares final --sec-y/--pad-y/--pad-y-sm directly + guard test).
 Gates green: tsc exit 0; conformance+atelier = 441 passed/8 skipped. Verified: class rename atl-→lg-atelier-, knob realignment (cardStyle=[hairline,flat]/density=[comfortable,compact], defaults no-emit), ThemeInjector/SSRTokens parity, Hero slider DOM contract exact, Header overlay+solid+drawer+page-head-mode, marquee, core purity, data-surface. Scope = 8 files.
 CARRY→9b: palette ids (types/service.ts vermilion/indigo/olive → vermilion/cobalt/moss/ochre + 4th). CARRY→12/13: buttonShape default rounded≠Kontur square (per-project knob seed decision at parity gate).
+
+---
+### Phase 9b — content blocks (Work/Packages/About/Quote/Contact/Footer) + palette-id fix
+
+**Files changed:**
+- `src/types/service.ts` — AtelierPalette union rename + comment
+- `src/modules/templates/atelier/palettes.ts` — palette configs (id rename + ochre)
+- `src/modules/templates/atelier/imageKeywords.ts` — PALETTE_IMAGE_KEYWORDS keys
+- `src/modules/templates/atelier/blocks/Work/{AtelierWorkGallery.core.tsx,styles.ts}`
+- `src/modules/templates/atelier/blocks/Packages/{AtelierPackages.core.tsx,styles.ts}`
+- `src/modules/templates/atelier/blocks/About/{AtelierAbout.core.tsx,styles.ts}`
+- `src/modules/templates/atelier/blocks/Quote/{AtelierQuoteBand.core.tsx,styles.ts}`
+- `src/modules/templates/atelier/blocks/Contact/{AtelierContact.core.tsx,AtelierContact.tsx,AtelierContact.published.tsx,styles.ts}` + NEW `contactFields.ts`, `leadFormMarkup.tsx`
+- `src/modules/templates/atelier/blocks/Footer/{AtelierFooter.core.tsx,styles.ts}`
+- (Work/Packages/About/Quote/Footer `.tsx`/`.published.tsx` wrappers UNCHANGED — boilerplate already correct; core signature unchanged.)
+- (`blockManifest.ts` NOT edited — no consumes/capacity changed; packages capacity confirmed minCards:2/maxCards:4.)
+- (`paletteSelection.ts` NOT edited — only returns default 'vermilion'; no id references.)
+
+**Palette-id rename (9a carry):** union `vermilion|indigo|olive` → `vermilion|cobalt|moss|ochre` (default stays vermilion). Threaded through `types/service.ts` (atelierPalettes + AtelierPalette; PALETTES_BY_TEMPLATE reads the array so no separate edit), `palettes.ts` (cobalt/moss exact oklch + ochre added: `oklch(0.680 0.140 70)` / `oklch(0.540 0.130 66)`), `imageKeywords.ts` (cobalt/moss/ochre phrases). No reader outside the listed files (grep confirmed; conformance.test.ts uses only 'vermilion'). Blast radius clean — no STOP.
+
+**Per block (class prefix atl-→lg-atelier-, values from styles.css):**
+- **Work** — TWO modes on the `works` collection via `content.mode`: default `.lg-atelier-mosaic` (6-col dense grid, per-cell spans via `:nth-child(6n±)` so no per-item class is needed — works with the shared collection primitive; each cell `.lg-atelier-cell` + media aspect + `.lg-atelier-cap` category dot + more-link `.lg-atelier-qlink`); `mode==='gallery'` `.lg-atelier-gallery` (CSS `columns:3` masonry, `.lg-atelier-gcell` + `.lg-atelier-gcap` title/category). Images via E.List reorderable+imageField (EditableImageCollection). Title kept as `.lg-atelier-vh` visually-hidden in mosaic (design surfaces only the category; also satisfies coreParity fixture).
+- **Packages** — `.lg-atelier-packs` auto-fit minmax(300px,1fr) (survives 2/3/4); each `.lg-atelier-pack` = `.lg-atelier-pack-img` (3:2 + optional `.lg-atelier-flag` when is_featured) + body (summary→tier `.lg-atelier-pack-cat`, name→h3, price_display→`.lg-atelier-price`, features→`.lg-atelier-pack-features li::before="—"`, full-width CTA accent/line by is_featured). Consumes uses `--card-bg`/`--card-bd` (cardStyle knob now visually live).
+- **About** — `.lg-atelier-split` bio (art `.lg-atelier-split-art__img` 4:5 + `.lg-atelier-badge` / copy label·h2 accent-em·body·body2·`.lg-atelier-sign`·actions). `content.mode==='page'` adds `.lg-atelier-press` rows (year/title/publication) + reversed `.lg-atelier-split--rev` studio split.
+- **Quote** — STATIC dark grid `.lg-atelier-quotes` (auto-fit minmax(320px)) of `figure.lg-atelier-quote` (`.lg-atelier-mark` big serif " + p + `.lg-atelier-who` with `<b>`=accent). Optional `quotes` collection for the 1–3-up grid; single schema quote falls back to one figure. Dark surface.
+- **Contact** — `.lg-atelier-contact` 2-col: copy + `.lg-atelier-cd` detail rows (Based in/Phone/Email/Instagram) / bordered `.lg-atelier-form`. Uses the SHARED lead-form split (formNode prop; edit inert preview, published real `<form data-lessgo-form>` wired to form.v1.js) via new `leadFormMarkup.tsx` + `contactFields.ts` (fields name/email/occasion/brief; "Send brief") — mirrors Vestria; submission NOT reinvented. Inner-page dark page-head is the Hero page-head mode (separate section), not duplicated.
+- **Footer** — big `.lg-atelier-fw` wordmark (`.dot`=accent) + 3-col (`desc+contact` / Index `footer_links` / Elsewhere `social_links`) + bottom bar (copyright + legal). Surface dark-2.
+
+**Closer + page-head mapping:** `.atl-closer` full-bleed CTA band mapped INTO the Footer core (above the footer proper) per ruling — no new section type. Bg image via a controlled absolute wrapper + full-size E.Img (edit primitive forces inline position:relative, so image wrappers are declared position:relative in CSS, never absolute — dual-renderer parity rule; absolute-fill backgrounds use a separate controlled wrapper). `.atl-page-head` handled by Hero page-head mode (9a), reused not duplicated.
+
+**Deviations (in-scope, conservative):**
+1. Work-page CSS radio FILTER dropped — the shared collection primitive exposes no per-item `data-cat` hook and adding one is outside 9b's files-touched (would need a primitive/resolve change → would STOP). Masonry gallery ships without the filter; flagged for phase 11/12 (primitive enhancement or manual data-cat).
+2. Several design regions have no service-schema backing (elementSchema.ts not in files-touched), so they render via OPTIONAL non-schema content keys, editable + degrading to design placeholders (generation leaves them empty; manual-fill / block-mocks populate): Work more-link (more_text/href), Packages per-item `image`, About badge/cta/press_items/studio_*, Quote `quotes` grid, Contact location/instagram, Footer closer_*/footer_links/index_heading/elsewhere_heading/contact_location/legal_text. Published Txt renders placeholder-as-fallback (existing pattern), so chrome shows design copy until edited.
+3. About PAGE compresses the design's 3 surfaces (bio/press-alt/studio) into ONE section (one data-surface), delineated by rules — the About block is a single section type.
+4. Contact form fields render single-column (Vestria-style) rather than the design's name+email 2-col row, for robustness with arbitrary form-builder fields.
+5. Mode selection (Work gallery / About page) is content-driven like Hero's pageHead/overlay (no schema `mode` element) — populated by archetypes/mocks/manual-fill (out of 9b scope).
+
+**blockManifest confirmation:** unchanged; packages capacity minCards:2/maxCards:4 intact; work 1/12; all `consumes` still ⊆ serviceElementSchema contract (no new schema-backed keys added).
+
+**Commands:** `npx tsc --noEmit` → exit 0. `vitest run conformance.test.ts + atelier` → 55 passed. `vitest run src/modules/templates` → 25 files, 921 passed / 8 skipped. All PASS.
+
+**For phase 10/11/12:**
+- Phase 10 slider asset: Hero DOM contract untouched by 9b.
+- Phase 11 mocks (blockMocks/index.ts): author works (mosaic + gallery mode), packages @2/3/4, about press_items + studio_* (page mode), quotes grid, footer closer_*/footer_links, contact forms — to exercise the non-schema optional keys + the mode flags. Consider seeding `mode` on Work(work-page)/About(about-page) archetypes so gallery/press render.
+- Phase 12 parity: verify the Work CSS-filter deferral decision; nth-child mosaic spans + `.vs-ic-add` trailing edit-only child (parity holds for the N image cells). buttonShape default rounded≠Kontur square still open (9a carry).
+- If the Work filter is wanted: needs a per-item attribute hook on EditableImageCollection (shared primitive) — orchestrator call.
+
+---
+### Phase 9b — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; templates suite 921 passed/8 skipped. Scope = 6 blocks (17 files) + 2 new Contact files (contactFields.ts, leadFormMarkup.tsx) + palette rename (service.ts/palettes.ts/imageKeywords.ts). Verified: all 6 cores pure + boundary-safe; conformance non-vacuous (all core+capability sections resolve real); palette rename COMPLETE (vermilion/cobalt/moss/ochre, zero stale indigo/olive in src, ochre oklch matches); shared lead-form (data-lessgo-form + form.v1.js, not reinvented); closer→Footer + page-head reuse (no new section type); data-surface margins clean.
+Deferrable deviations (carries): (1) unfilled non-schema chrome keys render design placeholder as LIVE TEXT → phase-11 mocks + phase-13 manual-fill must populate (@studioname/"Let's make yours."/etc.); (2) Work category-filter dropped (needs shared-primitive data-cat hook → orchestrator call at 11/12); (3) About 3-surface→1-section + Contact single-col + buttonShape default + opsz → phase-12 parity eyeball.
+
+## FULL 8-BLOCK PORT COMPLETE (9a+9b). Next: 10 (slider JS asset), 11 (editor basics/mocks + carries), 12 (parity QA — HUMAN GATE), 13 (Kundius publish — HUMAN GATE).

@@ -7,8 +7,9 @@ import type { AtelierPalette } from '@/types/service';
 
 export const PALETTE_IMAGE_KEYWORDS: Record<AtelierPalette, string> = {
   vermilion: 'photography portfolio editorial warm gallery craft',
-  indigo:    'photography portfolio editorial cool gallery refined',
-  olive:     'photography portfolio editorial natural gallery muted',
+  cobalt:    'photography portfolio editorial cool gallery refined',
+  moss:      'photography portfolio editorial natural gallery muted',
+  ochre:     'photography portfolio editorial golden gallery earthy',
 };
 
 export function getAtelierImageQuery(query: string, paletteId?: AtelierPalette): string {

@@ -1,8 +1,13 @@
 // src/modules/templates/atelier/blocks/Packages/AtelierPackages.core.tsx
 // SINGLE-SOURCE tiered packages — the `packages` capability's evidence section.
-// 2–4 cards (scope #5 capacity; enforced by the blockManifest). PLAIN server-safe
-// module. `features` is a string[] rendered statically this phase (rich per-item
-// editing lands in the phase-9/11 work); all other slots go through E.
+// 2–4 cards (scope #5 capacity; enforced by the blockManifest minCards/maxCards).
+// PLAIN server-safe module. Ported from the approved design (index.html /
+// experiences.html EXPERIENCES cards; atl-* → lg-atelier-).
+//
+// Field mapping (service schema AtelierPackages.packages): summary → tier/category
+// label, name → h3, price_display → serif price, features[] → dashed list,
+// is_featured → "Most booked" flag + accent CTA. `image` is an optional per-item
+// slot (not schema-generated; customer/manual fill via the image affordance).
 
 import React from 'react';
 import type { AtelierPrimitives } from '../primitives';
@@ -16,6 +21,7 @@ export interface AtelierPackageItem {
   features?: string[];
   cta_text?: string;
   is_featured?: boolean;
+  image?: string;
 }
 
 export interface AtelierPackagesContent {
@@ -31,38 +37,49 @@ export function AtelierPackagesCore({ content, E }: { content: AtelierPackagesCo
     <>
       <style dangerouslySetInnerHTML={{ __html: PACKAGES_STYLES }} />
       <div className="lg-atelier-wrap lg-atelier-pad">
-        <div className="lg-atelier-eyebrow-block">
+        <div className="lg-atelier-rule">
           {content.eyebrow !== undefined && (
-            <E.Txt elementKey="eyebrow" value={content.eyebrow} as="span" className="lg-atelier-tag" placeholder="Packages" />
+            <E.Txt elementKey="eyebrow" value={content.eyebrow} as="span" className="lg-atelier-rule__idx" placeholder="02" />
           )}
-          <E.Txt elementKey="headline" value={content.headline} as="h2" className="lg-atelier-heading lg-atelier-h2" placeholder="Ways to work together" />
-          <E.Txt elementKey="lede" value={content.lede} as="p" className="lg-atelier-lede" placeholder="" multiline />
+          <E.Txt elementKey="headline" value={content.headline} as="h2" className="lg-atelier-heading" placeholder="Experiences" />
+          {content.lede !== undefined && (
+            <E.Txt elementKey="lede" value={content.lede} as="span" className="lg-atelier-rule__meta" placeholder="Ways to work together" />
+          )}
         </div>
         <E.List
           collectionKey="packages"
           items={packages}
-          className="lg-atelier-pkg__grid"
-          itemClassName=""
-          makeItem={() => ({ name: '', price_display: '', summary: '', features: [], cta_text: 'Enquire', is_featured: false })}
+          className="lg-atelier-packs"
+          itemClassName="lg-atelier-pack"
+          makeItem={() => ({ name: '', price_display: '', summary: '', features: [], cta_text: 'See details', is_featured: false, image: '' })}
           min={2}
           max={4}
           addLabel="+ Package"
           render={(pkg: AtelierPackageItem) => (
-            <div className={`lg-atelier-pkg__card${pkg.is_featured ? ' lg-atelier-pkg__card--featured' : ''}`}>
-              <E.Txt elementKey={`packages.${pkg.id}.name`} value={pkg.name} as="p" className="lg-atelier-pkg__name" placeholder="Package" />
-              <E.Txt elementKey={`packages.${pkg.id}.price_display`} value={pkg.price_display} as="p" className="lg-atelier-pkg__price" placeholder="From …" />
-              <E.Txt elementKey={`packages.${pkg.id}.summary`} value={pkg.summary} as="p" className="lg-atelier-pkg__summary" placeholder="What's included, briefly." multiline />
-              {(pkg.features && pkg.features.length > 0) && (
-                <ul className="lg-atelier-pkg__features">
-                  {pkg.features.map((f, i) => <li key={i}>{f}</li>)}
-                </ul>
-              )}
-              <div className="lg-atelier-pkg__cta">
-                <E.Link hrefKey={`packages.${pkg.id}.cta_href`} href="#contact" className="lg-atelier-btn lg-atelier-ghost">
-                  <E.Txt elementKey={`packages.${pkg.id}.cta_text`} value={pkg.cta_text} isButton placeholder="Enquire" />
-                </E.Link>
+            <>
+              <div className="lg-atelier-pack-img">
+                {pkg.is_featured && <span className="lg-atelier-flag">Most booked</span>}
+                <E.Img elementKey={`packages.${pkg.id}.image`} src={pkg.image} alt={pkg.name || 'package'}
+                  className="lg-atelier-pack-img__img" imgClassName=""
+                  placeholder={<div className="lg-atelier-ph"><span>Package image</span></div>} />
               </div>
-            </div>
+              <div className="lg-atelier-pack-body">
+                <E.Txt elementKey={`packages.${pkg.id}.summary`} value={pkg.summary} as="span" className="lg-atelier-pack-cat" placeholder="The Essential" />
+                <E.Txt elementKey={`packages.${pkg.id}.name`} value={pkg.name} as="h3" placeholder="Single Session" />
+                <E.Txt elementKey={`packages.${pkg.id}.price_display`} value={pkg.price_display} as="div" className="lg-atelier-price" placeholder="From €250" />
+                {(pkg.features && pkg.features.length > 0) && (
+                  <ul className="lg-atelier-pack-features">
+                    {pkg.features.map((f, i) => <li key={i}>{f}</li>)}
+                  </ul>
+                )}
+                <div className="lg-atelier-pack-foot">
+                  <E.Link hrefKey={`packages.${pkg.id}.cta_href`} href="#contact"
+                    className={`lg-atelier-btn ${pkg.is_featured ? 'lg-atelier-accent' : 'lg-atelier-line'}`}>
+                    <E.Txt elementKey={`packages.${pkg.id}.cta_text`} value={pkg.cta_text} isButton placeholder="See details" />
+                  </E.Link>
+                </div>
+              </div>
+            </>
           )}
         />
       </div>

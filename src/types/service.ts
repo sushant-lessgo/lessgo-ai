@@ -315,13 +315,13 @@ export type GranthPalette = (typeof granthPalettes)[number];
 
 /**
  * ===== ATELIER PALETTE =====
- * Atelier (on-demand work-engine visual-portfolio template) ships a small
- * accent family designed for growth: `vermilion` (warm paper + vermilion accent,
- * default) plus two placeholder accents (`indigo`, `olive`). Final curation is a
- * phase-9 human gate against approved Kontur HTML. A palette swaps ONLY the
- * accent duo; the paper/ink system is palette-invariant.
+ * Atelier (on-demand work-engine visual-portfolio template) ships the four
+ * curated Kontur accents: `vermilion` (warm paper + vermilion accent, default),
+ * `cobalt`, `moss`, `ochre` — exact oklch values from the approved design
+ * (styles.css L40-42). A palette swaps ONLY the accent duo; the paper/ink system
+ * is palette-invariant.
  */
-export const atelierPalettes = ['vermilion', 'indigo', 'olive'] as const;
+export const atelierPalettes = ['vermilion', 'cobalt', 'moss', 'ochre'] as const;
 
 export type AtelierPalette = (typeof atelierPalettes)[number];
 
