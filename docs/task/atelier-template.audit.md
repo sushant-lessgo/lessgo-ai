@@ -186,3 +186,66 @@ In-scope edits complete and green in isolation (templates suite). Phase cannot f
 ### Phase 3 — impl-review verdict: SHIP (1 loop + 1 orchestrator ruling)
 No blocking issues. Gates green: tsc exit 0; templates+engines 977 passed/8 skipped. Scope = 4 source files, inputContracts.ts confirmed byte-unchanged. Granth-safety proven: 'work' alias→GranthBooks/GranthBooksPublished (real pair); granth's GENERATED section list comes from granthSeed not engineCoreSections (reviewer gate-6 trace), so unaffected. Allowlist work:['books','writing','praise'] exactly matches workContract's beyond-core refs — not over/under-broad; typos still fail.
 Non-blocking: slotless 'work' kit section (accepted per ruling — designer-handoff artifact, not runtime).
+
+---
+### Phase 4 — atelier registration + service element schema + provisional blocks + serve-flip
+
+**Files changed (complete scope for review):**
+- `src/types/service.ts` — `'atelier'` added to `templateIds`; entries in the four forced Records (`defaultVariantForTemplate: 'editorial'`, `templateLabels`, `templateBlurbs`, `PALETTES_BY_TEMPLATE`); new `atelierPalettes`/`AtelierPalette` (vermilion default + indigo/olive placeholders).
+- `src/modules/brief/serveGate.ts` — `TEMPLATE_AUDIENCE.atelier = 'service'` (the work→service deviation).
+- `src/modules/brief/serveGate.test.ts` — TEMPLATE_AUDIENCE map assertion +atelier; parity-table test rewritten (derive engine from `templateMeta.copyEngines`, skip retired, special-case lumen+atelier as work→service, corrects the phase-1 lumen:'trust' mislabel); photographer flip MANUAL→SERVE/service/atelier; writer-shortlist assertions `['granth']`→`['granth','atelier']` (F15 + writer-serve); photographer added to structureHint-invariance fixtures.
+- `src/modules/brief/serveMatrix.test.ts` *(orchestrator-added to scope)* — photographer rows flipped to SERVE/service/atelier.
+- `src/modules/templates/fit.test.ts` *(orchestrator-added to scope)* — `ALL_TEMPLATES` +atelier; photographer-gallery, work+[], work+lead-form shortlist expectations refreshed; the "gallery unsatisfiable everywhere" assertion rewritten to "only atelier on work, nobody on trust"; fitsBrief loop uses ALL_TEMPLATES.
+- `src/modules/templates/registry.ts` — atelier async loader (dispatch firewall).
+- `src/modules/templates/templateMeta.ts` — atelier entry: `copyEngines:['work']`, `capabilities:['gallery','packages','multipage']` (NO lead-form), `capabilitySections:{gallery:'work',packages:'packages'}`, `designStyles:['editorial-craft']`.
+- `src/modules/templates/templateMeta.test.ts` — count assertions 8→9 (keys) and 7→8 (non-retired).
+- `src/modules/templates/templateConformance.ts` — RESOLVERS atelier entry + imports (resolver + placeholder).
+- `src/modules/templates/blockManifest.ts` — real `atelierManifest` (8 sections, one variant each; packages `minCards:2/maxCards:4`; consumes = each layout's top-level scalar keys).
+- `src/modules/audience/service/elementSchema.ts` — 8 Atelier-named layouts.
+- `src/modules/templates/atelier/**` — new module (vestria clone, mood axis dropped): tokens, palettes, sectionRules, imageKeywords, paletteSelection, ThemeInjector, components/{AtelierSSRTokens,AtelierEditable}, hooks/useAtelierBlock, AtelierPlaceholderBlock, resolveAtelierBlock, index; blocks/{primitives,editPrimitives,publishedPrimitives,shared/styles}; 8 provisional triads (Header/Hero/Work/Packages/About/Quote/Contact/Footer × core+tsx+published+styles); coreParity.test, registration.test, README.
+
+**Section types → layoutNames (two-identifier discipline, hyphen-free types):**
+| sectionType | layoutName | resolveAtelierBlock key | elementSchema key | manifest key | capabilitySections |
+|---|---|---|---|---|---|
+| header | AtelierNavHeader | header | AtelierNavHeader | header | — |
+| hero | AtelierHero | hero | AtelierHero | hero | — (work core) |
+| work | AtelierWorkGallery | work | AtelierWorkGallery | work | gallery→work |
+| packages | AtelierPackages | packages | AtelierPackages | packages | packages→packages |
+| about | AtelierAbout | about | AtelierAbout | about | — (work core) |
+| quote | AtelierQuoteBand | quote | AtelierQuoteBand | quote | — |
+| contact | AtelierContact | contact | AtelierContact | contact | — |
+| footer | AtelierFooter | footer | AtelierFooter | footer | — (work core) |
+- Dispatch is by lowercase sectionType; schema/manifest use the PascalCase layoutName; `contractFor(layoutName)` resolves via serviceElementSchema (resolveEngineSectionSchema returns null for atelier). `manifest.consumes ⊆ contract` verified by conformance group (3). Work core (`hero/work/about/footer`) all resolve real in both modes (group a). capabilitySections values are SECTION TYPES (`work`,`packages`), resolved real by (b)/(b+).
+- **The quote band is sectionType `quote`, NOT `quote-band`** — `extractSectionType` matches `^[a-zA-Z]+`, so a hyphenated type would dispatch as `quote` and break the id round-trip. Conservative single-token choice; logged under Deviations.
+
+**serveGate parity-table fix:** the phase-1 hand-fed `engineOfTemplate` map (lumen:'trust', +techpremium rows) was replaced by deriving each engine from `templateMeta.copyEngines[0]`, skipping retired templates, and encoding the deviating pair `{lumen, atelier}` (both work-engine→service-audience) as an explicit `service` assertion. This corrects the lumen mislabel and the "atelier is first to deviate" framing (lumen already deviated).
+
+**Photographer flip is GREEN in-phase:** serveGate.test.ts (serve/service/atelier, shortlist `['atelier']`), serveMatrix.test.ts (all photographer intents serve), fit.test.ts (atelier the sole work+gallery fit) all pass. No deferred red.
+
+**DesignStyle chosen:** `editorial-craft` (existing closed-vocab value; matches `businessTypes.photographer.defaultStyle`, so the served photographer's shortlist pick resolves to atelier by style — while writer briefs still pick granth via `literary-quiet`).
+
+**Deviations:**
+- Quote band sectionType = `quote` (not `quote-band`) — extractSectionType constraint (above).
+- Writer shortlist now `['granth','atelier']` (was `['granth']`): atelier fits any work brief (no required caps); pick stays granth by style. Orchestrator-confirmed acceptable.
+- Scope EXPANDED by orchestrator ruling to include `fit.test.ts` + `serveMatrix.test.ts` (the deliberate serve-flip breaks them; both are run by the phase's own verification commands). Surfaced and confirmed before editing.
+- `features` (packages string[]) rendered statically this phase (not per-item editable) — rich editing lands phase 9/11. Provisional-block scope.
+- No knobs declared (phase 6); no lead-form capability (shared-block lane); atelier registry loader omits `knobs` like surge/lex.
+
+**Test results (all PASS):**
+- `npx tsc --noEmit` — exit 0.
+- `test:run src/modules/templates/conformance.test.ts` — 371 passed, 8 skipped.
+- `test:run src/modules/templates/atelier` — 55 passed.
+- `test:run src/modules/brief` — 123 passed (incl. flipped photographer/writer cases).
+- `test:run src/modules/templates` — 904 passed, 8 skipped (incl. publishedClientBoundary — no 'use client'→published import leaks).
+- Collateral check `test:run src/types src/modules/audience/service src/modules/engines` — 234 passed.
+
+**Notes for later phases:**
+- Phase 5: `blockManifests['atelier']` layout names (AtelierWorkGallery/AtelierPackages/AtelierQuoteBand) resolve real via the manifest, so `selectProductBlocks`→`selectEligibleBlock` no longer falls to `'default'` for atelier work/packages/quote sections — verify at phase 5. Archetype `defaultSections` must use these sectionTypes (`work`,`packages`,`quote`,`contact`).
+- Phase 6: tokens/palettes/variants are provisional; `atelier` uses generic CSS vars + `lg-atelier-` classes; 2 variants (`editorial` default, `compact`) with distinct typeface/spacing overrides already declared. Knobs to be added (all 5 axes rule).
+- Phase 9: blocks are provisional (Hero static image — slider markup here; contact has form_id in contract but no shared lead-form placement yet; packages `features` not per-item editable). `AtelierEditable` does NOT emit `data-edit-primitive` markers yet → BLOCK_MOCKS[atelier] empty, so assertEditorBasics green-passes vacuously until phase 11.
+- Bricolage Grotesque referenced in tokens.fontDisplay but not self-hosted until phase 8 (falls back to Hanken meanwhile).
+
+---
+### Phase 4 — impl-review verdict: SHIP (1 loop + 1 orchestrator ruling)
+No blocking issues. Gates green: tsc exit 0; templates+brief+audience/service = 1076 passed/8 skipped. Scope = 12 modified + atelier/** (51 files); componentRegistry{,.published}.ts untouched. Verified: dual-renderer discipline (Hero/Work/Packages triads pure-core, boundary-safe; coreParity + publishedClientBoundary tests cover atelier non-vacuously); conformance non-vacuous (all core+capability sections resolve REAL components, not placeholder); two-identifier consistency across resolve/meta/manifest/sectionRules/elementSchema; quote (not quote-band) everywhere; flip correct (photographer SERVE/service, writer shortlist ['granth','atelier'] pick=granth, parity-table lumen:'trust'→work corrected).
+Non-blocking (cosmetic): serveGate.test.ts:120 stale comment (photographer-contrast obsolete post-flip). Leave; note for phase 7 sweep.

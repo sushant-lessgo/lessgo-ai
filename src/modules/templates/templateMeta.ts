@@ -187,6 +187,22 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
     capabilitySections: { gallery: 'portfolio', 'lead-form': 'contact' },
     bespoke: true,
   },
+  atelier: {
+    // First NON-BESPOKE work template (visual-portfolio). Declaring `gallery`
+    // here is what FLIPS the photographer serve decision MANUAL→SERVE
+    // (serveGate rungC probe) — atelier is service-audience (TEMPLATE_AUDIENCE).
+    copyEngines: ['work'],
+    // `editorial-craft` matches photographer.defaultStyle (businessTypes config)
+    // so the served photographer's shortlist pick resolves to atelier by style.
+    designStyles: ['editorial-craft'],
+    // `lead-form` DROPPED: satisfied via the shared-block lane (fit.ts
+    // sharedBlockCapabilities), so declaring it here — without a capabilitySections
+    // entry — would only red conformance group (b). `bilingual` is a PLATFORM
+    // capability (never declared per-template). `multipage` is structural
+    // (page-menu machinery; exempt from block-evidence).
+    capabilities: ['gallery', 'packages', 'multipage'],
+    capabilitySections: { gallery: 'work', packages: 'packages' },
+  },
   techpremium: {
     copyEngines: [],
     designStyles: [],

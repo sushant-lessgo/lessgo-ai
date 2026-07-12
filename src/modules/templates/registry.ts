@@ -110,6 +110,21 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
     };
   },
+  // On-demand work-engine template (visual-portfolio; anchor customer Kundius
+  // Photography). Service audience; served to photographers via the serve gate.
+  atelier: async () => {
+    const m = await import('@/modules/templates/atelier');
+    return {
+      resolveBlock: m.resolveBlock,
+      ThemeInjector: m.ThemeInjector,
+      SSRTokens: m.SSRTokens,
+      getSurfaceForSection: m.getSurfaceForSection,
+      defaultPaletteId: m.defaultAtelierPalette,
+      variants: m.atelierVariantDefs,
+      defaultVariantId: m.defaultAtelierVariant,
+      paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
+    };
+  },
   // Bespoke §13 (Writer vertical) — registered + renderable, but absent from the
   // onboarding picker. Writer projects are seeded white-glove.
   granth: async () => {

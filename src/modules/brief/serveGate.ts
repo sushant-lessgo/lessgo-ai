@@ -105,6 +105,11 @@ export const TEMPLATE_AUDIENCE: Record<TemplateId, AudienceType> = {
   techpremium: 'product',
   vestria: 'product',
   granth: 'writer',
+  // atelier is a WORK-engine template that is SERVICE-audience (atelier-template
+  // phase 1) — the deviation the picked-template map exists for. work→writer is
+  // the engine bridge, but atelier declares service, so a served photographer
+  // reaches a service-audience atelier site (NOT the writer wizard).
+  atelier: 'service',
 };
 
 export type ServeDecision =

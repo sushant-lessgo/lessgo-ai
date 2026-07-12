@@ -12,7 +12,8 @@ import {
 } from './classify';
 import { decideServe, BRIDGEABLE_ENGINES, TEMPLATE_AUDIENCE, uncoveredCollectionTags } from './serveGate';
 import { businessTypes } from '@/modules/businessTypes/config';
-import { templateIds } from '@/types/service';
+import { templateIds, type TemplateId } from '@/types/service';
+import { templateMeta } from '@/modules/templates/templateMeta';
 
 function makeSignals(overrides: Partial<EntrySignals> = {}): EntrySignals {
   return {
@@ -172,8 +173,11 @@ describe('decideServe — serve paths', () => {
     expect(decision.outcome).toBe('serve');
     if (decision.outcome === 'serve') {
       expect(decision.audienceType).toBe('writer');
+      // atelier (work engine, no required caps) now also FITS the writer brief, so
+      // it joins the work shortlist — but the STYLE pick stays granth
+      // (literary-quiet; atelier is editorial-craft). See the pick note below.
       expect(decision.templateId).toBe('granth');
-      expect(decision.shortlist).toEqual(['granth']);
+      expect(decision.shortlist).toEqual(['granth', 'atelier']);
     }
   });
 
@@ -202,7 +206,8 @@ describe('decideServe — serve paths', () => {
     if (decision.outcome === 'serve') {
       expect(decision.audienceType).toBe('writer');
       expect(decision.templateId).toBe('granth');
-      expect(decision.shortlist).toEqual(['granth']);
+      // atelier joins the work shortlist (fits any work brief); pick stays granth.
+      expect(decision.shortlist).toEqual(['granth', 'atelier']);
       // bridge:work MANUAL clause is deleted — no such tag exists on any path.
       expect(decision).not.toHaveProperty('tags');
     }
@@ -210,7 +215,7 @@ describe('decideServe — serve paths', () => {
 });
 
 describe('TEMPLATE_AUDIENCE — served audience derives from picked template (atelier phase 1)', () => {
-  it('mirrors engine→audience today: thing→product, trust→service, work-granth→writer', () => {
+  it('maps every template to its served audience (atelier = service despite work engine)', () => {
     expect(TEMPLATE_AUDIENCE).toEqual({
       hearth: 'service',
       lex: 'service',
@@ -220,6 +225,7 @@ describe('TEMPLATE_AUDIENCE — served audience derives from picked template (at
       techpremium: 'product',
       vestria: 'product',
       granth: 'writer',
+      atelier: 'service',
     });
   });
 
@@ -229,21 +235,26 @@ describe('TEMPLATE_AUDIENCE — served audience derives from picked template (at
     }
   });
 
-  it('derivation matches BRIDGEABLE_ENGINES for every current template (byte-identical behavior)', () => {
-    // Today the served audienceType still equals the engine bridge for every
-    // shipped template — the picked-template map introduces NO observable change.
-    const engineOfTemplate: Record<string, 'thing' | 'trust' | 'work'> = {
-      hearth: 'trust',
-      lex: 'trust',
-      surge: 'trust',
-      lumen: 'trust',
-      meridian: 'thing',
-      techpremium: 'thing',
-      vestria: 'thing',
-      granth: 'work',
-    };
+  it('derivation matches the engine bridge for every NON-deviating template; lumen + atelier deviate (work→service)', () => {
+    // Engine is DERIVED from templateMeta.copyEngines (not a hand-fed map that can
+    // drift — the phase-1 map mislabeled lumen as 'trust' when its real engine is
+    // 'work'). Retired templates (techpremium) carry no engine → skipped.
+    //
+    // Two templates DEVIATE from the pure engine→audience bridge: BOTH are
+    // work-engine yet SERVICE-audience — lumen (bespoke, ALREADY deviating before
+    // atelier) and atelier. The map exists precisely to encode these deviations,
+    // so they are asserted as service directly rather than against
+    // BRIDGEABLE_ENGINES['work'] (= 'writer').
+    const DEVIATE = new Set<TemplateId>(['lumen', 'atelier']);
     for (const id of templateIds) {
-      expect(TEMPLATE_AUDIENCE[id]).toBe(BRIDGEABLE_ENGINES[engineOfTemplate[id]]);
+      const meta = templateMeta[id];
+      if (meta.retired) continue; // no engine to derive from
+      if (DEVIATE.has(id)) {
+        expect(TEMPLATE_AUDIENCE[id], `${id} deviates: work engine → service audience`).toBe('service');
+        continue;
+      }
+      const engine = meta.copyEngines[0] as 'thing' | 'trust' | 'work';
+      expect(TEMPLATE_AUDIENCE[id]).toBe(BRIDGEABLE_ENGINES[engine]);
     }
   });
 
@@ -264,31 +275,29 @@ describe('TEMPLATE_AUDIENCE — served audience derives from picked template (at
   });
 });
 
-describe('decideServe — manual paths (strict missing strings)', () => {
-  it('photographer (KNOWN work type, gallery cap unbacked) ⇒ rungC:gallery — no rungA (type is known)', () => {
-    // scale-08 phase 3: photographer is now a KNOWN businessType with a required
-    // `gallery` cap that no shipped template declares. resolveEngine → work via
-    // lookup (source 'lookup', NOT tiebreaker), so no rungA tag and the gallery
-    // gap surfaces via the latent-cap fallback ⇒ single `rungC:gallery`.
+describe('decideServe — serve paths (atelier flip)', () => {
+  it('photographer (KNOWN work type, gallery cap NOW backed by atelier) ⇒ SERVE / service / atelier', () => {
+    // atelier-template phase 4: atelier is the first NON-bespoke work template to
+    // declare `gallery` (+ a resolving capabilitySections block), so the rungC
+    // gallery probe now finds a fit → photographer FLIPS MANUAL→SERVE. atelier is
+    // the only work template that fits `gallery`, so shortlist = ['atelier'], and
+    // it is SERVICE-audience (TEMPLATE_AUDIENCE['atelier'], NOT the work→writer
+    // engine bridge) so the served photographer reaches a service-audience site.
     const brief = buildBriefDraft(
       makeSignals({ businessTypeGuess: 'photographer', tiebreaker: 'portfolio-is-proof' }),
       'wedding photographer in Jaipur'
     );
     const decision = decideServe(brief);
-    expect(decision.outcome).toBe('manual');
-    if (decision.outcome === 'manual') {
-      expect(decision.missing).toBe('rungC:gallery');
-      // serve-gate-v2: photographer is now the live path through the latent-cap
-      // FALLBACK guard (F16's saas+download-app test used to hold the
-      // never-empty invariant, but that fixture serves now). Keep the invariant
-      // asserted here so `missing` can never silently become ''.
-      expect(decision.missing).not.toBe('');
-      expect(decision.tags).toHaveLength(1);
-      expect(decision.tags).not.toContain('bridge:work');
-      expect(decision.outOfIcp).toBe(false);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.audienceType).toBe('service');
+      expect(decision.templateId).toBe('atelier');
+      expect(decision.shortlist).toEqual(['atelier']);
     }
   });
+});
 
+describe('decideServe — manual paths (strict missing strings)', () => {
   it('restaurant (unknown, browsing-place) ⇒ rungE:place,rungA:restaurant', () => {
     const brief = buildBriefDraft(
       makeSignals({ businessTypeGuess: 'restaurant', tiebreaker: 'browsing-place' }),
@@ -361,6 +370,9 @@ describe('decideServe — inferred structureHint never changes serve/manual outc
     { businessTypeGuess: 'saas', goalIntentGuess: 'free-trial' },
     { businessTypeGuess: 'app', goalIntentGuess: 'download-app' },
     { businessTypeGuess: 'writer', goalIntentGuess: 'lead-magnet' },
+    // atelier flip: photographer now SERVES — invariance must hold across the
+    // newly-serving outcome (single vs multi ⇒ same serve/service/atelier).
+    { businessTypeGuess: 'photographer', goalIntentGuess: 'book-call', tiebreaker: 'portfolio-is-proof' },
   ];
 
   for (const overrides of serveableFixtures) {

@@ -16,14 +16,14 @@ import type { CapabilityId } from '@/types/brief';
 const STRUCTURAL_CAPABILITIES: readonly CapabilityId[] = ['multipage', 'bilingual'];
 
 describe('templateMeta', () => {
-  it('has exactly the registry templateIds as keys (8)', () => {
+  it('has exactly the registry templateIds as keys (9)', () => {
     expect(Object.keys(templateMeta).sort()).toEqual([...templateIds].sort());
-    expect(Object.keys(templateMeta)).toHaveLength(8);
+    expect(Object.keys(templateMeta)).toHaveLength(9);
   });
 
-  it('has exactly 7 non-retired templates', () => {
+  it('has exactly 8 non-retired templates', () => {
     const nonRetired = Object.values(templateMeta).filter((m) => m.retired !== true);
-    expect(nonRetired).toHaveLength(7);
+    expect(nonRetired).toHaveLength(8);
   });
 
   it('flags lumen bespoke and techpremium retired (and nobody else)', () => {

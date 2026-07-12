@@ -33,7 +33,10 @@ export type AudienceType = (typeof audienceTypes)[number];
 // Golden Shadow Trading). Registered + renderable; product has no picker yet —
 // selected via the onboarding `?template=vestria` param OR by default for the
 // `manufacturer` persona. Open to all users (no admin gate).
-export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen', 'granth', 'vestria'] as const;
+// `atelier` = on-demand work-engine template (visual-portfolio; anchor customer
+// Kundius Photography). Service audience (atelier-template phase 1 ruling), first
+// non-bespoke work template — served to photographers via the serve gate.
+export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen', 'granth', 'vestria', 'atelier'] as const;
 export type TemplateId = (typeof templateIds)[number];
 
 export type VariantId = string;
@@ -48,6 +51,7 @@ export const defaultVariantForTemplate: Record<TemplateId, VariantId> = {
   lumen: 'default',
   granth: 'granth', // serif-led (Tiro) default; 'adhunik' = sans-led (Mukta) alt
   vestria: 'tailored',
+  atelier: 'editorial', // editorial default; 'compact' = tighter spacing alt
 };
 
 /**
@@ -310,6 +314,18 @@ export const granthPalettes = ['sinduri', 'neel'] as const;
 export type GranthPalette = (typeof granthPalettes)[number];
 
 /**
+ * ===== ATELIER PALETTE =====
+ * Atelier (on-demand work-engine visual-portfolio template) ships a small
+ * accent family designed for growth: `vermilion` (warm paper + vermilion accent,
+ * default) plus two placeholder accents (`indigo`, `olive`). Final curation is a
+ * phase-9 human gate against approved Kontur HTML. A palette swaps ONLY the
+ * accent duo; the paper/ink system is palette-invariant.
+ */
+export const atelierPalettes = ['vermilion', 'indigo', 'olive'] as const;
+
+export type AtelierPalette = (typeof atelierPalettes)[number];
+
+/**
  * ===== TEMPLATE PICKER METADATA =====
  * Leaf-level display data + palette scoping for the Phase 11b picker. Kept here
  * (NOT importing the template modules) so onboarding/editor pickers can scope by
@@ -326,6 +342,7 @@ export const templateLabels: Record<TemplateId, string> = {
   lumen: 'Lumen',
   granth: 'Granth',
   vestria: 'Vestria',
+  atelier: 'Atelier',
 };
 
 export const templateBlurbs: Record<TemplateId, string> = {
@@ -337,6 +354,7 @@ export const templateBlurbs: Record<TemplateId, string> = {
   lumen: 'Photography & creative — warm gallery, one brass accent, editorial captions + lightbox.',
   granth: 'Hindi literary — ivory paper, maroon accent, Devanagari-first.',
   vestria: 'Manufacturing & trade — editorial paper, dark bands, cobalt accent, quote-led.',
+  atelier: 'Photography & visual-portfolio — warm paper, vermilion accent, gallery-led, editorial captions.',
 };
 
 /** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Surge → 9 accent-hue, Meridian → 9 accent, TechPremium → forest). */
@@ -349,6 +367,7 @@ const PALETTES_BY_TEMPLATE: Record<TemplateId, readonly string[]> = {
   lumen: lumenPalettes,
   granth: granthPalettes,
   vestria: vestriaPalettes,
+  atelier: atelierPalettes,
 };
 
 export function palettesForTemplate(templateId: TemplateId): readonly string[] {

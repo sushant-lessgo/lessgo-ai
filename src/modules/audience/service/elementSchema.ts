@@ -633,6 +633,160 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
     },
   },
 
+  // ===================================================================
+  // ===== ATELIER — on-demand work-engine visual-portfolio template ====
+  // 8 Atelier-named layouts (globally-unique so product schema can't shadow
+  // them). Service audience; work engine. Two-identifier discipline: sectionType
+  // (lowercase single token — must survive extractSectionType's ^[a-zA-Z]+ match,
+  // so NO hyphens: the quote band is sectionType 'quote') + PascalCase layout name.
+  // Provisional-but-real contract; italic-accent convention on headline/lede.
+  // Final field curation lands with the phase-9 visual port.
+  // ===================================================================
+  AtelierNavHeader: {
+    sectionType: 'header',
+    elements: {
+      logo_text:  { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Studio' },
+      cta_text:   { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Get in touch' },
+      logo_image: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      nav_items: {
+        requirement: 'required',
+        fillMode: 'ai_generated',
+        constraints: { min: 2, max: 6 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          label: { type: 'string', fillMode: 'ai_generated', default: '' },
+          href:  { type: 'string', fillMode: 'ai_generated', default: '#' },
+        },
+      },
+    },
+  },
+
+  AtelierHero: {
+    sectionType: 'hero',
+    elements: {
+      eyebrow:            { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Work that <em>holds the room</em>.' },
+      lede:               { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      cta_text:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'View the work' },
+      secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      hero_image:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      meta:               { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+  },
+
+  // Work/gallery showcase — the `gallery` capability's evidence section
+  // (templateMeta.capabilitySections.gallery = 'work').
+  AtelierWorkGallery: {
+    sectionType: 'work',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Selected <em>work</em>' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      works: {
+        requirement: 'required',
+        fillMode: 'manual_preferred',
+        constraints: { min: 1, max: 12 },
+        fields: {
+          id:      { type: 'string', fillMode: 'system' },
+          title:   { type: 'string', fillMode: 'manual_preferred', default: '' },
+          caption: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          image:   { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
+    },
+  },
+
+  // Tiered packages — the `packages` capability's evidence section. 2–4 cards
+  // (scope #5 capacity; enforced by the blockManifest minCards/maxCards).
+  AtelierPackages: {
+    sectionType: 'packages',
+    elements: {
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Ways to work together' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      packages: {
+        requirement: 'required',
+        fillMode: 'ai_generated',
+        constraints: { min: 2, max: 4 },
+        fields: {
+          id:            { type: 'string', fillMode: 'system' },
+          name:          { type: 'string', fillMode: 'ai_generated', default: '' },
+          price_display: { type: 'string', fillMode: 'ai_generated_needs_review', default: '' },
+          summary:       { type: 'string', fillMode: 'ai_generated', default: '' },
+          features:      { type: 'string[]', fillMode: 'ai_generated', default: [], constraints: { min: 3, max: 7 } },
+          cta_text:      { type: 'string', fillMode: 'ai_generated', default: 'Enquire' },
+          is_featured:   { type: 'boolean', fillMode: 'ai_generated', default: false },
+        },
+      },
+    },
+  },
+
+  AtelierAbout: {
+    sectionType: 'about',
+    elements: {
+      eyebrow:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline:    { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'About <em>the studio</em>' },
+      body:        { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
+      body2:       { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      about_image: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      signature:   { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+  },
+
+  // Quote band — sectionType 'quote' (single token; hyphen-free for
+  // extractSectionType). quote/author are proof → needs_review.
+  AtelierQuoteBand: {
+    sectionType: 'quote',
+    elements: {
+      eyebrow:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      quote:       { type: 'string', requirement: 'required', fillMode: 'ai_generated_needs_review', default: '' },
+      author_name: { type: 'string', requirement: 'optional', fillMode: 'ai_generated_needs_review', default: '' },
+      author_role: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+  },
+
+  AtelierContact: {
+    sectionType: 'contact',
+    elements: {
+      form_id:  { type: 'string', requirement: 'optional', fillMode: 'system', default: '' },
+      eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Let’s work together' },
+      lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      email:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      phone:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+  },
+
+  AtelierFooter: {
+    sectionType: 'footer',
+    elements: {
+      brand_text:      { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Studio' },
+      tagline:         { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      contact_email:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      contact_phone:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      copyright:       { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '© Studio' },
+      whatsapp_number: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+    },
+    collections: {
+      social_links: {
+        requirement: 'optional',
+        fillMode: 'manual_preferred',
+        constraints: { min: 0, max: 6 },
+        fields: {
+          id:       { type: 'string', fillMode: 'system' },
+          platform: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          href:     { type: 'string', fillMode: 'manual_preferred', default: '#' },
+        },
+      },
+    },
+  },
+
   // ===== Shared template-agnostic LeadForm (scale-05) =====
   // Injected deterministically by seedGoalForm for M1 goals; NOT AI-generated.
   // Mirror of the meridianElementSchema entry so the composed layoutElementSchema

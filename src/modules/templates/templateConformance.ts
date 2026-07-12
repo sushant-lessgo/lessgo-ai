@@ -73,6 +73,8 @@ import { resolveGranthBlock } from './granth/resolveGranthBlock';
 import { GranthPlaceholderBlock } from './granth/GranthPlaceholderBlock';
 import { resolveLumenBlock } from './lumen/resolveLumenBlock';
 import { LumenPlaceholderBlock } from './lumen/LumenPlaceholderBlock';
+import { resolveAtelierBlock } from './atelier/resolveAtelierBlock';
+import { AtelierPlaceholderBlock } from './atelier/AtelierPlaceholderBlock';
 
 export type Mode = 'edit' | 'published';
 
@@ -91,6 +93,7 @@ export const RESOLVERS: Record<
   surge: { resolve: resolveSurgeBlock, placeholder: SurgePlaceholderBlock },
   granth: { resolve: resolveGranthBlock, placeholder: GranthPlaceholderBlock },
   lumen: { resolve: resolveLumenBlock, placeholder: LumenPlaceholderBlock },
+  atelier: { resolve: resolveAtelierBlock, placeholder: AtelierPlaceholderBlock },
 };
 
 // Structural capabilities are NOT block-backed: `multipage` is page-menu

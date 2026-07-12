@@ -79,13 +79,18 @@ describe('serveabilityMatrix — real gate per businessType × intent', () => {
     }
   });
 
-  it('every photographer intent ⇒ MANUAL with rungC:gallery', () => {
+  it('every photographer intent ⇒ SERVE on atelier / service (atelier-template phase 4 flip)', () => {
+    // atelier declares `gallery` on the work engine, so the rungC gallery probe
+    // now finds a fit → photographer FLIPS MANUAL→SERVE. atelier is the only
+    // work template that supplies gallery (shortlist ['atelier']) and is
+    // SERVICE-audience (TEMPLATE_AUDIENCE['atelier']).
     const photoRows = matrix.filter((r) => r.businessType === 'photographer');
     expect(photoRows.length).toBeGreaterThan(0);
     for (const r of photoRows) {
-      expect(r.decision.outcome).toBe('manual');
-      if (r.decision.outcome === 'manual') {
-        expect(r.decision.missing).toBe('rungC:gallery');
+      expect(r.decision.outcome).toBe('serve');
+      if (r.decision.outcome === 'serve') {
+        expect(r.decision.audienceType).toBe('service');
+        expect(r.decision.templateId).toBe('atelier');
       }
     }
   });
