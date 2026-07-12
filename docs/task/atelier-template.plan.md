@@ -36,7 +36,19 @@ Build `atelier`, the first on-demand work-engine template (visual-portfolio; anc
 - phase 7 serve-gate + fit + served-path integration coverage: done (commit pending-below, review loops 1, verdict ship) — tests only, no prod change; SERVE-depth + real over-serve guards + fit provenance + composed served-path (real buildBriefDraft→decideServe→hydrate→skeleton) + granth regression. serveGate.test.ts:120 stale comment fixed
 - phase 8 fonts (Bricolage Grotesque) + preload + kit whitelist: done (commit 3ff7ba2c, review loops 1, verdict ship)
 
-### ⏸️ STOPPED at phase 9 HUMAN GATE (2026-07-12). Foundation phases 1-8 all shipped + committed. Phase 9 (visual block port) blocked on: approved designer HTML (template-design/KPDirection2Atelier.html + KPDirection3Kontur.html + atelierKonturBrief.md — MISSING), founder+customer Step-1 tile pick, kit:lint pass, curated-palette taste pass. Phases 10 (slider asset) + 11 (editor basics/mocks) depend on phase-9 real blocks; 12 (parity QA) + 13 (Kundius publish) are also human gates. Resume: re-read this plan's Progress log + audit.md, `git branch --show-current`, continue at phase 9 once designer HTML delivered. — Bricolage woff2 (fontsource, /fonts/bricolage-grotesque/) + @font-face (wght 200-800) + preload case (editorial→Bricolage, compact→Fraunces) + SELF_HOSTED_FONTS whitelist; family-name 3-way match; `npm run build` exit 0
+### ▶️ RESUMED at phase 9 (2026-07-12). Human gate CLEARED — founder confirmed:
+- Approved design source = `template-design/designer-workspace/atelier/` (5-pager). Step-1 tile pick + palette taste-pass done (the delivered atelier direction IS the pick).
+- Q1 (served skeleton path): **KEEP** — served photographer → empty 5-page atelier site → manual-fill.
+- Q5 (photographer structureDefault→multi): **KEEP** — affects all future photographers (intended).
+Foundation phases 1-8 all shipped+committed. **Full port spec + reconciliation rulings → `docs/task/atelier-template.portspec.md`** (class rename atl-→lg-atelier-, --atl- vars→tokens.ts, knob-value alignment cardStyle=[hairline,flat]/density=[comfortable,compact], closer/page-head/marquee mapping, slider DOM contract, opsz-font note).
+
+### Phase 9 SPLIT (size + slider parity risk) → 9a + 9b:
+- **9a — design system + Header + Hero(+slider markup+marquee) + page-head/nav-modes.** Reconcile tokens.ts/palettes.ts/sectionRules.ts to real Kontur values; align knob declaration (index.ts + conformance) to shipped values; port Header (overlay+solid) + Hero (slider DOM contract, no-JS first-slide fallback) + marquee. Files: atelier/tokens.ts, palettes.ts, sectionRules.ts, index.ts, ThemeInjector.tsx, components/AtelierSSRTokens.tsx, conformance.test.ts (knob realignment), blocks/{Header,Hero}/**. Verify: tsc + conformance (incl. knob) + atelier module.
+- **9b — content blocks: Work(mosaic+filter), Packages(2/3/4), About(+press), Quote, Contact, Footer(+closer).** Files: blocks/{Work,Packages,About,Quote,Contact,Footer}/** + blockManifest.ts (card ranges/consumes if changed). Verify: tsc + conformance + atelier module + coreParity.
+- Then phase 10 (slider vanilla asset, DOM contract from 9a Hero), 11 (editor basics + mocks + registry knobs mapping — CARRY from phase 6), 12 (parity QA — HUMAN GATE), 13 (Kundius publish — HUMAN GATE).
+
+- phase 9a design-system + Header + Hero + slider-markup: pending
+- phase 9b content blocks (Work/Packages/About/Quote/Contact/Footer): pending — Bricolage woff2 (fontsource, /fonts/bricolage-grotesque/) + @font-face (wght 200-800) + preload case (editorial→Bricolage, compact→Fraunces) + SELF_HOSTED_FONTS whitelist; family-name 3-way match; `npm run build` exit 0
 - phase 9 [HUMAN GATE] visual block port from approved designer HTML: pending
 - phase 10 hero-slider behaviors asset: pending
 - phase 11 editor basics + atelier block mocks: pending
