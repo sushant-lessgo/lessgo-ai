@@ -16,6 +16,16 @@ export {
   type AtelierBaseTokens,
 } from './tokens';
 
+// Knob surface (template-factory standard axes). `atelierKnobs` is the
+// TemplateModule.knobs declaration; the token map + shared stylesheet builder are
+// consumed by the two renderers. Surfaced on the registry loader via `m.atelierKnobs`.
+export {
+  atelierKnobs,
+  atelierKnobTokenMap,
+  serializeAtelierKnobOverrides,
+  buildAtelierStylesheet,
+} from './tokens';
+
 export {
   atelierPaletteConfigs,
   pilotEnabledPalettes,

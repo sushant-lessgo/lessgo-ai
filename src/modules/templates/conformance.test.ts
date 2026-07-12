@@ -64,6 +64,11 @@ import { hearthKnobs, hearthVariants, buildHearthStylesheet } from './hearth/tok
 import { hearthPalettes } from '@/types/service';
 import { HearthSSRTokens } from './hearth/components/HearthSSRTokens';
 
+// Atelier knob enrollment (phase 6). Pure data imports (tokens) + the published
+// SSRTokens for the back-compat evidence — no client-only surface pulled in.
+import { atelierKnobs, buildAtelierStylesheet } from './atelier/tokens';
+import { AtelierSSRTokens } from './atelier/components/AtelierSSRTokens';
+
 import {
   templateConformance,
   RESOLVERS,
@@ -104,6 +109,9 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
   // pure data so templateConformance stays free of template-module imports.
   const HEARTH_VARIANT_IDS = hearthVariants.map((v) => v.id);
   assertKnobConformance('hearth', hearthKnobs);
+  // atelier (phase 6) — full 5-axis declaration: real alternates on buttonShape/
+  // cardStyle/density, default-only typePairing/texture.
+  assertKnobConformance('atelier', atelierKnobs);
   assertLooksConformance(
     'hearth',
     templateMeta.hearth.looks,
@@ -161,6 +169,54 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
       expect(html).toContain('data-knob-buttonShape="pill"');
       expect(html).toContain('data-knob-density="compact"');
       expect(html).toContain('[data-knob-buttonShape="pill"]');
+      expect(html).toContain('[data-knob-density="compact"]');
+    });
+  });
+
+  // ── back-compat + renderer-parity evidence (atelier knobs, phase 6) ────────
+  // Same two claims as the hearth gate: (1) default emits nothing (byte-identical
+  // to base+palette+variant); (2) a non-default knob emits scoped CSS + a wrapper
+  // attr in the published renderer (AtelierSSRTokens consumes the prop — no silent
+  // no-op). The edit-side AtelierThemeInjector shares buildAtelierStylesheet +
+  // knobDataAttributes, so knob CSS + attrs are byte-identical across renderers.
+  describe('phase-6 knob back-compat + parity evidence (atelier)', () => {
+    const baselineStylesheet = buildAtelierStylesheet();
+
+    it('default: no knobs / all-default knobs emit NOTHING (byte-identical stylesheet)', () => {
+      expect(buildAtelierStylesheet()).toBe(baselineStylesheet);
+      expect(buildAtelierStylesheet(null)).toBe(baselineStylesheet);
+      expect(buildAtelierStylesheet({})).toBe(baselineStylesheet);
+      // Explicit axis DEFAULTS still emit nothing (default = :root).
+      expect(
+        buildAtelierStylesheet({ buttonShape: 'rounded', cardStyle: 'hairline', density: 'comfortable', typePairing: 'classic', texture: 'none' }),
+      ).toBe(baselineStylesheet);
+      expect(baselineStylesheet).not.toContain('data-knob-');
+    });
+
+    it('default: AtelierSSRTokens published markup carries NO data-knob-* attr', () => {
+      const html = renderToStaticMarkup(
+        React.createElement(AtelierSSRTokens, { paletteId: 'vermilion' as any }),
+      );
+      expect(html).not.toContain('data-knob-');
+    });
+
+    it('non-default: a knob emits scoped CSS AND a wrapper attr in the published renderer', () => {
+      const css = buildAtelierStylesheet({ buttonShape: 'pill' });
+      expect(css).toContain('[data-knob-buttonShape="pill"]');
+      expect(css).toContain('--btn-r:999px');
+      expect(css.length).toBeGreaterThan(baselineStylesheet.length);
+
+      const html = renderToStaticMarkup(
+        React.createElement(AtelierSSRTokens, {
+          paletteId: 'vermilion' as any,
+          knobs: { buttonShape: 'pill', cardStyle: 'shadow', density: 'compact' },
+        }),
+      );
+      expect(html).toContain('data-knob-buttonShape="pill"');
+      expect(html).toContain('data-knob-cardStyle="shadow"');
+      expect(html).toContain('data-knob-density="compact"');
+      expect(html).toContain('[data-knob-buttonShape="pill"]');
+      expect(html).toContain('[data-knob-cardStyle="shadow"]');
       expect(html).toContain('[data-knob-density="compact"]');
     });
   });

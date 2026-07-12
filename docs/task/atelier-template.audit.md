@@ -317,3 +317,54 @@ Loop 1 = fix-first: reviewer caught a REACHABLE zero-page-draft bug (bare classi
 Gates green: tsc exit 0; hooks+audience/product+businessTypes+wizard+conformance = 714 passed/8 skipped. Scope = 8 files (useWizardStore.ts added mid-phase per ruling), GeneratingSlot.tsx untouched.
 Fixes this phase: (1) hydrate feeds briefSignalFromState(state) to slotsForEngine (both derivations now confirmed-only signal) — representative bare-hint + confirmed-single tests added; (2) pipelineGuards RENDER_LAYER_ALLOWLIST += StyleSlot.tsx (phase-2 regression). Both phase-2 carries proven (signal consistency real now; manifestPick resolves real Atelier layouts not 'default'). Granth inert (no multipage cap).
 Non-blocking (cosmetic): stale CARRY-test inline comment ("keys off full brief" now via briefSignalFromState).
+
+## Phase 6 — Design system: tokens / palettes / variants / knobs / sectionRules
+
+### Files changed
+- `src/modules/templates/atelier/tokens.ts` — knob declaration + token map + shared stylesheet builder; knob-consumed :root baselines; button radius now `--btn-r`.
+- `src/modules/templates/atelier/palettes.ts` — no code change (already provisional vermilion default + indigo/olive placeholders; confirmed only).
+- `src/modules/templates/atelier/sectionRules.ts` — comment-only (confirmed all-8-type band alternation; final-refinement pointer → phase 9).
+- `src/modules/templates/atelier/ThemeInjector.tsx` — knob-aware: shared `buildAtelierStylesheet(knobs)` + `knobDataAttributes` on documentElement.
+- `src/modules/templates/atelier/components/AtelierSSRTokens.tsx` — knob-aware: same shared builder + `{...knobAttrs}` on wrapper.
+- `src/modules/templates/atelier/index.ts` — export knob surface (`atelierKnobs`, `atelierKnobTokenMap`, `serializeAtelierKnobOverrides`, `buildAtelierStylesheet`).
+- `src/modules/templates/conformance.test.ts` — `assertKnobConformance('atelier', atelierKnobs)` + phase-6 back-compat/parity evidence block.
+
+### 5-axis knob declaration
+`atelierKnobs` declares ALL 5 standard axes (declare-one⇒declare-all):
+- REAL alternates: `buttonShape` [square, rounded*, pill], `cardStyle` [hairline*, shadow, flat], `density` [compact, comfortable*, spacious] (* = axis default).
+- DEFAULT-ONLY (single-value): `typePairing` ['classic'], `texture` ['none'] — conformance-valid, no knob CSS.
+
+### Per-axis CSS added to tokens.ts (`atelierKnobTokenMap`, non-default values only)
+- buttonShape: square → `--btn-r:0px`; pill → `--btn-r:999px` (rounded default = `:root --btn-r:var(--r)`, ~3px).
+- cardStyle: shadow → `--card-bd:1px solid transparent; --card-shadow:0 6px 22px …; --card-bg:var(--paper)`; flat → transparent border, no shadow, `--card-bg:var(--paper-2)` (hairline default = :root).
+- density: compact/spacious retune `--pad-y`/`--pad-y-sm` (comfortable default = :root). This axis has real effect NOW — `.lg-atelier-pad{,-sm}` in tokens.ts consume the vars.
+New `:root` baselines added so defaults emit nothing: `--btn-r`, `--card-bd`, `--card-shadow`, `--card-bg`. `.lg-atelier-btn` switched `var(--r)`→`var(--btn-r)`.
+
+### How knobs wire into both renderers (identical, hearth precedent)
+Single source of truth `buildAtelierStylesheet(knobs)` in tokens.ts = base+palette+variant, appends `serializeAtelierKnobOverrides()` ONLY when `knobDataAttributes(knobs)` is non-empty. Both `AtelierThemeInjector` (edit; documentElement attrs, `+ EDIT_AFFORDANCE_STYLES`) and `AtelierSSRTokens` (published; wrapper `{...knobAttrs}`) call the SAME builder + `knobDataAttributes`, so knob CSS + wrapper attrs are byte-identical across renderers (edit-affordance CSS is the only allowed divergence). LAW upheld: default value → no attr, no CSS (evidence test asserts byte-identical baseline + no `data-knob-` in default published markup).
+
+### Registry loader gap (flagged, NOT edited — registry.ts out of Files-touched)
+The atelier registry loader block (`registry.ts:115`) does NOT surface `knobs: m.atelierKnobs` (hearth does at :29). This is NOT needed for phase 6: the render path passes `knobs` DIRECTLY to the injector props from `themeValues.knobs` (`LandingPageRenderer.tsx:963`, `LandingPagePublishedRenderer.tsx:220`) — it does not read `mod.knobs`; and `assertKnobConformance` takes the declaration as a direct argument. So phase 6 render + conformance both work without it. The one-line registry addition (`knobs: m.atelierKnobs`) becomes relevant in PHASE 11 (editor knob-switching / `assertEditorBasics` reads the module-level declaration). Reporting per instructions — did not silently edit registry.ts.
+
+### Palette set (provisional; final = phase-9 human gate)
+`vermilion` (default), `indigo`, `olive` — unchanged from phase 4 scaffold; accent duo `--accent`/`--accent-deep` under `[data-palette]`.
+
+### Deviations
+- cardStyle alternates emit real scoped CSS + attrs (mechanism REAL, conformance-valid), but the provisional Packages block (`blocks/Packages/styles.ts`, out of Files-touched) does not yet consume `--card-bd/--card-shadow/--card-bg`, so cardStyle has no VISIBLE effect until the phase-9 block port wires the card to those vars. Conservative: added the baselines + emission now; deferred block consumption to phase 9. buttonShape (`.lg-atelier-btn`) and density (`.lg-atelier-pad`) DO have live effect (their consumers live in tokens.ts).
+- palettes.ts / sectionRules.ts required no substantive change (phase-4 scaffold already correct) — only a sectionRules comment update.
+
+### Test results
+- `npx tsc --noEmit` → exit 0.
+- `npm run test:run -- src/modules/templates/conformance.test.ts` → 385 passed | 8 skipped (incl. atelier 5-axis knob conformance + back-compat/parity evidence).
+- `npm run test:run -- src/modules/templates/atelier` → 55 passed (coreParity + registration still green).
+
+### Open risks
+- Registry `mod.knobs` surface deferred (see gap above) — phase 11 must add `knobs: m.atelierKnobs` to the atelier loader for editor knob-switching.
+- cardStyle visual effect deferred to phase-9 block port (card must reference the new vars).
+- All design values (paper/ink/vermilion/rhythm/knob CSS) remain PROVISIONAL — locked against approved Kontur HTML in phase 9.
+
+---
+### Phase 6 — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; conformance+atelier = 440 passed/8 skipped. Scope = 6 files (palettes.ts needed no change). Verified: all 5 knob axes conformance-valid (assertKnobConformance enrolled+passing); default=byte-empty (no attr/no CSS); ThemeInjector+SSRTokens byte-identical knob emission via shared buildAtelierStylesheet; blocks never branch on knobs; no default-value regression (--btn-r/--card-* baselines = prior values).
+Deferrable (confirmed): registry loader doesn't surface m.atelierKnobs — nothing reads it in current render/publish/conformance path (props-threaded); needed only for phase-11 editor knob-switching. cardStyle emits real CSS but no consumer until phase-9 Packages port — conformance is declaration-only so valid.
+Non-blocking (CARRY→phase 11): (1) index.ts:20 comment misleadingly says registry surfaces atelierKnobs; (2) density/variant --pad-y overlap (intended, knob wins, default emits nothing).

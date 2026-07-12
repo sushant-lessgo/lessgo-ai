@@ -9,22 +9,28 @@
 
 import React from 'react';
 import type { AtelierPalette } from '@/types/service';
-import {
-  serializeBaseTokens,
-  serializeVariantOverrides,
-  defaultAtelierVariant,
-} from '../tokens';
-import { serializePaletteOverrides } from '../palettes';
+import type { KnobSelection } from '@/types/template';
+import { buildAtelierStylesheet, defaultAtelierVariant } from '../tokens';
+import { knobDataAttributes } from '../../shared/knobCss';
 
 interface AtelierSSRTokensProps {
   paletteId: AtelierPalette;
   variantId?: string;
+  // `knobs` — CONSUMED here, not merely accepted: the knob CSS is inlined in the
+  // <style> block AND the data-knob-* attrs are applied on the wrapper, mirroring
+  // the edit-side AtelierThemeInjector. A knob shown in the editor that no-oped in
+  // published output would be a silent parity break. Absent / all-default →
+  // byte-identical to the pre-knob published HTML.
+  knobs?: KnobSelection | null;
   children?: React.ReactNode;
   className?: string;
 }
 
-export function AtelierSSRTokens({ paletteId, variantId, children, className = '' }: AtelierSSRTokensProps) {
-  const stylesheet = `${serializeBaseTokens()}\n${serializePaletteOverrides()}\n${serializeVariantOverrides()}`;
+export function AtelierSSRTokens({ paletteId, variantId, knobs, children, className = '' }: AtelierSSRTokensProps) {
+  // SAME shared builder as the edit-side injector — knob CSS cannot diverge
+  // between the two renderers.
+  const stylesheet = buildAtelierStylesheet(knobs);
+  const knobAttrs = knobDataAttributes(knobs);
 
   return (
     <>
@@ -32,6 +38,7 @@ export function AtelierSSRTokens({ paletteId, variantId, children, className = '
       <div
         data-palette={paletteId}
         data-variant={variantId || defaultAtelierVariant}
+        {...knobAttrs}
         className={className}
       >
         {children}

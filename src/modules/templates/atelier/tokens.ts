@@ -14,7 +14,13 @@
 //   - PALETTE ([data-palette], palettes.ts) — swaps only the accent duo.
 //   - VARIANT ([data-variant]) — swaps the display/body typeface + spacing feel.
 
-import type { TemplateVariant } from '@/types/template';
+import type { TemplateVariant, TemplateKnobDeclaration, KnobSelection } from '@/types/template';
+import {
+  serializeKnobOverrides,
+  knobDataAttributes,
+  type KnobTokenMap,
+} from '../shared/knobCss';
+import { serializePaletteOverrides } from './palettes';
 
 export interface AtelierBaseTokens {
   paper: string;
@@ -102,6 +108,15 @@ export function serializeBaseTokens(t: AtelierBaseTokens = atelierBaseTokens): s
   --pad-y:${t.padY};
   --pad-y-sm:${t.padYSm};
   --r:${t.r};
+  /* Knob-consumed baselines (default axis values = :root, emit no knob block).
+     --btn-r from buttonShape (default rounded); --card-* from cardStyle (default
+     hairline). Section rhythm (--pad-y/--pad-y-sm) doubles as the density
+     channel. Blocks reference these vars so a non-default knob retunes them via
+     the scoped wrapper layer (inherited through the theme wrapper). */
+  --btn-r:var(--r);
+  --card-bd:1px solid var(--line);
+  --card-shadow:none;
+  --card-bg:var(--paper);
 }
 [data-surface="paper"]{background:var(--paper);color:var(--ink);}
 [data-surface="paper-2"]{background:var(--paper-2);color:var(--ink);border-block:1px solid var(--line-soft);}
@@ -120,7 +135,7 @@ export function serializeBaseTokens(t: AtelierBaseTokens = atelierBaseTokens): s
 .lg-atelier-eyebrow-block .lg-atelier-h2{font-size:clamp(2.1rem,4.4vw,3.4rem);margin-top:0.4em;max-width:20ch;}
 .lg-atelier-eyebrow-block .lg-atelier-lede{margin-top:1.1em;color:var(--ink-soft);max-width:58ch;font-size:1.06rem;}
 [data-surface="dark"] .lg-atelier-eyebrow-block .lg-atelier-lede{color:var(--on-dark-soft);}
-.lg-atelier-btn{display:inline-flex;align-items:center;gap:0.6em;font-weight:600;font-size:0.96rem;padding:0.92em 1.5em;border-radius:var(--r);border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;transition:.18s ease;white-space:nowrap;text-decoration:none;font-family:var(--ff-body);}
+.lg-atelier-btn{display:inline-flex;align-items:center;gap:0.6em;font-weight:600;font-size:0.96rem;padding:0.92em 1.5em;border-radius:var(--btn-r);border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;transition:.18s ease;white-space:nowrap;text-decoration:none;font-family:var(--ff-body);}
 .lg-atelier-btn:hover{background:transparent;color:var(--ink);}
 .lg-atelier-btn.lg-atelier-accent{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;}
 .lg-atelier-btn.lg-atelier-accent:hover{background:transparent;color:var(--accent-deep);}
@@ -152,4 +167,84 @@ export function serializeVariantOverrides(): string {
   // serializeBaseTokens in both injectors so var overrides win the specificity tie.
   return `[data-variant="compact"]{--ff-display:'Fraunces',Georgia,serif;--pad-y:clamp(52px,6.5vw,96px);--pad-y-sm:clamp(40px,5vw,68px);}
 [data-variant="compact"] .lg-atelier-display,[data-variant="compact"] .lg-atelier-heading{letter-spacing:-0.02em;font-weight:500;}`;
+}
+
+/**
+ * ===== KNOBS (template-factory standard axes) =====
+ * Atelier declares ALL 5 standard axes (rule: declare one ⇒ declare all). REAL
+ * alternates on the three spec-named axes — `buttonShape`, `cardStyle`, `density`
+ * — surfaced as `data-knob-*` wrapper attrs whose scoped CSS retunes the knob-
+ * consumed baselines above. `typePairing` and `texture` ship DEFAULT-ONLY
+ * (single-value arrays holding just the axis default): conformance-valid, no knob
+ * CSS. LAW: the default value of every axis emits NO attr and NO CSS (default =
+ * `:root`), so a knob-unaware project renders byte-identical to the baseline.
+ * Blocks NEVER branch on a knob — all effects are CSS via inherited custom props.
+ */
+export const atelierKnobs: TemplateKnobDeclaration = {
+  axes: {
+    // buttonShape → --btn-r (button corner radius). default 'rounded' = :root.
+    buttonShape: ['square', 'rounded', 'pill'],
+    // cardStyle → --card-bd/--card-shadow/--card-bg. default 'hairline' = :root.
+    cardStyle: ['hairline', 'shadow', 'flat'],
+    // density → section rhythm --pad-y/--pad-y-sm. default 'comfortable' = :root.
+    density: ['compact', 'comfortable', 'spacious'],
+    // typePairing: default-only. ALIASES the [data-variant] axis; a look sets the
+    // flat variantId directly, so this carries no knob CSS.
+    typePairing: ['classic'],
+    // texture: default-only. Atelier ships no surface overlay.
+    texture: ['none'],
+  },
+};
+
+/**
+ * Per-axis, per-value CSS the knob layer emits. ONLY non-default values appear
+ * (defaults = :root, skipped by `serializeKnobOverrides`). Every declaration is a
+ * plain custom-property override on the `[data-knob-*]` wrapper; the knob-consumed
+ * baselines in `:root` mean blocks pick these up through inheritance with no block
+ * change. typePairing/texture are default-only → no entries.
+ */
+export const atelierKnobTokenMap: KnobTokenMap = {
+  buttonShape: {
+    square: { '--btn-r': '0px' },
+    pill:   { '--btn-r': '999px' },
+  },
+  cardStyle: {
+    shadow: {
+      '--card-bd': '1px solid transparent',
+      '--card-shadow': '0 6px 22px oklch(0.215 0.014 52 / 0.10)',
+      '--card-bg': 'var(--paper)',
+    },
+    flat: {
+      '--card-bd': '1px solid transparent',
+      '--card-shadow': 'none',
+      '--card-bg': 'var(--paper-2)',
+    },
+  },
+  density: {
+    compact:  { '--pad-y': 'clamp(48px,6vw,88px)',    '--pad-y-sm': 'clamp(38px,4.5vw,60px)' },
+    spacious: { '--pad-y': 'clamp(84px,10.5vw,156px)', '--pad-y-sm': 'clamp(64px,7.5vw,108px)' },
+  },
+};
+
+/** The constant knob CSS (all non-default blocks for every tokenized axis). The
+ *  wrapper's `data-knob-*` attrs select which block applies — the
+ *  `serializeVariantOverrides` precedent. */
+export function serializeAtelierKnobOverrides(): string {
+  return serializeKnobOverrides(atelierKnobTokenMap);
+}
+
+/**
+ * SINGLE source of truth for the full atelier stylesheet, consumed IDENTICALLY by
+ * both renderers (`AtelierThemeInjector` edit-side, `AtelierSSRTokens` published-
+ * side) so the knob CSS can never diverge between them.
+ *
+ * When the knob selection contributes NO active attrs (absent / all-default), the
+ * output equals base + palette + variant EXACTLY — byte-identical, default-emits-
+ * nothing. Only a non-default selection appends the knob block(s).
+ */
+export function buildAtelierStylesheet(knobs?: KnobSelection | null): string {
+  const base = `${serializeBaseTokens()}\n${serializePaletteOverrides()}\n${serializeVariantOverrides()}`;
+  const hasActiveKnob = Object.keys(knobDataAttributes(knobs)).length > 0;
+  if (!hasActiveKnob) return base;
+  return `${base}\n${serializeAtelierKnobOverrides()}`;
 }

@@ -2,7 +2,9 @@
 // Atelier section surface rhythm. Warm paper with a raised paper-2 band and a
 // dark editorial quote band + dark-2 footer. The published renderer wraps each
 // section in `<div data-surface="...">`; blocks must NOT paint their own
-// full-bleed section background. PROVISIONAL rhythm — refined in phase 6.
+// full-bleed section background. Band alternation covers all 8 grammar section
+// types (header/hero/work/packages/about/quote/contact/footer); final surface
+// values lock against approved Kontur HTML in the phase-9 visual port.
 
 export type AtelierSurface = 'paper' | 'paper-2' | 'dark' | 'dark-2';
 
