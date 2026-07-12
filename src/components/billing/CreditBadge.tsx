@@ -13,6 +13,10 @@ interface CreditBalance {
   daysUntilReset: number;
   nextResetDate: Date;
   tier: string;
+  // pricing-v2 pool-aware fields (same /api/credits/balance shape).
+  monthlyRemaining?: number;
+  poolRemaining?: number;
+  totalAvailable?: number;
 }
 
 export function CreditBadge() {
@@ -53,14 +57,27 @@ export function CreditBadge() {
     return null;
   }
 
+  // pricing-v2: mirror the billing dashboard — headline = total available (monthly
+  // remaining + persistent pool). FREE/LTD have monthlyLimit 0 with credits in the
+  // pool, so the "/limit" and %-bar are only meaningful when monthlyLimit > 0.
+  const monthlyLimit = balance.limit ?? 0;
+  const totalAvailable =
+    balance.totalAvailable ??
+    (balance.monthlyRemaining ?? balance.remaining ?? 0) + (balance.poolRemaining ?? 0);
+  const hasMonthly = monthlyLimit > 0;
+  // Only drive severity colors off usage when there IS a monthly allotment;
+  // otherwise treat "empty pool" (0 available) as the out state.
+  const isOut = hasMonthly ? balance.percentUsed >= 100 : totalAvailable <= 0;
+  const isLow = hasMonthly ? balance.percentUsed >= 80 : totalAvailable <= 2;
+
   const getColor = () => {
-    if (balance.percentUsed >= 100) return 'text-red-600 bg-red-50 border-red-200';
-    if (balance.percentUsed >= 80) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    if (isOut) return 'text-red-600 bg-red-50 border-red-200';
+    if (isLow) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
     return 'text-green-600 bg-green-50 border-green-200';
   };
 
   const getIcon = () => {
-    if (balance.percentUsed >= 100) return <AlertCircle className="w-4 h-4" />;
+    if (isOut) return <AlertCircle className="w-4 h-4" />;
     return <Coins className="w-4 h-4" />;
   };
 
@@ -73,7 +90,7 @@ export function CreditBadge() {
       >
         {getIcon()}
         <span className="text-sm font-semibold">
-          {balance.remaining}/{balance.limit}
+          {hasMonthly ? `${totalAvailable}/${monthlyLimit}` : totalAvailable}
         </span>
       </button>
 
@@ -87,41 +104,62 @@ export function CreditBadge() {
           </div>
 
           <div className="space-y-3">
-            {/* Progress Bar */}
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600">Used</span>
+            {hasMonthly ? (
+              <>
+                {/* Monthly allotment progress bar (only when there is one) */}
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600">Used</span>
+                    <span className="font-semibold text-gray-900">
+                      {balance.used} / {monthlyLimit}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all ${
+                        balance.percentUsed >= 100
+                          ? 'bg-red-500'
+                          : balance.percentUsed >= 80
+                          ? 'bg-yellow-500'
+                          : 'bg-green-500'
+                      }`}
+                      style={{ width: `${Math.min(balance.percentUsed, 100)}%` }}
+                    />
+                  </div>
+                </div>
+                {(balance.poolRemaining ?? 0) > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Bonus pool</span>
+                    <span className="font-semibold text-gray-900">
+                      {balance.poolRemaining} credits
+                    </span>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Available</span>
                 <span className="font-semibold text-gray-900">
-                  {balance.used} / {balance.limit}
+                  {totalAvailable} credit{totalAvailable === 1 ? '' : 's'}
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className={`h-2 rounded-full transition-all ${
-                    balance.percentUsed >= 100
-                      ? 'bg-red-500'
-                      : balance.percentUsed >= 80
-                      ? 'bg-yellow-500'
-                      : 'bg-green-500'
-                  }`}
-                  style={{ width: `${Math.min(balance.percentUsed, 100)}%` }}
-                />
-              </div>
-            </div>
+            )}
 
-            {/* Reset Info */}
-            <div className="flex items-center gap-2 text-sm text-gray-600 pt-2 border-t">
-              <TrendingUp className="w-4 h-4" />
-              <span>
-                Resets in {balance.daysUntilReset} day{balance.daysUntilReset !== 1 ? 's' : ''}
-              </span>
-            </div>
+            {/* Reset Info (monthly allotment only — pool credits don't reset) */}
+            {hasMonthly && (
+              <div className="flex items-center gap-2 text-sm text-gray-600 pt-2 border-t">
+                <TrendingUp className="w-4 h-4" />
+                <span>
+                  Resets in {balance.daysUntilReset} day{balance.daysUntilReset !== 1 ? 's' : ''}
+                </span>
+              </div>
+            )}
 
             {/* Low Balance Warning */}
-            {balance.percentUsed >= 80 && (
+            {isLow && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                 <p className="text-sm text-yellow-800 mb-2">
-                  {balance.percentUsed >= 100
+                  {isOut
                     ? 'Out of credits! Upgrade for more.'
                     : 'Running low on credits'}
                 </p>

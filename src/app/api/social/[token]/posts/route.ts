@@ -24,6 +24,8 @@ import { prisma } from '@/lib/prisma';
 import { createSecureResponse, assertProjectOwner } from '@/lib/security';
 import { withAIRateLimit } from '@/lib/rateLimit';
 import { UsageEventType } from '@/lib/creditSystem';
+import { getUserPlan, checkLimit, PlanTier } from '@/lib/planManager';
+import { getSocialPostWindow, countSocialPostGenerations } from '@/modules/social/gating';
 import { generateRawJson } from '@/lib/aiClient';
 import { buildBrandContext } from '@/modules/social/brandContext';
 import {
@@ -217,6 +219,24 @@ async function generateHandler(
     // internalUserId is the Project FK id space — MUST NOT flow into ledger/SocialPost.
     const internalUserId = access.userRecord?.id ?? null;
     void internalUserId;
+
+    // 3b. CAP GATE (phase 7). Defense-in-depth beneath the kill-switch. Counts the
+    //     append-only UsageEvent ledger keyed on the CLERK id (D6), so delete-and-regen
+    //     can never restore allowance. FREE = 10 lifetime; PRO = 300/calendar-month.
+    //     TOCTOU: two concurrent POSTs at 9/10 can both pass — accepted for a soft cap.
+    const userPlan = await getUserPlan(clerkId);
+    const tier = userPlan.tier as PlanTier;
+    const window = getSocialPostWindow(tier);
+    const currentCount = await countSocialPostGenerations(clerkId, window);
+    const limitCheck = await checkLimit(clerkId, 'socialPosts', currentCount);
+    if (!limitCheck.allowed) {
+      // 403 (a 4xx that is NOT 402 — plan forbids 402). The UI keys the upgrade wall
+      // off `error === 'limit_reached'`, not the status code.
+      return createSecureResponse(
+        { success: false, error: 'limit_reached', remaining: 0, tier, window },
+        403,
+      );
+    }
 
     // 4. Load brand data SEPARATELY (assertProjectOwner does not return it).
     //    NOTE: Project has NO `name` column — the display field is `title` (phase-1 finding).

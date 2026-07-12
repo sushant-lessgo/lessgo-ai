@@ -8,7 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { PublishSchema, sanitizeForLogging, sanitizeSeo } from '@/lib/validation';
 import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectAccess } from '@/lib/security';
 import { withPublishRateLimit } from '@/lib/rateLimit';
-import { getUserPlan, checkLimit, hasTrackingPixels } from '@/lib/planManager';
+import { getUserPlan, checkLimit, hasTrackingPixels, getPlanConfig, PlanTier } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
 import { publishedSubdomainHost, publishSubdomainHosts } from '@/lib/domains/hosts';
@@ -339,6 +339,21 @@ async function publishHandler(req: NextRequest) {
         (content as any).localeContent = projectLocaleContent;
       }
 
+      // pricing-v2 (phase 2): suppress the "Made with Lessgo" badge only when the
+      // page OWNER's plan has removeBranding (Pro/LTD). userId here is the owner.
+      // CONFIG-DERIVED ON PURPOSE — do NOT use hasFeature('removeBranding'): its
+      // test (`=== true || !== 'none'`) returns true for a boolean `false`
+      // (`false !== 'none'`), so it fails OPEN and would strip the badge for FREE.
+      // Resolve the tier and read the flag straight from PLAN_CONFIGS (same pattern
+      // as hasTrackingPixels). Any error ⇒ false ⇒ badge shown (fail-closed).
+      let removeBranding = false;
+      try {
+        const ownerPlan = await getUserPlan(userId);
+        removeBranding = getPlanConfig(ownerPlan.tier as PlanTier)?.features.removeBranding === true;
+      } catch (brandingErr) {
+        console.warn('[publish] removeBranding lookup failed (defaulting to branded):', brandingErr);
+      }
+
       const { version, blobKey, blobUrl, sizeBytes, extraRoutes } = await renderPublishedExport({
         pageId,
         userId,
@@ -355,6 +370,7 @@ async function publishHandler(req: NextRequest) {
         knobs: projectKnobs,
         baseUrl,
         canonicalDomain,
+        removeBranding,
         // i18n (Phase 6): drives the per-locale fan-out. Absent/single-locale ⇒
         // renderPublishedExport's single default-locale pass (byte-identical).
         localeConfig,

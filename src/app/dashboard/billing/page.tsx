@@ -17,6 +17,8 @@ interface PlanInfo {
   tier: string;
   status: string;
   creditsLimit: number;
+  creditPool?: number;
+  lifetimeDeal?: boolean;
   currentPeriodEnd: string | null;
   isTrialing: boolean;
   trialEnd: string | null;
@@ -28,6 +30,9 @@ interface UsageStats {
     used: number;
     remaining: number;
     limit: number;
+    percentUsed?: number;
+    poolRemaining?: number;
+    totalAvailable?: number;
   };
   operations: {
     fullPageGenerations: number;
@@ -125,9 +130,24 @@ export default function BillingPage() {
     );
   }
 
-  const percentUsed = usage
-    ? (usage.credits.used / usage.credits.limit) * 100
-    : 0;
+  // pricing-v2: guard the division — FREE has monthly limit 0 (its 20 credits live
+  // in the persistent pool), so used/limit would be NaN/Infinity.
+  const monthlyLimit = usage?.credits.limit ?? 0;
+  const percentUsed =
+    usage && monthlyLimit > 0 ? (usage.credits.used / monthlyLimit) * 100 : 0;
+
+  const pool = plan?.creditPool ?? usage?.credits.poolRemaining ?? 0;
+  const totalAvailable =
+    usage?.credits.totalAvailable ?? (usage?.credits.remaining ?? 0) + pool;
+
+  // Human label for the credit balance, per tier.
+  const creditsLabel = (() => {
+    if (plan?.lifetimeDeal) return `${pool} lifetime credits`;
+    if (plan?.tier === 'FREE') return `${pool} one-time credits`;
+    if (monthlyLimit === -1) return 'Unlimited';
+    if (pool > 0) return `${monthlyLimit}/mo + ${pool} bonus`;
+    return `${monthlyLimit}/mo`;
+  })();
 
   return (
     <div className="max-w-6xl mx-auto p-8">
@@ -165,11 +185,9 @@ export default function BillingPage() {
 
           <div className="space-y-3 mb-6">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Monthly Credits</span>
+              <span className="text-gray-600">Credits</span>
               <span className="font-semibold text-gray-900">
-                {plan?.creditsLimit === -1
-                  ? 'Unlimited'
-                  : plan?.creditsLimit || 30}
+                {creditsLabel}
               </span>
             </div>
             <div className="flex justify-between text-sm">
@@ -226,30 +244,38 @@ export default function BillingPage() {
           <div className="mb-6">
             <div className="flex justify-between items-baseline mb-2">
               <span className="text-3xl font-bold text-gray-900">
-                {usage?.credits.remaining || 0}
+                {totalAvailable}
               </span>
-              <span className="text-gray-600">
-                / {usage?.credits.limit || 30} credits
-              </span>
+              <span className="text-gray-600">credits available</span>
             </div>
 
-            {/* Progress Bar */}
-            <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
-              <div
-                className={`h-3 rounded-full transition-all ${
-                  percentUsed >= 100
-                    ? 'bg-red-500'
-                    : percentUsed >= 80
-                    ? 'bg-yellow-500'
-                    : 'bg-green-500'
-                }`}
-                style={{ width: `${Math.min(percentUsed, 100)}%` }}
-              />
-            </div>
-
-            <p className="text-sm text-gray-600">
-              {usage?.credits.used || 0} credits used this month
-            </p>
+            {monthlyLimit > 0 ? (
+              <>
+                {/* Monthly allotment progress bar (only meaningful when there is one) */}
+                <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                  <div
+                    className={`h-3 rounded-full transition-all ${
+                      percentUsed >= 100
+                        ? 'bg-red-500'
+                        : percentUsed >= 80
+                        ? 'bg-yellow-500'
+                        : 'bg-green-500'
+                    }`}
+                    style={{ width: `${Math.min(percentUsed, 100)}%` }}
+                  />
+                </div>
+                <p className="text-sm text-gray-600">
+                  {usage?.credits.used || 0} of {monthlyLimit} monthly credits used
+                  {pool > 0 ? ` · ${pool} bonus in pool` : ''}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-gray-600">
+                {plan?.lifetimeDeal
+                  ? 'Lifetime credits — never expire'
+                  : 'One-time credits — do not refill'}
+              </p>
+            )}
           </div>
 
           {usage && (

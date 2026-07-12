@@ -421,6 +421,12 @@ model UserPlan {
   // Credit limits
   creditsLimit Int @default(30)
 
+  // Pricing v2: lifetime deal + persistent credit pool
+  lifetimeDeal  Boolean @default(false)
+  ltdCohort     Int?
+  ltdPricePaid  Int? // cents
+  creditPool    Int     @default(0)
+
   // Feature limits
   publishedPagesLimit  Int @default(1)
   draftProjectsLimit   Int @default(3)

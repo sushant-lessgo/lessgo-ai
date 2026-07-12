@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     // Handle different event types
     switch (event.type) {
       case 'checkout.session.completed':
-        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session, event.id);
         break;
 
       case 'customer.subscription.created':
@@ -114,8 +114,16 @@ export async function POST(req: NextRequest) {
  * Handle checkout.session.completed
  * User completed checkout - may be in trial or active
  */
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session, eventId?: string) {
   try {
+    // pricing-v2: one-time payments (Founding LTD + $9/100 top-ups) arrive here
+    // with mode === 'payment' and metadata.kind. Handle them before the
+    // subscription path (which expects metadata.tier).
+    if (session.mode === 'payment') {
+      await handleOneTimePayment(session, eventId);
+      return;
+    }
+
     const userId = session.metadata?.userId;
     const tier = session.metadata?.tier as PlanTier;
 
@@ -140,6 +148,78 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     logger.error('Error handling checkout.session.completed:', error);
     throw error;
   }
+}
+
+/**
+ * Handle one-time (mode: 'payment') checkout completions: Founding LTD + top-ups.
+ *
+ * Idempotency:
+ *  - LTD  → grantLifetimeDeal is once-only: if the user is already lifetimeDeal
+ *           we skip (Stripe retries + accidental double-buys can't double-grant).
+ *  - topup → repeatable, so we dedupe on the Stripe session id, persisted in the
+ *           UsageEvent.metadata JSON written by addPoolCredits. (Column is
+ *           `metadata`, NOT `context`.) A matching CREDIT_TOPUP row → skip.
+ */
+async function handleOneTimePayment(session: Stripe.Checkout.Session, eventId?: string) {
+  const userId = session.metadata?.userId;
+  const kind = session.metadata?.kind;
+
+  if (!userId || !kind) {
+    logger.error('Missing userId/kind in one-time payment session:', session.id);
+    return;
+  }
+
+  const { prisma } = await import('@/lib/prisma');
+
+  if (kind === 'ltd') {
+    // Once-only guard: skip if the user already holds a lifetime deal.
+    const plan = await prisma.userPlan.findUnique({
+      where: { userId },
+      select: { lifetimeDeal: true },
+    });
+    if (plan?.lifetimeDeal) {
+      logger.info(`LTD already granted for user ${userId}; skipping (session ${session.id}).`);
+      return;
+    }
+
+    const cohort = session.metadata?.cohort ? parseInt(session.metadata.cohort, 10) : NaN;
+    if (!Number.isFinite(cohort)) {
+      logger.error('Invalid/missing cohort in LTD session:', session.id);
+      return;
+    }
+
+    const { grantLifetimeDeal } = await import('@/lib/planManager');
+    await grantLifetimeDeal(userId, cohort, session.amount_total ?? 0);
+    logger.info(`Granted LTD (cohort ${cohort}) to user ${userId} from session ${session.id}`);
+    return;
+  }
+
+  if (kind === 'topup') {
+    // Dedupe: has this exact Stripe session already been credited?
+    const { UsageEventType, addPoolCredits } = await import('@/lib/creditSystem');
+    const already = await prisma.usageEvent.findFirst({
+      where: {
+        userId,
+        eventType: UsageEventType.CREDIT_TOPUP,
+        metadata: { path: ['stripeSessionId'], equals: session.id },
+      },
+      select: { id: true },
+    });
+    if (already) {
+      logger.info(`Top-up already applied for session ${session.id}; skipping.`);
+      return;
+    }
+
+    await addPoolCredits(userId, 100, UsageEventType.CREDIT_TOPUP, {
+      stripeSessionId: session.id,
+      stripeEventId: eventId,
+      reason: 'topup',
+    });
+    logger.info(`Applied 100 top-up credits to user ${userId} from session ${session.id}`);
+    return;
+  }
+
+  logger.warn(`Unknown one-time payment kind '${kind}' for session ${session.id}`);
 }
 
 /**
@@ -305,7 +385,13 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     const subscriptionId = (invoice as any).subscription as string;
 
     if (!subscriptionId) {
-      // Not a subscription invoice
+      // Not a subscription invoice.
+      // pricing-v2: this guard also protects LTD/top-up buyers. Those are one-time
+      // payments (`mode: 'payment'`, no subscription), so invoice.payment_succeeded
+      // either never fires or carries no subscriptionId → we return early and never
+      // call resetCredits. That is REQUIRED: LTD/FREE have monthly creditsLimit=0
+      // and their credits live in the persistent pool, which resetCredits must never
+      // touch. Do not remove this early return.
       return;
     }
 

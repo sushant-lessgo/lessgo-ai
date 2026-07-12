@@ -12,10 +12,31 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   typescript: true,
 });
 
+// ---------------------------------------------------------------------------
+// Pricing-v2 commerce env vars (NAMES ONLY — real values live in .env.local,
+// supplied later behind a separate human gate; never commit IDs/keys):
+//
+//   PRICING_V2_COMMERCE            kill-switch, default OFF. LTD + top-up routes
+//                                  return 404 unless this === 'true'.
+//   STRIPE_PRO_MONTHLY_PRICE_ID    existing — new $29/mo test-mode price ID goes here
+//   STRIPE_PRO_ANNUAL_PRICE_ID     existing — new $290/yr test-mode price ID goes here
+//   STRIPE_LTD_COHORT_1_PRICE_ID   Founding LTD cohort 1 ($69) price ID
+//   STRIPE_LTD_COHORT_2_PRICE_ID   Founding LTD cohort 2 ($99) price ID
+//   STRIPE_LTD_COHORT_3_PRICE_ID   Founding LTD cohort 3 ($129) price ID
+//   STRIPE_TOPUP_100_PRICE_ID      $9 / 100-credit top-up price ID
+//
+// LTD structure (plan decision 4): ONE Stripe product, THREE prices; cohort is
+// carried in our own metadata + UserPlan rows, not derived from Stripe.
+// ---------------------------------------------------------------------------
+
 // Stripe price IDs from environment
 export const STRIPE_PRICES = {
   PRO_MONTHLY: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || '',
   PRO_ANNUAL: process.env.STRIPE_PRO_ANNUAL_PRICE_ID || '',
+  LTD_COHORT_1: process.env.STRIPE_LTD_COHORT_1_PRICE_ID || '',
+  LTD_COHORT_2: process.env.STRIPE_LTD_COHORT_2_PRICE_ID || '',
+  LTD_COHORT_3: process.env.STRIPE_LTD_COHORT_3_PRICE_ID || '',
+  TOPUP_100: process.env.STRIPE_TOPUP_100_PRICE_ID || '',
 } as const;
 
 // Price ID to tier mapping
@@ -42,13 +63,15 @@ export async function createCheckoutSession({
   priceId,
   successUrl,
   cancelUrl,
-  trialDays = 14,
+  trialDays,
 }: {
   userId: string;
   userEmail: string;
   priceId: string;
   successUrl: string;
   cancelUrl: string;
+  // pricing-v2 decision: no trials (free tier is the trial; 14-day refund instead).
+  // Left optional for back-compat; when undefined we omit trial_period_days entirely.
   trialDays?: number;
 }): Promise<Stripe.Checkout.Session> {
   try {
@@ -63,7 +86,9 @@ export async function createCheckoutSession({
         },
       ],
       subscription_data: {
-        trial_period_days: trialDays,
+        // Only set a trial when explicitly requested; otherwise Stripe charges
+        // immediately (no trial).
+        ...(trialDays !== undefined ? { trial_period_days: trialDays } : {}),
         metadata: {
           userId,
           tier: getTierFromPriceId(priceId) || 'PRO',
@@ -82,6 +107,60 @@ export async function createCheckoutSession({
     return session;
   } catch (error) {
     logger.error('Error creating Stripe checkout session:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create a one-time-payment Stripe checkout session (mode: 'payment').
+ *
+ * Used by pricing-v2 for Founding LTD purchases and $9/100 credit top-ups.
+ * The webhook (`checkout.session.completed`, mode === 'payment') branches on
+ * `metadata.kind` to grant the LTD deal or add pool credits.
+ */
+export async function createOneTimeCheckoutSession({
+  userId,
+  userEmail,
+  priceId,
+  kind,
+  cohort,
+  successUrl,
+  cancelUrl,
+}: {
+  userId: string;
+  userEmail: string;
+  priceId: string;
+  kind: 'ltd' | 'topup';
+  cohort?: number;
+  successUrl: string;
+  cancelUrl: string;
+}): Promise<Stripe.Checkout.Session> {
+  try {
+    const metadata: Record<string, string> = { userId, kind };
+    if (cohort !== undefined) {
+      metadata.cohort = String(cohort);
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer_email: userEmail,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      metadata,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      allow_promotion_codes: true,
+    });
+
+    logger.info(`Created one-time Stripe checkout session (${kind}) for user ${userId}`);
+    return session;
+  } catch (error) {
+    logger.error('Error creating one-time Stripe checkout session:', error);
     throw error;
   }
 }
