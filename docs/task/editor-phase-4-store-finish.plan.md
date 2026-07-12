@@ -13,7 +13,7 @@ Collapse the editor store's **four** access layers (`useEditStore.ts` token hook
 - phase 2 Step A façade unification: done (commit 14c4f3e9, review loops 1)
 - phase 3 Step A import sweep + legacy delete: done (commit 91883aff, review loops 1) — 106 files swept; NOTE bare-call count = 73 (scout est ~30 undershot; Step B batches must absorb the extra — no new bare introduced)
 - phase 3G HUMAN GATE A (Step-A merge + editor verify): CLEARED — Step A merged to main by station (ff → 9f03c996); edit-persistence smoke accepted as verification; instructed to proceed to Step B now (don't wait for deploy). Branch fully contains main @20fb7bab.
-- phase 4 Step B baseline probe: pending
+- phase 4 Step B baseline probe: done (commit 31669bae, review loops 1) — probe green 6/6 x2 authed; baseline: palette-swap 4-5 commits + commits-on-blur 3 = the discriminators (NOT per-keystroke, near-noise); B2 content batch must run undo,redo,select smokes
 - phase 5 batch B1 useOptimizedEditStore: pending
 - phase 6 batch B2 renderer/selection hot path: pending
 - phase 7 batch B3 useEditor + SectionCRUD: pending
