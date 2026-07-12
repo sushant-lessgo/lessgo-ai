@@ -120,12 +120,82 @@ export const VESTRIA_PAGE_ARCHETYPES: PageArchetypeDef[] = [
 ];
 
 /**
+ * Atelier (visual-portfolio / work engine — Kundius Photography anchor) 5-page
+ * menu: Home / Work / Experiences / About / Contact. Body section types are the
+ * ones atelier actually RESOLVES (resolveAtelierBlock): hero, work, packages,
+ * about, quote, contact. `header`/`footer` are shared chrome — never in a page's
+ * section list. NOTE the quote-band type is `quote` (NOT `quote-band` — a hyphen
+ * breaks extractSectionType's id round-trip). Photographers default to `multi`
+ * (businessTypes config), so the whole menu (all 5 `defaultIncluded`) is the
+ * served skeleton default.
+ */
+export const ATELIER_PAGE_ARCHETYPES: PageArchetypeDef[] = [
+  {
+    key: 'home',
+    title: 'Home',
+    pathSlug: '/',
+    required: true,
+    defaultIncluded: true,
+    allowedSections: ['hero', 'work', 'quote', 'packages', 'about', 'contact'],
+    requiredSections: ['hero'],
+    defaultSections: ['hero', 'work', 'quote', 'contact'],
+    description:
+      'The main landing page — a striking hero, a teaser of selected work, a client quote, and a call to get in touch.',
+  },
+  {
+    key: 'work',
+    title: 'Work',
+    pathSlug: '/work',
+    required: true,
+    defaultIncluded: true,
+    allowedSections: ['work', 'quote', 'contact'],
+    requiredSections: ['work'],
+    defaultSections: ['work', 'quote'],
+    description:
+      'The portfolio in depth — the full selected-work gallery (the gallery capability), with a client quote.',
+  },
+  {
+    key: 'experiences',
+    title: 'Experiences',
+    pathSlug: '/experiences',
+    defaultIncluded: true,
+    allowedSections: ['packages', 'quote', 'contact'],
+    requiredSections: ['packages'],
+    defaultSections: ['packages', 'quote'],
+    description:
+      'The offering as tiered packages/experiences — two-to-four options, plus a client quote. Right when the studio sells distinct package tiers.',
+  },
+  {
+    key: 'about',
+    title: 'About',
+    pathSlug: '/about',
+    defaultIncluded: true,
+    allowedSections: ['about', 'quote', 'packages'],
+    requiredSections: ['about'],
+    defaultSections: ['about', 'quote'],
+    description:
+      'The studio story — who is behind the camera, the approach, and a client quote as proof.',
+  },
+  {
+    key: 'contact',
+    title: 'Contact',
+    pathSlug: '/contact',
+    defaultIncluded: true,
+    allowedSections: ['contact'],
+    requiredSections: ['contact'],
+    defaultSections: ['contact'],
+    description: 'The enquiry / contact page with the lead form (shared-block lead-form lane).',
+  },
+];
+
+/**
  * Archetype registry — the page menus, keyed by the template that OWNS them.
  * A template appears here iff it ships a page-archetype menu; the `multipage`
  * capability declaration (templateMeta) is what makes the menu REACHABLE.
  */
 const PAGE_ARCHETYPES_BY_TEMPLATE: Record<string, PageArchetypeDef[]> = {
   vestria: VESTRIA_PAGE_ARCHETYPES,
+  atelier: ATELIER_PAGE_ARCHETYPES,
 };
 
 /** Does this template declare the `multipage` capability (templateMeta)? */

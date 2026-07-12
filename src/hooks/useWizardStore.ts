@@ -727,9 +727,28 @@ export const useWizardStore = create<WizardStore>()(
           state.mode = deriveMode(brief);
 
           const contract = getContract(engine);
-          // atelier phase 2 — slot inclusion is now template-aware for work
-          // (multipage picked template ⇒ the structure slot is NOT skipped).
-          state.slots = slotsForEngine(engine, templateId ?? null, brief);
+          // atelier phase 5 — slot inclusion must key off the SAME confirmed-only
+          // multipage signal that fetchStrategy/GeneratingSlot use
+          // (briefSignalFromState), NOT the raw classify brief. classify stamps
+          // EVERY brief with an UNCONFIRMED `structure:{ mode, pages: [] }` hint
+          // (classify.ts) = the raw AI guess. Feeding that raw hint here let a
+          // served photographer the AI read as single-page suppress the structure
+          // slot (isMultipage(brief) → mode==='single' → skip retained), while the
+          // dispatch derivation — which reads briefStructureMode, set ONLY from a
+          // CONFIRMED structure — still went multipage → a zero-page skeleton.
+          // Set briefStructureMode from a CONFIRMED structure FIRST (design intent,
+          // comment below), then derive slots from the reconstructed signal so both
+          // derivations agree. A CONFIRMED single still correctly stays single;
+          // an unconfirmed hint never suppresses the slot for a multipage template.
+          const confirmedStructure = brief.structure;
+          const hasConfirmedStructure =
+            !!confirmedStructure &&
+            ((confirmedStructure.sections?.length ?? 0) > 0 ||
+              (confirmedStructure.pageDetails?.length ?? 0) > 0);
+          if (confirmedStructure && hasConfirmedStructure) {
+            state.briefStructureMode = confirmedStructure.mode;
+          }
+          state.slots = slotsForEngine(engine, templateId ?? null, briefSignalFromState(state));
           state.currentSlot = state.slots[0] ?? 'identity';
 
           // Per-field state via the phase-1 waterfall (logic NOT duplicated here).
@@ -775,13 +794,14 @@ export const useWizardStore = create<WizardStore>()(
           // reload after confirm resumes the user's structure edits (the
           // strategy-seed guards never clobber these), and the required set
           // reflects the confirmed structure immediately.
+          // (briefStructureMode already set from the CONFIRMED structure above —
+          // before slot derivation. This block seeds the sitemap/section state.)
           const persisted = brief.structure;
           const isConfirmedStructure =
             !!persisted &&
             ((persisted.sections?.length ?? 0) > 0 ||
               (persisted.pageDetails?.length ?? 0) > 0);
           if (persisted && isConfirmedStructure) {
-            state.briefStructureMode = persisted.mode;
             if (persisted.mode === 'multi' && persisted.pageDetails?.length) {
               state.sitemap = persisted.pageDetails.map((d) => ({
                 archetypeKey: d.archetypeKey,

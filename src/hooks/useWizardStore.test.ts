@@ -75,6 +75,40 @@ const workNoBizBrief = briefWithEntry(
   { copyEngine: 'work' },
 );
 
+// atelier phase 5 — a REAL served photographer+atelier brief (businessType
+// carries the multi structureDefault). This is the reachable served path now
+// that atelier declares `multipage` (phase 4) + ships archetypes (phase 5).
+const photographerAtelierBrief = briefWithEntry(
+  { rawInput: 'kundius photography', oneLiner: 'editorial wedding photographer' },
+  { businessType: 'photographer', copyEngine: 'work' },
+);
+
+// atelier phase 5 (fix-first) — the REACHABLE bug case: classify.ts stamps EVERY
+// brief with a bare UNCONFIRMED `structure:{ mode, pages: [] }` hint (the raw AI
+// guess). A served photographer the AI read as single-page carries mode:'single'
+// with NO sections/pageDetails. hydrate must NOT let this suppress the structure
+// slot (it is unconfirmed) — both derivations must still resolve multipage.
+const photographerAtelierRawSingleHint = briefWithEntry(
+  { rawInput: 'kundius photography', oneLiner: 'editorial wedding photographer' },
+  {
+    businessType: 'photographer',
+    copyEngine: 'work',
+    structure: { mode: 'single', pages: [] },
+  } as Partial<Brief>,
+);
+
+// A CONFIRMED single structure (real 7b write — carries sections). This MUST
+// still correctly stay single (both derivations honor an explicit confirmed
+// single), proving the fix didn't break the legitimate single path.
+const photographerAtelierConfirmedSingle = briefWithEntry(
+  { rawInput: 'kundius photography', oneLiner: 'editorial wedding photographer' },
+  {
+    businessType: 'photographer',
+    copyEngine: 'work',
+    structure: { mode: 'single', sections: ['hero', 'work', 'footer'] },
+  } as Partial<Brief>,
+);
+
 beforeEach(() => {
   useWizardStore.getState().reset();
 });
@@ -999,5 +1033,99 @@ describe('useWizardStore — served work→multipage skeleton path (atelier phas
       .hydrate({ tokenId: 'tokG', brief: workBrief, audienceType: 'writer', templateId: 'granth' });
     const single = useWizardStore.getState();
     expect(isMultipage(single.templateId ?? undefined, briefSignalFromState(single))).toBe(false);
+  });
+});
+
+// ===========================================================================
+// atelier phase 5 — the REAL served photographer+atelier path
+// ===========================================================================
+// Now that atelier declares `multipage` + ships archetypes and photographers
+// default to `multi`, prove the phase-2 machinery fires on a REAL template — and
+// (phase-2 CARRY) that the TWO multipage derivations AGREE: slot inclusion keys
+// off the full `brief` at hydrate, while fetchStrategy/dispatch key off
+// `briefSignalFromState(store)`. For a photographer+atelier brief both must
+// resolve TRUE (else the structure slot shows but the skeleton declines, or
+// vice-versa).
+describe('useWizardStore — served photographer+atelier path (atelier phase 5)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('(c) wizard slot list for work + atelier INCLUDES structure', () => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokA', brief: photographerAtelierBrief, audienceType: 'service', templateId: 'atelier' });
+    expect(useWizardStore.getState().slots).toContain('structure');
+  });
+
+  it('(CARRY) both multipage derivations AGREE for photographer+atelier — full-brief slot inclusion AND briefSignalFromState dispatch gate both TRUE', () => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokA', brief: photographerAtelierBrief, audienceType: 'service', templateId: 'atelier' });
+    const s = useWizardStore.getState();
+    // Derivation 1 (slotsForEngine at hydrate keys off the full brief).
+    expect(s.slots).toContain('structure');
+    // Derivation 2 (fetchStrategy / GeneratingSlot dispatch keys off briefSignalFromState).
+    expect(isMultipage(s.templateId ?? undefined, briefSignalFromState(s))).toBe(true);
+    // The signal the store reconstructs must carry the photographer businessType.
+    expect(briefSignalFromState(s)).toMatchObject({ businessType: 'photographer' });
+  });
+
+  it('(fix-first) a bare UNCONFIRMED classify single hint does NOT suppress the structure slot — both derivations AGREE multipage', () => {
+    // This is the case the earlier no-structure proof missed: classify stamped
+    // `structure:{ mode:'single', pages:[] }`. Pre-fix, slotsForEngine read the
+    // RAW brief (→ single → skip), while the dispatch derivation went multipage
+    // → zero-page skeleton. Post-fix both key off the confirmed-only signal.
+    useWizardStore.getState().reset();
+    useWizardStore.getState().hydrate({
+      tokenId: 'tokRaw',
+      brief: photographerAtelierRawSingleHint,
+      audienceType: 'service',
+      templateId: 'atelier',
+    });
+    const s = useWizardStore.getState();
+    // Derivation 1 (slot inclusion) — the unconfirmed hint is ignored.
+    expect(s.slots).toContain('structure');
+    // Derivation 2 (dispatch/fetchStrategy) — confirmed-only signal, photographer→multi.
+    expect(isMultipage(s.templateId ?? undefined, briefSignalFromState(s))).toBe(true);
+    // The unconfirmed hint never reaches briefStructureMode.
+    expect(s.briefStructureMode).toBeNull();
+  });
+
+  it('(fix-first) a CONFIRMED single structure DOES stay single — the legitimate single path is unbroken', () => {
+    useWizardStore.getState().reset();
+    useWizardStore.getState().hydrate({
+      tokenId: 'tokConf',
+      brief: photographerAtelierConfirmedSingle,
+      audienceType: 'service',
+      templateId: 'atelier',
+    });
+    const s = useWizardStore.getState();
+    // Confirmed single ⇒ briefStructureMode set ⇒ both derivations resolve single.
+    expect(s.briefStructureMode).toBe('single');
+    expect(s.slots).not.toContain('structure');
+    expect(isMultipage(s.templateId ?? undefined, briefSignalFromState(s))).toBe(false);
+  });
+
+  it('(d) fetchStrategy (work + atelier) seeds the 5 default pages with ZERO fetch/charge', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokA', brief: photographerAtelierBrief, audienceType: 'service', templateId: 'atelier' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+
+    expect(spy).not.toHaveBeenCalled(); // no LLM, no credit charge
+    expect(s.strategyStatus).toBe('done');
+    expect(s.strategy).toBeNull(); // copy-gen stays OUT
+    const map = s.sitemap as any[];
+    expect(Array.isArray(map)).toBe(true);
+    expect(map.map((p) => p.archetypeKey)).toEqual(['home', 'work', 'experiences', 'about', 'contact']);
   });
 });

@@ -249,3 +249,71 @@ Non-blocking: slotless 'work' kit section (accepted per ruling — designer-hand
 ### Phase 4 — impl-review verdict: SHIP (1 loop + 1 orchestrator ruling)
 No blocking issues. Gates green: tsc exit 0; templates+brief+audience/service = 1076 passed/8 skipped. Scope = 12 modified + atelier/** (51 files); componentRegistry{,.published}.ts untouched. Verified: dual-renderer discipline (Hero/Work/Packages triads pure-core, boundary-safe; coreParity + publishedClientBoundary tests cover atelier non-vacuously); conformance non-vacuous (all core+capability sections resolve REAL components, not placeholder); two-identifier consistency across resolve/meta/manifest/sectionRules/elementSchema; quote (not quote-band) everywhere; flip correct (photographer SERVE/service, writer shortlist ['granth','atelier'] pick=granth, parity-table lumen:'trust'→work corrected).
 Non-blocking (cosmetic): serveGate.test.ts:120 stale comment (photographer-contrast obsolete post-flip). Leave; note for phase 7 sweep.
+
+---
+### Phase 5 — Page archetypes + multipage + photographer multi default
+
+**Files changed**
+- `src/modules/audience/product/pageArchetypes.ts` — added `ATELIER_PAGE_ARCHETYPES` (5 defs) + registered in `PAGE_ARCHETYPES_BY_TEMPLATE`.
+- `src/modules/businessTypes/config.ts` — photographer `structureDefault` `'single'`→`'multi'`.
+- `src/modules/businessTypes/config.test.ts` — `:104` assertion `'single'`→`'multi'`.
+- `src/modules/audience/product/pageArchetypes.test.ts` — relaxed the structureDefault invariant (photographer now multi alongside manufacturer). [see Deviations]
+- `src/hooks/useWizardStore.test.ts` — photographer+atelier fixture + phase-5 describe (cases c/d + signal-consistency CARRY).
+- `src/modules/audience/product/pageArchetypes.atelier.test.ts` — NEW (cases a/b + block-resolution CARRY proof).
+- `src/modules/businessTypes/pipelineGuards.test.ts` — allowlisted StyleSlot.tsx (orchestrator ruling; see below).
+- `src/hooks/useWizardStore.ts` — hydrate now feeds `briefSignalFromState(state)` (confirmed-only signal) to `slotsForEngine`, not the raw brief (fix-first bug; see below).
+
+**The 5 archetypes** (all `defaultIncluded`; body sectionTypes cross-checked against `resolveAtelierBlock` registry — every one resolves a REAL atelier block in both modes, none hits `AtelierPlaceholderBlock`):
+- **home** `/` (required) — default `[hero, work, quote, contact]`; allowed adds `packages, about`.
+- **work** `/work` (required) — default `[work, quote]`; allowed adds `contact`.
+- **experiences** `/experiences` — default `[packages, quote]`; allowed adds `contact`.
+- **about** `/about` — default `[about, quote]`; allowed adds `packages`.
+- **contact** `/contact` — default `[contact]`.
+
+All sectionTypes ∈ atelier body types `{hero, work, packages, about, quote, contact}` (chrome header/footer excluded). Quote-band type is `quote` (hyphen-free per phase-4). `getPageArchetypesForTemplate('atelier')` returns the menu because atelier's templateMeta already declares `multipage` (phase 4).
+
+**Photographer multi flip** — `structureDefault:'multi'`. Live (not inert) post-phase-2: the served work→multipage flow now reaches the structure slot, and `isMultipage` reads this businessType signal.
+
+**Signal-consistency CARRY (phase-2 forward hazard) — RESULT: derivations AGREE.** For a photographer+atelier store state, slot inclusion (`slotsForEngine` at hydrate, keyed off the FULL brief) and the dispatch/fetchStrategy gate (keyed off `briefSignalFromState(store)`) BOTH resolve `isMultipage` TRUE. Proven by the `(CARRY)` test in useWizardStore.test.ts (asserts `slots` contains `structure` AND `isMultipage(templateId, briefSignalFromState(s))===true` for the same state; signal carries `businessType:'photographer'`). No bug — did NOT need a phase-2 file. Known non-blocking asymmetry (documented, NOT on the served path): an UNCONFIRMED `brief.structure.mode:'single'` would make the full-brief derivation false while `briefSignalFromState` (which only adopts CONFIRMED structure mode, useWizardStore.ts:783) stays photographer→multi. The served photographer brief carries no structure at hydrate, so this cannot fire on the reachable path; flag for phase 9/13 if a resume-with-unconfirmed-structure flow is ever added.
+
+**Block-resolution CARRY (phase-2 forward hazard) — RESULT: resolves REAL atelier layouts, NOT 'default'.** `selectProductBlocks({templateId:'atelier', sections})` → `selectEligibleBlock` reads `blockManifests['atelier']` (real, phase 4) → `pickFromSet` returns the section's default declaration (eligible with no hints/assets): `work→AtelierWorkGallery`, `packages→AtelierPackages`, `quote→AtelierQuoteBand`, `hero→AtelierHero`, `about→AtelierAbout`, `contact→AtelierContact`. Proven by the `selectProductBlocks` test in pageArchetypes.atelier.test.ts. The meridian fallback map is never hit for atelier. No manifest gap.
+
+**Deviations**
+- Fixed `pageArchetypes.test.ts:137` (a photographer-single assertion the flip broke) even though the plan's step-4 grep-note named only `config.test.ts`. In-scope: my Files-touched lists "existing pageArchetypes/businessTypes test file"; this is a pure test-expectation update from my flip, same class as config.test.ts:104. Generalized the invariant to `MULTI_DEFAULTS={manufacturer, photographer}`.
+- Left the now-stale prose comment in config.ts (:246-248, "no shipped template declares [gallery], so the serve gate rejects photographer to MANUAL") untouched — cosmetic, and editing narrative beyond the flip is scope creep. Flag for a later sweep alongside the phase-4 serveGate.test.ts:120 stale comment.
+
+**Test results**
+- `npx tsc --noEmit` — exit 0. PASS.
+- `npx vitest run src/modules/audience/product src/modules/businessTypes/config.test.ts src/hooks` — 269 passed. PASS.
+- `npx vitest run src/modules/templates/conformance.test.ts` — 371 passed / 8 skipped. PASS (archetype addition didn't disturb conformance).
+
+**pipelineGuards allowlist fix (orchestrator ruling — folded into phase 5).** `src/modules/businessTypes/pipelineGuards.test.ts:62` was failing: it asserts literal `templateId === 'vestria'` appears ONLY in `RENDER_LAYER_ALLOWLIST`, but **phase 2** (commit c9af411d) added such a gate to `src/components/onboarding/wizard/StyleSlot.tsx` (`showVestriaPickers = templateId === 'vestria'` — the vestria hero-variant/style pickers) WITHOUT allowlisting it. It escaped phase-2's narrower test scope and surfaced under phase 5's `test:run -- src/modules/businessTypes` verification command. StyleSlot is render-layer wizard UI (vestria-only pickers, not a copy-pipeline fork), so the guard's own header (b) sanctions the allowlist. **Fix applied (added to phase-5 Files-touched):** added `'components/onboarding/wizard/StyleSlot.tsx'` to `RENDER_LAYER_ALLOWLIST`. StyleSlot.tsx itself NOT touched. File added to the Files-changed list below.
+
+**Final all-green results (after pipelineGuards fix):**
+- `npx tsc --noEmit` — exit 0. PASS.
+- `npx vitest run src/modules/audience/product src/modules/businessTypes src/hooks` — 272 passed (20 files, incl. pipelineGuards.test.ts). PASS.
+- `npx vitest run src/modules/templates/conformance.test.ts` — 371 passed / 8 skipped. PASS.
+
+**For phase 9/13**
+- Archetype `defaultSections` are the served skeleton seed (all 5 pages, chargeless). Phase 13 Kundius run reaches the structure slot with this 5-page menu.
+- `quote` survives `filterSectionsByProof` (only `testimonials` is proof-gated); when the photographer has no captured testimonials, `quote` sections still seed — confirm this is desired for the manual-fill flow, or gate `quote` at phase 9 if empty-quote bands are undesirable.
+- Unconfirmed-structure signal asymmetry (above) — revisit only if a resume flow persists an unconfirmed `structure.mode`.
+
+**FIX-FIRST — reachable zero-page-skeleton bug (review verdict, scope expanded to `useWizardStore.ts`).**
+- **Bug:** `classify.ts` stamps EVERY brief with an UNCONFIRMED `structure:{ mode: structureHint, pages: [] }` (raw AI guess). At hydrate `useWizardStore.ts` passed the RAW brief to `slotsForEngine`. For a served photographer the AI read as single-page (`structure.mode==='single'`): (1) `isMultipage('atelier', brief)` → `mode==='single'` → FALSE → structure skip RETAINED → StructureSlot never mounts → its mount-effect `fetchStrategy` never runs → sitemap stays null; BUT (2) `GeneratingSlot.isWorkMultipage()` keys off `briefSignalFromState(s)`, which carries `structure` ONLY when `briefStructureMode` is set — and that is set (hydrate) ONLY for a CONFIRMED structure (`sections?.length>0 || pageDetails?.length>0`). A bare `{mode:'single',pages:[]}` hint is NOT confirmed → signal omits structure → `isMultipage('atelier',{businessType:'photographer'})` → TRUE → `runWorkSkeleton` dispatches with `pages = sitemap ?? [] = []` → ZERO-PAGE multipage draft saved. The two derivations DISAGREED. (My earlier "signal-consistency" proof used a brief with NO `structure` field, so it missed this case.)
+- **Fix (minimal, `useWizardStore.ts` only):** at hydrate, compute the CONFIRMED-structure check and set `state.briefStructureMode` BEFORE the `state.slots = …` line, then call `state.slots = slotsForEngine(engine, templateId, briefSignalFromState(state))`. Now slot inclusion and the dispatch/fetchStrategy gate read the SAME confirmed-only signal (`businessTypeKey` is already set upstream, so `briefSignalFromState(state)` is valid at that point). Deduped the later `briefStructureMode = persisted.mode` assignment (single assignment now); the later block still seeds sitemap/structureSections from a confirmed structure. `isMultipage`'s "explicit CONFIRMED single wins → false" logic is UNCHANGED — only which signal hydrate feeds it changed.
+- **Net behavior:** a bare/unconfirmed classify `mode` NEVER suppresses the structure slot for a multipage-capable template; businessType default (photographer=multi) drives when structure is unconfirmed; a CONFIRMED single still correctly stays single.
+- **Representative tests (useWizardStore.test.ts, the ones the earlier proof missed):** (i) photographer+atelier brief WITH bare `structure:{mode:'single',pages:[]}` → asserts `slots` INCLUDES `'structure'` AND `isMultipage(templateId, briefSignalFromState(state))` TRUE (derivations AGREE) AND `briefStructureMode` stays null; (ii) photographer+atelier brief WITH a CONFIRMED single (`structure.sections=['hero','work','footer']`) → asserts `briefStructureMode==='single'`, `slots` does NOT contain `'structure'`, and the dispatch derivation is FALSE (legitimate single path unbroken).
+- **Granth unchanged:** the phase-2 granth cases (`work + granth STILL skips structure`, `fetchStrategy work+single-page granth early-returns idle`, `dispatch work+single → writer generator`) all still pass — granth declares no `multipage`, so `isMultipage` is false regardless of which signal is fed; the confirmed-only change is inert for it.
+
+**Final all-green results (after fix-first):**
+- `npx tsc --noEmit` — exit 0. PASS.
+- `npx vitest run src/hooks src/modules/audience/product src/modules/businessTypes src/modules/wizard` — 343 passed (25 files). PASS.
+- `npx vitest run src/modules/templates/conformance.test.ts` — 371 passed / 8 skipped. PASS.
+
+---
+### Phase 5 — impl-review verdict: SHIP (2 loops)
+Loop 1 = fix-first: reviewer caught a REACHABLE zero-page-draft bug (bare classify structure hint diverged slot-inclusion vs dispatch). Loop 2 = ship after fix.
+Gates green: tsc exit 0; hooks+audience/product+businessTypes+wizard+conformance = 714 passed/8 skipped. Scope = 8 files (useWizardStore.ts added mid-phase per ruling), GeneratingSlot.tsx untouched.
+Fixes this phase: (1) hydrate feeds briefSignalFromState(state) to slotsForEngine (both derivations now confirmed-only signal) — representative bare-hint + confirmed-single tests added; (2) pipelineGuards RENDER_LAYER_ALLOWLIST += StyleSlot.tsx (phase-2 regression). Both phase-2 carries proven (signal consistency real now; manifestPick resolves real Atelier layouts not 'default'). Granth inert (no multipage cap).
+Non-blocking (cosmetic): stale CARRY-test inline comment ("keys off full brief" now via briefSignalFromState).
