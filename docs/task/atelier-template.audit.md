@@ -591,3 +591,40 @@ No blocking issues. Gates green: tsc exit 0; templates suite 921 passed/8 skippe
 Deferrable deviations (carries): (1) unfilled non-schema chrome keys render design placeholder as LIVE TEXT → phase-11 mocks + phase-13 manual-fill must populate (@studioname/"Let's make yours."/etc.); (2) Work category-filter dropped (needs shared-primitive data-cat hook → orchestrator call at 11/12); (3) About 3-surface→1-section + Contact single-col + buttonShape default + opsz → phase-12 parity eyeball.
 
 ## FULL 8-BLOCK PORT COMPLETE (9a+9b). Next: 10 (slider JS asset), 11 (editor basics/mocks + carries), 12 (parity QA — HUMAN GATE), 13 (Kundius publish — HUMAN GATE).
+
+---
+### Phase 10 — Hero-slider behaviors asset
+
+**Files changed:**
+- `src/lib/staticExport/atelierSliderBehaviors.js` (new) — vanilla IIFE slider asset (built → `public/assets/slider.v1.js`).
+- `scripts/buildAssets.js` — added `{ src:'atelierSliderBehaviors.js', out:'slider.v1.js' }` to the Terser files array.
+- `src/lib/staticExport/htmlGenerator.ts` — `usesAtelier` gating flag + gated `<script .../slider.v1.js defer>` tag; threaded the flag through `buildHTMLDocument`'s params type + destructure.
+- `src/lib/staticExport/htmlGenerator.test.ts` (new) — gating test (present for atelier, absent for meridian/hearth).
+- `src/modules/templates/atelier/blocks/Hero/AtelierHero.tsx` — editor wrapper: effect-driven slider over the SAME core DOM (no restructure). 9a-locked `.core.tsx`/`.published.tsx`/`styles.ts` untouched.
+
+**Asset behavior + selector contract (HARD contract with 9a Hero markup):** queries `[data-atl-slider]` (all, no-op if none); per slider `cover = closest('.lg-atelier-cover')`, `slides = .lg-atelier-slide[]`, bails if `<2`; reads `data-interval` (default 5000); injects `button.lg-atelier-dot[aria-label][aria-current]` into the EMPTY `[data-atl-dots]`; `go(n)` modulo-wraps + toggles `.is-active` on slides and `aria-current` on dots; autoplay via `setInterval(go(idx+1), interval)` SKIPPED under `prefers-reduced-motion`; `[data-atl-prev]`/`[data-atl-next]` → `go(±1)` + restart; `visibilitychange` stop/restart. Idempotent boot guard `window.__atelierSliderBooted`. Degrades to the static first `.is-active` slide with JS off. Selectors verified byte-present in the minified output (`data-atl-slider`, `.lg-atelier-cover`, `.lg-atelier-slide`, `prefers-reduced-motion`).
+
+**buildAssets entry:** `slider.v1.js` — immutable filename; behavior change post-release ⇒ `slider.v2.js` (never mutate v1 bytes). Emitted minified at 1438 bytes.
+
+**htmlGenerator gating:** `const usesAtelier = options.templateId === 'atelier'` (beside `usesNaayom`/`usesLumen`); tag `${usesAtelier ? '<script src="${assetBase}/assets/slider.v1.js" defer></script>' : ''}` beside the other behavior scripts. Atelier pages ONLY.
+
+**Editor .tsx slider approach (parity + editing intact):** the wrapper renders `AtelierHeroCore` (unchanged) inside a `display:contents` grouping div (layout-transparent → zero DOM/CSS parity impact vs the published wrapper) carrying a ref. A `useEffect` runs the SAME slider logic as the published asset against the core-rendered DOM (same selectors) — it does NOT restructure markup, so editor↔published DOM/CSS are identical. Parity baseline = slide 1 active: core ships `.is-active` on slide 1 and `go(0)` holds it on mount; cleanup resets to slide-1-active. Inline editing stays intact: autoplay is PAUSED on `focusin` within the cover and resumed on `focusout` (text edits happen in the z2 `.lg-atelier-cover-in` overlay above the slides; image edits are on the paused slides). Effect re-inits on slide-count/mode change and clears injected dots on cleanup (no double-inject under strict-mode double-invoke). `.core.tsx`/`.published.tsx` untouched — the 9a DOM lock holds; interactivity in published is asset-only (no React).
+
+**Gating test file used:** `src/lib/staticExport/htmlGenerator.test.ts` (new — the plan's explicitly-named option; no pre-existing dedicated generateStaticHTML test file existed. Neutralizes `server-only`, renders a hero page per templateId, asserts the `slider.v1.js` tag present for atelier / absent for meridian+hearth).
+
+**Deviations:** none of substance. In-scope judgment calls: (1) editor uses effect-driven-over-core-DOM (not React-state re-render) to guarantee DOM parity + avoid clobbering contentEditable; (2) `display:contents` wrapper chosen over a Fragment (Fragments can't hold a ref) so no layout box is added; (3) autoplay kept but focus-paused (rather than fully manual) for closer published fidelity while keeping edits safe.
+
+**Commands / results:**
+- `npx tsc --noEmit` → exit 0 (PASS)
+- `npm run test:run -- src/lib/staticExport` → 10 files, 70 passed (PASS; incl. new gating test)
+- `npm run test:run -- src/modules/templates/atelier` → 2 files, 55 passed (PASS; coreParity + registration green — core purity + edit/published DOM lock intact)
+- `npm run build` → exit 0 (PASS); `public/assets/slider.v1.js` emitted, minified, 1438 bytes.
+
+**Open risks:**
+- Editor autoplay pausing relies on `focusin`/`focusout` bubbling to the cover; verify no editor overlay stops propagation at phase-12 QA.
+- Runtime slider interaction (autoplay/arrows/dots/reduced-motion/JS-off fallback) is not unit-covered — manual publish QA at phase 12 (per plan's manual step).
+
+---
+### Phase 10 — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; npm run build exit 0 (slider.v1.js re-emitted 1438b minified); staticExport+atelier = 125 passed. Verified: selector contract MATCHES 9a Hero markup exactly (data-atl-slider/.lg-atelier-slide/.is-active/[data-atl-prev,next]/[data-atl-dots]/.lg-atelier-dot); asset idempotent+no-op-safe; usesAtelier gating threaded + non-vacuous test (atelier present, meridian/hearth absent); immutable slider.v1.js; editor .tsx display:contents wrapper layout-neutral, slide-1 baseline, 9a .core/.published lock held (empty diff); published server-safe.
+Non-blocking CARRIES: (1) phase-12 parity — editor injects dots but published-static empty [data-atl-dots] (JS injects on live) → harness must run asset OR use <2-slide mock. (2) editor slide-node mapping stale on reorder (editor cosmetic only). (3) runtime behavior not unit-covered → phase-12 manual/e2e. focusin/focusout pause reliable (editables inside .lg-atelier-cover).
