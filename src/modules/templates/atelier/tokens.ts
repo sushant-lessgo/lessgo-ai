@@ -235,6 +235,16 @@ export const atelierKnobs: TemplateKnobDeclaration = {
 };
 
 /**
+ * Atelier's ZERO-CONFIG default knob selection, seeded into
+ * Project.themeValues.knobs at creation (registry surfaces this as
+ * TemplateModule.defaultKnobs). buttonShape 'square' is the Kontur signature look
+ * — the knob token map's :root default is 'rounded' (10px), so without this seed a
+ * served atelier project would render rounded. Seeding square makes the zero-config
+ * published + editor render square; the user can still switch via the knob UI.
+ */
+export const defaultAtelierKnobs: KnobSelection = { buttonShape: 'square' };
+
+/**
  * Per-axis, per-value CSS the knob layer emits. ONLY non-default values appear
  * (defaults = :root, skipped by `serializeKnobOverrides`). Every declaration is a
  * plain custom-property override on the `[data-knob-*]` wrapper; the knob-consumed

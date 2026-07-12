@@ -28,6 +28,8 @@ import {
   finalizeMultiPageGeneration,
 } from '@/modules/generation/multiPageAssembly';
 import { templateMeta } from '@/modules/templates/templateMeta';
+import { preloadTemplate } from '@/modules/templates/registry';
+import type { TemplateId } from '@/types/service';
 import type { CollectionsFacts } from '@/modules/brief/collections';
 import type { SitemapPage } from '@/types/product';
 import { saveDraft } from './finalize';
@@ -218,10 +220,28 @@ export async function runWorkSkeleton(
     // resumable generation). No goal stamping (no goal on this path).
     finalizeMultiPageGeneration(fc);
 
+    // Phase 12b — seed the served template's ZERO-CONFIG default knobs into
+    // themeValues.knobs so the zero-config published + editor render reflects the
+    // template's signature (atelier → square buttons). Resolve defaultKnobs off the
+    // loaded template module (server-safe barrel). MERGE into themeValues (there is
+    // none on this path today, but never clobber a future mood/palette/variant).
+    // Templates without defaultKnobs (granth) leave themeValues untouched.
+    const resolvedTemplateId = (input.templateId ?? 'atelier') as TemplateId;
+    let themeValues: Record<string, unknown> | undefined;
+    try {
+      const mod = await preloadTemplate(resolvedTemplateId);
+      if (mod.defaultKnobs) {
+        themeValues = { knobs: mod.defaultKnobs };
+      }
+    } catch {
+      // Non-fatal: an unknown/unloadable template just skips the knob seed.
+    }
+
     await saveDraft({
       tokenId,
       title: (fc.meta?.title as string) || title,
       ...(input.templateId ? { templateId: input.templateId } : {}),
+      ...(themeValues ? { themeValues } : {}),
       finalContent: fc,
     });
   } catch (e: any) {

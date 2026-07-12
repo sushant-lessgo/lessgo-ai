@@ -93,6 +93,12 @@ export interface TemplateModule {
   variants: TemplateVariant[];
   /** Template's default variant id (used when none persisted). */
   defaultVariantId: string;
+  /** Template's default knob selection, seeded into Project.themeValues.knobs at
+   *  creation so the ZERO-CONFIG render reflects the template's signature knob
+   *  defaults (e.g. atelier → square buttons). Optional — only knob-tokenized
+   *  templates with a non-trivial default ship it; absence leaves themeValues.knobs
+   *  unseeded (renders the knob token map's own defaults). */
+  defaultKnobs?: KnobSelection;
   /** Per-palette image mood phrases (paletteId → keyword phrase). Optional —
    *  consumed by the editor image search; absent templates just omit the mood. */
   paletteImageKeywords?: Record<string, string>;

@@ -28,6 +28,7 @@ export {
   atelierKnobTokenMap,
   serializeAtelierKnobOverrides,
   buildAtelierStylesheet,
+  defaultAtelierKnobs,
 } from './tokens';
 
 export {

@@ -127,6 +127,11 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       // `knobs` here populates `mod.knobs` at runtime so editor knob-switching can
       // read `getLoadedTemplate('atelier').knobs` (mirrors hearth).
       knobs: m.atelierKnobs,
+      // Phase 12b — atelier's ZERO-CONFIG default knob seed (square buttons, the
+      // Kontur signature). Surfaced here so the creation path (runWorkSkeleton)
+      // can seed themeValues.knobs. Optional on TemplateModule; other templates
+      // leave it undefined.
+      defaultKnobs: m.defaultAtelierKnobs,
     };
   },
   // Bespoke §13 (Writer vertical) — registered + renderable, but absent from the

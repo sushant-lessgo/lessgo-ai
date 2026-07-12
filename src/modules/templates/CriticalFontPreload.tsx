@@ -88,7 +88,7 @@ function criticalFontHrefs(
       // discovery path (small near-body weights), like the other grotesk templates.
       return variantId === 'compact'
         ? ['/fonts/fraunces/fraunces-latin-opsz-normal.woff2']
-        : ['/fonts/bricolage-grotesque/bricolage-grotesque-latin-wght-normal.woff2'];
+        : ['/fonts/bricolage-grotesque/bricolage-grotesque-latin-opsz-normal.woff2'];
 
     default:
       return [];
