@@ -18,6 +18,11 @@ Clerk middleware wrapping custom host resolution. For non-API/non-`_next` reques
 
 ## Public / marketing
 
+> **INVARIANT:** every page meant to be visible logged-out MUST be added to the
+> `isPublicRoute` allowlist in `src/middleware.ts` — there is no auto-detection;
+> a new marketing page not listed there silently 307s to sign-in on prod.
+> (Bug class caught 2026-07-12: `/pricing`, `/blog`, `/sitemap.xml` were all gated.)
+
 | Route | File | Purpose |
 |-------|------|---------|
 | `/` | `page.tsx` | Landing / marketing home |
