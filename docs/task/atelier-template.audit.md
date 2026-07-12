@@ -802,3 +802,47 @@ No blocking issues. Gates green: tsc exit 0; templates+renderParity = 1037 passe
 Non-blocking nits: Img alt source differs edit(store) vs published(metadata) — non-visible, intended; bandDiff selects non-unique data-parity-section (fine, controls target unique hero).
 
 ## ⏸️ HUMAN GATE — founder parity sign-off pending (see plan phase-12 line). Automated parity fully green.
+
+## Phase 12b — parity-fidelity fixes (founder-approved at gate)
+
+### Files changed
+- `src/styles/fonts-self-hosted.css` — Bricolage `@font-face` src → opsz file; block header comment updated (opsz axis auto-applies via CSS default `font-optical-sizing: auto`, no pin in @font-face).
+- `src/modules/templates/CriticalFontPreload.tsx` — atelier non-`compact` hero preload href → `bricolage-grotesque-latin-opsz-normal.woff2`.
+- `public/fonts/bricolage-grotesque/bricolage-grotesque-latin-wght-normal.woff2` — DELETED (unreferenced; grep-confirmed only historical audit-doc mention remained).
+- `src/modules/templates/atelier/tokens.ts` — added `export const defaultAtelierKnobs: KnobSelection = { buttonShape: 'square' }`.
+- `src/modules/templates/atelier/index.ts` — re-export `defaultAtelierKnobs`.
+- `src/types/template.ts` — added optional `defaultKnobs?: KnobSelection` to `TemplateModule` (mirrors defaultPaletteId/defaultVariantId).
+- `src/modules/templates/registry.ts` — atelier loader now surfaces `defaultKnobs: m.defaultAtelierKnobs`; other templates leave it undefined.
+- `src/modules/wizard/generation/work.ts` — `runWorkSkeleton` seeds `themeValues.knobs` from the served template's `defaultKnobs` (resolved via `preloadTemplate`), merged into the `saveDraft` body.
+
+### FIX 1 — Bricolage opsz+wght swap
+`-wght-normal` (41KB, weight-only) → `-opsz-normal` (76KB, opsz 10..48 + wght 200..800), `format('woff2-variations')`, `font-weight: 200 800`, `font-display: swap`, no optical-sizing pin (matches Fraunces/Bodoni opsz convention — CSS default `font-optical-sizing: auto` applies opsz by font-size). Preload href updated. Old file deleted. Post-build `public/assets/fonts-self-hosted.css:297` references the opsz file (build regenerated it).
+
+### FIX 2 — atelier ZERO-CONFIG square-button seed (persisted)
+New minimal `defaultKnobs` mechanism: optional `TemplateModule.defaultKnobs`, surfaced ONLY for atelier via the registry loader. `runWorkSkeleton` (atelier's real creation path — work-engine multipage skeleton) resolves the served template via `preloadTemplate(resolvedTemplateId)` and, when `mod.defaultKnobs` is present, composes `themeValues = { knobs: mod.defaultKnobs }` into the `saveDraft` body.
+
+Proof the seed persists square (documented trace, since no runWorkSkeleton test file exists):
+- atelier: `input.templateId === 'atelier'` → `resolvedTemplateId='atelier'` → `preloadTemplate('atelier')` returns `defaultKnobs = defaultAtelierKnobs = { buttonShape: 'square' }` → `themeValues = { knobs: { buttonShape: 'square' } }` → saveDraft create branch persists `themeValues` (route.ts:272 `themeValues || existing || null`) → `Project.themeValues.knobs.buttonShape === 'square'`. Zero-config editor+published render square (knob token map `:root` default is `rounded`, so the seed is what flips it). User can still change via knob UI.
+- granth / any template with no `defaultKnobs`: `mod.defaultKnobs` undefined → `themeValues` stays undefined → saveDraft body omits `themeValues` → project unchanged. (granth also uses the single-page `runWorkGeneration` path, not the skeleton, so it is doubly unaffected.)
+
+### Deviations
+- MERGE semantics: `runWorkSkeleton` carries NO prior themeValues on this served-work creation path (mood/palette/variant pickers belong to the thing.ts wizard, not the served-work skeleton), and the saveDraft create branch coalesces `themeValues || existingProject?.themeValues`. So seeding `{ knobs }` cannot clobber a mood/palette. Kept the compose spread-safe (`...(themeValues ? { themeValues } : {})`) so a future themeValues source merges rather than being dropped. Conservative; logged.
+- `preloadTemplate` resolution wrapped in try/catch — an unknown/unloadable templateId skips the seed (non-fatal) rather than failing the skeleton save.
+
+### Verification
+- `npx tsc --noEmit` — EXIT 0. PASS.
+- `npm run build` — EXIT 0. PASS. (opsz reference present in regenerated `public/assets/fonts-self-hosted.css`.)
+- `npm run test:run -- src/modules/templates src/modules/wizard src/hooks` — 41 files, 1303 passed / 12 skipped. EXIT 0. PASS. (optional `defaultKnobs?` broke no `Record<...TemplateModule>` conformance; no wizard test asserts skeleton themeValues shape, so none needed updating.)
+
+### Open risks
+- None functional. The opsz axis relies on the browser honoring `font-optical-sizing: auto` (default) — visually verify hero optical sizing at the manual parity pass. Square-button zero-config default only affects served atelier projects created after this change (existing projects keep their persisted themeValues).
+
+---
+### Phase 12 — orchestrator visual QA pass (founder-requested, driven in-app)
+Ran `npm run dev` + browser on `/dev/blocks/atelier` (all 8 sections, edit+published bands). Findings:
+- DESIGN FIDELITY: faithful to Kontur across all sections — hero dark cover + Bricolage display "Seen. Chosen. Remembered." (vermilion accent <em>), PORTFOLIO·COMMISSIONS eyebrow, square/rounded buttons + arrows + SCROLL cue; marquee (Editorial✳Portraits✳…); Selected work (mosaic); Experiences packages rendering 2/3/4 card tiers; About bio-split; Quote dark grid; Contact detail+form; Footer closer band ("Let's make yours.") + wordmark + INDEX/ELSEWHERE cols.
+- CHROME KEYS POPULATED (11b fix verified live): location "Amsterdam·serving NL", instagram "@atelierkontur", legal "PRIVACY·TERMS", closer, quotes, press — all render real content, NO placeholder leak.
+- PALETTE LIVE-SWITCH WORKS: switched vermilion→moss in the knob panel → entire design recolored green in real time, EDIT + PUBLISHED bands in lockstep (proves palette/knob axis end-to-end in-app).
+- EDIT↔PUBLISHED: automated parity <3% all sections + visual bands match.
+- NOT driven (lower-risk, need full onboard→publish; verified in code+automated instead): slider autoplay/arrows/dots runtime on a LIVE published page (dev mock is single-slide); published no-JS static-first-slide fallback (.published ships .is-active slide 1); real EN/NL translation (platform i18n overlay, separate from template; toggle present). Recommend a live smoke at Kundius publish (phase 13).
+Screenshots captured: hero (vermilion) + moss palette-switch.
