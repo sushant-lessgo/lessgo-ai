@@ -211,12 +211,19 @@ export async function createDefaultPlan(userId: string) {
   try {
     const config = PLAN_CONFIGS[PlanTier.FREE];
 
+    // pricing-v2: FREE monthly allotment is DELIBERATELY 0 (new periods seed 0), and
+    // the displayed 20 credits are ONE-TIME — seeded into the persistent creditPool
+    // exactly ONCE, here at plan creation. They never refill (resetCredits / the
+    // lazy period seed never touch the pool). Do NOT write config.credits into
+    // creditsLimit for FREE. This creation path is the ONLY place the 20-pool is
+    // seeded; existing FREE rows are intentionally left untouched (Q7).
     const userPlan = await prisma.userPlan.create({
       data: {
         userId,
         tier: config.tier,
         status: PlanStatus.ACTIVE,
-        creditsLimit: config.credits,
+        creditsLimit: 0,
+        creditPool: config.credits, // one-time 20
         publishedPagesLimit: config.limits.publishedPages,
         draftProjectsLimit: config.limits.draftProjects,
         customDomainsLimit: config.limits.customDomains,
@@ -256,6 +263,8 @@ export async function upgradePlan(
   try {
     const config = PLAN_CONFIGS[newTier];
 
+    // pricing-v2: PRO monthly allotment = config.credits (200). creditPool is
+    // deliberately NOT written here, so any top-up balance survives an upgrade.
     const userPlan = await prisma.userPlan.update({
       where: { userId },
       data: {
@@ -296,6 +305,12 @@ export async function downgradePlan(userId: string, newTier: PlanTier = PlanTier
   try {
     const config = PLAN_CONFIGS[newTier];
 
+    // pricing-v2: FREE monthly allotment is 0 (config.credits=20 is a DISPLAY value
+    // living in the pool). Crucially, downgrade does NOT re-seed the 20-credit pool —
+    // that seed happens once at plan creation only, so users can't farm free credits
+    // by cycling upgrade→downgrade. creditPool is deliberately left untouched here.
+    const monthlyLimit = newTier === PlanTier.FREE ? 0 : config.credits;
+
     const userPlan = await prisma.userPlan.update({
       where: { userId },
       data: {
@@ -305,7 +320,7 @@ export async function downgradePlan(userId: string, newTier: PlanTier = PlanTier
         stripeSubscriptionId: null,
         currentPeriodStart: null,
         currentPeriodEnd: null,
-        creditsLimit: config.credits,
+        creditsLimit: monthlyLimit,
         publishedPagesLimit: config.limits.publishedPages,
         draftProjectsLimit: config.limits.draftProjects,
         customDomainsLimit: config.limits.customDomains,
@@ -325,6 +340,63 @@ export async function downgradePlan(userId: string, newTier: PlanTier = PlanTier
     return userPlan;
   } catch (error) {
     logger.error('Error downgrading plan:', error);
+    throw error;
+  }
+}
+
+/**
+ * Grant a lifetime deal (pricing-v2 LTD / bespoke).
+ *
+ * LTD is modeled as tier=PRO + lifetimeDeal=true (+ ltdCohort/ltdPricePaid). Monthly
+ * allotment is 0 (no subscription ever fires resetCredits for them); the value comes
+ * from a one-time 600-credit pool seed via addPoolCredits. Gets full PRO feature
+ * limits. Used by the phase-6 webhook and the phase-8 admin grant route.
+ *
+ * `ltdCohort = 0` is reserved for pre-cohort bespoke grants (hidden from the public
+ * 1–3 cohort counter).
+ */
+export async function grantLifetimeDeal(
+  userId: string,
+  cohort: number,
+  pricePaidCents: number
+) {
+  try {
+    const config = PLAN_CONFIGS[PlanTier.PRO];
+
+    const userPlan = await prisma.userPlan.update({
+      where: { userId },
+      data: {
+        tier: PlanTier.PRO,
+        status: PlanStatus.ACTIVE,
+        lifetimeDeal: true,
+        ltdCohort: cohort,
+        ltdPricePaid: pricePaidCents,
+        // Monthly allotment 0 — the 600 credits live in the persistent pool below.
+        creditsLimit: 0,
+        publishedPagesLimit: config.limits.publishedPages,
+        draftProjectsLimit: config.limits.draftProjects,
+        customDomainsLimit: config.limits.customDomains,
+        formSubmissionsLimit: config.limits.formSubmissions,
+        teamMembersLimit: config.limits.teamMembers,
+        removeBranding: config.features.removeBranding,
+        customDomains: config.features.customDomains,
+        formIntegrations: config.features.formIntegrations,
+        exportHTML: config.features.exportHTML,
+        whiteLabel: config.features.whiteLabel,
+        analytics: config.features.analytics,
+        prioritySupport: config.features.prioritySupport,
+      },
+    });
+
+    // Seed the 600-credit lifetime pool. Dynamic import avoids a top-level circular
+    // dependency (creditSystem imports getUserPlan from this module).
+    const { addPoolCredits, UsageEventType } = await import('./creditSystem');
+    await addPoolCredits(userId, 600, UsageEventType.LTD_GRANT, { cohort, pricePaidCents });
+
+    logger.info(`Granted lifetime deal to user ${userId} (cohort ${cohort}, ${pricePaidCents}c)`);
+    return userPlan;
+  } catch (error) {
+    logger.error('Error granting lifetime deal:', error);
     throw error;
   }
 }

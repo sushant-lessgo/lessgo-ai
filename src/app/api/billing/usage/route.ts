@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getUsageStats } from '@/lib/creditSystem';
+import { getUserPlan } from '@/lib/planManager';
 import { logger } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
@@ -20,13 +21,21 @@ export async function GET(req: NextRequest) {
     const stats = await getUsageStats(userId);
 
     if (!stats) {
-      // No usage data yet - return defaults
+      // No usage data yet — return defaults derived from the plan (pool-aware).
+      // pricing-v2: FREE has monthly limit 0 with a persistent pool, so we can't
+      // hardcode 30/30 anymore — read the plan's real monthly limit + pool.
+      const plan = await getUserPlan(userId);
+      const poolRemaining = plan.creditPool ?? 0;
       return NextResponse.json({
         period: new Date().toISOString().slice(0, 7),
         credits: {
           used: 0,
-          remaining: 30,
-          limit: 30,
+          remaining: plan.creditsLimit,
+          limit: plan.creditsLimit,
+          percentUsed: 0,
+          monthlyRemaining: plan.creditsLimit,
+          poolRemaining,
+          totalAvailable: plan.creditsLimit + poolRemaining,
         },
         operations: {
           fullPageGenerations: 0,

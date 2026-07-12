@@ -17,6 +17,9 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // getCreditBalance returns pool-aware fields (monthlyRemaining / poolRemaining /
+    // totalAvailable) alongside the legacy used/remaining/limit/percentUsed shape
+    // for back-compat with existing consumers (CreditBadge, billing dashboard).
     const balance = await getCreditBalance(userId);
 
     return NextResponse.json(balance);

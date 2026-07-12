@@ -305,7 +305,13 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     const subscriptionId = (invoice as any).subscription as string;
 
     if (!subscriptionId) {
-      // Not a subscription invoice
+      // Not a subscription invoice.
+      // pricing-v2: this guard also protects LTD/top-up buyers. Those are one-time
+      // payments (`mode: 'payment'`, no subscription), so invoice.payment_succeeded
+      // either never fires or carries no subscriptionId → we return early and never
+      // call resetCredits. That is REQUIRED: LTD/FREE have monthly creditsLimit=0
+      // and their credits live in the persistent pool, which resetCredits must never
+      // touch. Do not remove this early return.
       return;
     }
 
