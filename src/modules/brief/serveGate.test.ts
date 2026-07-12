@@ -117,11 +117,13 @@ describe('decideServe — serve paths', () => {
 
   it('app (KNOWN thing type, scale-08 phase 3) IS serveable ⇒ serve / product', () => {
     // Proves the config-only `app` entry rides the existing thing pipeline: same
-    // serve outcome as saas, zero new code. Contrast with photographer, whose
-    // unbacked gallery cap sends it to the manual/demand lane below. serve-gate-v2:
-    // download-app's derived `store-badges` cap is now satisfied by the
-    // store-badges SHARED BLOCK, so even the download-app intent serves (see the
-    // F16 serve test below) — the old "pushes to manual" note is obsolete.
+    // serve outcome as saas, zero new code. (Historical note: photographer's
+    // gallery cap USED to be unbacked → manual; atelier-template phase 4 backs
+    // gallery, so photographer now SERVES atelier — see the atelier flip block
+    // below.) serve-gate-v2: download-app's derived `store-badges` cap is now
+    // satisfied by the store-badges SHARED BLOCK, so even the download-app intent
+    // serves (see the F16 serve test below) — the old "pushes to manual" note is
+    // obsolete.
     const brief = buildBriefDraft(
       makeSignals({ businessTypeGuess: 'app', goalIntentGuess: 'signup-free' }),
       'habit-tracking mobile app'
@@ -293,6 +295,83 @@ describe('decideServe — serve paths (atelier flip)', () => {
       expect(decision.audienceType).toBe('service');
       expect(decision.templateId).toBe('atelier');
       expect(decision.shortlist).toEqual(['atelier']);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// atelier-template phase 7 — deepened served-path + over-serve coverage.
+// These ADD depth beyond the phase-4 flip assertions above: they pin the
+// templateMeta backing behind the rungC gallery probe, and prove atelier does
+// NOT leak into any non-work shortlist (over-serve guard).
+// ---------------------------------------------------------------------------
+describe('atelier phase 7 — serve backing + over-serve guards', () => {
+  it('rungC gallery probe is backed by atelier templateMeta (gallery+packages capabilitySections resolve)', () => {
+    // The photographer flip is only sound because atelier DECLARES gallery as a
+    // work-engine capability WITH a resolving capabilitySections entry.
+    const meta = templateMeta.atelier;
+    expect(meta.copyEngines).toEqual(['work']);
+    expect(meta.capabilities).toEqual(['gallery', 'packages', 'multipage']);
+    expect(meta.capabilitySections).toEqual({ gallery: 'work', packages: 'packages' });
+    expect(meta.retired).toBeFalsy();
+    expect(meta.bespoke).toBeFalsy();
+  });
+
+  it('photographer ⇒ SERVE/service/atelier with atelier the SOLE shortlist entry + audience derived from the template', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'photographer', tiebreaker: 'portfolio-is-proof' }),
+      'wedding photographer in Jaipur'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.templateId).toBe('atelier');
+      expect(decision.shortlist).toEqual(['atelier']);
+      // audience derives from the picked template (service), NOT the work engine
+      // bridge (writer) — the whole point of the phase-1 map.
+      expect(decision.audienceType).toBe('service');
+      expect(decision.audienceType).toBe(TEMPLATE_AUDIENCE.atelier);
+      expect(decision.audienceType).not.toBe(BRIDGEABLE_ENGINES.work);
+    }
+  });
+
+  it('over-serve guard: a TRUST-engine serve (agency) never lists atelier (work-only)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'agency', goalIntentGuess: 'book-call' }),
+      'growth agency'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.shortlist).toEqual(['hearth', 'lex', 'surge']);
+      expect(decision.shortlist).not.toContain('atelier');
+    }
+  });
+
+  it('over-serve guard: a PRODUCT-engine serve (saas) never lists atelier (work-only)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'saas', goalIntentGuess: 'free-trial' }),
+      'invoicing tool'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.shortlist).toEqual(['meridian', 'vestria']);
+      expect(decision.shortlist).not.toContain('atelier');
+    }
+  });
+
+  it('over-serve guard: an OUT-OF-ICP brief (checkout) is NOT served — atelier cannot rescue it', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'photographer', platformNeeds: 'checkout' }),
+      'photographer storefront with checkout'
+    );
+    const decision = decideServe(brief);
+    // out-of-icp is EXCLUSIVE — even a work/gallery type is pushed to manual.
+    expect(decision.outcome).toBe('manual');
+    if (decision.outcome === 'manual') {
+      expect(decision.missing).toBe('out-of-icp');
+      expect(decision.outOfIcp).toBe(true);
     }
   });
 });

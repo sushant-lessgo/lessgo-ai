@@ -15,6 +15,7 @@ import {
 import type { Brief } from '@/types/brief';
 import type { TemplateId } from '@/types/service';
 import { BriefSchema } from '@/lib/schemas/brief.schema';
+import { templateMeta } from './templateMeta';
 
 const ALL_TEMPLATES = [
   'meridian', 'vestria', 'hearth', 'lex', 'surge', 'granth', 'lumen', 'techpremium', 'atelier',
@@ -47,6 +48,32 @@ describe('shortlist — acceptance fixtures', () => {
     const trustMatches = ALL_TEMPLATES.filter((t) => fit(t, 'trust', ['gallery']));
     expect(workMatches).toEqual(['atelier']);
     expect(trustMatches).toEqual([]);
+  });
+});
+
+describe('fit — atelier full-capability satisfaction (atelier-template phase 7)', () => {
+  it("fit('atelier','work',[gallery,packages,lead-form,multipage,bilingual]) is TRUE across all three satisfaction lanes", () => {
+    // Proves atelier covers the union of the three satisfaction lanes at once:
+    //  - gallery + packages + multipage  → atelier's OWN meta.capabilities
+    //  - lead-form                         → sharedBlockCapabilities (shared-block
+    //                                        lane, NOT declared in templateMeta —
+    //                                        atelier deliberately DROPPED lead-form)
+    //  - bilingual                         → PLATFORM_CAPABILITIES (i18n platform)
+    expect(
+      fit('atelier', 'work', ['gallery', 'packages', 'lead-form', 'multipage', 'bilingual'])
+    ).toBe(true);
+
+    // Lane provenance is non-vacuous: lead-form + bilingual are NOT in atelier's
+    // own capabilities, so the TRUE result must come from the shared/platform
+    // lanes, not templateMeta.
+    expect(templateMeta.atelier.capabilities).not.toContain('lead-form');
+    expect(templateMeta.atelier.capabilities).not.toContain('bilingual');
+    expect(templateMeta.atelier.capabilities).toEqual(['gallery', 'packages', 'multipage']);
+  });
+
+  it('atelier does NOT fit on a non-work engine even for its own capabilities (engine gate first)', () => {
+    expect(fit('atelier', 'trust', ['gallery'])).toBe(false);
+    expect(fit('atelier', 'thing', ['gallery', 'packages'])).toBe(false);
   });
 });
 

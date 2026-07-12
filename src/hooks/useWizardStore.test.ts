@@ -24,6 +24,8 @@ import {
 } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
 import { runTrustGeneration } from '@/modules/wizard/generation/trust';
+import { buildBriefDraft, type EntrySignals } from '@/modules/brief/classify';
+import { decideServe } from '@/modules/brief/serveGate';
 
 /** Build a Brief with a partial EntryFacts payload at facts.entry. */
 function briefWithEntry(entry: Record<string, unknown>, extra: Partial<Brief> = {}): Brief {
@@ -1127,5 +1129,125 @@ describe('useWizardStore — served photographer+atelier path (atelier phase 5)'
     const map = s.sitemap as any[];
     expect(Array.isArray(map)).toBe(true);
     expect(map.map((p) => p.archetypeKey)).toEqual(['home', 'work', 'experiences', 'about', 'contact']);
+  });
+});
+
+// ===========================================================================
+// atelier phase 7 — COMPOSED served-path proof (serveGate → wizard store)
+// ===========================================================================
+// The phase-2/5 store tests hand-fed audienceType/templateId. This block instead
+// runs the REAL serve decision through decideServe (from a classify-produced
+// brief, carrying the bare unconfirmed `structure.mode` hint buildBriefDraft
+// stamps) and feeds that decision's audience/template into the store — proving
+// the whole chain composes for the actual served brief, not an idealized one.
+function makeEntrySignals(overrides: Partial<EntrySignals> = {}): EntrySignals {
+  return {
+    businessTypeGuess: null,
+    businessTypeConfidence: 0.9,
+    category: null,
+    goalIntentGuess: null,
+    tiebreaker: 'none',
+    structureHint: 'single',
+    designStyleHint: null,
+    platformNeeds: 'none',
+    summary: 'A business.',
+    businessName: 'Acme',
+    offerings: [],
+    audiences: [],
+    categories: [],
+    outcomes: [],
+    deliveryModel: null,
+    offer: '',
+    oneLiner: 'We do things.',
+    proofAvailable: [],
+    socialProfiles: [],
+    testimonials: [],
+    ...overrides,
+  };
+}
+
+describe('useWizardStore — COMPOSED served photographer path (atelier phase 7)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('photographer classify brief ⇒ serve(atelier/service) ⇒ slots include structure ⇒ chargeless 5-page seed ⇒ skeleton dispatch', async () => {
+    // (1) REAL classify brief — buildBriefDraft stamps the bare unconfirmed
+    //     structure:{mode:'single',pages:[]} hint (the phase-5 reachable case).
+    const brief = buildBriefDraft(
+      makeEntrySignals({ businessTypeGuess: 'photographer', tiebreaker: 'portfolio-is-proof' }),
+      'editorial wedding photographer in Jaipur'
+    );
+    expect(brief.structure).toEqual({ mode: 'single', pages: [] });
+
+    // (2) REAL serve decision (not hand-fed).
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome !== 'serve') return;
+    expect(decision.templateId).toBe('atelier');
+    expect(decision.audienceType).toBe('service');
+
+    // (3) Hydrate the store with the decision's audience/template (as the confirm
+    //     route does) + the same brief.
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+    useWizardStore.getState().reset();
+    useWizardStore.getState().hydrate({
+      tokenId: 'tokCompose',
+      brief,
+      audienceType: decision.audienceType,
+      templateId: decision.templateId,
+    });
+    const s0 = useWizardStore.getState();
+    expect(s0.engine).toBe('work');
+    expect(s0.businessTypeKey).toBe('photographer');
+    // The unconfirmed single hint must NOT suppress the structure slot.
+    expect(s0.briefStructureMode).toBeNull();
+    expect(s0.slots).toContain('structure');
+
+    // (4) chargeless archetype seed — the served skeleton path, zero LLM/credits.
+    await useWizardStore.getState().fetchStrategy();
+    const s1 = useWizardStore.getState();
+    expect(spy).not.toHaveBeenCalled();
+    expect(s1.strategyStatus).toBe('done');
+    expect(s1.strategy).toBeNull(); // copy-gen stays OUT
+    const map = s1.sitemap as any[];
+    expect(Array.isArray(map)).toBe(true);
+    expect(map.map((p) => p.archetypeKey)).toEqual([
+      'home', 'work', 'experiences', 'about', 'contact',
+    ]);
+
+    // (5) skeleton dispatch selected (GeneratingSlot keys on this exact predicate).
+    expect(isMultipage(s1.templateId ?? undefined, briefSignalFromState(s1))).toBe(true);
+  });
+
+  it('REGRESSION: writer classify brief ⇒ serve(granth/writer) ⇒ structure SKIPPED ⇒ writer-generator dispatch (NOT skeleton)', () => {
+    // The granth-unchanged proof composed across phases 1+2+4: a served writer
+    // still routes to writer audience AND the store still skips structure and
+    // declines the skeleton dispatch (isMultipage false ⇒ buildWorkInput path).
+    const brief = buildBriefDraft(
+      makeEntrySignals({ businessTypeGuess: 'writer', goalIntentGuess: 'follow-social' }),
+      'Hindi literary fiction author'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome !== 'serve') return;
+    expect(decision.templateId).toBe('granth');
+    expect(decision.audienceType).toBe('writer');
+
+    useWizardStore.getState().reset();
+    useWizardStore.getState().hydrate({
+      tokenId: 'tokGranth',
+      brief,
+      audienceType: decision.audienceType,
+      templateId: decision.templateId,
+    });
+    const s = useWizardStore.getState();
+    expect(s.engine).toBe('work');
+    expect(s.businessTypeKey).toBe('writer');
+    // granth is NOT multipage ⇒ structure slot skipped (writer flow unchanged).
+    expect(s.slots).not.toContain('structure');
+    // dispatch declines the skeleton ⇒ writer generator (buildWorkInput) path.
+    expect(isMultipage(s.templateId ?? undefined, briefSignalFromState(s))).toBe(false);
   });
 });

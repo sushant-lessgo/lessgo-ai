@@ -368,3 +368,38 @@ The atelier registry loader block (`registry.ts:115`) does NOT surface `knobs: m
 No blocking issues. Gates green: tsc exit 0; conformance+atelier = 440 passed/8 skipped. Scope = 6 files (palettes.ts needed no change). Verified: all 5 knob axes conformance-valid (assertKnobConformance enrolled+passing); default=byte-empty (no attr/no CSS); ThemeInjector+SSRTokens byte-identical knob emission via shared buildAtelierStylesheet; blocks never branch on knobs; no default-value regression (--btn-r/--card-* baselines = prior values).
 Deferrable (confirmed): registry loader doesn't surface m.atelierKnobs — nothing reads it in current render/publish/conformance path (props-threaded); needed only for phase-11 editor knob-switching. cardStyle emits real CSS but no consumer until phase-9 Packages port — conformance is declaration-only so valid.
 Non-blocking (CARRY→phase 11): (1) index.ts:20 comment misleadingly says registry surfaces atelierKnobs; (2) density/variant --pad-y overlap (intended, knob wins, default emits nothing).
+
+---
+
+## Phase 7 — Serve-gate + fit + served-path integration coverage
+
+### Files changed
+- `src/modules/brief/serveGate.test.ts` — fixed the stale line-120 comment; added an "atelier phase 7 — serve backing + over-serve guards" describe block.
+- `src/modules/templates/fit.test.ts` — added `templateMeta` import + an "atelier full-capability satisfaction" describe block.
+- `src/hooks/useWizardStore.test.ts` — added `buildBriefDraft`/`EntrySignals`/`decideServe` imports + a "COMPOSED served photographer path" describe block (composed served-path proof + granth regression).
+
+**No production code changed — tests only, as scoped.** No production defect found.
+
+### Coverage added
+- **serveGate (SERVE depth):** pins the templateMeta backing behind the rungC gallery probe (`atelier.copyEngines`/`capabilities`/`capabilitySections` exact values, not retired/bespoke); photographer ⇒ SERVE/service/atelier with `shortlist === ['atelier']` and `audienceType === TEMPLATE_AUDIENCE.atelier !== BRIDGEABLE_ENGINES.work`.
+- **serveGate (negative / over-serve guards):** trust serve (agency) shortlist `['hearth','lex','surge']` `.not.toContain('atelier')`; product serve (saas) shortlist `['meridian','vestria']` `.not.toContain('atelier')`; out-of-ICP (photographer + `platformNeeds:'checkout'`) ⇒ manual/`out-of-icp` — atelier cannot rescue an out-of-ICP brief.
+- **fit():** `fit('atelier','work',['gallery','packages','lead-form','multipage','bilingual']) === true`, with non-vacuous lane provenance (lead-form + bilingual asserted ABSENT from `templateMeta.atelier.capabilities`, so the TRUE result is proven to come from the shared-block + platform lanes, not templateMeta); plus atelier engine-gate negatives (`trust`/`thing` false).
+- **Composed served-path (store level):** REAL `buildBriefDraft` photographer brief (carrying the bare unconfirmed `structure:{mode:'single',pages:[]}` classify hint) → `decideServe` = serve/atelier/service → store hydrate with the decision's audience/template → `slots` include `structure` (`briefStructureMode` null, hint ignored) → chargeless `fetchStrategy` seeds the 5 archetype pages (`['home','work','experiences','about','contact']`, `strategy` null, fetch never called) → `isMultipage(...)` true (skeleton dispatch). Representative brief, not idealized.
+- **Composed granth regression:** REAL writer `buildBriefDraft` brief → serve/granth/writer → store skips `structure` + `isMultipage` false (writer-generator dispatch, not skeleton) — the granth-unchanged proof composed across phases 1+2+4.
+
+### Comment sweep (phase-4 nit)
+`serveGate.test.ts` line-120 stale comment ("Contrast with photographer, whose unbacked gallery cap sends it to the manual/demand lane") rewritten to a historical note: photographer's gallery cap is now backed by atelier (phase 4) so photographer SERVES atelier.
+
+### Deviations
+- Negative-case out-of-ICP fixture uses `businessTypeGuess:'photographer'` (not the pre-existing `boutique`/`restaurant` checkout fixtures) so the test proves a WORK/gallery type is still pushed to manual by the exclusive out-of-icp rung — a stronger over-serve guard for atelier specifically. Conservative, in-scope.
+
+### Test results
+- `npx tsc --noEmit` → exit 0.
+- `npm run test:run -- src/modules/brief src/modules/templates/fit.test.ts src/hooks` → 16 files, 353 tests, all PASS.
+
+### Open risks
+- None new. Composed path is pure unit composition (no browser); true E2E of the served flow remains the phase 12/13 manual gates.
+
+---
+### Phase 7 — impl-review verdict: SHIP (1 loop)
+No blocking issues, no material nits. Gates green: tsc exit 0; brief+fit+hooks = 353 tests pass. Tests-only confirmed (no production change). Verified NON-VACUOUS + correct against production: SERVE-depth (photographer→serve/atelier/service, shortlist=['atelier']); over-serve guards REAL not tautologies (out-of-icp checkout fires before serve logic; agency/saas .not.toContain('atelier') pin exact shortlists); fit() provenance real (lead-form via sharedBlockCapabilities, bilingual via PLATFORM, both absent from atelier.capabilities); composed served-path threads real fns (buildBriefDraft→decideServe→hydrate→isMultipage, fetch stubbed+never-called=chargeless, 5-page seed); granth regression composes writer→skip→writer-gen. No existing test weakened; line-120 comment fix sanctioned.
