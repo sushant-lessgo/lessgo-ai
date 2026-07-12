@@ -11,6 +11,7 @@ import type { Link } from '@/types/destination';
 import { isLink } from '@/types/destination';
 import { resolveLogo } from '@/modules/editing/resolveLogo';
 import { FOOTER_STYLES } from './footerStyles';
+import { normalizeCopyrightYear, filterFooterColumns } from '../../../shared/footerHygiene';
 
 // Dual-read a footer link's target: legacy raw string href passes through verbatim
 // (old pages byte-identical); a new Link object resolves via the dumb resolver.
@@ -37,9 +38,14 @@ interface Props {
 const SOCIAL_ICON: Record<string, React.ComponentType<any>> = { Facebook, Linkedin, Youtube, MessageCircle };
 
 export default function TechPremiumFooterPublished(props: Props) {
-  const columns = Array.isArray(props.footer_columns) ? props.footer_columns : [];
+  const columns = filterFooterColumns(
+    Array.isArray(props.footer_columns) ? props.footer_columns : [],
+    resolveLinkHref,
+  );
   const socials = (Array.isArray(props.socials) ? props.socials : []).filter((s) => s && s.url && s.url !== '#');
-  const legal = (Array.isArray(props.legal_links) ? props.legal_links : []).filter((l) => l && l.label);
+  const legal = (Array.isArray(props.legal_links) ? props.legal_links : []).filter(
+    (l) => l && l.label && resolveLinkHref(l.href) !== '#',
+  );
 
   const newsletterFormId: string | undefined = props.content?.[props.sectionId]?.elementMetadata?.newsletter_cta?.buttonConfig?.formId;
   const newsletterForm = newsletterFormId ? props.content?.forms?.[newsletterFormId] : undefined;
@@ -92,7 +98,7 @@ export default function TechPremiumFooterPublished(props: Props) {
         </div>
 
         <div className="tp-footer__bottom">
-          <div>{props.copyright || '© Your Company'}{props.location ? ` · ${props.location}` : ''}</div>
+          <div>{normalizeCopyrightYear(props.copyright) || '© Your Company'}{props.location ? ` · ${props.location}` : ''}</div>
           {legal.length > 0 && (
             <div className="tp-footer__legal">{legal.map((l, i) => <a key={l.id || i} href={resolveLinkHref(l.href)}>{l.label}</a>)}</div>
           )}

@@ -6,6 +6,7 @@ import MeridianNewsletterCapture from './MeridianNewsletterCapture';
 import { resolveDestination } from '@/utils/resolveCtaHref';
 import type { Link } from '@/types/destination';
 import { isLink } from '@/types/destination';
+import { normalizeCopyrightYear, filterFooterColumns } from '../../../shared/footerHygiene';
 
 // Dual-read a footer link's target: legacy raw string href passes through verbatim
 // (old pages byte-identical); a new Link object resolves via the dumb resolver.
@@ -43,7 +44,10 @@ interface HairlineFooterPublishedProps {
 }
 
 export default function HairlineFooterPublished(props: HairlineFooterPublishedProps) {
-  const columns = Array.isArray(props.footer_columns) ? props.footer_columns : [];
+  const columns = filterFooterColumns(
+    Array.isArray(props.footer_columns) ? props.footer_columns : [],
+    resolveLinkHref,
+  );
 
   // Newsletter capture is live only when a form was provisioned + connected in the
   // editor (buttonConfig.formId on newsletter_cta). Otherwise the block is omitted.
@@ -91,7 +95,7 @@ export default function HairlineFooterPublished(props: HairlineFooterPublishedPr
         </div>
 
         <div className="mrd-footer__bottom">
-          <div>{props.copyright || '© Meridian'}</div>
+          <div>{normalizeCopyrightYear(props.copyright) || '© Meridian'}</div>
           {props.location && <div>{props.location}</div>}
         </div>
       </footer>

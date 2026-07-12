@@ -12,7 +12,7 @@ Published pages ship "looks fake" defects that contradict the publish-ready prom
 ## Progress log
 
 - phase 1 SEO meta HTML strip: done (review loops 1, ship) — buildPageMetadata + subpath route inline strip; tsc/2779 tests green
-- phase 2 footer fixes (year + empty columns + dead links): pending
+- phase 2 footer fixes (year + empty columns + dead links): done (review loops 1, ship) — footerHygiene.ts helper; year-wrap all 9 footers; column/link filter meridian+techpremium; fixture meridian.ts hrefs realistic; tsc clean, 2790 tests green
 - phase 3 brand-string sweep (published output): pending
 - phase 4 build + live verification: pending
 
