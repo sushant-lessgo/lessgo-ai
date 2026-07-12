@@ -1,247 +1,87 @@
 /**
- * SSR-Safe useEditStore Hook - Token-scoped store access
- * Replaces the global useEditStore with token-aware store management
+ * Reactive editor-store hook (THE hook — ~100+ call sites).
+ *
+ * Reads the token-scoped store instance from `EditProvider` context so
+ * components need no tokenId. `useEditStore.getState()` gives static
+ * (non-reactive) access to the last-mounted store. Must run inside an
+ * `<EditProvider>` — throws otherwise.
  */
 
-import { useEffect, useState, useRef } from 'react';
-import { storeManager } from '@/stores/storeManager';
+import { useContext, createContext } from 'react';
+import { useStore } from 'zustand';
+import { useEditStoreContext } from '@/components/EditProvider';
 import type { EditStoreInstance } from '@/stores/editStore';
 import type { EditStore } from '@/types/store';
-import { isStorageAvailable } from '@/utils/storage';
 
-import { logger } from '@/lib/logger';
-// Hook state for managing store lifecycle
-interface UseEditStoreState {
-  store: EditStoreInstance | null;
-  isInitialized: boolean;
-  isHydrating: boolean;
-  error: string | null;
+// Legacy context for providing store without token parameter
+const LegacyEditStoreContext = createContext<EditStoreInstance | null>(null);
+
+// Global store reference for static access pattern
+let globalStoreRef: EditStoreInstance | null = null;
+
+/**
+ * Reactive useEditStore hook.
+ * This should be used within an EditProvider context.
+ *
+ * Two forms (TypeScript overloads):
+ *   useEditStore()            -> whole EditStore (all ~103 existing callers)
+ *   useEditStore(selector)    -> narrow slice T (pair with useShallow for objects)
+ *
+ * The overloads (not a lone optional-param signature) keep zero-arg callers
+ * inferring EditStore, so their property access still type-checks.
+ */
+export function useEditStore(): EditStore;
+export function useEditStore<T>(selector: (state: EditStore) => T): T;
+export function useEditStore<T>(selector?: (state: EditStore) => T): EditStore | T {
+  // Try to get from new context first
+  const editContext = useEditStoreContext();
+
+  // Guard first, so the useStore hook below runs unconditionally on every render
+  // (react-hooks/rules-of-hooks). Within an EditProvider the store is always set;
+  // absence is an invariant violation, hence the throw.
+  if (!editContext.store) {
+    throw new Error(
+      'useEditStore must be used within an EditProvider context. ' +
+      'Please wrap your component with <EditProvider tokenId={tokenId}>'
+    );
+  }
+
+  // Update global reference for static access
+  globalStoreRef = editContext.store;
+
+  // Use useStore hook to get reactive state and actions. A missing selector maps
+  // to an identity selector → the whole EditStore, matching the zero-arg overload.
+  const resolvedSelector = (selector ?? ((state: EditStore) => state)) as (state: EditStore) => T;
+  return useStore(editContext.store, resolvedSelector);
 }
 
 /**
- * SSR-safe hook for accessing token-scoped EditStore
- * 
- * @param tokenId - The token ID for the project
- * @param options - Configuration options
- * @returns Store instance and loading states
+ * Non-reactive access to the current token-scoped store INSTANCE from context.
+ * Use in event handlers: `const store = useEditStoreApi(); ... store.getState()`.
+ * Prefer this over the static `useEditStore.getState()` (which targets the
+ * global last-mounted store) so handlers read the correct token-scoped instance.
  */
-export function useEditStore(
-  tokenId: string,
-  options: {
-    suspense?: boolean;
-    preload?: boolean;
-    resetOnTokenChange?: boolean;
-  } = {}
-) {
-  const {
-    suspense = false,
-    preload = false,
-    resetOnTokenChange = true
-  } = options;
-
-  // State management
-  const [state, setState] = useState<UseEditStoreState>({
-    store: null,
-    isInitialized: false,
-    isHydrating: true,
-    error: null,
-  });
-
-  // Ref to track current token and prevent unnecessary re-renders
-  const currentTokenRef = useRef<string | null>(null);
-  const initializationRef = useRef<Promise<EditStoreInstance> | null>(null);
-
-  /**
-   * Initialize store for the given token
-   */
-  const initializeStore = async (newTokenId: string): Promise<EditStoreInstance> => {
-    try {
-      
-      // Check if we're switching tokens
-      const isTokenSwitch = currentTokenRef.current && currentTokenRef.current !== newTokenId;
-      if (isTokenSwitch && resetOnTokenChange) {
-      }
-
-      // Get store from manager
-      const store = storeManager.getEditStore(newTokenId);
-      currentTokenRef.current = newTokenId;
-
-      // Wait for hydration if storage is available
-      if (isStorageAvailable()) {
-        // Give the persist middleware time to hydrate
-        await new Promise(resolve => {
-          const unsubscribe = store.persist.onFinishHydration(() => {
-            unsubscribe();
-            resolve(void 0);
-          });
-          
-          // Fallback timeout in case hydration events don't fire
-          setTimeout(() => {
-            unsubscribe();
-            resolve(void 0);
-          }, 1000);
-        });
-      }
-
-      // Mark store as initialized in manager
-      storeManager.markStoreInitialized(newTokenId);
-
-      setState({
-        store,
-        isInitialized: true,
-        isHydrating: false,
-        error: null,
-      });
-
-      return store;
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error(`❌ useEditStore: Failed to initialize store for token ${newTokenId}:`, error);
-      
-      setState(prev => ({
-        ...prev,
-        isHydrating: false,
-        error: errorMessage,
-      }));
-
-      throw error;
-    }
-  };
-
-  /**
-   * Handle token changes and initialization
-   */
-  useEffect(() => {
-    // Skip on server side
-    if (typeof window === 'undefined') return;
-
-    // Validate token
-    if (!tokenId || typeof tokenId !== 'string') {
-      setState(prev => ({
-        ...prev,
-        isHydrating: false,
-        error: 'Invalid token ID provided',
-      }));
-      return;
-    }
-
-    // Skip if already initializing the same token
-    if (currentTokenRef.current === tokenId && state.store && !state.error) {
-      return;
-    }
-
-    // Initialize or switch store
-    const initPromise = initializeStore(tokenId);
-    initializationRef.current = initPromise;
-
-    // Handle initialization result
-    initPromise.catch(error => {
-      // Error is already handled in initializeStore
-      logger.warn('useEditStore initialization failed:', error);
-    });
-
-    return () => {
-      // Cleanup on unmount or token change
-      if (initializationRef.current === initPromise) {
-        initializationRef.current = null;
-      }
-    };
-  }, [tokenId, resetOnTokenChange]);
-
-  /**
-   * Preload effect for performance optimization
-   */
-  useEffect(() => {
-    if (preload && tokenId && typeof window !== 'undefined') {
-      // Preload in the background without affecting state
-      storeManager.preloadStore(tokenId).catch(error => {
-        logger.warn('Store preloading failed:', error);
-      });
-    }
-  }, [tokenId, preload]);
-
-  /**
-   * SSR compatibility - return minimal state on server
-   */
-  if (typeof window === 'undefined') {
-    return {
-      // Server-side safe values
-      store: null,
-      isInitialized: false,
-      isHydrating: true,
-      error: null,
-      // Dummy functions for SSR
-      sections: [],
-      content: {},
-      theme: null,
-      // State management helpers
-      isLoading: true,
-      hasError: false,
-      retryInitialization: () => {},
-    };
+export function useEditStoreApi(): EditStoreInstance {
+  const editContext = useEditStoreContext();
+  if (editContext.store) {
+    globalStoreRef = editContext.store;
+    return editContext.store;
   }
-
-  /**
-   * Suspense support for React concurrent features
-   */
-  if (suspense && state.isHydrating && !state.error) {
-    if (initializationRef.current) {
-      throw initializationRef.current;
-    }
-  }
-
-  /**
-   * Retry initialization function
-   */
-  const retryInitialization = () => {
-    if (tokenId) {
-      setState(prev => ({ ...prev, error: null, isHydrating: true }));
-      initializeStore(tokenId);
-    }
-  };
-
-  // Extract commonly used store properties for convenience
-  const storeState = state.store?.getState();
-  const sections = storeState?.sections || [];
-  const content = storeState?.content || {};
-  const theme = storeState?.theme || null;
-
-  return {
-    // Core store access
-    store: state.store,
-    isInitialized: state.isInitialized,
-    isHydrating: state.isHydrating,
-    error: state.error,
-
-    // Convenience properties
-    sections,
-    content,
-    theme,
-
-    // Status helpers
-    isLoading: state.isHydrating,
-    hasError: !!state.error,
-    isReady: state.isInitialized && !state.error && !state.isHydrating,
-
-    // Actions
-    retryInitialization,
-  };
+  throw new Error(
+    'useEditStoreApi must be used within an EditProvider context. ' +
+    'Please wrap your component with <EditProvider tokenId={tokenId}>'
+  );
 }
 
-/**
- * Development utilities
- */
-if (process.env.NODE_ENV === 'development') {
-  (window as any).__useEditStoreDebug = {
-    storeManager,
-    getCurrentStore: (tokenId: string) => storeManager.getEditStore(tokenId),
-    getCacheStats: () => storeManager.getCacheStats(),
-    isStorageAvailable,
-  };
-  
-  logger.debug('🔧 useEditStore debug utilities available at window.__useEditStoreDebug');
-}
+// Add getState method to the hook function for static access pattern
+useEditStore.getState = () => {
+  if (!globalStoreRef) {
+    throw new Error(
+      'Store not initialized. Make sure useEditStore has been called at least once within an EditProvider context.'
+    );
+  }
+  return globalStoreRef.getState();
+};
 
 // Export types for consumer components
 export type { EditStore, EditStoreInstance };

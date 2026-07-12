@@ -62,3 +62,37 @@ None. Scope executed exactly as specified. The dev IIFE and type re-exports were
 ### Open risks
 
 None for phase 1. The `useEditStoreGlobal.ts` README references in `src/hooks/README.md` and `src/stores/README.md` now point at a deleted file — this is expected and scheduled for cleanup in phase 13 (docs close-out), per the plan.
+
+## Phase 2 — Step A: façade unification (mechanical)
+
+**Files changed:**
+- `src/hooks/useEditStoreBootstrap.ts` (NEW)
+- `src/hooks/useEditStore.ts` (rewritten)
+- `src/hooks/useEditStoreLegacy.ts` (reduced to thin re-export)
+- `src/components/EditProvider.tsx` (one import line + one call-site name)
+
+### What changed
+- **`useEditStoreBootstrap.ts` (new):** the old `useEditStore.ts` token/SSR hook body moved VERBATIM, function renamed `useEditStore` → `useEditStoreBootstrap`. Header comment "EditProvider-only bootstrap; do not import elsewhere." added. The `window.__useEditStoreDebug` dev IIFE (`process.env.NODE_ENV === 'development'` block referencing `storeManager`) moved WITH it — it lives here now, NOT in the reactive file. `export type { EditStore, EditStoreInstance }` retained.
+- **`useEditStore.ts` (rewrite):** now the old `useEditStoreLegacy.ts` body verbatim — reactive `useEditStore(selector?)` overloads (function renamed from `useEditStoreLegacy`), `useEditStoreApi`, `globalStoreRef` set-on-render in both hooks, static `useEditStore.getState()`. Added explicit `export type { EditStore, EditStoreInstance }` (from `@/types/store` and `@/stores/editStore` respectively) — the legacy body did not carry these; added so `import type` consumers keep resolving after phase 3. Removed the legacy file's default export and `export { useEditStoreLegacy as useEditStore }` alias (no longer needed — this file's own function is named `useEditStore`).
+- **`useEditStoreLegacy.ts` (thin re-export):** reduced to `export { useEditStore, useEditStore as useEditStoreLegacy, useEditStoreApi } from './useEditStore'` + `@deprecated delete in phase 3` header. Keeps the ~107 existing importers resolving until phase 3's sweep.
+- **`EditProvider.tsx`:** import changed `useEditStore` from `@/hooks/useEditStore` → `useEditStoreBootstrap` from `@/hooks/useEditStoreBootstrap`; call site `useEditStore(tokenId, {...})` → `useEditStoreBootstrap(tokenId, {...})`. Nothing else changed.
+
+### Default export decision
+- `rg "import useEditStore(Legacy)? from" src/` → **zero hits** (no default importers). Therefore NO default export was added to either `useEditStore.ts` or the `useEditStoreLegacy.ts` shim. No default-import normalization needed.
+
+### Confirmations
+- Debug IIFE (`window.__useEditStoreDebug`) landed in `useEditStoreBootstrap.ts`, NOT in the reactive `useEditStore.ts`. Verified.
+- Both type re-exports (`EditStore`, `EditStoreInstance`) present in `useEditStore.ts`. Verified.
+- No logic lines altered — pure move/rename. `globalStoreRef` set-on-render semantics and static `.getState()` preserved exactly; `useEditStoreApi` unchanged.
+
+### Deviations
+- None.
+
+### Test results
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run` — 2476 passed, 11 skipped (156 files).
+- `npm run lint` — passes; only pre-existing warnings (no errors). The bootstrap-file `react-hooks/exhaustive-deps` warning on the useEffect is carried verbatim from the old file.
+- `npm run build` — succeeded.
+
+### Open risks
+- The reactive `useEditStore.ts` carries a now-unused `useContext` import and unused `LegacyEditStoreContext` (both verbatim from the legacy body). Lint only warns, not errors, consistent with the prior legacy file. Left as-is to preserve pure-move discipline; can be swept in phase 3.
