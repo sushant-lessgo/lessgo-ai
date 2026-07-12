@@ -106,3 +106,70 @@ None. Followed the plan exactly. `entryClassify.schema.ts` deliberately untouche
 - `npm run test:run`: 163 passed | 1 skipped (164 files); 2779 passed | 15 skipped (2794 tests). Green. (UI-only phase; no unit test added — gate logic lives in the store/shell, untouched.)
 
 **Open risks:** none. Escape hatch is now visually prominent; F14 gate intent preserved.
+
+## Phase 4 — Structure step: real toggles, no phantom "Products · 0 items", Continue gated while drafting
+
+**Files changed**
+- `src/components/onboarding/wizard/WizardShell.tsx`
+- `src/components/onboarding/wizard/StructureSlot.tsx`
+- `src/modules/collections/registry.ts`
+- `src/hooks/useWizardStore.test.ts`
+
+(`src/hooks/useWizardStore.ts` was in scope but NOT changed — see step 2.)
+
+### Step 1 — Drafting gate (bug, fixed)
+`WizardShell.tsx`: added `strategy` store subscription and extended `gateBlocked` so
+that on the structure slot, when `!strategy && (strategyStatus === 'idle' || 'fetching')`,
+Continue is blocked — mirroring the EXACT condition `StructureSlot.tsx:374` uses to render
+the "Drafting the pages your site needs…" spinner. Existing `strategyStatus === 'error'`
+gate kept. No StructureSlot behavior change for this step.
+
+### Step 2 — Required-flag report (diagnosed, NOT a bug — NO code change)
+**Verdict: not reproduced / not a bug.** Reasoning:
+- `structureSections` is seeded by `seedStructureFromStrategy` (useWizardStore.ts:680) from
+  `strategy.sections`, filtered only for `header`/`footer` — these are BARE type keys
+  (`hero`, `features`, `cta`, …), never uuid/display-name form.
+- `lockedSet` at `StructureSlot.tsx:282` = `lockedSectionsForEngine(engine)` which returns
+  bare keys (`thing → hero, features, cta`; inputContracts.ts:235).
+- Both sides are bare, so `lockedSet.has(sec)` matches correctly → only genuine core
+  sections get the "required" chip; optionals toggle off/on with an enabled X.
+- The report's failure DIRECTION is impossible with a key-form mismatch: if keys were
+  uuid/display form, `has()` would be FALSE for ALL → NOTHING marked required (opposite of
+  "all required"). Likely a stale observation or an all-core drafted page.
+- Per the plan's "do NOT apply a speculative normalization without a confirmed repro",
+  `seedStructureFromStrategy` was left untouched. No seed-normalization test added.
+
+### Step 3 — Collections gating (fixed)
+`registry.ts`: added `emptyCollectionNodeAllowed(bt)` — true only when the businessType is
+catalog-shaped (`extractionSchemaKey === 'manufacturer'`) or declares a non-empty
+`requiredCollections` (dormant today, future-proof). Unknown/null bt → false.
+`StructureSlot.tsx` `CollectionNodes`: the union keys are now filtered — a key renders when
+it HAS items (always) OR `allowEmpty` is true. So SaaS/app (`thing`) hides empty
+"Products · 0 items"; manufacturer keeps its empty Products node + `+ Add`; keys with items
+are never gated. F19 comment block updated to record the new rule.
+
+### Step 4 — Tests
+`useWizardStore.test.ts`: added `describe('emptyCollectionNodeAllowed …')` — manufacturer →
+true, saas/app → false, unclassified (null/undefined/unknown) → false. (Placed here, not in
+`registry.test.ts`, because that file was outside the phase's Files-touched list.) No
+seed-normalization test (step 2 changed nothing).
+
+### Verification
+- `npx tsc --noEmit`: clean except the KNOWN pre-existing unrelated error
+  `src/app/page.tsx(6,26): Cannot find module '@/assets/images/founder.jpg'`.
+- `npm run test:run`: 163 passed | 1 skipped (files); 2783 passed | 15 skipped (tests). Green.
+
+### Manual dev checks for a human
+- Structure step: Continue is DISABLED while "Drafting the pages your site needs…" shows,
+  ENABLED once the section list renders.
+- SaaS/app run: NO "Collections › Products · 0 items" node.
+- Manufacturer run: empty Products node still present with `+ Add`.
+- Optional (non-core) sections toggle off/on; X enabled on optionals, disabled on core.
+
+### Deviations
+- Step-4 test placed in `useWizardStore.test.ts` (imports the predicate from registry)
+  rather than `registry.test.ts`, since the latter was not in this phase's Files-touched list.
+
+### Open risks
+- None functional. The empty-node rule keys on `extractionSchemaKey`/`requiredCollections`;
+  a future catalog-shaped businessType must set one of those to surface an empty node.

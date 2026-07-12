@@ -134,3 +134,26 @@ export function collectionKeysForBusinessType(
   const key = businessTypes[bt as BusinessTypeKey].extractionSchemaKey;
   return (extractionCollections as Record<string, readonly CollectionKey[]>)[key] ?? [];
 }
+
+/**
+ * May an EMPTY (0-item) collection node surface at the 7b structure gate for
+ * this businessType? True only for CATALOG-SHAPED businessTypes — those whose
+ * extraction family is `manufacturer` (a manufacturer page is expected to carry
+ * a Products catalogue, so an empty Products node + `+ Add` is meaningful), OR
+ * any businessType that declares a non-empty `requiredCollections` (dormant
+ * today, but future-proofs the rule so a newly-required collection auto-surfaces
+ * its empty node).
+ *
+ * For the `thing` (SaaS/app) extraction family the discriminator is FALSE: a
+ * SaaS site has no catalogue, so a phantom "Products · 0 items" node is noise
+ * (F19). Keys that DO have items always render regardless of this predicate —
+ * the caller only gates EMPTY keys on it. Unknown/undefined bt ⇒ false.
+ */
+export function emptyCollectionNodeAllowed(
+  bt: string | null | undefined
+): boolean {
+  if (!bt || !(bt in businessTypes)) return false;
+  const entry = businessTypes[bt as BusinessTypeKey];
+  if (entry.extractionSchemaKey === 'manufacturer') return true;
+  return !!entry.requiredCollections && entry.requiredCollections.length > 0;
+}

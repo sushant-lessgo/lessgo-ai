@@ -23,6 +23,7 @@ import {
   clampSectionList,
 } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
+import { emptyCollectionNodeAllowed } from '@/modules/collections/registry';
 import { runTrustGeneration } from '@/modules/wizard/generation/trust';
 import { buildBriefDraft, type EntrySignals } from '@/modules/brief/classify';
 import { decideServe } from '@/modules/brief/serveGate';
@@ -1331,5 +1332,30 @@ describe('useWizardStore — COMPOSED served photographer path (atelier phase 7)
     expect(s.slots).not.toContain('structure');
     // dispatch declines the skeleton ⇒ writer generator (buildWorkInput) path.
     expect(isMultipage(s.templateId ?? undefined, briefSignalFromState(s))).toBe(false);
+  });
+});
+
+// onboarding-fixes phase 4 — the 7b empty-collection-node predicate. Gates
+// whether a 0-item collection surfaces at the structure gate: catalog-shaped
+// (manufacturer / future requiredCollections) YES, SaaS `thing` family NO.
+// Keys WITH items are never gated by this predicate (asserted structurally in
+// StructureSlot's CollectionNodes filter, not here).
+describe('emptyCollectionNodeAllowed (7b phantom-node gate)', () => {
+  it('manufacturer → allowed (catalog-shaped, keeps empty Products node)', () => {
+    expect(emptyCollectionNodeAllowed('manufacturer')).toBe(true);
+  });
+
+  it('saas (thing family) → NOT allowed (no phantom "Products · 0 items")', () => {
+    expect(emptyCollectionNodeAllowed('saas')).toBe(false);
+  });
+
+  it('app (thing family) → NOT allowed', () => {
+    expect(emptyCollectionNodeAllowed('app')).toBe(false);
+  });
+
+  it('unclassified (null / undefined / unknown) → NOT allowed', () => {
+    expect(emptyCollectionNodeAllowed(null)).toBe(false);
+    expect(emptyCollectionNodeAllowed(undefined)).toBe(false);
+    expect(emptyCollectionNodeAllowed('not-a-real-type')).toBe(false);
   });
 });

@@ -126,6 +126,7 @@ export default function WizardShell({
   // Continue past it into a broken editor. `Try again` / `Skip to editor` stay
   // available inside the slot; only the shell's Continue is blocked.
   const strategyStatus = useWizardStore((s) => s.strategyStatus);
+  const strategy = useWizardStore((s) => s.strategy);
   const generationError = useWizardStore((s) => s.generationError);
 
   // Hydrate once from the DB-confirmed brief (load-detection already fetched it).
@@ -152,6 +153,17 @@ export default function WizardShell({
     // Structure step (7): a failed strategy fetch blocks Continue — the user
     // retries in place rather than walking a missing site plan forward (F27b).
     if (currentSlot === 'structure' && strategyStatus === 'error') return true;
+    // Structure step (7): while the site plan is still being drafted (no
+    // strategy in hand yet), StructureSlot shows the "Drafting…" spinner — the
+    // same condition mirrored here so Continue can't jump past a plan that
+    // doesn't exist yet (there's nothing to confirm). Mirrors StructureSlot.tsx's
+    // spinner guard exactly.
+    if (
+      currentSlot === 'structure' &&
+      !strategy &&
+      (strategyStatus === 'idle' || strategyStatus === 'fetching')
+    )
+      return true;
     // Generating step (8): a failed generation blocks Continue. This slot is
     // terminal (isLast already disables Continue), but gate explicitly so the
     // rule holds if the slot order ever changes. `Skip to editor` inside the
