@@ -957,6 +957,10 @@ export default function LandingPageRenderer({ className = '', tokenId, published
         // Neutral mood (vestria) from Project.themeValues.mood — undefined for
         // other templates / unset drafts; injectors default it (bone).
         mood={(themeValues as Record<string, any> | null)?.mood}
+        // Knob selection (template-factory phase 9) from Project.themeValues.knobs —
+        // undefined for knob-unaware templates / unset drafts; injectors ignore
+        // the extra prop, and default knob values emit no CSS (byte-neutral).
+        knobs={(themeValues as Record<string, any> | null)?.knobs}
       >
         {renderContent()}
       </ThemeInjector>

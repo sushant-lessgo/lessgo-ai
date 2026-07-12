@@ -34,6 +34,7 @@ model Project {
   themeValues    Json?
   computedDesign Json?
   brief          Json?
+  aiBaseline     Json? // frozen AI-generated text per element { [sectionId]: { [elementKey]: string } } — data-capture edit-delta baseline
   inputText      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -42,11 +43,34 @@ model Project {
   testimonials Testimonial[]
   collectLink  CollectLink?
   blogPosts    BlogPost[]
+  editDeltas   EditDelta[]
   socialPosts  SocialPost[]
   emailSequence EmailSequence?
   outreachIntake  OutreachIntake?
   prospectScrapes ProspectScrape[]
   outreachMessages OutreachMessage[]
+}
+
+// Data-capture: records "AI wrote X, user changed it to Y" per element. Upserted
+// on unique (projectToken, sectionId, elementKey); latest divergence-from-baseline
+// wins; reverted elements delete their row. See docs/task/data-capture.plan.md.
+model EditDelta {
+  id            String   @id @default(cuid())
+  projectToken  String
+  project       Project  @relation(fields: [projectToken], references: [tokenId], onDelete: Cascade)
+  sectionId     String
+  sectionType   String
+  elementKey    String
+  aiText        String
+  userText      String
+  editDistance  Int
+  templateId    String?
+  audienceType  String?
+  isFounderEdit Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([projectToken, sectionId, elementKey])
 }
 
 // Blog (Phase 1). Posts have their own draft→publish lifecycle, decoupled from

@@ -13,6 +13,16 @@ export function isAdmin(clerkId: string | null | undefined): boolean {
 }
 
 /**
+ * data-capture: is this clerkId a founder/admin? Same `ADMIN_CLERK_IDS` parse as
+ * `isAdmin` — a distinct named export so the delta-capture write site reads
+ * clearly (`isFounderEdit`) without coupling to the auth-gate helper. No behavior
+ * change to `requireAdmin`.
+ */
+export function isAdminClerkId(clerkId: string | null | undefined): boolean {
+  return isAdmin(clerkId);
+}
+
+/**
  * Record a privileged admin override — an admin acting on a resource they don't own
  * (publish/domain/image on another user's page). The DB row is the durable system-of-record;
  * the logger.warn line is live-ops visibility (dev). Best-effort: an audit-write failure must

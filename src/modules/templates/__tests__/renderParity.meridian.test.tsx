@@ -15,9 +15,13 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect, vi } from 'vitest';
-import { createStore } from 'zustand';
 
-import { MERIDIAN_BLOCK_MOCKS } from '@/app/dev/meridian/blocks/mockContent';
+// Canonical mock home + shared store-mock harness (template-factory phase 2).
+// The `vi.mock` shims below stay INLINE (per-file hoisted); only the store SHAPE
+// builder + factory are extracted to the harness — proving the extraction did not
+// change behavior when this suite stays green.
+import { createHarnessStore } from '@/modules/templates/blockMocks/harness';
+import { MERIDIAN_BLOCK_MOCKS } from '@/modules/templates/blockMocks/meridian';
 import { resolveMeridianBlock } from '@/modules/templates/meridian/resolveMeridianBlock';
 import { normalizeCtas } from '@/utils/normalizeCtas';
 import { resolveDestination } from '@/utils/resolveCtaHref';
@@ -42,32 +46,7 @@ vi.mock('@/components/EditProvider', () => ({
 
 const SECTIONS = MERIDIAN_BLOCK_MOCKS.map((m) => ({ ...m, sectionId: `${m.sectionType}-mrd` }));
 
-function buildStoreState() {
-  const content: Record<string, any> = {};
-  const sections: string[] = [];
-  for (const s of SECTIONS) {
-    sections.push(s.sectionId);
-    const elements: Record<string, any> = {};
-    for (const [key, value] of Object.entries(s.content)) {
-      elements[key] = { value, content: value };
-    }
-    content[s.sectionId] = { elements, layout: s.layout, aiMetadata: {} };
-  }
-  return {
-    content,
-    sections,
-    pages: {},
-    mode: 'preview',
-    forms: [],
-    updateElementContent: () => {},
-    setSection: () => {},
-    addForm: () => 'noop-form',
-    deleteForm: () => {},
-    getFormById: () => null,
-  };
-}
-
-h.store = createStore(() => buildStoreState());
+h.store = createHarnessStore(SECTIONS);
 
 /** Visible text of an HTML string: strips tags, aria-hidden subtrees, collapses whitespace. */
 function visibleText(html: string): string {

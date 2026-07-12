@@ -10,6 +10,13 @@
 // Default-component imports (`import X from './Sibling'`) are the legitimate
 // cross-boundary case (client components render server-side) and are allowed.
 // Shared helpers/styles must live in a plain (non-'use client') `.ts` module.
+//
+// ── Boundary enforcement point (cross-reference) ────────────────────────────
+// This is the GLOBAL published/client-boundary check for ALL templates — the
+// per-template structural suite `src/modules/templates/templateConformance.ts`
+// deliberately does NOT reinvent it. This filesystem walk is stronger: it
+// covers `*.published.tsx` files in templates not yet enrolled in
+// `templateConformance`. Keep it standalone; assertions must stay unweakened.
 import { describe, it, expect } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
