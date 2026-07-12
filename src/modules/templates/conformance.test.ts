@@ -209,15 +209,32 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
       const html = renderToStaticMarkup(
         React.createElement(AtelierSSRTokens, {
           paletteId: 'vermilion' as any,
-          knobs: { buttonShape: 'pill', cardStyle: 'shadow', density: 'compact' },
+          knobs: { buttonShape: 'pill', cardStyle: 'flat', density: 'compact' },
         }),
       );
       expect(html).toContain('data-knob-buttonShape="pill"');
-      expect(html).toContain('data-knob-cardStyle="shadow"');
+      expect(html).toContain('data-knob-cardStyle="flat"');
       expect(html).toContain('data-knob-density="compact"');
       expect(html).toContain('[data-knob-buttonShape="pill"]');
-      expect(html).toContain('[data-knob-cardStyle="shadow"]');
+      expect(html).toContain('[data-knob-cardStyle="flat"]');
       expect(html).toContain('[data-knob-density="compact"]');
+    });
+
+    // Dual-renderer parity guard (regression): the compact density knob is applied
+    // on :root in the editor (documentElement) but on a wrapper <div> in published
+    // (AtelierSSRTokens). Custom-property var() substitution resolves at the
+    // DECLARING scope, so a wrapper-scoped `--space:0.82` would leave the :root-
+    // declared `--sec-y`/`--pad-y`/`--pad-y-sm` uncompressed for descendants in the
+    // PUBLISHED renderer (rhythm compresses in editor only). The compact block MUST
+    // therefore redeclare the FINAL section-rhythm vars directly (not only --space).
+    it('parity: compact density redeclares the FINAL section-rhythm vars, not only --space', () => {
+      const css = buildAtelierStylesheet({ density: 'compact' });
+      const block = css.slice(css.indexOf('[data-knob-density="compact"]'));
+      expect(block).toContain('--space:0.82');
+      // The load-bearing assertion — these must appear inside the wrapper-scoped
+      // block so a :root-descendant knob still compresses rhythm in published.
+      expect(block).toContain('--pad-y:');
+      expect(block).toContain('--pad-y-sm:');
     });
   });
 

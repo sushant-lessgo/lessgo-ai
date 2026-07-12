@@ -446,3 +446,95 @@ CONFIRMED match. tokens.ts NOT touched (in-name already correct).
 No blocking issues. Gates green: tsc exit 0; `npm run build` exit 0 (FIRST full build of run — validates whole tree); engines 175 passed. Bricolage woff2 (41KB fontsource variable, orchestrator-placed) wired: @font-face wght 200-800 woff2-variations; preload case atelier (editorial→Bricolage / compact→Fraunces, both files present); SELF_HOSTED_FONTS +1. Family-name 'Bricolage Grotesque' 3-way match (@font-face / tokens.ts:65 fontDisplay / whitelist). Build artifact public/assets/fonts-self-hosted.css regenerated (expected). Non-blocking: cosmetic comment.
 
 ## FOUNDATION COMPLETE (phases 1-8). Phase 9 = HUMAN GATE (designer HTML missing).
+
+---
+### Phase 9a — design system + Header + Hero (+slider markup + marquee + page-head)
+
+**Files changed:**
+- `src/modules/templates/atelier/tokens.ts` — real Kontur :root values + ported base/type/label/lede/button/qlink utilities; density knob re-mechanised onto `--space`; knob declaration + token map realigned.
+- `src/modules/templates/atelier/palettes.ts` — real Kontur accent oklch values (vermilion exact; cobalt/moss values under existing indigo/olive ids — see Deviations).
+- `src/modules/templates/atelier/sectionRules.ts` — hero surface flipped paper→dark (Kontur cover + page-head are both dark).
+- `src/modules/templates/atelier/blocks/Header/AtelierNavHeader.core.tsx` — ported 3-col nav grammar, overlay+solid modes, EN/NL toggle, CSS-only mobile drawer.
+- `src/modules/templates/atelier/blocks/Header/styles.ts` — ported NAV CSS (overlay/solid/burger/drawer/lang/btn-nav + responsive).
+- `src/modules/templates/atelier/blocks/Hero/AtelierHero.core.tsx` — cover slider DOM contract + marquee (home) + page-head mode.
+- `src/modules/templates/atelier/blocks/Hero/styles.ts` — ported COVER/arrows/dots/scroll/MARQUEE/page-head CSS (keyframe atl-scrollx→lg-atelier-scrollx); placeholders scoped under `.lg-atelier-cover`.
+- `src/modules/templates/conformance.test.ts` — phase-6 atelier knob-evidence block updated to the shipped values (cardStyle `shadow`→`flat`).
+- `index.ts`, `ThemeInjector.tsx`, `components/AtelierSSRTokens.tsx` — reviewed, NOT edited (knob decl lives in tokens.ts and is already re-exported; both renderers consume `buildAtelierStylesheet`+`knobDataAttributes` generically with no hardcoded knob values, so the realignment flows through automatically).
+
+**Tokens/palettes reconciled (real Kontur values):** `:root` now carries the design's `--atl-*` values mapped onto atelier's phase-6 token names — paper `oklch(0.978 0.004 95)`, paper-2 `0.945…`, ink `0.165 0.010 60`, ink-soft (=design ink-2) `0.385…`, ink-mute (NEW, =design ink-3) `0.560…`, line `ink/0.16`, line-dark `paper/0.20`, on-dark-soft `0.82 0.008 90`, wrap `1380px`, gutter `clamp(20px,5vw,76px)`, fs-body `16px`. Dark surfaces (`--dark`/`--dark-2`) both resolve to `--ink` because the design paints every dark band (`.atl-sec.dark`, `.atl-page-head`, `.atl-footer`) with `var(--atl-ink)` — the platform's 4-surface `data-surface` mechanism is retained unchanged (base→paper, alt→paper-2, dark→dark). Ported the button family (`.lg-atelier-btn` + `.lg-atelier-fill/-line/-accent/-ghost/-ghost-d/-lg/-on-dark`), the `.lg-atelier-label` eyebrow (sans, tracked, accent dot), `.lg-atelier-lede`, `.lg-atelier-qlink`. Palette accents are the exact design duos.
+
+**Knob-value realignment (cardStyle / density) + conformance:**
+- cardStyle: `['hairline','shadow','flat']` → **`['hairline','flat']`** (design has no shadow; dropped `shadow` from decl + token map). flat = `--card-bd:1px solid transparent; --card-bg:var(--paper-2)` (Kontur `[data-variant~=flat]`).
+- density: `['compact','comfortable','spacious']` → **`['comfortable','compact']`** (dropped `spacious`). compact = Kontur `[data-variant~=dense]`. It emits `--space:0.82` (for the DIRECT `calc(X * var(--space))` consumers — button padding, page-head, gaps) AND redeclares the final `--sec-y`/`--pad-y`/`--pad-y-sm` with `0.82` baked in — see the dual-renderer fix below.
+- buttonShape unchanged `['square','rounded','pill']`; `:root --btn-r` set to the design's rounded value `10px` (square→0px, pill→999px).
+- conformance.test.ts phase-6 evidence block: `cardStyle:'shadow'` → `cardStyle:'flat'` (the only test that referenced a dropped value). `assertKnobConformance('atelier', atelierKnobs)` passes with the new subsets (both include their axis default; default emits nothing — verified by the byte-identical baseline test).
+
+**Header dual-mode:** one core, two modes via `content.mode`. Default `solid` = sticky blurred-paper bar (dark text, inner pages); `overlay` = transparent bar with light text (home, over the dark hero). Overlay uses `position:absolute` per the design; whether it visually lands over the following hero section in the multipage stack is a phase-12 parity check (default is the safe always-visible solid bar). Mobile drawer is the design's CSS-only checkbox hack — a top-level `<input id="lg-atelier-menu">` + a sibling `.lg-atelier-drawer` (both siblings of `<header>` inside the section wrapper, so `:checked ~` resolves). EN/NL toggle is static visual chrome (aria-pressed); real locale switching is the platform i18n layer.
+
+**Page-head mode:** the inner-page dark hero band (`.atl-page-head`) is rendered by the **Hero** block when `content.mode === 'pageHead'` — NOT a new section type, NOT a resolver/manifest change. label + accent-`em` h1 + lede, dark surface (hero's sectionRules surface is `dark`, which serves both modes).
+
+**Marquee:** part of the Hero region, home mode only. `.lg-atelier-marquee[data-surface="dark"][aria-hidden="true"]` after the cover; `.lg-atelier-marquee-track` runs `animation:lg-atelier-scrollx 32s linear infinite` (keyframe renamed from `atl-scrollx`), words duplicated ×2 for a seamless loop, `prefers-reduced-motion` halts it. Pure CSS. Words come from `content.marquee_items` (else a 5-word default). This is the Hero's marquee — NOT the QuoteBand.
+
+**Hero slider DOM contract (VERBATIM — phase-10 asset selectors must match; class prefix renamed atl-→lg-atelier-, but the `data-atl-*` hooks are EXACT):**
+```
+.lg-atelier-cover                                     <- JS: slider.closest('.lg-atelier-cover')
+  .lg-atelier-slides[data-atl-slider][data-interval="5000"]
+    .lg-atelier-slide.is-active   (slide 1)           <- first slide default-visible (no-JS fallback)
+    .lg-atelier-slide             (slides 2..N)
+      .lg-atelier-slide-ph > .lg-atelier-ph.dark > .lg-atelier-ph-num   (or customer <img class="lg-atelier-slide-img">)
+  .lg-atelier-cover-in            (z2 -- eyebrow/h1/tagline/actions)
+  .lg-atelier-arrows
+    button.lg-atelier-arrow.lg-atelier-arrow-prev[data-atl-prev]
+    button.lg-atelier-arrow.lg-atelier-arrow-next[data-atl-next]
+  .lg-atelier-dots[data-atl-dots]                      <- EMPTY container; JS injects button.lg-atelier-dot[aria-current]
+  .lg-atelier-scroll
+```
+Data-attribute hooks (do NOT rename in phase 10): `data-atl-slider`, `data-interval` (="5000"), `data-atl-prev`, `data-atl-next`, `data-atl-dots`. Active-slide class: `.is-active`. JS-injected dot class: `.lg-atelier-dot`. Slides are rendered from the block's `slides` image collection (`slides.<id>.image` through the standard funnel); an empty collection renders ONE `.is-active` dark placeholder slide.
+
+**No-JS first-slide fallback:** `.lg-atelier-slide{opacity:0}` + `.lg-atelier-slide.is-active{opacity:1}` in CSS, and the first slide ships `is-active` in the static markup. With JS disabled the first slide is opaque and the rest are transparent; arrows and the empty `[data-atl-dots]` are inert (no handlers). Phase-10 JS injects dots and toggles `.is-active` for autoplay/controls.
+
+**Deviations (in-scope judgment calls, logged):**
+1. **Palette ids/4th accent (out-of-scope file):** the design ships FOUR accents (vermilion + cobalt + moss + ochre) but the `AtelierPalette` union in `src/types/service.ts` (NOT in 9a Files-touched) declares three ids `vermilion|indigo|olive`. Conservative choice: applied the exact vermilion duo, and carried the design's **cobalt** and **moss** values under the existing `indigo`/`olive` ids. The id-rename to cobalt/moss/ochre AND the 4th (ochre) palette require editing `types/service.ts` (the union tuple `atelierPalettes` + its `PALETTES_BY_TEMPLATE` entry) — **REPORTED as a follow-up needing that file**; not done here to stay in Files-touched.
+2. **buttonShape default:** platform law fixes the buttonShape axis DEFAULT to `rounded` (must be the no-emit `:root`), but the Kontur design's `:root` default is square (`0px`). Kept the law: `:root --btn-r:10px` (the design's rounded value, so the `rounded` knob is honest), with `square` (0px) as an explicit alternate. Kundius/atelier projects reproduce the exact square Kontur look by selecting `buttonShape:'square'` in `themeValues.knobs`. Documented so phase 13 sets it.
+3. **Hero `hero_image` field dropped** from `AtelierHeroContent` in favour of the `slides` collection (the design is a slider, not a single image). No test referenced `hero_image`.
+4. **Header overlay-over-hero** positioning verified only in phase-12 parity (default is solid); noted above.
+
+**Guardrails honored:** no new section type; `resolveAtelierBlock`/`blockManifest.ts` untouched (page-head is a Hero mode); slider `data-atl-*` hooks preserved exactly; default knob values emit nothing (byte-identical baseline test green). Class rename atl-→lg-atelier- applied throughout markup + styles.ts.
+
+**Commands / results:**
+- `npx tsc --noEmit` -> exit 0 (PASS)
+- `npx vitest run src/modules/templates/conformance.test.ts` -> 385 passed, 8 skipped (PASS; incl. realigned knob conformance + atelier default-emits-nothing + non-default parity evidence)
+- `npx vitest run src/modules/templates/atelier` -> 55 passed (PASS; coreParity 8 cores stay pure + render server-side, registration all 8 types)
+
+**Open risks:**
+- Palette id-rename + ochre accent (Deviation 1) needs `types/service.ts` — orchestrator to schedule a small follow-up (or fold into 9b) so all four Kontur palettes ship with correct ids.
+- Header overlay-over-dark-hero visual overlap depends on the multipage renderer's section stacking; confirm at phase 12. Solid default is safe meanwhile.
+- 9b provisional blocks (Work/Packages/About/Quote/Contact/Footer) still emit the shared HATCH placeholder + old button-modifier styling; they will be re-ported in 9b and may look mixed until then (no test impact).
+
+---
+#### Phase 9a — review fix (density dual-renderer parity trap)
+
+**Blocking bug (verdict fix-first):** the compact density knob emitted ONLY `[data-knob-density="compact"]{--space:0.82}`, while `--sec-y`/`--pad-y`/`--pad-y-sm` were declared at `:root` as `calc(… * var(--space))`. CSS custom-property `var()` substitution resolves at the DECLARING scope (`:root`) and descendants inherit the already-computed value. ThemeInjector (edit) sets `data-knob-*` on `documentElement` (=`:root`) so rhythm recompressed; AtelierSSRTokens (published) sets them on a wrapper `<div>` (a `:root` descendant), so `--pad-y`/`--sec-y` stayed resolved with `--space:1` → section rhythm did NOT compress in published. Emitted CSS text is byte-identical (byte-compare evidence test misses it) but the RENDERED layout diverged editor vs published — the exact parity trap the track guards against. Regression from my phase-9a re-mechanisation.
+
+**Fix (`tokens.ts`, `atelierKnobTokenMap.density.compact`):** the compact block now redeclares the FINAL section-rhythm vars directly (0.82 baked in, not via `var(--space)`), so a wrapper-scoped `data-knob` recomputes them for descendants in the published renderer too:
+```
+compact: {
+  '--space': '0.82',
+  '--sec-y':   'calc(clamp(72px, 10vw, 150px) * 0.82)',
+  '--pad-y':   'calc(clamp(72px, 10vw, 150px) * 0.82)',
+  '--pad-y-sm':'calc(clamp(52px, 7vw, 100px) * 0.82)',
+}
+```
+`--space` is still emitted for the direct consumers (button padding, page-head, marquee gaps). DEFAULT (comfortable) still emits nothing — verified by the unchanged byte-identical baseline test.
+
+**Regression guard added (`conformance.test.ts`):** new test asserts the compact block declares `--pad-y:`/`--pad-y-sm:` directly (not only `--space`), so a future "multiplier-only" regression on any `:root`-declared rhythm var goes red.
+
+**Comments corrected:** the token-map + knob-declaration comments in `tokens.ts` no longer claim `--space` scales section rhythm "in one lever" (true only on the edit side); they now document why the final vars must be redeclared.
+
+**Re-verify:** `npx tsc --noEmit` exit 0 (PASS) · `npm run test:run -- src/modules/templates/conformance.test.ts src/modules/templates/atelier` → 441 passed, 8 skipped (PASS; new parity guard green, default still no-emit). Fix stayed within phase-9a Files-touched (tokens.ts + conformance.test.ts).
+
+---
+### Phase 9a — impl-review verdict: SHIP (2 loops)
+Loop 1 = fix-first: density=compact editor↔published parity divergence (--space multiplier resolved at :root declaring-scope; published wrapper is a :root descendant so section rhythm didn't compress there). Loop 2 = ship after fix (compact block redeclares final --sec-y/--pad-y/--pad-y-sm directly + guard test).
+Gates green: tsc exit 0; conformance+atelier = 441 passed/8 skipped. Verified: class rename atl-→lg-atelier-, knob realignment (cardStyle=[hairline,flat]/density=[comfortable,compact], defaults no-emit), ThemeInjector/SSRTokens parity, Hero slider DOM contract exact, Header overlay+solid+drawer+page-head-mode, marquee, core purity, data-surface. Scope = 8 files.
+CARRY→9b: palette ids (types/service.ts vermilion/indigo/olive → vermilion/cobalt/moss/ochre + 4th). CARRY→12/13: buttonShape default rounded≠Kontur square (per-project knob seed decision at parity gate).

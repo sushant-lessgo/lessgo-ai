@@ -26,7 +26,8 @@ export interface AtelierBaseTokens {
   paper: string;
   paper2: string;
   ink: string;
-  inkSoft: string;
+  inkSoft: string; // ink-2 (mid — body copy)
+  inkMute: string; // ink-3 (faint — labels/meta)
   line: string;
   lineSoft: string;
   dark: string;
@@ -37,42 +38,52 @@ export interface AtelierBaseTokens {
 
   fontDisplay: string; // Bricolage Grotesque (headings; hero em accent)
   fontBody: string;    // Hanken Grotesk
-  fontMono: string;    // JetBrains Mono (tags/labels/meta)
+  fontMono: string;    // JetBrains Mono (placeholder image tags only)
 
   fsBody: string;
   lhBody: string;
 
   wrap: string;
   gutter: string;
+  space: string;  // density multiplier (--space; density knob compact → 0.82)
+  secY: string;   // section rhythm (× --space)
   padY: string;
   padYSm: string;
   r: string;
 }
 
+// Real Atelier×Kontur values ported from
+// template-design/designer-workspace/atelier/styles.css :root (L11-37).
+// Warm paper / ink / vermilion. Dark surfaces = --ink (design tags .atl-sec.dark
+// / .atl-page-head / .atl-footer all paint var(--atl-ink)); the platform keeps a
+// dark-2 slot (= ink) so the 4-surface sectionRules mechanism is unchanged.
 export const atelierBaseTokens: AtelierBaseTokens = {
-  paper:      'oklch(0.976 0.006 70)',
-  paper2:     'oklch(0.948 0.011 68)',
-  ink:        'oklch(0.215 0.014 52)',
-  inkSoft:    'oklch(0.45 0.014 54)',
-  line:       'oklch(0.215 0.014 52 / 0.16)',
-  lineSoft:   'oklch(0.215 0.014 52 / 0.09)',
-  dark:       'oklch(0.245 0.016 50)',
-  dark2:      'oklch(0.19 0.014 50)',
-  onDark:     'oklch(0.95 0.01 78)',
-  onDarkSoft: 'oklch(0.73 0.014 72)',
-  lineDark:   'oklch(0.95 0.01 78 / 0.16)',
+  paper:      'oklch(0.978 0.004 95)',
+  paper2:     'oklch(0.945 0.006 95)',
+  ink:        'oklch(0.165 0.010 60)',
+  inkSoft:    'oklch(0.385 0.012 60)',
+  inkMute:    'oklch(0.560 0.012 62)',
+  line:       'oklch(0.165 0.010 60 / 0.16)',
+  lineSoft:   'oklch(0.165 0.010 60 / 0.09)',
+  dark:       'oklch(0.165 0.010 60)',
+  dark2:      'oklch(0.165 0.010 60)',
+  onDark:     'oklch(0.978 0.004 95)',
+  onDarkSoft: 'oklch(0.82 0.008 90)',
+  lineDark:   'oklch(0.978 0.004 95 / 0.20)',
 
-  fontDisplay: "'Bricolage Grotesque', 'Hanken Grotesk', system-ui, sans-serif",
+  fontDisplay: "'Bricolage Grotesque', 'Arial Narrow', system-ui, sans-serif",
   fontBody:    "'Hanken Grotesk', system-ui, -apple-system, sans-serif",
   fontMono:    "'JetBrains Mono', ui-monospace, monospace",
 
-  fsBody: '17px',
+  fsBody: '16px',
   lhBody: '1.6',
 
-  wrap:   '1200px',
-  gutter: 'clamp(20px, 5vw, 68px)',
-  padY:   'clamp(64px, 8.5vw, 120px)',
-  padYSm: 'clamp(52px, 6vw, 84px)',
+  wrap:   '1380px',
+  gutter: 'clamp(20px, 5vw, 76px)',
+  space:  '1',
+  secY:   'calc(clamp(72px, 10vw, 150px) * var(--space))',
+  padY:   'var(--sec-y)',
+  padYSm: 'calc(clamp(52px, 7vw, 100px) * var(--space))',
   r:      '3px',
 };
 
@@ -91,6 +102,7 @@ export function serializeBaseTokens(t: AtelierBaseTokens = atelierBaseTokens): s
   --paper-2:${t.paper2};
   --ink:${t.ink};
   --ink-soft:${t.inkSoft};
+  --ink-mute:${t.inkMute};
   --line:${t.line};
   --line-soft:${t.lineSoft};
   --dark:${t.dark};
@@ -105,44 +117,63 @@ export function serializeBaseTokens(t: AtelierBaseTokens = atelierBaseTokens): s
   --lh-body:${t.lhBody};
   --wrap:${t.wrap};
   --gutter:${t.gutter};
+  --space:${t.space};
+  --sec-y:${t.secY};
   --pad-y:${t.padY};
   --pad-y-sm:${t.padYSm};
   --r:${t.r};
   /* Knob-consumed baselines (default axis values = :root, emit no knob block).
-     --btn-r from buttonShape (default rounded); --card-* from cardStyle (default
-     hairline). Section rhythm (--pad-y/--pad-y-sm) doubles as the density
-     channel. Blocks reference these vars so a non-default knob retunes them via
-     the scoped wrapper layer (inherited through the theme wrapper). */
-  --btn-r:var(--r);
+     --btn-r = buttonShape default 'rounded' (design's rounded value = 10px; a
+     project selects buttonShape:'square' to reproduce Kontur's 0px default look).
+     --card-* = cardStyle default 'hairline'. --space = density default
+     'comfortable' (design 'regular'; compact → 0.82). Blocks reference these
+     vars so a non-default knob retunes them via the scoped wrapper layer. */
+  --btn-r:10px;
   --card-bd:1px solid var(--line);
   --card-shadow:none;
   --card-bg:var(--paper);
 }
 [data-surface="paper"]{background:var(--paper);color:var(--ink);}
-[data-surface="paper-2"]{background:var(--paper-2);color:var(--ink);border-block:1px solid var(--line-soft);}
+[data-surface="paper-2"]{background:var(--paper-2);color:var(--ink);border-block:1px solid var(--line);}
 [data-surface="dark"]{background:var(--dark);color:var(--on-dark);}
 [data-surface="dark-2"]{background:var(--dark-2);color:var(--on-dark-soft);}
-[data-palette]{background:var(--paper);color:var(--ink);font-family:var(--ff-body);font-size:var(--fs-body);line-height:var(--lh-body);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+[data-palette]{background:var(--paper);color:var(--ink);font-family:var(--ff-body);font-weight:400;font-size:var(--fs-body);line-height:var(--lh-body);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
 [data-palette] ::selection{background:var(--accent);color:#fff;}
 .lg-atelier-wrap{max-width:var(--wrap);margin:0 auto;padding-inline:var(--gutter);}
 .lg-atelier-pad{padding-block:var(--pad-y);}
 .lg-atelier-pad-sm{padding-block:var(--pad-y-sm);}
-.lg-atelier-display,.lg-atelier-heading{font-family:var(--ff-display);font-weight:600;line-height:1.05;margin:0;letter-spacing:-0.01em;}
-.lg-atelier-display em,.lg-atelier-heading em{font-style:italic;color:var(--accent-deep);font-weight:500;}
+.lg-atelier-display,.lg-atelier-heading{font-family:var(--ff-display);font-weight:600;line-height:0.96;margin:0;letter-spacing:-0.02em;}
+.lg-atelier-display em,.lg-atelier-heading em{font-style:normal;color:var(--accent-deep);}
 [data-surface="dark"] .lg-atelier-display em,[data-surface="dark"] .lg-atelier-heading em{color:var(--accent);}
-.lg-atelier-tag{font-family:var(--ff-mono);font-size:0.72rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent-deep);display:inline-flex;align-items:center;gap:0.75em;font-weight:500;}
+/* eyebrow label — Kontur .atl-label (sans, tracked, accent dot) */
+.lg-atelier-label{font-family:var(--ff-body);font-weight:600;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink);display:inline-flex;align-items:center;gap:10px;}
+.lg-atelier-label::before{content:"";width:8px;height:8px;background:var(--accent);border-radius:50%;flex:none;}
+.lg-atelier-label.lg-atelier-on-dark,[data-surface="dark"] .lg-atelier-label{color:var(--on-dark);}
+.lg-atelier-lede{font-weight:300;font-size:clamp(17px,2vw,21px);line-height:1.55;color:var(--ink-soft);}
+[data-surface="dark"] .lg-atelier-lede{color:var(--on-dark-soft);}
+.lg-atelier-acc{color:var(--accent-deep);}
+.lg-atelier-tag{font-family:var(--ff-body);font-weight:600;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-mute);}
 .lg-atelier-eyebrow-block{margin-bottom:clamp(28px,4vw,44px);}
 .lg-atelier-eyebrow-block .lg-atelier-h2{font-size:clamp(2.1rem,4.4vw,3.4rem);margin-top:0.4em;max-width:20ch;}
 .lg-atelier-eyebrow-block .lg-atelier-lede{margin-top:1.1em;color:var(--ink-soft);max-width:58ch;font-size:1.06rem;}
 [data-surface="dark"] .lg-atelier-eyebrow-block .lg-atelier-lede{color:var(--on-dark-soft);}
-.lg-atelier-btn{display:inline-flex;align-items:center;gap:0.6em;font-weight:600;font-size:0.96rem;padding:0.92em 1.5em;border-radius:var(--btn-r);border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer;transition:.18s ease;white-space:nowrap;text-decoration:none;font-family:var(--ff-body);}
-.lg-atelier-btn:hover{background:transparent;color:var(--ink);}
-.lg-atelier-btn.lg-atelier-accent{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;}
-.lg-atelier-btn.lg-atelier-accent:hover{background:transparent;color:var(--accent-deep);}
+/* buttons — Kontur .atl-btn family (rename atl-→lg-atelier-) */
+.lg-atelier-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-family:var(--ff-body);font-weight:600;font-size:13px;letter-spacing:0.04em;padding:calc(15px * var(--space)) calc(26px * var(--space));border:1.5px solid var(--ink);border-radius:var(--btn-r);white-space:nowrap;line-height:1;cursor:pointer;text-decoration:none;transition:background .2s,color .2s,border-color .2s;}
+.lg-atelier-btn.lg-atelier-lg{padding:calc(18px * var(--space)) calc(34px * var(--space));font-size:14px;}
+.lg-atelier-btn.lg-atelier-fill{background:var(--ink);color:var(--paper);}
+.lg-atelier-btn.lg-atelier-fill:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+.lg-atelier-btn.lg-atelier-line{background:transparent;color:var(--ink);}
+.lg-atelier-btn.lg-atelier-line:hover{background:var(--ink);color:var(--paper);}
+.lg-atelier-btn.lg-atelier-accent{background:var(--accent);border-color:var(--accent);color:#fff;}
+.lg-atelier-btn.lg-atelier-accent:hover{background:var(--ink);border-color:var(--ink);color:var(--paper);}
 .lg-atelier-btn.lg-atelier-ghost{background:transparent;color:var(--ink);}
 .lg-atelier-btn.lg-atelier-ghost:hover{background:var(--ink);color:var(--paper);}
+.lg-atelier-btn.lg-atelier-ghost-d{border-color:var(--paper);color:var(--paper);background:transparent;}
+.lg-atelier-btn.lg-atelier-ghost-d:hover{background:var(--paper);color:var(--ink);}
 .lg-atelier-btn.lg-atelier-on-dark{border-color:var(--on-dark);background:var(--on-dark);color:var(--dark);}
 .lg-atelier-btn.lg-atelier-on-dark:hover{background:transparent;color:var(--on-dark);}
+.lg-atelier-qlink{font-family:var(--ff-body);font-weight:600;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink);display:inline-flex;align-items:center;gap:10px;padding-bottom:5px;border-bottom:2px solid var(--accent);text-decoration:none;transition:gap .25s,color .25s;}
+.lg-atelier-qlink:hover{gap:16px;color:var(--accent-deep);}
 .lg-atelier-stitch{border:0;border-top:1.5px solid var(--line);margin:0;}`;
 }
 
@@ -182,12 +213,19 @@ export function serializeVariantOverrides(): string {
  */
 export const atelierKnobs: TemplateKnobDeclaration = {
   axes: {
-    // buttonShape → --btn-r (button corner radius). default 'rounded' = :root.
+    // buttonShape → --btn-r (button corner radius). default 'rounded' = :root
+    // (10px, the design's rounded value); square (0px) reproduces the Kontur
+    // baseline look, pill (999px). All three ship in the design.
     buttonShape: ['square', 'rounded', 'pill'],
-    // cardStyle → --card-bd/--card-shadow/--card-bg. default 'hairline' = :root.
-    cardStyle: ['hairline', 'shadow', 'flat'],
-    // density → section rhythm --pad-y/--pad-y-sm. default 'comfortable' = :root.
-    density: ['compact', 'comfortable', 'spacious'],
+    // cardStyle → --card-bd/--card-bg. default 'hairline' = :root. The design
+    // ships hairline + flat ONLY (no shadow — 'shadow' dropped from phase 6).
+    cardStyle: ['hairline', 'flat'],
+    // density → `--space` (default 'comfortable' = :root, design 'regular',
+    // --space:1). compact = design 'dense': emits --space:0.82 for the DIRECT
+    // consumers (button padding, page-head, gaps) AND redeclares the final
+    // --sec-y/--pad-y/--pad-y-sm (0.82 baked) so wrapper-scoped published output
+    // compresses section rhythm too — see the token-map note. NO 'spacious'.
+    density: ['comfortable', 'compact'],
     // typePairing: default-only. ALIASES the [data-variant] axis; a look sets the
     // flat variantId directly, so this carries no knob CSS.
     typePairing: ['classic'],
@@ -209,20 +247,29 @@ export const atelierKnobTokenMap: KnobTokenMap = {
     pill:   { '--btn-r': '999px' },
   },
   cardStyle: {
-    shadow: {
-      '--card-bd': '1px solid transparent',
-      '--card-shadow': '0 6px 22px oklch(0.215 0.014 52 / 0.10)',
-      '--card-bg': 'var(--paper)',
-    },
+    // Kontur flat: transparent border on the raised paper-2 fill (styles.css L48).
     flat: {
       '--card-bd': '1px solid transparent',
-      '--card-shadow': 'none',
       '--card-bg': 'var(--paper-2)',
     },
   },
   density: {
-    compact:  { '--pad-y': 'clamp(48px,6vw,88px)',    '--pad-y-sm': 'clamp(38px,4.5vw,60px)' },
-    spacious: { '--pad-y': 'clamp(84px,10.5vw,156px)', '--pad-y-sm': 'clamp(64px,7.5vw,108px)' },
+    // Kontur dense (styles.css L47): --space drops to 0.82. `--space` alone is
+    // NOT enough — `--sec-y`/`--pad-y`/`--pad-y-sm` are declared at :root, so their
+    // `var(--space)` substitution resolves at :root and descendants inherit the
+    // already-computed (space:1) value. ThemeInjector sets data-knob-* on :root
+    // (documentElement) but AtelierSSRTokens sets them on a wrapper <div> (a :root
+    // DESCENDANT) — so a wrapper-scoped `--space:0.82` would recompress rhythm in
+    // the editor but NOT in published (dual-renderer parity trap). FIX: redeclare
+    // the FINAL section-rhythm vars here (0.82 baked in, NOT via var(--space)) so
+    // the wrapper scope carries them for descendants in BOTH renderers. `--space`
+    // is still emitted for the DIRECT consumers (button padding, page-head, gaps).
+    compact: {
+      '--space': '0.82',
+      '--sec-y': 'calc(clamp(72px, 10vw, 150px) * 0.82)',
+      '--pad-y': 'calc(clamp(72px, 10vw, 150px) * 0.82)',
+      '--pad-y-sm': 'calc(clamp(52px, 7vw, 100px) * 0.82)',
+    },
   },
 };
 

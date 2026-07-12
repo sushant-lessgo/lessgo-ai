@@ -14,14 +14,14 @@ export type AtelierSurface = 'paper' | 'paper-2' | 'dark' | 'dark-2';
  * section types.
  */
 export const atelierSectionSurfaces: Record<string, AtelierSurface> = {
-  header:   'paper',
-  hero:     'paper',
+  header:   'paper',   // solid inner-page nav = blurred paper (overlay mode is CSS-local, see Header)
+  hero:     'dark',    // Kontur cover = full-bleed dark slider; page-head mode is also dark
   work:     'paper',
-  packages: 'paper-2',
+  packages: 'paper-2', // Kontur .atl-sec.alt
   about:    'paper',
-  quote:    'dark',
+  quote:    'dark',    // Kontur .atl-sec.dark quote band
   contact:  'paper-2',
-  footer:   'dark-2',
+  footer:   'dark-2',  // Kontur .atl-footer (= --ink)
 };
 
 const surfaceVarMap: Record<AtelierSurface, string> = {

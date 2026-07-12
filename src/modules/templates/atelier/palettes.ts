@@ -1,20 +1,30 @@
 // src/modules/templates/atelier/palettes.ts
 // Atelier palette config. A palette swaps ONLY the accent duo (--accent /
-// --accent-deep); the paper/ink/dark system is palette-invariant (tokens.ts).
-// PROVISIONAL: `vermilion` is the default; `indigo`/`olive` are placeholder
-// accents. Final curation is a phase-9 founder taste pass against Kontur HTML.
+// --accent-deep = design's --atl-accent / --atl-accent-d); the paper/ink/dark
+// system is palette-invariant (tokens.ts). Values are the REAL Kontur accents
+// (styles.css L40-42). `vermilion` is the default.
+//
+// PORT NOTE (9a): the design ships FOUR curated accents — vermilion (default),
+// cobalt, moss, ochre. The AtelierPalette union in src/types/service.ts (out of
+// 9a's files-touched) currently declares three ids `vermilion | indigo | olive`,
+// so the two alternates below carry the design's COBALT and MOSS oklch values
+// under the existing `indigo`/`olive` ids, and the 4th accent (ochre) + the
+// id-rename to cobalt/moss/ochre are deferred to a follow-up that edits
+// types/service.ts. accent duos are exact-to-design.
 
 import { atelierPalettes, type AtelierPalette } from '@/types/service';
 
 export interface PaletteConfig {
-  accent: string;     // tags, marks, hover accents
-  accentDeep: string; // primary CTA fill, em accents, links
+  accent: string;     // tags, marks, hover accents (--atl-accent)
+  accentDeep: string; // primary CTA fill, em accents, links (--atl-accent-d)
 }
 
 export const atelierPaletteConfigs: Record<AtelierPalette, PaletteConfig> = {
-  vermilion: { accent: 'oklch(0.66 0.18 34)',  accentDeep: 'oklch(0.55 0.19 32)' },
-  indigo:    { accent: 'oklch(0.55 0.15 278)', accentDeep: 'oklch(0.44 0.15 280)' },
-  olive:     { accent: 'oklch(0.62 0.11 118)', accentDeep: 'oklch(0.49 0.10 120)' },
+  vermilion: { accent: 'oklch(0.585 0.205 31)',  accentDeep: 'oklch(0.535 0.210 31)' },
+  // design 'cobalt' values, carried under the existing `indigo` id (see PORT NOTE).
+  indigo:    { accent: 'oklch(0.585 0.170 262)', accentDeep: 'oklch(0.490 0.180 262)' },
+  // design 'moss' values, carried under the existing `olive` id (see PORT NOTE).
+  olive:     { accent: 'oklch(0.600 0.135 150)', accentDeep: 'oklch(0.500 0.135 150)' },
 };
 
 /** Picker enablement — all accents live. */
