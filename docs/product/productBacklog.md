@@ -2,7 +2,7 @@
 
 Things I want to build. Unspecced — moves to `productQueue.md` once a spec exists.
 
-1. **Branded sign up / log in page**
+1. **Branded sign up / log in page** — folded into app-UI reimagine; founder generating a UI evaluation report first (in progress 2026-07-12), then /discuss
 2. **Engine coverage** — RULED 2026-07-11: all 4 engines before beta; work then place; see `docs/tracks/templatePlan.md` T5/T6
 3. **Place engine** — restaurants/hotels/venues; build ASAP after work engine, before beta; bundles menu/multi-location/events capabilities (templatePlan T5, wave 2)
 4. **Download after form** — form submit → deliver a file/asset (lead magnet)
