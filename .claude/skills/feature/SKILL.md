@@ -36,13 +36,20 @@ or empty, STOP: ask the user to write the spec first (offer to draft it from the
 conversation). Do not proceed without a spec.
 
 **0.5. Branch setup (orchestrator only — subagents NEVER switch branches).**
+- **WORKTREE GUARD (rule since 2026-07-12): the primary repo dir
+  (`C:\Users\susha\lessgo-ai`) permanently holds `main` — it is the merge
+  station and NEVER hosts a feature branch.** If you are running in the primary
+  dir (`git rev-parse --git-common-dir` returns `./.git` AND cwd is the repo
+  root), HARD STOP: tell the user this session must run in a per-track
+  worktree — the main-session orchestrator creates it
+  (`git worktree add .claude/worktrees/<feature> -b feature/<feature> main`
+  + real `npm install` + `npx prisma generate`), then reopen the session there.
 - If the working tree is dirty, warn the user and wait for their go — don't
   proceed silently.
-- Derive the branch from the spec name: `feature/<feature>`. Create it from main
-  (`git checkout -b feature/<feature>`), or check it out if it already exists.
-- Verify with `git branch --show-current`; record the branch at the top of the
-  plan file, and pass it EXPLICITLY to every implementer/impl-reviewer spawn
-  (they hard-stop on mismatch).
+- In the worktree, the branch `feature/<feature>` already exists (created with
+  the worktree). Verify with `git branch --show-current`; record the branch at
+  the top of the plan file, and pass it EXPLICITLY to every
+  implementer/impl-reviewer spawn (they hard-stop on mismatch).
 
 **1. Scout.** For each open exploration question in the spec (where does X live, how
 does Y work, who calls Z), spawn the `scout` agent. Collect the condensed findings —
