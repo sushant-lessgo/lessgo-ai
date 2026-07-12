@@ -1,8 +1,34 @@
 // hooks/editStore/aiActions.ts - AI generation and regeneration actions
+import posthog from 'posthog-js';
+
 import type { EditStore } from '@/types/store';
 
 import { logger } from '@/lib/logger';
+// data-capture Phase 3: reuse the SERVER extractor so the re-frozen baseline
+// string is byte-identical to what the server-side diff (collectElements →
+// extractElementText) later extracts. capture.ts is a pure module (only pulls in
+// editDistance) — safe to import into this client store slice; no server-only deps.
+import { extractElementText } from '@/lib/editDelta/capture';
 import { deepCopy, pushHistoryEntry } from './historyHelpers';
+
+// data-capture Phase 3 — session-scoped regen attempt counters (module-scoped,
+// in-memory; reset on reload). Keyed `${sectionId}` / `${sectionId}.${elementKey}`.
+const sectionAttempts = new Map<string, number>();
+const elementAttempts = new Map<string, number>();
+function nextAttempt(map: Map<string, number>, key: string): number {
+  const n = (map.get(key) ?? 0) + 1;
+  map.set(key, n);
+  return n;
+}
+
+// Fire-and-forget PostHog emit (never breaks a regen if posthog is unavailable).
+function trackRegen(event: string, props: Record<string, unknown>): void {
+  try {
+    posthog.capture(event, props);
+  } catch (e) {
+    logger.warn(`[data-capture] posthog ${event} emit failed`, e);
+  }
+}
 
 // i18n-phase-1 (3a) REGEN GUARD: AI (re)generation writes must never target a
 // non-default-locale overlay in v1. When the editor is on a non-default locale,
@@ -190,6 +216,31 @@ export function createAIActions(set: any, get: any) {
           }
         });
         
+        // data-capture Phase 3 — re-freeze the regen output as the NEW AI
+        // baseline for this section (so the whole regen is not later mis-captured
+        // as a giant user edit vs the stale original-AI baseline), then emit the
+        // regen event. MUST run BEFORE the autosave below so the patch ships in it.
+        try {
+          const applied = (get() as EditStore).content[sectionId]?.elements ?? {};
+          const normalized: Record<string, string> = {};
+          for (const [k, v] of Object.entries(applied)) {
+            const t = extractElementText(v);
+            if (t !== null) normalized[k] = t;
+          }
+          // Section regen replaces the whole section's queued baseline map.
+          (get() as EditStore).queueAiBaselinePatch(sectionId, normalized, 'replace');
+
+          const st = get() as EditStore;
+          trackRegen('section_regenerated', {
+            sectionType,
+            attemptNumber: nextAttempt(sectionAttempts, sectionId),
+            templateId: st.templateId ?? null,
+            audienceType: st.audienceType ?? null,
+          });
+        } catch (e) {
+          logger.warn('[data-capture] section re-freeze/emit failed', e);
+        }
+
         // Trigger auto-save
         const autoSaveModule = await import('@/utils/autoSaveDraft');
         if (autoSaveModule.completeSaveDraft) {
@@ -326,7 +377,20 @@ export function createAIActions(set: any, get: any) {
         }
 
         const result = await response.json();
-        
+
+        // data-capture Phase 3 — emit on the regen REQUEST (variations returned);
+        // the re-freeze happens later in applyVariation (accept), per plan.
+        {
+          const st = get() as EditStore;
+          trackRegen('element_regenerated', {
+            sectionType: sectionId.split('-')[0],
+            elementKey,
+            attemptNumber: nextAttempt(elementAttempts, `${sectionId}.${elementKey}`),
+            templateId: st.templateId ?? null,
+            audienceType: st.audienceType ?? null,
+          });
+        }
+
         set((state: EditStore) => {
           state.elementVariations = {
             visible: true,
@@ -434,7 +498,17 @@ export function createAIActions(set: any, get: any) {
         // Use the proper updateElementContent function to update the content
         // This ensures proper state management, change tracking, and auto-save
         get().updateElementContent(sectionId, elementKey, variation);
-        
+
+        // data-capture Phase 3 — re-freeze the accepted variation as the new AI
+        // baseline for this one element (element-level merge). `variation` is a
+        // string, so it is already normalized. Rides the autosave triggered by
+        // updateElementContent above.
+        try {
+          (get() as EditStore).queueAiBaselinePatch(sectionId, { [elementKey]: variation });
+        } catch (e) {
+          logger.warn('[data-capture] element re-freeze failed', e);
+        }
+
         // Update AI metadata
         set((state: EditStore) => {
           const section = state.content[sectionId];

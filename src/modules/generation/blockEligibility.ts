@@ -22,6 +22,7 @@ import type { AssetKind, BlockDeclaration, SectionBlockSet } from '@/modules/tem
 import { blockManifests } from '@/modules/templates/blockManifest';
 import type { TemplateId, ServiceAssetInput } from '@/types/service';
 import type { Brief } from '@/types/brief';
+import { pickSeeded } from '@/modules/generation/spread';
 
 /**
  * Normalized asset facts — typed booleans unifying the service typed asset
@@ -57,6 +58,16 @@ export interface EligibilityInput {
   cardCountHint?: number;
   /** Normalized asset presence facts. */
   assetFacts?: AssetFacts;
+  /**
+   * template-factory phase 10 — OPTIONAL spread seed (the project token). When
+   * present, `pickFromSet` picks a SEEDED choice among the ELIGIBLE variants
+   * (deterministic per token; spreads across tokens) instead of always the
+   * declaration-first eligible one. ABSENT ⇒ the legacy deterministic path is
+   * byte-identical (default-first → first-eligible → default), so every existing
+   * caller/test is unaffected. Copy never changes: co-eligible variants that
+   * spread here share a `copyShape`/consumes contract (variant-swap-integrity).
+   */
+  seed?: string;
 }
 
 /**
@@ -89,11 +100,27 @@ export function isBlockEligible(decl: BlockDeclaration, input: EligibilityInput 
 }
 
 /**
- * Pick a layout name from a resolved SectionBlockSet (exported for tests):
- * default if eligible → else first eligible in declaration order → else default.
- * NEVER returns undefined.
+ * Pick a layout name from a resolved SectionBlockSet (exported for tests).
+ *
+ * WITHOUT a seed (legacy, byte-identical): default if eligible → else first
+ * eligible in declaration order → else default.
+ *
+ * WITH a seed (phase-10 spread): pick a SEEDED choice among ALL eligible
+ * variants (default included in the pool) → else default. Same token → same
+ * pick (reproducible); different tokens spread across the eligible set. Salted
+ * by `set.default` so each section draws independently from the same token.
+ *
+ * NEVER returns undefined; always a VALID eligible (or default) layout name.
  */
 export function pickFromSet(set: SectionBlockSet, input: EligibilityInput = {}): string {
+  if (input.seed !== undefined) {
+    const eligibleNames = set.variants
+      .filter((v) => isBlockEligible(v, input))
+      .map((v) => v.layoutName);
+    if (eligibleNames.length === 0) return set.default;
+    return pickSeeded(eligibleNames, input.seed, `block:${set.default}`) ?? set.default;
+  }
+
   const defaultDecl = set.variants.find((v) => v.layoutName === set.default);
   if (defaultDecl && isBlockEligible(defaultDecl, input)) return set.default;
 

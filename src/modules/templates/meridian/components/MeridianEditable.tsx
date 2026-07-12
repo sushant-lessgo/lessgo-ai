@@ -58,6 +58,15 @@ export function MeridianEditable({
   // Button mode: render a selectable (non-editing) element until double-clicked.
   const [editing, setEditing] = React.useState(false);
   const isElExcluded = useIsElementExcluded(sectionId, elementKey);
+  // Edit-primitive marker (template-factory phase 2): templates DECLARE a slot's
+  // edit primitive; the platform primitive OWNS the editing UI. This wrapper is a
+  // `text` primitive by default, or a `button` primitive when `isButton` (the CTA
+  // wiring that makes Button Settings reachable). Emitted alongside the existing
+  // data-section-id/data-element-key so wrapper presence is machine-observable
+  // (templateConformance editor-basics subset asserts it in preview). Published
+  // `.published.tsx` blocks NEVER import this wrapper, so the marker never reaches
+  // published HTML; it is also pixel-neutral for the phase-7 parity diff.
+  const editPrimitive = isButton ? 'button' : 'text';
   if (mode === 'edit' && isElExcluded) return null;
 
   if (mode === 'edit' && isButton && !editing) {
@@ -69,6 +78,7 @@ export function MeridianEditable({
       style,
       'data-section-id': sectionId,
       'data-element-key': elementKey,
+      'data-edit-primitive': editPrimitive,
       role: 'button' as const,
       tabIndex: 0,
       title: 'Click for button settings · double-click to edit text',
@@ -90,6 +100,7 @@ export function MeridianEditable({
           style={style}
           data-section-id={sectionId}
           data-element-key={elementKey}
+          data-edit-primitive={editPrimitive}
           dangerouslySetInnerHTML={{ __html: value || placeholder }}
         />
       );
@@ -100,6 +111,7 @@ export function MeridianEditable({
         style={style}
         data-section-id={sectionId}
         data-element-key={elementKey}
+        data-edit-primitive={editPrimitive}
       >
         {value || placeholder}
       </Tag>

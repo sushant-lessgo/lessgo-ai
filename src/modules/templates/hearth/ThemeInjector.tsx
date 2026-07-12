@@ -13,19 +13,19 @@
 
 import { useEffect, type ReactNode } from 'react';
 import type { HearthPalette } from '@/types/service';
-import { serializeBaseTokens, serializeVariantOverrides, defaultHearthVariant } from './tokens';
-import { serializePaletteOverrides } from './palettes';
+import type { KnobSelection } from '@/types/template';
+import { buildHearthStylesheet, defaultHearthVariant } from './tokens';
+import { knobDataAttributes } from '../shared/knobCss';
 
 const STYLE_ID = 'hearth-theme';
 
 interface HearthThemeInjectorProps {
   paletteId: HearthPalette;
   variantId?: string;
+  // `knobs` (factory phase 8) — project knob selection from
+  // Project.themeValues.knobs. Absent / all-default → byte-identical to today.
+  knobs?: KnobSelection | null;
   children?: ReactNode;
-}
-
-function buildStylesheet(): string {
-  return `${serializeBaseTokens()}\n${serializePaletteOverrides()}\n${serializeVariantOverrides()}`;
 }
 
 function ensureStyleTag(): HTMLStyleElement {
@@ -34,19 +34,31 @@ function ensureStyleTag(): HTMLStyleElement {
     el = document.createElement('style');
     el.id = STYLE_ID;
     document.head.appendChild(el);
-    el.textContent = buildStylesheet();
-  } else if (!el.textContent) {
-    el.textContent = buildStylesheet();
   }
   return el;
 }
 
-export function HearthThemeInjector({ paletteId, variantId, children }: HearthThemeInjectorProps) {
+export function HearthThemeInjector({ paletteId, variantId, knobs, children }: HearthThemeInjectorProps) {
   const variant = variantId || defaultHearthVariant;
+  // Stable string key so the effect re-runs when the selection changes.
+  const knobKey = JSON.stringify(knobDataAttributes(knobs));
   useEffect(() => {
-    ensureStyleTag();
+    const el = ensureStyleTag();
+    // Rebuild the stylesheet from the SHARED builder every run — knob CSS is only
+    // appended when a non-default knob is active, so the no-knob render stays
+    // byte-identical to the pre-phase-8 content.
+    el.textContent = buildHearthStylesheet(knobs);
+
     document.documentElement.dataset.palette = paletteId;
     document.documentElement.dataset.variant = variant;
+
+    // Apply active `data-knob-*` attrs (same wrapper-attr mechanism as
+    // data-variant). knobDataAttributes drops absent/default/invalid values, so
+    // an all-default selection sets nothing.
+    const knobAttrs = knobDataAttributes(knobs);
+    for (const [name, value] of Object.entries(knobAttrs)) {
+      document.documentElement.setAttribute(name, value);
+    }
 
     return () => {
       // Clean up only the data attributes on unmount; keep the <style> around
@@ -54,8 +66,12 @@ export function HearthThemeInjector({ paletteId, variantId, children }: HearthTh
       // Full cleanup happens implicitly when the page navigates away.
       delete document.documentElement.dataset.palette;
       delete document.documentElement.dataset.variant;
+      for (const name of Object.keys(knobAttrs)) {
+        document.documentElement.removeAttribute(name);
+      }
     };
-  }, [paletteId, variant]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paletteId, variant, knobKey]);
 
   return <>{children}</>;
 }

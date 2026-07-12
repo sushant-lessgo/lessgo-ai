@@ -11,6 +11,10 @@
 
 import type { TemplateId } from '@/types/service';
 import { templateLabels, templateBlurbs, palettesForTemplate } from '@/types/service';
+// templateMeta is pure List-3 data (type-only imports) — firewall-safe. `looks`
+// is the hybrid-look catalog surfaced to the onboarding StyleSlot (phase 9).
+import { templateMeta } from '@/modules/templates/templateMeta';
+import type { TemplateLook } from '@/modules/templates/templateMeta';
 
 import {
   hearthPaletteConfigs,
@@ -50,6 +54,9 @@ export interface TemplateCatalogEntry {
   /** Swatch colors per palette id. */
   swatch: (paletteId: string) => PaletteSwatchColors;
   variants: { id: string; label: string; blurb?: string }[];
+  /** Named looks (phase 9) — knob+variant+palette bundles. Empty for templates
+   *  without a `looks` declaration (only knob-tokenized templates ship them). */
+  looks: readonly TemplateLook[];
   /** Deterministic default palette for an understanding payload. */
   inferDefaultPalette: (understanding: any) => string;
 }
@@ -69,6 +76,7 @@ export const TEMPLATE_CATALOG: Partial<Record<TemplateId, TemplateCatalogEntry>>
       return { accent: c?.accent, accentDeep: c?.accentDeep, wash: c?.accentWash };
     },
     variants: hearthVariants,
+    looks: templateMeta.hearth.looks ?? [],
     inferDefaultPalette: (u) => inferHearthPalette(u),
   },
   lex: {
@@ -82,6 +90,7 @@ export const TEMPLATE_CATALOG: Partial<Record<TemplateId, TemplateCatalogEntry>>
       return { accent: c?.accent, accentDeep: c?.accentDeep, wash: c?.trustSoft };
     },
     variants: lexVariants,
+    looks: templateMeta.lex.looks ?? [],
     inferDefaultPalette: (u) => inferLexPalette(u),
   },
   surge: {
@@ -95,6 +104,7 @@ export const TEMPLATE_CATALOG: Partial<Record<TemplateId, TemplateCatalogEntry>>
       return { accent: c?.accent, accentDeep: c?.accentDeep, wash: c?.accentSoft };
     },
     variants: surgeVariants,
+    looks: templateMeta.surge.looks ?? [],
     inferDefaultPalette: (u) => inferSurgePalette(u),
   },
 };

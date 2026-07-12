@@ -167,3 +167,164 @@ route silently staying un-redirected on apex. Imported `APP_PATH_PREFIXES` for t
 - Everything remains inert until `NEXT_PUBLIC_DASHBOARD_URL` is set (Phase 4 human gate):
   helper returns null and the Clerk app origin is filtered out, so localhost/e2e/pre-cutover
   behavior is unchanged.
+
+## Phase 5 — app-host noindex + apex `/p/{slug}` 301
+
+**Files changed**
+- `src/lib/domains/appSplit.ts` (edit — two pure helpers)
+- `src/lib/domains/appSplit.test.ts` (edit — helper tests)
+- `src/middleware.ts` (edit — apex `/p` 301, app-host `/robots.txt`, post-auth noindex header)
+
+### appSplit.ts
+Added `import { publishedSubdomainHost } from './hosts'` and two pure helpers:
+- `shouldNoindex(host)` — thin wrapper over `isAppProdHost` (exact `app.lessgo.ai`; apex/localhost/vercel → false).
+- `getApexPublishRedirect(host, pathname)` — null unless `isApexProdHost(host)` AND pathname matches `/^\/p\/([^/]+)(\/.*)?$/`; returns `https://${publishedSubdomainHost(slug)}${subpath}` (subpath from capture group 2, `''` when absent). So `/p/foo` → `https://foo.lessgo.site` (no trailing slash; `NextResponse.redirect` normalizes to `.../` on the wire), `/p/foo/gallery` → `https://foo.lessgo.site/gallery`. Respects `LESSGO_PUBLISH_HOST` via `publishedSubdomainHost`.
+
+### middleware.ts — three changes, ordering preserved (D6)
+1. `isPublicRoute`: added `'/robots.txt'` (belt-and-braces; the app-host early return precedes `auth.protect()` anyway).
+2. Import extended: `getApexToAppRedirect, getApexPublishRedirect, shouldNoindex`.
+3. Inside `if (!isApiOrNext)`, FIRST statement — app-host `/robots.txt` SOLE pass-through early return: `if (shouldNoindex(host) && url.pathname === '/robots.txt') return new NextResponse('User-agent: *\nDisallow: /', { headers: { 'content-type':'text/plain','x-robots-tag':'noindex, nofollow' } })`. Fixed public body, never an app page — D6-safe.
+4. In the apex fall-through, BEFORE the phase-3 app-path 307: `const pubRedirect = getApexPublishRedirect(host, url.pathname); if (pubRedirect) return NextResponse.redirect(pubRedirect, 301)`. Redirect-only early return — D6-safe. (A `/p` path is not an app-path, so order vs the 307 is independent; kept first per plan.)
+
+**Terminal-block restructure (the critical D6 fix) — exact ordering:**
+```
+if (!isPublicRoute(req)) {
+  await auth.protect()            // (i) FIRST, unchanged, ALL hosts
+}
+if (shouldNoindex(host)) {        // (ii) STRICTLY POST-AUTH
+  const res = NextResponse.next()
+  res.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  return res
+}
+// (iii) apex/localhost fall past → return undefined (Clerk default), no header
+```
+An unauthenticated non-public request never reaches (ii): `auth.protect()` throws Clerk's control-flow response first. Confirmed empirically — app-host `/dashboard` (no cookie) carries NO `X-Robots-Tag` (protect short-circuited before the noindex block).
+
+**Clerk header preservation:** header is mutated on `NextResponse.next()` (not a fabricated bare response), so `clerkMiddleware` merges its session/handshake headers onto it. Confirmed sessions survive — authed `publish.spec.ts` (Hearth/Lex/Meridian) + `edit-persistence.spec.ts` all pass on the app-default path.
+
+### Verification run + results
+- `npx tsc --noEmit`: clean except one PRE-EXISTING error `src/app/page.tsx(6,26): Cannot find module '@/assets/images/founder.jpg'` — reproduced on the stashed clean tree (missing asset in this worktree, not touched by this phase). Zero new errors from Phase 5 files.
+- `npm run test:run`: **147 files / 2257 tests passed, 3 skipped** (incl. the 25 appSplit tests). No i18nHonesty flake this run.
+- `npm run test:e2e` (mock): first run had 1 flake — `publish service / Lex` timed out at the "Page Published" toast (Blob/KV local-dev timeout + a seed 429). RE-RAN `publish.spec.ts` → all 4 authed publish tests PASS (Hearth/Lex/Meridian). Authed publish + edit-persistence green = Clerk sessions survive the middleware restructure; `/p/*` render specs green = D4 localhost untouched.
+- Local Host-header curls (dev on :3123, `NEXT_PUBLIC_DASHBOARD_URL=https://app.lessgo.ai`):
+  - `Host: app.lessgo.ai /thanks` → `200` + `x-robots-tag: noindex, nofollow`. PASS
+  - `Host: app.lessgo.ai /robots.txt` → body `User-agent: *\nDisallow: /`, `content-type: text/plain`, `x-robots-tag` present. PASS
+  - `Host: lessgo.ai /` → `200`, NO `x-robots-tag`. PASS
+  - `Host: lessgo.ai /p/foo` → `301`, `location: https://foo.lessgo.site/`. PASS
+  - **AUTH-BYPASS (mandatory):** `Host: app.lessgo.ai /dashboard` no cookie → Clerk `protect-rewrite` (`x-clerk-auth-status: signed-out`), NOT a 200 dashboard, NO `x-robots-tag`. **PASS.** Baseline `Host: localhost /dashboard` gives the identical `signed-out` protect response → confirms this is standard Clerk protection, unchanged by this phase. (Raw curl yields Clerk's dev protect-rewrite 404 rather than a 3xx to accounts.clerk because there's no dev-browser cookie for the handshake; production turns this into the sign-in redirect. Sign-off criterion — NOT a 200 dashboard — is met.)
+  - `Host: app.lessgo.ai /sign-in` (public) → reaches post-auth block, carries `x-robots-tag`. Confirms public routes on app host get noindex.
+
+### Deviations
+- Added `'/robots.txt'` to `isPublicRoute` (plan called this belt-and-braces optional) — conservative; the early return precedes auth anyway.
+- Did NOT touch `docs/task/app-subdomain.plan.md` (a pre-existing orchestrator edit updating branch/phase-4 status was already present in the worktree — left as-is; outside my Files-touched).
+
+### Open risks
+- Pre-existing `founder.jpg` tsc error is unrelated but means `tsc --noEmit` is not zero-exit in this worktree; reviewer should confirm the asset is present on main/CI.
+- Prod auth-bypass shape (3xx to accounts.clerk vs dev protect-rewrite 404) is deferred to the Phase 8 live gate — local curl can only prove "not a 200 dashboard + Clerk intercepted", which it does.
+
+## Phase 6 — apex as customer #0 (KV branch)
+
+**Files changed**
+- `src/lib/domains/appSplit.ts`
+- `src/lib/domains/appSplit.test.ts`
+- `src/middleware.ts`
+
+### appSplit.ts
+Added pure `isApexPublishCandidate(host, pathname): boolean` — true iff `isApexProdHost(host)` AND `pathname === '/'`. Root-only, deliberate: avoids a KV GET on every `/privacy`/`/blog`/`/pricing` marketing hit. Code comment notes to widen to per-path (mirroring Branch B's path-aware fast path) when multi-page apex dogfood lands. localhost / *.vercel.app / app host → false.
+
+### middleware.ts
+Inserted the KV branch in the apex `!isApiOrNext` fall-through, AFTER the phase-3 app-path 307. Apex ordering is now:
+1. Branch A/B skipped (apex is isLessgoAppHost).
+2. Apex `/p/*` 301 (phase 5) — `getApexPublishRedirect`.
+3. App-path 307 (phase 3) — `getApexToAppRedirect`.
+4. **`isApexPublishCandidate` KV branch (THIS PHASE)** — on true, `getRouteByKeyEdge('route:{host}:/')`; hit → rewrite to `/api/blob-proxy` with `rk` + `v` params + `stampGeo` (copied EXACTLY from Branch B fast path); miss OR error → fall through (no return, never 404). Errors logged + Sentry-tagged (`op: 'apexKvLookup'`) like Branch B, never thrown.
+5. Fall through → `isPublicRoute`/`auth.protect()` + phase-5 noindex tail.
+
+Copied Branch-B fast-path shape verbatim: `url.pathname = '/api/blob-proxy'`, `url.searchParams.set('rk', routeKey)`, `url.searchParams.set('v', route.version)`, `return stampGeo(NextResponse.rewrite(url))`. It is a REWRITE to public published content (D6-safe: `/` is a public route, no auth bypass).
+
+**Deliberate omissions (commented in code):**
+- NO `getSlugForHostEdge` SSR fallback — a `slug-for:lessgo.ai` key would shadow every apex path. Route-key check only.
+- NO `seoRewrite` on apex — sitemap/robots stay Next.js routes.
+- No publish-flow change: assigning `lessgo.ai` as a domain already writes `route:lessgo.ai:/` via `kvRoutes.atomicPublish`.
+
+### Deviations
+None. Followed plan steps 1-6 exactly.
+
+### Fall-through safety (code-verified)
+`getRouteByKeyEdge` returns `null` on KV miss AND on HTTP error (its own try/catch; middleware also wraps in try/catch). On miss → `if (route)` skipped → block exits with no return → reaches `if (!isPublicRoute(req))`; `/` is public so no `auth.protect()`; `shouldNoindex(apex)` is false → Clerk default → Next.js marketing homepage renders. **Apex `/` with no KV key falls through to marketing — confirmed. The live homepage cannot break from an empty KV.**
+
+### Dry-run
+NOT run against live KV. Only one KV instance is configured in `.env.local` (`KV_REST_API_URL`/`KV_REST_API_TOKEN`), and writing `route:lessgo.ai:/` there could briefly hijack the real live apex homepage (root-only scope) — a production-touch risk. Chose the conservative option: code-verified the fall-through (above) and defer the live dry-run to the Phase 8 human gate (which explicitly lists the optional prod KV dry-run). Reviewer note: the KV-hit path is a byte-for-byte copy of Branch B's exercised fast path.
+
+### Verification
+- `npx tsc --noEmit` — clean (no output).
+- `npx vitest run src/lib/domains/appSplit.test.ts` — 28 passed (5 new `isApexPublishCandidate` assertions incl. the required true/false cases).
+- `npm run test:run` — 2259 passed, 1 failed = i18nHonesty full-suite timeout (KNOWN FLAKE); isolation `npx vitest run src/lib/i18n/i18nHonesty.test.ts` → 15 passed. No other regressions.
+
+### Open risks
+- Live customer #0 serve path unproven until the Phase 8 prod dry-run (KV write → curl apex `/` → delete). Code path is identical to Branch B, which is live.
+
+## Phase 7 — reserved-slug hardening + asset-base regression guard
+
+**Files changed**
+- `src/app/api/checkSlug/route.ts` — reserved/format guard before DB check
+- `src/lib/staticExport/assetBase.guard.test.ts` (new) — D5 apex-origin regression guard
+
+(`src/lib/security.ts` NOT touched — `validateSlug` was already exported.)
+
+### `src/app/api/checkSlug/route.ts`
+Added `import { validateSlug } from "@/lib/security"`. After the empty-slug 400
+guard and BEFORE the `prisma.publishedPage.findUnique` existence check, run
+`validateSlug(slug)`; if `!valid`, return `{ available: false, reason }` (matches
+the route's `{ available }` shape, adds the existing validator's `error` as an
+optional `reason`). Net effect: `app`, `dashboard`, `admin`, `api`, `www`, `mail`,
+`ftp`, `ssl` (security.ts:205 reserved list) — plus any malformed slug (uppercase,
+leading/trailing hyphen, illegal chars) — now report unavailable up-front instead
+of letting a user burn a publish attempt on a slug the publish path rejects.
+- `/api/checkSlug?slug=app` → `{ available: false, reason: "Slug is reserved" }`.
+- `validateSlug` is the same validator the publish path uses, so UI + publish agree.
+
+### `src/lib/staticExport/assetBase.guard.test.ts` (new)
+Renders a form-bearing, analytics-enabled published page through the real
+`generateStaticHTML` exporter (meridian hero with `form_id`, `content.forms`
+present → gates form.v1.js; `analyticsOptIn: true` → gates a.v2.js). `vi.mock('server-only')`
+neutralized so the exporter runs under jsdom (same pattern as the sibling
+realProof/multipage staticExport tests). Three assertions on the rendered HTML:
+1. `https://lessgo.ai/assets/fonts-self-hosted.css`
+2. `https://lessgo.ai/assets/form.v1.js`
+3. `https://lessgo.ai/assets/a.v2.js`
+Plus a negative: `https://app.lessgo.ai/assets/` never appears.
+
+Pins BOTH origin sources named in D5: htmlGenerator's `assetBase`
+(`NEXT_PUBLIC_APP_URL || 'https://lessgo.ai'`, now at htmlGenerator.ts:305) and
+the hardcoded `https://lessgo.ai/assets/{form.v1.js,a.v2.js}` literals in
+LandingPagePublishedRenderer.tsx:252,260.
+
+### Deviations
+- The plan says stub `NEXT_PUBLIC_DASHBOARD_URL` only. I ALSO stub
+  `NEXT_PUBLIC_APP_URL=''` (via `vi.stubEnv`) so `assetBase` deterministically
+  falls back to the apex default regardless of ambient test env (.env.local sets
+  `NEXT_PUBLIC_APP_URL=https://lessgo.ai`, but vitest doesn't load NEXT_PUBLIC_*
+  reliably). Conservative: forces the hermetic apex default and strengthens the
+  pin. Both stubs cleaned up in `afterEach` via `vi.unstubAllEnvs()`.
+- No `security.ts` change was needed (validator already exported) — Files-touched
+  listed it as conditional; left untouched.
+
+### tracking-pixels asset-base check
+Verified htmlGenerator.ts:305 is still `process.env.NEXT_PUBLIC_APP_URL || 'https://lessgo.ai'`
+(plan referenced :296; tracking-pixels' head-tag/meta-pixel additions shifted the
+line to :305 but did NOT change the expression). Renderer literals at
+LandingPagePublishedRenderer.tsx:252,260 unchanged. Guard holds; nothing to flag.
+
+### Verification
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — 2261 passed | 3 skipped (149 files); new guard test passes;
+  i18nHonesty did NOT flake this run.
+- `npx vitest run src/lib/staticExport/assetBase.guard.test.ts` — 1 passed (isolated).
+- `npm run build` — green (~full slice-2 gate; middleware 81.8 kB, all routes built).
+- Manual dev curl not run; checkSlug change code-verified above (reviewer can spot
+  `/api/checkSlug?slug=app` → unavailable/reserved).
+
+### Open risks
+- None new. checkSlug is a GET availability probe; the authoritative publish-time
+  reject already existed via the same `validateSlug` — this only surfaces it earlier.

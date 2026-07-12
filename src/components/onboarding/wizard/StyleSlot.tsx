@@ -51,6 +51,20 @@ function TrustStyleSlot() {
   const selectedPalette = paletteId ?? catalog.enabled[0] ?? catalog.palettes[0];
   const selectedVariant = variantId ?? catalog.variants[0]?.id;
 
+  // Named looks (phase 9) — curated variant+palette bundles for knob-tokenized
+  // templates (hearth today). Onboarding applies a look's variant + palette (the
+  // dominant visual signal); the look's knob refinements + hybrid lookId are
+  // applied at full fidelity in the editor (ServiceThemePopover → themeValues).
+  // Active look = the tile whose variant + palette both match the current pick.
+  const looks = catalog.looks ?? [];
+  const activeLookId = looks.find(
+    (l) => l.variantId === selectedVariant && l.paletteId === selectedPalette,
+  )?.id;
+  const pickLook = (look: (typeof looks)[number]) => {
+    if (enabled(look.paletteId)) setPaletteId(look.paletteId);
+    setVariantId(look.variantId);
+  };
+
   // Seed defaults on mount when none picked yet (mirror old StyleStep seeding).
   useEffect(() => {
     if (!paletteId && selectedPalette) setPaletteId(selectedPalette);
@@ -67,6 +81,45 @@ function TrustStyleSlot() {
           the editor.
         </p>
       </div>
+
+      {/* Curated looks — PRIMARY choice for look-bearing templates. Each bundles
+          a layout variant + color story; the raw variant/palette rows below stay
+          as the fallback/advanced controls (conservative — no removal). */}
+      {looks.length > 0 && (
+        <div>
+          <h2 className="text-sm font-medium text-gray-700 mb-2">Looks</h2>
+          <div className="grid grid-cols-2 gap-2">
+            {looks.map((look) => {
+              const isActive = activeLookId === look.id;
+              // Swatch color from the catalog (explicit hex — onboarding has no
+              // injected [data-palette]{--accent} CSS, unlike the editor).
+              const sw = catalog.swatch(look.paletteId);
+              return (
+                <button
+                  key={look.id}
+                  type="button"
+                  onClick={() => pickLook(look)}
+                  aria-pressed={isActive}
+                  className={`flex items-center gap-2 text-left rounded-lg border px-3 py-2 transition ${
+                    isActive
+                      ? 'border-brand-accentPrimary ring-2 ring-brand-accentPrimary/30 bg-orange-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <span
+                    className="w-5 h-5 rounded-sm flex-shrink-0"
+                    style={{ background: sw.accent ?? '#ccc' }}
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-gray-900">{look.label}</span>
+                    <span className="block text-xs text-gray-500 truncate">{look.blurb}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Layout variant — pure token rescale, no copy impact. */}
       <div>

@@ -37,6 +37,11 @@ export interface StaticHTMLOptions {
   variantId?: string | null;
   /** Neutral mood (vestria) — Project.themeValues.mood; default bone. */
   mood?: string | null;
+  /** Knob selection (template-factory phase 3) — Project.themeValues.knobs.
+   *  Threaded to the published renderer → template SSRTokens, which applies
+   *  `data-knob-*` attrs + inlines the knob CSS. Absent/all-default ⇒ no attrs,
+   *  no CSS ⇒ byte-identical output. Only knob-tokenized templates consume it. */
+  knobs?: import('@/types/template').KnobSelection | null;
   /** scale-04 (phase 3): the project's Brief.goal, threaded into the renderer's
    *  normalization pre-pass so GOAL_REF primaries resolve. OPTIONAL — blog/no-goal
    *  callers omit it → null-goal legacy fallback. */
@@ -132,6 +137,7 @@ export async function generateStaticHTML(
       paletteId: options.paletteId ?? null,
       variantId: options.variantId ?? null,
       mood: options.mood ?? null,
+      knobs: options.knobs ?? null,
       goal: options.goal ?? null,
       currentPagePath: options.currentPagePath,
       formPagePath: options.formPagePath,

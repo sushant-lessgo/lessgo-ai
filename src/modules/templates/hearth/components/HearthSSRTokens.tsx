@@ -11,23 +11,38 @@
 
 import React from 'react';
 import type { HearthPalette } from '@/types/service';
-import { serializeBaseTokens, serializeVariantOverrides, defaultHearthVariant } from '../tokens';
-import { serializePaletteOverrides } from '../palettes';
+import type { KnobSelection } from '@/types/template';
+import { buildHearthStylesheet, defaultHearthVariant } from '../tokens';
+import { knobDataAttributes } from '../../shared/knobCss';
 
 interface HearthSSRTokensProps {
   paletteId: HearthPalette;
   variantId?: string;
+  // `knobs` (factory phase 8) — CONSUMED here, not merely accepted: the knob CSS
+  // is inlined in the <style> block AND the `data-knob-*` attrs are applied on the
+  // wrapper, mirroring the edit-side HearthThemeInjector. A knob shown in the
+  // editor that no-oped in published output would be a silent parity break.
+  // Absent / all-default → byte-identical to the pre-phase-8 published HTML.
+  knobs?: KnobSelection | null;
   children?: React.ReactNode;
   className?: string;
 }
 
-export function HearthSSRTokens({ paletteId, variantId, children, className = '' }: HearthSSRTokensProps) {
-  const stylesheet = `${serializeBaseTokens()}\n${serializePaletteOverrides()}\n${serializeVariantOverrides()}`;
+export function HearthSSRTokens({ paletteId, variantId, knobs, children, className = '' }: HearthSSRTokensProps) {
+  // SAME shared builder as the edit-side injector — knob CSS cannot diverge
+  // between the two renderers.
+  const stylesheet = buildHearthStylesheet(knobs);
+  const knobAttrs = knobDataAttributes(knobs);
 
   return (
     <>
       <style id="hearth-theme" dangerouslySetInnerHTML={{ __html: stylesheet }} />
-      <div data-palette={paletteId} data-variant={variantId || defaultHearthVariant} className={className}>
+      <div
+        data-palette={paletteId}
+        data-variant={variantId || defaultHearthVariant}
+        {...knobAttrs}
+        className={className}
+      >
         {children}
       </div>
     </>

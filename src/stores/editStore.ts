@@ -308,6 +308,10 @@ function createInitialState(tokenId: string): EditStore {
     // (content.baseline) or re-captured on load; never from localStorage.
     baseline: null as Record<string, any> | null,
     baselineDirty: false,
+    // data-capture Phase 3 — regen re-freeze accumulator (queued by aiActions on
+    // regen success; shipped as payload.aiBaselinePatch, selectively cleared on
+    // save success). Same non-partialize lifecycle as `baseline`.
+    aiBaselinePatch: null as Record<string, Record<string, string>> | null,
     persistence: {
       isDirty: false,
       isSaving: false,
@@ -437,6 +441,60 @@ export function createEditStore(tokenId: string) {
               set((state) => {
                 Object.assign(state.publishing, publishingState);
                 state.lastUpdated = Date.now();
+              });
+            },
+
+            // data-capture Phase 3 — regen re-freeze accumulator actions.
+            // Colocated with the baseline slice (mirrors captureBaseline /
+            // markBaselineSaved lifecycle). Queue on regen success; ship + clear
+            // in autoSaveDraft. See docs/task/data-capture.plan.md Phase 3.
+            queueAiBaselinePatch: (
+              sectionId: string,
+              elements: Record<string, string>,
+              mode: 'replace' | 'merge' = 'merge',
+            ) => {
+              set((state) => {
+                if (!state.aiBaselinePatch) state.aiBaselinePatch = {};
+                // Defensive: only string values enter the baseline patch.
+                const filtered: Record<string, string> = {};
+                for (const [k, v] of Object.entries(elements)) {
+                  if (typeof v === 'string') filtered[k] = v;
+                }
+                if (mode === 'replace') {
+                  // Section regen replaces the whole section's queued map.
+                  state.aiBaselinePatch[sectionId] = filtered;
+                } else {
+                  // Element-variation accept merges one element into it.
+                  state.aiBaselinePatch[sectionId] = {
+                    ...(state.aiBaselinePatch[sectionId] || {}),
+                    ...filtered,
+                  };
+                }
+              });
+            },
+
+            // PINNED clear semantics — NEVER blanket-clear. Remove ONLY sections
+            // whose CURRENT accumulator value deep-equals the shipped snapshot's;
+            // sections queued/overwritten after the snapshot (regen-B while save-A
+            // in flight) differ → survive → ship next save. On save FAILURE this
+            // is never called → the whole accumulator re-ships.
+            clearShippedAiBaselinePatch: (
+              shipped: Record<string, Record<string, string>> | null | undefined,
+            ) => {
+              set((state) => {
+                const acc = state.aiBaselinePatch;
+                if (!acc || !shipped) return;
+                for (const [sid, shippedElems] of Object.entries(shipped)) {
+                  const current = acc[sid];
+                  if (!current) continue;
+                  const sKeys = Object.keys(shippedElems);
+                  const cKeys = Object.keys(current);
+                  const equal =
+                    sKeys.length === cKeys.length &&
+                    sKeys.every((k) => current[k] === shippedElems[k]);
+                  if (equal) delete acc[sid];
+                }
+                if (Object.keys(acc).length === 0) state.aiBaselinePatch = null;
               });
             },
 

@@ -165,3 +165,97 @@ export function serializeVariantOverrides(): string {
   --sec-pad-y:160px;
 }`;
 }
+
+/**
+ * ===== KNOBS — hearth is the first knob-tokenized template (factory phase 8) =====
+ *
+ * A knob is an ADDITIVE `data-knob-<axis>` layer over the existing base/palette/
+ * variant CSS (same wrapper-attr mechanism as `[data-variant]`). Hearth tokenizes
+ * TWO axes with real CSS:
+ *   - `buttonShape` → the button/control radii `--r-md` + `--r-sm` (hearth's
+ *     `.hearth-btn`/inputs read these). Default `rounded` = today's :root
+ *     (14px / 10px), so it emits NO block. `square` crisps corners; `pill` rounds
+ *     them fully.
+ *   - `density` → section rhythm `--sec-pad-y` (every section consumes it via
+ *     `--sec-pad-y`). Default `comfortable` = today's :root (140px), emits NO
+ *     block. `compact` tightens, `spacious` opens up.
+ *
+ * The remaining standard axes are DECLARED (conformance requires the full axis
+ * set) but hearth supports only their no-op default value — `cardStyle:hairline`
+ * and `texture:none` map to the baked :root, and `typePairing` ALIASES the
+ * existing variant axis (classic/condensed/editorial === `hearthVariants` ids):
+ * a look sets the flat `variantId` directly, so `typePairing` carries no knob CSS
+ * (the [data-variant] mechanism already renders it). None of these emit a knob
+ * block.
+ *
+ * BACK-COMPAT BY CONSTRUCTION: every axis default equals hearth's CURRENT :root
+ * value and is skipped by `serializeKnobOverrides` (default = :root). A project
+ * with no `themeValues.knobs` (or all-default knobs) yields `knobDataAttributes`
+ * = `{}` → no `data-knob-*` attr and no appended CSS → byte-identical render.
+ */
+import type { KnobSelection, TemplateKnobDeclaration } from '@/types/template';
+import {
+  serializeKnobOverrides,
+  knobDataAttributes,
+  type KnobTokenMap,
+} from '../shared/knobCss';
+import { serializePaletteOverrides } from './palettes';
+
+/** Hearth's knob declaration (full standard axis set; only supported values).
+ *  Surfaced on the TemplateModule via the barrel — enables the conditional
+ *  `assertKnobConformance` rule. */
+export const hearthKnobs: TemplateKnobDeclaration = {
+  axes: {
+    // buttonShape maps to hearth's button/control radii (below).
+    buttonShape: ['square', 'rounded', 'pill'],
+    // cardStyle: hearth ships only its baked hairline treatment (no-op default).
+    cardStyle: ['hairline'],
+    // density maps to section rhythm --sec-pad-y (below).
+    density: ['compact', 'comfortable', 'spacious'],
+    // typePairing ALIASES the variant axis — values === hearthVariants ids. No
+    // knob CSS: a look sets the flat variantId, the [data-variant] layer renders.
+    typePairing: ['classic', 'condensed', 'editorial'],
+    // texture: hearth ships no overlay (no-op default only).
+    texture: ['none'],
+  },
+};
+
+/** Per-axis, per-value CSS the knob layer emits. ONLY non-default values appear
+ *  (defaults = :root, skipped by the serializer). buttonShape retunes the control
+ *  radii; density retunes section rhythm. Both are already consumed by hearth
+ *  blocks/sectionRules, so no block change is needed. */
+export const hearthKnobTokenMap: KnobTokenMap = {
+  buttonShape: {
+    square: { '--r-md': '3px', '--r-sm': '3px' },
+    pill: { '--r-md': '999px', '--r-sm': '999px' },
+  },
+  density: {
+    compact: { '--sec-pad-y': '96px' },
+    spacious: { '--sec-pad-y': '180px' },
+  },
+};
+
+/** The constant knob CSS (all non-default blocks for every tokenized axis). The
+ *  wrapper's `data-knob-*` attrs select which block applies — exactly the
+ *  `serializeVariantOverrides` precedent. */
+export function serializeHearthKnobOverrides(): string {
+  return serializeKnobOverrides(hearthKnobTokenMap);
+}
+
+/**
+ * SINGLE source of truth for the full hearth stylesheet, consumed IDENTICALLY by
+ * both renderers (`HearthThemeInjector` edit-side, `HearthSSRTokens` published-
+ * side) so the knob CSS can never diverge between them.
+ *
+ * When the knob selection contributes NO active attrs (absent / all-default), the
+ * output equals the pre-phase-8 stylesheet EXACTLY (base + palette + variant) —
+ * byte-identical, default-emits-nothing. Only a non-default selection appends the
+ * knob block(s).
+ */
+export function buildHearthStylesheet(knobs?: KnobSelection | null): string {
+  const base = `${serializeBaseTokens()}\n${serializePaletteOverrides()}\n${serializeVariantOverrides()}`;
+  const hasActiveKnob = Object.keys(knobDataAttributes(knobs)).length > 0;
+  if (!hasActiveKnob) return base;
+  const knobCss = serializeHearthKnobOverrides();
+  return knobCss ? `${base}\n${knobCss}` : base;
+}

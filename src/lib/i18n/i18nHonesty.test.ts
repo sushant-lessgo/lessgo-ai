@@ -202,6 +202,7 @@ describe('i18n honesty — `bilingual` capability is backed by real machinery (D
 
       // overlay copy actually rendered on the nl doc
       expect(nl).toContain('BOUWSNEL');
-    });
+      // 20s: real generateStaticHTML work; 5s default flakes under full-suite import load
+    }, 20_000);
   });
 });
