@@ -3,6 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { useSectionCRUD } from '@/hooks/useSectionCRUD';
 import { promptDialog } from '@/components/ui/ConfirmDialog';
 import { useEditStore } from '@/hooks/useEditStore';
+import { useShallow } from 'zustand/react/shallow';
 import type { SectionType } from '@/types/core/content';
 import type { AddSectionOptions } from '@/hooks/useSectionCRUD';
 
@@ -105,7 +106,9 @@ export function SectionActionsMenu({ sectionId, position, onClose }: SectionActi
     moveSectionDown,
   } = useSectionCRUD();
   
-  const { content, sections } = useEditStore();
+  const { content, sections } = useEditStore(
+    useShallow((s) => ({ content: s.content, sections: s.sections }))
+  );
   const section = content[sectionId];
   const sectionIndex = sections.indexOf(sectionId);
 
@@ -279,7 +282,7 @@ export function BulkSectionActions({ selectedSectionIds, onSelectionChange, onAc
     duplicateSections 
   } = useSectionCRUD();
   
-  const { sections, content } = useEditStore();
+  const sections = useEditStore((s) => s.sections);
 
   const handleSelectAll = useCallback(() => {
     onSelectionChange(sections);
@@ -440,7 +443,9 @@ export function SectionList({
   showValidation = true,
   allowReordering = true 
 }: SectionListProps) {
-  const { sections, content } = useEditStore();
+  const { sections, content } = useEditStore(
+    useShallow((s) => ({ sections: s.sections, content: s.content }))
+  );
   const { moveSectionToPosition } = useSectionCRUD();
   const [dragOverPosition, setDragOverPosition] = useState<number | null>(null);
 

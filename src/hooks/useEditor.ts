@@ -1,5 +1,6 @@
 // hooks/useEditor.ts - Unified editor interaction system
 import { useCallback, useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStore } from './useEditStore';
 
 import { logger } from '@/lib/logger';
@@ -25,7 +26,23 @@ export function useEditor() {
     textEditingElement,
     toolbar,
     updateElementContent,
-  } = useEditStore();
+  } = useEditStore(
+    useShallow((s) => ({
+      mode: s.mode,
+      selectedSection: s.selectedSection,
+      selectedElement: s.selectedElement,
+      showToolbar: s.showToolbar,
+      hideToolbar: s.hideToolbar,
+      setActiveSection: s.setActiveSection,
+      selectElement: s.selectElement,
+      announceLiveRegion: s.announceLiveRegion,
+      setTextEditingMode: s.setTextEditingMode,
+      isTextEditing: s.isTextEditing,
+      textEditingElement: s.textEditingElement,
+      toolbar: s.toolbar,
+      updateElementContent: s.updateElementContent,
+    }))
+  );
 
   // Determine what was clicked and its context
   const determineClickTarget = useCallback((event: MouseEvent): ClickTarget | null => {

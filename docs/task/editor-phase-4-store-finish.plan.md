@@ -16,7 +16,7 @@ Collapse the editor store's **four** access layers (`useEditStore.ts` token hook
 - phase 4 Step B baseline probe: done (commit 31669bae, review loops 1) — probe green 6/6 x2 authed; baseline: palette-swap 4-5 commits + commits-on-blur 3 = the discriminators (NOT per-keystroke, near-noise); B2 content batch must run undo,redo,select smokes
 - phase 5 batch B1 useOptimizedEditStore: done (commit e6c32ec6, review loops 1) — 26 sites → narrow selectors; return shapes byte-preserved; probe 6/6, commits ≤ baseline
 - phase 6 batch B2 renderer/selection hot path: done (review loops 1) — 11 sites (SelectionSystem trap verified, no dropped fields); probe 6/6 incl select/undo/redo, commits flat
-- phase 7 batch B3 useEditor + SectionCRUD: pending
+- phase 7 batch B3 useEditor + SectionCRUD: done (review loops 1) — 4 sites, HOT LIST COMPLETE; useEditor return-shape preserved; probe 6/6 + edit-persistence 2/2; perf checkpoint flat/≤baseline (heap flat, commits ≤base; structural win = narrow subs, not commit-count visible)
 - phase 8 batch B4 theme surfaces: pending
 - phase 9 batch B5 modals/forms: pending
 - phase 10 batch B6 header/chrome/preview/dev: pending

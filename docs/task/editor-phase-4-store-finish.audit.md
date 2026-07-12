@@ -438,3 +438,129 @@ Dev server stopped after probe (PID killed, :3021 → 000; :3000 never touched, 
 ### Open risks
 
 - None functional. Only store-subscription lines changed; no persist/commit/renderer-layout/dual-pair edits. SelectionSystem #4 dead-var subscription intentionally preserved (see Deviations).
+
+---
+
+## Phase 7 (Batch B3) — useEditor.ts + SectionCRUD (HOT list finish + PERF CHECKPOINT)
+
+**Files changed:**
+- `src/hooks/useEditor.ts` (1 bare aggregate destructure → `useShallow` selector; public return shape byte-preserved)
+- `src/app/edit/[token]/components/content/SectionCRUD.tsx` (3 bare sites → narrow selectors)
+- `docs/task/editor-phase-4-store-finish.baseline.md` (post-phase-7 perf-checkpoint column)
+- `docs/task/editor-phase-4-store-finish.audit.md` (this section)
+
+4 bare `useEditStore()` sites converted → the HOT list (B1–B3) is now complete.
+
+### `useEditor.ts` — 1 site (aggregation shim, D2 refactor not exempt)
+
+Converted the single 13-field bare aggregate destructure to one `useShallow` object
+selector of exactly those 13 fields. Destructure names, all callback bodies, every
+`useCallback`/`useEffect` dependency array, and the public return shape are
+byte-for-byte unchanged — the hook re-renders only when one of its 13 subscribed
+fields changes instead of on every store mutation.
+
+**Return-shape preservation (exposed vs subscribed), like B1:**
+
+| Return-shape key | Kind | Source |
+|---|---|---|
+| `handleEditorClick` | callback | local `useCallback` |
+| `handleKeyboardNavigation` | callback | local `useCallback` |
+| `enterTextEditMode` | callback | local `useCallback` |
+| `exitTextEditMode` | callback | local `useCallback` |
+| `determineClickTarget` | callback | local `useCallback` |
+| `calculateToolbarPosition` | callback | local `useCallback` |
+| `determineElementType` | callback | local `useCallback` |
+| `selectedSection` | state | subscribed |
+| `selectedElement` | state | subscribed |
+| `mode` | state | subscribed |
+
+Return shape identical to pre-change; downstream consumers NOT edited.
+
+**Over-narrow guard (D4.2) — subscribed 13 fields vs render-path reads:**
+
+| Field | Kind | Read on render path? | Where |
+|---|---|---|---|
+| `mode` | state | yes | `handleEditorClick`/`handleKeyboardNavigation` guards + `useEffect` deps (381,391) + return |
+| `selectedSection` | state | yes | `handleKeyboardNavigation` Tab logic (343) + dep array + return |
+| `selectedElement` | state | yes | returned (exposed to consumers) |
+| `isTextEditing` | state | yes | `determineClickTarget` (36) + its dep array (110) |
+| `textEditingElement` | state | yes | `determineClickTarget` (36,46) + dep array (110) |
+| `toolbar` | state | yes | `determineClickTarget` (36,53) + dep array (110) |
+| `showToolbar` | action ref | callback-only | subscribed for stable ref (in dep arrays) |
+| `hideToolbar` | action ref | callback-only | " |
+| `setActiveSection` | action ref | callback-only | " |
+| `selectElement` | action ref | callback-only | " |
+| `announceLiveRegion` | action ref | callback-only | " |
+| `setTextEditingMode` | action ref | callback-only | " |
+| `updateElementContent` | action ref | callback-only | used in `enterTextEditMode`/`exitTextEditMode` onblur/onkeydown/exit |
+
+Action refs kept inside the `useShallow` selector (stable object identity while refs
+unchanged) — same choice as B1, preserves referential identity in the callback dep
+arrays with zero body/dep-array edits. No field the callbacks/deps read was dropped.
+
+### `SectionCRUD.tsx` — 3 sites
+
+| # | Line | Component | Orig | Fields read on render path | Disposition |
+|---|---|---|---|---|---|
+| 1 | 108 | `SectionActionsMenu` | `{ content, sections }` | `content[sectionId]` (109); `sections.indexOf` (110) + `sections.length` (136) | `useShallow({content,sections})` — both render-read, kept |
+| 2 | 282 | `BulkSectionActions` | `{ sections, content }` | `sections` in `handleSelectAll` (285) + dep (286). `content` NEVER read in this component | narrowed to `useEditStore((s) => s.sections)` — dropped dead `content` (see Deviations) |
+| 3 | 443 | `SectionList` | `{ sections, content }` | `sections.map` (500) + `.length` (571); `content[sectionId]` (501) → `section.elements` (542) | `useShallow({sections,content})` — both render-read, kept |
+
+`sections` in #2 is used only inside `handleSelectAll` but captured in that callback's
+closure + dep array, so it must stay reactively subscribed — a single-field selector
+(`(s) => s.sections`, ref-stable, no `useShallow` needed) preserves that exactly.
+
+### Deviations
+
+- **`BulkSectionActions` (#2) dead `content` dropped.** Confirmed via full-body grep
+  (`content[`, `content.` — zero matches in lines 276–353) that `content` was never
+  referenced in this component; the bare destructure subscribed to it as pure churn.
+  Dropping it is correct narrowing (D4.2 over-narrow guard only bans dropping
+  *render-read* fields), not a behavior change — the var was unused, so no observable
+  output changes. Chose to drop rather than preserve (unlike B2's SelectionIndicators
+  dead-var keep) because here it's a single genuinely-unreferenced field in a
+  cold-rendered component and subscribing to the whole `content` object would re-render
+  the component on every text-edit commit for nothing. `sections` (the one real read)
+  stays subscribed. Note: `SectionActionsMenu` (#1) also computes an unused `section`
+  var from `content[sectionId]` (line 109), but there `content` indexing IS evaluated
+  on the render path, so `content` was kept subscribed — conservative.
+
+### Grep-zero
+
+`rg "useEditStore\(\s*\)"` on both touched files → 0 matches (exit 1).
+
+### Verification
+
+- `npx tsc --noEmit` → PASS (exit 0).
+- `npm run test:run` → 2508 passed / 11 skipped (159 files), exit 0.
+- `npm run lint` → PASS (exit 0); only pre-existing `no-img-element`/`exhaustive-deps`
+  warnings, none in the two touched files.
+- **renderProbe smoke** (authed, worktree dev :3021, `NEXT_PUBLIC_DEBUG_EDITOR=true`,
+  mock-GPT; :3000 never touched) `--smoke=type,select,undo,redo,palette,modal` →
+  **all 6 PASS** (`allPassed: true`). Section-CRUD-relevant `select`/`undo`/`redo`
+  all green (select → toolbar[text-mvp] visible; undo reverted; redo reapplied).
+- **Authed edit-persistence E2E** (`E2E_PORT=3021 npx playwright test edit-persistence`)
+  → **2/2 pass** (auth setup + throttled-edit-persists-no-silent-loss). Confirms the
+  hot-path selector work didn't break the commit/persist path.
+- Dev server stopped after (PID killed, :3021 → 000; :3000 confirmed not running/000).
+
+### ⭐ HOT-PATH PERF CHECKPOINT — post-phase-7 vs baseline
+
+| Metric | Baseline | Post-phase-7 | Verdict |
+|---|---|---|---|
+| React commits during 20-char burst | 6 | 6 | flat |
+| React commits / keystroke | 0.3 | 0.3 | flat |
+| React commits on commit (blur) | 3 | 3 | flat |
+| Store mutations observed | 1 | 1 | flat |
+| JS heap delta (post-GC) | +0.6 – +0.9 MB | +0.667 MB | flat (in range) |
+| Palette-swap re-commits | 4–5 | 4 | ≤ baseline |
+
+Commit counts ≤ baseline, heap flat — matches phase-7 expectation. Recorded in
+`editor-phase-4-store-finish.baseline.md` as the "post-phase-7 (hot paths done)" row
+(the number Gate B reviews for the hot-path half).
+
+### Open risks
+
+- None functional. Only store-subscription lines changed; no persist/commit path,
+  no renderer/dual-pair, no ad-hoc `set()`, named-op discipline intact. The dropped
+  `content` in `BulkSectionActions` was verified dead before removal.
