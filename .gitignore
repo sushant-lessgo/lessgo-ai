@@ -77,3 +77,6 @@ template-design/
 .claude/settings.local.json
 
 docs/research/coverage-100/raw/
+
+# shared session mailbox (see CLAUDE.md)
+.claude/mailbox/

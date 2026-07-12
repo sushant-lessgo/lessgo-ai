@@ -166,6 +166,14 @@ When unset/false: prompts/responses are smart-truncated (~800/~1000 chars) but m
 - `src/modules/templates/` — template skins (blocks + tokens). `src/modules/sections/` — section/layout schemas & rules. `src/modules/Design/` — design system. `src/modules/prompt/`, `src/modules/audience/`, `src/modules/generation/`, `src/modules/inference/`, `src/modules/generatedLanding/` (renderers + registries).
 - Drag & drop via `@dnd-kit`. Section IDs follow `${type}-${uuid}` (e.g. `hero-abc12345`).
 
+## Multi-session comms — shared mailbox (worktree pitfall)
+
+`docs/temp/` exists SEPARATELY in every worktree — writing "a message file" there loses it (recurring incident). ALL session↔orchestrator messages go in the ONE shared mailbox instead:
+
+- Physical path: `<main-repo-dir>\.claude\mailbox\` (e.g. `C:\Users\susha\lessgo-ai\.claude\mailbox\`)
+- Resolve from ANY worktree: `$(git rev-parse --git-common-dir)/../.claude/mailbox/`
+- One file per track, named after the branch (e.g. `editor-phase-4.md`, `pricing-v2-stripe-gate.md`). Sessions write questions; the orchestrator replies in the same file. Untracked/gitignored — never commit.
+
 ## Documentation (`docs/`)
 
 All project docs live under `docs/` (see `docs/README.md` for the full index). **Additionally, every major `src/` directory carries an agent-oriented `README.md`** (module purpose, key files, invariants, pitfalls) — read the local README before working in an unfamiliar dir; the full list is in `docs/README.md` under "Code-level READMEs".
