@@ -58,6 +58,12 @@ import { LumenPlaceholderBlock } from './lumen/LumenPlaceholderBlock';
 import { createHarnessStore } from './blockMocks/harness';
 import { ALL_BLOCK_MOCK_SECTIONS } from './blockMocks';
 
+// phase 11b round-trip guard: prove atelier chrome keys survive the store→render
+// read path (extractLayoutContent iterates ONLY schema keys — a non-schema key is
+// dropped). Plain data imports; test-only.
+import { extractLayoutContent } from '@/types/storeTypes';
+import { getSchemaDefaults } from '@/modules/sections/layoutElementSchema';
+
 // Hearth knob/looks pilot (template-factory phase 8). Pure data imports (tokens /
 // palettes / service types) — no template-module (client) surface pulled in.
 import { hearthKnobs, hearthVariants, buildHearthStylesheet } from './hearth/tokens';
@@ -106,6 +112,52 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
   // collection (add/remove/reorder) + packages at 2/3/4 cards. Mocks in
   // blockMocks/index.ts; non-vacuous (empty mocks → the deferred-template branch).
   assertEditorBasics('atelier');
+
+  // ── ROUND-TRIP PERSISTENCE (atelier-template phase 11b) ────────────────────
+  // assertEditorBasics is marker-only: it proves a chrome key is WRAPPED in an
+  // edit primitive, NOT that a value set for it SURVIVES the store→render read
+  // (extractLayoutContent iterates ONLY schema keys, dropping non-schema ones).
+  // Phase 11 shipped green while chrome keys leaked design placeholders precisely
+  // because that round-trip was unchecked. This pins it for atelier's chrome keys:
+  // a value set in `elements` must come back out of extractLayoutContent (i.e. the
+  // key is in the schema) — the exact class of bug 11b fixed.
+  describe('atelier chrome-key round-trip persistence (phase 11b)', () => {
+    // (layout, key, value) — one representative chrome key per affected block.
+    const CASES: Array<[string, string, string]> = [
+      ['AtelierFooter', 'closer_headline', 'Let’s make yours.'],
+      ['AtelierFooter', 'legal_text', 'Privacy · Terms'],
+      ['AtelierContact', 'instagram', '@studioname'],
+      ['AtelierAbout', 'badge_text', 'Maker · City'],
+      ['AtelierWorkGallery', 'more_text', 'View the full portfolio →'],
+      ['AtelierQuoteBand', 'headline', 'Kind words'],
+    ];
+
+    for (const [layout, key, value] of CASES) {
+      it(`${layout}.${key} survives extractLayoutContent (schema-backed, not dropped)`, () => {
+        const schema = getSchemaDefaults(layout);
+        expect(schema, `${layout} has no schema defaults`).toBeTruthy();
+        // The key must be part of the schema-derived contract...
+        expect(Object.keys(schema!)).toContain(key);
+        // ...and a set value must come back out unchanged (round-trip).
+        const out = extractLayoutContent(
+          { [key]: value } as any,
+          schema as any,
+          layout,
+        );
+        expect((out as any)[key]).toBe(value);
+      });
+    }
+
+    it('a NON-schema key is still DROPPED (proves the check is real, not vacuous)', () => {
+      const schema = getSchemaDefaults('AtelierFooter')!;
+      const out = extractLayoutContent(
+        { __not_a_schema_key__: 'leak' } as any,
+        schema as any,
+        'AtelierFooter',
+      );
+      expect((out as any).__not_a_schema_key__).toBeUndefined();
+    });
+  });
 
   // ── KNOB + LOOKS conformance (template-factory phase 8) ────────────────────
   // hearth is the FIRST template to opt into knobs (dormant rules from phase 3

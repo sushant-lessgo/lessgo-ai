@@ -84,22 +84,20 @@ function hearthSections(): BlockMockSection[] {
 // ⚠️ TWO Atelier-specific facts drive how `editBasics` is authored (verified
 // against source, NOT copied from meridian/hearth blindly):
 //
-//   1. SCHEMA GATE — the edit blocks read content through `useAtelierBlock` →
-//      `extractLayoutContent(elements, getSchemaDefaults(layout), …)`, which
-//      iterates ONLY the layout's `serviceElementSchema` keys (+ collections as
-//      array keys). So NON-schema "chrome" keys (`more_text`, `badge_text`, About
-//      `cta_text`, Quote `headline`, Contact `location`/`instagram`, Footer
-//      `closer_*`/`contact_location`/`index_heading`/`elsewhere_heading`/
-//      `legal_text`, …) get NO value in the render — BUT the cores render them
-//      UNCONDITIONALLY, so they still emit an (empty→placeholder) edit-primitive
-//      marker. They MUST therefore be listed in `text`/`button` or the no-orphan
-//      check flags them. Populating them in `content` below is INERT for the
-//      harness (extraction drops them); the values document phase-13 intent only.
-//      → Real placeholder-leak prevention needs these keys added to
-//      `serviceElementSchema` (out of phase-11 scope) — logged in the audit.
-//      Non-schema COLLECTIONS (`footer_links`, `press_items`, `quotes`) stay
-//      EMPTY (dropped) → render zero item markers (not exercised here); the
-//      schema collections `works`/`packages`/`nav_items`/`social_links` ARE.
+//   1. SCHEMA GATE (RESOLVED in phase 11b) — the edit blocks read content through
+//      `useAtelierBlock` → `extractLayoutContent(elements, getSchemaDefaults(layout),
+//      …)`, which iterates ONLY the layout's `serviceElementSchema` keys (+
+//      collections as array keys). In phase 11 the atelier "chrome" keys
+//      (`more_text`, `badge_text`, About `cta_text`, Quote `headline`, Contact
+//      `location`/`instagram`, Footer `closer_*`/`contact_location`/`index_heading`/
+//      `elsewhere_heading`/`legal_text`, …) were NOT in the schema → extraction
+//      DROPPED them → cores rendered their hardcoded design placeholder as live
+//      text, and edits reverted (persist-then-dropped). Phase 11b added every one
+//      to the `Atelier*` layouts in `serviceElementSchema`, so the values below now
+//      SURVIVE extraction — persistable, fillable, and rendered as the mock value
+//      (not the placeholder). Collections `footer_links`/`press_items`/`quotes`/
+//      `slides` are likewise schema-backed now (footer_links is exercised below;
+//      press_items/quotes/slides render only in page/multi/slider mode).
 //
 //   2. DOT-FORMAT COLLECTION KEYS — atelier collection item fields are keyed
 //      `<coll>.<id>.<field>` (the platform SelectionSystem treats the LAST dot
@@ -303,9 +301,9 @@ const ATELIER_BLOCK_MOCKS: Array<{
         { id: 'as2', platform: 'Behance', href: '#' },
         { id: 'as3', platform: 'LinkedIn', href: '#' },
       ],
-      // non-schema chrome (dropped; closer band + column headings + legal render
-      // unconditionally as markers). footer_links is a non-schema collection →
-      // dropped → empty → no item markers (documents phase-13 intent only).
+      // chrome (phase 11b: now schema-backed → persistable/fillable): closer band +
+      // column headings + legal render as markers with these values. footer_links is
+      // now a schema collection → its items render label markers (counted below).
       closer_eyebrow: 'Ready when you are',
       closer_headline: 'Let’s make <em>yours.</em>',
       closer_cta_text: 'Start a project',
@@ -326,8 +324,10 @@ const ATELIER_BLOCK_MOCKS: Array<{
         'index_heading', 'elsewhere_heading', 'copyright', 'legal_text',
       ],
       button: ['closer_cta_text'],
-      // social_links (schema collection, plain List): platform per item = 1 marker.
+      // both plain-List schema collections: 1 marker/item (footer_links.label,
+      // social_links.platform). footer_links is schema-backed as of phase 11b.
       collections: [
+        { key: 'footer_links', countPrefix: 'footer_links.', itemPrefixes: ['footer_links.'], items: 2 },
         { key: 'social_links', countPrefix: 'social_links.', itemPrefixes: ['social_links.'], items: 3 },
       ],
     },

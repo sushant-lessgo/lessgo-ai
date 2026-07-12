@@ -647,6 +647,8 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
     elements: {
       logo_text:  { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Studio' },
       cta_text:   { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Get in touch' },
+      // chrome (phase 11b): nav-CTA link target — core reads content.cta_href.
+      cta_href:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '#contact' },
       logo_image: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
     },
     collections: {
@@ -670,9 +672,26 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       headline:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Work that <em>holds the room</em>.' },
       lede:               { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '' },
       cta_text:           { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'View the work' },
+      // chrome (phase 11b): CTA link targets — core reads content.{cta,secondary_cta}_href.
+      cta_href:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '#contact' },
       secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      secondary_cta_href: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '#work' },
       hero_image:         { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       meta:               { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      // chrome (phase 11b): home cover slider — core iterates content.slides
+      // (id/image/caption). Manual-fill; absent → static no-content fallback slide.
+      slides: {
+        requirement: 'optional',
+        fillMode: 'manual_preferred',
+        constraints: { min: 0, max: 8 },
+        fields: {
+          id:      { type: 'string', fillMode: 'system' },
+          image:   { type: 'string', fillMode: 'manual_preferred', default: '' },
+          caption: { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
     },
   },
 
@@ -684,6 +703,9 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       headline: { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: 'Selected <em>work</em>' },
       lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      // chrome (phase 11b): "view full portfolio" teaser link — core reads more_text/more_href.
+      more_text: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      more_href: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '#work' },
     },
     collections: {
       works: {
@@ -721,6 +743,9 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
           summary:       { type: 'string', fillMode: 'ai_generated', default: '' },
           features:      { type: 'string[]', fillMode: 'ai_generated', default: [], constraints: { min: 3, max: 7 } },
           cta_text:      { type: 'string', fillMode: 'ai_generated', default: 'Enquire' },
+          // chrome (phase 11b): per-card image + CTA link — core reads packages.<id>.{image,cta_href}.
+          cta_href:      { type: 'string', fillMode: 'manual_preferred', default: '#contact' },
+          image:         { type: 'string', fillMode: 'manual_preferred', default: '' },
           is_featured:   { type: 'boolean', fillMode: 'ai_generated', default: false },
         },
       },
@@ -736,6 +761,37 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       body2:       { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       about_image: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       signature:   { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      // chrome (phase 11b): teaser badge + CTA pair — core reads badge_text/cta_*/secondary_cta_*.
+      badge_text:          { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      cta_text:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      cta_href:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '#contact' },
+      secondary_cta_text:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      secondary_cta_href:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '#work' },
+      // chrome (phase 11b): page-mode press strip + studio split — core reads these
+      // only when content.mode === 'page' (teaser mode leaves them inert).
+      press_eyebrow:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      press_headline:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      studio_eyebrow:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      studio_headline: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      studio_body:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      studio_image:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      studio_cta_text: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      studio_cta_href: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '#packages' },
+    },
+    collections: {
+      // chrome (phase 11b): page-mode recognition strip — core iterates press_items
+      // (id/year/title/publication) only in mode 'page'.
+      press_items: {
+        requirement: 'optional',
+        fillMode: 'manual_preferred',
+        constraints: { min: 0, max: 12 },
+        fields: {
+          id:          { type: 'string', fillMode: 'system' },
+          year:        { type: 'string', fillMode: 'manual_preferred', default: '' },
+          title:       { type: 'string', fillMode: 'manual_preferred', default: '' },
+          publication: { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
     },
   },
 
@@ -745,9 +801,26 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
     sectionType: 'quote',
     elements: {
       eyebrow:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+      // chrome (phase 11b): band heading — core reads content.headline unconditionally.
+      headline:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       quote:       { type: 'string', requirement: 'required', fillMode: 'ai_generated_needs_review', default: '' },
       author_name: { type: 'string', requirement: 'optional', fillMode: 'ai_generated_needs_review', default: '' },
       author_role: { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
+    },
+    collections: {
+      // chrome (phase 11b): optional multi-quote grid — core iterates content.quotes
+      // (id/quote/author_name/author_role); absent → single-quote fallback.
+      quotes: {
+        requirement: 'optional',
+        fillMode: 'manual_preferred',
+        constraints: { min: 0, max: 6 },
+        fields: {
+          id:          { type: 'string', fillMode: 'system' },
+          quote:       { type: 'string', fillMode: 'manual_preferred', default: '' },
+          author_name: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          author_role: { type: 'string', fillMode: 'manual_preferred', default: '' },
+        },
+      },
     },
   },
 
@@ -760,6 +833,9 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       lede:     { type: 'string', requirement: 'optional', fillMode: 'ai_generated', default: '' },
       email:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       phone:    { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      // chrome (phase 11b): detail rows — core reads content.location/instagram.
+      location:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      instagram: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
     },
   },
 
@@ -772,8 +848,33 @@ export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
       contact_phone:   { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
       copyright:       { type: 'string', requirement: 'required', fillMode: 'ai_generated', default: '© Studio' },
       whatsapp_number: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      // chrome (phase 11b): full-bleed closer CTA band — core reads content.closer_*.
+      closer_image:              { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      closer_eyebrow:            { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      closer_headline:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      closer_lede:               { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      closer_cta_text:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      closer_cta_href:           { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '#contact' },
+      closer_secondary_cta_text: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      closer_secondary_cta_href: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '#packages' },
+      // chrome (phase 11b): footer body chrome — core reads these unconditionally.
+      contact_location:  { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      index_heading:     { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      elsewhere_heading: { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
+      legal_text:        { type: 'string', requirement: 'optional', fillMode: 'manual_preferred', default: '' },
     },
     collections: {
+      // chrome (phase 11b): footer index column — core iterates content.footer_links (id/label/href).
+      footer_links: {
+        requirement: 'optional',
+        fillMode: 'manual_preferred',
+        constraints: { min: 0, max: 8 },
+        fields: {
+          id:    { type: 'string', fillMode: 'system' },
+          label: { type: 'string', fillMode: 'manual_preferred', default: '' },
+          href:  { type: 'string', fillMode: 'manual_preferred', default: '#' },
+        },
+      },
       social_links: {
         requirement: 'optional',
         fillMode: 'manual_preferred',

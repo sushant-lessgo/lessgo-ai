@@ -672,3 +672,51 @@ Non-blocking CARRIES: (1) phase-12 parity — editor injects dots but published-
 No blocking issues within phase-11 scope. Gates green: tsc exit 0; templates 998 passed/12 skipped. Mocks non-vacuous (+76 assertions; no-orphan check prevents padding; covers 8 sections + works collection + packages 2/3/4). Editor-gap fix (AtelierEditable data-edit-primitive marker + editPrimitives.Txt threads store mode) correct/safe/boundary-clean (both 'use client', never reach published, coreParity green). Registry knobs mapping + index.ts:20 comment done. No shared-editor patched.
 CRITICAL (→ phase 11b, HARD blocker before 12/13): reviewer confirmed at source — chrome keys NOT in serviceElementSchema; extractLayoutContent (storeTypes.ts:371) drops non-schema keys on READ → cores render hardcoded placeholder as LIVE TEXT in both renderers AND manual edits revert (persist then dropped on re-read) → NOT fillable by any path → design strings leak to live Kundius page. assertEditorBasics is marker-only (proves wrap, not round-trip). Fix = add chrome keys to serviceElementSchema.ts Atelier* layouts + round-trip persistence assertion.
 Other: dot-format collection keys = mock granularity (not broken); add/remove/reorder affordances it.skip'd in jsdom (manual QA, matches meridian/hearth).
+
+---
+### Phase 11b — Chrome-key schema-backing (HARD pre-12/13 blocker)
+
+**Files changed**
+- `src/modules/audience/service/elementSchema.ts` — added atelier chrome keys to the 8 `Atelier*` layouts (elements + collections). NO hearth/lex/shared layouts touched.
+- `src/modules/templates/blockMocks/index.ts` — updated the (now-resolved) SCHEMA-GATE header comment; added the `footer_links` collection to the footer `editBasics` (now schema-backed → renders label markers).
+- `src/modules/templates/conformance.test.ts` — added the round-trip persistence describe block + the 2 test-only imports (`extractLayoutContent`, `getSchemaDefaults`).
+
+**Root cause (confirmed at source).** `extractLayoutContent` (`src/types/storeTypes.ts:357`) iterates ONLY `getSchemaDefaults(layout)` keys; `getSchemaDefaults` (`layoutElementSchema.ts:333`) enumerates `schema.elements` + `schema.collections`. Any elementKey a core renders that is NOT in the layout's schema is DROPPED on read → the core's hardcoded `placeholder="…"` renders as LIVE text (both renderers) and a manual edit persists to the store but is dropped on re-read (reverts). So the keys were neither fillable, editable, nor mockable.
+
+**Chrome keys added per layout (all `type:'string'` unless noted; all `requirement:'optional', fillMode:'manual_preferred'` — manual-fill intent, inert to the skeleton generation path):**
+- **AtelierNavHeader**: `cta_href`.
+- **AtelierHero**: `cta_href`, `secondary_cta_href`; collection `slides` (fields id/image/caption).
+- **AtelierWorkGallery**: `more_text`, `more_href`.
+- **AtelierPackages**: collection `packages` gains fields `cta_href`, `image`.
+- **AtelierAbout**: `badge_text`, `cta_text`, `cta_href`, `secondary_cta_text`, `secondary_cta_href`, `press_eyebrow`, `press_headline`, `studio_eyebrow`, `studio_headline`, `studio_body`, `studio_image`, `studio_cta_text`, `studio_cta_href`; collection `press_items` (id/year/title/publication).
+- **AtelierQuoteBand**: `headline`; collection `quotes` (id/quote/author_name/author_role).
+- **AtelierContact**: `location`, `instagram`.
+- **AtelierFooter**: `closer_image`, `closer_eyebrow`, `closer_headline`, `closer_lede`, `closer_cta_text`, `closer_cta_href`, `closer_secondary_cta_text`, `closer_secondary_cta_href`, `contact_location`, `index_heading`, `elsewhere_heading`, `legal_text`; collection `footer_links` (id/label/href).
+
+Element TYPE decision: the service schema has no `richtext`/`image`/`link` types — images (logo_image/about_image) and hrefs are all `type:'string'`; headlines/labels are `type:'string'`; collections use the standard `collections` shape with `fields`. So every added key is `string` or a collection, matching how the cores consume them.
+
+**Grep coverage.** Grepped all 8 `*.core.tsx` for every `elementKey=`, `hrefKey=`, `collectionKey=`. Every consumed key now exists in the schema EXCEPT `marquee_items` (Hero) — a decorative `aria-hidden` `<span>` loop with NO `elementKey`/edit primitive and a generic built-in fallback (`Editorial/Portraits/…`); it is not a chrome *elementKey* (out of this phase's grep scope) and schema-backing it would not make it editor-exercisable. Logged as an observation, not added. (Deviation, conservative.)
+
+**blockMocks re-population.** The phase-11 mocks already authored real values for these keys (they were inert then). Now schema-backed, they SURVIVE extraction and render as the mock value instead of the placeholder. The only editBasics change needed: `footer_links` is now a schema collection → its 2 mock items render `footer_links.<id>.label` markers, so I added the matching collection entry (`items:2`) to the footer `editBasics` (else the no-orphan check flags them). No other expectation changed (nav CTA `*_href`/per-card `image`/`cta_href` are links/images → emit no `data-edit-primitive` marker; `slides`/`press_items`/`quotes` render only in slider/page/multi mode, absent in the mocks → fallback paths, zero item markers).
+
+**Round-trip assertion added.** New `describe('atelier chrome-key round-trip persistence (phase 11b)')` in conformance.test.ts: for 6 representative chrome keys across 5 blocks it asserts (a) the key IS in `getSchemaDefaults(layout)` and (b) a value set in `elements` comes back out of `extractLayoutContent` unchanged. Plus a negative case proving a bogus non-schema key is STILL dropped (so the check isn't vacuous). This catches the exact "marker-only green, round-trip broken" class phase 11 missed.
+
+**Proof the fix holds.** `getSchemaDefaults('AtelierFooter')` now contains `closer_headline` and `legal_text`; `extractLayoutContent({closer_headline:'Let’s make yours.'}, …, 'AtelierFooter')` returns `{closer_headline:'Let’s make yours.'}` (survives) — previously the key was absent from the schema-defaults iteration set → dropped → placeholder rendered as live text. Same proven for `AtelierContact.instagram`, `AtelierAbout.badge_text`, `AtelierWorkGallery.more_text`, `AtelierQuoteBand.headline` — all green.
+
+**consumes ⊆ contract.** Adding keys GROWS each layout's contract, so any manifest `consumes` set stays a subset — the `templateConformance` (b)/(c) checks stay green (confirmed: 31 files / 1055 passed).
+
+**hearth/lex/generation untouched.** Only `Atelier*` layout entries edited. Generation-contract frozen-fixture + service section-selection tests are in `src/modules/audience/service` — all green (atelier uses the skeleton path; new keys are `manual_preferred` → inert to copy-gen). No STOP condition hit.
+
+**Commands + results (all PASS)**
+- `npx tsc --noEmit` → exit 0.
+- `npx vitest run src/modules/templates/conformance.test.ts` → 471 passed | 12 skipped (was 463; +8 from footer_links collection check + 6 round-trip cases + 1 negative case).
+- `npx vitest run src/modules/templates src/modules/audience/service` → 31 files, 1055 passed | 12 skipped.
+
+**Open risks**
+- `marquee_items` (Hero, decorative aria-hidden) still falls back to the built-in generic word list if unset — not a studio-specific design leak, not an elementKey; left for a Kundius/parity decision at phase 13 if the generic words are unwanted.
+- `slides`/`press_items`/`quotes`/`studio_*` schema-backed but only exercised in slider/page/multi-quote mode (not in the current editor-basics mocks, which use home/teaser/single modes) — persistence proven via the round-trip test for the scalar reps; collection round-trip in those modes is a phase-12 manual-QA item.
+
+---
+### Phase 11b — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; templates+service = 1055 passed/12 skipped (was 1047). Verified: COMPLETENESS — grepped all elementKey=/hrefKey=/collectionKey= across 8 cores; every consumed key now schema-backed in its Atelier* layout (Footer closer_*/legal_text/footer_links, Contact location/instagram, About press/studio + press_items, Quote headline+quotes, Work more_*, Hero slides+cta_hrefs, Packages per-card image/cta_href) — no still-leaking key; only marquee_items deferred (decorative, no elementKey). TYPES correct (service schema string/collection convention; item-field schemas match core iteration). Round-trip real + non-vacuous (positive survives, negative __not_a_schema_key__ dropped). Atelier-scoped (hearth/lex/generation untouched). consumes⊆contract holds. Leak CLOSED.
+Non-blocking (→phase-12 manual QA): collection round-trip only marker-count-tested (scalars round-trip-asserted); collections work for works/packages/social already.
