@@ -1,13 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { Check, Zap } from 'lucide-react';
 
-// Founding LTD cohort counter — STATIC placeholder until phase 7 wires the
-// live `/api/billing/ltd-availability` route. Do NOT treat as real inventory.
+// Founding LTD cohort counter — STATIC placeholder shown when the live
+// `/api/billing/ltd-availability` route reports `enabled:false` (kill-switch
+// PRICING_V2_COMMERCE off). When enabled, the live counter replaces this.
 const LTD_SEATS_LEFT_PLACEHOLDER = '20 of 20 left';
+
+// Shape returned by /api/billing/ltd-availability. `enabled:false` => keep the
+// static placeholder (phase-3 behavior); no live buy button.
+type LtdAvailability = {
+  enabled: boolean;
+  soldOut?: boolean;
+  currentCohort?: number | null;
+  currentPriceUsd?: number | null;
+  currentRemaining?: number;
+  seatsPerCohort?: number;
+  cohorts?: { cohort: number; seatsTotal: number; remaining: number; priceUsd: number }[];
+};
 
 // Agency is contact-only (spec decision 7) — no self-serve checkout.
 const AGENCY_CONTACT_EMAIL = 'hello@lessgo.ai';
@@ -126,8 +139,26 @@ const CREDIT_COST_LINES = [
 export default function PricingPage() {
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('monthly');
   const [isLoading, setIsLoading] = useState(false);
+  // LTD availability — defaults to disabled so we render the static placeholder
+  // until the route confirms the kill-switch is on.
+  const [ltdAvail, setLtdAvail] = useState<LtdAvailability>({ enabled: false });
   const router = useRouter();
   const { isSignedIn } = useAuth();
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/billing/ltd-availability')
+      .then((r) => r.json())
+      .then((data: LtdAvailability) => {
+        if (!cancelled && data) setLtdAvail(data);
+      })
+      .catch(() => {
+        // Network/parse failure → keep the safe placeholder default.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleCta = async (tier: Tier) => {
     if (tier.tier === 'FREE') {
@@ -143,7 +174,33 @@ export default function PricingPage() {
     }
 
     if (tier.tier === 'LTD') {
-      // Disabled until phase 7 wires LTD checkout. No-op guard.
+      // Placeholder (kill-switch off) or sold out → no checkout.
+      if (!ltdAvail.enabled || ltdAvail.soldOut) return;
+
+      // Signed-out → same redirect-to-checkout pattern as the Pro button below.
+      if (!isSignedIn) {
+        router.push('/sign-in?redirect=/pricing');
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await fetch('/api/stripe/create-ltd-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+        const data = await response.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error(data.error || 'No checkout URL received');
+        }
+      } catch (error) {
+        console.error('LTD checkout error:', error);
+        alert('Failed to start checkout. Please try again.');
+        setIsLoading(false);
+      }
       return;
     }
 
@@ -171,6 +228,22 @@ export default function PricingPage() {
       alert('Failed to start checkout. Please try again.');
       setIsLoading(false);
     }
+  };
+
+  // CTA label + disabled state. Only LTD is dynamic (driven by availability);
+  // every other tier keeps its static config.
+  const ctaStateFor = (tier: Tier): { label: string; disabled: boolean } => {
+    if (tier.tier !== 'LTD') {
+      return { label: tier.cta, disabled: !!tier.ctaDisabled };
+    }
+    if (!ltdAvail.enabled) {
+      // Kill-switch off → phase-3 placeholder: disabled "Coming at launch".
+      return { label: 'Coming at launch', disabled: true };
+    }
+    if (ltdAvail.soldOut) {
+      return { label: 'Founding closed — never returns', disabled: true };
+    }
+    return { label: `Claim your seat — $${ltdAvail.currentPriceUsd}`, disabled: false };
   };
 
   const renderPrice = (tier: Tier) => {
@@ -208,17 +281,49 @@ export default function PricingPage() {
           </>
         );
       }
-      case 'onetime':
+      case 'onetime': {
+        // Kill-switch off (or fetch pending/failed) → static phase-3 placeholder.
+        if (!ltdAvail.enabled) {
+          return (
+            <>
+              <div className="flex items-baseline">
+                <span className="text-5xl font-bold text-gray-900">$69</span>
+                <span className="text-gray-600 ml-2">one-time</span>
+              </div>
+              <p className="text-sm text-gray-500 mt-1">{tier.ltdNote}</p>
+              <p className="text-sm font-semibold text-amber-600 mt-1">{tier.ltdSeats}</p>
+            </>
+          );
+        }
+        // All 60 seats claimed — the offer never returns.
+        if (ltdAvail.soldOut) {
+          return (
+            <>
+              <div className="flex items-baseline">
+                <span className="text-4xl font-bold text-gray-900">Sold out</span>
+              </div>
+              <p className="text-sm text-gray-500 mt-1">All 60 founding seats are claimed.</p>
+              <p className="text-sm font-semibold text-amber-600 mt-1">
+                Founding closed — never returns
+              </p>
+            </>
+          );
+        }
+        // Live counter for the current (lowest-open) cohort.
         return (
           <>
             <div className="flex items-baseline">
-              <span className="text-5xl font-bold text-gray-900">$69</span>
+              <span className="text-5xl font-bold text-gray-900">${ltdAvail.currentPriceUsd}</span>
               <span className="text-gray-600 ml-2">one-time</span>
             </div>
             <p className="text-sm text-gray-500 mt-1">{tier.ltdNote}</p>
-            <p className="text-sm font-semibold text-amber-600 mt-1">{tier.ltdSeats}</p>
+            <p className="text-sm font-semibold text-amber-600 mt-1">
+              {ltdAvail.currentRemaining} of {ltdAvail.seatsPerCohort} left at $
+              {ltdAvail.currentPriceUsd}
+            </p>
           </>
         );
+      }
       case 'contact':
       default:
         return (
@@ -271,7 +376,10 @@ export default function PricingPage() {
 
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
-          {PRICING_TIERS.map((tier) => (
+          {PRICING_TIERS.map((tier) => {
+            const ctaState = ctaStateFor(tier);
+            const showLoading = isLoading && (tier.tier === 'PRO' || tier.tier === 'LTD');
+            return (
             <div
               key={tier.tier}
               className={`relative rounded-2xl border-2 p-8 ${
@@ -304,16 +412,16 @@ export default function PricingPage() {
 
               <button
                 onClick={() => handleCta(tier)}
-                disabled={isLoading || tier.ctaDisabled}
+                disabled={isLoading || ctaState.disabled}
                 className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors mb-6 ${
-                  tier.ctaDisabled
+                  ctaState.disabled
                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                     : tier.popular
                     ? 'bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-300'
                     : 'bg-gray-900 text-white hover:bg-gray-800 disabled:bg-gray-300'
                 }`}
               >
-                {isLoading && tier.tier === 'PRO' ? 'Loading...' : tier.cta}
+                {showLoading ? 'Loading...' : ctaState.label}
               </button>
 
               <div className="space-y-3">
@@ -331,7 +439,8 @@ export default function PricingPage() {
                 ))}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Top-up footnote (real top-up CTA lives on the billing page) */}
