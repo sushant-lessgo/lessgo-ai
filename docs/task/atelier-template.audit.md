@@ -403,3 +403,46 @@ Non-blocking (CARRY→phase 11): (1) index.ts:20 comment misleadingly says regis
 ---
 ### Phase 7 — impl-review verdict: SHIP (1 loop)
 No blocking issues, no material nits. Gates green: tsc exit 0; brief+fit+hooks = 353 tests pass. Tests-only confirmed (no production change). Verified NON-VACUOUS + correct against production: SERVE-depth (photographer→serve/atelier/service, shortlist=['atelier']); over-serve guards REAL not tautologies (out-of-icp checkout fires before serve logic; agency/saas .not.toContain('atelier') pin exact shortlists); fit() provenance real (lead-form via sharedBlockCapabilities, bilingual via PLATFORM, both absent from atelier.capabilities); composed served-path threads real fns (buildBriefDraft→decideServe→hydrate→isMultipage, fetch stubbed+never-called=chargeless, 5-page seed); granth regression composes writer→skip→writer-gen. No existing test weakened; line-120 comment fix sanctioned.
+
+## Phase 8 — Fonts: Bricolage Grotesque + preload + kit whitelist
+
+### Files changed
+- `src/styles/fonts-self-hosted.css` — added `@font-face` for Bricolage Grotesque.
+- `src/modules/templates/CriticalFontPreload.tsx` — added `case 'atelier':` to `criticalFontHrefs`.
+- `src/modules/engines/designKit.ts` — added `'Bricolage Grotesque'` to `SELF_HOSTED_FONTS`.
+
+(No file added under `public/fonts/bricolage-grotesque/` — the woff2 was pre-placed; peer dirs hanken-grotesk/space-grotesk carry no README, so none added.)
+
+### @font-face block
+`font-family: 'Bricolage Grotesque'`; variable `font-weight: 200 800`; `font-style: normal`; `font-display: swap`; `src: url('/fonts/bricolage-grotesque/bricolage-grotesque-latin-wght-normal.woff2') format('woff2-variations')` — mirrors the Archivo / Space Grotesk / Hanken variable-wght precedent in the same file. Placed just before the Cormorant Garamond block.
+
+### Preload case (variant-branched)
+`case 'atelier':` returns the display face only, branched by variant:
+- `compact` → `/fonts/fraunces/fraunces-latin-opsz-normal.woff2` (Fraunces — confirmed present).
+- default (`editorial` baseline) → `/fonts/bricolage-grotesque/bricolage-grotesque-latin-wght-normal.woff2` (confirmed present, 41KB).
+Body face (Hanken Grotesk) intentionally not preloaded — rides CSS discovery like the other grotesk templates (vestria/surge precedent).
+
+### Whitelist entry
+`'Bricolage Grotesque'` inserted alphabetically between `'Bodoni Moda'` and `'Cormorant Garamond'` in `SELF_HOSTED_FONTS`.
+
+### Three-way family-name match
+Identical string `Bricolage Grotesque` across:
+1. `@font-face` `font-family` (fonts-self-hosted.css).
+2. atelier `tokens.ts:65` `fontDisplay: "'Bricolage Grotesque', 'Hanken Grotesk', ..."` (unchanged — set in phase 6; not edited).
+3. `SELF_HOSTED_FONTS` whitelist (designKit.ts).
+CONFIRMED match. tokens.ts NOT touched (in-name already correct).
+
+### Verification
+- `npx tsc --noEmit` → exit 0. PASS.
+- `npm run test:run -- src/modules/engines` → 4 files, 175 tests passed. PASS.
+- `npm run build` → exit 0 (buildPublishedCSS + buildAssets + next build all green). PASS. Built `public/assets/fonts-self-hosted.css` contains 2 `Bricolage Grotesque` references + the woff2 url. Confirmed.
+
+### Deviations / risks
+- Bricolage wght range set to `200 800` (fontsource standard for the wght axis). If the placed binary's actual axis differs the range would clamp — conservative and matches source naming; no runtime error either way.
+- No open risks. Phase-9 `kit:lint` prerequisite (whitelist entry) satisfied.
+
+---
+### Phase 8 — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; `npm run build` exit 0 (FIRST full build of run — validates whole tree); engines 175 passed. Bricolage woff2 (41KB fontsource variable, orchestrator-placed) wired: @font-face wght 200-800 woff2-variations; preload case atelier (editorial→Bricolage / compact→Fraunces, both files present); SELF_HOSTED_FONTS +1. Family-name 'Bricolage Grotesque' 3-way match (@font-face / tokens.ts:65 fontDisplay / whitelist). Build artifact public/assets/fonts-self-hosted.css regenerated (expected). Non-blocking: cosmetic comment.
+
+## FOUNDATION COMPLETE (phases 1-8). Phase 9 = HUMAN GATE (designer HTML missing).
