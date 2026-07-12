@@ -11,8 +11,8 @@ Targeted fixes to the 8-step wizard (`src/components/onboarding/wizard/`, store 
 ## Progress log
 
 - phase 1 seed shape — offer + proof prompts: done (commit 6b13f28f, review loops 1)
-- phase 2 style step — skip when no real controls: done (commit pending, review loops 1) [DECISION POINT: skip, not generalize]
-- phase 3 goal step — prominent skip: pending
+- phase 2 style step — skip when no real controls: done (commit d96eec68, review loops 1) [DECISION POINT: skip, not generalize]
+- phase 3 goal step — prominent skip: done (commit pending, review loops 1)
 - phase 4 structure step — toggles, collections, drafting gate: pending
 - phase 5 building step — honest finalize, no dead Continue: pending
 - phase 6 understanding — keep niche specificity in prompts: pending

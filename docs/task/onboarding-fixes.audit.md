@@ -80,3 +80,29 @@ None. Followed the plan exactly. `entryClassify.schema.ts` deliberately untouche
 ### Open risks
 
 - Manual verification still pending (not run here): meridian/techpremium product onboarding should show 7 steps with no Style step; vestria and a trust/service run should still show their pickers.
+
+## Phase 3 — Goal step: skip is obvious, no stall
+
+**Files changed**
+- `src/components/onboarding/wizard/GoalSlot.tsx`
+
+**What changed**
+- In the `showParamFields` param box, the `paramGateOpen` branch (required param empty, not yet skipped) previously rendered only a faint gray "Skip for now" text link. Replaced with:
+  - An inline blocked-state hint: "Add the link, or skip for now to continue." — explains the disabled Continue where the user is looking.
+  - A prominent bordered secondary button "Skip for now" (white bg, gray border, rounded-lg, hover states) matching the wizard's button idiom.
+  - A one-line explainer beside/below it: "You can add the link later in the editor."
+- Behavior unchanged: the button still calls `setGoalParamSkipped(true)`, which clears `paramGateOpen` → existing WizardShell gate unblocks Continue. No `WizardShell.tsx` change. No new dependency; reused existing Tailwind classes.
+
+**Deviations from plan:** none.
+
+**Manual verification (for a human on `npm run dev`):**
+1. Onboard to the Goal step; pick an intent with a required param (e.g. `book-call`).
+2. Leave the param empty → the bordered "Skip for now" button + hint + explainer are clearly visible; Continue disabled.
+3. Click "Skip for now" → Continue enables.
+4. Alternatively fill the param → Continue also enables (skip UI disappears).
+
+**Test results**
+- `npx tsc --noEmit`: only the known pre-existing unrelated error `src/app/page.tsx(6,26)` (founder.jpg). No new errors.
+- `npm run test:run`: 163 passed | 1 skipped (164 files); 2779 passed | 15 skipped (2794 tests). Green. (UI-only phase; no unit test added — gate logic lives in the store/shell, untouched.)
+
+**Open risks:** none. Escape hatch is now visually prominent; F14 gate intent preserved.
