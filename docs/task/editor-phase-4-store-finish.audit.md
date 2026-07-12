@@ -564,3 +564,62 @@ Commit counts ≤ baseline, heap flat — matches phase-7 expectation. Recorded 
 - None functional. Only store-subscription lines changed; no persist/commit path,
   no renderer/dual-pair, no ad-hoc `set()`, named-op discipline intact. The dropped
   `content` in `BulkSectionActions` was verified dead before removal.
+
+## Phase 8 (Batch B4) — theme surfaces (cold)
+
+### Files changed
+- `src/app/edit/[token]/components/ui/ThemeSelector.tsx`
+- `src/app/edit/[token]/components/ui/ThemePopover.tsx`
+- `src/app/edit/[token]/components/ui/ServiceThemePopover.tsx`
+- `src/app/edit/[token]/components/ui/VestriaThemePopover.tsx`
+- `src/app/edit/[token]/components/ui/StyleBrowserModal.tsx`
+- `src/app/edit/[token]/components/ui/ColorPicker/SolidColorPicker.tsx`
+
+All 6 resolved paths confirmed via `rg` (each had exactly one bare `useEditStore()` site).
+
+### Per-file field-enumeration (D4.2: subscribed vs render-read)
+
+| File | Bare-site line | Subscribed (selector) | Render-read | Action-only (handlers) |
+|---|---|---|---|---|
+| ThemeSelector.tsx | 8 | `theme`, `getColorTokens` | `theme.colors.accentColor`, `getColorTokens()` | — (dead `handleColorChange`, all commented) |
+| ThemePopover.tsx | 56 | `theme`, `updateTheme`, `recalculateTextColors` | `theme.colors.*` (palette/texture/accent/backgrounds) | `updateTheme`, `recalculateTextColors` |
+| ServiceThemePopover.tsx | 49 | `audienceType`,`templateId`,`variantId`,`paletteId`,`themeValues`,`sections`,`pages`,`updateMeta`,`triggerAutoSave` | all first 7 (guard, active ids, look, fit-filter `deriveSwapSite(sections,pages)`) | `updateMeta`, `triggerAutoSave` |
+| VestriaThemePopover.tsx | 67 | same 9 as Service | same 7 render + `deriveSwapSite(sections,pages)` | `updateMeta`, `triggerAutoSave` |
+| StyleBrowserModal.tsx | 33 | `theme` (single-field selector) | `theme.colors.paletteId` (active highlight) | — (swap via `usePaletteSwap`) |
+| SolidColorPicker.tsx | 14 | `theme` (single-field selector) | `theme.colors.base/accentColor` (brand-color memo) | — |
+
+No over-narrowing: every subscribed field is either render-read or a stable action ref
+used in handlers. No render-read field was dropped from a subscription.
+
+### Conversion classification
+- **Render-read (useShallow object selector):** ThemeSelector, ThemePopover, ServiceThemePopover, VestriaThemePopover. Actions kept in the shallow selector as stable refs (no `getState()` needed — they never trigger re-renders under shallow-equal).
+- **Render-read (single-field selector):** StyleBrowserModal, SolidColorPicker (each reads only `theme`).
+- **Pure-action (`useEditStoreApi()` only):** none — all 6 read theme state to render.
+
+### Verification
+- Grep zero: all 6 files → zero bare `useEditStore(\s*)`.
+- `npx tsc --noEmit`: clean.
+- `npm run test:run`: 2508 passed | 11 skipped (159 files).
+- `npm run lint`: pass (only pre-existing `<img>` / exhaustive-deps warnings, none in touched files).
+
+### renderProbe smoke (authed, worktree :3021, DEBUG_EDITOR + mock-GPT)
+`PROBE_URL=http://localhost:3021 --smoke=palette,modal,select,undo,redo` → `allPassed: true`.
+
+| Smoke | Result |
+|---|---|
+| palette (discriminating) | PASS — mint→cyan via popover, **4** React re-commits |
+| modal | PASS — popover active swatch reflects store paletteId="cyan" |
+| select | PASS — store.textEditing + text-mvp toolbar visible |
+| undo | PASS |
+| redo | PASS |
+
+- Palette-swap re-commits: **4** vs baseline 4–5 → ≤ baseline.
+- Heap delta +0.76 MB (baseline +0.6–0.9 MB) → flat.
+- Burst commits 6, commits/keystroke 0.3, commits-on-blur 3 → flat vs baseline.
+
+Dev server stopped after probe (:3021 no longer LISTEN; :3000 untouched).
+
+### Open risks
+- None. Store-subscription lines only; no persist/commit path, no renderer/dual-pair,
+  no ad-hoc `set()`, named-op discipline intact. `ThemeSelector.handleColorChange` was
+  already fully commented-out dead code before this change (unrelated to the conversion).

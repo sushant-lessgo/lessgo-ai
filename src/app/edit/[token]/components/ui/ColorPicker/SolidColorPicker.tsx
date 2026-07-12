@@ -11,7 +11,8 @@ interface SolidColorPickerProps {
 }
 
 export function SolidColorPicker({ value, onChange }: SolidColorPickerProps) {
-  const { theme } = useEditStore();
+  // Render-read: theme (base/accent brand-color suggestions).
+  const theme = useEditStore((s) => s.theme);
   const [selectedColor, setSelectedColor] = useState(value?.color || '#3B82F6');
   const [customColor, setCustomColor] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { StyleBrowserModal } from './StyleBrowserModal';
 import { usePaletteSwap } from './usePaletteSwap';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -49,11 +50,19 @@ function extractHexFromBg(bg: string): string {
 }
 
 export function ThemePopover() {
+  // Render-read: theme (palette/texture/accent/backgrounds). updateTheme +
+  // recalculateTextColors are stable action refs used only in handlers.
   const {
     theme,
     updateTheme,
     recalculateTextColors,
-  } = useEditStore();
+  } = useEditStore(
+    useShallow((s) => ({
+      theme: s.theme,
+      updateTheme: s.updateTheme,
+      recalculateTextColors: s.recalculateTextColors,
+    }))
+  );
 
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customHex, setCustomHex] = useState('#3b82f6');

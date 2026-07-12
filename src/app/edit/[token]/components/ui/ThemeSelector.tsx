@@ -2,10 +2,14 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useEditStore } from '@/hooks/useEditStore';
 
 export function ThemeSelector() {
-  const { theme, /* setTheme, */ getColorTokens } = useEditStore();
+  // Render-read: theme (accentColor comparison) + getColorTokens (accent swatch).
+  const { theme, /* setTheme, */ getColorTokens } = useEditStore(
+    useShallow((s) => ({ theme: s.theme, getColorTokens: s.getColorTokens }))
+  );
   const [showColorPicker, setShowColorPicker] = useState(false);
   
   const colorTokens = getColorTokens();

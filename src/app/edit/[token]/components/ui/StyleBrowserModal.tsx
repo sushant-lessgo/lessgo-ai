@@ -30,7 +30,8 @@ interface StyleBrowserModalProps {
 
 export function StyleBrowserModal({ open, onOpenChange }: StyleBrowserModalProps) {
   const [mode, setMode] = useState<ModeFilter>('all');
-  const { theme } = useEditStore();
+  // Render-read: theme (active paletteId highlight).
+  const theme = useEditStore((s) => s.theme);
   const paletteId = theme?.colors?.paletteId;
   const handlePaletteSwap = usePaletteSwap();
 

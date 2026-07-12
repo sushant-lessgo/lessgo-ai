@@ -17,6 +17,7 @@
 // to that palette's accent without importing the template's config.
 
 import React, { useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { usePostHog } from 'posthog-js/react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { useEditStore } from '@/hooks/useEditStore';
@@ -36,6 +37,8 @@ import {
 } from './TemplateSwapList';
 
 export function ServiceThemePopover() {
+  // Render-read: audienceType/templateId/variantId/paletteId/themeValues + sections/pages
+  // (fit-filter list). updateMeta + triggerAutoSave are stable action refs used in handlers.
   const {
     audienceType,
     templateId,
@@ -46,7 +49,19 @@ export function ServiceThemePopover() {
     pages,
     updateMeta,
     triggerAutoSave,
-  } = useEditStore();
+  } = useEditStore(
+    useShallow((s) => ({
+      audienceType: s.audienceType,
+      templateId: s.templateId,
+      variantId: s.variantId,
+      paletteId: s.paletteId,
+      themeValues: s.themeValues,
+      sections: s.sections,
+      pages: s.pages,
+      updateMeta: s.updateMeta,
+      triggerAutoSave: s.triggerAutoSave,
+    }))
+  );
 
   const posthog = usePostHog();
   const [open, setOpen] = useState(false);
