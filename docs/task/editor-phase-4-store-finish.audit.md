@@ -246,3 +246,116 @@ the conservative, no-`src`-change options.
 - One dev-server-lifecycle caveat: an early background start used a trailing `&`
   which detached the process; it was found on :3021 and killed, then restarted
   under the task runner. Nothing touched :3000 (founder server) at any point.
+
+## Phase 5 (Batch B1)
+
+**Files changed:**
+- `src/hooks/useOptimizedEditStore.ts` (modified — all 26 bare `useEditStore()` destructures → narrow selectors)
+
+### What changed
+
+Converted every bare whole-store subscription in the shared shim (26 total) to a
+narrow `useEditStore(selector)` — object selectors wrapped in `useShallow`
+(`zustand/react/shallow`). Public return shape of every wrapper preserved
+byte-for-byte; downstream consumers (~27 refs) unchanged and gain narrow
+subscriptions for free. No `useEditStoreApi().getState()` was needed — action
+wrappers select the store's stable action refs directly through `useShallow`
+(stable object identity while refs unchanged), which also preserves the exact
+referential-identity semantics consumers previously got from the bare store.
+
+Imports: added `useShallow`; kept `useMemo`/`useCallback` (still used by computed +
+element-editor hooks) and the `EditStore` type import (unchanged, lint-clean).
+`useBatchUpdates` dropped its unused `const store = useEditStore()` entirely — it
+only returned a `useCallback` that calls `updates()` and never read the store, so
+the whole-store subscription was pure dead churn; return shape (the callback) is
+identical.
+
+### Over-narrow guard (D4.2) — subscribed-vs-exposed field enumeration
+
+State-selector wrappers (selector subscribes to exactly the returned field(s)):
+
+| Wrapper | Selector subscribes to | Returns / exposes | Wide enough? |
+|---|---|---|---|
+| `useEditMode` | `mode` | `mode` | yes |
+| `useEditingMode` | `editMode` | `editMode` | yes |
+| `useSelectedSection` | `selectedSection` | `selectedSection` | yes |
+| `useSelectedElement` | `selectedElement` | `selectedElement` | yes |
+| `useToolbarState` | `toolbar` | `toolbar` (object ref) | yes |
+| `useSections` | `sections` | `sections` | yes |
+| `useSectionLayouts` | `sectionLayouts` | `sectionLayouts` | yes |
+| `useContent` | `content` | `content` | yes |
+| `useSection(id)` | `content[id]` | `content[id]` | yes |
+| `useSectionLayout(id)` | `sectionLayouts[id]` | `sectionLayouts[id]` | yes |
+| `useSectionElements(id)` | `content[id]?.elements` | `elements \|\| {}` | yes (empty-`{}` fallback kept in body, NOT selector, to avoid new-ref subscribe loop) |
+| `useElement(id,key)` | `content[id]?.elements?.[key] \|\| ''` | that value or `''` | yes |
+| `useTheme` | `theme` | `theme` | yes |
+| `useGlobalSettings` | `globalSettings` | `globalSettings` | yes |
+| `useLeftPanel` | `leftPanel` | `leftPanel` | yes |
+| `useAIGeneration` | `aiGeneration` | `aiGeneration` | yes |
+| `usePersistenceState` | `persistence` | `persistence` | yes |
+| `useIsSaving` | `persistence.isSaving` | `persistence.isSaving` | yes |
+| `useIsDirty` | `persistence.isDirty` | `persistence.isDirty` | yes |
+
+Action-selector wrappers (`useShallow`, all fields are stable action refs):
+
+| Wrapper | Subscribes to (all action refs) | Exposes (same keys) |
+|---|---|---|
+| `useEditActions` | setMode, setEditMode, setActiveSection, selectElement | identical |
+| `useToolbarActions` | showToolbar, hideToolbar, showSectionToolbar, showElementToolbar, hideElementToolbar, hideSectionToolbar | identical |
+| `useContentActions` | addSection, removeSection, moveSection, updateSectionLayout, setSection, updateElementContent, duplicateSection, markAsCustomized | identical |
+| `useAIActions` | regenerateSection, regenerateElement, generateVariations, showElementVariations, hideElementVariations, applyVariation, setGenerationMode | identical |
+| `usePersistenceActions` | save, loadFromDraft, export, triggerAutoSave, forceSave, clearAutoSaveError | identical |
+| `useStorePerformance` | getPerformanceStats, resetPerformanceStats | identical |
+| `useBatchUpdates` | — (no store subscription; removed dead one) | returns the same `useCallback` |
+
+Computed/derived hooks (`useHasContent`, `useSectionCompletion`, `usePageCompletion`,
+`useIsElementSelected`, `useIsSectionSelected`, `useElementEditor`) were already
+built on the wrapper hooks above (no bare `useEditStore()`) — untouched in body,
+inherit narrower subscriptions transitively.
+
+**Return-shape confirmation:** every wrapper's public return is byte-for-byte
+unchanged (same keys, same value semantics — action wrappers still hand back the
+real store refs). Downstream files: zero edits (the point of B1).
+
+### Verification
+
+- **Grep** `rg "useEditStore\(\s*\)" src/hooks/useOptimizedEditStore.ts` → zero (exit 1).
+- **`npx tsc --noEmit`** → clean (exit 0).
+- **`npm run test:run`** → 2508 passed / 11 skipped (159 files), exit 0.
+- **`npx next lint --file …useOptimizedEditStore.ts`** → no warnings or errors.
+- **renderProbe smoke** (worktree dev :3021, `NEXT_PUBLIC_DEBUG_EDITOR=true`,
+  authed, `--smoke=type,select,undo,redo,palette,modal`) → **all 6 PASS**,
+  `allPassed: true`. Founder :3000 untouched; server stopped after.
+
+### renderProbe commit counts vs baseline
+
+| Metric | Baseline | Phase 5 (B1) | Verdict |
+|---|---|---|---|
+| React commits during 20-char burst | 6 | 6 | flat |
+| React commits / keystroke | 0.3 | 0.3 | flat |
+| React commits on commit (blur) | 3 | 3 | flat |
+| Store mutations observed | 1 | 1 | flat |
+| JS heap delta (post-GC) | +0.6 – +0.9 MB | +0.656 MB | flat (in range) |
+| Palette-swap re-commits | 4–5 | **4** (isolated run ×3) | ≤ baseline |
+
+Note on palette count: the combined 6-smoke run reported 6 palette re-commits, but
+that window is contaminated by trailing commits from the preceding undo/redo
+smokes (the counter is coarse and the count is captured across a fixed 600ms
+post-click window). Re-running `--smoke=palette` in isolation ×3 gave a stable **4**
+— at/below the 4–5 baseline. No metric is higher than baseline in isolation; no
+over-broad selector churn.
+
+### Deviations from plan
+
+- Chose to keep all action refs inside `useShallow` selectors (rather than moving
+  them to `useEditStoreApi().getState()`) — the plan explicitly allows either, and
+  this path preserves the exact referential-identity semantics downstream
+  consumers relied on (they receive the real store action refs, not wrappers).
+- `useBatchUpdates`: removed its dead whole-store subscription outright (it read
+  nothing). Conservative and in-scope — return value (the callback) is identical.
+
+### Open risks
+
+- None functional. B1 only narrows subscriptions; no persist/commit path touched.
+  The palette combined-run count contamination is a measurement artifact of the
+  probe's fixed-window counter, not a code regression (isolated = 4 ≤ baseline).
