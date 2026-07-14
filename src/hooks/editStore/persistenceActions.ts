@@ -7,6 +7,14 @@ import { logger } from '@/lib/logger';
 
 const deepClone = <T>(v: T): T => JSON.parse(JSON.stringify(v ?? null));
 
+// content-baseline-split — in-flight dedupe for ensureBaseline().
+// Module-level (NOT in Immer/store state — promises must never enter the store).
+// Keyed by tokenId so a Reset click racing the review-diff prefetch shares ONE
+// `/api/loadDraft?part=baseline` request. The entry is cleared on settle
+// (success OR failure) in a `finally`, so a later fetch is never blocked by a
+// stale resolved/rejected promise.
+const inFlightBaselineFetches = new Map<string, Promise<Record<string, any> | null>>();
+
 // ===== i18n-phase-1 (3a): FULL-MAP EXPORT INVARIANT (contract i) =====
 // saveDraft replaces `finalContent.localeContent` WHOLESALE when the key is
 // present, so a partial map WIPES omitted locales. export() ships the COMPLETE
@@ -524,6 +532,15 @@ export function createPersistenceActions(set: any, get: any) {
           if (storedBaseline) {
             state.baseline = deepClone(storedBaseline);
             state.baselineDirty = false; // already persisted server-side
+            // content-baseline-split: baseline shipped in-line (old response
+            // shape, still active until Phase 4 / Deploy B) ⇒ it exists.
+            state.baselineAvailable = true;
+          } else {
+            // content-baseline-split: no baseline in the response — trust the
+            // cheap `hasBaseline` flag. true ⇒ a stored baseline exists but was
+            // NOT shipped (fetch it lazily via ensureBaseline); false ⇒ true
+            // legacy project with no baseline (backfill capture below fires).
+            state.baselineAvailable = Boolean(apiResponse.hasBaseline);
           }
 
           state.lastUpdated = Date.now();
@@ -542,13 +559,22 @@ export function createPersistenceActions(set: any, get: any) {
 
         });
 
-        // No stored baseline → capture the just-hydrated state as baseline.
-        // This one path covers BOTH initial-generation capture (first editor
-        // load after onboarding gen) AND legacy-page backfill. MUST run after
-        // the hydration set() above has committed: captureBaseline → export()
-        // reads committed state via get(); inside the producer it would
+        // No stored baseline AND the server has none → capture the just-hydrated
+        // state as baseline. This one path covers BOTH initial-generation capture
+        // (first editor load after onboarding gen) AND true-legacy backfill. MUST
+        // run after the hydration set() above has committed: captureBaseline →
+        // export() reads committed state via get(); inside the producer it would
         // snapshot stale pre-hydration state.
-        if (!storedBaseline) {
+        //
+        // content-baseline-split — THE CRITICAL GUARD: the condition adds
+        // `&& !apiResponse.hasBaseline`. A server-side baseline that simply
+        // wasn't shipped (Phase 4 / Deploy B response: `hasBaseline:true` but no
+        // `baseline` field) must NEVER be overwritten by a fresh capture.
+        // Without this guard, such a load would recapture the EDITED state as the
+        // baseline (`baselineDirty=true`) and the next autosave would ship it,
+        // silently overwriting the true AI original on live projects (naayom).
+        // ensureBaseline() lazily fetches the real baseline instead.
+        if (!storedBaseline && !apiResponse.hasBaseline) {
           get().captureBaseline();
         }
 
@@ -625,6 +651,10 @@ export function createPersistenceActions(set: any, get: any) {
       set((state: EditStore) => {
         state.baseline = snapshot;
         state.baselineDirty = true;
+        // content-baseline-split: capture makes a baseline resident ⇒ it exists.
+        // Covers legacy backfill (loadFromDraft) AND Regen Copy
+        // (generationActions.ts) with zero changes at either call site.
+        state.baselineAvailable = true;
         // Intentionally does NOT set persistence.isDirty — the baseline rides
         // the next natural save; capturing alone is not a user edit.
       });
@@ -637,6 +667,81 @@ export function createPersistenceActions(set: any, get: any) {
       set((state: EditStore) => {
         state.baselineDirty = false;
       });
+    },
+
+    // content-baseline-split — lazy on-demand baseline fetch.
+    // Consumers (header Reset, needs-review diff prefetch) call this instead of
+    // reading `state.baseline` directly. Returns the baseline (resident or
+    // freshly fetched) or `null` when the server truly has none (callers fall
+    // back to their legacy behavior). Network I/O happens OUTSIDE any Immer
+    // producer (async in a set() producer is forbidden): fetch first, then set().
+    ensureBaseline: async (): Promise<Record<string, any> | null> => {
+      const state = get();
+
+      // Already resident → no fetch.
+      if (state.baseline) {
+        return state.baseline;
+      }
+      // Server has no baseline (true legacy) → nothing to fetch; callers use
+      // their existing fallbacks.
+      if (!state.baselineAvailable) {
+        return null;
+      }
+
+      const tokenId: string = state.tokenId;
+      if (!tokenId) {
+        // No token to fetch against — treat as unavailable.
+        return null;
+      }
+
+      // In-flight dedupe: a Reset click racing the review prefetch shares ONE
+      // request. The promise lives in a module-level Map (never in the store).
+      const existing = inFlightBaselineFetches.get(tokenId);
+      if (existing) {
+        return existing;
+      }
+
+      const fetchPromise = (async (): Promise<Record<string, any> | null> => {
+        // Matches loadFromDraft/save fetch conventions in this module.
+        const response = await fetch(
+          `/api/loadDraft?tokenId=${encodeURIComponent(tokenId)}&part=baseline`,
+        );
+        if (!response.ok) {
+          throw new Error(
+            `Baseline fetch failed: ${response.status} ${response.statusText}`,
+          );
+        }
+        const json = await response.json();
+        const fetched = json?.baseline ?? null;
+
+        if (!fetched) {
+          // Server unexpectedly returned null (baseline vanished server-side) →
+          // record it and let callers fall back.
+          set((s: EditStore) => {
+            s.baselineAvailable = false;
+          });
+          return null;
+        }
+
+        const cloned = deepClone(fetched);
+        set((s: EditStore) => {
+          s.baseline = cloned;
+          // Already persisted server-side — must NOT re-ship on the next save.
+          s.baselineDirty = false;
+          s.baselineAvailable = true;
+        });
+        return cloned;
+      })();
+
+      // Wrap so the map entry is cleared on settle (success OR failure). On
+      // FAILURE the error propagates to the caller (Phase 3 Reset relies on the
+      // throw) and `baselineAvailable` is deliberately NOT flipped — callers
+      // decide how to handle a transient network error.
+      const guarded = fetchPromise.finally(() => {
+        inFlightBaselineFetches.delete(tokenId);
+      });
+      inFlightBaselineFetches.set(tokenId, guarded);
+      return guarded;
     },
 
     /**

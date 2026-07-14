@@ -306,8 +306,12 @@ function createInitialState(tokenId: string): EditStore {
     // Baseline snapshot (header Reset) — captured post-load / post-Regen-Copy.
     // Deliberately NOT in `partialize` below: hydrated from the server
     // (content.baseline) or re-captured on load; never from localStorage.
+    // `baselineAvailable` (content-baseline-split) is likewise excluded from
+    // `partialize`: it re-derives from the server contract (baseline shipped OR
+    // hasBaseline flag) on every load, never from localStorage.
     baseline: null as Record<string, any> | null,
     baselineDirty: false,
+    baselineAvailable: false,
     // data-capture Phase 3 — regen re-freeze accumulator (queued by aiActions on
     // regen success; shipped as payload.aiBaselinePatch, selectively cleared on
     // save success). Same non-partialize lifecycle as `baseline`.
