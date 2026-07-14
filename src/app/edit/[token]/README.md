@@ -125,8 +125,14 @@ Wraps the entire edit interface and provides:
 - Loading and error boundary handling
 - Store initialization and cleanup
 
-#### useEditStoreLegacy
-Primary state store managing:
+#### useEditStore (selector-first)
+The primary editor-state hook (`src/hooks/useEditStore.ts`) — reads the token-scoped
+instance from `EditProvider` context, so call sites need no tokenId. **Always pass a
+selector**: `useEditStore(s => s.field)` (object selectors wrapped in `useShallow`); use
+`useEditStoreApi()` / `useEditStore.getState()` for actions and one-shot reads. Bare
+`useEditStore()` whole-store subscription is **banned by ESLint** (`no-restricted-syntax`).
+`EditProvider` alone bootstraps the instance via `useEditStoreBootstrap`. (Formerly
+`useEditStoreLegacy` — renamed/collapsed in editor-phase-4.) Primary state managed:
 ```typescript
 {
   // Page structure

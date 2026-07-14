@@ -19,18 +19,20 @@ Global (non-token) Zustand store for the **onboarding field pipeline**: `oneLine
 (`Partial<InputVariables>`), `hiddenInferredFields`, AI features, and
 `forceManualFields`. Feeds the edit-time field modals. Uses `devtools` (no persist).
 
-### `useEditStoreLegacy.ts` — **the active editor store hook**
-Despite the name, this is the primary editor-state API (~100+ call sites across
-`src/app/edit/`, toolbars, template blocks, renderers). It reads the
-**token-scoped** store instance from `EditProvider` context (see
-`src/stores/editStore.ts`) so callers need no tokenId. Re-exported as
-`useEditStore` (both from this file and from `useEditStoreGlobal.ts`); most call
-sites write `import { useEditStoreLegacy as useEditStore } from '@/hooks/useEditStoreLegacy'`.
-`useEditStoreLegacy.getState()` gives static (non-reactive) access to the
-last-mounted store. State surface: sections/layouts/spacing, `content`, multi-page
-`pages`/`currentPageId`/`chrome`, theme + design tokens, UI (selection, toolbars,
-modals), forms/images, meta (audienceType/templateId/variantId/paletteId), and
-persistence/auto-save.
+### `useEditStore.ts` — **the active editor store hook** (selector-first)
+The primary editor-state API (~100+ call sites across `src/app/edit/`, toolbars,
+template blocks, renderers). It reads the **token-scoped** store instance from
+`EditProvider` context (see `src/stores/editStore.ts`) so callers need no tokenId.
+**Always call with a selector** — `useEditStore(s => s.field)` (wrap object selectors
+in `useShallow`); bare `useEditStore()` whole-store subscription is **banned by ESLint**
+(`no-restricted-syntax` in `.eslintrc.json`). Use `useEditStoreApi()` (non-reactive
+store API) / `useEditStore.getState()` (static, last-mounted store) for actions and
+one-shot reads. `EditProvider` alone bootstraps the token-scoped instance via
+`useEditStoreBootstrap.ts` (import it nowhere else). State surface: sections/layouts/spacing,
+`content`, multi-page `pages`/`currentPageId`/`chrome`, theme + design tokens, UI
+(selection, toolbars, modals), forms/images, meta (audienceType/templateId/variantId/
+paletteId), and persistence/auto-save. (editor-phase-4 collapsed the old four access
+layers — `useEditStoreLegacy`/`useEditStoreGlobal`/dead compat shims — into this one hook.)
 
 ### Generation-flow stores
 The old per-route generation stores — `useGenerationStore.ts` (the original
@@ -61,7 +63,7 @@ imports only pure helpers + types (firewall-clean — no template/renderer impor
 ### `useModalManager.ts`
 Field-edit modal orchestration for the editor: a modal queue over
 `CanonicalFieldName`s; bridges `useOnboardingStore` (field values) and the editor
-store (`useEditStoreLegacy`).
+store (`useEditStore`).
 
 ---
 
@@ -92,10 +94,12 @@ store (`useEditStoreLegacy`).
   token-scoped factory — the real Zustand instance), `storeManager.ts` (per-token
   LRU cache), `useThemeStore.ts` (small landing-preview color store).
 - **`src/hooks/`** owns the *onboarding/generation stores* and every hook that
-  reads/mutates the editor store. `useEditStore.ts` here is the SSR-safe
-  token-aware hook (`useEditStore(tokenId)`); `useEditStoreLegacy.ts` /
-  `useEditStoreGlobal.ts` are the context-based no-token wrappers used everywhere.
+  reads/mutates the editor store. `useEditStore.ts` here is the context-based
+  no-token reactive hook used everywhere (selector-first — see above);
+  `useEditStoreBootstrap.ts` is the SSR-safe token-aware bootstrap
+  (`useEditStoreBootstrap(tokenId)`) imported **only** by `EditProvider`.
 
-The "token-scoped" migration is effectively **complete at the store layer** — the
-global store is gone; every editor call resolves to a per-token instance. Only the
-*hook naming* still carries the transitional "Legacy" label.
+The "token-scoped" migration is **complete** — the global store is gone; every
+editor call resolves to a per-token instance. As of editor-phase-4 the transitional
+"Legacy"/"Global" hook names are also gone: one `useEditStore` selector-first hook,
+one `useEditStoreBootstrap`.

@@ -118,3 +118,11 @@ modal. Authed edit-persistence E2E: **2/2 pass** (auth setup + throttled-edit-pe
 Commit counts ≤ baseline, heap flat across the whole selector-ization. This is the
 final number Gate B reviews (baseline vs post-7 vs post-10). Dev server stopped
 (:3021 free; :3000 untouched).
+
+## Close-out (2026-07-14)
+
+Gates B (reactivity + perf sign-off) and C (lint-rule flip) both **founder-approved
+2026-07-14**. Spec acceptance met: renders/keystroke flat-or-down, heap flat across
+all 6 Step-B batches. This doc is retained as the phase-4 perf record. The reusable
+probe `e2e/tools/renderProbe.ts` is kept in-repo (unresolved Q3) as the editor
+render-churn/heap measurement tool for future perf work.

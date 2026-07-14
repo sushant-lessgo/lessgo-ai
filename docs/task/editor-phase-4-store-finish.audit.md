@@ -830,3 +830,104 @@ server stopped afterward (:3021 free; :3000 untouched throughout).
   renderer/dual-pair edit, no ad-hoc `set()`, named-op discipline intact. All B6 surfaces
   are cold (header chrome, preview pages, dev-only stage) off the typing hot path. The
   ESLint rule flip (phase 12) can now proceed with target exemption list = empty.
+
+---
+
+## Phase 12 — Lint rule flip (Gate C)
+
+**Files changed:**
+- `.eslintrc.json` (modified — added `no-restricted-syntax` rule)
+
+### What changed
+Added the D3 rule to `.eslintrc.json` `rules`:
+```json
+"no-restricted-syntax": ["error", {
+  "selector": "CallExpression[callee.name='useEditStore'][arguments.length=0]",
+  "message": "Bare whole-store subscription banned. Pass a selector (wrap object selectors in useShallow); use useEditStoreApi()/.getState() for actions & one-shot reads."
+}]
+```
+Alongside the pre-existing `react/no-unescaped-entities: off`. No other config change.
+
+### Gate C pre-flight (founder-approved 2026-07-14)
+- `rg -n "useEditStore\(\s*\)" src/ -g "*.ts" -g "*.tsx"` → the 3 predicted non-code matches only:
+  JSDoc example + TS overload signature declaration in `useEditStore.ts` (a declaration, not a
+  CallExpression — the AST rule ignores it) + explanatory comment in `LeadForm.tsx` (its code
+  uses a selector). Zero real bare call expressions.
+- Inline `eslint-disable no-restricted-syntax` exemptions: **zero** (target met).
+
+### Negative test (evidence)
+Temporarily added `src/hooks/__lintScratch.tsx` with a bare `const store = useEditStore();`, ran
+`npx eslint src/hooks/__lintScratch.tsx`:
+```
+  4:17  error  Bare whole-store subscription banned. Pass a selector (wrap object selectors in useShallow); use useEditStoreApi()/.getState() for actions & one-shot reads  no-restricted-syntax
+✖ 1 problem (1 error, 0 warnings)
+```
+Rule fires exactly as intended. Scratch file deleted after.
+
+### Test results
+- `npm run lint` → 0 errors (warnings only: pre-existing `<img>`/exhaustive-deps).
+- `npx tsc --noEmit` → clean (exit 0).
+- `npm run test:run` → 2508 passed | 11 skipped (158 files passed | 1 skipped).
+
+### Deviations
+None.
+
+### Open risks
+- Known accepted blind spot (per D3): an aliased import (`useEditStore as x`) escapes the AST
+  match. None exist today (the only aliaser, `useEditStoreGlobal.ts`, was deleted in phase 1).
+
+**Commit:** `93423d06`
+
+---
+
+## Phase 13 — Docs close-out
+
+**Files changed:**
+- `docs/tracks/editorPlan.md` (modified)
+- `CLAUDE.md` (modified)
+- `src/app/edit/[token]/README.md` (modified)
+- `src/hooks/README.md` (modified)
+- `src/stores/README.md` (modified)
+- `docs/task/editor-phase-4-store-finish.baseline.md` (modified — close-out note)
+- `docs/task/editor-phase-4-store-finish.plan.md` (modified — progress log)
+- `docs/task/editor-phase-4-store-finish.audit.md` (this file — phases 12+13 appended)
+
+### What changed
+- **editorPlan.md**: phase-4 row → `✅ DONE` + summary (one selector-first hook, 70 sites
+  selector-ized, lint rule, ops-undo descoped). Unresolved Q2 (phase 3/4 boundary) resolved:
+  "phase 3 did toolbars, phase 4 did the rest". Decision-3 (ops-based undo in phase 4) struck
+  through + superseded note: ops-undo **descoped to universe/i18n**, named-op mutation discipline
+  preserved. Added a "Known dead code — KEPT (founder ruling 2026-07-14)" note listing the 6
+  never-mounted modals (countdown, taxonomy, landing-goals, element-picker, device-toggle,
+  privacy-editor) — retained for now, deletion deferred.
+- **CLAUDE.md**: State Management bullet repointed `useEditStoreLegacy` → selector-first
+  `useEditStore` + `useEditStoreBootstrap`; notes the ESLint ban on bare subscriptions.
+- **src/app/edit/[token]/README.md**: store-access section (`useEditStoreLegacy` → selector-first
+  `useEditStore`, bootstrap note, lint ban).
+- **src/hooks/README.md**: `useEditStoreLegacy` store section + modal-manager mention + the
+  hooks-vs-stores comparison all repointed to `useEditStore`/`useEditStoreBootstrap`.
+- **src/stores/README.md**: "Relationship to useEditStore" section repointed (selector-first,
+  bootstrap-only-in-EditProvider, four-layer collapse note).
+- **baseline.md**: added a Close-out (2026-07-14) note recording Gate B/C approval, retention of
+  the doc as the perf record, and the probe kept in-repo (Q3).
+
+### Deviations
+- **Q3 mapping (in-scope judgment):** the plan's Phase-13 file list phrased the ops-undo answer as
+  "Q3", but editorPlan.md's actual unresolved Q3 is about save-state-chip placement (unrelated,
+  already resolved in phases 1/3). The ops-undo resolution belongs to Decision-3 (which explicitly
+  committed ops-undo to phase 4), so I recorded it there + in the phase-4 row rather than
+  overwriting the save-state-chip question. Conservative, preserves existing content.
+- **Out-of-scope stale references NOT touched (report, not edit):** `rg` for the old names still
+  finds hits in files NOT on the Phase-13 Files-touched list —
+  `docs/architecture/newServiceOnboarding.md`, `docs/README.md`,
+  `docs/reports/perfEditPreviewReport.md`, `src/modules/generatedLanding/README.md`. Per the hard
+  scope rule I did not edit them. The plan's "grep → zero outside git history/task docs" goal is
+  therefore not fully met; flagged as an open risk for the orchestrator to scope a follow-up.
+
+### Test results
+- `npm run lint` / `npx tsc --noEmit` / `npm run test:run` — see Phase 12 (docs-only changes here;
+  no code touched, so the green state holds). Final re-verification run recorded below.
+
+### Open risks
+- The 4 out-of-scope files above retain stale `useEditStoreLegacy`/`useEditStoreGlobal` mentions —
+  needs a small follow-up outside this phase's scope.

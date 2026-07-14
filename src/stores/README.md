@@ -48,18 +48,21 @@ token systems; used for lightweight color theming of a landing preview.
 
 ---
 
-## Relationship to `useEditStoreLegacy` (migration status — verified)
+## Relationship to `useEditStore` (migration status — verified)
 
 There is **no separate "legacy store"**. The editor store *is* the token-scoped
-factory here. `src/hooks/useEditStoreLegacy.ts` is a thin **hook wrapper** that
-pulls the current instance from `EditProvider` context — so components read the
-per-token store without passing a tokenId. Consumption (verified by grep):
+factory here. `src/hooks/useEditStore.ts` is a thin **hook wrapper** that pulls the
+current instance from `EditProvider` context — so components read the per-token
+store without passing a tokenId. Consumption (verified by grep):
 
-- `useEditStoreLegacy` (as `useEditStore`): ~100+ call sites — the actual editor
-  API used across `src/app/edit/`, toolbars, template blocks, and both renderers.
-- `useEditStore(tokenId)` (SSR-safe token hook in `src/hooks/useEditStore.ts`):
-  used by `EditProvider` to establish the context.
+- `useEditStore(selector)`: ~100+ call sites — the actual editor API used across
+  `src/app/edit/`, toolbars, template blocks, and both renderers. **Selector-first**:
+  bare `useEditStore()` is banned by ESLint (`no-restricted-syntax`).
+- `useEditStoreBootstrap(tokenId)` (SSR-safe token hook in
+  `src/hooks/useEditStoreBootstrap.ts`): used by `EditProvider` to establish the
+  context — imported nowhere else.
 - `createEditStore` here: called only by `storeManager`.
 
-So the token-scoped migration is **complete at the store layer**; only the hook
-name still says "Legacy". `useEditStoreGlobal.ts` re-exports the same wrapper.
+So the token-scoped migration is **complete at the store layer**. editor-phase-4
+collapsed the old four hook layers (`useEditStoreLegacy`/`useEditStoreGlobal`/dead
+compat shims) into one `useEditStore` selector-first hook + `useEditStoreBootstrap`.

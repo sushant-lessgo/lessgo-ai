@@ -88,7 +88,7 @@ Two-phase strategic generation. (The legacy monolithic `/api/generate-landing` r
 ### State Management (Zustand + Immer)
 
 - `useOnboardingStore` (`src/hooks/`) — onboarding fields: confirmed/validated/inferred, dependencies, AI features.
-- `useEditStoreLegacy` (`src/hooks/`) — **still the active editor store**: layout/sections, content, UI/toolbars, meta, persistence/auto-save.
+- `useEditStore` (`src/hooks/useEditStore.ts`) — **the active editor store hook** (selector-first): layout/sections, content, UI/toolbars, meta, persistence/auto-save. Call it with a selector — `useEditStore(s => s.field)` (wrap object selectors in `useShallow`); use `useEditStoreApi()`/`useEditStore.getState()` for actions & one-shot reads. Bare `useEditStore()` whole-store subscription is **banned by ESLint** (`no-restricted-syntax` in `.eslintrc.json`). `EditProvider` bootstraps the token-scoped instance via `useEditStoreBootstrap` (import it nowhere else). (The old `useEditStoreLegacy`/`useEditStoreGlobal` façades were removed in editor-phase-4.)
 - `useModalManager` (`src/hooks/`) — modal queue + field-edit dialogs.
 - `src/stores/`: `editStore.ts` (token-scoped store factory), `useThemeStore.ts`, `storeManager.ts`.
 - Generation stores: `useProductGenerationStore`, `useServiceGenerationStore`, `useGenerationStore`.

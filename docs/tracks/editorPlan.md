@@ -90,18 +90,23 @@ aspect)` → standard collection editor → template dev writes NO upload code.
 | 1 | **Trust** — synchronous-flush commit path (InlineTextEditorV2 commit audit) + save-state chip + throttled Playwright persistence spec | zero lost edits at 6×, spec in CI-runnable form |
 | 2 | **Truth** — wire alt-text (one store call), DELETE FormToolbar (form-builder modal stays reachable; rebuild post-§6), wire-or-remove section "Regenerate Content" | no control that no-ops |
 | 3 ✅ BUILT | **Shell + primitives** — schema-driven selection · floating-ui shell + action-set configs · selector-ize all toolbar store access · build `imageCollection` + `logo` primitives (atelier needs both) · DELETE anchors/locks/watchdog/singleton/legacy positioning · BUILT 2026-07-11 on `feature/editor-phase-3-shell-primitives` (`imageCollection` proven on vestria catalogue grid via upgraded injected `E.List`/`E.Img` + alt law; founder manual QA pending) | net-negative LOC; idle <10% at 6×; toolbar QA |
-| 4 | **Store finish** — retire `useEditStoreLegacy` façade → sliced token-scoped store (content/selection/ui/persistence) · ops-based undo · lint rule banning bare `useEditStore()` | heap flat while typing; undo/redo QA |
+| 4 ✅ DONE | **Store finish** (`docs/task/editor-phase-4-store-finish.{spec,plan,audit}.md`) — collapsed the 4 access layers into ONE selector-first `useEditStore(selector?)` hook (+ `useEditStoreBootstrap` for `EditProvider` only); deleted `useEditStoreLegacy`/`useEditStoreGlobal`/dead compat shims; selector-ized all 70 bare whole-store call sites in 6 hot-first batches; ESLint `no-restricted-syntax` now bans bare `useEditStore()`. Ops-based undo **descoped** to universe/i18n (named-op mutation discipline preserved untouched — it's the propagation prerequisite, tackled there). Perf: renders/keystroke ↓, heap flat (see baseline doc). Gates A/B/C founder-approved 2026-07-14. | heap flat while typing; undo/redo QA — MET |
 | 5 | **scalePlan surface** — §5 button modal + THE link popover · T3 placeholder-slot fill flow · social profiles editor · proof needs-review badges | lands ON the new shell (the reason this track precedes §5 implementation) |
 
 Phases 0–3 unblock template-factory/atelier (kit + conformance consume the contract; atelier's
 slider is the `imageCollection` proving case). Phase 4 unblocks universe + i18n assisted mode.
 Phase 5 IS part of scale implementation, sequenced here.
 
+> **Known dead code — KEPT (founder ruling 2026-07-14):** 6 never-mounted modals surfaced during
+> phase-4's B5 batch — `CountdownConfigModal`, `TaxonomyModalManager`, `LandingGoalsModal`,
+> `ElementPicker`, `DeviceToggle`, `PrivacyPolicyEditor` — are retained for now (deletion deferred,
+> not part of the store-finish scope). Their store access was selector-ized like everything else.
+
 ## Decisions locked (2026-07-11)
 
 1. `@floating-ui/react` adopted for all toolbar/popover positioning.
 2. FormToolbar deleted now; form-editing UX rebuilt only after scale §6 (goal→form) defines it.
-3. Ops-based undo in phase 4 (not deferred to universe — it's also the heap fix).
+3. ~~Ops-based undo in phase 4 (not deferred to universe — it's also the heap fix).~~ **Superseded (2026-07-14):** phase 4 delivered the heap fix via selector-ization alone; ops-based undo **descoped** back to universe/i18n (its real driver = shared-edit propagation). Named-op mutation discipline preserved untouched, so ops-undo remains a clean future add.
 4. Queue: this track = #1 after i18n-phase-1; template-factory + atelier run AFTER phases 0–3;
    scale §5/§6 UI waits for the shell (phase 5).
 5. No UX layout change (locked earlier: cost driver was store writes, not editable surface).
@@ -126,8 +131,9 @@ freeform styling controls (D6: curated looks only) · mobile editing UX.
 
 1. Phase 1 commit-path fix: patch InlineTextEditorV2's existing commit chain vs rewrite commit
    layer (decide after phase-0 edit-loss re-test).
-2. Phase 3/4 boundary: selector-ize during shell build or all-at-once in store finish (plan-time
-   call).
+2. ~~Phase 3/4 boundary: selector-ize during shell build or all-at-once in store finish.~~
+   **Resolved:** phase 3 did the toolbars, phase 4 did the rest (the ~70 remaining bare
+   whole-store call sites, in hot-first batches).
 3. Save-state chip placement + copy (small taste gate at build).
 4. `imageCollection` per-item caption/category schema — align with portfolio grid contract slots
    at kit-generation time.
