@@ -45,3 +45,61 @@ Rubric (full text in the file header): two opposing scores summed from three sig
 ### Open risks
 - Amount hints (`HIGH_AMOUNT_HINT`/`LOW_AMOUNT_HINT`) are currency-naive; they are weak (+1, never decisive alone) and keyword/mode-dominated, but real INR/EUR/USD tuning is a track-E concern.
 - `storyBranch` default (`established`) is a judgment call; revisit if the founder wants absent-slot to be conservative-`new`.
+
+## Phase 2 — work strategy route (the ONE small AI call)
+
+### Files changed
+- ADD `src/lib/schemas/workStrategy.schema.ts`
+- ADD `src/modules/audience/work/strategy/promptsWork.ts`
+- ADD `src/modules/audience/work/strategy/parseStrategyWork.ts`
+- ADD `src/modules/audience/work/strategy/parseStrategyWork.test.ts`
+- ADD `src/modules/audience/work/promptFirewall.ts`
+- ADD `src/modules/audience/work/promptFirewall.test.ts`
+- ADD `src/modules/prompt/mockResponseGeneratorWork.ts`
+- MODIFY `src/lib/modelConfig.ts`
+- ADD `src/app/api/audience/work/strategy/route.ts`
+
+### What was built
+
+**workStrategy.schema.ts** — `WorkStrategyResponseSchema` = a zod object with ONLY `positioningAngle` (string), `storyAngle` (string), `voiceNotes` (string[]≥1). The tiny surface IS the AC-3 enforcement point: zod strips any structural key the model returns, so the AI can never contribute structure.
+
+**promptFirewall.ts** — work clone of the product firewall, but TWO guards (the plan asked for "prompt string OR engine input object"):
+- `assertNoTemplateLeak(input, where)` — object-key guard; forbidden keys `templateId`/`skeletonId`/`variantId` (added `skeletonId` vs product's two).
+- `assertNoTemplateNamesInText(text, where)` — string scan over `TEMPLATE_NAME_TOKENS` (atelier/granth/lumen/meridian/techpremium/hearth/lex/vestria/surge + the 3 identity keys). Both dev-only throw, prod no-op.
+
+**promptsWork.ts** — `buildWorkStrategyPrompt(input)`: lean strategy prompt from businessName + profession/workNoun + pricePosition + establishment branch + dreamClient + verbatim praise + group names + primaryLanguage + the pre-rendered voice block. Calls `assertNoTemplateLeak(input)` at entry and `assertNoTemplateNamesInText(prompt)` at exit. Asks the model for ONLY the 3 angle fields and states structure is already decided in code.
+
+**parseStrategyWork.ts** — `assembleWorkStrategy({ llmResponse, facts, professionRow, structure? })`: calls phase-1 `assembleWorkStructure` for the deterministic half, reads the AI response ONLY for the 3 narrative fields. Applies the shared `clampSectionList` (imported from product `parseStrategyProduct.ts`, never edited) to the home body → chrome at edges, hero first, required sections present. Returns `WorkStrategyOutput`.
+
+**mockResponseGeneratorWork.ts** — `generateMockWorkStrategy({facts, professionRow})` returns a canned `WorkStrategyResponse` run through the REAL `assembleWorkStrategy` (real structure, canned angles). Plus a phase-3 placeholder `generateMockWorkCopy` returning `{}` (kept minimal; fleshed in phase 3).
+
+**modelConfig.ts** — added `'work-strategy'` and `'work-copy'` to the `Endpoint` union + MODELS rows in BOTH tiers: cheap = GPT-4o-mini/Haiku (mirrors `strategy`/`copy`), production = Sonnet/GPT-4o. Global `AI_MODEL_OVERRIDE` logic untouched.
+
+**route.ts** (`/api/audience/work/strategy`) — mirrors the product strategy route: request schema `{ brief: BriefSchema }`, reads `getWorkFacts(brief.facts)` (400 if absent), `requireAuth`, `withAIRateLimit`, `professionRow` from `brief.businessType`. Mock path (NEXT_PUBLIC_USE_MOCK_GPT or DEMO_TOKEN bearer) → `generateMockWorkStrategy` with `meta.mock`, 0 credits. Real path: derive pricePosition + voice, build prompt, `generateWithSchema('work-strategy', …, WorkStrategyResponseSchema, 'workStrategy')`, `assembleWorkStrategy`, then `consumeCredits(userId, UsageEventType.STRATEGY_GENERATION, CREDIT_COSTS.STRATEGY_GENERATION, …)` — the SAME event/cost as product (no new credit event).
+
+### WorkStrategyOutput shape (settled)
+Parallel to `ProductStrategyOutput` — deterministic structure + narrative fields:
+- AI narrative: `positioningAngle: string`, `storyAngle: string`, `voiceNotes: string[]`
+- Deterministic: `sections: string[]` (home incl. chrome, via clampSectionList), `uiblocks: Record<string,string>` (section → template-AGNOSTIC contract sectionType — the concrete skin/block resolves later, never here; firewall), `sitemap: WorkSitemapPage[]` ([0]=home; `{archetypeKey,title,pathSlug,sections}` parallel to product `SitemapPage`), plus deterministic context the copy phase needs: `archetype`, `leadGroups`, `storyBranch`, `primaryLanguage`, `wording`.
+
+### How the route mirrors product (auth/credits/mock)
+- Auth: `requireAuth(req)` + `withAIRateLimit` wrapper — identical to product.
+- Credits: reuses `UsageEventType.STRATEGY_GENERATION` + `CREDIT_COSTS.STRATEGY_GENERATION`; consumed AFTER assembly; failure warns but does not fail the response — identical pattern.
+- Mock: same DEMO_TOKEN + NEXT_PUBLIC_USE_MOCK_GPT gate, `meta: { mock: true }`, 0 credits.
+
+### Deviations from the plan
+- **Firewall = two functions, not one.** The plan said "clone product's `assertNoTemplateLeak`". Product's is object-key-only, but the plan text also required guarding "any prompt string". I added a second guard `assertNoTemplateNamesInText` (string scan) rather than overloading one function, and wired both into the prompt builder. In-scope, conservative — strictly stronger than the product clone.
+- **`uiblocks` = identity map to contract sectionType.** Product `uiblocks` are template block/layout names, but the work strategy is template-agnostic (firewall) and no work block registry is in this phase's scope. So `uiblocks[section]` = the contract sectionType (== the key). Keeps the ProductStrategyOutput-parallel shape without leaking template identity; the real skin/block resolves downstream. Documented in the file header.
+- **`WorkStrategyRequestSchema.brief` is REQUIRED** (product's is `.optional()`). The work engine has no meaningful behavior without facts, so the route requires the Brief and 400s if `facts.work` is absent. In-scope judgment call.
+- **`WorkStrategyOutput` type lives in `parseStrategyWork.ts`** (not a shared types file) — no types file was on the Files-touched list; mirrors how the assembler owns the type locally.
+- **`professionRow` cast** — `brief.businessType` is an open string; cast to `WorkProfessionRow` (only `.key` is read + mapped by `resolveWorkProfession`, which defaults unknowns). Safe; commented at the cast site.
+
+### Test results
+- `npx tsc --noEmit`: clean except the pre-existing unrelated `src/app/page.tsx(6,26)` missing `@/assets/images/founder.jpg` (not in scope, ignored per instructions).
+- New tests: `promptFirewall.test.ts` (object-key guard throws on each forbidden key; string guard throws on each template token; `buildWorkStrategyPrompt` produces no template names, throws when salted with templateId/skeletonId, still carries seller facts — AC-7 first half) + `parseStrategyWork.test.ts` (narrative copied from AI; structure IDENTICAL across two different AI responses on the same facts; home leads sitemap; clampSectionList law; schema STRIPS structural contraband and rejects missing narrative fields — AC-3 second half). Work module: 5 files, 45 tests, all pass.
+- Full suite `npm run test:run`: 172 passed | 1 skipped (173 files); 2899 passed | 15 skipped (2914 tests). No regressions (up 2 files / 14 tests from phase 1).
+- `npx eslint` on all 9 touched files: clean, no errors introduced.
+
+### Open risks
+- `TEMPLATE_NAME_TOKENS` is a manual roster — a NEW work template name not added here would slip the string guard. Low risk (dev-only guard; roster covers all current templates); noted for whoever adds a template.
+- `uiblocks` identity map is a phase-2 placeholder shape; phase 3/5 copy generation must confirm it reads `sections`/`sitemap` (not `uiblocks` block names) or that the identity map suffices.

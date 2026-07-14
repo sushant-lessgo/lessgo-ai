@@ -2,7 +2,7 @@
 // cheap = testing/development, production = quality
 
 export type ModelTier = 'cheap' | 'production';
-export type Endpoint = 'understand' | 'strategy' | 'uiblock' | 'copy' | 'privacy' | 'social-posts' | 'emailSequence' | 'cold-outreach';
+export type Endpoint = 'understand' | 'strategy' | 'uiblock' | 'copy' | 'privacy' | 'social-posts' | 'emailSequence' | 'cold-outreach' | 'work-strategy' | 'work-copy';
 
 interface ModelConfig {
   primary: string;
@@ -29,6 +29,10 @@ const MODELS: Record<ModelTier, Record<Endpoint, ModelConfig>> = {
     emailSequence: { primary: GPT_4O_MINI, backup: null },
     // Cold outreach: OpenAI/Nebius path (spec constraint) — no Anthropic backup.
     'cold-outreach': { primary: GPT_4O_MINI, backup: null },
+    // Work engine (work-copy-engine track): mirror strategy/copy default tiers.
+    // 'work-copy' is the ONE knob to bump if NL quality fails (plan phase 7).
+    'work-strategy': { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
+    'work-copy': { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
   },
   production: {
     understand: { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
@@ -43,6 +47,10 @@ const MODELS: Record<ModelTier, Record<Endpoint, ModelConfig>> = {
     emailSequence: { primary: GPT_4O_MINI, backup: null },
     // Cold outreach: OpenAI/Nebius path (spec constraint) — no Anthropic backup.
     'cold-outreach': { primary: GPT_4O_MINI, backup: null },
+    // Work engine: mirror strategy/copy production tiers (sonnet quality, GPT-4o
+    // backup). 'work-copy' is the ONE knob to bump if NL quality fails (phase 7).
+    'work-strategy': { primary: CLAUDE_SONNET, backup: GPT_4O },
+    'work-copy': { primary: CLAUDE_SONNET, backup: GPT_4O },
   },
 };
 
