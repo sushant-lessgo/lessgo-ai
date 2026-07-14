@@ -2,7 +2,11 @@
   "root": true,
   "extends": "next/core-web-vitals",
   "rules": {
-    "react/no-unescaped-entities": "off"
+    "react/no-unescaped-entities": "off",
+    "no-restricted-syntax": ["error", {
+      "selector": "CallExpression[callee.name='useEditStore'][arguments.length=0]",
+      "message": "Bare whole-store subscription banned. Pass a selector (wrap object selectors in useShallow); use useEditStoreApi()/.getState() for actions & one-shot reads."
+    }]
   },
   "ignorePatterns": ["src/generated/"]
 }
