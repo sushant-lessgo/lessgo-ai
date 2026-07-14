@@ -66,6 +66,11 @@ describe('scale-08 pipeline guards', () => {
       // Editor layout-change modal: only vestria hero sections offer the
       // hero-layout swap. Pure render-layer UI gate.
       'app/edit/[token]/components/ui/LayoutChangeModal.tsx',
+      // Wizard style slot: the vestria hero-variant / style pickers are
+      // vestria-only UI (atelier phase 2 gate `showVestriaPickers =
+      // templateId === 'vestria'`). Render-layer picker, not a copy-pipeline
+      // fork.
+      'components/onboarding/wizard/StyleSlot.tsx',
     ]);
     const pattern = /(templateId\s*===\s*'vestria'|'vestria'\s*===\s*templateId)/;
     const offenders = FILES.filter((f) => pattern.test(fs.readFileSync(f, 'utf8')))

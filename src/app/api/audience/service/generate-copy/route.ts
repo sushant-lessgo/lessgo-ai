@@ -138,7 +138,10 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
     if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true' || token === DEMO_TOKEN) {
-      logger.info('[Service Copy] Using mock response');
+      // silent-fallback: MOCK copy is canned, not AI-written — warn (not info) so
+      // a degraded run is visible in logs, and flag it in meta so the client can
+      // surface/telemeter it instead of treating it as a normal success.
+      logger.warn('[Service Copy] Using MOCK response — no real copy generated (NEXT_PUBLIC_USE_MOCK_GPT or demo token)');
       let mockSections = generateMockServiceCopy({
         strategy: strategy as any,
         uiblocks,
@@ -154,7 +157,7 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
         sections: processed,
         creditsUsed: 0,
         creditsRemaining: 999,
-        meta: { attempts: 0, complete: true },
+        meta: { attempts: 0, complete: true, mock: true },
       });
     }
 
@@ -248,6 +251,7 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
       meta: {
         attempts,
         complete,
+        mock: false,
         missingSections: complete ? undefined : missingSections,
       },
     });

@@ -2,7 +2,7 @@
 
 Things I want to build. Unspecced — moves to `productQueue.md` once a spec exists.
 
-1. **Branded sign up / log in page** — folded into app-UI reimagine; founder generating a UI evaluation report first (in progress 2026-07-12), then /discuss
+1. **Branded sign up / log in page** — SPECCED 2026-07-12 as `docs/task/app-entry.spec.md` (from app-UI assessment); now in queue
 2. **Engine coverage** — RULED 2026-07-11: all 4 engines before beta; work then place; see `docs/tracks/templatePlan.md` T5/T6
 3. **Place engine** — restaurants/hotels/venues; build ASAP after work engine, before beta; bundles menu/multi-location/events capabilities (templatePlan T5, wave 2)
 4. **Download after form** — form submit → deliver a file/asset (lead magnet)
@@ -28,3 +28,10 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 24. **Entity / AI-search pack** — see `docs/tracks/seoPlan.md` §10
 25. **Lead enrichment** — form submit → scrape lead's domain → lead brief + drafted reply in the lead-notification email. Copy-only, no CRM
 26. **Free-tools TOF** — flagship: landing-page analyzer (email-gated results + launch distribution); programmatic per-category fan-out as experiment only
+27. **Meridian terminal-mock hero content** — `TerminalHero` ships hardcoded "item one/two/three" filler on published page; parameterize with real business data or swap for static visual (OOO from app-UI hygiene = template-content work); `src/modules/templates/meridian/blocks/Hero/TerminalHero.tsx` (+ `.published.tsx`)
+28. For TOF WebsiteExamples.com
+
+| 3 | Research brief — premium research-backed path: agentic Claude VoC + competitor research → editable Brief → generation | `docs/task/research-brief.spec.md` | queued — HELD until atelier lands (generation-path conflict) |
+| 4 | Universe v1 — variant fan-out (message-match / SEO keyword / audience), shared-edit propagation, universe view + per-variant analytics | `docs/tracks/universePlan.md` → universe-01… (spec required before /feature) | reserved, awaiting spec (**needs editorPlan phase 4 ops**) |
+| 5 | Campaign/offer pages — time-bound promo variants (universe v2) | universePlan.md U2 (spec required before /feature) | reserved, awaiting spec |
+| 6 | A/B testing — split traffic between variants (universe v3) | universePlan.md U2 (spec required before /feature) | reserved, awaiting spec |

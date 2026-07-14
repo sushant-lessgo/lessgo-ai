@@ -46,17 +46,27 @@ describe('inputContracts — field hygiene', () => {
 });
 
 describe('inputContracts — core-section alignment', () => {
-  it.each(engines)('%s field sections are ⊆ engine core sections', (engine) => {
-    const core = new Set(engineCoreSections[engine]);
+  // The work wizard contract is writer-shaped (granth): its field sections target
+  // granth-specific sections that are NOT part of the template-agnostic minimal
+  // work core. atelier (2nd work template) uses the skeleton path, not these fields.
+  // Anything outside core∪extras still fails — the typo-catch value is preserved.
+  const CONTRACT_EXTRA_SECTIONS: Record<CopyEngine, readonly string[]> = {
+    thing: [],
+    trust: [],
+    work: ['books', 'writing', 'praise'],
+  };
+
+  it.each(engines)('%s field sections are ⊆ engine core sections (+contract extras)', (engine) => {
+    const allowed = new Set([...engineCoreSections[engine], ...CONTRACT_EXTRA_SECTIONS[engine]]);
     for (const f of engineContracts[engine].fields) {
-      if (f.section) expect(core.has(f.section)).toBe(true);
+      if (f.section) expect(allowed.has(f.section)).toBe(true);
     }
   });
 
-  it.each(engines)('%s dropTargets are ⊆ engine core sections', (engine) => {
-    const core = new Set(engineCoreSections[engine]);
+  it.each(engines)('%s dropTargets are ⊆ engine core sections (+contract extras)', (engine) => {
+    const allowed = new Set([...engineCoreSections[engine], ...CONTRACT_EXTRA_SECTIONS[engine]]);
     for (const f of engineContracts[engine].fields) {
-      if (f.dropTarget) expect(core.has(f.dropTarget)).toBe(true);
+      if (f.dropTarget) expect(allowed.has(f.dropTarget)).toBe(true);
     }
   });
 });

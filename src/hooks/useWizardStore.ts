@@ -65,7 +65,17 @@ import {
 import { computeFieldStates, type FieldState } from '@/modules/wizard/waterfall';
 // Single-page structure clamp law (scale-07 phase 4) — plain data-layer module
 // (generalized clampSitemap sibling), safe for the client store.
-import { applyConfirmedSections } from '@/modules/audience/product/strategy/parseStrategyProduct';
+import {
+  applyConfirmedSections,
+  filterSectionsByProof,
+} from '@/modules/audience/product/strategy/parseStrategyProduct';
+// atelier phase 2 — pure audience-level DATA (templateMeta/businessTypes siblings,
+// firewall-safe): the multipage-capability gate + page-archetype menu that the
+// served work→multipage skeleton path seeds its sitemap from.
+import {
+  getPageArchetypesForTemplate,
+  isMultipage,
+} from '@/modules/audience/product/pageArchetypes';
 // scale-07 phase 6 — pure data-layer hard-fit helper (templateMeta/coreSections
 // data only, no template modules; firewall-safe for the client store).
 import {
@@ -406,9 +416,27 @@ function prefillValueFor(
     return raw != null;
   }
   if (field.input === 'chips' || field.input === 'upload') {
-    return Array.isArray(raw) ? (raw as string[]) : emptyValueFor(field);
+    if (!Array.isArray(raw)) return emptyValueFor(field);
+    return applyPrefillArrayFilter(field, raw as string[]);
   }
   return typeof raw === 'string' ? raw : emptyValueFor(field);
+}
+
+/**
+ * The ONLY place the numeric-or-empty rule for proof lives. The thing engine's
+ * `realNumbers` field wants claims with an ACTUAL number; the shared `outcomes`
+ * entry field that feeds it (also consumed by trust/work, qualitatively) must
+ * stay untouched — so we filter client-side, scoped by `field.id` (unique per
+ * engine), never by `prefillKey` (shared as `outcomes`). Known tradeoff: the
+ * "contains a digit" test drops non-numeric proof like "cut onboarding from
+ * days to minutes" and keeps numeric-adjacent non-metrics like "ISO 9001
+ * certified" — matches the spec's "actual numbers" intent, not a bug.
+ */
+function applyPrefillArrayFilter(field: ContractField, values: string[]): string[] {
+  if (field.id === 'realNumbers') {
+    return values.filter((v) => /\d/.test(v));
+  }
+  return values;
 }
 
 function sourceForState(state: FieldState): FieldSource {
@@ -422,10 +450,66 @@ function businessTypeEntryFor(brief: Brief): BusinessTypeEntry | null {
   return key && key in businessTypes ? businessTypes[key] : null;
 }
 
-/** Slot skeleton minus this engine's skips, preserving canonical slot order. */
-function slotsForEngine(engine: CopyEngine): WizardSlot[] {
-  const { slotSkips } = getContract(engine);
-  return wizardSlots.filter((s) => !slotSkips.includes(s));
+/**
+ * The multipage brief-signal (businessType + persisted structure.mode) the
+ * capability gate reads. Mirrors StructureSlot's `briefSignal` so slot inclusion,
+ * fetchStrategy seeding, and generation dispatch all key off the SAME signal.
+ */
+export function briefSignalFromState(
+  s: Pick<WizardState, 'businessTypeKey' | 'briefStructureMode'>,
+): Pick<Brief, 'structure' | 'businessType'> | undefined {
+  if (!s.businessTypeKey && !s.briefStructureMode) return undefined;
+  return {
+    ...(s.businessTypeKey ? { businessType: s.businessTypeKey } : {}),
+    ...(s.briefStructureMode ? { structure: { mode: s.briefStructureMode } } : {}),
+  } as Pick<Brief, 'structure' | 'businessType'>;
+}
+
+/**
+ * Whether a thing-engine template exposes REAL style controls (hero-variant +
+ * palette/mood pickers). Only `vestria` does today — its pickers are
+ * VESTRIA-TYPED by construction (see StyleSlot's `showVestriaPickers`, which
+ * consumes this SAME predicate so the vestria literal lives in ONE place). Any
+ * future thing template with real pickers opts in by flipping this one
+ * predicate; templates without controls have the `style` slot skipped at
+ * runtime (below) so the user never hits a dead step.
+ *
+ * NB param is `tid`, not `templateId`: this is a render-layer UI-capability
+ * predicate (same category as VestriaThemePopover's `tid`-form vestria gate),
+ * and the scale-08 pipelineGuards test bans the `templateId`-operand vestria
+ * literal outside its render-layer allowlist. The `tid` form is the codebase's
+ * documented escape for legitimate render-layer vestria gates.
+ */
+export function thingTemplateHasStyleControls(
+  tid: TemplateId | null | undefined,
+): boolean {
+  return tid === 'vestria';
+}
+
+/**
+ * Slot skeleton minus this engine's skips, preserving canonical slot order.
+ * atelier phase 2: work keeps its structure skip UNLESS the PICKED template is
+ * multipage — a served work→multipage brief (e.g. atelier) goes THROUGH the
+ * structure slot's page-archetype menu. Granth declares no `multipage`
+ * capability, so `isMultipage` is false for it and its skip is retained.
+ *
+ * onboarding-fixes phase 2: thing templates WITHOUT real style controls skip
+ * the `style` slot (dead one-line stub otherwise). vestria keeps it; `style`
+ * stays in `wizardSlots` globally because trust + vestria still need it.
+ */
+function slotsForEngine(
+  engine: CopyEngine,
+  templateId: TemplateId | null | undefined,
+  briefSignal?: Pick<Brief, 'structure' | 'businessType'> | null,
+): WizardSlot[] {
+  const skips = new Set<WizardSlot>(getContract(engine).slotSkips);
+  if (engine === 'work' && isMultipage(templateId ?? undefined, briefSignal)) {
+    skips.delete('structure');
+  }
+  if (engine === 'thing' && !thingTemplateHasStyleControls(templateId)) {
+    skips.add('style');
+  }
+  return wizardSlots.filter((s) => !skips.has(s));
 }
 
 // ---------------------------------------------------------------------------
@@ -689,7 +773,28 @@ export const useWizardStore = create<WizardStore>()(
           state.mode = deriveMode(brief);
 
           const contract = getContract(engine);
-          state.slots = slotsForEngine(engine);
+          // atelier phase 5 — slot inclusion must key off the SAME confirmed-only
+          // multipage signal that fetchStrategy/GeneratingSlot use
+          // (briefSignalFromState), NOT the raw classify brief. classify stamps
+          // EVERY brief with an UNCONFIRMED `structure:{ mode, pages: [] }` hint
+          // (classify.ts) = the raw AI guess. Feeding that raw hint here let a
+          // served photographer the AI read as single-page suppress the structure
+          // slot (isMultipage(brief) → mode==='single' → skip retained), while the
+          // dispatch derivation — which reads briefStructureMode, set ONLY from a
+          // CONFIRMED structure — still went multipage → a zero-page skeleton.
+          // Set briefStructureMode from a CONFIRMED structure FIRST (design intent,
+          // comment below), then derive slots from the reconstructed signal so both
+          // derivations agree. A CONFIRMED single still correctly stays single;
+          // an unconfirmed hint never suppresses the slot for a multipage template.
+          const confirmedStructure = brief.structure;
+          const hasConfirmedStructure =
+            !!confirmedStructure &&
+            ((confirmedStructure.sections?.length ?? 0) > 0 ||
+              (confirmedStructure.pageDetails?.length ?? 0) > 0);
+          if (confirmedStructure && hasConfirmedStructure) {
+            state.briefStructureMode = confirmedStructure.mode;
+          }
+          state.slots = slotsForEngine(engine, templateId ?? null, briefSignalFromState(state));
           state.currentSlot = state.slots[0] ?? 'identity';
 
           // Per-field state via the phase-1 waterfall (logic NOT duplicated here).
@@ -735,13 +840,14 @@ export const useWizardStore = create<WizardStore>()(
           // reload after confirm resumes the user's structure edits (the
           // strategy-seed guards never clobber these), and the required set
           // reflects the confirmed structure immediately.
+          // (briefStructureMode already set from the CONFIRMED structure above —
+          // before slot derivation. This block seeds the sitemap/section state.)
           const persisted = brief.structure;
           const isConfirmedStructure =
             !!persisted &&
             ((persisted.sections?.length ?? 0) > 0 ||
               (persisted.pageDetails?.length ?? 0) > 0);
           if (persisted && isConfirmedStructure) {
-            state.briefStructureMode = persisted.mode;
             if (persisted.mode === 'multi' && persisted.pageDetails?.length) {
               state.sitemap = persisted.pageDetails.map((d) => ({
                 archetypeKey: d.archetypeKey,
@@ -932,7 +1038,36 @@ export const useWizardStore = create<WizardStore>()(
           });
           return;
         }
-        // Only structure-gated engines fetch here (work keeps its slot skip).
+        // atelier phase 2 — Work + a multipage picked template (e.g. atelier)
+        // seeds the sitemap from the page-archetype menu defaults with ZERO
+        // LLM fetch / ZERO credit charge (work copy-gen stays OUT — the served
+        // skeleton path fills copy manually in the editor). Shaped like the
+        // "strategy already present" early-exit above: mark done, no fetch.
+        // Granth (work + single-page — no `multipage` capability) falls through
+        // to the early return below unchanged.
+        if (s.engine === 'work' && isMultipage(s.templateId ?? undefined, briefSignalFromState(s))) {
+          set((state) => {
+            if (!state.sitemap) {
+              const menu = getPageArchetypesForTemplate(state.templateId) ?? [];
+              state.sitemap = menu
+                .filter((a) => a.defaultIncluded)
+                .map((a) => ({
+                  archetypeKey: a.key,
+                  title: a.title,
+                  pathSlug: a.pathSlug,
+                  // Proof hard rule (F22) — same filter StructureSlot's addPage
+                  // uses: an unpromised proof section can't be seeded.
+                  sections: filterSectionsByProof([...a.defaultSections], {
+                    hasTestimonials: state.proof.hasTestimonials,
+                  }),
+                }));
+            }
+            state.strategyStatus = 'done';
+          });
+          return;
+        }
+        // Only structure-gated engines fetch here (work single-page keeps its
+        // slot skip; work multipage is handled chargeless above).
         if (s.engine !== 'thing' && s.engine !== 'trust') return;
         set((state) => {
           state.strategyStatus = 'fetching';

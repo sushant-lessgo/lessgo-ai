@@ -28,12 +28,29 @@ export interface GenerationCallbacks {
 
 export type GenerationStatus = 'done' | 'credits' | 'error';
 
+/**
+ * silent-fallback telemetry — the degraded-generation signal a route reports so
+ * the slot can tell the user (and PostHog) that copy came back MOCK or
+ * INCOMPLETE instead of silently passing as a normal success. Threaded from the
+ * copy route's `json.meta` through the engine adapters (thing/trust).
+ */
+export interface GenerationMeta {
+  /** true when the route served canned MOCK copy (no real LLM call). */
+  mock?: boolean;
+  /** false when the completeness check found promised sections missing. */
+  complete?: boolean;
+  /** Section keys the completeness check flagged as missing (when !complete). */
+  missingSections?: string[];
+}
+
 export interface GenerationResult {
   status: GenerationStatus;
   /** Where the slot navigates on success (`/edit/${tokenId}`). */
   redirectTo?: string;
   /** Human-readable error for the retry UI (status === 'error'). */
   error?: string;
+  /** Degraded-generation signal on success (silent-fallback surfacing). */
+  meta?: GenerationMeta;
 }
 
 /** Per-engine adapter input union. */

@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     description,
     alternates: { canonical: canonicalURL },
-    openGraph: { title, description, url: canonicalURL, siteName: 'Lessgo.ai', type: 'website' },
+    openGraph: { title, description, url: canonicalURL, siteName: 'Lessgo AI', type: 'website' },
   };
 }
 

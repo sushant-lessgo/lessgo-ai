@@ -12,6 +12,7 @@
 
 import React from 'react';
 import type { VestriaPrimitives } from '../primitives';
+import { normalizeCopyrightYear } from '../../../shared/footerHygiene';
 import { FOOTER_STYLES } from './styles';
 
 export interface VestriaFooterLink { id?: string; label?: string; href?: string }
@@ -99,7 +100,7 @@ export function VestriaFooterCore({ content, E }: { content: VestriaFooterConten
           </div>
 
           <div className="vs-foot__bot">
-            <E.Txt elementKey="copyright" value={content.copyright} as="span" placeholder="© 2026 Company — All rights reserved." />
+            <E.Txt elementKey="copyright" value={normalizeCopyrightYear(content.copyright) ?? content.copyright} as="span" placeholder="© 2026 Company — All rights reserved." />
             <E.Txt elementKey="tagline" value={content.tagline} as="span" placeholder="" />
           </div>
         </div>

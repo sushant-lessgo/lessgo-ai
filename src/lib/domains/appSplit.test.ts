@@ -9,6 +9,8 @@ import {
   shouldNoindex,
   getApexPublishRedirect,
   isApexPublishCandidate,
+  isAppRootRequest,
+  getAppRootAction,
   APP_PATH_PREFIXES,
 } from './appSplit';
 
@@ -183,6 +185,56 @@ describe('isApexPublishCandidate', () => {
     expect(isApexPublishCandidate('localhost:3000', '/')).toBe(false);
     expect(isApexPublishCandidate('lessgo-ai.vercel.app', '/')).toBe(false);
     expect(isApexPublishCandidate(null, '/')).toBe(false);
+  });
+});
+
+describe('isAppRootRequest', () => {
+  it('is true only for the app prod host at root', () => {
+    expect(isAppRootRequest('app.lessgo.ai', '/')).toBe(true);
+    expect(isAppRootRequest('APP.LESSGO.AI:443', '/')).toBe(true);
+  });
+
+  it('is false for non-root app-host paths', () => {
+    expect(isAppRootRequest('app.lessgo.ai', '/dashboard')).toBe(false);
+    expect(isAppRootRequest('app.lessgo.ai', '/welcome')).toBe(false);
+    expect(isAppRootRequest('app.lessgo.ai', '/sign-in')).toBe(false);
+  });
+
+  it('is false off the app prod host, even at root', () => {
+    expect(isAppRootRequest('lessgo.ai', '/')).toBe(false);
+    expect(isAppRootRequest('www.lessgo.ai', '/')).toBe(false);
+    expect(isAppRootRequest('localhost:3000', '/')).toBe(false);
+    expect(isAppRootRequest('lessgo-ai.vercel.app', '/')).toBe(false);
+    expect(isAppRootRequest(null, '/')).toBe(false);
+  });
+
+  it('ignores query/hash when classifying root', () => {
+    expect(isAppRootRequest('app.lessgo.ai', '/?ref=x')).toBe(true);
+    expect(isAppRootRequest('app.lessgo.ai', '/#top')).toBe(true);
+  });
+});
+
+describe('getAppRootAction', () => {
+  it('routes signed-in visitors to the dashboard', () => {
+    expect(getAppRootAction(true)).toBe('dashboard');
+  });
+
+  it('routes signed-out visitors to the welcome entry page', () => {
+    expect(getAppRootAction(false)).toBe('welcome');
+  });
+});
+
+describe('/welcome is an app path', () => {
+  it('isAppPath treats /welcome (and nested) as an app path', () => {
+    expect(isAppPath('/welcome')).toBe(true);
+    expect(isAppPath('/welcome/anything')).toBe(true);
+  });
+
+  it('getApexToAppRedirect 307s apex /welcome to the app host', () => {
+    vi.stubEnv('NEXT_PUBLIC_DASHBOARD_URL', 'https://app.lessgo.ai');
+    expect(getApexToAppRedirect('lessgo.ai', '/welcome')).toBe(
+      'https://app.lessgo.ai/welcome',
+    );
   });
 });
 

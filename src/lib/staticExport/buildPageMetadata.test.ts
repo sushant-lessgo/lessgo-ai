@@ -106,7 +106,7 @@ describe('buildPageMetadata', () => {
     const m = buildPageMetadata({ ...base, content: flatContent, canonicalPath: '/' });
     expect(m.description).toBe('Founders launch in minutes, not weeks.');
     expect(m.title).toBe('Acme');
-    expect(m.siteName).toBe('Lessgo.ai');
+    expect(m.siteName).toBe('Lessgo AI');
     expect(m.ogType).toBe('website');
   });
 
@@ -252,6 +252,82 @@ describe('buildPageMetadata — seo overrides (Phase 2)', () => {
       true
     );
   });
+
+});
+
+describe('buildPageMetadata — HTML strip (Phase 1)', () => {
+  const base = {
+    slug: 'acme',
+    pageTitle: 'Acme',
+    previewImage: undefined,
+    baseUrl: 'https://lessgo.ai',
+  };
+
+  it('strips <em>/<strong> from headline (title) and subheadline (description), preserving inner text', () => {
+    const c = {
+      layout: { sections: ['hero-x'] },
+      'hero-x': {
+        elements: {
+          headline: { content: 'Ship <em>landing pages</em> fast' },
+          subheadline: { content: 'Founders <strong>launch in minutes</strong>, not weeks.' },
+        },
+      },
+    };
+    const m = buildPageMetadata({ ...base, pageTitle: '', content: c });
+    expect(m.title).toBe('Ship landing pages fast');
+    expect(m.description).toBe('Founders launch in minutes, not weeks.');
+    expect(m.title).not.toMatch(/[<>]/);
+    expect(m.description).not.toMatch(/[<>]/);
+  });
+
+  it('strips markup from seo.title / seo.description overrides', () => {
+    const m = buildPageMetadata({
+      ...base,
+      content: flatContent,
+      seo: {
+        title: 'Custom <em>SEO</em> Title',
+        description: 'Custom <strong>snippet</strong>.',
+      },
+    });
+    expect(m.title).toBe('Custom SEO Title');
+    expect(m.description).toBe('Custom snippet.');
+  });
+
+  it('applies the 160-cap AFTER stripping (markup near the boundary reclaims budget)', () => {
+    const inner = 'x'.repeat(200);
+    const c = {
+      layout: { sections: ['hero-x'] },
+      'hero-x': { elements: { subheadline: { content: `<strong>${inner}</strong>` } } },
+    };
+    const desc = buildPageMetadata({ ...base, content: c }).description;
+    expect(desc).toHaveLength(160);
+    expect(desc).toBe('x'.repeat(160));
+    expect(desc).not.toMatch(/[<>]/);
+  });
+
+  it('documenting: strips tags but preserves inner text, & and quotes unchanged (no drop, no encode)', () => {
+    const c = {
+      layout: { sections: ['hero-x'] },
+      'hero-x': {
+        elements: {
+          headline: { content: 'Tom <em>&</em> "Jerry" & Co' },
+          subheadline: { content: 'A <strong>fast</strong> & "quoted" tagline' },
+        },
+      },
+    };
+    const m = buildPageMetadata({ ...base, pageTitle: '', content: c });
+    expect(m.title).toBe('Tom & "Jerry" & Co');
+    expect(m.description).toBe('A fast & "quoted" tagline');
+  });
+});
+
+describe('buildPageMetadata — favicon cascade', () => {
+  const base = {
+    slug: 'acme',
+    pageTitle: 'Acme',
+    previewImage: undefined,
+    baseUrl: 'https://lessgo.ai',
+  };
 
   it('faviconUrl: own seo wins, else falls back to rootSeo (site-wide cascade)', () => {
     const own = buildPageMetadata({

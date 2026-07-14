@@ -264,7 +264,10 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
     },
     extractionSchemaKey: 'work',
     likelyIntents: ['enquiry', 'book-call', 'follow-social'],
-    structureDefault: 'single',
+    // atelier phase 5 — photographers default to MULTI now that a work+multipage
+    // template (atelier) exists and the served work flow reaches the structure
+    // slot (phase 2). This is the businessType signal `isMultipage` reads.
+    structureDefault: 'multi',
   },
   app: {
     key: 'app',

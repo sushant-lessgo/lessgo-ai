@@ -84,6 +84,23 @@ export function createEditorSelection(storeState: {
 }
 
 /**
+ * Whether a section should show its VISUAL selection (outline/ring) for a given
+ * sectionId. Mirrors the section-toolbar gate (`selectedSection && !selectedElement`):
+ * once an element is selected the element wins, so the parent section must NOT also
+ * render as selected (otherwise every renderer washes the section blue under a
+ * floating element toolbar). Kept pure + shared so the three redundant highlight
+ * systems (MainContent ring, SelectionSystem `.selected-section`, ElementDetector
+ * `.section-selected`) can't drift apart.
+ */
+export function isSectionVisuallySelected(
+  selectedSection: string | null | undefined,
+  sectionId: string,
+  selectedElement: ElementSelection | null | undefined
+): boolean {
+  return selectedSection === sectionId && !selectedElement;
+}
+
+/**
  * Helper to determine if a toolbar should be visible
  */
 export function shouldShowToolbar(

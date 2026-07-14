@@ -69,6 +69,7 @@ export const APP_PATH_PREFIXES = [
   '/t',
   '/sign-in',
   '/sign-up',
+  '/welcome',
 ] as const;
 
 /** True if `pathname` is under an app path prefix (exact or `/prefix/...`). */
@@ -148,4 +149,31 @@ export function isApexPublishCandidate(
   if (!isApexProdHost(host)) return false;
   const p = (pathname || '').split('?')[0].split('#')[0];
   return p === '/';
+}
+
+/**
+ * True only for an app-host root request: the exact app prod host
+ * (`app.lessgo.ai`) AND `pathname === '/'`. This is the pure pre-check that
+ * gates the (costly) `auth()` call in middleware — `auth()` fires only when this
+ * returns true. localhost / *.vercel.app / apex / any non-root path → false, so
+ * apex `/` and dev behaviour are untouched by construction.
+ */
+export function isAppRootRequest(
+  host: string | null | undefined,
+  pathname: string,
+): boolean {
+  if (!isAppProdHost(host)) return false;
+  const p = (pathname || '').split('?')[0].split('#')[0];
+  return p === '/';
+}
+
+/**
+ * Decision for an app-host root request (only ever called after
+ * `isAppRootRequest` returns true): signed-in visitors go to the dashboard,
+ * signed-out visitors get the welcome entry page.
+ */
+export function getAppRootAction(
+  isSignedIn: boolean,
+): 'dashboard' | 'welcome' {
+  return isSignedIn ? 'dashboard' : 'welcome';
 }

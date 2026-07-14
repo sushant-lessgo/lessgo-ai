@@ -17,6 +17,7 @@
  * The static path already flattens before calling; the dynamic routes must flatten explicitly.
  */
 import { resolveCanonicalURL } from './canonicalUrl';
+import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import type { PageSeo } from '@/types/store/pages';
 
 export interface BuildPageMetadataInput {
@@ -123,8 +124,11 @@ export function buildPageMetadata(input: BuildPageMetadataInput): PageMetadata {
   // Description: seo override → subheadline → headline → title, capped at 160 for
   // the auto path (matches the static path exactly); overrides render verbatim
   // (schema caps them at 200).
-  const rawDesc =
-    elementText(heroEls?.subheadline) || elementText(heroEls?.headline) || input.pageTitle;
+  // Strip HTML tags BEFORE the 160-cap: reclaims char budget AND avoids a truncated
+  // tag remnant (`...<e`) the regex can't match after capping.
+  const rawDesc = stripHTMLTags(
+    elementText(heroEls?.subheadline) || elementText(heroEls?.headline) || input.pageTitle
+  );
   const autoDescription = rawDesc.slice(0, 160);
   const description = seo?.description || autoDescription;
 
@@ -133,6 +137,12 @@ export function buildPageMetadata(input: BuildPageMetadataInput): PageMetadata {
   // (byte-identical head); they only benefit the dynamic route where page.title may be empty.
   const title =
     seo?.title || input.pageTitle || elementText(heroEls?.headline) || 'Landing Page';
+
+  // Strip HTML from the FINAL resolved strings — covers seo.title/seo.description
+  // overrides (og/twitter reuse these). Strip removes tags only; never encodes, so
+  // downstream escapeHTML() doesn't double-escape.
+  const cleanTitle = stripHTMLTags(title);
+  const cleanDescription = stripHTMLTags(description);
 
   const canonicalURL = resolveCanonicalURL({
     slug: input.slug,
@@ -152,11 +162,11 @@ export function buildPageMetadata(input: BuildPageMetadataInput): PageMetadata {
   });
 
   return {
-    title,
-    description,
+    title: cleanTitle,
+    description: cleanDescription,
     canonicalURL,
     ogImage,
-    siteName: 'Lessgo.ai',
+    siteName: 'Lessgo AI',
     ogType: 'website',
     noIndex: !!seo?.noIndex,
     faviconUrl: seo?.faviconUrl || input.rootSeo?.faviconUrl || DEFAULT_FAVICON_URL,

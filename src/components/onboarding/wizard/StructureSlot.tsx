@@ -52,6 +52,7 @@ import { businessTypes } from '@/modules/businessTypes/config';
 import {
   getCollectionDef,
   collectionKeysForBusinessType,
+  emptyCollectionNodeAllowed,
   type CollectionKey,
 } from '@/modules/collections/registry';
 import type { CollectionEntry } from '@/modules/brief/collections';
@@ -68,6 +69,10 @@ const SECTION_LABELS: Record<string, string> = {
   process: 'Process',
   testimonials: 'Testimonials',
   contact: 'Quote form',
+  // atelier phase 2 — work-grammar sections (served work→multipage skeleton).
+  work: 'Work',
+  packages: 'Packages',
+  'quote-band': 'Quote',
 };
 const sectionLabel = (s: string) => SECTION_LABELS[s] ?? s;
 
@@ -216,11 +221,19 @@ function CollectionNode({ collectionKey }: { collectionKey: CollectionKey }) {
 // coupling, none set today), OR declared by the businessType's ENGINE extraction
 // family (`collectionKeysForBusinessType`). The engine-key union is what makes a
 // one-liner entry (no site → no extraction → empty `facts.collections`) still
-// reach an empty collection node + its `+ Add` path (F19). Zero-entry state is
-// allowed (count-only/empty node, decision 2). For an UNCLASSIFIED entry (rung A,
-// `businessTypeKey` null) the engine union is `[]`, so we fall back to present-only
-// and never surface empty nodes. Returns null when there are no collections to
-// show, so single-page/multipage gates without collections are unchanged.
+// reach an empty collection node + its `+ Add` path (F19).
+//
+// EMPTY-NODE RULE (F19 refinement): a 0-item key surfaces ONLY when the
+// businessType is CATALOG-SHAPED — `emptyCollectionNodeAllowed(businessTypeKey)`
+// (extraction family `manufacturer`, or any future non-empty `requiredCollections`).
+// `requiredCollections` is dormant/EMPTY for every businessType today, so the
+// manufacturer-vs-SaaS distinction can NOT hinge on it — the real discriminator
+// is the extraction family. For the `thing` (SaaS/app) family an empty key is a
+// phantom "Products · 0 items" node and is HIDDEN; keys that HAVE items always
+// render (never gated). Manufacturer keeps its empty Products node + `+ Add`.
+// For an UNCLASSIFIED entry (rung A, `businessTypeKey` null) the engine union is
+// `[]` and the predicate is false, so we surface nothing empty. Returns null when
+// there are no collections to show, so gates without collections are unchanged.
 function CollectionNodes() {
   const businessTypeKey = useWizardStore((s) => s.businessTypeKey);
   const collections = useWizardStore((s) => s.collections);
@@ -230,9 +243,12 @@ function CollectionNodes() {
       (businessTypeKey && businessTypes[businessTypeKey]?.requiredCollections) || [];
     const engineKeys = collectionKeysForBusinessType(businessTypeKey);
     const present = Object.keys(collections) as CollectionKey[];
-    return Array.from(
+    const union = Array.from(
       new Set<CollectionKey>([...present, ...required, ...engineKeys])
     );
+    const allowEmpty = emptyCollectionNodeAllowed(businessTypeKey);
+    // Keys WITH items always render; EMPTY keys only for catalog-shaped types.
+    return union.filter((key) => (collections[key]?.length ?? 0) > 0 || allowEmpty);
   }, [businessTypeKey, collections]);
 
   if (keys.length === 0) return null;
@@ -567,8 +583,9 @@ export default function StructureSlot() {
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Your site plan</h1>
         <p className="mt-2 text-gray-600">
-          We suggest these pages. Adjust anything — nothing is written until you
-          approve the shape.
+          {engine === 'work'
+            ? "We suggest these pages. Adjust anything — we'll set up an empty page for each so you can fill it in the editor."
+            : 'We suggest these pages. Adjust anything — nothing is written until you approve the shape.'}
         </p>
       </div>
 

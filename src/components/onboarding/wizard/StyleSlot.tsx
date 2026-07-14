@@ -25,9 +25,8 @@
 // (ssr:false) so this never enters the firewall-pure entry bundle.
 
 import { useEffect } from 'react';
-import { useWizardStore } from '@/hooks/useWizardStore';
+import { useWizardStore, thingTemplateHasStyleControls } from '@/hooks/useWizardStore';
 import type { VestriaHeroVariant } from '@/types/product';
-import { isMultipage } from '@/modules/audience/product/pageArchetypes';
 import HeroVariantPicker from '@/components/onboarding/wizard/fields/HeroVariantPicker';
 import ProductStylePicker from '@/components/onboarding/wizard/fields/ProductStylePicker';
 import PaletteSwatch from '@/components/onboarding/shared/PaletteSwatch';
@@ -188,10 +187,13 @@ function ThingStyleSlot() {
 
   // ProductStylePicker writes variant/palette/mood DIRECTLY to the wizard store
   // (single source of truth for the phase-5 adapter) — no mirror needed.
-  // scale-08 phase 2 re-key: the hero + style pickers ship with the multipage
-  // pilot (vestria today). Multipage is a CAPABILITY question, not a
-  // businessType one — key off isMultipage, not the old vestria hardcode.
-  const showVestriaPickers = isMultipage(templateId ?? null);
+  // These pickers are VESTRIA-TYPED (HeroVariantPicker imports VestriaHeroVariant),
+  // so they are vestria-only by construction. atelier phase 2: gate strictly on
+  // `templateId === 'vestria'`, NOT `isMultipage` — a multipage WORK template
+  // (atelier) must NOT surface vestria's hero-variant/style pickers.
+  // onboarding-fixes phase 2: shares the `thingTemplateHasStyleControls`
+  // predicate with `slotsForEngine` so the vestria literal lives in ONE place.
+  const showVestriaPickers = thingTemplateHasStyleControls(templateId);
 
   return (
     <div className="space-y-2">
@@ -211,6 +213,9 @@ function ThingStyleSlot() {
           <ProductStylePicker />
         </>
       ) : (
+        // Defensive fallback only — unreachable in practice: `slotsForEngine`
+        // (useWizardStore.ts) skips the `style` slot entirely for thing
+        // templates without real controls, so this stub is never rendered.
         <p className="pt-4 text-sm text-gray-500">
           We&apos;ll use a clean default theme. You can fine-tune fonts, colours
           and layout in the editor once your page is generated.

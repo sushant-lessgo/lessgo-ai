@@ -6,6 +6,7 @@ import { usesTemplateModule, type TemplateId } from '@/types/service';
 import { resolveCanonicalURL } from '@/lib/staticExport/canonicalUrl';
 import { resolveOgImage } from '@/lib/staticExport/buildPageMetadata';
 import { getPublishedGoal } from '@/lib/staticExport/getPublishedGoal';
+import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 
 // Multi-page subpage route. Serves content.subpages[pathSlug] from a published
 // project. The blob fast path (KV route:{host}:{path} → blob-proxy) handles most
@@ -76,25 +77,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (pdEl) {
     const model = typeof pdEl.model === 'string' ? pdEl.model : '';
     const name = typeof pdEl.name === 'string' ? pdEl.name : '';
-    headline = [model, name].filter(Boolean).join(' ') || sub?.title || page.title || 'Product';
-    const intro = (typeof pdEl.oneLiner === 'string' && pdEl.oneLiner) || (typeof pdEl.lede === 'string' && pdEl.lede) || '';
+    // Strip HTML from model/name (user/AI strings) before composing the headline.
+    headline = stripHTMLTags([model, name].filter(Boolean).join(' ')) || sub?.title || page.title || 'Product';
+    // Strip HTML from oneLiner/lede BEFORE the 157-char cap (avoids truncated-tag remnants).
+    const intro = stripHTMLTags((typeof pdEl.oneLiner === 'string' && pdEl.oneLiner) || (typeof pdEl.lede === 'string' && pdEl.lede) || '');
     description = intro ? (intro.length > 160 ? intro.slice(0, 157) + '...' : intro) : `Learn more about the ${headline}.`;
     const firstImg = Array.isArray(pdEl.images) ? pdEl.images.find((im: any) => im?.src)?.src : undefined;
     if (firstImg) ogImageUrl = firstImg;
   } else {
     const heroElements = heroId ? sub?.content?.[heroId]?.elements || {} : {};
-    headline = heroElements.headline?.content || sub?.title || page.title || 'Page';
-    const subheadline = heroElements.subheadline?.content || '';
+    // Strip HTML from headline (user/AI string) before it feeds pageTitle + the fallback.
+    headline = stripHTMLTags(heroElements.headline?.content || '') || sub?.title || page.title || 'Page';
+    // Strip HTML from subheadline BEFORE the 157-char cap (avoids truncated-tag remnants).
+    const subheadline = stripHTMLTags(heroElements.subheadline?.content || '');
     description = subheadline
       ? subheadline.length > 160
         ? subheadline.slice(0, 157) + '...'
         : subheadline
       : `Check out ${headline}`;
   }
-  const pageTitle =
+  let pageTitle =
     seo?.title || (sub?.title ? `${sub.title} — ${page.title}` : page.title || headline);
   if (seo?.description) description = seo.description;
   if (seo?.ogImage) ogImageUrl = seo.ogImage;
+
+  // Final strip on the resolved strings — covers both branches + seo.title/seo.description
+  // overrides. Strip removes tags only (never encodes), so nothing double-escapes downstream.
+  pageTitle = stripHTMLTags(pageTitle);
+  description = stripHTMLTags(description);
 
   const faviconUrl = seo?.faviconUrl || content?.seo?.faviconUrl;
 
@@ -108,7 +118,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: pageTitle,
       description,
       url: canonicalURL,
-      siteName: 'Lessgo.ai',
+      siteName: 'Lessgo AI',
       images: [{ url: ogImageUrl, width: 1200, height: 630, alt: pageTitle }],
       type: 'website',
     },

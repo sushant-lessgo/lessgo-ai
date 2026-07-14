@@ -15,9 +15,10 @@ import {
 import type { Brief } from '@/types/brief';
 import type { TemplateId } from '@/types/service';
 import { BriefSchema } from '@/lib/schemas/brief.schema';
+import { templateMeta } from './templateMeta';
 
 const ALL_TEMPLATES = [
-  'meridian', 'vestria', 'hearth', 'lex', 'surge', 'granth', 'lumen', 'techpremium',
+  'meridian', 'vestria', 'hearth', 'lex', 'surge', 'granth', 'lumen', 'techpremium', 'atelier',
 ] as const satisfies readonly TemplateId[];
 
 describe('shortlist — acceptance fixtures', () => {
@@ -39,16 +40,40 @@ describe('shortlist — acceptance fixtures', () => {
     expect(shortlist(brief)).toEqual(['hearth', 'lex', 'surge']);
   });
 
-  it('photographer needing gallery → 0 matches on work AND trust engines', () => {
-    // Photographer has no businessType entry yet — exercise the pure fit()
-    // with explicit required: ['gallery'], documenting exactly what an entry
-    // would need. granth lacks gallery; lumen is bespoke-excluded.
-    const workMatches = (['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen', 'granth', 'vestria'] as const)
-      .filter((t) => fit(t, 'work', ['gallery']));
-    const trustMatches = (['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen', 'granth', 'vestria'] as const)
-      .filter((t) => fit(t, 'trust', ['gallery']));
-    expect(workMatches).toEqual([]);
+  it('photographer needing gallery → atelier is the ONLY work match; 0 on trust (atelier-template phase 4)', () => {
+    // atelier declares `gallery` on the WORK engine — the flip. granth lacks
+    // gallery; lumen is bespoke-excluded; every other template is a different
+    // engine. On the TRUST engine nobody supplies gallery (atelier is work-only).
+    const workMatches = ALL_TEMPLATES.filter((t) => fit(t, 'work', ['gallery']));
+    const trustMatches = ALL_TEMPLATES.filter((t) => fit(t, 'trust', ['gallery']));
+    expect(workMatches).toEqual(['atelier']);
     expect(trustMatches).toEqual([]);
+  });
+});
+
+describe('fit — atelier full-capability satisfaction (atelier-template phase 7)', () => {
+  it("fit('atelier','work',[gallery,packages,lead-form,multipage,bilingual]) is TRUE across all three satisfaction lanes", () => {
+    // Proves atelier covers the union of the three satisfaction lanes at once:
+    //  - gallery + packages + multipage  → atelier's OWN meta.capabilities
+    //  - lead-form                         → sharedBlockCapabilities (shared-block
+    //                                        lane, NOT declared in templateMeta —
+    //                                        atelier deliberately DROPPED lead-form)
+    //  - bilingual                         → PLATFORM_CAPABILITIES (i18n platform)
+    expect(
+      fit('atelier', 'work', ['gallery', 'packages', 'lead-form', 'multipage', 'bilingual'])
+    ).toBe(true);
+
+    // Lane provenance is non-vacuous: lead-form + bilingual are NOT in atelier's
+    // own capabilities, so the TRUE result must come from the shared/platform
+    // lanes, not templateMeta.
+    expect(templateMeta.atelier.capabilities).not.toContain('lead-form');
+    expect(templateMeta.atelier.capabilities).not.toContain('bilingual');
+    expect(templateMeta.atelier.capabilities).toEqual(['gallery', 'packages', 'multipage']);
+  });
+
+  it('atelier does NOT fit on a non-work engine even for its own capabilities (engine gate first)', () => {
+    expect(fit('atelier', 'trust', ['gallery'])).toBe(false);
+    expect(fit('atelier', 'thing', ['gallery', 'packages'])).toBe(false);
   });
 });
 
@@ -59,10 +84,13 @@ describe('fit — edge cases', () => {
     expect(shortlist(briefThing)).toEqual(['meridian', 'vestria']);
   });
 
-  it('bespoke excluded: work + [] → granth only (lumen out)', () => {
+  it('bespoke excluded: work + [] → [granth, atelier] (lumen out; atelier joins post-flip)', () => {
+    // atelier-template phase 4: atelier is a NON-bespoke work template, so it now
+    // fits any work brief (no required caps) and joins the work shortlist. lumen
+    // stays excluded (bespoke). Order follows templateIds (granth before atelier).
     expect(fit('lumen', 'work', [])).toBe(false);
     const briefWork: Brief = { copyEngine: 'work' };
-    expect(shortlist(briefWork)).toEqual(['granth']);
+    expect(shortlist(briefWork)).toEqual(['granth', 'atelier']);
   });
 
   it('M1 derives lead-form (requirement stays modeled)', () => {
@@ -102,16 +130,20 @@ describe('fit — edge cases', () => {
   it('serve-gate-v2: lead-form (no native template declaration) is satisfied by the shared block on the work engine', () => {
     // granth declares NO capabilities, yet a work brief requiring lead-form
     // fits granth — the lead-form shared block backs it. This is the F15 win.
+    // atelier (work, non-bespoke) also fits and joins the shortlist post-flip.
     const brief: Brief = { copyEngine: 'work', goal: { intent: 'lead-magnet', mechanism: 'M1' } };
     expect(requiredCapabilitiesFromBrief(brief)).toContain('lead-form');
     expect(fit('granth', 'work', ['lead-form'])).toBe(true);
-    expect(shortlist(brief)).toEqual(['granth']);
+    expect(shortlist(brief)).toEqual(['granth', 'atelier']);
   });
 
-  it('serve-gate-v2: gallery is NOT satisfied by any shared block ⇒ still unsatisfiable everywhere', () => {
+  it('gallery is NOT satisfied by any shared block: unsatisfiable on trust everywhere, and on work only atelier declares it', () => {
+    // gallery has no shared/platform lane — it is BLOCK-BACKED. Only atelier
+    // (work, native `gallery` capability) satisfies it; nobody satisfies it on
+    // the trust engine, and no non-atelier template satisfies it on work.
     for (const t of ALL_TEMPLATES) {
-      expect(fit(t, 'work', ['gallery'])).toBe(false);
       expect(fit(t, 'trust', ['gallery'])).toBe(false);
+      expect(fit(t, 'work', ['gallery'])).toBe(t === 'atelier');
     }
   });
 
@@ -323,7 +355,7 @@ describe('fitsBrief — brief-level convenience', () => {
   it('agrees with shortlist membership', () => {
     const brief: Brief = { copyEngine: 'trust', goal: { intent: 'enquiry', mechanism: 'M1' } };
     const list = shortlist(brief);
-    for (const t of ['hearth', 'lex', 'surge', 'meridian', 'granth', 'lumen', 'techpremium', 'vestria'] as const) {
+    for (const t of ALL_TEMPLATES) {
       expect(fitsBrief(t, brief)).toBe(list.includes(t));
     }
   });

@@ -96,7 +96,9 @@ async function serviceStrategyHandler(req: NextRequest): Promise<Response> {
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
     if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true' || token === DEMO_TOKEN) {
-      logger.info('[Service Strategy] Using mock response');
+      // silent-fallback: MOCK strategy is canned, not AI-derived — warn (not info)
+      // so a degraded run is visible in logs, and flag it in meta.
+      logger.warn('[Service Strategy] Using MOCK response — no real strategy generated (NEXT_PUBLIC_USE_MOCK_GPT or demo token)');
       const mockStrategy = generateMockServiceStrategy({
         oneLiner: data.oneLiner,
         understanding: data.understanding as any,
@@ -110,6 +112,7 @@ async function serviceStrategyHandler(req: NextRequest): Promise<Response> {
         data: mockStrategy,
         creditsUsed: 0,
         creditsRemaining: 999,
+        meta: { mock: true },
       });
     }
 

@@ -37,6 +37,10 @@
 - Forms cap on free (~25/mo) — enforcement point in `/api/forms/submit`.
 - Comped-Pro admin path for naayom; migrate Kundius record.
 
+## In-app plan/credits surface → own spec (added 2026-07-12)
+
+Pricing-v2 (this spec) shipped the pricing page + backend enforcement but **no in-app UI** (no credits counter, plan display, or gating messages — see `docs/reports/app-ui-ux-assessment.md` P0.7). That gap is now its own queued spec: **`docs/task/plan-credits-surface.spec.md`** (depends on this spec's shipped `UserUsage`/`planManager` config).
+
 ## Open items (resolve at plan time)
 
 - Exact enforcement when free credits hit 0 mid-edit (block regen only, or block save too? → block AI ops only).

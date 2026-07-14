@@ -82,6 +82,36 @@ export const BRIDGEABLE_ENGINES: Record<'thing' | 'trust' | 'work', AudienceType
   work: 'writer',
 };
 
+/**
+ * Template → audience map (atelier-template phase 1). The served audienceType is
+ * derived from the PICKED TEMPLATE, not the engine, so a template can declare an
+ * audience that differs from its engine's default bridge (e.g. atelier is a
+ * work-engine template that is service-audience — arriving phase 4). A FULL
+ * `Record<TemplateId, AudienceType>` so tsc FORCES an entry when the TemplateId
+ * union grows.
+ *
+ * Every entry MIRRORS today's engine→audience result byte-for-byte (so nothing
+ * observable changes until a template deviates): thing-engine templates → product,
+ * trust-engine templates → service, work-engine granth → writer. `decideServe`
+ * falls back to `BRIDGEABLE_ENGINES[engine]` if a picked template is ever absent
+ * (never today — the Record is total).
+ */
+export const TEMPLATE_AUDIENCE: Record<TemplateId, AudienceType> = {
+  hearth: 'service',
+  lex: 'service',
+  surge: 'service',
+  lumen: 'service',
+  meridian: 'product',
+  techpremium: 'product',
+  vestria: 'product',
+  granth: 'writer',
+  // atelier is a WORK-engine template that is SERVICE-audience (atelier-template
+  // phase 1) — the deviation the picked-template map exists for. work→writer is
+  // the engine bridge, but atelier declares service, so a served photographer
+  // reaches a service-audience atelier site (NOT the writer wizard).
+  atelier: 'service',
+};
+
 export type ServeDecision =
   | {
       outcome: 'serve';
@@ -211,10 +241,14 @@ export function decideServe(brief: Brief): ServeDecision {
   const sl = known && bridgeable ? shortlist(brief) : [];
 
   if (tags.length === 0 && known && bridgeable && sl.length > 0) {
+    const pickedTemplateId = pickTemplate(brief, sl);
     return {
       outcome: 'serve',
-      audienceType: BRIDGEABLE_ENGINES[engine],
-      templateId: pickTemplate(brief, sl),
+      // audienceType derives from the PICKED TEMPLATE (atelier-template phase 1),
+      // falling back to the engine bridge if a template is ever unmapped. Total
+      // Record today ⇒ fallback never fires ⇒ byte-identical to prior behavior.
+      audienceType: TEMPLATE_AUDIENCE[pickedTemplateId] ?? BRIDGEABLE_ENGINES[engine],
+      templateId: pickedTemplateId,
       shortlist: sl,
     };
   }

@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useEditStore } from '@/hooks/useEditStore';
+import { isSectionVisuallySelected } from '@/utils/selectionPriority';
 
 interface ElementDetectorProps {
   sectionId: string;
@@ -41,7 +42,7 @@ export function ElementDetector({ sectionId, children }: ElementDetectorProps) {
     });
 
     // Section selection indicator
-    if (selectedSection === sectionId) {
+    if (isSectionVisuallySelected(selectedSection, sectionId, selectedElement)) {
       sectionRef.current.classList.add('section-selected');
     } else {
       sectionRef.current.classList.remove('section-selected');

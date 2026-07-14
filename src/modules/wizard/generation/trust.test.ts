@@ -322,6 +322,58 @@ describe('TRUST adapter — runTrustGeneration smoke', () => {
     );
   });
 
+  // silent-fallback: the degraded-generation signal (mock / incomplete copy) the
+  // route now returns in `json.meta` must thread through to `result.meta`, so the
+  // slot can telemeter a too-fast/canned run instead of treating it as a clean
+  // success. Regression guard for "building your page ran too fast" (mock copy
+  // passed as success with no signal).
+  it('threads a MOCK copy meta flag through to result.meta', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('/api/audience/service/strategy'))
+          return { ok: true, json: async () => ({ success: true, data: STRATEGY }) } as any;
+        if (url.includes('/api/audience/service/generate-copy'))
+          return {
+            ok: true,
+            json: async () => ({
+              success: true,
+              sections: { hero: { elements: { headline: 'H' } }, footer: { elements: {} } },
+              meta: { attempts: 0, complete: true, mock: true },
+            }),
+          } as any;
+        return { ok: true, json: async () => ({}) } as any;
+      })
+    );
+    const result = await runTrustGeneration(baseInput());
+    expect(result.status).toBe('done');
+    expect(result.meta?.mock).toBe(true);
+  });
+
+  it('threads an INCOMPLETE copy meta (missing sections) through to result.meta', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('/api/audience/service/strategy'))
+          return { ok: true, json: async () => ({ success: true, data: STRATEGY }) } as any;
+        if (url.includes('/api/audience/service/generate-copy'))
+          return {
+            ok: true,
+            json: async () => ({
+              success: true,
+              sections: { hero: { elements: { headline: 'H' } }, footer: { elements: {} } },
+              meta: { attempts: 1, complete: false, mock: false, missingSections: ['cta'] },
+            }),
+          } as any;
+        return { ok: true, json: async () => ({}) } as any;
+      })
+    );
+    const result = await runTrustGeneration(baseInput());
+    expect(result.status).toBe('done');
+    expect(result.meta?.complete).toBe(false);
+    expect(result.meta?.missingSections).toEqual(['cta']);
+  });
+
   it('propagates a 402 credit failure as status:credits', async () => {
     vi.stubGlobal(
       'fetch',

@@ -10,8 +10,10 @@ import {
   applyBusinessTypeCorrection,
   type EntrySignals,
 } from './classify';
-import { decideServe, BRIDGEABLE_ENGINES, uncoveredCollectionTags } from './serveGate';
+import { decideServe, BRIDGEABLE_ENGINES, TEMPLATE_AUDIENCE, uncoveredCollectionTags } from './serveGate';
 import { businessTypes } from '@/modules/businessTypes/config';
+import { templateIds, type TemplateId } from '@/types/service';
+import { templateMeta } from '@/modules/templates/templateMeta';
 
 function makeSignals(overrides: Partial<EntrySignals> = {}): EntrySignals {
   return {
@@ -115,11 +117,13 @@ describe('decideServe — serve paths', () => {
 
   it('app (KNOWN thing type, scale-08 phase 3) IS serveable ⇒ serve / product', () => {
     // Proves the config-only `app` entry rides the existing thing pipeline: same
-    // serve outcome as saas, zero new code. Contrast with photographer, whose
-    // unbacked gallery cap sends it to the manual/demand lane below. serve-gate-v2:
-    // download-app's derived `store-badges` cap is now satisfied by the
-    // store-badges SHARED BLOCK, so even the download-app intent serves (see the
-    // F16 serve test below) — the old "pushes to manual" note is obsolete.
+    // serve outcome as saas, zero new code. (Historical note: photographer's
+    // gallery cap USED to be unbacked → manual; atelier-template phase 4 backs
+    // gallery, so photographer now SERVES atelier — see the atelier flip block
+    // below.) serve-gate-v2: download-app's derived `store-badges` cap is now
+    // satisfied by the store-badges SHARED BLOCK, so even the download-app intent
+    // serves (see the F16 serve test below) — the old "pushes to manual" note is
+    // obsolete.
     const brief = buildBriefDraft(
       makeSignals({ businessTypeGuess: 'app', goalIntentGuess: 'signup-free' }),
       'habit-tracking mobile app'
@@ -171,8 +175,11 @@ describe('decideServe — serve paths', () => {
     expect(decision.outcome).toBe('serve');
     if (decision.outcome === 'serve') {
       expect(decision.audienceType).toBe('writer');
+      // atelier (work engine, no required caps) now also FITS the writer brief, so
+      // it joins the work shortlist — but the STYLE pick stays granth
+      // (literary-quiet; atelier is editorial-craft). See the pick note below.
       expect(decision.templateId).toBe('granth');
-      expect(decision.shortlist).toEqual(['granth']);
+      expect(decision.shortlist).toEqual(['granth', 'atelier']);
     }
   });
 
@@ -201,38 +208,175 @@ describe('decideServe — serve paths', () => {
     if (decision.outcome === 'serve') {
       expect(decision.audienceType).toBe('writer');
       expect(decision.templateId).toBe('granth');
-      expect(decision.shortlist).toEqual(['granth']);
+      // atelier joins the work shortlist (fits any work brief); pick stays granth.
+      expect(decision.shortlist).toEqual(['granth', 'atelier']);
       // bridge:work MANUAL clause is deleted — no such tag exists on any path.
       expect(decision).not.toHaveProperty('tags');
     }
   });
 });
 
-describe('decideServe — manual paths (strict missing strings)', () => {
-  it('photographer (KNOWN work type, gallery cap unbacked) ⇒ rungC:gallery — no rungA (type is known)', () => {
-    // scale-08 phase 3: photographer is now a KNOWN businessType with a required
-    // `gallery` cap that no shipped template declares. resolveEngine → work via
-    // lookup (source 'lookup', NOT tiebreaker), so no rungA tag and the gallery
-    // gap surfaces via the latent-cap fallback ⇒ single `rungC:gallery`.
+describe('TEMPLATE_AUDIENCE — served audience derives from picked template (atelier phase 1)', () => {
+  it('maps every template to its served audience (atelier = service despite work engine)', () => {
+    expect(TEMPLATE_AUDIENCE).toEqual({
+      hearth: 'service',
+      lex: 'service',
+      surge: 'service',
+      lumen: 'service',
+      meridian: 'product',
+      techpremium: 'product',
+      vestria: 'product',
+      granth: 'writer',
+      atelier: 'service',
+    });
+  });
+
+  it('is total over templateIds so tsc forces future entries (atelier arrives phase 4)', () => {
+    for (const id of templateIds) {
+      expect(TEMPLATE_AUDIENCE[id]).toBeDefined();
+    }
+  });
+
+  it('derivation matches the engine bridge for every NON-deviating template; lumen + atelier deviate (work→service)', () => {
+    // Engine is DERIVED from templateMeta.copyEngines (not a hand-fed map that can
+    // drift — the phase-1 map mislabeled lumen as 'trust' when its real engine is
+    // 'work'). Retired templates (techpremium) carry no engine → skipped.
+    //
+    // Two templates DEVIATE from the pure engine→audience bridge: BOTH are
+    // work-engine yet SERVICE-audience — lumen (bespoke, ALREADY deviating before
+    // atelier) and atelier. The map exists precisely to encode these deviations,
+    // so they are asserted as service directly rather than against
+    // BRIDGEABLE_ENGINES['work'] (= 'writer').
+    const DEVIATE = new Set<TemplateId>(['lumen', 'atelier']);
+    for (const id of templateIds) {
+      const meta = templateMeta[id];
+      if (meta.retired) continue; // no engine to derive from
+      if (DEVIATE.has(id)) {
+        expect(TEMPLATE_AUDIENCE[id], `${id} deviates: work engine → service audience`).toBe('service');
+        continue;
+      }
+      const engine = meta.copyEngines[0] as 'thing' | 'trust' | 'work';
+      expect(TEMPLATE_AUDIENCE[id]).toBe(BRIDGEABLE_ENGINES[engine]);
+    }
+  });
+
+  it('served work brief that picks granth still yields audienceType "writer" (unchanged)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'writer', goalIntentGuess: 'follow-social' }),
+      'Hindi literary fiction author'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.templateId).toBe('granth');
+      // derived via TEMPLATE_AUDIENCE['granth'], not BRIDGEABLE_ENGINES['work']
+      // directly — but the value is identical.
+      expect(decision.audienceType).toBe('writer');
+      expect(decision.audienceType).toBe(TEMPLATE_AUDIENCE.granth);
+    }
+  });
+});
+
+describe('decideServe — serve paths (atelier flip)', () => {
+  it('photographer (KNOWN work type, gallery cap NOW backed by atelier) ⇒ SERVE / service / atelier', () => {
+    // atelier-template phase 4: atelier is the first NON-bespoke work template to
+    // declare `gallery` (+ a resolving capabilitySections block), so the rungC
+    // gallery probe now finds a fit → photographer FLIPS MANUAL→SERVE. atelier is
+    // the only work template that fits `gallery`, so shortlist = ['atelier'], and
+    // it is SERVICE-audience (TEMPLATE_AUDIENCE['atelier'], NOT the work→writer
+    // engine bridge) so the served photographer reaches a service-audience site.
     const brief = buildBriefDraft(
       makeSignals({ businessTypeGuess: 'photographer', tiebreaker: 'portfolio-is-proof' }),
       'wedding photographer in Jaipur'
     );
     const decision = decideServe(brief);
-    expect(decision.outcome).toBe('manual');
-    if (decision.outcome === 'manual') {
-      expect(decision.missing).toBe('rungC:gallery');
-      // serve-gate-v2: photographer is now the live path through the latent-cap
-      // FALLBACK guard (F16's saas+download-app test used to hold the
-      // never-empty invariant, but that fixture serves now). Keep the invariant
-      // asserted here so `missing` can never silently become ''.
-      expect(decision.missing).not.toBe('');
-      expect(decision.tags).toHaveLength(1);
-      expect(decision.tags).not.toContain('bridge:work');
-      expect(decision.outOfIcp).toBe(false);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.audienceType).toBe('service');
+      expect(decision.templateId).toBe('atelier');
+      expect(decision.shortlist).toEqual(['atelier']);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// atelier-template phase 7 — deepened served-path + over-serve coverage.
+// These ADD depth beyond the phase-4 flip assertions above: they pin the
+// templateMeta backing behind the rungC gallery probe, and prove atelier does
+// NOT leak into any non-work shortlist (over-serve guard).
+// ---------------------------------------------------------------------------
+describe('atelier phase 7 — serve backing + over-serve guards', () => {
+  it('rungC gallery probe is backed by atelier templateMeta (gallery+packages capabilitySections resolve)', () => {
+    // The photographer flip is only sound because atelier DECLARES gallery as a
+    // work-engine capability WITH a resolving capabilitySections entry.
+    const meta = templateMeta.atelier;
+    expect(meta.copyEngines).toEqual(['work']);
+    expect(meta.capabilities).toEqual(['gallery', 'packages', 'multipage']);
+    expect(meta.capabilitySections).toEqual({ gallery: 'work', packages: 'packages' });
+    expect(meta.retired).toBeFalsy();
+    expect(meta.bespoke).toBeFalsy();
+  });
+
+  it('photographer ⇒ SERVE/service/atelier with atelier the SOLE shortlist entry + audience derived from the template', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'photographer', tiebreaker: 'portfolio-is-proof' }),
+      'wedding photographer in Jaipur'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.templateId).toBe('atelier');
+      expect(decision.shortlist).toEqual(['atelier']);
+      // audience derives from the picked template (service), NOT the work engine
+      // bridge (writer) — the whole point of the phase-1 map.
+      expect(decision.audienceType).toBe('service');
+      expect(decision.audienceType).toBe(TEMPLATE_AUDIENCE.atelier);
+      expect(decision.audienceType).not.toBe(BRIDGEABLE_ENGINES.work);
     }
   });
 
+  it('over-serve guard: a TRUST-engine serve (agency) never lists atelier (work-only)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'agency', goalIntentGuess: 'book-call' }),
+      'growth agency'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.shortlist).toEqual(['hearth', 'lex', 'surge']);
+      expect(decision.shortlist).not.toContain('atelier');
+    }
+  });
+
+  it('over-serve guard: a PRODUCT-engine serve (saas) never lists atelier (work-only)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'saas', goalIntentGuess: 'free-trial' }),
+      'invoicing tool'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.shortlist).toEqual(['meridian', 'vestria']);
+      expect(decision.shortlist).not.toContain('atelier');
+    }
+  });
+
+  it('over-serve guard: an OUT-OF-ICP brief (checkout) is NOT served — atelier cannot rescue it', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'photographer', platformNeeds: 'checkout' }),
+      'photographer storefront with checkout'
+    );
+    const decision = decideServe(brief);
+    // out-of-icp is EXCLUSIVE — even a work/gallery type is pushed to manual.
+    expect(decision.outcome).toBe('manual');
+    if (decision.outcome === 'manual') {
+      expect(decision.missing).toBe('out-of-icp');
+      expect(decision.outOfIcp).toBe(true);
+    }
+  });
+});
+
+describe('decideServe — manual paths (strict missing strings)', () => {
   it('restaurant (unknown, browsing-place) ⇒ rungE:place,rungA:restaurant', () => {
     const brief = buildBriefDraft(
       makeSignals({ businessTypeGuess: 'restaurant', tiebreaker: 'browsing-place' }),
@@ -305,6 +449,9 @@ describe('decideServe — inferred structureHint never changes serve/manual outc
     { businessTypeGuess: 'saas', goalIntentGuess: 'free-trial' },
     { businessTypeGuess: 'app', goalIntentGuess: 'download-app' },
     { businessTypeGuess: 'writer', goalIntentGuess: 'lead-magnet' },
+    // atelier flip: photographer now SERVES — invariance must hold across the
+    // newly-serving outcome (single vs multi ⇒ same serve/service/atelier).
+    { businessTypeGuess: 'photographer', goalIntentGuess: 'book-call', tiebreaker: 'portfolio-is-proof' },
   ];
 
   for (const overrides of serveableFixtures) {

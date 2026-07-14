@@ -285,6 +285,22 @@
 }
 
 /* ============================================================================
+   Bricolage Grotesque - Atelier display (VARIABLE: opsz 10..48 + wght 200..800).
+   Editorial grotesk; weight RANGE is load-bearing (Atelier headings use 600, hero
+   heavier). The opsz axis auto-applies via the CSS default `font-optical-sizing:
+   auto` (driven by font-size) — do NOT pin it in the @font-face (see Fraunces block).
+   The `compact` variant swaps display to Fraunces (already declared above).
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  src: url('/fonts/bricolage-grotesque/bricolage-grotesque-latin-opsz-normal.woff2') format('woff2-variations');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================================
    Cormorant Garamond - Vestria `heritage` variant display (VARIABLE: wght
    300..700 + italic). Italic is load-bearing (Vestria hero <em> accent).
    ============================================================================ */

@@ -8,13 +8,14 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { getRouteByKeyEdge, getRedirectEdge, getSlugForHostEdge } from '@/lib/routing/kvRoutes'
 import { isLessgoAppHost, matchPublishSubdomain } from '@/lib/domains/hosts'
-import { getApexToAppRedirect, getApexPublishRedirect, isApexPublishCandidate, shouldNoindex } from '@/lib/domains/appSplit'
+import { getApexToAppRedirect, getApexPublishRedirect, isApexPublishCandidate, shouldNoindex, isAppRootRequest, getAppRootAction } from '@/lib/domains/appSplit'
 import * as Sentry from '@sentry/nextjs'
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/',
+  '/welcome', // app-host entry page (middleware rewrites app.lessgo.ai/ → here for signed-out)
   '/dev/(.*)',  // Dev routes (blocked in production by middleware)
   '/api/subscribe',
   '/api/test',
@@ -166,6 +167,31 @@ export default clerkMiddleware(async (auth, req) => {
         Sentry.captureException(error, { level: 'warning', tags: { area: 'middleware', op: 'customDomainKv' }, extra: { host } })
       }
       return new NextResponse('Not Found', { status: 404 })
+    }
+
+    // App-host root (app.lessgo.ai/) entry split. Pure pre-check gates auth():
+    // isAppRootRequest is true ONLY for the exact app prod host AND pathname '/'
+    // (apex/localhost/vercel → false), so await auth() fires solely on the app
+    // root — never on every app request. Signed-in → 307 to /dashboard; signed-out
+    // → REWRITE to /welcome (URL stays '/', apex page.tsx output untouched). This
+    // retires the waitlist page from the app root; apex '/' keeps serving marketing.
+    // D6: rewrite targets a PUBLIC page ('/welcome' is now public) from a PUBLIC
+    // path ('/' is public) — no auth bypass; the signed-in branch is a redirect
+    // early-return (an allowed pre-auth kind). Both responses bypass the post-auth
+    // shouldNoindex block, so the noindex header is set directly here (host is the
+    // app prod host by construction).
+    if (isAppRootRequest(host, url.pathname)) {
+      const action = getAppRootAction(!!(await auth()).userId)
+      if (action === 'dashboard') {
+        url.pathname = '/dashboard'
+        const res = NextResponse.redirect(url, 307)
+        res.headers.set('X-Robots-Tag', 'noindex, nofollow')
+        return res
+      }
+      url.pathname = '/welcome'
+      const res = NextResponse.rewrite(url)
+      res.headers.set('X-Robots-Tag', 'noindex, nofollow')
+      return res
     }
 
     // Apex /p/{slug} → published-subdomain 301 (permanent — spec). Apex hosts

@@ -101,7 +101,8 @@ describe('businessTypes phase-3 entries (photographer + app)', () => {
     expect(p.requiredCapabilities).toEqual(['gallery']);
     expect(p.defaultStyle).toBe('editorial-craft');
     expect(p.extractionSchemaKey).toBe('work');
-    expect(p.structureDefault).toBe('single');
+    // atelier phase 5 — photographers default to MULTI (work+multipage atelier).
+    expect(p.structureDefault).toBe('multi');
     expect(p.voiceHint).toBeUndefined(); // work engine keeps voice archetype-keyed
     expect(p.likelyIntents).toEqual(['enquiry', 'book-call', 'follow-social']);
   });

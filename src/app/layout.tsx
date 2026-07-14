@@ -65,13 +65,13 @@ export const metadata: Metadata = {
       images: [
         {
           url: "/og-image.jpg",
-          alt: "Lessgo.ai – AI landing page builder screenshot",
+          alt: "Lessgo AI – AI landing page builder screenshot",
         },
       ],
     creator: "@LessgoSushant", // Replace with your actual Twitter handle
   },
   authors: [{ name: "Sushant Jain", url: "https://lessgo.ai" }],
-  publisher: "Lessgo.ai",
+  publisher: "Lessgo AI",
 };
 
 
@@ -99,6 +99,8 @@ export default function RootLayout({
   return (
     <ClerkProvider
       allowedRedirectOrigins={allowedRedirectOrigins}
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
       signUpForceRedirectUrl="/dashboard"
       signInForceRedirectUrl="/dashboard"
     >

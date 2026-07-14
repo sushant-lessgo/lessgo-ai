@@ -18,6 +18,7 @@ import {
   useWizardStore,
   buildThingInput,
   buildTrustInput,
+  briefSignalFromState,
   fieldStr,
   fieldArr,
 } from '@/hooks/useWizardStore';
@@ -28,7 +29,10 @@ import {
   type GenerationInput,
 } from '@/modules/wizard/generation';
 import { humanizeGenerationError } from '@/modules/wizard/generation/errorMessage';
-import type { WorkGenerationInput } from '@/modules/wizard/generation/work';
+import { trackGenerationDegraded } from '@/utils/trackTelemetry';
+import { runWorkSkeleton, type WorkGenerationInput } from '@/modules/wizard/generation/work';
+import { isMultipage } from '@/modules/audience/product/pageArchetypes';
+import type { SitemapPage } from '@/types/product';
 
 interface StageDef {
   id: GenerationStage;
@@ -61,7 +65,18 @@ function buildWorkInput(): WorkGenerationInput {
     oneLiner: fieldStr(fields, 'oneLiner'),
     // The 3–5 work uploads captured in ProofSlot (contract `theWork`).
     works: fieldArr(fields, 'theWork'),
+    // atelier phase 2 — the confirmed sitemap pages for the SKELETON path.
+    // Ignored by the granth generator (single-page work has no sitemap → []).
+    pages: (s.sitemap as SitemapPage[] | null) ?? [],
   };
+}
+
+/** True when the picked WORK template is multipage (atelier) → SKELETON path.
+ *  Keys on `isMultipage(templateId)` — the picked template's capability — never
+ *  on `engine === 'work'` alone, so granth (no `multipage`) is always false. */
+function isWorkMultipage(): boolean {
+  const s = useWizardStore.getState();
+  return isMultipage(s.templateId ?? undefined, briefSignalFromState(s));
 }
 
 /** Minimum work uploads required before the writer page can be generated. */
@@ -83,6 +98,11 @@ export default function GeneratingSlot() {
   const [pageProgress, setPageProgress] = useState<{ done: number; total: number } | null>(null);
   const [creditsError, setCreditsError] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Honest finalize state: generation succeeded and we've fired router.push into
+  // the heavy /edit/[token] route. App Router navigation keeps this slot mounted
+  // through the (5–10 s) client-side transition, so we show a persistent
+  // "opening your editor" spinner for the whole stall instead of a silent freeze.
+  const [redirecting, setRedirecting] = useState(false);
   const hasRun = useRef(false);
 
   const run = useCallback(async () => {
@@ -99,9 +119,36 @@ export default function GeneratingSlot() {
       return;
     }
 
+    // atelier phase 2 — WORK + multipage (e.g. atelier): SKELETON path. Build an
+    // EMPTY multipage draft for manual fill (zero LLM, zero credits, zero copy) —
+    // NOT buildWorkInput()/runGeneration('work'), and NOT the MIN_WORKS guard
+    // below (that's the writer/granth generator's contract, not the skeleton's).
+    // Granth (work + single-page) never enters here: isWorkMultipage() is false.
+    if (engine === 'work' && isWorkMultipage()) {
+      setStage('saving');
+      let skelResult;
+      try {
+        skelResult = await runWorkSkeleton(input as WorkGenerationInput, {
+          onStage: (st) => setStage(st),
+        });
+      } catch (e: any) {
+        setError(humanizeGenerationError(e?.message));
+        return;
+      }
+      if (skelResult.status === 'error') {
+        setError(humanizeGenerationError(skelResult.error));
+        return;
+      }
+      // Reveal the editor immediately, with an honest "opening…" state (below).
+      setRedirecting(true);
+      router.push(skelResult.redirectTo || `/edit/${input.tokenId}`);
+      return;
+    }
+
     // WORK empty-gallery guard: the writer profile needs at least MIN_WORKS work
     // samples (uploaded or scraped) before we can build the shelf. Block the run
-    // and send them back to the proof step to add more.
+    // and send them back to the proof step to add more. GENERATOR PATH ONLY —
+    // the skeleton path above returns before this.
     if (engine === 'work') {
       const works = (input as WorkGenerationInput).works ?? [];
       if (works.length < MIN_WORKS) {
@@ -134,8 +181,20 @@ export default function GeneratingSlot() {
       setError(humanizeGenerationError(result.error));
       return;
     }
-    // Reveal the editor.
-    setTimeout(() => router.push(result.redirectTo || `/edit/${input.tokenId}`), 600);
+    // silent-fallback: the run SUCCEEDED but the copy came back MOCK or INCOMPLETE
+    // — telemeter it so a too-fast/canned generation isn't invisible (it still
+    // opens the editor; degraded ≠ failed).
+    if (result.meta && (result.meta.mock || result.meta.complete === false)) {
+      trackGenerationDegraded({
+        engine,
+        mock: result.meta.mock ?? false,
+        complete: result.meta.complete ?? true,
+        missingSections: result.meta.missingSections ?? null,
+      });
+    }
+    // Reveal the editor immediately, with an honest "opening…" state (below).
+    setRedirecting(true);
+    router.push(result.redirectTo || `/edit/${input.tokenId}`);
   }, [engine, router]);
 
   useEffect(() => {
@@ -145,6 +204,13 @@ export default function GeneratingSlot() {
   }, [run]);
 
   const tokenId = useWizardStore.getState().tokenId ?? '';
+
+  // Warm the heavy /edit/[token] route while generation runs so the post-success
+  // client navigation lands faster (esp. on prod cold routes). Guard on tokenId.
+  useEffect(() => {
+    if (!tokenId) return;
+    router.prefetch(`/edit/${tokenId}`);
+  }, [tokenId, router]);
 
   if (creditsError) {
     return (
@@ -233,6 +299,13 @@ export default function GeneratingSlot() {
           );
         })}
       </ol>
+
+      {redirecting && (
+        <div className="mt-8 flex items-center justify-center gap-2 text-sm text-gray-600">
+          <Loader2 className="w-4 h-4 animate-spin text-brand-accentPrimary" />
+          <span>Opening your editor — this can take a few seconds.</span>
+        </div>
+      )}
     </div>
   );
 }

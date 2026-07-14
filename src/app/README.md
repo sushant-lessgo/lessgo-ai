@@ -26,6 +26,7 @@ Clerk middleware wrapping custom host resolution. For non-API/non-`_next` reques
 | Route | File | Purpose |
 |-------|------|---------|
 | `/` | `page.tsx` | Landing / marketing home |
+| `/welcome` | `welcome/page.tsx` | App-host signed-out entry page (sign up / sign in CTAs); app root rewrites here for signed-out visitors, signed-in → `/dashboard` |
 | `/pricing` | `pricing/page.tsx` | Pricing + plans |
 | `/privacy` · `/terms` · `/thanks` | `{privacy,terms,thanks}/page.tsx` | Static legal / post-action pages |
 | `/blog` · `/blog/[slug]` | `blog/…` | Lessgo's own marketing blog (MDX) |

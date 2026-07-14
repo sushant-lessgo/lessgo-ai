@@ -11,12 +11,15 @@ import { PostHogProvider as PHProvider } from 'posthog-js/react'
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
+    const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
+    if (!posthogKey) return // no key → don't init with an empty/undefined token
+
+    posthog.init(posthogKey, {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com',
       person_profiles: 'identified_only', // or 'always' to create profiles for anonymous users as well
       capture_pageview: false, // Disable automatic pageview capture, as we capture manually
       session_recording: {
-        maskAllInputs: false,                // beta: max signal. revisit before GA.
+        maskAllInputs: true,                 // mask raw input text (PII) in recordings
         maskTextSelector: '[data-ph-mask]',  // opt-in masking escape hatch
         recordCrossOriginIframes: false,
       },

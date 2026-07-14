@@ -137,7 +137,7 @@ export function entryClassificationPromptBlock(): string {
   return `CLASSIFICATION SIGNALS — you are GUESSING raw signals only. Do NOT decide the copy engine, template, or page structure strategy; downstream code decides all of that from your signals.
 - businessTypeGuess: your best guess at the business type. Prefer one of: ${businessTypeMenu}. If none of those fit, use a short lowercase label of your own (e.g. "photographer", "restaurant"). Use null only if you cannot tell at all. This is a guess only — do not decide the engine.
 - businessTypeConfidence: number between 0 and 1 — your confidence in businessTypeGuess.
-- category: a short market category (e.g. "Performance marketing", "Wedding photography"), or null.
+- category: the SPECIFIC niche category in the business's OWN terms (e.g. "GST invoicing for Indian freelancers", "Wedding photography"), NOT the parent industry ("Accounting software", "Photography"). Keep the source's niche wording; do not broaden it. Use null only if unclear.
 - goalIntentGuess: the single action a visitor would most plausibly take — one of: ${goalIntentMenu} — or null if unclear.
 - tiebreaker: which trust signal best describes how this business wins customers:
   - "expertise": sells knowledge, judgment, or outcomes (agencies, consultants, coaches)
@@ -157,7 +157,7 @@ export function entryClassificationPromptBlock(): string {
  */
 export function entryPrefillDeltaPromptBlock(): string {
   return `ADDITIONAL PREFILL FIELDS:
-- summary: one neutral paragraph describing the business.
+- summary: one neutral paragraph describing the business. Preserve the business's OWN niche/specialty words (e.g. "GST invoicing for Indian freelancers"); never generalize to a broader category label (e.g. "accounting software").
 - offerings: 1-8 short phrases for what the business offers/sells/does.
 - outcomes: 0-6 short phrases for client outcomes or results claims.
 - deliveryModel: "remote", "in-person", or "hybrid" — or null when not inferable.

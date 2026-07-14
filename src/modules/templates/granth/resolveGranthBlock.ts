@@ -33,6 +33,9 @@ const GRANTH_BLOCK_REGISTRY: Record<string, BlockEntry> = {
   hero:    { edit: GranthHero,    published: GranthHeroPublished },
   about:   { edit: GranthAbout,   published: GranthAboutPublished },
   books:   { edit: GranthBooks,   published: GranthBooksPublished },
+  // Generic work-core showcase section (engineCoreSections.work) → granth's
+  // existing books/portfolio block pair. Alias only; no new granth visuals.
+  work:    { edit: GranthBooks,   published: GranthBooksPublished },
   writing: { edit: GranthWriting, published: GranthWritingPublished },
   praise:  { edit: GranthPraise,  published: GranthPraisePublished },
   footer:  { edit: GranthFooter,  published: GranthFooterPublished },

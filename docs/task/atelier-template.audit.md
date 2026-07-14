@@ -1,0 +1,848 @@
+# atelier-template — audit
+
+## Phase 1 — audienceType ruling + serve-route reconciliation
+
+### Files changed
+- `src/modules/brief/serveGate.ts` — added `TEMPLATE_AUDIENCE` map; `decideServe()` serve branch now derives `audienceType` from the picked template.
+- `src/modules/brief/serveGate.test.ts` — added a `TEMPLATE_AUDIENCE` derivation describe block; extended imports.
+
+`src/types/service.ts` was NOT touched — the map homed cleanly in serveGate.ts (both `TemplateId` and `AudienceType` already imported there), so no natural reason to relocate it.
+
+### What changed + why
+- **`TEMPLATE_AUDIENCE: Record<TemplateId, AudienceType>`** added right after `BRIDGEABLE_ENGINES`. A FULL Record (not Partial) so tsc will FORCE the `atelier: 'service'` entry when the `TemplateId` union grows in phase 4. Values mirror today's engine→audience result exactly: trust-engine (hearth/lex/surge/lumen)→`service`, thing-engine (meridian/techpremium/vestria)→`product`, work-engine granth→`writer`.
+- **`decideServe()` serve branch** now hoists the pick into `const pickedTemplateId = pickTemplate(brief, sl)` (single pick — reused for both fields, no second `pickTemplate` call) and returns `audienceType: TEMPLATE_AUDIENCE[pickedTemplateId] ?? BRIDGEABLE_ENGINES[engine]`. The `??` fallback never fires today (Record is total) but keeps `engine` referenced and is the documented safety net. Net observable behavior: byte-identical to before.
+
+### Where the map is homed
+`src/modules/brief/serveGate.ts`, immediately after `BRIDGEABLE_ENGINES`. Exported for testability.
+
+### Premise-verification findings (read-only)
+1. **`usesTemplateModule()`** (`src/types/service.ts:79-89`) — blanket-true for `audienceType === 'service'` (line 84). No per-id whitelist for service (only product has `PRODUCT_TEMPLATE_MODULE_IDS`). CONFIRMED: atelier as service needs no whitelist edit.
+2. **`contractFor()`** (`src/modules/templates/templateConformance.ts:143-148`) — consults `resolveEngineSectionSchema` then `productElementSchema ?? serviceElementSchema`. Never `writerElementSchema`. CONFIRMED: atelier layouts registered in serviceElementSchema (phase 4) will let `consumes ⊆ contract` resolve.
+3. **Consumer grep (`BRIDGEABLE_ENGINES`)** — the ONLY production reader is `serveGate.ts` (now line ~239). Sole authoritative consumer of `decision.audienceType` is `src/app/api/brief/confirm/route.ts:78` (writes `audienceType: decision.audienceType` to the project). No other site recomputes engine→audience. Remaining references are the test file + `serveGate` README doc line. CONFIRMED: changing the derivation inside `decideServe` is sufficient; no downstream recompute to reconcile.
+
+### Tests added (serveGate.test.ts)
+New `describe('TEMPLATE_AUDIENCE …')` block:
+- map equals the expected full literal;
+- map is total over `templateIds` (forces future entries);
+- for every current template, `TEMPLATE_AUDIENCE[id] === BRIDGEABLE_ENGINES[engineOfTemplate[id]]` — proves the picked-template derivation is byte-identical to the old engine derivation across all three engines;
+- a served work brief that picks granth still yields `audienceType: 'writer'`.
+No photographer flip / SERVE case added (atelier not declared yet — photographer still routes MANUAL; existing outcomes unchanged).
+
+### Commands run + results
+- `npx tsc --noEmit` — my touched files produce ZERO errors (filtered grep for serveGate/brief/confirm/types-service = empty). PASS for this phase's scope. NOTE: pre-existing, unrelated errors exist in `src/app/api/saveDraft/route.ts` (`aiBaseline`/`editDelta` not on the Prisma client) — a stale/undgenerated Prisma client (the Worktree Prisma pitfall in MEMORY), NOT introduced by this phase; out of files-touched, left alone.
+- `npm run test:run -- src/modules/brief` — **PASS: 5 files, 122 tests passed.** All existing serve decisions byte-identical (green) + new derivation cases pass.
+
+### For the next phase (phase 4)
+- Adding `'atelier'` to the `TemplateId` union will make tsc FORCE an `atelier: 'service'` entry in `TEMPLATE_AUDIENCE` (as designed) alongside the four service.ts full-Records the plan already lists.
+- The `TEMPLATE_AUDIENCE` test's `.toEqual({...})` literal and the `engineOfTemplate` map in the derivation-parity test are hard-coded to the current 8 templates — phase 4 must add `atelier: 'service'` to both (atelier's engine = `work`, but it maps to `service`, so the parity test's `engineOfTemplate` assumption BREAKS for atelier — atelier is exactly the template that deviates from `BRIDGEABLE_ENGINES[engine]`; phase 4 should exclude atelier from that parity assertion or special-case it).
+- Serve-flip test updates for the photographer path land in phase 4 (per plan), not here.
+
+### Open risks
+- Pre-existing `saveDraft` Prisma-client tsc errors remain in the tree (environment/Prisma-generation, not this phase). If phase 4 runs a full `tsc`, expect them until `prisma generate` is re-run.
+
+---
+### Phase 1 — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0, brief suite 122/122. Scope clean (service.ts untouched).
+Non-blocking (carry to phase 4): parity test `engineOfTemplate` hand-feeds lumen:'trust' (lumen real engine = 'work', templateMeta.ts:177) + techpremium rows → those 2 rows self-satisfy the parity assertion (harmless: both bespoke/retired, excluded by fit(), never picked). Stronger form = derive engine from templateMeta.copyEngines + skip bespoke/retired. Also: lumen already deviates (work→service) today, so atelier is NOT the first deviation — fix that framing when adding atelier:'service'.
+
+---
+
+## Phase 2 — Served work→multipage skeleton wizard path
+
+### Files changed
+- `src/hooks/useWizardStore.ts` — template-aware structure skip + fetchStrategy work+multipage seed branch + exported `briefSignalFromState`.
+- `src/hooks/useWizardStore.test.ts` — slot-inclusion cases + phase-2 skeleton-path describe.
+- `src/components/onboarding/wizard/GeneratingSlot.tsx` — skeleton dispatch gate + `pages` projection + `isWorkMultipage`.
+- `src/components/onboarding/wizard/StructureSlot.tsx` — work-grammar SECTION_LABELS + work-engine microcopy.
+- `src/components/onboarding/wizard/StyleSlot.tsx` — vestria-picker gate re-keyed to `templateId === 'vestria'`.
+- `src/modules/wizard/generation/work.ts` — `WorkGenerationInput.pages` + new `runWorkSkeleton`.
+
+### What changed + why (and how each gate keys on isMultipage → granth-unchanged)
+Every new branch is gated on `isMultipage(templateId, briefSignal)` — the PICKED template's `multipage` capability — never on `engine === 'work'`. Granth declares no `multipage` (templateMeta), so `isMultipage('granth', …)` is `false` and each gate below is inert for granth.
+
+1. **`slotsForEngine(engine, templateId, briefSignal)`** — was pure engine → `getContract(engine).slotSkips`. Now builds a `Set` of skips and, for `engine === 'work' && isMultipage(...)`, deletes `'structure'`. Granth: gate false → skip retained → structure still absent from `slots`. Called once (hydrate), which now passes `templateId` + the full `brief` as the signal. Comment updated ("work keeps its skip UNLESS the picked template is multipage").
+2. **`fetchStrategy` work+multipage branch** — inserted BEFORE the `engine !== 'thing' && 'trust'` early-return, AFTER the existing `if (s.strategy)` early-exit. For `work + isMultipage`: seeds `sitemap` from `getPageArchetypesForTemplate(templateId)` `defaultIncluded` pages (proof-filtered via `filterSectionsByProof`, mirroring StructureSlot.addPage), sets `strategyStatus='done'`, NO fetch, NO charge, and returns. Idempotent via the existing top-of-fn `'done'` guard. Granth: gate false → falls through to the unchanged `engine !== thing/trust` early return (byte-for-byte). `strategy` stays `null` on this path (copy-gen stays OUT).
+3. **StructureSlot** — verified the strategy-less path: mount effect fires `fetchStrategy` only on `'idle'`; after seeding, `strategyStatus==='done'` + `strategy===null` + `sitemap` set means the `:323` error guard, `:370` loading guard (`!strategy && (idle|fetching)` → false), and `:500` `!draft` guard all pass through to the multipage editor (draft = storeSitemap). Only additions: `work`/`packages`/`quote-band` in `SECTION_LABELS`; the multipage header `<p>` is now `engine === 'work'`-aware ("we'll set up an empty page for each so you can fill it in the editor") for the no-copy path.
+4. **GeneratingSlot** — new gate at the top of `run()` (after the tokenId guard): `engine === 'work' && isWorkMultipage()` → `setStage('saving')` → `runWorkSkeleton(input, {onStage})` → route to `result.redirectTo || /edit/${tokenId}`. The MIN_WORKS guard now sits BELOW this branch (generator path only). Granth: `isWorkMultipage()` false → skips skeleton → MIN_WORKS guard + `runGeneration('work')` exactly as before. Did NOT touch the credits-error "Continue without copy" bare redirect.
+5. **StyleSlot** — `showVestriaPickers` changed from `isMultipage(templateId)` to `templateId === 'vestria'`. Rationale: HeroVariantPicker/ProductStylePicker are `VestriaHeroVariant`-typed and vestria-only; a multipage WORK template (atelier) must not surface them. vestria=true / granth=false unchanged; atelier=false (falls to the "clean default theme" note). Removed the now-unused `isMultipage` import.
+6. **work.ts `runWorkSkeleton`** — plain module (no store import; slot hands it plain data). Builds the draft via the EXISTING `buildMultiPageSkeleton`, then `mergePageIntoFinalContent` per confirmed page with `copy: {}` (empty elements; home gets header/footer chrome + flat top-level), then `finalizeMultiPageGeneration(fc)` to drop the in-progress marker so the draft loads as an ordinary editable multipage draft (not a resumable generation), then `saveDraft`. Returns the shared `{status, redirectTo}`. Existing `runWorkGeneration` untouched. No templateId-guard (unlike the granth generator) — the skeleton materializes whatever confirmed template+pages carry.
+
+### WorkGenerationInput extension shape
+Added one optional field: `pages?: SitemapPage[]` (imported `type SitemapPage` from `@/types/product`). GeneratingSlot's `buildWorkInput()` projects `pages: (s.sitemap as SitemapPage[] | null) ?? []`. The granth generator ignores it (single-page work has null sitemap → `[]`). Chose to EXTEND the existing input (not a separate type) so the slot's single `buildInput`/`buildWorkInput` projection feeds both paths.
+
+### Uploads-seeding choice (unresolved Q#6)
+IGNORED `theWork` uploads on the skeleton path — the Work page's gallery is left EMPTY for manual fill in the editor. Rationale: conservative + the skeleton is a "manual-fill now" deliverable; the gallery collection is authored in the editor. `runWorkSkeleton` does not read `input.works`. If founder wants uploads pre-seeded into the Work-page gallery collection, that is an additive follow-up (would require the atelier Work section's collection contract, which lands phase 4/5).
+
+### Deviations
+- None material. StructureSlot needed NO guard-logic change (guards already tolerated `strategy===null` + `strategyStatus==='done'`), so the change there was limited to labels + microcopy — narrower than "verify guards" might have implied.
+
+### Test (e) realization
+No GeneratingSlot/StructureSlot test file exists, so the dispatch gate (e) is proven at the DECISION level in `useWizardStore.test.ts`: `isMultipage(templateId, briefSignalFromState(state))` = true for work+vestria, false for work+granth — the exact expression GeneratingSlot's `isWorkMultipage()` evaluates.
+
+### Commands + results
+- `npx tsc --noEmit` → EXIT 0 (clean; no Prisma-client errors surfaced this run).
+- `npm run test:run -- src/hooks src/modules/wizard` → PASS: 15 files, 259 tests.
+- Manual smoke (writer/granth onboarding) not run in this session; granth-path regression covered by unit tests (slot skip retained, fetchStrategy early-return unchanged, dispatch gate false).
+
+### For phases 4 & 5 (must know)
+- **This path goes LIVE the moment atelier declares `multipage` in templateMeta (phase 4) + registers `ATELIER_PAGE_ARCHETYPES` (phase 5).** Until then, no template is work+multipage, so every gate is inert and runtime behavior is identical everywhere (tests use vestria as a synthetic stand-in).
+- **Layout resolution gap:** `runWorkSkeleton` → `mergePageIntoFinalContent` → `selectProductBlocks`, whose `LAYOUTS_BY_TEMPLATE` is product-only (vestria) and falls back to `MERIDIAN_LAYOUT_NAMES`, then to `'default'` per section. For atelier (service) sections (`work`/`packages`/`quote-band`), layout names will resolve to `'default'` unless phase 4/5 wires atelier layout mappings into the block-selection path so the skeleton's sections map to real atelier blocks. Flag for phase 5 (multipage machinery wiring).
+- **Test fixtures to update in phase 4:** the phase-2 tests use `vestria` as the synthetic work+multipage template. Once `atelier` exists, add atelier-based assertions (and phase 5 adds the reachable-path cases c/d against the real archetype menu).
+- `briefSignalFromState` is now exported from useWizardStore — reuse it (don't re-inline) in any further served-path detection.
+
+---
+### Phase 2 — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0, hooks+wizard 259/259. Scope = 6 files, no creep. Granth byte-unchanged invariant verified against actual code paths (skip retained, fetchStrategy falls to unchanged early-return, MIN_WORKS + writer generator still reached).
+Non-blocking carried: (1) slot-inclusion uses full `brief` signal, fetchStrategy/dispatch use `briefSignalFromState(store)` — coincide for granth; phase 5 must prove atelier's two derivations agree. (2) `buildWorkInput` projects `pages` unconditionally — harmless (granth generator ignores it). (3) `selectProductBlocks` product-only → atelier sections fall to 'default' UNTIL phase-4 `blockManifests['atelier']` manifestPick resolves them (runtime-inert now, cleanly fixable).
+
+---
+
+## Phase 3 — Work-grammar generalization (G1, granth-safe) — ⚠️ STOPPED, blast radius outside Files-touched
+
+### Files changed (in-scope edits made)
+- `src/modules/engines/coreSections.ts` — `engineCoreSections.work` changed from `['hero','about','books','writing','praise','footer']` to `['hero','work','about','footer']`; rewrote the "revisit work-core" comment (atelier = the anticipated second shortlist-eligible work template; notes granth resolves `work` via alias, visuals byte-unchanged).
+- `src/modules/templates/granth/resolveGranthBlock.ts` — added string-keyed `work` alias entry → granth's existing books/portfolio pair (`GranthBooks` / `GranthBooksPublished`), both edit + published. No union surgery; no new granth visuals.
+- `src/modules/templates/templateMeta.test.ts` — updated the work-core freeze assertion (~:87) to the new 4-item list.
+
+### New core list (exact)
+`work: ['hero', 'work', 'about', 'footer']`
+
+### Granth alias mechanism
+`GRANTH_BLOCK_REGISTRY['work'] = { edit: GranthBooks, published: GranthBooksPublished }` — the same component pair as `books`. So `resolveGranthBlock('work','edit')` and `('work','published')` return granth's real books/portfolio (work-showcase) components, NON-placeholder. Granth already resolves `hero`/`about`/`footer` (existing registry entries), so only `work` is new. **Granth-safety PROVEN:** conformance group (a) for granth (requires resolving every section in the new core in both modes) passes — see test results below (templates suite fully green).
+
+### Grep results — all `engineCoreSections.work` readers
+- `templateMeta.test.ts:87` — hard-coded work-core assertion → **UPDATED** (now green).
+- `conformance.test.ts:192` — filters over `.work` to prove lumen fails core (lumen has no `work` key → still in `missing`, `missing.length > 0` holds) → **verify-only, still green.** (Stale explanatory comment "granth's canonical 6 — lumen has no books/writing/praise" left untouched — out of files-touched; non-load-bearing.)
+- `templateConformance.ts:251` — generic loop → verify-only, green.
+- `fit.ts:165` — flattens all cores → verify-only, green.
+- `sectionGrammar.ts:94` — generic → verify-only, green.
+- `TemplateSwapList.tsx:91` — `engineCoreSections[engine] ?? []` → verify-only, green.
+- `swap.test.ts`, `structureConvergence.test.ts`, `designKit.test.ts:118` — reference `.thing`/`.trust` only → unaffected.
+- **`inputContracts.ts:239` (`lockedSectionsForEngine`)** — generic filter → itself fine.
+- **`inputContracts.test.ts:48-62` ("core-section alignment") — BREAKS. See blocker below.**
+
+### 🛑 BLOCKER — requires edit outside Files-touched (STOPPED per phase instructions)
+`inputContracts.test.ts` asserts every work-engine CONTRACT field's `section`/`dropTarget` is ⊆ `engineCoreSections.work`. The **work engine contract (`workContract` in `inputContracts.ts`)** — the granth WRITER wizard contract — still keys fields to the removed writer sections:
+- `theWork.section = 'books'` (line 195)
+- `genresStyle.section = 'writing'` (line 196)
+- `praise.section = 'praise'` + `praise.dropTarget = 'praise'` (line 206)
+
+Removing `books`/`writing`/`praise` from core makes these fields no longer ⊆ core → **2 tests fail**:
+- `work field sections are ⊆ engine core sections` (:52)
+- `work dropTargets are ⊆ engine core sections` (:59)
+
+This is NOT union surgery and NOT a hard-coded old-core fixture — the test invariant is legitimate; the true fix is editing **`src/modules/engines/inputContracts.ts`** (production data: the writer wizard's field→section mapping), which is **outside this phase's Files-touched list** and would alter granth's writer wizard drop-target/section wiring (behavior risk to granth). Per instructions I did NOT edit it and did NOT apply the fallback.
+
+**Key finding — the plan's documented fallback does NOT resolve this.** Shrinking core to `['hero','about','footer']` (plan's fallback) ALSO omits `books`/`writing`/`praise`, so the SAME two contract-alignment assertions still fail. The failure is independent of which generalized core is chosen; it stems from the work engine contract being coupled to the old writer-shaped section names. Both plan-review and the phase-3 "verify-only" classification of `inputContracts.ts`+its test missed this coupling.
+
+### Options for orchestrator (not applied — decision needed)
+1. **Add `inputContracts.ts` + `inputContracts.test.ts` to Phase 3 Files-touched** and re-key the writer contract's field sections to the generalized core (e.g. `theWork.section: 'books'→'work'`, `praise` section/dropTarget → `'work'` or drop, `genresStyle.section: 'writing'` → drop/`'work'`). Requires care: these feed granth's wizard drop-targets and section rendering — must prove granth writer flow unchanged. This is the cleanest but expands scope into production data.
+2. **Relax the invariant** so contract field sections may reference engine-specific sections beyond the generalized core (granth's `books`/`writing`/`praise` are legit granth sections, just not conformance-core). Smaller code change, but weakens a real guard; still needs `inputContracts.test.ts` in scope.
+3. Decouple: keep a separate "writer contract sections" set from the conformance core. Largest change.
+
+### designKit / slotless `work`
+Did NOT edit `designKit.ts` (pure derivation). Did NOT yet run `npm run kit:generate` (deferred pending the blocker resolution, since the emitted work brief depends on the final core shape). Per key decision, the new `work` sectionType has no granth layout → `designKit(work)` will emit it **slotless**; consequence: handoff lint has no required data-slots for the showcase section (accepted — gallery capabilitySections + parity cover it). No committed granth kit/golden fixture found asserting the section list (`designKit.test.ts` loops generically; kit markdown lives in gitignored `template-design/`). Will confirm the slotless eyeball once core shape is final.
+
+### Commands
+- `npx tsc --noEmit` → **PASS (exit 0)** with all in-scope edits.
+- `npm run test:run -- src/modules/templates` → **PASS** (granth auto-enrolled conformance + templateMeta work-core green against new core; alias proven).
+- `npm run test:run -- src/modules/engines` → **FAIL: 2 tests** in `inputContracts.test.ts` (the blocker above); 975 passed, 8 skipped otherwise.
+- `npm run kit:generate` → deferred (see above).
+
+### Status
+In-scope edits complete and green in isolation (templates suite). Phase cannot finish green because closing the engines suite requires an out-of-scope edit to `inputContracts.ts`. Edits left in place on-branch (uncommitted) for orchestrator review; awaiting decision on option 1/2/3.
+
+---
+
+### Phase 3 — RESOLVED (orchestrator ruling: Option 2, invariant relaxation)
+
+**Ruling applied:** `src/modules/engines/inputContracts.ts` kept BYTE-UNCHANGED (granth writer flow untouched). Confirmed: `git diff src/modules/engines/inputContracts.ts` = empty; `git status` shows it NOT modified. The `workContract` field→section mappings (`theWork→books`, `genresStyle→writing`, `praise→praise`/dropTarget `praise`) are granth's WRITER-wizard sections — legitimate granth sections that atelier need not render (atelier uses the phase-2 skeleton path, never these copy fields). Only the stale test invariant was fixed.
+
+**Files changed (this resolution): `src/modules/engines/inputContracts.test.ts` only.**
+- Relaxed the "core-section alignment" invariant. Added a documented per-engine allowlist constant inside the describe:
+  ```
+  const CONTRACT_EXTRA_SECTIONS: Record<CopyEngine, readonly string[]> = {
+    thing: [], trust: [], work: ['books', 'writing', 'praise'],
+  };
+  ```
+- Both `it.each` checks (field `section` and `dropTarget`) now assert membership in `new Set([...engineCoreSections[engine], ...CONTRACT_EXTRA_SECTIONS[engine]])` instead of core alone.
+- **WHY:** `engineCoreSections.work` is now the minimal, template-agnostic conformance core (every work template must resolve `hero/work/about/footer`). The old invariant was written under the OLD semantics where the work core WAS granth's full writer section list — now stale. Consistent with existing codebase precedent (coreSections.ts note: "pricing and cta are meridian-specific extras, not engine guarantees"). Typo-catching value preserved: anything outside core∪extras still fails.
+
+**Final phase-3 Files-touched set (all in scope):**
+- `src/modules/engines/coreSections.ts`
+- `src/modules/templates/granth/resolveGranthBlock.ts`
+- `src/modules/templates/templateMeta.test.ts`
+- `src/modules/engines/inputContracts.test.ts` (invariant relaxation — NOT inputContracts.ts)
+
+**Verification (all green):**
+- `npx tsc --noEmit` → EXIT 0.
+- `npm run test:run -- src/modules/templates` → 23 files, 802 passed / 8 skipped (granth conformance + templateMeta green).
+- `npm run test:run -- src/modules/engines` → 4 files, 175 passed (ALL green, incl. inputContracts.test.ts).
+- `npm run kit:generate` → eyeballed. Granth brief emits `### \`work\`  _(source: legacy-layout)_` with `_No slots derivable (unmapped section)._` — slotless `work` section is PRESENT and expected/accepted (new work sectionType has no granth layout mapping; gallery capabilitySections + parity cover it). No new out-of-scope edit forced.
+
+**inputContracts.ts diff confirmation:** empty (byte-unchanged, granth writer flow intact).
+
+---
+### Phase 3 — impl-review verdict: SHIP (1 loop + 1 orchestrator ruling)
+No blocking issues. Gates green: tsc exit 0; templates+engines 977 passed/8 skipped. Scope = 4 source files, inputContracts.ts confirmed byte-unchanged. Granth-safety proven: 'work' alias→GranthBooks/GranthBooksPublished (real pair); granth's GENERATED section list comes from granthSeed not engineCoreSections (reviewer gate-6 trace), so unaffected. Allowlist work:['books','writing','praise'] exactly matches workContract's beyond-core refs — not over/under-broad; typos still fail.
+Non-blocking: slotless 'work' kit section (accepted per ruling — designer-handoff artifact, not runtime).
+
+---
+### Phase 4 — atelier registration + service element schema + provisional blocks + serve-flip
+
+**Files changed (complete scope for review):**
+- `src/types/service.ts` — `'atelier'` added to `templateIds`; entries in the four forced Records (`defaultVariantForTemplate: 'editorial'`, `templateLabels`, `templateBlurbs`, `PALETTES_BY_TEMPLATE`); new `atelierPalettes`/`AtelierPalette` (vermilion default + indigo/olive placeholders).
+- `src/modules/brief/serveGate.ts` — `TEMPLATE_AUDIENCE.atelier = 'service'` (the work→service deviation).
+- `src/modules/brief/serveGate.test.ts` — TEMPLATE_AUDIENCE map assertion +atelier; parity-table test rewritten (derive engine from `templateMeta.copyEngines`, skip retired, special-case lumen+atelier as work→service, corrects the phase-1 lumen:'trust' mislabel); photographer flip MANUAL→SERVE/service/atelier; writer-shortlist assertions `['granth']`→`['granth','atelier']` (F15 + writer-serve); photographer added to structureHint-invariance fixtures.
+- `src/modules/brief/serveMatrix.test.ts` *(orchestrator-added to scope)* — photographer rows flipped to SERVE/service/atelier.
+- `src/modules/templates/fit.test.ts` *(orchestrator-added to scope)* — `ALL_TEMPLATES` +atelier; photographer-gallery, work+[], work+lead-form shortlist expectations refreshed; the "gallery unsatisfiable everywhere" assertion rewritten to "only atelier on work, nobody on trust"; fitsBrief loop uses ALL_TEMPLATES.
+- `src/modules/templates/registry.ts` — atelier async loader (dispatch firewall).
+- `src/modules/templates/templateMeta.ts` — atelier entry: `copyEngines:['work']`, `capabilities:['gallery','packages','multipage']` (NO lead-form), `capabilitySections:{gallery:'work',packages:'packages'}`, `designStyles:['editorial-craft']`.
+- `src/modules/templates/templateMeta.test.ts` — count assertions 8→9 (keys) and 7→8 (non-retired).
+- `src/modules/templates/templateConformance.ts` — RESOLVERS atelier entry + imports (resolver + placeholder).
+- `src/modules/templates/blockManifest.ts` — real `atelierManifest` (8 sections, one variant each; packages `minCards:2/maxCards:4`; consumes = each layout's top-level scalar keys).
+- `src/modules/audience/service/elementSchema.ts` — 8 Atelier-named layouts.
+- `src/modules/templates/atelier/**` — new module (vestria clone, mood axis dropped): tokens, palettes, sectionRules, imageKeywords, paletteSelection, ThemeInjector, components/{AtelierSSRTokens,AtelierEditable}, hooks/useAtelierBlock, AtelierPlaceholderBlock, resolveAtelierBlock, index; blocks/{primitives,editPrimitives,publishedPrimitives,shared/styles}; 8 provisional triads (Header/Hero/Work/Packages/About/Quote/Contact/Footer × core+tsx+published+styles); coreParity.test, registration.test, README.
+
+**Section types → layoutNames (two-identifier discipline, hyphen-free types):**
+| sectionType | layoutName | resolveAtelierBlock key | elementSchema key | manifest key | capabilitySections |
+|---|---|---|---|---|---|
+| header | AtelierNavHeader | header | AtelierNavHeader | header | — |
+| hero | AtelierHero | hero | AtelierHero | hero | — (work core) |
+| work | AtelierWorkGallery | work | AtelierWorkGallery | work | gallery→work |
+| packages | AtelierPackages | packages | AtelierPackages | packages | packages→packages |
+| about | AtelierAbout | about | AtelierAbout | about | — (work core) |
+| quote | AtelierQuoteBand | quote | AtelierQuoteBand | quote | — |
+| contact | AtelierContact | contact | AtelierContact | contact | — |
+| footer | AtelierFooter | footer | AtelierFooter | footer | — (work core) |
+- Dispatch is by lowercase sectionType; schema/manifest use the PascalCase layoutName; `contractFor(layoutName)` resolves via serviceElementSchema (resolveEngineSectionSchema returns null for atelier). `manifest.consumes ⊆ contract` verified by conformance group (3). Work core (`hero/work/about/footer`) all resolve real in both modes (group a). capabilitySections values are SECTION TYPES (`work`,`packages`), resolved real by (b)/(b+).
+- **The quote band is sectionType `quote`, NOT `quote-band`** — `extractSectionType` matches `^[a-zA-Z]+`, so a hyphenated type would dispatch as `quote` and break the id round-trip. Conservative single-token choice; logged under Deviations.
+
+**serveGate parity-table fix:** the phase-1 hand-fed `engineOfTemplate` map (lumen:'trust', +techpremium rows) was replaced by deriving each engine from `templateMeta.copyEngines[0]`, skipping retired templates, and encoding the deviating pair `{lumen, atelier}` (both work-engine→service-audience) as an explicit `service` assertion. This corrects the lumen mislabel and the "atelier is first to deviate" framing (lumen already deviated).
+
+**Photographer flip is GREEN in-phase:** serveGate.test.ts (serve/service/atelier, shortlist `['atelier']`), serveMatrix.test.ts (all photographer intents serve), fit.test.ts (atelier the sole work+gallery fit) all pass. No deferred red.
+
+**DesignStyle chosen:** `editorial-craft` (existing closed-vocab value; matches `businessTypes.photographer.defaultStyle`, so the served photographer's shortlist pick resolves to atelier by style — while writer briefs still pick granth via `literary-quiet`).
+
+**Deviations:**
+- Quote band sectionType = `quote` (not `quote-band`) — extractSectionType constraint (above).
+- Writer shortlist now `['granth','atelier']` (was `['granth']`): atelier fits any work brief (no required caps); pick stays granth by style. Orchestrator-confirmed acceptable.
+- Scope EXPANDED by orchestrator ruling to include `fit.test.ts` + `serveMatrix.test.ts` (the deliberate serve-flip breaks them; both are run by the phase's own verification commands). Surfaced and confirmed before editing.
+- `features` (packages string[]) rendered statically this phase (not per-item editable) — rich editing lands phase 9/11. Provisional-block scope.
+- No knobs declared (phase 6); no lead-form capability (shared-block lane); atelier registry loader omits `knobs` like surge/lex.
+
+**Test results (all PASS):**
+- `npx tsc --noEmit` — exit 0.
+- `test:run src/modules/templates/conformance.test.ts` — 371 passed, 8 skipped.
+- `test:run src/modules/templates/atelier` — 55 passed.
+- `test:run src/modules/brief` — 123 passed (incl. flipped photographer/writer cases).
+- `test:run src/modules/templates` — 904 passed, 8 skipped (incl. publishedClientBoundary — no 'use client'→published import leaks).
+- Collateral check `test:run src/types src/modules/audience/service src/modules/engines` — 234 passed.
+
+**Notes for later phases:**
+- Phase 5: `blockManifests['atelier']` layout names (AtelierWorkGallery/AtelierPackages/AtelierQuoteBand) resolve real via the manifest, so `selectProductBlocks`→`selectEligibleBlock` no longer falls to `'default'` for atelier work/packages/quote sections — verify at phase 5. Archetype `defaultSections` must use these sectionTypes (`work`,`packages`,`quote`,`contact`).
+- Phase 6: tokens/palettes/variants are provisional; `atelier` uses generic CSS vars + `lg-atelier-` classes; 2 variants (`editorial` default, `compact`) with distinct typeface/spacing overrides already declared. Knobs to be added (all 5 axes rule).
+- Phase 9: blocks are provisional (Hero static image — slider markup here; contact has form_id in contract but no shared lead-form placement yet; packages `features` not per-item editable). `AtelierEditable` does NOT emit `data-edit-primitive` markers yet → BLOCK_MOCKS[atelier] empty, so assertEditorBasics green-passes vacuously until phase 11.
+- Bricolage Grotesque referenced in tokens.fontDisplay but not self-hosted until phase 8 (falls back to Hanken meanwhile).
+
+---
+### Phase 4 — impl-review verdict: SHIP (1 loop + 1 orchestrator ruling)
+No blocking issues. Gates green: tsc exit 0; templates+brief+audience/service = 1076 passed/8 skipped. Scope = 12 modified + atelier/** (51 files); componentRegistry{,.published}.ts untouched. Verified: dual-renderer discipline (Hero/Work/Packages triads pure-core, boundary-safe; coreParity + publishedClientBoundary tests cover atelier non-vacuously); conformance non-vacuous (all core+capability sections resolve REAL components, not placeholder); two-identifier consistency across resolve/meta/manifest/sectionRules/elementSchema; quote (not quote-band) everywhere; flip correct (photographer SERVE/service, writer shortlist ['granth','atelier'] pick=granth, parity-table lumen:'trust'→work corrected).
+Non-blocking (cosmetic): serveGate.test.ts:120 stale comment (photographer-contrast obsolete post-flip). Leave; note for phase 7 sweep.
+
+---
+### Phase 5 — Page archetypes + multipage + photographer multi default
+
+**Files changed**
+- `src/modules/audience/product/pageArchetypes.ts` — added `ATELIER_PAGE_ARCHETYPES` (5 defs) + registered in `PAGE_ARCHETYPES_BY_TEMPLATE`.
+- `src/modules/businessTypes/config.ts` — photographer `structureDefault` `'single'`→`'multi'`.
+- `src/modules/businessTypes/config.test.ts` — `:104` assertion `'single'`→`'multi'`.
+- `src/modules/audience/product/pageArchetypes.test.ts` — relaxed the structureDefault invariant (photographer now multi alongside manufacturer). [see Deviations]
+- `src/hooks/useWizardStore.test.ts` — photographer+atelier fixture + phase-5 describe (cases c/d + signal-consistency CARRY).
+- `src/modules/audience/product/pageArchetypes.atelier.test.ts` — NEW (cases a/b + block-resolution CARRY proof).
+- `src/modules/businessTypes/pipelineGuards.test.ts` — allowlisted StyleSlot.tsx (orchestrator ruling; see below).
+- `src/hooks/useWizardStore.ts` — hydrate now feeds `briefSignalFromState(state)` (confirmed-only signal) to `slotsForEngine`, not the raw brief (fix-first bug; see below).
+
+**The 5 archetypes** (all `defaultIncluded`; body sectionTypes cross-checked against `resolveAtelierBlock` registry — every one resolves a REAL atelier block in both modes, none hits `AtelierPlaceholderBlock`):
+- **home** `/` (required) — default `[hero, work, quote, contact]`; allowed adds `packages, about`.
+- **work** `/work` (required) — default `[work, quote]`; allowed adds `contact`.
+- **experiences** `/experiences` — default `[packages, quote]`; allowed adds `contact`.
+- **about** `/about` — default `[about, quote]`; allowed adds `packages`.
+- **contact** `/contact` — default `[contact]`.
+
+All sectionTypes ∈ atelier body types `{hero, work, packages, about, quote, contact}` (chrome header/footer excluded). Quote-band type is `quote` (hyphen-free per phase-4). `getPageArchetypesForTemplate('atelier')` returns the menu because atelier's templateMeta already declares `multipage` (phase 4).
+
+**Photographer multi flip** — `structureDefault:'multi'`. Live (not inert) post-phase-2: the served work→multipage flow now reaches the structure slot, and `isMultipage` reads this businessType signal.
+
+**Signal-consistency CARRY (phase-2 forward hazard) — RESULT: derivations AGREE.** For a photographer+atelier store state, slot inclusion (`slotsForEngine` at hydrate, keyed off the FULL brief) and the dispatch/fetchStrategy gate (keyed off `briefSignalFromState(store)`) BOTH resolve `isMultipage` TRUE. Proven by the `(CARRY)` test in useWizardStore.test.ts (asserts `slots` contains `structure` AND `isMultipage(templateId, briefSignalFromState(s))===true` for the same state; signal carries `businessType:'photographer'`). No bug — did NOT need a phase-2 file. Known non-blocking asymmetry (documented, NOT on the served path): an UNCONFIRMED `brief.structure.mode:'single'` would make the full-brief derivation false while `briefSignalFromState` (which only adopts CONFIRMED structure mode, useWizardStore.ts:783) stays photographer→multi. The served photographer brief carries no structure at hydrate, so this cannot fire on the reachable path; flag for phase 9/13 if a resume-with-unconfirmed-structure flow is ever added.
+
+**Block-resolution CARRY (phase-2 forward hazard) — RESULT: resolves REAL atelier layouts, NOT 'default'.** `selectProductBlocks({templateId:'atelier', sections})` → `selectEligibleBlock` reads `blockManifests['atelier']` (real, phase 4) → `pickFromSet` returns the section's default declaration (eligible with no hints/assets): `work→AtelierWorkGallery`, `packages→AtelierPackages`, `quote→AtelierQuoteBand`, `hero→AtelierHero`, `about→AtelierAbout`, `contact→AtelierContact`. Proven by the `selectProductBlocks` test in pageArchetypes.atelier.test.ts. The meridian fallback map is never hit for atelier. No manifest gap.
+
+**Deviations**
+- Fixed `pageArchetypes.test.ts:137` (a photographer-single assertion the flip broke) even though the plan's step-4 grep-note named only `config.test.ts`. In-scope: my Files-touched lists "existing pageArchetypes/businessTypes test file"; this is a pure test-expectation update from my flip, same class as config.test.ts:104. Generalized the invariant to `MULTI_DEFAULTS={manufacturer, photographer}`.
+- Left the now-stale prose comment in config.ts (:246-248, "no shipped template declares [gallery], so the serve gate rejects photographer to MANUAL") untouched — cosmetic, and editing narrative beyond the flip is scope creep. Flag for a later sweep alongside the phase-4 serveGate.test.ts:120 stale comment.
+
+**Test results**
+- `npx tsc --noEmit` — exit 0. PASS.
+- `npx vitest run src/modules/audience/product src/modules/businessTypes/config.test.ts src/hooks` — 269 passed. PASS.
+- `npx vitest run src/modules/templates/conformance.test.ts` — 371 passed / 8 skipped. PASS (archetype addition didn't disturb conformance).
+
+**pipelineGuards allowlist fix (orchestrator ruling — folded into phase 5).** `src/modules/businessTypes/pipelineGuards.test.ts:62` was failing: it asserts literal `templateId === 'vestria'` appears ONLY in `RENDER_LAYER_ALLOWLIST`, but **phase 2** (commit c9af411d) added such a gate to `src/components/onboarding/wizard/StyleSlot.tsx` (`showVestriaPickers = templateId === 'vestria'` — the vestria hero-variant/style pickers) WITHOUT allowlisting it. It escaped phase-2's narrower test scope and surfaced under phase 5's `test:run -- src/modules/businessTypes` verification command. StyleSlot is render-layer wizard UI (vestria-only pickers, not a copy-pipeline fork), so the guard's own header (b) sanctions the allowlist. **Fix applied (added to phase-5 Files-touched):** added `'components/onboarding/wizard/StyleSlot.tsx'` to `RENDER_LAYER_ALLOWLIST`. StyleSlot.tsx itself NOT touched. File added to the Files-changed list below.
+
+**Final all-green results (after pipelineGuards fix):**
+- `npx tsc --noEmit` — exit 0. PASS.
+- `npx vitest run src/modules/audience/product src/modules/businessTypes src/hooks` — 272 passed (20 files, incl. pipelineGuards.test.ts). PASS.
+- `npx vitest run src/modules/templates/conformance.test.ts` — 371 passed / 8 skipped. PASS.
+
+**For phase 9/13**
+- Archetype `defaultSections` are the served skeleton seed (all 5 pages, chargeless). Phase 13 Kundius run reaches the structure slot with this 5-page menu.
+- `quote` survives `filterSectionsByProof` (only `testimonials` is proof-gated); when the photographer has no captured testimonials, `quote` sections still seed — confirm this is desired for the manual-fill flow, or gate `quote` at phase 9 if empty-quote bands are undesirable.
+- Unconfirmed-structure signal asymmetry (above) — revisit only if a resume flow persists an unconfirmed `structure.mode`.
+
+**FIX-FIRST — reachable zero-page-skeleton bug (review verdict, scope expanded to `useWizardStore.ts`).**
+- **Bug:** `classify.ts` stamps EVERY brief with an UNCONFIRMED `structure:{ mode: structureHint, pages: [] }` (raw AI guess). At hydrate `useWizardStore.ts` passed the RAW brief to `slotsForEngine`. For a served photographer the AI read as single-page (`structure.mode==='single'`): (1) `isMultipage('atelier', brief)` → `mode==='single'` → FALSE → structure skip RETAINED → StructureSlot never mounts → its mount-effect `fetchStrategy` never runs → sitemap stays null; BUT (2) `GeneratingSlot.isWorkMultipage()` keys off `briefSignalFromState(s)`, which carries `structure` ONLY when `briefStructureMode` is set — and that is set (hydrate) ONLY for a CONFIRMED structure (`sections?.length>0 || pageDetails?.length>0`). A bare `{mode:'single',pages:[]}` hint is NOT confirmed → signal omits structure → `isMultipage('atelier',{businessType:'photographer'})` → TRUE → `runWorkSkeleton` dispatches with `pages = sitemap ?? [] = []` → ZERO-PAGE multipage draft saved. The two derivations DISAGREED. (My earlier "signal-consistency" proof used a brief with NO `structure` field, so it missed this case.)
+- **Fix (minimal, `useWizardStore.ts` only):** at hydrate, compute the CONFIRMED-structure check and set `state.briefStructureMode` BEFORE the `state.slots = …` line, then call `state.slots = slotsForEngine(engine, templateId, briefSignalFromState(state))`. Now slot inclusion and the dispatch/fetchStrategy gate read the SAME confirmed-only signal (`businessTypeKey` is already set upstream, so `briefSignalFromState(state)` is valid at that point). Deduped the later `briefStructureMode = persisted.mode` assignment (single assignment now); the later block still seeds sitemap/structureSections from a confirmed structure. `isMultipage`'s "explicit CONFIRMED single wins → false" logic is UNCHANGED — only which signal hydrate feeds it changed.
+- **Net behavior:** a bare/unconfirmed classify `mode` NEVER suppresses the structure slot for a multipage-capable template; businessType default (photographer=multi) drives when structure is unconfirmed; a CONFIRMED single still correctly stays single.
+- **Representative tests (useWizardStore.test.ts, the ones the earlier proof missed):** (i) photographer+atelier brief WITH bare `structure:{mode:'single',pages:[]}` → asserts `slots` INCLUDES `'structure'` AND `isMultipage(templateId, briefSignalFromState(state))` TRUE (derivations AGREE) AND `briefStructureMode` stays null; (ii) photographer+atelier brief WITH a CONFIRMED single (`structure.sections=['hero','work','footer']`) → asserts `briefStructureMode==='single'`, `slots` does NOT contain `'structure'`, and the dispatch derivation is FALSE (legitimate single path unbroken).
+- **Granth unchanged:** the phase-2 granth cases (`work + granth STILL skips structure`, `fetchStrategy work+single-page granth early-returns idle`, `dispatch work+single → writer generator`) all still pass — granth declares no `multipage`, so `isMultipage` is false regardless of which signal is fed; the confirmed-only change is inert for it.
+
+**Final all-green results (after fix-first):**
+- `npx tsc --noEmit` — exit 0. PASS.
+- `npx vitest run src/hooks src/modules/audience/product src/modules/businessTypes src/modules/wizard` — 343 passed (25 files). PASS.
+- `npx vitest run src/modules/templates/conformance.test.ts` — 371 passed / 8 skipped. PASS.
+
+---
+### Phase 5 — impl-review verdict: SHIP (2 loops)
+Loop 1 = fix-first: reviewer caught a REACHABLE zero-page-draft bug (bare classify structure hint diverged slot-inclusion vs dispatch). Loop 2 = ship after fix.
+Gates green: tsc exit 0; hooks+audience/product+businessTypes+wizard+conformance = 714 passed/8 skipped. Scope = 8 files (useWizardStore.ts added mid-phase per ruling), GeneratingSlot.tsx untouched.
+Fixes this phase: (1) hydrate feeds briefSignalFromState(state) to slotsForEngine (both derivations now confirmed-only signal) — representative bare-hint + confirmed-single tests added; (2) pipelineGuards RENDER_LAYER_ALLOWLIST += StyleSlot.tsx (phase-2 regression). Both phase-2 carries proven (signal consistency real now; manifestPick resolves real Atelier layouts not 'default'). Granth inert (no multipage cap).
+Non-blocking (cosmetic): stale CARRY-test inline comment ("keys off full brief" now via briefSignalFromState).
+
+## Phase 6 — Design system: tokens / palettes / variants / knobs / sectionRules
+
+### Files changed
+- `src/modules/templates/atelier/tokens.ts` — knob declaration + token map + shared stylesheet builder; knob-consumed :root baselines; button radius now `--btn-r`.
+- `src/modules/templates/atelier/palettes.ts` — no code change (already provisional vermilion default + indigo/olive placeholders; confirmed only).
+- `src/modules/templates/atelier/sectionRules.ts` — comment-only (confirmed all-8-type band alternation; final-refinement pointer → phase 9).
+- `src/modules/templates/atelier/ThemeInjector.tsx` — knob-aware: shared `buildAtelierStylesheet(knobs)` + `knobDataAttributes` on documentElement.
+- `src/modules/templates/atelier/components/AtelierSSRTokens.tsx` — knob-aware: same shared builder + `{...knobAttrs}` on wrapper.
+- `src/modules/templates/atelier/index.ts` — export knob surface (`atelierKnobs`, `atelierKnobTokenMap`, `serializeAtelierKnobOverrides`, `buildAtelierStylesheet`).
+- `src/modules/templates/conformance.test.ts` — `assertKnobConformance('atelier', atelierKnobs)` + phase-6 back-compat/parity evidence block.
+
+### 5-axis knob declaration
+`atelierKnobs` declares ALL 5 standard axes (declare-one⇒declare-all):
+- REAL alternates: `buttonShape` [square, rounded*, pill], `cardStyle` [hairline*, shadow, flat], `density` [compact, comfortable*, spacious] (* = axis default).
+- DEFAULT-ONLY (single-value): `typePairing` ['classic'], `texture` ['none'] — conformance-valid, no knob CSS.
+
+### Per-axis CSS added to tokens.ts (`atelierKnobTokenMap`, non-default values only)
+- buttonShape: square → `--btn-r:0px`; pill → `--btn-r:999px` (rounded default = `:root --btn-r:var(--r)`, ~3px).
+- cardStyle: shadow → `--card-bd:1px solid transparent; --card-shadow:0 6px 22px …; --card-bg:var(--paper)`; flat → transparent border, no shadow, `--card-bg:var(--paper-2)` (hairline default = :root).
+- density: compact/spacious retune `--pad-y`/`--pad-y-sm` (comfortable default = :root). This axis has real effect NOW — `.lg-atelier-pad{,-sm}` in tokens.ts consume the vars.
+New `:root` baselines added so defaults emit nothing: `--btn-r`, `--card-bd`, `--card-shadow`, `--card-bg`. `.lg-atelier-btn` switched `var(--r)`→`var(--btn-r)`.
+
+### How knobs wire into both renderers (identical, hearth precedent)
+Single source of truth `buildAtelierStylesheet(knobs)` in tokens.ts = base+palette+variant, appends `serializeAtelierKnobOverrides()` ONLY when `knobDataAttributes(knobs)` is non-empty. Both `AtelierThemeInjector` (edit; documentElement attrs, `+ EDIT_AFFORDANCE_STYLES`) and `AtelierSSRTokens` (published; wrapper `{...knobAttrs}`) call the SAME builder + `knobDataAttributes`, so knob CSS + wrapper attrs are byte-identical across renderers (edit-affordance CSS is the only allowed divergence). LAW upheld: default value → no attr, no CSS (evidence test asserts byte-identical baseline + no `data-knob-` in default published markup).
+
+### Registry loader gap (flagged, NOT edited — registry.ts out of Files-touched)
+The atelier registry loader block (`registry.ts:115`) does NOT surface `knobs: m.atelierKnobs` (hearth does at :29). This is NOT needed for phase 6: the render path passes `knobs` DIRECTLY to the injector props from `themeValues.knobs` (`LandingPageRenderer.tsx:963`, `LandingPagePublishedRenderer.tsx:220`) — it does not read `mod.knobs`; and `assertKnobConformance` takes the declaration as a direct argument. So phase 6 render + conformance both work without it. The one-line registry addition (`knobs: m.atelierKnobs`) becomes relevant in PHASE 11 (editor knob-switching / `assertEditorBasics` reads the module-level declaration). Reporting per instructions — did not silently edit registry.ts.
+
+### Palette set (provisional; final = phase-9 human gate)
+`vermilion` (default), `indigo`, `olive` — unchanged from phase 4 scaffold; accent duo `--accent`/`--accent-deep` under `[data-palette]`.
+
+### Deviations
+- cardStyle alternates emit real scoped CSS + attrs (mechanism REAL, conformance-valid), but the provisional Packages block (`blocks/Packages/styles.ts`, out of Files-touched) does not yet consume `--card-bd/--card-shadow/--card-bg`, so cardStyle has no VISIBLE effect until the phase-9 block port wires the card to those vars. Conservative: added the baselines + emission now; deferred block consumption to phase 9. buttonShape (`.lg-atelier-btn`) and density (`.lg-atelier-pad`) DO have live effect (their consumers live in tokens.ts).
+- palettes.ts / sectionRules.ts required no substantive change (phase-4 scaffold already correct) — only a sectionRules comment update.
+
+### Test results
+- `npx tsc --noEmit` → exit 0.
+- `npm run test:run -- src/modules/templates/conformance.test.ts` → 385 passed | 8 skipped (incl. atelier 5-axis knob conformance + back-compat/parity evidence).
+- `npm run test:run -- src/modules/templates/atelier` → 55 passed (coreParity + registration still green).
+
+### Open risks
+- Registry `mod.knobs` surface deferred (see gap above) — phase 11 must add `knobs: m.atelierKnobs` to the atelier loader for editor knob-switching.
+- cardStyle visual effect deferred to phase-9 block port (card must reference the new vars).
+- All design values (paper/ink/vermilion/rhythm/knob CSS) remain PROVISIONAL — locked against approved Kontur HTML in phase 9.
+
+---
+### Phase 6 — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; conformance+atelier = 440 passed/8 skipped. Scope = 6 files (palettes.ts needed no change). Verified: all 5 knob axes conformance-valid (assertKnobConformance enrolled+passing); default=byte-empty (no attr/no CSS); ThemeInjector+SSRTokens byte-identical knob emission via shared buildAtelierStylesheet; blocks never branch on knobs; no default-value regression (--btn-r/--card-* baselines = prior values).
+Deferrable (confirmed): registry loader doesn't surface m.atelierKnobs — nothing reads it in current render/publish/conformance path (props-threaded); needed only for phase-11 editor knob-switching. cardStyle emits real CSS but no consumer until phase-9 Packages port — conformance is declaration-only so valid.
+Non-blocking (CARRY→phase 11): (1) index.ts:20 comment misleadingly says registry surfaces atelierKnobs; (2) density/variant --pad-y overlap (intended, knob wins, default emits nothing).
+
+---
+
+## Phase 7 — Serve-gate + fit + served-path integration coverage
+
+### Files changed
+- `src/modules/brief/serveGate.test.ts` — fixed the stale line-120 comment; added an "atelier phase 7 — serve backing + over-serve guards" describe block.
+- `src/modules/templates/fit.test.ts` — added `templateMeta` import + an "atelier full-capability satisfaction" describe block.
+- `src/hooks/useWizardStore.test.ts` — added `buildBriefDraft`/`EntrySignals`/`decideServe` imports + a "COMPOSED served photographer path" describe block (composed served-path proof + granth regression).
+
+**No production code changed — tests only, as scoped.** No production defect found.
+
+### Coverage added
+- **serveGate (SERVE depth):** pins the templateMeta backing behind the rungC gallery probe (`atelier.copyEngines`/`capabilities`/`capabilitySections` exact values, not retired/bespoke); photographer ⇒ SERVE/service/atelier with `shortlist === ['atelier']` and `audienceType === TEMPLATE_AUDIENCE.atelier !== BRIDGEABLE_ENGINES.work`.
+- **serveGate (negative / over-serve guards):** trust serve (agency) shortlist `['hearth','lex','surge']` `.not.toContain('atelier')`; product serve (saas) shortlist `['meridian','vestria']` `.not.toContain('atelier')`; out-of-ICP (photographer + `platformNeeds:'checkout'`) ⇒ manual/`out-of-icp` — atelier cannot rescue an out-of-ICP brief.
+- **fit():** `fit('atelier','work',['gallery','packages','lead-form','multipage','bilingual']) === true`, with non-vacuous lane provenance (lead-form + bilingual asserted ABSENT from `templateMeta.atelier.capabilities`, so the TRUE result is proven to come from the shared-block + platform lanes, not templateMeta); plus atelier engine-gate negatives (`trust`/`thing` false).
+- **Composed served-path (store level):** REAL `buildBriefDraft` photographer brief (carrying the bare unconfirmed `structure:{mode:'single',pages:[]}` classify hint) → `decideServe` = serve/atelier/service → store hydrate with the decision's audience/template → `slots` include `structure` (`briefStructureMode` null, hint ignored) → chargeless `fetchStrategy` seeds the 5 archetype pages (`['home','work','experiences','about','contact']`, `strategy` null, fetch never called) → `isMultipage(...)` true (skeleton dispatch). Representative brief, not idealized.
+- **Composed granth regression:** REAL writer `buildBriefDraft` brief → serve/granth/writer → store skips `structure` + `isMultipage` false (writer-generator dispatch, not skeleton) — the granth-unchanged proof composed across phases 1+2+4.
+
+### Comment sweep (phase-4 nit)
+`serveGate.test.ts` line-120 stale comment ("Contrast with photographer, whose unbacked gallery cap sends it to the manual/demand lane") rewritten to a historical note: photographer's gallery cap is now backed by atelier (phase 4) so photographer SERVES atelier.
+
+### Deviations
+- Negative-case out-of-ICP fixture uses `businessTypeGuess:'photographer'` (not the pre-existing `boutique`/`restaurant` checkout fixtures) so the test proves a WORK/gallery type is still pushed to manual by the exclusive out-of-icp rung — a stronger over-serve guard for atelier specifically. Conservative, in-scope.
+
+### Test results
+- `npx tsc --noEmit` → exit 0.
+- `npm run test:run -- src/modules/brief src/modules/templates/fit.test.ts src/hooks` → 16 files, 353 tests, all PASS.
+
+### Open risks
+- None new. Composed path is pure unit composition (no browser); true E2E of the served flow remains the phase 12/13 manual gates.
+
+---
+### Phase 7 — impl-review verdict: SHIP (1 loop)
+No blocking issues, no material nits. Gates green: tsc exit 0; brief+fit+hooks = 353 tests pass. Tests-only confirmed (no production change). Verified NON-VACUOUS + correct against production: SERVE-depth (photographer→serve/atelier/service, shortlist=['atelier']); over-serve guards REAL not tautologies (out-of-icp checkout fires before serve logic; agency/saas .not.toContain('atelier') pin exact shortlists); fit() provenance real (lead-form via sharedBlockCapabilities, bilingual via PLATFORM, both absent from atelier.capabilities); composed served-path threads real fns (buildBriefDraft→decideServe→hydrate→isMultipage, fetch stubbed+never-called=chargeless, 5-page seed); granth regression composes writer→skip→writer-gen. No existing test weakened; line-120 comment fix sanctioned.
+
+## Phase 8 — Fonts: Bricolage Grotesque + preload + kit whitelist
+
+### Files changed
+- `src/styles/fonts-self-hosted.css` — added `@font-face` for Bricolage Grotesque.
+- `src/modules/templates/CriticalFontPreload.tsx` — added `case 'atelier':` to `criticalFontHrefs`.
+- `src/modules/engines/designKit.ts` — added `'Bricolage Grotesque'` to `SELF_HOSTED_FONTS`.
+
+(No file added under `public/fonts/bricolage-grotesque/` — the woff2 was pre-placed; peer dirs hanken-grotesk/space-grotesk carry no README, so none added.)
+
+### @font-face block
+`font-family: 'Bricolage Grotesque'`; variable `font-weight: 200 800`; `font-style: normal`; `font-display: swap`; `src: url('/fonts/bricolage-grotesque/bricolage-grotesque-latin-wght-normal.woff2') format('woff2-variations')` — mirrors the Archivo / Space Grotesk / Hanken variable-wght precedent in the same file. Placed just before the Cormorant Garamond block.
+
+### Preload case (variant-branched)
+`case 'atelier':` returns the display face only, branched by variant:
+- `compact` → `/fonts/fraunces/fraunces-latin-opsz-normal.woff2` (Fraunces — confirmed present).
+- default (`editorial` baseline) → `/fonts/bricolage-grotesque/bricolage-grotesque-latin-wght-normal.woff2` (confirmed present, 41KB).
+Body face (Hanken Grotesk) intentionally not preloaded — rides CSS discovery like the other grotesk templates (vestria/surge precedent).
+
+### Whitelist entry
+`'Bricolage Grotesque'` inserted alphabetically between `'Bodoni Moda'` and `'Cormorant Garamond'` in `SELF_HOSTED_FONTS`.
+
+### Three-way family-name match
+Identical string `Bricolage Grotesque` across:
+1. `@font-face` `font-family` (fonts-self-hosted.css).
+2. atelier `tokens.ts:65` `fontDisplay: "'Bricolage Grotesque', 'Hanken Grotesk', ..."` (unchanged — set in phase 6; not edited).
+3. `SELF_HOSTED_FONTS` whitelist (designKit.ts).
+CONFIRMED match. tokens.ts NOT touched (in-name already correct).
+
+### Verification
+- `npx tsc --noEmit` → exit 0. PASS.
+- `npm run test:run -- src/modules/engines` → 4 files, 175 tests passed. PASS.
+- `npm run build` → exit 0 (buildPublishedCSS + buildAssets + next build all green). PASS. Built `public/assets/fonts-self-hosted.css` contains 2 `Bricolage Grotesque` references + the woff2 url. Confirmed.
+
+### Deviations / risks
+- Bricolage wght range set to `200 800` (fontsource standard for the wght axis). If the placed binary's actual axis differs the range would clamp — conservative and matches source naming; no runtime error either way.
+- No open risks. Phase-9 `kit:lint` prerequisite (whitelist entry) satisfied.
+
+---
+### Phase 8 — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; `npm run build` exit 0 (FIRST full build of run — validates whole tree); engines 175 passed. Bricolage woff2 (41KB fontsource variable, orchestrator-placed) wired: @font-face wght 200-800 woff2-variations; preload case atelier (editorial→Bricolage / compact→Fraunces, both files present); SELF_HOSTED_FONTS +1. Family-name 'Bricolage Grotesque' 3-way match (@font-face / tokens.ts:65 fontDisplay / whitelist). Build artifact public/assets/fonts-self-hosted.css regenerated (expected). Non-blocking: cosmetic comment.
+
+## FOUNDATION COMPLETE (phases 1-8). Phase 9 = HUMAN GATE (designer HTML missing).
+
+---
+### Phase 9a — design system + Header + Hero (+slider markup + marquee + page-head)
+
+**Files changed:**
+- `src/modules/templates/atelier/tokens.ts` — real Kontur :root values + ported base/type/label/lede/button/qlink utilities; density knob re-mechanised onto `--space`; knob declaration + token map realigned.
+- `src/modules/templates/atelier/palettes.ts` — real Kontur accent oklch values (vermilion exact; cobalt/moss values under existing indigo/olive ids — see Deviations).
+- `src/modules/templates/atelier/sectionRules.ts` — hero surface flipped paper→dark (Kontur cover + page-head are both dark).
+- `src/modules/templates/atelier/blocks/Header/AtelierNavHeader.core.tsx` — ported 3-col nav grammar, overlay+solid modes, EN/NL toggle, CSS-only mobile drawer.
+- `src/modules/templates/atelier/blocks/Header/styles.ts` — ported NAV CSS (overlay/solid/burger/drawer/lang/btn-nav + responsive).
+- `src/modules/templates/atelier/blocks/Hero/AtelierHero.core.tsx` — cover slider DOM contract + marquee (home) + page-head mode.
+- `src/modules/templates/atelier/blocks/Hero/styles.ts` — ported COVER/arrows/dots/scroll/MARQUEE/page-head CSS (keyframe atl-scrollx→lg-atelier-scrollx); placeholders scoped under `.lg-atelier-cover`.
+- `src/modules/templates/conformance.test.ts` — phase-6 atelier knob-evidence block updated to the shipped values (cardStyle `shadow`→`flat`).
+- `index.ts`, `ThemeInjector.tsx`, `components/AtelierSSRTokens.tsx` — reviewed, NOT edited (knob decl lives in tokens.ts and is already re-exported; both renderers consume `buildAtelierStylesheet`+`knobDataAttributes` generically with no hardcoded knob values, so the realignment flows through automatically).
+
+**Tokens/palettes reconciled (real Kontur values):** `:root` now carries the design's `--atl-*` values mapped onto atelier's phase-6 token names — paper `oklch(0.978 0.004 95)`, paper-2 `0.945…`, ink `0.165 0.010 60`, ink-soft (=design ink-2) `0.385…`, ink-mute (NEW, =design ink-3) `0.560…`, line `ink/0.16`, line-dark `paper/0.20`, on-dark-soft `0.82 0.008 90`, wrap `1380px`, gutter `clamp(20px,5vw,76px)`, fs-body `16px`. Dark surfaces (`--dark`/`--dark-2`) both resolve to `--ink` because the design paints every dark band (`.atl-sec.dark`, `.atl-page-head`, `.atl-footer`) with `var(--atl-ink)` — the platform's 4-surface `data-surface` mechanism is retained unchanged (base→paper, alt→paper-2, dark→dark). Ported the button family (`.lg-atelier-btn` + `.lg-atelier-fill/-line/-accent/-ghost/-ghost-d/-lg/-on-dark`), the `.lg-atelier-label` eyebrow (sans, tracked, accent dot), `.lg-atelier-lede`, `.lg-atelier-qlink`. Palette accents are the exact design duos.
+
+**Knob-value realignment (cardStyle / density) + conformance:**
+- cardStyle: `['hairline','shadow','flat']` → **`['hairline','flat']`** (design has no shadow; dropped `shadow` from decl + token map). flat = `--card-bd:1px solid transparent; --card-bg:var(--paper-2)` (Kontur `[data-variant~=flat]`).
+- density: `['compact','comfortable','spacious']` → **`['comfortable','compact']`** (dropped `spacious`). compact = Kontur `[data-variant~=dense]`. It emits `--space:0.82` (for the DIRECT `calc(X * var(--space))` consumers — button padding, page-head, gaps) AND redeclares the final `--sec-y`/`--pad-y`/`--pad-y-sm` with `0.82` baked in — see the dual-renderer fix below.
+- buttonShape unchanged `['square','rounded','pill']`; `:root --btn-r` set to the design's rounded value `10px` (square→0px, pill→999px).
+- conformance.test.ts phase-6 evidence block: `cardStyle:'shadow'` → `cardStyle:'flat'` (the only test that referenced a dropped value). `assertKnobConformance('atelier', atelierKnobs)` passes with the new subsets (both include their axis default; default emits nothing — verified by the byte-identical baseline test).
+
+**Header dual-mode:** one core, two modes via `content.mode`. Default `solid` = sticky blurred-paper bar (dark text, inner pages); `overlay` = transparent bar with light text (home, over the dark hero). Overlay uses `position:absolute` per the design; whether it visually lands over the following hero section in the multipage stack is a phase-12 parity check (default is the safe always-visible solid bar). Mobile drawer is the design's CSS-only checkbox hack — a top-level `<input id="lg-atelier-menu">` + a sibling `.lg-atelier-drawer` (both siblings of `<header>` inside the section wrapper, so `:checked ~` resolves). EN/NL toggle is static visual chrome (aria-pressed); real locale switching is the platform i18n layer.
+
+**Page-head mode:** the inner-page dark hero band (`.atl-page-head`) is rendered by the **Hero** block when `content.mode === 'pageHead'` — NOT a new section type, NOT a resolver/manifest change. label + accent-`em` h1 + lede, dark surface (hero's sectionRules surface is `dark`, which serves both modes).
+
+**Marquee:** part of the Hero region, home mode only. `.lg-atelier-marquee[data-surface="dark"][aria-hidden="true"]` after the cover; `.lg-atelier-marquee-track` runs `animation:lg-atelier-scrollx 32s linear infinite` (keyframe renamed from `atl-scrollx`), words duplicated ×2 for a seamless loop, `prefers-reduced-motion` halts it. Pure CSS. Words come from `content.marquee_items` (else a 5-word default). This is the Hero's marquee — NOT the QuoteBand.
+
+**Hero slider DOM contract (VERBATIM — phase-10 asset selectors must match; class prefix renamed atl-→lg-atelier-, but the `data-atl-*` hooks are EXACT):**
+```
+.lg-atelier-cover                                     <- JS: slider.closest('.lg-atelier-cover')
+  .lg-atelier-slides[data-atl-slider][data-interval="5000"]
+    .lg-atelier-slide.is-active   (slide 1)           <- first slide default-visible (no-JS fallback)
+    .lg-atelier-slide             (slides 2..N)
+      .lg-atelier-slide-ph > .lg-atelier-ph.dark > .lg-atelier-ph-num   (or customer <img class="lg-atelier-slide-img">)
+  .lg-atelier-cover-in            (z2 -- eyebrow/h1/tagline/actions)
+  .lg-atelier-arrows
+    button.lg-atelier-arrow.lg-atelier-arrow-prev[data-atl-prev]
+    button.lg-atelier-arrow.lg-atelier-arrow-next[data-atl-next]
+  .lg-atelier-dots[data-atl-dots]                      <- EMPTY container; JS injects button.lg-atelier-dot[aria-current]
+  .lg-atelier-scroll
+```
+Data-attribute hooks (do NOT rename in phase 10): `data-atl-slider`, `data-interval` (="5000"), `data-atl-prev`, `data-atl-next`, `data-atl-dots`. Active-slide class: `.is-active`. JS-injected dot class: `.lg-atelier-dot`. Slides are rendered from the block's `slides` image collection (`slides.<id>.image` through the standard funnel); an empty collection renders ONE `.is-active` dark placeholder slide.
+
+**No-JS first-slide fallback:** `.lg-atelier-slide{opacity:0}` + `.lg-atelier-slide.is-active{opacity:1}` in CSS, and the first slide ships `is-active` in the static markup. With JS disabled the first slide is opaque and the rest are transparent; arrows and the empty `[data-atl-dots]` are inert (no handlers). Phase-10 JS injects dots and toggles `.is-active` for autoplay/controls.
+
+**Deviations (in-scope judgment calls, logged):**
+1. **Palette ids/4th accent (out-of-scope file):** the design ships FOUR accents (vermilion + cobalt + moss + ochre) but the `AtelierPalette` union in `src/types/service.ts` (NOT in 9a Files-touched) declares three ids `vermilion|indigo|olive`. Conservative choice: applied the exact vermilion duo, and carried the design's **cobalt** and **moss** values under the existing `indigo`/`olive` ids. The id-rename to cobalt/moss/ochre AND the 4th (ochre) palette require editing `types/service.ts` (the union tuple `atelierPalettes` + its `PALETTES_BY_TEMPLATE` entry) — **REPORTED as a follow-up needing that file**; not done here to stay in Files-touched.
+2. **buttonShape default:** platform law fixes the buttonShape axis DEFAULT to `rounded` (must be the no-emit `:root`), but the Kontur design's `:root` default is square (`0px`). Kept the law: `:root --btn-r:10px` (the design's rounded value, so the `rounded` knob is honest), with `square` (0px) as an explicit alternate. Kundius/atelier projects reproduce the exact square Kontur look by selecting `buttonShape:'square'` in `themeValues.knobs`. Documented so phase 13 sets it.
+3. **Hero `hero_image` field dropped** from `AtelierHeroContent` in favour of the `slides` collection (the design is a slider, not a single image). No test referenced `hero_image`.
+4. **Header overlay-over-hero** positioning verified only in phase-12 parity (default is solid); noted above.
+
+**Guardrails honored:** no new section type; `resolveAtelierBlock`/`blockManifest.ts` untouched (page-head is a Hero mode); slider `data-atl-*` hooks preserved exactly; default knob values emit nothing (byte-identical baseline test green). Class rename atl-→lg-atelier- applied throughout markup + styles.ts.
+
+**Commands / results:**
+- `npx tsc --noEmit` -> exit 0 (PASS)
+- `npx vitest run src/modules/templates/conformance.test.ts` -> 385 passed, 8 skipped (PASS; incl. realigned knob conformance + atelier default-emits-nothing + non-default parity evidence)
+- `npx vitest run src/modules/templates/atelier` -> 55 passed (PASS; coreParity 8 cores stay pure + render server-side, registration all 8 types)
+
+**Open risks:**
+- Palette id-rename + ochre accent (Deviation 1) needs `types/service.ts` — orchestrator to schedule a small follow-up (or fold into 9b) so all four Kontur palettes ship with correct ids.
+- Header overlay-over-dark-hero visual overlap depends on the multipage renderer's section stacking; confirm at phase 12. Solid default is safe meanwhile.
+- 9b provisional blocks (Work/Packages/About/Quote/Contact/Footer) still emit the shared HATCH placeholder + old button-modifier styling; they will be re-ported in 9b and may look mixed until then (no test impact).
+
+---
+#### Phase 9a — review fix (density dual-renderer parity trap)
+
+**Blocking bug (verdict fix-first):** the compact density knob emitted ONLY `[data-knob-density="compact"]{--space:0.82}`, while `--sec-y`/`--pad-y`/`--pad-y-sm` were declared at `:root` as `calc(… * var(--space))`. CSS custom-property `var()` substitution resolves at the DECLARING scope (`:root`) and descendants inherit the already-computed value. ThemeInjector (edit) sets `data-knob-*` on `documentElement` (=`:root`) so rhythm recompressed; AtelierSSRTokens (published) sets them on a wrapper `<div>` (a `:root` descendant), so `--pad-y`/`--sec-y` stayed resolved with `--space:1` → section rhythm did NOT compress in published. Emitted CSS text is byte-identical (byte-compare evidence test misses it) but the RENDERED layout diverged editor vs published — the exact parity trap the track guards against. Regression from my phase-9a re-mechanisation.
+
+**Fix (`tokens.ts`, `atelierKnobTokenMap.density.compact`):** the compact block now redeclares the FINAL section-rhythm vars directly (0.82 baked in, not via `var(--space)`), so a wrapper-scoped `data-knob` recomputes them for descendants in the published renderer too:
+```
+compact: {
+  '--space': '0.82',
+  '--sec-y':   'calc(clamp(72px, 10vw, 150px) * 0.82)',
+  '--pad-y':   'calc(clamp(72px, 10vw, 150px) * 0.82)',
+  '--pad-y-sm':'calc(clamp(52px, 7vw, 100px) * 0.82)',
+}
+```
+`--space` is still emitted for the direct consumers (button padding, page-head, marquee gaps). DEFAULT (comfortable) still emits nothing — verified by the unchanged byte-identical baseline test.
+
+**Regression guard added (`conformance.test.ts`):** new test asserts the compact block declares `--pad-y:`/`--pad-y-sm:` directly (not only `--space`), so a future "multiplier-only" regression on any `:root`-declared rhythm var goes red.
+
+**Comments corrected:** the token-map + knob-declaration comments in `tokens.ts` no longer claim `--space` scales section rhythm "in one lever" (true only on the edit side); they now document why the final vars must be redeclared.
+
+**Re-verify:** `npx tsc --noEmit` exit 0 (PASS) · `npm run test:run -- src/modules/templates/conformance.test.ts src/modules/templates/atelier` → 441 passed, 8 skipped (PASS; new parity guard green, default still no-emit). Fix stayed within phase-9a Files-touched (tokens.ts + conformance.test.ts).
+
+---
+### Phase 9a — impl-review verdict: SHIP (2 loops)
+Loop 1 = fix-first: density=compact editor↔published parity divergence (--space multiplier resolved at :root declaring-scope; published wrapper is a :root descendant so section rhythm didn't compress there). Loop 2 = ship after fix (compact block redeclares final --sec-y/--pad-y/--pad-y-sm directly + guard test).
+Gates green: tsc exit 0; conformance+atelier = 441 passed/8 skipped. Verified: class rename atl-→lg-atelier-, knob realignment (cardStyle=[hairline,flat]/density=[comfortable,compact], defaults no-emit), ThemeInjector/SSRTokens parity, Hero slider DOM contract exact, Header overlay+solid+drawer+page-head-mode, marquee, core purity, data-surface. Scope = 8 files.
+CARRY→9b: palette ids (types/service.ts vermilion/indigo/olive → vermilion/cobalt/moss/ochre + 4th). CARRY→12/13: buttonShape default rounded≠Kontur square (per-project knob seed decision at parity gate).
+
+---
+### Phase 9b — content blocks (Work/Packages/About/Quote/Contact/Footer) + palette-id fix
+
+**Files changed:**
+- `src/types/service.ts` — AtelierPalette union rename + comment
+- `src/modules/templates/atelier/palettes.ts` — palette configs (id rename + ochre)
+- `src/modules/templates/atelier/imageKeywords.ts` — PALETTE_IMAGE_KEYWORDS keys
+- `src/modules/templates/atelier/blocks/Work/{AtelierWorkGallery.core.tsx,styles.ts}`
+- `src/modules/templates/atelier/blocks/Packages/{AtelierPackages.core.tsx,styles.ts}`
+- `src/modules/templates/atelier/blocks/About/{AtelierAbout.core.tsx,styles.ts}`
+- `src/modules/templates/atelier/blocks/Quote/{AtelierQuoteBand.core.tsx,styles.ts}`
+- `src/modules/templates/atelier/blocks/Contact/{AtelierContact.core.tsx,AtelierContact.tsx,AtelierContact.published.tsx,styles.ts}` + NEW `contactFields.ts`, `leadFormMarkup.tsx`
+- `src/modules/templates/atelier/blocks/Footer/{AtelierFooter.core.tsx,styles.ts}`
+- (Work/Packages/About/Quote/Footer `.tsx`/`.published.tsx` wrappers UNCHANGED — boilerplate already correct; core signature unchanged.)
+- (`blockManifest.ts` NOT edited — no consumes/capacity changed; packages capacity confirmed minCards:2/maxCards:4.)
+- (`paletteSelection.ts` NOT edited — only returns default 'vermilion'; no id references.)
+
+**Palette-id rename (9a carry):** union `vermilion|indigo|olive` → `vermilion|cobalt|moss|ochre` (default stays vermilion). Threaded through `types/service.ts` (atelierPalettes + AtelierPalette; PALETTES_BY_TEMPLATE reads the array so no separate edit), `palettes.ts` (cobalt/moss exact oklch + ochre added: `oklch(0.680 0.140 70)` / `oklch(0.540 0.130 66)`), `imageKeywords.ts` (cobalt/moss/ochre phrases). No reader outside the listed files (grep confirmed; conformance.test.ts uses only 'vermilion'). Blast radius clean — no STOP.
+
+**Per block (class prefix atl-→lg-atelier-, values from styles.css):**
+- **Work** — TWO modes on the `works` collection via `content.mode`: default `.lg-atelier-mosaic` (6-col dense grid, per-cell spans via `:nth-child(6n±)` so no per-item class is needed — works with the shared collection primitive; each cell `.lg-atelier-cell` + media aspect + `.lg-atelier-cap` category dot + more-link `.lg-atelier-qlink`); `mode==='gallery'` `.lg-atelier-gallery` (CSS `columns:3` masonry, `.lg-atelier-gcell` + `.lg-atelier-gcap` title/category). Images via E.List reorderable+imageField (EditableImageCollection). Title kept as `.lg-atelier-vh` visually-hidden in mosaic (design surfaces only the category; also satisfies coreParity fixture).
+- **Packages** — `.lg-atelier-packs` auto-fit minmax(300px,1fr) (survives 2/3/4); each `.lg-atelier-pack` = `.lg-atelier-pack-img` (3:2 + optional `.lg-atelier-flag` when is_featured) + body (summary→tier `.lg-atelier-pack-cat`, name→h3, price_display→`.lg-atelier-price`, features→`.lg-atelier-pack-features li::before="—"`, full-width CTA accent/line by is_featured). Consumes uses `--card-bg`/`--card-bd` (cardStyle knob now visually live).
+- **About** — `.lg-atelier-split` bio (art `.lg-atelier-split-art__img` 4:5 + `.lg-atelier-badge` / copy label·h2 accent-em·body·body2·`.lg-atelier-sign`·actions). `content.mode==='page'` adds `.lg-atelier-press` rows (year/title/publication) + reversed `.lg-atelier-split--rev` studio split.
+- **Quote** — STATIC dark grid `.lg-atelier-quotes` (auto-fit minmax(320px)) of `figure.lg-atelier-quote` (`.lg-atelier-mark` big serif " + p + `.lg-atelier-who` with `<b>`=accent). Optional `quotes` collection for the 1–3-up grid; single schema quote falls back to one figure. Dark surface.
+- **Contact** — `.lg-atelier-contact` 2-col: copy + `.lg-atelier-cd` detail rows (Based in/Phone/Email/Instagram) / bordered `.lg-atelier-form`. Uses the SHARED lead-form split (formNode prop; edit inert preview, published real `<form data-lessgo-form>` wired to form.v1.js) via new `leadFormMarkup.tsx` + `contactFields.ts` (fields name/email/occasion/brief; "Send brief") — mirrors Vestria; submission NOT reinvented. Inner-page dark page-head is the Hero page-head mode (separate section), not duplicated.
+- **Footer** — big `.lg-atelier-fw` wordmark (`.dot`=accent) + 3-col (`desc+contact` / Index `footer_links` / Elsewhere `social_links`) + bottom bar (copyright + legal). Surface dark-2.
+
+**Closer + page-head mapping:** `.atl-closer` full-bleed CTA band mapped INTO the Footer core (above the footer proper) per ruling — no new section type. Bg image via a controlled absolute wrapper + full-size E.Img (edit primitive forces inline position:relative, so image wrappers are declared position:relative in CSS, never absolute — dual-renderer parity rule; absolute-fill backgrounds use a separate controlled wrapper). `.atl-page-head` handled by Hero page-head mode (9a), reused not duplicated.
+
+**Deviations (in-scope, conservative):**
+1. Work-page CSS radio FILTER dropped — the shared collection primitive exposes no per-item `data-cat` hook and adding one is outside 9b's files-touched (would need a primitive/resolve change → would STOP). Masonry gallery ships without the filter; flagged for phase 11/12 (primitive enhancement or manual data-cat).
+2. Several design regions have no service-schema backing (elementSchema.ts not in files-touched), so they render via OPTIONAL non-schema content keys, editable + degrading to design placeholders (generation leaves them empty; manual-fill / block-mocks populate): Work more-link (more_text/href), Packages per-item `image`, About badge/cta/press_items/studio_*, Quote `quotes` grid, Contact location/instagram, Footer closer_*/footer_links/index_heading/elsewhere_heading/contact_location/legal_text. Published Txt renders placeholder-as-fallback (existing pattern), so chrome shows design copy until edited.
+3. About PAGE compresses the design's 3 surfaces (bio/press-alt/studio) into ONE section (one data-surface), delineated by rules — the About block is a single section type.
+4. Contact form fields render single-column (Vestria-style) rather than the design's name+email 2-col row, for robustness with arbitrary form-builder fields.
+5. Mode selection (Work gallery / About page) is content-driven like Hero's pageHead/overlay (no schema `mode` element) — populated by archetypes/mocks/manual-fill (out of 9b scope).
+
+**blockManifest confirmation:** unchanged; packages capacity minCards:2/maxCards:4 intact; work 1/12; all `consumes` still ⊆ serviceElementSchema contract (no new schema-backed keys added).
+
+**Commands:** `npx tsc --noEmit` → exit 0. `vitest run conformance.test.ts + atelier` → 55 passed. `vitest run src/modules/templates` → 25 files, 921 passed / 8 skipped. All PASS.
+
+**For phase 10/11/12:**
+- Phase 10 slider asset: Hero DOM contract untouched by 9b.
+- Phase 11 mocks (blockMocks/index.ts): author works (mosaic + gallery mode), packages @2/3/4, about press_items + studio_* (page mode), quotes grid, footer closer_*/footer_links, contact forms — to exercise the non-schema optional keys + the mode flags. Consider seeding `mode` on Work(work-page)/About(about-page) archetypes so gallery/press render.
+- Phase 12 parity: verify the Work CSS-filter deferral decision; nth-child mosaic spans + `.vs-ic-add` trailing edit-only child (parity holds for the N image cells). buttonShape default rounded≠Kontur square still open (9a carry).
+- If the Work filter is wanted: needs a per-item attribute hook on EditableImageCollection (shared primitive) — orchestrator call.
+
+---
+### Phase 9b — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; templates suite 921 passed/8 skipped. Scope = 6 blocks (17 files) + 2 new Contact files (contactFields.ts, leadFormMarkup.tsx) + palette rename (service.ts/palettes.ts/imageKeywords.ts). Verified: all 6 cores pure + boundary-safe; conformance non-vacuous (all core+capability sections resolve real); palette rename COMPLETE (vermilion/cobalt/moss/ochre, zero stale indigo/olive in src, ochre oklch matches); shared lead-form (data-lessgo-form + form.v1.js, not reinvented); closer→Footer + page-head reuse (no new section type); data-surface margins clean.
+Deferrable deviations (carries): (1) unfilled non-schema chrome keys render design placeholder as LIVE TEXT → phase-11 mocks + phase-13 manual-fill must populate (@studioname/"Let's make yours."/etc.); (2) Work category-filter dropped (needs shared-primitive data-cat hook → orchestrator call at 11/12); (3) About 3-surface→1-section + Contact single-col + buttonShape default + opsz → phase-12 parity eyeball.
+
+## FULL 8-BLOCK PORT COMPLETE (9a+9b). Next: 10 (slider JS asset), 11 (editor basics/mocks + carries), 12 (parity QA — HUMAN GATE), 13 (Kundius publish — HUMAN GATE).
+
+---
+### Phase 10 — Hero-slider behaviors asset
+
+**Files changed:**
+- `src/lib/staticExport/atelierSliderBehaviors.js` (new) — vanilla IIFE slider asset (built → `public/assets/slider.v1.js`).
+- `scripts/buildAssets.js` — added `{ src:'atelierSliderBehaviors.js', out:'slider.v1.js' }` to the Terser files array.
+- `src/lib/staticExport/htmlGenerator.ts` — `usesAtelier` gating flag + gated `<script .../slider.v1.js defer>` tag; threaded the flag through `buildHTMLDocument`'s params type + destructure.
+- `src/lib/staticExport/htmlGenerator.test.ts` (new) — gating test (present for atelier, absent for meridian/hearth).
+- `src/modules/templates/atelier/blocks/Hero/AtelierHero.tsx` — editor wrapper: effect-driven slider over the SAME core DOM (no restructure). 9a-locked `.core.tsx`/`.published.tsx`/`styles.ts` untouched.
+
+**Asset behavior + selector contract (HARD contract with 9a Hero markup):** queries `[data-atl-slider]` (all, no-op if none); per slider `cover = closest('.lg-atelier-cover')`, `slides = .lg-atelier-slide[]`, bails if `<2`; reads `data-interval` (default 5000); injects `button.lg-atelier-dot[aria-label][aria-current]` into the EMPTY `[data-atl-dots]`; `go(n)` modulo-wraps + toggles `.is-active` on slides and `aria-current` on dots; autoplay via `setInterval(go(idx+1), interval)` SKIPPED under `prefers-reduced-motion`; `[data-atl-prev]`/`[data-atl-next]` → `go(±1)` + restart; `visibilitychange` stop/restart. Idempotent boot guard `window.__atelierSliderBooted`. Degrades to the static first `.is-active` slide with JS off. Selectors verified byte-present in the minified output (`data-atl-slider`, `.lg-atelier-cover`, `.lg-atelier-slide`, `prefers-reduced-motion`).
+
+**buildAssets entry:** `slider.v1.js` — immutable filename; behavior change post-release ⇒ `slider.v2.js` (never mutate v1 bytes). Emitted minified at 1438 bytes.
+
+**htmlGenerator gating:** `const usesAtelier = options.templateId === 'atelier'` (beside `usesNaayom`/`usesLumen`); tag `${usesAtelier ? '<script src="${assetBase}/assets/slider.v1.js" defer></script>' : ''}` beside the other behavior scripts. Atelier pages ONLY.
+
+**Editor .tsx slider approach (parity + editing intact):** the wrapper renders `AtelierHeroCore` (unchanged) inside a `display:contents` grouping div (layout-transparent → zero DOM/CSS parity impact vs the published wrapper) carrying a ref. A `useEffect` runs the SAME slider logic as the published asset against the core-rendered DOM (same selectors) — it does NOT restructure markup, so editor↔published DOM/CSS are identical. Parity baseline = slide 1 active: core ships `.is-active` on slide 1 and `go(0)` holds it on mount; cleanup resets to slide-1-active. Inline editing stays intact: autoplay is PAUSED on `focusin` within the cover and resumed on `focusout` (text edits happen in the z2 `.lg-atelier-cover-in` overlay above the slides; image edits are on the paused slides). Effect re-inits on slide-count/mode change and clears injected dots on cleanup (no double-inject under strict-mode double-invoke). `.core.tsx`/`.published.tsx` untouched — the 9a DOM lock holds; interactivity in published is asset-only (no React).
+
+**Gating test file used:** `src/lib/staticExport/htmlGenerator.test.ts` (new — the plan's explicitly-named option; no pre-existing dedicated generateStaticHTML test file existed. Neutralizes `server-only`, renders a hero page per templateId, asserts the `slider.v1.js` tag present for atelier / absent for meridian+hearth).
+
+**Deviations:** none of substance. In-scope judgment calls: (1) editor uses effect-driven-over-core-DOM (not React-state re-render) to guarantee DOM parity + avoid clobbering contentEditable; (2) `display:contents` wrapper chosen over a Fragment (Fragments can't hold a ref) so no layout box is added; (3) autoplay kept but focus-paused (rather than fully manual) for closer published fidelity while keeping edits safe.
+
+**Commands / results:**
+- `npx tsc --noEmit` → exit 0 (PASS)
+- `npm run test:run -- src/lib/staticExport` → 10 files, 70 passed (PASS; incl. new gating test)
+- `npm run test:run -- src/modules/templates/atelier` → 2 files, 55 passed (PASS; coreParity + registration green — core purity + edit/published DOM lock intact)
+- `npm run build` → exit 0 (PASS); `public/assets/slider.v1.js` emitted, minified, 1438 bytes.
+
+**Open risks:**
+- Editor autoplay pausing relies on `focusin`/`focusout` bubbling to the cover; verify no editor overlay stops propagation at phase-12 QA.
+- Runtime slider interaction (autoplay/arrows/dots/reduced-motion/JS-off fallback) is not unit-covered — manual publish QA at phase 12 (per plan's manual step).
+
+---
+### Phase 10 — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; npm run build exit 0 (slider.v1.js re-emitted 1438b minified); staticExport+atelier = 125 passed. Verified: selector contract MATCHES 9a Hero markup exactly (data-atl-slider/.lg-atelier-slide/.is-active/[data-atl-prev,next]/[data-atl-dots]/.lg-atelier-dot); asset idempotent+no-op-safe; usesAtelier gating threaded + non-vacuous test (atelier present, meridian/hearth absent); immutable slider.v1.js; editor .tsx display:contents wrapper layout-neutral, slide-1 baseline, 9a .core/.published lock held (empty diff); published server-safe.
+Non-blocking CARRIES: (1) phase-12 parity — editor injects dots but published-static empty [data-atl-dots] (JS injects on live) → harness must run asset OR use <2-slide mock. (2) editor slide-node mapping stale on reorder (editor cosmetic only). (3) runtime behavior not unit-covered → phase-12 manual/e2e. focusin/focusout pause reliable (editables inside .lg-atelier-cover).
+
+---
+### Phase 11 — Editor basics + atelier block mocks (+ folded carries)
+
+**Files changed**
+- `src/modules/templates/blockMocks/index.ts` — authored the 10 inline Atelier block-mock sections (8 types; packages ×3 for 2/3/4 cards) + `atelierSections()` + registered `atelier` in `BLOCK_MOCKS`.
+- `src/modules/templates/conformance.test.ts` — enrolled `assertEditorBasics('atelier')`.
+- `src/modules/templates/registry.ts` — added `knobs: m.atelierKnobs` to the atelier loader (phase-6 carry #1).
+- `src/modules/templates/atelier/index.ts` — corrected the misleading knob-surface comment (phase-6 carry #2).
+- `src/modules/templates/atelier/components/AtelierEditable.tsx` — emit `data-edit-primitive` (`text`/`button`) in the button-select + preview static branches (the atelier editor gap the assertion surfaced).
+- `src/modules/templates/atelier/blocks/editPrimitives.tsx` — thread store `mode` into the edit ctx; `Txt` now renders `mode={ctx.mode}` (was hardcoded `"edit"`) so preview hits the marker-emitting path (matches Meridian/Hearth). No per-wrapper edits needed — all 8 wrappers route through `useAtelierEditCtx`.
+
+**The editor gap (root cause + fix).** Atelier's edit primitives hardcoded `mode="edit"`, and `AtelierEditable` never emitted the `data-edit-primitive` marker — so `assertEditorBasics` would have failed for real (it renders edit blocks in `mode:'preview'` and queries the marker). Meridian/Hearth emit the marker in their button-select + `mode !== 'edit'` static branches and rely on the harness store's `mode:'preview'`. Fixed atelier the SAME way, fully within atelier module files: (a) `AtelierEditable` now stamps `data-edit-primitive` (like Hearth/Meridian); (b) `editPrimitives.Txt` passes the real store mode. Runtime effect: edit mode unchanged (`mode==='edit'` -> InlineTextEditorV2 / button-select as before, buttons now also carry the marker — harmless); PREVIEW mode now renders static text instead of contentEditable (a latent-bug correction aligning atelier with meridian/hearth/vestria). Reordering keys to meridian's field-first format was rejected — the shared `SelectionSystem` (`elementKey.split('.').pop()` = field) and `contentActions` dot-path parser depend on atelier's `<coll>.<id>.<field>` format.
+
+**Mock coverage (per section, authored against ACTUAL preview render, verified against each core).** header: logo_text(text)/cta_text(button)/nav_items×4. hero: eyebrow/headline/lede + cta/secondary_cta buttons (slides is non-schema -> static fallback slide, no collection). work: eyebrow/headline/lede + more_text + **works image collection** (title+caption ×4 via EditableImageCollection = add/remove/reorder exercised). **packages ×3 sections at 2/3/4 cards** (summary/name/price text + cta button per card). about: badge/eyebrow/headline/body/body2/signature + cta button (teaser mode). quote: eyebrow/headline/quote/author_name/author_role (single-quote fallback). contact: eyebrow/headline/lede/location/phone/email/instagram (lead-form node emits no markers). footer: closer_eyebrow/closer_headline + closer_cta button + brand/tagline/contact_location/phone/email/index_heading/elsewhere_heading/copyright/legal_text + social_links×3.
+
+**Chrome-key population (phase-9b carry) — PARTIAL, with a hard finding.** The plan asked to populate non-schema chrome keys (`more_text`, `badge_text`, About `cta_text`, Quote `headline`, Contact `location`/`instagram`, Footer `closer_*`/`contact_location`/`index_heading`/`elsewhere_heading`/`legal_text`) so they don't leak placeholders. **Verified this is NOT achievable via BLOCK_MOCKS:** every edit block reads content through `useAtelierBlock -> extractLayoutContent(elements, getSchemaDefaults(layout))`, which iterates ONLY the `serviceElementSchema` keys (+ collections). Non-schema keys are DROPPED before reaching the core, so mock values for them are inert — the cores render them UNCONDITIONALLY, so they still emit an (empty->placeholder) marker (hence they are listed in `text`/`button` to satisfy the no-orphan check, which is part of why enrollment is non-vacuous). I set their values in `content` anyway (documents phase-13 intent) and documented the gate prominently in the mocks file. **Real placeholder-leak prevention requires adding these keys to `serviceElementSchema` (`src/modules/audience/service/elementSchema.ts`) — OUT of phase-11 files-touched -> NOT done; flagged for phase 13.** Same gate means these chrome keys are currently not editor-persistable either (a manual edit writes to the store but extraction drops it on re-read) — same schema fix resolves both. Non-schema COLLECTIONS (`footer_links`, `press_items`, `quotes`) likewise stay empty (dropped); the schema collections `works`/`packages`/`nav_items`/`social_links` are the ones exercised.
+
+**Dot-format collection counting.** Atelier keys are `<coll>.<id>.<field>` (field = last segment per shared SelectionSystem), so a start-anchored `countPrefix` matches every per-item text/button marker -> `items` = cards × markers/item (nav/social 1/item; works 2/item; packages 4/item). Documented in the mocks file. This differs from meridian/hearth's field-first `<coll>_<field>_<id>` (which isolate one field/item) but is forced by the shared parsers; it still bites (a missing card drops the count).
+
+**assertEditorBasics enrollment + non-vacuity spot-check.** Enrolled one explicit line. Spot-check (temporarily set `atelier: []`): empty -> **387 passed | 8 skipped**; full mocks -> **463 passed | 12 skipped**. The mocks genuinely drive **+76 passing assertions (+4 declared-skips)** across 10 sections (resolve-real, per-text, per-button, collection-count, no-orphan). Enrollment is non-vacuous. Restored to full mocks after the check.
+
+**Registry knobs mapping + comment (phase-6 carries).** `registry.ts` atelier loader now surfaces `knobs: m.atelierKnobs` (mirrors hearth) so editor knob-switching can read `getLoadedTemplate('atelier').knobs`. `atelier/index.ts` comment corrected to state the registry now surfaces it (and that the render path threads `knobs` from `themeValues.knobs`, not `mod.knobs`).
+
+**Work-page category-filter — KNOWN LIMITATION (unchanged, per Step 5).** The design's radio filter bar stays dropped — the shared `EditableImageCollection` primitive has no per-item `data-cat` hook, and adding one is a shared-primitive change outside atelier scope. Confirmed the gallery renders + is editable without it: the `works` collection renders all items (2 markers/item in the harness) and is fully editable (EditableImageCollection add/remove/reorder + per-item image/alt). No fix attempted.
+
+**Gate-0 vestria editor punch-list (Step 6 reasoning; NO shared-editor patches).** All are SHARED-editor concerns, out of scope here, for phase-12 manual QA: (1) rich-text toolbar -> `InlineTextEditorV2` (shared); (2) undo/redo disabled -> edit-store history (shared); (3) section Delete freeze -> editor section actions (shared); (4) section-regen fails -> regen pipeline (shared); (5) editor/published serif/font mismatch -> NOT surfaced by editor-basics; atelier fonts are token/preload-driven (phase 8/9a) and dual-renderer parity is guarded — flag for the phase-12 parity eyeball, not atelier-specific here. None are fixable within atelier/** for the editor-basics contract; none patched.
+
+**Commands + results (all PASS)**
+- `npx tsc --noEmit` -> exit 0.
+- `npm run test:run -- src/modules/templates/conformance.test.ts` -> 463 passed | 12 skipped (WITH non-empty atelier mocks). Non-vacuity: empty 387/8 -> full 463/12.
+- `npm run test:run -- src/modules/templates/atelier` -> 55 passed (coreParity + registration still green).
+- `npm run test:run -- src/modules/templates` -> 25 files, 998 passed | 12 skipped (registry knobs change didn't break anything; publishedClientBoundary green — no client->published leak).
+
+**Open risks**
+- Chrome keys + non-schema collections need a `serviceElementSchema` addition before phase 13 or they leak design placeholders on the live Kundius page (and aren't editor-persistable). Schema change is out of phase-11 scope — escalated.
+- Preview mode now renders atelier text statically (correctness fix); if any preview-route consumer relied on the old always-editable behavior, re-check at phase-12 manual QA (no known consumer).
+- Img/Link/List primitives are NOT mode-gated (still show edit affordances in preview) — harmless for editor-basics (no `data-edit-primitive`), noted for a later polish pass; not fixed to avoid touching the live-editor collection/image path.
+
+---
+### Phase 11 — impl-review verdict: SHIP within scope (1 loop) + HARD carry to 11b
+No blocking issues within phase-11 scope. Gates green: tsc exit 0; templates 998 passed/12 skipped. Mocks non-vacuous (+76 assertions; no-orphan check prevents padding; covers 8 sections + works collection + packages 2/3/4). Editor-gap fix (AtelierEditable data-edit-primitive marker + editPrimitives.Txt threads store mode) correct/safe/boundary-clean (both 'use client', never reach published, coreParity green). Registry knobs mapping + index.ts:20 comment done. No shared-editor patched.
+CRITICAL (→ phase 11b, HARD blocker before 12/13): reviewer confirmed at source — chrome keys NOT in serviceElementSchema; extractLayoutContent (storeTypes.ts:371) drops non-schema keys on READ → cores render hardcoded placeholder as LIVE TEXT in both renderers AND manual edits revert (persist then dropped on re-read) → NOT fillable by any path → design strings leak to live Kundius page. assertEditorBasics is marker-only (proves wrap, not round-trip). Fix = add chrome keys to serviceElementSchema.ts Atelier* layouts + round-trip persistence assertion.
+Other: dot-format collection keys = mock granularity (not broken); add/remove/reorder affordances it.skip'd in jsdom (manual QA, matches meridian/hearth).
+
+---
+### Phase 11b — Chrome-key schema-backing (HARD pre-12/13 blocker)
+
+**Files changed**
+- `src/modules/audience/service/elementSchema.ts` — added atelier chrome keys to the 8 `Atelier*` layouts (elements + collections). NO hearth/lex/shared layouts touched.
+- `src/modules/templates/blockMocks/index.ts` — updated the (now-resolved) SCHEMA-GATE header comment; added the `footer_links` collection to the footer `editBasics` (now schema-backed → renders label markers).
+- `src/modules/templates/conformance.test.ts` — added the round-trip persistence describe block + the 2 test-only imports (`extractLayoutContent`, `getSchemaDefaults`).
+
+**Root cause (confirmed at source).** `extractLayoutContent` (`src/types/storeTypes.ts:357`) iterates ONLY `getSchemaDefaults(layout)` keys; `getSchemaDefaults` (`layoutElementSchema.ts:333`) enumerates `schema.elements` + `schema.collections`. Any elementKey a core renders that is NOT in the layout's schema is DROPPED on read → the core's hardcoded `placeholder="…"` renders as LIVE text (both renderers) and a manual edit persists to the store but is dropped on re-read (reverts). So the keys were neither fillable, editable, nor mockable.
+
+**Chrome keys added per layout (all `type:'string'` unless noted; all `requirement:'optional', fillMode:'manual_preferred'` — manual-fill intent, inert to the skeleton generation path):**
+- **AtelierNavHeader**: `cta_href`.
+- **AtelierHero**: `cta_href`, `secondary_cta_href`; collection `slides` (fields id/image/caption).
+- **AtelierWorkGallery**: `more_text`, `more_href`.
+- **AtelierPackages**: collection `packages` gains fields `cta_href`, `image`.
+- **AtelierAbout**: `badge_text`, `cta_text`, `cta_href`, `secondary_cta_text`, `secondary_cta_href`, `press_eyebrow`, `press_headline`, `studio_eyebrow`, `studio_headline`, `studio_body`, `studio_image`, `studio_cta_text`, `studio_cta_href`; collection `press_items` (id/year/title/publication).
+- **AtelierQuoteBand**: `headline`; collection `quotes` (id/quote/author_name/author_role).
+- **AtelierContact**: `location`, `instagram`.
+- **AtelierFooter**: `closer_image`, `closer_eyebrow`, `closer_headline`, `closer_lede`, `closer_cta_text`, `closer_cta_href`, `closer_secondary_cta_text`, `closer_secondary_cta_href`, `contact_location`, `index_heading`, `elsewhere_heading`, `legal_text`; collection `footer_links` (id/label/href).
+
+Element TYPE decision: the service schema has no `richtext`/`image`/`link` types — images (logo_image/about_image) and hrefs are all `type:'string'`; headlines/labels are `type:'string'`; collections use the standard `collections` shape with `fields`. So every added key is `string` or a collection, matching how the cores consume them.
+
+**Grep coverage.** Grepped all 8 `*.core.tsx` for every `elementKey=`, `hrefKey=`, `collectionKey=`. Every consumed key now exists in the schema EXCEPT `marquee_items` (Hero) — a decorative `aria-hidden` `<span>` loop with NO `elementKey`/edit primitive and a generic built-in fallback (`Editorial/Portraits/…`); it is not a chrome *elementKey* (out of this phase's grep scope) and schema-backing it would not make it editor-exercisable. Logged as an observation, not added. (Deviation, conservative.)
+
+**blockMocks re-population.** The phase-11 mocks already authored real values for these keys (they were inert then). Now schema-backed, they SURVIVE extraction and render as the mock value instead of the placeholder. The only editBasics change needed: `footer_links` is now a schema collection → its 2 mock items render `footer_links.<id>.label` markers, so I added the matching collection entry (`items:2`) to the footer `editBasics` (else the no-orphan check flags them). No other expectation changed (nav CTA `*_href`/per-card `image`/`cta_href` are links/images → emit no `data-edit-primitive` marker; `slides`/`press_items`/`quotes` render only in slider/page/multi mode, absent in the mocks → fallback paths, zero item markers).
+
+**Round-trip assertion added.** New `describe('atelier chrome-key round-trip persistence (phase 11b)')` in conformance.test.ts: for 6 representative chrome keys across 5 blocks it asserts (a) the key IS in `getSchemaDefaults(layout)` and (b) a value set in `elements` comes back out of `extractLayoutContent` unchanged. Plus a negative case proving a bogus non-schema key is STILL dropped (so the check isn't vacuous). This catches the exact "marker-only green, round-trip broken" class phase 11 missed.
+
+**Proof the fix holds.** `getSchemaDefaults('AtelierFooter')` now contains `closer_headline` and `legal_text`; `extractLayoutContent({closer_headline:'Let’s make yours.'}, …, 'AtelierFooter')` returns `{closer_headline:'Let’s make yours.'}` (survives) — previously the key was absent from the schema-defaults iteration set → dropped → placeholder rendered as live text. Same proven for `AtelierContact.instagram`, `AtelierAbout.badge_text`, `AtelierWorkGallery.more_text`, `AtelierQuoteBand.headline` — all green.
+
+**consumes ⊆ contract.** Adding keys GROWS each layout's contract, so any manifest `consumes` set stays a subset — the `templateConformance` (b)/(c) checks stay green (confirmed: 31 files / 1055 passed).
+
+**hearth/lex/generation untouched.** Only `Atelier*` layout entries edited. Generation-contract frozen-fixture + service section-selection tests are in `src/modules/audience/service` — all green (atelier uses the skeleton path; new keys are `manual_preferred` → inert to copy-gen). No STOP condition hit.
+
+**Commands + results (all PASS)**
+- `npx tsc --noEmit` → exit 0.
+- `npx vitest run src/modules/templates/conformance.test.ts` → 471 passed | 12 skipped (was 463; +8 from footer_links collection check + 6 round-trip cases + 1 negative case).
+- `npx vitest run src/modules/templates src/modules/audience/service` → 31 files, 1055 passed | 12 skipped.
+
+**Open risks**
+- `marquee_items` (Hero, decorative aria-hidden) still falls back to the built-in generic word list if unset — not a studio-specific design leak, not an elementKey; left for a Kundius/parity decision at phase 13 if the generic words are unwanted.
+- `slides`/`press_items`/`quotes`/`studio_*` schema-backed but only exercised in slider/page/multi-quote mode (not in the current editor-basics mocks, which use home/teaser/single modes) — persistence proven via the round-trip test for the scalar reps; collection round-trip in those modes is a phase-12 manual-QA item.
+
+---
+### Phase 11b — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; templates+service = 1055 passed/12 skipped (was 1047). Verified: COMPLETENESS — grepped all elementKey=/hrefKey=/collectionKey= across 8 cores; every consumed key now schema-backed in its Atelier* layout (Footer closer_*/legal_text/footer_links, Contact location/instagram, About press/studio + press_items, Quote headline+quotes, Work more_*, Hero slides+cta_hrefs, Packages per-card image/cta_href) — no still-leaking key; only marquee_items deferred (decorative, no elementKey). TYPES correct (service schema string/collection convention; item-field schemas match core iteration). Round-trip real + non-vacuous (positive survives, negative __not_a_schema_key__ dropped). Atelier-scoped (hearth/lex/generation untouched). consumes⊆contract holds. Leak CLOSED.
+Non-blocking (→phase-12 manual QA): collection round-trip only marker-count-tested (scalars round-trip-asserted); collections work for works/packages/social already.
+
+---
+### Phase 12 (automated parity enrollment) — STOP: real header divergence found
+
+**Files changed**
+- `e2e/parity.spec.ts` — added `'atelier'` to `TEMPLATES` (:18); added an atelier `?parityBreak=1` negative-control test (+ a comment documenting the dot-injection resolution).
+- `src/modules/templates/atelier/renderParity.atelier.test.tsx` (new) — jsdom content-parity (edit vs published visible-text) over `BLOCK_MOCKS.atelier`, modeled on `renderParity.meridian.test.tsx`.
+
+**TemplateBlocksStage — NOT touched (by design).** `src/app/dev/blocks/TemplateBlocksStage.tsx` is fully GENERIC — it renders `BLOCK_MOCKS[templateId]` with no per-template switch, and `/dev/blocks/[template]/page.tsx` gates on `templateId in templateRegistry`. Atelier was already registered in `BLOCK_MOCKS` (phase 11) and in the registry, so `/dev/blocks/atelier` renders every atelier edit+published band with zero stage edits. Confirmed live: `/dev/blocks/atelier` returned HTTP 200; the parity run enumerated all atelier sections.
+
+**Dot-injection resolution (phase-10 CARRY) = OPTION (b), single-slide hero — and it is HONEST.** The hero mock ships NO `slides` array, so `AtelierHeroCore` renders ONE static fallback slide. Both the editor `.tsx` effect (`AtelierHero.tsx:36` `if (slides.length < 2) return;`) and the published `slider.v1.js` asset bail on `<2` slides, so NEITHER side injects `.lg-atelier-dot` into the empty `[data-atl-dots]`. Editor-static and published-static therefore compare the SAME intended final state (no dots) — exactly what a real single-slide hero ships live. No dots were deleted to force a match; the editor correctly no-ops dots for <2 slides (verified — no editor bug). Documented inline in the spec above the atelier negative control. Multi-slide dot behavior (the actual crossfade/dots on the live page) remains a founder/manual+e2e runtime item, unchanged.
+
+**Content parity (jsdom) — GREEN.** `npm run test:run -- renderParity.atelier` gave 1 file, 31 passed (enrollment guard + 10 sections x 3 assertions: has-fields / no-one-sided-field / fixture-not-dead). Edit render reads real `serviceElementSchema` via `useAtelierBlock` -> `extractLayoutContent`; published takes flat props — so this would catch any chrome key dropped by the schema (phase-11b fix holds; none dropped). Visible text matches on both sides for all 10 atelier sections.
+
+**Screenshot parity (Playwright, real Chromium) — RAN, and it caught a REAL divergence.** Ran `npx playwright test parity --project=public` against a warm dev server (see env note). Results:
+- Negative controls BOTH fire (permanent proof the harness detects divergence): `PARITY BREAK meridian/hero: 6.409%` PASS (>3%); `PARITY BREAK atelier/hero: 6.739%` PASS (>3%).
+- meridian: all 7 sections < 3% (green). hearth: all 7 < 3% (green).
+- atelier: FAILS at `header` — edit-vs-published diff = 4.99% > 3% threshold. The per-section loop bails on the first failure, so hero/work/packages/about/quote/contact/footer were not measured this run.
+
+**Root cause of the atelier/header divergence (REAL editor-vs-published bug, NOT a threshold-calibration issue).** Atelier's shared `Link` edit primitive (`src/modules/templates/atelier/blocks/editPrimitives.tsx`, the `Link` component ~:134) renders its editing chrome UNCONDITIONALLY — a `<span class="lg-atelier-link-edit" style="display:inline-flex; gap:6">` wrapper PLUS an always-present `<LinkTargetPopover>` trigger (a lucide Link2 icon button) — with NO `mode` gate. The published `E.Link` renders a plain `<a>`. In the parity harness's `mode:'preview'` (which is supposed to render NO editing chrome, per the stage's own contract), atelier still paints the popover triggers + inline-flex layout. The header is the worst case (4 nav links + 1 CTA all wrapped), hence 4.99%.
+- Precedent that atelier violates: meridian gates the identical control behind `mode === 'edit'` (`MeridianNavHeader.tsx:133`) -> preview renders plain `<a>` -> meridian/header = 0.93%. Atelier's `E.Txt` (via `AtelierEditable`) DOES respect preview mode; only `E.Link` (and, latently, `E.Img`'s always-visible "Image"/"Replace" overlay button in `EDIT_AFFORDANCE_STYLES`, which lacks `opacity:0`) do not.
+- Blast radius (latent, not yet measured — loop bailed at header): every atelier section using `E.Link` has the same divergence source — hero CTAs, about CTA, footer closer/links CTA, work "more" link, packages CTAs — and image-bearing sections (work) may also diverge via the always-visible image-upload affordance. These need re-measuring after the header fix.
+
+**Why I STOPPED (did not fix, did not threshold around).** The fix lives in `src/modules/templates/atelier/blocks/editPrimitives.tsx` (gate the `Link` affordance — and likely the `Img` overlay — on `ctx.mode === 'edit'`, mirroring meridian: plain wrapper/anchor in preview/published, popover only in edit). That file is OUTSIDE this phase's Files-touched list, and the orchestrator guardrail is explicit: a REAL edit-not-equal-published failure beyond threshold is a genuine bug to report, not to threshold around. The harness wiring is CORRECT — it did its job by catching this. I left `atelier` enrolled (do NOT remove it) so the fix can be verified green.
+
+**Recommended follow-up (scoped, for the orchestrator to dispatch):** a small atelier-module phase touching `src/modules/templates/atelier/blocks/editPrimitives.tsx` — mode-gate `Link` (render children in a mode-neutral wrapper + only mount `LinkTargetPopover` when `ctx.mode === 'edit'`) and give the `Img` affordance buttons `opacity:0` default with hover/focus reveal (or mode-gate them) so preview is pixel-neutral. Then re-run `npm run test:parity`; expect atelier header + all sections < 3% with both negative controls still firing.
+
+**Commands + results**
+- `npx tsc --noEmit` -> exit 0 (PASS).
+- `npm run test:run -- renderParity.atelier` -> 31 passed (PASS).
+- `npm run test:run -- src/modules/templates` -> 26 files, 1037 passed | 12 skipped (PASS — nothing else broke).
+- `npx playwright test parity --project=public` -> 4 passed, 1 FAILED (atelier/header 4.99% > 3%). Negative controls: meridian 6.41% PASS, atelier 6.74% PASS. Meridian + hearth sections all green.
+
+**Environment note (screenshot parity is runnable here, with a caveat).** `npm run test:parity`'s default invocation timed out: `playwright.config.ts` runs a `globalSetup` (Clerk network) + a `webServer: npm run dev` cold build for ALL projects — the cold Next build blows the 10-min bound. Worked around WITHOUT editing the config (out of scope): started `npm run dev` myself, warm-compiled `/dev/blocks/atelier` (HTTP 200), then ran `--project=public` which reused the warm server (`reuseExistingServer:true`) and skips the authed/setup projects. That produced the real results above.
+
+**Still open for the FOUNDER manual sign-off (separate human gate, NOT done here):**
+- Slider RUNTIME on the live published page: autoplay crossfade, arrows, JS-injected dots (>=2 slides), and the no-JS static first-slide fallback (harness cannot exercise `slider.v1.js` behavior).
+- Bilingual: editor language toggle, published `/{loc}` docs + hreflang, geo/localStorage boot via `switcher.v1.js`.
+- Knob + palette live-switch parity across BOTH renderers (the /dev switcher exercises it visually; eyeball needed).
+- D5 Dutch typography fidelity ("first exercised in the atelier build" — i18nHonesty note).
+- The design-vs-implementation eyeballs called out in the phase-9b CARRY: About collapsing design's 3 surfaces (bio/press/studio) into 1 section; Contact single-col vs design 2-col; `buttonShape` zero-knob default = rounded (platform law) not-equal Kontur square (per-project `square` seed?); Bricolage `opsz` axis rendering.
+- BLOCKING the sign-off: the atelier/header (and likely other `E.Link`/`E.Img`) edit-vs-published parity fix above must land + `npm run test:parity` go fully green first.
+
+---
+### Phase 12 (continued) — divergence FIXED, screenshot parity fully GREEN
+
+**Files changed (this follow-up; Files-touched EXPANDED by orchestrator ruling to add `editPrimitives.tsx`)**
+- `src/modules/templates/atelier/blocks/editPrimitives.tsx` — mode-gated the affordance-bearing primitives (`Link`, `Img`, `List`) so a non-edit (preview/parity) render emits the SAME static DOM as `publishedPrimitives.tsx`. Edit-mode (`ctx.mode === 'edit'`) behavior is UNCHANGED.
+- `e2e/parity.spec.ts` — main per-section loop now pairs edit↔published bands BY INDEX (`editBands.nth(i)` ↔ `publishedBands.nth(i)`) instead of by `data-parity-section`, because atelier enrolls three `packages` sections (2/3/4 cards) → the attribute isn't unique (Playwright strict-mode violation). More correct (per-instance pairing), not thresholding.
+
+**The mode-gate (mirrors Meridian's `mode === 'edit'` gating).** All three primitives read `ctx.mode` (already threaded via `useAtelierEditCtx`, same source phase-11 used for `Txt`):
+- **Link**: non-edit renders a plain `<a href className aria-label {...externalLinkProps(target)} {...ctaAttrs}>` — byte-identical to `publishedPrimitives.Link` (same CTA analytics attrs: `data-lessgo-cta` + role for `*cta*` non-`nav_items` keys). Edit renders the `lg-atelier-link-edit` inline-flex wrapper + `LinkTargetPopover` as before. This was the header's 4.99% (4 nav links + CTA each rendering an inline popover trigger + inline-flex wrapper in preview).
+- **Img**: non-edit renders `<div className>{src ? <img …/> : placeholder}</div>` — identical to `publishedPrimitives.Img` (no upload/alt overlay, no `position:relative` wrapper). The `useState` hook stays above the early return (rules-of-hooks preserved). This was the latent work/gallery + about image divergence.
+- **List**: non-edit renders `<div className>{items.map(i => <div className={itemClassName}>{render}</div>)}</div>` — identical to `publishedPrimitives.List` (no `EditableImageCollection` chrome, no add/remove buttons). Inner `render()` uses the now-gated `Txt`/`Img`/`Link`, so the whole subtree matches published in non-edit. This fixed the work gallery band (4.99% loop would have hit it next).
+
+**Boundary + behavior safety.** `editPrimitives.tsx` stays `'use client'` and is imported only by the edit `.tsx` wrappers — never by `.core`/`.published` (unchanged). Edit-mode is untouched, so the `data-edit-primitive` marker path (owned by `AtelierEditable` in the `mode === 'edit'` and `mode !== 'edit'` Txt branches — NOT the gated Link/Img/List) and editor-basics collection counts (render() runs per item in both branches) are unaffected — conformance stayed green.
+
+**Screenshot parity — FULLY GREEN (real Chromium, warm-server + `--project=public`).** All 5 tests pass. Per-section atelier diffs (all < 3%):
+- header 1.717% · hero 0.737% · work 0.136% · packages(2) 0.242% · packages(3) 0.070% · packages(4) 0.004% · about 0.130% · quote 0.000% · contact 0.055% · footer 0.866%.
+- meridian: header 0.932% / hero 0.018% / features 0.000% / testimonials 0.624% / pricing 0.979% / cta 0.167% / footer 1.297% (green — unchanged by the index-pairing refactor).
+- hearth: all 7 < 0.25% (green).
+- Negative controls BOTH still fire >3%: `PARITY BREAK meridian/hero: 6.409%`, `PARITY BREAK atelier/hero: 6.714%`.
+- No DIFFERENT atelier section exceeds 3% for a new reason — nothing to STOP on.
+
+**Commands + results (all PASS)**
+- `npx tsc --noEmit` → exit 0.
+- `npm run test:run -- src/modules/templates renderParity.atelier` → 26 files, 1037 passed | 12 skipped (coreParity, conformance/editor-basics, content parity all green — mode-gate did not break the marker path or collection counts).
+- `npx playwright test parity --project=public` → **5 passed, 0 failed** (all atelier sections < 3%; both negative controls fire).
+
+**Net Phase-12 file set (supersedes the STOP above):**
+- `e2e/parity.spec.ts` (atelier enrolled + atelier negative control + index-pairing)
+- `src/modules/templates/atelier/renderParity.atelier.test.tsx` (new)
+- `src/modules/templates/atelier/blocks/editPrimitives.tsx` (mode-gate Link/Img/List)
+
+Automated parity enrollment is COMPLETE and green. The FOUNDER manual sign-off items listed above (slider runtime, bilingual toggle, knob/palette live-switch, Dutch typography, the About/Contact/buttonShape/opsz eyeballs) remain the separate human gate.
+
+---
+### Phase 12 (automated) — impl-review verdict: SHIP (1 loop)
+No blocking issues. Gates green: tsc exit 0; templates+renderParity = 1037 passed/12 skipped; screenshot parity all atelier sections <3% (header 1.72→footer 0.87), both negative controls >6.4%. Parity harness CAUGHT a real divergence (Link/Img/List edit primitives rendered chrome unconditionally vs published plain) → FIXED by mode-gating on ctx.mode==='edit' (non-edit branch byte-matches publishedPrimitives, verified line-by-line incl CTA analytics attrs); edit-mode affordances + phase-11 data-edit-primitive marker intact; hooks above early-returns; boundary clean. Enrollment sound (index-pairing for 3 packages sections, equivalent for unique-section templates; renderParity non-vacuous). Dot-injection option-(b) single-slide mock honest.
+Non-blocking nits: Img alt source differs edit(store) vs published(metadata) — non-visible, intended; bandDiff selects non-unique data-parity-section (fine, controls target unique hero).
+
+## ⏸️ HUMAN GATE — founder parity sign-off pending (see plan phase-12 line). Automated parity fully green.
+
+## Phase 12b — parity-fidelity fixes (founder-approved at gate)
+
+### Files changed
+- `src/styles/fonts-self-hosted.css` — Bricolage `@font-face` src → opsz file; block header comment updated (opsz axis auto-applies via CSS default `font-optical-sizing: auto`, no pin in @font-face).
+- `src/modules/templates/CriticalFontPreload.tsx` — atelier non-`compact` hero preload href → `bricolage-grotesque-latin-opsz-normal.woff2`.
+- `public/fonts/bricolage-grotesque/bricolage-grotesque-latin-wght-normal.woff2` — DELETED (unreferenced; grep-confirmed only historical audit-doc mention remained).
+- `src/modules/templates/atelier/tokens.ts` — added `export const defaultAtelierKnobs: KnobSelection = { buttonShape: 'square' }`.
+- `src/modules/templates/atelier/index.ts` — re-export `defaultAtelierKnobs`.
+- `src/types/template.ts` — added optional `defaultKnobs?: KnobSelection` to `TemplateModule` (mirrors defaultPaletteId/defaultVariantId).
+- `src/modules/templates/registry.ts` — atelier loader now surfaces `defaultKnobs: m.defaultAtelierKnobs`; other templates leave it undefined.
+- `src/modules/wizard/generation/work.ts` — `runWorkSkeleton` seeds `themeValues.knobs` from the served template's `defaultKnobs` (resolved via `preloadTemplate`), merged into the `saveDraft` body.
+
+### FIX 1 — Bricolage opsz+wght swap
+`-wght-normal` (41KB, weight-only) → `-opsz-normal` (76KB, opsz 10..48 + wght 200..800), `format('woff2-variations')`, `font-weight: 200 800`, `font-display: swap`, no optical-sizing pin (matches Fraunces/Bodoni opsz convention — CSS default `font-optical-sizing: auto` applies opsz by font-size). Preload href updated. Old file deleted. Post-build `public/assets/fonts-self-hosted.css:297` references the opsz file (build regenerated it).
+
+### FIX 2 — atelier ZERO-CONFIG square-button seed (persisted)
+New minimal `defaultKnobs` mechanism: optional `TemplateModule.defaultKnobs`, surfaced ONLY for atelier via the registry loader. `runWorkSkeleton` (atelier's real creation path — work-engine multipage skeleton) resolves the served template via `preloadTemplate(resolvedTemplateId)` and, when `mod.defaultKnobs` is present, composes `themeValues = { knobs: mod.defaultKnobs }` into the `saveDraft` body.
+
+Proof the seed persists square (documented trace, since no runWorkSkeleton test file exists):
+- atelier: `input.templateId === 'atelier'` → `resolvedTemplateId='atelier'` → `preloadTemplate('atelier')` returns `defaultKnobs = defaultAtelierKnobs = { buttonShape: 'square' }` → `themeValues = { knobs: { buttonShape: 'square' } }` → saveDraft create branch persists `themeValues` (route.ts:272 `themeValues || existing || null`) → `Project.themeValues.knobs.buttonShape === 'square'`. Zero-config editor+published render square (knob token map `:root` default is `rounded`, so the seed is what flips it). User can still change via knob UI.
+- granth / any template with no `defaultKnobs`: `mod.defaultKnobs` undefined → `themeValues` stays undefined → saveDraft body omits `themeValues` → project unchanged. (granth also uses the single-page `runWorkGeneration` path, not the skeleton, so it is doubly unaffected.)
+
+### Deviations
+- MERGE semantics: `runWorkSkeleton` carries NO prior themeValues on this served-work creation path (mood/palette/variant pickers belong to the thing.ts wizard, not the served-work skeleton), and the saveDraft create branch coalesces `themeValues || existingProject?.themeValues`. So seeding `{ knobs }` cannot clobber a mood/palette. Kept the compose spread-safe (`...(themeValues ? { themeValues } : {})`) so a future themeValues source merges rather than being dropped. Conservative; logged.
+- `preloadTemplate` resolution wrapped in try/catch — an unknown/unloadable templateId skips the seed (non-fatal) rather than failing the skeleton save.
+
+### Verification
+- `npx tsc --noEmit` — EXIT 0. PASS.
+- `npm run build` — EXIT 0. PASS. (opsz reference present in regenerated `public/assets/fonts-self-hosted.css`.)
+- `npm run test:run -- src/modules/templates src/modules/wizard src/hooks` — 41 files, 1303 passed / 12 skipped. EXIT 0. PASS. (optional `defaultKnobs?` broke no `Record<...TemplateModule>` conformance; no wizard test asserts skeleton themeValues shape, so none needed updating.)
+
+### Open risks
+- None functional. The opsz axis relies on the browser honoring `font-optical-sizing: auto` (default) — visually verify hero optical sizing at the manual parity pass. Square-button zero-config default only affects served atelier projects created after this change (existing projects keep their persisted themeValues).
+
+---
+### Phase 12 — orchestrator visual QA pass (founder-requested, driven in-app)
+Ran `npm run dev` + browser on `/dev/blocks/atelier` (all 8 sections, edit+published bands). Findings:
+- DESIGN FIDELITY: faithful to Kontur across all sections — hero dark cover + Bricolage display "Seen. Chosen. Remembered." (vermilion accent <em>), PORTFOLIO·COMMISSIONS eyebrow, square/rounded buttons + arrows + SCROLL cue; marquee (Editorial✳Portraits✳…); Selected work (mosaic); Experiences packages rendering 2/3/4 card tiers; About bio-split; Quote dark grid; Contact detail+form; Footer closer band ("Let's make yours.") + wordmark + INDEX/ELSEWHERE cols.
+- CHROME KEYS POPULATED (11b fix verified live): location "Amsterdam·serving NL", instagram "@atelierkontur", legal "PRIVACY·TERMS", closer, quotes, press — all render real content, NO placeholder leak.
+- PALETTE LIVE-SWITCH WORKS: switched vermilion→moss in the knob panel → entire design recolored green in real time, EDIT + PUBLISHED bands in lockstep (proves palette/knob axis end-to-end in-app).
+- EDIT↔PUBLISHED: automated parity <3% all sections + visual bands match.
+- NOT driven (lower-risk, need full onboard→publish; verified in code+automated instead): slider autoplay/arrows/dots runtime on a LIVE published page (dev mock is single-slide); published no-JS static-first-slide fallback (.published ships .is-active slide 1); real EN/NL translation (platform i18n overlay, separate from template; toggle present). Recommend a live smoke at Kundius publish (phase 13).
+Screenshots captured: hero (vermilion) + moss palette-switch.

@@ -80,6 +80,7 @@ const ENGINE_SECTION_LAYOUTS: Record<CopyEngine, Record<string, string>> = {
 export const SELF_HOSTED_FONTS: readonly string[] = [
   'Archivo',
   'Bodoni Moda',
+  'Bricolage Grotesque',
   'Cormorant Garamond',
   'DM Sans',
   'EB Garamond',

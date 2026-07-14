@@ -15,13 +15,18 @@ import {
   deriveMode,
   buildThingInput,
   buildTrustInput,
+  briefSignalFromState,
 } from './useWizardStore';
+import { isMultipage } from '@/modules/audience/product/pageArchetypes';
 import {
   assembleProductStrategy,
   clampSectionList,
 } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
+import { emptyCollectionNodeAllowed } from '@/modules/collections/registry';
 import { runTrustGeneration } from '@/modules/wizard/generation/trust';
+import { buildBriefDraft, type EntrySignals } from '@/modules/brief/classify';
+import { decideServe } from '@/modules/brief/serveGate';
 
 /** Build a Brief with a partial EntryFacts payload at facts.entry. */
 function briefWithEntry(entry: Record<string, unknown>, extra: Partial<Brief> = {}): Brief {
@@ -62,6 +67,49 @@ const trustBrief = briefWithEntry(
 const workBrief = briefWithEntry(
   { rawInput: 'author of hindi fiction', oneLiner: 'author of hindi fiction' },
   { businessType: 'writer', copyEngine: 'work' },
+);
+
+// atelier phase 2 — a served WORK brief WITHOUT a businessType so `isMultipage`
+// is decided by the picked template's capability alone. Paired with a multipage
+// template (vestria, synthetic — atelier doesn't exist until phase 4) it stands
+// in for a work+multipage combo; paired with granth it stays single-page.
+const workNoBizBrief = briefWithEntry(
+  { rawInput: 'kundius photography', oneLiner: 'portrait photographer' },
+  { copyEngine: 'work' },
+);
+
+// atelier phase 5 — a REAL served photographer+atelier brief (businessType
+// carries the multi structureDefault). This is the reachable served path now
+// that atelier declares `multipage` (phase 4) + ships archetypes (phase 5).
+const photographerAtelierBrief = briefWithEntry(
+  { rawInput: 'kundius photography', oneLiner: 'editorial wedding photographer' },
+  { businessType: 'photographer', copyEngine: 'work' },
+);
+
+// atelier phase 5 (fix-first) — the REACHABLE bug case: classify.ts stamps EVERY
+// brief with a bare UNCONFIRMED `structure:{ mode, pages: [] }` hint (the raw AI
+// guess). A served photographer the AI read as single-page carries mode:'single'
+// with NO sections/pageDetails. hydrate must NOT let this suppress the structure
+// slot (it is unconfirmed) — both derivations must still resolve multipage.
+const photographerAtelierRawSingleHint = briefWithEntry(
+  { rawInput: 'kundius photography', oneLiner: 'editorial wedding photographer' },
+  {
+    businessType: 'photographer',
+    copyEngine: 'work',
+    structure: { mode: 'single', pages: [] },
+  } as Partial<Brief>,
+);
+
+// A CONFIRMED single structure (real 7b write — carries sections). This MUST
+// still correctly stay single (both derivations honor an explicit confirmed
+// single), proving the fix didn't break the legitimate single path.
+const photographerAtelierConfirmedSingle = briefWithEntry(
+  { rawInput: 'kundius photography', oneLiner: 'editorial wedding photographer' },
+  {
+    businessType: 'photographer',
+    copyEngine: 'work',
+    structure: { mode: 'single', sections: ['hero', 'work', 'footer'] },
+  } as Partial<Brief>,
 );
 
 beforeEach(() => {
@@ -126,9 +174,82 @@ describe('useWizardStore — hydration resolves engine/audience/template from Br
   });
 });
 
+describe('useWizardStore — proof prefill numeric filter (phase 1)', () => {
+  // thing `realNumbers` (field.id) is the ONLY field the numeric-or-empty rule
+  // applies to. The shared `outcomes` prefillKey feeding trust/work stays raw.
+  it('realNumbers prefill drops non-numeric entries, keeps numeric ones', () => {
+    const brief = briefWithEntry(
+      {
+        rawInput: 'https://acme.app',
+        businessName: 'Acme',
+        oneLiner: 'invoicing software for freelancers',
+        outcomes: ['cut churn by 30%', 'ISO 9001 certified', 'days to minutes', 'trusted by teams'],
+      },
+      { businessType: 'saas', copyEngine: 'thing', confidence: 0.9 },
+    );
+    useWizardStore.getState().hydrate({ brief, audienceType: 'product', templateId: 'meridian' });
+    // Keeps entries containing a digit; drops purely qualitative ones.
+    expect(useWizardStore.getState().fields.realNumbers.value).toEqual([
+      'cut churn by 30%',
+      'ISO 9001 certified',
+    ]);
+  });
+
+  it('realNumbers prefill with empty outcomes → []', () => {
+    const brief = briefWithEntry(
+      {
+        rawInput: 'https://acme.app',
+        businessName: 'Acme',
+        oneLiner: 'invoicing software for freelancers',
+        outcomes: [],
+      },
+      { businessType: 'saas', copyEngine: 'thing', confidence: 0.9 },
+    );
+    useWizardStore.getState().hydrate({ brief, audienceType: 'product', templateId: 'meridian' });
+    expect(useWizardStore.getState().fields.realNumbers.value).toEqual([]);
+  });
+
+  it('trust `outcomes` prefill passes through UNFILTERED (shared field, qualitative)', () => {
+    const brief = briefWithEntry(
+      {
+        rawInput: 'https://studio.co',
+        businessName: 'Studio Co',
+        oneLiner: 'growth marketing agency',
+        outcomes: ['helped clients grow', 'award-winning creative team'],
+      },
+      { businessType: 'agency', copyEngine: 'trust', confidence: 0.9 },
+    );
+    useWizardStore.getState().hydrate({ brief, audienceType: 'service', templateId: 'surge' });
+    // No digit in either entry, yet both survive — the filter is scoped to
+    // field.id === 'realNumbers' (thing), never the shared prefillKey.
+    expect(useWizardStore.getState().fields.outcomes.value).toEqual([
+      'helped clients grow',
+      'award-winning creative team',
+    ]);
+  });
+});
+
 describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', () => {
-  it('thing keeps the full slot skeleton including structure', () => {
+  // onboarding-fixes phase 2 — thing templates WITHOUT real style controls skip
+  // the `style` slot (no dead step); vestria (real pickers) keeps it.
+  it('thing + a non-vestria template (meridian) SKIPS the style slot', () => {
     useWizardStore.getState().hydrate({ brief: richThing, audienceType: 'product', templateId: 'meridian' });
+    const { slots } = useWizardStore.getState();
+    expect(slots).toEqual([
+      'identity',
+      'understanding',
+      'goal',
+      'offer',
+      'proof',
+      'structure',
+      'generating',
+    ]);
+    expect(slots).not.toContain('style');
+    expect(slots).toHaveLength(7);
+  });
+
+  it('thing + vestria INCLUDES the style slot (real pickers)', () => {
+    useWizardStore.getState().hydrate({ brief: richThing, audienceType: 'product', templateId: 'vestria' });
     const { slots } = useWizardStore.getState();
     expect(slots).toEqual([
       'identity',
@@ -140,6 +261,8 @@ describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', (
       'structure',
       'generating',
     ]);
+    expect(slots).toContain('style');
+    expect(slots).toHaveLength(8);
   });
 
   it('trust slot order now INCLUDES structure (scale-07 phase 4 — 7b GA)', () => {
@@ -155,11 +278,31 @@ describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', (
       'structure',
       'generating',
     ]);
+    // onboarding-fixes phase 2 — trust keeps style (real pickers); count unchanged.
+    expect(slots).toContain('style');
+    expect(slots).toHaveLength(8);
   });
 
-  it('work skips the structure slot', () => {
+  it('work skips the structure slot but KEEPS style (thing-only style skip)', () => {
     useWizardStore.getState().hydrate({ brief: workBrief, audienceType: 'writer', templateId: 'granth' });
+    const { slots } = useWizardStore.getState();
+    expect(slots).not.toContain('structure');
+    // onboarding-fixes phase 2 — the style skip is thing-only; work is unchanged.
+    expect(slots).toContain('style');
+    expect(slots).toHaveLength(7);
+  });
+
+  // atelier phase 2 — the structure skip is now TEMPLATE-aware for work.
+  it('work + a NON-multipage template (granth) STILL skips structure — granth unchanged', () => {
+    useWizardStore.getState().hydrate({ brief: workNoBizBrief, audienceType: 'writer', templateId: 'granth' });
     expect(useWizardStore.getState().slots).not.toContain('structure');
+  });
+
+  it('work + a multipage template (vestria, synthetic) INCLUDES structure', () => {
+    // vestria declares the `multipage` capability; the brief has no businessType,
+    // so capability alone decides ⇒ isMultipage true ⇒ the skip is dropped.
+    useWizardStore.getState().hydrate({ brief: workNoBizBrief, audienceType: 'service', templateId: 'vestria' });
+    expect(useWizardStore.getState().slots).toContain('structure');
   });
 
   it('nextSlot / prevSlot walk the slot IDs', () => {
@@ -883,5 +1026,336 @@ describe('useWizardStore — 7b collection channel', () => {
     const patch = useWizardStore.getState().buildBriefPatch();
     const products = (patch.facts as any)?.collections?.products;
     expect(products).toEqual([{ name: 'Widget -- Co', slug: 'widget-co' }]);
+  });
+});
+
+// ===========================================================================
+// atelier phase 2 — served work→multipage SKELETON path
+// ===========================================================================
+// The gate everywhere is `isMultipage(templateId, briefSignal)` — the PICKED
+// template's multipage capability — NEVER `engine === 'work'` alone. Granth
+// declares no `multipage`, so every new gate is false for it and its served
+// writer flow (structure skip + fetchStrategy early-return) is byte-for-byte
+// unchanged. These tests prove both sides of each gate.
+describe('useWizardStore — served work→multipage skeleton path (atelier phase 2)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('(gate) isMultipage is FALSE for granth and TRUE for a multipage template — the dispatch key', () => {
+    // GeneratingSlot dispatch + slot inclusion + fetchStrategy all key on this.
+    expect(isMultipage('granth', undefined)).toBe(false);
+    expect(isMultipage('vestria', undefined)).toBe(true);
+  });
+
+  it('fetchStrategy (work + multipage) seeds the sitemap from archetype defaults with ZERO fetch/charge', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokW', brief: workNoBizBrief, audienceType: 'service', templateId: 'vestria' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+
+    expect(spy).not.toHaveBeenCalled(); // no LLM, no credit charge
+    expect(s.strategyStatus).toBe('done');
+    expect(s.strategy).toBeNull(); // copy-gen stays OUT — no strategy object
+    expect(Array.isArray(s.sitemap)).toBe(true);
+    expect((s.sitemap as unknown[]).length).toBeGreaterThan(0);
+    expect((s.sitemap as any[])[0].archetypeKey).toBe('home');
+  });
+
+  it('fetchStrategy (work + multipage) is idempotent — a second call never re-seeds or charges', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokW', brief: workNoBizBrief, audienceType: 'service', templateId: 'vestria' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const firstMap = useWizardStore.getState().sitemap;
+    await useWizardStore.getState().fetchStrategy();
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(useWizardStore.getState().sitemap).toBe(firstMap); // same reference
+    expect(useWizardStore.getState().strategyStatus).toBe('done');
+  });
+
+  it('fetchStrategy (work + SINGLE-PAGE granth) still early-returns — no seed, no fetch, status stays idle', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokG', brief: workBrief, audienceType: 'writer', templateId: 'granth' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(s.sitemap).toBeNull();
+    expect(s.strategyStatus).toBe('idle'); // work single-page never reaches 'done' here
+  });
+
+  it('(dispatch) work + multipage ⇒ skeleton path; work + single-page ⇒ writer generator', () => {
+    // Mirrors GeneratingSlot's `engine === 'work' && isWorkMultipage()` decision.
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokW', brief: workNoBizBrief, audienceType: 'service', templateId: 'vestria' });
+    const multi = useWizardStore.getState();
+    expect(isMultipage(multi.templateId ?? undefined, briefSignalFromState(multi))).toBe(true);
+
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokG', brief: workBrief, audienceType: 'writer', templateId: 'granth' });
+    const single = useWizardStore.getState();
+    expect(isMultipage(single.templateId ?? undefined, briefSignalFromState(single))).toBe(false);
+  });
+});
+
+// ===========================================================================
+// atelier phase 5 — the REAL served photographer+atelier path
+// ===========================================================================
+// Now that atelier declares `multipage` + ships archetypes and photographers
+// default to `multi`, prove the phase-2 machinery fires on a REAL template — and
+// (phase-2 CARRY) that the TWO multipage derivations AGREE: slot inclusion keys
+// off the full `brief` at hydrate, while fetchStrategy/dispatch key off
+// `briefSignalFromState(store)`. For a photographer+atelier brief both must
+// resolve TRUE (else the structure slot shows but the skeleton declines, or
+// vice-versa).
+describe('useWizardStore — served photographer+atelier path (atelier phase 5)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('(c) wizard slot list for work + atelier INCLUDES structure', () => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokA', brief: photographerAtelierBrief, audienceType: 'service', templateId: 'atelier' });
+    expect(useWizardStore.getState().slots).toContain('structure');
+  });
+
+  it('(CARRY) both multipage derivations AGREE for photographer+atelier — full-brief slot inclusion AND briefSignalFromState dispatch gate both TRUE', () => {
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokA', brief: photographerAtelierBrief, audienceType: 'service', templateId: 'atelier' });
+    const s = useWizardStore.getState();
+    // Derivation 1 (slotsForEngine at hydrate keys off the full brief).
+    expect(s.slots).toContain('structure');
+    // Derivation 2 (fetchStrategy / GeneratingSlot dispatch keys off briefSignalFromState).
+    expect(isMultipage(s.templateId ?? undefined, briefSignalFromState(s))).toBe(true);
+    // The signal the store reconstructs must carry the photographer businessType.
+    expect(briefSignalFromState(s)).toMatchObject({ businessType: 'photographer' });
+  });
+
+  it('(fix-first) a bare UNCONFIRMED classify single hint does NOT suppress the structure slot — both derivations AGREE multipage', () => {
+    // This is the case the earlier no-structure proof missed: classify stamped
+    // `structure:{ mode:'single', pages:[] }`. Pre-fix, slotsForEngine read the
+    // RAW brief (→ single → skip), while the dispatch derivation went multipage
+    // → zero-page skeleton. Post-fix both key off the confirmed-only signal.
+    useWizardStore.getState().reset();
+    useWizardStore.getState().hydrate({
+      tokenId: 'tokRaw',
+      brief: photographerAtelierRawSingleHint,
+      audienceType: 'service',
+      templateId: 'atelier',
+    });
+    const s = useWizardStore.getState();
+    // Derivation 1 (slot inclusion) — the unconfirmed hint is ignored.
+    expect(s.slots).toContain('structure');
+    // Derivation 2 (dispatch/fetchStrategy) — confirmed-only signal, photographer→multi.
+    expect(isMultipage(s.templateId ?? undefined, briefSignalFromState(s))).toBe(true);
+    // The unconfirmed hint never reaches briefStructureMode.
+    expect(s.briefStructureMode).toBeNull();
+  });
+
+  it('(fix-first) a CONFIRMED single structure DOES stay single — the legitimate single path is unbroken', () => {
+    useWizardStore.getState().reset();
+    useWizardStore.getState().hydrate({
+      tokenId: 'tokConf',
+      brief: photographerAtelierConfirmedSingle,
+      audienceType: 'service',
+      templateId: 'atelier',
+    });
+    const s = useWizardStore.getState();
+    // Confirmed single ⇒ briefStructureMode set ⇒ both derivations resolve single.
+    expect(s.briefStructureMode).toBe('single');
+    expect(s.slots).not.toContain('structure');
+    expect(isMultipage(s.templateId ?? undefined, briefSignalFromState(s))).toBe(false);
+  });
+
+  it('(d) fetchStrategy (work + atelier) seeds the 5 default pages with ZERO fetch/charge', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tokA', brief: photographerAtelierBrief, audienceType: 'service', templateId: 'atelier' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+
+    expect(spy).not.toHaveBeenCalled(); // no LLM, no credit charge
+    expect(s.strategyStatus).toBe('done');
+    expect(s.strategy).toBeNull(); // copy-gen stays OUT
+    const map = s.sitemap as any[];
+    expect(Array.isArray(map)).toBe(true);
+    expect(map.map((p) => p.archetypeKey)).toEqual(['home', 'work', 'experiences', 'about', 'contact']);
+  });
+});
+
+// ===========================================================================
+// atelier phase 7 — COMPOSED served-path proof (serveGate → wizard store)
+// ===========================================================================
+// The phase-2/5 store tests hand-fed audienceType/templateId. This block instead
+// runs the REAL serve decision through decideServe (from a classify-produced
+// brief, carrying the bare unconfirmed `structure.mode` hint buildBriefDraft
+// stamps) and feeds that decision's audience/template into the store — proving
+// the whole chain composes for the actual served brief, not an idealized one.
+function makeEntrySignals(overrides: Partial<EntrySignals> = {}): EntrySignals {
+  return {
+    businessTypeGuess: null,
+    businessTypeConfidence: 0.9,
+    category: null,
+    goalIntentGuess: null,
+    tiebreaker: 'none',
+    structureHint: 'single',
+    designStyleHint: null,
+    platformNeeds: 'none',
+    summary: 'A business.',
+    businessName: 'Acme',
+    offerings: [],
+    audiences: [],
+    categories: [],
+    outcomes: [],
+    deliveryModel: null,
+    offer: '',
+    oneLiner: 'We do things.',
+    proofAvailable: [],
+    socialProfiles: [],
+    testimonials: [],
+    ...overrides,
+  };
+}
+
+describe('useWizardStore — COMPOSED served photographer path (atelier phase 7)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('photographer classify brief ⇒ serve(atelier/service) ⇒ slots include structure ⇒ chargeless 5-page seed ⇒ skeleton dispatch', async () => {
+    // (1) REAL classify brief — buildBriefDraft stamps the bare unconfirmed
+    //     structure:{mode:'single',pages:[]} hint (the phase-5 reachable case).
+    const brief = buildBriefDraft(
+      makeEntrySignals({ businessTypeGuess: 'photographer', tiebreaker: 'portfolio-is-proof' }),
+      'editorial wedding photographer in Jaipur'
+    );
+    expect(brief.structure).toEqual({ mode: 'single', pages: [] });
+
+    // (2) REAL serve decision (not hand-fed).
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome !== 'serve') return;
+    expect(decision.templateId).toBe('atelier');
+    expect(decision.audienceType).toBe('service');
+
+    // (3) Hydrate the store with the decision's audience/template (as the confirm
+    //     route does) + the same brief.
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+    useWizardStore.getState().reset();
+    useWizardStore.getState().hydrate({
+      tokenId: 'tokCompose',
+      brief,
+      audienceType: decision.audienceType,
+      templateId: decision.templateId,
+    });
+    const s0 = useWizardStore.getState();
+    expect(s0.engine).toBe('work');
+    expect(s0.businessTypeKey).toBe('photographer');
+    // The unconfirmed single hint must NOT suppress the structure slot.
+    expect(s0.briefStructureMode).toBeNull();
+    expect(s0.slots).toContain('structure');
+
+    // (4) chargeless archetype seed — the served skeleton path, zero LLM/credits.
+    await useWizardStore.getState().fetchStrategy();
+    const s1 = useWizardStore.getState();
+    expect(spy).not.toHaveBeenCalled();
+    expect(s1.strategyStatus).toBe('done');
+    expect(s1.strategy).toBeNull(); // copy-gen stays OUT
+    const map = s1.sitemap as any[];
+    expect(Array.isArray(map)).toBe(true);
+    expect(map.map((p) => p.archetypeKey)).toEqual([
+      'home', 'work', 'experiences', 'about', 'contact',
+    ]);
+
+    // (5) skeleton dispatch selected (GeneratingSlot keys on this exact predicate).
+    expect(isMultipage(s1.templateId ?? undefined, briefSignalFromState(s1))).toBe(true);
+  });
+
+  it('REGRESSION: writer classify brief ⇒ serve(granth/writer) ⇒ structure SKIPPED ⇒ writer-generator dispatch (NOT skeleton)', () => {
+    // The granth-unchanged proof composed across phases 1+2+4: a served writer
+    // still routes to writer audience AND the store still skips structure and
+    // declines the skeleton dispatch (isMultipage false ⇒ buildWorkInput path).
+    const brief = buildBriefDraft(
+      makeEntrySignals({ businessTypeGuess: 'writer', goalIntentGuess: 'follow-social' }),
+      'Hindi literary fiction author'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome !== 'serve') return;
+    expect(decision.templateId).toBe('granth');
+    expect(decision.audienceType).toBe('writer');
+
+    useWizardStore.getState().reset();
+    useWizardStore.getState().hydrate({
+      tokenId: 'tokGranth',
+      brief,
+      audienceType: decision.audienceType,
+      templateId: decision.templateId,
+    });
+    const s = useWizardStore.getState();
+    expect(s.engine).toBe('work');
+    expect(s.businessTypeKey).toBe('writer');
+    // granth is NOT multipage ⇒ structure slot skipped (writer flow unchanged).
+    expect(s.slots).not.toContain('structure');
+    // dispatch declines the skeleton ⇒ writer generator (buildWorkInput) path.
+    expect(isMultipage(s.templateId ?? undefined, briefSignalFromState(s))).toBe(false);
+  });
+});
+
+// onboarding-fixes phase 4 — the 7b empty-collection-node predicate. Gates
+// whether a 0-item collection surfaces at the structure gate: catalog-shaped
+// (manufacturer / future requiredCollections) YES, SaaS `thing` family NO.
+// Keys WITH items are never gated by this predicate (asserted structurally in
+// StructureSlot's CollectionNodes filter, not here).
+describe('emptyCollectionNodeAllowed (7b phantom-node gate)', () => {
+  it('manufacturer → allowed (catalog-shaped, keeps empty Products node)', () => {
+    expect(emptyCollectionNodeAllowed('manufacturer')).toBe(true);
+  });
+
+  it('saas (thing family) → NOT allowed (no phantom "Products · 0 items")', () => {
+    expect(emptyCollectionNodeAllowed('saas')).toBe(false);
+  });
+
+  it('app (thing family) → NOT allowed', () => {
+    expect(emptyCollectionNodeAllowed('app')).toBe(false);
+  });
+
+  it('unclassified (null / undefined / unknown) → NOT allowed', () => {
+    expect(emptyCollectionNodeAllowed(null)).toBe(false);
+    expect(emptyCollectionNodeAllowed(undefined)).toBe(false);
+    expect(emptyCollectionNodeAllowed('not-a-real-type')).toBe(false);
   });
 });

@@ -5,6 +5,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { useReviewState } from '@/hooks/useReviewState';
 import { isTestimonialsEnabledPublic } from '@/lib/testimonials/flag';
+import { isSectionVisuallySelected } from '@/utils/selectionPriority';
 // Removed useSelection - functionality now in unified useEditor system
 
 // Proof-element predicate (co-located with the marker UI). A needs-review marker sits on a
@@ -76,7 +77,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
       section.setAttribute('tabindex', '0');
       section.setAttribute('aria-label', `Section ${sectionId}`);
       
-      if (selectedSection === sectionId) {
+      if (isSectionVisuallySelected(selectedSection, sectionId, selectedElement)) {
         section.setAttribute('aria-selected', 'true');
         section.classList.add('selected-section');
       } else {

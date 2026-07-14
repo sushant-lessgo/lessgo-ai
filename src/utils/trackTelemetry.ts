@@ -23,6 +23,24 @@ export function trackFailure(event: string, props: Record<string, unknown>): voi
   }
 }
 
+/**
+ * silent-fallback — emit a `generation_degraded` event when a run SUCCEEDED but
+ * came back MOCK or INCOMPLETE, so a too-fast/canned generation is no longer
+ * invisible. Same fire-and-forget contract as `trackFailure` (never throws into
+ * the caller). Called by the GeneratingSlot only when the degraded signal is set.
+ */
+export function trackGenerationDegraded(props: Record<string, unknown>): void {
+  try {
+    posthog?.capture?.('generation_degraded', props);
+  } catch (e) {
+    try {
+      logger.warn('[data-capture] posthog generation_degraded emit failed', e);
+    } catch {
+      /* swallow — telemetry must never throw into the caller */
+    }
+  }
+}
+
 // Parse-failure signature. VERIFIED against the throw sites the audience routes'
 // AI loop catches (`src/lib/aiClient.ts` generateRawJson): `'No JSON found in
 // response'` (L234), native `JSON.parse` SyntaxErrors (`'Unexpected token …'`,
