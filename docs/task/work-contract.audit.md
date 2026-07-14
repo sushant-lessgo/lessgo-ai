@@ -101,3 +101,59 @@ NOT in the runtime generation/render/publish path — so flipping work's design-
 - `npx tsc --noEmit` — fully clean, no output.
 - `npm run test:run -- src/modules/engines src/modules/templates` —
   **Test Files 31 passed (31) · Tests 1224 passed | 12 skipped (1236) · 0 failed.**
+
+---
+
+## Phase 2 — page vocabulary + site archetypes + proposal rule
+
+### Files changed
+- `src/modules/engines/workPages.ts` (NEW)
+
+### Summary (3 lines)
+Pure-data freeze of the work vertical's PAGE layer, sibling to `workSections.ts`. Exports
+the closed 8-page vocabulary with FIXED in-code slugs (2 parametric), the 3 named
+whole-site archetypes + default, and the deterministic (zero-AI) `proposeWorkSiteStructure`
+proposal rule mirroring clampSitemap's propose-then-user-decides philosophy. Firewall-clean:
+`import type` only from pageArchetypes (VALUE import would drag templateMeta), value imports
+limited to workSections (type-only) + collections/registry.
+
+### Full export list of `workPages.ts`
+- `workPageTypeKeys` (readonly tuple, 8) · `WorkPageTypeKey` (type)
+- `WorkPageDef` (interface — `PageArchetypeDef` + `parametric?: true`)
+- `workPageTypes: Record<WorkPageTypeKey, WorkPageDef>` (fixed slugs; blog = attachment slot, `allowedSections: []`)
+- `WorkSiteArchetypeKey` (type) · `workSiteArchetypes: Record<WorkSiteArchetypeKey, readonly WorkPageTypeKey[]>` · `defaultWorkSiteArchetype = 'standard'`
+- `WorkStructureSignals` (interface) · `WorkStructureProposal` (interface) · `proposeWorkSiteStructure(signals): WorkStructureProposal`
+- Stubbed thresholds: `ONE_PAGER_MAX_ITEMS` · `STANDARD_MIN_GROUPS` · `PROMOTE_GROUP_MIN`
+
+### Stubbed threshold consts (placeholder values, `// STUB — planner's call, tune at track-E pilot`)
+- `ONE_PAGER_MAX_ITEMS = 3`
+- `STANDARD_MIN_GROUPS = 3`
+- `PROMOTE_GROUP_MIN = 2`
+
+### Key modelling notes / in-scope decisions
+- Page slugs fixed in code: home `/`, work `/work`, work-group `/work/[group]` (parametric),
+  prices `/prices`, about `/about`, contact `/contact`, project-story `/work/[group]/[item]`
+  (parametric), blog `/blog`.
+- `project-story.key` reuses `COLLECTIONS.works.itemArchetypeKey` (`'work-detail'`) verbatim
+  (one collections spine, never a fork) — the only value import needed at runtime.
+- allowedSections/requiredSections/defaultSections are body-only WorkSectionKeys (header/footer
+  chrome excluded, per pageArchetypes convention).
+- Proposal rule invariants enforced in code (tested phase 5): pages ⊆ closed vocab (`work-group`
+  is the only optional auto-inserted, and it IS in the vocab), `home` always first (archetype
+  lists start with home by construction), archetype ∈ the 3 names, blog + project-story never
+  auto-proposed. `promotedGroupCount` inserts a `work-group` page after `work` when it clears
+  `PROMOTE_GROUP_MIN`.
+
+### Deviations from the plan
+- None material. The plan's proposal-rule invariant list said "blog/project-story never
+  auto-proposed" but was silent on `work-group`; I treated `work-group` as an auto-attachable
+  optional (it is in the closed vocab, unlike a fork) and gate its insertion behind
+  `PROMOTE_GROUP_MIN`. Conservative and inside the stated invariants (pages ⊆ vocab). Logged here.
+
+### Verification
+- `npx tsc --noEmit` — fully clean, no output.
+- `npm run test:run -- src/modules/engines` — Test Files 4 passed (4) · Tests 176 passed (176) · 0 failed.
+
+### Open risks
+- Thresholds are placeholders; the shape (`WorkStructureSignals` fields, one-pager/compact/
+  standard tiering) is a phase-A judgement pending track-E pilot data.
