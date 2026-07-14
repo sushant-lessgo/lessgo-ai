@@ -1,0 +1,74 @@
+KUNDIUS — WORK COPY ENGINE — NL HOME GOLDEN (founder read)
+*** NL-PRIMARY (languages: ["nl"]) — every string should be Dutch ***
+
+== NO-ENGLISH HEURISTIC (load-bearing framing strings) ==
+(none — every load-bearing framing string is Dutch)
+
+KUNDIUS — WORK COPY ENGINE — HOME GOLDEN (founder read)
+*** REAL KUNDIUS FACTS (phase-4 gate 2026-07-14) — establishment "in-between"→established, event price €100/hr→exact 100 (per-hour in name) ***
+
+== PER-PAGE ONE-LINER / POSITIONING ==
+Positioning angle: Kristina Kundius captures your brand story through thoughtfully framed photography.
+Story angle: With a rich portfolio and years of experience, Kristina knows how to bring your vision to life through her lens.
+Voice notes: Duidelijk en concreet boven slim. | Een lange zin, dan een korte. | Warm en direct — een echte persoon.
+Archetype: standard
+Home sections: header, hero, work, proof, contact, footer
+
+== PROMISE LINE (hero) ==
+Eyebrow: (empty)
+Heading: (empty)
+Lead: (empty)
+CTA: Bekijk mijn werk
+
+== GALLERY INTROS / CAPTIONS (work) ==
+Eyebrow: Mijn Aanbod
+Heading: Ontdek mijn fotografische diensten
+Lead: (empty)
+  - card: Volledig merkpakket
+  - card: Merk fotoshoot
+  - card: Portret- en zakelijke shoot
+  - card: Evenement fotografie
+
+== STORY (about) ==
+Eyebrow: (empty)
+Heading: (empty)
+Bio: (empty)
+
+== PRICES FRAMING (packages) ==
+Eyebrow: (empty)
+Heading: (empty)
+
+== PROOF / PRAISE (proof) ==
+Eyebrow: Wat klanten zeggen
+Heading: Vertrouwd door bedrijven
+Awards line: (empty)
+
+== CONTACT NUDGE (contact) ==
+Eyebrow: Neem contact op
+Heading: Laten we jouw verhaal vastleggen
+Note: (empty)
+CTA: Stuur een bericht
+
+== ALL SECTIONS (raw string dump) ==
+--- header ---
+  logo_text: Kristina Kundius Fotografie
+--- hero ---
+  role_line: Fotograaf voor jouw merkverhaal.
+  name: Kristina Kundius
+  cta_label: Bekijk mijn werk
+--- work ---
+  eyebrow: Mijn Aanbod
+  heading: Ontdek mijn fotografische diensten
+--- proof ---
+  eyebrow: Wat klanten zeggen
+  heading: Vertrouwd door bedrijven
+--- contact ---
+  eyebrow: Neem contact op
+  heading: Laten we jouw verhaal vastleggen
+  lead: Ik kijk ernaar uit om met je samen te werken. Stuur me een bericht!
+  contact_method: E-mail: info@kristinakundius.nl
+  cta_label: Stuur een bericht
+--- footer ---
+  heading: Kristina Kundius Fotografie
+  note: Vastleg jouw merk met prachtige fotografie.
+  copyright: © 2023 Kristina Kundius

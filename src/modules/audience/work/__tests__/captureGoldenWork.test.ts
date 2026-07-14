@@ -73,6 +73,11 @@ import {
   kundiusProfessionRow,
   kundiusAboutHarvest,
 } from './fixtures/kundiusBrief';
+import {
+  nlWorkFacts,
+  nlProfessionRow,
+  nlAboutHarvest,
+} from './fixtures/nlBrief';
 
 const OUT_DIR = path.resolve(__dirname, 'goldens');
 
@@ -178,6 +183,87 @@ function renderStringsDump(
   }
 
   return out.join('\n');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NO-ENGLISH HEURISTIC (phase 7) — the AUTOMATED leakage detector for the NL
+// pass. Scans ONLY the load-bearing FRAMING strings (hero role_line/heading/lead/
+// quote/cta, every section's eyebrow/heading/lead/cta_label/note/awards_line/bio)
+// for common English function/marketing words that should never appear in Dutch
+// copy. Collection ITEM names (group/package cards) are DELIBERATELY excluded —
+// they are verbatim facts (e.g. the English group name "Brand photoshoot") and
+// may legitimately stay as-stated even on a Dutch site.
+//
+// It REPORTS leakage (which field, which token, the offending string) rather than
+// only pass/fail, so a failure prints exactly what leaked for the founder read.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Scalar framing fields scanned per section (never collection item names). */
+const FRAMING_FIELDS = [
+  'eyebrow',
+  'heading',
+  'lead',
+  'role_line',
+  'quote',
+  'cta_label',
+  'note',
+  'awards_line',
+  'bio',
+] as const;
+
+/**
+ * English-only tokens (each has a DISTINCT Dutch equivalent — the/de, and/en,
+ * with/met, for/voor, your/uw, our/onze, story/verhaal, photography/fotografie,
+ * book/boek, view/bekijk, more/meer, discover/ontdek, about/over). Deliberately
+ * EXCLUDES words spelled the same (or valid) in Dutch to avoid false positives:
+ *   • "we" — Dutch subject pronoun ("Laten we…" = "let's…")
+ *   • "let" — Dutch "let op" (= "watch out")
+ *   • contact / portfolio / is / in — identical in Dutch
+ */
+const ENGLISH_TOKENS = [
+  'the',
+  'and',
+  'with',
+  'for',
+  'your',
+  'our',
+  'you',
+  'story',
+  'photography',
+  'book',
+  'view',
+  'more',
+  'discover',
+  'welcome',
+  'about',
+  'get',
+  'crafted',
+  'timeless',
+];
+
+interface Leak {
+  section: string;
+  field: string;
+  token: string;
+  value: string;
+}
+
+/** Scan the load-bearing framing strings; return every English-token hit. */
+function detectEnglishLeakage(sections: Record<string, SectionCopy>): Leak[] {
+  const leaks: Leak[] = [];
+  for (const [section, copy] of Object.entries(sections)) {
+    const els = (copy?.elements as Record<string, unknown> | undefined) ?? {};
+    for (const field of FRAMING_FIELDS) {
+      const value = els[field];
+      if (typeof value !== 'string' || !value.trim()) continue;
+      for (const token of ENGLISH_TOKENS) {
+        if (new RegExp(`\\b${token}\\b`, 'i').test(value)) {
+          leaks.push({ section, field, token, value });
+        }
+      }
+    }
+  }
+  return leaks;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -456,5 +542,162 @@ describe.skipIf(process.env.CAPTURE !== '1')(
         expect(Object.keys(entry.copy).length).toBeGreaterThan(0);
       }
     }, 300_000);
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NL LANGUAGE PASS (phase 7, AC-6) — an NL-primary Kundius Brief must produce
+// Dutch copy THROUGHOUT. Always-on sanity proves the deterministic half carries
+// primaryLanguage 'nl'; the CAPTURE describe runs the real-LLM HOME pipeline,
+// writes goldens/nl.home.*, and asserts the no-English heuristic on the
+// load-bearing framing strings (reporting any leakage).
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('NL fixture sanity (no LLM)', () => {
+  it('carries primaryLanguage "nl" through the deterministic slim strategy', () => {
+    const s = assembleWorkStructure(nlWorkFacts, nlProfessionRow);
+    expect(s.primaryLanguage).toBe('nl');
+    // Same deterministic structure as EN (only the language differs).
+    expect(assembleWorkStructure(nlWorkFacts, nlProfessionRow)).toEqual(s);
+  });
+});
+
+describe.skipIf(process.env.CAPTURE !== '1')(
+  'CAPTURE real-LLM Kundius NL HOME golden',
+  () => {
+    it('slim strategy → strategy call → HOME copy (Dutch) → goldens/nl.home.*', async () => {
+      const facts = nlWorkFacts;
+      const professionRow = nlProfessionRow;
+
+      // 1. Deterministic slim strategy (no AI) + derived voice.
+      const structure = assembleWorkStructure(facts, professionRow);
+      const pricePosition = derivePricePosition(facts);
+      const establishment: Establishment =
+        facts.establishment ?? DEFAULT_ESTABLISHMENT;
+      const profession = resolveWorkProfession(professionRow.key);
+      const voice = selectWorkVoice({ professionRow, pricePosition, establishment });
+
+      expect(structure.primaryLanguage).toBe('nl');
+
+      // 2. The ONE small AI strategy call → assemble WorkStrategyOutput.
+      const strategyPrompt = buildWorkStrategyPrompt({
+        businessName: facts.identity?.name,
+        profession,
+        workNoun: professionWording[profession].workGroup,
+        pricePosition,
+        establishment,
+        dreamClient: facts.dreamClient,
+        praise: facts.praise ?? [],
+        groupNames: (facts.groups ?? []).map((g) => g.name),
+        primaryLanguage: facts.languages?.[0] ?? 'en',
+        voiceBlock: formatWorkVoiceForPrompt(voice),
+      });
+
+      const { generateWithSchema, generateRawJson } = await import('@/lib/aiClient');
+
+      const llmResponse = await generateWithSchema(
+        'work-strategy',
+        [{ role: 'user', content: strategyPrompt }],
+        WorkStrategyResponseSchema,
+        'workStrategy'
+      );
+      const strategy = assembleWorkStrategy({
+        llmResponse,
+        facts,
+        professionRow,
+        structure,
+      });
+
+      // 3. HOME copy — chrome-inclusive home sections (matches the route default).
+      const home = strategy.sitemap[0];
+      const homePage: WorkCopyPage = {
+        archetypeKey: home?.archetypeKey ?? 'home',
+        title: home?.title ?? 'Home',
+        pathSlug: home?.pathSlug ?? '/',
+        isHome: true,
+        sections: strategy.sections,
+      };
+
+      // Dutch about-text harvest travels as a tone-only SiteContext reference.
+      const siteContextBlock = `## EXISTING-SITE TONE REFERENCE (voice only — do NOT copy verbatim, do NOT lift claims)\n${nlAboutHarvest}`;
+
+      const copyPrompt = buildWorkCopyPrompt({
+        strategy,
+        page: homePage,
+        facts,
+        voice,
+        siteContextBlock,
+      });
+
+      const raw = (await generateRawJson(
+        'work-copy',
+        copyPrompt,
+        CopyResponseSchema
+      )) as Record<string, SectionCopy>;
+
+      const pageUiblocks: Record<string, string> = {};
+      for (const section of homePage.sections) pageUiblocks[section] = section;
+
+      const homeCopy = parseWorkCopy(raw, pageUiblocks, facts.praise);
+      const { complete, missingSections } = validateWorkCopyCompleteness(
+        homeCopy,
+        pageUiblocks
+      );
+
+      // ── NO-ENGLISH HEURISTIC — the automated leakage detector (AC-6). ──
+      const leaks = detectEnglishLeakage(homeCopy);
+      const leakReport =
+        leaks.length === 0
+          ? '(none — every load-bearing framing string is Dutch)'
+          : leaks
+              .map(
+                (l) =>
+                  `  [${l.section}.${l.field}] English token "${l.token}" in: "${l.value}"`
+              )
+              .join('\n');
+
+      // Write the golden artifact + the founder-facing rendered-strings dump.
+      fs.mkdirSync(OUT_DIR, { recursive: true });
+      const jsonFile = path.join(OUT_DIR, 'nl.home.json');
+      const txtFile = path.join(OUT_DIR, 'nl.home.read.txt');
+      fs.writeFileSync(
+        jsonFile,
+        JSON.stringify(
+          {
+            fixture: 'NL-PRIMARY KUNDIUS FACTS (phase-7 gate) — languages: ["nl"], Dutch throughout',
+            capturedAt: new Date().toISOString(),
+            meta: { complete, missingSections },
+            englishLeakage: leaks,
+            strategy,
+            homeCopy,
+          },
+          null,
+          2
+        )
+      );
+      fs.writeFileSync(
+        txtFile,
+        [
+          'KUNDIUS — WORK COPY ENGINE — NL HOME GOLDEN (founder read)',
+          '*** NL-PRIMARY (languages: ["nl"]) — every string should be Dutch ***',
+          '',
+          '== NO-ENGLISH HEURISTIC (load-bearing framing strings) ==',
+          leakReport,
+          '',
+          renderStringsDump(strategy, homeCopy),
+        ].join('\n')
+      );
+
+      // eslint-disable-next-line no-console
+      console.log(
+        `[capture] wrote ${jsonFile} + ${txtFile} (complete=${complete}); English leakage: ${
+          leaks.length === 0 ? 'NONE' : `${leaks.length} hit(s)\n${leakReport}`
+        }`
+      );
+
+      expect(Object.keys(homeCopy).length).toBeGreaterThan(0);
+      // Report leakage as the assertion message so a failure prints the specifics.
+      expect(leaks, `English leakage detected in NL output:\n${leakReport}`).toEqual([]);
+    }, 180_000);
   }
 );

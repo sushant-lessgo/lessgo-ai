@@ -515,3 +515,54 @@ The underlying LEAK the reviewer flagged is REAL (the panel currently renders fo
 - MainContent gate verified-by-reading (render test heavy): `mode === 'edit' && isWorkTemplate && selectedSection && selectedSection.split('-')[0] === 'about'`.
 
 **Open risks:** `facts.work` editor writeback (Brief→editor projection) still open — a LIVE work-template story submit needs it wired; that is a separate deferred follow-up, not this gate. The panel now correctly appears ONLY for atelier (work) projects, closing the leak into generic service/writer editors.
+
+## Phase 7 — NL language pass  ⛔ HUMAN GATE
+
+### Files changed
+- ADD `src/modules/audience/work/__tests__/fixtures/nlBrief.ts` — NL-primary Kundius fixture.
+- MODIFY `src/modules/audience/work/__tests__/captureGoldenWork.test.ts` — NL sanity + CAPTURE-gated NL HOME golden + automated no-English heuristic.
+- ADD `src/modules/audience/work/__tests__/goldens/nl.home.json` — captured NL artifact (real gpt-4o-mini).
+- ADD `src/modules/audience/work/__tests__/goldens/nl.home.read.txt` — founder-facing NL rendered dump.
+
+`copyPrompt.ts` and `modelConfig.ts` were **NOT touched** — the capture was clean (see assessment). EN goldens (`kundius.home.*` / `kundius.full.*`) left byte-identical (confirmed via empty `git diff`).
+
+### NL fixture (nlBrief.ts)
+Re-uses `kundiusWorkFacts` verbatim (identity, the FOUR priced groups EUR 500/350/250/100, dreamClient "Enterprise customers, big corporates", empty praise `[]`, contactMethod `form`) with the ONE change `languages: ['nl']`. Separate fixture (not a param on kundiusBrief) so the founder-approved EN golden capture path stays undisturbed. The Dutch about-harvest (`nlAboutHarvest` = kundiusAboutHarvest) doubles as tone reference + a natural NL fit. Always-on sanity asserts `assembleWorkStructure(nlWorkFacts).primaryLanguage === 'nl'` and determinism — runs inside `test:run`, no network.
+
+### No-English heuristic (automated, AC-6)
+`detectEnglishLeakage(sections)` scans ONLY the load-bearing FRAMING scalar fields (`eyebrow/heading/lead/role_line/quote/cta_label/note/awards_line/bio`) across every section for word-boundary hits of `ENGLISH_TOKENS` (English words with a DISTINCT Dutch equivalent: the/and/with/for/your/our/you/story/photography/book/view/more/discover/welcome/about/get/crafted/timeless). Collection ITEM names (group/package cards) are excluded — they are verbatim facts and may legitimately stay English. Leaks are reported field-by-field (section.field, token, offending string) in the golden JSON (`englishLeakage`), the read.txt header, a console line, and the assertion message — reports specifics, not just pass/fail.
+
+**False-positive fix during capture:** the first run flagged `we` in two genuinely-Dutch phrases ("Laten we samenwerken…", "Laten we samen…") — `we` is the Dutch subject pronoun, and `let` is valid Dutch ("let op"). Both removed from `ENGLISH_TOKENS` (they are spelled the same/valid in Dutch); re-captured clean. Documented in the token-list comment.
+
+### Capture result — model that served
+- **Model: real OpenAI `gpt-4o-mini`** for BOTH work-strategy and work-copy (USE_OPENAI=true, AI_MODEL_TIER=cheap → the `work-copy`/`work-strategy` cheap-tier rows = GPT_4o-mini). Default tier, no bump.
+- Ran `CAPTURE=1 npx vitest run captureGoldenWork -t "NL HOME"` — passed, heuristic clean (`englishLeakage: []`).
+
+### Leakage assessment — gpt-4o-mini HOLDS Dutch on the default tier
+Every load-bearing, USER-FACING rendered string is Dutch, grammatical, and on-voice:
+- hero role_line "Fotograaf voor jouw merkverhaal.", CTA "Bekijk mijn werk"
+- work eyebrow "Mijn Aanbod" / heading "Ontdek mijn fotografische diensten"
+- proof eyebrow "Wat klanten zeggen" / heading "Vertrouwd door bedrijven"
+- contact eyebrow "Neem contact op" / heading "Laten we jouw verhaal vastleggen" / lead "Ik kijk ernaar uit om met je samen te werken. Stuur me een bericht!" / CTA "Stuur een bericht"
+- footer heading "Kristina Kundius Fotografie" / note "Vastleg jouw merk met prachtige fotografie."
+- even the group card names were translated to Dutch: "Volledig merkpakket", "Merk fotoshoot", "Portret- en zakelijke shoot", "Evenement fotografie".
+No English fragments, no mixed-language cards, no grammar breakdown. Empty-praise strip holds (proof heading present, zero fabricated quotes). Facts-law holds (exactly the 4 real groups; no invented prices on home).
+
+Observations (NOT language-gate blockers, reported for the founder):
+1. Strategy `positioningAngle`/`storyAngle` came back in ENGLISH ("Kristina Kundius captures your brand story through thoughtfully framed photography."), while `voiceNotes` are Dutch. These are INTERNAL strategy notes that guide the copy prompt — they do NOT render on the page and did NOT leak into the Dutch copy. The work-strategy prompt lacks a primary-language directive; harmless today (non-rendered), but a candidate hardening if strategy notes ever surface. Left untouched (phase-7 scope = language directive in copyPrompt only; the copy is clean).
+2. contact_method rendered "E-mail: info@kristinakundius.nl" — a fabricated email (facts contactMethod = form). This is a pre-existing, language-agnostic facts-law nit (non-deterministic per capture), not an NL issue; flagged for the general facts-law backlog.
+3. Chrome nits unchanged from EN: footer "© 2023" stale year; "Vastleg" is slightly informal Dutch imperative phrasing (understandable).
+
+### copyPrompt.ts / modelConfig.ts decision
+- **copyPrompt.ts: NOT hardened.** The existing PRIMARY-LANGUAGE directive (rule 1 "Write EVERY string in <language> … no mixed-language cards, no English fragments" + self-check (b)) already produced clean Dutch. Per the plan ("harden only if the capture shows leakage"), it held → no change.
+- **modelConfig.ts: NOT bumped. Founder cost decision = NOT required.** gpt-4o-mini (cheap tier) delivered clean, grammatical, on-voice Dutch. There is no quality basis for a Sonnet-tier bump. Recommendation to founder: KEEP `work-copy`/`work-strategy` on the default cheap tier for NL; no cost escalation warranted.
+
+### Verify
+- `npx tsc --noEmit`: clean except the pre-existing `src/app/page.tsx(6,26)` founder.jpg error (out of scope, ignored).
+- `npm run test:run`: 181 files passed | 1 skipped; 2968 passed | 18 skipped (NL sanity adds 1 test; NL capture skips without CAPTURE=1). No regressions.
+- `npx eslint` on the two touched source files: 0 errors.
+- EN goldens + copyPrompt.ts + modelConfig.ts: byte-identical (empty git diff).
+
+### Open risks
+- The NL golden is a single non-deterministic snapshot; re-capture varies (e.g. contact_method fabrication in obs. 2). The founder read judges representativeness.
+- Strategy narrative fields (obs. 1) stay English; acceptable while non-rendered, revisit if they ever surface to users.
