@@ -1,0 +1,712 @@
+{
+  "fixture": "REAL KUNDIUS FACTS (phase-4 gate 2026-07-14) — full-site fan-out (phase 5, AC-1)",
+  "capturedAt": "2026-07-14T21:59:01.867Z",
+  "archetype": "standard",
+  "strategy": {
+    "positioningAngle": "Capturing authentic moments for established brands that demand quality and professionalism.",
+    "storyAngle": "With a rich portfolio and a commitment to storytelling through light and frame, Kristina Kundius connects enterprises to their essence through photography.",
+    "voiceNotes": [
+      "Clear and concrete over clever.",
+      "Use warmth and directness - write like a real person.",
+      "Follow the cadence: one long sentence, then one short.",
+      "Avoid any mention of forbidden words."
+    ],
+    "sections": [
+      "header",
+      "hero",
+      "work",
+      "proof",
+      "contact",
+      "footer"
+    ],
+    "uiblocks": {
+      "header": "header",
+      "hero": "hero",
+      "work": "work",
+      "proof": "proof",
+      "contact": "contact",
+      "footer": "footer"
+    },
+    "sitemap": [
+      {
+        "archetypeKey": "home",
+        "title": "Home",
+        "pathSlug": "/",
+        "sections": [
+          "hero",
+          "work",
+          "proof",
+          "contact"
+        ]
+      },
+      {
+        "archetypeKey": "work",
+        "title": "Work",
+        "pathSlug": "/work",
+        "sections": [
+          "work",
+          "proof"
+        ]
+      },
+      {
+        "archetypeKey": "work-group",
+        "title": "Work Group",
+        "pathSlug": "/work/[group]",
+        "sections": [
+          "work"
+        ]
+      },
+      {
+        "archetypeKey": "prices",
+        "title": "Prices",
+        "pathSlug": "/prices",
+        "sections": [
+          "packages"
+        ]
+      },
+      {
+        "archetypeKey": "about",
+        "title": "About",
+        "pathSlug": "/about",
+        "sections": [
+          "about",
+          "proof"
+        ]
+      },
+      {
+        "archetypeKey": "contact",
+        "title": "Contact",
+        "pathSlug": "/contact",
+        "sections": [
+          "contact"
+        ]
+      }
+    ],
+    "archetype": "standard",
+    "leadGroups": [
+      "Full brand package",
+      "Brand photoshoot",
+      "Portrait & business shoot",
+      "Event photography (per hour)"
+    ],
+    "storyBranch": "established",
+    "primaryLanguage": "en",
+    "wording": {
+      "workItem": "shoot",
+      "workGroup": "galleries",
+      "processLabel": "How a shoot works",
+      "groupFallbackLabel": "Galleries"
+    }
+  },
+  "pages": {
+    "home": {
+      "page": {
+        "archetypeKey": "home",
+        "title": "Home",
+        "pathSlug": "/",
+        "isHome": true,
+        "sections": [
+          "header",
+          "hero",
+          "work",
+          "proof",
+          "contact",
+          "footer"
+        ]
+      },
+      "copy": {
+        "header": {
+          "elements": {
+            "logo_text": "Kristina Kundius Photography",
+            "cta_label": "Get in Touch",
+            "nav_links": [
+              {
+                "label": "Home",
+                "href": "/",
+                "id": "nav_links-ee7528b7"
+              },
+              {
+                "label": "Work",
+                "href": "/work",
+                "id": "nav_links-be3b3208"
+              },
+              {
+                "label": "About",
+                "href": "/about",
+                "id": "nav_links-6a8bd348"
+              },
+              {
+                "label": "Contact",
+                "href": "/contact",
+                "id": "nav_links-5c710d70"
+              }
+            ]
+          }
+        },
+        "hero": {
+          "elements": {
+            "role_line": "Photographer for Established Brands",
+            "name": "Kristina Kundius",
+            "quote": "Bringing your brand's story to life through photography.",
+            "cta_label": "Explore My Work",
+            "socials": []
+          }
+        },
+        "work": {
+          "elements": {
+            "eyebrow": "My Offerings",
+            "heading": "Captivating Photography for Your Brand",
+            "lead": "Transform your corporate identity with authentic imagery that resonates.",
+            "groups": [
+              {
+                "name": "Full brand package",
+                "cover_image": null,
+                "href": "/work/full-brand-package",
+                "id": "groups-24ae8e21"
+              },
+              {
+                "name": "Brand photoshoot",
+                "cover_image": null,
+                "href": "/work/brand-photoshoot",
+                "id": "groups-34386b42"
+              },
+              {
+                "name": "Portrait & business shoot",
+                "cover_image": null,
+                "href": "/work/portrait-business-shoot",
+                "id": "groups-48b0bb5c"
+              },
+              {
+                "name": "Event photography",
+                "cover_image": null,
+                "href": "/work/event-photography",
+                "id": "groups-5a64fcf8"
+              }
+            ]
+          }
+        },
+        "proof": {
+          "elements": {
+            "eyebrow": "What Clients Say",
+            "heading": "Trusted by Leading Brands",
+            "awards_line": "Client feedback highlights the impact of photography.",
+            "quotes": []
+          }
+        },
+        "contact": {
+          "elements": {
+            "eyebrow": "Let's Connect",
+            "heading": "Ready to Capture Your Brand's Essence?",
+            "lead": "Reach out today to discuss your photography needs and how we can tell your story.",
+            "contact_method": "Email: info@kristinakundius.com",
+            "cta_label": "Send a Message"
+          }
+        },
+        "footer": {
+          "elements": {
+            "eyebrow": "Stay Connected",
+            "heading": "Kristina Kundius Photography",
+            "note": "Authentic moments captured with care and professionalism.",
+            "copyright": "© 2023 Kristina Kundius. All rights reserved.",
+            "socials": []
+          }
+        }
+      },
+      "complete": true,
+      "missingSections": []
+    },
+    "work": {
+      "page": {
+        "archetypeKey": "work",
+        "title": "Work",
+        "pathSlug": "/work",
+        "isHome": false,
+        "sections": [
+          "header",
+          "work",
+          "proof",
+          "footer"
+        ]
+      },
+      "copy": {
+        "header": {
+          "elements": {
+            "logo_text": "Kristina Kundius Photography",
+            "cta_label": "Get in Touch",
+            "cta_href": "/contact",
+            "nav_links": [
+              {
+                "label": "Home",
+                "href": "/",
+                "id": "nav_links-b67c1af0"
+              },
+              {
+                "label": "Work",
+                "href": "/work",
+                "id": "nav_links-b003c3ca"
+              },
+              {
+                "label": "About",
+                "href": "/about",
+                "id": "nav_links-9bdd5b1a"
+              },
+              {
+                "label": "Testimonials",
+                "href": "/testimonials",
+                "id": "nav_links-05d877f7"
+              },
+              {
+                "label": "Contact",
+                "href": "/contact",
+                "id": "nav_links-2c30ba03"
+              }
+            ]
+          }
+        },
+        "work": {
+          "elements": {
+            "eyebrow": "Explore My Work",
+            "heading": "Photography That Captures Your Brand's Essence",
+            "lead": "Each photograph tells a story, connecting your enterprise to its true spirit through light and frame.",
+            "groups": [
+              {
+                "name": "Full brand package",
+                "cover_image": "url_to_image_1.jpg",
+                "href": "/work/full-brand-package",
+                "id": "groups-409a5976"
+              },
+              {
+                "name": "Brand photoshoot",
+                "cover_image": "url_to_image_2.jpg",
+                "href": "/work/brand-photoshoot",
+                "id": "groups-8d8f4ecf"
+              },
+              {
+                "name": "Portrait & business shoot",
+                "cover_image": "url_to_image_3.jpg",
+                "href": "/work/portrait-business-shoot",
+                "id": "groups-fe6347d6"
+              },
+              {
+                "name": "Event photography (per hour)",
+                "cover_image": "url_to_image_4.jpg",
+                "href": "/work/event-photography",
+                "id": "groups-2c5f00ea"
+              }
+            ]
+          }
+        },
+        "proof": {
+          "elements": {
+            "eyebrow": "Client Praise",
+            "heading": "Discover What Clients Say",
+            "awards_line": "",
+            "quotes": []
+          }
+        },
+        "footer": {
+          "elements": {
+            "eyebrow": "Let's Connect",
+            "heading": "Ready to Capture Your Vision?",
+            "note": "Reach out to discuss how we can bring your ideas to life through photography.",
+            "copyright": "© 2023 Kristina Kundius Photography",
+            "socials": [
+              {
+                "network": "Instagram",
+                "href": "https://instagram.com/kristinakundius",
+                "id": "socials-b8e90b3f"
+              },
+              {
+                "network": "LinkedIn",
+                "href": "https://linkedin.com/in/kristinakundius",
+                "id": "socials-3d2dc73d"
+              }
+            ]
+          }
+        }
+      },
+      "complete": true,
+      "missingSections": []
+    },
+    "work-group": {
+      "page": {
+        "archetypeKey": "work-group",
+        "title": "Work Group",
+        "pathSlug": "/work/[group]",
+        "isHome": false,
+        "sections": [
+          "header",
+          "work",
+          "footer"
+        ]
+      },
+      "copy": {
+        "header": {
+          "elements": {
+            "logo_text": "Kristina Kundius Photography",
+            "cta_label": "Contact Me",
+            "cta_href": "/contact",
+            "nav_links": [
+              {
+                "label": "Portfolio",
+                "href": "/portfolio",
+                "id": "nav_links-4eb9bef6"
+              },
+              {
+                "label": "Services",
+                "href": "/services",
+                "id": "nav_links-384a1e7c"
+              },
+              {
+                "label": "About",
+                "href": "/about",
+                "id": "nav_links-599f5ede"
+              },
+              {
+                "label": "Testimonials",
+                "href": "/testimonials",
+                "id": "nav_links-97b295da"
+              }
+            ]
+          }
+        },
+        "work": {
+          "elements": {
+            "eyebrow": "Discover Your Story",
+            "heading": "Expert Photography for Established Brands",
+            "lead": "Kristina Kundius captures the essence of your brand through striking photography tailored to your vision.",
+            "groups": [
+              {
+                "name": "Full Brand Package",
+                "cover_image": "path/to/image1.jpg",
+                "href": "/work/full-brand-package",
+                "id": "groups-9e8b2c11"
+              },
+              {
+                "name": "Brand Photoshoot",
+                "cover_image": "path/to/image2.jpg",
+                "href": "/work/brand-photoshoot",
+                "id": "groups-d0448a9c"
+              },
+              {
+                "name": "Portrait & Business Shoot",
+                "cover_image": "path/to/image3.jpg",
+                "href": "/work/portrait-business-shoot",
+                "id": "groups-19c37069"
+              },
+              {
+                "name": "Event Photography",
+                "cover_image": "path/to/image4.jpg",
+                "href": "/work/event-photography",
+                "id": "groups-5d32b132"
+              }
+            ]
+          }
+        },
+        "footer": {
+          "elements": {
+            "eyebrow": "Work with Kristina",
+            "heading": "Let’s Capture Your Vision",
+            "note": "Reach out today to discuss how we can bring your brand's story to life through impactful photography.",
+            "copyright": "© 2023 Kristina Kundius. All rights reserved.",
+            "socials": [
+              {
+                "network": "Instagram",
+                "href": "https://instagram.com/kristinakundius",
+                "id": "socials-38cf3a52"
+              },
+              {
+                "network": "LinkedIn",
+                "href": "https://linkedin.com/in/kristinakundius",
+                "id": "socials-fec62a13"
+              },
+              {
+                "network": "Facebook",
+                "href": "https://facebook.com/kristinakundius",
+                "id": "socials-0928514c"
+              }
+            ]
+          }
+        }
+      },
+      "complete": true,
+      "missingSections": []
+    },
+    "prices": {
+      "page": {
+        "archetypeKey": "prices",
+        "title": "Prices",
+        "pathSlug": "/prices",
+        "isHome": false,
+        "sections": [
+          "header",
+          "packages",
+          "footer"
+        ]
+      },
+      "copy": {
+        "header": {
+          "elements": {
+            "logo_text": "Kristina Kundius Photography",
+            "cta_label": "Inquire Today",
+            "nav_links": [
+              {
+                "label": "Home",
+                "href": "/",
+                "id": "nav_links-9062496b"
+              },
+              {
+                "label": "Portfolio",
+                "href": "/portfolio",
+                "id": "nav_links-239e739d"
+              },
+              {
+                "label": "About",
+                "href": "/about",
+                "id": "nav_links-e01f096b"
+              },
+              {
+                "label": "Prices",
+                "href": "/prices",
+                "id": "nav_links-019c4c5d"
+              },
+              {
+                "label": "Contact",
+                "href": "/contact",
+                "id": "nav_links-b38b4a06"
+              }
+            ]
+          }
+        },
+        "packages": {
+          "elements": {
+            "eyebrow": "Services",
+            "heading": "Discover Our Pricing Packages",
+            "lead": "Tailored photography packages designed for your brand's needs.",
+            "packages": [
+              {
+                "name": "Full brand package",
+                "price_mode": "exact",
+                "price_line": "EUR 500",
+                "description": "A complete package to encapsulate your brand identity in a single, stunning image.",
+                "cta_label": "Inquire Now",
+                "id": "packages-5089f923"
+              },
+              {
+                "name": "Brand photoshoot",
+                "price_mode": "exact",
+                "price_line": "EUR 350",
+                "description": "Capture the essence of your brand with a tailored photoshoot reflecting your vision.",
+                "cta_label": "Book Your Shoot",
+                "id": "packages-62d74d99"
+              },
+              {
+                "name": "Portrait & business shoot",
+                "price_mode": "exact",
+                "price_line": "EUR 250",
+                "description": "Professional portraits that convey your company's values and professionalism.",
+                "cta_label": "Schedule a Session",
+                "id": "packages-7c9ea8a9"
+              },
+              {
+                "name": "Event photography (per hour)",
+                "price_mode": "exact",
+                "price_line": "EUR 100",
+                "description": "Expert coverage of your corporate events, framing moments that matter.",
+                "cta_label": "Get a Quote",
+                "id": "packages-4a3ff08a"
+              }
+            ]
+          }
+        },
+        "footer": {
+          "elements": {
+            "eyebrow": "Connect with Us",
+            "heading": "Ready to Capture Your Brand’s Story?",
+            "note": "Let’s create something beautiful together. Reach out today.",
+            "copyright": "© 2023 Kristina Kundius Photography",
+            "socials": [
+              {
+                "network": "Instagram",
+                "href": "https://instagram.com/kristinakundius",
+                "id": "socials-d703a75b"
+              },
+              {
+                "network": "Facebook",
+                "href": "https://facebook.com/kristinakundius",
+                "id": "socials-c073515a"
+              },
+              {
+                "network": "LinkedIn",
+                "href": "https://linkedin.com/in/kristinakundius",
+                "id": "socials-1c7018c6"
+              }
+            ]
+          }
+        }
+      },
+      "complete": true,
+      "missingSections": []
+    },
+    "about": {
+      "page": {
+        "archetypeKey": "about",
+        "title": "About",
+        "pathSlug": "/about",
+        "isHome": false,
+        "sections": [
+          "header",
+          "about",
+          "proof",
+          "footer"
+        ]
+      },
+      "copy": {
+        "header": {
+          "elements": {
+            "logo_text": "Kristina Kundius",
+            "cta_label": "Get in Touch",
+            "nav_links": [
+              {
+                "label": "Portfolio",
+                "href": "/portfolio",
+                "id": "nav_links-8a9b1653"
+              },
+              {
+                "label": "Services",
+                "href": "/services",
+                "id": "nav_links-0e3e5800"
+              },
+              {
+                "label": "About",
+                "href": "/about",
+                "id": "nav_links-46f839d4"
+              },
+              {
+                "label": "Contact",
+                "href": "/contact",
+                "id": "nav_links-77b63bde"
+              }
+            ]
+          }
+        },
+        "about": {
+          "elements": {
+            "heading": "Connecting Brands Through Thoughtful Photography",
+            "bio": "With a rich portfolio and an eye for storytelling, Kristina Kundius captures the essence of businesses through photography. Based in the Netherlands and dedicated to authenticity, her work resonates with companies striving for quality and professionalism. When you're ready to convey your brand's story, Kristina stands ready to help.",
+            "facts": [
+              {
+                "value": "Established",
+                "label": "Years of Experience",
+                "id": "facts-4688e6ab"
+              },
+              {
+                "value": "Industry Leader",
+                "label": "Client Focus",
+                "id": "facts-dedd20a2"
+              }
+            ]
+          }
+        },
+        "proof": {
+          "elements": {
+            "heading": "What Clients Say",
+            "quotes": []
+          }
+        },
+        "footer": {
+          "elements": {
+            "heading": "Ready to Capture Your Story?",
+            "note": "Photography that conveys authenticity and professionalism.",
+            "copyright": "© 2023 Kristina Kundius",
+            "socials": [
+              {
+                "network": "Instagram",
+                "href": "https://instagram.com/kristinakundius",
+                "id": "socials-cf732dd0"
+              },
+              {
+                "network": "LinkedIn",
+                "href": "https://linkedin.com/in/kristinakundius",
+                "id": "socials-a4df2fd4"
+              }
+            ]
+          }
+        }
+      },
+      "complete": true,
+      "missingSections": []
+    },
+    "contact": {
+      "page": {
+        "archetypeKey": "contact",
+        "title": "Contact",
+        "pathSlug": "/contact",
+        "isHome": false,
+        "sections": [
+          "header",
+          "contact",
+          "footer"
+        ]
+      },
+      "copy": {
+        "header": {
+          "elements": {
+            "logo_text": "Kristina Kundius Photography",
+            "cta_label": "Get in Touch",
+            "nav_links": [
+              {
+                "label": "Portfolio",
+                "href": "/portfolio",
+                "id": "nav_links-3c602fc9"
+              },
+              {
+                "label": "About",
+                "href": "/about",
+                "id": "nav_links-90e5defd"
+              },
+              {
+                "label": "Services",
+                "href": "/services",
+                "id": "nav_links-b8406529"
+              },
+              {
+                "label": "Contact",
+                "href": "/contact",
+                "id": "nav_links-deac1f65"
+              }
+            ]
+          }
+        },
+        "contact": {
+          "elements": {
+            "heading": "Connect for Authentic Photography",
+            "contact_method": "Fill out the form below to begin a conversation.",
+            "cta_label": "Start Your Inquiry"
+          }
+        },
+        "footer": {
+          "elements": {
+            "heading": "Let's Create Moments Together",
+            "note": "Your essence deserves to be captured beautifully. Reach out today.",
+            "copyright": "© 2023 Kristina Kundius Photography",
+            "socials": [
+              {
+                "network": "Instagram",
+                "href": "https://instagram.com/kristinakundius",
+                "id": "socials-7fb5c547"
+              },
+              {
+                "network": "LinkedIn",
+                "href": "https://linkedin.com/in/kristinakundius",
+                "id": "socials-7b26be1f"
+              }
+            ]
+          }
+        }
+      },
+      "complete": true,
+      "missingSections": []
+    }
+  }
+}

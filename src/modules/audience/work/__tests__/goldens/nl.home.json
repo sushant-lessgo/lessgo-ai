@@ -1,0 +1,197 @@
+{
+  "fixture": "NL-PRIMARY KUNDIUS FACTS (phase-7 gate) — languages: [\"nl\"], Dutch throughout",
+  "capturedAt": "2026-07-14T22:50:20.894Z",
+  "meta": {
+    "complete": true,
+    "missingSections": []
+  },
+  "englishLeakage": [],
+  "strategy": {
+    "positioningAngle": "Kristina Kundius captures your brand story through thoughtfully framed photography.",
+    "storyAngle": "With a rich portfolio and years of experience, Kristina knows how to bring your vision to life through her lens.",
+    "voiceNotes": [
+      "Duidelijk en concreet boven slim.",
+      "Een lange zin, dan een korte.",
+      "Warm en direct — een echte persoon."
+    ],
+    "sections": [
+      "header",
+      "hero",
+      "work",
+      "proof",
+      "contact",
+      "footer"
+    ],
+    "uiblocks": {
+      "header": "header",
+      "hero": "hero",
+      "work": "work",
+      "proof": "proof",
+      "contact": "contact",
+      "footer": "footer"
+    },
+    "sitemap": [
+      {
+        "archetypeKey": "home",
+        "title": "Home",
+        "pathSlug": "/",
+        "sections": [
+          "hero",
+          "work",
+          "proof",
+          "contact"
+        ]
+      },
+      {
+        "archetypeKey": "work",
+        "title": "Work",
+        "pathSlug": "/work",
+        "sections": [
+          "work",
+          "proof"
+        ]
+      },
+      {
+        "archetypeKey": "work-group",
+        "title": "Work Group",
+        "pathSlug": "/work/[group]",
+        "sections": [
+          "work"
+        ]
+      },
+      {
+        "archetypeKey": "prices",
+        "title": "Prices",
+        "pathSlug": "/prices",
+        "sections": [
+          "packages"
+        ]
+      },
+      {
+        "archetypeKey": "about",
+        "title": "About",
+        "pathSlug": "/about",
+        "sections": [
+          "about",
+          "proof"
+        ]
+      },
+      {
+        "archetypeKey": "contact",
+        "title": "Contact",
+        "pathSlug": "/contact",
+        "sections": [
+          "contact"
+        ]
+      }
+    ],
+    "archetype": "standard",
+    "leadGroups": [
+      "Full brand package",
+      "Brand photoshoot",
+      "Portrait & business shoot",
+      "Event photography (per hour)"
+    ],
+    "storyBranch": "established",
+    "primaryLanguage": "nl",
+    "wording": {
+      "workItem": "shoot",
+      "workGroup": "galleries",
+      "processLabel": "How a shoot works",
+      "groupFallbackLabel": "Galleries"
+    }
+  },
+  "homeCopy": {
+    "header": {
+      "elements": {
+        "logo_text": "Kristina Kundius Fotografie",
+        "nav_links": [
+          {
+            "label": "Home",
+            "href": "/",
+            "id": "nav_links-196497c6"
+          },
+          {
+            "label": "Werk",
+            "href": "/werk",
+            "id": "nav_links-92115ce0"
+          },
+          {
+            "label": "Over mij",
+            "href": "/over",
+            "id": "nav_links-7d7e472e"
+          },
+          {
+            "label": "Contact",
+            "href": "/contact",
+            "id": "nav_links-cc9ba1e8"
+          }
+        ]
+      }
+    },
+    "hero": {
+      "elements": {
+        "role_line": "Fotograaf voor jouw merkverhaal.",
+        "name": "Kristina Kundius",
+        "cta_label": "Bekijk mijn werk",
+        "socials": []
+      }
+    },
+    "work": {
+      "elements": {
+        "eyebrow": "Mijn Aanbod",
+        "heading": "Ontdek mijn fotografische diensten",
+        "groups": [
+          {
+            "name": "Volledig merkpakket",
+            "cover_image": "",
+            "href": "/werk/volledig-merkpakket",
+            "id": "groups-0c77be88"
+          },
+          {
+            "name": "Merk fotoshoot",
+            "cover_image": "",
+            "href": "/werk/merk-fotoshoot",
+            "id": "groups-7962b042"
+          },
+          {
+            "name": "Portret- en zakelijke shoot",
+            "cover_image": "",
+            "href": "/werk/portret-zakelijke-shoot",
+            "id": "groups-6badc05b"
+          },
+          {
+            "name": "Evenement fotografie",
+            "cover_image": "",
+            "href": "/werk/evenement-fotografie",
+            "id": "groups-800d7564"
+          }
+        ]
+      }
+    },
+    "proof": {
+      "elements": {
+        "eyebrow": "Wat klanten zeggen",
+        "heading": "Vertrouwd door bedrijven",
+        "awards_line": "",
+        "quotes": []
+      }
+    },
+    "contact": {
+      "elements": {
+        "eyebrow": "Neem contact op",
+        "heading": "Laten we jouw verhaal vastleggen",
+        "lead": "Ik kijk ernaar uit om met je samen te werken. Stuur me een bericht!",
+        "contact_method": "E-mail: info@kristinakundius.nl",
+        "cta_label": "Stuur een bericht"
+      }
+    },
+    "footer": {
+      "elements": {
+        "heading": "Kristina Kundius Fotografie",
+        "note": "Vastleg jouw merk met prachtige fotografie.",
+        "copyright": "© 2023 Kristina Kundius"
+      }
+    }
+  }
+}

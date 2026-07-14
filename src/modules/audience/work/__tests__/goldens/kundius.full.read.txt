@@ -1,0 +1,379 @@
+KUNDIUS — WORK COPY ENGINE — FULL-SITE GOLDEN (founder read)
+archetype: standard
+
+########## PAGE: Home (/) [home] ##########
+  complete=true missing=(none)
+KUNDIUS — WORK COPY ENGINE — HOME GOLDEN (founder read)
+*** REAL KUNDIUS FACTS (phase-4 gate 2026-07-14) — establishment "in-between"→established, event price €100/hr→exact 100 (per-hour in name) ***
+
+== PER-PAGE ONE-LINER / POSITIONING ==
+Positioning angle: Capturing authentic moments for established brands that demand quality and professionalism.
+Story angle: With a rich portfolio and a commitment to storytelling through light and frame, Kristina Kundius connects enterprises to their essence through photography.
+Voice notes: Clear and concrete over clever. | Use warmth and directness - write like a real person. | Follow the cadence: one long sentence, then one short. | Avoid any mention of forbidden words.
+Archetype: standard
+Home sections: header, hero, work, proof, contact, footer
+
+== PROMISE LINE (hero) ==
+Eyebrow: (empty)
+Heading: (empty)
+Lead: (empty)
+CTA: Explore My Work
+
+== GALLERY INTROS / CAPTIONS (work) ==
+Eyebrow: My Offerings
+Heading: Captivating Photography for Your Brand
+Lead: Transform your corporate identity with authentic imagery that resonates.
+  - card: Full brand package
+  - card: Brand photoshoot
+  - card: Portrait & business shoot
+  - card: Event photography
+
+== STORY (about) ==
+Eyebrow: (empty)
+Heading: (empty)
+Bio: (empty)
+
+== PRICES FRAMING (packages) ==
+Eyebrow: (empty)
+Heading: (empty)
+
+== PROOF / PRAISE (proof) ==
+Eyebrow: What Clients Say
+Heading: Trusted by Leading Brands
+Awards line: Client feedback highlights the impact of photography.
+
+== CONTACT NUDGE (contact) ==
+Eyebrow: Let's Connect
+Heading: Ready to Capture Your Brand's Essence?
+Note: (empty)
+CTA: Send a Message
+
+== ALL SECTIONS (raw string dump) ==
+--- header ---
+  logo_text: Kristina Kundius Photography
+  cta_label: Get in Touch
+--- hero ---
+  role_line: Photographer for Established Brands
+  name: Kristina Kundius
+  quote: Bringing your brand's story to life through photography.
+  cta_label: Explore My Work
+--- work ---
+  eyebrow: My Offerings
+  heading: Captivating Photography for Your Brand
+  lead: Transform your corporate identity with authentic imagery that resonates.
+--- proof ---
+  eyebrow: What Clients Say
+  heading: Trusted by Leading Brands
+  awards_line: Client feedback highlights the impact of photography.
+--- contact ---
+  eyebrow: Let's Connect
+  heading: Ready to Capture Your Brand's Essence?
+  lead: Reach out today to discuss your photography needs and how we can tell your story.
+  contact_method: Email: info@kristinakundius.com
+  cta_label: Send a Message
+--- footer ---
+  eyebrow: Stay Connected
+  heading: Kristina Kundius Photography
+  note: Authentic moments captured with care and professionalism.
+  copyright: © 2023 Kristina Kundius. All rights reserved.
+
+########## PAGE: Work (/work) [work] ##########
+  complete=true missing=(none)
+KUNDIUS — WORK COPY ENGINE — HOME GOLDEN (founder read)
+*** REAL KUNDIUS FACTS (phase-4 gate 2026-07-14) — establishment "in-between"→established, event price €100/hr→exact 100 (per-hour in name) ***
+
+== PER-PAGE ONE-LINER / POSITIONING ==
+Positioning angle: Capturing authentic moments for established brands that demand quality and professionalism.
+Story angle: With a rich portfolio and a commitment to storytelling through light and frame, Kristina Kundius connects enterprises to their essence through photography.
+Voice notes: Clear and concrete over clever. | Use warmth and directness - write like a real person. | Follow the cadence: one long sentence, then one short. | Avoid any mention of forbidden words.
+Archetype: standard
+Home sections: header, hero, work, proof, contact, footer
+
+== PROMISE LINE (hero) ==
+Eyebrow: (empty)
+Heading: (empty)
+Lead: (empty)
+CTA: (empty)
+
+== GALLERY INTROS / CAPTIONS (work) ==
+Eyebrow: Explore My Work
+Heading: Photography That Captures Your Brand's Essence
+Lead: Each photograph tells a story, connecting your enterprise to its true spirit through light and frame.
+  - card: Full brand package
+  - card: Brand photoshoot
+  - card: Portrait & business shoot
+  - card: Event photography (per hour)
+
+== STORY (about) ==
+Eyebrow: (empty)
+Heading: (empty)
+Bio: (empty)
+
+== PRICES FRAMING (packages) ==
+Eyebrow: (empty)
+Heading: (empty)
+
+== PROOF / PRAISE (proof) ==
+Eyebrow: Client Praise
+Heading: Discover What Clients Say
+Awards line: (empty)
+
+== CONTACT NUDGE (contact) ==
+Eyebrow: (empty)
+Heading: (empty)
+Note: (empty)
+CTA: (empty)
+
+== ALL SECTIONS (raw string dump) ==
+--- header ---
+  logo_text: Kristina Kundius Photography
+  cta_label: Get in Touch
+  cta_href: /contact
+--- work ---
+  eyebrow: Explore My Work
+  heading: Photography That Captures Your Brand's Essence
+  lead: Each photograph tells a story, connecting your enterprise to its true spirit through light and frame.
+--- proof ---
+  eyebrow: Client Praise
+  heading: Discover What Clients Say
+--- footer ---
+  eyebrow: Let's Connect
+  heading: Ready to Capture Your Vision?
+  note: Reach out to discuss how we can bring your ideas to life through photography.
+  copyright: © 2023 Kristina Kundius Photography
+
+########## PAGE: Work Group (/work/[group]) [work-group] ##########
+  complete=true missing=(none)
+KUNDIUS — WORK COPY ENGINE — HOME GOLDEN (founder read)
+*** REAL KUNDIUS FACTS (phase-4 gate 2026-07-14) — establishment "in-between"→established, event price €100/hr→exact 100 (per-hour in name) ***
+
+== PER-PAGE ONE-LINER / POSITIONING ==
+Positioning angle: Capturing authentic moments for established brands that demand quality and professionalism.
+Story angle: With a rich portfolio and a commitment to storytelling through light and frame, Kristina Kundius connects enterprises to their essence through photography.
+Voice notes: Clear and concrete over clever. | Use warmth and directness - write like a real person. | Follow the cadence: one long sentence, then one short. | Avoid any mention of forbidden words.
+Archetype: standard
+Home sections: header, hero, work, proof, contact, footer
+
+== PROMISE LINE (hero) ==
+Eyebrow: (empty)
+Heading: (empty)
+Lead: (empty)
+CTA: (empty)
+
+== GALLERY INTROS / CAPTIONS (work) ==
+Eyebrow: Discover Your Story
+Heading: Expert Photography for Established Brands
+Lead: Kristina Kundius captures the essence of your brand through striking photography tailored to your vision.
+  - card: Full Brand Package
+  - card: Brand Photoshoot
+  - card: Portrait & Business Shoot
+  - card: Event Photography
+
+== STORY (about) ==
+Eyebrow: (empty)
+Heading: (empty)
+Bio: (empty)
+
+== PRICES FRAMING (packages) ==
+Eyebrow: (empty)
+Heading: (empty)
+
+== PROOF / PRAISE (proof) ==
+Eyebrow: (empty)
+Heading: (empty)
+Awards line: (empty)
+
+== CONTACT NUDGE (contact) ==
+Eyebrow: (empty)
+Heading: (empty)
+Note: (empty)
+CTA: (empty)
+
+== ALL SECTIONS (raw string dump) ==
+--- header ---
+  logo_text: Kristina Kundius Photography
+  cta_label: Contact Me
+  cta_href: /contact
+--- work ---
+  eyebrow: Discover Your Story
+  heading: Expert Photography for Established Brands
+  lead: Kristina Kundius captures the essence of your brand through striking photography tailored to your vision.
+--- footer ---
+  eyebrow: Work with Kristina
+  heading: Let’s Capture Your Vision
+  note: Reach out today to discuss how we can bring your brand's story to life through impactful photography.
+  copyright: © 2023 Kristina Kundius. All rights reserved.
+
+########## PAGE: Prices (/prices) [prices] ##########
+  complete=true missing=(none)
+KUNDIUS — WORK COPY ENGINE — HOME GOLDEN (founder read)
+*** REAL KUNDIUS FACTS (phase-4 gate 2026-07-14) — establishment "in-between"→established, event price €100/hr→exact 100 (per-hour in name) ***
+
+== PER-PAGE ONE-LINER / POSITIONING ==
+Positioning angle: Capturing authentic moments for established brands that demand quality and professionalism.
+Story angle: With a rich portfolio and a commitment to storytelling through light and frame, Kristina Kundius connects enterprises to their essence through photography.
+Voice notes: Clear and concrete over clever. | Use warmth and directness - write like a real person. | Follow the cadence: one long sentence, then one short. | Avoid any mention of forbidden words.
+Archetype: standard
+Home sections: header, hero, work, proof, contact, footer
+
+== PROMISE LINE (hero) ==
+Eyebrow: (empty)
+Heading: (empty)
+Lead: (empty)
+CTA: (empty)
+
+== GALLERY INTROS / CAPTIONS (work) ==
+Eyebrow: (empty)
+Heading: (empty)
+Lead: (empty)
+
+== STORY (about) ==
+Eyebrow: (empty)
+Heading: (empty)
+Bio: (empty)
+
+== PRICES FRAMING (packages) ==
+Eyebrow: Services
+Heading: Discover Our Pricing Packages
+  - Full brand package — EUR 500 — A complete package to encapsulate your brand identity in a single, stunning image.
+  - Brand photoshoot — EUR 350 — Capture the essence of your brand with a tailored photoshoot reflecting your vision.
+  - Portrait & business shoot — EUR 250 — Professional portraits that convey your company's values and professionalism.
+  - Event photography (per hour) — EUR 100 — Expert coverage of your corporate events, framing moments that matter.
+
+== PROOF / PRAISE (proof) ==
+Eyebrow: (empty)
+Heading: (empty)
+Awards line: (empty)
+
+== CONTACT NUDGE (contact) ==
+Eyebrow: (empty)
+Heading: (empty)
+Note: (empty)
+CTA: (empty)
+
+== ALL SECTIONS (raw string dump) ==
+--- header ---
+  logo_text: Kristina Kundius Photography
+  cta_label: Inquire Today
+--- packages ---
+  eyebrow: Services
+  heading: Discover Our Pricing Packages
+  lead: Tailored photography packages designed for your brand's needs.
+--- footer ---
+  eyebrow: Connect with Us
+  heading: Ready to Capture Your Brand’s Story?
+  note: Let’s create something beautiful together. Reach out today.
+  copyright: © 2023 Kristina Kundius Photography
+
+########## PAGE: About (/about) [about] ##########
+  complete=true missing=(none)
+KUNDIUS — WORK COPY ENGINE — HOME GOLDEN (founder read)
+*** REAL KUNDIUS FACTS (phase-4 gate 2026-07-14) — establishment "in-between"→established, event price €100/hr→exact 100 (per-hour in name) ***
+
+== PER-PAGE ONE-LINER / POSITIONING ==
+Positioning angle: Capturing authentic moments for established brands that demand quality and professionalism.
+Story angle: With a rich portfolio and a commitment to storytelling through light and frame, Kristina Kundius connects enterprises to their essence through photography.
+Voice notes: Clear and concrete over clever. | Use warmth and directness - write like a real person. | Follow the cadence: one long sentence, then one short. | Avoid any mention of forbidden words.
+Archetype: standard
+Home sections: header, hero, work, proof, contact, footer
+
+== PROMISE LINE (hero) ==
+Eyebrow: (empty)
+Heading: (empty)
+Lead: (empty)
+CTA: (empty)
+
+== GALLERY INTROS / CAPTIONS (work) ==
+Eyebrow: (empty)
+Heading: (empty)
+Lead: (empty)
+
+== STORY (about) ==
+Eyebrow: (empty)
+Heading: Connecting Brands Through Thoughtful Photography
+Bio: With a rich portfolio and an eye for storytelling, Kristina Kundius captures the essence of businesses through photography. Based in the Netherlands and dedicated to authenticity, her work resonates with companies striving for quality and professionalism. When you're ready to convey your brand's story, Kristina stands ready to help.
+
+== PRICES FRAMING (packages) ==
+Eyebrow: (empty)
+Heading: (empty)
+
+== PROOF / PRAISE (proof) ==
+Eyebrow: (empty)
+Heading: What Clients Say
+Awards line: (empty)
+
+== CONTACT NUDGE (contact) ==
+Eyebrow: (empty)
+Heading: (empty)
+Note: (empty)
+CTA: (empty)
+
+== ALL SECTIONS (raw string dump) ==
+--- header ---
+  logo_text: Kristina Kundius
+  cta_label: Get in Touch
+--- about ---
+  heading: Connecting Brands Through Thoughtful Photography
+  bio: With a rich portfolio and an eye for storytelling, Kristina Kundius captures the essence of businesses through photography. Based in the Netherlands and dedicated to authenticity, her work resonates with companies striving for quality and professionalism. When you're ready to convey your brand's story, Kristina stands ready to help.
+--- proof ---
+  heading: What Clients Say
+--- footer ---
+  heading: Ready to Capture Your Story?
+  note: Photography that conveys authenticity and professionalism.
+  copyright: © 2023 Kristina Kundius
+
+########## PAGE: Contact (/contact) [contact] ##########
+  complete=true missing=(none)
+KUNDIUS — WORK COPY ENGINE — HOME GOLDEN (founder read)
+*** REAL KUNDIUS FACTS (phase-4 gate 2026-07-14) — establishment "in-between"→established, event price €100/hr→exact 100 (per-hour in name) ***
+
+== PER-PAGE ONE-LINER / POSITIONING ==
+Positioning angle: Capturing authentic moments for established brands that demand quality and professionalism.
+Story angle: With a rich portfolio and a commitment to storytelling through light and frame, Kristina Kundius connects enterprises to their essence through photography.
+Voice notes: Clear and concrete over clever. | Use warmth and directness - write like a real person. | Follow the cadence: one long sentence, then one short. | Avoid any mention of forbidden words.
+Archetype: standard
+Home sections: header, hero, work, proof, contact, footer
+
+== PROMISE LINE (hero) ==
+Eyebrow: (empty)
+Heading: (empty)
+Lead: (empty)
+CTA: (empty)
+
+== GALLERY INTROS / CAPTIONS (work) ==
+Eyebrow: (empty)
+Heading: (empty)
+Lead: (empty)
+
+== STORY (about) ==
+Eyebrow: (empty)
+Heading: (empty)
+Bio: (empty)
+
+== PRICES FRAMING (packages) ==
+Eyebrow: (empty)
+Heading: (empty)
+
+== PROOF / PRAISE (proof) ==
+Eyebrow: (empty)
+Heading: (empty)
+Awards line: (empty)
+
+== CONTACT NUDGE (contact) ==
+Eyebrow: (empty)
+Heading: Connect for Authentic Photography
+Note: (empty)
+CTA: Start Your Inquiry
+
+== ALL SECTIONS (raw string dump) ==
+--- header ---
+  logo_text: Kristina Kundius Photography
+  cta_label: Get in Touch
+--- contact ---
+  heading: Connect for Authentic Photography
+  contact_method: Fill out the form below to begin a conversation.
+  cta_label: Start Your Inquiry
+--- footer ---
+  heading: Let's Create Moments Together
+  note: Your essence deserves to be captured beautifully. Reach out today.
+  copyright: © 2023 Kristina Kundius Photography

@@ -90,6 +90,7 @@ import type { ServiceAssetAvailability } from '@/types/service';
 // static import graph).
 import type { ThingGenerationInput } from '@/modules/wizard/generation/thing';
 import type { TrustGenerationInput } from '@/modules/wizard/generation/trust';
+import type { WorkGenerationInput } from '@/modules/wizard/generation/work';
 import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
 
 // ---------------------------------------------------------------------------
@@ -664,6 +665,51 @@ export function buildTrustInput(s: WizardState): TrustGenerationInput {
     importedTestimonials: s.importedTestimonials,
     paletteId: s.paletteId ?? undefined,
     variantId: s.variantId ?? undefined,
+  };
+}
+
+/**
+ * work-copy-engine phase 5 — reconstruct the resolved Brief the WORK LLM routes
+ * read (`facts.work` + businessType + composed goal). The store keeps the
+ * COMPLETE `brief.facts` snapshot (`briefFacts`, taken at hydrate) so `facts.work`
+ * rides it verbatim; businessType + goal are derived. Every BriefSchema field is
+ * optional, so this minimal projection validates at the routes.
+ */
+function resolveWorkBrief(s: WizardState): Brief {
+  const goal = s.goalIntent ? intentToBriefGoal(s.goalIntent, s.goalParam) : undefined;
+  return {
+    facts: (s.briefFacts ?? {}) as Brief['facts'],
+    ...(s.businessTypeKey ? { businessType: s.businessTypeKey } : {}),
+    copyEngine: 'work',
+    ...(goal ? { goal } : {}),
+  };
+}
+
+/**
+ * Project the wizard store state → the WORK adapter input (plain data). Mirrors
+ * buildThingInput / buildTrustInput. Adds (phase 5) the LLM fan-out fields:
+ * the resolved Brief (facts.work), the SiteContext `sourceUrl` (derived from the
+ * scrape entry when URL-like — tone-only), and the confirmed sitemap `pages`.
+ * The granth generator + skeleton paths IGNORE brief/sourceUrl (they never call
+ * the copy routes), so this is additive for those flows.
+ */
+export function buildWorkInput(s: WizardState): WorkGenerationInput {
+  const fields = s.fields as Record<string, { value: unknown }>;
+  const brief = resolveWorkBrief(s);
+  const entry = getEntryFacts(brief);
+  const sourceUrl = rawInputIsUrl(entry?.rawInput) ? entry!.rawInput : undefined;
+  return {
+    tokenId: s.tokenId ?? '',
+    templateId: s.templateId ?? 'granth',
+    writerName: fieldStr(fields, 'name'),
+    oneLiner: fieldStr(fields, 'oneLiner'),
+    // The 3–5 work uploads captured in ProofSlot (contract `theWork`).
+    works: fieldArr(fields, 'theWork'),
+    // The confirmed sitemap pages (multipage skeleton / LLM fan-out; ignored by
+    // the single-page granth generator).
+    pages: (s.sitemap as SitemapPage[] | null) ?? [],
+    brief,
+    ...(sourceUrl ? { sourceUrl } : {}),
   };
 }
 

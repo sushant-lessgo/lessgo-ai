@@ -267,6 +267,187 @@ export function createAIActions(set: any, get: any) {
       }
     },
 
+    // work-copy-engine phase 6 — story-interview (Sugarman) regen. THIN parallel
+    // of regenerateSection: POSTs the 3 interview answers + Brief to the dedicated
+    // work-copy route (NOT the legacy /api/regenerate-section) and applies the
+    // returned `content` EXACTLY the way regenerateSection applies its content.
+    // Additive only — existing actions are unchanged. The route validates the
+    // returned story against workElementContract.about before responding, so only
+    // the `about` (story) section is affected; proof/testimonials are untouched.
+    // NOTE: `brief` (with facts.work) is supplied by the caller — the editStore
+    // does not yet carry facts.work (phase-5 field→facts writeback gap); live
+    // wiring of that is a documented follow-up (see audit).
+    regenerateStoryFromInterview: async (
+      sectionId: string,
+      interviewAnswers: { origin: string; moment: string; belief: string },
+      brief: unknown
+    ) => {
+      if (regenBlockedForLocale(get)) return; // i18n-phase-1 (3a) regen guard
+      // work-copy-engine phase 6 (review-fix) — defensive target guard. This
+      // action is the untyped-cast entry point for the story interview; it must
+      // only ever touch an `about` (story) section. No-op if mis-targeted so a
+      // stray call can never rewrite hero/proof/etc via the work-story route.
+      if (sectionId.split('-')[0] !== 'about') {
+        logger.warn(
+          `[work-copy-engine] regenerateStoryFromInterview ignored: ${sectionId} is not an about section`,
+        );
+        return;
+      }
+      set((state: EditStore) => {
+        state.aiGeneration.isGenerating = true;
+        state.aiGeneration.currentOperation = 'section';
+        state.aiGeneration.progress = 0;
+        state.aiGeneration.status = 'Rewriting your story…';
+        state.aiGeneration.context = { type: 'section', sectionId };
+      });
+
+      try {
+        const currentState = get() as EditStore;
+        const section = currentState.content[sectionId];
+        if (!section) {
+          throw new Error(`Section ${sectionId} not found`);
+        }
+
+        const sectionType = sectionId.split('-')[0];
+
+        const response = await fetch('/api/audience/work/regenerate-story', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tokenId: currentState.tokenId,
+            sectionId,
+            interviewAnswers,
+            brief,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || errorData.message || 'Failed to regenerate story');
+        }
+
+        const data = await response.json();
+        logger.debug('Story regeneration response:', data);
+
+        // Apply the returned content — IDENTICAL merge to regenerateSection.
+        set((state: EditStore) => {
+          if (state.content[sectionId] && data.content) {
+            const existingElements = state.content[sectionId].elements;
+            const preElements = deepCopy(existingElements);
+            const updatedElements = { ...existingElements };
+
+            const isImageValue = (val: unknown): boolean => {
+              const str = typeof val === 'string' ? val : (val as any)?.content;
+              return typeof str === 'string' && (
+                str.startsWith('/') || str.startsWith('http') || str.startsWith('blob:') || str.startsWith('data:image')
+              );
+            };
+            const isImageKey = (key: string): boolean =>
+              key.includes('image') || key.includes('avatar') ||
+              key.includes('visual') || key.includes('mockup') ||
+              key.includes('logo');
+
+            Object.entries(data.content).forEach(([key, value]: [string, any]) => {
+              if (isImageValue(existingElements[key]) || isImageKey(key)) return;
+
+              const existing = updatedElements[key];
+              const existingIsObject =
+                existing !== null && typeof existing === 'object' && !Array.isArray(existing);
+
+              if (existing !== undefined && existing !== null && existing !== '') {
+                if (typeof value === 'object' && value !== null && value.content !== undefined) {
+                  updatedElements[key] = existingIsObject
+                    ? { ...existing, content: value.content, ...(value.type && { type: value.type }) }
+                    : value.content;
+                } else if (typeof value === 'string') {
+                  if (existingIsObject) {
+                    updatedElements[key] = { ...existing, content: value };
+                  } else if (!Array.isArray(existing)) {
+                    updatedElements[key] = value;
+                  }
+                }
+              } else {
+                updatedElements[key] = value;
+              }
+            });
+
+            state.content[sectionId].elements = updatedElements;
+            state.content[sectionId].aiMetadata = {
+              ...state.content[sectionId].aiMetadata,
+              lastGenerated: Date.now(),
+              isCustomized: false,
+            };
+
+            state.aiGeneration.isGenerating = false;
+            state.aiGeneration.currentOperation = null;
+            state.aiGeneration.progress = 100;
+            state.aiGeneration.status = 'Story regenerated successfully';
+            state.aiGeneration.context = null;
+            state.persistence.isDirty = true;
+            state.lastUpdated = Date.now();
+
+            state.queuedChanges.push({
+              id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              type: 'content',
+              sectionId,
+              oldValue: section.elements,
+              newValue: updatedElements,
+              timestamp: Date.now(),
+              source: 'ai',
+            });
+
+            pushHistoryEntry(state, {
+              type: 'content',
+              description: `Regenerated story ${sectionId}`,
+              timestamp: Date.now(),
+              sectionId,
+              beforeState: { elements: preElements },
+              afterState: { elements: deepCopy(updatedElements) },
+            });
+          }
+        });
+
+        // data-capture Phase 3 — re-freeze the regen output as the new AI baseline.
+        try {
+          const applied = (get() as EditStore).content[sectionId]?.elements ?? {};
+          const normalized: Record<string, string> = {};
+          for (const [k, v] of Object.entries(applied)) {
+            const t = extractElementText(v);
+            if (t !== null) normalized[k] = t;
+          }
+          (get() as EditStore).queueAiBaselinePatch(sectionId, normalized, 'replace');
+
+          const st = get() as EditStore;
+          trackRegen('section_regenerated', {
+            sectionType,
+            attemptNumber: nextAttempt(sectionAttempts, sectionId),
+            templateId: st.templateId ?? null,
+            audienceType: st.audienceType ?? null,
+            source: 'story-interview',
+          });
+        } catch (e) {
+          logger.warn('[data-capture] story re-freeze/emit failed', e);
+        }
+
+        const autoSaveModule = await import('@/utils/autoSaveDraft');
+        if (autoSaveModule.completeSaveDraft) {
+          await autoSaveModule.completeSaveDraft(currentState.tokenId, {
+            description: `Story ${sectionId} regenerated`,
+          });
+        }
+      } catch (error) {
+        logger.error('Story regeneration error:', error);
+        set((state: EditStore) => {
+          state.aiGeneration.isGenerating = false;
+          state.aiGeneration.currentOperation = null;
+          state.aiGeneration.context = null;
+          state.aiGeneration.errors.push(error instanceof Error ? error.message : 'Story regeneration failed');
+          state.aiGeneration.status = 'Failed to regenerate story. Please try again.';
+        });
+        throw error;
+      }
+    },
+
     regenerateElement: async (sectionId: string, elementKey: string, variationCount: number = 1) => {
       if (regenBlockedForLocale(get)) return; // i18n-phase-1 (3a) regen guard
       set((state: EditStore) => {
