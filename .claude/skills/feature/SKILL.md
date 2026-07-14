@@ -1,12 +1,14 @@
 ---
 name: feature
 description: >-
-  Runs the Lessgo feature-build pipeline for an agreed spec: scout → plan →
-  plan-review (loop) → implement per phase → impl-review (loop), delegating each
-  stage to a model+effort-tuned subagent (scout=Opus/low, planner=Fable/high,
-  reviewers=Opus/high, implementer=Opus/medium). Use AFTER you've discussed a
-  feature and written its spec to docs/task/<feature>.spec.md, when you want the
-  plan→review→implement→review loops driven automatically instead of by hand.
+  Runs the Lessgo feature-build pipeline for an agreed spec at the spec's
+  declared tier (light / standard / full): up to scout → plan → plan-review
+  (loop) → implement per phase → impl-review (loop), delegating each stage to a
+  model+effort-tuned subagent (scout=Opus/low, planner=Fable/high,
+  reviewers=Opus/high, implementer=Opus/medium). Light skips reviews entirely;
+  standard reviews once over the whole diff; full is the complete pipeline —
+  auto-escalates (never downgrades) when risky surfaces show up. Use AFTER
+  you've discussed a feature and written its spec to docs/task/<feature>.spec.md.
   NOT for the discuss stage (that's manual chat) and NOT for one-off trivial edits.
 argument-hint: <path-to-spec.md>
 ---
@@ -32,9 +34,37 @@ worktree), `<feature>.plan.md` (planner), `<feature>.audit.md` (implementer).
 
 ## Playbook
 
-**0. Spec check.** Arg = spec path (`docs/task/<feature>.spec.md`). If it's missing
-or empty, STOP: ask the user to write the spec first (offer to draft it from the
-conversation). Do not proceed without a spec.
+**0. Spec check + tier.** Arg = spec path (`docs/task/<feature>.spec.md`). If it's
+missing or empty, STOP: ask the user to write the spec first (offer to draft it
+from the conversation). Do not proceed without a spec.
+Read `tier:` from the spec frontmatter (`light | standard | full`, set by
+/discuss). Missing/invalid → treat as **standard** and note it in the plan.
+Announce the tier + what it skips at the start of the run.
+
+**Tier lanes** (everything not mentioned — worktree protocol, branch rules,
+commits, artifacts, merge gate, deploy watch — is IDENTICAL in all tiers):
+- **light**: skip steps 1–3. One `implementer` spawn gets the spec directly,
+  edits ≤3 files, writes the audit (with a 3-line inline plan at top), and
+  self-verifies the FULL green gate (`tsc` + `test:run` + `lint` + `build`).
+  No impl-review. Orchestrator sanity-reads the diff stat before the merge gate.
+- **standard**: scout only if the spec has open exploration questions → plan
+  (step 2) but SKIP the plan-review loop (step 3) → implement per phase (4a,
+  4d, 4e, 4f as written) but SKIP per-phase impl-review (4b) → after the final
+  phase, ONE `impl-reviewer` pass over the WHOLE feature diff
+  (`git diff main...HEAD`), loop ×3 on that single review.
+- **full**: the complete playbook below, as written.
+
+**Auto-escalation (one-way).** At scout time and again at each phase's
+Files-touched, check against the RISKY-SURFACE LIST: `src/middleware.ts` or any
+auth/Clerk config; editor store internals (`src/hooks/editStore*`,
+`useEditStore*`, `src/stores/`); dual-renderer surface (any `.published.tsx`,
+`src/modules/generatedLanding/` renderers/registries); `prisma/schema.prisma`
+or migrations; billing/money (`src/lib/planManager.ts`, `creditSystem.ts`,
+`src/app/api/{stripe,billing,credits}/`); publish path (`src/app/api/publish`,
+`src/lib/staticExport/`, `src/lib/routing/kvRoutes.ts`); or total files >15.
+Hit → ESCALATE to the next tier that covers it (risky surface always means
+**full**), announce it, log it in the plan. NEVER downgrade — a lower tier than
+the spec declares requires the user editing the spec.
 
 **0.5. Worktree setup (self-provisioning — run /feature from ANY dir).**
 The primary repo dir (`C:\Users\susha\lessgo-ai`) permanently holds `main` (merge
@@ -106,8 +136,9 @@ a 3–5 question quiz on the change's behavior; recommend merging only after the
 pass. They may skip it. Only on their yes — NO checkout anywhere:
 first `git -C C:\Users\susha\lessgo-ai merge main` INTO the feature branch is
 NOT needed if main hasn't moved; if it HAS moved, merge main into
-`feature/<feature>` inside WORKDIR and re-green (tsc/test/build) BEFORE the
-main merge. Then merge at the station:
+`feature/<feature>` inside WORKDIR and re-green (tsc/test/**lint**/build —
+lint is in the pre-push hook; skipping it here blocked a push on 2026-07-14)
+BEFORE the main merge. Then merge at the station:
 `git -C C:\Users\susha\lessgo-ai merge feature/<feature>` (primary dir holds
 main; plain merge, no squash; verify its tree is clean first).
 **Never push** — the user pushes manually (`git push origin main` from the

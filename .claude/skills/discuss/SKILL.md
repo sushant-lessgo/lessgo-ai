@@ -51,6 +51,33 @@ implementer. The deliverable is an agreed spec file — nothing else.
    this?" — prefer a thin pilot + decision gate over a multi-week build.
 9. Be extremely concise. Sacrifice grammar for concision. No walls of questions.
 
+## Pipeline tier (decide before writing the spec)
+
+Every spec declares a **tier** — how much /feature pipeline the build gets. The
+tier is a property of **blast radius + surface touched**, NOT effort to build.
+Propose one, get the user's nod, record it in the spec frontmatter with a
+one-line justification.
+
+- **light** — ≤3 files, no risky surface (see list), copy/prompt-string/config/
+  small-UI. One implementer, self-verified green gates. No scout/plan-review/
+  impl-review.
+- **standard** (default) — bounded feature, low blast radius. Scout (if needed)
+  → plan (no review loop) → implement per phase → ONE impl-review over the whole
+  diff at the end.
+- **full** — MANDATORY when touching any risky surface: middleware/auth/Clerk,
+  editor store internals, dual-renderer blocks (`.tsx`+`.published.tsx`) or
+  `generatedLanding` renderers/registries, `prisma/schema.prisma`, billing/
+  Stripe/credits, publish path (publish API/staticExport/KV routes), or >15
+  files. Full pipeline: scout → plan → plan-review loop → per-phase implement +
+  impl-review loops + gates.
+
+Grounding (2026-07-14 retro): across ~10 phase reviews, loop-1 ship rate ≈100%
+on light/standard-shaped work — reviews caught typos while real bugs were
+caught by browser QA, the lint hook, and prod checks. Reviews earn their tokens
+on risky surfaces (middleware shadowing/loop analysis, store refactors). Tier
+accordingly. /feature may AUTO-ESCALATE (never downgrade) if scouting reveals
+risky surfaces the discussion missed.
+
 ## End condition
 
 When the user says it's agreed (any clear "agreed / done / write it"), write
@@ -61,6 +88,11 @@ If discussion stalls or the feature gets killed, say so plainly — no spec.
 ## Spec template
 
 ```md
+---
+tier: light | standard | full
+tier-why: <one line: blast radius + surfaces touched>
+---
+
 # <feature> — spec
 
 ## Problem / why
