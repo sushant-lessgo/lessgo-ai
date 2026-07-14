@@ -32,9 +32,13 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
   // Render-read: pages (tabs + per-page seo), and the active-page working set
   // (currentPageId/sections/content/slug/title) that feeds the live preview meta.
   // updatePageSeo/triggerAutoSave/uploadImage are handler-only.
-  const { pages, currentPageId, sections, content, slug, title } = useEditStore(
+  // Select the RAW pages record (stable reference between snapshots) and derive
+  // the sorted list with useMemo OUTSIDE the selector — calling getPagesList()
+  // inside the selector returns a fresh array every snapshot, which prevents
+  // useSyncExternalStore from stabilizing ("Maximum update depth exceeded").
+  const { pagesMap, currentPageId, sections, content, slug, title } = useEditStore(
     useShallow((s) => ({
-      pages: (s.getPagesList ? s.getPagesList() : []) as ProjectPageEntry[],
+      pagesMap: s.pages,
       currentPageId: s.currentPageId,
       sections: s.sections,
       content: s.content,
@@ -42,6 +46,14 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
       title: s.title,
     })),
   );
+  const pages = React.useMemo<ProjectPageEntry[]>(() => {
+    const entries = Object.values((pagesMap || {}) as Record<string, ProjectPageEntry>);
+    return entries.sort((a, b) => {
+      if (a.pathSlug === '/') return -1;
+      if (b.pathSlug === '/') return 1;
+      return a.order - b.order;
+    });
+  }, [pagesMap]);
   const storeApi = useEditStoreApi();
   const [selectedId, setSelectedId] = React.useState<string>(
     () => pages.find((p) => p.pathSlug === '/')?.id || pages[0]?.id || ''
