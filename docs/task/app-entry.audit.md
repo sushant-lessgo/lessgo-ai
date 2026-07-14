@@ -94,7 +94,7 @@ NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 
 ### Verification
 - `npx tsc --noEmit`: clean (no output).
-- `npm run test:run`: 163 passed | 1 skipped (164 files); 2783 passed | 15 skipped (2798 tests). Green; appSplit file now 46 tests.
+- `npm run test:run`: 163 passed | 1 skipped (164 files); 2783 passed | 15 skipped (2798 tests). Green; appSplit file now 36 tests.
 - `npm run lint`: zero errors (only pre-existing `<img>` / exhaustive-deps warnings in unrelated files).
 
 ### Open risks
