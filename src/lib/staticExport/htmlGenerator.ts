@@ -371,7 +371,7 @@ function buildHTMLDocument(params: {
   <meta property="og:title" content="${escapeHTML(metadata.title)}">
   <meta property="og:description" content="${escapeHTML(metadata.description)}">
   <meta property="og:image" content="${ogImage}">
-  <meta property="og:site_name" content="Lessgo.ai">
+  <meta property="og:site_name" content="Lessgo AI">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">

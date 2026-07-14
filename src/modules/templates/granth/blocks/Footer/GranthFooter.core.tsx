@@ -4,6 +4,7 @@
 
 import React from 'react';
 import type { GranthPrimitives } from '../primitives';
+import { normalizeCopyrightYear } from '../../../shared/footerHygiene';
 import { FOOTER_STYLES } from './styles';
 import { socialIcon } from '../shared/socialIcons';
 
@@ -41,7 +42,7 @@ export function GranthFooterCore({ content, E }: { content: GranthFooterContent;
             )}
           />
 
-          <E.Txt elementKey="copyright" value={content.copyright} as="p"
+          <E.Txt elementKey="copyright" value={normalizeCopyrightYear(content.copyright)} as="p"
             className="gr-footer__fine" placeholder="लेखक का नाम © २०२६" />
         </div>
       </footer>

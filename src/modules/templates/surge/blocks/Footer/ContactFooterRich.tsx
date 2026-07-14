@@ -14,6 +14,7 @@ import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
 import { resolveDestination } from '@/utils/resolveCtaHref';
 import { FOOTER_STYLES } from './styles';
 import { DEFAULT_FOOTER_LINKS, type FooterLink } from './footerDefaults';
+import { normalizeCopyrightYear } from '../../../shared/footerHygiene';
 
 const rid = (p: string) => `${p}${Math.random().toString(36).slice(2, 7)}`;
 
@@ -302,7 +303,7 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
             mode={mode}
             sectionId={sectionId}
             elementKey="copyright"
-            value={blockContent.copyright}
+            value={normalizeCopyrightYear(blockContent.copyright) ?? blockContent.copyright}
             onSave={(v) => handleContentUpdate('copyright', v)}
             enterBehavior="save"
             placeholder="© 2026 Studio"

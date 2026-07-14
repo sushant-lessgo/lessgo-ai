@@ -19,6 +19,7 @@ import { resolveDestination } from '@/utils/resolveCtaHref';
 import { resolveLogo } from '@/modules/editing/resolveLogo';
 import { EditableLogo } from '@/app/edit/[token]/components/primitives/EditableLogo';
 import { FOOTER_STYLES } from './footerStyles';
+import { normalizeCopyrightYear, filterFooterColumns } from '../../../shared/footerHygiene';
 
 // Dual-read a footer link's target: legacy raw string href passes through verbatim
 // (old pages byte-identical); a new Link object resolves via the dumb resolver.
@@ -84,6 +85,8 @@ export default function TechPremiumFooter({ sectionId }: Props) {
   const removeNewsletter = () => { if (newsletterFormId) deleteForm(newsletterFormId); };
 
   const columns = blockContent.footer_columns || [];
+  // Edit mode stays permissive; preview (mode !== 'edit') mirrors the published filter.
+  const displayColumns = edit ? columns : filterFooterColumns(columns, resolveLinkHref);
   const setColumns = (next: FooterColumn[]) => handleCollectionUpdate('footer_columns', next);
   const patchCol = (id: string, p: Partial<FooterColumn>) => setColumns(columns.map((c) => (c.id === id ? { ...c, ...p } : c)));
   const addColumn = () => columns.length < 5 && setColumns([...columns, { id: rid('col'), heading: 'Column', links: [{ id: rid('ln'), label: 'Link', href: '#' }] }]);
@@ -95,6 +98,9 @@ export default function TechPremiumFooter({ sectionId }: Props) {
   const socials = blockContent.socials || [];
   const setSocials = (next: Social[]) => handleCollectionUpdate('socials', next);
   const legal = blockContent.legal_links || [];
+  const displayLegal = edit
+    ? legal
+    : legal.filter((l) => l && l.label && resolveLinkHref(l.href) !== '#');
   const setLegal = (next: FooterLink[]) => handleCollectionUpdate('legal_links', next);
 
   const wa = (blockContent.whatsapp_number || '').replace(/[^0-9]/g, '');
@@ -158,7 +164,7 @@ export default function TechPremiumFooter({ sectionId }: Props) {
             ) : (edit && <button type="button" className="tp-news-setup" onClick={setupNewsletter}>⊕ Set up newsletter signup</button>)}
           </div>
 
-          {columns.map((col) => (
+          {displayColumns.map((col) => (
             <div key={col.id} className="tp-footer__col">
               <div className="tp-footer__col-head">
                 <TechPremiumEditable as="h4" mode={mode} sectionId={sectionId} elementKey={`footer_columns_heading_${col.id}`} value={col.heading} onSave={(v) => patchCol(col.id, { heading: v })} enterBehavior="save" placeholder="Heading" />
@@ -182,10 +188,10 @@ export default function TechPremiumFooter({ sectionId }: Props) {
         </div>
 
         <div className="tp-footer__bottom">
-          <TechPremiumEditable as="div" mode={mode} sectionId={sectionId} elementKey="copyright" value={blockContent.copyright} onSave={(v) => handleContentUpdate('copyright', v)} enterBehavior="save" placeholder="© Your Company" />
-          {(legal.length > 0 || edit) && (
+          <TechPremiumEditable as="div" mode={mode} sectionId={sectionId} elementKey="copyright" value={normalizeCopyrightYear(blockContent.copyright) ?? blockContent.copyright} onSave={(v) => handleContentUpdate('copyright', v)} enterBehavior="save" placeholder="© Your Company" />
+          {(displayLegal.length > 0 || edit) && (
             <div className="tp-footer__legal">
-              {legal.map((l, i) => edit ? (
+              {displayLegal.map((l, i) => edit ? (
                 <span key={l.id} className="tp-legal-edit">
                   <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey={`legal_links_label_${l.id}`} value={l.label} onSave={(v) => setLegal(legal.map((x) => (x.id === l.id ? { ...x, label: v } : x)))} enterBehavior="save" placeholder="Privacy" />
                   <button type="button" onClick={() => setLegal(legal.filter((x) => x.id !== l.id))}>×</button>

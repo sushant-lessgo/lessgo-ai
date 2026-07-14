@@ -18,6 +18,7 @@ import { buildPageLinkOptions } from '@/utils/pageLinks';
 import type { Link } from '@/types/destination';
 import { isLink } from '@/types/destination';
 import { resolveDestination } from '@/utils/resolveCtaHref';
+import { normalizeCopyrightYear, filterFooterColumns } from '../../../shared/footerHygiene';
 
 // Dual-read a footer link's target: legacy raw string href passes through verbatim
 // (old pages byte-identical); a new Link object resolves via the dumb resolver.
@@ -101,6 +102,11 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
   };
 
   const columns = blockContent.footer_columns || [];
+
+  // Edit mode stays permissive (author placeholder columns/links visible); preview
+  // (mode !== 'edit') applies the same filter as the published renderer for parity.
+  const displayColumns =
+    mode === 'edit' ? columns : filterFooterColumns(columns, resolveLinkHref);
 
   const setColumns = (next: FooterColumn[]) => handleCollectionUpdate('footer_columns', next);
 
@@ -225,7 +231,7 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
             )}
           </div>
 
-          {columns.map((col) => (
+          {displayColumns.map((col) => (
             <div key={col.id} className="mrd-footer__col">
               <div className="mrd-footer__col-head">
                 <MeridianEditable
@@ -315,7 +321,7 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
             mode={mode}
             sectionId={sectionId}
             elementKey="copyright"
-            value={blockContent.copyright}
+            value={normalizeCopyrightYear(blockContent.copyright) ?? blockContent.copyright}
             onSave={(v) => handleContentUpdate('copyright', v)}
             enterBehavior="save"
             placeholder="© Meridian"
