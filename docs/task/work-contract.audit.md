@@ -334,3 +334,106 @@ FINAL verification (WORKDIR):
 - `npx tsc --noEmit` — CLEAN.
 - `npm run test:run -- src/modules/businessTypes src/modules/brief src/modules/collections src/modules/engines`
   → **328 passed / 0 failed** (12 files).
+
+---
+
+## Phase 5 — conformance test + README + full green
+
+**Status: in-scope work COMPLETE + green. Whole-suite gate BLOCKED by ONE stale
+out-of-scope test that is phase-4 fallout (reported to orchestrator, not edited).**
+
+### Files changed
+- `src/modules/engines/workContract.test.ts` (NEW)
+- `src/modules/engines/README.md` (EDIT — added the work-vertical freeze section: 4 new
+  modules + D1 subset / D2 slot-table-not-wizard / vocab single-source invariants; noted
+  `workFacts.schema.ts` lives in `src/lib/schemas`)
+- `src/modules/audience/product/pageArchetypes.test.ts` (EDIT — orchestrator-amended
+  Files-touched; stale `MULTI_DEFAULTS` set + designer, see cross-phase fixup below)
+
+### `workContract.test.ts` — assertion groups (30 tests, all pass)
+1. **Element coverage (3):** every must+optional key ∈ `workElementContract`;
+   `elementContracts.work` === `workElementContract`; every proof shape has a
+   `workProofShapeContracts` entry (sectionType `'proof'`) and default (`testimonials`)
+   === the registered `proof` schema.
+2. **D1 subset (1):** `engineCoreSections.work ⊆ workMustSections`.
+3. **Vocab coverage (4):** `workVocabulary` names every must+optional key + every proof
+   shape (non-empty userLabel + description); EXACTLY `{ctaButton, footer, hero, logos}`
+   carry `flagged`; `professionWording`/`dreamClientChips` cover all 4 professions; the
+   work-engine businessType keys resolve to exactly `{designer, photographer, writer}` and
+   each has a wording row.
+4. **Pages (5):** `workPageTypes` = exactly the 8 keys; slugs are the fixed strings;
+   allowed/required/default sections ⊆ WorkSectionKeys; each archetype is a page-vocab list
+   with `home` first; `proposeWorkSiteStructure` deterministic, bare-minimum → one-pager
+   `['home']`, rich+prices → standard, and across 5 fixtures pages ⊆ vocab / home-first /
+   never blog|project-story.
+5. **Facts (9):** flat group parses; two-level (items+photos) parses; `kind` union enforced;
+   exact/from price w/o amount rejected, on-request w/o amount passes; `getWorkFacts` safe-
+   reads `facts.work`; 8 slot ids unique; every slot field.group ∈ factGroups & field.slot ∈
+   wizardSlots; price slot required + contactMethod neverSilent; every factsPath resolves
+   into `WorkFactsSchema.shape` (`'groups[].price'` sentinel → `groups`).
+6. **D5 firewall (5, one per module):** reads each of the 5 modules with `fs` (workSections/
+   workPages/workSlots/workVocabulary via `__dirname`; workFacts.schema via
+   `../../lib/schemas`), strips block+line comments (so firewall-note prose can't false-
+   match), collects value-import specifiers only (skips `import type`, multiline-aware),
+   asserts none match `@/stores`, `@/hooks`, `react`(/), `@/modules/templates/`, and no
+   `templateId`/`skeletonId` in the comment-stripped source.
+7. **Zero-behavior sentinel (3):** `resolveEngineSectionSchema('GranthArchedHero')` === null;
+   `resolveEngineSectionSchema('TerminalHero')` === `thingElementContract.hero`;
+   `engineContracts.work.fields` ids === today's nine (name/oneLiner/whatYouTakeOn/theWork/
+   genresStyle/bioStory/achievements/praise/goal). Pins D2.
+
+### In-scope decisions
+- Comment-stripping in the firewall scan: the 5 modules' own firewall NOTES contain the
+  words "templateId / skeletonId" and "@/modules/templates" in prose. Stripping comments
+  before the literal scan (and checking value-imports only for specifiers) is the
+  conservative reading of "no `templateId`/`skeletonId` literals" — it tests the CODE, not
+  the documentation. Logged here.
+- Proof-shape testimonials asserted as the SAME object reference as `workElementContract.proof`
+  (`toBe`), matching phase-1's stated invariant.
+
+### Verification (WORKDIR)
+- `npx tsc --noEmit` — **CLEAN** (no output).
+- `npx eslint src/modules/engines/workContract.test.ts` — exit 0, clean.
+- `npm run lint` (full) — **exit 0**; only pre-existing warnings remain (`@next/next/no-img-element`
+  across techpremium/vestria blocks, one `react-hooks/exhaustive-deps` in `ph-provider.tsx`) —
+  NONE from the new/edited files.
+- `npm run test:run` (FULL suite) — **1 failed | 2848 passed | 15 skipped (2864)**.
+  - New `workContract.test.ts` alone: **30 passed / 0 failed**.
+
+### Cross-phase blocker (NOT fixed — outside work-contract module set, reported)
+The one failure is `src/modules/audience/product/pageArchetypes.test.ts:139`
+("businessTypes structureDefault … manufacturer + photographer are multi"):
+`expected 'multi' to be 'single'` for key `designer`.
+
+Root cause = **phase-4 fallout**, not a phase-5 change: phase 4 (commit b98b62ce) added the
+`designer` businessType row with `structureDefault: 'multi'`, but this test's hardcoded
+`MULTI_DEFAULTS = new Set(['manufacturer','photographer'])` (line 134) was never updated, so
+it now asserts `designer` should be `'single'`. Phase-4 verification only ran
+`businessTypes/brief/collections/engines`, so `audience/product` was never re-run — the break
+has been latent on the branch since phase 4. Same class as the phase-1 (designKit.test.ts) and
+phase-4 (config.test.ts) stale-test escalations the orchestrator authorized by amending
+Files-touched.
+
+`pageArchetypes.test.ts` is outside Phase 5's Files-touched AND outside the work-contract
+module set → per the hard rule I did NOT edit it. **One-line fix** = add `'designer'` to
+`MULTI_DEFAULTS` (line 134) + update the it-title. Reported in the shared mailbox
+(`work-contract.md`); awaiting orchestrator ruling to amend Files-touched or handle directly.
+
+### Cross-phase fixup — RESOLVED (orchestrator-approved, Files-touched amended)
+The orchestrator confirmed the `designer` row is correct (`structureDefault: 'multi'`, mirrors
+photographer) and the hardcoded test set was stale; amended Phase 5 Files-touched to add
+`src/modules/audience/product/pageArchetypes.test.ts`.
+
+- `src/modules/audience/product/pageArchetypes.test.ts` (EDIT) — line 134
+  `MULTI_DEFAULTS` set: added `'designer'` (with a one-line comment noting the mirror);
+  updated the it-title to "manufacturer + photographer + designer are multi". Minimal — no
+  other edits.
+
+### FINAL verification (WORKDIR, after the fixup)
+- `npx tsc --noEmit` — **CLEAN** (exit 0, no output).
+- `npm run test:run` (FULL suite) — **2849 passed | 15 skipped | 0 failed (2864)**, 166 files.
+- `npm run lint` (full) — **exit 0**; only pre-existing `react-hooks/exhaustive-deps` +
+  `@next/next/no-img-element` warnings remain, none from touched files.
+
+### Open risks
+- None. Full suite green; no product-code defect. Whole-diff gate passes.

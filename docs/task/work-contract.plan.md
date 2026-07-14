@@ -21,7 +21,7 @@ engines.
 - phase 2 page vocabulary + site archetypes + proposal rule: done (review skipped — standard tier; tsc clean, 176 pass/0 fail; work-group auto-attachable behind PROMOTE_GROUP_MIN)
 - phase 3 work facts schema + 8 slots: done (review skipped — standard tier; tsc clean, 224 pass/0 fail; D2 honored; price on group → 7 top-level fact keys)
 - phase 4 profession rows + buyer-words vocabulary: done (review skipped — standard tier; config.test.ts count 8→9 added to scope by orchestrator; tsc clean, 328 pass/0 fail; 4 vocab names flagged + agency=trust drafts left for merge gate)
-- phase 5 conformance test + README + full green: pending
+- phase 5 conformance test + README + full green: done (30-assertion conformance test; pageArchetypes.test.ts MULTI_DEFAULTS 8→9 fixup added to scope; FULL suite 2849 pass/0 fail, tsc clean, lint exit 0)
 
 ## Design decisions (read before implementing any phase)
 
