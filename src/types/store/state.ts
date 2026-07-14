@@ -430,6 +430,18 @@ export interface PersistenceSlice {
    *  Gates including `baseline` in save payloads (it ~doubles body size);
    *  cleared on a successful save that carried it. NEVER in `partialize`. */
   baselineDirty: boolean;
+  /** content-baseline-split: true when a stored baseline EXISTS server-side
+   *  (fetched or not) OR a baseline is currently resident in-store; false only
+   *  when the server truly has NO baseline (true legacy / never-captured project).
+   *  Lifecycle: seeded `false` in createInitialState; re-derived on every load in
+   *  loadFromDraft (baseline shipped ⇒ true; else `Boolean(apiResponse.hasBaseline)`);
+   *  set `true` by captureBaseline (capture makes baseline resident) and by a
+   *  successful `ensureBaseline()` lazy fetch; set `false` by ensureBaseline only
+   *  when the server unexpectedly returns a null baseline. Gates the lazy
+   *  `ensureBaseline()` fetch (skip the network when this is false — server has
+   *  nothing to fetch, callers use their legacy fallbacks). NEVER in `partialize`
+   *  (it re-derives from the server contract on each load, never from localStorage). */
+  baselineAvailable: boolean;
 
   /** data-capture Phase 3 — regen re-freeze accumulator: normalized element
    *  text queued by section/element regen to become the NEW AI baseline on the

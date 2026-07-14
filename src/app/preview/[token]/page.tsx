@@ -36,6 +36,9 @@ export default function PreviewPage() {
         showLoadingState: true,
         showErrorBoundary: true,
         resetOnTokenChange: false,
+        // Preview never fetches the ~68 KB baseline: no Reset, markers not
+        // rendered here — the driving win of content-baseline-split.
+        prefetchBaselineForReview: false,
       }}
     >
       <PreviewPageContent tokenId={tokenId} />

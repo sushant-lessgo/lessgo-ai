@@ -49,8 +49,10 @@ getTypographyForSection: (sectionId: string) => FontTheme;
    * ===== RESET TO GENERATED =====
    */
   
-  // Reset all customizations to original AI-generated design
-  resetToGenerated: () => void;
+  // Reset all customizations to original AI-generated design.
+  // Async: lazily fetches the stored baseline via ensureBaseline() before
+  // applying the reset (network I/O outside the Immer producer).
+  resetToGenerated: () => Promise<void>;
 
   // Global Settings
   setDeviceMode: (mode: 'desktop' | 'mobile') => void;
@@ -424,6 +426,12 @@ export interface MetaActions {
   // Baseline (edit-header Reset) — snapshot/dirty-flag lifecycle.
   captureBaseline: () => void;
   markBaselineSaved: () => void;
+  /** content-baseline-split — lazy on-demand baseline fetch. Returns the
+   *  baseline (resident or freshly fetched via `?part=baseline`) or `null` when
+   *  the server truly has none (callers use their legacy fallbacks). Deduped
+   *  per-tokenId; rejects (throws) on fetch failure without flipping
+   *  `baselineAvailable` — the caller decides. */
+  ensureBaseline: () => Promise<Record<string, any> | null>;
 
   // Legal Pages
   setLegalPage: (kind: 'privacy', entry: { content: string; metadata?: any } | undefined) => void;

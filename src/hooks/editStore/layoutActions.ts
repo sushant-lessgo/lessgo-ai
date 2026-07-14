@@ -604,15 +604,24 @@ getTypographyForSection: (sectionId: string) => {
      * ===== RESET TO GENERATED =====
      */
     
-    resetToGenerated: () =>
+    resetToGenerated: async () => {
+      // Lazily fetch the baseline BEFORE opening any Immer producer — network
+      // I/O inside a set() is forbidden. ensureBaseline resolves to the resident
+      // baseline (or fetches it via ?part=baseline), returns null only when the
+      // server genuinely has none (true legacy), and THROWS on fetch failure.
+      // A throw propagates out of resetToGenerated — we do NOT fall into the
+      // legacy onboarding fallback below (that would apply a WRONG design reset).
+      // useResetSystem's existing catch surfaces the failure toast.
+      const baseline = await get().ensureBaseline();
+
       set((state: EditStore) => {
         // Primary path: restore the stored generation baseline (copy + theme
         // + pages/chrome/forms) via the SAME hydration core loadFromDraft
-        // uses. Deep-clone first: state.baseline lives in committed (possibly
+        // uses. Deep-clone first: the baseline may alias committed (possibly
         // frozen) state, and applySnapshot mutates nested objects and aliases
         // payload.content into the active state.
-        if (state.baseline) {
-          const snapshot = JSON.parse(JSON.stringify(state.baseline));
+        if (baseline) {
+          const snapshot = JSON.parse(JSON.stringify(baseline));
           applySnapshot(state, snapshot);
 
           // isDirty → the 1s autosave poller persists the restored state.
@@ -625,8 +634,8 @@ getTypographyForSection: (sectionId: string) => {
           return;
         }
 
-        // Fallback (should be unreachable post-Phase-4 — loadFromDraft always
-        // captures a baseline): legacy derive-design-from-onboarding reset.
+        // Fallback (true legacy — server has no stored baseline):
+        // legacy derive-design-from-onboarding reset.
         // Store current state for undo
         const currentState = {
           theme: { ...state.theme },
@@ -679,7 +688,8 @@ getTypographyForSection: (sectionId: string) => {
         //   originalBackgroundSystem,
         //   sectionsReset: Object.keys(state.content).length,
         // });
-      }),
+      });
+    },
 
     /**
      * ===== GLOBAL SETTINGS =====
