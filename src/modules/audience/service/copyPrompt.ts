@@ -140,6 +140,18 @@ export function buildServiceCopyPrompt(input: ServiceCopyPromptInput): string {
   // templateId — firewall-safe. Drives IDENTITY, the voice block, and the rules.
   const voice = selectServiceVoice(understanding);
   const hasCaseStudies = strategy.sections.includes('casestudies');
+  const hasServicesSection = strategy.sections.includes('services');
+
+  // Bind the services section to the provider's ACTUAL stated services — the #1
+  // source of "it invented services I never offer". Surface them as their own
+  // prominent, one-per-line block (not the buried comma line in PROVIDER) so the
+  // model treats them as the source of truth, plus an explicit rule below.
+  const servicesSourceBlock =
+    understanding.services.length > 0
+      ? `## SERVICES THE PROVIDER OFFERS (source of truth — use these, do NOT invent)
+${understanding.services.map((s) => `- ${s}`).join('\n')}
+`
+      : '';
 
   const sectionSpecs = strategy.sections
     .map((sectionType) => {
@@ -149,6 +161,24 @@ export function buildServiceCopyPrompt(input: ServiceCopyPromptInput): string {
     })
     .filter(Boolean)
     .join('\n\n');
+
+  // Anchor rules that bind generated copy to the user's actual inputs (services +
+  // offer). Numbered after the existing rules (case-studies rule 10 is conditional).
+  const bindServices = hasServicesSection && understanding.services.length > 0;
+  const bindOffer = offer.trim().length > 0;
+  let nextRule = hasCaseStudies ? 11 : 10;
+  const bindingRuleLines: string[] = [];
+  if (bindServices) {
+    bindingRuleLines.push(
+      `${nextRule++}. **The services section MUST be built from the provider's actual services listed in "SERVICES THE PROVIDER OFFERS" above.** Emit one "services" card per stated service, deriving each card title directly from the user's service (rephrase for polish only — do NOT invent, rename, drop, or add services). If the schema allows more items than the provider has services, generate fewer cards; NEVER pad with fabricated services (this overrides the array-min rule for the services section only).`
+    );
+  }
+  if (bindOffer) {
+    bindingRuleLines.push(
+      `${nextRule++}. **Bind the CTA to the stated offer.** The hero and cta call-to-action must reflect the provider's actual offer ("${offer}") as the literal next step — do NOT invent a different offer or promise.`
+    );
+  }
+  const bindingRules = bindingRuleLines.length > 0 ? `\n${bindingRuleLines.join('\n')}` : '';
 
   return `## IDENTITY
 ${voice.identity}
@@ -196,7 +226,7 @@ Show case studies: ${strategy.servicePresentation.showCaseStudies}
 
 ${formatServiceVoiceForPrompt(voice)}
 
-## SECTIONS TO GENERATE
+${servicesSourceBlock}## SECTIONS TO GENERATE
 
 ${sectionSpecs}
 
@@ -213,13 +243,14 @@ ${getElementSchemas()}
 7. Return ONLY valid JSON. No markdown, no commentary.
 8. **Output EVERY section listed above — no omissions.** Include each section key (header, hero, services, testimonials, packages, cta, footer — whichever are listed) with a complete "elements" object. Do not drop trailing sections like testimonials or footer.
 9. Use ${voice.label} voice (see the VOICE section above). **Avoid that voice's forbidden words ANYWHERE** — including invented brand names (logo_text), company names (author_company), copyright lines, and testimonial quotes. Forbidden words for this voice: ${voice.lexicon.forbidden.join(', ')}.${hasCaseStudies ? `
-10. **Case studies — placeholders, NOT fabrication (overrides rule 3 for this section only).** For the "casestudies" section, you do NOT know the agency's real clients or numbers. In each item of "cases", emit EXPLICIT placeholders the founder will replace: set "client" to "[Client]" (or "[Client name]"), and every metric "value" to a bracketed placeholder like "+XX% [metric]" / "X.X× [metric]". Write the "tag" and "headline" (the result sentence) as real, specific-sounding copy in the voice above, but NEVER invent real-looking client names or exact figures. This is the one place placeholders are required.` : ''}
+10. **Case studies — placeholders, NOT fabrication (overrides rule 3 for this section only).** For the "casestudies" section, you do NOT know the agency's real clients or numbers. In each item of "cases", emit EXPLICIT placeholders the founder will replace: set "client" to "[Client]" (or "[Client name]"), and every metric "value" to a bracketed placeholder like "+XX% [metric]" / "X.X× [metric]". Write the "tag" and "headline" (the result sentence) as real, specific-sounding copy in the voice above, but NEVER invent real-looking client names or exact figures. This is the one place placeholders are required.` : ''}${bindingRules}
 
 ## FINAL SELF-CHECK (do this before returning)
 Scan your JSON once more and fix any miss:
 (a) Every section listed in "SECTIONS TO GENERATE" has an entry.
 (b) Every "headline" contains an <em>...</em>.
-(c) Every "lede" contains an <em>...</em> — this is the field most often missed.
+(c) Every "lede" contains an <em>...</em> — this is the field most often missed.${bindServices ? `
+(d) Every services-section item maps to one of the provider's stated services — no invented services.` : ''}
 
 ## OUTPUT FORMAT
 

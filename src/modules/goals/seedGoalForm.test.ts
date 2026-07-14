@@ -133,7 +133,7 @@ describe('seedGoalForm — injects a rendered leadForm section (scale-05)', () =
   const findLeadFormId = (fc: any): string | undefined =>
     (fc.layout.sections as string[]).find((id) => id.startsWith('leadForm-'));
 
-  it('injects a leadForm section after the hero, wired to the seeded form', () => {
+  it('injects a leadForm section near the bottom (not directly under the hero), wired to the seeded form', () => {
     const fc = makeFinalContent();
     seedGoalForm(fc as any, m1Goal('book-call'));
 
@@ -141,9 +141,11 @@ describe('seedGoalForm — injects a rendered leadForm section (scale-05)', () =
     const leadFormId = findLeadFormId(fc);
     expect(leadFormId).toBeTruthy();
 
-    // Positioned immediately after the hero.
+    // House rule: multi-field form lives in a dedicated section near the BOTTOM,
+    // NOT immediately under the hero. With no footer here, it appends at the end.
     const sections = fc.layout.sections as string[];
-    expect(sections.indexOf(leadFormId!)).toBe(sections.indexOf('hero-aaaa1111') + 1);
+    expect(sections.indexOf(leadFormId!)).not.toBe(sections.indexOf('hero-aaaa1111') + 1);
+    expect(sections.indexOf(leadFormId!)).toBe(sections.length - 1);
 
     // sectionLayouts + content entry with the shared layout + form_id.
     expect((fc.layout as any).sectionLayouts[leadFormId!]).toBe('SharedLeadForm');
@@ -152,6 +154,24 @@ describe('seedGoalForm — injects a rendered leadForm section (scale-05)', () =
     expect(sec.elements.form_id).toBe(formId);
     expect(typeof sec.elements.form_headline).toBe('string');
     expect(sec.elements.form_headline.length).toBeGreaterThan(0);
+  });
+
+  it('inserts the leadForm section immediately BEFORE the footer when one exists', () => {
+    const fc = makeFinalContent();
+    // Add a footer so the bottom-placement rule has an anchor.
+    (fc.layout.sections as string[]).push('footer-dddd4444');
+    (fc.layout.sectionLayouts as any)['footer-dddd4444'] = 'Footer';
+    (fc.content as any)['footer-dddd4444'] = { id: 'footer-dddd4444', layout: 'Footer', elements: {} };
+
+    seedGoalForm(fc as any, m1Goal('book-call'));
+
+    const sections = fc.layout.sections as string[];
+    const leadFormId = findLeadFormId(fc);
+    expect(leadFormId).toBeTruthy();
+    // Sits right before the footer — the last content section on the page.
+    expect(sections.indexOf(leadFormId!)).toBe(sections.indexOf('footer-dddd4444') - 1);
+    // And it is NOT directly under the hero.
+    expect(sections.indexOf(leadFormId!)).not.toBe(sections.indexOf('hero-aaaa1111') + 1);
   });
 
   it('injects exactly one leadForm section and is idempotent on re-seed', () => {

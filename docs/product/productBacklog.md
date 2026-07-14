@@ -29,3 +29,9 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 25. **Lead enrichment** — form submit → scrape lead's domain → lead brief + drafted reply in the lead-notification email. Copy-only, no CRM
 26. **Free-tools TOF** — flagship: landing-page analyzer (email-gated results + launch distribution); programmatic per-category fan-out as experiment only
 27. **Meridian terminal-mock hero content** — `TerminalHero` ships hardcoded "item one/two/three" filler on published page; parameterize with real business data or swap for static visual (OOO from app-UI hygiene = template-content work); `src/modules/templates/meridian/blocks/Hero/TerminalHero.tsx` (+ `.published.tsx`)
+28. For TOF WebsiteExamples.com
+
+| 3 | Research brief — premium research-backed path: agentic Claude VoC + competitor research → editable Brief → generation | `docs/task/research-brief.spec.md` | queued — HELD until atelier lands (generation-path conflict) |
+| 4 | Universe v1 — variant fan-out (message-match / SEO keyword / audience), shared-edit propagation, universe view + per-variant analytics | `docs/tracks/universePlan.md` → universe-01… (spec required before /feature) | reserved, awaiting spec (**needs editorPlan phase 4 ops**) |
+| 5 | Campaign/offer pages — time-bound promo variants (universe v2) | universePlan.md U2 (spec required before /feature) | reserved, awaiting spec |
+| 6 | A/B testing — split traffic between variants (universe v3) | universePlan.md U2 (spec required before /feature) | reserved, awaiting spec |

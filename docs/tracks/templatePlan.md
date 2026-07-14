@@ -23,6 +23,64 @@ trust≈30% / place≈28–36% / thing≈20–24% / work≈14–19% / quick-yes�
 | T7 | **Contract patch in two waves.** Wave 1 now (engine-agnostic, before factory): sections `team` + `certsBand`, tiered pricing/packages variant, capabilities `booking-embed` + `reviews-widget`, + fold T1–T4 rulings into taxonomy. Wave 2 with place engine build: `menu`, `multi-location`, `events-calendar` (designed with place grammar, not guessed). | ✅ AGREED |
 | T8 | **India sample top-up: DEFERRED** — GTM (India-first vs global) undecided; revisit at GTM decision. Priorities lock on current N=101; top-up can amend later. | ⏸ DEFERRED |
 
+## Skeleton layer (T9 — RULED 2026-07-14)
+
+**New tier between engine and template.** Stack: **Engine (4-5, code) → Skeleton (~5-8,
+ALL markup) → Template (many, tokens+selections) → Look (user's variant+palette)**.
+Evidence: designer's 13 library systems share one structural spine (identical
+btn/eyebrow/display/lede/actions grammar); differences = tokens + one signature device
+each → ~5 skeletons. Grouping runs ENGINE-FIRST (section grammar defines a skeleton,
+never hero aesthetics).
+
+| Layer | Owns | Never owns |
+|---|---|---|
+| Engine | canonical sections + element contract, copy, strategy, order | markup, styling |
+| Skeleton | ALL markup: `.core.tsx` single-source blocks (Granth pattern — zero dual-renderer pairs), layout/device **variant library** per section (scale-09 machinery), capability blocks, edit-primitive declarations, token bounds | copy decisions, fonts/colors |
+| Template | `tokens.ts` (bounded), palette set, variant/device SELECTIONS, imagery treatment, style/collection tags | **ZERO markup, ZERO components** |
+
+Guardrails (all ruled):
+- Template needs new markup → it's a new skeleton variant (contributed to the library,
+  distinctness-guarded) or a new skeleton. **>2-3 new variants needed = it's a new skeleton.**
+- **1 skeleton = 1 engine for beta**; cross-engine skeletons only on proven ≥80% block overlap.
+- **Token contract with bounds** declared by skeleton (type scale/spacing/radius ranges) —
+  skins cannot set values layouts weren't designed for. + explicit compatibility matrix
+  where axes interact. + sampled screenshot harness per skeleton (both renderers).
+- Distinctness of sibling templates = curation guideline (picker shelving), NOT architecture —
+  the config space (layouts × devices × density × type × palette) makes coordinates distinct.
+- Collections = **tags on templates, picker-only metadata** — never an architectural tier,
+  never user-facing vocabulary.
+- No DB change: registry resolves `templateId → { skeletonId, tokens, selections }`.
+- **No retro-collapse of built templates pre-beta** (meridian/hearth/lex/granth stay as-is;
+  skeleton applies to NEW builds). Revisit retro at factory time.
+- Editor win: skeleton declares edit primitives once → all sibling templates inherit
+  identical, already-QA'd editing.
+
+## Work vertical reshape (2026-07-14 — supersedes queue #1 execution order)
+
+`docs/tracks/workEndtoEnd.md` = the agreed product vision (founder-brainstormed, 7/7
+settled) and THE execution frame for the work engine. Kundius delivery = **Atelier skin
+on the work skeleton** (current atelier module on main = anti-pattern reference: 32
+files, template owns markup; replaced by the rebuild, deleted after sign-off). Old
+execution order (i18n-phase-1 → template-factory → atelier port) is reshaped: the
+skeleton IS the factory's foundation; i18n phase 1 still required (Kundius NL/EN =
+workEndtoEnd slot 8).
+
+Build order (each = own /discuss → /feature; gates between):
+- **A. Contract freeze** — work-core sections/elements + Brief fields (8 slots) + List-1
+  entries (photographer/designer/writer/agency)
+- **B. newGeneration Gate 0 parity QA** — work is inherently multi-page; unvalidated
+  foundation is not inheritable
+- **C. Work copy engine** — granth seed → full (strategy, fan-out, voice); parallel-OK
+  with D after A+B (copy firewall)
+- **D. Work skeleton + atelier skin** — + gallery capability + image ingestion + work
+  library (the generic CMS board — parts 2+3 exist in `src/modules/collections/`)
+- **E. Onboarding work path** — slot machinery, understanding rail, visual site plan,
+  during-wait design taps
+- **F. Editor work primitives** — portfolio board + page dropdown (beta-essential cut only)
+- **Gate:** Kundius sign-off + **Kontur 1-day second-skin spike** (the skeleton
+  economics proof). Public look trio at launch: Atelier / Kontur / Pulse (Lumen public
+  bench — rejected by Kundius, no longer exclusive).
+
 ## Place engine (T5 — ruled)
 
 **Committed; build ASAP after work engine; before beta (T6).** Context kept for the record: the
@@ -75,6 +133,7 @@ gap-audit of the 13 designs runs when a demand signal points at one of them.
 template. Everything else agent-executable.
 
 ## References
+- `docs/tracks/workEndtoEnd.md` — work-vertical product vision (agreed 2026-07-14): journey, 8 slots, work library/CMS boards, look trio, buyer-words vocabulary
 - `docs/research/coverage-100/templateMapping.md` — per-site template fit + gap rollup (2026-07-11): 36% servable in-code, place bucket 35%, empty cells = trust×editorial (4) + thing×warm (2); designer ask-list §Gist
 - `docs/task/template-factory.spec.md` — factory spec (kit/lint/conformance/parity/skill-rewrite)
 - `docs/research/coverage-100/findings.md` — canonical experiment findings (N=101)

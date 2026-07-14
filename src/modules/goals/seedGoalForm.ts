@@ -178,10 +178,13 @@ export function seedGoalForm(
 }
 
 /**
- * Inject a `leadForm-<uuid>` section (shared LeadForm block) after the hero so
- * the seeded form RENDERS on every template in both renderers, and the
- * `#form-section` anchor exists in exported HTML. Idempotent: no-op when a
- * leadForm section already exists, or when the payload has no section array.
+ * Inject a `leadForm-<uuid>` section (shared LeadForm block) near the BOTTOM of
+ * the page (before the footer) so the seeded MULTI-FIELD form RENDERS on every
+ * template in both renderers, and the `#form-section` anchor exists in exported
+ * HTML. The hero/CTA button uses `behavior:'scrollTo'` to scroll DOWN to it
+ * (house rule: multi-field forms live in a dedicated section near the bottom,
+ * not directly under the hero). Idempotent: no-op when a leadForm section
+ * already exists, or when the payload has no section array.
  */
 function injectLeadFormSection(
   finalContent: SeedableFinalContent,
@@ -198,9 +201,11 @@ function injectLeadFormSection(
 
   const leadFormId = `leadForm-${shortId()}`;
 
-  // Position: after the hero (short scroll; matches other goal-section injectors).
-  const heroIdx = sections.findIndex((id) => id === 'hero' || id.startsWith('hero-'));
-  const insertAt = heroIdx >= 0 ? heroIdx + 1 : sections.length;
+  // Position: near the BOTTOM, immediately before the footer (house rule:
+  // multi-field forms get a dedicated bottom section; hero CTA scrolls down to
+  // it). Fall back to appending at the end when there is no footer section.
+  const footerIdx = sections.findIndex((id) => id === 'footer' || id.startsWith('footer-'));
+  const insertAt = footerIdx >= 0 ? footerIdx : sections.length;
   sections.splice(insertAt, 0, leadFormId);
 
   if (finalContent.layout && finalContent.layout.sectionLayouts) {

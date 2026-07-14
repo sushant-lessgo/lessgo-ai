@@ -48,7 +48,7 @@ import { templateMeta, type TemplateLook } from '@/modules/templates/templateMet
 import { pickSeeded } from '@/modules/generation/spread';
 import type { CollectionsFacts } from '@/modules/brief/collections';
 import { buildFinalContent, saveDraft, type BriefGoal } from './finalize';
-import type { GenerationCallbacks, GenerationResult } from './index';
+import type { GenerationCallbacks, GenerationResult, GenerationMeta } from './index';
 import { trackFailure, failureEventName } from '@/utils/trackTelemetry';
 
 // ---------------------------------------------------------------------------
@@ -390,6 +390,9 @@ export async function runTrustGeneration(
   // ─── Copy ───
   cb.onStage?.('copy');
   let copySections: Record<string, SectionCopy>;
+  // silent-fallback: the route's degraded-generation signal (mock / incomplete)
+  // — surfaced to the slot so a too-fast/canned run isn't mistaken for success.
+  let copyMeta: GenerationMeta | undefined;
   try {
     const res = await fetch('/api/audience/service/generate-copy', {
       method: 'POST',
@@ -409,6 +412,7 @@ export async function runTrustGeneration(
       throw new Error(json?.message || 'Copy generation failed');
     }
     copySections = json.sections as Record<string, SectionCopy>;
+    copyMeta = json.meta as GenerationMeta | undefined;
   } catch (e: any) {
     return { status: 'error', error: e?.message || 'Copy generation failed.' };
   }
@@ -497,5 +501,5 @@ export async function runTrustGeneration(
   }
 
   cb.onStage?.('done');
-  return { status: 'done', redirectTo: REDIRECT(tokenId) };
+  return { status: 'done', redirectTo: REDIRECT(tokenId), meta: copyMeta };
 }
