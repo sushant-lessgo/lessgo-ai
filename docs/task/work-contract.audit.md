@@ -157,3 +157,91 @@ limited to workSections (type-only) + collections/registry.
 ### Open risks
 - Thresholds are placeholders; the shape (`WorkStructureSignals` fields, one-pager/compact/
   standard tiering) is a phase-A judgement pending track-E pilot data.
+
+---
+
+## Phase 3 — work facts schema (Brief) + 8 slots
+
+**Status: COMPLETE. tsc clean; scoped tests green; ad-hoc zod sanity passed then deleted.**
+
+### Files changed
+- `src/lib/schemas/workFacts.schema.ts` (NEW)
+- `src/modules/engines/workSlots.ts` (NEW)
+
+### `src/lib/schemas/workFacts.schema.ts`
+Pure zod value shapes for the 8 work fact slots + accessor. Mirrors `brief.schema.ts`
+(all-optional, shape-not-gate) and `getEntryFacts` (safeParse accessor). Storage documented
+at `brief.facts.work`.
+
+Exports:
+- `WorkPriceSchema` — `{ mode: 'exact'|'from'|'on-request', amount?: number, currency?: string }`
+  with a `.refine()`: `amount` required unless `mode === 'on-request'` (path `['amount']`).
+- `WorkPhotoRefSchema` — `{ id, url?, alt?, cover? }` (reference-only; ingestion scope-OUT).
+- `WorkSubItemSchema` — `{ name, photos: WorkPhotoRef[], client?, problem?, result? }`
+  (second-level `items`; story fields align with phase-1 `workdetail`).
+- `WorkGroupSchema` — `{ name, kind: 'category'|'story', price: WorkPrice, photos?, items? }`
+  (second level optional; flat legal).
+- `WorkFactsSchema` — object of 7 top-level keys (price lives on the group, not top-level):
+  `identity{ name, location?, reach? }` · `groups: WorkGroup[]` · `establishment: 'new'|'established'` ·
+  `dreamClient` · `praise: string[]` · `contactMethod: 'whatsapp'|'booking'|'form'` · `languages: string[]`.
+  All optional.
+- Types: `WorkPrice`, `WorkPhotoRef`, `WorkSubItem`, `WorkGroup`, `WorkFacts` (all `z.infer`).
+- `getWorkFacts(facts: Record<string, unknown> | undefined): WorkFacts | null` — reads
+  `facts.work`, safeParse, never throws.
+
+### `src/modules/engines/workSlots.ts`
+The slot table + reconciliation onto the live `workContract`. D2 header comment: the live
+`workContract` in inputContracts.ts is intentionally NOT modified. `mechanics` is a default
+posture; runtime resolution stays `resolveFieldState()` in wizard/waterfall.ts (referenced,
+not duplicated).
+
+Exports:
+- `workSlotIds` (8) + `WorkSlotId` union.
+- `WorkFactsPath = keyof WorkFacts | 'groups[].price'` (price sentinel).
+- `WorkSlotDef { id; field: ContractField; mechanics: 'auto-confident'|'confirm-shaky'|'ask-unknown'; neverSilent?: true; branch?: true; factsPath: WorkFactsPath }`.
+- `workSlots: readonly WorkSlotDef[]` (8 entries).
+- `workSlotReconciliation: Record<WorkSlotId, { existingFieldId?: string }>`.
+
+`field` entries typed as `ContractField` (imported type-only from `./inputContracts`), correct
+group/slot/tier/requirement. Price slot `requirement: 'required'`; contactMethod carries
+`neverSilent: true` (on the slot def, not the field — `ContractField` has no such key);
+establishment `branch: true`.
+
+### 8-slot → existing-field reconciliation table
+| Slot id | mechanics | field group/slot/tier/req | existingFieldId (live workContract) |
+|---|---|---|---|
+| identity | auto-confident | WHO/identity/T1/required | `name` (+ `oneLiner` folds in; `name` = anchor) |
+| groups | confirm-shaky | WHAT/understanding/T1/required | `theWork` (nearest — T3 upload gallery) |
+| price | ask-unknown | WHAT/offer/T1/**required** | — NEW (adding a live price field = D2 behavior change) |
+| establishment | confirm-shaky, branch | WHY-YOU/understanding/T1/optional | — NEW |
+| dreamClient | confirm-shaky | WHO/understanding/T1/optional | `whatYouTakeOn` (audiences, nearest) |
+| praise | confirm-shaky | WHY-BELIEVE/proof/T2/optional | `praise` (1:1) |
+| contactMethod | confirm-shaky, neverSilent | ACT/goal/T1/required | — NEW (today the generic `goal` resolver) |
+| languages | auto-confident | WHO/identity/T1/optional | — NEW |
+
+### Zod refinement behavior
+`WorkPriceSchema`: parse rejects `{ mode: 'exact' }` / `{ mode: 'from' }` with no `amount`;
+accepts them with `amount`; accepts `{ mode: 'on-request' }` alone. Verified in the ad-hoc check.
+
+### Deviations
+- `WorkFactsSchema` has 7 top-level keys, not 8: slot 3 (price) has no top-level key — its value
+  lives on each group (`WorkGroup.price`) per spec §3, while remaining a distinct ASK step in
+  `workSlots.ts`. In-scope judgement, matches the plan's "price = inside each group" note.
+- `neverSilent`/`branch` live on `WorkSlotDef`, not on the `ContractField` (which has no such
+  fields). Matches the plan's WorkSlotDef shape.
+- `field.section` set to work-core section names (work/packages/proof/contact) as documentation;
+  omitted where none applies (identity/establishment/dreamClient/languages/contactMethod's is
+  `contact`). No current test iterates workSlots' sections, so no `⊆ engineCoreSections` collision.
+
+### Verification
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run -- src/modules/engines src/lib/schemas` — Test Files 7 passed (7) · Tests 224 passed (224) · 0 failed.
+- Ad-hoc zod sanity (throwaway `sp_check.test.ts` in src/lib/schemas, deleted after): flat group
+  parses, two-level group parses, `exact` price w/o amount rejects, on-request w/o amount ok,
+  `getWorkFacts` reads `facts.work` + returns null on undefined, full 8-slot facts parse —
+  6 passed (6). File removed; `git status` shows only the two NEW modules untracked.
+
+### Open risks
+- Slot mechanics + group/tier assignments are phase-A judgement (no runtime consumer yet);
+  track E may retune when wiring into the live contract. The committed conformance test (phase 5)
+  will pin invariants; a real test file is deliberately NOT added here (phase 5 owns it).
