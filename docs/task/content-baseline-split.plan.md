@@ -29,8 +29,8 @@
 
 - phase 1 server-additive hasBaseline flag + part=baseline fetch: done (commit bab59628, review loops 1, ship)
 - phase 2 store ensureBaseline + hydration honors hasBaseline: done (commit 01f49a9f, review loops 1, ship)
-- phase 3 consumers — async Reset + review-diff lazy fetch + preview opt-out: done (review loops 1, ship) — DEPLOY-A BOUNDARY (this commit = Deploy A tip)
-- phase 4 server flip (DEPLOY B ONLY) — drop baseline from default loadDraft response + save-path regression test: pending
+- phase 3 consumers — async Reset + review-diff lazy fetch + preview opt-out: done (commit d3bb5e31, review loops 1, ship) — DEPLOY-A BOUNDARY (d3bb5e31 = Deploy A merge tip)
+- phase 4 server flip (DEPLOY B ONLY) — drop baseline from default loadDraft response + save-path regression test: done (review loops 1, ship) — DEPLOY-B tip (merge SEPARATELY, after Deploy A bakes)
 - phase 5 prod-copy round-trip QA gate (naayom): pending
 - deploy A (phases 1–3) merge + prod deploy + bake: pending
 - deploy B (phase 4) merge + prod deploy: pending

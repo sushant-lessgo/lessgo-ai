@@ -149,19 +149,17 @@ export async function GET(req: Request) {
       // Final content (supports both new and legacy formats)
       finalContent: finalContent,
 
-      // Generation baseline (edit-header Reset). Null for legacy projects —
-      // the editor backfills by capturing load-time state (loadFromDraft).
-      baseline: content.baseline ?? null, // Phase 4 (Deploy B) removes this
-
-      // content-baseline-split Phase 1: additive flag so clients know a
-      // server-side baseline exists WITHOUT shipping the (large) blob in the
-      // default response. Clients fetch it lazily via `?part=baseline`.
+      // content-baseline-split Phase 4 (Deploy B): the (large) generation
+      // baseline blob is NO LONGER shipped in the default response. Clients
+      // read `hasBaseline` below and fetch the blob lazily via `?part=baseline`
+      // (branch above). Legacy projects (no content.baseline) → hasBaseline
+      // false; the editor backfills by capturing load-time state (loadFromDraft).
       hasBaseline: Boolean(content.baseline),
 
       // i18n-phase-1 (D4): per-project locale declaration. This top-level
       // response object WHITELISTS keys, so localeConfig must be passed through
-      // explicitly (mirrors `baseline`) or it would be silently stripped. Null
-      // for legacy single-locale projects ⇒ locale machinery stays invisible.
+      // explicitly or it would be silently stripped. Null for legacy
+      // single-locale projects ⇒ locale machinery stays invisible.
       // NOTE: the D1 text overlay `localeContent` needs NO line here — it rides
       // INSIDE `finalContent` (returned whole above), so it passes through
       // untouched with no key-stripping.
