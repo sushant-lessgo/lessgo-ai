@@ -18,9 +18,8 @@ import {
   useWizardStore,
   buildThingInput,
   buildTrustInput,
+  buildWorkInput,
   briefSignalFromState,
-  fieldStr,
-  fieldArr,
 } from '@/hooks/useWizardStore';
 import ErrorRetry from '@/components/onboarding/shared/ErrorRetry';
 import {
@@ -30,9 +29,13 @@ import {
 } from '@/modules/wizard/generation';
 import { humanizeGenerationError } from '@/modules/wizard/generation/errorMessage';
 import { trackGenerationDegraded } from '@/utils/trackTelemetry';
-import { runWorkSkeleton, type WorkGenerationInput } from '@/modules/wizard/generation/work';
+import {
+  runWorkSkeleton,
+  runWorkLLMGeneration,
+  workCopyEngineEnabled,
+  type WorkGenerationInput,
+} from '@/modules/wizard/generation/work';
 import { isMultipage } from '@/modules/audience/product/pageArchetypes';
-import type { SitemapPage } from '@/types/product';
 
 interface StageDef {
   id: GenerationStage;
@@ -54,23 +57,6 @@ const STAGES: StageDef[] = [
 // multipage, runCopyAndSave for single-page; trust: applyConfirmedStructure
 // then copy. The trust module-scoped pre-gate bridge is deleted (phase 5).
 
-/** Project the wizard store → the WORK (writer/granth) adapter input (plain data). */
-function buildWorkInput(): WorkGenerationInput {
-  const s = useWizardStore.getState();
-  const fields = s.fields as Record<string, { value: unknown }>;
-  return {
-    tokenId: s.tokenId ?? '',
-    templateId: s.templateId ?? 'granth',
-    writerName: fieldStr(fields, 'name'),
-    oneLiner: fieldStr(fields, 'oneLiner'),
-    // The 3–5 work uploads captured in ProofSlot (contract `theWork`).
-    works: fieldArr(fields, 'theWork'),
-    // atelier phase 2 — the confirmed sitemap pages for the SKELETON path.
-    // Ignored by the granth generator (single-page work has no sitemap → []).
-    pages: (s.sitemap as SitemapPage[] | null) ?? [],
-  };
-}
-
 /** True when the picked WORK template is multipage (atelier) → SKELETON path.
  *  Keys on `isMultipage(templateId)` — the picked template's capability — never
  *  on `engine === 'work'` alone, so granth (no `multipage`) is always false. */
@@ -85,7 +71,7 @@ export const MIN_WORKS = 3;
 /** Project the wizard store → the engine's adapter input (plain data). */
 function buildInput(engine: NonNullable<ReturnType<typeof useWizardStore.getState>['engine']>): GenerationInput {
   if (engine === 'trust') return buildTrustInput(useWizardStore.getState());
-  if (engine === 'work') return buildWorkInput();
+  if (engine === 'work') return buildWorkInput(useWizardStore.getState());
   return buildThingInput(useWizardStore.getState());
 }
 
@@ -119,29 +105,56 @@ export default function GeneratingSlot() {
       return;
     }
 
-    // atelier phase 2 — WORK + multipage (e.g. atelier): SKELETON path. Build an
-    // EMPTY multipage draft for manual fill (zero LLM, zero credits, zero copy) —
-    // NOT buildWorkInput()/runGeneration('work'), and NOT the MIN_WORKS guard
-    // below (that's the writer/granth generator's contract, not the skeleton's).
-    // Granth (work + single-page) never enters here: isWorkMultipage() is false.
+    // WORK + multipage (e.g. atelier). Two sub-paths, decided by the LLM engine
+    // flag + template allow-list (work-copy-engine phase 5):
+    //   • flag ON  + atelier (allow-list) → LLM MULTI-PAGE FAN-OUT
+    //     (runWorkLLMGeneration: strategy → per-page copy → save).
+    //   • flag OFF, or a non-allow-list template → the EXISTING SKELETON path
+    //     (runWorkSkeleton: empty multipage draft for manual fill; zero LLM,
+    //     zero credits, zero copy) — BYTE-IDENTICAL to today when the flag is OFF
+    //     (default). NEXT_PUBLIC_* is build-time inlined; the kill-switch is
+    //     redeploy-speed, not a runtime toggle.
+    // Neither is buildWorkInput()/runGeneration('work') nor the MIN_WORKS guard
+    // below (that's the writer/granth generator's contract). Granth (work +
+    // single-page) never enters here: isWorkMultipage() is false.
     if (engine === 'work' && isWorkMultipage()) {
-      setStage('saving');
-      let skelResult;
+      const useLLM = workCopyEngineEnabled(useWizardStore.getState().templateId);
+      setStage(useLLM ? 'strategy' : 'saving');
+      let mpResult;
       try {
-        skelResult = await runWorkSkeleton(input as WorkGenerationInput, {
-          onStage: (st) => setStage(st),
-        });
+        mpResult = useLLM
+          ? await runWorkLLMGeneration(input as WorkGenerationInput, {
+              onStage: (st) => setStage(st),
+              onPageProgress: (p) => setPageProgress(p),
+            })
+          : await runWorkSkeleton(input as WorkGenerationInput, {
+              onStage: (st) => setStage(st),
+            });
       } catch (e: any) {
         setError(humanizeGenerationError(e?.message));
         return;
       }
-      if (skelResult.status === 'error') {
-        setError(humanizeGenerationError(skelResult.error));
+      if (mpResult.status === 'credits') {
+        setCreditsError(true);
         return;
+      }
+      if (mpResult.status === 'error') {
+        setError(humanizeGenerationError(mpResult.error));
+        return;
+      }
+      // silent-fallback: a degraded (mock/incomplete) LLM run still opens the
+      // editor, but telemeter it (skeleton never sets meta ⇒ no-op there).
+      if (mpResult.meta && (mpResult.meta.mock || mpResult.meta.complete === false)) {
+        trackGenerationDegraded({
+          engine,
+          mock: mpResult.meta.mock ?? false,
+          complete: mpResult.meta.complete ?? true,
+          missingSections: mpResult.meta.missingSections ?? null,
+        });
       }
       // Reveal the editor immediately, with an honest "opening…" state (below).
       setRedirecting(true);
-      router.push(skelResult.redirectTo || `/edit/${input.tokenId}`);
+      router.push(mpResult.redirectTo || `/edit/${input.tokenId}`);
       return;
     }
 

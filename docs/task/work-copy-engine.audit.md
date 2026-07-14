@@ -333,3 +333,73 @@ surface at the authorized capture.)
 - Event per-hour nuance is soft (name-only); the copy LLM may drop it in display. If the /prices page must show "€100/hr" verbatim, consider a WorkPrice `note`/hourly mode (out of scope here).
 - pricePosition 'middle' (not premium) means the pilot voice is the middle band — confirm that matches founder intent for an enterprise-targeting photographer.
 - Golden artifacts NOT committed — awaiting founder read.
+
+## Phase 5 — adapter fan-out: full multi-page generation
+
+### Files changed
+- ADD `src/modules/wizard/generation/work.llm.ts` — `runWorkLLMGeneration` + the dispatch guard (`workCopyEngineEnabled` / `resolveWorkRoute` / `WORK_COPY_ENGINE_TEMPLATES`).
+- ADD `src/modules/wizard/generation/work.llm.test.ts` — orchestration + routing tests (mocked network).
+- MODIFY `src/modules/wizard/generation/work.ts` — re-export the phase-5 surface + 3 additive optional fields on `WorkGenerationInput` (`brief`/`sourceUrl`/`strategy`). ZERO edits to `runWorkGeneration`/`runWorkSkeleton` bodies.
+- MODIFY `src/modules/wizard/generation/index.ts` — additive discoverability re-export of the phase-5 surface. `runGeneration` dispatch UNCHANGED.
+- MODIFY `src/components/onboarding/wizard/GeneratingSlot.tsx` — work fork now flag/allow-list-guarded (LLM vs skeleton); local `buildWorkInput` removed (moved to the store); imports trimmed.
+- MODIFY `src/hooks/useWizardStore.ts` — added exported `buildWorkInput(s)` (+ private `resolveWorkBrief`) projecting the resolved Brief + `sourceUrl` + confirmed pages; type-only `WorkGenerationInput` import.
+- MODIFY `src/modules/audience/work/__tests__/captureGoldenWork.test.ts` — added the CAPTURE-gated FULL-SITE golden.
+- ADD `src/modules/audience/work/__tests__/goldens/kundius.full.json` — captured full-site artifact (real gpt-4o-mini).
+- ADD `src/modules/audience/work/__tests__/goldens/kundius.full.read.txt` — founder-facing per-page rendered dump (authorized "readable dump").
+
+### Fan-out design + the ~180-line clone note
+`runWorkLLMGeneration` MIRRORS the THING fan-out (`thing.ts` runThingGeneration L410 / runFanOut L456-635 / resume L638-649): resume-first (`loadDraft` -> `isResumableGeneration` -> runFanOut), else the ONE work strategy call (POST `/api/audience/work/strategy` with the Brief; the work wizard does NOT fetch strategy pre-gate, so this is the first + only strategy call), `buildMultiPageSkeleton` + `saveFC`, then iterate the sitemap: skip `completedPageKeys`, POST each page to `/api/audience/work/generate-copy`, `mergePageIntoFinalContent` + per-page `saveFC`, `onPageProgress`, meta threading, and `finalizeMultiPageGeneration(fc, briefGoal)` at the tail (MANDATORY — drops the in-progress marker + stamps goal-ref CTAs).
+
+Work-specific divergences from thing.ts (why NOT extracted yet): the work copy route REQUIRES `page.sections` in the payload (WorkCopyPageSchema min 1), so the fan-out sends CHROME-INCLUSIVE sections for home (`['header', ...page.sections, 'footer']`) while handing `mergePageIntoFinalContent` the BODY-ONLY page (it re-injects chrome itself); the Brief travels in the body (decision #4) instead of the product field-remap payload; template-knob seeding mirrors `runWorkSkeleton` (`preloadTemplate(...).defaultKnobs` -> `themeValues.knobs`); no collections fan-out (granth/atelier declare no collection family). Extracting ONE audience-agnostic driver shared by thing+work was CONSIDERED and DEFERRED for this track — the file header records the duplication (breadcrumb) so a future refactor finds BOTH copies.
+
+### Allow-list guard (plan step 4 / N4) + enumerated isWorkMultipage templates
+Per the orchestrator ruling the guard is a **template ALLOW-LIST**, not "all `isWorkMultipage()` templates": `WORK_COPY_ENGINE_TEMPLATES = ['atelier']` (named const, easy to extend). `workCopyEngineEnabled(templateId)` returns true ONLY when `NEXT_PUBLIC_WORK_COPY_ENGINE === 'true'` AND `templateId` is in the allow-list. Every other work-multipage template keeps today's skeleton path even with the flag ON, until explicitly added.
+
+Enumerated `copyEngines: ['work']` templates and their `multipage` capability (from `templateMeta.ts`):
+- `granth` — capabilities `[]` -> NOT multipage -> single-page writer generator (`runWorkGeneration`); never enters the multipage fork.
+- `lumen` — `['bilingual','gallery','lead-form']` -> NOT multipage (bespoke/retired-in-place) -> not affected.
+- `atelier` — `['gallery','packages','multipage']` -> the ONLY work-multipage template today, and the ONLY allow-listed one.
+
+So today `isWorkMultipage()` => {atelier} exactly; the allow-list is belt-and-suspenders (a future work-multipage template does NOT auto-enable the LLM engine). N4 blast-radius eliminated.
+
+### Byte-identical routing proof (the 4 cases)
+`resolveWorkRoute` extracts the fork PURE (tested in work.llm.test.ts without rendering React). Proven:
+- (a) granth (not multipage) -> `'granth-generator'` (runWorkGeneration) regardless of flag.
+- (b) flag OFF + work-multipage -> `'skeleton'` (runWorkSkeleton, UNCHANGED). Default (flag unset) => this branch => byte-identical to today.
+- (c) flag ON + non-atelier (lumen) multipage -> `'skeleton'` (unchanged).
+- (d) flag ON + atelier multipage -> `'llm-fanout'` (runWorkLLMGeneration).
+`NEXT_PUBLIC_WORK_COPY_ENGINE` is build-time inlined (decision #8) — the flag defaults OFF (unset => false), so the existing skeleton + granth behavior is provably unchanged until a REDEPLOY with the flag on + atelier.
+
+### Full-site capture (AC-1) — real gpt-4o-mini, `CAPTURE=1 npx vitest run captureGoldenWork`
+Ran on real OpenAI `gpt-4o-mini` (USE_OPENAI=true, cheap tier, key present). Standard archetype -> 7 pages, ALL `complete=true`, missing=(none). Per-page summary:
+- **home** (`/`): header + hero (role_line/name/quote/cta — atelier hero uses those keys, NOT eyebrow/heading, so the dump's "PROMISE LINE" labels read empty but the hero IS filled) + work (4 group cards) + proof (heading, no fabricated quotes) + contact + footer.
+- **work** (`/work`): work gallery intro + 4 group cards (one card keeps "Event photography (per hour)") + proof heading + footer.
+- **work-group** (`/work/[group]`): work intro + 4 cards + footer (singleton group-page template).
+- **prices** (`/prices`): packages — 4 lines, prices VERBATIM (EUR 500 / 350 / 250 / 100), per-hour nuance preserved in the last package name.
+- **about** (`/about`): about heading + bio (facts-only framing: Netherlands, storytelling; no fabricated credentials) + proof heading.
+- **contact** (`/contact`): contact heading + contact_method + cta + footer.
+- (every page filled >=1 section.)
+
+**Facts-law: PASS.** No invented groups (exactly the 4 real priced groups; weddings/family breadth correctly absent). No invented prices (exact amounts only). Empty praise -> proof sections carry a heading but ZERO fabricated quotes (empty-praise strip holds site-wide). No fabricated biography; the Dutch about-harvest did NOT leak (no NL fragments, no invented Art-History degree). Language EN throughout. No non-lean bloat (headings short; the About bio is one lean paragraph). Only non-facts-law nits (same as phase 4): footer "(c) 2023" stale chrome year; the home work-card display name drops the "(per hour)" suffix (nuance survives on `/prices`).
+
+### Invariant compliance (decision #10)
+Plain sitemap pages NEVER get `collectionKey`/`kind:'collectionItem'` and `materializeIntoPages` is never called — the fan-out only calls `mergePageIntoFinalContent` (body-only, chrome-at-boundaries). The orchestration test asserts every persisted page has `collectionKey===undefined` and `kind!=='collectionItem'`, and that `finalizeMultiPageGeneration` fires EXACTLY ONCE (dropping `generationProgress`). `finalizeMultiPageGeneration` is mandatory (goal-CTA stamping) and threaded `briefGoal` from the resolved Brief.
+
+### Deviations
+- **`buildWorkInput` moved to the store** (was local in GeneratingSlot). Needed to reconstruct the resolved Brief (`resolveWorkBrief`) + derive `sourceUrl` from the scrape entry via the store-private `rawInputIsUrl`; mirrors buildThingInput/buildTrustInput. `useWizardStore.ts` is on the Files-touched list for exactly this. Removed now-unused `fieldStr`/`fieldArr`/`SitemapPage` imports from GeneratingSlot.
+- **3 additive optional fields on `WorkGenerationInput`** (brief/sourceUrl/strategy). Type-only additions; runWorkGeneration/runWorkSkeleton bodies untouched, and they ignore the new fields.
+- **`sourceUrl` is derived, not a new field.** Read from the scrape entry `rawInput` when URL-like (tone-only SiteContext lookup, server-side); absent on manual-entry runs.
+- **`buildWorkInput` reconstructs a minimal Brief** from `briefFacts` (the hydrate snapshot carrying `facts.work`) + businessType + composed goal. All BriefSchema fields are optional, so it validates at the routes. It does NOT re-map per-field wizard edits into `facts.work` — that field->facts writeback is out of this phase's scope (the pilot's facts come from the hydrated Brief). Logged as an open risk.
+- **`git checkout -- kundius.home.{json,read.txt}`** — the authorized `CAPTURE=1` run re-executes the always-on HOME capture too, which overwrote the phase-4 founder-APPROVED home artifact with a fresh (non-deterministic) capture. I restored the two files to their committed phase-4 versions so the approved golden is preserved. This is a file-restore of an unintended side-effect, not a branch/history git op; disclosed here for transparency.
+
+### tsc / test / lint
+- `npx tsc --noEmit`: clean except the pre-existing unrelated `src/app/page.tsx(6,26)` founder.jpg error (out of scope, ignored per instructions).
+- `npm run test:run`: 177 files passed | 1 skipped; 2941 passed | 17 skipped. No regressions (up 1 file / 16 tests from phase 4: the new adapter test file). Full-site golden SKIPS without CAPTURE=1.
+- `CAPTURE=1 npx vitest run captureGoldenWork`: 4 passed (2 sanity + HOME + FULL-SITE), real gpt-4o-mini.
+- `npx eslint` on all touched files: 0 errors; 1 PRE-EXISTING warning in GeneratingSlot.tsx (`useCallback` missing `setGenerationError` dep — on the untouched `run` hook, not introduced here).
+
+### Open risks
+- **Flag-on prerequisite (unchanged):** phase-B newGeneration Gate-0 QA is still pending; the flag stays OFF until the founder rules. Enabling atelier LLM copy for real requires a redeploy (build-time inlined).
+- **Field->facts writeback:** wizard edits to work fields are not re-projected into `facts.work` by `buildWorkInput` — the copy engine reads the hydrated `briefFacts` snapshot. Fine for the Kundius pilot (facts hydrated from the Brief); a general edit-then-generate flow would need a store->facts.work mapping (out of scope, flag for a follow-up).
+- **`sourceUrl`/SiteContext:** only fires when the entry was a URL scrape; manual-entry work runs generate with no tone reference (acceptable — facts are the claim backbone).
+- Full-site golden committed off the current fixture — re-capture if the founder revises Kundius facts.

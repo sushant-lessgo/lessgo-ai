@@ -320,3 +320,141 @@ describe.skipIf(process.env.CAPTURE !== '1')(
     }, 180_000);
   }
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CAPTURE — the FULL-SITE golden (work-copy-engine phase 5, AC-1). Iterates ALL
+// standard-archetype sitemap pages, generate-copy per page, and writes
+// goldens/kundius.full.json + a readable dump. Founder-authorized only (CAPTURE=1).
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe.skipIf(process.env.CAPTURE !== '1')(
+  'CAPTURE real-LLM Kundius FULL-SITE golden',
+  () => {
+    it('slim strategy → strategy call → per-page copy (all pages) → goldens/kundius.full.*', async () => {
+      const facts = kundiusWorkFacts;
+      const professionRow = kundiusProfessionRow;
+
+      // 1. Deterministic slim strategy (no AI) + derived voice.
+      const structure = assembleWorkStructure(facts, professionRow);
+      const pricePosition = derivePricePosition(facts);
+      const establishment: Establishment =
+        facts.establishment ?? DEFAULT_ESTABLISHMENT;
+      const profession = resolveWorkProfession(professionRow.key);
+      const voice = selectWorkVoice({ professionRow, pricePosition, establishment });
+
+      // 2. The ONE small AI strategy call → assemble WorkStrategyOutput.
+      const strategyPrompt = buildWorkStrategyPrompt({
+        businessName: facts.identity?.name,
+        profession,
+        workNoun: professionWording[profession].workGroup,
+        pricePosition,
+        establishment,
+        dreamClient: facts.dreamClient,
+        praise: facts.praise ?? [],
+        groupNames: (facts.groups ?? []).map((g) => g.name),
+        primaryLanguage: facts.languages?.[0] ?? 'en',
+        voiceBlock: formatWorkVoiceForPrompt(voice),
+      });
+
+      const { generateWithSchema, generateRawJson } = await import('@/lib/aiClient');
+
+      const llmResponse = await generateWithSchema(
+        'work-strategy',
+        [{ role: 'user', content: strategyPrompt }],
+        WorkStrategyResponseSchema,
+        'workStrategy'
+      );
+      const strategy = assembleWorkStrategy({
+        llmResponse,
+        facts,
+        professionRow,
+        structure,
+      });
+
+      // About-text harvest travels as a tone-only SiteContext reference.
+      const siteContextBlock = `## EXISTING-SITE TONE REFERENCE (voice only — do NOT copy verbatim, do NOT lift claims)\n${kundiusAboutHarvest}`;
+
+      // 3. Fan out over EVERY sitemap page (mirrors runWorkLLMGeneration): home is
+      //    chrome-inclusive (strategy.sections); inner pages are body-only.
+      const pageCopies: Record<
+        string,
+        { page: WorkCopyPage; copy: Record<string, SectionCopy>; complete: boolean; missingSections: string[] }
+      > = {};
+      for (let i = 0; i < strategy.sitemap.length; i++) {
+        const sp = strategy.sitemap[i];
+        const isHome = sp.pathSlug === '/';
+        const pageSections = isHome
+          ? strategy.sections
+          : ['header', ...sp.sections, 'footer'];
+        const workPage: WorkCopyPage = {
+          archetypeKey: sp.archetypeKey,
+          title: sp.title,
+          pathSlug: sp.pathSlug,
+          isHome,
+          sections: pageSections,
+        };
+        const copyPrompt = buildWorkCopyPrompt({
+          strategy,
+          page: workPage,
+          facts,
+          voice,
+          siteContextBlock,
+        });
+        const raw = (await generateRawJson(
+          'work-copy',
+          copyPrompt,
+          CopyResponseSchema
+        )) as Record<string, SectionCopy>;
+        const pageUiblocks: Record<string, string> = {};
+        for (const section of pageSections) pageUiblocks[section] = section;
+        const copy = parseWorkCopy(raw, pageUiblocks, facts.praise);
+        const { complete, missingSections } = validateWorkCopyCompleteness(
+          copy,
+          pageUiblocks
+        );
+        pageCopies[sp.archetypeKey] = { page: workPage, copy, complete, missingSections };
+      }
+
+      // 4. Write the full-site golden + a readable per-page dump.
+      fs.mkdirSync(OUT_DIR, { recursive: true });
+      const jsonFile = path.join(OUT_DIR, 'kundius.full.json');
+      const txtFile = path.join(OUT_DIR, 'kundius.full.read.txt');
+      fs.writeFileSync(
+        jsonFile,
+        JSON.stringify(
+          {
+            fixture: 'REAL KUNDIUS FACTS (phase-4 gate 2026-07-14) — full-site fan-out (phase 5, AC-1)',
+            capturedAt: new Date().toISOString(),
+            archetype: strategy.archetype,
+            strategy,
+            pages: pageCopies,
+          },
+          null,
+          2
+        )
+      );
+
+      const dump: string[] = [];
+      dump.push('KUNDIUS — WORK COPY ENGINE — FULL-SITE GOLDEN (founder read)');
+      dump.push(`archetype: ${strategy.archetype}`);
+      dump.push('');
+      for (const [key, entry] of Object.entries(pageCopies)) {
+        dump.push(`########## PAGE: ${entry.page.title} (${entry.page.pathSlug}) [${key}] ##########`);
+        dump.push(`  complete=${entry.complete} missing=${entry.missingSections.join(',') || '(none)'}`);
+        dump.push(renderStringsDump(strategy, entry.copy));
+        dump.push('');
+      }
+      fs.writeFileSync(txtFile, dump.join('\n'));
+
+      // eslint-disable-next-line no-console
+      console.log(
+        `[capture] wrote ${jsonFile} + ${txtFile} — ${Object.keys(pageCopies).length} pages`
+      );
+
+      // Every page filled at least one section (AC-1 lean full site).
+      for (const entry of Object.values(pageCopies)) {
+        expect(Object.keys(entry.copy).length).toBeGreaterThan(0);
+      }
+    }, 300_000);
+  }
+);

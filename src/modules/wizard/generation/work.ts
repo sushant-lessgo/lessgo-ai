@@ -32,8 +32,21 @@ import { preloadTemplate } from '@/modules/templates/registry';
 import type { TemplateId } from '@/types/service';
 import type { CollectionsFacts } from '@/modules/brief/collections';
 import type { SitemapPage } from '@/types/product';
+import type { Brief } from '@/types/brief';
+import type { WorkStrategyOutput } from '@/modules/audience/work/strategy/parseStrategyWork';
 import { saveDraft } from './finalize';
 import type { GenerationCallbacks, GenerationResult } from './index';
+
+// work-copy-engine phase 5 — the guarded WORK LLM multi-page fan-out. Kept in a
+// sibling file (work.llm.ts) so this deterministic adapter's diff stays minimal;
+// re-exported here so callers have ONE work-adapter import surface.
+export {
+  runWorkLLMGeneration,
+  workCopyEngineEnabled,
+  resolveWorkRoute,
+  WORK_COPY_ENGINE_TEMPLATES,
+  type WorkRoutePath,
+} from './work.llm';
 
 // ---------------------------------------------------------------------------
 // Adapter input — the PLAIN projection of `useWizardStore` the slot builds.
@@ -62,6 +75,20 @@ export interface WorkGenerationInput {
   // (single-page work ignores it). WorkGenerationInput can't import the store
   // (firewall), so the slot carries the page list in as plain data.
   pages?: SitemapPage[];
+
+  // work-copy-engine phase 5 — the LLM fan-out fields. IGNORED by the granth
+  // generator (runWorkGeneration) + the skeleton path (runWorkSkeleton) — they
+  // never call the work copy routes. Consumed ONLY by runWorkLLMGeneration.
+  /** Resolved Brief (facts.work + businessType + composed goal) the work
+   *  strategy/generate-copy routes read via getWorkFacts. */
+  brief?: Brief | null;
+  /** SiteContext tone-lookup key (the server fetches facts/excerpts; tone-only —
+   *  never a claim source). */
+  sourceUrl?: string;
+  /** Pre-fetched work strategy (reuse — skips the strategy call). Normally
+   *  absent: the work wizard does NOT fetch strategy pre-gate (the multipage
+   *  sitemap is seeded chargeless from the page-archetype menu). */
+  strategy?: WorkStrategyOutput | null;
 }
 
 const REDIRECT = (tokenId: string) => `/edit/${tokenId}`;
