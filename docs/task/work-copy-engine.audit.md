@@ -170,3 +170,118 @@ CONFIRMED: the copy path reads STRUCTURE from `strategy.sitemap` / `page.section
 
 ### Hardening (impl-review carry-forward)
 - `injectPraise` HARDENED: empty/absent praise + a `proof` section now forces `proof.quotes = []` (was a no-op) — strips any LLM-fabricated testimonial so zero-fabrication holds even when there is no real praise. Added a fabrication-strip test (+1 test, 6 total in injectPraise; existing "no praise" test now asserts `[]`). tsc clean (ignoring pre-existing page.tsx:6 founder.jpg), full suite green: 2923 passed | 15 skipped.
+
+## Phase 4 (scaffold) — golden-capture harness + Kundius fixture
+
+> SCAFFOLD ONLY. The real-LLM `CAPTURE=1` run was NOT executed (founder-gated).
+> The golden artifact is NOT captured yet — it awaits the founder's REAL Kundius
+> facts (the fixture is REPRESENTATIVE placeholder) + capture authorization.
+
+### Files added
+- ADD `src/modules/audience/work/__tests__/fixtures/kundiusBrief.ts`
+- ADD `src/modules/audience/work/__tests__/captureGoldenWork.test.ts`
+- ADD `src/modules/audience/work/__tests__/goldens/README.md` (dir marker + capture instructions; no artifact committed)
+
+`src/modules/audience/work/__tests__/goldens/kundius.home.json` (the captured
+artifact on the plan's Files-touched list) is intentionally NOT created — it is
+produced by the authorized `CAPTURE=1` run later, off real founder facts.
+
+### Fixture shape (kundiusBrief.ts) — REPRESENTATIVE PLACEHOLDER
+Header carries the mandated prominent comment. Real facts drop in by editing
+VALUES only (shape is the frozen `WorkFacts` contract). Exports:
+- `kundiusWorkFacts: WorkFacts` — established, premium, bilingual EN+NL photography
+  studio. identity (name/location/reach); establishment `'established'`;
+  dreamClient (discerning/editorial/timeless → premium signal); 3 verbatim
+  `praise` strings (sits exactly at the contract max = 3, a useful clamp edge);
+  contactMethod `'form'`; `languages: ['en','nl']` (EN primary); 3 groups —
+  Weddings (`from €4500`, cover photos), Editorial & Campaigns (`on-request`,
+  story kind, cover), Portraits (`exact €1200`). The premium signals
+  (on-request + high stated amount + premium dreamClient + premium praise) make
+  `derivePricePosition → 'premium'` (asserted by the always-on sanity test).
+- `kundiusBrief: Brief` — wraps the facts (`facts.work`), `businessType:
+  'photographer'`, `copyEngine: 'work'`, `locales: ['en','nl']`.
+- `kundiusProfessionRow: WorkProfessionRow` — `{ key: 'photographer' }`.
+- `kundiusAboutHarvest: string` — the old-site about-text paragraph. **There is
+  NO WorkFacts slot for about text** (slots: identity/groups/establishment/
+  dreamClient/praise/contactMethod/languages), so it is exported SEPARATELY and
+  fed to the copy prompt as a tone-only `siteContextBlock` (mirrors how the
+  production route feeds SiteContext by `sourceUrl`) — never a fact, never
+  copied verbatim, never a claim source.
+
+### How the harness works (captureGoldenWork.test.ts)
+Mirrors `src/modules/audience/__tests__/captureGolden.test.ts`: `dotenv` loads
+`.env.local`; `@/lib/aiClient` is dynamic-imported INSIDE the capture test so a
+no-key run never loads it.
+
+- **Always-on sanity (no network, part of `test:run`):** asserts the fixture
+  derives `'premium'` and assembles a deterministic HOME structure (twice-equal;
+  storyBranch established; primaryLanguage en; leadGroups curated). This is what
+  keeps the fixture honest without a capture run.
+- **CAPTURE-gated (`describe.skipIf(process.env.CAPTURE !== '1')`):** end-to-end
+  HOME-only run — (1) `assembleWorkStructure` deterministic slim strategy,
+  (2) `buildWorkStrategyPrompt` → `generateWithSchema('work-strategy', …)` →
+  `assembleWorkStrategy`, (3) build HOME `WorkCopyPage` (chrome-inclusive
+  `strategy.sections`, matching the route default) → `buildWorkCopyPrompt`
+  (siteContextBlock = the about-harvest tone reference) →
+  `generateRawJson('work-copy', …)` → `parseWorkCopy` (contract defaults +
+  verbatim praise injection + id backfill). Writes two artifacts to `goldens/`.
+
+### Run it (founder-authorized only)
+```
+CAPTURE=1 npx vitest run captureGoldenWork
+```
+Without `CAPTURE=1` the capture SKIPS cleanly (no network, no cost); only the
+two sanity checks run.
+
+### Rendered-strings dump (what the founder READS)
+`goldens/kundius.home.read.txt` — a human-readable dump with a placeholder
+warning banner, then, pulled from the parsed HOME copy + strategy:
+- per-page one-liner / positioning (positioningAngle, storyAngle, voiceNotes,
+  archetype, home section list)
+- promise line (hero eyebrow/heading/lead/CTA)
+- gallery intros/captions (work eyebrow/heading/lead + each group card name)
+- story (about eyebrow/heading/bio)
+- prices framing (packages eyebrow/heading + each package name/price_line/description)
+- proof/praise (proof eyebrow/heading/awards_line + each injected quote text/source)
+- contact nudge (contact eyebrow/heading/note/CTA)
+- an ALL-SECTIONS raw string dump as a catch-all
+`goldens/kundius.home.json` holds the full strategy JSON + parsed HOME copy JSON
++ capture meta (complete/missingSections) for the offline record.
+
+### Wiring issues found
+None. The phase 1-3 exports compose cleanly for a HOME-only end-to-end run — no
+out-of-scope engine edits were needed. (The capture path itself is only
+exercisable under `CAPTURE=1`, which was NOT run; a real wiring bug there would
+surface at the authorized capture.)
+
+### Deviations from the plan
+- **`goldens/kundius.home.json` not created.** The plan lists the captured
+  artifact in Files-touched, but this phase is scaffold-only (no `CAPTURE=1`).
+  Committing a placeholder artifact would misrepresent it as a founder-read
+  golden. Added `goldens/README.md` as the dir marker instead; the JSON lands on
+  the authorized capture. Conservative, in-scope.
+- **About-text harvest is a separate export, not a WorkFacts field.** WorkFacts
+  has no about-text slot; adding one would be an out-of-scope schema change. It
+  travels as a `siteContextBlock` tone reference (faithful to the production
+  SiteContext path). Logged as the conservative choice.
+- **An always-on sanity describe was added alongside the CAPTURE describe.** The
+  plan named only the capture test; the sanity block validates the fixture
+  (premium + deterministic structure) within `test:run` with zero network — this
+  is the "ensure the pricePosition test would pass" requirement, kept in-file.
+
+### Test / tsc / lint results
+- `npx tsc --noEmit`: clean except the pre-existing, unrelated
+  `src/app/page.tsx(6,26)` missing `@/assets/images/founder.jpg` (out of scope).
+- `npx vitest run captureGoldenWork`: 2 passed | 1 skipped (the capture) — SKIP
+  confirmed, no network.
+- Full `npm run test:run`: 176 files passed | 1 skipped; 2925 passed | 16
+  skipped (capture adds the one new skip). No regressions.
+- `npx eslint` on both new source files: clean.
+
+### Open risks
+- The fixture is REPRESENTATIVE placeholder. The golden read is NOT authoritative
+  until the founder replaces the values with Kundius's real Brief.
+- The CAPTURE path is unexecuted; a latent wiring bug (e.g. a section key the
+  contract does not carry, model output shape) would only surface at the
+  authorized real-LLM run. The always-on sanity de-risks the deterministic half
+  only.
