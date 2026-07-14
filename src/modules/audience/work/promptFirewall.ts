@@ -23,8 +23,10 @@ export const WORK_FORBIDDEN_KEYS = ['templateId', 'skeletonId', 'variantId'] as 
 
 /**
  * Template/skeleton NAME tokens (+ identity keys) forbidden in any built prompt
- * string. Lowercased; matched as whole-ish substrings. This is the current work +
- * cross-vertical template roster — extend when a new work template ships.
+ * string. Lowercased; matched as WHOLE WORDS (word-boundary regex) so common-
+ * English substrings — flexible, complex, resurgence, unhearth — do NOT false-
+ * positive on lex / surge / hearth. This is the current work + cross-vertical
+ * template roster — extend when a new work template ships.
  */
 export const TEMPLATE_NAME_TOKENS = [
   'atelier',
@@ -65,9 +67,12 @@ export function assertNoTemplateLeak(input: unknown, where: string): void {
  */
 export function assertNoTemplateNamesInText(text: string, where: string): void {
   if (process.env.NODE_ENV === 'production') return;
-  const haystack = text.toLowerCase();
   for (const token of TEMPLATE_NAME_TOKENS) {
-    if (haystack.includes(token)) {
+    // WORD-BOUNDARY match (case-insensitive): a real leak like " lex " or
+    // "hearth" as its own word is caught, but substrings (flexible / complex /
+    // resurgence / unhearth) are not.
+    const re = new RegExp(`\\b${token}\\b`, 'i');
+    if (re.test(text)) {
       throw new Error(
         `[work prompt firewall] ${where} produced a prompt containing template ` +
           `token "${token}" — copy prompts must be template-agnostic.`

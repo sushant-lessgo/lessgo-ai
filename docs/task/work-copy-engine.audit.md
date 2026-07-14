@@ -103,3 +103,70 @@ Parallel to `ProductStrategyOutput` — deterministic structure + narrative fiel
 ### Open risks
 - `TEMPLATE_NAME_TOKENS` is a manual roster — a NEW work template name not added here would slip the string guard. Low risk (dev-only guard; roster covers all current templates); noted for whoever adds a template.
 - `uiblocks` identity map is a phase-2 placeholder shape; phase 3/5 copy generation must confirm it reads `sections`/`sitemap` (not `uiblocks` block names) or that the identity map suffices.
+
+## Phase 3 — work copy prompt + parser + generate-copy route
+
+### Files changed
+- ADD `src/modules/audience/work/workLibrary.ts`
+- ADD `src/modules/audience/work/copyPrompt.ts`
+- ADD `src/modules/audience/work/copyPrompt.factsLaw.test.ts`
+- ADD `src/modules/audience/work/injectPraise.ts`
+- ADD `src/modules/audience/work/injectPraise.test.ts`
+- ADD `src/modules/audience/work/parseCopy.ts`
+- ADD `src/modules/audience/work/parseCopy.test.ts`
+- MODIFY `src/modules/prompt/mockResponseGeneratorWork.ts` (fleshed out the copy mock)
+- ADD `src/app/api/audience/work/generate-copy/route.ts`
+- MODIFY `src/modules/audience/work/promptFirewall.ts` (word-boundary fix)
+- MODIFY `src/modules/audience/work/promptFirewall.test.ts` (word-boundary tests)
+
+### What was built
+
+**workLibrary.ts** — introduces the typed `WorkLibrary`/`WorkLibraryGroup` object (a pure projection of `WorkFacts`; nearest prior art `CollectionsFacts`) + `buildWorkLibraryPromptBlock(facts)` mirroring `buildSiteContextPromptBlock`. Renders identity, groups (name/kind VERBATIM), `formatWorkPrice` (verbatim amount+currency, mode-phrased: exact `€7777` / from `from €7777` / on-request `On request`), photo counts, sub-items, dream client, and verbatim praise. Framing states the never-invent / never-pad law. `formatWorkPrice` is exported (reused by the mock).
+
+**copyPrompt.ts** — `buildWorkCopyPrompt(input)` = the facts-law core, inheriting the service binding-rules pattern:
+- Static numbered RULES 1-10: (1) PRIMARY-LANGUAGE directive "Write EVERY string in <language>" from `strategy.primaryLanguage`; (2) anti-invention (facts are law, graceful omission); (3) no-placeholder; (4) array min/max + LEAN length caps; (5) frame-don't-describe; (6) proof quotes injected — model writes only framing; (7) story ship-grade (facts-only, NO fabricated biography — AC-4), plus an extra `new`-seller clause; (8) JSON-only; (9) output every section; (10) voice-forbidden words.
+- Dynamically-appended BINDING lines (rules 11+): "One card per stated item — NO padding" enumerating EXACTLY the stated group names + count; "Prices are law — verbatim or mode-phrased"; and a CONDITIONAL bracketed-placeholder rule for the ONE placeholder zone (agency case-study metrics, gated on `voice.profession === 'agency'` AND page has `results`).
+- FINAL SELF-CHECK echo (language, no-invention, exact card count, no proof quotes written).
+- Section specs built from the FROZEN `workElementContract` (not `layoutElementSchema` — work contracts are separate and all `manual_preferred`, so ALL non-system elements are listed, not an `ai_generated` subset which would be empty). LEAN per-element char caps via `WORK_CHAR_CAPS`. Voice block via `formatWorkVoiceForPrompt`. Calls `assertNoTemplateLeak(input)` at entry and `assertNoTemplateNamesInText(prompt)` at exit (the word-boundary fix is what makes running the string guard on the larger copy prompt safe).
+
+**injectPraise.ts** (work-LOCAL, design decision #9) — `injectPraise(sections, praise)` maps EVERY praise string VERBATIM into `proof.elements.quotes` as `{ text }` items, facts order, `source` omitted (never fabricated). Deterministic clamp to the contract max via `proofQuotesMax()` (reads `workElementContract.proof.collections.quotes.constraints.max` = 3 — law-driven, not hard-coded). No-op when praise empty or no `proof` section. NOT the service `injectRealTestimonials` (wrong key `testimonials`, single-quote pick, object input — three shape mismatches documented in-file).
+
+**parseCopy.ts** — `parseWorkCopy(raw, uiblocks, praise)` pipeline: `flattenReviewSentinel` -> `applyAllSchemaDefaults(raw, uiblocks, resolveWorkSchema)` (defaults resolved against the frozen work contract via the `resolveSchema` callback) -> `injectPraise` (work-LOCAL) -> `backfillWorkCollectionIds` (schema-driven off `workElementContract`, idempotent). `resolveWorkSchema(name)` maps a section/uiblock name to its contract schema (identity). `validateWorkCopyCompleteness` reports `complete`/`missingSections`. Story section `about` is DISTINCT from `proof`/`testimonials` — no service testimonials path can touch it.
+
+**mockResponseGeneratorWork.ts** — replaced the empty `generateMockWorkCopy` stub with a real canned per-page generator: `generateMockWorkCopy({ facts, sections })` fills required scalar elements (canned, deterministic) + facts-backed collections (`work.groups`, `packages.packages` from `facts.groups`, prices via `formatWorkPrice`); leaves `proof.quotes` empty (the parser injects real praise). Output is `CopyResponseSchema`-shaped and runs through the SAME `parseWorkCopy` pipeline. `MockWorkCopyInput` changed `{strategy}` -> `{sections}` (no other callers — phase 3 is first).
+
+**generate-copy/route.ts** — mirrors the product copy route. Consumes `{strategy, page?, uiblocks?, brief, sourceUrl?}`. Reads facts via `getWorkFacts(brief.facts)` (400 if absent). Resolves the target page (defaults to home = `strategy.sitemap[0]` + `strategy.sections`, chrome-inclusive). Auth via `requireAuth` + `withAIRateLimit`. Mock path (NEXT_PUBLIC_USE_MOCK_GPT / DEMO_TOKEN) -> `generateMockWorkCopy` -> `parseWorkCopy`, `meta.mock`, 0 credits. SiteContext fed server-side via `getFreshSiteContext(normalizeUrlKey(sourceUrl), 'work')` -> `buildSiteContextPromptBlock` (adapter passes only `sourceUrl`). Derives pricePosition + voice (pure code), builds prompt, `generateRawJson('work-copy', ..., CopyResponseSchema)` with server-side `MAX_RETRIES=2`, `parseWorkCopy`, degraded signals `meta.mock`/`meta.complete`/`missingSections`. Credits: reuses `UsageEventType.GENERATE_COPY` + `CREDIT_COSTS.GENERATE_COPY` — the SAME event/cost as the product copy route, NO new credit event.
+
+### Binding-rules structure
+Static RULES (language/anti-invention/no-placeholder/caps/frame/proof-injected/story/JSON/all-sections/voice) + dynamic binding lines appended after rule 10: one-card-per-stated-group (enumerates exact names + count, "emit FEWER, never pad"), prices-verbatim-or-mode-phrased, and the conditional agency-metrics placeholder (the ONE placeholder zone). Closed by a FINAL SELF-CHECK echo.
+
+### How injectPraise maps to proof.quotes
+Praise `string[]` -> `proof.elements.quotes = kept.map(text => ({ text }))` where `kept = praise.slice(0, proofQuotesMax())` — verbatim `text`, facts order, no `source`, clamp to contract max = 3. Item `id`s backfilled after injection by `backfillWorkCollectionIds` (system fillMode field). No-op when no `proof` section.
+
+### How the route mirrors product
+Credits (GENERATE_COPY, no new event), mock path (canned + `meta.mock`, 0 credits), degraded signals (`meta.complete`/`missingSections`), SiteContext (server-side by `sourceUrl`, audienceType `'work'`), server-side retry x2, `requireAuth`+rate-limit guards — all one-to-one with the product copy route.
+
+### Firewall word-boundary fix (authorized carry-forward)
+`assertNoTemplateNamesInText` changed from naive `haystack.includes(token)` to per-token word-boundary regex `new RegExp('\\b' + token + '\\b', 'i')`. Common-English substrings (flexible/complex/resurgence/unhearth) no longer false-positive on `lex`/`surge`/`hearth`; a real whole-word leak (` lex `, `hearth`) still throws. New tests assert both. This is what makes it safe for `buildWorkCopyPrompt` to run the string guard on the much larger, prose-heavy copy prompt.
+
+### uiblocks confirmation (structure source)
+CONFIRMED: the copy path reads STRUCTURE from `strategy.sitemap` / `page.sections` (and `strategy.sections` for home), NOT the inert `uiblocks` identity map. `uiblocks` is accepted by the route contract for parity + schema resolution only (the route derives `pageUiblocks` as an identity fallback per page section: `uiblocks[section] ?? section`), and `parseCopy` uses it purely to resolve each section's contract schema (identity -> `workElementContract[section]`). Section specs in the prompt iterate `page.sections`, looking up `workElementContract` directly.
+
+### Deviations from the plan
+- **copyPrompt lists ALL non-system elements, not an `ai_generated` subset.** The service pattern filters `generation === 'ai_generated'`; every work contract element is `manual_preferred` (granth lineage), so that filter would emit an empty spec. In the work engine the AI writes the copy, so the spec lists all non-system elements. In-scope, necessary for a working prompt; documented in-file.
+- **Copy prompt runs `assertNoTemplateNamesInText` on the final string.** The phase-3 plan text didn't spell this out, but the authorized word-boundary fix exists precisely because the copy prompt trips the string guard — so the guard IS wired in (parity with the strategy prompt + firewall completeness). Conservative, stronger-not-weaker.
+- **`generateMockWorkCopy` signature `{strategy}` -> `{facts, sections}`.** The phase-2 placeholder took `{strategy, facts}` and returned `{}`; the real per-page mock needs the page's section list. No other callers existed. In-scope.
+- **`WorkStrategySchema` in the route is `.passthrough()` and permissive.** The strategy is produced by our own assembler (not user input); the route only asserts the fields the prompt/parser read. Mirrors the product route's pragmatic strategy validation.
+
+### Test results
+- `npx tsc --noEmit`: clean except the pre-existing unrelated `src/app/page.tsx(6,26)` missing `@/assets/images/founder.jpg` (out of scope, ignored per instructions).
+- Work module + mock: 8 files, 68 tests, all pass — incl. the FACTS-LAW test (groups/prices verbatim in prompt; binding line enumerates EXACTLY the stated groups; ALL praise word-for-word in parsed `proof.quotes`, zero drops/extras; parser never pads card counts), injectPraise (verbatim/no-extras/no-drops/no-op/over-max clamp), parseCopy (defaults+injection+id backfill+idempotence+completeness), and the firewall word-boundary tests.
+- Full suite `npm run test:run`: 175 passed | 1 skipped (176 files); 2922 passed | 15 skipped (2937 tests). No regressions (up 3 files / 23 tests from phase 2).
+- `npx eslint` on all 11 touched files: clean, no errors introduced.
+
+### Open risks
+- The copy prompt's string firewall guard throws (dev/test only) if a seller's business name / group name / praise contains a template name AS A WHOLE WORD (e.g. a studio literally named "Lex"). Word-boundary matching removes the substring false positives; a genuine whole-word collision remains a (rare) dev-only throw — same behavior as the phase-2 strategy prompt.
+- `parseWorkCopy` trusts the LLM's card counts (anti-padding is enforced prompt-side, not clamped at parse); a misbehaving model could still over-emit groups. The facts-law guarantee proved here is that the PARSER introduces no padding and injects praise deterministically; hard parse-time group clamping was not added (would need a facts cross-check out of this phase's scope).
+
+### Hardening (impl-review carry-forward)
+- `injectPraise` HARDENED: empty/absent praise + a `proof` section now forces `proof.quotes = []` (was a no-op) — strips any LLM-fabricated testimonial so zero-fabrication holds even when there is no real praise. Added a fabrication-strip test (+1 test, 6 total in injectPraise; existing "no praise" test now asserts `[]`). tsc clean (ignoring pre-existing page.tsx:6 founder.jpg), full suite green: 2923 passed | 15 skipped.

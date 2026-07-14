@@ -15,7 +15,7 @@ Build the WORK copy engine: from a work Brief (`brief.facts.work`, phase-A contr
 
 - phase 1 deterministic slim-strategy core: done (commit e7be5151, review loops 1, verdict ship) | tsc+test green, workPages.ts untouched, Kundius→premium asserted
 - phase 2 work strategy route (the ONE small AI call): done (commit cc5cc7b1, review loops 1, verdict ship) | AI-only-angle schema + firewall tested; clampSectionList/creditSystem untouched. CARRY→p3: harden firewall substring→word-boundary; confirm copy reads sections/sitemap not uiblocks
-- phase 3 work copy prompt + parser + generate-copy route: pending
+- phase 3 work copy prompt + parser + generate-copy route: done (review loops 1, verdict ship) | facts-law core: verbatim praise→proof.quotes + empty-praise fabrication-strip, exact-group binding, no padding, story facts-only, firewall word-boundary. KNOWN-RISK→p4 gate: parser doesn't hard-clamp rogue group over-emission vs facts.groups (prompt-enforced only; validate at real-LLM gate)
 - phase 4 PILOT — Kundius golden, Home page only [HUMAN GATE]: pending
 - phase 5 adapter fan-out — full multi-page generation: pending
 - phase 6 story interview tier (Sugarman regen) [HUMAN GATE — orchestrator escalation re-check]: pending

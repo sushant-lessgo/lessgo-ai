@@ -46,6 +46,31 @@ describe('assertNoTemplateNamesInText (prompt-string guard)', () => {
   });
 });
 
+describe('assertNoTemplateNamesInText — word-boundary (phase-3 carry-forward fix)', () => {
+  // Naive `includes(token)` false-positived on common-English substrings once the
+  // larger phase-3 copy prompts carry real prose. Word-boundary matching fixes it:
+  // substrings pass, whole-word leaks still throw.
+  it('does NOT trip on common-English substrings of a token', () => {
+    for (const clean of [
+      'A flexible schedule for a demanding shoot.', // contains "lex"
+      'The brief was complex but rewarding.', // contains "lex"
+      'A resurgence of interest in film photography.', // contains "surge"
+      'They unhearth the story in every frame.', // contains "hearth"
+    ]) {
+      expect(() => assertNoTemplateNamesInText(clean, 'test')).not.toThrow();
+    }
+  });
+
+  it('STILL throws on a real whole-word template-name leak', () => {
+    expect(() => assertNoTemplateNamesInText('render with the lex skin', 'test')).toThrow(
+      /template token/
+    );
+    expect(() => assertNoTemplateNamesInText('use the hearth layout', 'test')).toThrow(
+      /template token/
+    );
+  });
+});
+
 describe('buildWorkStrategyPrompt is firewall-clean (AC-7 first half)', () => {
   // The prompt builder must never surface template identity, EVEN when the
   // surrounding call site is salted with template ids. It internally calls both
