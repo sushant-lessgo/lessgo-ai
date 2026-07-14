@@ -17,11 +17,12 @@
 //  5. Profession-adaptive words (shoot / project / piece / case study) come from
 //     `professionWording` below (same layer that personalizes questions).
 //
-// ── DRAFT / HUMAN GATE ──────────────────────────────────────────────────────
-//   Four names are DRAFTS awaiting the founder's pick at the merge gate — they
-//   carry `flagged: true`: hero ("Your promise"), ctaButton ("Your action
-//   button"), footer ("Page bottom"), logos ("Seen with / featured in").
-//   Ship the draft; the gate confirms or renames (one edit here).
+// ── SIGN-OFF / HUMAN GATE ────────────────────────────────────────────────────
+//   The four once-contested names are FOUNDER-APPROVED and frozen as of the
+//   work-contract merge: hero ("Your promise"), ctaButton ("Your action
+//   button"), footer ("Page bottom"), logos ("Seen with / featured in"). No
+//   entry carries `flagged` anymore; the `flagged?: true` FIELD stays available
+//   on the type for any future contested name (rename = one edit here).
 //
 // ── FIREWALL (D5) ───────────────────────────────────────────────────────────
 //   PURE DATA. Imports NOTHING at runtime — no react / stores / hooks / template
@@ -31,13 +32,14 @@
 //   alignment against `workSections` + `businessTypeKeys` instead.
 // ============================================================================
 
-/** One buyer-facing translation of an internal name. `flagged` = draft, gated. */
+/** One buyer-facing translation of an internal name. `flagged` = contested,
+ *  awaiting a founder ruling (unused now — all names signed off; reserved). */
 export interface WorkVocabEntry {
   /** What the seller sees — second person, visitor-benefit (rule 1 & 2). */
   userLabel: string;
   /** One-line explanation shown beside the label (rule 4). */
   description: string;
-  /** Draft name awaiting the founder's merge-gate ruling. */
+  /** Marks a contested name pending a founder ruling. Reserved for future use. */
   flagged?: true;
 }
 
@@ -57,7 +59,6 @@ export const workVocabulary: Record<string, WorkVocabEntry> = {
   hero: {
     userLabel: 'Your promise',
     description: 'the first thing visitors see',
-    flagged: true,
   },
   work: {
     userLabel: 'Your work',
@@ -83,7 +84,6 @@ export const workVocabulary: Record<string, WorkVocabEntry> = {
   footer: {
     userLabel: 'Page bottom',
     description: 'the quiet essentials on every page',
-    flagged: true,
   },
 
   // ── OPTIONAL sections ──
@@ -106,7 +106,6 @@ export const workVocabulary: Record<string, WorkVocabEntry> = {
   logos: {
     userLabel: 'Seen with / featured in',
     description: 'names that vouch for you',
-    flagged: true,
   },
   team: {
     userLabel: 'Your team',
@@ -132,7 +131,6 @@ export const workVocabulary: Record<string, WorkVocabEntry> = {
   ctaButton: {
     userLabel: 'Your action button',
     description: 'the one thing each page asks visitors to do',
-    flagged: true,
   },
   map: {
     userLabel: 'Where to find you',

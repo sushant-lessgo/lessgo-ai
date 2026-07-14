@@ -113,12 +113,8 @@ describe('vocab coverage', () => {
     }
   });
 
-  it('exactly the 4 agreed names carry `flagged`', () => {
-    const flagged = Object.entries(workVocabulary)
-      .filter(([, v]) => v.flagged === true)
-      .map(([k]) => k)
-      .sort();
-    expect(flagged).toEqual(['ctaButton', 'footer', 'hero', 'logos']);
+  it('no vocab entry carries `flagged` (all names founder-signed-off)', () => {
+    expect(Object.values(workVocabulary).filter((e) => e.flagged)).toHaveLength(0);
   });
 
   const professions: readonly WorkProfession[] = ['photographer', 'designer', 'writer', 'agency'];

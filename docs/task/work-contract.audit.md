@@ -437,3 +437,31 @@ photographer) and the hardcoded test set was stale; amended Phase 5 Files-touche
 
 ### Open risks
 - None. Full suite green; no product-code defect. Whole-diff gate passes.
+
+## Close-out — vocab sign-off
+
+**Files changed**
+- `src/modules/engines/workVocabulary.ts`
+- `src/modules/engines/workContract.test.ts`
+
+Founder approved all 4 buyer-words vocab names as-is (hero='Your promise',
+footer='Page bottom', logos='Seen with / featured in', ctaButton='Your action
+button'). The stale draft markers are now cleared.
+
+- `workVocabulary.ts`: removed `flagged: true` from all 4 entries; reworded the
+  DRAFT/HUMAN-GATE header comment to SIGN-OFF (founder-approved/frozen as of the
+  work-contract merge); updated the `WorkVocabEntry` JSDoc. Kept the
+  `flagged?: true` FIELD on the type (reserved for future contested names).
+- `workContract.test.ts`: replaced the "exactly the 4 agreed names carry flagged"
+  assertion with `expect(...filter(e => e.flagged)).toHaveLength(0)`; retitled the
+  test accordingly. All other vocab-coverage assertions untouched.
+
+**Deviations**: none of substance. Also lightly reworded the `WorkVocabEntry`
+type-field JSDoc in the same in-scope file (was "Draft name awaiting the
+founder's merge-gate ruling") so it no longer implies an active draft — reserved
+for future use.
+
+**Verification**: `npx tsc --noEmit` clean (exit 0); `npm run test:run --
+src/modules/engines` → 5 files, 207 passed, 0 failed.
+
+**Open risks**: none.
