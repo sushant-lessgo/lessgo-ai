@@ -245,3 +245,92 @@ accepts them with `amount`; accepts `{ mode: 'on-request' }` alone. Verified in 
 - Slot mechanics + group/tier assignments are phase-A judgement (no runtime consumer yet);
   track E may retune when wiring into the live contract. The committed conformance test (phase 5)
   will pin invariants; a real test file is deliberately NOT added here (phase 5 owns it).
+
+---
+
+## Phase 4 — profession rows + buyer-words vocabulary
+
+### Files changed
+- `src/modules/businessTypes/config.ts` (EDIT — added `designer` key + entry)
+- `src/modules/brief/bridge.ts` (EDIT — one mapping line for `designer`)
+- `src/modules/engines/workVocabulary.ts` (NEW — single-source buyer-words vocab)
+
+### Per-file summary
+
+**config.ts** — added `'designer'` to `businessTypeKeys` (between `photographer` and
+`app`) and a config-only `BusinessTypeEntry` mirroring photographer:
+- `copyEngine: 'work'`, `requiredCapabilities: ['gallery']` (unbacked → serve gate routes
+  to demand lane, intended honest non-serve), `defaultStyle: 'editorial-craft'` (verified
+  a valid `DesignStyle` — no deviation), `extractionSchemaKey: 'work'`,
+  `structureDefault: 'multi'`, `likelyIntents: ['enquiry','book-call','follow-social']`
+  (mirrors photographer, all valid `GoalIntent`s).
+- 3 `wizardFields`: `work` ("What do you design?"), `approach` ("How would you describe
+  your approach?"), `offer` ("What is the offer / next step?") — designer-worded.
+- Existing writer/photographer/agency/other rows untouched.
+
+**bridge.ts** — added `designer: 'agency'` to `BUSINESS_TYPE_TO_SERVICE_TYPE` (same as
+photographer's fallback, bridge.test.ts:58). No other consumer edits needed — the Record
+is `Partial`, serveMatrix/serveGate/z.enum iterate `businessTypeKeys`.
+
+**workVocabulary.ts** (NEW, pure data, zero runtime imports — firewall D5):
+- `WorkVocabEntry { userLabel; description; flagged? }` + `workVocabulary: Record<string,
+  WorkVocabEntry>` keyed by INTERNAL name.
+- `WorkProfession = 'photographer'|'designer'|'writer'|'agency'` + `professionWording`
+  Record (workItem/workGroup/processLabel/groupFallbackLabel) — all 4 professions incl.
+  agency NOW (ruling-proof per D3).
+- `dreamClientChips: Record<WorkProfession, readonly string[]>` — 7 chips each profession.
+
+### workVocabulary key list (25 keys)
+MUST sections: header, hero*, work, proof, packages, about, contact, footer*
+OPTIONAL sections: results, faq, process, stats, logos*, team, workdetail
+Proof shapes: testimonials (logos/results reuse the section entries — documented in-file)
+Non-section internals: featuredWork, ctaButton*, map, socialLinks, menu
+
+`flagged: true` on EXACTLY 4 (the merge-gate names, marked * above):
+- hero → "Your promise"
+- footer → "Page bottom"
+- logos → "Seen with / featured in"
+- ctaButton → "Your action button"
+
+### professionWording coverage
+photographer (shoot/galleries/"How a shoot works"/Galleries), designer
+(project/projects/"How a project works"/Projects), writer (piece/collections/"How working
+together works"/Collections), agency (case study/case studies/"How an engagement
+works"/Case studies).
+
+### dreamClientChips coverage
+photographer, designer, writer, agency — 7 seed chips each (within 5–8 range).
+
+### Deviations
+- None on values. `defaultStyle: 'editorial-craft'` and the three `likelyIntents` are all
+  valid enum members (verified against `designStyles` / `goalIntents`) — no substitution
+  needed.
+
+### Verification
+- `npx tsc --noEmit` — CLEAN (no output).
+- `npm run test:run -- src/modules/businessTypes src/modules/brief src/modules/collections src/modules/engines`
+  → 327 passed, 1 FAILED.
+
+### Open risk / orchestrator call (out-of-scope test)
+The one failure is `src/modules/businessTypes/config.test.ts:15` — a HARDCODED
+`expect(keys).toHaveLength(8)` (title: "has exactly the 8 seed keys…"). The adjacent
+derive-from-source assertion (`expect(keys).toEqual([...businessTypeKeys].sort())`, line
+14) PASSES. `config.test.ts` is NOT in this phase's Files-touched list, so per the plan
+("a test that hardcodes the businessType count… may need the orchestrator's call; report
+it, don't guess-edit an out-of-scope test") it is left unedited. Fix required: bump `8→9`
+on line 15 and update the test title/`toContain('designer')` — orchestrator's decision.
+
+### Deferred to merge human gate (do NOT block)
+- (a) the 4 flagged vocab names shipped as DRAFT (`flagged: true`).
+- (b) agency stays `copyEngine: 'trust'` (D3) — agency present only as a wording row.
+
+### Phase 4 follow-up — test count fix (orchestrator-approved, Files-touched amended)
+`src/modules/businessTypes/config.test.ts` added to this phase's scope by the coordinator
+(designer row is a spec acceptance criterion → stale hardcoded count MUST become 9):
+- line ~15: `toHaveLength(8)` → `toHaveLength(9)`; test title "8 seed keys" → "9 seed keys
+  … + designer"; added `expect(keys).toContain('designer')`. Minimal — no other edits.
+
+FINAL verification (WORKDIR):
+- `npx tsc --noEmit` — CLEAN.
+- `npm run test:run -- src/modules/businessTypes src/modules/brief src/modules/collections src/modules/engines`
+  → **328 passed / 0 failed** (12 files).

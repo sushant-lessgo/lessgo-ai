@@ -20,7 +20,7 @@ engines.
 - phase 1 work-core section freeze + element contract: done (review skipped — standard tier; designKit.test.ts added to scope by orchestrator for the intended contract-source flip; tsc clean, 1224 pass/0 fail)
 - phase 2 page vocabulary + site archetypes + proposal rule: done (review skipped — standard tier; tsc clean, 176 pass/0 fail; work-group auto-attachable behind PROMOTE_GROUP_MIN)
 - phase 3 work facts schema + 8 slots: done (review skipped — standard tier; tsc clean, 224 pass/0 fail; D2 honored; price on group → 7 top-level fact keys)
-- phase 4 profession rows + buyer-words vocabulary: pending
+- phase 4 profession rows + buyer-words vocabulary: done (review skipped — standard tier; config.test.ts count 8→9 added to scope by orchestrator; tsc clean, 328 pass/0 fail; 4 vocab names flagged + agency=trust drafts left for merge gate)
 - phase 5 conformance test + README + full green: pending
 
 ## Design decisions (read before implementing any phase)
