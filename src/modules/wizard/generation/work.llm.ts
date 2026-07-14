@@ -39,6 +39,7 @@ import type {
   WorkSitemapPage,
 } from '@/modules/audience/work/strategy/parseStrategyWork';
 import { saveDraft } from './finalize';
+import { WORK_COPY_ENGINE_TEMPLATES, isWorkCopyTemplate } from '@/lib/workCopyEngine';
 import type { WorkGenerationInput } from './work';
 import type { GenerationCallbacks, GenerationResult, GenerationMeta } from './index';
 
@@ -48,13 +49,12 @@ import type { GenerationCallbacks, GenerationResult, GenerationMeta } from './in
 
 /**
  * Founder-approved ALLOW-LIST of WORK templates the LLM copy engine may drive.
- * `atelier` is the ONLY tested/approved work-multipage template; every OTHER
- * work-multipage template (lumen, any future one) keeps today's SKELETON
- * (manual-fill) path even when the env flag is ON, until explicitly added here.
- * This eliminates the N4 flag-scope blast radius. Extend by appending a
- * templateId (named const so it's easy to find + widen).
+ * RELOCATED to the leaf module `@/lib/workCopyEngine` (single source of truth,
+ * shared with the editor's story-panel gate) — re-exported here so existing
+ * generation callers (`index.ts`, `work.ts`, `work.llm.test.ts`) keep their
+ * import surface unchanged.
  */
-export const WORK_COPY_ENGINE_TEMPLATES: readonly string[] = ['atelier'];
+export { WORK_COPY_ENGINE_TEMPLATES, isWorkCopyTemplate };
 
 /**
  * Whether the WORK LLM copy engine is enabled for `templateId`. TRUE only when
@@ -66,7 +66,7 @@ export const WORK_COPY_ENGINE_TEMPLATES: readonly string[] = ['atelier'];
  */
 export function workCopyEngineEnabled(templateId: string | null | undefined): boolean {
   if (process.env.NEXT_PUBLIC_WORK_COPY_ENGINE !== 'true') return false;
-  return !!templateId && WORK_COPY_ENGINE_TEMPLATES.includes(templateId);
+  return isWorkCopyTemplate(templateId);
 }
 
 export type WorkRoutePath = 'granth-generator' | 'skeleton' | 'llm-fanout';

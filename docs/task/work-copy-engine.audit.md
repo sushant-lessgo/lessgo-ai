@@ -403,3 +403,115 @@ Plain sitemap pages NEVER get `collectionKey`/`kind:'collectionItem'` and `mater
 - **Field->facts writeback:** wizard edits to work fields are not re-projected into `facts.work` by `buildWorkInput` — the copy engine reads the hydrated `briefFacts` snapshot. Fine for the Kundius pilot (facts hydrated from the Brief); a general edit-then-generate flow would need a store->facts.work mapping (out of scope, flag for a follow-up).
 - **`sourceUrl`/SiteContext:** only fires when the entry was a URL scrape; manual-entry work runs generate with no tone reference (acceptable — facts are the claim backbone).
 - Full-site golden committed off the current fixture — re-capture if the founder revises Kundius facts.
+
+## Phase 6 — story interview tier (Sugarman regen)
+
+### Files changed
+- ADD `src/modules/audience/work/storyInterview.ts` — single-section `about`/story prompt builder + contract validator.
+- ADD `src/modules/audience/work/storyInterview.test.ts` — prompt-shape + validation tests.
+- ADD `src/app/api/audience/work/regenerate-story/route.ts` — NEW dedicated work-copy story regen route.
+- ADD `src/app/api/audience/work/regenerate-story/route.test.ts` — guards + contract-validation + generator-parity tests.
+- MODIFY `src/hooks/editStore/aiActions.ts` — ADD `regenerateStoryFromInterview` (additive; existing actions untouched).
+- ADD `src/app/edit/[token]/components/StoryInterviewPanel.tsx` — minimal 3-input entry point.
+- MODIFY `src/app/edit/[token]/components/layout/MainContent.tsx` — single wiring point (about-section-gated panel render).
+
+`/api/regenerate-section/route.ts` was **NOT touched** — confirmed byte-identical via `git diff --stat HEAD` (empty diff).
+
+### storyInterview rule structure
+`buildStoryInterviewPrompt({ answers, facts, voice, siteContextBlock? })` composes: voice identity + `formatWorkVoiceForPrompt` block + establishment note; THE INTERVIEW block (the 3 answers = the only raw material); verbatim CLIENT PRAISE block (or an explicit "do NOT invent" note when empty); an about-section-ONLY spec (eyebrow/heading/bio); then 8 numbered RULES:
+1. primary-language directive (`facts.languages[0]`, "Write EVERY string in <lang>").
+2. **HOOK on the moment** — open the bio on the specific client moment (concrete scene, not summary).
+3. **BELIEF is the spine** — build the story to the craft belief.
+4. **Praise is the LANDING** — close on what the work leaves people with, verbatim where quoted, never invented.
+5. anti-invention (facts are law, no fabricated biography/year/award/roster/stat/history, graceful omission) + a `new`-seller anti-history clause (only emitted for `establishment === 'new'`).
+6. ship-grade lean (one true paragraph).
+7. voice-forbidden words.
+8. JSON-only + OUTPUT FORMAT (single `about` key).
+Firewall: `assertNoTemplateLeak(input)` on entry + `assertNoTemplateNamesInText(prompt)` on exit — no templateId/skeletonId/template names reach the prompt.
+
+### The new route — guards + contract-validation + parity
+`POST /api/audience/work/regenerate-story`:
+- **Guards:** `requireAICredits(req, SECTION_REGEN, CREDIT_COSTS.SECTION_REGENERATION)` (SAME cost/event as regenerate-section — **NO new credit event**, creditSystem.ts untouched), THEN body zod (`{tokenId, sectionId, interviewAnswers:{origin,moment,belief}, brief}`), THEN `getWorkFacts(brief.facts)` (400 if absent), THEN `assertProjectOwner(userId, tokenId, { action:'regenerate-story' })` BEFORE any charge/cross-tenant read (skipped in mock/demo). Matches the regenerate-section guard shape.
+- **Generation:** `derivePricePosition` + `selectWorkVoice` (pure code) then `buildStoryInterviewPrompt` then `generateRawJson('work-copy', ..., CopyResponseSchema)` on the SAME strong `work-copy` endpoint/model phase-3 copy uses, server-side retry `MAX_RETRIES=2`.
+- **Contract validation:** each attempt runs the phase-3 work parser `parseWorkCopy(response, {about:'about'}, facts.praise)` then `validateStoryAbout(parsed)` — REJECTS (retry, then 500 `generation_failed` recoverable) on a malformed/short shape (missing about, empty required element, or a sub-`MIN_STORY_BIO_CHARS` bio). Validation happens BEFORE returning.
+- **No persist:** returns `content` = `processed.about.elements` for the CLIENT to apply (mirrors regenerate-section's contract). `meta.mock`/`meta.attempts` carried; mock path (NEXT_PUBLIC_USE_MOCK_GPT / DEMO_TOKEN) uses `generateMockWorkCopy(['about'])` then same parse+validate, 0 credits.
+- **Parity guarantee:** BOTH story paths validate against the IDENTICAL `workElementContract.about`. Phase-3 generate-copy validates via `parseWorkCopy -> resolveWorkSchema('about') -> workElementContract.about`; this route validates via `validateStoryAbout -> aboutRequiredKeys() -> workElementContract.about`. `aboutRequiredKeys()` is DERIVED from the contract (filters `requirement === 'required'`), not hand-rolled — a route.test parity block asserts `resolveWorkSchema('about') === workElementContract.about`, the full element set matches, and `aboutRequiredKeys()` equals the contract's required elements. Test fails if either path drifts.
+- `about` is DISTINCT from `proof`/`testimonials`; only the story section is produced/returned.
+
+### aiActions additive action
+`regenerateStoryFromInterview(sectionId, interviewAnswers, brief)` — THIN parallel of `regenerateSection`: POSTs `{tokenId, sectionId, interviewAnswers, brief}` to `/api/audience/work/regenerate-story` and applies the returned `data.content` with the **byte-identical merge algorithm** regenerateSection uses (image-skip, string/object shape-preservation, history push, queuedChanges, aiMetadata reset, data-capture re-freeze via `queueAiBaselinePatch` + `trackRegen`, autosave). Existing actions are unchanged (verified — only an addition between `regenerateSection` and `regenerateElement`). The i18n regen-locale guard is applied.
+
+### Editor wiring point used
+`MainContent.tsx` — CONFIRMED as the section-regen host (it already dispatches `case 'regenerate-section': store.getState().regenerateSection(selectedSection)` at ~L287). The panel is surfaced there via ONE gated render: `mode === 'edit' && selectedSection?.split('-')[0] === 'about'` then an absolute-positioned `<StoryInterviewPanel sectionId={selectedSection} />`. Post-reveal only; not in the wizard flow. No other/unlisted host file needed.
+
+### Deviations from the plan
+- **`generateRawJson` (not `generateWithSchema`).** The plan text names `generateWithSchema`, but the phase-3 generate-copy route it says to mirror uses `generateRawJson('work-copy', ..., CopyResponseSchema)` precisely because `CopyResponseSchema` is `z.record` (no structured outputs). To stay TRUE to "the SAME strong path phase-3 uses" + "reuse the phase-3 work parser", I used `generateRawJson` on endpoint `'work-copy'` (identical model row/strength; `generateWithSchema` also routes by endpoint, so model selection is unchanged). Conservative, in-scope; logged here.
+- **`brief` is a caller-supplied arg on the store action + panel prop.** The editStore does NOT carry `facts.work` (the phase-5 documented field->facts writeback gap). So `regenerateStoryFromInterview` takes `brief` as an argument and the panel accepts it as a prop, rather than reading it from the store. The route/parser/parity are fully unit-tested; the LIVE editor path needs `facts.work` projected into the editor (a follow-up, matching the deferred manual-QA note). No new store field invented, no unlisted file edited.
+- **Store action accessed via `(store.getState() as any)` in the panel.** `regenerateStoryFromInterview` is additive and NOT declared on the shared `EditStore` actions type (`src/types/store/actions.ts` is out of this phase's Files-touched). To avoid editing an unlisted type file, the panel accesses the action through a cast. The store assembly spreads `createAIActions` (spread bypasses excess-property checks, so tsc stays green). Flagged for a future type declaration.
+- **`validateStoryAbout` adds a `MIN_STORY_BIO_CHARS` (40) short-shape gate** beyond bare presence. The contract has no charLimit; a one-word bio is not ship-grade. Conservative additional rejection; unit-tested.
+
+### Manual-QA (deferred, per task)
+Running the interview in a live editor (watch ONLY the story section update; proof/other sections untouched) is a FOLLOW-UP manual-test item — NOT run here. It additionally depends on wiring `facts.work` into the editor (the deviation above). Logic is covered by the route/action/parity/prompt unit tests.
+
+### tsc / test / lint
+- `npx tsc --noEmit`: clean except the pre-existing unrelated `src/app/page.tsx(6,26)` founder.jpg error (out of scope, ignored per instructions).
+- New tests: `storyInterview.test.ts` + `regenerate-story/route.test.ts` — 20 tests, all pass (prompt shape hook/belief/landing/anti-invention/language; validation accept+reject; owner guard; credits gate; contract-rejection with retry exhaustion -> 500; parity single-source-of-truth).
+- Full `npm run test:run`: 179 files passed | 1 skipped; 2961 passed | 17 skipped. No regressions (up 2 files / 20 tests from phase 5).
+- `npx eslint` on all touched files: 0 errors. 3 PRE-EXISTING warnings in MainContent.tsx (lines 157/159/562 — untouched `useCallback`/aria code, not introduced here).
+- `/api/regenerate-section/route.ts`: byte-identical (git diff empty).
+
+### Open risks
+- **Brief->editor gap:** the live story-interview call needs `facts.work` available in the editor; it is not yet (phase-5 writeback gap). Until wired, a live submit will 400 (`brief.facts.work is required`). Follow-up.
+- **Untyped store action:** `regenerateStoryFromInterview` is not on the `EditStore` actions type; the panel uses a cast. A future phase should declare it in `src/types/store/actions.ts`.
+- Contract-validation trusts the phase-3 parser's defaults; a model that returns an about with only whitespace is caught (empty-after-trim), but a plausible-but-fabricated bio is a CONTENT concern (facts-law is prompt-enforced), not a shape concern — same posture as phase 3.
+
+### Phase 6 — review-fix pass (impl-review follow-up)
+
+**Files changed (this pass):**
+- MODIFY `src/hooks/editStore/aiActions.ts` — defensive target guard on `regenerateStoryFromInterview` (FIX 2).
+- ADD `src/hooks/editStore/storyInterviewGuard.test.ts` — unit test for that guard.
+- (`MainContent.tsx` — NOT changed this pass; see the FIX 1 blocker below.)
+
+**FIX 2 (applied, defensive — reviewer non-blocking note).** `regenerateStoryFromInterview` now early-returns (with a `logger.warn`) when `sectionId.split('-')[0] !== 'about'`, BEFORE flipping `isGenerating` or hitting the network. This guards the untyped-cast entry point so a stray/mis-targeted call can never rewrite hero/proof/etc via the work-story route. `regenerateSection`/`regenerateElement` untouched; the about-path behavior is unchanged. Covered by `storyInterviewGuard.test.ts` (2 tests): non-about → no fetch + `isGenerating` stays false; about → reaches the `/api/audience/work/regenerate-story` POST.
+
+**FIX 1 (BLOCKED — could NOT apply as prescribed; needs orchestrator decision).** The task said to add `audienceType === 'work'` to the `MainContent.tsx` panel gate. This is unworkable, for two independent reasons:
+1. **Does not type-check.** The editStore `audienceType` union (`src/types/store/state.ts:375`) is `'product' | 'service' | 'ecommerce' | 'writer'` — there is NO `'work'`. `audienceType === 'work'` raises `TS2367` (no overlap).
+2. **Would never be true at runtime → silently breaks the feature.** Work is a *copyEngine*, not an audienceType. `serveGate.ts` bridges the work engine to an audience via the PICKED TEMPLATE: `TEMPLATE_AUDIENCE.granth = 'writer'`, `TEMPLATE_AUDIENCE.atelier = 'service'` (and `BRIDGEABLE_ENGINES.work = 'writer'` as fallback). So a work-copy-engine project's persisted `audienceType` is `'writer'` (granth) or `'service'` (atelier) — never `'work'` (confirmed by `serveGate.test.ts:263-275`). Gating on `'work'` would render the panel for NO project.
+
+No single `audienceType` value isolates the work engine either: work spans BOTH `'writer'` (granth) and `'service'` (atelier — the actual Kundius pilot). The real discriminator is the copyEngine, which the editStore does **not** carry (no `copyEngine`/`engine` field in `state.ts`; consistent with the phase-5 field→facts writeback gap). Fixing this correctly requires an OUT-OF-SCOPE store-shape change (add + hydrate a `copyEngine`/`engine` field in `src/types/store/state.ts` + `loadFromDraft`), which is explicitly forbidden for this pass ("Do NOT change store shape/selectors"; edit ONLY the two listed files). Per the STOP-and-report rule, I reverted the non-compiling gate to leave `MainContent.tsx` byte-identical to its phase-6 state (tree compiles) and am escalating.
+
+The underlying LEAK the reviewer flagged is REAL (the panel currently renders for ANY `about` section, including a plain-service project's) — it just cannot be closed with `audienceType` alone. Options for the orchestrator: (a) authorize the store-shape change to carry `copyEngine` into the editor and gate on `copyEngine === 'work'`; or (b) accept that this is blocked by the same Brief→editor gap already logged as the phase-6 top open risk (live submit already 400s without `facts.work`), and fold the gate into that follow-up.
+
+**Deferred follow-ups CONFIRMED still open (unchanged, non-blocking):**
+- `facts.work` editor writeback (Brief→editor projection) — the LIVE story-interview path still needs it; a live submit 400s until wired. Also the natural home for the correct work-engine panel gate.
+- Untyped store-action declaration — `regenerateStoryFromInterview` still not on `src/types/store/actions.ts`; panel + new guard test both reach it via cast.
+
+**review-fix verify:** `npx tsc --noEmit` clean except the pre-existing `src/app/page.tsx:6` founder.jpg error. `npm run test:run` green — 180 files passed | 1 skipped, 2963 passed | 17 skipped (up 1 file / 2 tests from phase 5's tally). `npx eslint` on `aiActions.ts` + `storyInterviewGuard.test.ts`: 0 errors. MainContent gate: verified-by-reading (unchanged; blocker above).
+
+---
+
+### Phase 6 — review-fix pass 2 (templateId-based panel gate)
+
+**Files changed (this pass):**
+- ADD `src/lib/workCopyEngine.ts` — leaf module (no React, no generation imports): relocated `WORK_COPY_ENGINE_TEMPLATES` + new `isWorkCopyTemplate(templateId)` membership predicate. Single source of truth.
+- ADD `src/lib/workCopyEngine.test.ts` — unit test for `isWorkCopyTemplate` (atelier → true; hearth/lex → false; null/undefined → false; allow-list === ['atelier']).
+- MODIFY `src/modules/wizard/generation/work.llm.ts` — re-point: import `WORK_COPY_ENGINE_TEMPLATES` + `isWorkCopyTemplate` from `@/lib/workCopyEngine`, re-export both (unchanged import surface for `index.ts`/`work.ts`/`work.llm.test.ts`). `workCopyEngineEnabled` now delegates its allow-list check to `isWorkCopyTemplate` — behavior identical (still env-flag AND membership).
+- MODIFY `src/app/edit/[token]/components/layout/MainContent.tsx` — read `templateId` from store (`useStoreState`); gate `StoryInterviewPanel` on `isWorkTemplate = isWorkCopyTemplate(templateId)` AND the `about-` section prefix.
+
+**The corrected fix.** The earlier `audienceType === 'work'` approach was wrong ('work' is a copyEngine, not an audienceType — see the prior FIX-1 blocked note). The correct discriminator is the PICKED TEMPLATE: the panel renders only when the project's `templateId` is on the work-copy-engine allow-list (`atelier`). This is the SAME set the generation fork uses (`workCopyEngineEnabled`), so editor panel and generator agree — no leak into generic service/writer `about-` sections (which caused the submit → 400 regression).
+
+**Why template-membership, NOT the `NEXT_PUBLIC_WORK_COPY_ENGINE` flag.** The panel gate uses `isWorkCopyTemplate` (pure membership), not `workCopyEngineEnabled` (env-flag AND membership). The story-regen route is independent of the generation kill-switch, so the panel should be usable for work-template projects in the editor regardless of the wizard flag. The env flag only gates the wizard's LLM fan-out generation path.
+
+**Allow-list relocation (single source of truth, generation behavior unchanged).** `WORK_COPY_ENGINE_TEMPLATES` moved out of `work.llm.ts` into the dependency-free leaf `@/lib/workCopyEngine`, so it can be imported into the editor bundle without dragging generation code along. `work.llm.ts` re-exports it, so `index.ts` / `work.ts` / `work.llm.test.ts` are untouched and still consume the same const. Purely additive/import-only for generation — zero behavior change.
+
+**FIX-2 guard retained.** The `aiActions.ts` `regenerateStoryFromInterview` no-op-if-not-about guard and its `storyInterviewGuard.test.ts` are UNCHANGED (not reverted).
+
+**Deviations:** none. All work stayed within the listed files.
+
+**Verify:**
+- `npx tsc --noEmit` — clean except the pre-existing `src/app/page.tsx:6` founder.jpg error (ignored per instruction).
+- `npm run test:run` — green: 181 files passed | 1 skipped, 2967 passed | 17 skipped. The phase-5 byte-identical routing tests in `work.llm.test.ts` still pass after the const relocation (20 tests across the leaf test + work.llm.test.ts confirmed).
+- `npx eslint` on all four touched files — 0 errors (3 pre-existing warnings in MainContent.tsx, none on changed lines).
+- MainContent gate verified-by-reading (render test heavy): `mode === 'edit' && isWorkTemplate && selectedSection && selectedSection.split('-')[0] === 'about'`.
+
+**Open risks:** `facts.work` editor writeback (Brief→editor projection) still open — a LIVE work-template story submit needs it wired; that is a separate deferred follow-up, not this gate. The panel now correctly appears ONLY for atelier (work) projects, closing the leak into generic service/writer editors.

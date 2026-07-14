@@ -16,6 +16,8 @@ import { ElementDetector, ElementBoundaryVisualizer } from '../selection/Element
 // Removed useToolbarContext - now using unified useEditor system
 import { useElementPicker } from '@/hooks/useElementPicker';
 import { ElementPicker } from '../content/ElementPicker';
+import { StoryInterviewPanel } from '../StoryInterviewPanel';
+import { isWorkCopyTemplate } from '@/lib/workCopyEngine';
 
 import { logger } from '@/lib/logger';
 import { isSectionVisuallySelected } from '@/utils/selectionPriority';
@@ -63,6 +65,16 @@ export function MainContent({ tokenId }: MainContentProps) {
   const selectedElement = useStoreState(state => state.selectedElement);
   const multiSelection = useStoreState(state => state.multiSelection);
   const audienceType = useStoreState(state => state.audienceType);
+  const templateId = useStoreState(state => state.templateId);
+
+  // work-copy-engine phase 6 — the story-interview panel is ONLY valid for
+  // work-copy-engine templates (allow-list). SERVICE/WRITER audiences also have
+  // `about-<uuid>` sections, so gating on the section prefix alone leaked this
+  // panel into the live editor for generic users (submit → 400). Membership
+  // predicate (NOT the NEXT_PUBLIC generation flag): the story-regen route is
+  // independent of the generation kill-switch, so the panel stays usable for
+  // work-template projects in the editor regardless of the wizard flag.
+  const isWorkTemplate = isWorkCopyTemplate(templateId);
 
   // Service projects use the Hearth UIBlock library; the layout-swap UI
   // (add-section / change-layout) is product-only at pilot. Hide accordingly.
@@ -657,6 +669,14 @@ const handleAddSection = (afterSectionId?: string) => {
                       options={pickerOptions}
                     />
                   )}
+        {/* work-copy-engine phase 6 — story-interview entry point. Post-reveal
+            only; surfaced from the About/story section (single wiring point). */}
+        {mode === 'edit' && isWorkTemplate && selectedSection && selectedSection.split('-')[0] === 'about' && (
+          <div className="absolute bottom-6 left-6 z-30 w-80">
+            <StoryInterviewPanel sectionId={selectedSection} />
+          </div>
+        )}
+
         {/* Floating Toolbars */}
         <FloatingToolbars />
         
