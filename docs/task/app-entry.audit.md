@@ -70,3 +70,32 @@ NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 
 ### Open risks
 - Vercel env vars (`NEXT_PUBLIC_CLERK_SIGN_IN_URL` / `NEXT_PUBLIC_CLERK_SIGN_UP_URL`) still need setting post-merge; without them prod `auth.protect()` reverts to the hosted Account Portal. (Already tracked as a post-merge deploy action in the plan.)
+
+## Phase 3 — appSplit pure helpers + unit tests
+
+**Files changed:**
+- `src/lib/domains/appSplit.ts` (edited)
+- `src/lib/domains/appSplit.test.ts` (edited)
+
+### What changed
+`appSplit.ts`:
+- Added `'/welcome'` to `APP_PATH_PREFIXES` (last entry) → apex `/welcome` now 307s to the app host via existing `getApexToAppRedirect`/`isAppPath`, consistent with `/sign-in`/`/sign-up`.
+- Added `isAppRootRequest(host, pathname): boolean` — true ONLY when `isAppProdHost(host) && pathname === '/'`. Query/hash stripped before the `=== '/'` check (matches sibling helpers). This is the pure pre-check that gates the `auth()` call in phase-4 middleware.
+- Added `getAppRootAction(isSignedIn): 'dashboard' | 'welcome'` — `'dashboard'` when signed in, else `'welcome'`. Only ever called after `isAppRootRequest` is true.
+
+`appSplit.test.ts`:
+- Imported the two new helpers.
+- `isAppRootRequest`: app-host root true (incl. `APP.LESSGO.AI:443` case/port); non-root app paths (`/dashboard`, `/welcome`, `/sign-in`) false; off-host at root false (apex, www, localhost, vercel, null); query/hash-at-root true.
+- `getAppRootAction`: both `true`→`'dashboard'` and `false`→`'welcome'`.
+- `/welcome` coverage: `isAppPath('/welcome')` + nested true; `getApexToAppRedirect('lessgo.ai', '/welcome')` → `https://app.lessgo.ai/welcome` (with `NEXT_PUBLIC_DASHBOARD_URL` stubbed via existing `vi.stubEnv` convention).
+
+### Deviations
+- None. Helpers, prefix entry, and tests match the plan exactly. Added two small extra assertions (query/hash-at-root for `isAppRootRequest`) beyond the plan's enumerated branches for robustness — in-scope, same file.
+
+### Verification
+- `npx tsc --noEmit`: clean (no output).
+- `npm run test:run`: 163 passed | 1 skipped (164 files); 2783 passed | 15 skipped (2798 tests). Green; appSplit file now 46 tests.
+- `npm run lint`: zero errors (only pre-existing `<img>` / exhaustive-deps warnings in unrelated files).
+
+### Open risks
+- None for this phase. Middleware wiring that consumes these helpers is phase 4 (human gate) — helpers are the real coverage; middleware is thin glue.
