@@ -40,16 +40,13 @@ export function normalizeCopyrightYear(text?: string): string | undefined {
  * own `FooterColumn`/`FooterLink` types (some with `href: string | Link`), so the
  * predicate takes the caller's `resolveHref` and the parameter types stay loose.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function filterFooterColumns<T extends { links?: any }>(
   columns: T[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resolveHref: (href?: any) => string | undefined | null,
 ): T[] {
   return columns
     .map((col) => ({
       ...col,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       links: ((col.links ?? []) as any[]).filter((l: any) => {
         const href = resolveHref(l.href);
         return Boolean(href) && href !== '#';
