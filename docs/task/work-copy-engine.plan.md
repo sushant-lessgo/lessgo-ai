@@ -16,7 +16,7 @@ Build the WORK copy engine: from a work Brief (`brief.facts.work`, phase-A contr
 - phase 1 deterministic slim-strategy core: done (commit e7be5151, review loops 1, verdict ship) | tsc+test green, workPages.ts untouched, Kundius→premium asserted
 - phase 2 work strategy route (the ONE small AI call): done (commit cc5cc7b1, review loops 1, verdict ship) | AI-only-angle schema + firewall tested; clampSectionList/creditSystem untouched. CARRY→p3: harden firewall substring→word-boundary; confirm copy reads sections/sitemap not uiblocks
 - phase 3 work copy prompt + parser + generate-copy route: done (review loops 1, verdict ship) | facts-law core: verbatim praise→proof.quotes + empty-praise fabrication-strip, exact-group binding, no padding, story facts-only, firewall word-boundary. KNOWN-RISK→p4 gate: parser doesn't hard-clamp rogue group over-emission vs facts.groups (prompt-enforced only; validate at real-LLM gate)
-- phase 4 PILOT — Kundius golden, Home page only [HUMAN GATE]: scaffold done (harness + placeholder fixture, suite green, capture SKIPPED) | AWAITING FOUNDER: real Kundius facts + CAPTURE=1 authorization + golden read. BLOCKS phase 5+ and merge.
+- phase 4 PILOT — Kundius golden, Home page only [HUMAN GATE]: DONE — FOUNDER APPROVED 2026-07-14 (real facts, gpt-4o-mini capture, facts-law PASS: no invented groups/prices, empty-praise→[], no bio fabrication, EN-only). Band=middle, establishment=established (both approved as-is). Flag stays OFF until final merge gate. Gate cleared → phase 5+ unblocked.
 - phase 5 adapter fan-out — full multi-page generation: pending
 - phase 6 story interview tier (Sugarman regen) [HUMAN GATE — orchestrator escalation re-check]: pending
 - phase 7 NL language pass [HUMAN GATE]: pending

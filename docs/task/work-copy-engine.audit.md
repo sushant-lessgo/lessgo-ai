@@ -285,3 +285,51 @@ surface at the authorized capture.)
   contract does not carry, model output shape) would only surface at the
   authorized real-LLM run. The always-on sanity de-risks the deterministic half
   only.
+
+## Phase 4 (capture)
+
+### Files changed
+- MOD `src/modules/audience/work/__tests__/fixtures/kundiusBrief.ts` — placeholder → real founder facts
+- MOD `src/modules/audience/work/__tests__/captureGoldenWork.test.ts` — sanity assertion + node env + banners
+- ADD `src/modules/audience/work/__tests__/goldens/kundius.home.json` — capture artifact (real gpt-4o-mini)
+- ADD `src/modules/audience/work/__tests__/goldens/kundius.home.read.txt` — founder-facing rendered dump
+
+### Real facts mapped (Kristina Kundius, photographer)
+- identity: name "Kristina Kundius", location Netherlands, reach = "Portfolio headshots for your company brand" (the one-liner/identity).
+- Weddings + family = identity breadth ONLY; NOT priced groups (none invented).
+- groups (all kind:'category', EUR, exact): Full brand package 500 / Brand photoshoot 350 / Portrait & business shoot 250 / Event photography (per hour) 100.
+- dreamClient: "Enterprise customers, big corporates" (verbatim).
+- praise: [] (founder gave none) — exercises empty-praise strip.
+- contactMethod: 'form' (founder offers form+WhatsApp+email; enum is single-value → form as richest capture; WA/email secondary).
+- languages: ['en']. Dutch about-text harvested as tone-only siteContextBlock (not output language).
+
+### Judgment mappings (both flagged inline + here)
+1. establishment: founder said "in-between" (not new, not established). Schema enum is new|established → mapped `established` (practicing graduate professional targeting enterprise reads closer to established).
+2. Event photography is €100 PER HOUR; WorkPrice has no hourly mode → represented `exact` 100 EUR with the "per hour" nuance carried in the group NAME ("Event photography (per hour)"). NOTE: the copy-phase LLM shortened the home gallery card display name back to "Event photography" (dropped the suffix) — the nuance survives in facts/strategy/leadGroups; the /prices page (not captured — home only) is where the price line would render.
+
+### Harness adjustment
+- Sanity block previously asserted `derivePricePosition → 'premium'`. With real €100–500 pricing + no premium/friendly keywords + empty praise the rubric nets 0 → **derived pricePosition = `'middle'`**. Assertion changed to expect the actual `'middle'` and re-derive equal (deterministic). Did NOT force premium.
+- Added `// @vitest-environment node` docblock: the global vitest env is jsdom, and the OpenAI client refuses to instantiate in a browser-like env ("dangerouslyAllowBrowser"). This test does no DOM work; node env lets CAPTURE=1 reach the live provider. (In-scope: only the test file touched.)
+
+### Capture run
+- Provider/model: **real OpenAI `gpt-4o-mini`** for BOTH work-strategy and work-copy (env: USE_OPENAI=true, AI_MODEL_TIER=cheap, OPENAI_API_KEY present). This aiClient has NO mock path — not a mock read.
+- Home sitemap sections: header, hero, work, proof, contact, footer (no about/packages on home — those are separate pages; that is why the dump's STORY/PRICES labels read empty).
+- Ran twice (first jsdom failure, then node) — spent credits on the successful node run.
+
+### Facts-law assessment (PASS)
+- Groups: exactly the 4 real priced groups; NO invented groups; weddings/family correctly absent as groups.
+- Prices: no invented amounts anywhere; no price fabrication on home.
+- Praise: proof `quotes: []` — heading "What My Clients Say" present but ZERO fabricated testimonials. Empty-praise strip holds.
+- Biography: no invented bio; `about` not on home so no fabricated life story; the Dutch harvest did NOT leak (grep for mijn/fotograaf/afgestudeerd/nederland = 0 hits).
+- Language: all output EN; no NL leakage.
+- Minor (not facts-law): footer copyright reads "© 2023" (stale year, chrome); event card dropped "(per hour)" suffix on home gallery card (noted above).
+
+### Verify
+- `npx tsc --noEmit`: clean except the pre-existing `src/app/page.tsx:6` founder.jpg error (ignored per scope).
+- `npm run test:run`: 2925 passed | 16 skipped (golden capture skips without CAPTURE; sanity passes).
+- Phase 1–3 engine code untouched.
+
+### Open risks
+- Event per-hour nuance is soft (name-only); the copy LLM may drop it in display. If the /prices page must show "€100/hr" verbatim, consider a WorkPrice `note`/hourly mode (out of scope here).
+- pricePosition 'middle' (not premium) means the pilot voice is the middle band — confirm that matches founder intent for an enterprise-targeting photographer.
+- Golden artifacts NOT committed — awaiting founder read.

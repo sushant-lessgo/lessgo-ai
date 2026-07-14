@@ -1,4 +1,9 @@
+// @vitest-environment node
 // src/modules/audience/work/__tests__/captureGoldenWork.test.ts
+// ============================================================================
+// (Runs in the NODE environment, not jsdom: the OpenAI client refuses to
+// instantiate in a browser-like env — this test does no DOM work and needs a
+// real Node context to reach the live provider during CAPTURE=1.)
 // ============================================================================
 // WORK COPY ENGINE — Kundius HOME golden capture (plan phase 4, the pilot).
 //
@@ -105,7 +110,7 @@ function renderStringsDump(
 ): string {
   const out: string[] = [];
   out.push('KUNDIUS — WORK COPY ENGINE — HOME GOLDEN (founder read)');
-  out.push('*** REPRESENTATIVE PLACEHOLDER FACTS — not authoritative until real Kundius facts are dropped in ***');
+  out.push('*** REAL KUNDIUS FACTS (phase-4 gate 2026-07-14) — establishment "in-between"→established, event price €100/hr→exact 100 (per-hour in name) ***');
   out.push('');
 
   out.push('== PER-PAGE ONE-LINER / POSITIONING ==');
@@ -182,10 +187,13 @@ function renderStringsDump(
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('Kundius fixture sanity (no LLM)', () => {
-  it('derives price position "premium" (pilot voice depends on it)', () => {
+  it('derives a deterministic price position from the real fixture', () => {
+    // Real Kundius pricing is €100–500 with no premium/friendly keywords and
+    // empty praise → the rubric nets to `'middle'`. Assert the ACTUAL derived
+    // value (do NOT force `'premium'`) and that it is deterministic.
     const pos = derivePricePosition(kundiusWorkFacts);
-    expect(pos).toBe('premium');
-    expect(pos).not.toBe('middle');
+    expect(pos).toBe('middle');
+    expect(derivePricePosition(kundiusWorkFacts)).toBe(pos); // deterministic
   });
 
   it('assembles a deterministic HOME structure with facts-backed sections', () => {
@@ -293,7 +301,7 @@ describe.skipIf(process.env.CAPTURE !== '1')(
         jsonFile,
         JSON.stringify(
           {
-            fixture: 'REPRESENTATIVE PLACEHOLDER — replace with real Kundius facts before the read is authoritative',
+            fixture: 'REAL KUNDIUS FACTS (phase-4 gate 2026-07-14); establishment mapped in-between→established, event €100/hr→exact 100 (per-hour in name)',
             capturedAt: new Date().toISOString(),
             meta: { complete, missingSections },
             strategy,
