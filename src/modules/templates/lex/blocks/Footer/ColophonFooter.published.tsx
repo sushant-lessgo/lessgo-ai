@@ -2,6 +2,7 @@
 // Server-safe published variant of ColophonFooter.
 
 import React from 'react';
+import { normalizeCopyrightYear } from '../../../shared/footerHygiene';
 
 interface SocialLink {
   id?: string;
@@ -51,7 +52,7 @@ export default function ColophonFooterPublished(props: ColophonFooterPublishedPr
           )}
         </div>
         <div className="lex-footer__bottom">
-          <span>{props.copyright || ''}</span>
+          <span>{normalizeCopyrightYear(props.copyright) || ''}</span>
           <span className="lex-footer__set">Set in Source Serif 4 &amp; Inter Tight</span>
         </div>
       </footer>

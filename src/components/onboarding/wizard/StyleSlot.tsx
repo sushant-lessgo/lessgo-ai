@@ -25,7 +25,7 @@
 // (ssr:false) so this never enters the firewall-pure entry bundle.
 
 import { useEffect } from 'react';
-import { useWizardStore } from '@/hooks/useWizardStore';
+import { useWizardStore, thingTemplateHasStyleControls } from '@/hooks/useWizardStore';
 import type { VestriaHeroVariant } from '@/types/product';
 import HeroVariantPicker from '@/components/onboarding/wizard/fields/HeroVariantPicker';
 import ProductStylePicker from '@/components/onboarding/wizard/fields/ProductStylePicker';
@@ -191,7 +191,9 @@ function ThingStyleSlot() {
   // so they are vestria-only by construction. atelier phase 2: gate strictly on
   // `templateId === 'vestria'`, NOT `isMultipage` — a multipage WORK template
   // (atelier) must NOT surface vestria's hero-variant/style pickers.
-  const showVestriaPickers = templateId === 'vestria';
+  // onboarding-fixes phase 2: shares the `thingTemplateHasStyleControls`
+  // predicate with `slotsForEngine` so the vestria literal lives in ONE place.
+  const showVestriaPickers = thingTemplateHasStyleControls(templateId);
 
   return (
     <div className="space-y-2">
@@ -211,6 +213,9 @@ function ThingStyleSlot() {
           <ProductStylePicker />
         </>
       ) : (
+        // Defensive fallback only — unreachable in practice: `slotsForEngine`
+        // (useWizardStore.ts) skips the `style` slot entirely for thing
+        // templates without real controls, so this stub is never rendered.
         <p className="pt-4 text-sm text-gray-500">
           We&apos;ll use a clean default theme. You can fine-tune fonts, colours
           and layout in the editor once your page is generated.

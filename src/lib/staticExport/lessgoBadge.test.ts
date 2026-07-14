@@ -1,4 +1,4 @@
-// Tests for the published-page "Proudly built by Lessgo.ai" attribution strip.
+// Tests for the published-page "Proudly built by Lessgo AI" attribution strip.
 import { describe, it, expect } from 'vitest';
 import { renderLessgoBadge } from './lessgoBadge';
 
@@ -7,7 +7,7 @@ describe('renderLessgoBadge', () => {
 
   it('shows the locked wording', () => {
     expect(html).toContain('Proudly built by');
-    expect(html).toContain('Lessgo.ai');
+    expect(html).toContain('Lessgo AI');
   });
 
   it('links to lessgo.ai with ref/UTM attribution', () => {

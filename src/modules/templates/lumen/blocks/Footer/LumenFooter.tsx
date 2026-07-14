@@ -12,6 +12,7 @@ import { useLumenBlock } from '../../hooks/useLumenBlock';
 import { LumenEditable } from '../../components/LumenEditable';
 import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
 import { resolveDestination } from '@/utils/resolveCtaHref';
+import { normalizeCopyrightYear } from '../../../shared/footerHygiene';
 import { FOOTER_STYLES } from './styles';
 import {
   DEFAULT_FOOTER_COLUMNS, DEFAULT_LEGAL_LINKS,
@@ -67,6 +68,14 @@ export default function LumenFooter({ sectionId }: { sectionId: string }) {
 
   const waHref = buildWaHref(blockContent.whatsapp_number, blockContent.whatsapp_prefill);
   const callHref = blockContent.book_call_url || '#contact';
+
+  // Shallow copy with normalized copyright twins for the content-object editable —
+  // never mutate the store object.
+  const copyrightContent = {
+    ...blockContent,
+    copyright: normalizeCopyrightYear(blockContent.copyright) ?? blockContent.copyright,
+    copyright_nl: normalizeCopyrightYear(blockContent.copyright_nl) ?? blockContent.copyright_nl,
+  };
 
   const setColumns = (next: FooterColumn[]) => handleCollectionUpdate('footer_columns', next);
   const patchCol = (id: string, p: Partial<FooterColumn>) => setColumns(columns.map((c) => (c.id === id ? { ...c, ...p } : c)));
@@ -148,7 +157,7 @@ export default function LumenFooter({ sectionId }: { sectionId: string }) {
 
         <div className="lm-footer-bottom">
           <LumenEditable as="span" mode={mode} sectionId={sectionId} editLang={editLang}
-            content={blockContent} elementKey="copyright" onSave={handleContentUpdate}
+            content={copyrightContent} elementKey="copyright" onSave={handleContentUpdate}
             enterBehavior="save" placeholder="© 2026 Studio" />
           <span className="lm-footer-legal">
             {legal.map((l, i) => (

@@ -4,6 +4,7 @@ import React from 'react';
 import { externalLinkProps } from '@/utils/resolveCtaHref';
 import { FOOTER_STYLES } from './styles';
 import { DEFAULT_FOOTER_LINKS, type FooterLink } from './footerDefaults';
+import { normalizeCopyrightYear } from '../../../shared/footerHygiene';
 
 interface SocialLink {
   id?: string;
@@ -95,7 +96,7 @@ export default function ContactFooterRichPublished(props: ContactFooterRichPubli
         </div>
 
         <div className="sg-footer__bottom">
-          <span>{props.copyright || ''}</span>
+          <span>{normalizeCopyrightYear(props.copyright) || ''}</span>
         </div>
       </footer>
 

@@ -309,7 +309,7 @@ export function buildTechPremiumHomeFinalContent(opts: {
     contact_email: 'info@naayom.com',
     newsletter_placeholder: 'you@company.com',
     newsletter_cta: 'Subscribe',
-    copyright: `© 2024 ${brand}. All Rights Reserved.`,
+    copyright: `© ${new Date().getFullYear()} ${brand}. All Rights Reserved.`,
     location: 'Gurugram, India',
     whatsapp_number: '919310119271',
     whatsapp_prefill: 'Hi Naayom, I’d like to know more about your climate controllers.',

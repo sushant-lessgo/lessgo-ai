@@ -11,6 +11,7 @@
 
 import React from 'react';
 import type { AtelierPrimitives } from '../primitives';
+import { normalizeCopyrightYear } from '../../../shared/footerHygiene';
 import { FOOTER_STYLES } from './styles';
 
 export interface AtelierSocialLink { id: string; platform?: string; href?: string }
@@ -118,7 +119,7 @@ export function AtelierFooterCore({ content, E }: { content: AtelierFooterConten
           </div>
         </div>
         <div className="lg-atelier-footer-bottom">
-          <E.Txt elementKey="copyright" value={content.copyright} as="span" placeholder="© Studio Name" />
+          <E.Txt elementKey="copyright" value={normalizeCopyrightYear(content.copyright) ?? content.copyright} as="span" placeholder="© Studio Name" />
           <E.Txt elementKey="legal_text" value={content.legal_text} as="span" placeholder="Privacy · Terms" />
         </div>
       </div>

@@ -7,6 +7,7 @@
 import React from 'react';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { HearthEditable } from '../../components/HearthEditable';
+import { normalizeCopyrightYear } from '../../../shared/footerHygiene';
 
 interface SocialLink {
   id: string;
@@ -175,7 +176,7 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
             mode={mode}
             sectionId={sectionId}
             elementKey="copyright"
-            value={blockContent.copyright}
+            value={normalizeCopyrightYear(blockContent.copyright) ?? blockContent.copyright}
             onSave={(v) => handleContentUpdate('copyright', v)}
             enterBehavior="save"
             placeholder="© Studio"

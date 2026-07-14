@@ -2,6 +2,7 @@
 // Server-safe published variant.
 
 import React from 'react';
+import { normalizeCopyrightYear } from '../../../shared/footerHygiene';
 
 interface SocialLink {
   id?: string;
@@ -57,7 +58,7 @@ export default function ContactFooterRichPublished(props: ContactFooterRichPubli
           )}
         </div>
         <div className="hearth-footer__bottom">
-          <div>{props.copyright || '© Studio'}</div>
+          <div>{normalizeCopyrightYear(props.copyright) || '© Studio'}</div>
           <div className="hearth-footer__made">Made with care.</div>
         </div>
       </footer>

@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { bilingualAttrs } from '../../i18nKeys';
+import { normalizeCopyrightYear } from '../../../shared/footerHygiene';
 import { FOOTER_STYLES } from './styles';
 import {
   DEFAULT_FOOTER_COLUMNS, DEFAULT_LEGAL_LINKS,
@@ -91,7 +92,7 @@ export default function LumenFooterPublished(props: Props) {
         </div>
 
         <div className="lm-footer-bottom">
-          <span {...bilingualAttrs(props.copyright || '', props.copyright_nl || '')}>{props.copyright || ''}</span>
+          <span {...bilingualAttrs(normalizeCopyrightYear(props.copyright) || '', normalizeCopyrightYear(props.copyright_nl) || '')}>{normalizeCopyrightYear(props.copyright) || ''}</span>
           <span className="lm-footer-legal">
             {legal.map((l, i) => (
               <React.Fragment key={l.id || i}>

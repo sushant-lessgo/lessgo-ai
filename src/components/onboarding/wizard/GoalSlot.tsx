@@ -195,13 +195,26 @@ export default function GoalSlot() {
             onChange={setGoalParam}
           />
           {paramGateOpen && (
-            <button
-              type="button"
-              onClick={() => setGoalParamSkipped(true)}
-              className="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors"
-            >
-              Skip for now
-            </button>
+            <div className="space-y-3 pt-1">
+              {/* F14: a required-but-empty param blocks Continue — explain the
+                  block right where the user is looking, and make the escape
+                  hatch a prominent secondary button (not a faint text link). */}
+              <p className="text-sm text-gray-600">
+                Add the link, or skip for now to continue.
+              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => setGoalParamSkipped(true)}
+                  className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors"
+                >
+                  Skip for now
+                </button>
+                <span className="text-sm text-gray-500">
+                  You can add the link later in the editor.
+                </span>
+              </div>
+            </div>
           )}
         </div>
       )}

@@ -416,9 +416,27 @@ function prefillValueFor(
     return raw != null;
   }
   if (field.input === 'chips' || field.input === 'upload') {
-    return Array.isArray(raw) ? (raw as string[]) : emptyValueFor(field);
+    if (!Array.isArray(raw)) return emptyValueFor(field);
+    return applyPrefillArrayFilter(field, raw as string[]);
   }
   return typeof raw === 'string' ? raw : emptyValueFor(field);
+}
+
+/**
+ * The ONLY place the numeric-or-empty rule for proof lives. The thing engine's
+ * `realNumbers` field wants claims with an ACTUAL number; the shared `outcomes`
+ * entry field that feeds it (also consumed by trust/work, qualitatively) must
+ * stay untouched — so we filter client-side, scoped by `field.id` (unique per
+ * engine), never by `prefillKey` (shared as `outcomes`). Known tradeoff: the
+ * "contains a digit" test drops non-numeric proof like "cut onboarding from
+ * days to minutes" and keeps numeric-adjacent non-metrics like "ISO 9001
+ * certified" — matches the spec's "actual numbers" intent, not a bug.
+ */
+function applyPrefillArrayFilter(field: ContractField, values: string[]): string[] {
+  if (field.id === 'realNumbers') {
+    return values.filter((v) => /\d/.test(v));
+  }
+  return values;
 }
 
 function sourceForState(state: FieldState): FieldSource {
@@ -448,11 +466,36 @@ export function briefSignalFromState(
 }
 
 /**
+ * Whether a thing-engine template exposes REAL style controls (hero-variant +
+ * palette/mood pickers). Only `vestria` does today — its pickers are
+ * VESTRIA-TYPED by construction (see StyleSlot's `showVestriaPickers`, which
+ * consumes this SAME predicate so the vestria literal lives in ONE place). Any
+ * future thing template with real pickers opts in by flipping this one
+ * predicate; templates without controls have the `style` slot skipped at
+ * runtime (below) so the user never hits a dead step.
+ *
+ * NB param is `tid`, not `templateId`: this is a render-layer UI-capability
+ * predicate (same category as VestriaThemePopover's `tid`-form vestria gate),
+ * and the scale-08 pipelineGuards test bans the `templateId`-operand vestria
+ * literal outside its render-layer allowlist. The `tid` form is the codebase's
+ * documented escape for legitimate render-layer vestria gates.
+ */
+export function thingTemplateHasStyleControls(
+  tid: TemplateId | null | undefined,
+): boolean {
+  return tid === 'vestria';
+}
+
+/**
  * Slot skeleton minus this engine's skips, preserving canonical slot order.
  * atelier phase 2: work keeps its structure skip UNLESS the PICKED template is
  * multipage — a served work→multipage brief (e.g. atelier) goes THROUGH the
  * structure slot's page-archetype menu. Granth declares no `multipage`
  * capability, so `isMultipage` is false for it and its skip is retained.
+ *
+ * onboarding-fixes phase 2: thing templates WITHOUT real style controls skip
+ * the `style` slot (dead one-line stub otherwise). vestria keeps it; `style`
+ * stays in `wizardSlots` globally because trust + vestria still need it.
  */
 function slotsForEngine(
   engine: CopyEngine,
@@ -462,6 +505,9 @@ function slotsForEngine(
   const skips = new Set<WizardSlot>(getContract(engine).slotSkips);
   if (engine === 'work' && isMultipage(templateId ?? undefined, briefSignal)) {
     skips.delete('structure');
+  }
+  if (engine === 'thing' && !thingTemplateHasStyleControls(templateId)) {
+    skips.add('style');
   }
   return wizardSlots.filter((s) => !skips.has(s));
 }

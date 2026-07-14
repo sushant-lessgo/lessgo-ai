@@ -23,6 +23,7 @@ import {
   clampSectionList,
 } from '@/modules/audience/product/strategy/parseStrategyProduct';
 import { lockedSectionsForEngine } from '@/modules/engines/inputContracts';
+import { emptyCollectionNodeAllowed } from '@/modules/collections/registry';
 import { runTrustGeneration } from '@/modules/wizard/generation/trust';
 import { buildBriefDraft, type EntrySignals } from '@/modules/brief/classify';
 import { decideServe } from '@/modules/brief/serveGate';
@@ -173,9 +174,82 @@ describe('useWizardStore — hydration resolves engine/audience/template from Br
   });
 });
 
+describe('useWizardStore — proof prefill numeric filter (phase 1)', () => {
+  // thing `realNumbers` (field.id) is the ONLY field the numeric-or-empty rule
+  // applies to. The shared `outcomes` prefillKey feeding trust/work stays raw.
+  it('realNumbers prefill drops non-numeric entries, keeps numeric ones', () => {
+    const brief = briefWithEntry(
+      {
+        rawInput: 'https://acme.app',
+        businessName: 'Acme',
+        oneLiner: 'invoicing software for freelancers',
+        outcomes: ['cut churn by 30%', 'ISO 9001 certified', 'days to minutes', 'trusted by teams'],
+      },
+      { businessType: 'saas', copyEngine: 'thing', confidence: 0.9 },
+    );
+    useWizardStore.getState().hydrate({ brief, audienceType: 'product', templateId: 'meridian' });
+    // Keeps entries containing a digit; drops purely qualitative ones.
+    expect(useWizardStore.getState().fields.realNumbers.value).toEqual([
+      'cut churn by 30%',
+      'ISO 9001 certified',
+    ]);
+  });
+
+  it('realNumbers prefill with empty outcomes → []', () => {
+    const brief = briefWithEntry(
+      {
+        rawInput: 'https://acme.app',
+        businessName: 'Acme',
+        oneLiner: 'invoicing software for freelancers',
+        outcomes: [],
+      },
+      { businessType: 'saas', copyEngine: 'thing', confidence: 0.9 },
+    );
+    useWizardStore.getState().hydrate({ brief, audienceType: 'product', templateId: 'meridian' });
+    expect(useWizardStore.getState().fields.realNumbers.value).toEqual([]);
+  });
+
+  it('trust `outcomes` prefill passes through UNFILTERED (shared field, qualitative)', () => {
+    const brief = briefWithEntry(
+      {
+        rawInput: 'https://studio.co',
+        businessName: 'Studio Co',
+        oneLiner: 'growth marketing agency',
+        outcomes: ['helped clients grow', 'award-winning creative team'],
+      },
+      { businessType: 'agency', copyEngine: 'trust', confidence: 0.9 },
+    );
+    useWizardStore.getState().hydrate({ brief, audienceType: 'service', templateId: 'surge' });
+    // No digit in either entry, yet both survive — the filter is scoped to
+    // field.id === 'realNumbers' (thing), never the shared prefillKey.
+    expect(useWizardStore.getState().fields.outcomes.value).toEqual([
+      'helped clients grow',
+      'award-winning creative team',
+    ]);
+  });
+});
+
 describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', () => {
-  it('thing keeps the full slot skeleton including structure', () => {
+  // onboarding-fixes phase 2 — thing templates WITHOUT real style controls skip
+  // the `style` slot (no dead step); vestria (real pickers) keeps it.
+  it('thing + a non-vestria template (meridian) SKIPS the style slot', () => {
     useWizardStore.getState().hydrate({ brief: richThing, audienceType: 'product', templateId: 'meridian' });
+    const { slots } = useWizardStore.getState();
+    expect(slots).toEqual([
+      'identity',
+      'understanding',
+      'goal',
+      'offer',
+      'proof',
+      'structure',
+      'generating',
+    ]);
+    expect(slots).not.toContain('style');
+    expect(slots).toHaveLength(7);
+  });
+
+  it('thing + vestria INCLUDES the style slot (real pickers)', () => {
+    useWizardStore.getState().hydrate({ brief: richThing, audienceType: 'product', templateId: 'vestria' });
     const { slots } = useWizardStore.getState();
     expect(slots).toEqual([
       'identity',
@@ -187,6 +261,8 @@ describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', (
       'structure',
       'generating',
     ]);
+    expect(slots).toContain('style');
+    expect(slots).toHaveLength(8);
   });
 
   it('trust slot order now INCLUDES structure (scale-07 phase 4 — 7b GA)', () => {
@@ -202,11 +278,18 @@ describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', (
       'structure',
       'generating',
     ]);
+    // onboarding-fixes phase 2 — trust keeps style (real pickers); count unchanged.
+    expect(slots).toContain('style');
+    expect(slots).toHaveLength(8);
   });
 
-  it('work skips the structure slot', () => {
+  it('work skips the structure slot but KEEPS style (thing-only style skip)', () => {
     useWizardStore.getState().hydrate({ brief: workBrief, audienceType: 'writer', templateId: 'granth' });
-    expect(useWizardStore.getState().slots).not.toContain('structure');
+    const { slots } = useWizardStore.getState();
+    expect(slots).not.toContain('structure');
+    // onboarding-fixes phase 2 — the style skip is thing-only; work is unchanged.
+    expect(slots).toContain('style');
+    expect(slots).toHaveLength(7);
   });
 
   // atelier phase 2 — the structure skip is now TEMPLATE-aware for work.
@@ -1249,5 +1332,30 @@ describe('useWizardStore — COMPOSED served photographer path (atelier phase 7)
     expect(s.slots).not.toContain('structure');
     // dispatch declines the skeleton ⇒ writer generator (buildWorkInput) path.
     expect(isMultipage(s.templateId ?? undefined, briefSignalFromState(s))).toBe(false);
+  });
+});
+
+// onboarding-fixes phase 4 — the 7b empty-collection-node predicate. Gates
+// whether a 0-item collection surfaces at the structure gate: catalog-shaped
+// (manufacturer / future requiredCollections) YES, SaaS `thing` family NO.
+// Keys WITH items are never gated by this predicate (asserted structurally in
+// StructureSlot's CollectionNodes filter, not here).
+describe('emptyCollectionNodeAllowed (7b phantom-node gate)', () => {
+  it('manufacturer → allowed (catalog-shaped, keeps empty Products node)', () => {
+    expect(emptyCollectionNodeAllowed('manufacturer')).toBe(true);
+  });
+
+  it('saas (thing family) → NOT allowed (no phantom "Products · 0 items")', () => {
+    expect(emptyCollectionNodeAllowed('saas')).toBe(false);
+  });
+
+  it('app (thing family) → NOT allowed', () => {
+    expect(emptyCollectionNodeAllowed('app')).toBe(false);
+  });
+
+  it('unclassified (null / undefined / unknown) → NOT allowed', () => {
+    expect(emptyCollectionNodeAllowed(null)).toBe(false);
+    expect(emptyCollectionNodeAllowed(undefined)).toBe(false);
+    expect(emptyCollectionNodeAllowed('not-a-real-type')).toBe(false);
   });
 });
