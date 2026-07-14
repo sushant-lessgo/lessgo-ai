@@ -191,3 +191,32 @@ baseline blob. Actual byte measurement is deferred to Phase 5 against a real naa
   production removes the resident baseline before the lazy `?part=baseline` fetch is in the
   deployed client bundle → Reset would fail. Must merge/deploy strictly after Deploy A bakes
   (orchestrator's rollout concern).
+
+## Phase 5 — QA gate (results)
+
+Orchestrator ruling: run **(c)** script-level dev round-trip; **(b)** browser only if dev Clerk
+auth possible w/o founder creds; **(a)** prod naayom read NOT authorized (founder-only).
+
+### (c) script-level dev round-trip — DONE, PASS (12/12) — 2026-07-14
+Method: 3 real dev-project `content` blobs extracted read-only (dev DB only; prod untouched),
+fed through the REAL `loadDraft GET` + `saveDraft POST` handlers (only auth/prisma/security/
+rateLimit mocked; route logic real). Temp test + extract scripts + fixtures deleted after
+(never committed); permanent synthetic coverage stays in `baseline.test.ts` + `baselinePreserve.test.ts`.
+
+Fixtures: lumen/service/2pg (99.6KB, baseline 49.1KB) · vestria/product/5pg (61.5KB, baseline
+25.6KB) · surge/service/1pg (33.1KB, baseline 16.2KB).
+
+Per fixture verified on REAL content:
+1. default loadDraft resp: `baseline` ABSENT, `hasBaseline:true`, `finalContent` byte-identical to stored.
+2. `?part=baseline`: returns exactly `{ baseline }` = stored baseline byte-for-byte.
+3. edit save WITHOUT `body.baseline` → stored `content.baseline` BYTE-IDENTICAL + `onboarding` preserved + edit landed. (Data-loss guarantee confirmed on real 49/26/16KB baselines.)
+4. loadDraft response payload delta: lumen −49.3% (99.6→50.5KB), vestria −41.6% (61.5→35.9KB),
+   surge −48.8% (33.1→17.0KB). "Response ~halved" acceptance criterion MET on real content.
+
+### (b) browser editor QA — SKIPPED
+Dev editor/loadDraft require a Clerk session; no dev test-user creds without founder credentials.
+
+### Residual (not covered by (c))
+Live editor UX on real data — Reset restoring, needs-review markers auto-clearing, Regen-Copy
+recapture, publish byte-equivalence — needs Clerk/browser or founder's own naayom prod-copy pass.
+Data-loss + payload are validated; residual is UX-correctness, not data-safety.

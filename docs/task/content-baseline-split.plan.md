@@ -31,7 +31,7 @@
 - phase 2 store ensureBaseline + hydration honors hasBaseline: done (commit 01f49a9f, review loops 1, ship)
 - phase 3 consumers — async Reset + review-diff lazy fetch + preview opt-out: done (commit d3bb5e31, review loops 1, ship) — DEPLOY-A BOUNDARY (d3bb5e31 = Deploy A merge tip)
 - phase 4 server flip (DEPLOY B ONLY) — drop baseline from default loadDraft response + save-path regression test: done (commit 38ce4346, review loops 1, ship) — DEPLOY-B tip (merge SEPARATELY, after Deploy A bakes)
-- phase 5 prod-copy round-trip QA gate (naayom): PENDING — HUMAN GATE (needs user: migrate-project + dev QA + sign-off)
+- phase 5 QA gate: (c) script-level dev round-trip DONE/PASS 2026-07-14 (12/12; real lumen/vestria/surge; content.baseline byte-identical on save; loadDraft resp −42..−49%); (b) browser SKIPPED (no dev Clerk creds); (a) prod naayom read NOT authorized (founder-only). Residual: live editor UX on real data unverified. Awaiting bake + two-step station merge.
 - deploy A (phases 1–3, tip d3bb5e31) merge + prod deploy + bake: pending (after Phase 5 sign-off)
 - deploy B (phase 4, tip 38ce4346) merge + prod deploy: pending (after Deploy A bakes)
 
