@@ -23,6 +23,12 @@ engines.
 - phase 4 profession rows + buyer-words vocabulary: done (review skipped — standard tier; config.test.ts count 8→9 added to scope by orchestrator; tsc clean, 328 pass/0 fail; 4 vocab names flagged + agency=trust drafts left for merge gate)
 - phase 5 conformance test + README + full green: done (30-assertion conformance test; pageArchetypes.test.ts MULTI_DEFAULTS 8→9 fixup added to scope; FULL suite 2849 pass/0 fail, tsc clean, lint exit 0)
 
+## Final status (all phases done)
+
+Whole-diff impl-review verdict: **ship** (0 blocking; 3 non-blocking notes: workContract name overload section-vs-wizard, WorkGroup↔works compat is convention-not-type, theoretical regex edge in firewall test). Commits: p1 1fc0b4f5 · p2 496c3bad · p3 37939046 · p4 b98b62ce · p5 05f25af0 · close-out 233a001e.
+
+**Human gates RESOLVED (founder, 2026-07-14):** (1) work-core section list approved as-is; (2) all 4 buyer-words names approved (flags cleared in close-out); (3) agency stays `copyEngine:'trust'` (D3). Merged main (content-baseline-split, d3bb5e31) into the branch and re-greened: tsc clean · full suite 2854 pass / 0 fail · lint exit 0 · `npm run build` exit 0. Ready for station merge → main.
+
 ## Design decisions (read before implementing any phase)
 
 These resolve the tensions between the spec and the live code. They are load-bearing;
