@@ -35,7 +35,7 @@ export default function Footer() {
 
         {/* Right: Legal and Copyright */}
         <div className="text-gray-500 text-sm flex flex-col md:items-end gap-2">
-          <p>© 2025 Lessgo.ai. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Lessgo AI. All rights reserved.</p>
           <div className="flex gap-4">
             <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:underline">
               Terms

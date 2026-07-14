@@ -22,7 +22,7 @@ Signed-out visitors to `app.lessgo.ai/` currently get the old pre-launch waitlis
 - phase 2 clerk sign-in/sign-up routes + provider config: done (review loops 1, ship) — HUMAN GATE pending
 - phase 3 appSplit pure helpers + tests: done
 - phase 4 middleware app-root wiring: done — HUMAN GATE pending
-- phase 5 branded 404 + brand/year polish + full build: pending
+- phase 5 branded 404 + brand/year polish + full build: done (build gate green)
 
 ---
 

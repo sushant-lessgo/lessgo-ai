@@ -146,3 +146,34 @@ Three edits, all in `src/middleware.ts`:
 ### Open risks
 - Prod verification (per plan) is a post-merge/human-gate action: signed-out `app.lessgo.ai/` entry page, signed-in → `/dashboard`, apex `lessgo.ai/` unchanged, `curl -I` app root carries the noindex header.
 - Signed-in `/dashboard` 307 path unverified in dev (no authed session) — low risk (thin glue over unit-tested helpers).
+
+---
+
+## Phase 5 — Branded 404 + brand/year polish + full build
+
+**Files changed:**
+- `src/app/not-found.tsx` (created)
+- `src/components/shared/Footer.tsx` (edited — brand/year string only)
+- `src/app/README.md` (edited — added `/welcome` route row; phase-4 reviewer fold-in)
+
+### What changed
+- **`src/app/not-found.tsx`** — static server component (NO `auth()`; prerendered at build as `/_not-found`). Branded "404 / Page not found" with dual CTAs: "Go to dashboard" (`/dashboard`) and "Home" (`/`). Brand "Lessgo AI", year via `new Date().getFullYear()`. Reuses the `/welcome` shell aesthetic (logo header, centered main, muted footer) without importing from it. Code comment documents the signed-out unknown-route path: `auth.protect()` redirects to on-domain `/sign-in` (valid only because phase 2 set `NEXT_PUBLIC_CLERK_SIGN_IN_URL`), so this 404 is effectively the authed-user surface.
+- **`src/components/shared/Footer.tsx:38`** — `© 2025 Lessgo.ai. All rights reserved.` → `© {new Date().getFullYear()} Lessgo AI. All rights reserved.` (brand mandate + live year). Only the copyright line touched; feedback/legal blocks untouched.
+- **`src/app/README.md`** — added a `/welcome` row to the Public/marketing route table (doc-only; keeps the human-facing index in sync with `isPublicRoute`). Phase-4 reviewer's fold-in item.
+
+### Dual-renderer note (for the record)
+No block edits anywhere in this feature — no `.tsx`/`.published.tsx` pairs touched, no published-renderer involvement, no blob/KV/published-page changes. Dual-renderer parity is not implicated.
+
+### Deviations from plan
+- Plan step 3 quoted the target as "© 2025 Lessgo.ai"; the actual line was "© 2025 Lessgo.ai. All rights reserved." — replaced the full line, preserving the "All rights reserved." suffix. Conservative, in-scope.
+- `not-found.tsx` uses `<img>` for the logo (consistent with `/welcome`), producing the same benign `@next/next/no-img-element` ESLint *warning* (not an error) as the rest of the app. Zero lint errors.
+
+### Test results
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run` — 2783 passed, 15 skipped (163 files passed, 1 skipped). No regressions.
+- `npm run lint` — zero errors (pre-existing `<img>`/exhaustive-deps warnings only).
+- `npm run build` — full build green (buildPublishedCSS + assets + next build). `/_not-found` prerendered `○ (Static)`; `/welcome`, `/sign-in`, `/sign-up` all compile.
+
+### Open risks
+- Manual dev/prod acceptance sweep (authed garbage-route → branded 404; signed-out garbage-route → on-domain `/sign-in`; dashboard footer shows current year + "Lessgo AI") is a human-gate/post-merge action per plan.
+- Backlog item (out of scope, not fixed here): apex `src/app/page.tsx:379` still shows "© 2025 Lessgo.AI" — apex-marketing track.
