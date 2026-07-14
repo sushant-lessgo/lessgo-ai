@@ -65,3 +65,59 @@ Module-level `const inFlightBaselineFetches = new Map<string, Promise<…>>()` i
 ### Open risks
 - No consumer calls `ensureBaseline()` yet (Phase 3 wires Reset + review-diff + preview opt-out). Until then the lazy path is unexercised in-app but unit-clean.
 - Backward tolerance intact: loadDraft still ships `baseline` (Deploy A), so `baselineAvailable` derives from the resident branch today; the `hasBaseline`-only branch activates at Phase 4 / Deploy B.
+
+## Phase 3 — Consumers: async Reset + review-diff lazy fetch + preview opt-out
+
+### Files changed
+- `src/hooks/editStore/layoutActions.ts` (modified) — `resetToGenerated` now async: awaits `ensureBaseline()` outside any producer, then one `set()`.
+- `src/types/store/actions.ts` (modified) — `resetToGenerated: () => Promise<void>` (was `() => void`).
+- `src/app/edit/[token]/components/ui/useResetSystem.ts` (modified) — `await resetToGenerated()` before `triggerAutoSave()`.
+- `src/components/EditProvider.tsx` (modified) — `prefetchBaselineForReview` option (default true) + `maybePrefetchBaselineForReview` helper + two call sites.
+- `src/app/preview/[token]/page.tsx` (modified) — passes `prefetchBaselineForReview: false`.
+
+### resetToGenerated structure (await-then-set, throw-propagation)
+```
+resetToGenerated: async () => {
+  const baseline = await get().ensureBaseline();   // outside producer; THROW propagates
+  set((state) => {
+    if (baseline) {
+      const snapshot = JSON.parse(JSON.stringify(baseline));
+      applySnapshot(state, snapshot);
+      state.persistence.isDirty = true;
+      state.history.undoStack = [];
+      state.history.redoStack = [];
+      return;
+    }
+    // baseline === null (true legacy) → EXISTING onboarding-derived fallback verbatim
+  });
+}
+```
+- `ensureBaseline()` throw (fetch failure while `baselineAvailable`) propagates out of `resetToGenerated` and is caught by `useResetSystem`'s existing try/catch → toast "Reset failed. Please try again." It does NOT fall into the legacy onboarding fallback (that would apply a WRONG design reset). The legacy fallback runs ONLY on a genuine `null` return (server truly has no baseline).
+- Deep-clone kept (comment updated: baseline may alias committed/frozen state).
+
+### refreshFromContent arg shape + matched call site
+Used exactly: `refreshFromContent(fresh.content, fresh.baseline, fresh.currentPageId, fresh.globalSettings)` — matched the existing debounced-subscription call site in `EditProvider.tsx` (the reactive refresh, ~`:242`). Signature confirmed at `useReviewState.ts:105-110` (`content`, `baseline?`, `currentPageId?`, `globalSettings?`).
+
+### maybePrefetchBaselineForReview — helper + both call sites
+- Module-level helper `maybePrefetchBaselineForReview(store, enabled)`. No-op unless `enabled` AND `useReviewState.getState().needsReviewItems.length > 0` AND `store.getState().baseline === null` AND `store.getState().baselineAvailable`. Otherwise calls `state.ensureBaseline()` (deduped in store); on RESOLVE calls `refreshFromContent(...)` reading fresh state via `store.getState()`; failures swallowed + logged (`logger.warn`).
+  - Signature takes `enabled` explicitly (kept helper module-level/pure rather than closing over the prop) — the `(store)`-only shape in the plan is preserved semantically; `enabled` threads the option. Logged under Deviations.
+- Call site (i): inside the `initFromContent` try-block right after `initFromContent(...)` (post-load markers).
+- Call site (ii): inside the debounced subscription callback right after its `refreshFromContent(...)` (markers appearing later, e.g. section regen before baseline resident).
+- `prefetchBaselineForReview` added to BOTH effect dep arrays (`[store, isInitialized, isHydrating, tokenId, prefetchBaselineForReview]` and `[store, tokenId, prefetchBaselineForReview]`).
+- The load-bearing `refreshFromContent()` in the resolve handler is present (the ONLY re-derive path on baseline arrival — `ensureBaseline` sets `state.baseline`, not `state.content`, so the content subscription will not fire).
+
+### Preview opt-out
+`preview/[token]/page.tsx` passes `prefetchBaselineForReview: false` in the EditProvider `options` object → preview never calls `ensureBaseline()` (no `?part=baseline` request).
+
+### Deviations
+- `maybePrefetchBaselineForReview` takes an explicit `enabled` param (module-level pure fn) instead of the literal `(store)`-only signature in the plan text — behaviorally identical (option gate still first check), avoids capturing the prop in a closure. Conservative; keeps the helper reusable/testable.
+
+### Verification
+- `npx tsc --noEmit`: clean (EXIT 0).
+- `npm run test:run`: 166 files passed | 1 skipped; 2821 tests passed | 15 skipped. No new failures.
+- `npm run lint`: no errors; only pre-existing warnings (`<img>` LCP, react-hooks/exhaustive-deps) — none in changed files.
+
+### Open risks
+- No `useReviewState.ts` change (as planned): `null` baseline stays conservatively active until baseline lands.
+- Reset failure path relies on `ensureBaseline` throwing only when `baselineAvailable && fetch fails` (Phase 2 contract). Genuine-legacy `null` returns still hit the onboarding fallback.
+- Deploy-A boundary: server still ships `baseline`, so `ensureBaseline` resolves from resident baseline; the `?part=baseline` fetch path activates at Phase 4 / Deploy B.

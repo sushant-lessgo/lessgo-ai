@@ -42,7 +42,54 @@ interface EditProviderProps {
     showErrorBoundary?: boolean;
     fallbackComponent?: React.ComponentType<{ error: string; retry: () => void }>;
     loadingComponent?: React.ComponentType<{ tokenId: string }>;
+    // When true (default), the editor background-fetches the on-demand baseline
+    // via ensureBaseline() whenever needs-review markers exist, so the auto-clear
+    // diff can re-derive against the true original. Preview passes `false` so it
+    // NEVER fetches the ~68 KB baseline (no Reset, markers not rendered there).
+    prefetchBaselineForReview?: boolean;
   };
+}
+
+/**
+ * Review-diff lazy baseline fetch. No-op unless: the option is enabled, there is
+ * at least one needs-review marker, the baseline is NOT yet resident, and the
+ * server DOES hold one (`baselineAvailable`). Otherwise it triggers the deduped
+ * `ensureBaseline()` fetch.
+ *
+ * On resolve it MUST call `refreshFromContent()` — this is load-bearing.
+ * `ensureBaseline()` sets `state.baseline`, NOT `state.content`, so the content
+ * subscription below will NOT fire on baseline arrival; the explicit
+ * `refreshFromContent()` here is the ONLY thing that re-derives markers once the
+ * baseline lands. Without it an edited-but-still-marked element stays marked
+ * until the next content edit. Failures are swallowed + logged: markers just
+ * stay conservatively active (the missing-baseline guard in useReviewState
+ * already treats an undefined baselineVal as active).
+ */
+function maybePrefetchBaselineForReview(
+  store: EditStoreInstance | null,
+  enabled: boolean
+) {
+  if (!enabled || !store) return;
+  if (useReviewState.getState().needsReviewItems.length === 0) return;
+
+  const state = store.getState();
+  if (state.baseline !== null) return;       // already resident
+  if (!state.baselineAvailable) return;      // server has none (true legacy)
+
+  state
+    .ensureBaseline()
+    .then(() => {
+      const fresh = store.getState();
+      useReviewState.getState().refreshFromContent(
+        fresh.content,
+        fresh.baseline,
+        fresh.currentPageId,
+        fresh.globalSettings
+      );
+    })
+    .catch((err) => {
+      logger.warn('Failed to prefetch baseline for review:', err);
+    });
 }
 
 // Create context with default values
@@ -95,6 +142,7 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
     showErrorBoundary = true,
     fallbackComponent: FallbackComponent = DefaultErrorComponent,
     loadingComponent: LoadingComponent = DefaultLoadingComponent,
+    prefetchBaselineForReview = true,
   } = options;
 
   // Hook into the store management
@@ -196,6 +244,10 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
                 updatedState.currentPageId,
                 hydratedDismisses
               );
+              // If markers already exist at load, background-fetch the on-demand
+              // baseline so the auto-clear diff can re-derive against the true
+              // original (no-op in preview / when no markers / when resident).
+              maybePrefetchBaselineForReview(store, prefetchBaselineForReview);
             } catch (err) {
               logger.warn('Failed to init review state:', err);
             }
@@ -212,7 +264,7 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
           }
         });
     }
-  }, [store, isInitialized, isHydrating, tokenId]);
+  }, [store, isInitialized, isHydrating, tokenId, prefetchBaselineForReview]);
 
   // Reactivity: keep review state (Feature 1 auto-check / Feature 2 markers) in sync with
   // live content via a store subscription OUTSIDE React render (not a render-phase selector).
@@ -245,6 +297,10 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
             fresh.currentPageId,
             fresh.globalSettings
           );
+          // Covers markers appearing AFTER load (e.g. section regen inventing new
+          // specifics while the baseline is not yet resident) — background-fetch
+          // it then re-derive. No-op once resident / no markers / preview.
+          maybePrefetchBaselineForReview(store, prefetchBaselineForReview);
         } catch (err) {
           logger.warn('Failed to refresh review state:', err);
         }
@@ -255,7 +311,7 @@ export function EditProvider({ children, tokenId, options = {} }: EditProviderPr
       if (timer) clearTimeout(timer);
       unsubscribe();
     };
-  }, [store, tokenId]);
+  }, [store, tokenId, prefetchBaselineForReview]);
 
 
   // Create context value - get fresh data from store if available

@@ -16,7 +16,9 @@ export function useResetSystem() {
   const handleResetConfirm = useCallback(async (scope: ResetScope) => {
     try {
       const { resetToGenerated, triggerAutoSave } = storeApi.getState();
-      resetToGenerated();
+      // resetToGenerated is async — it lazily fetches the stored baseline and
+      // throws on fetch failure (caught below → failure toast, state untouched).
+      await resetToGenerated();
       await triggerAutoSave();
 
       // Reset now restores the full generation baseline (copy + design)

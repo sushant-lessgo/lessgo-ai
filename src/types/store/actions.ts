@@ -49,8 +49,10 @@ getTypographyForSection: (sectionId: string) => FontTheme;
    * ===== RESET TO GENERATED =====
    */
   
-  // Reset all customizations to original AI-generated design
-  resetToGenerated: () => void;
+  // Reset all customizations to original AI-generated design.
+  // Async: lazily fetches the stored baseline via ensureBaseline() before
+  // applying the reset (network I/O outside the Immer producer).
+  resetToGenerated: () => Promise<void>;
 
   // Global Settings
   setDeviceMode: (mode: 'desktop' | 'mobile') => void;
