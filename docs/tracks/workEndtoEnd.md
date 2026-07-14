@@ -428,6 +428,31 @@ ingestion) → onboarding path → editor primitives. Gate = Kundius sign-off + 
 doc is the acceptance-criteria source for all of them (the promises are testable
 requirements).
 
+### Phase C — work copy engine: BUILT + FOUNDER-APPROVED (2026-07-15)
+
+Status: **built + founder-approved**, flag **OFF** pending phase-B Gate-0 QA.
+Branch `feature/work-copy-engine` (plan/audit in `docs/task/work-copy-engine.{plan,audit}.md`).
+
+- Deterministic slim-strategy (code) + ONE AI angle/story/voice call + facts-bound
+  per-page copy call; rides the newGeneration multi-page fan-out. Firewall-clean
+  (no templateId/skeletonId in prompts).
+- **EN golden** (Kundius Home + full site) founder-approved 2026-07-14; **NL golden**
+  (Kundius Home) founder-approved 2026-07-15 — gpt-4o-mini holds Dutch cleanly on the
+  cheap tier (no model bump).
+- Flag `NEXT_PUBLIC_WORK_COPY_ENGINE` (build-time inlined → flip = redeploy), allow-list
+  `['atelier']` (`src/lib/workCopyEngine.ts`). Stays OFF until phase-B newGeneration
+  Gate-0 QA passes and the founder rules flag-on.
+- **Contact-binding fix shipped** (phase 8): the engine no longer invents a specific
+  email/phone/URL/@handle from the business name — the contact section binds to the
+  stated `contactMethod` only (regression was `info@kristinakundius.nl`). Committed
+  EN/NL goldens PRE-DATE this fix (they still show the fabricated email; not re-captured).
+
+Deferred follow-ups (before work goes user-facing):
+- **`facts.work` editor writeback** — `buildWorkInput` reads the hydrated Brief snapshot,
+  not per-field wizard edits; the LIVE story-interview submit 400s until wired.
+- **Untyped story action** — `regenerateStoryFromInterview` not yet declared on
+  `src/types/store/actions.ts` (panel reaches it via cast).
+
 ## To brainstorm, one by one
 
 1. ~~Step 2 (work ingestion): sources + auto-curation~~ ✅ agreed, folded into step 2

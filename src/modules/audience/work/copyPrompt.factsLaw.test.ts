@@ -101,6 +101,52 @@ describe('work copy prompt — facts are law (AC-2)', () => {
   });
 });
 
+describe('work copy prompt — contact binding, no invented address (facts-law)', () => {
+  const strategy = buildStrategy();
+  const prompt = buildWorkCopyPrompt({
+    strategy,
+    page: homePage(strategy),
+    facts: FACTS, // contactMethod 'form', NO specific address stated
+    voice: buildVoice(),
+  });
+
+  it('home page includes the contact section (binding is exercised)', () => {
+    expect(strategy.sections).toContain('contact');
+  });
+
+  it('carries the no-invent-contact binding rule', () => {
+    expect(prompt).toContain('bind to the stated method');
+    expect(prompt).toContain('invent NO address');
+  });
+
+  it('enumerates ONLY the stated method (form) and forbids fabricated email', () => {
+    expect(prompt).toContain('a contact form');
+    expect(prompt).toContain('contactMethod: "form"');
+    expect(prompt).toContain('NEVER fabricate an "info@');
+    expect(prompt).toContain('social @handle');
+  });
+
+  it('directs a form CTA to the mechanism, not an address', () => {
+    expect(prompt).toContain('NOT an email address');
+    // Self-check echoes the contact anti-invention guard.
+    expect(prompt).toContain(
+      'The contact section invents NO email address, phone number, URL, or @handle'
+    );
+  });
+
+  it('renders WhatsApp when that is the stated method (no address invention)', () => {
+    const waFacts: WorkFacts = { ...FACTS, contactMethod: 'whatsapp' };
+    const waPrompt = buildWorkCopyPrompt({
+      strategy,
+      page: homePage(strategy),
+      facts: waFacts,
+      voice: buildVoice(),
+    });
+    expect(waPrompt).toContain('is WhatsApp (contactMethod: "whatsapp")');
+    expect(waPrompt).toContain('invent NO address');
+  });
+});
+
 describe('work copy parse — praise verbatim, no drops/extras, no padding (AC-2)', () => {
   // A well-behaved LLM response: it writes framing + one card per stated group,
   // and writes NO proof quotes (the system injects them).

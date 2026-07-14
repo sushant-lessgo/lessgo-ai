@@ -20,7 +20,7 @@ Build the WORK copy engine: from a work Brief (`brief.facts.work`, phase-A contr
 - phase 5 adapter fan-out — full multi-page generation: done (review loops 1, verdict ship) | runWorkLLMGeneration (thing.ts clone), allow-list guard ['atelier'], byte-identical routing (4 cases proven), invariants hold, 6-page full-site golden facts-law PASS. Flag OFF; phase-B Gate-0 QA still prereq before any flag-on. OPEN-RISK: buildWorkInput doesn't re-project per-field wizard edits into facts.work (fine for Kundius pilot; general edit→gen needs store→facts writeback)
 - phase 6 story interview tier (Sugarman regen) [orchestrator escalation re-check: STAYS FULL — editStore touch additive]: done (review loops 2, verdict ship) | dedicated regenerate-story route on work-copy path (regenerate-section byte-identical), contract-validated, parity-pinned, SECTION_REGEN reuse. FIX: panel gated on isWorkCopyTemplate(templateId) (leaf module) — closed cross-audience leak. DEFERRED FOLLOW-UP→before work goes user-facing: facts.work editor writeback (live story submit) + untyped action decl in store/actions.ts
 - phase 7 NL language pass [HUMAN GATE]: DONE — FOUNDER APPROVED 2026-07-15. gpt-4o-mini holds Dutch cleanly on CHEAP tier (no model bump, no directive hardening; answers NL-cost Q1=keep cheap). Zero English leakage. FOLD→phase8: contact-binding fix (engine invented email info@kristinakundius.nl; bind to stated contactMethod, never invent address) + test.
-- phase 8 close-out — full suite green, README, track doc: pending
+- phase 8 close-out — full suite green, README, track doc: done | founder contact-binding fix (bind to stated contactMethod, never invent email/phone/URL/@handle) + 5 deterministic tests; README added (`src/modules/audience/work/README.md`); track doc updated (workEndtoEnd.md phase-C status); AC sweep below; committed EN/NL goldens PRE-DATE the contact fix (not re-captured — founder already approved copy). FULL SWEEP: tsc clean (except pre-existing page.tsx:6 founder.jpg), test:run green, lint clean, build → see audit "## Phase 8".
 
 ## Design decisions (locked for this plan)
 
@@ -233,6 +233,44 @@ Runs on the `work-copy` path (design decision #6) — NOT the legacy `/api/regen
 | NL-primary → NL throughout | 7 |
 | Copy firewall green; degraded flagged | 2 + 3 (+5 threading) |
 | Kundius golden founder-approved | 4 (home) + 5 (full) |
+
+### Phase-8 AC sweep (spec §Acceptance criteria — evidence per box)
+
+- [x] **AC-1 Full site, lean lengths** — CLOSED. Phase 5: full-site `CAPTURE=1` golden
+  (`kundius.full.json/.read.txt`) — 7 pages of the standard archetype, all `complete=true`,
+  lean lengths (`WORK_CHAR_CAPS`). Founder-approved.
+- [x] **AC-2 Facts law (zero invention/padding, praise verbatim)** — CLOSED. Phase 3
+  deterministic `copyPrompt.factsLaw.test.ts` (fake groups/prices verbatim; binding line
+  enumerates EXACTLY the stated groups; ALL praise word-for-word in `proof.quotes`, no
+  drops/extras; parser never pads) + `injectPraise.test.ts` (incl. empty-praise strip,
+  over-max clamp). Golden facts-law PASS (phase 4/5). Phase 8 EXTENDS: contact section
+  binds to stated `contactMethod`, invents no email/phone/URL/@handle (new tests in
+  `copyPrompt.factsLaw.test.ts`).
+- [x] **AC-3 Slim strategy deterministic; AI returns only angle/story/voice** — CLOSED.
+  Phase 1 determinism/archetype/card-count/price-position tests; phase 2
+  `parseStrategyWork.test.ts` (structure IDENTICAL across two AI responses; zod schema
+  STRIPS structural contraband; AI contributes only the 3 narrative fields).
+- [x] **AC-4 Story ship-grade (facts-only, no fabricated bio)** — CLOSED. Phase 3 copy
+  prompt rule 7 (facts-only, graceful omission, `new`-seller clause); golden PASS (no
+  fabricated bio; Dutch harvest did not leak).
+- [~] **AC-5 Story interview → only About regenerates, Sugarman-shaped** — ROUTE-LEVEL
+  PROVEN, live-editor PENDING. Phase 6: `/api/audience/work/regenerate-story` +
+  `storyInterview.test.ts` + `route.test.ts` (hook/belief/landing; contract-validated
+  against `workElementContract.about`; generator-parity test; owner+credits guards).
+  NOT fully closed live: the editor submit needs the deferred `facts.work` writeback
+  (a live submit 400s without it) — manual editor QA is a follow-up.
+- [x] **AC-6 NL-primary → NL throughout** — CLOSED. Phase 7 NL golden (`nl.home.*`) +
+  automated `detectEnglishLeakage` heuristic (0 leaks); founder-approved; gpt-4o-mini on
+  the cheap tier holds Dutch (no model bump).
+- [x] **AC-7 Copy firewall green; degraded flagged** — CLOSED. Phase 2/3
+  `promptFirewall.test.ts` (object-key + word-boundary string guards; salted-input throws);
+  degraded-signal threading (`meta.mock`/`meta.complete`/`missingSections`) unit-tested in
+  the copy route + phase-5 fan-out.
+- [x] **AC-8 Kundius golden founder-approved** — CLOSED. Phase 4 home golden approved
+  2026-07-14; phase 5 full-site golden approved; phase 7 NL home golden approved 2026-07-15.
+  NOTE: committed goldens PRE-DATE the phase-8 contact-binding fix (they still show the
+  fabricated `info@kristinakundius.nl`); not re-captured — founder already approved the copy
+  and re-capture costs credits. The fix is covered by the deterministic phase-8 unit tests.
 
 ## Risky-surface flags (orchestrator re-check)
 

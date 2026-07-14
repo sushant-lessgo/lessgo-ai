@@ -161,6 +161,7 @@ export function buildWorkCopyPrompt(input: WorkCopyPromptInput): string {
   const groupNames = (facts.groups ?? []).map((g) => g.name);
   const hasWork = page.sections.includes('work');
   const hasPackages = page.sections.includes('packages');
+  const hasContact = page.sections.includes('contact');
   const agencyMetrics = hasAgencyMetrics(voice, page);
 
   let nextRule = 11;
@@ -176,6 +177,23 @@ export function buildWorkCopyPrompt(input: WorkCopyPromptInput): string {
     );
     bindingRuleLines.push(
       `${nextRule++}. **Prices are law — verbatim or mode-phrased.** Use each item's price EXACTLY as given in the WORK LIBRARY: an exact price as stated, a "from" price framed as "from …", and an on-request item framed as "on request" / "price on enquiry". NEVER invent, round, discount, or attach a number the library does not state.`
+    );
+  }
+
+  if (hasContact) {
+    // Slot 7 is an ENUM (whatsapp | booking | form) — never a specific address.
+    // Facts-law: the contact section must reflect ONLY the stated method and MUST
+    // NOT invent a concrete email/phone/URL/@handle (regression: the engine once
+    // fabricated "info@<name>.nl" from the business name).
+    const cm = facts.contactMethod ?? 'form';
+    const methodPhrase =
+      cm === 'whatsapp'
+        ? 'WhatsApp'
+        : cm === 'booking'
+          ? 'an online booking link'
+          : 'a contact form';
+    bindingRuleLines.push(
+      `${nextRule++}. **Contact — bind to the stated method; invent NO address.** The seller's ONLY stated way to be reached is ${methodPhrase} (contactMethod: "${cm}"${facts.contactMethod ? '' : ', default'}). Set \`contact_method\` to exactly "${cm}". Do NOT invent, guess, or construct a specific email address, phone number, website URL, or social @handle the seller did not provide — NEVER fabricate an "info@…" (or any) email from the business name. Write only method-appropriate framing plus a CTA that points to that mechanism${cm === 'form' ? ` (for a form, a nudge in ${language} like "Get in touch" / "Send a message" — NOT an email address)` : ''}. Use a concrete address or number ONLY if the WORK LIBRARY states one verbatim.`
     );
   }
 
@@ -248,7 +266,12 @@ Scan your JSON once more and fix any miss:
 (d) The work and packages collections have EXACTLY ${groupNames.length} card(s) — one per stated item, none invented.`
       : ''
   }
-(e) You wrote NO client quotes in the proof section (they are injected for you).
+(e) You wrote NO client quotes in the proof section (they are injected for you).${
+    hasContact
+      ? `
+(f) The contact section invents NO email address, phone number, URL, or @handle — it only reflects the stated contact method.`
+      : ''
+  }
 
 ## OUTPUT FORMAT
 Return a JSON object keyed by section. Each value is { "elements": { … } }. For

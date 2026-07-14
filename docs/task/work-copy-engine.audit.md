@@ -566,3 +566,111 @@ Observations (NOT language-gate blockers, reported for the founder):
 ### Open risks
 - The NL golden is a single non-deterministic snapshot; re-capture varies (e.g. contact_method fabrication in obs. 2). The founder read judges representativeness.
 - Strategy narrative fields (obs. 1) stay English; acceptable while non-rendered, revisit if they ever surface to users.
+
+## Phase 8 — close-out: contact-binding fix, README, track doc, full green sweep
+
+### Files changed
+- MODIFY `src/modules/audience/work/copyPrompt.ts` — contact-binding facts-law rule + self-check line.
+- MODIFY `src/modules/audience/work/copyPrompt.factsLaw.test.ts` — 5 new deterministic contact-binding tests.
+- ADD `src/modules/audience/work/README.md` — agent-oriented module README.
+- MODIFY `docs/tracks/workEndtoEnd.md` — phase-C status (built + founder-approved, flag OFF, deferred follow-ups, contact fix).
+- MODIFY `docs/task/work-copy-engine.plan.md` — progress-log phase-8 line + per-AC phase-8 sweep.
+- MODIFY `docs/task/work-copy-engine.audit.md` — this section.
+
+### 1. Contact-binding fix (founder-requested facts-law)
+The NL/EN captures showed the contact section INVENTING `info@kristinakundius.nl`
+when the stated contact facts were form/WhatsApp/email with NO specific address
+(phase-7 audit obs. 2; facts-law forbids inventing contact details).
+
+- **Root cause = prompt-side only.** The work contact contract
+  (`workSections.ts` `contactContract`) has NO email/phone/handle SLOT — elements
+  are `eyebrow/heading/lead/contact_method(default 'form')/form_ref/cta_label`.
+  `WorkFacts.contactMethod` is an ENUM (`whatsapp | booking | form`), never a
+  concrete address. `parseCopy.ts` only defaults `contact_method` to `'form'` — it
+  reintroduces NO fabricated value. So the invention was the LLM writing an email
+  into a free-text field (`lead`/`cta_label`). **`parseCopy.ts` NOT changed** (it
+  already graceful-omits; verified before editing, per the task).
+- **Fix (`copyPrompt.ts`):** new dynamically-appended BINDING rule (mirrors the
+  group/price binding pattern), emitted whenever the page has a `contact` section.
+  It states the seller's ONLY stated way to be reached is the derived method-phrase
+  (`a contact form` / `WhatsApp` / `an online booking link`) from
+  `facts.contactMethod ?? 'form'`, pins `contact_method` to that value, and forbids
+  inventing/guessing/constructing a specific email/phone/URL/@handle — explicitly
+  "NEVER fabricate an info@… from the business name". For `form` the CTA nudges
+  toward the form ("Get in touch"/"Send a message"), NOT an address. A concrete
+  address/number is used ONLY if the WORK LIBRARY states one verbatim. Added a
+  gated FINAL SELF-CHECK line (f) echoing the guard.
+- **Tests (`copyPrompt.factsLaw.test.ts`, +5, all green):** with the fixture's
+  `contactMethod: 'form'` and NO address stated — home page includes `contact`;
+  prompt carries the "bind to the stated method"/"invent NO address" binding;
+  enumerates ONLY the stated method (`a contact form`, `contactMethod: "form"`)
+  and forbids the `info@` fabrication + `social @handle`; form CTA points to the
+  mechanism (`NOT an email address`) + self-check echo; a WhatsApp variant asserts
+  `is WhatsApp (contactMethod: "whatsapp")` with no address-invention path. All
+  pre-existing facts-law tests stay green (13 total in the file).
+- **Goldens PRE-DATE this fix.** The committed EN/NL goldens (`kundius.home.*`,
+  `kundius.full.*`, `nl.home.*`) still show the fabricated email — they were
+  captured before this fix and are NOT re-captured (founder already approved the
+  copy; CAPTURE costs credits). The fix is covered by the deterministic unit tests
+  above. (The optional one-shot EN-home re-capture was SKIPPED — not trivial enough
+  to justify the credit spend; the unit test is authoritative.)
+
+### 2. README
+`src/modules/audience/work/README.md` added, following the `modules/**/README.md`
+style: module purpose; slim-strategy split (deterministic CODE vs the one AI
+angle/story/voice call); facts-law rules (verbatim groups/prices/praise,
+anti-invention, anti-padding, empty-praise strip, contact binding); firewall
+invariants (no templateId/skeletonId; word-boundary guard); price-position
+derivation; story two-tier (ship-grade auto + Sugarman interview via
+`/api/audience/work/regenerate-story`); the flag + `['atelier']` allow-list
+(`src/lib/workCopyEngine.ts`); pitfalls (praise→proof.quotes is work-LOCAL, NOT
+service `injectRealTestimonials`; story section `about` distinct from
+`proof`/`testimonials`; multipage invariants; the ~180-line thing.ts fan-out
+clone; deferred `facts.work` editor writeback).
+
+### 3. Track doc
+`docs/tracks/workEndtoEnd.md` — new "### Phase C — work copy engine" subsection
+under "How this gets built": status built + founder-approved (EN 2026-07-14 + NL
+2026-07-15 goldens), flag OFF pending phase-B Gate-0 QA, contact-binding fix
+shipped, deferred follow-ups (`facts.work` editor writeback, untyped story action).
+
+### 4. AC sweep
+Recorded in the plan under "### Phase-8 AC sweep". AC-1/2/3/4/6/7/8 CLOSED with
+per-phase test/golden evidence. **AC-5 (story interview) is ROUTE-LEVEL PROVEN,
+live-editor PENDING** — the route/prompt/parity/guards are unit-tested (phase 6),
+but the live editor submit needs the deferred `facts.work` writeback (a live
+submit 400s without it); manual editor QA is a follow-up. AC-8 note: committed
+goldens pre-date the phase-8 contact fix.
+
+### 5. FULL GREEN SWEEP (merge-gate)
+- `npx tsc --noEmit`: **clean EXCEPT** the known pre-existing, unrelated
+  `src/app/page.tsx(6,26): error TS2307: Cannot find module '@/assets/images/founder.jpg'`
+  — that error is on main too, not in this feature's scope, NOT fixed here.
+- `npm run test:run`: **GREEN** — 181 files passed | 1 skipped; 2973 passed | 18
+  skipped. No regressions (up 5 tests from phase 7's 2968 — the 5 new contact
+  binding tests).
+- `npm run lint`: **clean** — exit 0. Only PRE-EXISTING warnings (techpremium/vestria
+  `<img>` no-img-element, `ph-provider.tsx` exhaustive-deps); NONE in the work
+  module or on changed lines.
+- `npm run build` (= `build:published-css` + `build:assets` + `next build`):
+  **SUCCEEDED — exit 0, "✓ Compiled successfully"**, full route table emitted. The
+  pre-existing `src/app/page.tsx:6` founder.jpg issue does NOT fail `next build`
+  (it surfaces only under `tsc --noEmit`); the build is clean. (Non-blocking build
+  notes: "Bundle size exceeds 5KB target" warning + a `@sentry/nextjs`
+  Turbopack-config deprecation warning — both pre-existing, unrelated.)
+
+### Deviations from the plan
+- Optional one-shot EN-home `CAPTURE=1` re-capture SKIPPED (per the task's "only if
+  trivial; otherwise skip and rely on the unit test") — goldens left pre-fix, noted
+  in AC-8 + the track doc + README.
+
+### Open risks
+- Committed EN/NL goldens still show the fabricated email (pre-date the fix) —
+  re-capture on the next authorized capture will reflect the corrected contact
+  binding.
+- The contact fix is prompt-enforced (facts-law is a content guarantee, not a
+  parse-time clamp) — same posture as the group/price binding. A misbehaving model
+  could still emit an address; the deterministic guarantee is that the PROMPT now
+  forbids it and the parser introduces none.
+- Deferred (unchanged): `facts.work` editor writeback (blocks live AC-5 story
+  submit) + untyped `regenerateStoryFromInterview` store action.
