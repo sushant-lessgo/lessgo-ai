@@ -32,19 +32,29 @@ describe('designKit generator', () => {
     }
   });
 
-  it('labels source per section: thing=contract, trust/work=legacy-layout', () => {
-    const thing = buildDesignKit('thing');
-    for (const s of thing.sections) expect(s.source).toBe('contract');
-
-    for (const engine of ['trust', 'work'] as CopyEngine[]) {
+  it('labels source per section: thing/work=contract, trust=legacy-layout', () => {
+    for (const engine of ['thing', 'work'] as CopyEngine[]) {
       const kit = buildDesignKit(engine);
-      for (const s of kit.sections) expect(s.source).toBe('legacy-layout');
+      for (const s of kit.sections) expect(s.source).toBe('contract');
     }
+
+    const trust = buildDesignKit('trust');
+    for (const s of trust.sections) expect(s.source).toBe('legacy-layout');
   });
 
   it('thing sections carry every slot from the LIVE elementContract (derive-from-live)', () => {
     const kit = buildDesignKit('thing');
     const contract = elementContracts.thing!;
+    for (const s of kit.sections) {
+      const liveKeys = getAllElements(contract[s.sectionType] as any).map((e) => e.element);
+      const kitKeys = s.slots.map((sl) => sl.key);
+      expect(kitKeys.sort()).toEqual(liveKeys.sort());
+    }
+  });
+
+  it('work sections carry every slot from the LIVE work elementContract (derive-from-live)', () => {
+    const kit = buildDesignKit('work');
+    const contract = elementContracts.work!;
     for (const s of kit.sections) {
       const liveKeys = getAllElements(contract[s.sectionType] as any).map((e) => e.element);
       const kitKeys = s.slots.map((sl) => sl.key);

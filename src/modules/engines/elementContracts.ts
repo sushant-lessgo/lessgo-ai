@@ -25,9 +25,16 @@
 // trust/industries/about/materials/process/catalog/contact) are taken verbatim
 // from their sole schema — byte-identical output to today.
 //
-// NOT covered (deliberate, plan phase 8):
+// NOT covered on the GENERATION path (deliberate, plan phase 8):
 // - trust + work engines — service legacy + granth stay on the layout path
 //   (getLayoutElements) untouched.
+//   NOTE (work-contract phase 1): `work` is now covered as DATA — the frozen
+//   work-core element contract (workSections.ts) is registered below as
+//   `elementContracts.work`. It is INERT at runtime: resolveEngineSectionSchema()
+//   is gated by THING_GENERATION_LAYOUTS (thing-only), so no work/granth layout
+//   name resolves through here. The generation path still routes work via the
+//   layout path until track C wires it. Registration = contract availability,
+//   zero behavior change.
 // - Editor-runtime callers (useElementCRUD.getLayoutElements, useSectionCRUD's
 //   local map, validationActions' local map) — layout path, untouched (no
 //   engine context at editor add-section/add-element time).
@@ -51,6 +58,7 @@ import {
   meridianElementSchema,
   vestriaElementSchema,
 } from '@/modules/audience/product/elementSchema';
+import { workElementContract } from './workSections';
 
 /**
  * Union two-or-more V2 schemas for the SAME logical section.
@@ -133,13 +141,17 @@ export const thingElementContract: Readonly<Record<string, UIBlockSchemaV2>> = {
 };
 
 /**
- * Per-engine contracts. Only `thing` is covered in scale-07 phase 8 — trust
- * (service) and work (granth) generations keep the existing layout-keyed path.
+ * Per-engine contracts. `thing` (scale-07 phase 8) drives generation. `work`
+ * (work-contract phase 1) is the frozen work-core contract — registered as DATA
+ * only; it is inert on the generation path (resolveEngineSectionSchema is
+ * thing-gated) until track C wires the work copy engine. `trust` (service)
+ * generation still keeps the existing layout-keyed path.
  */
 export const elementContracts: Partial<
   Record<CopyEngine, Readonly<Record<string, UIBlockSchemaV2>>>
 > = {
   thing: thingElementContract,
+  work: workElementContract,
 };
 
 /**
