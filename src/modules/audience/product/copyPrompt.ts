@@ -247,6 +247,15 @@ You are a conversion copywriter for a software product landing page. The page us
     ? `5. Pricing: set "featured": true on EXACTLY ONE tier (the middle "most chosen" plan); all others false. Each tier's "features" is an array of 3-6 short concrete strings.\n`
     : '';
 
+  // Bind the features section to the founder's ACTUAL stated features/USPs — mirror
+  // of the service services-binding rule (see service/copyPrompt.ts). The FEATURE
+  // ANALYSIS block already enumerates them; this makes "use them, don't invent" explicit.
+  const hasFeaturesSection = sectionTypes.includes('features');
+  const featuresBindingRule =
+    hasFeaturesSection && features.length > 0
+      ? `\n10. **The features section MUST be built from the founder's actual ${isTrade ? 'value-adds/USPs' : 'features'} listed above (FEATURE ANALYSIS).** Derive each feature card directly from a stated ${isTrade ? 'USP' : 'feature'} — rephrase for polish only; do NOT invent, rename, or add ${isTrade ? 'USPs' : 'features'} the founder never gave.`
+      : '';
+
   const voiceRuleName = isTrade ? 'Tailored-trade' : 'Meridian';
 
   const selfCheckAccent = isTrade
@@ -405,7 +414,7 @@ ${accentRule}
 ${pricingRule}6. Footer: each footer/link column has a "links" array of { id: "", label, href } — emit empty "" for every id, including nested link ids.
 7. Output EVERY section listed above — no omissions (${sectionList}). Each as a key with a complete "elements" object.
 8. Use the ${voiceRuleName} voice — concrete, precise, no hype. Avoid the forbidden words ANYWHERE, including the brand/wordmark (logo_text, wordmark, brand_text), copyright line, and testimonial quotes.
-9. Return ONLY valid JSON. No markdown, no commentary.
+9. Return ONLY valid JSON. No markdown, no commentary.${featuresBindingRule}
 
 ## FINAL SELF-CHECK (before returning)
 (a) Every listed section has an entry with a complete "elements" object.

@@ -18,6 +18,7 @@ import { useElementPicker } from '@/hooks/useElementPicker';
 import { ElementPicker } from '../content/ElementPicker';
 
 import { logger } from '@/lib/logger';
+import { isSectionVisuallySelected } from '@/utils/selectionPriority';
 interface MainContentProps {
   tokenId: string;
 }
@@ -533,7 +534,7 @@ const handleAddSection = (afterSectionId?: string) => {
                   mode !== 'preview' && [
                     "rounded-lg border border-transparent hover:border-primary/20",
                     "hover:shadow-sm px-4 py-2 -mx-4 -my-2",
-                    selectedSection === sectionId && "border-primary/40 shadow-md bg-primary/5"
+                    isSectionVisuallySelected(selectedSection, sectionId, selectedElement) && "border-primary/40 shadow-md bg-primary/5"
                   ]
                 )}>
                   {/* Add Section Button (Between Sections) */}
@@ -560,8 +561,8 @@ const handleAddSection = (afterSectionId?: string) => {
                     <div
                       className={`
                         relative transition-all duration-200 cursor-pointer
-                        ${selectedSection === sectionId 
-                          ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-50' 
+                        ${isSectionVisuallySelected(selectedSection, sectionId, selectedElement)
+                          ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-50'
                           : 'hover:ring-1 hover:ring-gray-300'
                         }
                       `}
@@ -573,7 +574,7 @@ const handleAddSection = (afterSectionId?: string) => {
                       role="button"
                       tabIndex={0}
                       aria-label={`Section ${sectionId}`}
-                      aria-selected={selectedSection === sectionId}
+                      aria-selected={isSectionVisuallySelected(selectedSection, sectionId, selectedElement)}
                     >
                       {/* Section Content */}
                       <EditablePageRenderer
@@ -581,7 +582,7 @@ const handleAddSection = (afterSectionId?: string) => {
                         sectionData={content[sectionId]}
                         layout={sectionLayouts[sectionId] || content[sectionId]?.layout || getSectionFallbackLayout(sectionId)}  // ← Gets correct layout
                         mode={mode}
-                        isSelected={selectedSection === sectionId}
+                        isSelected={isSectionVisuallySelected(selectedSection, sectionId, selectedElement)}
                         colorTokens={colorTokens}
                         globalSettings={globalSettings}
                       />

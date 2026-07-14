@@ -59,7 +59,7 @@ import {
   VESTRIA_LEAD_SUCCESS_MESSAGE,
 } from '@/modules/templates/vestria/blocks/Contact/contactFields';
 import { buildFinalContent, saveDraft, type BriefGoal } from './finalize';
-import type { GenerationCallbacks, GenerationResult } from './index';
+import type { GenerationCallbacks, GenerationResult, GenerationMeta } from './index';
 import { trackFailure, failureEventName } from '@/utils/trackTelemetry';
 
 // Pilot locks — single-page THING (meridian). Style pickers only affect vestria.
@@ -691,6 +691,9 @@ export async function runThingGeneration(
 
     cb.onStage?.('copy');
     let copySections: Record<string, SectionCopy>;
+    // silent-fallback: the route's degraded-generation signal (mock / incomplete)
+    // — surfaced to the slot so a too-fast/canned run isn't mistaken for success.
+    let copyMeta: GenerationMeta | undefined;
     try {
       const res = await fetch('/api/audience/product/generate-copy', {
         method: 'POST',
@@ -710,6 +713,7 @@ export async function runThingGeneration(
         throw new Error(json?.message || 'Copy generation failed');
       }
       copySections = json.sections as Record<string, SectionCopy>;
+      copyMeta = json.meta as GenerationMeta | undefined;
     } catch (e: any) {
       return { status: 'error', error: e?.message || 'Copy generation failed.' };
     }
@@ -769,7 +773,7 @@ export async function runThingGeneration(
     }
 
     cb.onStage?.('done');
-    return { status: 'done', redirectTo: REDIRECT(tokenId) };
+    return { status: 'done', redirectTo: REDIRECT(tokenId), meta: copyMeta };
   };
 
   // ─── Strategy (PRIMARY path: fetched pre-gate at the structure slot) ───

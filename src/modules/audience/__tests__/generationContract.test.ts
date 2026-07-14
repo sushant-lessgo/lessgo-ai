@@ -574,6 +574,68 @@ describe('proof-truth phase 2 — prompt forbids named companies / hard metrics 
   });
 });
 
+// Regression for [facts-ignored]: the user-entered services/offer reached the
+// prompt only as a buried comma line with no instruction to USE them, so the model
+// invented its own services. The fix surfaces them as a source-of-truth block +
+// explicit binding rules. These assertions fail on the pre-fix prompt.
+describe('facts-ignored — service copy prompt binds services + offer to user input', () => {
+  const understanding: ServiceUnderstandingInput = {
+    serviceType: 'photographer',
+    whatYouDo: 'Editorial and portrait photography for brands and families',
+    services: ['Editorial portraits', 'Family sessions', 'Brand shoots'],
+    targetClients: ['DTC founders', 'Families'],
+    outcomes: ['Gallery in 2 weeks'],
+    deliveryModel: 'in-person',
+  };
+  const oneLiner = 'A portrait studio for brands and families.';
+  const offer = 'Book a 90-minute portrait session';
+
+  const strategy = generateMockServiceStrategy({
+    oneLiner,
+    understanding,
+    goal: 'book-call',
+    offer,
+    assets: {
+      hasTestimonials: true,
+      hasClientLogos: false,
+      hasOutcomes: true,
+      hasCaseStudies: false,
+      hasTeamPhotos: false,
+      hasFounderPhoto: true,
+      testimonialType: 'text',
+    },
+  });
+
+  const prompt = buildServiceCopyPrompt({
+    strategy,
+    uiblocks: strategy.uiblocks,
+    oneLiner,
+    offer,
+    goal: 'book-call',
+    understanding,
+  });
+
+  it('surfaces every stated service as its own line under a source-of-truth block', () => {
+    expect(prompt).toContain('SERVICES THE PROVIDER OFFERS');
+    for (const svc of understanding.services) {
+      expect(prompt).toContain(`- ${svc}`);
+    }
+  });
+
+  it('binds the CTA to the stated offer', () => {
+    expect(prompt).toContain('Bind the CTA to the stated offer');
+    expect(prompt).toContain(offer);
+  });
+
+  it('instructs one card per stated service when a services section routes', () => {
+    // Only assert the section-scoped rule when a services section is actually present.
+    if (strategy.sections.includes('services')) {
+      expect(prompt).toContain('one "services" card per stated service');
+      expect(prompt).toContain('no invented services');
+    }
+  });
+});
+
 // ---- Golden real-LLM captures (opt-in, present only after a real capture run) ----
 const goldenDir = path.resolve(process.cwd(), 'e2e/fixtures/generated');
 const goldenFiles = fs.existsSync(goldenDir)

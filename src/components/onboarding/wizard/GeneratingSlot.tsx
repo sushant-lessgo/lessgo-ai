@@ -29,6 +29,7 @@ import {
   type GenerationInput,
 } from '@/modules/wizard/generation';
 import { humanizeGenerationError } from '@/modules/wizard/generation/errorMessage';
+import { trackGenerationDegraded } from '@/utils/trackTelemetry';
 import { runWorkSkeleton, type WorkGenerationInput } from '@/modules/wizard/generation/work';
 import { isMultipage } from '@/modules/audience/product/pageArchetypes';
 import type { SitemapPage } from '@/types/product';
@@ -179,6 +180,17 @@ export default function GeneratingSlot() {
     if (result.status === 'error') {
       setError(humanizeGenerationError(result.error));
       return;
+    }
+    // silent-fallback: the run SUCCEEDED but the copy came back MOCK or INCOMPLETE
+    // — telemeter it so a too-fast/canned generation isn't invisible (it still
+    // opens the editor; degraded ≠ failed).
+    if (result.meta && (result.meta.mock || result.meta.complete === false)) {
+      trackGenerationDegraded({
+        engine,
+        mock: result.meta.mock ?? false,
+        complete: result.meta.complete ?? true,
+        missingSections: result.meta.missingSections ?? null,
+      });
     }
     // Reveal the editor immediately, with an honest "opening…" state (below).
     setRedirecting(true);
