@@ -52,6 +52,7 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const tokenId = searchParams.get("tokenId");
+    const part = searchParams.get("part");
 
     // A03: Injection Prevention - Validate token format
     if (!tokenId || !validateToken(tokenId)) {
@@ -99,6 +100,16 @@ export async function GET(req: Request) {
     const content = (project.content as ProjectContent) || {};
     const onboarding = content.onboarding || {};
 
+    // content-baseline-split Phase 1: `?part=baseline` targeted fetch.
+    // Extending loadDraft (not a new route) because the baseline blob already
+    // ships through this exact route under this exact auth — one auth surface,
+    // preserves demo/admin semantics, avoids drift. Runs AFTER the existing
+    // auth/ownership block above (reused verbatim — no new auth path). Returns
+    // ONLY the baseline blob, no other page fields.
+    if (part === 'baseline') {
+      return createSecureResponse({ baseline: content.baseline ?? null });
+    }
+
     // 🔧 BACKWARD COMPATIBILITY: Detect legacy data format
     // Legacy format: { layout, sections, content } at top level
     // New format: { onboarding, finalContent }
@@ -140,7 +151,12 @@ export async function GET(req: Request) {
 
       // Generation baseline (edit-header Reset). Null for legacy projects —
       // the editor backfills by capturing load-time state (loadFromDraft).
-      baseline: content.baseline ?? null,
+      baseline: content.baseline ?? null, // Phase 4 (Deploy B) removes this
+
+      // content-baseline-split Phase 1: additive flag so clients know a
+      // server-side baseline exists WITHOUT shipping the (large) blob in the
+      // default response. Clients fetch it lazily via `?part=baseline`.
+      hasBaseline: Boolean(content.baseline),
 
       // i18n-phase-1 (D4): per-project locale declaration. This top-level
       // response object WHITELISTS keys, so localeConfig must be passed through
