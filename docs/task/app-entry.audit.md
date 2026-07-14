@@ -99,3 +99,50 @@ NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 
 ### Open risks
 - None for this phase. Middleware wiring that consumes these helpers is phase 4 (human gate) — helpers are the real coverage; middleware is thin glue.
+
+## Phase 4 — Middleware app-root wiring
+
+**Files changed:**
+- `src/middleware.ts` (edited)
+
+### What changed
+Three edits, all in `src/middleware.ts`:
+1. **Import:** added `isAppRootRequest`, `getAppRootAction` to the existing `@/lib/domains/appSplit` import (nothing else new).
+2. **Public route:** added `'/welcome'` to the `isPublicRoute` matcher list (right after `'/'`), keeping the list in sync with the file-header INVARIANT (matcher is `createRouteMatcher`, no separate config array to touch). Satisfies the `src/app/README.md` public-route INVARIANT so app-host `/welcome` rewrites resolve and apex `/welcome` isn't gated.
+3. **App-root block:** in the `!isApiOrNext` region, AFTER the app-host `/robots.txt` early return and BEFORE the apex `getApexPublishRedirect` block, added:
+   ```ts
+   if (isAppRootRequest(host, url.pathname)) {
+     const action = getAppRootAction(!!(await auth()).userId)
+     if (action === 'dashboard') {
+       url.pathname = '/dashboard'
+       const res = NextResponse.redirect(url, 307)
+       res.headers.set('X-Robots-Tag', 'noindex, nofollow')
+       return res
+     }
+     url.pathname = '/welcome'
+     const res = NextResponse.rewrite(url)
+     res.headers.set('X-Robots-Tag', 'noindex, nofollow')
+     return res
+   }
+   ```
+   - `await auth()` fires ONLY inside the `isAppRootRequest` branch (app prod host + `pathname === '/'`) — never on every app request (pure pre-check gate).
+   - Signed-in → 307 redirect to `/dashboard`; signed-out → `NextResponse.rewrite` to `/welcome` (URL stays `/`, apex `page.tsx` output byte-untouched).
+   - Both early-return responses set `X-Robots-Tag: noindex, nofollow` directly (they bypass the post-auth `shouldNoindex` block; host is the app prod host by construction).
+   - D6 audit comment inline: rewrite targets a public page (`/welcome` now public) from a public path (`/` is public) — no auth bypass; signed-in path is a redirect early-return (allowed kind).
+
+### Deviations
+- None. Placement, call structure, response kinds, and noindex handling match the plan exactly. The `/welcome` public entry was added to the single `createRouteMatcher` list (there is no duplicate matcher array in this file), consistent with the header comment "keep isPublicRoute and the matcher in sync."
+
+### Verification
+- `npx tsc --noEmit`: clean (no output).
+- `npm run test:run`: 163 passed | 1 skipped (164 files); 2783 passed | 15 skipped (2798 tests). Green (incl. phase-3 helper tests, the real coverage).
+- `npm run lint`: zero errors (only pre-existing `<img>`/exhaustive-deps warnings in unrelated files; none in `middleware.ts`).
+- **Dev-runtime (port 3024, `curl` with `Host` header — middleware host-detection reads `req.headers.get('host')`, so app-host is simulable in dev):**
+  - `Host: app.lessgo.ai` `/` signed-out → `200`, body contains welcome markers (`welcome`, `Sign in`, `Lessgo AI`), `x-robots-tag: noindex, nofollow` present, URL stays `/` (rewrite). Confirms waitlist retired from app root.
+  - localhost `/` (no Host override) → `200`, marketing homepage, NO `x-robots-tag` (regression check: `isAppRootRequest` false off-prod-host).
+  - localhost `/welcome` → `200` (now public; no sign-in bounce).
+  - Signed-in → 307 `/dashboard` branch NOT exercised at runtime (no authed dev session available); covered by unit reasoning + phase-3 `getAppRootAction`/`isAppRootRequest` tests. The branch is symmetric to the verified signed-out path.
+
+### Open risks
+- Prod verification (per plan) is a post-merge/human-gate action: signed-out `app.lessgo.ai/` entry page, signed-in → `/dashboard`, apex `lessgo.ai/` unchanged, `curl -I` app root carries the noindex header.
+- Signed-in `/dashboard` 307 path unverified in dev (no authed session) — low risk (thin glue over unit-tested helpers).
