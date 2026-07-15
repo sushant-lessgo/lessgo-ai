@@ -39,6 +39,14 @@ import WorkContact from './blocks/Contact/WorkContact';
 import WorkContactPublished from './blocks/Contact/WorkContact.published';
 import WorkFooter from './blocks/Footer/WorkFooter';
 import WorkFooterPublished from './blocks/Footer/WorkFooter.published';
+import WorkPackages from './blocks/Packages/WorkPackages';
+import WorkPackagesPublished from './blocks/Packages/WorkPackages.published';
+import WorkAbout from './blocks/About/WorkAbout';
+import WorkAboutPublished from './blocks/About/WorkAbout.published';
+import WorkFaq from './blocks/Faq/WorkFaq';
+import WorkFaqPublished from './blocks/Faq/WorkFaq.published';
+import WorkResults from './blocks/Results/WorkResults';
+import WorkResultsPublished from './blocks/Results/WorkResults.published';
 
 /** One built layout variant = an edit component + its published twin. */
 export interface WorkBlockVariant {
@@ -108,6 +116,30 @@ export const WORK_BLOCK_REGISTRY: Record<string, WorkSectionEntry> = {
     default: 'workfooter',
     variants: {
       workfooter: { edit: WorkFooter, published: WorkFooterPublished },
+    },
+  },
+  packages: {
+    default: 'workpackages',
+    variants: {
+      workpackages: { edit: WorkPackages, published: WorkPackagesPublished },
+    },
+  },
+  about: {
+    default: 'workabout',
+    variants: {
+      workabout: { edit: WorkAbout, published: WorkAboutPublished },
+    },
+  },
+  faq: {
+    default: 'workfaq',
+    variants: {
+      workfaq: { edit: WorkFaq, published: WorkFaqPublished },
+    },
+  },
+  results: {
+    default: 'workresults',
+    variants: {
+      workresults: { edit: WorkResults, published: WorkResultsPublished },
     },
   },
 };

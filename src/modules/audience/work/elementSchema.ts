@@ -49,6 +49,11 @@ const WORK_LAYOUT_TO_SECTION: Record<string, string> = {
   WorkProofTestimonials: 'proof',
   WorkContact: 'contact',
   WorkFooter: 'footer',
+  // phase 7 — remaining MUST sections (packages/about) + optionals (faq/results).
+  WorkPackages: 'packages',
+  WorkAbout: 'about',
+  WorkFaq: 'faq',
+  WorkResults: 'results',
 };
 
 /**

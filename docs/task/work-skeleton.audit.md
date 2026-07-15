@@ -615,3 +615,80 @@ Confirmed. Templates without styleTokens (meridian/hearth/atelier/etc.) receive 
 
 ### Open risks
 - verify-dns previously did NOT thread `knobs` (pre-existing gap, out of this fix's scope); `styleTokens` IS threaded there, so custom-domain go-live now bakes style tokens correctly. Knobs parity on that path remains a separate pre-existing gap.
+
+---
+
+## Phase 7 — Section coverage + purity/bounds conformance (FREEZE GATE)
+
+### Files changed
+New (4 block quads; Results has no styles.ts — reuses Proof/Results styles):
+- `src/modules/skeletons/work/blocks/Packages/WorkPackages.core.tsx` / `.tsx` / `.published.tsx` / `styles.ts`
+- `src/modules/skeletons/work/blocks/About/WorkAbout.core.tsx` / `.tsx` / `.published.tsx` / `styles.ts`
+- `src/modules/skeletons/work/blocks/Faq/WorkFaq.core.tsx` / `.tsx` / `.published.tsx` / `styles.ts`
+- `src/modules/skeletons/work/blocks/Results/WorkResults.core.tsx` / `.tsx` / `.published.tsx`
+- `src/modules/templates/skinPurity.test.ts` (NET-NEW — AC L121/L122)
+- `src/modules/skeletons/work/renderParity.work.test.tsx` (NET-NEW — jsdom content parity, all built blocks)
+
+Edited (in Files-touched):
+- `src/modules/skeletons/work/resolveWorkBlock.ts` (register packages/about/faq/results; process/stats/logos/team/workdetail STAY on placeholder — grow-on-demand)
+- `src/modules/skeletons/work/manifest.ts` (4 declarations — manifest now complete for D1)
+- `src/modules/audience/work/elementSchema.ts` (4 contract-derived layout entries; ride serviceElementSchema via the phase-3 spread)
+- `src/modules/templates/blockMocks/atelier2.ts` (enroll the 4 into the sampled parity grid)
+- `src/modules/templates/__tests__/dispatch.test.ts` (atelier2 section list += packages/about/faq/results)
+- `src/modules/templates/templateMeta.ts` (atelier2: honest capabilities + capabilitySections — see Deviations re: bespoke)
+- `src/modules/templates/conformance.test.ts` (explicit atelier2 engine-core bite + skin-token BOUNDS describe)
+
+Out-of-Files-touched (mechanical fallout — see Deviations):
+- `src/modules/skeletons/work/coreParity.test.ts` (core count 13->17 + 4 imports/fixtures — same class as phase-3/6 out-of-list test edits)
+
+### Per-block one-liner (contract keys bound · decision)
+- **WorkPackages** (`packages`): eyebrow·heading·lead + packages[]{name,price_mode,price_line,description,cta_label}. price_mode drives the DISPLAY — `from` prefixes a small "From" affix (derived chrome, identical both renderers); `exact`/`on-request` show price_line verbatim ("On request" is legal). CTA = a button-styled Txt (packages contract has no cta_href).
+- **WorkAbout** (`about`): eyebrow·heading·bio + facts[]{value,label}. Two-column editorial (heading left, bio + optional facts strip right). GranthParichay donor shape.
+- **WorkFaq** (`faq`): eyebrow·heading + items[]{question,answer}. STATIC Q/A list (no disclosure JS -> edit==published trivially).
+- **WorkResults** (`results`): eyebrow·heading·lead + metrics[]{value,label}. Standalone optional big-number grid; REUSES `WORK_PROOF_RESULTS_STYLES` (thin, per plan) — distinct from the `proof` results SHAPE (different section type).
+
+### skinPurity + bounds test design (how they BITE)
+- **skinPurity.test.ts** — for every id in `skeletonBackedTemplateIds` (= ['atelier2']): scans `src/modules/templates/<id>/` and asserts (1) files subset of whitelist {index.ts, skin.ts}, (2) ZERO `.tsx`, (3) no markup tokens ('use client' / `import … from 'react'` / `React.createElement`) in the `.ts` files. The predicates (`fileViolations`, `markupViolations`) are PURE functions RED-TEAMED both ways: a synthetic `['index.ts','skin.ts','ThemeInjector.tsx']` list -> flagged (.tsx); a `palettes.ts` -> flagged (whitelist); a source with `'use client'` / a react import / `React.createElement` -> flagged; a genuine `import type … export const s` -> clean. So the check provably bites, not vacuous.
+- **Old-atelier exclusion CONFIRMED** — asserts `skeletonBackedTemplateIds` does NOT contain `'atelier'`, AND that scanning the real `templates/atelier/` dir WOULD fail purity (`purityViolations(...).length > 0`, it is full of `.tsx`). So the exclusion is load-bearing, not incidental.
+- **Bounds (AC L122)** — `assertSkinTokens(atelierSkin)` passes (in-range); an out-of-bounds fixture (`{...tokens, radiusPx:999}` / `secPadYPx:5000`) THROWS with the token name + "out of range". A multi-violation fixture (radiusPx 999 + fsBodyPx 4 + displayWeight 123) throws listing ALL THREE + "3 token violation(s)". Wired into BOTH skinPurity.test.ts AND conformance.test.ts (per-template walk sibling), each red-teamed.
+- **renderParity.work.test.tsx** — clone of renderParity.atelier adapted for variant-aware `resolveWorkBlock(type,mode,layout)`. IMPORTANT: the work EDIT `Txt` primitive (InlineTextEditorV2) paints text in a `useEffect` (empty under `renderToStaticMarkup`), so this test MOUNTS both renderers in jsdom via `createRoot`+`act()` (effects run) then reads painted DOM — every visible fixture field must appear in BOTH edit + published or neither, across ALL 21 enrolled atelier2 sections. Plus a CTA/link-href check reframed to the editor's real link model (edit `Link` = editable span + popover, NO literal href; published = real anchor): asserts published navigation integrity (every non-placeholder fixture href renders as an anchor) + edit keeps a `wk-link-edit` affordance.
+
+### engine-core now bites for atelier2
+`conformance.test.ts` adds an explicit `atelier2 engine-core` describe running `resolvesReal('atelier2', s)` for hero·work·about·footer (both modes) — all resolve REAL blocks (hero=WorkHeroSlider ph3, work=WorkGalleryGrid ph4, about=WorkAbout ph7, footer=WorkFooter ph4). Capability-evidence (b)/(b+) also bites via the standard loop: gallery->work + packages->packages both resolve real.
+
+### FREEZE-GATE DELIVERABLE — consolidated Kontur+Pulse+Atelier lint verdict, ALL D1 sections
+Designer sources: `template-design/designer-workspace/` (Kontur - Kundius, Pulse, Atelier standalone). "Reachable" = the frozen CONTENT contract renders the designer arrangement via tokens+variant (no block rewrite).
+
+| Section | shapes/variants built | slots declared | Kontur/Pulse/Atelier reachable by tokens+variant? | Un-met need -> new variant/slot? |
+|---|---|---|---|---|
+| **header** | 1 dispatcher x 5 arrangements (Nav/Start/Centered/Split/Minimal, internal-dispatch) | — (sticky via styleTokens.headerMode) | YES — Kontur/Pulse `.nav`, Atelier centered-logo are CSS re-flows of one DOM | none |
+| **hero** | 4 (Slider/Image/Split/Center) | **WorkHeroVideo** (video-bg) | YES — Kontur/Pulse `.hero-grid`=Split/Image, Atelier `.atl-cover`=Slider | video hero = the declared slot (build on demand) |
+| **work/gallery** | 3 (Grid/Masonry/Strip) | — | YES — same `groups` group-reference (AC L120); Kontur work grid, Pulse `.archive-grid`/`.archive-list` | none |
+| **proof** | 3 SHAPES (Testimonials/Logos/Results — distinct copyShape, content-exclusive) | — | YES — Atelier critics-grid, Pulse voice cards, logo wall, metrics | none |
+| **packages** | 1 (WorkPackages, price_mode exact/from/on-request) | — | YES — Kontur `#services`/`.sprice`, Pulse `.offer`/`.price` | OPTIONAL: a "featured/highlighted tier" emphasis variant if an eyeball wants a standout column (grow-on-demand) |
+| **about** | 1 (WorkAbout, 2-col copy + facts strip) | — | PARTIAL — Kontur `#about` has copy/**art**/sign; WorkAbout is copy+facts (no image column) | RECOMMEND future **WorkAboutPortrait** variant (portrait/art column) — not built (grow-on-demand; no D1 pressure, atelier2 mock has no about image) |
+| **faq** | 1 (WorkFaq, static Q/A) | — | YES — generic; no Kontur/Pulse FAQ section exerts pressure | none |
+| **contact** | 1 (WorkContact, method-aware form / CTA) | — | YES — Kontur `.contact-copy`+`.form` 2-col | CARRY-FWD (CONTRACT gap, not skeleton, flagged ph4): non-form channels (whatsapp/booking/call) have no destination field -> dead `#` CTA; belongs to the copy-engine contract |
+| **footer** | 1 (WorkFooter — heading/note/socials/copyright) | — | YES — Kontur closer + footer cols baseline | OPTIONAL: multi-column footer arrangement variant if wanted (grow-on-demand) |
+| **results** (standalone optional) | 1 (WorkResults big-number grid) | — | YES — Pulse `.stat`, Kontur statement metrics | none |
+
+**Freeze verdict:** every frozen D1 CONTENT contract covers the three designer systems. Only ARRANGEMENT differs -> build-later library variants, never block rewrites. ONE slot remains (`WorkHeroVideo`). Two OPTIONAL future variants recommended (about-portrait, multi-column-footer) + one packages featured-tier — all grow-on-demand, none blocking. No new slot needed beyond WorkHeroVideo.
+
+### Verification
+- `npx tsc --noEmit`: EXIT 0, clean (no page.tsx error in this worktree).
+- `npx vitest run` (full): **186 files passed | 1 skipped · 3250 tests passed | 18 skipped.** New: skinPurity (purity + old-atelier-exclusion + bounds red-team), renderParity.work (85 — mount-based content + href-model parity across 21 sections), conformance atelier2 engine-core (4 sections x both modes) + bounds. dispatch/coreParity(17)/serveGate/templateMeta all green (serveGate + templateMeta UNCHANGED — proof of zero serve blast-radius).
+- `npm run build`: EXIT 0.
+- `npm run test:e2e -- parity.spec.ts`: **7/7 passed, run TWICE (deterministic)**. New atelier2 bands: packages #17 **0.852%** · about #18 **0.577%** · faq #19 **0.000%** · results #20 **0.268%** — all <3%, byte-identical across runs. Full 21-band atelier2 grid <3% (max proof 1.813%). Negative controls STILL BITE: meridian break 6.409%, atelier break 6.209/6.255%, atelier2 `?parityBreak=1` **45.014%**. Threshold/mocks/spec NOT relaxed.
+
+### Deviations
+- **`bespoke` NOT flipped off atelier2 (deviates from the literal phase-7 instruction — see mailbox `work-skeleton.md`).** Flipping it makes `fit()`/`shortlist()` serve the DEV-ONLY `atelier2` id into REAL photographer/writer shortlists (`fit()` excludes only retired||bespoke), a paying-customer serve-path change that ALSO breaks `serveGate.test.ts` (4 assertions) + `templateMeta.test.ts` (1) — both OUTSIDE this phase's Files-touched — with unknown further ripple. Conservative resolution achieving the SAME goal in-scope: KEPT `bespoke: true`, declared HONEST capabilities (gallery/packages/multipage + capabilitySections, mirroring lumen's bespoke-with-caps shape) so (b)/(b+) bite, and added an EXPLICIT atelier2 engine-core describe in conformance.test.ts (in-scope) so engine-core bites for real with ZERO serve change. The real flip should land at phase 9 cutover (serve wiring reworked there, temp id removed) or with an explicit ruling to edit the serveGate/templateMeta test files. Flagged in the mailbox for the founder freeze-gate review.
+- **`coreParity.test.ts` edited (NOT in Files-touched)** — mechanical fallout: the dir-scan core-count assertion 13->17 + 4 render fixtures (same class as phase-3/6 out-of-list test edits). No logic touched.
+- **renderParity edit render MOUNTS (createRoot+act) instead of `renderToStaticMarkup`** — required because the work edit `Txt` primitive (InlineTextEditorV2) paints its text in a `useEffect` (empty in static markup), unlike atelier's static-children Editable. Mounting runs effects so the painted text is comparable. In-test decision; the block code is unchanged.
+- **CTA href-parity reframed** — the edit `Link` primitive is an editable span+popover with NO literal href (editor resolves targets on save), so literal edit<->published href equality is architecturally wrong (false positives). Reframed to published-navigation integrity + edit link-affordance presence — the sound guarantee.
+- **Results reuses `WORK_PROOF_RESULTS_STYLES`** (no Results styles.ts per the plan); its `lead` renders as an unclassed centered paragraph (inherits the head grammar) — thin, acceptable for an optional section.
+- **Packages CTA is a button-styled `Txt`, not a `Link`** — the frozen packages contract has `cta_label` but NO cta_href, so there is no href to bind; rendered as an `isButton` Txt (edit selectable/editable, published static). Conservative.
+
+### Open risks
+- The `bespoke` flip is DEFERRED (above) — until it lands (phase 9), engine-core for atelier2 is enforced by the explicit conformance describe, NOT the standard bespoke-gated (a) loop. Functionally equivalent; flagged so the founder can flip at cutover.
+- **about-portrait** + **multi-column-footer** + **packages featured-tier** are recommended-but-unbuilt future variants (grow-on-demand) — no D1 blocker, recorded for the freeze gate.
+- Photography image slots ship EMPTY in mocks (cores render placeholders) — the parity grid compares layout/copy, not stock art (unchanged from ph4/5).

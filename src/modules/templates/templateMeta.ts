@@ -204,16 +204,25 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
     capabilitySections: { gallery: 'work', packages: 'packages' },
   },
   atelier2: {
-    // Work-SKELETON Atelier skin (dev id; cutover to `atelier` in phase 9).
-    // `bespoke: true` is TEMPORARY — it exempts atelier2 from engine-core
-    // conformance (a) while its blocks (about/proof/contact/…) are still unbuilt
-    // (phase 3 builds hero only). Phase 7 FLIPS this off + declares honest
-    // capabilities once the block set is complete, so engine-core bites for real.
-    // No capabilities declared yet ⇒ (b)/(b+) evidence checks are vacuous; the
-    // real manifest still drives the (c)/(d)/(e) manifest walks.
+    // Work-SKELETON Atelier skin (dev id; cutover to the live `atelier` id in
+    // phase 9). Now declares HONEST capabilities (mirroring atelier + lumen's
+    // bespoke-with-real-capabilities shape) so the capability-evidence conformance
+    // checks (b)/(b+) BITE: gallery→work + packages→packages must resolve to real
+    // blocks in both renderers (they do — phase 4/7). Engine-core (hero·work·about·
+    // footer) is additionally enforced by an EXPLICIT atelier2 block in
+    // conformance.test.ts (phase 7).
+    //
+    // `bespoke: true` is DELIBERATELY RETAINED here (NOT flipped to satisfy the
+    // standard (a) loop) because flipping it makes fit()/shortlist() serve the
+    // dev-only atelier2 id into REAL photographer/writer shortlists (fit() excludes
+    // only retired||bespoke) — a paying-customer serve-path change that also breaks
+    // serveGate.test.ts + templateMeta.test.ts, both OUTSIDE this phase's scope. The
+    // flip belongs to phase 9 cutover, where the serve wiring is reworked wholesale.
+    // See work-skeleton.audit.md (phase 7 Deviations) + the mailbox note.
     copyEngines: ['work'],
     designStyles: ['editorial-craft'],
-    capabilities: [],
+    capabilities: ['gallery', 'packages', 'multipage'],
+    capabilitySections: { gallery: 'work', packages: 'packages' },
     bespoke: true,
   },
   techpremium: {

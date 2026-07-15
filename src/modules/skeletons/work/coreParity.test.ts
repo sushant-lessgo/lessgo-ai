@@ -27,6 +27,10 @@ import { WorkProofLogosCore } from './blocks/Proof/WorkProofLogos.core';
 import { WorkProofResultsCore } from './blocks/Proof/WorkProofResults.core';
 import { WorkContactCore } from './blocks/Contact/WorkContact.core';
 import { WorkFooterCore } from './blocks/Footer/WorkFooter.core';
+import { WorkPackagesCore } from './blocks/Packages/WorkPackages.core';
+import { WorkAboutCore } from './blocks/About/WorkAbout.core';
+import { WorkFaqCore } from './blocks/Faq/WorkFaq.core';
+import { WorkResultsCore } from './blocks/Results/WorkResults.core';
 
 const BLOCKS_DIR = path.join(__dirname, 'blocks');
 
@@ -52,8 +56,8 @@ const FORBIDDEN = [
 describe('Work-skeleton core-purity (single-source guard)', () => {
   const files = coreFiles(BLOCKS_DIR);
 
-  it('finds all 13 block cores (6 pilot + 7 phase-6 library variants)', () => {
-    expect(files.length).toBe(13);
+  it('finds all 17 block cores (6 pilot + 7 phase-6 variants + 4 phase-7 sections)', () => {
+    expect(files.length).toBe(17);
   });
 
   for (const file of files) {
@@ -85,6 +89,10 @@ describe('Work-skeleton core-purity (single-source guard)', () => {
       [WorkProofResultsCore as any, { eyebrow: 'The numbers', heading: 'Results', metrics: [{ id: 'm1', value: '98%', label: 'Would book again' }] }, 'Would book again'],
       [WorkContactCore as any, { eyebrow: 'Get in touch', heading: 'Let’s work together', lead: 'x', contact_method: 'whatsapp', cta_label: 'Message me' }, 'Message me'],
       [WorkFooterCore as any, { eyebrow: 'x', heading: 'Let’s make yours.', note: 'A closing line.', copyright: '© 2026' }, 'A closing line.'],
+      [WorkPackagesCore as any, { eyebrow: 'Packages', heading: 'Ways to work', lead: 'x', packages: [{ id: 'p1', name: 'Full package', price_mode: 'from', price_line: '€2,400', description: 'Everything included.', cta_label: 'Enquire →' }] }, '€2,400'],
+      [WorkAboutCore as any, { eyebrow: 'About', heading: 'The person', bio: 'A short honest bio.', facts: [{ id: 'a1', value: '10+ yrs', label: 'Experience' }] }, 'A short honest bio.'],
+      [WorkFaqCore as any, { eyebrow: 'FAQ', heading: 'Questions', items: [{ id: 'q1', question: 'How soon?', answer: 'Two weeks typically.' }] }, 'Two weeks typically.'],
+      [WorkResultsCore as any, { eyebrow: 'Outcomes', heading: 'Results', lead: 'x', metrics: [{ id: 'r1', value: '3×', label: 'More engagement' }] }, 'More engagement'],
     ];
     for (const [Core, content, expected] of fixtures) {
       const html = renderToStaticMarkup(React.createElement(Core, { content, E, sectionId }));

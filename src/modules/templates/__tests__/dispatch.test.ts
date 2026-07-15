@@ -43,12 +43,13 @@ const TEMPLATES: Array<{
     sections: ['header', 'hero', 'features', 'testimonials', 'pricing', 'cta', 'footer'],
   },
   {
-    // Work-skeleton (Atelier skin, dev id atelier2). Phase-4 pilot Home slice:
-    // gallery is section type `work`; proof default shape = testimonials.
+    // Work-skeleton (Atelier skin, dev id atelier2). Phase-7 full coverage:
+    // gallery is section type `work`; proof default shape = testimonials; packages/
+    // about (MUST) + faq/results (built optionals) now resolve real blocks.
     name: 'atelier2 (work skeleton)',
     resolve: resolveWorkBlock as Resolver,
     placeholder: WorkPlaceholderBlock,
-    sections: ['header', 'hero', 'work', 'proof', 'contact', 'footer'],
+    sections: ['header', 'hero', 'work', 'proof', 'packages', 'about', 'faq', 'contact', 'footer', 'results'],
   },
 ];
 

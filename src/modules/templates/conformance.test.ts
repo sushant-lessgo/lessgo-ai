@@ -75,6 +75,16 @@ import { HearthSSRTokens } from './hearth/components/HearthSSRTokens';
 import { atelierKnobs, buildAtelierStylesheet } from './atelier/tokens';
 import { AtelierSSRTokens } from './atelier/components/AtelierSSRTokens';
 
+// Work-skeleton (atelier2) — engine-core + skin-token BOUNDS conformance (phase 7).
+// Pure data imports: the registered skin data + the skeleton's loud bounds gate.
+// atelier2 is bespoke (kept off shortlists — see templateMeta), so the standard
+// (a) engine-core loop SKIPS it; the explicit block below enforces it anyway so
+// the work-skeleton coverage bites for real. assertSkinTokens is the AC-L122
+// "out-of-range fails loud" gate, run per registered skin + proven to throw.
+import { atelierSkin } from './atelier2/skin';
+import { assertSkinTokens, type WorkSkinTokens } from '@/modules/skeletons/work/tokenContract';
+import { skeletonBackedTemplateIds } from '@/modules/skeletons/ids';
+
 import {
   templateConformance,
   RESOLVERS,
@@ -291,6 +301,61 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
       // block so a :root-descendant knob still compresses rhythm in published.
       expect(block).toContain('--pad-y:');
       expect(block).toContain('--pad-y-sm:');
+    });
+  });
+
+  // ── WORK-SKELETON (atelier2): engine-core bites even though bespoke (phase 7) ─
+  // atelier2 keeps `bespoke: true` to stay off real serve shortlists (fit()
+  // excludes only retired||bespoke), so the standard (a) loop skips it. But the
+  // work skeleton is now section-complete (hero·work·about·footer all resolve real
+  // blocks), so we ENFORCE engine-core here explicitly — the exact guarantee a
+  // bespoke-off flip would give, with zero serve-behavior change.
+  describe('atelier2 engine-core sections resolve to real blocks (work-skeleton, phase 7)', () => {
+    for (const sectionType of engineCoreSections.work) {
+      it(`${sectionType}: real block (edit + published)`, () => {
+        resolvesReal('atelier2', sectionType);
+      });
+    }
+  });
+
+  // ── SKIN-TOKEN BOUNDS conformance (AC-L122: out-of-range fails loud) ─────────
+  // Run assertSkinTokens over every REGISTERED work skin, then prove the gate
+  // BITES: an out-of-bounds fixture skin throws with the offending token listed.
+  describe('work-skeleton skin-token bounds (assertSkinTokens, AC-L122)', () => {
+    // The only skeleton-backed template today is atelier2 → its registered skin.
+    it('skeletonBackedTemplateIds is exactly the work skins under bounds check', () => {
+      expect(skeletonBackedTemplateIds).toContain('atelier2');
+    });
+
+    it('the registered atelier2 skin passes assertSkinTokens (all tokens in range)', () => {
+      expect(() => assertSkinTokens(atelierSkin)).not.toThrow();
+    });
+
+    it('an OUT-OF-BOUNDS skin FAILS LOUD with the offending token in the message', () => {
+      // radiusPx max is 48 → 999 is out of range. Clone so the real skin is intact.
+      const badTokens: WorkSkinTokens = { ...atelierSkin.tokens, radiusPx: 999 };
+      const badSkin = { id: 'atelier2-oob-fixture', tokens: badTokens };
+      expect(() => assertSkinTokens(badSkin)).toThrow(/radiusPx/);
+      expect(() => assertSkinTokens(badSkin)).toThrow(/out of range/);
+    });
+
+    it('collects EVERY violation (multiple out-of-range tokens all listed)', () => {
+      const badTokens: WorkSkinTokens = {
+        ...atelierSkin.tokens,
+        radiusPx: 999,      // > 48
+        fsBodyPx: 4,        // < 12
+        displayWeight: 123, // not an enum value
+      };
+      let msg = '';
+      try {
+        assertSkinTokens({ id: 'multi-oob', tokens: badTokens });
+      } catch (e) {
+        msg = (e as Error).message;
+      }
+      expect(msg).toMatch(/radiusPx/);
+      expect(msg).toMatch(/fsBodyPx/);
+      expect(msg).toMatch(/displayWeight/);
+      expect(msg).toMatch(/3 token violation/);
     });
   });
 

@@ -287,6 +287,104 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
       ],
     },
   },
+
+  // ── Phase 7 section coverage — packages · about · faq · results ────────────
+
+  // Packages — the conviction pillar. Mixed price_mode (exact / from / on-request)
+  // exercises the price-display logic in ONE section.
+  {
+    sectionType: 'packages',
+    layout: 'WorkPackages',
+    sectionId: 'atelier2-packages',
+    content: {
+      eyebrow: 'Packages',
+      heading: 'Ways to work together',
+      lead: 'Clear, honest pricing — pick the scope that fits your brand.',
+      packages: [
+        { id: 'pk1', name: 'Full brand package', price_mode: 'from', price_line: '€2,400', description: 'A complete shoot day plus a curated library for every channel.', cta_label: 'Enquire →' },
+        { id: 'pk2', name: 'Brand photoshoot', price_mode: 'exact', price_line: '€1,200', description: 'A focused half-day covering your core brand imagery.', cta_label: 'Enquire →' },
+        { id: 'pk3', name: 'Portrait & business shoot', price_mode: 'on-request', price_line: 'On request', description: 'Team headshots and executive portraits, scoped to your size.', cta_label: 'Enquire →' },
+      ],
+    },
+    editBasics: {
+      text: ['eyebrow', 'heading', 'lead'],
+      button: [],
+      collections: [
+        { key: 'packages', countPrefix: 'packages.', itemPrefixes: ['packages.'], items: 3 },
+      ],
+    },
+  },
+
+  // About — the story. Two-column with an optional facts strip.
+  {
+    sectionType: 'about',
+    layout: 'WorkAbout',
+    sectionId: 'atelier2-about',
+    content: {
+      eyebrow: 'About',
+      heading: 'The person behind the lens',
+      bio: 'I photograph brands the way I wish more of them were seen — honestly, warmly, and with an eye for the small details that make a company feel human. Over the last decade I have worked with enterprise teams across the Netherlands to build image libraries they actually reach for.',
+      facts: [
+        { id: 'af1', value: '10+ yrs', label: 'Behind the camera' },
+        { id: 'af2', value: '120+', label: 'Brands photographed' },
+        { id: 'af3', value: 'NL', label: 'Based & working' },
+      ],
+    },
+    editBasics: {
+      text: ['eyebrow', 'heading', 'bio'],
+      button: [],
+      collections: [
+        { key: 'facts', countPrefix: 'facts.', itemPrefixes: ['facts.'], items: 3 },
+      ],
+    },
+  },
+
+  // FAQ — static question/answer list (optional section).
+  {
+    sectionType: 'faq',
+    layout: 'WorkFaq',
+    sectionId: 'atelier2-faq',
+    content: {
+      eyebrow: 'FAQ',
+      heading: 'Questions, answered',
+      items: [
+        { id: 'fq1', question: 'How far ahead should I book?', answer: 'Two to four weeks is typical, though I can often accommodate shorter timelines for existing clients.' },
+        { id: 'fq2', question: 'Do you travel?', answer: 'Yes — anywhere in the Netherlands is included, and further afield is quoted transparently.' },
+        { id: 'fq3', question: 'How do we use the images?', answer: 'You receive a full commercial licence for your brand across web, social, and print.' },
+      ],
+    },
+    editBasics: {
+      text: ['eyebrow', 'heading'],
+      button: [],
+      collections: [
+        { key: 'items', countPrefix: 'items.', itemPrefixes: ['items.'], items: 3 },
+      ],
+    },
+  },
+
+  // Results — standalone big-number outcomes (optional section).
+  {
+    sectionType: 'results',
+    layout: 'WorkResults',
+    sectionId: 'atelier2-results',
+    content: {
+      eyebrow: 'Outcomes',
+      heading: 'What the work returns',
+      lead: 'The measurable difference a considered image library makes.',
+      metrics: [
+        { id: 'rm1', value: '3×', label: 'More engagement on launch posts' },
+        { id: 'rm2', value: '98%', label: 'Would book again' },
+        { id: 'rm3', value: '48h', label: 'Typical delivery' },
+      ],
+    },
+    editBasics: {
+      text: ['eyebrow', 'heading'],
+      button: [],
+      collections: [
+        { key: 'metrics', countPrefix: 'metrics.', itemPrefixes: ['metrics.'], items: 3 },
+      ],
+    },
+  },
 ];
 
 export function atelier2Sections(): BlockMockSection[] {

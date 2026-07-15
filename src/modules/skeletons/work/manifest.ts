@@ -25,6 +25,10 @@ const HEADER_CONSUMES = ['logo_text', 'cta_label', 'cta_href'];
 const GALLERY_CONSUMES = ['eyebrow', 'heading', 'lead'];
 const CONTACT_CONSUMES = ['eyebrow', 'heading', 'lead', 'contact_method', 'form_ref', 'cta_label'];
 const FOOTER_CONSUMES = ['eyebrow', 'heading', 'note', 'copyright'];
+const PACKAGES_CONSUMES = ['eyebrow', 'heading', 'lead'];
+const ABOUT_CONSUMES = ['eyebrow', 'heading', 'bio'];
+const FAQ_CONSUMES = ['eyebrow', 'heading'];
+const RESULTS_CONSUMES = ['eyebrow', 'heading', 'lead'];
 
 // PROOF shapes read DIFFERENT collections (quotes / logos / metrics), so they are
 // CONTENT-EXCLUSIVE: each carries a DISTINCT `copyShape` (never blind-swapped) AND a
@@ -191,6 +195,50 @@ export const workSkeletonManifest: TemplateBlockManifest = {
         label: 'Footer',
         blurb: 'Closing band — heading, note, socials, copyright.',
         consumes: FOOTER_CONSUMES,
+      },
+    ],
+  },
+  packages: {
+    default: 'WorkPackages',
+    variants: [
+      {
+        layoutName: 'WorkPackages',
+        label: 'Packages',
+        blurb: 'Priced-services card grid — price_mode-aware (exact / from / on-request).',
+        consumes: PACKAGES_CONSUMES,
+      },
+    ],
+  },
+  about: {
+    default: 'WorkAbout',
+    variants: [
+      {
+        layoutName: 'WorkAbout',
+        label: 'About',
+        blurb: 'Two-column story — eyebrow/heading + bio and an optional facts strip.',
+        consumes: ABOUT_CONSUMES,
+      },
+    ],
+  },
+  faq: {
+    default: 'WorkFaq',
+    variants: [
+      {
+        layoutName: 'WorkFaq',
+        label: 'FAQ',
+        blurb: 'Question/answer list (static — no disclosure JS).',
+        consumes: FAQ_CONSUMES,
+      },
+    ],
+  },
+  results: {
+    default: 'WorkResults',
+    variants: [
+      {
+        layoutName: 'WorkResults',
+        label: 'Results',
+        blurb: 'Standalone big-number outcomes grid (optional section).',
+        consumes: RESULTS_CONSUMES,
       },
     ],
   },
