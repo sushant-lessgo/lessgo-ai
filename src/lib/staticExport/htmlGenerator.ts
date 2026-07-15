@@ -43,6 +43,12 @@ export interface StaticHTMLOptions {
    *  `data-knob-*` attrs + inlines the knob CSS. Absent/all-default ⇒ no attrs,
    *  no CSS ⇒ byte-identical output. Only knob-tokenized templates consume it. */
   knobs?: import('@/types/template').KnobSelection | null;
+  /** User style tokens (work-skeleton D1/§D) — Project.themeValues.styleTokens.
+   *  Threaded to the published renderer → skeleton SSRTokens → buildWorkStylesheet →
+   *  serializeStyleTokens, which emits `[data-sid]{--u-*}` CSS. Absent/empty ⇒ the
+   *  serializer returns '' ⇒ no CSS ⇒ byte-identical output. Only skeleton-backed
+   *  templates consume it; classic templates ignore the extra prop. Mirrors `knobs`. */
+  styleTokens?: import('@/modules/skeletons/styleTokens').StyleTokens | null;
   /** scale-04 (phase 3): the project's Brief.goal, threaded into the renderer's
    *  normalization pre-pass so GOAL_REF primaries resolve. OPTIONAL — blog/no-goal
    *  callers omit it → null-goal legacy fallback. */
@@ -139,6 +145,7 @@ export async function generateStaticHTML(
       variantId: options.variantId ?? null,
       mood: options.mood ?? null,
       knobs: options.knobs ?? null,
+      styleTokens: options.styleTokens ?? null,
       goal: options.goal ?? null,
       currentPagePath: options.currentPagePath,
       formPagePath: options.formPagePath,

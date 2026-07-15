@@ -24,7 +24,11 @@ function buildPage() {
   } as Record<string, any>;
 }
 
-async function render(templateId: string, audienceType: 'product' | 'service') {
+async function render(
+  templateId: string,
+  audienceType: 'product' | 'service',
+  styleTokens?: import('@/modules/skeletons/styleTokens').StyleTokens | null
+) {
   const res = await generateStaticHTML({
     sections: [SECTION_ID],
     content: buildPage(),
@@ -38,6 +42,7 @@ async function render(templateId: string, audienceType: 'product' | 'service') {
     paletteId: null,
     variantId: null,
     goal: null,
+    styleTokens: styleTokens ?? null,
   });
   return res.html;
 }
@@ -86,5 +91,41 @@ describe('generateStaticHTML — work.v1.js skeleton gating', () => {
   it('does NOT inject work.v1.js for the OLD atelier page', async () => {
     const html = await render('atelier', 'service');
     expect(html).not.toContain(WORK_TAG);
+  });
+});
+
+// AC-L123 (phase 6b): user style tokens (Project.themeValues.styleTokens) must
+// render on a REAL static-export page, not just in the editor. This proves the
+// generator→published-renderer→SSRTokens→serializeStyleTokens thread fires end to
+// end (the `[data-sid]{--u-*}` CSS block reaches the static HTML), and that with
+// NO styleTokens no such block appears (byte-neutral for non-styled pages).
+describe('generateStaticHTML — styleTokens in static export (AC-L123)', () => {
+  const STYLED = { [SECTION_ID]: { corners: 'soft' as const, background: 'dark' as const } };
+
+  // The serialized CSS block `[data-sid="…"]{…}` (note the trailing `{`) is the
+  // discriminator: skeleton block cores DO carry a `data-sid="…"` HTML attribute
+  // and reference `var(--u-radius, …)` fallbacks in markup, but ONLY the
+  // serializer emits the CSS-selector form `[data-sid="…"]{--u-…}`.
+  const CSS_BLOCK = `[data-sid="${SECTION_ID}"]{`;
+
+  it('emits the [data-sid]{--u-*} CSS block for a skeleton-backed atelier2 page', async () => {
+    const html = await render('atelier2', 'service', STYLED);
+    // serializeStyleTokens output: `[data-sid="hero-abc12345"]{--u-bg:…;--u-fg:…;--u-radius:10px;}`
+    expect(html).toContain(CSS_BLOCK);
+    expect(html).toContain('--u-radius:10px;');
+    expect(html).toContain('--u-bg:');
+  });
+
+  it('emits NO [data-sid]{…} CSS block when styleTokens is absent (byte-neutral)', async () => {
+    const html = await render('atelier2', 'service', null);
+    expect(html).not.toContain(CSS_BLOCK);
+    // No serialized declaration (block cores may still use var(--u-radius, …) fallbacks).
+    expect(html).not.toContain('--u-radius:10px;');
+  });
+
+  it('ignores styleTokens for a classic (meridian) template — no --u-* CSS at all', async () => {
+    const html = await render('meridian', 'product', STYLED);
+    expect(html).not.toContain(CSS_BLOCK);
+    expect(html).not.toContain('--u-radius');
   });
 });

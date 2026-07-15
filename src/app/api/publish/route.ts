@@ -169,12 +169,25 @@ async function publishHandler(req: NextRequest) {
       project?.themeValues && typeof (project.themeValues as any).knobs === 'object' && (project.themeValues as any).knobs !== null
         ? (project.themeValues as any).knobs
         : null;
+    // User style tokens (work-skeleton D1/§D) live in Project.themeValues.styleTokens
+    // (per-section Design ▾ overrides — JSON, no flat column). Like knobs, the client
+    // publish payload themeValues doesn't carry them, so read them off the project and
+    // (a) feed them into the static-export render and (b) persist them on PublishedPage
+    // so the SSR fallback + verify-dns regeneration bake the same `--u-*` CSS. Unset
+    // drafts (no styleTokens key) stay byte-identical — serializer emits nothing.
+    const projectStyleTokens: import('@/modules/skeletons/styleTokens').StyleTokens | null =
+      project?.themeValues && typeof (project.themeValues as any).styleTokens === 'object' && (project.themeValues as any).styleTokens !== null
+        ? (project.themeValues as any).styleTokens
+        : null;
     const themeValuesWithMood = projectMood
       ? { ...((themeValues as Record<string, any> | undefined) ?? {}), mood: projectMood }
       : themeValues;
-    const publishedThemeValues = projectKnobs
+    const themeValuesWithKnobs = projectKnobs
       ? { ...((themeValuesWithMood as Record<string, any> | undefined) ?? {}), knobs: projectKnobs }
       : themeValuesWithMood;
+    const publishedThemeValues = projectStyleTokens
+      ? { ...((themeValuesWithKnobs as Record<string, any> | undefined) ?? {}), styleTokens: projectStyleTokens }
+      : themeValuesWithKnobs;
 
     // Phase 2: No longer generating htmlContent - using dynamic rendering
     // Published pages now render on-demand via React Server Components
@@ -368,6 +381,7 @@ async function publishHandler(req: NextRequest) {
         paletteId,
         mood: projectMood,
         knobs: projectKnobs,
+        styleTokens: projectStyleTokens,
         baseUrl,
         canonicalDomain,
         removeBranding,

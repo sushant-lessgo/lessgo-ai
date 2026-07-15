@@ -573,3 +573,45 @@ Enrollment initially tripped WorkHeaderCentered (3.76%) then WorkHeaderSplit (3.
 - Production published sticky needs the published renderer to thread `styleTokens` to blocks (out of scope). No panel UI sets headerMode yet, so the gap is inert today.
 - Header integer `height:80px` relies on `box-sizing:border-box` (set explicitly on `.wk-header__in`).
 - Proof logos/results are content-exclusive (distinct copyShape) -> hidden from the editor swap picker by design; they surface via generation asset-gating when a work skin enters the generation path (atelier2 is dev-only).
+
+## Phase 6b — AC-L123 published styleTokens threading
+
+### Files changed
+- `src/lib/staticExport/htmlGenerator.ts`
+- `src/lib/staticExport/renderPublishedExport.ts`
+- `src/app/api/publish/route.ts`
+- `src/app/api/domains/verify-dns/route.ts`
+- `src/lib/staticExport/htmlGenerator.test.ts`
+
+### The gap
+Phase 2 threaded `themeValues.styleTokens` into the EDIT renderer + the published RENDERER component, but the static-export GENERATOR (`generateStaticHTML`) never passed `styleTokens` into `LandingPagePublishedRenderer`. Hand-written style tokens rendered in the editor but were DROPPED from the real static export → edit↔published divergence failing AC L123's published side.
+
+### What changed (mirrors the existing `knobs` thread exactly)
+- **htmlGenerator.ts** — added `styleTokens?: StyleTokens | null` to `StaticHTMLOptions`; passed `styleTokens: options.styleTokens ?? null` into the `LandingPagePublishedRenderer` `createElement` props (1 line, next to `knobs`). The renderer already forwards it to `SSRTokens → buildWorkStylesheet → serializeStyleTokens`.
+- **renderPublishedExport.ts** — added `styleTokens?` to `RenderPublishedExportInput`; destructured it; passed `styleTokens: styleTokens ?? null` into ALL THREE `generateStaticHTML` calls (root, subpage, locale) alongside `knobs`.
+- **publish/route.ts** (caller edit NEEDED) — read `projectStyleTokens` off `project.themeValues.styleTokens` (same guard shape as `projectKnobs`); (a) persisted it into `publishedThemeValues` via a new `themeValuesWithKnobs` intermediate so the merge chain stays mood→knobs→styleTokens; (b) passed `styleTokens: projectStyleTokens` into `renderPublishedExport`.
+- **verify-dns/route.ts** (caller edit NEEDED) — custom-domain go-live regen: added `styleTokens: (page.themeValues as any)?.styleTokens ?? null`, mirroring the existing `mood` line (reads the value persisted at publish time).
+
+### Was a caller edit needed?
+Yes — two. `renderPublishedExport` receives `knobs`/`mood` as explicit params (not off `themeValues`), so the value must be sourced by each caller. Both callers of `renderPublishedExport` (publish route + verify-dns) were updated.
+
+### New test (htmlGenerator.test.ts)
+Added `describe('generateStaticHTML — styleTokens in static export (AC-L123)')`, 3 cases, using a skeleton-backed `atelier2` page:
+1. WITH `styleTokens` (corners `soft` + background `dark`) → output CONTAINS the serialized CSS block `[data-sid="hero-abc12345"]{` + `--u-radius:10px;` + `--u-bg:` — proving the generator→serializer thread fires end to end.
+2. WITHOUT styleTokens (`null`) → output does NOT contain the `[data-sid="…"]{` CSS block (control — the thread is real, not incidental). Note: block cores legitimately reference `var(--u-radius, …)` fallbacks in markup, so the discriminator is the braced CSS-selector form, not the raw `--u-radius` string.
+3. Classic `meridian` template + styleTokens → no `--u-*` CSS at all (skin-agnostic; only skeleton templates consume the map).
+
+### Byte-neutrality
+Confirmed. Templates without styleTokens (meridian/hearth/atelier/etc.) receive `styleTokens: null` → `serializeStyleTokens(null)` returns `''` → no CSS emitted → identical static HTML. All 9 pre-existing htmlGenerator tests stayed green with no changes; full suite unchanged.
+
+### Scope discipline
+- Did NOT touch the published RENDERER, SSRTokens, or the serializer (already correct, phase 2/6).
+- Did NOT alter blob upload, KV routes, versioning, or the publishState machine — the publish-route change is confined to the themeValues merge chain + one added prop.
+
+### Verification
+- `npx tsc --noEmit` — clean (no errors).
+- `npm run test:run` — 3116 passed | 18 skipped (185 files); new 3 styleTokens cases green; all existing htmlGenerator + publish + renderPublishedExport suites green (byte-neutral proof).
+- `npm run build` — succeeded.
+
+### Open risks
+- verify-dns previously did NOT thread `knobs` (pre-existing gap, out of this fix's scope); `styleTokens` IS threaded there, so custom-domain go-live now bakes style tokens correctly. Knobs parity on that path remains a separate pre-existing gap.
