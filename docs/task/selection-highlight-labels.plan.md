@@ -18,8 +18,9 @@ Redesign the editor canvas selection affordance: hover shows one stable outline 
 - gate A bug-fix sign-off on Atelier: pending
 - phase 3 shared target resolver + hover overlay + labels (wired types): done (review loops 1, ship)
 - phase 4 placeholder-type labels (Logo/Menu/Header/Form/Footer/Social bar): done (review loops 1, ship; + follow-up tightening logo/social key match)
-- gate B pilot decision gate (readability, 1:1, hover-trigger, label strings): pending
-- phase 5 regression pinning + docs + full green: pending
+- gate A bug-fix sign-off on Atelier: PASSED (user: both bugs dead, nothing regressed)
+- gate B pilot decision gate (readability, 1:1, hover-trigger, label strings): PASSED (user: "it's working"; D6/D7a/D7b/Q5 defaults accepted; Atelier "dashed-hover" was dead code EditableWrapper.tsx — no fix needed, faint InlineTextEditorV2 hover tint left for user to eyeball)
+- phase 5 regression pinning + docs + full green: REDUCED per user token-save — extra test-pinning + README SKIPPED (core regression already pinned by phase 3/4 hoverTarget tests: duplicate-data-section-id→single-target + all label mappings). Green gate RUN + PASSED: tsc clean, test:run 3004 passed, lint warnings-only, build success.
 
 ## Key design decisions (rationale up front)
 
