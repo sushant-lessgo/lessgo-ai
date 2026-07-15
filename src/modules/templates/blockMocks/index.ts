@@ -10,6 +10,7 @@
 import type { TemplateId } from '@/types/service';
 import { MERIDIAN_BLOCK_MOCKS, MERIDIAN_EDIT_BASICS } from './meridian';
 import { HEARTH_BLOCK_MOCKS } from './hearth';
+import { atelier2Sections } from './atelier2';
 
 /** One collection's per-item marker expectation (editor-basics). */
 export interface CollectionExpectation {
@@ -354,6 +355,9 @@ export const BLOCK_MOCKS: Partial<Record<TemplateId, BlockMockSection[]>> = {
   meridian: meridianSections(),
   hearth: hearthSections(),
   atelier: atelierSections(),
+  // Work-skeleton Atelier skin (dev id). Phase 3: hero only. atelier2Sections is
+  // self-tagged with templateId, so it slots in directly.
+  atelier2: atelier2Sections(),
 };
 
 /** Flat list of every enrolled section (for seeding one shared harness store). */

@@ -6,9 +6,10 @@
 // importing template/skeleton code.
 //
 // FIREWALL-SAFE: pure data — NO React, NO template-module imports, NO skeleton
-// imports. Empty until phase 3 registers the first skin id (`atelier2`).
+// imports. Phase 3 registers the first skin id (`atelier2`, the dev id cutover to
+// `atelier` in phase 9).
 
-export const skeletonBackedTemplateIds: string[] = [];
+export const skeletonBackedTemplateIds: string[] = ['atelier2'];
 
 /** True when a templateId resolves through a skeleton module. */
 export function isSkeletonBacked(id: string | null | undefined): boolean {

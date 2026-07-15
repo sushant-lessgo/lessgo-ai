@@ -13,6 +13,8 @@
 
 import React from 'react';
 import { WorkPlaceholderBlock } from './WorkPlaceholderBlock';
+import WorkHeroSlider from './blocks/Hero/WorkHeroSlider';
+import WorkHeroSliderPublished from './blocks/Hero/WorkHeroSlider.published';
 
 /** One built layout variant = an edit component + its published twin. */
 export interface WorkBlockVariant {
@@ -27,7 +29,18 @@ export interface WorkSectionEntry {
 }
 
 // Keyed by section type (lowercase single tokens). Filled in phases 3/4/6/7.
-export const WORK_BLOCK_REGISTRY: Record<string, WorkSectionEntry> = {};
+// Variant keys are the LOWERCASED stored layout name (resolveWorkBlock lowercases
+// the incoming layoutName before lookup). Phase 3: hero (WorkHeroSlider). The
+// WorkHeroVideo slot (manifest) is declared-but-NOT-built — it has NO component,
+// so it is intentionally ABSENT here.
+export const WORK_BLOCK_REGISTRY: Record<string, WorkSectionEntry> = {
+  hero: {
+    default: 'workheroslider',
+    variants: {
+      workheroslider: { edit: WorkHeroSlider, published: WorkHeroSliderPublished },
+    },
+  },
+};
 
 export type WorkBlockMode = 'edit' | 'published';
 

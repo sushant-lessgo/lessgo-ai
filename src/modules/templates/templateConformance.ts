@@ -75,6 +75,11 @@ import { resolveLumenBlock } from './lumen/resolveLumenBlock';
 import { LumenPlaceholderBlock } from './lumen/LumenPlaceholderBlock';
 import { resolveAtelierBlock } from './atelier/resolveAtelierBlock';
 import { AtelierPlaceholderBlock } from './atelier/AtelierPlaceholderBlock';
+// Work-skeleton dispatch (dev id `atelier2`). Static import is fine here: this
+// module is vitest-only infra (never enters the app bundle) — same idiom as the
+// other resolvers above. NOT a firewall breach.
+import { resolveWorkBlock } from '@/modules/skeletons/work/resolveWorkBlock';
+import { WorkPlaceholderBlock } from '@/modules/skeletons/work/WorkPlaceholderBlock';
 
 export type Mode = 'edit' | 'published';
 
@@ -94,6 +99,7 @@ export const RESOLVERS: Record<
   granth: { resolve: resolveGranthBlock, placeholder: GranthPlaceholderBlock },
   lumen: { resolve: resolveLumenBlock, placeholder: LumenPlaceholderBlock },
   atelier: { resolve: resolveAtelierBlock, placeholder: AtelierPlaceholderBlock },
+  atelier2: { resolve: resolveWorkBlock, placeholder: WorkPlaceholderBlock },
 };
 
 // Structural capabilities are NOT block-backed: `multipage` is page-menu

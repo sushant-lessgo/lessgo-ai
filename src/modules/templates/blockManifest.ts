@@ -28,6 +28,8 @@
 // thing-engine union), service contract via the block's own layout schema.
 
 import type { TemplateId } from '@/types/service';
+// Work-skeleton manifest is PURE DATA (no component/schema import) — safe here.
+import { workSkeletonManifest } from '@/modules/skeletons/work/manifest';
 
 /** Asset facts a variant may require to be eligible (phase 4 uses these). */
 export type AssetKind = 'photos' | 'logos' | 'testimonialPhotos';
@@ -503,4 +505,7 @@ export const blockManifests: Partial<Record<TemplateId, TemplateBlockManifest>> 
   surge: surgeManifest,
   vestria: vestriaManifest,
   atelier: atelierManifest,
+  // Work-skeleton skin (dev id until phase 9). ONE manifest describes the whole
+  // skeleton's block surface (skins swap tokens only). Phase 3: hero + a slot.
+  atelier2: workSkeletonManifest,
 };

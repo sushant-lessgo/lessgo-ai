@@ -12,7 +12,7 @@
 import React from 'react';
 import type { KnobSelection } from '@/types/template';
 import type { StyleTokens } from '../styleTokens';
-import { buildWorkStylesheet, type WorkSkinDef } from './skin';
+import { buildWorkStylesheet, type WorkSkinDef } from './stylesheet';
 import { knobDataAttributes } from '@/modules/templates/shared/knobCss';
 
 interface WorkSSRTokensProps {

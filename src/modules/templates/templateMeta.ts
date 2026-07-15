@@ -203,6 +203,19 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
     capabilities: ['gallery', 'packages', 'multipage'],
     capabilitySections: { gallery: 'work', packages: 'packages' },
   },
+  atelier2: {
+    // Work-SKELETON Atelier skin (dev id; cutover to `atelier` in phase 9).
+    // `bespoke: true` is TEMPORARY — it exempts atelier2 from engine-core
+    // conformance (a) while its blocks (about/proof/contact/…) are still unbuilt
+    // (phase 3 builds hero only). Phase 7 FLIPS this off + declares honest
+    // capabilities once the block set is complete, so engine-core bites for real.
+    // No capabilities declared yet ⇒ (b)/(b+) evidence checks are vacuous; the
+    // real manifest still drives the (c)/(d)/(e) manifest walks.
+    copyEngines: ['work'],
+    designStyles: ['editorial-craft'],
+    capabilities: [],
+    bespoke: true,
+  },
   techpremium: {
     copyEngines: [],
     designStyles: [],

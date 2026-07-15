@@ -47,7 +47,7 @@ vi.mock('@/components/EditProvider', () => ({
 }));
 
 import { templateMeta } from './templateMeta';
-import { blockManifests } from './blockManifest';
+import { blockManifests, builtVariantCount } from './blockManifest';
 import { engineCoreSections } from '@/modules/engines/coreSections';
 import { templateIds } from '@/types/service';
 import { capabilityIds } from '@/types/brief';
@@ -296,9 +296,11 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
 
   // ── GLOBAL sanity: at least one manifest declaration exists to check ───────
   it('block manifests declare at least one variant to check', () => {
+    // builtVariantCount (NOT raw set.variants.length) so a declared-but-not-built
+    // SLOT (e.g. work-skeleton WorkHeroVideo) never inflates the coverage stat.
     const total = Object.values(blockManifests).reduce(
       (n, manifest) =>
-        n + Object.values(manifest ?? {}).reduce((m, set) => m + set.variants.length, 0),
+        n + Object.values(manifest ?? {}).reduce((m, set) => m + builtVariantCount(set), 0),
       0
     );
     expect(total).toBeGreaterThan(0);

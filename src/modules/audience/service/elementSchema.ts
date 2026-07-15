@@ -14,8 +14,16 @@
 //   TieredPackages, BookCallCTA, ContactFooterRich.
 
 import type { UIBlockSchemaV2 } from '@/modules/sections/layoutElementSchema';
+// Work-skeleton layout schemas, DERIVED from the frozen work-core contract. Spread
+// below (atelier precedent) so `contractFor`/`classify` AND the layoutElementSchema
+// aggregator resolve the work layouts. Pure data — reads the contract, imports no
+// skeleton/skin module (copy firewall preserved).
+import { workLayoutElementSchema } from '@/modules/audience/work/elementSchema';
 
 export const serviceElementSchema: Record<string, UIBlockSchemaV2> = {
+  // ===== WORK SKELETON (derived from workElementContract) =====
+  ...workLayoutElementSchema,
+
   // ===== Header =====
   WarmNavHeader: {
     sectionType: 'header',
