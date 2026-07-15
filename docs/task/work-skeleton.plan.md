@@ -29,7 +29,7 @@ are designer-curated, not user data).
 ## Progress log
 
 - phase 1 slot mechanism (scale-09 extension): done (review loops 1, ship). CARRY-FWD: conformance.test.ts:301 sums set.variants.length for a coverage stat — switch to builtVariants when the first real slot (WorkHeroVideo) lands in phase 3.
-- phase 2 skeleton foundation (primitives · factory · token contracts · style tokens): pending
+- phase 2 skeleton foundation (primitives · factory · token contracts · style tokens): done (review loops 1, ship). CARRY-FWD to phase 3 (do FIRST): break the skin.ts↔ThemeInjector/SSRTokens import cycle — extract buildWorkStylesheet + serialize helpers + WorkSkinDef type into a plain stylesheet.ts/skinTypes.ts (granth one-directional parity); eval-safe today but fragile under bundler/HMR.
 - phase 3 seam lands — TemplateId cascade + atelier2 skin + ONE hero block end-to-end: pending
 - phase 4 remaining pilot blocks (header/gallery/proof/contact/footer) + mocks + harness: pending
 - phase 5 published pipeline (work.v1.js · htmlGenerator · editor behaviors) — pilot gate: pending
