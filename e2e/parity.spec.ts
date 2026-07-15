@@ -67,11 +67,18 @@ async function settle(page: import('@playwright/test').Page) {
 }
 
 async function bandDiff(page: import('@playwright/test').Page, section: string): Promise<number> {
+  // `.first()`: a template may enroll SEVERAL sections of the same sectionType (the
+  // work skeleton enrols every hero/gallery/proof layout variant), so the
+  // data-parity-section attribute is not unique. The negative controls only need ONE
+  // band of the type to inject+measure the seeded break; the first is the pilot
+  // default. (The MAIN per-section test pairs bands BY INDEX, so it is unaffected.)
   const editBuf = await page
     .locator(`[data-parity-band="edit"][data-parity-section="${section}"]`)
+    .first()
     .screenshot();
   const pubBuf = await page
     .locator(`[data-parity-band="published"][data-parity-section="${section}"]`)
+    .first()
     .screenshot();
   return diffRatio(editBuf, pubBuf);
 }

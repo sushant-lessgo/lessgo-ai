@@ -15,12 +15,26 @@ import React from 'react';
 import { WorkPlaceholderBlock } from './WorkPlaceholderBlock';
 import WorkHeroSlider from './blocks/Hero/WorkHeroSlider';
 import WorkHeroSliderPublished from './blocks/Hero/WorkHeroSlider.published';
+import WorkHeroImage from './blocks/Hero/WorkHeroImage';
+import WorkHeroImagePublished from './blocks/Hero/WorkHeroImage.published';
+import WorkHeroSplit from './blocks/Hero/WorkHeroSplit';
+import WorkHeroSplitPublished from './blocks/Hero/WorkHeroSplit.published';
+import WorkHeroCenter from './blocks/Hero/WorkHeroCenter';
+import WorkHeroCenterPublished from './blocks/Hero/WorkHeroCenter.published';
 import WorkHeader from './blocks/Header/WorkHeader';
 import WorkHeaderPublished from './blocks/Header/WorkHeader.published';
 import WorkGalleryGrid from './blocks/Gallery/WorkGalleryGrid';
 import WorkGalleryGridPublished from './blocks/Gallery/WorkGalleryGrid.published';
+import WorkGalleryMasonry from './blocks/Gallery/WorkGalleryMasonry';
+import WorkGalleryMasonryPublished from './blocks/Gallery/WorkGalleryMasonry.published';
+import WorkGalleryStrip from './blocks/Gallery/WorkGalleryStrip';
+import WorkGalleryStripPublished from './blocks/Gallery/WorkGalleryStrip.published';
 import WorkProofTestimonials from './blocks/Proof/WorkProofTestimonials';
 import WorkProofTestimonialsPublished from './blocks/Proof/WorkProofTestimonials.published';
+import WorkProofLogos from './blocks/Proof/WorkProofLogos';
+import WorkProofLogosPublished from './blocks/Proof/WorkProofLogos.published';
+import WorkProofResults from './blocks/Proof/WorkProofResults';
+import WorkProofResultsPublished from './blocks/Proof/WorkProofResults.published';
 import WorkContact from './blocks/Contact/WorkContact';
 import WorkContactPublished from './blocks/Contact/WorkContact.published';
 import WorkFooter from './blocks/Footer/WorkFooter';
@@ -45,27 +59,43 @@ export interface WorkSectionEntry {
 // so it is intentionally ABSENT here.
 export const WORK_BLOCK_REGISTRY: Record<string, WorkSectionEntry> = {
   header: {
+    // INTERNAL DISPATCH: all 5 header arrangements share the ONE WorkHeader
+    // component (it re-flows the CSS by the stored layout name, both modes). Every
+    // header layout key therefore maps to the SAME component pair — the conformance
+    // distinctness guard asserts .toBe(default) for the internalDispatch variants.
     default: 'workheader',
     variants: {
       workheader: { edit: WorkHeader, published: WorkHeaderPublished },
+      workheaderstart: { edit: WorkHeader, published: WorkHeaderPublished },
+      workheadercentered: { edit: WorkHeader, published: WorkHeaderPublished },
+      workheadersplit: { edit: WorkHeader, published: WorkHeaderPublished },
+      workheaderminimal: { edit: WorkHeader, published: WorkHeaderPublished },
     },
   },
   hero: {
     default: 'workheroslider',
     variants: {
       workheroslider: { edit: WorkHeroSlider, published: WorkHeroSliderPublished },
+      workheroimage: { edit: WorkHeroImage, published: WorkHeroImagePublished },
+      workherosplit: { edit: WorkHeroSplit, published: WorkHeroSplitPublished },
+      workherocenter: { edit: WorkHeroCenter, published: WorkHeroCenterPublished },
+      // WorkHeroVideo is a SLOT (manifest) — declared-but-NOT-built, no component.
     },
   },
   work: {
     default: 'workgallerygrid',
     variants: {
       workgallerygrid: { edit: WorkGalleryGrid, published: WorkGalleryGridPublished },
+      workgallerymasonry: { edit: WorkGalleryMasonry, published: WorkGalleryMasonryPublished },
+      workgallerystrip: { edit: WorkGalleryStrip, published: WorkGalleryStripPublished },
     },
   },
   proof: {
     default: 'workprooftestimonials',
     variants: {
       workprooftestimonials: { edit: WorkProofTestimonials, published: WorkProofTestimonialsPublished },
+      workprooflogos: { edit: WorkProofLogos, published: WorkProofLogosPublished },
+      workproofresults: { edit: WorkProofResults, published: WorkProofResultsPublished },
     },
   },
   contact: {

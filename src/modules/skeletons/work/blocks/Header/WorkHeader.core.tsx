@@ -11,8 +11,21 @@
 // Section toolbars auto-consume. A text-only logo is used (logo image slot is not
 // in the frozen contract → `src` stays undefined → the wordmark always renders).
 //
-// PARAMETRIC SHELL, DEFAULT ARRANGEMENT ONLY this phase (logo-left · nav-center ·
-// cta-right). The other 4 arrangements + sticky/fixed land in phase 6.
+// INTERNAL DISPATCH (phase 6). ONE parametric component renders ALL FIVE header
+// arrangements. The stored layout name (read in BOTH modes — vestria-hero
+// precedent) is emitted as `data-wk-header-layout` on the root; the arrangement is
+// a pure CSS re-flow of the SAME 3-child DOM (logo · nav · right) keyed off that
+// attribute (see styles.ts). Because the DOM is identical across arrangements,
+// edit == published for every one of them by construction. The 4 NON-default
+// arrangements are declared `internalDispatch: true` in the manifest (they share
+// this one dispatcher → the conformance distinctness guard asserts they resolve to
+// the SAME component as the default).
+//
+// STICKY (phase 6). `headerMode` (design state, from styleTokens[sectionId].
+// headerMode with the skin selection as default) is emitted as `data-wk-header-mode`.
+// `"fixed"` opts the header into `position:fixed` (styles.ts) in BOTH renderers and
+// binds the published `work.v1.js` fixed-header scroll refinement; `"static"`
+// (the default) is an inert no-op. It is design state, NOT a content-contract key.
 //
 // Tokens: SKIN vars `var(--wk-*)` + USER style-token vars `var(--u-*, <default>)`
 // (see styles.ts). Root carries `data-sid` (style-token hook) + `data-section-id`.
@@ -31,14 +44,46 @@ export interface WorkHeaderContent {
   nav_links?: WorkNavLink[];
 }
 
+/** The five canonical header arrangements (CSS re-flow of the same DOM). */
+export type WorkHeaderLayout =
+  | 'WorkHeader'          // logo-left · nav-center · cta-right (default)
+  | 'WorkHeaderStart'     // logo-left · nav grouped left · cta-right
+  | 'WorkHeaderCentered'  // centered logo · nav-left · cta-right (Atelier)
+  | 'WorkHeaderSplit'     // logo-left · nav+cta grouped right (Kontur/Pulse nav-right)
+  | 'WorkHeaderMinimal';  // logo-left · cta-right only (nav hidden)
+
+const HEADER_LAYOUTS: readonly string[] = [
+  'WorkHeader', 'WorkHeaderStart', 'WorkHeaderCentered', 'WorkHeaderSplit', 'WorkHeaderMinimal',
+];
+
+/** Normalize an unknown/foreign stored layout name to the default arrangement. */
+function normalizeLayout(name?: string): string {
+  return name && HEADER_LAYOUTS.includes(name) ? name : 'WorkHeader';
+}
+
 export function WorkHeaderCore({
-  content, E, sectionId,
-}: { content: WorkHeaderContent; E: WorkPrimitives; sectionId: string }) {
+  content, E, sectionId, layoutName, headerMode = 'static',
+}: {
+  content: WorkHeaderContent; E: WorkPrimitives; sectionId: string;
+  /** Stored layout name → CSS arrangement (both modes read the same value). */
+  layoutName?: string;
+  /** Sticky lever: 'fixed' | 'static' (design state). */
+  headerMode?: string;
+}) {
   const navLinks = content.nav_links || [];
+  const arrangement = normalizeLayout(layoutName);
+  const mode = headerMode === 'fixed' ? 'fixed' : 'static';
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: WORK_HEADER_STYLES }} />
-      <header className="wk-header" data-sid={sectionId} data-section-id={sectionId} data-wk-header="">
+      <header
+        className="wk-header"
+        data-sid={sectionId}
+        data-section-id={sectionId}
+        data-wk-header=""
+        data-wk-header-layout={arrangement}
+        data-wk-header-mode={mode}
+      >
         <div className="wk-header__in">
           <E.Logo
             imageKey="logo_image" textKey="logo_text"

@@ -465,3 +465,111 @@ churned (Txt/Img/Link/Logo/Nav untouched — Nav routes through this same fixed 
 **Open risk:** none known. No residual in-flow editor chrome remains in the work primitives —
 `.wk-img-edit`, `.wk-list-x`, `.wk-link-edit__btn`, and now `.wk-list-add` are all absolute,
 zero-footprint, hover/focus-gated. Every atelier2 band clears 3% with margin.
+
+---
+
+## Phase 6 — Layout library completion
+
+### Files changed
+Header quad (edit — parametric across 5 arrangements, internal dispatch):
+- `src/modules/skeletons/work/blocks/Header/WorkHeader.core.tsx`
+- `src/modules/skeletons/work/blocks/Header/WorkHeader.tsx`
+- `src/modules/skeletons/work/blocks/Header/WorkHeader.published.tsx`
+- `src/modules/skeletons/work/blocks/Header/styles.ts`
+
+Hero (3 new quads + shared styles):
+- `src/modules/skeletons/work/blocks/Hero/styles.ts` (edit — +3 style blocks)
+- `.../Hero/WorkHeroImage.core.tsx` / `.tsx` / `.published.tsx` (new)
+- `.../Hero/WorkHeroSplit.core.tsx` / `.tsx` / `.published.tsx` (new)
+- `.../Hero/WorkHeroCenter.core.tsx` / `.tsx` / `.published.tsx` (new)
+
+Gallery (2 new + shared styles):
+- `src/modules/skeletons/work/blocks/Gallery/styles.ts` (edit — +masonry/strip)
+- `.../Gallery/WorkGalleryMasonry.core.tsx` / `.tsx` / `.published.tsx` (new)
+- `.../Gallery/WorkGalleryStrip.core.tsx` / `.tsx` / `.published.tsx` (new)
+
+Proof (2 new — different collections + shared styles):
+- `src/modules/skeletons/work/blocks/Proof/styles.ts` (edit — +logos/results)
+- `.../Proof/WorkProofLogos.core.tsx` / `.tsx` / `.published.tsx` (new)
+- `.../Proof/WorkProofResults.core.tsx` / `.tsx` / `.published.tsx` (new)
+
+Wiring:
+- `src/modules/skeletons/work/resolveWorkBlock.ts` (register all variants)
+- `src/modules/skeletons/work/manifest.ts` (5 header + 4 hero + slot + 3 gallery + 3 proof)
+- `src/modules/audience/work/elementSchema.ts` (new layout entries + proof-shape contracts)
+- `src/modules/templates/blockMocks/atelier2.ts` (enroll every built layout)
+- `src/modules/templates/__tests__/dispatch.test.ts` (rows for all new variants)
+- `src/lib/staticExport/workBehaviors.js` (finalize fixed-header + add gallery lightbox)
+- `public/assets/work.v1.js` (rebuilt asset — build artifact of workBehaviors.js)
+- `src/modules/skeletons/work/blocks/editPrimitives.tsx` (pointer-events:none on hover-gated affordances)
+
+Out-of-Files-touched (mechanical fallout — see Deviations):
+- `src/modules/skeletons/work/coreParity.test.ts` (core count 6->13 + render fixtures)
+- `e2e/parity.spec.ts` (bandDiff -> `.first()` for repeated-sectionType enrollment)
+
+### Per-variant one-liners (contract keys / collection · dispatch kind)
+- **WorkHeader x5** (`header`): logo_text/cta_label/cta_href + nav_links[]. INTERNAL DISPATCH — ONE component, 5 arrangements as a pure CSS re-flow of the same DOM keyed off `data-wk-header-layout` (WorkHeader / Start / Centered / Split / Minimal). 4 non-default = `internalDispatch:true` -> distinctness guard asserts `.toBe(default)`. Sticky via `data-wk-header-mode`.
+- **WorkHeroImage** (`hero`): still-image full-bleed cover, centered overlay. DISTINCT, same hero contract (lossless swap), requiresAssets:['photos'].
+- **WorkHeroSplit** (`hero`): LeftTextRightImage editorial poster (Kontur/Pulse `.hero-grid`). DISTINCT, requiresAssets:['photos'].
+- **WorkHeroCenter** (`hero`): AllCenter typographic hero, no media. DISTINCT.
+- **WorkHeroVideo** (`hero`): SLOT — declared, unbuilt, skipped by conformance, resolves to hero default.
+- **WorkGalleryMasonry** (`work`): CSS-columns collage of group covers. DISTINCT, same `groups` (AC L120). Lightbox hooks.
+- **WorkGalleryStrip** (`work`): horizontal scroll row (Pulse `.archive-list`). DISTINCT, same `groups`. Lightbox hooks.
+- **WorkProofLogos** (`proof`): logo wall — reads `logos` collection. DISTINCT + copyShape 'proof-logos', requiresAssets:['logos'].
+- **WorkProofResults** (`proof`): big-number metrics — reads `metrics` collection. DISTINCT + copyShape 'proof-results'.
+
+### Proof copyShape / consumes design (forced)
+The 3 proof shapes read DIFFERENT collections (quotes/logos/metrics) -> each carries a DISTINCT copyShape so the editor never blind-swaps them. The conformance (e) both-ways-hidden check further requires each to own a scalar the others lack. Available proof scalars are only {eyebrow, heading, awards_line} and logos/results contracts lack awards_line, so the disjoint singleton assignment is FORCED: testimonials=`awards_line`, logos=`eyebrow`, results=`heading`. (Testimonials' manifest `consumes` was reduced from [eyebrow,heading,awards_line] to [awards_line] — safe: it is the default/always-offered-via-escape-hatch; consumes drives conformance/eligibility only, not rendering.)
+
+### Kontur + Pulse + Atelier lint verdicts (feed phase-7 FREEZE gate)
+Designer sources read from `C:\Users\susha\lessgo-ai\template-design\designer-workspace\` (Kontur - Kundius, Pulse, Atelier).
+
+| Section | Designer arrangement | Reachable by tokens+variant, or slot? | Built as |
+|---|---|---|---|
+| header | Kontur/Pulse `.nav` (brand/mid/right); Atelier centered-logo | Reachable — CSS re-flows of one DOM -> internal-dispatch VARIANTS | 5 arrangements |
+| hero | Kontur/Pulse `.hero-grid`; Atelier `.atl-cover`; big-portrait | Reachable — same hero CONTENT, only ARRANGEMENT differs -> VARIANTS | slider+image+split+center |
+| hero (video) | full-bleed autoplay video | Needs a SLOT (media capability) | `WorkHeroVideo` slot (unbuilt) |
+| work/gallery | Pulse `.archive-grid` + `.archive-list`; Atelier mosaic/masonry | Reachable — same `groups` reference -> VARIANTS | grid+masonry+strip |
+| proof | Atelier critics-grid; logo wall; results/metrics | Reachable but CONTENT-EXCLUSIVE (different collections) -> distinct components + distinct copyShape | testimonials+logos+results |
+
+Verdict: no NEW slot needed beyond the declared `WorkHeroVideo`. All designer arrangements reachable as library variants (token+variant), ported from classic grammars — not invented.
+
+### Sticky / headerMode
+`data-wk-header-mode` emitted by WorkHeader (both renderers), default 'static'. `"fixed"` -> `position:fixed` (CSS = editor mirror) + `work.v1.js` `.is-scrolled` refinement (already present, finalized). Edit reads headerMode from `themeValues.styleTokens[sectionId].headerMode` (store); published from `content[sectionId].styleTokens?.headerMode` (best-effort). Today resolves to 'static' everywhere (no Design ▾ panel to set it, and the published renderer does not yet thread styleTokens to blocks), so edit==published holds unconditionally. OPEN follow-up (out of scope): full production published sticky needs the published renderer to thread `styleTokens` to the header block.
+
+### Gallery lightbox (work.v1.js)
+Added behavior #3 to `workBehaviors.js` (rebuilt -> `public/assets/work.v1.js`): opt-in via `[data-wk-gallery-lightbox]` + `[data-wk-lightbox]` per cover. A cover with a real `<img>` opens a lazily-built inline-styled full-screen overlay (ESC/click/close dismiss) and preventDefaults the group-link navigation; placeholder-only covers are ignored. Independently guarded. Masonry + strip expose the hooks in BOTH renderers (inert data attrs -> zero pixels); the phase-4 grid is untouched and does NOT opt in.
+
+### pointer-events fix (phase-5 review nit)
+`.wk-list-x`, `.wk-list-add`, `.wk-link-edit__btn` (the `opacity:0` hover-gated affordances) gained `pointer-events:none` while invisible, restored to `pointer-events:auto` on the SAME hover/focus reveal. Pure interaction; ZERO pixel/band change (the always-visible `.wk-img-edit` is intentionally excluded).
+
+### Parity band %s (official parity.spec.ts, deterministic — runs A & B byte-identical)
+atelier2 (17 bands, all < 3%):
+- header #0 1.236% · hero #1 0.015% · work #2 0.199% · proof(testimonials) #3 1.813% · contact #4 0.000% · footer #5 0.774%
+- header #6 Start 1.236% · #7 Centered 1.611% · #8 Split 1.566% · #9 Minimal 1.593%
+- hero #10 Image 0.012% · #11 Split 0.198% · #12 Center 0.109%
+- work #13 Masonry 0.269% · #14 Strip 0.236%
+- proof #15 Logos 0.215% · #16 Results 0.030%
+Negative controls STILL BITE: meridian break 6.409%, atelier break 6.229%, atelier2 `?parityBreak=1` 45.014% (all > 3%). meridian/hearth/atelier suites unchanged and green. Threshold/mocks/spec NOT relaxed.
+
+### Header parity investigation (REAL divergence chased down)
+Enrollment initially tripped WorkHeaderCentered (3.76%) then WorkHeaderSplit (3.66%). Measurement showed sub-pixel element boxes IDENTICAL edit vs published; per-row diff dominated by full-width rows 79-80 = the header's bottom `border-bottom` hairline sitting exactly on the harness screenshot CROP boundary — because the two stacked bands are at different sub-pixel Y, the hairline rounded to a different pixel row between them (~2.5% alone), position-dependent (Start 0.000%, Split 3.66%). Fixes (all `Header/styles.ts`, identical CSS both renderers): (1) integer `height:80px` on the header row so the hairline rounds consistently regardless of band position; (2) divider drawn as a pseudo-element inset 1px from the bottom (crop-edge row = uniform background); (3) nav typography targets BOTH `.wk-header__nav a` (published) and `.wk-header__nav .wk-link-edit` (editor); (4) Centered logo absolutely centered (out of grid flow). Result: all 5 header bands uniform at 1.2-1.6%, well under 3%. No threshold/mock changes.
+
+### Verification
+- `npx tsc --noEmit`: EXIT 0.
+- `npm run test:run`: 184 files passed | 1 skipped · 3113 tests passed | 18 skipped. Conformance distinctness (hero/gallery/proof != default), internalDispatch `.toBe(default)` (4 header arrangements), slot skip + never-default, dispatch rows, coreParity (13 cores), (e) proof both-ways-hidden — all green.
+- `npm run build`: EXIT 0; `work.v1.js` = slider + fixed-header + lightbox.
+- `npm run test:e2e -- parity.spec.ts`: 7/7 passed, run TWICE byte-identical (deterministic). 17 atelier2 bands < 3%; negative controls bite.
+
+### Deviations
+- **testimonials manifest `consumes` -> [awards_line]** — FORCED by the (e) consistency check given the frozen proof-shape contracts. Safe (default/escape-hatch; consumes not used for rendering).
+- **`coreParity.test.ts` edited (NOT in Files-touched)** — mechanical fallout: exact core-count assertion 6->13 + render fixtures for the 7 new cores (same class as phase-3's out-of-list test edits). No logic touched.
+- **`e2e/parity.spec.ts` edited (NOT in Files-touched)** — the mandated multi-layout enrollment makes `data-parity-section` non-unique, so the negative-control `bandDiff` strict locator resolved to 4 hero elements. Minimal fix: `bandDiff` uses `.first()` (safe for single-section templates; the MAIN test pairs BY INDEX, unaffected). Flagged for orchestrator ratification.
+- **Header `height:80px` + inset-pseudo hairline + absolute centered logo** — robustness fixes for the crop artifact; identical CSS both renderers, visually equivalent to the phase-4 header.
+- **Masonry/Strip skip the "manage photos" edit link** (grid keeps it) — conservative; fewer edit-only affordances, no parity risk.
+- **requiresAssets** on hero image/split (['photos']) + proof-logos (['logos']) — semantic generation gating; no conformance impact (checks use all-assets-present).
+
+### Open risks
+- Production published sticky needs the published renderer to thread `styleTokens` to blocks (out of scope). No panel UI sets headerMode yet, so the gap is inert today.
+- Header integer `height:80px` relies on `box-sizing:border-box` (set explicitly on `.wk-header__in`).
+- Proof logos/results are content-exclusive (distinct copyShape) -> hidden from the editor swap picker by design; they surface via generation asset-gating when a work skin enters the generation path (atelier2 is dev-only).

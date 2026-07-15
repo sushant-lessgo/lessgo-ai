@@ -16,8 +16,15 @@ import { makePublishedPrimitives } from './blocks/publishedPrimitives';
 
 import { WorkHeaderCore } from './blocks/Header/WorkHeader.core';
 import { WorkHeroSliderCore } from './blocks/Hero/WorkHeroSlider.core';
+import { WorkHeroImageCore } from './blocks/Hero/WorkHeroImage.core';
+import { WorkHeroSplitCore } from './blocks/Hero/WorkHeroSplit.core';
+import { WorkHeroCenterCore } from './blocks/Hero/WorkHeroCenter.core';
 import { WorkGalleryGridCore } from './blocks/Gallery/WorkGalleryGrid.core';
+import { WorkGalleryMasonryCore } from './blocks/Gallery/WorkGalleryMasonry.core';
+import { WorkGalleryStripCore } from './blocks/Gallery/WorkGalleryStrip.core';
 import { WorkProofTestimonialsCore } from './blocks/Proof/WorkProofTestimonials.core';
+import { WorkProofLogosCore } from './blocks/Proof/WorkProofLogos.core';
+import { WorkProofResultsCore } from './blocks/Proof/WorkProofResults.core';
 import { WorkContactCore } from './blocks/Contact/WorkContact.core';
 import { WorkFooterCore } from './blocks/Footer/WorkFooter.core';
 
@@ -45,8 +52,8 @@ const FORBIDDEN = [
 describe('Work-skeleton core-purity (single-source guard)', () => {
   const files = coreFiles(BLOCKS_DIR);
 
-  it('finds all 6 pilot block cores', () => {
-    expect(files.length).toBe(6);
+  it('finds all 13 block cores (6 pilot + 7 phase-6 library variants)', () => {
+    expect(files.length).toBe(13);
   });
 
   for (const file of files) {
@@ -67,8 +74,15 @@ describe('Work-skeleton core-purity (single-source guard)', () => {
     const fixtures: Array<[React.FC<any>, any, string]> = [
       [WorkHeaderCore as any, { logo_text: 'Studio', cta_label: 'Start a project', cta_href: '#contact', nav_links: [{ id: 'n1', label: 'Work', href: '#work' }] }, 'Start a project'],
       [WorkHeroSliderCore as any, { role_line: 'Photographer', name: 'Studio <em>Name</em>', quote: 'A short line.', cta_label: 'Start', cta_href: '#contact', portrait_image: '' }, 'A short line.'],
+      [WorkHeroImageCore as any, { role_line: 'Photographer', name: 'Studio <em>Name</em>', quote: 'Image hero line.', cta_label: 'Start', cta_href: '#contact', portrait_image: '' }, 'Image hero line.'],
+      [WorkHeroSplitCore as any, { role_line: 'Photographer', name: 'Studio <em>Name</em>', quote: 'Split hero line.', cta_label: 'Start', cta_href: '#contact', portrait_image: '' }, 'Split hero line.'],
+      [WorkHeroCenterCore as any, { role_line: 'Photographer', name: 'Studio <em>Name</em>', quote: 'Center hero line.', cta_label: 'Start', cta_href: '#contact' }, 'Center hero line.'],
       [WorkGalleryGridCore as any, { eyebrow: 'Work', heading: 'The work', lead: 'x', groups: [{ id: 'g1', name: 'Brand shoot', cover_image: '', href: '#work' }] }, 'Brand shoot'],
+      [WorkGalleryMasonryCore as any, { eyebrow: 'Work', heading: 'The work', lead: 'x', groups: [{ id: 'g1', name: 'Masonry group', cover_image: '', href: '#work' }] }, 'Masonry group'],
+      [WorkGalleryStripCore as any, { eyebrow: 'Work', heading: 'The work', lead: 'x', groups: [{ id: 'g1', name: 'Strip group', cover_image: '', href: '#work' }] }, 'Strip group'],
       [WorkProofTestimonialsCore as any, { eyebrow: 'Kind words', heading: 'What clients say', quotes: [{ id: 'q1', text: 'Loved every frame.', source: 'Client' }] }, 'Loved every frame.'],
+      [WorkProofLogosCore as any, { eyebrow: 'Trusted by', heading: 'Selected clients', logos: [{ id: 'l1', name: 'Northwind', image: '' }] }, 'Northwind'],
+      [WorkProofResultsCore as any, { eyebrow: 'The numbers', heading: 'Results', metrics: [{ id: 'm1', value: '98%', label: 'Would book again' }] }, 'Would book again'],
       [WorkContactCore as any, { eyebrow: 'Get in touch', heading: 'Let’s work together', lead: 'x', contact_method: 'whatsapp', cta_label: 'Message me' }, 'Message me'],
       [WorkFooterCore as any, { eyebrow: 'x', heading: 'Let’s make yours.', note: 'A closing line.', copyright: '© 2026' }, 'A closing line.'],
     ];

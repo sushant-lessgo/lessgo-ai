@@ -23,12 +23,27 @@ import type { TemplateBlockManifest } from '@/modules/templates/blockManifest';
 const HERO_CONSUMES = ['role_line', 'name', 'quote', 'portrait_image', 'cta_label', 'cta_href'];
 const HEADER_CONSUMES = ['logo_text', 'cta_label', 'cta_href'];
 const GALLERY_CONSUMES = ['eyebrow', 'heading', 'lead'];
-const PROOF_CONSUMES = ['eyebrow', 'heading', 'awards_line'];
 const CONTACT_CONSUMES = ['eyebrow', 'heading', 'lead', 'contact_method', 'form_ref', 'cta_label'];
 const FOOTER_CONSUMES = ['eyebrow', 'heading', 'note', 'copyright'];
 
+// PROOF shapes read DIFFERENT collections (quotes / logos / metrics), so they are
+// CONTENT-EXCLUSIVE: each carries a DISTINCT `copyShape` (never blind-swapped) AND a
+// DISJOINT single scalar `consumes` (each owns one scalar the others lack) so the
+// conformance both-ways-hidden consistency check (e) passes — a swap into any shape
+// from another's content is runtime-hidden (would drop that scalar). Available proof
+// scalars are only {eyebrow, heading, awards_line} and logos/results contracts lack
+// awards_line, so the disjoint assignment below is FORCED: testimonials=awards_line,
+// logos=eyebrow, results=heading.
+const PROOF_TESTIMONIALS_CONSUMES = ['awards_line'];
+const PROOF_LOGOS_CONSUMES = ['eyebrow'];
+const PROOF_RESULTS_CONSUMES = ['heading'];
+
 export const workSkeletonManifest: TemplateBlockManifest = {
   header: {
+    // FIVE arrangements share ONE dispatcher (WorkHeader) — internal dispatch. The
+    // 4 non-default arrangements are `internalDispatch: true` so the conformance
+    // distinctness guard asserts they resolve to the SAME component as the default
+    // (they are a pure CSS re-flow of the same DOM, keyed off the stored layout).
     default: 'WorkHeader',
     variants: [
       {
@@ -36,6 +51,34 @@ export const workSkeletonManifest: TemplateBlockManifest = {
         label: 'Nav header',
         blurb: 'Logo · nav · CTA — the default header arrangement.',
         consumes: HEADER_CONSUMES,
+      },
+      {
+        layoutName: 'WorkHeaderStart',
+        label: 'Left-grouped nav',
+        blurb: 'Logo left with the nav grouped beside it · CTA right.',
+        consumes: HEADER_CONSUMES,
+        internalDispatch: true,
+      },
+      {
+        layoutName: 'WorkHeaderCentered',
+        label: 'Centered logo',
+        blurb: 'Centered wordmark · nav left · CTA right (editorial).',
+        consumes: HEADER_CONSUMES,
+        internalDispatch: true,
+      },
+      {
+        layoutName: 'WorkHeaderSplit',
+        label: 'Nav-right',
+        blurb: 'Logo left · nav + CTA grouped on the right.',
+        consumes: HEADER_CONSUMES,
+        internalDispatch: true,
+      },
+      {
+        layoutName: 'WorkHeaderMinimal',
+        label: 'Minimal',
+        blurb: 'Logo + CTA only — nav hidden.',
+        consumes: HEADER_CONSUMES,
+        internalDispatch: true,
       },
     ],
   },
@@ -46,6 +89,26 @@ export const workSkeletonManifest: TemplateBlockManifest = {
         layoutName: 'WorkHeroSlider',
         label: 'Cover slider',
         blurb: 'Full-bleed cover hero — the work baseline.',
+        consumes: HERO_CONSUMES,
+      },
+      {
+        layoutName: 'WorkHeroImage',
+        label: 'Image cover',
+        blurb: 'Full-bleed still-image cover with centered content.',
+        consumes: HERO_CONSUMES,
+        requiresAssets: ['photos'],
+      },
+      {
+        layoutName: 'WorkHeroSplit',
+        label: 'Split poster',
+        blurb: 'Text left · portrait right (editorial poster).',
+        consumes: HERO_CONSUMES,
+        requiresAssets: ['photos'],
+      },
+      {
+        layoutName: 'WorkHeroCenter',
+        label: 'Centered type',
+        blurb: 'Centered typographic hero — no media.',
         consumes: HERO_CONSUMES,
       },
       // SLOT — declared capability, NO component yet (built on first demand). Never
@@ -68,6 +131,18 @@ export const workSkeletonManifest: TemplateBlockManifest = {
         blurb: 'Group-reference grid (category covers) — the work baseline.',
         consumes: GALLERY_CONSUMES,
       },
+      {
+        layoutName: 'WorkGalleryMasonry',
+        label: 'Masonry',
+        blurb: 'CSS-columns collage of group covers (varied heights).',
+        consumes: GALLERY_CONSUMES,
+      },
+      {
+        layoutName: 'WorkGalleryStrip',
+        label: 'Strip',
+        blurb: 'Horizontal scroll row of group covers.',
+        consumes: GALLERY_CONSUMES,
+      },
     ],
   },
   proof: {
@@ -77,7 +152,23 @@ export const workSkeletonManifest: TemplateBlockManifest = {
         layoutName: 'WorkProofTestimonials',
         label: 'Testimonials',
         blurb: 'Verbatim client quotes — the default proof shape.',
-        consumes: PROOF_CONSUMES,
+        consumes: PROOF_TESTIMONIALS_CONSUMES,
+        copyShape: 'proof-testimonials',
+      },
+      {
+        layoutName: 'WorkProofLogos',
+        label: 'Client logos',
+        blurb: 'A logo wall (reads the `logos` collection — content-exclusive).',
+        consumes: PROOF_LOGOS_CONSUMES,
+        copyShape: 'proof-logos',
+        requiresAssets: ['logos'],
+      },
+      {
+        layoutName: 'WorkProofResults',
+        label: 'Results',
+        blurb: 'Big-number metrics (reads the `metrics` collection — content-exclusive).',
+        consumes: PROOF_RESULTS_CONSUMES,
+        copyShape: 'proof-results',
       },
     ],
   },

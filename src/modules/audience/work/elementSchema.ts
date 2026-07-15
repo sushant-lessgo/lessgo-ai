@@ -16,29 +16,62 @@
 // schema — it is never generated/offered, so it never needs a layout schema.
 
 import type { UIBlockSchemaV2 } from '@/modules/sections/layoutElementSchema';
-import { workElementContract } from '@/modules/engines/workSections';
+import { workElementContract, workProofShapeContracts } from '@/modules/engines/workSections';
 
 /**
  * Built work-skeleton layout name → the frozen work-core SECTION key it renders.
- * Grows as the layout library expands (phases 4/6/7). Phase 4: pilot Home set
- * (hero · header · work/gallery · proof · contact · footer).
+ * Grows as the layout library expands (phases 4/6/7). Every layout that renders a
+ * given section maps to the SAME section contract (arrangement variants share the
+ * section's content shape) — EXCEPT the alternate proof SHAPES, which read a
+ * DIFFERENT collection and so bind their own proof-shape contract below.
+ *
+ * Phase 4: pilot Home set. Phase 6: layout library — the 4 non-default header
+ * arrangements (internal dispatch → same `header` contract), the 3 alternate hero
+ * arrangements, the 2 alternate galleries, the 2 alternate proof SHAPES.
  */
 const WORK_LAYOUT_TO_SECTION: Record<string, string> = {
+  // hero — all arrangements share the frozen `hero` contract.
   WorkHeroSlider: 'hero',
+  WorkHeroImage: 'hero',
+  WorkHeroSplit: 'hero',
+  WorkHeroCenter: 'hero',
+  // header — all 5 arrangements (internal dispatch) share the `header` contract.
   WorkHeader: 'header',
+  WorkHeaderStart: 'header',
+  WorkHeaderCentered: 'header',
+  WorkHeaderSplit: 'header',
+  WorkHeaderMinimal: 'header',
+  // work/gallery — all arrangements share the `work` (group-reference) contract.
   WorkGalleryGrid: 'work',
+  WorkGalleryMasonry: 'work',
+  WorkGalleryStrip: 'work',
+  // proof — the DEFAULT (testimonials) shape IS workElementContract.proof.
   WorkProofTestimonials: 'proof',
   WorkContact: 'contact',
   WorkFooter: 'footer',
 };
 
+/**
+ * Alternate proof SHAPES bind their OWN proof-shape contract (they read a different
+ * collection than the default testimonials shape — logos vs metrics vs quotes).
+ * Registered directly so `contractFor(layoutName)` resolves the right element/
+ * collection set for each shape's `consumes` conformance.
+ */
+const WORK_PROOF_SHAPE_LAYOUTS: Record<string, UIBlockSchemaV2> = {
+  WorkProofLogos: workProofShapeContracts.logos,
+  WorkProofResults: workProofShapeContracts.results,
+};
+
 /** layoutName → element schema (the section's frozen contract). */
-export const workLayoutElementSchema: Record<string, UIBlockSchemaV2> = Object.fromEntries(
-  Object.entries(WORK_LAYOUT_TO_SECTION).map(([layoutName, sectionKey]) => {
-    const contract = workElementContract[sectionKey];
-    if (!contract) {
-      throw new Error(`[work/elementSchema] no frozen contract for section "${sectionKey}" (layout "${layoutName}")`);
-    }
-    return [layoutName, contract];
-  }),
-);
+export const workLayoutElementSchema: Record<string, UIBlockSchemaV2> = {
+  ...Object.fromEntries(
+    Object.entries(WORK_LAYOUT_TO_SECTION).map(([layoutName, sectionKey]) => {
+      const contract = workElementContract[sectionKey];
+      if (!contract) {
+        throw new Error(`[work/elementSchema] no frozen contract for section "${sectionKey}" (layout "${layoutName}")`);
+      }
+      return [layoutName, contract];
+    }),
+  ),
+  ...WORK_PROOF_SHAPE_LAYOUTS,
+};

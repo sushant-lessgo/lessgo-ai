@@ -338,18 +338,21 @@ export const EDIT_AFFORDANCE_STYLES = `
 .wk-img-edit__btn{ font-family:var(--wk-ff-body); font-size:11px; letter-spacing:.04em; color:var(--wk-ink); background:var(--wk-paper); border:1px solid var(--wk-line); border-radius:var(--wk-r); padding:5px 9px; cursor:pointer; }
 .wk-img-edit__btn:hover{ border-color:var(--wk-accent); }
 .wk-img-edit__x{ font-family:var(--wk-ff-body); font-size:11px; color:var(--wk-paper); background:var(--wk-accent); border:none; border-radius:var(--wk-r); padding:5px 8px; cursor:pointer; }
-.wk-list-x{ position:absolute; top:-8px; right:-8px; z-index:4; width:20px; height:20px; line-height:1; font-size:14px; color:var(--wk-paper); background:var(--wk-accent); border:none; border-radius:999px; cursor:pointer; opacity:0; transition:opacity .15s; }
-.wk-list-x:hover, *:hover > .wk-list-x{ opacity:1; }
+/* opacity:0 affordances also set pointer-events:none while invisible so they never
+   capture a click over live content (phase-5 review nit); pointer-events restored on
+   the SAME hover/focus reveal. Purely interaction — zero pixel/layout (band) impact. */
+.wk-list-x{ position:absolute; top:-8px; right:-8px; z-index:4; width:20px; height:20px; line-height:1; font-size:14px; color:var(--wk-paper); background:var(--wk-accent); border:none; border-radius:999px; cursor:pointer; opacity:0; pointer-events:none; transition:opacity .15s; }
+.wk-list-x:hover, *:hover > .wk-list-x{ opacity:1; pointer-events:auto; }
 /* Add control floats OUT of layout flow (absolute, zero in-flow footprint) so the
    edit list box matches the published list box (which has no add button); hidden
    until the list is hovered or the control is focused, same gating as .wk-list-x. */
-.wk-list-add{ position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); z-index:4; font-family:var(--wk-ff-body); font-size:12px; letter-spacing:.06em; color:var(--wk-accent); background:var(--wk-paper); border:1px dashed var(--wk-line); border-radius:var(--wk-r); padding:6px 14px; cursor:pointer; opacity:0; transition:opacity .15s; }
-.wk-list-add:hover, *:hover > .wk-list-add, .wk-list-add:focus-visible{ opacity:1; border-color:var(--wk-accent); }
+.wk-list-add{ position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); z-index:4; font-family:var(--wk-ff-body); font-size:12px; letter-spacing:.06em; color:var(--wk-accent); background:var(--wk-paper); border:1px dashed var(--wk-line); border-radius:var(--wk-r); padding:6px 14px; cursor:pointer; opacity:0; pointer-events:none; transition:opacity .15s; }
+.wk-list-add:hover, *:hover > .wk-list-add, .wk-list-add:focus-visible{ opacity:1; pointer-events:auto; border-color:var(--wk-accent); }
 /* Link edit affordance: positioning context on the wrapper (no size change), the
    "Set link target" trigger floats OUT of layout flow (absolute) so the edit box
    matches the published anchor; hidden until hover/focus so it never shows in a
    static parity screenshot. */
 .wk-link-edit{ position:relative; }
-.wk-link-edit__btn{ position:absolute; top:50%; left:100%; transform:translateY(-50%); margin-left:4px; z-index:5; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; opacity:0; transition:opacity .15s; background:transparent; border:none; cursor:pointer; color:var(--wk-accent); }
-.wk-link-edit:hover .wk-link-edit__btn, .wk-link-edit__btn:focus-visible{ opacity:1; }
+.wk-link-edit__btn{ position:absolute; top:50%; left:100%; transform:translateY(-50%); margin-left:4px; z-index:5; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; opacity:0; pointer-events:none; transition:opacity .15s; background:transparent; border:none; cursor:pointer; color:var(--wk-accent); }
+.wk-link-edit:hover .wk-link-edit__btn, .wk-link-edit__btn:focus-visible{ opacity:1; pointer-events:auto; }
 `;

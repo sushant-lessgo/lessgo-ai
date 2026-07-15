@@ -7,7 +7,7 @@
  * renderer. All hooks are namespaced `data-wk-*` / `.wk-*`. Idempotent boot guard;
  * EACH behavior is independently guarded so a page missing a section never errors.
  *
- * Behaviors (D1 / phase 5):
+ * Behaviors:
  *   1. HERO SLIDER — ported from atelierSliderBehaviors.js (autoplay crossfade,
  *      prev/next arrows, injected dots, visibilitychange pause, reduced-motion).
  *      Degrades to the static first (.is-active) slide with no JS; bails when a
@@ -16,18 +16,20 @@
  *   2. FIXED / STICKY HEADER — a header opts in via
  *      `[data-wk-header][data-wk-header-mode="fixed"]`; JS toggles `is-scrolled` on
  *      scroll for the shadow/compaction. No-op (static header) when the attribute is
- *      absent — which is the phase-5 pilot markup; the mode attribute is emitted by
- *      the header wrapper in phase 6, where the editor mirror also lands.
- *
- * DEFERRED to phase 6 (with the gallery masonry/strip work): the gallery lightbox.
- * The pilot gallery renders GROUP REFERENCES that navigate to group hrefs (AC L120)
- * — there is no in-page image set to lightbox — so no lightbox ships here, keeping
- * published + editor consistent.
+ *      absent. The mode attribute is emitted by the WorkHeader block (phase 6).
+ *   3. GALLERY LIGHTBOX (phase 6) — a gallery opts in via `[data-wk-gallery-lightbox]`;
+ *      each cover carries `[data-wk-lightbox]`. Clicking a cover that has a real image
+ *      opens a full-screen overlay (built lazily, inline-styled — no external CSS) and
+ *      preventDefaults the group-link navigation; ESC / click / the close button
+ *      dismiss it. Covers with only a placeholder (no <img>) are ignored (nothing to
+ *      show), so the behavior is inert on empty galleries. Independently guarded.
  *
  * Selector contract (HARD — rename ⇒ ship work.v2.js):
- *   HERO   [data-wk-hero-slider][data-wk-interval] · .wk-hero__slide/.is-active ·
- *          [data-wk-prev]/[data-wk-next] · [data-wk-dots] (EMPTY → JS adds .wk-hero__dot)
- *   HEADER [data-wk-header][data-wk-header-mode="fixed"] → toggles .is-scrolled
+ *   HERO    [data-wk-hero-slider][data-wk-interval] · .wk-hero__slide/.is-active ·
+ *           [data-wk-prev]/[data-wk-next] · [data-wk-dots] (EMPTY → JS adds .wk-hero__dot)
+ *   HEADER  [data-wk-header][data-wk-header-mode="fixed"] → toggles .is-scrolled
+ *   GALLERY [data-wk-gallery-lightbox] [data-wk-lightbox] (has child <img> or
+ *           [data-wk-lightbox-src]) → click opens the overlay
  */
 (function () {
   if (window.__workBooted) return;
@@ -119,5 +121,81 @@
 
     window.addEventListener('scroll', sync, { passive: true });
     sync();
+  })();
+
+  /* ---------- 3. GALLERY LIGHTBOX ---------- */
+  (function () {
+    var galleries = Array.prototype.slice.call(
+      document.querySelectorAll('[data-wk-gallery-lightbox]')
+    );
+    if (!galleries.length) return; // no opt-in gallery → no-op
+
+    var overlay = null;
+    var overlayImg = null;
+
+    function ensureOverlay() {
+      if (overlay) return overlay;
+      overlay = document.createElement('div');
+      overlay.className = 'wk-lightbox';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.style.cssText =
+        'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;' +
+        'justify-content:center;padding:4vmin;background:rgba(0,0,0,0.86);' +
+        'opacity:0;transition:opacity .18s;cursor:zoom-out;';
+      overlayImg = document.createElement('img');
+      overlayImg.className = 'wk-lightbox__img';
+      overlayImg.alt = '';
+      overlayImg.style.cssText =
+        'max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,0.5);';
+      var close = document.createElement('button');
+      close.type = 'button';
+      close.className = 'wk-lightbox__close';
+      close.setAttribute('aria-label', 'Close');
+      close.textContent = '×';
+      close.style.cssText =
+        'position:absolute;top:16px;right:20px;width:40px;height:40px;font-size:26px;' +
+        'line-height:1;color:#fff;background:transparent;border:none;cursor:pointer;';
+      overlay.appendChild(overlayImg);
+      overlay.appendChild(close);
+      overlay.addEventListener('click', hide);
+      close.addEventListener('click', hide);
+      document.body.appendChild(overlay);
+      return overlay;
+    }
+
+    function show(src, alt) {
+      ensureOverlay();
+      overlayImg.src = src;
+      overlayImg.alt = alt || '';
+      // force reflow so the opacity transition runs
+      void overlay.offsetWidth;
+      overlay.style.opacity = '1';
+      document.addEventListener('keydown', onKey);
+    }
+
+    function hide() {
+      if (!overlay) return;
+      overlay.style.opacity = '0';
+      document.removeEventListener('keydown', onKey);
+    }
+
+    function onKey(e) {
+      if (e.key === 'Escape') hide();
+    }
+
+    galleries.forEach(function (gallery) {
+      var targets = Array.prototype.slice.call(gallery.querySelectorAll('[data-wk-lightbox]'));
+      targets.forEach(function (t) {
+        t.addEventListener('click', function (e) {
+          var explicit = t.getAttribute('data-wk-lightbox-src');
+          var img = t.querySelector('img');
+          var src = explicit || (img && img.getAttribute('src'));
+          if (!src) return; // placeholder only → let the group link behave normally
+          e.preventDefault();
+          show(src, img && img.getAttribute('alt'));
+        });
+      });
+    });
   })();
 })();
