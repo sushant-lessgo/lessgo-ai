@@ -692,3 +692,52 @@ Designer sources: `template-design/designer-workspace/` (Kontur - Kundius, Pulse
 - The `bespoke` flip is DEFERRED (above) — until it lands (phase 9), engine-core for atelier2 is enforced by the explicit conformance describe, NOT the standard bespoke-gated (a) loop. Functionally equivalent; flagged so the founder can flip at cutover.
 - **about-portrait** + **multi-column-footer** + **packages featured-tier** are recommended-but-unbuilt future variants (grow-on-demand) — no D1 blocker, recorded for the freeze gate.
 - Photography image slots ship EMPTY in mocks (cores render placeholders) — the parity grid compares layout/copy, not stock art (unchanged from ph4/5).
+
+---
+
+## Phase 8 — Kundius end-to-end + parity QA (sign-off gate)
+
+### Files changed
+- `src/modules/skeletons/work/__tests__/kundiusPages.test.tsx` (new) — real-content dual-renderer parity across Kundius's 5 standard-archetype pages.
+- `src/modules/templates/blockMocks/atelier2.ts` — reviewed, NOT edited (see Deviations).
+
+### The 5-page Kundius fixture + per-page asserts
+Pages assembled from the shipped atelier2 mocks (fixtures/kundiusBrief.ts-derived, mapped onto the frozen work-core contracts) at the **standard whole-site archetype** (`workPages.ts`): `home · work · prices · about · contact`. Header/footer chrome wraps each page's body sections (defaultSections per page). Each section reuses the DEFAULT-layout mock for its type, given a page-scoped sectionId (`${type}-${page}` — extractSectionType still resolves the type).
+
+Per page, three assertions:
+1. **PUBLISHED path** (`generateStaticHTML` — the exact /api/publish code): asserts real per-section markers appear and NO placeholder ("Work block — coming soon") leaks. Markers = header logo · hero headline (name)+role · all gallery group names · proof quotes · packages tiers (name+price_line) · about heading+body · contact heading + `data-wk-contact-method="form"` · footer copyright.
+2. **EDITOR == PUBLISHED** on real content (AC L127): every visible fixture field must appear in BOTH the mounted edit render and the published HTML (symmetric XOR check — a field in exactly one mode is the dual-renderer bug). Zero divergences across all 5 pages.
+3. **CTA/nav href consistency**: every non-`#` fixture href navigates in published (`href="…"`); edit exposes a `wk-link-edit` affordance for the same links.
+Plus 2 fixture-shape guards (page set == the 5 standard pages; every page has header+footer chrome + ≥1 body section). 19 tests, all green.
+
+### NL/EN twin-field non-preclusion (constraint L91)
+Proven, NOT wired (bilingual = concierge patch). Two assertions:
+- Rendering a hero whose `name` = `<span data-en>…</span><span data-nl>…</span>` through the PUBLISHED path preserves both wrappers + both texts verbatim (published `E.Txt` renders HTML values via `dangerouslySetInnerHTML`).
+- Source scan: published `Txt` uses `dangerouslySetInnerHTML`; edit `Txt` uses `preserveHtml={true}` (InlineTextEditorV2). Neither reads/asserts a single text node.
+FINDING: the skeleton's text path does **not** preclude the lumen `data-en`/`data-nl` twin pattern — a future twin wrapper survives in both renderers. Door open; wiring deferred to the concierge patch as scoped.
+
+### Real bug found?
+NONE. All 5 pages render edit==published on Kundius's real content with zero field divergence on the first pass — the single-source `.core.tsx` pattern makes parity structural (as designed). No bug-fix edit needed inside skeletons/work or atelier2.
+
+### Verification
+- `npx tsc --noEmit` — clean (no errors; the tolerated pre-existing page.tsx error did not appear).
+- `npm run test:run` — 187 passed | 1 skipped (188 files); 3269 passed | 18 skipped. kundiusPages 19/19; all existing suites green.
+- `npm run build` — green.
+- `npm run test:e2e -- parity.spec.ts` — 7/7. Negative controls bite (meridian 6.409%, atelier 6.209%, atelier2 45.014%). atelier2 bands UNCHANGED from phase 7 (mocks untouched): 21 bands all <3%, max **proof #3 = 1.813%**, headers ~1.2–1.6%, hero 0.012–0.198%, contact/faq 0.000%.
+
+### Deviations
+- **atelier2.ts NOT edited** (in-scope judgment, conservative). The plan lists it as an OPTIONAL edit ("swap any *lorem/placeholder* copy … where the eyeball needs it"). Review found the mock already carries Kundius-real content mapped onto the frozen contracts (no lorem) — editing would be gratuitous and would perturb the 21 frozen parity bands. Left byte-untouched; the kundiusPages fixture SOURCES its content from these same mocks, so the parity grid, dev stage, and this proof all reflect one consistent Kundius page. (Note: proof testimonials + results metrics in the mocks are illustrative — Kundius's real `praise` is empty per kundiusBrief.ts; documented there. They are eyeball/parity content, not fact claims, and do not affect the content-parity proof.)
+
+### FOUNDER MANUAL-QA CHECKLIST (human sign-off — automation cannot cover these)
+Automated equivalents already cover the intent: kundiusPages = editor==published on real content; htmlGenerator.test.ts (AC-L123) = styleTokens in both renderers; e2e parity.spec = visual editor==published; `public/assets/work.v1.js` (built) = published behaviors asset exists. The remaining human checks (need a browser + running dev/publish):
+
+1. **Editor click-select toolbars** — `npm run dev`, open `/dev/blocks/atelier2` (edit band). For EACH block (header, hero, work/gallery, proof, contact, footer, packages, about, faq, results): click a headline → the **Text** toolbar appears; click an image placeholder → **Image** toolbar; click the section chrome → **Section** toolbar; click a nav item / CTA → **Link** toolbar. Confirm NO renegade/bespoke UI inside any skeleton block (only the shared shell toolbars). Header logo + menu must be editable via the shared primitives (click logo text → Text toolbar; click a nav link → Link popover).
+2. **Gallery manage-photos link** — in the edit gallery block, the "manage photos" link is present and jumps to `WORK_LIBRARY_BOARD_HREF` (currently the `/dashboard/library` placeholder; re-pointed in D2).
+3. **Style-token spot check (AC-L123)** — on a real dev draft (a token-scoped `/edit/[token]` project set to templateId `atelier2`), hand-write in the DB/JSON `Project.themeValues.styleTokens` a per-section entry, e.g. `{"hero-<id>": {"corners":"soft","background":"dark"}}` (use the actual hero sectionId). Reload the editor → the hero shows rounded corners + dark surface. Then **publish** → open `/p/<slug>` → confirm the SAME radius/background render in the static page (the `[data-sid="hero-<id>"]{--u-*}` CSS block is in the page source).
+4. **Publish behaviors on /p/slug (AC L118/119)** — publish an atelier2 dev draft with a multi-slide hero + a gallery, then load `/p/<slug>` and verify: hero **slider** advances (autoplay/arrows, work.v1.js), gallery **lightbox** opens on click, **fixed header** sticks on scroll when `styleTokens[headerId].headerMode:'fixed'`. Confirm `work.v1.js` is the injected asset (view-source).
+5. **Kundius real-content eyeball** — compare `/dev/blocks/atelier2` (both bands) against the designer Atelier HTML (`template-design/designer-workspace/atelier/` + `delivery/`, main repo dir). Sign off that her real page reads correctly in editor AND published. This gate ALSO authorizes phase 9 (cutover to the live `atelier` id).
+
+### Open risks
+- Phase-8 human gate (editor toolbars / styleTokens spot check / publish behaviors) is deferred to the founder's browser pass above — automated proxies are green but the visual/interaction sign-off is pending.
+- Phase 9 cutover (re-point live `atelier` id) NOT done — deferred + human-gated (touches paying-customer prod rendering). atelier2 stays the dev-only id.
+- Mock proof/results content is illustrative (Kundius praise empty) — replace with her real testimonials/metrics (or omit proof) at concierge content-load; does not affect the parity proof.
