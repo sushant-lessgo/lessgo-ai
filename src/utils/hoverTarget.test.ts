@@ -9,14 +9,18 @@ import { resolveTarget, getTargetLabel } from './hoverTarget';
 //           > leaf node (the actual hovered content)
 const SECTION_ID = 'hero-abc12345';
 
-function mount(html: string): HTMLElement {
+function mountIn(sectionId: string, html: string): HTMLElement {
   document.body.innerHTML = `
-    <div data-section-root="${SECTION_ID}" data-section-id="${SECTION_ID}" id="section-root">
-      <section data-section-id="${SECTION_ID}" id="block-section">
+    <div data-section-root="${sectionId}" data-section-id="${sectionId}" id="section-root">
+      <section data-section-id="${sectionId}" id="block-section">
         ${html}
       </section>
     </div>`;
   return document.getElementById('section-root') as HTMLElement;
+}
+
+function mount(html: string): HTMLElement {
+  return mountIn(SECTION_ID, html);
 }
 
 function byId(id: string): HTMLElement {
@@ -145,5 +149,124 @@ describe('getTargetLabel (wired types)', () => {
   it('data-element-type maps via UNIVERSAL_ELEMENTS (button → Button/CTA even without key convention)', () => {
     mount(`<div data-element-key="offer" data-element-type="button" data-section-id="${SECTION_ID}"><a id="b">X</a></div>`);
     expect(getTargetLabel(resolveTarget(byId('b')))).toBe('Button/CTA');
+  });
+});
+
+describe('getTargetLabel (placeholder types, phase 4)', () => {
+  const HEADER_ID = 'header-abc12345';
+  const FOOTER_ID = 'footer-def67890';
+  const CONTACT_ID = 'contact-11112222';
+
+  it('header section container → "Header" (not "Section")', () => {
+    mountIn(HEADER_ID, `<div data-element-key="cta_text" data-section-id="${HEADER_ID}"><a>Go</a></div>`);
+    expect(getTargetLabel(resolveTarget(byId('block-section')))).toBe('Header');
+  });
+
+  it('footer section container → "Footer" (not "Section")', () => {
+    mountIn(FOOTER_ID, `<div data-element-key="brand_text" data-section-id="${FOOTER_ID}"><span>Studio</span></div>`);
+    expect(getTargetLabel(resolveTarget(byId('block-section')))).toBe('Footer');
+  });
+
+  it('logo element (Atelier logo_image, an <img>) → "Logo" (wins over Image)', () => {
+    mountIn(HEADER_ID, `
+      <div data-element-key="logo_image" data-section-id="${HEADER_ID}">
+        <div data-image-id="${HEADER_ID}.logo_image"><img id="logo" src="l.png" /></div>
+      </div>`);
+    expect(getTargetLabel(resolveTarget(byId('logo')))).toBe('Logo');
+  });
+
+  it('logo wordmark (logo_text) → "Logo"', () => {
+    mountIn(HEADER_ID, `<div data-element-key="logo_text" data-section-id="${HEADER_ID}"><span id="wm">Studio</span></div>`);
+    expect(getTargetLabel(resolveTarget(byId('wm')))).toBe('Logo');
+  });
+
+  it('logo inside header labels "Logo" NOT "Menu" (precedence)', () => {
+    mountIn(HEADER_ID, `<div data-element-key="logo_image" data-section-id="${HEADER_ID}"><span id="l2">L</span></div>`);
+    const label = getTargetLabel(resolveTarget(byId('l2')));
+    expect(label).toBe('Logo');
+    expect(label).not.toBe('Menu');
+  });
+
+  it('nav item inside header (nav_items.<id>.label) → "Menu"', () => {
+    mountIn(HEADER_ID, `<div data-element-key="nav_items.n1.label" data-section-id="${HEADER_ID}"><span id="nav">Work</span></div>`);
+    expect(getTargetLabel(resolveTarget(byId('nav')))).toBe('Menu');
+  });
+
+  it('nav-item key convention only fires inside a header section (elsewhere → Text)', () => {
+    mount(`<div data-element-key="nav_items.n1.label" data-section-id="${SECTION_ID}"><span id="notmenu">x</span></div>`);
+    expect(getTargetLabel(resolveTarget(byId('notmenu')))).toBe('Text');
+  });
+
+  it('form field inside a <form> labels "Form" NOT "Text"', () => {
+    mountIn(CONTACT_ID, `
+      <form class="lg-atelier-form">
+        <div data-element-key="submit_button" data-section-id="${CONTACT_ID}"><span id="fld">Send</span></div>
+      </form>`);
+    expect(getTargetLabel(resolveTarget(byId('fld')))).toBe('Form');
+  });
+
+  it('form submit button inside a <form> labels "Form" NOT "Button/CTA"', () => {
+    mountIn(CONTACT_ID, `
+      <form data-lessgo-form>
+        <button data-element-key="cta_submit" data-section-id="${CONTACT_ID}" id="submit">Send</button>
+      </form>`);
+    expect(getTargetLabel(resolveTarget(byId('submit')))).toBe('Form');
+  });
+
+  it('social link (footer social_links.<id>.platform) → "Social bar"', () => {
+    mountIn(FOOTER_ID, `<div data-element-key="social_links.s1.platform" data-section-id="${FOOTER_ID}"><span id="soc">Instagram</span></div>`);
+    expect(getTargetLabel(resolveTarget(byId('soc')))).toBe('Social bar');
+  });
+
+  it('footer link (non-social) still labels "Text" (no Link toolbar; D7 ruling)', () => {
+    mountIn(FOOTER_ID, `<div data-element-key="footer_links.f1.label" data-section-id="${FOOTER_ID}"><span id="fl">Privacy</span></div>`);
+    expect(getTargetLabel(resolveTarget(byId('fl')))).toBe('Text');
+  });
+
+  it('CTA in a header (cta_text, not a form/nav/logo) still labels "Button/CTA"', () => {
+    mountIn(HEADER_ID, `<div data-element-key="cta_text" data-section-id="${HEADER_ID}"><a id="hcta">Start</a></div>`);
+    expect(getTargetLabel(resolveTarget(byId('hcta')))).toBe('Button/CTA');
+  });
+
+  // ── Tightened logo/social matching: substring-only keys must NOT mislabel. ──
+  it('logo-wall company_logos (an <img>) → "Image" NOT "Logo"', () => {
+    mount(`
+      <div data-element-key="company_logos" data-section-id="${SECTION_ID}">
+        <div data-image-id="${SECTION_ID}.company_logos"><img id="cl" src="c.png" /></div>
+      </div>`);
+    const label = getTargetLabel(resolveTarget(byId('cl')));
+    expect(label).toBe('Image');
+    expect(label).not.toBe('Logo');
+  });
+
+  it('logo-wall logo_urls (an <img>) → "Image" NOT "Logo"', () => {
+    mount(`
+      <div data-element-key="logo_urls" data-section-id="${SECTION_ID}">
+        <div data-image-id="${SECTION_ID}.logo_urls"><img id="lu" src="u.png" /></div>
+      </div>`);
+    const label = getTargetLabel(resolveTarget(byId('lu')));
+    expect(label).toBe('Image');
+    expect(label).not.toBe('Logo');
+  });
+
+  it('testimonial_company_logo text → falls through, NOT "Logo"', () => {
+    mount(`<div data-element-key="testimonial_company_logo" data-section-id="${SECTION_ID}"><span id="tcl">Acme</span></div>`);
+    const label = getTargetLabel(resolveTarget(byId('tcl')));
+    expect(label).toBe('Text');
+    expect(label).not.toBe('Logo');
+  });
+
+  it('stat metric social_metric_1 → "Text" NOT "Social bar"', () => {
+    mount(`<div data-element-key="social_metric_1" data-section-id="${SECTION_ID}"><span id="sm">50K+ Followers</span></div>`);
+    const label = getTargetLabel(resolveTarget(byId('sm')));
+    expect(label).toBe('Text');
+    expect(label).not.toBe('Social bar');
+  });
+
+  it('flag show_social_proof → "Text" NOT "Social bar"', () => {
+    mount(`<div data-element-key="show_social_proof" data-section-id="${SECTION_ID}"><span id="ssp">on</span></div>`);
+    const label = getTargetLabel(resolveTarget(byId('ssp')));
+    expect(label).toBe('Text');
+    expect(label).not.toBe('Social bar');
   });
 });

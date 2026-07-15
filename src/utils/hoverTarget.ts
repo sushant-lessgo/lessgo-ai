@@ -12,7 +12,20 @@
 // Label vocabulary is the toolbarPlan action-list verbatim (plan D7). Labels are
 // FORWARD vocabulary: a target may be labelled with a toolbar name whose toolbar
 // isn't wired yet (placeholder types, phase 4) — clicking keeps today's behavior.
-// This phase wires only: Section, Text, Button/CTA, Image.
+//
+// WIRED types (their own toolbar exists today): Section, Text, Button/CTA, Image.
+// PLACEHOLDER types (phase 4 — LABEL ONLY, no toolbar wired): Header, Footer, Logo,
+// Menu, Form, Social bar. Clicking a placeholder-labelled target keeps TODAY's
+// behavior — whatever toolbar currently fires for that node (e.g. a header nav item
+// still opens today's element/text toolbar; the section background still opens the
+// SectionToolbar). The placeholder labels are forward vocabulary ONLY so that when
+// the toolbarPlan track lands the real Header/Footer/Logo/Menu/Form/Social toolbars,
+// it relabels nothing here — the vocabulary already matches. No dispatch changes.
+//
+// Placeholder classification is TEMPLATE-AGNOSTIC — driven by attribute/key/section
+// conventions shared across templates (verified against Atelier), never per-template
+// hardcoding. Precedence (plan D7): specific placeholder rules > Image / Button/CTA
+// conventions > Text; and section placeholders (Header/Footer) > generic Section.
 
 import { UNIVERSAL_ELEMENTS, type UniversalElementType } from '@/types/universalElements';
 
@@ -96,16 +109,84 @@ function isImageNode(node: HTMLElement | null): boolean {
 }
 
 /**
+ * The section TYPE segment of a `${type}-${uuid}` section id (e.g. `header-abc123`
+ * → `header`). Empty for a null/malformed id. Template-agnostic — every audience/
+ * template stamps section ids in this convention.
+ */
+function sectionTypeOf(sectionId: string | null): string {
+  if (!sectionId) return '';
+  const dash = sectionId.indexOf('-');
+  return (dash === -1 ? sectionId : sectionId.slice(0, dash)).toLowerCase();
+}
+
+/**
+ * Site-scoped BRAND-logo primitive key convention. Verified: Atelier header/footer
+ * render the logo via `E.Img elementKey="logo_image"` / `E.Txt elementKey="logo_text"`
+ * (`AtelierNavHeader.core.tsx`, `resolveLogo.ts`); other templates use `logo` /
+ * `nav_logo`.
+ *
+ * Anchored to the brand-logo primitive shape — the whole key (or, for dotted paths,
+ * its last segment) is `logo`/`nav_logo` optionally suffixed by a single primitive
+ * word (`_image`/`_text`/…). This must NOT fire for logo-WALL / company-logos
+ * collections that merely CONTAIN the substring `logo`, which are ordinary
+ * Image/Text targets: `company_logos`, `logo_urls`, `testimonial_company_logo`
+ * (`defaultPlaceholders.ts`). Template-agnostic — a convention set, not per-template.
+ */
+function isLogoKey(key: string): boolean {
+  const seg = key.split('.').pop() ?? key;
+  return /^(nav_)?logo(_(image|text|icon|svg|src|mark|wordmark))?$/.test(seg);
+}
+
+/**
+ * Social-BAR key convention: the `social_links.<id>.*` collection (Atelier footer).
+ * Anchored to that collection path so it does NOT fire for stat/metric keys that
+ * merely CONTAIN `social` — `social_metric_1..4`, `show_social_proof`
+ * (`defaultPlaceholders.ts`) — which are ordinary Text targets.
+ */
+function isSocialKey(key: string): boolean {
+  return /^social_links(\.|$)/.test(key);
+}
+
+/** Nav-item key convention (Atelier header `nav_items.<id>.label|href`). */
+function isNavItemKey(key: string): boolean {
+  return key.includes('nav_item');
+}
+
+/**
  * Classify a resolved target to its toolbarPlan label (D7 vocabulary).
- * Wired types this phase: `Section`, `Text`, `Button/CTA`, `Image`.
+ * WIRED types: `Section`, `Text`, `Button/CTA`, `Image`.
+ * PLACEHOLDER types (label-only, no toolbar): `Header`, `Footer`, `Logo`, `Menu`,
+ * `Form`, `Social bar`. Placeholder rules are checked FIRST (plan D7 precedence).
  * Returns '' for a null (non-selectable) target.
  */
 export function getTargetLabel(target: HoverTarget): string {
   if (!target || target.kind === null) return '';
-  if (target.kind === 'section') return 'Section';
 
   const node = target.node;
   const key = (target.elementKey ?? '').toLowerCase();
+  const sectionType = sectionTypeOf(target.sectionId);
+
+  // ── Section-level: placeholder section types win over generic `Section`. ──
+  if (target.kind === 'section') {
+    if (sectionType === 'header') return 'Header';
+    if (sectionType === 'footer') return 'Footer';
+    return 'Section';
+  }
+
+  // ── Element-level placeholder rules — checked BEFORE Image / Button/CTA / Text. ──
+  // Logo before Image: the resolved logo is an <img> on header/footer, but its key
+  // convention marks it as the (forthcoming) Logo toolbar's target.
+  if (isLogoKey(key)) return 'Logo';
+  // Social bar (footer social-links convention).
+  if (isSocialKey(key)) return 'Social bar';
+  // Menu — nav items, only inside a header section (mirrors the header nav grammar;
+  // a `nav_item*` key elsewhere would not be a menu). Logo already returned above,
+  // so a logo inside the header can never fall through to Menu.
+  if (sectionType === 'header' && isNavItemKey(key)) return 'Menu';
+  // Form — any element inside a <form> (edit preview `<form class="lg-atelier-form">`,
+  // published `<form data-lessgo-form>`, or the shared `FormRenderer` <form>): fields
+  // and the submit button both label `Form`, never `Text`/`Button/CTA`.
+  if (node && typeof node.closest === 'function' && node.closest('form')) return 'Form';
 
   // Image wins (mirrors the click-path data-image-id early-return contract).
   if (isImageNode(node)) return 'Image';

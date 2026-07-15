@@ -128,3 +128,93 @@ Mitigation (clean, low-risk, fully within the Files-touched `SelectionSystem.tsx
 ### Open risks
 - `HoverOverlay` chrome-suppression uses a conservative selector set (`[data-toolbar-type]`, `header`, `[role="dialog"]`, `[data-radix-portal]`); if some editor panel isn't covered the overlay may briefly show over it — Gate-B manual check recommended, cheap to extend.
 - Atelier double-affordance (above) — Gate B decision, not a code risk in this phase.
+
+## Phase 4 — Placeholder-type labels (Logo/Menu/Header/Form/Footer/Social bar)
+
+**Files changed:**
+- `src/utils/hoverTarget.ts` — extended `getTargetLabel` with attribute/convention-driven placeholder rules + module docstring note.
+- `src/utils/hoverTarget.test.ts` — 11 new placeholder + precedence cases; added `mountIn(sectionId, html)` helper.
+
+### Key conventions verified (source files)
+- **Logo:** `AtelierNavHeader.core.tsx` renders logo via `E.Img elementKey="logo_image"` and `E.Txt elementKey="logo_text"`; `resolveLogo.ts` uses per-section `logo_image`/`wordmark` + site-scoped `globalSettings.logoUrl/logoUrlDark`; `EditableLogo.tsx` writes the site-scoped value. → Convention = element key CONTAINS `logo` (covers `logo_image`, `logo_text`, other-template `logo`/`nav_logo`).
+- **Menu (nav item):** `AtelierNavHeader.core.tsx` nav list keys are `nav_items.<id>.label` / `nav_items.<id>.href`. → Convention = key CONTAINS `nav_item`, AND section type is `header`.
+- **Header/Footer section:** Atelier README + section registration use section types `header` / `footer`; ids follow `${type}-${uuid}`. → Convention = `sectionTypeOf(sectionId) === 'header'|'footer'`.
+- **Form:** edit wrapper `AtelierContact.tsx` renders `<form class="lg-atelier-form">`; published renders `<form data-lessgo-form>`; shared `FormRenderer.tsx` wraps fields + submit (which carries `data-element-key`/`data-section-id`) in a `<form>`. → Convention = `target.node.closest('form')` non-null.
+- **Social bar:** `AtelierFooter.core.tsx` social list keys are `social_links.<id>.platform` / `.href`. → Convention = key CONTAINS `social`.
+
+### Label rules added (in `getTargetLabel`)
+Section-kind: `header-*` → `Header`; `footer-*` → `Footer`; else `Section`.
+Element-kind (checked before wired Image/Button/CTA/Text):
+1. key contains `logo` → `Logo`
+2. key contains `social` → `Social bar`
+3. section type `header` AND key contains `nav_item` → `Menu`
+4. `node.closest('form')` → `Form`
+Then existing wired path: Image → data-element-type map → cta/button convention → Text.
+
+### Precedence order (plan D7)
+Section placeholders (Header/Footer) > Section. Specific element placeholders (Logo > Social bar > Menu > Form) > Image / Button/CTA conventions > Text. Logo intentionally placed before Image (resolved logo is an `<img>`) and before Menu (logo inside header must not read as Menu). Form placed before Image/Button so a submit button inside a form labels `Form`, not `Button/CTA`.
+
+### Divergences from the plan's convention guesses
+- Nav-item key: plan guessed `nav_item*`; real Atelier keys are `nav_items.<id>.label`. Used substring match `nav_item` (matches both `nav_items` and a hypothetical `nav_item`).
+- Logo key: plan guessed `logo`/`logo_image`/`nav_logo`; real Atelier keys are `logo_image`/`logo_text`. Used substring `logo` (covers all four + `logo_text`).
+- Form: no dedicated form-builder data-attribute needed — every form path (edit preview, published, `FormRenderer`) wraps in a real `<form>`, so `closest('form')` is sufficient and template-agnostic.
+- No per-template hardcoding introduced; all rules are key/section-type/DOM-ancestor conventions.
+
+### Behavior note (documented in module docstring)
+Clicking a placeholder-labelled target keeps TODAY's dispatch (whatever toolbar currently fires) — labels are forward vocabulary only; the toolbarPlan track relabels nothing when the real toolbars land. No dispatch changes in this phase.
+
+### Verification
+- `npx tsc --noEmit` — clean (no output, no errors).
+- `npx vitest run src/utils/hoverTarget.test.ts` — 26 passed (was 15; +11).
+- `npm run test:run` — 2999 passed | 18 skipped (182 files passed | 1 skipped). Green.
+
+## Phase 4 — follow-up (tighten logo/social matching)
+
+**Files changed:**
+- `src/utils/hoverTarget.ts`
+- `src/utils/hoverTarget.test.ts`
+
+**Why:** impl-review found the phase-4 logo/social key matching was too broad for
+the wider template set (feature must be template-agnostic). Real product/service
+element keys were being mislabeled.
+
+**Old match (too broad):**
+- `isLogoKey(key)` = `key.includes('logo')` → wrongly labeled `company_logos`,
+  `logo_urls`, `testimonial_company_logo` (logo-wall / company-logos collections) as `Logo`.
+- `isSocialKey(key)` = `key.includes('social')` → wrongly labeled `social_metric_1..4`
+  and `show_social_proof` (stat metrics / flag) as `Social bar`.
+
+**Real keys confirmed** (`src/modules/sections/defaultPlaceholders.ts`):
+- Logo false-positives: `testimonial_company_logo` (L39), `logo_urls` (L51), `company_logos` (L52).
+- Social false-positives: `social_metric_1..4` (L87-90), `show_social_proof` (L93).
+- True brand-logo keys (Atelier): `logo_image` / `logo_text`; other templates `logo` / `nav_logo`.
+- True social-bar key (Atelier footer): `social_links.<id>.platform|href`.
+
+**New convention (template-agnostic, no per-template hardcoding):**
+- Logo: last dotted segment (or whole key) matches
+  `^(nav_)?logo(_(image|text|icon|svg|src|mark|wordmark))?$` — a brand-logo primitive
+  shape, never a substring-containing collection key.
+- Social bar: key matches `^social_links(\.|$)` — anchored to the `social_links.*`
+  collection path, not any key containing `social`.
+- No label strings changed (D7 verbatim); precedence order unchanged.
+
+**New test cases** (all under "placeholder types, phase 4"):
+- `company_logos` (img) → `Image` not `Logo`.
+- `logo_urls` (img) → `Image` not `Logo`.
+- `testimonial_company_logo` → `Text` not `Logo`.
+- `social_metric_1` → `Text` not `Social bar`.
+- `show_social_proof` → `Text` not `Social bar`.
+- Existing `logo_image`/`logo_text` → `Logo` and `social_links.*` → `Social bar` still pass.
+
+**Deviations:** none. (Logo regex includes a few extra primitive suffixes —
+`icon`/`svg`/`src`/`mark`/`wordmark` — beyond the confirmed `image`/`text`, as a
+conservative forward-compatible allow-list; still excludes all confirmed false positives.)
+
+**Test results:**
+- `npx tsc --noEmit` — clean (exit 0).
+- `npx vitest run src/utils/hoverTarget.test.ts` — 31 passed (was 26; +5).
+- `npm run test:run` — 3004 passed | 18 skipped (182 files passed | 1 skipped). Green.
+
+**Open risks:** none identified. Matching is now convention-anchored; any future
+template using a non-`logo*`/`social_links` naming for true logo/social elements
+would fall through to Text/Image (safe default), not mislabel.
