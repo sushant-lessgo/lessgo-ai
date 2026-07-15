@@ -15,6 +15,7 @@ import { resolveCanonicalURL } from './canonicalUrl';
 import { resolveOgImage } from './buildPageMetadata';
 import { escapeHTML, robotsMetaTag, faviconLinkTag, jsonLdScriptTag, metaPixelSnippet, ga4Snippet } from './headTags';
 import { usesTemplateModule } from '@/types/service';
+import { isSkeletonBacked } from '@/modules/skeletons/ids';
 import type { PageSeo } from '@/types/store/pages';
 import type { LocaleConfig } from '@/types/core/content';
 
@@ -158,6 +159,12 @@ export async function generateStaticHTML(
   // + injected dots). No-op without the hero markup; degrades to the static slide.
   const usesAtelier = options.templateId === 'atelier';
 
+  // Skeleton-backed pages (e.g. atelier2) load work.v1.js (hero slider + fixed
+  // header). Gated ONLY off the pure-data skeletonBackedTemplateIds list — NO
+  // skeleton/registry React import enters the static-export path. Each behavior is
+  // independently guarded, so a page missing a section is a no-op.
+  const usesWorkSkeleton = isSkeletonBacked(options.templateId);
+
   // 5. Build complete HTML document
   const html = buildHTMLDocument({
     bodyHTML,
@@ -184,6 +191,7 @@ export async function generateStaticHTML(
     usesNaayom,
     usesLumen,
     usesAtelier,
+    usesWorkSkeleton,
     locale: options.locale,
     localeConfig: options.localeConfig,
     localeAlternates: options.localeAlternates,
@@ -272,11 +280,12 @@ function buildHTMLDocument(params: {
   usesNaayom: boolean;
   usesLumen: boolean;
   usesAtelier: boolean;
+  usesWorkSkeleton: boolean;
   locale?: string;
   localeConfig?: LocaleConfig;
   localeAlternates?: Array<{ hreflang: string; href: string }>;
 }): string {
-  const { bodyHTML, cssVariables, metadata, analyticsOptIn, removeBranding, hasForms, usesNaayom, usesLumen, usesAtelier } = params;
+  const { bodyHTML, cssVariables, metadata, analyticsOptIn, removeBranding, hasForms, usesNaayom, usesLumen, usesAtelier, usesWorkSkeleton } = params;
 
   // i18n (Phase 5): multi-locale head/script emission. When the project declares
   // only one locale (or none), NONE of this fires and the document is
@@ -404,7 +413,10 @@ function buildHTMLDocument(params: {
   ${usesLumen ? `<script src="${assetBase}/assets/lumen.v1.js" defer></script>` : ''}
 
   <!-- Atelier hero cover slider (autoplay crossfade + arrows + injected dots) -->
-  ${usesAtelier ? `<script src="${assetBase}/assets/slider.v1.js" defer></script>` : ''}${switcherTags}
+  ${usesAtelier ? `<script src="${assetBase}/assets/slider.v1.js" defer></script>` : ''}
+
+  <!-- Work skeleton behaviors (hero slider + fixed header) -->
+  ${usesWorkSkeleton ? `<script src="${assetBase}/assets/work.v1.js" defer></script>` : ''}${switcherTags}
 
   <!-- Phase 4: Analytics beacon (opt-in) -->
   ${

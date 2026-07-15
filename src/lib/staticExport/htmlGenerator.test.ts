@@ -60,3 +60,31 @@ describe('generateStaticHTML — atelier slider.v1.js gating', () => {
     expect(html).not.toContain(SLIDER_TAG);
   });
 });
+
+// Work skeleton (phase 5): work.v1.js (hero slider + fixed header) is injected ONLY
+// for skeleton-backed templateIds (skeletonBackedTemplateIds, e.g. atelier2) and
+// NEVER for classic templates — including the OLD atelier module, which keeps its
+// own slider.v1.js and must not gain work.v1.js.
+const WORK_TAG = '/assets/work.v1.js';
+
+describe('generateStaticHTML — work.v1.js skeleton gating', () => {
+  it('injects work.v1.js for a skeleton-backed atelier2 page', async () => {
+    const html = await render('atelier2', 'service');
+    expect(html).toContain(WORK_TAG);
+  });
+
+  it('does NOT inject work.v1.js for a meridian (product) page', async () => {
+    const html = await render('meridian', 'product');
+    expect(html).not.toContain(WORK_TAG);
+  });
+
+  it('does NOT inject work.v1.js for a hearth (service) page', async () => {
+    const html = await render('hearth', 'service');
+    expect(html).not.toContain(WORK_TAG);
+  });
+
+  it('does NOT inject work.v1.js for the OLD atelier page', async () => {
+    const html = await render('atelier', 'service');
+    expect(html).not.toContain(WORK_TAG);
+  });
+});

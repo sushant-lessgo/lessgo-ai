@@ -270,3 +270,198 @@ The stage `preloadTemplate('atelier2')` + `BLOCK_MOCKS.atelier2` now enumerate a
 - Photography image slots ship EMPTY in the mocks (cores render placeholders); the phase-5 pilot-gate eyeball compares layout/copy parity, not stock art.
 - Only the 6 pilot sections resolve; packages/about + optionals still fall to `WorkPlaceholderBlock` (phases 6/7).
 - Header sticky/fixed (`data-wk-header-mode`) + the 4 non-default arrangements are declared as future work, not yet in the manifest (phase 6) — conformance exercises only the single default per section this phase.
+
+---
+
+## Phase 5 — Published pipeline + editor behaviors (PILOT GATE)
+
+### Files changed
+- `src/lib/staticExport/workBehaviors.js` (new — source asset → `public/assets/work.v1.js`)
+- `scripts/buildAssets.js` (edit — added `{ src: 'workBehaviors.js', out: 'work.v1.js' }`)
+- `src/lib/staticExport/htmlGenerator.ts` (edit — inject `work.v1.js` gated off `isSkeletonBacked`)
+- `src/lib/staticExport/htmlGenerator.test.ts` (edit — work.v1.js gating tests)
+- `src/modules/skeletons/work/blocks/Hero/WorkHeroSlider.tsx` (edit — editor slider effect mirroring the asset)
+- `e2e/parity.spec.ts` (edit — enrolled atelier2 + atelier2 negative control)
+- (NOT edited: `WorkGalleryGrid.tsx` — lightbox deferred, see below)
+
+### Behaviors landed vs deferred
+- **work.v1.js** ships TWO behaviors, boot-once (`window.__workBooted`), each independently guarded:
+  1. **Hero slider** — ported from `atelierSliderBehaviors.js`, re-namespaced `data-wk-*`
+     (`[data-wk-hero-slider]` / `.wk-hero__slide.is-active` / `[data-wk-prev|next]` /
+     `[data-wk-dots]`→injected `.wk-hero__dot` / `data-wk-interval`). Autoplay crossfade,
+     prev/next, injected dots, visibilitychange pause, reduced-motion. Bails `<2` slides.
+  2. **Fixed/sticky header** — opts in via `[data-wk-header][data-wk-header-mode="fixed"]`,
+     toggles `is-scrolled` on scroll. NO-OP on the pilot markup (the mode attribute is
+     emitted by the header wrapper in phase 6, where its editor mirror also lands — the
+     header wrapper is out of this phase's scope, so no editor mirror here; both bands
+     stay static → parity holds).
+- **DEFERRED to phase 6: gallery lightbox.** Removed from the asset (never added). The
+  pilot gallery renders GROUP REFERENCES that navigate to group hrefs (AC L120) — there is
+  no in-page image set to lightbox — so shipping one would have no markup to bind and would
+  desync edit/published. Deferring keeps both bands consistent. `WorkGalleryGrid.tsx` left
+  untouched accordingly. Fixed-header + slider were the must-haves; both landed.
+
+### htmlGenerator gating
+- New `usesWorkSkeleton = isSkeletonBacked(options.templateId)` (import from the pure-data
+  `src/modules/skeletons/ids.ts` — NO skeleton/registry React import into the static-export
+  path). `<script src=".../work.v1.js" defer>` injected only when true. Threaded through the
+  same param plumbing as `usesAtelier`/`usesLumen`. Old `atelier` id keeps `slider.v1.js`
+  and does NOT gain `work.v1.js` (asserted).
+
+### Editor effect mirrors the asset
+- `WorkHeroSlider.tsx` gained a `useEffect` (scoped to a `display:contents` ref wrapper —
+  layout-transparent, no DOM/CSS divergence) that drives the EXACT core-rendered DOM one-for-
+  one with `work.v1.js` (same selectors, same dot injection, same `go/restart/stop`), plus a
+  focus-pause so inline editing isn't interrupted, and a cleanup that resets to slide-0
+  baseline. `≥2-slide` guard: the pilot hero ships a single portrait (no `.wk-hero__slide`
+  set), so BOTH the editor effect and the asset bail → identical static first-slide state.
+  Core/published wrappers untouched (effect is edit-wrapper-only).
+
+### tsc / test / build
+- `npx tsc --noEmit`: clean.
+- `npm run test:run`: 184 files passed / 1 skipped; 3064 tests passed / 18 skipped. The 4 new
+  htmlGenerator `work.v1.js` gating tests pass (injected for atelier2; NOT for
+  meridian/hearth/old-atelier).
+- `npm run build`: green; `public/assets/work.v1.js` emitted (minified, ~1.7 KB).
+
+### e2e parity — REAL BAND DIVERGENCE (BLOCKER, out-of-scope fix)
+- `npm run test:e2e -- parity.spec.ts`: 6/7 tests pass. All THREE negative controls pass,
+  including the new **atelier2/hero break at 81.18%** (harness proven to catch divergence on
+  the work skin). The atelier2 hero content-parity band = static single-slide in both bands
+  as intended.
+- **FAILING: atelier2 `header` band edit↔published = 3.384% (> 3% threshold), DETERMINISTIC
+  across 4 runs (not AA/font noise).** Root cause is a real parity defect in a file OUTSIDE
+  this phase's scope: the work **`Link` edit primitive**
+  (`src/modules/skeletons/work/blocks/editPrimitives.tsx` L183-196) renders the
+  `LinkTargetPopover` ("Set link target" trigger button) INLINE, wrapped in a `wk-link-edit`
+  span with `display:inline-flex; gap:6px` — IN LAYOUT FLOW. In the thin, dense header band
+  the 3 nav-link popover buttons + gaps inflate the edit band vs published past threshold.
+  Tall bands (hero) dilute the same chrome below threshold, so ONLY the header trips it.
+  Other templates keep this affordance out of flow (absolute/overlay). Fix belongs in the
+  phase-2 `editPrimitives.tsx` (make the popover trigger position:absolute / overlay so it
+  leaves no in-flow footprint), NOT in any phase-5 file. NOT fixed here (out of scope; the
+  test/threshold/mock are intentionally left honest rather than gamed).
+- The suite aborts at the first failing band (header #0), so the remaining atelier2 bands
+  (hero/work/proof/contact/footer) are unverified by e2e THIS run; their content parity is
+  already green via the jsdom `coreParity` suite (phase 4, passing in test:run).
+
+### Deviations
+- Gallery lightbox deferred to phase 6 (plan-authorized) → `WorkGalleryGrid.tsx` untouched;
+  lightbox kept out of `work.v1.js` for edit/published consistency.
+- Fixed-header behavior shipped in the asset but inert on pilot markup (mode attribute +
+  editor mirror land phase 6 with the header wrapper, which is out of this phase's scope).
+
+### Open risks / hand-off
+- **PILOT GATE cannot pass clean until the header parity defect is fixed.** It is a one-line-
+  ish CSS fix in the phase-2 `editPrimitives.tsx` Link primitive (take the popover trigger
+  out of flow), OUTSIDE phase 5's Files-touched — needs an orchestrator-approved scope add
+  (phase-2 file) or a dedicated small phase. Everything else in phase 5 is green.
+
+---
+
+### Phase 5 close-out — parity defect FIXED (scoped follow-up, orchestrator-approved)
+
+**Files changed (this follow-up):**
+- `src/modules/skeletons/work/blocks/editPrimitives.tsx` — Link primitive + Img primitive +
+  `EDIT_AFFORDANCE_STYLES`. (Only this file touched.)
+
+**Exact DOM/CSS changes:**
+1. **Link primitive (root cause of the header 3.384% trip).** The popover "Set link target"
+   trigger no longer sits INLINE, IN LAYOUT FLOW. Old DOM was an extra wrapper
+   `<span class="wk-link-edit" style="display:inline-flex;gap:6px">` holding the link text
+   span PLUS the trigger button → the 3 dense nav-link triggers+gaps widened the edit band vs
+   the published bare anchor. New DOM: a single wrapper `<span class="wk-link-edit {className}">`
+   that carries the link `className` directly (matching published's one anchor box) with the
+   trigger as an ABSOLUTE, zero-in-flow-footprint overlay (`triggerClassName="wk-link-edit__btn"`).
+   New CSS: `.wk-link-edit{position:relative}` (no size change) and
+   `.wk-link-edit__btn{position:absolute;top:50%;left:100%;transform:translateY(-50%);opacity:0;…}`
+   revealed on `.wk-link-edit:hover`/`:focus-visible` → invisible in a static parity screenshot,
+   still clickable in the editor.
+2. **Img primitive (unmasked hero defect — see below).** Removed `style={{position:'relative'}}`
+   from the edit Img wrapper `<div className={className}>`. That editor-only positioning context
+   made the wrapper a containing block, so the hero's full-bleed placeholder
+   `.wk-hero__ph{position:absolute;inset:0}` collapsed into the 0-height wrapper (dark hero base
+   showed) instead of escaping to `.wk-hero__media` and filling the band as it does published.
+   Wrapper is now STATIC like published; the `.wk-img-edit` affordance (still `position:absolute`)
+   anchors to the block's nearest positioned ancestor (media/card box) — same place the escaped
+   placeholder lives. Gallery/footer placeholders are in-flow (`width/height:100%` of an
+   `aspect-ratio` box), so they are unaffected by dropping the wrapper's position.
+
+**Why Img was needed:** the parity spec's per-band loop aborts on the FIRST failing assertion.
+The header failing at 3.384% (band #0) masked a pre-existing hero divergence (band #1). Fixing
+the header UNMASKED the hero at **77.623%** — verified pre-existing (reverting the Link fix put
+the header failure back and the loop again aborted before hero; the hero defect was always
+there). Root cause = the Img `position:relative` above. Same principle as the Link defect
+(editor-only chrome/positioning altering published layout), same file → in the phase's
+"fix Logo/Nav/Txt/Img if the identical problem exists" allowance. Logo/Nav/Txt did NOT need
+changes (Nav routes through the fixed Link; Logo's Img routes through the fixed Img; Txt has no
+in-flow chrome).
+
+**Band diffs — before → after (atelier2, official `parity.spec.ts`, deterministic across 3 runs):**
+- header: **3.384% → 1.250%** (fixed; well under 3%)
+- hero: **77.623% (unmasked) → 2.951%** (under 3%)
+- work 0.285% · proof 1.860% · contact 1.368% · footer 0.159% — all green.
+- Negative controls STILL BITE: meridian break 6.409%, atelier break 6.255%,
+  **atelier2 `?parityBreak=1` break 45.964%** (all > 3%). meridian/hearth/atelier parity bands
+  all unchanged and green. The 3% threshold, mocks, and spec were NOT touched.
+
+**Verification:** `npx tsc --noEmit` clean · `npm run test:run` 3064 passed / 18 skipped (incl.
+coreParity/renderParity/publishedClientBoundary) · `npm run build` exit 0 · `npm run test:e2e --
+parity.spec.ts` 7/7 passed.
+
+**Deviations:**
+- atelier2/hero settles at a DETERMINISTIC **2.951%** — a genuine pass but only ~0.05% under the
+  3% ceiling. The dominant residual is NOT the fixed Link/Img chrome; it is the in-flow
+  `+ Social` `List` add-button (`.wk-list-add`), which is taller than the social-link row and
+  makes the bottom-aligned hero overlay ~10px taller in edit → shifts the large `.wk-hero__name`
+  up ~10px vs published. `List` is out of this fix's named Link/Img scope AND drives many
+  currently-passing bands (header nav, gallery grid, footer/hero socials, packages, proof), so
+  per the phase's "don't churn primitives that already parity-pass" rule I left `List` untouched
+  rather than risk regressions for ~0.05% of headroom. The pass is deterministic (mock content),
+  so no run-to-run flake was observed.
+
+**Open risk / recommendation:** the 2.951% hero margin is thin. If the pilot gate wants comfortable
+headroom, the clean follow-up is to take `.wk-list-add` out of layout flow (absolute + hover-gated,
+mirroring the already-out-of-flow `.wk-list-x`) so editor add-buttons contribute zero in-flow
+height — a `List`-primitive change with cross-band blast radius that should be its own scoped pass
+and re-verified against ALL work bands (header nav especially). Not done here.
+
+### Phase 5 parity hardening — `.wk-list-add` out of flow (scoped follow-up, orchestrator-approved)
+
+**Files changed (this follow-up):**
+- `src/modules/skeletons/work/blocks/editPrimitives.tsx` — `List` primitive + `EDIT_AFFORDANCE_STYLES`. (Only this file touched.)
+
+This executes the recommendation logged just above — the LAST known in-flow-chrome instance.
+
+**Exact DOM/CSS changes:**
+- `List` container `<div className={className}>` gained `style={{ position:'relative' }}` — a
+  containing block with NO change to the box's own size/flow (no in-flow item relies on escaping
+  to it), same technique as the Link wrapper fix.
+- `.wk-list-add` ("+ Add"/"+ Social") moved OUT of layout flow: was an in-flow block button
+  (`padding:10px 16px`) sitting after the items → taller than the social-link row → pushed the
+  bottom-aligned hero overlay ~10px up in edit vs published. Now `position:absolute;
+  bottom:-14px; left:50%; transform:translateX(-50%); opacity:0` → zero in-flow footprint,
+  revealed on `*:hover > .wk-list-add` / `:hover` / `:focus-visible` (identical gating to
+  `.wk-list-x`). Still clickable — add-item affordance preserved. Given a paper background so it
+  reads over content when revealed.
+
+**Band diffs — before → after (atelier2, official `parity.spec.ts`, deterministic across 3 runs):**
+- hero: **2.951% → 0.015%** (razor-thin margin eliminated; now ~200× under the 3% ceiling).
+- Other atelier2 bands (unchanged, all green): header 1.135% · work 0.423% · proof 1.810% ·
+  contact 0.000% · footer 0.545%. All 6 bands green with comfortable headroom.
+- meridian/hearth/atelier suites all unchanged and green (best/worst meridian footer 1.297%,
+  atelier header 1.717%).
+- Negative controls STILL BITE: meridian break 6.409%, atelier break 6.209%, atelier2
+  `?parityBreak=1` break 45.606% (all > 3%). Threshold, mocks, spec NOT touched.
+
+**Verification:** `npx tsc --noEmit` clean · `npm run test:run` 3064 passed / 18 skipped (incl.
+coreParity/renderParity/publishedClientBoundary — unaffected) · `npm run build` exit 0 ·
+`npm run test:e2e -- parity.spec.ts` 7/7 passed, run 3× (identical band %s each run — deterministic,
+no flake).
+
+**Deviations:** none. Only the named `.wk-list-add`/`List` container changed; no other primitive
+churned (Txt/Img/Link/Logo/Nav untouched — Nav routes through this same fixed `List`).
+
+**Open risk:** none known. No residual in-flow editor chrome remains in the work primitives —
+`.wk-img-edit`, `.wk-list-x`, `.wk-link-edit__btn`, and now `.wk-list-add` are all absolute,
+zero-footprint, hover/focus-gated. Every atelier2 band clears 3% with margin.

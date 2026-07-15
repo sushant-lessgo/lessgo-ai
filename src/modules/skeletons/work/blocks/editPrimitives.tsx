@@ -161,10 +161,17 @@ const Img: React.FC<WorkImgProps> = ({ elementKey, src, alt, className, imgClass
     finally { setUploading(false); }
   };
   const clear = () => saveField(ctx, elementKey, '');
+  // Parity: the wrapper must stay a STATIC (non-positioned) box like the published
+  // `<div class={className}>`. If it were `position:relative` it becomes a
+  // containing block, and a CONTENT placeholder using `position:absolute; inset:0`
+  // (e.g. the hero's full-bleed `.wk-hero__ph`) collapses to this 0-height wrapper
+  // instead of escaping to the media area as it does when published — an
+  // editor-only positioning context must not alter published layout. The upload
+  // affordance is `position:absolute` and anchors to the block's own nearest
+  // positioned ancestor (the media/card box), same as the escaped placeholder.
   return (
     <div
       className={className}
-      style={{ position: 'relative' }}
       data-section-id={ctx.sectionId}
       data-element-key={elementKey}
     >
@@ -182,13 +189,24 @@ const Img: React.FC<WorkImgProps> = ({ elementKey, src, alt, className, imgClass
 
 const Link: React.FC<WorkLinkProps> = ({ hrefKey, href, className, ariaLabel, children }) => {
   const ctx = useCtx();
+  // Parity: the edit box must occupy the SAME layout box as the published anchor
+  // (`<a class={linkClassName}>text</a>`). So `className` lives on the single
+  // wrapper (no extra in-flow span/gap), and the "Set link target" trigger is an
+  // ABSOLUTE overlay (zero in-flow width/height, hidden until hover) — editor-only
+  // chrome must never occupy layout flow.
   return (
-    <span className="wk-link-edit" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <span className={className} aria-label={ariaLabel} data-section-id={ctx.sectionId} data-element-key={hrefKey}>{children}</span>
+    <span
+      className={`wk-link-edit${className ? ` ${className}` : ''}`}
+      aria-label={ariaLabel}
+      data-section-id={ctx.sectionId}
+      data-element-key={hrefKey}
+    >
+      {children}
       <LinkTargetPopover
         value={href || ''}
         sectionOptions={ctx.sectionOptions}
         pageOptions={ctx.pageOptions}
+        triggerClassName="wk-link-edit__btn"
         onChange={(link) => saveField(ctx, hrefKey, resolveDestination(link.dest))}
       />
     </span>
@@ -205,8 +223,14 @@ const List: React.FC<WorkListProps> = ({ collectionKey, items, render, makeItem,
     if (items.length <= min) return;
     ctx.updateCollection(collectionKey, items.filter((_, i) => i !== idx));
   };
+  // Parity: the list box must match the published `<div class={className}>` box.
+  // `position:relative` here creates a containing block WITHOUT changing the box's
+  // own size/flow (no in-flow items rely on escaping to it). The "+ Add" control is
+  // then an ABSOLUTE overlay (zero in-flow footprint, hidden until hover/focus) so
+  // it can't shift a bottom-aligned neighbour — editor-only chrome off layout flow,
+  // same as `.wk-list-x` / `.wk-link-edit__btn`.
   return (
-    <div className={className}>
+    <div className={className} style={{ position: 'relative' }}>
       {items.map((item, i) => (
         <div key={item.id ?? i} className={itemClassName} style={{ position: 'relative' }}>
           {render(item, i)}
@@ -316,6 +340,16 @@ export const EDIT_AFFORDANCE_STYLES = `
 .wk-img-edit__x{ font-family:var(--wk-ff-body); font-size:11px; color:var(--wk-paper); background:var(--wk-accent); border:none; border-radius:var(--wk-r); padding:5px 8px; cursor:pointer; }
 .wk-list-x{ position:absolute; top:-8px; right:-8px; z-index:4; width:20px; height:20px; line-height:1; font-size:14px; color:var(--wk-paper); background:var(--wk-accent); border:none; border-radius:999px; cursor:pointer; opacity:0; transition:opacity .15s; }
 .wk-list-x:hover, *:hover > .wk-list-x{ opacity:1; }
-.wk-list-add{ font-family:var(--wk-ff-body); font-size:12px; letter-spacing:.06em; color:var(--wk-accent); background:transparent; border:1px dashed var(--wk-line); border-radius:var(--wk-r); padding:10px 16px; cursor:pointer; }
-.wk-list-add:hover{ border-color:var(--wk-accent); }
+/* Add control floats OUT of layout flow (absolute, zero in-flow footprint) so the
+   edit list box matches the published list box (which has no add button); hidden
+   until the list is hovered or the control is focused, same gating as .wk-list-x. */
+.wk-list-add{ position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); z-index:4; font-family:var(--wk-ff-body); font-size:12px; letter-spacing:.06em; color:var(--wk-accent); background:var(--wk-paper); border:1px dashed var(--wk-line); border-radius:var(--wk-r); padding:6px 14px; cursor:pointer; opacity:0; transition:opacity .15s; }
+.wk-list-add:hover, *:hover > .wk-list-add, .wk-list-add:focus-visible{ opacity:1; border-color:var(--wk-accent); }
+/* Link edit affordance: positioning context on the wrapper (no size change), the
+   "Set link target" trigger floats OUT of layout flow (absolute) so the edit box
+   matches the published anchor; hidden until hover/focus so it never shows in a
+   static parity screenshot. */
+.wk-link-edit{ position:relative; }
+.wk-link-edit__btn{ position:absolute; top:50%; left:100%; transform:translateY(-50%); margin-left:4px; z-index:5; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; opacity:0; transition:opacity .15s; background:transparent; border:none; cursor:pointer; color:var(--wk-accent); }
+.wk-link-edit:hover .wk-link-edit__btn, .wk-link-edit__btn:focus-visible{ opacity:1; }
 `;

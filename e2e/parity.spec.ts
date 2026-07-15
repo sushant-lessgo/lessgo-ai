@@ -15,7 +15,7 @@ import { PNG } from 'pngjs';
 // control, which injects a small style break into the edit band only.
 
 // Templates enrolled in the parity harness (their mocks exist in blockMocks/).
-const TEMPLATES = ['meridian', 'hearth', 'atelier'] as const;
+const TEMPLATES = ['meridian', 'hearth', 'atelier', 'atelier2'] as const;
 
 // Fraction of compared pixels allowed to differ. Edit-preview and published render
 // the same HTML/CSS, so real parity sits far below this; the seeded break lands
@@ -137,6 +137,30 @@ test('atelier parityBreak negative control: seeded divergence exceeds threshold'
   // scale(1.03) on the edit band shifts every content edge well past the threshold.
   const ratio = await bandDiff(page, 'hero');
   console.log(`PARITY BREAK atelier/hero: ${(ratio * 100).toFixed(3)}%`);
+  expect(
+    ratio,
+    `seeded break not caught: diff ${(ratio * 100).toFixed(2)}% did not exceed ${(PASS_THRESHOLD * 100).toFixed(0)}%`,
+  ).toBeGreaterThan(PASS_THRESHOLD);
+});
+
+// Per-template proof that the harness detects a divergence on the WORK SKELETON
+// skin (atelier2) too — the permanent negative control for the phase-5 enrollment.
+//
+// Work hero slider note (phase 5): the atelier2 hero mock ships NO `slides` array,
+// so WorkHeroSlider.core renders ONE static portrait. Both the editor `.tsx` effect
+// and the published `work.v1.js` asset bail on `slides.length < 2`, so NEITHER side
+// injects `.wk-hero__dot` into the empty `[data-wk-dots]`. Editor-static and
+// published-static compare the SAME intended final state — the exact state a real
+// single-slide hero ships live. The runtime slider JS only matters on a real
+// multi-slide published page.
+test('atelier2 parityBreak negative control: seeded divergence exceeds threshold', async ({ page }) => {
+  await page.goto('/dev/blocks/atelier2?parityBreak=1', { waitUntil: 'load' });
+  await settle(page);
+
+  // hero is the work skeleton's largest content band — the seeded scale on the edit
+  // band shifts every content edge well past the threshold.
+  const ratio = await bandDiff(page, 'hero');
+  console.log(`PARITY BREAK atelier2/hero: ${(ratio * 100).toFixed(3)}%`);
   expect(
     ratio,
     `seeded break not caught: diff ${(ratio * 100).toFixed(2)}% did not exceed ${(PASS_THRESHOLD * 100).toFixed(0)}%`,

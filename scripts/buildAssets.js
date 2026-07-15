@@ -56,6 +56,7 @@ const files = [
   { src: 'lumenBehaviors.js', out: 'lumen.v1.js' },   // Lumen: lightbox + reveal + EN/NL toggle/geo
   { src: 'atelierSliderBehaviors.js', out: 'slider.v1.js' }, // Atelier: hero cover slider (autoplay crossfade + arrows + injected dots). Immutable v1 — behavior change ⇒ slider.v2.js
   { src: 'switcherBehaviors.js', out: 'switcher.v1.js' }, // i18n: shared template-agnostic locale switcher pill + geo redirect
+  { src: 'workBehaviors.js', out: 'work.v1.js' }, // Work skeleton: hero slider + fixed header (lightbox deferred to phase 6). Immutable v1 — behavior change ⇒ work.v2.js
 ];
 
 // Static CSS copied verbatim (no minify) into public/assets for published pages.
