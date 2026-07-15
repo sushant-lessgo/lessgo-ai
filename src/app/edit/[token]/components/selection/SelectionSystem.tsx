@@ -68,9 +68,9 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
     if (mode !== 'edit') return;
 
     // Add role and aria attributes to sections
-    const sections = document.querySelectorAll('[data-section-id]');
+    const sections = document.querySelectorAll('[data-section-root]');
     sections.forEach((section) => {
-      const sectionId = section.getAttribute('data-section-id');
+      const sectionId = section.getAttribute('data-section-root');
       if (!sectionId) return;
 
       section.setAttribute('role', 'button');
@@ -165,7 +165,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
           element.focus();
         }
       } else if (selectedSection) {
-        const section = document.querySelector(`[data-section-id="${selectedSection}"]`);
+        const section = document.querySelector(`[data-section-root="${selectedSection}"]`);
         if (section instanceof HTMLElement) {
           section.focus();
         }

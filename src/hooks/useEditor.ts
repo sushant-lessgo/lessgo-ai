@@ -354,12 +354,12 @@ export function useEditor() {
       case 'Tab':
         // Tab navigation between sections
         event.preventDefault();
-        const allSections = Array.from(document.querySelectorAll('[data-section-id]'));
+        const allSections = Array.from(document.querySelectorAll('[data-section-root]'));
         if (allSections.length === 0) return;
 
         const currentIndex = selectedSection
           ? allSections.findIndex(
-              (el) => el.getAttribute('data-section-id') === selectedSection
+              (el) => el.getAttribute('data-section-root') === selectedSection
             )
           : -1;
 

@@ -123,6 +123,7 @@ export function EditablePageRenderer({
           ${mode !== 'preview' ? 'cursor-pointer' : ''}
         `}
         data-section-id={sectionId}
+        {...(mode !== 'preview' ? { 'data-section-root': sectionId } : {})}
         data-layout={layout}
         data-background-type={backgroundType}
         {...(surface ? { 'data-surface': surface } : {})}
