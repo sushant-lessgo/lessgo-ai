@@ -65,21 +65,36 @@ execution order (i18n-phase-1 → template-factory → atelier port) is reshaped
 skeleton IS the factory's foundation; i18n phase 1 still required (Kundius NL/EN =
 workEndtoEnd slot 8).
 
-Build order (each = own /discuss → /feature; gates between):
-- **A. Contract freeze** — work-core sections/elements + Brief fields (8 slots) + List-1
-  entries (photographer/designer/writer/agency)
-- **B. newGeneration Gate 0 parity QA** — work is inherently multi-page; unvalidated
-  foundation is not inheritable
-- **C. Work copy engine** — granth seed → full (strategy, fan-out, voice); parallel-OK
-  with D after A+B (copy firewall)
-- **D. Work skeleton + atelier skin** — + gallery capability + image ingestion + work
-  library (the generic CMS board — parts 2+3 exist in `src/modules/collections/`)
-- **E. Onboarding work path** — slot machinery, understanding rail, visual site plan,
-  during-wait design taps
-- **F. Editor work primitives** — portfolio board + page dropdown (beta-essential cut only)
+Build order (each = own /discuss → /feature; gates between) — **status 2026-07-15:**
+- **A. Contract freeze** — ✅ DONE + MERGED (`work-contract` spec; modules
+  `src/modules/engines/{workSections,workPages,workSlots,workVocabulary}.ts` +
+  `src/lib/schemas/workFacts.schema.ts`; founder signed off sections + vocab)
+- **B. newGeneration Gate 0 parity QA** — OPEN, prerequisite for C's multipage fan-out
+- **C. Work copy engine** — 📋 SPECCED `docs/task/work-copy-engine.spec.md` (standard):
+  lean copy · slim strategy (assembly=code, ONE AI call: angles/voice) · primary-language
+  only (Kundius NL twin = concierge) · two-tier story (ship-grade auto / Sugarman-grade
+  via post-reveal 3-question interview) · Kundius-golden gate
+- **D1. Work skeleton + Atelier skin** — 📋 SPECCED `docs/task/work-skeleton.spec.md`
+  (full): boundary = "new HTML → skeleton; values/picks → template"; ONE work skeleton
+  (5 header arrangements = options inside it; 2nd work skeleton expected NEVER);
+  derive-from-Atelier LINTED against Kontur+Pulse before block freeze; workhorse
+  inventory (header 5+sticky, hero 3+slider, video-bg=slot, gallery 2-3, proof 2-3);
+  harvest old atelier module, delete after Kundius sign-off; serves
+  `docs/tracks/toolbarPlan.md` (Design ▾ user style-token landing surface built NOW,
+  header shell-compliant from birth = toolbarPlan's pilot vehicle)
+- **D2. Work library board + ingestion** — NEXT TO DISCUSS (generic CMS board part 1;
+  parts 2+3 exist in `src/modules/collections/`; group shape frozen in A)
+- **E. Onboarding work path** — to discuss after D2 (heavily pre-settled in workEndtoEnd)
+- **F. ~~Editor work primitives~~ → dissolved into toolbarPlan Beta** (own track,
+  engine-agnostic); D1 ships the surfaces, toolbarPlan ships the toolbars
 - **Gate:** Kundius sign-off + **Kontur 1-day second-skin spike** (the skeleton
   economics proof). Public look trio at launch: Atelier / Kontur / Pulse (Lumen public
   bench — rejected by Kundius, no longer exclusive).
+
+**Restart pointer (context cleared 2026-07-15):** vision + all product rulings =
+`docs/tracks/workEndtoEnd.md` · specs = `docs/task/work-{contract,copy-engine,skeleton}.spec.md` ·
+toolbar standard = `docs/tracks/toolbarPlan.md` · bucket-1 trust-breaker fixes merged
+to main (5b4da96f). Resume with: /discuss D2 (work library board + ingestion), then E.
 
 ## Place engine (T5 — ruled)
 
