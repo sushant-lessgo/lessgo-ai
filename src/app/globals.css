@@ -16,7 +16,8 @@ body {
 [data-element-key]:not([contenteditable="true"][data-editing="true"]) {
   cursor: pointer;
   user-select: none;
-  transition: all 0.2s ease;
+  /* Only background transitions — no outline transition (flicker fix, phase 2) */
+  transition: background-color 0.2s ease;
 }
 
 /* Hover state for elements - only when NOT in edit mode */
@@ -102,9 +103,9 @@ body {
   background-color: rgba(16, 185, 129, 0.05);
 }
 
-/* Smooth transitions */
+/* Smooth transitions (no outline transition — flicker fix, phase 2) */
 [data-element-key] {
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, outline 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* Edit mode entrance animation */

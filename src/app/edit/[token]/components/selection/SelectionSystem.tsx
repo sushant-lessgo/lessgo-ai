@@ -54,12 +54,17 @@ async function persistDismissedFlags(tokenId: string): Promise<void> {
 
 export function SelectionSystem({ children }: SelectionSystemProps) {
   // Selection state now comes from unified editor system
-  const { mode, selectedSection, selectedElement, multiSelection } = useEditStore(
+  const { mode, selectedSection, selectedElement, multiSelection, sections } = useEditStore(
     useShallow((s) => ({
       mode: s.mode,
       selectedSection: s.selectedSection,
       selectedElement: s.selectedElement,
       multiSelection: s.multiSelection,
+      // Subscribed so the imperative sweep below re-runs after a section
+      // reorder/add/remove — otherwise a remounted SELECTED node would lose its
+      // .selected-section class until the next selection change (single-writer
+      // model, phase 2). The array reference changes on any structural edit.
+      sections: s.sections,
     })),
   );
 
@@ -114,7 +119,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
         element.classList.remove('selected-element');
       }
     });
-  }, [mode, selectedSection, selectedElement, multiSelection]);
+  }, [mode, selectedSection, selectedElement, multiSelection, sections]);
 
   // Apply inline "verify AI-written" markers — Feature 2, edit canvas ONLY.
   // Only the `ai_generated_needs_review` category gets a marker now. The former stock-image /
@@ -346,38 +351,34 @@ function SelectionStyles() {
         background: rgba(16, 185, 129, 0.05) !important;
       }
       
-      /* Hover Effects */
-      [data-section-id]:hover:not(.selected-section):not(.multi-selected) {
+      /* Hover Effects (interim — replaced by HoverOverlay in phase 3).
+         Scoped to the canonical section-root and suppressed when the pointer is
+         over a child element (element wins, mirroring click dispatch). No
+         transition so a resting pointer never fades in/out (flicker fix). */
+      [data-section-root]:hover:not(:has([data-element-key]:hover)):not(.selected-section):not(.multi-selected) {
         outline: 1px solid #d1d5db;
         outline-offset: 2px;
-        transition: outline 0.15s ease-in-out;
       }
-      
+
       [data-element-key]:hover:not(.selected-element) {
         outline: 1px solid #e5e7eb;
         outline-offset: 1px;
         background: rgba(0, 0, 0, 0.02);
-        transition: all 0.15s ease-in-out;
       }
-      
+
       /* Focus Styles */
       [data-section-id]:focus-visible {
         outline: 2px solid #f59e0b !important;
         outline-offset: 2px;
         box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
       }
-      
+
       [data-element-key]:focus-visible {
         outline: 2px solid #f59e0b !important;
         outline-offset: 1px;
         box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
       }
-      
-      /* Animation for selection changes */
-      [data-section-id], [data-element-key] {
-        transition: outline 0.2s ease-in-out, background 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-      }
-      
+
       /* Selection badges */
       .selection-badge {
         position: absolute;

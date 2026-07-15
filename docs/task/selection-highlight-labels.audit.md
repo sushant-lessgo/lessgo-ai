@@ -34,3 +34,48 @@
 
 ### Open risks
 - None functional. The single pre-existing `page.tsx` tsc error is out of scope for this phase.
+
+## Phase 2 — Single-writer highlight consolidation (fixes flicker)
+
+**Files changed:**
+- `src/app/edit/[token]/components/selection/ElementDetector.tsx`
+- `src/app/edit/[token]/components/layout/MainContent.tsx`
+- `src/app/edit/[token]/components/ui/EditablePageRenderer.tsx`
+- `src/app/edit/[token]/components/selection/SelectionSystem.tsx`
+- `src/app/globals.css`
+- `src/utils/selectionPriority.ts` (permitted comment-only fix)
+
+### Per-file changes
+
+**ElementDetector.tsx**: deleted the selection-indicator effect (former L27-50: `.element-selected`/`.section-selected` writers), `handleNestedElementClick` + its `onClick` wiring (former L53-89, 111: purely visual `.element-hover`/`data-selection-depth`), the mode-change cleanup effect for those classes (former L91-104), and the entire `ElementDetectorStyles` component + its render (former L115, L120-157 — every rule referenced the now-deleted classes, so nothing remained). Removed now-unused imports `useShallow` and `isSectionVisuallySelected`. Kept the wrapper `<div>` with `ref` + `data-section-id` + className (other code `closest()`s through it) — now `ElementDetector` (~L14-30) is a thin structural wrapper. `ElementBoundaryVisualizer` (debug tool) untouched; its use of `useEffect`/`useState`/`useCallback` keeps those imports live, and `useRef` stays for `sectionRef`.
+
+**MainContent.tsx**: removed the selected-section ring/border from both wrappers. Outer wrapper (~L546-551): dropped `isSectionVisuallySelected(...) && "border-primary/40 shadow-md bg-primary/5"`, kept the non-selection hover chrome. Inner section wrapper (~L573-577): collapsed the selection ternary to the plain `hover:ring-1 hover:ring-gray-300` hover class. `isSectionVisuallySelected` import retained — still feeds `aria-selected` (~L586) and the `isSelected` prop passed to `EditablePageRenderer` (~L594).
+
+**EditablePageRenderer.tsx**: removed `${isSelected ? 'ring-2 ring-blue-500' : ''}` from the root div className (~L120-123). SelectionSystem's `.selected-section` now lands on this same node (it carries `data-section-root`) as the single selected visual. The `isSelected` prop/interface field is retained (still passed by MainContent; harmlessly unused in the body — no `noUnusedLocals` in tsconfig). Phase-1 `data-section-root` stamping intact.
+
+**SelectionSystem.tsx** `SelectionStyles` (~L349-373): rescoped the section hover rule `[data-section-id]:hover:not(.selected-section):not(.multi-selected)` → `[data-section-root]:hover:not(:has([data-element-key]:hover)):not(.selected-section):not(.multi-selected)` (element wins, mirrors dispatch) and removed its `transition: outline` line. Dropped `transition: all` from `[data-element-key]:hover`. Removed the blanket `[data-section-id], [data-element-key] { transition: … }` rule (former L376-379). Kept `.selected-section`/`.selected-element`/`.multi-selected`/focus/badge styles. Also applied the remount mitigation below (selector + sweep-effect dep).
+
+**globals.css**: `[data-element-key]:not(...)` (~L16-20) `transition: all 0.2s ease` → `transition: background-color 0.2s ease`. `[data-element-key]` smooth-transition rule (~L106-109) dropped `outline` from the list (now `background-color, box-shadow`). Cursor/contentEditable rules untouched.
+
+**selectionPriority.ts** (comment-only, ~L86-93): updated the `isSectionVisuallySelected` docstring — the stale reference to the "three redundant highlight systems" incl. ElementDetector's `.section-selected` writer (deleted this phase) now describes the single-writer model (SelectionSystem sweep = selected classes; hover = CSS interim → phase-3 HoverOverlay). No logic changed.
+
+### Remount-staleness caution — handled IN-SCOPE (mitigated)
+Real regression risk: pre-phase-2, remount of a selected section re-applied its ring via MainContent's React className AND ElementDetector's per-section effect (deps incl. `sectionId`, runs on that component's remount). Deleting both leaves only SelectionSystem's document-level sweep, whose deps were selection-state only (`[mode, selectedSection, selectedElement, multiSelection]`) — so a reorder/add that remounts a still-selected node without changing `selectedSection` would drop `.selected-section` until the next selection change.
+
+Mitigation (clean, low-risk, fully within the Files-touched `SelectionSystem.tsx`): subscribed the component to `s.sections` via the existing `useShallow` selector and added `sections` to the sweep effect's dep array. The `sections` array reference changes on any structural edit (reorder/add/remove) under Zustand+Immer, so the sweep re-runs and re-stamps `.selected-section`/`.selected-element`/aria after remount. No new render churn on unrelated edits (shallow-guarded). Gate-A manual check still recommended: drag/reorder a selected section, confirm the outline persists.
+
+### Verification
+- `npx tsc --noEmit`:
+  ```
+  src/app/page.tsx(6,26): error TS2307: Cannot find module '@/assets/images/founder.jpg' or its corresponding type declarations.
+  ```
+  Only the known pre-existing unrelated error; no new errors.
+- `npm run test:run`:
+  ```
+   Test Files  181 passed | 1 skipped (182)
+        Tests  2973 passed | 18 skipped (2991)
+  ```
+
+### Open risks
+- Interim CSS hover is scoped via `:has()` — well-supported in current evergreen browsers; it is replaced by the JS `HoverOverlay` in phase 3, so no long-term dependency.
+- Remount staleness for the AI-verify marker sweep (separate effect, same document-level pattern) is pre-existing and untouched — out of this phase's scope.

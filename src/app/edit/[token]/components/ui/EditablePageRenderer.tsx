@@ -119,7 +119,6 @@ export function EditablePageRenderer({
       <div
         className={`
           relative transition-all duration-200
-          ${isSelected ? 'ring-2 ring-blue-500' : ''}
           ${mode !== 'preview' ? 'cursor-pointer' : ''}
         `}
         data-section-id={sectionId}

@@ -14,7 +14,7 @@ Redesign the editor canvas selection affordance: hover shows one stable outline 
 ## Progress log
 
 - phase 1 canonical section-root + rescoped section queries: done (review loops 1, ship)
-- phase 2 single-writer highlight consolidation (flicker fix): pending
+- phase 2 single-writer highlight consolidation (flicker fix): done (review loops 1, ship)
 - gate A bug-fix sign-off on Atelier: pending
 - phase 3 shared target resolver + hover overlay + labels (wired types): pending
 - phase 4 placeholder-type labels (Logo/Menu/Header/Form/Footer/Social bar): pending
