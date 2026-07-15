@@ -33,7 +33,7 @@ import React, { useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { blockManifests, type BlockDeclaration, type SectionBlockSet } from '@/modules/templates/blockManifest';
+import { blockManifests, builtVariantCount, type BlockDeclaration, type SectionBlockSet } from '@/modules/templates/blockManifest';
 import { isBlockEligible, isCopyCompatible, type AssetFacts } from '@/modules/generation/blockEligibility';
 import { clampSectionCards, sectionCardCount, type ClampableSection } from './clampSectionCards';
 
@@ -55,13 +55,15 @@ export function getVariantSetForLayout(
   return null;
 }
 
-/** True when the section owning `layoutName` declares MORE THAN ONE variant (swap-eligible). */
+/** True when the section owning `layoutName` declares MORE THAN ONE BUILT variant (swap-eligible). */
 export function hasMultipleVariants(
   templateId: string | null | undefined,
   layoutName: string | null | undefined
 ): boolean {
   const found = getVariantSetForLayout(templateId, layoutName);
-  return !!found && found.set.variants.length > 1;
+  // Count BUILT (non-slot) variants only — a declared-but-not-built SLOT must
+  // never inflate the count and trigger a dead swap UI (work-skeleton phase 1).
+  return !!found && builtVariantCount(found.set) > 1;
 }
 
 /**
@@ -74,13 +76,17 @@ export function hasMultipleVariants(
  *   • copy-compatible with the section's LIVE content (`isCopyCompatible` —
  *     would not silently drop a present scalar nor render empty).
  */
-function isVariantOffered(
+export function isVariantOffered(
   variant: BlockDeclaration,
   currentLayout: string | null | undefined,
   currentShape: string | undefined,
   assetFacts: AssetFacts,
   elements: Record<string, unknown>
 ): boolean {
+  // SLOT (work-skeleton phase 1) — a declared-but-not-built capability is NEVER
+  // offered in the picker (checked before the escape hatch: a slot is never a
+  // stored layout, so it can never be the current variant either).
+  if (variant.slot) return false;
   if (variant.layoutName === currentLayout) return true; // escape hatch
   if (!isBlockEligible(variant, { assetFacts })) return false;
   if ((variant.copyShape ?? undefined) !== currentShape) return false;

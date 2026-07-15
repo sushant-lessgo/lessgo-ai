@@ -69,6 +69,16 @@ export interface BlockDeclaration {
    * distinctness guard exempts these (they resolve to the SAME component).
    */
   internalDispatch?: boolean;
+  /**
+   * SLOT (work-skeleton phase 1) — a DECLARED-but-NOT-BUILT capability: this
+   * layout name is reserved (e.g. a future video-bg hero) but has NO component
+   * yet. A slot is metadata only. It is NEVER offered in the editor picker,
+   * NEVER generated (`isBlockEligible` returns false), NEVER counted as a "real"
+   * (built) variant, and is SKIPPED by the conformance resolution/distinctness/
+   * consumes/copyShape walks (it has no resolvable component or contract).
+   * INVARIANT: a slot must NEVER be a set's `default`.
+   */
+  slot?: true;
 }
 
 /** Per-section-type declaration: the default layout + all declared variants. */
@@ -80,6 +90,31 @@ export interface SectionBlockSet {
 
 /** A template's full block manifest, keyed by section type. */
 export type TemplateBlockManifest = Record<string, SectionBlockSet>;
+
+// ── slot helpers (work-skeleton phase 1) — pure data, safe to import from the
+//    client editor UI (this module is a leaf on the import graph) ─────────────
+
+/**
+ * The BUILT (non-slot) variants of a set — the ones that have a real component,
+ * are offered/generated, and count toward "does this section have >1 variant".
+ * Byte-neutral for every existing manifest (nothing declares `slot` yet).
+ */
+export function builtVariants(set: SectionBlockSet): BlockDeclaration[] {
+  return set.variants.filter((v) => !v.slot);
+}
+
+/** Count of BUILT (non-slot) variants — a slot must not inflate this count. */
+export function builtVariantCount(set: SectionBlockSet): number {
+  return builtVariants(set).length;
+}
+
+/**
+ * INVARIANT probe: does the set's `default` name a SLOT declaration? MUST always
+ * be false — a slot (declared-but-not-built) can never be a set default.
+ */
+export function defaultIsSlot(set: SectionBlockSet): boolean {
+  return set.variants.some((v) => v.layoutName === set.default && v.slot === true);
+}
 
 // ── meridian (product / thing engine) ───────────────────────────────────────
 // Source: meridianElementSchema (MERIDIAN_LAYOUT_NAMES). One declared variant
