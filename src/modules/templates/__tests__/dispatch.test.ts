@@ -13,6 +13,8 @@ import { resolveServiceBlock as resolveLex } from '@/modules/templates/lex/resol
 import { LexPlaceholderBlock } from '@/modules/templates/lex/LexPlaceholderBlock';
 import { resolveMeridianBlock } from '@/modules/templates/meridian/resolveMeridianBlock';
 import { MeridianPlaceholderBlock } from '@/modules/templates/meridian/MeridianPlaceholderBlock';
+import { resolveWorkBlock } from '@/modules/skeletons/work/resolveWorkBlock';
+import { WorkPlaceholderBlock } from '@/modules/skeletons/work/WorkPlaceholderBlock';
 
 type Resolver = (sectionType: string, mode?: 'edit' | 'published') => any;
 
@@ -39,6 +41,14 @@ const TEMPLATES: Array<{
     resolve: resolveMeridianBlock as Resolver,
     placeholder: MeridianPlaceholderBlock,
     sections: ['header', 'hero', 'features', 'testimonials', 'pricing', 'cta', 'footer'],
+  },
+  {
+    // Work-skeleton (Atelier skin, dev id atelier2). Phase-4 pilot Home slice:
+    // gallery is section type `work`; proof default shape = testimonials.
+    name: 'atelier2 (work skeleton)',
+    resolve: resolveWorkBlock as Resolver,
+    placeholder: WorkPlaceholderBlock,
+    sections: ['header', 'hero', 'work', 'proof', 'contact', 'footer'],
   },
 ];
 

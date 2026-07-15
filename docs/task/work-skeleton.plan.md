@@ -26,12 +26,19 @@ per-section CSS vars by the skeleton's injectors (precedent: `knobs`, byte-neutr
 every other template). Tradeoff accepted: adding a skin requires a deploy (fine — skins
 are designer-curated, not user data).
 
+## Orchestrator rulings — UNATTENDED RUN (founder asleep 2026-07-15, reviews tomorrow)
+Founder authorized proceeding through human gates with conservative defaults.
+- In-phase gates (pilot ph5 / freeze ph7 / Kundius sign-off ph8): PROCEED on automated proof (e2e parity editor==published + conformance + coreParity green). Visual eyeball vs designer HTML = PENDING founder review, flagged not blocking.
+- Phase 9 (cutover to live `atelier` id): DEFERRED — touches live Kundius (paying customer) prod rendering; needs explicit founder go. Pipeline merges through phase 8; phase 9 = post-merge follow-up.
+- MERGE to main + push: NOT done unattended — prepared green on feature branch + comprehension check; founder merges/pushes.
+- Unresolved Qs resolved conservatively: (1) keep temp id atelier2; (2) DEFER cutover; (3) manage-photos → /dashboard/library placeholder; (4) optional sections = placeholder fallback (grow-on-demand); (5) sticky/headerMode in themeValues.styleTokens (design state); (6) pilot header = default arrangement only.
+
 ## Progress log
 
 - phase 1 slot mechanism (scale-09 extension): done (review loops 1, ship). CARRY-FWD: conformance.test.ts:301 sums set.variants.length for a coverage stat — switch to builtVariants when the first real slot (WorkHeroVideo) lands in phase 3.
 - phase 2 skeleton foundation (primitives · factory · token contracts · style tokens): done (review loops 1, ship). CARRY-FWD to phase 3 (do FIRST): break the skin.ts↔ThemeInjector/SSRTokens import cycle — extract buildWorkStylesheet + serialize helpers + WorkSkinDef type into a plain stylesheet.ts/skinTypes.ts (granth one-directional parity); eval-safe today but fragile under bundler/HMR.
 - phase 3 seam lands — TemplateId cascade + atelier2 skin + ONE hero block end-to-end: done (review loops 1, ship). Cycle broken (stylesheet.ts extracted). 8-map cascade complete, no 9th. Slot WorkHeroVideo declared+skipped. +2 pre-authorized test edits (templateMeta.test, serveGate.test = assertion mirrors). Nits (non-block): dead knobs re-export registry.ts:142; content?:any in hero.published (granth precedent).
-- phase 4 remaining pilot blocks (header/gallery/proof/contact/footer) + mocks + harness: pending
+- phase 4 remaining pilot blocks (header/gallery/proof/contact/footer) + mocks + harness: done (review loops 1, ship). Pilot Home slice complete (6 blocks). AC L120 gallery-group-refs proven. CARRY-FWD (CONTRACT gap, NOT skeleton — flag founder): workElementContract.contact has no destination field for non-form channels (whatsapp/booking/call) → those CTAs dead '#' on generated content; belongs to phase-A/copy-engine contract, pilot uses form so unaffected. Nits: mock editBasics counts informational; footer socials add-affordance hidden when empty.
 - phase 5 published pipeline (work.v1.js · htmlGenerator · editor behaviors) — pilot gate: pending
 - phase 6 layout library completion (header ×5 · hero ×3+slot · gallery ×3 · proof ×3 · sticky): pending
 - phase 7 section coverage + zero-markup/bounds conformance — freeze gate: pending

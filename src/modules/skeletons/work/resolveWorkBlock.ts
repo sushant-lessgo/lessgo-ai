@@ -15,6 +15,16 @@ import React from 'react';
 import { WorkPlaceholderBlock } from './WorkPlaceholderBlock';
 import WorkHeroSlider from './blocks/Hero/WorkHeroSlider';
 import WorkHeroSliderPublished from './blocks/Hero/WorkHeroSlider.published';
+import WorkHeader from './blocks/Header/WorkHeader';
+import WorkHeaderPublished from './blocks/Header/WorkHeader.published';
+import WorkGalleryGrid from './blocks/Gallery/WorkGalleryGrid';
+import WorkGalleryGridPublished from './blocks/Gallery/WorkGalleryGrid.published';
+import WorkProofTestimonials from './blocks/Proof/WorkProofTestimonials';
+import WorkProofTestimonialsPublished from './blocks/Proof/WorkProofTestimonials.published';
+import WorkContact from './blocks/Contact/WorkContact';
+import WorkContactPublished from './blocks/Contact/WorkContact.published';
+import WorkFooter from './blocks/Footer/WorkFooter';
+import WorkFooterPublished from './blocks/Footer/WorkFooter.published';
 
 /** One built layout variant = an edit component + its published twin. */
 export interface WorkBlockVariant {
@@ -34,10 +44,40 @@ export interface WorkSectionEntry {
 // WorkHeroVideo slot (manifest) is declared-but-NOT-built — it has NO component,
 // so it is intentionally ABSENT here.
 export const WORK_BLOCK_REGISTRY: Record<string, WorkSectionEntry> = {
+  header: {
+    default: 'workheader',
+    variants: {
+      workheader: { edit: WorkHeader, published: WorkHeaderPublished },
+    },
+  },
   hero: {
     default: 'workheroslider',
     variants: {
       workheroslider: { edit: WorkHeroSlider, published: WorkHeroSliderPublished },
+    },
+  },
+  work: {
+    default: 'workgallerygrid',
+    variants: {
+      workgallerygrid: { edit: WorkGalleryGrid, published: WorkGalleryGridPublished },
+    },
+  },
+  proof: {
+    default: 'workprooftestimonials',
+    variants: {
+      workprooftestimonials: { edit: WorkProofTestimonials, published: WorkProofTestimonialsPublished },
+    },
+  },
+  contact: {
+    default: 'workcontact',
+    variants: {
+      workcontact: { edit: WorkContact, published: WorkContactPublished },
+    },
+  },
+  footer: {
+    default: 'workfooter',
+    variants: {
+      workfooter: { edit: WorkFooter, published: WorkFooterPublished },
     },
   },
 };

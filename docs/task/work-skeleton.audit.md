@@ -212,3 +212,61 @@ SKIN tokens: `.wk-hero` base bg/fg via `--wk-dark`/`--wk-on-dark`; eyebrow dot +
 - atelier2 is dev-only (no picker/catalog); reachable only via `/dev/blocks/atelier2` + conformance/harness. First real editor/publish load lands phases 4-5.
 - Only the hero resolves; every other atelier2 section falls to `WorkPlaceholderBlock` by design (phases 4/6/7). Manifest declares hero only, so conformance does not yet exercise other sections.
 - Hero `data-surface` wrapper interaction (skin hero='dark' + core paints `--u-bg`/`--wk-dark`) is first exercised at phase-4/5 full-page render.
+
+## Phase 4 — Remaining pilot blocks + mocks + harness enrollment
+
+### Files changed
+New (5 block quads + harvested markup + 2 tests):
+- `src/modules/skeletons/work/blocks/Header/WorkHeader.core.tsx` / `.tsx` / `.published.tsx` / `styles.ts`
+- `src/modules/skeletons/work/blocks/Gallery/WorkGalleryGrid.core.tsx` / `.tsx` / `.published.tsx` / `styles.ts`
+- `src/modules/skeletons/work/blocks/Proof/WorkProofTestimonials.core.tsx` / `.tsx` / `.published.tsx` / `styles.ts`
+- `src/modules/skeletons/work/blocks/Contact/WorkContact.core.tsx` / `.tsx` / `.published.tsx` / `styles.ts` / `leadFormMarkup.tsx`
+- `src/modules/skeletons/work/blocks/Footer/WorkFooter.core.tsx` / `.tsx` / `.published.tsx` / `styles.ts`
+- `src/modules/skeletons/work/coreParity.test.ts`
+- `src/modules/skeletons/work/galleryGroups.test.tsx`
+
+Edited:
+- `src/modules/skeletons/work/resolveWorkBlock.ts` (register 5 SectionEntry rows)
+- `src/modules/skeletons/work/manifest.ts` (5 pilot declarations, default only)
+- `src/modules/audience/work/elementSchema.ts` (5 layoutName→section entries)
+- `src/modules/templates/blockMocks/atelier2.ts` (hero-only → full pilot set)
+- `src/modules/templates/__tests__/dispatch.test.ts` (atelier2 rows, 6 pilot blocks)
+
+### Per-block (contract keys bound · layout decision)
+- **WorkHeader** (`header`) — binds logo_text · cta_label · cta_href + nav_links[]{label,href}. Uses shared `Logo`+`Nav` primitives (zero renegade UI). DEFAULT arrangement only (logo-left · nav-center · cta-right); other 4 perms + sticky = phase 6. logo_image is NOT in the frozen header contract → Logo `src` stays undefined → text wordmark always renders (conservative).
+- **WorkGalleryGrid** (`work`) — binds eyebrow · heading · lead + groups[]{name,cover_image,href}. Renders GROUP REFERENCES ONLY (one cover + name per group) — never a flat photo list (AC L120, proven by galleryGroups.test). Edit-only "Manage photos →" link injected via a core `manageSlot` prop; published omits it.
+- **WorkProofTestimonials** (`proof`) — binds eyebrow · heading · awards_line + quotes[]{text,source} (GranthCriticsGrid donor shape). Card grid = default proof shape; logos/results shapes = phase 6.
+- **WorkContact** (`contact`) — binds eyebrow · heading · lead · contact_method · form_ref · cta_label. `contact_method`-aware: `form` → harvested lead-form markup (2-col card; edit=inert preview, published=real `<form data-lessgo-form>`); whatsapp/booking/call → single CTA link. leadFormMarkup.tsx harvested from `atelier/blocks/Contact` (renderer + default fields + submit/success text), re-classed `wk-contact-*`, server-safe (no hooks).
+- **WorkFooter** (`footer`) — binds eyebrow · heading · note · copyright + socials[]{network,href} (GranthFollowFooter donor). Baseline top-band + socials + copyright; multi-column footer = phase-6 variant if needed. Reuses shared `footerHygiene.normalizeCopyrightYear`.
+
+### Kontur + Pulse + Atelier LINT verdicts (feed phase-7 freeze gate)
+| Section | Atelier | Kontur | Pulse | Reachable by tokens+variant of the built block? | Needs variant later? | Needs a SLOT now? |
+|---|---|---|---|---|---|---|
+| **header** | 3-col nav (centered logo) + CSS drawer | `.nav`/`.nav-in` logo·links·right bar | `.nav` brand·mid·right bar | YES for the CONTENT contract (logo/nav_links/cta) — the default logo-left arrangement is the WorkHeader baseline | YES — Atelier centered-logo + the other perms = phase-6 header arrangements (5) + sticky | no |
+| **work/gallery** | home mosaic / work masonry (flat works) | editorial work grid | `.archive-grid` + `.archive-list` (list view) | YES — group-reference auto-fill grid is the baseline; content maps | YES — masonry + strip/list = phase-6 gallery variants | no |
+| **proof** | quote band / critics grid | inline praise | voice/testimonial cards | YES — testimonials card grid is the default proof shape | YES — logos + results are the other two proof SHAPES (phase 6) | no |
+| **contact** | 2-col copy + bordered form card | `.contact-copy`+`.contact-quick`+`.form` 2-col | `.cta-form` | YES — 2-col form path + whatsapp/booking/call CTA path both built; content maps | no (arrangement is tokens-reachable) | no |
+| **footer** | closer CTA band + 3-col index footer | `.footer-big`+`.footer-cols`+bottom | `.footer-top`+brand+3 cols+bottom | YES for baseline (heading/note/socials/copyright); the closer band is non-contract chrome | Optional — multi-column footer arrangement = phase-6 variant if the eyeball wants it | no |
+Verdict: all 5 frozen CONTENT contracts cover Atelier+Kontur+Pulse; only ARRANGEMENT differs → build-later library variants (phase 6), never new slots. No new slot needed this phase.
+
+### WORK_LIBRARY_BOARD_HREF
+`/dashboard/library` — exported from `WorkGalleryGrid.tsx` (edit wrapper only). Placeholder dashboard route; re-pointed in D2 when the library board exists.
+
+### Verification
+- `npx tsc --noEmit`: EXIT 0, clean (no page.tsx founder.jpg error present in this worktree).
+- `npx vitest run` (full): Test Files 184 passed | 1 skipped (185) · Tests 3060 passed | 18 skipped (3078). Dispatch (6 pilot blocks resolve non-placeholder both modes, edit≠published), templateConformance(atelier2) manifest loops (c)/(3)/(e) green for header/hero/work/proof/contact/footer + WorkHeroVideo slot skipped, coreParity (6 cores, purity + SSR render), galleryGroups (AC L120) all green.
+- `npm run build`: succeeded (exit 0).
+
+### Manual note — /dev/blocks/atelier2 (static-state bands)
+The stage `preloadTemplate('atelier2')` + `BLOCK_MOCKS.atelier2` now enumerate all 6 pilot sections (header/hero/work/proof/contact/footer). Each resolves via `resolveBlock(type, mode, layoutName)` → the built work block in BOTH the edit band (seeded store, editPrimitives) and the published band (flat props, makePublishedPrimitives). Could not run a browser here; confirmed by construction (tsc + dispatch + conformance + build green). Slider/lightbox/fixed-header published JS + e2e parity enrollment land in phase 5 — this phase's bands are static-state.
+
+### Deviations
+- **Contact non-form CTA rides `cta_href`** (not in the frozen contact contract — contract has contact_method/form_ref/cta_label). Not in `consumes` (conformance unaffected); like Atelier's non-schema chrome keys, it renders but is dropped by edit-extraction. Conservative: the form path (default `contact_method='form'`) is fully contract-backed; the channel-link href resolves from contact_method proper in a later phase.
+- **Contact uses `form_ref`** (the frozen contract key) as the forms-system lookup key where Atelier used `form_id`. Mirrors atelier's edit-preview/published-real split otherwise.
+- **Gallery "manage photos" link injected via a core `manageSlot` prop** (edit wrapper passes it, published passes nothing) rather than duplicating the section shell — keeps the single-source core and makes the edit-only affordance structurally impossible to leak into published.
+- **editBasics for atelier2 is informational** (atelier2 not enrolled in `assertEditorBasics`, per phase-3 note) — authored plausibly, not asserted.
+
+### Open risks
+- Photography image slots ship EMPTY in the mocks (cores render placeholders); the phase-5 pilot-gate eyeball compares layout/copy parity, not stock art.
+- Only the 6 pilot sections resolve; packages/about + optionals still fall to `WorkPlaceholderBlock` (phases 6/7).
+- Header sticky/fixed (`data-wk-header-mode`) + the 4 non-default arrangements are declared as future work, not yet in the manifest (phase 6) — conformance exercises only the single default per section this phase.

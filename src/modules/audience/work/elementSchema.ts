@@ -20,10 +20,16 @@ import { workElementContract } from '@/modules/engines/workSections';
 
 /**
  * Built work-skeleton layout name → the frozen work-core SECTION key it renders.
- * Grows as the layout library expands (phases 4/6/7). Phase 3: hero only.
+ * Grows as the layout library expands (phases 4/6/7). Phase 4: pilot Home set
+ * (hero · header · work/gallery · proof · contact · footer).
  */
 const WORK_LAYOUT_TO_SECTION: Record<string, string> = {
   WorkHeroSlider: 'hero',
+  WorkHeader: 'header',
+  WorkGalleryGrid: 'work',
+  WorkProofTestimonials: 'proof',
+  WorkContact: 'contact',
+  WorkFooter: 'footer',
 };
 
 /** layoutName → element schema (the section's frozen contract). */
