@@ -33,6 +33,12 @@ Founder authorized proceeding through human gates with conservative defaults.
 - MERGE to main + push: NOT done unattended — prepared green on feature branch + comprehension check; founder merges/pushes.
 - Unresolved Qs resolved conservatively: (1) keep temp id atelier2; (2) DEFER cutover; (3) manage-photos → /dashboard/library placeholder; (4) optional sections = placeholder fallback (grow-on-demand); (5) sticky/headerMode in themeValues.styleTokens (design state); (6) pilot header = default arrangement only.
 
+## MERGE-GATE STATUS (unattended run paused here 2026-07-15)
+Phases 1–8 (+6b) COMPLETE, committed, all reviewed ship. Phase 9 (cutover) DEFERRED per ruling.
+Final gate at feature HEAD (post reconcile-merge of main's docs reorg): tsc ✅ · lint ✅ (warnings only) · build ✅ · test:run 3269 ✅ · e2e parity 7/7 ✅ (21 atelier2 bands <3%, neg controls bite).
+Main reconciled into feature (clean, docs-only) → station merge is trivial. Branch NOT merged to main, NOT pushed (founder's call).
+AWAITING FOUNDER: (1) merge feature/work-skeleton → main + push (auto-deploys; atelier2 is dev-only, live atelier untouched, so safe); (2) run the FOUNDER MANUAL-QA CHECKLIST in audit.md (browser sign-offs: pilot eyeball, editor toolbars, styleTokens spot-check, /p/slug behaviors, Kundius-vs-designer); (3) review consolidated freeze-gate lint table (audit.md); (4) explicit go for phase 9 cutover (the bespoke flip + live atelier re-point).
+
 ## Progress log
 
 - phase 1 slot mechanism (scale-09 extension): done (review loops 1, ship). CARRY-FWD: conformance.test.ts:301 sums set.variants.length for a coverage stat — switch to builtVariants when the first real slot (WorkHeroVideo) lands in phase 3.
