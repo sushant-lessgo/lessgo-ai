@@ -20,11 +20,8 @@ body {
   transition: background-color 0.2s ease;
 }
 
-/* Hover state for elements - only when NOT in edit mode */
-[data-element-key]:hover:not([contenteditable="true"][data-editing="true"]) {
-  background-color: rgba(59, 130, 246, 0.05);
-  border-radius: 4px;
-}
+/* Element hover tint removed (phase 3) — the JS HoverOverlay is now the sole
+   hover affordance. Cursor rules above are kept. */
 
 /* Edit mode: Only contenteditable elements show text cursor */
 [data-element-key][contenteditable="true"][data-editing="true"] {
@@ -93,15 +90,8 @@ body {
   -webkit-user-select: none;
 }
 
-/* Enhanced visual feedback for different element types - only when NOT in edit mode */
-[data-element-key*="headline"]:hover:not([contenteditable="true"][data-editing="true"]) {
-  background-color: rgba(139, 69, 19, 0.05);
-}
-
-[data-element-key*="cta"]:hover:not([contenteditable="true"][data-editing="true"]),
-[data-element-key*="button"]:hover:not([contenteditable="true"][data-editing="true"]) {
-  background-color: rgba(16, 185, 129, 0.05);
-}
+/* Per-type hover background tints removed (phase 3) — hover feedback is now the
+   JS HoverOverlay (single hover writer). */
 
 /* Smooth transitions (no outline transition — flicker fix, phase 2) */
 [data-element-key] {

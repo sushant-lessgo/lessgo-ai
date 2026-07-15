@@ -6,6 +6,7 @@ import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { useReviewState } from '@/hooks/useReviewState';
 import { isTestimonialsEnabledPublic } from '@/lib/testimonials/flag';
 import { isSectionVisuallySelected } from '@/utils/selectionPriority';
+import { HoverOverlay } from './HoverOverlay';
 // Removed useSelection - functionality now in unified useEditor system
 
 // Proof-element predicate (co-located with the marker UI). A needs-review marker sits on a
@@ -193,6 +194,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
         <>
           <SelectionStyles />
           <SelectionIndicators />
+          <HoverOverlay />
           <VerifyMarkerControls mode={mode} />
         </>
       )}
@@ -351,20 +353,9 @@ function SelectionStyles() {
         background: rgba(16, 185, 129, 0.05) !important;
       }
       
-      /* Hover Effects (interim — replaced by HoverOverlay in phase 3).
-         Scoped to the canonical section-root and suppressed when the pointer is
-         over a child element (element wins, mirroring click dispatch). No
-         transition so a resting pointer never fades in/out (flicker fix). */
-      [data-section-root]:hover:not(:has([data-element-key]:hover)):not(.selected-section):not(.multi-selected) {
-        outline: 1px solid #d1d5db;
-        outline-offset: 2px;
-      }
-
-      [data-element-key]:hover:not(.selected-element) {
-        outline: 1px solid #e5e7eb;
-        outline-offset: 1px;
-        background: rgba(0, 0, 0, 0.02);
-      }
+      /* Hover affordance is now the JS-driven HoverOverlay (phase 3) — the sole
+         hover writer. No CSS :hover outline rules here (removes the interim
+         phase-2 rules and their nested-node flicker surface entirely). */
 
       /* Focus Styles */
       [data-section-id]:focus-visible {
