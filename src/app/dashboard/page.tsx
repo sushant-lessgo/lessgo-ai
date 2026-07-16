@@ -1,8 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { isAdmin } from '@/lib/admin'
-import Header from '@/components/dashboard/Header'
-import Footer from '@/components/shared/Footer'
 import DashboardHeader from '@/components/dashboard/DashboardHeader'
 import ProjectCard from '@/components/dashboard/ProjectCard'
 import EmptyState from '@/components/dashboard/EmptyState'
@@ -153,7 +151,6 @@ export default async function DashboardPage({
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-brand-text font-body">
-      <Header />
       <main className="flex-grow w-full max-w-5xl mx-auto px-4 py-8">
         {searchParams?.personaUpdated === '1' && <PersonaUpdatedBanner />}
         <DashboardHeader />
@@ -177,7 +174,6 @@ export default async function DashboardPage({
           <EmptyState />
         )}
       </main>
-      <Footer />
     </div>
   )
 }

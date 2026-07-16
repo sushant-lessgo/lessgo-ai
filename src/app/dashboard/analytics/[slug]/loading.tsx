@@ -1,11 +1,8 @@
-import Header from '@/components/dashboard/Header'
-import Footer from '@/components/shared/Footer'
 import { ArrowLeft } from 'lucide-react'
 
 export default function Loading() {
   return (
     <div className="flex flex-col min-h-screen bg-white text-brand-text font-body">
-      <Header />
       <main className="flex-grow w-full max-w-7xl mx-auto px-4 py-8">
         {/* Header Skeleton */}
         <div className="flex items-center justify-between mb-8">
@@ -70,7 +67,6 @@ export default function Loading() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   )
 }

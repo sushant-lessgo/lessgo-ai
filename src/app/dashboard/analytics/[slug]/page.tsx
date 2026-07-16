@@ -1,8 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
-import Header from '@/components/dashboard/Header'
-import Footer from '@/components/shared/Footer'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import MetricsCards from './components/MetricsCards'
@@ -190,7 +188,6 @@ export default async function AnalyticsPage({ params, searchParams }: PageProps)
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-brand-text font-body">
-      <Header />
       <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -274,7 +271,6 @@ export default async function AnalyticsPage({ params, searchParams }: PageProps)
           <EmptyState slug={params.slug} publishedPageTitle={publishedPage.title || 'Untitled Page'} />
         )}
       </main>
-      <Footer />
     </div>
   )
 }

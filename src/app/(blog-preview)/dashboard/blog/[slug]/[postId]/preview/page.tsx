@@ -8,6 +8,16 @@ import { loadBlogSsr, renderBlogSsrPage, toSsrPostData } from '@/lib/blog/ssr';
 // Blog (P2): owner-only preview of a post in ANY status (drafts included) —
 // Clerk-gated dashboard route (no signed-token scheme exists; don't invent one).
 // Renders through the exact same page def as publish/SSR, minus analytics.
+//
+// ⚠️ ROUTE-GROUP ESCAPE (dashboard-workspace-ia phase 1, B2): this file lives in
+// the `(blog-preview)` root route group — NOT under `src/app/dashboard/` — even
+// though its URL is `/dashboard/blog/{slug}/{postId}/preview` (route groups are
+// URL-invisible). Reason: this is NOT a dashboard screen; it returns real blog
+// TEMPLATE markup and must render byte-identical to the live page. The dashboard
+// shell (`src/app/dashboard/layout.tsx`) attaches `.app-chrome`, which would
+// inherit Onest/ink/canvas onto this template output and break editor↔published
+// parity (see src/components/ui/README.md "Attach rules"). Only the root layout
+// wraps this route. DO NOT move it back under `src/app/dashboard/`.
 
 export const dynamic = 'force-dynamic';
 

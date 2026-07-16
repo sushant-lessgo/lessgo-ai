@@ -1,7 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
-import Header from '@/components/dashboard/Header'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import BlogPostEditor from './components/BlogPostEditor'
@@ -36,7 +35,6 @@ export default async function BlogPostEditorPage({ params }: PageProps) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900 font-body">
-      <Header />
       <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8">
         <div className="mb-6">
           <Link

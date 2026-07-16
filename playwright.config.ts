@@ -46,11 +46,23 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
-    // Authenticated flows (publish + throttled edit-persistence). Serial, shared
-    // Clerk session from `setup`.
+    // Authenticated flows (publish + throttled edit-persistence + the dashboard
+    // suite). Serial, shared Clerk session from `setup`.
+    //
+    // NOTE: a spec only runs if it is listed HERE — an unregistered spec silently
+    // matches no project and gives false confidence. The dashboard-workspace-ia
+    // specs are pre-registered across all its phases (shell = phases 1-2,
+    // workspace = phase 3, redirects = phases 4-5); listing a file before it
+    // exists is harmless (it simply matches nothing).
     {
       name: 'authed',
-      testMatch: [/publish\.spec\.ts/, /edit-persistence\.spec\.ts/],
+      testMatch: [
+        /publish\.spec\.ts/,
+        /edit-persistence\.spec\.ts/,
+        /dashboard-shell\.spec\.ts/,
+        /dashboard-workspace\.spec\.ts/,
+        /dashboard-redirects\.spec\.ts/,
+      ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
     },
