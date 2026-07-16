@@ -67,7 +67,7 @@ const PAGE = {
   variantId: null,
   paletteId: null,
   analyticsEnabled: false,
-  isPublished: true,
+  publishState: 'published', // DD0b: loadContext filters on publishState, not isPublished
   customDomain: 'acme.com',
   customDomainStatus: 'failed', // durable gate: liveAt below still counts
   customDomainLiveAt: new Date('2026-01-01'),

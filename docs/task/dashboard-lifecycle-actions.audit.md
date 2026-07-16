@@ -103,3 +103,119 @@ manual pass where the dialog has a real caller.
 - `publishedUrl` does not consider a live custom domain (documented in the module header).
   Correct for this phase's two call sites — a custom-domain page is still reachable at its
   subdomain — but a future "canonical URL" surface should use `resolvePublishedHost` instead.
+
+---
+
+# Phase 2 — Publish-state serving predicate (SSR 404 + `isPublished` re-point)
+
+**Files changed**
+- `src/lib/publishState.ts` (new)
+- `src/lib/publishState.test.ts` (new)
+- `src/app/p/[slug]/page.tsx`
+- `src/app/p/[slug]/[...subpath]/page.tsx`
+- `src/app/p/[slug]/privacy/page.tsx`
+- `src/lib/blog/ssr.tsx`
+- `src/lib/seo/resolvePublishedHost.ts`
+- `src/app/api/publish/route.ts` (count predicate only)
+- `src/lib/blog/publishBlogPost.ts` (loadContext predicate only)
+- `src/lib/blog/__tests__/publishBlogPost.test.ts`
+- `docs/task/dashboard-lifecycle-actions.audit.md` (this section)
+
+## Per file
+
+**`src/lib/publishState.ts` (new).** Plain module, no `'use client'` (imported by server
+components). `isServingPublishState(state)` → `false` for exactly `'draft'` and
+`'unpublishing'`; `true` for everything else. Fail-open by construction: the non-serving set is
+an explicit allowlist-of-denials, so `'published'`/`'publishing'`/`'failed'`/null/undefined/
+unknown all serve. Doc comment spells out WHY `'publishing'` must serve (re-publish goes
+`published → publishing → published`; 404ing there = live-page regression) and why `'failed'`
+serves (failed re-publish leaves the prior version live). Also exports
+`OCCUPIES_PUBLISH_SLOT_DOC` as the canonical doc string for the slot predicate
+(`publishState !== 'draft'`) — the predicate itself is expressed inline as Prisma `where` at
+call sites, since Prisma filters aren't composable from a JS boolean fn.
+
+**`src/lib/publishState.test.ts` (new).** 8 cases covering every state: published, publishing,
+failed (serve); draft, unpublishing (404); null/undefined/empty and unknown/`'DRAFT'`
+(fail-open serve — case-sensitivity asserted deliberately).
+
+**`src/app/p/[slug]/page.tsx`.** BOTH exports gated. `generateMetadata` (:19 lookup) adds
+`publishState` to the select → non-serving returns `{}`. Page (:71 lookup) adds `publishState`
+→ non-serving returns `notFound()`. No other select/query changes.
+
+**`src/app/p/[slug]/[...subpath]/page.tsx`.** Same treatment on both exports; the page's
+existing `!page || !page.content` guard extended with the predicate.
+
+**`src/app/p/[slug]/privacy/page.tsx`.** Both exports. `generateMetadata` previously tolerated a
+missing row (generic 'Privacy Policy' title); kept that behavior for `!page` and only returns
+`{}` when a row exists AND is non-serving — narrowest change, no new 404 for missing rows.
+
+**`src/lib/blog/ssr.tsx`.** `loadBlogSsr()` — the single choke point for `/p/[slug]/blog` and
+`/p/[slug]/blog/[postSlug]`. Full-row `findUnique` (no select), so `publishState` was already
+loaded; added a separate `return null` line for the predicate. Callers already map null → 404.
+
+**`src/lib/seo/resolvePublishedHost.ts`.** `SELECT.isPublished` → `publishState`; `:41`
+predicate → `isServingPublishState(page.publishState)`. Per DD0b nuance, sitemap/robots/rss now
+follow the serving predicate, so `'publishing'`/`'failed'` pages can appear in a sitemap —
+accepted (the page IS reachable), not a defect.
+
+**`src/app/api/publish/route.ts`.** ONE line: limit count `where` → `{ userId, publishState: {
+not: 'draft' } }`. Nothing else in the file touched. Business-rule change per DD0b item 2
+(limit loosens — `isPublished` was `@default(true)` on every row incl. drafts) → Gate A.
+
+**`src/lib/blog/publishBlogPost.ts`.** ONE predicate: `loadContext`'s `findFirst` →
+`publishState: 'published'` (strict, not the serving predicate — blog publish requires a live
+site). Nothing else touched.
+
+**`src/lib/blog/__tests__/publishBlogPost.test.ts`.** Fixture `PAGE.isPublished: true` →
+`publishState: 'published'`. Fixture-shape only; the `db.publishedPage.findFirst` mock ignores
+the `where`, so no assertion changes were needed.
+
+## `isPublished` grep findings (repo-wide, DD0b step 4)
+
+9 non-doc hits. Verdicts:
+- `prisma/schema.prisma:161` + `prisma/migrations/20250522204925_init/migration.sql:44` — the
+  field definition. LEFT (no migration, deprecated-in-place per DD0b).
+- `src/types/core/content.ts:325` — `PageMetadata` interface. **Unrelated entity** (verified:
+  sits in a `PageMetadata` block with `keywords`/`ogImage`/`language`). LEFT.
+- `src/schemas/validation.ts:234` — the zod schema for that same `PageMetadata`
+  (`isPublished: z.boolean().default(false)`). **Unrelated entity.** LEFT.
+- The remaining 4 (`resolvePublishedHost.ts:13,:41`, `publish/route.ts:229`,
+  `publishBlogPost.ts:78`) + the test fixture — all re-pointed above.
+
+**Conclusion: no `PublishedPage.isPublished` readers remain anywhere in the repo.** The field
+now has neither a writer nor a reader; it survives as a schema-level `@default(true)` column.
+
+## Deviations from the plan
+
+None material. Two in-scope judgment calls, both taken conservatively:
+1. Privacy `generateMetadata` gates only when a row exists and is non-serving (see above) —
+   preserves the existing missing-row behavior rather than widening the change.
+2. `OCCUPIES_PUBLISH_SLOT` is exported as a doc constant, not a function — a Prisma `where`
+   can't be derived from a boolean predicate, and the plan only calls for a "predicate doc".
+
+## Verification
+
+- `npx tsc --noEmit` — **green** (no output).
+- `npm run test:run` — **green**: `Test Files 195 passed | 1 skipped (196)`,
+  `Tests 3350 passed | 18 skipped (3368)`. Includes the new 8-case predicate test and the
+  updated blog fixture.
+- Manual dev verification (existing page still serves; hand-set `draft` row 404s) NOT run —
+  requires a dev DB row; deferred to the phase-2 plan's manual step / Gate A.
+
+## Open risks
+
+- **Live-site blast radius:** these are the published-serving paths. Mitigated by fail-open
+  (null/unknown → serve) and by `'publishing'`/`'failed'` serving, so no currently-published
+  page's behavior changes. Any legacy dev row that is live-but-`'draft'` will now 404 — intended
+  per the plan (prod was wiped 2026-06-16).
+- **Limit loosening** (`publish/route.ts:229`) is a real billing-adjacent semantics change —
+  needs the founder ack at Gate A, as DD0b item 2 requires.
+- `/api/og/[slug]` remains ungated (DD0 accepted gap) — an unpublished page still yields an OG
+  image with title/description. Follow-up for phase 7 docs.
+- ISR (`revalidate = 3600`) means a cached render of a now-unpublished page survives up to an
+  hour until phase 3's `revalidatePath()` lands. Expected — this phase is the origin-truth half.
+
+**Working-tree note:** `git status` also shows `docs/task/dashboard-lifecycle-actions.plan.md`
+(the orchestrator's uncommitted progress-log line for phase 1) and
+`src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` (empty diff —
+CRLF-only churn from the test run). Neither was touched by this phase.

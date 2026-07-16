@@ -226,7 +226,9 @@ async function publishHandler(req: NextRequest) {
     } else {
       // Check published pages limit before creating new page
       const currentPublishedCount = await prisma.publishedPage.count({
-        where: { userId, isPublished: true }
+        // DD0b: isPublished is @default(true) on every row (no writer), so it counted
+        // draft rows too. Slot predicate = publishState !== 'draft'.
+        where: { userId, publishState: { not: 'draft' } }
       });
 
       const limitCheck = await checkLimit(userId, 'publishedPages', currentPublishedCount);

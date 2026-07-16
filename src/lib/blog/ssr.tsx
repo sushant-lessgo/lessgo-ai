@@ -9,6 +9,7 @@ import type { PublishedPage } from '@prisma/client';
 import { flattenContent } from '@/lib/staticExport/buildPageMetadata';
 import { liveHostsForPage } from '@/lib/domains/liveHosts';
 import { usesTemplateModule, type TemplateId } from '@/types/service';
+import { isServingPublishState } from '@/lib/publishState';
 import type { BlogPageDef, BlogPostPageData } from './buildBlogPages';
 
 export interface BlogSsrContext {
@@ -19,7 +20,10 @@ export interface BlogSsrContext {
 
 export async function loadBlogSsr(slug: string): Promise<BlogSsrContext | null> {
   const page = await prisma.publishedPage.findUnique({ where: { slug } });
+  // DD0: single choke point for both blog SSR routes — an unpublished site's blog
+  // must 404 even though the PublishedPage row is retained.
   if (!page || !page.content || !page.projectId) return null;
+  if (!isServingPublishState(page.publishState)) return null;
   const audienceType = page.audienceType === 'service' ? 'service' : 'product';
   if (!usesTemplateModule(audienceType, page.templateId as any)) return null;
 

@@ -18,7 +18,7 @@ the publish pipeline without orphaning KV routes, blobs, or live pages.
 
 ## Progress log
 
-- phase 1 dashboard plumbing (providers, URL helper): pending
+- phase 1 dashboard plumbing (providers, URL helper): done (commit c16baad5, review loops 1, verdict ship)
 - phase 2 publish-state serving predicate (SSR 404 + isPublished re-point): pending
 - phase 3 teardown library: pending
 - phase 4 unpublish + delete API routes + e2e: pending

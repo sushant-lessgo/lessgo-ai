@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import ReactMarkdown from 'react-markdown';
+import { isServingPublishState } from '@/lib/publishState';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -13,8 +14,9 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const page = await prisma.publishedPage.findUnique({
     where: { slug: params.slug },
-    select: { title: true },
+    select: { title: true, publishState: true },
   });
+  if (page && !isServingPublishState(page.publishState)) return {};
   const title = page?.title ? `Privacy Policy — ${page.title}` : 'Privacy Policy';
   return { title, robots: { index: true, follow: true } };
 }
@@ -22,10 +24,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PrivacyPage({ params }: PageProps) {
   const page = await prisma.publishedPage.findUnique({
     where: { slug: params.slug },
-    select: { content: true, themeValues: true, title: true },
+    select: { content: true, themeValues: true, title: true, publishState: true },
   });
 
-  if (!page) return notFound();
+  // DD0: unpublished rows are retained — gate serving on publishState, not row existence.
+  if (!page || !isServingPublishState(page.publishState)) return notFound();
 
   const legalPages = (page.content as any)?.legalPages;
   const privacy = legalPages?.privacy;
