@@ -174,6 +174,21 @@ Reskin the blog authoring experience (first-run enable state, posts manager, pos
 - Auth/middleware: reuse `requireBlogProject` + `requireAICredits`; **no changes to either** (`access.ts` untouched — route does its own project-context query).
 - Editor store / dual-renderer: not involved (dashboard surface only).
 
+## OPEN RISK — 4 unrelated e2e failures, baseline UNPROVEN (must resolve before push)
+
+A full-suite e2e run on this branch (phase 2, accidental — CLI file args don't filter; see below) showed **28 passed / 4 failed / 30 not run**:
+`dashboard-lifecycle.spec.ts:81`, `dashboard-redirects.spec.ts:134`, `dashboard-shell.spec.ts:126`, `publish.spec.ts:14`.
+
+**Status: NOT PROVEN pre-existing.** Three orchestrator runs + two subagent attempts all died (harness kills the long run; the subagent stalled twice waiting on a monitor). Investigation STOPPED deliberately — it was costing more than the answer is worth here, because **the merge gate requires a fully green suite anyway** (no CI; founder pushes to main after a locally-green run). Resolve it there, not by more baselining.
+
+**Evidence it is NOT feature-caused (analysis, not proof — impl-reviewer, phase 2):**
+- Phase 2's diff is confined entirely to the `[postId]` composer subtree; none of the 4 specs visit it.
+- Phase 1's diff is confined to the blog manager subtree + additive `playwright.config.ts` regexes.
+- `dashboard-redirects:134` = analytics redirect; `dashboard-shell:126` = project-card ••• menuitem count. Neither renders blog UI.
+- Likely environmental (missing blob/KV creds locally — same class as the blob-fatal publish landmine).
+
+**⚠️ Playwright CLI trap (bit two agents — do not repeat):** `npm run test:e2e -- <spec>` and `npx playwright test <path>` do **NOT** filter — each project's `testMatch` allow-list wins, so the whole 39-test suite runs. Use `-g`/`--grep` on test titles. Ports 3000/3117/3119 have been occupied on this machine.
+
 ## Unresolved questions
 
 1. **Hero image = SPEC DEVIATION:** keep `/api/upload-image` (picker branch unmerged), swap to media picker later via `HeroImageField` seam — sign off at GATE A?
