@@ -25,7 +25,8 @@ FIRST plus a founder eyeball gate.
 - phase 3 token layer + AppIcon + scope class [HUMAN GATE]: done (commit efe3d48b, review loops 1, verdict ship, HUMAN GATE passed 2026-07-16) — app-* tokens additions-only, AppIcon, .app-chrome (unattached); config-freeze re-scoped; isolation held + founder-confirmed identical
 - phase 4 reskin 9 existing primitives: done (commit 4f282f03, review loops 1, verdict ship) — 9 primitives on app-* tokens, stable API (0 call-site changes), added button.cta + 7 badge variants; published.css byte-identical. Nit for P6: badge default radius full→6px, grep existing badge usages
 - phase 5 net-new primitives: done (commit 34066f5d, review loops 1, verdict ship) — nav-item/segmented-control/tabs/toast/image-placeholder, headless, 0 new deps, 13 real tests; published.css byte-identical
-- phase 6 acceptance sweep + final green gate [HUMAN GATE]: impl done (review loops 1, verdict ship), full gate green incl lint fix; README written; awaiting founder final eyeball + merge gate
+- phase 6 acceptance sweep + final green gate [HUMAN GATE]: done (commit c6679b17, review loops 1, verdict ship); README written; full gate green incl lint fix
+- MERGE PREP: merged main (713d29ef work-skeleton) into feature (merge 3421907e, no conflicts). Re-greened: tsc clean, 3331 tests pass, lint 0 errors, build green, published.css BYTE-IDENTICAL (isolation held through the merge). Isolation HTML snapshot re-baselined for a single benign MAIN-SIDE addition (`<!-- Work skeleton behaviors -->` comment, meridian+hearth) — negative-trace assertions still pass (zero app-* leak); founder-approved at merge gate 2026-07-16. Awaiting station merge + push.
 
 ## Isolation mechanism (design decision, binding for all phases)
 

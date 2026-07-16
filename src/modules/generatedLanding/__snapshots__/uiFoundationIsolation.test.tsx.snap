@@ -524,6 +524,9 @@ exports[`ui-foundation isolation — published HTML baseline (product: meridian)
   <!-- Atelier hero cover slider (autoplay crossfade + arrows + injected dots) -->
   
 
+  <!-- Work skeleton behaviors (hero slider + fixed header) -->
+  
+
   <!-- Phase 4: Analytics beacon (opt-in) -->
   
 </body>
@@ -1019,6 +1022,9 @@ exports[`ui-foundation isolation — published HTML baseline (service: hearth) >
   
 
   <!-- Atelier hero cover slider (autoplay crossfade + arrows + injected dots) -->
+  
+
+  <!-- Work skeleton behaviors (hero slider + fixed header) -->
   
 
   <!-- Phase 4: Analytics beacon (opt-in) -->
