@@ -50,6 +50,10 @@ export function WorkHeroSliderCore({
             className="wk-hero__media-in" placeholder={MEDIA_PH} eager />
         </div>
         <div className="wk-hero__scrim" aria-hidden="true" />
+        {/* Giant background slide numeral (Atelier "cover" signature). Rendered in
+            BOTH renderers identically; CSS-gated OFF by default via
+            --wk-hero-num-display (skin.heroNumeral). D1 = static first slide → "01". */}
+        <span className="wk-hero__num" aria-hidden="true">01</span>
 
         <div className="wk-hero__in">
           <E.Txt elementKey="role_line" value={content.role_line} as="p"

@@ -44,6 +44,17 @@ export interface WorkSkinTokens {
 
   // Enum-constrained.
   displayWeight: number; // one of WORK_TOKEN_ENUMS.displayWeight
+
+  // Hero-composition knobs (fidelity Wave 1). NEUTRAL defaults reproduce the
+  // CURRENT hero exactly; a dramatic skin (atelier2) raises them for the Atelier
+  // "cover" signature (giant tight centered headline + background numeral). The
+  // skeleton owns the markup; these vars let a skin reach the hero's DNA.
+  heroAlign: 'start' | 'center'; // hero content alignment (start = current bottom-left)
+  heroDisplayScaleMax: number;   // hero headline clamp max, px (bounded)
+  heroDisplayLineHeight: number; // hero headline line-height (bounded)
+  heroDisplayTracking: number;   // hero headline letter-spacing, em (bounded, usually negative)
+  heroDisplayWeight: number;     // hero headline weight (enum) — may exceed section displayWeight
+  heroNumeral: boolean;          // giant background slide numeral on/off (default off)
 }
 
 /** Token field → its emitted `--wk-*` CSS custom property name. */
@@ -69,6 +80,12 @@ export const WORK_TOKEN_VARS: Record<keyof WorkSkinTokens, string> = {
   secPadYPx: '--wk-sec-y',
   radiusPx: '--wk-r',
   displayWeight: '--wk-display-weight',
+  heroAlign: '--wk-hero-align',
+  heroDisplayScaleMax: '--wk-hero-scale',
+  heroDisplayLineHeight: '--wk-hero-lh',
+  heroDisplayTracking: '--wk-hero-tracking',
+  heroDisplayWeight: '--wk-hero-weight',
+  heroNumeral: '--wk-hero-num-display',
 };
 
 export const WORK_TOKEN_COLOR_FIELDS: (keyof WorkSkinTokens)[] = [
@@ -88,12 +105,24 @@ export const WORK_TOKEN_BOUNDS: Record<string, { min: number; max: number }> = {
   gutterPx:  { min: 12, max: 120 },
   secPadYPx: { min: 32, max: 260 },
   radiusPx:  { min: 0, max: 48 },
+  heroDisplayScaleMax:   { min: 48, max: 200 },
+  heroDisplayLineHeight: { min: 0.8, max: 1.4 },
+  heroDisplayTracking:   { min: -0.08, max: 0.02 },
 };
 
 /** Enum-constrained numeric tokens. */
 export const WORK_TOKEN_ENUMS: Record<string, number[]> = {
   displayWeight: [300, 400, 500, 600, 700, 800],
+  heroDisplayWeight: [300, 400, 500, 600, 700, 800],
 };
+
+/** Enum-constrained STRING tokens. */
+export const WORK_TOKEN_STRING_ENUMS: Record<string, string[]> = {
+  heroAlign: ['start', 'center'],
+};
+
+/** Boolean tokens (validated as `typeof === 'boolean'`). */
+export const WORK_TOKEN_BOOL_FIELDS: (keyof WorkSkinTokens)[] = ['heroNumeral'];
 
 // ── Compatibility matrix (cross-token rules) ────────────────────────────────
 // Rules that no single-field bound can express (e.g. paper vs ink must contrast).
@@ -157,6 +186,19 @@ export function assertSkinTokens(skin: SkinTokenCarrier): void {
       violations.push(`token "${f}" (${varName}) = ${v} is not one of {${allowed.join(', ')}}`);
     }
   }
+  for (const [f, allowed] of Object.entries(WORK_TOKEN_STRING_ENUMS)) {
+    const varName = WORK_TOKEN_VARS[f as keyof WorkSkinTokens];
+    const v = (t as any)[f];
+    if (!allowed.includes(v)) {
+      violations.push(`token "${f}" (${varName}) = ${JSON.stringify(v)} is not one of {${allowed.join(', ')}}`);
+    }
+  }
+  for (const f of WORK_TOKEN_BOOL_FIELDS) {
+    const v = (t as any)[f];
+    if (typeof v !== 'boolean') {
+      violations.push(`token "${String(f)}" (${WORK_TOKEN_VARS[f]}) must be a boolean`);
+    }
+  }
   for (const rule of WORK_TOKEN_COMPAT) {
     try {
       if (rule.violated(t)) violations.push(`compatibility "${rule.id}": ${rule.describe}`);
@@ -181,6 +223,13 @@ export function assertSkinTokens(skin: SkinTokenCarrier): void {
  * the `[data-surface]` wrapper does.
  */
 export function serializeSkinTokens(t: WorkSkinTokens): string {
+  // Hero alignment expands into three derived vars (one enum → text-align +
+  // vertical align-items + column cross-axis) so the SAME hero CSS renders
+  // neutral (start = current bottom-left) or dramatic (center = Atelier cover).
+  const heroCenter = t.heroAlign === 'center';
+  const heroTextAlign = heroCenter ? 'center' : 'left';
+  const heroItems = heroCenter ? 'center' : 'flex-end';   // .wk-hero vertical
+  const heroInline = heroCenter ? 'center' : 'stretch';   // .wk-hero__in cross-axis
   return `:root{
   --wk-paper:${t.paper};
   --wk-paper-2:${t.paper2};
@@ -203,6 +252,14 @@ export function serializeSkinTokens(t: WorkSkinTokens): string {
   --wk-sec-y:${t.secPadYPx}px;
   --wk-r:${t.radiusPx}px;
   --wk-display-weight:${t.displayWeight};
+  --wk-hero-align:${heroTextAlign};
+  --wk-hero-items:${heroItems};
+  --wk-hero-inline:${heroInline};
+  --wk-hero-scale:${t.heroDisplayScaleMax}px;
+  --wk-hero-lh:${t.heroDisplayLineHeight};
+  --wk-hero-tracking:${t.heroDisplayTracking}em;
+  --wk-hero-weight:${t.heroDisplayWeight};
+  --wk-hero-num-display:${t.heroNumeral ? 'block' : 'none'};
 }
 [data-surface="paper"]{background:var(--wk-paper);color:var(--wk-ink);}
 [data-surface="paper-2"]{background:var(--wk-paper-2);color:var(--wk-ink);border-block:1px solid var(--wk-line);}

@@ -39,6 +39,11 @@ Final gate at feature HEAD (post reconcile-merge of main's docs reorg): tsc ✅ 
 Main reconciled into feature (clean, docs-only) → station merge is trivial. Branch NOT merged to main, NOT pushed (founder's call).
 AWAITING FOUNDER: (1) merge feature/work-skeleton → main + push (auto-deploys; atelier2 is dev-only, live atelier untouched, so safe); (2) run the FOUNDER MANUAL-QA CHECKLIST in audit.md (browser sign-offs: pilot eyeball, editor toolbars, styleTokens spot-check, /p/slug behaviors, Kundius-vs-designer); (3) review consolidated freeze-gate lint table (audit.md); (4) explicit go for phase 9 cutover (the bespoke flip + live atelier re-point).
 
+## Atelier fidelity track (post pilot-gate — founder eyeball found skin ≠ designer Atelier)
+- Pilot gate manual QA (2026-07-15): #1 parity PASS, #2 toolbars "not coming" = NOT A BUG (dev stage is bare preview harness, no selection system; blocks emit attrs, work in real /edit set to atelier2), #3 manage-link PASS, #4 "looks like Lumen" = REAL: skin harvested colors/fonts right but Atelier's DNA (bold tight giant centered cover headline, square buttons, bg numeral, compositions) was HARDCODED in skeleton, unreachable by skin tokens. STRATEGIC FINDING: skeleton D1 token surface too thin to carry designer visual identity.
+- Founder chose Option 1 (Wave 1 quick+core-tokens first, then re-eyeball; single-CTA for now).
+- **Phase 8.5 Wave 1 DONE + founder eyeball "better"** (gates green: tsc/test 3271/build/e2e 7/7, hero bands <0.3%): skin wins (wt700, square, proof=dark/packages=paper-2, header=Centered, gallery=Masonry) + 6 NEW skeleton hero tokens (heroAlign/scaleMax/lineHeight/tracking/weight/numeral, NEUTRAL defaults = thesis preserved) + full-bleed centered cover w/ CSS-gated giant numeral. Wave 2 candidates (deferred): rule-header index grammar, gallery/packages/about/footer composition rebuilds, 2nd hero CTA (needs copy-engine contract change), header overlay+lang-toggle, marquee/closer.
+
 ## Progress log
 
 - phase 1 slot mechanism (scale-09 extension): done (review loops 1, ship). CARRY-FWD: conformance.test.ts:301 sums set.variants.length for a coverage stat — switch to builtVariants when the first real slot (WorkHeroVideo) lands in phase 3.

@@ -741,3 +741,48 @@ Automated equivalents already cover the intent: kundiusPages = editor==published
 - Phase-8 human gate (editor toolbars / styleTokens spot check / publish behaviors) is deferred to the founder's browser pass above — automated proxies are green but the visual/interaction sign-off is pending.
 - Phase 9 cutover (re-point live `atelier` id) NOT done — deferred + human-gated (touches paying-customer prod rendering). atelier2 stays the dev-only id.
 - Mock proof/results content is illustrative (Kundius praise empty) — replace with her real testimonials/metrics (or omit proof) at concierge content-load; does not affect the parity proof.
+
+## Phase 8.5 — Atelier fidelity Wave 1
+
+### Files changed
+- `src/modules/templates/atelier2/skin.ts` — dramatic hero token values + selections.
+- `src/modules/skeletons/work/tokenContract.ts` — 6 new hero-composition tokens + bounds/enums + serialization.
+- `src/modules/skeletons/work/tokenContract.test.ts` — fixture + new-token in/out-of-range coverage.
+- `src/modules/skeletons/work/blocks/Hero/styles.ts` — hero CSS reads new vars (neutral fallbacks) + numeral CSS.
+- `src/modules/skeletons/work/blocks/Hero/WorkHeroSlider.core.tsx` — giant background numeral markup (single-source).
+- (stylesheet.ts NOT edited — serialization lives in tokenContract.serializeSkinTokens, which buildWorkStylesheet already calls.)
+
+### Skin values set (atelier2)
+displayWeight 600→700 · radiusPx 3→0 (square) · heroAlign `center` · heroDisplayScaleMax 138 · heroDisplayLineHeight 0.9 · heroDisplayTracking -0.045 · heroDisplayWeight 700 · heroNumeral `true`.
+selections.surfaceBySection += `proof:'dark'`, `packages:'paper-2'`. defaultLayoutBySection += `header:'WorkHeaderCentered'`, `work:'WorkGalleryMasonry'` (hero kept `WorkHeroSlider`).
+
+### New skeleton tokens + NEUTRAL defaults (thesis: byte-neutral for a non-setting skin)
+| token | var | neutral default | atelier |
+|---|---|---|---|
+| heroAlign | --wk-hero-align (+ derived --wk-hero-items/-inline) | `start` (bottom-left) | `center` |
+| heroDisplayScaleMax | --wk-hero-scale | 86px | 138px |
+| heroDisplayLineHeight | --wk-hero-lh | 0.94 | 0.9 |
+| heroDisplayTracking | --wk-hero-tracking | -0.02em | -0.045em |
+| heroDisplayWeight | --wk-hero-weight | =displayWeight | 700 |
+| heroNumeral | --wk-hero-num-display | `none` (off) | `block` (on) |
+Bounds: scale [48,200], lh [0.8,1.4], tracking [-0.08,0.02]; heroDisplayWeight enum {300..800}; heroAlign string-enum {start,center}; heroNumeral boolean. All fail loud via assertSkinTokens (new WORK_TOKEN_STRING_ENUMS + WORK_TOKEN_BOOL_FIELDS loops).
+
+### Numeral gating (kept OFF by default, identical in both renderers)
+`.wk-hero__num` markup ("01") is ALWAYS emitted by the single-source `.core.tsx`, so edit==published by construction. Visibility is CSS-only: `display:var(--wk-hero-num-display, none)`. serializeSkinTokens emits `block` iff `heroNumeral`. A skin that never sets it → `none` → element hidden in DOM identically on both sides (no injector/data-attr wiring needed — cleanest option, no out-of-scope files).
+
+### Hero composition before/after (atelier2)
+Before: bottom-left-aligned, headline clamp max 5.4rem/86px, lh 0.94, tracking -0.02, weight=display (600), rounded 3px buttons, no numeral → read as quiet "Lumen".
+After: centered full-bleed cover (align-items:center + centered column + text-align:center), headline clamp max 138px, lh 0.9, tracking -0.045em, weight 700, square (0px) buttons, oversized background numeral at white ~7% → Atelier "cover" signature. Neutral fallbacks in styles.ts equal the old hardcoded values, so any future skin renders exactly as before.
+
+### Gate results
+- tsc --noEmit: clean.
+- test:run: 187 files / 3271 tests pass, 18 skipped (new hero-knob tests green; conformance/coreParity/renderParity/skinPurity/htmlGenerator all still green).
+- build: green.
+- parity.spec.ts (run ×2, deterministic) 7/7. atelier2 hero bands: #1 0.014% · #10 0.012% · #11 0.201% · #12 0.109% (all «3%). atelier2 negative control 46.5% (bites). meridian/atelier controls 6.4%/6.2%.
+
+### What's still NOT Atelier (Wave 2 candidates)
+- Rule-header index grammar (`01 —` Kontur `.atl-rule .atl-idx`) on section headers (gallery/packages/about/proof).
+- Gallery masonry composition fidelity + packages/about/footer layout personality.
+- 2nd CTA in hero (deferred — content contract untouched this wave).
+- Header overlay-on-cover + language toggle (Kundius EN/NL); centered header is arrangement-only so far.
+- Marquee strip attached to hero; slide numeral currently static "01" (multi-slide index grammar).

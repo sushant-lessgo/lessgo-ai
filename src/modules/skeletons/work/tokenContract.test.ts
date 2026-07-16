@@ -31,6 +31,12 @@ const validTokens: WorkSkinTokens = {
   secPadYPx: 120,
   radiusPx: 3,
   displayWeight: 600,
+  heroAlign: 'start',
+  heroDisplayScaleMax: 86,
+  heroDisplayLineHeight: 0.94,
+  heroDisplayTracking: -0.02,
+  heroDisplayWeight: 600,
+  heroNumeral: false,
 };
 
 describe('assertSkinTokens — skin token bounds (loud fail)', () => {
@@ -64,6 +70,44 @@ describe('assertSkinTokens — skin token bounds (loud fail)', () => {
 
   it('throws when the tokens object is missing', () => {
     expect(() => assertSkinTokens({ id: 'no-tokens', tokens: undefined as any })).toThrow(/no tokens/);
+  });
+
+  it('accepts the dramatic Atelier hero knob values (in range)', () => {
+    const atelier: WorkSkinTokens = {
+      ...validTokens,
+      heroAlign: 'center',
+      heroDisplayScaleMax: 138,
+      heroDisplayLineHeight: 0.9,
+      heroDisplayTracking: -0.045,
+      heroDisplayWeight: 700,
+      heroNumeral: true,
+    };
+    expect(() => assertSkinTokens({ id: 'atelier-knobs', tokens: atelier })).not.toThrow();
+  });
+
+  it('throws listing EVERY hero-knob violation (out of range / bad enum / bad type)', () => {
+    const bad: WorkSkinTokens = {
+      ...validTokens,
+      heroAlign: 'middle' as any,     // not start|center
+      heroDisplayScaleMax: 400,       // > max 200
+      heroDisplayLineHeight: 2.0,     // > max 1.4
+      heroDisplayTracking: -0.2,      // < min -0.08
+      heroDisplayWeight: 450,         // not an enum member
+      heroNumeral: 'yes' as any,      // not a boolean
+    };
+    let msg = '';
+    try {
+      assertSkinTokens({ id: 'bad-hero', tokens: bad });
+    } catch (e) {
+      msg = (e as Error).message;
+    }
+    expect(msg).toContain('6 token violation(s)');
+    expect(msg).toContain('--wk-hero-align');
+    expect(msg).toContain('--wk-hero-scale');
+    expect(msg).toContain('--wk-hero-lh');
+    expect(msg).toContain('--wk-hero-tracking');
+    expect(msg).toContain('--wk-hero-weight');
+    expect(msg).toContain('--wk-hero-num-display');
   });
 });
 

@@ -41,8 +41,17 @@ export const atelierSkin: WorkSkinDef = {
     wrapPx:    1380, // --wrap 1380px
     gutterPx:  64,   // --gutter clamp(20,5vw,76) → representative
     secPadYPx: 120,  // --sec-y clamp(72,10vw,150) → representative
-    radiusPx:  3,    // --r 3px
-    displayWeight: 600, // .lg-atelier-display font-weight 600
+    radiusPx:  0,    // --atl-btn-radius 0px (square buttons/inputs — Atelier DNA)
+    displayWeight: 700, // .atl h2 rule-header weight (bold editorial)
+
+    // Hero-composition knobs → Atelier "cover" signature (styles.css .atl-cover h1
+    // + .atl-ph-num). Bold, tight, giant, centered, with the background numeral on.
+    heroAlign: 'center',        // centered full-bleed cover
+    heroDisplayScaleMax: 138,   // clamp(52,9vw,138px)
+    heroDisplayLineHeight: 0.9, // line-height:0.9
+    heroDisplayTracking: -0.045,// letter-spacing:-0.045em
+    heroDisplayWeight: 700,     // h1 font-weight:700
+    heroNumeral: true,          // oversized .atl-ph-num background numeral
   },
 
   // Four curated Kontur accents (atelier/palettes.ts). accentInk = on-accent text
@@ -60,12 +69,18 @@ export const atelierSkin: WorkSkinDef = {
     // phase and are listed here as the intended defaults (data — harmless now).
     defaultLayoutBySection: {
       hero: 'WorkHeroSlider',
+      // Centered wordmark editorial header (Atelier nav) + masonry gallery collage.
+      header: 'WorkHeaderCentered',
+      work: 'WorkGalleryMasonry',
     },
     // Surface override over the skeleton default (sectionRules.ts). The Atelier
     // cover is a full-bleed DARK hero (old atelier sectionRules hero='dark'); the
-    // work skeleton default for hero is 'paper', so override it here.
+    // work skeleton default for hero is 'paper', so override it here. Proof reads as
+    // a dark band; Experiences/packages is the alt paper surface (designer parity).
     surfaceBySection: {
       hero: 'dark',
+      proof: 'dark',
+      packages: 'paper-2',
     },
     // Atelier nav is a normal (non-fixed) editorial bar by default.
     headerMode: 'static',
