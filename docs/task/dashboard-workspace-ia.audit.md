@@ -592,3 +592,183 @@ New helper `getPostId(page)` follows the established memoised-fixture pattern an
 - `npx playwright test --list --project=authed` → **Total: 32 tests in 6 files**.
 - `npm run build` / e2e execution not run (per instructions).
 - Not committed — orchestrator commits.
+
+---
+
+## Phase 6 — Dead-component cleanup + docs + full gates
+
+**Files changed**
+- `src/components/dashboard/Header.tsx` — **deleted**
+- `src/components/dashboard/DashboardHeader.tsx` — **deleted**
+- `src/components/dashboard/ProjectCard.tsx` — **deleted**
+- `src/components/dashboard/EmptyState.tsx` — **deleted**
+- `src/components/dashboard/Footer.tsx` — **deleted**
+- `src/app/README.md` — route table updated (D4) + preview route-group path named (G2)
+- `src/components/README.md` — **orchestrator exception (G1)**, doc-only: `:14` still listed the just-deleted `DashboardHeader`/`ProjectCard`/`EmptyState` as living components
+- `docs/task/dashboard-workspace-ia.audit.md` — this section + the merge-gate checklist
+
+(`docs/task/dashboard-workspace-ia.plan.md` also shows modified in `git status` — that is the
+**orchestrator's own uncommitted Progress-log edit** marking phase 5 done. Not touched by this phase.)
+
+### B4 guard — grep evidence before each delete
+
+Ran a broad sweep (`components/dashboard` import paths + whole-word identifiers) across `src/`, `e2e/`, `scripts/`.
+**Every one of the 5 files had zero live importers.** All remaining textual hits are comments or self-definitions:
+
+| File | Remaining hits | Verdict |
+|---|---|---|
+| `Header.tsx` | none | dead |
+| `DashboardHeader.tsx` | `dashboard/page.tsx:8-9` (comment saying it's gone) · `NewSiteButton.tsx:12,14` (provenance comment) · `e2e/dashboard-shell.spec.ts:38` (comment) | dead |
+| `ProjectCard.tsx` | `continueRouting.ts:9-10` (provenance doc-comment) · `ProjectGridCard.tsx:13` · `[token]/page.tsx:20` · `emails/[token]/page.tsx:15` — **all comments** | dead since phase 2 |
+| `EmptyState.tsx` (dashboard) | none | dead |
+| `Footer.tsx` | none (`DialogFooter` in `social/[token]` is unrelated) | dead per scout §D |
+
+⚠️ **`src/app/dashboard/[token]/analytics/components/EmptyState.tsx` is a DIFFERENT file and was preserved** —
+verified present post-delete; `analytics/page.tsx:12` imports it via the relative `./components/EmptyState`.
+
+**Editor-opening paths confirmed intact:** `continueRouting.ts` still holds all **4 branches + 2 error fallbacks**
+verbatim, and remains the **single** `project_edit_clicked` PostHog call site. Its 3 consumers
+(`ProjectGridCard.tsx:98,:104`, `WorkspaceHeader.tsx:37`) all route through it; none captures the event itself.
+The `handleEdit` hits in `generate/[token]/page.tsx` + `preview/[token]/page.tsx` are unrelated local functions
+(not ProjectCard consumers) — no reader dropped.
+
+### D4 — `src/app/README.md`
+
+Replaced the 4 stale slug rows with a `/dashboard/[token]/*` workspace sub-section (6 routes + the shared
+layout), noted the token is **routing, not authz** (each page asserts ownership; admins get god-view), and added
+the shim note: the 4 old slug URLs are redirect-only (`slug → projectId → token`), while
+`blog/[slug]/[postId]/preview` is **not** shimmed and stays a real chrome-free page. Kept `/dashboard/testimonials`
+(account-wide, still live) and marked it as such. Route table verified against the actual `page.tsx` tree and the
+build output (shims **367–372 B** = redirect-only; preview 786 kB = real page — confirms B2 held).
+
+### G1 / G2 — post-review doc fixes (orchestrator exception, doc-only, no code change)
+
+Both close the exact future-reader trap D4 exists for; shipping docs that name files deleted this run is worse
+than the one-line cost.
+
+- **G1 — `src/components/README.md:14`** listed `DashboardHeader`, `ProjectCard`, `EmptyState` as living dashboard
+  components; all three were deleted above. Rewrote the row **against a real `ls` of `src/components/dashboard/`**
+  (not the brief's list — they matched): shell (`AppSidebar`, `DashboardTopBar`), grid (`ProjectGridCard`,
+  `ProjectCardMenu`, `ProjectFilters`, `DashboardEmptyState`, `NewSiteButton`), workspace (`WorkspaceHeader`,
+  `WorkspaceTabs`), shared (`continueRouting.ts`, `FormSubmissionsTable`, `PersonaUpdatedBanner`, `testimonials/`).
+  Carried two invariants a future reader needs: `ProjectFilters.tsx` exports `ProjectsBoard` (file name ≠ default
+  export — follow-up #13), and `continueRouting` is load-bearing + the single `project_edit_clicked` call site.
+- **G2 — `src/app/README.md`** now names the preview's real path,
+  `src/app/(blog-preview)/dashboard/blog/[slug]/[postId]/preview/page.tsx`, in a File-column row, and states **why**
+  it sits outside `src/app/dashboard/`: the `(blog-preview)` route group adds no URL segment, so the page keeps its
+  URL while escaping `dashboard/layout.tsx`'s `.app-chrome` — which would otherwise break the preview's parity with
+  the live `/p/[slug]/blog/[postSlug]` page. Explicit "do not restore it under `src/app/dashboard/`" warning added
+  (the reviewer looked there and couldn't find it — precisely the path to undoing B2).
+
+**Claims verified before writing, not assumed:** `find "src/app/(blog-preview)" -name layout.tsx` → **no layouts**;
+`grep -rn app-chrome src/app/` → attached **only** at `dashboard/layout.tsx:56`.
+
+### Gates — actual output
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit` | **exit 0, zero errors** |
+| `npm run test:run` | **194 passed / 1 skipped (195 files) · 3343 passed / 18 skipped (3361 tests)** — no count change from phase 5; nothing depended on the deleted files |
+| `npm run lint` | **exit 0, zero errors** — warnings only, all pre-existing (`no-img-element` in template blocks, `react-hooks/exhaustive-deps` in `ph-provider.tsx`) |
+| **`npm run build`** | ✅ **exit 0 — "Compiled successfully"**. Full pipeline ran (`build:published-css` → `build:assets` (form.v1/a.v1/a.v2/fonts…) → `next build`). All 6 workspace routes + 4 shims + preview present. |
+
+E2e **not run** (needs dev server + Clerk session — founder's/deploy's job, per instructions).
+
+**Frozen surfaces:** `git diff HEAD --stat -- tailwind.config.js src/components/ui src/middleware.ts` → **empty**. `.app-chrome` untouched.
+
+### Deviations
+- **None from the plan.** The task brief listed 4 deletions; the **frozen plan's Files-touched lists 5** (adds
+  `Footer.tsx`, dead per scout §D). Followed the plan (the contract) and deleted all 5 after proving `Footer.tsx`
+  has zero importers.
+
+### Open risks
+- Deletions are the only code change; all four gates green. Residual risk is limited to the founder-eyeball
+  and manual-authz items below.
+
+---
+
+# MERGE GATE — founder checklist
+
+Work top-to-bottom; no other part of this audit needs reading. Nothing here is a known defect — these are the
+checks automation cannot reach, plus decisions reserved for you. **Merge is plain, to main-LOCAL only, DO NOT PUSH**
+(big-bang with auth + editor-shell).
+
+## A. Must-pass checks
+
+**1. 🔴 MANDATORY — non-owner 404 (the spec's reason this is a human gate).**
+From a **SECOND, non-owner account**, open another user's token on **every** surface:
+`/dashboard/{other-token}` · `/…/analytics` · `/…/leads` · `/…/blog` · `/…/blog/{postId}` · `/…/testimonials`.
+**All must 404.** E2e runs a single Clerk session and structurally cannot cover this.
+
+**2. Admin god-view — NEWLY GAINED, sign off explicitly.**
+As an admin, open a **non-owned** token on analytics / leads / blog. These now **work**; the old slug routes were
+hard-scoped on `userId` and **silently 404'd admins**. This is an intended behavior change, not a leak — confirm you want it.
+Also confirm **testimonials shows the OWNER's entries, not blank** (C2 — third ID space).
+
+**3. Demo-token rejection (B3/D2).** `/dashboard/lessgodemomockdata/…` from a **normal signed-in** account → **404**.
+
+**4. 🟡 null-`projectId` count — run this before merge.**
+
+```sql
+SELECT count(*) FROM "PublishedPage" WHERE "projectId" IS NULL;
+```
+
+(`schema.prisma:154` nullable; `api/publish/route.ts:216,250` writes `project?.id || null`.)
+**Expected 0** (prod wiped 2026-06-16). **If > 0:** each such page shows the workspace's "publish first" locked
+state for a live project, AND its shim 404s a bookmark that works today. Surface for a decision — **verify, don't redesign**.
+
+**5. Redirect coverage — old bookmarks.** Each old URL must land on the right workspace tab:
+`/dashboard/analytics/{slug}` → `…/{token}/analytics` · `/dashboard/forms/{slug}` → `…/{token}/leads` ·
+`/dashboard/blog/{slug}` → `…/{token}/blog` · `/dashboard/blog/{slug}/{postId}` → `…/{token}/blog/{postId}`.
+**`/dashboard/blog/{slug}/{postId}/preview` must NOT redirect** — same URL, chrome-free (B2).
+In-tab blog nav + analytics day pills should have **no redirect hop** (C1/D1).
+
+**6. ⚠️ Lead counts may shift after deploy — expect questions, not a bug.**
+`/api/forms/submit` takes **both** `userId` and `publishedPageId` from the **client-supplied body**
+(`route.ts:57`, written `:198-199`), so the old Clerk-`userId` filter **never protected anything**. But it did
+**hide** submissions whose `userId` != the owner — those rows **now appear**. Not a cross-project leak
+(`publishedPageId` scoping holds). A live page's visible lead count can move.
+
+## B. Founder eyeball (design + judgment)
+
+**7.** Main dashboard reads 100% final-design; every not-yet-built control **greyed in place** (Domains R15).
+Sidebar / top bar / card / menu / header / tabs visuals are **unverified by eye** — no browser run in any phase.
+
+**8. R17b — the live-button-over-a-dead-field read.** A greyed toggle + textarea sit above an **enabled**
+"Build my site". Accept, or order the prefill follow-up (#12) now.
+
+**9. Duplicate back-link.** Analytics / leads / blog tabs show "All Projects" (workspace header) above the moved
+body's own verbatim "Dashboard" link. Kept deliberately — D1 calls those links fine and the plan mandated no
+reskin. Keep, or drop in a polish slice.
+
+**10. "Free plan" vs the design's "Starter plan"** — copy mismatch in the sidebar; your call.
+
+**11. `dashboard_header_loaded` PostHog event is LOST** with `<DashboardHeader/>`. The plan specified no new home,
+so none was invented. Identity + pageview tracking unaffected. **Re-home or accept.**
+
+## C. Follow-ups to order or park (no action needed to merge)
+
+**12. R17b prefill slice** — prompt text → onboarding prefill; needs `/api/start` to accept an input body + an
+onboarding prefill param. Self-contained.
+
+**13. Rename `ProjectFilters.tsx` → `ProjectsBoard.tsx`** — file exports `ProjectsBoard` as default (deliberate;
+phase 2 had no slot for a new file). Trivial.
+
+**14. D5 extra-hop callers — RECORD ONLY, deliberately not fixed:** `admin/page.tsx:370,:378` (old analytics/forms
+slug URLs) and `edit/[token]/components/layout/PageSwitcher.tsx:43` (`/dashboard/blog/{slug}`). All route correctly
+**via the shims**, just with one extra hop. Re-pointing = a later cleanup slice, explicitly out of scope here.
+
+**15. B2 runtime preview guard** — the fixture-based check `test.skip`s (with a reason) when it can't seed;
+worth one real pass with a dev server.
+
+**16. `src/components/shared/Footer.tsx` is now orphaned repo-wide — RECORDED, deliberately NOT fixed.**
+Verified: `grep -rl "shared/Footer" src/` → **zero consumers**. Phase 2's `dashboard/page.tsx` rewrite plus the
+phase 4/5 shims removed its last importers, so the scout's premise (true when written) went stale during the run.
+A dead-code candidate for the **D5 polish slice** (#14). ⚠️ **Distinct from `dashboard/Footer.tsx`**, which was a
+0-byte file safely deleted in phase 6 — do not conflate them. Out of scope here (unlisted file).
+
+## D. Reviewer-cleared — do NOT re-litigate
+
+B1–B5, C1–C3 as implemented · R17b · R2/R3/R8/R15/R16 · ID-space handling · dropping the `userId` filter on
+`formSubmission.findMany`. B3 was adversarially attacked (orphan / demo / non-owner / null-`userRecord`) with no
+path through, and its guards are mutation-proven.
