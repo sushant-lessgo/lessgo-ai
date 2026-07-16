@@ -120,6 +120,15 @@ export const WorkFactsSchema = z.object({
       name: z.string(),
       location: z.string().optional(),
       reach: z.string().optional(),
+      /**
+       * "What you do" — a short human descriptor (work-onboarding-shell P1).
+       * ADDITIVE-OPTIONAL: pre-existing facts that omit it still parse, so
+       * `getWorkFacts` cannot start returning null because of this key.
+       * Seeded from `facts.entry.summary` (+ categories) by
+       * `seedWorkFactsFromEntry` (src/modules/wizard/work/rail.ts); the rail
+       * makes it user-correctable. NOT a generation input in E1.
+       */
+      descriptor: z.string().optional(),
     })
     .optional(),
   /** Slot 2 — what you sell. Price (slot 3) lives on each group. */
@@ -134,6 +143,13 @@ export const WorkFactsSchema = z.object({
   contactMethod: z.enum(['whatsapp', 'booking', 'form']).optional(),
   /** Slot 8 — content language(s); auto-from-location, confirm when ambiguous. */
   languages: z.array(z.string()).optional(),
+  /**
+   * NOT a slot — the rail's "Something wrong?" append-only correction log
+   * (work-onboarding-shell P1). ADDITIVE-OPTIONAL: absent on every pre-existing
+   * facts bag, so parse behaviour is unchanged. Written by `appendUserNote`
+   * (src/modules/wizard/work/rail.ts); consumed in E3, ignored by generation.
+   */
+  userNotes: z.array(z.string()).optional(),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
