@@ -22,7 +22,7 @@ FIRST plus a founder eyeball gate.
 
 - phase 1 isolation baseline guards: done (commit 454dbc23, review loops 1, verdict ship) — guards: HTML snapshot + published.css sha256 (published surface) + /dev computed-style e2e (editor surface) + tailwind.config.js freeze test; isolation spec wired into playwright public project
 - phase 2 fonts (fetch + subset + app-only stylesheet + preloads): done (commit 6e7af964, review loops 1, verdict ship) — 4 families self-hosted, MS subset 164KB axes-intact, app-only stylesheet no published leak; mid-flight fix: app mono = distinct family 'JetBrains Mono App' (avoids mono@600 editor/published divergence); e2e /dev network assertion dropped as mis-scoped
-- phase 3 token layer + AppIcon + scope class [HUMAN GATE]: pending
+- phase 3 token layer + AppIcon + scope class [HUMAN GATE]: done (commit efe3d48b, review loops 1, verdict ship, HUMAN GATE passed 2026-07-16) — app-* tokens additions-only, AppIcon, .app-chrome (unattached); config-freeze re-scoped; isolation held + founder-confirmed identical
 - phase 4 reskin 9 existing primitives: pending
 - phase 5 net-new primitives: pending
 - phase 6 acceptance sweep + final green gate [HUMAN GATE]: pending

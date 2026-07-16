@@ -4,17 +4,33 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center gap-1 rounded-app-badge border px-2.5 py-0.5 text-xs font-app-sans font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-app-primary/40",
   {
     variants: {
       variant: {
+        // existing keys (restyled onto app-* tokens — keys unchanged)
         default:
-          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+          "border-transparent bg-app-primary text-white hover:bg-app-primary-hover",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border-transparent bg-app-tint text-app-primary-deep",
         destructive:
-          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground",
+          "border-transparent bg-app-danger text-white",
+        outline: "border-app-border text-app-ink",
+        // added handoff variants
+        status:
+          "rounded-app-pill border-transparent bg-app-canvas text-app-muted",
+        mono:
+          "border-transparent bg-app-ink text-white font-app-mono uppercase tracking-wide",
+        postBeta:
+          "rounded-app-pill border-[#ecdcc2] bg-[#f1e6d8] text-[#9a6a1f] font-app-mono uppercase tracking-wide",
+        magic:
+          "rounded-app-pill border-transparent bg-app-cta text-white",
+        success:
+          "rounded-app-pill border-transparent bg-app-success-bg text-app-success",
+        danger:
+          "rounded-app-pill border-transparent bg-app-danger-bg text-app-danger",
+        saved:
+          "border-transparent bg-transparent px-0 text-app-muted",
       },
     },
     defaultVariants: {

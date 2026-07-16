@@ -509,3 +509,111 @@ Re-verification after the re-scope:
   `test:run` 0 failed.
 - HUMAN GATE (orchestrator's step): founder before/after eyeball on a real `/p/[slug]` +
   `/edit/[token]` — not performed by this agent.
+
+---
+
+# ui-foundation — Phase 4 audit (reskin 9 existing primitives)
+
+Branch: `feature/ui-foundation` (verified before any edit). Reskin-in-place only — no
+parallel components, no new files, all exported names/props/cva variant KEYS stable so
+every call site compiles untouched. Only `app-*` tokens (Phase-3) used; no `tailwind.config.js`
+edit. No forbidden-list file touched.
+
+## Files changed
+
+- `src/components/ui/button.tsx` — reskinned onto app-* tokens; ADDED `cta` variant.
+- `src/components/ui/input.tsx` — reskinned.
+- `src/components/ui/select.tsx` — reskinned (trigger + popover + item/label/separator).
+- `src/components/ui/checkbox.tsx` — reskinned.
+- `src/components/ui/switch.tsx` — reskinned.
+- `src/components/ui/textarea.tsx` — reskinned.
+- `src/components/ui/card.tsx` — reskinned (Card + Title + Description).
+- `src/components/ui/badge.tsx` — restyled existing keys + ADDED 7 handoff variants.
+- `src/components/ui/dialog.tsx` — reskinned modal shell (overlay/content/close/title/description).
+- `docs/task/ui-foundation.audit.md` (this section).
+
+## Per-primitive changes (+ handoff source)
+
+- **button.tsx** (matched `Lessgo Auth.dc.html` "Claim my seat" primary + `Lessgo Dashboard.dc.html`
+  coral CTA/secondary/ghost): base now `rounded-app-ctl font-app-sans font-semibold` +
+  `focus-visible:ring-app-primary/40`. `default` = `bg-app-primary hover:bg-app-primary-hover
+  text-white shadow-app-btn-primary` (auth blue button). ADDED `cta` = `bg-app-cta
+  hover:bg-app-cta-soft text-white shadow-app-btn-cta` (dashboard coral, shadow token matches
+  handoff `0 10px 22px -9px rgba(255,107,61,.7)`). `destructive` = `bg-app-danger`; `outline` =
+  white surface + `border-app-border-input` hover canvas; `secondary` = canvas-fill bordered;
+  `ghost` = hover `bg-app-canvas`; `link` = `text-app-primary` hover primary-hover+underline.
+  Dropped the `rounded-md` on `sm`/`lg` sizes so base `rounded-app-ctl` applies (deviation note 1).
+  `buttonVariants` export + all 6 original keys + 4 size keys UNCHANGED.
+- **input.tsx** (matched Auth email/password field: `border #e2e4ea`, focus border `#006CFF` +
+  white bg, placeholder `#b0b0ba`): `rounded-app-input border-app-border-input bg-app-surface
+  font-app-sans text-app-ink placeholder:text-app-placeholder focus-visible:border-app-primary
+  focus-visible:bg-white`; height 9→10, dropped `shadow-sm` (handoff fields are flat).
+- **textarea.tsx** (same field system): matching input treatment, `rounded-app-input` etc.
+- **select.tsx** (matched editor/dashboard dropdown surfaces): trigger mirrors input; popover
+  `SelectContent` = `rounded-app-panel border-app-border bg-app-surface shadow-app-float
+  font-app-sans` (white floating surface per handoff); item focus `bg-app-tint
+  text-app-primary-deep` (active-nav tint); label `text-app-muted`; separator `bg-app-divider`.
+- **checkbox.tsx**: unchecked `border-app-border-strong bg-app-surface`, checked `bg-app-primary
+  border-app-primary text-white`, `rounded-[4px]`, ring `app-primary/40`.
+- **switch.tsx** (matched editor toggle `#006CFF` on-track): checked `bg-app-primary`, unchecked
+  `bg-app-border-strong`, white thumb, ring `app-primary/40`.
+- **card.tsx** (matched dashboard cards): `rounded-app-card border-app-border bg-app-surface
+  shadow-app-card font-app-sans`; Title `text-app-ink`, Description `text-app-muted`.
+- **badge.tsx** (matched README "Recurring badge styles" + dashboard/editor chips): base now
+  `rounded-app-badge font-app-sans gap-1`. Existing keys restyled: `default` bg-app-primary,
+  `secondary` app-tint/primary-deep, `destructive` app-danger, `outline` app-border.
+- **dialog.tsx** (matched Auth 20px-radius modal card + modal shadow token): overlay
+  `bg-app-ink/60`; content `rounded-app-modal border-app-border bg-app-surface font-app-sans
+  text-app-ink shadow-app-modal`; close button hover `bg-app-canvas`; title `text-app-ink`,
+  description `text-app-muted`. Radix structure + all exported parts UNCHANGED.
+
+## Variant-key inventory
+
+- **button** existing keys UNCHANGED: `default/destructive/outline/secondary/ghost/link` +
+  sizes `default/sm/lg/icon`. `buttonVariants` export unchanged. ADDED: `cta`.
+- **badge** existing keys UNCHANGED: `default/secondary/destructive/outline`. `badgeVariants`
+  export unchanged. ADDED (7): `status` (pill canvas/muted), `mono` (dark `bg-app-ink` white
+  `font-app-mono` — README dark annotation badge), `postBeta` (`bg-[#f1e6d8] text-[#9a6a1f]
+  border-[#ecdcc2]` pill — one-off arbitrary values per plan, no config tokens), `magic`
+  (`bg-app-cta` white pill — MAGIC MOMENT), `success` (`bg-app-success-bg text-app-success`
+  pill), `danger` (`bg-app-danger-bg text-app-danger` pill), `saved` (transparent `text-app-muted`
+  — consumer supplies the green dot).
+- No other primitive exposes cva variants; all component/part exports on all 9 files are unchanged.
+
+## Deviations / judgment calls
+
+1. Removed `rounded-md` from button `sm`/`lg` sizes and `md:text-sm`/`shadow-sm` from
+   input/textarea so the app radius + flat handoff field look apply uniformly. In-scope styling
+   only; no API change.
+2. Badge base radius changed pill(rounded-full)→`rounded-app-badge` (6px) to match README's
+   "Small badges 5–6px"; pill-shaped chips use the new pill variants. Existing keys keep working;
+   only their corner radius shifts. Conservative reskin, logged.
+3. Focus rings unified to `ring-app-primary/40` (replacing `ring-ring`) across primitives so
+   portaled/unwrapped usage (dialog/select in document.body, outside `.app-chrome`) styles
+   correctly per isolation mechanism §2. Every base carries explicit `font-app-sans` (badge/dialog
+   mono variant carries `font-app-mono`).
+
+## Verification (all run in WORKDIR)
+
+- `npx tsc --noEmit` → clean (no output). Stable API confirmed: no call site needed adjustment.
+- `npm run build` → green.
+- `npm run test:run` → 184 files passed / 1 skipped; 3012 passed / 18 skipped; **0 failed**.
+  tailwindConfigFreeze + published.css sha256 + HTML-snapshot guards all green.
+- `public/published.css` sha256 = `c2f87e08f517a72b43f6e9e0e9b703b6261f4f152c711be9241649c6f26219b6`
+  == committed baseline (byte-identical — no token added, no template touched).
+- `npm run lint` (eslint on the 9 touched files) → clean (no output).
+- `npm run test:e2e` isolation spec (`--project=public`, **port 3050** — 3000 held a stale
+  server returning 500; ran a dedicated fresh dev server via `PORT=3050 E2E_PORT=3050`) →
+  2 passed: computed-style baselines on `/dev/meridian/blocks` unchanged + no app-chrome
+  fonts/classes on the block surface. Primitives aren't used by templates, so template
+  rendering is unchanged.
+- Dev visual spot-check: SKIPPED (a working dev server on the standard port was unavailable;
+  the isolation e2e ran against a dedicated 3050 server, but a manual eyeball of the reskinned
+  primitives themselves was not performed). Founder's Phase-6 manual pass is the visual-taste gate.
+
+## Open risks
+
+- Visual fidelity vs handoff is unverified by human eye this phase (deferred to Phase-6 HUMAN
+  GATE). Reskin values were copied from the `.dc.html` markup at high fidelity.
+- Badge default-radius change (deviation 2) could surface where an existing call site assumed a
+  full pill; grep of usages not exhaustively re-audited — low risk (badges are decorative).
