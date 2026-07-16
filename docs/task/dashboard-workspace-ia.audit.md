@@ -467,3 +467,128 @@ Judgment call #2 (`min-h-screen` drop) reviewer-confirmed as the only body conte
 - `npx playwright test --list --project=authed` → **Total: 24 tests in 6 files** (unchanged — F3 edited an existing helper/test).
 - `git diff --stat tailwind.config.js src/components/ui` → **empty**.
 - Not committed — orchestrator commits.
+
+---
+
+## Phase 5 — re-home Blog + Testimonials under `[token]`, blog shims (LAST build phase)
+
+### Files changed
+
+**New**
+- `src/app/dashboard/[token]/blog/page.tsx`
+- `src/app/dashboard/[token]/blog/[postId]/page.tsx`
+- `src/app/dashboard/[token]/testimonials/page.tsx`
+
+**Moved (`git mv` → pure renames)**
+- `src/app/dashboard/blog/[slug]/components/BlogPostsTable.tsx` → `src/app/dashboard/[token]/blog/components/BlogPostsTable.tsx` *(re-pointed)*
+- `src/app/dashboard/blog/[slug]/components/NewPostButton.tsx` → `src/app/dashboard/[token]/blog/components/NewPostButton.tsx` *(re-pointed)*
+- `src/app/dashboard/blog/[slug]/[postId]/components/BlogPostEditor.tsx` → `src/app/dashboard/[token]/blog/[postId]/components/BlogPostEditor.tsx` *(comment only)*
+- `src/app/dashboard/blog/[slug]/[postId]/components/BlogRichTextEditor.tsx` → `src/app/dashboard/[token]/blog/[postId]/components/BlogRichTextEditor.tsx` *(0 changed lines)*
+
+**Rewritten → shims**
+- `src/app/dashboard/blog/[slug]/page.tsx`
+- `src/app/dashboard/blog/[slug]/[postId]/page.tsx`
+
+**Extended**
+- `e2e/dashboard-redirects.spec.ts`
+
+Nothing else. `git status -- src e2e tailwind.config.js` shows exactly this set.
+
+### What changed, per file
+
+- **`[token]/blog/page.tsx`** — body moved from `blog/[slug]/page.tsx`. Entry = `getWorkspaceProject(params.token)` (first statement); the old `publishedPage.findFirst({slug, userId})` + its **slug→token hop (`:29-34`) are gone** — the wrapper already hands back both. Posts: `blogPost.findMany({ where: { projectId: project.id } })` (was `publishedPage.projectId` — same value, now post-authz). Subscriber count keyed on `publishedPage.id` as before. `host` from `publishedPage.slug` instead of the route param. **R18 locked state** when `publishedPage == null` ("Publish to start blogging"), same minimal R10 shape/tokens as phase 4's analytics/leads.
+- **`[token]/blog/[postId]/page.tsx`** — body moved. Wrapper first, then **the integrity check is PRESERVED**: `post.projectId !== project.id → notFound()` (exact equivalent of the old `!== publishedPage.projectId` once ownership of `project` is asserted). Without it any owned token could open another project's post by id. **D3**: `slug` for `BlogPostEditor` comes from `publishedPage.slug`, not a route param; R18's gate (`if (!publishedPage) notFound()`) makes it non-null.
+- **`[token]/testimonials/page.tsx`** — new per-project tab; `TestimonialModerationList` + dialogs reused as-is, `isTestimonialsEnabled()` gate kept identical to the account page. See the ID-space section below.
+- **`BlogPostsTable.tsx` / `NewPostButton.tsx`** — C1 re-points (below).
+- **`BlogPostEditor.tsx`** — no logic change; only the B2 comment block above the preview link.
+- **Both blog shims** — Node-runtime server pages, shaped exactly like phase 4's: `publishedPage.findFirst({where:{slug}, select:{projectId}})` → `project.findUnique({id}, select:{tokenId})` → `redirect(...)`; `notFound()` on missing page / null `projectId` / missing project. Redirect unconditionally; the target enforces authz. Each documents why middleware (edge, no Prisma) and `next.config` (static) can't do the lookup, and that **the dir must stay real** or `[token]` swallows `/dashboard/blog/foo`. The `[postId]` shim passes `postId` through unvalidated on purpose — validating it there would duplicate the target's check.
+
+### 🚨 How testimonials avoids the third-ID-space trap
+
+`Testimonial.userId` is a **CLERK** id (`prisma/schema.prisma:600`, "Clerk User ID (owner / tenant)"); `project.userId` is an internal **`User.id`** (`:22`). Both `string` ⇒ a wrong-space pass is tsc-green, throws nothing, and returns **zero rows**.
+
+The page calls:
+
+```ts
+const { project, clerkId } = await getWorkspaceProject(params.token)
+listTestimonialsByOwner(clerkId, { projectId: project.id })
+```
+
+- `clerkId` is the wrapper's — i.e. the **project OWNER's** Clerk id, resolved via `project.user.clerkId`, **not** the requesting admin's. That is what keeps **admin god-view (R8)** showing the owner's testimonials instead of a blank tab.
+- `project.id` (internal PK) is used ONLY as the `projectId` filter — never compared against a Clerk column. **No cross-space join anywhere in the file.**
+- `listTestimonialsByOwner` **was NOT edited** — it already accepts `{ projectId }` (`src/lib/testimonials/repo.ts:82-94`: `where:{ userId, ...(filter.projectId !== undefined ? { projectId } : {}) }`), as used by `autoImport.ts:58`. Signature confirmed by reading it; zero changes.
+- A 🚨 header comment in the file states the trap, the ✅/❌ pair, and why `clerkId` must be the owner's.
+- e2e **non-empty guard**: seed a project-scoped testimonial via `POST /api/testimonials`, then assert the quote is **visible** on the tab. A wrong-space call renders an empty-but-healthy page, so only a non-empty assertion bites.
+
+### C1 re-points + the deliberate B2 exception
+
+Re-pointed (these would otherwise be in-tab links bouncing through the shims this phase created — the plan's global invariant):
+
+| Was | Now |
+|---|---|
+| `BlogPostsTable.tsx:77` row title `Link` → `/dashboard/blog/{slug}/{postId}` | `/dashboard/{tokenId}/blog/{postId}` |
+| `BlogPostsTable.tsx:97` "Edit" `Link` → same | `/dashboard/{tokenId}/blog/{postId}` |
+| `NewPostButton.tsx:22` `router.push('/dashboard/blog/{slug}/{postId}')` | `router.push('/dashboard/{tokenId}/blog/{postId}')` |
+| `blog/[slug]/[postId]/page.tsx:41` back-link → `/dashboard/blog/{slug}` | `/dashboard/{tokenId}/blog` |
+
+**Deliberate exception — `BlogPostEditor.tsx:178` preview link stays on the OLD slug URL** `/dashboard/blog/{slug}/{postId}/preview` (B2). That route lives in the `(blog-preview)` root route group, **outside** the dashboard tree, so no `.app-chrome` ancestor can leak app fonts/colors into real template markup. It has **no `[token]` twin and no shim**, so this URL is the live target, not a hop. A multi-line 🚨 comment above the link says exactly this ("Do NOT 'fix' it") plus the D3 note.
+
+**Phase 5 states explicitly: no `.app-chrome` / workspace-chrome ancestor wraps the blog SSR preview.** It was moved out of the dashboard tree in phase 1; this phase added no wrapper, no shim, and did not touch `src/app/(blog-preview)/...`. An e2e guard asserts `.app-chrome` count is 0 on that URL.
+
+### Judgment calls (in-scope, conservative)
+
+1. **`slug` prop dropped from `BlogPostsTable` + `NewPostButton`.** After the C1 re-points it was referenced nowhere in either component (the `/blog/{post.slug}` sub-line uses the POST's own slug — a different field). Keeping a dead prop invites someone to "reuse" it and rebuild the old URL. Both components have exactly one caller (the new page, also in this phase's Files-touched). Recorded as a **deviation-lite**: the plan said "pass token down as prop" and did not explicitly authorise removing `slug`.
+2. **`min-h-screen` dropped + `<Footer/>` not carried over** on both moved blog bodies — same as phase 4's judgment calls 2 & 3. Phase 1 recorded `blog/[slug]`'s `shared/Footer` as an accepted transient "until phase 5 turns them into shims"; the shim has no Footer and the moved body correctly does not reintroduce one. Transient now resolved as planned.
+3. **The verbatim `/dashboard` back-link was KEPT** in the moved blog index body (as in analytics/leads) → the "All Projects" + "Dashboard" duplication also appears on the Blog tab. Consistent with phase 4; already on the founder-eyeball list.
+4. **The blog post page has NO `/dashboard` back-link** — the old one didn't either (only "All posts"). Unchanged.
+5. **R18 locked state uses `AppIcon name="article"`** — already in the committed Material Symbols subset (`public/fonts/material-symbols-rounded/icons.txt`), no font regeneration. Copy is the plan's "Publish to start blogging".
+6. **Testimonials tab header** drops the account page's `/dashboard` back-link (the workspace header owns that) and re-words the sub-copy "…for your landing pages" → "…for this site". Stats grid + moderation list otherwise identical.
+7. **`audienceType` is read with an extra `project.findUnique({ where: { id: project.id } })`.** `TestimonialModerationList`'s `projects` prop needs it and `WorkspaceContext` doesn't carry it; `workspace.ts` is frozen for this phase, so the read happens at the call site by **primary key, after** the ownership assertion. `token: project.tokenId` is passed because `Project.tokenId` **is** the token value (`schema.prisma:23` — the relation targets `Token.value`), i.e. the same string the account page passes as `p.token.value`.
+8. **`export const dynamic = 'force-dynamic'`** kept on the testimonials tab (copied from the account page — moderation state must never be cached).
+
+### Deliberately NOT done
+
+- **`src/lib/testimonials/repo.ts` NOT touched** — it already accepts `{ projectId }`. Callers grepped: `autoImport.ts:58`, `dashboard/testimonials/page.tsx:19`, and this new page; the two existing callers are unaffected (`projectId` is optional).
+- **`/dashboard/testimonials` (account-level) left alive and owner-scoped exactly as today (R19)** — not deleted, not re-routed, not shimmed, still unlinked from the sidebar.
+- **No preview shim, no preview re-home, `src/app/(blog-preview)/...` untouched (B2).**
+- No re-skin of any moved body (plan: "moved as-is").
+- No edit to `middleware.ts`, `security.ts`, `workspace.ts`, the schema, `src/components/ui/*`, `tailwind.config.js`, or `playwright.config.ts` (the phase-5 spec filename was already registered — reused it).
+- `Header.tsx` / `DashboardHeader.tsx` / `ProjectCard.tsx` / `components/dashboard/EmptyState.tsx` NOT deleted — phase 6.
+- **D5 (record only, do NOT fix):** `edit/[token]/components/layout/PageSwitcher.tsx:43` → `/dashboard/blog/{slug}` now routes correctly **via this phase's shim**, one extra hop. This is the phase-5 half of D5 that phase 4's F4 correctly re-scoped here. `admin/page.tsx:370,:378` remain phase 4's. Left alone by ruling.
+
+### e2e (8 new tests → `authed` total 24 → 32)
+
+- **2 blog shim redirects**: `/dashboard/blog/{slug}` → `/dashboard/{token}/blog`; `/dashboard/blog/{slug}/{postId}` → `/dashboard/{token}/blog/{postId}`.
+- **1 unknown-slug → 404** on both blog shims (pins "shim dirs stay real").
+- **1 C1 no-hop test**: asserts the row link's **`href`** is the token URL, then clicks it, then asserts the "All posts" back-link's `href` + click. ⚠️ The href assertion is the one that bites — a hop through the shim lands on the **same** final URL, so a URL-only check would pass with the bug still present.
+- **2 B2 tests**: the preview URL 200s on the OLD slug path, **does not redirect**, and has `.app-chrome` count **0**; and the post editor's "Preview saved draft" link still carries the old-slug `href` (locks the deliberate exception + D3's slug source).
+- **1 C2 non-empty testimonials guard** (the silent-zero-rows check): `GET /api/projects/{token}` → `POST /api/testimonials {projectId}` → assert the quote renders on the tab.
+- **1 R18 locked state**: draft token → `/dashboard/{token}/blog` renders (<400) with "Publish to start blogging".
+
+New helper `getPostId(page)` follows the established memoised-fixture pattern and reuses phase 4's `getPublishedFixture()` / `getDraftToken()` unchanged. **No vacuous tests**: every fixture failure → `test.skip(cond, reason)` loudly (incl. `TESTIMONIALS_ENABLED` unset → 404 from the seed POST → loud skip, never a mute pass). AppIcon-ligature trap avoided (`getByRole(..., {name})` + exact leaf text + `href` locators only). Analytics `?days` pill survival is already covered by phase 4's D1 test in this same file — not duplicated.
+
+### Open risks
+
+1. **Playwright not executed** (needs a dev server + Clerk E2E creds; per instructions only tsc/test:run/lint ran). `--list --project=authed` → **Total: 32 tests in 6 files** (was 24 → all 8 collected).
+2. **NEW admin god-view** now reaches blog + testimonials by token URL (the slug blog route hard-scoped on `userId` and 404'd admins). Intended per spec — founder gate item 2. Untestable here (single Clerk session).
+3. **Pilot risk: the `vishwas dubey` blog has a custom domain** and is the real fixture — the shims keep old bookmarks working, but every in-tab URL changed. Founder gate item 5.
+4. **`BlogPost` rows are token-reachable but the tab is publish-gated (R18)** — a project with posts and no `PublishedPage` shows the locked state and its posts are UI-unreachable. They were unreachable before too (the old route was publish-gated by construction), so this is status quo; pre-publish blog = later slice.
+5. Moved-body + locked-state visuals unverified by eye (gate item 6), incl. the Blog tab's duplicate back-link (judgment call 3).
+
+### Merge-gate summary items (phase 5)
+
+1. **Recorded:** the testimonials tab reads with the **owner's Clerk id + `projectId`**; the util was not modified. Admin god-view must show the OWNER's entries, not blank (gate item 2's C2 half).
+2. **Recorded (B2):** the blog preview URL is unchanged and deliberately unshimmed; the post editor still links to the old slug URL **by design**. Do not "fix" it in a later cleanup.
+3. **D5, phase-5 half (record only):** `PageSwitcher.tsx:43` → `/dashboard/blog/{slug}` takes one extra hop via the new shim. Re-pointing = later slice.
+4. **Founder eyeball:** duplicate back-link now also on the Blog tab (consistent with analytics/leads).
+5. **Recorded:** the blog shims 404 on a null `projectId` → gate item 4's count matters for blog bookmarks too.
+
+### Verification (actual output)
+
+- **`npx tsc --noEmit`** → **exit 0, zero errors**.
+- **`npm run test:run`** → **Test Files 194 passed | 1 skipped (195); Tests 3343 passed | 18 skipped (3361)** — unchanged vs phases 3/4 (no unit tests added; phase 5 is route + e2e work). Config-freeze isolation guard green.
+- **`npm run lint`** → **zero errors** (`grep -c "Error:"` → `0`); warnings only, all pre-existing (`no-img-element` in templates, `react-hooks/exhaustive-deps` in providers). **No warning in any phase-5 file.**
+- `git diff --stat tailwind.config.js src/components/ui` → **empty** (foundation frozen).
+- `npx playwright test --list --project=authed` → **Total: 32 tests in 6 files**.
+- `npm run build` / e2e execution not run (per instructions).
+- Not committed — orchestrator commits.

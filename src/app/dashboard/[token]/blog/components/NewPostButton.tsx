@@ -3,7 +3,14 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function NewPostButton({ tokenId, slug }: { tokenId: string; slug: string }) {
+/**
+ * New-post button — moved from `dashboard/blog/[slug]/components/` with its page.
+ *
+ * 🚨 C1 — pushes `/dashboard/{tokenId}/blog/{postId}`, NOT the old
+ * `/dashboard/blog/{slug}/{postId}` (now a redirect shim; in-tab links must never hop
+ * through one). The `slug` prop existed only for that old URL and is dropped.
+ */
+export default function NewPostButton({ tokenId }: { tokenId: string }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
 
@@ -19,7 +26,7 @@ export default function NewPostButton({ tokenId, slug }: { tokenId: string; slug
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data?.error || 'Failed to create post')
-      router.push(`/dashboard/blog/${slug}/${data.post.id}`)
+      router.push(`/dashboard/${tokenId}/blog/${data.post.id}`)
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Failed to create post')
       setBusy(false)

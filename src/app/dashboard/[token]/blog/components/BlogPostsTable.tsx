@@ -4,6 +4,16 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+/**
+ * Blog posts table — moved from `dashboard/blog/[slug]/components/` with its page.
+ *
+ * 🚨 C1 — the row/Edit links target `/dashboard/{tokenId}/blog/{postId}`, NOT the old
+ * `/dashboard/blog/{slug}/{postId}` (that URL is now a redirect shim: an in-tab link
+ * must never bounce through one). The page's `slug` prop existed ONLY to build those two
+ * old URLs, so it is dropped here (the `/blog/{post.slug}` sub-line uses the POST's own
+ * slug, a different field).
+ */
+
 interface PostRow {
   id: string
   slug: string
@@ -16,11 +26,9 @@ interface PostRow {
 export default function BlogPostsTable({
   posts,
   tokenId,
-  slug,
 }: {
   posts: PostRow[]
   tokenId: string
-  slug: string
 }) {
   const router = useRouter()
   const [busyId, setBusyId] = useState<string | null>(null)
@@ -74,7 +82,7 @@ export default function BlogPostsTable({
           {posts.map((post) => (
             <tr key={post.id} className="border-b border-gray-100 last:border-0">
               <td className="px-5 py-3">
-                <Link href={`/dashboard/blog/${slug}/${post.id}`} className="font-medium text-gray-900 hover:text-blue-600">
+                <Link href={`/dashboard/${tokenId}/blog/${post.id}`} className="font-medium text-gray-900 hover:text-blue-600">
                   {post.title}
                 </Link>
                 <div className="text-xs text-gray-400">/blog/{post.slug}</div>
@@ -94,7 +102,7 @@ export default function BlogPostsTable({
                 {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : '—'}
               </td>
               <td className="px-5 py-3 text-right space-x-3 whitespace-nowrap">
-                <Link href={`/dashboard/blog/${slug}/${post.id}`} className="text-gray-600 hover:text-gray-900">
+                <Link href={`/dashboard/${tokenId}/blog/${post.id}`} className="text-gray-600 hover:text-gray-900">
                   Edit
                 </Link>
                 {post.status === 'published' ? (

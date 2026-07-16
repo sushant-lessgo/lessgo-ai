@@ -1,7 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { AUDIENCES, seedDraft } from './helpers/seedDraft';
 
-// dashboard-workspace-ia PHASE 4 — slug → token redirect shims + the D1 no-hop rule.
+// dashboard-workspace-ia PHASE 4 (analytics/leads) + PHASE 5 (blog/testimonials) —
+// slug → token redirect shims + the C1/D1 no-hop rule.
 //
 // Registered on the `authed` project in playwright.config.ts (a spec that isn't listed
 // there matches no project and silently never runs). Run just this file:
@@ -32,6 +33,7 @@ interface Fixture {
 /** undefined = not attempted yet; null = attempted and failed (→ skip, never pass silently). */
 let fixture: Fixture | null | undefined;
 let draftToken: string | null | undefined;
+let postId: string | null | undefined;
 
 /**
  * Create an UNPUBLISHED project (the R10 locked-state fixture) and return its token.
@@ -107,6 +109,27 @@ async function getPublishedFixture(page: Page): Promise<Fixture | null> {
   return fixture;
 }
 
+/**
+ * Create (once) a blog post on the published fixture project, returning its id.
+ * Posts are token-keyed (`/api/blog/posts` takes `tokenId`), so no slug is needed —
+ * but the blog TAB is publish-gated (R18), hence the published fixture.
+ */
+async function getPostId(page: Page): Promise<string | null> {
+  if (postId !== undefined) return postId;
+  postId = null;
+
+  const f = await getPublishedFixture(page);
+  if (!f) return null;
+
+  const res = await page.request.post('/api/blog/posts', {
+    data: { tokenId: f.token, title: `e2e phase5 post ${Date.now()}` },
+  });
+  if (!res.ok()) return null;
+  const data = await res.json();
+  postId = data?.post?.id ?? null;
+  return postId;
+}
+
 test.describe('slug → token redirect shims (phase 4)', () => {
   test('/dashboard/analytics/{slug} → /dashboard/{token}/analytics', async ({ page }) => {
     const f = await getPublishedFixture(page);
@@ -178,5 +201,133 @@ test.describe('R10 — locked states before publish (phase 4)', () => {
     await expect(
       page.getByText('Publish to start collecting leads', { exact: true })
     ).toBeVisible();
+  });
+});
+
+test.describe('blog slug → token redirect shims (phase 5)', () => {
+  test('/dashboard/blog/{slug} → /dashboard/{token}/blog', async ({ page }) => {
+    const f = await getPublishedFixture(page);
+    test.skip(!f, 'could not build a published fixture (persona/start/seed/publish failed)');
+
+    await page.goto(`/dashboard/blog/${f!.slug}`);
+    await expect(page).toHaveURL(`/dashboard/${f!.token}/blog`);
+  });
+
+  test('/dashboard/blog/{slug}/{postId} → /dashboard/{token}/blog/{postId}', async ({ page }) => {
+    const f = await getPublishedFixture(page);
+    test.skip(!f, 'could not build a published fixture (persona/start/seed/publish failed)');
+    const id = await getPostId(page);
+    test.skip(!id, 'could not create a blog post via /api/blog/posts');
+
+    await page.goto(`/dashboard/blog/${f!.slug}/${id}`);
+    await expect(page).toHaveURL(`/dashboard/${f!.token}/blog/${id}`);
+  });
+
+  // Both blog shim dirs must stay REAL — deleting one lets `/dashboard/blog/foo` fall
+  // through to `[token]` and "blog" gets read as a project token.
+  test('unknown slug → 404 (both blog shims)', async ({ page }) => {
+    const a = await page.goto('/dashboard/blog/definitely-not-a-real-slug-xyz');
+    expect(a?.status(), 'unknown blog slug must 404').toBe(404);
+
+    const b = await page.goto('/dashboard/blog/definitely-not-a-real-slug-xyz/some-post-id');
+    expect(b?.status(), 'unknown blog post slug must 404').toBe(404);
+  });
+});
+
+test.describe('C1 — in-tab blog nav never hops through a shim (phase 5)', () => {
+  test('table row → post → back-link are all token URLs', async ({ page }) => {
+    const f = await getPublishedFixture(page);
+    test.skip(!f, 'could not build a published fixture (persona/start/seed/publish failed)');
+    const id = await getPostId(page);
+    test.skip(!id, 'could not create a blog post via /api/blog/posts');
+
+    await page.goto(`/dashboard/${f!.token}/blog`);
+
+    // The HREF is the assertion that bites: a verbatim component copy would have kept
+    // `/dashboard/blog/{slug}/{postId}`, which redirects to the SAME final URL — so
+    // checking only the landing URL would pass while the hop was still there.
+    const row = page.locator(`a[href="/dashboard/${f!.token}/blog/${id}"]`).first();
+    await expect(row, 'blog table row must link straight at the token URL').toBeVisible();
+    await row.click();
+    await expect(page).toHaveURL(`/dashboard/${f!.token}/blog/${id}`);
+
+    const back = page.getByRole('link', { name: 'All posts' });
+    await expect(back).toHaveAttribute('href', `/dashboard/${f!.token}/blog`);
+    await back.click();
+    await expect(page).toHaveURL(`/dashboard/${f!.token}/blog`);
+  });
+});
+
+test.describe('B2 — blog SSR preview is NOT re-homed and stays chrome-free (phase 5)', () => {
+  test('preview URL 200s on the OLD slug path, no redirect, no .app-chrome', async ({ page }) => {
+    const f = await getPublishedFixture(page);
+    test.skip(!f, 'could not build a published fixture (persona/start/seed/publish failed)');
+    const id = await getPostId(page);
+    test.skip(!id, 'could not create a blog post via /api/blog/posts');
+
+    const url = `/dashboard/blog/${f!.slug}/${id}/preview`;
+    const res = await page.goto(url);
+    expect(res?.status(), 'the preview route must render, not 404').toBeLessThan(400);
+
+    // Deliberately NOT shimmed: this URL is live, not a hop (the post editor links here).
+    await expect(page).toHaveURL(url);
+
+    // It renders real template markup — app chrome must never wrap it (fonts/colors
+    // would leak in and break parity with the live page).
+    await expect(page.locator('.app-chrome')).toHaveCount(0);
+  });
+
+  test('the post editor still points its preview link at the old slug URL', async ({ page }) => {
+    const f = await getPublishedFixture(page);
+    test.skip(!f, 'could not build a published fixture (persona/start/seed/publish failed)');
+    const id = await getPostId(page);
+    test.skip(!id, 'could not create a blog post via /api/blog/posts');
+
+    await page.goto(`/dashboard/${f!.token}/blog/${id}`);
+    // D3: the slug comes from the wrapper's publishedPage.slug, not a route param.
+    await expect(page.getByRole('link', { name: 'Preview saved draft' })).toHaveAttribute(
+      'href',
+      `/dashboard/blog/${f!.slug}/${id}/preview`
+    );
+  });
+});
+
+test.describe('C2 — testimonials tab avoids the third ID space (phase 5)', () => {
+  // The silent-zero-rows guard. `Testimonial.userId` is a CLERK id while
+  // `project.userId` is an internal `User.id`: passing the wrong one is tsc-green and
+  // returns ZERO rows with no error. Only a NON-EMPTY assertion catches that.
+  test('a project-scoped testimonial actually renders in the tab', async ({ page }) => {
+    const f = await getPublishedFixture(page);
+    test.skip(!f, 'could not build a published fixture (persona/start/seed/publish failed)');
+
+    const projectRes = await page.request.get(`/api/projects/${f!.token}`);
+    test.skip(!projectRes.ok(), 'could not resolve the project id via /api/projects');
+    const { id: projectId } = await projectRes.json();
+
+    const quote = `e2e phase5 quote ${Date.now()}`;
+    const created = await page.request.post('/api/testimonials', {
+      data: { authorName: 'E2E Author', quote, projectId },
+    });
+    // 404 = TESTIMONIALS_ENABLED unset in this run's env — skip loudly, never pass mute.
+    test.skip(
+      created.status() === 404,
+      'TESTIMONIALS_ENABLED is not "true" in this env — testimonials surface is dark'
+    );
+    expect(created.ok(), `seeding a testimonial failed: ${created.status()}`).toBeTruthy();
+
+    const res = await page.goto(`/dashboard/${f!.token}/testimonials`);
+    expect(res?.status(), 'the testimonials tab must render').toBeLessThan(400);
+    await expect(page.getByText(quote, { exact: false })).toBeVisible();
+  });
+});
+
+test.describe('R18 — blog tab locked before publish (phase 5)', () => {
+  test('unpublished project: blog renders locked, not an error', async ({ page }) => {
+    const token = await getDraftToken(page);
+    test.skip(!token, 'persona//api/start failed — cannot build a draft fixture');
+
+    const b = await page.goto(`/dashboard/${token}/blog`);
+    expect(b?.status(), 'a draft workspace tab must render, not 404').toBeLessThan(400);
+    await expect(page.getByText('Publish to start blogging', { exact: true })).toBeVisible();
   });
 });

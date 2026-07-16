@@ -174,6 +174,16 @@ export default function BlogPostEditor({
           {notice && <span className="text-sm text-green-700">{notice}</span>}
         </div>
         <div className="space-x-2">
+          {/*
+            🚨 DELIBERATE: this preview link stays on the OLD slug URL (B2). Every other
+            blog link was re-pointed to `/dashboard/{token}/...`, but the SSR preview is
+            NOT a dashboard screen — it lives in the `(blog-preview)` root route group
+            (`src/app/(blog-preview)/dashboard/blog/[slug]/[postId]/preview/page.tsx`),
+            deliberately OUTSIDE the dashboard tree so no `.app-chrome` ancestor can leak
+            app fonts/colors into real template markup. It has no `[token]` twin and no
+            redirect shim, so this URL is the live one, not a hop. Do NOT "fix" it.
+            (`slug` comes from the page's `publishedPage.slug`, D3 — not a route param.)
+          */}
           <a
             href={`/dashboard/blog/${slug}/${post.id}/preview`}
             target="_blank"
