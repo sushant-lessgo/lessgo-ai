@@ -72,6 +72,15 @@ backups/
 Lessgo.zip
 design_handoff_naayom/
 
+# Design source stays local (brand assets, future designer drops) — EXCEPT the
+# UI-redesign handoff, which Lane-1 + work-onboarding specs cite BY PATH, so it
+# must exist in every worktree. Parent dirs are re-included explicitly: git never
+# descends into an excluded directory, so `!` alone on a nested path won't work.
+docs/Design/*
+!docs/Design/Lessgo AI UI redesign/
+docs/Design/Lessgo AI UI redesign/*
+!docs/Design/Lessgo AI UI redesign/design_handoff_lessgo_app/
+
 # Template design mockups (local reference only)
 template-design/
 .claude/settings.local.json
