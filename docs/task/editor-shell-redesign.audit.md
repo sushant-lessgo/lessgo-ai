@@ -1241,3 +1241,149 @@ returned it to **1x**. The check can go red, so green means something.
   `TemplateSwapList`, so the duplicate bug never applied to it).
 - Verification was jsdom, not a real browser: it proves the **row count / branch selection**, not
   pixels. `TemplateSwapList`'s legacy blue-ring styling inside a t14 group remains the phase-8 carry.
+
+---
+
+# Phase 6 — Site settings + SEO (t16) + per-page SEO (t18)
+
+## Files changed
+- `src/app/edit/[token]/components/ui/SeoSettingsModal.tsx` — reskinned to t16/t18. **The only file
+  touched.** `LocaleSettings.tsx` / `LanguageToggle.tsx` were REMOVED from Files-touched by the
+  orchestrator amendment (decision 8b, Languages gone → they are unmounted dead code; left untouched
+  on disk for the i18n track). `GlobalModals.tsx` needed no change (the wrapper-className ceiling was
+  never reached — see "Social row" below).
+
+## What shipped
+
+**t16 site-settings window** (root page selected):
+- `dialog` primitive, **912×552** (live-measured `{x:224,y:156,width:912,height:552}`), radius 16,
+  border `app-border-strong`, `shadow-app-window`.
+- Header 56 / bottom border `app-border-pane`: `tune` `#006CFF` + "Site settings" 700/15 + **Saved
+  dot-pill** + `close`.
+- Left nav 196, bg `app-surface-sunken` (#fafafb), right border `app-border-pane`, eyebrow `SITE`:
+  **Domain (greyed) / SEO (active) / Social & sharing (wired)**.
+- SEO pane (pad 22/26, two cols gap 26): Homepage title input · Meta description textarea + mono
+  counter · Google preview card (`app-border-pane`, radius 10, title `app-preview-title`, URL
+  `app-preview-url`, snippet `app-preview-snippet`) · indexing `switch` row. Side col **184**:
+  Favicon 40×40 + Replace · Default social image (`image-placeholder` + `1200×630` mono chip +
+  Replace image) · Social card preview · Sitemap row (bg `app-surface-alt`, `open_in_new`).
+- Fields pad `9px 12px` / border `app-border-hairline` / radius 9 (`rounded-app-ctl-sm`); labels
+  600/11.5 `app-label`.
+
+**t18 per-page overrides** (sub-page selected — the EXISTING per-page section, restyled):
+- Header "Page settings · <name>" + t18's verbatim caption ("Overrides, not duplicates. Each field
+  falls back to the site SEO defaults — you only fill in what should differ for this page.").
+- `tabs` primitive → `General | SEO | Social`, restyled to the drawn segmented look (track
+  `app-track`, active `#fff` + `app-primary` 600/12 + `0 1px 2px rgba(0,0,0,.07)`).
+- Tighter fields (radius 8, pad `8px 11px`), mono counters. General = indexing toggle, SEO = meta
+  title/description + Google preview, Social = social image.
+
+## Ruled deviation from t16 as drawn — no `Languages` nav row
+t16 draws a 4th left-nav row (`Languages` + mono locale count). **Deliberately omitted** per founder
+ruling 8b (Languages gone from the chrome; phase 4 already deleted the `LanguageToggle`/
+`LocaleSettings` mounts). Re-adding it in the settings modal would contradict the ruling. Left nav is
+**Domain / SEO / Social & sharing** — 3 rows, live-verified. Documented in the file's header comment.
+
+## Dispositions — evidence
+- **Social & sharing: WIRED, never greyed.** Opens the existing social panel. Implementation note: it
+  does **not** import `showSocialModal` — `GlobalModals.tsx` imports THIS file, so that would be a
+  require cycle. It dispatches the `lessgo:manage-social` window event, which `GlobalModals` already
+  listens for (the firewall-safe pattern already in the codebase). This is why no `GlobalModals`
+  change was needed. Live-verified: SEO window closes (autosave fires), social panel opens.
+- **Domain: GREYED** via `<Coming what="custom domain setup">`. Re-verified the phase-4 finding: no
+  domain entry point exists anywhere in `src/app/edit/`. Live: `aria-disabled="true"`, `.app-coming`,
+  tooltip "Coming soon — custom domain setup".
+- **Sitemap: GREYED — evidence both ways.** A per-host sitemap route **does exist**
+  (`src/app/api/seo/sitemap/route.ts`, reached by a middleware rewrite of `{publishedHost}/sitemap.xml`;
+  `src/app/sitemap.xml/route.ts` is the marketing sitemap only, not this site's). **But the editor has
+  no published host to build the link from**: `publishing.publishedUrl` is *declared* at
+  `src/types/store/state.ts:407` and **never assigned anywhere in the repo** (grep returns only the
+  type declaration), and this phase may add no fetches. Wiring it needs the publish-status fetch that
+  lives on the preview page → phase 7/8 territory. Greyed as `Coming what="the sitemap link"`.
+- **`nav-item`'s `activeBar` variant: FITS — now consumed.** t16's left nav is exactly its drawn use
+  (`bg-app-tint` + `inset 2px 0 0 #006CFF` + `app-primary-deep` 600). It should NOT be deleted in
+  phase 8.
+
+## Preserved (scout §E landmines)
+- **`useMemo`-outside-selector shape (L36-38 comments + code): verbatim.** The raw `pages` record is
+  still selected and the sorted list still derived in a `useMemo` outside the selector. Live probes
+  across 3 sessions: **no "Maximum update depth exceeded"** in the console.
+- **`store.updatePageSeo` wiring**: untouched — reskin, not rebuild. Live-verified a per-page override
+  reaching the store: `T18 STORE seo: {"description":"Pricing page override description."}`.
+- **Char meters** (60/70, 160/200) + `maxLength` behavior unchanged.
+- **Pixel regexes + Pro gate** (`/api/billing/plan`, L66-80): untouched, still **fail-closed**. Live:
+  `#seo-meta-pixel` rendered disabled.
+- **Google preview still renders from the real `buildPageMetadata`** — no mock markup. Live: typing in
+  the description updated the snippet, and the title field updated the preview title.
+- `noindex` semantics unchanged (see judgement calls).
+- Raw tracking-ID local state, upload handlers, `handleClose`→`triggerAutoSave` all byte-identical.
+
+## Judgement calls (in-scope, conservative)
+1. **noindex checkbox → t16 indexing switch.** t16 draws "Let search engines index this site" (ON =
+   indexed); the store field is `noIndex`. Mapped by inversion — `checked={!seo.noIndex}`,
+   `onCheckedChange(v => patch({noIndex: v ? undefined : true}))`. Identical semantics/store writes.
+2. **Switch left at the primitive's 36×20, not t16's 38×22.** The thumb size and its 16px travel are
+   internal to `switch.tsx` (out of scope); resizing the track alone would desynchronize the knob.
+   2px deviation, deliberate.
+3. **Built-in `DialogContent` close suppressed** via `[&>button]:hidden` so the t16 header close (a
+   `DialogClose`) is the only one. t16 draws exactly ONE close. Live-verified: **1 visible close
+   affordance** (the built-in has `box=null`). `dialog.tsx` is out of scope, hence the utility rather
+   than a primitive change.
+4. **Radix Dialog adds ESC-to-close** (backdrop-click already closed and still does; both route to the
+   same `handleClose` → `triggerAutoSave`). Minor behavior addition inherent to the primitive.
+5. **Saved dot-pill derives save state locally** (read-only, `useShallow` selector on the persistence
+   slice) rather than mounting `SaveStateChip` — the chip registers a `beforeunload` guard, and a
+   second one is not wanted. No new store state.
+6. **`.app-chrome` sits on the portalled `DialogContent`** (Radix portals to `body`, escaping
+   `EditLayout`'s chrome roots) and never near the canvas. All backgrounds are painted by CHILDREN —
+   `.app-chrome` would beat a co-located `bg-*` utility on the same element.
+7. **Nothing dropped.** t16 doesn't draw structured data / tracking pixels / the social card preview;
+   all three are working features, so they were restyled and kept (extras below the drawn t16 fields /
+   in the side col) rather than omitted.
+8. **Char-meter tone preserved.** t16 specifies `#b0b0ba`; the green/amber over-ideal tone is the
+   meter's *behavior*, so it was kept and only the neutral state adopts the handoff grey.
+
+## Verification — actual output
+- `npx tsc --noEmit` → **clean, 0 errors**.
+- `npm run test:run` → **194 passed | 1 skipped (195 files); 3337 passed | 18 skipped (3355 tests)**.
+- `npm run lint` → **0 errors** (pre-existing `no-img-element` / `exhaustive-deps` warnings only;
+  targeted `eslint` on the touched file: clean).
+- CRLF-churned `uiFoundationIsolation.test.tsx.snap` restored; `git status` shows only this phase's file.
+- e2e not run (optional this phase).
+
+### Live browser check — RUN (headless Chromium, dev on :3003, seeded Meridian project, 1360×864)
+Ports 3000-3002 were held by other worktrees' dev servers. Probes were standalone scripts in the
+scratchpad (no repo files created; `playwright.config.ts`'s `testMatch` allowlist makes a throwaway
+spec impossible without an out-of-scope config edit). Screenshots reviewed, then deleted.
+- Opens via the Settings popover → SEO row. PASS
+- Dialog geometry **912×552** exactly. PASS
+- Left nav: **exactly 3 rows** — `Domain` / `SEO` / `Social & sharing` (counted against t16 as drawn,
+  minus the ruled Languages omission). PASS
+- **Exactly 1 visible close** (the duplicate hazard — explicitly counted, not assumed). PASS
+- Meters + Google preview update **live**: `MONO ["0 / 60","63 / 160","1200x630"]`; snippet became the
+  typed text; `PREVIEW TITLE AFTER "Probe SEO title"`. PASS
+- Per-page override **saves** through `updatePageSeo`. PASS. t18 tabs all three render + switch. PASS
+- Social row opens the social panel. PASS
+- **No "Maximum update depth exceeded"** in any probe. PASS
+- **Clipping/reachability** (the 912×552 + scrolling-pane hazard): pane `scrollHeight 801 / clientH
+  494`, scrolls correctly; the bottom-most controls (Sitemap row, tracking inputs) are visible and
+  reachable; nothing clipped or unreachable. PASS
+- Pro gate: `#seo-meta-pixel` **disabled** (fail-closed holds). PASS
+- **False alarm, chased down not assumed:** a probe reported only ONE page chip where two were drawn
+  (the phase-5 duplicate-row failure mode in reverse). Re-probed with a verbatim dump: **3 chips**,
+  `"Home*" / "Pricing*" / "Pricing"` — the first reading was my regex missing the seo bullet marker,
+  and the third chip was my own probe calling `addPage` twice across sessions (store confirmed two
+  `/pricing` entries). **Not a UI bug** — the strip renders every page.
+
+## Open risks / not done
+- **Pre-existing, NOT mine:** `GET /edit/<token>` returns **500** on first SSR in dev —
+  `useEditStoreBootstrap.ts:238 ReferenceError: window is not defined` (the dev-only `window` debug
+  block). Already logged as the phase-7 note in the plan; the page hydrates and works. Unrelated to
+  this file.
+- t18's entry point per the handoff is the Pages rail ... menu, which is **greyed** (phase 3) and
+  explicitly not built here — so the per-page pane is reached via the modal's page-chip strip, as it
+  was before this phase. The chip strip itself is a restyle, not the drawn t18 entry.
+- The t18 branch only renders for multi-page projects; the live check exercised it by adding a page
+  through the dev store handle (probe-only, no code path added).
+- `LocaleSettings.tsx` / `LanguageToggle.tsx` remain unstyled dead code on disk by ruling — if the
+  i18n track re-mounts them, they will not match app-chrome.
