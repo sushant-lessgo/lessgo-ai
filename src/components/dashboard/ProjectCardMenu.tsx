@@ -1,6 +1,9 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import posthog from 'posthog-js'
+import { confirmDialog } from '@/components/ui/ConfirmDialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { AppIcon } from '@/components/ui/icon'
+import { useToast } from '@/components/ui/toast'
 import { publishedUrl } from '@/lib/publishedUrl'
 import { cn } from '@/lib/utils'
 import type { ProjectGridItem } from './ProjectGridCard'
@@ -17,9 +21,10 @@ import type { ProjectGridItem } from './ProjectGridCard'
  * ProjectCardMenu — the `•••` popover on a project card (handoff §E 1d).
  *
  * R4: ships ALL 7 design items in design order. ACTIVE: "Open editor",
- * "Visit site" (published only). GREYED (completeness principle — render in
- * place, disabled): Rename, Duplicate, Domain settings (R15-consistent: no
- * per-card domain route), Archive, Delete (no backend — S2).
+ * "Visit site" (published only), "Unpublish" (published only — phase 5),
+ * "Delete" (phase 5). GREYED (completeness principle — render in place,
+ * disabled): Rename, Duplicate (phase 6), Domain settings + Archive (D3 — out
+ * of this spec's scope entirely).
  *
  * R11 — `@/components/ui/dropdown-menu` is NOT part of the foundation's
  * reskinned set (still stock `rounded-sm`/`accent` classes). It must NOT be
@@ -30,6 +35,15 @@ import type { ProjectGridItem } from './ProjectGridCard'
  * 🚨 PostHog: `project_preview_clicked` fires ONLY in "Visit site" (single call
  * site, B5). "Open editor" fires nothing here — `continueRouting` owns
  * `project_edit_clicked`.
+ *
+ * 🚨 Refresh model: the grid is a SERVER component, so a successful action ends
+ * in `router.refresh()` — never an optimistic local removal. The server re-reads
+ * `publishState`/`customDomain` and re-derives the card; that keeps the DD7 stale
+ * -client problem bounded to a single round trip.
+ *
+ * 🚨 The server is the source of truth for the DD7 guard. The pre-disable below
+ * is a courtesy; a stale client that still fires gets a 409 and shows the SAME
+ * sentence via an error toast.
  */
 
 const CONTENT_CLASS =
@@ -41,6 +55,30 @@ const ITEM_CLASS =
 const DANGER_ITEM_CLASS =
   'cursor-pointer gap-2.5 rounded-[7px] px-2.5 py-2 text-[12.5px] font-medium text-app-danger focus:bg-app-danger-bg focus:text-app-danger'
 
+/** DD7 — one sentence, one place: pre-disable tooltip AND the 409 error toast. */
+const DOMAIN_BLOCKED_MESSAGE = 'Remove the custom domain first'
+
+/**
+ * 🚨 DD1c — LOAD-BEARING COPY, NOT DECORATION. Read before touching.
+ *
+ * The phase-3 investigation found NO usable cache-purge mechanism in this stack: there is no
+ * per-URL Vercel purge API available to us, and the `cacheTag`/`revalidateTag` route is Next 15
+ * while this app is Next 14 (and the blob-proxy runs on the edge runtime). The blob-proxy's CDN
+ * cache is keyed by the PUBLIC url, so nothing we do server-side evicts it — `revalidatePath()`
+ * only clears our own ISR render.
+ *
+ * Net effect: take-down is immediate at the ORIGIN, but the edge can keep replaying a cached
+ * copy for ~1h. These two strings are therefore the ONLY honest signal the user ever gets about
+ * that window. They must survive rewording:
+ *   - plain words only — never "s-maxage", "SWR", "CDN cache key", "edge";
+ *   - never promise instant global removal;
+ *   - keep "up to an hour" (~1h is the practical window: after it, stale-while-revalidate
+ *     revalidation reaches the 404 origin and the cache self-corrects — it is NOT 24h).
+ */
+const CACHED_COPY_SENTENCE =
+  'Your page stops being served immediately, but visitors may see a cached copy for up to an hour.'
+const UNPUBLISHED_TOAST = 'Unpublished. The cached copy can take up to an hour to clear.'
+
 export interface ProjectCardMenuProps {
   project: ProjectGridItem
   /** Routes through `continueRouting` — supplied by the card. */
@@ -48,6 +86,101 @@ export interface ProjectCardMenuProps {
 }
 
 export default function ProjectCardMenu({ project, onOpenEditor }: ProjectCardMenuProps) {
+  const router = useRouter()
+  const { toast } = useToast()
+  const [busy, setBusy] = useState(false)
+
+  const name = project.name || 'this project'
+  // The RAW state, not the display pill: a page parked at 'unpublishing' by a failed teardown
+  // still needs its Unpublish item — that item IS the retry (the route is idempotent).
+  const isPublished = project.publishState !== 'draft'
+  const blockedByDomain = project.hasCustomDomain
+
+  /**
+   * Shared action runner. Both endpoints answer with the same typed error contract, so the
+   * mapping lives here once:
+   *   409 custom_domain_attached → the guard sentence (a stale pre-disable)
+   *   500 teardown_incomplete    → retryable; say so instead of a dead-end "failed"
+   */
+  const run = async (
+    request: () => Promise<Response>,
+    successMessage: string
+  ) => {
+    setBusy(true)
+    try {
+      const res = await request()
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as { code?: string; error?: string }))
+        const message =
+          data.code === 'custom_domain_attached'
+            ? DOMAIN_BLOCKED_MESSAGE
+            : data.code === 'teardown_incomplete'
+              ? "Take-down didn't finish. Please try again."
+              : data.error || 'Something went wrong. Please try again.'
+        toast(message, { variant: 'error' })
+        return
+      }
+      toast(successMessage, { variant: 'success' })
+      // Server component → re-read, never an optimistic splice.
+      router.refresh()
+    } catch {
+      toast("Couldn't reach the server. Please try again.", { variant: 'error' })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const handleUnpublish = () => {
+    posthog.capture('project_unpublish_clicked', {
+      project_id: project.id,
+      project_name: project.name,
+    })
+
+    // Deferred a tick: the Radix menu restores focus to its trigger as it closes, which would
+    // otherwise land after DialogHost's rAF focus and leave the dialog unfocused (Esc dead).
+    setTimeout(() => {
+      void (async () => {
+        const ok = await confirmDialog({
+          title: 'Unpublish this site?',
+          message: `“${name}” will be taken off the web. ${CACHED_COPY_SENTENCE} You can publish it again later — the address stays reserved.`,
+          confirmLabel: 'Unpublish',
+        })
+        if (!ok) return
+        await run(
+          () => fetch(`/api/projects/${project.tokenId}/unpublish`, { method: 'POST' }),
+          UNPUBLISHED_TOAST
+        )
+      })()
+    }, 0)
+  }
+
+  const handleDelete = () => {
+    posthog.capture('project_delete_clicked', {
+      project_id: project.id,
+      project_name: project.name,
+    })
+
+    setTimeout(() => {
+      void (async () => {
+        const ok = await confirmDialog({
+          title: 'Delete this project?',
+          // A published project's delete ALSO tears the live page down — say so, and inherit
+          // the same DD1c honesty (delete runs the identical teardown).
+          message: isPublished
+            ? `“${name}” will be permanently deleted, and its live page taken down with it. ${CACHED_COPY_SENTENCE} This can't be undone.`
+            : `“${name}” will be permanently deleted. This can't be undone.`,
+          confirmLabel: 'Delete',
+          destructive: true,
+        })
+        if (!ok) return
+        await run(
+          () => fetch(`/api/projects/${project.tokenId}`, { method: 'DELETE' }),
+          'Project deleted.'
+        )
+      })()
+    }, 0)
+  }
+
   const handleVisit = () => {
     posthog.capture('project_preview_clicked', {
       project_id: project.id,
@@ -86,6 +219,20 @@ export default function ProjectCardMenu({ project, onOpenEditor }: ProjectCardMe
           Visit site
         </DropdownMenuItem>
 
+        {/* Published-only, and only while a page is actually up. Also the RETRY for a page
+            stuck at 'unpublishing' (the route is idempotent). */}
+        {isPublished && (
+          <DropdownMenuItem
+            className={cn(ITEM_CLASS, (blockedByDomain || busy) && 'cursor-not-allowed')}
+            disabled={blockedByDomain || busy}
+            title={blockedByDomain ? DOMAIN_BLOCKED_MESSAGE : undefined}
+            onSelect={handleUnpublish}
+          >
+            <AppIcon name="cloud_off" size={17} />
+            Unpublish
+          </DropdownMenuItem>
+        )}
+
         {/* R4 — designed chrome with no backend yet: greyed in place, never hidden. */}
         <DropdownMenuItem className={cn(ITEM_CLASS, 'cursor-not-allowed')} disabled>
           <AppIcon name="drive_file_rename_outline" size={17} />
@@ -106,7 +253,12 @@ export default function ProjectCardMenu({ project, onOpenEditor }: ProjectCardMe
           <AppIcon name="archive" size={17} />
           Archive
         </DropdownMenuItem>
-        <DropdownMenuItem className={cn(DANGER_ITEM_CLASS, 'cursor-not-allowed')} disabled>
+        <DropdownMenuItem
+          className={cn(DANGER_ITEM_CLASS, (blockedByDomain || busy) && 'cursor-not-allowed')}
+          disabled={blockedByDomain || busy}
+          title={blockedByDomain ? DOMAIN_BLOCKED_MESSAGE : undefined}
+          onSelect={handleDelete}
+        >
           <AppIcon name="delete" size={17} />
           Delete
         </DropdownMenuItem>

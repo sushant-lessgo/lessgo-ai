@@ -569,3 +569,124 @@ which is what drove the fix above.
   project is seeded in the target DB. The guard itself is unconditional in code.
 - All phase-4 open risks above still stand (the spec has never run; local publishes land in
   `'failed'`; the post-teardown `$transaction` window).
+
+---
+
+# Phase 5 — Dashboard wiring slice 1: Unpublish + Delete live
+
+## Files changed
+
+- `src/app/dashboard/page.tsx`
+- `src/components/dashboard/ProjectGridCard.tsx`
+- `src/components/dashboard/ProjectCardMenu.tsx`
+- `e2e/dashboard-lifecycle.spec.ts`
+- `docs/task/dashboard-lifecycle-actions.audit.md` (this section)
+
+`@/components/ui/dropdown-menu` NOT touched (hard ruling) — popover/disabled styling stays at
+the call site via `className`/`title`. `ConfirmDialog.tsx` NOT touched (DD5).
+
+## The DD1c copy shipped (VERBATIM — founder reviews this at Gate A)
+
+Constants live in `ProjectCardMenu.tsx` (`CACHED_COPY_SENTENCE`, `UNPUBLISHED_TOAST`) under a
+comment explaining WHY they are load-bearing, so a future reword can't silently drop the only
+honest signal about the ~1h edge window.
+
+1. **Unpublish confirm dialog** — title `Unpublish this site?`, body:
+   > “{name}” will be taken off the web. Your page stops being served immediately, but visitors may see a cached copy for up to an hour. You can publish it again later — the address stays reserved.
+   Confirm button: `Unpublish`.
+2. **Unpublish success toast:**
+   > Unpublished. The cached copy can take up to an hour to clear.
+3. **Delete confirm dialog (published project)** — title `Delete this project?`, body:
+   > “{name}” will be permanently deleted, and its live page taken down with it. Your page stops being served immediately, but visitors may see a cached copy for up to an hour. This can't be undone.
+4. **Delete confirm dialog (draft project):**
+   > “{name}” will be permanently deleted. This can't be undone.
+5. **Delete success toast:** `Project deleted.`
+6. **Error toasts:** 409 → `Remove the custom domain first` (same string as the pre-disable
+   tooltip, one constant); 500 `teardown_incomplete` → `Take-down didn't finish. Please try
+   again.` (retryable, says so); other non-OK → server `error` or `Something went wrong. Please
+   try again.`; network throw → `Couldn't reach the server. Please try again.`
+
+No jargon anywhere: "s-maxage" / "SWR" / "CDN" / "edge" appear in code comments only, never in
+user-visible strings.
+
+## What changed, per file
+
+**`src/app/dashboard/page.tsx`**
+- `publishState` + `customDomain` added to the `publishedPage` select in **BOTH** the admin
+  god-view branch and the owner branch (DD7), plus the shared `publishedPages` type. The two
+  are separate queries — a comment now says so at the type, since adding a field to one only
+  ships a stale menu for half the users.
+- Status derivation moved from `publishedPage ? 'Published' : 'Draft'` to the DD4/DD0 slot
+  predicate: `occupiesSlot = Boolean(publishedPage) && publishState !== 'draft'`. A row kept
+  for slug reservation (DD12) no longer reads "Published" forever; a page stuck at
+  `'unpublishing'` still shows Published and offers Unpublish as the retry.
+- Item gains `publishState` (raw) + `hasCustomDomain`.
+
+**`src/components/dashboard/ProjectGridCard.tsx`**
+- `ProjectGridItem` extended with `publishState: string` + `hasCustomDomain: boolean` (both
+  documented; `publishState` is deliberately NOT a duplicate of `status`). Pass-through to the
+  menu needed no change — the card already forwards the whole item.
+- Added `data-testid="project-card-{tokenId}"` on the card root for the e2e UI path (see
+  Deviations).
+
+**`src/components/dashboard/ProjectCardMenu.tsx`**
+- New **Unpublish** item, rendered only when `publishState !== 'draft'` (so it doubles as the
+  retry for a stuck `'unpublishing'`); **Delete** un-greyed. Both disabled (with the guard
+  sentence as `title`) when `hasCustomDomain`, and while an action is in flight (`busy`).
+- One shared `run()` helper maps the phase-4 error contract (`custom_domain_attached` /
+  `teardown_incomplete`) to toasts, then `router.refresh()` on success — the app-chrome
+  `useToast()` from `@/components/ui/toast`, never the editor-local `showToast()` singleton.
+  No optimistic removal: the grid is a server component, so the flip to Draft / the card's
+  disappearance is the SERVER's answer.
+- PostHog `project_unpublish_clicked` / `project_delete_clicked`, mirroring
+  `project_preview_clicked` (`{ project_id, project_name }`), fired at click — before the
+  confirm — matching the existing "clicked" naming.
+- Domain settings + Archive left greyed (D3).
+
+**`e2e/dashboard-lifecycle.spec.ts`** — 3 UI tests added on top of the 7 API tests:
+menu → confirm (asserting the cached-copy sentence) → toast → card flips to Draft + `/p/{slug}`
+404s; delete → destructive confirm (asserts "live page taken down" + the cached-copy sentence)
+→ toast → card gone + DB rows gone; custom-domain card → both items `data-disabled` with the
+guard `title`. The copy assertions carry a comment telling a future editor to preserve the
+MEANING rather than delete the assertion.
+
+## Deviations / in-scope judgment calls
+
+1. **`slug` is now nulled for a non-serving card** (`slug: occupiesSlot ? … : null`). The plan
+   didn't specify. Without it, an unpublished project would keep an enabled "Visit site" that
+   opens a 404 (the row + slug survive by DD12). Nulling makes a draft-state row behave exactly
+   as a never-published project always did — conservative, no new behavior.
+2. **`data-testid` on the card root** (file is in scope). Every meridian seed is titled
+   'Meridian', so a name-based locator is ambiguous in the shared-user e2e grid; the tokenId is
+   the handle the test already holds. Chosen over a brittle DOM-ancestor locator.
+3. **Unpublish confirm is NOT `destructive: true`** (Delete is). Unpublish is reversible and the
+   dialog says the address stays reserved; red is reserved for the irreversible action.
+4. **The DD1c sentence is also shown on the PUBLISHED delete confirm.** The plan mandated it for
+   unpublish only, but delete runs the identical teardown and therefore has the identical edge
+   window — omitting it there would be the same dishonesty in a worse place.
+5. **Confirm dialogs are opened via `setTimeout(…, 0)`** after the Radix menu closes: the menu
+   restores focus to its trigger on close, which would otherwise land after DialogHost's `rAF`
+   focus and leave the dialog unfocused (Esc dead).
+
+## Verification
+
+- `npx tsc --noEmit` — **green**.
+- `npm run test:run` — **green** (196 files / 3371 tests passed, 1 file + 18 tests skipped).
+- **e2e observed green by execution**: `E2E_PORT=3011 npx playwright test
+  e2e/dashboard-lifecycle.spec.ts --project=setup --project=authed --reporter=list` →
+  **10 passed** (the 7 pre-existing API tests + the 3 new UI tests), 5.7m. Port 3011 confirmed
+  clear beforehand; Playwright started its own server.
+- Manual dev pass NOT run — deferred to founder Gate A.
+
+## Open risks
+
+- The `hasCustomDomain` pre-disable is a courtesy over possibly-stale server-rendered data; the
+  409 remains the real gate (asserted in the API test). A stale click is handled, not prevented.
+- `'unpublishing'`-stuck cards show "Published" with a working Unpublish retry, but nothing
+  tells the user the page is ALREADY non-serving. Acceptable (the state is rare and transient);
+  no state-specific pill was added this slice.
+- The DD1c copy asserts against the real cache window only if the founder accepts the ~1h
+  window at Gate A. If Gate A rules the window unacceptable, the copy AND a purge mechanism
+  change together.
+- e2e UI tests depend on the toast's `role="status"` and Radix's `data-disabled` — both
+  implementation details of components outside this spec's fence.

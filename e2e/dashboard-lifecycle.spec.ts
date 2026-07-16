@@ -22,6 +22,11 @@ import { AUDIENCES, seedDraft, publishSeed } from './helpers/seedDraft';
  *    fails non-fatally here. KV/blob teardown is pinned by `src/lib/staticExport/teardown.test.ts`
  *    (unit, mocked) and verified for real at Gate A on a deployed host.
  *
+ * Phase 5 adds the DASHBOARD UI path on top of the same contract: `••• → confirm → toast →
+ * router.refresh()`. Those tests assert the DD1c honest-window copy verbatim-ish, because that
+ * sentence is the only signal a user gets about the ~1h edge cache window and a silent reword
+ * would remove it without breaking anything else.
+ *
  * Serial: one shared Clerk test user + deterministic slugs.
  */
 test.describe.configure({ mode: 'serial' });
@@ -58,6 +63,115 @@ async function newSeededProject(api: APIRequestContext) {
   const finalContent = await seedDraft(api, token, CFG);
   return { token, finalContent };
 }
+
+/**
+ * Every meridian seed is titled 'Meridian', so a name locator would be ambiguous in this
+ * shared-user grid. Cards are scoped by `data-testid=project-card-{tokenId}` instead — the
+ * tokenId is the handle the test already holds.
+ */
+const cardFor = (page: import('@playwright/test').Page, token: string) =>
+  page.getByTestId(`project-card-${token}`);
+
+async function openCardMenu(page: import('@playwright/test').Page, token: string) {
+  const card = cardFor(page, token);
+  await expect(card, 'project card missing from the dashboard grid').toBeVisible();
+  await card.getByRole('button', { name: 'Project actions' }).click();
+}
+
+test('UI: ••• → Unpublish → confirm (with the cached-copy sentence) → toast → card flips to Draft', async ({
+  page,
+}) => {
+  const api = await authedApi(page);
+  const { token, finalContent } = await newSeededProject(api);
+  const slug = `e2e-lifecycle-ui-unpub-${randomUUID().slice(0, 6)}`;
+
+  try {
+    await publishSeed(api, token, slug, CFG, finalContent);
+
+    await page.goto('/dashboard');
+    await expect(cardFor(page, token).getByText('Published')).toBeVisible();
+
+    await openCardMenu(page, token);
+    await page.getByRole('menuitem', { name: 'Unpublish' }).click();
+
+    // DD1c: the ONLY honest signal about the ~1h edge window. If this assertion fails because
+    // the copy was reworded, the replacement MUST still say take-down is immediate but a cached
+    // copy can linger ~an hour — do not just delete the assertion.
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText('cached copy for up to an hour');
+    await dialog.getByRole('button', { name: 'Unpublish' }).click();
+
+    await expect(page.getByRole('status')).toContainText('up to an hour to clear');
+
+    // router.refresh() re-derives the card from the server (DD4 slot predicate), no optimistic
+    // client mutation — so a green here means the SERVER really says draft.
+    await expect(cardFor(page, token).getByText('Draft')).toBeVisible();
+    expect((await page.goto(`/p/${slug}`))?.status(), 'unpublished page still serves').toBe(404);
+  } finally {
+    await api.delete(`/api/projects/${token}`);
+    await db.publishedPage.deleteMany({ where: { slug } });
+  }
+});
+
+test('UI: ••• → Delete → destructive confirm → toast → card disappears', async ({ page }) => {
+  const api = await authedApi(page);
+  const { token, finalContent } = await newSeededProject(api);
+  const slug = `e2e-lifecycle-ui-del-${randomUUID().slice(0, 6)}`;
+
+  try {
+    await publishSeed(api, token, slug, CFG, finalContent);
+
+    await page.goto('/dashboard');
+    await openCardMenu(page, token);
+    await page.getByRole('menuitem', { name: 'Delete' }).click();
+
+    const dialog = page.getByRole('alertdialog');
+    // Published delete tears the live page down too — the dialog must SAY so (and inherits the
+    // same DD1c window, since it runs the identical teardown).
+    await expect(dialog).toContainText('live page taken down');
+    await expect(dialog).toContainText('cached copy for up to an hour');
+    await dialog.getByRole('button', { name: 'Delete' }).click();
+
+    await expect(page.getByRole('status')).toContainText('deleted');
+    await expect(cardFor(page, token), 'deleted card still in the grid').toHaveCount(0);
+
+    // The UI told the truth: the rows really are gone.
+    expect(await db.project.findUnique({ where: { tokenId: token } })).toBeNull();
+  } finally {
+    await db.publishedPage.deleteMany({ where: { slug } });
+    await db.project.deleteMany({ where: { tokenId: token } });
+    await db.token.deleteMany({ where: { value: token } });
+  }
+});
+
+test('UI: custom-domain card pre-disables Unpublish + Delete (DD7)', async ({ page }) => {
+  const api = await authedApi(page);
+  const { token, finalContent } = await newSeededProject(api);
+  const slug = `e2e-lifecycle-ui-domain-${randomUUID().slice(0, 6)}`;
+
+  try {
+    await publishSeed(api, token, slug, CFG, finalContent);
+    await db.publishedPage.update({
+      where: { slug },
+      data: { customDomain: `e2e-${randomUUID().slice(0, 6)}.example.com`, customDomainStatus: 'live' },
+    });
+
+    await page.goto('/dashboard');
+    await openCardMenu(page, token);
+
+    // Pre-disable is a COURTESY only — the 409 guard (asserted in the API test above) is the
+    // real gate. Both items still RENDER (completeness principle), just disabled.
+    for (const label of ['Unpublish', 'Delete']) {
+      const item = page.getByRole('menuitem', { name: label });
+      await expect(item).toHaveAttribute('data-disabled', /.*/);
+      await expect(item).toHaveAttribute('title', 'Remove the custom domain first');
+    }
+  } finally {
+    await db.publishedPage.updateMany({ where: { slug }, data: { customDomain: null } });
+    await api.delete(`/api/projects/${token}`);
+    await db.publishedPage.deleteMany({ where: { slug } });
+  }
+});
 
 test('unauthenticated → rejected by middleware (404) on both lifecycle routes', async () => {
   // A cookie-less context: the `authed` project's storageState is NOT applied here.

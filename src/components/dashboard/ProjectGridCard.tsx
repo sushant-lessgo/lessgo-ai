@@ -37,6 +37,15 @@ export interface ProjectGridItem {
   tokenId: string | null
   slug: string | null
   type: 'unified'
+  /**
+   * Raw `PublishedPage.publishState` ('draft' when never published) — NOT a duplicate of
+   * `status`. `status` is the slot predicate for display; the menu needs the raw state to
+   * decide whether Unpublish is offered (any non-'draft' state, incl. a stuck
+   * 'unpublishing' → the item doubles as the retry).
+   */
+  publishState: string
+  /** DD7 — a domain is attached, so unpublish/delete are server-blocked (409). */
+  hasCustomDomain: boolean
   publishedAt?: string
   /** Admin god-view only (R8) — the owning account's email. */
   owner?: string
@@ -112,7 +121,13 @@ export default function ProjectGridCard({ project }: { project: ProjectGridItem 
   const name = stripHTMLTags(project.name || '')
 
   return (
-    <div className="overflow-hidden rounded-[14px] border border-app-border bg-app-surface shadow-[0_2px_10px_-6px_rgba(20,20,40,.2)]">
+    <div
+      // Keyed by tokenId (not the internal project id) because that is the handle e2e already
+      // holds from /api/start — it lets a test scope to ONE card in a shared-user grid where
+      // seeded project names repeat.
+      data-testid={project.tokenId ? `project-card-${project.tokenId}` : undefined}
+      className="overflow-hidden rounded-[14px] border border-app-border bg-app-surface shadow-[0_2px_10px_-6px_rgba(20,20,40,.2)]"
+    >
       {/* Thumbnail — the click target is an inset button so the badge and the
           `•••` trigger aren't nested inside it (invalid + unclickable). */}
       <div className="relative h-[120px] bg-app-stripes">
