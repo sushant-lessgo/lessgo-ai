@@ -1,42 +1,50 @@
 // /app/edit/[token]/components/ui/UndoRedoButtons.tsx
 "use client";
 
+// PHASE 8 — t1 undo/redo. Presentation only: the old grey bordered boxes (and
+// their hand-drawn SVGs) are replaced by t1's ghost icon buttons — 19px Material
+// `undo`/`redo` glyphs, disabled tone #c7c7cf (app-border-mute). `useUndoRedo`,
+// the handlers, the `disabled` predicates and the shortcut titles are untouched.
+//
+// `disabled` is CORRECT here (unlike a <Coming> control): these buttons really do
+// nothing when there is no history to walk, they carry no tooltip that needs
+// pointer events, and they must not be tab stops in that state.
+
 import React from 'react';
+import { AppIcon } from '@/components/ui/icon';
 import { useUndoRedo } from './useUndoRedo';
+
+/** t1 bar icon button: 28px hit box, ghost hover, muted-when-dead. */
+const ICON_BTN =
+  'inline-flex h-7 w-7 flex-none items-center justify-center rounded-app-badge transition-colors ' +
+  'text-app-icon-muted hover:bg-app-hover hover:text-app-ink ' +
+  'disabled:cursor-not-allowed disabled:text-app-border-mute disabled:hover:bg-transparent disabled:hover:text-app-border-mute';
 
 export function UndoRedoButtons() {
   const { handleUndo, handleRedo, canUndo, canRedo } = useUndoRedo();
 
   return (
-    <div className="flex items-center space-x-1">
+    <div className="flex flex-none items-center gap-0.5">
       <button
+        type="button"
         onClick={handleUndo}
         disabled={!canUndo}
-        className={`w-8 h-8 rounded border flex items-center justify-center ${
-          canUndo
-            ? 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-            : 'border-gray-100 text-gray-300 cursor-not-allowed'
-        }`}
+        className={ICON_BTN}
         title="Undo (Ctrl+Z)"
+        aria-label="Undo"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-        </svg>
+        <AppIcon name="undo" size={19} />
       </button>
 
       <button
+        type="button"
         onClick={handleRedo}
         disabled={!canRedo}
-        className={`w-8 h-8 rounded border flex items-center justify-center ${
-          canRedo
-            ? 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-            : 'border-gray-100 text-gray-300 cursor-not-allowed'
-        }`}
+        className={ICON_BTN}
         title="Redo (Ctrl+Y)"
+        aria-label="Redo"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" />
-        </svg>
+        <AppIcon name="redo" size={19} />
       </button>
     </div>
   );

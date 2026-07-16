@@ -24,19 +24,32 @@
 import React, { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { usePostHog } from 'posthog-js/react';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Popover, PopoverTrigger, AppPopoverPanel } from '@/components/ui/popover';
+import { Coming } from '@/components/ui/coming';
 import { useEditStore } from '@/hooks/useEditStore';
 import {
   usesTemplateModule,
   palettesForTemplate,
   defaultVariantForTemplate,
+  templateLabels,
+  templateBlurbs,
   type TemplateId,
 } from '@/types/service';
+import {
+  DesignMenuShell,
+  DesignMenuTrigger,
+  DesignMenuGroup,
+  DesignTemplateRow,
+  DesignSegmented,
+  DesignSwatch,
+  DesignSwatchRow,
+} from './DesignMenuShell';
 import type { TemplateModule } from '@/types/template';
 import { getLoadedTemplate } from '@/modules/templates/registry';
 import {
   TemplateSwapList,
   deriveSwapSite,
+  swapShortlist,
   buildSwapPatch,
 } from './TemplateSwapList';
 
@@ -45,13 +58,16 @@ const MOODS: Array<{ id: 'bone' | 'slate'; label: string; swatch: string }> = [
   { id: 'slate', label: 'Slate', swatch: '#3d4450' },
 ];
 
-// Fallback variant defs if the vestria module somehow isn't cached yet (labels
-// only — ids must match vestriaVariantDefs in modules/templates/vestria/tokens.ts).
+// Fallback variant defs if the vestria module somehow isn't cached yet. Ids,
+// labels AND blurbs mirror vestriaVariantDefs in modules/templates/vestria/tokens.ts
+// — copied as literals, NOT imported (firewall: no static template import). The
+// blurbs matter: they are the hover `title` that tells the user these variants
+// are TYPEFACE sets, which the "Style" eyebrow no longer says.
 // Other templates fall back to an empty list (section hides until loaded).
 const VESTRIA_FALLBACK_VARIANTS = [
-  { id: 'tailored', label: 'Tailored' },
-  { id: 'modern', label: 'Modern' },
-  { id: 'heritage', label: 'Heritage' },
+  { id: 'tailored', label: 'Tailored', blurb: 'Editorial — Bodoni Moda display over Hanken Grotesk. The atelier baseline.' },
+  { id: 'modern', label: 'Modern', blurb: 'Engineered — Space Grotesk display over Hanken Grotesk.' },
+  { id: 'heritage', label: 'Heritage', blurb: 'Established — Cormorant Garamond display over Source Serif 4.' },
 ];
 
 export function VestriaThemePopover() {
@@ -104,6 +120,13 @@ export function VestriaThemePopover() {
   const activeMood: 'bone' | 'slate' = tv?.mood === 'slate' ? 'slate' : 'bone';
   const isVestria = tid === 'vestria';
 
+  // TemplateSwapList ALWAYS emits the current template as its own (active) row,
+  // and hides itself entirely when no eligible target exists. So the t14 thumb
+  // row must be the FALLBACK for exactly that hidden case — otherwise the
+  // current template renders twice. Exactly one current-template row, always.
+  const swapSite = deriveSwapSite(sections, pages);
+  const hasSwapTargets = swapShortlist(tid, swapSite).some((t) => t !== tid);
+
   // Reuse the existing autosave path (matches ServiceThemePopover).
   const persist = () => {
     void triggerAutoSave();
@@ -151,117 +174,92 @@ export function VestriaThemePopover() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
-          className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors border border-gray-200"
-          title="Template, variant & palette"
-        >
-          <span
-            data-palette={activePalette}
-            className="w-4 h-4 rounded-sm"
-            style={{ background: 'var(--accent, #4a5fc1)' }}
-          />
-          <span>Style</span>
-        </button>
+        <DesignMenuTrigger paletteId={activePalette} title="Template, variant & palette" />
       </PopoverTrigger>
 
-      <PopoverContent side="bottom" align="start" className="w-80 p-0">
-        <div className="p-4 space-y-4">
-          {/* ─── Template (fit-filtered swap — hides when no eligible target) ─── */}
-          <TemplateSwapList
-            current={tid}
-            site={deriveSwapSite(sections, pages)}
-            onSwap={handleSwap}
-          />
-
-          {/* ─── Typeface variant ─── */}
-          {variants.length > 0 && (
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-2">Typeface</p>
-              <div className="grid grid-cols-3 gap-1.5">
-                {variants.map((v) => {
-                  const isActive = activeVariant === v.id;
-                  return (
-                    <button
-                      key={v.id}
-                      onClick={() => handleVariant(v.id)}
-                      aria-pressed={isActive}
-                      title={(v as any).blurb}
-                      className={`rounded-md border px-2 py-1.5 text-xs font-medium transition ${
-                        isActive
-                          ? 'border-blue-500 ring-2 ring-blue-200 text-gray-900'
-                          : 'border-gray-200 text-gray-700 hover:border-gray-400'
-                      }`}
-                    >
-                      {v.label}
-                    </button>
-                  );
-                })}
+      <AppPopoverPanel side="bottom" align="start" width={288}>
+        <DesignMenuShell onClose={() => setOpen(false)}>
+          {/* ─── TEMPLATE ─── see ServiceThemePopover for the full note: the row
+              is t14's current-template thumb, "Browse all" is greyed (no picker
+              route exists), and the WORKING swap affordance is TemplateSwapList,
+              untouched — it preloads through the registry's dynamic loader. */}
+          <DesignMenuGroup
+            label="Template"
+            action={<Coming what="browsing all templates with your content">Browse all</Coming>}
+          >
+            {hasSwapTargets ? (
+              // Swap list draws its own current-template row + the targets. Its
+              // inner "Template" heading is hidden — this group already has
+              // t14's eyebrow, and that shared file is out of this phase's scope.
+              <div className="[&>div>p]:hidden">
+                <TemplateSwapList current={tid} site={swapSite} onSwap={handleSwap} />
               </div>
-            </div>
+            ) : (
+              // No eligible target ⇒ TemplateSwapList renders null; t14's thumb
+              // row is the current-template row.
+              <DesignTemplateRow
+                name={templateLabels[tid]}
+                subtitle={templateBlurbs[tid]}
+                active
+              />
+            )}
+          </DesignMenuGroup>
+
+          {/* ─── STYLE (= variant, per t14; these variants are typeface sets) ─── */}
+          {variants.length > 0 && (
+            <DesignMenuGroup label="Style">
+              <DesignSegmented
+                aria-label="Typeface"
+                options={variants.map((v) => ({
+                  id: v.id,
+                  label: v.label,
+                  blurb: (v as any).blurb,
+                }))}
+                value={activeVariant}
+                onChange={handleVariant}
+              />
+            </DesignMenuGroup>
           )}
 
-          {/* ─── Palette ─── */}
-          <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">Palette</p>
-            <div className={`grid gap-1.5 ${palettes.length > 8 ? 'grid-cols-9' : 'grid-cols-8'}`}>
-              {palettes.map((id) => {
-                const isActive = activePalette === id;
-                return (
-                  <button
-                    key={id}
-                    onClick={() => handlePalette(id)}
-                    aria-pressed={isActive}
-                    title={id}
-                    className={`aspect-square rounded-md border-2 transition-all ${
-                      isActive
-                        ? 'border-blue-500 ring-2 ring-blue-200'
-                        : 'border-gray-200 hover:border-gray-400'
-                    }`}
-                  >
-                    {/* Swatch color from the injected [data-palette]{--accent} var. */}
-                    <span
-                      data-palette={id}
-                      className="block w-full h-full rounded-sm"
-                      style={{ background: 'var(--accent, #ccc)' }}
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          {/* ─── ACCENT — the template's REAL palettes; each swatch resolves its
+              colour from the injected [data-palette]{--accent} var. ─── */}
+          <DesignMenuGroup label="Accent">
+            <DesignSwatchRow>
+              {palettes.map((id) => (
+                <DesignSwatch
+                  key={id}
+                  paletteId={id}
+                  title={id}
+                  selected={activePalette === id}
+                  onClick={() => handlePalette(id)}
+                />
+              ))}
+            </DesignSwatchRow>
+          </DesignMenuGroup>
 
           {/* ─── Mood (vestria-only: themeValues.mood → VestriaThemeInjector) ─── */}
           {isVestria && (
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-2">Mood</p>
-              <div className="grid grid-cols-2 gap-1.5">
-                {MOODS.map((m) => {
-                  const isActive = activeMood === m.id;
-                  return (
-                    <button
-                      key={m.id}
-                      onClick={() => handleMood(m.id)}
-                      aria-pressed={isActive}
-                      className={`flex items-center gap-2 rounded-md border px-2 py-1.5 text-xs font-medium transition ${
-                        isActive
-                          ? 'border-blue-500 ring-2 ring-blue-200 text-gray-900'
-                          : 'border-gray-200 text-gray-700 hover:border-gray-400'
-                      }`}
-                    >
-                      <span
-                        aria-hidden
-                        className="w-3.5 h-3.5 rounded-full border border-gray-300"
-                        style={{ background: m.swatch }}
-                      />
-                      {m.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <DesignMenuGroup label="Mood">
+              <DesignSegmented
+                aria-label="Mood"
+                options={MOODS.map((m) => ({
+                  id: m.id,
+                  label: m.label,
+                  leading: (
+                    <span
+                      aria-hidden
+                      className="block h-3 w-3 rounded-full border border-app-border-soft"
+                      style={{ background: m.swatch }}
+                    />
+                  ),
+                }))}
+                value={activeMood}
+                onChange={(id) => handleMood(id as 'bone' | 'slate')}
+              />
+            </DesignMenuGroup>
           )}
-        </div>
-      </PopoverContent>
+        </DesignMenuShell>
+      </AppPopoverPanel>
     </Popover>
   );
 }

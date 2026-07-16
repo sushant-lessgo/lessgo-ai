@@ -2,15 +2,22 @@
 "use client";
 
 import React, { useRef, useEffect } from 'react';
-import { usePreviewNavigation } from './usePreviewNavigation';
 import { useEditStore } from '@/hooks/useEditStore';
+import { AppIcon } from '@/components/ui/icon';
 
+// Navigation state is OWNED BY THE PARENT (EditHeaderRightPanel), not by this
+// button: `usePreviewNavigation` is not pure — its effect drives
+// getTabManager()/cleanupTabManager(), and utils/tabManager.ts is a keyed
+// singleton with NO refcount whose cleanup unconditionally destroy()s. Calling
+// the hook here AND in the parent (same tokenId) gave two owners of one
+// lifecycle, and split `isNavigating` so Publish's "Opening…" left Preview live.
+// One hook, one owner. Do not re-instantiate it here.
 interface PreviewButtonProps {
-  tokenId: string;
+  onPreviewClick: () => void;
+  isNavigating: boolean;
 }
 
-export function PreviewButton({ tokenId }: PreviewButtonProps) {
-  const { handlePreviewClick, isNavigating } = usePreviewNavigation(tokenId);
+export function PreviewButton({ onPreviewClick, isNavigating }: PreviewButtonProps) {
   // Single-field selector: stable getter ref (no whole-store subscription).
   const getColorTokens = useEditStore((s) => s.getColorTokens);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -44,38 +51,35 @@ export function PreviewButton({ tokenId }: PreviewButtonProps) {
   
   const handleClick = (e: React.MouseEvent) => {
     try {
-      handlePreviewClick();
+      onPreviewClick();
     } catch (error) {
       // console.error('❌ Preview click error:', error);
     }
   };
 
+  // t1: this is now the INACTIVE half of the Edit/Preview segmented control that
+  // EditHeaderRightPanel draws — hence a ghost segment rather than a blue button.
+  // Navigation (`handleClick` / `onPreviewClick`) and the `isNavigating`
+  // disabled+"Saving..." states are unchanged.
   return (
     <button
       ref={buttonRef}
       onClick={handleClick}
       disabled={isNavigating}
       className={`
-        px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-        bg-blue-600 text-white hover:opacity-90 
-        shadow-sm hover:shadow-md
-        disabled:opacity-50 disabled:cursor-not-allowed
-        ${isNavigating ? 'cursor-wait' : ''}
+        inline-flex items-center gap-1.5 rounded-[7px] px-3 py-1 text-[13px] font-medium
+        text-app-muted transition-colors hover:text-app-ink
+        disabled:cursor-wait disabled:opacity-50
       `}
       style={{ pointerEvents: 'auto' }}
       title="Preview your landing page"
     >
-      <div className="flex items-center space-x-2">
-        {isNavigating ? (
-          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-        ) : (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-        )}
-        <span>{isNavigating ? 'Saving...' : 'Preview'}</span>
-      </div>
+      {isNavigating ? (
+        <AppIcon name="progress_activity" size={16} className="animate-spin" />
+      ) : (
+        <AppIcon name="visibility" size={16} />
+      )}
+      <span>{isNavigating ? 'Saving...' : 'Preview'}</span>
     </button>
   );
 }
