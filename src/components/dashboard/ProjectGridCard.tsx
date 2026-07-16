@@ -15,10 +15,13 @@ import ProjectCardMenu from './ProjectCardMenu'
  * Rulings in force:
  * - R5  — primary label is "Open" for published, "Continue" for drafts (R9).
  * - R9  — draft badge is amber; draft primary routes via `continueRouting`.
- * - B5  — BOTH primary labels (and the name/thumbnail click) route through
- *         `continueRouting`; never hard-code `/edit/{token}` (transient 404).
- *         Phase 3 re-points the PUBLISHED "Open" + name/thumbnail to
- *         `/dashboard/{tokenId}`; the draft path keeps `continueRouting`.
+ * - B5  — the DRAFT primary ("Continue"), the draft name/thumbnail click and the
+ *         `•••` "Open editor" (published or draft) route through `continueRouting`;
+ *         never hard-code `/edit/{token}` (transient 404).
+ *         Phase 3 re-point: a PUBLISHED card's "Open" + name/thumbnail now go to the
+ *         project workspace `/dashboard/{tokenId}` and fire NO PostHog event (it is
+ *         workspace navigation, not an editor open — the B5 single-call-site rule for
+ *         `project_edit_clicked` stays intact inside `continueRouting`).
  * - R14/R16 — metrics are em-dashes this slice. NO fabricated numbers and NO
  *         per-card analytics query; account/project rollups are slice S4.
  * - R8  — admin god-view has no design; the owner-email affordance is preserved
@@ -83,13 +86,24 @@ function Metric({ label }: { label: string }) {
 export default function ProjectGridCard({ project }: { project: ProjectGridItem }) {
   const router = useRouter()
 
-  // B5 — the ONE action behind the thumbnail, the name and the primary button.
-  // `continueRouting` owns the PostHog `project_edit_clicked` fire.
+  const published = project.status === 'Published'
+
+  // Phase 3 re-point: a published card opens the project WORKSPACE; a draft still has
+  // no workspace worth landing on, so it keeps the state-aware editor routing.
   const openProject = () => {
+    if (published && project.tokenId) {
+      router.push(`/dashboard/${project.tokenId}`)
+      return
+    }
     void continueRouting(project, router)
   }
 
-  const published = project.status === 'Published'
+  // The `•••` "Open editor" always means the EDITOR — always state-aware (B5).
+  // `continueRouting` owns the PostHog `project_edit_clicked` fire.
+  const openEditor = () => {
+    void continueRouting(project, router)
+  }
+
   const domain = published && project.slug ? `lessgo.ai/p/${project.slug}` : EM_DASH
   const name = stripHTMLTags(project.name || '')
 
@@ -108,7 +122,7 @@ export default function ProjectGridCard({ project }: { project: ProjectGridItem 
           <StatusBadge status={project.status} />
         </div>
         <div className="absolute right-2 top-2">
-          <ProjectCardMenu project={project} onOpenEditor={openProject} />
+          <ProjectCardMenu project={project} onOpenEditor={openEditor} />
         </div>
       </div>
 

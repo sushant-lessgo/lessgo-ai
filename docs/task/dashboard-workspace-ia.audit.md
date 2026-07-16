@@ -206,3 +206,127 @@ The other three phase-2 tests were reviewer-confirmed sound and untouched.
 - **`npm run lint`** → **zero errors**; warnings only, all pre-existing (`no-img-element` in templates, `react-hooks/exhaustive-deps` in providers/editor/generation). **No warning in any phase-2 file.**
 - `npm run build` / e2e not run (per instructions).
 - Not committed — orchestrator commits.
+
+---
+
+## Phase 3 — Token workspace spine + Overview + hardened authz helper ⚠️ SECURITY-CRITICAL
+
+Branch guard: `git branch --show-current` → `feature/dashboard-workspace-ia`. Matched (checked before any edit).
+
+### Files changed
+
+**New**
+- `src/lib/workspace.ts` — `getWorkspaceProject(tokenId)`, the authz spine.
+- `src/lib/workspace.test.ts` — 11 security regression guards (vitest).
+- `src/app/dashboard/[token]/layout.tsx` — workspace chrome (NOT an auth boundary).
+- `src/app/dashboard/[token]/page.tsx` — Overview (quick actions only, R3).
+- `src/components/dashboard/WorkspaceHeader.tsx` — §E 3a header.
+- `src/components/dashboard/WorkspaceTabs.tsx` — Link-based tab bar (R13).
+- `e2e/dashboard-workspace.spec.ts` — 5 tests; the spec name was already pre-registered on `authed` (phase-1 exception), so `playwright.config.ts` was NOT touched.
+
+**Modified**
+- `src/components/dashboard/ProjectGridCard.tsx` — re-point only (step 7).
+
+**NOT modified** (listed in the plan, no change needed): `src/app/dashboard/page.tsx` — the re-point lives entirely inside the card; no prop change, so the page was left byte-identical (conservative).
+
+`src/lib/security.ts` untouched. `src/components/ui/*` untouched. `git diff tailwind.config.js src/components/ui` → **empty**. No `.app-chrome` added (still only `dashboard/layout.tsx`). No middleware change. No schema change.
+
+### The authz rules as implemented (`src/lib/workspace.ts`)
+
+`assertProjectOwner` RETURNS (never throws) and its `{ok:true}` is NOT "this user owns it". The wrapper's rejection ladder, in order — all four rungs land `notFound()`:
+
+1. `!result.ok` → notFound. (401/403/404; Clerk middleware owns authn.)
+2. `result.isDemo || result.project == null` → notFound. **B3** — `security.ts:63-65` returns `{ok:true, project:null, userRecord:null}` for the demo token `lessgodemomockdata` to ANYONE.
+3. `result.project.userId == null` (orphan) → notFound. **B3/D2** — `security.ts:98-110` returns `{ok:true}` to ANY authenticated user. Rung 3 sits **OUTSIDE / BEFORE the `adminOverride` short-circuit**: an orphan has no owner to god-view *as*, and rejecting it for admins too is what makes the returned `clerkId` non-null **by construction** (`Project.userId String?`).
+4. `!result.adminOverride && result.project.userId !== result.userRecord?.id` → notFound. (`userRecord` null ⇒ `undefined !== string` ⇒ reject.)
+
+Rungs 2–4 all short-circuit **before** any display query — no data is read on a rejected path (asserted).
+
+- **`claimIfOrphan` is never passed** (asserted). A page render must not mutate ownership.
+- **Returned `clerkId` = the OWNER's** (`project.user.clerkId` via the `Project → User` relation, `schema.prisma:23`/`:12`), **not the requesting admin's**. The admin's own clerkId is used only inside `assertProjectOwner` for `isAdmin` + `logAdminOverride`. Returning it would make owner-scoped Clerk-keyed reads (`Testimonial.userId` = Clerk id) silently return zero rows on god-view — blank, not an error. Phase 5's `listTestimonialsByOwner(clerkId, {projectId})` consumes this.
+- **THREE ID spaces honoured:** `publishedPage.findFirst({where:{projectId: project.id}})` — keyed on `projectId`, never a cross-space userId join (asserted).
+- Return shape: `{project:{id,tokenId,title}, publishedPage:{id,slug,title}|null, adminOverride, clerkId}`.
+- `if (!project || !project.user) notFound()` after the gate: unreachable in practice post-rung-3, but a delete racing between the two reads must 404, not crash.
+- ⚠️ **Behavior change (intended, per spec):** routing analytics/forms/blog through this ADDS admin god-view where the slug routes silently 404'd admins. Founder gate item 2.
+- **Layout is NOT an auth boundary.** `[token]/layout.tsx` calls the wrapper for chrome data only; `[token]/page.tsx` calls it independently. Both files carry a 🚨 comment saying so. Within a request React `cache()` dedupes.
+
+### Judgment calls (in-scope, conservative)
+
+1. **`cache` from `react` does not exist at runtime under vitest** (React 18.3.1 exports no `cache`; Next aliases `react` to its bundled canary server-side — `tsc` is green because @types/react declares it). Importing `workspace.ts` in a unit test therefore crashes at module load. Fixed **in the test, not in prod code**: `vi.mock('react', () => ({ cache: fn => fn }))` (identity ⇒ no memoisation ⇒ each test really re-runs the ladder). Prod code uses `cache()` exactly as the plan specifies. A module-level Map was considered and **rejected** — it would cache one user's project across requests (a comment in the file forbids it).
+2. **Quick-action card #1 "Write a blog post" → `/dashboard/{token}/blog` is ENABLED** even though that route only lands in phase 5. Same target as the Blog tab, which R2 requires as an enabled link — a mid-pipeline 404 is unavoidable and is not a shipped state. R3's "greyed where route absent" is judged against the feature's end state.
+3. **Card #3 sub-copy: design says "3 emails active" — a fabricated count (R14).** Replaced with "Goal-matched email copy". Title/icon/tint unchanged.
+4. **Card #4 "Request testimonials" → GREYED.** No per-project collection route exists (`CollectLinksDialog` is an account-page dialog, not a route). Grey-by-existence.
+5. **Cards #2/#3 read the same kill-switches the retired `ProjectCard.tsx:28-36` did** — `NEXT_PUBLIC_SOCIAL_POSTS_DISABLED` → `/dashboard/social/{token}`, `NEXT_PUBLIC_EMAIL_SEQUENCES_DISABLED` → `/dashboard/emails/{token}`. Read at render time (server component), not at module load, so a flag flip needs no rebuild. `NEXT_PUBLIC_COLD_OUTREACH_DISABLED` has no card — the design's 4 cards contain no Outreach action; `/dashboard/outreach/{token}` stays reachable at its URL.
+6. **Step 7 re-point:** a **published** card's "Open" + name + thumbnail → `router.push('/dashboard/{tokenId}')`, firing **no** PostHog event (workspace nav, not an editor open). **Draft** cards keep `continueRouting` (a draft has no workspace worth landing on; the plan says so). The `•••` "Open editor" now uses a separate `openEditor()` → `continueRouting` for BOTH statuses (B5) — previously it shared the card's handler, which the re-point would have silently turned into workspace nav. `project_edit_clicked` still has exactly one call site (inside `continueRouting`); no double-fire, no zero-fire from the header either (WorkspaceHeader's "Open editor" calls the util unconditionally and captures nothing).
+7. **Workspace title = `project.title`** (fallback `'Untitled Project'`, `stripHTMLTags`) — the `emails/[token]` precedent. The grid's smart-name fallback chain isn't reachable from the wrapper's shape; not duplicated.
+8. **Draft header: domain text omitted entirely** (not an em-dash) and **Visit greyed in place** — R14 (real or absent) + completeness principle.
+9. **Near-miss colors as arbitrary values, no new Tailwind keys**: chrome border `#f0f0f3`, outline-button border `#e6e6ec`, breadcrumb sep `#c8c8d0`, back-arrow `#9a9aa4`, draft amber `#9a6a1e`/`#fdf2dc`, quick-action hover border `#cfe0ff`, orange tile `#fff0eb`. Everything else `app-*`.
+10. All icons used (`arrow_back`, `open_in_new`, `edit`, `auto_awesome`, `campaign`, `mail`, `ios_share`) are already in the committed Material Symbols subset (`public/fonts/material-symbols-rounded/icons.txt`) — no font regeneration.
+11. **Route-shadow caveat (scout §B), recorded:** `[token]` resolves AFTER literal siblings (`billing`, `settings`, `testimonials`, `analytics`, `forms`, `blog`, `emails`, `outreach`, `social`) — static-first, so no collision today. A token literally equal to one of those words would be shadowed. No action; noted in `layout.tsx`.
+
+### Deliberately NOT done
+
+- **No KPI cards, no "Recent leads" panel, no "Pages on this site" panel** (R3) — and no rollup queries anywhere.
+- **No `TabsContent`** (R13) — the tab bar is hand-rolled Links; `@/components/ui/tabs` is not imported.
+- **Grow is a disabled `<button>` stub, not the hub** (R2).
+- No edit to `src/lib/security.ts`, `src/components/ui/*`, `tailwind.config.js`, `playwright.config.ts`, middleware, or the schema.
+- No re-home of analytics/leads/blog/testimonials and no shims (phases 4–5) — those four tabs 404 until then.
+- `src/app/dashboard/page.tsx` left untouched (no prop change needed for the re-point).
+
+### Open risks
+
+1. **Playwright not executed** (needs a dev server + Clerk E2E creds; per instructions only tsc/test:run/lint were run). `--list --project=authed` confirms all 5 new tests are collected (**Total: 19 tests in 5 files**).
+2. The `workspace unauthenticated` block relies on `test.use({storageState:{cookies:[],origins:[]}})` overriding the project-level `storageState` — standard Playwright, unverified at runtime here.
+3. Header/tab visuals unverified by eye against the handoff — founder gate item 6.
+4. Non-owner 404 remains **founder-gate-only** (single Clerk session in e2e); orphan / admin-orphan rejection is unit-tested only (e2e cannot seed an orphan). Both called out in the spec file's header comment.
+
+### Merge-gate summary items (phase 3)
+
+1. **B3/D2 decision recorded:** demo + orphan → 404 **for everyone, admins included**; `claimIfOrphan` never passed; wrapper returns the OWNER's clerkId (C2).
+2. **NEW admin god-view** on token-routed analytics/leads/blog (slug routes 404'd admins) — intended, needs explicit sign-off (gate item 2).
+3. Design deviation: quick-action "3 emails active" → "Goal-matched email copy" (R14 — no fabricated counts).
+4. `react`'s `cache` is Next-server-only at runtime — any future unit test importing `workspace.ts` must mock it (see `workspace.test.ts` header).
+
+### Verification (actual output)
+
+- **`npx tsc --noEmit`** → **exit 0, zero errors**.
+- **`npm run test:run`** → **Test Files 194 passed | 1 skipped (195); Tests 3342 passed | 18 skipped (3360)** — +11 = the new `workspace.test.ts` guards. Config-freeze isolation guard green.
+- **`npm run lint`** → **zero errors**; warnings only, all pre-existing (`react-hooks/exhaustive-deps` in providers/editor/generation). No warning in any phase-3 file.
+- `git diff tailwind.config.js src/components/ui` → **empty** (foundation frozen).
+- `npx playwright test --list --project=authed` → **Total: 19 tests in 5 files** (5 from `dashboard-workspace.spec.ts`).
+- `npm run build` / e2e execution not run (per instructions).
+- Not committed — orchestrator commits.
+
+### Impl-review fixes S1–S3 (TEST FILES ONLY — zero implementation changes)
+
+Verdict was **ship**; implementation is final and was not touched. `src/lib/workspace.ts` was temporarily mutated ONLY to empirically prove the new guards fail on a rung deletion, then restored — `diff` against a pre-mutation backup confirms it is **byte-identical** (the file is untracked, so `git diff` would prove nothing here). All three fixes land in `src/lib/workspace.test.ts` and `e2e/dashboard-workspace.spec.ts`.
+
+**S1 — rung 3 (orphan) is now mutation-proof.** The reviewer was right: the non-admin orphan test would still pass with rung 3 deleted (rung 4 catches it incidentally, `null !== 'user_internal_stranger'`), so it documents the B3 hole from a stranger's POV but pins nothing. A comment now says exactly that. The **admin+orphan** test is the discriminating case (rung 4 can't catch it — `adminOverride` short-circuits) and is now labelled 🚨 **THE SOLE GUARD for rung 3 / the D2 ruling, DO NOT WEAKEN OR DELETE**. It now:
+  - seeds the row a real orphan would return (`user: null`) so a rung-3 deletion takes the realistic path instead of crashing on an unseeded mock — which is precisely why `rejects.toThrow` alone is **vacuous** here: the `:122` race-guard throws the SAME `NotFoundError`, i.e. the right outcome for the wrong reason (an orphan read that rung 3 exists to prevent);
+  - keeps `expect(db.project.findUnique).not.toHaveBeenCalled()` with an explicit **LOAD-BEARING** comment + a failure message ("an admin reached the DB") — it is the only assertion that fails on the mutation;
+  - adds `expect(db.publishedPage.findFirst).not.toHaveBeenCalled()`;
+  - renamed to "…**before any display read** (D2)" so the test name states the actual contract.
+
+**S2 — `isDemo` sub-clause now exercised in isolation.** New test: `isDemo: true` with a **non-null project owned by the caller**, so rung 4 would happily pass and only the `result.isDemo ||` clause can reject. A comment records that `security.ts:63-65` always pairs `isDemo` with `project:null` today, so this guards the **wrapper's contract** against a future `security.ts` change rather than a live hole.
+
+**Mutation testing — empirical proof both guards bite** (each mutation applied to `workspace.ts`, suite run, then restored):
+
+| Mutation | Result |
+|---|---|
+| rung 3 deleted (`\|\| result.project.userId == null` removed) | **1 failed | 11 passed** — `rejects an orphan project for an ADMIN too, before any display read (D2)` × |
+| isDemo clause deleted (`result.isDemo \|\|` removed) | **1 failed | 11 passed** — `rejects isDemo even when the gate also returns a real, owned project (rung 2)` × |
+
+Before S1/S2 both mutations were **silent**. `workspace.test.ts` is now 12 tests (was 11).
+
+**S3 — e2e tab order is now actually asserted.** `dashboard-workspace.spec.ts` claimed "design order" and carried a `position ${i}` failure message while asserting visibility only — a message that would lie about what failed. Replaced with a real DOM-order assertion on the tab bar's children: `expect(tabBar.locator('a, button')).toHaveText(['Overview','Blog','Leads','Testimonials','Analytics','Grow'])`, which fails on any permutation. Safe from the AppIcon ligature trap — tab labels carry no icon (the active tab's only child is the empty underline span); a comment records why. The Grow disabled/aria-disabled assertions are unchanged.
+
+Everything the reviewer cleared (R13/R2/R3/R14, kill-switches, B5, scope, isolation) was left untouched.
+
+**Verification after S1–S3 (actual output)**
+
+- **`npx tsc --noEmit`** → **exit 0, zero errors**.
+- **`npm run test:run`** → **Test Files 194 passed | 1 skipped (195); Tests 3343 passed | 18 skipped (3361)** (+1 vs the pre-S2 run = the new isDemo isolation guard).
+- **`npm run lint`** → **zero errors** (warnings only, all pre-existing).
+- `npx playwright test --list --project=authed` → **Total: 19 tests in 5 files** (unchanged — S3 edited an existing test).
+- `diff` vs pre-mutation backup → `src/lib/workspace.ts` **IDENTICAL**; rung 2/3 line intact at `:105`.
+- Not committed — orchestrator commits.

@@ -1,0 +1,47 @@
+import { stripHTMLTags } from '@/utils/htmlSanitization'
+import { getWorkspaceProject } from '@/lib/workspace'
+import WorkspaceHeader from '@/components/dashboard/WorkspaceHeader'
+import WorkspaceTabs from '@/components/dashboard/WorkspaceTabs'
+
+/**
+ * Project workspace shell — `/dashboard/[token]/*`.
+ *
+ * ⚠️ NOT AN AUTH BOUNDARY. This `getWorkspaceProject` call exists for CHROME DATA
+ * ONLY. Next.js does not re-run layouts as a guard on every nested render, so a
+ * check here guarantees nothing for the pages below. **Every page under this layout
+ * calls `getWorkspaceProject` itself and owner-scopes its own query.** Do not delete
+ * a page's own call "because the layout already checks".
+ *
+ * Within a request the two calls are deduped by the wrapper's React `cache()`.
+ *
+ * `.app-chrome` is NOT attached here — it lives once, on `dashboard/layout.tsx`
+ * (phase 1). The root `DashboardTopBar` self-suppresses on token paths, so the
+ * workspace header below is the only bar.
+ *
+ * Route-shadow note (scout §B): `[token]` resolves AFTER literal siblings
+ * (`billing`, `settings`, `analytics`, `forms`, `blog`, …) — static-first, so no
+ * collision today. A token literally equal to one of those words would be shadowed.
+ */
+export default async function WorkspaceLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: { token: string }
+}) {
+  const { project, publishedPage } = await getWorkspaceProject(params.token)
+  const name = stripHTMLTags(project.title || 'Untitled Project')
+
+  return (
+    <div className="flex min-h-full flex-col">
+      <WorkspaceHeader
+        projectId={project.id}
+        tokenId={project.tokenId}
+        name={name}
+        slug={publishedPage?.slug ?? null}
+      />
+      <WorkspaceTabs tokenId={project.tokenId} />
+      <div className="flex-1">{children}</div>
+    </div>
+  )
+}
