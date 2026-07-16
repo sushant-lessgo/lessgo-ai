@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { AppIcon } from '@/components/ui/icon'
+import { publishedUrl } from '@/lib/publishedUrl'
 import { cn } from '@/lib/utils'
 import type { ProjectGridItem } from './ProjectGridCard'
 
@@ -53,8 +54,10 @@ export default function ProjectCardMenu({ project, onOpenEditor }: ProjectCardMe
       project_name: project.name,
     })
 
+    // DD8 — "Visit site" must open the LIVE address, not the internal `/p/{slug}`
+    // SSR path. `noopener` because this is a cross-origin window.open.
     if (project.slug) {
-      window.open(`/p/${project.slug}`, '_blank')
+      window.open(publishedUrl(project.slug), '_blank', 'noopener')
     }
   }
 

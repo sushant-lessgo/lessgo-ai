@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { AppIcon } from '@/components/ui/icon'
+import { publishedHost } from '@/lib/publishedUrl'
 import { cn } from '@/lib/utils'
 import { stripHTMLTags } from '@/utils/htmlSanitization'
 import { continueRouting } from './continueRouting'
@@ -104,7 +105,10 @@ export default function ProjectGridCard({ project }: { project: ProjectGridItem 
     void continueRouting(project, router)
   }
 
-  const domain = published && project.slug ? `lessgo.ai/p/${project.slug}` : EM_DASH
+  // DD8 — the sub-line shows the address a visitor actually gets. It used to read
+  // `lessgo.ai/p/{slug}` (the internal SSR path); the live URL is the publish
+  // subdomain. Host derivation lives in `publishedUrl`, never inline here.
+  const domain = published && project.slug ? publishedHost(project.slug) : EM_DASH
   const name = stripHTMLTags(project.name || '')
 
   return (
