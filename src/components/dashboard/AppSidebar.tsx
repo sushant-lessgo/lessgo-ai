@@ -19,7 +19,7 @@ import NewSiteButton from './NewSiteButton'
  * foundation primitive must not be edited. Un-built destinations therefore render
  * via `DisabledNavItem` below — a plain <button disabled> reusing the primitive's
  * exported `navItemClasses()`, so a greyed row is pixel-identical to an idle row
- * plus opacity. Greyed here: All Analytics (S4), All Leads (S4), Domains (R15 —
+ * plus opacity. Greyed here: Domains (R15 —
  * no /dashboard/domains route exists), Upgrade (S3).
  */
 
@@ -79,6 +79,8 @@ export default function AppSidebar({ profile, plan }: AppSidebarProps) {
   // Projects is the dashboard root only — nested screens must not light it up.
   const projectsActive = pathname === '/dashboard'
   const billingActive = pathname?.startsWith('/dashboard/billing') ?? false
+  const leadsActive = pathname?.startsWith('/dashboard/leads') ?? false
+  const analyticsActive = pathname?.startsWith('/dashboard/analytics') ?? false
 
   const pct =
     plan && plan.limit > 0 ? Math.min(100, Math.round((plan.used / plan.limit) * 100)) : 0
@@ -110,9 +112,24 @@ export default function AppSidebar({ profile, plan }: AppSidebarProps) {
             Projects
           </Link>
         </NavItem>
-        {/* S4 — account-level rollups not built (no count pill: R14 forbids a fake count). */}
-        <DisabledNavItem icon="monitoring" label="All Analytics" />
-        <DisabledNavItem icon="move_to_inbox" label="All Leads" />
+        {/* S4 — live. No count pill (R-C): un-grey only. */}
+        <NavItem
+          asChild
+          active={analyticsActive}
+          className={analyticsActive ? 'font-semibold' : undefined}
+        >
+          <Link href="/dashboard/analytics">
+            <AppIcon name="monitoring" filled={analyticsActive} size={20} />
+            All Analytics
+          </Link>
+        </NavItem>
+        {/* S4 — live. No count pill (R-C): un-grey only. */}
+        <NavItem asChild active={leadsActive} className={leadsActive ? 'font-semibold' : undefined}>
+          <Link href="/dashboard/leads">
+            <AppIcon name="move_to_inbox" filled={leadsActive} size={20} />
+            All Leads
+          </Link>
+        </NavItem>
       </nav>
 
       {/* ACCOUNT */}

@@ -29,7 +29,12 @@ export default async function BlogPostPreviewPage({ params }: PageProps) {
   const { userId } = await auth();
   if (!userId) redirect('/sign-in');
 
-  const ctx = await loadBlogSsr(params.slug);
+  // `requireServing: false` — preview must survive an unpublish (dashboard-lifecycle-actions
+  // phase 7). This route is Clerk-authed and ownership-checked one line below, renders no
+  // public URL, and unpublish demotes every post to `draft` anyway (DD2b): gating it on the
+  // site's serving state would lock the owner out of their own drafts. Public blog SSR keeps
+  // the default gate — do not copy this flag anywhere else.
+  const ctx = await loadBlogSsr(params.slug, { requireServing: false });
   if (!ctx || ctx.page.userId !== userId) return notFound();
 
   const post = await prisma.blogPost.findUnique({ where: { id: params.postId } });

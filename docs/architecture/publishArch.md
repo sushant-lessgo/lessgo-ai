@@ -852,6 +852,209 @@ If issues arise:
 
 ---
 
+## Unpublish / Take-down (teardown) — the inverse pipeline
+
+Added by `dashboard-lifecycle-actions` (dashboard slice S2). Before it, **a mispublish was
+permanent**: nothing anywhere took a page down. Entry points: `POST /api/projects/{tokenId}/unpublish`
+and `DELETE /api/projects/{tokenId}` (delete = teardown + row deletion). Core library:
+`src/lib/staticExport/teardown.ts` → `teardownPublishedPage(pageId, { mode: 'unpublish' | 'delete' })`.
+
+### The serving predicate (read this first)
+
+`src/lib/publishState.ts` → `isServingPublishState(state)` is **the** answer to "is this page live?".
+It is `false` for exactly `'draft'` and `'unpublishing'`, and `true` for everything else
+(`'published'`, `'publishing'`, `'failed'`, unknown/null → fail-open).
+
+Why `'publishing'`/`'failed'` still serve: a re-publish goes `published → publishing → published`,
+and a *failed* re-publish leaves the previous version live. 404ing in those windows would be a
+live-page regression.
+
+**Deleting KV routes alone does NOT stop serving.** A KV miss is not a 404 — `src/middleware.ts`
+falls through to a rewrite of `/p/{subdomain}{path}`, and the `/p/[slug]` SSR routes used to serve
+any row that existed. So every SSR fallback is now gated on the predicate:
+`p/[slug]/page.tsx` (both `generateMetadata` and the page), `p/[slug]/[...subpath]/page.tsx` (both),
+`p/[slug]/privacy/page.tsx`, and `src/lib/blog/ssr.tsx` `loadBlogSsr()` (the single choke point for
+both blog SSR routes).
+
+**`loadBlogSsr()`'s one sanctioned opt-out:** `loadBlogSsr(slug, { requireServing: false })` is
+passed ONLY by the owner-only draft preview
+(`src/app/(blog-preview)/dashboard/blog/[slug]/[postId]/preview/page.tsx`). That route is
+Clerk-authed + ownership-checked and renders no public URL; since teardown demotes every post to
+`draft`, gating it would lock an owner out of their own drafts. Never pass `false` from a public
+route. Pinned by `src/lib/blog/__tests__/ssr.test.ts`.
+
+**Slot predicate (different question):** `publishState !== 'draft'` = "this row still occupies a
+published slot". Used by the plan limit and the dashboard status pill. A page stuck at
+`'unpublishing'` still shows "Published" (with Unpublish as the retry) even though SSR already 404s.
+
+### `PublishedPage.isPublished` is deprecated in place — do not use it
+
+The column (`schema.prisma:161`, `@default(true)`) has **no writer and, as of this slice, no reader**.
+It was `true` on every row including drafts, so it never meant anything. Writing `false` on unpublish
+would be a one-way door (re-publish's existing-row branch never sets it back), so teardown does not
+touch it; the readers were re-pointed to `publishState` instead
+(`src/lib/seo/resolvePublishedHost.ts`, `src/app/api/publish/route.ts` limit count,
+`src/lib/blog/publishBlogPost.ts` `loadContext`). The column survives (no migration).
+**Any new code asking "is this published?" must use `publishState` / `isServingPublishState`.**
+(`isPublished` in `src/types/core/content.ts` + `src/schemas/validation.ts` is a *different* entity —
+`PageMetadata` — and is unrelated.)
+
+### Teardown order (atomicity is BUILT, not inherited)
+
+True atomicity across KV + Blob + Postgres is impossible. Instead: a **forward-only ordered sequence
+with a DB-finalize-last invariant** — the DB is marked `draft`/deleted only after ALL external
+cleanup succeeded. Every step is idempotent, so a failed teardown is resumed by re-running it
+(the UI keeps Unpublish available for exactly this).
+
+1. **Custom-domain guard** — `publishedPage.customDomain !== null`, *regardless of*
+   `customDomainStatus` (a pending/failed domain still holds the `@unique` slot + a live Vercel
+   registration). → `{ blocked: 'custom_domain' }`, **zero writes**, route → 409
+   `custom_domain_attached` ("Remove the custom domain first"). Automated domain/SSL detach is
+   deliberately out of scope (post-beta). DELETE also guards independently, before its teardown
+   branch, because a *draft* row can still hold a `customDomain` (domains can be attached after an
+   unpublish) and would otherwise skip the guard with the teardown.
+2. **`publishState: 'unpublishing'`** — transient marker (plain String column, no migration). A crash
+   mid-teardown leaves a *detectable* state instead of a lying `'published'`; and because the
+   predicate treats `'unpublishing'` as non-serving, the page already 404s at the origin from here on.
+3. **KV route deletion** — the switch that stops blob-proxy serving (blobs deleted later are already
+   unreachable; blob-first would leave live routes pointing at deleted blobs). Beware
+   `removeRoutes(hosts)`: it only deletes the ROOT trio (`route:{host}:/`, `redirect:{host}:/`,
+   `slug-for:{host}`). Teardown enumerates the full key set itself: hosts =
+   `publishSubdomainHosts(slug)`; paths = the union of `metadata.blobs[].path` across **ALL**
+   versions (older versions may have written subpage/locale routes the current one doesn't; a legacy
+   `version.blobKey`-only row contributes `/`) + `/blog` + `/blog/{post.slug}` per published post.
+   Non-root keys → `deleteRoutes`, then `removeRoutes` for the root trio.
+   - **3b. ISR invalidation** — `revalidatePath()` for `/p/{slug}`, each non-root path, `/privacy`
+     and the blog paths. Without it the cached SSR render (`revalidate = 3600`) survives teardown for
+     up to an hour. (Requires a request context — teardown must be called from a route handler.)
+   - **3c. CDN purge** — *does not exist*. See the next section.
+4. **Blob deletion (strict)** — teardown does its own `publishedPageVersion.findMany` (it does NOT
+   touch `versionCleanup.ts`, and nothing here is modeled on publish's root-blob-only rollback):
+   all versions' `metadata.blobs[].blobKey` (legacy `version.blobKey` fallback) + every published
+   post's `blobKey` + `blogIndex.blobKey`. Then `currentVersionId: null` **before** deleting version
+   rows (the `"CurrentVersion"` relation has no explicit `onDelete` — don't lean on implicit SetNull).
+5. **DB finalize** — `mode: 'unpublish'` only: blog demote → `Project.status: 'draft'` →
+   `PublishedPage` LAST (`publishState: 'draft'`, `publishError: null`, `blogIndex: DbNull`).
+   `mode: 'delete'` stops after step 4 and the caller runs the delete transaction.
+
+Failure at any step after the marker → `retryable_failure` (route → 500 `teardown_incomplete`), the
+row **stays `'unpublishing'`** (non-serving, honest), and `Sentry.captureMessage('teardown_incomplete',
+{ extra: { pageId, slug, step, mode } })` fires so a stuck page is visible to us, not just the customer.
+There is no rollback-to-published once step 3 begins, and no `'unpublish_failed'` state.
+
+**Delete cascade:** guard → teardown (`mode: 'delete'`) → `$transaction`: `PublishedPage` → `Project`
+→ `Token` LAST (`Project.tokenId` FKs `Token.value`). `EditDelta`/`BlogPost`/`ProjectPage`/
+`SocialPost`/`EmailSequence`/`Outreach*`/`CollectLink` are `onDelete: Cascade`. `Testimonial` is
+`SetNull` — rows survive with `projectId: null`. `FormSubmission`/`PageAnalytics` are slug-keyed
+historical records and are retained. `PublishedPage.projectId` has no `@relation`, so nothing
+FK-blocks the project delete — which is why the "teardown ok, transaction fails" window is benign and
+retry-safe.
+
+### ⚠️ DD1c — the CDN cache window on unpublish (no purge mechanism exists)
+
+**Take-down is immediate at the ORIGIN, but the EDGE can replay a cached copy for ~1 hour.** This is a
+real, shipped product behaviour, and the UI copy says so in plain words.
+
+Why: the customer-facing URL (`{slug}.lessgo.site/`) is served by a middleware rewrite to
+`/api/blob-proxy`, which returns `Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400`.
+**The CDN cache key is the PUBLIC URL, not the rewritten path — so `revalidatePath('/p/{slug}')`
+does not evict it.** Re-publish escapes this for free by minting a NEW cache key (middleware appends
+`&v={version}` precisely so republishes propagate immediately); unpublish has no new version to mint.
+
+Investigated at implement time; **nothing usable was found** (do not re-litigate without new facts):
+- **Vercel purge REST API** — the only credentials we hold (`VERCEL_TOKEN`/`VERCEL_PROJECT_ID`/
+  `VERCEL_TEAM_ID`, `src/lib/vercel/domains.ts`) are used against the Domains endpoints. Vercel exposes
+  no public per-URL/per-path Edge purge endpoint; invalidation is dashboard/CLI "Purge Everything"
+  (project-wide — never something an unpublish should fire) or Next-level `revalidatePath`/`revalidateTag`.
+- **`cacheTag` + `revalidateTag`** — two independent blockers: `cacheTag` is a **Next 15 `'use cache'`
+  API** and this repo is **Next 14** (`next@^14.2.28`); and `blob-proxy/route.ts` is `runtime = 'edge'`
+  and fully dynamic, so its response is not in Next's Full Route Cache — the `Cache-Control` header is
+  honoured directly by Vercel's Edge Network, which carries no tag for `revalidateTag` to act on. It
+  would be a silent no-op.
+- **Rejected: lowering `s-maxage`** — that taxes every published-page view, forever, to speed up a rare
+  unpublish, and it is a change to the fenced publish happy path. Not done.
+
+**~1h, not 24h** (the SWR nuance): after `s-maxage` expires, `stale-while-revalidate` serves stale
+while revalidating in the background — that revalidation hits the middleware, finds no KV route,
+reaches the origin 404, and **the cache corrects itself**.
+
+**Honest AC status:** the spec's "unpublish → stops serving" is satisfied at the origin immediately and
+at the edge within ~1h. **How to verify a take-down correctly:** hit the subdomain with a cache-busting
+query param (`?nocache=1`) or hard-refresh — that proves the origin is down. The plain URL may serve
+stale. If a deployed check ever shows the plain URL 404ing immediately too (i.e. the edge key includes
+the rewrite target), the window doesn't exist and the UI copy should be TIGHTENED — a cheap follow-up.
+
+### Other behaviours worth knowing
+
+- **DD12 — slug retention is deliberate squatting.** Unpublish KEEPS the `PublishedPage` row, so the
+  `@unique` slug stays reserved and re-publish preserves the URL (the intended UX). Consequence:
+  `/api/publish` returns 409 "Slug already taken" to **any other user, forever**; the only release path
+  is Delete. Accepted for beta; a reclaim policy is post-beta if ever.
+- **DD0b — what the plan limit counts.** `/api/publish`'s published-page limit now counts
+  `publishState: { not: 'draft' }` (was `isPublished`, which was `true` on every row incl. drafts —
+  i.e. the *published*-page limit was counting drafts). Net effect: **an unpublished page no longer
+  consumes a plan slot, while still squatting its slug.** Pre-existing gap, left as-is: the limit check
+  runs only on publish's CREATE branch, so re-publishing a previously-unpublished page never re-checks
+  the limit.
+- **Blog demote on unpublish (DD2b).** Teardown deletes blog blobs/keys directly — it does NOT loop
+  `unpublishBlogPost` (that re-renders and *uploads* a fresh index blob per non-last post, and its
+  deletes are best-effort/invisible to the strict-failure contract). Blog blobs are never registered in
+  `PublishedPageVersion`, so version cleanup cannot see them. At finalize, published posts are demoted
+  to `status: 'draft'` (`publishedVersion`/`blobKey`/`blobUrl` nulled, `firstPublishedAt` kept so the
+  slug stays locked) and `PublishedPage.blogIndex` is cleared. **Re-publishing the site does NOT
+  auto-restore the blog** (`syncBlogAfterSitePublish` only re-renders `status: 'published'` posts) —
+  posts must be re-published individually. Honest full take-down; intended.
+- **Accepted gap: `/api/og/[slug]`** selects by slug with no publish-state check, so an unpublished page
+  still yields an OG image with its title/description. Metadata only — no page content, no orphaned
+  storage. Deliberately deferred (follow-up below).
+- **Sitemap nuance:** `resolvePublishedHost` follows the *serving* predicate, so a `'publishing'`/
+  `'failed'` page can appear in a sitemap. Consistent (the page IS reachable); accepted, not a defect.
+- **Authz:** every lifecycle mutation uses `assertProjectOwner(clerkId, tokenId, { action, claimIfOrphan: true })`
+  — never the `published-slug` route's hand-rolled admin-all widening. Its **audited** admin override
+  (`logAdminOverride`) is kept by founder ruling; each route carries the commented one-liner
+  (`if (access.adminOverride) return 403`) that would make it strict owner-only. **The demo token
+  (`lessgodemomockdata`) short-circuits `assertProjectOwner` to `ok: true` for ANY caller before any
+  ownership check** — every destructive/creating route therefore needs its own explicit
+  `if (access.isDemo) → 404` guard. Do not forget this on new token routes.
+
+### Pre-existing gaps in the PUBLISH path (found while building teardown; NOT caused by it)
+
+1. **KV keys from dropped versions are unenumerable.** `cleanupOldVersions` retains 10 versions and
+   **prunes the rows** — but publish never deletes routes for subpages that no longer exist. Once a
+   version's row is gone, its `metadata.blobs[].path` set is gone with it, so nothing (including
+   teardown) can enumerate those keys. A subpage removed >10 publishes ago can keep a live KV route.
+2. **A slug changed while published strands its old blog key.** A published post whose slug changed
+   leaves the old `/blog/{oldSlug}` KV key behind.
+
+### Test coverage
+
+- `src/lib/staticExport/teardown.test.ts` (21) — enumeration across multiple/legacy versions, blog keys,
+  ordering (marker → KV → blob → `draft` last), the **no-uploads-during-teardown** regression guard,
+  failure/retry paths, the guard's zero writes.
+- `src/lib/publishState.test.ts` (8) · `src/lib/blog/__tests__/ssr.test.ts` (8).
+- `e2e/dashboard-lifecycle.spec.ts` (14) — API contract + dashboard UI. **Honest scope:** it does NOT
+  assert `{slug}.lessgo.site` going down (host-based middleware+KV routing isn't reproducible on
+  localhost, and the CDN layer doesn't exist locally at all) nor real KV/blob deletion. Local publishes
+  land in `publishState: 'failed'` (Blob/KV absent) — a serving state, so the assertions hold.
+  Note: `/api/publish` is rate-limited **5/60s per user**; `publishSeed()` in `e2e/helpers/seedDraft.ts`
+  self-paces against it, so a 6th publish waits rather than 429ing in an unrelated test.
+
+### Follow-ups (deliberately deferred)
+
+- `ConfirmDialog.tsx` `app-*` retokenize (DD5) — shares blast radius with the edit page.
+- `src/components/SlugModal.tsx:39,:119` + `src/components/domain/LiveStep.tsx:64` print the published
+  URL as literals → re-point to `src/lib/publishedUrl.ts`.
+- `/api/start` still inlines token minting → re-point to `src/lib/projectToken.ts` `mintProjectToken()`
+  (two copies of that logic exist today and can drift).
+- `/api/og/[slug]` publish-state gating (the accepted gap above).
+- **Duplicate has no plan-limit check** — a user can clone past their site allowance. Consistent with
+  the rest of the app (`/api/start` project creation is unmetered too), but duplicate is a NEW, cheaper
+  project-creation path → revisit at pricing-v2.
+- DD1c copy tightening **if** the deployed check shows no edge window.
+- Automated custom-domain teardown (detach domain + SSL on unpublish); beta uses the guard instead.
+
+---
+
 ## Future Enhancements
 
 1. **Optimize Tailwind CSS**: Generate minimal CSS with only used classes

@@ -1,0 +1,169 @@
+// editor-shell-redesign phase 4 (fix pass) — t1 header menu open/dismiss semantics.
+//
+// REGRESSION THIS PINS: `Logo → Help & support` closes the app menu and opens the
+// help menu in one handler. Radix FocusScope fires AUTOFOCUS_ON_UNMOUNT in a
+// setTimeout(0) when the app-menu content unmounts; the non-modal popover's default
+// onCloseAutoFocus then focuses the app-menu trigger (the logo button), which is
+// OUTSIDE the freshly-mounted help content → focusin → onFocusOutside → dismiss.
+// Help flashed open and vanished. The fix is `onFocusOutside={e => e.preventDefault()}`
+// on the help AppPopoverMenu — so this test MUST flush timers before asserting,
+// otherwise the focus-return never runs and the test can never go red.
+//
+// No @testing-library/react in the repo — react-dom/client + React.act, per
+// src/components/ui/segmented-control.test.tsx.
+
+import React from 'react';
+import { createRoot, type Root } from 'react-dom/client';
+import { act } from 'react';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// vi.hoisted: vi.mock factories are hoisted above module scope, so the spies they
+// close over must be created there too.
+const { push, showSeoModal, showSocialModal } = vi.hoisted(() => ({
+  push: vi.fn(),
+  showSeoModal: vi.fn(),
+  showSocialModal: vi.fn(),
+}));
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
+vi.mock('@clerk/nextjs', () => ({
+  useUser: () => ({ isSignedIn: false }),
+  UserButton: () => null,
+}));
+vi.mock('@/hooks/useEditStore', () => ({
+  useEditStore: Object.assign(() => undefined, {
+    getState: () => ({ toggleLeftPanel: vi.fn() }),
+  }),
+}));
+vi.mock('@/components/shared/Logo', () => ({
+  default: () => <span data-testid="logo" />,
+}));
+vi.mock('./PageSwitcher', () => ({ PageSwitcher: () => null }));
+vi.mock('./EditHeader', () => ({
+  EditorDesignControls: () => null,
+  EditorStatusCluster: () => null,
+}));
+vi.mock('./EditHeaderRightPanel', () => ({ EditHeaderRightPanel: () => null }));
+vi.mock('../ui/GlobalModals', () => ({ showSeoModal, showSocialModal }));
+
+// Imported after the mocks are registered.
+import { GlobalAppHeader } from './GlobalAppHeader';
+
+(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT =
+  true;
+
+let container: HTMLDivElement;
+let root: Root;
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  container = document.createElement('div');
+  document.body.appendChild(container);
+  root = createRoot(container);
+  act(() => root.render(<GlobalAppHeader tokenId="tok" />));
+});
+
+afterEach(() => {
+  act(() => root.unmount());
+  container.remove();
+});
+
+/** Popover content is portalled to document.body — query globally, not in `container`. */
+function trigger(label: string): HTMLButtonElement {
+  const el = document.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`);
+  if (!el) throw new Error(`no trigger: ${label}`);
+  return el;
+}
+
+function row(text: string): HTMLElement {
+  const el = Array.from(document.querySelectorAll<HTMLElement>('[data-radix-popper-content-wrapper] button, [data-radix-popper-content-wrapper] span')).find(
+    (n) => n.textContent?.trim() === text
+  );
+  if (!el) throw new Error(`no open menu row: ${text}`);
+  return el;
+}
+
+function menuOpen(label: string) {
+  return trigger(label).getAttribute('data-state') === 'open';
+}
+
+/** Let the AUTOFOCUS_ON_UNMOUNT setTimeout(0) + Radix's dismiss path settle. */
+async function settle() {
+  await act(async () => {
+    await new Promise((r) => setTimeout(r, 200));
+  });
+}
+
+describe('GlobalAppHeader menus', () => {
+  it('app menu → Help & support opens the help menu and it STAYS open', async () => {
+    act(() => trigger('Site menu').click());
+    expect(menuOpen('Site menu')).toBe(true);
+
+    act(() => row('Help & support').click());
+    await settle();
+
+    // The regression: help flashed open then Radix dismissed it on focus-return.
+    expect(menuOpen('Help and support')).toBe(true);
+    expect(menuOpen('Site menu')).toBe(false);
+  });
+
+  it('help menu still dismisses on outside pointerdown', async () => {
+    act(() => trigger('Help and support').click());
+    // Radix attaches its `pointerdown` listener in a setTimeout(0) — dispatching
+    // before that flushes would pass vacuously.
+    await settle();
+    expect(menuOpen('Help and support')).toBe(true);
+
+    act(() => {
+      // jsdom has no PointerEvent constructor; MouseEvent carries everything
+      // Radix's usePointerDownOutside reads (target + pointerType undefined).
+      document.body.dispatchEvent(
+        new MouseEvent('pointerdown', { bubbles: true, cancelable: true })
+      );
+      document.body.dispatchEvent(new MouseEvent('pointerup', { bubbles: true }));
+      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await settle();
+
+    expect(menuOpen('Help and support')).toBe(false);
+  });
+
+  it('help menu still dismisses on Escape', async () => {
+    act(() => trigger('Help and support').click());
+    expect(menuOpen('Help and support')).toBe(true);
+
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    });
+    await settle();
+
+    expect(menuOpen('Help and support')).toBe(false);
+  });
+
+  it('app menu → Back to dashboard navigates and closes the menu', async () => {
+    act(() => trigger('Site menu').click());
+    act(() => row('Back to dashboard').click());
+    await settle();
+
+    expect(push).toHaveBeenCalledWith('/dashboard');
+    expect(menuOpen('Site menu')).toBe(false);
+  });
+
+  it('Settings → SEO opens the SEO modal and closes the menu', async () => {
+    act(() => trigger('Site settings').click());
+    act(() => row('SEO').click());
+    await settle();
+
+    expect(showSeoModal).toHaveBeenCalledTimes(1);
+    expect(menuOpen('Site settings')).toBe(false);
+  });
+
+  it('Settings → Social & sharing opens the social modal and closes the menu', async () => {
+    act(() => trigger('Site settings').click());
+    act(() => row('Social & sharing').click());
+    await settle();
+
+    expect(showSocialModal).toHaveBeenCalledTimes(1);
+    expect(menuOpen('Site settings')).toBe(false);
+  });
+});

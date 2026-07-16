@@ -58,6 +58,7 @@ dynamic_feed
 edit
 edit_note
 edit_square
+error
 expand_less
 expand_more
 filter_alt
@@ -86,6 +87,7 @@ insights
 inventory_2
 ios_share
 key
+keyboard
 label
 language
 layers
@@ -99,6 +101,7 @@ logout
 mail
 mark_email_read
 menu
+menu_book
 monitoring
 more_horiz
 more_vert
@@ -112,6 +115,7 @@ outgoing_mail
 palette
 perm_media
 person
+phone
 photo_camera
 photo_library
 photo_size_select_large
@@ -138,6 +142,7 @@ send
 settings
 share
 smart_button
+smart_display
 smartphone
 sms
 south
@@ -168,6 +173,7 @@ view_column
 view_list
 visibility
 visibility_off
+warning
 wb_sunny
 web_asset
 widgets

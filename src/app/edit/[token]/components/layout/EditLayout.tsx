@@ -5,7 +5,6 @@ import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { useEditor } from '@/hooks/useEditor';
 import { GlobalAppHeader } from './GlobalAppHeader';
-import { EditHeader } from './EditHeader';
 import { LeftPanel } from './LeftPanel';
 import { MainContent } from './MainContent';
 import { useAutoSave } from '@/hooks/useAutoSave';
@@ -126,25 +125,53 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
     }
   }, [mode]);
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // `.app-chrome` ATTACH MAP (phase 3) — read before adding/moving a wrapper.
+  //
+  // `.app-chrome` re-bases font-family (Onest) + ink. It MUST wrap chrome only.
+  // If it ever wraps the CANVAS, generated blocks inherit the app font in the
+  // EDITOR but not when published → editor↔published divergence (a known past
+  // incident: docs/architecture/phase11aArchitectureGaps.md, dual-renderer).
+  //
+  // Attached to exactly three regions, each a LEAF-side wrapper:
+  //   1. the top-bar wrapper        (GlobalAppHeader — the single t1 bar)
+  //   2. the rail wrapper           (LeftPanel)
+  //   3. the modal roots            (GlobalFormBuilder / GlobalButtonConfigModal
+  //                                  / LayoutChangeModal / ModalDebugPanel)
+  //
+  // PHASE 4 CHANGED THIS MAP: there used to be a FOURTH attach point around a
+  // nested <EditHeader> inside the right content column. That row is gone —
+  // collapsed into the single bar (#1) — so the wrapper went with it. The right
+  // content column still must NEVER carry `.app-chrome`: it holds <MainContent>,
+  // the canvas. Wrapping the column would put the canvas inside .app-chrome.
+  // That is the whole hazard; it is why the bar spans the frame instead.
+  //
+  // The `shell` root below deliberately does NOT carry `.app-chrome`: it is the
+  // canvas's ancestor. It keeps its Inter base, which the canvas inherits today.
+  // ──────────────────────────────────────────────────────────────────────────
   const shell = (
       <div
-        className="h-screen flex flex-col bg-gray-50 font-inter"
+        className="h-screen flex flex-col bg-app-frame font-inter"
         onContextMenu={handleContextMenu}
         style={{
           fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         }}
       >
-      {/* Global App Header */}
-      <GlobalAppHeader tokenId={tokenId} />
-      
+      {/* THE editor bar (t1): one 56px full-width row ABOVE the rail — it spans
+          the frame, which is why the rail starts below it. */}
+      <div className="app-chrome flex-none">
+        <GlobalAppHeader tokenId={tokenId} />
+      </div>
+
       {/* Main Layout Container */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Collapsible */}
-        <div 
+        <div
           className={`
-            transition-all duration-300 ease-in-out border-r border-gray-200 bg-white
-            ${leftPanel.collapsed 
-              ? 'w-12 lg:w-12' 
+            app-chrome
+            transition-all duration-300 ease-in-out border-r border-app-border-frame bg-app-surface
+            ${leftPanel.collapsed
+              ? 'w-12 lg:w-12'
               : `w-[${leftPanel.width}px]`
             }
             lg:relative absolute lg:static z-40
@@ -167,12 +194,12 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
           />
         )}
 
-        {/* Right Content Area */}
+        {/* Right Content Area.
+            NOT `.app-chrome`, and it no longer contains any chrome to justify it:
+            <MainContent> (the editor CANVAS) is all that lives here now that the
+            second header row is collapsed into the bar. See the attach map. */}
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
-          {/* Edit Header */}
-          <EditHeader tokenId={tokenId} />
-
-          {/* Main Content Area */}
+          {/* Main Content Area — CANVAS. Must stay outside every .app-chrome. */}
           <MainContent tokenId={tokenId} />
         </div>
       </div>
@@ -185,17 +212,22 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
         className="absolute -left-[10000px] w-px h-px overflow-hidden"
       />
       
-      {/* MVP Form Builder Modal */}
-      <GlobalFormBuilder />
-      
-      {/* Global Button Configuration Modal */}
-      <GlobalButtonConfigModal />
-      
-      {/* Layout Change Modal */}
-      <LayoutChangeModal />
-      
-      {/* Modal Debug Panel - Only in development */}
-      {process.env.NODE_ENV === 'development' && <ModalDebugPanel />}
+      {/* Modal roots — chrome, so `.app-chrome`. Zero-size wrapper: every modal
+          inside renders fixed/portalled, so this adds no layout box; it exists
+          only to give in-place (non-portalled) modal DOM the app font. */}
+      <div className="app-chrome contents">
+        {/* MVP Form Builder Modal */}
+        <GlobalFormBuilder />
+
+        {/* Global Button Configuration Modal */}
+        <GlobalButtonConfigModal />
+
+        {/* Layout Change Modal */}
+        <LayoutChangeModal />
+
+        {/* Modal Debug Panel - Only in development */}
+        {process.env.NODE_ENV === 'development' && <ModalDebugPanel />}
+      </div>
       </div>
   );
 

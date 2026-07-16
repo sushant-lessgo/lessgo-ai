@@ -6,6 +6,7 @@ import { usesTemplateModule, type TemplateId } from '@/types/service';
 import { buildPageMetadata, flattenContent } from '@/lib/staticExport/buildPageMetadata';
 import { buildStructuredData, serializeJsonLd, extractLogoUrl } from '@/lib/staticExport/structuredData';
 import { getPublishedGoal } from '@/lib/staticExport/getPublishedGoal';
+import { isServingPublishState } from '@/lib/publishState';
 
 // ISR configuration - revalidate every hour
 export const revalidate = 3600;
@@ -24,10 +25,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       previewImage: true,
       customDomain: true,
       customDomainStatus: true,
+      publishState: true,
     },
   });
 
-  if (!page) return {};
+  if (!page || !isServingPublishState(page.publishState)) return {};
 
   // Single source of truth (shared with the static generator). Canonical/og:url resolve to the
   // live custom domain when one exists — otherwise the SSR fallback would point authority at the
@@ -85,10 +87,13 @@ export default async function PublishedPage({ params }: PageProps) {
       themeValues: true,
       customDomain: true,
       customDomainStatus: true,
+      publishState: true,
     },
   });
 
-  if (!page) return notFound();
+  // DD0: a KV-route miss falls through to this SSR route, so "not published" must
+  // mean 404 here — the row is deliberately retained on unpublish.
+  if (!page || !isServingPublishState(page.publishState)) return notFound();
 
   // Backward compatibility: Use static HTML if exists and no content structure
   if (page.htmlContent && !page.content) {

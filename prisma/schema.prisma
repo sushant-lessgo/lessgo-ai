@@ -49,6 +49,7 @@ model Project {
   outreachIntake  OutreachIntake?
   prospectScrapes ProspectScrape[]
   outreachMessages OutreachMessage[]
+  mediaAssets      MediaAsset[]
 }
 
 // Data-capture: records "AI wrote X, user changed it to Y" per element. Upserted
@@ -263,6 +264,53 @@ model SocialPost {
 
   @@index([userId, createdAt])
   @@index([tokenId, createdAt])
+}
+
+// Source of a MediaAsset. 'scrape' is E2 (work-onboarding ingestion) — unused by
+// the t7 picker pilot. Neon PG supports `ALTER TYPE ... ADD VALUE` → future
+// sources (instagram, drive) are small additive migrations.
+enum MediaSource {
+  upload
+  stock
+  scrape
+}
+
+// Per-project media registry (media-library-picker t7 + work-onboarding E2 spine).
+// userId is a BARE Clerk User ID (no @relation — matches SocialPost/FormSubmission);
+// the Project link is carried by projectId (@relation, cascade-delete) + tokenId
+// (route key, avoids a lookup in token-scoped routes).
+// Rows are created ONLY server-side via the upload/proxy route seam (src/lib/media/registry.ts).
+// Blobs are never deleted: hiddenAt is a soft-delete ("photos are hidden, never
+// destroyed — restorable anytime", workEndtoEnd.md §8a). Blob GC is t8's job.
+model MediaAsset {
+  id          String      @id @default(cuid())
+  projectId   String
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tokenId     String // project token (route key)
+  userId      String // Clerk User ID (owner) — bare, no @relation (matches SocialPost)
+  url         String // OUR blob URL (or dev-fallback relative URL)
+  source      MediaSource
+  sourceUrl   String? // origin URL (Pexels src.large / scraped page). Null on proxy cache-hit backfill.
+  width       Int? // null: SVG may not yield dims; unknown on cache-hit backfill
+  height      Int?
+  bytes       Int // non-null: processed-buffer length, or blobs[0].size on the proxy cache-hit path
+  format      String // 'webp' | 'svg'
+  blurDataUrl String? // base64 webp micro-thumb; null for SVG / cache-hit backfill
+  checksum    String? // sha256 of processed buffer; v1 = store-only (no dedupe UX yet)
+  alt         String?
+  hiddenAt    DateTime? // soft-delete
+  // E2-forward (nothing in the t7 pilot writes these — expected):
+  groupId     String? // MediaGroup model itself lands with E2
+  sortOrder   Int         @default(0) // "lead with the best" ordering
+  selected    Boolean     @default(true) // E2 curation (~150 in → ~30 used) flips rejects to false
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([tokenId, url]) // required by the proxy cache-hit upsert (where: { tokenId_url })
+  @@index([tokenId, createdAt])
+  @@index([projectId])
+  @@index([groupId])
+  @@index([projectId, checksum])
 }
 
 model EmailSequence {

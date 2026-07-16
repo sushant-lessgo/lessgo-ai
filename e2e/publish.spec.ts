@@ -39,24 +39,46 @@ for (const cfg of AUDIENCES) {
     await seedDraft(api, token, cfg);
 
     // 4. Open preview; Publish enables only when isPublishReady (draft loaded + CTA).
+    // Selector note (editor-shell-redesign phase 7): the t17 reskin moved these
+    // controls onto stable data-testids. Testids over copy/class coupling — the
+    // old hooks (`div.shadow-lg`, `/Choose your page URL/`, `/Confirm & Publish/`,
+    // `/Page Published/`, `{name:'Publish', exact:true}`) all tracked strings the
+    // handoff replaced. Every assertion below is the same strength or stronger.
     await page.goto(`/preview/${token}`);
-    const publishBtn = page.getByRole('button', { name: 'Publish', exact: true });
+    const publishBtn = page.getByTestId('publish-trigger');
     await expect(publishBtn, 'Publish button never enabled (isPublishReady false?)').toBeEnabled({
       timeout: 45_000,
     });
+    await expect(publishBtn).toHaveText(/Publish/);
     await publishBtn.click();
 
-    // 5. SlugModal — fill slug + title, confirm (handles first-publish + republish).
-    // Scope to the modal card (shadow-lg + its heading) to avoid the page wrapper.
-    const modal = page.locator('div.shadow-lg').filter({ hasText: /Choose your page URL|Republish Your Page/ });
+    // 5. t17 · A confirm card — fill slug + title, confirm.
+    const modal = page.getByTestId('publish-confirm-card');
     await expect(modal).toBeVisible();
-    await modal.getByRole('textbox').first().fill(slug);
-    await modal.getByPlaceholder('e.g., Design Tools for Social Media Marketers').fill(cfg.title);
-    await modal.getByRole('button', { name: /Confirm & Publish|Update Published Page/ }).click();
+    await expect(modal.getByRole('heading', { name: 'Publish changes' })).toBeVisible();
+    await modal.getByTestId('publish-slug-input').fill(slug);
+    await modal.getByTestId('publish-title-input').fill(cfg.title);
 
-    // 6. Success. Generous timeout — publish runs doomed Blob/KV calls to their
-    // timeouts in local dev before the non-fatal fallback returns success.
-    await expect(page.getByText(/Page Published/i)).toBeVisible({ timeout: 120_000 });
+    // The Review nudge is a soft nudge, never a gate (handoff t17 interaction rule:
+    // "Publish now always works — never block someone from shipping"). Assert the
+    // nudge is actually SHOWING first: without this the next assertion only ever
+    // proved "enabled with no nudge", which is the trivial branch. The seeded draft
+    // always leaves guide tasks open (no logo, no contact info), so the nudge renders.
+    await expect(modal.getByTestId('publish-review-nudge')).toBeVisible();
+    const confirmBtn = modal.getByRole('button', { name: 'Publish now' });
+    await expect(confirmBtn).toBeEnabled();
+    await confirmBtn.click();
+
+    // 5b. t17 · B publishing card replaces the confirm body while `publishing`.
+    await expect(page.getByTestId('publish-publishing-card')).toBeVisible({ timeout: 20_000 });
+
+    // 6. t17 · C live card. Generous timeout — publish runs doomed Blob/KV calls to
+    // their timeouts in local dev before the non-fatal fallback returns success.
+    const liveCard = page.getByTestId('publish-live-card');
+    await expect(liveCard).toBeVisible({ timeout: 120_000 });
+    await expect(liveCard.getByText(/You're live!/)).toBeVisible();
+    // The live card must show the real published URL, not an empty row.
+    await expect(page.getByTestId('publish-live-url')).toHaveText(new RegExp(slug));
 
     // 7. Published page renders from DB with the right template.
     const pub = await page.goto(`/p/${slug}`);

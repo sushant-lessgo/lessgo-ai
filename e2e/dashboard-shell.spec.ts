@@ -40,12 +40,13 @@ test.describe('dashboard shell', () => {
     await expect(page.getByRole('button', { name: /\+ Create New Page/i })).toHaveCount(0);
   });
 
-  test('un-built controls are greyed in place (All Analytics / All Leads / Domains / bell)', async ({
+  test('un-built controls are greyed in place (Domains / bell)', async ({
     page,
   }) => {
     await page.goto('/dashboard');
 
-    for (const name of ['All Analytics', 'All Leads', 'Domains']) {
+    // S4 phase 4 un-greyed All Analytics (real <Link> now) — only Domains remains.
+    for (const name of ['Domains']) {
       const item = page.getByRole('button', { name, exact: true });
       await expect(item, `${name} should render (completeness principle)`).toBeVisible();
       await expect(item, `${name} should be disabled`).toBeDisabled();
@@ -56,16 +57,17 @@ test.describe('dashboard shell', () => {
     await expect(bell).toBeVisible();
     await expect(bell).toBeDisabled();
 
-    // R14: All Leads must NOT carry a count pill (no real rollup data this slice).
+    // R14/R-C: All Leads must NOT carry a count pill. S4 un-greyed it (it is now a
+    // real <Link> to /dashboard/leads) but deliberately shipped NO count pill.
     //
     // ⚠️ Same AppIcon ligature-text trap as the ••• menu (see the comment in the
-    // phase-2 block): DisabledNavItem renders <AppIcon/> BEFORE {label}, so this
-    // button's textContent is "move_to_inboxAll Leads" — a whole-string
+    // phase-2 block): the nav row renders <AppIcon/> BEFORE the label, so this
+    // element's textContent is "move_to_inboxAll Leads" — a whole-string
     // toHaveText('All Leads') can never pass. The END ANCHOR is exactly the R14
     // intent: the design's count pill renders AFTER the label (margin-left:auto),
     // so "move_to_inboxAll Leads7" still fails. Do NOT weaken this to
     // toContainText — that would pass WITH a pill present and guard nothing.
-    const allLeads = page.getByRole('button', { name: 'All Leads', exact: true });
+    const allLeads = page.getByRole('link', { name: 'All Leads', exact: true });
     await expect(allLeads).toHaveText(/All Leads$/);
   });
 
@@ -123,7 +125,7 @@ test.describe('projects grid (phase 2)', () => {
     await expect(page.getByRole('button', { name: /^Recent$/ })).toBeDisabled();
   });
 
-  test('••• menu ships all 7 items, exactly 2 active on a published card (R4)', async ({ page }) => {
+  test('••• menu ships all 8 items on a published card, only Domain settings + Archive greyed (R4)', async ({ page }) => {
     await page.goto('/dashboard');
 
     const published = page.getByRole('button', { name: 'Open', exact: true });
@@ -131,8 +133,9 @@ test.describe('projects grid (phase 2)', () => {
 
     // Anchor to a PUBLISHED card, not `.first()`: card order is `sourceProjects`
     // order (updatedAt desc), NOT published-first — so the first card may be a
-    // draft, whose "Visit site" is correctly disabled and would fail the
-    // "exactly 2 active" assertion below for entirely the wrong reason.
+    // draft, whose "Visit site" is correctly disabled — and which has no
+    // "Unpublish" item at all — failing the assertions below for entirely the
+    // wrong reason.
     // The innermost div containing BOTH the "Published" badge and the "Open"
     // primary is the card root (`.last()` = deepest match in document order).
     const publishedCard = page
@@ -143,7 +146,11 @@ test.describe('projects grid (phase 2)', () => {
     await publishedCard.getByRole('button', { name: 'Project actions' }).click();
 
     const items = page.getByRole('menuitem');
-    await expect(items).toHaveCount(7);
+    // Re-synced to S2 (`dashboard-lifecycle-actions`)'s shipped ProjectCardMenu:
+    // it added a published-only "Unpublish" item (→ 8 items on a published card,
+    // 7 on a draft) and made Rename/Duplicate/Delete live. This spec had been red
+    // on main since S2; the assertions below now match the component.
+    await expect(items).toHaveCount(8);
     // ⚠️ GOTCHA — AppIcon renders the Material Symbols LIGATURE NAME as element
     // text (`src/components/ui/icon.tsx:33` → `{name}`, aria-hidden). So an
     // item's textContent is "open_in_newOpen editor", NOT "Open editor", and a
@@ -154,6 +161,7 @@ test.describe('projects grid (phase 2)', () => {
     await expect(items).toHaveText([
       /Open editor$/,
       /Visit site$/,
+      /Unpublish$/,
       /Rename$/,
       /Duplicate$/,
       /Domain settings$/,
@@ -161,11 +169,14 @@ test.describe('projects grid (phase 2)', () => {
       /Delete$/,
     ]);
 
-    // Active: Open editor + Visit site. Greyed: the other five (R4).
-    for (const name of ['Open editor', 'Visit site']) {
+    // Active on a published, non-busy card without a custom domain: everything
+    // except the two D3 items. Unpublish/Delete are `blockedByDomain || busy`,
+    // Rename/Duplicate are `busy`-only — all false here.
+    // Greyed: only Domain settings + Archive — designed chrome, no backend (R4).
+    for (const name of ['Open editor', 'Visit site', 'Unpublish', 'Rename', 'Duplicate', 'Delete']) {
       await expect(page.getByRole('menuitem', { name })).not.toHaveAttribute('data-disabled', '');
     }
-    for (const name of ['Rename', 'Duplicate', 'Domain settings', 'Archive', 'Delete']) {
+    for (const name of ['Domain settings', 'Archive']) {
       await expect(page.getByRole('menuitem', { name })).toHaveAttribute('data-disabled', '');
     }
   });

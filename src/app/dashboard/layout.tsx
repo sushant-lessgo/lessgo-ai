@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { PLAN_CONFIGS, PlanTier } from '@/lib/planManager'
 import AppSidebar, { type SidebarPlan } from '@/components/dashboard/AppSidebar'
 import DashboardTopBar from '@/components/dashboard/DashboardTopBar'
+import { DialogHost } from '@/components/ui/ConfirmDialog'
+import { ToastProvider } from '@/components/ui/toast'
 
 /**
  * Dashboard shell (dashboard-workspace-ia phase 1) — sidebar + top bar chrome for
@@ -19,6 +21,15 @@ import DashboardTopBar from '@/components/dashboard/DashboardTopBar'
  *
  * NOT an auth boundary: Clerk middleware handles authn and each page owner-scopes
  * its own query. This layout only fetches chrome display data.
+ *
+ * Dialog + toast hosts are mounted HERE, once, for every `/dashboard/*` screen
+ * (dashboard-lifecycle-actions DD6). `<DialogHost />` is load-bearing, not
+ * decoration: with no host mounted, `confirmDialog()`/`promptDialog()` silently
+ * fall back to native `window.confirm`/`prompt` (ConfirmDialog.tsx:42-58) — the
+ * destructive lifecycle actions would still "work", just unstyled and
+ * unautomatable, so its absence fails silently rather than loudly.
+ * Both are client components; this layout stays a server component (Next inserts
+ * the boundary at the import).
  */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser()
@@ -53,12 +64,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="app-chrome flex h-screen w-full overflow-hidden">
-      <AppSidebar profile={profile} plan={plan} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <DashboardTopBar />
-        <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
+    <ToastProvider>
+      <div className="app-chrome flex h-screen w-full overflow-hidden">
+        <AppSidebar profile={profile} plan={plan} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <DashboardTopBar />
+          <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
+        </div>
+        {/* Sibling of the scroll container, not inside it: the dialog is a fixed
+            full-viewport overlay and must not be clipped by `overflow-y-auto`. */}
+        <DialogHost />
       </div>
-    </div>
+    </ToastProvider>
   )
 }
