@@ -12,7 +12,8 @@ Reskin the complete non-canvas editor shell (top bar, pills, left rail, Design m
 ## Progress log
 - phase 1 foundation (popover/tooltip/spinner/divider, coming variant, tokens, icons): **done** (commit 6c62bdb8, review loops 0 — gates green: tsc clean, 3331 tests, lint 0)
 - phase 2 status pills (SaveStateChip/ReviewPill) + dirty-guard e2e: **done** (commit c335a75a, impl-review loops 1 → `ship`; gates green: tsc 0, 3331 tests, lint 0, e2e authed 9 passed + spec EXECUTION confirmed; red-capability proven by neutering the guard)
-- phase 3 left rail frame + .app-chrome attach (EditLayout structure moved to phase 4): pending
+- phase 3 left rail frame + .app-chrome attach (EditLayout structure moved to phase 4): **built** (commit 2a749fb9, impl-review loops 1 → `ship`; gates green: tsc 0, 3331 tests, lint 0, e2e public 13 + authed 9) — **AWAITING FOUNDER HUMAN GATE (canvas-bleed)**
+  - ⚠️ **The automated specs CANNOT see this attach** — `ui-isolation.spec.ts`/`parity.spec.ts` hit `/dev/blocks/*`, which never mounts `EditLayout`. Founder eyes are the ONLY real check. Structural verification (impl-review traced the JSX tree): 4 attach points (GlobalAppHeader wrapper L158, rail wrapper L165-181, EditHeader wrapper L198, modal-roots `display:contents` L218); `MainContent` L203 is a TRUE SIBLING of wrapper #3; shell root L150 carries NO `.app-chrome`; no `.app-chrome` ancestor exists above the canvas.
 - phase 4 single-bar collapse (GlobalAppHeader + EditHeader merge) + ALL EditLayout structure + right cluster: pending
 - phase 5 Design menu (t14 theme popovers): pending
 - phase 6 site settings + SEO (t16/t18): pending

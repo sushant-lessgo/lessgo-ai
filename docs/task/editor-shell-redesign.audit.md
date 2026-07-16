@@ -499,3 +499,417 @@ show modified — **pre-existing in this worktree, not touched by me.**
   `page.locator('header')`. My `.app-chrome` wrappers are `<div>`s *around* the existing
   `<header>` elements, so the selectors still resolve — but phase 4's collapse must keep a
   `<header>` or re-point them.
+
+---
+
+## Phase 4 — Single-bar collapse: GlobalAppHeader + EditHeader merge + right cluster
+
+### COLLAPSE, not fallback
+
+The collapse landed. It did **not** turn structural: no handler was rewritten, no store
+wiring changed, and the rail's layout was untouched (the bar already sat above it — what
+moved was `EditHeader`'s *content*, out of the right content column and into the one bar).
+The fallback (stacked-but-restyled) was not needed and was not taken.
+
+Mechanically: `EditHeader` stopped being a component that renders a `<header>`, and became
+the two CLUSTERS its content was — `EditorDesignControls` (left) + `EditorStatusCluster`
+(right) — which `GlobalAppHeader` mounts inside the single `<header>`. That split was forced
+by t1's ordering: the old row's content does not stay contiguous in the new bar (design
+controls go left, pills go right), so a fragment could not have interleaved it.
+
+### Files changed
+
+| File | Change |
+|---|---|
+| `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx` | Rewritten as THE single t1 56px bar: app menu, page switcher, design controls, Settings menu, help menu, mobile toggle, device segmented (greyed), status cluster, right panel, UserButton. |
+| `src/app/edit/[token]/components/layout/EditHeader.tsx` | No longer renders a row. Exports `EditorDesignControls` + `EditorStatusCluster`; dispatch logic + ReviewPill guard moved unchanged. Score pill (greyed) added here. |
+| `src/app/edit/[token]/components/layout/EditHeaderRightPanel.tsx` | Button markup + `RegenCopyConfirmModal` + toast restyled; Edit/Preview segmented shell + inline Publish split-button added. Orchestration untouched. |
+| `src/app/edit/[token]/components/ui/PreviewButton.tsx` | Restyled to the inactive Edit/Preview segment. Navigation untouched. |
+| `src/app/edit/[token]/components/layout/EditLayout.tsx` | Second header mount + its `.app-chrome` wrapper removed; attach map updated. Nothing else. |
+
+No file outside the phase's Files-touched list was edited. **No commit made.**
+
+### Attach-map change (trap 3)
+
+Phase 3 had FOUR attach points; there are now **three**. The removed one is wrapper #3
+(around the nested `EditHeader`) — the row it wrapped no longer exists. The comment block in
+`EditLayout.tsx` was updated to say so explicitly, including *why* the right content column
+still must never carry `.app-chrome` (it holds `<MainContent>`).
+
+**The canvas did not move and did not become a descendant of anything new.** The `EditLayout`
+diff is 4 non-comment lines: the `EditHeader` import and its 4-line mount. `<MainContent>` is
+now the ONLY child of the right column; the shell root still carries no `.app-chrome`. Net
+effect on the canvas: strictly *less* `.app-chrome` in the tree than phase 3 shipped.
+
+`EditLayout` L64-127 (resize/shortcuts/autosave/modal reset), L35-40 `store?.getState()`, the
+ThemeInjector/backgroundSystem block, and the mobile overlay + its L193
+`storeState?.toggleLeftPanel?.()` are all byte-identical (verified by diff — they produce zero
+changed lines).
+
+### The `Coming`-in-menu-rows pattern (decision 17) — DECIDED HERE
+
+**Greyed row = `<Coming>` wearing `AppPopoverItem`'s row geometry via `className`,** from a
+single `COMING_ROW` const at the top of `GlobalAppHeader.tsx`. Used for all 7 greyed rows
+(My sites / Rename site / Duplicate; the 4 help rows; Domain).
+
+Rejected the alternative (a row-shaped variant on `AppPopoverItem`) because the variant would
+have to render a `<span>` not a `<button>`, drop `onClick`, and re-implement `Coming`'s
+inertness — i.e. it would be `Coming` with extra steps, added to a *shared* primitive for one
+file's benefit. `COMING_ROW` restates only box + typography; colors are left to `.app-coming`,
+which `!important`-wins regardless. Later menu consumers should copy this const, not improvise.
+
+Per trap 5, **no `disabled`** was set on any greyed `SegmentedControl` option (device
+segmented): inertness is `Coming`'s `onClickCapture` + a no-op `onValueChange`. Phase 3's
+precedent followed exactly.
+
+### Handlers — how "byte-identical" was verified
+
+Diffed each file and filtered out presentation lines; the surviving non-presentational lines
+are only imports, the two new cluster component boundaries, and the one new hook call site
+noted below. Specifically confirmed unchanged: `handleLogoClick`, `handleHelpClick`,
+`showSeoModal`/`showSocialModal` call sites, the L157 `useEditStore.getState().toggleLeftPanel?.()`
+mutation (still verbatim, still via the hook object — `GlobalAppHeader.tsx:202`), the design-control
+dispatch, the `!allComplete` ReviewPill guard, `regenerateAllContent` orchestration, the
+toast-on-completion effect, the regen locale-lock, and the regen button's `disabled`/`title`
+expressions. **No new store-write PATHS** — every store action reachable from this bar was already
+reachable pre-diff, and no new action was introduced.
+
+> **CORRECTION (impl-review note 2).** This originally read "*Zero new store writes — no
+> `setState`/action call was added anywhere*", which is **false as worded**. The Publish
+> split-button's main half calls `usePreviewNavigation`, which reaches
+> `storeApi.getState().triggerAutoSave()` — so a new *call site* of an existing store action WAS
+> added. It is per-plan (the plan sanctions "main button = existing Preview→publish entry
+> navigation") and it is the same action Preview already invoked via the same hook, so no new
+> behavior or new action reaches the store. But the literal claim was wrong and is retracted here.
+
+### The two t1 deviations the founder must sign off (gate)
+
+1. **`UserButton` KEPT** in the right cluster (decision 8) — t1 draws no avatar, but this is
+   the only sign-out path. The `user.firstName` label beside it IS dropped (presentation only;
+   `user` is no longer read).
+2. **"/ Editor" breadcrumb REMOVED** — pure text, no handler, superseded by the page-switcher.
+
+### Other judgement calls / deviations
+
+1. **`Domain` in the Settings popover is GREYED, not wired.** The plan says all four rows wire
+   to existing `GlobalModals` callers, but only `showSeoModal`/`showSocialModal`/`showProductsModal`
+   exist — **there is no domain modal in the editor** (domain lives in the publish/preview flow).
+   Greying it is not a regression (nothing works today) and matches "render greyed, never omit".
+   Phase 6 builds the real t16 Domain pane. **Social is WIRED and was never greyed** (decision 10).
+2. **`Languages` is NOT a Settings row.** t1 puts it there with a mono count, but `LocaleSettings`
+   is a self-contained control with its own trigger + popover, and it is **not in this phase's
+   Files touched** — opening it from a menu row would require editing it (and nesting a popover
+   in a popover). Conservative option: `LanguageToggle` + `LocaleSettings` stay mounted in the
+   bar (as the plan requires), so Languages keeps working. The Settings menu therefore has 3 rows.
+3. **Publish split-button's main half calls `usePreviewNavigation(tokenId)`** — a NEW call site
+   of an EXISTING hook, not new logic. Justified: publishing lives on the preview page and the
+   Preview navigation is the only entry today, which is exactly what the plan says the main
+   button should be. Dropdown half greyed (handoff never defines it).
+4. **`Help & support` opens the help popover via controlled state** (`showHelpMenu`), with the
+   help icon button as the Radix anchor. Both entry points work; `handleHelpClick` preserved.
+   Consequence: the help button remains in the bar, which t1 does not draw.
+5. **`Regen Copy` and `Reset` are kept in the bar** though t1 draws neither — they work today.
+   **`UndoRedoButtons` and `ResetButton` are NOT in this phase's Files touched**, so they keep
+   their old grey-box styling: t1's 19px undo/redo (disabled `#c7c7cf`) is **NOT achieved**. This
+   is a visible inconsistency in the right cluster and the most likely founder-gate comment.
+   Flagging rather than editing out-of-scope files.
+6. **4 icons the handoff implies are absent from the subset font** (`menu_book`, `smart_display`,
+   `keyboard`, `warning`) and `icons.txt` is not in this phase's Files touched. Rather than ship
+   tofu boxes or regenerate the font out of scope, substituted present ligatures: `auto_stories`,
+   `subtitles`, `smart_button`, `info`. Every ligature used in this phase was verified against
+   `icons.txt` programmatically.
+7. **`RegenCopyConfirmModal` stayed a plain conditional overlay** rather than adopting the dialog
+   primitive (the plan suggested it). It is driven by local `showConfirm` state and rendered from
+   inside the bar; swapping the mount model changes focus/scroll/portal behavior = behavior change.
+   Restyled only. Same call for the toast (no toast primitive exists in `src/components/ui`).
+8. **Neither the modal nor the toast carries `.app-chrome`** — `fixed` moves the box, not the DOM
+   position, so both still inherit the app font from the bar's wrapper. Adding the class would have
+   overridden their own backgrounds (trap 2). Two tokens I reached for did not exist
+   (`nudge-icon`, `nudge-bg-strong`); used `app-review-text`/`app-review-bg` rather than adding
+   keys (`tailwind.config.js` is not in this phase's Files touched).
+9. **`Logo` height constrained via className.** `<Logo size>` feeds next/image as BOTH width and
+   height, so a bare `size` reserves a square box far taller than a 56px bar. `h-[22px] w-auto`
+   gives t1's h22.
+
+### Verification (actual results)
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit` | **CLEAN** — zero output. |
+| `npm run test:run` | **GREEN** — 193 files passed / 1 skipped; **3331 passed** / 18 skipped (identical to phases 1-3). |
+| `npm run lint` | **GREEN** — 0 errors; only pre-existing warnings (`no-img-element`, `exhaustive-deps`), **none in my files**. |
+| `PORT=3007 E2E_PORT=3007 npm run test:e2e --project=authed` | **9 passed (4.5m)** — run twice, green both times. |
+| `PORT=3007 E2E_PORT=3007 npm run test:e2e --project=public` | **13 passed (2.1m)** — ui-isolation + parity still green. |
+
+**Proof the dirty-guard spec EXECUTED against the new bar** (trap 1 — `SaveStateChip`/`ReviewPill`
+were re-mounted into a different parent; the spec's `page.locator('header')` / `header [role="status"]`
+selectors kept resolving because the composed bar IS the `<header>`, and it is now the only one):
+
+```
+  ✓  3 [authed] › e2e\editor-dirty-guard.spec.ts:102:5 › dirty-guard prompts on close while mid-edit (unsynced work is protected) (6.2s)
+  ✓  4 [authed] › e2e\editor-dirty-guard.spec.ts:129:5 › dirty-guard prompts on close inside the dirty window (post-blur, pre-autosave) (52.2s)
+  ✓  5 [authed] › e2e\editor-dirty-guard.spec.ts:152:5 › dirty-guard stays SILENT on a clean page (with user activation present) (5.2s)
+  ✓  6 [authed] › e2e\editor-dirty-guard.spec.ts:183:5 › review pill: visible while setup is incomplete, opens the review panel on click (55.2s)
+```
+
+Selectors were **not** re-pointed — no need. The negative test's activation target is still the
+`SaveStateChip` (`role="status"`, no handler, now inside the composed bar); it re-asserts `Saved`
+after the click, and it passed, so the red-capability proof has not rotted. The toast I restyled
+deliberately did **not** gain a `role="status"` that could have made `header [role="status"]`
+ambiguous. `useEditor.ts:212`'s `target.closest('header')` header-click detection also still
+resolves — another reason the bar had to stay a `<header>`.
+
+`git status` after gates: the `uiFoundationIsolation.test.tsx.snap` CRLF rewrite recurred as in
+phases 2-3; `git diff --numstat` showed **zero content lines** and I restored it with
+`git checkout -- <that file>` (single-file restore of a file I never edited; no branch/ref op, no
+commit). `docs/task/editor-shell-redesign.plan.md` + `docs/tracks/uiRequirements.md` still show
+modified — pre-existing in this worktree, not touched by me.
+
+### NOT done / open risks
+
+- **No live `npm run dev` manual pass was performed.** This is the honest gap and the founder gate
+  is the real check. What the e2e suite DOES cover on the real bar (worth more than nothing): the
+  editor loads and edits, autosave + dirty guard fire, the ReviewPill click still opens the left
+  panel, and `publish.spec` drives Preview → publish → `/p/[slug]` renders (so the Publish
+  split-button's entry point and PreviewButton navigation are exercised end-to-end).
+  **NOT covered by any automation, needs founder eyes:** sign-out via `UserButton`, app-menu
+  Back-to-dashboard, each Settings row opening its modal (**especially Social**), the help menu's
+  two entry points, undo/redo, the regen toast + locale lock, the mobile overlay at narrow width,
+  and the composed bar's actual look.
+- **Right-cluster styling is inconsistent by construction** (deviation 5): reskinned Regen +
+  segmented + Publish sit beside un-reskinned UndoRedo/Reset. Needs either a Files-touched
+  amendment or the phase-8 sweep.
+- **Bar overflow at narrow widths is unverified.** The bar now carries strictly more controls than
+  either old row did, and there is no responsive pass in this track (handoff is fixed 1360 desktop).
+  The two `ml-auto` groups will compress before they wrap.
+- **`npm run build` not run** this phase (no tailwind/asset change here); phases 1/3's standing
+  "build before merge" item is unchanged.
+
+---
+
+## Phase 4 — fix pass (impl-review blocking issue)
+
+**Files changed (this pass)**
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx`
+- `src/app/edit/[token]/components/layout/EditHeaderRightPanel.tsx`
+- `src/app/edit/[token]/components/ui/PreviewButton.tsx`
+- `docs/task/editor-shell-redesign.audit.md` (this section + the store-writes correction above)
+
+No other file touched. The phase-4 diff was kept and fixed on top; nothing from the approved
+collapse was redone.
+
+### BLOCKING — wired popover rows never dismissed their menu
+
+Real regression the composition introduced: Radix `Popover` does not close on item click (unlike
+`DropdownMenu`), and `popover.tsx` exports no `PopoverClose`. Pre-diff, SEO/Social were bare bar
+buttons — click, modal opens, nothing left behind.
+
+Fixed per the ruling: all three menus are now **controlled** with local state in
+`GlobalAppHeader.tsx` (`showAppMenu`, `showSettingsMenu`, plus the already-controlled
+`showHelpMenu`), and every WIRED row sets its menu `false` in its own `onClick`:
+
+| Row | Before | After |
+|---|---|---|
+| Settings → SEO | modal opens, menu hangs on top | menu closes, then `showSeoModal()` |
+| Settings → Social & sharing | same | menu closes, then `showSocialModal()` |
+| App menu → Help & support | two popovers, two anchors, overlapping | app menu closes, help opens |
+| App menu → Back to dashboard | menu open during nav | menu closes, then `router.push` |
+
+**No `Close` was added to the shared primitive** — that's a phase-8/decision-17-style call on a
+component with other consumers. `popover.tsx` is untouched by this pass.
+
+Greyed rows are left alone deliberately: `<Coming>`'s `onClickCapture` swallows the click, so
+nothing happens and there is nothing to dismiss — and a Radix close wouldn't fire through the
+swallowed event anyway. A load-bearing comment at the top of the file records the whole rule so a
+later consumer doesn't "simplify" the controlled state away.
+
+### `handleHelpClick` — coincidence → intent (note 4)
+
+`handleHelpClick` (`setShowHelpMenu(!showHelpMenu)`) sat on the trigger *alongside* Radix's own
+`onOpenToggle`. Both fired; it only worked because Radix `preventDefault()`s a re-entrant trigger
+click (`targetIsTrigger`). Deleted the hand-rolled toggle and the redundant `aria-expanded` (Radix
+`PopoverTrigger` sets both). **Behavior identical**, now by design rather than by accident.
+
+### `Back to dashboard` emphasis (also-fix 1)
+
+`active` rendered AppPopoverItem's *selected-row* styling **and** `data-active` on a navigation
+action — semantically "this is the current item", which is wrong. The handoff (scout §H t1) does
+draw the row highlighted, but that's emphasis, not selection.
+
+**Approach chosen:** kept the exact visual treatment, dropped the `active` prop, and applied the
+pixels as a presentational `EMPHASIS_ROW` className const in this file. Rationale: the alternative
+— adding an `emphasis` prop to `AppPopoverItem` — edits the shared primitive, which is precisely
+what the ruling on `PopoverClose` told me not to do in this pass. A local className keeps
+`popover.tsx` untouched and confines the decision to the one consumer that needs it. `hover:bg-app-tint-soft`
+is restated so the emphasised row doesn't flip to the hairline hover; tailwind-merge resolves the
+rest against the base row classes. Nothing announces the row as selected any more.
+
+### `usePreviewNavigation` double-instantiation (also-fix 2) — **LIFTED**
+
+Chose the **preferred fix (lift), not the comment**. `EditHeaderRightPanel` is the SOLE consumer of
+`PreviewButton` (verified by grep), so the hook now runs ONCE in the parent and
+`handlePreviewClick`/`isNavigating` go down as props. `PreviewButton`'s props changed
+`{tokenId}` → `{onPreviewClick, isNavigating}`; its `tokenId` was only ever feeding the hook.
+
+Why this stayed inside the presentation line: the button's user-visible behavior is unchanged (same
+handler, same `disabled`, same "Saving..." label), no store logic moved, and the public-API change
+reaches exactly one call site which is in Files touched. What it buys:
+- One owner of the `getTabManager`/`cleanupTabManager` lifecycle. `utils/tabManager.ts:230-247` is a
+  keyed singleton with **no refcount** whose cleanup unconditionally `destroy()`s — two owners was a
+  latent landmine (safe only by luck: the `instances` map deduped construction and both mounted in
+  the same commit).
+- Publish's "Opening…" now correctly disables Preview — the two halves shared one `isNavigating`
+  instead of each having its own. That was the stated side-effect bug.
+
+Both files carry a comment naming the refcount hazard so nobody re-instantiates the hook.
+
+### Invariants re-checked
+- `.app-chrome` still never wraps the canvas — **no wrapper touched**, attach points unchanged at 3
+  (bar, rail, modal roots). Attach-map comment needed no update.
+- `GlobalAppHeader.tsx` mobile toggle `useEditStore.getState().toggleLeftPanel?.()` verbatim.
+- Regen orchestration / toast effect / locale lock / mobile overlay untouched.
+- Handlers still verbatim: `showSeoModal`/`showSocialModal`/`handleLogoClick` are *called*
+  unchanged, only wrapped to close their menu first.
+- `COMING_ROW` pattern consistent; greyed things still use `<Coming>`, never the bare class.
+- Still exactly one `<header>`; `role="status"` still unique to `SaveStateChip`.
+
+### Test results (actual)
+- `npx tsc --noEmit` — **clean, no output.**
+- `npm run test:run` — **193 passed | 1 skipped (194 files); 3331 passed | 18 skipped (3349 tests).**
+- `npm run lint` — **no errors**; pre-existing warnings only, none in the three touched files.
+- `PORT=3007 E2E_PORT=3007 npm run test:e2e` — **22 passed, 4 skipped (6.2m).**
+- Dirty-guard **execution proof** (re-run alone, list reporter):
+  ```
+  ✓ 2 [authed] › editor-dirty-guard.spec.ts:102 › dirty-guard prompts on close while mid-edit
+  ✓ 3 [authed] › editor-dirty-guard.spec.ts:129 › dirty-guard prompts on close inside the dirty window
+  ✓ 4 [authed] › editor-dirty-guard.spec.ts:152 › dirty-guard stays SILENT on a clean page
+  ✓ 5 [authed] › editor-dirty-guard.spec.ts:183 › review pill: visible while setup is incomplete
+  5 passed (2.1m)
+  ```
+  All four executed, including the negative chip-click case.
+- `uiFoundationIsolation.test.tsx.snap` CRLF churn restored (`git checkout --`); tree is back to the
+  phase-4 file set exactly.
+
+### Deviations
+- Emphasis applied as a local className rather than a new `emphasis` prop on the shared primitive —
+  conservative reading of the "don't touch the shared primitive in this pass" ruling. If phase 8
+  reskins menus anyway, promoting `EMPHASIS_ROW` to a primitive prop is the natural follow-up.
+
+### Residual risk
+- **The dismissal fix is NOT covered by automation** — no e2e asserts menu-closes-on-row-click. It is
+  verified by inspection (controlled `open` + explicit `setOpen(false)` is deterministic), but a live
+  click-through in `npm run dev` was **not** performed this pass. Worth 30 seconds at the founder
+  gate: Settings→SEO, Settings→Social, Logo→Help & support.
+- `EMPHASIS_ROW` relies on tailwind-merge resolving against `AppPopoverItem`'s base row classes; if
+  phase 8 restructures those classes, re-check the row still reads emphasised.
+- Deliberately left for **phase 8** (ruled deferred, untouched): `UndoRedoButtons`/`ResetButton` grey-box
+  styling; the 4 missing icons + weak substitutes (`subtitles`, `smart_button`); two `ml-auto` →
+  device segmented not truly centred (founder call); bar overflow at narrow widths.
+
+---
+
+## Phase 4 — fix pass II (help-menu regression introduced by fix pass I)
+
+### Files changed
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx`
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.menus.test.tsx` (**new**)
+- `docs/task/editor-shell-redesign.audit.md` (this section)
+
+Nothing else touched. `popover.tsx` untouched (shared-primitive ruling holds). Phase 4 + fix pass I
+kept as-is and fixed on top.
+
+### CORRECTION to fix pass I's audit
+Fix pass I claimed the menu-dismissal wiring was "verified by inspection (controlled `open` +
+explicit `setOpen(false)` is deterministic)". **That claim was wrong for `Logo → Help & support`.**
+Inspection missed a Radix focus-semantics interaction: the row unmounts the app-menu content and
+opens the help menu in ONE handler, so
+1. `FocusScope` fires `AUTOFOCUS_ON_UNMOUNT` in a `setTimeout(0)` on the app-menu content unmount
+   (`@radix-ui/react-focus-scope/dist/index.js:125-132`);
+2. `PopoverContentNonModal.onCloseAutoFocus` (not default-prevented, no outside interaction) calls
+   `context.triggerRef.current?.focus()` → focus lands on the **logo button**
+   (`@radix-ui/react-popover@1.1.14/dist/index.js:225-233`);
+3. the help layer's `DismissableLayer` `focusin` listener is already live and the logo button is
+   outside it → `onFocusOutside` → `onDismiss` → help closes.
+Help flashed open and vanished (in a real browser the app menu's `data-[state=closed]:animate-out`
+defers unmount ~150ms via Presence, so it's a visible flash rather than an instant no-op).
+Fix pass I's audit also said the dismissal fix was "NOT covered by automation" — that is now false;
+see the new test below.
+
+### The fix — option A
+`onFocusOutside={(e) => e.preventDefault()}` on the **help** `AppPopoverMenu`, with a comment
+explaining the Radix mechanism (it reads as cruft otherwise). Accepted side effect: the help menu no
+longer dismisses on focus-out; it still dismisses on outside pointerdown and on Escape (both pinned
+by tests). This is exactly what Radix's own *modal* popover does.
+
+**Why not option B** (`onCloseAutoFocus` preventDefault on the app menu): it suppresses focus-return
+for EVERY app-menu close, including Escape — an a11y regression. Rejected per the ruling.
+
+### New test — `GlobalAppHeader.menus.test.tsx` (Vitest/jsdom)
+Repo convention: no `@testing-library/react`, so `react-dom/client` + `React.act`, mirroring
+`src/components/ui/segmented-control.test.tsx`. Renders the **real** `GlobalAppHeader` with the real
+`popover.tsx` primitives; only leaf deps are mocked (`next/navigation`, `@clerk/nextjs`,
+`useEditStore`, `Logo`, `PageSwitcher`, `EditHeader`, `EditHeaderRightPanel`, `GlobalModals`).
+Six cases: help stays open after the app-menu handoff · help still dismisses on outside pointerdown ·
+help still dismisses on Escape · Back to dashboard navigates + closes · Settings→SEO · Settings→Social.
+
+Two traps the test defuses (both would make it pass vacuously):
+- assertions **flush timers** (`settle()` = 200ms in `act`) — without it the `setTimeout(0)`
+  focus-return never runs and the bug is invisible;
+- the outside-pointerdown case settles **before** dispatching, because Radix attaches its
+  `pointerdown` listener in a `setTimeout(0)`. jsdom has no `PointerEvent` constructor — a
+  `MouseEvent('pointerdown')` carries everything `usePointerDownOutside` reads.
+
+**RED PROOF (performed):** removed `onFocusOutside` → 
+`1 failed | 5 passed` — `app menu → Help & support opens the help menu and it STAYS open`:
+`AssertionError: expected false to be true` at the `menuOpen('Help and support')` assertion.
+Restored the prop → **6 passed**. The test fails for exactly the intended reason.
+
+### Test results (actual)
+- `npx tsc --noEmit` — **clean (exit 0, no output).**
+- `npm run test:run` — **194 passed | 1 skipped (195 files); 3337 passed | 18 skipped (3355 tests).**
+  Collection proof (`npx vitest list`): all 6 new cases listed under
+  `src/app/edit/[token]/components/layout/GlobalAppHeader.menus.test.tsx`.
+- `npm run lint` — **no errors** (pre-existing warnings only; none in the touched files).
+- `PORT=3007 E2E_PORT=3007 npm run test:e2e` — **21 passed | 4 skipped | 1 failed (7.2m)**.
+  The failure is `publish.spec.ts` (authed): `Publish button never enabled` on `/preview/<token>`.
+  **Unrelated to this pass and to phase 4** — the preview page is untouched and does not import
+  `PreviewButton`; this fix only adds a prop to the editor's help popover. Env-dependent authed
+  publish flow (Blob/KV absent locally). Flagged as an open risk, not fixed (out of scope).
+- **Dirty-guard execution proof** (re-run alone, list reporter):
+  ```
+  ✓  5 [authed] › e2e\editor-dirty-guard.spec.ts:183:5 › review pill: visible while setup is incomplete, opens the review panel on click (5.2s)
+  5 passed (2.1m)
+  ```
+  All 5 executed and green.
+- `uiFoundationIsolation.test.tsx.snap` CRLF churn restored (`git checkout --`); no longer in the diff.
+
+### Live click-through (performed, real Chromium)
+Driven with a **throwaway** authed Playwright spec against the dev server on :3007, using a scratchpad
+config (repo `playwright.config.ts` was NOT edited — its `testMatch` is an allowlist). The spec was
+**deleted** afterwards; no repo file outside the Files-changed list remains modified.
+
+Observed on `/edit/<token>`, `Logo → Help & support`:
+```
+LIVE: appMenu after open = open | help row count = 1
+LIVE: +50   help= open  app= closed
+LIVE: +100  help= open  app= closed
+LIVE: +300  help= open  app= closed
+LIVE: +1000 help= open  app= closed
+LIVE: final help= open  appMenu= closed  helpRowsVisible= 1
+LIVE: after SEO -> settings= closed
+```
+Help opens, the app menu closes, no overlap, help STAYS open past 1.4s. Settings→SEO closes its menu.
+
+### Open risk — separate, pre-existing (NOT this fix)
+While instrumenting, a **control** case (open the help menu on its OWN trigger, no cross-menu handoff)
+showed it self-closing once, early in page life:
+```
+CONTROL: help-alone t+300  = open
+CONTROL: help-alone t+1000 = closed
+```
+On the same page, menus opened *later* survive indefinitely (the trace above). So: a one-shot event
+~1s after editor load — most plausibly the draft-load/hydration remount resetting the header's local
+`useState` — dismisses whatever menu is open at that moment. It is **not** the focus-return bug (that
+one is now fixed and pinned), it affects every menu equally, and diagnosing it means going into
+`EditLayout`/`EditProvider`, outside this phase's Files touched. **Reported, not fixed** — worth a
+phase-8 look, and it is why the first live run misleadingly showed `help=closed`.

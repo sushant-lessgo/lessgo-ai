@@ -5,7 +5,6 @@ import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { useEditor } from '@/hooks/useEditor';
 import { GlobalAppHeader } from './GlobalAppHeader';
-import { EditHeader } from './EditHeader';
 import { LeftPanel } from './LeftPanel';
 import { MainContent } from './MainContent';
 import { useAutoSave } from '@/hooks/useAutoSave';
@@ -134,14 +133,18 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   // EDITOR but not when published → editor↔published divergence (a known past
   // incident: docs/architecture/phase11aArchitectureGaps.md, dual-renderer).
   //
-  // Attached to exactly three kinds of region, each a LEAF-side wrapper:
-  //   1. the top-bar wrapper        (GlobalAppHeader)
+  // Attached to exactly three regions, each a LEAF-side wrapper:
+  //   1. the top-bar wrapper        (GlobalAppHeader — the single t1 bar)
   //   2. the rail wrapper           (LeftPanel)
   //   3. the modal roots            (GlobalFormBuilder / GlobalButtonConfigModal
   //                                  / LayoutChangeModal / ModalDebugPanel)
-  //   + the nested EditHeader, wrapped INDIVIDUALLY rather than via its column —
-  //     that column also contains <MainContent> (the canvas). Wrapping the column
-  //     would put the canvas inside .app-chrome. This is the whole hazard.
+  //
+  // PHASE 4 CHANGED THIS MAP: there used to be a FOURTH attach point around a
+  // nested <EditHeader> inside the right content column. That row is gone —
+  // collapsed into the single bar (#1) — so the wrapper went with it. The right
+  // content column still must NEVER carry `.app-chrome`: it holds <MainContent>,
+  // the canvas. Wrapping the column would put the canvas inside .app-chrome.
+  // That is the whole hazard; it is why the bar spans the frame instead.
   //
   // The `shell` root below deliberately does NOT carry `.app-chrome`: it is the
   // canvas's ancestor. It keeps its Inter base, which the canvas inherits today.
@@ -154,7 +157,8 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
           fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         }}
       >
-      {/* Global App Header */}
+      {/* THE editor bar (t1): one 56px full-width row ABOVE the rail — it spans
+          the frame, which is why the rail starts below it. */}
       <div className="app-chrome flex-none">
         <GlobalAppHeader tokenId={tokenId} />
       </div>
@@ -191,14 +195,10 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
         )}
 
         {/* Right Content Area.
-            NOT `.app-chrome`: <MainContent> (the editor CANVAS) lives here. The
-            nested EditHeader gets its own wrapper instead — see the attach map. */}
+            NOT `.app-chrome`, and it no longer contains any chrome to justify it:
+            <MainContent> (the editor CANVAS) is all that lives here now that the
+            second header row is collapsed into the bar. See the attach map. */}
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
-          {/* Edit Header */}
-          <div className="app-chrome flex-none">
-            <EditHeader tokenId={tokenId} />
-          </div>
-
           {/* Main Content Area — CANVAS. Must stay outside every .app-chrome. */}
           <MainContent tokenId={tokenId} />
         </div>
