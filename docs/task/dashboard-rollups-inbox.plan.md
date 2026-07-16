@@ -23,7 +23,7 @@ Ship two account-level, read-only pages — `/dashboard/leads` (cross-site leads
 ## Progress log
 
 - phase 1 accountScope helper + isolation unit test: done (commit 25c9c2a3, review loops 0 — standard tier: single impl-review after phase 5). test:run 3382 green incl. 3 new isolation tests. tsc: only the pre-existing worktree artifact `src/app/page.tsx TS2307 founder.jpg` (gitignored next-env.d.ts absent in a fresh worktree; present on main; regenerates on first build — verified, not a real error).
-- phase 2 All Leads inbox route + UI + top-bar titles: pending
+- phase 2 All Leads inbox route + UI + top-bar titles: done (commit 53f79b9e, review loops 0). test:run 3382 green; tsc clean bar the known worktree artifact. Orchestrator-verified ruling compliance: R-A query = `publishedPageId:{in:pageIds}` with NO userId filter; R-B no isAdmin import; R-D zero stock-Tailwind keys + FormSubmissionsTable not imported; TopBar diff = exactly the 2 intended TITLES lines. **HUMAN GATE A now open — awaiting founder sign-off before phase 3.**
 - phase 3 un-grey All Leads nav + e2e updates: pending
 - phase 4 All Analytics rollup + un-grey All Analytics + e2e: pending
 - phase 5 acceptance + full-gate sweep: pending
