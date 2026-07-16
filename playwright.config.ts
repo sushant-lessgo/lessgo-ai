@@ -46,11 +46,13 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
-    // Authenticated flows (publish + throttled edit-persistence). Serial, shared
-    // Clerk session from `setup`.
+    // Authenticated flows (publish + throttled edit-persistence + the editor
+    // dirty-guard). Serial, shared Clerk session from `setup`.
+    // NOTE: testMatch is an explicit ALLOWLIST — a new e2e spec that isn't listed
+    // in some project silently never runs. Add new authed specs here.
     {
       name: 'authed',
-      testMatch: [/publish\.spec\.ts/, /edit-persistence\.spec\.ts/],
+      testMatch: [/publish\.spec\.ts/, /edit-persistence\.spec\.ts/, /editor-dirty-guard\.spec\.ts/],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
     },

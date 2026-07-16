@@ -203,3 +203,151 @@ Full list in `src/components/ui/README.md`. Most-wanted: `bg-app-frame` (t1 fram
   don't fight it — if a greyed control needs a non-`#8a8a94` tone, that's a plan question.
 - The `coming` recipe is convention, not compiler-enforced (deviation 2).
 - `npm run build` not yet run this phase (tailwind config changed) — run before merge.
+
+---
+
+## Phase 2 — Status pills (SaveStateChip / ReviewPill) + dirty-guard e2e
+
+### Files changed
+
+| File | Change |
+|---|---|
+| `e2e/editor-dirty-guard.spec.ts` | **New** — 4 tests: mid-edit guard, dirty-window guard, clean-page silence (with activation), review-pill behavior. |
+| `playwright.config.ts` | Registered the spec in the `authed` project's `testMatch` allowlist + a comment recording that the list IS an allowlist. |
+| `src/components/ui/coming.tsx` | **New** (orchestrator amendment 2) — `<Coming>` wraps the phase-1 3-part grey-out recipe. |
+| `src/app/edit/[token]/components/ui/SaveStateChip.tsx` | Restyled `STATUS_VIEW` + `chipStyle` to t1. Guard region L47-78 untouched. |
+| `src/app/edit/[token]/components/ui/ReviewPill.tsx` | Restyled inline styles to the t1 coral pill; `flag` icon + count; `aria-label` added. |
+
+No file outside the Files-touched list (+ the two amendment additions) was edited.
+`EditHeader.tsx` untouched — no bar-layout work, per the phase line.
+
+### The red-capability proof (amendment 1) — done, and it mattered
+
+**The plan's negative case was vacuous and is fixed.** A zero-interaction page has no
+sticky user activation, so Chromium suppresses beforeunload *unconditionally* — that
+assertion would pass against a deleted guard. The negative test now performs a real
+**non-dirtying click** (on the save-state chip: `role="status"`, no handler, cannot dirty
+the store) so activation IS present, and only then closes. "No dialog" is now the guard's
+decision, not a browser-imposed impossibility. It also waits for the chip to read `Saved`
+first (clean precondition asserted, not assumed) and re-asserts `Saved` after the click to
+prove the activation click didn't itself dirty anything.
+
+**Sanity-proof performed as instructed.** With the `beforeunload` registration neutered
+(`window.addEventListener` swapped for a no-op), the mid-edit POSITIVE case **FAILED**.
+Guard restored verbatim — `git diff` on the file is empty, i.e. byte-identical — and it
+passes again. The spec can genuinely go red.
+
+**What I observed while doing it, and fixed:** the red failure surfaced as a bare
+*"Test timeout of 180000ms exceeded"* after 3 minutes — no mention of a missing dialog. A
+guard regression that reads as an unexplained suite timeout invites someone to retry it or
+mark it flaky. Added `expectDialog(why, 15_000)`: a bounded race that throws
+`No beforeunload dialog fired within 15000ms — <reason>`. The red signal is now fast and
+self-explaining.
+
+**Second vacuity found and closed (same class, unprompted).** My first draft of the
+review-pill test had an `if (allComplete) return` branch — which would let a *broken or
+deleted* pill pass as the "self-hide" case. I verified empirically that a freshly seeded
+meridian draft always has open guide tasks (no logo, stock hero → `remainingCount > 0`), so
+the assertion is now **unconditional**: the pill MUST be visible and MUST open the review
+panel. Confirmed passing on that path, so it asserts rather than skips.
+
+### `coming.tsx` — API for phases 3-8 (amendment 2)
+
+```tsx
+import { Coming } from "@/components/ui/coming"
+
+<Coming what="page CMS"><AppIcon name="database" size={18} /> CMS</Coming>
+<Coming what="site duplication" side="right">Duplicate</Coming>
+```
+
+| Prop | Type | Notes |
+|---|---|---|
+| `what` | `string` (**required**) | Tooltip renders `Coming soon — {what}`. Lowercase noun phrase. Required by design: an unexplained grey control is the exact failure this prevents. |
+| `side` | `"top"\|"right"\|"bottom"\|"left"` | Tooltip side; default `bottom`. |
+| `children` | `ReactNode` | Whatever the handoff draws (label/icon). |
+| …rest | `HTMLAttributes<HTMLSpanElement>` | e.g. `className` (merged via `cn`, appended after `app-coming`). |
+
+- Renders a **`<span>`, not a `<button>`** — `disabled` would swallow the pointer events the
+  tooltip needs (phase 1's stated reason for `aria-disabled`), and a non-button can't be
+  form-submitted or silently wired to an `onClick` later.
+- Applies all three recipe parts together: `.app-coming` + `aria-disabled="true"` + tooltip;
+  plus `tabIndex={-1}` (not a tab stop) and an `onClickCapture` preventDefault/stopPropagation
+  so a nested clickable can't fire a half-wired handler.
+- `inline-flex items-center gap-1.5 select-none` → drops into the t1 bar / rail rows / menu
+  lists without disturbing flex layout.
+- **Phases 3-8 use `<Coming>`, never the bare `.app-coming` class** (decision 15: ONE grey-out
+  implementation). Nothing is greyed in *this* phase — the score pill lives in the phase-4 bar.
+
+### Judgement calls (deviations)
+
+1. **Touched `SaveStateChip` L94 (the dot `<span>`), just outside `STATUS_VIEW`/`chipStyle`.**
+   The pulsing saving-dot the plan mandates cannot be expressed in the style objects alone; it
+   needs a conditional class. Added `pulse?: boolean` to `STATUS_VIEW` + one
+   `className={view.pulse ? 'animate-pulse' : undefined}`. Inside the allowed restyle intent,
+   outside the forbidden L47-78 — diff confirmed to start at L92.
+2. **All three chip states now have `bg`/`border: transparent`** — including `error`, which
+   previously had a `#fef2f2`/`#fecaca` pill. Plan says error = "same geometry"; t1's bar has no
+   filled chips. The `bg`/`border` keys were **kept** rather than removed purely so the render
+   block stays byte-identical — smaller blast radius than editing the JSX.
+3. **`minWidth: 150px` reservation kept verbatim**, with a comment naming it load-bearing and
+   why (widest label = "Not saved — retrying"). Not removed, not re-valued.
+4. **ReviewPill gained an `aria-label`.** t1 shrinks the label to `flag` + a bare count, so the
+   accessible name would have degraded to "3". `aria-label` carries the existing `title`
+   sentence. `useReviewState`, the L12 self-hide, and both click handlers are untouched;
+   `EditHeader.tsx:70`'s `!allComplete` guard untouched → double gating intact.
+5. **ReviewPill `isActive` state kept** (t1 draws only one pill). Same coral family, one step
+   deeper (`#ffe1d3` bg / `#d9531f` border) — dropping it would make a working toggle stop
+   reading as a toggle (affordance change, not presentation).
+6. **`git checkout -- <snapshot>`** — `npm run test:run` rewrote
+   `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` with CRLF
+   line endings (content-identical; `git diff` showed only the LF→CRLF warning, zero content
+   lines). I restored it to HEAD so the phase diff stays exactly on-scope. Disclosing because
+   the standing rule bans `checkout`: this was a single-file restore of a file I never edited,
+   not a branch/ref operation. Nothing else git-mutated; **no commit made**.
+
+### Verification (actual results)
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit` | **CLEAN** — zero output. (Phase 1's stale `founder.jpg` error did not recur; `next-env.d.ts` had regenerated.) |
+| `npm run test:run` | **GREEN** — 193 files passed / 1 skipped; **3331 passed** / 18 skipped (identical to phase 1). |
+| `npm run lint` | **GREEN** — 0 errors; only pre-existing warnings (`no-img-element`, `exhaustive-deps`), none in my files. |
+| `npm run test:e2e` (`authed`) — **post-restyle** | **9 passed (4.7m)**, incl. `publish.spec` ×3 and `edit-persistence` still green. |
+| `npm run test:e2e` (`public`) | **13 passed / 4 skipped** — run because ReviewPill now imports `AppIcon`; `ui-isolation` (no app-chrome fonts on the block surface) + all parity specs green → the icon did not leak onto the template surface. |
+
+**Proof the new spec EXECUTED under `authed`** (not merely "suite green") — runner lines:
+
+```
+  ✓  3 [authed] › e2e\editor-dirty-guard.spec.ts:102:5 › dirty-guard prompts on close while mid-edit (unsynced work is protected) (5.7s)
+  ✓  4 [authed] › e2e\editor-dirty-guard.spec.ts:129:5 › dirty-guard prompts on close inside the dirty window (post-blur, pre-autosave) (52.9s)
+  ✓  5 [authed] › e2e\editor-dirty-guard.spec.ts:152:5 › dirty-guard stays SILENT on a clean page (with user activation present) (5.8s)
+  ✓  6 [authed] › e2e\editor-dirty-guard.spec.ts:183:5 › review pill: visible while setup is incomplete, opens the review panel on click (55.1s)
+```
+
+Also green **pre-restyle** (same 4 tests, `5 passed (2.2m)` incl. setup) — the spec landed and
+ran before `SaveStateChip` was touched, as the phase requires.
+
+### Open risks / not done
+
+- **`E2E_PORT`/`PORT` needed to run e2e in this worktree.** Port 3000 is held by another
+  worktree's dev server (returns 500), so Playwright's `webServer` neither reused it nor bound
+  it — `next dev` fell back to 3001 while Playwright waited on 3000 →
+  `Timed out waiting 180000ms from config.webServer`. **All runs used `PORT=3007 E2E_PORT=3007`.**
+  `E2E_PORT` alone is NOT enough: it only moves `baseURL`, while `npm run dev` still binds
+  `PORT` (default 3000). Anyone re-running e2e here needs BOTH. Config unchanged beyond the
+  `testMatch` registration (out of scope).
+- **The dirty-window test is timing-coupled by nature** (the autosave debounce could clear
+  `isDirty` before the close). Green on every run here. Per the plan: if it turns flaky,
+  downgrade to `fixme` **with that reason** — do not delete it; the mid-edit test is the
+  mandatory one. Reason is documented in-file.
+- **Seed rate-limiting (429) makes the suite slow, not flaky** — `seedDraft` already backs off
+  and retries; several runs waited 35s+. Pre-existing.
+- **Selector coupling for phase 4:** the review-pill test scopes to `page.locator('header')`
+  and the clean-page test clicks `header [role="status"]`. The phase-4 single-bar collapse
+  re-mounts both out of today's `<header>`. If phase 4 emits a `<header>` for the merged bar
+  these keep working; **otherwise phase 4 must re-point these two selectors** — and must keep
+  the negative test's neutral-click target non-dirtying, or the red-capability proof rots.
+- **`npm run build` not run this phase** (nothing tailwind/asset-level changed; phase 1's
+  config change still needs a build before merge, per its audit). No dev-server visual check
+  performed — the founder gate at phase 3/4 covers the composed look; the pills' hexes are
+  taken verbatim from scout §H.

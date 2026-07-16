@@ -10,10 +10,10 @@ Green gates before merge: `tsc`, `npm run test:run`, `npm run lint`, `npm run bu
 Reskin the complete non-canvas editor shell (top bar, pills, left rail, Design menu, SEO/settings modals, publish flow, page switcher) to the handoff look (t1/t14/t16/t17/t18), built on ui-foundation tokens/primitives. Presentation only: zero changes to edit-store internals, selection, canvas renderer, publish-path logic, or any `.published.tsx` — published output stays byte-identical. Handoff COPY is in scope (copy = presentation). Not-yet-wired controls render greyed/"coming", never omitted — and nothing that works today gets greyed.
 
 ## Progress log
-- phase 1 foundation (popover/tooltip/spinner/divider, coming variant, tokens, icons): pending
+- phase 1 foundation (popover/tooltip/spinner/divider, coming variant, tokens, icons): **done** (commit 6c62bdb8, review loops 0 — gates green: tsc clean, 3331 tests, lint 0)
 - phase 2 status pills (SaveStateChip/ReviewPill) + dirty-guard e2e: pending
-- phase 3 EditLayout shell + left rail frame + .app-chrome attach: pending
-- phase 4 single-bar collapse (GlobalAppHeader + EditHeader merge) + right cluster: pending
+- phase 3 left rail frame + .app-chrome attach (EditLayout structure moved to phase 4): pending
+- phase 4 single-bar collapse (GlobalAppHeader + EditHeader merge) + ALL EditLayout structure + right cluster: pending
 - phase 5 Design menu (t14 theme popovers): pending
 - phase 6 site settings + SEO (t16/t18): pending
 - phase 7 publish flow (t17) + publish.spec selector repair: pending
