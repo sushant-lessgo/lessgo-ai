@@ -78,3 +78,22 @@ The ui-foundation isolation guards stayed green: the `published-css.sha256` and 
 ## Open risks
 - Clerk owns the widget's internal DOM; a future `@clerk/nextjs` major could shift element keys and silently drop styles. Keys are type-checked, so `tsc` will catch renames of typed keys, not restructures.
 - `next/image` with `fill` on the founder photo requires the parent to stay `relative` — it is; noted for future edits.
+
+## Founder ruling — CTA label (2026-07-16)
+
+**Decision: ACCEPT Clerk's default "Continue" on both routes.** Spec's locked copy
+("Claim my seat" / "Log in") is NOT met, knowingly.
+
+**Why it's not achievable as specced:** Clerk exposes `formButtonPrimary` as a single
+top-level localization key (verified in `@clerk/types` dist — there is no
+`signUp.start.formButtonPrimary`). Sign-up and sign-in therefore physically cannot carry
+different primary-button labels via `localization`.
+
+**Options considered and rejected:**
+- `@clerk/elements` — not installed; replaces the whole form, out of scope for tier=light.
+  May be revisited as a separate spec if the label matters commercially.
+- CSS `::before` text swap — rejected: breaks the loading-spinner state and the button's
+  accessible name (screen readers would announce the wrong action).
+
+All other locked copy is verbatim. Acceptance criterion "copy per route as locked" is
+partially unmet by this ruling — recorded here so it is not re-litigated.
