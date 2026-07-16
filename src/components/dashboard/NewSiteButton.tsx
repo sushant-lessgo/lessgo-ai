@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { useUser } from '@clerk/nextjs'
 import posthog from 'posthog-js'
 import { cn } from '@/lib/utils'
@@ -15,11 +16,18 @@ import { AppIcon } from '@/components/ui/icon'
  * never read. Do NOT change the fetch/open behavior: `/api/start` returns the
  * universal entry URL and is the single onboarding entry point.
  *
- * Reused by the sidebar (default), the projects filter row and the empty state
- * (phase 2) via `label`/`icon`/`className`.
+ * Reused by the sidebar (default), the projects filter row, the empty state and
+ * the grid's ghost card (phase 2) via `label`/`icon`/`className`.
+ *
+ * `label` is a ReactNode (widened in phase 2, orchestrator exception): the ghost
+ * card and the 1a "Build my site" CTA need rich children (a title + sub-line, a
+ * trailing arrow). Rendering them as REAL children of this button — rather than
+ * layering a transparent copy of it over `pointer-events-none` visuals — keeps
+ * the accessible name, the focus ring and the hit target on the actual control.
+ * Type-only change: behavior is byte-identical to phase 1.
  */
 export interface NewSiteButtonProps {
-  label?: string
+  label?: ReactNode
   /** Material Symbols ligature name; pass `null` for no icon. */
   icon?: string | null
   iconSize?: number

@@ -21,7 +21,7 @@ Build the dashboard IA spine: account-level shell (sidebar + top bar) via a new 
 
 ## Progress log
 
-- phase 1 shell (layout + sidebar + top bar, Header retired ×11, blog-preview escapes shell): pending
+- phase 1 shell (layout + sidebar + top bar, Header retired ×11, blog-preview escapes shell): **done** (commit `9c5a3aed`, review loops 1, verdict ship). Gates: tsc clean · 3331 tests pass · lint 0 err. Orchestrator exception: `playwright.config.ts` added to Files-touched (plan gap — new e2e specs were registered by no project; specs for phases 2-5 pre-registered in the same edit). Non-blocking carried to gate: plan widget renders "Free plan" (real `PLAN_CONFIGS[FREE].name`) vs design's "Starter plan" — founder eyeball.
 - phase 2 projects grid + card + menu + filters + empty state: pending
 - phase 3 token workspace spine + Overview + hardened authz helper: pending
 - phase 4 re-home analytics + leads (+ 8 co-located components), slug shims: pending

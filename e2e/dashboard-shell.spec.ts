@@ -57,8 +57,16 @@ test.describe('dashboard shell', () => {
     await expect(bell).toBeDisabled();
 
     // R14: All Leads must NOT carry a count pill (no real rollup data this slice).
+    //
+    // ⚠️ Same AppIcon ligature-text trap as the ••• menu (see the comment in the
+    // phase-2 block): DisabledNavItem renders <AppIcon/> BEFORE {label}, so this
+    // button's textContent is "move_to_inboxAll Leads" — a whole-string
+    // toHaveText('All Leads') can never pass. The END ANCHOR is exactly the R14
+    // intent: the design's count pill renders AFTER the label (margin-left:auto),
+    // so "move_to_inboxAll Leads7" still fails. Do NOT weaken this to
+    // toContainText — that would pass WITH a pill present and guard nothing.
     const allLeads = page.getByRole('button', { name: 'All Leads', exact: true });
-    await expect(allLeads).toHaveText('All Leads');
+    await expect(allLeads).toHaveText(/All Leads$/);
   });
 
   test('nested screens render inside the shell with no second nav', async ({ page }) => {
@@ -70,6 +78,126 @@ test.describe('dashboard shell', () => {
       // One sidebar only → the CTA appears exactly once.
       await expect(page.getByRole('button', { name: /New site with AI/i })).toHaveCount(1);
     }
+  });
+});
+
+// dashboard-workspace-ia PHASE 2 — projects grid + card + ••• menu + filters +
+// empty state. Registered on the same `authed` project (see the note above).
+//
+// The test account's project count isn't controllable from here, so each test
+// branches on the real state and `test.skip`s WITH A REASON rather than passing
+// vacuously (a silent pass on the wrong branch is worthless).
+test.describe('projects grid (phase 2)', () => {
+  const card = (page: import('@playwright/test').Page) =>
+    page.getByRole('button', { name: /^(Open|Continue)$/ });
+
+  test('grid + filter pills render; pills filter client-side', async ({ page }) => {
+    await page.goto('/dashboard');
+
+    // Ghost "Create a new site" card is always present (1b).
+    await expect(page.getByText('Create a new site', { exact: true })).toBeVisible();
+
+    const cards = card(page);
+    const total = await cards.count();
+    test.skip(total === 0, 'account has no projects — grid branch not exercised');
+
+    // "All {n}" pill carries the REAL count (R14: never a padded number).
+    const allPill = page.getByRole('button', { name: /^All \d+$/ });
+    await expect(allPill).toHaveAttribute('aria-pressed', 'true');
+
+    await page.getByRole('button', { name: 'Drafts', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Drafts', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    // Drafts view must contain no published-card primary ("Open").
+    await expect(page.getByRole('button', { name: 'Open', exact: true })).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Published', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Continue', exact: true })).toHaveCount(0);
+
+    await allPill.click();
+    await expect(cards).toHaveCount(total);
+
+    // Sort pill is designed chrome with no implementation — greyed in place.
+    await expect(page.getByRole('button', { name: /^Recent$/ })).toBeDisabled();
+  });
+
+  test('••• menu ships all 7 items, exactly 2 active on a published card (R4)', async ({ page }) => {
+    await page.goto('/dashboard');
+
+    const published = page.getByRole('button', { name: 'Open', exact: true });
+    test.skip((await published.count()) === 0, 'account has no published project');
+
+    // Anchor to a PUBLISHED card, not `.first()`: card order is `sourceProjects`
+    // order (updatedAt desc), NOT published-first — so the first card may be a
+    // draft, whose "Visit site" is correctly disabled and would fail the
+    // "exactly 2 active" assertion below for entirely the wrong reason.
+    // The innermost div containing BOTH the "Published" badge and the "Open"
+    // primary is the card root (`.last()` = deepest match in document order).
+    const publishedCard = page
+      .locator('div')
+      .filter({ has: page.getByText('Published', { exact: true }) })
+      .filter({ has: published })
+      .last();
+    await publishedCard.getByRole('button', { name: 'Project actions' }).click();
+
+    const items = page.getByRole('menuitem');
+    await expect(items).toHaveCount(7);
+    // ⚠️ GOTCHA — AppIcon renders the Material Symbols LIGATURE NAME as element
+    // text (`src/components/ui/icon.tsx:33` → `{name}`, aria-hidden). So an
+    // item's textContent is "open_in_newOpen editor", NOT "Open editor", and a
+    // whole-string `toHaveText(['Open editor', …])` can never pass. Anchor the
+    // label at the end instead. (Accessible-name queries — `getByRole('menuitem',
+    // {name})` below — are unaffected: they exclude the aria-hidden icon span.)
+    // This trap applies to ANY text assertion on a component containing AppIcon.
+    await expect(items).toHaveText([
+      /Open editor$/,
+      /Visit site$/,
+      /Rename$/,
+      /Duplicate$/,
+      /Domain settings$/,
+      /Archive$/,
+      /Delete$/,
+    ]);
+
+    // Active: Open editor + Visit site. Greyed: the other five (R4).
+    for (const name of ['Open editor', 'Visit site']) {
+      await expect(page.getByRole('menuitem', { name })).not.toHaveAttribute('data-disabled', '');
+    }
+    for (const name of ['Rename', 'Duplicate', 'Domain settings', 'Archive', 'Delete']) {
+      await expect(page.getByRole('menuitem', { name })).toHaveAttribute('data-disabled', '');
+    }
+  });
+
+  test('card metrics are em-dashes — no fabricated numbers (R16)', async ({ page }) => {
+    await page.goto('/dashboard');
+    test.skip((await card(page).count()) === 0, 'account has no projects');
+
+    for (const label of ['views', 'leads', 'conv.']) {
+      const metric = page.getByText(label, { exact: true }).first();
+      await expect(metric).toBeVisible();
+      // Sibling value cell must be an em-dash until rollups land (S4).
+      const value = metric.locator('xpath=preceding-sibling::span[1]');
+      await expect(value).toHaveText('—');
+    }
+  });
+
+  test('empty state: prompt controls dead, "Build my site" live (R17b)', async ({ page }) => {
+    await page.goto('/dashboard');
+    test.skip((await card(page).count()) > 0, 'account has projects — 1a not rendered');
+
+    await expect(page.getByText('Welcome to Lessgo AI')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Let's build your first site/ })).toBeVisible();
+
+    // The designed prompt controls are visible but disabled — they must never
+    // silently swallow typed text.
+    await expect(page.getByRole('radio', { name: /Describe your site/ })).toBeDisabled();
+    await expect(page.getByRole('radio', { name: /Use my current site/ })).toBeDisabled();
+    await expect(page.getByRole('textbox', { name: /Describe your site/ })).toBeDisabled();
+
+    // The CTA is the real /api/start entry point and stays enabled.
+    await expect(page.getByRole('button', { name: 'Build my site' })).toBeEnabled();
   });
 });
 

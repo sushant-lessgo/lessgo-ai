@@ -1,10 +1,18 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { isAdmin } from '@/lib/admin'
-import DashboardHeader from '@/components/dashboard/DashboardHeader'
-import ProjectCard from '@/components/dashboard/ProjectCard'
-import EmptyState from '@/components/dashboard/EmptyState'
+import ProjectsBoard from '@/components/dashboard/ProjectFilters'
+import DashboardEmptyState from '@/components/dashboard/DashboardEmptyState'
 import PersonaUpdatedBanner from '@/components/dashboard/PersonaUpdatedBanner'
+
+// dashboard-workspace-ia phase 2: <DashboardHeader/> is gone — the shell top bar
+// (phase 1) + the filter row's "New site" CTA replace it. `ProjectCard` and the old
+// `EmptyState` are superseded by ProjectsBoard/DashboardEmptyState; those three
+// files are deleted in phase 6.
+//
+// ⚠️ The data fetch below is UNCHANGED (R16): same admin god-view branch, same
+// take:200, same smart-name fallback chain, same item shape. Filtering is
+// client-side in ProjectsBoard — no new query, no per-card analytics read.
 
 export default async function DashboardPage({
   searchParams,
@@ -149,31 +157,26 @@ export default async function DashboardPage({
     }
   })
 
-  return (
-    <div className="flex flex-col min-h-screen bg-white text-brand-text font-body">
-      <main className="flex-grow w-full max-w-5xl mx-auto px-4 py-8">
-        {searchParams?.personaUpdated === '1' && <PersonaUpdatedBanner />}
-        <DashboardHeader />
-
-        {allItems.length > 0 ? (
-          <section className="space-y-4 mt-4">
-            <h2 className="text-sm uppercase text-brand-mutedText tracking-wide">
-              Recent Projects
-            </h2>
-            {viewerIsAdmin && sourceProjects.length === 200 && (
-              <p className="text-xs text-brand-mutedText">Showing first 200 projects</p>
-            )}
-            {allItems.map((item) => (
-              <ProjectCard
-                key={`${item.type}-${item.id}`}
-                project={item}
-              />
-            ))}
-          </section>
-        ) : (
-          <EmptyState />
+  if (allItems.length === 0) {
+    return (
+      <>
+        {searchParams?.personaUpdated === '1' && (
+          <div className="px-[26px] pt-[22px]">
+            <PersonaUpdatedBanner />
+          </div>
         )}
-      </main>
+        <DashboardEmptyState />
+      </>
+    )
+  }
+
+  return (
+    <div className="px-[26px] py-[22px]">
+      {searchParams?.personaUpdated === '1' && <PersonaUpdatedBanner />}
+      <ProjectsBoard
+        items={allItems}
+        showTruncationNotice={viewerIsAdmin && sourceProjects.length === 200}
+      />
     </div>
   )
 }
