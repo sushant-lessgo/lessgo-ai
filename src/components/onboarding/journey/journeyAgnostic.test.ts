@@ -7,7 +7,9 @@
 //      import an engine's modules, and neither the seams nor the work resume
 //      rules may STATICALLY import the generation/template graph (landmine 14:
 //      seams load PRE-CONFIRM on the entry page, so one static edge there puts
-//      the whole generation bundle on the STEP-01 path).
+//      the whole generation bundle on the STEP-01 path). The seam scan is a
+//      1-HOP CLOSURE (`SEAM_CLOSURE`): a seam's own `@/`-local static imports
+//      are on the same entry path and are banned from the same graph.
 //
 //  (b) LITERAL TRIPWIRE — NOT a proof. Trivially bypassed and scoped narrowly;
 //      it only catches the obvious "hardcode a templateId in the shell" slip.
@@ -49,12 +51,35 @@ const REPO_SRC = path.resolve(__dirname, '../../..');
  * Handles multi-line import clauses: the middle is bounded to characters that
  * cannot appear before `from` in one (no quotes, no `;`).
  */
-function staticImportSpecifiers(source: string): string[] {
-  const re = /(?:^|\n)[ \t]*(?:import|export)\b(?:[^'";]*?\bfrom[ \t]*)?['"]([^'"]+)['"]/g;
-  const found: string[] = [];
+function staticImports(source: string): { spec: string; typeOnly: boolean }[] {
+  const re =
+    /(?:^|\n)[ \t]*(?:import|export)\b([ \t]+type\b)?(?:[^'";]*?\bfrom[ \t]*)?['"]([^'"]+)['"]/g;
+  const found: { spec: string; typeOnly: boolean }[] = [];
   let m: RegExpExecArray | null;
-  while ((m = re.exec(source)) !== null) found.push(m[1]);
+  while ((m = re.exec(source)) !== null) found.push({ spec: m[2], typeOnly: Boolean(m[1]) });
   return found;
+}
+
+function staticImportSpecifiers(source: string): string[] {
+  return staticImports(source).map((i) => i.spec);
+}
+
+/**
+ * The specifiers that survive compilation — i.e. the REAL bundle edges.
+ *
+ * `import type { X } from 'y'` is fully ERASED by TypeScript: it is not an edge
+ * and cannot put anything on the entry bundle. This distinction is load-bearing
+ * for the 1-hop closure, not pedantry: `engines/types.ts` legitimately does
+ * `import type { WizardStore } from '@/hooks/useWizardStore'`, and that module
+ * type-imports `@/modules/wizard/generation/{thing,trust,work}` for its input
+ * contracts. Banning erased imports would fail the guard on code that adds ZERO
+ * bytes to the entry path — and a guard that cries wolf gets deleted.
+ * (`import { type A, B } from 'y'` is NOT type-only: `B` is a real edge.)
+ */
+function valueImportSpecifiers(source: string): string[] {
+  return staticImports(source)
+    .filter((i) => !i.typeOnly)
+    .map((i) => i.spec);
 }
 
 function listFiles(dir: string, predicate: (f: string) => boolean): string[] {
@@ -67,6 +92,27 @@ function listFiles(dir: string, predicate: (f: string) => boolean): string[] {
 }
 
 const isTestFile = (f: string) => /\.test\.tsx?$/.test(f);
+
+/**
+ * Resolve a `@/…` specifier to a file under `src/`. `null` for anything that
+ * does not resolve to a real file (non-`@/` specifiers, packages, directories
+ * without an index). Non-resolution is silently skipped: the closure is a
+ * best-effort WIDENING of the scan, never its only assertion — `SEAM_CLOSURE`'s
+ * non-vacuity is pinned by an explicit `rail.ts` membership test below.
+ */
+function resolveAlias(spec: string): string | null {
+  if (!spec.startsWith('@/')) return null;
+  const base = path.resolve(REPO_SRC, spec.slice(2));
+  for (const cand of [
+    `${base}.ts`,
+    `${base}.tsx`,
+    path.join(base, 'index.ts'),
+    path.join(base, 'index.tsx'),
+  ]) {
+    if (fs.existsSync(cand) && fs.statSync(cand).isFile()) return cand;
+  }
+  return null;
+}
 
 /** The AGNOSTIC shell: journey/*.tsx + journey/steps/* (never engines/). */
 const SHELL_FILES = [
@@ -82,6 +128,35 @@ const SEAM_FILES = [
 
 const rel = (f: string) => path.relative(REPO_SRC, f).replace(/\\/g, '/');
 const read = (f: string) => fs.readFileSync(f, 'utf8');
+
+/**
+ * SEAM_FILES **plus one hop** of their own `@/`-local static imports.
+ *
+ * WHY (P2b follow-up): a direct-imports-only scan is NOT TRANSITIVE, and the
+ * bypass was live. `engines/work.ts` statically imports
+ * `@/modules/wizard/work/rail.ts`, which SEAM_FILES never scanned — so a
+ * generation/template import added to `rail.ts` poisons the STEP-01 entry bundle
+ * exactly as one in `resumeStep.ts` would, with the guard silent. P3 edits the
+ * rail adapter, so that edge goes live next phase.
+ *
+ * ONE hop, not a full closure: it covers every module a seam actually pulls onto
+ * the pre-confirm path directly (the real risk surface), stays fast, and stays
+ * readable. Deeper edges are review's job — and any deeper module reached from a
+ * seam-adjacent file is itself a hop-1 of that file the day it is added to a seam.
+ *
+ * Only VALUE imports are followed: a type-only edge puts nothing on the bundle,
+ * so the module behind it is not on the entry path (see `valueImportSpecifiers`).
+ */
+const SEAM_CLOSURE: string[] = (() => {
+  const set = new Map<string, string>(SEAM_FILES.map((f) => [f, f]));
+  for (const file of SEAM_FILES) {
+    for (const spec of valueImportSpecifiers(read(file))) {
+      const resolved = resolveAlias(spec);
+      if (resolved && !set.has(resolved)) set.set(resolved, resolved);
+    }
+  }
+  return [...set.keys()];
+})();
 
 const GENERATION_GRAPH = [/^@\/modules\/wizard\/generation\//, /^@\/modules\/generation\//];
 const WORK_ENGINE_MODULES = [/^@\/modules\/wizard\/work\//];
@@ -128,9 +203,21 @@ describe('journey seams — entry-bundle firewall (landmine 14, rev-5 NB1)', () 
   // `engines/work.ts` statically imports `resumeStep.ts`, and the seam loads
   // pre-confirm, so a careless static import THERE silently re-drags the whole
   // template+generation graph onto the STEP-01 entry bundle.
-  it('no seam (nor the work resume rules) statically imports the generation graph', () => {
-    for (const file of SEAM_FILES) {
-      for (const spec of staticImportSpecifiers(read(file))) {
+  it('the scan reaches ONE HOP past the seams (the rail edge P3 opens)', () => {
+    // Non-vacuity pin for SEAM_CLOSURE. `engines/work.ts` imports `rail.ts`, so
+    // `rail.ts` MUST be scanned — if this fails, the closure silently degraded
+    // back to direct-imports-only and the rail bypass is open again.
+    const railFile = path.resolve(REPO_SRC, 'modules/wizard/work/rail.ts');
+    expect(
+      SEAM_CLOSURE.includes(railFile),
+      `rail.ts is not in the scanned set (${SEAM_CLOSURE.map(rel).join(', ')}) — the 1-hop closure is not resolving seam imports.`
+    ).toBe(true);
+    expect(SEAM_CLOSURE.length).toBeGreaterThan(SEAM_FILES.length);
+  });
+
+  it('no seam — nor anything ONE HOP inside it — statically imports the generation graph', () => {
+    for (const file of SEAM_CLOSURE) {
+      for (const spec of valueImportSpecifiers(read(file))) {
         for (const banned of GENERATION_GRAPH) {
           expect(
             banned.test(spec),
@@ -169,6 +256,19 @@ describe('journey seams — entry-bundle firewall (landmine 14, rev-5 NB1)', () 
     const specs = staticImportSpecifiers(bad);
     expect(specs).toEqual(['@/modules/generation/multiPageAssembly']);
     expect(GENERATION_GRAPH.some((r) => r.test(specs[0]))).toBe(true);
+  });
+
+  it('treats `import type` as erased, but `import { type A, B }` as a real edge', () => {
+    // Pins the closure's own semantics. If type-only imports ever start counting
+    // as edges, the guard fails on `engines/types.ts` → `useWizardStore` →
+    // `@/modules/wizard/generation/*` type-contracts, which cost zero bytes.
+    const src = `
+      import type { WizardStore } from '@/hooks/useWizardStore';
+      export type { A } from '@/modules/generation/multiPageAssembly';
+      import { type Opts, run } from '@/modules/wizard/generation/work';
+    `;
+    expect(valueImportSpecifiers(src)).toEqual(['@/modules/wizard/generation/work']);
+    expect(staticImportSpecifiers(src)).toHaveLength(3);
   });
 
   it('parses multi-line import clauses and `export … from`', () => {

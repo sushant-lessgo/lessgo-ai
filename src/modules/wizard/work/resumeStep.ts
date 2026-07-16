@@ -24,6 +24,23 @@
 // STATUS (phase 2b): a confirmed brief resumes at STEP 02. P5 adds
 // mid-fan-out resume (⇒ 5, via the lazy `isResumableGeneration`); P6 adds
 // finished-content resume (⇒ 6).
+//
+// ── READ THIS BEFORE ADDING A `finalContent` RULE (P5/P6) ───────────────────
+// `finalContent` is DECLARED on the contract (`engines/types.ts` —
+// `finalContent?: unknown`) but is **NOT CURRENTLY PASSED**. `JourneyShell.tsx`
+// calls `resolveResumeStep({ brief, audienceType, templateId })` and nothing
+// else; that is all the entry page's load-detection reads. So today
+// `loaded.finalContent` is ALWAYS `undefined` in production.
+//
+// A rule like `if (loaded.finalContent) return 5` is therefore DEAD CODE that
+// silently resumes at step 2 forever. Before it can work, the shell must be
+// WIDENED to pass it: `JourneyShell.tsx` (and possibly
+// `src/app/onboarding/[token]/page.tsx`'s load-detection) must read and forward
+// `finalContent` from `/api/loadDraft`.
+//
+// AND: `resumeStep.test.ts` FABRICATES `loaded` objects directly, so unit tests
+// will go GREEN on such a rule regardless. Green tests are NOT evidence here —
+// widen the shell, then verify the resume on a real draft.
 // ============================================================================
 
 import type {
@@ -39,7 +56,12 @@ import type {
  * from the start means P5 fills the body without touching every caller.
  *
  * P2b: a confirmed brief ⇒ STEP 02. `loaded` is deliberately unread for now;
- * the parameter is the contract's, and P5/P6 branch on `loaded.finalContent`.
+ * the parameter is the contract's.
+ *
+ * P5/P6 intend to branch on `loaded.finalContent` — but it is NOT PASSED by the
+ * shell today (always `undefined`), and the unit tests fabricate `loaded`, so
+ * such a branch ships green and never fires. Read the `finalContent` note in the
+ * header before writing it.
  */
 export async function resolveWorkResumeStep(
   _loaded: JourneyLoadedDraft

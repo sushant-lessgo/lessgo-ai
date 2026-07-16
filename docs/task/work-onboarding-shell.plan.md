@@ -15,7 +15,7 @@ Build the universal 6-step onboarding **journey shell** (agnostic chrome + step 
 
 - phase 1 rail data model + entry→work seed + brief plumbing: **done** (commits 715e4c63 + 43938e1d, review loops 1, verdict ship) — **STANDS under rev 4** (rail.ts = the WORK seam's rail adapter, verbatim)
 - phase 2a seam contract + registry + leaf + work seam + drift guard: **done** (commit fe2d063f, review loops 1, verdict ship; +2 review fixes folded pre-gate: chipIndex regex guard, preflight fail-closed) — **AWAITING HUMAN GATE (seam-contract sign-off)**
-- phase 2b journey shell scaffold (agnostic) + dispatch + e2e registration: pending
+- phase 2b journey shell scaffold (agnostic) + dispatch + e2e registration: **done** (commit dadbc760, review loops 1, verdict ship; e2e 4 passed on a fresh server; +2 review fixes folded: transitive purity guard, resumeStep `finalContent` doc)
 - phase 3 STEP 01 + rail UI (agnostic) + work rail adapter wiring + icons: pending
 - phase 4 thin steps 02/03/04 (agnostic frames + work seam content): pending
 - phase 5 STEP 05 building (seam-driven generation): pending
@@ -323,7 +323,11 @@ Shipped as specced in rev 3 (see `docs/task/work-onboarding-shell.audit.md`): `w
 - `src/modules/wizard/generation/work.llm.ts` (edit — RE-EXPORT-ONLY, per step 1; **shared file, regression risk**)
 - `src/modules/wizard/work/resumeStep.ts` (edit)
 - `src/modules/wizard/work/resumeStep.test.ts` (edit)
+- ⟳ **`src/components/onboarding/journey/JourneyShell.tsx` (edit — MANDATORY, added rev 5 post-P2b review)**
+- ⟳ `src/app/onboarding/[token]/page.tsx` (edit — ONLY if load-detection must also widen to surface `finalContent`; **shared file, regression risk**)
 - `e2e/work-onboarding.spec.ts` (edit)
+
+> ⚠️ **P5 TRAP — `resolveResumeStep` cannot see `finalContent` today (P2b review finding).** The contract type declares `finalContent?: unknown` (`engines/types.ts:82`), but `JourneyShell.tsx:105` passes ONLY `{brief, audienceType, templateId}` — that is all load-detection reads. **`resumeStep.test.ts` fabricates `loaded` objects directly, so P5 can ship `if (loaded.finalContent) return 5` with GREEN unit tests and a rule that NEVER FIRES in production** — a silent resume-at-2-forever bug. Before adding ANY `finalContent`-based resume rule (⇒5 mid-generation / ⇒6 finished), **widen `JourneyShell` to actually pass it** (and `page.tsx`'s load-detection if the value isn't there either — check `/api/loadDraft`'s response, which DOES return `finalContent`). The e2e in P5 step 5 (`loadDraft` after completion) is the only gate that catches this — do not let it be the fabricated-unit-test kind of green.
 
 **Verification:** `npx tsc --noEmit` · `npm run test:run` (incl. `work.llm.test.ts` untouched-and-green — proves the re-export preserved the generation callers) · `npx playwright test e2e/work-onboarding.spec.ts` (mock generation, fresh server) · `npm run lint`.
 

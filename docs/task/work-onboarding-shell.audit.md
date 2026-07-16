@@ -438,3 +438,69 @@ Explicitly NOT deviated: `engines/types.ts` untouched; `understand`/`scrape-webs
 5. **The purity guard scans `journey/*.tsx` + `journey/steps/*`.** `UnderstoodRail.tsx` lands in that scope: it must import nothing from `@/modules/wizard/work/**` and carry no templateId literal — the rail renders `RailVM` only, and reaches work through `seam.rail`.
 6. **Store note for `commitRail` (P3):** `WizardJourneyStep` is declared in the store rather than imported from `engines/types.ts`, because that module imports `WizardStore` from the store — importing back would be a cycle. Same closed literal union, assignable both ways. `commitRail` faces the same direction constraint: the store must not import the seam contract.
 7. Open risk (unchanged from 2a): `preflight` is still the **fail-closed** placeholder. P5 must fill it with the real `workCopyEngineEnabled(templateId)` + `getWorkFacts` checks or STEP 05 hard-fails by design.
+
+---
+
+## Phase 2b — follow-up fixes (impl-review), 2026-07-16
+
+### Files changed
+
+- `src/components/onboarding/journey/journeyAgnostic.test.ts` — guard made 1-hop transitive (+ type-only awareness)
+- `src/modules/wizard/work/resumeStep.ts` — doc correction (comments only; zero behaviour change)
+- `docs/task/work-onboarding-shell.audit.md` — this section
+
+---
+
+### FIX 1 — the purity guard was not transitive
+
+**Chosen: option (b), the 1-hop closure.** It stayed simple (one resolver + one `Map` build, ~20 lines) and fast (no measurable delta; the guard file still runs in ~1s). (a) would have papered over the class of bug rather than the instance: `SEAM_FILES` would need a manual append every time a seam grows a new import, and the next missed edge would be as silent as the rail one.
+
+`SEAM_CLOSURE` = `SEAM_FILES` + one hop of each seam's own `@/`-local **value** static imports (resolved via `@/` → `src/`, trying `.ts`/`.tsx`/`index.ts`/`index.tsx`; unresolvable specifiers are skipped). Ban set unchanged: `@/modules/wizard/generation/**` + `@/modules/generation/**`. The guard still **parses import statements** — never greps raw source (`engines/work.ts`'s header names the banned path in prose, and a guard that fires on its own documentation gets deleted).
+
+Non-vacuity is pinned by an explicit test asserting `rail.ts ∈ SEAM_CLOSURE` and `SEAM_CLOSURE.length > SEAM_FILES.length` — if the closure ever silently degrades to direct-imports-only, that test fails rather than the scan quietly narrowing.
+
+**Proof (as requested):** temporarily prepended `import { isResumableGeneration } from '@/modules/generation/multiPageAssembly';` to `src/modules/wizard/work/rail.ts` → the guard **FAILED** and named the file:
+
+> `modules/wizard/work/rail.ts statically imports "@/modules/generation/multiPageAssembly". Seams load PRE-CONFIRM on the entry page — reach generation with a LAZY \`await import(…)\` inside the function instead.`
+
+Poison reverted via `git checkout -- src/modules/wizard/work/rail.ts`; `rail.ts` is untouched in the final diff (`git status` verified). Guard green after revert: 11/11.
+
+#### Deviation (in-scope, and load-bearing): the closure must ignore `import type`
+
+The first poisoned run failed on the **wrong file** — `hooks/useWizardStore.ts`, via a **pre-existing** edge, not via rail.ts. Cause: `engines/types.ts` does `import type { WizardStore } from '@/hooks/useWizardStore'`, and that module type-imports `@/modules/wizard/generation/{thing,trust,work}` for its input contracts.
+
+Those are **type-only imports — fully erased by TypeScript, zero bytes on the entry bundle**. A naive 1-hop closure therefore reports a firewall violation against code that cannot possibly cause one. Shipping that would have made the guard cry wolf on day one (and P3 would rightly have deleted or `.skip`ped it).
+
+So the closure follows, and the ban applies to, **value imports only** (`valueImportSpecifiers`). This is not a loosening — it encodes the actual rule (runtime edges are the bug), consistent with the existing dynamic-import carve-out. `import { type A, B }` correctly still counts (`B` is a real edge); only a leading `import type` / `export type` is erased. Two self-tests pin these semantics. Shell-purity tests keep the original all-specifiers behaviour (a type-import of an engine module in the agnostic shell is still a purity smell worth failing on).
+
+**Note for P3/P5:** `useWizardStore.ts`'s generation imports are type-only **today**. If any of them is ever changed to a value import, the guard will fail — correctly: that would put the generation graph on the pre-confirm STEP-01 path.
+
+---
+
+### FIX 2 — `resumeStep.ts`'s doc misled P5 into a silent bug
+
+The old doc said *"P5/P6 branch on `loaded.finalContent`"*, implying availability. It is not available: `JourneyShell.tsx:105` passes only `{brief, audienceType, templateId}`. Combined with `resumeStep.test.ts` fabricating `loaded` objects directly, P5 could have shipped `if (loaded.finalContent) return 5` with **green** unit tests and a rule that never fires — resume-at-2-forever.
+
+Rewrote the function doc and added a header section (`READ THIS BEFORE ADDING A finalContent RULE`) — where P5's implementer actually reads before editing — stating plainly:
+
+- `finalContent` is **declared** on the contract (`engines/types.ts` — `finalContent?: unknown`) but **NOT passed** by the shell ⇒ always `undefined` in production;
+- the shell (`JourneyShell.tsx`, and possibly `src/app/onboarding/[token]/page.tsx`'s load-detection) **must be widened to pass it** first;
+- **unit tests fabricating `loaded` will NOT catch this** — green tests are not evidence; a rule added without widening the shell is dead code that silently resumes at step 2 forever.
+
+**Shell NOT widened** (out of scope — orchestrator is adding `JourneyShell.tsx` to P5's Files-touched). The existing `JourneyShell.tsx:105` call-site note is left as-is and now agrees with the module doc. Comments only; `resolveWorkResumeStep` behaviour is unchanged (confirmed ⇒ 2).
+
+---
+
+### Test results
+
+- `npx tsc --noEmit` — **clean** (exit 0)
+- `npm run test:run` — **200 passed | 1 skipped (201 files); 3421 passed | 18 skipped**
+- `npm run lint` — **no errors**; pre-existing warnings only (`vestria/publishedPrimitives.tsx` no-img-element, `ph-provider.tsx` exhaustive-deps) — untouched by this phase
+- `journeyAgnostic.test.ts` — 11/11 (was 9; +2: closure non-vacuity, type-only semantics)
+- Known CRLF churn on `__snapshots__/uiFoundationIsolation.test.tsx.snap` (zero content change) restored via `git checkout --` on that path only. Final `git status` shows only the two source files above.
+
+### Open risks
+
+1. **The closure is 1 hop, not transitive-to-fixpoint.** A generation import at depth 2 (e.g. `rail.ts` → some pure helper → generation) stays invisible. Accepted deliberately: hop-1 covers the real surface (what a seam directly pulls onto the entry path), and any depth-2 module becomes a hop-1 the day a seam imports it. Depth ≥2 remains review's job. If a seam ever grows a deep pure-helper tree, revisit.
+2. `resolveAlias` handles `@/`-alias specifiers only — relative (`./types`) and package specifiers are not followed. In-scope files are all `@/`-imported today; a seam that starts importing a *relative* sibling outside `engines/` would not be closed over. `engines/*.ts` are all directly in `SEAM_FILES`, so today's relative edges (`./types`) are already scanned.
+3. P5 still must widen the shell before any `finalContent` rule. The doc now says so in two places, but nothing **mechanically** enforces it — a `finalContent` rule with fabricated-`loaded` tests will still go green. The real gate is P5's reviewer.
