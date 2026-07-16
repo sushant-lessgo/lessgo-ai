@@ -16,7 +16,7 @@ Build the universal 6-step onboarding **journey shell** (agnostic chrome + step 
 - phase 1 rail data model + entry→work seed + brief plumbing: **done** (commits 715e4c63 + 43938e1d, review loops 1, verdict ship) — **STANDS under rev 4** (rail.ts = the WORK seam's rail adapter, verbatim)
 - phase 2a seam contract + registry + leaf + work seam + drift guard: **done** (commit fe2d063f, review loops 1, verdict ship; +2 review fixes folded pre-gate: chipIndex regex guard, preflight fail-closed) — **AWAITING HUMAN GATE (seam-contract sign-off)**
 - phase 2b journey shell scaffold (agnostic) + dispatch + e2e registration: **done** (commit dadbc760, review loops 1, verdict ship; e2e 4 passed on a fresh server; +2 review fixes folded: transitive purity guard, resumeStep `finalContent` doc)
-- phase 3 STEP 01 + rail UI (agnostic) + work rail adapter wiring + icons: pending
+- phase 3 STEP 01 + rail UI (agnostic) + work rail adapter wiring + icons: **done** (commit 7ffe63b7, review loops 1, verdict ship; e2e 5 passed; icons a verified no-op — all 16 glyphs already in `icons.txt`; `engines/work.ts` needed no edit — P2a shipped the real toVM+join, P3 paid its test debt). **2 review findings pushed forward: P4 step 6 (serialize `commitRail` — it gains its 2nd caller) + P4 step 7 (re-point the tautological chips-lifecycle test); P5 owns the `onDraftCorrected` one-liner.**
 - phase 4 thin steps 02/03/04 (agnostic frames + work seam content): pending
 - phase 5 STEP 05 building (seam-driven generation): pending
 - phase 6 STEP 06 reveal + editor handoff (agnostic): pending
@@ -284,6 +284,8 @@ Shipped as specced in rev 3 (see `docs/task/work-onboarding-shell.audit.md`): `w
 3. `StepPlan.tsx` (04, agnostic): calls `seam.steps.plan.prepare(wizardApi)` once, renders `items()` as simple cards + "Build my site" CTA → STEP 05. Work `prepare` = the EXISTING chargeless work sitemap seeding (`fetchStrategy` work+multipage branch, `useWizardStore.ts:1094-1113`, behind the `strategyStatus` guard — never the charged path; landmine 8). Implementer notes stand: `state.strategy` stays NULL by design; thin steps never set `goalIntent` ⇒ finalize with `briefGoal=null`, accepted. No tap powers (add/rename/reorder = E4).
 4. e2e (seeded-resume): journey 02→04 — 03 answers appear in the rail; a STEP 03 group answer round-trips through `loadDraft` with `kind:'category'`; 04 lists ≥1 page; back-nav across 02–04 doesn't duplicate sitemap seeding.
 5. Unit: extend `engines/work.test.ts` for `questions()` ask-if logic; `rail.test.ts` only if a new rail action shape is needed (avoid churn).
+6. ⚠️ **`commitRail` GAINS ITS SECOND CALLER HERE — serialize it (P3 review NB2).** `commitRail`'s `revert()` restores the pre-edit snapshot **wholesale**, so interleaved commits let a late failure wipe an earlier success. Today that's unreachable only because the rail is the SOLE caller and its global `saving` flag disables every submit control. **Step 2 wires `StepQuestions` commits through `commitRail` from OUTSIDE the rail, where that guard does not apply.** Fix in THIS phase: either serialize commits in the store (queue) or gate on an in-flight flag exposed to every caller. Add a test: two overlapping commits where the FIRST succeeds and the SECOND fails ⇒ the first's facts survive. Do not ship a second caller against an unserialized revert.
+7. ⚠️ **Re-point the tautological chips-lifecycle test (P3 review NB1).** `UnderstoodRail.test.tsx:264-279` ("chips editor does not survive a commit") **passes with `projectionKey` deleted** — it clicks `rail-edit-name`, so the editor unmounts from the `editingId` change ALONE and the WeakMap key is never exercised. The mechanism DOES hold (reviewer traced it by hand), but it is **unpinned** — and it's what stops the photos/items wipe. Re-point the test at the one path where a commit happens while `editingId` stays `'groups'`: **NoteBox is independent of `editingId`** ⇒ open the chips editor, type a draft, submit a note (`commitRail` swaps `briefFacts`) ⇒ assert the editor remounted, the draft is gone, and chip ids were re-seeded from the new projection. Add `src/components/onboarding/journey/UnderstoodRail.test.tsx` to Files touched.
 
 **Files touched:**
 - `src/components/onboarding/journey/steps/StepShowWork.tsx` (edit)
@@ -292,9 +294,12 @@ Shipped as specced in rev 3 (see `docs/task/work-onboarding-shell.audit.md`): `w
 - `src/components/onboarding/journey/engines/types.ts` (edit — only if question-kind shape needs adjusting)
 - `src/components/onboarding/journey/engines/work.ts` (edit — showWork copy, questions, plan prepare/items)
 - `src/components/onboarding/journey/engines/work.test.ts` (edit)
-- `src/hooks/useWizardStore.ts` (edit — ONLY if the sitemap seed needs a shell-callable wrapper; otherwise untouched; **shared file, regression risk**)
+- `src/hooks/useWizardStore.ts` (edit — ⟳ NOW EXPECTED, not conditional: `commitRail` serialization/in-flight guard per step 6; plus a shell-callable sitemap-seed wrapper if needed; **shared file, regression risk**)
+- ⟳ `src/components/onboarding/journey/UnderstoodRail.test.tsx` (edit — re-point the tautological chips-lifecycle test per step 7)
 - `src/modules/wizard/work/rail.test.ts` (edit — only if needed)
 - `e2e/work-onboarding.spec.ts` (edit)
+
+> ⚠️ **`engines/types.ts` is FOUNDER-SIGNED.** It is listed above only for the narrow case that a question-kind shape genuinely must change. The 3 question kinds are CLOSED for E1 (ruling). Touching it = a deviation that must be called out loudly in the audit, not a routine edit.
 
 **Verification:** `npx tsc --noEmit` · `npm run test:run` · `npx playwright test e2e/work-onboarding.spec.ts` · `npm run lint`.
 
@@ -324,7 +329,9 @@ Shipped as specced in rev 3 (see `docs/task/work-onboarding-shell.audit.md`): `w
 - `src/modules/wizard/work/resumeStep.ts` (edit)
 - `src/modules/wizard/work/resumeStep.test.ts` (edit)
 - ⟳ **`src/components/onboarding/journey/JourneyShell.tsx` (edit — MANDATORY, added rev 5 post-P2b review)**
-- ⟳ `src/app/onboarding/[token]/page.tsx` (edit — ONLY if load-detection must also widen to surface `finalContent`; **shared file, regression risk**)
+- ⟳ `src/app/onboarding/[token]/page.tsx` (edit — **TWO reasons now**: (a) the `onDraftCorrected` one-liner below; (b) if load-detection must widen to surface `finalContent`; **shared file, regression risk**)
+
+> ⟳ **P5 also owns a one-line P3 leftover (P3 review NB5 — reviewer ruled P5 the owner since page.tsx is already here).** `src/app/onboarding/[token]/page.tsx:171-181` must pass **`onDraftCorrected={setBriefDraft}`** to `<JourneyEntryStep>`. That prop completes decision 3's "edited line ⇒ re-classify ⇒ NON-seam result ⇒ hand back to `ConfirmBriefStep`" (parent re-renders → dispatch branch (b) goes false → legacy confirm takes over). P3 added the prop as OPTIONAL and correctly did not edit this shared file (not on its list). **Not currently broken** — without the prop that path shows an explicit, recoverable error ("That looks like a different kind of business — please refresh and try again"); a refresh returns the user to entry input. Cost = 1 wasted UNDERSTAND credit + retyping, not stranding. **But it MUST land before P7's founder-QA item (a), which spot-checks exactly this path.** P7 (fix-only over P1–P6 files) is the fallback owner if P5 somehow can't.
 - `e2e/work-onboarding.spec.ts` (edit)
 
 > ⚠️ **P5 TRAP — `resolveResumeStep` cannot see `finalContent` today (P2b review finding).** The contract type declares `finalContent?: unknown` (`engines/types.ts:82`), but `JourneyShell.tsx:105` passes ONLY `{brief, audienceType, templateId}` — that is all load-detection reads. **`resumeStep.test.ts` fabricates `loaded` objects directly, so P5 can ship `if (loaded.finalContent) return 5` with GREEN unit tests and a rule that NEVER FIRES in production** — a silent resume-at-2-forever bug. Before adding ANY `finalContent`-based resume rule (⇒5 mid-generation / ⇒6 finished), **widen `JourneyShell` to actually pass it** (and `page.tsx`'s load-detection if the value isn't there either — check `/api/loadDraft`'s response, which DOES return `finalContent`). The e2e in P5 step 5 (`loadDraft` after completion) is the only gate that catches this — do not let it be the fabricated-unit-test kind of green.
