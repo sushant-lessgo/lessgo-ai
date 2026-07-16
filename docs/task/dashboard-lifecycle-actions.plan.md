@@ -19,7 +19,7 @@ the publish pipeline without orphaning KV routes, blobs, or live pages.
 ## Progress log
 
 - phase 1 dashboard plumbing (providers, URL helper): done (commit c16baad5, review loops 1, verdict ship)
-- phase 2 publish-state serving predicate (SSR 404 + isPublished re-point): pending
+- phase 2 publish-state serving predicate (SSR 404 + isPublished re-point): done (commit ecffd51a, review loops 1, verdict ship)
 - phase 3 teardown library: pending
 - phase 4 unpublish + delete API routes + e2e: pending
 - phase 5 dashboard wiring slice 1 (Unpublish/Delete live): pending
@@ -556,10 +556,23 @@ published project → copy is Draft, original stays live.
    retention, blog-demote behavior. Record follow-ups: ConfirmDialog `app-*` retokenize
    (DD5), `SlugModal`/`LiveStep` → `publishedUrl.ts`, `/api/start` → `mintProjectToken()`,
    `/api/og/[slug]` publish-state gating (DD0 accepted gap).
-3. Full gates: `tsc`, `npm run test:run`, `npm run test:e2e`, `npm run build`.
+3. **Restore owner blog-draft preview on an unpublished site** (regression introduced by phase 2;
+   found by phase-2 impl-review). `loadBlogSsr()` has a THIRD caller the plan missed:
+   `src/app/(blog-preview)/dashboard/blog/[slug]/[postId]/preview/page.tsx:32` — the owner-only
+   preview of a post in ANY status (drafts included). Phase 2's gate means that once teardown
+   writes `'draft'`/`'unpublishing'`, the owner loses blog-draft preview of their own unpublished
+   site. **ORCHESTRATOR RULING: preview must survive unpublish** — it is authed/owner-only, serves
+   no public content, and DD2b demotes posts to draft on unpublish anyway, so the gate is actively
+   wrong here. Add an opt-out option to `loadBlogSsr()` (e.g. `{ requireServing = true }`) and pass
+   `false` from the preview route ONLY. Public blog SSR routes keep the gate (default). Add a unit
+   test asserting: preview loads a `'draft'`-state page, public SSR does not.
+4. Full gates: `tsc`, `npm run test:run`, `npm run test:e2e`, `npm run build`.
 
 **Files touched:**
 - `docs/architecture/publishArch.md`
+- `src/lib/blog/ssr.tsx` (add `requireServing` opt-out — step 3)
+- `src/app/(blog-preview)/dashboard/blog/[slug]/[postId]/preview/page.tsx` (pass the opt-out — step 3)
+- `src/lib/blog/__tests__/` (preview-survives-unpublish test — step 3)
 
 **Verification:** all gates green. Then **⛔ HUMAN GATE B — merge**: founder pass on
 rename/duplicate + merge-to-main decision (merge is always a human gate; user pushes).

@@ -219,3 +219,130 @@ None material. Two in-scope judgment calls, both taken conservatively:
 (the orchestrator's uncommitted progress-log line for phase 1) and
 `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` (empty diff —
 CRLF-only churn from the test run). Neither was touched by this phase.
+
+---
+
+# Phase 3 — Teardown library (server-only core)
+
+## Files changed
+
+- `src/lib/staticExport/teardown.ts` (new)
+- `src/lib/staticExport/teardown.test.ts` (new)
+- `docs/task/dashboard-lifecycle-actions.audit.md` (this section)
+
+`src/app/api/blob-proxy/route.ts` was **NOT touched** — see the DD1c finding below.
+
+## DD1c investigation (step 1) — RESULT: no real purge mechanism exists
+
+Checked, in order:
+
+1. **Vercel purge/invalidate REST API with the token we already hold.** The app's only Vercel
+   API credentials are `VERCEL_TOKEN` / `VERCEL_PROJECT_ID` / `VERCEL_TEAM_ID`, read in
+   `src/lib/vercel/domains.ts:4-8` and used solely against the **Domains** endpoints
+   (`https://api.vercel.com` projects/domains, `getDomainConfig`). Vercel exposes no public,
+   documented per-URL/per-path Edge-Network purge endpoint — cache invalidation is
+   dashboard/CLI "Purge Everything" (project-wide, not per-URL, and not something an unpublish
+   should ever fire) or Next.js-level `revalidatePath`/`revalidateTag`. Per the plan's explicit
+   instruction I did **not** invent or assume an endpoint.
+2. **`cacheTag` + `revalidateTag` on the blob-proxy handler.** Two independent blockers:
+   (a) `cacheTag` is a Next 15 `'use cache'` API — this repo is `next@^14.2.28`
+   (`package.json:66`), so it does not exist here; (b) `src/app/api/blob-proxy/route.ts:4` is
+   `runtime = 'edge'` and fully dynamic, so its response is not in Next's Full Route Cache — the
+   `Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400` at :74 is honored
+   directly by Vercel's Edge Network, which carries no tag association for `revalidateTag` to
+   act on. `revalidateTag` would be a silent no-op for this response.
+
+**Conclusion: EMPTY, exactly as the plan-review predicted.** Step 3c is therefore *skipped* (no
+call, no Sentry `cdn_purge` warning path, no `blob-proxy/route.ts` edit — the file is untouched,
+`Cache-Control` byte-identical). DD1c(2) carries it: the origin 404s immediately (phase 2's DD0
+predicate + KV deletion), the edge can replay a cached copy for ~1h, and the SWR revalidation
+then hits the missing KV route → origin 404 → cache self-corrects. The finding is recorded at
+the top of `teardown.ts` so nobody re-litigates it, and phase 5's honest-window UI copy + Gate
+A's cache-busting verification method are now **required**, not optional.
+
+## `src/lib/staticExport/teardown.ts`
+
+`teardownPublishedPage(pageId, { mode })` — DD1 order exactly:
+
+1. **Guard (D1):** `customDomain !== null` regardless of `customDomainStatus` → returns
+   `{ status: 'blocked', reason: 'custom_domain' }` with zero writes. A missing page row also
+   short-circuits to `done` (idempotent retry after the caller's delete transaction).
+2. **Marker:** `publishState: 'unpublishing'` (skipped if already set, so a retry doesn't churn).
+3. **KV (DD2):** hosts = `publishSubdomainHosts(slug)` (custom domain guaranteed absent).
+   Paths = union of `metadata.blobs[].path` across **ALL** versions (a legacy blobKey-only
+   version contributes `/`) + `/blog` (when an index blob or any published post exists) +
+   `/blog/{slug}` per published post. Non-root keys → `deleteRoutes(host × path)`, THEN
+   `removeRoutes(hosts)` for the root trio — the root-only trap the review flagged.
+   3b. `revalidatePath` for `/p/{slug}`, `/p/{slug}/privacy` and every non-root path.
+   3c. CDN purge intentionally absent (above).
+4. **Blobs (DD3/DD2b), strict:** own `publishedPageVersion.findMany` → `metadata.blobs[].blobKey`
+   with `version.blobKey` legacy fallback → `del()` each; then blog post blobs + `blogIndex.blobKey`
+   enumerated directly. Then `currentVersionId: null` **before** `publishedPageVersion.deleteMany`
+   (the `"CurrentVersion"` relation has no explicit `onDelete`).
+5. **Finalize:** `mode:'delete'` returns after step 4 (caller runs DD11). `mode:'unpublish'` does
+   blog demote → `Project.status:'draft'` → `PublishedPage` LAST
+   (`publishState:'draft'`, `publishError:null`, `blogIndex: Prisma.DbNull`; `isPublished` and
+   `lastPublishAt` untouched per DD0b/DD4).
+
+Typed union: `blocked` / `retryable_failure` (with `step`) / `done`. Every failure path fires
+`Sentry.captureMessage('teardown_incomplete', { level:'error', extra:{ pageId, slug, step, mode } })`.
+Invariant held structurally: the only write of `'draft'` is the last statement of the last step.
+
+Traps avoided, as instructed: `versionCleanup.ts` untouched; no `unpublishBlogPost` loop (it
+uploads a fresh index blob per non-last post); nothing modeled on `publish/route.ts:520-528`.
+
+## `src/lib/staticExport/teardown.test.ts` — 18 tests
+
+Guard (blocked incl. `pending_dns`, zero writes; missing row no-op) · route enumeration (both
+hosts × `/about` from a *dropped older version* + `/pricing` + `/nl` locale + `/blog` +
+`/blog/{slug}`, root never in `deleteRoutes`, `removeRoutes` gets the host trio; blog-index-only;
+no-blog site; legacy-only version) · `revalidatePath` set · blob deletion (all versions incl.
+legacy fallback + blog post/index blobs) · `currentVersionId` nulled before version-row delete ·
+**B3 upload guard** (`uploadStaticSite` / `generateStaticHTML` / `unpublishBlogPost` /
+`syncBlogAfterSitePublish` mocked and asserted never called, while blog blobs are still deleted)
+· ordering (marker → KV → blob → `draft` last) · unpublish finalize contents (asserts
+`isPublished`/`lastPublishAt` are NOT in the write) · delete mode stops before finalize · KV
+failure / mid-blob failure / db-finalize failure → `retryable_failure`, stays `'unpublishing'`,
+Sentry captured · retry on a stuck `'unpublishing'` row completes.
+
+## Deviations from the plan
+
+- **DD1 3c dropped** (not a deviation in substance — the plan makes it conditional on step 1
+  finding a mechanism; none exists). Consequently the planned "CDN-purge failure does not fail
+  the teardown" unit test is **not applicable** and is absent; the plan already scoped it "only
+  if a purge mechanism was adopted".
+- **`revalidatePath` treated as strict** (its own `step: 'revalidate'` retryable failure) rather
+  than best-effort. Conservative reading of DD1 ("failure at step 3/4 → retryable"): 3b is part
+  of step 3 and the plan marks only 3c best-effort. Retry is safe (idempotent).
+- **`/blog` key included when `blogIndex` is set even with zero published posts** (plan says
+  "per published BlogPost"). Conservative: catches a stranded index route; deletes are idempotent.
+- **No `$transaction` around the DB finalize** — kept as ordered sequential writes so
+  `PublishedPage → 'draft'` is provably the last write; a partial finalize is retry-safe and
+  leaves `'unpublishing'`, which is the honest state.
+
+## Test results
+
+- `npx tsc --noEmit` — green (the plan's noted `founder.jpg`/`next-env.d.ts` false error did not
+  reproduce; no build needed).
+- `npm run test:run` — **196 passed | 1 skipped (197 files), 3368 passed | 18 skipped**. New file:
+  18/18. No existing test touched; publish-path tests green.
+
+## Open risks
+
+- **DD1c is now load-bearing on phase 5 + Gate A.** With no purge, the ~1h edge window is the
+  product behavior. If phase 5 omits the honest confirm/toast copy, the AC "unpublish stops
+  serving" is user-visibly false for up to an hour. Flagged loudly.
+- **`revalidatePath` requires a request/render context** — teardown must be called from a route
+  handler (phase 4 does). Called from a script/cron it would throw → `retryable_failure`
+  `step:'revalidate'` after KV deletion, i.e. a stuck `'unpublishing'` page. Not reachable today.
+- **Blob `del()` failure semantics unverified against the live SDK** — assumed idempotent (a
+  no-op on an already-deleted key), which is what makes retry converge; matches `versionCleanup`'s
+  existing assumption. Gate A's admin KV/blob check is the real proof.
+- `mode:'delete'` leaves the row at `'unpublishing'` between teardown and the caller's DD11
+  transaction. Benign (`PublishedPage.projectId` has no `@relation`, nothing FK-blocks) and
+  already non-serving, but a crash in that window leaves an `'unpublishing'` row whose only
+  recovery is re-running Delete — acceptable, and phase 5 keeps Delete available for it.
+- Blog demote is *not* reversed by a later site re-publish (DD2b, by design) — Gate A talking point.
+
+**Working-tree note (phase 3):** unchanged from above — `plan.md` (orchestrator progress log) and
+the CRLF-only `uiFoundationIsolation.test.tsx.snap` churn are not from this phase.
