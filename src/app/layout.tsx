@@ -106,9 +106,40 @@ export default function RootLayout({
     process.env.NEXT_PUBLIC_DASHBOARD_URL,
   ].filter((o): o is string => Boolean(o))
 
+  // Founding-cohort auth copy (auth-redesign). These are FLOW-SCOPED keys —
+  // `signUp.start.*` and `signIn.start.*` are distinct namespaces, so setting both
+  // cannot collide, and no shared/global key is touched (a global override like
+  // `formButtonPrimary` would leak into UserButton/UserProfile forms). Purely
+  // presentational: Clerk still owns every flow, step and redirect.
+  const authLocalization = {
+    signUp: {
+      start: {
+        title: 'Claim your founding seat',
+        titleCombined: 'Claim your founding seat',
+        subtitle:
+          'Invite-only access to Lessgo. Set up in minutes, no credit card required.',
+        subtitleCombined:
+          'Invite-only access to Lessgo. Set up in minutes, no credit card required.',
+        actionText: 'Already have an account?',
+        actionLink: 'Log in',
+      },
+    },
+    signIn: {
+      start: {
+        title: 'Welcome back',
+        titleCombined: 'Welcome back',
+        subtitle: 'Pick up where you left off.',
+        subtitleCombined: 'Pick up where you left off.',
+        actionText: 'New here?',
+        actionLink: 'Claim your seat',
+      },
+    },
+  }
+
   return (
     <ClerkProvider
       allowedRedirectOrigins={allowedRedirectOrigins}
+      localization={authLocalization}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
       signUpForceRedirectUrl="/dashboard"
