@@ -33,6 +33,12 @@ import {
   seedWorkFactsFromEntry,
   type WorkGroupInput,
 } from '@/modules/wizard/work/rail';
+// Pure resume rules (P2b). Allowed at module top BECAUSE it is pure — it
+// lazy-imports `isResumableGeneration` at call time (P5). A static generation
+// import THERE would re-drag the template+generation graph onto this seam, and
+// therefore onto the pre-confirm entry path; `journeyAgnostic.test.ts` asserts
+// it does not.
+import { resolveWorkResumeStep } from '@/modules/wizard/work/resumeStep';
 import type {
   JourneyEngineSeam,
   JourneyLoadedDraft,
@@ -278,9 +284,14 @@ export const workJourneySeam: JourneyEngineSeam = {
     return { ok: false as const, kind: 'error' as const, message: 'Generation is not wired yet.' };
   },
 
-  /** P2b wires `@/modules/wizard/work/resumeStep`; P5 adds the mid-fan-out
-   *  resume (lazy `isResumableGeneration`). Confirmed ⇒ STEP 02. */
-  async resolveResumeStep(_loaded: JourneyLoadedDraft): Promise<JourneyStep> {
-    return 2;
+  /**
+   * Delegates to the work resume rules (`@/modules/wizard/work/resumeStep` — a
+   * pure module, so a static import here is firewall-clean; see that file's
+   * header before adding an import to IT). Confirmed ⇒ STEP 02; P5 adds the
+   * mid-fan-out resume (⇒ 5) via a LAZY `isResumableGeneration`, P6 the
+   * finished-content resume (⇒ 6).
+   */
+  resolveResumeStep(loaded: JourneyLoadedDraft): Promise<JourneyStep> {
+    return resolveWorkResumeStep(loaded);
   },
 };

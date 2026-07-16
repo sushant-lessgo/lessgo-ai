@@ -11,6 +11,28 @@
 // Firewall: this segment imports only pure @/modules/brief + fetch. The wizard
 // dispatcher (WizardShell + template-adjacent slot code) is DYNAMICALLY imported
 // so it never enters the entry bundle.
+//
+// work-onboarding-shell P2b — JOURNEY DISPATCH (two narrow branches):
+//   (a) POST-CONFIRM: a confirmed brief whose engine has a seam AND whose
+//       TEMPLATE is eligible renders `JourneyShell` instead of `WizardShell`.
+//   (b) PRE-CONFIRM: a draft whose engine has a seam renders `JourneyEntryStep`
+//       instead of `ConfirmBriefStep` (the template is unknown pre-confirm, so
+//       this branch keys on the seam only).
+// Both are FULL-VIEWPORT early returns — they render their own chrome and must
+// NOT sit inside this page's legacy max-w-xl card.
+//
+// The eligibility test is the ZERO-DEP LEAF `@/lib/journeyEngines` and nothing
+// else. Importing a seam, the registry, or the shell statically here would put
+// the seam/generation graph on the entry bundle (landmine 14) — the shells are
+// dynamic (`ssr:false`) for the same reason as WizardShell.
+//
+// Why eligibility is template-gated, not engine-gated: `granth` (writer) is a
+// work-engine template that is NOT work-copy-engine allow-listed. An
+// engine-only dispatch would strand writers in a journey their generation path
+// does not drive, so granth correctly keeps landing on `WizardShell`
+// post-confirm. (Accepted cosmetic: a granth-bound work DRAFT does see branch
+// (b)'s STEP 01 pre-confirm, since the template isn't known yet. It is
+// data-inert.)
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -18,6 +40,7 @@ import { useParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import type { Brief } from '@/types/brief';
 import type { AudienceType, TemplateId } from '@/types/service';
+import { hasJourneySeam, isJourneyEligible } from '@/lib/journeyEngines';
 import Logo from '@/components/shared/Logo';
 import EntryInputStep from './components/EntryInputStep';
 import ConfirmBriefStep from './components/ConfirmBriefStep';
@@ -35,7 +58,30 @@ const WizardShell = dynamic(
   }
 );
 
-type EntryStep = 'input' | 'confirm' | 'manual' | 'wizard';
+// FIREWALL: same rule as WizardShell — the journey shells are dynamically
+// imported (ssr:false) so neither the seam registry nor any seam code enters the
+// entry bundle. The entry page's DECISIONS come from the leaf only.
+const JourneyShell = dynamic(
+  () => import('@/components/onboarding/journey/JourneyShell'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="py-12 text-center text-gray-500">Loading your page…</div>
+    ),
+  }
+);
+
+const JourneyEntryStep = dynamic(
+  () => import('@/components/onboarding/journey/JourneyEntryStep'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="py-12 text-center text-gray-500">Loading…</div>
+    ),
+  }
+);
+
+type EntryStep = 'input' | 'confirm' | 'manual' | 'wizard' | 'journey';
 
 interface WizardData {
   brief: Brief;
@@ -80,10 +126,14 @@ export default function EntryOnboardingPage() {
         // audienceType (both written together at /api/brief/confirm serve).
         const confirmed = !!brief && !!audienceType && !!brief.copyEngine;
         if (confirmed && brief) {
-          // Every engine is served by the unified wizard (phase 10) — render it.
+          // JOURNEY DISPATCH (a): seam EXISTS and the picked TEMPLATE is
+          // eligible ⇒ the journey shell. Everything else — including
+          // work-engine templates that are not allow-listed (granth) — keeps the
+          // unified wizard, unchanged.
+          const journey = isJourneyEligible(brief.copyEngine, templateId);
           if (!cancelled) {
             setWizardData({ brief, audienceType, templateId });
-            setStep('wizard');
+            setStep(journey ? 'journey' : 'wizard');
             setChecking(false);
           }
           return;
@@ -97,6 +147,39 @@ export default function EntryOnboardingPage() {
       cancelled = true;
     };
   }, [tokenId]);
+
+  // ── JOURNEY DISPATCH — FULL-VIEWPORT EARLY RETURNS ────────────────────────
+  // These render their own chrome (top bar + `.app-chrome` wrapper), so they
+  // must escape the legacy centered card below, not nest inside it.
+
+  // (a) POST-CONFIRM: confirmed + seam + eligible template.
+  if (!checking && step === 'journey' && wizardData) {
+    return (
+      <JourneyShell
+        tokenId={tokenId}
+        brief={wizardData.brief}
+        audienceType={wizardData.audienceType}
+        templateId={wizardData.templateId}
+      />
+    );
+  }
+
+  // (b) PRE-CONFIRM: a draft whose engine has a seam replaces ConfirmBriefStep.
+  // Template-independent by necessity (nothing has picked one yet).
+  if (!checking && step === 'confirm' && briefDraft && hasJourneySeam(briefDraft.copyEngine)) {
+    return (
+      <JourneyEntryStep
+        tokenId={tokenId}
+        briefDraft={briefDraft}
+        onManual={(missingTags) => {
+          // Reuses the existing manual path verbatim — the journey adds no new
+          // demand-capture surface.
+          setMissing(missingTags);
+          setStep('manual');
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

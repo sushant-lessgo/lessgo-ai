@@ -277,7 +277,31 @@ interface WizardState {
   // generating slot.
   generationProgress: number;
   generationError: string | null;
+
+  /**
+   * work-onboarding-shell P2b — the JOURNEY step machine (2–6).
+   *
+   * ADDITIVE and fully INDEPENDENT of the slot machine above: a project renders
+   * EITHER the legacy `WizardShell` (slots) OR the journey shell (this), never
+   * both, so the two never interact. `slots`/`currentSlot`/`nextSlot`/`prevSlot`
+   * are untouched by the journey.
+   *
+   * STEP 01 is absent by design — it is pre-confirm and owned by the entry page,
+   * so the journey shell only ever mounts at 2+.
+   */
+  journeyStep: WizardJourneyStep;
 }
+
+/**
+ * The journey steps the shell can be on (02 show-work → 06 reveal).
+ *
+ * Structurally identical to `JourneyStep` in
+ * `src/components/onboarding/journey/engines/types.ts`, and deliberately NOT
+ * imported from it: that module imports `WizardStore` from THIS file, so
+ * importing back would be a cycle. Both are the same closed literal union, so
+ * values pass between them without a cast.
+ */
+export type WizardJourneyStep = 2 | 3 | 4 | 5 | 6;
 
 interface WizardActions {
   hydrate: (payload: WizardHydratePayload) => void;
@@ -354,6 +378,12 @@ interface WizardActions {
   // generating.
   setGenerationProgress: (progress: number) => void;
   setGenerationError: (error: string | null) => void;
+
+  /**
+   * work-onboarding-shell P2b — journey step machine. Additive; the journey
+   * shell owns forward/back motion. No slot-machine interaction.
+   */
+  setJourneyStep: (step: WizardJourneyStep) => void;
 
   // Persistence (reuses /api/saveDraft — no new API).
   buildBriefPatch: () => Partial<Brief>;
@@ -778,7 +808,16 @@ const initialState: WizardState = {
   importedTestimonials: [],
   generationProgress: 0,
   generationError: null,
+  // Journey (P2b). 2 = the first resumable step; the entry page owns STEP 01.
+  journeyStep: 2,
 };
+
+// ---------------------------------------------------------------------------
+// Journey selectors (P2b) — selector-first reads for the journey shell.
+// ---------------------------------------------------------------------------
+
+export const selectJourneyStep = (s: WizardStore): WizardJourneyStep => s.journeyStep;
+export const selectSetJourneyStep = (s: WizardStore) => s.setJourneyStep;
 
 // ---------------------------------------------------------------------------
 // Store
@@ -1196,6 +1235,13 @@ export const useWizardStore = create<WizardStore>()(
       setGenerationError: (error) =>
         set((state) => {
           state.generationError = error;
+        }),
+
+      // work-onboarding-shell P2b — journey step machine (additive). The union
+      // is closed, so no range clamp is needed; the slot machine is untouched.
+      setJourneyStep: (step) =>
+        set((state) => {
+          state.journeyStep = step;
         }),
 
       // Compose the Brief patch persisted on save — goal is the well-defined

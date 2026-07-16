@@ -62,6 +62,9 @@ export default defineConfig({
         /dashboard-shell\.spec\.ts/,
         /dashboard-workspace\.spec\.ts/,
         /dashboard-redirects\.spec\.ts/,
+        // work-onboarding-shell: the journey needs a Clerk session (seeded via
+        // the real /api/start + /api/brief/confirm routes).
+        /work-onboarding\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
@@ -76,6 +79,13 @@ export default defineConfig({
       // Mock mode: bypasses Clerk auth on generation routes AND returns canned
       // copy (no credits, deterministic). Override per-run with E2E_LLM=real.
       NEXT_PUBLIC_USE_MOCK_GPT: process.env.E2E_LLM === 'real' ? 'false' : 'true',
+      // work-onboarding-shell: the work copy-engine kill-switch. Off ⇒ STEP 05
+      // hard-fails by design (landmine 2), so the journey e2e needs it ON.
+      //
+      // ⚠️ NEXT_PUBLIC_* is BUILD-TIME INLINED and `reuseExistingServer: !CI`
+      // means a dev server already listening on the port is reused AS-IS — it
+      // will not have this var. Kill stale dev servers before running the suite.
+      NEXT_PUBLIC_WORK_COPY_ENGINE: 'true',
     },
   },
 });
