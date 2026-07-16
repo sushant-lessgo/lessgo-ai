@@ -1,8 +1,6 @@
 // app/edit/[token]/components/selection/ElementDetector.tsx
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { useShallow } from 'zustand/react/shallow';
 import { useEditStore } from '@/hooks/useEditStore';
-import { isSectionVisuallySelected } from '@/utils/selectionPriority';
 
 interface ElementDetectorProps {
   sectionId: string;
@@ -19,140 +17,17 @@ export function ElementDetector({ sectionId, children }: ElementDetectorProps) {
   const mode = useEditStore((s) => s.mode);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  // Handle selection visual feedback
-  const { selectedElement, selectedSection } = useEditStore(
-    useShallow((s) => ({ selectedElement: s.selectedElement, selectedSection: s.selectedSection })),
-  );
-
-  useEffect(() => {
-    if (!sectionRef.current) return;
-
-    // Update selection indicators
-    const elements = sectionRef.current.querySelectorAll('[data-element-key]');
-
-    elements.forEach((element) => {
-      const elementKey = element.getAttribute('data-element-key');
-      const isSelected = selectedElement?.sectionId === sectionId && selectedElement?.elementKey === elementKey;
-
-      if (isSelected) {
-        element.classList.add('element-selected');
-      } else {
-        element.classList.remove('element-selected');
-      }
-    });
-
-    // Section selection indicator
-    if (isSectionVisuallySelected(selectedSection, sectionId, selectedElement)) {
-      sectionRef.current.classList.add('section-selected');
-    } else {
-      sectionRef.current.classList.remove('section-selected');
-    }
-  }, [selectedElement, selectedSection, sectionId]);
-
-  // Handle nested element detection
-  const handleNestedElementClick = useCallback((event: React.MouseEvent) => {
-
-    if (mode !== 'edit') return;
-
-    const target = event.target as HTMLElement;
-
-    // Check if target is an image with data-image-id - let image click handlers work
-    if (target.tagName === 'IMG' && target.getAttribute('data-image-id')) {
-      event.stopPropagation();
-      // Allow image click handlers to work by not intercepting
-      return;
-    }
-
-    // Find the closest selectable element
-    let current = target;
-    let elementKey = null;
-    let depth = 0;
-
-    while (current && current !== sectionRef.current && depth < 10) {
-      elementKey = current.getAttribute('data-element-key');
-      if (elementKey) break;
-
-      current = current.parentElement as HTMLElement;
-      depth++;
-    }
-
-    if (elementKey && current) {
-      // Add visual feedback for nested selection
-      const allElementsInSection = sectionRef.current?.querySelectorAll('[data-element-key]');
-      allElementsInSection?.forEach(el => el.classList.remove('element-hover'));
-
-      current.classList.add('element-hover');
-
-      // Store depth information for hierarchy display
-      current.setAttribute('data-selection-depth', depth.toString());
-    }
-  }, [mode, sectionId]);
-
-  // Cleanup on mode change
-  useEffect(() => {
-    if (mode !== 'edit') {
-      if (sectionRef.current) {
-        const elements = sectionRef.current.querySelectorAll('[data-element-key]');
-        elements.forEach(element => {
-          element.classList.remove('element-selected', 'element-hover');
-          element.removeAttribute('data-selection-depth');
-        });
-
-        sectionRef.current.classList.remove('section-selected');
-      }
-    }
-  }, [mode]);
-
+  // Selected/hover visuals are owned by a single writer (SelectionSystem sweep for
+  // selected classes; CSS hover interim → HoverOverlay in phase 3). This wrapper is
+  // retained only as a stable closest('[data-section-id]') anchor for other code.
   return (
     <div
       ref={sectionRef}
       data-section-id={sectionId}
       className={`element-detector-section ${mode !== 'preview' ? 'edit-mode' : ''}`}
-      onClick={handleNestedElementClick}
     >
       {children}
-
-      {mode !== 'preview' && <ElementDetectorStyles />}
     </div>
-  );
-}
-
-// Styles for element detection and selection
-// (cursor/hover/editing affordances live in globals.css on [data-element-key])
-function ElementDetectorStyles() {
-  return (
-    <style jsx>{`
-      .element-detector-section.edit-mode .element-selected {
-        background-color: rgba(16, 185, 129, 0.1) !important;
-        outline: 2px solid #10b981 !important;
-        outline-offset: 1px;
-      }
-
-      .element-detector-section.edit-mode .element-hover {
-        background-color: rgba(59, 130, 246, 0.08) !important;
-        outline: 1px dashed rgba(59, 130, 246, 0.4) !important;
-        outline-offset: 1px;
-      }
-
-      .element-detector-section.section-selected {
-        background-color: rgba(59, 130, 246, 0.03);
-        outline: 2px solid #3b82f6;
-        outline-offset: 2px;
-      }
-
-      /* Selection depth indicators */
-      .element-detector-section.edit-mode [data-element-key][data-selection-depth="0"] {
-        box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.3);
-      }
-
-      .element-detector-section.edit-mode [data-element-key][data-selection-depth="1"] {
-        box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.4);
-      }
-
-      .element-detector-section.edit-mode [data-element-key][data-selection-depth="2"] {
-        box-shadow: inset 0 0 0 3px rgba(59, 130, 246, 0.5);
-      }
-    `}</style>
   );
 }
 

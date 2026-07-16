@@ -48,7 +48,10 @@ function resolveAnchor(
 
   if (activeToolbar === 'section') {
     if (!target.sectionId) return null;
-    return document.querySelector<HTMLElement>(`[data-section-id="${target.sectionId}"]`);
+    return (
+      document.querySelector<HTMLElement>(`[data-section-root="${target.sectionId}"]`) ??
+      document.querySelector<HTMLElement>(`[data-section-id="${target.sectionId}"]`)
+    );
   }
 
   if (activeToolbar === 'image') {

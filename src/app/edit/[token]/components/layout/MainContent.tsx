@@ -545,8 +545,9 @@ const handleAddSection = (afterSectionId?: string) => {
                   "relative group transition-all duration-200",
                   mode !== 'preview' && [
                     "rounded-lg border border-transparent hover:border-primary/20",
-                    "hover:shadow-sm px-4 py-2 -mx-4 -my-2",
-                    isSectionVisuallySelected(selectedSection, sectionId, selectedElement) && "border-primary/40 shadow-md bg-primary/5"
+                    "hover:shadow-sm px-4 py-2 -mx-4 -my-2"
+                    // Selected-section visual is owned solely by SelectionSystem's
+                    // .selected-section writer (single-writer model, phase 2).
                   ]
                 )}>
                   {/* Add Section Button (Between Sections) */}
@@ -573,10 +574,7 @@ const handleAddSection = (afterSectionId?: string) => {
                     <div
                       className={`
                         relative transition-all duration-200 cursor-pointer
-                        ${isSectionVisuallySelected(selectedSection, sectionId, selectedElement)
-                          ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-50'
-                          : 'hover:ring-1 hover:ring-gray-300'
-                        }
+                        hover:ring-1 hover:ring-gray-300
                       `}
                       draggable={mode !== 'preview'}
                       // DISABLED: Using unified click handler from useEditor instead
