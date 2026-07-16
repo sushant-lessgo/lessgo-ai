@@ -63,6 +63,7 @@ export default defineConfig({
         /dashboard-workspace\.spec\.ts/,
         /dashboard-redirects\.spec\.ts/,
         /dashboard-lifecycle\.spec\.ts/,
+        /dashboard-rollups-inbox\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
