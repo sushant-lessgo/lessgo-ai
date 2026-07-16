@@ -17,7 +17,7 @@ Build the universal 6-step onboarding **journey shell** (agnostic chrome + step 
 - phase 2a seam contract + registry + leaf + work seam + drift guard: **done** (commit fe2d063f, review loops 1, verdict ship; +2 review fixes folded pre-gate: chipIndex regex guard, preflight fail-closed) — **AWAITING HUMAN GATE (seam-contract sign-off)**
 - phase 2b journey shell scaffold (agnostic) + dispatch + e2e registration: **done** (commit dadbc760, review loops 1, verdict ship; e2e 4 passed on a fresh server; +2 review fixes folded: transitive purity guard, resumeStep `finalContent` doc)
 - phase 3 STEP 01 + rail UI (agnostic) + work rail adapter wiring + icons: **done** (commit 7ffe63b7, review loops 1, verdict ship; e2e 5 passed; icons a verified no-op — all 16 glyphs already in `icons.txt`; `engines/work.ts` needed no edit — P2a shipped the real toVM+join, P3 paid its test debt). **2 review findings pushed forward: P4 step 6 (serialize `commitRail` — it gains its 2nd caller) + P4 step 7 (re-point the tautological chips-lifecycle test); P5 owns the `onDraftCorrected` one-liner.**
-- phase 4 thin steps 02/03/04 (agnostic frames + work seam content): pending
+- phase 4 thin steps 02/03/04 (agnostic frames + work seam content): **done** (commit 8453be04, review loops 1, verdict ship; e2e 6 passed; both P3 findings closed — `commitRail` serialized, chips test re-pointed + poison-proven). **P5 inherits 3 notes: fold `useJourneySeam` into prop-passing, stale `registry.ts` header, `commitGroupPrice` blankets all groups (E3 concern, correct for E1).**
 - phase 5 STEP 05 building (seam-driven generation): pending
 - phase 6 STEP 06 reveal + editor handoff (agnostic): pending
 - phase 7 gates sweep + founder QA: pending
@@ -317,6 +317,11 @@ Shipped as specced in rev 3 (see `docs/task/work-onboarding-shell.audit.md`): `w
 5. Env: `NEXT_PUBLIC_WORK_COPY_ENGINE=true` + mock mode already in `playwright.config.ts` webServer env (P2b). Both build-time inlined + `reuseExistingServer:!CI` ⇒ **kill/restart the dev server before this phase's e2e run.**
 6. e2e (seeded-resume — the fixture's persisted `facts.work` is what makes mock work generation runnable): 02→05 with mock generation completes → STEP 06 state; `loadDraft` after completion has `finalContent` (finalize marker cleared).
 7. ⟳ `work.llm.ts` is a **REAL edit this phase — re-export-only** (step 1). Expect it in the audit as such, NOT as a deviation; anything beyond the re-export IS a deviation.
+8. ⟳ **P4 inheritance (review notes — all cheap, all in files P5 already owns):**
+   - **Fold `steps/useJourneySeam.ts` into prop-passing.** P4 created it because `JourneyShell` renders step bodies with NO props and wasn't on P4's list — it IS on yours. Per-step async resolution is *safe* (the loader returns a module-level const ⇒ stable identity ⇒ no re-`prepare`, no double chunk), but costs a one-tick `seam === null` frame: `StepShowWork` paints an empty `<h1>`/`<p>` before the seam lands. The shell already HAS the seam — pass it down (add `steps/useJourneySeam.ts` + the step files you touch to your list). `StepBuilding` needs the seam anyway.
+   - **`engines/registry.ts`'s header comment is STALE** ("Only `JourneyShell`/`JourneyEntryStep` call `loadJourneySeam`" — steps do too). Fix while you're in `engines/`; add the file to your list if so.
+   - **Queue-stall (know it; fix only if trivial):** `commitRail`'s `perform` has no fetch timeout, so a hung save blocks EVERY subsequent commit (it previously froze only the rail via its `saving` flag).
+   - **`commitGroupPrice` writes the answered price onto EVERY group** — correct for E1 (one price for the practice; seed is uniformly `on-request`) but it will silently blanket-overwrite once E3 adds per-group pricing. **Leave as-is; ensure it's recorded for E3** (a comment at the call site is enough).
 
 **Files touched:**
 - `src/components/onboarding/journey/steps/StepBuilding.tsx` (edit)
