@@ -6,6 +6,18 @@
 // state / save path / publish pipeline / XSS contract are untouched.
 // Extension set mirrors tiptapRoundTrip.test.ts (the round-trip contract):
 // v3 StarterKit (bundles Link) + Image (NOT bundled — images drop without it).
+//
+// 🚨 blog-composer-redesign phase 2 touched this file for TOOLBAR CHROME ONLY. Untouched
+// on purpose, and not up for casual edits:
+//   - the extension set (dropping `Image` silently drops every image from posts),
+//   - `immediatelyRender: false` (the Next SSR hydration guard),
+//   - the markdown-canonical `onUpdate` serialization,
+//   - `PROSE` below — it deliberately mirrors what READERS get from BlogPostBodyBlock, so
+//     it is reader fidelity, not app chrome; retokenizing it to app-* fonts would make the
+//     WYSIWYG lie about the published article.
+// The `window.prompt`/`alert` in the link + image-upload handlers below are a KNOWN, ACCEPTED
+// leftover: this phase's remit was styling here, and swapping them for the shared dialog/toast
+// hosts is behaviour. Tracked, not forgotten.
 import { useRef } from 'react'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -40,8 +52,8 @@ function ToolbarButton({
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`px-2 py-1 rounded text-sm min-w-[30px] disabled:opacity-30 ${
-        active ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
+      className={`min-w-[30px] rounded-[7px] px-2 py-1 font-app-sans text-[12.5px] transition-colors disabled:opacity-30 ${
+        active ? 'bg-app-ink text-white' : 'text-app-slate hover:bg-app-hairline'
       }`}
     >
       {children}
@@ -83,10 +95,10 @@ function Toolbar({ editor, tokenId }: { editor: Editor; tokenId: string }) {
     }
   }
 
-  const divider = <span className="w-px h-5 bg-gray-200 mx-1" aria-hidden="true" />
+  const divider = <span className="mx-1 h-5 w-px bg-app-border" aria-hidden="true" />
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-gray-100 bg-gray-50/50">
+    <div className="flex flex-wrap items-center gap-0.5 border-b border-app-hairline bg-app-canvas px-2 py-1.5">
       <ToolbarButton
         title="Paragraph"
         active={editor.isActive('paragraph')}
@@ -213,7 +225,7 @@ export default function BlogRichTextEditor({ initialMarkdown, onChange, tokenId 
   })
 
   if (!editor) {
-    return <div className="min-h-[480px] p-6 text-sm text-gray-400">Loading editor…</div>
+    return <div className="min-h-[480px] p-6 font-app-sans text-[12.5px] text-app-faint">Loading editor…</div>
   }
 
   return (
