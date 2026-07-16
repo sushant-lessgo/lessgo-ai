@@ -3,6 +3,10 @@
 // Token-driven ONLY via CSS custom properties: SKIN `var(--wk-*)` + USER
 // `var(--u-*, <default>)`. Verbatim-quote grid (the default proof shape).
 
+// Shared var-gated rule-header grammar (Wave 2A). NEUTRAL default = byte-identical
+// stacked head; `sectionHeaderStyle:'rule'` → Atelier rule header. See Gallery/styles.
+import { RULE_HEAD } from '../Gallery/styles';
+
 export const WORK_PROOF_STYLES = `
 .wk-proof{ background:var(--u-bg, var(--wk-paper-2)); color:var(--u-fg, var(--wk-ink)); }
 .wk-proof__in{ width:100%; max-width:var(--wk-wrap); margin:0 auto; padding:calc(var(--wk-sec-y) * var(--u-space-y, 1)) var(--wk-gutter); }
@@ -14,7 +18,7 @@ export const WORK_PROOF_STYLES = `
 .wk-proof__card{ background:var(--wk-paper); border:1px solid var(--wk-line); border-radius:var(--u-radius, var(--wk-r)); padding:clamp(20px,2.4vw,32px); display:flex; flex-direction:column; gap:16px; }
 .wk-proof__quote{ font-family:var(--wk-ff-display); font-size:1.15rem; line-height:1.45; letter-spacing:-0.01em; opacity:var(--u-opacity, 1); margin:0; }
 .wk-proof__source{ font-family:var(--wk-ff-body); font-weight:600; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--wk-ink-mute); margin:0; }
-`;
+${RULE_HEAD('wk-proof', 'awards')}`;
 
 // Shared head grammar for the alternate proof SHAPES (logos/results) — centered.
 const PROOF_HEAD = (p: string) => `

@@ -4,6 +4,10 @@
 // A priced-services card grid (the conviction pillar — "on request" is a legal
 // price answer). price_mode drives whether a "from" affix precedes the price line.
 
+// Shared var-gated rule-header grammar (Wave 2A). NEUTRAL default = byte-identical
+// stacked head; `sectionHeaderStyle:'rule'` → Atelier rule header. See Gallery/styles.
+import { RULE_HEAD } from '../Gallery/styles';
+
 export const WORK_PACKAGES_STYLES = `
 .wk-packages{ background:var(--u-bg, var(--wk-paper)); color:var(--u-fg, var(--wk-ink)); }
 .wk-packages__in{ width:100%; max-width:var(--wk-wrap); margin:0 auto; padding:calc(var(--wk-sec-y) * var(--u-space-y, 1)) var(--wk-gutter); }
@@ -18,4 +22,4 @@ export const WORK_PACKAGES_STYLES = `
 .wk-packages__from{ font-family:var(--wk-ff-body); font-weight:600; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--wk-ink-mute); }
 .wk-packages__desc{ font-family:var(--wk-ff-body); font-size:var(--wk-fs-body); line-height:var(--wk-lh-body); color:var(--wk-ink-soft); flex:1 1 auto; }
 .wk-packages__cta{ align-self:flex-start; font-family:var(--wk-ff-body); font-weight:600; font-size:13px; letter-spacing:0.02em; color:var(--wk-accent); text-decoration:none; border-bottom:1px solid var(--wk-accent); padding-bottom:2px; }
-`;
+${RULE_HEAD('wk-packages', 'lead')}`;

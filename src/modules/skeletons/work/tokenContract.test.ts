@@ -6,7 +6,7 @@
 //      `--u-*` CSS, and empty input → empty string (AC L123 serializer path).
 
 import { describe, it, expect } from 'vitest';
-import { assertSkinTokens, type WorkSkinTokens } from './tokenContract';
+import { assertSkinTokens, serializeSkinTokens, type WorkSkinTokens } from './tokenContract';
 import { serializeStyleTokens, type StyleTokens } from '../styleTokens';
 
 const validTokens: WorkSkinTokens = {
@@ -37,6 +37,8 @@ const validTokens: WorkSkinTokens = {
   heroDisplayTracking: -0.02,
   heroDisplayWeight: 600,
   heroNumeral: false,
+  sectionHeaderStyle: 'plain',
+  footerWordmark: false,
 };
 
 describe('assertSkinTokens — skin token bounds (loud fail)', () => {
@@ -108,6 +110,53 @@ describe('assertSkinTokens — skin token bounds (loud fail)', () => {
     expect(msg).toContain('--wk-hero-tracking');
     expect(msg).toContain('--wk-hero-weight');
     expect(msg).toContain('--wk-hero-num-display');
+  });
+
+  it('accepts the Wave 2A section-header + footer-wordmark opt-ins (atelier2)', () => {
+    const atelier: WorkSkinTokens = {
+      ...validTokens,
+      sectionHeaderStyle: 'rule',
+      footerWordmark: true,
+    };
+    expect(() => assertSkinTokens({ id: 'wave2a', tokens: atelier })).not.toThrow();
+  });
+
+  it('throws on a bad sectionHeaderStyle enum / non-boolean footerWordmark', () => {
+    const bad: WorkSkinTokens = {
+      ...validTokens,
+      sectionHeaderStyle: 'ruled' as any, // not plain|rule
+      footerWordmark: 'yes' as any,       // not a boolean
+    };
+    let msg = '';
+    try {
+      assertSkinTokens({ id: 'bad-wave2a', tokens: bad });
+    } catch (e) {
+      msg = (e as Error).message;
+    }
+    expect(msg).toContain('2 token violation(s)');
+    expect(msg).toContain('--wk-sec-head-display');
+    expect(msg).toContain('--wk-footer-wm-fs');
+  });
+});
+
+describe('serializeSkinTokens — Wave 2A derived vars', () => {
+  it('emits plain/off defaults for a neutral skin (byte-neutral)', () => {
+    const css = serializeSkinTokens(validTokens);
+    expect(css).toContain('--wk-sec-head-display:block;');
+    expect(css).toContain('--wk-sec-head-bw:0;');
+    expect(css).toContain('--wk-sec-head-num:none;');
+    expect(css).toContain('--wk-footer-wm-fs:clamp(1.7rem,4vw,3rem);');
+    expect(css).toContain('--wk-footer-dot:none;');
+  });
+
+  it('emits rule-header + wordmark vars for the opted-in skin', () => {
+    const css = serializeSkinTokens({ ...validTokens, sectionHeaderStyle: 'rule', footerWordmark: true });
+    expect(css).toContain('--wk-sec-head-display:flex;');
+    expect(css).toContain('--wk-sec-head-bw:2px;');
+    expect(css).toContain('--wk-sec-head-num:block;');
+    expect(css).toContain('--wk-sec-head-meta-ml:auto;');
+    expect(css).toContain('--wk-footer-wm-fs:clamp(48px,11vw,170px);');
+    expect(css).toContain('--wk-footer-dot:inline;');
   });
 });
 

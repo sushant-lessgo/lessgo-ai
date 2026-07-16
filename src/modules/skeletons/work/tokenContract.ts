@@ -55,6 +55,18 @@ export interface WorkSkinTokens {
   heroDisplayTracking: number;   // hero headline letter-spacing, em (bounded, usually negative)
   heroDisplayWeight: number;     // hero headline weight (enum) — may exceed section displayWeight
   heroNumeral: boolean;          // giant background slide numeral on/off (default off)
+
+  // Section-header grammar (fidelity Wave 2A). NEUTRAL default `'plain'` renders
+  // section heads EXACTLY as today (byte-identical). `'rule'` = Atelier's signature
+  // "rule header": a 2px top rule spanning the head, an accent index numeral
+  // (auto-numbered 01/02… via a CSS counter), the h2, and right-aligned meta
+  // (reuses the head's existing eyebrow — no new contract field).
+  sectionHeaderStyle: 'plain' | 'rule';
+
+  // Footer wordmark (fidelity Wave 2A). NEUTRAL default `false` keeps the current
+  // compact footer. `true` = Atelier's giant footer wordmark (the heading rendered
+  // huge, weight 700, with an accent dot) — no new contract field (reuses heading).
+  footerWordmark: boolean;
 }
 
 /** Token field → its emitted `--wk-*` CSS custom property name. */
@@ -86,6 +98,8 @@ export const WORK_TOKEN_VARS: Record<keyof WorkSkinTokens, string> = {
   heroDisplayTracking: '--wk-hero-tracking',
   heroDisplayWeight: '--wk-hero-weight',
   heroNumeral: '--wk-hero-num-display',
+  sectionHeaderStyle: '--wk-sec-head-display', // primary; expands to 5 derived vars
+  footerWordmark: '--wk-footer-wm-fs',         // primary; expands to 4 derived vars
 };
 
 export const WORK_TOKEN_COLOR_FIELDS: (keyof WorkSkinTokens)[] = [
@@ -119,10 +133,11 @@ export const WORK_TOKEN_ENUMS: Record<string, number[]> = {
 /** Enum-constrained STRING tokens. */
 export const WORK_TOKEN_STRING_ENUMS: Record<string, string[]> = {
   heroAlign: ['start', 'center'],
+  sectionHeaderStyle: ['plain', 'rule'],
 };
 
 /** Boolean tokens (validated as `typeof === 'boolean'`). */
-export const WORK_TOKEN_BOOL_FIELDS: (keyof WorkSkinTokens)[] = ['heroNumeral'];
+export const WORK_TOKEN_BOOL_FIELDS: (keyof WorkSkinTokens)[] = ['heroNumeral', 'footerWordmark'];
 
 // ── Compatibility matrix (cross-token rules) ────────────────────────────────
 // Rules that no single-field bound can express (e.g. paper vs ink must contrast).
@@ -230,6 +245,24 @@ export function serializeSkinTokens(t: WorkSkinTokens): string {
   const heroTextAlign = heroCenter ? 'center' : 'left';
   const heroItems = heroCenter ? 'center' : 'flex-end';   // .wk-hero vertical
   const heroInline = heroCenter ? 'center' : 'stretch';   // .wk-hero__in cross-axis
+  // Section-header grammar (Wave 2A): one enum → 5 derived vars that flip the
+  // shared head CSS between the current stacked head (`plain`, byte-identical to
+  // the fallback defaults) and Atelier's rule header (`rule`). All 5 vars carry
+  // the plain value for a non-setting skin, so `[data-palette]` still renders as
+  // before.
+  const ruleHead = t.sectionHeaderStyle === 'rule';
+  const headDisplay = ruleHead ? 'flex' : 'block';
+  const headBorderW = ruleHead ? '2px' : '0';
+  const headPadTop  = ruleHead ? '18px' : '0';
+  const headNum     = ruleHead ? 'block' : 'none'; // index-numeral ::before display
+  const headMetaMl  = ruleHead ? 'auto' : '0';     // eyebrow → right-aligned meta
+  // Footer wordmark (Wave 2A): the boolean expands into the heading's giant-type
+  // vars + the accent-dot display. Defaults equal the current compact footer.
+  const fw = t.footerWordmark;
+  const fwFs  = fw ? 'clamp(48px,11vw,170px)' : 'clamp(1.7rem,4vw,3rem)';
+  const fwLh  = fw ? '0.85' : '1.02';
+  const fwLs  = fw ? '-0.04em' : '-0.02em';
+  const fwDot = fw ? 'inline' : 'none';
   return `:root{
   --wk-paper:${t.paper};
   --wk-paper-2:${t.paper2};
@@ -260,6 +293,15 @@ export function serializeSkinTokens(t: WorkSkinTokens): string {
   --wk-hero-tracking:${t.heroDisplayTracking}em;
   --wk-hero-weight:${t.heroDisplayWeight};
   --wk-hero-num-display:${t.heroNumeral ? 'block' : 'none'};
+  --wk-sec-head-display:${headDisplay};
+  --wk-sec-head-bw:${headBorderW};
+  --wk-sec-head-pt:${headPadTop};
+  --wk-sec-head-num:${headNum};
+  --wk-sec-head-meta-ml:${headMetaMl};
+  --wk-footer-wm-fs:${fwFs};
+  --wk-footer-wm-lh:${fwLh};
+  --wk-footer-wm-ls:${fwLs};
+  --wk-footer-dot:${fwDot};
 }
 [data-surface="paper"]{background:var(--wk-paper);color:var(--wk-ink);}
 [data-surface="paper-2"]{background:var(--wk-paper-2);color:var(--wk-ink);border-block:1px solid var(--wk-line);}

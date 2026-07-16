@@ -52,6 +52,10 @@ export const atelierSkin: WorkSkinDef = {
     heroDisplayTracking: -0.045,// letter-spacing:-0.045em
     heroDisplayWeight: 700,     // h1 font-weight:700
     heroNumeral: true,          // oversized .atl-ph-num background numeral
+
+    // Wave 2A signatures.
+    sectionHeaderStyle: 'rule', // Kontur .atl-rule section heads (rule + index + meta)
+    footerWordmark: true,       // giant .atl-footer-big wordmark + accent dot
   },
 
   // Four curated Kontur accents (atelier/palettes.ts). accentInk = on-accent text

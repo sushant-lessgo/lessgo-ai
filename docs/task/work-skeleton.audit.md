@@ -786,3 +786,55 @@ After: centered full-bleed cover (align-items:center + centered column + text-al
 - 2nd CTA in hero (deferred — content contract untouched this wave).
 - Header overlay-on-cover + language toggle (Kundius EN/NL); centered header is arrangement-only so far.
 - Marquee strip attached to hero; slide numeral currently static "01" (multi-slide index grammar).
+
+## Phase 8.5 — Wave 2A (rule-header grammar + footer giant wordmark)
+
+### Files changed
+- `src/modules/skeletons/work/tokenContract.ts` — 2 new skin tokens + enums/bools + 9 derived serialized vars.
+- `src/modules/skeletons/work/tokenContract.test.ts` — fixture + Wave-2A assert/serialize coverage.
+- `src/modules/templates/atelier2/skin.ts` — opts in (`sectionHeaderStyle:'rule'`, `footerWordmark:true`).
+- `src/modules/skeletons/work/blocks/Gallery/styles.ts` — exported `RULE_HEAD` helper + applied to grid/masonry/strip heads.
+- `src/modules/skeletons/work/blocks/Packages/styles.ts` — imports+applies `RULE_HEAD`.
+- `src/modules/skeletons/work/blocks/Proof/styles.ts` — imports+applies `RULE_HEAD` (meta=awards).
+- `src/modules/skeletons/work/blocks/About/styles.ts` — imports+applies `RULE_HEAD` (no third line).
+- `src/modules/skeletons/work/blocks/Footer/styles.ts` — heading→wordmark vars + accent-dot `::after`.
+- NO block `.core.tsx` touched (both treatments are PURE CSS on existing markup — see below).
+
+### New tokens + NEUTRAL defaults (thesis: byte-neutral for a non-setting skin)
+| token | primary var | neutral default | atelier2 |
+|---|---|---|---|
+| `sectionHeaderStyle: 'plain'\|'rule'` | `--wk-sec-head-display` (+4 derived) | `plain` | `rule` |
+| `footerWordmark: boolean` | `--wk-footer-wm-fs` (+3 derived) | `false` | `true` |
+
+`sectionHeaderStyle` expands (serializeSkinTokens) to `--wk-sec-head-display` (block/flex), `-bw` (0/2px), `-pt` (0/18px), `-num` (none/block index numeral), `-meta-ml` (0/auto). `footerWordmark` expands to `--wk-footer-wm-fs` (compact/`clamp(48px,11vw,170px)`), `-lh` (1.02/0.85), `-ls` (-0.02em/-0.04em), `--wk-footer-dot` (none/inline). All fail loud via existing WORK_TOKEN_STRING_ENUMS (`sectionHeaderStyle`) + WORK_TOKEN_BOOL_FIELDS (`footerWordmark`) loops.
+
+### Treatment 1 — rule header (CSS-only, no core edit)
+Shared `RULE_HEAD(prefix, meta?)` helper (Gallery/styles, imported by Packages/Proof/About) emits an ADDITIVE var-gated block over each existing `__head`: `display` flips block→flex, a 2px `currentColor` top rule (auto-contrasts on dark proof surface), an accent index numeral via `::before`, `heading` order:1, `eyebrow` pushed right (`margin-left:auto`) as the meta (its uppercase-tracked style already matches Atelier `.atl-meta`), and the third line (lead/awards) dropped full-width below. In plain mode every gated prop resolves to its current value and all flex-only props (order/gap/align-items/flex-basis) are inert on a block box → byte-identical (proven by parity: gallery/proof/packages/about bands unchanged vs Wave 1).
+
+**Numeral wiring:** a pure CSS counter — `::before{ content:counter(wk-sec,decimal-leading-zero); counter-increment:wk-sec }`. No content-contract field, no data. In plain mode `::before` is `display:none`, which per spec suppresses BOTH render and increment → zero side effects. Applied heads (gallery/packages/proof/about) auto-number 01/02/03/04 in document order on a full page. **Limitation:** the e2e parity harness renders each section in ISOLATION, so every band shows "01" (edit==published holds trivially); true 01/02/03/04 sequencing is only exercised on a full multi-section page (no counter-reset anywhere → the counter lives at document root and accumulates). Meta reuses `eyebrow` (task-sanctioned); designer's meta is descriptive prose — a `lead`-as-meta swap is a taste call left for founder eyeball.
+
+**About caveat:** about's `__head` is the LEFT cell of a 2-col grid, not a full-width band, so its rule + index render within that column (scaled-down rule header). Proof: rule applied to the DEFAULT testimonials head only; the centered logos/results proof SHAPES (unused by atelier2) left as-is.
+
+### Treatment 2 — footer giant wordmark (CSS-only, no core edit)
+The `heading` h2 is restyled into Atelier's `.atl-footer-big .fw` via the 4 `--wk-footer-*` vars + an accent-dot `::after` (`content:"."`, gated by `--wk-footer-dot`). Leads the footer already (first element in `__top`). Byte-neutral off (dot `display:none`, sizes = old literals). **Contract reachability:** the footer contract (`fromDonor(GranthFollowFooter)`) has NO brand/name field, so the wordmark text sources from `heading` (the closest prominent scalar; single binding, no new field). Atelier's 3 named link columns (Index/Elsewhere + city/phone/email contact block) are NOT reachable — the footer contract carries only `eyebrow/heading/note/copyright/socials[]`. Delivered: giant wordmark + dot + existing note/socials/copyright. NOT delivered (needs a contract field — Wave 2 later / concierge): named nav columns, contact detail block, true studio-name wordmark distinct from the closer heading.
+
+### Before/after (atelier2)
+- gallery/packages/proof heads: stacked eyebrow→h2→lead  →  `[2px rule] 01  <h2> ......... <eyebrow meta>` + lead below.
+- about head: same, scoped to its grid column.
+- footer heading: `clamp(1.7rem,4vw,3rem)`  →  `clamp(48px,11vw,170px)` weight 700, lh 0.85, -0.04em, trailing accent dot.
+- Every other skin (neutral defaults): unchanged.
+
+### Gate results
+- `tsc --noEmit`: clean (no page.tsx error in this worktree).
+- `test:run`: 187 files / 3275 tests pass, 18 skipped (new tokenContract cases green; conformance/coreParity/renderParity/skinPurity/htmlGenerator all green).
+- `build`: green.
+- `parity.spec.ts` (run ×2, IDENTICAL/deterministic) 7/7. atelier2 bands: header 1.236% · **work(gallery/masonry) 0.528%/0.125%/0.076%** · **proof 1.737%/0.576%/0.223%** · **packages 0.585%** · **about 0.642%** · **footer 0.538%** · hero 0.014% — all «3%. Negative controls bite: meridian 6.409%, atelier 6.209%, atelier2 46.496%. meridian/hearth/atelier suites unchanged.
+
+### Deviations
+- **No `.core.tsx` files touched** (plan listed them as "likely"). Both treatments are achievable as pure var-gated CSS on the existing single-source markup (index = `::before` counter; meta = existing eyebrow reordered; wordmark = restyled heading + `::after` dot), which is strictly more parity-safe than markup changes and needs no new contract fields. Conservative choice, logged here.
+- **`RULE_HEAD` lives in Gallery/styles.ts** and is imported by Packages/Proof/About styles (all plain server-safe CSS-string modules) to avoid divergence — no shared module created (out of scope); a same-skeleton sibling import.
+
+### Remaining Wave 2 candidates
+- Footer named link columns + contact block + distinct studio-name wordmark (needs a footer contract field).
+- Multi-section numeral verified only on a full page (isolated harness shows 01 each).
+- Gallery masonry composition fidelity; hero marquee strip + 2nd CTA (contract-touching); header overlay-on-cover + EN/NL toggle.

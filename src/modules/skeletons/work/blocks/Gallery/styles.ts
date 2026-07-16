@@ -4,6 +4,23 @@
 // <default>)`. Renders GROUP references (category cover + name) — NEVER a flat
 // embedded photo list (AC L120; the photos live in the works collection, not here).
 // Ported from the Atelier home-mosaic grammar.
+//
+// RULE_HEAD (Wave 2A): additive, VAR-GATED rule-header grammar shared by every
+// work section head. NEUTRAL defaults (from serializeSkinTokens for a non-setting
+// skin) render byte-identical to the stacked head; only `sectionHeaderStyle:'rule'`
+// flips it to Atelier's `.atl-rule` (2px top rule + accent index numeral + h2 +
+// right-aligned eyebrow meta). Pure CSS — no markup change → edit==published. The
+// index is a CSS counter (`wk-sec`, auto 01/02… in document order); in plain mode
+// the ::before is display:none so it neither renders nor increments (byte-neutral).
+// `meta` = the third head line that drops below the rule row (lead/awards); omit
+// for heads without one.
+export const RULE_HEAD = (p: string, meta?: string) => `
+.${p}__head{ display:var(--wk-sec-head-display, block); flex-wrap:wrap; align-items:baseline; gap:12px 20px; border-top:var(--wk-sec-head-bw, 0) solid currentColor; padding-top:var(--wk-sec-head-pt, 0); }
+.${p}__head::before{ content:counter(wk-sec, decimal-leading-zero); display:var(--wk-sec-head-num, none); counter-increment:wk-sec; order:0; font-family:var(--wk-ff-mono); font-weight:500; font-size:14px; letter-spacing:0.04em; color:var(--wk-accent); }
+.${p}__heading{ order:1; }
+.${p}__eyebrow{ order:2; margin-left:var(--wk-sec-head-meta-ml, 0); }${meta ? `
+.${p}__${meta}{ order:3; flex-basis:100%; }` : ''}
+`;
 
 export const WORK_GALLERY_STYLES = `
 .wk-gallery{ background:var(--u-bg, var(--wk-paper)); color:var(--u-fg, var(--wk-ink)); }
@@ -21,7 +38,7 @@ export const WORK_GALLERY_STYLES = `
 .wk-gallery__name{ display:block; font-family:var(--wk-ff-display); font-weight:600; font-size:1.05rem; letter-spacing:-0.01em; margin-top:12px; }
 .wk-gallery__manage{ margin-top:22px; }
 .wk-gallery__manage a{ font-family:var(--wk-ff-body); font-size:12px; letter-spacing:0.06em; color:var(--wk-accent); text-decoration:none; border-bottom:1px dashed var(--wk-accent); }
-`;
+${RULE_HEAD('wk-gallery', 'lead')}`;
 
 // Shared head styling for the alternate gallery shapes (masonry/strip) — same
 // eyebrow/heading/lead grammar as the grid, re-prefixed per shape below.
@@ -49,7 +66,7 @@ ${GALLERY_HEAD('wk-gallery-masonry')}
 .wk-gallery-masonry__media img{ width:100%; height:auto; display:block; }
 .wk-gallery-masonry__img{ display:block; }
 .wk-gallery-masonry__media .wk-gallery-masonry__ph{ aspect-ratio:4 / 5; }
-`;
+${RULE_HEAD('wk-gallery-masonry', 'lead')}`;
 
 // ── WorkGalleryStrip — horizontal scroll row of group covers (Pulse .archive-list
 // horizontal read). Same `groups` collection + group-reference contract.
@@ -60,4 +77,4 @@ ${GALLERY_HEAD('wk-gallery-strip')}
 .wk-gallery-strip__media{ position:relative; aspect-ratio:3 / 4; overflow:hidden; border-radius:var(--u-radius, var(--wk-r)); background:var(--wk-paper-2); display:block; }
 .wk-gallery-strip__media img{ width:100%; height:100%; object-fit:cover; display:block; }
 .wk-gallery-strip__img{ display:block; width:100%; height:100%; }
-`;
+${RULE_HEAD('wk-gallery-strip', 'lead')}`;

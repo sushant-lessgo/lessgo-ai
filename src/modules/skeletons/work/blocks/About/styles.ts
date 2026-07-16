@@ -4,6 +4,12 @@
 // The "your story" section (GranthParichay donor): eyebrow + heading + bio, with an
 // optional facts strip (value/label pairs).
 
+// Shared var-gated rule-header grammar (Wave 2A). NEUTRAL default = byte-identical
+// head; `sectionHeaderStyle:'rule'` → Atelier rule header. See Gallery/styles.
+// NOTE: about's head is the LEFT grid cell (not a full-width band), so the rule +
+// index render within that column — a scaled-down rule header (no `meta` third line).
+import { RULE_HEAD } from '../Gallery/styles';
+
 export const WORK_ABOUT_STYLES = `
 .wk-about{ background:var(--u-bg, var(--wk-paper-2)); color:var(--u-fg, var(--wk-ink)); }
 .wk-about__in{ width:100%; max-width:var(--wk-wrap); margin:0 auto; padding:calc(var(--wk-sec-y) * var(--u-space-y, 1)) var(--wk-gutter); display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.4fr); gap:clamp(24px,4vw,72px); align-items:start; }
@@ -15,4 +21,4 @@ export const WORK_ABOUT_STYLES = `
 .wk-about__fact-value{ font-family:var(--wk-ff-display); font-weight:var(--wk-display-weight); font-size:1.5rem; letter-spacing:-0.02em; color:var(--wk-accent); }
 .wk-about__fact-label{ font-family:var(--wk-ff-body); font-size:12px; letter-spacing:0.04em; color:var(--wk-ink-mute); }
 @media (max-width:720px){ .wk-about__in{ grid-template-columns:1fr; } }
-`;
+${RULE_HEAD('wk-about')}`;
