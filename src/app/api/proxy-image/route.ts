@@ -146,7 +146,9 @@ export async function POST(request: NextRequest) {
     console.log('🔵 [PROXY] Processing with Sharp...');
 
     // Process + store via the shared pipeline (same blob key as before: uploads/{tokenId}/…)
-    const processed = await processImage(buffer, 'image/webp');
+    // mime is left undefined on purpose: only the SVG branch reads it, and the Pexels
+    // source is a raster (usually JPEG). Passing 'image/webp' here would state a falsehood.
+    const processed = await processImage(buffer, undefined);
     const filename = `pexels-${pexelsPhotoId}.webp`;
 
     const stored = await storeImage(processed.buffer, {

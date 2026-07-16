@@ -169,3 +169,99 @@ Cache-hit branch added exactly as specified: `recordMediaAssetBestEffort` with `
 - `blurDataUrl` is populated on the upload path → phase 3's e2e "registry-row-on-upload check incl. blurDataUrl" will find it. It is **null** for SVG uploads and for cache-hit backfill rows — the phase-4 grid must tolerate a null placeholder.
 - The `assetId` is now on the upload response `metadata` if phase 4 wants to skip a grid refetch after upload.
 - Manual dev verification (blob/dev-fs file + row via prisma studio, repeat-pick single row, un-hide) is NOT done — no dev server was run this phase. It remains on the founder's manual pass listed under phase 2/4 verification.
+
+---
+
+# Phase 3 — `/api/media` routes + ownership e2e
+
+## Files changed
+
+- `src/lib/schemas/media.schema.ts` (new)
+- `src/app/api/media/route.ts` (new)
+- `e2e/media.spec.ts` (new)
+- `playwright.config.ts` (modified — spec registration)
+- `src/lib/media/pipeline.test.ts` (modified — folded-in `storeImage` coverage)
+- `src/app/api/proxy-image/route.ts` (modified — folded-in one-line mime fix)
+
+## What changed
+
+**`src/lib/schemas/media.schema.ts`** — `MediaDeleteSchema` (`{tokenId, assetId}`) and
+`MediaUpdateSchema` (`{tokenId, assetId, restore?, alt?}`, `.refine`d so a body with neither
+mutation is a 400 rather than a silent no-op). No create schema — documented in the header why.
+
+**`src/app/api/media/route.ts`** — `force-dynamic`, single file, three methods, `brief/route.ts`
+precedent:
+- **GET** `?tokenId=` (+ optional `includeHidden=1`) → `assets[]`. `hiddenAt: null` filter by
+  default; `orderBy: { createdAt: 'desc' }` with an in-file note on why NOT `updatedAt` (the
+  registry's un-hide arm bumps it → the grid would reshuffle on a re-pick).
+- **DELETE** → `updateMany({ id, tokenId }, { hiddenAt: new Date() })`. Soft only; blob untouched;
+  the `workEndtoEnd` §8a promise is cited in the file so nobody "optimises" it into a hard delete.
+- **POST** → restore (`hiddenAt: null`) and/or `alt` (empty string clears → null). Returns the row.
+- Auth: a small `gate()` helper runs `auth()` → 401 → `validateToken` → 400 → `assertProjectOwner`
+  → `createSecureResponse({error: access.error}, access.status)`. Every response goes through
+  `createSecureResponse`. No CSRF gate, 0 credits.
+- `tokenId` is in the `updateMany` WHERE alongside `id`, so owning token A cannot mutate an asset
+  belonging to token B by guessing its id.
+
+**`e2e/media.spec.ts`** — 6 authed tests: full lifecycle (upload via `/api/upload-image` → listed
+with `source:'upload'` + `blurDataUrl` prefix → DELETE hides → still present under
+`includeHidden=1` (proves "never destroyed") → POST restore+alt), empty-update 400, ownership
+negatives (foreign token → 403 on all three methods; unknown token → 404; missing tokenId → 400),
+and an anonymous-rejection test. `afterAll` hard-deletes rows via `PrismaClient` and `fs.rm`s
+`public/uploads/<token>/` — verified: no litter left in the worktree after the run.
+
+**`playwright.config.ts`** — `/media\.spec\.ts/` + `/media-picker\.spec\.ts/` (phase 4's,
+pre-registered) added to `authed.testMatch`.
+
+**`pipeline.test.ts`** — new `storeImage` suite, `@vercel/blob` mocked: blob branch asserts the key
+is exactly `uploads/tok123/pexels-42.webp` (+ body identity and `put` options), dev-fs branch
+asserts `put` is NOT called, the URL is the relative `/uploads/…`, and the bytes really landed on
+disk (cwd stubbed to a tmpdir), plus a dev-WITH-blob-token case proving the branch is on the token,
+not on NODE_ENV alone. Header comment states the stake: proxy-image derives its `cacheKey`
+independently, so key drift silently kills the cache with no other failing test.
+
+**`proxy-image/route.ts:149`** — `processImage(buffer, 'image/webp')` → `processImage(buffer, undefined)`
+with a comment. Behaviour identical (only the SVG branch reads the mime); the lie is gone.
+
+## Deviations
+
+1. **Anonymous test asserts rejection (401 *or* 404), not a bare 401.** The plan expected "no auth →
+   401". Reality: `/api/media` is not in `src/middleware.ts`'s `isPublicRoute`, so Clerk's
+   `auth.protect()` rejects the request **before the handler runs**, and Clerk answers API requests
+   with **404**. The handler's own 401 is unreachable today and stays as defence-in-depth (it fires
+   if the public list ever changes). Conservative choice: assert the security property that matters
+   (anonymous callers get nothing, never a 200) and document the mechanism in the spec. Verified
+   empirically — the first run failed with `Expected 401, Received 404`.
+2. **Foreign-owner fixture is seeded via `PrismaClient` directly** (throwaway `User` + `Token` +
+   `Project`, all torn down in `afterAll`). There is only one Clerk session in the e2e harness, so a
+   genuinely foreign project cannot be created through the app's own routes. This is the only way to
+   cover the 403 arm, which is the whole point of the ownership negatives.
+3. `restore: false` passes the schema and is a no-op rather than an error — accepted; the refine only
+   guards against a body that requests *nothing*.
+
+## Verification
+
+- `npx tsc --noEmit` → **exactly 1 error**, the known pre-existing `src/app/page.tsx` / `founder.jpg`
+  (gitignored `next-env.d.ts`). Unchanged from baseline.
+- `npm run test:run` → **196 passed | 1 skipped (197 files)**, **3360 passed | 18 skipped (3378)**.
+  Baseline was 3357 → +3 = the new `storeImage` cases. `pipeline.test.ts` alone: 11 passed (was 8).
+- `npm run lint` → warnings only (all pre-existing `<img>`/exhaustive-deps); nothing from the new files.
+- `PORT=3021 E2E_PORT=3021 npx playwright test e2e/media.spec.ts --project=authed` → **7 passed**
+  (1 `setup` + **6 `authed` media tests**). Non-zero count confirmed — the `testMatch` registration
+  is live, the spec is not silently matching zero.
+  - Port note: ports 3000-3004 were occupied by other worktrees' dev servers, and
+    `reuseExistingServer: true` would have run the suite against the WRONG code. Had to pin
+    `PORT`/`E2E_PORT` to a free port. Anyone re-running this needs the same.
+- `npm run build` NOT run (phase 4's gate, per instructions). Nothing committed.
+
+## For phase 4
+
+- GET shape: `{ assets: [{ id, url, source, sourceUrl, width, height, bytes, format, blurDataUrl,
+  alt, hiddenAt, createdAt }] }` — hidden rows already excluded, so the grid needs no filter.
+- `e2e/media-picker.spec.ts` is **already registered** in `playwright.config.ts` — just create the file.
+- Reuse `e2e/media.spec.ts`'s cleanup pattern (prisma hard-delete by `tokenId` + `fs.rm` of
+  `public/uploads/<token>/`) verbatim; the plan mandates the same discipline for phase 4.
+- Phase 4 must run its e2e with a pinned free `PORT`/`E2E_PORT` (see above) or it may silently test
+  another worktree's server.
+- Still open from phase 2: the manual dev pass (real blob/prisma-studio check, repeat-pick single
+  row) — no dev server was driven by hand this phase either.

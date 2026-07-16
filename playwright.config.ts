@@ -62,6 +62,9 @@ export default defineConfig({
         /dashboard-shell\.spec\.ts/,
         /dashboard-workspace\.spec\.ts/,
         /dashboard-redirects\.spec\.ts/,
+        // media-library-picker: media = phase 3, media-picker = phase 4 (pre-registered).
+        /media\.spec\.ts/,
+        /media-picker\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
