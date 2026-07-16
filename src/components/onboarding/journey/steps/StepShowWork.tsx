@@ -1,20 +1,64 @@
 'use client';
 
+// ============================================================================
 // STEP 02 — show-work. AGNOSTIC FRAME.
 //
-// P2b: a placeholder body proving the step machine walks. P4 renders
-// `seam.steps.showWork` (title/body/icon) as a dropzone-styled stub +
-// "Skip for now". The frame NEVER knows what an engine's work looks like.
+// Renders `seam.steps.showWork` (title / body / icon) and nothing else: the
+// frame never knows what an engine's "work" looks like.
+//
+// ── E1 SCOPE (deliberate, do not "finish" it) ───────────────────────────────
+// This is a NON-FUNCTIONAL dropzone-styled STUB + "Skip for now". There is no
+// upload pipeline and no scrape here — image INGESTION is E2, and it is what
+// will write `facts.work.groups[].photos` (the payload the rail's chip-id join
+// already protects). Rendering the seam's content as a stub is an E1
+// implementation choice, NOT a contract field (`stub:true` was deliberately
+// kept out of `engines/types.ts`).
+// ============================================================================
 
-import JourneyStepPlaceholder from './JourneyStepPlaceholder';
+import { useWizardStore, selectSetJourneyStep } from '@/hooks/useWizardStore';
+import { AppIcon } from '@/components/ui/icon';
+import { ImagePlaceholder } from '@/components/ui/image-placeholder';
+import { Button } from '@/components/ui/button';
+import { useJourneySeam } from './useJourneySeam';
 
 export default function StepShowWork() {
+  const seam = useJourneySeam();
+  const setJourneyStep = useWizardStore(selectSetJourneyStep);
+  const content = seam?.steps.showWork;
+
   return (
-    <JourneyStepPlaceholder
-      testId="step-show-work"
-      step={2}
-      title="Show your work"
-      note="Content arrives in P4 (seam.steps.showWork + Skip)."
-    />
+    <div data-testid="step-show-work" data-journey-step={2} className="space-y-6">
+      <div className="space-y-2">
+        <h1 className="font-app-sans text-2xl font-semibold text-app-ink">
+          {content?.title ?? ''}
+        </h1>
+        <p className="font-app-sans text-sm text-app-muted max-w-xl">{content?.body ?? ''}</p>
+      </div>
+
+      {/* The stub. `aria-disabled` + no handler: it LOOKS like the drop target
+          E2 will build, and does nothing — better than a control that silently
+          fails. */}
+      <ImagePlaceholder
+        aspect="16 / 7"
+        data-testid="show-work-dropzone"
+        aria-disabled="true"
+        className="flex-col gap-2 text-center"
+      >
+        <AppIcon name={content?.icon ?? 'add_photo_alternate'} size={28} />
+        <span className="font-app-sans text-xs text-app-placeholder">
+          Uploads arrive in the next release — skip for now and add images in the editor.
+        </span>
+      </ImagePlaceholder>
+
+      <Button
+        type="button"
+        variant="ghost"
+        data-testid="show-work-skip"
+        onClick={() => setJourneyStep(3)}
+      >
+        Skip for now
+        <AppIcon name="arrow_forward" size={16} className="ml-1.5" />
+      </Button>
+    </div>
   );
 }

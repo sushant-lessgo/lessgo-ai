@@ -155,6 +155,97 @@ test('the rail projects the seeded brief and its edits SURVIVE a reload', async 
   await expect(page.getByTestId('rail-chip-g0')).toHaveText('Wedding days');
 });
 
+// ============================================================================
+// P4 — the THIN steps 02 → 04, over a REAL persisted project.
+//
+// What only e2e can prove: a STEP 03 answer reaches Postgres through the rail
+// adapter STILL `kind`-valid (landmine 6 — a `kind`-less group nulls
+// `getWorkFacts`, 400s the work strategy, and PERSISTS, so a retry never
+// recovers), and that STEP 04's plan seeding is idempotent across back-nav
+// (landmine 8).
+// ============================================================================
+
+test('the journey walks 02 → 04: answers land in the rail and in the DB, kind-valid', async ({
+  page,
+}) => {
+  const api = await authedApi(page);
+  const { token } = await seedWorkBrief(api);
+
+  await page.goto(`/onboarding/${token}`);
+  await expect(page.getByTestId('step-show-work')).toBeVisible({ timeout: 30_000 });
+
+  // ── 02: the stub + Skip (E1: no upload pipeline — ingestion is E2) ────────
+  await expect(page.getByTestId('show-work-dropzone')).toBeVisible();
+  await page.getByTestId('show-work-skip').click();
+  await expect(page.getByTestId('step-questions')).toBeVisible();
+
+  // ── 03 ask-if: the seeded brief has a name AND groups, so neither is asked —
+  // only the optional price.
+  await expect(page.getByTestId('question-name')).toHaveCount(0);
+  await expect(page.getByTestId('question-groups')).toHaveCount(0);
+  await expect(page.getByTestId('question-price')).toBeVisible();
+
+  // Empty the seeded groups from the RAIL, so the group question becomes real
+  // (the fixture is deliberately well-seeded; this is how a sparse classify
+  // lands). The question must then appear — ask-if is driven by the projection.
+  await page.getByTestId('rail-edit-groups').click();
+  await page.getByTestId('rail-chip-remove-1').click();
+  await page.getByTestId('rail-chip-remove-0').click();
+  await page.getByTestId('rail-chips-save').click();
+  await expect(page.getByTestId('rail-field-groups')).toHaveAttribute('data-skeleton', 'true');
+
+  await expect(page.getByTestId('question-groups')).toBeVisible();
+  await expect(page.getByTestId('question-price')).toHaveCount(0); // nothing to price yet
+
+  // ── The answer: it appears IN THE RAIL (the journey's core promise) ───────
+  await page.getByTestId('question-input-groups').fill('Newborn sessions');
+  await page.getByTestId('question-save-groups').click();
+  await expect(page.getByTestId('rail-chip-g0')).toHaveText('Newborn sessions');
+  // …and the price question now has something to price.
+  await expect(page.getByTestId('question-price')).toBeVisible();
+
+  // Default is "On request" (always valid); "From" needs an amount — the Save
+  // stays disabled without one, and the seam refuses it anyway.
+  await page.getByTestId('question-price-mode-price').getByRole('radio', { name: 'From' }).click();
+  await page.getByTestId('question-price-amount-price').fill('900');
+  await page.getByTestId('question-save-price').click();
+
+  // ── The real assertion: it is in the DB, and it is generation-valid ───────
+  // Polled, not slept: the price answer has no rail field of its own to watch
+  // (PRICE POSITION is a derived BAND, and it is already non-null from the
+  // group answer's on-request default — asserting on it would pass before the
+  // save landed).
+  await expect
+    .poll(async () => (await loadDraft(api, token)).brief.facts.work.groups[0].price.mode, {
+      timeout: 15_000,
+    })
+    .toBe('from');
+
+  const draft = await loadDraft(api, token);
+  const groups = draft.brief.facts.work.groups;
+  expect(groups.map((g: { name: string }) => g.name)).toEqual(['Newborn sessions']);
+  // A question answer routed through the rail adapter is NEVER kind-less.
+  expect(groups[0].kind).toBe('category');
+  expect(groups[0].price).toEqual({ mode: 'from', amount: 900 });
+  expect(draft.brief.facts.entry.businessName).toBe('Kundius Studio'); // landmine 4
+  expect(draft.audienceType).toBe('service');
+  expect(draft.templateId).toBe('atelier');
+
+  // ── 04: the plan, seeded chargelessly ────────────────────────────────────
+  await page.getByTestId('journey-next').click();
+  await expect(page.getByTestId('step-plan')).toBeVisible();
+  const cards = page.getByTestId('plan-items').getByRole('listitem');
+  const count = await cards.count();
+  expect(count).toBeGreaterThan(0);
+
+  // Back-nav must not re-seed (landmine 8 — the guard lives in fetchStrategy).
+  await page.getByTestId('journey-back').click();
+  await expect(page.getByTestId('step-questions')).toBeVisible();
+  await page.getByTestId('journey-next').click();
+  await expect(page.getByTestId('step-plan')).toBeVisible();
+  await expect(page.getByTestId('plan-items').getByRole('listitem')).toHaveCount(count);
+});
+
 test('legacy unchanged: a non-seam brief still reaches the entry card / WizardShell', async ({
   page,
 }) => {

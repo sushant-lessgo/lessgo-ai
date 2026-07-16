@@ -45,6 +45,7 @@ import type {
   JourneyQuestion,
   JourneyRailAdapter,
   JourneyStep,
+  JourneyWizardApi,
   JourneyWizardState,
   RailChipEdit,
   RailCommit,
@@ -213,6 +214,46 @@ function liveGroups(liveFacts: Brief['facts']): WorkGroupInput[] {
   return Array.isArray(work.groups) ? (work.groups as WorkGroupInput[]) : [];
 }
 
+/** The live groups as chips, ids issued against THIS bag (chip stable-id rule). */
+function liveChips(liveFacts: Brief['facts']): RailChipEdit[] {
+  return liveGroups(liveFacts).map((g, i) => ({ id: chipId(i), label: g.name }));
+}
+
+/**
+ * STEP 03's PRICE answer (P4). There is no `price` rail field — price lives on
+ * each group — so this rebuilds the groups from `liveFacts` with the answered
+ * price overlaid, and routes through `applyRailEdit({field:'groups'})` like
+ * every other write. `photos`/`items` therefore ride along untouched (the same
+ * reason the chip join exists); only `price` changes.
+ *
+ * E1 asks ONE price for the whole practice (thin by design — per-group pricing
+ * is E3). `on-request` is the default and always valid; `exact`/`from` REFUSE
+ * without a finite amount rather than silently degrading to `on-request`
+ * (`normalizeWorkGroup` would degrade — a rail headed WHAT WE UNDERSTOOD must
+ * not quietly record something the user did not say).
+ */
+function commitGroupPrice(
+  price: { mode: 'exact' | 'from' | 'on-request'; amount?: number },
+  liveFacts: Brief['facts']
+): RailCommit {
+  const live = liveGroups(liveFacts);
+  if (live.length === 0) return { ok: false, error: 'Add what you sell before pricing it' };
+  if (price.mode !== 'on-request') {
+    const amount = price.amount;
+    if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {
+      return { ok: false, error: 'Enter an amount, or choose “On request”' };
+    }
+  }
+  const next: WorkGroupInput[] = live.map((g) => ({
+    ...g,
+    price:
+      price.mode === 'on-request'
+        ? { mode: 'on-request' as const }
+        : { mode: price.mode, amount: price.amount, currency: g.price?.currency },
+  }));
+  return applyRailEdit({ field: 'groups', value: next }, liveFacts);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // The seam
 // ─────────────────────────────────────────────────────────────────────────────
@@ -239,22 +280,107 @@ export const workJourneySeam: JourneyEngineSeam = {
   },
 
   steps: {
-    // P4 fills the real copy (portfolio images + `add_photo_alternate`).
+    // STEP 02 content. E1 renders it as a non-functional dropzone stub + "Skip
+    // for now" — the upload pipeline (and the scrape) are E2.
     showWork: {
       title: 'Show your work',
-      body: 'Add a few images of your work.',
+      body: 'Your images are what sells the work. Add a few and we’ll build the site around them — or skip and add them later in the editor.',
       icon: 'add_photo_alternate',
     },
-    // P4 fills the real question list (name / what you sell / optional price).
-    questions(_vm: RailVM): JourneyQuestion[] {
-      return [];
+
+    /**
+     * STEP 03 — ONLY the questions still needed, read off the rail projection
+     * (never off the facts bag: the VM is the seam's own contract with the
+     * frame, and it already says what is unknown).
+     *
+     *   • NAME  — only when the rail has none (the entry seed usually supplies it)
+     *   • WHAT YOU SELL — only when the seed produced NO groups. This ask-if is
+     *     load-bearing beyond tidiness: the rail's chips editor is the only
+     *     OTHER group writer, so keeping this question off while chips exist is
+     *     what makes the chip stable-id rule's stale-VM hole unreachable in E1.
+     *   • PRICE — optional, offered once there is something to price. Default
+     *     `on-request`.
+     *
+     * Every commit routes through the rail adapter ⇒ groups are always
+     * `kind`-valid (landmine 6: a `kind`-less group nulls `getWorkFacts`, 400s
+     * the work strategy, and PERSISTS — a retry never recovers).
+     */
+    questions(vm: RailVM): JourneyQuestion[] {
+      const field = (id: string) => vm.fields.find((f) => f.id === id);
+      const name = field(FIELD_NAME);
+      const groups = field(FIELD_GROUPS);
+      const questions: JourneyQuestion[] = [];
+
+      if (!name || name.skeleton) {
+        questions.push({
+          id: FIELD_NAME,
+          kind: 'text',
+          label: 'What should we call you?',
+          prefill: name?.value ?? '',
+          commit: (value, liveFacts) =>
+            workRailAdapter.applyEdit(FIELD_NAME, { kind: 'text', value }, liveFacts),
+        });
+      }
+
+      if (!groups || groups.skeleton) {
+        questions.push({
+          id: FIELD_GROUPS,
+          kind: 'group',
+          label: 'What do you sell?',
+          // APPEND through the chip join (ids re-read from the live bag), so
+          // this can never delete a group even if it somehow fires with groups
+          // present.
+          commit: (groupName, liveFacts) =>
+            commitGroupChips([...liveChips(liveFacts), { label: groupName }], liveFacts),
+        });
+      } else {
+        questions.push({
+          // A QUESTION id, not a rail field id: price is not an editable rail
+          // field (PRICE POSITION is derived) — it is written onto the groups.
+          id: 'price',
+          kind: 'price',
+          label: 'Roughly what do you charge?',
+          commit: commitGroupPrice,
+        });
+      }
+
+      return questions;
     },
+
     plan: {
-      // P4 wires the EXISTING chargeless work sitemap seed (behind the
-      // `strategyStatus` idempotency guard — never the charged path).
-      async prepare(): Promise<void> {},
-      items(_state: JourneyWizardState): { title: string }[] {
-        return [];
+      /**
+       * STEP 04 — the EXISTING chargeless work sitemap seed (landmine 8).
+       *
+       * `fetchStrategy` is the ONE door: for `work` + a multipage template it
+       * seeds `sitemap` from the page-archetype defaults with ZERO LLM fetch and
+       * ZERO credit charge, behind its own `strategyStatus` idempotency guard
+       * (so back-nav re-entry is a no-op). It returns BEFORE the charged
+       * thing/trust path — never call a strategy route from here, and never add
+       * a second fetch.
+       *
+       * By design (do not "fix"): `state.strategy` stays NULL on this path — the
+       * real strategy call happens inside `runWorkLLMGeneration` at STEP 05.
+       */
+      async prepare(wizardApi: JourneyWizardApi): Promise<void> {
+        await wizardApi.getState().fetchStrategy();
+      },
+      /** The seeded sitemap, as page cards. No add/rename/reorder in E1 (E4). */
+      items(state: JourneyWizardState): { title: string }[] {
+        const sitemap = (state.sitemap ?? []) as {
+          title?: unknown;
+          archetypeKey?: unknown;
+        }[];
+        return sitemap
+          .map((page) => {
+            const title =
+              typeof page?.title === 'string' && page.title.trim()
+                ? page.title.trim()
+                : typeof page?.archetypeKey === 'string'
+                  ? page.archetypeKey
+                  : '';
+            return { title };
+          })
+          .filter((p) => p.title !== '');
       },
     },
   },

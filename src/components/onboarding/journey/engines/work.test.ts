@@ -15,7 +15,7 @@
 // proves it, over an E2-SHAPED bag (groups that actually carry photos/items).
 // ============================================================================
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 import { workJourneySeam } from './work';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
@@ -262,5 +262,163 @@ describe('work rail adapter — text edits', () => {
       'And the name',
     ]);
     expect(second.facts['entry']).toBeTruthy();
+  });
+});
+
+// ============================================================================
+// P4 — STEP 03 questions (ask-if + commit validity) and STEP 04 plan.
+//
+// The load-bearing property: EVERY question commit routes through the rail
+// adapter, so an answer can never persist a `kind`-less group (landmine 6 —
+// `getWorkFacts` nulls ⇒ the work strategy 400s, and confirm/saveDraft has
+// ALREADY persisted the bad bag, so a retry never recovers).
+// ============================================================================
+
+const steps = workJourneySeam.steps;
+
+/** A bag with an identity but NO groups — the state the group question exists for. */
+function noGroupsFacts(): Record<string, unknown> {
+  return {
+    entry: { businessName: 'Kundius Studio' },
+    work: { identity: { name: 'Kundius Studio' } },
+  };
+}
+
+/** A bag with groups but NO name. */
+function noNameFacts(): Record<string, unknown> {
+  return { work: { groups: [{ name: 'Weddings', kind: 'category', price: { mode: 'on-request' } }] } };
+}
+
+const questionsFor = (facts: Record<string, unknown> | undefined) =>
+  steps.questions(rail.toVM(facts));
+
+describe('work seam — STEP 03 ask-if logic', () => {
+  it('asks nothing it already knows: a seeded bag (name + groups) asks only the optional price', () => {
+    const qs = questionsFor(e2Facts());
+    expect(qs.map((q) => q.id)).toEqual(['price']);
+    expect(qs[0]!.kind).toBe('price');
+  });
+
+  it('asks NAME only when the rail has none', () => {
+    expect(questionsFor(e2Facts()).some((q) => q.id === 'name')).toBe(false);
+    expect(questionsFor(noNameFacts()).some((q) => q.id === 'name' && q.kind === 'text')).toBe(true);
+  });
+
+  it('asks WHAT YOU SELL only when the seed produced no groups — never alongside chips', () => {
+    expect(questionsFor(noGroupsFacts()).map((q) => q.id)).toEqual(['groups']);
+    // This ask-if is load-bearing beyond tidiness: the rail's chips editor is
+    // the only OTHER group writer, so keeping the question off while chips
+    // exist is what makes the chip stable-id rule's stale-VM hole unreachable.
+    expect(questionsFor(e2Facts()).some((q) => q.id === 'groups')).toBe(false);
+  });
+
+  it('an empty bag asks name AND what-you-sell — but not price (nothing to price yet)', () => {
+    expect(questionsFor(undefined).map((q) => q.id)).toEqual(['name', 'groups']);
+  });
+});
+
+describe('work seam — STEP 03 commits (all routed through the rail adapter)', () => {
+  const groupQuestion = () => {
+    const q = questionsFor(noGroupsFacts()).find((x) => x.id === 'groups')!;
+    if (q.kind !== 'group') throw new Error('expected a group question');
+    return q;
+  };
+  const priceQuestion = () => {
+    const q = questionsFor(e2Facts()).find((x) => x.id === 'price')!;
+    if (q.kind !== 'price') throw new Error('expected a price question');
+    return q;
+  };
+
+  it('the GROUP answer emits a kind-valid, on-request group and keeps siblings', () => {
+    const result = expectOk(groupQuestion().commit('Newborn sessions', noGroupsFacts()));
+    expect(groupsOf(result)).toEqual([
+      { name: 'Newborn sessions', kind: 'category', price: { mode: 'on-request' } },
+    ]);
+    expect(result.facts['entry']).toBeTruthy();
+  });
+
+  it('the GROUP answer APPENDS through the chip join — never a destructive write', () => {
+    // Defensive: the question does not fire with groups present, but if a future
+    // ask-if let it, it must still not delete or wipe a live group.
+    const result = expectOk(groupQuestion().commit('Newborn', e2Facts()));
+    const groups = groupsOf(result);
+    expect(groups.map((g) => g.name)).toEqual(['Weddings', 'Portraits', 'Newborn']);
+    expect(groups[0]!.photos).toEqual([{ id: 'ph_w1', url: 'https://cdn.example.com/w1.jpg' }]);
+    expect(groups[1]!.items).toBeTruthy();
+  });
+
+  it('a blank GROUP answer is refused, never sent', () => {
+    expect(groupQuestion().commit('   ', noGroupsFacts()).ok).toBe(false);
+  });
+
+  it('the PRICE answer writes onto every group, carries photos/items, stays kind-valid', () => {
+    const result = expectOk(priceQuestion().commit({ mode: 'from', amount: 900 }, e2Facts()));
+    const groups = groupsOf(result);
+    expect(groups.map((g) => g.price)).toEqual([
+      { mode: 'from', amount: 900, currency: 'EUR' }, // the live currency carried
+      { mode: 'from', amount: 900 },
+    ]);
+    for (const g of groups) expect(g.kind).toBe('category');
+    expect(groups[0]!.photos).toBeTruthy();
+    expect(groups[1]!.items).toBeTruthy();
+  });
+
+  it('the PRICE default (on-request) is always valid', () => {
+    const result = expectOk(priceQuestion().commit({ mode: 'on-request' }, e2Facts()));
+    for (const g of groupsOf(result)) expect(g.price).toEqual({ mode: 'on-request' });
+  });
+
+  it('exact/from WITHOUT a valid amount is REFUSED, not silently degraded to on-request', () => {
+    const q = priceQuestion();
+    expect(q.commit({ mode: 'exact' }, e2Facts()).ok).toBe(false);
+    expect(q.commit({ mode: 'from', amount: Number.NaN }, e2Facts()).ok).toBe(false);
+    expect(q.commit({ mode: 'from', amount: -5 }, e2Facts()).ok).toBe(false);
+  });
+
+  it('a price answer with nothing to price is refused', () => {
+    expect(priceQuestion().commit({ mode: 'on-request' }, noGroupsFacts()).ok).toBe(false);
+  });
+
+  it('the NAME answer emits the store field mirror', () => {
+    const q = questionsFor(noNameFacts()).find((x) => x.id === 'name')!;
+    if (q.kind !== 'text') throw new Error('expected a text question');
+    const result = expectOk(q.commit('Kundius Studio', noNameFacts()));
+    expect(result.fieldMirrors).toEqual([{ fieldId: 'name', value: 'Kundius Studio' }]);
+    expect(getWorkFacts(result.facts)?.identity?.name).toBe('Kundius Studio');
+  });
+});
+
+describe('work seam — STEP 04 plan', () => {
+  type PlanState = Parameters<typeof steps.plan.items>[0];
+
+  it('items() projects the seeded sitemap as page titles', () => {
+    const state = {
+      sitemap: [
+        { archetypeKey: 'home', title: 'Home' },
+        { archetypeKey: 'work', title: 'Work' },
+      ],
+    } as unknown as PlanState;
+    expect(steps.plan.items(state)).toEqual([{ title: 'Home' }, { title: 'Work' }]);
+  });
+
+  it('items() is defensive: no sitemap ⇒ no cards; junk entries dropped', () => {
+    expect(steps.plan.items({ sitemap: null } as unknown as PlanState)).toEqual([]);
+    expect(
+      steps.plan.items({
+        sitemap: [{}, { title: '  ' }, { archetypeKey: 'about' }],
+      } as unknown as PlanState)
+    ).toEqual([{ title: 'about' }]);
+  });
+
+  it('prepare() drives the EXISTING chargeless seed — fetchStrategy, nothing else', async () => {
+    const fetchStrategy = vi.fn().mockResolvedValue(undefined);
+    const api = { getState: () => ({ fetchStrategy }) } as unknown as Parameters<
+      typeof steps.plan.prepare
+    >[0];
+    await steps.plan.prepare(api);
+    // The idempotency guard (landmine 8) lives INSIDE fetchStrategy — the frame
+    // may call prepare on every mount. What must never exist is a second,
+    // charged path invented here.
+    expect(fetchStrategy).toHaveBeenCalledTimes(1);
   });
 });

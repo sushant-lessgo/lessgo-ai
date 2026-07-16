@@ -846,6 +846,28 @@ const initialState: WizardState = {
   journeyStep: 2,
 };
 
+/**
+ * work-onboarding-shell P4 — the `commitRail` SERIALIZATION chain.
+ *
+ * WHY (P3 review NB2): `commitRail` is optimistic + REVERTS WHOLESALE to a
+ * pre-edit snapshot on a failed save. With ONE caller that was safe — the rail's
+ * own `saving` flag disabled every submit control while a commit was in flight.
+ * P4 adds a SECOND caller (STEP 03's questions) OUTSIDE the rail, where that
+ * flag does not apply. Interleaved commits would then let a late failure's
+ * revert wipe an EARLIER SUCCESS: B snapshots before A lands, A succeeds, B
+ * fails, B restores the pre-A bag — and the DB (which has A) silently diverges
+ * from `briefFacts`, which is what generation reads.
+ *
+ * Fix: commits run ONE AT A TIME, chained here. Each commit takes its snapshot
+ * only when its turn starts, so a revert can only ever undo ITS OWN edit.
+ *
+ * Module-level (not store state) on purpose: a Promise is not serializable
+ * state, nothing renders from it, and immer must never see it. It only ORDERS
+ * work — `reset()` deliberately does not touch it (an in-flight save must still
+ * settle in order).
+ */
+let railCommitChain: Promise<unknown> = Promise.resolve();
+
 // ---------------------------------------------------------------------------
 // Journey selectors (P2b) — selector-first reads for the journey shell.
 // ---------------------------------------------------------------------------
@@ -1299,66 +1321,85 @@ export const useWizardStore = create<WizardStore>()(
       //
       // The toast lives at the CALL SITE (a store cannot use the `useToast`
       // hook); the revert — the part that protects generation — lives here.
-      commitRail: async (commit) => {
-        const { tokenId, currentSlot, slots } = get();
-        if (!tokenId) return { ok: false, error: 'No project token' };
+      commitRail: (commit) => {
+        // SERIALIZED (P4 — see `railCommitChain`). `perform` runs only after the
+        // previous commit has SETTLED, so its snapshot is post-that-commit and
+        // its revert can never undo someone else's successful edit. The queue is
+        // what makes a second caller (STEP 03) safe against the wholesale revert.
+        const perform = async (): Promise<WizardRailCommitResult> => {
+          const { tokenId, currentSlot, slots } = get();
+          if (!tokenId) return { ok: false, error: 'No project token' };
 
-        const mirrors = commit.fieldMirrors ?? [];
-        // Step 1 — pre-edit snapshots.
-        const prevFacts = get().briefFacts;
-        const prevFields = mirrors.map(
-          (m) => [m.fieldId, get().fields[m.fieldId]] as const
-        );
+          const mirrors = commit.fieldMirrors ?? [];
+          // Step 1 — pre-edit snapshots. Taken HERE (inside `perform`, i.e. when
+          // this commit's turn starts), never at enqueue time — that is the
+          // whole point of the chain.
+          const prevFacts = get().briefFacts;
+          const prevFields = mirrors.map(
+            (m) => [m.fieldId, get().fields[m.fieldId]] as const
+          );
 
-        // Step 2 — the one optimistic set.
-        set((state) => {
-          state.briefFacts = commit.facts;
-          for (const m of mirrors) {
-            const prev = state.fields[m.fieldId];
-            state.fields[m.fieldId] = {
-              value: m.value,
-              source: 'user',
-              confirmed: prev?.confirmed ?? false,
-              state: prev?.state ?? 'ask',
-            };
-          }
-        });
-
-        const revert = () =>
+          // Step 2 — the one optimistic set.
           set((state) => {
-            state.briefFacts = prevFacts;
-            for (const [id, entry] of prevFields) {
-              // A field the mirror CREATED must be removed again, not left as
-              // an `undefined`-valued entry.
-              if (entry === undefined) delete state.fields[id];
-              else state.fields[id] = entry;
+            state.briefFacts = commit.facts;
+            for (const m of mirrors) {
+              const prev = state.fields[m.fieldId];
+              state.fields[m.fieldId] = {
+                value: m.value,
+                source: 'user',
+                confirmed: prev?.confirmed ?? false,
+                state: prev?.state ?? 'ask',
+              };
             }
           });
 
-        // Step 3 — persist. Body shape is `save()`'s, verbatim: the journey has
-        // no slot, so `slots.indexOf(currentSlot)` is -1 → 0. Harmless — the only
-        // consumer of the persisted stepIndex is dashboard `continueRouting`,
-        // whose mid-journey branch routes 0 back through onboarding (→ journey
-        // resume-mount) and whose `finalContent` branch wins post-generation.
-        try {
-          const res = await fetch('/api/saveDraft', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              tokenId,
-              stepIndex: Math.max(0, slots.indexOf(currentSlot)),
-              brief: commit.patch,
-            }),
-          });
-          if (!res.ok) {
+          const revert = () =>
+            set((state) => {
+              state.briefFacts = prevFacts;
+              for (const [id, entry] of prevFields) {
+                // A field the mirror CREATED must be removed again, not left as
+                // an `undefined`-valued entry.
+                if (entry === undefined) delete state.fields[id];
+                else state.fields[id] = entry;
+              }
+            });
+
+          // Step 3 — persist. Body shape is `save()`'s, verbatim: the journey
+          // has no slot, so `slots.indexOf(currentSlot)` is -1 → 0. Harmless —
+          // the only consumer of the persisted stepIndex is dashboard
+          // `continueRouting`, whose mid-journey branch routes 0 back through
+          // onboarding (→ journey resume-mount) and whose `finalContent` branch
+          // wins post-generation.
+          try {
+            const res = await fetch('/api/saveDraft', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                tokenId,
+                stepIndex: Math.max(0, slots.indexOf(currentSlot)),
+                brief: commit.patch,
+              }),
+            });
+            if (!res.ok) {
+              revert();
+              return { ok: false, error: `saveDraft failed (${res.status})` };
+            }
+            return { ok: true };
+          } catch {
             revert();
-            return { ok: false, error: `saveDraft failed (${res.status})` };
+            return { ok: false, error: 'saveDraft failed' };
           }
-          return { ok: true };
-        } catch {
-          revert();
-          return { ok: false, error: 'saveDraft failed' };
-        }
+        };
+
+        // Chain on SETTLEMENT (both arms), so one rejection cannot stall the
+        // queue forever. `perform` never throws — it returns `{ok:false}` — so
+        // the second arm is belt-and-braces.
+        const run = railCommitChain.then(perform, perform);
+        railCommitChain = run.then(
+          () => undefined,
+          () => undefined
+        );
+        return run;
       },
 
       // Compose the Brief patch persisted on save — goal is the well-defined

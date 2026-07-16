@@ -715,3 +715,251 @@ stock Tailwind key.
    `resumeStep.ts`'s header says so; fabricated-`loaded` unit tests will NOT catch it).
 5. The rail occupies 312px from STEP 02 on; step bodies now live in the remaining column
    (`max-w-3xl`). No responsive pass in E1 (decision 8).
+
+---
+
+## Phase 4 — Thin steps 02 / 03 / 04 (agnostic frames + work seam content)
+
+### Files changed
+
+**New:**
+- `src/components/onboarding/journey/steps/useJourneySeam.ts` *(deviation 1)*
+
+**Edited:**
+- `src/components/onboarding/journey/steps/StepShowWork.tsx`
+- `src/components/onboarding/journey/steps/StepQuestions.tsx`
+- `src/components/onboarding/journey/steps/StepPlan.tsx`
+- `src/components/onboarding/journey/engines/work.ts` (showWork copy, questions, plan)
+- `src/components/onboarding/journey/engines/work.test.ts` (+18 tests)
+- `src/components/onboarding/journey/UnderstoodRail.test.tsx` (re-pointed chips test + serialization)
+- `src/hooks/useWizardStore.ts` (**shared** — `commitRail` serialization)
+- `e2e/work-onboarding.spec.ts`
+- `docs/task/work-onboarding-shell.audit.md` (this append)
+
+**NOT changed, deliberately:**
+- `engines/types.ts` — **founder-signed, and untouched.** The 3 question kinds
+  were sufficient exactly as signed; nothing about their shape needed adjusting.
+  (It is on the Files-touched list only for that narrow case.) No deviation here.
+- `rail.ts` / `rail.test.ts` — no new rail action shape was needed. STEP 03's
+  price answer is a `groups` write (see below), so it reuses `applyRailEdit`
+  verbatim. Listed as "only if needed"; it wasn't.
+- `JourneyShell.tsx` — not on this phase's list (it is on P5's); see deviation 1.
+
+---
+
+### 1. `commitRail` SERIALIZATION — the P3 review finding, closed (step 6)
+
+**The chain.** A module-level `railCommitChain: Promise<unknown>` in
+`useWizardStore.ts`. `commitRail` now wraps its whole former body in a local
+`perform()` and returns `railCommitChain.then(perform, perform)` (chained on
+SETTLEMENT — both arms — so one rejection can never stall the queue), re-pointing
+the chain at the new tail. Consequence, and the entire point: **each commit takes
+its pre-edit snapshot when its turn STARTS, not at enqueue time**, so a revert can
+only ever undo its own edit.
+
+Module-level, not store state: a Promise is not serializable state, nothing
+renders off it, and immer must never see it. `reset()` deliberately does not clear
+it — an in-flight save must still settle in order.
+
+**Test results — and an honesty note on the mandated test.** The mandated case
+(*first succeeds, second fails ⇒ the first's facts survive*) is in the suite and
+passes… **but I verified it passes with the queue REMOVED too, so on its own it is
+not evidence.** Reason, traced rather than assumed: `perform`'s optimistic `set`
+is synchronous, so under the old code a second same-tick caller always snapshots
+*after* the first's set — its revert restores the first's facts, not the pre-first
+bag. The order that actually breaks is the reverse: **an early failure's revert
+landing after a later commit's set.** So the file now pins three:
+
+| test | with queue | queue removed |
+|---|---|---|
+| first succeeds, second fails ⇒ first survives (mandated) | pass | pass (not discriminating — stated above) |
+| **first fails, second succeeds ⇒ the second survives** | pass | **FAIL** |
+| **commits run one at a time** (`start:A,end:A,start:B,end:B`) | pass | **FAIL** |
+
+Poison proof, run: replaced `const run = railCommitChain.then(perform, perform)`
+with `const run = perform()` ⇒ the latter two tests failed; restored ⇒ 12/12 green.
+
+### 2. The re-pointed chips-lifecycle test — WITH the proof (step 7)
+
+The P3 test clicked `rail-edit-name` to trigger the commit, which changes
+`editingId` ⇒ the chips editor unmounts from that alone ⇒ `projectionKey` was
+never exercised. Re-pointed at the one path where a commit lands while
+`editingId` stays `'groups'`: **NoteBox** (independent of `editingId`). Open the
+chips editor → type a draft into chip 0 → submit a note (`commitRail` swaps
+`briefFacts`) ⇒ assert (a) the editor is **still open** (so it is here for a
+reason other than `editingId`), (b) the draft is **gone** (input back to
+`Weddings` — it remounted), (c) the ids it now carries are the NEW bag's: saving
+unchanged joins g0/g1 correctly, photos intact, nothing deleted or duplicated,
+and the note the commit wrote is still in the re-emitted bag.
+
+**Proof, as required — I did delete `projectionKey` and confirm the FAILURE:**
+changed the `ChipsEditor` key from `` `${field.id}-${pKey}` `` to `field.id` and ran:
+
+> `× a commit while the chips editor is OPEN remounts it: the draft dies and ids re-seed`
+> `AssertionError: expected 'DRAFT — never saved' to be 'Weddings'`
+
+i.e. it failed on exactly the mechanism, not on scaffolding. Restored with
+`git checkout -- src/components/onboarding/journey/UnderstoodRail.tsx` (verified
+unmodified in the final diff); 11/11 green after restore. **`UnderstoodRail.tsx`
+itself is NOT in this phase's diff** — the poison was a test procedure only.
+
+### 3. STEP 02 — `StepShowWork.tsx` (thin, and staying thin)
+
+Renders `seam.steps.showWork` (title/body/icon) + an `ImagePlaceholder` dropzone
+stub (`aria-disabled`, no handler — it looks like the target E2 will build and
+does nothing, which beats a control that silently fails) + "Skip for now" →
+`setJourneyStep(3)`. **No upload pipeline, no scrape** — ingestion is E2.
+
+### 4. STEP 03 — `StepQuestions.tsx` + the work questions
+
+Frame: renders the 3 CLOSED kinds; each answer calls the QUESTION's own
+`commit(answer, liveFacts)` → `commitRail`. `liveFacts` is always the store's
+current `briefFacts`. Failure semantics identical to the rail's: seam `{ok:false}`
+⇒ toast the seam's message, nothing sent (landmine 5); `commitRail` `{ok:false}`
+⇒ the store already reverted ⇒ "Couldn't save — reverted, try again".
+
+Work questions (`engines/work.ts`), ask-if read **off the VM**, not the facts bag:
+- **NAME** — only when the rail has none.
+- **WHAT YOU SELL** — only when the seed produced no groups. Load-bearing beyond
+  tidiness: this is what makes the chip stable-id rule's stale-VM hole unreachable
+  (the chips editor is the only other group writer, and it can't be open on chips
+  that don't exist). Its commit **APPENDS through the chip join** (ids re-read from
+  the live bag), so even if a future ask-if let it fire with groups present it
+  could not delete or wipe one.
+- **PRICE** — optional, offered once there is something to price; default
+  `on-request`.
+
+**Group validity (landmine 6):** every commit routes through the rail adapter ⇒
+`{name, kind:'category', price:{mode:'on-request'}}`. Unit-asserted, and
+e2e-asserted against real Postgres.
+
+### 5. STEP 04 — `StepPlan.tsx` + the work plan
+
+`prepare` = `wizardApi.getState().fetchStrategy()` — **the existing chargeless
+work+multipage sitemap seed**, behind `fetchStrategy`'s own `strategyStatus`
+guard. No second fetch, never the charged path. The frame does NOT dedupe on its
+own (a frame-level "run once" flag would be a second, weaker guard hiding a broken
+engine one — back-nav idempotency is proven at the e2e layer instead).
+`items(state)` projects `state.sitemap` → `{title}` cards (defensive: junk/absent
+⇒ no cards). Read-only — no add/rename/reorder (E4).
+
+Both by-design nulls left alone, as instructed: `state.strategy` stays **NULL**;
+thin steps never set `goalIntent`.
+
+### 6. Shared-file edits — and why they're safe
+
+**`src/hooks/useWizardStore.ts` (shared: product/service/writer).** Purely
+additive: one module-level `let railCommitChain`, and `commitRail`'s body moved
+verbatim into a local `perform()` with the chain wrapper around it. **Nothing else
+touched** — no state key added, no slot machine, `hydrate`, `buildBriefPatch`,
+`save`, `fetchStrategy`, `reset` unchanged. Regression surface: `commitRail` is the
+ONLY behaviour changed, and its only callers are the journey rail and (new) STEP
+03 — no legacy path calls it. The one semantic change for existing callers: the
+optimistic `set` is now deferred by a microtask (it was synchronous-within-async).
+The rail already awaits the returned promise, and its P3 tests are unchanged and
+green. Full suite green.
+
+**`e2e/work-onboarding.spec.ts`**, **`engines/work.ts`**, the two test files:
+journey-local.
+
+### 7. Deviations (2, in-scope; conservative option taken, logged per protocol)
+
+1. **`steps/useJourneySeam.ts` — one extra file (a hook), not on Files-touched.**
+   `JourneyShell` renders step bodies with **no props**
+   (`STEP_BODIES: Record<JourneyStep, () => JSX.Element>`), and `JourneyShell.tsx`
+   is **not on this phase's list** (it is on P5's). So the three steps resolve the
+   seam themselves through the registry's async loader — the same door the shell
+   uses, and the only one (no step statically imports a seam; landmine 14 holds,
+   and the purity guard covers `steps/*`). Three inline copies of the same
+   `useEffect`+`loadJourneySeam` would have been three things to delete when P5
+   or a later phase passes the seam down; one hook in this phase's own directory
+   is the smaller footprint. Precedent: P2b's `JourneyStepPlaceholder.tsx`.
+   **The alternative — editing `JourneyShell.tsx` to pass `seam` as a prop — is
+   the better long-run design and I did NOT do it: out of scope.** P5 already owns
+   that file and may want to fold it in (see "What P5 must know").
+2. **The PRICE answer REFUSES `exact`/`from` without a finite amount rather than
+   degrading to `on-request`.** The instruction allows "a valid amount or
+   degrade", and `normalizeWorkGroup` would silently degrade. A rail headed WHAT
+   WE UNDERSTOOD must not quietly record something the user did not say, so the
+   seam returns `{ok:false, error:'Enter an amount, or choose "On request"'}` (the
+   UI additionally keeps Save disabled). `on-request` — the default — is always
+   valid, so nothing is ever a dead end. Unit-tested both ways.
+
+Two smaller judgment calls: (a) STEP 03's **price question is not a rail field** —
+price lives on the groups, so its commit rebuilds every group from `liveFacts`
+with the price overlaid and routes through `applyRailEdit({field:'groups'})`;
+`photos`/`items` therefore ride along untouched, and its question id is `'price'`
+(a question id, not the derived `pricePosition` rail field). E1 asks ONE price for
+the whole practice — per-group pricing is E3. (b) `StepPlan` memoises
+`items(getState())` on the `sitemap`/`strategyStatus` slices it subscribes to
+(the contract hands `items` the whole snapshot, so there is nothing narrower to
+select).
+
+Explicitly NOT deviated: **`engines/types.ts` untouched** (founder-signed; the
+question kinds needed no change); no upload pipeline / scrape at 02; no tap powers
+at 04; no P5+ work (no generation drive, no reveal, no preflight fill).
+
+### 8. Test results (run in full, honestly)
+
+- `npx tsc --noEmit` — **clean** (exit 0, no output).
+- `npm run test:run` — **202 passed | 1 skipped (203 files); 3469 passed | 18
+  skipped** (3451 → 3469: **+18** — 18 seam question/plan + 2 serialization, minus
+  the re-pointed chips test replacing one; none removed). Includes the
+  agnostic-purity guard (`steps/useJourneySeam.ts` and the three step frames are
+  in its scanned set: no `@/modules/wizard/work/**`, no generation graph, no
+  templateId literal) and the registry/leaf drift guard.
+- `npm run lint` — **no errors**; zero warnings from any new/edited file
+  (pre-existing template `<img>` / `ph-provider` / `GeneratingSlot` /
+  `useEditStoreBootstrap` warnings unchanged).
+- `npx playwright test e2e/work-onboarding.spec.ts` — **6 passed** (incl. `setup`)
+  on a **FRESH dev server** via the config's own `E2E_PORT=3123 PORT=3123` toggle.
+  Same reason as P2b/P3, stated plainly: **a foreign dev server holds :3000 and is
+  not mine to kill**, and `reuseExistingServer: !CI` would have silently reused it
+  without the build-time-inlined `NEXT_PUBLIC_WORK_COPY_ENGINE`. The run is
+  genuine; the only thing unverified is the default-port path, which differs by
+  port number alone. The new spec (02→04) asserts against real Postgres: the 02
+  stub + Skip → 03 ask-if (name/groups NOT asked for the well-seeded fixture, only
+  price) → emptying the chips from the rail makes the group question appear
+  (ask-if is projection-driven) → the group answer **lands in the rail** and in
+  the DB **`kind:'category'`** → the price answer round-trips `{mode:'from',
+  amount:900}` (polled, not slept — see below) → `facts.entry` intact, service/
+  atelier unchanged → 04 lists ≥1 page and **back-nav does not duplicate the
+  sitemap seeding**.
+  - One real bug the e2e caught in my own first draft: I asserted the price
+    answer via `rail-field-pricePosition`'s skeleton state, which is already
+    non-null from the group answer's on-request default ⇒ the assertion passed
+    *before* the save landed and `loadDraft` raced it. Replaced with an
+    `expect.poll` on the DB. Recorded because the same trap will bite P5/P6:
+    **a derived rail field is not a proxy for "the write landed".**
+- Known `core.autocrlf` churn on `__snapshots__/uiFoundationIsolation.test.tsx.snap`
+  (zero content change) restored via `git checkout --` on that path only. Final
+  `git status` shows only this phase's files. No commits.
+
+### 9. Open risks / what P5 must know
+
+1. **The step frames resolve the seam themselves** (deviation 1). P5 edits
+   `JourneyShell.tsx` anyway (mandatory, for `finalContent`); if it starts passing
+   `seam` down as a prop, `steps/useJourneySeam.ts` should go with it —
+   `StepBuilding` will need the seam too, and props are the better shape. Either
+   way is firewall-safe; the hook exists because P4 could not touch the shell.
+2. **`commitRail` is serialized, not locked.** The queue guarantees a revert only
+   undoes its own edit. It does NOT stop a caller from building a commit off a
+   `liveFacts` that a queued-but-unapplied commit is about to supersede. Not
+   reachable in E1 (both callers read the store's live `briefFacts`, and the
+   optimistic `set` lands a microtask after enqueue), but a THIRD caller that
+   captures facts and submits later would be a stale-write — the chip stable-id
+   rule's stale-VM hole, one layer up. If P5 adds a `commitRail` caller, read this
+   first.
+3. **`preflight` is still the fail-CLOSED placeholder** and `resolveResumeStep`
+   still cannot see `finalContent` (P5 must widen the shell — `resumeStep.ts`'s
+   header says so; fabricated-`loaded` unit tests will NOT catch it). Unchanged
+   from P3.
+4. **The `onDraftCorrected={setBriefDraft}` one-liner in
+   `src/app/onboarding/[token]/page.tsx` is still outstanding** — P5 owns it
+   (plan, rev 5). Not touched here (not on this phase's list).
+5. STEP 03's group question fires **only when `groups` is empty** — the assumption
+   that keeps the stale-VM hole unreachable. It is now unit-pinned. Don't loosen
+   it without revisiting the chip-id rule.
+6. STEP 04's `prepare` runs on **every** mount by design; the idempotency guard is
+   `fetchStrategy`'s `strategyStatus`. If P5 ever makes STEP 05 re-enter 04, that
+   guard is the only thing between back-nav and a duplicate seed.

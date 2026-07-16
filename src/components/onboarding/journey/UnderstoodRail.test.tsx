@@ -235,6 +235,117 @@ describe('UnderstoodRail — persistence failure', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// commitRail — SERIALIZATION (P4 step 6)
+//
+// `commitRail` gained a SECOND caller in P4 (STEP 03's questions), outside the
+// rail — so the rail's `saving` flag no longer prevents overlapping commits.
+// Its revert restores a pre-edit snapshot WHOLESALE, so without serialization a
+// later failure can wipe an earlier SUCCESS: B snapshots before A lands, A
+// succeeds, B fails, B restores the pre-A bag — and `briefFacts` (what
+// generation reads) silently diverges from the DB.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('commitRail — serialization', () => {
+  it('two overlapping commits: the FIRST succeeds, the SECOND fails ⇒ the first survives', async () => {
+    const seam = workJourneySeam.rail;
+    const store = useWizardStore.getState();
+
+    // saveDraft: #1 → 200, #2 → 500.
+    let call = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(async () => {
+        call += 1;
+        return { ok: call === 1, status: call === 1 ? 200 : 500, json: async () => ({}) };
+      })
+    );
+
+    const facts0 = useWizardStore.getState().briefFacts;
+    const editA = seam.applyEdit('name', { kind: 'text', value: 'Kundius A' }, facts0 ?? undefined);
+    const editB = seam.applyEdit(
+      'descriptor',
+      { kind: 'text', value: 'Descriptor B' },
+      // Built from the SAME pre-commit bag — this IS the overlap. (In the UI
+      // the two callers are the rail and STEP 03.)
+      facts0 ?? undefined
+    );
+    if (!editA.ok || !editB.ok) throw new Error('fixture edits must be valid');
+
+    // Fired without awaiting the first — the interleave the queue must absorb.
+    const [a, b] = await Promise.all([store.commitRail(editA), store.commitRail(editB)]);
+
+    expect(a.ok, 'commit A persisted').toBe(true);
+    expect(b.ok, 'commit B was rejected by saveDraft').toBe(false);
+
+    // THE ASSERTION: B's revert undid only B. A's fact — which the DB has —
+    // is still in briefFacts.
+    const work = (useWizardStore.getState().briefFacts as any).work;
+    expect(work.identity.name).toBe('Kundius A');
+    // …and B's unpersisted belief is gone (the seeded descriptor is back).
+    expect(work.identity.descriptor).toBe('Documentary wedding photography');
+  });
+
+  // The mandated first/second-order case above is the one to REASON about, but
+  // this is the order that actually breaks without the queue: an EARLY failure's
+  // wholesale revert lands AFTER a later commit's optimistic set and wipes it —
+  // leaving `briefFacts` (what generation reads) behind a DB that has the write.
+  it('the FIRST fails and the SECOND succeeds ⇒ the second survives (the revert undoes only its own edit)', async () => {
+    let call = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(async () => {
+        call += 1;
+        const first = call === 1;
+        // The failing commit answers LAST — its revert would otherwise land on
+        // top of the successful one.
+        await new Promise((r) => setTimeout(r, first ? 20 : 0));
+        return { ok: !first, status: first ? 500 : 200, json: async () => ({}) };
+      })
+    );
+
+    const seam = workJourneySeam.rail;
+    const store = useWizardStore.getState();
+    const facts0 = useWizardStore.getState().briefFacts ?? undefined;
+    const a = seam.applyEdit('name', { kind: 'text', value: 'Doomed' }, facts0);
+    const b = seam.applyEdit('descriptor', { kind: 'text', value: 'Survivor' }, facts0);
+    if (!a.ok || !b.ok) throw new Error('fixture edits must be valid');
+
+    const [ra, rb] = await Promise.all([store.commitRail(a), store.commitRail(b)]);
+    expect(ra.ok).toBe(false);
+    expect(rb.ok).toBe(true);
+
+    const work = (useWizardStore.getState().briefFacts as any).work;
+    expect(work.identity.descriptor, 'the persisted edit must survive').toBe('Survivor');
+    expect(work.identity.name, 'the unpersisted edit must be gone').toBe('Kundius Studio');
+  });
+
+  it('commits run one at a time (no interleaving of the optimistic set and the save)', async () => {
+    const order: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(async (_url: string, init: RequestInit) => {
+        const name = JSON.parse(init.body as string).brief.facts.work.identity.name;
+        order.push(`start:${name}`);
+        await new Promise((r) => setTimeout(r, 10));
+        order.push(`end:${name}`);
+        return { ok: true, status: 200, json: async () => ({}) };
+      })
+    );
+
+    const seam = workJourneySeam.rail;
+    const store = useWizardStore.getState();
+    const facts0 = useWizardStore.getState().briefFacts ?? undefined;
+    const a = seam.applyEdit('name', { kind: 'text', value: 'A' }, facts0);
+    const b = seam.applyEdit('name', { kind: 'text', value: 'B' }, facts0);
+    if (!a.ok || !b.ok) throw new Error('fixture edits must be valid');
+
+    await Promise.all([store.commitRail(a), store.commitRail(b)]);
+
+    expect(order).toEqual(['start:A', 'end:A', 'start:B', 'end:B']);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Chips — the lifecycle rule
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -261,21 +372,55 @@ describe('UnderstoodRail — chips', () => {
     expect(groups[2]).toEqual({ name: 'Newborn', kind: 'category', price: { mode: 'on-request' } });
   });
 
-  it('the chips editor does not survive a commit (ids are per-projection)', async () => {
-    mockSaveDraft(true);
+  // ── The chip-draft lifecycle, pinned at the ONE path that exercises the
+  // projection key (P4 step 7 — re-pointed from the P3 version, which was
+  // TAUTOLOGICAL).
+  //
+  // The old test clicked `rail-edit-name` to trigger the commit. That changes
+  // `editingId` from 'groups' to 'name', which unmounts the chips editor ALL BY
+  // ITSELF — so it passed even with `projectionKey` deleted, i.e. it never
+  // tested the mechanism that actually stops the photos/items wipe.
+  //
+  // NoteBox is the only writer INDEPENDENT of `editingId`: a note commits while
+  // the chips editor stays open. `commitRail` swaps `briefFacts` for the seam's
+  // merged bag ⇒ new projection key ⇒ the editor REMOUNTS, its draft dies, and
+  // its ids are re-seeded from the NEW bag. Delete `projectionKey` and this
+  // test fails (verified by doing exactly that).
+  it('a commit while the chips editor is OPEN remounts it: the draft dies and ids re-seed', async () => {
+    const fetchMock = mockSaveDraft(true);
     await mountRail();
 
     await click(testid('rail-edit-groups'));
     expect(testid('rail-chips-editor-groups')).not.toBeNull();
 
-    // Commit a DIFFERENT field: briefFacts is replaced ⇒ new projection ⇒ the
-    // chips editor (and any draft it held) is gone. A draft that outlived this
-    // would carry ids issued against the OLD bag into the next join.
-    await click(testid('rail-edit-name'));
-    await type(testid<HTMLInputElement>('rail-input-name')!, 'Kundius');
-    await click(testid('rail-save-name'));
+    // A draft the user has typed but NOT saved. Its ids belong to the CURRENT
+    // bag; carrying it across someone else's write is the stale-VM hole.
+    await type(testid<HTMLInputElement>('rail-chip-input-0')!, 'DRAFT — never saved');
+    expect(testid<HTMLInputElement>('rail-chip-input-0')!.value).toBe('DRAFT — never saved');
 
-    expect(testid('rail-chips-editor-groups')).toBeNull();
+    // Commit through a path that does NOT touch `editingId`.
+    await type(testid<HTMLInputElement>('rail-note-input')!, 'The prices are wrong');
+    await click(testid('rail-note-submit'));
+
+    // Still editing groups — so the editor is here for a reason other than
+    // `editingId` changing.
+    const editor = testid('rail-chips-editor-groups');
+    expect(editor, 'the chips editor must still be open (editingId is unchanged)').not.toBeNull();
+    // …but it REMOUNTED on the new projection: the draft is gone.
+    expect(testid<HTMLInputElement>('rail-chip-input-0')!.value).toBe('Weddings');
+
+    // And the ids it now carries are the NEW bag's: saving unchanged joins g0/g1
+    // correctly — photos intact, nothing deleted, nothing duplicated.
+    await click(testid('rail-chips-save'));
+    const last = fetchMock.mock.calls[fetchMock.mock.calls.length - 1];
+    const groups = JSON.parse((last[1] as RequestInit).body as string).brief.facts.work.groups;
+    expect(groups.map((g: { name: string }) => g.name)).toEqual(['Weddings', 'Portraits']);
+    expect(groups[0].photos).toEqual([{ id: 'ph_w1', url: 'https://cdn.example.com/w1.jpg' }]);
+    // The note the commit-under-the-editor wrote is still there (the chips save
+    // re-emitted the FULL bag it was projected from).
+    expect(JSON.parse((last[1] as RequestInit).body as string).brief.facts.work.userNotes).toEqual([
+      'The prices are wrong',
+    ]);
   });
 });
 
