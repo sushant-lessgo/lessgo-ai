@@ -33,7 +33,9 @@ import {
 } from '@/hooks/useWizardStore';
 import { Button } from '@/components/ui/button';
 import { AppIcon } from '@/components/ui/icon';
+import { ToastProvider } from '@/components/ui/toast';
 import JourneyTopBar from './JourneyTopBar';
+import UnderstoodRail from './UnderstoodRail';
 import { loadJourneySeam } from './engines/registry';
 import type { JourneyEngineSeam, JourneyStep } from './engines/types';
 import StepShowWork from './steps/StepShowWork';
@@ -116,64 +118,76 @@ export default function JourneyShell({
 
   return (
     // THE ONLY `.app-chrome` attachment in the journey (see the header note).
-    <div className="app-chrome fixed inset-0 flex flex-col bg-app-canvas">
-      <JourneyTopBar
-        step={ready ? journeyStep : null}
-        onExit={() => router.push('/dashboard')}
-      />
+    // ToastProvider (the ui-foundation one — NEVER the edit-page-local
+    // ToastProvider) wraps the shell because the rail surfaces persistence
+    // failures through it; its viewport portals to <body>, outside this scope,
+    // and carries its own app-* tokens, so that is fine.
+    <ToastProvider>
+      <div className="app-chrome fixed inset-0 flex flex-col bg-app-canvas">
+        <JourneyTopBar
+          step={ready ? journeyStep : null}
+          onExit={() => router.push('/dashboard')}
+        />
 
-      <div className="flex-1 min-h-0 overflow-auto">
-        <div className="mx-auto max-w-3xl px-6 py-10">
-          {seamError && (
-            <p className="font-app-sans text-sm text-app-danger">
-              We couldn&apos;t open this flow. Please refresh and try again.
-            </p>
-          )}
+        {/* P3 — the two-column journey: the persistent rail (02–06) beside the
+            step body. The rail is AGNOSTIC; it renders the seam's projection. */}
+        <div className="flex-1 min-h-0 flex">
+          {ready && seam && <UnderstoodRail rail={seam.rail} />}
 
-          {!seamError && !ready && (
-            <p className="font-app-sans text-sm text-app-muted" role="status">
-              Loading your page…
-            </p>
-          )}
+          <div className="flex-1 min-w-0 overflow-auto">
+            <div className="mx-auto max-w-3xl px-6 py-10">
+              {seamError && (
+                <p className="font-app-sans text-sm text-app-danger">
+                  We couldn&apos;t open this flow. Please refresh and try again.
+                </p>
+              )}
 
-          {ready && (
-            <div className="space-y-8">
-              <Body />
+              {!seamError && !ready && (
+                <p className="font-app-sans text-sm text-app-muted" role="status">
+                  Loading your page…
+                </p>
+              )}
 
-              {/* P2b navigation — makes 02–06 walkable. Each step takes over its
-                  own forward motion as it lands (P4's CTA, P5's generation
-                  completion, P6's editor handoff). */}
-              <div className="flex items-center justify-between pt-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setJourneyStep(Math.max(FIRST_STEP, journeyStep - 1) as JourneyStep)
-                  }
-                  disabled={journeyStep === FIRST_STEP}
-                  data-testid="journey-back"
-                  className="font-app-sans inline-flex items-center gap-1.5 text-sm text-app-muted
-                             hover:text-app-ink disabled:opacity-40 disabled:cursor-not-allowed
-                             transition-colors duration-200"
-                >
-                  <AppIcon name="arrow_back" size={16} />
-                  Back
-                </button>
-                <Button
-                  type="button"
-                  onClick={() =>
-                    setJourneyStep(Math.min(LAST_STEP, journeyStep + 1) as JourneyStep)
-                  }
-                  disabled={journeyStep === LAST_STEP}
-                  data-testid="journey-next"
-                >
-                  Continue
-                  <AppIcon name="arrow_forward" size={16} className="ml-1.5" />
-                </Button>
-              </div>
+              {ready && (
+                <div className="space-y-8">
+                  <Body />
+
+                  {/* P2b navigation — makes 02–06 walkable. Each step takes over
+                      its own forward motion as it lands (P4's CTA, P5's
+                      generation completion, P6's editor handoff). */}
+                  <div className="flex items-center justify-between pt-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setJourneyStep(Math.max(FIRST_STEP, journeyStep - 1) as JourneyStep)
+                      }
+                      disabled={journeyStep === FIRST_STEP}
+                      data-testid="journey-back"
+                      className="font-app-sans inline-flex items-center gap-1.5 text-sm text-app-muted
+                                 hover:text-app-ink disabled:opacity-40 disabled:cursor-not-allowed
+                                 transition-colors duration-200"
+                    >
+                      <AppIcon name="arrow_back" size={16} />
+                      Back
+                    </button>
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        setJourneyStep(Math.min(LAST_STEP, journeyStep + 1) as JourneyStep)
+                      }
+                      disabled={journeyStep === LAST_STEP}
+                      data-testid="journey-next"
+                    >
+                      Continue
+                      <AppIcon name="arrow_forward" size={16} className="ml-1.5" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
-    </div>
+    </ToastProvider>
   );
 }

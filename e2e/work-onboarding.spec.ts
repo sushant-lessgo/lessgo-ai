@@ -74,6 +74,87 @@ test('the journey step machine walks 02 → 06 and back', async ({ page }) => {
   await expect(page.getByTestId('step-building')).toBeVisible();
 });
 
+// ============================================================================
+// P3 — the "What we understood" rail, over a REAL persisted project.
+//
+// These are the assertions unit tests structurally cannot make: that a rail
+// belief actually reaches Postgres through /api/saveDraft's brief merge, and
+// that it does so WITHOUT dropping `facts.entry` (landmine 4) or breaking the
+// group `kind` invariant that STEP-05 generation depends on (landmine 6).
+// ============================================================================
+
+test('the rail projects the seeded brief and its edits SURVIVE a reload', async ({ page }) => {
+  const api = await authedApi(page);
+  const { token } = await seedWorkBrief(api);
+
+  await page.goto(`/onboarding/${token}`);
+  await expect(page.getByTestId('understood-rail')).toBeVisible({ timeout: 30_000 });
+
+  // Projected from the seeded facts.work — not typed in by this test.
+  await expect(page.getByTestId('rail-value-name')).toHaveText('Kundius Studio');
+  await expect(page.getByTestId('rail-value-descriptor')).toHaveText(
+    'Documentary wedding photography'
+  );
+  await expect(page.getByTestId('rail-chip-g0')).toHaveText('Wedding day coverage');
+  await expect(page.getByTestId('rail-chip-g1')).toHaveText('Engagement session');
+
+  // ── Edit #1: NAME ────────────────────────────────────────────────────────
+  await page.getByTestId('rail-edit-name').click();
+  await page.getByTestId('rail-input-name').fill('Kundius Photography');
+  await page.getByTestId('rail-save-name').click();
+  await expect(page.getByTestId('rail-value-name')).toHaveText('Kundius Photography');
+
+  // ── Edit #2, immediately after: DESCRIPTOR (lost-update guard) ────────────
+  // Edit #2 re-emits the FULL bag from the snapshot edit #1 wrote. If commitRail
+  // did not sync briefFacts in the same `set` as the save, this would re-emit
+  // stale facts and silently revert edit #1.
+  await page.getByTestId('rail-edit-descriptor').click();
+  await page.getByTestId('rail-input-descriptor').fill('Wedding & portrait photographer');
+  await page.getByTestId('rail-save-descriptor').click();
+  await expect(page.getByTestId('rail-value-descriptor')).toHaveText(
+    'Wedding & portrait photographer'
+  );
+
+  // ── Edit #3: RENAME a group chip (the id-join, end to end) ────────────────
+  await page.getByTestId('rail-edit-groups').click();
+  await page.getByTestId('rail-chip-input-0').fill('Wedding days');
+  await page.getByTestId('rail-chips-save').click();
+  await expect(page.getByTestId('rail-chip-g0')).toHaveText('Wedding days');
+
+  // ── Note ─────────────────────────────────────────────────────────────────
+  await page.getByTestId('rail-note-input').fill('The prices are wrong');
+  await page.getByTestId('rail-note-submit').click();
+  await expect(page.getByTestId('rail-note-input')).toHaveValue('', { timeout: 10_000 });
+
+  // ── The real assertion: it is in the DB, and nothing else was dropped ─────
+  const draft = await loadDraft(api, token);
+  const work = draft.brief.facts.work;
+  expect(work.identity.name).toBe('Kundius Photography');
+  expect(work.identity.descriptor).toBe('Wedding & portrait photographer'); // BOTH edits
+  expect(work.groups.map((g: { name: string }) => g.name)).toEqual([
+    'Wedding days',
+    'Engagement session',
+  ]);
+  // The renamed group is still kind-valid — a kind-less group nulls
+  // getWorkFacts and dead-ends STEP 05 with an unrecoverable 400.
+  for (const g of work.groups) expect(g.kind).toBe('category');
+  expect(work.userNotes).toEqual(['The prices are wrong']);
+
+  // Sibling facts survived every full-facts re-emit (landmine 4).
+  expect(draft.brief.facts.entry.businessName).toBe('Kundius Studio');
+  // And the serve-gate stamps are untouched by rail writes (landmine 3).
+  expect(draft.audienceType).toBe('service');
+  expect(draft.templateId).toBe('atelier');
+  expect(draft.brief.copyEngine).toBe('work');
+
+  // Reload: the rail re-projects from the DB, not from client memory.
+  await page.reload();
+  await expect(page.getByTestId('rail-value-name')).toHaveText('Kundius Photography', {
+    timeout: 30_000,
+  });
+  await expect(page.getByTestId('rail-chip-g0')).toHaveText('Wedding days');
+});
+
 test('legacy unchanged: a non-seam brief still reaches the entry card / WizardShell', async ({
   page,
 }) => {

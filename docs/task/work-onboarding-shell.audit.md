@@ -504,3 +504,214 @@ Rewrote the function doc and added a header section (`READ THIS BEFORE ADDING A 
 1. **The closure is 1 hop, not transitive-to-fixpoint.** A generation import at depth 2 (e.g. `rail.ts` → some pure helper → generation) stays invisible. Accepted deliberately: hop-1 covers the real surface (what a seam directly pulls onto the entry path), and any depth-2 module becomes a hop-1 the day a seam imports it. Depth ≥2 remains review's job. If a seam ever grows a deep pure-helper tree, revisit.
 2. `resolveAlias` handles `@/`-alias specifiers only — relative (`./types`) and package specifiers are not followed. In-scope files are all `@/`-imported today; a seam that starts importing a *relative* sibling outside `engines/` would not be closed over. `engines/*.ts` are all directly in `SEAM_FILES`, so today's relative edges (`./types`) are already scanned.
 3. P5 still must widen the shell before any `finalContent` rule. The doc now says so in two places, but nothing **mechanically** enforces it — a `finalContent` rule with fabricated-`loaded` tests will still go green. The real gate is P5's reviewer.
+
+---
+
+## Phase 3 — STEP 01 (real) + "What we understood" rail (agnostic UI + work adapter) + icons
+
+### Files changed
+
+**New:**
+- `src/components/onboarding/journey/UnderstoodRail.tsx` (the agnostic rail)
+- `src/components/onboarding/journey/UnderstoodRail.test.tsx` *(deviation 1)*
+- `src/components/onboarding/journey/engines/work.test.ts` (the mandated regression)
+
+**Edited:**
+- `src/components/onboarding/journey/JourneyEntryStep.tsx` (handoff 1a + re-classify)
+- `src/components/onboarding/journey/JourneyEntryStep.test.tsx`
+- `src/components/onboarding/journey/JourneyShell.tsx` (rail layout + ToastProvider)
+- `src/hooks/useWizardStore.ts` (**shared** — additive `commitRail` + 2 selectors)
+- `e2e/work-onboarding.spec.ts`
+- `docs/task/work-onboarding-shell.audit.md` (this append)
+
+**NOT changed, deliberately:**
+- `engines/types.ts` — founder-signed; consumed as-is, nothing needed changing.
+- `engines/work.ts` — **already complete.** P2a shipped the real 4-field `toVM` +
+  chip-id join (its deviation 4) and its review folded the `chipIndex` strict-regex
+  fix. P3's remaining debt on it was the TESTS, which is what `work.test.ts` is.
+  Editing it to satisfy a Files-touched line would have been churn.
+- `public/fonts/material-symbols-rounded/icons.txt` + the subset — **no-op, verified
+  by diff, not assumed** (see Icons).
+- `rail.ts`, `buildBriefPatch`'s collections-only `facts` guard — untouched (load-bearing).
+
+---
+
+### 1. `UnderstoodRail.tsx` — the agnostic rail
+
+312px aside (steps 02–06), mono "WHAT WE UNDERSTOOD" + "Tap anything to correct it",
+one block per `RailFieldVM` **in the adapter's order**, trailing `edit` affordance →
+thin inline input (no dialog), footer "Something wrong?" → `adapter.appendNote`.
+Unknown = `opacity-50` + a `bg-app-stripes` bar (per handoff), with `data-skeleton`
+for tests. Toasts from `@/components/ui/toast` (NOT the edit-page-local provider).
+`app-*` utilities only.
+
+**It knows no field names.** Labels/order/kinds/skeleton/editability all come from
+`seam.rail.toVM(briefFacts)`; the engine is reachable only through the injected
+adapter. It renders FOUR fields today because the work adapter emits four — no WHERE,
+no LANGUAGES (founder ruling: no E1 source, and a rail headed "WHAT WE UNDERSTOOD"
+must not present a default as a belief). They stay modelled in `rail.ts`.
+
+#### The chip lifecycle — how "no chip array survives a commit" is GUARANTEED
+
+Not by discipline — structurally, three ways:
+
+1. **The chips editor is a separate component keyed on the FACTS-BAG IDENTITY.**
+   `projectionKey(facts)` = a module-level `WeakMap<object, number>` -> `p<n>`.
+   `commitRail` swaps `briefFacts` for the seam's merged bag in one `set`, so a new
+   object reference *is* "a commit happened, ids re-issued" => new key => React
+   unmounts the editor and the draft dies with it. A WeakMap on identity, not a
+   content hash: two commits producing identical labels are still two projections,
+   and a content hash would let a draft survive one.
+2. **`liveFacts` is always the store's current `briefFacts`** — the same bag `toVM`
+   just projected. Never a captured copy, never a value closed over at edit-open time.
+3. **The UI never mints, reuses or reorders an id.** Surviving chips carry `id`
+   verbatim; "Add" pushes `{label:''}` with **no id**; remove just stops submitting the
+   chip; array order = new order. All join semantics stay in the adapter — the rail
+   never rebuilds groups from labels or positions (that is the wipe, one layer up).
+
+Pinned by a test that opens the chips editor, commits a *different* field, and asserts
+the editor is gone.
+
+### 2. `engines/work.test.ts` — the mandated regression (24 tests)
+
+**The hard gate, concretely:** over an **E2-shaped bag** (g0 `Weddings` with `photos`
++ a `from EUR 2400` price, g1 `Portraits` with `items`), **ONE** `applyEdit` that
+RENAMES g0 to "Wedding days", REORDERS it after g1, and ADDS an id-less "Newborn":
+
+- renamed group keeps `photos` **and** its price and `kind` (rebuilt from `liveFacts`,
+  not from the lossy chip) — label-match would have lost it, positional index would
+  have handed it g1's payload;
+- reordered sibling keeps its `items`;
+- new group = `{name, kind:'category', price:{mode:'on-request'}}`, **no** inherited photos;
+- `getWorkFacts(result.facts)` non-null; `facts.entry` preserved; `patch.facts === facts`.
+
+Plus: the FOUR-field VM shape/order, WHERE/LANGUAGES **absent**, chip ids `g0..gN`,
+PRICE POSITION derived + `editable:false` + `null` => skeleton, all-skeleton VM for
+`undefined`/`{}`/garbage (never a throw), **re-projection re-issues ids for the NEW
+order** (why a draft must never cross a commit) + a second edit against the new bag
+joining correctly, delete-by-omission, NAME mirror, invalid => `{ok:false}`.
+
+### 3. `commitRail` (store, additive, engine-agnostic)
+
+`WizardRailCommit` / `WizardRailCommitResult` are declared IN the store, not imported
+from `engines/types.ts` — that module imports `WizardStore` from the store, so
+importing back is a cycle (the `WizardJourneyStep` precedent P2b flagged).
+Structurally identical => a `RailCommit & {ok:true}` passes with no cast, and the
+store never learns what `work` is.
+
+Order, all of it load-bearing: (1) snapshot `briefFacts` + every field a mirror will
+overwrite **before** the optimistic `set`; (2) ONE `set` applies `facts` + mirrors (so
+the rail re-projects immediately and the next edit's `liveFacts` IS that snapshot —
+which is what makes the index-derived chip ids safe); (3) POST `/api/saveDraft` with
+`save()`'s body shape and **check `res.ok`** — non-2xx/throw => restore BOTH in one
+`set` => `{ok:false}`. Never keeps optimistic state on failure: `briefFacts` is what
+generation reads, so an unpersisted belief would make STEP 05 generate from data that
+vanishes on reload. A mirror that CREATED a field is deleted on revert, not left as an
+`undefined`-valued entry. `stepIndex` = `save()`'s `-1 -> 0` (verified-harmless per
+decision 5). `buildBriefPatch` / `save` / slot machine / `hydrate` untouched.
+
+### 4. `JourneyEntryStep.tsx` — handoff 1a, rebuilt with real primitives
+
+Radial-gradient body, `rocket_launch` badge, 40px display headline, 720px card with
+`SegmentedControl` ("Describe your site" / "Use my current site" **disabled** stub),
+the one-liner **prefilled and editable**, coral CTA "Build my site" + `arrow_forward`.
+Copy is UNIVERSAL (ruling). Confirm path unchanged: seam `enrichDraftForConfirm` ->
+`/api/brief/confirm` -> serve => `window.location.assign` / manual => `onManual(missing)`.
+CTA still disabled until the seam resolves; a missing seam still fails loudly (P2b's
+guard kept). Edited line => `/api/v2/understand` re-classify -> seamed result: load
+**that engine's** seam and confirm the fresh draft; non-seam result: hand back via
+`onDraftCorrected` (see Deviations 3 — **this needs one line in `page.tsx`**).
+Its 6 P2b branch tests stayed green through the rework; +5 new.
+
+### 5. `JourneyShell.tsx`
+
+Two-column from STEP 02: `<UnderstoodRail rail={seam.rail} />` + step body, wrapped in
+the ui-foundation `ToastProvider`. `.app-chrome` scope unchanged (still exactly the two
+shell wrappers; the toast viewport portals to `<body>`, outside the scope, and carries
+its own `app-*` tokens).
+
+### Icons — no-op, and I checked rather than assumed
+
+Diffed P3's list (`rocket_launch, edit_note, link, chat_bubble, progress_activity,
+check_circle, add_photo_alternate, tune, folder, language, close, arrow_forward, edit,
+check`) plus the two the rail actually needed (`add`, `send`) against the committed
+`icons.txt`: **every one is already present** (P2b predicted this). So `icons.txt` is
+unchanged and the subset was **NOT regenerated** — regenerating a byte-identical set
+would only risk the landmine-11 failure (the full upstream font is deliberately not
+committed, so a regen here could only have come from the wrong source). If a future
+phase adds a glyph: append to `icons.txt`, regen per NOTICE (`--no-layout-closure`,
+all four axes, never `--instance`).
+
+---
+
+### Deviations (3, all in-scope; conservative option taken, logged per protocol)
+
+1. **`UnderstoodRail.test.tsx` — one extra test file.** The plan mandates the
+   revert-on-failure test ("mocked non-2xx => briefFacts + fields identical, toast
+   shown") in step 5, whose Files-touched lists `useWizardStore.ts` but **no store test
+   file**. Options were: edit `src/hooks/useWizardStore.test.ts` (a shared file *not* on
+   the list), or bury a store test in `engines/work.test.ts` (misleading). Chose a new
+   file in this phase's own directory, which also lets the mandated test assert the
+   **toast** (which only exists at the UI layer) and covers the rail UI the plan builds.
+   It exercises the REAL work seam adapter — a fake adapter would prove the test, not
+   the product.
+2. **`commitRail` REVERTS but does not TOAST; the rail toasts.** A zustand action cannot
+   call the `useToast` hook, and there is no global toast singleton. The data-integrity
+   half (revert) is in the store; the store returns `{ok:false, error}` and
+   `UnderstoodRail` raises the ruled copy — *"Couldn't save — reverted, try again"*.
+   Same guarantee, correct layer. Both halves are asserted in one test.
+3. **`JourneyEntryStep` gained an OPTIONAL `onDraftCorrected` prop, and
+   `src/app/onboarding/[token]/page.tsx` was NOT edited** (not on Files-touched —
+   reported, not edited). See "What P4 must know" #1: the flip needs one line there.
+
+Two smaller judgment calls: chips render as `Badge variant="secondary"` (a named
+variant — blue tint, `app-badge` 6px), which is the handoff's chip exactly; the
+README's "use status/pill variants" warning is about the raw `default`, and `status` is
+grey. And STEP 01's radial-gradient body uses the handoff's hex values as an arbitrary
+Tailwind gradient — there is no token for a decorative gradient, and it touches no
+stock Tailwind key.
+
+### Test results (all green, run in full)
+
+- `npx tsc --noEmit` — **clean** (exit 0, no output).
+- `npm run test:run` — **202 passed | 1 skipped (203 files); 3451 passed | 18 skipped**
+  (3421 -> 3451: **+30** — 24 adapter incl. the mandated rename+reorder+add regression,
+  11 rail/commitRail incl. the mocked non-2xx revert, +5 entry-step re-classify, none
+  removed). Purity guard still green: `UnderstoodRail.tsx` is in its scanned set and
+  imports no engine module and carries no templateId literal.
+- `npm run lint` — no errors; **zero warnings from any new/edited file** (pre-existing
+  template `<img>` / ph-provider warnings unchanged).
+- `npx playwright test e2e/work-onboarding.spec.ts` — **5 passed** (incl. `setup`), on a
+  **FRESH dev server** via the config's own `E2E_PORT=3123 PORT=3123` toggle (same
+  reason as P2b: `reuseExistingServer: !CI` would silently reuse a server built without
+  the inlined env). Nothing skipped or faked. The new spec asserts, against real
+  Postgres: rail projects the seeded name/descriptor/chips -> NAME edit -> an
+  **immediately consecutive** DESCRIPTOR edit (the lost-update guard for same-`set`
+  snapshot sync) -> a group-chip RENAME -> a note -> `loadDraft` shows **both** edits,
+  the renamed group still `kind:'category'`, the note, **`facts.entry` intact**, and
+  service/atelier/work unchanged -> reload re-projects from the DB.
+- Known `core.autocrlf` churn on `__snapshots__/uiFoundationIsolation.test.tsx.snap`
+  (zero content change) restored via `git checkout --` on that path only. No commits.
+
+### What P4 must know
+
+1. **BLOCKING, one line, out of my scope:** `src/app/onboarding/[token]/page.tsx` must
+   pass `onDraftCorrected={setBriefDraft}` to `<JourneyEntryStep>`. It is what makes
+   decision 3's "non-seam re-classify => back to `ConfirmBriefStep`" real: the parent
+   re-renders from the corrected draft, the seam-keyed branch (b) goes false, and the
+   legacy confirm step takes over (`step` is already `'confirm'`) — no page logic needed
+   beyond the prop. Without it the component surfaces an explicit error instead of
+   silently stranding the user in a journey his engine cannot drive. The seamed
+   re-classify path works today regardless.
+2. **STEP 03 group questions must keep firing only when `groups` is empty.** That is the
+   assumption that makes the stale-VM hole unreachable: the rail's chip editor is the
+   only other group writer, and it cannot be open on chips that do not exist.
+3. **`commitRail` is the ONE write door for question commits** (plan P4 step 2) —
+   `commit(...)` returns a `RailCommit`; pass its `ok:true` half straight in. Do not add
+   a second saveDraft path, and do not "fix" `buildBriefPatch`'s collections-only `facts`
+   guard (it is what stops legacy autosave clobbering rail facts).
+4. **`engines/work.ts`'s `preflight` is still the fail-CLOSED placeholder** (P5 owns it),
+   and `resolveResumeStep` still cannot see `finalContent` (P5 must widen the shell —
+   `resumeStep.ts`'s header says so; fabricated-`loaded` unit tests will NOT catch it).
+5. The rail occupies 312px from STEP 02 on; step bodies now live in the remaining column
+   (`max-w-3xl`). No responsive pass in E1 (decision 8).

@@ -303,6 +303,27 @@ interface WizardState {
  */
 export type WizardJourneyStep = 2 | 3 | 4 | 5 | 6;
 
+/**
+ * work-onboarding-shell P3 — the OK half of a journey seam's `RailCommit`
+ * (`src/components/onboarding/journey/engines/types.ts`).
+ *
+ * Declared HERE rather than imported for the same reason as `WizardJourneyStep`:
+ * that module imports `WizardStore` from this file, so importing back would be a
+ * cycle. Structurally identical, so a `RailCommit & {ok:true}` passes without a
+ * cast — and the store stays engine-agnostic (it never learns what `work` is).
+ */
+export interface WizardRailCommit {
+  /** The `/api/saveDraft` brief patch — a FULL-facts re-emit (landmine 4). */
+  patch: Partial<Brief>;
+  /** The SAME merged bag, so persist + `briefFacts` land in one `set`. */
+  facts: Record<string, unknown>;
+  /** Store-level mirrors the SEAM declares (e.g. work NAME → `fields['name']`). */
+  fieldMirrors?: { fieldId: string; value: string }[];
+}
+
+/** `ok:false` ⇒ the optimistic state was REVERTED; the caller toasts. */
+export type WizardRailCommitResult = { ok: true } | { ok: false; error: string };
+
 interface WizardActions {
   hydrate: (payload: WizardHydratePayload) => void;
 
@@ -384,6 +405,19 @@ interface WizardActions {
    * shell owns forward/back motion. No slot-machine interaction.
    */
   setJourneyStep: (step: WizardJourneyStep) => void;
+
+  /**
+   * work-onboarding-shell P3 — apply ONE rail write, atomically, and persist it.
+   * ENGINE-AGNOSTIC: the seam builds the commit, this only applies + saves it.
+   *
+   * `briefFacts` is what GENERATION reads (`resolveWorkBrief` → `buildWorkInput`),
+   * so an unpersisted rail belief would make STEP 05 generate from data that
+   * vanishes on reload. Therefore, unlike `save()`, this is NOT fire-and-forget:
+   * it checks `res.ok` and REVERTS both `briefFacts` and the mirrored `fields` on
+   * any non-2xx/throw, returning `{ok:false}` for the caller to toast. The rail
+   * must never show a belief we failed to persist.
+   */
+  commitRail: (commit: WizardRailCommit) => Promise<WizardRailCommitResult>;
 
   // Persistence (reuses /api/saveDraft — no new API).
   buildBriefPatch: () => Partial<Brief>;
@@ -818,6 +852,10 @@ const initialState: WizardState = {
 
 export const selectJourneyStep = (s: WizardStore): WizardJourneyStep => s.journeyStep;
 export const selectSetJourneyStep = (s: WizardStore) => s.setJourneyStep;
+/** P3 — the rail's source of truth. Re-projected by the seam on every change. */
+export const selectBriefFacts = (s: WizardStore): Record<string, unknown> | null =>
+  s.briefFacts;
+export const selectCommitRail = (s: WizardStore) => s.commitRail;
 
 // ---------------------------------------------------------------------------
 // Store
@@ -1243,6 +1281,85 @@ export const useWizardStore = create<WizardStore>()(
         set((state) => {
           state.journeyStep = step;
         }),
+
+      // work-onboarding-shell P3 — the atomic rail commit (decision 5).
+      //
+      // ORDER MATTERS, all of it:
+      //  1. SNAPSHOT `briefFacts` + every field a mirror will overwrite BEFORE
+      //     the optimistic `set` — after it, immer has replaced them and the
+      //     pre-edit values are gone.
+      //  2. ONE `set` applies `facts` + mirrors together. `facts` is the seam's
+      //     merged bag (same object as `patch.facts`), so the rail re-projects
+      //     immediately and the NEXT edit's `liveFacts` is this snapshot — which
+      //     is what makes the seam's chip ids join correctly (chip stable-id
+      //     rule). Never split this into two sets.
+      //  3. POST + CHECK `res.ok`. `save()` swallows everything by design
+      //     (autosave must not block the wizard); this must not — see the action
+      //     doc. On failure we restore BOTH in one `set` and report `ok:false`.
+      //
+      // The toast lives at the CALL SITE (a store cannot use the `useToast`
+      // hook); the revert — the part that protects generation — lives here.
+      commitRail: async (commit) => {
+        const { tokenId, currentSlot, slots } = get();
+        if (!tokenId) return { ok: false, error: 'No project token' };
+
+        const mirrors = commit.fieldMirrors ?? [];
+        // Step 1 — pre-edit snapshots.
+        const prevFacts = get().briefFacts;
+        const prevFields = mirrors.map(
+          (m) => [m.fieldId, get().fields[m.fieldId]] as const
+        );
+
+        // Step 2 — the one optimistic set.
+        set((state) => {
+          state.briefFacts = commit.facts;
+          for (const m of mirrors) {
+            const prev = state.fields[m.fieldId];
+            state.fields[m.fieldId] = {
+              value: m.value,
+              source: 'user',
+              confirmed: prev?.confirmed ?? false,
+              state: prev?.state ?? 'ask',
+            };
+          }
+        });
+
+        const revert = () =>
+          set((state) => {
+            state.briefFacts = prevFacts;
+            for (const [id, entry] of prevFields) {
+              // A field the mirror CREATED must be removed again, not left as
+              // an `undefined`-valued entry.
+              if (entry === undefined) delete state.fields[id];
+              else state.fields[id] = entry;
+            }
+          });
+
+        // Step 3 — persist. Body shape is `save()`'s, verbatim: the journey has
+        // no slot, so `slots.indexOf(currentSlot)` is -1 → 0. Harmless — the only
+        // consumer of the persisted stepIndex is dashboard `continueRouting`,
+        // whose mid-journey branch routes 0 back through onboarding (→ journey
+        // resume-mount) and whose `finalContent` branch wins post-generation.
+        try {
+          const res = await fetch('/api/saveDraft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tokenId,
+              stepIndex: Math.max(0, slots.indexOf(currentSlot)),
+              brief: commit.patch,
+            }),
+          });
+          if (!res.ok) {
+            revert();
+            return { ok: false, error: `saveDraft failed (${res.status})` };
+          }
+          return { ok: true };
+        } catch {
+          revert();
+          return { ok: false, error: 'saveDraft failed' };
+        }
+      },
 
       // Compose the Brief patch persisted on save — goal is the well-defined
       // writeback (scale-05); field→Brief mapping lands with the phase-5

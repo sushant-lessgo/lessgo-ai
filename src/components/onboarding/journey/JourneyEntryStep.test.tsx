@@ -62,6 +62,35 @@ function mockConfirm(json: unknown, ok = true) {
   return fetchMock;
 }
 
+/**
+ * Route-aware fetch: the edited-line path hits `/api/v2/understand` FIRST and
+ * `/api/brief/confirm` second, so a single blanket mock cannot express it.
+ */
+function mockRoutes(handlers: Record<string, { ok?: boolean; json: unknown }>) {
+  const fetchMock = vi.fn(async (url: string) => {
+    const h = handlers[url];
+    if (!h) throw new Error(`unexpected fetch: ${url}`);
+    return { ok: h.ok ?? true, json: async () => h.json };
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+}
+
+/** Rewrite the one-liner (React tracks its own value on the textarea). */
+async function editLine(value: string) {
+  const el = container.querySelector<HTMLTextAreaElement>(
+    '[data-testid="journey-entry-oneliner"]'
+  )!;
+  const setter = Object.getOwnPropertyDescriptor(
+    window.HTMLTextAreaElement.prototype,
+    'value'
+  )!.set!;
+  await act(async () => {
+    setter.call(el, value);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+}
+
 /** Let queued microtasks/timers drain inside act (the seam load is a real
  *  dynamic import, so one microtask is not enough). */
 async function flush(times = 5) {
@@ -216,11 +245,115 @@ describe('JourneyEntryStep — error handling', () => {
 });
 
 describe('JourneyEntryStep — rendering', () => {
-  it('shows the classified one-liner', async () => {
+  it('prefills the composer with the classified one-liner', async () => {
     mockConfirm({ outcome: 'serve', redirectTo: '/x' });
     await mountEntry();
     expect(
-      container.querySelector('[data-testid="journey-entry-oneliner"]')?.textContent
+      container.querySelector<HTMLTextAreaElement>('[data-testid="journey-entry-oneliner"]')
+        ?.value
     ).toBe('Documentary wedding photography in Amsterdam');
+  });
+});
+
+// ============================================================================
+// Edited line ⇒ re-classify (P3 / decision 3)
+// ============================================================================
+
+/** A re-classified draft on a NON-seam engine (trust). */
+const TRUST_DRAFT: Brief = {
+  businessType: 'agency',
+  copyEngine: 'trust',
+  facts: {
+    entry: {
+      rawInput: 'a six-week brand studio for DTC founders',
+      resolvedEngine: 'trust',
+      classificationSource: 'lookup',
+      tiebreaker: 'none',
+      platformNeeds: 'none',
+      summary: 'Brand identity studio',
+      businessName: 'Studio Six',
+      offerings: ['Brand identity'],
+      audiences: [],
+      categories: ['branding'],
+      outcomes: [],
+      deliveryModel: 'remote',
+      offer: 'Book a call',
+      oneLiner: 'A six-week brand studio for DTC founders',
+      testimonials: [],
+    },
+  },
+  confidence: 0.9,
+};
+
+describe('JourneyEntryStep — edited line re-classifies', () => {
+  it('an UNEDITED line does not re-classify (no wasted UNDERSTAND credit)', async () => {
+    const fetchMock = mockConfirm({ outcome: 'serve', redirectTo: '/x' });
+    await mountEntry();
+    await clickCta();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/brief/confirm');
+  });
+
+  it('an edited line re-classifies, then confirms the FRESH draft (still seamed)', async () => {
+    const fresh: Brief = {
+      ...WORK_DRAFT,
+      facts: {
+        entry: {
+          ...(WORK_DRAFT.facts!['entry'] as Record<string, unknown>),
+          businessName: 'Newborn Studio',
+          offerings: ['Newborn session'],
+        },
+      },
+    };
+    const fetchMock = mockRoutes({
+      '/api/v2/understand': { json: { success: true, briefDraft: fresh } },
+      '/api/brief/confirm': { json: { outcome: 'serve', redirectTo: '/onboarding/tok_test' } },
+    });
+    const { onManual } = await mountEntry();
+    await editLine('newborn photographer in Utrecht');
+    await clickCta();
+
+    expect(fetchMock.mock.calls.map((c) => c[0])).toEqual([
+      '/api/v2/understand',
+      '/api/brief/confirm',
+    ]);
+    // The CONFIRMED brief is the fresh one — and it carries the seam enrichment
+    // built from the FRESH entry facts, not the stale ones.
+    const body = JSON.parse((fetchMock.mock.calls[1][1] as RequestInit).body as string);
+    const work = getWorkFacts(body.brief.facts);
+    expect(work?.identity?.name).toBe('Newborn Studio');
+    expect(work?.groups?.[0]?.name).toBe('Newborn session');
+    expect(assign).toHaveBeenCalledWith('/onboarding/tok_test');
+    expect(onManual).not.toHaveBeenCalled();
+  });
+
+  it('a NON-seam re-classification hands the fresh draft back and never confirms', async () => {
+    const fetchMock = mockRoutes({
+      '/api/v2/understand': { json: { success: true, briefDraft: TRUST_DRAFT } },
+    });
+    const onDraftCorrected = vi.fn();
+    await mountEntry({ onDraftCorrected });
+    await editLine('a six-week brand studio for DTC founders');
+    await clickCta();
+
+    // The parent re-renders from the corrected draft ⇒ the entry page's
+    // seam-keyed branch goes false ⇒ ConfirmBriefStep takes over. Confirming a
+    // non-seam brief from here would strand it in a journey it cannot drive.
+    expect(onDraftCorrected).toHaveBeenCalledWith(TRUST_DRAFT);
+    expect(fetchMock.mock.calls.map((c) => c[0])).toEqual(['/api/v2/understand']);
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  it('surfaces a failed re-classify and does not confirm the stale draft', async () => {
+    const fetchMock = mockRoutes({
+      '/api/v2/understand': { ok: false, json: { message: 'Could not understand that.' } },
+    });
+    await mountEntry();
+    await editLine('asdf asdf asdf');
+    await clickCta();
+
+    expect(fetchMock.mock.calls.map((c) => c[0])).toEqual(['/api/v2/understand']);
+    expect(container.textContent).toContain('Could not understand that.');
+    expect(assign).not.toHaveBeenCalled();
   });
 });
