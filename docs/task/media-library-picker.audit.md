@@ -94,3 +94,78 @@ None. Shape matches the plan minus the excluded ballot field.
 - `checksum` is store-only by ruling: rows written before phase 2 computes it (and every proxy cache-hit backfill row) carry `checksum = null`. Any future dupe-collapse UX must treat null as "unknown", never as "no match".
 - `@@index([projectId, checksum])` is dead weight until a checksum consumer exists — accepted cost of the ruling.
 - `groupId` has an index but no `MediaGroup` FK (that model lands with E2) — referential integrity for grouping is E2's problem, not enforced here.
+
+---
+
+## Phase 2 — Shared image pipeline + storage + registry writes in upload/proxy routes
+
+**Files changed**
+- `src/lib/media/pipeline.ts` (created)
+- `src/lib/media/registry.ts` (created)
+- `src/lib/media/pipeline.test.ts` (created)
+- `src/lib/media/registry.test.ts` (created)
+- `src/app/api/upload-image/route.ts` (modified)
+- `src/app/api/proxy-image/route.ts` (modified)
+- `docs/task/media-library-picker.audit.md` (appended — this section)
+
+Exactly the plan's Phase-2 Files-touched list. Nothing outside it.
+
+### `src/lib/media/pipeline.ts` (new)
+
+Buffer-in shared module, two exports plus constants (`MAX_WIDTH=2400`, `WEBP_QUALITY=85`, `BLUR_WIDTH=16`, `SVG_MIME`):
+
+- `processImage(buffer, mimeType?)` → `{ buffer, width, height, bytes, format, blurDataUrl, checksum, extension, contentType }`.
+  - Raster: `sharp().resize(2400, null, { withoutEnlargement: true, fit: 'inside' }).webp({ quality: 85 })` — byte-identical to the code lifted from both routes.
+  - Blur: sharp-only (`resize(16)` → `webp({quality:40})` → `data:image/webp;base64,…`). **No new dependency** (`sharp ^0.34.3` already present). Wrapped in try/catch → returns null rather than failing an upload.
+  - Checksum: sha256 of the **processed** buffer via `crypto.createHash`. Store-only in v1 per the founder ruling — nothing reads it, no dedupe UX.
+  - **Explicit SVG branch** (ruling 5): buffer passed through untouched (no sharp re-encode — rasterizing would defeat the point of a vector), `format:'svg'`, `blurDataUrl:null`, dims best-effort in try/catch.
+- `storeImage(buffer, { tokenId, filename, contentType })` → `{ url, storage: 'blob' | 'dev-fs' }` — the `put()` + dev-fs fallback lifted out of both routes. Prefix stays `uploads/{tokenId}/{filename}`; dev-fs returns `/uploads/{tokenId}/{filename}`. Both routes now USE it — no third copy left.
+
+`extension`/`contentType` were added to the return shape (beyond the plan's listed fields) so callers don't re-branch on SVG to build a filename — the branch lives in one place. Module JSDoc documents the E2 seam.
+
+### `src/lib/media/registry.ts` (new)
+
+Per ruling 4's scope note — two exports:
+- `recordMediaAsset(input)` — **STRICT, throws**, returns `assetId`. E2's entry point (`workEndtoEnd.md` §8a: the row IS the deliverable).
+- `recordMediaAssetBestEffort(input)` — try/catch wrapper, logs, **never throws**, returns `assetId | null`. The only thing the two routes call.
+
+Both go through `prisma.mediaAsset.upsert({ where: { tokenId_url: { tokenId, url } }, update: { hiddenAt: null }, create: {…} })`. The `hiddenAt: null` update arm is the resurrection-bug fix and is asserted in tests. Optional inputs normalized to `null` via `?? null`.
+
+### `src/app/api/upload-image/route.ts`
+
+Inline sharp/put/fs deleted → `processImage` + `storeImage` + `recordMediaAssetBestEffort({ source: 'upload' })`. `sharp`/`put` imports dropped (now unused).
+
+- **Ruling 2 honored:** the inline ownership check (user lookup → token → `token.project.userId !== user.id` → `isAdmin`/`logAdminOverride`) is **completely untouched**. No `assertProjectOwner`.
+- Response only **extended**: `metadata` gains `blurDataUrl` + `assetId`. `width`/`height`/`size`/`format` unchanged (`?? undefined` preserves the old "absent key" shape when sharp yields no dims, rather than newly emitting `null`). `uploadImage`/`bulkUploadImages`/`EditableImageCollection` keep working unmodified.
+- `userId` on the row = **Clerk id** (`clerkId`), per the schema's `userId String // Clerk User ID` comment — deliberately NOT the internal `user.id`. `projectId` = `token.project.id`.
+
+### `src/app/api/proxy-image/route.ts`
+
+Miss path rewired the same way with `source:'stock'`, `sourceUrl` = the Pexels `src.large` URL, full metadata. `cacheKey` is still used as the `list()` prefix, and `storeImage` reproduces the identical blob key (`uploads/{tokenId}/pexels-{id}.webp`) — verified by inspection.
+
+Cache-hit branch added exactly as specified: `recordMediaAssetBestEffort` with `bytes: blobs[0].size`, `format:'webp'`, `source:'stock'`, everything else omitted → null. No Pexels call. It sits inside the existing `try{list}catch{}`, which is harmless since the best-effort fn cannot throw.
+
+### Decisions / deviations
+
+- **No deviations from the plan.** Two in-scope judgment calls, both conservative:
+  1. `extension`/`contentType` added to `ProcessedImage` (rationale above) — additive, no caller impact.
+  2. Upload response uses `?? undefined` not `?? null` for width/height, to avoid narrowing/changing the existing JSON shape for consumers.
+- Behavior deltas, both strictly wider (nothing narrowed): (a) a sharp-metadata failure on a malformed SVG previously 500'd the upload route; it now stores with null dims. (b) an SVG upload now gets a registry row and a checksum.
+- Not touched, as instructed: `bulkUploadImages`, editor store, `src/stores/*`, `src/lib/testimonials/photo.ts` (logged debt).
+
+### Verification
+
+- `npx tsc --noEmit` → **1 error**, the known pre-existing `src/app/page.tsx` / `@/assets/images/founder.jpg` (gitignored `next-env.d.ts` not generated until first `next build`). Count unchanged from baseline — not mine.
+- `npm run test:run` → **196 files passed | 1 skipped (197)**, **3357 passed | 18 skipped (3375)**. Baseline was 194 files / 3343 tests; delta is exactly my 2 files / 14 tests. Nothing regressed.
+- `npx eslint` on all touched paths → clean.
+- `npm run build` NOT run (phase 4's gate, per instructions).
+- Not committed — orchestrator commits.
+
+`pipeline.test.ts` carries `// @vitest-environment node` (sharp is native; nothing DOM-y in the file). It passes under it — no jsdom trouble observed.
+
+### Notes for phases 3 / 4
+
+- Registry rows now exist for **every** upload/stock pick, including the dev-fs fallback path, where `url` is the **relative** `/uploads/{token}/{file}` string. Phase 3's GET `/api/media` and phase 4's grid must render relative AND absolute URLs.
+- `blurDataUrl` is populated on the upload path → phase 3's e2e "registry-row-on-upload check incl. blurDataUrl" will find it. It is **null** for SVG uploads and for cache-hit backfill rows — the phase-4 grid must tolerate a null placeholder.
+- The `assetId` is now on the upload response `metadata` if phase 4 wants to skip a grid refetch after upload.
+- Manual dev verification (blob/dev-fs file + row via prisma studio, repeat-pick single row, un-hide) is NOT done — no dev server was run this phase. It remains on the founder's manual pass listed under phase 2/4 verification.

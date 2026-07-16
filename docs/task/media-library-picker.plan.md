@@ -21,7 +21,7 @@ Ship a per-project **`MediaAsset` registry** (Prisma), a **shared image-pipeline
 
 ## Progress log
 
-- phase 1 MediaAsset model + migration: pending
+- phase 1 MediaAsset model + migration: **done** (commit `130f22cd`, review loops 1, verdict `ship`). Gate CLEARED by founder: `curationSignal` EXCLUDED · `checksum` + `@@index([projectId, checksum])` INCLUDED (store-only v1) · `groupId`/`sortOrder`/`selected` ALL INCLUDED · DB target confirmed DEV (`ep-nameless-thunder-a2lj1s9v`). Migration `20260716164706_media_asset` applied to dev, additive-only, safe for `migrate deploy` on prod. Compound-unique input is `tokenId_url`. NOTE for later phases: `updatedAt` is `@updatedAt`, so the cache-hit `update:{hiddenAt:null}` arm bumps it — use `createdAt` for "first seen" ordering.
 - phase 2 shared pipeline + registry seam in upload/proxy routes: pending
 - phase 3 /api/media routes + ownership e2e: pending
 - phase 4 media picker UI wired into ImageToolbar Replace: pending

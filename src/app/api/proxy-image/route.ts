@@ -3,13 +3,12 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-import sharp from 'sharp';
-import { put, list } from '@vercel/blob';
+import { list } from '@vercel/blob';
 import { isAdmin } from '@/lib/admin';
+import { processImage, storeImage } from '@/lib/media/pipeline';
+import { recordMediaAssetBestEffort } from '@/lib/media/registry';
 
 const MAX_INPUT_SIZE = 15 * 1024 * 1024; // 15MB max from Pexels
-const MAX_WIDTH = 2400;
-const WEBP_QUALITY = 85;
 
 export async function POST(request: NextRequest) {
   console.log('🔵 [PROXY] POST handler called');
@@ -62,6 +61,25 @@ export async function POST(request: NextRequest) {
       const { blobs } = await list({ prefix: cacheKey });
       if (blobs.length > 0) {
         console.log('🔵 [PROXY] Cache hit:', blobs[0].url);
+
+        // Backfill / un-hide the registry row WITHOUT calling Pexels — the cache exists
+        // precisely to avoid that call, and this path fires before any Pexels fetch, so
+        // sourceUrl/width/height/blurDataUrl are unobtainable here (all nullable by design;
+        // `bytes` comes from the blob listing, which is why it can stay non-null).
+        // The upsert's update arm sets `hiddenAt: null`: re-picking an asset is an explicit
+        // "I want this on my page", so a hidden asset must reappear in the library.
+        // Partial rows are rare by construction — post-seam, the MISS path writes the full
+        // row on first proxy, so `create` here only backfills pre-feature blobs.
+        await recordMediaAssetBestEffort({
+          projectId: token.project.id,
+          tokenId,
+          userId: clerkId,
+          url: blobs[0].url,
+          source: 'stock',
+          bytes: blobs[0].size,
+          format: 'webp',
+        });
+
         return NextResponse.json({
           success: true,
           url: blobs[0].url,
@@ -127,56 +145,37 @@ export async function POST(request: NextRequest) {
 
     console.log('🔵 [PROXY] Processing with Sharp...');
 
-    // Process with Sharp
-    const processedBuffer = await sharp(buffer)
-      .resize(MAX_WIDTH, null, {
-        withoutEnlargement: true,
-        fit: 'inside',
-      })
-      .webp({ quality: WEBP_QUALITY })
-      .toBuffer();
+    // Process + store via the shared pipeline (same blob key as before: uploads/{tokenId}/…)
+    const processed = await processImage(buffer, 'image/webp');
+    const filename = `pexels-${pexelsPhotoId}.webp`;
 
-    // Dev mode fallback
-    const isDev = process.env.NODE_ENV === 'development';
-    const hasBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
-
-    if (isDev && !hasBlob) {
-      const { writeFile, mkdir } = await import('fs/promises');
-      const { existsSync } = await import('fs');
-      const path = await import('path');
-
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', tokenId);
-      if (!existsSync(uploadDir)) {
-        await mkdir(uploadDir, { recursive: true });
-      }
-
-      const filename = `pexels-${pexelsPhotoId}.webp`;
-      const filePath = path.join(uploadDir, filename);
-      await writeFile(filePath, processedBuffer);
-
-      const localUrl = `/uploads/${tokenId}/${filename}`;
-      console.log('🔵 [PROXY] Dev mode: Saved to filesystem:', localUrl);
-
-      return NextResponse.json({
-        success: true,
-        url: localUrl,
-        cached: false,
-      });
-    }
-
-    // Upload to Vercel Blob
-    console.log('🔵 [PROXY] Uploading to Vercel Blob...');
-    const blob = await put(cacheKey, processedBuffer, {
-      access: 'public',
-      contentType: 'image/webp',
-      addRandomSuffix: false,
+    const stored = await storeImage(processed.buffer, {
+      tokenId,
+      filename,
+      contentType: processed.contentType,
     });
 
-    console.log('🔵 [PROXY] Upload successful:', blob.url);
+    console.log('🔵 [PROXY] Stored:', stored.storage, stored.url);
+
+    // Registry row — BEST EFFORT: a stock pick must never fail because the row failed.
+    await recordMediaAssetBestEffort({
+      projectId: token.project.id,
+      tokenId,
+      userId: clerkId,
+      url: stored.url,
+      source: 'stock',
+      sourceUrl: imageUrl,
+      width: processed.width,
+      height: processed.height,
+      bytes: processed.bytes,
+      format: processed.format,
+      blurDataUrl: processed.blurDataUrl,
+      checksum: processed.checksum,
+    });
 
     return NextResponse.json({
       success: true,
-      url: blob.url,
+      url: stored.url,
       cached: false,
     });
 
