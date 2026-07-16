@@ -40,12 +40,13 @@ test.describe('dashboard shell', () => {
     await expect(page.getByRole('button', { name: /\+ Create New Page/i })).toHaveCount(0);
   });
 
-  test('un-built controls are greyed in place (All Analytics / Domains / bell)', async ({
+  test('un-built controls are greyed in place (Domains / bell)', async ({
     page,
   }) => {
     await page.goto('/dashboard');
 
-    for (const name of ['All Analytics', 'Domains']) {
+    // S4 phase 4 un-greyed All Analytics (real <Link> now) — only Domains remains.
+    for (const name of ['Domains']) {
       const item = page.getByRole('button', { name, exact: true });
       await expect(item, `${name} should render (completeness principle)`).toBeVisible();
       await expect(item, `${name} should be disabled`).toBeDisabled();

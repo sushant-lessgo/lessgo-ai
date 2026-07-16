@@ -220,3 +220,41 @@ domain-less card). No contradictions found.
 - Phase 4 also edits `AppSidebar.tsx` + both e2e specs — same conflict surface as noted above.
 - Pre-existing `stash@{0}` ("WIP on feature/work-skeleton") is still parked in the repo — untouched here
   (no git stash used in this addendum), but someone should reclaim or drop it.
+
+---
+
+## Phase 4 — All Analytics rollup + un-grey All Analytics + e2e
+
+**Files changed**
+- `src/app/dashboard/analytics/page.tsx` (new)
+- `src/components/dashboard/AppSidebar.tsx` (edit)
+- `e2e/dashboard-shell.spec.ts` (edit)
+- `e2e/dashboard-rollups-inbox.spec.ts` (edit)
+- `docs/task/dashboard-rollups-inbox.audit.md` (this append)
+
+### `src/app/dashboard/analytics/page.tsx` (new)
+Server component; legal sibling of the `analytics/[slug]/page.tsx` redirect shim (shim untouched).
+- Auth: `const { userId } = await auth()`; unauth → `return null` (same as `/dashboard/leads`). **R-B**: no `isAdmin` import, no admin branch — doc-comment records the deliberate divergence from S1's dashboard root. `getUserPlan()` never called.
+- Scope: `getAccountScope(userId)` with the **Clerk** id → `{ pages, slugs }`. Empty `slugs` → app-* empty state ("Publish a site to see analytics.") + range switcher.
+- **R-E window**: mirrors `[token]/analytics/page.tsx:70-78` verbatim — `searchParams.days`, valid `{7,30,90}`, default 30, same `startDate`/`endDate`. No previous-period comparison, no trend chart.
+- Query: `pageAnalytics.findMany({ where: { slug: { in: slugs }, date: { gte: startDate, lte: endDate } } })` (PageAnalytics has no userId; slugs are server-set-derived).
+- Grouped by slug in JS. Totals sum `views`/`uniqueVisitors`/`formSubmissions`/`ctaClicks`; `conversionRate = submissions/views*100` **computed from totals**, never averaging stored per-row `conversionRate` (comment explains why).
+- Render (**R-D**, fresh app-*-only markup; zero legacy component imports, zero stock-Tailwind color/font keys): 4 stat tiles (Views / Unique visitors / Conversions / Conv. rate) + per-site table (title from the `pages` map, slug, views, visitors, conversions, conv. rate), sorted views desc, **zero-filled** rows for owned sites with no rows in window. Range switcher = three `<Link href="/dashboard/analytics?days=7|30|90">` pills, active highlighted.
+
+### `src/components/dashboard/AppSidebar.tsx`
+`analyticsActive` added (mirrors `leadsActive`); `All Analytics` `DisabledNavItem` → enabled `NavItem asChild` + `Link href="/dashboard/analytics"`, icon `monitoring`, **no count pill (R-C)**. Doc-comment: minimal token-level edit — greyed list now "Domains (R15), Upgrade (S3)". `src/components/ui/nav-item.tsx` untouched.
+
+### e2e
+- `dashboard-shell.spec.ts`: greyed loop narrowed `['All Analytics','Domains']` → `['Domains']` (+ comment), test retitled. Bell + the just-re-synced menu-item assertions untouched.
+- `dashboard-rollups-inbox.spec.ts`: leads test untouched; ADDED a `all analytics rollup (phase 4)` describe with 2 tests — (1) sidebar link → `/dashboard/analytics`, exactly one `.app-chrome`, heading "All Analytics", tiles-or-empty-state, no error overlay; (2) `?days=7` pill navigates, URL search `?days=7`, page still renders. Avoids `toHaveText` on AppIcon-bearing nodes (ligature text) per the file's existing patterns.
+
+### Verification (real)
+- `npx tsc --noEmit` → **clean, zero output** (the phase-1..3 `founder.jpg` worktree artifact no longer reproduces).
+- `npm run test:run` → **198 files passed / 1 skipped; 3382 tests passed / 18 skipped**.
+- `E2E_PORT=3117 npx playwright test e2e/dashboard-shell.spec.ts e2e/dashboard-rollups-inbox.spec.ts` → **12 passed / 1 skipped** (13 collected). Both new analytics tests **COLLECTED and PASSED** (`#3` sidebar→rollup 7.0s, `#4` 7d range link 2.0s). The 1 skip is the pre-existing data-conditional empty-state test (account has projects) — unchanged from phase 3. No assertion weakened or skipped.
+
+### Sanity — rollup vs per-site totals (code-level)
+Plausibly consistent: same table, same `slug`+`date` predicate, and identical window arithmetic copied from `[token]/analytics/page.tsx:70-78`, so the rollup's day-row set for one slug is exactly that page's set. Totals are plain sums of the same columns, and `conversionRate` uses the same from-totals formula → the account total equals the sum of the per-site pages' views/visitors/conversions, and the account conv. rate is the correctly view-weighted (not averaged) rate. Only expected difference: the rollup includes sites whose per-site page is "locked" (unpublished project) if a PublishedPage row/slug still exists — intentional per accountScope (historical analytics still belong to the user).
+
+### Deviations / notes
+- None from the plan. Manual `npm run dev` check of totals against live per-site pages was NOT run (no prod data in this worktree) — covered by the code-level reasoning above and left to phase 5 / founder gate.
