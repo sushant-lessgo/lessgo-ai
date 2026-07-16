@@ -25,10 +25,16 @@ export const WORK_HEADER_STYLES = `
    two stacked bands (a pure crop artifact that pushed the dense header bands past
    3%); inset by 1px, the crop-edge row is uniform background and the divider renders
    consistently in both renderers. Visually identical to a bottom border. */
-.wk-header{ position:relative; background:var(--u-bg, var(--wk-paper)); color:var(--u-fg, var(--wk-ink)); }
-.wk-header::after{ content:""; position:absolute; left:0; right:0; bottom:1px; height:1px; background:var(--wk-line); }
+/* OVERLAY (Wave 2B): var-gated between the current paper header (defaults, byte-
+   identical) and the Atelier on-dark header — dark bar + white text + on-dark
+   hairline + accent-dot wordmark — designed to sit over the dark hero cover. Pure
+   CSS on the existing markup → edit==published; server-safe (no hook). */
+.wk-header{ position:relative; background:var(--wk-header-bg, var(--u-bg, var(--wk-paper))); color:var(--wk-header-fg, var(--u-fg, var(--wk-ink))); }
+.wk-header::after{ content:""; position:absolute; left:0; right:0; bottom:1px; height:1px; background:var(--wk-header-line, var(--wk-line)); }
 .wk-header__in{ width:100%; max-width:var(--wk-wrap); margin:0 auto; box-sizing:border-box; height:80px; padding:0 var(--wk-gutter); display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:24px; }
 .wk-header__logo{ display:inline-flex; align-items:center; gap:10px; text-decoration:none; color:inherit; font-family:var(--wk-ff-display); font-weight:var(--wk-display-weight); font-size:18px; letter-spacing:-0.01em; justify-self:start; }
+/* Accent-dot wordmark (Atelier .atl-wm::before) — gated on in overlay mode only. */
+.wk-header__logo::before{ content:""; display:var(--wk-header-dot, none); width:9px; height:9px; border-radius:50%; background:var(--wk-accent); flex:none; }
 .wk-header__logo img{ height:32px; width:auto; display:block; }
 .wk-header__nav{ display:flex; align-items:center; gap:26px; justify-self:center; }
 /* Style the nav link typography for BOTH renderers: published emits a bare anchor,

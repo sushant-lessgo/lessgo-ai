@@ -39,6 +39,10 @@ const validTokens: WorkSkinTokens = {
   heroNumeral: false,
   sectionHeaderStyle: 'plain',
   footerWordmark: false,
+  galleryCaption: 'below',
+  packagesStyle: 'list',
+  aboutLayout: 'stack',
+  headerOverlay: false,
 };
 
 describe('assertSkinTokens — skin token bounds (loud fail)', () => {
@@ -137,6 +141,38 @@ describe('assertSkinTokens — skin token bounds (loud fail)', () => {
     expect(msg).toContain('--wk-sec-head-display');
     expect(msg).toContain('--wk-footer-wm-fs');
   });
+
+  it('accepts the Wave 2B composition opt-ins (atelier2)', () => {
+    const atelier: WorkSkinTokens = {
+      ...validTokens,
+      galleryCaption: 'overlay',
+      packagesStyle: 'card',
+      aboutLayout: 'split-portrait',
+      headerOverlay: true,
+    };
+    expect(() => assertSkinTokens({ id: 'wave2b', tokens: atelier })).not.toThrow();
+  });
+
+  it('throws listing EVERY Wave 2B violation (bad enums + non-boolean headerOverlay)', () => {
+    const bad: WorkSkinTokens = {
+      ...validTokens,
+      galleryCaption: 'inside' as any,    // not below|overlay
+      packagesStyle: 'grid' as any,       // not list|card
+      aboutLayout: 'split' as any,        // not stack|split-portrait
+      headerOverlay: 'yes' as any,        // not a boolean
+    };
+    let msg = '';
+    try {
+      assertSkinTokens({ id: 'bad-wave2b', tokens: bad });
+    } catch (e) {
+      msg = (e as Error).message;
+    }
+    expect(msg).toContain('4 token violation(s)');
+    expect(msg).toContain('--wk-gal-cap-pos');
+    expect(msg).toContain('--wk-pkg-cta-w');
+    expect(msg).toContain('--wk-about-align');
+    expect(msg).toContain('--wk-header-bg');
+  });
 });
 
 describe('serializeSkinTokens — Wave 2A derived vars', () => {
@@ -157,6 +193,41 @@ describe('serializeSkinTokens — Wave 2A derived vars', () => {
     expect(css).toContain('--wk-sec-head-meta-ml:auto;');
     expect(css).toContain('--wk-footer-wm-fs:clamp(48px,11vw,170px);');
     expect(css).toContain('--wk-footer-dot:inline;');
+  });
+});
+
+describe('serializeSkinTokens — Wave 2B derived vars', () => {
+  it('emits neutral (below/list/stack/off) defaults for a non-setting skin', () => {
+    const css = serializeSkinTokens(validTokens);
+    expect(css).toContain('--wk-gal-cap-pos:static;');
+    expect(css).toContain('--wk-gal-grad-display:none;');
+    expect(css).toContain('--wk-gal-hover-scale:1;');
+    expect(css).toContain('--wk-pkg-cta-w:auto;');
+    expect(css).toContain('--wk-pkg-price-fs:1.7rem;');
+    expect(css).toContain('--wk-about-align:start;');
+    expect(css).toContain('--wk-header-bg:var(--u-bg, var(--wk-paper));');
+    expect(css).toContain('--wk-header-dot:none;');
+  });
+
+  it('emits the Atelier composition vars for the opted-in skin', () => {
+    const css = serializeSkinTokens({
+      ...validTokens,
+      galleryCaption: 'overlay',
+      packagesStyle: 'card',
+      aboutLayout: 'split-portrait',
+      headerOverlay: true,
+    });
+    expect(css).toContain('--wk-gal-cap-pos:absolute;');
+    expect(css).toContain('--wk-gal-grad-display:block;');
+    expect(css).toContain('--wk-gal-dot-display:inline-block;');
+    expect(css).toContain('--wk-pkg-cta-w:100%;');
+    expect(css).toContain('--wk-pkg-cta-mt:auto;');
+    expect(css).toContain('--wk-pkg-price-fs:clamp(32px,3vw,42px);');
+    expect(css).toContain('--wk-about-align:center;');
+    expect(css).toContain('--wk-about-eyebrow-display:inline-block;');
+    expect(css).toContain('--wk-header-bg:transparent;');
+    expect(css).toContain('--wk-header-fg:var(--wk-on-dark);');
+    expect(css).toContain('--wk-header-dot:inline-block;');
   });
 });
 

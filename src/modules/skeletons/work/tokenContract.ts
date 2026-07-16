@@ -67,6 +67,30 @@ export interface WorkSkinTokens {
   // compact footer. `true` = Atelier's giant footer wordmark (the heading rendered
   // huge, weight 700, with an accent dot) — no new contract field (reuses heading).
   footerWordmark: boolean;
+
+  // Section-composition personality (fidelity Wave 2B). Each NEUTRAL default renders
+  // its block EXACTLY as today (byte-identical); atelier2 opts into the Atelier
+  // composition. All are pure var-gated CSS on the frozen contract (no new fields).
+
+  // Gallery caption placement. `below` = current stacked name under the cover.
+  // `overlay` = Atelier mosaic — caption OVERLAID on the image (accent dot + name on
+  // a bottom gradient) with a hover-scale. Uses only groups[].name / cover_image.
+  galleryCaption: 'below' | 'overlay';
+
+  // Packages presentation. `list` = current bordered card grid (link-style CTA).
+  // `card` = Atelier "Experiences" card — big serif price + full-width square button
+  // pinned to the card foot. Uses only name/price_line/description/cta_label.
+  packagesStyle: 'list' | 'card';
+
+  // About arrangement. `stack` = current 2-col editorial (head left, body right).
+  // `split-portrait` = Atelier split — centre-aligned columns + an accent badge
+  // eyebrow (graceful accent treatment; the contract carries NO portrait image).
+  aboutLayout: 'stack' | 'split-portrait';
+
+  // Header overlay-on-hero. NEUTRAL `false` = current paper header. `true` = Atelier
+  // on-dark header (dark bar + white text + accent-dot wordmark + on-dark hairline)
+  // designed to sit over the dark hero cover. Server-safe (no hook).
+  headerOverlay: boolean;
 }
 
 /** Token field → its emitted `--wk-*` CSS custom property name. */
@@ -100,6 +124,10 @@ export const WORK_TOKEN_VARS: Record<keyof WorkSkinTokens, string> = {
   heroNumeral: '--wk-hero-num-display',
   sectionHeaderStyle: '--wk-sec-head-display', // primary; expands to 5 derived vars
   footerWordmark: '--wk-footer-wm-fs',         // primary; expands to 4 derived vars
+  galleryCaption: '--wk-gal-cap-pos',          // primary; expands to 6 derived vars
+  packagesStyle: '--wk-pkg-cta-w',             // primary; expands to 9 derived vars
+  aboutLayout: '--wk-about-align',             // primary; expands to 5 derived vars
+  headerOverlay: '--wk-header-bg',             // primary; expands to 4 derived vars
 };
 
 export const WORK_TOKEN_COLOR_FIELDS: (keyof WorkSkinTokens)[] = [
@@ -134,10 +162,13 @@ export const WORK_TOKEN_ENUMS: Record<string, number[]> = {
 export const WORK_TOKEN_STRING_ENUMS: Record<string, string[]> = {
   heroAlign: ['start', 'center'],
   sectionHeaderStyle: ['plain', 'rule'],
+  galleryCaption: ['below', 'overlay'],
+  packagesStyle: ['list', 'card'],
+  aboutLayout: ['stack', 'split-portrait'],
 };
 
 /** Boolean tokens (validated as `typeof === 'boolean'`). */
-export const WORK_TOKEN_BOOL_FIELDS: (keyof WorkSkinTokens)[] = ['heroNumeral', 'footerWordmark'];
+export const WORK_TOKEN_BOOL_FIELDS: (keyof WorkSkinTokens)[] = ['heroNumeral', 'footerWordmark', 'headerOverlay'];
 
 // ── Compatibility matrix (cross-token rules) ────────────────────────────────
 // Rules that no single-field bound can express (e.g. paper vs ink must contrast).
@@ -263,6 +294,47 @@ export function serializeSkinTokens(t: WorkSkinTokens): string {
   const fwLh  = fw ? '0.85' : '1.02';
   const fwLs  = fw ? '-0.04em' : '-0.02em';
   const fwDot = fw ? 'inline' : 'none';
+  // Gallery caption (Wave 2B): the enum expands into the overlay-caption vars.
+  // Defaults reproduce the current stacked name-below (byte-neutral).
+  const galOverlay = t.galleryCaption === 'overlay';
+  const galCapPos   = galOverlay ? 'absolute' : 'static';
+  const galCapColor = galOverlay ? '#fff' : 'inherit';
+  const galCapMt    = galOverlay ? '0' : '12px';
+  const galGrad     = galOverlay ? 'block' : 'none';  // ::after gradient display
+  const galDot      = galOverlay ? 'inline-block' : 'none';
+  const galScale    = galOverlay ? '1.045' : '1';     // hover-scale factor
+  // Packages card (Wave 2B): list = the current link-style CTA + 1.7rem price;
+  // card = full-width square accent button pinned to the foot + big serif price.
+  const pkgCard = t.packagesStyle === 'card';
+  const pkgCtaW     = pkgCard ? '100%' : 'auto';
+  const pkgCtaAlign = pkgCard ? 'stretch' : 'flex-start';
+  const pkgCtaMt    = pkgCard ? 'auto' : '0';         // push button to card bottom
+  const pkgCtaBg    = pkgCard ? 'var(--wk-accent)' : 'transparent';
+  const pkgCtaColor = pkgCard ? 'var(--wk-accent-ink,#fff)' : 'var(--wk-accent)';
+  const pkgCtaPad   = pkgCard ? '15px 20px' : '0 0 2px';
+  const pkgCtaBb    = pkgCard ? 'none' : '1px solid var(--wk-accent)'; // border-bottom
+  const pkgCtaTa    = pkgCard ? 'center' : 'left';
+  const pkgPriceFs  = pkgCard ? 'clamp(32px,3vw,42px)' : '1.7rem';
+  // About split (Wave 2B): stack = current 2-col; split-portrait = centre-aligned
+  // columns + accent-badge eyebrow (no portrait field → graceful accent treatment).
+  const aboutSplit = t.aboutLayout === 'split-portrait';
+  const aboutAlign     = aboutSplit ? 'center' : 'start';
+  const aboutEbBg      = aboutSplit ? 'var(--wk-accent)' : 'transparent';
+  const aboutEbColor   = aboutSplit ? 'var(--wk-accent-ink,#fff)' : 'var(--wk-ink-mute)';
+  const aboutEbPad     = aboutSplit ? '10px 14px' : '0';
+  const aboutEbDisplay = aboutSplit ? 'inline-block' : 'inline';
+  // Header overlay (Wave 2B): overlay = dark bar + on-dark text + accent-dot
+  // wordmark + on-dark hairline (sits over the dark hero); off = current paper bar.
+  const hdrOverlay = t.headerOverlay;
+  // Transparent (not a dark FILL): the header is designed to sit over the dark hero
+  // cover, and a transparent bg lets the hero show through. It also keeps the short
+  // header band free of a fill-vs-crop-edge subpixel artifact that a hard dark fill
+  // trips in the isolated parity harness. The REAL-PAGE geometric overlay (absolute
+  // over the hero) is a page/section-stack concern (reported cross-track).
+  const hdrBg   = hdrOverlay ? 'transparent' : 'var(--u-bg, var(--wk-paper))';
+  const hdrFg   = hdrOverlay ? 'var(--wk-on-dark)' : 'var(--u-fg, var(--wk-ink))';
+  const hdrLine = hdrOverlay ? 'var(--wk-line-dark)' : 'var(--wk-line)';
+  const hdrDot  = hdrOverlay ? 'inline-block' : 'none';
   return `:root{
   --wk-paper:${t.paper};
   --wk-paper-2:${t.paper2};
@@ -302,6 +374,30 @@ export function serializeSkinTokens(t: WorkSkinTokens): string {
   --wk-footer-wm-lh:${fwLh};
   --wk-footer-wm-ls:${fwLs};
   --wk-footer-dot:${fwDot};
+  --wk-gal-cap-pos:${galCapPos};
+  --wk-gal-cap-color:${galCapColor};
+  --wk-gal-cap-mt:${galCapMt};
+  --wk-gal-grad-display:${galGrad};
+  --wk-gal-dot-display:${galDot};
+  --wk-gal-hover-scale:${galScale};
+  --wk-pkg-cta-w:${pkgCtaW};
+  --wk-pkg-cta-align:${pkgCtaAlign};
+  --wk-pkg-cta-mt:${pkgCtaMt};
+  --wk-pkg-cta-bg:${pkgCtaBg};
+  --wk-pkg-cta-color:${pkgCtaColor};
+  --wk-pkg-cta-pad:${pkgCtaPad};
+  --wk-pkg-cta-bb:${pkgCtaBb};
+  --wk-pkg-cta-ta:${pkgCtaTa};
+  --wk-pkg-price-fs:${pkgPriceFs};
+  --wk-about-align:${aboutAlign};
+  --wk-about-eyebrow-bg:${aboutEbBg};
+  --wk-about-eyebrow-color:${aboutEbColor};
+  --wk-about-eyebrow-pad:${aboutEbPad};
+  --wk-about-eyebrow-display:${aboutEbDisplay};
+  --wk-header-bg:${hdrBg};
+  --wk-header-fg:${hdrFg};
+  --wk-header-line:${hdrLine};
+  --wk-header-dot:${hdrDot};
 }
 [data-surface="paper"]{background:var(--wk-paper);color:var(--wk-ink);}
 [data-surface="paper-2"]{background:var(--wk-paper-2);color:var(--wk-ink);border-block:1px solid var(--wk-line);}

@@ -56,6 +56,12 @@ export const atelierSkin: WorkSkinDef = {
     // Wave 2A signatures.
     sectionHeaderStyle: 'rule', // Kontur .atl-rule section heads (rule + index + meta)
     footerWordmark: true,       // giant .atl-footer-big wordmark + accent dot
+
+    // Wave 2B section compositions (Atelier parity).
+    galleryCaption: 'overlay',      // .atl-gcell caption overlaid + hover-scale
+    packagesStyle: 'card',          // .atl-pack cards (big serif price + full-width button)
+    aboutLayout: 'split-portrait',  // .atl-split centre-aligned + accent badge
+    headerOverlay: true,            // .atl-nav on-dark header over the cover
   },
 
   // Four curated Kontur accents (atelier/palettes.ts). accentInk = on-accent text

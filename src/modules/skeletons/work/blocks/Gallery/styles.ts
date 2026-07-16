@@ -22,6 +22,24 @@ export const RULE_HEAD = (p: string, meta?: string) => `
 .${p}__${meta}{ order:3; flex-basis:100%; }` : ''}
 `;
 
+// GALLERY_CAPTION (Wave 2B): additive, VAR-GATED overlay-caption grammar shared by
+// every gallery shape. NEUTRAL defaults (from serializeSkinTokens for a non-setting
+// skin) render byte-identical to the stacked name-below; only `galleryCaption:'overlay'`
+// flips it to Atelier's `.atl-gcell` — the group name OVERLAID on the cover (accent
+// dot + name on a bottom gradient) with a hover-scale. Pure CSS on the existing
+// markup (name is a sibling of the media inside the group link) → edit==published.
+// In `below` mode `position:static` + `display:none` pseudo-elements + `scale(1)`
+// make every added rule inert (the name keeps its 12px margin-below, ink colour).
+export const GALLERY_CAPTION = (p: string) => `
+.${p}__link{ position:relative; }
+.${p}__media{ position:relative; }
+.${p}__media::after{ content:""; position:absolute; inset:0; z-index:1; pointer-events:none; display:var(--wk-gal-grad-display, none); background:linear-gradient(180deg, transparent 55%, rgba(20,16,13,0.55)); }
+.${p}__media img{ transition:transform .9s cubic-bezier(.2,.7,.2,1); }
+.${p}__group:hover .${p}__media img{ transform:scale(var(--wk-gal-hover-scale, 1)); }
+.${p}__name{ position:var(--wk-gal-cap-pos, static); left:14px; right:14px; bottom:12px; z-index:2; margin-top:var(--wk-gal-cap-mt, 12px); color:var(--wk-gal-cap-color, inherit); }
+.${p}__name::before{ content:""; display:var(--wk-gal-dot-display, none); width:7px; height:7px; margin-right:8px; border-radius:50%; background:var(--wk-accent); vertical-align:middle; }
+`;
+
 export const WORK_GALLERY_STYLES = `
 .wk-gallery{ background:var(--u-bg, var(--wk-paper)); color:var(--u-fg, var(--wk-ink)); }
 .wk-gallery__in{ width:100%; max-width:var(--wk-wrap); margin:0 auto; padding:calc(var(--wk-sec-y) * var(--u-space-y, 1)) var(--wk-gutter); }
@@ -38,7 +56,7 @@ export const WORK_GALLERY_STYLES = `
 .wk-gallery__name{ display:block; font-family:var(--wk-ff-display); font-weight:600; font-size:1.05rem; letter-spacing:-0.01em; margin-top:12px; }
 .wk-gallery__manage{ margin-top:22px; }
 .wk-gallery__manage a{ font-family:var(--wk-ff-body); font-size:12px; letter-spacing:0.06em; color:var(--wk-accent); text-decoration:none; border-bottom:1px dashed var(--wk-accent); }
-${RULE_HEAD('wk-gallery', 'lead')}`;
+${RULE_HEAD('wk-gallery', 'lead')}${GALLERY_CAPTION('wk-gallery')}`;
 
 // Shared head styling for the alternate gallery shapes (masonry/strip) — same
 // eyebrow/heading/lead grammar as the grid, re-prefixed per shape below.
@@ -58,15 +76,25 @@ const GALLERY_HEAD = (p: string) => `
 
 // ── WorkGalleryMasonry — CSS-columns masonry of group covers (varied heights).
 // Same `groups` collection + AC-L120 group-reference contract as the grid.
+// NOTE (Wave 2B): the mosaic uses a deterministic CSS GRID (not CSS multicol).
+// Multicol balances by CONTENT HEIGHT, and the editor's inline-edit affordances give
+// its items a different min-content width than the published static items, so the two
+// renderers pick a DIFFERENT column count (edit collapses to fewer, wider columns) —
+// an edit↔published parity break the isolated harness catches. A fixed-track grid is
+// column-count-stable in both renderers. Varied-height packing (true masonry) is the
+// trade-off; captured as a cross-track note. Mirrors Atelier's own home `.atl-mosaic`
+// (which is grid, not columns).
 export const WORK_GALLERY_MASONRY_STYLES = `
 ${GALLERY_HEAD('wk-gallery-masonry')}
-.wk-gallery-masonry__grid{ columns:3 260px; column-gap:clamp(14px,2vw,26px); }
-.wk-gallery-masonry__group{ position:relative; break-inside:avoid; margin:0 0 clamp(14px,2vw,26px); }
+.wk-gallery-masonry__grid{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:clamp(14px,2vw,26px); align-items:start; }
+@media(max-width:820px){ .wk-gallery-masonry__grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); } }
+@media(max-width:520px){ .wk-gallery-masonry__grid{ grid-template-columns:1fr; } }
+.wk-gallery-masonry__group{ position:relative; }
 .wk-gallery-masonry__media{ position:relative; overflow:hidden; border-radius:var(--u-radius, var(--wk-r)); background:var(--wk-paper-2); display:block; }
 .wk-gallery-masonry__media img{ width:100%; height:auto; display:block; }
 .wk-gallery-masonry__img{ display:block; }
 .wk-gallery-masonry__media .wk-gallery-masonry__ph{ aspect-ratio:4 / 5; }
-${RULE_HEAD('wk-gallery-masonry', 'lead')}`;
+${RULE_HEAD('wk-gallery-masonry', 'lead')}${GALLERY_CAPTION('wk-gallery-masonry')}`;
 
 // ── WorkGalleryStrip — horizontal scroll row of group covers (Pulse .archive-list
 // horizontal read). Same `groups` collection + group-reference contract.
@@ -77,4 +105,4 @@ ${GALLERY_HEAD('wk-gallery-strip')}
 .wk-gallery-strip__media{ position:relative; aspect-ratio:3 / 4; overflow:hidden; border-radius:var(--u-radius, var(--wk-r)); background:var(--wk-paper-2); display:block; }
 .wk-gallery-strip__media img{ width:100%; height:100%; object-fit:cover; display:block; }
 .wk-gallery-strip__img{ display:block; width:100%; height:100%; }
-${RULE_HEAD('wk-gallery-strip', 'lead')}`;
+${RULE_HEAD('wk-gallery-strip', 'lead')}${GALLERY_CAPTION('wk-gallery-strip')}`;

@@ -838,3 +838,55 @@ The `heading` h2 is restyled into Atelier's `.atl-footer-big .fw` via the 4 `--w
 - Footer named link columns + contact block + distinct studio-name wordmark (needs a footer contract field).
 - Multi-section numeral verified only on a full page (isolated harness shows 01 each).
 - Gallery masonry composition fidelity; hero marquee strip + 2nd CTA (contract-touching); header overlay-on-cover + EN/NL toggle.
+
+## Phase 8.5 — Wave 2B (gallery overlay · packages card · about split · header overlay)
+
+### Files changed
+- `src/modules/skeletons/work/tokenContract.ts` — 4 new skin tokens + string-enum/bool registration + 24 derived serialized `--wk-*` vars.
+- `src/modules/skeletons/work/tokenContract.test.ts` — fixture + Wave-2B assert/serialize coverage (+5 cases).
+- `src/modules/templates/atelier2/skin.ts` — opts in to all 4 compositions.
+- `src/modules/skeletons/work/blocks/Gallery/styles.ts` — new `GALLERY_CAPTION` helper (all 3 shapes) + masonry multicol→grid swap.
+- `src/modules/skeletons/work/blocks/Packages/styles.ts` — var-gated CTA (list link / card button) + price size.
+- `src/modules/skeletons/work/blocks/About/styles.ts` — var-gated align + accent-badge eyebrow.
+- `src/modules/skeletons/work/blocks/Header/styles.ts` — var-gated bg/fg/hairline + accent-dot wordmark.
+- NO `.core.tsx` / contract / engine files touched (all four compositions are pure var-gated CSS on the frozen markup — same parity-safe pattern as Wave 2A).
+
+### New tokens + NEUTRAL defaults (byte-neutral for a non-setting skin)
+| token | primary var | neutral default | atelier2 | derived vars |
+|---|---|---|---|---|
+| `galleryCaption: below\|overlay` | `--wk-gal-cap-pos` | `below` | `overlay` | pos, cap-color, cap-mt, grad-display, dot-display, hover-scale (6) |
+| `packagesStyle: list\|card` | `--wk-pkg-cta-w` | `list` | `card` | cta w/align/mt/bg/color/pad/bb/ta + price-fs (9) |
+| `aboutLayout: stack\|split-portrait` | `--wk-about-align` | `stack` | `split-portrait` | align + eyebrow bg/color/pad/display (5) |
+| `headerOverlay: boolean` | `--wk-header-bg` | `false` | `true` | bg/fg/line/dot (4) |
+
+All fail loud via the existing `WORK_TOKEN_STRING_ENUMS` (3 enums) + `WORK_TOKEN_BOOL_FIELDS` (`headerOverlay`) loops in `assertSkinTokens`. Serialize always emits every var; neutral values equal the prior literals → other skins byte-identical.
+
+### Per section — composition built, contract fields used, Atelier fields MISSING
+1. **Gallery (overlay caption)** — shared `GALLERY_CAPTION(p)` on all 3 shapes: group `name` overlaid on the cover (accent dot `::before` + white name at a bottom gradient `::after`) + hover-scale on the img. Uses ONLY `groups[].name` / `cover_image` — NO contract change, FULL fidelity (no missing field). Neutral `below` = current stacked name (static / inherit / scale(1) / pseudo display:none). **Masonry mechanism swap:** the masonry `__grid` moved from CSS multicol (`columns:3`) to a fixed CSS `grid` (`repeat(3,1fr)`). Multicol balances by content-height, and the editor inline-edit affordances give edit items a different min-content width → the two renderers pick a DIFFERENT column count (edit collapsed to 1 wide col, published 2) → a 6.4% parity break the isolated harness caught. Grid is column-count-stable in both. Trade-off: true varied-height masonry packing is lost (now a fixed-track mosaic — mirrors Atelier's own `.atl-mosaic`, which is grid). Cross-track note: varied-span mosaic (col/row spans) needs a per-group span signal the contract lacks.
+2. **Packages (card)** — var-gated card: big serif price (`price_line` + `price_mode='from'` affix), name, description, full-width SQUARE accent button (`cta_label`) pinned to the card foot. Uses `name / price_mode / price_line / description / cta_label`. **MISSING from contract (cross-track Wave-2):** per-tier image (`.atl-pack-img` 3:2), bullet/feature LIST (`.atl-pack ul` dash bullets), "Most booked" FLAG (`.atl-flag`), category label (`.atl-pack-cat`). Card renders cleanly without them. Minor: Atelier price is a serif face; atelier2 display face is Bricolage (grotesque) — no serif-price token to reach (the `compact` variant is Fraunces).
+3. **About (split-portrait)** — centre-aligned 2-col + the eyebrow restyled into an Atelier `.atl-badge` accent chip (the graceful accent stand-in). Uses `eyebrow / heading / bio / facts[]`. **MISSING from contract (cross-track Wave-2):** portrait image (4:5 `.atl-split-art`), signature (`.atl-sign`), a real badge text field (badge currently reuses `eyebrow`). Per the guardrail, built the graceful accent treatment WITHOUT a portrait rather than adding a field.
+4. **Header (overlay)** — transparent bg + on-dark text (`--wk-on-dark`) + accent-dot wordmark (`.wk-header__logo::before`) + on-dark hairline. Combined with atelier2 existing `WorkHeaderCentered` arrangement = the Atelier `.atl-nav`. Uses `logo_text / cta / nav_links`. **MISSING / cross-track:** (a) the true GEOMETRIC overlay — the header floating ABSOLUTELY over the hero — is a page/section-stack renderer concern, NOT reachable from the block+token surface: `position:absolute` collapses the isolated parity band to 0-height (screenshot error) so it can't ship here; the transparent header therefore looks correct ONLY over a dark backdrop (the hero) and renders white-on-paper (invisible) standalone / in normal flow. (b) EN/NL language toggle (`.atl-lang`) — bilingual twin-field = concierge patch, explicitly out of scope. (c) `logo_image` (known since phase 4 — text wordmark only).
+
+### Why header bg = transparent (not a dark bar) — deviation
+First tried a dark FILL (`var(--wk-dark)`) so the header is visible standalone. It TRIPPED the parity gate at **4.94%**: the short (81px) header band + a hard dark fill hits a subpixel crop-edge artifact — the two parity bands have different fractional Y origins, so the fill top/bottom antialiased rows land on different pixel rows (~4 full-width rows = 4×1440 px). Tall dark bands (hero/proof) dilute the same artifact below threshold; the short header magnifies it. `transparent` (flat dark behind, no fill boundary at the crop edge) renders the header band identically in both renderers (0.000%) AND matches the task literal "transparent header" spec. Diagnosed via a screenshot/pixel-diff of the two header bands (the text itself was pixel-identical throughout).
+
+### Gate results
+- `tsc --noEmit`: clean (no page.tsx error in this worktree).
+- `test:run`: **187 files / 3279 tests pass, 18 skipped** (new tokenContract Wave-2B cases green; conformance / coreParity / renderParity / skinPurity / htmlGenerator all green).
+- `build`: green.
+- `parity.spec.ts` (run ×2, IDENTICAL / deterministic) **7/7**. atelier2 bands, all «3%:
+  - **header 0.000%** · **work(grid) 1.132% / masonry 0.322% / strip 0.436%** · **packages 0.232%** · **about 0.768%** · proof 1.738% / 0.220% / 0.166% · footer 0.179% · hero 0.014% / 0.012% / 0.098% / 0.149%.
+  - Negative controls bite: meridian 6.409%, atelier 6.206–6.233%, **atelier2 `?parityBreak=1` 46.516%**. meridian / hearth / atelier suites unchanged.
+
+### Cross-track Wave-2 field-gap list (founder decision input)
+- **packages contract:** per-tier image · feature/bullet list · "most booked" flag · category label.
+- **about contract:** portrait image · signature line · badge text (distinct from eyebrow).
+- **header contract:** logo_image · EN/NL bilingual twin-field (language toggle).
+- **gallery:** per-group span signal (for true varied-span mosaic).
+- **header renderer:** page/section-stack support for absolute-over-hero (true transparent overlay geometry).
+
+### Deviations
+- **No `.core.tsx` touched** (plan allowed edits): all four compositions are pure var-gated CSS on existing single-source markup — strictly more parity-safe, no new contract fields. Conservative.
+- **Masonry multicol→grid** (see Gallery above): a real layout-mechanism change inside the Gallery block to make the mosaic column-count-stable across renderers (multicol was parity-unstable in the editor). In-scope (Gallery block); logged.
+- **Header overlay = transparent, in normal flow** (not a dark bar, not absolute): forced by the parity gate + the isolated-harness 0-height constraint (see above). The on-dark VISUAL treatment ships; the geometric overlay is reported cross-track.
+- **About badge reuses `eyebrow`** (no badge field); **packages card omits image/bullets/flag** (no fields) — both per the no-invent-fields guardrail.
