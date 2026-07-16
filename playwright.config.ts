@@ -63,6 +63,12 @@ export default defineConfig({
         /dashboard-workspace\.spec\.ts/,
         /dashboard-redirects\.spec\.ts/,
         /dashboard-lifecycle\.spec\.ts/,
+        // blog-composer-redesign: manager = phase 1, composer = phase 2, ai-write = phase 4.
+        // Pre-registered ahead of the files landing (harmless — an unmatched pattern is a
+        // no-op) so no later phase rediscovers the false-confidence trap called out above.
+        /blog-manager\.spec\.ts/,
+        /blog-composer\.spec\.ts/,
+        /blog-ai-write\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
