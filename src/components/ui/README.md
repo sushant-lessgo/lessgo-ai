@@ -26,7 +26,7 @@ All foundation tokens live under **namespaced `app-*` keys** in `tailwind.config
   `divider`/`hairline`. Use as `bg-app-primary`, `text-app-muted`, etc.
   **+ editor-shell-redesign additions** (one key per unmapped handoff hex — never snap
   to a near-neighbour, snapping silently changes the designer's palette):
-  `frame #ececee` · `border-frame #e9e9ee` · `surface-alt #f6f7fb` ·
+  `frame #ececee` · `border-frame #e9e9ee` · `border-hairline #e6e6ec` · `surface-alt #f6f7fb` ·
   `surface-sunken #fafafb` · `track #f1f1f5` · `hover #f6f6f9` · `tint-soft #f5f9ff` ·
   `tint-ring #e6eefc` · `tint-edge #e0ecff` · `score-bg #f0f4ff` ·
   `score-border #dbe6ff` · `review-bg #fff2ec` · `review-border #ffd9c7` ·
@@ -214,8 +214,23 @@ response. The class does **not** carry the aria or the tooltip — apply the ful
 
 ### `.app-divider`
 
-1×22 vertical hairline (`#e6e6ec`), `flex:none`, self-centering — the t1 top bar uses it
+1×22 vertical hairline, `flex:none`, self-centering — the t1 top bar uses it
 ×3. `.app-divider--full` stretches to the parent's height instead. Plain `<div className="app-divider" />`.
+Its colour comes from `theme('colors.app.border-hairline')`, not a hard-coded literal.
+
+### Three border hexes that look alike and are NOT interchangeable
+
+Editor-shell decision 16. Snapping any of these to another silently changes the designer's palette:
+
+| Token | Hex | Owns |
+|---|---|---|
+| `app-border-hairline` | `#e6e6ec` | popover **menu/panel** borders, `.app-divider`, t1 page-switcher pill |
+| `app-border-frame` | `#e9e9ee` | t1 **top-bar** bottom border, left-rail right border |
+| `app-border` | `#ececf1` | general app-chrome borders (ui-foundation default) |
+| `app-border-input` | `#e2e4ea` | form field borders |
+
+The first two matter most: phase 4 places a bar border directly against a menu border, so
+they must read as deliberately different, not as a drift bug.
 
 ## Isolation guards — must stay green (do not defeat)
 

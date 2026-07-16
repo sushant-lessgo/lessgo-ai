@@ -86,7 +86,9 @@ const AppPopoverMenu = React.forwardRef<
       sideOffset={sideOffset}
       style={{ width, ...style }}
       className={cn(
-        "z-50 rounded-app-input border border-app-border bg-app-surface p-1.5 font-app-sans text-app-ink shadow-app-menu outline-none",
+        // border-app-border-hairline (#e6e6ec) — decision 16: the handoff's menu
+        // border is its OWN hex, not app-border (#ececf1). Do not "simplify" it.
+        "z-50 rounded-app-input border border-app-border-hairline bg-app-surface p-1.5 font-app-sans text-app-ink shadow-app-menu outline-none",
         appMotionClasses,
         className
       )}
@@ -117,7 +119,8 @@ const AppPopoverPanel = React.forwardRef<
       sideOffset={sideOffset}
       style={{ width, ...style }}
       className={cn(
-        "z-50 overflow-hidden rounded-app-panel border border-app-border bg-app-surface font-app-sans text-app-ink shadow-app-popover outline-none",
+        // border-app-border-hairline (#e6e6ec) — see AppPopoverMenu, decision 16.
+        "z-50 overflow-hidden rounded-app-panel border border-app-border-hairline bg-app-surface font-app-sans text-app-ink shadow-app-popover outline-none",
         appMotionClasses,
         className
       )}

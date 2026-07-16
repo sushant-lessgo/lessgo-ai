@@ -109,13 +109,19 @@
    .app-divider — 1×22 vertical hairline. t1 top bar uses it ×3.
    Built here so phase 4 does not improvise its own.
    `.app-divider--full` stretches to the parent's height instead of a fixed 22px.
+
+   Colour = the `app-border-hairline` token (#e6e6ec), NOT `app-border` (#ececf1)
+   and NOT `app-border-input` (#e2e4ea) — decision 16. Phase 1 hard-coded the
+   literal here while three sources disagreed about which token owned this hex;
+   phase 3 gave it its own key and re-pointed this rule at it, so the divider and
+   the popover borders can never drift apart again.
    ============================================================================ */
 
 .app-divider {
   flex: none;
   width: 1px;
   height: 22px;
-  background: #e6e6ec;
+  background: theme('colors.app.border-hairline');
   align-self: center;
 }
 

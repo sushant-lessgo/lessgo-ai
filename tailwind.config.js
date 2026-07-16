@@ -710,6 +710,14 @@ module.exports = {
   				// snapping silently changes the designer's palette. No existing key edited.
   				frame: '#ececee',            // t1 outer frame bg
   				'border-frame': '#e9e9ee',   // t1 top-bar bottom border / rail right border
+  				// Decision 16: #e6e6ec gets its OWN key. Three sources disagreed
+  				// (scout §G said border-input #e2e4ea, phase-1's audit said border
+  				// #ececf1, .app-divider hard-coded the literal). Decision 3 governs:
+  				// additive, never snap. Menu/panel borders + .app-divider + the t1
+  				// page-switcher pill all use it — and phase 4 puts a bar border
+  				// (border-frame) directly next to a menu border, so the two must
+  				// stay distinct on purpose, not by accident.
+  				'border-hairline': '#e6e6ec',
   				'surface-alt': '#f6f7fb',    // t17 live-target row, t16 sitemap row
   				'surface-sunken': '#fafafb', // t14 footer strip, t16 left nav
   				track: '#f1f1f5',            // segmented-control track, route chip

@@ -11,7 +11,7 @@ Reskin the complete non-canvas editor shell (top bar, pills, left rail, Design m
 
 ## Progress log
 - phase 1 foundation (popover/tooltip/spinner/divider, coming variant, tokens, icons): **done** (commit 6c62bdb8, review loops 0 — gates green: tsc clean, 3331 tests, lint 0)
-- phase 2 status pills (SaveStateChip/ReviewPill) + dirty-guard e2e: pending
+- phase 2 status pills (SaveStateChip/ReviewPill) + dirty-guard e2e: **done** (commit c335a75a, impl-review loops 1 → `ship`; gates green: tsc 0, 3331 tests, lint 0, e2e authed 9 passed + spec EXECUTION confirmed; red-capability proven by neutering the guard)
 - phase 3 left rail frame + .app-chrome attach (EditLayout structure moved to phase 4): pending
 - phase 4 single-bar collapse (GlobalAppHeader + EditHeader merge) + ALL EditLayout structure + right cluster: pending
 - phase 5 Design menu (t14 theme popovers): pending
@@ -34,7 +34,9 @@ Reskin the complete non-canvas editor shell (top bar, pills, left rail, Design m
 12. **Device control → GREYED slot.** `ui/DeviceToggle.tsx` exists but is mounted NOWHERE (verified dead code); wiring it = new behavior (Lane-3).
 13. **"N edits since last publish" row → OMIT entirely.** No data source (`published-slug` fetch at `preview/[token]/page.tsx:145` carries no edit count), no new fetches allowed, and there is no control to grey.
 14. **`EditLayout.tsx:166`** mobile-overlay `storeState?.toggleLeftPanel?.()` mutation (overlay L163-168, fed by the L35-40 stale-closure `storeState`) is on the preserve list — the overlay + its handler SURVIVE the phase-3 frame rewrite.
-15. Grey-out treatment (defined once, phase 1): `opacity:.5` + `#8a8a94` + `cursor:not-allowed` + `aria-disabled` + tooltip naming what's coming.
+15. Grey-out treatment (defined once, phase 1): `opacity:.5` + `#8a8a94` + `cursor:not-allowed` + `aria-disabled` + tooltip naming what's coming. **Consume `src/components/ui/coming.tsx` (phase 2) — the component, NEVER the bare `.app-coming` class** (the class alone can't carry `aria-disabled`/tooltip; the component makes the 3-part recipe inseparable and requires a `what` prop).
+16. **`#e6e6ec` gets its OWN token key — do NOT snap it to `app-border` (#ececf1) or `border-input` (#e2e4ea).** Impl-review found drift: scout §G groups it under `border-input`, the phase-1 audit claims `app-border`, and `.app-divider` hard-codes the literal. All three disagree. Decision 3 (additive, no snapping) governs → add `colors.app['border-hairline'] = '#e6e6ec'` and re-point `AppPopover*` borders + `.app-divider` to it. Phase 3 fixes this (small); phases 4+ consume it. This matters because phase 4 puts a bar border directly next to a menu border.
+17. **`<Coming>` geometry vs menu rows** (impl-review note): `Coming` renders its own `inline-flex items-center gap-1.5` span, so a greyed popover row cannot be an `AppPopoverItem`. Phase 4 (first menu consumer) either passes row padding/typography via `className` or adds a row-shaped variant — decide there and document it, don't improvise per-site.
 
 ## Global invariants (every phase)
 - **Presentation-only line.** ZERO edits to: edit store internals/actions, `SelectionSystem`/`ElementDetector`/`HoverOverlay`, `LandingPageRenderer`/`EditablePageRenderer`, `api/publish`, `staticExport/*`, `kvRoutes.ts`, any `.published.tsx`, both component registries, templates. Moving a handler VERBATIM with its markup is allowed; changing what it does is not.

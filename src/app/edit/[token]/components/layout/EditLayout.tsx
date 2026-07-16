@@ -126,25 +126,48 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
     }
   }, [mode]);
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // `.app-chrome` ATTACH MAP (phase 3) — read before adding/moving a wrapper.
+  //
+  // `.app-chrome` re-bases font-family (Onest) + ink. It MUST wrap chrome only.
+  // If it ever wraps the CANVAS, generated blocks inherit the app font in the
+  // EDITOR but not when published → editor↔published divergence (a known past
+  // incident: docs/architecture/phase11aArchitectureGaps.md, dual-renderer).
+  //
+  // Attached to exactly three kinds of region, each a LEAF-side wrapper:
+  //   1. the top-bar wrapper        (GlobalAppHeader)
+  //   2. the rail wrapper           (LeftPanel)
+  //   3. the modal roots            (GlobalFormBuilder / GlobalButtonConfigModal
+  //                                  / LayoutChangeModal / ModalDebugPanel)
+  //   + the nested EditHeader, wrapped INDIVIDUALLY rather than via its column —
+  //     that column also contains <MainContent> (the canvas). Wrapping the column
+  //     would put the canvas inside .app-chrome. This is the whole hazard.
+  //
+  // The `shell` root below deliberately does NOT carry `.app-chrome`: it is the
+  // canvas's ancestor. It keeps its Inter base, which the canvas inherits today.
+  // ──────────────────────────────────────────────────────────────────────────
   const shell = (
       <div
-        className="h-screen flex flex-col bg-gray-50 font-inter"
+        className="h-screen flex flex-col bg-app-frame font-inter"
         onContextMenu={handleContextMenu}
         style={{
           fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         }}
       >
       {/* Global App Header */}
-      <GlobalAppHeader tokenId={tokenId} />
-      
+      <div className="app-chrome flex-none">
+        <GlobalAppHeader tokenId={tokenId} />
+      </div>
+
       {/* Main Layout Container */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Collapsible */}
-        <div 
+        <div
           className={`
-            transition-all duration-300 ease-in-out border-r border-gray-200 bg-white
-            ${leftPanel.collapsed 
-              ? 'w-12 lg:w-12' 
+            app-chrome
+            transition-all duration-300 ease-in-out border-r border-app-border-frame bg-app-surface
+            ${leftPanel.collapsed
+              ? 'w-12 lg:w-12'
               : `w-[${leftPanel.width}px]`
             }
             lg:relative absolute lg:static z-40
@@ -167,12 +190,16 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
           />
         )}
 
-        {/* Right Content Area */}
+        {/* Right Content Area.
+            NOT `.app-chrome`: <MainContent> (the editor CANVAS) lives here. The
+            nested EditHeader gets its own wrapper instead — see the attach map. */}
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
           {/* Edit Header */}
-          <EditHeader tokenId={tokenId} />
+          <div className="app-chrome flex-none">
+            <EditHeader tokenId={tokenId} />
+          </div>
 
-          {/* Main Content Area */}
+          {/* Main Content Area — CANVAS. Must stay outside every .app-chrome. */}
           <MainContent tokenId={tokenId} />
         </div>
       </div>
@@ -185,17 +212,22 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
         className="absolute -left-[10000px] w-px h-px overflow-hidden"
       />
       
-      {/* MVP Form Builder Modal */}
-      <GlobalFormBuilder />
-      
-      {/* Global Button Configuration Modal */}
-      <GlobalButtonConfigModal />
-      
-      {/* Layout Change Modal */}
-      <LayoutChangeModal />
-      
-      {/* Modal Debug Panel - Only in development */}
-      {process.env.NODE_ENV === 'development' && <ModalDebugPanel />}
+      {/* Modal roots — chrome, so `.app-chrome`. Zero-size wrapper: every modal
+          inside renders fixed/portalled, so this adds no layout box; it exists
+          only to give in-place (non-portalled) modal DOM the app font. */}
+      <div className="app-chrome contents">
+        {/* MVP Form Builder Modal */}
+        <GlobalFormBuilder />
+
+        {/* Global Button Configuration Modal */}
+        <GlobalButtonConfigModal />
+
+        {/* Layout Change Modal */}
+        <LayoutChangeModal />
+
+        {/* Modal Debug Panel - Only in development */}
+        {process.env.NODE_ENV === 'development' && <ModalDebugPanel />}
+      </div>
       </div>
   );
 

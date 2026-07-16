@@ -351,3 +351,151 @@ ran before `SaveStateChip` was touched, as the phase requires.
   config change still needs a build before merge, per its audit). No dev-server visual check
   performed — the founder gate at phase 3/4 covers the composed look; the pills' hexes are
   taken verbatim from scout §H.
+
+---
+
+## Phase 3 — LeftPanel reskin + `.app-chrome` attach + `#e6e6ec` token fix
+
+Scope per orchestrator **amendment 1** (RESEQUENCED): LeftPanel reskin + the `.app-chrome`
+attach + frame bg. **No EditLayout header geometry** — the two-row frame's spacing/heights/
+borders are untouched; phase 4 collapses it. Both mount points (`GlobalAppHeader` L138,
+`EditHeader` L173) intact.
+
+### Files changed
+
+| File | Change |
+|---|---|
+| `src/app/edit/[token]/components/layout/LeftPanel.tsx` | Rail reskinned to t1 (the bulk). |
+| `src/app/edit/[token]/components/layout/EditLayout.tsx` | `.app-chrome` attach + frame bg ONLY. |
+| `tailwind.config.js` | **+1 additive key**: `colors.app['border-hairline'] = '#e6e6ec'` (amendment 2 / decision 16). |
+| `src/components/ui/popover.tsx` | `AppPopoverMenu` + `AppPopoverPanel` borders re-pointed `border-app-border` -> `border-app-border-hairline`. |
+| `src/styles/app-chrome.css` | `.app-divider` background literal -> `theme('colors.app.border-hairline')`. |
+| `src/components/ui/README.md` | Documented the new key + a "three border hexes that look alike" table. |
+
+Files-touched additions were the four amendment-2 files, authorized by the orchestrator.
+Nothing else edited. **No commit made.**
+
+### Exactly which wrappers got `.app-chrome` (and proof the canvas is outside)
+
+Four attach points, all **leaf-side** wrappers:
+
+| # | Wrapper | Contains |
+|---|---|---|
+| 1 | new `<div className="app-chrome flex-none">` around `<GlobalAppHeader>` (was bare at L138) | top bar |
+| 2 | existing rail wrapper (`EditLayout` L143) — class added | `<LeftPanel>` |
+| 3 | new `<div className="app-chrome flex-none">` around `<EditHeader>` | nested header row |
+| 4 | new `<div className="app-chrome contents">` around the 4 modal roots | GlobalFormBuilder, GlobalButtonConfigModal, LayoutChangeModal, ModalDebugPanel |
+
+**Proof the canvas is outside** (structural, by construction):
+
+- The `shell` root deliberately does **NOT** carry `.app-chrome`. It keeps its existing
+  `font-inter` + inline `fontFamily: 'Inter…'`. It is the canvas's ancestor.
+- `<MainContent>` (the canvas) is a **sibling** of wrapper #3 inside the right column, and the
+  right column itself is NOT `.app-chrome` — this is why `EditHeader` is wrapped individually
+  instead of the cheaper "wrap the column" move. Wrapping the column would have put the canvas
+  inside `.app-chrome`. That trap is now written into the file as a comment block ("attach map")
+  so phase 4 cannot reintroduce it while restructuring.
+- No `.app-chrome` element is an ancestor of `<MainContent>`. Verified by reading the final JSX
+  top-to-bottom; the four attach points are enumerated above and none of them wrap it.
+- Wrapper #4 uses `display:contents` -> zero layout box (modals inside render fixed/portalled),
+  and font inheritance still flows since inheritance follows the DOM tree, not the box tree.
+
+**Honest caveat about the automated signal.** The brief called the `public` project's
+ui-isolation + parity specs "your automated canvas-bleed signal". They are green, but they
+**cannot see this change**: both `ui-isolation.spec.ts` and `parity.spec.ts` navigate to
+`/dev/blocks/*`, which does **not mount `EditLayout`**. What they prove is narrower and still
+worth having: the token/popover/`.app-divider` edits did not leak onto the block surface
+globally. They are **not** proof that `.app-chrome` misses the canvas inside `/edit/[token]` —
+that rests on the structural argument above plus the phase-3 **human gate** (founder eyeballs
+editor vs published). Flagging rather than overclaiming.
+
+### Mobile overlay (decision 14) — SURVIVED, verbatim
+
+`EditLayout` L163-168 and its L166 `storeState?.toggleLeftPanel?.()` are **byte-identical** —
+I did not even restyle its classes (permitted, but the black scrim needs no t1 treatment and
+leaving it untouched is the smaller blast radius). Verified by `git diff`: the overlay block
+shows zero changed lines. The L35-40 `store?.getState()` stale-closure that feeds it is also
+byte-identical, as is `LeftPanel` L112-114. **Not verified in a live browser at a narrow
+window** — no dev-server visual check was performed this phase (see Not done).
+
+### `Coming` vs segmented-control geometry (decision 17) — NO conflict, but one real trap found
+
+The rail's `Pages`/`CMS`/`Theme` tabs use the **`Coming` component** (never the bare class).
+Geometry composes fine: `Coming` renders an `inline-flex items-center gap-1.5` span, and a
+`SegmentedControl` option button is already `inline-flex`, so the nested span adds no visible
+box. **No second grey-out style was improvised.**
+
+**The trap phase 4 must know:** I deliberately did **NOT** set `disabled: true` on those three
+options. `SegmentedControl`'s button carries `disabled:pointer-events-none` — which would
+swallow the very pointer events `Coming`'s tooltip needs, silently killing the "why" affordance
+that decision 15 exists to guarantee (and `disabled:opacity-50` would compound with
+`.app-coming`'s `opacity:.5` -> .25). Inertness instead comes from `Coming`'s own
+`onClickCapture` stopPropagation, which kills the click before the option button's `onClick`
+sees it; `onValueChange` is additionally a no-op guard (belt-and-braces). **Anyone greying a
+`SegmentedControl` option later must not "fix" this by adding `disabled`.** Documented in-file.
+
+### Judgement calls / deviations
+
+1. **Active rail row reads `state.selectedSection`** (a selector-first, read-only subscription).
+   t1 specifies an active row (`bg #e6f0ff` + `inset 2px 0 0 #006CFF` + `#003E80` 600) and the
+   plan mandates it, but `LeftPanel` had no active state. `selectedSection` already exists in
+   the store; reading it adds **zero writes** and no new selection behavior. The conservative
+   alternative (omit active styling) would have dropped a specced treatment.
+2. **`nav-item`'s `activeBar` variant was NOT used** for the rail rows. The rows are existing
+   `<button>`s whose handlers must stay untouched (plan: className-only); swapping in `NavItem`
+   would have rebuilt them. The inset bar is applied as the identical
+   `shadow-[inset_2px_0_0_#006CFF]`. Phase 6's t16 left-nav is the natural `activeBar` consumer.
+3. **Emoji `SECTION_ICONS` -> Material Symbols ligatures.** Map keys and the `custom`/fallback
+   behavior are unchanged; every ligature verified present in `icons.txt` (no font regeneration
+   needed). This is presentation.
+4. **No hover-reveal on the row `visibility` slot.** `.app-coming` sets `opacity:.5` and
+   `app-chrome.css` is imported **after** the Tailwind utilities, so an
+   `opacity-0 group-hover:opacity-50` pair loses the cascade — the icon paints at .5 regardless.
+   Rendered at a constant .5 (the honest result) rather than shipping classes that do not work.
+   Phase 1's audit predicted this class of `!important`/cascade friction.
+5. **Rail tabs hidden in review ("Setup") mode.** Showing `Sections` as the active tab while the
+   Setup checklist is displayed would be a lie about state. The `add` slot is likewise hidden in
+   review mode. The Setup view keeps its existing back-button flow.
+6. **The duplicate right border was removed from `LeftPanel`'s root** (both the wrapper and the
+   panel root had `border-r border-gray-200`). The border now lives once, on the `EditLayout`
+   wrapper, as `border-app-border-frame` (#e9e9ee per t1/§H).
+7. **`.app-divider` re-pointed via `theme()`, verified not assumed.** `app-chrome.css` had no
+   prior `theme()` usage (only `globals.css` did), so I ran the file through postcss+tailwind
+   and confirmed it compiles to `background: #e6e6ec`. A silent no-op here would have broken the
+   x3 dividers phase 4 is about to place.
+
+### Verification (actual results)
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit` | **CLEAN** — zero output. |
+| `npm run test:run` | **GREEN** — 193 files passed / 1 skipped; **3331 passed** / 18 skipped (identical to phases 1-2). `tailwindConfigFreeze` green -> the `border-hairline` addition is correctly additive. |
+| `npm run lint` | **GREEN** — **0 errors**; only pre-existing warnings (`no-img-element`, `exhaustive-deps`), **none in my files** (grepped for LeftPanel/EditLayout/popover/coming -> no hits). |
+| `PORT=3007 E2E_PORT=3007 npm run test:e2e -- --project=public` | **13 passed / 4 skipped (1.3m)** — incl. `ui-isolation` x2 and all parity specs + their 3 negative controls. See the caveat above re: what this does/does not prove. |
+| `PORT=3007 E2E_PORT=3007 npm run test:e2e -- --project=authed` | **9 passed (4.4m)** — incl. `editor-dirty-guard` x4 (still green with the reskinned rail) and `publish.spec` x3. Both ports needed, per phase 2's finding. |
+
+`git status` after gates: the `uiFoundationIsolation.test.tsx.snap` CRLF rewrite occurred as
+predicted; `git diff --numstat` showed **zero content lines** and I restored it with
+`git checkout -- <that file>` (single-file restore of a file I never edited; no branch/ref op,
+no commit). `docs/task/editor-shell-redesign.plan.md` and `docs/tracks/uiRequirements.md` also
+show modified — **pre-existing in this worktree, not touched by me.**
+
+### Not done / open risks for phase 4
+
+- **No dev-server visual check** and no side-by-side editor<->published canvas comparison. That
+  is the phase-3 **HUMAN GATE** and it is now the primary evidence for the attach — the
+  automated specs do not reach `EditLayout` (above). The narrow-window mobile-overlay toggle
+  also wants a live check; code-wise it is byte-identical.
+- **`npm run build` not run** — `tailwind.config.js` changed again (one additive key). Phase 1's
+  audit already carries a standing "build before merge" item; this does not change that.
+- **The rail's top edge is NOT final.** The tabs row currently sits under the nested `EditHeader`
+  row, because phase 3 kept both mount points per amendment 1. Phase 4's single-bar collapse
+  changes the rail's vertical extent — the `pt-3` on the tabs row and the `h-10` header row are
+  provisional spacing, not a ruled t1 measurement.
+- **Phase 4 owns the frame.** What I leave: shell root = `bg-app-frame`, no `.app-chrome`, canvas
+  inherits Inter. Four attach points enumerated in an "attach map" comment at the top of the
+  `shell` JSX — **update that comment if you move a wrapper.** L64-127 and L202-231 untouched.
+- **Selector coupling still stands** (phase 2's note): the dirty-guard spec scopes to
+  `page.locator('header')`. My `.app-chrome` wrappers are `<div>`s *around* the existing
+  `<header>` elements, so the selectors still resolve — but phase 4's collapse must keep a
+  `<header>` or re-point them.
