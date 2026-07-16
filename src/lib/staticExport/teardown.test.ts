@@ -9,12 +9,15 @@
 //   • the custom-domain guard short-circuits with zero writes.
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+// Vitest runs jsdom (client condition), so `server-only`'s guard module throws on import.
+// Stub it — the guard exists for the Next bundler, not for this unit test.
+vi.mock('server-only', () => ({}));
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     publishedPage: { findUnique: vi.fn(), update: vi.fn() },
     publishedPageVersion: { findMany: vi.fn(), deleteMany: vi.fn() },
     blogPost: { findMany: vi.fn(), updateMany: vi.fn() },
-    project: { update: vi.fn() },
+    project: { updateMany: vi.fn() },
   },
 }));
 vi.mock('@vercel/blob', () => ({ del: vi.fn().mockResolvedValue(undefined) }));
@@ -102,7 +105,7 @@ function arm(overrides: { page?: any; versions?: any[]; posts?: any[] } = {}) {
   db.publishedPageVersion.deleteMany.mockResolvedValue({ count: 3 });
   db.blogPost.findMany.mockResolvedValue(overrides.posts ?? POSTS);
   db.blogPost.updateMany.mockResolvedValue({ count: 2 });
-  db.project.update.mockResolvedValue({});
+  db.project.updateMany.mockResolvedValue({});
   blobDel.mockResolvedValue(undefined);
   kvDeleteRoutes.mockResolvedValue(undefined);
   kvRemoveRoutes.mockResolvedValue(undefined);
@@ -138,7 +141,7 @@ describe('teardownPublishedPage — guard (D1)', () => {
     expect(kvRemoveRoutes).not.toHaveBeenCalled();
     expect(blobDel).not.toHaveBeenCalled();
     expect(db.publishedPageVersion.deleteMany).not.toHaveBeenCalled();
-    expect(db.project.update).not.toHaveBeenCalled();
+    expect(db.project.updateMany).not.toHaveBeenCalled();
   });
 
   it('blocks regardless of customDomainStatus (pending/failed still hold the slot)', async () => {
@@ -314,7 +317,7 @@ describe('teardownPublishedPage — ordering + DB finalize (DD1 / DD4)', () => {
     expect(finalize.data).not.toHaveProperty('isPublished'); // DD0b: never written
     expect(finalize.data).not.toHaveProperty('lastPublishAt'); // kept as history
     // Project demoted; blog posts demoted keeping firstPublishedAt (slug stays locked).
-    expect(db.project.update).toHaveBeenCalledWith({
+    expect(db.project.updateMany).toHaveBeenCalledWith({
       where: { id: 'proj_1' },
       data: { status: 'draft' },
     });
@@ -333,7 +336,7 @@ describe('teardownPublishedPage — ordering + DB finalize (DD1 / DD4)', () => {
     expect(db.publishedPageVersion.deleteMany).toHaveBeenCalled();
     expect(publishStateWrites()).toEqual(['unpublishing']); // never finalized to draft
     expect(db.blogPost.updateMany).not.toHaveBeenCalled();
-    expect(db.project.update).not.toHaveBeenCalled();
+    expect(db.project.updateMany).not.toHaveBeenCalled();
   });
 });
 
@@ -369,7 +372,7 @@ describe('teardownPublishedPage — failure semantics (DD1)', () => {
     // The invariant: never 'draft' with external state remaining.
     expect(publishStateWrites()).toEqual(['unpublishing']);
     expect(db.publishedPageVersion.deleteMany).not.toHaveBeenCalled();
-    expect(db.project.update).not.toHaveBeenCalled();
+    expect(db.project.updateMany).not.toHaveBeenCalled();
     expect(captureMessage).toHaveBeenCalledWith(
       'teardown_incomplete',
       expect.objectContaining({
@@ -397,7 +400,7 @@ describe('teardownPublishedPage — failure semantics (DD1)', () => {
   });
 
   it('db finalize failure: retryable, page still unpublishing (never a lying draft)', async () => {
-    db.project.update.mockRejectedValue(new Error('pg down'));
+    db.project.updateMany.mockRejectedValue(new Error('pg down'));
 
     const result = await teardownPublishedPage('page_1', { mode: 'unpublish' });
 
@@ -407,5 +410,65 @@ describe('teardownPublishedPage — failure semantics (DD1)', () => {
       error: 'pg down',
     });
     expect(publishStateWrites()).toEqual(['unpublishing']);
+  });
+
+  // `PublishedPage.projectId` has no FK (DD11), so it can point at a Project that is already
+  // gone. With `project.update` that threw P2025 → 'db_finalize' retryable → and every retry
+  // re-ran the same failing statement, wedging the row at 'unpublishing' FOREVER. `updateMany`
+  // matches zero rows instead, so teardown converges on the first attempt.
+  it('dangling projectId (project already deleted) still finalizes to draft — no wedge', async () => {
+    // updateMany's real behaviour against a non-existent id: matches nothing, no throw.
+    db.project.updateMany.mockResolvedValue({ count: 0 });
+
+    const result = await teardownPublishedPage('page_1', { mode: 'unpublish' });
+
+    expect(result).toEqual({ status: 'done', mode: 'unpublish' });
+    expect(db.project.updateMany).toHaveBeenCalledWith({
+      where: { id: 'proj_1' },
+      data: { status: 'draft' },
+    });
+    expect(publishStateWrites()).toEqual(['unpublishing', 'draft']);
+    expect(captureMessage).not.toHaveBeenCalled();
+  });
+});
+
+describe('teardownPublishedPage — honest failure labels', () => {
+  it('marker-write failure reports step "marker" at warning level (nothing was changed)', async () => {
+    db.publishedPage.update.mockRejectedValueOnce(new Error('pg down'));
+
+    const result = await teardownPublishedPage('page_1', { mode: 'unpublish' });
+
+    // NOT 'kv_routes': no KV call has happened at this point.
+    expect(result).toEqual({ status: 'retryable_failure', step: 'marker', error: 'pg down' });
+    expect(kvDeleteRoutes).not.toHaveBeenCalled();
+    expect(kvRemoveRoutes).not.toHaveBeenCalled();
+    expect(blobDel).not.toHaveBeenCalled();
+    // Nothing to clean up ⇒ not an incomplete teardown ⇒ not error-level.
+    expect(captureMessage).toHaveBeenCalledWith(
+      'teardown_incomplete',
+      expect.objectContaining({
+        level: 'warning',
+        tags: expect.objectContaining({ step: 'marker' }),
+      })
+    );
+  });
+
+  it('enumeration-read failure reports step "db_read" at error level (marker already written)', async () => {
+    db.publishedPageVersion.findMany.mockRejectedValue(new Error('pg read timeout'));
+
+    const result = await teardownPublishedPage('page_1', { mode: 'unpublish' });
+
+    expect(result).toEqual({
+      status: 'retryable_failure',
+      step: 'db_read',
+      error: 'pg read timeout',
+    });
+    expect(kvDeleteRoutes).not.toHaveBeenCalled();
+    // The marker IS written → row parked non-serving with KV/blobs live = incomplete teardown.
+    expect(publishStateWrites()).toEqual(['unpublishing']);
+    expect(captureMessage).toHaveBeenCalledWith(
+      'teardown_incomplete',
+      expect.objectContaining({ level: 'error', tags: expect.objectContaining({ step: 'db_read' }) })
+    );
   });
 });

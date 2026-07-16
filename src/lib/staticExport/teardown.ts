@@ -40,6 +40,7 @@
  *   are best-effort `safeDel`. Teardown never uploads anything (DD2b).
  * - `publish/route.ts`'s root-blob-only rollback — known-weak, not a model (DD3).
  */
+import 'server-only';
 import { del } from '@vercel/blob';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
@@ -50,8 +51,18 @@ import { publishSubdomainHosts } from '@/lib/domains/hosts';
 
 export type TeardownMode = 'unpublish' | 'delete';
 
-/** The step that failed — surfaced to Sentry + the route's 500 body. */
-export type TeardownStep = 'kv_routes' | 'revalidate' | 'blob_delete' | 'db_finalize';
+/**
+ * The step that failed — surfaced to Sentry + the route's 500 body. Labels are TRUTHFUL:
+ * `'marker'`/`'db_read'` failures happen BEFORE any external state is touched, so they must
+ * not masquerade as `'kv_routes'` (which would send the founder hunting a KV incident).
+ */
+export type TeardownStep =
+  | 'marker'
+  | 'db_read'
+  | 'kv_routes'
+  | 'revalidate'
+  | 'blob_delete'
+  | 'db_finalize';
 
 export type TeardownResult =
   /** Custom domain attached (any status) — nothing was written. Caller → 409. */
@@ -99,11 +110,18 @@ export async function teardownPublishedPage(
 
   const { slug } = page;
 
-  const fail = (step: TeardownStep, err: unknown): TeardownResult => {
+  // `level` is a knob, not decoration: an incomplete teardown (external state half-gone) is an
+  // 'error' the founder must chase; a pre-external failure changed NOTHING and is merely a
+  // failed attempt → 'warning'.
+  const fail = (
+    step: TeardownStep,
+    err: unknown,
+    level: 'error' | 'warning' = 'error'
+  ): TeardownResult => {
     const error = err instanceof Error ? err.message : String(err);
     console.error('[teardown] failed:', { pageId, slug, step, error });
     Sentry.captureMessage('teardown_incomplete', {
-      level: 'error',
+      level,
       tags: { area: 'teardown', step },
       extra: { pageId, slug, step, mode, error },
     });
@@ -119,8 +137,10 @@ export async function teardownPublishedPage(
         data: { publishState: 'unpublishing' },
       });
     } catch (err) {
-      // Nothing external touched yet; the page is untouched and still serving.
-      return fail('kv_routes', err);
+      // Nothing external touched yet; the page is untouched and still serving. Truthful step
+      // ('marker', not 'kv_routes' — no KV call has happened) and warning-level: there is no
+      // incomplete teardown to clean up, the attempt simply never started.
+      return fail('marker', err, 'warning');
     }
   }
 
@@ -142,7 +162,10 @@ export async function teardownPublishedPage(
         })
       : [];
   } catch (err) {
-    return fail('kv_routes', err);
+    // Enumeration read, not a KV call. Stays at 'error' level: the marker IS written by now,
+    // so the row is parked at 'unpublishing' (non-serving on SSR) with KV/blobs still alive —
+    // a genuinely incomplete teardown needing a retry.
+    return fail('db_read', err);
   }
 
   // Paths: the union across ALL versions — an older version may have written subpage or
@@ -246,7 +269,12 @@ export async function teardownPublishedPage(
       });
     }
     if (page.projectId) {
-      await prisma.project.update({
+      // `updateMany`, NOT `update`: `PublishedPage.projectId` carries no `@relation`/FK by
+      // design (DD11), so it can dangle at a deleted Project. `update` would throw P2025 on a
+      // dangling id → 'db_finalize' retryable → and since EVERY retry re-runs this same
+      // statement, the row would wedge at 'unpublishing' forever. `updateMany` matches zero
+      // rows and moves on, so teardown converges.
+      await prisma.project.updateMany({
         where: { id: page.projectId },
         data: { status: 'draft' },
       });

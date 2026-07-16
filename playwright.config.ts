@@ -62,6 +62,7 @@ export default defineConfig({
         /dashboard-shell\.spec\.ts/,
         /dashboard-workspace\.spec\.ts/,
         /dashboard-redirects\.spec\.ts/,
+        /dashboard-lifecycle\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
@@ -76,6 +77,10 @@ export default defineConfig({
       // Mock mode: bypasses Clerk auth on generation routes AND returns canned
       // copy (no credits, deterministic). Override per-run with E2E_LLM=real.
       NEXT_PUBLIC_USE_MOCK_GPT: process.env.E2E_LLM === 'real' ? 'false' : 'true',
+      // `next dev` reads PORT. Without this, E2E_PORT only moved the URL Playwright
+      // waited on while dev still grabbed 3000 (or the next free port — which, with
+      // sibling worktrees running, is someone else's server) → webServer timeout.
+      PORT: String(PORT),
     },
   },
 });

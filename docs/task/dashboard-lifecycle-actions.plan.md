@@ -20,7 +20,7 @@ the publish pipeline without orphaning KV routes, blobs, or live pages.
 
 - phase 1 dashboard plumbing (providers, URL helper): done (commit c16baad5, review loops 1, verdict ship)
 - phase 2 publish-state serving predicate (SSR 404 + isPublished re-point): done (commit ecffd51a, review loops 1, verdict ship)
-- phase 3 teardown library: pending
+- phase 3 teardown library: done (commit 2e80de3d, review loops 1, verdict ship). DD1c investigation = NO purge mechanism exists → honest ~1h edge window; phase 5 copy is load-bearing.
 - phase 4 unpublish + delete API routes + e2e: pending
 - phase 5 dashboard wiring slice 1 (Unpublish/Delete live): pending
 - phase 6 rename + duplicate: pending

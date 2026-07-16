@@ -206,7 +206,11 @@ function buildFinalContent(
   };
 }
 
-/** Run strategy -> copy (mock) -> saveDraft for the given token + audience. */
+/**
+ * Run strategy -> copy (mock) -> saveDraft for the given token + audience.
+ * Returns the assembled finalContent so callers can publish it via `publishSeed`
+ * without re-deriving it (the publish body needs the same layout/content).
+ */
 export async function seedDraft(request: APIRequestContext, tokenId: string, cfg: AudienceConfig) {
   const strategyJson = await postOk(request, cfg.strategyUrl, cfg.strategyBody);
   const strategy = strategyJson.data;
@@ -227,4 +231,42 @@ export async function seedDraft(request: APIRequestContext, tokenId: string, cfg
     variantId: cfg.variantId,
     finalContent,
   });
+
+  return finalContent;
+}
+
+/**
+ * Publish a seeded draft through the REAL `/api/publish` route (the same body the preview
+ * page sends, minus the UI-only extras). Used by the lifecycle spec, which needs a PUBLISHED
+ * project without driving the publish UI for each case.
+ *
+ * NOTE on local dev: Vercel Blob/KV are absent, so the static export fails non-fatally and the
+ * row lands in `publishState: 'failed'` rather than `'published'`. Both are SERVING states
+ * (`isServingPublishState`), so `/p/{slug}` renders and teardown treats them identically —
+ * which is exactly what the spec asserts against.
+ */
+export async function publishSeed(
+  request: APIRequestContext,
+  tokenId: string,
+  slug: string,
+  cfg: AudienceConfig,
+  finalContent: ReturnType<typeof buildFinalContent>,
+) {
+  const res = await request.post('/api/publish', {
+    data: {
+      slug,
+      title: cfg.title,
+      content: {
+        layout: { sections: finalContent.layout.sections, theme: {} },
+        content: finalContent.content,
+        forms: {},
+      },
+      themeValues: {},
+      tokenId,
+    },
+    timeout: 150_000,
+  });
+  const json = await res.json().catch(() => ({}));
+  expect(res.ok(), `/api/publish -> ${res.status()} ${JSON.stringify(json)}`).toBeTruthy();
+  return json;
 }

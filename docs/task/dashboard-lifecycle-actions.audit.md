@@ -346,3 +346,226 @@ Sentry captured · retry on a stuck `'unpublishing'` row completes.
 
 **Working-tree note (phase 3):** unchanged from above — `plan.md` (orchestrator progress log) and
 the CRLF-only `uiFoundationIsolation.test.tsx.snap` churn are not from this phase.
+
+---
+
+## Phase 4 — API routes: unpublish + delete (+ honest e2e)
+
+**Files changed**
+
+- `src/app/api/projects/[tokenId]/unpublish/route.ts` (new)
+- `src/app/api/projects/[tokenId]/route.ts` (DELETE added; GET untouched)
+- `src/lib/staticExport/teardown.ts` (3 folded phase-3 review fixes only)
+- `src/lib/staticExport/teardown.test.ts` (dangling-projectId + honest-label tests)
+- `e2e/dashboard-lifecycle.spec.ts` (new)
+- `e2e/helpers/seedDraft.ts` (`publishSeed` helper; `seedDraft` now returns finalContent)
+- `docs/task/dashboard-lifecycle-actions.audit.md` (this section)
+
+### `src/app/api/projects/[tokenId]/unpublish/route.ts` (new)
+
+`POST` → `auth()`/401 → `assertProjectOwner(..., { action: 'projects.unpublish',
+claimIfOrphan: true })` with **status passthrough** (canonical `[tokenId]/route.ts:23-30`
+pattern; the `published-slug` hand-rolled admin-all widening is NOT copied) → project lookup →
+`PublishedPage` by `projectId`. No page / `publishState === 'draft'` → **idempotent 200
+`{ ok: true, unpublished: false }`** (a double-click must not 404). Else
+`teardownPublishedPage(pageId, { mode: 'unpublish' })`: `blocked` → 409
+`{ code: 'custom_domain_attached', error: 'Remove the custom domain first' }`;
+`retryable_failure` → 500 `{ code: 'teardown_incomplete', step }`; `done` → 200.
+`runtime = 'nodejs'` + `dynamic = 'force-dynamic'` (teardown touches Blob/KV/Postgres).
+
+### `src/app/api/projects/[tokenId]/route.ts` (DELETE added)
+
+Identical authz ladder with `action: 'projects.delete'`. Published (`publishState !== 'draft'`)
+→ `teardownPublishedPage(pageId, { mode: 'delete' })` with the same 409/500 mapping; draft →
+teardown skipped (no KV/blobs left) → straight to the **DD11 `$transaction`**: `PublishedPage`
+→ `Project` → `Token` LAST (`Project.tokenId` FKs `Token.value`). Cascades left implicit per
+DD11; the comment names `Testimonial` (`SetNull`, rows survive with `projectId: null`) and the
+retained slug-keyed `FormSubmission`/`PageAnalytics`. **GET not touched** (no file-level
+`runtime` export added, precisely so GET's behavior is unchanged; the route default is already
+`nodejs`).
+
+### D2 (step 3) — admin override, one-line flip
+
+Both routes carry the **same** comment block + the same commented line immediately after the
+`!access.ok` check, so strict owner-only is one uncomment in each file:
+`if (access.adminOverride) return NextResponse.json({ error: 'Access denied' }, { status: 403 });`
+Each comment cross-references the other file ("flip BOTH together"). Founder decides at Gate A.
+
+### `src/lib/staticExport/teardown.ts` — the 3 folded phase-3 review fixes (nothing else)
+
+1. **Wedge fix (was :249):** `prisma.project.update` → `prisma.project.updateMany`. `update`
+   throws P2025 on a dangling `PublishedPage.projectId` (the FK is intentionally absent, DD11)
+   → `db_finalize` retryable → and every retry re-ran the same failing statement, wedging the
+   row at `'unpublishing'` forever. `updateMany` matches zero rows and converges.
+2. **Honest step labels (was :122, :145):** `TeardownStep` gained `'marker' | 'db_read'`. The
+   marker-write failure now reports `step: 'marker'` at **`level: 'warning'`** (nothing was
+   touched ⇒ not an incomplete teardown, just a failed attempt); the enumeration-read failure
+   reports `step: 'db_read'` and stays at `'error'` (the marker IS written by then, so the row
+   is parked non-serving with KV/blobs alive = genuinely incomplete). `fail()` took an optional
+   `level` param to express this.
+3. **`import 'server-only'`** added at the top, matching `renderPublishedExport.ts:1`.
+
+### `src/lib/staticExport/teardown.test.ts`
+
+`project.update` mock → `updateMany` throughout. New: **dangling-projectId** test
+(`updateMany` → `{ count: 0 }` ⇒ still finalizes to `'draft'`, no Sentry, no wedge) and two
+label tests (`'marker'` @ warning with zero KV/blob calls; `'db_read'` @ error with the marker
+written). Added `vi.mock('server-only', () => ({}))` — vitest runs jsdom (client condition), so
+the real guard module throws on import; stubbing it in the test file avoided touching
+`vitest.config.ts` (out of scope). 21/21 pass.
+
+### `e2e/dashboard-lifecycle.spec.ts` (new) + `e2e/helpers/seedDraft.ts`
+
+Six cases: (a) unauthenticated → **404** both routes (cookie-less `request.newContext`) —
+corrected in the review-fix pass below; the routes' own 401 is unreachable for an anonymous API
+caller and is NOT covered; (a2) demo token → 404 both routes + demo project survives;
+(b) non-owner token → 403 both routes + project survives; (c) unpublish published seed → 200,
+`/p/{slug}` 404, project GET `status: 'draft'`, PublishedPage row + slug KEPT (DD12), second
+unpublish = 200 no-op, re-publish → serves again on the same slug; (d) DELETE published → 200,
+project GET 404, `/p/{slug}` 404, all three rows gone; (e) custom domain (status
+`pending_dns`, per D1) → 409 `custom_domain_attached` on BOTH routes, `/p/{slug}` STILL serves,
+no `'unpublishing'` marker written, project intact, then domain removed → unpublish 200.
+
+The spec's header states the honest scope in-file: it does **not** assert `{slug}.lessgo.site`
+going down (host-based middleware+KV routing isn't reproducible on localhost; the DD1c CDN
+layer doesn't exist locally at all) and does not assert real KV/blob deletion (absent locally —
+covered by the mocked unit tests + Gate A on a deployed host).
+
+`seedDraft()` now **returns** the assembled finalContent (additive; existing caller ignores it)
+and a new `publishSeed()` publishes it through the real `/api/publish`. Direct `PrismaClient`
+use is confined to the spec, only for what no API can do locally (plant a custom domain;
+fabricate a foreign-owned project).
+
+### Deviations
+
+- **`teardown.test.ts` `vi.mock('server-only')`** instead of a vitest config alias — in-scope
+  conservative choice; `vitest.config.ts` is not in Files touched.
+- **`publishSeed` / `seedDraft` return value** — the plan allowed `seedDraft.ts` edits "only if
+  seeding needs a published variant helper". It does (cases c/d/e need a PUBLISHED project and
+  driving the publish UI five times would be slow and flaky).
+- The spec's custom-domain and foreign-owner setup uses Prisma directly (see above); the
+  helper file's "no app modules in the Playwright runner" rule is respected (`@prisma/client`
+  is a package, not an app module, and lives in the spec, not the helper).
+
+### STOPPED / out of scope — needs an orchestrator decision
+
+**`playwright.config.ts` is NOT in this phase's Files-touched list, and the new spec cannot run
+without it.** The config's `authed` project lists specs explicitly and warns in-file: "a spec
+only runs if it is listed HERE — an unregistered spec silently matches no project and gives
+false confidence." Verified: `npx playwright test --list | grep lifecycle` → **no matches**.
+The one-line fix is adding `/dashboard-lifecycle\.spec\.ts/` to the `authed` project's
+`testMatch`. NOT done (would edit a file outside the list). Until then the spec is dead code.
+
+### Test results
+
+- `npx tsc --noEmit` — **green** (no output; the plan's noted `page.tsx` false error did not
+  reproduce). `e2e/` is excluded from tsconfig, so the new spec was typechecked separately with
+  an equivalent standalone `tsc` invocation — also clean.
+- `npm run test:run` — **green: 196 files passed / 1 skipped; 3371 tests passed / 18 skipped.**
+- `npm run test:e2e` — **NOT RUN. No pass is claimed.** Two independent blockers: (1) the spec
+  is unregistered (above), so it matches no project; (2) the run aborted in this environment —
+  `Process from config.webServer exited early` after ports 3000-3004 were all in use (other
+  worktrees/sessions). The e2e spec is therefore **unverified** — it has never executed.
+
+### Open risks
+
+- **The e2e spec has never run.** Beyond registration, first execution may need fixes (Clerk
+  session refresh timing, publish timeouts in local dev where Blob/KV run to their timeouts).
+  Treat it as unproven until a green run exists.
+- Local dev publishes land in `publishState: 'failed'` (Blob/KV absent), not `'published'`.
+  Both are serving states, so the assertions hold either way — but the spec exercises the
+  `'failed'` → teardown path locally, and the `'published'` → teardown path only at Gate A.
+- The delete `$transaction` runs AFTER teardown, outside it (unavoidable: Blob/KV aren't
+  transactional). A crash in that window leaves external state gone + rows present; recovery is
+  re-running Delete (idempotent). Same window as recorded in phase 3.
+- 500 `teardown_incomplete` is retry-safe but the route surfaces no retry affordance beyond the
+  user clicking again — phase 5 owns the toast copy.
+
+**Working-tree note (phase 4):** `plan.md` (orchestrator progress log) shows as modified — not
+from this phase.
+
+---
+
+## phase 4 — review fixes
+
+**Files changed**
+
+- `src/app/api/projects/[tokenId]/route.ts`
+- `src/app/api/projects/[tokenId]/unpublish/route.ts`
+- `e2e/dashboard-lifecycle.spec.ts`
+- `docs/task/dashboard-lifecycle-actions.audit.md`
+
+### BLOCKER 1 — destructive routes accepted the demo token (security hole)
+
+`assertProjectOwner` short-circuits `lessgodemomockdata` to `ok: true` for ANY caller BEFORE any
+ownership check (`src/lib/security.ts:63-65`), and a real shared/un-owned `Project` row exists for
+it (`/api/saveDraft`). Both handlers checked only `!access.ok` → any signed-in user could
+`DELETE /api/projects/lessgodemomockdata` and destroy the shared demo (`PublishedPage → Project →
+Token`; the Token delete is unrecoverable by re-saving). Unpublish was the same shape.
+
+Fix: one `if (access.isDemo) → 404 'Project not found'` guard per route, immediately after the
+`!access.ok` check, mirroring the codebase convention in `src/lib/blog/access.ts:21` (404 not 403 —
+don't reveal the row exists). Each carries a comment explaining WHY (the short-circuit). Covered by
+new e2e case (a2), which also asserts the demo row SURVIVES — conditional on the row existing in
+the local DB, since a missing row would 404 via the not-found branch and give a false green (stated
+in-spec).
+
+### BLOCKER 2 — e2e asserted a status the platform cannot return
+
+The "unauthenticated → 401" case would have gotten 404: `/api/projects/*` isn't in
+`isPublicRoute`, the matcher covers `/(api|trpc)(.*)`, and `auth.protect()` runs first
+(`src/middleware.ts:251-253`); for an `APIRequestContext` request Clerk's `handleUnauthenticated()`
+→ `isPageRequest()` false → `notFound()` → 404. The routes' 401 is defense-in-depth the middleware
+pre-empts.
+
+Fix: assert **404** (strict — deliberately NOT weakened to "any non-200", which would hide a real
+regression), with an in-test comment naming middleware `protect()` as the first gate and the route
+401 as defense-in-depth. The spec file header and the audit's "(a) unauthenticated → 401" line are
+both corrected so neither claims coverage that doesn't exist; the header now records the routes'
+401 branch under "what this does NOT cover".
+
+### Folded in (reviewer non-blocking) — DELETE skipped the D1 guard for a draft row
+
+`if (page && page.publishState !== 'draft')` skipped teardown for a draft row, and teardown owns
+the D1 custom-domain guard → the guard was skipped too. `domains/add` does not require a serving
+state, so a draft row CAN hold a `customDomain` (attach a domain after an unpublish) → delete
+dropped the row with no 409, orphaning the Vercel registration + KV keys. Fix: `customDomain` added
+to the route's `findFirst` select and an explicit 409 guard keyed on `page.customDomain !== null`
+placed BEFORE the teardown branch — D1's predicate, state-independent, full stop. Teardown itself
+is still skipped for a draft row (only the guard moved); teardown's own `blocked` branch is kept as
+defense-in-depth.
+
+### Deviations
+
+None. All edits confined to the Files-touched list. No demo-token unit assertion was added to
+`src/lib/staticExport/teardown.test.ts` — the guard lives in the route handlers, not teardown, so
+the e2e case is the honest home for it; that file was left untouched.
+
+### Test results
+
+- `npx tsc --noEmit` — **green** (no output).
+- `npm run test:run` — **green: 196 files passed / 1 skipped; 3371 tests passed / 18 skipped.**
+- `npm run test:e2e` — **NOT RUN by this pass** (an e2e run was in flight on port 3011; running it
+  would collide). The orchestrator runs the suite.
+
+**Orchestrator correction (supersedes the STOPPED note above):** the spec IS now registered —
+`playwright.config.ts:65` lists `/dashboard-lifecycle\.spec\.ts/` in the `authed` project's
+`testMatch` (the orchestrator added it; the implementer correctly refused to, being out of its
+Files-touched list). `npx playwright test --list` discovers all cases.
+
+The orchestrator also fixed a **pre-existing config defect** in the same file: `webServer.command`
+was a bare `npm run dev` with no port, so the documented `E2E_PORT` toggle only moved the URL
+Playwright *waited on* while `next dev` still grabbed 3000 (or the next free port — someone else's
+worktree server) → guaranteed `webServer` timeout whenever a sibling worktree is running. Fixed by
+passing `PORT: String(PORT)` into `webServer.env` (`next dev` reads `PORT`).
+
+**The spec HAS now executed.** Its first-ever run empirically confirmed the review's blocker 2
+(`Expected: 401, Received: 404` — Clerk middleware `auth.protect()` pre-empts the route's 401),
+which is what drove the fix above.
+
+### Open risks
+
+- The demo-token e2e case only distinguishes the guard from the not-found branch when the demo
+  project is seeded in the target DB. The guard itself is unconditional in code.
+- All phase-4 open risks above still stand (the spec has never run; local publishes land in
+  `'failed'`; the post-teardown `$transaction` window).
