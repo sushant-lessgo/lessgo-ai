@@ -34,7 +34,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEditStore } from '@/hooks/useEditStore';
-import { UserButton, useUser } from '@clerk/nextjs';
 import Logo from '@/components/shared/Logo';
 import { AppIcon } from '@/components/ui/icon';
 import { Coming } from '@/components/ui/coming';
@@ -76,8 +75,6 @@ const EMPHASIS_ROW =
 
 export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
   const router = useRouter();
-  // `user` is no longer read: t1 drops the firstName label beside the avatar.
-  const { isSignedIn } = useUser();
 
   const [showHelpMenu, setShowHelpMenu] = useState(false);
   const [showAppMenu, setShowAppMenu] = useState(false);
@@ -309,21 +306,11 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
         {/* Regen / undo / redo / reset / Edit-Preview / Publish */}
         <EditHeaderRightPanel tokenId={tokenId} />
 
-        <div className="app-divider" />
-
-        {/* UserButton STAYS (decision 8): it is the only sign-out path, so it
-            outranks t1's avatar-less bar. The `user.firstName` text label that
-            used to sit beside it IS dropped — pure presentation. */}
-        {isSignedIn && (
-          <UserButton
-            afterSignOutUrl="/"
-            appearance={{
-              elements: {
-                avatarBox: 'w-8 h-8',
-              },
-            }}
-          />
-        )}
+        {/* NO avatar / Clerk UserButton here (decision 8b — founder ruling at the
+            phase-4 gate, REVERSING decision 8's "keep it, it's the only in-editor
+            sign-out path"): account actions incl. sign-out live on the DASHBOARD,
+            reachable from the logo menu's `Back to dashboard` row. t1 draws no
+            avatar, so the bar now matches the handoff exactly. Do not re-add. */}
       </div>
     </header>
   );

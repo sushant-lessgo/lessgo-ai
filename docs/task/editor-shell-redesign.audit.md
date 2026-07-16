@@ -913,3 +913,90 @@ On the same page, menus opened *later* survive indefinitely (the trace above). S
 one is now fixed and pinned), it affects every menu equally, and diagnosing it means going into
 `EditLayout`/`EditProvider`, outside this phase's Files touched. **Reported, not fixed** — worth a
 phase-8 look, and it is why the first live run misleadingly showed `help=closed`.
+
+---
+
+## Phase 4 — amendment (founder removals, decisions 8 + 8b)
+
+Follow-up pass on top of the committed+approved phase 4 (`4462a93e`). Two founder-ruled
+REMOVALS, taken at the phase-4 gate, that reverse earlier plan decisions and are authorized
+BEHAVIOR changes overriding the spec's presentation-only line. Not a redo of phase 4.
+
+**Files changed**
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx`
+- `src/app/edit/[token]/components/layout/EditHeader.tsx`
+- `docs/task/editor-shell-redesign.audit.md` (this section)
+
+No other file was touched; nothing forced a wider edit.
+
+### GlobalAppHeader.tsx — avatar / Clerk `UserButton` removed
+Removed the `{isSignedIn && <UserButton .../>}` mount from the right cluster, plus the
+`app-divider` that separated it from `EditHeaderRightPanel` (a trailing divider with nothing
+after it would be a dangling separator). Reverses decision 8 ("keep it, it's the only in-editor
+sign-out path"); founder ruling: account actions incl. sign-out live on the dashboard, reachable
+from the logo menu's `Back to dashboard` row.
+
+Dead code cleaned: `useUser()` became unused → removed, and with it the whole
+`import { UserButton, useUser } from '@clerk/nextjs'` line — this file no longer imports Clerk at
+all. A comment now records the ruling so the next reader does not "restore" the avatar.
+
+**Upside realized:** t1 draws no avatar, so the bar now matches the handoff exactly and the
+phase-4 "avatar deviation" is gone.
+
+### EditHeader.tsx — Languages control unmounted
+Removed the `<LanguageToggle />` + `<LocaleSettings />` mounts from `EditorDesignControls` and
+their two imports; `EditorDesignControls` now returns just `designControls`. Reverses the earlier
+"removing a working control is a behavior change" call. Rationale: `LanguageToggle` is invisible
+until a project declares a 2nd locale, so on ~every project the pair was dead weight.
+
+**Deliberately LEFT ON DISK, untouched and unimported:**
+`src/app/edit/[token]/components/editor/{LanguageToggle,LocaleSettings}.tsx`. They are not dead
+code to be swept — see residual risk below; keeping them makes re-mounting elsewhere cheap.
+(`LocaleSettings` imports `localeLabel` from `LanguageToggle`, so the pair stays internally
+consistent on disk. `i18nStoreState.test.ts` only *simulates* their store calls and is unaffected.)
+
+Updated the file's header comment (which previously documented that these "stay mounted" and WHY)
+to state the founder ruling + point at the `docs/product/orchestrator.md` open risk. Also corrected
+`EditorDesignControls`' docstring, which still advertised "+ the i18n controls".
+
+### Regen locale-lock — VERIFIED SURVIVING
+`EditHeaderRightPanel` L107-108:
+`const regenLocaleLocked = !!localeConfig && activeLocale !== localeConfig.defaultLocale;`
+This reads `activeLocale`/`localeConfig` **from the store selector** (L81-88), never the toggle
+component — so unmounting the toggle cannot affect it. File untouched; compiles; logic intact.
+Not removed as "dead" despite the toggle being gone. The lock is now only reachable on a project
+whose active locale was already non-default, which is the residual risk below, not a lock defect.
+
+### Deviations
+None. Both removals implemented exactly as scoped; no file outside the list touched.
+
+### Test results (actual)
+- `npx tsc --noEmit` — **clean, no output.**
+- `npm run test:run` — **194 passed | 1 skipped (195 files); 3337 passed | 18 skipped.**
+- `GlobalAppHeader.menus.test.tsx` — **6/6 passed.** No test needed weakening or fixing: the
+  suite's `vi.mock('@clerk/nextjs')` stubs (`useUser: () => ({ isSignedIn: false })`,
+  `UserButton: () => null`) already rendered NO avatar, so no assertion covered the removed mount.
+  Those two stub lines are now inert (the component imports no Clerk) but sit in a file outside
+  this phase's Files touched — left alone, flagged here as trivial cleanup for a later phase.
+- `npm run lint` — no errors; only pre-existing `no-img-element` / `exhaustive-deps` warnings.
+  Neither touched file appears in the output → no newly-unused imports.
+- `PORT=3007 E2E_PORT=3007` full Playwright suite — **EXIT=0, 22 passed, 4 skipped.**
+  Dirty-guard **EXECUTED** (proof from list reporter):
+  `✓ 20/21/22 editor-dirty-guard.spec.ts` (mid-edit prompt, dirty-window prompt, silent-when-clean)
+  plus `✓ 23` review pill — all green. `publish.spec.ts` passed on this run.
+- CRLF-churned `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap`
+  restored (`git diff --ignore-all-space` confirmed line-ending churn only, zero content delta).
+
+### Invariants re-checked (not regressed)
+`.app-chrome` attach map untouched (no wrapper touched → attach-map comment left as-is); the bar is
+still the single `<header>` with a unique `role="status"` (`SaveStateChip`) — dirty-guard e2e proves
+it; `GlobalAppHeader.tsx` `useEditStore.getState().toggleLeftPanel?.()` preserved VERBATIM; regen
+orchestration + toast effect untouched; popover-dispatch + `!allComplete` ReviewPill guard unchanged;
+greyed rows still use `<Coming>`; no new store writes.
+
+### Residual risk
+**Bilingual projects lose their only locale-switch affordance.** Lumen (EN/NL) and naayom→Hindi have
+no in-editor way to switch/declare a locale now. Consequences: (a) authors cannot reach non-default
+locale copy from the editor; (b) a project already parked on a non-default `activeLocale` will show
+Regen Copy locked with no visible way to switch back. Store state and both components are intact, so
+the fix is a re-mount, not a rebuild. Logged in `docs/product/orchestrator.md`.

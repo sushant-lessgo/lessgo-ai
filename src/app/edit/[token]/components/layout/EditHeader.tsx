@@ -13,9 +13,18 @@
 //  - the design-control dispatch below is UNCHANGED (byte-identical to the old
 //    EditHeader L24-52), including its render-read selector;
 //  - the `!allComplete` ReviewPill guard is UNCHANGED (old L70) — it double-gates
-//    with ReviewPill's own self-hide, and BOTH are deliberate (scout §D);
-//  - LanguageToggle / LocaleSettings stay mounted. t1 draws no language toggle,
-//    but they work today and removing a working control is a behavior change.
+//    with ReviewPill's own self-hide, and BOTH are deliberate (scout §D).
+//
+// LANGUAGES CONTROL — REMOVED, do NOT restore (decision 8b, founder ruling at the
+// phase-4 gate; it reverses the earlier "removing a working control is a behavior
+// change" call and authorizes the removal). LanguageToggle is invisible until a
+// project declares a 2nd locale, so on ~every project the pair was dead weight.
+// The two components are deliberately LEFT ON DISK, unimported, at
+// ../editor/{LanguageToggle,LocaleSettings}.tsx: there is a LOGGED OPEN RISK (see
+// docs/product/orchestrator.md) that bilingual projects (Lumen EN/NL, naayom→Hindi)
+// now have no locale-switch affordance — keeping them makes re-mounting cheap.
+// The regen locale-lock in EditHeaderRightPanel is UNAFFECTED: it reads
+// activeLocale/localeConfig from the store, never the toggle component.
 //
 // There is no `EditHeader` component any more; EditLayout mounts GlobalAppHeader
 // only. Kept in this file (rather than inlined into GlobalAppHeader) so the
@@ -27,8 +36,6 @@ import { ServiceThemePopover } from '../ui/ServiceThemePopover';
 import { VestriaThemePopover } from '../ui/VestriaThemePopover';
 import { ReviewPill } from '../ui/ReviewPill';
 import { SaveStateChip } from '../ui/SaveStateChip';
-import { LanguageToggle } from '../editor/LanguageToggle';
-import { LocaleSettings } from '../editor/LocaleSettings';
 import { AppIcon } from '@/components/ui/icon';
 import { Coming } from '@/components/ui/coming';
 import { useShallow } from 'zustand/react/shallow';
@@ -38,7 +45,8 @@ import { usesTemplateModule } from '@/types/service';
 
 /**
  * Left-cluster editor controls: the design-system popover for this project's
- * audience/template + the i18n controls.
+ * audience/template. (The i18n controls that used to sit beside it were removed
+ * — see the LANGUAGES CONTROL note at the top of this file.)
  */
 export function EditorDesignControls() {
   // Render-read: audienceType + templateId select which design-control popover renders.
@@ -71,15 +79,7 @@ export function EditorDesignControls() {
     designControls = <ThemePopover />;
   }
 
-  // LanguageToggle is invisible until the project declares a 2nd locale;
-  // LocaleSettings is the "Languages" declaration entry point.
-  return (
-    <div className="flex items-center gap-2">
-      {designControls}
-      <LanguageToggle />
-      <LocaleSettings />
-    </div>
-  );
+  return <div className="flex items-center gap-2">{designControls}</div>;
 }
 
 /**
