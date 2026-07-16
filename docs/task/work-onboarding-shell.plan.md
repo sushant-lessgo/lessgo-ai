@@ -14,7 +14,7 @@ Build the universal 6-step onboarding **journey shell** (agnostic chrome + step 
 ## Progress log
 
 - phase 1 rail data model + entry→work seed + brief plumbing: **done** (commits 715e4c63 + 43938e1d, review loops 1, verdict ship) — **STANDS under rev 4** (rail.ts = the WORK seam's rail adapter, verbatim)
-- phase 2a seam contract + registry + leaf + work seam skeleton + drift guard (→ HUMAN GATE): pending
+- phase 2a seam contract + registry + leaf + work seam + drift guard: **done** (commit fe2d063f, review loops 1, verdict ship; +2 review fixes folded pre-gate: chipIndex regex guard, preflight fail-closed) — **AWAITING HUMAN GATE (seam-contract sign-off)**
 - phase 2b journey shell scaffold (agnostic) + dispatch + e2e registration: pending
 - phase 3 STEP 01 + rail UI (agnostic) + work rail adapter wiring + icons: pending
 - phase 4 thin steps 02/03/04 (agnostic frames + work seam content): pending
