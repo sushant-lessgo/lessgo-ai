@@ -30,6 +30,7 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 26. **Free-tools TOF** — flagship: landing-page analyzer (email-gated results + launch distribution); programmatic per-category fan-out as experiment only
 27. **Meridian terminal-mock hero content** — `TerminalHero` ships hardcoded "item one/two/three" filler on published page; parameterize with real business data or swap for static visual (OOO from app-UI hygiene = template-content work); `src/modules/templates/meridian/blocks/Hero/TerminalHero.tsx` (+ `.published.tsx`)
 28. For TOF WebsiteExamples.com
+29. **Harden `/api/forms/submit` attribution** — route takes `userId` + `publishedPageId` from the client request body (`route.ts:57`, written `:198-199`), so anyone can write a `FormSubmission` attributed to any user; derive both server-side from the form/page instead. Found during dashboard-rollups-inbox (S4a reads around it via own-page-ids, R-A); also strands null-`publishedPageId` orphans out of the inbox — consider a backfill
 
 | 3 | Research brief — premium research-backed path: agentic Claude VoC + competitor research → editable Brief → generation | `docs/task/research-brief.spec.md` | queued — HELD until atelier lands (generation-path conflict) |
 | 4 | Universe v1 — variant fan-out (message-match / SEO keyword / audience), shared-edit propagation, universe view + per-variant analytics | `docs/tracks/universePlan.md` → universe-01… (spec required before /feature) | reserved, awaiting spec (**needs editorPlan phase 4 ops**) |
