@@ -47,12 +47,27 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     // Authenticated flows (publish + throttled edit-persistence + the editor
-    // dirty-guard). Serial, shared Clerk session from `setup`.
-    // NOTE: testMatch is an explicit ALLOWLIST — a new e2e spec that isn't listed
-    // in some project silently never runs. Add new authed specs here.
+    // dirty-guard + the dashboard suite). Serial, shared Clerk session from `setup`.
+    //
+    // NOTE: testMatch is an explicit ALLOWLIST — a spec only runs if it is listed
+    // HERE. An unregistered spec silently matches no project and gives false
+    // confidence: the suite goes green having never run it. (Both the editor-shell
+    // and dashboard tracks hit this independently.) Add new authed specs here.
+    // Listing a file before it exists is harmless — it simply matches nothing.
     {
       name: 'authed',
-      testMatch: [/publish\.spec\.ts/, /edit-persistence\.spec\.ts/, /editor-dirty-guard\.spec\.ts/],
+      testMatch: [
+        /publish\.spec\.ts/,
+        /edit-persistence\.spec\.ts/,
+        /editor-dirty-guard\.spec\.ts/,
+        /dashboard-shell\.spec\.ts/,
+        /dashboard-workspace\.spec\.ts/,
+        /dashboard-redirects\.spec\.ts/,
+        /dashboard-lifecycle\.spec\.ts/,
+        // media-library-picker: media = phase 3, media-picker = phase 4 (pre-registered).
+        /media\.spec\.ts/,
+        /media-picker\.spec\.ts/,
+      ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
     },
@@ -66,6 +81,12 @@ export default defineConfig({
       // Mock mode: bypasses Clerk auth on generation routes AND returns canned
       // copy (no credits, deterministic). Override per-run with E2E_LLM=real.
       NEXT_PUBLIC_USE_MOCK_GPT: process.env.E2E_LLM === 'real' ? 'false' : 'true',
+      // `next dev` reads PORT. Without this, E2E_PORT only moved the probe/baseURL
+      // while dev still grabbed 3000 (or the next free port — which, with sibling
+      // worktrees running, is someone else's server) → webServer timeout, or worse,
+      // reuseExistingServer:true silently tests a FOREIGN worktree's code.
+      // With this, `E2E_PORT=<n>` alone is sufficient and self-consistent.
+      PORT: String(PORT),
     },
   },
 });

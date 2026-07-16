@@ -2,8 +2,6 @@ import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import Header from '@/components/dashboard/Header';
-import Footer from '@/components/shared/Footer';
 import PersonaPrompt from '@/components/onboarding/PersonaPrompt';
 import type { UserPersona } from '@/types/service';
 
@@ -20,7 +18,6 @@ export default async function SettingsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-brand-text font-body">
-      <Header />
       <main className="flex-grow w-full max-w-3xl mx-auto px-4 py-8">
         <Link
           href="/dashboard"
@@ -43,7 +40,6 @@ export default async function SettingsPage() {
           subheading="Pick the option that fits best. You can change this later."
         />
       </main>
-      <Footer />
     </div>
   );
 }

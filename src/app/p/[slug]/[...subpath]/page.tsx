@@ -7,6 +7,7 @@ import { resolveCanonicalURL } from '@/lib/staticExport/canonicalUrl';
 import { resolveOgImage } from '@/lib/staticExport/buildPageMetadata';
 import { getPublishedGoal } from '@/lib/staticExport/getPublishedGoal';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
+import { isServingPublishState } from '@/lib/publishState';
 
 // Multi-page subpage route. Serves content.subpages[pathSlug] from a published
 // project. The blob fast path (KV route:{host}:{path} → blob-proxy) handles most
@@ -39,9 +40,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       previewImage: true,
       customDomain: true,
       customDomainStatus: true,
+      publishState: true,
     },
   });
-  if (!page) return {};
+  if (!page || !isServingPublishState(page.publishState)) return {};
 
   const content = page.content as any;
   const subPath = subPathFromParams(params.subpath);
@@ -140,10 +142,12 @@ export default async function PublishedSubpage({ params }: PageProps) {
       variantId: true,
       paletteId: true,
       themeValues: true,
+      publishState: true,
     },
   });
 
-  if (!page || !page.content) return notFound();
+  // DD0: unpublished rows are retained — gate serving on publishState, not row existence.
+  if (!page || !page.content || !isServingPublishState(page.publishState)) return notFound();
 
   const content = page.content as any;
   const pathSlug = subPathFromParams(params.subpath);

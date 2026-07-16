@@ -2,8 +2,6 @@ import { auth } from '@clerk/nextjs/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, MessageSquare, Clock, CheckCircle2, XCircle } from 'lucide-react'
-import Header from '@/components/dashboard/Header'
-import Footer from '@/components/shared/Footer'
 import { prisma } from '@/lib/prisma'
 import { isTestimonialsEnabled } from '@/lib/testimonials/flag'
 import { listTestimonialsByOwner } from '@/lib/testimonials/repo'
@@ -52,7 +50,6 @@ export default async function TestimonialsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900 font-body">
-      <Header />
       <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <Link
@@ -86,7 +83,6 @@ export default async function TestimonialsPage() {
 
         <TestimonialModerationList initial={testimonials} projects={projects} />
       </main>
-      <Footer />
     </div>
   )
 }

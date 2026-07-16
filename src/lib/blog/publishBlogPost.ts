@@ -75,7 +75,9 @@ async function loadContext(postId: string, tokenId: string): Promise<BlogContext
   if (!post || post.projectId !== project.id) throw new BlogPublishError(404, 'Post not found');
 
   const page = await prisma.publishedPage.findFirst({
-    where: { projectId: project.id, isPublished: true },
+    // DD0b: blog publish requires a LIVE site — strict 'published' (not the looser
+    // serving predicate), since baking a post onto a mid-publish site is not safe.
+    where: { projectId: project.id, publishState: 'published' },
   });
   if (!page) {
     throw new BlogPublishError(409, 'Publish your site first — the blog lives on your published site');

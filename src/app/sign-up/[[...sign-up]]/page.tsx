@@ -1,27 +1,20 @@
 import { SignUp } from '@clerk/nextjs';
 
+import { FounderAuthLayout } from '@/components/auth/FounderAuthLayout';
+import { authAppearance } from '@/lib/clerkAppearance';
+
 export const metadata = {
   title: 'Lessgo AI — Create your account',
 };
 
 export default function SignUpPage() {
-  const year = new Date().getFullYear();
-
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="w-full py-4">
-        <div className="mx-auto flex max-w-6xl items-center justify-center px-4">
-          <img src="/logo.svg" alt="Lessgo AI" className="h-12 md:h-14" />
-        </div>
-      </header>
-
-      <main className="flex flex-1 flex-col items-center justify-center px-6">
-        <SignUp />
-      </main>
-
-      <footer className="w-full py-6 text-center text-sm text-muted-foreground">
-        © {year} Lessgo AI
-      </footer>
-    </div>
+    <FounderAuthLayout
+      chipLabel="invite-only · founding cohort"
+      promiseTitle="You’re early. That’s the point."
+      promiseBody="Founding members get a direct line to me, priority on every feature request, and locked-in early pricing — for good."
+    >
+      <SignUp appearance={authAppearance} />
+    </FounderAuthLayout>
   );
 }
