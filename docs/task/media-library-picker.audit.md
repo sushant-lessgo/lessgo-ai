@@ -265,3 +265,196 @@ with a comment. Behaviour identical (only the SVG branch reads the mime); the li
   another worktree's server.
 - Still open from phase 2: the manual dev pass (real blob/prisma-studio check, repeat-pick single
   row) — no dev server was driven by hand this phase either.
+
+---
+
+# Phase 4 — media picker UI wired into ImageToolbar Replace
+
+**Files changed**
+- `src/app/edit/[token]/components/ui/MediaPickerModal.tsx` (new)
+- `src/app/edit/[token]/components/toolbars/ImageToolbar.tsx` (re-pointed; StockPhotosPanel deleted)
+- `e2e/media-picker.spec.ts` (new)
+- `playwright.config.ts` (webServer.env `PORT` forward — the phase-3 MUST-DO)
+- `docs/task/media-library-picker.audit.md` (this section)
+
+## What was built
+
+**`MediaPickerModal.tsx`** — Radix `Dialog` (`@/components/ui/dialog`) + `@/components/ui/tabs`,
+existing primitives only (ruling 1). Props `{open, onOpenChange, initialTab, tokenId, onPick}`; open
+state is owned by the invoking toolbar (local `useState`), NOT `useModalManager`.
+- **Library tab** — `GET /api/media?tokenId=` grid (route already excludes hidden + orders
+  `createdAt desc`, so no client filter). Handles both URL shapes (`<img src>` takes the dev-fs
+  relative `/uploads/{token}/…` and the absolute blob URL alike) and a **null `blurDataUrl`**
+  (SVG + cache-hit backfill rows) → tile falls back to plain grey. `Upload image` posts a single
+  file to `/api/upload-image` and the successful upload IS the pick (no second click).
+- **Stock tab** — RULING 8 carried forward verbatim:
+  - enrichment guard wraps the WHOLE call — `usesTemplate ? getServiceImageQuery(q, undefined, palettePhrase) : q.trim()` — so raw searches stay raw on non-template projects;
+  - `palettePhrase = getLoadedTemplate((templateId || 'hearth') as TemplateId)?.paletteImageKeywords?.[paletteId ?? '']` (the `|| 'hearth'` fallback kept as-is);
+  - six category buttons (featured=curated, other five enriched), curated-on-mount;
+  - identity fields via a narrow `useShallow` selector (bare `useEditStore()` is lint-banned);
+  - pick → `POST /api/proxy-image` (blob copy) → `onPick(proxied.url)`. Never hotlinks `photos[].url`; the store's mock `searchStockPhotos` is not used.
+- **From-CMS**: `SHOW_CMS_TAB = false` const + TODO. No CMS boards exist.
+
+**`ImageToolbar.tsx`** — re-pointed, not added:
+- `replace-image` no longer builds a dynamic `<input type=file>`; it opens the picker on `library`.
+- `stock-photos` opens the SAME picker on `stock`.
+- `handleStockPhotos`, `showStockPhotos`, `getPanelAnchor` and the whole in-file `StockPhotosPanel`
+  (~320 lines) are deleted, along with the now-unused `createPortal`/`StockPhoto`/`logger`/
+  `getServiceImageQuery`/`getLoadedTemplate`/`usesTemplateModule` imports. One stock
+  implementation, not two.
+- `onPick` → `parseTargetId(targetId)` → `replaceImage(sectionId, elementKey, url)` and **nothing
+  else** — no extra `save()`; `replaceImage` already does `updateElementContent` + undo push, and
+  autosave picks it up (proven by the e2e's saveDraft assertion). Invalid parse → `uploadError`.
+- `handleImageEditor`/`SimpleImageEditor`/`uploadImageFromObjectUrl` paths untouched.
+
+**Zero store changes** — nothing under `src/hooks/editStore/*` or `src/stores/`; `replaceImage` is
+an existing action, everything else is local component state. `bulkUploadImages` untouched.
+
+**`playwright.config.ts`** — added `PORT: String(PORT)` to `webServer.env`, so `E2E_PORT=3021`
+alone now starts `next dev` on 3021 instead of silently probing 3021 while serving 3000 (which,
+with `reuseExistingServer:true` and worktrees on 3000-3004, tests FOREIGN code).
+
+## Decisions / deviations
+
+1. **`handleFileUpload` removed** (plan said "left functional"). Once Replace opens the picker,
+   nothing referenced it — it was an unreachable second upload path, which is exactly what the
+   phase's "re-point, don't add / no two implementations" rule forbids. The picker's Library tab
+   posts to the same `/api/upload-image` route. `uploadImage` dropped from the toolbar's selector
+   with it (the store action itself is untouched and still used elsewhere).
+2. **Stock e2e asserts request bodies by `searchType`, not by index.** React StrictMode
+   double-invokes the curated-on-mount effect in dev, so the request count is not deterministic
+   (this cost one red run). Curated-on-mount is still asserted on `searchBodies[0]`.
+3. **e2e enriched strings hardcoded** (`'mountains warm professional craft natural light warm earthy natural'`) — the Playwright runner has no `@/` alias, per the plan. Fixture is
+   deterministic: `seedDraft` posts `templateId:'hearth'` + `paletteId:'terracotta'`.
+4. **Hearth is the e2e fixture**, not Meridian: Meridian's hero has no image element at all —
+   `data-image-id` only exists on Hearth's `PetalFramedHero` among the seed fixtures. The hero
+   image is a background-image div, so the DOM assertion reads `style.backgroundImage`.
+5. **Stock e2e stubs `/api/proxy-image` too** and its pick URL is a fake https URL — the assertion
+   that matters is "the PROXIED url lands on the page, and the proxy was called with
+   `{pexelsPhotoId, tokenId}`". Real Pexels→proxy→blob is on the founder's manual pass (ruling 7).
+6. Both picker tests share ONE seeded project (serial): a second seed usually eats a ~30s 429
+   back-off on the generation routes and ages the shared Clerk session for later specs.
+
+## FULL GATE
+
+- `npx tsc --noEmit` → **0 errors**.
+- `npm run test:run` → **196 files passed / 3360 tests passed** (+1 file, 18 tests skipped) = baseline.
+- `npm run lint` → **no errors**; only pre-existing warnings (`<img>` LCP, exhaustive-deps). Nothing
+  new from the picker (its `<img>` grid warnings match every other image UI in the repo).
+- `npm run build` (build:published-css → build:assets → next build) → **passed**.
+- `E2E_PORT=3021 npx playwright test e2e/media-picker.spec.ts --project=authed` → **3 passed**
+  (1 setup + **2 authed picker tests**, non-zero — both legs green incl. all three enrichment
+  body assertions).
+- `E2E_PORT=3021 npx playwright test --project=authed` (whole suite) → **25 passed, 2 failed**.
+  The 2 failures are **NOT from this phase** — both pass in isolation and one reproduces with the
+  picker spec excluded entirely:
+  - `media.spec.ts` "upload → listed with blur…" → `upload -> 401`. **Pre-existing full-suite
+    failure**: proven by `--grep-invert "picker|Stock tab"` (picker spec removed) → still `1 failed`,
+    same test, same error; and `npx playwright test e2e/media.spec.ts --project=authed` alone →
+    **7 passed**. Cause: media.spec calls `/api/upload-image` through the **`request` fixture**,
+    a separate context pinned to the saved `storageState`, so its Clerk JWT is never refreshed and
+    goes stale once the suite runs long. Fix = use `page.request` in media.spec — **out of this
+    phase's Files touched, not edited. Orchestrator call.**
+  - `publish.spec.ts` "service / Hearth → /p/[slug]" → `pub?.status()` undefined. **Flaky**: passed
+    in the picker-excluded run and passed in isolation (`e2e/publish.spec.ts --project=authed` →
+    **4 passed**).
+- Not committed (orchestrator commits).
+
+## Remains for the founder's manual pass (no agent replaces this)
+
+1. **Real Stock, real key** (`PEXELS_API_KEY` set, `npm run dev`): open Replace → Stock. Confirm the
+   tab is **pre-populated** (curated, not an empty grid), the six category buttons work, and results
+   for a palette-bearing project **visibly reflect the mood phrase** (compare terracotta vs charcoal
+   if in doubt). This is the ruling-8 taste check — the e2e proves the string is enriched, only a
+   human can say the photos are actually better.
+2. **Real Pexels → proxy → blob round trip**: pick a real stock photo; confirm the page ends up on
+   OUR blob URL (not `images.pexels.com`), a `MediaAsset` row with `source:'stock'` + `sourceUrl`
+   exists (`npx prisma studio`), and **re-picking the same photo yields exactly ONE row** (cache-hit
+   upsert). Carried over from phase 2 — still never done by hand.
+3. **Editor ↔ published parity**: after a pick, check `/edit/[token]` AND `/preview/[token]` (and a
+   publish) show the same image. No renderer was touched, but this is the house's #1 trap.
+4. **Picker feel/taste**: the modal is built on existing primitives, NOT the held `ui-foundation`
+   handoff design (ruling 1) — it will not match the designer's media-picker comp. Founder should
+   decide whether it ships as-is or waits for the ui-foundation big-bang.
+5. **Upload UX on a real image**: large photo (resize/WebP), an **SVG** (null blur → grey tile is
+   expected, not a bug), and a failed upload's error copy.
+6. **Other image entry points are unchanged** (logo, avatar, collection, SEO/OG, crop) — they still
+   use their old flows and only inherit registry rows via the phase-2 seam. Expected, per plan.
+
+---
+
+## Phase 4 follow-up — impl-review blocker fix: `media.spec.ts` red in the full suite
+
+**Files changed**
+- `e2e/media.spec.ts`
+- `docs/task/media-library-picker.audit.md` (this note)
+
+### The blocker
+
+`e2e/media.spec.ts` (ours, phase 3) passed alone but went **red in the full authed suite**. Because
+the file is `mode: 'serial'`, the first failure aborted the rest — the reviewer's run showed
+**1 failed, 5 did not run**, i.e. ALL the ownership 403/404/400 coverage silently evaporated on
+every full-suite run. No CI here + push-straight-to-main, so a red suite must not ship.
+
+**Root cause (reviewer-diagnosed, independently verified — not a guess):** the `request` fixture
+builds its `APIRequestContext` from the on-disk `e2e/.clerk/user.json` snapshot. Its Clerk
+`__session` JWT is minted once in `auth.setup` and **nothing refreshes it** (no Clerk JS runs in a
+bare request context). In a long suite run it goes stale → `/api/upload-image`'s `auth()` returns no
+`userId` → 401 at **authentication**. Not a masked authz bug: the ownership logic never executes,
+and a masked authz bug would have to wrongly *allow*, which an `expect(res.ok())` failure cannot
+hide. Proof already in-suite: `media-picker.spec.ts` sorts immediately before `media.spec.ts`, does
+the identical upload to the same route in the same long run via **`page.request`**, and passes.
+
+### The fix
+
+Switched every authed call in the file from the `request` fixture to **`page.request`**, which
+shares the browser context whose live Clerk client keeps `__session` fresh:
+- lifecycle + ownership tests: `uploadImage(page.request, …)`, all `listMedia(page.request, …)`,
+  and `page.request.{delete,post,get}`; `request` dropped from their fixture destructuring.
+- `'unknown token → 404'` and `'missing tokenId → 400'` took only `{ request }` → now take
+  `{ page }` and call a new **`warmUpSession(page)`** helper before using `page.request`.
+- **`warmUpSession()`** extracted from the `page.goto('/')` + `waitForFunction(window.Clerk?.user)`
+  preamble that `createProject()` already did, so the warm-up is identical everywhere (no
+  copy-paste drift) and carries the doc comment explaining WHY `page.request` and not `request`.
+- **`/api/media unauthenticated` describe left untouched** — it deliberately uses
+  `test.use({ storageState: { cookies: [], origins: [] } })`; `page.request` there would defeat the
+  test. The comment now records that exception so nobody "fixes" it later.
+
+No product code touched — phase 4's code was reviewed clean and ships as-is.
+
+### Deviations
+
+- **Reviewer's optional nit declined:** the anonymous test's fake `tokenId=some-token` conflates
+  "rejected for lack of auth" with "404, token doesn't exist". Sharpening it needs a real fixture
+  token, but that block runs under empty `storageState` and the tokens are created by authed tests
+  in other contexts — threading one in would complicate exactly the isolation that makes the test
+  meaningful. Reviewer said "skip if it complicates". Skipped; assertion still holds the real line
+  (`[401, 404]`, never a 200).
+- Added `warmUpSession()` rather than inlining the warm-up twice — in-scope, conservative, keeps the
+  existing `createProject()` behaviour byte-identical.
+
+### Test results
+
+**Full authed suite** (`E2E_PORT=3021 npx playwright test --project=authed` — 3000-3004 are held by
+other worktrees, where `reuseExistingServer` would test the WRONG code). Run twice; per-test JSON:
+
+- **`media.spec.ts` — 6 passed, 0 skipped, 0 "did not run".** Blocker fixed; serial abort gone and
+  the ownership coverage genuinely executes again. Per-file JSON tally:
+  `{"media.spec.ts":{"passed":6}}`, all six named tests `passed`.
+- Suite totals: **31 expected/passed, 1 unexpected, 8 skipped, 0 flaky.**
+- The 1 failure is **`publish.spec.ts` "service / Hearth"** — the known pre-existing flake
+  (`expect(pub?.status()).toBeLessThan(400)` with `received: undefined` at `publish.spec.ts:63`).
+  Predates this feature, passed in the reviewer's run, out of scope, not chased. Its 2 serial
+  siblings (Lex, Meridian) are the "did not run" — they belong to that flake, **not** to media.
+- `npx tsc --noEmit` → **0 errors**.
+- `npm run test:run` → **196 files passed | 1 skipped; 3360 tests passed | 18 skipped**. Matches the
+  expected baseline exactly.
+
+### Open risks
+
+- `publish.spec.ts` Hearth is genuinely flaky (`page.goto('/p/[slug]')` returning a null response
+  under load). It failed in both of my full runs but passed in the reviewer's — it will
+  intermittently red the suite for the same "must not ship red" reason this fix addressed. Separate
+  finding, worth its own triage; untouched here per scope.
+- The `request` fixture remains stale-session-prone for **any future** authed spec. The doc comment
+  on `warmUpSession()` is the only guard; a lint rule would be the durable fix (out of scope).

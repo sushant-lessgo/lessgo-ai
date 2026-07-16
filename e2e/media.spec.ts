@@ -35,10 +35,25 @@ const createdTokens = new Set<string>();
 let foreignToken: string | null = null;
 let foreignUserId: string | null = null;
 
-/** Create a real, owned project via the app's own route and return its token. */
-async function createProject(page: import('@playwright/test').Page): Promise<string | null> {
+/**
+ * Load the app and wait for Clerk to hydrate.
+ *
+ * Every authed call in this file goes through `page.request`, NOT the `request` fixture.
+ * The fixture builds its context from the on-disk e2e/.clerk/user.json snapshot, whose
+ * `__session` JWT is minted once in auth.setup and never refreshed (no Clerk JS runs there) —
+ * in a long full-suite run it expires and /api/upload-image's `auth()` returns 401.
+ * `page.request` shares the browser context, where the live Clerk client keeps `__session` fresh.
+ * (Exception: the unauthenticated describe below deliberately uses the empty-storageState
+ * `request` fixture — page.request there would defeat the test.)
+ */
+async function warmUpSession(page: import('@playwright/test').Page): Promise<void> {
   await page.goto('/');
   await page.waitForFunction(() => Boolean((window as any).Clerk?.user), null, { timeout: 30_000 });
+}
+
+/** Create a real, owned project via the app's own route and return its token. */
+async function createProject(page: import('@playwright/test').Page): Promise<string | null> {
+  await warmUpSession(page);
   const startRes = await page.request.get('/api/start');
   if (!startRes.ok()) return null;
   const { url } = await startRes.json();
@@ -100,15 +115,14 @@ test.afterAll(async () => {
 test.describe('/api/media lifecycle (phase 3)', () => {
   test('upload → listed with blur → soft-delete hides → restore brings it back', async ({
     page,
-    request,
   }) => {
     const token = await createProject(page);
     test.skip(!token, '/api/start failed — cannot build a project fixture');
 
     // Registry-row-on-upload: the phase-2 seam is what puts the row there; /api/media reads it.
-    const uploaded = await uploadImage(request, token!, 'library-fixture.png');
+    const uploaded = await uploadImage(page.request, token!, 'library-fixture.png');
 
-    let assets = await listMedia(request, token!);
+    let assets = await listMedia(page.request, token!);
     const asset = assets.find((a) => a.url === uploaded.url);
     expect(asset, `uploaded url not listed: ${JSON.stringify(assets)}`).toBeTruthy();
     expect(asset!.source).toBe('upload');
@@ -117,41 +131,43 @@ test.describe('/api/media lifecycle (phase 3)', () => {
     expect(asset!.blurDataUrl).toMatch(/^data:image\/webp;base64,/);
 
     // DELETE = soft-delete: gone from the default list…
-    const del = await request.delete('/api/media', {
+    const del = await page.request.delete('/api/media', {
       data: { tokenId: token, assetId: asset!.id },
     });
     expect(del.ok(), `DELETE -> ${del.status()}`).toBeTruthy();
 
-    assets = await listMedia(request, token!);
+    assets = await listMedia(page.request, token!);
     expect(assets.some((a) => a.id === asset!.id)).toBe(false);
 
     // …but NEVER destroyed (workEndtoEnd §8a): still there with includeHidden.
-    const hidden = await listMedia(request, token!, true);
+    const hidden = await listMedia(page.request, token!, true);
     expect(hidden.some((a) => a.id === asset!.id)).toBe(true);
 
     // POST restore + alt.
-    const restore = await request.post('/api/media', {
+    const restore = await page.request.post('/api/media', {
       data: { tokenId: token, assetId: asset!.id, restore: true, alt: 'a blue rectangle' },
     });
     expect(restore.ok(), `POST restore -> ${restore.status()}`).toBeTruthy();
 
-    assets = await listMedia(request, token!);
+    assets = await listMedia(page.request, token!);
     const restored = assets.find((a) => a.id === asset!.id);
     expect(restored, 'restored asset must reappear in the library').toBeTruthy();
     expect(restored!.alt).toBe('a blue rectangle');
   });
 
-  test('rejects a body with nothing to update', async ({ page, request }) => {
+  test('rejects a body with nothing to update', async ({ page }) => {
     const token = await createProject(page);
     test.skip(!token, '/api/start failed — cannot build a project fixture');
 
-    const res = await request.post('/api/media', { data: { tokenId: token, assetId: 'nope' } });
+    const res = await page.request.post('/api/media', {
+      data: { tokenId: token, assetId: 'nope' },
+    });
     expect(res.status()).toBe(400);
   });
 });
 
 test.describe('/api/media ownership (phase 3)', () => {
-  test('another user’s token → 403', async ({ page, request }) => {
+  test('another user’s token → 403', async ({ page }) => {
     const token = await createProject(page);
     test.skip(!token, '/api/start failed — cannot build a project fixture');
 
@@ -167,27 +183,29 @@ test.describe('/api/media ownership (phase 3)', () => {
       data: { tokenId: foreignToken, userId: foreignUser.id, title: 'e2e foreign project' },
     });
 
-    const list = await request.get(`/api/media?tokenId=${foreignToken}`);
+    const list = await page.request.get(`/api/media?tokenId=${foreignToken}`);
     expect(list.status(), 'must not list another user’s media').toBe(403);
 
-    const del = await request.delete('/api/media', {
+    const del = await page.request.delete('/api/media', {
       data: { tokenId: foreignToken, assetId: 'whatever' },
     });
     expect(del.status(), 'must not hide another user’s media').toBe(403);
 
-    const post = await request.post('/api/media', {
+    const post = await page.request.post('/api/media', {
       data: { tokenId: foreignToken, assetId: 'whatever', restore: true },
     });
     expect(post.status()).toBe(403);
   });
 
-  test('unknown token → 404', async ({ request }) => {
-    const res = await request.get('/api/media?tokenId=definitely-not-a-real-token-xyz');
+  test('unknown token → 404', async ({ page }) => {
+    await warmUpSession(page);
+    const res = await page.request.get('/api/media?tokenId=definitely-not-a-real-token-xyz');
     expect(res.status()).toBe(404);
   });
 
-  test('missing tokenId → 400', async ({ request }) => {
-    const res = await request.get('/api/media');
+  test('missing tokenId → 400', async ({ page }) => {
+    await warmUpSession(page);
+    const res = await page.request.get('/api/media');
     expect(res.status()).toBe(400);
   });
 });

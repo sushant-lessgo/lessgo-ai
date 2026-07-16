@@ -79,6 +79,11 @@ export default defineConfig({
       // Mock mode: bypasses Clerk auth on generation routes AND returns canned
       // copy (no credits, deterministic). Override per-run with E2E_LLM=real.
       NEXT_PUBLIC_USE_MOCK_GPT: process.env.E2E_LLM === 'real' ? 'false' : 'true',
+      // Forward the port to `next dev`. Without this, E2E_PORT alone moved only the
+      // probe/baseURL while the server still started on 3000 — with
+      // reuseExistingServer:true that silently tests a FOREIGN worktree's server.
+      // Now `E2E_PORT=3021` on its own is sufficient and self-consistent.
+      PORT: String(PORT),
     },
   },
 });
