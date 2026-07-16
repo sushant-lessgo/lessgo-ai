@@ -1000,3 +1000,244 @@ no in-editor way to switch/declare a locale now. Consequences: (a) authors canno
 locale copy from the editor; (b) a project already parked on a non-default `activeLocale` will show
 Regen Copy locked with no visible way to switch back. Store state and both components are intact, so
 the fix is a re-mount, not a rebuild. Logged in `docs/product/orchestrator.md`.
+
+---
+
+## Phase 5 — Design menu (t14): the three theme popovers
+
+### Files changed
+
+| File | Change |
+|---|---|
+| `src/app/edit/[token]/components/ui/DesignMenuShell.tsx` | **New** — t14 chrome, pure presentation: trigger + shell (header/body/footer) + group/row/thumb/segmented/swatch/link atoms. |
+| `src/app/edit/[token]/components/ui/ServiceThemePopover.tsx` | Adopts the shell. Trigger `Style` → `Design`. Sections → TEMPLATE / Looks / STYLE / ACCENT. Handlers untouched. |
+| `src/app/edit/[token]/components/ui/VestriaThemePopover.tsx` | Same, + Mood group (vestria-only) as a segmented with its colour dots preserved. |
+| `src/app/edit/[token]/components/ui/ThemePopover.tsx` | Legacy product: standalone restyle to the same vocabulary (NOT folded into the shell). Trigger `Theme` → `Design`. |
+
+Nothing outside the Files-touched list was edited. `TemplateSwapList.tsx`, `tailwind.config.js`,
+`app-chrome.css`, `GlobalAppHeader.tsx`, `EditHeader.tsx` all untouched.
+
+### Style → Design (founder ruling 8b)
+
+- **Trigger, all three popovers → `Design`** with t1's `palette` ghost icon (`DESIGN_TRIGGER_CLASS`
+  restates `GlobalAppHeader`'s private `BAR_BTN`, since that file is out of scope this phase).
+  `ThemePopover`'s trigger said **`Theme`**, not "Style" — renamed too: it is the same t1 slot, and
+  leaving one audience on a different word would re-create the inconsistency the ruling closes.
+- **Panel header → `palette` + "Design" + `close`** on all three.
+- **The internal STYLE group eyebrow: KEPT as t14 draws it.** Asked to use judgement here. "Design ▸
+  Style" is an ordinary hierarchy (Figma/Sheets read the same way), and the *reason* it could confuse
+  — a sibling control also called "Style" — is exactly what the rename deletes. Consumers see one
+  "Design" button; "STYLE" only ever appears inside it.
+  - Cost, logged: the group eyebrow is now `Style` on both, where Service said "Layout variant" and
+    Vestria said "Typeface". That semantic hint survives on the `aria-label` (`Layout variant` /
+    `Typeface`) and each option's blurb `title`, so it is not lost to AT or hover — only to the
+    eyebrow, which the handoff specifies.
+
+### "Browse all" — greyed on Service/Vestria, WIRED and kept on ThemePopover
+
+Checked before greying (the `Social & sharing` lesson):
+- **Service/Vestria: no picker exists** — no route/handler for the handoff's "live preview with the
+  user's real content" picker; the only template affordance is `TemplateSwapList`. So "Browse all"
+  renders via **`<Coming what="browsing all templates with your content">`**, never omitted.
+- **ThemePopover: `Browse all styles` IS wired today** (`setStyleBrowserOpen(true)` → `StyleBrowserModal`,
+  a real modal over the legacy palette set). **Kept working**, promoted to the footer strip. Greying it
+  would have been the exact repeat of the near-miss.
+
+### Dispatch firewall — how it was kept
+
+- **`TemplateSwapList` and `handleSwap` are byte-identical.** `git diff` over both popovers'
+  handler regions shows a single hunk: `onSwap={handleSwap}` re-indented. No `preloadTemplate`,
+  `buildSwapPatch`, `updateMeta`, `triggerAutoSave` or posthog line changed.
+- **No new template imports.** `DesignMenuShell` imports only `react` / `AppIcon` / `cn`. The
+  popovers' `@/modules/templates/*` import set is unchanged (`registry`, `templateMeta` — both
+  firewall-safe). `templateLabels`/`templateBlurbs` come from `@/types/service` (type-level data,
+  already what `TemplateSwapList` reads).
+- **Accent swatches still resolve through `[data-palette]{--accent}`** — the existing CSS-var trick,
+  not a palette-config import. Verified live: hearth and meridian render **different, real** 9-swatch
+  sets (hearth `oklch(0.62 0.15 40)`… warm/terracotta; meridian `oklch(0.78 0.17 155)`… brights) —
+  i.e. real template palettes, NOT the handoff's 6 illustrative hexes.
+- Dispatch + palette regression suites green (see Gates).
+
+### `DesignMenuShell` API (for phases 6-8 / downstream)
+
+```tsx
+<Popover open={open} onOpenChange={setOpen}>
+  <PopoverTrigger asChild><DesignMenuTrigger paletteId={activePalette} /></PopoverTrigger>
+  <AppPopoverPanel side="bottom" align="start" width={288}>
+    <DesignMenuShell onClose={() => setOpen(false)}>
+      <DesignMenuGroup label="Template" action={<Coming what="…">Browse all</Coming>}>
+        <DesignTemplateRow name={…} subtitle={…} active />
+      </DesignMenuGroup>
+      <DesignMenuGroup label="Style">
+        <DesignSegmented options={…} value={…} onChange={…} aria-label="Layout variant" />
+      </DesignMenuGroup>
+      <DesignMenuGroup label="Accent">
+        <DesignSwatchRow>{ids.map(id => <DesignSwatch paletteId={id} selected={…} onClick={…} />)}</DesignSwatchRow>
+      </DesignMenuGroup>
+    </DesignMenuShell>
+  </AppPopoverPanel>
+</Popover>
+```
+
+| Export | Notes |
+|---|---|
+| `DesignMenuTrigger` | t1 Design button. `paletteId` tints the glyph from the live `--accent`; `accentColor` is the literal-hex escape hatch (legacy system). forwardRef → works with `asChild`. |
+| `DESIGN_TRIGGER_CLASS` | The bar-control class string, if a caller needs its own element. |
+| `DesignMenuShell` | Header + scrolling body + footer. `footer` defaults to the lock strip; pass `null`/custom to replace. |
+| `DesignMenuGroup` | Eyebrow (700/10/.09em) + optional trailing `action` + body. |
+| `DesignTemplateRow` / `DesignTemplateThumb` | t14 bordered row (radius 11) + 40×30 faux thumb. Renders a `div` unless `onClick` is given. |
+| `DesignSegmented` | t14 STYLE segmented. Options take `leading` (used for vestria's mood dots) + `blurb` (title). |
+| `DesignSwatch` / `DesignSwatchRow` | 26×26 radius-8, double-ring selection. `paletteId` (CSS var) OR `color` (literal). |
+| `DesignMenuFooter` / `DesignMenuLink` | Lock strip; "Browse all"-style link. |
+
+Pure presentation: no store reads, no handlers, no template knowledge.
+
+### Judgement calls / deviations
+
+1. **A real layout bug found by browser probe, and fixed here: the panel could clip its own ACCENT
+   group.** On service/hearth (swap list + 4 Looks + Style + Accent) the t14 panel is taller than the
+   viewport, and `AppPopoverPanel` is `overflow-hidden` → the last swatches were rendered but
+   **outside the viewport and unclickable** (Playwright: 256 retries, "element is outside of the
+   viewport"). `DesignMenuShell` is now `flex max-h-[var(--radix-popover-content-available-height,80vh)]
+   flex-col` with a scrolling body and pinned header/footer; same bound applied to `ThemePopover`.
+   This was invisible to `tsc`/vitest and to inspection — only the live click-through caught it.
+2. **`TemplateSwapList`'s own "Template" heading is hidden by a wrapper** (`[&>div>p]:hidden`), because
+   the t14 group already supplies the eyebrow and that file is out of scope. Verified live: the inner
+   `<p>` is `present=2 visible=1` (mine visible, its hidden). **Flag for the orchestrator:** the swap
+   *rows* inside it keep their legacy blue-ring/amber-confirm styling — visually off-vocabulary next to
+   t14. Fixing that needs `TemplateSwapList.tsx` on a Files-touched list (phase 8 sweep candidate).
+3. **`ThemePopover` NOT folded into the shell** — per plan step 3 / scout §E, and independently
+   justified: t14's footer says *"Curated set — no free color or background editing"* and this panel
+   **ships a colour picker** (custom hex + contrast warning). The claim would be a lie, so this surface
+   gets the wired "Browse all styles" footer instead. Only the shared *trigger* is reused.
+4. **`DesignSegmented` is local, not the shared `SegmentedControl`** — t14's active segment is
+   `#006CFF` 600/11.5, the primitive's is ink at `text-sm`. Re-tuning a shared primitive for one panel
+   is out of scope.
+5. **Swatch double-ring is an inline `boxShadow`**, not a token: it is two comma-separated shadows over
+   the swatch's own background and `tailwind.config.js` is out of scope (no new key). Hexes restate
+   existing tokens (`#fff` = app-surface, `#006CFF` = app-primary).
+6. **Trigger swatch → tinted `palette` glyph.** t1 draws an icon-only Design button; tinting the glyph
+   from the live accent keeps the at-a-glance colour the old swatch gave.
+7. **Vestria mood dots preserved** via `DesignSegmented`'s `leading` slot — bone vs slate is a colour
+   choice; a text-only segmented would have dropped the information.
+8. **`triggerPreview` removed** from `ThemePopover` (only consumer was the old swatch; would have been
+   an unused-var lint error).
+
+### Gates (actual output)
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit` | **GREEN** — no output. |
+| `npm run test:run` | **GREEN** — 194 files passed / 1 skipped; **3337 passed** / 18 skipped (identical to phase 4 — no test lost or gained). |
+| `npm run lint` | **GREEN** — 0 errors (warnings pre-existing: `<img>`/exhaustive-deps in untouched files). |
+| **Dispatch + palette regression (the firewall signal)** | **GREEN, called out explicitly** — ran `templates/__tests__/dispatch.test.ts`, `templates/__tests__/barrelDispatch.test.ts`, `templates/paletteSelection.regression.test.ts`, `templates/swap.test.ts`, `GlobalAppHeader.menus.test.tsx` together: **5 files / 57 tests passed**. The 6 `GlobalAppHeader.menus` cases are among them. |
+| `PORT=3007 E2E_PORT=3007 npm run test:e2e` | **19 passed, 1 failed, 4 skipped, 2 did not run.** Dirty-guard **EXECUTED and GREEN — confirmed from runner output**, all 4 cases (mid-edit / dirty-window / clean-silence / review pill); re-run alone: `5 passed`. The 1 failure is the **known** `publish.spec.ts` flake under full-suite load — it dies at `page.waitForFunction(() => Clerk?.user)` (`publish.spec.ts:23`), i.e. Clerk session expiry, before any UI selector; nothing in it touches this phase's files. |
+
+### Live browser verification (done — real Chromium, real seeded projects, mock LLM)
+
+Throwaway probe (scratchpad-only, deleted; no repo file added), authed storageState, `npm run dev`:
+
+| Path | Result |
+|---|---|
+| **service → ServiceThemePopover** | ✅ `Design` trigger; panel + TEMPLATE/STYLE/ACCENT + lock strip; **accent swap applied** (`aria-pressed` false→true) across **9 real hearth palettes**; **variant swap applied** — STYLE group = `["Classic","Condensed","Editorial"]`; TemplateSwapList alive with **real swap targets** (`Hearth` current + `Lex` + `Surge`) + 4 Looks; `Browse all` greyed (`aria-disabled`); close works. <br>❌ **CORRECTION (fix pass):** this row recorded the TEMPLATE group as correct. It was **not** — `Hearth` rendered **TWICE** (t14 thumb row + TemplateSwapList's own always-emitted current row), both styled active. The probe SAW both and I logged them as "`Hearth` current + `Lex` + `Surge`" because the `[&>div>p]:hidden` wrapper suppressed the duplicate *heading*, making the duplicate *row* read as intentional. Fixed below; everything else in this row stands. |
+| **product + template module → VestriaThemePopover** | ✅ same, **9 real meridian palettes**; STYLE = `["Developer","Marketing","Light"]`. <br>❌ **CORRECTION (fix pass):** "swap rows `Meridian` (current) + `Vestria`" — same duplicate-current-row bug as above. Also note the seeded meridian fixture (`hero/features/cta`) actually has **no** eligible target (`swapShortlist('meridian') = ['meridian']`), so this path is the *fallback* branch, not the swap-list branch. |
+| **legacy product → ThemePopover** | ❌ **NOT exercised — say so plainly.** Every seedable audience uses a template module (`AUDIENCES` = hearth/meridian/lex); I had no legacy non-template product project to open, and creating one was out of scope. It is `tsc`+lint clean and its handlers are untouched, but **its restyle is unverified in a browser** — founder eyes needed at the gate. |
+| **template swap COMMIT** | Rows render and are clickable; I did not click through the amber confirm → commit (would mutate the seed mid-probe). Mechanism is byte-identical + `swap.test.ts` green. |
+
+**Pre-existing bug re-observed (phase-8 carry, NOT mine):** the **~1s menu self-close**. The probe was
+intermittently red on hearth until the settle wait went 1500ms → 4000ms, then deterministic. Confirms
+the phase-4 note: a menu opened <1s after editor load closes itself once. Heavier pages (hearth) widen
+the window. Unchanged by this phase; it just makes the symptom easy to reproduce.
+
+### Open risks
+
+- **Legacy `ThemePopover` unverified in-browser** (above) — the one real gap in this phase.
+- **`TemplateSwapList` rows are visually legacy** inside a t14 group (deviation 2) — needs the file
+  scoped into a later phase.
+- The scroll bound relies on Radix's `--radix-popover-content-available-height`; the `80vh` fallback
+  covers any context where Radix does not publish it.
+- Snapshot `uiFoundationIsolation.test.tsx.snap` CRLF churn restored (`git checkout`), tree clean.
+
+---
+
+## Phase 5 — fix pass (duplicate current-template row)
+
+**Files changed (this pass)**
+
+- `src/app/edit/[token]/components/ui/ServiceThemePopover.tsx`
+- `src/app/edit/[token]/components/ui/VestriaThemePopover.tsx`
+- `docs/task/editor-shell-redesign.audit.md`
+
+### 1. BLOCKING — current template rendered twice (fixed)
+
+`TemplateSwapList` **always emits the current template as its own active row**
+(`TemplateSwapList.tsx:145-146`) and returns `null` when no target is eligible. Rendering the t14
+`DesignTemplateRow` *unconditionally above it* therefore duplicated the current template whenever a
+swap target existed. Applied the ruled fix — the t14 thumb row is now the **fallback for the
+"swap list hides itself" case**, which is what it is actually needed for:
+
+```tsx
+const swapSite = deriveSwapSite(sections, pages);
+const hasSwapTargets = swapShortlist(tid, swapSite).some((t) => t !== tid);
+…
+{hasSwapTargets ? <div className="[&>div>p]:hidden"><TemplateSwapList …/></div>
+                : <DesignTemplateRow name={…} subtitle={…} active />}
+```
+
+**Exactly ONE current-template row on both branches.** `swapShortlist` is an exported pure fn from
+the module already imported here; no new static template import → **firewall intact**.
+`TemplateSwapList.tsx` untouched (its legacy row styling remains the ruled phase-8 carry).
+
+**Which branch serves which:**
+
+| Branch | Who draws the current row | Real cases |
+|---|---|---|
+| `hasSwapTargets === true` | `TemplateSwapList` (current + targets) | hearth, lex → `[hearth, lex, surge]` |
+| `hasSwapTargets === false` | t14 `DesignTemplateRow` fallback | meridian (`['meridian']` — eligible but no target); techpremium/lumen/granth (`[]` — retired/bespoke, no engine) |
+
+### 2. Dead gap (fixed)
+
+The `<div className="mt-2 …">` wrapper rendered even when `TemplateSwapList` returned `null` → an 8px
+dead gap. The wrapper now only exists on the `hasSwapTargets` branch, and its `mt-2` is dropped (it is
+the group's first child now — nothing above it to space from).
+
+### 3. Vestria "Typeface" hint (fixed — cheap, no module reach)
+
+`VESTRIA_FALLBACK_VARIANTS` was `{id,label}` only → `title` undefined → on that path the only visible
+hint that these variants are *typeface* sets vanished once the eyebrow became "Style". Added the 3
+`blurb`s **as literals copied from** `modules/templates/vestria/tokens.ts` — deliberately *not*
+imported (firewall). 3-line change, so done per instruction; no template module reached into.
+
+### Verification (actual output)
+
+- `npx tsc --noEmit` → **clean**.
+- `npm run lint` → **no new errors** (pre-existing `no-img-element` / `exhaustive-deps` warnings only).
+- `npm run test:run` → **194 passed | 1 skipped (195 files); 3337 passed | 18 skipped (3355 tests)**.
+- Named suites (`dispatch palette swap GlobalAppHeader`) → **6 files / 59 passed**, incl. all **6
+  `GlobalAppHeader.menus` cases**. (Reviewer baseline was 4 files/51; my filter matched two extra
+  files — `sectionSwap.test.ts`, `paletteSelection.regression.test.ts` — hence the higher count.)
+
+**Both branches verified against what t14 DRAWS** (throwaway jsdom probe, deleted — mounted the real
+popovers, opened the panel, counted the current template's label+blurb in the rendered panel text):
+
+| Case | Result |
+|---|---|
+| hearth (targets exist) | `"Hearth"` drawn **1x**, blurb **1x** — panel: `Template · Browse all · Hearth / Lex / Surge · Looks…`. Duplicate gone. |
+| meridian (no targets) | `"Meridian"` drawn **1x**, blurb **1x** — t14 fallback row present, `Accent`, lock strip. |
+
+**The metric was itself validated (this is the part the first pass skipped):** my initial probe counted
+*DOM nodes* and reported "1" for hearth — but the meridian control returned **0**, proving the selector
+never matched `DesignTemplateRow` at all and so *could not* have seen the duplicate. Switched to
+counting label+blurb occurrences in panel text, then **red-checked it**: temporarily restoring the old
+unconditional row made hearth report **`"Hearth" drawn: 2x`** (the exact reported bug); reverting
+returned it to **1x**. The check can go red, so green means something.
+
+- e2e not run (no chrome/bar change — optional per scope).
+- Snapshot `uiFoundationIsolation.test.tsx.snap` CRLF-churned by the suite run, restored; tree clean.
+
+### Open risks
+
+- Legacy `ThemePopover` still unverified in-browser (unchanged by this pass; it does not use
+  `TemplateSwapList`, so the duplicate bug never applied to it).
+- Verification was jsdom, not a real browser: it proves the **row count / branch selection**, not
+  pixels. `TemplateSwapList`'s legacy blue-ring styling inside a t14 group remains the phase-8 carry.
