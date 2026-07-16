@@ -330,3 +330,140 @@ Everything the reviewer cleared (R13/R2/R3/R14, kill-switches, B5, scope, isolat
 - `npx playwright test --list --project=authed` → **Total: 19 tests in 5 files** (unchanged — S3 edited an existing test).
 - `diff` vs pre-mutation backup → `src/lib/workspace.ts` **IDENTICAL**; rung 2/3 line intact at `:105`.
 - Not committed — orchestrator commits.
+
+---
+
+## Phase 4 — Re-home Analytics + Leads under `[token]` + slug shims ⚠️ auth-adjacent
+
+Branch guard: `git branch --show-current` → `feature/dashboard-workspace-ia`. Matched (checked before any edit).
+
+### Files changed
+
+**New**
+- `src/app/dashboard/[token]/analytics/page.tsx` — moved body; **D1 day-links re-pointed**.
+- `src/app/dashboard/[token]/analytics/loading.tsx` — old skeleton (Header already gone since phase 1).
+- `src/app/dashboard/[token]/leads/page.tsx` — moved body; `userId` filter dropped.
+- `e2e/dashboard-redirects.spec.ts` — 5 tests. Spec name was already pre-registered on `authed` (phase-1 exception) → `playwright.config.ts` NOT touched.
+
+**Moved (`git mv` — rename detected, history preserved)**
+- 7 analytics components `analytics/[slug]/components/*` → `[token]/analytics/components/*`: `CtaBreakdown`, `DeviceBreakdown`, `EmptyState`, `ExportCSV`, `MetricsCards`, `TrafficSourcesTable`, `TrendChart`. **Contents byte-identical** — all 7 are self-contained (only `lucide-react` / `recharts` / `next/link` imports; no relative import crossed a directory). ⚠️ `[token]/analytics/components/EmptyState.tsx` is the analytics one and LIVES ON — NOT `src/components/dashboard/EmptyState.tsx`, which phase 6 deletes.
+- `forms/[slug]/components/ExportFormCSV.tsx` → `[token]/leads/components/ExportFormCSV.tsx` (byte-identical).
+- Both now-empty `components/` dirs removed from disk → **each shim dir holds ONLY the shim** (C3).
+
+**Rewritten → shims**
+- `src/app/dashboard/analytics/[slug]/page.tsx`
+- `src/app/dashboard/forms/[slug]/page.tsx`
+
+**Deleted**
+- `src/app/dashboard/analytics/[slug]/loading.tsx` — the route is now an instant server redirect; nothing to stream.
+
+Nothing outside phase 4's Files-touched list was edited. `git diff tailwind.config.js src/components/ui` → **empty**. No `.app-chrome` added (still only `dashboard/layout.tsx`). `src/middleware.ts`, `src/lib/security.ts`, `src/lib/workspace.ts`, the schema and `playwright.config.ts` are all untouched.
+
+### Ownership check per moved surface
+
+Both pages call **`getWorkspaceProject(params.token)` THEMSELVES** as their first statement — the `[token]/layout.tsx` call is chrome data only and is NOT an auth boundary. Each carries a 🚨 header comment saying so. Within a request React `cache()` dedupes.
+
+The old `publishedPage.findFirst({ slug, userId })` scope is gone; the wrapper's ladder replaces it and both pages then key strictly on wrapper-returned ids:
+
+| Surface | Display query | Keyed on | ID space |
+|---|---|---|---|
+| Analytics | `pageAnalytics.findMany({ slug, date })` | `publishedPage.slug` from the wrapper | n/a (`PageAnalytics` has no userId) |
+| Leads | `formSubmission.findMany({ publishedPageId })` | `publishedPage.id` from the wrapper | n/a (no cross-space compare) |
+
+**Neither page compares user ids at all** — so the three-ID-space trap has no surface here. `clerkId` is not consumed this phase (that is phase 5's testimonials read).
+
+### D1 — the `?days` re-point
+
+The 7/30/90 pills now render `/dashboard/{token}/analytics?days={d}` (was `/dashboard/analytics/{slug}?days={d}`). The page reads `searchParams.days` and does the `[7,30,90]` validation **exactly as before**. A verbatim copy would have aimed the pills at the shim, which preserves no query → every range click would leave the workspace and silently render the default 30d. A code comment at the link states this. E2e asserts both the `href`s and a real click (URL + query intact, active style moves to 7d and off 30d).
+
+Other links in the moved bodies, per the plan, are correct as-is and were kept verbatim: analytics back-link → `/dashboard`, site link → external host; leads back-link → `/dashboard`, empty-state → `/p/{slug}`; the analytics `EmptyState` component → `/p/{slug}`.
+
+### Leads — the dropped `userId` filter (audit-noted, per plan step 4)
+
+`formSubmission.findMany({ where: { userId, publishedPageId } })` → `{ where: { publishedPageId } }`. Reviewer-cleared, and re-verified here:
+- `publishedPage.id` is a **PRIMARY KEY returned by `getWorkspaceProject` after its authz ladder passed**, so `where:{ publishedPageId }` can only match rows for that one asserted-owned page → the `userId` filter added no security, only redundant scoping.
+  ⚠️ **Correction (F1)** — the guarantee is **provenance, not a DB constraint**. `FormSubmission.publishedPageId` (`prisma/schema.prisma:232`) is a **nullable, indexed scalar with NO relation and NO unique constraint**; an earlier draft of this audit and of the code comment called it a "unique FK", which the schema does not say. Conclusion unchanged, reason corrected — nobody should relax this query believing a FK enforces it. Comment fixed in `leads/page.tsx`.
+- `FormSubmission.userId` is a **Clerk** id while `project.userId` is an internal `User.id` — keeping a filter here would invite exactly the tsc-green / zero-rows wrong-space bug.
+- The filter is precisely what blanks **admin god-view** (R8) — an admin's clerkId matches none of the owner's submissions.
+- **F2 — the filter was never a real defence, and dropping it is a visible behavior delta.** `/api/forms/submit` reads **both** `userId` and `publishedPageId` from the **client-supplied request body** (`src/app/api/forms/submit/route.ts:57`, written `:198-199`) — they are embedded in the published page's form handler, so an attacker controls both. Therefore: (a) nothing is lost security-wise by dropping the `userId` filter; and (b) **submissions whose `FormSubmission.userId` != the owner were previously HIDDEN and will now APPEAR — an existing page's visible lead count can change after deploy.** Not a cross-project leak: the `publishedPageId` scoping above still holds. Founder-facing (merge-gate item below).
+
+A 🚨 comment in the file records all of the above and says "do NOT restore it".
+
+### Shims
+
+Node-runtime server pages: `publishedPage.findFirst({ where:{slug}, select:{projectId} })` → `project.findUnique({ id }, select:{tokenId})` → `redirect('/dashboard/{tokenId}/{analytics|leads}')`; `notFound()` on a missing page, a **null `projectId`**, or a missing project — preserving today's no-leak behavior. They redirect **unconditionally**; the target enforces authz (post-B3/D2 it also rejects orphans + the demo token). They leak only slug existence, which `/p/{slug}` already publishes. Each file documents why middleware (edge, no Prisma) and `next.config` (static) cannot do this, and that the **directory must stay real** or `[token]` swallows `/dashboard/analytics/foo`.
+
+### Judgment calls (in-scope, conservative)
+
+1. **The verbatim `/dashboard` back-link was KEPT** in both moved bodies, so the workspace now shows "All Projects" (3a header) above a second "Dashboard" back-link. D1 explicitly lists those links as "fine" and the plan says the body moves with no reskin — deleting it would be an unmandated design change. Cosmetic duplication; flagged for the founder eyeball at gate item 6.
+2. **`min-h-screen` dropped** from both moved wrappers (`flex flex-col bg-gray-50 …` otherwise kept). Inside the shell's own scroll container a `min-h-screen` child forces a spurious second scrollbar under the tab bar. Everything else in the wrapper is byte-identical.
+3. **`<Footer/>` is gone from leads.** Phase 1 kept `@/components/shared/Footer` in `forms/[slug]/page.tsx` as an explicitly accepted transient "until phases 4–5 turn them into shims" — the shim has no Footer and the moved body correctly does not reintroduce one. The transient is now resolved, as planned. (`blog/[slug]` keeps its Footer until phase 5.)
+4. **R10 locked states are minimal and token-only**: `border-app-border` / `bg-app-surface` / `bg-app-tint` / `text-app-primary` / `text-app-ink` / `text-app-faint` / `font-app-sans`, one `AppIcon`, same `rounded-[13px]` + `[38px]` tile geometry as the Overview quick-action cards. **No new visual language, no new Tailwind key, no arbitrary color.** Copy is the plan's: "Publish to see analytics" / "Publish to start collecting leads".
+5. **Icons `monitoring` + `move_to_inbox` are already in the committed Material Symbols subset** (`public/fonts/material-symbols-rounded/icons.txt`) — no font regeneration.
+6. **Analytics is locked, not empty-stated, pre-publish** — genuinely published-only (`PageAnalytics` keys on `slug` alone, so no page ⇒ no slug ⇒ no rows can exist). The moved `EmptyState` component still covers the published-but-no-traffic case, unchanged.
+
+### e2e (5 tests, `authed`)
+
+- 2 redirect tests (`analytics/{slug}` → `{token}/analytics`; `forms/{slug}` → `{token}/leads`).
+- 1 unknown-slug → 404 on both shims.
+- 1 **D1** test: all three pill `href`s + a real click (no hop, `?days=7` preserved, active style moves).
+- 1 **R10** test: draft project → both tabs render (<400) with the locked copy.
+
+The published fixture is built ONCE (memoized, serial) via the `publish.spec.ts` pattern (persona → `/api/start` → `seedDraft` → real publish UI → deterministic slug `e2e-redirect-smoke`, republished each run rather than accumulating). `e2e/helpers/seedDraft.ts` is **imported, not modified**. **No vacuous tests**: a failed fixture build → `test.skip(..., reason)` loudly; it never passes silently. The AppIcon-ligature trap is avoided throughout (`getByRole(..., {name})` + exact leaf text only) and is documented in the spec header.
+
+### Deliberately NOT done
+
+- No reskin of either body (plan: "moved as-is").
+- No blog/testimonials re-home, no blog shims (phase 5) — those two tabs still 404.
+- No preview shim; no middleware, `security.ts`, `workspace.ts`, schema, foundation, Tailwind or `playwright.config.ts` edit.
+- `Header.tsx` / `DashboardHeader.tsx` / `ProjectCard.tsx` / `components/dashboard/EmptyState.tsx` NOT deleted — phase 6.
+- **D5 extra-hop callers left alone (record only) — corrected list (F4):**
+  - **Phase 4's only LIVE extra-hop caller: `src/app/admin/page.tsx:370` (`/dashboard/analytics/{p.slug}`) + `:378` (`/dashboard/forms/{p.slug}`)** — routes correctly via the new shims, one extra hop.
+  - `src/app/edit/[token]/components/layout/PageSwitcher.tsx:43` links `/dashboard/blog/{slug}` → that's **phase 5's** shim, not analytics/leads. (Earlier draft of this audit both mis-scoped it to phase 4 and gave a wrong path.)
+  - `src/components/dashboard/ProjectCard.tsx:175,:181` still push old slug URLs but the file has **ZERO importers** since phase 2 — dead code until phase 6 deletes it. Recorded so it isn't mistaken for a live caller.
+  Out of scope by ruling (D5 = record only).
+
+### Open risks
+
+1. **Playwright not executed** (needs a dev server + Clerk E2E creds; per instructions only tsc/test:run/lint were run). `--list --project=authed` → **Total: 24 tests in 6 files** (was 19/5 → all 5 new tests collected).
+2. **NEW admin god-view** now reaches analytics/leads by token URL (the slug routes hard-scoped on `userId` and silently 404'd admins). Intended per spec — founder gate item 2. Untestable here (single Clerk session).
+3. **Null-`projectId` `PublishedPage` rows** would 404 in the shims (bookmarks that work today) and show the R10 locked state in the workspace — exactly the gate item 4 count the founder must run. Prod was wiped 2026-06-16; expected zero.
+4. Locked-state + moved-body visuals unverified by eye (gate item 6), incl. the double back-link (judgment call 1).
+
+### Merge-gate summary items (phase 4)
+
+1. **Founder eyeball:** duplicate back-link ("All Projects" + the body's verbatim "Dashboard") on the analytics/leads tabs — keep, or drop in a later polish slice.
+2. **Recorded:** leads `userId` filter dropped (required for R8 admin god-view; scoping holds because `publishedPage.id` is a **post-authz PK**, NOT because of any FK/unique constraint — see F1).
+3. **⚠️ FOUNDER-FACING BEHAVIOR DELTA (F2) — sits next to the new-admin-god-view note:** `/api/forms/submit` takes both `userId` and `publishedPageId` from the **client-supplied body**, so the old Clerk-`userId` filter protected nothing — but it DID hide any submission whose `userId` != the owner. Those rows now **appear**, so an existing page's **visible lead count can shift after deploy**. Not a cross-project leak. Expect questions if a number moves.
+4. **Recorded:** shims 404 on a null `projectId` → gate item 4's count matters.
+5. **D5 (record only), corrected:** live = `admin/page.tsx:370,:378` only. `PageSwitcher.tsx:43` → `/dashboard/blog/{slug}` is **phase 5**. `ProjectCard.tsx:175,:181` = **dead** (zero importers, deleted in phase 6).
+
+### Verification (actual output)
+
+- **`npx tsc --noEmit`** → **exit 0, zero errors**.
+- **`npm run test:run`** → **Test Files 194 passed | 1 skipped (195); Tests 3343 passed | 18 skipped (3361)** — unchanged vs phase 3 (no unit tests added; phase 4 is route + e2e work). Config-freeze isolation guard green.
+- **`npm run lint`** → **zero errors** (`grep -c "Error:"` → `0`); warnings only, all pre-existing (`react-hooks/exhaustive-deps` in providers/editor/generation). No warning in any phase-4 file.
+- `git diff --stat tailwind.config.js src/components/ui` → **empty** (foundation frozen).
+- `npx playwright test --list --project=authed` → **Total: 24 tests in 6 files**.
+- `npm run build` / e2e execution not run (per instructions).
+- Not committed — orchestrator commits.
+
+### Impl-review fixes F1–F4 (verdict: **ship**; ZERO implementation-logic changes)
+
+Reviewer verified: ownership is the first statement on both pages, no cross-space compare, the `userId` drop is safe (`publishedPage.id` = a PK handed back post-authz — no other project's rows can surface), D1 correct (pills → token URL, `searchParams.days` byte-identical, both halves of the test bite), all 8 moves are pure renames with **0 changed lines**, isolation empty. Implementation logic untouched; the four fixes are comment / doc / e2e only.
+
+- **F1 — `leads/page.tsx` header comment corrected (comment only).** It claimed `publishedPageId` is a "unique FK". `prisma/schema.prisma:232` says `publishedPageId String?` — a **nullable, indexed scalar with NO relation and NO unique constraint**. The conclusion was right, the stated reason wasn't: the guarantee is **provenance** (`publishedPage.id` is a PK returned by `getWorkspaceProject` *after* its authz ladder, so `where:{publishedPageId}` can only match rows for that one asserted-owned page), not a DB constraint. The comment now says so and warns explicitly not to relax the query believing a FK enforces anything. Audit's "Dropped `userId` filter" section corrected too.
+- **F2 — real behavior delta recorded (audit + merge-gate; no code change).** `/api/forms/submit` reads **both** `userId` and `publishedPageId` from the **client-supplied request body** (`src/app/api/forms/submit/route.ts:57`, written `:198-199`) — both are embedded in the published page's form handler, so an attacker controls them. ⇒ (a) the old Clerk-`userId` filter was never real protection, so dropping it loses nothing security-wise; (b) **submissions whose `FormSubmission.userId` != the owner were previously HIDDEN and now APPEAR → an existing page's visible lead count can change after deploy.** Not a cross-project leak (`publishedPageId` scoping holds). Now in the file comment, the audit, and the merge-gate list beside the new-admin-god-view note.
+- **F3 — `dashboard-redirects.spec.ts` draft fixture de-fragilised (e2e only).** `createProject` inherited its persona from an earlier `describe` (serial file order) — it would break the moment a test is filtered or reordered, since `audienceType` is captured on the Project at `/api/start`. Replaced by `getDraftToken()`, which **POSTs the persona itself** like the published fixture does, and is **memoised** so a run creates at most one throwaway draft. Accumulation is now bounded and explained in the spec: a draft has no natural dedupe key (unlike the published fixture's deterministic slug), but drafts are unpublished and so cost nothing against the plan's published-page limit. Skip reason updated. No test now passes because of file ordering.
+- **F4 — D5 list corrected (doc only).** Phase 4's only **live** extra-hop caller is `src/app/admin/page.tsx:370` + `:378`. `src/app/edit/[token]/components/layout/PageSwitcher.tsx:43` targets `/dashboard/blog/{slug}` → **phase 5's** shim, and the earlier entry also had the wrong path. `src/components/dashboard/ProjectCard.tsx:175,:181` still push old slug URLs but the file has **zero importers** (dead since phase 2, deleted in phase 6) — recorded so it isn't mistaken for a live caller.
+
+Judgment call #2 (`min-h-screen` drop) reviewer-confirmed as the only body content change beyond the authorized ones (`flex-grow` preserved, empty/pre-publish layouts unaffected) — left as built. Judgment call #1 (duplicate back-link) stays flagged for the founder.
+
+**Verification after F1–F4 (actual output)**
+
+- **`npx tsc --noEmit`** → **exit 0, zero errors**.
+- **`npm run test:run`** → **Test Files 194 passed | 1 skipped (195); Tests 3343 passed | 18 skipped (3361)** — unchanged (fixes are comment/doc/e2e only).
+- **`npm run lint`** → **zero errors** (`grep -c "Error:"` → `0`); warnings only, all pre-existing.
+- `npx playwright test --list --project=authed` → **Total: 24 tests in 6 files** (unchanged — F3 edited an existing helper/test).
+- `git diff --stat tailwind.config.js src/components/ui` → **empty**.
+- Not committed — orchestrator commits.

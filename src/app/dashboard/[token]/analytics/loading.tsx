@@ -1,8 +1,12 @@
 import { ArrowLeft } from 'lucide-react'
 
+/**
+ * Analytics tab skeleton — moved from the retired `dashboard/analytics/[slug]/loading.tsx`
+ * (which is deleted: its route is now an instant server redirect with nothing to stream).
+ */
 export default function Loading() {
   return (
-    <div className="flex flex-col min-h-screen bg-white text-brand-text font-body">
+    <div className="flex flex-col bg-white text-brand-text font-body">
       <main className="flex-grow w-full max-w-7xl mx-auto px-4 py-8">
         {/* Header Skeleton */}
         <div className="flex items-center justify-between mb-8">
