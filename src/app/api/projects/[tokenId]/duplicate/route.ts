@@ -91,7 +91,15 @@ export async function POST(
     }
 
     const ownerId = access.userRecord.id;
-    const copyTitle = `${source.title} (copy)`.slice(0, 120);
+    // Clamp the BASE, not the result: slicing `${title} (copy)` to 120 would let a long title
+    // silently eat its own " (copy)" marker (a 120-char title would duplicate to an identical
+    // name) and could cut a surrogate pair in half. 120 = the rename route's PATCH bound, so a
+    // copy is always renameable.
+    const COPY_SUFFIX = ' (copy)';
+    const base = source.title.slice(0, 120 - COPY_SUFFIX.length);
+    // A cut at an arbitrary code unit can strand the high half of a surrogate pair (emoji,
+    // non-BMP scripts) → a lone U+FFFD in the copy's name. Drop the orphan.
+    const copyTitle = `${base.replace(/[\uD800-\uDBFF]$/, '')}${COPY_SUFFIX}`;
 
     const newTokenId = await prisma.$transaction(async (tx) => {
       const value = await mintProjectToken(tx);

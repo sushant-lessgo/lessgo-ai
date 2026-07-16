@@ -101,11 +101,17 @@ test('UI: ••• → Unpublish → confirm (with the cached-copy sentence) �
     await expect(dialog).toContainText('cached copy for up to an hour');
     await dialog.getByRole('button', { name: 'Unpublish' }).click();
 
-    await expect(page.getByRole('status')).toContainText('up to an hour to clear');
+    // Explicit 15s (not the 5s default): the click fires a REAL Blob/KV teardown round-trip and
+    // the toast only lands after it resolves. On the 5s default a slow-but-correct teardown reads
+    // as a failure — a flaky gate teaches "re-run it", which is how a gate stops protecting.
+    await expect(page.getByRole('status')).toContainText('up to an hour to clear', {
+      timeout: 15_000,
+    });
 
     // router.refresh() re-derives the card from the server (DD4 slot predicate), no optimistic
-    // client mutation — so a green here means the SERVER really says draft.
-    await expect(cardFor(page, token).getByText('Draft')).toBeVisible();
+    // client mutation — so a green here means the SERVER really says draft. Same 15s reasoning:
+    // this waits on a server round-trip, not on local state.
+    await expect(cardFor(page, token).getByText('Draft')).toBeVisible({ timeout: 15_000 });
     expect((await page.goto(`/p/${slug}`))?.status(), 'unpublished page still serves').toBe(404);
   } finally {
     await api.delete(`/api/projects/${token}`);
@@ -132,8 +138,12 @@ test('UI: ••• → Delete → destructive confirm → toast → card disapp
     await expect(dialog).toContainText('cached copy for up to an hour');
     await dialog.getByRole('button', { name: 'Delete' }).click();
 
-    await expect(page.getByRole('status')).toContainText('deleted');
-    await expect(cardFor(page, token), 'deleted card still in the grid').toHaveCount(0);
+    // 15s, same as the unpublish toast: a published delete runs the IDENTICAL teardown before
+    // the toast/refresh land. Both waits are on server truth, not on local state.
+    await expect(page.getByRole('status')).toContainText('deleted', { timeout: 15_000 });
+    await expect(cardFor(page, token), 'deleted card still in the grid').toHaveCount(0, {
+      timeout: 15_000,
+    });
 
     // The UI told the truth: the rows really are gone.
     expect(await db.project.findUnique({ where: { tokenId: token } })).toBeNull();
@@ -389,13 +399,6 @@ test('custom domain attached → 409 custom_domain_attached, page STILL serves (
 });
 
 
-// ---------------------------------------------------------------------------
-// Phase 6 (Rename + Duplicate) lives at the END of this file ON PURPOSE. /api/publish is
-// rate-limited to 5 requests/minute per user, and the publish-backed tests above already spend
-// that whole budget; inserting these fast, publish-free tests earlier re-times the run and tips
-// one of THOSE tests into a 429. Nothing below publishes — keep it that way, and keep it last.
-// ---------------------------------------------------------------------------
-
 test('rename: PATCH 200 writes the title, and the card shows it (DD10)', async ({ page }) => {
   const api = await authedApi(page);
   const { token } = await newSeededProject(api);
@@ -456,9 +459,9 @@ test('duplicate: new Draft with a NEW token, pages cloned, original untouched (D
 
   try {
     // The ORIGINAL gets a PublishedPage row so we can prove the copy does NOT inherit it.
-    // Planted directly, NOT via publishSeed: /api/publish is rate-limited to 5/min and this
-    // serial suite already spends that budget on the tests that genuinely need a real blob.
-    // Duplicate never touches publish infra, so a real publish would buy nothing here but flake.
+    // Planted directly, NOT via publishSeed: /api/publish is rate-limited to 5/min, so each
+    // real publish can cost this serial suite a limiter wait (see `publishSeed`'s pacing).
+    // Duplicate never touches publish infra, so a real publish would buy nothing here but time.
     const src = (await db.project.findUnique({ where: { tokenId: token } }))!;
     const owner = (await db.user.findUnique({ where: { id: src.userId! } }))!;
     await db.publishedPage.create({
@@ -528,7 +531,7 @@ test('duplicate: new Draft with a NEW token, pages cloned, original untouched (D
     expect((await db.project.findUnique({ where: { id: source.id } }))!.title).toBe(source.title);
 
     // The ORIGINAL's published row is untouched — duplicating never disturbs the live page.
-    // (Real SSR take-down/serving is pinned by the publish-backed tests below; this test
+    // (Real SSR take-down/serving is pinned by the publish-backed tests above; this test
     // deliberately spends no publish budget.)
     const originalPage = await db.publishedPage.findUnique({ where: { slug } });
     expect(originalPage!.projectId, 'duplicate re-pointed the original published page').toBe(

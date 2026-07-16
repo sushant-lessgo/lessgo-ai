@@ -18,12 +18,29 @@ export interface BlogSsrContext {
   canonicalDomain?: string;
 }
 
-export async function loadBlogSsr(slug: string): Promise<BlogSsrContext | null> {
+export interface LoadBlogSsrOptions {
+  /**
+   * Gate on the DD0 serving predicate (default true — every PUBLIC blog SSR route).
+   *
+   * Pass `false` ONLY from the owner-only draft preview
+   * (`src/app/(blog-preview)/dashboard/blog/[slug]/[postId]/preview/page.tsx`): it is
+   * Clerk-authed + ownership-checked, serves no public content, and must keep working
+   * after an unpublish — teardown demotes every post to `draft` (DD2b), so the owner's
+   * only way back to their own drafts would otherwise die with the site.
+   * Never pass `false` from a public route: that would re-open the unpublished-blog hole.
+   */
+  requireServing?: boolean;
+}
+
+export async function loadBlogSsr(
+  slug: string,
+  { requireServing = true }: LoadBlogSsrOptions = {},
+): Promise<BlogSsrContext | null> {
   const page = await prisma.publishedPage.findUnique({ where: { slug } });
   // DD0: single choke point for both blog SSR routes — an unpublished site's blog
   // must 404 even though the PublishedPage row is retained.
   if (!page || !page.content || !page.projectId) return null;
-  if (!isServingPublishState(page.publishState)) return null;
+  if (requireServing && !isServingPublishState(page.publishState)) return null;
   const audienceType = page.audienceType === 'service' ? 'service' : 'product';
   if (!usesTemplateModule(audienceType, page.templateId as any)) return null;
 

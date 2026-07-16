@@ -23,7 +23,7 @@ the publish pipeline without orphaning KV routes, blobs, or live pages.
 - phase 3 teardown library: done (commit 2e80de3d, review loops 1, verdict ship). DD1c investigation = NO purge mechanism exists → honest ~1h edge window; phase 5 copy is load-bearing.
 - phase 4 unpublish + delete API routes + e2e: done (commit 82cc4cba, review loops 2, verdict ship). Found+fixed: demo-token destructive bypass (SECURITY), D1 guard state-hole, untrue e2e 401 assert, 2 e2e-infra defects (unregistered spec / broken E2E_PORT). **e2e 7/7 green, verified by execution.**
 - phase 5 dashboard wiring slice 1 (Unpublish/Delete live): done (commit bddc24af, review loops 1, verdict ship). **⛔ GATE A now open — awaiting founder.**
-- phase 6 rename + duplicate: pending
+- phase 6 rename + duplicate: done (commit b5e3405c, review loops 1, verdict ship). e2e 14/14.
 - phase 7 acceptance sweep + docs: pending
 
 ## Recorded orchestrator decisions
@@ -603,13 +603,41 @@ published project → copy is Draft, original stays live.
    wrong here. Add an opt-out option to `loadBlogSsr()` (e.g. `{ requireServing = true }`) and pass
    `false` from the preview route ONLY. Public blog SSR routes keep the gate (default). Add a unit
    test asserting: preview loads a `'draft'`-state page, public SSR does not.
-4. Full gates: `tsc`, `npm run test:run`, `npm run test:e2e`, `npm run build`.
+4. **De-fang the e2e test-ordering tripwire** (phase-6 review; reviewer judged the audit
+   under-sells this). `/api/publish` is rate-limited **5/60s per user** (`src/lib/rateLimit.ts:30-31`,
+   in-memory). Phase 6's fast tests compressed *neighbouring, unmodified* publish tests into one
+   window → a 429 that **looks exactly like a real publish regression**. Current mitigation is
+   only "keep phase-6 tests last" + a comment (`e2e/dashboard-lifecycle.spec.ts:391-396`) — a
+   tripwire for the next contributor who inserts a test mid-file.
+   **RULING: make ordering irrelevant.** Wrap `publishSeed()` so it tracks its own publish
+   timestamps and `await`s out the 60s window before the 6th call (~15 lines, `e2e/helpers/`).
+   **Do NOT add an e2e rate-limit bypass flag** — that would un-pin real limiter behaviour.
+   No product-code change. Then the "keep last" comment can go.
+5. Fix the phase-6 review's cosmetic nits: `duplicate/route.ts:94` clamp the **base** title to
+   `120 - ' (copy)'.length` rather than slicing the result (avoids splitting a surrogate pair and
+   avoids a 120-char title losing its " (copy)" marker entirely); the stale "below" pointer at
+   `e2e/dashboard-lifecycle.spec.ts:483` (the phase-6 block is now above); missing trailing
+   newline on that spec.
+6. Full gates: `tsc`, `npm run test:run`, `npm run test:e2e`, `npm run build`.
 
 **Files touched:**
 - `docs/architecture/publishArch.md`
 - `src/lib/blog/ssr.tsx` (add `requireServing` opt-out — step 3)
 - `src/app/(blog-preview)/dashboard/blog/[slug]/[postId]/preview/page.tsx` (pass the opt-out — step 3)
-- `src/lib/blog/__tests__/` (preview-survives-unpublish test — step 3)
+- `src/lib/blog/__tests__/ssr.test.ts` (preview-survives-unpublish test — step 3)
+- `e2e/helpers/seedDraft.ts` (publish-pacing wrapper — step 4)
+- `e2e/dashboard-lifecycle.spec.ts` (steps 4, 5 + the flake timeout below)
+- `src/app/api/projects/[tokenId]/duplicate/route.ts` (title clamp — step 5)
+
+7. **De-flake the UI-unpublish toast assertion** (phase-7 review's top non-blocking; orchestrator
+   took it). `e2e/dashboard-lifecycle.spec.ts:102` asserts the toast on Playwright's 5s default
+   while a real Blob/KV teardown round-trip is in flight — it timed out once, then passed in
+   isolation and in a clean 14/14 re-run. Give it (and any sibling assertion waiting on a real
+   teardown/publish round-trip) an explicit `{ timeout: 15_000 }`. Weakens nothing — same text,
+   same server truth. **Why it's worth doing before merge:** the audit otherwise instructs future
+   readers to "expect an occasional red here", and a gate people are pre-authorized to ignore
+   stops protecting anything. This suite is what guards the take-down path on every future push;
+   a flaky gate teaches re-running instead of investigating, which is how gates die.
 
 **Verification:** all gates green. Then **⛔ HUMAN GATE B — merge**: founder pass on
 rename/duplicate + merge-to-main decision (merge is always a human gate; user pushes).

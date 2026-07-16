@@ -794,3 +794,228 @@ unrenamed and uncopied).
 - Rename has no uniqueness constraint — two projects can share a title. Intentional (the grid is
   keyed by tokenId), but the UI-duplicate test's cleanup matches on title, so it would over-match
   if a user manually created a same-named `(copy)`.
+
+---
+
+# Phase 7 — Acceptance sweep + docs
+
+## Files changed
+
+- `docs/architecture/publishArch.md` (new top-level "Unpublish / Take-down (teardown)" section)
+- `src/lib/blog/ssr.tsx` (`requireServing` opt-out)
+- `src/app/(blog-preview)/dashboard/blog/[slug]/[postId]/preview/page.tsx` (passes the opt-out)
+- `src/lib/blog/__tests__/ssr.test.ts` (new — 8 tests)
+- `e2e/helpers/seedDraft.ts` (publish-pacing wrapper)
+- `e2e/dashboard-lifecycle.spec.ts` (removed the "keep last" comment; 2 stale comments; trailing newline)
+- `src/app/api/projects/[tokenId]/duplicate/route.ts` (title clamp only)
+- `docs/task/dashboard-lifecycle-actions.audit.md` (this section)
+
+## Step 1 — AC walk (spec `## Acceptance criteria`)
+
+Verdicts are against CODE + the gates I ran. Nothing deployed was checked (Gate A ruling).
+
+1. **••• menu Rename / Duplicate / Delete live; Unpublish shows on published projects** —
+   **SATISFIED.** `ProjectCardMenu.tsx`: Unpublish rendered only when `publishState !== 'draft'`
+   (:273-278, so it doubles as the retry for a stuck `'unpublishing'`), Delete :316, Rename :286-290,
+   Duplicate :294-298 — all enabled (`busy`/domain-guard only). Domain settings + Archive stay greyed
+   by ruling D3 (:303, :310). E2e: the 4 UI tests (Unpublish / Delete / Rename / Duplicate).
+2. **Rename updates the title; Duplicate creates an independent unpublished draft (new token)** —
+   **SATISFIED.** PATCH `[tokenId]/route.ts` (1–120 trimmed, writes `Project.title`); duplicate route
+   mints a NEW token (`src/lib/projectToken.ts`) + `status: 'draft'`, clones `pages`, clones no
+   published/engagement state. E2e "rename: PATCH 200 …" and "duplicate: new Draft with a NEW token,
+   pages cloned, original untouched (DD9)" (asserts a new tokenId, cloned `ProjectPage`, and that
+   editing the copy leaves the original's title + published row untouched).
+3. **Delete (any project, explicit confirm) removes it; published → also taken down (KV + blob cleaned)** —
+   **SATISFIED-WITH-CAVEAT.** Confirm: `ProjectCardMenu.tsx:157-172` (`destructive: true`, names the
+   project, says "live page taken down with it"). Route: DELETE → guard → teardown (`mode:'delete'`)
+   → `$transaction` PublishedPage → Project → Token. E2e "delete removes the project and takes
+   /p/{slug} down" (rows gone, `/p/{slug}` 404). **Caveat:** real KV/blob deletion is proven only by
+   mocked unit tests (`teardown.test.ts`, 21) — Blob/KV are absent locally; on-prod cleanliness is
+   Gate A item 3, DEFERRED.
+4. **Unpublish → stops serving, `publishState` = draft, KV + blob cleaned; re-publish works** —
+   **SATISFIED-WITH-CAVEAT (the DD1c deviation — stated, not papered over).** "Stops serving" is true
+   at the **ORIGIN immediately** (`isServingPublishState` false for `'unpublishing'`/`'draft'` gates
+   every SSR fallback; KV routes deleted) and at the **EDGE within ~1h**: no CDN purge mechanism exists
+   (phase 3: no per-URL Vercel purge API; `cacheTag` is a Next-15 `'use cache'` API and this repo is
+   Next 14; the blob-proxy is `runtime='edge'` so `revalidateTag` would be a no-op; lowering `s-maxage`
+   rejected as a publish-happy-path change). SWR self-corrects → ~1h, not 24h. The confirm dialog +
+   toast tell the user this in plain words. `publishState = 'draft'` + re-publish: e2e "unpublish takes
+   /p/{slug} down (404), then re-publish serves it again".
+   **Whether the edge window actually exists is the open empirical question — Gate A item 2, DEFERRED.**
+5. **Custom-domain page cannot be unpublished/deleted; clear message; no partial teardown** —
+   **SATISFIED.** Predicate D1 = `customDomain !== null` regardless of status (`teardown.ts:107-108`,
+   `blocked` with zero writes); DELETE guards independently before its teardown branch (a draft row can
+   hold a domain). Routes → 409 `custom_domain_attached` / "Remove the custom domain first"
+   (`unpublish/route.ts:88`). Menu pre-disables with the same sentence (DD7); the 409 is the real gate.
+   E2e "custom domain attached → 409 custom_domain_attached, page STILL serves (zero writes)" asserts
+   both routes 409, the page still serves, and that NO `'unpublishing'` marker was written.
+6. **Every mutation enforces `assertProjectOwner`; non-owner blocked** — **SATISFIED.** DELETE (:88),
+   PATCH (:162), unpublish (:43), duplicate (:43), all with `claimIfOrphan: true` and the canonical
+   status passthrough (never the `published-slug` widening). E2e "non-owner token → 403 on both
+   lifecycle routes" (+ rename/duplicate folded in, with positive proof the foreign project survives
+   unrenamed/uncopied). Two honest notes: (a) the routes' own `auth()` → **401 is unreachable** — Clerk
+   middleware `protect()` 404s an anonymous API caller first; the e2e asserts the true 404. (b) The
+   **audited admin override is KEPT** by founder ruling — "every mutation is owner-only" holds modulo
+   that logged override; the one-line flip stays commented in each route.
+7. **No orphaned live pages / KV routes / blobs after delete or unpublish** —
+   **SATISFIED-WITH-CAVEAT.** Structurally: KV enumerated across ALL versions + blog keys (not just
+   `removeRoutes`' root trio), blobs deleted strictly across all versions + blog, DB finalized LAST, and
+   a failure parks the row at `'unpublishing'` (non-serving) + Sentry rather than lying. **Caveats:**
+   (i) verified by mocked unit tests only — real KV/blob is Gate A item 3, DEFERRED; (ii) two
+   **pre-existing PUBLISH-path gaps** (NOT introduced here, now documented) mean orphans can pre-exist:
+   KV keys of versions older than the retained 10 are unenumerable once `cleanupOldVersions` prunes the
+   rows, and a post whose slug changed while published strands its old `/blog/{oldSlug}` key.
+8. **`tsc`, `test:run`, `npm run build` green** — **SATISFIED, all observed** (see Test results).
+
+**DEFERRED (Gate A — the founder cannot deploy; this branch is a consuming spec of the held big-bang
+push):** `{slug}.lessgo.site` take-down through real host routing; whether the DD1c edge window exists;
+prod KV/blob cleanliness + re-publish on the real host. **No deployed verification is claimed.** What IS
+proven locally: local dev uses REAL Vercel Blob + KV, and the e2e performed a genuine
+`POST /api/publish` → unpublish → 404.
+
+## Step 2 — `docs/architecture/publishArch.md`
+
+New section before "Future Enhancements": the serving predicate (+ why `'publishing'`/`'failed'` serve,
++ why deleting KV routes alone does NOT stop serving) · `loadBlogSsr`'s one sanctioned opt-out ·
+`isPublished` deprecated-in-place (**no writer, no reader** — new code must use `publishState`) ·
+teardown order 1-5 with failure semantics · delete cascade · **DD1c** (why no mechanism exists, the
+~1h/SWR nuance, the rejected `s-maxage` change, how to verify a take-down, and the tighten-if-no-window
+follow-up) · DD12 slug squatting · DD0b limit-count semantics · blog demote-on-unpublish · the accepted
+`/api/og` gap · the demo-token short-circuit trap · **the two pre-existing publish-path gaps** (recorded
+as NOT ours) · test coverage with its honest scope · the follow-up list (ConfirmDialog `app-*`,
+SlugModal/LiveStep → `publishedUrl.ts`, `/api/start` → `mintProjectToken()`, `/api/og` gating, duplicate
+has no plan-limit check → revisit at pricing-v2, DD1c copy tightening, automated domain teardown).
+
+## Step 3 — owner blog-draft preview restored
+
+Confirmed the regression: phase 2 gated `loadBlogSsr()`, whose THIRD caller is the owner-only preview —
+so an unpublished site's owner lost preview of their own drafts. `loadBlogSsr(slug, { requireServing =
+true })` now takes an opt-out; the preview route passes `false` (only caller), public blog SSR keeps the
+default. Both sites carry a comment saying why, and the option's docblock says never to pass `false`
+from a public route. The opt-out relaxes the serving predicate ONLY — missing row / missing content /
+detached project still return null (asserted). New `src/lib/blog/__tests__/ssr.test.ts`, 8 tests: public
+SSR serves `published`/`publishing`/`failed` and 404s `draft`/`unpublishing`; preview loads
+`draft`/`unpublishing`; the opt-out doesn't bypass the other guards.
+
+## Step 4 — e2e ordering tripwire de-fanged
+
+`publishSeed()` (`e2e/helpers/seedDraft.ts`) now self-paces against the real limiter
+(`RATE_LIMIT_PRESETS.PUBLISHING`, 5/60s per user, `rateLimit.ts:48-51` — the task's `:30-31` is the
+AI_GENERATION preset): a module-level timestamp list, a sliding-window wait (+1s skew slack) before the
+6th call in a window, and a log line when it waits. **No rate-limit bypass flag** — the suite keeps
+exercising the real limiter. No product code touched. The "keep phase-6 tests last" comment is removed;
+test order is now irrelevant to the publish budget.
+
+## Step 5 — cosmetic nits
+
+- `duplicate/route.ts`: clamps the **base** to `120 - ' (copy)'.length` then appends the suffix, so a
+  120-char title can no longer silently lose its " (copy)" marker (which would have produced a copy
+  named identically to the original). **Deviation (conservative):** clamping the base does not by itself
+  prevent splitting a surrogate pair — `slice` still cuts by code unit — so I also strip a stranded high
+  surrogate (`.replace(/[\uD800-\uDBFF]$/, '')`) to actually deliver the nit's stated intent (no U+FFFD
+  in the copy's name). The existing e2e title assertion still passes.
+- Stale "tests below" → "above" (the phase-6 block is now last); refreshed the neighbouring rate-limit
+  rationale comment, which the pacing wrapper made inaccurate; added the trailing newline.
+
+## Deviations
+
+1. The surrogate-strip above (in-scope, logged).
+2. The e2e comment at the duplicate test was reworded (not in the nit list) because step 4 made its
+   stated reason ("the suite already spends that budget") false. Same file, in scope.
+3. `docs/task/dashboard-lifecycle-actions.plan.md` shows as modified in `git status` — the
+   orchestrator's progress log, pre-existing, NOT touched by this phase.
+
+## Test results (all four gates observed green)
+
+- `npx tsc --noEmit` — **green** (`TSC_EXIT=0`, no output).
+- `npm run test:run` — **green**: `Test Files 197 passed | 1 skipped (198)`,
+  `Tests 3379 passed | 18 skipped (3397)` (+8 from the new ssr test; was 3371).
+- `npm run test:e2e` (lifecycle spec) — **green, 14/14**:
+  `E2E_PORT=3011 npx playwright test e2e/dashboard-lifecycle.spec.ts --project=setup --project=authed`
+  → **14 passed (5.6m)**. Port 3011 verified clear first; Playwright started its own server.
+  **Honest note:** the FIRST full run had 1 failure — the UI-unpublish test's toast assertion timed out
+  at 5s while the unpublish request was still in flight (the card still read "Published", no error
+  toast). It passed in isolation and passed in the clean 14/14 re-run. **A latency flake, not a
+  regression** (see Open risks) — recorded rather than hidden.
+- `npm run build` — **green** (exit 0, full route table emitted).
+
+## Open risks
+
+- ~~**The UI-unpublish toast assertion is timing-sensitive**~~ — **FIXED (phase 7 follow-up).** The
+  four assertions that wait on a real teardown round-trip now carry an explicit `{ timeout: 15_000 }`
+  (see "Phase 7 follow-up: teardown-assertion timeouts" below). The earlier position — "an explicit
+  timeout should be a deliberate choice, so I left it" — is superseded: the deliberate choice is now
+  made. The previous instruction to **"expect an occasional red here"** was the real defect. This suite
+  exists to protect the take-down path on *every future push*; a gate readers are pre-authorized to
+  ignore protects nothing, and a flaky gate is worse than no gate because it trains the reflex of
+  re-running instead of investigating. No assertion was weakened: same text, same server truth, same
+  locators — only the patience changed.
+- The publish pacing assumes a **sliding** window while the limiter uses a **fixed** window with
+  `resetTime`; the wait is therefore conservative (never too short). It also assumes the suite is the
+  only publisher for that user — true for the serial e2e project.
+- Everything under Gate A's DEFERRED list remains unproven on real infra. The DD1c copy is defensively
+  honest: if the deployed check shows no window, the copy over-promises staleness (a cheap tighten).
+- All prior phases' open risks stand (notably: local publishes land in `'failed'`, so teardown-from-
+  `'published'` is only exercised at Gate A; the post-teardown `$transaction` window).
+
+---
+
+# Phase 7 follow-up: teardown-assertion timeouts
+
+## Files changed
+
+- `e2e/dashboard-lifecycle.spec.ts` — explicit 15s timeouts on the four teardown-bound assertions.
+- `docs/task/dashboard-lifecycle-actions.audit.md` — this section; phase-7 flake risk rewritten as FIXED.
+
+## What changed
+
+Four assertions, all of which block on a **real Blob/KV teardown round-trip** completing server-side,
+moved from Playwright's 5s default to `{ timeout: 15_000 }`:
+
+| Line | Assertion | Why it waits on a round-trip |
+|---|---|---|
+| ~104 | unpublish toast `'up to an hour to clear'` | toast fires only after the teardown request resolves — **the assertion that actually flaked** |
+| ~110 | card flips to `Draft` | `router.refresh()` re-derives from the server (no optimistic mutation) |
+| ~137 | delete toast `'deleted'` | published delete runs the identical teardown first |
+| ~139 | card disappears (`toHaveCount(0)`) | same `router.refresh()` server re-derive |
+
+**Rationale (the point of the change).** Phase 7 recorded this as "not fixed — an explicit timeout
+should be a deliberate choice" and told future readers to *expect an occasional red*. That instruction
+is how a gate dies. This suite's whole job is to protect the take-down path on every future push; a
+red that people are pre-authorized to shrug at stops being a signal, and the habit it teaches —
+re-run, don't investigate — is exactly the habit that lets a real take-down regression through. A
+flaky gate is worse than no gate. The fix weakens nothing: identical text, identical locators,
+identical server truth. It only stops a slow-but-correct teardown from reading as a failure.
+
+## Deliberately NOT touched (in-scope judgment)
+
+An inflated timeout on a fast, purely-local assertion buys nothing and makes real failures slower to
+surface, so these keep the 5s default:
+
+- DD7 disabled-menu-item attribute checks (`data-disabled`, `title`) — local, menu already open.
+- `alertdialog` copy assertions — the dialog is client-rendered on click, no network.
+- Rename / Duplicate toasts — single DB write / row-clone, **no Blob/KV teardown**. Not reported flaky
+  and outside this fix's stated remit (teardown round-trips only).
+- `page.goto('/p/{slug}')` 404/serve checks — navigation, governed by the navigation timeout, not the
+  5s `expect` default.
+
+## Test results (observed)
+
+`E2E_PORT=3011 npx playwright test e2e/dashboard-lifecycle.spec.ts --project=setup --project=authed --reporter=list`
+→ **14 passed (7.7m)**. Port 3011 verified free beforehand; Playwright started its own server. Still 14/14.
+
+## Open risks
+
+- **A NEW, UNEXPLAINED failure was seen on the first run of this change and could not be reproduced —
+  recorded, not hidden.** `delete removes the project and takes /p/{slug} down` (~line 340) got **404**
+  from `DELETE /api/projects/{token}`, and the body was the middleware's `notFound()` **HTML page** —
+  i.e. that request resolved as **unauthenticated**, the anonymous-rejection path, not the route's
+  own not-found branch. Serial mode then skipped the remaining 5. On the clean re-run the same test
+  passed in 58s. This is **NOT the latency flake fixed above** (different test, different mechanism —
+  a Clerk session/context issue, not a slow teardown) and **is NOT fixed by this change**; the timeouts
+  are irrelevant to it. It is unproven whether this is a test-harness session-refresh flake or a real
+  intermittent auth fault. If it recurs, investigate `authedApi()`'s session refresh — do not assume
+  it is benign, and do not add a retry to make it quiet.
+- The 15s bound is a judgment call, not a measured ceiling: the UI-unpublish test took **1.7m** overall
+  in the green run (mostly seeding/publish), so if the local teardown itself ever exceeds 15s this will
+  red again — correctly, as a genuinely slow teardown worth looking at.
