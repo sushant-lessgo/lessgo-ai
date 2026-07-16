@@ -15,7 +15,7 @@
 // proves it, over an E2-SHAPED bag (groups that actually carry photos/items).
 // ============================================================================
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 
 import { workJourneySeam } from './work';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
@@ -420,5 +420,83 @@ describe('work seam — STEP 04 plan', () => {
     // may call prepare on every mount. What must never exist is a second,
     // charged path invented here.
     expect(fetchStrategy).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ============================================================================
+// STEP 05 — preflight (P5).
+//
+// Landmine 2 in one sentence: the legacy wizard, with the flag OFF, silently
+// falls through to `runWorkSkeleton`. In the JOURNEY a skeleton is an EMPTY
+// REVEAL — so `preflight` must FAIL LOUDLY instead. These tests exist so nobody
+// "simplifies" that back into a fall-through.
+//
+// `runGeneration` is deliberately NOT unit-tested here: it lazy-imports the real
+// driver (that laziness is the firewall — landmine 14 — and is asserted by
+// `journeyAgnostic.test.ts`), and `runWorkLLMGeneration` has its own suite
+// (work.llm.test.ts). Mocking it here would only prove the mock.
+// ============================================================================
+
+describe('work seam — STEP 05 preflight', () => {
+  type PreState = Parameters<typeof workJourneySeam.preflight>[0];
+  const priorFlag = process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
+
+  const state = (over: Record<string, unknown>) =>
+    ({ templateId: 'atelier', briefFacts: e2Facts(), ...over }) as unknown as PreState;
+
+  afterEach(() => {
+    if (priorFlag === undefined) delete process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
+    else process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = priorFlag;
+  });
+
+  it('flag ON + allow-listed template + work facts ⇒ ok', () => {
+    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+    expect(workJourneySeam.preflight(state({}))).toEqual({ ok: true });
+  });
+
+  it('flag OFF ⇒ engine-disabled, EXPLICIT — never a silent skeleton (landmine 2)', () => {
+    delete process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
+    const result = workJourneySeam.preflight(state({}));
+    expect(result.ok).toBe(false);
+    expect(result.ok === false && result.reason).toBe('engine-disabled');
+    expect(result.ok === false && result.message.length).toBeGreaterThan(0);
+  });
+
+  it('a work template that is NOT allow-listed (granth) ⇒ engine-disabled even with the flag ON', () => {
+    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+    const result = workJourneySeam.preflight(state({ templateId: 'granth' }));
+    expect(result.ok === false && result.reason).toBe('engine-disabled');
+  });
+
+  it('reads the kill-switch from the LEAF — one source, no second env check in the seam', () => {
+    // If the seam ever re-implemented the env read, this flip would not be seen
+    // by it (or, worse, would drift from the generation fork's answer).
+    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+    expect(workJourneySeam.preflight(state({})).ok).toBe(true);
+    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'false';
+    expect(workJourneySeam.preflight(state({})).ok).toBe(false);
+  });
+
+  it('no work facts ⇒ missing-facts (getWorkFacts null 400s the strategy route unrecoverably)', () => {
+    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+    for (const facts of [undefined, null, {}, { entry: { businessName: 'x' } }]) {
+      const result = workJourneySeam.preflight(state({ briefFacts: facts }));
+      expect(result.ok).toBe(false);
+      expect(result.ok === false && result.reason).toBe('missing-facts');
+    }
+  });
+
+  it('a KIND-LESS group ⇒ missing-facts, not a green light into an unrecoverable 400 (landmine 6)', () => {
+    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+    const broken = {
+      work: { identity: { name: 'X' }, groups: [{ name: 'Weddings' }] },
+    };
+    const result = workJourneySeam.preflight(state({ briefFacts: broken }));
+    expect(result.ok === false && result.reason).toBe('missing-facts');
+  });
+
+  it('preflight is SYNC (its result is not a promise) — the firewall depends on it', () => {
+    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+    expect(workJourneySeam.preflight(state({}))).not.toBeInstanceOf(Promise);
   });
 });

@@ -24,9 +24,31 @@ const JOURNEY_STEPS: JourneyStep[] = [2, 3, 4, 5, 6];
 export interface JourneyTopBarProps {
   /** Current step; `null` ⇒ no dot progress (STEP 01, pre-confirm). */
   step: JourneyStep | null;
-  /** Right-hand slot (P5 puts "Building…" here). Defaults to Save & exit. */
+  /** Right-hand slot (STEP 05 puts `<JourneyBuildingStatus/>` here). Defaults to
+   *  Save & exit. */
   right?: React.ReactNode;
   onExit?: () => void;
+}
+
+/**
+ * The STEP-05 right slot: "Building…" + a spinning `progress_activity`.
+ *
+ * A component, not a `right={...}` string, so the ONE place that decides the bar
+ * is in-flight (the shell, from StepBuilding's `onBuildingChange`) can hand it
+ * over without the bar learning anything about generation. `progress_activity`
+ * is in the committed icon subset (P3's pass).
+ */
+export function JourneyBuildingStatus() {
+  return (
+    <span
+      data-testid="topbar-building"
+      role="status"
+      className="font-app-sans font-semibold text-[12.5px] text-app-muted inline-flex items-center gap-1.5"
+    >
+      <AppIcon name="progress_activity" size={16} className="animate-spin" />
+      Building…
+    </span>
+  );
 }
 
 export default function JourneyTopBar({ step, right, onExit }: JourneyTopBarProps) {

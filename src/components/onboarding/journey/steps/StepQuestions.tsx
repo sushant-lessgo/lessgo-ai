@@ -32,7 +32,7 @@ import { Input } from '@/components/ui/input';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { useToast } from '@/components/ui/toast';
 import type { JourneyQuestion, RailCommit } from '../engines/types';
-import { useJourneySeam } from './useJourneySeam';
+import type { JourneyStepProps } from '../JourneyShell';
 
 type PriceMode = 'exact' | 'from' | 'on-request';
 
@@ -42,8 +42,7 @@ const PRICE_MODES: { value: PriceMode; label: string }[] = [
   { value: 'exact', label: 'Exact' },
 ];
 
-export default function StepQuestions() {
-  const seam = useJourneySeam();
+export default function StepQuestions({ seam }: JourneyStepProps) {
   const briefFacts = useWizardStore(selectBriefFacts);
   const commitRail = useWizardStore(selectCommitRail);
   const { toast } = useToast();
@@ -52,7 +51,7 @@ export default function StepQuestions() {
   const facts = briefFacts ?? undefined;
   // Re-projected on every commit, so an answered question disappears and the
   // next one (if any) appears — the rail filling up IS the journey's promise.
-  const questions = seam ? seam.steps.questions(seam.rail.toVM(facts)) : [];
+  const questions = seam.steps.questions(seam.rail.toVM(facts));
 
   /** The ONE write path (identical failure semantics to the rail's). */
   const submit = async (result: RailCommit): Promise<boolean> => {
@@ -83,7 +82,7 @@ export default function StepQuestions() {
         </p>
       </div>
 
-      {seam && questions.length === 0 && (
+      {questions.length === 0 && (
         <p
           data-testid="questions-none"
           role="status"

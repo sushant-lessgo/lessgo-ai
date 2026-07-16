@@ -39,7 +39,11 @@ import type {
   WorkSitemapPage,
 } from '@/modules/audience/work/strategy/parseStrategyWork';
 import { saveDraft } from './finalize';
-import { WORK_COPY_ENGINE_TEMPLATES, isWorkCopyTemplate } from '@/lib/workCopyEngine';
+import {
+  WORK_COPY_ENGINE_TEMPLATES,
+  isWorkCopyTemplate,
+  workCopyEngineEnabled,
+} from '@/lib/workCopyEngine';
 import type { WorkGenerationInput } from './work';
 import type { GenerationCallbacks, GenerationResult, GenerationMeta } from './index';
 
@@ -48,26 +52,15 @@ import type { GenerationCallbacks, GenerationResult, GenerationMeta } from './in
 // ---------------------------------------------------------------------------
 
 /**
- * Founder-approved ALLOW-LIST of WORK templates the LLM copy engine may drive.
- * RELOCATED to the leaf module `@/lib/workCopyEngine` (single source of truth,
- * shared with the editor's story-panel gate) — re-exported here so existing
- * generation callers (`index.ts`, `work.ts`, `work.llm.test.ts`) keep their
- * import surface unchanged.
+ * The allow-list, the membership predicate AND the kill-switch all live in the
+ * leaf module `@/lib/workCopyEngine` (single source of truth, shared with the
+ * editor's story-panel gate and — since work-onboarding-shell P5 — the journey
+ * seam's SYNC STEP-05 `preflight`, which must not statically import THIS module
+ * because its top pulls the template registry + multi-page assembly).
+ * Re-exported here so existing generation callers (`index.ts`, `work.ts`,
+ * `work.llm.test.ts`) keep their import surface unchanged.
  */
-export { WORK_COPY_ENGINE_TEMPLATES, isWorkCopyTemplate };
-
-/**
- * Whether the WORK LLM copy engine is enabled for `templateId`. TRUE only when
- * (a) the env kill-switch `NEXT_PUBLIC_WORK_COPY_ENGINE === 'true'` AND (b) the
- * template is on `WORK_COPY_ENGINE_TEMPLATES`. `NEXT_PUBLIC_*` is BUILD-TIME
- * INLINED (plan decision #8) — flipping it needs a REDEPLOY, not a runtime
- * toggle. Default OFF (unset ⇒ false) ⇒ the existing skeleton path is
- * byte-identical.
- */
-export function workCopyEngineEnabled(templateId: string | null | undefined): boolean {
-  if (process.env.NEXT_PUBLIC_WORK_COPY_ENGINE !== 'true') return false;
-  return isWorkCopyTemplate(templateId);
-}
+export { WORK_COPY_ENGINE_TEMPLATES, isWorkCopyTemplate, workCopyEngineEnabled };
 
 export type WorkRoutePath = 'granth-generator' | 'skeleton' | 'llm-fanout';
 

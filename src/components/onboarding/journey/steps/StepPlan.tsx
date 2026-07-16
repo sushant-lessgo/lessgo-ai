@@ -25,17 +25,15 @@ import {
 } from '@/hooks/useWizardStore';
 import { AppIcon } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
-import { useJourneySeam } from './useJourneySeam';
+import type { JourneyStepProps } from '../JourneyShell';
 
-export default function StepPlan() {
-  const seam = useJourneySeam();
+export default function StepPlan({ seam }: JourneyStepProps) {
   const setJourneyStep = useWizardStore(selectSetJourneyStep);
   // Subscribed so the cards render as soon as `prepare` seeds the plan.
   const sitemap = useWizardStore((s) => s.sitemap);
   const strategyStatus = useWizardStore((s) => s.strategyStatus);
 
   useEffect(() => {
-    if (!seam) return;
     let cancelled = false;
     void (async () => {
       // The live store handle (not a snapshot): `prepare` awaits store actions.
@@ -52,11 +50,11 @@ export default function StepPlan() {
   // memoised on the slices this frame subscribes to. Those subscriptions are
   // what re-render us; `getState()` is current by the time they fire.
   const items = useMemo(
-    () => (seam ? seam.steps.plan.items(useWizardStore.getState()) : []),
+    () => seam.steps.plan.items(useWizardStore.getState()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [seam, sitemap, strategyStatus]
   );
-  const preparing = !seam || (strategyStatus !== 'done' && items.length === 0);
+  const preparing = strategyStatus !== 'done' && items.length === 0;
 
   return (
     <div data-testid="step-plan" data-journey-step={4} className="space-y-6">

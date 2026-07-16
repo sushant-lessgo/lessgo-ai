@@ -19,20 +19,22 @@ import { useWizardStore, selectSetJourneyStep } from '@/hooks/useWizardStore';
 import { AppIcon } from '@/components/ui/icon';
 import { ImagePlaceholder } from '@/components/ui/image-placeholder';
 import { Button } from '@/components/ui/button';
-import { useJourneySeam } from './useJourneySeam';
+import type { JourneyStepProps } from '../JourneyShell';
 
-export default function StepShowWork() {
-  const seam = useJourneySeam();
+export default function StepShowWork({ seam }: JourneyStepProps) {
   const setJourneyStep = useWizardStore(selectSetJourneyStep);
-  const content = seam?.steps.showWork;
+  // The shell resolves the seam ONCE and passes it down (P5 folded away the
+  // per-step `useJourneySeam` hook) — so there is no `seam === null` frame here
+  // and this headline never paints empty before its content arrives.
+  const content = seam.steps.showWork;
 
   return (
     <div data-testid="step-show-work" data-journey-step={2} className="space-y-6">
       <div className="space-y-2">
         <h1 className="font-app-sans text-2xl font-semibold text-app-ink">
-          {content?.title ?? ''}
+          {content.title}
         </h1>
-        <p className="font-app-sans text-sm text-app-muted max-w-xl">{content?.body ?? ''}</p>
+        <p className="font-app-sans text-sm text-app-muted max-w-xl">{content.body}</p>
       </div>
 
       {/* The stub. `aria-disabled` + no handler: it LOOKS like the drop target
@@ -44,7 +46,7 @@ export default function StepShowWork() {
         aria-disabled="true"
         className="flex-col gap-2 text-center"
       >
-        <AppIcon name={content?.icon ?? 'add_photo_alternate'} size={28} />
+        <AppIcon name={content.icon} size={28} />
         <span className="font-app-sans text-xs text-app-placeholder">
           Uploads arrive in the next release — skip for now and add images in the editor.
         </span>

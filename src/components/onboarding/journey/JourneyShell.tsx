@@ -34,7 +34,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { AppIcon } from '@/components/ui/icon';
 import { ToastProvider } from '@/components/ui/toast';
-import JourneyTopBar from './JourneyTopBar';
+import { cn } from '@/lib/utils';
+import JourneyTopBar, { JourneyBuildingStatus } from './JourneyTopBar';
 import UnderstoodRail from './UnderstoodRail';
 import { loadJourneySeam } from './engines/registry';
 import type { JourneyEngineSeam, JourneyStep } from './engines/types';
@@ -49,9 +50,39 @@ export interface JourneyShellProps {
   brief: Brief;
   audienceType: AudienceType | null;
   templateId: TemplateId | null;
+  /**
+   * The project's generated content, straight from `/api/loadDraft` (the entry
+   * page's load-detection forwards it verbatim). Shape is generation-owned, so
+   * the shell treats it as OPAQUE — it exists solely to be handed to the seam's
+   * `resolveResumeStep`, which is the only thing allowed to interpret it.
+   *
+   * ⚠️ LOAD-BEARING (P2b trap, closed in P5). Until P5 the shell passed only
+   * {brief, audienceType, templateId}, so `loaded.finalContent` was ALWAYS
+   * undefined and every generation-resume rule was dead code that silently
+   * resumed at STEP 02 forever — with `resumeStep.test.ts` green, because it
+   * fabricates its `loaded` objects. If you drop this prop, the resume rules
+   * stop firing and NO unit test will tell you.
+   */
+  finalContent?: unknown;
 }
 
-const STEP_BODIES: Record<JourneyStep, () => JSX.Element> = {
+/**
+ * Step bodies are AGNOSTIC and are given the seam as a PROP.
+ *
+ * P4 had each step resolve the seam itself (`steps/useJourneySeam`) because the
+ * shell rendered them with no props. P5 folded that away: the shell already HAS
+ * the seam, and per-step async resolution cost a one-tick `seam === null` frame
+ * (StepShowWork painted an empty headline before the seam landed). One door,
+ * resolved once, passed down.
+ */
+export interface JourneyStepProps {
+  seam: JourneyEngineSeam;
+  /** STEP 05 reports generation in-flight so the top bar can say "Building…".
+   *  Lives here (not in the store) because it is pure chrome state. */
+  onBuildingChange?: (building: boolean) => void;
+}
+
+const STEP_BODIES: Record<JourneyStep, (props: JourneyStepProps) => JSX.Element> = {
   2: StepShowWork,
   3: StepQuestions,
   4: StepPlan,
@@ -67,6 +98,7 @@ export default function JourneyShell({
   brief,
   audienceType,
   templateId,
+  finalContent,
 }: JourneyShellProps) {
   const router = useRouter();
   const hydrate = useWizardStore((s) => s.hydrate);
@@ -76,6 +108,7 @@ export default function JourneyShell({
 
   const [seam, setSeam] = useState<JourneyEngineSeam | null>(null);
   const [seamError, setSeamError] = useState(false);
+  const [building, setBuilding] = useState(false);
 
   // Hydrate once from the DB-confirmed brief (load-detection already fetched
   // it). Same one-shot rule as WizardShell: re-running would clobber edits.
@@ -100,11 +133,16 @@ export default function JourneyShell({
         return;
       }
       setSeam(loaded);
-      // NOTE (P5/P6): `finalContent` is NOT available here — the entry page's
-      // load-detection reads only {brief, audienceType, templateId}. The
-      // generation-resume rules (⇒ 5 / ⇒ 6) need it, so the phase that adds them
-      // must widen what the shell is given.
-      const step = await loaded.resolveResumeStep({ brief, audienceType, templateId });
+      // `finalContent` is what makes the generation-resume rules (⇒ 5 mid
+      // fan-out / ⇒ 6 finished) able to fire AT ALL — P5 widened the entry
+      // page's load-detection to keep it and this prop to carry it. Passing
+      // less than the contract declares is how that rule silently died before.
+      const step = await loaded.resolveResumeStep({
+        brief,
+        audienceType,
+        templateId,
+        finalContent,
+      });
       if (!cancelled) setJourneyStep(step);
     })();
     return () => {
@@ -126,6 +164,10 @@ export default function JourneyShell({
       <div className="app-chrome fixed inset-0 flex flex-col bg-app-canvas">
         <JourneyTopBar
           step={ready ? journeyStep : null}
+          // While STEP 05 generates, the bar reports it instead of offering
+          // "Save & exit" — leaving mid-fan-out is not a thing we want to invite
+          // (the driver resumes, but the honest chrome is "we're working").
+          right={building ? <JourneyBuildingStatus /> : undefined}
           onExit={() => router.push('/dashboard')}
         />
 
@@ -148,14 +190,16 @@ export default function JourneyShell({
                 </p>
               )}
 
-              {ready && (
+              {ready && seam && (
                 <div className="space-y-8">
-                  <Body />
+                  <Body seam={seam} onBuildingChange={setBuilding} />
 
                   {/* P2b navigation — makes 02–06 walkable. Each step takes over
                       its own forward motion as it lands (P4's CTA, P5's
-                      generation completion, P6's editor handoff). */}
-                  <div className="flex items-center justify-between pt-2">
+                      generation completion, P6's editor handoff).
+                      Hidden while STEP 05 generates: stepping away mid-fan-out
+                      is never what the user means to do. */}
+                  <div className={cn('flex items-center justify-between pt-2', building && 'hidden')}>
                     <button
                       type="button"
                       onClick={() =>

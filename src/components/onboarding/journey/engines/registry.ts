@@ -5,8 +5,10 @@
 // onboarding entry bundle. Nothing here is a static import of a seam module;
 // the only way in is the async loader.
 //
-// Only `JourneyShell` / `JourneyEntryStep` (themselves `ssr:false` dynamic
-// imports) call `loadJourneySeam`. Dispatch DECISIONS use the leaf
+// `loadJourneySeam` is called by `JourneyEntryStep` (STEP 01) and by
+// `JourneyShell` (which resolves the seam ONCE and passes it down to the step
+// bodies as a prop — P5 folded away the per-step `useJourneySeam` hook). Both
+// are themselves `ssr:false` dynamic imports. Dispatch DECISIONS use the leaf
 // `src/lib/journeyEngines.ts` instead — never this file.
 //
 // `Partial<Record<…>>`: `thing`/`trust` are declared by the contract but have no

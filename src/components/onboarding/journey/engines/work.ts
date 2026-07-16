@@ -10,7 +10,11 @@
 // static imports are therefore limited to:
 //     • `@/modules/wizard/work/rail.ts`   (pure: zod + types)
 //     • `@/modules/wizard/work/resumeStep.ts` (pure — joins the list in P2b)
-//     • `@/lib/workCopyEngine`            (zero-dep leaf)
+//     • `@/lib/schemas/workFacts.schema`  (pure: zod)
+//     • `@/lib/workCopyEngine`            (zero-dep leaf — hosts BOTH
+//        `isWorkCopyTemplate` and, since P5, the `workCopyEngineEnabled`
+//        kill-switch, precisely so `preflight` can stay SYNC without importing
+//        `work.llm.ts`)
 //     • `@/types/brief` + `./types`       (types only)
 //     • local copy strings
 // and NOTHING else. In particular NEVER `@/modules/wizard/generation/**` or
@@ -20,12 +24,13 @@
 // `resolveResumeStep` lazy-import their drivers at CALL time (the
 // `useWizardStore` lazy-adapter pattern).
 //
-// STATUS (phase 2a): SKELETON. The rail adapter is real (it proves the contract
-// is implementable over phase 1's `rail.ts`); step content, `preflight`,
-// `runGeneration` and `resolveResumeStep` are filled in P4/P5/P2b.
+// STATUS (P5): COMPLETE for E1 — rail adapter, entry enrichment, step content,
+// preflight, generation drive and resume rules are all real.
 // ============================================================================
 
 import type { Brief } from '@/types/brief';
+import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
+import { workCopyEngineEnabled } from '@/lib/workCopyEngine';
 import {
   railFromFacts,
   applyRailEdit,
@@ -41,7 +46,10 @@ import {
 import { resolveWorkResumeStep } from '@/modules/wizard/work/resumeStep';
 import type {
   JourneyEngineSeam,
+  JourneyGenerationCallbacks,
+  JourneyGenerationResult,
   JourneyLoadedDraft,
+  JourneyPreflightResult,
   JourneyQuestion,
   JourneyRailAdapter,
   JourneyStep,
@@ -340,6 +348,13 @@ export const workJourneySeam: JourneyEngineSeam = {
           id: 'price',
           kind: 'price',
           label: 'Roughly what do you charge?',
+          // ⚠️ E3 NOTE (recorded, deliberately NOT fixed in E1): this answer is
+          // BLANKETED onto EVERY group (see `commitGroupPrice`). Correct today —
+          // E1 asks ONE price for the practice and the entry seed prices every
+          // group uniformly `on-request`, so there is no per-group price to
+          // clobber. The DAY E3 introduces per-group pricing, this one question
+          // silently overwrites all of it. Split the question per group (or scope
+          // the commit) THEN — not before.
           commit: commitGroupPrice,
         });
       }
@@ -386,36 +401,101 @@ export const workJourneySeam: JourneyEngineSeam = {
   },
 
   /**
-   * P5 fills this: `workCopyEngineEnabled(templateId)` false ⇒
-   * `{ok:false, reason:'engine-disabled'}` (explicit error at STEP 05, never a
-   * silent skeleton), `getWorkFacts` null ⇒ `{ok:false, reason:'missing-facts'}`.
-   * It stays SYNC and reads the kill-switch from the LEAF `@/lib/workCopyEngine`
-   * (P5 relocates `workCopyEngineEnabled` there) — never a second env check here.
+   * STEP 05's two hard preconditions, checked BEFORE anything is charged or
+   * written. SYNC by contract: the kill-switch comes from the zero-dep LEAF
+   * `@/lib/workCopyEngine`, so this needs no `await` and drags no generation
+   * code onto the pre-confirm entry path (landmine 14). NEVER re-implement the
+   * env read here — one kill-switch source, ever.
    *
-   * Until then it is deliberately fail-CLOSED: landmine 2's failure mode is
-   * "flag off ⇒ silent skeleton ⇒ empty reveal", so an unconditional `{ok:true}`
-   * placeholder would reproduce it silently if P5 wired `runGeneration` and
-   * forgot this. A loud dev-time failure beats a silent ship.
+   * (a) FLAG (landmine 2). `NEXT_PUBLIC_WORK_COPY_ENGINE` off (or a template
+   *     off the allow-list) ⇒ an EXPLICIT error. The failure mode this exists to
+   *     kill is the SILENT one: the legacy wizard's fork falls through to
+   *     `runWorkSkeleton` when the flag is off, and a skeleton in the JOURNEY
+   *     means STEP 06 reveals an EMPTY site as though it were the finished
+   *     thing. The journey has no skeleton path — it says so instead.
+   *     Near-unreachable via dispatch (`isJourneyEligible` already gates on
+   *     `isWorkCopyTemplate`), but the flag is orthogonal to eligibility and is
+   *     build-time inlined: a prod deploy with the flag off would land here.
+   *
+   * (b) FACTS (landmine 6). `getWorkFacts` null ⇒ the work strategy route 400s
+   *     UNRECOVERABLY (a `kind`-less group persists, so a retry never fixes
+   *     it). The rail/questions are what collect this, so the honest recovery is
+   *     STEP 03 — not a retry button.
    */
-  preflight(_state: JourneyWizardState) {
-    return {
-      ok: false as const,
-      reason: 'engine-disabled' as const,
-      message: 'preflight not wired',
-    };
+  preflight(state: JourneyWizardState): JourneyPreflightResult {
+    if (!workCopyEngineEnabled(state.templateId)) {
+      return {
+        ok: false,
+        reason: 'engine-disabled',
+        message:
+          'Site building is switched off for this account right now. Nothing has been charged — please contact support.',
+      };
+    }
+    // The LIVE bag — `briefFacts` is what generation itself reads
+    // (`resolveWorkBrief` → `buildWorkInput`), so preflighting anything else
+    // would check a different thing than the one that runs.
+    if (!getWorkFacts((state.briefFacts ?? undefined) as Record<string, unknown> | undefined)) {
+      return {
+        ok: false,
+        reason: 'missing-facts',
+        message: 'We still need a couple of details before we can write your site.',
+      };
+    }
+    return { ok: true };
   },
 
-  /** P5: lazy-imports `buildWorkInput` + `runWorkLLMGeneration` at CALL time. */
-  async runGeneration(_state: JourneyWizardState) {
-    return { ok: false as const, kind: 'error' as const, message: 'Generation is not wired yet.' };
+  /**
+   * The drive. `runWorkLLMGeneration` is used VERBATIM (landmine 7): the
+   * saveDraft-before-copy skeleton, per-page persistence, mid-fan-out resume and
+   * — critically — the MANDATORY `finalizeMultiPageGeneration` all live inside
+   * it. Re-implementing any of that here would, at minimum, leave the
+   * in-progress marker in place, and the editor would treat a finished site as
+   * mid-generation forever.
+   *
+   * BOTH imports are LAZY (landmine 14): `work.llm.ts`'s module top statically
+   * pulls the template registry + multi-page assembly, and this seam is loaded
+   * PRE-CONFIRM at STEP 01. `journeyAgnostic.test.ts` enforces the static half;
+   * this is the sanctioned dynamic escape hatch.
+   *
+   * The callbacks pass straight through — `JourneyGenerationCallbacks` is a
+   * restatement of `GenerationCallbacks` (the contract keeps zero edges to the
+   * generation graph), so they are structurally the same object.
+   */
+  async runGeneration(
+    state: JourneyWizardState,
+    cb: JourneyGenerationCallbacks
+  ): Promise<JourneyGenerationResult> {
+    const [{ buildWorkInput }, { runWorkLLMGeneration }] = await Promise.all([
+      import('@/hooks/useWizardStore'),
+      import('@/modules/wizard/generation/work.llm'),
+    ]);
+
+    const result = await runWorkLLMGeneration(buildWorkInput(state), cb);
+
+    // Distinct kinds: credits is a BILLING dead-end (a retry burns nothing but
+    // time), an error is retryable. `redirectTo` is deliberately DROPPED — the
+    // journey's STEP 06 owns forward motion, not the driver's editor redirect.
+    if (result.status === 'done') return { ok: true };
+    if (result.status === 'credits') {
+      return {
+        ok: false,
+        kind: 'credits',
+        message: 'You’re out of credits — top up and we’ll pick up where we left off.',
+      };
+    }
+    return { ok: false, kind: 'error', message: result.error || 'We couldn’t finish your site.' };
   },
 
   /**
    * Delegates to the work resume rules (`@/modules/wizard/work/resumeStep` — a
    * pure module, so a static import here is firewall-clean; see that file's
-   * header before adding an import to IT). Confirmed ⇒ STEP 02; P5 adds the
-   * mid-fan-out resume (⇒ 5) via a LAZY `isResumableGeneration`, P6 the
-   * finished-content resume (⇒ 6).
+   * header before adding an import to IT). Confirmed ⇒ STEP 02; an in-progress
+   * generation ⇒ STEP 05 (via a LAZY `isResumableGeneration`); finished content
+   * ⇒ STEP 06.
+   *
+   * The shell MUST pass `loaded.finalContent` for the latter two to fire — P5
+   * widened `page.tsx` load-detection → `JourneyShell` → here to do that. See
+   * resumeStep.ts's header before touching any link in that chain.
    */
   resolveResumeStep(loaded: JourneyLoadedDraft): Promise<JourneyStep> {
     return resolveWorkResumeStep(loaded);

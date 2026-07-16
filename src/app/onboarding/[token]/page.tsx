@@ -87,6 +87,15 @@ interface WizardData {
   brief: Brief;
   audienceType: AudienceType | null;
   templateId: TemplateId | null;
+  /**
+   * work-onboarding-shell P5 — the journey's RESUME input. `/api/loadDraft`
+   * already returns it; load-detection used to discard it, which made every
+   * generation-resume rule in the seam dead code (`resolveResumeStep` saw
+   * `finalContent: undefined` forever ⇒ always STEP 02). Kept OPAQUE here: only
+   * the engine's seam may interpret generated content. WizardShell does not take
+   * it (the legacy wizard has its own resume) — journey only.
+   */
+  finalContent?: unknown;
 }
 
 export default function EntryOnboardingPage() {
@@ -132,7 +141,13 @@ export default function EntryOnboardingPage() {
           // unified wizard, unchanged.
           const journey = isJourneyEligible(brief.copyEngine, templateId);
           if (!cancelled) {
-            setWizardData({ brief, audienceType, templateId });
+            setWizardData({
+              brief,
+              audienceType,
+              templateId,
+              // Carried for the journey's resume rules only (see WizardData).
+              finalContent: json?.finalContent ?? null,
+            });
             setStep(journey ? 'journey' : 'wizard');
             setChecking(false);
           }
@@ -160,6 +175,7 @@ export default function EntryOnboardingPage() {
         brief={wizardData.brief}
         audienceType={wizardData.audienceType}
         templateId={wizardData.templateId}
+        finalContent={wizardData.finalContent}
       />
     );
   }
@@ -171,6 +187,14 @@ export default function EntryOnboardingPage() {
       <JourneyEntryStep
         tokenId={tokenId}
         briefDraft={briefDraft}
+        // Decision 3's last mile (P3 shipped the prop optional; P5 wires it):
+        // an EDITED one-liner is re-classified, and a NON-seam result must hand
+        // the user back to the legacy `ConfirmBriefStep`. Setting the draft here
+        // re-renders this parent ⇒ `hasJourneySeam(briefDraft.copyEngine)` goes
+        // false ⇒ branch (b) stops matching ⇒ the legacy confirm below takes
+        // over with the fresh draft. Same setter, same contract as
+        // ConfirmBriefStep's own.
+        onDraftCorrected={setBriefDraft}
         onManual={(missingTags) => {
           // Reuses the existing manual path verbatim — the journey adds no new
           // demand-capture surface.
