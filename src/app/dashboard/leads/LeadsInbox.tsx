@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AppIcon } from '@/components/ui/icon'
 
 /**
@@ -40,18 +40,44 @@ function previewOf(lead: InboxLead): string {
   return first ? first[1] : 'Submission'
 }
 
+// Timestamps render in the VIEWER'S LOCAL time zone — intentional. A `timeZone: 'UTC'`
+// pin was considered and REJECTED: the founder reads this inbox from IST (UTC+5:30), so
+// UTC would show every lead 5.5h (and near midnight, a day) off — actively misleading.
+//
+// Local time alone would trip a React hydration mismatch (this is a 'use client'
+// component that Next still server-renders; the server is UTC, the browser is not).
+// The MOUNT-GATE below — not a UTC pin — is what makes hydration deterministic: server
+// and first client render both emit a stable placeholder, and the real local-time string
+// only appears after mount.
+//
+// The locale stays pinned so formatting can't drift on ICU-default differences; 'en-US'
+// matches the existing precedent in src/components/dashboard/FormSubmissionsTable.tsx.
+//
+// Do NOT revert to unguarded `toLocaleString(undefined, …)`, and do NOT re-pin UTC.
+const DATE_LOCALE = 'en-US'
+
+/** Server + pre-mount client placeholder. Byte-identical both sides; sized to limit shift. */
+const DATE_PLACEHOLDER = '—'
+
 function formatShort(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
+  return new Date(iso).toLocaleDateString(DATE_LOCALE, {
     month: 'short',
     day: 'numeric',
   })
 }
 
 function formatFull(iso: string): string {
-  return new Date(iso).toLocaleString(undefined, {
+  return new Date(iso).toLocaleString(DATE_LOCALE, {
     dateStyle: 'medium',
     timeStyle: 'short',
   })
+}
+
+/** True only after the first client render — gates local-time formatting past hydration. */
+function useMounted(): boolean {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  return mounted
 }
 
 export default function LeadsInbox({
@@ -64,6 +90,7 @@ export default function LeadsInbox({
   // First row selected by default.
   const [selectedId, setSelectedId] = useState<string>(leads[0]?.id ?? '')
   const selected = leads.find((l) => l.id === selectedId) ?? leads[0]
+  const mounted = useMounted()
 
   return (
     <div className="px-[26px] pb-[26px] pt-[22px]">
@@ -93,8 +120,10 @@ export default function LeadsInbox({
                       <span className="min-w-0 flex-1 truncate font-app-sans text-[13px] font-bold text-app-ink">
                         {previewOf(lead)}
                       </span>
-                      <span className="shrink-0 font-app-sans text-[11.5px] text-app-faint">
-                        {formatShort(lead.createdAt)}
+                      {/* min-w reserves the formatted-date width so the pre-mount
+                          placeholder doesn't let the preview reflow on mount. */}
+                      <span className="min-w-[44px] shrink-0 text-right font-app-sans text-[11.5px] text-app-faint">
+                        {mounted ? formatShort(lead.createdAt) : DATE_PLACEHOLDER}
                       </span>
                     </span>
                     <span className="w-full truncate font-app-sans text-[12px] text-app-muted">
@@ -116,7 +145,7 @@ export default function LeadsInbox({
           {selected ? (
             <>
               <p className="font-app-sans text-[11.5px] text-app-faint">
-                {formatFull(selected.createdAt)}
+                {mounted ? formatFull(selected.createdAt) : DATE_PLACEHOLDER}
               </p>
               <h2 className="mt-0.5 font-app-sans text-[15px] font-extrabold tracking-[-0.2px] text-app-ink">
                 {previewOf(selected)}

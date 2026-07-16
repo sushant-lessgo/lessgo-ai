@@ -258,3 +258,57 @@ Plausibly consistent: same table, same `slug`+`date` predicate, and identical wi
 
 ### Deviations / notes
 - None from the plan. Manual `npm run dev` check of totals against live per-site pages was NOT run (no prod data in this worktree) — covered by the code-level reasoning above and left to phase 5 / founder gate.
+
+---
+
+## Phase 5 fix-forward — hydration-deterministic lead timestamps
+
+**Files changed**
+- `src/app/dashboard/leads/LeadsInbox.tsx`
+
+**Finding (impl-review, non-blocking)**
+`formatShort`/`formatFull` called `toLocaleDateString(undefined, …)` / `toLocaleString(undefined, …)`
+in a `'use client'` component that Next still SSRs. Server (Vercel = UTC, ICU default locale) and
+browser (user local TZ/locale) can produce different strings → React recoverable hydration error +
+console noise. Passing ISO strings only half-solved the plan's own "avoid hydration-format drift" risk.
+
+**First attempt — REJECTED by orchestrator ruling**
+Initially pinned `DATE_LOCALE = 'en-US'` **and** `DATE_TIME_ZONE = 'UTC'`. Rejected: the founder reads
+this inbox from IST (UTC+5:30), so a UTC pin renders every lead timestamp 5.5h off — and a whole day
+off near midnight — i.e. **actively misleading**, traded for what was only recoverable console noise.
+Correct local time outranks SSR determinism on a dashboard timestamp. UTC pin removed; **do not re-pin.**
+
+**Shipped fix — mount-gate (local time, no mismatch)**
+- Kept `DATE_LOCALE = 'en-US'` (deterministic locale; matches the precedent at
+  `src/components/dashboard/FormSubmissionsTable.tsx:47`).
+- Removed the `timeZone` pin → `formatShort`/`formatFull` render in the **viewer's local zone** again.
+- Added `useMounted()` (`useState(false)` + `useEffect(() => setMounted(true), [])`). Timestamps format
+  only after mount; before mount both server and first client render emit the stable, byte-identical
+  `DATE_PLACEHOLDER = '—'`. SSR and first client render therefore agree → zero hydration mismatch, and
+  the viewer then sees correct local time.
+- WHY comment rewritten in-file: local time is intentional (UTC rejected as misleading); the mount-gate,
+  not a UTC pin, is what makes hydration deterministic; do not revert to unguarded
+  `toLocaleString(undefined, …)` and do not re-pin UTC.
+- Layout shift guarded: the master-list date chip span gained `min-w-[44px] … text-right` so the `—`
+  placeholder reserves roughly the formatted-date width and the list doesn't reflow on mount. The
+  detail-pane timestamp is its own `<p>` line — height already stable.
+- `app-*` tokens only; no other behavior/markup change; server page, analytics page and e2e specs untouched.
+
+**Deviations**
+- Added the `min-w-[44px] text-right` classes on the existing date span — a hair beyond "no markup
+  change", but explicitly required by the ruling's layout-shift instruction. Conservative: classes only,
+  same element, `app-*` fonts/colors untouched.
+
+**Verification (real output)**
+- `npx tsc --noEmit` → `TSC_EXIT=0`, zero output. Clean.
+- `npm run test:run` → **Test Files 198 passed | 1 skipped (199); Tests 3382 passed | 18 skipped (3400)**, 59.95s. Green.
+- `E2E_PORT=3117 npx playwright test e2e/dashboard-rollups-inbox.spec.ts` → still collected, **4 passed** (35.0s):
+  auth setup, phase-3 all-leads inbox render, phase-4 analytics rollup render, phase-4 7d range link.
+- **No e2e assertion depends on timestamp text** (grepped the spec for date/locale/`createdAt`/`—`: only
+  shell-wrapper, list-or-empty-state, range-pill and error-absence assertions). The mount-gate changes
+  first-paint text, but Playwright asserts post-hydration and nothing matches on a date string.
+
+**Open risks**
+- Timestamps flash `—` → local time on mount (one frame). Accepted: correctness over first-paint text.
+- No automated test asserts SSR/client agreement or the absence of a hydration warning; the guards are
+  the mount-gate plus the code comment.
