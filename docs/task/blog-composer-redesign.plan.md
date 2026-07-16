@@ -12,7 +12,7 @@ Reskin the blog authoring experience (first-run enable state, posts manager, pos
 
 ## Progress log
 
-- phase 1 Blog manager reskin (3b first-run + 3c manager): pending
+- phase 1 Blog manager reskin (3b first-run + 3c manager): **done** (commit `c9aad99a`, review loops 1, verdict `ship`). Orchestrator amendment: `playwright.config.ts` added to Files touched — the plan missed e2e spec registration (`authed` project's `testMatch` is an allow-list; an unregistered spec silently runs nothing). All three blog specs pre-registered (Playwright no-ops on patterns matching no file — confirmed empirically) → **phases 2 and 4 need no config change**. e2e observed green (2 passed, `E2E_PORT=3117`; 3000 occupied). For GATE A: duplicate `← Dashboard` back-link + `Blog — {title}` h1 removed (already rendered by `WorkspaceHeader`/`WorkspaceTabs`); success toasts on publish/unpublish/delete are net-new (previously no success signal); sibling pages (`leads`/`analytics`) turn out to be only partially reskinned themselves, so "matches siblings" was a weaker target than assumed — tokens matched rather than legacy chrome copied.
 - phase 2 Post composer reskin (3d shell, manual authoring): pending — **GATE A after**
 - phase 3 AI-write backend (generate route + credits): pending
 - phase 4 AI-write UI (brief panel + gating copy): pending — **GATE B after**
