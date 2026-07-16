@@ -20,7 +20,7 @@ FIRST plus a founder eyeball gate.
 
 ## Progress log
 
-- phase 1 isolation baseline guards: pending
+- phase 1 isolation baseline guards: done (commit 454dbc23, review loops 1, verdict ship) — guards: HTML snapshot + published.css sha256 (published surface) + /dev computed-style e2e (editor surface) + tailwind.config.js freeze test; isolation spec wired into playwright public project
 - phase 2 fonts (fetch + subset + app-only stylesheet + preloads): pending
 - phase 3 token layer + AppIcon + scope class [HUMAN GATE]: pending
 - phase 4 reskin 9 existing primitives: pending
@@ -157,10 +157,17 @@ ToastProvider at `src/app/edit/[token]/components/ui/` is behavior reference onl
       pre-change; a handful of elements covering radius + font-size + font-family, not
       exhaustive). Select elements via stable selectors (`data-surface` attrs / template block
       classnames), not nth-child.
-   b. On a generated landing page (as render.spec does): computed `font-family` of the hero
-      headline does NOT contain `Onest`; `document.querySelectorAll('[class*="app-"]')` inside
-      the landing root is empty; no network request for `fonts-app-chrome.css` or
-      `material-symbols`/`onest` woff2.
+   b. On the `/dev/meridian/blocks` app-surface render: computed `font-family` of the hero
+      headline does NOT contain `Onest` (templates don't USE app fonts even when available), and
+      `document.querySelectorAll('[class*="app-"]')` inside the landing root is empty. **NOTE (Phase 2
+      correction):** do NOT assert "no app-font woff2 network request" on this route — `/dev/*` is an
+      APP-SHELL route served by the root layout, which legitimately preloads app fonts (Onest/Material
+      Symbols) on every app route. That is app chrome, not a published page. The published-surface
+      font-network isolation ("a published page references/loads no app font") is proven instead by the
+      vitest guard's HTML-snapshot negative-trace (no `fonts-app-chrome`/`Onest`/etc. in published HTML)
+      + the published.css sha256 + 0-leak grep. The meaningful app-surface assertions here are the
+      font-family (templates render Inter Tight, not Onest, despite Onest being preloaded/available) and
+      the app-class checks.
    c. Skip gracefully if mock-mode server prereqs unavailable (follow render.spec conventions) —
       BUT the phase-gate expectation is that it actually EXECUTES (render.spec proves mock-mode
       prereqs are normally available). A silent skip makes the editor-surface guard vacuous, so
@@ -205,6 +212,7 @@ confirm fetched binaries match the commands below before committing.)
 - `public/fonts/caveat/OFL.txt` (new)
 - `src/styles/fonts-app-chrome.css` (new)
 - `src/app/layout.tsx` (import stylesheet + preload links in the empty `<head />` slot, lines ~107–115)
+- `e2e/ui-isolation.spec.ts` (**Phase-2 correction to this Phase-1 file**: the root-layout preloads added here fire on every app-surface route incl. `/dev`, so remove the mis-scoped "no app-font woff2 request on `/dev`" assertion — see Phase 1 step 3b note; keep the font-family + app-class assertions. Published-surface font-network isolation stays proven by the vitest HTML-snapshot + published.css guards.)
 
 > **Shared-file note:** `src/app/layout.tsx` is INTENTIONALLY touched by both Phase 2 (this
 > phase: `fonts-app-chrome.css` import + 3 preload links) and Phase 3 (`app-chrome.css` import).
@@ -251,9 +259,20 @@ confirm fetched binaries match the commands below before committing.)
    `fonts-self-hosted.css` (but do NOT edit that file):
    - 5 static Onest faces (`font-display:swap`).
    - 2 static Caveat faces.
-   - 1 JetBrains Mono 600 face (same `font-family:'JetBrains Mono'` name — browsers merge it
-     with the 400/500 faces declared in `fonts-self-hosted.css`; declaring it HERE keeps
-     `public/published.css` and the `handoffLint.ts`/`designKit.ts` font whitelist untouched).
+   - App mono faces under a **DISTINCT family name `'JetBrains Mono App'`** (NOT `'JetBrains Mono'`).
+     Declare 400/500/600 under this distinct name (400/500 reuse the existing
+     `public/fonts/jetbrains-mono/jetbrains-mono-latin-{400,500}-normal.woff2`; 600 = the new file).
+     **WHY distinct (corrected mid-flight — the plan's original same-name-merge premise was FALSE):**
+     multiple templates (`techpremium`, `lumen`, meridian `.mrd-cta__eyebrow`) render
+     `var(--font-mono)` = `'JetBrains Mono'` at `font-weight:600`. If the app 600 face used the SAME
+     family name, it would merge on the app surface (root layout covers `/edit`,`/preview`) and those
+     template nodes would render REAL 600 in the editor while published (published.css ships only JBM
+     400/500) synthesizes faux-bold → a NEW editor↔published divergence in GENERATED pages, violating
+     the #1 constraint. A distinct app-only family name means templates' `'JetBrains Mono'` stays
+     400/500-only on BOTH surfaces (faux-bold 600 on both, byte-identical, as before this feature),
+     while app chrome gets real JBM 600 via the `font-app-mono` token (Phase 3) → `'JetBrains Mono App'`.
+     Touches no forbidden files. Consumers reference the `font-app-mono` token, never the raw family
+     name, so the internal rename is invisible to them.
    - Material Symbols Rounded variable face: `src:url(...) format('woff2-variations');
      font-weight:100 700; font-style:normal; font-display:block` (block avoids icon-name FOUT).
 5. `src/app/layout.tsx`: `import '@/styles/fonts-app-chrome.css'` (alongside the existing
@@ -265,12 +284,13 @@ confirm fetched binaries match the commands below before committing.)
 then `npm run test:run` — published-css sha256 == phase-1 baseline AND phase-1 HTML snapshot
 unchanged · `npm run test:e2e` isolation spec — `/dev/meridian/blocks` computed-style baselines
 unchanged · diagnostic re-grep `rg -i "onest|caveat|material symbols" public/published.css` →
-empty · **JBM-600 divergence check:** confirm no template requests JetBrains Mono at weight 600 —
-grep `src/modules/templates/**` for mono usage combined with weight 600
-(`rg -il "mono" src/modules/templates` then inspect hits for `font-weight:\s*600|font-semibold`
-on mono text); must be none — published.css ships only JBM 400/500, so a template rendering
-mono@600 would show the real 600 face on `/edit`/`/preview` but a synthesized bold when published
-(editor↔published divergence). Reviewer verified none exist today; this check keeps it true ·
+empty · **JBM-600 divergence — RESOLVED BY DESIGN (see step 4):** templates DO render mono@600
+(`techpremium`/`lumen`/meridian), so the app mono faces use the distinct family name
+`'JetBrains Mono App'` and CANNOT merge with templates' `'JetBrains Mono'`. Verify the guarantee:
+`rg -i "jetbrains mono" src/styles/fonts-app-chrome.css` must show ONLY `'JetBrains Mono App'`
+(no bare `'JetBrains Mono'` face declared in the app stylesheet), and templates' `--font-mono`
+still resolves to `'JetBrains Mono'` (unchanged). This keeps template mono@600 faux-bold on BOTH
+surfaces (editor==published). ·
 read-only confirm `scripts/buildAssets.js` still copies only `fonts-self-hosted.css` (it lists
 files explicitly, line ~65 — no glob, so no action needed) · dev spot-check: app page loads the
 3 preloads, a `/p/[slug]` page requests NONE of the new font files.
@@ -297,7 +317,11 @@ scope class, and the icon component — then prove isolation held before buildin
 1. `tailwind.config.js`: ADD the namespaced keys from the token table. Hard rules: no edits to
    existing keys; do not touch stock palette, `borderRadius.lg/md/sm`, `fontSize`, or
    `fontFamily.heading/body`; confirm `content` globs already cover `src/components/**` and
-   `src/app/**` (they do — existing ui/ works; change nothing if so). The phase-1
+   `src/app/**` (they do — existing ui/ works; change nothing if so).
+   **`fontFamily['app-mono']` MUST use the distinct app family:**
+   `['JetBrains Mono App', 'ui-monospace', 'monospace']` (NOT bare `'JetBrains Mono'`) — see Phase 2
+   step 4: sharing the template family name reintroduces the mono@600 editor↔published divergence.
+   `app-sans` = `['Onest', ...system]`, `app-hand` = `['Caveat', 'cursive']`. The phase-1
    `/dev/meridian/blocks` computed-style baseline (e2e) is the mechanical proof no existing key
    moved on the main-app surface — a root-config mutation does NOT show up in the published-css
    hash (standalone config), so the e2e check is MANDATORY this phase, not optional.

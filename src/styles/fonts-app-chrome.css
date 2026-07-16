@@ -1,0 +1,135 @@
+/**
+ * App-Chrome Fonts (self-hosted)
+ *
+ * These @font-face declarations load the app-chrome UI families (Onest,
+ * JetBrains Mono 600, Material Symbols Rounded, Caveat) from /public/fonts/.
+ *
+ * ISOLATION: this stylesheet is imported ONLY by the root app layout
+ * (src/app/layout.tsx) — it is NOT inlined into public/published.css and is NOT
+ * loaded by p/layout.tsx, so ZERO bytes of these families reach published pages.
+ * Mirrors the @font-face pattern in fonts-self-hosted.css (which stays the
+ * template/published font surface — do NOT move these faces there).
+ *
+ * Declarations are lazy: browsers only download faces actually used on screen.
+ */
+
+/* ============================================================================
+   Onest - app-chrome sans (display + body). Weights 400/500/600/700/800.
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Onest';
+  src: url('/fonts/onest/onest-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Onest';
+  src: url('/fonts/onest/onest-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Onest';
+  src: url('/fonts/onest/onest-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Onest';
+  src: url('/fonts/onest/onest-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Onest';
+  src: url('/fonts/onest/onest-latin-800-normal.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================================
+   JetBrains Mono App - app-chrome mono, declared under a DISTINCT family name
+   (NOT the bare 'JetBrains Mono' that templates use via --font-mono).
+
+   ISOLATION: templates (techpremium, lumen, meridian .mrd-cta__eyebrow) set
+   --font-mono:'JetBrains Mono' and render it at weight 600. fonts-self-hosted.css
+   only ships JetBrains Mono 400/500, so template mono@600 synthesizes faux-bold on
+   BOTH the editor and published surfaces (byte-identical, no divergence). If app
+   chrome added a real 600 face under the SAME 'JetBrains Mono' name it would be
+   document-global and give the editor a real 600 while published stayed faux-bold
+   -> an editor<->published divergence. Using a DISTINCT family name here keeps the
+   template family untouched. App chrome references this via Phase 3's font-app-mono
+   token (never the raw family name).
+
+   Full app mono set (400/500/600): 400/500 reuse the existing self-hosted files;
+   600 is the new file added this phase.
+   ============================================================================ */
+
+@font-face {
+  font-family: 'JetBrains Mono App';
+  src: url('/fonts/jetbrains-mono/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono App';
+  src: url('/fonts/jetbrains-mono/jetbrains-mono-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono App';
+  src: url('/fonts/jetbrains-mono/jetbrains-mono-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================================
+   Caveat - app-chrome handwritten accent (Auth). Weights 400/700.
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Caveat';
+  src: url('/fonts/caveat/caveat-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  src: url('/fonts/caveat/caveat-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================================================
+   Material Symbols Rounded - app-chrome icon font (VARIABLE: FILL/GRAD/opsz/wght).
+   Subset to the app's icon set (see /fonts/material-symbols-rounded/icons.txt);
+   all four axes preserved so `font-variation-settings:'FILL' 1` animates.
+   font-display:block avoids a flash of raw ligature names (icon-name FOUT).
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Material Symbols Rounded';
+  src: url('/fonts/material-symbols-rounded/material-symbols-rounded.woff2') format('woff2-variations');
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: block;
+}

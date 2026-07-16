@@ -1,0 +1,41 @@
+Material Symbols Rounded
+========================
+
+Source
+------
+Google Material Design Icons — variable icon font "Material Symbols Rounded"
+(axes FILL, GRAD, opsz, wght).
+Upstream: https://github.com/google/material-design-icons
+File: variablefont/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].woff2
+
+License
+-------
+Licensed under the Apache License, Version 2.0 (see ./LICENSE).
+
+Modifications (Apache-2.0 change notice)
+----------------------------------------
+This file (material-symbols-rounded.woff2) is a SUBSET of the upstream variable
+font, produced with fontTools (pyftsubset). Only the icon glyphs used by the
+Lessgo app-chrome UI are retained, plus the Latin alphabet/digits/underscore
+glyphs required as ligature-input components. All four variation axes
+(FILL, GRAD, opsz, wght) are preserved (no axis was pinned/instanced), so
+`font-variation-settings: 'FILL' 1` still animates. The full ~5.3 MB upstream
+font is intentionally NOT committed.
+
+Regeneration
+------------
+The retained icon set is the ligature-name list in ./icons.txt (one name per
+line). To regenerate after editing that list:
+
+  python -m fontTools.subset <MaterialSymbolsRounded-full.woff2> \
+    --output-file=material-symbols-rounded.woff2 \
+    --flavor=woff2 --no-layout-closure --layout-features='rlig,rclt,liga,calt' \
+    --glyphs-file=<icon-names-that-are-glyph-names> \
+    --text='abcdefghijklmnopqrstuvwxyz0123456789_'
+
+(--no-layout-closure is required: without it the shared Latin alphabet pulls in
+every icon via ligature closure, bloating the output back to multi-MB.)
+
+Retained icons
+--------------
+See ./icons.txt for the authoritative list.

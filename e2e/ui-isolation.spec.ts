@@ -83,24 +83,13 @@ test.describe('ui-foundation isolation — main-app surface', () => {
     expect(captured).toEqual(baseline);
   });
 
-  test('no app-chrome fonts/classes/network on the block surface', async ({ page }) => {
-    // Watch for any app-chrome font network request BEFORE navigating.
-    const badFontRequests: string[] = [];
-    page.on('request', (req) => {
-      const url = req.url().toLowerCase();
-      if (
-        url.includes('fonts-app-chrome') ||
-        url.includes('material-symbols') ||
-        (url.includes('onest') && url.endsWith('.woff2'))
-      ) {
-        badFontRequests.push(req.url());
-      }
-    });
-
+  test('no app-chrome fonts/classes on the block surface', async ({ page }) => {
     await page.goto(BLOCKS_ROUTE, { waitUntil: 'load' });
     await page.waitForSelector(TOKEN_ATTRS, { timeout: 45_000 });
 
-    // Hero headline font-family must NOT contain the app-chrome display font.
+    // Hero headline font-family must NOT contain the app-chrome display font —
+    // proves templates on the app surface still compute to their own font (Inter
+    // Tight) even though Onest is preloaded/available in the root layout.
     const headingFont = await page
       .locator('.mrd-hero__headline')
       .first()
@@ -111,7 +100,11 @@ test.describe('ui-foundation isolation — main-app surface', () => {
     const appClassCount = await page.locator('[class*="app-"]').count();
     expect(appClassCount, 'app-* classes leaked into the template surface').toBe(0);
 
-    // No app-chrome font files requested.
-    expect(badFontRequests, `app-chrome font requests: ${badFontRequests.join(', ')}`).toEqual([]);
+    // NOTE: a "no onest/material-symbols woff2 network request" assertion used to
+    // live here. Removed under Phase 2: /dev/meridian/blocks is an APP-SHELL route
+    // served by the ROOT layout, which (correctly) preloads app-chrome fonts on
+    // every app route — so those requests are EXPECTED here, not an isolation break.
+    // Published-surface isolation (a /p page loads/references no app font) is proven
+    // by the vitest HTML-snapshot negative-trace + published.css sha256 + 0-leak grep.
   });
 });
