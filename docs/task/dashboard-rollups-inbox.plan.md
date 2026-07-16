@@ -22,7 +22,7 @@ Ship two account-level, read-only pages — `/dashboard/leads` (cross-site leads
 
 ## Progress log
 
-- phase 1 accountScope helper + isolation unit test: pending
+- phase 1 accountScope helper + isolation unit test: done (commit 25c9c2a3, review loops 0 — standard tier: single impl-review after phase 5). test:run 3382 green incl. 3 new isolation tests. tsc: only the pre-existing worktree artifact `src/app/page.tsx TS2307 founder.jpg` (gitignored next-env.d.ts absent in a fresh worktree; present on main; regenerates on first build — verified, not a real error).
 - phase 2 All Leads inbox route + UI + top-bar titles: pending
 - phase 3 un-grey All Leads nav + e2e updates: pending
 - phase 4 All Analytics rollup + un-grey All Analytics + e2e: pending
