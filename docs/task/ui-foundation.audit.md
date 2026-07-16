@@ -617,3 +617,96 @@ edit. No forbidden-list file touched.
   GATE). Reskin values were copied from the `.dc.html` markup at high fidelity.
 - Badge default-radius change (deviation 2) could surface where an existing call site assumed a
   full pill; grep of usages not exhaustively re-audited — low risk (badges are decorative).
+
+---
+
+## Phase 5 — Net-new primitives (headless, no new deps)
+
+**Files changed**
+- `src/components/ui/nav-item.tsx` (new)
+- `src/components/ui/segmented-control.tsx` (new)
+- `src/components/ui/tabs.tsx` (new)
+- `src/components/ui/toast.tsx` (new)
+- `src/components/ui/image-placeholder.tsx` (new)
+- `src/components/ui/segmented-control.test.tsx` (new)
+- `src/components/ui/tabs.test.tsx` (new)
+- `src/components/ui/toast.test.tsx` (new)
+- `docs/task/ui-foundation.audit.md` (this section)
+
+### Primitive APIs + handoff surface matched
+
+- **`nav-item.tsx`** — `NavItem` (fwdRef) + `navItemClasses(active?)`. Props: `asChild?`,
+  `active?`, `href?`, `icon?` (Material Symbols ligature), `iconFilled?`, `label?`, + HTML attrs.
+  Renders `<button>` / `<a href>` / `Slot` (asChild for Next `<Link>`). Active =
+  `text-app-primary-deep bg-app-tint` (#003E80 on #e6f0ff), idle hover `bg-app-canvas`; sets
+  `aria-current="page"` when active. `'use client'` (Slot). → Dashboard sidebar nav.
+- **`segmented-control.tsx`** — `SegmentedControl` (fwdRef) + `SegmentedOption` type. Controlled
+  `value`/`onValueChange`, `options[]` ({value,label,icon?,disabled?}), `aria-label`.
+  WAI-ARIA radiogroup + roving tabindex; Arrow (L/U=prev, R/D=next, wraps), Home/End; skips
+  disabled. Container `bg-app-canvas rounded-app-ctl p-1`, active segment `bg-app-surface
+  shadow-app-card`. `'use client'`. → Editor link-picker / media-picker type control.
+- **`tabs.tsx`** — `Tabs` / `TabsList` / `TabsTrigger` / `TabsContent` (all fwdRef),
+  shadcn-compatible (`value`/`defaultValue`/`onValueChange`) so a later `@radix-ui/react-tabs`
+  swap is a drop-in. Controlled + uncontrolled; context carries value + `React.useId()` baseId.
+  Roving focus (arrows wrap, Home/End) with automatic activation; `role=tablist|tab|tabpanel`,
+  `aria-selected`, `aria-controls`/`aria-labelledby` id-linked, inactive panel `hidden` + not
+  rendered. Underline active = `border-app-primary text-app-primary-deep`. `'use client'`.
+  → Editor media-picker "Stock/Upload/URL" tabs.
+- **`toast.tsx`** — `ToastProvider` + `useToast()` → `{ toast(message, {variant?,duration?}), dismiss(id) }`
+  + `ToastVariant`/`ToastOptions` types. Bottom-stacked viewport `createPortal`ed to
+  `document.body`, carrying `font-app-sans` + direct app-* tokens (Phase-4 dialog pattern).
+  Auto-dismiss (default 4000ms; 0 = sticky); variants success (`app-success-bg`/`check_circle`),
+  error (`app-danger-bg`/`error`), info (`app-tint`/`info`) via AppIcon; per-card dismiss button.
+  `'use client'`. Self-contained — does NOT touch the edit-page-local ToastProvider. → global toast.
+- **`image-placeholder.tsx`** — `ImagePlaceholder` (fwdRef) + `ImagePlaceholderProps`. Props:
+  `aspect?` (CSS aspect-ratio), `rounded?` (default `rounded-app-card`), + HTML attrs. Striped
+  `bg-app-stripes` box, `aria-hidden` when empty. Presentational — server component (no `'use client'`).
+  → universal "image goes here" region.
+
+### Tests (13 assertions across 3 files)
+
+No `@testing-library/react` is installed in this repo (contrary to the task note — verified absent
+from package.json + node_modules). To honor the hard "NO new npm deps" rule, the interactive tests
+use a `react-dom/client` `createRoot` + `React.act` (18.3.1) harness with native event dispatch and
+`IS_REACT_ACT_ENVIRONMENT=true`. No new dependency added.
+
+- `segmented-control.test.tsx` (4): radiogroup + radio-per-option + roving tabindex/aria-checked;
+  value change on click; ArrowRight/Left selection + wrap; Home/End jump.
+- `tabs.test.tsx` (4): role/aria-selected/aria-controls + panel visibility (uncontrolled);
+  selection change on click; roving arrow focus + auto-activation + wrap; controlled value honored
+  (self-update suppressed) + `onValueChange` fired + re-render on new prop.
+- `toast.test.tsx` (5): enqueue → renders with message; variant data-attr + app-success/app-danger
+  chip class + per-variant AppIcon ligature; auto-dismiss after duration (fake timers); duration 0
+  = no dismiss; dismiss button removes.
+- New total: **13 tests, all pass.**
+
+### Isolation
+
+All 5 primitives are app-chrome-only (use app-* tokens directly, explicit `font-app-sans` on
+portaled/base surfaces). Each file carries an "APP-CHROME ONLY — never import from
+`src/modules/templates/**` or `src/components/published/**`" comment. `nav-item`/`segmented-control`/
+`toast` import `AppIcon` (Material Symbols) so leakage to template/published surfaces is explicitly
+forbidden. No template/published/renderer/forbidden file touched.
+
+### Gate results
+
+- `npx tsc --noEmit` → clean.
+- `npm run test:run` → 3025 passed | 18 skipped (0 failed); includes the 13 new tests and the
+  Phase-1 guards (published-css sha256, config-freeze, HTML snapshot) all green.
+- `npm run build` → green.
+- `public/published.css` sha256 = `c2f87e08f517a72b43f6e9e0e9b703b6261f4f152c711be9241649c6f26219b6`
+  == committed baseline → **byte-identical (yes)**.
+- `npm run lint` (eslint, 8 new files) → clean.
+- `git diff HEAD -- package.json package-lock.json` → empty → **zero new deps confirmed**.
+- e2e isolation not re-run this phase (port contention) — published-surface unchanged is proven
+  by the byte-identical sha256 + config-freeze + HTML-snapshot guards, which all passed.
+
+### Deviations
+
+1. **Test harness = `react-dom/client` + `React.act`, not `@testing-library/react`.** The library
+   the task cited is not installed and adding it would violate the binding "no new npm deps" rule.
+   Chose the conservative option: a dependency-free harness (createRoot + act + native events).
+   Same behavioral coverage (click, keyboard, auto-dismiss, variant).
+2. **`tabs.test.tsx` panel lookup uses `document.getElementById`** rather than a CSS selector —
+   `React.useId()` produces ids containing `:` which are invalid in `querySelector`. Behavior
+   unaffected; the id-linking assertion still holds.
