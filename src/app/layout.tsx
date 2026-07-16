@@ -10,6 +10,16 @@ import "./globals.css";
 // (QA vestria: display serif fell back to a slab serif). Declarations are lazy —
 // browsers only download faces actually used on screen.
 import "@/styles/fonts-self-hosted.css";
+// App-chrome @font-face declarations (Onest, JetBrains Mono 600, Material Symbols
+// Rounded, Caveat). Imported ONLY here in the root app layout — NOT inlined into
+// public/published.css and NOT loaded by p/layout.tsx, so these families add zero
+// bytes to published pages. Lazy: only faces used on screen download.
+import "@/styles/fonts-app-chrome.css";
+// App-chrome scope class (.app-chrome) + Material Symbols icon base (.app-icon).
+// Imported ONLY here in the root app layout — NOT loaded by p/layout.tsx and NOT
+// inlined into public/published.css, so it adds zero bytes to published pages.
+// `.app-chrome` is applied to NO screen by this feature; consuming specs attach it.
+import "@/styles/app-chrome.css";
 // import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { Suspense } from 'react';
 import {
@@ -105,7 +115,33 @@ export default function RootLayout({
       signInForceRedirectUrl="/dashboard"
     >
       <html lang="en">
-        <head />
+        <head>
+          {/* App-chrome font preloads (app surface only; see fonts-app-chrome.css).
+              Onest 400/600 = the two most-used chrome weights; Material Symbols
+              subset = icon font used across chrome. Published pages preload their
+              own template hero font via CriticalFontPreload — untouched here. */}
+          <link
+            rel="preload"
+            as="font"
+            type="font/woff2"
+            href="/fonts/onest/onest-latin-400-normal.woff2"
+            crossOrigin="anonymous"
+          />
+          <link
+            rel="preload"
+            as="font"
+            type="font/woff2"
+            href="/fonts/onest/onest-latin-600-normal.woff2"
+            crossOrigin="anonymous"
+          />
+          <link
+            rel="preload"
+            as="font"
+            type="font/woff2"
+            href="/fonts/material-symbols-rounded/material-symbols-rounded.woff2"
+            crossOrigin="anonymous"
+          />
+        </head>
         <body className="antialiased">
           <TooltipProvider>
           <PostHogProvider>

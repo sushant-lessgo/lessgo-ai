@@ -1,0 +1,17 @@
+{
+  "card": {
+    "borderRadius": "10px"
+  },
+  "button": {
+    "borderRadius": "8px",
+    "fontSize": "13.5px"
+  },
+  "heading": {
+    "fontFamily": "\"Inter Tight\", ui-sans-serif, system-ui, sans-serif",
+    "fontSize": "108px"
+  },
+  "body": {
+    "fontFamily": "\"Inter Tight\", ui-sans-serif, system-ui, sans-serif",
+    "fontSize": "21px"
+  }
+}
