@@ -1,0 +1,315 @@
+// src/components/onboarding/journey/engines/types.ts
+// ============================================================================
+// THE JOURNEY SEAM CONTRACT — the durable artifact of work-onboarding-shell.
+//
+// The 6-step onboarding journey (01 one-line → 02 show-work → 03 questions →
+// 04 plan → 05 build → 06 reveal, with a persistent "What we understood" rail)
+// is UNIVERSAL. Only the step CONTENT varies per COPY ENGINE. The shell in
+// `src/components/onboarding/journey/` is therefore engine-AGNOSTIC; everything
+// engine-specific lives behind ONE object: `JourneyEngineSeam`.
+//
+// Precedent (this is a mirror, not an invention): the legacy wizard is already
+// engine-seamed via `slotsForEngine()` + `getContract(engine).slotSkips`
+// (`src/hooks/useWizardStore.ts`, `src/modules/engines/inputContracts.ts`) —
+// a closed per-engine record of DATA + narrow functions consumed by shared
+// machinery. Same shape here.
+//
+// ── HONESTY RULE (ruling ground truth) ──────────────────────────────────────
+// An engine-agnostic rail UI is buildable; an engine-agnostic rail MODEL is
+// NOT — only `workFacts.schema.ts` exists (there is no thingFacts/trustFacts).
+// So the rail UI renders a generic PROJECTION (`RailVM`) and each engine
+// supplies the adapter that produces it and constructs edits back onto its own
+// facts. `work` is the only seam built (pilot). thing/trust are DECLARED, not
+// filled — do not invent fact schemas or speculative seams for them.
+//
+// ── WHAT ENGINE #2 MUST IMPLEMENT (the reuse checklist) ─────────────────────
+//   1. a facts schema for its engine (THE REAL BLOCKER — none exists today)
+//   2. a rail adapter over it (its `rail.ts` equivalent; the phase-1 hard rules
+//      apply: FULL-facts re-emit, zod pre-validate, `{patch, facts}` snapshot
+//      sync, and the chip-id join rule below)
+//   3. `enrichDraftForConfirm`
+//   4. step content: `steps.showWork` copy, `steps.questions`, `steps.plan`
+//   5. `preflight` + `runGeneration` over ITS generation driver
+//   6. `resolveResumeStep`
+//   7. an entry in `JOURNEY_SEAM_ENGINES` (`src/lib/journeyEngines.ts`) AND in
+//      `registry.ts` — the drift guard forces both
+//   8. a template-eligibility predicate (work's `isWorkCopyTemplate` equivalent)
+// Everything else — shell, top bar, dot progress, rail UI, step frames, the
+// STEP 06 reveal, the store slice, dispatch — is inherited verbatim.
+//
+// ── FIREWALL ────────────────────────────────────────────────────────────────
+// TYPES ONLY. Every import here is `import type` (fully erased at compile), so
+// this module contributes NO runtime edge. Seams load at STEP 01 — pre-confirm,
+// on the entry page — so a single static value-import of the generation graph
+// (`@/modules/wizard/generation/**`) from a seam would drag the template +
+// generation bundle onto the entry path (landmine 14). Seam generation
+// functions lazy-import their driver at CALL time.
+// ============================================================================
+
+import type { Brief, CopyEngine } from '@/types/brief';
+import type { WizardStore } from '@/hooks/useWizardStore';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wizard-state handles
+//
+// State is `useWizardStore` (decision 5) and `briefFacts` is the source of
+// truth for generation. `WizardState` itself is not exported from the store;
+// `WizardStore` (= state & actions) is the canonical exported shape, so the
+// seam reads through it rather than a hand-copied narrowing that could drift.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** A wizard-store SNAPSHOT (what seam functions read). */
+export type JourneyWizardState = WizardStore;
+
+/**
+ * A live store HANDLE (what `steps.plan.prepare` needs — it awaits store
+ * actions such as the chargeless sitemap seed). Structural on purpose: zustand's
+ * store api satisfies it without this contract importing zustand.
+ */
+export interface JourneyWizardApi {
+  getState(): JourneyWizardState;
+}
+
+/**
+ * The `/api/loadDraft` payload the resume rules read. Declared structurally
+ * (the route has no exported response type); `finalContent` is deliberately
+ * `unknown` — its shape is generation-owned and each engine interprets it.
+ */
+export interface JourneyLoadedDraft {
+  brief?: Brief | null;
+  audienceType?: string | null;
+  templateId?: string | null;
+  finalContent?: unknown;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Rail view-model — what the AGNOSTIC UnderstoodRail renders
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * One rail block. The rail knows NO field names: order, labels and kinds all
+ * come from the adapter.
+ *
+ * `skeleton: true` = UNKNOWN ⇒ the opacity-50 + stripes state. It is not the
+ * same as an empty string: unknown is honest, "" is a claim.
+ */
+export interface RailFieldVM {
+  /** Seam-defined stable field id ('name' | 'descriptor' | 'groups' | …). */
+  id: string;
+  /** Mono header, e.g. "WHAT YOU SELL". */
+  label: string;
+  kind: 'text' | 'chips' | 'derived';
+  /** For 'text' / 'derived'. `null` ⇒ unknown. */
+  value: string | null;
+  /**
+   * For 'chips'. `id` is SEAM-ISSUED and stable WITHIN THIS PROJECTION ONLY —
+   * see the chip stable-id rule on `RailChipEdit` before touching this.
+   */
+  chips?: { id: string; label: string }[];
+  skeleton: boolean;
+  editable: boolean;
+}
+
+/** ORDER = render order. (E1 work emits EXACTLY FOUR fields.) */
+export interface RailVM {
+  fields: RailFieldVM[];
+}
+
+/**
+ * A chip as submitted back by the rail UI.
+ *
+ * ⚠️ CHIP STABLE-ID RULE — read in full; do NOT improvise.
+ *
+ *   **Chip ids are valid ONLY against the facts bag they were projected from.
+ *   The shell MUST pass the current `briefFacts` as `liveFacts`, and MUST NOT
+ *   carry a chip array across a commit.**
+ *
+ * Why ids exist at all: the rail's chip projection is LOSSY (work's
+ * `WorkRailGroup` exposes only name/kind/price — the underlying group also
+ * carries `photos`/`items` written by image ingestion), and a groups edit
+ * REPLACES the whole array. So the adapter must rebuild every group from
+ * `liveFacts`, joined to the edited chips by a handle that survives both a
+ * RENAME (label-match breaks) and an ADD/REMOVE (positional index breaks).
+ * That handle is the id.
+ *
+ * The contract only requires "stable within a projection"; each adapter picks
+ * its derivation. Work derives `id = 'g' + index` in `liveFacts.work.groups[]`
+ * at projection time — safe because a commit applies `RailCommit.facts` to
+ * `briefFacts` in ONE `set` and the rail immediately re-projects, so the VM and
+ * `liveFacts` can never be one edit apart. The one real hole is a STALE VM: a
+ * chip draft held across someone else's group write would mis-join or
+ * mis-delete. Hence the rule above — the UI keys/resets chip drafts on VM
+ * re-projection, and never mints, reuses or reorders ids on its own.
+ *
+ * Join semantics (implemented by the adapter, guaranteed by its tests):
+ *   • chip WITH an id      → that live entry, carrying its unprojected data
+ *                            through; only the label (name) is updated
+ *   • chip WITHOUT an id   → a NEW entry (seed defaults)
+ *   • live entry unreferenced by any chip → DELETED
+ *   • the edited array's ORDER → the new order
+ */
+export type RailChipEdit = { id?: string; label: string };
+
+/** The value the rail UI submits for a field edit. */
+export type RailEditValue =
+  | { kind: 'text'; value: string }
+  | { kind: 'chips'; value: RailChipEdit[] };
+
+/**
+ * The result of any rail write. The agnostic store action (`commitRail`)
+ * applies it atomically; the seam declares the mirrors, the store knows no
+ * engine.
+ *
+ *   • `patch`  — the `/api/saveDraft` brief patch. MUST re-emit the FULL facts
+ *                bag (saveDraft REPLACES `facts` wholesale — a partial patch
+ *                silently drops `facts.entry`; landmine 4).
+ *   • `facts`  — the SAME merged bag, so the store can persist AND set
+ *                `briefFacts` in one `set`. Without it, edit #2 re-emits stale
+ *                facts and reverts edit #1.
+ *   • `ok:false` — zod pre-validation failed. `saveDraft` returns 200 while
+ *                silently dropping an invalid brief write (landmine 5), so an
+ *                invalid edit is NEVER sent; the UI surfaces `error`.
+ */
+export type RailCommit =
+  | {
+      ok: true;
+      patch: Partial<Brief>;
+      facts: NonNullable<Brief['facts']>;
+      /** Store-level field mirrors, e.g. work NAME → `fields['name']`. */
+      fieldMirrors?: { fieldId: string; value: string }[];
+    }
+  | { ok: false; error: string };
+
+/**
+ * The engine's rail adapter — projection + edit construction over ITS facts.
+ */
+export interface JourneyRailAdapter {
+  /**
+   * Project a facts bag onto the rail VM. Any chip ids issued here are valid
+   * ONLY against THIS `facts` bag (chip stable-id rule on `RailChipEdit`).
+   * `undefined` / unparseable facts ⇒ an all-skeleton VM, never a throw.
+   */
+  toVM(facts: Brief['facts']): RailVM;
+  /**
+   * Construct one edit against the LIVE facts — never by rebuilding from the
+   * VM (the projection is lossy). Chip edits JOIN ON id per the rule above.
+   */
+  applyEdit(fieldId: string, value: RailEditValue, liveFacts: Brief['facts']): RailCommit;
+  /** Append to the rail's "Something wrong?" log (append-only). */
+  appendNote(note: string, liveFacts: Brief['facts']): RailCommit;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STEP 03 questions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * A question descriptor. The agnostic StepQuestions renders the 3 kinds; the
+ * seam supplies the list and the commits. Every commit routes through the
+ * engine's rail adapter, so an answer can never persist a malformed record
+ * (work: never a `kind`-less group ⇒ never a null-facts strategy 400).
+ *
+ * The 3 kinds are CLOSED for E1 (ruling). Engine #2 extends the union if it
+ * genuinely needs a 4th — deliberately, not by accident.
+ */
+export type JourneyQuestion =
+  | {
+      id: string;
+      kind: 'text';
+      label: string;
+      prefill?: string;
+      commit(value: string, liveFacts: Brief['facts']): RailCommit;
+    }
+  | {
+      id: string;
+      kind: 'group';
+      label: string;
+      commit(name: string, liveFacts: Brief['facts']): RailCommit;
+    }
+  | {
+      id: string;
+      kind: 'price';
+      label: string;
+      commit(
+        price: { mode: 'exact' | 'from' | 'on-request'; amount?: number },
+        liveFacts: Brief['facts']
+      ): RailCommit;
+    };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Generation surfaces (honestly engine-shaped)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Progress stages the agnostic StepBuilding renders. Mirrors `GenerationStage`
+ *  in `@/modules/wizard/generation` — restated (not imported) so this contract
+ *  keeps ZERO edges to the generation graph (landmine 14). */
+export type JourneyGenerationStage = 'strategy' | 'copy' | 'saving' | 'done';
+
+/** Callbacks the seam drives while generating. Structurally compatible with
+ *  `GenerationCallbacks` — same reason as above. */
+export interface JourneyGenerationCallbacks {
+  onStage?: (stage: JourneyGenerationStage) => void;
+  onPageProgress?: (p: { done: number; total: number }) => void;
+}
+
+export type JourneyPreflightResult =
+  | { ok: true }
+  | { ok: false; reason: 'engine-disabled' | 'missing-facts'; message: string };
+
+export type JourneyGenerationResult =
+  | { ok: true }
+  | { ok: false; kind: 'credits' | 'error'; message: string };
+
+/** Journey steps the shell can resume into. STEP 01 is never resumed — it is
+ *  pre-confirm and owned by the entry page. */
+export type JourneyStep = 2 | 3 | 4 | 5 | 6;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// The seam
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface JourneyEngineSeam {
+  engine: CopyEngine;
+
+  /** Rail projection + edits over this engine's facts. */
+  rail: JourneyRailAdapter;
+
+  /**
+   * STEP 01 — enrich the classified draft BEFORE `/api/brief/confirm`.
+   * (work: `facts.work = seedWorkFactsFromEntry(facts.entry)` — nothing else
+   * writes `facts.work`, so without this the rail projects over nothing.)
+   * PURE: returns the draft to POST; never persists.
+   */
+  enrichDraftForConfirm(draft: Brief): Brief;
+
+  steps: {
+    /** 02 — content only; the agnostic frame renders it. */
+    showWork: { title: string; body: string; icon: string };
+    /** 03 — only the questions still needed, given the current rail. */
+    questions(vm: RailVM): JourneyQuestion[];
+    /** 04 — `prepare` runs once on entry (work: the CHARGELESS sitemap seed,
+     *  behind the existing idempotency guard — never the charged path). */
+    plan: {
+      prepare(wizardApi: JourneyWizardApi): Promise<void>;
+      items(state: JourneyWizardState): { title: string }[];
+    };
+  };
+
+  /**
+   * 05 — HONESTLY engine-shaped: there is no generic generation driver, so the
+   * seam OWNS the drive and the agnostic step owns only UI + state routing.
+   * Do not pretend otherwise; engine #2 supplies its own.
+   *
+   * `preflight` is SYNC (and must stay so): its kill-switch check reads a
+   * LEAF module, never the generation graph. Never re-implement an env check
+   * inside a seam — one kill-switch source, ever.
+   */
+  preflight(state: JourneyWizardState): JourneyPreflightResult;
+  /** Lazy-imports its generation driver at CALL time (landmine 14). */
+  runGeneration(
+    state: JourneyWizardState,
+    cb: JourneyGenerationCallbacks
+  ): Promise<JourneyGenerationResult>;
+  /** Where a returning user re-enters the journey. Lazy-imports anything heavy. */
+  resolveResumeStep(loaded: JourneyLoadedDraft): Promise<JourneyStep>;
+}
