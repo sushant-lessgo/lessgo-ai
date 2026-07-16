@@ -62,6 +62,7 @@ export default defineConfig({
         /dashboard-shell\.spec\.ts/,
         /dashboard-workspace\.spec\.ts/,
         /dashboard-redirects\.spec\.ts/,
+        /dashboard-lifecycle\.spec\.ts/,
         // media-library-picker: media = phase 3, media-picker = phase 4 (pre-registered).
         /media\.spec\.ts/,
         /media-picker\.spec\.ts/,
@@ -79,10 +80,11 @@ export default defineConfig({
       // Mock mode: bypasses Clerk auth on generation routes AND returns canned
       // copy (no credits, deterministic). Override per-run with E2E_LLM=real.
       NEXT_PUBLIC_USE_MOCK_GPT: process.env.E2E_LLM === 'real' ? 'false' : 'true',
-      // Forward the port to `next dev`. Without this, E2E_PORT alone moved only the
-      // probe/baseURL while the server still started on 3000 — with
-      // reuseExistingServer:true that silently tests a FOREIGN worktree's server.
-      // Now `E2E_PORT=3021` on its own is sufficient and self-consistent.
+      // `next dev` reads PORT. Without this, E2E_PORT only moved the probe/baseURL
+      // while dev still grabbed 3000 (or the next free port — which, with sibling
+      // worktrees running, is someone else's server) → webServer timeout, or worse,
+      // reuseExistingServer:true silently tests a FOREIGN worktree's code.
+      // With this, `E2E_PORT=<n>` alone is sufficient and self-consistent.
       PORT: String(PORT),
     },
   },

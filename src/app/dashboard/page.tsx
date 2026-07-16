@@ -57,7 +57,18 @@ export default async function DashboardPage({
   }
 
   let sourceProjects: SourceProject[]
-  let publishedPages: { slug: string; title: string | null; updatedAt: Date; projectId: string | null }[]
+  // DD7 — `publishState` + `customDomain` drive the card menu: the status pill uses the
+  // slot predicate (below) and Unpublish/Delete pre-disable when a domain is attached.
+  // Both branches below select them; they are SEPARATE queries, so a field added to one
+  // and not the other silently ships a stale menu for admins (or for owners).
+  let publishedPages: {
+    slug: string
+    title: string | null
+    updatedAt: Date
+    projectId: string | null
+    publishState: string
+    customDomain: string | null
+  }[]
 
   if (viewerIsAdmin) {
     // Admin god-view: every project, regardless of owner, with the owner's email for labelling.
@@ -85,13 +96,27 @@ export default async function DashboardPage({
     }))
     publishedPages = await prisma.publishedPage.findMany({
       where: { projectId: { in: all.map((p) => p.id) } },
-      select: { slug: true, title: true, updatedAt: true, projectId: true },
+      select: {
+        slug: true,
+        title: true,
+        updatedAt: true,
+        projectId: true,
+        publishState: true,
+        customDomain: true,
+      },
     })
   } else {
     sourceProjects = (user?.projects ?? []).map((p) => ({ ...p, ownerEmail: undefined }))
     publishedPages = await prisma.publishedPage.findMany({
       where: { userId },
-      select: { slug: true, title: true, updatedAt: true, projectId: true },
+      select: {
+        slug: true,
+        title: true,
+        updatedAt: true,
+        projectId: true,
+        publishState: true,
+        customDomain: true,
+      },
     })
   }
 
@@ -106,7 +131,14 @@ export default async function DashboardPage({
   const allItems = sourceProjects.map((project) => {
     const publishedPage = publishedByProjectId.get(project.id)
 
-    // Generate smart project name from available data
+    // Generate smart project name from available data.
+    //
+    // 🚨 DD10 (verified phase 6, unchanged) — an EXPLICIT title is authoritative. The whole
+    // derivation chain below is a FALLBACK, gated on the title being empty or the
+    // `@default("Untitled Project")` placeholder. `PATCH /api/projects/[tokenId]` (Rename)
+    // relies on exactly that: it writes `Project.title`, and this branch then never runs, so
+    // the user's name sticks. Do not make the derivation unconditional — it would silently
+    // eat every rename.
     let smartName = project.title
 
     if (!smartName || smartName === 'Untitled Project') {
@@ -144,14 +176,26 @@ export default async function DashboardPage({
       }
     }
 
+    // DD4/DD0 — the row is KEPT on unpublish (slug reservation, DD12), so
+    // `publishedPage ? 'Published' : 'Draft'` would keep calling a torn-down page
+    // "Published" forever. The slot predicate is `publishState !== 'draft'`: a page stuck
+    // at `'unpublishing'` still shows Published (it holds its slot) and offers Unpublish
+    // as the retry, even though SSR already 404s it.
+    const publishState = publishedPage?.publishState ?? 'draft'
+    const occupiesSlot = Boolean(publishedPage) && publishState !== 'draft'
+
     return {
       id: project.id,
       name: smartName,
-      status: publishedPage ? ('Published' as const) : ('Draft' as const),
+      status: occupiesSlot ? ('Published' as const) : ('Draft' as const),
       updatedAt: project.updatedAt.toISOString(),
       tokenId: project.token.value,
-      slug: publishedPage?.slug || null,
+      // Only a serving page gets a live address: an unpublished row keeps its slug
+      // reserved, but "Visit site" must not offer a link that 404s.
+      slug: occupiesSlot ? publishedPage?.slug ?? null : null,
       type: 'unified' as const,
+      publishState,
+      hasCustomDomain: Boolean(publishedPage?.customDomain),
       publishedAt: publishedPage?.updatedAt.toISOString(),
       owner: viewerIsAdmin ? (project.ownerEmail ?? '(orphan)') : undefined,
     }
