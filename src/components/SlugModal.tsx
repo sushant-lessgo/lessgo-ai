@@ -29,10 +29,13 @@ type SlugModalProps = {
   onConfirm: () => void;
   loading: boolean;
   error?: string;
+  // Phase 8: `publishedAt` dropped. It became a dead prop when the t17 reskin
+  // replaced "Last updated: <date>" with the live-target row — typed, passed,
+  // never read. The preview page's fetch/state still carries the field (that
+  // status fetch is NO-TOUCH); this type just stops claiming to need it.
   existingPublished?: {
     slug: string;
     title: string;
-    publishedAt: string;
   } | null;
   analyticsEnabled?: boolean;
   onAnalyticsChange?: (enabled: boolean) => void;
@@ -83,7 +86,11 @@ export function SlugModal({
 
   return (
     <div className="app-chrome contents">
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,20,40,.45)] px-4">
+      {/* Overlay tone matches the Radix dialog primitive's (`bg-app-ink/60`) so
+          the app's two modal treatments read as one. The SHELL stays hand-rolled
+          on purpose — swapping in Radix Dialog would add a focus trap + body
+          scroll lock, i.e. a behavior change (phase 7 note). */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-app-ink/60 px-4">
         <div
           data-testid="publish-confirm-card"
           className="relative w-full max-w-[380px] rounded-app-panel border border-app-border-hairline bg-white shadow-app-popover"

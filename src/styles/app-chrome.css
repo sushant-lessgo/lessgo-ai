@@ -7,9 +7,18 @@
  * ISOLATION (binding — see docs/task/ui-foundation.plan.md §Isolation mechanism):
  *   - `.app-chrome` is DEFINED here but applied to NO screen by this feature.
  *     Consuming specs (auth-redesign, dashboard, editor-shell) attach it to their
- *     OWN shells. It must NEVER be attached to the root <body>, /p/*, /preview/*,
- *     or any wrapper containing the editor CANVAS — doing so would restyle the base
- *     font/ink of generated template pages and break editor↔published parity.
+ *     OWN shells. It must NEVER be attached to the root <body>, /p/*, or ANY
+ *     WRAPPER CONTAINING THE CANVAS — doing so would restyle the base font/ink of
+ *     generated template pages and break editor↔published parity.
+ *
+ *     THE RULE IS "no canvas ancestor", not "no route". The original wording also
+ *     blanket-forbade /preview/*, which reads as a violation of a legitimate
+ *     pattern: editor-shell-redesign phase 7 attaches the class on /preview/* to
+ *     the publish CHROME (SlugModal + the success card), which are SIBLINGS of the
+ *     canvas — several via `display:contents` wrappers that move no box. Same
+ *     shape as the phase-3/4 attach map in EditLayout.tsx (bar / rail / modal
+ *     roots, canvas a true sibling). A chrome wrapper on a canvas-bearing route is
+ *     fine; a wrapper that CONTAINS the canvas is not, on any route.
  *   - Imported ONLY by the root app layout (src/app/layout.tsx) — NOT by p/layout.tsx
  *     and NOT inlined into public/published.css, so zero bytes reach published pages.
  */

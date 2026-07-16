@@ -59,8 +59,12 @@ for (const cfg of AUDIENCES) {
     await modal.getByTestId('publish-slug-input').fill(slug);
     await modal.getByTestId('publish-title-input').fill(cfg.title);
 
-    // The Review nudge is a soft nudge, never a gate (handoff t17 interaction rule):
-    // Publish now must be enabled whether or not the nudge is showing.
+    // The Review nudge is a soft nudge, never a gate (handoff t17 interaction rule:
+    // "Publish now always works — never block someone from shipping"). Assert the
+    // nudge is actually SHOWING first: without this the next assertion only ever
+    // proved "enabled with no nudge", which is the trivial branch. The seeded draft
+    // always leaves guide tasks open (no logo, no contact info), so the nudge renders.
+    await expect(modal.getByTestId('publish-review-nudge')).toBeVisible();
     const confirmBtn = modal.getByRole('button', { name: 'Publish now' });
     await expect(confirmBtn).toBeEnabled();
     await confirmBtn.click();

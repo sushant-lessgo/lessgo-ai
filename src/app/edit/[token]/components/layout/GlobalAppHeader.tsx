@@ -47,6 +47,9 @@ import {
   AppPopoverSeparator,
 } from '@/components/ui/popover';
 import { PageSwitcher } from './PageSwitcher';
+// THE t1 bar-control class, defined once (phase 8 de-dupe: this file's private
+// `BAR_BTN` and DesignMenuShell's `DESIGN_TRIGGER_CLASS` were byte-identical).
+import { BAR_CTL_CLASS } from '../ui/DesignMenuShell';
 import { EditorDesignControls, EditorStatusCluster } from './EditHeader';
 import { EditHeaderRightPanel } from './EditHeaderRightPanel';
 import { showSeoModal, showSocialModal } from '../ui/GlobalModals';
@@ -58,10 +61,6 @@ interface GlobalAppHeaderProps {
 /** Greyed popover row: AppPopoverItem's geometry, worn by <Coming>. See header note. */
 const COMING_ROW =
   'w-full gap-2.5 rounded-app-badge px-2.5 py-[7px] text-[13px] font-medium';
-
-/** t1 bar control: ghost button, pad 7/10, radius 8, label 500/13. */
-const BAR_BTN =
-  'inline-flex items-center gap-1.5 rounded-app-badge px-2.5 py-[7px] text-[13px] font-medium text-app-label transition-colors hover:bg-app-hairline data-[state=open]:bg-app-track';
 
 /**
  * `Back to dashboard` emphasis (scout §H t1: bg #f5f9ff, arrow_back #006CFF,
@@ -157,7 +156,7 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
           callers — the two modal systems stay separate (decision 7). */}
       <Popover open={showSettingsMenu} onOpenChange={setShowSettingsMenu}>
         <PopoverTrigger asChild>
-          <button type="button" className={BAR_BTN} aria-label="Site settings">
+          <button type="button" className={BAR_CTL_CLASS} aria-label="Site settings">
             <AppIcon name="tune" size={18} className="text-app-icon-muted" />
             <span>Settings</span>
             <AppIcon name="expand_more" size={18} className="text-app-icon-faint" />
@@ -205,7 +204,7 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
               click — a coincidence, not a design. Same behavior, on purpose. */}
           <button
             type="button"
-            className={BAR_BTN}
+            className={BAR_CTL_CLASS}
             aria-label="Help and support"
           >
             <AppIcon name="help" size={18} className="text-app-icon-muted" />
@@ -227,6 +226,18 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
           onFocusOutside={(e) => e.preventDefault()}
         >
           <AppPopoverLabel>Help &amp; support</AppPopoverLabel>
+          {/* ICON SUBSTITUTES — PENDING A FONT REGENERATION (phase-8 carry, NOT a
+              style choice). The handoff wants `menu_book` / `smart_display` /
+              `keyboard`; the committed subset font has none of them, and an absent
+              ligature renders as its literal NAME, not a glyph. Phase 8 added the
+              four missing names to ./public/fonts/material-symbols-rounded/icons.txt
+              (the authoritative want-list) but could NOT regenerate the woff2 — the
+              NOTICE's toolchain (python + fontTools, subsetting the ~5.3MB upstream
+              font, which is deliberately not committed) is not available here, and
+              hand-editing or guessing at font binaries is forbidden. So the nearest
+              PRESENT glyphs stand in. AFTER someone regenerates per the NOTICE:
+              auto_stories → menu_book, subtitles → smart_display, smart_button →
+              keyboard. Until then, do NOT "fix" these names — you'd ship text. */}
           <Coming what="the editor guide" side="right" className={COMING_ROW}>
             <AppIcon name="auto_stories" size={18} />
             Editor Guide
@@ -262,6 +273,18 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
           wiring this would be new behavior. Inertness comes from <Coming>'s
           onClickCapture + the no-op onValueChange — NOT from `disabled`, which
           would swallow the tooltip's pointer events (phase-3 precedent). */}
+      {/* ICON SUBSTITUTE — PENDING A FONT REGENERATION (same carry as the Help
+          menu's three above; see that note for the full why). The handoff draws
+          `smartphone`; the committed subset woff2 has no working ligature for it,
+          so it rendered the literal TEXT "smartphone" (measured 144px wide at 24px
+          vs 24px for a real glyph — a visibly broken top bar). `phone` is the only
+          phone-ish glyph actually PRESENT in the subset (verified against the
+          woff2's GSUB ligature table, NOT icons.txt — that manifest is unreliable
+          in both directions: `smartphone` is listed there yet was silently DROPPED
+          by the subset build, and `phone` is absent there yet present in the font).
+          AFTER someone regenerates per public/fonts/material-symbols-rounded/NOTICE:
+          swap `phone` → `smartphone` here. Do NOT restore `smartphone` before that
+          — you'd ship text. */}
       <div className="ml-auto flex-none">
         <SegmentedControl
           aria-label="Preview device"
@@ -288,7 +311,8 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
               value: 'phone',
               label: (
                 <Coming what="device previews">
-                  <AppIcon name="smartphone" size={19} />
+                  {/* substitute pending font regeneration → `smartphone` */}
+                  <AppIcon name="phone" size={19} />
                 </Coming>
               ),
             },

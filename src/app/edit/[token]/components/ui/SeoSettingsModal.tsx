@@ -22,7 +22,13 @@ import { useShallow } from 'zustand/react/shallow';
 import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { buildPageMetadata } from '@/lib/staticExport/buildPageMetadata';
 import { META_PIXEL_ID_RE, GA4_MEASUREMENT_ID_RE } from '@/lib/staticExport/headTags';
-import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { NavItem, navItemClasses } from '@/components/ui/nav-item';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
@@ -282,7 +288,12 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
       <Switch
         checked={!seo.noIndex}
         onCheckedChange={(v) => patch({ noIndex: v ? undefined : true })}
-        aria-label="Let search engines index this page"
+        // Must track the VISIBLE label above (site vs page) — it was hardcoded to
+        // "page" while the root pane says "site", so a screen reader was told the
+        // wrong scope for the site-wide switch.
+        aria-label={
+          isRoot ? 'Let search engines index this site' : 'Let search engines index this page'
+        }
         className="shrink-0"
       />
     </div>
@@ -351,6 +362,13 @@ export function SeoSettingsModal({ onClose }: { onClose: () => void }) {
             <DialogTitle className="text-[15px] font-bold tracking-normal text-app-ink">
               Site settings
             </DialogTitle>
+            {/* Radix requires a description (or an explicit opt-out) on every
+                DialogContent and logs a console warning on EVERY open without one.
+                t16 draws no subtitle in the header, so it is screen-reader-only:
+                the warning goes away, the pixels don't move. */}
+            <DialogDescription className="sr-only">
+              Domain, search-engine (SEO) and social-sharing settings for this site.
+            </DialogDescription>
             <div className="flex-1" />
             <SavedPill />
             <DialogClose

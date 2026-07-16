@@ -571,7 +571,9 @@ function PreviewPageContent({ tokenId }: { tokenId: string }) {
           Same trigger as before (`publishSuccess`); only the markup changed. */}
       {publishSuccess && (
         <div className="app-chrome contents">
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,20,40,.45)] px-4">
+        {/* Same overlay tone as the Radix dialog primitive + SlugModal — see the
+            note there; the hand-rolled shell is deliberate. */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-app-ink/60 px-4">
           <div
             data-testid="publish-live-card"
             className="relative w-full max-w-[322px] rounded-app-panel border border-app-border-hairline bg-white shadow-app-popover"

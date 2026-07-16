@@ -1541,3 +1541,133 @@ What I *can* evidence — a by-construction argument, each link verified:
   so the nudge count is correct. No store writes were added.
 - `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` gets CRLF-churned by
   every `test:run`; restored (`git status` clean of it).
+
+---
+
+# Phase 8 — PageSwitcher + final sweep + merge gates
+
+## Files changed
+- `src/app/edit/[token]/components/layout/PageSwitcher.tsx` — t1 pill + page-select dropdown; "+ Add page" chrome removed.
+- `src/app/edit/[token]/components/ui/UndoRedoButtons.tsx` — carry: t1 reskin (old grey boxes → 19px ghost glyphs).
+- `src/app/edit/[token]/components/ui/ResetButton.tsx` — carry: t1 reskin (amber box → bar ghost, coral tokens).
+- `src/app/edit/[token]/components/ui/DesignMenuShell.tsx` — carry: `DESIGN_TRIGGER_CLASS` → exported `BAR_CTL_CLASS` (de-dupe).
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx` — consumes `BAR_CTL_CLASS` (private `BAR_BTN` deleted); two icon-defect notes.
+- `src/app/edit/[token]/components/ui/SeoSettingsModal.tsx` — carry: `DialogDescription` + indexing `aria-label` scope fix.
+- `src/components/SlugModal.tsx` — carry: dead `publishedAt` prop field removed; overlay → `bg-app-ink/60`.
+- `src/app/preview/[token]/page.tsx` — carry: overlay → `bg-app-ink/60` (className only).
+- `src/styles/app-chrome.css` — carry: attach-contract comment amended ("no canvas ancestor", not "no route").
+- `e2e/publish.spec.ts` — carry: assert `publish-review-nudge` visible before the enabled check.
+- `public/fonts/material-symbols-rounded/icons.txt` — 4 missing icon names staged (font NOT regenerated — see below).
+
+## 1. PageSwitcher — handler-diff proof
+Diffed the whole logic block (selector → handlers) against `git show HEAD:`. The ONLY deltas:
+comments (tab→row), the new `open` state, and the ruled `handleAdd` removal. Verbatim, all present
+and byte-identical: `setCurrentPage(p.id)` · `deletePage(id)` · `renamePage(id, title.trim())` ·
+`addArchetypePage('gallery')` · `addArchetypePage('contact')` · `openCollectionPanel`
+(`setPanelCollectionKey` + `showProductsModal`) · `confirmDialog`/`promptDialog` bodies incl.
+`e.stopPropagation()` · `BlogButton`'s `published-slug` self-fetch · every capability gate
+(`usesTemplateModule`, `isTechPremium`, `hasCatalog`, `hasArchetype`, `collectionKeysInPages` filter) —
+same predicates, same order, same fallbacks.
+
+**Dropdown (ruling 8b):** tabs → phase-1 `AppPopoverMenu`; each row is an `AppPopoverItem` whose onClick
+is the SAME `setCurrentPage`, plus `setOpen(false)` (the file-level Radix-Popover dismissal pattern phase 4
+established — Popover is not DropdownMenu, rows do not self-close). Row + delete button are SIBLINGS (an
+`AppPopoverItem` is itself a `<button>`; nesting is invalid HTML) — the same shape the tab strip used, so
+hover-delete survives.
+
+> ⚠️ **CORRECTION (fix pass).** This paragraph originally claimed "double-click-rename **and** hover-delete
+> survive". **The rename half was FALSE** and shipped a real capability loss. The sibling reasoning was
+> right; the conclusion was not. `setOpen(false)` on row-select tears the row out from under the gesture
+> (150ms exit animation → Radix Presence unmount), so click 2 of a double-click lands on a dead target —
+> rename was a race it usually lost. Delete only worked because it's a sibling button that
+> `stopPropagation()`s, so `setOpen(false)` never fires — that asymmetry was the tell I missed.
+> I asserted survival from *structure* without exercising the gesture. **Fixed below (§9).**
+
+t18's ⋯ menu deliberately NOT built (rail Pages tab owns it).
+Creation entries (+ Products / collections / + Gallery / + Contact) moved into the dropdown under an "Add"
+eyebrow — still reachable, gating untouched. Pill: bordered `#e6e6ec` r9, `description` `#006CFF`, name
+600/13, mono route chip on `#f1f1f5` r4, `expand_more`, hover `#f6f6f9`.
+
+**"+ Add page" removed:** only the chrome. `addPage`/`addArchetypePage` store actions untouched — proven
+live: invoking `addPage` through the store created the 2nd page (`ADDED:2`). `handleAdd` (the local wrapper
+that existed ONLY to feed that one button, no other caller) went with it — see Deviations.
+
+## 2. Grey-out sweep — BOTH directions, verified against code
+Greyed (all via the `Coming` COMPONENT; grep confirms ZERO bare `.app-coming` class usage anywhere):
+score pill · rail Pages/CMS/Theme · rail `add` slot · rail drag/visibility · My sites · Rename site ·
+Duplicate · Settings→Domain · Help's 4 rows · Publish dropdown half · device segmented ×3 · Share ·
+t16 Domain nav · Sitemap · Service/Vestria "Browse all". Each re-checked against code that it is NOT wired
+(e.g. rail reorder/visibility confirmed absent at `2a749fb9^`; sitemap has no host to build a link from).
+
+Protected — each verified WORKING against code, not the list: Design · SEO · **Social & sharing** (wired,
+decision 10; live-probed: Settings→Social opens the modal) · **Browse all styles** (`ThemePopover` →
+`StyleBrowserModal`) · undo/redo · Edit/Preview · Publish · Back to dashboard · Help & support control ·
+page switcher · mobile panel toggle · View site · t17 domain upsell (data-precondition gated, not `Coming`).
+
+**Near-miss caught (the third of this run):** "Browse all" appears twice. `ThemePopover`'s **"Browse all
+styles"** is WIRED → `StyleBrowserModal` (a *palette* browser) and is protected — untouched. The
+Service/Vestria **"Browse all"** is t14's *template* picker, which has no route/handler → correctly greyed.
+Two different controls with near-identical labels; confirmed by reading `StyleBrowserModal.tsx` (it imports
+`palettes` + `usePaletteSwap`), not by matching the string.
+
+## 3. Carries — fixed vs deferred
+FIXED: UndoRedo/Reset reskin · `BAR_CTL_CLASS` de-dupe · `app-chrome.css` contract comment · publish.spec
+nudge assertion · `DialogDescription` · indexing `aria-label` scope · dead `publishedAt` field · overlay
+colour alignment (hand-rolled SHELL kept — Radix Dialog would add focus-trap + scroll-lock = behavior).
+
+DEFERRED (with reasons):
+- **Icon regeneration — BLOCKED, founder/later item.** The NOTICE's toolchain is unavailable here: no
+  Python/fontTools, and the ~5.3MB upstream font is (correctly) not committed. Per instruction I did NOT
+  hand-edit the binary or guess. `icons.txt` now lists the 4 names (staged want-list); the woff2 is
+  UNCHANGED, so the substitutes MUST stay — proven below that they'd otherwise ship literal text.
+  ⚠️ **`icons.txt` is now the DESIRED list, ahead of the shipped font.** Post-regeneration mapping is
+  recorded in-code: `auto_stories`→`menu_book`, `subtitles`→`smart_display`, `smart_button`→`keyboard`.
+- **NEW DEFECT FOUND — `smartphone` renders as TEXT, not a glyph.** Empirically measured, not guessed: a
+  live probe rendered every icon in the bar and measured widths — `smartphone` = 144px at 24px font
+  (i.e. letters) vs 24px for a real glyph; `desktop_windows`/`tablet_mac` beside it are fine. It IS in
+  icons.txt, so this is a subset-BUILD artifact, not a typo. Introduced (visibly) by phase 4 — the first
+  `smartphone` usage — and never live-checked. NOT papered over with a wrong-semantic substitute: the one
+  correct fix is the same regeneration, which fixes all 5 names at once. **Founder-visible in the bar today.**
+- **Device segmented centring — deferred, NOT safe.** True centring needs `absolute left-1/2`; the bar's
+  greyed device span would then overlap the right cluster at narrow widths and its `onClickCapture` could
+  swallow clicks meant for Publish. An in-flow "fix" (`mx-auto`/`flex-1`) is visually identical to today's
+  two-`ml-auto` split — fake progress. Coupled to the deferred responsive pass; conservative option taken.
+- Not chased per instruction: ~1s menu self-close · narrow-width overflow · stale `CLAUDE.md` · double spinner.
+
+## Deviations
+1. **`handleAdd` deleted with its button.** The task's preserve-verbatim list names L125 (`addPage` inside
+   `handleAdd`), which collides with ruling 8b's "+ Add page GONE". Read conservatively: the ruling is
+   explicit and newer, `handleAdd` is CHROME (a local wrapper with exactly one caller — the removed button),
+   and the *store* actions are what the ruling protects. Leaving it = dead code + an unused-var lint error.
+   `addPage` itself is untouched and still works (live-proven).
+2. **Route chip uses `rounded-[4px]`, not a token.** No 4px radius key exists; adding one to
+   `tailwind.config.js` is out of phase-8's className-only remit. Follows the phase-6/7 arbitrary-value
+   precedent (`rounded-[9px]`).
+3. **`ResetButton` uses the coral `app-review-*` family** for its amber warning tone — decision 3 forbids
+   inventing/snapping a hex, and these are the nearest existing app-chrome tokens. t1 draws no Reset.
+4. `BAR_CTL_CLASS` lives in `DesignMenuShell` (leaf/ui) so the import runs ui ← layout, never the reverse.
+
+## Test results (ACTUAL)
+- `npx tsc --noEmit` → **exit 0**, clean.
+- `npm run test:run` → **194 files passed / 1 skipped; 3337 passed / 18 skipped; 0 failed**.
+- `npm run lint` → **0 errors** (pre-existing `<img>`/exhaustive-deps warnings only).
+- `npm run build` → **GREEN** (the standing item since phase 1 touched `tailwind.config.js`; full
+  `build:published-css` → `build:assets` → `next build`). Parity re-checked structurally: `published.css`
+  contains **0** occurrences of `app-chrome`/`app-coming`/`Onest`; the build produced no asset churn.
+- `PORT=3007 E2E_PORT=3007 npx playwright test` → **22 passed / 4 skipped / 0 failed** (8.8m). A re-run of
+  the `authed` project confirms EXECUTION by name: `editor-dirty-guard.spec.ts` ×4 (mid-edit, dirty-window,
+  clean-page negative, review pill) ✓ and `publish.spec.ts` ×3 (Hearth, Lex, Meridian) ✓ — **9 passed**.
+  No Clerk flake this run. The new nudge assertion passed on all 3 configs (the seeded draft always leaves
+  guide tasks open), so the spec's comment is now true rather than aspirational.
+
+## Live verification (dev, PORT=3007, real Chromium + saved Clerk session)
+Probe drove the REAL editor (throwaway script, deleted; no repo files added): page dropdown switches pages
+(`setCurrentPage` moved the store's `currentPageId`, pill re-labelled, menu closed) · both rows render with
+route chips · "+ Add page" chrome absent · `addPage` store action still functional · undo/redo/Design/
+Settings/Help/Site-menu all present · Settings→Social opens the modal. Bar screenshot checked against t1
+AS DRAWN — which is how the `smartphone` defect was caught (it was invisible to tsc/tests/lint/e2e).
+
+## Open risks
+- `smartphone` + the 4 substitutes are blocked on ONE font regeneration (founder/toolchain).
+- `ThemePopover` (legacy non-template product) remains browser-unverified — no seedable project (phase-5 carry).
+- Snapshot `uiFoundationIsolation.test.tsx.snap` CRLF-churn restored; `git status` clean of it.

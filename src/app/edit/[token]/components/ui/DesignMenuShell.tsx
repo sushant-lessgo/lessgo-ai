@@ -24,12 +24,15 @@ import { AppIcon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 
 /**
- * t1 bar control geometry for the Design trigger — mirrors GlobalAppHeader's
- * private `BAR_BTN` (that file is out of this phase's scope, so the classes are
- * restated rather than exported from it). Ghost button, pad 7/10, radius 8,
- * label 500/13.
+ * THE t1 bar-control class — ghost button, pad 7/10, radius 8, label 500/13.
+ *
+ * Phase 5 restated GlobalAppHeader's private `BAR_BTN` here byte-for-byte
+ * because that file was out of its scope; phase 8 de-duped by keeping ONE
+ * definition and importing it. It lives in this (leaf, presentation-only) file
+ * rather than in GlobalAppHeader so the import runs ui ← layout, never the
+ * reverse. Every t1 bar control — Design, Settings, Help — wears this.
  */
-export const DESIGN_TRIGGER_CLASS =
+export const BAR_CTL_CLASS =
   'inline-flex items-center gap-1.5 rounded-app-badge px-2.5 py-[7px] text-[13px] font-medium text-app-label transition-colors hover:bg-app-hairline data-[state=open]:bg-app-track';
 
 export interface DesignMenuTriggerProps
@@ -56,7 +59,7 @@ export const DesignMenuTrigger = React.forwardRef<
     ref={ref}
     type="button"
     aria-label="Design"
-    className={cn(DESIGN_TRIGGER_CLASS, className)}
+    className={cn(BAR_CTL_CLASS, className)}
     {...props}
   >
     <span
