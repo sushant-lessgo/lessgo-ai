@@ -22,9 +22,7 @@
 // and the e2e computed-style fixture, with a documented reason.
 
 import { describe, it, expect } from 'vitest';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const resolveConfig = require('tailwindcss/resolveConfig');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const rootConfig = require('../../../tailwind.config.js');
 
 const resolved = resolveConfig(rootConfig);

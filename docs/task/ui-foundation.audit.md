@@ -710,3 +710,132 @@ forbidden. No template/published/renderer/forbidden file touched.
 2. **`tabs.test.tsx` panel lookup uses `document.getElementById`** rather than a CSS selector —
    `React.useId()` produces ids containing `:` which are invalid in `querySelector`. Behavior
    unaffected; the id-linking assertion still holds.
+
+---
+
+# ui-foundation — Phase 6 audit (acceptance sweep + final green gate) — HUMAN GATE
+
+Branch: `feature/ui-foundation` (verified `git branch --show-current` before any action).
+Verification + docs phase — NO code changes. HEAD before this phase = `34066f5d` (Phase 5).
+
+## Files changed
+
+- `src/components/ui/README.md` (new) — agent-oriented foundation doc: `app-*` token layer +
+  naming, `.app-chrome` scope class + attach/prohibition rules, fonts + app-mono distinct-family
+  gotcha, AppIcon + Material Symbols subset regeneration (`icons.txt`), full primitive inventory
+  (9 reskinned + AppIcon + 5 net-new), forbidden-files/isolation rules, and the three isolation
+  guards (published.css sha / config-freeze / computed-style e2e) with the "e2e fixture is a
+  checked-in INPUT, never silently regenerate" warning.
+- `src/modules/generatedLanding/tailwindConfigFreeze.test.ts` — deleted the 2 dangling
+  `// eslint-disable-next-line @typescript-eslint/no-var-requires` comments that made `npm run lint`
+  fail (rule not loaded by the repo config → "rule not found" error). Added to Phase-6 Files-touched
+  by the orchestrator mid-phase; scoped fix only — freeze assertions untouched. See RESOLVED below.
+- `docs/task/ui-foundation.audit.md` (this Phase 6 section).
+
+NO forbidden-list file touched. The only code edit is the 2-line comment deletion in the Phase-1
+freeze test (orchestrator-authorized).
+
+## 1. Full green gate results
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit` | **clean** (exit 0). |
+| `npm run build` | **green** (exit 0; ran build:published-css + build:assets + next build). |
+| `public/published.css` sha256 | `c2f87e08f517a72b43f6e9e0e9b703b6261f4f152c711be9241649c6f26219b6` == committed baseline (`__fixtures__/published-css.sha256`) → **byte-identical (the isolation proof)**. |
+| leak grep `onest\|caveat\|material symbols\|app-primary\|app-cta\|app-stripes\|JetBrains Mono App` on published.css | **0** (no leak). |
+| `npm run test:run` | **3025 passed \| 18 skipped \| 0 failed** (187 files passed, 1 skipped). |
+| `npm run lint` | **clean, exit 0** (full repo). RESOLVED — see below. (129 warnings remain, all pre-existing `<img>`/exhaustive-deps, non-blocking.) |
+| `npm run test:e2e -- --project=public` (port **3057**) | **11 passed, 4 skipped, 0 failed.** Both isolation tests green: `#14` computed-style baselines on `/dev/meridian/blocks` unchanged; `#15` no app-chrome fonts/classes on the block surface. (4 skips = real-LLM generation cases that self-skip without E2E_AUTH.) |
+
+**FULL GATE = ALL GREEN** (tsc / build / test:run / lint / e2e all pass; `published.css` sha256
+byte-identical to the committed baseline).
+
+### RESOLVED — lint gate (orchestrator-authorized, `tailwindConfigFreeze.test.ts` added to Phase-6 Files-touched)
+
+`npm run lint` had failed with 2 ESLint **errors**, both from `tailwindConfigFreeze.test.ts`
+(lines 25 & 27): `Definition for rule '@typescript-eslint/no-var-requires' was not found`. Root
+cause: the file carried two `// eslint-disable-next-line @typescript-eslint/no-var-requires`
+comments, but the repo ESLint config (`.eslintrc.json` extends only `next/core-web-vitals`) does
+NOT load the `@typescript-eslint` plugin, so referencing that rule name in a disable directive is
+itself an error. The file is NEW in this branch (absent on `main`) and was the SOLE source of both
+errors — this feature introduced the red gate.
+
+**Fix applied (preferred option — comment deletion):** deleted the two
+`// eslint-disable-next-line @typescript-eslint/no-var-requires` lines. Since the rule was never
+loaded it was enforcing nothing, so the bare `const … = require(…)` calls do NOT newly trip any
+active rule (confirmed by full `npm run lint` → exit 0). Did NOT need the import-conversion
+fallback. NOTHING else in the file changed — the freeze assertions (`borderRadius` `toMatchObject`,
+`fontSize`/`fontFamily` deep/per-key) are byte-for-byte as before, so the guard still catches an
+existing-key mutation.
+
+Re-verification after the fix:
+- `npm run lint` → **exit 0, 0 errors** (full repo).
+- `npx vitest run …/tailwindConfigFreeze.test.ts` → **3 passed** (guard intact, same assertions).
+- `npm run test:run` → **3025 passed | 18 skipped | 0 failed** (unchanged).
+- `npx tsc --noEmit` → **clean** (exit 0).
+- No rebuild needed (no runtime code changed; the edit is comment-only in a test file). `published.css`
+  sha256 therefore still == committed baseline (`c2f87e08…19b6`).
+
+## 2. Isolation import grep guard (hard requirement — expect zero)
+
+Commands run against `src/modules/templates`, `src/modules/generatedLanding`, `src/components/published`:
+
+- `grep -rnE "components/ui/icon|from ['\"].*ui/icon['\"]"` → **(none)**.
+- `grep -rnE "app-chrome\.css|fonts-app-chrome\.css"` → **(none)**.
+- `grep -rnE "^\s*import .*(AppIcon|ui/icon|ui/nav-item|ui/segmented-control|ui/tabs|ui/toast|ui/image-placeholder)"` → **(none — zero real imports)**.
+
+A broad substring grep flagged `AppIcon` matches, but ALL are locally-defined inline
+`WhatsAppIcon` components in template footers (lumen/surge/vestria) — false positives, not imports
+of `@/components/ui/icon`. The precise import-statement grep confirms **zero** forbidden imports.
+(The Phase-1 test/fixture files under `generatedLanding/` are the sanctioned carve-out and import
+no primitives.)
+
+## 3. Phase-4 badge-radius nit check (default `rounded-full` → `rounded-app-badge` 6px)
+
+7 `<Badge>` call sites in `src/` (0 `badgeVariants(` call sites outside badge.tsx):
+
+| Site | Content | Pill-dependent? |
+|---|---|---|
+| `edit/.../BlockVariantSelector.tsx:326` | "Current" corner label | No |
+| `edit/.../LayoutChangeSelector.tsx:153,157` | "Current" label | No |
+| `edit/.../LayoutSelector.tsx:202` | "popular"/recommendation | No |
+| `dashboard/testimonials/TestimonialModerationList.tsx:212` | status text | No |
+| `Design/ColorSystem/VariableModeIndicators.tsx:112,163` | mode name / "Debug" | No |
+
+All are **multi-character text labels** — none is a circular single-char/numeric badge that relies
+on a full-pill shape. The full→6px change is a benign cosmetic shift (corner labels go from pill to
+lightly-rounded rect), consistent with the handoff's "small badges 5–6px". **Heads-up only for the
+founder gate; no fix warranted.**
+
+## 4. Acceptance-criteria walk (spec §Acceptance)
+
+| Criterion | Verdict | Evidence |
+|---|---|---|
+| All 4 fonts self-hosted + loading; icons render by name w/ FILL axis | **PASS** | Phase-2 audit: Onest 400–800, JBM 600, Caveat 400/700, MS Rounded subset (164 KB, all 4 axes intact) all under `public/fonts/`, declared in `fonts-app-chrome.css`, 3 preloads in root layout. FILL-axis smoke ran in Phase 3 (filled vs outline `push_pin` rendered as distinct glyphs, `document.fonts.check` true). |
+| Full token layer (color/radius/shadow/type/placeholder/badge) matching handoff README | **PASS** | Phase-3 audit: 24 `colors.app.*`, 7 `borderRadius['app-*']`, 5 `boxShadow['app-*']`, 3 `fontFamily['app-*']`, `backgroundImage['app-stripes']` — values match the handoff README (CTA shadow pulled from `.dc.html`). Documented in the new README. |
+| Complete primitive set (9 reskinned + badge pill/status variants + 5 net-new) | **PASS** | 9 reskinned in place (button/input/textarea/select/checkbox/switch/card/badge/dialog); badge added `status/mono/postBeta/magic/success/danger/saved`; 5 net-new (nav-item/segmented-control/tabs/toast/image-placeholder) + AppIcon. Enumerated in README. |
+| No parallel component library | **PASS** | `git diff --name-status main...HEAD -- src/components/ui/`: 9 primitives = **M** (edited in place, stable APIs, 0 call-site churn per Phase-4 tsc), new files = genuinely new primitives (icon/nav-item/segmented-control/tabs/toast/image-placeholder) + 3 test files. NO duplicate button/input/etc. added. |
+| `tsc` / `test:run` / `build` green | **PASS** | tsc clean, test:run 3025/0-failed, build green (all above). |
+| Generated pages unchanged (both surfaces) | **PASS (automated) / pending-founder (final eyeball)** | Published surface: byte-identical `published.css` sha + HTML-snapshot + 0-leak grep. Editor surface: `/dev/meridian/blocks` computed-style e2e unchanged + config-freeze green. Phase-3 founder before/after gate already PASSED (2026-07-16). The FINAL founder re-eyeball on `/p/[slug]` + `/edit/[token]` (phases 4–5 landed since) is the orchestrator's Phase-6 HUMAN GATE. |
+
+**Overall:** all acceptance criteria PASS on the automated evidence, with the generated-pages
+criterion carrying the mandatory final founder eyeball (orchestrator's gate). The lint gate that was
+RED during the sweep is now RESOLVED (see above) — the full gate (tsc/build/test/lint/e2e +
+byte-identical `published.css`) is ALL GREEN.
+
+## For the founder's final gate
+
+- Re-eyeball a real `/p/[slug]` published page and an `/edit/[token]` editor page before/after
+  the whole branch — templates must look identical (fonts/colors/radii). The automated guards say
+  they are byte-identical, but this is the mandatory human confirmation.
+- Optional visual-taste pass on the reskinned primitives themselves (dashboard/modal/form) — Phase 4
+  copied values from the handoff at high fidelity but did no dev eyeball; foundation attaches
+  `.app-chrome` to no screen yet, so old screens keep their old base look until consuming specs land.
+- Badge default radius is now 6px (was full pill) — see nit above; expected, cosmetic.
+
+## Open risks / follow-ups
+
+- Lint RED → **RESOLVED** this phase (2 dangling `no-var-requires` disable directives deleted from
+  `tailwindConfigFreeze.test.ts`; `npm run lint` now exit 0). No open lint risk.
+- e2e guard requires a running `next dev` + Chromium (ran on port 3057 here); wire the same as
+  render.spec in CI. No new deps added anywhere in the feature.

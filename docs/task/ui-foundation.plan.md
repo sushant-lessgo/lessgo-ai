@@ -24,8 +24,8 @@ FIRST plus a founder eyeball gate.
 - phase 2 fonts (fetch + subset + app-only stylesheet + preloads): done (commit 6e7af964, review loops 1, verdict ship) — 4 families self-hosted, MS subset 164KB axes-intact, app-only stylesheet no published leak; mid-flight fix: app mono = distinct family 'JetBrains Mono App' (avoids mono@600 editor/published divergence); e2e /dev network assertion dropped as mis-scoped
 - phase 3 token layer + AppIcon + scope class [HUMAN GATE]: done (commit efe3d48b, review loops 1, verdict ship, HUMAN GATE passed 2026-07-16) — app-* tokens additions-only, AppIcon, .app-chrome (unattached); config-freeze re-scoped; isolation held + founder-confirmed identical
 - phase 4 reskin 9 existing primitives: done (commit 4f282f03, review loops 1, verdict ship) — 9 primitives on app-* tokens, stable API (0 call-site changes), added button.cta + 7 badge variants; published.css byte-identical. Nit for P6: badge default radius full→6px, grep existing badge usages
-- phase 5 net-new primitives: pending
-- phase 6 acceptance sweep + final green gate [HUMAN GATE]: pending
+- phase 5 net-new primitives: done (commit 34066f5d, review loops 1, verdict ship) — nav-item/segmented-control/tabs/toast/image-placeholder, headless, 0 new deps, 13 real tests; published.css byte-identical
+- phase 6 acceptance sweep + final green gate [HUMAN GATE]: impl done (review loops 1, verdict ship), full gate green incl lint fix; README written; awaiting founder final eyeball + merge gate
 
 ## Isolation mechanism (design decision, binding for all phases)
 
@@ -455,6 +455,7 @@ new primitive (scratch usage, reverted).
 for consuming specs.
 
 **Files touched**
+- `src/modules/generatedLanding/tailwindConfigFreeze.test.ts` (**added in Phase 6**: the full-repo `npm run lint` — first run here — errors on `// eslint-disable-next-line @typescript-eslint/no-var-requires` comments referencing a rule the repo ESLint config doesn't load. Scoped fix so the pre-push lint hook passes.)
 - `src/components/ui/README.md` (new or update — token layer summary, `app-*` naming, AppIcon
   usage + subset-regeneration note (`icons.txt`), `.app-chrome` attach rules incl. the
   editor-canvas prohibition, forbidden-files isolation list, two-surface guard doc: published-css
