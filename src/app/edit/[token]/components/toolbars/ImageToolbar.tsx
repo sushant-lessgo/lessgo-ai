@@ -1,21 +1,15 @@
 // app/edit/[token]/components/toolbars/ImageToolbar.tsx - Complete Image Toolbar
-import React, { useState, useRef, useEffect } from 'react';
-import ReactDOM, { createPortal } from 'react-dom';
+import React, { useState, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useEditStore } from '@/hooks/useEditStore';
 
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
-import type { StockPhoto } from '@/services/pexelsApi';
 import { SimpleImageEditor } from '@/components/ui/SimpleImageEditor';
 import { isForbiddenImageSrc } from '@/hooks/editStore/imageWriteGuard';
-import { logger } from '@/lib/logger';
-// Palette mood phrase comes from the preloaded template module (no static
-// template import in the shared editor bundle — firewall, 7.5d). The query
-// composition helper itself is audience-level.
-import { getServiceImageQuery } from '@/modules/audience/service/imageKeywords';
-import { getLoadedTemplate } from '@/modules/templates/registry';
-import type { TemplateId } from '@/types/service';
-import { usesTemplateModule } from '@/types/service';
+// The media picker replaces BOTH the old bare `<input type=file>` Replace action and
+// the in-file StockPhotosPanel — one implementation, not two. Its Stock tab carries
+// the panel's palette-enriched queries / category buttons / curated-on-mount forward.
+import { MediaPickerModal, type MediaPickerTab } from '../ui/MediaPickerModal';
 
 interface ImageToolbarProps {
   targetId: string;
@@ -25,7 +19,10 @@ interface ImageToolbarProps {
 // component is a dumb child of the shell's floating container.
 export function ImageToolbar({ targetId }: ImageToolbarProps) {
   const [showUploader, setShowUploader] = useState(false);
-  const [showStockPhotos, setShowStockPhotos] = useState(false);
+  // Picker open/tab state is LOCAL to the toolbar (useModalManager is the
+  // onboarding-oriented queue) — StyleBrowserModal/ElementToggleModal precedent.
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerTab, setPickerTab] = useState<MediaPickerTab>('library');
   const [showEditor, setShowEditor] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -41,14 +38,14 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
   // never used by the main component (StockPhotosPanel reads it separately) → dropped.
   const {
     updateElementContent,
-    uploadImage,
+    replaceImage,
     hideElementToolbar,
     tokenId,
     uploadImageFromObjectUrl,
   } = useEditStore(
     useShallow((s) => ({
       updateElementContent: s.updateElementContent,
-      uploadImage: s.uploadImage,
+      replaceImage: s.replaceImage,
       hideElementToolbar: s.hideElementToolbar,
       tokenId: s.tokenId,
       uploadImageFromObjectUrl: (s as any).uploadImageFromObjectUrl as (
@@ -171,59 +168,33 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
     return null;
   };
 
-  // Secondary panels (stock-photos portal) anchor to the toolbar bar's live
-  // position rather than a passed-in coordinate — the shell owns the bar's
-  // placement now. Read at render time; the bar is already mounted whenever a
-  // panel is open.
-  const getPanelAnchor = () => {
-    const rect = toolbarRef.current?.getBoundingClientRect();
-    if (!rect) return { x: 20, y: 20 };
-    return { x: rect.left, y: rect.bottom };
-  };
-
   // The target image node — used to seed the image editor with the current src/alt.
   const targetElement = typeof document !== 'undefined'
     ? document.querySelector(`[data-image-id="${targetId}"]`)
     : null;
 
-  // Handle file upload
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  // (`handleFileUpload` retired with the bare file-input Replace action: the picker's
+  // Library/Upload tab posts to /api/upload-image itself and hands the URL back through
+  // onPick. Keeping the old helper would have left an unreachable second upload path.)
 
-    setUploadError(null);
-    setIsUploading(true);
-
-    try {
-      // Parse target info
-      const targetInfo = parseTargetId(targetId);
-      if (!targetInfo) {
-        throw new Error('Invalid target element');
-      }
-
-      // Upload to server via store action
-      await uploadImage(file, {
-        sectionId: targetInfo.sectionId,
-        elementKey: targetInfo.elementKey,
-      });
-
-      setIsUploading(false);
-    } catch (error) {
-      setUploadError(error instanceof Error ? error.message : 'Upload failed. Please try again.');
-      setIsUploading(false);
-    }
-
-    // Reset input
-    event.target.value = '';
+  // Open the picker on a given tab. Both the Replace and Stock Photos actions land here —
+  // one picker, two entry tabs.
+  const openPicker = (tab: MediaPickerTab) => {
+    setPickerTab(tab);
+    setPickerOpen(true);
   };
 
-  // Handle stock photo search
-  const handleStockPhotos = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
+  // The toolbar only holds `targetId`; replaceImage takes (sectionId, elementKey, url) —
+  // so route through parseTargetId, mirroring handleFileUpload. replaceImage already
+  // delegates to updateElementContent AND pushes an undo entry; autosave picks the change
+  // up like any other content edit → NO extra save() call here, deliberately.
+  const handlePick = (url: string) => {
+    const targetInfo = parseTargetId(targetId);
+    if (!targetInfo) {
+      setUploadError('Invalid target element');
+      return;
     }
-    setShowStockPhotos(true);
+    replaceImage(targetInfo.sectionId, targetInfo.elementKey, url);
   };
 
   // Handle image editing
@@ -272,29 +243,15 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
       id: 'replace-image',
       label: 'Replace',
       icon: 'upload',
-      handler: () => {
-        // Always use dynamic approach to avoid positioning issues
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.style.display = 'none';
-        
-        input.addEventListener('change', (e) => {
-          handleFileUpload(e as any);
-          // Clean up
-          document.body.removeChild(input);
-        });
-        
-        // Add to body, click, and the change event will handle removal
-        document.body.appendChild(input);
-        input.click();
-      },
+      // Was a bare dynamic <input type=file>; now opens the picker's Library/Upload tab
+      // (upload still available there — re-pointed, not removed).
+      handler: () => openPicker('library'),
     },
     {
       id: 'stock-photos',
       label: 'Stock Photos',
       icon: 'search',
-      handler: handleStockPhotos,
+      handler: () => openPicker('stock'),
     },
     {
       id: 'edit-image',
@@ -372,48 +329,14 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
 
       {/* Removed advanced actions menu for MVP */}
 
-      {/* Stock Photos Panel */}
-      {showStockPhotos && typeof window !== 'undefined' && (
-        <>
-          {createPortal(
-            <StockPhotosPanel
-          position={{
-            x: Math.max(10, Math.min(getPanelAnchor().x, window.innerWidth - 420)),
-            y: Math.max(10, Math.min(getPanelAnchor().y + 8, window.innerHeight - 320)),
-          }}
-          onClose={() => {
-            setShowStockPhotos(false);
-          }}
-          onSelectImage={(stockPhoto) => {
-            const targetInfo = parseTargetId(targetId);
-            if (targetInfo) {
-              // Show preview immediately (optimistic UX)
-              updateElementContent(targetInfo.sectionId, targetInfo.elementKey, stockPhoto.downloadUrl || stockPhoto.url);
-
-              // Proxy through Sharp in background for compression
-              if (tokenId) {
-                fetch('/api/proxy-image', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ pexelsPhotoId: stockPhoto.id, tokenId }),
-                })
-                  .then(res => res.ok ? res.json() : null)
-                  .then(data => {
-                    if (data?.url) {
-                      updateElementContent(targetInfo.sectionId, targetInfo.elementKey, data.url);
-                      logger.debug('✅ Stock photo compressed:', { id: stockPhoto.id, url: data.url });
-                    }
-                  })
-                  .catch(() => logger.warn('⚠️ Proxy failed, keeping original URL'));
-              }
-            }
-            setShowStockPhotos(false);
-          }}
-        />,
-            document.body
-          )}
-        </>
-      )}
+      {/* Media picker — Library/Upload + Stock (replaces the old file input + StockPhotosPanel) */}
+      <MediaPickerModal
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        initialTab={pickerTab}
+        tokenId={tokenId}
+        onPick={handlePick}
+      />
 
       {/* Upload Progress */}
       {isUploading && (
@@ -470,328 +393,6 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
       )}
 
     </>
-  );
-}
-
-// Stock Photos Panel Component
-function StockPhotosPanel({ position, onClose, onSelectImage }: {
-  position: { x: number; y: number };
-  onClose: () => void;
-  onSelectImage: (stockPhoto: StockPhoto) => void;
-}) {
-  // Narrow selector: this portal only needs the template-identity fields to
-  // resolve the palette mood phrase for stock-photo queries.
-  const { audienceType, templateId, paletteId } = useEditStore(
-    useShallow((s) => ({
-      audienceType: s.audienceType,
-      templateId: s.templateId,
-      paletteId: s.paletteId,
-    })),
-  );
-  const usesTemplate = usesTemplateModule(audienceType, templateId);
-
-  // Resolve the active template's palette mood phrase from the preloaded module
-  // (loaded by EditablePageRenderer before the toolbar opens). Undefined → the
-  // audience helper simply omits the mood suffix.
-  const palettePhrase =
-    usesTemplate
-      ? getLoadedTemplate((templateId || 'hearth') as TemplateId)
-          ?.paletteImageKeywords?.[(paletteId as string) ?? '']
-      : undefined;
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<StockPhoto[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentCategory, setCurrentCategory] = useState<'featured' | 'business' | 'tech' | 'people' | 'nature' | 'lifestyle'>('featured');
-
-  // Load featured photos on mount
-  useEffect(() => {
-    loadFeaturedPhotos();
-  }, []);
-
-  const loadFeaturedPhotos = async () => {
-    setIsSearching(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/images/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ searchType: 'curated', per_page: 12 })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to load photos');
-      }
-
-      setSearchResults(data.photos);
-    } catch (err) {
-      // console.error('Error loading featured photos:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load photos. Please check your API key.';
-      setError(errorMessage);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const handleSearch = async (query: string) => {
-    if (!query.trim()) {
-      loadFeaturedPhotos();
-      return;
-    }
-
-    setSearchQuery(query);
-    setIsSearching(true);
-    setError(null);
-
-    const effectiveQuery =
-      usesTemplate
-        ? getServiceImageQuery(query.trim(), undefined, palettePhrase)
-        : query.trim();
-
-    try {
-      const response = await fetch('/api/images/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          searchType: 'search',
-          query: effectiveQuery,
-          per_page: 12,
-          orientation: 'landscape'
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Search failed');
-      }
-
-      setSearchResults(data.photos);
-    } catch (err) {
-      setError('Search failed. Please try again.');
-      // console.error('Error searching photos:', err);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const handleCategorySearch = async (category: typeof currentCategory) => {
-    setCurrentCategory(category);
-    setIsSearching(true);
-    setError(null);
-    setSearchQuery('');
-    
-    try {
-      let requestBody;
-      
-      if (category === 'featured') {
-        requestBody = { searchType: 'curated', per_page: 12 };
-      } else {
-        const categoryQuery =
-          usesTemplate
-            ? getServiceImageQuery(category, undefined, palettePhrase)
-            : category;
-        requestBody = {
-          searchType: category,
-          query: categoryQuery,
-          per_page: 12
-        };
-      }
-      
-      const response = await fetch('/api/images/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to load category photos');
-      }
-
-      setSearchResults(data.photos);
-    } catch (err) {
-      setError('Failed to load category photos.');
-      // console.error('Error loading category photos:', err);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-
-  return (
-    <div
-      className="fixed bg-white border-2 border-blue-500 rounded-lg shadow-2xl"
-      style={{
-        left: position.x,
-        top: position.y,
-        width: 400,
-        height: 300,
-        zIndex: 10001, // Higher than toolbar's z-index
-      }}
-      onClick={(e) => {
-        // Prevent clicks from propagating and potentially closing the toolbar
-        e.stopPropagation();
-      }}
-    >
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium text-gray-900">Stock Photos</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        
-        <div className="relative mb-3">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search stock photos..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-            {isSearching ? (
-              <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            )}
-          </div>
-        </div>
-        
-        {/* Category buttons */}
-        <div className="flex gap-1 flex-wrap">
-          {[
-            { key: 'featured', label: 'Featured' },
-            { key: 'business', label: 'Business' },
-            { key: 'tech', label: 'Tech' },
-            { key: 'people', label: 'People' },
-            { key: 'nature', label: 'Nature' },
-            { key: 'lifestyle', label: 'Lifestyle' },
-          ].map((category) => (
-            <button
-              key={category.key}
-              onClick={() => handleCategorySearch(category.key as any)}
-              className={`px-2 py-1 text-xs rounded-md transition-colors ${
-                currentCategory === category.key
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {category.label}
-            </button>
-          ))}
-        </div>
-      </div>
-      
-      <div className="p-4 overflow-y-auto" style={{ height: 'calc(100% - 140px)' }}>
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">{error}</p>
-            <button
-              onClick={() => {
-                setError(null);
-                loadFeaturedPhotos();
-              }}
-              className="mt-2 text-xs text-red-700 underline hover:no-underline"
-            >
-              Try again
-            </button>
-          </div>
-        )}
-        
-        {/* Show loading indicator prominently */}
-        {isSearching && (
-          <div className="mb-4 p-4 text-center">
-            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-            <p className="text-sm text-gray-600">Loading stock photos...</p>
-          </div>
-        )}
-        
-        <div className="grid grid-cols-2 gap-3">
-          {searchResults.map((photo) => (
-            <button
-              key={photo.id}
-              onClick={() => onSelectImage(photo)}
-              className="relative group overflow-hidden rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
-              style={{ aspectRatio: '16/9' }}
-              title={`${photo.alt} by ${photo.author}`}
-            >
-              <img
-                src={photo.url}
-                alt={photo.alt}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
-                <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                </div>
-              </div>
-              
-              {/* Attribution overlay */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <p className="text-xs text-white truncate">
-                  by {photo.author}
-                </p>
-              </div>
-            </button>
-          ))}
-        </div>
-        
-        {searchResults.length === 0 && !isSearching && !error && (
-          <div className="text-center py-8">
-            <svg className="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <p className="text-sm text-gray-500">No photos found</p>
-          </div>
-        )}
-        
-        {isSearching && (
-          <div className="flex justify-center py-8">
-            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )}
-      </div>
-      
-      {/* Attribution footer */}
-      <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
-        <p className="text-xs text-gray-500 text-center">
-          Photos provided by{' '}
-          <a
-            href="https://pexels.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
-          >
-            Pexels
-          </a>
-        </p>
-      </div>
-    </div>
   );
 }
 
