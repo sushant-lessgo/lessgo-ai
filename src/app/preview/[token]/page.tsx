@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { Suspense, useEffect, useState, useRef } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useShallow } from 'zustand/react/shallow';
 import { EditProvider } from '@/components/EditProvider';
 import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
@@ -29,8 +29,31 @@ export default function PreviewPage() {
     );
   }
 
+  // `?chrome=0` is read via useSearchParams, which REQUIRES a Suspense boundary:
+  // without one, `next build` fails the page with
+  // "missing-suspense-with-csr-bailout" (precedent: dashboard/billing/page.tsx).
+  //
+  // The branch lives INSIDE the boundary on purpose. Lifting the flag out (an
+  // effect reading window.location.search, or state hoisted to this component)
+  // would first-paint the action bar and then remove it — inside the STEP 06
+  // reveal iframe that is a visible flash. Reading it here means the chromeless
+  // tree never renders the bar at all, not even for a frame.
   return (
-    <EditProvider 
+    <Suspense fallback={null}>
+      <PreviewPageRouter tokenId={tokenId} />
+    </Suspense>
+  );
+}
+
+function PreviewPageRouter({ tokenId }: { tokenId: string }) {
+  const searchParams = useSearchParams();
+  // Strictly opt-in: ONLY the exact string '0' suppresses chrome. Every other
+  // value (absent, '1', 'false', garbage) is the normal preview — the default
+  // path must never be reachable by accident.
+  const chromeless = searchParams?.get('chrome') === '0';
+
+  return (
+    <EditProvider
       tokenId={tokenId}
       options={{
         showLoadingState: true,
@@ -41,8 +64,68 @@ export default function PreviewPage() {
         prefetchBaselineForReview: false,
       }}
     >
-      <PreviewPageContent tokenId={tokenId} />
+      {chromeless ? (
+        <PreviewSiteOnly tokenId={tokenId} />
+      ) : (
+        <PreviewPageContent tokenId={tokenId} />
+      )}
     </EditProvider>
+  );
+}
+
+/**
+ * `?chrome=0` — the site and NOTHING else.
+ *
+ * Used by the onboarding STEP 06 reveal, which embeds this route in an iframe so
+ * the journey's `.app-chrome` scope can never become an ancestor of template
+ * output (landmine 1 / decision 6: app fonts+tokens bleeding into a template =
+ * editor↔published divergence). The reveal deliberately has NO publish surface —
+ * the only way forward is the editor — so the action bar, SlugModal, the custom
+ * domain modal and the publish success modal are ABSENT FROM THE TREE here, not
+ * merely hidden. The e2e asserts count = 0 in the iframe document.
+ *
+ * A sibling of PreviewPageContent rather than a set of flags inside it: the
+ * normal preview is a shared, load-bearing flow and this phase must not put a
+ * single new conditional on it. The two effects below are the only ones the site
+ * itself needs (preview mode + default-to-home); everything else PreviewPageContent
+ * does — published-slug fetch, tab manager, publish payload assembly — exists
+ * solely to serve chrome that does not render here.
+ *
+ * INTERIM TARGET: generate + reveal + preview are consolidating onto the edit
+ * route (preview becomes an editor mode toggle; `/preview` retires) — future
+ * editor-track work. When that lands, this chromeless branch moves to the editor
+ * preview surface, together with the reveal's iframe src (StepReveal.tsx) and the
+ * `/preview/:token*` X-Frame-Options SAMEORIGIN rule in next.config.js.
+ */
+function PreviewSiteOnly({ tokenId }: { tokenId: string }) {
+  const { pages, currentPageId } = useEditStore(
+    useShallow((s) => ({ pages: s.pages, currentPageId: s.currentPageId })),
+  );
+  const storeApi = useEditStoreApi();
+
+  useEffect(() => {
+    storeApi.getState().setMode('preview');
+  }, [storeApi]);
+
+  // Same default-to-home rule as the normal preview (no page switcher here
+  // either, so without it the reveal could open on whatever page was last
+  // active). One-shot; setCurrentPage is a no-op when already home.
+  const didDefaultToHome = useRef(false);
+  useEffect(() => {
+    if (didDefaultToHome.current) return;
+    const list = pages ? Object.values(pages) : [];
+    if (list.length === 0) return; // draft not loaded yet
+    const home = list.find((p: any) => p?.pathSlug === '/') as any;
+    if (home && currentPageId !== home.id) storeApi.getState().setCurrentPage(home.id);
+    didDefaultToHome.current = true;
+  }, [pages, currentPageId, storeApi]);
+
+  return (
+    <div className="min-h-screen bg-white" data-testid="preview-chromeless">
+      <div id="landing-preview">
+        <LandingPageRenderer tokenId={tokenId} />
+      </div>
+    </div>
   );
 }
 

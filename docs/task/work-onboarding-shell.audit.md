@@ -1158,21 +1158,39 @@ before P7 QA item (a).
    **Fix needs `src/lib/rateLimit.ts` or the work routes — neither on P5's list.**
    Options for the orchestrator: raise/except the AI limit for the per-page copy
    route, count a fan-out as one operation, or have the driver pace itself.
-2. **`finalizeMultiPageGeneration`'s marker-drop never reaches the DB — landmine
-   7's symptom is LIVE.** The driver DOES call finalize (which `delete`s
+2. ⟳ **SEVERITY CORRECTED DOWN IN P6 — read the correction below before acting on
+   this item.** (Original P5 heading, preserved for the record: *"finalize's
+   marker-drop never reaches the DB — landmine 7's symptom is LIVE"*.)
+   **`finalizeMultiPageGeneration`'s marker-drop never reaches the DB.**
+   The driver DOES call finalize (which `delete`s
    `fc.generationProgress`), but `/api/saveDraft` shallow-SPREADS the incoming
    finalContent over the stored one (`{...existingContent.finalContent,
    ...finalContent}`, `route.ts:194-199`) — so a client-side `delete` is invisible
    to it and the key survives from the previous per-page save. Verified in the DB:
    after a complete run, `generationProgress.completedPageKeys` still lists all 5
-   pages. Consequences: (a) **the editor treats a finished site as
-   mid-generation** — exactly the failure the plan says finalize exists to
-   prevent, and it is NOT caused by omitting finalize; (b) P5's resume rule
-   resolves a finished draft to STEP 05 instead of 06 (it self-heals: re-drive =>
-   all pages skipped => re-finalize => 06, chargeless but wasteful). Affects EVERY
-   multi-page LLM run (thing included), predates this phase. **Fix needs
-   `/api/saveDraft` (deep-delete/tombstone support) or a driver change beyond P5's
-   re-export-only mandate on `work.llm.ts`.**
+   pages.
+
+   ⟳ **P6 CORRECTION — the claim "(a) the editor treats a finished site as
+   mid-generation" was WRONG and is WITHDRAWN.** It is NOT supported by the code:
+   **no editor code reads `generationProgress` at all.** The only readers anywhere
+   are `isResumableGeneration`, the work/thing skip-loops, `resumeStep.ts`, and
+   `editDelta/capture.ts:98` — where it is explicitly SKIP-LISTED. The editor
+   opens a finished site normally (P6's e2e drives reveal → `/edit/{token}`; the
+   stale marker changes nothing there).
+
+   **The actual, whole consequence** is P5's point (b) plus junk data: a finished
+   draft resumes at STEP 05 rather than 06, flashes the building UI, and re-drives
+   **CHARGELESSLY** (every page is already in `completedPageKeys` ⇒ 0 AI calls ⇒
+   re-finalize ⇒ advance to 06), leaving a permanently stale `generationProgress`
+   in the stored `finalContent`. **Cosmetic + wasteful — NOT a handoff break, and
+   NOT a threat to P7's QA gate.** Affects EVERY multi-page LLM run (thing
+   included) and predates this feature. Severity: **low-priority follow-up**, not
+   a merge blocker — the founder should rule on accurate severity, which is why
+   this correction exists. **Fix needs `/api/saveDraft` (deep-delete/tombstone
+   support); it belongs to whoever owns saveDraft, not this feature.**
+   ⚠️ When that fix lands, the tripwire assertion in `e2e/work-onboarding.spec.ts`
+   (`generationProgress?.completedPageKeys ?? []`) **will fail by design** — the
+   comment there says what to replace it with (`toBeUndefined()`).
 3. **Two by-design nulls stand** (decision 8): thin steps never set `goalIntent`
    => finalize runs with `briefGoal=null` (no goal-CTA stamping); `state.strategy`
    stays null (the real strategy call is inside the driver).
@@ -1201,3 +1219,347 @@ before P7 QA item (a).
   step-06 variant ("Save & exit" -> `/dashboard`) is the default and needs nothing.
 - **e2e:** the P5 spec ends on `step-reveal` + a reload. P6's full-journey spec can
   extend it, but keep the rate-limit retry loop (open risk #1) or it will flake.
+
+---
+
+# Phase 6 — STEP 06: the reveal -> editor handoff (fully agnostic)
+
+## Files changed
+
+- `src/app/preview/[token]/page.tsx` (edit — `chrome=0` via a Suspense-wrapped `useSearchParams` child; **P6-finish:** interim-target comment on the `PreviewSiteOnly` docblock)
+- `src/components/onboarding/journey/steps/StepReveal.tsx` (rewrite — placeholder -> the real reveal; **P6-finish:** interim-target comment at the iframe call site)
+- `next.config.js` (**founder-authored** XFO split — SAMEORIGIN on `/preview/:token*`, DENY elsewhere. **P6-finish:** I added ONLY the interim-target comment on the rule; I changed **no header logic**, and verified the construction by curl instead of assuming it — see the RESOLVED box)
+- `e2e/work-onboarding.spec.ts` (edit — reveal assertions folded into the P5 generation test; Bug B tripwire comment; Bug B severity correction)
+- `docs/task/work-onboarding-shell.audit.md` (this entry + the P5 Bug B severity correction)
+
+**NOT changed, though listed in the plan's Files touched** (see Deviations):
+`src/components/onboarding/journey/JourneyTopBar.tsx`, `src/modules/wizard/work/resumeStep.ts`.
+
+## ✅ RESOLVED (2026-07-16) — the XFO blocker is closed; the reveal is PROVEN
+
+**Status: the blocker below is HISTORY. Kept for the reasoning trail; read this box first.**
+
+The founder ruled **option B**: keep the iframe, relax `X-Frame-Options` `DENY` → `SAMEORIGIN`
+**on the framed preview route only**. Explicitly the long-term-right call, not a shortcut: the
+merged editor preview is getting a **mobile-view toggle** (`toolbarPlan.md`), an honest mobile
+preview needs a **true viewport**, and only an iframe delivers that — so an iframe is needed
+eventually regardless. **The founder made the `next.config.js` change themselves.**
+
+### The header construction (founder-authored) — verified sound, NOT assumed
+
+`next.config.js` now splits XFO into two mutually exclusive sources; the global `/(.*)` block
+no longer carries XFO at all:
+
+| source | XFO |
+|---|---|
+| `/preview/:token*` | `SAMEORIGIN` |
+| `/((?!preview/).*)` (negative-lookahead catch-all) | `DENY` |
+
+**Why the mutual exclusivity matters (the trap I checked for):** Next applies **every** matching
+`headers()` entry. Had the `SAMEORIGIN` rule and a `DENY` catch-all both matched `/preview/x`,
+**two conflicting XFO lines** would be sent and browsers take the **most restrictive** — silently
+re-blocking the reveal while looking correct in the config. The lookahead is what prevents this.
+**I verified it empirically rather than by reading**, counting header lines, on a fresh production
+server (`next build` + `next start -p 3411`):
+
+```
+$ for u in /preview/testtoken123?chrome=0 /dashboard / ; do curl -sI -H 'Host: app.lessgo.ai' "http://127.0.0.1:3411$u" ...
+
+=== /preview/testtoken123?chrome=0
+X-Frame-Options: SAMEORIGIN      -- xfo line count: 1     ← exactly ONE, no duplicate
+=== /dashboard
+X-Frame-Options: DENY            -- xfo line count: 1
+=== /                    HTTP/1.1 200 OK
+X-Frame-Options: DENY            -- xfo line count: 1
+```
+
+Both directions, incl. the edge cases:
+
+```
+/preview/testtoken123            → X-Frame-Options: SAMEORIGIN
+/preview/testtoken123?chrome=0   → X-Frame-Options: SAMEORIGIN
+/preview                         → X-Frame-Options: DENY     ← bare /preview is NOT framed-eligible
+/edit/testtoken123               → X-Frame-Options: DENY
+/dashboard                       → X-Frame-Options: DENY
+/                                → X-Frame-Options: DENY
+```
+
+**Verdict: the construction is correct — no fix needed, and I changed no header logic.** Exactly
+one XFO per route; `SAMEORIGIN` is confined to `/preview/:token*`; `DENY` holds everywhere else,
+including bare `/preview` (so `:token*`'s optional-segment match does **not** overlap the catch-all
+in practice — the one duplicate risk worth naming, and it does not occur).
+
+*(Note on the 404s in the first curl pass: local requests to `127.0.0.1` hit the host-based
+middleware's marketing branch. Irrelevant to the proof — `headers()` applies regardless of status —
+and the e2e below exercises the real routed pages.)*
+
+### The reveal e2e — previously UNPROVEN, now PASSING
+
+`E2E_PORT=3412 PORT=3412 npx playwright test e2e/work-onboarding.spec.ts` → **7 passed (3.3m), exit 0.**
+Fresh server on an unused port (the foreign :3000 server was **not** killed; a distinct port avoids
+`reuseExistingServer: !CI` silently reusing a stale build without the inlined
+`NEXT_PUBLIC_WORK_COPY_ENGINE`). **The in-frame assertions now actually pass:**
+
+- the iframe renders the **real generated site** (`preview-chromeless` visible; `[data-surface]/[data-palette]/[data-variant]` present **inside** the frame);
+- **Publish is ABSENT FROM THE DOM** — `toHaveCount(0)`, not merely hidden (likewise Custom Domain, Back to Edit, "Preview from edit mode", and no Publish in the shell either);
+- **the `.app-chrome`-bleed tripwire holds**: template tokens appear **only inside** the frame — `page.locator('[data-surface], [data-palette], [data-variant]')` is **count 0** outside it (landmine 1, proven from both sides);
+- the phone toggle constrains the frame to 390px, and the handoff into `/edit/{token}` works with the stamps intact.
+
+### Default preview (no param) — action bar intact
+
+Proven by automation, not eyeballed: `e2e/publish.spec.ts` navigates `/preview/{token}` **without**
+the param and asserts the Publish button enables → **4 passed**, all three templates publish end to
+end. The `chrome=0` branch does not leak into the default path. (This closes P7 QA item (f) below.)
+
+---
+
+## ~~BLOCKER FOR THE ORCHESTRATOR~~ (RESOLVED — see above; retained for the reasoning trail)
+
+**The reveal iframe cannot render, in dev OR prod, and the fix is outside my Files-touched list.**
+
+`next.config.js:9-36` applies `X-Frame-Options: DENY` to **`source: '/(.*)'` — every route**,
+including `/preview/[token]`. Verified live:
+
+```
+$ curl -sI 'http://localhost:3101/preview/<token>?chrome=0' | grep -i x-frame
+X-Frame-Options: DENY
+```
+
+`DENY` blocks framing **even same-origin** (unlike `SAMEORIGIN`). So `<iframe
+src="/preview/{token}?chrome=0">` is refused by the browser and renders empty.
+This is **not** a dev-only artifact and **`npm run build` cannot catch it** — it is a
+runtime response header. Decision 6 pins the iframe as the "primary and ONLY"
+mechanism, so this blocks the phase's headline outcome.
+
+**Evidence chain (each step verified, not assumed):**
+1. e2e fails at the first frame assertion: `frameLocator(...).getByTestId('preview-chromeless')` — *element(s) not found*. The failure snapshot shows `iframe [ref=e73]:` with an empty body, while the STEP 06 body around it (badge, "Meet your site.", toggle, "Open the editor") renders correctly.
+2. Loaded **top-level** (not framed), the same URL works: `preview-chromeless=1`, `Publish` count `0`. So the route and the chromeless branch are fine — the iframe specifically is blocked.
+3. "Works top-level, blank when framed" is the XFO signature; `curl -I` confirms the header on the exact route.
+
+**Recommended fix (needs `next.config.js`, NOT on my list — I did not touch it):**
+add a route-specific header entry BEFORE the catch-all so `/preview/:token` sends
+`X-Frame-Options: SAMEORIGIN` (or drop XFO there in favour of CSP
+`frame-ancestors 'self'`, the modern equivalent). Scope it to `/preview/:token`
+only — do **not** weaken the global default. Security read: `SAMEORIGIN` on a
+preview route is the same posture the editor already relies on, and the route is
+auth-gated; it does not expose anything cross-origin.
+
+**Ruling needed:** which file owns this (P7 is fix-only over P1–P6 files, and
+`next.config.js` is on no phase's list), and whether to accept `SAMEORIGIN` on
+`/preview/:token`. **Until it lands, STEP 06 shows a working frame chrome around
+an empty iframe** — everything else in the phase is done and green.
+
+## What I built
+
+### 1. `preview/[token]` — `chrome=0` (decision 6, landmine 1)
+
+Structure now: `PreviewPage` (token guard, unchanged) -> `<Suspense fallback={null}>`
+-> **`PreviewPageRouter`** (new; reads `useSearchParams`) -> `EditProvider` ->
+either `PreviewPageContent` (**untouched**) or **`PreviewSiteOnly`** (new).
+
+- **Suspense approach (the pinned one; the banned fallback was not used).**
+  `useSearchParams` is read in a small child under `<Suspense fallback={null}>`,
+  per the `dashboard/billing/page.tsx:155` precedent. The
+  `window.location.search`-in-an-effect fallback is **not present anywhere** — it
+  would first-paint the action bar inside the reveal iframe and then remove it.
+- **The branch lives INSIDE the boundary on purpose.** Lifting the flag out to
+  `PreviewPage` (state + effect) would reintroduce exactly that flash. Reading it
+  in the same component that chooses the tree means the chromeless path never
+  renders the action bar, not even for one frame.
+- **`PreviewSiteOnly` is a sibling, not a set of flags inside `PreviewPageContent`.**
+  The normal preview is a shared, load-bearing flow; this phase puts **zero** new
+  conditionals on it. It duplicates only the two effects the site itself needs
+  (`setMode('preview')`, default-to-home); everything else `PreviewPageContent`
+  does (published-slug fetch, tab manager, publish payload assembly) exists purely
+  to serve chrome that does not render here.
+- Opt-in is strict: **only** the exact string `'0'`. Any other value (absent,
+  `'1'`, garbage) is the normal preview.
+- Absent from the chromeless tree (not hidden): action bar, Publish, Custom
+  Domain, Back to Edit, SlugModal, CustomDomainModal, publish-success modal.
+
+### 2. `StepReveal.tsx` — the magic moment
+
+Full-width scrollable `<iframe src="/preview/{token}?chrome=0">` (`h-[68vh]`),
+Desktop/Phone `SegmentedControl` (phone = `width: 390px`), a "Opening your site…"
+loading state until `onLoad` (iframe fades in), "Ready" badge + "Meet your site."
+per the handoff, and **one** CTA: **"Open the editor"** -> `router.push('/edit/{token}')`.
+**No publish action anywhere.**
+
+Fully agnostic: takes **no props at all** (not even `seam`) — a zero-arg component
+is still assignable to the step signature. `tokenId` comes from the store. The
+purity guard (import assertion + literal tripwire) passes.
+
+### 3. How I guaranteed `.app-chrome` is not an ancestor of the revealed site
+
+- **Mechanism:** the site renders in an `<iframe>` — a **separate document**.
+  `.app-chrome` is not merely "not applied"; it is *structurally unable* to reach
+  in (no CSS scope, cascade, or inherited font-family crosses a document
+  boundary). This is why the plan pins the iframe rather than a div/portal.
+- **Verified there is no non-iframe rendering of site content in the shell.**
+  Greps across `src/components/onboarding/journey/**` confirm: **no** import of any
+  template resolver/registry/renderer, no `LandingPageRenderer`, no
+  `LandingPagePublishedRenderer` — the only site rendering is the iframe `src`.
+  The agnostic-purity Vitest guard asserts the import graph mechanically.
+- **Asserted from both sides in e2e** (written, currently blocked by the XFO
+  issue above): *inside* the frame, template token attributes
+  (`[data-surface],[data-palette],[data-variant]`) are present; *outside*, the
+  shell document must contain **zero** such attributes — i.e. template output
+  exists only inside the frame. That outside-in assertion is the landmine-1
+  tripwire: it fails the moment anyone inlines the site into the shell.
+- The `.app-chrome` attachment remains the single one in `JourneyShell` (untouched).
+
+### 4. Build result (mandatory this phase)
+
+`npm run build` **PASSED**. No `missing-suspense-with-csr-bailout` — the Suspense
+boundary does its job. `/preview/[token]` stays `f (Dynamic)`, 10.5 kB / 477 kB
+First Load. This was the phase's stated build risk and it is closed.
+
+### 5. Proof the default preview is unchanged
+
+- **Code:** `PreviewPageContent` is **byte-identical** — the diff adds a wrapper
+  and a sibling; not one line inside it changed. The only edits to shared lines are
+  two imports (`Suspense`, `useSearchParams`).
+- **Runtime (the manual check I was asked to report):** loaded `/preview/{token}`
+  **without** the param against a real seeded project. It renders the normal
+  preview — `preview-chromeless` count `0`, and the page shows its standard
+  empty-draft state ("Preview Not Available… Go to Edit Mode") because the probe
+  project had no generated content. The action bar is not reachable in that
+  particular state (it is behind the `error` early-return, pre-existing behaviour),
+  so **the action bar was NOT visually confirmed on a CONTENT-BEARING project** —
+  the e2e that would have covered it is blocked by XFO. **Open item for P7 QA item
+  (f).** No flash was observed with the param (the chromeless tree never renders
+  the bar by construction).
+
+### 6. The two corrections from the P5 review
+
+- **(1) Bug B tripwire — DONE, assertion kept.** The
+  `generationProgress?.completedPageKeys ?? []` assertion in
+  `e2e/work-onboarding.spec.ts` now carries a loud comment naming Bug B, stating
+  it is **expected to fail when `/api/saveDraft` gains tombstone support** (marker
+  becomes `undefined` -> `?? []` -> 0 vs 5), that such a failure **is the fix
+  landing, not a regression**, and exactly what to replace it with
+  (`expect(draft.finalContent.generationProgress).toBeUndefined()`). Not deleted —
+  it is the only thing pinning "every planned page was written" and it is a useful
+  canary.
+- **(2) Bug B severity — CORRECTED in the P5 section above.** The claim "the
+  editor treats a finished site as mid-generation" is **withdrawn**: no editor code
+  reads `generationProgress` (only `isResumableGeneration`, the work/thing
+  skip-loops, `resumeStep.ts`, and `editDelta/capture.ts:98` where it is
+  skip-listed). Real consequence = a brief STEP-05 flash on reload that re-drives
+  chargelessly + junk in stored `finalContent`. Cosmetic + wasteful, **not a
+  handoff break**. The same overstated wording inside `e2e/work-onboarding.spec.ts`
+  was corrected too (it is my file this phase).
+
+## Deviations
+
+1. **`JourneyTopBar.tsx` NOT edited** (plan listed it: "step-06 variant polish").
+   Nothing to do — it **already** conforms to the handoff for 06: the shell's
+   wrapper is `bg-app-canvas` = `#f7f8fa` (the handoff's body colour) and, since
+   `building` is false at step 6, the `right` slot is undefined -> the default
+   "Save & exit" -> `router.push('/dashboard')`. Conservative call: do not churn a
+   shared agnostic file to produce an identical result. (P5's audit predicted this.)
+2. **`resumeStep.ts` NOT edited** (plan: "finished => 6, *if not fully landed in
+   P5*"). It fully landed in P5 — `resolveWorkResumeStep` already returns 6 for
+   finished content. Verified by reading it; no edit needed.
+3. **Reveal assertions folded into the P5 generation test rather than a new spec.**
+   Reaching STEP 06 honestly costs a full fan-out (1 strategy + 5 copy calls) plus,
+   on the free tier, a 61s rate-limit wait (Bug A). A second spec would double the
+   cost and the flake surface for identical coverage. The one test is now the
+   full-journey gate (02 -> 06 -> iframe -> editor) and is renamed to say so.
+4. **Desktop reveal is capped at the shell's `max-w-3xl` (768px) column.** The
+   handoff shows a wider stage. Widening it means editing `JourneyShell.tsx`'s
+   layout — **not on my list** — so I left it. Flag for P7/founder QA: the desktop
+   reveal is narrower than the design. Phone (390px) is exact.
+5. **Temporary out-of-scope experiment, reverted.** To test a hypothesis I briefly
+   added a `typeof window` guard to `src/hooks/useEditStoreBootstrap.ts`; it did not
+   fix the symptom and was reverted with `git checkout --` (confirmed clean in
+   `git status`). A temporary e2e probe test was added to my own spec file and
+   removed after use. **Net change to both: none.**
+
+## Test results (honest)
+
+- `npx tsc --noEmit` — **PASS** (clean).
+- `npm run test:run` — **PASS**: 202 files / 3484 tests, 1 file + 18 tests skipped.
+  Includes the agnostic-purity guard, the registry/leaf drift guard and
+  `tailwindConfigFreeze` (I added **no** Tailwind keys — I hit this: my first draft
+  used non-existent `app-success-border`/`app-success-subtle`; corrected to the real
+  `app-success` / `app-success-bg` tokens rather than adding keys).
+- `npm run build` — **PASS** (the mandatory gate; see above).
+- `npm run lint` — **PASS**, zero errors in my files (pre-existing warnings only).
+### ⟳ P6-FINISH RE-RUN (2026-07-16, post-ruling) — everything green
+
+| gate | result |
+|---|---|
+| `npx tsc --noEmit` | **PASS** (clean, exit 0) |
+| `npm run test:run` | **PASS** — 202 files / 3484 tests passed, 1 file + 18 tests skipped |
+| `npm run build` | **PASS** (mandatory this phase; exit 0, 34/34 static pages, `ƒ /preview/[token]`) |
+| `npm run lint` | **PASS** — zero errors; pre-existing warnings only (`vestria/publishedPrimitives`, `ph-provider`) |
+| `npx playwright test e2e/work-onboarding.spec.ts` | **PASS — 7 passed (3.3m), exit 0**, INCLUDING the reveal specs |
+| `npx playwright test e2e/publish.spec.ts` | **PASS — 4 passed**; proves the default (no-param) preview action bar |
+| curl XFO proofs | **PASS** both directions — exactly one XFO line per route |
+
+Snapshot CRLF churn on `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap`
+restored via `git checkout --` on that path only; final `git status` clean apart from this phase's files.
+
+One build wrinkle worth noting for whoever repeats this: after `npm run build`, `.next/routes-manifest.json`
+was missing and `next start` ENOENT'd; a plain `npx next build` re-run regenerated it. Local artifact, not a
+code issue — the build itself exits 0.
+
+### Original P5/P6 run (superseded by the re-run above)
+
+- `npx playwright test e2e/work-onboarding.spec.ts` — **5 passed, 1 FAILED, 1 did
+  not run.** Ran on a **freshly spawned server via `E2E_PORT=3100 PORT=3100`**; the
+  foreign server on :3000 was **not** killed, and `reuseExistingServer` did not
+  silently reuse a stale one (the flag `NEXT_PUBLIC_WORK_COPY_ENGINE=true` was
+  inlined correctly — generation ran, so the env reached the server).
+  - The failure is **the XFO blocker**, at the first in-frame assertion. Everything
+    before it passes: generation completes, STEP 06 mounts, the reload resume
+    lands on the reveal, the DB stamps hold.
+  - **"1 did not run"** = the `legacy unchanged` spec, skipped because the file is
+    `mode: 'serial'` and an earlier test failed. It passed in the pre-P6 run and
+    my changes cannot affect it.
+  - The reveal assertions themselves are therefore **written but not yet proven
+    green** — they cannot be until the XFO ruling lands. I am not reporting them
+    as passing.
+
+## Open risks / what P7 must know
+
+1. ~~**XFO is P7's gate-0.**~~ **CLOSED** — founder ruled option B and made the
+   `next.config.js` change; construction verified by curl, reveal e2e green. Nothing
+   for P7 here. **But see the interim-target note (item 3) — that IS live.**
+2. ~~**The reveal e2e is unproven.**~~ **CLOSED** — 7/7 pass, both landmine-1
+   assertions included (template tokens present *inside* the frame, **count 0**
+   outside) and Publish absent from the DOM.
+3. **⚠️ THE HEADER RULE IS AN INTERIM TARGET AND MUST MOVE WITH THE REVEAL.**
+   Generate + reveal + preview are consolidating onto the **edit route** (preview
+   becomes an editor mode toggle; `/preview` retires) — future editor-track work.
+   When that lands, **both** the iframe target and the `/preview/:token*` SAMEORIGIN
+   rule move to the editor preview surface. Do not leave a dangling rule for a
+   nonexistent route, and do not simply delete it (the reveal stops rendering).
+   Comments are planted at **all three** sites so nobody finds one without the others:
+   - `src/components/onboarding/journey/steps/StepReveal.tsx` — at the `<iframe>` call site
+   - `src/app/preview/[token]/page.tsx` — on the `PreviewSiteOnly` (`chrome=0`) docblock
+   - `next.config.js` — **on the rule itself**, cross-referencing StepReveal.tsx
+4. ~~**P7 QA item (f)**~~ **CLOSED by automation** — `e2e/publish.spec.ts` drives
+   `/preview/{token}` with no param and asserts Publish enables (4 passed). The
+   default action bar is intact; no founder eyeballing needed.
+5. **Desktop reveal width is 768px**, narrower than the handoff (deviation 4) —
+   `JourneyShell`'s `max-w-3xl`. **Carried to P7 as a note**: I was scoped out of
+   widening it (it is shared journey chrome, and changing it moves every step, not
+   just the reveal). Needs a founder call on whether the reveal should break out of
+   the shell's measure — the reveal is the one step showing a full site, so the
+   constraint that helps steps 01-05 read arguably hurts 06.
+6. **Bug A (rate limit) still bites**: the e2e retry loop is load-bearing. The
+   founder meets a 429 + 61s stall on the first real pilot run. (Confirmed still
+   live in the P6-finish re-run — the reveal test took 1.7m.)
+7. **Bug B** stays open, at **corrected (low) severity** — the STEP-05 flash on
+   reload is expected until saveDraft gains tombstone support, and the tripwire
+   assertion will fail *by design* when it does.
+8. **Pre-existing dev-only noise (NOT a blocker, do not chase):** `/preview` (and
+   `/edit`) return **HTTP 500** in dev with `ReferenceError: window is not defined`
+   from module-scope `window` access; the page recovers client-side, and the guard
+   is `NODE_ENV === 'development'` so it is compiled out of prod (`npm run build`
+   passes). It affects the **default** preview identically — proven, so it is not a
+   P6 regression, and it is **not** what breaks the iframe (XFO is). One source is
+   `src/hooks/useEditStoreBootstrap.ts:237`, but a guard there alone did **not**
+   silence it, so there is at least one more. Separate cleanup, someone else's file.

@@ -285,7 +285,18 @@ test('the journey walks 02 → 04: answers land in the rail and in the DB, kind-
 // keeps the gate honest and proves the resume path works. See the audit.
 // ============================================================================
 
-test('STEP 05 generates the site (mock), hands off to STEP 06, and RESUMES there', async ({
+// ============================================================================
+// P6 — STEP 06: the reveal → editor handoff.
+//
+// The reveal assertions are APPENDED to the P5 generation test rather than given
+// their own spec, deliberately: reaching STEP 06 honestly costs a full work
+// fan-out (1 strategy + 5 copy calls) AND, on the free tier, a 61s rate-limit
+// wait (Bug A). A second spec would double that for zero extra coverage — the
+// generation path is identical. So this ONE test is the full-journey gate:
+// 02 → 06 → the real site in the iframe → the editor.
+// ============================================================================
+
+test('STEP 05 generates the site (mock), STEP 06 reveals it, and the editor opens', async ({
   page,
 }) => {
   const api = await authedApi(page);
@@ -352,6 +363,25 @@ test('STEP 05 generates the site (mock), hands off to STEP 06, and RESUMES there
   expect(draft.finalContent, 'no finalContent — generation did not persist').toBeTruthy();
   expect(Object.keys(draft.finalContent.pages ?? {}).length).toBeGreaterThan(0);
   // Every planned page was written.
+  //
+  // ⚠️ TRIPWIRE — THIS ASSERTION IS EXPECTED TO FAIL WHEN BUG B IS FIXED. ⚠️
+  // It only passes because of Bug B (see below + the audit): `generationProgress`
+  // is SUPPOSED to be gone from the DB by now — `finalizeMultiPageGeneration`
+  // deletes it — but the deletion never reaches Postgres, because /api/saveDraft
+  // shallow-spreads the incoming finalContent over the stored one
+  // (route.ts:194-199), so a client-side `delete` is merely an ABSENT key and the
+  // stored value survives. We are therefore asserting on a stale marker.
+  //
+  // The day someone gives /api/saveDraft tombstone support, `generationProgress`
+  // becomes undefined here ⇒ `?? []` ⇒ length 0 vs 5 ⇒ this line fails, and it
+  // will look like a real regression to whoever is holding the saveDraft fix.
+  // IT IS NOT. That failure is the FIX LANDING. When it happens, replace this
+  // with the assertion it was always standing in for:
+  //
+  //     expect(draft.finalContent.generationProgress).toBeUndefined();
+  //
+  // Kept (not deleted) meanwhile because it is the only thing pinning "every
+  // planned page was written" — and it is a useful canary for the saveDraft fix.
   expect(draft.finalContent.generationProgress?.completedPageKeys ?? []).toHaveLength(
     Object.keys(draft.finalContent.pages).length
   );
@@ -363,11 +393,19 @@ test('STEP 05 generates the site (mock), hands off to STEP 06, and RESUMES there
   // `/api/saveDraft` shallow-SPREADS the incoming finalContent over the stored
   // one (`{...existingContent.finalContent, ...finalContent}`, route.ts:194-199),
   // so a key deleted client-side survives from the earlier per-page save.
-  // Landmine 7's stated symptom (the editor treats a finished site as
-  // mid-generation) is therefore LIVE, and it predates this phase — every
-  // multi-page LLM run (thing included) is affected. Fixing it means touching
-  // `/api/saveDraft` (or having the driver send an explicit tombstone), both
-  // outside P5's Files-touched.
+  // It predates this phase — every multi-page LLM run (thing included) is
+  // affected. Fixing it means touching `/api/saveDraft` (or having the driver
+  // send an explicit tombstone), both outside this feature's Files-touched.
+  //
+  // ⟳ SEVERITY CORRECTED DOWN (P6 review — P5's wording overstated it).
+  // Landmine 7's stated symptom, "the editor treats a finished site as
+  // mid-generation", is NOT what happens: NO editor code reads
+  // `generationProgress` (only `isResumableGeneration`, the work/thing
+  // skip-loops, `resumeStep.ts`, and `editDelta/capture.ts:98`, where it is
+  // explicitly skip-listed). The real consequence is the brief STEP-05 flash on
+  // reload asserted below, which re-drives CHARGELESSLY (every page is already
+  // in `completedPageKeys` ⇒ 0 AI calls ⇒ re-finalize ⇒ 06), plus permanent junk
+  // in the stored finalContent. Cosmetic + wasteful — NOT a handoff break.
 
   // The stamps are untouched by the whole run (landmine 3).
   expect(draft.audienceType).toBe('service');
@@ -392,6 +430,62 @@ test('STEP 05 generates the site (mock), hands off to STEP 06, and RESUMES there
   await page.reload();
   await expect(page.getByTestId('step-reveal')).toBeVisible({ timeout: 120_000 });
   await expect(page.getByTestId('step-show-work')).toHaveCount(0);
+
+  // ── P6: THE REVEAL ───────────────────────────────────────────────────────
+  // The site renders in an IFRAME — a separate document — which is the entire
+  // mechanism that keeps the journey's `.app-chrome` from becoming an ancestor
+  // of template output (landmine 1). Asserting through frameLocator is itself
+  // part of the point: if someone ever "simplifies" this into an inline render,
+  // there is no frame to locate and these assertions die loudly.
+  const frame = page.frameLocator('[data-testid="reveal-frame"]');
+
+  // The chromeless preview mounted...
+  await expect(frame.getByTestId('preview-chromeless')).toBeVisible({ timeout: 60_000 });
+
+  // ...and it is the REAL generated site, not an empty shell: template blocks
+  // emit token attributes (same proof render.spec.ts uses). Mock copy still
+  // renders through the real atelier template.
+  await expect(
+    frame.locator('[data-surface], [data-palette], [data-variant]').first()
+  ).toBeVisible({ timeout: 60_000 });
+
+  // ── NO PUBLISH SURFACE — absent from the DOM, not merely hidden ───────────
+  // The reveal IS the review; the only way forward is the editor. `toHaveCount(0)`
+  // (not `not.toBeVisible()`) is the assertion the plan pins: a hidden-but-present
+  // Publish button would pass visibility checks and still be one CSS change from
+  // shipping a publish action into the magic moment.
+  await expect(frame.getByRole('button', { name: 'Publish' })).toHaveCount(0);
+  await expect(frame.getByRole('button', { name: 'Custom Domain' })).toHaveCount(0);
+  await expect(frame.getByRole('button', { name: 'Back to Edit' })).toHaveCount(0);
+  await expect(frame.getByText('Preview from edit mode')).toHaveCount(0);
+
+  // Nor is there a publish control in the SHELL around the iframe.
+  await expect(page.getByRole('button', { name: 'Publish' })).toHaveCount(0);
+
+  // Site content lives ONLY inside the iframe: the shell's own document must
+  // carry no template output (the landmine-1 tripwire, from the outside).
+  await expect(page.locator('[data-surface], [data-palette], [data-variant]')).toHaveCount(0);
+
+  // Phone toggle constrains the frame; desktop is the default.
+  await page.getByTestId('reveal-viewport').getByRole('radio', { name: 'Phone' }).click();
+  await expect(page.getByTestId('reveal-frame')).toHaveAttribute('style', /width:\s*390px/);
+
+  // ── The handoff: the one forward path ────────────────────────────────────
+  await page.getByTestId('reveal-open-editor').click();
+  await page.waitForURL(`**/edit/${token}`, { timeout: 60_000 });
+
+  // The editor loads the generated site (template output present = it rendered,
+  // not an empty canvas). Here it IS in the page document — the editor is not
+  // under `.app-chrome`, which is exactly why the reveal needed the iframe.
+  await expect(
+    page.locator('[data-surface], [data-palette], [data-variant]').first()
+  ).toBeVisible({ timeout: 60_000 });
+
+  // The stamps survive the whole journey, end to end (landmine 3).
+  const afterEdit = await loadDraft(api, token);
+  expect(afterEdit.audienceType).toBe('service');
+  expect(afterEdit.templateId).toBe('atelier');
+  expect(afterEdit.brief.copyEngine).toBe('work');
 });
 
 test('legacy unchanged: a non-seam brief still reaches the entry card / WizardShell', async ({
