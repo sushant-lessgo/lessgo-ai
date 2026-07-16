@@ -24,7 +24,7 @@ the publish pipeline without orphaning KV routes, blobs, or live pages.
 - phase 4 unpublish + delete API routes + e2e: done (commit 82cc4cba, review loops 2, verdict ship). Found+fixed: demo-token destructive bypass (SECURITY), D1 guard state-hole, untrue e2e 401 assert, 2 e2e-infra defects (unregistered spec / broken E2E_PORT). **e2e 7/7 green, verified by execution.**
 - phase 5 dashboard wiring slice 1 (Unpublish/Delete live): done (commit bddc24af, review loops 1, verdict ship). **⛔ GATE A now open — awaiting founder.**
 - phase 6 rename + duplicate: done (commit b5e3405c, review loops 1, verdict ship). e2e 14/14.
-- phase 7 acceptance sweep + docs: pending
+- phase 7 acceptance sweep + docs: done (commit 0e9a704d, review loops 1, verdict ship). All 4 gates green. GATE B (merge) open.
 
 ## Recorded orchestrator decisions
 
