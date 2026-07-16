@@ -6,6 +6,7 @@ import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { useReviewState } from '@/hooks/useReviewState';
 import { isTestimonialsEnabledPublic } from '@/lib/testimonials/flag';
 import { isSectionVisuallySelected } from '@/utils/selectionPriority';
+import { HoverOverlay } from './HoverOverlay';
 // Removed useSelection - functionality now in unified useEditor system
 
 // Proof-element predicate (co-located with the marker UI). A needs-review marker sits on a
@@ -54,12 +55,17 @@ async function persistDismissedFlags(tokenId: string): Promise<void> {
 
 export function SelectionSystem({ children }: SelectionSystemProps) {
   // Selection state now comes from unified editor system
-  const { mode, selectedSection, selectedElement, multiSelection } = useEditStore(
+  const { mode, selectedSection, selectedElement, multiSelection, sections } = useEditStore(
     useShallow((s) => ({
       mode: s.mode,
       selectedSection: s.selectedSection,
       selectedElement: s.selectedElement,
       multiSelection: s.multiSelection,
+      // Subscribed so the imperative sweep below re-runs after a section
+      // reorder/add/remove — otherwise a remounted SELECTED node would lose its
+      // .selected-section class until the next selection change (single-writer
+      // model, phase 2). The array reference changes on any structural edit.
+      sections: s.sections,
     })),
   );
 
@@ -68,9 +74,9 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
     if (mode !== 'edit') return;
 
     // Add role and aria attributes to sections
-    const sections = document.querySelectorAll('[data-section-id]');
+    const sections = document.querySelectorAll('[data-section-root]');
     sections.forEach((section) => {
-      const sectionId = section.getAttribute('data-section-id');
+      const sectionId = section.getAttribute('data-section-root');
       if (!sectionId) return;
 
       section.setAttribute('role', 'button');
@@ -114,7 +120,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
         element.classList.remove('selected-element');
       }
     });
-  }, [mode, selectedSection, selectedElement, multiSelection]);
+  }, [mode, selectedSection, selectedElement, multiSelection, sections]);
 
   // Apply inline "verify AI-written" markers — Feature 2, edit canvas ONLY.
   // Only the `ai_generated_needs_review` category gets a marker now. The former stock-image /
@@ -165,7 +171,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
           element.focus();
         }
       } else if (selectedSection) {
-        const section = document.querySelector(`[data-section-id="${selectedSection}"]`);
+        const section = document.querySelector(`[data-section-root="${selectedSection}"]`);
         if (section instanceof HTMLElement) {
           section.focus();
         }
@@ -188,6 +194,7 @@ export function SelectionSystem({ children }: SelectionSystemProps) {
         <>
           <SelectionStyles />
           <SelectionIndicators />
+          <HoverOverlay />
           <VerifyMarkerControls mode={mode} />
         </>
       )}
@@ -346,38 +353,23 @@ function SelectionStyles() {
         background: rgba(16, 185, 129, 0.05) !important;
       }
       
-      /* Hover Effects */
-      [data-section-id]:hover:not(.selected-section):not(.multi-selected) {
-        outline: 1px solid #d1d5db;
-        outline-offset: 2px;
-        transition: outline 0.15s ease-in-out;
-      }
-      
-      [data-element-key]:hover:not(.selected-element) {
-        outline: 1px solid #e5e7eb;
-        outline-offset: 1px;
-        background: rgba(0, 0, 0, 0.02);
-        transition: all 0.15s ease-in-out;
-      }
-      
+      /* Hover affordance is now the JS-driven HoverOverlay (phase 3) — the sole
+         hover writer. No CSS :hover outline rules here (removes the interim
+         phase-2 rules and their nested-node flicker surface entirely). */
+
       /* Focus Styles */
       [data-section-id]:focus-visible {
         outline: 2px solid #f59e0b !important;
         outline-offset: 2px;
         box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
       }
-      
+
       [data-element-key]:focus-visible {
         outline: 2px solid #f59e0b !important;
         outline-offset: 1px;
         box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
       }
-      
-      /* Animation for selection changes */
-      [data-section-id], [data-element-key] {
-        transition: outline 0.2s ease-in-out, background 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-      }
-      
+
       /* Selection badges */
       .selection-badge {
         position: absolute;

@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useEditStore } from './useEditStore';
 
 import { logger } from '@/lib/logger';
+import { resolveTarget } from '@/utils/hoverTarget';
 export interface ClickTarget {
   element: HTMLElement;
   sectionId: string | null;
@@ -89,41 +90,36 @@ export function useEditor() {
       return null;
     }
 
-    // Find the closest element with data-element-key
-    const elementWithKey = target.closest('[data-element-key]') as HTMLElement;
-    
-    // Find the closest section
-    const sectionElement = target.closest('[data-section-id]') as HTMLElement;
-    
-    if (!sectionElement) {
+    // Shared DOM resolution (D4) — the SAME resolver the hover overlay uses, so
+    // hover-label ↔ resulting-toolbar are 1:1 by construction. Store-state guards
+    // and the image early-return above stay here; dispatch semantics unchanged.
+    const resolved = resolveTarget(target);
+
+    if (resolved.kind === 'element' && resolved.node) {
       return {
-        element: target,
-        sectionId: null,
-        elementKey: null,
-        type: 'background'
+        element: resolved.node,
+        sectionId: resolved.sectionId,
+        elementKey: resolved.elementKey,
+        type: 'element'
       };
     }
 
-    const sectionId = sectionElement.getAttribute('data-section-id');
-    
-    if (elementWithKey && sectionElement.contains(elementWithKey)) {
-      // Clicked on an element
-      const elementKey = elementWithKey.getAttribute('data-element-key');
+    if (resolved.kind === 'section' && resolved.node) {
       return {
-        element: elementWithKey,
-        sectionId,
-        elementKey,
-        type: 'element'
-      };
-    } else {
-      // Clicked on section background
-      return {
-        element: sectionElement,
-        sectionId,
+        element: resolved.node,
+        sectionId: resolved.sectionId,
         elementKey: null,
         type: 'section'
       };
     }
+
+    // No section container → background click (clears selection).
+    return {
+      element: target,
+      sectionId: null,
+      elementKey: null,
+      type: 'background'
+    };
   }, [isTextEditing, textEditingElement, toolbar]);
 
   // Calculate optimal toolbar position for target
@@ -354,12 +350,12 @@ export function useEditor() {
       case 'Tab':
         // Tab navigation between sections
         event.preventDefault();
-        const allSections = Array.from(document.querySelectorAll('[data-section-id]'));
+        const allSections = Array.from(document.querySelectorAll('[data-section-root]'));
         if (allSections.length === 0) return;
 
         const currentIndex = selectedSection
           ? allSections.findIndex(
-              (el) => el.getAttribute('data-section-id') === selectedSection
+              (el) => el.getAttribute('data-section-root') === selectedSection
             )
           : -1;
 

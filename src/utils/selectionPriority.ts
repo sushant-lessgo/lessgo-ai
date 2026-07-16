@@ -88,9 +88,10 @@ export function createEditorSelection(storeState: {
  * sectionId. Mirrors the section-toolbar gate (`selectedSection && !selectedElement`):
  * once an element is selected the element wins, so the parent section must NOT also
  * render as selected (otherwise every renderer washes the section blue under a
- * floating element toolbar). Kept pure + shared so the three redundant highlight
- * systems (MainContent ring, SelectionSystem `.selected-section`, ElementDetector
- * `.section-selected`) can't drift apart.
+ * floating element toolbar). Kept pure + shared so it stays the single gate feeding
+ * the one selected-visual writer (SelectionSystem's `.selected-section`/
+ * `.selected-element` sweep, phase 2). Hover is handled separately (CSS interim →
+ * HoverOverlay in phase 3), not by this gate.
  */
 export function isSectionVisuallySelected(
   selectedSection: string | null | undefined,
