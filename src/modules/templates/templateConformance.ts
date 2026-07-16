@@ -33,7 +33,7 @@ import { describe, it, expect } from 'vitest';
 
 import { templateMeta } from './templateMeta';
 import { BLOCK_MOCKS } from './blockMocks';
-import { blockManifests, type BlockDeclaration } from './blockManifest';
+import { blockManifests, defaultIsSlot, type BlockDeclaration } from './blockManifest';
 import {
   isCopyCompatible,
   isBlockEligible,
@@ -75,6 +75,11 @@ import { resolveLumenBlock } from './lumen/resolveLumenBlock';
 import { LumenPlaceholderBlock } from './lumen/LumenPlaceholderBlock';
 import { resolveAtelierBlock } from './atelier/resolveAtelierBlock';
 import { AtelierPlaceholderBlock } from './atelier/AtelierPlaceholderBlock';
+// Work-skeleton dispatch (dev id `atelier2`). Static import is fine here: this
+// module is vitest-only infra (never enters the app bundle) — same idiom as the
+// other resolvers above. NOT a firewall breach.
+import { resolveWorkBlock } from '@/modules/skeletons/work/resolveWorkBlock';
+import { WorkPlaceholderBlock } from '@/modules/skeletons/work/WorkPlaceholderBlock';
 
 export type Mode = 'edit' | 'published';
 
@@ -94,6 +99,7 @@ export const RESOLVERS: Record<
   granth: { resolve: resolveGranthBlock, placeholder: GranthPlaceholderBlock },
   lumen: { resolve: resolveLumenBlock, placeholder: LumenPlaceholderBlock },
   atelier: { resolve: resolveAtelierBlock, placeholder: AtelierPlaceholderBlock },
+  atelier2: { resolve: resolveWorkBlock, placeholder: WorkPlaceholderBlock },
 };
 
 // Structural capabilities are NOT block-backed: `multipage` is page-menu
@@ -318,6 +324,10 @@ export function templateConformance(templateId: TemplateId): void {
           });
 
           for (const variant of set.variants) {
+            // SLOT (work-skeleton phase 1) — declared-but-not-built: no component
+            // to resolve, so it is SKIPPED by the resolution + distinctness walk.
+            if (variant.slot) continue;
+
             it(`${variant.layoutName}: resolves to a real block (edit + published)`, () => {
               resolvesReal(templateId, sectionType, variant.layoutName);
             });
@@ -373,10 +383,26 @@ export function templateConformance(templateId: TemplateId): void {
         }
       });
 
+      // SLOT (work-skeleton phase 1) — a slot is never a set default. A
+      // declared-but-not-built capability must never be the block that renders.
+      describe('a slot is NEVER a set default (INVARIANT)', () => {
+        for (const [sectionType, set] of Object.entries(manifest)) {
+          it(`${sectionType}: default "${set.default}" is not a slot`, () => {
+            expect(
+              defaultIsSlot(set),
+              `${templateId}/${sectionType}: default "${set.default}" names a SLOT declaration — a slot (declared-but-not-built) must never be a set default`
+            ).toBe(false);
+          });
+        }
+      });
+
       // (3) copy-compatibility: consumes ⊆ contract (inventing a key is red).
       describe('every declaration consumes ⊆ its section element contract', () => {
         for (const [sectionType, set] of Object.entries(manifest)) {
           for (const decl of set.variants) {
+            // SLOT — no built component, so no resolvable element contract to
+            // check consumes against; skipped (work-skeleton phase 1).
+            if (decl.slot) continue;
             it(`${sectionType}/${decl.layoutName}`, () => {
               const contract = contractFor(decl.layoutName);
               expect(
@@ -439,6 +465,10 @@ export function templateConformance(templateId: TemplateId): void {
           for (let j = i + 1; j < variants.length; j++) {
             const A = variants[i];
             const B = variants[j];
+            // SLOT (work-skeleton phase 1) — a slot is never eligible/generated,
+            // so it is never co-offered; skip it from the copyShape both-ways
+            // consistency check (its layout has no resolvable contract anyway).
+            if (A.slot || B.slot) continue;
             const sameShape = (A.copyShape ?? undefined) === (B.copyShape ?? undefined);
             const bothEligible =
               isBlockEligible(A, { assetFacts: ALL_ASSETS }) &&

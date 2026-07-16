@@ -96,6 +96,11 @@ function assetNeedsMet(decl: BlockDeclaration, assetFacts?: AssetFacts): boolean
 
 /** Pure eligibility predicate over a single declaration (exported for tests). */
 export function isBlockEligible(decl: BlockDeclaration, input: EligibilityInput = {}): boolean {
+  // SLOT (work-skeleton phase 1) — a declared-but-not-built capability is NEVER
+  // eligible: no component exists to render it. This is the single generation-side
+  // slot filter; `pickFromSet`/`selectEligibleBlock` ride on it, so a slot can
+  // never be generated or selected as a section's block.
+  if (decl.slot) return false;
   return capacityFits(decl, input.cardCountHint) && assetNeedsMet(decl, input.assetFacts);
 }
 

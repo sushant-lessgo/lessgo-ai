@@ -47,6 +47,11 @@ export interface RenderPublishedExportInput {
    *  byte-identical published output. Threaded unchanged into every
    *  generateStaticHTML render (root, subpage, locale). */
   knobs?: import('@/types/template').KnobSelection | null;
+  /** User style tokens (work-skeleton D1/§D; Project.themeValues.styleTokens).
+   *  Optional — absent/empty ⇒ serializer emits nothing ⇒ byte-identical published
+   *  output. Threaded unchanged into every generateStaticHTML render (root, subpage,
+   *  locale). Only skeleton-backed templates consume it. */
+  styleTokens?: import('@/modules/skeletons/styleTokens').StyleTokens | null;
   baseUrl: string;
   /** Live custom domain (no scheme) to bake into canonical/og:url; undefined → subdomain. */
   canonicalDomain?: string;
@@ -93,6 +98,7 @@ export async function renderPublishedExport(
     paletteId,
     mood,
     knobs,
+    styleTokens,
     baseUrl,
     canonicalDomain,
     localeConfig,
@@ -212,6 +218,7 @@ export async function renderPublishedExport(
     variantId,
     mood: mood ?? null,
     knobs: knobs ?? null,
+    styleTokens: styleTokens ?? null,
     goal,
     currentPagePath: '/',
     formPagePath: findFormPagePath(pageInputsForScan, '/'),
@@ -310,6 +317,7 @@ export async function renderPublishedExport(
         variantId,
         mood: mood ?? null,
         knobs: knobs ?? null,
+        styleTokens: styleTokens ?? null,
         goal,
         currentPagePath: path,
         formPagePath: findFormPagePath(pageInputsForScan, path),
@@ -469,6 +477,7 @@ export async function renderPublishedExport(
             variantId,
             mood: mood ?? null,
             knobs: knobs ?? null,
+            styleTokens: styleTokens ?? null,
             goal,
             currentPagePath: p.path,
             formPagePath: findFormPagePath(locPageInputs, p.path),

@@ -4,6 +4,7 @@ import React from 'react';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
 import { LayoutChangeSelector } from './LayoutChangeSelector';
 import { BlockVariantSelector, getVariantSetForLayout } from './BlockVariantSelector';
+import { builtVariantCount } from '@/modules/templates/blockManifest';
 import type { EditableElement } from '@/types/core';
 import { usesTemplateModule } from '@/types/service';
 
@@ -70,7 +71,9 @@ export function LayoutChangeModal() {
     const effectiveLayout = currentContentLayout ?? layoutChangeModal.currentLayout;
     const found = getVariantSetForLayout(templateId, effectiveLayout);
 
-    if (!found || found.set.variants.length <= 1 || !effectiveLayout) {
+    // Count BUILT (non-slot) variants — a declared-but-not-built SLOT must never
+    // open a dead 1-block swap modal (work-skeleton phase 1).
+    if (!found || builtVariantCount(found.set) <= 1 || !effectiveLayout) {
       return null;
     }
 

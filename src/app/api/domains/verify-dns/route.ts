@@ -140,6 +140,11 @@ export async function POST(req: NextRequest) {
         // Mood was merged into PublishedPage.themeValues at publish time —
         // pass it through so the go-live regeneration doesn't drop it.
         mood: (page.themeValues as any)?.mood ?? null,
+        // Style tokens (work-skeleton D1/§D) were likewise merged into
+        // PublishedPage.themeValues at publish time — thread them through so the
+        // custom-domain go-live regen bakes the same `--u-*` CSS. Absent ⇒ null ⇒
+        // byte-identical.
+        styleTokens: (page.themeValues as any)?.styleTokens ?? null,
         baseUrl: 'https://lessgo.ai',
         canonicalDomain: customHost,
         removeBranding,
