@@ -15,6 +15,11 @@ import "@/styles/fonts-self-hosted.css";
 // public/published.css and NOT loaded by p/layout.tsx, so these families add zero
 // bytes to published pages. Lazy: only faces used on screen download.
 import "@/styles/fonts-app-chrome.css";
+// App-chrome scope class (.app-chrome) + Material Symbols icon base (.app-icon).
+// Imported ONLY here in the root app layout — NOT loaded by p/layout.tsx and NOT
+// inlined into public/published.css, so it adds zero bytes to published pages.
+// `.app-chrome` is applied to NO screen by this feature; consuming specs attach it.
+import "@/styles/app-chrome.css";
 // import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { Suspense } from 'react';
 import {

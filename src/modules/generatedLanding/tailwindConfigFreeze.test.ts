@@ -31,8 +31,15 @@ const resolved = resolveConfig(rootConfig);
 const theme = resolved.theme as Record<string, any>;
 
 describe('ui-foundation isolation — root tailwind.config.js FREEZE', () => {
-  it('borderRadius (esp. lg/md/sm) is unchanged', () => {
-    expect(theme.borderRadius).toEqual({
+  it('borderRadius (esp. lg/md/sm) existing keys are unchanged', () => {
+    // Freeze the keys that existed BEFORE ui-foundation via toMatchObject — this
+    // fails on any MUTATION or deletion of an existing radius key, while tolerating
+    // the additive namespaced `app-*` radius keys that ui-foundation Phase 3 adds
+    // (app-ctl/app-input/app-panel/app-card/app-modal/app-pill/app-badge). Same
+    // addition-tolerant approach as the fontFamily assertion below (which is why it
+    // stayed green after app-sans/mono/hand were added). Do NOT switch this to a
+    // whole-object toEqual — that rejects the authorized additions.
+    expect(theme.borderRadius).toMatchObject({
       none: '0px',
       sm: 'calc(var(--radius) - 4px)',
       DEFAULT: '0.25rem',

@@ -21,7 +21,7 @@ FIRST plus a founder eyeball gate.
 ## Progress log
 
 - phase 1 isolation baseline guards: done (commit 454dbc23, review loops 1, verdict ship) — guards: HTML snapshot + published.css sha256 (published surface) + /dev computed-style e2e (editor surface) + tailwind.config.js freeze test; isolation spec wired into playwright public project
-- phase 2 fonts (fetch + subset + app-only stylesheet + preloads): pending
+- phase 2 fonts (fetch + subset + app-only stylesheet + preloads): done (commit 6e7af964, review loops 1, verdict ship) — 4 families self-hosted, MS subset 164KB axes-intact, app-only stylesheet no published leak; mid-flight fix: app mono = distinct family 'JetBrains Mono App' (avoids mono@600 editor/published divergence); e2e /dev network assertion dropped as mis-scoped
 - phase 3 token layer + AppIcon + scope class [HUMAN GATE]: pending
 - phase 4 reskin 9 existing primitives: pending
 - phase 5 net-new primitives: pending
@@ -308,6 +308,7 @@ scope class, and the icon component — then prove isolation held before buildin
 - `src/styles/app-chrome.css` (new)
 - `src/app/layout.tsx` (import app-chrome.css)
 - `src/components/ui/icon.tsx` (new — `AppIcon`)
+- `src/modules/generatedLanding/tailwindConfigFreeze.test.ts` (**added post-implementation**: the Phase-1 borderRadius freeze used whole-object `toEqual`, which rejects the authorized additive `app-*` radius keys. Re-scope the borderRadius assertion to per-EXISTING-key checks — mirroring the fontFamily assertion already in this file — so existing keys `lg/md/sm`/etc. stay frozen (mutation still fails) while namespaced `app-*` additions are tolerated. Do NOT weaken the existing-key freeze.)
 
 > **Shared-file note:** `src/app/layout.tsx` already carries Phase 2's `fonts-app-chrome.css`
 > import + preload links — expected prior state, leave intact; this phase only ADDS the

@@ -340,3 +340,172 @@ Re-verification after the spec edit:
   published-surface half (a `/p/[slug]` requests none of the new fonts) is proven by static
   analysis (fonts-app-chrome.css imported only in root layout, not p/layout.tsx; buildAssets
   ships only fonts-self-hosted.css; published.css 0-leak grep + sha256 baseline).
+
+---
+
+# ui-foundation — Phase 3 audit (token layer + AppIcon + scope class) — HUMAN GATE
+
+Branch: `feature/ui-foundation` (verified `git branch --show-current` before any edit).
+Goal: the complete namespaced app-chrome token layer + `.app-chrome` scope class +
+`AppIcon`, proving template/published isolation held via the automated guards.
+
+## Files changed
+
+- `tailwind.config.js` — theme.extend ADDITIONS ONLY (namespaced `app-*` keys). No existing key edited.
+- `src/styles/app-chrome.css` (new) — `.app-chrome` scope base + `.app-icon`/`.app-icon--filled`.
+- `src/components/ui/icon.tsx` (new) — `AppIcon` component.
+- `src/app/layout.tsx` — ADDED one import (`@/styles/app-chrome.css`) only; Phase-2 font import + preloads left intact.
+- `src/modules/generatedLanding/tailwindConfigFreeze.test.ts` — borderRadius freeze re-scoped from whole-object `toEqual` to `toMatchObject` (added to Phase-3 Files-touched by the orchestrator; see "RESOLVED — config-freeze borderRadius" below).
+- `docs/task/ui-foundation.audit.md` (this Phase 3 section appended).
+
+No forbidden-list file touched (globals.css, p/layout.tsx, fonts-self-hosted.css,
+htmlGenerator.ts, buildPublishedCSS.js, buildAssets.js, templates/**, renderers,
+designTokens.ts, CriticalFontPreload.tsx — all untouched).
+
+## Exact token values committed (tailwind.config.js theme.extend)
+
+- `colors.app.*` (24 keys, from handoff README §Color): primary `#006CFF`,
+  primary-hover `#0056d6`, primary-deep `#003E80`, tint `#e6f0ff`, cta `#FF6B3D`,
+  cta-soft `#FF814A`, ink `#191922`, muted `#7b7b86`, faint `#a6a6b0`,
+  placeholder `#b0b0ba`, label `#3a3a44`, slate `#5a6472`, body `#5b5b66`,
+  success `#16a34a`, success-bg `#e6f5ec`, danger `#d1483a`, danger-bg `#fef2f2`,
+  canvas `#f7f8fa`, surface `#ffffff`, border `#ececf1`, border-input `#e2e4ea`,
+  border-strong `#d7d7dd`, divider `#eef0f3`, hairline `#f2f2f5`.
+- `borderRadius` app keys (added alongside untouched lg/md/sm): app-ctl `10px`,
+  app-input `12px`, app-panel `14px`, app-card `16px`, app-modal `20px`,
+  app-pill `20px`, app-badge `6px`.
+- `boxShadow` (new key, all namespaced): app-card `0 2px 10px -6px rgba(20,20,40,.2)`,
+  app-modal `0 40px 90px -34px rgba(20,20,40,.4)`, app-float `0 30px 66px -22px rgba(20,20,40,.4)`,
+  app-btn-primary `0 14px 28px -12px rgba(0,108,255,.75)`,
+  **app-btn-cta `0 10px 22px -9px rgba(255,107,61,.7)`**.
+- `fontFamily` app keys (added alongside untouched heading/body):
+  app-sans `['Onest','ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto','Helvetica Neue','Arial','sans-serif']`,
+  **app-mono `['JetBrains Mono App','ui-monospace','monospace']`** (distinct app family per Phase 2 — NOT bare 'JetBrains Mono'),
+  app-hand `['Caveat','cursive']`.
+- `backgroundImage['app-stripes']`: `repeating-linear-gradient(135deg,#eef0f4 0 11px,#e6e8ee 11px 22px)`.
+
+### CTA shadow source + variance
+
+README truncates the coral CTA shadow (`0 10px 22px -...`). Grepped the four
+`.dc.html` files for the orange (`#FF6B3D`) CTA `box-shadow`. The value varies
+slightly per button:
+- `0 10px 22px -9px rgba(255,107,61,.7)` — dominant across in-app action CTAs
+  (`Lessgo Dashboard.dc.html` lines 181 "Regenerate draft", 572/597 "Generate posts/email"), and the closest analogue to the `Onboarding Flow.dc.html:89` primary CTA.
+- variants: `-8px …,.7)` ("New site with AI" buttons), `-9px …,.75)` ("Build my site"),
+  `-10px …,.8)` (icon tiles, e.g. Dashboard lines 345/732).
+
+Committed `app-btn-cta = 0 10px 22px -9px rgba(255,107,61,.7)` (dominant in-app CTA
+value). Source: `Lessgo Dashboard.dc.html`. Logged under Deviations as an in-scope
+judgment call.
+
+Confirmation: **`fontFamily['app-mono']` → `'JetBrains Mono App'`** (distinct family;
+avoids the mono@600 editor↔published divergence — Phase 2).
+
+## app-chrome.css classes
+
+- `.app-chrome` — Onest system stack, `color:#191922`, `background:#f7f8fa`,
+  `font-optical-sizing:auto`, `-webkit-font-smoothing:antialiased`/`-moz-osx-font-smoothing:grayscale`.
+  Documented in-file: applied to NO screen by this feature; consuming specs attach it;
+  never root `<body>`/`/p`/`/preview`/editor-canvas.
+- `.app-icon` — `font-family:'Material Symbols Rounded'`, `line-height:1`,
+  `display:inline-block`, `white-space:nowrap`, antialiased,
+  `font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24`.
+- `.app-icon--filled` — flips to `'FILL' 1` (other axes unchanged).
+
+## AppIcon API
+
+`AppIcon({ name, filled?, size?, className? })` →
+`<span aria-hidden className={cn('app-icon', filled && 'app-icon--filled', className)} style={{ fontSize: size }}>{name}</span>`.
+`cn` imported from `@/lib/utils`. In-file comment: app-chrome only; MUST NEVER be
+imported by `src/modules/templates/**` or `src/components/published/**`.
+
+## layout.tsx change
+
+Added exactly one line: `import "@/styles/app-chrome.css";` (with isolation comment),
+directly after the Phase-2 `fonts-app-chrome.css` import. Phase-2 preload `<link>`s and
+all other layout content untouched.
+
+## Verification results
+
+- `npx tsc --noEmit` → clean (exit 0).
+- `npm run build` → green (regenerated `public/published.css`).
+- **published.css sha256 == baseline: YES.** current `c2f87e08f517a72b43f6e9e0e9b703b6261f4f152c711be9241649c6f26219b6`
+  == committed baseline (byte-identical published surface — the namespaced app-* keys
+  never emit into the standalone published config).
+- Leak grep `grep -icE "onest|caveat|material symbols|[^a-z]app-" public/published.css` → **0**.
+- `npm run test:run` → **3012 passed | 18 skipped | 0 failed** (after the config-freeze
+  re-scope — see RESOLVED below). HTML-snapshot (meridian+hearth) byte-identical,
+  published.css sha256 guard green, negative-trace green, config-freeze (borderRadius
+  existing-keys + fontFamily heading/body + fontSize scale) all green.
+- `npm run test:e2e -- --project=public` → **11 passed, 4 skipped, 0 failed** (port 3021,
+  set via `PORT=3021 E2E_PORT=3021`; 3000/3001 occupied). Both isolation tests green:
+  - `#14 ui-isolation.spec.ts:55 › computed-style baselines on /dev/meridian/blocks are unchanged`
+    — THE mandatory editor-surface existing-key-mutation check for this phase's
+    `tailwind.config.js` edit; proves no template style moved on the main-app surface.
+  - `#15 ui-isolation.spec.ts:86 › no app-chrome fonts/classes on the block surface`.
+- **FILL-axis smoke: PASS.** Temp page (`src/app/dev/fillsmoke/page.tsx`, rendered under
+  `/dev` because localhost is treated as the apex host by middleware and non-`/dev` app
+  routes 404) rendered `<AppIcon name="push_pin" filled>` + unfilled twin; dev server on
+  3022 + Playwright probe:
+  - both spans compute `font-family:"Material Symbols Rounded"`, `document.fonts.check` true;
+  - filled `font-variation-settings` = `"FILL" 1,…`, outline = `"FILL" 0,…`;
+  - both boxes 64×64 (single glyph, NOT the ~8-char literal text "push_pin");
+  - screenshot: top glyph SOLID (filled pin), bottom HOLLOW (outline pin) — visibly distinct.
+  Temp page + throwaway screenshot script deleted (git status clean of `fillsmoke`/`fillshot`);
+  dev server killed. No trace left.
+
+## Deviations from the plan (with reason)
+
+1. **CTA shadow value pick.** The `.dc.html` files carry 4 slightly-different coral CTA
+   shadows (see above). Picked the dominant in-app action-CTA value
+   `0 10px 22px -9px rgba(255,107,61,.7)`. In-scope judgment call (matches plan
+   unresolved-question #1's "pull from .dc.html").
+2. **FILL-axis smoke mounted under `/dev/fillsmoke`, not the dashboard page** (plan said
+   "drop onto the dashboard page"). On localhost the app's host-based middleware serves
+   apex/marketing + `/dev/*` only; `/dashboard` and top-level app routes 404, so the
+   dashboard page is unreachable in this env. `/dev/*` is the same root-app-layout surface
+   (app-chrome.css + fonts-app-chrome.css active), so the smoke is equally valid. Temp
+   files fully reverted.
+
+## RESOLVED — config-freeze borderRadius (orchestrator-authorized, added to Files-touched)
+
+The Phase-1 guard `tailwindConfigFreeze.test.ts` asserted `borderRadius` via whole-object
+`toEqual`, which rejected the 7 plan-authorized additive `borderRadius['app-*']` keys — NOT
+an existing-key mutation (`lg/md/sm/none/DEFAULT/xl/2xl/3xl/full` all unchanged). The
+orchestrator added the test file to Phase-3 Files-touched and authorized re-scoping it to
+match the addition-tolerant `fontFamily` assertion already in the same file (per-key freeze,
+which is why fontFamily stayed green after app-sans/mono/hand were added).
+
+Change made (ONLY this): the `borderRadius` assertion is now
+
+```js
+expect(theme.borderRadius).toMatchObject({
+  none: '0px', sm: 'calc(var(--radius) - 4px)', DEFAULT: '0.25rem',
+  md: 'calc(var(--radius) - 2px)', lg: 'var(--radius)', xl: '0.75rem',
+  '2xl': '1rem', '3xl': '1.5rem', full: '9999px',
+});
+```
+
+`toMatchObject` freezes every key that existed before ui-foundation (fails on any
+mutation OR deletion of `lg/md/sm`/etc.) while tolerating the additive `app-*` radius keys
+— intent preserved. The `fontFamily` (heading/body per-key) and `fontSize` (whole-scale)
+assertions were left EXACTLY as-is; no other test or fixture touched. Test renamed to
+"borderRadius (esp. lg/md/sm) existing keys are unchanged".
+
+Re-verification after the re-scope:
+- `npx tsc --noEmit` → clean (exit 0). (Also removed a stale `.next/types/app/dev/fillsmoke`
+  build artifact left by the FILL-axis smoke temp page — gitignored `.next`, not a source file.)
+- `npm run test:run` → **3012 passed | 18 skipped | 0 failed.** config-freeze borderRadius
+  now passes with the `app-*` keys present; HTML-snapshot + published.css sha256 guards still
+  green. (A mutation of `lg/md/sm` would still fail `toMatchObject` — mutation-catching intent
+  intact.)
+- No rebuild / e2e re-run needed (only the test assertion changed; no config/source/style change).
+
+## Open risks / follow-ups
+
+- None outstanding. All isolation proofs green: published.css sha byte-identical, HTML
+  snapshot byte-identical, e2e computed-style baselines on `/dev/meridian/blocks` unchanged,
+  0-leak grep, config-freeze (borderRadius existing-keys + fontFamily + fontSize) green,
+  `test:run` 0 failed.
+- HUMAN GATE (orchestrator's step): founder before/after eyeball on a real `/p/[slug]` +
+  `/edit/[token]` — not performed by this agent.

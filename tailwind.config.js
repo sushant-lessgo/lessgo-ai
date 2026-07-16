@@ -641,9 +641,63 @@ module.exports = {
   			body: [
   				'Inter',
   				'sans-serif'
+  			],
+  			// ── App-chrome namespaced type (ui-foundation). Additions only; the
+  			// heading/body keys above are UNTOUCHED. app-mono MUST use the distinct
+  			// 'JetBrains Mono App' family (NOT bare 'JetBrains Mono') — sharing the
+  			// template family name reintroduces the mono@600 editor↔published divergence.
+  			'app-sans': [
+  				'Onest',
+  				'ui-sans-serif',
+  				'system-ui',
+  				'-apple-system',
+  				'Segoe UI',
+  				'Roboto',
+  				'Helvetica Neue',
+  				'Arial',
+  				'sans-serif'
+  			],
+  			'app-mono': [
+  				'JetBrains Mono App',
+  				'ui-monospace',
+  				'monospace'
+  			],
+  			'app-hand': [
+  				'Caveat',
+  				'cursive'
   			]
   		},
   		colors: {
+  			// ── App-chrome namespaced palette (ui-foundation). Values from the
+  			// designer handoff README §Color. Namespaced under `app.*` so the stock
+  			// palette + existing brand/landing/editable tokens stay UNTOUCHED and
+  			// nothing leaks onto template/published surfaces.
+  			app: {
+  				primary: '#006CFF',
+  				'primary-hover': '#0056d6',
+  				'primary-deep': '#003E80',
+  				tint: '#e6f0ff',
+  				cta: '#FF6B3D',
+  				'cta-soft': '#FF814A',
+  				ink: '#191922',
+  				muted: '#7b7b86',
+  				faint: '#a6a6b0',
+  				placeholder: '#b0b0ba',
+  				label: '#3a3a44',
+  				slate: '#5a6472',
+  				body: '#5b5b66',
+  				success: '#16a34a',
+  				'success-bg': '#e6f5ec',
+  				danger: '#d1483a',
+  				'danger-bg': '#fef2f2',
+  				canvas: '#f7f8fa',
+  				surface: '#ffffff',
+  				border: '#ececf1',
+  				'border-input': '#e2e4ea',
+  				'border-strong': '#d7d7dd',
+  				divider: '#eef0f3',
+  				hairline: '#f2f2f5'
+  			},
   			brand: {
   				text: '#003E80',
   				mutedText: '#5A6A85',
@@ -743,7 +797,29 @@ module.exports = {
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			sm: 'calc(var(--radius) - 4px)',
+  			// ── App-chrome radii (ui-foundation). Namespaced; lg/md/sm above UNTOUCHED.
+  			'app-ctl': '10px',
+  			'app-input': '12px',
+  			'app-panel': '14px',
+  			'app-card': '16px',
+  			'app-modal': '20px',
+  			'app-pill': '20px',
+  			'app-badge': '6px'
+  		},
+  		boxShadow: {
+  			// ── App-chrome shadows (ui-foundation). New key; all namespaced. Values
+  			// from the handoff README §Shadow; app-btn-cta pulled from the .dc.html
+  			// CTA buttons (README truncates it) — the dominant in-app CTA value.
+  			'app-card': '0 2px 10px -6px rgba(20,20,40,.2)',
+  			'app-modal': '0 40px 90px -34px rgba(20,20,40,.4)',
+  			'app-float': '0 30px 66px -22px rgba(20,20,40,.4)',
+  			'app-btn-primary': '0 14px 28px -12px rgba(0,108,255,.75)',
+  			'app-btn-cta': '0 10px 22px -9px rgba(255,107,61,.7)'
+  		},
+  		backgroundImage: {
+  			// ── App-chrome placeholder-image stripe (ui-foundation). New key.
+  			'app-stripes': 'repeating-linear-gradient(135deg,#eef0f4 0 11px,#e6e8ee 11px 22px)'
   		},
 		
 		fontSize: {
