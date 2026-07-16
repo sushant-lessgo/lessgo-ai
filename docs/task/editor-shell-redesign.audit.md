@@ -1387,3 +1387,157 @@ spec impossible without an out-of-scope config edit). Screenshots reviewed, then
   through the dev store handle (probe-only, no code path added).
 - `LocaleSettings.tsx` / `LanguageToggle.tsx` remain unstyled dead code on disk by ruling — if the
   i18n track re-mounts them, they will not match app-chrome.
+
+---
+
+## Phase 7 — Publish flow (t17) + publish.spec selector repair
+
+### Files changed
+- `src/app/preview/[token]/page.tsx` — action-bar reskin (publish ENTRY) + t17-C live card; `onReview` slot wired.
+- `src/components/SlugModal.tsx` — t17-A confirm card + t17-B publishing card + `app-danger` error.
+- `e2e/publish.spec.ts` — selector repair (5 planned + 1 unenumerated) + 4 new UI-state assertions.
+
+Nothing else. `git status --short -- src e2e` lists exactly these three.
+
+### What shipped, per t17 state
+- **A · confirm** (`SlugModal`, `data-testid="publish-confirm-card"`): header "Publish changes" + `close`;
+  live-target row (`bg-app-surface-alt` #f6f7fb r9, `public` icon, slug 600/11.5, "Live target" caption
+  `app-faint`, **"Change"** link `app-primary` → focuses the slug input); soft **Review nudge**
+  (`app-nudge-bg`/`app-nudge-border`, `flag` `app-cta`, `app-nudge-text`, "Review" link
+  `app-review-text`) rendered only when `!allComplete` (mirrors `ReviewPill`'s self-hide); URL field
+  (mono) + title field + mono `n / 60` counter; analytics row; footer `Cancel` + **`Publish now`**
+  (flex-1, `app-primary`, 600/12.5). **"N edits since last publish" row OMITTED** (decision 13).
+- **B · publishing** (`publish-publishing-card`): phase-1 `<Spinner size={40}>` (ring `app-tint-ring`
+  + `app-primary` top, `.8s`), "Publishing your changes…" 600/14, "Usually takes a few seconds" 400/11.5.
+  Renders **in place of the confirm body** when `loading` — same WHEN (`publishing` is only ever true
+  while `showSlugModal` is true; `handlePublish` is the sole setter), different WHAT.
+- **C · live** (`publish-live-card`): 48px `app-success-bg` circle + filled `check` `app-success`;
+  **"You're live!"** 700/18 `-.3px`; sub; URL row (border r10, `lock` green, URL **mono 500/12**,
+  `content_copy` → existing `navigator.clipboard` handler); **`Share` GREYED via `<Coming what="one-click
+  sharing">`**; `View site` (`app-primary` + `open_in_new`, real `href={publishedUrl}` — works); footer
+  "Version saved · restore anytime"; **domain upsell row** (`app-tint-soft`/`app-tint-edge`,
+  `app-primary-deep`, `arrow_forward`) → `setPublishSuccess(false); setShowDomainModal(true)` (the same
+  setter the action bar's Custom Domain button already uses).
+- **Error**: `publishError` restyled to `app-danger` in the confirm card. When it fires: unchanged.
+- **Action bar** (the publish entry, not itself a t17 state): reskinned to app-chrome; label stays
+  "Publish" + `rocket_launch`; `data-testid="publish-trigger"` added.
+
+### Proof the no-touch regions are untouched
+`git show HEAD:` diff of the protected span (old L108-450 vs new L114-456) → **empty**:
+`handlePublish` body incl. the single `fetch('/api/publish')`, slug normalization, the
+`published-slug` status fetch, and the whole local `useState` set are **BYTE-IDENTICAL**.
+Every diff hunk is at the import block or >= L457 (JSX). `git diff --name-only HEAD --
+src/app/api/publish src/lib/staticExport src/lib/routing src/modules "*.published.tsx"` → **empty**.
+Zero `@/app/edit/**` imports in either touched component (the one grep hit is my own comment).
+
+### Selector repairs (old → new) — honest, not weakened
+| old | new | why honest |
+|---|---|---|
+| `div.shadow-lg` + `hasText:/Choose your page URL\|Republish Your Page/` | `getByTestId('publish-confirm-card')` **+** `getByRole('heading', {name:'Publish changes'})` | class+copy coupling → testid; the heading assertion is *added*, so copy is still checked |
+| `getByRole('button',{name:/Confirm & Publish\|Update Published Page/})` | `getByRole('button',{name:'Publish now'})` **+ `toBeEnabled()`** | still a role+name assertion (not a testid); the enabled check *adds* the handoff's "nudge never gates" rule |
+| `getByPlaceholder('e.g., Design Tools…')` | `getByTestId('publish-title-input')` | placeholder retained in the DOM; testid is the stable hook |
+| `getByText(/Page Published/i)` | `getByTestId('publish-live-card')` **+** `getByText(/You're live!/)` **+** `publish-live-url` matches the slug | 1 assertion → 3; the URL row is now proven non-empty |
+| `getByRole('button',{name:'Publish', exact:true})` (**unenumerated in the plan** — impl-review flagged it) | `getByTestId('publish-trigger')` + `toHaveText(/Publish/)` | `exact:true` would have broken on the `rocket_launch` ligature text node; label still asserted |
+| — | **NEW** `publish-publishing-card` visible after confirm | state B had no coverage at all before |
+
+Net: assertions went from 4 → 9. Nothing was relaxed to make the suite pass.
+
+### Gates (actual output)
+- `npx tsc --noEmit` → **0 errors**.
+- `npm run test:run` → **194 files passed | 1 skipped; 3337 passed | 18 skipped**.
+- `npm run lint` → **0 errors** (warnings only, all pre-existing, none in the touched files).
+- `PORT=3007 E2E_PORT=3007 npx playwright test` → **22 passed | 4 skipped | 0 failed**, and
+  `publish.spec.ts` **EXECUTED** — runner lines: `✓ 24 [authed] publish service / Hearth (34.2s)`,
+  `✓ 25 publish service / Lex (7.8s)`, `✓ 26 publish product / Meridian (1.1m)`. The 4 skips are the
+  pre-existing `generation.spec.ts` public skips, not publish.
+- **Flake classification (honest):** across 4 full-suite runs + 1 isolated run, publish.spec passed
+  4/5. The single failure (run 2, Hearth) failed at **32.0s** — consistent with the known 30s
+  `waitForFunction(() => Clerk?.user)` timeout at `publish.spec.ts:23`, i.e. the recorded env/session
+  flake, NOT the new selectors (which carry 45s/20s/120s timeouts and would fail at different marks).
+  I did not capture that run's stack (my own grep filter dropped it), so this is **inference from the
+  timing, not proof**. The isolated re-run immediately after was 4/4 green, as was every later full run.
+
+### Live loop (performed, real Chromium, `PORT=3007`) — verified against t17 AS DRAWN
+A scratchpad-only probe (outside the repo; no repo file added) seeded a real Hearth draft via the
+authed routes and drove preview → Publish → confirm → publishing → live → `/p/[slug]`, dumping
+computed styles + screenshots which I then compared against scout §H's hexes/sizes:
+- confirm card `#e6e6ec` / r14 / Onest OK · nudge `#fff8f5` + `#ffe1d3` / r9 OK · **`Publish now`
+  `#006CFF` 600/12.5, `enabled = true` WITH the nudge showing (2 setup steps left)** OK — the handoff's
+  "soft nudge, not a gate" rule holds empirically, not just by inspection · slug input `JetBrains Mono App` OK
+- spinner: top `rgb(0,108,255)` + track `rgb(230,238,252)` OK (the bounding box reads 56px because a
+  rotating 40px square's rect is 40·√2 — the element is 40px)
+- live card **w=322 exactly as t17** OK · URL row mono 500/12 OK · `View site` href = the real published
+  URL OK · Share = `.app-coming` grey `#8a8a94` OK
+- Republish of an existing slug: covered by the e2e suite itself (deterministic slugs → runs 2+ are
+  republishes) — green.
+- The canvas behind the modal keeps its template serif/colors — no `.app-chrome` bleed (screenshot).
+
+**Two real bugs the probe caught that tsc/tests/lint could not** (both fixed, both were "looks fine
+in code" defects — the phase-5 lesson applied):
+1. **`Share` was 80px wide / 19.2px / radius 0** instead of a flex-1 12.5px button: I had put the row
+   geometry on a child of `<Coming>`, but `Coming` renders its OWN `inline-flex` span (decision 17's
+   exact trap). Fixed by passing the classes to `Coming` via `className` — the phase-4 documented pattern.
+2. **Both cards rendered `#f7f8fa`, not white**: `.app-chrome`'s `background` beat `bg-white` (equal
+   specificity, later in the cascade). Fixed with the **existing phase-3/4 `app-chrome contents`
+   wrapper** (`display:contents` → inherits Onest/ink, paints no box), applied at all three sites
+   (confirm modal, live modal, action bar). Re-probed: all now `rgb(255,255,255)`.
+
+### PARITY EVIDENCE — what I can and cannot claim
+**I did NOT produce a before/after byte diff of exported HTML.** Doing it properly needs a
+`git stash`/checkout of the working tree, which is a state-changing git command I'm not permitted to
+run. The founder must still do the hand check at the gate.
+
+What I *can* evidence — a by-construction argument, each link verified:
+1. Published output = f(`content` payload, published renderer, `staticExport`, templates, registries).
+2. The `content` payload is built by `handlePublish` → **byte-identical** (diff above).
+3. Renderer / `staticExport` / registries / templates / every `.published.tsx` → **zero diff**.
+4. The one DOM-derived input, `htmlContent` scraped from `#landing-preview`, is **discarded by the
+   route**: `src/app/api/publish/route.ts:212,246` store `htmlContent: ''` ("Phase 2: Empty for dynamic
+   rendering"). So even the preview DOM cannot reach published output — and my markup is entirely
+   outside `#landing-preview` regardless.
+5. Empirical: the e2e published 3 templates (Hearth/Lex/Meridian) to real `/p/[slug]` pages across 4
+   runs and asserted each renders `div.landing-page-published` with template token attrs + real hero copy.
+→ Output is identical **by construction**, but that is an argument, not a byte diff. Gate still required.
+
+### Judgement calls / deviations
+- **Confirm card is 380px, not t17's 314px.** t17-A draws a popover with a live-target row, an edit
+  count and a nudge; our confirm ALSO owns the slug field, title field + counter and the analytics
+  opt-in (all pre-existing, all load-bearing). 314px squeezes them. Live card is 322px, exactly as drawn.
+- **Confirm stays a centered modal, not a popover anchored under Publish.** Anchoring it would mean
+  moving the trigger/ownership of `showSlugModal` — a structural change to when things render. Plan
+  says "A confirm (SlugModal context)"; I read that as the modal keeps its shell.
+- **"Change" focuses the slug input** rather than toggling a disclosure. A disclosure would add new
+  UI state and hide the field the e2e fills; the fields stay visible, so the link is a jump, not a gate.
+- **`Publish now` keeps `disabled={loading || !slug…}`.** The "ALWAYS ENABLED" rule is about the Review
+  nudge never gating (verified live: enabled with 2 steps outstanding). The empty-slug guard is
+  pre-existing *validation*, which the plan says is unchanged. Removing it would let a publish fire at
+  a URL that `handlePublish` then early-returns on.
+- **Contextual submit labels dropped** ("Update Published Page" / "Change URL & Republish" → always
+  "Publish now", per decision 5). The URL-change warning banner still carries that information; it is
+  restyled to the coral nudge family and keeps its copy.
+- **Domain upsell is `disabled` + tooltip when `existingPublished?.slug` is absent** (i.e. on a *first*
+  publish), mirroring the action bar's existing Custom Domain gating exactly. `CustomDomainModal` only
+  renders for an already-published slug (`page.tsx:554`) and widening that condition is a render-condition
+  change → out of bounds. I did **not** use `<Coming>` here: the control is real and wired, and `Coming`
+  would claim "not built yet", which is a lie. **Founder-visible wart:** right after a first publish the
+  upsell is greyed until the preview is reopened (the status fetch is mount-only). Fixing it needs a
+  refetch/state write = out of scope.
+- **"Review" link → `handleEdit`** (the page's existing, verbatim route back to the editor). It does not
+  open the review tab — cross-page state I'm not allowed to write. Nudge is soft, so this is a jump-back.
+- **`#f0f0f3`** (t17 footer/divider hairline) has no token and `tailwind.config.js` is not in my
+  Files-touched → used as an arbitrary `border-[#f0f0f3]`. Decision 3 forbids snapping it to
+  `app-hairline` (#f2f2f5). Phase 8 could tokenize it.
+- **Action bar reskinned** though it isn't a t17 state: it carried the `div.shadow-lg` the e2e coupled
+  to, and it is the entry to the flow. Handlers moved verbatim; `Publish` label kept.
+
+### Open risks
+- `publish.spec.ts`'s Clerk-session flake is untouched and still present (~1-in-5 under full-suite load).
+- The dev-server SSR error at `useEditStoreBootstrap.ts:238` (`window is not defined`) still logs on the
+  preview page's server render. **Not worsened** — it appears identically before/after and never failed a
+  run. Not touched (out of scope, editor-perf track).
+- `SlugModal` now reads `useReviewState`. On the preview page `EditProvider` calls `initFromContent`, so
+  `remainingCount` is real (probe showed "2 setup steps left"). But preview passes
+  `prefetchBaselineForReview: false` — that suppresses *markers* only, not `guideTasks`/`remainingCount`,
+  so the nudge count is correct. No store writes were added.
+- `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` gets CRLF-churned by
+  every `test:run`; restored (`git status` clean of it).
