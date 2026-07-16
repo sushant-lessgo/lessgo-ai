@@ -22,9 +22,17 @@ const nextConfig = {
       // same-origin (work-onboarding-shell, founder ruling 2026-07-16). DENY blocks
       // framing EVEN same-origin — that's why this exists. Every other route keeps DENY.
       //
-      // ⚠️ Next applies EVERY matching entry, so these two sources MUST stay mutually
-      // exclusive. If both ever match one path, conflicting XFO values are sent and
-      // browsers take the most restrictive — silently re-blocking the reveal.
+      // ⚠️ These two sources MUST stay mutually exclusive, and they are:
+      //   `/preview/:token+`  → one-or-more segments ⇒ matches `/preview/{token}`
+      //                         (and `/preview/{token}/privacy`), NOT bare `/preview`.
+      //   `/((?!preview/).*)` → everything whose path does not start with `preview/`,
+      //                         which includes bare `/preview`.
+      // Do NOT loosen `:token+` to `:token*` (zero-or-more): `*` also matches bare
+      // `/preview`, which then matches BOTH sources. Next dedupes headers() by key
+      // with LAST-WINS, so today that overlap would resolve to DENY (the DENY entry
+      // is last) rather than sending two conflicting XFO values — but it makes the
+      // behavior depend on ENTRY ORDER instead of the source patterns. Keep them
+      // exclusive so order can't matter.
       //
       // ⚠️ INTERIM TARGET — THIS RULE MUST MOVE WITH THE REVEAL. Generate + reveal
       // + preview are consolidating onto the edit route (preview becomes an editor
@@ -34,7 +42,7 @@ const nextConfig = {
       // not simply delete it — the reveal's iframe stops rendering without it.
       // The matching iframe call site is src/components/onboarding/journey/steps/StepReveal.tsx.
       {
-        source: '/preview/:token*',
+        source: '/preview/:token+',
         headers: [
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
         ],

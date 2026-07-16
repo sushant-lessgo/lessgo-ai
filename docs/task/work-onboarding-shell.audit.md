@@ -1505,6 +1505,16 @@ One build wrinkle worth noting for whoever repeats this: after `npm run build`, 
 was missing and `next start` ENOENT'd; a plain `npx next build` re-run regenerated it. Local artifact, not a
 code issue — the build itself exits 0.
 
+> **CORRECTED IN P7 — do not hunt a build bug here.** The note above implies the custom
+> `build:published-css`/`build:assets` prebuild steps ate the manifest. **They did not.**
+> Review reproduced it: `npm run build` produces `routes-manifest.json` fine, and then
+> **Playwright's `webServer: 'npm run dev'` overwrites `.next` with a dev build** —
+> `BUILD_ID` and the manifest disappear, `.next/static/development` appears. It is an
+> ordinary dev/prod `.next` collision inside one worktree, benign, with no deploy risk
+> (CI builds clean into a fresh `.next`). The practical rule: **run production
+> `build`/`next start`/curl checks BEFORE or AFTER a Playwright run, never interleaved**
+> — P7 followed exactly that ordering and hit no missing manifest.
+
 ### Original P5/P6 run (superseded by the re-run above)
 
 - `npx playwright test e2e/work-onboarding.spec.ts` — **5 passed, 1 FAILED, 1 did
@@ -1563,3 +1573,159 @@ code issue — the build itself exits 0.
    P6 regression, and it is **not** what breaks the iframe (XFO is). One source is
    `src/hooks/useEditStoreBootstrap.ts:237`, but a guard there alone did **not**
    silence it, so there is at least one more. Separate cleanup, someone else's file.
+
+---
+
+# Phase 7 — Gates sweep + founder QA (FINAL phase)
+
+**Files changed**
+- `next.config.js` (edit — XFO source `:token*` → `:token+` + comment corrected; step 6a)
+- `docs/task/work-onboarding-shell.audit.md` (this file — P6 build-note correction 6c + this section)
+
+No other file touched. Phase 7 was **fix-only**: no new features, nothing outside the P1–P6 lists.
+(`src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` showed CRLF-only
+churn from the vitest run again — no content diff — restored via `git checkout --` on that path.)
+
+## 1. Step 6a — the false invariant in `next.config.js` (FIXED)
+
+**The comment was wrong and it was the instruction a maintainer would act on.** It claimed the two
+XFO sources "MUST stay mutually exclusive" and that "Next applies EVERY matching entry". Neither held:
+`/preview/:token*` is **zero**-or-more so it matched **bare `/preview`**, and `/((?!preview/).*)`'s
+lookahead only rejects `preview/` — so bare `/preview` matched **both**. The config was nonetheless
+correct for a *different* reason: Next dedupes `headers()` by key **last-wins**, so the real invariant
+was **entry ORDER** (DENY last), not exclusivity.
+
+**Chosen fix: `/preview/:token*` → `/preview/:token+` (one-or-more).** Rationale: it makes the sources
+**genuinely exclusive**, which makes the comment *true as written* and removes the dependency on entry
+order entirely — strictly better than keeping `*` and documenting an order invariant, because an
+order-dependent config is one careless reorder away from silently re-blocking the reveal. The comment
+now states the exclusivity, spells out **why `*` must not come back**, and records the last-wins
+dedupe as the reason the old form was merely lucky rather than correct. The **interim-target block was
+kept verbatim** (the rule MOVES with the reveal when `/preview` retires).
+
+**Security posture: this TIGHTENS.** Bare `/preview` moves SAMEORIGIN → DENY. The global `DENY`
+catch-all is intact for every route except the framed preview. `/preview/{token}/privacy` keeps
+SAMEORIGIN (unchanged from `*`; benign — same-origin only, and it IS a preview surface).
+
+### Proof 1 — compiled `.next/routes-manifest.json` (no path matches both)
+
+| path | `/preview/:token+` (SAMEORIGIN) | `/((?!preview/).*)` (DENY) |
+|---|---|---|
+| `/preview` | false | **true** |
+| `/preview/abc` | **true** | false |
+| `/preview/abc/privacy` | **true** | false |
+| `/` | false | **true** |
+| `/dashboard` | false | **true** |
+| `/edit/tok123` | false | **true** |
+
+Exactly one source matches every path ⇒ exclusivity now genuinely holds.
+
+### Proof 2 — live `curl -sI` vs a FRESH `npm run build` + `next start -p 3117`
+
+```
+--- /preview/tok123          X-Frame-Options: SAMEORIGIN     (xfo line count: 1)
+--- /preview/tok123/privacy  X-Frame-Options: SAMEORIGIN     (xfo line count: 1)
+--- /                        X-Frame-Options: DENY           (xfo line count: 1)
+--- /dashboard               X-Frame-Options: DENY           (xfo line count: 1)
+--- /edit/tok123             X-Frame-Options: DENY           (xfo line count: 1)
+--- /preview                 X-Frame-Options: DENY           (xfo line count: 1)
+```
+
+Both directions proven: **exactly ONE xfo line per route**, reveal target SAMEORIGIN, everything
+else (incl. bare `/preview`) DENY. Run BEFORE the e2e, per the 6c collision below.
+
+## 2. Gates — ACTUAL results
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit` | **PASS** — exit 0, clean |
+| `npm run test:run` | **PASS** — 202 files passed / 1 skipped; **3484 passed**, 18 skipped |
+| `npm run lint` | **PASS** — zero errors; pre-existing `no-img-element` / `exhaustive-deps` warnings only |
+| **FRESH `npm run build`** | **PASS** — exit 0; `ƒ /preview/[token]` present; published.css sha-vs-fixture check valid against the fresh artifact (landmine 10 respected) |
+| `tailwindConfigFreeze.test.ts` | **PASS** (in the vitest run) — **no tailwind keys added**; `git status` on `tailwind.config.*` = clean |
+| `npx playwright test e2e/ui-isolation.spec.ts` | **PASS — 2 passed** (computed-style baselines unchanged; no app-chrome fonts/classes on the block surface) |
+| `e2e/fixtures/ui-isolation-computed-styles.json` | **NOT regenerated — confirmed** via `git status --porcelain` (clean; it is a checked-in INPUT baseline) |
+| Agnostic-purity (import assertion + literal tripwire) + registry/leaf drift guards | **PASS** (in the vitest run) |
+| **`npm run test:e2e` (full suite)** | **PASS — 45 passed, 10 skipped, 0 failed, exit 0** (10.6m) — see flakiness note |
+
+### e2e honesty note — first run had 2 failures; cause = Bug A, not a code defect
+
+The **first** full-suite run failed 2 `authed` tests (`publish.spec.ts` Hearth `/p/{slug}`;
+`work-onboarding.spec.ts` "resumes at STEP 02" — it landed on STEP 01 because the **seed** never
+completed) and left 7 not-run (serial mode). Diagnosis, not a workaround:
+- `e2e/work-onboarding.spec.ts` alone ⇒ **7/7 pass**.
+- The **re-run of the full suite ⇒ 45/45 pass**, with the log showing
+  `[seed] 429 on /api/audience/product/strategy; waiting 35s then retrying` **twice**.
+
+So this is **Bug A live** (work fan-out + publish specs share the 5/min FREE bucket ⇒ 429s). The seed
+retry loop usually absorbs it; when the whole suite piles on, it can exhaust and a seeded spec starts
+from an unseeded project. **Stating it plainly as instructed: the full e2e suite is rate-limit-flaky,
+Bug A is the cause, and I did not work around it.** Ports: `:3000` was held by a **foreign** dev server
+(HTTP 500) — **not killed**; everything ran on `E2E_PORT=3117 PORT=3117`.
+
+## 3. Step 6c — P6 audit correction (applied above, in the P6 section)
+
+The P6 note implied `build:published-css`/`build:assets` ate `.next/routes-manifest.json`. **False, and
+corrected in place** so nobody hunts a phantom build bug: `npm run build` produces the manifest fine;
+**Playwright's `webServer: 'npm run dev'` then overwrites `.next` with a dev build** (`BUILD_ID`/manifest
+gone, `.next/static/development` present). Ordinary dev/prod `.next` collision in one worktree. Benign,
+no deploy risk (CI builds into a fresh `.next`). Rule recorded: run prod build/`next start`/curl checks
+**before or after** Playwright, never interleaved. P7 followed that ordering and hit **no** missing manifest.
+
+## 4. FOUNDER-QA CHECKLIST — ready to run (HUMAN GATE)
+
+**Setup:** real-LLM, `NEXT_PUBLIC_WORK_COPY_ENGINE=true`, **mock OFF**, `npm run dev`. The flag is
+**build-time inlined** — a dev server restart is required after setting it.
+
+- [ ] **(a) REAL STEP 01 entry — the path automation CANNOT cover.** Work-shaped one-liner
+      (Kundius-style photographer) ⇒ classifies to **work** ⇒ `JourneyEntryStep` renders ⇒ confirm
+      serves ⇒ shell mounts at **STEP 02** with a correctly seeded rail. Spot-check the **manual
+      verdict** path + **one edited-line re-classify** (costs 1 UNDERSTAND credit; no
+      `applyBusinessTypeCorrection` — accepted decision-3 trade-off).
+- [ ] **(b) Full journey 01→06** — reveal quality; rail correctness/correctability.
+      **⚠️ Includes the landmine-15 scenario LIVE: do ONE group RENAME on a project that has photos,
+      then verify the photos SURVIVE the rename.**
+- [ ] **(c) Reveal → editor** — site opens **EDITABLE**, edits save, `templateId: 'atelier'` +
+      `audienceType: 'service'`.
+- [ ] **(d) ⚠️ FOUNDER DECISION — `NEXT_PUBLIC_WORK_COPY_ENGINE` prod/Vercel state at the merge gate.**
+      Build-time inlined ⇒ **flipping it later = a redeploy**, not an env toggle (landmine 2). Decide
+      ON or OFF for prod as part of the merge.
+- [ ] **(e) Legacy spot-check** — thing/trust onboarding unchanged; **granth/writer lands on
+      `WizardShell` post-confirm** (pre-confirm STEP 01 visual for granth drafts = accepted decision-2
+      cosmetic).
+- [ ] **(f) `/preview/{token}` default (no param) unchanged** — *already covered by automation*
+      (`publish.spec.ts` drives it and asserts Publish enables). Eyeball only if desired.
+- [ ] **(g) ⚠️ LANGUAGE ASSUMPTION — flag if pilot-blocking.** The rail **deliberately renders no
+      LANGUAGES** in E1 (no source for it), and generation **silently defaults to `en`**
+      (`slimStrategy.ts` — `languages[0] ?? 'en'`). **A Dutch/NL pilot (Kundius) gets ENGLISH copy,
+      silently.** Closing it = E2/E3 (ingestion → location + site → language inference).
+- [ ] **(h) SEAM SANITY** — eyeball `src/modules/wizard/work/engines/work.ts` as **"the thing engine #2
+      clones"**; confirm nothing in `journey/` root would need touching for a second engine.
+- [ ] **(+) 768px REVEAL-WIDTH CALL (founder decision, step 6b).** Desktop reveal is **768px**
+      (`JourneyShell`'s shared `max-w-3xl`), **narrower than the handoff**. Deliberately **NOT fixed** —
+      widening moves **every** step, not just the reveal. STEP 06 is the one step showing a full site,
+      so the measure that helps 01–05 read arguably hurts 06. **Your call.**
+
+## 5. Deviations
+
+- **None from the plan.** Step 6a took the plan's *preferred* option (`:token+`); 6b left unfixed as
+  instructed (founder call); 6c corrected in place.
+
+## 6. What remains OPEN at this gate
+
+1. **768px reveal width** — founder call (above). Not a defect; a scoping decision.
+2. **Prod flag state** for `NEXT_PUBLIC_WORK_COPY_ENGINE` — founder decides at merge; flip = redeploy.
+3. **Bug A** (work fan-out = 6 AI calls vs shared 5/min FREE bucket ⇒ last page 429s; recoverable via
+   resume) — pre-existing, review-verified, **founder-logged for separate handling; NOT E1's**. It is
+   also the cause of the e2e flakiness documented above, and the founder will meet a 429 + stall on the
+   first real pilot run.
+4. **Bug B** (`saveDraft` shallow-spread ⇒ finalize's marker delete never persists) — cosmetic, no
+   editor reads it; pre-existing, **not E1's**.
+5. **Pre-existing dev-only noise, do NOT chase:** `ReferenceError: window is not defined` at
+   `src/hooks/useEditStoreBootstrap.ts:238` on dev SSR of `/preview` and `/edit`. Dev-only guard
+   (`NODE_ENV === 'development'`), compiled out of prod, fires in `publish.spec.ts` too. Still visible
+   in this phase's logs; harmless.
+6. **The XFO rule is an INTERIM TARGET** — it must MOVE with the reveal when `/preview` retires
+   (comments planted at all three sites: `next.config.js`, `StepReveal.tsx`, `preview/[token]/page.tsx`).
+
+**Phase 7 complete. All gates green. Ends at the founder-QA human gate above.**
