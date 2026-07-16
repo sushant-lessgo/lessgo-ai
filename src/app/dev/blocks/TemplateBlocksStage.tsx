@@ -250,7 +250,7 @@ export default function TemplateBlocksStage({ templateId }: { templateId: Templa
   const tokenId = `dev-blocks-${templateId}`;
 
   return (
-    <ThemeInjector paletteId={paletteId} variantId={variantId} knobs={knobs}>
+    <ThemeInjector paletteId={paletteId} variantId={variantId} knobs={knobs} styleTokens={undefined}>
       <Switcher
         mod={mod}
         paletteId={paletteId}

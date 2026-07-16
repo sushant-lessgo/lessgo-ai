@@ -134,6 +134,26 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
       defaultKnobs: m.defaultAtelierKnobs,
     };
   },
+  // Work-SKELETON Atelier skin (dev id `atelier2`; cutover to `atelier` in
+  // phase 9). Loader import()s the skin barrel, which builds the full
+  // TemplateModule from the skeleton factory + skin data. Dispatch firewall
+  // intact: skeleton code rides in this chunk; nothing new is statically imported
+  // by registry.ts or the main bundle.
+  atelier2: async () => {
+    const m = await import('@/modules/templates/atelier2');
+    return {
+      resolveBlock: m.resolveBlock,
+      ThemeInjector: m.ThemeInjector,
+      SSRTokens: m.SSRTokens,
+      getSurfaceForSection: m.getSurfaceForSection,
+      defaultPaletteId: m.defaultPaletteId,
+      variants: m.variants,
+      defaultVariantId: m.defaultVariantId,
+      paletteImageKeywords: m.paletteImageKeywords,
+      defaultKnobs: m.defaultKnobs,
+      knobs: m.knobs,
+    };
+  },
   // Bespoke §13 (Writer vertical) — registered + renderable, but absent from the
   // onboarding picker. Writer projects are seeded white-glove.
   granth: async () => {

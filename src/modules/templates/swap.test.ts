@@ -38,6 +38,14 @@ import {
   buildSwapPatch,
   type SwapSite,
 } from '@/app/edit/[token]/components/ui/TemplateSwapList';
+import { isVariantOffered } from '@/app/edit/[token]/components/ui/BlockVariantSelector';
+import {
+  builtVariantCount,
+  defaultIsSlot,
+  type BlockDeclaration,
+  type SectionBlockSet,
+} from '@/modules/templates/blockManifest';
+import type { AssetFacts } from '@/modules/generation/blockEligibility';
 import { engineCoreSections } from '@/modules/engines/coreSections';
 import type { TemplateId } from '@/types/service';
 
@@ -107,6 +115,83 @@ const countWords = (o: unknown) =>
 // ---------------------------------------------------------------------------
 // deriveSwapSite
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// SLOT mechanism (work-skeleton phase 1) — synthetic fixtures only (no real
+// template declares a slot yet).
+// ---------------------------------------------------------------------------
+
+describe('SLOT — declared-but-not-built variant (work-skeleton phase 1)', () => {
+  const ALL_ASSETS: AssetFacts = {
+    hasPhotos: true,
+    hasLogos: true,
+    hasTestimonials: true,
+    hasTestimonialPhotos: true,
+  };
+  const decl = (o: Partial<BlockDeclaration>): BlockDeclaration => ({
+    layoutName: 'X',
+    label: 'X',
+    consumes: [],
+    ...o,
+  });
+
+  it('a slot variant is NEVER offered by isVariantOffered', () => {
+    const slotVariant = decl({ layoutName: 'WorkHeroVideo', consumes: ['headline'], slot: true });
+    // not offered even when asset-eligible + copyShape-matched + content present
+    expect(
+      isVariantOffered(slotVariant, 'WorkHeroSlider', undefined, ALL_ASSETS, { headline: 'H' })
+    ).toBe(false);
+    // not offered even if it were (impossibly) the "current" layout — slot check
+    // runs before the escape hatch
+    expect(
+      isVariantOffered(slotVariant, 'WorkHeroVideo', undefined, ALL_ASSETS, { headline: 'H' })
+    ).toBe(false);
+    // sanity: an equivalent BUILT variant IS offered under the same inputs
+    const builtVariant = decl({ layoutName: 'WorkHeroImage', consumes: ['headline'] });
+    expect(
+      isVariantOffered(builtVariant, 'WorkHeroSlider', undefined, ALL_ASSETS, { headline: 'H' })
+    ).toBe(true);
+  });
+
+  it('a slot does not inflate builtVariantCount', () => {
+    const oneBuiltPlusSlot: SectionBlockSet = {
+      default: 'WorkHeroSlider',
+      variants: [
+        decl({ layoutName: 'WorkHeroSlider' }),
+        decl({ layoutName: 'WorkHeroVideo', slot: true }),
+      ],
+    };
+    // 2 raw variants but only 1 BUILT ⇒ no swap UI should open
+    expect(oneBuiltPlusSlot.variants.length).toBe(2);
+    expect(builtVariantCount(oneBuiltPlusSlot)).toBe(1);
+
+    const twoBuilt: SectionBlockSet = {
+      default: 'A',
+      variants: [decl({ layoutName: 'A' }), decl({ layoutName: 'B' })],
+    };
+    expect(builtVariantCount(twoBuilt)).toBe(2);
+  });
+
+  it('never-default INVARIANT: defaultIsSlot flags a fixture whose default names a slot', () => {
+    const badDefault: SectionBlockSet = {
+      default: 'WorkHeroVideo',
+      variants: [
+        decl({ layoutName: 'WorkHeroSlider' }),
+        decl({ layoutName: 'WorkHeroVideo', slot: true }),
+      ],
+    };
+    expect(defaultIsSlot(badDefault)).toBe(true);
+
+    const okDefault: SectionBlockSet = {
+      default: 'WorkHeroSlider',
+      variants: [
+        decl({ layoutName: 'WorkHeroSlider' }),
+        decl({ layoutName: 'WorkHeroVideo', slot: true }),
+      ],
+    };
+    expect(defaultIsSlot(okDefault)).toBe(false);
+  });
+});
 
 describe('deriveSwapSite — store layout → site facts', () => {
   it('extracts deduped section TYPES from ${type}-${uuid} ids', () => {

@@ -5,6 +5,7 @@
 // prevent drift.
 
 import type React from 'react';
+import type { StyleTokens } from '@/modules/skeletons/styleTokens';
 
 /** One selectable variant (token rescale) within a template. */
 export interface TemplateVariant {
@@ -78,11 +79,16 @@ export interface TemplateModule {
    *  simply ignore the extra prop.
    *  `knobs` (optional, phase 3) is the project's knob selection persisted in
    *  Project.themeValues.knobs — only knob-tokenized templates consume it; others
-   *  ignore the extra prop, so this addition is byte-neutral for them. */
-  ThemeInjector: React.ComponentType<{ paletteId: any; variantId?: any; mood?: any; knobs?: KnobSelection; children?: React.ReactNode }>;
-  /** Server-safe token emitter for published / static export. `knobs` is
-   *  optional (phase 3): knob-unaware templates ignore it. */
-  SSRTokens: React.ComponentType<{ paletteId: any; variantId?: any; mood?: any; knobs?: KnobSelection; children?: React.ReactNode }>;
+   *  ignore the extra prop, so this addition is byte-neutral for them.
+   *  `styleTokens` (optional, work-skeleton D1) is the project's per-section USER
+   *  style-token map from Project.themeValues.styleTokens — only skeleton-backed
+   *  templates consume it; others ignore the extra prop (byte-neutral), exactly
+   *  like `knobs`. */
+  ThemeInjector: React.ComponentType<{ paletteId: any; variantId?: any; mood?: any; knobs?: KnobSelection; styleTokens?: StyleTokens | null; children?: React.ReactNode }>;
+  /** Server-safe token emitter for published / static export. `knobs` +
+   *  `styleTokens` are optional: templates that don't consume them ignore the
+   *  extra props (byte-neutral). */
+  SSRTokens: React.ComponentType<{ paletteId: any; variantId?: any; mood?: any; knobs?: KnobSelection; styleTokens?: StyleTokens | null; children?: React.ReactNode }>;
   /** Section-type → surface token for this template's alternation rules. The
    *  renderer writes this under the neutral `data-surface` attribute (shared by
    *  all templates; surface *values* differ per template, so no collision). */
