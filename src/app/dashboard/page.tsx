@@ -131,7 +131,14 @@ export default async function DashboardPage({
   const allItems = sourceProjects.map((project) => {
     const publishedPage = publishedByProjectId.get(project.id)
 
-    // Generate smart project name from available data
+    // Generate smart project name from available data.
+    //
+    // 🚨 DD10 (verified phase 6, unchanged) — an EXPLICIT title is authoritative. The whole
+    // derivation chain below is a FALLBACK, gated on the title being empty or the
+    // `@default("Untitled Project")` placeholder. `PATCH /api/projects/[tokenId]` (Rename)
+    // relies on exactly that: it writes `Project.title`, and this branch then never runs, so
+    // the user's name sticks. Do not make the derivation unconditional — it would silently
+    // eat every rename.
     let smartName = project.title
 
     if (!smartName || smartName === 'Untitled Project') {

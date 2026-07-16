@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import posthog from 'posthog-js'
-import { confirmDialog } from '@/components/ui/ConfirmDialog'
+import { confirmDialog, promptDialog } from '@/components/ui/ConfirmDialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,8 +22,8 @@ import type { ProjectGridItem } from './ProjectGridCard'
  *
  * R4: ships ALL 7 design items in design order. ACTIVE: "Open editor",
  * "Visit site" (published only), "Unpublish" (published only — phase 5),
- * "Delete" (phase 5). GREYED (completeness principle — render in place,
- * disabled): Rename, Duplicate (phase 6), Domain settings + Archive (D3 — out
+ * "Delete" (phase 5), "Rename" + "Duplicate" (phase 6). GREYED (completeness
+ * principle — render in place, disabled): Domain settings + Archive (D3 — out
  * of this spec's scope entirely).
  *
  * R11 — `@/components/ui/dropdown-menu` is NOT part of the foundation's
@@ -181,6 +181,52 @@ export default function ProjectCardMenu({ project, onOpenEditor }: ProjectCardMe
     }, 0)
   }
 
+  const handleRename = () => {
+    posthog.capture('project_rename_clicked', {
+      project_id: project.id,
+      project_name: project.name,
+    })
+
+    setTimeout(() => {
+      void (async () => {
+        // DD10 — prefilled with the DISPLAYED name (which may be the dashboard's derived
+        // smart name), so renaming never starts from a blank the user has never seen. The
+        // PATCH writes an explicit title, which then wins over that fallback for good.
+        const next = await promptDialog({
+          title: 'Rename project',
+          defaultValue: project.name,
+          confirmLabel: 'Rename',
+        })
+        if (next === null) return
+        const title = next.trim()
+        if (!title || title === project.name) return
+        await run(
+          () =>
+            fetch(`/api/projects/${project.tokenId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ title }),
+            }),
+          'Project renamed.'
+        )
+      })()
+    }, 0)
+  }
+
+  const handleDuplicate = () => {
+    posthog.capture('project_duplicate_clicked', {
+      project_id: project.id,
+      project_name: project.name,
+    })
+
+    // No confirm: duplicate creates, it never destroys. The copy lands as a Draft card via
+    // router.refresh() (DD9 — it is an independent, unpublished clone).
+    void run(
+      () => fetch(`/api/projects/${project.tokenId}/duplicate`, { method: 'POST' }),
+      'Duplicated. The copy is a new draft.'
+    )
+  }
+
   const handleVisit = () => {
     posthog.capture('project_preview_clicked', {
       project_id: project.id,
@@ -233,15 +279,27 @@ export default function ProjectCardMenu({ project, onOpenEditor }: ProjectCardMe
           </DropdownMenuItem>
         )}
 
-        {/* R4 — designed chrome with no backend yet: greyed in place, never hidden. */}
-        <DropdownMenuItem className={cn(ITEM_CLASS, 'cursor-not-allowed')} disabled>
+        {/* Rename + Duplicate are domain-agnostic: neither touches the live page, so the DD7
+            guard does NOT apply to them — only `busy` gates them. */}
+        <DropdownMenuItem
+          className={cn(ITEM_CLASS, busy && 'cursor-not-allowed')}
+          disabled={busy}
+          onSelect={handleRename}
+        >
           <AppIcon name="drive_file_rename_outline" size={17} />
           Rename
         </DropdownMenuItem>
-        <DropdownMenuItem className={cn(ITEM_CLASS, 'cursor-not-allowed')} disabled>
+        <DropdownMenuItem
+          className={cn(ITEM_CLASS, busy && 'cursor-not-allowed')}
+          disabled={busy}
+          onSelect={handleDuplicate}
+        >
           <AppIcon name="content_copy" size={17} />
           Duplicate
         </DropdownMenuItem>
+
+        {/* R4 — designed chrome with no backend yet (D3, out of scope): greyed in place,
+            never hidden. */}
         <DropdownMenuItem className={cn(ITEM_CLASS, 'cursor-not-allowed')} disabled>
           <AppIcon name="language" size={17} />
           Domain settings

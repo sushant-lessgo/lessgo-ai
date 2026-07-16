@@ -482,7 +482,44 @@ published → gone + `/p/{slug}` 404.
 
 ---
 
-## ⛔ HUMAN GATE A — slice-1 sign-off (MANDATORY, blocks phase 6+)
+## ⛔ HUMAN GATE A — **PASSED (with deployed checks DEFERRED) 2026-07-16**
+
+### Founder rulings (binding — do not re-litigate)
+- **D2 admin override → KEEP the audited override.** No `adminOverride → 403` flip. The
+  commented one-liner stays in both routes as documentation of the road not taken.
+- **DD12 slug squatting → fine for beta.** No reclaim policy this slice.
+- **DD0b limit-count loosening → founder delegated the call ("trivial at this stage, you
+  decide"). ORCHESTRATOR RULING: KEEP the loosening** (`publishState: { not: 'draft' }`).
+  Rationale: `isPublished` was `@default(true)` with no writer, so the *published*-page limit
+  was counting drafts — that was a bug, not a policy. The fix restores the limit's intended
+  meaning; pricing-v2 redefines these limits anyway. Reverting to bug-compatible behaviour to
+  protect an undesigned limit would be worse.
+- **DD2b blog demote-on-unpublish → right for beta.** Posts return as drafts; re-publish is
+  per-post.
+
+### ⚠️ DEFERRED to the big-bang deploy — NOT verified, do not claim otherwise
+The founder cannot deploy now: this branch is a **consuming spec of the held big-bang push**
+(main carries the ui-foundation base with push HELD until auth/dashboard/editor-shell land).
+So three Gate A items are **untested on real infra** and must be checked at the big-bang deploy:
+1. **`{slug}.lessgo.site` take-down** — needs host-based subdomain routing through real
+   middleware + KV; not reproducible locally.
+2. **DD1c: does the ~1h CDN edge window actually EXIST?** — the open empirical question. No
+   purge mechanism exists (phase 3), so the shipped copy promises the window defensively. The
+   phase-2 plan-reviewer's read is that the blob-proxy CDN cache key may include the *rewrite
+   target* (`middleware.ts:115-117`), in which case unpublish escapes the window for free and
+   the copy should be TIGHTENED. **Check: unpublish, then hit the plain subdomain URL vs. one
+   with `?nocache=1`.** Plain still serving + cache-bust 404 ⇒ window is real (copy correct).
+   Both 404 ⇒ no window (tighten copy — a cheap follow-up, not a re-plan).
+3. **KV/blob cleanliness on prod** (admin KV diagnostics) + re-publish on the real host.
+
+**What IS verified (don't under-claim either):** local dev exercises **real Vercel Blob + KV** —
+the e2e run performed a genuine `POST /api/publish 200` with a real blob upload, then unpublished
+and got a real 404. Teardown is proven against real infra; only real *host routing* + the CDN
+layer are unproven.
+
+---
+
+### Original gate definition (retained for the deploy-time checks)
 
 One combined gate covering all four spec-mandated items:
 1. **Unpublish/take-down** — founder QA on a deployed env: publish → unpublish → verify

@@ -58,6 +58,79 @@ export async function GET(
   }
 }
 
+/** DD10 — an explicit title is authoritative; these are the bounds the dashboard renders within. */
+const TITLE_MAX = 120;
+
+/**
+ * PATCH /api/projects/[tokenId] — rename a project (phase 6).
+ *
+ * Body `{ title: string }`. Trimmed; 1–120 chars or 400. Writes `Project.title` ONLY — the
+ * dashboard's smart-name fallback (`dashboard/page.tsx`) then steps aside, because it only fires
+ * for an empty/`"Untitled Project"` title (DD10).
+ *
+ * Contract: 401 · 403|404 (authz passthrough) · 400 invalid_title · 200 `{ ok, title }`.
+ */
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { tokenId: string } }
+) {
+  try {
+    const { tokenId } = params;
+    if (!tokenId) {
+      return NextResponse.json({ error: 'Token ID is required' }, { status: 400 });
+    }
+
+    // A01: same authz ladder as GET/DELETE above (D2).
+    const { userId: clerkId } = await auth();
+    if (!clerkId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const access = await assertProjectOwner(clerkId, tokenId, {
+      action: 'projects.rename',
+      claimIfOrphan: true,
+    });
+    if (!access.ok) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
+    }
+    // The demo token short-circuits assertProjectOwner to ok:true for ANY caller before any
+    // ownership check, and a real shared Project row exists for it. This is a MUTATION — a
+    // rename here would rewrite the shared mock's title for everyone. 404 mirrors
+    // `src/lib/blog/access.ts` (don't reveal the row exists).
+    if (access.isDemo) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+    // D2 (Gate A ruling: KEEP the audited override): a non-owner ADMIN reaches here with
+    // `access.adminOverride === true`, already audit-logged by assertProjectOwner.
+    // STRICT OWNER-ONLY = uncomment the next line (flip it in DELETE + unpublish + duplicate too):
+    // if (access.adminOverride) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+
+    const body = await req.json().catch(() => null);
+    const raw = (body as { title?: unknown } | null)?.title;
+    const title = typeof raw === 'string' ? raw.trim() : '';
+    if (!title || title.length > TITLE_MAX) {
+      return NextResponse.json(
+        { code: 'invalid_title', error: `Name must be 1–${TITLE_MAX} characters.` },
+        { status: 400 }
+      );
+    }
+
+    const project = await prisma.project.findUnique({
+      where: { tokenId },
+      select: { id: true },
+    });
+    if (!project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    await prisma.project.update({ where: { id: project.id }, data: { title } });
+
+    return NextResponse.json({ ok: true, title });
+  } catch (error) {
+    console.error('Error renaming project:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 /**
  * DELETE /api/projects/[tokenId] — delete a project, taking any live page down with it (DD11).
  *

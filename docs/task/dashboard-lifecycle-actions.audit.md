@@ -690,3 +690,107 @@ MEANING rather than delete the assertion.
   change together.
 - e2e UI tests depend on the toast's `role="status"` and Radix's `data-disabled` — both
   implementation details of components outside this spec's fence.
+
+---
+
+# Phase 6 — Rename + Duplicate
+
+## Files changed
+- `src/app/api/projects/[tokenId]/route.ts` (added PATCH; GET/DELETE untouched)
+- `src/lib/projectToken.ts` (new)
+- `src/app/api/projects/[tokenId]/duplicate/route.ts` (new)
+- `src/components/dashboard/ProjectCardMenu.tsx`
+- `src/app/dashboard/page.tsx` (comment only — see DD10 below)
+- `e2e/dashboard-lifecycle.spec.ts`
+- `docs/task/dashboard-lifecycle-actions.audit.md` (this section)
+
+## What changed, per file
+
+**`src/app/api/projects/[tokenId]/route.ts`** — new `PATCH` handler. Same authz ladder as
+DELETE (`action: 'projects.rename'`, `claimIfOrphan: true`), demo-token → 404 guard, and the
+same commented D2 one-liner (Gate A: KEEP the audited admin override). Body `{ title }`:
+trimmed, 1–120 chars else `400 invalid_title`. Writes `Project.title` only. GET and DELETE were
+not touched.
+
+**`src/lib/projectToken.ts`** (new) — `mintProjectToken(client)`: `nanoid(12)` + `token.create`,
+per the `/api/start:56-70` pattern. Takes a `PrismaClient | Prisma.TransactionClient` so the
+duplicate route can mint inside its `$transaction` (`Project.tokenId` FKs `Token.value`, so the
+Token must exist before the Project insert). `/api/start` deliberately NOT re-pointed
+(blast-radius control; phase-7 follow-up) — noted in the file's docblock.
+
+**`src/app/api/projects/[tokenId]/duplicate/route.ts`** (new) — authz ladder
+(`action: 'projects.duplicate'`), demo guard, D2 comment. Loads the source with an explicit
+`select` covering **every** field it clones (the unselected-field trap), plus `pages`. One
+`$transaction`: mint token → `project.create` → `projectPage.createMany`. Returns
+`{ ok, tokenId }`. No `user.upsert`/`createDefaultPlan` — `access.userRecord.id` is the owner.
+DD9 contract implemented exactly: copied scalars/JSON + `title + " (copy)"` (clamped to 120 to
+stay inside the rename bound), `status: 'draft'`; `pages` the ONLY cloned relation; no
+publishedPage/testimonials/collectLink/blogPosts/editDeltas/socialPosts/emailSequence/outreach*.
+
+**`ProjectCardMenu.tsx`** — Rename and Duplicate un-greyed (only `busy` gates them; the DD7
+custom-domain guard does not apply — neither action touches the live page). Rename →
+`promptDialog({ defaultValue: project.name })` (the DISPLAYED name, DD10) → PATCH → existing
+`run()` (app-chrome `useToast()`, `router.refresh()`). No-ops on cancel/unchanged/blank.
+Duplicate → POST → toast, no confirm (it creates, never destroys). PostHog
+`project_rename_clicked` / `project_duplicate_clicked` mirror the existing convention.
+`@/components/ui/dropdown-menu` and `ConfirmDialog.tsx` untouched (R11 / DD5). Domain settings +
+Archive remain greyed (D3).
+
+**`src/app/dashboard/page.tsx`** — DD10 **verified, no behaviour change**. The fallback chain is
+already gated on `if (!smartName || smartName === 'Untitled Project')`, i.e. an explicit title
+already wins. Added a load-bearing comment tying that gate to the rename route so a future
+"simplification" can't silently eat every rename.
+
+**`e2e/dashboard-lifecycle.spec.ts`** — 4 new tests (rename API incl. trim + 1/120 bounds; UI
+rename; duplicate DD9 contract; UI duplicate) + rename/duplicate assertions folded into the
+existing demo-token and non-owner tests (incl. positive proof: the foreign project survives
+unrenamed and uncopied).
+
+## Decisions / deviations
+
+1. **Duplicate + demo token → 404 (conservative, as instructed to judge).** Duplicate is
+   read-then-create, not destructive, so a rejection isn't strictly forced. Rejected anyway:
+   (a) the demo short-circuit returns `userRecord: null` — there is no owner to assign the copy
+   to; (b) it would otherwise let any signed-in user mint unbounded projects off the shared mock,
+   outside every plan limit. Implemented as `if (access.isDemo || !access.userRecord)`, which
+   also discharges the null-owner type obligation at the same point. Rationale is in the route.
+2. **`(copy)` title clamped to 120 chars** — otherwise duplicating a 120-char title yields a
+   title the rename route would reject as invalid. In-scope edge case, conservative choice.
+3. **Duplicate's e2e plants the `PublishedPage` row instead of calling `publishSeed`.**
+   `/api/publish` is rate-limited to 5/min and the pre-existing tests already spend that budget.
+   The duplicate route never touches publish infra, so a real publish buys nothing here. The
+   assertion "the original stays live" therefore degrades to "the original's published row is
+   untouched (`projectId` + `publishState`)"; real SSR serving/take-down stays pinned by the
+   publish-backed tests above it.
+4. **Phase-6 tests appended at the END of the spec, with a comment explaining why.** SURPRISE
+   (see below) — placing them mid-file re-timed the run and tipped a PRE-EXISTING test into a
+   `/api/publish` 429. Ordering is now load-bearing.
+5. Rename's prompt renders `role="dialog"` (only `confirm` is an `alertdialog`) — the e2e
+   locator matches, ConfirmDialog itself was not touched.
+
+## Surprises
+- **The publish rate limit (5/min) is a real constraint on this spec's runtime, not just its
+  content.** Inserting fast tests mid-file compressed the publish cadence of the tests around
+  them into one 60s window → a 429 in a test I hadn't modified. This looks exactly like a real
+  regression and isn't one; hence the explanatory comment in the file.
+- `PublishedPage.userId` is a **Clerk** id, not `User.id` — relevant when planting rows in e2e.
+
+## Verification (all observed)
+- `npx tsc --noEmit` — **green**.
+- `npm run test:run` — **green** (196 files passed / 1 skipped; 3371 passed / 18 skipped).
+- `E2E_PORT=3011 npx playwright test e2e/dashboard-lifecycle.spec.ts --project=setup
+  --project=authed` — **14/14 passed** (was 10/10; +4). Port 3011 checked for a stale server
+  first (free); Playwright started its own.
+
+## Open risks
+- `mintProjectToken()` now has TWO call sites' worth of logic in the codebase — the helper and
+  the still-inline copy in `/api/start`. They can drift until phase 7's follow-up re-points it.
+- The duplicate route has no plan-limit check: a user can clone past their site allowance.
+  Consistent with the rest of the app (project creation via `/api/start` is unmetered too) and
+  out of this slice's scope, but it is a new, cheaper way to create projects — worth a look when
+  pricing-v2 lands.
+- Duplicate is unbounded in payload size (`content`/`computedDesign` JSON copied in-process for
+  a project + all its pages). Fine at current scale; a very large multi-page site is untested.
+- Rename has no uniqueness constraint — two projects can share a title. Intentional (the grid is
+  keyed by tokenId), but the UI-duplicate test's cleanup matches on title, so it would over-match
+  if a user manually created a same-named `(copy)`.

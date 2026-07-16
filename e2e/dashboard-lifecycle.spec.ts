@@ -173,6 +173,7 @@ test('UI: custom-domain card pre-disables Unpublish + Delete (DD7)', async ({ pa
   }
 });
 
+
 test('unauthenticated → rejected by middleware (404) on both lifecycle routes', async () => {
   // A cookie-less context: the `authed` project's storageState is NOT applied here.
   const anon = await playwrightRequest.newContext({ baseURL: BASE_URL });
@@ -207,6 +208,15 @@ test('demo token → 404 on both lifecycle routes, demo project NOT destroyed', 
 
   const del = await api.delete(`/api/projects/${DEMO_TOKEN}`);
   expect(del.status(), 'demo delete must 404').toBe(404);
+
+  // Phase 6: rename is a MUTATION of the shared mock (it would retitle the demo for everyone);
+  // duplicate is only read-then-create, but is rejected too — the demo short-circuit leaves no
+  // `userRecord` to own the copy, and it would be an unmetered project factory.
+  const rename = await api.patch(`/api/projects/${DEMO_TOKEN}`, { data: { title: 'pwned' } });
+  expect(rename.status(), 'demo rename must 404').toBe(404);
+
+  const dup = await api.post(`/api/projects/${DEMO_TOKEN}/duplicate`);
+  expect(dup.status(), 'demo duplicate must 404').toBe(404);
 
   // The 404 must be the GUARD, not the not-found branch: if the demo row exists in this DB, it
   // must SURVIVE. (If it doesn't exist locally, the status assertions above still stand but
@@ -244,8 +254,20 @@ test('non-owner token → 403 on both lifecycle routes', async ({ page }) => {
     const del = await api.delete(`/api/projects/${otherToken}`);
     expect(del.status(), 'non-owner delete must 403').toBe(403);
 
-    // The 403 is real, not cosmetic: the project survives.
-    expect(await db.project.findUnique({ where: { tokenId: otherToken } })).not.toBeNull();
+    const rename = await api.patch(`/api/projects/${otherToken}`, { data: { title: 'pwned' } });
+    expect(rename.status(), 'non-owner rename must 403').toBe(403);
+
+    const dup = await api.post(`/api/projects/${otherToken}/duplicate`);
+    expect(dup.status(), 'non-owner duplicate must 403').toBe(403);
+
+    // The 403 is real, not cosmetic: the project survives, unrenamed, uncopied.
+    const survivor = await db.project.findUnique({ where: { tokenId: otherToken } });
+    expect(survivor).not.toBeNull();
+    expect(survivor!.title, 'non-owner rename went through').toBe('Foreign project');
+    expect(
+      await db.project.count({ where: { title: 'Foreign project (copy)' } }),
+      'non-owner duplicate went through'
+    ).toBe(0);
   } finally {
     await db.project.deleteMany({ where: { tokenId: otherToken } });
     await db.token.deleteMany({ where: { value: otherToken } });
@@ -363,5 +385,197 @@ test('custom domain attached → 409 custom_domain_attached, page STILL serves (
     await db.publishedPage.updateMany({ where: { slug }, data: { customDomain: null } });
     await api.delete(`/api/projects/${token}`);
     await db.publishedPage.deleteMany({ where: { slug } });
+  }
+});
+
+
+// ---------------------------------------------------------------------------
+// Phase 6 (Rename + Duplicate) lives at the END of this file ON PURPOSE. /api/publish is
+// rate-limited to 5 requests/minute per user, and the publish-backed tests above already spend
+// that whole budget; inserting these fast, publish-free tests earlier re-times the run and tips
+// one of THOSE tests into a 429. Nothing below publishes — keep it that way, and keep it last.
+// ---------------------------------------------------------------------------
+
+test('rename: PATCH 200 writes the title, and the card shows it (DD10)', async ({ page }) => {
+  const api = await authedApi(page);
+  const { token } = await newSeededProject(api);
+  const newName = `E2E Renamed ${randomUUID().slice(0, 6)}`;
+
+  try {
+    const res = await api.patch(`/api/projects/${token}`, { data: { title: newName } });
+    expect(res.status(), `rename: ${await res.text()}`).toBe(200);
+    expect((await res.json()).title).toBe(newName);
+
+    // DD10: the explicit title must beat the dashboard's smart-name derivation chain — a seeded
+    // project HAS onboarding content, so a regression there (unconditional derivation) would
+    // overwrite the rename on screen while the DB row stays correct. Assert the SCREEN.
+    await page.goto('/dashboard');
+    await expect(cardFor(page, token)).toContainText(newName);
+
+    // Trimming + the 1–120 bound are the route's contract, not the client's.
+    expect((await api.patch(`/api/projects/${token}`, { data: { title: '   ' } })).status()).toBe(400);
+    expect((await api.patch(`/api/projects/${token}`, { data: { title: 'x'.repeat(121) } })).status()).toBe(400);
+    const trimmed = await api.patch(`/api/projects/${token}`, { data: { title: `  ${newName}  ` } });
+    expect((await trimmed.json()).title).toBe(newName);
+  } finally {
+    await api.delete(`/api/projects/${token}`);
+  }
+});
+
+test('UI: ••• → Rename → prompt → toast → card shows the new name', async ({ page }) => {
+  const api = await authedApi(page);
+  const { token } = await newSeededProject(api);
+  const newName = `E2E UI Rename ${randomUUID().slice(0, 6)}`;
+
+  try {
+    await page.goto('/dashboard');
+    await openCardMenu(page, token);
+    await page.getByRole('menuitem', { name: 'Rename' }).click();
+
+    // A prompt renders role="dialog" (only `confirm` is an alertdialog) — DD5: ConfirmDialog is
+    // used as-is, not restyled.
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('textbox').fill(newName);
+    await dialog.getByRole('button', { name: 'Rename' }).click();
+
+    await expect(page.getByRole('status')).toContainText('renamed');
+    // router.refresh() re-derives from the server — green here means the SERVER says so.
+    await expect(cardFor(page, token)).toContainText(newName);
+  } finally {
+    await api.delete(`/api/projects/${token}`);
+  }
+});
+
+test('duplicate: new Draft with a NEW token, pages cloned, original untouched (DD9)', async ({
+  page,
+}) => {
+  const api = await authedApi(page);
+  const { token } = await newSeededProject(api);
+  const slug = `e2e-lifecycle-dup-${randomUUID().slice(0, 6)}`;
+  let copyToken: string | undefined;
+
+  try {
+    // The ORIGINAL gets a PublishedPage row so we can prove the copy does NOT inherit it.
+    // Planted directly, NOT via publishSeed: /api/publish is rate-limited to 5/min and this
+    // serial suite already spends that budget on the tests that genuinely need a real blob.
+    // Duplicate never touches publish infra, so a real publish would buy nothing here but flake.
+    const src = (await db.project.findUnique({ where: { tokenId: token } }))!;
+    const owner = (await db.user.findUnique({ where: { id: src.userId! } }))!;
+    await db.publishedPage.create({
+      data: {
+        userId: owner.clerkId, // PublishedPage.userId is the CLERK id, not User.id
+        slug,
+        projectId: src.id,
+        htmlContent: '<html></html>',
+        publishState: 'published',
+      },
+    });
+
+    // A second page on the source. THE trap DD9 flags: cloning the Project row but not its
+    // `pages` silently loses every extra page of a multi-page site, with no error anywhere.
+    const source = src;
+    await db.projectPage.create({
+      data: {
+        projectId: source.id,
+        archetypeKey: 'contact',
+        pathSlug: '/contact',
+        title: 'Contact',
+        order: 1,
+        content: { sections: ['contact-e2e'] },
+      },
+    });
+
+    const res = await api.post(`/api/projects/${token}/duplicate`);
+    expect(res.status(), `duplicate: ${await res.text()}`).toBe(200);
+    copyToken = (await res.json()).tokenId as string;
+    expect(copyToken, 'duplicate must return a NEW token').not.toBe(token);
+
+    const copy = (await db.project.findUnique({ where: { tokenId: copyToken } }))!;
+    expect(copy, 'copy row missing').not.toBeNull();
+    expect(copy.id).not.toBe(source.id);
+    expect(copy.title).toBe(`${source.title} (copy)`);
+    expect(copy.status).toBe('draft');
+    expect(copy.userId).toBe(source.userId);
+    // Carried design/content identity (a copy the user recognises, not a blank).
+    expect(copy.audienceType).toBe(source.audienceType);
+    expect(copy.templateId).toBe(source.templateId);
+    expect(copy.paletteId).toBe(source.paletteId);
+    expect(JSON.stringify(copy.content)).toBe(JSON.stringify(source.content));
+
+    // The multi-page clone.
+    const copiedPages = await db.projectPage.findMany({
+      where: { projectId: copy.id },
+      orderBy: { order: 'asc' },
+    });
+    const sourcePages = await db.projectPage.findMany({
+      where: { projectId: source.id },
+      orderBy: { order: 'asc' },
+    });
+    expect(copiedPages.length, 'pages NOT cloned — multi-page site silently lost').toBe(
+      sourcePages.length
+    );
+    expect(copiedPages.map((p) => p.pathSlug)).toEqual(sourcePages.map((p) => p.pathSlug));
+    expect(copiedPages.some((p) => p.pathSlug === '/contact')).toBe(true);
+
+    // NOT cloned: the copy is an independent UNPUBLISHED draft.
+    expect(
+      await db.publishedPage.findFirst({ where: { projectId: copy.id } }),
+      'copy inherited the published page'
+    ).toBeNull();
+
+    // Independence: editing the copy must not touch the original.
+    await api.patch(`/api/projects/${copyToken}`, { data: { title: 'Copy edited' } });
+    expect((await db.project.findUnique({ where: { id: source.id } }))!.title).toBe(source.title);
+
+    // The ORIGINAL's published row is untouched — duplicating never disturbs the live page.
+    // (Real SSR take-down/serving is pinned by the publish-backed tests below; this test
+    // deliberately spends no publish budget.)
+    const originalPage = await db.publishedPage.findUnique({ where: { slug } });
+    expect(originalPage!.projectId, 'duplicate re-pointed the original published page').toBe(
+      source.id
+    );
+    expect(originalPage!.publishState).toBe('published');
+
+    // The copy lands as a Draft card in the grid.
+    await page.goto('/dashboard');
+    await expect(cardFor(page, copyToken).getByText('Draft')).toBeVisible();
+  } finally {
+    if (copyToken) {
+      await db.project.deleteMany({ where: { tokenId: copyToken } });
+      await db.token.deleteMany({ where: { value: copyToken } });
+    }
+    // The planted row goes FIRST: the DELETE route would otherwise run a real teardown on a
+    // fabricated 'published' page and could refuse (teardown_incomplete), leaking the project.
+    await db.publishedPage.deleteMany({ where: { slug } });
+    await api.delete(`/api/projects/${token}`);
+  }
+});
+
+test('UI: ••• → Duplicate → toast → a new Draft card appears', async ({ page }) => {
+  const api = await authedApi(page);
+  const { token } = await newSeededProject(api);
+
+  try {
+    await page.goto('/dashboard');
+    const before = await page.getByTestId(/^project-card-/).count();
+
+    await openCardMenu(page, token);
+    await page.getByRole('menuitem', { name: 'Duplicate' }).click();
+
+    // No confirm dialog — duplicate creates, it never destroys.
+    await expect(page.getByRole('status')).toContainText('Duplicated');
+    await expect(page.getByTestId(/^project-card-/)).toHaveCount(before + 1);
+  } finally {
+    // The copy is the only OTHER project holding this project's cloned title.
+    const src = await db.project.findUnique({ where: { tokenId: token } });
+    if (src) {
+      const copies = await db.project.findMany({
+        where: { title: `${src.title} (copy)`, userId: src.userId },
+        select: { tokenId: true },
+      });
+      await db.project.deleteMany({ where: { tokenId: { in: copies.map((c) => c.tokenId) } } });
+      await db.token.deleteMany({ where: { value: { in: copies.map((c) => c.tokenId) } } });
+    }
+    await api.delete(`/api/projects/${token}`);
   }
 });
