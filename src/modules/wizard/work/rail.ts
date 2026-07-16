@@ -93,11 +93,22 @@ export interface WorkRail {
   userNotes: string[];
 }
 
-/** Loose group input from the seed / STEP 03 questions — normalized before emit. */
+/**
+ * Loose group input from the seed / STEP 03 questions — normalized before emit.
+ *
+ * `photos` / `items` are CARRIED, not authored, here: E2 image ingestion writes
+ * them onto `facts.work.groups[]`, and because `applyRailEdit({field:'groups'})`
+ * REPLACES the whole array, a rail edit that dropped them would silently wipe
+ * ingested photos. Shapes are exactly `WorkGroupSchema`'s (never re-declared).
+ */
 export interface WorkGroupInput {
   name: string;
   kind?: WorkGroup['kind'];
   price?: { mode?: WorkPrice['mode']; amount?: number; currency?: string };
+  /** Direct group-level photos (flat group) — carried through untouched. */
+  photos?: WorkGroup['photos'];
+  /** Second level (shoots / projects) — carried through untouched. */
+  items?: WorkGroup['items'];
 }
 
 /** One rail correction. `note` appends to `userNotes` (never overwrites). */
@@ -211,6 +222,12 @@ function isValidAmount(n: unknown): n is number {
  * `'story'` is the case-study shape and has no data here) and
  * `price:{mode:'on-request'}` unless a valid amount was supplied for
  * `exact`/`from`.
+ *
+ * PRESERVES `photos` / `items` when supplied (E2 ingestion owns them). They are
+ * carried verbatim — this module never authors or repairs them; a malformed
+ * value simply fails `WorkFactsSchema` at emit time (`workFactsToBriefPatch` ⇒
+ * `{ok:false}`), which is the same never-persist-garbage rule as everything
+ * else here. Absent keys stay ABSENT (never `{photos: undefined}`).
  */
 export function normalizeWorkGroup(input: WorkGroupInput | null | undefined): WorkGroup | null {
   const name = typeof input?.name === 'string' ? input.name.trim() : '';
@@ -225,7 +242,10 @@ export function normalizeWorkGroup(input: WorkGroupInput | null | undefined): Wo
       price.currency = input.price.currency.trim();
     }
   }
-  return { name, kind, price };
+  const group: WorkGroup = { name, kind, price };
+  if (input?.photos !== undefined) group.photos = input.photos;
+  if (input?.items !== undefined) group.items = input.items;
+  return group;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

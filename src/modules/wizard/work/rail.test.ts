@@ -223,6 +223,26 @@ describe('normalizeWorkGroup (landmine 6)', () => {
     });
   });
 
+  it('PRESERVES E2-ingested photos/items (rail edits must not wipe them)', () => {
+    const g = normalizeWorkGroup({
+      name: 'Weddings',
+      photos: [{ id: 'p1', url: 'https://x/1.jpg', cover: true }],
+      items: [{ name: 'Anna & Bo', photos: [{ id: 'p2' }], client: 'Anna' }],
+    })!;
+    expect(g).toEqual({
+      name: 'Weddings',
+      kind: 'category',
+      price: { mode: 'on-request' },
+      photos: [{ id: 'p1', url: 'https://x/1.jpg', cover: true }],
+      items: [{ name: 'Anna & Bo', photos: [{ id: 'p2' }], client: 'Anna' }],
+    });
+    expect(WorkFactsSchema.safeParse({ groups: [g] }).success).toBe(true);
+    // Absent keys stay ABSENT (no {photos: undefined} noise in persisted facts).
+    const plain = normalizeWorkGroup({ name: 'Portraits' })!;
+    expect('photos' in plain).toBe(false);
+    expect('items' in plain).toBe(false);
+  });
+
   it('returns null for an unnameable group; every non-null result parses', () => {
     expect(normalizeWorkGroup({ name: '   ' })).toBeNull();
     expect(normalizeWorkGroup(null)).toBeNull();
@@ -280,6 +300,31 @@ describe('applyRailEdit — full-facts re-emit + snapshot sync', () => {
       { name: 'Weddings', kind: 'category', price: { mode: 'on-request' } },
       { name: 'Portraits', kind: 'category', price: { mode: 'from', amount: 400 } },
     ]);
+  });
+
+  it('a groups edit carrying E2 photos/items round-trips them intact; the bag still passes getWorkFacts', () => {
+    const photos = [{ id: 'p1', url: 'https://x/1.jpg', alt: 'a', cover: true }];
+    const items = [{ name: 'Anna & Bo', photos: [{ id: 'p2' }], problem: 'rain', result: 'sun' }];
+    // Live bag as E2 ingestion would leave it: a group with photos already on it.
+    const live: Record<string, unknown> = {
+      ...seededFactsBag(),
+      work: { identity: { name: 'Kundius Studio' }, groups: [{ name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos, items }] },
+    };
+    expect(getWorkFacts(live)!.groups![0].photos).toEqual(photos);
+
+    // The edit re-sends the group (price changed) WITH its photos/items.
+    const res = applyRailEdit(
+      { field: 'groups', value: [{ name: 'Weddings', price: { mode: 'from', amount: 900, currency: 'EUR' }, photos, items }] },
+      live
+    );
+    expect(res.ok).toBe(true);
+    const facts = (res as { facts: Record<string, unknown> }).facts;
+    const work = getWorkFacts(facts);
+    expect(work).not.toBeNull();
+    expect(work!.groups).toEqual([
+      { name: 'Weddings', kind: 'category', price: { mode: 'from', amount: 900, currency: 'EUR' }, photos, items },
+    ]);
+    expect(facts['entry']).toEqual(ENTRY);
   });
 
   it('works from an EMPTY facts bag (pre-E1 project with no facts.work)', () => {
