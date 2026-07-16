@@ -53,3 +53,73 @@
 .app-icon--filled {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
+
+/* ============================================================================
+   .app-coming — THE shared "not yet wired" (greyed) treatment.
+   editor-shell-redesign phase 1 (decisions 2 + 15). Named `coming`; posted to
+   the dashboard-workspace-ia mailbox so dashboard S1 adopts the same name.
+
+   THE one greyed style across every track — do NOT improvise a second.
+   Consumers MUST apply the full recipe (see src/components/ui/README.md §coming):
+
+     <AppTooltip label="Coming soon — page CMS">
+       <button type="button" className="app-coming" aria-disabled="true"
+               tabIndex={-1} onClick={(e) => e.preventDefault()}>…</button>
+     </AppTooltip>
+
+   aria-disabled (NOT `disabled`) is required: a `disabled` button suppresses the
+   pointer events the tooltip needs, so the "why" affordance would never show.
+
+   Derived from the handoff's own held-back legend row (scout §I): the handoff
+   specifies no disabled control, so spec intent ("render greyed, never omitted")
+   supplies the treatment: opacity .5 + #8a8a94 + not-allowed + no hover.
+   ============================================================================ */
+
+.app-coming,
+.app-coming * {
+  color: #8a8a94 !important;
+}
+
+.app-coming {
+  opacity: 0.5;
+  cursor: not-allowed;
+  /* Hover/active states must not fire: the control does nothing yet. Pointer
+     events stay ON so the wrapping tooltip can still explain why. */
+  filter: none;
+}
+
+/* Kill every interactive affordance — greyed controls never react. */
+.app-coming:hover,
+.app-coming:focus,
+.app-coming:active,
+.app-coming:focus-visible {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* Any icon inside inherits the muted tone (AppIcon sets color via `color`). */
+.app-coming .app-icon {
+  color: #8a8a94 !important;
+}
+
+/* ============================================================================
+   .app-divider — 1×22 vertical hairline. t1 top bar uses it ×3.
+   Built here so phase 4 does not improvise its own.
+   `.app-divider--full` stretches to the parent's height instead of a fixed 22px.
+   ============================================================================ */
+
+.app-divider {
+  flex: none;
+  width: 1px;
+  height: 22px;
+  background: #e6e6ec;
+  align-self: center;
+}
+
+.app-divider--full {
+  height: auto;
+  align-self: stretch;
+}

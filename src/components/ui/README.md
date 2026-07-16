@@ -24,10 +24,26 @@ All foundation tokens live under **namespaced `app-*` keys** in `tailwind.config
   `ink`, `muted`/`faint`/`placeholder`/`label`/`slate`/`body`, `success`/`success-bg`,
   `danger`/`danger-bg`, `canvas`/`surface`, `border`/`border-input`/`border-strong`,
   `divider`/`hairline`. Use as `bg-app-primary`, `text-app-muted`, etc.
+  **+ editor-shell-redesign additions** (one key per unmapped handoff hex — never snap
+  to a near-neighbour, snapping silently changes the designer's palette):
+  `frame #ececee` · `border-frame #e9e9ee` · `surface-alt #f6f7fb` ·
+  `surface-sunken #fafafb` · `track #f1f1f5` · `hover #f6f6f9` · `tint-soft #f5f9ff` ·
+  `tint-ring #e6eefc` · `tint-edge #e0ecff` · `score-bg #f0f4ff` ·
+  `score-border #dbe6ff` · `review-bg #fff2ec` · `review-border #ffd9c7` ·
+  `review-text #d9531f` · `nudge-bg #fff8f5` · `nudge-border #ffe1d3` ·
+  `nudge-text #8a5a44` · `border-soft #cdcdd4` · `border-mute #c7c7cf` ·
+  `border-pane #eceef2` · `preview-title #1a3fb8` · `preview-url #5f7d5f` ·
+  `preview-snippet #5a5a66` · `dim #8a8a94` · `icon-muted #6b6b76` ·
+  `icon-faint #9a9aa4` · `thumb-bg #f7f8fb` · `thumb-bar #c4d3f2` ·
+  `thumb-bar-soft #e0e3ec` · `delete #d23b3b` · `delete-bg #f7e6e6` · `marker #cdd0d8`.
 - `borderRadius['app-*']` — `app-ctl 10px`, `app-input 12px`, `app-panel 14px`,
-  `app-card 16px`, `app-modal 20px`, `app-pill 20px`, `app-badge 6px`.
+  `app-card 16px`, `app-modal 20px`, `app-pill 20px`, `app-badge 6px`,
+  `app-ctl-sm 9px` (t1 bar controls), `app-row 11px` (t14 template row, t18 ⋯ menu).
 - `boxShadow['app-*']` — `app-card`, `app-modal`, `app-float`, `app-btn-primary`,
-  `app-btn-cta`.
+  `app-btn-cta`, `app-menu` (t1 menu popovers), `app-popover` (t14/t17/t18 panels),
+  `app-window` (t16 settings window), `app-btn-publish` (t1 Publish split-button).
+- `animation['app-spin']` — `.8s linear` ring rotation (t17). Stock `animate-spin` is
+  1s — not a substitute.
 - `fontFamily['app-sans'|'app-mono'|'app-hand']` — `font-app-sans` (Onest),
   `font-app-mono` (**`'JetBrains Mono App'`** — see gotcha below), `font-app-hand` (Caveat).
 - `backgroundImage['app-stripes']` — the striped image-placeholder fill.
@@ -116,13 +132,90 @@ font (drops the curated list, bloats LCP, may pin axes and break `FILL`). Keep a
 | File | Usage |
 |---|---|
 | `icon.tsx` (`AppIcon`) | Material Symbols glyph by name, FILL axis. |
-| `nav-item.tsx` | Sidebar/nav row; active = `#003E80` on `#e6f0ff`; `asChild`/`href` polymorphic. |
+| `nav-item.tsx` | Sidebar/nav row; active = `#003E80` on `#e6f0ff`; `asChild`/`href` polymorphic. `activeBar` (opt-in, off by default) adds the `inset 2px 0 0 #006CFF` left bar for the t1 rail / t16 nav. |
 | `segmented-control.tsx` | Controlled pill group (`value`/`onValueChange`), radiogroup + arrow-key roving. |
 | `tabs.tsx` | Headless `Tabs`/`TabsList`/`TabsTrigger`/`TabsContent`, shadcn-compatible API (drop-in for a future `@radix-ui/react-tabs`). |
 | `toast.tsx` | `ToastProvider` + `useToast()` → `toast(msg,{variant,duration})`; bottom-stacked portal, success/error/info. Distinct from the edit-page-local `ToastProvider` (do not import that one). |
 | `image-placeholder.tsx` | `bg-app-stripes` "image goes here" box; `aspect`/`rounded` props. |
 
 Tabs / segmented-control / toast are **headless, in-house — no new npm deps** (`@radix-ui/react-tabs`/`react-toast` are not installed).
+
+**Added by editor-shell-redesign phase 1 (3):**
+
+| File | Usage |
+|---|---|
+| `popover.tsx` | **Two layers.** Stock `Popover`/`PopoverTrigger`/`PopoverContent`/`PopoverAnchor` = untouched shadcn (live consumers: `LinkTargetPopover`, the 3 theme popovers). App-chrome = `AppPopoverMenu` (menu list) / `AppPopoverPanel` (panel) + `AppPopoverItem`/`AppPopoverLabel`/`AppPopoverSeparator`. |
+| `tooltip.tsx` | **Two layers.** Stock `Tooltip` (= Radix Root) / `TooltipTrigger` / `TooltipContent` / `TooltipProvider` = untouched (consumers: `preview/[token]/page.tsx`, `modules/Design/ColorSystem/VariableModeIndicators.tsx`). App-chrome = `AppTooltip` (self-providing wrapper) + `AppTooltipContent`. |
+| `spinner.tsx` | `<Spinner size={40} thickness={3} />` ring spinner (t17 state B); `animate-app-spin`, reduced-motion aware. |
+
+> **Why two layers, not a reskin:** the stock popover/tooltip predate ui-foundation and
+> have live call sites outside the editor shell. Restyling them in place would silently
+> change `LinkTargetPopover` (out of scope) and push app-chrome styling into a
+> `modules/Design` component (forbidden — see Isolation above). `Tooltip` is also the
+> Radix *Root* export, so redefining it as a wrapper would break existing call sites.
+> **Consume the `App*` parts for app chrome; leave the stock parts alone.**
+
+### The app-chrome popover — ONE primitive, two surfaces
+
+The single popover for ALL app chrome: t1 app menu, t1 Settings menu, t14 Design menu,
+t18 ⋯ menu, t17 confirm, the 3 theme popovers. **Do not improvise a second one.**
+
+```tsx
+<Popover>
+  <PopoverTrigger asChild><button>Settings</button></PopoverTrigger>
+
+  {/* surface 1 — menu LIST (radius 12, shadow app-menu, pad 6) */}
+  <AppPopoverMenu width={224} align="start">
+    <AppPopoverLabel>Site settings</AppPopoverLabel>
+    <AppPopoverItem icon={<AppIcon name="public" size={18} />} onClick={openDomain}>
+      Domain
+    </AppPopoverItem>
+    <AppPopoverItem active trailing={<span className="font-app-mono text-[11px]">2</span>}>
+      Languages
+    </AppPopoverItem>
+    <AppPopoverSeparator />
+    <AppPopoverItem destructive>Delete</AppPopoverItem>
+  </AppPopoverMenu>
+
+  {/* surface 2 — PANEL (radius 14, deeper shadow, UNPADDED: bring your own
+      header/body/footer rhythm) for t14 / t17 / t18 */}
+  <AppPopoverPanel width={288}>…</AppPopoverPanel>
+</Popover>
+```
+
+`width` is a **number of px** (handoff: 216 app menu · 224 Settings · 194 t18 ⋯ ·
+288 t14 · 314/300/322 t17 · 344 t18 panel). `AppPopoverItem` is a styled slot — behavior
+arrives via `onClick`; `active`/`destructive`/`icon`/`trailing` cover every handoff row.
+
+### `coming` — THE shared "not yet wired" (greyed) treatment
+
+Named **`coming`** (utility `.app-coming` in `src/styles/app-chrome.css`). Editor-shell
+and dashboard S1 both use this name — **one greyed style across all tracks**. Spec intent
+("not-yet-wired shell controls render greyed, never omitted") supplies the treatment; the
+handoff specifies no disabled control.
+
+`opacity:.5` + `#8a8a94` text/icon + `cursor:not-allowed` + no hover/focus/active
+response. The class does **not** carry the aria or the tooltip — apply the full recipe:
+
+```tsx
+<AppTooltip label="Coming soon — page CMS">
+  <button type="button" className="app-coming" aria-disabled="true" tabIndex={-1}
+          onClick={(e) => e.preventDefault()}>
+    <AppIcon name="database" size={18} /> CMS
+  </button>
+</AppTooltip>
+```
+
+- **`aria-disabled`, NOT `disabled`** — a `disabled` button swallows the pointer events
+  the tooltip needs, so the "why" affordance would never appear.
+- Tooltip copy convention: **"Coming soon — <what>"**.
+- **Never grey something that works today.** (Editor-shell decision 10: `Social & sharing`
+  is wired — greying it is forbidden.)
+
+### `.app-divider`
+
+1×22 vertical hairline (`#e6e6ec`), `flex:none`, self-centering — the t1 top bar uses it
+×3. `.app-divider--full` stretches to the parent's height instead. Plain `<div className="app-divider" />`.
 
 ## Isolation guards — must stay green (do not defeat)
 

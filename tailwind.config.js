@@ -618,8 +618,15 @@ module.exports = {
   		animation: {
   			'pulse-border': 'pulseBorder 2s infinite',
 			'loading-fill': 'loadingFill linear forwards',
+			// ── App-chrome (editor-shell-redesign phase 1). Handoff t17 state B uses
+			// `lg-spin .8s linear infinite`; stock `animate-spin` is 1s, so it is a
+			// distinct key rather than a reuse. App-chrome only.
+			'app-spin': 'appSpin .8s linear infinite',
   		},
   		keyframes: {
+			appSpin: {
+				to: { transform: 'rotate(360deg)' }
+			},
   			pulseBorder: {
   				'0%, 100%': {
   					boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.4)'
@@ -696,7 +703,43 @@ module.exports = {
   				'border-input': '#e2e4ea',
   				'border-strong': '#d7d7dd',
   				divider: '#eef0f3',
-  				hairline: '#f2f2f5'
+  				hairline: '#f2f2f5',
+  				// ── editor-shell-redesign phase 1: additive keys for handoff hexes with
+  				// no existing app-* equivalent (scout §G "unmapped hexes" + §H sweep).
+  				// Decision 3: ONE key per unmapped hex — never snap to a near-neighbour,
+  				// snapping silently changes the designer's palette. No existing key edited.
+  				frame: '#ececee',            // t1 outer frame bg
+  				'border-frame': '#e9e9ee',   // t1 top-bar bottom border / rail right border
+  				'surface-alt': '#f6f7fb',    // t17 live-target row, t16 sitemap row
+  				'surface-sunken': '#fafafb', // t14 footer strip, t16 left nav
+  				track: '#f1f1f5',            // segmented-control track, route chip
+  				hover: '#f6f6f9',            // t1 rail row / page-switcher hover
+  				'tint-soft': '#f5f9ff',      // active menu row bg, t17 domain upsell
+  				'tint-ring': '#e6eefc',      // t17 spinner track
+  				'tint-edge': '#e0ecff',      // t17 domain upsell border
+  				'score-bg': '#f0f4ff',       // t1 score pill
+  				'score-border': '#dbe6ff',
+  				'review-bg': '#fff2ec',      // t1/t2 review pill
+  				'review-border': '#ffd9c7',
+  				'review-text': '#d9531f',
+  				'nudge-bg': '#fff8f5',       // t17 soft review nudge
+  				'nudge-border': '#ffe1d3',
+  				'nudge-text': '#8a5a44',
+  				'border-soft': '#cdcdd4',    // drag_indicator
+  				'border-mute': '#c7c7cf',    // disabled undo/redo icon
+  				'border-pane': '#eceef2',    // t16 header/nav/preview-card borders
+  				'preview-title': '#1a3fb8',  // t16 Google preview title
+  				'preview-url': '#5f7d5f',    // t16 Google preview URL
+  				'preview-snippet': '#5a5a66',
+  				dim: '#8a8a94',              // Saved text, inactive segmented, .app-coming
+  				'icon-muted': '#6b6b76',     // popover row icon
+  				'icon-faint': '#9a9aa4',     // logo-button expand_more
+  				'thumb-bg': '#f7f8fb',       // t14 template mini-thumb
+  				'thumb-bar': '#c4d3f2',
+  				'thumb-bar-soft': '#e0e3ec',
+  				delete: '#d23b3b',           // t18 delete row
+  				'delete-bg': '#f7e6e6',
+  				marker: '#cdd0d8'            // held-back legend marker
   			},
   			brand: {
   				text: '#003E80',
@@ -805,7 +848,10 @@ module.exports = {
   			'app-card': '16px',
   			'app-modal': '20px',
   			'app-pill': '20px',
-  			'app-badge': '6px'
+  			'app-badge': '6px',
+  			// ── editor-shell-redesign phase 1 (additive; existing keys untouched).
+  			'app-ctl-sm': '9px', // t1 bar controls (logo button, page switcher, Publish)
+  			'app-row': '11px'    // t14 template row, t18 ⋯ menu
   		},
   		boxShadow: {
   			// ── App-chrome shadows (ui-foundation). New key; all namespaced. Values
@@ -815,7 +861,13 @@ module.exports = {
   			'app-modal': '0 40px 90px -34px rgba(20,20,40,.4)',
   			'app-float': '0 30px 66px -22px rgba(20,20,40,.4)',
   			'app-btn-primary': '0 14px 28px -12px rgba(0,108,255,.75)',
-  			'app-btn-cta': '0 10px 22px -9px rgba(255,107,61,.7)'
+  			'app-btn-cta': '0 10px 22px -9px rgba(255,107,61,.7)',
+  			// ── editor-shell-redesign phase 1 (additive). Handoff popover/panel/window
+  			// shadows — distinct from app-float/app-modal, do not substitute.
+  			'app-menu': '0 18px 40px -12px rgba(20,20,40,.28)',   // t1 menu popovers
+  			'app-popover': '0 22px 50px -16px rgba(20,20,40,.30)', // t14/t17/t18 panels
+  			'app-window': '0 30px 70px -30px rgba(20,20,40,.35)',  // t16 settings window
+  			'app-btn-publish': '0 2px 8px -1px rgba(58,91,255,.5)' // t1 Publish split-button
   		},
   		backgroundImage: {
   			// ── App-chrome placeholder-image stripe (ui-foundation). New key.
