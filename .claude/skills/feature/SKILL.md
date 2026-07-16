@@ -104,6 +104,11 @@ list + verification + any **human gate** markers).
 **4. Implement, phase by phase** (in plan order). For each phase:
 - a. **Implement.** Spawn `implementer` with that phase (its steps + Files-touched
      list). It edits only those files and writes/appends `docs/task/<feature>.audit.md`.
+     When a phase adds an automatable, repeatable check — dual-renderer parity,
+     save/publish data-integrity, marker wiring, route/gate behavior — the
+     implementer lands it as a **Playwright spec in `e2e/`** (add `e2e/` to that
+     phase's touched files), NOT a manual TODO. This is the deterministic-QA rule
+     in Rules: script it once here, it runs free in the pre-push gate forever.
 - b. **Impl-review loop (max 3).** Spawn `impl-reviewer`.
      - Verdict `ship` → phase done.
      - Verdict `fix first` → hand its **Blocking issues** to `implementer`, repeat.
@@ -128,7 +133,10 @@ list + verification + any **human gate** markers).
 
 **5. Finish + merge gate.** After the final phase, run `npm run build` once.
 Report a summary: phases shipped, files changed (from the audit), test + build
-status, any open risks. Then STOP — the merge is a **human gate**: ask the user
+status, any open risks, and a **QA split** — which automatable checks were scripted
+to Playwright this run vs. what remains for the founder's manual pass (real-LLM
+generation quality + visual taste — the human-eyes P0/P1 in `/manual-test`, which
+no agent replaces). Then STOP — the merge is a **human gate**: ask the user
 explicitly whether to merge `feature/<feature>` into main. Offer a
 **comprehension check** first (antidote to comprehension debt): a short
 explainer of what changed and why — context + intuition, not a diff dump — plus
@@ -145,8 +153,11 @@ main; plain merge, no squash; verify its tree is clean first).
 primary dir).
 
 **6. Deploy watch.** After the user says they've pushed, spawn `deploy-watcher`
-(Haiku — cheap polling). READY → report the URL and, now that merge + deploy are
-green, clean up: `git -C C:\Users\susha\lessgo-ai worktree remove
+(Haiku — cheap polling). READY → it runs a quick **post-deploy HTTP smoke**
+(GET/HEAD, browser UA) on the feature's key routes — publish/route/gate health,
+the cheap agentic tier (~20k tokens; the `/pricing` auth-gate regression was caught
+this way) — and returns the evidence; then report the URL and, now that merge +
+deploy are green, clean up: `git -C C:\Users\susha\lessgo-ai worktree remove
 .claude/worktrees/<feature>` then `git -C C:\Users\susha\lessgo-ai branch -d
 feature/<feature>` (if `-d` refuses despite `merge-base --is-ancestor` proving
 the merge, use `-D` — known stale-checkout quirk; if worktree removal hits a
@@ -170,6 +181,20 @@ not auto-fix without their go.
   via `git -C`); delete branch + worktree only after deploy is green. The user
   alone pushes.
 - Reviewers are automated approvers; the only human gates are the ones the plan marks.
+- **QA is NOT a pipeline stage — by design (decided 2026-07-16).** A blanket agentic
+  QA-runner after impl-review would re-pay ~80–200k tokens/feature and still can't
+  judge real-LLM copy quality or visual taste (those stay the founder's manual pass),
+  so it mostly automates the mechanical checks — which are the cheapest to make FREE.
+  QA is therefore split three ways, none of them a new agentic stage:
+  1. **Deterministic checks → Playwright** (step 4a): parity / data-integrity /
+     marker-wiring / route-gate checks the implementer can script go in `e2e/` in the
+     phase that adds the surface — ~0 tokens/run forever, enforced by the pre-push gate.
+  2. **Post-deploy HTTP smoke → `deploy-watcher`** (step 6): cheap route/publish/gate
+     health, ~20k tokens, already where deploy is watched.
+  3. **Real-LLM generation quality + visual taste + prod-mutation → founder** at the
+     merge gate via `/manual-test` (the ~200–500k-token tier, cheapest as human eyes).
+  Reserve an ad-hoc agentic browser pass ONLY for genuinely un-scriptable evidence,
+  invoked by hand — never wired as an every-feature step.
 - **Context hygiene = a token budget, not just a nicety.** Subagents run in isolated
   context; their file reads / build logs die with them and only their final message
   returns to you. Keep it that way: hand each stage POINTERS (spec path, plan phase,
