@@ -7,11 +7,17 @@
 // pricing-v2 (phase 2): also covers the per-owner monthly form-submission cap
 // (checkLimit against the current-month FormSubmission count) — over limit ⇒ 429
 // with a stable error code, never a silent drop.
+//
+// secrets-forms-security (phase 1): pins server-side owner derivation. The request
+// BODY still forges `userId: 'user_1'` on purpose — every assertion expects the
+// DERIVED owner `'owner_1'` (from PublishedPage.userId) instead. That asymmetry IS
+// the forged-id regression case; do not "fix" the body.
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
-    project: { findMany: vi.fn() },
+    publishedPage: { findUnique: vi.fn() },
+    project: { findUnique: vi.fn() },
     formSubmission: { create: vi.fn(), update: vi.fn(), count: vi.fn() },
     blogSubscriber: { upsert: vi.fn() },
   },
@@ -49,12 +55,16 @@ function makeReq(body: any) {
   } as any;
 }
 
+// `userId: 'user_1'` is a FORGED owner id — the server must ignore it and use the
+// page's real owner (`owner_1`) everywhere.
 const BODY = { formId: 'contact', data: { email: 'a@b.com', name: 'Asha' }, userId: 'user_1', publishedPageId: 'page_1' };
+const PAGE = { userId: 'owner_1', projectId: 'proj_1', publishState: 'published' };
 
 describe('/api/forms/submit — notify outcome row flag (F30b)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    db.project.findMany.mockResolvedValue([]); // no formConfig; keeps the path minimal
+    db.publishedPage.findUnique.mockResolvedValue(PAGE);
+    db.project.findUnique.mockResolvedValue(null); // no formConfig; keeps the path minimal
     db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
     db.formSubmission.update.mockResolvedValue({ id: 'sub_1' });
     db.formSubmission.count.mockResolvedValue(3); // under any cap by default
@@ -107,25 +117,26 @@ describe('/api/forms/submit — notify outcome row flag (F30b)', () => {
 describe('/api/forms/submit — monthly submission cap (pricing-v2 phase 2)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    db.project.findMany.mockResolvedValue([]);
+    db.publishedPage.findUnique.mockResolvedValue(PAGE);
+    db.project.findUnique.mockResolvedValue(null);
     db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
     db.formSubmission.update.mockResolvedValue({ id: 'sub_1' });
     notify.mockResolvedValue({ status: 'skipped' });
   });
 
-  it('counts the current calendar month for the page owner', async () => {
+  it('counts the current calendar month for the DERIVED page owner (not the body userId)', async () => {
     db.formSubmission.count.mockResolvedValue(10);
     limit.mockResolvedValue({ allowed: true, limit: 25, current: 10 });
     await POST(makeReq(BODY));
 
     expect(db.formSubmission.count).toHaveBeenCalledTimes(1);
     const where = db.formSubmission.count.mock.calls[0][0].where;
-    expect(where.userId).toBe('user_1');
+    expect(where.userId).toBe('owner_1');
     expect(where.createdAt.gte).toBeInstanceOf(Date);
     // month start = first day of the current UTC month
     const gte = where.createdAt.gte as Date;
     expect(gte.getUTCDate()).toBe(1);
-    expect(limit).toHaveBeenCalledWith('user_1', 'formSubmissions', 10);
+    expect(limit).toHaveBeenCalledWith('owner_1', 'formSubmissions', 10);
   });
 
   it('over limit → 429 with a stable error code, no submission stored', async () => {
@@ -145,5 +156,99 @@ describe('/api/forms/submit — monthly submission cap (pricing-v2 phase 2)', ()
 
     expect(res.__body.success).toBe(true);
     expect(db.formSubmission.create).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('/api/forms/submit — server-side owner derivation (secrets-forms-security phase 1)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    db.publishedPage.findUnique.mockResolvedValue(PAGE);
+    db.project.findUnique.mockResolvedValue(null);
+    db.formSubmission.create.mockResolvedValue({ id: 'sub_1' });
+    db.formSubmission.update.mockResolvedValue({ id: 'sub_1' });
+    db.formSubmission.count.mockResolvedValue(3);
+    limit.mockResolvedValue({ allowed: true, limit: 25, current: 3 });
+    notify.mockResolvedValue({ status: 'skipped' });
+  });
+
+  it('stores the DERIVED owner, never the forged body userId', async () => {
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__body.success).toBe(true);
+    expect(db.publishedPage.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'page_1' } })
+    );
+    const created = db.formSubmission.create.mock.calls[0][0].data;
+    expect(created.userId).toBe('owner_1');
+    expect(created.userId).not.toBe('user_1');
+  });
+
+  it('scopes the form-config lookup to the page’s OWN project', async () => {
+    await POST(makeReq(BODY));
+
+    expect(db.project.findUnique).toHaveBeenCalledWith({ where: { id: 'proj_1' } });
+  });
+
+  it('page with a null projectId → skips the form-config lookup, still stores the lead', async () => {
+    db.publishedPage.findUnique.mockResolvedValue({ ...PAGE, projectId: null });
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__body.success).toBe(true);
+    expect(db.project.findUnique).not.toHaveBeenCalled();
+    const created = db.formSubmission.create.mock.calls[0][0].data;
+    expect(created.userId).toBe('owner_1');
+    expect(created.formName).toBe('Unknown Form');
+    expect(res.__body.integrations).toEqual([]);
+  });
+
+  it('unknown publishedPageId → 404 unknown_page, nothing stored', async () => {
+    db.publishedPage.findUnique.mockResolvedValue(null);
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__status).toBe(404);
+    expect(res.__body.error).toBe('unknown_page');
+    expect(db.formSubmission.create).not.toHaveBeenCalled();
+  });
+
+  it('missing publishedPageId → 400 missing_page_id, no page lookup', async () => {
+    const { publishedPageId, ...noPageId } = BODY;
+    const res: any = await POST(makeReq(noPageId));
+
+    expect(res.__status).toBe(400);
+    expect(res.__body.error).toBe('missing_page_id');
+    expect(db.publishedPage.findUnique).not.toHaveBeenCalled();
+    expect(db.formSubmission.create).not.toHaveBeenCalled();
+  });
+
+  it.each(['draft', 'unpublishing'])('publishState %s → 404 unknown_page', async (publishState) => {
+    db.publishedPage.findUnique.mockResolvedValue({ ...PAGE, publishState });
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__status).toBe(404);
+    expect(res.__body.error).toBe('unknown_page');
+    expect(db.formSubmission.create).not.toHaveBeenCalled();
+  });
+
+  it.each(['publishing', 'failed'])('publishState %s → accepted (page still live)', async (publishState) => {
+    db.publishedPage.findUnique.mockResolvedValue({ ...PAGE, publishState });
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__body.success).toBe(true);
+  });
+
+  it('legacy null publishState → accepted (fail-open via isServingPublishState)', async () => {
+    db.publishedPage.findUnique.mockResolvedValue({ ...PAGE, publishState: null });
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__body.success).toBe(true);
+    expect(db.formSubmission.create.mock.calls[0][0].data.userId).toBe('owner_1');
+  });
+
+  it('omitted body userId + valid page → 200, attributed to the page owner', async () => {
+    const { userId, ...noUserId } = BODY;
+    const res: any = await POST(makeReq(noUserId));
+
+    expect(res.__body.success).toBe(true);
+    expect(db.formSubmission.create.mock.calls[0][0].data.userId).toBe('owner_1');
   });
 });
