@@ -219,8 +219,34 @@ async function regenerateStoryHandler(req: NextRequest): Promise<Response> {
       }
     );
     if (!consumption.success) {
-      logger.warn(
-        `[work-regenerate-story] Credit consumption failed for user ${userId}: ${consumption.error}`
+      // The charge failed AFTER generation → the output is DISCARDED (no free
+      // output). The requireAICredits pre-gate above already 402s a 0-credit
+      // user before any AI work; this is the check→charge race loser.
+      if (consumption.error === 'charge_conflict') {
+        // Solvent user, lost the write race → recoverable. The error code AND
+        // message deliberately avoid the substring "credit": the client rails
+        // regex-match /credit/i and would strand a paying user on the buy wall.
+        logger.error(
+          `[work-regenerate-story] Charge conflict for user ${userId} — nothing charged, output discarded`
+        );
+        return createSecureResponse(
+          {
+            success: false,
+            error: 'charge_failed',
+            message: 'Temporary billing conflict — please try again. You have not been charged.',
+          },
+          500
+        );
+      }
+      return createSecureResponse(
+        {
+          success: false,
+          error: 'insufficient_credits',
+          message: consumption.error || 'Insufficient credits',
+          creditsRequired: CREDIT_COSTS.SECTION_REGENERATION,
+          creditsRemaining: consumption.remaining,
+        },
+        402
       );
     }
 
