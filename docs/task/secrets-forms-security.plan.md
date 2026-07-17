@@ -12,7 +12,7 @@
 
 ## Progress log
 
-- phase 1 server-side owner derivation: pending
+- phase 1 server-side owner derivation: **done** (commit 142cbba9, review loops 1, verdict `ship`) — tsc clean, 3557 tests pass. Founder signed off the gate: canonical `isServingPublishState` matrix + project-scoped lookup, both as planned. Null-`projectId` guard added (reviewer catch; `PublishedPage.projectId` is `String?`) → skips config lookup, no 500.
 - phase 2 forged-submission e2e spec: pending
 - phase 3 form.v2.js + markup — stop sending/leaking owner id: pending
 - phase 4 integration verification + no-regression smoke: pending

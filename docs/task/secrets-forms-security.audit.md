@@ -88,3 +88,170 @@ Not caused by this phase (untouched file, clean in `git status`). Cause: `next-e
 - **`src/app/api/forms/submit/route.ts:1`** — `NextResponse` and `z` imports, and `sanitizeForLogging`, were already unused before this phase and remain so. Out of scope; not touched.
 - Behavior change accepted per Locked decision 3: a `formId` living in a *different* project of the same owner no longer resolves config (lead still stored, no integrations). Phase 4 ConvertKit smoke must attach the integration to a form in the published page's **own** project.
 - Leak side is still open until Phase 3: `data-owner-id` remains in published markup and `form.v1.js` still sends `userId` — harmless now that the server ignores it, but the ordering (server first) is why this is safe.
+
+---
+
+## Phase 2 — forged-submission e2e spec
+
+**Files changed**
+- `e2e/forms-forgery.spec.ts` — **NEW** (only file created or modified this phase)
+
+### What was written
+
+An API-level Playwright spec (`request` fixture, no browser) pinning the phase-1 identity
+contract of `POST /api/forms/submit`. Seeds a victim directly with `PrismaClient`
+(`User` → `Token` → `Project` → `PublishedPage`), following the helper/cleanup style of
+`e2e/dashboard-lifecycle.spec.ts`. `content` is `{}` (no `forms`) — form config is optional,
+the submission still stores as `formName: 'Unknown Form'` with no integrations. All ids are
+run-scoped via a `randomUUID().slice(0,8)` suffix, so concurrent/repeat runs cannot collide.
+`PublishedPage.projectId` is nullable but is SET, so the project-scoped config lookup is
+exercised rather than skipped.
+
+6 cases, all as specced:
+1. **Forged owner (the required regression case)** — forged `userId: 'attacker_forged_id'` → 200,
+   then the persisted `FormSubmission` row is read back via Prisma and asserted
+   `toBe(VICTIM_CLERK_ID)` **and** `not.toBe('attacker_forged_id')`. The status code is
+   deliberately *not* the assertion: the vulnerable route 200'd too — only the DB row
+   distinguishes fixed from broken.
+2. **Omitted userId** → 200, row attributed to the victim owner (catches a
+   trust-body-then-fall-back-to-page regression, which case 1 alone would not).
+3. **Unknown page** (cuid-shaped random id) → 404 `unknown_page`.
+4. **Missing page id** → 400 `missing_page_id`.
+5. **Draft** → 404 `unknown_page`, plus an assertion that **no row was stored** (proves the
+   404 is a real reject, not cosmetic). Restores `published` in `finally`.
+6. **Unpublishing (stuck teardown)** → 404 `unknown_page`. Restores `published` in `finally`.
+
+The file header states plainly what it does **not** cover: the phase-3 markup/asset half, the
+fail-open states (`publishing`/`failed`/legacy-null — pinned by the route unit test, which can
+fabricate them without a real publish), and integration firing.
+
+### Rate-limiter finding (watchpoint resolved — no sleeps needed)
+
+Inspected rather than assumed. `withFormRateLimit` → `RATE_LIMIT_PRESETS.FORM_SUBMISSION` =
+**10 requests / 60 000 ms** (`src/lib/rateLimit.ts:36-39`), keyed by `defaultKeyGenerator` →
+`ip:{ip}` for an anonymous caller (`/api/forms/submit` is in the middleware `isPublicRoute`
+list, so no Clerk session). The spec makes **exactly 6 POSTs** from one IP → under the limit
+with 4 to spare. **No sleeps, no pacing, no distinct-form-id workaround** — the run is
+deterministic. A comment in the header records the 10-POST ceiling for anyone adding cases.
+Second-order: the per-owner monthly cap (`checkLimit`, FREE = 25) is also safe because the
+victim is a fresh run-scoped user AND `afterAll` deletes the rows — a leak would eventually
+429 a future run's first POST, which is why cleanup matters beyond tidiness.
+
+### Did it actually run? YES — 6/6 passed
+
+`npx playwright test --config=<temp> ...` against a real `npm run dev` (E2E_PORT=3021) and the
+real dev DB: **6 passed (44.0s)**. Server logs confirm the intended branches were hit
+(`publishState: 'draft'` / `'unpublishing'` / null → "unknown/non-serving page"). Not an
+unrun test.
+
+- `npx tsc --noEmit` — clean. **Note:** tsc does **not** cover `e2e/` (not in the tsconfig
+  include), so it is not a real gate for this file; the actual Playwright run is.
+- Leak check after the run, direct Prisma count:
+  `{ users: 0, pages: 0, projects: 0, submissions: 0, forgedRows: 0 }` — cleanup verified.
+
+### Deviations
+
+- **None within Files-touched.** `e2e/forms-forgery.spec.ts` is the only file created or modified.
+
+### Open risks / noticed but NOT fixed
+
+1. **BLOCKER FOR THE ORCHESTRATOR — the spec currently runs in NO project.**
+   `playwright.config.ts` `testMatch` is an explicit **allowlist** (its own comment warns:
+   "an unregistered spec silently matches no project and gives false confidence: the suite goes
+   green having never run it"). `npx playwright test forms-forgery --list` → **"Total: 0 tests
+   in 0 files"**. `playwright.config.ts` is **not in this phase's Files-touched list**, so per
+   the scope rule I did not edit it. It needs `/forms-forgery\.spec\.ts/` added — most likely to
+   a **no-auth** project, since the route is public and the spec needs no Clerk session (the
+   `public` project's testMatch, or a new one). Until that lands, `npm run test:e2e --
+   forms-forgery` runs nothing and the plan's Phase 2 verification line cannot be satisfied via
+   the repo config. I proved the spec passes with a temporary root config
+   (`pw.forgery.tmp.config.ts`), which has been **deleted** — `git status` shows only
+   `?? e2e/forms-forgery.spec.ts` from this phase.
+2. Storage-state caveat for whoever registers it: if it is added to the **`authed`** project,
+   the Clerk session changes the rate-limit key from `ip:` to `user:` (still 10/60s, still fine)
+   — but `public`/no-auth is the more honest match for a public endpoint.
+3. The spec cannot distinguish "derivation is correct" from "the route happens to ignore the
+   body because of an unrelated bug" — it is a contract pin, not a mutation test. The route unit
+   test carries the finer-grained pins.
+
+---
+
+## Phase 2 — config registration
+
+Follow-up to the Phase-2 blocker above (open risk 1). The orchestrator authorized adding
+`playwright.config.ts` to Phase 2's Files touched to fix exactly this.
+
+**Files changed**
+- `playwright.config.ts` (modified — one line)
+
+### The change
+
+Registered `/forms-forgery\.spec\.ts/` in the **`public`** project's `testMatch` array, alongside
+`generation`/`render`/`parity`/`ui-isolation`. Existing single-line style/formatting kept:
+
+```ts
+testMatch: [/generation\.spec\.ts/, /render\.spec\.ts/, /parity\.spec\.ts/, /ui-isolation\.spec\.ts/, /forms-forgery\.spec\.ts/],
+```
+
+`public` (not `authed`) is correct: the spec is API-level and needs no Clerk session
+(`/api/forms/submit` is public via the middleware `isPublicRoute` list), so `authed`'s `setup`
+dependency + `storageState` would be dead weight. This also keeps the rate-limit key as `ip:`,
+matching the 6-POST/10-per-60s headroom analysis recorded above.
+
+`e2e/forms-forgery.spec.ts` was **not** modified — it is reviewed and passing.
+
+### Before / after — `npx playwright test forms-forgery --list`
+
+**Before:** `Error: No tests found.` → `Total: 0 tests in 0 files`
+
+**After:** `Total: 6 tests in 1 file`, all under `[public]`:
+
+```
+  [public] › forms-forgery.spec.ts:100:5 › forged body userId is IGNORED — the row is attributed to the page owner
+  [public] › forms-forgery.spec.ts:128:5 › omitted userId still resolves to the page owner (derivation, not fallback)
+  [public] › forms-forgery.spec.ts:148:5 › unknown publishedPageId → 404 unknown_page
+  [public] › forms-forgery.spec.ts:166:5 › missing publishedPageId → 400 missing_page_id
+  [public] › forms-forgery.spec.ts:181:5 › unpublished page (draft) → 404 unknown_page, no lead captured
+  [public] › forms-forgery.spec.ts:211:5 › stuck teardown (unpublishing) → 404 unknown_page
+  Total: 6 tests in 1 file
+```
+
+### Real run — 6/6 PASSED
+
+`E2E_PORT=3411 npm run test:e2e -- forms-forgery`, against a real `npm run dev` + the real dev DB
+(dedicated port per the config's own warning that `reuseExistingServer` can silently test a
+foreign worktree's code):
+
+```
+Running 6 tests using 1 worker
+  ✓  1 [public] › e2e\forms-forgery.spec.ts:100:5 › forged body userId is IGNORED … (7.3s)
+  ✓  2 [public] › e2e\forms-forgery.spec.ts:128:5 › omitted userId still resolves to the page owner …
+  ✓  3 [public] › e2e\forms-forgery.spec.ts:148:5 › unknown publishedPageId → 404 unknown_page
+  ✓  4 [public] › e2e\forms-forgery.spec.ts:166:5 › missing publishedPageId → 400 missing_page_id
+  ✓  5 [public] › e2e\forms-forgery.spec.ts:181:5 › unpublished page (draft) → 404 unknown_page …
+  ✓  6 [public] › e2e\forms-forgery.spec.ts:211:5 › stuck teardown (unpublishing) → 404 unknown_page
+  6 passed (37.5s)
+```
+
+Server logs again confirm the intended branches were hit (`publishState: 'draft'` /
+`'unpublishing'` / null → "unknown/non-serving page"). Observed, not assumed.
+
+### No collateral damage to other projects
+
+`npx playwright test --list` → **89 tests in 17 files** (was 83 in 16; delta = exactly the 6 new).
+All pre-existing specs still resolve, unchanged counts: `generation` 5, `parity` 7, `render` 3,
+`ui-isolation` 2, `auth.setup` 1, `publish` 3, `edit-persistence` 1, `editor-dirty-guard` 4,
+`dashboard-shell` 9, `dashboard-workspace` 5, `dashboard-redirects` 13, `dashboard-lifecycle` 13,
+`dashboard-rollups-inbox` 3, `media` 6, `media-picker` 2, `work-onboarding` 6.
+
+### Deviations
+
+- **None.** Single line, single file, exactly as scoped.
+
+### Open risks
+
+- Phase-2 open risk 1 above is now **RESOLVED** — the security spec genuinely executes in
+  `npm run test:e2e`. Open risks 2 and 3 stand as written (2 is now moot: `public` was chosen).
+- The allowlist trap that caused this remains structural: any future e2e spec still needs manual
+  registration here or it silently runs nowhere. Out of scope to fix; the config's existing
+  comment already warns about it.
