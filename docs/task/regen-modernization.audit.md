@@ -198,3 +198,82 @@ The old atelier test built its mock from `narrowElementsMap(...)`'s own output, 
 3. The element-scope OVERRIDE block appends to a full-page-format prompt (it tells the model to ignore the earlier output format). Real-LLM behavior is the pilot's job; a mis-followed override surfaces as an `AiParseError` → retry → 500 recoverable, never filler copy.
 4. The work-engine synthetic `page: { archetypeKey: 'regen', pathSlug: '/', isHome: true }` — `buildWorkCopyPrompt` reads only `page.sections`/`title`/`isHome`/`pathSlug`, but multi-page nuance (which page a section belongs to) is lost for atelier regen.
 5. `ScopeInputError` vs `UnsupportedProjectError` are BOTH 422 but semantically different (`invalid_scope` vs `unsupported_project`) — phases 3–5 must map both, or a work-facts gap will read as a 500.
+
+---
+
+## Phase 3 — rebuild `regenerate-element` (PILOT)
+
+**Files changed**
+- `src/app/api/regenerate-element/route.ts` (rewritten)
+- `src/app/api/regenerate-element/route.test.ts` (new — 18 tests)
+- `src/lib/security.test.ts` (modified — +3 tests appended; **the file already existed**, see Deviation 1)
+- `docs/task/regen-modernization.audit.md` (this section)
+
+> NOT touched: `src/modules/generation/scopedRegen.ts` — the plan listed it as *conditional* ("only if the pilot surfaces a primitive gap"). **No gap surfaced.** The primitive's element scope, its `ScopeInputError`/`UnsupportedProjectError`/`ScopedGenerationError` taxonomy, and its `maxTokens` seam covered the route with zero changes.
+> Also modified in `git status`: `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` — the same **CRLF-only** vitest artifact phases 1 and 2 recorded (`git diff` reports zero content lines). Not authored here. And `e2e/fixtures/generated/` shows untracked — that is the founder's gate-1 `CAPTURE=1` output (gitignored, `.gitignore:89`), not mine.
+
+### The canonical sequence, exactly as implemented
+
+Verbatim from `route.ts` (phases 4–5 reuse this order; the numbered comments are in the file):
+
+1. `requireAICredits(req, UsageEventType.ELEMENT_REGEN, CREDIT_COSTS.ELEMENT_REGENERATION)` — check only, never charges.
+2. `tokenId` read from the **QUERY string** (`?tokenId=…`, caller contract `aiActions.ts:543`) + Zod body validation (`{sectionId, elementKey, currentContent, variationCount default 5}`). Missing tokenId or bad body → 400.
+3. `isMock = NEXT_PUBLIC_USE_MOCK_GPT === 'true' || tokenId === DEMO_TOKEN`; **`if (!isMock)` → `assertProjectOwner(userId, tokenId, { action: 'regenerate-element' })`** — NEW on this route; no `claimIfOrphan`/`allowMissing`.
+4. **Project load wrapped in `if (tokenId !== DEMO_TOKEN)`** → `prisma.project.findUnique({ select: { id, audienceType, templateId, content, brief, title, inputText } })`; `if (!project && !isMock)` → **404**, no charge. Demo → no fetch, `project = null`.
+5. **Mock short-circuit BEFORE engine dispatch** → `resolveMockEngine(project)` + mock variations, `creditsUsed: 0`, `meta.mock: true`.
+6. `resolveCopyEngine(project)` — real path only. `UnsupportedProjectError` → **422 `unsupported_project`**, no AI call, no charge.
+7. `generateScopedCopy({ scope: {kind:'element', sectionId, elementKey}, layoutState: readPersistedLayoutState(project.content), currentContent, variationCount, maxTokens: 2048 })`. `ScopeInputError` → **422 `invalid_scope`** + honest message; `ScopedGenerationError` → **500 `generation_failed`, `recoverable: true`** — both return BEFORE the charge.
+8. `consumeCredits(userId, ELEMENT_REGEN, 1, …)` — success only; `!consumption.success` is `logger.warn` only.
+9. Respond `{ variations, originalContent, elementKey, sectionId, creditsUsed, creditsRemaining, meta }` via `createSecureResponse`; handler wrapped in `withAIRateLimit`.
+
+**ID-space:** `requireAICredits` → Clerk id → `assertProjectOwner` (expects Clerk id) → `consumeCredits` (same id, as the legacy route did). No internal-id crossover; pinned by a test asserting the exact `assertProjectOwner` args.
+
+**Removed (M16 slice):** the route's private `callAIProvider` copy, the hardcoded `gpt-3.5-turbo`/`Mixtral-8x7B` strings, the raw `fetch` to OpenAI/Nebius, the inline generic variations prompt (old `:70-81`), the line-splitting parse fallback, and BOTH filler-copy exits (old `:93-104` provider-failure and `:147-167` catch-all). This route imported no legacy `buildPrompt`/`parseAiResponse` modules, so there was nothing legacy to strip for the phase-6 sweep.
+
+### New helper: `readPersistedLayoutState(content)` (exported from the route)
+
+D4 says element scope reads the section's layout from PERSISTED state (the element caller sends no layout). The persisted `content.finalContent` is an `export()` payload, and its layout state lives in **four** places — so the helper merges all of them: the body-only home slice (top-level `sections`/`sectionLayouts`), the legacy `layout.*` nesting (`persistenceActions.ts:113-114` accepts both), every entry of the multi-page `pages` map, and the **shared `chrome` header/footer entries** — which carry `{id, layout}` and live OUTSIDE `sections` (`pageHelpers.ts:47-68`). Missing them would have made header/footer element regen a spurious 422. Legacy projects whose `content` IS the page data (no `finalContent` key) fall back to `content` itself, mirroring `loadDraft/route.ts:120-125`.
+
+### Deviations from the plan (and why)
+
+1. **🚩 `src/lib/security.test.ts` ALREADY EXISTED — the plan's D6 premise is FALSE.** The plan says (twice: D6 + phase-3 step 4) "no `*.test.ts` exists anywhere in `src/lib/` today" and instructs me to CREATE the file. It is tracked, and has been since commit `1baeb6ed` ("Fix token-only edit bypass"), with 10 tests already covering owner / non-owner / admin override / orphan claim / missing / 401 / demo. **Conservative choice: I did NOT rewrite it** (that would delete a live A01 regression suite to re-derive it). I appended a 3-test `describe('assertProjectOwner — regen routes (isMock pairing)')` block covering only the genuine D6 gap:
+   - the existing demo test passes an **authenticated** `clerkId`, so it does not pin the actual residual — that the demo token yields `ok: true` **for a caller with no identity at all**, before any read. That property is exactly why routes must pair `ok` with their own `isMock`; it is now asserted.
+   - the regen action's ownership matrix + "regen never claims and never creates" (no `claimIfOrphan`/`allowMissing` ⇒ missing project is a 404).
+2. **Mock variations are generated locally, NOT by a `mockResponseGenerator{Product,Service,Work}` sibling** (plan step 5 said pick the generator via `resolveMockEngine`). The siblings emit whole-page `SectionCopy` records and require strategy / work-facts inputs; the demo token has `project === null`, so there is no honest source for them — driving them would mean fabricating a strategy just to mock five variations of one string. `resolveMockEngine(project)` **is** still called (it is the seam the sequence test guards) and its verdict is returned as `meta.engine`; only the string generator is local, preserving the legacy mock output shape byte-for-byte. Phases 4–5 regenerate whole sections and CAN use the siblings — this deviation does not transfer to them.
+3. **404 is conditioned on `!isMock`, not on `!project` alone.** The plan says "non-mock + no row → 404". With the env mock flag ON and an unknown token, a 404 would contradict "mock mode never fails". Implemented as `if (!project && !isMock) → 404`, so: real path + unknown token → 404 (tested); demo → never fetched; env-mock + unknown → mock output.
+4. **`ELEMENT_MAX_TOKENS = 2048`** (the plan only said "element regen shouldn't pay for 8k", no number). 2048 comfortably covers 5 variations of even a long bio; the 8192 default is preserved for every other caller.
+5. **Responses go through `createSecureResponse`** (the story route's pattern: no-store + security headers) rather than the legacy route's bare `NextResponse.json`. The caller reads `response.ok` + `result.variations`, both unaffected.
+
+### Tests — per-group MUTATION results (every probe run, then reverted)
+
+`route.test.ts` mocks only module boundaries (planCheck / creditSystem / rateLimit / security / prisma / **aiClient**). **The phase-2 primitive runs FOR REAL**, so the suite pins the route→primitive wiring, not a fake of it. Mocks are hand-written from contracts: the AI mock returns `{ variations: [...] }` because `ElementVariationsSchema` declares that shape; `elementKey: 'headline'` is read by hand from `product/elementSchema.ts:83` (a REQUIRED TerminalHero element); the project fixture's `content.finalContent` is the shape `saveDraft` actually stores.
+
+| # | Mutation (behavior reverted) | Result | Group proven discriminating |
+|---|---|---|---|
+| M1 | `if (!isMock)` → `if (true)` around `assertProjectOwner` | **2 failed** | demo-token + env-mock sequence tests |
+| M2 | `if (tokenId !== DEMO_TOKEN)` → `if (true)` around the project fetch | **1 failed** | demo-token "NO project fetch" |
+| M3 | `if (!project && !isMock)` → `if (false)` (404 branch removed) | **1 failed** | unknown-token → 404 |
+| M4 | **`resolveCopyEngine(project)` inserted BEFORE the mock short-circuit** (the D2 sequence-order regression) | **4 failed** | the whole sequence group — demo 200 becomes a throw |
+| M5 | `if (err instanceof UnsupportedProjectError)` → `if (false)` (422 mapping dropped) | **2 failed** | writer + ecommerce → 422 |
+| M6 | `if (err instanceof ScopeInputError)` → `if (false)` (the 2nd 422 code) | **2 failed** | unknown-section + unknown-element honesty |
+| M7 | `consumeCredits` inserted before the generation-failure exit | **1 failed** | "generation failure → NO charge" |
+| M8 | `variations: result.variations ?? []` → `variations: []` | **3 failed** | caller-contract group |
+| M9 | `security.ts:63` demo short-circuit narrowed to `&& clerkId` | **1 failed** (12 passed) | the NEW unauth-demo test — and note the 10 pre-existing tests ALL still passed, which is precisely the gap deviation 1 describes |
+
+M5 and M6 are the two separate 422 codes the phase-2 carry-forward warned about; both are mapped and both are independently pinned.
+
+### Green gate (actual output, run in WORKDIR)
+
+- `npx tsc --noEmit` → **one line only**:
+  `src/app/page.tsx(6,26): error TS2307: Cannot find module '@/assets/images/founder.jpg' or its corresponding type declarations.`
+  The known pre-existing worktree-never-built error. Zero errors in any phase-3 file.
+- `npm run test:run` → **Test Files 212 passed | 1 skipped (213); Tests 3637 passed | 18 skipped (3655)**. Baseline was 3616/18 → +21 = 18 new route tests + 3 new security tests. Zero failures.
+
+### 🚩 FOR THE FOUNDER — pilot gate (real-LLM element regen vs current)
+
+1. **The honest 422 message does NOT reach the user — and never could with the current caller.** The route returns `{error, message, detail}`, but `aiActions.ts:556-558` is ``if (!response.ok) throw new Error(`API error: ${response.status}`)`` — **the body is discarded**. So the "this element isn't AI-written" / "AI copy isn't available for this kind of project" text the plan asked for is produced and logged server-side, but the editor shows only `API error: 422`. **Confirmed as asked: it is NOT a silent spinner** — the catch at `:591-598` sets `isGenerating=false` and pushes the message into `aiGeneration.errors`. Making the message visible needs a ~3-line change in `aiActions.ts` (read `errorData.error`/`errorData.message` before throwing) — that file is **outside phase 3's Files-touched**, so I did not touch it. Recommend folding it into phase 4 or 5, where the same 422s become far more likely (atelier's `quote` band).
+2. **Failures are now visible, by design.** Old behavior: an AI failure returned **200 + fabricated** `"<your copy> - Enhanced version"` variations. New: 500 → an error in the editor. If the founder sees element-regen errors during the pilot that they "never saw before", that is the filler-copy criterion working, not a regression — the errors were always happening, silently, dressed as copy.
+3. **The prompt-thinness question (phase-2 deviation 2) is what the pilot must actually judge.** Element regen builds the full product/service copy prompt with **empty strategy fields** (`bigBenefit`/`uniqueMechanism`/`reasonToBelieve` = `''`) because no strategy is persisted. Per the plan's amended gate rule, element scope's status quo (a generic "vary this string" prompt with no business context at all) is strictly worse, so **this pilot cannot surface the strategy gap** — it will look green. The three options (persist strategy at first-gen / re-run strategy at regen / amend the acceptance criterion) still need a decision before phase 4.
+4. **`aiActions.ts:451` `regenerateElement` is a STUB that never calls this route** (a `setTimeout(1500)` that only stamps `aiMetadata`). The live caller is `regenerateElementWithVariations` (`:493`, default 5 variations). If pilot QA "regenerates an element" through a UI path wired to the stub, it will pass without touching the new code — make sure QA drives the **variations** flow (the picker showing current + 5 alternatives).
+5. **Cost per failed request is now up to 3 paid `copy` calls** (MAX_RETRIES=2) charged to nobody — charge-on-success means a hard-failing element burns real OpenAI spend at 0 credits. Intended (never charge for filler), but worth knowing.
+6. Element regen rides the **`copy` endpoint** (product/service) / **`work-copy`** (atelier) — the same model tier as first-gen (D5), at 1 credit.
