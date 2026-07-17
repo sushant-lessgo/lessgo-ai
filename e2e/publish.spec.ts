@@ -67,20 +67,47 @@ for (const cfg of AUDIENCES) {
     await expect(modal.getByTestId('publish-review-nudge')).toBeVisible();
     const confirmBtn = modal.getByRole('button', { name: 'Publish now' });
     await expect(confirmBtn).toBeEnabled();
+
+    // publish-trust M3: `/api/publish` no longer lies. When the static export throws
+    // (LOCAL DEV: Vercel Blob/KV are absent, so it always does — see the export catch
+    // in `src/app/api/publish/route.ts`) the route returns 500 instead of the old
+    // non-fatal 200 fall-through. So branch on the REAL status rather than assuming:
+    //  - 200 (Blob/KV-provisioned env) → the live card + /p assertions, unchanged.
+    //  - 500 (local dev)              → the M3 client-behavior acceptance test: the
+    //    modal surfaces `publish-error`, NO live card, and /p/{slug} still renders
+    //    because the catch's `publishState:'failed'` row is a SERVING state.
+    // Generous timeout either way: the 500 arrives after the SAME doomed Blob/KV retries
+    // the old 200 waited out.
+    const publishResPromise = page.waitForResponse(
+      (r) => r.url().includes('/api/publish') && r.request().method() === 'POST',
+      { timeout: 120_000 },
+    );
     await confirmBtn.click();
 
     // 5b. t17 · B publishing card replaces the confirm body while `publishing`.
     await expect(page.getByTestId('publish-publishing-card')).toBeVisible({ timeout: 20_000 });
 
-    // 6. t17 · C live card. Generous timeout — publish runs doomed Blob/KV calls to
-    // their timeouts in local dev before the non-fatal fallback returns success.
-    const liveCard = page.getByTestId('publish-live-card');
-    await expect(liveCard).toBeVisible({ timeout: 120_000 });
-    await expect(liveCard.getByText(/You're live!/)).toBeVisible();
-    // The live card must show the real published URL, not an empty row.
-    await expect(page.getByTestId('publish-live-url')).toHaveText(new RegExp(slug));
+    const publishRes = await publishResPromise;
+    const publishStatus = publishRes.status();
+    expect([200, 500], `/api/publish -> ${publishStatus} (unexpected status)`).toContain(
+      publishStatus,
+    );
 
-    // 7. Published page renders from DB with the right template.
+    if (publishStatus === 200) {
+      // 6. t17 · C live card.
+      const liveCard = page.getByTestId('publish-live-card');
+      await expect(liveCard).toBeVisible({ timeout: 120_000 });
+      await expect(liveCard.getByText(/You're live!/)).toBeVisible();
+      // The live card must show the real published URL, not an empty row.
+      await expect(page.getByTestId('publish-live-url')).toHaveText(new RegExp(slug));
+    } else {
+      // 6'. Honest failure surfaced (M3 acceptance): error in the modal, never "published".
+      await expect(modal.getByTestId('publish-error')).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByTestId('publish-live-card')).toHaveCount(0);
+    }
+
+    // 7. Published page renders from DB with the right template — true in BOTH branches
+    // ('published' and 'failed' are both serving states).
     const pub = await page.goto(`/p/${slug}`);
     expect(pub?.status(), `/p/${slug} status`).toBeLessThan(400);
     await expect(page.locator('div.landing-page-published')).toHaveCount(1);

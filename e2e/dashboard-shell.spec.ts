@@ -286,7 +286,21 @@ test.describe('blog preview escapes the dashboard shell (B2)', () => {
       },
       timeout: 120_000,
     });
-    test.skip(!publishRes.ok(), `publish failed: ${publishRes.status()} ${await publishRes.text()}`);
+    // publish-trust M3: `/api/publish` now honestly 500s when the static export throws —
+    // which in LOCAL DEV it always does (Blob/KV absent; see the export catch in
+    // `src/app/api/publish/route.ts`). A bare `test.skip(!publishRes.ok())` would therefore
+    // skip this guard FOREVER — silent coverage loss. What this test actually needs is a
+    // SERVING PublishedPage row, and the catch still writes one (`publishState:'failed'`,
+    // a serving state). So: tolerate 200|500, then gate on the row really serving.
+    expect([200, 500], `publish -> ${publishRes.status()} (unexpected status)`).toContain(
+      publishRes.status(),
+    );
+    if (!publishRes.ok()) {
+      const served = await api.get(`/p/${slug}`, { timeout: 60_000 });
+      // Skip-not-fail contract preserved: no serving row → this environment can't build
+      // the fixture, so skip rather than fail. (publish.spec.ts owns the publish contract.)
+      test.skip(served.status() >= 400, `no serving page after publish 500: /p/${slug} -> ${served.status()}`);
+    }
 
     const postRes = await api.post('/api/blog/posts', {
       data: { tokenId: token, title: 'E2E shell preview post' },

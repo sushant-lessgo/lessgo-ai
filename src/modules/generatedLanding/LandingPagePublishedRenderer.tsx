@@ -250,12 +250,13 @@ export function LandingPagePublishedRenderer({
 
     {/* Form handler (conditionally injected when the page has forms).
         Mirrors htmlGenerator's hasForms gate so the SSR fallback path serves a
-        submittable form — the static blob loads form.v1.js, and without this the
+        submittable form — the static blob loads form.v2.js, and without this the
         SSR-rendered page (e.g. custom-domain slug-for-host fallback) would render
-        identical form markup with no submit handler. */}
+        identical form markup with no submit handler. Must stay in lockstep with
+        htmlGenerator's asset version (old blobs keep the frozen form.v1.js). */}
     {Boolean(content?.forms && Object.keys(content.forms).length > 0) && (
       <Script
-        src="https://lessgo.ai/assets/form.v1.js"
+        src="https://lessgo.ai/assets/form.v2.js"
         strategy="afterInteractive"
       />
     )}

@@ -91,13 +91,14 @@ describe('shared LeadForm — firewall-split registry resolution', () => {
   });
 });
 
-describe('shared LeadForm — published <form> contract (form.v1.js)', () => {
-  it('emits data-lessgo-form with the exact dataset keys form.v1.js reads', () => {
+describe('shared LeadForm — published <form> contract (form.v2.js)', () => {
+  it('emits data-lessgo-form with the exact dataset keys form.v2.js reads', () => {
     const html = publishedMarkup();
     expect(html).toContain('data-lessgo-form');
     expect(html).toContain(`data-form-id="${FORM_ID}"`);
     expect(html).toContain('data-page-id="page-1"');
-    expect(html).toContain('data-owner-id="owner-1"');
+    // Owner id is server-derived from the page id — never leaked into public HTML.
+    expect(html).not.toContain('data-owner-id');
     expect(html).toContain('data-success-message="Booked — see you soon."');
   });
 

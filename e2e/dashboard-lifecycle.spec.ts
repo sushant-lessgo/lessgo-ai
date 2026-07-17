@@ -293,15 +293,22 @@ test('unpublish takes /p/{slug} down (404), then re-publish serves it again', as
     await publishSeed(api, token, slug, CFG, finalContent);
 
     // Baseline: the SSR path serves.
-    expect((await page.goto(`/p/${slug}`))?.status(), 'seeded page not serving').toBeLessThan(400);
+    // Fetched via `api` (page.request), NOT page.goto: `/p/{slug}` is a PUBLISHED page with no
+    // clerk-js, so navigating there stops the `__session` JWT (~60s) from being refreshed and the
+    // NEXT api.* call can land past expiry → middleware auth.protect() → notFound() → a spurious
+    // 404 (see `authedApi` / publish.spec.ts). The assertion is status-only, so the request
+    // context proves the same thing while the browser stays on a Clerk-bearing page.
+    expect((await api.get(`/p/${slug}`)).status(), 'seeded page not serving').toBeLessThan(400);
 
     const res = await api.post(`/api/projects/${token}/unpublish`);
     expect(res.status(), `unpublish: ${await res.text()}`).toBe(200);
     expect((await res.json()).unpublished).toBe(true);
 
     // DD0: publishState 'draft' ⇒ non-serving ⇒ the SSR route 404s (the KV/blob half of the
-    // take-down is unverifiable locally — see the file header).
-    expect((await page.goto(`/p/${slug}`))?.status(), 'unpublished page still serves').toBe(404);
+    // take-down is unverifiable locally — see the file header). Same reason as above for `api`
+    // over page.goto: leaving for a clerk-js-less page would expire the session before the
+    // api.get below.
+    expect((await api.get(`/p/${slug}`)).status(), 'unpublished page still serves').toBe(404);
 
     // The project is back to a draft the owner can keep editing.
     const projectRes = await api.get(`/api/projects/${token}`);
@@ -320,7 +327,7 @@ test('unpublish takes /p/{slug} down (404), then re-publish serves it again', as
 
     // Re-publish through the real route → serving again on the SAME slug.
     await publishSeed(api, token, slug, CFG, finalContent);
-    expect((await page.goto(`/p/${slug}`))?.status(), 're-published page not serving').toBeLessThan(400);
+    expect((await api.get(`/p/${slug}`)).status(), 're-published page not serving').toBeLessThan(400);
   } finally {
     await api.delete(`/api/projects/${token}`);
     await db.publishedPage.deleteMany({ where: { slug } });
@@ -334,15 +341,18 @@ test('delete removes the project and takes /p/{slug} down', async ({ page }) => 
 
   try {
     await publishSeed(api, token, slug, CFG, finalContent);
-    expect((await page.goto(`/p/${slug}`))?.status(), 'seeded page not serving').toBeLessThan(400);
+    // `api`, not page.goto: `/p/{slug}` has no clerk-js, so navigating there stops the ~60s
+    // `__session` refresh and the api.delete below could then 404 at the middleware instead of
+    // reaching the route (see `authedApi`). Status-only assertion → the request context suffices.
+    expect((await api.get(`/p/${slug}`)).status(), 'seeded page not serving').toBeLessThan(400);
 
     const res = await api.delete(`/api/projects/${token}`);
     expect(res.status(), `delete: ${await res.text()}`).toBe(200);
 
     // Project gone (GET 404 — the route's own not-found branch) …
     expect((await api.get(`/api/projects/${token}`)).status()).toBe(404);
-    // … and the live page with it.
-    expect((await page.goto(`/p/${slug}`))?.status(), 'deleted page still serves').toBe(404);
+    // … and the live page with it (same `api`-over-goto reasoning as above).
+    expect((await api.get(`/p/${slug}`)).status(), 'deleted page still serves').toBe(404);
 
     // DD11 rows: PublishedPage + Project + Token all gone (slug released — the only path
     // that ever releases it).
@@ -380,7 +390,11 @@ test('custom domain attached → 409 custom_domain_attached, page STILL serves (
     expect((await del.json()).code).toBe('custom_domain_attached');
 
     // The point of a ZERO-WRITE guard: nothing was half-torn-down.
-    expect((await page.goto(`/p/${slug}`))?.status(), 'blocked page must keep serving').toBeLessThan(400);
+    // MUST stay on `api` (page.request), not page.goto: `/p/{slug}` is a published page with no
+    // clerk-js, so navigating there stops the ~60s `__session` refresh (see `authedApi` /
+    // publish.spec.ts) and the unpublish call below would intermittently 404 at the middleware
+    // (auth.protect() → notFound()) instead of hitting the route — the flake this replaced.
+    expect((await api.get(`/p/${slug}`)).status(), 'blocked page must keep serving').toBeLessThan(400);
     const row = await db.publishedPage.findUnique({ where: { slug } });
     expect(row!.publishState, 'guard must not write the unpublishing marker').not.toBe('unpublishing');
     expect(await db.project.findUnique({ where: { tokenId: token } }), 'project deleted despite 409').not.toBeNull();

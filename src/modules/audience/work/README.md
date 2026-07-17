@@ -3,8 +3,9 @@
 Generates a complete, lean, voice-true multi-page work site from a work Brief
 (`brief.facts.work`, the phase-A `WorkFacts` contract) plus the work library
 (groups / photos / praise). Modeled on the PRODUCT pipeline
-(`modules/audience/product/*`) — **not** the legacy `parseStrategyResponse()` /
-`parseAiResponse()` shapes in `modules/prompt/`.
+(`modules/audience/product/*`). (It was never modeled on the legacy shared
+`parseStrategyResponse()` / `parseAiResponse()` shapes — those were **deleted** in
+regen-modernization; `modules/prompt/` is now mock-generators only.)
 
 `work` is a **copyEngine**, NOT an `audienceType`. A work project's persisted
 `audienceType` is bridged to an audience by its picked template

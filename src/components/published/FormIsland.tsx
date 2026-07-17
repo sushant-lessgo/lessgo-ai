@@ -45,7 +45,6 @@ export function FormIsland({
           formId,
           data: { email },
           publishedPageId,
-          userId: pageOwnerId,
         }),
       });
 

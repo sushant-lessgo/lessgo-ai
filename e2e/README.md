@@ -37,6 +37,30 @@ Hybrid: for **each audience** (service/Hearth + product/Meridian) it sets person
 → asserts `/p/[slug]` renders the template. Uses deterministic slugs
 (`e2e-{template}-smoke`) so reruns republish the same pages.
 
+### Local dev publish honestly 500s (publish-trust M3)
+Vercel Blob/KV are absent locally, so the static export throws. `POST /api/publish`
+**used** to swallow that and return 200 "published" anyway; M3 removed the lie — it
+now returns **500** `{ error: 'Publish failed. Your changes were saved — please try
+publishing again.' }` (see the export catch in `src/app/api/publish/route.ts`).
+
+What did NOT change is the DB outcome: that same catch still writes the row as
+`publishState: 'failed'` **before** returning, and `failed` is a **SERVING** state
+(`isServingPublishState`) — so `/p/{slug}` still renders (SSR fallback) and the
+dashboard still shows the page. So locally, expect:
+
+| | local dev | Blob/KV-provisioned env |
+|---|---|---|
+| `POST /api/publish` | 500 | 200 `{ message, url }` |
+| row `publishState` | `failed` (serving) | `published` |
+| `GET /p/{slug}` | renders | renders |
+| publish UI | `publish-error` in the modal, no live card | live card |
+
+The specs therefore accept **`200 || (500 && GET /p/{slug} < 400)`** — never a blanket
+500. A publish that leaves no serving row still fails loudly. `publish.spec.ts` branches
+on the real `/api/publish` status and asserts BOTH outcomes properly (its 500 branch is
+the M3 "honest failure is surfaced" acceptance test). The deterministic guard on the
+route's catch is a vitest: `src/app/api/publish/route.test.ts`.
+
 ## What's covered
 - **generation.spec.ts** — POSTs the real `service/strategy` + `service/generate-copy`
   routes (mock mode via the `lessgodemomockdata` token → bypasses Clerk auth,

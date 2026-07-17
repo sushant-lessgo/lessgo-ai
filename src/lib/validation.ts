@@ -10,7 +10,13 @@ export const FormSubmissionSchema = z.object({
     (data) => Object.keys(data).length <= 50, // Prevent large objects
     'Too many form fields'
   ),
+  // IGNORED by /api/forms/submit — the owner is server-derived from
+  // publishedPageId → PublishedPage.userId. Kept (and still optional) purely for
+  // old-client back-compat: immutable published blobs ship the frozen form.v1.js,
+  // which sends this field forever. Accepted-and-ignored, never rejected.
   userId: z.string().optional(),
+  // Optional here so the route can return its own stable `missing_page_id` 400
+  // instead of a zod issues array; the route requires it.
   publishedPageId: z.string().optional(),
 });
 

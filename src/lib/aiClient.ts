@@ -161,52 +161,230 @@ async function callModel<T extends z.ZodType>(
 }
 
 /**
- * Check if error is infrastructure-related (should trigger backup)
+ * Tagged parse failure from the raw-JSON path.
+ *
+ * - `no_json`   — nothing JSON-shaped found. Message is EXACTLY
+ *                 'No JSON found in response' — `src/utils/trackTelemetry.ts:45`
+ *                 string-matches it; do NOT rename.
+ * - `bad_json`  — a balanced JSON candidate was found but `JSON.parse` rejected it.
+ *                 Message keeps the "JSON" marker (telemetry PARSE_SIGNATURE).
+ * - `schema`    — reserved: zod validation failures currently surface as the raw
+ *                 `ZodError` (callers may inspect `.issues`), so nothing throws
+ *                 this kind today.
+ *
+ * All kinds are CONTENT errors: `isInfrastructureError` returns false for them,
+ * so they never buy a paid backup call.
+ */
+export type AiParseErrorKind = 'no_json' | 'bad_json' | 'schema';
+
+export class AiParseError extends Error {
+  readonly kind: AiParseErrorKind;
+  constructor(kind: AiParseErrorKind, message: string, cause?: unknown) {
+    super(message);
+    this.name = 'AiParseError';
+    this.kind = kind;
+    // `cause` via assignment (ES2022 Error.cause not in this lib target)
+    (this as Error & { cause?: unknown }).cause = cause;
+  }
+}
+
+/**
+ * Truncation signal from the raw path: the provider stopped because it hit
+ * max_tokens AND the output failed to parse. Infrastructure-class (a backup
+ * retry can plausibly fix it), unlike AiParseError.
+ */
+export class AiTruncationError extends Error {
+  constructor(model: string, cause?: unknown) {
+    super(`Model ${model} response truncated (max_tokens) and did not parse`);
+    this.name = 'AiTruncationError';
+    (this as Error & { cause?: unknown }).cause = cause;
+  }
+}
+
+function isZodError(error: unknown): boolean {
+  return (
+    error instanceof z.ZodError ||
+    (error instanceof Error && error.name === 'ZodError')
+  );
+}
+
+/**
+ * Check if error is infrastructure-related (should trigger a paid backup call).
+ *
+ * Ordering matters: content errors fast-exit false FIRST. Previously the
+ * substring matches on '500' and 'length' made this return true for token
+ * counts, ids, `maxLength: 500` and EVERY zod too_long/min/maxLength message —
+ * buying a second paid call that could never help. Both are removed; the string
+ * matcher is a narrowed last resort behind the structured signals.
+ *
+ * KNOWN ASYMMETRY (accepted, plan phase 1 step 2): the stop/finish-reason seam
+ * lives in `callModelRaw` only. The `callModel` / `generateWithSchema` path
+ * loses the old 'length'/'max_tokens' string match with no replacement, so
+ * truncation there is now non-recoverable. Net effect is still strictly fewer
+ * backup calls; wiring the seam into `callModel` is deferred (no regen caller
+ * uses that path).
  */
 function isInfrastructureError(error: unknown): boolean {
+  // 1. Content errors — NEVER infrastructure. Fast-exit before anything else.
+  if (
+    isZodError(error) ||
+    error instanceof AiParseError ||
+    error instanceof SyntaxError
+  ) {
+    return false;
+  }
+
+  // 2. Explicit truncation signal (read off the provider response object).
+  if (error instanceof AiTruncationError) return true;
+
+  if (typeof error !== 'object' || error === null) return false;
+
+  const err = error as { status?: unknown; code?: unknown; message?: unknown };
+
+  // 3. Structured signals: HTTP status from SDK errors.
+  if (typeof err.status === 'number') {
+    return [429, 500, 502, 503, 504].includes(err.status);
+  }
+
+  // 4. Node/SDK error codes.
+  if (typeof err.code === 'string') {
+    const code = err.code.toUpperCase();
+    if (
+      code === 'ECONNREFUSED' ||
+      code === 'ECONNRESET' ||
+      code === 'ETIMEDOUT' ||
+      code === 'ENOTFOUND' ||
+      code === 'EAI_AGAIN'
+    ) {
+      return true;
+    }
+  }
+
+  // 5. Narrowed string matcher — last resort only. '500' and 'length' are
+  //    deliberately absent (they matched content errors; see doc comment).
   if (error instanceof Error) {
     const msg = error.message.toLowerCase();
-    // Rate limits, API down, network errors, truncation
     return (
       msg.includes('rate limit') ||
-      msg.includes('429') ||
-      msg.includes('503') ||
-      msg.includes('502') ||
-      msg.includes('500') ||
       msg.includes('timeout') ||
+      msg.includes('timed out') ||
       msg.includes('network') ||
       msg.includes('econnrefused') ||
+      msg.includes('etimedout') ||
       msg.includes('unavailable') ||
-      msg.includes('max_tokens') ||
-      msg.includes('length')
+      msg.includes('service unavailable')
     );
   }
+
   return false;
 }
+
+type RawModelResult = {
+  text: string;
+  /** Provider stopped at the token cap (anthropic stop_reason / openai finish_reason). */
+  truncated: boolean;
+};
 
 /**
  * Call model without structured outputs - for schemas with z.record() that
  * Anthropic doesn't support (additionalProperties: object)
+ *
+ * Returns the stop/finish reason alongside the text (seam added for M14: the
+ * response object used to be discarded, so truncation was only detectable via
+ * fragile message substrings).
  */
-async function callModelRaw(model: string, prompt: string): Promise<string> {
+async function callModelRaw(
+  model: string,
+  prompt: string,
+  maxTokens = 8192
+): Promise<RawModelResult> {
   const provider = getProvider(model);
 
   if (provider === 'openai') {
     const response = await openai.chat.completions.create({
       model,
-      max_tokens: 8192,
+      max_tokens: maxTokens,
       messages: [{ role: 'user', content: prompt }],
     });
-    return response.choices[0].message.content || '';
+    const choice = response.choices[0];
+    return {
+      text: choice?.message?.content || '',
+      truncated: choice?.finish_reason === 'length',
+    };
   } else {
     const response = await anthropic.messages.create({
       model,
-      max_tokens: 8192,
+      max_tokens: maxTokens,
       messages: [{ role: 'user', content: prompt }],
     });
     const content = response.content[0];
-    return content.type === 'text' ? content.text : '';
+    return {
+      text: content && content.type === 'text' ? content.text : '',
+      truncated: response.stop_reason === 'max_tokens',
+    };
   }
+}
+
+/**
+ * Scan `source` for the FIRST complete, brace/bracket-balanced JSON value
+ * (object OR top-level array — the array case fixes the known
+ * `src/modules/email/sequenceEngine.ts:188` gap). String literals and escapes
+ * are respected so braces inside strings don't skew the depth count.
+ *
+ * Replaces the greedy /(\{[\s\S]*\})/ which spanned from the first `{` to the
+ * LAST `}` — mangling any multi-object / prose-trailing response.
+ */
+function scanBalancedJson(source: string): string | null {
+  for (let start = 0; start < source.length; start++) {
+    const open = source[start];
+    if (open !== '{' && open !== '[') continue;
+    const close = open === '{' ? '}' : ']';
+
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+
+    for (let i = start; i < source.length; i++) {
+      const ch = source[i];
+
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (ch === '\\') escaped = true;
+        else if (ch === '"') inString = false;
+        continue;
+      }
+
+      if (ch === '"') inString = true;
+      else if (ch === open) depth++;
+      else if (ch === close) {
+        depth--;
+        if (depth === 0) return source.slice(start, i + 1);
+      }
+    }
+    // Unbalanced from this opener — try the next one.
+  }
+  return null;
+}
+
+/**
+ * Extract a JSON string from raw model text: prefer fenced content, fall back
+ * to scanning the whole response. Throws AiParseError('no_json') with the
+ * telemetry-matched literal message when nothing is found.
+ */
+function extractJsonString(text: string): string {
+  const fenced =
+    text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/```\s*([\s\S]*?)\s*```/);
+
+  const candidates = fenced ? [fenced[1], text] : [text];
+  for (const candidate of candidates) {
+    const found = scanBalancedJson(candidate);
+    if (found) return found;
+  }
+
+  // A fence may hold a bare JSON scalar/edge shape with no braces at all.
+  if (fenced && fenced[1].trim()) return fenced[1].trim();
+
+  throw new AiParseError('no_json', 'No JSON found in response');
 }
 
 /**
@@ -217,25 +395,38 @@ async function callModelRaw(model: string, prompt: string): Promise<string> {
 export async function generateRawJson<T extends z.ZodType>(
   endpoint: Endpoint,
   prompt: string,
-  schema: T
+  schema: T,
+  opts?: { maxTokens?: number }
 ): Promise<z.infer<T>> {
   const { primary, backup } = getModelConfig(endpoint);
 
   async function tryGenerate(model: string): Promise<z.infer<T>> {
     console.log(`[aiClient] Trying raw JSON generation with: ${model}`);
-    const text = await callModelRaw(model, prompt);
+    const { text, truncated } = await callModelRaw(model, prompt, opts?.maxTokens);
 
-    // Extract JSON from response (may have markdown code blocks)
-    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) ||
-                      text.match(/```\s*([\s\S]*?)\s*```/) ||
-                      text.match(/(\{[\s\S]*\})/);
-
-    if (!jsonMatch) {
-      throw new Error('No JSON found in response');
+    let jsonStr: string;
+    try {
+      jsonStr = extractJsonString(text);
+    } catch (error) {
+      // Nothing parseable + provider hit the token cap ⇒ truncation, retryable.
+      if (truncated) throw new AiTruncationError(model, error);
+      throw error;
     }
 
-    const jsonStr = jsonMatch[1] || jsonMatch[0];
-    const parsed = JSON.parse(jsonStr);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(jsonStr);
+    } catch (error) {
+      if (truncated) throw new AiTruncationError(model, error);
+      throw new AiParseError(
+        'bad_json',
+        `Malformed JSON in response: ${(error as Error)?.message ?? 'parse failed'}`,
+        error
+      );
+    }
+
+    // Zod failures surface as the raw ZodError (callers inspect .issues);
+    // isInfrastructureError fast-exits false on them, so no backup is bought.
     return schema.parse(parsed);
   }
 

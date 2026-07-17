@@ -273,10 +273,15 @@ async function awaitPublishWindow() {
  * Self-pacing against the 5/60s publish limiter (see above) — callers may publish freely,
  * in any test order.
  *
- * NOTE on local dev: Vercel Blob/KV are absent, so the static export fails non-fatally and the
- * row lands in `publishState: 'failed'` rather than `'published'`. Both are SERVING states
- * (`isServingPublishState`), so `/p/{slug}` renders and teardown treats them identically —
- * which is exactly what the spec asserts against.
+ * NOTE on local dev (publish-trust M3): Vercel Blob/KV are absent, so the static export throws
+ * and `/api/publish` now honestly returns **500** (the old non-fatal 200 fall-through was the
+ * lie M3 removed — see the export catch in `src/app/api/publish/route.ts`). The catch still
+ * writes the row as `publishState: 'failed'` BEFORE returning, and `failed` is a SERVING state
+ * (`isServingPublishState`), so `/p/{slug}` still renders and teardown treats it identically to
+ * `'published'` — which is exactly what the specs assert against.
+ *
+ * Hence the acceptance rule below: `200 || (500 && the row actually serves)`. We never blanket-
+ * accept 500 — a genuinely broken publish (no row at all) must still fail loudly.
  */
 export async function publishSeed(
   request: APIRequestContext,
@@ -285,23 +290,35 @@ export async function publishSeed(
   cfg: AudienceConfig,
   finalContent: ReturnType<typeof buildFinalContent>,
 ) {
+  const body = {
+    slug,
+    title: cfg.title,
+    content: {
+      layout: { sections: finalContent.layout.sections, theme: {} },
+      content: finalContent.content,
+      forms: {},
+    },
+    themeValues: {},
+    tokenId,
+  };
+
   await awaitPublishWindow();
   publishTimes.push(Date.now());
-  const res = await request.post('/api/publish', {
-    data: {
-      slug,
-      title: cfg.title,
-      content: {
-        layout: { sections: finalContent.layout.sections, theme: {} },
-        content: finalContent.content,
-        forms: {},
-      },
-      themeValues: {},
-      tokenId,
-    },
-    timeout: 150_000,
-  });
+  const res = await request.post('/api/publish', { data: body, timeout: 150_000 });
   const json = await res.json().catch(() => ({}));
-  expect(res.ok(), `/api/publish -> ${res.status()} ${JSON.stringify(json)}`).toBeTruthy();
+
+  if (!res.ok()) {
+    // Only a 500 from the export catch is tolerated, and only if it left a SERVING row.
+    expect(
+      res.status(),
+      `/api/publish -> ${res.status()} ${JSON.stringify(json)} (only an honest 500 is tolerated)`,
+    ).toBe(500);
+    const served = await request.get(`/p/${slug}`, { timeout: 60_000 });
+    expect(
+      served.status(),
+      `/api/publish 500'd AND /p/${slug} -> ${served.status()}: no serving row, publish is genuinely broken`,
+    ).toBeLessThan(400);
+  }
+
   return json;
 }

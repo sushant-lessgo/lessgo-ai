@@ -5,7 +5,9 @@ Form builder + renderer for landing pages. Components in this dir:
 `FormConnectedButton.tsx` (button → form wiring), `FormPlacementRenderer.tsx`
 (placement/positioning), `InlineFormInput.tsx` (inline field). Published pages render a
 server-safe island (`src/components/published/FormIsland.tsx` / `FormMarkupPublished.tsx`);
-runtime submit is handled by the minified `formHandler.js` → `public/assets/form.v1.js`.
+runtime submit is handled by the minified `formHandler.js` → `public/assets/form.v2.js`
+(v2 = no owner id in the markup or the POST body; the frozen `form.v1.js`, built from
+`scripts/legacy/form.v1.src.js`, still serves pre-existing immutable blobs).
 
 > **Status note:** the "submissions only logged to console" / "SMTP" wording lower in this
 > doc is **stale**. `POST /api/forms/submit` (`withFormRateLimit`, `createSecureResponse`)
@@ -132,8 +134,14 @@ The ButtonConfigurationModal automatically supports native forms:
 interface FormSubmissionRequest {
   formId: string;
   data: Record<string, any>;
+  publishedPageId: string; // REQUIRED — the route derives the owner from this
+  userId?: string;         // accepted-and-IGNORED (old blobs still send it); never trust it
 }
 ```
+
+The submitting page's owner is resolved server-side via `PublishedPage.userId` and gated on
+the canonical `isServingPublishState` predicate. Never reintroduce a client-supplied owner id
+(that was the forgery hole: `data-owner-id` in public HTML + a trusted body `userId`).
 
 The API handles:
 - Form validation

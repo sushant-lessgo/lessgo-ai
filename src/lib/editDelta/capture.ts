@@ -13,7 +13,8 @@
 // "AI wrote X, user changed to X'" row. Verified shapes (2026-07-12):
 //
 //   FREEZE side — wizard `finalContent.content[id].elements` (finalize.ts ~L76:
-//     `elements = copy[type].elements`). After parseAiResponse, each value is a
+//     `elements = copy[type].elements`). After the per-audience copy parser
+//     (`modules/audience/*/parseCopy.ts`), each value is a
 //     plain `string` (headline/subheadline/…) or `string[]` (pipe/collection
 //     fields like feature_titles). The `SectionCopy.elements` *type* also admits
 //     `{ value, needsReview }` and `Record<string,unknown>[]`, but the parser
