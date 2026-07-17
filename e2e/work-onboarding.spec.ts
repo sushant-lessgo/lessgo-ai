@@ -27,6 +27,25 @@ async function authedApi(page: import('@playwright/test').Page) {
   return page.request;
 }
 
+/**
+ * Satisfy the E3 required gate (D-D) from STEP 03: price + languages must be
+ * answered before Continue un-blocks. price is the native `price` kind whose
+ * default mode IS the on-request confirm posture (one tap = answer); languages
+ * is a `choice` MULTI (tap English, then Save — not an immediate commit).
+ * Call while STEP 03 (`step-questions`) is visible.
+ */
+async function answerRequiredQuestions(page: import('@playwright/test').Page) {
+  // price — select on-request (the default confirm posture) and save.
+  await page
+    .getByTestId('question-price-mode-price')
+    .getByRole('radio', { name: 'On request' })
+    .click();
+  await page.getByTestId('question-save-price').click();
+  // languages — multi choice: tap English, then Save.
+  await page.getByTestId('question-chip-languages-English').click();
+  await page.getByTestId('question-save-languages').click();
+}
+
 test('served work brief resumes the JOURNEY shell at STEP 02 (not WizardShell)', async ({
   page,
 }) => {
@@ -69,10 +88,23 @@ test('the journey step machine walks 02 → 04 and back', async ({ page }) => {
   await expect(page.getByTestId('step-show-work')).toBeVisible({ timeout: 30_000 });
 
   const next = page.getByTestId('journey-next');
-  for (const testId of ['step-questions', 'step-plan']) {
-    await next.click();
-    await expect(page.getByTestId(testId)).toBeVisible();
-  }
+
+  // 02 → 03.
+  await next.click();
+  await expect(page.getByTestId('step-questions')).toBeVisible();
+
+  // ⚠️ The E3 required gate (D-D) now blocks Continue on STEP 03 until price +
+  // languages are answered — so a naive Continue-through-03 stalls here. Answer
+  // the required questions first. This is NOT scaffolding: it is the regression
+  // that the gate EXISTS — `journey-next` is disabled below until both land, and
+  // a silently-green walk would be gate theatre.
+  await expect(next).toBeDisabled();
+  await answerRequiredQuestions(page);
+  await expect(next).toBeEnabled();
+
+  // 03 → 04.
+  await next.click();
+  await expect(page.getByTestId('step-plan')).toBeVisible();
 
   // 02 is the floor.
   await page.getByTestId('journey-back').click();
@@ -203,13 +235,16 @@ test('the journey walks 02 → 04: answers land in the rail and in the DB, kind-
   await expect(page.getByTestId('rail-field-groups')).toHaveAttribute('data-skeleton', 'true');
 
   await expect(page.getByTestId('question-groups')).toBeVisible();
-  await expect(page.getByTestId('question-price')).toHaveCount(0); // nothing to price yet
+  // E3: price is a REQUIRED question — it is asked from the start regardless of
+  // groups (its commit simply refuses until something exists to price), so unlike
+  // the E1 placeholder it does NOT disappear when groups are empty.
+  await expect(page.getByTestId('question-price')).toBeVisible();
 
   // ── The answer: it appears IN THE RAIL (the journey's core promise) ───────
   await page.getByTestId('question-input-groups').fill('Newborn sessions');
   await page.getByTestId('question-save-groups').click();
   await expect(page.getByTestId('rail-chip-g0')).toHaveText('Newborn sessions');
-  // …and the price question now has something to price.
+  // …and the price question is still there, now with something to price.
   await expect(page.getByTestId('question-price')).toBeVisible();
 
   // Default is "On request" (always valid); "From" needs an amount — the Save
@@ -217,6 +252,12 @@ test('the journey walks 02 → 04: answers land in the rail and in the DB, kind-
   await page.getByTestId('question-price-mode-price').getByRole('radio', { name: 'From' }).click();
   await page.getByTestId('question-price-amount-price').fill('900');
   await page.getByTestId('question-save-price').click();
+
+  // E3 required gate (D-D): languages is ALSO required — answer it (tap English,
+  // Save) so Continue un-blocks for the STEP 04 advance below. Price is already
+  // answered above.
+  await page.getByTestId('question-chip-languages-English').click();
+  await page.getByTestId('question-save-languages').click();
 
   // ── The real assertion: it is in the DB, and it is generation-valid ───────
   // Polled, not slept: the price answer has no rail field of its own to watch
@@ -252,6 +293,122 @@ test('the journey walks 02 → 04: answers land in the rail and in the DB, kind-
   await page.getByTestId('journey-next').click();
   await expect(page.getByTestId('step-plan')).toBeVisible();
   await expect(page.getByTestId('plan-items').getByRole('listitem')).toHaveCount(count);
+});
+
+// ============================================================================
+// E3 — STEP 03 questions (deterministic gating).
+//
+// The E1 STEP 03 placeholder (name / what-you-sell / one price) is replaced by
+// the full gating step: a zero-AI resolver decides per slot whether we KNOW
+// (skip), are almost sure (one-tap confirm) or DON'T know (ask), price +
+// language are required to proceed, and every answer writes the frozen WorkFacts
+// through the SAME `commitRail` door the rail uses. These are the deterministic
+// assertions only — real-LLM copy quality of the branch (new vs established) is
+// the founder's manual pass (plan Phase 5 human gate).
+//
+// The seeded Kundius fixture already carries name + 2 groups, so the resolver
+// must NEVER ask them, and the ceiling (D-F) lands EXACTLY 5 candidates: price
+// (ask, required) · establishment (ask) · dreamClient (confirm from
+// entry.audiences) · contactMethod (confirm) · languages (ask, required).
+// ============================================================================
+
+test.describe('E3 — STEP 03 questions (deterministic gating)', () => {
+  /** Seed a Kundius project and drive 02 → 03 (Skip the E1 upload stub). */
+  async function openQuestions(page: import('@playwright/test').Page) {
+    const api = await authedApi(page);
+    const { token } = await seedWorkBrief(api);
+    await page.goto(`/onboarding/${token}`);
+    await expect(page.getByTestId('step-show-work')).toBeVisible({ timeout: 30_000 });
+    await page.getByTestId('show-work-skip').click();
+    await expect(page.getByTestId('step-questions')).toBeVisible();
+    return { api, token };
+  }
+
+  test('asks EXACTLY the 5 known gaps — never what the seed already knows', async ({ page }) => {
+    await openQuestions(page);
+
+    // The seed carries name + groups ⇒ they are NEVER asked ("never ask twice").
+    await expect(page.getByTestId('question-name')).toHaveCount(0);
+    await expect(page.getByTestId('question-groups')).toHaveCount(0);
+
+    // Exactly the 5 gaps, and no more (the D-F ceiling). Counting the CARD
+    // wrappers only — chips/inputs/save buttons are nested, not direct children.
+    const cards = page.locator('[data-testid="step-questions"] > [data-testid^="question-"]');
+    await expect(cards).toHaveCount(5);
+    for (const id of ['price', 'establishment', 'dreamClient', 'contactMethod', 'languages']) {
+      await expect(page.getByTestId(`question-${id}`)).toBeVisible();
+    }
+  });
+
+  test('required gate + answers reach the rail & DB (siblings intact) + never ask twice on reload', async ({
+    page,
+  }) => {
+    const { api, token } = await openQuestions(page);
+    const next = page.getByTestId('journey-next');
+
+    // ── AC 4: the required gate is CLOSED until price + languages are answered ─
+    await expect(next).toBeDisabled();
+
+    // ── establishment (single choice) — one tap commits; the rail row updates ─
+    await page.getByTestId('question-chip-establishment-new').click();
+    await expect(page.getByTestId('rail-value-establishment')).toHaveText('Just starting out');
+
+    // ── dreamClient (MULTI choice) — tap the suggested chip, THEN Save ────────
+    await page.getByTestId('question-chip-dreamClient-Couples getting married').click();
+    await page.getByTestId('question-save-dreamClient').click();
+    // The answered slot collapses to the compact "value — Change" posture (D-E),
+    // NOT vanishing (correctable + keeps required slots reachable).
+    await expect(page.getByTestId('question-change-dreamClient')).toBeVisible();
+
+    // Neither answer un-blocked the gate — only price + languages are required.
+    await expect(next).toBeDisabled();
+
+    // ── Answer the two REQUIRED questions → the gate opens (AC 4) ─────────────
+    await answerRequiredQuestions(page);
+    await expect(next).toBeEnabled();
+
+    // ── The real assertion: it is in the DB, through the REAL /api/saveDraft,
+    // and the entry sibling survived every full-facts re-emit (landmine 4) ────
+    const draft = await loadDraft(api, token);
+    const work = draft.brief.facts.work;
+    expect(work.establishment).toBe('new');
+    expect(work.dreamClient).toBe('Couples getting married');
+    expect(work.languages).toEqual(['English']);
+    // price was answered on-request — persisted onto the groups, kind-valid.
+    for (const g of work.groups) expect(g.kind).toBe('category');
+    expect(draft.brief.facts.entry.businessName).toBe('Kundius Studio'); // landmine 4
+    expect(draft.audienceType).toBe('service');
+    expect(draft.templateId).toBe('atelier');
+    expect(draft.brief.copyEngine).toBe('work');
+
+    // ── D-C · "never ask twice / on-request degrades to one tap" across reload ─
+    // A confirmed-but-ungenerated draft resumes at STEP 02, so re-skip to 03.
+    // Session-answered ids are GONE (fresh mount), so the resolver re-derives
+    // purely from persisted facts.
+    await page.reload();
+    await expect(page.getByTestId('step-show-work')).toBeVisible({ timeout: 30_000 });
+    await page.getByTestId('show-work-skip').click();
+    await expect(page.getByTestId('step-questions')).toBeVisible();
+
+    // Answered-from-facts slots are KNOWN now ⇒ never re-asked.
+    await expect(page.getByTestId('question-establishment')).toHaveCount(0);
+    await expect(page.getByTestId('question-dreamClient')).toHaveCount(0);
+    await expect(page.getByTestId('question-languages')).toHaveCount(0);
+
+    // price is the D-C edge: a genuine on-request answer is indistinguishable
+    // from the seed default after the session resets, so it degrades to a ONE-TAP
+    // confirm (the native price mode picker, on-request pre-selected) — NOT an
+    // open free-text re-ask.
+    await expect(page.getByTestId('question-price')).toBeVisible();
+    const onRequest = page
+      .getByTestId('question-price-mode-price')
+      .getByRole('radio', { name: 'On request' });
+    await expect(onRequest).toBeVisible();
+    await expect(onRequest).toHaveAttribute('aria-checked', 'true');
+    // The price kind has no free-text input in on-request mode — proving it is a
+    // confirm posture, not an open ask.
+    await expect(page.getByTestId('question-input-price')).toHaveCount(0);
+  });
 });
 
 // ============================================================================
@@ -305,9 +462,12 @@ test('STEP 05 generates the site (mock), STEP 06 reveals it, and the editor open
   await page.goto(`/onboarding/${token}`);
   await expect(page.getByTestId('step-show-work')).toBeVisible({ timeout: 30_000 });
 
-  // 02 → 03 → 04 (the fixture answers 03's ask-ifs already; price is optional).
+  // 02 → 03 → 04. The seed answers name + groups already, but the E3 required
+  // gate (D-D) now blocks Continue until price + languages are answered — so
+  // clear them before advancing (the same gate the E3 spec pins).
   await page.getByTestId('show-work-skip').click();
   await expect(page.getByTestId('step-questions')).toBeVisible();
+  await answerRequiredQuestions(page);
   await page.getByTestId('journey-next').click();
   await expect(page.getByTestId('step-plan')).toBeVisible();
 

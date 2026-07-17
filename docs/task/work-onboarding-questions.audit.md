@@ -145,3 +145,47 @@ After `pricePosition`, four `kind:'text'`, `editable:false` rows: LANGUAGES, EST
 ### Open risks
 - dreamClient multi + confirm suggested: a phase-4 e2e "tap suggested confirm" must tap-then-Save (multi needs Save); the phase-4 author owns that walk and should adjust the spec accordingly.
 - Answered-compact summary for `choice` still best-effort (renderer derives from `suggested`); real read verified at phase-4 e2e.
+
+## Phase 4 — Playwright e2e over the seeded STEP 01→03 walk
+
+**Files changed**
+- `e2e/work-onboarding.spec.ts` — added the `answerRequiredQuestions` helper, a new `describe('E3 — STEP 03 questions (deterministic gating)')` block (2 tests), and repaired THREE pre-existing tests that now hit the E3 required gate.
+- `docs/task/work-onboarding-questions.audit.md` — this section.
+- (`e2e/helpers/seedWorkBrief.ts` — NOT touched: the existing `seedWorkBrief` + `loadDraft` already cover seeding + DB facts-assert; no new helper was needed.)
+
+### Question ids targeted (confirmed by reading `engines/work.ts`)
+The 5 Kundius questions and their exact testid ids: `price` (native `price` kind — mode picker `question-price-mode-price` + amount; on-request is the one-tap confirm), `establishment` (choice SINGLE — tap `question-chip-establishment-new` commits immediately), `dreamClient` (choice MULTI — tap `question-chip-dreamClient-Couples getting married` THEN `question-save-dreamClient`), `contactMethod` (choice single), `languages` (choice MULTI, required — tap `question-chip-languages-English` then `question-save-languages`). The suggested dreamClient value comes verbatim from `entry.audiences` in `WORK_BRIEF_FIXTURE` (`'Couples getting married'`). `question-name`/`question-groups` are asserted ABSENT (the seed knows them).
+
+### Seeding path reused
+`authedApi(page)` → `seedWorkBrief(page.request)` (real `/api/start` → `/api/brief/confirm` serve gate) → `page.goto('/onboarding/{token}')` → wait `step-show-work` → click `show-work-skip` → `step-questions`. DB assertions read back through the existing `loadDraft(api, token)` (real `/api/loadDraft`). No new seed helper; identical idiom to the pre-existing P4 test.
+
+### New describe assertions (deterministic only — real-LLM copy quality is the founder gate)
+1. **"asks EXACTLY the 5 known gaps"** — `question-name`/`question-groups` count 0; the 5 expected `question-<id>` cards visible; and the CARD-wrapper count (`[data-testid="step-questions"] > [data-testid^="question-"]`, direct children only so chips/inputs don't inflate it) is exactly 5 (the D-F ceiling).
+2. **"required gate + answers reach the rail & DB + never ask twice on reload"** — one seeded walk covering plan ACs 2–5:
+   - `journey-next` DISABLED initially (AC 4 gate closed).
+   - Tap establishment `new` → `rail-value-establishment` shows "Just starting out" (rail row updates from a STEP-03 answer).
+   - Tap dreamClient suggested chip + Save → `question-change-dreamClient` visible (collapses to answered-compact, D-E). Gate still DISABLED (neither is required).
+   - `answerRequiredQuestions` (price on-request + languages English) → `journey-next` ENABLED (AC 4 enforcement).
+   - `loadDraft` ⇒ `facts.work.establishment === 'new'`, `dreamClient === 'Couples getting married'`, `languages === ['English']`, every group still `kind === 'category'`; `facts.entry.businessName` intact (landmine 4 through the real `/api/saveDraft`); `audienceType/templateId/copyEngine` stamps intact.
+   - Reload → resumes at STEP 02 (confirmed-but-ungenerated) → re-skip to 03 → establishment/dreamClient/languages questions ABSENT (never ask twice), while `price` re-appears as a ONE-TAP confirm: `question-price` visible, its on-request radio `aria-checked=true`, and NO `question-input-price` (native mode picker, not an open free-text re-ask — the D-C degrade).
+
+### The 02→04 repair (the regression that the gate EXISTS)
+- **`the journey step machine walks 02 → 04 and back`** (the plan's named target): split the loop so STEP 03 asserts `journey-next` is DISABLED, calls `answerRequiredQuestions`, asserts it becomes ENABLED, then advances. A silently-green walk here would be gate theatre — this makes the gate load-bearing.
+- **`the journey walks 02 → 04: answers land in the rail and in the DB, kind-valid`** (also in this file, ALSO broken by E3 — in-scope Files-touched, so repaired): (a) its stale "price disappears when groups are empty / `question-price` count 0" assertion was replaced — under E3 `price` is a REQUIRED question asked from the start regardless of groups (its commit refuses until groups exist); (b) added a languages answer (`English` + Save) after the price answer so the final `journey-next` → `step-plan` advance is un-blocked. All other assertions (DB kind-validity, sibling preservation, plan idempotency) unchanged.
+- **`STEP 05 generates the site … editor opens`** (P5/P6, also in this file, ALSO now walks 02→03→04 via `journey-next`): added `answerRequiredQuestions` on STEP 03 before advancing. Minimal, same helper.
+
+### Grep for other step-3 drivers (requested)
+`grep -E "step-questions|journey-next|step-plan|show-work-skip" e2e/**` → **only** `e2e/work-onboarding.spec.ts` matches. No OTHER suite drives STEP 03 / clicks `journey-next` on step 3, so no other spec is blocked by the new required gate. All three affected tests live in this one file and are repaired here.
+
+### Deviations
+- Repaired TWO pre-existing tests beyond the plan's single named target (`the journey walks 02 → 04: answers land…` and the P5/P6 `STEP 05 generates…`). Both are IN the Files-touched file, both are broken by the E3 required gate this phase introduces, and the phase verification requires e2e green — so leaving them red was not an option. In-scope judgment call, logged here (no file outside Files-touched was edited).
+- `seedWorkBrief.ts` left untouched (plan allowed a new facts-assert helper "only if needed" — it wasn't; `loadDraft` sufficed).
+
+### Verification (honest)
+- **`npm run test:run`** (before the e2e work; no src/unit files touched afterward): **3853 passed | 18 skipped** (225 files). Green.
+- **`npm run test:e2e` FULL SUITE**: ran to a 1.2h **environment meltdown UNRELATED to these specs** — 26 tests across EVERY spec (parity, render, ui-isolation, dashboard, edit-persistence, media, publish, toolbar, and the pre-existing work-onboarding test #1) died with `worker process exited unexpectedly (code=3221225794 = 0xC0000374 STATUS_HEAP_CORRUPTION)` + `warmUpSession` goto('/') timeouts; 75 tests "did not run". This is the known Windows-worktree node-worker heap-corruption flake, not a test-logic failure — my E3 tests were in the "did not run" bucket. NOT counted as a result. (Note: `npm run test:e2e -- work-onboarding` does NOT filter — `test:e2e` is bare `playwright test` and npm did not forward the positional; the whole suite ran.)
+- **`npx playwright test e2e/work-onboarding.spec.ts --workers=1`** (isolated — the honest result for this phase's file): **9 passed (3.0m)**. Includes both new E3 tests (2.9s, 5.7s), both repaired 02→04 walks (test 3 + test 5), the P5/P6 generation walk (1.4m), and the legacy-unchanged test. The `ReferenceError: window is not defined` lines in `[WebServer]` output are a pre-existing SSR log on the `/preview/[token]` route's `useEditStoreBootstrap` dev-only block — noise, the test passes through it.
+
+### Open risks / findings
+- **e2e infra flake (REPORTED, not mine to fix):** the full authed suite collapses with node-worker heap corruption under sustained load on this Windows worktree (1.2h, cross-spec). Per-spec isolation (`--workers=1`, single file) is green. This predates and is orthogonal to E3 — surfaced here only because the phase's verification is e2e.
+- The two E3 tests + three repaired walks are proven green only in ISOLATION; a from-cold full-suite run remains subject to the above infra flake (Phase 5's full gate should run specs in isolation or on CI, not one 1.2h local sweep).
