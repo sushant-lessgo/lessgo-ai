@@ -13,9 +13,40 @@ Close three verified billing-correctness holes before pricing-v2: (H1) `deductCr
 
 ```
 phase 1 H1 atomic decrement + ledger-in-tx + concurrency test: done (commit d6a4cc21, review loops 1, verdict ship) — AWAITING FOUNDER HUMAN GATE before phase 2
-phase 2 H2 hasFeature deny-by-default + tests: pending
+phase 2 H2 hasFeature deny-by-default + tests: done (commit 5eb69db4, review loops 1, verdict ship)
 phase 3 M1/M2 route standardization + withAICredits deletion + route tests: pending
 ```
+
+**Phase 2 review outcome (impl-reviewer, verdict `ship`):** Reviewer reverted `hasFeature`
+to the pre-fix predicate and re-ran → **5 tests RED** (FREE removeBranding, FREE
+whiteLabel/exportHTML/customDomains, FREE trackingPixels, PRO exportHTML, garbage tier),
+then restored byte-exact → 23/23 green. Genuine regression net, not theatre. `wrongRow()`
+helper sets every row column to `true`/`'full'` → config-wins-over-row is PROVEN.
+Not a blanket-false: PRO+removeBranding→true, PRO+exportHTML→false, AGENCY positives all
+verified against real config. `analytics:'basic'` on FREE still → true (typeof branch).
+`hasTrackingPixels` code byte-identical (comment only). **M7 fence HOLDS** — 29 changed
+lines total, ZERO tier limit/feature VALUES touched. Gates: `tsc` exit 0, `test:run` 3567
+passed (= phase 1's 3557 + 10 new), concurrency suite EXECUTED (5 real-DB), `lint` clean.
+
+**Verified fact (founder already ruled OK, Q5):** `domains/add` FREE = **403 → 403,
+message-only** delta (`'Custom domain limit reached'` → `'Custom domains not available on
+your plan'`). The `hasFeature` gate at :55 genuinely precedes the `checkLimit` backstop at
+:62, and FREE `limits.customDomains = 0` (planManager.ts:79) already shut the door.
+**H2 was a LATENT paywall hole, not a live leak** — worth closing before pricing-v2 gates
+anything new on it, exactly as the spec argued.
+
+**Known honest gap (reviewer-endorsed):** the `value !== 'none'` sub-clause is currently
+UNREACHABLE — no shipped tier sets `analytics:'none'` (FREE='basic', others='full'), so
+the garbage-tier test covers the `undefined` half only. A mutation deleting `&& value !==
+'none'` would NOT be caught. Accepted because: the expression is mandated verbatim by
+design decision 4; injecting a synthetic tier would breach the M7 values fence; and the
+tripwire test (asserts no tier uses `'none'`) is SELF-HEALING — it goes red the moment a
+tier adopts `'none'`, forcing real coverage before the branch can matter.
+
+**Carry-forward (do NOT fix in phase 3 — belongs to the deferred Q3 DRY-up):** comments at
+`publish/route.ts:359` + `domains/verify-dns/route.ts:117` still claim hasFeature "fails
+OPEN" — now STALE/false. Reviewer's advice: leave them; a wrong-but-inert comment on a
+correct inlined check is low-risk, and phase 3 shouldn't touch those files either.
 
 **Phase 1 review outcome (impl-reviewer, verdict `ship`):** RED proof independently
 reproduced (reviewer reverted to HEAD creditSystem.ts, got identical 3-fail/pool-negative
