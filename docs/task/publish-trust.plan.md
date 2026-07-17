@@ -118,7 +118,92 @@ retries (`retries: 0` locally).
   - Audit correction: ONE `page.goto('/p/{slug}')` remains (`dashboard-lifecycle.spec.ts:115`), not two
     — it's the last statement before unchecked `finally` cleanup, so no expiry hazard.
   - `test-results/` is gitignored (`.gitignore:52`) — cannot be accidentally committed.
-- phase 3 M4 head escaping + URL scheme gate: pending — **HUMAN GATE**
+- phase 3 M4 head escaping + URL scheme gate: **done** (commit `6de19d7c`, 1 review loop, `ship`)
+  — **AWAITING FOUNDER SIGN-OFF at the HUMAN GATE** before phase 4 starts.
+  - Tests 3560 → 3586 (+26). tsc 0 errors. Snapshot guard `uiFoundationIsolation.test.tsx.snap`
+    verified byte-identical to phase 1 (`git diff f2776e18 6de19d7c` on it = EMPTY) — NOT re-recorded,
+    and NOT swept into the commit (9 files, snap absent).
+  - **Fix-sensitivity MEASURED by reviewer** (not reasoned): reverting `htmlGenerator.ts` +
+    `buildPageMetadata.ts` to HEAD → **16 of the new tests fail**; restored byte-exact (`diff -q`
+    clean) → 129 passed. No third dud found (hunted; the run's earlier two are documented above).
+  - **Samples file verified GENUINE by reviewer** — regenerated both fixtures through the real
+    `generateStaticHTML()`; markdown matches output BYTE-FOR-BYTE. `HAS_LIVE_SCRIPT: false`,
+    `HAS_JS_SCHEME: false`, `BENIGN_DOUBLE_ESCAPE: false`. This was the highest-risk artifact (the
+    founder signs it) — a hand-written sample flattering the fix would have been the worst outcome.
+  - Reviewer STRENGTHENED our reasoning: entity-encoded `&#106;avascript:` doesn't merely get escaped
+    on output — it **fails the allow-list outright** (doesn't start with `/`, `http://`, `https://`),
+    so the defense does NOT depend on escape ordering. Audit understated itself.
+  - Non-blocking, deliberately NOT fixed (recorded for follow-up):
+    1. `htmlGenerator.ts:373` gates the og merge ONCE, not per-candidate: passes
+       `ogImageOverride || previewImage` into `resolveOgImage`'s single slot, so an unsafe
+       `ogImageOverride` shadows a BENIGN `previewImage` → auto `/api/og`, whereas
+       `buildPageMetadata.ts:169-171` merge-point gating would fall through to `previewImage`.
+       **Both outcomes SAFE** — the paths just disagree on which fallback wins. Align later.
+    2. `isSafeURL` accepts `http://` + root-relative for og:image (mixed-content-ish; relative isn't
+       scraper-resolvable). Both are PRE-EXISTING `previewImage` behaviors the gate deliberately preserves.
+    3. Plan file carries a literal NUL byte (a `java\0script:` test notation in prose) → grep-hostile.
+       **Pre-existing at HEAD** (`git show HEAD:` has exactly 1 NUL too), not introduced here.
+- phase 4 M5 — **RESCOPED to option C by orchestrator decision 2026-07-17** (mailbox
+  `.claude/mailbox/publish-trust.md`). GATE RESOLVED — no separate sign-off needed, the decision IS it.
+  Status: in progress.
+
+### ⚠️ M5's PREMISE IS FALSE — the spec was wrong (found at implement, 2026-07-17)
+
+**The dead glob is real** (`buildPublishedCSS.js:26` `src/modules/UIBlocks/**` → removed dir, ZERO
+matches). **The consequence is not.** Every `className` token across the 155 would-be-globbed files:
+**1302 tokens, ZERO Tailwind utilities** — all BEM (`mrd-hep__headline`, `wk-faq__in`, `sg-services-grid`).
+Template/skeleton/sharedBlock published blocks are styled by **inline `<style>` blocks they ship
+themselves** + CSS vars (`tokens.ts`/`ThemeInjector`/`SSRTokens`) — **never by `published.css`**.
+
+→ **The spec's acceptance criterion is UNMEETABLE** ("a Tailwind class used only in a template/shared
+published block survives the build…") — **no such class exists.** Not degrading live pages. The glob
+rotted unnoticed for months *precisely because* the dirs it should have pointed at contribute nothing.
+
+Implementing as specced would have shipped **~10KB of DEAD CSS to every customer page** (32,031 →
+42,482 B, +32.6%) and bumped the sha baseline to bless it:
+- the 91 "newly present" classes are **scanner artifacts** — Tailwind's extractor is a regex over raw
+  text: `uppercase`/`italic` matched `text-transform: uppercase;` INSIDE the inline `<style>` blocks;
+  `sticky`/`lowercase` matched **code comments**;
+- **~90% of growth = ONE editor-only file** — `Design/ColorSystem/accentOptions.ts` (+9,369 B), the
+  **editor's** accent-picker data table (`bg-orange-500`…). Published pages never use it.
+
+**The implementer REFUSED to dress a false positive up as the human-gate "money shot" and escalated
+instead. That refusal is what caught this.** Orchestrator independently re-verified and hit the SAME
+trap that likely created the false premise: a grep for Tailwind in template blocks returned 5 "hits",
+all false — `\bgrid\b` matches INSIDE `mrd-features-grid` (hyphens are word boundaries).
+
+**How it survived:** spec (from `docs/reports/code-quality-report.md`) → scout → plan → 2 plan-reviews
+→ orchestrator check. Everyone reasoned about **the glob**; nobody checked **what the globbed files
+contain** until an implementer was forced to produce concrete missing→present evidence and couldn't.
+M3 + M4 from the same report were accurate — M5 alone inferred consequences that don't hold.
+**LESSON: demand the artifact, not the argument.**
+
+### Decision: option C (guards only) — A and B REJECTED
+
+Ship: dead-glob removal + **guard 1 (per-glob zero-match `exit 1` naming the glob)** + **guard 3
+(app-chrome 0-leak)**. **NO** `templates/**`/`skeletons/**`/`sharedBlocks/**`/`Design/**`/
+`staticExport/*` globs. **NO sha bump** → `published.css` stays byte-identical at 32,031 B,
+`uiFoundationIsolation.test.tsx` stays green untouched, phase-4 gate risk surface GONE.
+Guards 2 (markers) + 4 (size cap) dropped — not in the decision, both were placeholders.
+
+**Why A ("+1,082 B forward insurance") was rejected — better reasoning than the orchestrator's own
+recommendation:** it would insure a path that **SHOULDN'T EXIST**. Tailwind utilities in published
+blocks *contradict* the inline+BEM convention. The right forward protection is a **LINT RULE
+forbidding them** (backlog #30), not globbing junk in to make the wrong thing work. Enforce the
+boundary; don't accommodate its violation.
+
+Guard 1 proven against the historical dead path:
+```
+❌ Published CSS content glob(s) matched ZERO files:
+   - src/modules/UIBlocks/**/*.published.tsx
+EXIT=1
+```
+
+**Backlog (orchestrator logged #30/#31, NOT this bundle):** lint rule forbidding Tailwind utilities in
+`*.published.tsx` template/skeleton/sharedBlock files; safelist shrink (L31-208), now guard-backstopped.
+
+**Merge context (orchestrator):** this is **deploy #2 (security tier)**, NOT the big-bang. Park at the
+merge gate. **Merge order: S1 `billing-correctness` FIRST; publish-trust any time after.**
 - phase 4 M5 published-CSS globs + in-script guards + sha baseline bump: pending
 - phase 5 integration verification + gates sweep: pending
 

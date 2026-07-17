@@ -581,3 +581,185 @@ Benign: identical except `&` → `&amp;` in attributes, no `&amp;amp;`. Hostile:
   needs a CSS-value validator. `localeJson` U+2028/29 (pre-ES2019 engines only). `jsonLd` verified
   already breakout-safe via `structuredData.ts:70`.
 - Not committed; tree left dirty as instructed. Phases 4-5 not touched.
+
+---
+
+## Phase 4 — M5: published-CSS guards (**shipped as option C: guards only, no new globs, no sha bump**)
+
+**STATUS: DONE.** Phase 4 was escalated mid-flight because M5's premise was false (evidence below,
+retained — it is the valuable part of this entry). The founder/orchestrator ruled **option C**:
+in-script guards + the dead-glob cleanup only. **A and B were rejected.** No new template globs, no
+artifact change, no baseline bump.
+
+### Files changed
+- `scripts/buildPublishedCSS.js` — removed the dead `src/modules/UIBlocks/**/*.published.tsx` glob;
+  added guard 1 (per-glob zero-match hard fail) + guard 2 (app-chrome 0-leak). Guard numbering
+  renumbered 1-2 after the placeholder guards were dropped.
+- `docs/task/publish-trust.audit.md` — this entry.
+- **NOT touched (verified unmodified):** `public/published.css`,
+  `src/modules/generatedLanding/__fixtures__/published-css.sha256`.
+
+### What shipped (option C, exactly)
+1. **Removed** the dead glob `src/modules/UIBlocks/**/*.published.tsx` (dir removed long ago → 0
+   matches). This is the one real piece of M5 cleanup.
+2. **Kept** the 3 live globs: `src/components/published/**/*.tsx`,
+   `LandingPagePublishedRenderer.tsx`, `componentRegistry.published.ts`.
+3. **Reverted all 16 added globs** (`templates/**`, `skeletons/**`, `sharedBlocks/**`, `Design/**`,
+   `staticExport/*`). Rationale on record below.
+4. **Guard 1 — per-glob zero-match hard fail.** Each content glob resolved via `fast-glob`; any glob
+   matching 0 files → `exit 1` naming that glob. Phase 4's durable value: it would have caught the
+   original rot, which aggregate/size checks did not.
+5. **Guard 2 — app-chrome 0-leak.** Output must contain none of (case-insensitive) `onest`, `caveat`,
+   `material symbols`, `app-primary`, `app-cta`, `app-ink` → else `exit 1`. Pins the ui-foundation
+   isolation contract at build time.
+6. **Dropped the placeholder guards** (marker classes `[]`, size cap) entirely — no `[]` stubs, no
+   dead cap code left behind. The pre-existing `>100KB` warn was restored verbatim to its committed
+   form (a prior edit had replaced it with the placeholder cap); its prose is still factually correct
+   (target <50KB, actual 31.28KB).
+
+### Why A and B were rejected — the false premise (evidence retained)
+
+Applying the plan's 19-glob set took the artifact from **32,031 B → 42,482 B** (+32.6%). The delta is
+**entirely false-positive junk**, not recovered block styling:
+
+1. **Templates / skeletons / sharedBlocks use NO Tailwind utilities.** Every `className` token across
+   all 155 newly-globbed block files: **1302 tokens, 0 Tailwind utilities** — all BEM
+   (`mrd-hero__grid`, `wk-faq__in`, `lg-lead__btn`, `lm-btn-brass`…). These blocks are styled by
+   **inline `<style>` + CSS custom properties the templates ship themselves**, not by `published.css`.
+   **There is no purge bug.**
+2. **The 91 "newly present" classes are scanner artifacts.** `uppercase`/`italic`/`text-wrap` matched
+   CSS *property* text inside those inline `<style>` strings (`text-transform: uppercase;`).
+   `sticky`/`lowercase` matched **code comments**. Tailwind's extractor is a regex over raw file text.
+3. **~90% of the growth was one editor-only file.** `Design/**/*.ts` alone = **+9,369 B**, essentially
+   all from `Design/ColorSystem/accentOptions.ts`, a class-name data table for the **editor's** accent
+   picker. Published pages never use them.
+
+**Ruling rationale:** option A's "forward insurance" would insure a path that **shouldn't exist** —
+Tailwind utilities in published blocks contradict the inline+BEM convention. The right protection is a
+**lint rule enforcing that convention**, logged to **backlog #30**, not this bundle. Option B would
+ship ~10KB of dead CSS to every customer page and bump the sha to bless it.
+
+Why the safelist has been carrying the load: `src/components/published/**` + the safelist really are
+the only Tailwind consumers on a published page. The dead glob rotted unnoticed for months precisely
+because the dir it pointed at contributes nothing to Tailwind.
+
+### Verification (real output)
+
+**Byte-identical artifact proof — the phase's key gate.** Removing a zero-match glob changes nothing,
+as predicted:
+
+```
+✅ All 3 content globs match at least one file
+✅ Published CSS generated: 31.28 KB
+✨ CSS size within target range (<50KB)
+✅ No app-chrome leakage
+✅ Published CSS build complete!
+
+$ sha256sum public/published.css
+c2f87e08f517a72b43f6e9e0e9b703b6261f4f152c711be9241649c6f26219b6 *public/published.css
+$ wc -c < public/published.css
+32031
+$ git status --short          # public/published.css ABSENT => unmodified
+ M docs/task/publish-trust.audit.md
+ M docs/task/publish-trust.plan.md
+ M scripts/buildPublishedCSS.js
+```
+
+Matches the committed artifact exactly (sha `c2f87e08…`, 32,031 B). Premise re-confirmed: none of the
+reverted globs were contributing.
+
+**Guard 1 negative spot-check** — `src/components/published/**/*.tsx` temporarily repointed at a
+nonexistent path, then restored (file diffed IDENTICAL to backup afterwards):
+
+```
+🎨 Building published.css...
+❌ Published CSS content glob(s) matched ZERO files:
+   - src/components/does-not-exist/**/*.tsx
+   A dead glob silently purges every class in that directory from published.css
+   (editor looks right, published page is unstyled). Fix or remove the glob.
+EXIT=1
+```
+
+**Gates:**
+- `npm run build` (full: build:published-css → build:assets → next build) → **exit 0**.
+- `npm run test:run` → **211 files passed | 1 skipped; 3586 passed | 18 skipped** — exactly the
+  baseline. `uiFoundationIsolation.test.tsx` sha case passes against the UNCHANGED fixture, no edits.
+- `npx tsc --noEmit` → **0 errors**.
+- `npm run lint` → **0 errors** (only pre-existing warnings: `no-img-element`, `exhaustive-deps`).
+- `test:e2e` NOT run per instruction (orchestrator has it green at 73/0).
+- The snapshot LF-rewrite noise did not reproduce this run — `git status` is clean of it.
+
+### Deviations
+- **Restored the `>100KB` warn.** The prior (escalated) edit had deleted it in favour of the
+  placeholder guard-4 cap. The decision said leave it as-is, so I put the committed version back
+  verbatim rather than leaving it deleted. Conservative; no new cap invented.
+- **Guard renumbering.** With placeholder guards 2 and 4 dropped, the surviving guards are numbered
+  1-2 in-script (the decision's "guard 1" and "guard 3"). Comment-only.
+- Did not touch the safelist (out of scope, per plan).
+
+### Open risks / must-know
+- **`fast-glob` is a transitive dep, not a direct one** (resolves via Tailwind's own dependency).
+  Guard 1 would break with a "cannot find module" if Tailwind ever drops it. Adding it to
+  `package.json` was outside this phase's Files-touched list, so I did not. Cheap follow-up.
+- The M5 *defect class* is genuine (a dead glob purges silently); the *blast radius today* is nil.
+  Guard 1 is the durable value of this phase.
+- **Backlog #30** (lint rule: no Tailwind utilities in published blocks) is the real protection for
+  the inline+BEM convention — this phase deliberately does not provide it.
+- Follow-up (unchanged): safelist shrink — now better motivated, since the safelist is demonstrably
+  the only thing styling published pages beyond `components/published/**`.
+
+## Phase 4 (hardening)
+
+Three non-blocking polish fixes from the phase-4 review (verdict was `ship`), folded in by
+orchestrator decision. Scope: guards only — no template globs, no sha bump, no safelist change.
+
+### Files changed
+- `scripts/buildPublishedCSS.js`
+- `docs/task/publish-trust.audit.md` (this note)
+
+### What changed
+1. **Failed build no longer orphans temp files.** Guard 2 (app-chrome 0-leak) ran
+   `process.exit(1)` *after* `tailwind.published.config.js` + `published.input.css` were written,
+   skipping both the inline `unlinkSync` cleanup and the `catch`'s cleanup → a failed build left two
+   untracked, non-gitignored files in the repo root. Now it `throw`s instead, so the existing
+   `catch` cleans up; exit stays non-zero and the message still names the offending token.
+   Guard 1 untouched (it runs before the temp files exist).
+2. **Dropped the `fast-glob` transitive-dep fragility.** Guard 1 now uses `require('glob')`
+   (`globSync`) — `glob@^11.0.3` is already a DIRECT dep (`package.json:58`); `fast-glob` only
+   resolved via Tailwind's dep tree. Zero new deps; `package.json` unmodified. Verified the swap is
+   semantics-preserving: per-glob counts are **identical** to `fast-glob` for all 3 live globs
+   (12 / 1 / 1) *and* for the removed dead `UIBlocks/**` glob (0 / 0).
+3. **Guard 2 now word-boundary matches.** It substring-matched the whole lowercased file, so
+   `onest` would false-positive on a future class containing it (`honest`), likewise `caveat`.
+   Now per-token `\b…\b` with regex-escaping. `\b` matches across `-` and ` `, so `app-cta` and
+   `material symbols` keep working. Over-matching, never under-matching → failure direction stays safe.
+
+### Verification (all real output)
+- `npm run build` → exit 0. `public/published.css` **byte-identical**:
+  sha256 `c2f87e08f517a72b43f6e9e0e9b703b6261f4f152c711be9241649c6f26219b6`, 32,031 B, and ABSENT
+  from `git status`.
+- `npm run test:run` → **3586 passed | 18 skipped** (baseline exact).
+- `npx tsc --noEmit` → 0 errors. `npm run lint` → 0 errors (pre-existing warnings only).
+- **Negative spot-check, guard 1** (glob → nonexistent path): exit 1, names
+  `src/components/published/DOES_NOT_EXIST/**/*.tsx`. Restored byte-exact (`diff` clean).
+  Confirms per-glob zero-match detection survives the glob-v11 swap.
+- **Negative spot-check, guard 2** (deliberately non-vacuous — probe token `tw-border-spacing-x` is
+  *provably present* in the output, 2 occurrences, unlike a safelisted class that emits no CSS):
+  exit 1, `❌ Build failed: App-chrome token(s) leaked into published.css: tw-border-spacing-x`,
+  and **both temp files absent afterwards** (`ls` → no such file), tree clean, sha unchanged.
+  Restored byte-exact.
+- **Word-boundary semantics proof** (7/7 pass, same expression as the script): `.honest-review{}`
+  and `.uncaveated{}` → no match (the old substring guard false-positived on the first);
+  `Onest` / `"Material Symbols Outlined"` / `--app-cta` / `.text-app-ink` / `--app-primary`+`Caveat`
+  → all still caught.
+- `test:e2e` NOT run (orchestrator has it green at 73/0).
+
+### Deviations
+- None.
+
+### Open risks / must-know
+- The `fast-glob` risk logged in phase 4's "Open risks" above is now **resolved** — no
+  `package.json` change was needed after all, since `glob` was already direct.
+- Guard 2 fires *after* `public/published.css` is written, so a genuine leak leaves the leaked CSS
+  on disk (build still fails non-zero). Not new, not in scope; noting it since the temp-file fix
+  invites the question. Only the temp files are cleaned on failure.
