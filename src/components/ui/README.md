@@ -144,13 +144,13 @@ Tabs / segmented-control / toast are **headless, in-house — no new npm deps** 
 
 | File | Usage |
 |---|---|
-| `popover.tsx` | **Two layers.** Stock `Popover`/`PopoverTrigger`/`PopoverContent`/`PopoverAnchor` = untouched shadcn (live consumers: `LinkTargetPopover`, the 3 theme popovers). App-chrome = `AppPopoverMenu` (menu list) / `AppPopoverPanel` (panel) + `AppPopoverItem`/`AppPopoverLabel`/`AppPopoverSeparator`. |
+| `popover.tsx` | **Two layers.** Stock `Popover`/`PopoverTrigger`/`PopoverContent`/`PopoverAnchor` = untouched shadcn (live consumers: `LinkPicker`, the 3 theme popovers). App-chrome = `AppPopoverMenu` (menu list) / `AppPopoverPanel` (panel) + `AppPopoverItem`/`AppPopoverLabel`/`AppPopoverSeparator`. |
 | `tooltip.tsx` | **Two layers.** Stock `Tooltip` (= Radix Root) / `TooltipTrigger` / `TooltipContent` / `TooltipProvider` = untouched (consumers: `preview/[token]/page.tsx`, `modules/Design/ColorSystem/VariableModeIndicators.tsx`). App-chrome = `AppTooltip` (self-providing wrapper) + `AppTooltipContent`. |
 | `spinner.tsx` | `<Spinner size={40} thickness={3} />` ring spinner (t17 state B); `animate-app-spin`, reduced-motion aware. |
 
 > **Why two layers, not a reskin:** the stock popover/tooltip predate ui-foundation and
 > have live call sites outside the editor shell. Restyling them in place would silently
-> change `LinkTargetPopover` (out of scope) and push app-chrome styling into a
+> change `LinkPicker` (out of scope) and push app-chrome styling into a
 > `modules/Design` component (forbidden — see Isolation above). `Tooltip` is also the
 > Radix *Root* export, so redefining it as a wrapper would break existing call sites.
 > **Consume the `App*` parts for app chrome; leave the stock parts alone.**

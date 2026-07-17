@@ -9,7 +9,7 @@ import React from 'react';
 import { Facebook, Linkedin, Youtube, MessageCircle } from 'lucide-react';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import { useEditStore } from '@/hooks/useEditStore';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
@@ -174,7 +174,7 @@ export default function TechPremiumFooter({ sectionId }: Props) {
                 {(col.links || []).map((link, i) => edit ? (
                   <li key={link.id || i}>
                     <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey={`footer_columns_link_${col.id}_${i}`} value={link.label} onSave={(v) => patchLink(col.id, i, { label: v })} enterBehavior="save" placeholder="Link" />
-                    <LinkTargetPopover value={link.href ?? '#'} sectionOptions={sectionOptions} pageOptions={pageOptions} onChange={(link2) => patchLink(col.id, i, { href: link2 })} triggerClassName="tp-footer__link-cfg" />
+                    <LinkPicker value={link.href ?? '#'} sectionOptions={sectionOptions} pageOptions={pageOptions} onChange={(link2) => patchLink(col.id, i, { href: link2 })} triggerClassName="tp-footer__link-cfg" />
                     {(col.links || []).length > 1 && <button type="button" className="tp-footer__link-remove" onClick={() => removeLink(col.id, i)} aria-label="Remove link">×</button>}
                   </li>
                 ) : (

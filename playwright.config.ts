@@ -71,6 +71,10 @@ export default defineConfig({
         // work-onboarding-shell: the journey needs a Clerk session (seeded via
         // the real /api/start + /api/brief/confirm routes).
         /work-onboarding\.spec\.ts/,
+        // toolbar-standard-beta: seeded editor project + Clerk session.
+        /toolbar-dispatch\.spec\.ts/,
+        /link-picker\.spec\.ts/,
+        /manage-items\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },

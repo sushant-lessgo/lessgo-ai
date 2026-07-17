@@ -1,31 +1,45 @@
 'use client';
 
-// src/components/editor/LinkTargetPopover.tsx
-// scale-04 — ONE shared inline editor control for setting a nav/footer link's
-// target. Replaces the 6 byte-for-byte-identical per-template copies
-// (meridian/techpremium/vestria/surge/lumen/granth) that existed before.
+// src/components/editor/LinkPicker.tsx
+// toolbar-standard-beta phase 3 (t4) — THE shared link-target picker. Replaces
+// `LinkTargetPopover` at all 15 edit-side mounts across 14 files (nav headers,
+// footers — LumenFooter has 2 — and the atelier/vestria/granth/work-skeleton
+// editPrimitives `E.Link`).
 //
-// Modes:
-//   - "Scroll to section": pick an on-page section → Destination { kind: 'section' } (manual)
-//   - "Link" (derived):    pick a page / legal / social target → Destination + source:'derived'
-//   - "Custom URL":        type any url → parsed by toDestination (external / call / …) (manual)
+// EMISSION CONTRACT — DO NOT DRIFT. Every published counterpart reads the href
+// this writes, so the emitted `Link` shape is load-bearing and is pinned by a
+// parity test (`LinkPicker.test.tsx`) whose expected payloads were validated
+// DIFFERENTIALLY against `LinkTargetPopover` while both components still existed:
+//   - section anchor / custom URL → { dest, source: 'manual'  }
+//   - page / legal / social pick  → { dest, source: 'derived' }
+// `emitManual` / `emitDerived` below are carried over from the popover verbatim.
+// Derived picks come from a SITE SOURCE (sitemap pages, the legal privacy page,
+// site-level social profiles): they are never goal-referencing and a goal change
+// never moves them (scale-04 phase-6 acceptance).
 //
-// It emits a `Link` object — `onChange(link: Link)`. Hand-typed / on-page picks
-// are `source: 'manual'`; picks from a SITE SOURCE (sitemap pages, the legal
-// privacy page, site-level social profiles) are `source: 'derived'` — they are
-// never goal-referencing and a goal change never moves them (phase-6 acceptance).
-// Callers whose stored field is a plain string convert with
-// `resolveDestination(link.dest)`.
-//
-// The incoming `value` is read as `string | Link` (old saved pages pass a raw
-// string href) via `toDestination`, so the popover opens on the right mode either
-// way. Section anchors come from buildSectionLinkOptions; pages from
+// The incoming `value` is dual-read as `string | Link` (old saved pages pass a
+// raw string href) via `toDestination`, so the picker opens on the right mode
+// either way. Section anchors come from buildSectionLinkOptions; pages from
 // buildPageLinkOptions — matching the ids/paths the renderers emit.
+//
+// SCOPE NOTES (toolbar-standard-beta plan):
+//   - NO "open in new tab" switch (ruling 1). `Link` has no newTab field —
+//     new-tab is DERIVED at render by `externalLinkProps` (external ⇒ _blank).
+//     A stored toggle would need both published renderers to read a new field.
+//   - The handoff's Done / Cancel / Remove footer is NOT built. The popover
+//     emitted LIVE on every select/keystroke and all 14 mounts persist on that
+//     callback; a commit-on-Done model would change when every one of them
+//     saves. "Remove" is likewise unexpressible — `Link` has no empty dest.
+//   - No controlled `open`/`onOpenChange` or trigger-less mode: the plan listed
+//     them for shell-mounted toolbar use, which is BLOCKED this phase (see the
+//     audit). Unused API is the trap that killed the dead nav editors (ruling 3)
+//     — it lands in the phase that has a consumer.
 
 import React, { useState } from 'react';
 import { Link2 } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import type { Link } from '@/types/destination';
 import { toDestination } from '@/utils/destinationShim';
 import { resolveDestination } from '@/utils/resolveCtaHref';
@@ -35,7 +49,7 @@ export interface SectionOption {
   label: string; // e.g. "Pricing"
 }
 
-interface LinkTargetPopoverProps {
+interface LinkPickerProps {
   /** Current target — a raw href string (legacy) OR a Link object (new writes). */
   value: string | Link;
   sectionOptions: SectionOption[];
@@ -54,7 +68,9 @@ function toHref(value: string | Link): string {
   return dest && dest !== 'GOAL_REF' ? resolveDestination(dest) : '';
 }
 
-export function LinkTargetPopover({
+type Mode = 'section' | 'url' | 'derived';
+
+export function LinkPicker({
   value,
   sectionOptions,
   pageOptions = [],
@@ -62,7 +78,7 @@ export function LinkTargetPopover({
   socialOptions = [],
   onChange,
   triggerClassName,
-}: LinkTargetPopoverProps) {
+}: LinkPickerProps) {
   const href = toHref(value);
   const isSectionHref = !!href && href.startsWith('#');
 
@@ -81,7 +97,7 @@ export function LinkTargetPopover({
   );
   const isDerivedHref = !!href && derivedValues.has(href);
 
-  const [mode, setMode] = useState<'section' | 'url' | 'derived'>(
+  const [mode, setMode] = useState<Mode>(
     isSectionHref || !href || href === '#'
       ? 'section'
       : isDerivedHref && hasDerived
@@ -117,10 +133,12 @@ export function LinkTargetPopover({
     onChange({ dest: { kind: 'page', pathSlug: rawValue }, source: 'derived' });
   };
 
-  // Footers pass only page options → keep the familiar "Link to page" label; the
-  // nav headers add legal/social → generic "Link".
-  const derivedLabel =
-    legalOptions.length || socialOptions.length ? 'Link' : 'Link to page';
+  // Footers pass only page options → keep the familiar "Page" label; the nav
+  // headers add legal/social → generic "Link".
+  const derivedLabel = legalOptions.length || socialOptions.length ? 'Link' : 'Page';
+
+  const selectClassName =
+    'w-full rounded-[11px] border border-[#e6e6ec] bg-white px-[13px] py-[11px] text-[13px] font-medium text-[#191922] focus:outline-none focus:ring-1 focus:ring-[#006CFF]';
 
   return (
     <Popover>
@@ -138,43 +156,41 @@ export function LinkTargetPopover({
           <Link2 size={14} />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-64 text-sm">
-        <div className="space-y-3">
-          <div className="flex gap-3 text-xs font-medium">
-            <label className="flex items-center gap-1.5 cursor-pointer">
-              <input
-                type="radio"
-                name="link-target-mode"
-                checked={mode === 'section'}
-                onChange={() => setMode('section')}
-              />
-              Scroll to section
-            </label>
-            {hasDerived && (
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="radio"
-                  name="link-target-mode"
-                  checked={mode === 'derived'}
-                  onChange={() => setMode('derived')}
-                />
-                {derivedLabel}
-              </label>
-            )}
-            <label className="flex items-center gap-1.5 cursor-pointer">
-              <input
-                type="radio"
-                name="link-target-mode"
-                checked={mode === 'url'}
-                onChange={() => setMode('url')}
-              />
-              Custom URL
-            </label>
-          </div>
+      <PopoverContent
+        align="start"
+        className="w-[284px] overflow-hidden rounded-[16px] border-[#e6e6ec] p-0 shadow-[0_24px_54px_-16px_rgba(20,20,40,.32)]"
+        data-testid="link-picker"
+      >
+        {/* header */}
+        <div className="px-4 pb-[14px] pt-4 leading-[1.3]">
+          <div className="text-[15px] font-semibold text-[#191922]">Link</div>
+          <div className="mt-px text-[11.5px] text-[#a6a6b0]">Where should this go?</div>
+        </div>
 
+        {/* type: text segmented (ui-foundation primitive) */}
+        <div className="px-4 pb-[14px]">
+          <SegmentedControl
+            aria-label="Link type"
+            className="flex w-full [&>button]:flex-1 [&>button]:justify-center"
+            value={mode}
+            onValueChange={(v) => setMode(v as Mode)}
+            options={[
+              { value: 'section', label: 'Section' },
+              ...(hasDerived ? [{ value: 'derived', label: derivedLabel }] : []),
+              { value: 'url', label: 'Web' },
+            ]}
+          />
+        </div>
+
+        {/* destination field */}
+        <div className="px-4 pb-4">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-[.09em] text-[#a6a6b0]">
+            Destination
+          </div>
           {mode === 'section' ? (
             <select
-              className="w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              aria-label="Choose section"
+              className={selectClassName}
               value={sectionOptions.some((o) => o.value === selectedSection) ? selectedSection : ''}
               onChange={(e) => emitManual(e.target.value)}
             >
@@ -189,7 +205,8 @@ export function LinkTargetPopover({
             </select>
           ) : mode === 'derived' ? (
             <select
-              className="w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              aria-label="Choose target"
+              className={selectClassName}
               value={derivedValues.has(selectedDerived) ? selectedDerived : ''}
               onChange={(e) => emitDerived(e.target.value)}
             >
@@ -227,7 +244,9 @@ export function LinkTargetPopover({
           ) : (
             <Input
               type="text"
+              aria-label="Custom URL"
               placeholder="https://…"
+              className="h-auto rounded-[11px] border-[#e6e6ec] px-[13px] py-[11px] text-[13px]"
               value={urlDraft}
               onChange={(e) => {
                 setUrlDraft(e.target.value);
@@ -241,4 +260,4 @@ export function LinkTargetPopover({
   );
 }
 
-export default LinkTargetPopover;
+export default LinkPicker;

@@ -9,7 +9,7 @@
 import React from 'react';
 import { useTechPremiumBlock } from '../../hooks/useTechPremiumBlock';
 import { TechPremiumEditable } from '../../components/TechPremiumEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import { useEditStore } from '@/hooks/useEditStore';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions, deriveNavLinks } from '@/utils/pageLinks';
@@ -124,7 +124,7 @@ export default function TechPremiumNav({ sectionId }: Props) {
                     <TechPremiumEditable as="span" mode={mode} sectionId={sectionId} elementKey={`nav_items_label_${item.id}`} value={item.label} onSave={(v) => patchItem(item.id, { label: v })} enterBehavior="save" placeholder="Link" />
                     {edit && (
                       <>
-                        <LinkTargetPopover value={item.href ?? '#'} sectionOptions={sectionOptions} pageOptions={pageOptions} legalOptions={legalOptions} socialOptions={socialOptions} onChange={(link) => patchItem(item.id, { href: link })} triggerClassName="tp-nav-edit-x" />
+                        <LinkPicker value={item.href ?? '#'} sectionOptions={sectionOptions} pageOptions={pageOptions} legalOptions={legalOptions} socialOptions={socialOptions} onChange={(link) => patchItem(item.id, { href: link })} triggerClassName="tp-nav-edit-x" />
                         <button type="button" className="tp-nav-edit-add" onClick={() => { addChild(item.id); setOpenDrop(item.id); }} title="Make dropdown">▾</button>
                         {navItems.length > 2 && <button type="button" className="tp-nav-edit-x" onClick={() => removeItem(item.id)} aria-label="Remove">×</button>}
                       </>
