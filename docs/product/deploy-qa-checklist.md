@@ -34,7 +34,7 @@
 - [ ] **E2 (when it merges)** — pilots on `atelier2` only, merges ZERO prod-reachable behavior (D7b); real reveal QA comes with the atelier-cutover, not here.
 
 ## D. Toolbar-found 🔴 defects — fix or consciously accept before push
-- [ ] **Published HTML never sanitized** — `sanitizeHtmlContent` imported (`publish/route.ts:9`) never called; whole sanitize layer dead. (Security. "Not free" — `STRICT_PROFILE` lacks `<a>`/`href`.)
+- [ ] **Published HTML never sanitized** — stored-XSS hole (64 published blocks inject raw user HTML; `sanitizeHtmlContent` imported `publish/route.ts:9` never called). **NOW SPECCED → `docs/task/publish-sanitize.spec.md`** (full tier, clean-at-publish, real DOM sanitizer). Includes a preview-deploy XSS payload smoke (§A). Build + verify before push.
 - [ ] **`GlobalButtonConfigModal` mounted twice** (`EditLayout.tsx:223` + `GlobalModals.tsx:99`) — Radix cross-aria-hides → screen readers get no dialog + pointer interception. (A11y.)
 - [ ] **`convertCTAToForm` live crash** (`uiActions.ts:489`, via `MainContent.tsx:320`) — writes phantom `state.forms.formBuilder.visible` → TypeError. (Phase 2 fixed the dead sibling, left this live one.)
 - [ ] Flake — `e2e/link-picker.spec.ts:150` (combined runs).
