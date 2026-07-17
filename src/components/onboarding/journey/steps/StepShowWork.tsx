@@ -3,31 +3,55 @@
 // ============================================================================
 // STEP 02 — show-work. AGNOSTIC FRAME.
 //
-// Renders `seam.steps.showWork` (title / body / icon) and nothing else: the
-// frame never knows what an engine's "work" looks like.
+// Renders the engine's step body when the seam supplies one (`showWork.loadStep`,
+// D9) via `React.lazy`, else the shared non-functional stub. The frame NEVER
+// knows what an engine's "work" looks like — engine-specific code (upload,
+// EXIF, grouping) lives behind the lazy import, which is invoked HERE at render
+// time (post-confirm) and so stays off the pre-confirm entry bundle.
 //
-// ── E1 SCOPE (deliberate, do not "finish" it) ───────────────────────────────
-// This is a NON-FUNCTIONAL dropzone-styled STUB + "Skip for now". There is no
-// upload pipeline and no scrape here — image INGESTION is E2, and it is what
-// will write `facts.work.groups[].photos` (the payload the rail's chip-id join
-// already protects). Rendering the seam's content as a stub is an E1
-// implementation choice, NOT a contract field (`stub:true` was deliberately
-// kept out of `engines/types.ts`).
+// ── SEAM SHAPE (do not "finish" the stub) ───────────────────────────────────
+// `loadStep` is OPTIONAL: an engine without a real STEP 02 keeps the stub. The
+// work engine (E2) supplies a loader; thing/trust do not, so they render the
+// stub verbatim — the frame is unchanged for them.
 // ============================================================================
 
+import { lazy, Suspense, useMemo } from 'react';
 import { useWizardStore, selectSetJourneyStep } from '@/hooks/useWizardStore';
 import { AppIcon } from '@/components/ui/icon';
 import { ImagePlaceholder } from '@/components/ui/image-placeholder';
 import { Button } from '@/components/ui/button';
 import type { JourneyStepProps } from '../JourneyShell';
 
-export default function StepShowWork({ seam }: JourneyStepProps) {
+export default function StepShowWork(props: JourneyStepProps) {
+  const { seam } = props;
   const setJourneyStep = useWizardStore(selectSetJourneyStep);
   // The shell resolves the seam ONCE and passes it down (P5 folded away the
   // per-step `useJourneySeam` hook) — so there is no `seam === null` frame here
   // and this headline never paints empty before its content arrives.
   const content = seam.steps.showWork;
 
+  // When the engine supplies a real body, render it via React.lazy. Memoized on
+  // the loader identity so the lazy component is created once per seam.
+  const LazyBody = useMemo(
+    () => (content.loadStep ? lazy(content.loadStep) : null),
+    [content.loadStep]
+  );
+
+  if (LazyBody) {
+    return (
+      <Suspense
+        fallback={
+          <p className="font-app-sans text-sm text-app-muted" role="status">
+            Loading…
+          </p>
+        }
+      >
+        <LazyBody {...props} />
+      </Suspense>
+    );
+  }
+
+  // ── The shared stub (engines without a real STEP 02) ──────────────────────
   return (
     <div data-testid="step-show-work" data-journey-step={2} className="space-y-6">
       <div className="space-y-2">

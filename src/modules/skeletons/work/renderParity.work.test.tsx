@@ -66,7 +66,7 @@ function visibleText(html: string): string {
 
 // Fixture keys that are NOT visible copy (attributes, media, icon names, flags).
 const NON_VISIBLE_KEY =
-  /(^id$|icon|href|image|video|placeholder|^featured$|is_featured|form_ref|form_id|^layout$|network|^price_mode$|^contact_method$|number$|^mode$|^platform$)/i;
+  /(^id$|icon|href|image|video|placeholder|^featured$|is_featured|form_ref|form_id|^layout$|network|^price_mode$|^contact_method$|number$|^mode$|^platform$|url|^cover$)/i;
 
 /** Collect { key, text } pairs of visible copy from a fixture content object. */
 function visibleFields(obj: Record<string, any>, prefix = ''): Array<{ key: string; text: string }> {

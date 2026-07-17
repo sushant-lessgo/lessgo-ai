@@ -398,6 +398,35 @@ const workdetailContract: UIBlockSchemaV2 = {
   },
 };
 
+// `/works` catalog index — the auto-listing block that fronts the works
+// collection (COLLECTIONS.works.catalogSectionType = 'workcatalog'). ADDITIVE
+// (work-onboarding-ingestion E2 / phase 2): this is collection MACHINERY, not a
+// member of the frozen must/optional section FREEZE — the freeze is untouched.
+// `items` are MATERIALIZED at assemble time from the works entries (name / cover /
+// href) — never authored here (fillMode:'system'). Field names mirror the generic
+// catalog slice (headline/lede, items.name/cover/href).
+const workcatalogContract: UIBlockSchemaV2 = {
+  sectionType: COLLECTIONS.works.catalogSectionType, // 'workcatalog'
+  elements: {
+    eyebrow: str('optional'),
+    headline: str('optional'),
+    lede: str('optional'),
+  },
+  collections: {
+    items: {
+      requirement: 'optional',
+      fillMode: 'system',
+      constraints: { min: 0, max: 99 },
+      fields: {
+        id: { type: 'string', fillMode: 'system' },
+        name: { type: 'string', fillMode: FILL, default: '' },
+        cover: { type: 'string', fillMode: FILL, default: '' },
+        href: { type: 'string', fillMode: FILL, default: '' },
+      },
+    },
+  },
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Proof-shape contracts — the `testimonials` entry IS the registered `proof`.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -477,4 +506,9 @@ export const workElementContract: Readonly<Record<string, UIBlockSchemaV2>> = {
   logos: logosContract,
   team: teamContract,
   workdetail: workdetailContract,
+  // COLLECTION MACHINERY (E2 / phase 2) — additive, NOT part of the section freeze
+  // (workMustSections/workOptionalSections). Registered here so the contract is
+  // available to the collections spine; the workContract.test freeze walks the
+  // section-key lists, not this map's extra keys.
+  workcatalog: workcatalogContract,
 };

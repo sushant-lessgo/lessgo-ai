@@ -221,8 +221,14 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
     // See work-skeleton.audit.md (phase 7 Deviations) + the mailbox note.
     copyEngines: ['work'],
     designStyles: ['editorial-craft'],
-    capabilities: ['gallery', 'packages', 'multipage'],
-    capabilitySections: { gallery: 'work', packages: 'packages' },
+    // `works` FLIP (work-onboarding-ingestion E2 / phase 2): declares the works
+    // COLLECTION-FAMILY capability, evidenced by the `workcatalog` catalog section
+    // (single-string entry — no capabilitySections type change, D14 option b). The
+    // conformance (b)/(b+)/(d) checks now BITE: workcatalog + workdetail (its
+    // registry-derived item pair) must resolve to real blocks in both renderers —
+    // they do (phase 2). This is what the ingestion fan-out binds photos into.
+    capabilities: ['gallery', 'packages', 'multipage', 'works'],
+    capabilitySections: { gallery: 'work', packages: 'packages', works: 'workcatalog' },
     bespoke: true,
   },
   techpremium: {

@@ -31,6 +31,8 @@ import { WorkPackagesCore } from './blocks/Packages/WorkPackages.core';
 import { WorkAboutCore } from './blocks/About/WorkAbout.core';
 import { WorkFaqCore } from './blocks/Faq/WorkFaq.core';
 import { WorkResultsCore } from './blocks/Results/WorkResults.core';
+import { WorkCatalogCore } from './blocks/Catalog/WorkCatalog.core';
+import { WorkDetailCore } from './blocks/WorkDetail/WorkDetail.core';
 
 const BLOCKS_DIR = path.join(__dirname, 'blocks');
 
@@ -56,8 +58,8 @@ const FORBIDDEN = [
 describe('Work-skeleton core-purity (single-source guard)', () => {
   const files = coreFiles(BLOCKS_DIR);
 
-  it('finds all 17 block cores (6 pilot + 7 phase-6 variants + 4 phase-7 sections)', () => {
-    expect(files.length).toBe(17);
+  it('finds all 19 block cores (6 pilot + 7 phase-6 variants + 4 phase-7 sections + 2 E2 collection sections)', () => {
+    expect(files.length).toBe(19);
   });
 
   for (const file of files) {
@@ -93,6 +95,8 @@ describe('Work-skeleton core-purity (single-source guard)', () => {
       [WorkAboutCore as any, { eyebrow: 'About', heading: 'The person', bio: 'A short honest bio.', facts: [{ id: 'a1', value: '10+ yrs', label: 'Experience' }] }, 'A short honest bio.'],
       [WorkFaqCore as any, { eyebrow: 'FAQ', heading: 'Questions', items: [{ id: 'q1', question: 'How soon?', answer: 'Two weeks typically.' }] }, 'Two weeks typically.'],
       [WorkResultsCore as any, { eyebrow: 'Outcomes', heading: 'Results', lead: 'x', metrics: [{ id: 'r1', value: '3×', label: 'More engagement' }] }, 'More engagement'],
+      [WorkCatalogCore as any, { eyebrow: 'Works', headline: 'Every project', lede: 'x', items: [{ id: 'c1', name: 'Brand shoot', cover: '', href: '/works/brand-shoot' }] }, 'Brand shoot'],
+      [WorkDetailCore as any, { name: 'Brand shoot', client: 'Northwind', problem: 'The ask', result: 'The outcome', photos: [{ id: 'd1', url: '', alt: '', cover: true }] }, 'Brand shoot'],
     ];
     for (const [Core, content, expected] of fixtures) {
       const html = renderToStaticMarkup(React.createElement(Core, { content, E, sectionId }));

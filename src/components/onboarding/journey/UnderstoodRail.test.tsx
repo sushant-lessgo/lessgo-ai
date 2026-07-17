@@ -30,6 +30,12 @@ import { workJourneySeam } from './engines/work';
 import { ToastProvider } from '@/components/ui/toast';
 import { useWizardStore } from '@/hooks/useWizardStore';
 import type { Brief } from '@/types/brief';
+import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
+import { applyRailEdit, type WorkGroupInput } from '@/modules/wizard/work/rail';
+import {
+  proposeGroups,
+  mergeProposalIntoGroups,
+} from '@/modules/wizard/work/ingest/proposeGroups';
 
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT =
   true;
@@ -421,6 +427,81 @@ describe('UnderstoodRail — chips', () => {
     expect(JSON.parse((last[1] as RequestInit).body as string).brief.facts.work.userNotes).toEqual([
       'The prices are wrong',
     ]);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// D8 — the INGESTION-shaped commit regression (work-onboarding-ingestion P4).
+//
+// P3 proved a NOTE commit under the open chips editor remounts it. E2 adds the
+// commit that actually carries photos: an ingestion commit (photo-bearing groups
+// added/merged through the D10 funnel) lands while a stale chip draft is open.
+// The projection key (`${field.id}-${pKey}`) MUST swap, so the draft — whose ids
+// are valid only against the PRE-ingestion bag — dies and re-seeds from the new
+// bag; and the ingested photos must sit on the RIGHT groups, none wiped or
+// misattached. This is the exact hazard D8 guards, exercised with real photos.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('UnderstoodRail — D8 ingestion-shaped commit regression', () => {
+  it('an ingestion commit under the open chips editor remounts it; photos land right, no wipe', async () => {
+    const fetchMock = mockSaveDraft(true);
+    await mountRail();
+
+    // A draft the user typed but did NOT save — its ids belong to the CURRENT bag.
+    await click(testid('rail-edit-groups'));
+    expect(testid('rail-chips-editor-groups')).not.toBeNull();
+    await type(testid<HTMLInputElement>('rail-chip-input-0')!, 'DRAFT — never saved');
+    expect(testid<HTMLInputElement>('rail-chip-input-0')!.value).toBe('DRAFT — never saved');
+
+    // An ingestion-shaped commit through the D10 funnel (NOT the chips editor):
+    // one photo attaches to the existing Weddings, one starts a new Newborns group.
+    await act(async () => {
+      const live = useWizardStore.getState().briefFacts;
+      const proposal = proposeGroups([
+        { name: 'w2.jpg', url: 'https://cdn.example.com/w2.jpg', relativePath: 'Root/Weddings/w2.jpg' },
+        { name: 'n1.jpg', url: 'https://cdn.example.com/n1.jpg', relativePath: 'Root/Newborns/n1.jpg' },
+      ]);
+      const existing = (getWorkFacts(live ?? undefined)?.groups ?? []) as WorkGroupInput[];
+      const merged = mergeProposalIntoGroups(proposal, existing);
+      const commit = applyRailEdit({ field: 'groups', value: merged }, live);
+      if (!commit.ok) throw new Error(`fixture commit invalid: ${commit.error}`);
+      await useWizardStore.getState().commitRail(commit);
+    });
+    await flush();
+
+    // The chips editor is STILL open (editingId is unchanged) but REMOUNTED on the
+    // new projection key: the stale draft is gone, ids re-seeded from the new bag.
+    expect(
+      testid('rail-chips-editor-groups'),
+      'chips editor still open (editingId unchanged)'
+    ).not.toBeNull();
+    expect(testid<HTMLInputElement>('rail-chip-input-0')!.value).toBe('Weddings');
+
+    // The committed facts carry the ingested photos on the RIGHT groups.
+    const work = (useWizardStore.getState().briefFacts as any).work;
+    expect(work.groups.map((g: any) => g.name)).toEqual(['Weddings', 'Portraits', 'Newborns']);
+    expect(work.groups[0].photos.map((p: any) => p.url)).toEqual([
+      'https://cdn.example.com/w1.jpg', // pre-existing
+      'https://cdn.example.com/w2.jpg', // ingested — attached, not replacing
+    ]);
+    expect(work.groups[1].photos ?? []).toEqual([]); // Portraits untouched
+    expect(work.groups[2].photos[0].url).toBe('https://cdn.example.com/n1.jpg');
+
+    // Saving the chips UNCHANGED now joins against the NEW bag by id — no wipe,
+    // no misattachment (the stale-id hole is unreachable).
+    await click(testid('rail-chips-save'));
+    const last = fetchMock.mock.calls[fetchMock.mock.calls.length - 1];
+    const groups = JSON.parse((last[1] as RequestInit).body as string).brief.facts.work.groups;
+    expect(groups.map((g: { name: string }) => g.name)).toEqual([
+      'Weddings',
+      'Portraits',
+      'Newborns',
+    ]);
+    expect(groups[0].photos.map((p: { url: string }) => p.url)).toEqual([
+      'https://cdn.example.com/w1.jpg',
+      'https://cdn.example.com/w2.jpg',
+    ]);
+    expect(groups[2].photos[0].url).toBe('https://cdn.example.com/n1.jpg');
   });
 });
 

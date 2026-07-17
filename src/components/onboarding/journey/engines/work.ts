@@ -26,6 +26,31 @@
 //
 // STATUS (P5): COMPLETE for E1 — rail adapter, entry enrichment, step content,
 // preflight, generation drive and resume rules are all real.
+//
+// ── E2 STEP-02 INGESTION (work-onboarding-ingestion) ────────────────────────
+// STEP 02 is now FUNCTIONAL: `steps.showWork.loadStep` (the D9 seam widening)
+// lazy-loads `./work/ShowWorkStep` — the real upload / EXIF-group / correction
+// body — at RENDER time (post-confirm), never onto the pre-confirm entry bundle
+// (landmine 14 holds; `journeyAgnostic.test.ts` is the guard). `loadStep` is a
+// field on the SHARED `JourneyStepConfig` (defined ONCE in `./types`), not
+// bolted onto `showWork` alone — E3/E4 reuse the same field for STEP 03/04, so
+// it must NOT be re-widened.
+//
+// ── D10 — THE ONE INGESTION WRITE FUNNEL ────────────────────────────────────
+// Photos NEVER ride the seam's `applyEdit`/`RailEditValue` (that contract is
+// text|chips and is founder-signed — do not widen it). ShowWorkStep commits the
+// full `WorkGroupInput[]` (photos riding) through the work module's
+// `applyRailEdit({field:'groups'})` → store `commitRail` — the SAME door the
+// chip join and price answer use, one validation gate (`normalizeWorkGroup` +
+// `WorkFactsSchema`).
+//
+// ── D8 — the commit swaps the facts identity ────────────────────────────────
+// Committing through `commitRail` is what makes the rail's EXISTING projection-key
+// guard fire (`UnderstoodRail.tsx` keys its chips editor on `${field.id}-${pKey}`,
+// a projection of the live bag): a photo-bearing commit swaps the bag ⇒ new key ⇒
+// the chips editor remounts, so a stale chip draft can never wipe or misattach the
+// just-ingested photos. NO `UnderstoodRail.tsx` edit — the guard was already there;
+// `UnderstoodRail.test.tsx` carries the ingestion-shaped regression.
 // ============================================================================
 
 import type { Brief } from '@/types/brief';
@@ -548,12 +573,19 @@ export const workJourneySeam: JourneyEngineSeam = {
   },
 
   steps: {
-    // STEP 02 content. E1 renders it as a non-functional dropzone stub + "Skip
-    // for now" — the upload pipeline (and the scrape) are E2.
+    // STEP 02 content. E2 makes it functional via `loadStep` (D9): the agnostic
+    // frame renders the engine's real upload/proposal body when this is present,
+    // else its stub. `loadStep` is a DYNAMIC import (landmine 14) — it pulls the
+    // ingestion + upload + exifr code ONLY at render time on STEP 02 (post-
+    // confirm), never onto the pre-confirm entry bundle. The ingestion write
+    // funnel is the work-module `applyRailEdit({field:'groups'})` → store
+    // `commitRail` (D10), NOT the seam's `applyEdit`/`RailEditValue` (photos
+    // cannot ride the chip contract — do not widen it).
     showWork: {
       title: 'Show your work',
       body: 'Your images are what sells the work. Add a few and we’ll build the site around them — or skip and add them later in the editor.',
       icon: 'add_photo_alternate',
+      loadStep: () => import('./work/ShowWorkStep'),
     },
 
     /**

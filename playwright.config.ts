@@ -71,6 +71,9 @@ export default defineConfig({
         // work-onboarding-shell: the journey needs a Clerk session (seeded via
         // the real /api/start + /api/brief/confirm routes).
         /work-onboarding\.spec\.ts/,
+        // work-onboarding-ingestion (E2): the binding/reveal proof on atelier2
+        // (P1 authored it; P2's works flip makes the real post-flip path runnable).
+        /work-binding\.spec\.ts/,
         // billing-beta: credit counter / gating / billing view — needs a Clerk session.
         /billing-beta\.spec\.ts/,
         // toolbar-standard-beta: seeded editor project + Clerk session.

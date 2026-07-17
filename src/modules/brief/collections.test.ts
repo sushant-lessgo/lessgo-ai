@@ -132,3 +132,52 @@ describe('setCollections — pure writer round-trip', () => {
     expect(out['case-studies']).toEqual([{ name: 'Client X Launch', slug: 'client-x-launch' }]);
   });
 });
+
+// ── work-onboarding E2 / D6: photos carry-through ────────────────────────────
+describe('CollectionEntry photos (D6) — carried through reader/writer', () => {
+  it('reader normalizes photos, drops photos without a url', () => {
+    const out = getCollections(
+      briefWith({
+        collections: {
+          works: [
+            {
+              name: 'Weddings',
+              photos: [
+                { id: 'p1', url: 'https://x/1.jpg', alt: 'a', cover: true },
+                { id: 'p2', url: 'https://x/2.jpg' },
+                { id: 'p3' }, // no url → dropped
+                'garbage', // non-object → dropped
+              ],
+            },
+          ],
+        },
+      })
+    );
+    expect(out.works).toHaveLength(1);
+    expect(out.works![0].photos).toEqual([
+      { id: 'p1', url: 'https://x/1.jpg', alt: 'a', cover: true },
+      { id: 'p2', url: 'https://x/2.jpg' },
+    ]);
+  });
+
+  it('omits photos entirely when none carry a url', () => {
+    const out = getCollections(briefWith({ collections: { works: [{ name: 'Empty', photos: [{ id: 'x' }] }] } }));
+    expect(out.works![0]).not.toHaveProperty('photos');
+  });
+
+  it('makeCollectionEntry + setCollections round-trip photos verbatim', () => {
+    const base = briefWith({});
+    const entry = makeCollectionEntry('Weddings', {
+      photos: [
+        { url: 'https://x/1.jpg', cover: true },
+        { url: 'https://x/2.jpg' },
+      ],
+    });
+    const next = setCollections(base, { works: [entry] });
+    const out = getCollections(next);
+    expect(out.works![0].photos).toEqual([
+      { url: 'https://x/1.jpg', cover: true },
+      { url: 'https://x/2.jpg' },
+    ]);
+  });
+});

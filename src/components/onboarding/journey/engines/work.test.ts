@@ -20,6 +20,13 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { workJourneySeam } from './work';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
 import type { JourneyQuestion, RailChipEdit, RailCommit } from './types';
+import { applyRailEdit, type WorkGroupInput } from '@/modules/wizard/work/rail';
+import { proposeGroups, mergeProposalIntoGroups } from '@/modules/wizard/work/ingest/proposeGroups';
+import {
+  mergeGroups,
+  hidePhoto,
+  pickCover,
+} from './work/correctionReducer';
 import { WORK_BRIEF_FIXTURE } from '../../../../../e2e/helpers/workBriefFixture';
 
 const rail = workJourneySeam.rail;
@@ -586,6 +593,197 @@ describe('work seam — STEP 04 plan', () => {
 // `journeyAgnostic.test.ts`), and `runWorkLLMGeneration` has its own suite
 // (work.llm.test.ts). Mocking it here would only prove the mock.
 // ============================================================================
+
+// ============================================================================
+// E2 — STEP 02 seam widening (D9) + the ingestion commit path (D10).
+//
+// The upload/EXIF/render UI is engine-owned (`engines/work/ShowWorkStep.tsx`)
+// and covered by e2e; here we lock the two seam-level contracts E2 adds:
+//   • the seam exposes an OPTIONAL lazy step body (`showWork.loadStep`);
+//   • ingestion commits ride the WORK-MODULE `applyRailEdit({field:'groups'})`
+//     funnel (NEVER the seam's `applyEdit`/`RailEditValue`), and a
+//     proposal-merged, photo-bearing groups array survives that gate with photos
+//     intact and siblings preserved — the exact write `ShowWorkStep` performs.
+// ============================================================================
+
+describe('work seam — STEP 02 widening (D9)', () => {
+  it('exposes an OPTIONAL lazy step body on the SHARED step config (loadStep)', () => {
+    const showWork = workJourneySeam.steps.showWork;
+    // Still carries the display config every engine shares…
+    expect(typeof showWork.title).toBe('string');
+    expect(typeof showWork.body).toBe('string');
+    expect(typeof showWork.icon).toBe('string');
+    // …plus the lazy engine body the agnostic frame renders when present.
+    expect(typeof showWork.loadStep).toBe('function');
+  });
+});
+
+describe('work seam — ingestion commit path (D10)', () => {
+  it('a proposal-merged, photo-bearing groups array survives applyRailEdit with photos + siblings intact', () => {
+    // Live bag: an entry-seeded group (Weddings) already carrying a photo, plus a
+    // sibling `entry` fact that must survive the full-facts re-emit (landmine 4).
+    const liveFacts: Record<string, unknown> = {
+      entry: { businessName: 'Kundius Studio' },
+      work: {
+        identity: { name: 'Kundius Studio' },
+        groups: [
+          {
+            name: 'Weddings',
+            kind: 'category',
+            price: { mode: 'on-request' },
+            photos: [{ id: 'pre', url: 'https://cdn.example.com/pre.jpg', cover: true }],
+          },
+        ],
+      },
+    };
+
+    // A folder upload: one photo into the existing "weddings" (case-insensitive
+    // attach) + one into a brand-new "Newborns" group.
+    const proposal = proposeGroups([
+      { name: 'w.jpg', url: 'https://cdn.example.com/w.jpg', relativePath: 'Root/weddings/w.jpg' },
+      { name: 'n.jpg', url: 'https://cdn.example.com/n.jpg', relativePath: 'Root/Newborns/n.jpg' },
+    ]);
+    const existing = (getWorkFacts(liveFacts)?.groups ?? []) as WorkGroupInput[];
+    const merged = mergeProposalIntoGroups(proposal, existing);
+
+    // THE D10 FUNNEL — the exact call ShowWorkStep makes.
+    const result = applyRailEdit({ field: 'groups', value: merged }, liveFacts);
+    expect(result.ok, result.ok ? '' : `commit failed: ${result.error}`).toBe(true);
+    if (!result.ok) return;
+
+    const groups = getWorkFacts(result.facts)!.groups!;
+    expect(groups.map((g) => g.name)).toEqual(['Weddings', 'Newborns']);
+    // Existing group kept its prior photo AND gained the uploaded one; kind valid.
+    expect(groups[0].photos?.map((p) => p.url)).toEqual([
+      'https://cdn.example.com/pre.jpg',
+      'https://cdn.example.com/w.jpg',
+    ]);
+    expect(groups[0].kind).toBe('category');
+    // The new group is kind-valid (landmine 6) and carries its uploaded photo as cover.
+    expect(groups[1].kind).toBe('category');
+    expect(groups[1].photos?.[0]).toEqual({
+      id: 'https://cdn.example.com/n.jpg',
+      url: 'https://cdn.example.com/n.jpg',
+      cover: true,
+    });
+    // Sibling fact survived (landmine 4); snapshot-sync object identity (decision 5).
+    expect((result.facts['entry'] as { businessName: string }).businessName).toBe('Kundius Studio');
+    expect(result.patch.facts).toBe(result.facts);
+  });
+
+  it('re-committing does not wipe a prior ingested photo (the E2 wipe-regression, ingestion-shaped)', () => {
+    // A group already carrying an ingested photo…
+    const liveFacts: Record<string, unknown> = {
+      work: {
+        identity: { name: 'Studio' },
+        groups: [
+          {
+            name: 'Weddings',
+            kind: 'category',
+            price: { mode: 'on-request' },
+            photos: [{ id: 'a', url: 'https://cdn.example.com/a.jpg', cover: true }],
+          },
+        ],
+      },
+    };
+    // …a SECOND ingestion pass attaches another photo to the same group.
+    const proposal = proposeGroups([
+      { name: 'b.jpg', url: 'https://cdn.example.com/b.jpg', relativePath: 'Root/Weddings/b.jpg' },
+    ]);
+    const existing = (getWorkFacts(liveFacts)?.groups ?? []) as WorkGroupInput[];
+    const merged = mergeProposalIntoGroups(proposal, existing);
+    const result = applyRailEdit({ field: 'groups', value: merged }, liveFacts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const photos = getWorkFacts(result.facts)!.groups![0].photos!;
+    expect(photos.map((p) => p.url)).toEqual([
+      'https://cdn.example.com/a.jpg',
+      'https://cdn.example.com/b.jpg',
+    ]);
+  });
+});
+
+// ============================================================================
+// P4 — the correction VERBS through the D10 funnel.
+//
+// correctionReducer.test.ts pins the pure verb transforms; here we prove they
+// survive the SAME founder-signed commit gate ShowWorkStep drives them through
+// (`applyRailEdit({field:'groups'})`) — cover-exclusivity persists, a hidden
+// photo is ABSENT from the committed facts (D12), and a merge conserves photos
+// (minus cap) while collapsing groups — with siblings intact.
+// ============================================================================
+
+describe('work seam — correction verbs through the D10 funnel (P4)', () => {
+  function photoBearingFacts(): Record<string, unknown> {
+    return {
+      entry: { businessName: 'Kundius Studio' },
+      work: {
+        identity: { name: 'Kundius Studio' },
+        groups: [
+          {
+            name: 'Weddings',
+            kind: 'category',
+            price: { mode: 'on-request' },
+            photos: [
+              { id: 'w1', url: 'https://cdn/w1.jpg', cover: true },
+              { id: 'w2', url: 'https://cdn/w2.jpg' },
+            ],
+          },
+          {
+            name: 'Portraits',
+            kind: 'category',
+            price: { mode: 'on-request' },
+            photos: [{ id: 'p1', url: 'https://cdn/p1.jpg', cover: true }],
+          },
+        ],
+      },
+    };
+  }
+
+  const commit = (groups: WorkGroupInput[], facts: Record<string, unknown>) =>
+    applyRailEdit({ field: 'groups', value: groups }, facts);
+
+  it('pickCover commits an EXCLUSIVE cover (the old cover is cleared in facts)', () => {
+    const facts = photoBearingFacts();
+    const groups = (getWorkFacts(facts)?.groups ?? []) as WorkGroupInput[];
+    const res = expectRail(commit(pickCover(groups, 0, 'w2'), facts));
+    const wed = getWorkFacts(res.facts)!.groups![0];
+    const covers = (wed.photos ?? []).filter((p) => p.cover);
+    expect(covers.map((p) => p.id)).toEqual(['w2']); // exactly one, and it's w2
+  });
+
+  it('hidePhoto DROPS the photo from the committed facts (D12 — not a MediaAsset op)', () => {
+    const facts = photoBearingFacts();
+    const groups = (getWorkFacts(facts)?.groups ?? []) as WorkGroupInput[];
+    const res = expectRail(commit(hidePhoto(groups, 0, 'w2'), facts));
+    const wed = getWorkFacts(res.facts)!.groups![0];
+    expect((wed.photos ?? []).map((p) => p.url)).toEqual(['https://cdn/w1.jpg']);
+    // Sibling preserved (full-facts re-emit, landmine 4).
+    expect((res.facts['entry'] as { businessName: string }).businessName).toBe('Kundius Studio');
+  });
+
+  it('mergeGroups conserves photos and collapses the group count through the funnel', () => {
+    const facts = photoBearingFacts();
+    const groups = (getWorkFacts(facts)?.groups ?? []) as WorkGroupInput[];
+    const { groups: merged } = mergeGroups(groups, [0, 1]);
+    const res = expectRail(commit(merged, facts));
+    const out = getWorkFacts(res.facts)!.groups!;
+    expect(out).toHaveLength(1);
+    expect((out[0].photos ?? []).map((p) => p.url)).toEqual([
+      'https://cdn/w1.jpg',
+      'https://cdn/w2.jpg',
+      'https://cdn/p1.jpg',
+    ]);
+    // One cover survives the merge (first encountered).
+    expect((out[0].photos ?? []).filter((p) => p.cover).map((p) => p.id)).toEqual(['w1']);
+  });
+
+  function expectRail(r: ReturnType<typeof applyRailEdit>) {
+    expect(r.ok, r.ok ? '' : `commit failed: ${r.error}`).toBe(true);
+    if (!r.ok) throw new Error(r.error);
+    return r;
+  }
+});
 
 describe('work seam — STEP 05 preflight', () => {
   type PreState = Parameters<typeof workJourneySeam.preflight>[0];

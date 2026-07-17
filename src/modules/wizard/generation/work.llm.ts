@@ -32,8 +32,14 @@ import {
   mergePageIntoFinalContent,
   finalizeMultiPageGeneration,
   isResumableGeneration,
+  runCollectionFanOut,
   type MultiPageOnboardingData,
+  type CollectionFanOutResult,
 } from '@/modules/generation/multiPageAssembly';
+import { deriveWorksEntries, stampWorkGalleryBinding } from '@/modules/generation/workCollections';
+import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
+import { templateMeta } from '@/modules/templates/templateMeta';
+import type { CollectionEntry } from '@/modules/brief/collections';
 import type {
   WorkStrategyOutput,
   WorkSitemapPage,
@@ -141,6 +147,57 @@ async function runWorkStrategy(input: WorkGenerationInput): Promise<WorkStrategy
 }
 
 /**
+ * The WORKS binding fan-out (work-onboarding-ingestion E2 / phase 1). Extracted
+ * so it can be driven DIRECTLY in tests (fixture caps ⇒ fires; real caps ⇒
+ * dormant). LLM-FREE — item copy is `{status:'done', copy:{}}` (the granth
+ * precedent): zero new AI calls, zero new credit ops.
+ *
+ * Steps:
+ *   1. entries = derive from `facts.work.groups[]` (resume: re-derive from the
+ *      persisted `onboardingData.collections.works` when present).
+ *   2. persist entries into `fc.onboardingData.collections` (resume durability).
+ *   3. runCollectionFanOut — builds the /works catalog + one item page per entry
+ *      carrying VERBATIM photos. DORMANT unless `works` is a declared capability.
+ *   4. stampWorkGalleryBinding — cover_image (always) + href (only when the item
+ *      page exists — D7a) on the home gallery group cards.
+ *
+ * NO-PHOTO / NO-GROUP FAST PATH: entries empty ⇒ returns immediately WITHOUT
+ * touching `fc` — so a work run that carries no photos (the P1 prod reality: no
+ * upload UI yet) stays byte-identical. Cover stamping is capability-independent
+ * by design (D7a), so it only ever runs when the user actually seeded photos.
+ */
+export async function runWorksFanOut(
+  fc: any,
+  input: WorkGenerationInput,
+  declaredCapabilities: readonly string[],
+  persist: (fc: any) => Promise<void>
+): Promise<CollectionFanOutResult> {
+  const persisted = fc.onboardingData?.collections?.works as CollectionEntry[] | undefined;
+  const entries =
+    persisted && persisted.length
+      ? persisted
+      : deriveWorksEntries(getWorkFacts(input.brief?.facts));
+  if (entries.length === 0) return { status: 'done' }; // no photos/groups ⇒ byte-identical
+
+  if (!fc.onboardingData) fc.onboardingData = {};
+  fc.onboardingData.collections = { ...(fc.onboardingData.collections ?? {}), works: entries };
+
+  const result = await runCollectionFanOut({
+    fc,
+    collections: { works: entries },
+    declaredCapabilities,
+    // LLM-FREE — no route call, no charge (granth precedent). Records ride the
+    // slice seed; the clamp keeps VERBATIM_ITEM_FIELDS (incl. photos) untouched.
+    generateItemCopy: async () => ({ status: 'done', copy: {} }),
+    persist,
+  });
+  if (result.status !== 'done') return result;
+
+  stampWorkGalleryBinding(fc, entries);
+  return { status: 'done' };
+}
+
+/**
  * The WORK LLM multi-page fan-out. Guarded (workCopyEngineEnabled / atelier
  * allow-list) at the GeneratingSlot fork — called DIRECTLY, mirroring
  * runWorkSkeleton (NOT via runGeneration).
@@ -241,6 +298,18 @@ export async function runWorkLLMGeneration(
       }
     } catch (e: any) {
       return { status: 'error', error: e?.message || 'Copy generation failed.' };
+    }
+
+    // ─── Works binding fan-out (E2 P1) — after the sitemap pages, before finalize.
+    // LLM-free; dormant unless `resolvedTemplateId` declares the `works` capability
+    // (byte-identical no-op on P1 templates). Persists item pages + stamps covers.
+    try {
+      const declaredCapabilities = templateMeta[resolvedTemplateId]?.capabilities ?? [];
+      const worksResult = await runWorksFanOut(fc, input, declaredCapabilities, saveFC);
+      if (worksResult.status === 'credits') return { status: 'credits' };
+      if (worksResult.status === 'error') return { status: 'error', error: worksResult.error };
+    } catch (e: any) {
+      return { status: 'error', error: e?.message || 'Works binding failed.' };
     }
 
     cb.onStage?.('saving');

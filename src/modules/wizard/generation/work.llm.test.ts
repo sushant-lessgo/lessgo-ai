@@ -36,10 +36,12 @@ vi.mock('@/modules/generation/multiPageAssembly', async (importActual) => {
 import { finalizeMultiPageGeneration } from '@/modules/generation/multiPageAssembly';
 import {
   runWorkLLMGeneration,
+  runWorksFanOut,
   resolveWorkRoute,
   workCopyEngineEnabled,
   WORK_COPY_ENGINE_TEMPLATES,
 } from './work.llm';
+import { templateMeta } from '@/modules/templates/templateMeta';
 import type { WorkGenerationInput } from './work';
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
@@ -279,6 +281,75 @@ describe('runWorkLLMGeneration — failures', () => {
   });
 });
 
+// ── Works binding fan-out (work-onboarding E2 / phase 1) ─────────────────────
+// Drives the EXTRACTED runWorksFanOut directly. Fixture caps ['works'] ⇒ fires
+// (wiring); real templateMeta caps (no `works`) ⇒ fan-out no-op (dormancy).
+
+describe('runWorksFanOut — wiring + dormancy', () => {
+  const PHOTO_BRIEF = {
+    facts: {
+      work: {
+        identity: { name: 'K' },
+        groups: [
+          { name: 'Weddings', kind: 'category', price: { mode: 'on-request' },
+            photos: [{ id: 'w1', url: 'https://cdn/w1.jpg', cover: true }, { id: 'w2', url: 'https://cdn/w2.jpg' }] },
+        ],
+      },
+    },
+  } as any;
+
+  /** fc with a home work gallery card named 'Weddings' + a resume marker. */
+  function fcWithGallery() {
+    return {
+      content: { 'work-1': { id: 'work-1', elements: { groups: [{ id: 'g1', name: 'Weddings', cover_image: '', href: '#work' }] } } },
+      pages: {},
+      onboardingData: {},
+      generationProgress: { completedPageKeys: [] },
+    };
+  }
+
+  it('WIRING: fixture caps [works] ⇒ builds /works pages + stamps covers/href', async () => {
+    const fc = fcWithGallery();
+    const r = await runWorksFanOut(fc, baseInput({ brief: PHOTO_BRIEF }), ['works'], async () => {});
+    expect(r.status).toBe('done');
+    // item + catalog pages built
+    expect(fc.pages['page-weddings']).toBeTruthy();
+    const item = (fc.pages['page-weddings'] as any);
+    const sec = item.content[item.sections[0]];
+    expect(sec.type).toBe('workdetail');
+    expect(sec.elements.photos).toHaveLength(2); // VERBATIM
+    // gallery card stamped: cover (cover:true) + href (item page exists)
+    const card = (fc.content['work-1'] as any).elements.groups[0];
+    expect(card.cover_image).toBe('https://cdn/w1.jpg');
+    expect(card.href).toBe('/works/weddings');
+    // entries persisted for resume
+    expect((fc.onboardingData as any).collections.works).toHaveLength(1);
+  });
+
+  it('DORMANCY: real atelier caps (no `works`) ⇒ no /works pages; fan-out gated', async () => {
+    const fc = fcWithGallery();
+    const caps = templateMeta['atelier' as keyof typeof templateMeta].capabilities;
+    expect(caps).not.toContain('works'); // guard the premise
+    await runWorksFanOut(fc, baseInput({ brief: PHOTO_BRIEF }), caps, async () => {});
+    expect(fc.pages['page-weddings']).toBeUndefined(); // fan-out dormant
+    // cover stamping IS capability-independent (D7a), href is NOT (no item page)
+    const card = (fc.content['work-1'] as any).elements.groups[0];
+    expect(card.cover_image).toBe('https://cdn/w1.jpg');
+    expect(card.href).toBe('#work'); // left as-is — no /works page exists
+  });
+
+  it('BYTE-IDENTICAL: no photos/groups ⇒ fc untouched (P1 prod reality)', async () => {
+    const fc = fcWithGallery();
+    const before = JSON.stringify(fc);
+    const caps = templateMeta['atelier' as keyof typeof templateMeta].capabilities;
+    const r = await runWorksFanOut(fc, baseInput({ brief: BRIEF }), caps, async () => {
+      throw new Error('persist must not be called on the empty fast path');
+    });
+    expect(r.status).toBe('done');
+    expect(JSON.stringify(fc)).toBe(before);
+  });
+});
+
 // ── Dispatch guard (byte-identical routing proof; plan step 4 / N4) ───────────
 
 describe('workCopyEngineEnabled + resolveWorkRoute (allow-list guard)', () => {
@@ -288,8 +359,8 @@ describe('workCopyEngineEnabled + resolveWorkRoute (allow-list guard)', () => {
     else process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = ORIG;
   });
 
-  it('allow-list is exactly [atelier]', () => {
-    expect([...WORK_COPY_ENGINE_TEMPLATES]).toEqual(['atelier']);
+  it('allow-list is exactly [atelier, atelier2]', () => {
+    expect([...WORK_COPY_ENGINE_TEMPLATES]).toEqual(['atelier', 'atelier2']);
   });
 
   it('flag OFF (default) ⇒ disabled for every template', () => {

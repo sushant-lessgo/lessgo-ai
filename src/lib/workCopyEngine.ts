@@ -12,12 +12,16 @@
 
 /**
  * Founder-approved ALLOW-LIST of WORK templates the LLM copy engine may drive.
- * `atelier` is the ONLY tested/approved work-multipage template; every OTHER
- * work-multipage template (lumen, any future one) keeps today's SKELETON
- * (manual-fill) path even when the env flag is ON, until explicitly added here.
- * Extend by appending a templateId (named const so it's easy to find + widen).
+ * `atelier` is the live tested/approved work-multipage template; `atelier2` is the
+ * work-SKELETON Atelier skin — added as the E2 skeleton pilot so the ingestion
+ * journey can resolve to it (journey-eligible + copy-engine-allowed) and prove
+ * grouped-photo binding on the skeleton. Every OTHER work-multipage template
+ * (lumen, any future one) keeps today's manual-fill path even when the env flag is
+ * ON, until explicitly added here. Extend by appending a templateId.
+ *
+ * atelier2 = E2 skeleton pilot; absorb at atelier-skeleton-cutover.
  */
-export const WORK_COPY_ENGINE_TEMPLATES: readonly string[] = ['atelier'];
+export const WORK_COPY_ENGINE_TEMPLATES: readonly string[] = ['atelier', 'atelier2'];
 
 /**
  * Pure template-MEMBERSHIP predicate: is `templateId` a work-copy-engine

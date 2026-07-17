@@ -385,6 +385,68 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
       ],
     },
   },
+
+  // ── Phase 2 (E2) collection-machinery sections — the works flip's payload ────
+  // Enrolled in renderParity (the dual-renderer founder gate) + the /dev gallery.
+  // The EDIT band resolves content via getSchemaDefaults('workcatalog'|'workdetail')
+  // now that both layouts register in workLayoutElementSchema (audience/work/
+  // elementSchema.ts), so edit and published both render the SAME populated copy.
+  // Layout is the lowercase section type (what the collections fan-out stores).
+
+  // WorkCatalog — the `/works` index. Covers grid seeded from the works entries
+  // (name + cover + href → /works/<slug>). Image-led ⇒ cover slots ship EMPTY (the
+  // core renders its "Cover" placeholder); the eyeball compares layout/copy parity.
+  {
+    sectionType: 'workcatalog',
+    layout: 'workcatalog',
+    sectionId: 'atelier2-workcatalog',
+    content: {
+      eyebrow: 'Works',
+      headline: 'Every project',
+      lede: 'The full index of recent commissions.',
+      items: [
+        { id: 'wc1', name: 'Full brand package', cover: '', href: '/works/full-brand-package' },
+        { id: 'wc2', name: 'Brand photoshoot', cover: '', href: '/works/brand-photoshoot' },
+        { id: 'wc3', name: 'Portrait & business shoot', cover: '', href: '/works/portrait-business-shoot' },
+      ],
+    },
+    editBasics: {
+      text: ['eyebrow', 'headline', 'lede'],
+      button: [],
+      collections: [
+        { key: 'items', countPrefix: 'items.', itemPrefixes: ['items.'], items: 3 },
+      ],
+    },
+  },
+
+  // WorkDetail — a `/works/<slug>` project-story page. Title + client/problem/result
+  // meta strip + a FLAT photo grid (correct on THIS surface — the group-references-
+  // only invariant is the home gallery's). Photos ship EMPTY urls (image-led) so the
+  // grid renders cover placeholders in both bands; the copy fields are populated so
+  // the parity assertion compares real content.
+  {
+    sectionType: 'workdetail',
+    layout: 'workdetail',
+    sectionId: 'atelier2-workdetail',
+    content: {
+      name: 'Full brand package',
+      client: 'Northwind',
+      problem: 'A launch-ready image library that felt like one brand, not fifty stock photos.',
+      result: 'A cohesive set the whole team now reaches for across web, social, and print.',
+      photos: [
+        { id: 'wd1', url: '', alt: '', cover: true },
+        { id: 'wd2', url: '', alt: '', cover: false },
+        { id: 'wd3', url: '', alt: '', cover: false },
+      ],
+    },
+    editBasics: {
+      text: ['name', 'client', 'problem', 'result'],
+      button: [],
+      collections: [
+        { key: 'photos', countPrefix: 'photos.', itemPrefixes: ['photos.'], items: 3 },
+      ],
+    },
+  },
 ];
 
 export function atelier2Sections(): BlockMockSection[] {

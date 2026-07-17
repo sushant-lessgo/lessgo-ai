@@ -79,6 +79,22 @@ Small helpers that sit **after** the two-phase copy pipeline
   `parseWorkCopy → validateStoryAbout` call. The two can drift (shared pieces today:
   `parseWorkCopy`, `validateStoryAbout`, `buildWorkCopyRetryPrompt`). If you change the
   loop here, check the story route too — or re-point it at this primitive.
+- **`workCollections.ts`** — the WORK photo binding (work-onboarding-ingestion E2).
+  Pure module (firewall: slugify + types only — no store/template/react).
+  `deriveWorksEntries(facts)` turns `facts.work.groups[].photos` into
+  `CollectionEntry[]` (name, code-derived slug, photos clamped to the 24 per-group
+  contract max); `stampWorkGalleryBinding(fc, entries)` joins each HOME
+  `work`-section group card by NAME→slug and stamps `cover_image` + `href`
+  (`/works/<slug>`, only when the item page exists in `fc.pages` — the guard that
+  keeps the engine-wide STEP-02 upload UI safe on non-flipped templates). Both are
+  driven from `wizard/generation/work.llm.ts` `runWorksFanOut`, which fans each
+  group into a `/works/<slug>` `workdetail` page via `runCollectionFanOut` with an
+  **LLM-FREE** `generateItemCopy: async () => ({status:'done', copy:{}})` — records
+  the photos verbatim (`photos` ∈ `VERBATIM_ITEM_FIELDS`), **zero AI calls, zero
+  new credit op**. The fan-out is LIVE only on `atelier2` (the `works` capability is
+  declared there alone — Path A pilot); on old `atelier` it no-ops (dormant), so
+  merging E2 changes zero prod-reachable behavior. Empty entries (the no-photos
+  prod reality) return byte-identical.
 - **`postGenerationAnalysis.ts`** — Analyzes generated content and flags sections
   that need manual review (classifies fields by `fillMode`, estimates customization
   time, produces a `PostGenerationReport`). Reads the layout element schema from
