@@ -14,8 +14,8 @@ How to measure landing-copy quality objectively, pick the right model per pipeli
 | What | Where |
 |---|---|
 | Model per endpoint (tier map, pinned IDs) | `src/lib/modelConfig.ts` — endpoints `understand · strategy · uiblock · copy · privacy`; tiers `cheap`/`production`; env `AI_MODEL_TIER`, `AI_MODEL_OVERRIDE` (global, no per-endpoint override — eval harness passes model per call instead) |
-| Prompt builders | `src/modules/prompt/buildStrategyPrompt.ts`, `buildPrompt.ts` (product); `src/app/api/audience/service/generate-copy/` + `src/modules/audience/service/` (service) |
-| Parsers (reuse as structural asserts) | `src/modules/prompt/parseStrategyResponse.ts`, `parseAiResponse.ts`, `src/modules/audience/service/parseCopy.ts` |
+| Prompt builders | `src/modules/audience/{product,service,work}/copyPrompt.ts` (+ each audience's strategy builder). Regen reuses these via `src/modules/generation/scopedRegen.ts`. (The legacy shared `buildStrategyPrompt.ts`/`buildPrompt.ts` are **deleted** — scale-08 / regen-modernization.) |
+| Parsers (reuse as structural asserts) | `src/modules/audience/{product,service,work}/parseCopy.ts`; `scopedRegen.ts`'s `validateScopedSubset` for regen subsets. (Legacy `parseStrategyResponse.ts`/`parseAiResponse.ts` are **deleted**.) |
 | Brief (eval-set fixture shape) | `src/types/brief.ts` (zod source: `src/lib/schemas/brief.schema.ts`); engines `thing · trust · work` |
 | Existing real-LLM capture | `src/modules/audience/__tests__/captureGolden.test.ts` (`CAPTURE=1`) |
 | Debug logging | `DEBUG_AI_PROMPTS`, `DEBUG_AI_RESPONSES` in `.env.local` |
@@ -99,7 +99,7 @@ defaultTest:
     provider: anthropic:messages:claude-opus-4-8   # judge ≥ strongest candidate
 ```
 
-**Layer 2 — end-to-end (secondary; catches cross-step interactions).** A custom provider that runs the real chain in-process: `buildStrategyPrompt → model → parseStrategyResponse → buildStrategicCopyPrompt → model → parseAiResponse`, returns the final page copy JSON. Use it for final pairwise verdicts between full configs (e.g. "Sonnet strategy + 4o-mini copy" vs "Sonnet both"), not for iteration — it's slow and expensive.
+**Layer 2 — end-to-end (secondary; catches cross-step interactions).** A custom provider that runs the real chain in-process: per-audience `strategy builder → model → strategy assembly → copyPrompt.ts → model → parseCopy.ts`, returns the final page copy JSON. Use it for final pairwise verdicts between full configs (e.g. "Sonnet strategy + 4o-mini copy" vs "Sonnet both"), not for iteration — it's slow and expensive.
 
 ```ts
 // eval/providers/e2e.ts — sketch

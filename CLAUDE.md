@@ -68,15 +68,19 @@ Every block exists as a **pair** and is rendered by one of **two renderers**:
 
 ### AI Generation Pipeline (per-audience routes)
 
-Two-phase strategic generation. (The legacy monolithic `/api/generate-landing` route and its `buildStrategyPrompt()` builder were removed in scale-08; generation now runs through the per-audience `/api/audience/{product,service}/{strategy,generate-copy}` routes with their own builders under `src/modules/audience/*`.)
+Two-phase strategic generation, run **per audience/engine**. (The legacy monolithic `/api/generate-landing` route + `buildStrategyPrompt()` were removed in scale-08; the legacy shared `buildPrompt.ts` / `parseAiResponse.ts` / `parseStrategyResponse.ts` were removed in regen-modernization. **`src/modules/prompt/` is now mock-generators only** — see its README.)
 
-1. **Strategy phase** — builds business context + brand positioning + layout requirements; AI returns `copyStrategy` (big idea) + per-section `cardCounts`. Parsed by `parseStrategyResponse()`.
-2. **Copy phase** — instructs the AI to fill each section's elements per the card counts; parsed by `parseAiResponse()`, validated by the layout schema, manual-preferred defaults applied.
+**First generation** — `/api/audience/{product,service,work}/{strategy,generate-copy}`, each with its OWN builders + parsers under `src/modules/audience/*`:
 
-- **Element selection:** `getCompleteElementsMap()` (`src/modules/sections/elementDetermination.ts`) maps every section→layout→all elements and marks excluded optional elements by business context. The AI sees all elements + the exclusion map.
+1. **Strategy phase** — builds business context + brand positioning + layout requirements; AI returns a copy strategy (big idea) + per-section `cardCounts`. Assembled/parsed per audience (e.g. `assembleProductStrategy`), NOT by any shared parser.
+2. **Copy phase** — `modules/audience/{product,service,work}/copyPrompt.ts` instructs the AI to fill each section's elements; parsed per audience (`parseCopy.ts`) and validated against the section contract.
+
+**Regeneration** — `/api/regenerate-{element,section,content}` run on `src/modules/generation/scopedRegen.ts`: server-side prompt construction, engine dispatch (`resolveCopyEngine` → `product` | `service` | `work`), narrowed elements map, Zod-validated output, and its own validate→retry loop. Regen reuses the SAME per-audience copy builders as first-gen. Note: **no strategy is persisted**, so regen prompts are honestly thinner than first-gen's (strategic fields empty/neutral).
+
+- **Engine ≠ audienceType.** `work` is a copy ENGINE (atelier), not an audienceType — atelier projects are `audienceType: 'service'`. Dispatch keys off `isWorkCopyTemplate(templateId)` FIRST, then `audienceType`. See `src/lib/workCopyEngine.ts` + `src/modules/generation/README.md`.
+- **Element selection:** `getCompleteElementsMap()` (`src/modules/sections/elementDetermination.ts`) maps every section→layout→all elements and marks excluded optional elements by business context. The AI sees all elements + the exclusion map. (The **work** engine uses `workElementContract` as its vocabulary instead — a documented pitfall.)
 - **Section selection:** Product uses a fixed section list (`src/modules/sections/sectionList.ts`). Service uses awareness-driven ordering (`src/modules/audience/service/sectionSelection.ts`).
-- **Providers (fallback chain):** OpenAI (`gpt-4o-mini`, primary when `USE_OPENAI=true`) → Nebius/Mixtral → mock response. **Note: the generation pipeline uses OpenAI/Nebius, not Anthropic.** (`@anthropic-ai/sdk` is a dependency but not used in the generation path.)
-- Prompt builders, parsers, and mock generators live in `src/modules/prompt/`.
+- **Models/providers:** endpoints are selected via `src/lib/modelConfig.ts` (incl. `copy` / `work-copy`) through the shared `src/lib/aiClient.ts`, which falls back to a backup model on **infrastructure** errors only (never on content/parse failures). Mock response = demo/`NEXT_PUBLIC_USE_MOCK_GPT` mode only, never a failure fallback.
 
 ### Onboarding Flow
 

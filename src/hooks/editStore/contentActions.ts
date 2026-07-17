@@ -1,7 +1,4 @@
 // hooks/editStore/contentActions.ts - Enhanced content actions with section CRUD methods
-import { useOnboardingStore } from '../useOnboardingStore';
-import { buildFullPrompt, buildSectionPrompt, buildElementPrompt } from '@/modules/prompt/buildPrompt';
-import { parseAiResponse } from '@/modules/prompt/parseAiResponse';
 import { createSectionCRUDActions } from './sectionCRUDActions';
 import { pushContentHistoryEntry, deepCopy } from './historyHelpers';
 import type { BackgroundType } from '@/types/core/index';

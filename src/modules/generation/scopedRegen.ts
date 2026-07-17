@@ -83,6 +83,31 @@ export interface CopyEngineResolution {
   endpoint: CopyEndpoint;
 }
 
+/**
+ * Exhaustiveness guard for `CopyEngine` dispatch.
+ *
+ * ⚠️ WHY THIS EXISTS — read before adding an engine.
+ * More engines are coming (thing / trust / work / place / quick-yes). Every
+ * engine-keyed dispatch below MUST be an exhaustive switch that ends in this
+ * call, so that adding a member to `CopyEngine` without handling it here is a
+ * **COMPILE ERROR** (TS2345: `'newEngine'` not assignable to `never`).
+ *
+ * The alternative — an unguarded `else` falling through to some default builder
+ * — is not hypothetical: it is EXACTLY the bug this module already shipped once.
+ * The work engine's prompt speaks `workElementContract`'s vocabulary
+ * (`heading`/`bio`) while the layout-schema path demands `headline`/`body`, so a
+ * work project silently routed to the service/layout path produced **100%
+ * validation failure, burning 3 paid AI calls per request** (see the vocabulary
+ * pitfall note in this module's header + README). A wrong-builder fall-through
+ * is silent at runtime and expensive; a compile error is free.
+ */
+function assertNeverEngine(engine: never, context: string): never {
+  throw new Error(
+    `Unhandled copy engine "${String(engine)}" in ${context}. ` +
+      `Every CopyEngine member must be handled explicitly — see assertNeverEngine.`
+  );
+}
+
 /** The minimal project view engine dispatch needs. */
 export interface EngineProjectView {
   audienceType?: string | null;
@@ -135,9 +160,21 @@ export class ScopedGenerationError extends Error {
   }
 }
 
-/** engine → EXISTING modelConfig endpoint (D5). */
+/**
+ * engine → EXISTING modelConfig endpoint (D5).
+ * Exhaustive by construction — a new CopyEngine member fails `tsc` here rather
+ * than silently inheriting the `copy` tier. See assertNeverEngine.
+ */
 function endpointForEngine(engine: CopyEngine): CopyEndpoint {
-  return engine === 'work' ? 'work-copy' : 'copy';
+  switch (engine) {
+    case 'work':
+      return 'work-copy';
+    case 'product':
+    case 'service':
+      return 'copy';
+    default:
+      return assertNeverEngine(engine, 'endpointForEngine');
+  }
 }
 
 /**
@@ -373,7 +410,20 @@ export function narrowElementsMap(
   engine: CopyEngine = 'product',
   skipped?: SkippedSection[]
 ): ElementsMap {
-  if (engine === 'work') return narrowWorkContractMap(input, scope, skipped);
+  // Engine ⇒ VOCABULARY. Exhaustive by construction: a new CopyEngine member
+  // fails `tsc` here rather than silently inheriting the layout-schema path,
+  // which is how the work engine once produced 100% validation failure on paid
+  // calls. See assertNeverEngine.
+  switch (engine) {
+    case 'work':
+      return narrowWorkContractMap(input, scope, skipped);
+    case 'product':
+    case 'service':
+      // Both speak the layout element schema — fall through to the path below.
+      break;
+    default:
+      return assertNeverEngine(engine, 'narrowElementsMap');
+  }
 
   if (scope.kind === 'all') {
     if (!input.sections.length) {
@@ -633,16 +683,32 @@ function buildWorkPrompt(project: ScopedProject, map: ElementsMap): string {
   });
 }
 
+// Exhaustive by construction — a new CopyEngine member fails `tsc` here rather
+// than silently falling through to the service builder. See assertNeverEngine.
 function buildEnginePrompt(engine: CopyEngine, project: ScopedProject, map: ElementsMap): string {
-  if (engine === 'work') return buildWorkPrompt(project, map);
-  if (engine === 'product') return buildProductPrompt(project, map);
-  return buildServicePrompt(project, map);
+  switch (engine) {
+    case 'work':
+      return buildWorkPrompt(project, map);
+    case 'product':
+      return buildProductPrompt(project, map);
+    case 'service':
+      return buildServicePrompt(project, map);
+    default:
+      return assertNeverEngine(engine, 'buildEnginePrompt');
+  }
 }
 
 function buildRetryPrompt(engine: CopyEngine, originalPrompt: string, error: string): string {
-  if (engine === 'work') return buildWorkCopyRetryPrompt(originalPrompt, error, '');
-  if (engine === 'product') return buildProductCopyRetryPrompt(originalPrompt, error, '');
-  return buildServiceCopyRetryPrompt(originalPrompt, error, '');
+  switch (engine) {
+    case 'work':
+      return buildWorkCopyRetryPrompt(originalPrompt, error, '');
+    case 'product':
+      return buildProductCopyRetryPrompt(originalPrompt, error, '');
+    case 'service':
+      return buildServiceCopyRetryPrompt(originalPrompt, error, '');
+    default:
+      return assertNeverEngine(engine, 'buildRetryPrompt');
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

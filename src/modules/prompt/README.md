@@ -1,55 +1,47 @@
-# `modules/prompt` — AI copy-generation prompts, parsers & mocks
+# `modules/prompt` — AI copy-generation mocks
 
-Prompt builders, parsers, and mocks for AI copy generation. The legacy
-`POST /api/generate-landing` route and its phase-1 prompt (`buildStrategyPrompt.ts`)
-+ dev UI (`PromptForm.tsx`/`PromptPage.tsx`) were **deleted in scale-08**. What
-remains here is consumed by the **regeneration** routes and the per-audience
-routes (`/api/audience/{product,service}/{strategy,generate-copy}`, whose own
-prompt/parse code lives under `modules/audience/*`) plus the shared parsers and
-mock generators below.
+**This module is now mocks-only.** The legacy prompt builders and parsers that
+used to live here were **deleted in regen-modernization (phase 6)**:
 
-## Parsers & shared shape
+| Deleted file | What replaced it |
+|---|---|
+| `buildPrompt.ts` (`buildFullPrompt`/`buildSectionPrompt`/`buildElementPrompt`) | Per-audience copy builders under `modules/audience/{product,service,work}/copyPrompt.ts`, driven for regen by `modules/generation/scopedRegen.ts` |
+| `parseAiResponse.ts` (`parseAiResponse()`, `applyManualPreferredDefaults()`) | Per-audience parsers (`modules/audience/service/parseCopy.ts`, `product/parseCopy.ts`, `work/parseCopy.ts`) + `scopedRegen`'s `validateScopedSubset` |
+| `parseStrategyResponse.ts` (`parseStrategyResponse()`, `applyCardCountConstraints()`) | Per-audience strategy assembly under `modules/audience/*/strategy*` (it was already orphaned — its only edge was a type-only import from `buildPrompt.ts`) |
+| `mockResponseGenerator.ts` (`generateMockResponse(prompt)`) | The per-engine siblings below; the regen routes generate their mock strings locally |
 
-`parseStrategyResponse()` (`parseStrategyResponse.ts`) extracts + validates a
-strategy response into `ParsedStrategy`; `applyCardCountConstraints()` clamps
-counts to schema min/max. `parseAiResponse()` (`parseAiResponse.ts`) extracts JSON
-(tolerant of markdown fences / partial output), validates section content, and
-`applyManualPreferredDefaults()` fills `manual_preferred` fields (logos, images)
-with schema defaults. Both are shared by the per-audience routes.
+(Earlier, in scale-08, the `POST /api/generate-landing` route, its
+`buildStrategyPrompt.ts`, and the `PromptForm.tsx`/`PromptPage.tsx` dev UI were
+deleted.)
 
 ## Key files
 
 | File | Role |
 |------|------|
-| `parseStrategyResponse.ts` | `parseStrategyResponse()`, `applyCardCountConstraints()` — parse strategy pass |
-| `buildPrompt.ts` | `buildFullPrompt` / `buildSectionPrompt` / `buildElementPrompt` (regeneration) + `validateGeneratedJSON`. (`buildStrategicCopyPrompt` / `generateCardRequirementsReport` remain but are now dead after the `/api/generate-landing` deletion.) |
-| `parseAiResponse.ts` | `parseAiResponse()`, `applyManualPreferredDefaults()` — parse copy pass |
-| `types.ts` | shared prompt types |
+| `mockResponseGeneratorProduct.ts` | `generateMockMeridianStrategy/Copy()` — product/thing routes |
+| `mockResponseGeneratorService.ts` | `generateMockServiceStrategy/Copy()` — service/trust routes |
+| `mockResponseGeneratorWork.ts` | `generateMockWorkStrategy/Copy()` — work routes (atelier) |
+| `types.ts` | shared prompt types — **orphaned** by the phase-6 deletion (zero importers); left in place, safe to delete |
 
-The **layout element schema** (`modules/sections/layoutElementSchema.ts`) is the
-single source of truth for what elements each section/layout may contain; prompt
-builders read card requirements and element lists from it.
+These are consumed by `/api/audience/{product,service,work}/{strategy,generate-copy}`,
+`/api/audience/work/regenerate-story`, the golden/contract tests
+(`modules/audience/__tests__/`), and `scripts/{testServicePipeline,dogfoodServicePipeline}.ts`.
 
-## Provider chain (NOT Anthropic in this path)
+## Where copy generation actually lives now
 
-The `regenerate-*` routes call AI directly:
+- **First generation:** `/api/audience/{product,service,work}/{strategy,generate-copy}` — prompt builders + parsers under `modules/audience/*`.
+- **Regeneration** (`/api/regenerate-{element,section,content}`): `modules/generation/scopedRegen.ts` — server-side prompt construction, engine dispatch (`resolveCopyEngine`), Zod-validated output, route-owned validate→retry loop.
+- **Model selection:** `src/lib/modelConfig.ts` (endpoints incl. `copy` / `work-copy`); the shared client is `src/lib/aiClient.ts`.
 
-- Primary: **OpenAI `gpt-4o-mini`** when `USE_OPENAI=true`.
-- Fallback: **Nebius** (`mistralai/Mixtral-8x7B-Instruct-v0.1`, `api.studio.nebius.ai`).
-- Last resort: **mock** response (see below).
+The **layout element schema** (`modules/sections/layoutElementSchema.ts`) remains the
+single source of truth for what elements each section/layout may contain (product/service);
+the **work** engine's vocabulary is `workElementContract` instead — see
+`modules/generation/README.md` for that pitfall.
 
-> The `@anthropic-ai/sdk` dependency is **not** used in this regeneration path.
-> (The newer audience routes select models via `src/lib/modelConfig.ts`, whose
-> `production` tier *can* use Claude — that is a separate code path.)
+## Mock mode
 
-## Mock generators
-
-Used for demo/testing without spending AI credits (toggled via `src/lib/mockMode.ts`
-— `NEXT_PUBLIC_USE_MOCK_GPT=true` or the `lessgodemomockdata` bearer token):
-
-- `mockResponseGenerator.ts` — `generateMockResponse(prompt)` for the regeneration routes.
-- `mockResponseGeneratorProduct.ts` — `generateMockMeridianStrategy/Copy()` for the product route.
-- `mockResponseGeneratorService.ts` — `generateMockServiceStrategy/Copy()` for the service route.
+Toggled via `src/lib/mockMode.ts` — `NEXT_PUBLIC_USE_MOCK_GPT=true` or the
+`lessgodemomockdata` demo token.
 
 ## Debug env vars (verbose — off in prod)
 

@@ -16,12 +16,10 @@
 // ============================================================================
 
 import { getCompleteElementsMap } from '@/modules/sections/elementDetermination';
-import type { EditStore, APIRequest } from '@/types/store';
+import type { EditStore } from '@/types/store';
 import type { RegenerationActions } from '@/types/store/actions';
 import type { CanonicalFieldName } from '@/types/core/index';
 import { logger } from '@/lib/logger';
-
-const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 const createPageStoreView = (editState: EditStore) => ({
   layout: {

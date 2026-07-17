@@ -540,3 +540,115 @@ Every group discriminates. No non-discriminating test found.
 3. **Missing `warnings` renderer (FIX 2).** `skippedSections`/`warnings` reach store state but **no component reads them** → R6.3's "a why the user SEES" is unmet. Founder decision: build the renderer in the editor lane, or accept data-only for beta.
 4. **Collections drop belongs to the SECTION loop (FIX 1)** — `regenerateAllContent` → `/api/regenerate-section` → `aiActions.ts:159-176`, at 2 credits × N sections. Phase 5's route assigns raw and lands collections fine. Backlog the merge-loop fix; do NOT attribute it to `regenerate-content`.
 5. **Founder `/manual-test` of `/api/regenerate-content` must be driven via the store/API** (`useEditStore.getState().regenerateContentOnly(...)`) or direct HTTP — **no button reaches this route**.
+
+---
+
+## Phase 6 — legacy deletion sweep + docs + chokepoint hardening (FINAL)
+
+**Files changed**
+
+*Deleted (5 files, **5,584 lines removed**):*
+- `src/modules/prompt/buildPrompt.ts` (**2,347**)
+- `src/modules/prompt/parseAiResponse.ts` (**1,832** — the repo's only `@ts-nocheck`)
+- `src/modules/prompt/parseStrategyResponse.ts` (**794**)
+- `src/modules/prompt/mockResponseGenerator.ts` (**568** — the BARE one only)
+- `src/utils/regeneration/contentOnlyRegeneration.ts` (**43**)
+
+*Modified:*
+- `src/hooks/editStore/contentActions.ts` (3 dead import lines stripped)
+- `src/hooks/editStore/regenerationActions.ts` (dead `APIRequest` + `generateId` stripped)
+- `src/modules/generation/scopedRegen.ts` (**Part B hardening**)
+- `src/modules/generation/README.md` (hardening + founder-direction notes)
+- `src/modules/prompt/README.md` (rewritten — mocks-only)
+- `CLAUDE.md` (AI-pipeline section corrected)
+- `docs/guides/copyQualityEval.md` (2 stale refs re-pointed)
+- `src/modules/sections/elementDetermination.ts` (comment-only, `:242`)
+- `src/lib/editDelta/capture.ts` (comment-only, `:16`)
+- `src/modules/audience/work/README.md` (comment-only stale ref — see Deviation 2)
+- `docs/task/regen-modernization.audit.md` (this section)
+
+> Also modified in `git status`: `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` — the same **CRLF-only** vitest artifact phases 1–5 recorded (`git diff --numstat` → zero content lines). Not authored here.
+
+### PART A — the deletion sweep
+
+**Pre-deletion grep evidence (the human gate's requirement):** the ONLY importers of the deleted modules anywhere in `src`/`scripts`/`e2e` were the 3 dead import lines in `contentActions.ts`. Verified that `buildPrompt` hits in `src/lib/perplexity.ts:95,159` are a **local private function of the same name** (unrelated — NOT touched), and that `elementDetermination.ts:242` / `editDelta/capture.ts:16` / `audience/work/README.md:6-7` were **comment-only** references.
+
+**Siblings verified LIVE, before AND after deletion.** `mockResponseGenerator{Product,Service,Work}.ts` were NOT deleted; each re-confirmed to retain live importers post-deletion:
+- `…Product` → `api/audience/product/{generate-copy,strategy}/route.ts`, `audience/product/sectionSelection.ts`, `generationContract.test.ts:37`, `captureGolden.test.ts:38`
+- `…Service` → `api/audience/service/{generate-copy,strategy}/route.ts`, `generationContract.test.ts:33`, `captureGolden.test.ts:35`, `scripts/{testServicePipeline,dogfoodServicePipeline}.ts`
+- `…Work` → `api/audience/work/{generate-copy,strategy,regenerate-story}/route.ts`
+
+**Dead imports stripped (nothing else touched in either file):**
+- `contentActions.ts:2-4` — `useOnboardingStore`, `buildFullPrompt`/`buildSectionPrompt`/`buildElementPrompt`, `parseAiResponse`. Re-verified dead by grep before removal: each symbol appeared **only on its own import line**, zero call sites (the regen methods are `logger.warn` stubs). A 3-line deletion, as specified.
+- `regenerationActions.ts:19,24` — `APIRequest` (type import) + `generateId` (local const), both dead after phase 5's re-point.
+
+**Doc fixes (all previously false):**
+- `CLAUDE.md` — the AI-pipeline section claimed `parseStrategyResponse()`/`parseAiResponse()` were the live parsers. **Nothing called them.** Rewritten to describe reality: per-audience first-gen routes with their own builders/parsers under `modules/audience/*`; regen via `scopedRegen.ts`; added the **engine ≠ audienceType** trap, the work-vocabulary pointer, and corrected the provider paragraph (models now go through `modelConfig`/`aiClient`; mock is demo-mode only, **not** a failure fallback as the old text implied).
+- `src/modules/prompt/README.md` — rewritten. The module is now **mocks-only**; a table maps each deleted file → what replaced it.
+- `docs/guides/copyQualityEval.md:17-18` (touchpoint table) + `:102` (the layer-2 e2e chain sketch) — re-pointed to the per-audience builders/parsers.
+- `elementDetermination.ts:242` + `editDelta/capture.ts:16` + `audience/work/README.md:6-7` — comment-only refs to deleted files, updated.
+
+### PART B — chokepoint hardening (prevents recurrence of this run's worst bug)
+
+**Before:** four engine-keyed dispatches ended in an **unguarded fall-through**:
+
+| Site | Before | Fall-through consequence for a NEW engine |
+|---|---|---|
+| `buildEnginePrompt` (`:639`) | `if work … if product … else buildServicePrompt(…)` | prompt built by the **service** builder |
+| `buildRetryPrompt` (`:645`) | `if work … if product … else buildServiceCopyRetryPrompt(…)` | retry prompt from the **service** builder |
+| `narrowElementsMap` (`:376`) | `if (engine === 'work') … else` layout-schema path | validated against the **layout** vocabulary |
+| `endpointForEngine` (`:164`) | `engine === 'work' ? 'work-copy' : 'copy'` | silently rides the `copy` model tier (**Deviation 1**) |
+
+**Why it mattered:** an engine added to the `CopyEngine` union but missed in these branches silently gets the service builder — the prompt speaks one vocabulary while the validator demands another. That is **exactly the phase-2 atelier bug: 100% validation failure burning 3 paid calls per request** (the module's own comment at `:250-263`). Silent at runtime, expensive, and invisible to `tsc`.
+
+**After:** all four are **exhaustive switches ending in `assertNeverEngine(engine, context)`** — a new `assertNeverEngine(engine: never, …): never` helper carrying the full why (documented at the `CopyEngine` type). An unhandled engine is now a **COMPILE ERROR**, not a paid silent wrong-builder.
+
+**Proven, not assumed (mutation probe, run then reverted):** temporarily widened `CopyEngine` to include `'place'` → `npx tsc --noEmit` produced **exactly 4 errors, one per site**:
+
+```
+scopedRegen.ts(176,32): error TS2345: Argument of type '"place"' is not assignable to parameter of type 'never'.  // endpointForEngine
+scopedRegen.ts(425,32): …  // narrowElementsMap
+scopedRegen.ts(697,32): …  // buildEnginePrompt
+scopedRegen.ts(710,32): …  // buildRetryPrompt
+```
+
+Reverted; `tsc` back to 0 errors. **Behavior-preserving for the existing 3 engines** — every existing `case` returns exactly what its old branch returned (`product`/`service` share the layout path via an explicit fall-through `case` pair). This is a safety net, not a refactor. The 3693-test suite (incl. phase 2's full dispatch matrix) passing unchanged is the behavior-preservation evidence.
+
+### Logged for the future (founder direction — deliberately NOT implemented)
+
+Recorded in `src/modules/generation/README.md`, each **verified against the code, not taken on faith**:
+
+1. **Writers/authors → WORK engine.** `modules/engines/workSections.ts:227` already builds the work contract's `about` via `fromDonor(writerElementSchema.GranthParichay, 'about')` — the work engine ALREADY borrows the writer schema. Confirmed the likely change is just **adding `granth` to `WORK_COPY_ENGINE_TEMPLATES`** (`src/lib/workCopyEngine.ts:20`, currently `['atelier']`) at the chokepoint. No new `CopyEngine` member needed.
+2. **Writer regen's 422 is HONEST today.** Verified: no `api/audience/writer/` route (only `product`/`service`/`work` exist), no writer onboarding route, and `modules/audience/writer/` contains ONLY `elementSchema.ts`. Writer sites are skeleton/manual-fill and were never LLM-generated → refusing to LLM-regenerate takes nothing away.
+3. **`audienceType` is being rethought.** `resolveCopyEngine` keys off `audienceType` (product/service) + the template allow-list (work) — flagged as **the ONE place that changes** if `audienceType` retires.
+
+Plus a standing warning: **do not "fix" a new-engine compile error by bolting it onto an existing `case`** — decide its vocabulary first.
+
+### Deviations from the plan
+
+1. **Hardened a FOURTH site the brief did not name: `endpointForEngine`.** The brief named three `else` branches; `endpointForEngine` is the same trap shape (a ternary) in the same file — a new engine would silently inherit the `copy` model tier instead of its own. In-scope (the file is on Files-touched), minimal, behavior-preserving, and leaving one of four fall-throughs open would have half-closed the very trap Part B exists to close. Lower severity than the builder sites (wrong model tier ≠ wrong vocabulary), hence declared rather than assumed.
+2. **Fixed a stale ref in `src/modules/audience/work/README.md:6-7`** (not on the plan's file list). The brief explicitly authorized "fix any other stale reference your grep finds"; this doc named both deleted parsers as though they were live. Doc-comment only, zero code impact.
+3. **`src/modules/prompt/types.ts` is now ORPHANED (zero importers) but was NOT deleted.** It was not on the delete list. Conservative call per the in-scope-ambiguity rule: I did not expand the deletion beyond the founder-signed-off set. Flagged in the module README as safe to delete. **Follow-up candidate, ~1 file.**
+4. **`src/utils/regeneration/fullPageRegeneration.ts` left untouched** — the sibling of the deleted `contentOnlyRegeneration.ts`, not on the delete list and not investigated for liveness. Noted only so the next engineer knows the directory was not swept wholesale.
+
+### Green gate — FULL (actual output, run in WORKDIR)
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit` | **0 errors** (exit 0). The old `founder.jpg` baseline error is gone — `.next/` now exists, as phase 4 explained. |
+| `npm run test:run` | **Test Files 216 passed \| 1 skipped (217); Tests 3693 passed \| 18 skipped (3711)** — 65.81s. **Exactly the phase-5 baseline (3693/18), zero drift.** Neither known load-flake (`pipelineGuards.test.ts`, `htmlGenerator.test.ts`) fired; no isolated re-run needed. |
+| `npm run lint` | **exit 0, ZERO errors.** 132 warnings, all pre-existing (`@next/next/no-img-element` across template blocks + one `react-hooks/exhaustive-deps` in `ph-provider.tsx`). **Zero warnings in any file this phase touched.** (Run because it gates the pre-push hook — skipping it blocked a push on 2026-07-14.) |
+| `npm run build` | **SUCCESS, exit 0** — full `build:published-css` → `build:assets` → `next build`; route table emitted. **The real proof the 5,584-line deletion is clean.** |
+
+**Residual-reference grep (post-deletion):** searched `src`/`scripts`/`e2e` for `modules/prompt/buildPrompt`, `modules/prompt/parseAiResponse`, `modules/prompt/parseStrategyResponse`, the bare `prompt/mockResponseGenerator'`, and `contentOnlyRegeneration` → **zero hits** outside `.md` files.
+
+### Open risks
+
+1. **`modules/prompt/types.ts` orphaned** (Deviation 3) — dead weight, not a hazard.
+2. **`regenerationActions.ts`'s three actions still have ZERO UI callers** (carried from phase 5, unchanged here — the sweep only removed its dead imports). `regenerate-content` remains reachable only via store/API, per the merge-gate list. Editor-lane decision: wire a caller or delete.
+3. **The hardening protects `scopedRegen.ts`'s dispatch only.** Other engine-keyed dispatch elsewhere in the codebase (e.g. onboarding-by-engine work) is NOT covered by `assertNeverEngine`; the pattern is documented for reuse.
+4. All phase-1→5 merge-gate items stand unchanged (pricing free→3 credits, Kundius's quote band, the missing warnings renderer, the section-loop collections drop). Phase 6 added no user-visible behavior change.
+
+### Post-review nit (fixed)
+
+- `src/modules/generation/README.md` line 3 — the sweep's own README header was stale (still pointed the two-phase copy pipeline at `modules/prompt` / `modules/audience`); corrected to name `modules/audience/{product,service,work}` as the builders/parsers home and note `modules/prompt` is mock-generators only. Doc-only; `npx tsc --noEmit` → 0 errors.
