@@ -38,6 +38,7 @@ import {
   useWizardStore,
   selectCommitRail,
   selectSetJourneyStep,
+  selectBriefFacts,
 } from '@/hooks/useWizardStore';
 import { AppIcon } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
@@ -49,9 +50,11 @@ import {
   proposeGroups,
   mergeProposalIntoGroups,
   PHOTOS_PER_GROUP_CAP,
+  PHOTOS_TOTAL_CAP,
   type ProposePhotoInput,
   type GroupProposal,
 } from '@/modules/wizard/work/ingest/proposeGroups';
+import CorrectionBoard from './CorrectionBoard';
 import type { JourneyStepProps } from '../../JourneyShell';
 
 interface Progress {
@@ -59,18 +62,35 @@ interface Progress {
   total: number;
 }
 
-/** D11 belt — clamp any outgoing group over the per-group cap. Never throws. */
+/**
+ * D11 belt (CF-1) — clamp the OUTGOING groups at the commit point, per-group 24
+ * AND total 150. Never throws (clamp + `console.warn`). The total belt matches
+ * `proposeGroups`' own global policy: earlier groups fill the 150 budget first,
+ * and within a group the earliest already survive (photos arrive earliest-first),
+ * so a later group is truncated / emptied rather than an earlier one thinned. A
+ * cross-group merge is the case that can overshoot 150 cumulatively.
+ */
 function clampGroupsToCap(groups: WorkGroupInput[]): WorkGroupInput[] {
+  let remaining = PHOTOS_TOTAL_CAP;
   return groups.map((g) => {
     const photos = g.photos ?? [];
-    if (photos.length > PHOTOS_PER_GROUP_CAP) {
+    let next = photos;
+    if (next.length > PHOTOS_PER_GROUP_CAP) {
       // eslint-disable-next-line no-console
       console.warn(
-        `[show-work] group "${g.name}" carries ${photos.length} photos over the ${PHOTOS_PER_GROUP_CAP} cap — clamping.`
+        `[show-work] group "${g.name}" carries ${next.length} photos over the ${PHOTOS_PER_GROUP_CAP} cap — clamping.`
       );
-      return { ...g, photos: photos.slice(0, PHOTOS_PER_GROUP_CAP) };
+      next = next.slice(0, PHOTOS_PER_GROUP_CAP);
     }
-    return g;
+    if (next.length > remaining) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[show-work] total photos exceed the ${PHOTOS_TOTAL_CAP} cap — clamping group "${g.name}".`
+      );
+      next = next.slice(0, Math.max(0, remaining));
+    }
+    remaining -= next.length;
+    return next === photos ? g : { ...g, photos: next };
   });
 }
 
@@ -83,6 +103,7 @@ export default function ShowWorkStep({ seam }: JourneyStepProps) {
   const content = seam.steps.showWork;
   const commitRail = useWizardStore(selectCommitRail);
   const setJourneyStep = useWizardStore(selectSetJourneyStep);
+  const briefFacts = useWizardStore(selectBriefFacts);
 
   const folderRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -92,6 +113,35 @@ export default function ShowWorkStep({ seam }: JourneyStepProps) {
   const [error, setError] = useState<string | null>(null);
   const [proposal, setProposal] = useState<GroupProposal | null>(null);
   const [failedCount, setFailedCount] = useState(0);
+  // url → tiny blur data-url (from the upload pipeline), for the board's
+  // instant thumbnail paint. Accumulated across uploads.
+  const [blurByUrl, setBlurByUrl] = useState<Record<string, string>>({});
+  // Bumped on each successful ingest so the CorrectionBoard REMOUNTS with the
+  // fresh committed groups (its own verb drives never reset it — same key).
+  const [uploadNonce, setUploadNonce] = useState(0);
+
+  // The committed groups the board edits — projected LIVE from the facts bag
+  // (commitRail is the only writer, so this is always the persisted truth).
+  const committedGroups = useMemo(
+    () => (getWorkFacts(briefFacts ?? undefined)?.groups ?? []) as WorkGroupInput[],
+    [briefFacts]
+  );
+
+  /**
+   * The ONE commit door for the board (D10 funnel + D11 belt). Clamp the
+   * outgoing array, run it through `applyRailEdit({field:'groups'})` →
+   * `commitRail`, and report ok/err back to the board (which reverts on fail).
+   */
+  async function commitGroups(
+    outgoing: WorkGroupInput[]
+  ): Promise<{ ok: boolean; error?: string }> {
+    const liveFacts = useWizardStore.getState().briefFacts;
+    const clamped = clampGroupsToCap(outgoing); // D11 belt (per-group 24 + total 150)
+    const commit = applyRailEdit({ field: 'groups', value: clamped }, liveFacts);
+    if (!commit.ok) return { ok: false, error: commit.error };
+    const res = await commitRail(commit);
+    return res.ok ? { ok: true } : { ok: false, error: res.error };
+  }
 
   // `webkitdirectory` is non-standard, so set it imperatively (typed attributes
   // would reject it). The folder input then reports each file's relative path.
@@ -166,20 +216,23 @@ export default function ShowWorkStep({ seam }: JourneyStepProps) {
       const liveFacts = useWizardStore.getState().briefFacts;
       const existing = (getWorkFacts(liveFacts ?? undefined)?.groups ?? []) as WorkGroupInput[];
       const merged = mergeProposalIntoGroups(nextProposal, existing);
-      const outgoing = clampGroupsToCap(merged); // D11 belt
 
-      const commit = applyRailEdit({ field: 'groups', value: outgoing }, liveFacts);
-      if (!commit.ok) {
-        setError(commit.error);
-        return;
-      }
-      const res = await commitRail(commit);
+      const res = await commitGroups(merged); // D10 funnel + D11 belt
       if (!res.ok) {
-        setError(res.error);
+        setError(res.error ?? 'Something went wrong adding your photos.');
         return;
       }
 
+      // Keep the blur placeholders for the board's thumbnails.
+      setBlurByUrl((prev) => {
+        const next = { ...prev };
+        for (const u of uploaded) {
+          if (u.blurDataUrl) next[u.url] = u.blurDataUrl;
+        }
+        return next;
+      });
       setProposal(nextProposal);
+      setUploadNonce((n) => n + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong adding your photos.');
     } finally {
@@ -283,6 +336,20 @@ export default function ShowWorkStep({ seam }: JourneyStepProps) {
               {failedCount} photo{failedCount === 1 ? '' : 's'} couldn’t be uploaded.
             </p>
           )}
+
+          {/* The correction board (5 tap verbs). Keyed on the upload nonce so a
+              NEW upload remounts it with fresh committed groups; its own verb
+              drives never reset it. Renders the COMMITTED groups (all of them),
+              distinct from the summary above (the just-added clusters). */}
+          {committedGroups.length > 0 && (
+            <CorrectionBoard
+              key={uploadNonce}
+              groups={committedGroups}
+              blurByUrl={blurByUrl}
+              onCommit={commitGroups}
+              busy={busy}
+            />
+          )}
         </div>
       )}
 
@@ -294,7 +361,7 @@ export default function ShowWorkStep({ seam }: JourneyStepProps) {
             disabled={busy}
             onClick={() => setJourneyStep(3)}
           >
-            Looks good
+            Looks right
             <AppIcon name="arrow_forward" size={16} className="ml-1.5" />
           </Button>
         )}

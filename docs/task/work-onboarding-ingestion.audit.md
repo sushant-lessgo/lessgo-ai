@@ -531,3 +531,173 @@ Non-blocking → CARRY INTO PHASE 4:
 1. Total-150 cap only enforced on proposeGroups' own contribution, not at the belt — a cross-group merge could cumulatively exceed 150. Practically bounded (entry-seeded groups start photoless). → P4: extend `clampGroupsToCap` to also enforce the 150 total at the commit point (P4 touches the merge verb which re-caps anyway).
 2. No dedup on re-ingest (bounded per-group by the 24 belt); proposal summary shows latest batch while facts accumulate — rail chips stay correct. P4 correction board (hide/merge) mitigates.
 3. `readCaptureDates.ts` has no dedicated unit test (e2e-covered only). → P4: add a 2-case unit test (dated JPEG → Date, PNG → null) as cheap insurance.
+
+---
+
+# work-onboarding-ingestion — Phase 4 audit (correction screen · 5 verbs + ingestion-writer regression)
+
+Branch: `feature/work-onboarding-ingestion` (verified before any edit).
+Scope: Phase 4 ONLY — the always-shown, skippable correction board (rename /
+merge / drag-between / hide / pick-cover), the pure verb reducer, the D8
+ingestion-shaped regression, plus the two carry-forward items (CF-1 total-150
+belt, CF-2 readCaptureDates unit test).
+
+## Files changed
+
+Created:
+- `src/components/onboarding/journey/engines/work/correctionReducer.ts`
+- `src/components/onboarding/journey/engines/work/correctionReducer.test.ts`
+- `src/components/onboarding/journey/engines/work/CorrectionBoard.tsx`
+- `src/modules/wizard/work/ingest/readCaptureDates.test.ts` (CF-2 — authorized new file)
+
+Modified:
+- `src/components/onboarding/journey/engines/work/ShowWorkStep.tsx`
+- `src/components/onboarding/journey/UnderstoodRail.test.tsx`
+- `src/components/onboarding/journey/engines/work.test.ts`
+- `e2e/work-onboarding.spec.ts`
+- `docs/task/work-onboarding-ingestion.audit.md` (this section)
+
+No file outside Phase 4's Files-touched was edited.
+
+## The five verbs — reducer semantics (correctionReducer.ts, all pure)
+
+All transforms return a FRESH array (inputs never mutated); an out-of-range
+index / unknown photo id is a NO-OP returning the input array by reference.
+
+1. rename — `renameGroup(groups, index, name)`: sets the group's name; preserves
+   photos/kind/price. (Empty name is guarded in the board, which discards a blank
+   rename so a kind-valid group is never blanked.)
+2. merge — `mergeGroups(groups, indices) -> {groups, kept, dropped}`: photos
+   CONCATENATE in group order (each source already earliest-first), duplicate
+   covers collapse to the FIRST encountered (cover stays exclusive), then the
+   merged group is re-capped at PHOTOS_PER_GROUP_CAP (24) with {kept,dropped}
+   surfaced. Keeps the lowest-index group's identity; <2 distinct valid indices
+   => no-op.
+3. drag-between — `movePhoto(groups, fromIndex, photoId, toIndex)`: moves a photo
+   to the end of the target group; the moved photo LOSES its cover flag (it can
+   never arrive as a second cover). @dnd-kit/core (existing dep) wires it.
+4. hide — `hidePhoto(groups, groupIndex, photoId)`: REMOVES the photo from the
+   group's photos[] (D12). The committed facts lose it; nothing writes MediaAsset
+   here, so the row survives dormant. Group-level removal is not a verb — it rides
+   merge.
+5. pick cover — `pickCover(groups, groupIndex, photoId)`: marks one photo
+   cover:true, EXCLUSIVELY (every other photo in that group has cover OMITTED,
+   not set false). Other groups untouched.
+
+The board (CorrectionBoard.tsx) wires taps/drags onto these and re-commits the
+FULL rebuilt WorkGroupInput[] through the D10 funnel on every change:
+ShowWorkStep.commitGroups = clampGroupsToCap (D11 belt) ->
+applyRailEdit({field:'groups'}) -> commitRail. NEVER the seam's
+applyEdit/RailEditValue. Optimistic-set-then-revert on commit failure. Blur-up:
+thumbnails paint the pipeline's blurDataUrl (captured in ShowWorkStep, keyed by
+url) behind the WebP — the in-product fast-on-phone blur path.
+
+Accept ("Looks right ->") and Skip both live in ShowWorkStep and are pure
+advances to STEP 03 (the proposal was committed in P3), so Skip loses nothing.
+The board is keyed on an upload nonce so a NEW upload remounts it with fresh
+committed groups; its own verb drives never reset it.
+
+## CF-1 — total-150 belt (ShowWorkStep.clampGroupsToCap)
+
+Extended from per-group-24-only to ALSO enforce the 150 total at the commit
+point. Policy matches proposeGroups' global cap exactly: iterate groups in order,
+each fills the remaining budget, later groups are truncated/emptied rather than
+earlier ones thinned (and within a group the earliest already survive since
+photos arrive earliest-first). Clamp + console.warn, never throws. This is the
+one place a cross-group merge can overshoot 150 cumulatively. All commits from
+the board route through this belt.
+
+## CF-2 — readCaptureDates unit test
+
+New readCaptureDates.test.ts: dated JPEG fixtures (exif-day1-a.jpg,
+exif-day2-a.jpg) -> real Date with the right calendar day; no-exif.png -> null;
+readCaptureDates index-alignment (JPEG->Date, PNG->null). Files built from the
+committed EXIF fixtures via a jsdom File; exifr parses them as-is
+(readCaptureDates.ts source UNTOUCHED — testable without a source change).
+
+## D8 regression (test-only, UnderstoodRail.test.tsx)
+
+New case: project the VM, open the chips editor with an unsaved stale draft, then
+land an INGESTION-shaped commit through the D10 funnel (a photo attaches to
+Weddings + a new photo-bearing Newborns group) while the editor is open. Asserts:
+the chips editor REMOUNTED on the swapped projection key (${field.id}-${pKey}) so
+the stale draft dies and ids re-seed; the ingested photos sit on the RIGHT groups
+(Weddings keeps w1 and gains w2, Portraits untouched, Newborns carries n1) — no
+wipe, no misattachment; and a subsequent unchanged chips-save joins by id against
+the new bag, still photo-intact. UnderstoodRail.tsx source NOT edited (the guard
+already exists).
+
+engines/work.test.ts also gains a P4 block proving the reducer verbs survive the
+same founder-signed gate: pickCover commits an exclusive cover, hidePhoto drops
+the photo from committed facts (D12, siblings intact), mergeGroups conserves
+photos + collapses the group count.
+
+## Deviations from the plan (in-scope judgment calls, conservative)
+
+1. Hide is one-way in-board (drop), not a reversible in-session toggle. The plan
+   calls hide a "photo-level toggle" but also mandates a PURE group-array
+   transform that DROPS from committed photos[] (D12). To keep the reducer pure
+   and the committed facts always clean, hidePhoto removes the photo from the
+   working array; un-hide within the session is not offered. Faithful to D12's
+   binding truth (the MediaAsset row survives, so re-add is a future library-UI
+   affordance) and the conservative reading. e2e proves the hidden url is absent
+   from persisted facts.
+2. e2e verb assertions are FACTS-level (loadDraft), not finalContent-level. The
+   instruction's literal wording ("cover_image post-generation", "absent from
+   finalContent") would couple each verb to a full atelier2 fan-out (6 AI calls +
+   free-tier rate-limit waits) — heavy and flaky. The facts->finalContent BINDING
+   (covers -> gallery cover_image, photos -> /works item pages) is already the
+   subject of the existing REAL-fanout atelier2 spec in this file, so the verb
+   tests assert the deterministic facts truth and reference that spec. Stated in
+   the spec comment, not silently skipped.
+3. The P3 proposal summary (show-work-proposal + -group) is KEPT alongside the
+   board. They show different things (summary = the just-added clusters; board =
+   all committed groups), so the existing P3 upload e2e assertions stay valid
+   unchanged. app-accent/app-subtle (non-existent tokens) mapped to
+   app-primary/app-tint/app-hairline.
+
+## Constraints honored
+
+Zero new AI calls, zero prisma schema touch, zero MediaAsset writes, no new dep
+(@dnd-kit/core already present). The commit funnel is exclusively the work
+module's applyRailEdit({field:'groups'}) -> commitRail.
+
+## Verification results (run in WORKDIR)
+
+1. `npx tsc --noEmit` — CLEAN (no output; no founder.jpg TS2307 surfaced).
+2. `npm run test:run` — 226 files / 3879 passed | 18 skipped (was 3852 in P3;
+   +27 net new across the reducer verbs, readCaptureDates, verb-through-funnel,
+   and the D8 ingestion regression). correctionReducer (all 5 verbs + merge cap +
+   cover-exclusivity + hide-drop + immutability), CF-1 belt, CF-2, D8 regression,
+   work.test — all green. No new failure.
+3. `npm run build` — SUCCEEDED.
+4. e2e — `npx playwright test work-onboarding.spec.ts -g "correction board"
+   --project=authed` -> PASSED (24.8s): rename -> rail chip updates + persists;
+   pick-cover -> exclusive cover in facts; hide -> url dropped from facts; merge
+   -> group count -1, photo count conserved, all kind-valid, sibling entry
+   intact. Drag-between attempted best-effort (tolerated; reducer movePhoto test
+   is the gate of record). A full unfiltered test:e2e run is slow/rate-limited on
+   UNRELATED authed specs — infra, not this phase; the scoped run is the honest
+   result.
+
+## For the impl-reviewer to scrutinize
+
+- cover-exclusivity — pickCover OMITS cover on non-chosen photos (never false);
+  merge dedupeCover keeps the first cover; move strips cover. Verified in reducer
+  test + funnel test + e2e.
+- hide drops from FACTS, not MediaAsset — hidePhoto is a pure array filter; no
+  code path here touches MediaAsset. Verified: url absent from persisted facts
+  (e2e) + committed facts (funnel test).
+- merge cap-conservation — concatenate -> dedupe cover -> re-cap at 24 with
+  {kept,dropped}; CF-1 belt additionally caps 150 total at commit. Reducer test
+  covers the 40->24 (dropped 16) case + earliest-survive ordering.
+
+---
+## Orchestrator record — Phase 4 impl-review
+
+**impl-review verdict: SHIP** (loop 1, no blocking). All 5 verb reducers semantically correct: pickCover exclusive (omitted==not-cover, consistent w/ stampWorkGalleryBinding), hide facts-only drop (zero MediaAsset/prisma in any code path), merge conserves photo count + {kept,dropped} + group count −(n−1) + deterministic identity/cover, movePhoto strips stale cover, rename name-only. CF-1 150-belt correct by inspection; CF-2 real; D8 regression real (would fail on projection-key regression); D10 funnel unchanged; always-shown/skippable holds; blur path present; @dnd-kit pre-existing, zero AI/credit/schema. Gates: tsc exit 0, test:run 3879 passed / 0 new failures (P4 files: 81 tests).
+
+Non-blocking:
+1. **CF-1 belt (150-total) untested at belt level** — `clampGroupsToCap` is private to ShowWorkStep; the tested 150-cap is proposeGroups' (a different function). Correct by inspection but the belt itself has no direct test. → CLOSE IN P5 (cheap insurance on a data-safety belt): export `clampGroupsToCap` + drive a >150-across-groups case. Authorized addition to P5 scope (ShowWorkStep.tsx + a test).
+2. Hide one-way in-session (D12-faithful; blob survives → re-uploadable, not data loss) — acceptable for E2 pilot; future reversible-toggle/undo is a UX nicety. Surface at the Kundius pilot.
+3. e2e verb assertions facts-level (finalContent binding owned by the real-fanout atelier2 spec); drag-between best-effort with movePhoto unit test as gate of record. Reasonable.

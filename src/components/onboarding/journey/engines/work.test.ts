@@ -22,6 +22,11 @@ import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
 import type { RailChipEdit, RailCommit } from './types';
 import { applyRailEdit, type WorkGroupInput } from '@/modules/wizard/work/rail';
 import { proposeGroups, mergeProposalIntoGroups } from '@/modules/wizard/work/ingest/proposeGroups';
+import {
+  mergeGroups,
+  hidePhoto,
+  pickCover,
+} from './work/correctionReducer';
 
 const rail = workJourneySeam.rail;
 
@@ -546,6 +551,88 @@ describe('work seam — ingestion commit path (D10)', () => {
       'https://cdn.example.com/b.jpg',
     ]);
   });
+});
+
+// ============================================================================
+// P4 — the correction VERBS through the D10 funnel.
+//
+// correctionReducer.test.ts pins the pure verb transforms; here we prove they
+// survive the SAME founder-signed commit gate ShowWorkStep drives them through
+// (`applyRailEdit({field:'groups'})`) — cover-exclusivity persists, a hidden
+// photo is ABSENT from the committed facts (D12), and a merge conserves photos
+// (minus cap) while collapsing groups — with siblings intact.
+// ============================================================================
+
+describe('work seam — correction verbs through the D10 funnel (P4)', () => {
+  function photoBearingFacts(): Record<string, unknown> {
+    return {
+      entry: { businessName: 'Kundius Studio' },
+      work: {
+        identity: { name: 'Kundius Studio' },
+        groups: [
+          {
+            name: 'Weddings',
+            kind: 'category',
+            price: { mode: 'on-request' },
+            photos: [
+              { id: 'w1', url: 'https://cdn/w1.jpg', cover: true },
+              { id: 'w2', url: 'https://cdn/w2.jpg' },
+            ],
+          },
+          {
+            name: 'Portraits',
+            kind: 'category',
+            price: { mode: 'on-request' },
+            photos: [{ id: 'p1', url: 'https://cdn/p1.jpg', cover: true }],
+          },
+        ],
+      },
+    };
+  }
+
+  const commit = (groups: WorkGroupInput[], facts: Record<string, unknown>) =>
+    applyRailEdit({ field: 'groups', value: groups }, facts);
+
+  it('pickCover commits an EXCLUSIVE cover (the old cover is cleared in facts)', () => {
+    const facts = photoBearingFacts();
+    const groups = (getWorkFacts(facts)?.groups ?? []) as WorkGroupInput[];
+    const res = expectRail(commit(pickCover(groups, 0, 'w2'), facts));
+    const wed = getWorkFacts(res.facts)!.groups![0];
+    const covers = (wed.photos ?? []).filter((p) => p.cover);
+    expect(covers.map((p) => p.id)).toEqual(['w2']); // exactly one, and it's w2
+  });
+
+  it('hidePhoto DROPS the photo from the committed facts (D12 — not a MediaAsset op)', () => {
+    const facts = photoBearingFacts();
+    const groups = (getWorkFacts(facts)?.groups ?? []) as WorkGroupInput[];
+    const res = expectRail(commit(hidePhoto(groups, 0, 'w2'), facts));
+    const wed = getWorkFacts(res.facts)!.groups![0];
+    expect((wed.photos ?? []).map((p) => p.url)).toEqual(['https://cdn/w1.jpg']);
+    // Sibling preserved (full-facts re-emit, landmine 4).
+    expect((res.facts['entry'] as { businessName: string }).businessName).toBe('Kundius Studio');
+  });
+
+  it('mergeGroups conserves photos and collapses the group count through the funnel', () => {
+    const facts = photoBearingFacts();
+    const groups = (getWorkFacts(facts)?.groups ?? []) as WorkGroupInput[];
+    const { groups: merged } = mergeGroups(groups, [0, 1]);
+    const res = expectRail(commit(merged, facts));
+    const out = getWorkFacts(res.facts)!.groups!;
+    expect(out).toHaveLength(1);
+    expect((out[0].photos ?? []).map((p) => p.url)).toEqual([
+      'https://cdn/w1.jpg',
+      'https://cdn/w2.jpg',
+      'https://cdn/p1.jpg',
+    ]);
+    // One cover survives the merge (first encountered).
+    expect((out[0].photos ?? []).filter((p) => p.cover).map((p) => p.id)).toEqual(['w1']);
+  });
+
+  function expectRail(r: ReturnType<typeof applyRailEdit>) {
+    expect(r.ok, r.ok ? '' : `commit failed: ${r.error}`).toBe(true);
+    if (!r.ok) throw new Error(r.error);
+    return r;
+  }
 });
 
 describe('work seam — STEP 05 preflight', () => {
