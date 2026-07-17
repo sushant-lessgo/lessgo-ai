@@ -741,12 +741,17 @@ export function createAIActions(set: any, get: any) {
           if (section) {
             // Handle both structures: section.elements[elementKey] and section[elementKey]
             if (section.elements && section.elements[elementKey]) {
-              // Update AI metadata
-              (section.elements[elementKey] as any).aiMetadata = {
-                ...(section.elements[elementKey] as any).aiMetadata,
-                lastGenerated: Date.now(),
-                isCustomized: variationIndex === 0, // First option is original content
-              };
+              // Update AI metadata — only for object-valued elements. Meridian (and
+              // other templates) store text elements as bare strings; assigning
+              // `.aiMetadata` onto a string primitive throws under immer, so no-op.
+              const elVal: any = section.elements[elementKey];
+              if (elVal !== null && typeof elVal === 'object' && !Array.isArray(elVal)) {
+                elVal.aiMetadata = {
+                  ...elVal.aiMetadata,
+                  lastGenerated: Date.now(),
+                  isCustomized: variationIndex === 0, // First option is original content
+                };
+              }
             }
             
             // Update section's edit metadata

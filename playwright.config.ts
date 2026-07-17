@@ -77,6 +77,8 @@ export default defineConfig({
         /toolbar-dispatch\.spec\.ts/,
         /link-picker\.spec\.ts/,
         /manage-items\.spec\.ts/,
+        // toolbar-beta-followup: behavioral regen (element + section) through the shell.
+        /toolbar-regen\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },

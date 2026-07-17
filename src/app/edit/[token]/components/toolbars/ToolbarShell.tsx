@@ -277,9 +277,6 @@ export function ToolbarShell() {
                 />
               </>
             )}
-
-            {/* Ask AI slot — intentionally NOT rendered. Lands in phase 5
-                (LLM + credits) behind a human gate. */}
           </div>
         ) : (
           // Chrome dropped by the body (SectionToolbar mid-regeneration): render

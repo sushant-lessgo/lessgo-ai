@@ -30,7 +30,7 @@ export type ToolbarSize = 'sm' | 'md' | 'lg';
 
 /**
  * Per-type control of the shell's trailing slot group (handoff t2 anatomy:
- * `[element actions] · [Design ▾] · [Ask AI] · [⋯/Delete]`).
+ * `[element actions] · [Design ▾] · [⋯/Delete]`).
  *
  * - `'disabled'` — the slot renders greyed with a "why" tooltip. Beta default:
  *   Design ▾ is skeleton-gated (plan D-3), and a greyed control reads as
