@@ -308,6 +308,62 @@ describe('multiPageAssembly — collections bridge (dormant, fixture-driven)', (
     expect(persistedAt).toEqual([0, 1, 2]);
   });
 
+  // ── work-onboarding E2 / phase 1: `works` fixture-cap path ────────────────
+  // With `works` undeclared on every live template, the driver no-ops in prod;
+  // these drive the bridge with a FIXTURE capability list ['works'] to prove the
+  // item pages carry VERBATIM photos + the catalog slice seeds cover items.
+  const worksFacts = (): CollectionsFacts => ({
+    works: [
+      { name: 'Weddings', slug: 'weddings', photos: [
+        { id: 'w1', url: 'https://cdn/w1.jpg', cover: true }, { id: 'w2', url: 'https://cdn/w2.jpg' },
+      ] },
+      { name: 'Portraits', slug: 'portraits', photos: [{ id: 'p1', url: 'https://cdn/p1.jpg' }] },
+    ],
+  });
+
+  it('works: builds /works catalog + item pages carrying VERBATIM photos', () => {
+    const fc: any = { pages: {} };
+    const plans = assembleCollectionPages({ fc, collections: worksFacts(), declaredCapabilities: ['works'] });
+    expect(plans).toHaveLength(2);
+    const catalog = Object.values<any>(fc.pages).find((p) => p.kind === 'singleton' && p.collectionKey === 'works');
+    expect(catalog.pathSlug).toBe('/works');
+    // Catalog slice seeds `items` from entries (name/cover/href — D13).
+    const catSec = catalog.content[catalog.sections[0]];
+    expect(catSec.elements.items).toEqual([
+      { id: expect.any(String), name: 'Weddings', cover: 'https://cdn/w1.jpg', href: '/works/weddings' },
+      { id: expect.any(String), name: 'Portraits', cover: 'https://cdn/p1.jpg', href: '/works/portraits' },
+    ]);
+    // Item page seeds the workdetail contract shape (name/client/problem/result + photos).
+    const wed = fc.pages['page-weddings'];
+    expect(wed.pathSlug).toBe('/works/weddings');
+    const itemSec = wed.content[wed.sections[0]];
+    expect(itemSec.type).toBe('workdetail');
+    expect(itemSec.elements.name).toBe('Weddings');
+    expect(itemSec.elements.client).toBe('');
+    expect(itemSec.elements.photos).toEqual([
+      { id: 'w1', url: 'https://cdn/w1.jpg', alt: '', cover: true },
+      { id: 'w2', url: 'https://cdn/w2.jpg', alt: '', cover: false },
+    ]);
+  });
+
+  it('works: AI connective copy can never clobber photos or name (VERBATIM clamp)', () => {
+    const fc: any = { pages: {} };
+    const plans = assembleCollectionPages({ fc, collections: worksFacts(), declaredCapabilities: ['works'] });
+    const briefSlugs = new Set(['weddings', 'portraits']);
+    const wedPlan = plans.find((p) => p.slug === 'weddings')!;
+    mergeCollectionItemCopy({
+      fc,
+      plan: wedPlan,
+      briefSlugs,
+      copy: { workdetail: { elements: { name: 'HACKED', photos: [{ url: 'https://evil/x.jpg' }], problem: 'The ask' } } as any },
+    });
+    const sec = fc.pages['page-weddings'].content[fc.pages['page-weddings'].sections[0]].elements;
+    expect(sec.name).toBe('Weddings'); // VERBATIM
+    expect(sec.photos).toHaveLength(2); // VERBATIM — not the injected single evil photo
+    expect(sec.photos[0].url).toBe('https://cdn/w1.jpg');
+    expect(sec.problem).toBe('The ask'); // connective copy applied
+  });
+
   it('runCollectionFanOut resume: already-completed item pages are skipped', async () => {
     const fc: any = { pages: {}, generationProgress: { completedPageKeys: ['page-alpha'] } };
     // Pre-build the alpha page so assembleCollectionPages won't recreate it.

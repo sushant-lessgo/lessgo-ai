@@ -12,7 +12,7 @@ E2 makes STEP 02 of the work journey real: upload photos (folder or loose files)
 
 ## Progress log
 
-- phase 1 binding spine + gallery covers (fail-fast reveal proof): pending
+- phase 1 binding spine + gallery covers (fail-fast reveal proof): done (impl-review=ship, loops 1; tsc clean, 3802 tests pass, build ok; e2e authored not-yet-registered)
 - phase 2 WorkDetail + WorkCatalog blocks, conformance relax, atelier2 works flip + pilot enablement: pending
 - phase 3 upload spine + functional STEP 02 behind widened seam: pending
 - phase 4 correction screen (5 verbs) + ingestion-writer regression: pending

@@ -67,3 +67,117 @@ export async function loadDraft(api: APIRequestContext, token: string) {
   expect(res.ok(), `/api/loadDraft: ${res.status()}`).toBeTruthy();
   return res.json();
 }
+
+// ── work-onboarding E2 / phase 1 ─────────────────────────────────────────────
+// Photo-bearing fixtures + a HAND-SEEDED pre-bound finalContent seeder, used by
+// e2e/work-binding.spec.ts to prove the reveal SURFACE renders group covers on
+// the work skeleton (atelier2). The data PATH is proved by vitest; this half is
+// the render proof. (Extended in P2 to drive the REAL fan-out path.)
+
+/** Distinct, greppable cover URLs — one per seeded group. */
+export const WORK_COVER_URLS = {
+  weddings: 'https://e2e.test/covers/weddings-cover.jpg',
+  portraits: 'https://e2e.test/covers/portraits-cover.jpg',
+} as const;
+
+/** The seeded work groups WITH photos (mirror of what STEP 02 upload commits). */
+export const WORK_GROUPS_WITH_PHOTOS = [
+  {
+    name: 'Weddings',
+    slug: 'weddings',
+    photos: [
+      { id: 'wed-1', url: WORK_COVER_URLS.weddings, cover: true },
+      { id: 'wed-2', url: 'https://e2e.test/covers/weddings-2.jpg' },
+    ],
+  },
+  {
+    name: 'Portraits',
+    slug: 'portraits',
+    photos: [{ id: 'por-1', url: WORK_COVER_URLS.portraits }],
+  },
+] as const;
+
+const sid = (type: string): string => `${type}-${Math.random().toString(36).slice(2, 10)}`;
+
+/** A minimal atelier2 single-page work finalContent with a work-gallery whose
+ *  group cards carry stamped covers/hrefs — the exact shape the P1 binding
+ *  produces (covers + /works/<slug> links + an item page carrying the photos). */
+function buildBoundAtelier2FinalContent(token: string): any {
+  const heroId = sid('hero');
+  const workId = sid('work');
+  const footerId = sid('footer');
+  const headerId = sid('header');
+
+  const groups = WORK_GROUPS_WITH_PHOTOS.map((g, i) => ({
+    id: `g${i}`,
+    name: g.name,
+    cover_image: (g.photos.find((p) => (p as any).cover) ?? g.photos[0]).url,
+    href: `/works/${g.slug}`,
+  }));
+
+  const section = (id: string, type: string, layout: string, elements: any) => ({
+    id, type, layout, elements, isVisible: true, backgroundType: 'theme',
+    aiMetadata: { aiGenerated: true, lastGenerated: Date.now(), isCustomized: false, aiGeneratedElements: [], excludedElements: [] },
+  });
+
+  const header = section(headerId, 'header', 'workheader', { logo_text: 'Kundius Studio' });
+  const hero = section(heroId, 'hero', 'workherocenter', { heading: 'Kundius Studio', lead: 'Documentary wedding photography' });
+  const work = section(workId, 'work', 'workgallerygrid', { eyebrow: 'Selected work', heading: 'The work', lead: 'Recent commissions.', groups });
+  const footer = section(footerId, 'footer', 'workfooter', { wordmark: 'Kundius Studio' });
+
+  const bodySections = [heroId, workId];
+  const bodyContent = { [heroId]: hero, [workId]: work };
+  const bodyLayouts = { [heroId]: 'workherocenter', [workId]: 'workgallerygrid' };
+
+  const chrome = {
+    header: { id: headerId, layout: 'workheader', data: header },
+    footer: { id: footerId, layout: 'workfooter', data: footer },
+  };
+
+  // /works/<slug> item pages carrying VERBATIM photos (the fan-out output).
+  const pages: Record<string, any> = {
+    home: {
+      id: 'home', archetypeKey: 'home', pathSlug: '/', title: 'Home', order: 0,
+      sections: bodySections, sectionLayouts: bodyLayouts, sectionSpacing: {}, content: bodyContent,
+    },
+  };
+  for (const g of WORK_GROUPS_WITH_PHOTOS) {
+    const itId = sid('workdetail');
+    pages[`page-${g.slug}`] = {
+      id: `page-${g.slug}`, archetypeKey: 'work-detail', pathSlug: `/works/${g.slug}`,
+      title: g.name, order: 1, kind: 'collectionItem', collectionKey: 'works',
+      sections: [itId], sectionLayouts: { [itId]: 'workdetail' }, sectionSpacing: {},
+      content: { [itId]: section(itId, 'workdetail', 'workdetail', { name: g.name, client: '', problem: '', result: '', photos: g.photos.map((p) => ({ ...p, alt: '', cover: (p as any).cover ?? false })) }) },
+    };
+  }
+
+  return {
+    layout: { sections: [headerId, ...bodySections, footerId], sectionLayouts: { [headerId]: 'workheader', ...bodyLayouts, [footerId]: 'workfooter' }, theme: {}, globalSettings: {} },
+    content: { [headerId]: header, ...bodyContent, [footerId]: footer },
+    meta: { id: token, title: 'Kundius Studio', slug: '', lastUpdated: Date.now(), version: 1, tokenId: token },
+    onboardingData: { oneLiner: 'Documentary wedding photography', productName: 'Kundius Studio' },
+    generatedAt: Date.now(),
+    chrome,
+    pages,
+    homeId: 'home',
+    currentPageId: 'home',
+  };
+}
+
+/**
+ * Seed a SERVED work project, then hand-seed a pre-bound atelier2 finalContent
+ * (covers stamped + /works item pages) via /api/saveDraft — flipping the
+ * persisted templateId to atelier2. Returns the token + the cover URLs the
+ * reveal must render.
+ */
+export async function seedBoundAtelier2Preview(
+  api: APIRequestContext
+): Promise<{ token: string; coverUrls: string[] }> {
+  const { token } = await seedWorkBrief(api);
+  const finalContent = buildBoundAtelier2FinalContent(token);
+  const res = await api.post('/api/saveDraft', {
+    data: { tokenId: token, title: 'Kundius Studio', templateId: 'atelier2', finalContent },
+  });
+  expect(res.ok(), `/api/saveDraft: ${res.status()} ${await res.text()}`).toBeTruthy();
+  return { token, coverUrls: [WORK_COVER_URLS.weddings, WORK_COVER_URLS.portraits] };
+}

@@ -298,8 +298,11 @@ export function finalizeMultiPageGeneration(
 // no registry def, so it can never fire (the invariant holds on vestria).
 
 /** Item-record fields seeded VERBATIM from the Brief entry — the clamp on merge
- *  never lets AI copy overwrite these. */
-const VERBATIM_ITEM_FIELDS = new Set(['name', 'oneLiner', 'images', 'slug']);
+ *  never lets AI copy overwrite these. `photos` (work-onboarding E2 / D6): the
+ *  user's uploaded photos on a `workdetail` item page are the heart of the work
+ *  product — AI supplies only connective copy (name/client/problem/result framing),
+ *  never the image list. */
+const VERBATIM_ITEM_FIELDS = new Set(['name', 'oneLiner', 'images', 'slug', 'photos']);
 
 export interface CollectionItemPagePlan {
   pageKey: string; // fc.pages key (also the page id)
@@ -368,7 +371,9 @@ export function assembleCollectionPages(opts: {
         order: order++,
         kind: 'singleton',
         collectionKey: key,
-        ...buildCollectionCatalogSlice(key),
+        // D13: the works catalog seeds its `items` from the entries (covers +
+        // /works/<slug> links); non-works keys ignore the second arg.
+        ...buildCollectionCatalogSlice(key, entries),
       };
     }
     for (const entry of entries) {

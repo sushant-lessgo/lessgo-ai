@@ -504,14 +504,36 @@ const COLLECTION_BLOCK_LAYOUTS: Record<string, { catalog: string; item: string }
   products: { catalog: 'ProductCatalogList', item: 'ProductDetailRecord' },
 };
 
+/** Cover url for a works entry: the `cover:true` photo, else the first photo,
+ *  else '' (work-onboarding E2 / D5 — mirrors stampWorkGalleryBinding). */
+function worksEntryCover(entry: CollectionEntry): string {
+  const photos = entry.photos ?? [];
+  return (photos.find((p) => p.cover) ?? photos[0])?.url ?? '';
+}
+
 /** Generic catalog singleton slice for any collection key (+ closing cta).
  *  `items[]` is MATERIALIZED (read-only) from the item records at the export
- *  boundary (materializeIntoPages) — never hand-authored here. */
-export function buildCollectionCatalogSlice(collectionKey: string): PageSlice {
+ *  boundary (materializeIntoPages) — never hand-authored here EXCEPT for the
+ *  `works` collection (work-onboarding E2 / D13), whose catalog `items` are
+ *  seeded here from the entries (name + cover + href) so the WorkCatalog block
+ *  (phase 2) lists covers pointing at each `/works/<slug>` item page. */
+export function buildCollectionCatalogSlice(
+  collectionKey: string,
+  entries: CollectionEntry[] = []
+): PageSlice {
   const def = getCollectionDef(collectionKey);
   const catType = def?.catalogSectionType ?? 'catalog';
   const catLayout = COLLECTION_BLOCK_LAYOUTS[collectionKey]?.catalog ?? catType;
   const catId = sectionId(catType);
+  const items =
+    collectionKey === 'works'
+      ? entries.map((e) => ({
+          id: rid('it'),
+          name: e.name,
+          cover: worksEntryCover(e),
+          href: `${def?.basePath ?? '/works'}/${e.slug}`,
+        }))
+      : [];
   const catalog = {
     id: catId,
     data: section(catId, catType, catLayout, {
@@ -519,7 +541,7 @@ export function buildCollectionCatalogSlice(collectionKey: string): PageSlice {
       headline: '',
       lede: '',
       categories: [],
-      items: [],
+      items,
     }),
   };
   return slice([catalog, ctaSection()]);
@@ -527,12 +549,38 @@ export function buildCollectionCatalogSlice(collectionKey: string): PageSlice {
 
 /** Generic collection-item slice — record fields seeded VERBATIM from the Brief
  *  entry (name / oneLiner / image slot). AI supplies only connective copy; the
- *  clamp in the fan-out never overwrites these record fields. */
+ *  clamp in the fan-out never overwrites these record fields.
+ *
+ *  work-onboarding E2 / D6: the `works` key seeds the `workdetailContract` shape
+ *  (name / client / problem / result + the `photos` collection) instead — the
+ *  GENERIC branch's `images` slot does NOT match the frozen workdetail contract.
+ *  `photos` are seeded VERBATIM from the entry and join VERBATIM_ITEM_FIELDS
+ *  (multiPageAssembly.ts) so AI connective copy can never clobber them. */
 export function buildCollectionItemSlice(collectionKey: string, entry: CollectionEntry): PageSlice {
   const def = getCollectionDef(collectionKey);
   const itType = def?.itemSectionType ?? 'item';
   const itLayout = COLLECTION_BLOCK_LAYOUTS[collectionKey]?.item ?? itType;
   const id = sectionId(itType);
+
+  if (collectionKey === 'works') {
+    const detail = {
+      id,
+      data: section(id, itType, itLayout, {
+        name: entry.name,
+        client: '',
+        problem: '',
+        result: '',
+        photos: (entry.photos ?? []).map((p) => ({
+          id: p.id ?? rid('ph'),
+          url: p.url,
+          alt: p.alt ?? '',
+          cover: p.cover ?? false,
+        })),
+      }),
+    };
+    return slice([detail, ctaSection()]);
+  }
+
   const detail = {
     id,
     data: section(id, itType, itLayout, {
