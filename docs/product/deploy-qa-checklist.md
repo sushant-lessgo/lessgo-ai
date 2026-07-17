@@ -25,6 +25,7 @@
 - [ ] **Generation + parity regression** — `parity.spec` / `generation.spec` NOT re-run since some merges (~12min); run on final main.
 
 ## C. Founder-taste / sign-off gates (the big-bang owed list)
+- [ ] **🔴 P0 — logout works** (needs `dashboard-profile-menu.spec.md` built): there is currently **NO logout anywhere in the app** (editor removed its UserButton expecting the dashboard to carry it; the dashboard profile menu was deferred → seam gap). Verify: sidebar avatar → popover → Log out → session ends → `/sign-in`. **Must ship before push.**
 - [ ] **editor-shell-redesign QA + 3 sign-offs** — nobody has clicked phases 4–8 live: settings rows→right modal (esp. Social & sharing), app menu→Back to dashboard, undo/redo, Regen Copy toast + locale lock, mobile overlay, theme swap + Browse-all-styles, SEO save + noindex, publish e2e, Reset. Sign-offs: creation-entries-moved, `smartphone`→`phone` glyph, ThemePopover.
 - [ ] **blog-composer GATE A** — manual publish/unpublish + visual sign-off + the hero-image deviation call.
 - [ ] **content-baseline-split Deploy B** — its own two-deploy gate (pre-B naayom row dump → bake signal).
