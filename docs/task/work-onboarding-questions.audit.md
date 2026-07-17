@@ -100,3 +100,48 @@ directly rather than inlining the 4-key map. Documented in the module header.
 **Open risks:**
 - The answered-compact "value summary" is best-effort (text→prefill, choice→suggested join; price/group show "Answered") — the `JourneyQuestion` descriptor carries no explicit answer-value field, and the contract wasn't extended beyond the specced fields. Phase 3 supplies whether this reads well; phase-4 e2e asserts the `question-change-<id>` affordance, not the summary text.
 - Renderer has no unit harness today (per plan); first real exercise is phase-4 e2e.
+
+## Phase 3 — work seam STEP 03 + rail widening
+
+**Files changed**
+- `src/components/onboarding/journey/engines/work.ts` — `questions(vm, ctx)` rewritten onto `buildQuestionPlan` + profession wording + `choice` descriptors; `toVM` widened with 4 read-only rows; new `buildWorkQuestion` + `dedupeOptions` helpers; new imports.
+- `src/components/onboarding/journey/engines/work.test.ts` — toVM count/order tests updated (4→8 fields); STEP-03 tests rewritten for the gating + commit-routing behavior against the Kundius fixture.
+- `docs/task/work-onboarding-questions.audit.md` — this section.
+- (`UnderstoodRail.test.tsx` NOT touched — it pins no rail field count/order; verified its edit/render assertions stay green with the 4 new skeleton rows.)
+
+### Question mapping (slot → kind → required → commit path)
+- `identity` → `text` · not required · `workRailAdapter.applyEdit('name', …)` (E1 verbatim; NAME prefill from `vm`).
+- `groups` → `group` · not required · `commitGroupChips([...liveChips, {label}])` (E1 append-through-chip-join verbatim). Label uses `professionWording[p].workGroup` → "What galleries do you offer?" for a photographer.
+- `price` → `price` · **required** · `commitGroupPrice` (D-G blanket practice-level, unchanged). `answered` from the plan. Price kind carries no `suggested` field, so the plan's `suggested:['on-request']` confirm posture is realized by the price renderer already defaulting to `on-request` (noted as an in-scope choice below).
+- `establishment` → `choice` (single) · options new/established · `applyRailEdit({field:'establishment', value: values[0]})`.
+- `dreamClient` → `choice` (multi, allowCustom) · options = de-duped `entry.audiences` (suggested) + `dreamClientChips[p]` · `applyRailEdit({field:'dreamClient', value: values.join(', ')})` (contract field is one string).
+- `praise` → `choice` (multi) · options = suggested testimonials · `applyRailEdit({field:'praise', value: values})`. Confirm-only; label forks on establishment (see branch below).
+- `contactMethod` → `choice` (single) · options whatsapp/booking/form · suggested from the plan's region default · `applyRailEdit({field:'contactMethod', value: values[0]})`.
+- `languages` → `choice` (multi, allowCustom) · **required** · options `English` + `Dutch` (orchestrator ruling), `suggested:['English']` · `applyRailEdit({field:'languages', value: values})`.
+
+### Profession wording + firewall import path
+`resolveQuestionProfession(ctx.businessType)` (re-exported from `@/modules/wizard/work/questionGating`, the pure `wizard/work/*` family) → key into `professionWording` / `dreamClientChips`. The seam's ONLY new module-top imports are `questionGating` (the sanctioned pure sibling of `rail.ts`) and, for the two wording maps that `questionGating` does not re-export, `@/modules/engines/workVocabulary` — verified import-pure (it imports nothing at runtime) and used type/data-only. No react/store/template edge added; `journeyAgnostic.test.ts` stays green.
+
+### toVM rows added
+After `pricePosition`, four `kind:'text'`, `editable:false` rows: LANGUAGES, ESTABLISHED, DREAM CLIENT, CONTACT — value from the rail projection, skeleton when unknown. Corrections for these happen in STEP 03's answered-compact state, not rail-side (D-E), hence read-only. Chip/groups rows untouched.
+
+### Establishment branch behavior
+`questions()` reads `getWorkFacts(ctx.facts)?.establishment` off the fresh bag each call; the praise question label forks pure-code: `new` → "What should clients expect from working with you?", else → "What do clients praise you for?". Since praise is confirm-only (testimonials present) it does not surface for Kundius, but the branch is live for any established/new bag with quotes.
+
+### E2 reconciliation touchpoints preserved
+- Groups path: `commitGroupChips` / `liveChips` / `commitGroupPrice` unchanged; the group question still appends through the chip join. The establishment-commit test asserts a group's `photos`/`items` and the sibling `entry` survive the STEP-03 write (landmine 4 + the photos/items wipe).
+- Price stays ONE blanket practice-level question (D-G) — no per-group split.
+
+### Deviations
+- **dreamClient made `multi:true`** (D-A described it as single). The binding Phase-3 instruction says "join multi selections with ', '", which is only meaningful for a multi-select; the commit joins with ', ' (single-selection collapses to the one value, so behavior is a superset). Logged as the conservative reading of the newer instruction.
+- **Price `suggested` not passed on the descriptor** — the `price` kind has no `suggested` field in the closed union; the on-request confirm posture is inherent to the price renderer's default. No type/contract change made (conservative, in-scope).
+- **praise commit writes the selected `values`** (verbatim testimonials, since option values ARE the testimonials) rather than a fixed suggested array — lets the user drop a bad quote while keeping the rest verbatim. praise is untested/unwalked in this phase; noted for the phase-4 author.
+
+### Verification
+- `npx tsc --noEmit` — exit 0, no errors (the pre-existing `founder.jpg` TS2307 did not reproduce in this worktree).
+- `npm run test:run` — 225 files passed | 1 skipped; **3853 passed | 18 skipped**. Green, incl. `work.test.ts`, `questionGating.test.ts`, `rail.test.ts`, `workBriefFixture.test.ts` (fixture NOT edited), `journeyAgnostic.test.ts`, `UnderstoodRail.test.tsx`.
+- `npm run lint` (touched files) — exit 0, no errors.
+
+### Open risks
+- dreamClient multi + confirm suggested: a phase-4 e2e "tap suggested confirm" must tap-then-Save (multi needs Save); the phase-4 author owns that walk and should adjust the spec accordingly.
+- Answered-compact summary for `choice` still best-effort (renderer derives from `suggested`); real read verified at phase-4 e2e.

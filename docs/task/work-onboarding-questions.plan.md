@@ -9,7 +9,7 @@ Replace the E1 STEP-03 placeholder (name / what-you-sell / one price) with the f
 ## Progress log
 
 - phase 1 pure gating resolver + rail write paths: done (commit cd0e4923; 49 new tests green; tsc clean re: E3 files)
-- phase 2 question contract + agnostic renderer + required gate: pending
+- phase 2 question contract + agnostic renderer + required gate: done (commit ba6c9afa; choice kind + onBlockedChange gate; tsc/test/lint green; +question-add-<id> testid)
 - phase 3 work seam STEP 03 + rail widening: pending
 - phase 4 playwright e2e over the STEP 01→03 walk: pending
 - phase 5 build/lint sweep + track doc + founder live-walk gate: pending
