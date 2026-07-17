@@ -21,7 +21,9 @@ import { ToolbarButton, ToolbarDivider, ToolbarLabel, useHideToolbarChrome } fro
 import { showSocialModal } from '../ui/GlobalModals';
 
 // Shared chrome (header/footer) is site-wide: hide per-page structural actions.
-const CHROME_HIDDEN_ACTIONS = ['move-up', 'move-down', 'duplicate', 'delete'];
+// `regen` joins the list — chrome isn't a copy-contract section, so a section
+// regen there is undefined (ruling 1: hide, not grey).
+const CHROME_HIDDEN_ACTIONS = ['move-up', 'move-down', 'duplicate', 'delete', 'regen'];
 
 /**
  * Actions that belong to the FOOTER alone (toolbarPlan's Footer + Social Beta
@@ -89,6 +91,7 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
     showLayoutChangeModal,
     audienceType,
     templateId,
+    regenerateSection,
   } = useEditStore(
     useShallow((s) => ({
       content: s.content,
@@ -99,6 +102,7 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
       showLayoutChangeModal: s.showLayoutChangeModal,
       audienceType: s.audienceType,
       templateId: s.templateId,
+      regenerateSection: s.regenerateSection,
     })),
   );
 
@@ -198,6 +202,20 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
       label: 'Elements',
       icon: 'plus',
       handler: () => setShowElementToggle(true),
+    },
+    // AI section regen (one-click, one-shot) — sits ahead of the structural
+    // moves per the plan's grouping. Calls the existing `regenerateSection`
+    // action (image/shape-preserving merge lives there). Disabled while any AI
+    // generation is in flight; the in-flight progress card + completion message
+    // below already provide feedback. Hidden on chrome via CHROME_HIDDEN_ACTIONS.
+    {
+      id: 'regen',
+      label: 'Regen',
+      icon: 'refresh',
+      disabled: aiGeneration.isGenerating,
+      handler: () => {
+        regenerateSection(sectionId);
+      },
     },
     {
       id: 'move-up',

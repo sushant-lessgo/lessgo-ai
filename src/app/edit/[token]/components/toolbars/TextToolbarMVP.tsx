@@ -773,9 +773,7 @@ function TextToolbarMVPInner({
               label="Link"
             />
 
-            {/* Divider + AI Sparkle. NOTE: this is the EXISTING sparkle →
-                variations flow, not the phase-5 "Ask Lessgo AI" instruction
-                prompt (which lands in the shell's hidden trailing slot). */}
+            {/* Divider + AI Sparkle — the existing sparkle → variations flow. */}
             <ToolbarDivider />
             <ToolbarButton
               data-action="ai-variations"
