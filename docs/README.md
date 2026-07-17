@@ -3,6 +3,7 @@
 _Verified against tree 2026-07-17._ One line per doc. Root keeps only `CLAUDE.md` + `README.md`. Completed/paused tracks move to `tracks/Completed/`; deferred to `tracks/Someday/`. Shipped `/feature` artifacts move to `docs/task/completed/`. Scratch (`temp/`, `reports/`) is deletable.
 
 ## architecture/ — references
+- [copyEngines.md](architecture/copyEngines.md) — **the 5 copy engines** (thing/trust/work/place/quick-yes) core mental model; engine ≠ audienceType; extracted evergreen from scalePlan
 - [publishArch.md](architecture/publishArch.md) — publishing & static-export architecture (Blob + KV, versions, custom domains); partly historical (has stale banner) — rendering now lives in `htmlGenerator.ts`, forms phase is done
 - [pricingSystem.md](architecture/pricingSystem.md) — historical build plan for billing; current truth = `src/lib/planManager.ts` + `creditSystem.ts`
 - [design-system-v3.md](architecture/design-system-v3.md) — **obsolete** (describes removed vibe-background system); superseded by CLAUDE.md "Design System v3" + `src/modules/Design/README.md`

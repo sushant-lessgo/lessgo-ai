@@ -56,6 +56,13 @@ A landing page is rendered from three orthogonal inputs:
 - **Templates live in** `src/modules/templates/{meridian,techpremium,hearth,lex}/` — each with `tokens.ts`, `palettes.ts`, `sectionRules.ts`, `ThemeInjector.tsx`, `resolve*Block.ts`, `index.ts`, and `blocks/<Section>/`.
 - A **template is a skin**: it supplies tokens/palettes/variants/block components but consumes the audience's existing content contract. It does NOT change copy generation, the element schema, or the section list. See the `/new-template` skill (`.claude/skills/new-template/SKILL.md`) for the full guide to adding one.
 
+### The 5 Copy Engines (core mental model)
+
+The second core mental model (peer to the 3-tier model). A **copy engine** is the argument machine that writes a page — forked by **how the visitor decides**, not by business type. The master list is **CLOSED at 5**: **thing** (evaluating a product — SaaS/hardware/app) · **trust** (trusting a person/firm — dentist/consultant/agency) · **work** (browsing the work itself — photographer/designer/writer) · **place** (checking a physical place — restaurant/shop/venue) · **quick-yes** (one instant ask — link-in-bio/RSVP/waitlist). Live: thing (`audience/product/`), trust (`audience/service/`), work (`audience/work/`, pilot). place + quick-yes not built yet.
+
+- **Engine ≠ audienceType** — the load-bearing trap. `work` is an *engine*, not an audienceType; atelier projects run the work engine but are `audienceType: 'service'`. Dispatch keys off `isWorkCopyTemplate(templateId)` **first**, then `audienceType` (`src/lib/workCopyEngine.ts`, `resolveCopyEngine → product|service|work`). Onboarding is reorganizing **by engine**; `audienceType` is retiring as the classification axis (still load-bearing plumbing for now).
+- **Full reference:** `docs/architecture/copyEngines.md`.
+
 ### ⚠️ Dual-Renderer Pitfall (the #1 architectural trap)
 
 Every block exists as a **pair** and is rendered by one of **two renderers**:
