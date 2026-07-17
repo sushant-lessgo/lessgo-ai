@@ -189,3 +189,29 @@ The 5 Kundius questions and their exact testid ids: `price` (native `price` kind
 ### Open risks / findings
 - **e2e infra flake (REPORTED, not mine to fix):** the full authed suite collapses with node-worker heap corruption under sustained load on this Windows worktree (1.2h, cross-spec). Per-spec isolation (`--workers=1`, single file) is green. This predates and is orthogonal to E3 — surfaced here only because the phase's verification is e2e.
 - The two E3 tests + three repaired walks are proven green only in ISOLATION; a from-cold full-suite run remains subject to the above infra flake (Phase 5's full gate should run specs in isolation or on CI, not one 1.2h local sweep).
+
+## Phase 5 — build/lint sweep + track doc
+
+**Files changed**
+- `docs/tracks/workEndtoEnd.md` — added `### Phase E3 — work-onboarding questions (STEP 03): BUILT (2026-07-17)` under "## How this gets built" (matches the existing Phase C status-note style: status line, branch, one-para summary, accepted design nuances, deferred gate). Records the four accepted nuances: (1) D-C on-request price re-confirm after mid-step reload (one tap via native price-mode picker, no contract marker); (2) praise confirm-ONLY (only when `entry.testimonials` exist); (3) dreamClient rendered multi, joined to the single contract string; (4) languages options include Dutch + English chips for the Kundius bilingual pilot. Deferred: founder live STEP 01→03 walk + new-vs-established branch copy proof.
+
+No `src/` file was touched in this phase — the full gate ran clean without code fixes.
+
+### Full local green gate
+
+| # | Command | Result | Key numbers |
+|---|---------|--------|-------------|
+| 1 | `npx tsc --noEmit` | PASS (exit 0) | Zero errors. The pre-existing environmental `src/app/page.tsx` `founder.jpg` TS2307 did NOT appear in this worktree state (same as phase 3); no `.next` clear needed. |
+| 2 | `npm run test:run` | PASS (exit 0) | 225 files passed, 1 skipped; **3853 passed, 18 skipped** (3871 total). 74.26s. |
+| 3 | `npm run lint` | PASS (exit 0) | Warnings only — all pre-existing (`<img>` LCP hints across techpremium/vestria blocks; one `react-hooks/exhaustive-deps` in `ph-provider.tsx`). No new errors, none in E3-touched files. |
+| 4 | `npm run build` | PASS (exit 0) | build:published-css → build:assets → next build all succeeded; all routes compiled, next-env regenerated. |
+| 5 | `npx playwright test e2e/work-onboarding.spec.ts --workers=1` | PASS (exit 0) | **9 passed (1.8m)** — both new E3 tests, the three repaired 02→04 / generation walks, and the legacy-unchanged test. |
+
+**e2e — per-spec isolation (honest note):** per phase-4's finding, the FULL authed sweep (`npm run test:e2e`, bare `playwright test`) heap-corrupts node workers (`0xC0000374 STATUS_HEAP_CORRUPTION`) after ~1.2h under sustained load on this Windows worktree — an environment flake that hits EVERY spec, not an E3 logic failure. The plan (phase 5 step) explicitly directs running the feature spec isolated instead. That isolated run is green (9/9). The `ReferenceError: window is not defined` lines in `[WebServer]` output are the pre-existing dev-only SSR log from `useEditStoreBootstrap` on `/preview/[token]` (documented phase 4) — noise; tests pass through it. The full cross-spec sweep was NOT run and is NOT claimed green.
+
+### Deviations from the plan
+- None. The plan's §"§3 status" resolves to the doc's build-status section "## How this gets built" (which uses `### Phase X` status subsections — Phase C was the prior one); the E3 note was added there in the same style.
+
+### Open risks
+- Founder live-walk gate (HUMAN GATE, final) still pending — the local gate proves determinism/wiring, not real-LLM copy quality or the new-vs-established branch copy routing (verified downstream at a generation run / E4).
+- Full-suite e2e remains subject to the Windows-worktree heap-corruption flake; run E3's spec in isolation (or on CI) rather than a from-cold 1.2h local sweep.
