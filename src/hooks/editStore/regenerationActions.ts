@@ -1,11 +1,24 @@
-// hooks/editStore/regenerationActions.ts - NEW FILE
+// hooks/editStore/regenerationActions.ts
+// ============================================================================
+// The page-regen callers. Until regen-modernization phase 5 this file was the
+// app's ONE remaining CLIENT-SIDE prompt builder: it ran `buildFullPrompt` in
+// the browser and POSTed the resulting prose to an ungated `/api/regenerate-
+// content`, which forwarded it to OpenAI (the H3 hole). Both callers now send
+// STRUCTURE ONLY — tokenId + sections + sectionLayouts + the unsaved field edits
+// — and the server builds the prompt from persisted project state (D4).
+//
+// Unchanged on purpose:
+//  • Design randomization stays HERE (D4) — layouts/background are randomized
+//    client-side, then sent as validated structure.
+//  • The WHOLE response JSON still goes to `updateFromAIResponse(aiResponse,
+//    elementsMap)` (D8) — the route preserves that wire shape, so
+//    `generationActions.ts` needed no change.
+// ============================================================================
 
-import { useOnboardingStore } from '../useOnboardingStore';
-import { buildFullPrompt } from '@/modules/prompt/buildPrompt';
 import { getCompleteElementsMap } from '@/modules/sections/elementDetermination';
 import type { EditStore, APIRequest } from '@/types/store';
 import type { RegenerationActions } from '@/types/store/actions';
-import type { CanonicalFieldName, InputVariables, HiddenInferredFields } from '@/types/core/index';
+import type { CanonicalFieldName } from '@/types/core/index';
 import { logger } from '@/lib/logger';
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -22,20 +35,19 @@ const createPageStoreView = (editState: EditStore) => ({
   meta: { onboardingData: editState.onboardingData },
 });
 
-const extractHiddenFields = (inputs: InputVariables & HiddenInferredFields): HiddenInferredFields => {
-  const hiddenFieldKeys = [
-    'awarenessLevel', 'copyIntent', 'toneProfile', 
-    'marketSophisticationLevel', 'problemType'
-  ];
-  
-  const hiddenFields: HiddenInferredFields = {};
-  hiddenFieldKeys.forEach(key => {
-    if (inputs[key as keyof typeof inputs]) {
-      hiddenFields[key as keyof HiddenInferredFields] = inputs[key as keyof typeof inputs] as any;
-    }
-  });
-  
-  return hiddenFields;
+/**
+ * The route answers gate failures with an honest, user-renderable `message`
+ * (402 credits, 422 unsupported_project / invalid_scope, 500 generation_failed).
+ * Surface it — phase 4's lesson: discarding the body leaves the user staring at
+ * `API error: 422` while the reason sits unread on the wire.
+ */
+const readErrorMessage = async (response: Response, fallback: string): Promise<string> => {
+  try {
+    const data = await response.json();
+    return data?.message || data?.error || `${fallback}: ${response.status}`;
+  } catch {
+    return `${fallback}: ${response.status} - ${response.statusText}`;
+  }
 };
 
 const handleContentOnlyRegeneration = async (
@@ -53,46 +65,23 @@ const handleContentOnlyRegeneration = async (
     });
 
     const updatedInputs = initialState.changeTracking.currentInputs;
-    const tempOnboardingStore = {
-      ...useOnboardingStore.getState(),
-      validatedFields: updatedInputs,
-      hiddenInferredFields: extractHiddenFields(updatedInputs),
-    };
 
-    const pageStoreView = createPageStoreView(initialState);
-    const designContext = {
-      sections: initialState.sections,
-      sectionLayouts: initialState.sectionLayouts,
-      theme: initialState.theme,
-    };
-    
-    const prompt = `${buildFullPrompt(tempOnboardingStore, pageStoreView as any)}
-
-CONTENT-ONLY REGENERATION:
-- PRESERVE existing sections: ${designContext.sections.join(', ')}
-- PRESERVE existing layouts: ${Object.entries(designContext.sectionLayouts).map(([id, layout]) => `${id}: ${layout}`).join(', ')}
-- PRESERVE existing theme and colors
-- ONLY update text content to reflect new business inputs`;
-
+    // Structure only — the server builds the prompt from persisted project state
+    // + these fields. `preserveDesign: true` keeps sections/layouts/theme as-is.
     const response = await fetch('/api/regenerate-content', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        prompt,
+      body: JSON.stringify({
+        tokenId: initialState.tokenId,
         preserveDesign: true,
-        currentDesign: designContext,
+        sections: initialState.sections,
+        sectionLayouts: initialState.sectionLayouts,
         updatedInputs,
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      // console.error('Content regeneration API error:', {
-      //   status: response.status,
-      //   statusText: response.statusText,
-      //   responseText: errorText,
-      // });
-      throw new Error(`Content regeneration failed: ${response.status} - ${response.statusText}`);
+      throw new Error(await readErrorMessage(response, 'Content regeneration failed'));
     }
 
     const aiResponse = await response.json();
@@ -248,39 +237,24 @@ const handleDesignAndCopyRegeneration = async (
       state.aiGeneration.status = 'Generating copy with new design...';
     });
 
-    // Step 4: Generate copy with updated design context
-    const tempOnboardingStore = {
-      ...useOnboardingStore.getState(),
-      validatedFields: updatedInputs,
-      hiddenInferredFields: extractHiddenFields(updatedInputs),
-    };
-
-    const updatedPageStoreView = createPageStoreView(getState());
-    const prompt = buildFullPrompt(tempOnboardingStore, updatedPageStoreView as any);
-
+    // Step 4: Generate copy against the design we just randomized. The FRESH
+    // layouts go out as structure (D4) — read back off the store so every
+    // section carries the layout the page will actually render.
     const response = await fetch('/api/regenerate-content', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        prompt,
+      body: JSON.stringify({
+        tokenId: initialState.tokenId,
         preserveDesign: false,
+        sections: currentSections,
+        sectionLayouts: getState().sectionLayouts,
         updatedInputs,
-        newDesign: {
-          sections: currentSections,
-          sectionLayouts: newLayouts,
-          backgroundSystem: newBackgroundSystem,
-        },
+        backgroundSystem: newBackgroundSystem,
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      // console.error('Design + copy regeneration API error:', {
-      //   status: response.status,
-      //   statusText: response.statusText,
-      //   responseText: errorText,
-      // });
-      throw new Error(`Design + copy regeneration failed: ${response.status} - ${response.statusText}`);
+      throw new Error(await readErrorMessage(response, 'Design + copy regeneration failed'));
     }
 
     const aiResponse = await response.json();

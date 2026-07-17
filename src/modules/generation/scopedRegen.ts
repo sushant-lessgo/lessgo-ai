@@ -208,6 +208,21 @@ export interface ElementsMapInput extends LayoutState {
   onboarding: OnboardingView;
 }
 
+/**
+ * A section the 'all' scope could NOT regenerate, and why (regen-modernization
+ * phase 5, R6.3). Before this existed, `narrowElementsMap` dropped such sections
+ * SILENTLY — the user paid for a whole-page regen and one band just never
+ * changed, with no explanation anywhere. Routes surface these so the editor can
+ * render an honest disabled/greyed state instead of omitting them.
+ *
+ * Only the 'all' scope produces these: section/element scopes throw
+ * `ScopeInputError` (422) instead — honest by construction.
+ */
+export interface SkippedSection {
+  sectionId: string;
+  reason: string;
+}
+
 /** Read the persisted onboarding view off a project row's `content` JSON. */
 export function readOnboardingView(project: ScopedProject | null): OnboardingView {
   const content = (project?.content ?? {}) as Record<string, unknown>;
@@ -285,12 +300,26 @@ function workRequirements(sectionId: string): SectionElementRequirements | null 
 }
 
 /** The work-engine counterpart of `narrowElementsMap` (contract vocabulary). */
-function narrowWorkContractMap(input: ElementsMapInput, scope: RegenScope): ElementsMap {
+function narrowWorkContractMap(
+  input: ElementsMapInput,
+  scope: RegenScope,
+  skipped?: SkippedSection[]
+): ElementsMap {
   if (scope.kind === 'all') {
     const map: ElementsMap = {};
     for (const sectionId of input.sections) {
       const req = workRequirements(sectionId);
-      if (req) map[sectionId] = req;
+      if (req) {
+        map[sectionId] = req;
+      } else {
+        // R6.3: NEVER a silent drop. atelier's `quote` band is a real, DEFAULT
+        // home section with no `workElementContract` entry — the copy engine has
+        // never written it. Report it so the editor can say so honestly.
+        skipped?.push({
+          sectionId,
+          reason: `This section isn't AI-written (no copy contract for "${sectionTypeKey(sectionId)}")`,
+        });
+      }
     }
     if (!Object.keys(map).length) {
       throw new ScopeInputError('Cannot regenerate: no section resolved to a work element contract');
@@ -334,13 +363,17 @@ function narrowWorkContractMap(input: ElementsMapInput, scope: RegenScope): Elem
  *
  * ENGINE-AWARE: `engine === 'work'` narrows against the frozen work CONTRACT (the
  * vocabulary its prompt actually asks for); product/service use the layout schema.
+ *
+ * `skipped` (optional, 'all' scope only): sections that resolved to no contract
+ * are pushed here instead of vanishing (R6.3 — see `SkippedSection`).
  */
 export function narrowElementsMap(
   input: ElementsMapInput,
   scope: RegenScope,
-  engine: CopyEngine = 'product'
+  engine: CopyEngine = 'product',
+  skipped?: SkippedSection[]
 ): ElementsMap {
-  if (engine === 'work') return narrowWorkContractMap(input, scope);
+  if (engine === 'work') return narrowWorkContractMap(input, scope, skipped);
 
   if (scope.kind === 'all') {
     if (!input.sections.length) {
@@ -348,6 +381,17 @@ export function narrowElementsMap(
     }
     const { onboardingStore, pageStore } = buildStoreViews(input);
     const map = getCompleteElementsMap(onboardingStore as any, pageStore as any);
+    // R6.3: `getCompleteElementsMap` drops layout-less sections with a log line
+    // only. Report them instead of silently omitting them.
+    for (const sectionId of input.sections) {
+      if (map[sectionId]) continue;
+      skipped?.push({
+        sectionId,
+        reason: input.sectionLayouts[sectionId]
+          ? `This section isn't AI-written (no element contract for layout "${input.sectionLayouts[sectionId]}")`
+          : `This section isn't AI-written (no layout is set for "${sectionId}")`,
+      });
+    }
     if (!Object.keys(map).length) {
       throw new ScopeInputError('Cannot regenerate: no section resolved to an element contract');
     }
@@ -682,6 +726,12 @@ export interface ScopedCopyResult {
   sections?: Record<string, { elements: Record<string, unknown> }>;
   /** Set for 'element' scope. */
   variations?: string[];
+  /**
+   * 'all' scope: sections that carry no copy contract and were therefore NOT
+   * regenerated — reported, never silently dropped (R6.3). Always present
+   * (empty for section/element scopes, which throw instead).
+   */
+  skippedSections: SkippedSection[];
 }
 
 function scopeLabel(scope: RegenScope): string {
@@ -707,10 +757,14 @@ export async function generateScopedCopy(input: ScopedCopyInput): Promise<Scoped
 
   // 2. Narrow the elements map to the scope's target — in the ENGINE's own
   //    vocabulary (work → frozen contract; product/service → layout schema).
+  //    'all' scope: contract-less sections land in `skippedSections` (R6.3) —
+  //    the route reports them; they are never silently dropped.
+  const skippedSections: SkippedSection[] = [];
   const elementsMap = narrowElementsMap(
     { onboarding: readOnboardingView(project), ...layoutState },
     scope,
-    engine
+    engine,
+    skippedSections
   );
 
   // 2b. Work post-processing inputs (also 422s on missing facts before any call).
@@ -758,7 +812,14 @@ Return exactly: {"variations": ["…", …]} with ${variationCount} entries.`
         if (!variations.length) {
           lastError = 'No non-empty variations returned';
         } else {
-          return { engine, endpoint, attempts, elementsMap, variations: variations.slice(0, variationCount) };
+          return {
+            engine,
+            endpoint,
+            attempts,
+            elementsMap,
+            skippedSections,
+            variations: variations.slice(0, variationCount),
+          };
         }
       } else {
         const response = (await generateRawJson(
@@ -794,7 +855,7 @@ Return exactly: {"variations": ["…", …]} with ${variationCount} entries.`
         if (reason) {
           lastError = reason;
         } else {
-          return { engine, endpoint, attempts, elementsMap, sections: processed };
+          return { engine, endpoint, attempts, elementsMap, skippedSections, sections: processed };
         }
       }
     } catch (err: any) {

@@ -397,3 +397,146 @@ Resolves the 🚩 blocker recorded above. `src/app/api/regenerate-element/route.
 - `npx tsc --noEmit` → **0 errors.** The old `src/app/page.tsx(6,26)` `founder.jpg` baseline error is gone, as predicted — `.next/` now exists so Next's image-module types resolve.
 - `npm run test:run` → **214 files passed | 1 skipped; 3660 tests passed | 18 skipped**, 83.8s. No `pipelineGuards.test.ts` flake this run. (Count is 3660 vs the 3659 baseline quoted to me — one extra test in the suite; no test files were touched in this fix, so this is baseline-count drift, not a regression.)
 - `npm run build` → **SUCCESS** (first-ever build in this worktree; full `build:published-css` → `build:assets` → `next build`, route table emitted, no errors). This is the real proof the illegal export is gone and the phase-6 / merge build gate will pass. No other pre-existing breakage surfaced.
+
+---
+
+# Phase 5 — `regenerate-content` rebuild + store re-point (the H3 hole)
+
+**Files changed**
+- `src/app/api/regenerate-content/route.ts` (rewritten)
+- `src/app/api/regenerate-content/route.test.ts` (new, 27 tests)
+- `src/hooks/editStore/regenerationActions.ts` (re-pointed to the route)
+- `src/hooks/editStore/regenerationRoute.test.ts` (new, 6 tests)
+- `src/modules/generation/scopedRegen.ts` (`skippedSections` — the plan's "only if `'all'` scope needs a gap filled" allowance)
+- `docs/task/regen-modernization.audit.md` (this section)
+
+> **Phase-5 fix round (impl-review `fix first`, 2 blockers — both AUDIT-DOCUMENT corrections; the code ships as-is).** Files changed in the fix round: `docs/task/regen-modernization.audit.md` + **two comments only** in `src/app/api/regenerate-content/route.ts` (`:84` backgroundSystem "echoed back" → accepted-and-discarded; `:369-371` the withdrawn "user-reachable today" claim). No route logic, no test, no `scopedRegen.ts` behavior changed.
+
+## 🚨 FOUNDER / BACKLOG — collections are silently dropped by the SECTION-regen merge (NOT fixed, per instruction)
+
+> **CORRECTED after impl-review (this block previously mis-attributed the drop to phase 5's route — that claim was FALSE and is deleted).** The reviewer disproved it by probe against the real `createEditStore` with phase 5's exact D8 response: `updateFromAIResponse` **assigns RAW** (`generationActions.ts:369-373`), so `{ headline, testimonials: [{quote, author_name, …}] }` **lands in full — collections included**. Phase 5's route does NOT drop collections, and nobody pays 3 credits for a testimonials no-op.
+
+**Where the drop is real:** the **SECTION-regen merge**, `aiActions.ts:159-176` (phase 4's path). An array landing on a non-empty array slot falls through every branch. Affects work `groups`, hero `stats`, and re-injected `testimonials`. The phase-4 reviewer verified **exact parity with legacy** (legacy tagged arrays with `.type` but no `.content`, so the loop skipped them identically) → **not a regression under R6.2**; fixing it is editor-store surgery outside this spec.
+
+**Correct cost attribution:** the editor's **Regen Copy** button (`EditHeaderRightPanel.tsx:132`) calls `regenerateAllContent` (`generationActions.ts:564`), which **loops `/api/regenerate-section`** — i.e. **2 credits × N sections** through the dropping merge. That loop, not `/api/regenerate-content`, is what a user actually pays for today when collections don't move. **Recommend: backlog item, sized before beta.**
+
+**Merge-gate relevant: `/api/regenerate-content` has NO UI caller.** `regenerateContentOnly` / `regenerateDesignAndCopy` / `regenerateWithInputs` (`regenerationActions.ts`) are called by **zero components** (grep-verified by the reviewer). Founder `/manual-test` of this route therefore **cannot be driven by any button** — it must be driven via the store API (`useEditStore.getState().regenerateContentOnly(...)`) or a direct HTTP call. Wiring a caller is editor-lane scope, not phase 5's.
+
+The route side is correct and pinned by tests; the interaction worth noting is only that the section loop drops the same collection type the routes now produce for real.
+
+## `route.ts` — what changed
+
+The legacy route was `POST = withAIRateLimit(handler)` over a handler that took a **client-supplied `prompt`** and called OpenAI via a hand-rolled `callAIProvider`. **No auth, no ownership, no credit check, no charge** — a free, unlimited completion proxy on our API key for any signed-in user, with three filler-copy exits that answered every failure with `200` + mock content.
+
+**How H3 is closed (four distinct holes):**
+1. **Auth/credit gate** — `requireAICredits(req, UsageEventType.GENERATE_COPY, CREDIT_COSTS.GENERATE_COPY)` is now the first statement. Unauthenticated → short-circuits before any read or AI call.
+2. **Prompt construction moved SERVER-side** — the body schema has no `prompt` field. Zod's default strip means an injected one is discarded **by the schema**, before anything downstream can see it (rather than by a hand-rolled check that can be forgotten). The prompt is built by the engine's own first-gen builder over persisted project state.
+3. **Ownership** — the legacy body had **no `tokenId`** (confirmed: old `route.ts:11`), so there was literally nothing to hang ownership off. `tokenId` is now in the contract and `assertProjectOwner(userId, tokenId, { action: 'regenerate-content' })` runs on the real path.
+4. **Charge** — 3 credits, on success only.
+
+**Sequence as implemented** (phase 3/4 canonical, D2 — verified in source order):
+1. `requireAICredits(GENERATE_COPY, 3)` — check only, never charges.
+2. Zod body validation — `tokenId` in the BODY; `prompt` stripped; `sections` non-empty.
+3. `isMock = NEXT_PUBLIC_USE_MOCK_GPT==='true' || tokenId===DEMO_TOKEN`; `if (!isMock) assertProjectOwner`.
+4. Project load inside `if (tokenId !== DEMO_TOKEN)`; `!project && !isMock` → **404**.
+5. **Mock short-circuit BEFORE dispatch** — `resolveMockEngine(project)`, `creditsUsed: 0`, never 422s.
+6. `resolveCopyEngine` → `UnsupportedProjectError` → **422 `unsupported_project`**, no AI call, no charge.
+7. `generateScopedCopy` scope `'all'`, layout state from the **REQUEST** (D4) → `ScopeInputError` → **422 `invalid_scope`**; `ScopedGenerationError` → **500 `generation_failed`, recoverable** — both **before** the charge.
+8. Real-proof re-injection (product/service only; work injects praise inside `parseWorkCopy`).
+9. Single `consumeCredits` — success only; failure is warn-only.
+
+**R7 honored exactly:** existing `CREDIT_COSTS.GENERATE_COPY` (3) + existing `UsageEventType.GENERATE_COPY`. **No new event type, no new cost constant, `src/lib/creditSystem.ts` untouched** (`billing-correctness` owns that surface).
+
+**R6.1 honored:** no strategy re-run, no strategy persistence, no fabrication. Strategic fields stay `''`/neutral (inherited from the phase-2 primitive, unmodified).
+
+**D4 honored:** design randomization stays client-side; `sections`/`sectionLayouts` arrive as schema-validated **structure**, not prose.
+
+**D8 preserved EXACTLY:** responds `{ success, content, warnings?, preservedElements, updatedElements, regenerationType, skippedSections, creditsUsed, creditsRemaining, meta }` with **top-level `content`**. `generationActions.ts` is **UNTOUCHED**.
+
+**One shape detail worth review attention:** `generationActions.ts:359` walks `content[sectionId]` entries as `elementKey -> value` (FLAT), and ignores any key not in `state.sections`. The model keys by section **TYPE**. So `toStoreContent()` maps model-type-keys back to the caller's real (uuid-suffixed) section IDs and flattens `.elements`. Pinned by the D8 test (`json.content[HERO_ID].elements` must be `undefined`) and by mutation probe 7.
+
+**Behavior changes (deliberate):** no filler copy (all three legacy 200-with-mock exits removed); contract-less sections reported instead of dropped.
+
+## How `skippedSections` works (R6.3 — killing the `'all'`-scope silent drop)
+
+Before: `scopedRegen.ts:289-294` (work) dropped contract-less sections **silently**; `getCompleteElementsMap` (product/service) dropped layout-less sections with a `logger.warn` only. Either way the user paid for a whole-page regen and one band just never changed, with no explanation anywhere. **Violates R6.3.**
+
+Now:
+- New exported `SkippedSection { sectionId, reason }` type.
+- `narrowElementsMap(input, scope, engine, skipped?)` takes an optional collector. **`'all'` scope only** — section/element scopes throw `ScopeInputError` (422) and are honest by construction.
+  - **work branch:** no `workElementContract` entry (atelier's `quote` band) → pushed with `"This section isn't AI-written (no copy contract for \"quote\")"`.
+  - **product/service branch:** in `input.sections` but absent from the map → pushed, reason distinguishing *no layout set* from *no element contract for layout X*.
+- `ScopedCopyResult.skippedSections` is **always present** (empty array for section/element scopes) — non-optional, so a caller can't quietly forget it.
+- The route surfaces it **two ways**: structured `skippedSections` (what an honest disabled/greyed control would render from) **and** `warnings[]`, which lands in `aiGeneration.warnings` (`generationActions.ts:191`).
+
+> **CORRECTED after impl-review — the earlier claim that the reason is "user-reachable today" was OVERSTATED and is withdrawn.** `generationActions.ts:191` *writes* `aiGeneration.warnings`; **no component reads it** (`grep aiGeneration src --include=*.tsx` → only `isGenerating` / `progress` / `context` / `errors.length`). Even `errors` is read only as a boolean, yielding the generic toast `'Some sections failed to regenerate'` (`EditHeaderRightPanel.tsx:118-122`). **The skip reason reaches store state and dies there.**
+>
+> **What the code does guarantee (mutant-verified, unchanged):** nothing is silently dropped on either branch; `skippedSections` is **non-optional** on `ScopedCopyResult`, so a caller cannot quietly forget it. The DATA contract is complete and correct.
+>
+> **What is NOT met: R6.3's bar** — "ship disabled+greyed WITH a why the user SEES". This matches Open Risk #4: `skippedSections` is **data, not a control**. The missing piece is a **warnings renderer** in the editor. **No editor file is in phase 5's Files-touched, so it is deliberately not built here → handed to the MERGE GATE as an explicit founder decision** (see the merge-gate list below).
+
+**Kept minimal as instructed: data is surfaced; no editor UI was redesigned.** The rest of the page still regenerates and still charges — a skipped band does not fail the request.
+
+## Deviations from the plan
+
+1. **Real-proof re-injection added to `regenerate-content`** (plan step 1 didn't name it). In-scope judgment call, conservative option taken. `'all'` scope regenerates the testimonials section, so without it a whole-page regen would **overwrite a live customer's approved testimonials with freshly invented ones** — a direct violation of the spec's proof-truth criterion 4, and a live-customer regression phase 4 explicitly guards on the section route. Mirrors `regenerate-section` exactly (same injectors, same product/service split, same owner-guarded read).
+2. **This also discharges the carried "proof-truth is untested" item.** The instruction pointed at `regenerate-section`'s path (mocked to `[]` everywhere). I pinned the provenance mechanism on **my own** route rather than editing phase 4's test file (outside my Files-touched): `listTestimonialsByOwner` returns a real row, the REAL injector runs, and the test asserts the customer's quote **replaced** the AI's invented one + `realProof: true` + the owner/project/approved-scoped read. Mutation probe 5 confirms it discriminates. The section route uses the identical injectors, so the mechanism is now pinned once, as asked.
+3. **`extractHiddenFields` moved server-side** (`HIDDEN_FIELD_KEYS` in the route), and `regenerationActions.ts` lost its `useOnboardingStore` + `buildFullPrompt` imports. Necessary: the hidden-field derivation existed only to feed the client-side prompt. `updatedInputs` (the editor's **unsaved** field edits — genuinely client-only) are now folded into the persisted onboarding view server-side by `projectWithUpdatedInputs()`. Without this the route would silently ignore the changed inputs that are the entire reason the caller regenerates.
+4. **`readErrorMessage` in the store** — prefers `message` → `error` → status, matching phase 4's `aiActions.ts` fix. The route's honest 402/422 messages would otherwise be discarded (phase 4's lesson: a why-message the user never sees does not satisfy R6.3).
+5. **`sectionLayouts` for design+copy read from `getState()`** rather than the local `newLayouts`: `newLayouts` only covers sections present in `sectionToRegistryKey`, so sending it raw would drop layouts for unmapped sections and make them 422/skip. Post-`setState` store read is the merged, authoritative map.
+   > **Reviewer clarification (added post-review):** this is **NOT a behavior change** — the legacy server ignored `newDesign` entirely. Sharp edge worth logging: `sectionToRegistryKey` is keyed by **BARE** section types (`regenerationActions.ts:182-200`), so with real uuid-suffixed ids (`hero-abc12345`) the design+copy path randomizes **NO layouts at all**. `getState()` is exactly what keeps the request valid. **Pre-existing, NOT ours to fix → backlog note.**
+6. **Mock short-circuit uses a bespoke `generateMockPageContent` (`route.ts:172-189`), NOT the sibling `mockResponseGenerator{Product,Service,Work}` the plan's step 1 named** — *undeclared in the first draft; declared here after impl-review*. Same justification phases 3 and 4 recorded: the siblings emit whole-page copy and require strategy / work-facts inputs the demo token (`project === null`) has no honest source for. Mock-only, and `resolveMockEngine(project)` **is** still called (it is the dispatch seam the sequence test guards) and reported as `meta.engine`.
+7. **Two new test files** (route + store) beyond the plan's single named one — the store re-point needs its own harness (`createEditStore`, not a route mock).
+
+## Test results — per-group MUTATION verification
+
+All mocks hand-written from the **contract** (`workElementContract.about` = heading/bio; TerminalHero = headline/lede/cta_text; ProofWithLogoRail = headline + `testimonials` collection), never from implementation output. **Every group was mutation-tested: behavior reverted, failure confirmed, then reverted back.** `grep -rn "MUTATION PROBE" src/` → **zero** hits at hand-off; `tsc` clean after revert.
+
+| # | Mutation (behavior reverted) | Expected | Result |
+|---|---|---|---|
+| 1 | `assertProjectOwner` block disabled | ownership tests fail | ✅ **2 failed** (non-owner 403; clerk-id/action assertion) |
+| 2 | `requireAICredits` gate ignored | auth/credit tests fail | ✅ **2 failed** (unauth 401; 402 insufficient) |
+| 3 | client `prompt` passed to `generateScopedCopy` (legacy trust) | H3 test fails | ✅ **1 failed** (injected prompt reached the model) |
+| 4 | `skipped?.push` removed in BOTH `'all'` branches (silent drop) | skip-report tests fail | ✅ **2 failed** (quote band; no-layout section) |
+| 5 | real-proof re-injection disabled | proof provenance fails | ✅ **1 failed** (AI's invented quote survived) |
+| 6 | `consumeCredits` moved BEFORE generation | charge-on-success fails | ✅ **5 failed** (incl. both no-charge-on-failure tests) |
+| 7 | `toStoreContent` returns nested `{elements}` | D8 shape fails | ✅ **6 failed** |
+| 8 | `projectWithUpdatedInputs` short-circuited | updatedInputs test fails | ✅ **1 failed** |
+| 9 | store sends `{prompt}` again, no tokenId | store structure test fails | ✅ **1 failed** |
+| 10 | store discards the error body (status only) | error-surfacing test fails | ✅ **1 failed** |
+
+Every group discriminates. No non-discriminating test found.
+
+**Coverage:** demo token → mock/`creditsUsed: 0`/no fetch/no AI/no charge · unknown token → 404 · **unauth → gated (the H3 fix)** · non-owner → 403 · writer + ecommerce → 422 `unsupported_project`, no charge · env-mock + writer → mock, no 422 · atelier → **work** engine on `work-copy` with **uuid-suffixed ids** (`about-abc12345`) · quote band → `skippedSections` + warning, rest of page still regenerates · generation failure → 500, no charge, no filler · required-element-empty → retried ×3, no charge · success → exactly 3 credits via `GENERATE_COPY`, exactly once · consumption failure → warn-only · D8 shape · design+copy randomization client-side (D4).
+
+**Carried item 3 (uuid-suffixed ids) discharged:** the atelier tests use `about-abc12345` / `quote-xyz11111`, and the product fixtures use `hero-abc12345` / `testimonials-def67890`, so `sectionTypeKey` is pinned on the real id shape — the gap the phase-4 reviewer found by probe.
+
+## Green gate (actual output, run in WORKDIR)
+
+- `npx tsc --noEmit` → **0 errors.** (Route-type checking is live; both new/edited route files export only `dynamic` + `POST`.)
+- `npm run test:run` → **216 files passed | 1 skipped; 3693 passed | 18 skipped** (77.1s). Baseline was 3660/18 → **+33 = my 27 route + 6 store tests**, no baseline test changed. **Neither known load-flake (`pipelineGuards.test.ts`, `htmlGenerator.test.ts`) fired this run.**
+- `npm run build` → **SUCCESS** (full `build:published-css` → `build:assets` → `next build`; route table emitted). Phase 6's gate is not left broken.
+
+## Open risks
+
+1. **The collections drop (above)** — the top one. The route's best output (real customer quotes) is what the store merge drops. Founder/backlog call, deliberately not fixed here.
+2. **`regenerate-content` becomes a paid route.** Free → 3 credits is user-visible; R7 says surface at the merge gate for comms.
+3. **Regen copy may read blander than first-gen** — accepted under R6.1/R6.2 (no strategy persisted). Whole-page `'all'` scope is where this is most visible, since it's the scope closest to first-gen. Founder real-LLM `/manual-test` of both editor paths (preserveDesign true/false) is still owed per the plan's verification line.
+4. **`skippedSections` is data, not yet a control.** Today the reason reaches the user as a post-hoc `aiGeneration.warnings` entry, not as the pre-emptive disabled+greyed control R6.3 ultimately wants. Editor-lane work; the data contract now exists to build it from.
+5. **`prompt` is stripped, not rejected.** A stale client sending `{prompt}` gets a 400 for the *missing* `tokenId`/`sections`, not for the prompt itself. Deliberate (conservative, non-breaking); the schema makes the prompt unreachable either way.
+6. **Phase 6 unblocked:** `regenerationActions.ts` no longer imports `buildFullPrompt`; the route no longer imports `parseAiResponse`/`generateMockResponse`. `contentActions.ts`'s 3 dead import lines remain — phase 6's, as ruled (R1), not touched here.
+
+## Phase-6 sweep additions (logged for the next phase — NOT fixed here)
+
+- `src/hooks/editStore/regenerationActions.ts:19` — unused `APIRequest` import; `:24` — unused `generateId`. Pre-existing, now clearly dead after the re-point.
+- **All three of that file's actions (`regenerateContentOnly`, `regenerateDesignAndCopy`, `regenerateWithInputs`) have ZERO UI callers.** Sweep should decide: wire a caller (editor lane) or delete.
+- `src/utils/regeneration/contentOnlyRegeneration.ts` — already on the phase-6 delete list; confirmed still unreferenced by the re-pointed store.
+- `regenerationActions.ts:182-200` `sectionToRegistryKey` bare-type keying (see Deviation 5) — backlog, not a phase-6 delete.
+
+## 🚪 MERGE-GATE LIST (founder decisions owed before merge)
+
+1. **`/api/regenerate-content` goes free → 3 credits.** User-visible pricing change; R7 says surface it for comms.
+2. **Kundius's atelier `quote` band now honestly refuses** (422 `invalid_scope`, 0 credits) where legacy served placeholder filler at 2 credits. Intended per R6.3; expect the report.
+3. **Missing `warnings` renderer (FIX 2).** `skippedSections`/`warnings` reach store state but **no component reads them** → R6.3's "a why the user SEES" is unmet. Founder decision: build the renderer in the editor lane, or accept data-only for beta.
+4. **Collections drop belongs to the SECTION loop (FIX 1)** — `regenerateAllContent` → `/api/regenerate-section` → `aiActions.ts:159-176`, at 2 credits × N sections. Phase 5's route assigns raw and lands collections fine. Backlog the merge-loop fix; do NOT attribute it to `regenerate-content`.
+5. **Founder `/manual-test` of `/api/regenerate-content` must be driven via the store/API** (`useEditStore.getState().regenerateContentOnly(...)`) or direct HTTP — **no button reaches this route**.
