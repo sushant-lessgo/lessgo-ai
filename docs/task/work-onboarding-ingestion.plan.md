@@ -16,7 +16,7 @@ E2 makes STEP 02 of the work journey real: upload photos (folder or loose files)
 - phase 2 WorkDetail + WorkCatalog blocks, conformance relax, atelier2 works flip + pilot enablement: done (commit a91b9272, impl-review=ship loops 1; founder parity gate PASSED; tsc clean, 3824 tests pass, build ok)
 - phase 3 upload spine + functional STEP 02 behind widened seam: done (commit 4791ac72, impl-review=ship loops 1; seam gate approved pre-impl; tsc clean, 3852 tests pass, build ok, e2e ran+passed; 3 non-blocking carried into P4)
 - phase 4 correction screen (5 verbs) + ingestion-writer regression: done (commit 2dda3255, impl-review=ship loops 1; tsc clean, 3879 tests pass, build ok, correction e2e passed; CF-1 belt-test → P5)
-- phase 5 end-to-end hardening + Kundius pilot: pending
+- phase 5 end-to-end hardening + Kundius pilot: steps 1-3 done (impl note, awaiting orchestrator stamp) — CF-1 belt exported+tested (clampGroupsToCap: per-group 24 + cumulative 150, 5 cases green); e2e blur/MediaAsset API assert added to the EXIF cluster test (RAN+PASSED authed); docs written (audience/work + generation READMEs, resolveWorkBlock/manifest/engines-work.ts headers); D2 no-schema-touch honored (stale MediaGroup comment left for the cutover track). FULL gate green: tsc clean, test:run 3884 passed/18 skipped/0 fail, lint pass (pre-existing warnings only), build ok, EXIF e2e 2 passed. Step 4 (Kundius real-photo founder pilot) = ORCHESTRATOR human gate, NOT run here; founder-pilot checklist in the audit.
 
 ---
 

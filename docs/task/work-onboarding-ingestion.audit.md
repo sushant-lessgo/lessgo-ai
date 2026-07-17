@@ -701,3 +701,216 @@ Non-blocking:
 1. **CF-1 belt (150-total) untested at belt level** — `clampGroupsToCap` is private to ShowWorkStep; the tested 150-cap is proposeGroups' (a different function). Correct by inspection but the belt itself has no direct test. → CLOSE IN P5 (cheap insurance on a data-safety belt): export `clampGroupsToCap` + drive a >150-across-groups case. Authorized addition to P5 scope (ShowWorkStep.tsx + a test).
 2. Hide one-way in-session (D12-faithful; blob survives → re-uploadable, not data loss) — acceptable for E2 pilot; future reversible-toggle/undo is a UX nicety. Surface at the Kundius pilot.
 3. e2e verb assertions facts-level (finalContent binding owned by the real-fanout atelier2 spec); drag-between best-effort with movePhoto unit test as gate of record. Reasonable.
+
+---
+
+# work-onboarding-ingestion — Phase 5 audit (end-to-end hardening + docs; founder pilot is the ORCHESTRATOR gate)
+
+Branch: `feature/work-onboarding-ingestion` (verified before any edit).
+Scope: Phase 5 steps 1-3 ONLY — the CF-1 belt export+test, e2e hardening (blur/
+MediaAsset API assert + resume-path confirmation), docs, and the FULL pre-merge
+gate. Step 4 (the Kundius founder pilot) is a HUMAN gate the orchestrator runs —
+NOT attempted here. Built ON Phases 1-4 (8cf890ab, a91b9272, 4791ac72, 2dda3255).
+
+## Files changed
+
+Created:
+- `src/components/onboarding/journey/engines/work/clampGroupsToCap.test.ts` (CF-1 belt test — authorized addition)
+
+Modified:
+- `src/components/onboarding/journey/engines/work/ShowWorkStep.tsx` (CF-1: `export` on `clampGroupsToCap` — no logic change)
+- `e2e/work-onboarding.spec.ts` (P5 blur/MediaAsset API assert on the EXIF cluster test)
+- `src/modules/audience/work/README.md` (photo-binding section: covers/href stamping + item pages, atelier2-only)
+- `src/modules/generation/README.md` (new `workCollections.ts` bullet: works fan-out live on atelier2, LLM-free)
+- `src/modules/skeletons/work/resolveWorkBlock.ts` (header comment: the two collection sections)
+- `src/modules/skeletons/work/manifest.ts` (header comment: pointer to the render + fan-out homes)
+- `src/components/onboarding/journey/engines/work.ts` (header comment: E2 seam widening + D10 funnel + D8 note)
+- `docs/task/work-onboarding-ingestion.audit.md` (this section)
+
+No file outside Phase 5's Files-touched (+ the authorized CF-1 pair) was edited.
+`prisma/schema.prisma` NOT touched (D2) — see the D2 note below.
+
+## CF-1 — belt export + test (closes the P4 non-blocking)
+
+- `ShowWorkStep.tsx`: `clampGroupsToCap` gained an `export` — a minimal one-word
+  change, ZERO logic change (the D11 belt body is byte-identical). It was private
+  to the module, which is why the P4 review flagged the 150-total belt as
+  correct-by-inspection but directly untested.
+- `clampGroupsToCap.test.ts` (NEW, 5 cases, all green): a single group of 30 →
+  clamped to exactly 24 (earliest-first survivors); 7 groups × 24 (168 raw) →
+  cumulative clamp to exactly 150 with the first 6 groups whole (144) and the 7th
+  truncated to 6 (earlier-groups-first policy, NOT earlier groups thinned); an 8th
+  group emptied once the 150 budget is exhausted; a within-cap set is a no-op that
+  returns the SAME group object references and never warns; a clamp warns (photo-
+  safety signal) and never throws. Exercises BOTH the per-group-24 and the
+  cumulative-150 halves of the belt — the exact data-safety gap P4 left open.
+
+## e2e hardening (step 1) — what's asserted, the segment split, and why
+
+The plan's ideal is a full 01→06 monolith (upload → correction/accept → 03/04 →
+STEP 05 mock copy → STEP 06 reveal: covers present, `/works` pages with photos,
+hidden photo absent, MediaAsset blur). Per the phase instruction's explicit
+escape hatch ("if a full 01→06 with 6 real gen calls is rate-limit-flaky, assert
+the load-bearing segments … and note the split — don't create a flaky
+monolith"), I did NOT build a new monolith. The load-bearing segments are ALL
+already proven across the existing `work-onboarding.spec.ts` tests (authored P2-P4,
+re-verified this phase), so P5 added the one genuinely missing assertion and
+confirmed the resume paths, rather than duplicating a 6-AI-call generation into a
+single flaky test:
+
+- **NEW — MediaAsset/blur API assert** (added to the `EXIF same-day clusters`
+  test, the non-rate-limited upload segment): a `page.on('response')` listener
+  captures every `/api/upload-image` POST response; after the proposal surfaces,
+  it asserts all 4 uploaded JPEGs returned a `metadata.blurDataUrl` starting
+  `data:image/webp`. That blur is EXACTLY what `route.ts` writes into the
+  MediaAsset row (`recordMediaAssetBestEffort({ blurDataUrl })`) and what paints
+  the correction-board thumbnails — so it is the pipeline-output proxy for "the
+  MediaAsset row carries blurDataUrl" (the row itself is not reachable via a
+  public API in the harness). RAN + PASSED against a real dev server + Clerk
+  session this session (see gate results).
+- **covers present + `/works/<slug>` pages exist with photos** — owned by the
+  existing `REAL fan-out on atelier2` test (seeded photo-bearing atelier2 brief →
+  STEP 05 → asserts each `page-<slug>` item page carries its seeded cover url
+  VERBATIM AND the home gallery paints the covers in the reveal iframe).
+- **hidden photo absent** — proven by COMPOSITION, deliberately not re-driven
+  through a full atelier2 fan-out: the `correction board` test proves a hidden
+  photo's url is DROPPED from persisted facts (D12), and the `REAL fan-out`
+  test proves facts photos reach `/works` finalContent VERBATIM (nothing but
+  facts reaches entries/pages — D1). A photo absent from facts therefore can
+  never reach finalContent. Re-driving a hide→generate monolith on atelier2
+  would add 6 AI calls + a 61s rate-limit wait for coverage these two segments
+  already own jointly.
+- **Resume mid-STEP-02** — the EXIF cluster test reloads after commit and asserts
+  the ingested chips (`rail-chip-g3`) re-project from Postgres: the proposal
+  persisted into facts survives the reload.
+- **Resume mid-fan-out (`completedPageKeys` skip)** — owned by the existing
+  STEP-05/06 generation test: its rate-limit retry loop RESUMES the fan-out
+  (already-persisted pages skipped, 0 re-charge) and the post-success reload
+  re-drives chargelessly to STEP 06 (every page in `completedPageKeys`).
+
+Net: one new non-flaky API assertion; the rest of the plan's ideal-monolith
+coverage is present and honest across the existing segmented tests, which is the
+sanctioned outcome. The two rate-limited generation tests were NOT run in the
+targeted e2e pass (they cost 6 AI calls + 61s waits each); they are unchanged
+from P2/P4 and were green there.
+
+## Docs (step 2)
+
+- `audience/work/README.md` — new "Photo binding" section: `facts.work.groups[]
+  .photos` is the ONE truth (no MediaGroup/schema), covers + href stamping
+  (name→slug join, href only when the item page exists), `/works/<slug>` item
+  pages carrying photos verbatim, LLM-free (zero AI/credit), binding is
+  atelier2-only (Path A).
+- `generation/README.md` — new `workCollections.ts` bullet under Files:
+  `deriveWorksEntries` + `stampWorkGalleryBinding`, driven by `runWorksFanOut`
+  with the LLM-free `generateItemCopy`, live on atelier2 only, empty-entries
+  byte-identical.
+- `skeletons/work/resolveWorkBlock.ts` header — the two collection sections
+  (`workcatalog` = `/works` index, `workdetail` = `/works/<slug>` project page),
+  resolved by section type, fed by the fan-out, lit by the atelier2-only `works`
+  capability, dual-renderer parity guarded.
+- `skeletons/work/manifest.ts` header — one-line pointer to the render
+  (resolveWorkBlock) + fan-out (workCollections) homes and the atelier2-only cap
+  (the detailed "why they're absent from the manifest" note predates P5).
+- `engines/work.ts` header — E2 STEP-02 ingestion block: `loadStep` seam widening
+  (shared `JourneyStepConfig`, render-time lazy, firewall holds), the D10 one
+  write funnel (photos via `applyRailEdit({field:'groups'})` → `commitRail`, never
+  the founder-signed `RailEditValue`), and the D8 note (the commit swaps the facts
+  identity so the existing projection-key guard fires; no `UnderstoodRail.tsx` edit).
+
+## D2 — NO schema touch (step 3)
+
+`prisma/schema.prisma` was NOT edited in any way, including its stale
+`MediaGroup model itself lands with E2` comment (`schema.prisma:303`). Per D2 the
+E2 slice adds/writes/references ZERO of `MediaGroup` / `MediaAsset.groupId` /
+`sortOrder` / `selected` / an EXIF column — group truth lives entirely in
+`facts.work.groups`, so nothing here reads or writes those columns. The stale
+comment is deliberately LEFT as-is: correcting it belongs to the future
+cutover/CMS track (which will actually decide the MediaGroup disposition), not to
+this schema-free slice. Noted here instead, per the phase instruction.
+
+## Constraints honored
+
+Zero new AI calls, zero prisma schema touch, zero new metered credit op, no new
+dependency, shell unforked. The CF-1 change is an `export` keyword; the e2e change
+is a passive response listener + assertion; the rest is docs/comments.
+
+## Full pre-merge gate (run in WORKDIR)
+
+1. `npx tsc --noEmit` — CLEAN (no output; the pre-existing founder.jpg TS2307 did
+   NOT surface this run).
+2. `npm run test:run` — **3884 passed | 18 skipped** (228 files), 0 failures.
+   +5 vs P4's 3879 = the CF-1 belt test's 5 cases (EXERCISED, not skipped). The
+   18 skips are pre-existing.
+3. `npm run lint` — PASS (exit 0). Only pre-existing WARNINGS (`@next/next/no-img-element`
+   across template blocks + one `react-hooks/exhaustive-deps` in `ph-provider.tsx`) —
+   NONE in any file I touched; zero errors; zero new warnings introduced. (Lint
+   matters this phase: the pre-push hook runs it — skipping it blocked a push before.)
+4. `npm run build` — SUCCEEDED (exit 0, full route table emitted).
+5. e2e — `npx playwright test work-onboarding.spec.ts -g "EXIF same-day clusters"
+   --project=authed` → **2 passed** (auth.setup + the EXIF test carrying the new
+   blur/MediaAsset assertion), 51.7s, against a real booted dev server + Clerk
+   session. The two rate-limited generation tests (`STEP 05 … STEP 06 reveals` and
+   `REAL fan-out on atelier2`) were NOT re-run in this targeted pass — each is a
+   6-AI-call + 61s-rate-limit-wait run, unchanged from P2/P4 where they were green;
+   running them adds flake surface for zero P5 delta. Prefer-segmented per the
+   phase instruction; not a rabbit-hole.
+
+## Founder pilot checklist (for the ORCHESTRATOR to hand the founder at the gate)
+
+Phase-5 step 4 is a HUMAN gate — the founder runs Kundius's REAL photos through
+STEP 02 on dev and eyeballs STEP 06. Exact steps:
+
+1. **Env override** — in `.env.local` (dev only; UNSET in prod), set:
+   `WORK_JOURNEY_TEMPLATE_OVERRIDE=atelier2`
+   This is the server-side confirm-route override (D7): a served work brief that
+   the gate resolves to `atelier` is persisted as `atelier2` instead, so the
+   journey resolves onto the works-flipped skeleton pilot. Also ensure the work
+   copy engine is on: `NEXT_PUBLIC_WORK_COPY_ENGINE=true` (build-time inlined —
+   `npm run dev` picks it up; a running server needs a restart).
+2. **Reach the work journey** — `npm run dev`, sign in, start onboarding, and
+   enter a photography/work one-liner so the classifier resolves the `work`
+   engine (the atelier persona). Confirm → the journey shell mounts at STEP 02
+   ("Show your work"). (The classify → STEP 01 entry is real; the e2e seeds it
+   because mock mode can't classify, but a real dev run classifies for real.)
+3. **STEP 02 — the real ingestion** — "Upload a folder" (Kundius's actual shoot
+   folders → folders become groups) or "Choose photos" (loose files → EXIF
+   same-day clusters). Correct in taps on the board that appears: rename / merge /
+   drag-between / hide a photo / pick a cover. "Looks right" (or Skip) advances.
+   Check it feels fast at mobile width (blur thumbnails paint instantly).
+4. **Generate** — walk 03 (answer any remaining ask-ifs) → 04 ("Build my site").
+   Free-tier accounts will hit the AI rate limit on the ~6th call — it is
+   RECOVERABLE ("Try again" resumes the already-persisted pages chargelessly).
+5. **"Proven" at STEP 06** — the reveal iframe shows Kundius's OWN work: her
+   photos, GROUPED, as the home gallery covers, with `/works/<slug>` project
+   pages behind them, rendered on the WORK SKELETON (Atelier skin, atelier2),
+   FAST on a phone. That is the spec's decision gate.
+6. **D7b acknowledgement** — the founder should explicitly acknowledge at merge:
+   E2 ships ZERO prod-reachable behavior (`WORK_JOURNEY_TEMPLATE_OVERRIDE` unset
+   in prod; `atelier` never gets the `works` flip; `atelier2` is bespoke/off-
+   shortlist). Merging E2 does NOT expose the feature to users — a later, separate
+   enablement decision (the cutover feature) does.
+
+## What the impl-reviewer should scrutinize
+
+- **CF-1 `export`** — confirm it is purely additive (the belt body unchanged) and
+  the test's earlier-groups-first assertion matches `proposeGroups`' global-cap
+  policy (later groups truncated, not earlier ones thinned).
+- **The blur/MediaAsset assertion** — it asserts the pipeline OUTPUT (`data:image/webp`
+  micro-thumb per upload), the proxy for the row's `blurDataUrl`, since the row is
+  not publicly readable in the harness. Confirm that's an acceptable read of the
+  "MediaAsset rows carry blurDataUrl (API assert)" AC (JPEG → webp blur is
+  guaranteed by `pipeline.ts`; the PNG fixture isn't in `EXIF_CLUSTER_FILES`, so
+  only JPEG uploads are asserted).
+- **The segment split** — confirm the composition argument for "hidden photo
+  absent" (correction test: absent from facts; real-fanout test: facts→finalContent
+  verbatim) is a sound substitute for a hide→generate monolith on atelier2.
+- **D2** — confirm `prisma/schema.prisma` is untouched (git diff) including the
+  stale comment, and that leaving it is the right call (cutover track owns it).
+
+---
+## Orchestrator record — Phase 5 impl-review (FINAL)
+
+**impl-review verdict: SHIP** (loop 1, no blocking). Full spec-AC sweep: no AC silently unmet. CF-1 export purely additive (belt body byte-identical, sole call site unchanged; test drives real >150 case, fails if 150-total dropped). READMEs/headers accurate to shipped code (LLM-free fan-out, photos∈VERBATIM_ITEM_FIELDS, name→slug+page-exists guard, works on atelier2 ONLY, seam on shared JourneyStepConfig — no overclaim). D2 schema untouched (empty diff, stale MediaGroup comment left). Founder-pilot checklist env vars/path verified correct. Blur AC = pipeline-output proxy (legitimate — same value written to row + returned in metadata), matches plan deviation #5. "Hidden absent from finalContent" transitively proven (deriveWorksEntries reads only facts.groups). Gates: tsc exit 0, test:run 3884 passed / 0 fail, lint exit 0 (pre-existing warnings only), build ok, EXIF e2e passed.
+
+**ALL 5 PHASES COMPLETE.** Remaining = 2 human gates: (1) Kundius real-photo pilot eyeball (spec decision gate, founder-run — checklist above), (2) merge gate (orchestrator, part of the unpushed deploy bundle; D7b: zero prod-reachable behavior).

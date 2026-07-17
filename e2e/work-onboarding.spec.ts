@@ -288,6 +288,24 @@ test('STEP 02 upload: EXIF same-day clusters surface as 2 rail groups + persist'
   await page.goto(`/onboarding/${token}`);
   await expect(page.getByTestId('step-show-work')).toBeVisible({ timeout: 30_000 });
 
+  // ── P5 MediaAsset/blur API assert ─────────────────────────────────────────
+  // The upload pipeline is what writes the MediaAsset row AND its blurDataUrl
+  // (route.ts → recordMediaAssetBestEffort({ blurDataUrl })). The row is not
+  // reachable via a public API here, so we assert the pipeline OUTPUT that the
+  // row is built from: every /api/upload-image response carries a WebP blur
+  // micro-thumb in its metadata. That blur is exactly what lands on the row and
+  // what paints the correction-board thumbnails (the blur AC read).
+  const uploadBlurs: (string | undefined)[] = [];
+  page.on('response', async (res) => {
+    if (!res.url().includes('/api/upload-image') || res.request().method() !== 'POST') return;
+    try {
+      const body = await res.json();
+      uploadBlurs.push(body?.metadata?.blurDataUrl);
+    } catch {
+      /* non-JSON / failed upload — ignored; the count assert below is the gate */
+    }
+  });
+
   // The seeded brief already has 2 groups (g0, g1). Uploading 4 loose photos across
   // TWO capture days should append TWO new date-labelled groups (g2, g3).
   await page.locator('[data-testid="show-work-file-input"]').setInputFiles(EXIF_CLUSTER_FILES);
@@ -295,6 +313,15 @@ test('STEP 02 upload: EXIF same-day clusters surface as 2 rail groups + persist'
   // The proposal surfaces exactly two clusters…
   await expect(page.getByTestId('show-work-proposal')).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId('show-work-proposal-group')).toHaveCount(2);
+
+  // …and every uploaded JPEG produced a WebP blur micro-thumb (⇒ the MediaAsset
+  // row carries `blurDataUrl`). Poll: responses resolve asynchronously.
+  await expect
+    .poll(() => uploadBlurs.length, { timeout: 15_000 })
+    .toBe(EXIF_CLUSTER_FILES.length);
+  expect(uploadBlurs.every((b) => typeof b === 'string' && b.startsWith('data:image/webp'))).toBe(
+    true
+  );
 
   // …and the rail gains two chips as a consequence of the commit (progressive update).
   await expect(page.getByTestId('rail-chip-g2')).toBeVisible({ timeout: 30_000 });

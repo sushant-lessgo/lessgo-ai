@@ -16,7 +16,10 @@
 // they are collection-fan-out machinery, resolved by SECTION TYPE (resolveWorkBlock)
 // and evidenced by the conformance (b)/(b+)/(d) capability walks, never by the
 // manifest's variant/distinctness (c)/(e) grammar. (Same as every other template's
-// catalog/detail pair — no template lists them in its block manifest.)
+// catalog/detail pair — no template lists them in its block manifest.) The blocks
+// themselves register in `resolveWorkBlock.ts`; the LLM-free photo fan-out that
+// fills them lives in `generation/workCollections.ts` (see those headers). The
+// `works` capability that lights them up is declared on `atelier2` ONLY (pilot).
 //
 // Phase 3: hero only — `WorkHeroSlider` (the built default) + `WorkHeroVideo` (a
 // declared-but-NOT-built SLOT: a future video-bg hero, capability reserved, built

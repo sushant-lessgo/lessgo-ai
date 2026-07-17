@@ -70,7 +70,7 @@ interface Progress {
  * so a later group is truncated / emptied rather than an earlier one thinned. A
  * cross-group merge is the case that can overshoot 150 cumulatively.
  */
-function clampGroupsToCap(groups: WorkGroupInput[]): WorkGroupInput[] {
+export function clampGroupsToCap(groups: WorkGroupInput[]): WorkGroupInput[] {
   let remaining = PHOTOS_TOTAL_CAP;
   return groups.map((g) => {
     const photos = g.photos ?? [];

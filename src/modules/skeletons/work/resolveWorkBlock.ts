@@ -10,6 +10,18 @@
 // lookup for it falls through to the placeholder. A1 guardrail preserved: a
 // foreign/unknown layout name resolves to the section's `default`, so switching
 // templates never breaks on a stored layout name.
+//
+// ── COLLECTION SECTIONS (work-onboarding-ingestion E2) ──────────────────────
+// Two sections here are the WORK PHOTO-BINDING render surface, NOT section-picker
+// arrangement variants (hence they're absent from `manifest.ts` — see its header):
+//   • `workcatalog` — the `/works` index: a covers grid over the catalog slice.
+//   • `workdetail`  — a `/works/<slug>` project page: the group's photo grid
+//     (cover first) + optional client/problem/result strip.
+// They resolve by SECTION TYPE (lowercase) and are fed by the LLM-free collection
+// fan-out (`generation/workCollections.ts` + `wizard/generation/work.llm.ts`).
+// The `works` capability that lights them up is declared on `atelier2` ONLY (the
+// Path A pilot); the block pair is single-source `.core.tsx` (dual-renderer parity
+// guarded by `coreParity.test.ts` + `renderParity.work.test.tsx`).
 
 import React from 'react';
 import { WorkPlaceholderBlock } from './WorkPlaceholderBlock';
