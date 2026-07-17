@@ -340,6 +340,63 @@ describe('applyRailEdit — full-facts re-emit + snapshot sync', () => {
     const cleared = applyRailEdit({ field: 'languages', value: [] }, (set as { facts: Record<string, unknown> }).facts);
     expect(getWorkFacts((cleared as { facts: Record<string, unknown> }).facts)!.languages).toBeUndefined();
   });
+
+  // ── E3 STEP 03 question write paths (D-H) ─────────────────────────────────
+  it('establishment edit round-trips and preserves siblings + groups photos/items', () => {
+    const photos = [{ id: 'p1', url: 'https://x/1.jpg' }];
+    const items = [{ name: 'Anna & Bo', photos: [{ id: 'p2' }] }];
+    const live: Record<string, unknown> = {
+      entry: ENTRY,
+      collections: { works: [] },
+      work: { identity: { name: 'Kundius Studio' }, groups: [{ name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, photos, items }] },
+    };
+    const res = applyRailEdit({ field: 'establishment', value: 'new' }, live);
+    expect(res.ok).toBe(true);
+    const facts = (res as { facts: Record<string, unknown> }).facts;
+    const work = getWorkFacts(facts)!;
+    expect(work.establishment).toBe('new');
+    // Siblings + E2 ingestion payload survive the write.
+    expect(facts['entry']).toEqual(ENTRY);
+    expect(facts['collections']).toEqual({ works: [] });
+    expect(work.groups![0].photos).toEqual(photos);
+    expect(work.groups![0].items).toEqual(items);
+  });
+
+  it('dreamClient edit round-trips (trimmed) and rejects an empty value', () => {
+    const res = applyRailEdit({ field: 'dreamClient', value: '  discerning couples  ' }, seededFactsBag());
+    expect(getWorkFacts((res as { facts: Record<string, unknown> }).facts)!.dreamClient).toBe('discerning couples');
+    expect(applyRailEdit({ field: 'dreamClient', value: '   ' }, seededFactsBag()).ok).toBe(false);
+  });
+
+  it('praise edit round-trips verbatim quotes and unsets when emptied', () => {
+    const set = applyRailEdit({ field: 'praise', value: ['Best day', ' Stunning ', ''] }, seededFactsBag());
+    expect(getWorkFacts((set as { facts: Record<string, unknown> }).facts)!.praise).toEqual(['Best day', 'Stunning']);
+    const cleared = applyRailEdit({ field: 'praise', value: [] }, (set as { facts: Record<string, unknown> }).facts);
+    expect(getWorkFacts((cleared as { facts: Record<string, unknown> }).facts)!.praise).toBeUndefined();
+  });
+
+  it('contactMethod edit round-trips and keeps the bag valid', () => {
+    const res = applyRailEdit({ field: 'contactMethod', value: 'whatsapp' }, seededFactsBag());
+    const work = getWorkFacts((res as { facts: Record<string, unknown> }).facts)!;
+    expect(work.contactMethod).toBe('whatsapp');
+    expect(work.identity!.name).toBe('Kundius Studio');
+    expect(work.groups).toHaveLength(2);
+  });
+
+  it('the four E3 fields write onto a bag with NO name (no identity dependency)', () => {
+    // establishment/dreamClient/praise/contactMethod do NOT hang off identity —
+    // unlike descriptor/location/reach they must write even with no name present.
+    for (const edit of [
+      { field: 'establishment', value: 'established' } as const,
+      { field: 'dreamClient', value: 'couples' } as const,
+      { field: 'praise', value: ['great'] } as const,
+      { field: 'contactMethod', value: 'form' } as const,
+    ]) {
+      const res = applyRailEdit(edit, { entry: ENTRY });
+      expect(res.ok, `${edit.field} should write without a name`).toBe(true);
+      expect((res as { facts: Record<string, unknown> }).facts['entry']).toEqual(ENTRY);
+    }
+  });
 });
 
 describe('appendUserNote', () => {
