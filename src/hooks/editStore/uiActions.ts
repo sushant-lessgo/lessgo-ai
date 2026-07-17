@@ -427,6 +427,10 @@ export function createUIActions(set: any, get: any): UIActions {
         (state.forms as any).activeForm = formId;
       }),
     
+    // NOTE: dead-shadowed at runtime by formActions' pair (spread LAST in
+    // editStore.ts). Kept because the `UIActions` type (actions.ts:178-179)
+    // requires it and `createUIActions` returns `UIActions` — deleting it here
+    // alone would break the type. See editor-defect-fixes Phase 2 audit.
     showFormBuilder: (formId?: string) =>
       set((state: EditStore) => {
         state.formBuilderOpen = true;

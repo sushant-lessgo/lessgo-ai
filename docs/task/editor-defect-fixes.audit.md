@@ -59,3 +59,68 @@
 - None from this phase. Phase 2 (formBuilder slice + dead show/hideFormBuilder duplicate sweep)
   is intentionally NOT done here; the `showFormBuilder`/`hideFormBuilder` pair in `uiActions.ts`
   and the `formBuilder` store slice remain in place for Phase 2.
+
+---
+
+## Phase 2 — Dead-code sweep (formBuilder slice + dead show/hideFormBuilder duplicates)
+
+### Files changed
+1. `src/types/store/state.ts`
+2. `src/stores/editStore.ts`
+3. `src/hooks/editStore/persistenceActions.ts`
+4. `src/hooks/editStore/uiActions.ts` (comment-only; pair KEPT — see decision)
+
+`formActions.ts` (LIVE pair) and `GlobalFormBuilder.tsx` were NOT touched (confirmed absent
+from `git diff`).
+
+### Precondition re-grep results
+- `state.forms.formBuilder` / `.formBuilder.visible` / `forms.formBuilder`: before edits, the
+  ONLY hits were the dead writers — `persistenceActions.ts:818,823` (the `showFormBuilder`/
+  `hideFormBuilder` duplicate), plus the type decl `state.ts:524` and the init `editStore.ts:296`.
+  No live reader anywhere. Safe to sweep.
+- `GlobalFormBuilder.tsx:8-22` reads only `formBuilderOpen` + `editingFormId` + `hideFormBuilder`
+  (the LIVE formActions pair) — NOT the `formBuilder` slice. Left untouched.
+- `showFormBuilder`/`hideFormBuilder` impls found in THREE creators: `persistenceActions.ts:816`
+  (spread first, dead), `uiActions.ts:430` (dead-shadowed), `formActions.ts:137/144` (spread last,
+  LIVE). Matches the plan's composition model.
+
+### Per-file changes
+1. **`src/types/store/state.ts`** — deleted the `formBuilder: { visible; editingField;
+   editingFormId; fieldLibrary }` type block from `FormsSlice` (was ~523-529) plus its
+   `// Form Builder State` comment. `FormFieldType` import remains used (line ~541/549).
+2. **`src/stores/editStore.ts`** — deleted the `formBuilder` init object (was ~296-301) from the
+   forms-slice initial state. Spread order at :417/419/420 (persistence → ui → formsImage)
+   unchanged; formActions still spread LAST.
+3. **`src/hooks/editStore/persistenceActions.ts`** — deleted the dead duplicate `showFormBuilder`/
+   `hideFormBuilder` pair (was ~816-824) that wrote the phantom
+   `(state.forms as any).formBuilder.visible`. This was the last remaining writer of the slice.
+4. **`src/hooks/editStore/uiActions.ts`** — pair KEPT (see decision). Added a 4-line comment above
+   `showFormBuilder` (now ~430) marking it dead-shadowed-by-formActions / kept-because-UIActions-
+   type-requires-it. No behavioral change.
+
+### Decision on the uiActions pair: KEPT (not swept)
+The plan's primary instruction was SWEEP, with a documented fallback. Checked: `createUIActions`
+has explicit return type `: UIActions` (uiActions.ts:100), and `UIActions` DECLARES
+`showFormBuilder`/`hideFormBuilder` (actions.ts:178-179). `actions.ts` is OUT of Phase 2 scope, so
+deleting the pair from `uiActions.ts` alone would make `createUIActions` no longer satisfy
+`UIActions` → tsc failure. Fallback applies verbatim: keep the pair + one-line comment. Confirmed
+empirically — `npx tsc --noEmit` is green WITH the pair kept. Two impls (uiActions kept +
+formActions live) legitimately remain post-phase; the plan's "exactly ONE impl each" verification
+line is known-inverted (flagged by plan-review). Runtime behavior is unchanged: formActions' pair
+still wins (spread last).
+
+### Gate results (all PASS)
+- **Grep-clean**: `formBuilder.visible` / `forms.formBuilder` / `.formBuilder` slice refs → 0 hits
+  in `src/`. (`formBuilderOpen` / `GlobalFormBuilder` / `showFormBuilder` remain — LIVE, correct.)
+- **git diff scope**: only the 4 files above (+ pre-existing uncommitted plan.md progress-log line
+  from Phase 1, not mine). `formActions.ts` + `GlobalFormBuilder.tsx` show no change.
+- **`FormBuilder.test.tsx`**: green (part of test:run below).
+- **`npx tsc --noEmit`**: EXIT 0.
+- **`npm run test:run`**: 243 files passed | 1 skipped; 4064 tests passed | 18 skipped. EXIT 0.
+- **`npm run lint`**: EXIT 0 (only pre-existing `<img>`/exhaustive-deps warnings).
+- **`npm run build`**: EXIT 0 (full route table emitted; middleware built).
+
+### Open risks
+- None. The kept uiActions pair is dead-shadowed but type-required and runtime-inert; a future
+  phase touching `actions.ts` could remove both the `UIActions` decl and this impl to reach the
+  "one impl each" ideal, but that is out of this phase's scope.

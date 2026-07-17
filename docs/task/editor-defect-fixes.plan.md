@@ -19,8 +19,8 @@ Pure removal/cleanup, no new behavior. Two 🔴 editor defects: (1) `convertCTAT
 
 ## Progress log
 
-- phase 1 core removals (convertCTAToForm + modal de-dup): pending
-- phase 2 dead-code sweep (formBuilder slice + dead duplicates): pending
+- phase 1 core removals (convertCTAToForm + modal de-dup): done (commit 6740e9f0, review loops 1, verdict ship)
+- phase 2 dead-code sweep (formBuilder slice + dead duplicates): done (commit pending, review loops 1, verdict ship; uiActions pair KEPT per fallback — UIActions type requires it)
 
 ---
 
