@@ -1470,3 +1470,127 @@ guard + serial structure intact.
   after the +8-line edit), plus `:174` editor-badge and `:191` 402-modal. No 404.
 - WARM run (no `.next` delete): **10 passed (1.6m)**. No regression on the warm path.
 - `npm run build` — green.
+
+---
+
+# Merge — main integration (regen-modernization)
+
+Resolved the `main` -> `feature/billing-beta` merge (5 conflicts) and re-verified the
+402 credit-block contract against main's REBUILT regen routes. Merge left IN PROGRESS
+for the orchestrator to commit (no commit made here).
+
+## Files changed (this merge-resolution task)
+- `playwright.config.ts` — conflict resolved.
+- `src/app/edit/[token]/components/toolbars/ElementToolbar.tsx` — conflict resolved.
+- `src/app/edit/[token]/components/toolbars/TextToolbarMVP.tsx` — conflict resolved.
+- `src/hooks/editStore/aiActions.ts` — conflict resolved (2 hunks).
+- `src/lib/creditSystem.ts` — conflict resolved.
+- `src/lib/creditCosts.ts` — deviation (outside the 5-conflict list): relocated main's
+  `LEAD_REPLY: 1` constant here (see below).
+- `src/hooks/editStore/aiActions.credits.test.ts` — deviation: two stale message-text
+  assertions updated to main's R6.3 honest-message contract (see below).
+
+## Per-conflict resolution (both intents preserved)
+1. playwright.config.ts — kept BOTH additions to the `authed` allowlist: billing-beta's
+   `/billing-beta\.spec\.ts/` AND main's toolbar specs (toolbar-dispatch / link-picker /
+   manage-items).
+2. ElementToolbar.tsx — main restructured every action from a hand-rolled button into the
+   shared `ToolbarButton` (data-action, variant, aria-disabled convention). Re-applied
+   billing-beta phase-7 on TOP of the new structure: `creditCostHint(
+   CREDIT_COSTS.ELEMENT_REGENERATION)` computed for the `regenerate-copy` action and the
+   button wrapped in `AppTooltip` (native title="" suppressed when hinted so the tooltip is
+   the sole affordance). Imports keep BOTH sides. The e2e "Regenerate" accessible name
+   survives via `ToolbarButton label="Regenerate"` (renders a Regenerate span).
+3. TextToolbarMVP.tsx — main replaced the sparkle button with a `ToolbarButton`
+   (data-action="ai-variations") and added a greyed `Link` placeholder before it. Kept
+   main's Link placeholder + ToolbarButton sparkle, then re-attached billing-beta
+   phase-7/8: added `aria-label="AI text variations"` (the e2e hook) to the sparkle
+   ToolbarButton and wrapped it in the cost-hint `AppTooltip` when ENABLED (bare when
+   disabled so `disabledTitle` carries the locale/generating message). Imports keep both.
+4. aiActions.ts (2 hunks) — reconciled billing-beta phase-4 credit-block detection
+   (creditBlockFrom -> bus emit + typed throw) with main's R6.3 honest-error message on
+   BOTH rebuilt fetch paths:
+   - regenerate-section (:139): creditBlockFrom check runs FIRST, then
+     `throw new Error(errorData?.message || errorData?.error || 'Failed to regenerate section')`.
+   - regenerate-element (:588): same order — 402 block check first, then
+     `errorData?.message || errorData?.error || 'API error: <status>'`.
+   Adopted main's `.catch(() => null)` + optional chaining on both.
+   The THIRD gated path, /api/audience/work/regenerate-story (:344), merged CLEANLY with
+   its creditBlockFrom intact (verified). All three gated paths still fire the block.
+5. creditSystem.ts — kept billing-beta's phase-1 re-export from prisma-free `./creditCosts`
+   (dropped main's inline CREDIT_COSTS object). Main's inline block had added `LEAD_REPLY: 1`
+   (its lead-reply track); to avoid clobbering it, relocated that constant to creditCosts.ts
+   — the reconciliation the lead-reply spec explicitly assigns to "whoever merges second".
+   `UsageEventType.LEAD_REPLY_GENERATION` (also main's) merged cleanly and is untouched.
+
+## Deviations (files outside the 5-conflict list)
+- src/lib/creditCosts.ts — added `LEAD_REPLY: 1`. Mechanically required to preserve main's
+  credit-config change once billing-beta relocated CREDIT_COSTS' home; consumed by
+  src/app/api/leads/[id]/draft-reply/route.ts:112,148. Without it tsc/build fail on a
+  missing key. The lead-reply plan/spec anticipate this exact reconciliation.
+- src/hooks/editStore/aiActions.credits.test.ts — two element-path tests asserted the OLD
+  generic throw text (API error: 500 / API error: 403); main's R6.3 change surfaces the
+  server's error/message string instead. Updated the message assertions to
+  'Model provider exploded' and 'limit_reached' respectively. The credit-block assertions
+  (events toEqual []) — the actual subject of both tests — are UNCHANGED and still pass.
+  Chose to update the stale text rather than revert main's honest-message intent.
+
+## PART 2 — 402 semantic contract re-verified against the REBUILT routes
+Read the current (main) source of all three rebuilt routes + the shared credit helper:
+- regenerate-element/route.ts:143-150, regenerate-section/route.ts:168,
+  regenerate-content/route.ts:197 all gate via requireAICredits(...) and return
+  creditCheck.response! on block.
+- requireAICredits (middleware/planCheck.ts:208-238) -> createErrorResponse (:193-203)
+  emits Pattern B: `{ error: 'Insufficient credits. Required: N, Available: M',
+  code: 'INSUFFICIENT_CREDITS' }` at status 402 — NO structured numbers, NO details.
+  planCheck.ts is UNCHANGED by the rebuild; the normalizer's cited line numbers (:100,
+  :243, :268) still match the source.
+- parseInsufficientCredits (src/lib/billing/insufficientCredits.ts) handles Pattern B:
+  code -> matchesCode('insufficient_credits') (case-insensitive) claims the block, and the
+  MESSAGE_RE fallback recovers required/available from the error string. So the numbers
+  reach the modal via the regex path — exactly what the e2e :191 stub exercises.
+- The regenerate-story route additionally emits a Pattern A consume-race 402
+  (route.ts:264-269: error:'insufficient_credits', creditsRequired), also handled
+  (structured creditsRequired beats the regex).
+Finding: the rebuilt routes did NOT change the 402 shape. No change to the normalizer or
+its fixtures was needed. (Not asserted from tsc passing — verified against route source.)
+The 6 fixtures in aiActions.credits.test.ts still transcribe the real shapes and pass.
+
+## PART 3 — gates
+- npx tsc --noEmit — clean.
+- npm run test:run — 234 files passed | 1 skipped; 3925 tests passed | 18 skipped.
+  (Pre-merge baseline in this branch was 3650; the higher count is main's added tests from
+  the 6 merged tracks — regen-modernization, lead-reply, toolbar-standard-beta, etc.
+  Nothing removed.) Only movement caused by THIS task: the 2 message-text assertions above.
+- npm run lint — clean (pre-existing img/exhaustive-deps warnings only, exit 0).
+- npm run build — green.
+- Isolation guards: uiFoundationIsolation.test.tsx (published-css sha256) — 5 passed;
+  tailwindConfigFreeze.test.ts — 3 passed; e2e/ui-isolation.spec.ts — 2 passed.
+
+### billing-beta e2e (COLD then warm, E2E_PORT=3147 ... --project=authed --reporter=list)
+- COLD (deleted .next first): 8 passed, 1 failed, 1 did-not-run.
+  - :191 (402-modal wiring — the merge-risk proof) PASSED against the merged/rebuilt regen
+    path. triggerVariations matched the Regenerate name / AI text variations aria-label
+    unchanged — no selector fix needed.
+  - The single failure was :330 ("Next charge…") with /api/billing/plan: 404 — the
+    documented cold-compile flake (readPlan's own retry-comment, lines 248-258): a
+    fully-deleted .next makes the first-ever compile of that route exceed the 5s x 10 retry
+    budget of an APIRequestContext GET (which skips Next's on-demand compile wait). Serial
+    mode then left :342 un-run. NOT a merge regression and NOT in a merged/toolbar path.
+- WARM (no .next delete): 10 passed (1.5m) — all green, incl. :191, :330, :342. The cold
+  :330 404 does not reproduce once the route is compiled, confirming the flake diagnosis.
+
+## Open risks
+- The cold :330 flake is pre-existing test infra (retry budget vs first-cold-compile of
+  /api/billing/plan), not merge-related; warm is green. Left as-is (billing-beta.spec.ts is
+  outside this task's scope). A future budget bump (>5s or a nav warm-up) would harden it.
+
+### Post-merge follow-up — readPlan cold-compile budget widened (e2e/billing-beta.spec.ts)
+- `readPlan()` retry-on-404 budget widened from 10 × 500ms (5s) to 120 × 500ms (~60s), still
+  404-only, final `expect(res.ok())` + returned shape unchanged. The larger post-merge route
+  table (6 tracks) pushed /api/billing/plan's first-ever cold compile past the old 5s (and
+  past an intermediate 30s try, which still 404'd), so the budget was set to a comfortable 60s.
+- COLD proof (deleted .next; E2E_PORT=3147 ... --project=authed --reporter=list): 10 passed
+  (1.8m) — all green from cold, incl. the previously cold-affected :332 ("Next charge…") and
+  :344 (sidebar Upgrade), plus :191 (402-modal). tsc clean, eslint on the file clean.
+  (Line numbers shifted +2 vs the original :330/:342 from the 2-line comment edit.)

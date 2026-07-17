@@ -28,6 +28,10 @@ export const CREDIT_COSTS = {
   PRIVACY_POLICY_GENERATION: 2,
   // Cold outreach: prospect scrape (fetch + one extraction call). Charged only on cache-miss/stale.
   OUTREACH_SCRAPE: 1,
+  // Lead reply (dashboard "Draft reply"): one gated AI call, charged only on a successful draft.
+  // (main's lead-reply track added this to creditSystem.ts; relocated here on the
+  // billing-beta merge so the prisma-free re-export carries it — see creditSystem.ts.)
+  LEAD_REPLY: 1,
 } as const;
 
 // Operation keys derived from the cost table.

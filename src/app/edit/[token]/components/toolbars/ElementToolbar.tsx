@@ -9,6 +9,7 @@ import { useButtonConfigModal } from '@/hooks/useButtonConfigModal';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import { AppTooltip } from '@/components/ui/tooltip';
 import { CREDIT_COSTS } from '@/lib/creditCosts';
+import { ToolbarButton, ToolbarDivider, ToolbarLabel } from './ToolbarButton';
 
 // billing-beta phase 7 — cost hint for a spend affordance. Trivial + local:
 // pluralization only. The NUMBER always comes from CREDIT_COSTS, never a literal
@@ -173,7 +174,64 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
       icon: 'edit',
       handler: handleEditText,
     }] : []),
-    // Add Button Configuration for button/CTA elements
+    // ── Button/CTA Beta set (toolbar-standard-beta phase 2) ──
+    // `canConvertToForm()` is the EXISTING button/CTA context gate (unchanged) —
+    // reused verbatim so Link/Action + Settings appear on exactly the elements
+    // that already got Button Settings. No new gating semantics.
+    //
+    // Link/Action STAYS DISABLED after phase 3 — and the reason is NOT "not built
+    // yet". Phase 3 shipped the shared t4 LinkPicker and migrated all 15 popover
+    // mounts, but it could NOT be wired here, because a button's link does not live
+    // in the shape the picker emits:
+    //   - LinkPicker emits `Link{dest, source}` (types/destination).
+    //   - A CTA's published href is resolved from `content[sectionId]
+    //     .elementMetadata[elementKey].buttonConfig` — a `CtaButtonConfig`
+    //     (resolveCtaHref.ts:18-27,56-77) written ONLY by ButtonConfigurationModal.
+    // `destinationShim.toDestination` converts buttonConfig → Destination, but there
+    // is NO inverse: Link → buttonConfig would be net-new mapping (section/whatsapp/
+    // email/download dests have no buttonConfig representation) and would clobber
+    // `formId` / `behavior` / `inputConfig` / icons on form-connected buttons.
+    // Writing a NEW per-element Link field instead is forbidden (no new store fields
+    // + both published renderers would have to read it = published-output change).
+    //
+    // So the honest state: "Button Settings" (right here, next to this) IS the
+    // link editor for buttons. The title says so rather than promising a phase that
+    // cannot deliver it. See the phase-3 audit's BLOCKER. Un-defer = a spec that
+    // reconciles the CTA link contract with `Link` (own blast radius).
+    ...(canConvertToForm() ? [{
+      id: 'link-action',
+      label: 'Link/Action',
+      icon: 'link',
+      handler: () => {},
+      disabled: true,
+      disabledTitle: 'Set this button’s link in Button Settings →',
+    }] : []),
+    // ── Button/CTA → Style: GREYED PLACEHOLDER (phase 3.5, founder ruling 9) ──
+    // Placed here, before Button Settings, because toolbarPlan's Beta column order
+    // is `edit text · Link/Action · Style`.
+    //
+    // This is a SEPARATE, DISABLED button — NOT a relabel of `button-config` below.
+    // That distinction is the whole point (and was correctly refused in phase 2):
+    // VERIFIED no per-button style (primary/secondary/tertiary) field exists in the
+    // store; the only style-adjacent field, `buttonConfig.ctaType`
+    // (types/core/content.ts:209), is DERIVED READ-ONLY from the element key
+    // (`secondary_*` ⇒ secondary, ButtonConfigurationModal.tsx:156-161, scale-04)
+    // and is a form-PLACEMENT role, not a visual style. And the panel `button-config`
+    // opens is a destination/behaviour configurator (link / page / form + behaviour +
+    // icons) with ZERO style controls — so renaming it "Style" would make the button
+    // lie about what it opens. A greyed placeholder is honest; a misleading label is
+    // not. Shipping it real = a new store field + template consumption in both
+    // renderers = the published-output change this spec forbids.
+    ...(canConvertToForm() ? [{
+      id: 'style',
+      label: 'Style',
+      icon: 'palette',
+      handler: () => {},
+      disabled: true,
+      disabledTitle: 'Button styles are coming with the design system.',
+    }] : []),
+    // Kept as "Button Settings" — see the Style note above for why it is NOT
+    // relabelled.
     ...(canConvertToForm() ? [{
       id: 'button-config',
       label: 'Button Settings',
@@ -196,6 +254,7 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
       id: 'delete',
       label: 'Delete',
       icon: 'trash',
+      variant: 'danger' as const,
       handler: async () => {
         const confirmed = await confirmDialog({
           title: 'Delete element',
@@ -212,75 +271,60 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
 
   return (
     <>
-      <div
-        ref={toolbarRef}
-        className="bg-white border border-gray-200 rounded-lg shadow-lg"
-        data-toolbar-type="element"
-      >
-        <div className="flex items-center px-3 py-2">
-          {/* Element Indicator */}
-          <div className="flex items-center space-x-1 mr-3">
-            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-            <span className="text-xs font-medium text-gray-700">
-              {elementSelection.elementKey}
-            </span>
-          </div>
-          
-          {/* Primary Actions */}
-          {primaryActions.map((action, index) => {
-            const actionDisabled = (action as any).disabled === true;
-            // Regenerate hits /api/regenerate-element ⇒ ELEMENT_REGENERATION spend.
-            // Surface its cost on hover. When disabled the button swallows pointer
-            // events (AppTooltip can't fire) so the native disabledTitle carries the
-            // "why", and we keep the native title off the enabled hinted button so the
-            // AppTooltip is the sole hover affordance.
-            const costHint =
-              action.id === 'regenerate-copy' && !actionDisabled
-                ? creditCostHint(CREDIT_COSTS.ELEMENT_REGENERATION)
-                : null;
-            const button = (
-              <button
-                onClick={(e) => {
-                  if (actionDisabled) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    return;
-                  }
-                  if (action.id === 'edit-text' || action.id === 'button-config') {
-                    e.stopPropagation();
-                    e.preventDefault();
-                  }
-                  action.handler(e);
-                }}
-                disabled={actionDisabled}
-                className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
-                  actionDisabled
-                    ? 'text-gray-300 cursor-not-allowed'
-                    : action.id === 'edit-text'
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                }`}
-                title={
-                  actionDisabled
-                    ? (action as any).disabledTitle || action.label
-                    : costHint
-                    ? undefined
-                    : action.label
+      {/* The t2 chrome box (bg/border/radius/shadow) is the SHELL's now — this
+          body only supplies the label chip + the action row. */}
+      <div ref={toolbarRef} className="flex items-center gap-0.5">
+        <ToolbarLabel dotClassName="bg-purple-400" text={elementSelection.elementKey} />
+
+        {/* Primary Actions */}
+        {primaryActions.map((action, index) => {
+          const actionDisabled = (action as any).disabled === true;
+          // Regenerate hits /api/regenerate-element ⇒ ELEMENT_REGENERATION spend.
+          // Surface its cost on hover. When disabled the button swallows pointer
+          // events (AppTooltip can't fire) so the native disabledTitle carries the
+          // "why", and we keep the native title off the enabled hinted button
+          // (title="") so the AppTooltip is the sole hover affordance.
+          const costHint =
+            action.id === 'regenerate-copy' && !actionDisabled
+              ? creditCostHint(CREDIT_COSTS.ELEMENT_REGENERATION)
+              : null;
+          const button = (
+            <ToolbarButton
+              data-action={action.id}
+              onClick={(e) => {
+                if (actionDisabled) {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  return;
                 }
-                aria-haspopup={action.id === 'button-config' ? 'dialog' : undefined}
-              >
-                <ElementIcon icon={action.icon} />
-                <span>{action.label}</span>
-              </button>
-            );
-            return (
+                if (action.id === 'edit-text' || action.id === 'button-config') {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }
+                action.handler(e);
+              }}
+              disabled={actionDisabled}
+              disabledTitle={(action as any).disabledTitle}
+              variant={
+                (action as any).variant === 'danger'
+                  ? 'danger'
+                  : action.id === 'edit-text'
+                  ? 'emphasis'
+                  : 'default'
+              }
+              icon={<ElementIcon icon={action.icon} />}
+              label={action.label}
+              title={costHint ? '' : undefined}
+              aria-haspopup={action.id === 'button-config' ? 'dialog' : undefined}
+            />
+          );
+          return (
             <React.Fragment key={action.id}>
-              {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
+              {index > 0 && <ToolbarDivider />}
               {costHint ? <AppTooltip label={costHint}>{button}</AppTooltip> : button}
             </React.Fragment>
-            );
-          })}
-        </div>
+          );
+        })}
       </div>
 
 

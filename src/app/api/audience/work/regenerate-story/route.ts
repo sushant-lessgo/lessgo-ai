@@ -9,7 +9,9 @@
  *  1. Guards: requireAICredits(SECTION_REGEN, 2) — SAME cost/event as
  *     regenerate-section, NO new credit event — then assertProjectOwner (owner
  *     gate BEFORE any charge/cross-tenant read; skipped in mock/demo).
- *  2. Validate the body (tokenId + sectionId + the 3 interview answers + Brief).
+ *  2. Validate the body (tokenId + sectionId + the 3 interview answers). The
+ *     Brief is NOT client-supplied — it is resolved SERVER-side from the
+ *     project row (behind the owner gate) and read via getWorkFacts.
  *  3. Derive price position + voice (pure code); build the story-interview prompt.
  *  4. Call the AI raw JSON on endpoint 'work-copy' (same strong model as phase-3
  *     copy), server-side retry (MAX_RETRIES=2).
@@ -29,7 +31,7 @@ import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem
 import { generateRawJson } from '@/lib/aiClient';
 import { CopyResponseSchema } from '@/lib/schemas/copy.schema';
 import type { SectionCopy } from '@/types/generation';
-import { BriefSchema } from '@/lib/schemas/brief.schema';
+import { prisma } from '@/lib/prisma';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
 import { derivePricePosition } from '@/modules/audience/work/pricePosition';
 import {
@@ -62,8 +64,6 @@ const RegenerateStoryRequestSchema = z.object({
   tokenId: z.string().min(1),
   sectionId: z.string().min(1),
   interviewAnswers: InterviewAnswersSchema,
-  // The resolved Brief carries facts.work (read via getWorkFacts) — decision #4.
-  brief: BriefSchema,
 });
 
 // The identity uiblocks map for the single about section (parity with the copy
@@ -75,6 +75,9 @@ async function regenerateStoryHandler(req: NextRequest): Promise<Response> {
 
   try {
     // 1. Auth + credits — SAME cost/event as regenerate-section (NO new event).
+    //    Safe AHEAD of the owner gate: it authenticates and reads only the
+    //    caller's OWN plan/usage — no cross-tenant read and no charge (the
+    //    charge is consumeCredits, below, after generation).
     const creditCheck = await requireAICredits(
       req,
       UsageEventType.SECTION_REGEN,
@@ -95,49 +98,22 @@ async function regenerateStoryHandler(req: NextRequest): Promise<Response> {
         400
       );
     }
-    const { tokenId, sectionId, interviewAnswers, brief } = validation.data;
+    const { tokenId, sectionId, interviewAnswers } = validation.data;
 
-    // 2b. Work facts.
-    const facts = getWorkFacts(brief.facts);
-    if (!facts) {
-      return createSecureResponse(
-        {
-          success: false,
-          error: 'validation_error',
-          message: 'brief.facts.work is required for work story regeneration',
-        },
-        400
-      );
-    }
-
-    // 2c. Ownership gate — BEFORE any charge or cross-tenant read (mirrors
-    //     regenerate-section). Skipped in mock/demo (synthetic user id).
     const isMock =
       process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true' || tokenId === DEMO_TOKEN;
-    if (!isMock) {
-      const access = await assertProjectOwner(userId, tokenId, {
-        action: 'regenerate-story',
-      });
-      if (!access.ok) {
-        return createSecureResponse({ success: false, error: access.error }, access.status);
-      }
-    }
 
-    // 3. Derive price position + voice (pure code).
-    const pricePosition = derivePricePosition(facts);
-    const establishment: Establishment = facts.establishment ?? DEFAULT_ESTABLISHMENT;
-    const professionRow: WorkProfessionRow | null = brief.businessType
-      ? ({ key: brief.businessType } as WorkProfessionRow)
-      : null;
-    const voice = selectWorkVoice({ professionRow, pricePosition, establishment });
-
-    // 3b. Mock mode — canned, renderable about; parseWorkCopy + validation still run.
+    // 2b. Mock mode — canned, renderable about; parseWorkCopy + validation still
+    //     run. Runs BEFORE the owner gate / Brief read / facts guard: the demo
+    //     token has NO Project row (assertProjectOwner short-circuits it), so
+    //     the mock path must not require one, nor resolvable facts. Voice/price
+    //     are unused here (generateMockWorkCopy is canned/facts-agnostic).
     if (isMock) {
       const mockRaw = generateMockWorkCopy({
-        facts,
+        facts: {},
         sections: [STORY_SECTION_KEY],
       }) as Record<string, SectionCopy>;
-      const processed = parseWorkCopy(mockRaw, ABOUT_UIBLOCKS, facts.praise);
+      const processed = parseWorkCopy(mockRaw, ABOUT_UIBLOCKS, undefined);
       const check = validateStoryAbout(processed);
       if (!check.valid) {
         return createSecureResponse(
@@ -155,6 +131,50 @@ async function regenerateStoryHandler(req: NextRequest): Promise<Response> {
         meta: { attempts: 0, mock: true },
       });
     }
+
+    // 2c. Ownership gate — BEFORE any charge or cross-tenant read (mirrors
+    //     regenerate-section).
+    const access = await assertProjectOwner(userId, tokenId, {
+      action: 'regenerate-story',
+    });
+    if (!access.ok) {
+      return createSecureResponse({ success: false, error: access.error }, access.status);
+    }
+
+    // 2d. Resolve the Brief SERVER-side (never client-supplied). The owner gate
+    //     above selects `userId` only, so this is a separate read — behind the
+    //     gate. Plain cast, not a parse: getWorkFacts safeParses the work bag.
+    const project = await prisma.project.findUnique({
+      where: { tokenId },
+      select: { brief: true },
+    });
+    const storedBrief = project?.brief as
+      | { businessType?: string; facts?: Record<string, unknown> }
+      | null
+      | undefined;
+
+    // 2e. Work facts guard. (A missing project row is unreachable in production
+    //     — assertProjectOwner already 404s it above — but the branch stays
+    //     defensive rather than relying on that ordering.)
+    const facts = getWorkFacts(storedBrief?.facts);
+    if (!facts) {
+      return createSecureResponse(
+        {
+          success: false,
+          error: 'validation_error',
+          message: 'brief.facts.work is required for work story regeneration',
+        },
+        400
+      );
+    }
+
+    // 3. Derive price position + voice (pure code) from the STORED Brief.
+    const pricePosition = derivePricePosition(facts);
+    const establishment: Establishment = facts.establishment ?? DEFAULT_ESTABLISHMENT;
+    const professionRow: WorkProfessionRow | null = storedBrief?.businessType
+      ? ({ key: storedBrief.businessType } as WorkProfessionRow)
+      : null;
+    const voice = selectWorkVoice({ professionRow, pricePosition, establishment });
 
     // 4. Build the story-interview prompt + AI loop (server-side retry ×2).
     const prompt = buildStoryInterviewPrompt({ answers: interviewAnswers, facts, voice });

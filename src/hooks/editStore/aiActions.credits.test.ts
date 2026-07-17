@@ -113,12 +113,18 @@ describe('aiActions — credit blocks', () => {
     );
     const { state, actions } = makeStore();
 
+    // The credit-block guard does NOT fire on a 500 (events stays empty). The
+    // thrown TEXT is the server's honest message, not a generic `API error: 500`:
+    // main's regen-modernization R6.3 change surfaces `errorData.message ??
+    // errorData.error` on non-credit failures (reconciled into the element path on
+    // the billing-beta merge). The credit-block assertion below is what this test
+    // actually guards.
     await expect(
       actions.regenerateElementWithVariations(SECTION_ID, 'headline', 5),
-    ).rejects.toThrow('API error: 500');
+    ).rejects.toThrow('Model provider exploded');
 
     expect(events).toEqual([]);
-    expect(state.aiGeneration.errors).toContain('API error: 500');
+    expect(state.aiGeneration.errors).toContain('Model provider exploded');
   });
 
   it('regenerateSection: 402 (Pattern A) emits with the structured numbers', async () => {
@@ -192,9 +198,12 @@ describe('aiActions — credit blocks', () => {
     );
     const { actions } = makeStore();
 
+    // Not claimed as a credit block (events stays empty). Thrown text is the
+    // server's honest `error` string per main's R6.3 message contract (see the
+    // 500 test above), not a generic `API error: 403`.
     await expect(
       actions.regenerateElementWithVariations(SECTION_ID, 'headline', 5),
-    ).rejects.toThrow('API error: 403');
+    ).rejects.toThrow('limit_reached');
     expect(events).toEqual([]);
   });
 });

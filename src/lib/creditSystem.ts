@@ -6,6 +6,9 @@ import { getUserPlan } from './planManager';
 // Credit costs live in the prisma-free `creditCosts.ts` so client components (and
 // the Playwright runner) can import them without pulling in prisma. Re-exported
 // here verbatim — every existing `@/lib/creditSystem` importer keeps working.
+// (Merge note: main's lead-reply track added `LEAD_REPLY: 1` to this inline block;
+// as the "second-merger" the lead-reply spec anticipated, that constant moved to
+// its new home in `creditCosts.ts` so the re-export carries it.)
 import { CREDIT_COSTS } from './creditCosts';
 import type { CreditOperation } from './creditCosts';
 
@@ -36,6 +39,8 @@ export enum UsageEventType {
   OUTREACH_SCRAPE = 'outreach_scrape',
   // Cold outreach generation (credits-free; this ledger row IS the gating source of truth, sibling precedent)
   OUTREACH_GENERATION = 'outreach_generation',
+  // Lead reply draft (dashboard "Draft reply"; charged 1 credit only on a successful draft)
+  LEAD_REPLY_GENERATION = 'lead_reply_generation',
   // Pricing v2: persistent credit pool grants (DB eventType is a plain String, so
   // these new values need no migration). CREDIT_TOPUP = paid $9/100 top-up;
   // LTD_GRANT = 600-credit lifetime-deal seed.

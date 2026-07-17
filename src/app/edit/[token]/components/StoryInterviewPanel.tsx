@@ -7,10 +7,6 @@
 // Three freeform answers → the dedicated work-copy regen route (via the
 // `regenerateStoryFromInterview` store action). Only the `about` (story) section
 // updates; proof/testimonials are untouched. Polish is scope-OUT.
-//
-// NOTE: the Brief (facts.work) is not yet carried by the editStore (phase-5
-// field→facts writeback gap). Passing it through the editor is a documented
-// follow-up; this panel is the UI + wiring entry point.
 // ============================================================================
 'use client';
 
@@ -21,11 +17,9 @@ import { logger } from '@/lib/logger';
 interface StoryInterviewPanelProps {
   /** The `about` (story) section id to regenerate (e.g. `about-abc12345`). */
   sectionId: string;
-  /** Optional resolved Brief carrying facts.work (see NOTE above). */
-  brief?: unknown;
 }
 
-export function StoryInterviewPanel({ sectionId, brief }: StoryInterviewPanelProps) {
+export function StoryInterviewPanel({ sectionId }: StoryInterviewPanelProps) {
   const { store } = useEditStoreContext();
   const [origin, setOrigin] = useState('');
   const [moment, setMoment] = useState('');
@@ -40,14 +34,11 @@ export function StoryInterviewPanel({ sectionId, brief }: StoryInterviewPanelPro
     setBusy(true);
     setError(null);
     try {
-      // regenerateStoryFromInterview is an additive work-copy-engine action not
-      // declared on the shared EditStore actions type (that type file is out of
-      // this phase's scope) — accessed via cast.
-      const action = (store?.getState() as any)?.regenerateStoryFromInterview;
+      const action = store?.getState().regenerateStoryFromInterview;
       if (typeof action !== 'function') {
         throw new Error('Story regeneration is unavailable.');
       }
-      await action(sectionId, { origin, moment, belief }, brief);
+      await action(sectionId, { origin, moment, belief });
     } catch (e) {
       logger.error('[StoryInterviewPanel] regenerate failed', e);
       setError(e instanceof Error ? e.message : 'Failed to rewrite the story.');

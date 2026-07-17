@@ -475,7 +475,11 @@ async function publishHandler(req: NextRequest) {
           user: { id: userId },
         });
 
-        // Set failed state in DB
+        // Set failed state in DB.
+        // NOTE (publish-trust M3): the outer static-export catch below ALSO writes
+        // publishState:'failed' (+ publishError) for this throw. The double-set is
+        // deliberate and harmless — this one carries the precise KV error message and
+        // runs even if the outer path changes. Don't "clean it up" without checking both.
         await prisma.publishedPage.update({
           where: { id: pageId },
           data: {
@@ -541,8 +545,16 @@ async function publishHandler(req: NextRequest) {
         });
       }
 
-      // Don't block publish - legacy SSR still works
-      console.warn('[Phase 2] Continuing with legacy publish despite static export failure');
+      // publish-trust M3: fail honestly. Previously this fell through to the 200
+      // "Page published successfully" response even though the export threw — so a
+      // first publish with no KV routes, or a republish still serving the PREVIOUS
+      // version, was reported to the user as live (and contradicted the row we just
+      // wrote as 'failed'). Return a 500 the client already surfaces (SlugModal
+      // `publish-error`). Details stay in publishError + Sentry — never in the body.
+      return createSecureResponse(
+        { error: 'Publish failed. Your changes were saved — please try publishing again.' },
+        500,
+      );
     }
 
     return createSecureResponse({

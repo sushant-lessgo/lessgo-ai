@@ -11,7 +11,7 @@
 import React from 'react';
 import { useMeridianBlock } from '../../hooks/useMeridianBlock';
 import { MeridianEditable } from '../../components/MeridianEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import { useEditStore } from '@/hooks/useEditStore';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
@@ -269,7 +269,7 @@ export default function HairlineFooter({ sectionId }: HairlineFooterProps) {
                         enterBehavior="save"
                         placeholder="Link"
                       />
-                      <LinkTargetPopover
+                      <LinkPicker
                         value={link.href ?? '#'}
                         sectionOptions={sectionOptions}
                         pageOptions={pageOptions}

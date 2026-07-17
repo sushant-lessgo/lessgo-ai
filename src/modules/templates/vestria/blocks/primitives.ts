@@ -42,7 +42,7 @@ export interface VestriaImgProps {
 }
 
 /** Outbound/anchor link. `hrefKey` is where the href STRING is stored (scalar key
- *  or collection path); `href` is its current value. Edit shows a LinkTargetPopover
+ *  or collection path); `href` is its current value. Edit shows a LinkPicker
  *  next to the children; published emits <a href> (+ target=_blank for http[s]). */
 export interface VestriaLinkProps {
   hrefKey: string;

@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils"
  * TWO LAYERS live here, deliberately:
  *
  *  1. STOCK (Popover / PopoverTrigger / PopoverContent / PopoverAnchor) —
- *     pre-existing shadcn surface with live consumers (LinkTargetPopover, the 3
+ *     pre-existing shadcn surface with live consumers (LinkPicker, the 3
  *     theme popovers). LEFT UNTOUCHED by editor-shell-redesign phase 1: reskinning
- *     it in place would silently restyle LinkTargetPopover, which is out of scope.
+ *     it in place would silently restyle LinkPicker, which is out of scope.
  *
  *  2. APP-CHROME (AppPopover*) — the app-chrome popover primitive added by
  *     editor-shell-redesign phase 1. THE one popover for app chrome: t1 app menu,

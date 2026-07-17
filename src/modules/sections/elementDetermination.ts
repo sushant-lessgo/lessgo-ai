@@ -239,7 +239,11 @@ export function createElementsMap(
  * Master function to get complete elements map from stores
  * @param onboardingStore - The onboarding store
  * @param pageStore - The page store
- * @returns Complete elements map ready for buildPrompt.ts
+ * @returns Complete elements map ready for the per-audience copy prompt builders
+ *          (`modules/audience/{product,service}/copyPrompt.ts`) and, for regeneration,
+ *          `modules/generation/scopedRegen.ts` (`narrowElementsMap`).
+ *          NOTE: the `work` engine does NOT use this map — its vocabulary is
+ *          `workElementContract`. See `modules/generation/README.md`.
  */
 export function getCompleteElementsMap(
   onboardingStore: OnboardingStore,

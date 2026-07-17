@@ -250,9 +250,11 @@ test.describe('billing-beta — Billing & plan view', () => {
     // skips Next dev's on-demand compile wait — so a still-uncompiled route
     // answers 404 once and only once. The real handler NEVER returns 404
     // (200/401/500 only), so a 404 is an unambiguous not-yet-compiled signal:
-    // retry briefly until it compiles. The warm path hits the loop body once.
+    // retry until it compiles (budget ~60s: 120 × 500ms — the post-merge route
+    // table is large enough that a cold first-compile can exceed the old 5s).
+    // The warm path hits the loop body once.
     let res = await page.request.get('/api/billing/plan');
-    for (let i = 0; res.status() === 404 && i < 10; i++) {
+    for (let i = 0; res.status() === 404 && i < 120; i++) {
       await page.waitForTimeout(500);
       res = await page.request.get('/api/billing/plan');
     }

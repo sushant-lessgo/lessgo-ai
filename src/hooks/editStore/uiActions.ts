@@ -427,16 +427,34 @@ export function createUIActions(set: any, get: any): UIActions {
         (state.forms as any).activeForm = formId;
       }),
     
-    showFormBuilder: () =>
+    // toolbar-standard-beta phase 2 — BROKEN-PATH FIX (see the audit).
+    //
+    // These wrote `state.forms.formBuilder.visible`, but `state.forms` is the FLAT
+    // `Record<string, MVPForm>` map (editStore.ts:291) — `formBuilder` is a SIBLING
+    // top-level slice field (:296). So `state.forms.formBuilder` was `undefined` and
+    // the assignment THREW `TypeError: Cannot set properties of undefined`. Nothing
+    // read `formBuilder.visible` either (zero readers in src/): the ONE consumer,
+    // `GlobalFormBuilder.tsx:10-16`, reads `formBuilderOpen` / `editingFormId` —
+    // exactly the fields the (never-wired) `formActions.ts:137-149` impl sets.
+    // Net effect: the FormBuilder modal was unreachable and every caller
+    // (ButtonConfigurationModal's "Create New Form", :486) threw.
+    //
+    // Fixed to the fields the consumer actually reads. `formId` is accepted so the
+    // builder can open ON an existing form; the EditStore TYPE still declares
+    // `showFormBuilder: () => void` (types/store/actions.ts:178) while
+    // `types/store/formActions.ts:21` declares `(formId?: string) => void` — the
+    // same three-way FormField-style contract drift ruling 4 forbids reconciling here.
+    // Callers that need the arg cast locally; 0-arg callers are unaffected.
+    showFormBuilder: (formId?: string) =>
       set((state: EditStore) => {
-        (state.forms as any).formBuilder.visible = true;
-        state.leftPanel.activeTab = 'pageStructure'; // Or dedicated forms tab
+        state.formBuilderOpen = true;
+        state.editingFormId = formId ?? null;
       }),
-    
+
     hideFormBuilder: () =>
       set((state: EditStore) => {
-        (state.forms as any).formBuilder.visible = false;
-        (state.forms as any).formBuilder.editingField = undefined;
+        state.formBuilderOpen = false;
+        state.editingFormId = null;
       }),
     
     convertCTAToForm: (sectionId: string, elementKey: string) =>
