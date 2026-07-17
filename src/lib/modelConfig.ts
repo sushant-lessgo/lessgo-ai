@@ -2,7 +2,7 @@
 // cheap = testing/development, production = quality
 
 export type ModelTier = 'cheap' | 'production';
-export type Endpoint = 'understand' | 'strategy' | 'uiblock' | 'copy' | 'privacy' | 'social-posts' | 'emailSequence' | 'cold-outreach' | 'work-strategy' | 'work-copy';
+export type Endpoint = 'understand' | 'strategy' | 'uiblock' | 'copy' | 'privacy' | 'social-posts' | 'emailSequence' | 'cold-outreach' | 'work-strategy' | 'work-copy' | 'lead-reply';
 
 interface ModelConfig {
   primary: string;
@@ -33,6 +33,8 @@ const MODELS: Record<ModelTier, Record<Endpoint, ModelConfig>> = {
     // 'work-copy' is the ONE knob to bump if NL quality fails (plan phase 7).
     'work-strategy': { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
     'work-copy': { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
+    // Lead reply: short single-call copy — reuse cold-outreach model choices.
+    'lead-reply': { primary: GPT_4O_MINI, backup: null },
   },
   production: {
     understand: { primary: GPT_4O_MINI, backup: CLAUDE_HAIKU },
@@ -51,6 +53,8 @@ const MODELS: Record<ModelTier, Record<Endpoint, ModelConfig>> = {
     // backup). 'work-copy' is the ONE knob to bump if NL quality fails (phase 7).
     'work-strategy': { primary: CLAUDE_SONNET, backup: GPT_4O },
     'work-copy': { primary: CLAUDE_SONNET, backup: GPT_4O },
+    // Lead reply: short single-call copy — reuse cold-outreach model choices.
+    'lead-reply': { primary: GPT_4O_MINI, backup: null },
   },
 };
 
