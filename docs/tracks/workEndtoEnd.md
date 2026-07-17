@@ -140,6 +140,8 @@ process. Five is the ceiling, not the count. Open chat is the exception handler 
 
 ### 4. Show the plan — visually, before building
 
+> **Status: BUILT (dev-gated, `NEXT_PUBLIC_WORK_COPY_ENGINE`) — work-onboarding-plan E4.** Rich plan screen (columns, photos, plain rows, goal badges) + tap-powers (add/remove/rename/reorder/goal/lead) persist to `Brief.structure`; approve awaits persist then fires generation. Invariant covered by `e2e/workPlan.spec.ts`.
+
 **Agreed (brainstorm #3, merged with docs/inspiration/sitestructure.png):**
 
 The screen answers exactly 3 questions in ~10 seconds: what pages, what's on each,

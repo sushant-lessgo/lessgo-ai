@@ -271,3 +271,194 @@ the change set scoped (also restored an unrelated pre-existing CRLF diff on the 
   re-normalizes each group; photos/items are carried (WorkGroupInput preserves them), so a
   reorder does not drop ingested photos — but this relies on the rail's carry contract
   (documented in rail.ts).
+
+## Phase 4 — Approve→structure→fire handoff + e2e invariant + whole-feature green
+
+### Files changed
+- `src/components/onboarding/journey/engines/work/PlanStep.tsx`
+- `src/components/onboarding/journey/steps/StepPlan.tsx`
+- `e2e/workPlan.spec.ts` (NEW)
+- `docs/tracks/workEndtoEnd.md`
+
+### What changed, per file
+
+**`src/components/onboarding/journey/engines/work/PlanStep.tsx`** — the approve
+("Build my site") handoff. Added an `approving` guard flag + an `approve()` handler;
+`plan-build` now `onClick={() => void approve()}` and is `disabled={pages.length === 0
+|| approving}`. Verbatim ordering (the invariant): read the LIVE sitemap
+(`useWizardStore.getState().sitemap`) + live facts → **await** ONE final
+`commitRail(buildPlanCommit(current, liveFacts))` (idempotent — re-emits the same
+`Brief.structure`, so persistence is guaranteed even if an earlier per-tap commit
+failed) → **gate on `out.ok`**: on `{ok:false}` set the inline `plan-error` and do NOT
+advance; ONLY on success `setJourneyStep(5)`. So: **await persist → gate on success →
+advance.** No generation/credit/rate-limit/reveal wiring touched — STEP 05
+(`StepBuilding` → `seam.runGeneration` → `buildWorkInput(state).pages = s.sitemap`) is
+reused unchanged; the removed page falls out of `input.pages` (verified: `buildWorkInput`
+reads `s.sitemap`, useWizardStore.ts L792; the fan-out iterates that sitemap,
+work.llm.ts L247).
+
+**`src/components/onboarding/journey/steps/StepPlan.tsx`** — single-advance guard. The
+frame ALREADY guarantees one advance path structurally: when `plan.loadStep` is present
+the early `if (LazyBody) return <Suspense><LazyBody/></Suspense>` renders ONLY the injected
+work body, so the stub-fallback's own `plan-build` button (below the return) is never
+mounted and can never also fire. Made that invariant explicit with a comment at the early
+return (no restructure — a runtime guard on the unreachable stub button would be dead code).
+
+**`e2e/workPlan.spec.ts`** (NEW) — the deterministic invariant spec (mock-LLM, seeded
+Kundius resume, serial/authed). It:
+1. Seeds the Kundius work brief (`seedWorkBrief`) and drives 02 → 03 (Skip upload,
+   `answerRequiredQuestions` = price on-request + languages English) → 04.
+2. Asserts the rich plan renders: the home column shows the buyer word "Your promise"
+   (proof the `hero` internal key was translated), and `plan-goal-0` shows the plain
+   badge "asks visitors to:". Then asserts ZERO internal vocabulary leaks into the
+   `step-plan` body innerText — none of `hero`, `quote`, `testimonial`, `cta`,
+   `collection`, `proof`, `workdetail`. (`hero`+`quote` are the atelier pages' pure-
+   internal section keys — `work`/`packages`/`about`/`contact` are excluded from the probe
+   because they legitimately occur as buyer page titles / userLabels; the rest are the
+   engine-internal names the vocabulary rules forbid outright.)
+3. REMOVES a page and RENAMES another via the tap-powers: renames About (col 3) →
+   "Studio and story", then removes Experiences (col 2). (Atelier's default menu has
+   NO "prices" page — the plan's "e.g. prices" example; Experiences is the equivalent
+   removable, `defaultIncluded` page. See Deviations.) Column titles are asserted before
+   the index-addressed edits, so the interaction is self-verifying.
+4. Approves → drives to `step-reveal` (with the same free-tier rate-limit retry loop as
+   work-onboarding.spec.ts — a real finding, not scaffolding; the retry RESUMES via
+   `completedPageKeys`, never re-issuing copy for the removed page), then asserts BOTH
+   halves of the invariant:
+   - (a) persisted `Brief.structure`: intercepts every `/api/saveDraft` body carrying a
+     `brief.structure` (the plan commits); the LAST = the approve commit. Asserts its
+     `pages` lacks `experiences`, its `pageDetails` has no `/experiences` slug, and the
+     `/about` entry's `title` is "Studio and story". Cross-checks the SAME via
+     `/api/loadDraft` (`draft.brief.structure`) so it is proven in Postgres, not just in the
+     request.
+   - (b) no copy for the removed page: intercepts every
+     `/api/audience/work/generate-copy` POST and records `body.page.pathSlug`. Asserts the
+     removed `/experiences` slug is ABSENT, the kept `/about` slug is PRESENT, and the
+     generated-slug set is non-empty — so the absence is a real behavior assert, never a
+     vacuous green (generation demonstrably ran and generated the kept pages).
+
+**`docs/tracks/workEndtoEnd.md`** — one-line status blockquote under "### 4. Show the
+plan" marking it BUILT (dev-gated), pointing at `e2e/workPlan.spec.ts`. No restructure.
+
+### Deviations
+- **Removed-page target = "Experiences", not "prices".** The atelier default sitemap
+  (`ATELIER_PAGE_ARCHETYPES`, all `defaultIncluded`) is Home / Work / Experiences / About /
+  Contact — there is NO prices page. The plan wrote "e.g. the prices page" (an example);
+  the actual equivalent removable, generated page is `experiences` (slug `/experiences`).
+  Conservative in-scope choice — same invariant, real fixture.
+- **Single-advance guard = comment, not code.** The early return already makes the stub
+  button unreachable when `loadStep` is injected; a runtime guard would be dead code. Kept
+  it "small" per the plan by documenting the structural guarantee instead of restructuring.
+- **Structure asserted via BOTH intercept + loadDraft.** Belt-and-suspenders: the approve
+  commit's saveDraft body proves what was sent at approve; `loadDraft` proves it survived
+  generation's later finalContent saves (which carry no `brief`, so they cannot clobber
+  `Brief.structure`).
+
+### BLOCKER — out-of-scope file needed to RUN the e2e (NOT edited)
+`e2e/workPlan.spec.ts` matches NO Playwright project until it is added to the `authed`
+project's `testMatch` allowlist in `playwright.config.ts` (L59-85) — an explicit allowlist
+(the config's own comment: an unregistered spec "silently matches no project and gives
+false confidence"). `playwright.config.ts` is NOT in Phase 4's Files-touched list, so per
+the hard scope rule it was left untouched and REPORTED. Verified unregistered:
+`npx playwright test --list workPlan` → "Total: 0 tests in 0 files". The e2e was therefore
+NOT run. Required (orchestrator-approved) one-line edit — add beside the existing
+`/work-onboarding\.spec\.ts/` entry (~L73):
+
+    /workPlan\.spec\.ts/,
+
+Once registered, run: `E2E_PORT=<free> npm run test:e2e -- workPlan` (needs a fresh dev
+server with `NEXT_PUBLIC_WORK_COPY_ENGINE=true` — already in webServer.env — + Clerk creds
+in `.env.local`; kill stale dev servers first, per the config note at L108-111).
+
+### Verification (verbatim tails)
+`npx tsc --noEmit` (AFTER `npm run build` regenerated `next-env.d.ts`):
+
+    EXIT: 0
+
+(Clean. Before the build the ONE known pre-existing env error persisted —
+`src/app/page.tsx(6,26): error TS2307: Cannot find module '@/assets/images/founder.jpg'` —
+and cleared once the build regenerated `next-env.d.ts`, as expected.)
+
+`npm run test:run`:
+
+     Test Files  244 passed | 1 skipped (245)
+          Tests  4091 passed | 18 skipped (4109)
+
+(Unchanged from Phase 3 — Phase 4 adds no vitest tests; the deterministic invariant lives
+in the e2e. Restored the incidental CRLF-touched `uiFoundationIsolation.test.tsx.snap` and
+`work-onboarding-plan.plan.md` via `git checkout --` to keep the change set scoped.)
+
+`npm run test:e2e -- workPlan`:
+
+    BLOCKED — see the BLOCKER above. `npx playwright test --list workPlan` → 0 tests
+    (spec unregistered in playwright.config.ts, which is out of Phase 4 scope). Not run.
+
+`npm run lint`:
+
+    (only pre-existing @next/next/no-img-element + react-hooks/exhaustive-deps WARNINGS
+    across the repo; ZERO errors — the two touched components add none.)
+
+`npm run build`:
+
+    ✓ Compiled successfully. Route table printed; Middleware 81.8 kB. Exit 0.
+
+### Open risks
+- The e2e is UNRUN pending the one-line `playwright.config.ts` registration (out of scope).
+  The spec is written to the proven work-onboarding.spec.ts patterns (seeded resume, route
+  interception, rate-limit retry) but has not executed — first run may need minor testid/
+  timing tuning. Recommend the orchestrator approve the registration line and run it before
+  the founder-pilot HUMAN GATE.
+- Known pre-existing multi-page saveDraft merge quirk (Bug B, documented in
+  work-onboarding.spec.ts) is unrelated to `Brief.structure` here: plan commits send
+  `brief:{structure}` and generation saves send no `brief`, so the persisted structure is
+  not subject to that shallow-spread issue.
+
+## Phase 4 — e2e registration + run
+
+### Files changed
+- `playwright.config.ts`
+
+### Registration diff
+Added `workPlan.spec.ts` to the `authed` project's `testMatch` allowlist, beside the
+existing `work-onboarding.spec.ts` entry (~L73):
+
+```
+        /work-onboarding\.spec\.ts/,
+        // work-onboarding-plan (E4): the plan-step tap-powers + approve→structure→fire
+        // invariant (removed page absent from persisted Brief.structure AND no
+        // generate-copy for the removed slug; kept pages still generated).
+        /workPlan\.spec\.ts/,
+```
+
+Registration confirmed:
+```
+npx playwright test --list workPlan
+  [setup] › auth.setup.ts:9:6 › authenticate
+  [authed] › workPlan.spec.ts:64:5 › STEP 04: a removed page is absent from Brief.structure AND never generated
+Total: 2 tests in 2 files
+```
+(was "Total: 0 tests in 0 files" before the registration.)
+
+### Run result
+Command: `E2E_PORT=3041 npm run test:e2e -- workPlan` (fresh dev server auto-started by
+Playwright's `webServer`; `NEXT_PUBLIC_WORK_COPY_ENGINE=true` from webServer.env; port 3041
+chosen because 3000/3022 were held by stale servers). Verbatim tail:
+
+```
+  ✓  1 [setup] › e2e\auth.setup.ts:9:6 › authenticate (8.5s)
+  ✓  2 [authed] › e2e\workPlan.spec.ts:64:5 › STEP 04: a removed page is absent from Brief.structure AND never generated (37.8s)
+
+  2 passed (1.3m)
+```
+
+PASS on the first run — NO spec tuning required. Both invariant halves asserted genuinely
+(removed `/experiences` absent from persisted `Brief.structure` + never generated, while
+kept `/about` present in both persisted structure and the generate-copy calls). Mock-LLM
+work strategy/copy confirmed in the server log.
+
+### Deviations
+None. Only the single approved one-line registration was added; the spec itself needed no
+changes.
+
+### Open risks
+None new. The spec now runs in the `authed` project on every `test:e2e` invocation.

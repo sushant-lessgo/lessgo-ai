@@ -118,6 +118,7 @@ export default function PlanStep(_props: JourneyStepProps) {
   const [error, setError] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<number | null>(null);
   const [addKey, setAddKey] = useState<WorkPageTypeKey | ''>('');
+  const [approving, setApproving] = useState(false);
 
   const facts = useMemo(() => getWorkFacts(briefFacts ?? undefined), [briefFacts]);
   const contactMethod = facts?.contactMethod as WorkPageGoalKey | undefined;
@@ -174,6 +175,29 @@ export default function PlanStep(_props: JourneyStepProps) {
   function submitRename(index: number, title: string) {
     setRenaming(null);
     void runPlanEdit({ type: 'renamePage', index, title });
+  }
+
+  // ── Approve → structure → fire (PHASE 4). ────────────────────────────────────
+  // The load-bearing invariant: the approved plan IS the generation input, so
+  // `Brief.structure` MUST be persisted BEFORE we advance into STEP 05. We run
+  // ONE final AWAITED `commitRail(buildPlanCommit(...))` off the LIVE sitemap —
+  // idempotent (re-emits the same structure), so it also guarantees persistence
+  // even if an earlier per-tap commit failed. Only a successful commit advances;
+  // a failure surfaces inline and does NOT dead-drop into an ungenerated build.
+  async function approve() {
+    if (approving) return;
+    setApproving(true);
+    const current =
+      (useWizardStore.getState().sitemap as WorkSitemapPage[] | null) ?? [];
+    const liveFacts = useWizardStore.getState().briefFacts;
+    const out = await commitRail(buildPlanCommit(current, liveFacts));
+    if (!out.ok) {
+      setError(out.error);
+      setApproving(false);
+      return;
+    }
+    setError(null);
+    setJourneyStep(5);
   }
 
   return (
@@ -423,8 +447,8 @@ export default function PlanStep(_props: JourneyStepProps) {
         type="button"
         variant="cta"
         data-testid="plan-build"
-        disabled={pages.length === 0}
-        onClick={() => setJourneyStep(5)}
+        disabled={pages.length === 0 || approving}
+        onClick={() => void approve()}
       >
         Build my site
         <AppIcon name="arrow_forward" size={16} className="ml-1.5" />

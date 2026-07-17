@@ -71,6 +71,10 @@ export default defineConfig({
         // work-onboarding-shell: the journey needs a Clerk session (seeded via
         // the real /api/start + /api/brief/confirm routes).
         /work-onboarding\.spec\.ts/,
+        // work-onboarding-plan (E4): the plan-step tap-powers + approve→structure→fire
+        // invariant (removed page absent from persisted Brief.structure AND no
+        // generate-copy for the removed slug; kept pages still generated).
+        /workPlan\.spec\.ts/,
         // work-onboarding-ingestion (E2): the binding/reveal proof on atelier2
         // (P1 authored it; P2's works flip makes the real post-flip path runnable).
         /work-binding\.spec\.ts/,

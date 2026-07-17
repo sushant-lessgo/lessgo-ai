@@ -73,6 +73,11 @@ export default function StepPlan(props: JourneyStepProps) {
   );
 
   // ── The engine body (work) — the rich plan owns its own advance. ──────────
+  // SINGLE ADVANCE PATH (E4 phase 4): when the engine injects a `loadStep`, THIS
+  // early return renders ONLY the injected body — the stub's own "Build my site"
+  // advance below is never mounted, so it can never ALSO fire. The injected work
+  // PlanStep owns the approve→structure→fire handoff; the stub advance is reached
+  // only by engines WITHOUT a real STEP 04. Do not add a second advance here.
   if (LazyBody) {
     return (
       <Suspense

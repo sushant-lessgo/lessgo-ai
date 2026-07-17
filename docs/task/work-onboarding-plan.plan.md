@@ -14,8 +14,8 @@ E4 builds STEP 04 of the work journey: a visual site-plan screen showing the pro
 
 - phase 1 goal contract + structure carry: done (commit 95c550f8, standard — no per-phase review; test:run 4068 pass)
 - phase 2 seam widening + rich read-only PlanStep: done (commit b75fdc6d, standard; test:run 4069 pass)
-- phase 3 tap-powers through the one write door: done (commit pending-below, standard; test:run 4091 pass)
-- phase 4 approve→structure→fire + e2e invariant + whole-feature green: pending
+- phase 3 tap-powers through the one write door: done (commit 597f89ac, standard; test:run 4091 pass)
+- phase 4 approve→structure→fire + e2e invariant + whole-feature green: done (commit 28145617, standard; tsc/test:run 4091/lint/build all green; e2e workPlan.spec.ts 2 passed — removed page absent from Brief.structure AND never generate-copy'd)
 
 ## Key design decisions (made here, flagged at end)
 
