@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AppIcon } from '@/components/ui/icon'
+import DraftReplyPanel from './DraftReplyPanel'
 
 /**
  * LeadsInbox — master-detail client shell for `/dashboard/leads`.
@@ -166,6 +167,8 @@ export default function LeadsInbox({
                   ))
                 )}
               </div>
+
+              <DraftReplyPanel submissionId={selected.id} data={selected.data} />
 
               <dl className="mt-5 space-y-1 border-t border-app-border pt-3">
                 <MetaRow label="Submission ID" value={selected.id} />

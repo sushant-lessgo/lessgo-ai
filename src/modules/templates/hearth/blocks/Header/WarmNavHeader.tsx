@@ -10,7 +10,7 @@ import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { HearthEditable } from '../../components/HearthEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import type { Link } from '@/types/destination';
 
 interface NavItem {
@@ -93,7 +93,7 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
                   placeholder="Link"
                 />
                 {edit && (
-                  <LinkTargetPopover
+                  <LinkPicker
                     value={item.href ?? '#'}
                     sectionOptions={sectionOptions}
                     pageOptions={pageOptions}

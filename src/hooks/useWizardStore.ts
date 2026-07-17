@@ -878,6 +878,10 @@ export const selectSetJourneyStep = (s: WizardStore) => s.setJourneyStep;
 export const selectBriefFacts = (s: WizardStore): Record<string, unknown> | null =>
   s.briefFacts;
 export const selectCommitRail = (s: WizardStore) => s.commitRail;
+/** E3 — the profession wording key STEP 03's `questions(vm, ctx)` needs (D-B).
+ *  Lives on the store (not the facts bag), so the seam reaches it via ctx. */
+export const selectBusinessTypeKey = (s: WizardStore): BusinessTypeKey | null =>
+  s.businessTypeKey;
 
 // ---------------------------------------------------------------------------
 // Store

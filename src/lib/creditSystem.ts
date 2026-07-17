@@ -3,27 +3,17 @@ import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 import { getUserPlan } from './planManager';
 
-// Credit costs for different operations
-export const CREDIT_COSTS = {
-  FULL_PAGE_GENERATION: 10,
-  SECTION_REGENERATION: 2,
-  ELEMENT_REGENERATION: 1,
-  FIELD_INFERENCE: 1,
-  FIELD_VALIDATION: 0, // Free operation
-  // V2 Generation system
-  UNDERSTAND: 1,
-  IVOC_RESEARCH: 3, // Only charged when Tavily called (cache hits = 0)
-  STRATEGY_GENERATION: 2,
-  UIBLOCK_SELECT: 1,
-  GENERATE_COPY: 3,
-  // Onboarding website import (fetch + one extraction call). Net-neutral vs
-  // typing manually since it replaces the UNDERSTAND charge on the import path.
-  SCRAPE_WEBSITE: 1,
-  // Legal pages
-  PRIVACY_POLICY_GENERATION: 2,
-  // Cold outreach: prospect scrape (fetch + one extraction call). Charged only on cache-miss/stale.
-  OUTREACH_SCRAPE: 1,
-} as const;
+// Credit costs live in the prisma-free `creditCosts.ts` so client components (and
+// the Playwright runner) can import them without pulling in prisma. Re-exported
+// here verbatim — every existing `@/lib/creditSystem` importer keeps working.
+// (Merge note: main's lead-reply track added `LEAD_REPLY: 1` to this inline block;
+// as the "second-merger" the lead-reply spec anticipated, that constant moved to
+// its new home in `creditCosts.ts` so the re-export carries it.)
+import { CREDIT_COSTS } from './creditCosts';
+import type { CreditOperation } from './creditCosts';
+
+export { CREDIT_COSTS };
+export type { CreditOperation };
 
 // Event types for usage tracking
 export enum UsageEventType {
@@ -49,6 +39,8 @@ export enum UsageEventType {
   OUTREACH_SCRAPE = 'outreach_scrape',
   // Cold outreach generation (credits-free; this ledger row IS the gating source of truth, sibling precedent)
   OUTREACH_GENERATION = 'outreach_generation',
+  // Lead reply draft (dashboard "Draft reply"; charged 1 credit only on a successful draft)
+  LEAD_REPLY_GENERATION = 'lead_reply_generation',
   // Pricing v2: persistent credit pool grants (DB eventType is a plain String, so
   // these new values need no migration). CREDIT_TOPUP = paid $9/100 top-up;
   // LTD_GRANT = 600-credit lifetime-deal seed.

@@ -82,7 +82,7 @@ ignore `variantId`; **only vestria consumes `mood`** (§7), everyone else ignore
   imageKeywords.ts      PALETTE_IMAGE_KEYWORDS + get<X>ImageQuery
   paletteSelection.ts   inferDefaultPalette() (business-context → palette) [most templates]
   <X>PlaceholderBlock.tsx   fallback for unknown section types
-  components/           <X>Editable, <X>SSRTokens, LinkTargetPopover, …
+  components/           <X>Editable, <X>SSRTokens, LinkPicker, …
   hooks/                use<X>Block (store wiring for edit blocks)
   blocks/<Section>/     the block pair(s) — see §6
 ```

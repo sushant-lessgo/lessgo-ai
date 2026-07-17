@@ -29,6 +29,13 @@ export async function GET(req: NextRequest) {
       creditPool: plan.creditPool ?? 0,
       lifetimeDeal: plan.lifetimeDeal ?? false,
       ltdCohort: plan.ltdCohort ?? null,
+      // billing-beta phase 6 (decision 5): does this user have a Stripe customer
+      // record at all? The portal route 400s without one
+      // (create-portal-session/route.ts:24-29), and TIER IS NOT A PROXY for it:
+      // a churned ex-payer is FREE *with* a customer id (must still reach
+      // invoices/cancellation), and an admin-granted PRO (api/admin/grant-plan)
+      // has none (a live button would 400). Boolean only — never expose the id.
+      hasBillingAccount: !!plan.stripeCustomerId,
       currentPeriodStart: plan.currentPeriodStart,
       currentPeriodEnd: plan.currentPeriodEnd,
       isTrialing: plan.isTrialing,

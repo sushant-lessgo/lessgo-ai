@@ -77,7 +77,7 @@ marker wiring) is asserted in `templateConformance()`; these are the items jsdom
 - [ ] **Image slots** — every image replaces AND removes via `uploadImage`/`bulkUploadImages` (no raw-URL inputs); collection-item images upload too
 - [ ] **Collections** (cards / gallery / list rows) — add, remove, AND reorder each collection; seeded defaults present (no silently-dropped designed element)
 - [ ] **Button Settings** — every button/CTA opens the Button-Settings popover; link + goal (GOAL_REF) configure and take effect on the published page
-- [ ] **Nav + footer links** — editable via `LinkTargetPopover` (scroll-to-section / page / custom URL); add/remove works; single-page hides the "Link to page" radio
+- [ ] **Nav + footer links** — editable via `LinkPicker` (scroll-to-section / page / custom URL); add/remove works; single-page hides the "Link to page" radio
 - [ ] **Social links** — add/edit/remove; published anchors correct (new-tab on external)
 - [ ] **Form blocks** — form-builder field config works; submission lands (see #3)
 - [ ] **Live palette / variant / knob / look switching** — switch each without breaking or clobbering edited content; copy JSON unchanged (no regen); editor AND published both reflect it

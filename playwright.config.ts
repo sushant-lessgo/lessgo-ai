@@ -74,6 +74,14 @@ export default defineConfig({
         // work-onboarding-ingestion (E2): the binding/reveal proof on atelier2
         // (P1 authored it; P2's works flip makes the real post-flip path runnable).
         /work-binding\.spec\.ts/,
+        // billing-beta: credit counter / gating / billing view — needs a Clerk session.
+        /billing-beta\.spec\.ts/,
+        // toolbar-standard-beta: seeded editor project + Clerk session.
+        /toolbar-dispatch\.spec\.ts/,
+        /link-picker\.spec\.ts/,
+        /manage-items\.spec\.ts/,
+        // toolbar-beta-followup: behavioral regen (element + section) through the shell.
+        /toolbar-regen\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },

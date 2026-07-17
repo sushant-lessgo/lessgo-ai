@@ -111,7 +111,14 @@ export interface WorkGroupInput {
   items?: WorkGroup['items'];
 }
 
-/** One rail correction. `note` appends to `userNotes` (never overwrites). */
+/**
+ * One rail correction. `note` appends to `userNotes` (never overwrites).
+ *
+ * The `establishment` / `dreamClient` / `praise` / `contactMethod` fields are the
+ * STEP 03 question write paths (E3): they are already keys of `WorkFactsSchema`
+ * (zero reshape), and `applyRailEdit` stays the SINGLE validation gate for them
+ * (D-H). `languages` predates E3 (rail edit).
+ */
 export type RailEdit =
   | { field: 'name'; value: string }
   | { field: 'descriptor'; value: string }
@@ -119,6 +126,10 @@ export type RailEdit =
   | { field: 'reach'; value: string }
   | { field: 'languages'; value: string[] }
   | { field: 'groups'; value: WorkGroupInput[] }
+  | { field: 'establishment'; value: 'new' | 'established' }
+  | { field: 'dreamClient'; value: string }
+  | { field: 'praise'; value: string[] }
+  | { field: 'contactMethod'; value: 'whatsapp' | 'booking' | 'form' }
   | { field: 'note'; value: string };
 
 /**
@@ -387,6 +398,27 @@ export function applyRailEdit(
         return { ok: false, error: 'Each thing you sell needs a name' };
       }
       next.groups = groups.length ? groups : undefined;
+      break;
+    }
+    case 'establishment': {
+      // Enum-constrained by the RailEdit type; WorkFactsSchema is the final gate.
+      next.establishment = edit.value;
+      break;
+    }
+    case 'dreamClient': {
+      const value = edit.value.trim();
+      if (!value) return { ok: false, error: 'Dream client cannot be empty' };
+      next.dreamClient = value;
+      break;
+    }
+    case 'praise': {
+      // Empty array ⇒ UNSET the slot (never persist `praise: []`).
+      const quotes = stringArray(edit.value);
+      next.praise = quotes.length ? quotes : undefined;
+      break;
+    }
+    case 'contactMethod': {
+      next.contactMethod = edit.value;
       break;
     }
     case 'note': {

@@ -210,13 +210,22 @@ export interface JourneyRailAdapter {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * A question descriptor. The agnostic StepQuestions renders the 3 kinds; the
+ * A question descriptor. The agnostic StepQuestions renders the kinds; the
  * seam supplies the list and the commits. Every commit routes through the
  * engine's rail adapter, so an answer can never persist a malformed record
  * (work: never a `kind`-less group ⇒ never a null-facts strategy 400).
  *
- * The 3 kinds are CLOSED for E1 (ruling). Engine #2 extends the union if it
- * genuinely needs a 4th — deliberately, not by accident.
+ * The union was CLOSED at 3 kinds for E1 (ruling). E3 (work-onboarding-questions,
+ * decision D-A) DELIBERATELY extends it with ONE new kind, `choice`, to express
+ * chips / one-tap confirm / the establishment branch — needs the E1 `text` kind
+ * cannot carry (no tap UX, no confirm posture). The union stays CLOSED at these
+ * FOUR kinds; a 5th requires the same deliberate sanction. Other engines never
+ * emit `choice`; the renderer switch in `StepQuestions.tsx` adds ONE case and
+ * the existing text/group/price rendering is unchanged.
+ *
+ * Two OPTIONAL common fields (E3, D-A) sit on EVERY member:
+ *   • `required?: true`   — drives the STEP-03 proceed gate (D-D).
+ *   • `answered?: boolean` — drives answered-compact rendering (D-E).
  */
 export type JourneyQuestion =
   | {
@@ -224,23 +233,65 @@ export type JourneyQuestion =
       kind: 'text';
       label: string;
       prefill?: string;
+      required?: true;
+      answered?: boolean;
       commit(value: string, liveFacts: Brief['facts']): RailCommit;
     }
   | {
       id: string;
       kind: 'group';
       label: string;
+      required?: true;
+      answered?: boolean;
       commit(name: string, liveFacts: Brief['facts']): RailCommit;
     }
   | {
       id: string;
       kind: 'price';
       label: string;
+      required?: true;
+      answered?: boolean;
       commit(
         price: { mode: 'exact' | 'from' | 'on-request'; amount?: number },
         liveFacts: Brief['facts']
       ): RailCommit;
+    }
+  | {
+      id: string;
+      kind: 'choice';
+      label: string;
+      /** The full tappable option set. `multi` renders ALL of these as chips. */
+      options: { value: string; label: string }[];
+      /** Multi-select (e.g. languages) ⇒ toggle chips + Save. Default single. */
+      multi?: boolean;
+      /** Free-text escape (e.g. dreamClient) ⇒ a small input + add. */
+      allowCustom?: boolean;
+      /**
+       * Present ⇒ these options render in the ONE-TAP CONFIRM posture (prominent);
+       * the rest render as quieter chips. For `multi`, suggested options are the
+       * visually prominent ones within the full option list.
+       */
+      suggested?: string[];
+      required?: true;
+      answered?: boolean;
+      commit(values: string[], liveFacts: Brief['facts']): RailCommit;
     };
+
+/**
+ * Upstream signals the seam's `questions()` needs beyond the rail VM (D-B).
+ * The VM says what's UNKNOWN; ctx supplies profession wording key + confirm
+ * suggestions + session-answered ids. Commits still route ONLY through the rail
+ * adapter — ctx is read-only input, never a write door.
+ */
+export interface JourneyQuestionsContext {
+  /** The brief/store `businessType` (profession wording key). Not in the facts
+   *  bag, so `toVM` can't carry it. */
+  businessType: string | null;
+  /** The current facts bag (confirm-suggestions read `facts.entry`). */
+  facts: Record<string, unknown> | undefined;
+  /** Question ids answered this session (D-C price answered-detection). */
+  sessionAnswered: readonly string[];
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Generation surfaces (honestly engine-shaped)
@@ -327,8 +378,10 @@ export interface JourneyEngineSeam {
     /** 02 — display config + an OPTIONAL lazy engine body (`loadStep`, D9). The
      *  agnostic frame renders the lazy body when present, else the stub. */
     showWork: JourneyStepConfig;
-    /** 03 — only the questions still needed, given the current rail. */
-    questions(vm: RailVM): JourneyQuestion[];
+    /** 03 — only the questions still needed, given the current rail + ctx.
+     *  `ctx` (D-B) supplies upstream signals (profession wording key, confirm
+     *  suggestions, session-answered ids) the VM alone can't carry. */
+    questions(vm: RailVM, ctx: JourneyQuestionsContext): JourneyQuestion[];
     /** 04 — `prepare` runs once on entry (work: the CHARGELESS sitemap seed,
      *  behind the existing idempotency guard — never the charged path). */
     plan: {

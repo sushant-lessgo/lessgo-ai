@@ -35,6 +35,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEditStore } from '@/hooks/useEditStore';
 import Logo from '@/components/shared/Logo';
+import { CreditBadge } from '@/components/billing/CreditBadge';
 import { AppIcon } from '@/components/ui/icon';
 import { Coming } from '@/components/ui/coming';
 import { SegmentedControl } from '@/components/ui/segmented-control';
@@ -322,6 +323,19 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
 
       {/* ── Right cluster ────────────────────────────────────────────────── */}
       <div className="ml-auto flex flex-none items-center gap-2">
+        {/* Credit counter (billing-beta phase 5). Self-fetching, zero editor-store
+            involvement — it is the SAME component the dashboard bar mounts, and it
+            stays the only `/api/credits/balance` fetcher (each instance polls on its
+            own 30s timer; that is fine, and is NOT a reason to add a shared store).
+            Placed at the head of the cluster so Publish stays rightmost. */}
+        <CreditBadge />
+
+        {/* CreditBadge renders null when its balance fetch fails; that would leave
+            this divider as the cluster's FIRST child — a hairline dangling with
+            nothing to its left. `first:hidden` drops it in exactly that case
+            (badge present → badge is first, divider shows as normal). */}
+        <div className="app-divider first:hidden" />
+
         {/* Score + review pills + save-state chip (moved from the old EditHeader) */}
         <EditorStatusCluster />
 

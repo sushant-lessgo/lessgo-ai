@@ -7,7 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, X, GripVertical, Settings } from 'lucide-react';
+// phase 4: GripVertical dropped — it was a decorative drag handle wired to nothing
+// (see the field row below). ChevronUp/Down are the real reorder controls.
+import { Plus, X, ChevronUp, ChevronDown, Settings } from 'lucide-react';
 import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import type { MVPForm, MVPFormField, MVPFormFieldType, MVPFormIntegration } from '@/types/core/forms';
 import {
@@ -23,7 +25,54 @@ interface FormBuilderProps {
   editingFormId?: string | null;
 }
 
-const FIELD_TYPES: { value: MVPFormFieldType; label: string; description: string }[] = [
+/**
+ * The field types `FormMarkupPublished.tsx:16-22` can actually render.
+ *
+ * This literal is a HAND-MAINTAINED MIRROR of that file's module-local `FormField`
+ * interface (it is not exported, so it cannot be imported and compared directly).
+ * The two type gates below are what stop the mirror from silently drifting.
+ */
+export const PUBLISHED_SUPPORTED_FIELD_TYPES = ['text', 'email', 'tel', 'textarea', 'select'] as const;
+type PublishedSupportedFieldType = (typeof PUBLISHED_SUPPORTED_FIELD_TYPES)[number];
+
+/**
+ * COMPILE-TIME GATE (toolbar-standard-beta phase 4, plan ruling 4 / step 6).
+ *
+ * Ruling 4 asked to RESTRICT the offered field types to the published-supported set.
+ * VERIFIED AT IMPLEMENT TIME: they already were, and the restriction is carried by
+ * the TYPE rather than by a runtime filter — `MVPFormFieldType`
+ * (types/core/forms.ts:10) is EXACTLY the union FormMarkupPublished declares, so
+ * FIELD_TYPES below (typed `MVPFormFieldType`) cannot gain a 6th entry. Step 6 was
+ * therefore a no-op: nothing needed narrowing.
+ *
+ * What phase 4 DID add is this gate, because that equality was previously an
+ * unenforced coincidence across two files that never referenced each other. It is
+ * bidirectional on purpose:
+ *   - `_publishedIsCovered` fails if MVPFormFieldType ever DROPS a type publish
+ *     renders (the builder would stop offering something that works);
+ *   - `_storeIsNotWider` fails if MVPFormFieldType ever GAINS one publish cannot
+ *     render (e.g. 'radio'/'file'/'date') — the silent-drop bug ruling 4 guards
+ *     against, where a user builds a field that simply vanishes on publish.
+ * It lives HERE, in app code, and NOT in FormBuilder.test.tsx — `tsconfig.json`
+ * EXCLUDES test files from compilation, so a type assertion written in the test file
+ * is never checked by `npx tsc --noEmit` and would be a gate that can never fail.
+ * (Verified by mutation: adding 'radio' to MVPFormFieldType left the test-file
+ * version of this gate perfectly green.)
+ *
+ * ⚠️ Do NOT "fix" any of this to the store's `FormFieldType` (types/store/state.ts:557),
+ * which has 10 members. That interface is NOT the one this builder or `state.forms`
+ * uses — `state.forms` is `Record<string, MVPForm>` (state.ts:511), i.e. the MVP
+ * types ARE the store's form types here. Switching would WIDEN the offered set past
+ * what publish renders. The three FormField interfaces are not reconciled on
+ * purpose; that is its own spec.
+ */
+const _publishedIsCovered: PublishedSupportedFieldType extends MVPFormFieldType ? true : false = true;
+const _storeIsNotWider: MVPFormFieldType extends PublishedSupportedFieldType ? true : false = true;
+void _publishedIsCovered;
+void _storeIsNotWider;
+
+/** Exported for FormBuilder.test.tsx — the offered list is the runtime half of the gate above. */
+export const FIELD_TYPES: { value: MVPFormFieldType; label: string; description: string }[] = [
   { value: 'text', label: 'Text Input', description: 'Single line text field' },
   { value: 'email', label: 'Email', description: 'Email address field with validation' },
   { value: 'tel', label: 'Phone', description: 'Phone number field' },
@@ -165,9 +214,29 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
     }));
   };
 
+  /**
+   * Field reorder — LOCAL-DRAFT ONLY (toolbar-standard-beta phase 4, plan ruling 4).
+   *
+   * This function already existed and was NEVER CALLED (dead since it was written);
+   * phase 4 wires it to real move up/down buttons. Its body is unchanged.
+   *
+   * WHY NOT the store's `reorderFormFields` (formActions.ts:120) — two independent
+   * reasons, both verified:
+   *   1. CONTRACT MISMATCH: its impl is `(formId, startIndex, endIndex)` but BOTH
+   *      declared type contracts say `(formId, fieldIds[])`
+   *      (types/store/formActions.ts:14, types/store/actions.ts:301) — so calling it
+   *      through the typed store does not typecheck. Reconciling those three files
+   *      is its own spec; do NOT do it from here.
+   *   2. DRAFT DESYNC: FormBuilder edits a LOCAL `formData` copy and commits on Save
+   *      via `updateForm` (handleSave, :106-113). A store write mid-draft would make
+   *      the store and the open draft disagree, and the next Save would clobber it.
+   * Add/edit/remove already work exactly this way, so reorder is now consistent with
+   * them rather than being the one field op that writes straight through.
+   */
   const handleMoveField = (fromIndex: number, toIndex: number) => {
     setFormData(prev => {
       const fields = [...(prev.fields || [])];
+      if (toIndex < 0 || toIndex >= fields.length) return prev;
       const [movedField] = fields.splice(fromIndex, 1);
       fields.splice(toIndex, 0, movedField);
       return { ...prev, fields };
@@ -282,10 +351,40 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
 
             <div className="space-y-4">
               {formData.fields?.map((field, index) => (
-                <div key={field.id} className="border rounded-lg p-4 bg-gray-50">
+                <div key={field.id} data-testid="form-field-row" className="border rounded-lg p-4 bg-gray-50">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-2">
-                      <GripVertical className="w-4 h-4 text-gray-400 cursor-move" />
+                      {/* phase 4: real move up/down replaces a DECORATIVE
+                          `<GripVertical className="cursor-move" />`, which promised
+                          drag-and-drop that was never wired to anything (the local
+                          `handleMoveField` had zero callers). A fake affordance that
+                          does nothing on drag is the naayom-C2 "dead control reads as
+                          a bug" failure — so it is removed, not kept beside these.
+                          Adjacent swap, matching SocialItemsEditor; no @dnd-kit. */}
+                      <div className="flex flex-col">
+                        <button
+                          type="button"
+                          data-testid="form-field-move-up"
+                          onClick={() => handleMoveField(index, index - 1)}
+                          disabled={index === 0}
+                          title="Move field up"
+                          aria-label={`Move field ${index + 1} up`}
+                          className="text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          data-testid="form-field-move-down"
+                          onClick={() => handleMoveField(index, index + 1)}
+                          disabled={index === (formData.fields?.length || 0) - 1}
+                          title="Move field down"
+                          aria-label={`Move field ${index + 1} down`}
+                          className="text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                      </div>
                       <span className="text-sm font-medium">Field {index + 1}</span>
                     </div>
                     <Button
@@ -307,12 +406,16 @@ export function FormBuilder({ isOpen, onClose, editingFormId }: FormBuilderProps
                           handleUpdateField(index, { type: value })
                         }
                       >
-                        <SelectTrigger>
+                        <SelectTrigger data-testid="form-field-type-trigger">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {FIELD_TYPES.map((fieldType) => (
-                            <SelectItem key={fieldType.value} value={fieldType.value}>
+                            <SelectItem
+                              key={fieldType.value}
+                              value={fieldType.value}
+                              data-testid="form-field-type-option"
+                            >
                               {fieldType.label}
                             </SelectItem>
                           ))}

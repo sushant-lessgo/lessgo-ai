@@ -14,6 +14,13 @@ import {
   wrapElementContentWithStyles,
   type PartialFormatResult
 } from '@/utils/textFormatting';
+import { AppTooltip } from '@/components/ui/tooltip';
+import { CREDIT_COSTS } from '@/lib/creditCosts';
+import { ToolbarButton, ToolbarDivider } from './ToolbarButton';
+
+// billing-beta phase 7 — cost hint for a spend affordance. Trivial + local:
+// pluralization only. The NUMBER always comes from CREDIT_COSTS, never a literal.
+const creditCostHint = (n: number) => `Costs ${n} credit${n === 1 ? '' : 's'}`;
 
 interface TextToolbarMVPProps {
   elementSelection: any;
@@ -491,11 +498,14 @@ function TextToolbarMVPInner({
 
   return (
     <>
+      {/* The t2 chrome box (bg/border/radius/shadow) is the SHELL's now. The
+          fixed 52px height went with it — the shell's pill sizes itself. The
+          mousedown/mouseup preventDefault below is load-bearing (it stops the
+          toolbar from stealing the text selection) and stays exactly as-is. */}
       <div
         ref={toolbarRef}
-        className="bg-white border border-gray-300 rounded-lg shadow-lg"
+        className="flex items-center gap-0.5"
         style={{
-          height: '52px', // Fixed MVP height
           whiteSpace: 'nowrap',
           userSelect: 'none', // Prevent text selection on toolbar
         }}
@@ -510,120 +520,97 @@ function TextToolbarMVPInner({
           e.stopPropagation();
         }}
       >
-        <div className="flex items-center justify-between px-3 py-2 h-full">
+        <div className="flex items-center gap-0.5">
           {/* Format Controls */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-0.5">
             {/* Bold, Italic, Underline */}
-            <button
+            <ToolbarButton
+              data-action="bold"
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 saveSelection();
                 toggleBold(e as any);
               }}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.bold 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.bold}
+              icon={<BoldIcon />}
               title={`Bold${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
-            >
-              <BoldIcon />
-            </button>
-            
-            <button
+            />
+
+            <ToolbarButton
+              data-action="italic"
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 saveSelection();
                 toggleItalic(e as any);
               }}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.italic 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.italic}
+              icon={<ItalicIcon />}
               title={`Italic${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
-            >
-              <ItalicIcon />
-            </button>
-            
-            <button
+            />
+
+            <ToolbarButton
+              data-action="underline"
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 saveSelection();
                 toggleUnderline(e as any);
               }}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.underline 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.underline}
+              icon={<UnderlineIcon />}
               title={`Underline${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
-            >
-              <UnderlineIcon />
-            </button>
-            
-            <div className="w-px h-6 bg-gray-300" />
-            
+            />
+
+            <ToolbarDivider />
+
             {/* Text Alignment */}
-            <button
+            <ToolbarButton
+              data-action="align-left"
               onMouseDown={(e) => {
                 e.preventDefault();
                 saveSelection();
               }}
               onPointerDown={(e) => setAlignment('left', e)}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.textAlign === 'left' 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.textAlign === 'left'}
+              icon={<AlignLeftIcon />}
               title="Align Left (Note: alignment applies to whole element)"
-            >
-              <AlignLeftIcon />
-            </button>
-            
-            <button
+            />
+
+            <ToolbarButton
+              data-action="align-center"
               onMouseDown={(e) => {
                 e.preventDefault();
                 saveSelection();
               }}
               onPointerDown={(e) => setAlignment('center', e)}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.textAlign === 'center' 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.textAlign === 'center'}
+              icon={<AlignCenterIcon />}
               title="Align Center (Note: alignment applies to whole element)"
-            >
-              <AlignCenterIcon />
-            </button>
-            
-            <button
+            />
+
+            <ToolbarButton
+              data-action="align-right"
               onMouseDown={(e) => {
                 e.preventDefault();
                 saveSelection();
               }}
               onPointerDown={(e) => setAlignment('right', e)}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.textAlign === 'right' 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.textAlign === 'right'}
+              icon={<AlignRightIcon />}
               title="Align Right (Note: alignment applies to whole element)"
-            >
-              <AlignRightIcon />
-            </button>
+            />
           </div>
-          
-          <div className="w-px h-6 bg-gray-300" />
-          
+
+          <ToolbarDivider />
+
           {/* Font Size & Color */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-0.5">
             {/* Font Size */}
             <div className="relative">
-              <button
+              <ToolbarButton
+                data-action="font-size"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   saveSelection();
@@ -633,16 +620,15 @@ function TextToolbarMVPInner({
                   e.stopPropagation();
                   setShowFontSizePicker(!showFontSizePicker);
                 }}
-                className="flex items-center space-x-1 px-2 py-1.5 text-sm rounded text-gray-600 hover:bg-gray-100 transition-colors select-none"
+                active={showFontSizePicker}
+                icon={<FontSizeIcon />}
+                label={
+                  FONT_SIZE_PRESETS.find(p => p.value === formatState.fontSize)?.shortLabel || 'M'
+                }
+                trailing={<ChevronDownIcon />}
                 title={`Font Size${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
-              >
-                <FontSizeIcon />
-                <span className="text-xs font-medium">
-                  {FONT_SIZE_PRESETS.find(p => p.value === formatState.fontSize)?.shortLabel || 'M'}
-                </span>
-                <ChevronDownIcon />
-              </button>
-              
+              />
+
               {showFontSizePicker && (
                 <div 
                   ref={fontSizePickerRef}
@@ -672,7 +658,8 @@ function TextToolbarMVPInner({
             
             {/* Color Picker */}
             <div className="relative">
-              <button
+              <ToolbarButton
+                data-action="text-color"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   saveSelection();
@@ -682,19 +669,20 @@ function TextToolbarMVPInner({
                   e.stopPropagation();
                   setShowColorPicker(!showColorPicker);
                 }}
-                className="flex items-center space-x-1 px-2 py-1.5 text-sm rounded text-gray-600 hover:bg-gray-100 transition-colors select-none"
+                active={showColorPicker}
+                icon={
+                  <span className="flex items-center gap-1">
+                    <ColorIcon />
+                    <span
+                      className="w-3 h-3 rounded-sm border border-white/25"
+                      style={{ backgroundColor: formatState.color }}
+                    />
+                  </span>
+                }
+                trailing={<ChevronDownIcon />}
                 title={`Text Color${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
-              >
-                <div className="flex items-center space-x-1">
-                  <ColorIcon />
-                  <div 
-                    className="w-3 h-3 rounded-sm border border-gray-300"
-                    style={{ backgroundColor: formatState.color }}
-                  />
-                </div>
-                <ChevronDownIcon />
-              </button>
-              
+              />
+
               {showColorPicker && (
                 <div 
                   ref={colorPickerRef}
@@ -760,28 +748,96 @@ function TextToolbarMVPInner({
               )}
             </div>
 
-            {/* Divider + AI Sparkle */}
-            <div className="w-px h-6 bg-gray-300" />
-            <button
+            {/* ── Text → Link: GREYED PLACEHOLDER (phase 3.5, founder ruling 9) ──
+                Sits here because toolbarPlan's Beta column order is
+                `… color · align · Link · Ask AI`, so Link belongs between the
+                colour picker and the sparkle.
+
+                It is DISABLED and carries ZERO functionality on purpose. Phase 3
+                shipped the shared t4 LinkPicker, but there is nowhere to put a
+                text link: NO text element in any schema has a link field (every
+                `href` in the element schema is inside a collection — `nav_items.href`
+                — or is a `*_cta_href`). The only mechanism would be injecting `<a>`
+                into the saved text HTML, which needs `<a>`-injection machinery in
+                `textFormatting.ts` (does not exist), would DISCARD `Link.source`,
+                and collides with the published sanitizer's STRICT_PROFILE (no `'a'`
+                tag) — i.e. it is a published-output change, which this spec forbids.
+
+                Ruling 9: ship it greyed rather than omit it — the anatomy should
+                show its intended shape, and a tooltip that says WHY reads as
+                "coming", not as the broken button QA naayom C2 flagged. */}
+            <ToolbarDivider />
+            <ToolbarButton
+              data-action="link"
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onClick={handleSparkle}
-              disabled={aiGeneration.isGenerating || regenLocaleLocked}
-              className={`p-1.5 rounded transition-colors select-none ${
-                regenLocaleLocked
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : aiGeneration.isGenerating
-                  ? 'text-yellow-500 bg-yellow-50 animate-pulse'
-                  : elementVariations.visible
-                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
-                    : 'text-gray-600 hover:bg-gray-100'
-              }`}
-              title={regenLocaleLocked ? 'Switch to the default language to regenerate.' : 'AI text variations'}
-            >
-              <SparkleIcon />
-            </button>
+              disabled
+              disabledTitle="Text links are coming — the text schema has no link field yet."
+              icon={<LinkIcon />}
+              label="Link"
+            />
+
+            {/* Divider + AI Sparkle. NOTE: this is the EXISTING sparkle →
+                variations flow, not the phase-5 "Ask Lessgo AI" instruction
+                prompt (which lands in the shell's hidden trailing slot).
+
+                billing-beta phase 7/8: handleSparkle hits /api/regenerate-element ⇒
+                ELEMENT_REGENERATION spend. Surface the cost on hover (AppTooltip)
+                and keep the e2e's `aria-label="AI text variations"` hook. When
+                enabled we suppress the native title (title="") so the AppTooltip is
+                the sole hover affordance; when disabled we render the button BARE so
+                ToolbarButton's disabledTitle carries the state message (locale /
+                generating). */}
+            <ToolbarDivider />
+            {(() => {
+              const sparkleDisabled = aiGeneration.isGenerating || regenLocaleLocked;
+              const sparkleButton = (
+                <ToolbarButton
+                  data-action="ai-variations"
+                  aria-label="AI text variations"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  // phase 3.5: the ONLY disabled ToolbarButton with a live handler
+                  // and no consumer-side guard. Native `disabled` used to protect
+                  // handleSparkle for free; with the aria-disabled convention that
+                  // protection is ToolbarButton's onClick guard alone. Guard here
+                  // too, matching Section/Image/ElementToolbar — a double-fired regen
+                  // (mid-generation) or a silent no-op regen (non-default locale) is
+                  // a real bug, not a placeholder no-op.
+                  onClick={(e) => {
+                    if (sparkleDisabled) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      return;
+                    }
+                    handleSparkle();
+                  }}
+                  disabled={sparkleDisabled}
+                  disabledTitle={
+                    regenLocaleLocked
+                      ? 'Switch to the default language to regenerate.'
+                      : 'Generating…'
+                  }
+                  active={elementVariations.visible}
+                  className={aiGeneration.isGenerating ? 'animate-pulse' : ''}
+                  icon={<SparkleIcon />}
+                  title={sparkleDisabled ? undefined : ''}
+                />
+              );
+              return sparkleDisabled ? (
+                sparkleButton
+              ) : (
+                <AppTooltip
+                  label={`AI text variations · ${creditCostHint(CREDIT_COSTS.ELEMENT_REGENERATION)}`}
+                >
+                  {sparkleButton}
+                </AppTooltip>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -938,6 +994,17 @@ function ChevronDownIcon() {
   return (
     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  );
+}
+
+// The natural lucide-style link glyph — phase 3.5 deliberately does NOT invent a
+// "disabled" icon; greying is carried by colour + cursor + aria-disabled alone.
+function LinkIcon() {
+  return (
+    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
     </svg>
   );
 }

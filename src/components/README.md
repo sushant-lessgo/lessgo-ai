@@ -17,10 +17,8 @@ published/dashboard/marketing UI.
 | `domain/` | Custom-domain wizard steps: `AddDomainForm`, `OwnershipStep`, `DnsStep`, `DnsRecordRow`, `LiveStep`, `FailedStep`. |
 | `billing/` | `CreditBadge`, `OutOfCreditsModal`. |
 | `admin/` | `TransferOwnershipControl`. |
-| `editor/` | Standalone editors reused outside the main edit route: `PrivacyPolicyEditor`, `PrivacyPolicyLink`. |
+| `editor/` | Standalone editors reused outside the main edit route: `PrivacyPolicyEditor`, `PrivacyPolicyLink`, `LinkPicker` (THE shared link-target picker — all 15 edit-side mounts), `SocialItemsEditor` + its `SocialProfilesPanel` entry point (site-level `socialMediaConfig` profiles). |
 | `toolbars/` | `ButtonConfigurationModal` (button-config toolbar shared with forms). |
-| `navigation/` | `NavigationEditor`, `NavItemToolbar`. |
-| `social/` | `SocialMediaEditor`. |
 | `theme/` | `ThemeCustomizer`, `predefinedThemes.ts`. |
 | `shared/` | Generic building blocks: `Header`, `Footer`, `Logo`, `PageIntro`, `LoadingButtonBar`. |
 | `t/` | `CollectFormClient` — public testimonial collect form (`/t/[collectToken]`). |

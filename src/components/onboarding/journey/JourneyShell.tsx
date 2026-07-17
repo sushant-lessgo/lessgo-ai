@@ -80,6 +80,10 @@ export interface JourneyStepProps {
   /** STEP 05 reports generation in-flight so the top bar can say "Building…".
    *  Lives here (not in the store) because it is pure chrome state. */
   onBuildingChange?: (building: boolean) => void;
+  /** STEP 03 reports whether required questions are still unanswered so the
+   *  shell can disable Continue (D-D). Mirrors `onBuildingChange`: pure chrome
+   *  state, lifted to the shell (the gate lives in the agnostic Continue). */
+  onBlockedChange?: (blocked: boolean) => void;
 }
 
 const STEP_BODIES: Record<JourneyStep, (props: JourneyStepProps) => JSX.Element> = {
@@ -109,6 +113,9 @@ export default function JourneyShell({
   const [seam, setSeam] = useState<JourneyEngineSeam | null>(null);
   const [seamError, setSeamError] = useState(false);
   const [building, setBuilding] = useState(false);
+  // STEP 03 required-gate (D-D). Reset on step change so a stale block can never
+  // outlive the step that reported it.
+  const [blocked, setBlocked] = useState(false);
 
   // Hydrate once from the DB-confirmed brief (load-detection already fetched
   // it). Same one-shot rule as WizardShell: re-running would clobber edits.
@@ -151,8 +158,15 @@ export default function JourneyShell({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Reset the required-gate whenever the step changes — only STEP 03 reports a
+  // block, and a block must never leak forward/back into another step.
+  useEffect(() => {
+    setBlocked(false);
+  }, [journeyStep]);
+
   const Body = STEP_BODIES[journeyStep];
   const ready = hydrated && !!seam;
+  const nextBlocked = journeyStep === 3 && blocked;
 
   return (
     // THE ONLY `.app-chrome` attachment in the journey (see the header note).
@@ -192,7 +206,7 @@ export default function JourneyShell({
 
               {ready && seam && (
                 <div className="space-y-8">
-                  <Body seam={seam} onBuildingChange={setBuilding} />
+                  <Body seam={seam} onBuildingChange={setBuilding} onBlockedChange={setBlocked} />
 
                   {/* P2b navigation — makes 02–06 walkable. Each step takes over
                       its own forward motion as it lands (P4's CTA, P5's
@@ -219,7 +233,7 @@ export default function JourneyShell({
                       onClick={() =>
                         setJourneyStep(Math.min(LAST_STEP, journeyStep + 1) as JourneyStep)
                       }
-                      disabled={journeyStep === LAST_STEP}
+                      disabled={journeyStep === LAST_STEP || nextBlocked}
                       data-testid="journey-next"
                     >
                       Continue

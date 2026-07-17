@@ -9,7 +9,7 @@ import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions, deriveNavLinks } from '@/utils/pageLinks';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { SurgeEditable } from '../../components/SurgeEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import type { Link } from '@/types/destination';
 import { HEADER_STYLES } from './styles';
 
@@ -134,7 +134,7 @@ export default function WarmNavHeader({ sectionId }: WarmNavHeaderProps) {
               />
               {edit && (
                 <>
-                  <LinkTargetPopover
+                  <LinkPicker
                     value={item.href ?? '#'}
                     sectionOptions={sectionOptions}
                     pageOptions={pageOptions}

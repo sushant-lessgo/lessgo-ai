@@ -19,7 +19,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 
 import { workJourneySeam } from './work';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
-import type { RailChipEdit, RailCommit } from './types';
+import type { JourneyQuestion, RailChipEdit, RailCommit } from './types';
 import { applyRailEdit, type WorkGroupInput } from '@/modules/wizard/work/rail';
 import { proposeGroups, mergeProposalIntoGroups } from '@/modules/wizard/work/ingest/proposeGroups';
 import {
@@ -27,6 +27,7 @@ import {
   hidePhoto,
   pickCover,
 } from './work/correctionReducer';
+import { WORK_BRIEF_FIXTURE } from '../../../../../e2e/helpers/workBriefFixture';
 
 const rail = workJourneySeam.rail;
 
@@ -70,29 +71,69 @@ function groupsOf(result: Extract<RailCommit, { ok: true }>) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('work rail adapter — toVM', () => {
-  it('emits EXACTLY four fields, in render order', () => {
+  it('emits the E3-widened field set, in render order', () => {
     const vm = rail.toVM(e2Facts());
     expect(vm.fields.map((f) => f.id)).toEqual([
       'name',
       'descriptor',
       'groups',
       'pricePosition',
+      // E3 read-only rows (fill from STEP 03; corrections happen in-step, D-E).
+      'languages',
+      'establishment',
+      'dreamClient',
+      'contactMethod',
     ]);
     expect(vm.fields.map((f) => f.label)).toEqual([
       'NAME',
       'WHAT YOU DO',
       'WHAT YOU SELL',
       'PRICE POSITION',
+      'LANGUAGES',
+      'ESTABLISHED',
+      'DREAM CLIENT',
+      'CONTACT',
     ]);
   });
 
-  it('does NOT render WHERE or LANGUAGES (modelled, but E1 has no source for them)', () => {
-    // A rail headed "WHAT WE UNDERSTOOD" must not present a hardcoded default as
-    // a belief we formed. They stay in the rail MODEL (rail.ts) — not here.
+  it('the E3 rows are read-only and skeleton until answered', () => {
+    // Kundius fixture-shaped bag has none of these yet ⇒ all four skeleton, none
+    // editable (the correctable path is STEP 03, not the rail — D-E).
     const vm = rail.toVM(e2Facts());
-    const labels = vm.fields.map((f) => f.label);
-    expect(labels).not.toContain('WHERE');
-    expect(labels).not.toContain('LANGUAGES');
+    for (const id of ['languages', 'establishment', 'dreamClient', 'contactMethod']) {
+      const field = vm.fields.find((f) => f.id === id)!;
+      expect(field.editable, `${id} must be read-only`).toBe(false);
+      expect(field.skeleton, `${id} must be skeleton when unknown`).toBe(true);
+    }
+  });
+
+  it('does NOT render WHERE (modelled, but E1 has no source for it)', () => {
+    // A rail headed "WHAT WE UNDERSTOOD" must not present a hardcoded default as
+    // a belief we formed. `location`/`reach` stay in the rail MODEL, not here.
+    const vm = rail.toVM(e2Facts());
+    expect(vm.fields.map((f) => f.label)).not.toContain('WHERE');
+  });
+
+  it('reflects answered E3 values as read-only rows', () => {
+    const facts = {
+      work: {
+        identity: { name: 'Kundius' },
+        groups: [{ name: 'Weddings', kind: 'category', price: { mode: 'on-request' } }],
+        languages: ['English', 'Dutch'],
+        establishment: 'established',
+        dreamClient: 'Couples getting married',
+        contactMethod: 'whatsapp',
+      },
+    } as unknown as Record<string, unknown>;
+    const vm = rail.toVM(facts);
+    const byId = (id: string) => vm.fields.find((f) => f.id === id)!;
+    expect(byId('languages').value).toBe('English, Dutch');
+    expect(byId('establishment').value).toBe('Established');
+    expect(byId('dreamClient').value).toBe('Couples getting married');
+    expect(byId('contactMethod').value).toBe('WhatsApp');
+    for (const id of ['languages', 'establishment', 'dreamClient', 'contactMethod']) {
+      expect(byId(id).skeleton).toBe(false);
+    }
   });
 
   it('issues chip ids g0..gN from the group positions in the projected bag', () => {
@@ -114,7 +155,7 @@ describe('work rail adapter — toVM', () => {
   it('an empty / undefined bag projects an all-skeleton VM (never a throw)', () => {
     for (const facts of [undefined, {}, { work: 'garbage' } as unknown as Record<string, unknown>]) {
       const vm = rail.toVM(facts);
-      expect(vm.fields).toHaveLength(4);
+      expect(vm.fields).toHaveLength(8);
       expect(vm.fields.every((f) => f.skeleton)).toBe(true);
       expect(vm.fields.find((f) => f.id === 'groups')!.chips).toEqual([]);
     }
@@ -273,15 +314,23 @@ describe('work rail adapter — text edits', () => {
 });
 
 // ============================================================================
-// P4 — STEP 03 questions (ask-if + commit validity) and STEP 04 plan.
+// E3 — STEP 03 questions (deterministic gating) and STEP 04 plan.
 //
-// The load-bearing property: EVERY question commit routes through the rail
-// adapter, so an answer can never persist a `kind`-less group (landmine 6 —
-// `getWorkFacts` nulls ⇒ the work strategy 400s, and confirm/saveDraft has
-// ALREADY persisted the bad bag, so a retry never recovers).
+// The step is now driven by `buildQuestionPlan` (phase 1) + profession wording,
+// mapped to `JourneyQuestion` descriptors. The load-bearing properties:
+//   • the seam asks ONLY the gaps the Kundius fixture leaves (≤5, never name /
+//     groups — "never ask twice");
+//   • EVERY commit still routes through `applyRailEdit` / the rail adapter, so no
+//     answer persists a `kind`-less group (landmine 6) or drops a sibling
+//     (`facts.entry`) / a group's `photos`/`items` (E2 reconciliation);
+//   • richer facts ⇒ FEWER questions (AC 3).
 // ============================================================================
 
 const steps = workJourneySeam.steps;
+
+/** Deep-cloned fixture facts (so a commit can never mutate the shared fixture). */
+const fixtureFacts = (): Record<string, unknown> =>
+  JSON.parse(JSON.stringify(WORK_BRIEF_FIXTURE.facts)) as Record<string, unknown>;
 
 /** A bag with an identity but NO groups — the state the group question exists for. */
 function noGroupsFacts(): Record<string, unknown> {
@@ -296,102 +345,203 @@ function noNameFacts(): Record<string, unknown> {
   return { work: { groups: [{ name: 'Weddings', kind: 'category', price: { mode: 'on-request' } }] } };
 }
 
-const questionsFor = (facts: Record<string, unknown> | undefined) =>
-  steps.questions(rail.toVM(facts));
+/** Run the seam's questions() with a ctx (default: photographer, nothing answered). */
+function questionsFor(
+  facts: Record<string, unknown> | undefined,
+  over: { businessType?: string | null; sessionAnswered?: readonly string[] } = {}
+): JourneyQuestion[] {
+  return steps.questions(rail.toVM(facts), {
+    businessType: over.businessType ?? 'photographer',
+    facts,
+    sessionAnswered: over.sessionAnswered ?? [],
+  });
+}
 
-describe('work seam — STEP 03 ask-if logic', () => {
-  it('asks nothing it already knows: a seeded bag (name + groups) asks only the optional price', () => {
-    const qs = questionsFor(e2Facts());
-    expect(qs.map((q) => q.id)).toEqual(['price']);
-    expect(qs[0]!.kind).toBe('price');
+const choiceQuestion = (
+  facts: Record<string, unknown> | undefined,
+  id: string,
+  over?: { businessType?: string | null }
+): Extract<JourneyQuestion, { kind: 'choice' }> => {
+  const q = questionsFor(facts, over).find((x) => x.id === id)!;
+  if (q.kind !== 'choice') throw new Error(`expected a choice question for ${id}`);
+  return q;
+};
+
+describe('work seam — STEP 03 gating (Kundius fixture)', () => {
+  it('yields EXACTLY the 5 expected questions in display order', () => {
+    expect(questionsFor(fixtureFacts()).map((q) => q.id)).toEqual([
+      'price',
+      'establishment',
+      'dreamClient',
+      'contactMethod',
+      'languages',
+    ]);
   });
 
-  it('asks NAME only when the rail has none', () => {
-    expect(questionsFor(e2Facts()).some((q) => q.id === 'name')).toBe(false);
-    expect(questionsFor(noNameFacts()).some((q) => q.id === 'name' && q.kind === 'text')).toBe(true);
+  it('never asks what the seed already knows (name / groups / praise)', () => {
+    const ids = questionsFor(fixtureFacts()).map((q) => q.id);
+    expect(ids).not.toContain('name');
+    expect(ids).not.toContain('groups');
+    // testimonials empty ⇒ praise is SILENT, never an open ask (D-F).
+    expect(ids).not.toContain('praise');
   });
 
-  it('asks WHAT YOU SELL only when the seed produced no groups — never alongside chips', () => {
-    expect(questionsFor(noGroupsFacts()).map((q) => q.id)).toEqual(['groups']);
-    // This ask-if is load-bearing beyond tidiness: the rail's chips editor is
-    // the only OTHER group writer, so keeping the question off while chips
-    // exist is what makes the chip stable-id rule's stale-VM hole unreachable.
-    expect(questionsFor(e2Facts()).some((q) => q.id === 'groups')).toBe(false);
-  });
-
-  it('an empty bag asks name AND what-you-sell — but not price (nothing to price yet)', () => {
-    expect(questionsFor(undefined).map((q) => q.id)).toEqual(['name', 'groups']);
+  it('maps each slot to the expected kind + gates only price and languages', () => {
+    const qs = questionsFor(fixtureFacts());
+    const byId = Object.fromEntries(qs.map((q) => [q.id, q]));
+    expect(byId['price']!.kind).toBe('price');
+    expect(byId['establishment']!.kind).toBe('choice');
+    expect(byId['dreamClient']!.kind).toBe('choice');
+    expect(byId['contactMethod']!.kind).toBe('choice');
+    expect(byId['languages']!.kind).toBe('choice');
+    // Required gate (D-D): only price + languages block Continue.
+    expect(qs.filter((q) => q.required).map((q) => q.id)).toEqual(['price', 'languages']);
   });
 });
 
-describe('work seam — STEP 03 commits (all routed through the rail adapter)', () => {
-  const groupQuestion = () => {
-    const q = questionsFor(noGroupsFacts()).find((x) => x.id === 'groups')!;
-    if (q.kind !== 'group') throw new Error('expected a group question');
-    return q;
-  };
-  const priceQuestion = () => {
-    const q = questionsFor(e2Facts()).find((x) => x.id === 'price')!;
-    if (q.kind !== 'price') throw new Error('expected a price question');
-    return q;
-  };
+describe('work seam — STEP 03 profession wording', () => {
+  it('a photographer sees "galleries" groups wording + photography dream-client chips', () => {
+    // groups only appears when the seed produced none — drop them to surface it.
+    const noGroups = { entry: fixtureFacts().entry, work: { identity: { name: 'Kundius' } } };
+    const groupsQ = questionsFor(noGroups).find((q) => q.id === 'groups')!;
+    expect(groupsQ.label).toContain('galleries'); // professionWording.photographer.workGroup
 
-  it('the GROUP answer emits a kind-valid, on-request group and keeps siblings', () => {
-    const result = expectOk(groupQuestion().commit('Newborn sessions', noGroupsFacts()));
-    expect(groupsOf(result)).toEqual([
-      { name: 'Newborn sessions', kind: 'category', price: { mode: 'on-request' } },
-    ]);
-    expect(result.facts['entry']).toBeTruthy();
+    const dreamQ = choiceQuestion(fixtureFacts(), 'dreamClient');
+    const optionValues = dreamQ.options.map((o) => o.value);
+    // dreamClientChips.photographer members present (the profession-adaptive layer).
+    expect(optionValues).toContain('Weddings');
+    expect(optionValues).toContain('Newborn & family');
+    // Confirm posture: the entry audiences are the suggested (prominent) options.
+    expect(dreamQ.suggested).toEqual(['Couples getting married']);
+    expect(optionValues).toContain('Couples getting married');
   });
 
-  it('the GROUP answer APPENDS through the chip join — never a destructive write', () => {
-    // Defensive: the question does not fire with groups present, but if a future
-    // ask-if let it, it must still not delete or wipe a live group.
-    const result = expectOk(groupQuestion().commit('Newborn', e2Facts()));
+  it('wording follows businessType (designer ⇒ "projects")', () => {
+    const noGroups = { work: { identity: { name: 'X' } } };
+    const q = questionsFor(noGroups, { businessType: 'designer' }).find((x) => x.id === 'groups')!;
+    expect(q.label).toContain('projects'); // professionWording.designer.workGroup
+  });
+});
+
+describe('work seam — STEP 03 commits (all routed through applyRailEdit)', () => {
+  it('establishment commit writes the fact AND preserves entry + groups photos/items', () => {
+    // e2Facts groups carry unprojected photos/items + a sibling entry — the exact
+    // E2 reconciliation landmine (landmine 4 + the photos/items wipe).
+    const facts = e2Facts();
+    const result = expectOk(choiceQuestion(facts, 'establishment').commit(['new'], facts));
+    const work = getWorkFacts(result.facts)!;
+    expect(work.establishment).toBe('new');
+    expect((result.facts['entry'] as { businessName?: string }).businessName).toBe('Kundius Studio');
+    expect(work.groups![0]!.photos).toEqual([{ id: 'ph_w1', url: 'https://cdn.example.com/w1.jpg' }]);
+    expect(work.groups![1]!.items).toBeTruthy();
+
+    // 'established' round-trips too.
+    const est = expectOk(choiceQuestion(facts, 'establishment').commit(['established'], facts));
+    expect(getWorkFacts(est.facts)!.establishment).toBe('established');
+  });
+
+  it('dreamClient commit joins selections into the single-string field', () => {
+    const facts = fixtureFacts();
+    const single = expectOk(
+      choiceQuestion(facts, 'dreamClient').commit(['Couples getting married'], facts)
+    );
+    expect(getWorkFacts(single.facts)!.dreamClient).toBe('Couples getting married');
+
+    const multi = expectOk(
+      choiceQuestion(facts, 'dreamClient').commit(['Weddings', 'Newborn & family'], facts)
+    );
+    expect(getWorkFacts(multi.facts)!.dreamClient).toBe('Weddings, Newborn & family');
+  });
+
+  it('languages is a required multi with BOTH English + Dutch tappable, English suggested', () => {
+    const q = choiceQuestion(fixtureFacts(), 'languages');
+    expect(q.options.map((o) => o.value)).toEqual(['English', 'Dutch']);
+    expect(q.multi).toBe(true);
+    expect(q.allowCustom).toBe(true);
+    expect(q.suggested).toEqual(['English']);
+    expect(q.required).toBe(true);
+
+    const facts = fixtureFacts();
+    const result = expectOk(choiceQuestion(facts, 'languages').commit(['English', 'Dutch'], facts));
+    expect(getWorkFacts(result.facts)!.languages).toEqual(['English', 'Dutch']);
+  });
+
+  it('contactMethod commit writes the enum; in-person delivery ⇒ whatsapp default', () => {
+    const facts = fixtureFacts();
+    const q = choiceQuestion(facts, 'contactMethod');
+    expect(q.suggested).toEqual(['whatsapp']); // deliveryModel 'in-person'
+    const result = expectOk(q.commit(['whatsapp'], facts));
+    expect(getWorkFacts(result.facts)!.contactMethod).toBe('whatsapp');
+  });
+
+  it('price stays ONE blanket practice-level commit (D-G), kind-valid across groups', () => {
+    const facts = fixtureFacts();
+    const q = questionsFor(facts).find((x) => x.id === 'price')!;
+    if (q.kind !== 'price') throw new Error('expected a price question');
+    expect(q.required).toBe(true);
+    const result = expectOk(q.commit({ mode: 'from', amount: 900 }, facts));
+    const groups = getWorkFacts(result.facts)!.groups!;
+    expect(groups.map((g) => g.price.mode)).toEqual(['from', 'from']);
+    for (const g of groups) expect(g.kind).toBe('category');
+  });
+
+  it('price still REFUSES exact/from without a valid amount (never silent on-request)', () => {
+    const facts = fixtureFacts();
+    const q = questionsFor(facts).find((x) => x.id === 'price')!;
+    if (q.kind !== 'price') throw new Error('expected a price question');
+    expect(q.commit({ mode: 'exact' }, facts).ok).toBe(false);
+    expect(q.commit({ mode: 'from', amount: Number.NaN }, facts).ok).toBe(false);
+  });
+
+  it('the GROUP answer appends through the chip join — never destructive', () => {
+    const groupQ = questionsFor(noGroupsFacts()).find((x) => x.id === 'groups')!;
+    if (groupQ.kind !== 'group') throw new Error('expected a group question');
+    // Fire against a live bag WITH groups (defensive): must append, not wipe.
+    const result = expectOk(groupQ.commit('Newborn', e2Facts()));
     const groups = groupsOf(result);
     expect(groups.map((g) => g.name)).toEqual(['Weddings', 'Portraits', 'Newborn']);
     expect(groups[0]!.photos).toEqual([{ id: 'ph_w1', url: 'https://cdn.example.com/w1.jpg' }]);
-    expect(groups[1]!.items).toBeTruthy();
-  });
-
-  it('a blank GROUP answer is refused, never sent', () => {
-    expect(groupQuestion().commit('   ', noGroupsFacts()).ok).toBe(false);
-  });
-
-  it('the PRICE answer writes onto every group, carries photos/items, stays kind-valid', () => {
-    const result = expectOk(priceQuestion().commit({ mode: 'from', amount: 900 }, e2Facts()));
-    const groups = groupsOf(result);
-    expect(groups.map((g) => g.price)).toEqual([
-      { mode: 'from', amount: 900, currency: 'EUR' }, // the live currency carried
-      { mode: 'from', amount: 900 },
-    ]);
-    for (const g of groups) expect(g.kind).toBe('category');
-    expect(groups[0]!.photos).toBeTruthy();
-    expect(groups[1]!.items).toBeTruthy();
-  });
-
-  it('the PRICE default (on-request) is always valid', () => {
-    const result = expectOk(priceQuestion().commit({ mode: 'on-request' }, e2Facts()));
-    for (const g of groupsOf(result)) expect(g.price).toEqual({ mode: 'on-request' });
-  });
-
-  it('exact/from WITHOUT a valid amount is REFUSED, not silently degraded to on-request', () => {
-    const q = priceQuestion();
-    expect(q.commit({ mode: 'exact' }, e2Facts()).ok).toBe(false);
-    expect(q.commit({ mode: 'from', amount: Number.NaN }, e2Facts()).ok).toBe(false);
-    expect(q.commit({ mode: 'from', amount: -5 }, e2Facts()).ok).toBe(false);
-  });
-
-  it('a price answer with nothing to price is refused', () => {
-    expect(priceQuestion().commit({ mode: 'on-request' }, noGroupsFacts()).ok).toBe(false);
   });
 
   it('the NAME answer emits the store field mirror', () => {
-    const q = questionsFor(noNameFacts()).find((x) => x.id === 'name')!;
+    const facts = noNameFacts();
+    const q = questionsFor(facts).find((x) => x.id === 'name')!;
     if (q.kind !== 'text') throw new Error('expected a text question');
-    const result = expectOk(q.commit('Kundius Studio', noNameFacts()));
+    const result = expectOk(q.commit('Kundius Studio', facts));
     expect(result.fieldMirrors).toEqual([{ fieldId: 'name', value: 'Kundius Studio' }]);
     expect(getWorkFacts(result.facts)?.identity?.name).toBe('Kundius Studio');
+  });
+});
+
+describe('work seam — STEP 03 ceiling + fewer-for-more-signal', () => {
+  it('empty facts caps at 5 questions by priority rank (D-F)', () => {
+    const qs = questionsFor(undefined);
+    expect(qs.length).toBe(5);
+    // The degenerate no-seed survivors: name, groups + the required pair rank in.
+    const ids = qs.map((q) => q.id);
+    expect(ids).toContain('name');
+    expect(ids).toContain('groups');
+    expect(ids).toContain('price');
+    expect(ids).toContain('languages');
+    // establishment / dreamClient are the ceiling casualties.
+    expect(ids).not.toContain('establishment');
+    expect(ids).not.toContain('dreamClient');
+  });
+
+  it('rich facts yield ZERO questions — fewer questions for more signal (AC 3)', () => {
+    const rich = {
+      entry: fixtureFacts().entry,
+      work: {
+        identity: { name: 'Kundius' },
+        groups: [{ name: 'Weddings', kind: 'category', price: { mode: 'from', amount: 2400 } }],
+        establishment: 'established',
+        dreamClient: 'Couples getting married',
+        contactMethod: 'whatsapp',
+        languages: ['English', 'Dutch'],
+      },
+    } as unknown as Record<string, unknown>;
+    // Everything known + a non-default price ⇒ nothing left to ask (D-C).
+    expect(questionsFor(rich)).toHaveLength(0);
   });
 });
 

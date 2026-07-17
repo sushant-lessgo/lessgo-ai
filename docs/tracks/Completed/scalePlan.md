@@ -42,6 +42,7 @@ One entry per kind of business (SaaS, hardware maker, cloth manufacturer, photog
 Customer #5 is a new kind of business → add entry #5. No funnel code.
 
 ### List 2: Copy engines (code, deliberately few — ~4–5 ever)
+> **Live definition promoted to `docs/architecture/copyEngines.md`** (evergreen). Statuses below are a 2026-07-07 snapshot — work engine is now BUILT; see the evergreen doc for current state.
 The only real code forks. **A copy engine = the argument machine: Brief in → (1) strategy questions the AI answers (awareness, oneReader/oneIdea), (2) section grammar (argument order + which objections), (3) element contract (what each section owes the argument), (4) voice rules → copy fan-out fills the words.** Concretely it IS today's `src/modules/audience/<x>/` folder (strategy prompts + sectionSelection + elementSchema + voice), renamed and keyed off the Brief instead of templateId. Division of labor: goal = what the visitor should DO · engine = what they must BELIEVE first, in what order · copy call = in which words · template = in what clothes. Engine never decides template/blocks/look (firewall) nor CTA mechanics (§5/§6) — it receives the goal as a fact and aims the argument at it.
 
 New engine ONLY when the visitor's decision question changes (Kinshu vs Golden Shadow: both "does this thing solve my problem" → same engine, different facts/voice = list data. Kinshu vs writer-Dinesh: "do I like his work" → sections change CATEGORY, not values → different engine). Split by how the visitor decides, because that changes what the page must say:

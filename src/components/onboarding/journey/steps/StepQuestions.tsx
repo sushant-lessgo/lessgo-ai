@@ -3,8 +3,10 @@
 // ============================================================================
 // STEP 03 — questions. AGNOSTIC FRAME.
 //
-// Renders `seam.steps.questions(vm)` through a renderer for the THREE CLOSED
-// question kinds (text / group / price — closed for E1 by ruling). The frame
+// Renders `seam.steps.questions(vm, ctx)` through a renderer for the FOUR CLOSED
+// question kinds (text / group / price / choice). `choice` is the E3 extension
+// (work-onboarding-questions, D-A): chips / one-tap confirm / multi-select /
+// free-text escape — everything the E1 `text` kind cannot express. The frame
 // never authors a question, never names a field, and never builds a payload:
 // every answer calls the QUESTION's own `commit(answer, liveFacts)`, which the
 // seam routes through its rail adapter. That is what guarantees an answer can
@@ -19,19 +21,37 @@
 // `liveFacts` is ALWAYS the store's current `briefFacts` — never a captured
 // copy (chip stable-id rule: ids are valid only against the bag that issued
 // them).
+//
+// ── CONTEXT (D-B) ────────────────────────────────────────────────────────────
+// `questions(vm, ctx)` also receives `ctx` — upstream signals the VM can't
+// carry: the profession wording key (`businessType`, off the store), the facts
+// bag (confirm suggestions read `facts.entry`) and this session's answered ids
+// (D-C price answered-detection). ctx is READ-ONLY input; commits still route
+// only through the rail adapter.
+//
+// ── REQUIRED GATE (D-D) ──────────────────────────────────────────────────────
+// The step reports `blocked = questions.some(q => q.required && !q.answered)`
+// up to the shell (mirrors `onBuildingChange`); the shell disables Continue on
+// STEP 03 while blocked. The gate lives in the agnostic Continue, not here.
 // ============================================================================
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   useWizardStore,
   selectBriefFacts,
+  selectBusinessTypeKey,
   selectCommitRail,
 } from '@/hooks/useWizardStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { useToast } from '@/components/ui/toast';
-import type { JourneyQuestion, RailCommit } from '../engines/types';
+import { cn } from '@/lib/utils';
+import type {
+  JourneyQuestion,
+  JourneyQuestionsContext,
+  RailCommit,
+} from '../engines/types';
 import type { JourneyStepProps } from '../JourneyShell';
 
 type PriceMode = 'exact' | 'from' | 'on-request';
@@ -42,19 +62,37 @@ const PRICE_MODES: { value: PriceMode; label: string }[] = [
   { value: 'exact', label: 'Exact' },
 ];
 
-export default function StepQuestions({ seam }: JourneyStepProps) {
+export default function StepQuestions({ seam, onBlockedChange }: JourneyStepProps) {
   const briefFacts = useWizardStore(selectBriefFacts);
+  const businessTypeKey = useWizardStore(selectBusinessTypeKey);
   const commitRail = useWizardStore(selectCommitRail);
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
+  // Question ids answered THIS session (D-C). Feeds ctx so the gating layer can
+  // tell a genuine "on request" answer from the seed default after an answer.
+  const [answeredIds, setAnsweredIds] = useState<readonly string[]>([]);
+  // Which answered-compact rows the user re-opened to correct (D-E).
+  const [expandedIds, setExpandedIds] = useState<readonly string[]>([]);
 
   const facts = briefFacts ?? undefined;
-  // Re-projected on every commit, so an answered question disappears and the
-  // next one (if any) appears — the rail filling up IS the journey's promise.
-  const questions = seam.steps.questions(seam.rail.toVM(facts));
+  const ctx: JourneyQuestionsContext = {
+    businessType: businessTypeKey ?? null,
+    facts,
+    sessionAnswered: answeredIds,
+  };
+  // Re-projected on every commit, so an answered question either disappears
+  // (known upstream) or collapses to its answered-compact state (D-E) — the
+  // rail filling up IS the journey's promise.
+  const questions = seam.steps.questions(seam.rail.toVM(facts), ctx);
+
+  // Required gate (D-D). Report up to the shell whenever the derived block flips.
+  const blocked = questions.some((q) => q.required && !q.answered);
+  useEffect(() => {
+    onBlockedChange?.(blocked);
+  }, [blocked, onBlockedChange]);
 
   /** The ONE write path (identical failure semantics to the rail's). */
-  const submit = async (result: RailCommit): Promise<boolean> => {
+  const submit = async (result: RailCommit, questionId: string): Promise<boolean> => {
     if (!result.ok) {
       // Seam zod pre-validation failed ⇒ nothing was sent (landmine 5).
       toast(result.error, { variant: 'error' });
@@ -68,6 +106,9 @@ export default function StepQuestions({ seam }: JourneyStepProps) {
       toast('Couldn’t save — reverted, try again', { variant: 'error' });
       return false;
     }
+    setAnsweredIds((ids) => (ids.includes(questionId) ? ids : [...ids, questionId]));
+    // Collapse the row back to compact after a successful correction.
+    setExpandedIds((ids) => ids.filter((id) => id !== questionId));
     return true;
   };
 
@@ -97,7 +138,13 @@ export default function StepQuestions({ seam }: JourneyStepProps) {
           key={question.id}
           question={question}
           saving={saving}
-          onCommit={(result) => submit(result)}
+          expanded={expandedIds.includes(question.id)}
+          onExpand={() =>
+            setExpandedIds((ids) =>
+              ids.includes(question.id) ? ids : [...ids, question.id]
+            )
+          }
+          onCommit={(result) => submit(result, question.id)}
           liveFacts={facts}
         />
       ))}
@@ -106,20 +153,29 @@ export default function StepQuestions({ seam }: JourneyStepProps) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// The renderer for the 3 CLOSED kinds
+// The renderer for the FOUR CLOSED kinds (+ answered-compact per D-E)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function QuestionCard({
   question,
   saving,
+  expanded,
   liveFacts,
+  onExpand,
   onCommit,
 }: {
   question: JourneyQuestion;
   saving: boolean;
+  expanded: boolean;
   liveFacts: Record<string, unknown> | undefined;
+  onExpand: () => void;
   onCommit: (result: RailCommit) => Promise<boolean>;
 }) {
+  // Answered-compact (D-E): an asked+answered slot stays VISIBLE but collapses
+  // to "value — Change" instead of vanishing (correctable, and required slots
+  // stay reachable). It re-opens on tap.
+  const compact = question.answered && !expanded;
+
   return (
     <div
       data-testid={`question-${question.id}`}
@@ -127,32 +183,86 @@ function QuestionCard({
     >
       <div className="font-app-sans text-sm font-semibold text-app-ink">{question.label}</div>
 
-      {question.kind === 'text' && (
-        <TextAnswer
-          id={question.id}
-          prefill={question.prefill ?? ''}
-          saving={saving}
-          onSubmit={(value) => onCommit(question.commit(value, liveFacts))}
-        />
-      )}
+      {compact ? (
+        <AnsweredCompact id={question.id} summary={answeredSummary(question)} onChange={onExpand} />
+      ) : (
+        <>
+          {question.kind === 'text' && (
+            <TextAnswer
+              id={question.id}
+              prefill={question.prefill ?? ''}
+              saving={saving}
+              onSubmit={(value) => onCommit(question.commit(value, liveFacts))}
+            />
+          )}
 
-      {question.kind === 'group' && (
-        <TextAnswer
-          id={question.id}
-          prefill=""
-          saving={saving}
-          clearOnSuccess
-          onSubmit={(value) => onCommit(question.commit(value, liveFacts))}
-        />
-      )}
+          {question.kind === 'group' && (
+            <TextAnswer
+              id={question.id}
+              prefill=""
+              saving={saving}
+              clearOnSuccess
+              onSubmit={(value) => onCommit(question.commit(value, liveFacts))}
+            />
+          )}
 
-      {question.kind === 'price' && (
-        <PriceAnswer
-          id={question.id}
-          saving={saving}
-          onSubmit={(price) => onCommit(question.commit(price, liveFacts))}
-        />
+          {question.kind === 'price' && (
+            <PriceAnswer
+              id={question.id}
+              saving={saving}
+              onSubmit={(price) => onCommit(question.commit(price, liveFacts))}
+            />
+          )}
+
+          {question.kind === 'choice' && (
+            <ChoiceAnswer
+              id={question.id}
+              options={question.options}
+              multi={question.multi ?? false}
+              allowCustom={question.allowCustom ?? false}
+              suggested={question.suggested ?? []}
+              saving={saving}
+              onSubmit={(values) => onCommit(question.commit(values, liveFacts))}
+            />
+          )}
+        </>
       )}
+    </div>
+  );
+}
+
+/** Best-effort answered value for the compact summary. The descriptor carries
+ *  no explicit answer field, so we derive from what each kind exposes; falls
+ *  back to nothing (the label above already names the slot). */
+function answeredSummary(question: JourneyQuestion): string {
+  if (question.kind === 'text') return question.prefill ?? '';
+  if (question.kind === 'choice') return (question.suggested ?? []).join(', ');
+  return '';
+}
+
+function AnsweredCompact({
+  id,
+  summary,
+  onChange,
+}: {
+  id: string;
+  summary: string;
+  onChange: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="font-app-sans text-sm text-app-muted truncate">
+        {summary || 'Answered'}
+      </span>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        data-testid={`question-change-${id}`}
+        onClick={onChange}
+      >
+        Change
+      </Button>
     </div>
   );
 }
@@ -261,6 +371,137 @@ function PriceAnswer({
       >
         Save
       </Button>
+    </div>
+  );
+}
+
+/**
+ * `choice` (E3, D-A). Three postures over ONE kind:
+ *   • single-select      → tapping a chip COMMITS immediately (one tap = answer).
+ *   • single + suggested  → the suggested chip(s) render PROMINENT (one-tap
+ *                           confirm); the rest are quieter chips. Still commits
+ *                           on tap.
+ *   • multi               → every option is a TOGGLE chip (suggested prominent);
+ *                           a Save button commits the selected array.
+ *   • allowCustom         → a small input + add for a free-text escape (single:
+ *                           adding commits the custom value; multi: adds it to
+ *                           the selection).
+ * `suggested` options are ALWAYS rendered within the full option list, just more
+ * prominent — never the only tappable options (orchestrator ruling: multi must
+ * render ALL options, e.g. Dutch + English).
+ */
+function ChoiceAnswer({
+  id,
+  options,
+  multi,
+  allowCustom,
+  suggested,
+  saving,
+  onSubmit,
+}: {
+  id: string;
+  options: { value: string; label: string }[];
+  multi: boolean;
+  allowCustom: boolean;
+  suggested: string[];
+  saving: boolean;
+  onSubmit: (values: string[]) => Promise<boolean>;
+}) {
+  const [selected, setSelected] = useState<readonly string[]>([]);
+  const [custom, setCustom] = useState('');
+  // Custom values added this session (rendered as extra chips so they toggle
+  // like any option once present).
+  const [extras, setExtras] = useState<{ value: string; label: string }[]>([]);
+
+  const isSuggested = (value: string) => suggested.includes(value);
+  const allOptions = [...options, ...extras];
+
+  const toggle = (value: string) =>
+    setSelected((cur) =>
+      cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value]
+    );
+
+  const addCustom = () => {
+    const v = custom.trim();
+    if (!v || saving) return;
+    if (multi) {
+      if (!allOptions.some((o) => o.value === v)) setExtras((e) => [...e, { value: v, label: v }]);
+      setSelected((cur) => (cur.includes(v) ? cur : [...cur, v]));
+      setCustom('');
+    } else {
+      // Single-select custom: adding IS the answer.
+      void onSubmit([v]);
+      setCustom('');
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        {allOptions.map((opt) => {
+          const active = selected.includes(opt.value);
+          const prominent = isSuggested(opt.value);
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              disabled={saving}
+              data-testid={`question-chip-${id}-${opt.value}`}
+              aria-pressed={multi ? active : undefined}
+              onClick={() => (multi ? toggle(opt.value) : void onSubmit([opt.value]))}
+              className={cn(
+                'font-app-sans inline-flex items-center rounded-app-pill border px-3 py-1.5 text-[13px]',
+                'transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed',
+                prominent
+                  ? 'border-app-primary bg-app-tint font-semibold text-app-ink'
+                  : 'border-app-hairline bg-app-surface text-app-muted hover:text-app-ink',
+                multi && active && 'ring-2 ring-app-primary ring-offset-1'
+              )}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {allowCustom && (
+        <div className="flex items-center gap-2">
+          <Input
+            value={custom}
+            disabled={saving}
+            data-testid={`question-input-${id}`}
+            aria-label={`Add your own for ${id}`}
+            placeholder="Something else…"
+            onChange={(e) => setCustom(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') addCustom();
+            }}
+            className="h-9 text-[13px]"
+          />
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            disabled={saving || !custom.trim()}
+            data-testid={`question-add-${id}`}
+            onClick={addCustom}
+          >
+            Add
+          </Button>
+        </div>
+      )}
+
+      {multi && (
+        <Button
+          type="button"
+          size="sm"
+          disabled={saving || selected.length === 0}
+          data-testid={`question-save-${id}`}
+          onClick={() => void onSubmit([...selected])}
+        >
+          Save
+        </Button>
+      )}
     </div>
   );
 }
