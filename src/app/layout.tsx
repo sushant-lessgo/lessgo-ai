@@ -28,7 +28,6 @@ import {
   SignUpButton,
   SignedIn,
   SignedOut,
-  UserButton,
 } from '@clerk/nextjs'
 
 import { TooltipProvider } from "@/components/ui/tooltip"
