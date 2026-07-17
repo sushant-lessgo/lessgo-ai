@@ -15,7 +15,7 @@ The three regeneration endpoints — the buttons users click **most** while edit
 - **M16 (regen slice only)** — `callAIProvider` triplicated across the 3 regen routes; model strings have already drifted.
 
 ## Goal
-Rebuild all three regeneration routes on the modern generation stack (`generateRawJson` + Zod-validated structured output, current model, typed fallback), each properly gated (auth + ownership + pre-spend credit check + charge-on-success). Harden the shared `aiClient.ts` parse + infra-error matcher they depend on. Once all three are migrated, delete the orphaned legacy `buildPrompt.ts` + `parseAiResponse.ts` (~4,200 lines) — the biggest single-code-deletion win in the repo. Regen copy quality should match or beat first-generation quality.
+Rebuild all three regeneration routes on the modern generation stack (`generateRawJson` + Zod-validated structured output, current model, typed fallback), each properly gated (auth + ownership + pre-spend credit check + charge-on-success). Harden the shared `aiClient.ts` parse + infra-error matcher they depend on. Once all three are migrated, delete the orphaned legacy `buildPrompt.ts` + `parseAiResponse.ts` (~4,200 lines) — the biggest single-code-deletion win in the repo. Regen copy quality should match or beat ~~first-generation quality~~ **today's legacy regen quality** (amended 2026-07-17 at the pilot gate — first-gen parity is unreachable while no strategy is persisted; see Acceptance criteria).
 
 ## Scope OUT (non-goals)
 - **Deleting the regen endpoints** — all three are live editor paths; they get rebuilt, not removed.
@@ -60,7 +60,7 @@ Rebuild all three regeneration routes on the modern generation stack (`generateR
 - [ ] `aiClient.ts` parse is guarded (no unguarded `JSON.parse`, no greedy match surfacing untyped throws); malformed output yields the typed fallback, not a billed infra error. `isInfrastructureError` no longer matches on `'500'`/`'length'` substrings.
 - [ ] Filler-copy failure mode ("Transform Your Business Today" on partial parse) is gone.
 - [ ] `buildPrompt.ts` + `parseAiResponse.ts` deleted; `callAIProvider` no longer triplicated across regen routes.
-- [ ] Real-LLM `/manual-test`: regen quality ≥ first-generation quality across content/section/element on a real page.
+- [x] ~~Real-LLM `/manual-test`: regen quality ≥ first-generation quality across content/section/element on a real page.~~ **AMENDED 2026-07-17 (founder ruling at the pilot gate) → "regen quality ≥ TODAY'S LEGACY REGEN quality."** Reason: **first-gen parity is unreachable by construction** — no strategy is persisted anywhere (`prisma/schema.prisma:20-48` = content/brief/aiBaseline only; `saveDraft/route.ts:155-179` writes no strategy blob), so the strategic half of the section/content prompt (`product/copyPrompt.ts:377-400` ONE READER / ONE IDEA; service's `ourPosition{promise,approach,credibility}`) renders as empty strings on regen. Founder chose **thin everywhere + amend the criterion** over re-running the strategy phase (+1 AI call/regen) or persisting strategy at first-gen (would fix new projects only, not Kundius/Naayom). **Accepted risk: section/content regen copy may read blander than first-gen.** Element pilot PASSED 2026-07-17 (element's status quo had no strategy either, so it is strictly ≥ today).
 - [ ] `tsc` + `test:run` green.
 
 ## Pilot / smallest slice
