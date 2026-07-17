@@ -12,9 +12,9 @@ E4 builds STEP 04 of the work journey: a visual site-plan screen showing the pro
 
 ## Progress log
 
-- phase 1 goal contract + structure carry: pending
-- phase 2 seam widening + rich read-only PlanStep: pending
-- phase 3 tap-powers through the one write door: pending
+- phase 1 goal contract + structure carry: done (commit 95c550f8, standard — no per-phase review; test:run 4068 pass)
+- phase 2 seam widening + rich read-only PlanStep: done (commit b75fdc6d, standard; test:run 4069 pass)
+- phase 3 tap-powers through the one write door: done (commit pending-below, standard; test:run 4091 pass)
 - phase 4 approve→structure→fire + e2e invariant + whole-feature green: pending
 
 ## Key design decisions (made here, flagged at end)

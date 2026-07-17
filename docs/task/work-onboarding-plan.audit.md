@@ -155,3 +155,119 @@ title + section rows + goal badge cleanly. `defaultGoalForPage` falls back to `'
 - Photo→page mapping is heuristic in read-only mode (all group photos shown on any
   work-bearing page); the true per-page/per-group placement is generation's job and is not
   editable here — acceptable for a preview. No change to generation/credit/reveal paths.
+
+## Phase 3 — Tap-powers through the one write door
+
+### Files changed
+- `src/modules/wizard/work/plan.ts` (NEW)
+- `src/modules/wizard/work/plan.test.ts` (NEW)
+- `src/hooks/useWizardStore.ts`
+- `src/components/onboarding/journey/engines/work/PlanStep.tsx`
+
+### What changed, per file
+
+**`src/modules/wizard/work/plan.ts`** (NEW, pure — types + the `workPages` contract
+only; `WizardRailCommit`/`ConfirmedStructure` are TYPE-ONLY imports so no runtime cycle
+with useWizardStore):
+- `PlanEdit` union (index-targeted for the four in-place edits; page-TYPE-key for add):
+  - `{ type:'addPage'; pageKey; contactMethod? }`
+  - `{ type:'removePage'; index }`
+  - `{ type:'renamePage'; index; title }`
+  - `{ type:'movePage'; index; dir:-1|1 }`
+  - `{ type:'setGoal'; index; goal }`
+- `applyPlanEdit(edit, sitemap): {ok:true; next} | {ok:false; error}` — PURE, never
+  mutates input (spreads a copy), never throws. Rejection rules AS IMPLEMENTED:
+  - **addPage**: `pageKey` must be in `addableWorkPages(currentKeys)` — this single check
+    covers "not designed / parametric `work-group` / `home` / already present" (all four
+    reject). New page appended LAST (so `home` stays first) with `archetypeKey/title/
+    pathSlug/sections` from `workPageTypes[pageKey]` (`sections = [...defaultSections]`)
+    and `goal = defaultGoalForPage(def.key, edit.contactMethod)`.
+  - **removePage**: index in range; `home` (archetypeKey `'home'`) rejected. Removed page
+    is absent from `next` (the generation invariant, unit-tested).
+  - **renamePage**: index in range; `title.trim()` non-empty; `pathSlug` UNCHANGED (slugs
+    code-fixed).
+  - **movePage**: index in range; `home` cannot move; destination `index+dir` in range AND
+    `!== 0` (a move into first would displace `home`) → both reject.
+  - **setGoal**: index in range; `goal ∈ WORK_PAGE_GOAL_KEYS`.
+  - `currentKeys` for the add-menu is derived via a local `ARCHETYPE_TO_PAGE_KEY` reverse
+    map (archetypeKey → page-type key) because `project-story`'s archetypeKey is
+    `'work-detail'`, not its page-type key.
+- `buildPlanCommit(nextSitemap, briefFacts): WizardRailCommit` — composes
+  `{ patch:{ structure }, facts:{...(briefFacts ?? {})}, sitemap: nextSitemap }`.
+  `structure` is built with the SAME sitemap→structure mapping `buildStructurePatch`
+  (useWizardStore.ts L622-645) uses, reproduced field-for-field:
+  `mode:'multi'` · `pages = nextSitemap.map(p=>p.archetypeKey)` · `pageDetails` =
+  `{archetypeKey, slug:p.pathSlug, sections:[...p.sections], title:p.title, ...(p.goal?{goal}:{})}`.
+  Typed `ConfirmedStructure` (`= NonNullable<Brief['structure']>`), so no cast is needed
+  (WorkSitemapPage.goal is `WorkPageGoalKey`, unlike the store's product-typed sitemap).
+  Facts are re-emitted UNCHANGED (structure taps touch no facts).
+
+**`src/hooks/useWizardStore.ts`**
+- `WizardRailCommit` (L316-333) gains optional `sitemap?: unknown[]` with a doc block.
+- `commitRail` `perform` (now ~L1358-1400): snapshot `prevSitemap = get().sitemap` guarded
+  by `hasSitemap = commit.sitemap !== undefined`; the ONE optimistic `set` now also does
+  `if (hasSitemap) state.sitemap = commit.sitemap ?? null`; the wholesale `revert` `set`
+  now also restores `if (hasSitemap) state.sitemap = prevSitemap`. Facts-only rail commits
+  (no `sitemap`) leave `state.sitemap` untouched. The saveDraft serialization chain +
+  `patch` body are unchanged — `patch.structure` flows through it exactly as before.
+
+**`src/components/onboarding/journey/engines/work/PlanStep.tsx`** — wired the taps onto the
+phase-2 read-only columns:
+- `runPlanEdit(edit)`: reads the LIVE sitemap via `useWizardStore.getState().sitemap` (not a
+  stale render closure — `commitRail` is serial) → `applyPlanEdit` → on `{ok:false}` set an
+  inline `plan-error` alert; on `{ok:true}` `commitRail(buildPlanCommit(next, liveFacts))`,
+  surfacing a commit failure as the same inline error (clears on next success). Optimistic
+  UI + revert come free from the store set/revert.
+- Per-column controls: rename (inline input, Enter/blur commit, Esc cancel), move earlier/
+  later (chevrons, disabled for `home` and at the ends), remove (hidden for `home`), and a
+  goal `<select>` (options + labels from `workPageGoalWords`/`WORK_PAGE_GOAL_KEYS`).
+- Add-page `<select>` populated from `addableWorkPages(present)` (present derived via the
+  same archetype→page-key reverse map) + an Add button; passes the seller `contactMethod`
+  so the new page's default goal reflects their choice.
+- **Swap which work leads** (`makeLead`): reorders `facts.work.groups` (chosen group moved
+  first) via the EXISTING `applyRailEdit({field:'groups', value}) → commitRail` door (the
+  ShowWorkStep E2 pattern) — no `leadWork` field invented. Rendered as a "Which work leads?"
+  pill row (first pill = current lead, disabled+starred).
+- NO section-level rearranging UI. The read-only render + the `plan-build`
+  `setJourneyStep(5)` advance are intact (approve→structure→fire is Phase 4).
+
+### Deviations
+- **Edit targeting = index** for remove/rename/move/setGoal (the plan left the addressing
+  open). Index is unambiguous (the UI holds it from the column map) and mirrors the existing
+  collection-edit-by-index convention. Add uses the page-TYPE key (the designed-set menu key).
+- **movePage uses `dir:-1|1`** (up/down, mirroring the existing `moveStructureSection(index,
+  dir)`) rather than an arbitrary target index — matches the chevron UI and keeps the
+  home-stays-first guard trivial.
+- **addPage carries an optional `contactMethod`** on the edit rather than threading facts
+  into `applyPlanEdit` — keeps `applyPlanEdit(edit, sitemap)` pure (no facts arg) while
+  letting the added page inherit the seller's contact method as its default goal. When
+  absent, `defaultGoalForPage` falls back to `'form'` (Phase-1 behavior).
+- **New pages append last.** The plan did not specify insertion position; appending is the
+  conservative choice that trivially preserves `home`-first and never reorders existing pages.
+
+### Verification (verbatim tails)
+`npx tsc --noEmit`:
+```
+src/app/page.tsx(6,26): error TS2307: Cannot find module '@/assets/images/founder.jpg' or its corresponding type declarations.
+```
+The ONE known pre-existing env error (absent `next-env.d.ts` image-module decls) — unrelated
+to E4; no Phase-3 file errors.
+
+`npm run test:run`:
+```
+ Test Files  244 passed | 1 skipped (245)
+      Tests  4091 passed | 18 skipped (4109)
+```
+(was 4069; +22 = the new `plan.test.ts`.) `plan.test.ts` alone: 22 passed. Restored the
+incidental CRLF-touched `uiFoundationIsolation.test.tsx.snap` via `git checkout --` to keep
+the change set scoped (also restored an unrelated pre-existing CRLF diff on the plan.md).
+
+### Open risks
+- Goal/rename/reorder persist through `Brief.structure`; generation still does not CONSUME
+  `goal` (by design — consuming it modifies the copy path → tier escalation). The
+  removed-page ⇒ absent-from-`next` invariant is unit-tested here; the end-to-end
+  no-copy-call assertion is Phase 4's e2e.
+- `makeLead` sends the reordered groups through `applyRailEdit({field:'groups'})` which
+  re-normalizes each group; photos/items are carried (WorkGroupInput preserves them), so a
+  reorder does not drop ingested photos — but this relies on the rail's carry contract
+  (documented in rail.ts).

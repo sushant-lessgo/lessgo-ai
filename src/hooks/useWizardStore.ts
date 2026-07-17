@@ -320,6 +320,16 @@ export interface WizardRailCommit {
   facts: Record<string, unknown>;
   /** Store-level mirrors the SEAM declares (e.g. work NAME → `fields['name']`). */
   fieldMirrors?: { fieldId: string; value: string }[];
+  /**
+   * work-onboarding-plan E4 — an edited sitemap to persist ALONGSIDE the facts
+   * (STEP 04 plan taps). When present, `commitRail` snapshots + optimistically
+   * sets + wholesale-reverts `state.sitemap` together with `briefFacts`, so the
+   * plan screen's optimistic UI + failure-revert cover the sitemap too. The
+   * `patch.structure` (built by `buildPlanCommit`) is what actually persists
+   * through the saveDraft chain; this field keeps the in-memory sitemap — the
+   * list generation reads — in lockstep. Absent for facts-only rail commits.
+   */
+  sitemap?: unknown[];
 }
 
 /** `ok:false` ⇒ the optimistic state was REVERTED; the caller toasts. */
@@ -1354,10 +1364,15 @@ export const useWizardStore = create<WizardStore>()(
           const prevFields = mirrors.map(
             (m) => [m.fieldId, get().fields[m.fieldId]] as const
           );
+          // E4 — the sitemap rides the SAME snapshot/set/revert when a plan tap
+          // supplied one; facts-only commits leave `state.sitemap` untouched.
+          const hasSitemap = commit.sitemap !== undefined;
+          const prevSitemap = hasSitemap ? get().sitemap : null;
 
           // Step 2 — the one optimistic set.
           set((state) => {
             state.briefFacts = commit.facts;
+            if (hasSitemap) state.sitemap = commit.sitemap ?? null;
             for (const m of mirrors) {
               const prev = state.fields[m.fieldId];
               state.fields[m.fieldId] = {
@@ -1372,6 +1387,7 @@ export const useWizardStore = create<WizardStore>()(
           const revert = () =>
             set((state) => {
               state.briefFacts = prevFacts;
+              if (hasSitemap) state.sitemap = prevSitemap;
               for (const [id, entry] of prevFields) {
                 // A field the mirror CREATED must be removed again, not left as
                 // an `undefined`-valued entry.
