@@ -23,6 +23,8 @@ export const CREDIT_COSTS = {
   PRIVACY_POLICY_GENERATION: 2,
   // Cold outreach: prospect scrape (fetch + one extraction call). Charged only on cache-miss/stale.
   OUTREACH_SCRAPE: 1,
+  // Lead reply (dashboard "Draft reply"): one gated AI call, charged only on a successful draft.
+  LEAD_REPLY: 1,
 } as const;
 
 // Event types for usage tracking
@@ -49,6 +51,8 @@ export enum UsageEventType {
   OUTREACH_SCRAPE = 'outreach_scrape',
   // Cold outreach generation (credits-free; this ledger row IS the gating source of truth, sibling precedent)
   OUTREACH_GENERATION = 'outreach_generation',
+  // Lead reply draft (dashboard "Draft reply"; charged 1 credit only on a successful draft)
+  LEAD_REPLY_GENERATION = 'lead_reply_generation',
   // Pricing v2: persistent credit pool grants (DB eventType is a plain String, so
   // these new values need no migration). CREDIT_TOPUP = paid $9/100 top-up;
   // LTD_GRANT = 600-credit lifetime-deal seed.
