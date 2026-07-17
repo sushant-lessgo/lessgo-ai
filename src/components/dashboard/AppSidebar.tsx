@@ -1,12 +1,27 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useClerk } from '@clerk/nextjs'
 import Logo from '@/components/shared/Logo'
 import { AppIcon } from '@/components/ui/icon'
 import { NavItem, navItemClasses } from '@/components/ui/nav-item'
+import { Coming } from '@/components/ui/coming'
+import {
+  Popover,
+  PopoverTrigger,
+  AppPopoverMenu,
+  AppPopoverItem,
+  AppPopoverSeparator,
+} from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import NewSiteButton from './NewSiteButton'
+
+/** Greyed popover row: AppPopoverItem's geometry, worn by <Coming>. Mirrors the
+ *  COMING_ROW const in GlobalAppHeader.tsx (the first menu consumer). */
+const COMING_ROW =
+  'w-full gap-2.5 rounded-app-badge px-2.5 py-[7px] text-[13px] font-medium'
 
 /**
  * AppSidebar — the 244px account-level nav rail of the dashboard shell.
@@ -78,6 +93,10 @@ function SectionHeading({ children, className }: { children: React.ReactNode; cl
 
 export default function AppSidebar({ profile, plan }: AppSidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const { signOut } = useClerk()
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
   // Projects is the dashboard root only — nested screens must not light it up.
   const projectsActive = pathname === '/dashboard'
   const billingActive = pathname?.startsWith('/dashboard/billing') ?? false
@@ -177,33 +196,75 @@ export default function AppSidebar({ profile, plan }: AppSidebarProps) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 px-2 py-1">
-          {profile.avatarUrl ? (
-            // Clerk avatar host isn't in next.config images — plain <img> is correct here.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.avatarUrl}
-              alt=""
-              className="h-[30px] w-[30px] shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <div className="h-[30px] w-[30px] shrink-0 rounded-full bg-app-tint" />
-          )}
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-app-sans text-xs font-semibold text-app-ink">
-              {profile.name}
-            </p>
-            <p className="truncate font-app-sans text-[10px] text-app-faint">{profile.email}</p>
-          </div>
-          {/* R7 — settings page exists → enabled. */}
-          <Link
-            href="/dashboard/settings"
-            aria-label="Settings"
-            className="shrink-0 text-app-faint transition-colors hover:text-app-ink"
-          >
-            <AppIcon name="settings" size={18} />
-          </Link>
-        </div>
+        {/* Account menu — the whole user-card is one trigger; the popover opens
+            UPWARD (side="top"). The old standalone settings-gear folded in here as
+            the `Settings` row. Sole sign-out path in the app (P0). */}
+        <Popover open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              aria-label="Account menu"
+              className="flex w-full items-center gap-2.5 rounded-md px-2 py-1 text-left transition-colors hover:bg-app-hairline"
+            >
+              {profile.avatarUrl ? (
+                // Clerk avatar host isn't in next.config images — plain <img> is correct here.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatarUrl}
+                  alt=""
+                  className="h-[30px] w-[30px] shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <div className="h-[30px] w-[30px] shrink-0 rounded-full bg-app-tint" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-app-sans text-xs font-semibold text-app-ink">
+                  {profile.name}
+                </p>
+                <p className="truncate font-app-sans text-[10px] text-app-faint">{profile.email}</p>
+              </div>
+              <AppIcon name="expand_more" size={18} className="shrink-0 text-app-faint" />
+            </button>
+          </PopoverTrigger>
+          <AppPopoverMenu side="top" align="start" sideOffset={8} width={224}>
+            <AppPopoverItem
+              icon={<AppIcon name="settings" size={18} />}
+              onClick={() => {
+                setAccountMenuOpen(false)
+                router.push('/dashboard/settings')
+              }}
+            >
+              Settings
+            </AppPopoverItem>
+            <AppPopoverItem
+              icon={<AppIcon name="credit_card" size={18} />}
+              onClick={() => {
+                setAccountMenuOpen(false)
+                router.push('/dashboard/billing')
+              }}
+            >
+              Billing
+            </AppPopoverItem>
+            <Coming what="appearance settings" side="right" className={COMING_ROW}>
+              <AppIcon name="palette" size={18} />
+              Appearance
+            </Coming>
+            <AppPopoverSeparator />
+            <AppPopoverItem
+              destructive
+              icon={<AppIcon name="logout" size={18} />}
+              onClick={() => {
+                if (isSigningOut) return
+                setIsSigningOut(true)
+                setAccountMenuOpen(false)
+                // Fire-and-forget — Clerk navigates away to /sign-in.
+                void signOut({ redirectUrl: '/sign-in' })
+              }}
+            >
+              Log out
+            </AppPopoverItem>
+          </AppPopoverMenu>
+        </Popover>
       </div>
     </aside>
   )
