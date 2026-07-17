@@ -567,6 +567,15 @@ describe('work seam — STEP 04 plan', () => {
     ).toEqual([{ title: 'about' }]);
   });
 
+  it('exposes the RICH plan body via the reused loadStep field (E4, D9)', () => {
+    // The founder-signed `loadStep?` is REUSED for STEP 04 (same field STEP 02
+    // uses) — its presence is what makes the agnostic frame render the rich plan
+    // instead of the `items()` stub. `prepare`/`items` stay untouched beside it.
+    expect(typeof steps.plan.loadStep).toBe('function');
+    expect(typeof steps.plan.prepare).toBe('function');
+    expect(typeof steps.plan.items).toBe('function');
+  });
+
   it('prepare() drives the EXISTING chargeless seed — fetchStrategy, nothing else', async () => {
     const fetchStrategy = vi.fn().mockResolvedValue(undefined);
     const api = { getState: () => ({ fetchStrategy }) } as unknown as Parameters<

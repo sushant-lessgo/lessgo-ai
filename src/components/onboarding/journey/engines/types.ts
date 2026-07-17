@@ -383,10 +383,19 @@ export interface JourneyEngineSeam {
      *  suggestions, session-answered ids) the VM alone can't carry. */
     questions(vm: RailVM, ctx: JourneyQuestionsContext): JourneyQuestion[];
     /** 04 — `prepare` runs once on entry (work: the CHARGELESS sitemap seed,
-     *  behind the existing idempotency guard — never the charged path). */
+     *  behind the existing idempotency guard — never the charged path). `items`
+     *  is the read-only stub projection every non-work engine still renders.
+     *
+     *  STEP-04 REUSE of the founder-signed `loadStep?` (see `JourneyStepConfig`
+     *  above — the field is defined ONCE and explicitly reserved for STEP 04).
+     *  When present the agnostic frame renders this lazy engine body (E4's rich
+     *  plan: photos + plain-word rows + goal badges); when absent it falls back
+     *  to the `items()` stub. SAME field, SAME signature — NOT a new seam
+     *  mechanism, and it does not re-widen the seam a third time. */
     plan: {
       prepare(wizardApi: JourneyWizardApi): Promise<void>;
       items(state: JourneyWizardState): { title: string }[];
+      loadStep?: JourneyStepConfig['loadStep'];
     };
   };
 

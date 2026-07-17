@@ -63,3 +63,95 @@ Pre-existing/environmental only — `next-env.d.ts` is absent in this worktree (
 ### Open risks
 - The `next-env.d.ts`-absent tsc error will vanish once the harness runs a Next build; if a reviewer runs bare `tsc` they will see it — unrelated to E4.
 - `goal` currently flows through persistence only; generation does not consume it (by design — consuming it would modify the copy path → tier escalation). Phase 2+ wires the UI.
+
+## Phase 2 — Seam widening + rich read-only PlanStep
+
+### Files changed
+- `src/components/onboarding/journey/engines/types.ts`
+- `src/components/onboarding/journey/steps/StepPlan.tsx`
+- `src/components/onboarding/journey/engines/work.ts`
+- `src/components/onboarding/journey/engines/work/PlanStep.tsx` (NEW)
+- `src/components/onboarding/journey/engines/work.test.ts`
+
+`journeyAgnostic.test.ts` was NOT modified — it is an import-graph/tripwire guard, not a
+seam/step-frame shape assertion, and the widened `steps.plan` + stub fallback pass it
+unchanged (StepPlan still statically imports no engine/generation module).
+
+### What changed, per file
+
+**`src/components/onboarding/journey/engines/types.ts`** (~L385-397) — widened the
+`steps.plan` seam member. Verbatim type change:
+```
+    plan: {
+      prepare(wizardApi: JourneyWizardApi): Promise<void>;
+      items(state: JourneyWizardState): { title: string }[];
+      loadStep?: JourneyStepConfig['loadStep'];
+    };
+```
+`loadStep?` is typed by indexing the founder-signed `JourneyStepConfig['loadStep']`
+(defined once at ~L346/356 and doc-reserved for STEP 04) — FIELD REUSE, identical
+signature, NOT a new mechanism. `prepare`/`items` and every other seam member untouched.
+Updated the doc comment above `plan` to record the STEP-04 reuse.
+
+**`src/components/onboarding/journey/engines/work.ts`** (~L652) — registered
+`steps.plan.loadStep = () => import('./work/PlanStep')` (dynamic import = firewall,
+copying the `showWork.loadStep` pattern). `plan.prepare` (chargeless `fetchStrategy`
+seed) and `plan.items` (stub projection) left byte-for-byte unchanged beside it; added a
+doc block explaining the reuse.
+
+**`src/components/onboarding/journey/steps/StepPlan.tsx`** — rewrote the frame to mirror
+`StepShowWork`: `prepare` still runs on mount; when `plan.loadStep` is present it renders
+`lazy(plan.loadStep)` inside `<Suspense fallback=…>` as `<LazyBody {...props} />` (passes
+the full `JourneyStepProps` — `seam` + `onBuildingChange`/`onBlockedChange`); when absent
+it renders the CURRENT read-only `items()` projection + the "Build my site" advance
+verbatim (non-work engines unaffected). `data-testid="step-plan"` / `plan-items` /
+`plan-build` preserved on the stub path.
+
+**`src/components/onboarding/journey/engines/work/PlanStep.tsx`** (NEW, `JourneyStepProps`)
+— READ-ONLY work plan. Reads `sitemap` + `selectBriefFacts` via `useWizardStore`, resolves
+work facts with `getWorkFacts(briefFacts)`. Renders one column per `WorkSitemapPage`:
+- title;
+- real ingested photos (prominent) — `photosWithUrl()` collects `groups[].photos[]` +
+  `groups[].items[].photos[]` that carry a `url`, cover-first; the strip renders ONLY when
+  the page has a work section (`hero`/`work`/`workdetail`/`featuredWork`) AND photos exist;
+- plain-word section rows (small) from `workVocabulary[key]` → `userLabel` + `description`;
+  a key with no vocab entry is dropped, never shown raw (zero internal vocabulary);
+- a distinct goal badge = `workPageGoalBadgePrefix` + `workPageGoalWords[page.goal ??
+  defaultGoalForPage(page.archetypeKey, facts.contactMethod)].userLabel`.
+Working "Build my site" → `setJourneyStep(5)`. Renders only the columns + CTA, so the
+shell-owned "What we understood" rail is untouched.
+
+**`src/components/onboarding/journey/engines/work.test.ts`** (~L570) — added a test in the
+`STEP 04 plan` block asserting `steps.plan.loadStep` is a function (mirrors the
+`showWork.loadStep` D9 assertion) and that `prepare`/`items` remain functions beside it.
+
+### No-photo (Kundius) path
+The Kundius fixture groups carry no photo urls, so `photosWithUrl()` returns `[]` and the
+photo strip is skipped entirely — no broken `<img>`, no empty frame. Columns still render
+title + section rows + goal badge cleanly. `defaultGoalForPage` falls back to `'form'`
+(no `contactMethod` in the fixture), so every column shows "asks visitors to: Send the form".
+
+### Deviations
+1. **`blurDataUrl`** — the plan mentioned a `blurDataUrl` preview, but `WorkPhotoRefSchema`
+   (the persisted fact shape) has no such field; `blurDataUrl` is an EPHEMERAL upload signal
+   held only in `ShowWorkStep` component state. This read-only projection of the COMMITTED
+   bag has no access to it, so photos render by `url`. Documented in the file header.
+2. **`steps.plan` widening** — added `loadStep?` alone (via `JourneyStepConfig['loadStep']`)
+   rather than intersecting the whole `JourneyStepConfig` (which would force unused
+   `title`/`body`/`icon` onto the plan seam member — StepPlan supplies its own heading).
+   The plan explicitly allowed this option ("or adding `loadStep?` of the identical signature").
+3. **Badge color tokens** — used existing `bg-app-tint`/`text-app-primary` (the design
+   system has no `app-accent`/`app-accent-subtle` token) for the "distinct" goal badge.
+4. **`journeyAgnostic.test.ts`** left untouched (conditional in the plan; not applicable).
+
+### Verification
+- `npx tsc --noEmit` → only the KNOWN pre-existing env error:
+  `src/app/page.tsx(6,26): error TS2307: Cannot find module '@/assets/images/founder.jpg'…`
+  Nothing else.
+- `npm run test:run` → `Test Files 243 passed | 1 skipped (244)` ·
+  `Tests 4069 passed | 18 skipped (4087)` (was 4068; +1 = the new loadStep assertion).
+
+### Open risks
+- Photo→page mapping is heuristic in read-only mode (all group photos shown on any
+  work-bearing page); the true per-page/per-group placement is generation's job and is not
+  editable here — acceptable for a preview. No change to generation/credit/reveal paths.
