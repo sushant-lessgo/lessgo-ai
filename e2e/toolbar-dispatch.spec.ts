@@ -15,6 +15,13 @@ import { AUDIENCES, seedDraft } from './helpers/seedDraft';
 //   4. Ask AI is NOT present (it lands in phase 5 behind a human gate).
 //   5. Esc dismisses.
 //
+// phase 2 adds the Button/CTA + Footer cases. NOTE: there is deliberately NO form
+// case — the `form` ToolbarType cannot be DISPATCHED in today's editor (every
+// `form_*` element is an InlineTextEditorV2, whose click→focus sets
+// `isTextEditing`, and text is priority 1 in `getActiveToolbar`, so a form
+// selection is unreachable). Fixing that needs `useEditor`/priority changes that
+// are outside phase 2's Files-touched list. See the audit's BLOCKER section.
+//
 // Shape mirrors edit-persistence.spec: authed Clerk session (storageState from the
 // `setup` project) → persona → /api/start → seed a mock-mode Meridian draft via the
 // real routes → open /edit/<token>. Mock mode = no LLM, no credits, deterministic.
@@ -53,7 +60,7 @@ async function dismiss(page: Page) {
   await expect(page.locator(SHELL)).toHaveCount(0, { timeout: 10_000 });
 }
 
-test.describe('toolbar dispatch (phase 1: one shell, curated actions)', () => {
+test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () => {
   let token: string;
   let imageToken: string;
 
@@ -157,6 +164,94 @@ test.describe('toolbar dispatch (phase 1: one shell, curated actions)', () => {
     // Image → Link is DEFERRED (ruling 5): no published-consumed image-link field
     // exists, so shipping the action would promise something publish drops.
     expect(ids).not.toContain('image-link');
+  });
+
+  // ── phase 2: Button/CTA ────────────────────────────────────────────────────
+  // Meridian's hero CTA is a `MeridianEditable ... isButton` (EditorialPhotoHero
+  // :114-125), i.e. single click SELECTS (element toolbar) and only a DOUBLE click
+  // enters text editing — which is precisely why Button/CTA is the one element
+  // family that reaches the `element` action set with a button context.
+  test('button/CTA target: Beta action set with Link/Action disabled', async ({ page }) => {
+    await page.locator('[data-element-key="cta_text"]').first().click();
+
+    await expect(page.locator(SHELL)).toHaveCount(1, { timeout: 15_000 });
+    await expect(page.locator(SHELL)).toHaveAttribute('data-toolbar-type', 'element');
+
+    const ids = await actionIds(page);
+    // The Beta Button/CTA set: Edit Text · Link/Action · Button Settings ·
+    // Regenerate · Delete (+ Design ▾). Equality, not a subset: every one of these
+    // is unconditional for a flat `cta_text` key (hasTextContent ✓,
+    // canConvertToForm ✓, no dot in the key ⇒ Delete ✓), so a missing OR a leaked
+    // action fails. `link-action` is the phase-2 addition.
+    expect(ids).toEqual(
+      [
+        'button-config',
+        'delete',
+        'design-menu',
+        'edit-text',
+        'link-action',
+        'regenerate-copy',
+      ].sort(),
+    );
+    expect(ids).not.toContain('ask-ai');
+  });
+
+  test('button/CTA: Link/Action is disabled and inert until phase 3', async ({ page }) => {
+    await page.locator('[data-element-key="cta_text"]').first().click();
+    await expect(page.locator(SHELL)).toHaveCount(1, { timeout: 15_000 });
+
+    const link = page.locator(`${SHELL} [data-action="link-action"]`);
+    await expect(link).toHaveCount(1);
+    await expect(link).toBeDisabled();
+    await expect(link).toHaveAttribute('aria-disabled', 'true');
+    // The tooltip must say WHY (the disabled convention phase 1 standardised).
+    await expect(link).toHaveAttribute('title', /link picker lands next phase/i);
+
+    // Force-click must not open a picker or tear the shell down. If phase 3 wires
+    // the picker without un-disabling this, or un-disables it without a picker,
+    // this fails.
+    await link.click({ force: true });
+    await expect(page.locator(SHELL)).toHaveCount(1);
+    await expect(page.locator('[data-link-picker]')).toHaveCount(0);
+  });
+
+  // ── phase 2: Footer ────────────────────────────────────────────────────────
+  // Honest scope (plan ruling 2 + D-1): the footer gains NO new capability. What
+  // is asserted is exactly what phase 2 claims — it dispatches into the ONE shell,
+  // it is labelled "Footer" (not `Footer-a1b2c3d4`), and the chrome-section gating
+  // that predates this track is intact.
+  test('footer target: chrome-section set in the one shell, labelled "Footer"', async ({ page }) => {
+    const footer = page.locator('[data-section-id^="footer"]').first();
+    await expect(footer, 'meridian draft rendered no footer section').toBeVisible({
+      timeout: 30_000,
+    });
+    // Top-left corner: section padding, so this lands on the section container
+    // rather than any element inside it.
+    await footer.click({ position: { x: 4, y: 4 } });
+
+    await expect(page.locator(SHELL)).toHaveCount(1, { timeout: 15_000 });
+    await expect(page.locator(SHELL)).toHaveAttribute('data-toolbar-type', 'section');
+
+    // The phase-2 deliverable: a human label. Pre-phase-2 this chip read
+    // `Footer-<uuid8>`, so the exact-match assertion genuinely fails on a revert.
+    await expect(page.locator(`${SHELL} [data-toolbar-label]`)).toContainText('Footer', {
+      timeout: 10_000,
+    });
+    const labelText = await page.locator(`${SHELL} [data-toolbar-label]`).innerText();
+    expect(labelText, 'section uuid leaked into the label chip').not.toMatch(/footer-[0-9a-f]{8}/i);
+
+    const ids = await actionIds(page);
+    // CHROME_HIDDEN_ACTIONS (SectionToolbar.tsx:18) — untouched by this phase, and
+    // the thing most likely to be broken by a later "just add one action" edit.
+    expect(ids).toContain('add-element');
+    expect(ids).toContain('design-menu');
+    for (const hidden of ['move-up', 'move-down', 'duplicate', 'delete']) {
+      expect(ids, `${hidden} must stay hidden on the shared footer`).not.toContain(hidden);
+    }
+    // Ruling 2 / D-1: Footer links + Background are deferred to Final. If either
+    // shows up in Beta it promises something the store cannot persist.
+    expect(ids).not.toContain('manage-links');
+    expect(ids).not.toContain('background');
   });
 
   test('Design ▾ renders disabled and inert', async ({ page }) => {

@@ -21,6 +21,7 @@ import { SectionToolbar } from './SectionToolbar';
 import { ElementToolbar } from './ElementToolbar';
 import { TextToolbarMVP } from './TextToolbarMVP';
 import { ImageToolbar } from './ImageToolbar';
+import { FormToolbar } from './FormToolbar';
 
 /** The positioning target shape produced by the priority resolver. */
 type ToolbarTarget = ReturnType<typeof getToolbarTarget>;
@@ -56,9 +57,10 @@ export interface ActionSetEntry {
   designMenu: TrailingSlotState;
 }
 
-// Only the 4 RENDERABLE toolbar types. `form` / null intentionally absent → the
-// shell's lookup misses and it renders nothing (matches prior behavior; no empty
-// floating bubble).
+// The 5 RENDERABLE toolbar types (phase 2 added `form`, which had been a live
+// ToolbarType with no entry → the shell's lookup missed and it rendered nothing).
+// `null` stays absent by construction; a resolver returning `null` still yields the
+// empty-bubble guard rather than a bare floating arrow.
 export const actionSets: Partial<Record<NonNullable<ToolbarType>, ActionSetEntry>> = {
   section: {
     component: SectionToolbar,
@@ -89,5 +91,25 @@ export const actionSets: Partial<Record<NonNullable<ToolbarType>, ActionSetEntry
     designMenu: 'disabled',
     resolveProps: (_selection, target) =>
       target.targetId ? { targetId: target.targetId } : null,
+  },
+  // phase 2. UNREACHABLE / dormant — no click path currently yields
+  // `activeToolbar === 'form'` (see the two blockers documented in
+  // FormToolbar.tsx's header). The wiring below is the INTENDED shape, not
+  // present-tense behaviour: *if* a form selection is ever dispatched, it is
+  // meant to route through `selectedElement` like the `element` set
+  // (uiActions.ts:340-352 sets {sectionId, elementKey, type:'form'}), so the
+  // shell's existing anchor resolution would need no `form` special-case.
+  // Retained pending a founder ruling at the gate; do not treat as live.
+  form: {
+    component: FormToolbar,
+    size: 'md',
+    designMenu: 'disabled',
+    resolveProps: (selection) =>
+      selection.selectedElement
+        ? {
+            sectionId: selection.selectedElement.sectionId,
+            elementKey: selection.selectedElement.elementKey,
+          }
+        : null,
   },
 };

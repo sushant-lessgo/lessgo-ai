@@ -17,6 +17,28 @@ import { ToolbarButton, ToolbarDivider, ToolbarLabel, useHideToolbarChrome } fro
 // Shared chrome (header/footer) is site-wide: hide per-page structural actions.
 const CHROME_HIDDEN_ACTIONS = ['move-up', 'move-down', 'duplicate', 'delete'];
 
+/**
+ * Human label for the toolbar's status chip, from the `${type}-${uuid}` section-id
+ * convention (`extractSectionType`'s grammar; every audience/template stamps it).
+ *
+ * toolbar-standard-beta phase 2 delivers the Footer's "Footer" label. The chip used
+ * to show the WHOLE id capitalised — `Footer-a1b2c3d4`, `Hero-9f0e1d2c` (flagged in
+ * phase 1's audit as "looks rough"). Dropping the uuid is what makes the label read
+ * as an element name, and it is the same one-expression change for every section
+ * type, so it is not footer-special-cased. `socialProof-x` → `SocialProof`; a
+ * suffix-less id (legacy `footer`) → `Footer`.
+ *
+ * Deliberately NOT sourced from `sectionList`'s labels — those are prose ("Social
+ * Proof Logos / Stats", "Primary CTA Section") sized for a picker, not a chip, and
+ * that list is the PRODUCT section vocabulary only (service/work types are absent),
+ * so it would degrade to this fallback for half the templates anyway.
+ */
+function sectionChipLabel(sectionId: string): string {
+  const dash = sectionId.indexOf('-');
+  const type = dash === -1 ? sectionId : sectionId.slice(0, dash);
+  return type.charAt(0).toUpperCase() + type.slice(1);
+}
+
 interface SectionToolbarProps {
   sectionId: string;
 }
@@ -289,7 +311,7 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
                 ? 'bg-yellow-400'
                 : 'bg-red-400'
             }
-            text={sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}
+            text={sectionChipLabel(sectionId)}
           >
             {isChromeId(sectionId) ? (
               <span className="text-[10px] font-medium text-[#e8e8ee] bg-white/10 rounded px-1.5 py-0.5 whitespace-nowrap">

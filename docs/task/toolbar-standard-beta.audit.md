@@ -289,3 +289,286 @@ $ npm run test:run
 ```
 
 Both green. Not committed — the orchestrator commits.
+
+---
+
+## Phase 2 — Beta action sets: Button/CTA, Form, Footer
+
+**Headline: this phase is 2/3 delivered. Button/CTA and Footer are done and gated. FORM IS
+BLOCKED** — not by effort, but because the plan's premise about it is wrong (see BLOCKER). I did
+not work around it by editing files outside the Files-touched list. **A ruling is needed before
+phase 3.**
+
+### Files changed
+
+- `src/app/edit/[token]/components/toolbars/ElementToolbar.tsx` — Button/CTA Beta set (`link-action`, disabled).
+- `src/app/edit/[token]/components/toolbars/SectionToolbar.tsx` — human label on the status chip ("Footer").
+- `src/app/edit/[token]/components/toolbars/actionSets.tsx` — `form` entry + comment correction.
+- `src/app/edit/[token]/components/toolbars/FormToolbar.tsx` (**new**) — ⚠️ currently UNREACHABLE, see BLOCKER.
+- `src/hooks/editStore/uiActions.ts` — **broken-path fix** to `showFormBuilder`/`hideFormBuilder` (flagged below).
+- `e2e/toolbar-dispatch.spec.ts` — +3 tests (button set, Link/Action disabled, footer). 10 total.
+- `docs/task/toolbar-standard-beta.audit.md` (this file).
+
+**Published-side: clean.** `git status` lists zero `.published.tsx` / `.core.tsx` / renderer /
+registry files. `linkTargetPublished.test.tsx` byte-untouched + green. The `M` on
+`uiFoundationIsolation.test.tsx.snap` is again the phase-1 CRLF stat artifact, **proven
+byte-identical by blob hash** (`git rev-parse HEAD:<snap>` == `git hash-object <snap>` ==
+`117aa8fee8e046025e5432c0300b12651eed7342`) — intentionally unstaged.
+
+---
+
+### ⚠️ BLOCKER — the `form` ToolbarType cannot be DISPATCHED (plan premise is wrong)
+
+The brief (and plan step 2) says: *"`'form'` IS in `ToolbarType` and `showFormToolbar` exists, but
+there is no `form` entry in `actionSets` → the shell's lookup misses → renders nothing. You are
+filling a dead ToolbarType."*
+
+**That is only half the story, and the missing half is fatal to the phase-2 Form goal.** Adding the
+`actionSets['form']` entry does not make Form reachable. Code-verified chain:
+
+1. `showFormToolbar` has **zero callers** in `src/` (grep: only its own definition at
+   `uiActions.ts:373` + the shell's `hideFormToolbar` in its dismissal set).
+2. The ONLY path that can emit a form selection is `useEditor.ts:307`,
+   `showToolbar(determineElementType(el), …)`, where `determineElementType` (`useEditor.ts:197`)
+   returns `'form'` for `tagName === 'form' || elementKey.includes('form')`.
+3. Every element key containing `form` in a servable template is a **contenteditable text element**
+   (exhaustive grep): `TechPremiumContact.tsx:125,127,134` (`form_heading` / `form_note` /
+   `form_foot`) and `LumenContactForm.tsx:74` (`form_note`) — all `TechPremiumEditable`/`ed()`
+   **without `isButton`**, i.e. a bare `InlineTextEditorV2`. (`form_headline` never even reaches the
+   `form` branch — `includes('headline')` returns `'text'` first at `:186`. `form_id` is
+   `fillMode:'system'`, never rendered.)
+4. Clicking one fires `InlineTextEditorV2`'s `onClick` → `focus()` → `handleFocus` (`:177-180`) →
+   **`setTextEditingMode(true)`**.
+5. `getActiveToolbar` (`selectionPriority.ts:45-47`) checks `isTextEditing` as **priority 1**, before
+   it ever consults `toolbarType === 'form'` at priority 2.
+
+⇒ **A form selection can never win the resolver.** `form` is not a dead *entry*, it is a dead
+*dispatch*. The shared `LeadForm.tsx` edit twin doesn't even stamp `data-element-key`, so it resolves
+to a **section** target; `TechPremiumContact`'s actual `<input>`s carry no element key either.
+(Telling detail: `hoverTarget.ts:189` already *labels* these targets `Form` — forward vocabulary for
+a toolbar that was never dispatched. The label has always been a promise the click path didn't keep.)
+
+**Why I stopped rather than fixed it.** Making Form reachable requires one of:
+- `useEditor.ts` — a `<form>`-ancestor rule in `determineClickTarget` (mirroring `hoverTarget.ts:189`), **and**
+- `selectionPriority.ts` and/or `InlineTextEditorV2.tsx` — to stop text-edit focus outranking it.
+
+**None of those files are in phase 2's Files-touched list**, and two of them are explicitly fenced:
+constraint 3 ("preserve existing gating semantics exactly") and the brief's "**Do NOT change priority
+logic**". The brief anticipated only an anchor/`resolveProps` fault ("if it doesn't, fix
+resolveProps/anchor for `form` ONLY") — **the fault is neither**: `resolveProps` and the anchor are
+both correct and would work the moment a form selection existed (`uiActions.ts:340-352` does populate
+`{sectionId, elementKey}`, and the shell's `[data-section-id] [data-element-key]` anchor resolves it).
+So this is an out-of-scope need → stop and report.
+
+**What I left in the tree (please rule):** `FormToolbar.tsx` + `actionSets['form']` are **written,
+typechecked, and completely inert** — the entry is only ever consulted if `activeToolbar === 'form'`,
+which cannot happen today, so there is **zero behaviour change**. I kept them so a dispatch fix is a
+small diff, not a rebuild. **They are dead code until dispatch is fixed.** Three options:
+1. Widen a phase (3 or 4) to include `useEditor.ts` + the text-focus interaction → Form lands properly.
+2. Delete `FormToolbar.tsx` + the `form` entry, move Form to Final, and correct the honesty table
+   (Form would join Footer/Menu in the "nothing new" column — that materially changes the phase-2
+   gate story, which is the whole point of the table).
+3. Keep as-is (dormant) pending option 1. **My recommendation** — but it must be an explicit,
+   recorded choice, not a silent one.
+
+**The honesty table needs a correction at the founder gate either way.** It currently promises
+"Form | Edit fields + settings **dispatch through the shell**". Today they dispatch through nothing.
+
+---
+
+### What changed, per file
+
+**`ElementToolbar.tsx` — Button/CTA Beta set.** Added `link-action` ("Link/Action"), rendered
+**disabled** with `disabledTitle: "Link picker lands next phase"`, gated on the EXISTING
+`canConvertToForm()` context predicate (reused verbatim — no new gating). Beta order is now
+Edit Text · Link/Action · Button Settings · Regenerate · Delete. Phase 3 un-disables the one entry.
+
+**`SectionToolbar.tsx` — the "Footer" label.** New `sectionChipLabel()`: the chip showed the whole
+section id capitalised (`Footer-e56fb4a4` — phase 1's audit called it "rough"), now the type segment
+(`Footer`). Not footer-special-cased: it is the same one-expression change for every section, and
+special-casing would have been more code for a worse result. **Deliberately not sourced from
+`sectionList`'s labels** — those are picker prose ("Primary CTA Section") and are product-only
+(service/work types absent), so they'd fall back to this anyway for half the templates.
+
+**`actionSets.tsx`.** Added the `form` entry (module-level `component` constant — invariant held;
+nothing maps to a locally-defined component). Corrected the stale "Only the 4 RENDERABLE toolbar
+types / `form` intentionally absent" comment.
+
+**`FormToolbar.tsx` (new).** Label chip + `edit-fields` / `form-settings`, both opening the existing
+FormBuilder. No new form capability (reorder + type restriction are phase 4, ruling 4). **See BLOCKER
+— currently unreachable.**
+
+**`uiActions.ts` — see the next section. This one needs a decision.**
+
+---
+
+### Decisions + Deviations (each is a judgment call — please check them)
+
+1. **`showFormBuilder`/`hideFormBuilder` were BROKEN; I fixed them. Flagging loudly — this is the
+   edit most likely to exceed my brief.** The plan said "Edit fields opens the existing FormBuilder
+   flow (verify current trigger path and reuse)". I verified it: **there is no working trigger path.**
+   - `uiActions.ts:430` wrote `state.forms.formBuilder.visible`, but `state.forms` is the FLAT
+     `Record<string, MVPForm>` map initialised to `{}` (`editStore.ts:291`) — `formBuilder` is a
+     **sibling** top-level field (`:296`). So `state.forms.formBuilder` is `undefined` and the
+     assignment **throws `TypeError: Cannot set properties of undefined`**.
+   - Nothing reads `formBuilder.visible` anyway (zero readers in `src/`). The ONE consumer,
+     `GlobalFormBuilder.tsx:10-16`, reads `formBuilderOpen`/`editingFormId` — the fields set by
+     `formActions.ts:137-149`, which is **never wired into the store** (`editStore.ts:423-426` spreads
+     persistence/ui/formsImage; `createFormActions` is absent).
+   - ⇒ **The FormBuilder modal is unreachable in the editor today, and its one caller —
+     ButtonConfigurationModal's "Create New Form" (`:485-487`) — throws when clicked.**
+
+   I repointed both actions at the fields the consumer actually reads. **Blast radius: that
+   ButtonConfigurationModal button starts working** (a crash-fix, but a genuinely NEW working flow in
+   the editor that nobody QA'd). `uiActions.ts` IS on my Files-touched list, but scoped there to
+   "action-id registry only, if needed" — so this is a deviation. **Drop it if you'd rather it rode
+   its own spec; nothing else in phase 2 depends on it** (Form is blocked regardless).
+   I also dropped the impl's `state.leftPanel.activeTab = 'pageStructure'` side-effect (switching the
+   left panel while opening a modal); it never executed, so nothing regresses. Left alone: the same
+   broken path in `persistenceActions.ts:816` (overridden by uiActions, file not in scope) and in
+   `convertCTAToForm` (`uiActions.ts:471`, still throws — not mine, flagging it).
+2. **Button "Style" is NOT shipped — the honesty table's "relabel" is downgraded to "absent". Blunt
+   version: Beta has no Style action.** Per constraint 8 I verified whether a per-button style field
+   exists: **it does not.** The only style-adjacent field, `buttonConfig.ctaType`
+   (`types/core/content.ts:209`), is **derived READ-ONLY from the element key** (`secondary_*` ⇒
+   secondary, `ButtonConfigurationModal.tsx:156-161`, scale-04 "role is DERIVED, never chosen") and is
+   a form-**placement** role, not a visual style. So: no store field added (as instructed). But I also
+   **did not rename "Button Settings" → "Style"**, because the panel it opens is a
+   destination/behaviour configurator (link / page / form + behaviour + icons) with **zero style
+   controls** — the rename would make the button lie about what it opens, which is worse than the
+   honest gap (cf. the QA-naayom precedent that dead/misleading buttons read as bugs). Conservative
+   option taken, per the ambiguity rule. **Founder gate: "Style" moves from Beta to Final.**
+3. **Form "Settings" is a second door to the same room.** FormBuilder is ONE scrolling dialog whose
+   top surface already IS the settings (name / submit text / success message / integrations,
+   `:219-251`) with the field list below. It has **no tabs or anchors** to route to, so "Edit fields"
+   and "Settings" open an identical modal in an identical state. Routing them apart would mean editing
+   `FormBuilder.tsx` (phase 4's file, not mine). Shipped per the plan's literal wording; recording
+   that it is **not two surfaces**. Moot while Form is blocked.
+4. **`trailing` abstraction: still NOT built** (per instruction). Nothing in phase 2 needed a consumer.
+5. **No `uiActions.ts:80-95` (`getActionsForType`) change** — confirmed metadata-only, gates nothing,
+   already has its `'form'` case. As the brief said.
+6. **Social: nothing.** Untouched, per plan step 4.
+
+---
+
+### Verification (pasted, real)
+
+```
+$ npx tsc --noEmit
+TSC=0                                    (clean, no output)
+
+$ npm run test:run
+ Test Files  209 passed | 1 skipped (210)
+      Tests  3546 passed | 18 skipped (3564)
+   Duration  57.83s
+```
+(Identical counts to phase 1 — no vitest test covers these files; the net here is Playwright.)
+
+```
+$ npx eslint "src/app/edit/[token]/components/toolbars" "src/hooks/editStore/uiActions.ts" e2e/toolbar-dispatch.spec.ts
+✖ 3 problems (0 errors, 3 warnings)
+```
+All 3 are the same pre-existing `react-hooks/exhaustive-deps` warnings phase 1 reported, on code I
+didn't author. No bare `useEditStore()` introduced (selector + `useEditStoreApi()`; the ESLint ban
+would have errored).
+
+```
+$ npx playwright test e2e/toolbar-dispatch.spec.ts --list
+Total: 10 tests in 2 files          (6 phase-1 + 3 phase-2 + the setup project's `authenticate`)
+
+$ E2E_PORT=3061 npx playwright test e2e/toolbar-dispatch.spec.ts
+  ✓   8 [authed] › ... › Design ▾ renders disabled and inert (3.4s)
+  ✓   9 [authed] › ... › dropdown panels are not clipped by the chrome box (3.6s)
+  ✓  10 [authed] › ... › Esc dismisses the shell (3.5s)
+  10 passed (1.3m)
+```
+Through the REAL config (registered in the `authed` project since phase 1's fix pass). `E2E_PORT=3061`
+only because 3000 is held by another worktree — a first-class toggle, not a config bypass. The
+interleaved `ReferenceError: window is not defined` lines are the same pre-existing dev-mode SSR log
+noise from `useEditStoreBootstrap.ts:238` (logged, never thrown into a test).
+
+**Anti-theatre — mutation-proven, not asserted-and-hoped.** The footer-label test is the one new
+assertion that could have passed vacuously (`toContainText('Footer')` matches `Footer-e56fb4a4` just
+fine — which is exactly the bug). I reverted `sectionChipLabel` to the old expression and re-ran:
+
+```
+✘  2 [authed] › ... › footer target: chrome-section set in the one shell, labelled "Footer"
+    Error: section uuid leaked into the label chip
+    Expected pattern: not /footer-[0-9a-f]{8}/i
+    Received string:  "Footer-e56fb4a4
+  1 failed
+```
+Fails on revert, passes when restored ⇒ the assertion is real. The two button/CTA tests can't be
+vacuous by construction: one asserts **set equality** on `data-action` ids (a missing OR leaked action
+fails), the other asserts `toBeDisabled()` on `link-action` — which only passes because `disabled`
+genuinely propagates through ElementToolbar's map into `ToolbarButton`.
+
+**No form e2e case exists, deliberately** — Form is undispatchable (BLOCKER), so any "form toolbar"
+test would have to assert a negative or skip itself green. That's precisely the failure mode phase 1
+caught twice. I left the reason in the spec's header comment instead.
+
+---
+
+### What I did NOT verify (explicit list)
+
+- **Nothing about Form works end-to-end** — `FormToolbar` has never rendered, in a test or by hand.
+  It is unreachable. Do not read "tsc + tests green" as evidence it functions.
+- **The `showFormBuilder` fix is unverified by hand.** I did not open the editor and click "Create
+  New Form" in ButtonConfigurationModal to watch the FormBuilder modal appear. The reasoning is
+  code-verified (the fix writes exactly the two fields `GlobalFormBuilder` reads) but **nobody has
+  observed the modal open**, and nobody has QA'd the create-form flow it un-breaks.
+- **No manual dev check at all this phase** — no visual look at the Button/CTA or Footer toolbars.
+- **Phase 1's two open items are still open**: toolbar local-state survival across shell re-renders,
+  and t2 visual fidelity by eye. Neither is verified by anyone.
+- **The Button/CTA set was verified on meridian only.** `cta_text` is the `isButton` path; templates
+  whose CTA is not `isButton` would enter text mode instead and never show this set. Not surveyed.
+- **`link-action`'s phase-3 hand-off is untested by definition** — I assert it stays inert; nobody has
+  proven the picker will mount cleanly where the disabled button sits.
+- **Section-label change blast radius**: the chip label change affects EVERY section type, not just
+  footer. I asserted footer; I did not eyeball hero/features/etc., and service/work section-id
+  vocabularies were not surveyed for ugly type segments.
+
+Not committed — the orchestrator commits.
+
+---
+
+## Phase 2 — comment fix (post-impl-review, ride-along)
+
+**Files changed**
+- `src/app/edit/[token]/components/toolbars/FormToolbar.tsx` (comment only)
+- `src/app/edit/[token]/components/toolbars/actionSets.tsx` (comment only)
+
+**What changed.** Comment text ONLY; zero behavior/code change. Both files carried comments
+asserting, in present tense, that Form dispatch works. Both were factually FALSE and would have
+misled the phase-3/4 implementer.
+
+- FormToolbar.tsx header: replaced the "HOW A FORM SELECTION IS REACHED (verified, not assumed)"
+  block with an accurate UNREACHABLE / dormant status block stating both blockers.
+- actionSets.tsx `form` entry: the "A form selection routes through `selectedElement` exactly like
+  the `element` set" claim is now marked as the (currently unreachable) INTENDED wiring, not fact.
+
+**The accurate mechanism — my original audit was INCOMPLETE.** I recorded `isTextEditing` /
+`selectionPriority.ts:45-47` as the blocker. That is real but it is the SECOND, subordinate one.
+The earlier and decisive blocker is a tagName short-circuit:
+
+1. `form_note` / `form_heading` / `form_foot` never reach the key check. All three render via
+   `InlineTextEditorV2` with `element={as}` = `h2`/`p` (`TechPremiumEditable.tsx:102-105`), and
+   `data-element-key` sits on that tag. `determineElementType` (`useEditor.ts:182-189`) therefore
+   matches the tagName branch (`h1..h6`,`p`,`span` → `'text'`) and RETURNS before
+   `elementKey.includes('form')` at `:197` is evaluated. `'form'` is never produced.
+2. Even if it were, `isTextEditing` outranks `form` (`selectionPriority.ts:45-47`).
+
+Form dispatch is over-determined dead: either blocker alone suffices. The real fix is spec-sized —
+a `<form>`-ancestor rule outranking the tagName text branch, PLUS a selection affordance (the real
+`<input>`s carry no element key at all). `hoverTarget.ts:189` already labels these targets "Form",
+a promise the click path never keeps.
+
+**Deviations.** None. FormToolbar and the `actionSets['form']` entry were deliberately NOT deleted —
+deletion is the standing recommendation but the founder rules on it at the gate.
+
+**Tests.** `npx tsc --noEmit` → clean (exit 0). `npm run test:run` → 209 passed / 1 skipped (210
+files); 3546 passed / 18 skipped. E2E not re-run: comment-only change, no runtime surface touched.
+
+**Open risks.** Unchanged from phase 2. The dormant Form path remains dead code until the gate ruling.
+
+Not committed — the orchestrator commits.

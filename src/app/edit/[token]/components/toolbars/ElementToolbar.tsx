@@ -167,7 +167,34 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
       icon: 'edit',
       handler: handleEditText,
     }] : []),
-    // Add Button Configuration for button/CTA elements
+    // ── Button/CTA Beta set (toolbar-standard-beta phase 2) ──
+    // `canConvertToForm()` is the EXISTING button/CTA context gate (unchanged) —
+    // reused verbatim so Link/Action + Settings appear on exactly the elements
+    // that already got Button Settings. No new gating semantics.
+    //
+    // Link/Action renders DISABLED this phase: the shared t4 LinkPicker lands in
+    // phase 3, which un-disables this entry and wires it to the element's EXISTING
+    // link write path. Shipping it greyed (rather than omitting it) keeps the Beta
+    // anatomy legible at the phase-2 founder gate and makes the phase-3 diff a
+    // one-line flip.
+    ...(canConvertToForm() ? [{
+      id: 'link-action',
+      label: 'Link/Action',
+      icon: 'link',
+      handler: () => {},
+      disabled: true,
+      disabledTitle: 'Link picker lands next phase',
+    }] : []),
+    // "Style" per toolbarPlan's Beta column is NOT shipped as a rename of this
+    // action — see the audit. VERIFIED: no per-button style (primary/secondary/
+    // tertiary) field exists in the store; the only style-adjacent field,
+    // `buttonConfig.ctaType` (types/core/content.ts:209), is DERIVED READ-ONLY from
+    // the element key (`secondary_*` ⇒ secondary, ButtonConfigurationModal.tsx:156-161,
+    // scale-04) and is a form-PLACEMENT role, not a visual style. Per the plan we do
+    // NOT add a store field; and the panel this opens is a destination/behaviour
+    // configurator (link / page / form + behaviour + icons) with zero style controls,
+    // so relabelling it "Style" would make the button lie about what it opens.
+    // Kept as "Button Settings".
     ...(canConvertToForm() ? [{
       id: 'button-config',
       label: 'Button Settings',
