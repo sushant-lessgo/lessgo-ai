@@ -78,7 +78,6 @@ export default function BlogPostBodyBlock(props: BlogPostBodyBlockProps) {
               data-lessgo-form
               data-form-id={props.subscribeFormId}
               data-page-id={props.publishedPageId}
-              data-owner-id={props.pageOwnerId}
               data-success-message="Thanks — you are subscribed!"
               className="lg-blog__subscribe-form"
             >

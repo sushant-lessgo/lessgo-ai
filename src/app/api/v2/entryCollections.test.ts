@@ -35,7 +35,9 @@ vi.mock('@/lib/middleware/planCheck', () => ({
   requireAuth: vi.fn(async () => ({ allowed: true, userId: 'user_1' })),
 }));
 vi.mock('@/lib/creditSystem', () => ({
+  checkCredits: vi.fn(async () => ({ allowed: true, remaining: 100, required: 1 })),
   consumeCredits: vi.fn(async () => ({ success: true, remaining: 100 })),
+  logUsageEvent: vi.fn(async () => undefined),
   CREDIT_COSTS: { SCRAPE_WEBSITE: 1, UNDERSTAND: 1 },
   UsageEventType: { SCRAPE_WEBSITE: 'SCRAPE_WEBSITE', UNDERSTAND: 'UNDERSTAND' },
 }));
@@ -47,11 +49,15 @@ vi.mock('@/lib/security', () => ({
 
 import { generateWithSchema } from '@/lib/aiClient';
 import { scrapeSite } from '@/lib/scrape/fetchSite';
+import { checkCredits, consumeCredits, logUsageEvent } from '@/lib/creditSystem';
 import { POST as scrapePOST } from './scrape-website/route';
 import { POST as understandPOST } from './understand/route';
 
 const ai = generateWithSchema as unknown as ReturnType<typeof vi.fn>;
 const scrape = scrapeSite as unknown as ReturnType<typeof vi.fn>;
+const checkCreditsMock = checkCredits as unknown as ReturnType<typeof vi.fn>;
+const consumeCreditsMock = consumeCredits as unknown as ReturnType<typeof vi.fn>;
+const logUsageEventMock = logUsageEvent as unknown as ReturnType<typeof vi.fn>;
 
 function makeReq(body: any) {
   return {
@@ -135,6 +141,9 @@ beforeEach(() => {
     combinedText: 'x'.repeat(200),
     pages: [{ url: 'https://example.com' }],
   });
+  checkCreditsMock.mockResolvedValue({ allowed: true, remaining: 100, required: 1 });
+  consumeCreditsMock.mockResolvedValue({ success: true, remaining: 100 });
+  logUsageEventMock.mockResolvedValue(undefined);
 });
 
 describe('entry collection capture — scrape-website route', () => {
@@ -239,5 +248,100 @@ describe('entry collection capture — understand route', () => {
     ]);
     // trust does not read `products` → discarded.
     expect(collections.products).toBeUndefined();
+  });
+});
+
+// ── billing-correctness phase 3 (M1): one charging model ────────────────────
+// V2 FAMILY. Both entry routes pre-gate the balance AFTER the demo/mock
+// short-circuit and BEFORE the scrape + the AI call, then split a failed
+// post-work charge two ways (402 genuine insufficiency / 500 charge_failed on a
+// lost write race). createSecureResponse is mocked to { __body, __status }.
+describe('v2 entry routes — charging model', () => {
+  it('scrape-website: no credits ⇒ 402 BEFORE the scrape AND the AI call, attempt ledgered', async () => {
+    checkCreditsMock.mockResolvedValue({ allowed: false, remaining: 0, required: 1 });
+
+    const res: any = await scrapePOST(makeReq({ url: 'https://example.com' }));
+
+    expect(res.__status).toBe(402);
+    expect(res.__body.error).toBe('insufficient_credits');
+    // Neither the network scrape nor the AI call happened; nothing was charged.
+    expect(scrape).not.toHaveBeenCalled();
+    expect(ai).not.toHaveBeenCalled();
+    expect(consumeCreditsMock).not.toHaveBeenCalled();
+    // The 0-credit attempt still lands in the ledger.
+    expect(logUsageEventMock).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, creditsUsed: 0, userId: 'user_1' })
+    );
+  });
+
+  it('scrape-website: post-work genuine insufficiency ⇒ 402, extract discarded', async () => {
+    ai.mockResolvedValueOnce(scrapeExtract());
+    consumeCreditsMock.mockResolvedValue({
+      success: false,
+      remaining: 0,
+      error: 'Insufficient credits',
+    });
+
+    const res: any = await scrapePOST(makeReq({ url: 'https://example.com' }));
+
+    expect(res.__status).toBe(402);
+    expect(res.__body.error).toBe('insufficient_credits');
+    expect(res.__body.data).toBeUndefined();
+    expect(res.__body.briefDraft).toBeUndefined();
+  });
+
+  it('scrape-website: charge_conflict ⇒ 500 charge_failed with NO "credit" in the payload', async () => {
+    ai.mockResolvedValueOnce(scrapeExtract());
+    consumeCreditsMock.mockResolvedValue({ success: false, remaining: 9, error: 'charge_conflict' });
+
+    const res: any = await scrapePOST(makeReq({ url: 'https://example.com' }));
+
+    expect(res.__status).toBe(500);
+    expect(res.__body.error).toBe('charge_failed');
+    expect(res.__body.data).toBeUndefined();
+    // Client rails match /credit/i → the buy wall. A solvent user must not land there.
+    expect(JSON.stringify(res.__body)).not.toMatch(/credit/i);
+  });
+
+  it('understand: no credits ⇒ 402 BEFORE the AI call, attempt ledgered', async () => {
+    checkCreditsMock.mockResolvedValue({ allowed: false, remaining: 0, required: 1 });
+
+    const res: any = await understandPOST(makeReq({ oneLiner: 'A growth marketing agency for SaaS' }));
+
+    expect(res.__status).toBe(402);
+    expect(res.__body.error).toBe('insufficient_credits');
+    expect(ai).not.toHaveBeenCalled();
+    expect(consumeCreditsMock).not.toHaveBeenCalled();
+    expect(logUsageEventMock).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, creditsUsed: 0, userId: 'user_1' })
+    );
+  });
+
+  it('understand: post-AI genuine insufficiency ⇒ 402, signals discarded', async () => {
+    ai.mockResolvedValueOnce(understandRaw());
+    consumeCreditsMock.mockResolvedValue({
+      success: false,
+      remaining: 0,
+      error: 'Insufficient credits',
+    });
+
+    const res: any = await understandPOST(makeReq({ oneLiner: 'A growth marketing agency for SaaS' }));
+
+    expect(res.__status).toBe(402);
+    expect(res.__body.error).toBe('insufficient_credits');
+    expect(res.__body.data).toBeUndefined();
+    expect(res.__body.briefDraft).toBeUndefined();
+  });
+
+  it('understand: charge_conflict ⇒ 500 charge_failed with NO "credit" in the payload', async () => {
+    ai.mockResolvedValueOnce(understandRaw());
+    consumeCreditsMock.mockResolvedValue({ success: false, remaining: 9, error: 'charge_conflict' });
+
+    const res: any = await understandPOST(makeReq({ oneLiner: 'A growth marketing agency for SaaS' }));
+
+    expect(res.__status).toBe(500);
+    expect(res.__body.error).toBe('charge_failed');
+    expect(res.__body.data).toBeUndefined();
+    expect(JSON.stringify(res.__body)).not.toMatch(/credit/i);
   });
 });

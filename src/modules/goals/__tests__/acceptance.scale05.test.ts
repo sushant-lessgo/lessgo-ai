@@ -251,7 +251,9 @@ describe('acceptance: consultant / book-call', () => {
     expect(html).toContain('data-lessgo-form');
     expect(html).toContain(`data-form-id="${formId}"`);
     expect(html).toContain('data-page-id="page-1"');
-    expect(html).toContain('data-owner-id="owner-1"');
+    // The owner's Clerk id must NEVER reach public HTML: the submit route derives
+    // the owner from data-page-id. Re-adding data-owner-id = the forgery hole.
+    expect(html).not.toContain('data-owner-id');
     // The scroll anchor the hero GOAL_REF + CTA scrollTo resolve to.
     expect(html).toContain('id="form-section"');
     // Seeded fields render (name=field.id = submission key) + a submit button.

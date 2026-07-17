@@ -16,7 +16,13 @@ import { logger } from '@/lib/logger';
 import { createSecureResponse } from '@/lib/security';
 import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
-import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
+import {
+  checkCredits,
+  consumeCredits,
+  logUsageEvent,
+  CREDIT_COSTS,
+  UsageEventType,
+} from '@/lib/creditSystem';
 import { generateRawJson } from '@/lib/aiClient';
 import { CopyResponseSchema } from '@/lib/schemas';
 import {
@@ -161,6 +167,35 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
       });
     }
 
+    // 2c. Credit PRE-GATE — check the balance BEFORE any AI work (one charging
+    //     model: check → generate → charge on success). Placed AFTER the mock/
+    //     demo short-circuit above, exactly where consumeCredits already applied,
+    //     so mock/demo runs stay both uncharged and ungated.
+    //     The failed attempt is still ledgered here — it mirrors the success:false
+    //     UsageEvent consumeCredits used to write once the AI had already run.
+    const preCheck = await checkCredits(userId, CREDIT_COSTS.GENERATE_COPY);
+    if (!preCheck.allowed) {
+      await logUsageEvent({
+        userId,
+        eventType: UsageEventType.GENERATE_COPY,
+        creditsUsed: 0,
+        success: false,
+        errorMessage: 'Insufficient credits',
+        endpoint: '/api/audience/service/generate-copy',
+        duration: Date.now() - startTime,
+      });
+      return createSecureResponse(
+        {
+          success: false,
+          error: 'insufficient_credits',
+          message: `Insufficient credits. Required: ${preCheck.required}, Available: ${preCheck.remaining}`,
+          creditsRequired: preCheck.required,
+          creditsRemaining: preCheck.remaining,
+        },
+        402
+      );
+    }
+
     // 3. Build prompt
     const prompt = buildServiceCopyPrompt({
       strategy: strategy as any,
@@ -240,7 +275,33 @@ async function serviceCopyHandler(req: NextRequest): Promise<Response> {
       }
     );
     if (!creditResult.success) {
-      logger.warn(`[service-generate-copy] Credit consumption failed for user ${userId}: ${creditResult.error}`);
+      // The charge failed AFTER generation → the output is DISCARDED (no free output).
+      if (creditResult.error === 'charge_conflict') {
+        // Solvent user, lost the write race → recoverable. The error code AND
+        // message deliberately avoid the substring "credit": the client rails
+        // regex-match /credit/i and would strand a paying user on the buy wall.
+        logger.error(
+          `[service-generate-copy] Charge conflict for user ${userId} — nothing charged, output discarded`
+        );
+        return createSecureResponse(
+          {
+            success: false,
+            error: 'charge_failed',
+            message: 'Temporary billing conflict — please try again. You have not been charged.',
+          },
+          500
+        );
+      }
+      return createSecureResponse(
+        {
+          success: false,
+          error: 'insufficient_credits',
+          message: creditResult.error || 'Insufficient credits',
+          creditsRequired: CREDIT_COSTS.GENERATE_COPY,
+          creditsRemaining: creditResult.remaining,
+        },
+        402
+      );
     }
 
     return createSecureResponse({

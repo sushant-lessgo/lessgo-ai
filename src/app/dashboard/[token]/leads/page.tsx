@@ -33,11 +33,13 @@ import { publishedSubdomainHost } from '@/lib/domains/hosts'
  *     ZERO rows.
  *   - The filter is exactly what blanks admin god-view (R8): an admin's own clerkId
  *     matches none of the owner's submissions.
- *   - It was never a real defence anyway: `/api/forms/submit` takes BOTH `userId` and
- *     `publishedPageId` from the client-supplied request body (`route.ts:57`, written
- *     `:198-199`). ⚠️ Consequence: submissions whose `userId` != the owner were
- *     previously HIDDEN and now appear — a page's visible lead count can shift after
- *     deploy. Not a cross-project leak (the `publishedPageId` scoping above holds).
+ *   - It was never a real defence anyway: `/api/forms/submit` used to take the owner
+ *     `userId` straight from the client-supplied request body. (Fixed by
+ *     secrets-forms-security phase 1: the route now IGNORES body `userId` and derives
+ *     the owner server-side from `publishedPageId` → `PublishedPage.userId`, gated on
+ *     `isServingPublishState`. So `FormSubmission.userId` is trustworthy for rows
+ *     written after that deploy — but forged rows may predate it, and the filter is
+ *     still redundant given the PK-provenance argument above.)
  * Do NOT "restore" it.
  */
 

@@ -87,7 +87,6 @@ export default function LumenContactFormPublished(props: Props) {
             data-lessgo-form
             data-form-id={formId}
             data-page-id={props.publishedPageId}
-            data-owner-id={props.pageOwnerId}
             data-success-message={form?.successMessage || 'Enquiry received — I’ll reply within a day.'}
           >
             {fields.map((f) => {

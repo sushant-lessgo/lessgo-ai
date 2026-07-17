@@ -13,8 +13,8 @@
 // three apex asset URLs appear. That pins BOTH origin sources against a future
 // env refactor:
 //   • htmlGenerator's `assetBase = NEXT_PUBLIC_APP_URL || 'https://lessgo.ai'`
-//     (fonts-self-hosted.css, form.v1.js, a.v2.js), and
-//   • the hardcoded `https://lessgo.ai/assets/{form.v1.js,a.v2.js}` literals in
+//     (fonts-self-hosted.css, form.v2.js, a.v2.js), and
+//   • the hardcoded `https://lessgo.ai/assets/{form.v2.js,a.v2.js}` literals in
 //     LandingPagePublishedRenderer's SSR-fallback <Script> tags.
 //
 // We also stub NEXT_PUBLIC_APP_URL to '' so assetBase deterministically falls
@@ -45,8 +45,8 @@ function buildFormBearingPage() {
       },
       backgroundType: 'neutral',
     },
-    // Presence of `content.forms` is what gates htmlGenerator's form.v1.js tag
-    // (and the published renderer's hardcoded form.v1.js <Script>).
+    // Presence of `content.forms` is what gates htmlGenerator's form.v2.js tag
+    // (and the published renderer's hardcoded form.v2.js <Script>).
     forms: {
       'form-1': {
         id: 'form-1',
@@ -97,7 +97,7 @@ describe('app-subdomain D5 — published assets always load from apex (lessgo.ai
     // 1. Fonts stylesheet (htmlGenerator assetBase).
     expect(html).toContain('https://lessgo.ai/assets/fonts-self-hosted.css');
     // 2. Form handler (htmlGenerator assetBase + published-renderer literal).
-    expect(html).toContain('https://lessgo.ai/assets/form.v1.js');
+    expect(html).toContain('https://lessgo.ai/assets/form.v2.js');
     // 3. Analytics beacon (htmlGenerator assetBase + published-renderer literal).
     expect(html).toContain('https://lessgo.ai/assets/a.v2.js');
 
