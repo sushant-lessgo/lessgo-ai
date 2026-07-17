@@ -420,7 +420,7 @@ else is watching, not blocking:
 
 ## How this gets built
 
-The technical rulings live in `docs/tracks/templatePlan.md` (T9 skeleton layer + the
+The technical rulings live in `docs/tracks/Completed/templatePlan.md` (T9 skeleton layer + the
 2026-07-14 work-vertical reshape). Build order A–F: contract freeze → multi-page
 foundation QA → copy engine → skeleton+atelier skin (incl. work library board + image
 ingestion) → onboarding path → editor primitives. Gate = Kundius sign-off + the Kontur
