@@ -189,6 +189,51 @@ export const workPageTypes: Record<WorkPageTypeKey, WorkPageDef> = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Per-page conversion goal (E4 plan screen)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// A page's "goal" = the one action it asks a visitor to take. Closed enum that
+// MIRRORS the `contactMethod` fact rail (workFacts.schema.ts slot 7:
+// whatsapp|booking|form). Carried + persisted as a forward contract
+// (WorkSitemapPage.goal, Brief.structure.pageDetails[].goal); generation does
+// NOT consume it yet. Plain user-facing wording lives ONLY in workVocabulary.ts
+// (single-source rename law) — this module holds keys/logic only.
+
+/** The closed per-page goal enum. Mirrors the `contactMethod` fact rail. */
+export const WORK_PAGE_GOAL_KEYS = ['whatsapp', 'booking', 'form'] as const;
+
+export type WorkPageGoalKey = (typeof WORK_PAGE_GOAL_KEYS)[number];
+
+/**
+ * Default goal for a page. Per the workEndtoEnd sketch: every page defaults to
+ * the seller's chosen contact method, EXCEPT the contact page which always
+ * defaults to `'form'`. When `contactMethod` is absent (not yet confirmed) the
+ * neutral fallback is `'form'` (matches the contact-page default).
+ */
+export function defaultGoalForPage(
+  pageKey: string,
+  contactMethod?: WorkPageGoalKey
+): WorkPageGoalKey {
+  if (pageKey === 'contact') return 'form';
+  return contactMethod ?? 'form';
+}
+
+/**
+ * The designed add-page menu: page types the user may ADD to the plan that are
+ * not already present. Excludes `home` (required — never removable, never in
+ * the menu) and the parametric `work-group` (needs a specific group to attach
+ * to). Includes `blog` + `project-story` as explicit adds (only the auto-
+ * proposal rule excludes them). `currentKeys` = the page-type keys already in
+ * the sitemap.
+ */
+export function addableWorkPages(currentKeys: string[]): WorkPageTypeKey[] {
+  const present = new Set<string>(currentKeys);
+  return workPageTypeKeys.filter(
+    (key) => key !== 'home' && key !== 'work-group' && !present.has(key)
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Named whole-site archetypes
 // ─────────────────────────────────────────────────────────────────────────────
 

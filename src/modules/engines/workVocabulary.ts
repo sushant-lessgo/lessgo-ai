@@ -147,6 +147,29 @@ export const workVocabulary: Record<string, WorkVocabEntry> = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Per-page goal wording (E4 plan screen). SINGLE user-facing source.
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// The plain badge shown on each page column at the site-plan screen. Keyed by
+// the closed `WorkPageGoalKey` (workPages.ts) — the ONLY place those keys become
+// words a seller reads (rename-once law). `import type` keeps this module pure.
+
+import type { WorkPageGoalKey } from './workPages';
+
+/** Buyer word for each per-page goal (what the page asks a visitor to do). */
+export const workPageGoalWords: Record<
+  WorkPageGoalKey,
+  { userLabel: string; description?: string }
+> = {
+  whatsapp: { userLabel: 'Message on WhatsApp' },
+  booking: { userLabel: 'Book a time' },
+  form: { userLabel: 'Send the form' },
+};
+
+/** The badge prefix that precedes a goal word, e.g. "asks visitors to: Book a time". */
+export const workPageGoalBadgePrefix = 'asks visitors to:';
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Profession-adaptive wording — the "shoot / project / piece / case study" layer.
 // ─────────────────────────────────────────────────────────────────────────────
 

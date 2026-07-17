@@ -92,6 +92,7 @@ import type { ThingGenerationInput } from '@/modules/wizard/generation/thing';
 import type { TrustGenerationInput } from '@/modules/wizard/generation/trust';
 import type { WorkGenerationInput } from '@/modules/wizard/generation/work';
 import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
+import type { WorkPageGoalKey } from '@/modules/engines/workPages';
 
 // ---------------------------------------------------------------------------
 // Field state model
@@ -624,11 +625,18 @@ export function buildStructurePatch(s: WizardState): ConfirmedStructure | null {
     return {
       mode: 'multi',
       pages: sitemap.map((p) => p.archetypeKey),
-      pageDetails: sitemap.map((p) => ({
-        archetypeKey: p.archetypeKey,
-        slug: p.pathSlug,
-        sections: [...p.sections],
-      })),
+      pageDetails: sitemap.map((p) => {
+        // `goal` rides on the work sitemap (WorkSitemapPage) which the store
+        // types loosely as the product SitemapPage; read it via a narrow widen.
+        const goal = (p as { goal?: WorkPageGoalKey }).goal;
+        return {
+          archetypeKey: p.archetypeKey,
+          slug: p.pathSlug,
+          sections: [...p.sections],
+          title: p.title,
+          ...(goal ? { goal } : {}),
+        };
+      }),
     };
   }
   const body = confirmedStructureBody(s);
@@ -1000,12 +1008,16 @@ export const useWizardStore = create<WizardStore>()(
             if (persisted.mode === 'multi' && persisted.pageDetails?.length) {
               state.sitemap = persisted.pageDetails.map((d) => ({
                 archetypeKey: d.archetypeKey,
-                // Title isn't persisted (schema carries key/slug/sections
-                // only) — prettify the key; the slot's title input remains
-                // editable.
-                title: d.archetypeKey.charAt(0).toUpperCase() + d.archetypeKey.slice(1),
+                // Title now persists (E4); fall back to prettifying the key for
+                // older Briefs that carry key/slug/sections only.
+                title:
+                  d.title ??
+                  d.archetypeKey.charAt(0).toUpperCase() + d.archetypeKey.slice(1),
                 pathSlug: d.slug,
                 sections: [...d.sections],
+                // Goal round-trips symmetrically (WorkSitemapPage.goal); absent
+                // on non-work / older Briefs.
+                ...(d.goal ? { goal: d.goal } : {}),
               }));
             } else if (persisted.mode === 'single' && persisted.sections?.length) {
               state.structureSections = persisted.sections.filter(
