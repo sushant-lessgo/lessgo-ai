@@ -14,8 +14,73 @@ Close three verified billing-correctness holes before pricing-v2: (H1) `deductCr
 ```
 phase 1 H1 atomic decrement + ledger-in-tx + concurrency test: done (commit d6a4cc21, review loops 1, verdict ship) — AWAITING FOUNDER HUMAN GATE before phase 2
 phase 2 H2 hasFeature deny-by-default + tests: done (commit 5eb69db4, review loops 1, verdict ship)
-phase 3 M1/M2 route standardization + withAICredits deletion + route tests: pending
+phase 3 M1/M2 route standardization + withAICredits deletion + route tests: done (commit 7d8e8e41, review loops 1, verdict ship)
+ALL PHASES DONE — npm run build GREEN — awaiting FOUNDER MERGE GATE
 ```
+
+**Phase 3 review outcome (impl-reviewer, verdict `ship`):** **Incident recovery VERIFIED
+COMPLETE** — reviewer diffed `product/strategy/route.ts` line-by-line vs its never-reverted
+siblings `service/strategy` + `work/strategy`: structurally byte-equivalent, only the 3
+legitimate per-route deltas (log prefix, endpoint string, handler name). Pre-gate present at
+step 2c — AFTER the mock/DEMO_TOKEN short-circuit, BEFORE prompt build. No other file
+collaterally reverted. Mutation claim INDEPENDENTLY REPRODUCED (reviewer neutered pre-gate +
+charge_conflict branch → exactly the 2 intended tests red; restored from scratchpad copy,
+hash-verified `775daa32` byte-identical → 7/7 green). Compensating control done: the 4
+untested routes (`service/{strategy,generate-copy}`, `work/{strategy,generate-copy}`)
+diff-read against their tested twin → identical correct edit. Costs verified:
+STRATEGY_GENERATION(2)×3, GENERATE_COPY(3)×3, SCRAPE_WEBSITE(1), UNDERSTAND(1),
+PRIVACY_POLICY_GENERATION(2) at both pre-gate(:98)+consume(:159). No double-gating on the 2
+alignment routes. `/credit/i` guard holds. Gates: `tsc` exit 0 · `test:run` **3583 passed**
+(+16 over phase 2) w/ concurrency suite EXECUTED · `lint` 0 errors · `npm run build` GREEN.
+Zero scope creep — all 10 out-of-scope fences = 0 files.
+
+**Process incident (disclosed by implementer, state verified trustworthy):** implementer
+chained a `git checkout --` as a "restore" during mutation-testing → reverted its own real
+edits to `product/strategy/route.ts`; caught it, re-applied by hand. Final state independently
+verified correct against 2 clean siblings (above). Lesson: agents must use `git stash`/backup
+copies, never `git checkout --` on a dirty file.
+
+## FOUNDER QA REMAINDER (the one gate this pipeline leaves open)
+
+The manual smoke could NOT be run in-worktree: **no `CLERK_SECRET_KEY`, no provider key** →
+no authed request, no real generation possible. Implementer did NOT fake it (correct call).
+Substitute actually run: real `checkCredits`/`logUsageEvent` against dev Postgres →
+(i) 0-credit denied, (ii) attempt ledgered `success:false`/`creditsUsed:0`, (iii) funded
+passes. Covers ledger/gate semantics — the riskiest, least test-visible part. HTTP layer
+remains unverified. **Founder pass, `npm run dev`, `DEV_BYPASS_CREDITS` UNSET:**
+
+1. **Funded happy path:** one real onboarding generation on a funded dev user → 200, correct
+   copy, balance decrements by the right amount, exactly ONE `UsageEvent` row `success:true`.
+2. **0-credit pre-gate over HTTP:** set a test user's `creditsRemaining` AND `creditPool` to 0
+   → endpoint returns **402**, server logs show **NO provider call**, and a
+   `success:false`/`creditsUsed:0` `UsageEvent` row exists.
+3. **Demo/mock still free:** a `DEMO_TOKEN`/`NEXT_PUBLIC_USE_MOCK_GPT` run on a 0-credit user
+   still succeeds uncharged AND ungated (guards the pre-gate placement).
+4. **Release-note item:** a 0-credit user's website-import attempt now triggers NO outbound
+   fetch at all — intended improvement, but it changes what an unfunded import does.
+
+## POST-PIPELINE FOLLOW-UPS (non-blocking, reviewer-raised)
+
+- **DB-outage-during-charge reads as a 402** (`consumeCredits` catch → non-`charge_conflict`
+  → 402), so an infra failure sends a SOLVENT user to the buy-credits wall with output
+  discarded. In-plan per design decision 1 ("anything else → 402"), but a third
+  `charge_failed`-style bucket for thrown/infra errors is the natural follow-up alongside Q9.
+- The 2 alignment routes' `requireAICredits` pre-gate 402s remain UNLEDGERED (pre-existing) —
+  blocked-attempt ledger coverage is consistent across the 8 main routes but absent on those
+  two. Fold into the deferred Q3 DRY-up.
+- `planCheck.ts` retains a now-unused `CREDIT_COSTS` import (already unused pre-phase; lint
+  agrees it's fine).
+- Stale "hasFeature fails OPEN" comments at `publish/route.ts:359` +
+  `domains/verify-dns/route.ts:117` → deferred Q3 DRY-up.
+- `deductCredits` without `eventData` writes no ledger row — inert today, latent footgun.
+- `CORROLARY` typo → `COROLLARY` in a creditSystem.ts comment.
+
+## MERGE-GATE HAZARD (orchestrator note)
+
+`docs/task/billing-correctness.spec.md` is **untracked on main** but **tracked on this
+branch** → `git merge` will REFUSE ("untracked working tree file would be overwritten").
+Content is byte-identical (verified). Fix at merge: `rm` the untracked copy on main first,
+then merge.
 
 **Phase 2 review outcome (impl-reviewer, verdict `ship`):** Reviewer reverted `hasFeature`
 to the pre-fix predicate and re-ran → **5 tests RED** (FREE removeBranding, FREE
