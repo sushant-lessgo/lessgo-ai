@@ -20,7 +20,8 @@ ruled additive exception: a read-only `hasBillingAccount` field on `/api/billing
 
 - phase 1 config extraction (prisma-free constants): done (commit 1262dbe2, review loops 1, verdict ship)
 - phase 2 insufficient-credits normalizer: done (commit b74023aa, review loops 2, verdict ship) — scout §F Pattern-A error found+corrected at source; fixture had echoed the wrong belief
-- phase 3 dashboard header credit counter: pending
+- phase 3 dashboard header credit counter: done (commit 35d53d42, review loops 1, verdict ship) — config-driven proven by review mutation probe (10→7, DOM followed); e2e registered in authed allowlist + execution evidenced
+  - carried to phase 8: (a) CreditBadge panel's Upgrade link is mouse-unreachable (pre-existing: mouseleave + sideOffset gap) — fix via close-delay or sideOffset=0; (b) add jsdom vitest that vi.mocks creditCosts with fabricated values to prove the component READS the module (catches same-value re-inline, which no e2e can); (c) audit sentence wrongly claims text-sm dropped (CreditBadge.tsx:150) — stock fontSize utilities are fine, fix the sentence
 - phase 4 gating message + upgrade path (beta blocker): pending
 - phase 5 editor header credit counter: pending
 - phase 6 lean Billing & plan view + CTAs + sidebar widget: pending

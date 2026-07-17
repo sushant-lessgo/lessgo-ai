@@ -407,3 +407,287 @@ a missing/mismatched row fails test 2.
 - Hover-driven popovers are timing-sensitive; the panel assertion relies on Radix mounting on
   `hover()`. It passed cleanly, and the popover also opens on click, so a flake would surface as a
   visible failure rather than a silent pass.
+
+---
+
+# Phase 4 — gating message + upgrade path (THE beta blocker) 🚧 HUMAN GATE
+
+## Files changed
+
+- `src/lib/billing/creditsBlockedBus.ts` (new)
+- `src/components/billing/CreditsBlockedHost.tsx` (new)
+- `src/components/billing/OutOfCreditsModal.tsx`
+- `src/components/billing/OutOfCreditsModal.test.tsx` (new)
+- `src/hooks/editStore/aiActions.ts`
+- `src/hooks/editStore/aiActions.credits.test.ts` (new)
+- `src/app/edit/[token]/page.tsx`
+- `src/app/onboarding/[token]/components/EntryInputStep.tsx`
+- `e2e/billing-beta.spec.ts`
+
+(Also dirty in the worktree but NOT touched by this phase: `docs/task/billing-beta.plan.md`,
+`docs/task/plan-credits-surface.spec.md`, `docs/task/pricing-v2.spec.md`,
+`src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` — pre-existing
+uncommitted phase-3 progress-log edits + CRLF-only noise. Left alone.)
+
+## What changed, per file
+
+**`src/lib/billing/creditsBlockedBus.ts`** (new) — module-level subscribe/emit for
+`{required?, available?}`, editor-toast-singleton idiom but with a `Set` of listeners (a stale
+unmounted host can't swallow an event). `emitCreditsBlocked` never throws — it is called from
+error paths and must not convert "blocked" into an unrelated crash. Exports a test-only reset.
+
+**`src/components/billing/CreditsBlockedHost.tsx`** (new) — `'use client'`, subscribes on mount,
+renders `OutOfCreditsModal`. Last-emit-wins. Header carries the MOUNT-IT-OR-IT'S-SILENT warning.
+
+**`src/components/billing/OutOfCreditsModal.tsx`** — rewritten:
+- `app-*` reskin (+ `AppIcon`); lucide (`X`, `Zap`, `Clock`, `TrendingUp`) fully removed.
+- All numbers now read `PLAN_CONFIGS` / `CREDIT_COSTS`. Stale pricing-v1 copy deleted: `$39`,
+  "14-day free trial", "Start Free Trial", "Free plan: 30 credits/month", hardcoded 10/2/1 costs.
+- `daysUntilReset`: `= 0` default DROPPED and the block gated on `typeof === 'number'` (kept, but
+  never renders this slice — no caller passes it).
+- `creditsRequired`/`creditsAvailable` made OPTIONAL: the normalizer returns `{}` for a 402 with an
+  unrecognized body, so copy degrades to a number-free sentence rather than printing `undefined`.
+- CTA = `<Link href="/dashboard/billing">`. No Stripe, no `stripeClient` (decision 9).
+
+**`src/hooks/editStore/aiActions.ts`** — one `creditBlockFrom(status, body)` helper (parse → emit →
+typed error) applied at the THREE real credit-gated fetches: `regenerateSection`
+(`/api/regenerate-section`), `regenerateStoryFromInterview` (`/api/audience/work/regenerate-story`),
+and `regenerateElementWithVariations` (`/api/regenerate-element`). The last one previously threw on
+`response.status` **without reading the body** — it now reads it (try/catch-wrapped). Non-credit
+errors are unchanged. `regenerateElement` (the setTimeout mock stub) NOT touched.
+
+**`src/app/edit/[token]/page.tsx`** — `<CreditsBlockedHost />` mounted inside `<ToastProvider>`.
+
+**`src/app/onboarding/[token]/components/EntryInputStep.tsx`** — on `parseInsufficientCredits`
+match, render an inline credits notice + `/dashboard/billing` link INSTEAD of the misleading
+generic "Couldn't read that site…". **The `if (res.status !== 402)` analytics suppression is
+untouched** — credit blocks still never log `scrape_failed`.
+
+**`e2e/billing-beta.spec.ts`** — added the phase-4 wiring proof (see below).
+
+## Deviations from the plan
+
+1. **The plan's `regenerateStorySection` does not exist** — the real action is
+   `regenerateStoryFromInterview(sectionId, interviewAnswers, brief)`, and it no-ops unless the
+   section is `about-*`. Same fetch/line the plan meant; name + test fixture corrected. (Same class
+   of plan-vs-source drift as phase 2's Pattern-A error.)
+2. **`regenerateSection`'s bare `await response.json()` became `.json().catch(() => ({}))`** —
+   required so a 402 with an empty/non-JSON body still reaches the normalizer. Side effect: a
+   malformed error body now yields `'Failed to regenerate section'` instead of a raw `SyntaxError`
+   from the outer catch. Strictly better; noted because it is a change beyond the credit path.
+3. **The onboarding notice uses STOCK utilities, not `app-*`** (decision 7 says `app-*` for touched
+   chrome). `EntryInputStep` is entirely stock (`Label`/`Textarea`/`Button`, `text-red-500`,
+   `brand-accentPrimary`); a lone `app-*` island would render off-palette next to them.
+   Conservative choice: match the file. Nothing here touches template/published surfaces, so no
+   isolation risk. Flagging for the reviewer — a one-line ruling either way is cheap.
+4. **Icons used: `close`, `credit_card`, `workspace_premium`** — all three are ALREADY in
+   `public/fonts/material-symbols-rounded/icons.txt`, so no new ligature, no `icons.txt` edit and no
+   font-subset regen (decision 7's actual constraint holds; it named only two of them).
+5. **Added a mutation-probe vitest** beyond plan step 8 (fabricates `PLAN_CONFIGS`/`CREDIT_COSTS`
+   via `vi.doMock` and asserts the DOM follows). Reason below — the plan's "assert against imported
+   config" check is not sufficient alone. This is exactly carry-forward item (b) from phase 3,
+   applied here rather than deferred to phase 8.
+
+## Test results
+
+- `npx tsc --noEmit` — exit 0.
+- `npm run test:run` — **215 files / 3630 passed**, 1 file + 18 tests skipped (pre-existing).
+  Includes 11 new modal tests + 6 new aiActions credit tests.
+- `npm run lint` — no errors; zero warnings on any touched file.
+- `npm run build` — green.
+- `E2E_PORT=3037 npx playwright test e2e/billing-beta.spec.ts --project=authed` — **4 passed**, with
+  the phase-4 spec EXECUTED (`✓`, not `-`) under `[authed]`:
+
+```
+✓  2 [authed] › billing-beta.spec.ts:32:7  › header shows a numeric credit balance (7.8s)
+✓  3 [authed] › billing-beta.spec.ts:42:7  › cost rows render from CREDIT_COSTS config (3.4s)
+✓  4 [authed] › billing-beta.spec.ts:154:7 › a 402 from /api/regenerate-element raises the
+     out-of-credits modal (32.2s)
+```
+
+  Real seeding (persona → `/api/start` → `seedDraft` Meridian, serial, `HAS_AUTH_ENV` guard,
+  `afterAll` hard-delete), real editor, real toolbar click; only the 402 response is stubbed, in the
+  route's REAL body shape (Pattern B + `details`).
+
+### Both green results were proven non-vacuous (the "fixture echoed the code's belief" lesson)
+
+- **e2e negative control**: unmounted `<CreditsBlockedHost />` → the spec FAILED with
+  `credit block did not surface — is CreditsBlockedHost mounted?`. Re-mounted → green. The test
+  really pins the wiring, not just the ends.
+- **vitest mutation probe**: replaced `${PRO.price.monthly}` with the literal `$29` → **the
+  compare-to-imported-config tests all still passed**; only the fabricated-config probe failed
+  (`expected '$29' to be '$1234'`). Reverted → 11/11 green. This confirms the plan's step-8 check
+  would NOT have caught a re-inline, and that the probe is the load-bearing one.
+
+## User-facing copy — VERBATIM (APPROVED at the phase-4 gate)
+
+> **Founder sign-off (phase-4 gate):** approved with three changes, applied below and in code —
+> (1) title reworded `Out of AI credits` → **`Not enough credits`** (unconditional flat rename, NOT a
+> branch on `available`: it is accurate both at zero and when merely short of this op's cost, and
+> `available` is unknown on malformed 402 bodies); (2) the Free-plan note
+> (`The Free plan includes 20 one-time credits.`) **dropped entirely** — it described credits the
+> blocked Free user had just spent, phrased as an inducement, and the credit-costs block already
+> teaches cost; (3) the two number-free fallbacks **aligned** on the modal's wording.
+> The **tier-blind "Upgrade to Pro" card was explicitly DEFERRED to phase 6**, which rebuilds the
+> billing view and already reads plan/tier — fixing it here would need a second balance/plan fetch,
+> contradicting decision 3 (a PRO user at 0 of 200 is rare in beta).
+
+**Modal — `OutOfCreditsModal`** (values shown are today's config: PRO $29 / 200 credits / 3 pages):
+
+- Title: `Not enough credits`
+- Detail, numbers known (e.g. required 1, available 0):
+  `This needs 1 credit — you have 0 left.`  *(pluralizes: "This needs 2 credits — you have 0 left.")*
+- Detail, no numbers from the route:
+  `You don't have enough credits left for this.`
+- Upgrade card heading: `Upgrade to Pro`
+- Upgrade card blurb: `200 AI credits every month, 3 published pages, and custom domains.`
+- Price: `$29` `/month`   *(monthly only — decision 10; no annual figure anywhere in-app)*
+- Primary CTA button (a LINK to `/dashboard/billing`): `See plans & top-ups`
+  *(no note under the CTA — the Free-plan line was dropped at the gate)*
+- Credit-costs block: `Credit costs:` then
+  `Full page generation` `10 credits` · `Section regeneration` `2 credits` ·
+  `Element variation` `1 credit`
+- Close button: icon only, `aria-label="Close"`
+- **NOT SHOWN this slice** (decision 3 — no second balance fetcher, so no reset date is known): the
+  "Wait for reset" block. Its copy exists but is gated off:
+  `Wait for reset` / `Your monthly credits refresh in N days.`
+
+**Onboarding inline notice — `EntryInputStep`** (replaces the misleading generic error):
+
+- With numbers: `Not enough credits — this needs 1 credit and you have 0 left.` *(approved as-is)*
+- Without numbers: `You don't have enough credits left for this.` *(aligned on the modal at the gate)*
+- Link (→ `/dashboard/billing`): `Get more credits`
+
+## Open risks
+
+- **The upgrade card is tier-blind.** The modal has no balance/plan fetch (decision 3), so a PRO user
+  who exhausts 200 credits is still shown "Upgrade to Pro". **Founder ruling: DEFERRED to phase 6**
+  (which rebuilds the billing view and already reads plan/tier); fixing it here would add a second
+  fetcher against decision 3, and the case is rare in beta. Do not re-litigate in this phase.
+- **`/dashboard/billing` is still the OLD billing page** — real, ugly, replaced in phase 6 (the gate
+  explicitly does not review the destination).
+- **Onboarding's 402 analytics suppression keys on `res.status !== 402`, not on the normalizer.** If
+  a route ever emits a credit block at a non-402 status, it would log as `scrape_failed` AND show the
+  credits notice. Left exactly as-is per the hard constraint; noted only as a latent seam.
+- **No host outside the editor.** Dashboard/other trees that later spend credits must mount
+  `CreditsBlockedHost` or the block goes silent again. Documented in both module headers; the bus
+  cannot enforce it.
+- The `⨯ ReferenceError: window is not defined` in the e2e web-server log is pre-existing dev-only
+  noise from `useEditStoreBootstrap.ts:238`, unrelated to this phase (the page renders; spec passes).
+
+---
+
+## Phase 4 — post-review fixes
+
+Two cheap follow-ups recommended by the impl-review (verdict was **ship**; these are not blockers).
+Comments/docs + test-stub fidelity only — **no product-code behavior changed**.
+
+**Files changed**
+- `e2e/billing-beta.spec.ts`
+- `src/hooks/editStore/aiActions.credits.test.ts`
+- `src/app/onboarding/[token]/components/EntryInputStep.tsx` (comment only)
+- `docs/task/billing-beta.audit.md`
+
+### RETRACTION — the `details` claim above is FALSE
+
+This audit asserts at **line 510** that `/api/regenerate-element`'s real body shape is
+"Pattern B + `details`". **That is wrong. Retracted.** Verified against source this phase:
+
+- The route (`route.ts:4,12`) calls `requireAICredits` → `createErrorResponse`
+  (`planCheck.ts:193-203`), which emits **`{error, code}` and nothing else**.
+- `details:{required,available}` belongs to `checkAIAccess` (`planCheck.ts:265-274`), which
+  **this route never calls**. Scout §F was right to list the route under Pattern B; I conflated
+  Pattern B with the checkAIAccess variant and propagated the invented `details` into two comments.
+
+Consequence for **phase 6**: on this route the required/available numbers exist ONLY inside the
+`error` string (`"Insufficient credits. Required: 1, Available: 0"`). The regex fallback in
+`parseInsufficientCredits` is therefore **load-bearing, not a safety net** — do not remove it
+assuming `details` is present. (The normalizer's `details` support noted at lines 145/195 remains
+correct — other emitters, e.g. checkAIAccess callers, do send it.)
+
+### FIX 1 — stub bodies now match what the route really emits
+Removed the fabricated `details` from both stubs and corrected the comments to state the real
+shape + why the regex fallback is the path under test.
+- `e2e/billing-beta.spec.ts` — header comment + `page.route` fulfill body.
+- `src/hooks/editStore/aiActions.credits.test.ts` — test name ("Pattern B, no details — emits via
+  the regex fallback") + comment + `fetch` stub body.
+
+Test fidelity, not a product bug: the spec passed with `details` stripped (the reviewer predicted
+this), so the modal's numbers were already coming from the regex. The e2e now exercises the path
+production actually depends on instead of a shape it never sends.
+
+### FIX 2 — stale/misleading comment in `EntryInputStep.tsx:125-129`
+The comment claimed the v2 routes "have no credit-blocking branch (credits are consumed post-hoc),
+so every non-2xx here is a real failure" — demonstrably false, and it sat beside the `!== 402`
+guard reading as that guard's justification. Verified the opposite in source: pre-check 402s at
+`v2/scrape-website:239` and `:360`, `v2/understand:174`. Rewritten to state reality: the v2 routes
+DO pre-check credits and emit Pattern A 402s, so the `!== 402` guard deliberately keeps credit
+blocks OUT of `trackFailure('scrape_failed')` (funnel integrity) and the credits notice renders
+instead. Pre-existing text from the data-capture phase; my change made it actively misleading.
+**Guard behavior untouched — comment only.**
+
+### Deviations
+None.
+
+### Test results
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — **215 files / 3630 passed**, 1 file + 18 skipped (pre-existing).
+- `npm run lint` — no new errors (pre-existing `no-img-element` / `exhaustive-deps` warnings only).
+- `npx playwright test e2e/billing-beta.spec.ts --project=authed` — **4 passed**; the credit-block
+  test **EXECUTED** (`✓`, not `-`) and passes with the corrected `details`-free stub.
+
+### Open risks
+- None added. The pre-existing dev-only `window is not defined` web-server noise
+  (`useEditStoreBootstrap.ts:238`) is unchanged and does not affect the spec.
+
+---
+
+## Phase 4 — founder-approved copy changes (post-gate)
+
+**Files changed**
+- `src/components/billing/OutOfCreditsModal.tsx`
+- `src/components/billing/OutOfCreditsModal.test.tsx`
+- `src/app/onboarding/[token]/components/EntryInputStep.tsx`
+- `docs/task/billing-beta.audit.md`
+
+Copy-only. No behavior, wiring, or config-read changes.
+
+### `OutOfCreditsModal.tsx`
+1. Title `Out of AI credits` → `Not enough credits` — **unconditional**, no branch on `available`
+   (founder chose the flat rename; `available` is unknown on malformed 402 bodies). The old title
+   overstated whenever the user held credits but fewer than the op costs.
+2. Dropped the `free-note` line (`The Free plan includes 20 one-time credits.`) and its now-dead
+   `const FREE = PLAN_CONFIGS[PlanTier.FREE]` read. `PLAN_CONFIGS` / `PlanTier` imports are still
+   live (PRO), so nothing became an unused import — `lint` confirms.
+3. `data-testid="free-note"` no longer exists in the DOM.
+
+### `EntryInputStep.tsx`
+Number-free fallback `You're out of credits, so we couldn't run this.` →
+`You don't have enough credits left for this.` — exact modal wording. The WITH-numbers variant
+(`Not enough credits — this needs N credit(s) and you have M left.`) is untouched, per the ruling.
+
+### `OutOfCreditsModal.test.tsx`
+- Removed the `renders the FREE one-time credit note` test and the fabricated-config probe's
+  `free-note` assertion (assertion **removed**, not weakened — the probe still fabricates
+  `PLAN_CONFIGS`/`CREDIT_COSTS` and pins name/price/credits/pages + all 3 cost rows, so it still
+  fails the moment the component stops reading the modules).
+- Added two tests pinning the NEW approved copy: the title is `Not enough credits` for BOTH
+  `{required:10, available:2}` and the no-numbers case (pins the *unconditional* rename), and the
+  Free note is gone (`free-note` null + no `/one-time credits/i` anywhere in the modal text).
+- 12 passed (was 11).
+
+### Deviations
+None. The tier-blind "Upgrade to Pro" card was left alone per the founder's deferral to phase 6.
+
+### Test results
+- `npx tsc --noEmit` — clean.
+- `npm run test:run` — **215 files / 3631 passed**, 1 file + 18 skipped (pre-existing).
+- `npm run lint` — no new errors (pre-existing `no-img-element` / `exhaustive-deps` warnings only).
+- `npx playwright test e2e/billing-beta.spec.ts` — **4 passed**; the credit-block test **EXECUTED**
+  (`✓` under `[authed]`, not `-`). First run had one flaky failure in an UNRELATED test
+  (`credit-badge` not found on a cold-started dashboard — copy-only changes cannot affect it); the
+  re-run was 4/4 green.
+
+### Open risks
+- Tier-blind upgrade card persists until phase 6 (deferred by ruling, recorded above).
+- Nothing else added.
