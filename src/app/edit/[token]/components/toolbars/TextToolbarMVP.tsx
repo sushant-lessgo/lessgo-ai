@@ -777,6 +777,7 @@ function TextToolbarMVPInner({
               label={`AI text variations · ${creditCostHint(CREDIT_COSTS.ELEMENT_REGENERATION)}`}
             >
               <button
+                aria-label="AI text variations"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();

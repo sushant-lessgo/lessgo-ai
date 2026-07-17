@@ -6,6 +6,56 @@
 > `IVOC_RESEARCH=3`, `SCRAPE_WEBSITE=1`). Ignore any `npx prisma db push` step — this
 > repo uses `npx prisma migrate dev`. See `CLAUDE.md` › "Billing, Plans & Credits".
 
+---
+
+## billing-beta client architecture (2026-07, maintained)
+
+The rest of this file is the stale Sprint-8 dump. THIS section is current truth for the
+client (dashboard/editor) billing surfaces.
+
+**Config split (prisma-free).** `planManager.ts` and `creditSystem.ts` import Prisma and are
+**server-only** — importing either into a client component drags Prisma into the browser
+bundle (build failure). So the pure constants were extracted into two prisma-free modules:
+
+- `src/lib/planConfigs.ts` — `PlanTier`, `PlanStatus`, `PlanConfig`, `PLAN_CONFIGS`,
+  `getPlanConfig`.
+- `src/lib/creditCosts.ts` — `CREDIT_COSTS` (+ its type).
+
+`planManager.ts`/`creditSystem.ts` **re-export** them, so all pre-existing server importers are
+untouched. Client components (`CreditBadge`, `OutOfCreditsModal`, `dashboard/billing/page.tsx`)
+and the e2e specs import from `planConfigs`/`creditCosts` **directly**. Rule: **never import
+`planManager`/`creditSystem` client-side.** (`isolatedModules` gotcha — a `PlanConfig` *interface*
+must be re-exported with `export type`, not a value re-export.)
+
+**Every client-facing number is config-driven.** Prices, credit costs, plan names, page limits all
+render from `PLAN_CONFIGS`/`CREDIT_COSTS` — never re-inlined literals. A same-value re-inline (`10`)
+is invisible to a compare-to-config test, so each surface carries a *fabricated-config probe*
+(`vi.doMock` the module with junk values, assert the DOM follows): see
+`CreditBadge.test.tsx`, `OutOfCreditsModal.test.tsx`, `dashboard/billing/page.test.tsx`.
+
+**402 normalizer.** `src/lib/billing/insufficientCredits.ts` `parseInsufficientCredits(status, body)`
+accepts all THREE insufficient-credits response shapes the routes emit (Pattern A
+`{success:false, error:{code, message}}`; Pattern B `{error, code:'INSUFFICIENT_CREDITS'}`;
+checkAIAccess = B + `details:{required, available}`) and returns `{required?, available?}`. When no
+structured `details` are present it **regexes** the "Required: N, Available: M" message. That regex
+fallback is **LOAD-BEARING**, not redundant: `/api/regenerate-element` calls `requireAICredits` →
+`createErrorResponse`, which emits `{error, code}` with **NO `details`** — the numbers reach the
+out-of-credits modal on that route *only* through the regex. Do not delete it as a duplicate of the
+structured path.
+
+**`hasBillingAccount`.** `/api/billing/plan` returns this additive boolean; the billing page gates
+the "Manage billing" (Stripe portal) CTA on it, **never on tier** (decision 5): a churned ex-payer
+is FREE but must still reach invoices/cancellation, and an admin-granted PRO has no Stripe customer
+id and would just 400.
+
+**In-app upgrade = monthly only (decision 10).** The billing page and out-of-credits modal render
+the Pro **monthly** price (`PLAN_CONFIGS[PRO].price.monthly`) and NO annual figure. Gotcha:
+`PLAN_CONFIGS[PRO].price.annual` is a **per-month** number (24), and the real $290/yr lives only in
+`app/pricing/page.tsx` — rendering either in-app would be wrong ($24) or invented. Annual purchase
+stays on the public `/pricing` page; in-app change-plan is Free↔Pro only, downgrade via the portal.
+
+---
+
 Sprint 8 Objective 1: Pricing System Implementation Plan                                                                          │
      │                                                                                                                                   │
      │ Context: Implement Stripe-based pricing with 4 tiers (Free, Pro, Agency, Enterprise). Build foundation for all but limit feature  │

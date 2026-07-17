@@ -82,6 +82,26 @@ const SHOWN_COSTS: ReadonlyArray<{ op: keyof typeof CREDIT_COSTS; label: string 
 /** Statuses in which a subscription actually bills again. */
 const LIVE_STATUSES: ReadonlyArray<string> = [PlanStatus.ACTIVE, PlanStatus.TRIALING];
 
+/**
+ * Friendly labels for raw Stripe subscription vocab, so the plan card doesn't
+ * flash `past_due`/`incomplete` at a glancing founder. Keyed by lowercased raw
+ * status; both Stripe's `canceled` and our enum's `cancelled` map. Unknown
+ * values fall back to a capitalized copy of the raw string (never blank).
+ */
+const STATUS_LABELS: Readonly<Record<string, string>> = {
+  active: 'Active',
+  trialing: 'Trial',
+  past_due: 'Payment overdue',
+  canceled: 'Canceled',
+  cancelled: 'Canceled',
+  incomplete: 'Incomplete',
+};
+
+function friendlyStatus(status: string | undefined): string {
+  const raw = status ?? PlanStatus.ACTIVE;
+  return STATUS_LABELS[raw.toLowerCase()] ?? (raw.charAt(0).toUpperCase() + raw.slice(1));
+}
+
 function SuccessBanner() {
   const searchParams = useSearchParams();
   if (searchParams.get('success') !== 'true') return null;
@@ -273,9 +293,8 @@ export default function BillingPage() {
               value={
                 <Badge
                   variant={plan?.status === PlanStatus.ACTIVE ? 'success' : 'status'}
-                  className="capitalize"
                 >
-                  {plan?.status ?? PlanStatus.ACTIVE}
+                  {friendlyStatus(plan?.status)}
                 </Badge>
               }
             />

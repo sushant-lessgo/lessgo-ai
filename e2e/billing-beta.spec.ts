@@ -31,13 +31,18 @@ test.describe('billing-beta — dashboard credit counter', () => {
   test.skip(!HAS_AUTH_ENV, 'Clerk E2E creds not configured');
 
   test('header shows a numeric credit balance', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
 
+    // Cold-start / concurrent-load robustness: the badge shows a spinner until
+    // /api/credits/balance resolves, so give it a real timeout instead of the
+    // default 5s (this assertion flaked once on a cold dashboard, green on re-run).
     const badge = page.getByTestId('credit-badge');
-    await expect(badge).toBeVisible();
+    await expect(badge).toBeVisible({ timeout: 20_000 });
 
     // Numeric: either "N" (pool-only tiers) or "N/M" (monthly allotment).
-    await expect(page.getByTestId('credit-badge-value')).toHaveText(/^\d+(\/\d+)?$/);
+    await expect(page.getByTestId('credit-badge-value')).toHaveText(/^\d+(\/\d+)?$/, {
+      timeout: 20_000,
+    });
   });
 
   test('cost rows render from CREDIT_COSTS config (not hardcoded)', async ({ page }) => {
@@ -133,7 +138,7 @@ async function triggerVariations(page: Page) {
   await headline.click();
 
   const regenerate = page.getByRole('button', { name: 'Regenerate', exact: true }).first();
-  const sparkle = page.locator('button[title="AI text variations"]').first();
+  const sparkle = page.getByRole('button', { name: 'AI text variations' }).first();
 
   await expect
     .poll(
@@ -153,6 +158,31 @@ test.afterAll(async () => {
     await prisma.project.deleteMany({ where: { tokenId: sharedToken } }).catch(() => {});
   }
   await prisma.$disconnect();
+});
+
+// billing-beta PHASE 8 (C9) — the EDITOR-header CreditBadge mount had ZERO
+// automated coverage: deleting `<CreditBadge/>` from GlobalAppHeader left every
+// gate green. The dashboard tests above cover the dashboard mount; this covers
+// the second (editor) mount — the SAME component but a distinct wiring point
+// (GlobalAppHeader, not DashboardTopBar). It reuses the seeded token/session and
+// is deliberately ordered BEFORE the 402-modal test: the file runs serial, and
+// this assertion only needs the editor page + badge (no toolbar interaction), so
+// it must not sit behind the heavier, occasionally-flaky variations flow below.
+test.describe('billing-beta — editor header credit badge', () => {
+  test.skip(!HAS_AUTH_ENV, 'Clerk E2E creds not configured');
+
+  test('the credit badge renders in the editor header', async ({ page }) => {
+    const token = await ensureSeededProject(page);
+    await page.goto(`/edit/${token}`, { waitUntil: 'domcontentloaded' });
+
+    // Same cold-start robustness as the dashboard assertion — the badge spins
+    // until /api/credits/balance resolves, so use a real timeout, not a bare query.
+    const badge = page.getByTestId('credit-badge');
+    await expect(badge).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('credit-badge-value')).toHaveText(/^\d+(\/\d+)?$/, {
+      timeout: 20_000,
+    });
+  });
 });
 
 test.describe('billing-beta — credit block surfaces in the editor', () => {
@@ -215,7 +245,17 @@ test.describe('billing-beta — Billing & plan view', () => {
   test.skip(!HAS_AUTH_ENV, 'Clerk E2E creds not configured');
 
   async function readPlan(page: Page) {
-    const res = await page.request.get('/api/billing/plan');
+    // COLD-CACHE ROBUSTNESS: this fetch can be the first-ever hit to
+    // /api/billing/plan, and an APIRequestContext GET (unlike a navigation)
+    // skips Next dev's on-demand compile wait — so a still-uncompiled route
+    // answers 404 once and only once. The real handler NEVER returns 404
+    // (200/401/500 only), so a 404 is an unambiguous not-yet-compiled signal:
+    // retry briefly until it compiles. The warm path hits the loop body once.
+    let res = await page.request.get('/api/billing/plan');
+    for (let i = 0; res.status() === 404 && i < 10; i++) {
+      await page.waitForTimeout(500);
+      res = await page.request.get('/api/billing/plan');
+    }
     expect(res.ok(), `/api/billing/plan: ${res.status()}`).toBeTruthy();
     return (await res.json()) as {
       tier: string;

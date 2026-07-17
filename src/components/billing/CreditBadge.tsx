@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
 import { AppIcon } from '@/components/ui/icon';
@@ -57,6 +57,30 @@ export function CreditBadge() {
   const [balance, setBalance] = useState<CreditBalance | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
+
+  // Hover intent: the trigger and the panel are separated by the popover's
+  // sideOffset gap, so a bare `onMouseLeave={() => setOpen(false)}` on the trigger
+  // fires the instant the pointer enters that gap — closing the panel before the
+  // pointer can reach its Upgrade link (mouse-unreachable). A short close-delay,
+  // cancelled by mouseenter on EITHER the trigger or the panel, bridges the gap.
+  // Keyboard path is untouched — it opens/closes via Radix onOpenChange, not these.
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelClose = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+  const openNow = () => {
+    cancelClose();
+    setOpen(true);
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setOpen(false), 140);
+  };
+  useEffect(() => () => cancelClose(), []);
 
   useEffect(() => {
     if (!isSignedIn) return;
@@ -124,8 +148,8 @@ export function CreditBadge() {
           type="button"
           data-testid="credit-badge"
           aria-label={`AI credits: ${totalAvailable} available`}
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
+          onMouseEnter={openNow}
+          onMouseLeave={scheduleClose}
           className={`flex items-center gap-1.5 rounded-app-pill border px-2.5 py-1.5 font-app-sans text-[13px] font-semibold transition-colors ${severityClasses}`}
         >
           <AppIcon name="credit_card" size={17} />
@@ -139,9 +163,10 @@ export function CreditBadge() {
         width={288}
         align="end"
         data-testid="credit-badge-panel"
-        // Hover-opened: keep it open while the pointer is over the panel itself.
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
+        // Hover-opened: keep it open while the pointer is over the panel itself,
+        // and cancel the trigger's pending close so the Upgrade link is reachable.
+        onMouseEnter={openNow}
+        onMouseLeave={scheduleClose}
         // Hover-opened popovers must not steal focus from the trigger.
         onOpenAutoFocus={(e) => e.preventDefault()}
         className="p-3.5"

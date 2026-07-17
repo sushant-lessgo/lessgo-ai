@@ -234,7 +234,9 @@ export function useEditStoreBootstrap(
 /**
  * Development utilities
  */
-if (process.env.NODE_ENV === 'development') {
+// `typeof window` guard prevents a dev-SSR ReferenceError: this module is imported by
+// the `'use client'` /edit page, which still SSRs, where `window` is undefined.
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   (window as any).__useEditStoreDebug = {
     storeManager,
     getCurrentStore: (tokenId: string) => storeManager.getEditStore(tokenId),

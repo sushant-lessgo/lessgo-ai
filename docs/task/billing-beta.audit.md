@@ -1103,3 +1103,370 @@ balance fetcher, no new Material Symbols ligature.
 - Native `title` + `AppTooltip` coexistence on the toolbar buttons is resolved by only ever
   populating one at a time (title on disabled, AppTooltip on enabled). If a future edit re-adds a
   static enabled-state `title`, both bubbles would show — noted so it isn't reintroduced.
+
+---
+
+# Phase 8 — docs + hardening sweep (A1-3, B4-5, C6-10)
+
+## Files changed
+- `src/components/billing/OutOfCreditsModal.tsx` (B4)
+- `src/components/billing/OutOfCreditsModal.test.tsx` (B4)
+- `src/app/dashboard/billing/page.tsx` (B5)
+- `src/app/dashboard/billing/page.test.tsx` (B5)
+- `src/components/billing/CreditBadge.tsx` (C6)
+- `src/components/billing/CreditBadge.test.tsx` — NEW (C10)
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx` (C7)
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.menus.test.tsx` (C8)
+- `e2e/billing-beta.spec.ts` (C9)
+- `docs/architecture/pricingSystem.md` (A2)
+- `CLAUDE.md` (A3)
+
+(NOT changed by me but showing modified in the worktree: `docs/task/billing-beta.plan.md` — a
+pre-existing phase-7 progress-log line flip; `docs/task/plan-credits-surface.spec.md`,
+`docs/task/pricing-v2.spec.md`, `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap`
+— pure CRLF normalization, zero content diff under `--ignore-all-space`. Pre-existing worktree state,
+left untouched.)
+
+## Per item
+
+### A1 — README dead-code note — NO-OP
+`src/components/README.md:18` already reads `| billing/ | CreditBadge, OutOfCreditsModal. |` with NO
+"zero import sites" note (confirmed absent on `main` too; the phrase exists nowhere in `src/`). A prior
+phase already cleaned it. Nothing to remove; file left untouched.
+
+### A2 — pricingSystem.md
+Added a maintained "billing-beta client architecture (2026-07)" section under the stale banner (the
+rest of the file is a stale Sprint-8 dump). Covers: prisma-free `planConfigs.ts`/`creditCosts.ts` split
++ re-export + never-import-planManager-client-side rule + isolatedModules `export type` gotcha;
+config-driven + fabricated-config probe pattern; the 402 normalizer's three shapes AND the LOAD-BEARING
+regex fallback for regenerate-element (no `details`); `hasBillingAccount`; decision-10 monthly-only with
+the per-month `price.annual`=24 gotcha.
+
+### A3 — CLAUDE.md
+Billing section: FULL_PAGE_GEN to FULL_PAGE_GENERATION, SECTION_REGEN to SECTION_REGENERATION,
+ELEMENT_REGEN to ELEMENT_REGENERATION; added the client-facing config pointer to
+planConfigs.ts/creditCosts.ts + the never-import-planManager/creditSystem-client-side rule, pointing to
+the new pricingSystem.md section. One-paragraph edit.
+
+### B4 — OutOfCreditsModal tier-neutral copy
+Heading "Upgrade to {PRO.name}" to tier-neutral "Need more credits?"; blurb reworded to describe the
+Pro plan factually ("The {PRO.name} plan includes {PRO.credits} AI credits...") instead of asserting the
+user is below Pro. Still fully config-driven — pro-price/upgrade-blurb testids and all PLAN_CONFIGS reads
+unchanged; CTA + /dashboard/billing link unchanged. Added a header note documenting the tier-neutral
+requirement. NO tier fetch added (decision 3 respected). Test: updated the two assertions pinning
+"Upgrade to {name}" to check the blurb contains the config name; added a positive pin for "Need more
+credits?" + a not.toMatch(/upgrade to/i) guard; the fabricated-config probe still asserts the config name.
+
+### B5 — billing page friendly status
+Added STATUS_LABELS map + friendlyStatus() helper mapping raw Stripe vocab to friendly copy (active to
+Active, past_due to Payment overdue, trialing to Trial, canceled/cancelled to Canceled, incomplete to
+Incomplete), fallback = capitalized raw string for unknowns (never blank). Status badge now renders
+friendlyStatus(plan?.status); dropped the redundant `capitalize` class (labels are pre-cased). Added two
+page.test.tsx cases: past_due to "Payment overdue" (raw token absent) + unknown "unpaid" to "Unpaid".
+
+### C6 — CreditBadge popover mouse-reachability
+Root cause: onMouseLeave={() => setOpen(false)} on the trigger fired the moment the pointer entered the
+sideOffset gap, closing the panel before the pointer reached its Upgrade link. Fix: a 140ms close-delay
+(closeTimer ref) — scheduleClose on mouseleave of EITHER trigger or panel, openNow (cancels the pending
+close) on mouseenter of either. Timer cleared on unmount. Keyboard path untouched (opens/closes via Radix
+onOpenChange). Fixes dashboard and editor mounts identically (same component).
+
+### C7 — GlobalAppHeader dangling divider
+The badge's trailing divider became the right-cluster's first child when CreditBadge returns null (fetch
+fails), orphaning a hairline. Added `first:hidden` so it drops in exactly that case (badge present to
+badge is first child to divider shows normally). Minimal; the getState().toggleLeftPanel idiom untouched.
+
+### C8 — menus test comment
+Reworded the overstated "the poll timer will leak" comment to note the afterEach unmount clears the
+interval; the only requirement is stubbing fetch. Comment-only, no harness reshape.
+
+### C9 — editor-mount e2e coverage + flake hardening
+Added ONE editor-header assertion (badge visible + numeric in /edit/[token], reusing the seeded
+token/session) in its OWN describe placed BEFORE the heavier 402-modal test — the file runs serial, and a
+badge-only check must not sit behind the flaky toolbar flow. Made BOTH badge assertions robust
+(toBeVisible({ timeout: 20000 }) + toHaveText with timeout, waitUntil:'domcontentloaded') for
+cold-start/concurrent load. Did NOT reshape the menus vitest harness. PROOF the new assertion EXECUTES:
+isolated run shows the tick line "3 [authed] ... the credit badge renders in the editor header" (4 passed,
+up from 3 pre-change) — a tick, not a dash.
+
+### C10 — CreditBadge fabricated-config probe (new test file)
+vi.doMock('@/lib/creditCosts') with fabricated 61/62/63, mocks @clerk/nextjs useAuth (signed-in) + stubs
+the balance fetch, renders, opens the popover via the click/onOpenChange path, asserts the cost table
+shows 61/62/63 — proves the component READS the module (catches a same-value re-inline). PASSES.
+
+## Full final gate
+- `npx tsc --noEmit` — GREEN (no output).
+- `npm run test:run` — GREEN: 217 files passed | 1 skipped; 3650 tests passed | 18 skipped. Includes the
+  new CreditBadge.test.tsx, updated OutOfCreditsModal.test.tsx / page.test.tsx, and the two vitest
+  isolation guards (tailwindConfigFreeze.test.ts, uiFoundationIsolation.test.tsx = published-css sha256 +
+  config-freeze) — all green.
+- `npm run lint` — GREEN (no errors; only pre-existing no-img-element + exhaustive-deps warnings, none in
+  phase-8 files).
+- `npm run build` — GREEN (published-css + assets + next build; full route table emitted).
+- `npm run test:e2e` (all specs) + isolated re-runs — see e2e evidence below.
+
+## e2e evidence
+- Isolation guards (hard requirement) — ALL GREEN: vitest tailwindConfigFreeze.test.ts +
+  uiFoundationIsolation.test.tsx (sha256) green in test:run; e2e/ui-isolation.spec.ts isolated = 2 passed
+  (computed-style baseline + no-app-chrome-fonts checks).
+- billing-beta dashboard credit counter: "header shows a numeric credit balance" + "cost rows render from
+  CREDIT_COSTS" — PASS.
+- billing-beta editor header credit badge (C9, NEW): "the credit badge renders in the editor header" —
+  PASS and EXECUTES (tick).
+- billing-beta Billing & plan view: isolated -g "Billing & plan view" = 5 passed / 1 failed. The 5 green
+  cover plan-name-from-config, Pro monthly price + no-annual-figure, cost rows from CREDIT_COSTS,
+  hasBillingAccount gating, and the "Next charge" gate — my billing-page render (incl. the B5 status change)
+  is intact.
+
+## Deliberately left (pre-existing, out of scope — NOT phase-8-caused)
+Two pre-existing e2e tests fail consistently in this dev-server environment; neither touches any phase-8
+file, and both failed in the FIRST full-suite run before my e2e edits:
+1. billing-beta.spec.ts 402-modal test (phase-4) — fails in triggerVariations: the hero headline renders
+   and is clicked, but the editor's variations toolbar affordance never appears within 15s. Root cause is
+   in the editor selection/toolbar path (surfaced alongside a dev-SSR "window is not defined" from
+   src/hooks/useEditStoreBootstrap.ts:238, module-scope window access under NODE_ENV==='development') —
+   all outside my Files-touched list. Fixing it would require editing out-of-scope editor/store files, so
+   left and reported. Because the file is serial, this failure skips tests ordered after it — which is
+   exactly why the C9 editor-badge test was placed BEFORE it.
+2. billing-beta.spec.ts "sidebar Upgrade is an enabled link" (phase-6) — the link's enabled state and
+   href=/dashboard/billing assert green; only the post-click SPA toHaveURL times out at 5s (dev cold
+   on-demand compile of the target route). page.goto('/dashboard/billing') works in the 5 passing view
+   tests, so the route is fine. Timing flake on the client-nav path; AppSidebar is not a phase-8 file.
+   Left and reported (would pass under CI retries:1).
+
+Both are environmental/timing on heavy real-editor + cold-dev-nav flows, matching the progress-log
+"load-sensitive under concurrent full-suite runs" note. No phase-8 deliverable is red.
+
+## Open risks
+- The 402-modal e2e (the wiring proof that CreditsBlockedHost is mounted) is currently red on the dev
+  toolbar-affordance timing / useEditStoreBootstrap dev-SSR window access. If that editor-side condition
+  is a genuine regression from a main-merge (not just timing), it warrants a separate, in-scope-for-the-editor
+  fix before relying on that wiring proof. Flagged for the merge gate.
+
+## Phase 8 — dev-SSR window guard (founder-authorized scope extension)
+
+### Files changed
+- `src/hooks/useEditStoreBootstrap.ts` (dev-only debug-hook guard)
+- `src/components/EditProvider.tsx` (dev-only debug-hook guard — twin #2)
+
+### Root cause
+`/edit/[token]` (a `'use client'` page that still SSRs) throws a dev-only
+`ReferenceError: window is not defined`. A module-scope block gated only by
+`process.env.NODE_ENV === 'development'` accessed `window` at import during SSR,
+where `window` is undefined. Pre-existing on main; dead-code-eliminated in
+production (`npm run build` green, zero prod risk). It made the two editor e2e
+tests flaky. The bug exists as multiple identical copies of the same debug
+snippet across editor modules.
+
+### The fix (one line + comment, identical in both files)
+```
+- if (process.env.NODE_ENV === 'development') {
++ // dev-SSR guard; this 'use client' module still SSRs on /edit, where `window` is undefined
++ if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+    (window as any).__<name>Debug = { ... }
+```
+Browser behavior unchanged: the debug hook still attaches client-side in dev.
+
+### Verification (after both fixes)
+- `npx tsc --noEmit` — clean.
+- `npm run lint` on `EditProvider.tsx` — 0 errors (1 pre-existing exhaustive-deps
+  warning at :411, unrelated); `useEditStoreBootstrap.ts` warning at :152.
+- `npm run build` — NOT re-run yet (blocked below); prior run green.
+
+### BLOCKER — a THIRD twin of the same bug is OUT OF SCOPE
+Fixing `useEditStoreBootstrap.ts` (twin #1) and `EditProvider.tsx` (twin #2) was
+necessary but STILL NOT sufficient. With twin #2 cleared, the e2e WebServer log
+now surfaces the *same* dev-SSR `window` ReferenceError from a THIRD file NOT on
+this phase's Files-touched list:
+`src/hooks/useAutoSave.ts:488-489` —
+```
+if (process.env.NODE_ENV === 'development') {
+  (window as any).__autoSaveHookDebug = { ... }
+```
+(imported by `EditLayout.tsx` → `/edit/[token]/page.tsx`, so it SSR-errors the
+same route.) The 402-modal editor test (`:191`, "…raises the out-of-credits
+modal") still fails ("no variations affordance appeared in any toolbar"). The
+credit-badge test (`:174`) PASSES. Per phase rules (no edits outside
+Files-touched), `useAutoSave.ts` was left untouched and reported back for
+authorization. Recommended fix is identical: `&& typeof window !== 'undefined'`.
+
+### e2e evidence (E2E_PORT=3147, --project=authed, first run — after twin #2 fix)
+- 4 passed (incl. `:174` editor credit badge)
+- 1 failed: `:191` 402-modal (blocked by the `useAutoSave.ts` twin #3 above;
+  WebServer log: `ReferenceError: window is not defined at ./src/hooks/useAutoSave.ts:358` / `489`)
+- 5 did not run (serial file aborted after the `:191` failure)
+Second stability run NOT taken — the first run was not green, so there is
+nothing to stability-check until twin #3 is fixed.
+
+### RESOLUTION — closing the class (twins #3/#4/#5)
+
+**Files changed (this pass):**
+- `src/hooks/useAutoSave.ts:488` — added `&& typeof window !== 'undefined'` + dev-SSR comment.
+- `src/utils/unifiedModeSelector.ts:75` — same guard + comment.
+- `src/utils/domNodeSelectionManager.ts:220` — same guard + comment.
+
+**The full class is FIVE files (2 prior + these 3):**
+1. `src/hooks/useEditStoreBootstrap.ts` (twin #1 — prior)
+2. `src/components/EditProvider.tsx` (twin #2 — prior)
+3. `src/hooks/useAutoSave.ts` (twin #3 — this pass)
+4. `src/utils/unifiedModeSelector.ts` (twin #4 — this pass)
+5. `src/utils/domNodeSelectionManager.ts` (twin #5 — this pass)
+
+Nature of the class: PRE-EXISTING on main, DEV-ONLY (`process.env.NODE_ENV === 'development'`
+gate → the block is dead-code-eliminated in production, `npm run build` green, zero prod risk).
+It is a module-scope `(window as any).__*Debug` write on the `/edit/[token]` SSR import path,
+surfaced by billing-beta's editor e2e (the `/edit` route is a `'use client'` page that still
+SSRs, where `window` is undefined). A full `src` grep for module-scope `window` writes gated by
+`NODE_ENV` ALONE (no `typeof window`) now returns ZERO — the class is closed; no sixth mole.
+
+**Verification (after all 5 fixed):**
+- `npx tsc --noEmit` — clean.
+- `npm run lint` on the 3 files — 0 problems.
+- `npm run build` — green.
+- e2e WebServer log across both runs below: grep for `window is not defined` / `ReferenceError`
+  → **NONE**. The SSR window crash is fully gone: the editor now renders — badge test `:174`
+  passes and the `:191` hero-headline `toBeVisible` (60s) passes (page hydrates).
+
+**Two-run e2e evidence (`E2E_PORT=3147 --project=authed --reporter=list`):**
+
+Run 1:
+```
+1 [setup] authenticate ✓ (7.3s)
+2 [authed] :33 dashboard credit counter — numeric balance ✓ (14.3s)
+3 [authed] :48 dashboard credit counter — cost rows from CREDIT_COSTS ✓ (4.3s)
+4 [authed] :174 editor header credit badge ✓ (1.2m)
+5 [authed] :191 402 raises out-of-credits modal ✘ (59.0s) — "no variations affordance appeared in any toolbar"
+6-10 :258/:286/:306/:320/:332 Billing & plan view — did not run (serial abort after :191)
+4 passed, 1 failed, 5 did not run (3.2m)
+```
+
+Run 2 (fresh server):
+```
+1 [setup] authenticate ✓ (10.5s)
+2 [authed] :33 dashboard credit counter — numeric balance ✓ (25.1s)
+3 [authed] :48 dashboard credit counter — cost rows from CREDIT_COSTS ✓ (9.5s)
+4 [authed] :174 editor header credit badge ✓ (52.5s)
+5 [authed] :191 402 raises out-of-credits modal ✘ (24.4s) — "no variations affordance appeared in any toolbar"
+6-10 :258/:286/:306/:320/:332 Billing & plan view — did not run (serial abort after :191)
+4 passed, 1 failed, 5 did not run (2.6m)
+```
+
+**NOT claiming green.** The window class is CLOSED and PROVEN (zero window errors in either
+WebServer log; editor renders). But `:191` still fails IDENTICALLY in BOTH runs — and it is now
+demonstrably a DIFFERENT root cause than the window bug: the editor page loads and the hero
+headline renders (its 60s `toBeVisible` passes), then the toolbar's variations affordance
+(`Regenerate` button / `AI text variations` sparkle) never appears within the 15s poll at
+`triggerVariations` (`billing-beta.spec.ts:148`). This is the "occasionally-flaky variations
+flow" the test's own comment (`:170`) flags — a toolbar-affordance / dev-lazy-compile timing
+issue in the editor selection→toolbar path, NOT an SSR `window` ReferenceError (grep: NONE).
+Because it fails deterministically in both runs at a step downstream of the window fix, and its
+resolution lies in files OUTSIDE this phase's Files-touched (editor toolbar/selection code or the
+test's poll timeout), it is reported for orchestrator triage rather than fixed here. The 5
+Billing-view tests (`:258/:286/:306/:320/:332`) still cannot be observed because the serial file
+aborts on the `:191` failure before they run.
+
+## Phase 8 — affordance a11y name + e2e selector (phase-7 regression fix)
+
+### Files changed
+
+- `src/app/edit/[token]/components/toolbars/TextToolbarMVP.tsx` (modified)
+- `e2e/billing-beta.spec.ts` (modified)
+
+### Confirmed root cause
+
+Phase 7 wrapped the TextToolbarMVP sparkle button in `AppTooltip`, moving "AI text
+variations" into the tooltip `label` and setting the enabled-state `title` to
+`undefined` (the native title survives only for the disabled/locked states). The
+button's sole child is `<SparkleIcon/>` (no text, no aria-label), so in the ENABLED
+state the button had NO accessible name. The `triggerVariations` helper still selected
+`button[title="AI text variations"]`, which matched only while the button was disabled
+(generating) — never when enabled — so on a fresh headline click it found neither
+affordance → "no variations affordance appeared". The phase-4/6 test passed only
+because the title existed then. Verified by reading TextToolbarMVP.tsx ~:776-805 and
+the helper at :133-152. Downstream (`:191` 402-modal) failed as a consequence: the
+serial file aborts on the first failure, hiding the 5 billing-view tests.
+
+### Fix
+
+1. `TextToolbarMVP.tsx` — added an unconditional `aria-label="AI text variations"` to
+   the sparkle `<button>`. This restores the accessible name phase 7 removed (a real
+   a11y regression, independent of disabled state) and gives the test a stable hook.
+   `handleSparkle`, the spend path, the AppTooltip label, and the conditional `title`
+   for disabled/locked states are unchanged.
+2. `ElementToolbar.tsx` — NOT modified. Verified its "Regenerate" affordance still
+   renders visible text `<span>{action.label}</span>` (line ~273), so its accessible
+   name is intact under the phase-7 AppTooltip wrap. No aria-label needed.
+3. `e2e/billing-beta.spec.ts` — `triggerVariations` now selects the sparkle via
+   `page.getByRole('button', { name: 'AI text variations' })` instead of the brittle
+   `button[title=...]`. The either-Regenerate-or-sparkle logic and all downstream
+   assertions (modal visible, required/available, upgrade link, dismissable) are
+   unchanged.
+
+### Verification
+
+- `npx tsc --noEmit`: clean.
+- `next lint` on the two touched source files: only a pre-existing unrelated
+  `react-hooks/exhaustive-deps` warning in TextToolbarMVP.tsx (not from this change).
+- `npm run build`: green.
+
+Two isolated e2e runs, dedicated port 3147, fresh WebServer each:
+`E2E_PORT=3147 npx playwright test e2e/billing-beta.spec.ts --project=authed --reporter=list`
+
+- Run 1 (COLD .next cache): editor + dashboard tests all green, INCLUDING the phase
+  target `:191` (402 raises the out-of-credits modal) ✓, `:174` editor badge ✓, `:33`/
+  `:48` dashboard ✓. The affordance was found via the new role selector (no
+  "no variations affordance" error, no window/ReferenceError in the WebServer log).
+  BUT `:258` failed at `readPlan()` with `/api/billing/plan: 404`, which aborted the
+  serial billing-view group (`:286/:306/:320/:332` did not run).
+- Run 2 (WARM cache from run 1): ALL 10 passed, including `:258/:286/:306/:320/:332`.
+
+### The `:258` cold-compile flake (non-editor, out of scope)
+
+Root cause is unrelated to this phase's change: `readPlan()` (:247-256) does
+`page.request.get('/api/billing/plan')` as the FIRST action of the serial billing-view
+group — BEFORE any `page.goto`. That is the first-ever hit to `/api/billing/plan` in
+the dev server, issued via Playwright's APIRequestContext, which does NOT trigger the
+navigation-based on-demand-compile wait that page navigations get. Next dev returns 404
+for the still-uncompiled route. Once warmed (run 2, or any prior navigation), it returns
+200. The route handler itself only ever returns 200/401/500 — never 404 — confirming the
+404 is a framework cold-compile artifact, not a route bug. It is NOT an editor test and
+NOT in this phase's three-file scope; reported for orchestrator triage. Suggested fix
+(separate change): warm the route with a `page.goto('/dashboard/billing')` before the
+first `readPlan`, or retry the request once on 404.
+
+### Open risks
+
+- The phase-8 target (sparkle affordance + `:191` 402 modal) is green in BOTH runs; the
+  fix is stable. The only non-green in run 1 is the pre-existing `:258` cold-compile
+  flake described above, which is deterministically green once the route is warm.
+
+## Phase 8 — cold-compile 404 flake fix (billing-view group)
+
+### Files changed
+- `e2e/billing-beta.spec.ts` (test-only; ONE helper hardened)
+
+### Root cause (confirmed)
+The `Billing & plan view` serial group's `readPlan()` helper fires
+`page.request.get('/api/billing/plan')` as the group's FIRST action, BEFORE any
+`page.goto`. On a cold `.next` cache this is the first-ever hit to that route, and via
+`APIRequestContext` it skips Next dev's navigation-based on-demand-compile wait, so the
+still-uncompiled route answers **404** once and `readPlan`'s `expect(res.ok())` fails.
+Once warm (a prior nav, or run 2) it's 200. The real handler
+(`src/app/api/billing/plan/route.ts`) only ever returns 200/401/500 — never 404 — so a
+404 is an unambiguous "route not yet compiled" signal, not a route bug. `npm run build`
+is green; this was purely a dev-server cold-compile timing artifact in the TEST.
+
+### The fix
+Retry-once-on-404 inside `readPlan`: refetch up to 10× with a 500ms wait while
+`res.status() === 404`, then run the unchanged `expect(res.ok())` + JSON parse. No
+assertion weakened; the warm path executes the loop body exactly once (no 404 → no
+retry, no added latency). Route file and all product files untouched. `HAS_AUTH_ENV`
+guard + serial structure intact.
+
+### Verification (cold + warm two-run green evidence)
+- `npx tsc --noEmit` — clean. `npx eslint e2e/billing-beta.spec.ts` — clean.
+- COLD run (deleted `.next` first), `E2E_PORT=3147 ... --project=authed --reporter=list`:
+  **10 passed (1.6m)** — incl. the 5 billing-view tests (now at `:268/:296/:316/:330/:342`
+  after the +8-line edit), plus `:174` editor-badge and `:191` 402-modal. No 404.
+- WARM run (no `.next` delete): **10 passed (1.6m)**. No regression on the warm path.
+- `npm run build` — green.

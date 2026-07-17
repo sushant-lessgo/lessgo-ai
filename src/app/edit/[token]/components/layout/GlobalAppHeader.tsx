@@ -330,7 +330,11 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
             Placed at the head of the cluster so Publish stays rightmost. */}
         <CreditBadge />
 
-        <div className="app-divider" />
+        {/* CreditBadge renders null when its balance fetch fails; that would leave
+            this divider as the cluster's FIRST child — a hairline dangling with
+            nothing to its left. `first:hidden` drops it in exactly that case
+            (badge present → badge is first, divider shows as normal). */}
+        <div className="app-divider first:hidden" />
 
         {/* Score + review pills + save-state chip (moved from the old EditHeader) */}
         <EditorStatusCluster />

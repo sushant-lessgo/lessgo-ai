@@ -190,6 +190,21 @@ describe('Billing & plan view', () => {
     expect(q('[data-testid="billing-next-charge"]')).not.toBeNull();
   });
 
+  // Phase-8 gate B5 — raw Stripe vocab is mapped to friendly copy for a glancing
+  // founder; the raw token must not leak into the status badge.
+  it('renders friendly status copy, not raw Stripe vocab', async () => {
+    await mountPage({ plan: { ...FREE_PLAN, status: 'past_due' } });
+    const badge = q('[data-testid="billing-status"]');
+    expect(badge?.textContent).toContain('Payment overdue');
+    expect(badge?.textContent).not.toContain('past_due');
+  });
+
+  it('capitalizes an unknown status as a fallback', async () => {
+    await mountPage({ plan: { ...FREE_PLAN, status: 'unpaid' } });
+    const badge = q('[data-testid="billing-status"]');
+    expect(badge?.textContent).toContain('Unpaid');
+  });
+
   // Decision 5 — hasBillingAccount, NOT tier.
   it('greys Manage billing when the user has no Stripe customer id', async () => {
     await mountPage({ plan: { ...FREE_PLAN, hasBillingAccount: false } });

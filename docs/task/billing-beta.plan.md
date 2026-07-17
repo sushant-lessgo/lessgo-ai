@@ -30,8 +30,8 @@ ruled additive exception: a read-only `hasBillingAccount` field on `/api/billing
   - founder manual list: no layout shift at h-14; balance refreshes within the 30s poll after a regen
 - phase 6 lean Billing & plan view + CTAs + sidebar widget: done (commit e8d939b1, review loops 1, verdict ship) — 🚧 GATE (b) portal-coverage PASSED 2026-07-17 (founder walked Stripe test-mode portal; payment-method + invoices + cancel/downgrade all confirmed → footnote accurate, descope holds). Files touched extended by page.test.tsx (fabricated-config probe; orchestrator ruling). hasBillingAccount added (only backend change). Reviewer reproduced probe negative control.
   - carried to phase 8: (a) OutOfCreditsModal.tsx:126 still tier-blind "Upgrade to {PRO.name}" — reword (CTA already tier-neutral + lands on tier-correct page); (b) status renders raw Stripe vocab (active/past_due) at page.tsx:278 — consider friendly copy (founder glance); (c) e2e :228 mildly load-sensitive under concurrent full-suite runs (passes isolated) — longer timeout / page.request pre-warm
-- phase 7 costs-at-action: pending
-- phase 8 docs + hardening sweep: pending
+- phase 7 costs-at-action: done (commit dc7388fe, review loops 1, verdict ship)
+- phase 8 docs + hardening sweep: done (commit PENDING, review loops 1, verdict ship) — grew beyond docs: founder-approved copy (tier-neutral modal, friendly status), carried hardening (mouse-reachable Upgrade link, CreditBadge fabricated-config probe, conditional divider, mock comment), + TWO opportunistic pre-existing-main fixes surfaced by billing-beta's editor e2e (both founder-authorized): (1) dev-SSR `window` guard CLASS — 5 files (useEditStoreBootstrap, EditProvider, useAutoSave, unifiedModeSelector, domNodeSelectionManager), dev-only/prod-safe/DCE'd, class verified closed by grep; (2) phase-7 a11y regression — sparkle button lost its accessible name → restored `aria-label`, e2e selector de-brittled. billing-beta e2e now 10/10 green COLD+warm (was flaky). readPlan retry-on-404 for cold-compile.
 
 ## Key decisions (resolved up front)
 

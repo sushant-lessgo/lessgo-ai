@@ -111,7 +111,7 @@ Flow: edit `/edit/[token]` → preview `/preview/[token]` → publish → live `
 ### Billing, Plans & Credits
 
 - Models: `UserPlan` (tier FREE/PRO/AGENCY/ENTERPRISE, Stripe IDs, feature flags, limits), `UserUsage` (monthly credit/token tracking), `UsageEvent` (per-operation ledger).
-- Config in `src/lib/planManager.ts`; credit costs in `src/lib/creditSystem.ts` (e.g. FULL_PAGE_GEN=10, SECTION_REGEN=2, ELEMENT_REGEN=1, IVOC_RESEARCH=3, SCRAPE_WEBSITE=1). `checkCredits()` gates AI operations.
+- Config in `src/lib/planManager.ts`; credit costs in `src/lib/creditSystem.ts` (e.g. `FULL_PAGE_GENERATION=10`, `SECTION_REGENERATION=2`, `ELEMENT_REGENERATION=1`, `IVOC_RESEARCH=3`, `SCRAPE_WEBSITE=1`). `checkCredits()` gates AI operations. **Client-facing** billing surfaces must NOT import `planManager`/`creditSystem` (they pull in Prisma) — the prisma-free constants live in `src/lib/planConfigs.ts` (`PLAN_CONFIGS`) and `src/lib/creditCosts.ts` (`CREDIT_COSTS`), which those two modules re-export; import config from there in any client component (see `docs/architecture/pricingSystem.md` › "billing-beta client architecture").
 - Stripe: `/api/stripe/webhooks` (updates plan/status, resets credits on renewal), checkout + portal session routes. Endpoints under `/api/billing` and `/api/credits`.
 
 ### Analytics, Forms & Integrations

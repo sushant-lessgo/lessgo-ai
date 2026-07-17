@@ -24,6 +24,12 @@ import { PLAN_CONFIGS, PlanTier } from '@/lib/planConfigs';
  * ⚠️ LINK ONLY (decision 9): the CTA navigates to `/dashboard/billing`, which
  * owns the Upgrade / Top-up / portal CTAs. No Stripe calls from this modal.
  *
+ * ⚠️ TIER-NEUTRAL COPY (phase-6 gate): the modal cannot read the user's tier
+ * (see the daysUntilReset note below — no second fetcher), so it must NOT assert
+ * the user is on a lower tier ("Upgrade to Pro" shown to a PRO user who ran out
+ * was the bug). It describes the Pro plan factually and routes everyone to the
+ * tier-correct billing page. Do not reintroduce tier-asserting verbs here.
+ *
  * ⚠️ `daysUntilReset` has NO default (it used to default to `0`, which rendered
  * "refresh in 0 days" whenever it was omitted). Nothing passes it this slice —
  * the bus carries only `{required, available}` and adding a balance fetch here
@@ -114,7 +120,12 @@ export function OutOfCreditsModal({
         </div>
 
         <div className="space-y-5 p-7">
-          {/* Upgrade — the primary path. All numbers from PLAN_CONFIGS. */}
+          {/* Need more credits — the primary path. Copy is TIER-NEUTRAL: the modal
+              can't read the user's tier (the bus carries only {required, available},
+              and adding a fetch would make a second balance fetcher — decision 3), so
+              it never claims the user is on a lower tier. It describes the Pro plan
+              factually and sends everyone to /dashboard/billing, which is tier-correct
+              (Free → upgrade, Pro → top-ups). All numbers from PLAN_CONFIGS. */}
           <div className="rounded-app-card border border-app-tint-edge bg-app-tint-soft p-5">
             <div className="mb-4 flex items-start gap-3">
               <AppIcon
@@ -123,10 +134,10 @@ export function OutOfCreditsModal({
                 className="mt-0.5 shrink-0 text-app-primary"
               />
               <div>
-                <h3 className="mb-1 text-sm font-bold text-app-ink">Upgrade to {PRO.name}</h3>
+                <h3 className="mb-1 text-sm font-bold text-app-ink">Need more credits?</h3>
                 <p className="mb-3 text-[13px] text-app-muted" data-testid="upgrade-blurb">
-                  {PRO.credits} AI credits every month, {PRO.limits.publishedPages} published
-                  pages, and custom domains.
+                  The {PRO.name} plan includes {PRO.credits} AI credits every month,{' '}
+                  {PRO.limits.publishedPages} published pages, and custom domains.
                 </p>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-2xl font-bold text-app-ink" data-testid="pro-price">

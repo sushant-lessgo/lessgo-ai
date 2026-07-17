@@ -84,10 +84,19 @@ describe('OutOfCreditsModal', () => {
   it('renders the PRO name/price/credits/pages from PLAN_CONFIGS', () => {
     mount();
     expect(q('[data-testid="pro-price"]')?.textContent).toBe(`$${PRO.price.monthly}`);
-    expect(text()).toContain(`Upgrade to ${PRO.name}`);
     const blurb = q('[data-testid="upgrade-blurb"]')?.textContent ?? '';
+    expect(blurb).toContain(PRO.name);
     expect(blurb).toContain(`${PRO.credits} AI credits`);
     expect(blurb).toContain(`${PRO.limits.publishedPages} published`);
+  });
+
+  // Phase-6 gate: the modal can't read tier, so it must not assert the user is on
+  // a lower tier. The heading is the tier-neutral "Need more credits?" and no
+  // "Upgrade to …" verb appears (that lied to a PRO user who ran out).
+  it('uses tier-neutral copy — no "Upgrade to" tier assertion', () => {
+    mount();
+    expect(text()).toContain('Need more credits?');
+    expect(text()).not.toMatch(/upgrade to/i);
   });
 
   // Founder ruling at the phase-4 gate: the Free-plan note was DROPPED (it
@@ -186,7 +195,7 @@ describe('OutOfCreditsModal — reads config (mutation probe)', () => {
       root.render(<Fresh isOpen onClose={() => {}} creditsRequired={1} creditsAvailable={0} />),
     );
 
-    expect(text()).toContain('Upgrade to Deluxe');
+    expect(q('[data-testid="upgrade-blurb"]')?.textContent).toContain('Deluxe');
     expect(q('[data-testid="pro-price"]')?.textContent).toBe('$1234');
     expect(q('[data-testid="upgrade-blurb"]')?.textContent).toContain('4242 AI credits');
     expect(q('[data-testid="upgrade-blurb"]')?.textContent).toContain('99 published');

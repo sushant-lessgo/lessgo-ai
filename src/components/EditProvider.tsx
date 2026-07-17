@@ -505,7 +505,8 @@ const EditStoreGate: React.FC<{
 /**
  * Development utilities
  */
-if (process.env.NODE_ENV === 'development') {
+// dev-SSR guard; this 'use client' module still SSRs on /edit, where `window` is undefined
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   (window as any).__editProviderDebug = {
     // Debug utilities for development
     getContext: () => {
