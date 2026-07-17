@@ -12,7 +12,7 @@ E2 makes STEP 02 of the work journey real: upload photos (folder or loose files)
 
 ## Progress log
 
-- phase 1 binding spine + gallery covers (fail-fast reveal proof): done (impl-review=ship, loops 1; tsc clean, 3802 tests pass, build ok; e2e authored not-yet-registered)
+- phase 1 binding spine + gallery covers (fail-fast reveal proof): done (commit 8cf890ab, impl-review=ship loops 1; tsc clean, 3802 tests pass, build ok; e2e authored, registration deferred to P2)
 - phase 2 WorkDetail + WorkCatalog blocks, conformance relax, atelier2 works flip + pilot enablement: pending
 - phase 3 upload spine + functional STEP 02 behind widened seam: pending
 - phase 4 correction screen (5 verbs) + ingestion-writer regression: pending
@@ -160,6 +160,7 @@ Rev 2's union widening (`string | readonly string[]`) broke `tsc` at two READ si
 - `e2e/work-onboarding.spec.ts`
 - `e2e/helpers/seedWorkBrief.ts`
 - `e2e/work-binding.spec.ts` (extend: item page renders the photo grid via the REAL fan-out path, replacing the P1 hand-seeded mechanism where covered)
+- `playwright.config.ts` (P1 carry-over: register `/work-binding\.spec\.ts/` on the `authed` project so the P1-authored spec actually executes here — P2 is where the real post-flip path makes it runnable)
 
 **Verification:** `tsc` · `test:run` (parity + conformance (b)/(b+)/(d) all EXERCISED + frozen gallery test green + negative fixtures bite) · `test:e2e` (work-binding + work-onboarding) · `npm run build`. Manual: `/dev/blocks/atelier2` eyeball of both new blocks, edit vs published bands.
 **Human gate: YES — dual-renderer/parity-sensitive skeleton surface (spec's candidate gate). Founder eyeballs the two blocks in the dev gallery before phase 3 builds UI on top.**
