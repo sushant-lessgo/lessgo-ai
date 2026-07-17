@@ -14,7 +14,7 @@ Two bounded edit-side items left over from `toolbar-standard-beta` (merged `349e
 
 ## Progress log
 
-- phase 1 Regen surface + section wire + e2e: pending
+- phase 1 Regen surface + section wire + e2e: done (commit ec544679, review loops 1, ship). Caught+fixed a real regen-modernization regression (applyVariation bare-string throw). Founder-eyeball half of gate BATCHED to merge gate.
 - phase 2 LinkPicker replaces ButtonSettings destination: pending
 
 ## Plan-time decisions (locked)

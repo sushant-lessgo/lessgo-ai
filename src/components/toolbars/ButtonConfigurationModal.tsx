@@ -18,9 +18,16 @@ import * as LucideIcons from 'lucide-react';
 import { getDisabledBehaviorOptions } from '@/utils/formPlacement';
 import { hasPrimaryCTASection } from '@/utils/sectionHelpers';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
-import { toDestination } from '@/utils/destinationShim';
-import { resolveDestination } from '@/utils/resolveCtaHref';
-import type { CTAButton, Destination } from '@/types/destination';
+import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
+import { LinkPicker } from '@/components/editor/LinkPicker';
+import type { CTAButton } from '@/types/destination';
+import {
+  type ButtonConfig,
+  buildCtaButton,
+  configFromCta,
+  configToPickerValue,
+  applyPickerLink,
+} from './buttonCtaAdapter';
 
 // Some button elements are items inside a collection (pricing/package tiers):
 // their elementKey is `<collection>_cta_<id>` and the visible text lives nested at
@@ -40,87 +47,6 @@ function getCollectionCtaRef(
   if (!Array.isArray(arr)) return null;
   const item = arr.find((it: any) => it?.id === id);
   return item ? { field, id, item } : null;
-}
-
-// scale-04: reverse-map a saved CTAButton (explicit destination) back into the
-// modal's flat ButtonConfig so the form fields prefill on reopen. Icons/inputs
-// ride on the legacy buttonConfig (the new shape doesn't carry them), so we pull
-// those from `legacy` when available.
-function configFromCta(
-  cta: CTAButton,
-  text: string,
-  role: 'primary' | 'secondary',
-  legacy: any,
-): ButtonConfig {
-  const dest = cta.dest as Destination;
-  const base: ButtonConfig = {
-    type: 'link',
-    text,
-    ctaType: role,
-    leadingIcon: legacy?.leadingIcon,
-    trailingIcon: legacy?.trailingIcon,
-    iconConfig: legacy?.iconConfig || { leadingSize: 'md', trailingSize: 'md' },
-  };
-  if (cta.formId && dest?.kind === 'section' && dest.anchor === 'form-section') {
-    return { ...base, type: 'form', formId: cta.formId, behavior: legacy?.behavior || 'scrollTo' };
-  }
-  if (dest?.kind === 'page') {
-    return { ...base, type: 'page', pathSlug: dest.pathSlug };
-  }
-  // external / whatsapp / call / email / social / download → a plain link url.
-  return { ...base, type: 'link', url: dest ? resolveDestination(dest) : '' };
-}
-
-// scale-04: build the new CTAButton write from the modal state. Primary + follow
-// goal ⇒ GOAL_REF. A FORM cta ALWAYS carries `formId` (the pre-pass detects the
-// form case by formId — a form-intent cta without it is mis-mapped to a link).
-// `link-with-input` is NOT representable in the new shape (it carries inputConfig)
-// ⇒ returns undefined so the legacy buttonConfig renders it instead.
-function buildCtaButton(
-  config: ButtonConfig,
-  role: 'primary' | 'secondary',
-  followGoal: boolean,
-): CTAButton | undefined {
-  if (role === 'primary' && followGoal) {
-    return { role: 'primary', dest: 'GOAL_REF' };
-  }
-  switch (config.type) {
-    case 'form':
-      return config.formId
-        ? { role, dest: { kind: 'section', anchor: 'form-section' }, formId: config.formId }
-        : undefined;
-    case 'page':
-      return { role, dest: { kind: 'page', pathSlug: config.pathSlug ?? '' } };
-    case 'link': {
-      const d = toDestination(config.url ?? '');
-      return d && d !== 'GOAL_REF' ? { role, dest: d } : undefined;
-    }
-    case 'link-with-input':
-    default:
-      return undefined;
-  }
-}
-
-interface ButtonConfig {
-  type: 'link' | 'form' | 'link-with-input' | 'page';
-  text: string;
-  url?: string;
-  pageId?: string; // cross-page link: target page id
-  pathSlug?: string; // cross-page link: target page pathSlug ('/contact')
-  formId?: string;
-  behavior?: 'scrollTo' | 'openModal';
-  ctaType?: 'primary' | 'secondary'; // NEW: CTA type for placement logic
-  inputConfig?: {
-    label?: string;
-    placeholder?: string;
-    queryParamName?: string;
-  };
-  leadingIcon?: string;
-  trailingIcon?: string;
-  iconConfig?: {
-    leadingSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-    trailingSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  };
 }
 
 interface ButtonConfigurationModalProps {
@@ -150,6 +76,10 @@ export function ButtonConfigurationModal({
   const storeApi = useEditStoreApi();
 
   const pageOptions = buildPageLinkOptions(pages);
+  const sectionOptions = buildSectionLinkOptions(sections || []);
+  // Strict parity with the replaced Page radio (which only appeared with >1 page):
+  // a single-page project offers no cross-page target.
+  const pickerPageOptions = pageOptions.length > 1 ? pageOptions : [];
   const availableForms = getAllForms();
   void forms; // subscription-only: keeps availableForms reactive to form changes
 
@@ -692,15 +622,19 @@ export function ButtonConfigurationModal({
           <div>
             <Label>Button Action*</Label>
             <RadioGroup
-              value={config.type}
+              // toolbar-beta-followup: "External Link" + "Link to Page" collapsed
+              // into ONE "Link" option rendered by LinkPicker (section anchor /
+              // page / custom URL). The "Link" radio owns both config.type 'link'
+              // and 'page' — LinkPicker decides which by what the user picks.
+              value={config.type === 'page' ? 'link' : config.type}
               onValueChange={(val) => setConfig(prev => ({ ...prev, type: val as any }))}
             >
               <div className="flex items-start space-x-2">
                 <RadioGroupItem value="link" id="link" />
                 <div>
-                  <Label htmlFor="link">External Link</Label>
+                  <Label htmlFor="link">Link</Label>
                   <p className="text-sm text-gray-600">
-                    Redirect to external URL like Typeform, Calendly, etc.
+                    Link to a section, another page, or an external URL.
                   </p>
                 </div>
               </div>
@@ -724,54 +658,30 @@ export function ButtonConfigurationModal({
                   </p>
                 </div>
               </div>
-
-              {pageOptions.length > 1 && (
-                <div className="flex items-start space-x-2 mt-2">
-                  <RadioGroupItem value="page" id="page" />
-                  <div>
-                    <Label htmlFor="page">Link to Page</Label>
-                    <p className="text-sm text-gray-600">
-                      Navigate to another page in this project.
-                    </p>
-                  </div>
-                </div>
-              )}
             </RadioGroup>
           </div>
 
-          {/* Internal page configuration */}
-          {config.type === 'page' && (
+          {/* Link Configuration — ONE destination editor (LinkPicker). Covers the
+              old External-Link + Link-to-Page fields (section anchor / page /
+              custom URL). GOAL_REF never routes here — the followGoal branch above
+              owns it. */}
+          {(config.type === 'link' || config.type === 'page') && (
             <div>
-              <Label htmlFor="page-target">Page*</Label>
-              <Select
-                value={config.pathSlug || ''}
-                onValueChange={(val) => setConfig(prev => ({ ...prev, pathSlug: val }))}
-              >
-                <SelectTrigger id="page-target">
-                  <SelectValue placeholder="Choose page…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {pageOptions.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.page && <p className="text-sm text-red-500 mt-1">{errors.page}</p>}
-            </div>
-          )}
-
-          {/* Link Configuration */}
-          {config.type === 'link' && (
-            <div>
-              <Label htmlFor="url">URL*</Label>
-              <Input
-                id="url"
-                type="url"
-                value={config.url || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, url: e.target.value }))}
-                placeholder="https://your-link.com"
-              />
+              <Label>Destination*</Label>
+              <div className="mt-1 flex items-center gap-2 rounded-md border px-3 py-2 bg-white">
+                <LinkPicker
+                  value={configToPickerValue(config)}
+                  sectionOptions={sectionOptions}
+                  pageOptions={pickerPageOptions}
+                  onChange={(link) => setConfig(prev => applyPickerLink(prev, link))}
+                  triggerClassName="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800"
+                />
+                <span className="text-sm text-gray-600 truncate">
+                  {configToPickerValue(config) || 'Set a destination…'}
+                </span>
+              </div>
               {errors.url && <p className="text-sm text-red-500 mt-1">{errors.url}</p>}
+              {errors.page && <p className="text-sm text-red-500 mt-1">{errors.page}</p>}
             </div>
           )}
 

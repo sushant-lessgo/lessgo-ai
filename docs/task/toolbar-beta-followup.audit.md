@@ -112,3 +112,56 @@ String-valued elements carry no per-element `aiMetadata` (section-level metadata
 
 ### Open risks
 - The section-regen SectionToolbar progress card is effectively unreachable in the selected-section→regen flow (shell detaches). Not in scope here; the header control covers in-flight feedback. Flag for a future toolbar polish pass if the card is meant to be the primary signal.
+
+---
+
+## Phase 2 — LinkPicker replaces Button Settings destination + goal-CTA preservation
+
+### Files changed
+- `src/components/toolbars/buttonCtaAdapter.ts` — **NEW** (pure module, no 'use client')
+- `src/components/toolbars/buttonCtaAdapter.test.ts` — **NEW** (vitest)
+- `src/components/toolbars/ButtonConfigurationModal.tsx` — swapped destination fields for LinkPicker; imports adapter
+
+### Per-file changes
+
+**`buttonCtaAdapter.ts` (new).** Pure adapter. Landed API (real type names):
+- `interface ButtonConfig { type: 'link'|'form'|'link-with-input'|'page'; text; url?; pageId?; pathSlug?; formId?; behavior?; ctaType?; inputConfig?; leadingIcon?; trailingIcon?; iconConfig? }` — moved verbatim from the modal.
+- `configFromCta(cta: CTAButton, text: string, role: 'primary'|'secondary', legacy: any): ButtonConfig` — moved verbatim (byte-identical body).
+- `buildCtaButton(config: ButtonConfig, role: 'primary'|'secondary', followGoal: boolean): CTAButton | undefined` — moved verbatim. GOAL_REF branch is `if (role === 'primary' && followGoal) return { role:'primary', dest:'GOAL_REF' }` — the FIRST statement, so any picker-set url/pathSlug in `config` is unreachable.
+- `configToPickerValue(config: ButtonConfig): string` — `type==='page'`→`pathSlug ?? ''`; `'link'`→`url ?? ''`; else `''`.
+- `applyPickerLink(config: ButtonConfig, link: Link): ButtonConfig` — `link.dest.kind==='page'`→`{...config, type:'page', pathSlug: link.dest.pathSlug}`; else→`{...config, type:'link', url: resolveDestination(link.dest)}`. `link.source` is never read → dropped. `resolveDestination` (from `@/utils/resolveCtaHref`) is the codebase's Destination→href helper (used identically by `configFromCta`, `normalizeCtas`).
+
+**`ButtonConfigurationModal.tsx`.** Imports `ButtonConfig`, `buildCtaButton`, `configFromCta`, `configToPickerValue`, `applyPickerLink` from `./buttonCtaAdapter`; deleted the local copies of the interface + two functions (behavior byte-identical — same functions, now imported). Added `buildSectionLinkOptions` + `LinkPicker` imports. Dropped now-unused `toDestination`/`resolveDestination`/`Destination` imports.
+- Computes `sectionOptions = buildSectionLinkOptions(sections || [])` and `pickerPageOptions = pageOptions.length > 1 ? pageOptions : []`.
+- RadioGroup: "External Link" + "Link to Page" collapsed into ONE "Link" option (value `'link'`). Radio value binds `config.type==='page' ? 'link' : config.type`, so the Link radio owns both `'link'` and `'page'`. "Native Form" + "Link with Input" options unchanged.
+- Deleted the page `Select` (743-761) and the URL `Input` (764-776); render `LinkPicker` when `config.type==='link' || 'page'`, wired `value={configToPickerValue(config)}`, `sectionOptions`, `pageOptions={pickerPageOptions}`, `onChange={(link) => setConfig(prev => applyPickerLink(prev, link))}`. No legal/social options (ruling 3, strict parity). A small read-only text span shows the current href beside the picker trigger.
+
+### GOAL_REF preservation — which lines stay OUTSIDE the swap
+- `followGoal` state (modal L172), the goal-follow info card + Detach button (L551-575), the re-attach control (L578-586): UNTOUCHED.
+- `buildCtaButton`'s `role==='primary' && followGoal ⇒ GOAL_REF` early return: moved verbatim into the adapter, still the first branch — picker residue in `config` cannot leak.
+- `handleSave` (validation + the `buttonConfig`/`cta`/`ctaConfig` writes + `elementMetadata[…].cta` persistence): UNTOUCHED. LinkPicker only mutates `config` via `applyPickerLink`, which feeds the exact existing `config` shape → persistence path byte-identical.
+- The whole `!followGoal` block stays gated by `{!followGoal && (…)}`, so a goal-following CTA hides the destination editor exactly as before.
+
+### Tests (buttonCtaAdapter.test.ts) — 15 cases, all pass
+- GOAL_REF preservation: primary+followGoal ⇒ `{role:'primary',dest:'GOAL_REF'}` regardless of picker-set url OR pathSlug; GOAL_REF still resolves through the render pass (`normalizeCtas` with an M3 goal → buttonConfig → `resolveCtaHref` = `https://calendly.com/demo`, non-empty); detach→picker-set dest→re-attach ⇒ GOAL_REF (no residue leak).
+- Round-trips: external URL → `{type:'link',url}` → CTAButton `{kind:'external'}`; page pick → `{type:'page',pathSlug}` → `{kind:'page'}`; section anchor → `{type:'link',url:'#pricing'}` → `{kind:'section'}`; `source` never present on config or CTAButton.
+- `configToPickerValue`: page→pathSlug, link→url, form→'', empty→''.
+- `configFromCta` reopen round-trip: page + external CTAButton → picker-seedable config.
+
+### Green-gate results
+- `npx tsc --noEmit`: PASS (clean).
+- `npm run test:run`: PASS (225 files, 3841 passed / 18 skipped; includes new adapter test + existing LinkPicker.test.tsx).
+- `npm run lint`: PASS (no new errors; only pre-existing `<img>`/exhaustive-deps warnings).
+- `npm run build`: PASS.
+- `npm run test:e2e` (`link-picker` + `toolbar-regen` + `toolbar-dispatch`, fresh server `E2E_PORT=3199`): PASS (19 passed). The `window is not defined` lines are the pre-existing SSR-only debug-hook warnings, not failures.
+
+### Confirmations
+- Zero `.published.tsx` / published-side files changed (`git status | grep published` → none).
+- No persistence-path change: `handleSave`, `buildCtaButton`, `configFromCta`, legacy `buttonConfig` sibling write, `elementMetadata[…].cta` all byte-identical (functions moved verbatim, not modified).
+
+### Deviations
+- **`pickerPageOptions = pageOptions.length > 1 ? pageOptions : []`** (in-scope judgment): the replaced "Link to Page" radio only appeared when `pageOptions.length > 1`. To keep strict parity (a single-page project offers no cross-page target), I gate the picker's `pageOptions` the same way. Conservative; matches prior behavior.
+- **`git checkout -- <snapshot>`**: running the test/build suite left `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` showing a working-tree change that was a pure LF→CRLF autocrlf artifact (empty content diff). It is outside my Files-touched, so I restored it with `git checkout --` on that single file to keep the change set to exactly my 3 files. No branch/commit/reset state touched; content was identical. Flagging per the git-command rule.
+
+### Open risks
+- The modal's existing save-validation message for an empty Link destination still reads "URL is required for external link." even though the Link editor now also covers section/page. Cosmetic; validation logic (locked-untouched) is correct. Left as-is.
