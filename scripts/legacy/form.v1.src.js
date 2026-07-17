@@ -1,12 +1,27 @@
 /**
+ * ⚠️ FROZEN LEGACY ARTIFACT — DO NOT EDIT.
+ *
+ * This is the pre-secrets-forms-security form handler source, vendored so
+ * `scripts/buildAssets.js` can keep emitting `public/assets/form.v1.js` with its
+ * ORIGINAL semantics. Every landing-page blob published before this change hardcodes
+ *   <script src="https://lessgo.ai/assets/form.v1.js" …>
+ * and its markup still carries `data-owner-id`; this script READS that attribute,
+ * REQUIRES it, and sends it as `userId` in the submit body. Rebuilding `form.v1.js`
+ * from the *current* source (which no longer reads/sends the owner id) would leave
+ * old cached copies of this script paired with new markup that omits the attribute —
+ * the required-field check would fail and every such form would silently die.
+ *
+ * The submit route ignores the body `userId` entirely (owner is derived server-side
+ * from `publishedPageId`), so the value shipped here is inert — it is kept only so
+ * old blobs keep passing their own client-side required-field check.
+ *
+ * The live handler is `form.v2.js`, built from
+ * `src/lib/staticExport/formHandler.js`. Never point new publishes at this file, and
+ * never change a shipped asset filename's semantics — bump the version.
+ *
+ * ---------------------------------------------------------------------------
  * Lessgo Forms - Vanilla JS Form Handler
  * Handles form submissions on static published pages
- *
- * Shipped as `public/assets/form.v2.js` (see scripts/buildAssets.js versioning
- * contract). v2 no longer reads `data-owner-id` or sends `userId`: the submit
- * route derives the owner server-side from `publishedPageId`. The frozen v1
- * source lives at `scripts/legacy/form.v1.src.js` for old immutable blobs —
- * any further semantic change here needs a v3, never an in-place edit.
  *
  * Features:
  * - Client-side validation (required, email)
@@ -165,9 +180,10 @@
     // Get form config from data attributes
     const formId = form.dataset.formId;
     const pageId = form.dataset.pageId;
+    const ownerId = form.dataset.ownerId;
     const successMessage = form.dataset.successMessage;
 
-    if (!formId || !pageId) {
+    if (!formId || !pageId || !ownerId) {
       showError(form, 'Form configuration error. Please contact support.');
       return;
     }
@@ -194,6 +210,7 @@
           formId,
           data,
           publishedPageId: pageId,
+          userId: ownerId,
         }),
         keepalive: true,
       });
@@ -251,9 +268,10 @@
     // Get form config from data attributes
     const formId = container.dataset.lessgoInlineForm;
     const pageId = container.dataset.pageId;
+    const ownerId = container.dataset.ownerId;
     const successMessage = container.dataset.successMessage;
 
-    if (!formId || !pageId) {
+    if (!formId || !pageId || !ownerId) {
       showInlineError(container, 'Form configuration error. Please contact support.');
       return;
     }
@@ -280,6 +298,7 @@
           formId,
           data,
           publishedPageId: pageId,
+          userId: ownerId,
         }),
         keepalive: true,
       });

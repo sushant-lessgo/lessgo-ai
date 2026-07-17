@@ -3,12 +3,14 @@
  *
  * Single-field form that renders inline (email input + submit button side-by-side).
  * Server component (no client state) for static HTML generation.
- * Pairs with form.v1.js for client-side submission handling.
+ * Pairs with form.v2.js for client-side submission handling. The owner is
+ * derived server-side from the page id — never emit data-owner-id (it leaked
+ * the owner's Clerk id and let anyone forge submissions).
  *
  * Key differences from InlineFormInput:
  * - No 'use client' directive (server component)
  * - No React state or event handlers
- * - Data attributes for form.v1.js integration
+ * - Data attributes for form.v2.js integration
  * - Uses inline styles for theme colors
  */
 
@@ -68,7 +70,6 @@ export function InlineFormMarkupPublished({
     <div
       data-lessgo-inline-form={form.id}
       data-page-id={publishedPageId}
-      data-owner-id={pageOwnerId}
       data-success-message={form.successMessage || "Thank you! We'll be in touch soon."}
       className={`w-full ${className}`}
     >

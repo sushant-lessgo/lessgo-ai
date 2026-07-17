@@ -255,3 +255,198 @@ All pre-existing specs still resolve, unchanged counts: `generation` 5, `parity`
 - The allowlist trap that caused this remains structural: any future e2e spec still needs manual
   registration here or it silently runs nowhere. Out of scope to fix; the config's existing
   comment already warns about it.
+
+---
+
+# Phase 3 — `form.v2.js` + markup: stop sending and stop leaking the owner id
+
+Founder sign-off received at the human gate: ship the semantic change as `form.v2.js`,
+freeze `form.v1.js` from a vendored source. No in-place v1 edit.
+
+## Files changed
+
+Created:
+- `scripts/legacy/form.v1.src.js` — vendored FROZEN copy of the pre-edit `formHandler.js`.
+- `public/assets/form.v2.js` — new built artifact (live handler).
+
+Modified:
+- `src/lib/staticExport/formHandler.js` — v2 semantics (both handlers).
+- `scripts/buildAssets.js` — mapping + contract comment.
+- `public/assets/form.v1.js` — rebuilt from the frozen source; **byte-identical to the committed artifact** (see grep results).
+- `src/lib/staticExport/htmlGenerator.ts` — blob injector → `form.v2.js`.
+- `src/modules/generatedLanding/LandingPagePublishedRenderer.tsx` — SSR-fallback `<Script>` → `form.v2.js`.
+- 9 `data-owner-id` emitters: `src/components/published/FormMarkupPublished.tsx`,
+  `src/components/published/InlineFormMarkupPublished.tsx`,
+  `src/modules/generatedLanding/sharedBlocks/LeadForm/LeadForm.published.tsx`,
+  `src/modules/skeletons/work/blocks/Contact/WorkContact.published.tsx`,
+  `src/modules/templates/atelier/blocks/Contact/AtelierContact.published.tsx`,
+  `src/modules/templates/vestria/blocks/Contact/VestriaLeadForm.published.tsx`,
+  `src/modules/templates/lumen/blocks/Contact/LumenContactForm.published.tsx`,
+  `src/modules/templates/techpremium/blocks/Contact/TechPremiumContact.published.tsx`,
+  `src/modules/templates/shared/blog/BlogPostBodyBlock.tsx`.
+- 5 first-party senders (dropped body `userId`): `src/components/published/FormIsland.tsx`,
+  `src/components/forms/FormRenderer.tsx`, `src/components/forms/InlineFormInput.tsx`,
+  `src/modules/templates/techpremium/blocks/Footer/TechPremiumNewsletterCapture.tsx`,
+  `src/modules/templates/meridian/blocks/Footer/MeridianNewsletterCapture.tsx`.
+- Tests: `src/lib/staticExport/assetBase.guard.test.ts`,
+  `src/modules/goals/__tests__/acceptance.scale05.test.ts`,
+  `src/modules/generatedLanding/sharedBlocks/__tests__/leadForm.parity.test.tsx`.
+- Docs: `CLAUDE.md`, `src/components/forms/README.md`, `src/lib/staticExport/README.md`,
+  `scripts/README.md`.
+
+## What changed, per file
+
+**Ordering followed exactly as specified:** vendor frozen copy → edit live source → update
+mapping → `node scripts/buildAssets.js` → verify.
+
+- `scripts/legacy/form.v1.src.js`: byte-exact body copy of the pre-edit `formHandler.js`,
+  verified mechanically (`diff <(tail -n +23 legacy) <(tail -n +2 orig)` → identical), with a
+  FROZEN banner mirroring `a.v1.src.js`. The banner states *why* v1 must keep reading/sending
+  the owner id: old blobs' markup still carries `data-owner-id` and the v1 script REQUIRES it.
+- `formHandler.js` (now → `form.v2.js`): both handlers drop the `dataset.ownerId` read, drop
+  `ownerId` from the required-field check (now `formId` + `pageId` only — the exact check that
+  would have silently killed every new form under an old cached script), and drop `userId` from
+  both fetch bodies. Header comment records the v2 identity + "next semantic change = v3".
+- `buildAssets.js`: `form.v1.js ← scripts/legacy/form.v1.src.js` (FROZEN, `dir: legacyDir`),
+  `form.v2.js ← src/lib/staticExport/formHandler.js` (live). Contract mapping block updated.
+- Both injectors repointed **in the same commit** (no SSR skew; app deploy is atomic).
+- Emitters: single attribute-line deletion each. `pageOwnerId` props/interfaces/threading LEFT
+  IN PLACE per Locked decision 6 (deferred cleanup, deliberately not widened here).
+- Tests: the two attribute assertions were flipped to `not.toContain('data-owner-id')` — they
+  now pin the *absence* of the leak rather than merely being neutered.
+
+## Artifact split check (real output)
+
+```
+$ grep -o 'dataset\.ownerId\|userId' public/assets/form.v1.js | sort | uniq -c
+      2 dataset.ownerId
+      2 userId                # FROZEN — both handlers intact
+
+$ grep -c 'ownerId\|userId' public/assets/form.v2.js
+0                             # live — NEITHER present
+
+$ git diff --exit-code -- public/assets/form.v1.js
+(no diff)  → form.v1.js is BYTE-IDENTICAL to the committed artifact
+```
+The byte-identity of `form.v1.js` is the strongest available evidence the freeze is exact: the
+rebuild from the vendored source reproduced the previously committed bytes. Re-verified AFTER
+the full `npm run build` (which re-runs `buildAssets`) — both still correct.
+
+## Dual-renderer parity
+
+- `grep -rn 'data-owner-id' src/ e2e/` → **zero live emitters** remain; all remaining hits are
+  comments or the new negative assertions.
+- Per-file diffstat for the 9 emitters: 8 files = exactly `1 deletion`; `LeadForm.published.tsx`
+  = attribute deletion + its stale contract comment (which documented `data-owner-id→ownerId`).
+  No other markup/CSS drifted, so no editor↔published divergence is possible.
+- Confirmed `TechPremiumNewsletterCapture.tsx` / `MeridianNewsletterCapture.tsx` are imported ONLY
+  by the `.published.tsx` footers. Their edit-side twins (`HairlineFooter.tsx`,
+  `TechPremiumFooter.tsx`) have no fetch/submit path at all — newsletter there is editor config UI
+  (`setupNewsletter`/`removeNewsletter`). So there is no twin to sync and no missed 6th sender.
+- The attribute only ever existed on `.published.tsx` files (edit-side twins are interactive
+  React and never used it), so removal cannot change the editor surface.
+
+## Test / build results (all run in WORKDIR, all observed)
+
+- `npx tsc --noEmit` → **exit 0, clean**.
+- `npm run test:run` → **209 files passed | 1 skipped; 3557 tests passed | 18 skipped** (incl.
+  all 3 flipped assertions, `leadForm.parity`, `acceptance.scale05`, `assetBase.guard`).
+- `npm run build` → **exit 0** (buildPublishedCSS + buildAssets + next build).
+- `E2E_PORT=3413 npx playwright test forms-forgery` → **6/6 passed** (dedicated port, so no
+  `reuseExistingServer` bleed into a foreign worktree). Server contract untouched this phase.
+
+## Deviations
+
+1. `scripts/README.md`: the adjacent line claimed `analyticsGenerator.js → a.v1.js`, which was
+   already **wrong** before this phase (F9b moved live analytics to `a.v2.js`). Since the file
+   was on my Files-touched list and this sits in the same 3-line bullet I was editing, I
+   corrected it to `a.v2.js` and documented both frozen legacy sources. Conservative, doc-only.
+2. `src/components/forms/README.md`: the plan cited a "stale owner-id claim" at line 129; the
+   `FormSubmissionRequest` snippet there in fact just omitted the fields. I documented the real
+   contract instead (`publishedPageId` required, `userId` accepted-and-ignored, never trusted).
+3. `CLAUDE.md`: the asset line also said `a.v1.js` for the beacon (same pre-existing F9b
+   staleness); corrected to `a.v2.js` while stating the versioning rule, since a half-corrected
+   line would be actively misleading to the next agent.
+
+## Noticed but NOT fixed (out of Files-touched — orchestrator's call)
+
+Stale `form.v1.js` prose references in files not on my list (all comments/names, no assertions,
+none affect behavior):
+- `src/hooks/editStore/lumenSeed.ts:255`, `src/hooks/editStore/pageActions.ts:259`
+- `src/lib/blog/buildBlogPages.ts:50,51`, `src/lib/blog/__tests__/buildBlogPages.test.ts:4,50`
+  (confirmed per plan step 5: **name/comment only, no `form.v1` assertion** — nothing to flip)
+- `src/modules/audience/product/elementSchema.ts:690,1085`,
+  `src/modules/audience/service/elementSchema.ts:548`
+- `src/components/published/InlineFormMarkupPublished.tsx:6,11` (header comment still says
+  "Pairs with form.v1.js" — file WAS on my list; left because the plan scoped this file to the
+  attribute removal only. Flag for a follow-up doc pass if desired.)
+- `src/modules/generatedLanding/sharedBlocks/LeadForm/leadFormFields.tsx:35`,
+  `src/modules/skeletons/work/blocks/Contact/{leadFormMarkup.tsx:32,WorkContact.core.tsx:7,WorkContact.published.tsx:3,WorkContact.tsx:6}`,
+  `src/modules/templates/atelier/blocks/Contact/{AtelierContact.core.tsx:5,AtelierContact.published.tsx:3,AtelierContact.tsx:6,contactFields.ts:4}`,
+  `src/modules/templates/{lumen,techpremium,vestria}/blocks/Contact/*` (various),
+  `src/modules/templates/shared/blog/BlogPostBodyBlock.tsx:16`,
+  `src/modules/templates/vestria/registration.test.ts:111`,
+  `src/modules/wizard/generation/finalize.ts:94`
+- `src/app/api/forms/submit/route.ts:23,65` + `e2e/forms-forgery.spec.ts:14` reference the
+  frozen `form.v1.js` **correctly** (they describe old-blob back-compat) — leave as-is.
+
+## Open risks
+
+- **Deploy ordering (carried from F9b):** `form.v2.js` must be live on the assets origin BEFORE
+  any page referencing it is published/served, else new blobs 404 their form handler. The app
+  deploy is atomic (htmlGenerator + `public/assets/` ship together); a page published from a
+  *pre-deploy* instance is unaffected (it references v1, still shipped).
+- `pageOwnerId` prop threading (~25 files) still exists and is now dead weight on the published
+  path (nothing reads it). Deferred per Locked decision 6 / unresolved question 5.
+- Manual QA still owed at phase 4: publish in dev → confirm HTML has no `data-owner-id`,
+  references `form.v2.js`, and submits end-to-end; plus the old-blob (`form.v1.js` + attribute)
+  back-compat submit.
+
+## Working-tree note (not my edits)
+
+`git status` also shows `docs/task/secrets-forms-security.plan.md` (the orchestrator's own
+uncommitted phase-2 progress-log line) and
+`src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` (empty diff —
+CRLF-only churn from the test run, no content change). Neither was touched by this phase.
+
+---
+
+## Phase 3 follow-up — doc/comment corrections (impl-review non-blocking items)
+
+**Files changed**
+- `src/components/published/InlineFormMarkupPublished.tsx`
+- `docs/task/secrets-forms-security.audit.md` (this file)
+
+Comments and prose ONLY. No code logic, markup, props, or assets changed.
+
+### `src/components/published/InlineFormMarkupPublished.tsx`
+Header comment said "Pairs with form.v1.js" (line ~6) and "Data attributes for form.v1.js
+integration" (line ~11). Both now read `form.v2.js` — this file's markup no longer emits
+`data-owner-id` and is consumed by v2. Added the same owner-derivation contract sentence used by
+its sibling `LeadForm.published.tsx`, for consistent wording across the two contract comments.
+Diff is confined to the header block comment (verified via `git diff -U2`; the `data-owner-id`
+attribute deletion visible in that diff is pre-existing Phase 3 work, not this follow-up).
+
+### `docs/task/secrets-forms-security.audit.md`
+The Phase 3 verification bullet claimed `TechPremiumNewsletterCapture.tsx` /
+`MeridianNewsletterCapture.tsx` were "shared by BOTH renderers". Imprecise and misleading.
+Corrected to the verified reason: both are imported ONLY by the `.published.tsx` footers; their
+edit-side twins (`HairlineFooter.tsx`, `TechPremiumFooter.tsx`) carry no fetch/submit path —
+newsletter there is editor config UI (`setupNewsletter`/`removeNewsletter`). Operational
+conclusion is unchanged (no twin to sync, no missed 6th sender); only the reason was wrong.
+
+### Deviations
+None.
+
+### Test results
+- `npx tsc --noEmit` → clean (exit 0).
+- `npm run test:run` → 209 files passed / 1 skipped; **3557 passed / 18 skipped** — matches the
+  expected baseline exactly.
+- `git diff -- public/assets/` → **EMPTY**. `form.v1.js` byte-identity (the phase's back-compat
+  proof) is undisturbed.
+- Scoped diff → only the 2 files above were modified by this follow-up. (Whole-branch
+  `git diff --stat` still lists all of Phases 1-3 because those remain uncommitted pending the
+  orchestrator's commit.)
+
+### Open risks
+None. Comment/prose-only; no runtime surface touched.

@@ -1,9 +1,11 @@
 // Shared LeadForm — PUBLISHED twin (server-safe, no hooks). Emits a real
-// <form data-lessgo-form …> wired to form.v1.js → /api/forms/submit →
-// FormSubmission (+ lead email). form.v1.js embeds automatically when
+// <form data-lessgo-form …> wired to form.v2.js → /api/forms/submit →
+// FormSubmission (+ lead email). form.v2.js embeds automatically when
 // content.forms is non-empty (the M1 seed guarantees that) and reads EXACTLY
 // these dataset keys: data-form-id→formId, data-page-id→pageId,
-// data-owner-id→ownerId, data-success-message→successMessage. Contract matches
+// data-success-message→successMessage. The owner is derived server-side from
+// the page id — never emit data-owner-id (it leaked the owner's Clerk id and
+// let anyone forge submissions). Contract matches
 // VestriaLeadForm.published.tsx. Renders the seeded fields from
 // content.forms[form_id]. Layout lives in leadFormFields.LeadFormCore so this is
 // byte-parallel with the edit twin.
@@ -40,7 +42,6 @@ export default function LeadFormPublished(props: Props) {
       data-lessgo-form
       data-form-id={formId}
       data-page-id={props.publishedPageId}
-      data-owner-id={props.pageOwnerId}
       data-success-message={form?.successMessage || LEAD_FORM_SUCCESS_FALLBACK}
     >
       {fields.map((f) => renderLeadField(f, formId))}

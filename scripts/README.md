@@ -18,8 +18,12 @@ or the injected form/analytics assets, you must rebuild for it to take effect.
 - **buildAssets.js** (`npm run build:assets`) — minifies the client scripts that get
   injected into published pages and copies the self-hosted fonts CSS into
   `public/assets/`:
-  - `formHandler.js` → `public/assets/form.v1.js` (published-page form submit handler)
-  - `analyticsGenerator.js` → `public/assets/a.v1.js` (analytics beacon)
+  - `formHandler.js` → `public/assets/form.v2.js` (published-page form submit handler)
+  - `analyticsGenerator.js` → `public/assets/a.v2.js` (analytics beacon)
+  - `legacy/form.v1.src.js` → `public/assets/form.v1.js`, `legacy/a.v1.src.js` →
+    `public/assets/a.v1.js` — FROZEN sources for already-published immutable blobs.
+    A shipped asset filename never changes semantics: bump to a new version instead
+    (see the versioning contract at the top of `buildAssets.js`).
   - `src/styles/fonts-self-hosted.css` → `public/assets/fonts-self-hosted.css` (copied
     verbatim; published HTML loads `https://lessgo.ai/assets/fonts-self-hosted.css`)
   Uses `terser` when installed; falls back to copying unminified with a warning.

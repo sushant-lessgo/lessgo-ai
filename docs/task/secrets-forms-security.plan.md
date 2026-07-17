@@ -13,7 +13,7 @@
 ## Progress log
 
 - phase 1 server-side owner derivation: **done** (commit 142cbba9, review loops 1, verdict `ship`) — tsc clean, 3557 tests pass. Founder signed off the gate: canonical `isServingPublishState` matrix + project-scoped lookup, both as planned. Null-`projectId` guard added (reviewer catch; `PublishedPage.projectId` is `String?`) → skips config lookup, no 500.
-- phase 2 forged-submission e2e spec: pending
+- phase 2 forged-submission e2e spec: **done** (commit 63856553, review loops 1, verdict `ship`) — 6/6 pass on real DB; verified all 6 FAIL against pre-fix `142cbba9^` (real pin, not decoration). Scope +1 file (orchestrator-authorized): `playwright.config.ts` — the spec matched **0 tests** unregistered (allowlist trap; 3rd track to hit it). Rate limiter verified 10/60s per IP vs 6 POSTs.
 - phase 3 form.v2.js + markup — stop sending/leaking owner id: pending
 - phase 4 integration verification + no-regression smoke: pending
 

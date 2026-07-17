@@ -24,7 +24,8 @@
  * Current mapping:
  *   a.v1.js  ← scripts/legacy/a.v1.src.js            (FROZEN pre-scale-04 beacon)
  *   a.v2.js  ← src/lib/staticExport/analyticsGenerator.js  (live: role+placement, v:2)
- *   form.v1.js ← src/lib/staticExport/formHandler.js  (unchanged since 2026-01, still v1)
+ *   form.v1.js ← scripts/legacy/form.v1.src.js       (FROZEN: reads data-owner-id, sends userId)
+ *   form.v2.js ← src/lib/staticExport/formHandler.js (live: no owner id — server derives it)
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -49,7 +50,8 @@ const outDir = path.join(__dirname, '../public/assets');
 // `dir` defaults to srcDir; frozen legacy artifacts pin their own source dir so an
 // edit to the live source can never leak into a shipped-versioned filename.
 const files = [
-  { src: 'formHandler.js', out: 'form.v1.js' },
+  { src: 'form.v1.src.js', out: 'form.v1.js', dir: legacyDir }, // FROZEN pre-secrets-forms-security handler (see contract above)
+  { src: 'formHandler.js', out: 'form.v2.js' },           // live handler: no owner id in markup or body
   { src: 'a.v1.src.js', out: 'a.v1.js', dir: legacyDir }, // FROZEN pre-scale-04 beacon (see contract above)
   { src: 'analyticsGenerator.js', out: 'a.v2.js' },       // live beacon: role+placement, v:2
   { src: 'naayomBehaviors.js', out: 'naayom.v1.js' }, // Phase 4: TechPremium behaviors

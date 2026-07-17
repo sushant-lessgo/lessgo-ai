@@ -100,7 +100,7 @@ Flow: edit `/edit/[token]` → preview `/preview/[token]` → publish → live `
 - `POST /api/publish` creates/updates `PublishedPage` + a new immutable `PublishedPageVersion`, runs `generateStaticHTML()` (`src/lib/staticExport/htmlGenerator.ts`) via the **published renderer**, uploads to Vercel Blob (`blobKey = pages/{pageId}/{version}/index.html`), then atomically writes KV routes.
 - `publishState` machine: `draft → publishing → published | failed`; orphaned blobs are cleaned up on DB failure.
 - `/p/[slug]` is ISR (`revalidate = 3600`); a blob-proxy edge route serves the static HTML by KV lookup.
-- Published pages embed minified `form.v1.js` and `a.v1.js` (analytics beacon).
+- Published pages embed minified `form.v2.js` and `a.v2.js` (analytics beacon). Asset filenames are versioned and immutable — old blobs keep loading the frozen `form.v1.js`/`a.v1.js`, built from `scripts/legacy/*.src.js`. Any semantic change to a shipped script = a NEW filename, never an in-place edit (contract: `scripts/buildAssets.js`).
 
 ### Custom Domains
 
@@ -117,7 +117,7 @@ Flow: edit `/edit/[token]` → preview `/preview/[token]` → publish → live `
 ### Analytics, Forms & Integrations
 
 - **Analytics:** `PageAnalytics` (daily per-slug aggregation: views, unique visitors, conversions, device split, top referrers/UTM). `POST /api/analytics/event` is a privacy-first beacon (no raw IP/UA stored). PostHog used app-side for tracking + feature flags.
-- **Forms:** `POST /api/forms/submit` validates + stores `FormSubmission`, runs integrations. `UserIntegration` holds encrypted API keys (ConvertKit live: `src/lib/integrations/convertkit.ts`).
+- **Forms:** `POST /api/forms/submit` validates + stores `FormSubmission`, runs integrations. `UserIntegration` holds encrypted API keys (ConvertKit live: `src/lib/integrations/convertkit.ts`). **The owner is derived server-side from `publishedPageId` (→ `PublishedPage.userId`), never from the request body** — a body `userId` is accepted-and-ignored for old-blob back-compat, and public HTML no longer emits the owner's Clerk id.
 - **IVOC (Voice-of-Customer):** `IVOCCache` caches pains/desires/objections/beliefs/phrases keyed by `(categoryKey, audienceKey)` (table retained). The Tavily search client + `ivocExtractor` were removed in scale-08 along with the `/api/market-insights` route that drove them.
 
 ### Admin

@@ -29,7 +29,6 @@ export default function WorkContactPublished(props: Props) {
       data-lessgo-form
       data-form-id={formRef}
       data-page-id={props.publishedPageId}
-      data-owner-id={props.pageOwnerId}
       data-success-message={form?.successMessage || WORK_LEAD_SUCCESS_MESSAGE}
       aria-label="Project enquiry"
     >
