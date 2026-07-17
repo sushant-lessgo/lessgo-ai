@@ -9,7 +9,33 @@ import { logger } from '@/lib/logger';
 // extractElementText) later extracts. capture.ts is a pure module (only pulls in
 // editDistance) — safe to import into this client store slice; no server-only deps.
 import { extractElementText } from '@/lib/editDelta/capture';
+// billing-beta phase 4 — credit blocks (402) must SURFACE, not vanish. Both
+// modules are client-safe leaves (no prisma, no React).
+import {
+  parseInsufficientCredits,
+  InsufficientCreditsError,
+} from '@/lib/billing/insufficientCredits';
+import { emitCreditsBlocked } from '@/lib/billing/creditsBlockedBus';
 import { deepCopy, pushHistoryEntry } from './historyHelpers';
+
+// billing-beta phase 4 — the ONE credit-block handler for this file's three
+// credit-gated fetches (/api/regenerate-section, /api/audience/work/regenerate-story,
+// /api/regenerate-element). If the response is an insufficient-credits block,
+// announce it on the bus (a mounted CreditsBlockedHost renders the modal) and
+// return a typed error for the caller to throw; otherwise return null and let
+// the existing non-credit error handling run UNCHANGED.
+//
+// The throw still lands in aiGeneration.errors via each catch block — this is a
+// behavior superset, not a store-shape change.
+//
+// ⚠️ NOT for `regenerateElement` (:~460): that one is a setTimeout MOCK with no
+// network call and no credit spend. Nothing to gate.
+function creditBlockFrom(status: number, body: unknown): InsufficientCreditsError | null {
+  const info = parseInsufficientCredits(status, body);
+  if (!info) return null;
+  emitCreditsBlocked(info);
+  return new InsufficientCreditsError(info);
+}
 
 // data-capture Phase 3 — session-scoped regen attempt counters (module-scoped,
 // in-memory; reset on reload). Keyed `${sectionId}` / `${sectionId}.${elementKey}`.
@@ -112,6 +138,10 @@ export function createAIActions(set: any, get: any) {
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
+          // billing-beta phase 4 — surface a 402 credit block BEFORE the generic
+          // error throw (announce on the bus + throw the typed error).
+          const blocked = creditBlockFrom(response.status, errorData);
+          if (blocked) throw blocked;
           // regen-modernization phase 4 (R6.3): prefer the server's honest
           // `message` over the machine `error` CODE — the atelier `quote` band
           // 422s `invalid_scope`, which alone tells the user nothing.
@@ -323,6 +353,8 @@ export function createAIActions(set: any, get: any) {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
+          const blocked = creditBlockFrom(response.status, errorData);
+          if (blocked) throw blocked;
           throw new Error(errorData.error || errorData.message || 'Failed to regenerate story');
         }
 
@@ -554,10 +586,17 @@ export function createAIActions(set: any, get: any) {
         });
 
         if (!response.ok) {
+          // This path used to throw on the STATUS ALONE, never reading the body —
+          // so a 402 was indistinguishable from any other failure and the block
+          // died in the toolbar's empty catch. Read it (defensively: the body may
+          // be empty/non-JSON) so the normalizer has something to see.
+          const errorData = await response.json().catch(() => null);
+          // billing-beta phase 4 — surface a 402 credit block before the generic throw.
+          const blocked = creditBlockFrom(response.status, errorData);
+          if (blocked) throw blocked;
           // regen-modernization phase 4 (R6.3): surface the SERVER's honest reason
           // (e.g. "This element isn't AI-written…" on a 422) instead of a bare
           // `API error: 422`. A why-message the user never sees isn't a why-message.
-          const errorData = await response.json().catch(() => null);
           throw new Error(
             errorData?.message || errorData?.error || `API error: ${response.status}`
           );

@@ -14,7 +14,13 @@ import {
   wrapElementContentWithStyles,
   type PartialFormatResult
 } from '@/utils/textFormatting';
+import { AppTooltip } from '@/components/ui/tooltip';
+import { CREDIT_COSTS } from '@/lib/creditCosts';
 import { ToolbarButton, ToolbarDivider } from './ToolbarButton';
+
+// billing-beta phase 7 — cost hint for a spend affordance. Trivial + local:
+// pluralization only. The NUMBER always comes from CREDIT_COSTS, never a literal.
+const creditCostHint = (n: number) => `Costs ${n} credit${n === 1 ? '' : 's'}`;
 
 interface TextToolbarMVPProps {
   elementSelection: any;
@@ -773,40 +779,65 @@ function TextToolbarMVPInner({
               label="Link"
             />
 
-            {/* Divider + AI Sparkle — the existing sparkle → variations flow. */}
+            {/* Divider + AI Sparkle. NOTE: this is the EXISTING sparkle →
+                variations flow, not the phase-5 "Ask Lessgo AI" instruction
+                prompt (which lands in the shell's hidden trailing slot).
+
+                billing-beta phase 7/8: handleSparkle hits /api/regenerate-element ⇒
+                ELEMENT_REGENERATION spend. Surface the cost on hover (AppTooltip)
+                and keep the e2e's `aria-label="AI text variations"` hook. When
+                enabled we suppress the native title (title="") so the AppTooltip is
+                the sole hover affordance; when disabled we render the button BARE so
+                ToolbarButton's disabledTitle carries the state message (locale /
+                generating). */}
             <ToolbarDivider />
-            <ToolbarButton
-              data-action="ai-variations"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              // phase 3.5: the ONLY disabled ToolbarButton with a live handler and
-              // no consumer-side guard. Native `disabled` used to protect
-              // handleSparkle for free; with the aria-disabled convention that
-              // protection is ToolbarButton's onClick guard alone. Guard here too,
-              // matching Section/Image/ElementToolbar — a double-fired regen (mid-
-              // generation) or a silent no-op regen (non-default locale) is a real
-              // bug, not a placeholder no-op.
-              onClick={(e) => {
-                if (aiGeneration.isGenerating || regenLocaleLocked) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  return;
-                }
-                handleSparkle();
-              }}
-              disabled={aiGeneration.isGenerating || regenLocaleLocked}
-              disabledTitle={
-                regenLocaleLocked
-                  ? 'Switch to the default language to regenerate.'
-                  : 'Generating…'
-              }
-              active={elementVariations.visible}
-              className={aiGeneration.isGenerating ? 'animate-pulse' : ''}
-              icon={<SparkleIcon />}
-              title="AI text variations"
-            />
+            {(() => {
+              const sparkleDisabled = aiGeneration.isGenerating || regenLocaleLocked;
+              const sparkleButton = (
+                <ToolbarButton
+                  data-action="ai-variations"
+                  aria-label="AI text variations"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  // phase 3.5: the ONLY disabled ToolbarButton with a live handler
+                  // and no consumer-side guard. Native `disabled` used to protect
+                  // handleSparkle for free; with the aria-disabled convention that
+                  // protection is ToolbarButton's onClick guard alone. Guard here
+                  // too, matching Section/Image/ElementToolbar — a double-fired regen
+                  // (mid-generation) or a silent no-op regen (non-default locale) is
+                  // a real bug, not a placeholder no-op.
+                  onClick={(e) => {
+                    if (sparkleDisabled) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      return;
+                    }
+                    handleSparkle();
+                  }}
+                  disabled={sparkleDisabled}
+                  disabledTitle={
+                    regenLocaleLocked
+                      ? 'Switch to the default language to regenerate.'
+                      : 'Generating…'
+                  }
+                  active={elementVariations.visible}
+                  className={aiGeneration.isGenerating ? 'animate-pulse' : ''}
+                  icon={<SparkleIcon />}
+                  title={sparkleDisabled ? undefined : ''}
+                />
+              );
+              return sparkleDisabled ? (
+                sparkleButton
+              ) : (
+                <AppTooltip
+                  label={`AI text variations · ${creditCostHint(CREDIT_COSTS.ELEMENT_REGENERATION)}`}
+                >
+                  {sparkleButton}
+                </AppTooltip>
+              );
+            })()}
           </div>
         </div>
       </div>

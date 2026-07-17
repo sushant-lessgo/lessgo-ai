@@ -7,7 +7,14 @@ import { useEditor } from '@/hooks/useEditor';
 
 import { useButtonConfigModal } from '@/hooks/useButtonConfigModal';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
+import { AppTooltip } from '@/components/ui/tooltip';
+import { CREDIT_COSTS } from '@/lib/creditCosts';
 import { ToolbarButton, ToolbarDivider, ToolbarLabel } from './ToolbarButton';
+
+// billing-beta phase 7 — cost hint for a spend affordance. Trivial + local:
+// pluralization only. The NUMBER always comes from CREDIT_COSTS, never a literal
+// (config-driven acceptance criterion; a re-inlined `1` is exactly what this guards).
+const creditCostHint = (n: number) => `Costs ${n} credit${n === 1 ? '' : 's'}`;
 
 interface ElementToolbarProps {
   elementSelection: any;
@@ -272,36 +279,49 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
         {/* Primary Actions */}
         {primaryActions.map((action, index) => {
           const actionDisabled = (action as any).disabled === true;
+          // Regenerate hits /api/regenerate-element ⇒ ELEMENT_REGENERATION spend.
+          // Surface its cost on hover. When disabled the button swallows pointer
+          // events (AppTooltip can't fire) so the native disabledTitle carries the
+          // "why", and we keep the native title off the enabled hinted button
+          // (title="") so the AppTooltip is the sole hover affordance.
+          const costHint =
+            action.id === 'regenerate-copy' && !actionDisabled
+              ? creditCostHint(CREDIT_COSTS.ELEMENT_REGENERATION)
+              : null;
+          const button = (
+            <ToolbarButton
+              data-action={action.id}
+              onClick={(e) => {
+                if (actionDisabled) {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  return;
+                }
+                if (action.id === 'edit-text' || action.id === 'button-config') {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }
+                action.handler(e);
+              }}
+              disabled={actionDisabled}
+              disabledTitle={(action as any).disabledTitle}
+              variant={
+                (action as any).variant === 'danger'
+                  ? 'danger'
+                  : action.id === 'edit-text'
+                  ? 'emphasis'
+                  : 'default'
+              }
+              icon={<ElementIcon icon={action.icon} />}
+              label={action.label}
+              title={costHint ? '' : undefined}
+              aria-haspopup={action.id === 'button-config' ? 'dialog' : undefined}
+            />
+          );
           return (
             <React.Fragment key={action.id}>
               {index > 0 && <ToolbarDivider />}
-              <ToolbarButton
-                data-action={action.id}
-                onClick={(e) => {
-                  if (actionDisabled) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    return;
-                  }
-                  if (action.id === 'edit-text' || action.id === 'button-config') {
-                    e.stopPropagation();
-                    e.preventDefault();
-                  }
-                  action.handler(e);
-                }}
-                disabled={actionDisabled}
-                disabledTitle={(action as any).disabledTitle}
-                variant={
-                  (action as any).variant === 'danger'
-                    ? 'danger'
-                    : action.id === 'edit-text'
-                    ? 'emphasis'
-                    : 'default'
-                }
-                icon={<ElementIcon icon={action.icon} />}
-                label={action.label}
-                aria-haspopup={action.id === 'button-config' ? 'dialog' : undefined}
-              />
+              {costHint ? <AppTooltip label={costHint}>{button}</AppTooltip> : button}
             </React.Fragment>
           );
         })}

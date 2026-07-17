@@ -20,7 +20,9 @@ import NewSiteButton from './NewSiteButton'
  * via `DisabledNavItem` below — a plain <button disabled> reusing the primitive's
  * exported `navItemClasses()`, so a greyed row is pixel-identical to an idle row
  * plus opacity. Greyed here: Domains (R15 —
- * no /dashboard/domains route exists), Upgrade (S3).
+ * no /dashboard/domains route exists). The plan widget's Upgrade was greyed for
+ * the same reason until billing-beta phase 6 built /dashboard/billing's CTAs —
+ * it is a live link now.
  */
 
 export interface SidebarPlan {
@@ -163,10 +165,15 @@ export default function AppSidebar({ profile, plan }: AppSidebarProps) {
           </div>
           <p className="mt-2 font-app-sans text-[10.5px] text-app-faint">
             {plan ? `${plan.used} of ${plan.limit < 0 ? '∞' : plan.limit}` : '— of —'} sites used ·{' '}
-            {/* S3 — no upgrade route yet; greyed in place rather than hidden. */}
-            <span className="cursor-not-allowed font-semibold opacity-60" aria-disabled="true">
+            {/* billing-beta phase 6 — the destination exists now (lean Billing &
+                plan view with the Upgrade / Top-up / portal CTAs), so this is a
+                real link. Never grey something that works today. */}
+            <Link
+              href="/dashboard/billing"
+              className="font-semibold text-app-primary hover:underline"
+            >
               Upgrade
-            </span>
+            </Link>
           </p>
         </div>
 

@@ -217,7 +217,8 @@ export function getHandlerDebugInfo(): Record<string, any> {
 }
 
 // Development utilities
-if (process.env.NODE_ENV === 'development') {
+// dev-SSR guard; module is on the /edit SSR import path where window is undefined
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   (window as any).__domSelectionHandlers = {
     getDebugInfo: getHandlerDebugInfo,
     handlerCounts,

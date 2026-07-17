@@ -7,6 +7,10 @@ import { EditLayout } from "./components/layout/EditLayout";
 import { EditLayoutErrorBoundary } from "@/app/edit/[token]/components/layout/EditLayoutErrorBoundary";
 import { ToastProvider } from "./components/ui/ToastProvider";
 import { DialogHost } from "@/components/ui/ConfirmDialog";
+// billing-beta phase 4: without this host, a credit-blocked AI op in the editor
+// emits on creditsBlockedBus with nobody listening — i.e. fails silently, the
+// exact bug the slice exists to kill. e2e/billing-beta.spec.ts pins the mount.
+import { CreditsBlockedHost } from "@/components/billing/CreditsBlockedHost";
 
 
 export default function EditPage() {
@@ -44,6 +48,7 @@ export default function EditPage() {
         <ToastProvider>
           <EditPageContent tokenId={tokenId} />
           <DialogHost />
+          <CreditsBlockedHost />
         </ToastProvider>
       </EditLayoutErrorBoundary>
     </EditProvider>
