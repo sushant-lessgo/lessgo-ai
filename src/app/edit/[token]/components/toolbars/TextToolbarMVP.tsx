@@ -742,6 +742,37 @@ function TextToolbarMVPInner({
               )}
             </div>
 
+            {/* ── Text → Link: GREYED PLACEHOLDER (phase 3.5, founder ruling 9) ──
+                Sits here because toolbarPlan's Beta column order is
+                `… color · align · Link · Ask AI`, so Link belongs between the
+                colour picker and the sparkle.
+
+                It is DISABLED and carries ZERO functionality on purpose. Phase 3
+                shipped the shared t4 LinkPicker, but there is nowhere to put a
+                text link: NO text element in any schema has a link field (every
+                `href` in the element schema is inside a collection — `nav_items.href`
+                — or is a `*_cta_href`). The only mechanism would be injecting `<a>`
+                into the saved text HTML, which needs `<a>`-injection machinery in
+                `textFormatting.ts` (does not exist), would DISCARD `Link.source`,
+                and collides with the published sanitizer's STRICT_PROFILE (no `'a'`
+                tag) — i.e. it is a published-output change, which this spec forbids.
+
+                Ruling 9: ship it greyed rather than omit it — the anatomy should
+                show its intended shape, and a tooltip that says WHY reads as
+                "coming", not as the broken button QA naayom C2 flagged. */}
+            <ToolbarDivider />
+            <ToolbarButton
+              data-action="link"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              disabled
+              disabledTitle="Text links are coming — the text schema has no link field yet."
+              icon={<LinkIcon />}
+              label="Link"
+            />
+
             {/* Divider + AI Sparkle. NOTE: this is the EXISTING sparkle →
                 variations flow, not the phase-5 "Ask Lessgo AI" instruction
                 prompt (which lands in the shell's hidden trailing slot). */}
@@ -752,7 +783,21 @@ function TextToolbarMVPInner({
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onClick={handleSparkle}
+              // phase 3.5: the ONLY disabled ToolbarButton with a live handler and
+              // no consumer-side guard. Native `disabled` used to protect
+              // handleSparkle for free; with the aria-disabled convention that
+              // protection is ToolbarButton's onClick guard alone. Guard here too,
+              // matching Section/Image/ElementToolbar — a double-fired regen (mid-
+              // generation) or a silent no-op regen (non-default locale) is a real
+              // bug, not a placeholder no-op.
+              onClick={(e) => {
+                if (aiGeneration.isGenerating || regenLocaleLocked) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return;
+                }
+                handleSparkle();
+              }}
               disabled={aiGeneration.isGenerating || regenLocaleLocked}
               disabledTitle={
                 regenLocaleLocked
@@ -920,6 +965,17 @@ function ChevronDownIcon() {
   return (
     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  );
+}
+
+// The natural lucide-style link glyph — phase 3.5 deliberately does NOT invent a
+// "disabled" icon; greying is carried by colour + cursor + aria-disabled alone.
+function LinkIcon() {
+  return (
+    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
     </svg>
   );
 }

@@ -14,6 +14,14 @@ import { AUDIENCES, seedDraft } from './helpers/seedDraft';
 //   3. Design ▾ renders, is `aria-disabled`, and does nothing (skeleton-gated, D-3).
 //   4. Ask AI is NOT present (it lands in phase 5 behind a human gate).
 //   5. Esc dismisses.
+//   6. phase 3.5 (founder ruling 9): every DEFERRED Beta action ships as a greyed
+//      placeholder — present + disabled + tooltipped + inert — rather than omitted,
+//      so the t2 anatomy reads visually complete and the roadmap is visible instead
+//      of looking finished-but-thin. Several assertions here flipped from
+//      `not.toContain(x)` to `toContain(x)` at that ruling; each is marked. NOTE the
+//      capability verdicts did NOT change — nothing was built behind these.
+//      Form + Menu are OUT ENTIRELY (not greyed): neither dispatches a toolbar, so
+//      there is nowhere to put one. The next spec builds those hosts.
 //
 // phase 2 adds the Button/CTA + Footer cases. NOTE: there is deliberately NO form
 // case, and there is no longer any form toolbar to test — phase 3 DELETED the inert
@@ -60,6 +68,53 @@ async function actionIds(page: Page): Promise<string[]> {
 async function dismiss(page: Page) {
   await page.keyboard.press('Escape');
   await expect(page.locator(SHELL)).toHaveCount(0, { timeout: 10_000 });
+}
+
+/**
+ * phase 3.5 (founder ruling 9) — the greyed-placeholder contract, in one place.
+ *
+ * Deferred Beta actions ship PRESENT but disabled rather than omitted, so that the
+ * t2 anatomy reads complete and the roadmap is visible. All four properties below
+ * are load-bearing:
+ *   - present + aria-disabled → it reads as "coming", not missing;
+ *   - a NON-EMPTY title → the mandatory "why". A dead button with no explanation is
+ *     the naayom-C2 bug report this convention exists to prevent, so emptiness fails;
+ *   - INERT on force-click → nothing behind it. The onClick guard is what makes this
+ *     true; removing it is the mutation this assertion is designed to catch.
+ *
+ * phase 3.5: `toBeDisabled()` is deliberately NOT used — it asserts the NATIVE
+ * disabled attribute, which these buttons intentionally no longer carry (a natively
+ * disabled button suppresses the `title` tooltip and the mousedown that retains
+ * contenteditable focus; see ToolbarButton.tsx). `aria-disabled` alone is only a
+ * CLAIM, so it is never asserted on its own — the force-click inertness check below
+ * is the assertion that actually has teeth.
+ */
+async function expectGreyedPlaceholder(page: Page, action: string, whyPattern: RegExp) {
+  const btn = page.locator(`${SHELL} [data-action="${action}"]`);
+  await expect(btn, `placeholder "${action}" is missing from the toolbar`).toHaveCount(1);
+  await expect(btn, `placeholder "${action}" is not aria-disabled`).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
+
+  const title = await btn.getAttribute('title');
+  expect(title, `placeholder "${action}" has no tooltip — a dead button with no "why" reads as a bug`)
+    .toBeTruthy();
+  expect(title!.trim().length, `placeholder "${action}" tooltip is empty`).toBeGreaterThan(0);
+  expect(title, `placeholder "${action}" tooltip must say WHY it is off`).toMatch(whyPattern);
+
+  // Inert: force past the disabled state and assert nothing happened — the shell
+  // survives, no picker/modal/panel opened.
+  await btn.click({ force: true });
+  await expect(page.locator(SHELL), `clicking "${action}" tore the shell down`).toHaveCount(1);
+  await expect(
+    page.locator('[data-testid="link-picker"]'),
+    `"${action}" opened a link picker — it is supposed to have NOTHING behind it`,
+  ).toHaveCount(0);
+  await expect(
+    page.locator('[role="dialog"]'),
+    `"${action}" opened a dialog — it is supposed to have NOTHING behind it`,
+  ).toHaveCount(0);
 }
 
 test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () => {
@@ -113,7 +168,8 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
     await expect(page.locator(SHELL)).toHaveAttribute('data-toolbar-type', 'text');
 
     const ids = await actionIds(page);
-    // The Beta text set: B/I/U · align · size · colour · variations (+ Design ▾).
+    // The Beta text set: B/I/U · align · size · colour · Link · variations (+ Design ▾).
+    // `link` is phase 3.5's greyed placeholder (ruling 9) — present, never enabled.
     expect(ids).toEqual(
       [
         'ai-variations',
@@ -124,12 +180,19 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
         'design-menu',
         'font-size',
         'italic',
+        'link',
         'text-color',
         'underline',
       ].sort(),
     );
     // Ask AI is phase 5, behind a human gate — it must not have leaked in.
     expect(ids).not.toContain('ask-ai');
+  });
+
+  test('text: Link is a greyed placeholder (no text link field exists)', async ({ page }) => {
+    await page.locator('[data-element-key="headline"]').first().click();
+    await expect(page.locator(SHELL)).toHaveCount(1, { timeout: 15_000 });
+    await expectGreyedPlaceholder(page, 'link', /schema|link field/i);
   });
 
   test('section target: one shell with the section action set', async ({ page }) => {
@@ -145,11 +208,18 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
     expect(ids).toContain('add-element');
     expect(ids).toContain('design-menu');
     expect(ids).not.toContain('ask-ai');
-    // Background is deferred (D-1): the write has nowhere to land in served templates.
-    expect(ids).not.toContain('background');
+    // phase 3.5 REVERSAL (ruling 9): Background is still deferred as a CAPABILITY
+    // (D-1 — the write has nowhere to land in served templates), but it now SHIPS as
+    // a greyed placeholder instead of being omitted. This assertion was
+    // `not.toContain('background')` through phase 3.
+    expect(ids).toContain('background');
+    // `manage-links` is FOOTER-only — it must not leak onto body sections.
+    expect(ids, 'manage-links leaked out of the footer').not.toContain('manage-links');
+
+    await expectGreyedPlaceholder(page, 'background', /design system/i);
   });
 
-  test('image target: reskin only — no Link action', async ({ page }) => {
+  test('image target: reskin + greyed Link placeholder', async ({ page }) => {
     // Hearth, not the shared meridian token (see `imageCfg` above).
     await page.goto(`/edit/${imageToken}`);
     const image = page.locator('[data-image-id]').first();
@@ -161,11 +231,20 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
     await expect(page.locator(SHELL)).toHaveCount(1, { timeout: 15_000 });
     const ids = await actionIds(page);
     expect(ids).toEqual(
-      ['delete-image', 'design-menu', 'edit-image', 'replace-image', 'stock-photos'].sort(),
+      [
+        'delete-image',
+        'design-menu',
+        'edit-image',
+        'image-link',
+        'replace-image',
+        'stock-photos',
+      ].sort(),
     );
-    // Image → Link is DEFERRED (ruling 5): no published-consumed image-link field
-    // exists, so shipping the action would promise something publish drops.
-    expect(ids).not.toContain('image-link');
+    // phase 3.5 REVERSAL (ruling 9): Image → Link is still DEFERRED as a CAPABILITY
+    // (ruling 5 — no published-consumed image-link field exists), but it now SHIPS
+    // greyed instead of omitted. This assertion was `not.toContain('image-link')`
+    // through phase 3. The tooltip is what stops it promising something publish drops.
+    await expectGreyedPlaceholder(page, 'image-link', /link field/i);
   });
 
   // ── phase 2: Button/CTA ────────────────────────────────────────────────────
@@ -180,11 +259,11 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
     await expect(page.locator(SHELL)).toHaveAttribute('data-toolbar-type', 'element');
 
     const ids = await actionIds(page);
-    // The Beta Button/CTA set: Edit Text · Link/Action · Button Settings ·
+    // The Beta Button/CTA set: Edit Text · Link/Action · Style · Button Settings ·
     // Regenerate · Delete (+ Design ▾). Equality, not a subset: every one of these
     // is unconditional for a flat `cta_text` key (hasTextContent ✓,
     // canConvertToForm ✓, no dot in the key ⇒ Delete ✓), so a missing OR a leaked
-    // action fails. `link-action` is the phase-2 addition.
+    // action fails. `link-action` is the phase-2 addition; `style` is phase 3.5's.
     expect(ids).toEqual(
       [
         'button-config',
@@ -193,9 +272,32 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
         'edit-text',
         'link-action',
         'regenerate-copy',
+        'style',
       ].sort(),
     );
     expect(ids).not.toContain('ask-ai');
+  });
+
+  // phase 3.5 (ruling 9): "Style" ships as a SEPARATE greyed button. It is NOT a
+  // relabel of `button-config` — that rename was correctly refused in phase 2
+  // because the panel it opens has ZERO style controls, so the label would lie.
+  // Both must therefore exist, distinctly.
+  test('button/CTA: Style is a greyed placeholder, distinct from Button Settings', async ({
+    page,
+  }) => {
+    await page.locator('[data-element-key="cta_text"]').first().click();
+    await expect(page.locator(SHELL)).toHaveCount(1, { timeout: 15_000 });
+
+    await expectGreyedPlaceholder(page, 'style', /design system/i);
+
+    // Button Settings must still be present AND still enabled — proof that `style`
+    // was ADDED beside it rather than laundered out of it.
+    const settings = page.locator(`${SHELL} [data-action="button-config"]`);
+    await expect(settings).toHaveCount(1);
+    await expect(settings).toBeEnabled();
+    await expect(settings, 'Button Settings was relabelled — ruling 9 forbids it').toContainText(
+      'Button Settings',
+    );
   });
 
   // phase 3 UPDATE: Link/Action is STILL disabled — deliberately, and not because
@@ -212,7 +314,7 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
 
     const link = page.locator(`${SHELL} [data-action="link-action"]`);
     await expect(link).toHaveCount(1);
-    await expect(link).toBeDisabled();
+    // aria-disabled, not native disabled — see expectGreyedPlaceholder's note.
     await expect(link).toHaveAttribute('aria-disabled', 'true');
     // The tooltip must say WHY (the disabled convention phase 1 standardised) and
     // must NOT promise a future phase — that promise is what went stale.
@@ -259,10 +361,47 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
     for (const hidden of ['move-up', 'move-down', 'duplicate', 'delete']) {
       expect(ids, `${hidden} must stay hidden on the shared footer`).not.toContain(hidden);
     }
-    // Ruling 2 / D-1: Footer links + Background are deferred to Final. If either
-    // shows up in Beta it promises something the store cannot persist.
-    expect(ids).not.toContain('manage-links');
-    expect(ids).not.toContain('background');
+    // phase 3.5 REVERSAL (ruling 9): Footer links (ruling 2) + Background (D-1) are
+    // still deferred as CAPABILITIES, but both now ship as greyed placeholders —
+    // toolbarPlan's Footer Beta column is exactly `manage links · background`, so the
+    // footer's anatomy is now visually complete. Both assertions were
+    // `not.toContain(...)` through phase 3.
+    expect(ids).toContain('manage-links');
+    expect(ids).toContain('background');
+
+    // CRITICAL: this must not have been achieved by widening CHROME_HIDDEN_ACTIONS
+    // or by dropping the chrome gate — re-assert the hidden set AFTER the additions.
+    for (const hidden of ['move-up', 'move-down', 'duplicate', 'delete']) {
+      expect(ids, `${hidden} leaked back onto the footer`).not.toContain(hidden);
+    }
+
+    await expectGreyedPlaceholder(page, 'manage-links', /store|coming/i);
+    await expectGreyedPlaceholder(page, 'background', /design system/i);
+  });
+
+  // The header is the OTHER chrome section, and it is the leak this phase most
+  // plausibly introduces: `isChromeId` is true for BOTH header and footer, so gating
+  // `manage-links` on it (instead of a footer-specific check) would silently put a
+  // "Manage links" button on the header — whose Beta column is Menu, deferred
+  // ENTIRELY per ruling 9 (there is nowhere to grey it; the next spec builds the host).
+  test('header target: no manage-links leak, chrome gating intact', async ({ page }) => {
+    const header = page.locator('[data-section-id^="header"]').first();
+    await expect(header, 'meridian draft rendered no header section').toBeVisible({
+      timeout: 30_000,
+    });
+    await header.click({ position: { x: 4, y: 4 } });
+
+    await expect(page.locator(SHELL)).toHaveCount(1, { timeout: 15_000 });
+    const ids = await actionIds(page);
+
+    expect(ids, 'manage-links is FOOTER-only — it leaked onto the header').not.toContain(
+      'manage-links',
+    );
+    // Background is a whole-Section placeholder, so the header legitimately has it.
+    expect(ids).toContain('background');
+    for (const hidden of ['move-up', 'move-down', 'duplicate', 'delete']) {
+      expect(ids, `${hidden} leaked onto the shared header`).not.toContain(hidden);
+    }
   });
 
   test('Design ▾ renders disabled and inert', async ({ page }) => {
@@ -272,11 +411,68 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
     const design = page.locator(`${SHELL} [data-action="design-menu"]`);
     await expect(design, 'Design ▾ slot missing').toHaveCount(1);
     await expect(design).toHaveAttribute('aria-disabled', 'true');
-    await expect(design).toBeDisabled();
     await expect(design).toHaveAttribute('title', /design system/i);
 
-    // Clicking it must not open anything or tear the shell down.
+    // MECHANISM, not coordinates. Design ▾ lives in the SHELL's trailing slot —
+    // OUTSIDE TextToolbarMVP's body, which is the thing that preventDefaults its
+    // own mousedown. So until phase 3.5 the shell's chrome had no such handler and
+    // pressing Design ▾ genuinely blurred the contenteditable: selection collapsed,
+    // the anchor changed, and the toolbar MOVED mid-gesture — the trailing click
+    // then landed wherever the pill used to be. This test only ever passed because
+    // that stray click happened to land back on the disabled button (whose click
+    // Chromium suppresses). Widening the pill by one slot moved it onto <main> and
+    // floating-ui's outsidePress tore the shell down. Assert the invariant that was
+    // silently untrue, so the luck can't come back:
+    // phase 3.5 RULING: the fix is a `mousedown`+`preventDefault` on the BUTTON
+    // (ToolbarButton.tsx), which requires the button NOT be natively disabled —
+    // Chromium dispatches no pointer events on a disabled control, so a
+    // preventDefault there is dead code. A chrome-level handler was tried and
+    // rejected: it also killed focus into the LinkPicker's <Input>.
+    const editableBefore = await page.evaluate(
+      () => document.activeElement?.closest('[contenteditable="true"]')?.tagName ?? null,
+    );
+    expect(editableBefore, 'precondition: expected a focused contenteditable').toBeTruthy();
+
+    // Trace the WHOLE gesture, not just the endpoints. Native focus transfer happens
+    // AFTER mousedown dispatch unless prevented, so `mousedown` alone can't tell the
+    // two worlds apart — mouseup/click are where a lost preventDefault shows up.
+    await page.evaluate(() => {
+      (window as any).__focusTrace = [];
+      const rec = (phase: string) => {
+        const active = document.activeElement;
+        const editable = active?.closest('[contenteditable="true"]') ?? null;
+        (window as any).__focusTrace.push({
+          phase,
+          active: editable ? editable.tagName : active?.tagName ?? 'NONE',
+        });
+      };
+      for (const p of ['mousedown', 'mouseup', 'click']) {
+        document.addEventListener(p, () => rec(p), true);
+      }
+    });
+
     await design.click({ force: true });
+
+    const trace = await page.evaluate(() => (window as any).__focusTrace);
+    // eslint-disable-next-line no-console
+    console.log('[focus-trace] Design ▾ press:', JSON.stringify(trace));
+    expect(trace.length, 'no pointer events reached the document').toBeGreaterThan(0);
+    for (const entry of trace) {
+      expect(
+        entry.active,
+        `focus left the contenteditable at "${entry.phase}" (saw ${entry.active}) — ToolbarButton is missing its disabled mousedown preventDefault`,
+      ).toBe(editableBefore);
+    }
+
+    const editableAfter = await page.evaluate(
+      () => document.activeElement?.closest('[contenteditable="true"]')?.tagName ?? null,
+    );
+    expect(
+      editableAfter,
+      'pressing Design ▾ blurred the contenteditable — ToolbarButton lost its mousedown preventDefault',
+    ).toBe(editableBefore);
+
+    // ...and it must not open anything or tear the shell down.
     await expect(page.locator(SHELL)).toHaveCount(1);
   });
 

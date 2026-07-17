@@ -260,6 +260,27 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
       icon: 'edit',
       handler: handleImageEditor,
     },
+    // ── Image → Link: GREYED PLACEHOLDER (phase 3.5, founder ruling 9) ──
+    // toolbarPlan's Beta column is `Replace · Stock · Crop · Link · Delete`, so Link
+    // sits between Edit (= the "Crop" tool, ruling 5) and Delete.
+    //
+    // DISABLED with ZERO functionality behind it, and that is deliberate: no
+    // published-consumed image-link field exists ANYWHERE. Code-verified (ruling 5):
+    // `image_link`/`imageLink`/`image_href` = zero hits in src/; the element schema
+    // has no href for image elements; and every `.published.tsx` twin of the blocks
+    // that emit `[data-image-id]` (hearth/surge/lex hero + testimonial images)
+    // renders a bare <img>/CSS background with NO <a> wrapper and no href prop.
+    // Shipping it real = a new field + an <a> wrapper across 6+ published files =
+    // the published-output change this spec forbids. Un-defer = an image-link field
+    // in the element schema + BOTH renderers (its own spec).
+    {
+      id: 'image-link',
+      label: 'Link',
+      icon: 'link',
+      handler: () => {},
+      disabled: true,
+      disabledTitle: 'Image links are coming — images have no link field yet.',
+    },
     {
       id: 'delete-image',
       label: 'Delete',
@@ -304,22 +325,32 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
         <ToolbarLabel dotClassName="bg-orange-400" text="Image" />
 
         {/* Primary Actions */}
-        {primaryActions.map((action, index) => (
-          <React.Fragment key={action.id}>
-            {index > 0 && <ToolbarDivider />}
-            <ToolbarButton
-              data-action={action.id}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation(); // Prevent event bubbling
-                action.handler();
-              }}
-              variant={(action as any).variant === 'danger' ? 'danger' : 'default'}
-              icon={<ImageIcon icon={action.icon} />}
-              label={action.label}
-            />
-          </React.Fragment>
-        ))}
+        {primaryActions.map((action, index) => {
+          // phase 3.5: this map previously ignored `disabled` entirely, so a
+          // placeholder would have rendered LIVE. Mirrors ElementToolbar's guard —
+          // `disabled` on the DOM node already stops real clicks; the early return
+          // also covers force-clicks/synthetic dispatch.
+          const actionDisabled = (action as any).disabled === true;
+          return (
+            <React.Fragment key={action.id}>
+              {index > 0 && <ToolbarDivider />}
+              <ToolbarButton
+                data-action={action.id}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation(); // Prevent event bubbling
+                  if (actionDisabled) return;
+                  action.handler();
+                }}
+                disabled={actionDisabled}
+                disabledTitle={(action as any).disabledTitle}
+                variant={(action as any).variant === 'danger' ? 'danger' : 'default'}
+                icon={<ImageIcon icon={action.icon} />}
+                label={action.label}
+              />
+            </React.Fragment>
+          );
+        })}
       </div>
 
 

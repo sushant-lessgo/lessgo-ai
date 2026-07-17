@@ -883,3 +883,592 @@ assertion of deviation 4.
   via `MainContent.tsx:320`, needs its own ticket).
 
 Not committed — the orchestrator commits.
+
+---
+
+## Phase 3.5 — greyed placeholders for deferred capabilities (founder ruling 9)
+
+**STATUS: code complete, gate RED by ONE pre-existing test. Needs an orchestrator ruling before
+commit — the fix requires `ToolbarShell.tsx`, which is NOT in this phase's Files touched.** See
+"BLOCKER" below. Everything else is green and all 10 placeholder assertions pass.
+
+### Files changed
+
+- `src/app/edit/[token]/components/toolbars/TextToolbarMVP.tsx`
+- `src/app/edit/[token]/components/toolbars/ElementToolbar.tsx`
+- `src/app/edit/[token]/components/toolbars/ImageToolbar.tsx`
+- `src/app/edit/[token]/components/toolbars/SectionToolbar.tsx`
+- `e2e/toolbar-dispatch.spec.ts`
+
+Exactly the Files-touched list, no more (`git diff --name-only HEAD` pasted below). **Zero
+published-side files.** Tripwire `linkTargetPublished.test.tsx` blob =
+`03fcf881e474f62478835faf5777dfee65389b09` — byte-identical, verified after the final revert.
+
+### What shipped — the five placeholders + exact tooltip copy
+
+Every one is `disabled` + `aria-disabled` + `cursor-not-allowed` + muted `#5a5a66` (the phase-1
+convention; **not** `text-gray-300`, which is brighter than enabled on the dark pill), carries a
+required `data-action`, and has **ZERO functionality behind it** — each `handler` is a literal
+`() => {}`. No store fields, no published reads, no new capability, no `trailing` abstraction.
+
+| Toolbar | `data-action` | Label | Tooltip shipped (`disabledTitle`) |
+|---|---|---|---|
+| Text | `link` | Link | `Text links are coming — the text schema has no link field yet.` |
+| Button/CTA | `style` | Style | `Button styles are coming with the design system.` |
+| Image | `image-link` | Link | `Image links are coming — images have no link field yet.` |
+| Section (all, incl. header/footer) | `background` | Background | `Section backgrounds are coming with the design system.` |
+| Footer ONLY | `manage-links` | Manage links | `Footer link editing is coming — footer links aren't in the editor store yet.` |
+
+Placement follows toolbarPlan's Beta column order in each element's own action row (Text: after
+colour, before the sparkle; Button: after `link-action`, before `button-config`; Image: after Edit,
+before Delete; Section: last; Footer: `manage links · background`). Icons are the natural lucide
+glyphs — no "disabled" icon invented; greying is carried by colour + cursor + `aria-disabled`.
+
+### Per-file detail
+
+**`TextToolbarMVP.tsx`** — added the `link` placeholder + a local `LinkIcon`. Nothing else touched.
+
+**`ElementToolbar.tsx`** — added `style` as a **separate, disabled button** gated on the existing
+`canConvertToForm()` (no new gating semantics). **`button-config` was NOT touched or renamed** —
+constraint 4 honoured, and the e2e now pins it (`toBeEnabled()` + `toContainText('Button Settings')`)
+so a future relabel fails the suite. The pre-existing map already handled `disabled`/`disabledTitle`.
+
+**`ImageToolbar.tsx`** — added the `image-link` placeholder. **Required a real fix:** this file's
+action map **ignored `disabled` entirely** (it only ever had enabled actions), so a placeholder would
+have rendered LIVE and clickable. Added the `disabled`/`disabledTitle` pass-through + an early-return
+guard, mirroring ElementToolbar's existing shape. This is presentation-only; no existing action's
+behaviour changes (all four remain `disabled: undefined` → falsy → identical).
+
+**`SectionToolbar.tsx`** — added `background` (all sections) + `manage-links` (footer only), a local
+`isFooterId()` helper, and the `link` glyph to `ActionIcon` (its map had `palette` but no `link`; the
+fallback renders a **grey square**, which would read as a rendering bug rather than a "coming" state).
+Two render-path fixes: the map now honours an explicit `disabledTitle` (falling back to `action.label`
+to **preserve the pre-existing move-up/move-down disabled tooltips** verbatim), and disabled actions
+early-return.
+
+### Decisions + Deviations
+
+1. **`isFooterId`, not `isChromeId`, for `manage-links` (constraint 11).** `isChromeId` is true for the
+   **header** too, whose Beta column is Menu — deferred ENTIRELY per ruling 9 (nowhere to grey). Kept as
+   its own filter rather than folded into `CHROME_HIDDEN_ACTIONS`, which is the *inverse* gate (hide ON
+   chrome) and is load-bearing for the header. **Mutation-proven** (below) + a new `header target` e2e.
+2. **`background` is deliberately NOT filtered off chrome sections.** toolbarPlan's Footer Beta column is
+   `manage links · background`, so the footer needs it; the header getting it too is the conservative
+   read (it is a *Section* placeholder, and D-1's blocker is template-wide, not chrome-specific).
+3. **Image action id = `image-link`, not the plan's literal `link` (deviation).** In-scope judgment call.
+   The plan's step-1 bullet says "Image → `link`", but (a) this file's id convention is `<verb>-image`
+   (`replace-image`/`edit-image`/`delete-image`), and (b) phase 3's e2e already asserted
+   `not.toContain('image-link')` — using `link` would have left that pre-existing assertion **orphaned
+   and vacuously green** (the exact theatre this phase's own instructions warn about). Flipping the
+   existing assertion to `toContain('image-link')` keeps it load-bearing. Text keeps the plain `link`
+   (no competing convention there). Ids are per-toolbar so there is no collision either way.
+4. **Form + Menu: nothing added.** Constraint 5 honoured — neither dispatches a toolbar, so there is
+   nowhere to grey. `FormToolbar` stays deleted; I did not resurrect it. Social `orientation` left for
+   phase 4. Design ▾ / `link-action` not duplicated.
+
+### Verification (pasted, real)
+
+`npx tsc --noEmit` → **clean, zero output.**
+
+`npm run test:run`:
+```
+ Test Files  210 passed | 1 skipped (211)
+      Tests  3557 passed | 18 skipped (3575)
+```
+3557 = phase 3's exact count — no vitest regression (these are edit-side toolbars; the unit suite does
+not render them, which is why the e2e below is the real net).
+
+`npx eslint 'src/app/edit/[token]/components/toolbars' e2e/toolbar-dispatch.spec.ts` →
+**0 errors, 3 warnings**, all pre-existing `react-hooks/exhaustive-deps` on code I did not author.
+No bare `useEditStore()` introduced (the ESLint ban would have errored).
+
+Diff scope + published tripwire:
+```
+$ git diff --name-only HEAD
+e2e/toolbar-dispatch.spec.ts
+src/app/edit/[token]/components/toolbars/ElementToolbar.tsx
+src/app/edit/[token]/components/toolbars/ImageToolbar.tsx
+src/app/edit/[token]/components/toolbars/SectionToolbar.tsx
+src/app/edit/[token]/components/toolbars/TextToolbarMVP.tsx
+
+$ git diff --name-only HEAD | grep -E "\.published\.tsx|\.core\.tsx|componentRegistry|PublishedRenderer"
+(none)
+
+$ git hash-object src/modules/templates/linkTargetPublished.test.tsx
+03fcf881e474f62478835faf5777dfee65389b09   <- expected, byte-untouched
+```
+
+`E2E_PORT=3099 npx playwright test e2e/toolbar-dispatch.spec.ts` (**real config** — both specs were
+already registered in the `authed` project; no config change needed this phase):
+```
+OK   2 text target: one shell, format actions, no Ask AI (16.4s)
+OK   3 text: Link is a greyed placeholder (no text link field exists) (4.5s)
+OK   4 section target: one shell with the section action set (4.0s)
+OK   5 image target: reskin + greyed Link placeholder (7.1s)
+OK   6 button/CTA target: Beta action set with Link/Action disabled (4.0s)
+OK   7 button/CTA: Style is a greyed placeholder, distinct from Button Settings (3.8s)
+OK   8 button/CTA: Link/Action is disabled and points at the control that works (3.6s)
+OK   9 footer target: chrome-section set in the one shell, labelled "Footer" (3.7s)
+OK  10 header target: no manage-links leak, chrome gating intact (3.7s)
+FAIL 11 Design ▾ renders disabled and inert (8.8s)      <- PRE-EXISTING TEST, see BLOCKER
+1 failed / 2 did not run / 10 passed
+```
+All four set-equality (`toEqual` on sorted ids) assertions were updated to include the new ids, and
+**four `not.toContain(...)` assertions were flipped to `toContain(...)`** (section `background`,
+image `image-link`, footer `manage-links` + `background`) — each marked in-file as a ruling-9 reversal
+with the note that the *capability* verdict did not change.
+
+### Mutation proof (two, both real)
+
+**1 — inertness is really carried by `disabled`.** `ElementToolbar` `style`: `disabled: true` -> `false`:
+```
+FAIL button/CTA: Style is a greyed placeholder, distinct from Button Settings
+  Error: placeholder "style" is not disabled
+  expect(locator).toBeDisabled() failed
+  > 88 | await expect(btn, `placeholder "${action}" is not disabled`).toBeDisabled();
+```
+**2 — the footer-leak guard is really `isFooterId`.** `SectionToolbar` filter `isFooterId` -> `isChromeId`:
+```
+FAIL header target: no manage-links leak, chrome gating intact
+  Error: manage-links is FOOTER-only — it leaked onto the header
+  > 388 | expect(ids, 'manage-links is FOOTER-only — it leaked onto the header').not.toContain(
+```
+Both reverted; `grep -rn "MUTATION TEST|BISECT"` -> clean; tsc re-run green; tripwire hash re-verified.
+
+### BLOCKER — `Design ▾ renders disabled and inert` now fails, and the fix is OUT OF SCOPE
+
+**This is a real behaviour regression caused by this phase, not a flaky test — and NOT one I can fix
+inside my Files-touched list.**
+
+**Proven by bisect, not guessed.** `git stash` -> the test **passes** on clean HEAD; restore -> **fails**.
+Removing *only* the Text `link` button -> **passes** again. So the Text placeholder is the trigger.
+
+**Root cause, from instrumented event capture** (temporary diagnostics, since removed). Force-clicking
+the disabled `design-menu` while text-editing, WITHOUT the Link button (passing):
+```
+pointerdown -> tgt=SPAN(inShell)  active=H1
+focusout    -> tgt=H1  rel=DIV  guardMatch=false
+SHELL AFTER = 1
+```
+WITH the Link button (failing):
+```
+pointerdown -> tgt=SPAN(inShell)  active=H1
+focusout    -> tgt=H1  rel=DIV  guardMatch=false     <- IDENTICAL up to here
+click       -> tgt=MAIN(outsideShell)                <- EXTRA EVENT
+focusout    -> tgt=DIV
+SHELL AFTER = 0
+```
+The mechanism: `design-menu` lives in the **shell**, *outside* the text body's `onMouseDown`
+`preventDefault` guard, so pressing it **blurs the contenteditable H1 in both cases** — that blur
+re-renders/moves the toolbar mid-gesture. The pill is ~74px wider with Link (`w=569` vs `w=495`;
+`design-menu` centre `cx=781` vs `cx=744`), so after the reflow the pending `click` at the original
+coordinates **lands on `MAIN` instead of the disabled button** -> floating-ui `useDismiss`
+`outsidePress` fires -> shell dismissed. Without Link the coords still land on the disabled button,
+whose click event Chromium suppresses -> no outside press -> shell survives.
+
+**So the phase-1 test was passing by coordinate luck, and Design ▾ was never genuinely inert while
+text-editing** — pressing it has always blurred the editor. My wider pill only exposed it.
+
+**Minimal correct fix (NOT applied):** `onMouseDown={e => e.preventDefault()}` on the shell's chrome
+container in **`ToolbarShell.tsx`** — clicking any shell chrome would then never steal focus from the
+contenteditable, making Design ▾ (and the phase-5 Ask AI slot) genuinely inert and killing the
+coordinate fragility for good. `ToolbarShell.tsx` is **not in Phase 3.5's Files touched**, so per the
+hard rules I stopped rather than edit it.
+
+**Options for the orchestrator:** (a) authorise the one-line `ToolbarShell.tsx` fix as a scope
+amendment (my recommendation — it fixes a real latent bug, is presentation-only, and has phase-1
+precedent for amending a file when the gate demands it); (b) hand it to a follow-up phase and accept a
+red gate now; (c) shrink the Text Link button to icon-only so the coords land back on the button — I
+recommend **against** this: it restores luck, not correctness, and is exactly the "route around the
+failure" the phase instructions forbid.
+
+### What I did NOT verify (explicit list)
+
+- **No manual dev check.** No placeholder has been seen by a human; t2 visual fidelity of five new
+  greyed buttons (especially the pill now being ~15% wider on text) is **unverified by eye**.
+- **The widened pill's real-world effect is untested beyond this one test.** The Design ▾ failure is
+  evidence the extra width has knock-on effects; narrow viewports / long element-key labels /
+  `shift(crossAxis)` behaviour are unexamined.
+- **Tooltip copy is unvalidated by the founder** — I shipped the plan's suggested copy, tuned for
+  length/honesty (Footer's gained a "why"; Image/Text reworded to name the missing field).
+- Placeholders verified on **meridian** (text/button/section/footer/header) and **hearth** (image)
+  only — no other template.
+- Only the **e2e** covers these; no vitest unit test renders these toolbars.
+- I did **not** verify the `background` placeholder on every section type — only hero-ish body,
+  header, footer.
+- I did **not** re-run the full `npm run build` or `link-picker.spec.ts` (untouched this phase).
+
+Not committed — the orchestrator commits.
+
+---
+
+## Phase 3.5 — BLOCKER ESCALATION: the authorized fix cannot work (ToolbarShell reverted)
+
+**Files changed by this attempt: NONE.** `ToolbarShell.tsx` was authorized, tried, proven wrong,
+and **reverted to HEAD**. The only surviving edit is the focus-retention assertion added to
+`e2e/toolbar-dispatch.spec.ts` (already in Files-touched). Everything else from phase 3.5 stands.
+
+### The ruling's premise is falsified
+
+The ruling authorized `onMouseDown={e => e.preventDefault()}` on the shell's chrome container. I
+applied it. **It changes nothing**, because the premise — that the mousedown reaches the chrome and
+its default action blurs the contenteditable — is not what happens.
+
+Instrumented capture-phase event log (`document.addEventListener(..., true)`), pressing Design ▾
+while text-editing, WITH the authorized one-liner in place:
+
+```
+focusout  target=H1            active=BODY    <-- focus already gone
+mouseup   target=DIV           active=DIV
+click     target=MAIN          active=DIV     <-- outsidePress -> shell dismissed
+focusout  target=DIV           active=BODY
+```
+
+**There is no `mousedown` event at all.** Chromium does not dispatch mouse events on `disabled`
+form controls, and the event is not retargeted to an ancestor — it is simply never dispatched.
+`design-menu` is a real `<button disabled>` (`toBeDisabled()` passes). Chromium still performs the
+default focus-clearing. So **no handler on any ancestor can `preventDefault` an event that is never
+dispatched**. The authorized one-liner is dead code for its stated purpose.
+
+### It is not merely inert — it is actively harmful
+
+With the one-liner in place, `link-picker.spec.ts:150` ("a custom external URL persists to the
+server and survives reload") **FAILED**. Reverting ToolbarShell alone makes it **pass** (verified in
+isolation: `2 passed`). Cause is exactly constraint 2's warning: `LinkPicker`
+(`src/components/editor/LinkPicker.tsx:41,141`) renders a focusable `<Input>`, and the picker panel
+is an `absolute top-full` **sibling of the text body inside the chrome box** — so its mousedown
+bubbles to the chrome div (TextToolbarMVP's own `stopPropagation` only covers its inner div, not
+the panel). The chrome-level `preventDefault` suppressed focus transfer into the URL field.
+So the authorized fix trades a broken Design ▾ for a broken Link picker.
+
+### What actually works (NOT applied — needs a ruling)
+
+The mousedown must first be made to *exist*. Making the disabled button transparent to hit-testing
+(`[&_button:disabled]:pointer-events-none` on the chrome) + the `preventDefault` gives:
+
+```
+mousedown target=DIV[CHROME]   active=H1
+mouseup   target=DIV[CHROME]   active=H1
+click     target=DIV[CHROME]   active=H1      <-- focus retained, toolbar never moves
+```
+
+Both halves are load-bearing (pointer-events alone → mousedown lands on a non-focusable div →
+still blurs). But this is **two coupled changes, not the authorized one-liner**, and it carries
+costs I am not authorized to accept:
+1. `pointer-events:none` kills the **native `title` tooltip** on every greyed placeholder — the
+   `disabledTitle` that constraint 4 makes *mandatory* stops reaching users (the attribute stays,
+   so the assertions stay green — the tests would not catch this).
+2. It still needs the `preventDefault` scoped to avoid the LinkPicker input.
+
+The clean fix (render `aria-disabled` + inert handler instead of native `disabled`, so the button
+receives its own mousedown and keeps its tooltip) lives in **`ToolbarButton.tsx` — NOT in
+Files-touched**. Hence: stop and report, per the out-of-scope rule.
+
+### Durable lesson: the phase-1 Design ▾ inertness test was passing on coordinate luck
+
+Recorded plainly, because it is the reusable part. `Design ▾ renders disabled and inert` never
+verified inertness. Pressing Design ▾ has **always** blurred the contenteditable and moved the
+toolbar mid-gesture; the trailing click then landed wherever the pill used to be, which happened to
+be the disabled button — whose click Chromium suppresses. The assertion passed for a reason
+unrelated to what it claimed. Widening the pill 495→569px (phase 3.5's Link placeholder) moved that
+stray click onto `<main>` → floating-ui `outsidePress` → dismissal → red. **Phase 3.5 exposed a
+real latent bug; it did not cause one.** Geometry-dependent assertions can be green for years while
+the invariant they name is false.
+
+### Test results (this attempt)
+
+- `npx tsc --noEmit` — **PASS** (exit 0), with the one-liner applied.
+- `npm run test:run` — **PASS**: 210 files / 3557 tests, 1 file + 18 tests skipped.
+- `E2E_PORT=3111 npx playwright test e2e/toolbar-dispatch.spec.ts e2e/link-picker.spec.ts` — **2 FAILED**
+  (`Design ▾ renders disabled and inert`; `link-picker.spec.ts:150`), 12 passed, 2 did not run.
+- `link-picker.spec.ts:150` with ToolbarShell reverted — **PASS** (proves the regression was mine).
+
+### Spec change kept
+
+`e2e/toolbar-dispatch.spec.ts` — the Design ▾ test now asserts **focus retention** (the
+contenteditable is still focused after pressing Design ▾), with the mechanism written up in-place so
+the luck cannot silently return. **This assertion is currently RED** — it is pinning the real,
+pre-existing bug. It goes green only once a genuine fix lands.
+
+### Status: BLOCKED — gate is RED, nothing committed
+
+Mutation proofs (the `style` disabled flip, the footer `isFooterId→isChromeId` leak) were NOT
+re-run: the tree no longer contains the fix they would be validating. They stand from the original
+phase 3.5 run. Awaiting a ruling on whether `ToolbarButton.tsx` may be added to Files-touched.
+
+---
+
+## Phase 3.5 — RESOLUTION (orchestrator ruling: option 1, `aria-disabled` + inert handlers)
+
+**STATUS: GREEN. Gate passes. Not committed (orchestrator commits).**
+
+### Files changed (this attempt — complete list)
+
+- `src/app/edit/[token]/components/toolbars/ToolbarButton.tsx` — **ADDED to Files-touched by ruling**
+- `src/app/edit/[token]/components/toolbars/TextToolbarMVP.tsx`
+- `src/app/edit/[token]/components/toolbars/ElementToolbar.tsx`
+- `src/app/edit/[token]/components/toolbars/ImageToolbar.tsx`
+- `src/app/edit/[token]/components/toolbars/SectionToolbar.tsx`
+- `e2e/toolbar-dispatch.spec.ts`
+- `docs/task/toolbar-standard-beta.audit.md`
+
+`ToolbarShell.tsx` is **reverted to HEAD and absent from the diff**, per the ruling. Zero
+published-side files. Tripwire `linkTargetPublished.test.tsx` blob =
+`03fcf881e474f62478835faf5777dfee65389b09` — byte-identical, re-verified after the final revert.
+
+`e2e/link-picker.spec.ts` needed **NO change**: its only `disabled` reference is
+`option:not([disabled])` on a `<select>` (line 131), which is not a ToolbarButton. It is listed in
+the ruling as possibly-affected; it was not.
+
+### The withdrawn ruling, and why it was wrong
+
+The orchestrator's original option (a) — a `mousedown`+`preventDefault` on the **chrome** in
+`ToolbarShell.tsx` — was withdrawn on instrumented evidence:
+
+1. **It could not have worked.** Chromium dispatches **no pointer events at all** on a natively
+   `disabled` control. Design was `disabled`, so no `mousedown` ever reached the chrome handler and
+   the `preventDefault` was dead code.
+2. **It caused a real regression.** A chrome-level handler also swallowed focus into the LinkPicker's
+   `<Input>` — the picker panel is an `absolute top-full` **sibling inside the chrome**, so it was in
+   the handler's subtree. That broke `link-picker.spec.ts:150`.
+
+### Why `aria-disabled` + inert handlers is the right shape
+
+A natively-disabled button is a black hole: it is **not mouse-dispatching**, **not keyboard-focusable**,
+and **not reliably tooltipped**. All three matter here, and `aria-disabled` preserves all three:
+
+- **Tooltip** — founder ruling 9 makes the "why" tooltip the *entire* mitigation for shipping greyed
+  buttons (naayom C2: dead buttons read as bugs). This is exactly why **option 2 (`pointer-events:none`)
+  was rejected**: it keeps assertions green while silently killing the `title` on every placeholder.
+- **Focus retention** — the button now fires its own `mousedown`, so `preventDefault` there genuinely
+  keeps the contenteditable's selection alive. Scoped to the button so it cannot touch the LinkPicker
+  `<Input>` (different component, different subtree). This is the fix the chrome-level version only
+  pretended to be.
+- **Announcement** — stays in the tab order, announced as unavailable rather than skipped.
+
+Inertness is carried by the `onClick` guard (Enter/Space route through `click`, so keyboard is covered
+by the same guard). **ONE convention only** — no ToolbarButton anywhere carries native `disabled` now.
+
+Handlers are **composed, not replaced**: `onClick`/`onMouseDown` are destructured out of props so a
+consumer-supplied handler cannot land in `...rest` and clobber the guard. `TextToolbarMVP` passes its
+own `onMouseDown`, which would have silently overridden it.
+
+### Blast-radius verification (every disabled ToolbarButton consumer)
+
+`BlogRichTextEditor.tsx` matched a `ToolbarButton` grep but is **NOT** blast radius: it declares its
+own private `function ToolbarButton` (line 23) and imports nothing from ours. Real consumers are the
+4 toolbars + the shell:
+
+| Disabled button | Kind | Consumer-side guard? | Inert because |
+|---|---|---|---|
+| ToolbarShell `design-menu` | placeholder | n/a — no `onClick` at all | nothing behind it |
+| TextToolbarMVP `link` | placeholder | n/a — no `onClick` | nothing behind it |
+| ElementToolbar `link-action`, `style` | placeholder | yes (`actionDisabled` early-return) | consumer guard |
+| ImageToolbar `image-link` | placeholder | yes | consumer guard |
+| SectionToolbar `background`, `manage-links` | placeholder | yes | consumer guard |
+| SectionToolbar `move-up` / `move-down` | **pre-existing** | yes | consumer guard |
+| ElementToolbar `regen` (`regenLocaleLocked`) | **pre-existing** | yes | consumer guard |
+| TextToolbarMVP sparkle (`isGenerating` / `regenLocaleLocked`) | **pre-existing** | **NO — fixed here** | see below |
+
+**The one genuine exposure my change created**, and the deviation taken to close it:
+
+> `TextToolbarMVP`'s sparkle was `onClick={handleSparkle}` with **no consumer-side guard** — native
+> `disabled` had been protecting `handleSparkle` for free. Removing native `disabled` left it relying
+> *solely* on ToolbarButton's guard. I added a consumer-side guard matching the other three toolbars'
+> convention. A double-fired regen (mid-generation) or a silent no-op regen (non-default locale) is a
+> real bug, not a placeholder no-op. Logged under Deviations.
+
+### Mutation proofs — all four re-run
+
+| # | Mutation | Result |
+|---|---|---|
+| (i) | `style` `disabled: true` to `false` | **FAILS correctly** — `Error: placeholder "style" is not aria-disabled` |
+| (ii) | footer `isFooterId` to `isChromeId` | **FAILS correctly** — `manage-links is FOOTER-only — it leaked onto the header`; received `["add-element","background","design-menu","manage-links"]` |
+| (iii) | remove ToolbarButton's `preventDefault` | **FAILS correctly** — `focus left the contenteditable at "mouseup" (saw BUTTON)` |
+| (iv) | remove ToolbarButton's `onClick` disabled guard | **DID NOT FAIL — see below. This is a real finding, not a pass.** |
+
+**Mutation (iii) validated the instrumentation design.** Trace with the mutation applied:
+`[{mousedown,H1},{mouseup,BUTTON},{click,BUTTON}]`. Note `mousedown` reads **H1 in both worlds** —
+native focus transfer happens *after* mousedown dispatch. An endpoint- or mousedown-only assertion
+could not have discriminated; `mouseup`/`click` are where a lost `preventDefault` shows up. That is
+why the full-gesture trace is the assertion, and why it stays in the spec permanently.
+
+Passing trace (fix in place): `[{mousedown,H1},{mouseup,H1},{click,H1}]`.
+
+### Mutation (iv) does NOT fail — honest accounting
+
+Removing ToolbarButton's `onClick` guard leaves **all 13 toolbar-dispatch tests green**. This is not a
+test I can honestly call a proof. The reason is structural, and it is the same class of problem as the
+phase-1 luck this run has been chasing:
+
+- Every **placeholder** has `handler: () => {}` — literally nothing behind it. Inertness is
+  over-determined; nothing observable changes when the guard is removed.
+- Every other **reachable** disabled button has its **own** consumer-side guard (table above), so
+  ToolbarButton's guard is defence-in-depth, not the load-bearing member.
+- The one button that *did* depend solely on it (the sparkle) now has a consumer guard too.
+
+**The pre-existing disabled states are unreachable in the e2e seed** — verified, not assumed:
+`sections` is always `[header, ...body, footer]` (`pageHelpers.ts:91-99`), so `sectionIndex === 0` is
+*always* the header and `sections.length - 1` is *always* the footer — and `CHROME_HIDDEN_ACTIONS`
+hides `move-up`/`move-down` on both. **Those two disabled states can never render in this seed.**
+`regenLocaleLocked` requires a non-null `localeConfig`, which the meridian seed has none of.
+
+So the orchestrator's instruction — "prove inertness for at least one pre-existing case" — **could not
+be satisfied within Files-touched**. Making it provable needs one of:
+- **(A)** a Vitest component test for `ToolbarButton` (mount disabled + `onClick` spy, assert not
+  called). Cleanest, directly falsifies mutation (iv) — but it is a **new file**, out of scope.
+- **(B)** a `localeConfig` in `e2e/helpers/seedDraft.ts` to make `regenLocaleLocked` reachable — that
+  file is **not** in Files-touched.
+
+Per the hard rules (out-of-scope file means stop and report) I did **neither** and am reporting instead.
+**Open risk:** ToolbarButton's inertness guard is currently unfalsified by any test. The code is
+correct and every consumer is independently guarded, so nothing ships broken — but a future edit that
+removes the guard *and* a consumer's guard together would not be caught.
+
+### Deviations from the ruling
+
+1. **Added a consumer-side guard to TextToolbarMVP's sparkle** (in Files-touched). Not requested. My
+   change created the exposure (native `disabled` had been the only thing protecting `handleSparkle`);
+   guarding it completes my own change rather than extending scope. Conservative option per the
+   in-scope-ambiguity rule.
+2. **`onMouseDown` is still forwarded to the consumer when disabled** (only `onClick` is suppressed).
+   Every consumer `mousedown` in this codebase is focus-retention / `stopPropagation`, never an action;
+   dropping it would have silently discarded TextToolbarMVP's `stopPropagation`. Actions live in
+   `onClick`, which is where the guard sits.
+3. **`e2e/link-picker.spec.ts` not modified** — no affected assertion existed (see above).
+
+### Test results
+
+- `npx tsc --noEmit` — **PASS** (exit 0).
+- `npm run test:run` — **PASS**: 210 files / 3557 tests (1 file + 18 tests skipped).
+- `E2E_PORT=3491 npx playwright test e2e/toolbar-dispatch.spec.ts e2e/link-picker.spec.ts` —
+  **PASS, 16/16**, including `link-picker.spec.ts:150` (the regression the withdrawn one-liner caused
+  is gone) and the focus-retention assertion passing *for the right reason* (trace pasted above).
+
+**Flake noted (not a regression):** across ~9 suite runs, `link-picker.spec.ts:150` intermittently hit
+a 180s `locator.click` timeout in *combined* runs. Attribution checked rather than assumed:
+`LinkPicker.tsx` contains no `ToolbarButton` and no `aria-disabled`; tests 82/123 exercise the same
+picker and always pass; the test passes **3/3 in isolation** (8.1s/8.1s/9.1s) and the failures are
+**monotonic with accumulated load** (early combined runs green, later ones red, identical code), with a
+final clean combined run **16/16 green**. Cause is dev-server/process accumulation across repeated
+runs, not the diff.
+
+### The durable lesson
+
+**The phase-1 Design inertness test passed on coordinate luck.** Pressing Design genuinely blurred
+the contenteditable: selection collapsed, the toolbar re-anchored and *moved mid-gesture*, and the
+trailing click landed wherever the pill used to be — which happened to still be the disabled button,
+whose click Chromium suppresses. The test asserted "Design is inert" and was green for the entire
+life of the phase while the invariant it names was **false**. Widening the pill by one slot moved the
+coordinates onto `<main>` and floating-ui tore the shell down — that is the only reason anyone found out.
+
+**Geometry-dependent assertions can sit green for years while the invariant they name is false.** Two
+corollaries this run also earned:
+- *Assert the mechanism, not the endpoints.* `mousedown` alone reads identical in the fixed and broken
+  worlds; only the full gesture trace discriminates (mutation iii).
+- *A mutation that refuses to fail is data, not a pass.* Mutation (iv) staying green is what exposed
+  that the guard is untested and that the pre-existing disabled states are unreachable — neither of
+  which any green run would ever have told us.
+
+---
+
+## Phase 3.5 — final step: close the unfalsified-guard hole (orchestrator ruling: option A)
+
+### Files changed
+
+- `src/app/edit/[token]/components/toolbars/ToolbarButton.test.tsx` — **NEW** (added to Phase 3.5's
+  Files-touched by orchestrator ruling). Test-only; **no behaviour change**.
+
+Everything else from Phase 3.5 is unchanged and retained. `ToolbarShell.tsx` remains reverted to HEAD
+and was **not** touched. No published-side edits.
+
+### Why this is a unit test and NOT more e2e seed
+
+**Record this plainly so nobody later "fixes" it by bloating the e2e seed:**
+
+Mutation (iv) — *remove `ToolbarButton`'s `onClick` disabled guard* — refused to fail under
+`e2e/toolbar-dispatch.spec.ts`. That is not because the guard works; it is because **every
+pre-existing disabled state is structurally unreachable in the e2e seed**:
+
+- `e2e/helpers/pageHelpers.ts:91-99` always seeds `sections = [header, ...body, footer]`. So
+  `sectionIndex === 0` is **always** the header and `length - 1` is **always** the footer, and
+  `CHROME_HIDDEN_ACTIONS` hides move-up/move-down on both. The disabled move buttons therefore never
+  render for any selectable section — the e2e can't reach them **by construction**, not by omission.
+- The remaining real disables (regen-locale-lock, sparkle mid-generation) need `localeConfig` / an
+  in-flight generation the seed doesn't produce.
+
+Option A (unit test) was chosen over option B (seed `localeConfig`) because it pins the **primitive's**
+contract directly, runs in ms, needs no dev server or seed, and doesn't entangle the e2e seed with an
+unrelated concern. **The unit level is the only level at which this guard is falsifiable at all.**
+
+**Mutation (iv) is now satisfied — at the unit level.**
+
+### The test (8 cases, repo convention: `react-dom/client` + `act`, no @testing-library)
+
+Written to falsify, not to decorate. Each case names a specific way the contract could rot:
+
+1. **the guard** — `disabled` + `vi.fn()` handler, real click ⇒ handler NOT called. *(= mutation iv)*
+2. **the enabled control** — `disabled: false` ⇒ handler called exactly once. Without this, deleting
+   `onClick?.(e)` outright would still pass #1: a guard that fires nothing is vacuously green.
+3. `aria-disabled="true"` when disabled, absent/false when enabled.
+4. `title` = `disabledTitle` when disabled — founder ruling 9's mandatory "why" tooltip (naayom C2:
+   dead buttons read as bugs), pinned so a refactor can't silently drop the reason.
+5. **NOT natively disabled** when `disabled: true` — pins the whole point of the aria-disabled pattern.
+6. `data-action` renders (the e2e hook).
+7. + 8. `onMouseDown` preventDefault when disabled / not when enabled (focus retention). **jsdom handled
+   this fine — not skipped.**
+
+### Mutation proofs (real output)
+
+**Mutation A — remove the `onClick` disabled guard (= mutation iv):**
+```
+ × does NOT call onClick when disabled
+   AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+   Number of calls: 1
+ ❯ ToolbarButton.test.tsx:68  expect(onClick).not.toHaveBeenCalled()
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+```
+Kills exactly #1, and only #1. Reverted.
+
+**Mutation B — reinstate native `disabled`:**
+```
+ × is NOT natively disabled when disabled=true   AssertionError: expected true to be false
+ × preventDefaults mousedown when disabled       AssertionError: expected false to be true
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed (8)
+```
+Kills #5 **and** #7. #7's failure is itself the empirical proof of the doc comment's claim 2: a
+natively-disabled button never fires `mousedown`, so the focus-retention `preventDefault` silently
+becomes a no-op. The reasoning behind the pattern is now pinned by a test, not just asserted in a
+comment. Reverted.
+
+Both mutations reverted; suite green.
+
+### Verification
+
+- `npx tsc --noEmit` → **exit 0, clean.**
+- `npm run test:run` → **Test Files 211 passed | 1 skipped (212); Tests 3565 passed | 18 skipped
+  (3583).** 3565 = 3557 baseline + 8 new cases, as predicted. No regressions.
+- **Playwright NOT re-run — deliberate and correct: this change is test-only** (one new Vitest file),
+  no source or e2e file was modified, so no Playwright behaviour can have changed.
+- Tripwire `03fcf881e474f62478835faf5777dfee65389b09` = `src/modules/templates/linkTargetPublished.test.tsx`;
+  blob hash in the working index is **identical to HEAD ⇒ byte-untouched**, and it passes within the 3565. Green.
+- Diff scope confirmed = Phase 3.5 Files-touched + `ToolbarButton.tsx` + `ToolbarButton.test.tsx`,
+  **minus `ToolbarShell.tsx`**. (`uiFoundationIsolation.test.tsx.snap` shows `M` in `git status` but its
+  blob hash equals HEAD's — CRLF stat-dirty only, content unchanged.)
+
+### Deviations
+
+None. Scope was exactly the authorized new test file.
+
+Deviation #1 from the previous 3.5 attempt (the `TextToolbarMVP` sparkle consumer guard) is retained
+per ruling — native `disabled` had been protecting it for free, so dropping it without a guard would
+allow a double-fired regen mid-generation (a real bug, not a hypothetical).
+
+### Disclosure — `link-picker.spec.ts:150` flake (unchanged, still open)
+
+Not introduced by this step and not fixed by it. Attribution work done: **passes 3/3 in isolation**;
+failures are **monotonic with dev-server load**; `LinkPicker.tsx` contains **no `ToolbarButton` and no
+`aria-disabled`**, so it is out of this phase's causal reach. Recorded as a load-sensitive flake, not
+a regression — flagged rather than silently retried.

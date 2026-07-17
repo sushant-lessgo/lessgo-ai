@@ -199,16 +199,32 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
       disabled: true,
       disabledTitle: 'Set this button’s link in Button Settings →',
     }] : []),
-    // "Style" per toolbarPlan's Beta column is NOT shipped as a rename of this
-    // action — see the audit. VERIFIED: no per-button style (primary/secondary/
-    // tertiary) field exists in the store; the only style-adjacent field,
-    // `buttonConfig.ctaType` (types/core/content.ts:209), is DERIVED READ-ONLY from
-    // the element key (`secondary_*` ⇒ secondary, ButtonConfigurationModal.tsx:156-161,
-    // scale-04) and is a form-PLACEMENT role, not a visual style. Per the plan we do
-    // NOT add a store field; and the panel this opens is a destination/behaviour
-    // configurator (link / page / form + behaviour + icons) with zero style controls,
-    // so relabelling it "Style" would make the button lie about what it opens.
-    // Kept as "Button Settings".
+    // ── Button/CTA → Style: GREYED PLACEHOLDER (phase 3.5, founder ruling 9) ──
+    // Placed here, before Button Settings, because toolbarPlan's Beta column order
+    // is `edit text · Link/Action · Style`.
+    //
+    // This is a SEPARATE, DISABLED button — NOT a relabel of `button-config` below.
+    // That distinction is the whole point (and was correctly refused in phase 2):
+    // VERIFIED no per-button style (primary/secondary/tertiary) field exists in the
+    // store; the only style-adjacent field, `buttonConfig.ctaType`
+    // (types/core/content.ts:209), is DERIVED READ-ONLY from the element key
+    // (`secondary_*` ⇒ secondary, ButtonConfigurationModal.tsx:156-161, scale-04)
+    // and is a form-PLACEMENT role, not a visual style. And the panel `button-config`
+    // opens is a destination/behaviour configurator (link / page / form + behaviour +
+    // icons) with ZERO style controls — so renaming it "Style" would make the button
+    // lie about what it opens. A greyed placeholder is honest; a misleading label is
+    // not. Shipping it real = a new store field + template consumption in both
+    // renderers = the published-output change this spec forbids.
+    ...(canConvertToForm() ? [{
+      id: 'style',
+      label: 'Style',
+      icon: 'palette',
+      handler: () => {},
+      disabled: true,
+      disabledTitle: 'Button styles are coming with the design system.',
+    }] : []),
+    // Kept as "Button Settings" — see the Style note above for why it is NOT
+    // relabelled.
     ...(canConvertToForm() ? [{
       id: 'button-config',
       label: 'Button Settings',
