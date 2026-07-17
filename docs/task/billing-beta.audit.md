@@ -284,3 +284,126 @@ real body is worth more than eleven tests against an invented one.
   Available: M` string that the routes build inline. If a route reworded that message, the numbers
   would silently vanish (degrading to `{}`, not crashing) for every shape except checkAIAccess.
   The fixtures make the coupling explicit and greppable, but there is no compile-time link.
+
+---
+
+# Phase 3 — dashboard header credit counter
+
+**Files changed**
+- `src/components/billing/CreditBadge.tsx` (rewritten in place)
+- `src/components/dashboard/DashboardTopBar.tsx` (modified)
+- `e2e/billing-beta.spec.ts` (new)
+- `playwright.config.ts` (modified)
+
+## What changed, per file
+
+### `src/components/billing/CreditBadge.tsx`
+- **`app-*` reskin.** Dropped lucide (`Coins`/`AlertCircle`/`TrendingUp`) and every stock-Tailwind
+  key (`bg-red-50`, `text-green-600`, `bg-gray-200`, `rounded-lg`, `text-sm`…). Now: `AppIcon`
+  (`credit_card` on the pill, `workspace_premium` on the upgrade link — both already in the
+  committed subset; `icons.txt` and the font binaries untouched), `app-*` colors
+  (`app-ink/muted/faint/border/divider/surface/hover/track/primary/danger/danger-bg/review-*`),
+  `rounded-app-pill`/`rounded-app-ctl`, `font-app-sans` (via the panel primitive), px type sizes.
+- **Hardcoded costs at old :179-191 killed.** Rows now render from a `SHOWN_COSTS` list mapped over
+  `CREDIT_COSTS` (`@/lib/creditCosts`) — `FULL_PAGE_GENERATION`, `SECTION_REGENERATION`,
+  `ELEMENT_REGENERATION`. `IVOC_RESEARCH` deliberately not surfaced (dead constant, scale-08).
+  Header comment states the config-driven rule + the single-fetcher rule so a future edit is a
+  conscious act.
+- **Preserved verbatim:** pool-aware math (`totalAvailable` fallback, `hasMonthly`, `isOut`/`isLow`
+  severity split), the 30s polling effect, the `/api/credits/balance` fetch, all copy semantics.
+  Still the ONLY balance fetcher; no second fetch added.
+- **Upgrade link** `/pricing` → `/dashboard/billing`.
+- Added `data-testid` hooks (`credit-badge`, `credit-badge-value`, `credit-badge-panel`,
+  `credit-cost-row[data-cost-op]`, `credit-cost-value`) for the e2e.
+
+### `src/components/dashboard/DashboardTopBar.tsx`
+- Import + `<CreditBadge />` mounted between the `flex-1` spacer and the greyed bell, with a comment
+  restating decision 6 (client fetch only; absent on `/dashboard/[token]/*` by the bar's existing
+  self-suppression). No other change; the bar stays `'use client'` and adds zero server reads.
+
+### `playwright.config.ts`
+- `/billing-beta\.spec\.ts/` added to the `authed` project's `testMatch` ALLOWLIST (the registration
+  trap this phase exists for). No other config change.
+
+### `e2e/billing-beta.spec.ts` (new)
+- `authed`, serial, `HAS_AUTH_ENV` skip guard (same triple as the other authed specs). No seeding —
+  the counter needs only a Clerk session.
+- Test 1: `/dashboard` header renders the badge with a numeric value (`/^\d+(\/\d+)?$/`).
+- Test 2: hover → panel; each cost row's rendered text must equal `CREDIT_COSTS[op]` **imported via
+  relative path** `../src/lib/creditCosts` (no `@/` — the Playwright runner has no alias resolution;
+  the module's phase-1 no-alias/prisma-free invariant is what makes this possible). Plus a negative
+  assertion that no `IVOC_RESEARCH` row exists.
+
+## Deviations from the plan
+
+1. **`AppPopoverPanel` instead of `AppTooltip`** (plan step 1 named `AppTooltip`). `AppTooltip`'s
+   content surface is a `max-w-[220px]` dark-ink bubble — it cannot carry the panel's progress bar,
+   pool row and cost table without restyling a shared primitive (forbidden) or hand-rolling a second
+   popover (explicitly banned by `ui/README.md`, "ONE primitive, two surfaces"). The old code's
+   `showTooltip` div WAS an improvised popover; it is now the sanctioned `Popover` +
+   `AppPopoverPanel`. Conservative choice: same hover-open UX preserved (controlled `open` +
+   mouseenter/leave on both trigger and panel), with `onOpenAutoFocus` prevented so a hover-open
+   popover does not steal focus; click/keyboard open now works for free (an a11y improvement over the
+   hover-only div). `AppIcon` is used as planned.
+2. **Loading state renders a `Spinner`** (size 16) instead of the old `return null`. Decision 7 names
+   `Spinner` as the loading treatment; it also avoids a layout jump in the bar. Signed-out and
+   fetch-failure still return `null`, unchanged.
+3. **Severity palette:** `isLow` uses the `app-review-*` trio (`#fff2ec`/`#ffd9c7`/`#d9531f`) — there
+   is no `app-warning`/amber `app-*` key, and adding one would mean editing `tailwind.config.js`,
+   which is NOT on this phase's Files-touched list. `isOut` uses `app-danger`/`app-danger-bg` with the
+   review border (no `app-danger-border` key exists).
+
+## Verification (WORKDIR, all green)
+
+- `npx tsc --noEmit` — clean, no output.
+- `npm run test:run` — `213 passed | 1 skipped (214)` files, `3613 passed | 18 skipped` tests.
+- `npm run lint` — no new errors/warnings (pre-existing template `no-img-element` /
+  `exhaustive-deps` warnings only).
+- `npm run build` — green (published-css + assets + next build).
+- Isolation guards re-run against the FRESH build artifact:
+  - `uiFoundationIsolation.test.tsx` (published.css sha256) — 5 passed.
+  - `tailwindConfigFreeze.test.ts` — 3 passed.
+  - `e2e/ui-isolation.spec.ts` — 2 passed (below).
+- **Playwright, with EXECUTION evidence** (`E2E_PORT=3037 npx playwright test e2e/billing-beta.spec.ts e2e/ui-isolation.spec.ts --project=authed --project=public`):
+
+```
+Running 5 tests using 1 worker
+  ✓  1 [setup] › e2e\auth.setup.ts:9:6 › authenticate (6.2s)
+  ✓  2 [public] › e2e\ui-isolation.spec.ts:55:7 › ui-foundation isolation — main-app surface › computed-style baselines on /dev/meridian/blocks are unchanged (15.5s)
+  ✓  3 [public] › e2e\ui-isolation.spec.ts:86:7 › ui-foundation isolation — main-app surface › no app-chrome fonts/classes on the block surface (4.3s)
+  ✓  4 [authed] › e2e\billing-beta.spec.ts:27:7 › billing-beta — dashboard credit counter › header shows a numeric credit balance (10.0s)
+  ✓  5 [authed] › e2e\billing-beta.spec.ts:37:7 › billing-beta — dashboard credit counter › cost rows render from CREDIT_COSTS config (not hardcoded) (4.3s)
+
+  5 passed (1.2m)
+```
+
+Both billing-beta tests are named in the output **under the `[authed]` project** — the spec really
+executed, against a real Clerk session and a really-rendered badge (not skipped, not unmatched). The
+`HAS_AUTH_ENV` guard did not fire (creds present in `.env.local`); a skip would have printed `-`, not
+`✓`. The assertions are non-vacuous: a missing `credit-badge` or a non-numeric value fails test 1, and
+a missing/mismatched row fails test 2.
+
+## Noticed but deliberately untouched
+
+- The panel's own `Resets in {daysUntilReset} days` row still renders for monthly tiers. It reads a
+  real value from the balance response (unrelated to the phase-4 modal's dropped `daysUntilReset`
+  prop), so it is correct here; left as-is.
+- `CREDIT_COSTS` carries other live costs (`SCRAPE_WEBSITE`, `GENERATE_COPY`,
+  `PRIVACY_POLICY_GENERATION`, `OUTREACH_SCRAPE`…). Only the plan's three are surfaced — the panel is
+  a hint, not the full price table. Costs-at-action is phase 7.
+- `FIELD_INFERENCE`/`FIELD_VALIDATION`/`IVOC_RESEARCH` look dead post-scale-08, but reconciling the
+  cost table is a config-value change — Scope OUT.
+- `SeoSettingsModal.tsx:135` comments that it "mirrors CreditBadge's plan fetch" — it fetches
+  `/api/billing/plan`, not the balance, so it is not a second *balance* fetcher; untouched.
+- The project workspace header (`/dashboard/[token]/*`) still has no counter (decision 6, accepted).
+
+## Open risks
+
+- **The config-driven check is directional, not airtight.** The e2e compares the rendered number to
+  `CREDIT_COSTS[op]` — if someone re-inlined the literal `10` today it would still pass, because the
+  config also says 10. It catches drift the moment the config changes (which is the stated acceptance
+  criterion), but it cannot detect a same-value re-inline. The `data-cost-op` attributes derive from
+  the same `SHOWN_COSTS` keys, which at least makes the coupling greppable.
+- Hover-driven popovers are timing-sensitive; the panel assertion relies on Radix mounting on
+  `hover()`. It passed cleanly, and the popover also opens on click, so a flake would surface as a
+  visible failure rather than a silent pass.

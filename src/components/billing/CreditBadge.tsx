@@ -2,8 +2,30 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { Coins, AlertCircle, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
+import { AppIcon } from '@/components/ui/icon';
+import { Popover, PopoverTrigger, AppPopoverPanel } from '@/components/ui/popover';
+import { Spinner } from '@/components/ui/spinner';
+import { CREDIT_COSTS } from '@/lib/creditCosts';
+
+/**
+ * CreditBadge — THE credit-balance surface for app chrome (billing-beta phase 3).
+ *
+ * ⚠️ SINGLE FETCHER RULE: this is the ONLY component that fetches
+ * `/api/credits/balance`. The editor counter (phase 5) and any future counter reuse
+ * THIS component — never add a second balance fetcher (and never read the plan in
+ * passive chrome / `dashboard/layout.tsx`).
+ *
+ * ⚠️ CONFIG-DRIVEN COSTS: the cost rows render from `CREDIT_COSTS`
+ * (`src/lib/creditCosts.ts`). They were hardcoded (10/2/1) before phase 3 — changing
+ * the config must change this UI with no code edit. Do not re-inline numbers.
+ * `IVOC_RESEARCH` is deliberately NOT surfaced (dead constant — backend removed in
+ * scale-08).
+ *
+ * APP-CHROME ONLY: `app-*` utilities + AppIcon/app-popover primitives. No lucide, no
+ * stock Tailwind palette keys (those feed template rendering — see
+ * `src/components/ui/README.md` isolation rules).
+ */
 
 interface CreditBalance {
   used: number;
@@ -19,11 +41,22 @@ interface CreditBalance {
   totalAvailable?: number;
 }
 
+/**
+ * The costs surfaced in the tooltip panel, in display order. Labels are UI copy;
+ * every NUMBER comes from CREDIT_COSTS. Keep this list short — it is a hint, not
+ * the full price table.
+ */
+const SHOWN_COSTS: ReadonlyArray<{ op: keyof typeof CREDIT_COSTS; label: string }> = [
+  { op: 'FULL_PAGE_GENERATION', label: 'Full page generation' },
+  { op: 'SECTION_REGENERATION', label: 'Section regeneration' },
+  { op: 'ELEMENT_REGENERATION', label: 'Element variation' },
+];
+
 export function CreditBadge() {
   const { isSignedIn } = useAuth();
   const [balance, setBalance] = useState<CreditBalance | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!isSignedIn) return;
@@ -49,8 +82,14 @@ export function CreditBadge() {
     return () => clearInterval(interval);
   }, [isSignedIn]);
 
-  if (!isSignedIn || isLoading) {
-    return null;
+  if (!isSignedIn) return null;
+
+  if (isLoading) {
+    return (
+      <div className="flex h-8 w-8 items-center justify-center" aria-label="Loading credits">
+        <Spinner size={16} thickness={2} />
+      </div>
+    );
   }
 
   if (!balance) {
@@ -70,129 +109,133 @@ export function CreditBadge() {
   const isOut = hasMonthly ? balance.percentUsed >= 100 : totalAvailable <= 0;
   const isLow = hasMonthly ? balance.percentUsed >= 80 : totalAvailable <= 2;
 
-  const getColor = () => {
-    if (isOut) return 'text-red-600 bg-red-50 border-red-200';
-    if (isLow) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-    return 'text-green-600 bg-green-50 border-green-200';
-  };
+  const severityClasses = isOut
+    ? 'border-app-review-border bg-app-danger-bg text-app-danger'
+    : isLow
+    ? 'border-app-review-border bg-app-review-bg text-app-review-text'
+    : 'border-app-border bg-app-surface text-app-ink hover:bg-app-hover';
 
-  const getIcon = () => {
-    if (isOut) return <AlertCircle className="w-4 h-4" />;
-    return <Coins className="w-4 h-4" />;
-  };
+  const barClasses = isOut ? 'bg-app-danger' : isLow ? 'bg-app-review-text' : 'bg-app-primary';
 
   return (
-    <div className="relative">
-      <button
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors ${getColor()}`}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          data-testid="credit-badge"
+          aria-label={`AI credits: ${totalAvailable} available`}
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+          className={`flex items-center gap-1.5 rounded-app-pill border px-2.5 py-1.5 font-app-sans text-[13px] font-semibold transition-colors ${severityClasses}`}
+        >
+          <AppIcon name="credit_card" size={17} />
+          <span data-testid="credit-badge-value">
+            {hasMonthly ? `${totalAvailable}/${monthlyLimit}` : totalAvailable}
+          </span>
+        </button>
+      </PopoverTrigger>
+
+      <AppPopoverPanel
+        width={288}
+        align="end"
+        data-testid="credit-badge-panel"
+        // Hover-opened: keep it open while the pointer is over the panel itself.
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        // Hover-opened popovers must not steal focus from the trigger.
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="p-3.5"
       >
-        {getIcon()}
-        <span className="text-sm font-semibold">
-          {hasMonthly ? `${totalAvailable}/${monthlyLimit}` : totalAvailable}
-        </span>
-      </button>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-app-ink">AI Credits</h3>
+          <span className="text-[10.5px] font-bold uppercase tracking-[.09em] text-app-faint">
+            {balance.tier}
+          </span>
+        </div>
 
-      {showTooltip && (
-        <div className="absolute top-full mt-2 right-0 w-72 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-900">AI Credits</h3>
-            <span className="text-xs text-gray-500 uppercase font-semibold">
-              {balance.tier}
-            </span>
-          </div>
+        <div className="space-y-3">
+          {hasMonthly ? (
+            <>
+              {/* Monthly allotment progress bar (only when there is one) */}
+              <div>
+                <div className="mb-1 flex justify-between text-[13px]">
+                  <span className="text-app-muted">Used</span>
+                  <span className="font-semibold text-app-ink">
+                    {balance.used} / {monthlyLimit}
+                  </span>
+                </div>
+                <div className="h-2 w-full rounded-app-pill bg-app-track">
+                  <div
+                    className={`h-2 rounded-app-pill transition-all ${barClasses}`}
+                    style={{ width: `${Math.min(balance.percentUsed, 100)}%` }}
+                  />
+                </div>
+              </div>
+              {(balance.poolRemaining ?? 0) > 0 && (
+                <div className="flex justify-between text-[13px]">
+                  <span className="text-app-muted">Bonus pool</span>
+                  <span className="font-semibold text-app-ink">
+                    {balance.poolRemaining} credits
+                  </span>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex justify-between text-[13px]">
+              <span className="text-app-muted">Available</span>
+              <span className="font-semibold text-app-ink">
+                {totalAvailable} credit{totalAvailable === 1 ? '' : 's'}
+              </span>
+            </div>
+          )}
 
-          <div className="space-y-3">
-            {hasMonthly ? (
-              <>
-                {/* Monthly allotment progress bar (only when there is one) */}
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Used</span>
-                    <span className="font-semibold text-gray-900">
-                      {balance.used} / {monthlyLimit}
+          {/* Reset Info (monthly allotment only — pool credits don't reset) */}
+          {hasMonthly && (
+            <p className="border-t border-app-divider pt-2 text-[13px] text-app-muted">
+              Resets in {balance.daysUntilReset} day{balance.daysUntilReset !== 1 ? 's' : ''}
+            </p>
+          )}
+
+          {/* Low Balance Warning */}
+          {isLow && (
+            <div className="rounded-app-ctl border border-app-review-border bg-app-review-bg p-3">
+              <p className="mb-2 text-[13px] text-app-review-text">
+                {isOut ? 'Out of credits! Upgrade for more.' : 'Running low on credits'}
+              </p>
+              <Link
+                href="/dashboard/billing"
+                className="inline-flex items-center gap-1 text-[13px] font-semibold text-app-primary-deep underline"
+              >
+                <AppIcon name="workspace_premium" size={16} />
+                Upgrade to Pro
+              </Link>
+            </div>
+          )}
+
+          {/* Credit costs — rendered from CREDIT_COSTS, never hardcoded. */}
+          <div className="border-t border-app-divider pt-2">
+            <p className="mb-2 text-[11px] text-app-faint">Credit costs:</p>
+            <div className="space-y-1 text-[11.5px] text-app-muted">
+              {SHOWN_COSTS.map(({ op, label }) => {
+                const cost = CREDIT_COSTS[op];
+                return (
+                  <div
+                    key={op}
+                    data-testid="credit-cost-row"
+                    data-cost-op={op}
+                    className="flex justify-between"
+                  >
+                    <span>{label}</span>
+                    <span className="font-semibold text-app-ink" data-testid="credit-cost-value">
+                      {cost} credit{cost === 1 ? '' : 's'}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full transition-all ${
-                        balance.percentUsed >= 100
-                          ? 'bg-red-500'
-                          : balance.percentUsed >= 80
-                          ? 'bg-yellow-500'
-                          : 'bg-green-500'
-                      }`}
-                      style={{ width: `${Math.min(balance.percentUsed, 100)}%` }}
-                    />
-                  </div>
-                </div>
-                {(balance.poolRemaining ?? 0) > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Bonus pool</span>
-                    <span className="font-semibold text-gray-900">
-                      {balance.poolRemaining} credits
-                    </span>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Available</span>
-                <span className="font-semibold text-gray-900">
-                  {totalAvailable} credit{totalAvailable === 1 ? '' : 's'}
-                </span>
-              </div>
-            )}
-
-            {/* Reset Info (monthly allotment only — pool credits don't reset) */}
-            {hasMonthly && (
-              <div className="flex items-center gap-2 text-sm text-gray-600 pt-2 border-t">
-                <TrendingUp className="w-4 h-4" />
-                <span>
-                  Resets in {balance.daysUntilReset} day{balance.daysUntilReset !== 1 ? 's' : ''}
-                </span>
-              </div>
-            )}
-
-            {/* Low Balance Warning */}
-            {isLow && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <p className="text-sm text-yellow-800 mb-2">
-                  {isOut
-                    ? 'Out of credits! Upgrade for more.'
-                    : 'Running low on credits'}
-                </p>
-                <Link
-                  href="/pricing"
-                  className="text-sm font-semibold text-yellow-900 hover:text-yellow-700 underline"
-                >
-                  Upgrade to Pro →
-                </Link>
-              </div>
-            )}
-
-            {/* Credit Costs */}
-            <div className="pt-2 border-t">
-              <p className="text-xs text-gray-500 mb-2">Credit costs:</p>
-              <div className="space-y-1 text-xs text-gray-600">
-                <div className="flex justify-between">
-                  <span>Full page generation</span>
-                  <span className="font-semibold">10 credits</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Section regeneration</span>
-                  <span className="font-semibold">2 credits</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Element variation</span>
-                  <span className="font-semibold">1 credit</span>
-                </div>
-              </div>
+                );
+              })}
             </div>
           </div>
         </div>
-      )}
-    </div>
+      </AppPopoverPanel>
+    </Popover>
   );
 }

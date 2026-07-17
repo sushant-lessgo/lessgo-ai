@@ -71,6 +71,8 @@ export default defineConfig({
         // work-onboarding-shell: the journey needs a Clerk session (seeded via
         // the real /api/start + /api/brief/confirm routes).
         /work-onboarding\.spec\.ts/,
+        // billing-beta: credit counter / gating / billing view — needs a Clerk session.
+        /billing-beta\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },

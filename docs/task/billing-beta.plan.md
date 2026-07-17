@@ -19,7 +19,7 @@ ruled additive exception: a read-only `hasBillingAccount` field on `/api/billing
 ## Progress log
 
 - phase 1 config extraction (prisma-free constants): done (commit 1262dbe2, review loops 1, verdict ship)
-- phase 2 insufficient-credits normalizer: pending
+- phase 2 insufficient-credits normalizer: done (commit b74023aa, review loops 2, verdict ship) — scout §F Pattern-A error found+corrected at source; fixture had echoed the wrong belief
 - phase 3 dashboard header credit counter: pending
 - phase 4 gating message + upgrade path (beta blocker): pending
 - phase 5 editor header credit counter: pending
