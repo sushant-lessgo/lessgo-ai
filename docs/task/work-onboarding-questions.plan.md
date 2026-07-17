@@ -12,7 +12,7 @@ Replace the E1 STEP-03 placeholder (name / what-you-sell / one price) with the f
 - phase 2 question contract + agnostic renderer + required gate: done (commit ba6c9afa; choice kind + onBlockedChange gate; tsc/test/lint green; +question-add-<id> testid)
 - phase 3 work seam STEP 03 + rail widening: done (commit 8aeda339; 5-question Kundius set + profession wording + establishment branch; tsc/test 3853/lint green; dev: dreamClient=multi, price=native kind)
 - phase 4 playwright e2e over the STEP 01→03 walk: done (commit 3ff01310; work-onboarding.spec 9/9 green ISOLATED; 3 walks repaired; full authed sweep heap-corrupts on win worktree — run e2e per-spec in phase 5)
-- phase 5 build/lint sweep + track doc + founder live-walk gate: pending
+- phase 5 build/lint sweep + track doc + founder live-walk gate: done (commit 0fcfd44a; all 5 gates green — tsc/test3853/lint/build/e2e9-9 isolated); founder live-walk = pending human gate
 
 ## Central design decisions (locked here so phases don't re-litigate)
 
