@@ -13,9 +13,24 @@ import { isChromeId } from '@/hooks/editStore/pageHelpers';
 import { eligibleVariantCount } from '../ui/BlockVariantSelector';
 import { usesTemplateModule } from '@/types/service';
 import { ToolbarButton, ToolbarDivider, ToolbarLabel, useHideToolbarChrome } from './ToolbarButton';
+// phase 4: the Social manage-items entry point. Direct import (not the
+// `lessgo:manage-social` window event) because SectionToolbar is APP code, not a
+// template module — the event exists to let template blocks request the panel
+// across the firewall. GlobalAppHeader.tsx:55 already imports it the same way, and
+// there is no cycle: GlobalModals imports no toolbar.
+import { showSocialModal } from '../ui/GlobalModals';
 
 // Shared chrome (header/footer) is site-wide: hide per-page structural actions.
 const CHROME_HIDDEN_ACTIONS = ['move-up', 'move-down', 'duplicate', 'delete'];
+
+/**
+ * Actions that belong to the FOOTER alone (toolbarPlan's Footer + Social Beta
+ * columns). Gated by `isFooterId`, NOT by `isChromeId` — the latter is true for the
+ * HEADER too, whose Beta column is Menu (deferred entirely per ruling 9). Leaking
+ * any of these onto the header is the most plausible regression here, so the header
+ * e2e case asserts their absence explicitly.
+ */
+const FOOTER_ONLY_ACTIONS = ['manage-links', 'manage-social', 'social-orientation'];
 
 /**
  * Human label for the toolbar's status chip, from the `${type}-${uuid}` section-id
@@ -242,6 +257,48 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
       disabledTitle: 'Footer link editing is coming — footer links aren’t in the editor store yet.',
       handler: () => {},
     },
+    // ── Footer → Manage social: REAL, ENABLED (phase 4, t5) ────────────────────
+    // FOOTER ONLY, and hosted HERE rather than on an element toolbar because phase
+    // 4 verified that social icons are NOT spine-selectable: `ToolbarType`
+    // (selectionPriority.ts:29) has no 'social' member, and NOTHING in src/ emits a
+    // `data-element-key` for a `socialMediaConfig` item — that config is not rendered
+    // by any block at all. The plan's step 2 anticipated exactly this ("if not,
+    // surface Manage-items on the containing chrome-section (footer) toolbar
+    // instead"), so this is the sanctioned fallback path, not a workaround.
+    //
+    // ⚠️ WHAT THIS EDITS — the site-level `socialMediaConfig` store slice (the
+    // LinkPicker's derived Social options + the Brief bridge). It is NOT the
+    // `social_links` BLOCK CONTENT a template footer actually renders (hearth
+    // ContactFooterRich:24,35), which is edited inline per-template. Those two are
+    // separate today; joining them is a published-output change ⇒ own spec.
+    //
+    // NOT a new capability (honesty): add/edit/remove/reorder already existed in
+    // SocialMediaEditor and were already reachable from the app header menu
+    // (GlobalAppHeader.tsx:188). Phase 4 adds the t5 reskin + THIS entry point.
+    {
+      id: 'manage-social',
+      label: 'Manage social',
+      icon: 'share',
+      handler: () => showSocialModal(),
+    },
+    // ── Social → Orientation: GREYED PLACEHOLDER (founder ruling 9, plan D-2) ───
+    // Rides WITH the social action (ruling 9 says it lands "with phase 4's toolbar"),
+    // which means the footer toolbar — because that is where the social action ended
+    // up (see above). Sits next to `manage-social` so the pair reads as one group.
+    //
+    // DISABLED with ZERO functionality: `SocialMediaConfig` (state.ts:141-145) has
+    // no orientation field. Adding one = a new store field that BOTH published
+    // renderers must read — the exact class of change rulings 2/3 defer and this
+    // spec's no-published-output rule forbids.
+    {
+      id: 'social-orientation',
+      label: 'Orientation',
+      icon: 'orientation',
+      disabled: true,
+      disabledTitle:
+        'Social layout options are coming — orientation isn’t stored on your site yet.',
+      handler: () => {},
+    },
     // ── Section → Background: GREYED PLACEHOLDER (phase 3.5, founder ruling 9) ──
     // Last, per toolbarPlan's Beta column order (`… Duplicate · Delete · Background`);
     // it is also Footer's second Beta action, so it is deliberately NOT filtered to
@@ -271,7 +328,11 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
     // leak out of the footer. Kept as its own filter rather than folded into
     // CHROME_HIDDEN_ACTIONS, which is the inverse gate (hide ON chrome) and is
     // load-bearing for the header.
-    .filter((action) => action.id !== 'manage-links' || isFooterId(sectionId));
+    //
+    // phase 4: `manage-social` + `social-orientation` join the same footer-only gate.
+    // Note `background` is deliberately NOT in this list — it is a whole-Section
+    // placeholder, so the header legitimately keeps it (pinned by the header e2e case).
+    .filter((action) => !FOOTER_ONLY_ACTIONS.includes(action.id) || isFooterId(sectionId));
 
   // Check if this specific section is being regenerated
   const isRegenerating = aiGeneration.isGenerating && 
@@ -473,6 +534,20 @@ function ActionIcon({ icon }: { icon: string }) {
     'link': (
       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+      </svg>
+    ),
+    // phase 4: the share glyph for the footer's real `manage-social` action.
+    'share': (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342A3 3 0 108.684 10.658m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+      </svg>
+    ),
+    // phase 4: the natural glyph for the `social-orientation` placeholder. Like
+    // `link` above, an explicit entry matters — the icon map's fallback is a grey
+    // square, which reads as a rendering BUG rather than a deliberate "coming" state.
+    'orientation': (
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
       </svg>
     ),
   };

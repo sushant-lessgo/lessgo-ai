@@ -215,6 +215,9 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
     expect(ids).toContain('background');
     // `manage-links` is FOOTER-only — it must not leak onto body sections.
     expect(ids, 'manage-links leaked out of the footer').not.toContain('manage-links');
+    // phase 4: same gate, same risk.
+    expect(ids, 'manage-social leaked out of the footer').not.toContain('manage-social');
+    expect(ids, 'social-orientation leaked out of the footer').not.toContain('social-orientation');
 
     await expectGreyedPlaceholder(page, 'background', /design system/i);
   });
@@ -368,6 +371,14 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
     // `not.toContain(...)` through phase 3.
     expect(ids).toContain('manage-links');
     expect(ids).toContain('background');
+    // phase 4: the footer additionally hosts the SOCIAL pair. `manage-social` is the
+    // one REAL new entry point in this slice (see e2e/manage-items.spec.ts for its
+    // behaviour); `social-orientation` is a greyed placeholder (ruling 9 / D-2).
+    // They live on the footer because social icons are NOT spine-selectable —
+    // `ToolbarType` has no 'social' member and no `data-element-key` is emitted for a
+    // socialMediaConfig item, so there is no element toolbar to host them.
+    expect(ids).toContain('manage-social');
+    expect(ids).toContain('social-orientation');
 
     // CRITICAL: this must not have been achieved by widening CHROME_HIDDEN_ACTIONS
     // or by dropping the chrome gate — re-assert the hidden set AFTER the additions.
@@ -377,6 +388,17 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
 
     await expectGreyedPlaceholder(page, 'manage-links', /store|coming/i);
     await expectGreyedPlaceholder(page, 'background', /design system/i);
+    await expectGreyedPlaceholder(page, 'social-orientation', /coming|stored/i);
+
+    // ...and `manage-social` must NOT be greyed — it is the one action here with
+    // something behind it. Asserting the placeholders alone would let a regression
+    // that greys out the real action pass unnoticed.
+    const social = page.locator(`${SHELL} [data-action="manage-social"]`);
+    await expect(social).toHaveCount(1);
+    await expect(social, 'Manage social must be live, not a placeholder').not.toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
   });
 
   // The header is the OTHER chrome section, and it is the leak this phase most
@@ -396,6 +418,15 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
 
     expect(ids, 'manage-links is FOOTER-only — it leaked onto the header').not.toContain(
       'manage-links',
+    );
+    // phase 4: the social pair is footer-only for the same reason (FOOTER_ONLY_ACTIONS
+    // is gated by `isFooterId`, NOT `isChromeId` — the latter is true for the header
+    // too, whose Beta column is Menu, deferred entirely per ruling 9).
+    expect(ids, 'manage-social is FOOTER-only — it leaked onto the header').not.toContain(
+      'manage-social',
+    );
+    expect(ids, 'social-orientation is FOOTER-only — it leaked onto the header').not.toContain(
+      'social-orientation',
     );
     // Background is a whole-Section placeholder, so the header legitimately has it.
     expect(ids).toContain('background');

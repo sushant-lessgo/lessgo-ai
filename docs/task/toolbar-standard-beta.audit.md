@@ -1472,3 +1472,250 @@ Not introduced by this step and not fixed by it. Attribution work done: **passes
 failures are **monotonic with dev-server load**; `LinkPicker.tsx` contains **no `ToolbarButton` and no
 `aria-disabled`**, so it is out of this phase's causal reach. Recorded as a load-sensitive flake, not
 a regression — flagged rather than silently retried.
+
+---
+
+# Phase 4 — t5 Social manage-items + form-field reorder + dead nav-editor deletion
+
+**Verdict:** delivered. But the phase's stated premise was wrong *again* (the 4th in a row), in the
+opposite direction from the warning: FormBuilder was **never** unreachable, and phase 2's
+"load-bearing crash fix" is **overridden dead code**. Details below — it did NOT block the work.
+
+## Files changed
+
+| File | Change |
+|---|---|
+| `src/components/editor/SocialItemsEditor.tsx` | **NEW** — t5 manage-items editor for `socialMediaConfig` |
+| `src/components/editor/SocialItemsEditor.test.tsx` | **NEW** — 9 cases (reorder/cap/boundaries/isVisible seam) |
+| `src/components/editor/SocialProfilesPanel.tsx` | repointed `SocialMediaEditor` → `SocialItemsEditor` |
+| `src/components/social/SocialMediaEditor.tsx` | **DELETED** (dir now empty) |
+| `src/components/navigation/NavigationEditor.tsx` | **DELETED** (dead) |
+| `src/components/navigation/NavItemToolbar.tsx` | **DELETED** (dead; dir now empty) |
+| `src/components/README.md` | dropped `navigation/` + `social/` rows; documented `editor/` |
+| `src/app/edit/[token]/components/toolbars/SectionToolbar.tsx` | footer-only `manage-social` (REAL) + `social-orientation` (greyed); `FOOTER_ONLY_ACTIONS`; 2 icons |
+| `src/components/forms/FormBuilder.tsx` | wired the dead `handleMoveField` to real move up/down; bounds guard; compile-time published-type gate; testids |
+| `src/components/forms/FormBuilder.test.tsx` | **NEW** — 11 cases (reachability/reorder+Save/type union) |
+| `e2e/manage-items.spec.ts` | **NEW** — 7 cases |
+| `e2e/toolbar-dispatch.spec.ts` | footer social pair asserted; header/body leak guards |
+| `playwright.config.ts` | registered `manage-items.spec.ts` in the `authed` allowlist |
+
+Not touched: no `.published.tsx`/`.core.tsx`, no published renderer, no registry, no
+`components/layout/*`, no `src/types/store/*`, no `formActions.ts`, no `types/core/forms.ts`, no
+`FormMarkupPublished.tsx`, no `selectionPriority.ts`, no store nav surface (constraint 7 — left
+deliberately), no new store fields, no `ManageItemsPanel` frame (constraint 2 — `SocialItemsEditor`
+built directly; the FormBuilder half reuses nothing, as predicted).
+
+## PREMISE CHECK — FormBuilder reachability (done FIRST, empirically, before any code)
+
+**Result: FormBuilder IS reachable and functional. Proceeded.** But the *reason* given in the brief is
+false, and the correction matters for the record.
+
+Verified by driving the **real composed store** (`createEditStore`), not by reading:
+
+```
+getAllForms present (formActions spread?): function
+reorderFormFields present: function
+live===formActions impl: true
+live===uiActions impl: false
+live source: (formId) => { set((state) => { state.formBuilderOpen = true; state.editingFormId = formId || null; }); }
+addForm returned: form-1784291304749
+after updateForm: {"form-...":{"fields":[{"id":"b","type":"email",...}], ...}}
+```
+
+**The correction.** The brief/plan/phase-2 audit assert: *"`createFormActions` never spread into the
+store"* -> *"pre-fix FormBuilder was 100% unreachable"* -> phase 2's `uiActions.showFormBuilder` fix is
+*"load-bearing; PHASE 4'S PREMISE DEPENDS ON IT"*. All of that is **wrong**:
+
+- `createFormActions` **IS** spread — *transitively*. `formsImageActions.ts:35-38` does
+  `const formActions = createFormActions(set, get)` then `...formActions`.
+- `createFormsImageActions` is spread **AFTER** `createUIActions` (`editStore.ts:423-426`) => **last
+  spread wins** => the live `showFormBuilder`/`hideFormBuilder`/`updateForm` are **formActions'**,
+  proven by function-identity above.
+- `formActions.showFormBuilder` (`:137`) always wrote `state.formBuilderOpen` — the field
+  `GlobalFormBuilder.tsx:10-16` actually gates on. **So FormBuilder was reachable before phase 2 too.**
+- => **phase 2's `uiActions.showFormBuilder`/`hideFormBuilder` are overridden, unreachable dead code.**
+  Phase 2's reviewer checked it wasn't shadowed by the *broken* `persistenceActions.ts:816` copy
+  (true — that one loses too) but missed `formsImageActions` shadowing it *from the other side*.
+  **Not fixed here** (`uiActions.ts` is outside phase 4's files-touched) — flagged for the orchestrator.
+  Note ruling 8's parenthetical ("KEEP the `uiActions.ts` fix — phase 4's premise depends on it") is
+  therefore moot: keeping it is harmless, but it does nothing.
+
+**Reachability is now pinned in CI, twice**, so it cannot silently rot: `FormBuilder.test.tsx`
+(store-level contract) + `e2e/manage-items.spec.ts` (a real browser walking
+button toolbar -> Button Settings -> Native Form -> Create New Form -> **FormBuilder visibly opens**).
+This is the first time anyone has observed it open.
+
+## Social entry point — which path I took, and why
+
+**Path taken: the FOOTER chrome-section toolbar** (`SectionToolbar.tsx`), i.e. the plan's explicitly
+sanctioned fallback ("VERIFY whether social icons are spine-selectable — if not, surface Manage-items
+on the containing chrome-section (footer) toolbar instead").
+
+Verified NOT spine-selectable, two independent ways:
+1. `ToolbarType` (`selectionPriority.ts:29`) = `'text'|'element'|'section'|'image'|'form'|null` — **no
+   `'social'` member**; and `actionSets` has no social entry. Adding one = the Form trap (ruling 8).
+2. **Nothing in `src/` emits a `data-element-key` for a `socialMediaConfig` item.** `grep data-element-key`
+   intersected with social/twitter/linkedin = **zero hits**. There is no DOM affordance to select.
+
+**TWO DIFFERENT "SOCIAL"s — the trap I nearly fell into, now documented in-code:**
+- `socialMediaConfig` (store, site-level) — what `SocialItemsEditor` edits. Source for the LinkPicker's
+  derived Social options + the Brief bridge. **Rendered by no block.**
+- `social_links` (per-template footer **block content**, e.g. `hearth/ContactFooterRich.tsx:24,35`) —
+  what a visitor actually sees; edited **inline** (`data-element-key="social_platform_<id>"`).
+
+`hoverTarget.ts:181` labels the latter "Social bar" — a label with no toolbar behind it, the same
+never-kept promise ruling 8 called out for Form. Joining the two = published-output change => own spec.
+
+`social-orientation` (ruling 9 / D-2) rides beside `manage-social` on the footer — greyed, inert,
+mandatory why-tooltip. Both gated by new `FOOTER_ONLY_ACTIONS` + `isFooterId` (**not** `isChromeId`,
+which is true for the header too, whose Beta column is Menu, deferred entirely).
+
+## Verified published-supported type union
+
+`FormMarkupPublished.tsx:16-22` -> **`'text' | 'email' | 'tel' | 'textarea' | 'select'`** (confirmed as
+believed). **Step 6 turned out to be a NO-OP — the restriction already existed and is enforced by the
+TYPE, not by a list:** `MVPFormFieldType` (`types/core/forms.ts:10`) is *exactly* that union, and
+`FIELD_TYPES` was already typed by it (a 6th entry would not compile).
+
+**Constraint 5 ("use the STORE `FormField` (`state.ts:547`) throughout") is WRONG and I did NOT follow
+it** — conservative in-scope call, logged under Deviations. `state.forms` is
+`Record<string, MVPForm>` (`state.ts:511`), i.e. **the MVP types ARE the store's form types here**;
+`state.ts:547`'s `FormField` (10 members) belongs to a *different, unused* interface. Following the
+constraint would have **widened** the offered set past what publish renders — the exact bug ruling 4
+exists to prevent — and broken `addForm`/`updateForm` typing.
+
+What phase 4 *did* add: a **bidirectional compile-time gate** in `FormBuilder.tsx` (app code, so `tsc`
+reads it), because the two-file equality was previously an unenforced coincidence.
+
+## Per-file notes
+
+- **`SocialItemsEditor.tsx`** — faithful behaviour port of `SocialMediaEditor` (every store call
+  carried over verbatim; `SOCIAL_PLATFORMS` icon strings kept byte-identical since they are persisted
+  in `items[].icon`). New: t5 app-chrome look, `data-testid` hooks (the old editor exposed no stable
+  DOM contract, so reorder was unassertable), extracted `moveItem(index, delta)` with a bounds guard.
+  Keeps `isVisible`/`onClose` **exactly** — `GlobalModals.tsx:95` is outside files-touched (seam held;
+  pinned by a test).
+- **`SectionToolbar.tsx`** — `manage-social` -> `showSocialModal()` (direct import; app code, no cycle —
+  `GlobalAppHeader.tsx:55` already does this; the `lessgo:manage-social` window event exists for
+  *template* blocks crossing the firewall). Consumer-side guard requirement: the pre-existing
+  `actionDisabled` guard at the map already covers both new actions.
+- **`FormBuilder.tsx`** — `handleMoveField` **already existed and had ZERO callers** (dead since
+  written); phase 4 wired it, body unchanged + a bounds guard. Removed the `<GripVertical cursor-move>`
+  **fake drag affordance** (promised drag-and-drop wired to nothing = naayom-C2 "dead control reads as
+  a bug") and replaced it with real up/down. Native `disabled` is correct here — not ToolbarButtons,
+  not on the dark pill, tooltip is a plain label not ruling 9's "why", and it matches the file's own
+  existing convention (`:393`).
+
+## Verification (real output)
+
+```
+$ npx tsc --noEmit
+tsc: 0 errors                       # deletions dangle nothing
+
+$ npx vitest run
+ Test Files  213 passed | 1 skipped (214)
+      Tests  3585 passed | 18 skipped (3603)     # 3565 + 20 new (9 social + 11 form)
+
+$ npx eslint <6 changed src files>
+x 1 problem (0 errors, 1 warning)   # warning = PRE-EXISTING react-hooks/exhaustive-deps, untouched
+
+$ E2E_PORT=3131 npx playwright test e2e/toolbar-dispatch.spec.ts e2e/link-picker.spec.ts e2e/manage-items.spec.ts
+  23 passed (3.3m)                  # REAL config: 1 setup + 12 toolbar-dispatch + 3 link-picker + 7 manage-items
+```
+
+**Tripwire HELD, byte-untouched:** `git hash-object src/modules/templates/linkTargetPublished.test.tsx`
+-> `03fcf881e474f62478835faf5777dfee65389b09` (before AND after). Zero published-side files in the
+diff (`git status` grep for `.published.tsx|.core.tsx|componentRegistry|...` = empty).
+
+`uiFoundationIsolation.test.tsx.snap` shows `M` but is **byte-identical** (worktree blob
+`117aa8fee8e046025e5432c0300b12651eed7342` == `HEAD` blob; `git diff` empty; CRLF stat artifact).
+Pre-existing, matches phase 1's finding. Not mine, left unstaged.
+
+`manage-items.spec.ts` **registered** in `playwright.config.ts`'s `authed` allowlist (the phase-1 trap
+— and it bit again mid-phase: a scripted edit silently failed and a diagnostic spec matched 0 tests
+with "No tests found", re-confirming the allowlist is real).
+
+## Mutation proofs (every key assertion falsified deliberately)
+
+| # | Mutation | Result |
+|---|---|---|
+| 1 | `SocialItemsEditor.moveItem`: remove the adjacent swap | **exactly 2 unit tests fail** (move-down, move-up); other 7 green |
+| 2 | same mutation, **e2e** | `reordering a social profile` **FAILS**: *"the social profile order did not change — reorder is broken"* |
+| 3 | `FormBuilder.handleMoveField`: gut the splices | **2 tests fail** (reorder+Save, move-up) |
+| 4 | `handleSave` writes the **stale** pre-reorder order | **FAILS**: *"the reordered field order did not survive Save: expected [Name,Email,Phone] to deeply equal [Email,Name,Phone]"* — and the DOM-only half stayed GREEN, proving the **store-read after Save** is the discriminating assertion, not the DOM |
+| 5 | add `'radio'` to `MVPFormFieldType` | `tsc` **FAILS**: `FormBuilder.tsx(70,7): error TS2322: Type 'true' is not assignable to type 'false'` |
+| 6 | offer `'radio'` in `FIELD_TYPES` (cast past the type) | **FAILS**: *"FormBuilder offers "radio", which FormMarkupPublished cannot render"* |
+
+**A test that could not fail — caught and fixed.** My first type gate lived in `FormBuilder.test.tsx`.
+Mutation 5 left it **green**: `tsconfig.json` **excludes test files**, so `tsc --noEmit` never
+typechecks them and *any* type-level assertion written there is theatre. Moved into
+`FormBuilder.tsx` (app code) — it now fails as shown. **Durable lesson for later phases: type-level
+assertions in this repo's test files are inert; they must live in app code.**
+
+## NEW BUG FOUND (pre-existing, out of scope, needs its own ticket)
+
+**`GlobalButtonConfigModal` is mounted TWICE** — `EditLayout.tsx:223` **and** `GlobalModals.tsx:99`
+(itself mounted at `MainContent.tsx:682`) — both reading the same **global** `useButtonConfigModal`
+store. Opening Button Settings renders **two identical, perfectly-stacked dialogs**. Verified in a real
+browser: `DIAG_ROLE_CSS_AFTER=2`, both `data-state=open`, both containing the "Button Configuration"
+heading. Consequences:
+
+1. **a11y: BOTH end up `aria-hidden="true"`** (Radix aria-hides each on behalf of the other) =>
+   `getByRole('dialog')` and every role query *inside* them match **zero**. **A screen-reader user gets
+   no dialog announced at all.**
+2. The second dialog **intercepts the first's pointer events** (`z-50`, identical position).
+
+Not fixed — both files are outside phase 4's files-touched. **Why nobody noticed:** the top copy is
+interactive, so it "works" by eye; and this spec is the **first test that ever clicked** Button
+Settings (phases 2/3.5 only asserted the button *exists*). It cost this phase two failed e2e rounds.
+My spec is written **forward-compatibly**: `.last()` resolves identically once the mount is
+de-duplicated, so it does not cement the bug.
+
+## Deviations from the plan
+
+1. **Constraint 5 not followed** (store `FormField`) — see above; following it would have caused the
+   very bug ruling 4 forbids. Kept `MVPForm*` (which *is* the store's form type). Conservative option,
+   logged as instructed.
+2. **Step 6 was a no-op** — the type restriction already existed and is type-enforced. Added a
+   compile-time gate instead of a runtime filter. Nothing was narrowed; no capability changed.
+3. **Two new test files** not on the Files-touched list (`SocialItemsEditor.test.tsx`,
+   `FormBuilder.test.tsx`), both adjacent to files I own. The brief expected new vitest cases
+   ("~3565 + your new cases") and forbade untestable claims; the e2e alone cannot reach the social cap
+   (maxItems=8) or the Save-persistence read.
+4. **`GripVertical` removed** from FormBuilder (in-scope judgment): it was a decorative drag handle
+   wired to nothing. Keeping it beside real arrows would ship a fake affordance.
+5. `actionSets.tsx` **not touched** — listed "if needed"; no new toolbar type was added, so it wasn't.
+
+## Honesty correction to the plan's table (Social row)
+
+The table calls Social **"Manage items (new, t5) — add/remove/reorder/edit"**, the *one genuinely new
+capability* in Beta. **That is wrong.** `SocialMediaEditor` **already had** add/edit/remove/move-up/
+move-down/cap, and was **already reachable** from the app header menu (`GlobalAppHeader.tsx:188` ->
+`showSocialModal`). What phase 4 actually delivers for Social: **(1)** the t5 reskin, **(2)** a new
+**footer-toolbar entry point**, **(3)** a stable DOM contract making reorder assertable at all.
+
+=> **The honesty table's "essentially NOTHING NEW" verdict now extends to Social too.** The genuinely
+new things in phase 4 are: form-field reorder (previously dead code + a fake grip), the entry point,
+two dead-code deletions, and the reachability/type gates. Recorded in-code at `SocialItemsEditor.tsx:8-16`.
+
+## What I did NOT verify
+
+- **No manual dev check by me; no human has seen the t5 panel.** Visual fidelity vs the handoff t5 is
+  unassessed (I mapped it to app-chrome tokens by hand). The footer pill is now **two actions wider**
+  again — phase 3.5's widening is what exposed the Design menu coordinate-luck bug, so a founder look
+  is warranted.
+- **Manual submit-path smoke on a form with reordered fields (the plan's own manual step) — NOT DONE.**
+  Reorder is proven to persist to the **store**; I did **not** publish a page and submit the form, so
+  "reordered fields render + submit correctly on a PUBLISHED page" is unverified end-to-end.
+- The social **Brief<->config bridge** (`persistenceActions`, `Project.brief.socialProfiles` round-trip)
+  — untouched, but I did not test that reordering survives a save/reload cycle.
+- `socialMediaConfig` items are **rendered by no block**, so there is no visual outcome to check for
+  reorder beyond the panel itself. (Arguably the deeper issue: this list mostly feeds LinkPicker's
+  derived options.)
+- The **duplicate BCM mount**'s full blast radius (double state, double effects) — only the two
+  symptoms above were characterised.
+- 5 of the 11 social platforms' URL normalisation (`processSocialMediaUrl`) — ported untouched, not
+  re-tested.
+- `npm run build` + full `npm run lint` — not run this phase (merge-checklist items).
+- A pre-existing dev-server SSR warning (`useEditStoreBootstrap.ts:238 ReferenceError: window is not
+  defined`) prints on every edit-page load. Pre-existing, unrelated, page renders fine. Not investigated.
