@@ -22,7 +22,9 @@ ruled additive exception: a read-only `hasBillingAccount` field on `/api/billing
 - phase 2 insufficient-credits normalizer: done (commit b74023aa, review loops 2, verdict ship) — scout §F Pattern-A error found+corrected at source; fixture had echoed the wrong belief
 - phase 3 dashboard header credit counter: done (commit 35d53d42, review loops 1, verdict ship) — config-driven proven by review mutation probe (10→7, DOM followed); e2e registered in authed allowlist + execution evidenced
   - carried to phase 8: (a) CreditBadge panel's Upgrade link is mouse-unreachable (pre-existing: mouseleave + sideOffset gap) — fix via close-delay or sideOffset=0; (b) add jsdom vitest that vi.mocks creditCosts with fabricated values to prove the component READS the module (catches same-value re-inline, which no e2e can); (c) audit sentence wrongly claims text-sm dropped (CreditBadge.tsx:150) — stock fontSize utilities are fine, fix the sentence
-- phase 4 gating message + upgrade path (beta blocker): pending
+- phase 4 gating message + upgrade path (beta blocker): done (commit 26238de9, review loops 1, verdict ship) — 🚧 GATE (a) copy sign-off PASSED 2026-07-17 w/ 3 changes (title→"Not enough credits", Free-plan note dropped, fallbacks aligned); tier-blind CTA deferred → phase 6. e2e wiring proven via reproduced negative control (host unmounted → spec fails).
+  - carried to phase 6: (a) tier-blind "Upgrade to Pro" — phase 6 knows tier, show PRO users "Top up credits" instead; (b) COPY the fabricated-config probe pattern (OutOfCreditsModal.test.tsx) — compare-to-imported-config tests CANNOT catch a same-value re-inline; (c) regenerate-element sends NO `details` → the regex fallback in parseInsufficientCredits is LOAD-BEARING there, do not delete it as redundant
+  - carried to phase 8: e2e `credit-badge` assertion looks timing-sensitive on a cold-started dashboard (failed once, green on re-run) — consider a proper wait
 - phase 5 editor header credit counter: pending
 - phase 6 lean Billing & plan view + CTAs + sidebar widget: pending
 - phase 7 costs-at-action: pending

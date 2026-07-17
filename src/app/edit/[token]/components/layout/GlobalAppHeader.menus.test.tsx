@@ -26,8 +26,15 @@ const { push, showSeoModal, showSocialModal } = vi.hoisted(() => ({
 }));
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
+// Partial Clerk stub. `useAuth` is NOT unused — GlobalAppHeader mounts <CreditBadge>
+// (billing-beta phase 5), which calls useAuth() and would throw without it. Keeping
+// isSignedIn:false (consistent with useUser above) makes CreditBadge return null
+// BEFORE its /api/credits/balance fetch + 30s poll interval start — so this suite
+// needs no fetch stub and leaks no timer. If a future test needs the badge rendered,
+// flip this to signed-in AND stub fetch, or the poll timer will leak into the suite.
 vi.mock('@clerk/nextjs', () => ({
   useUser: () => ({ isSignedIn: false }),
+  useAuth: () => ({ isSignedIn: false }),
   UserButton: () => null,
 }));
 vi.mock('@/hooks/useEditStore', () => ({

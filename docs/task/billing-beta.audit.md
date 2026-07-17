@@ -691,3 +691,92 @@ None. The tier-blind "Upgrade to Pro" card was left alone per the founder's defe
 ### Open risks
 - Tier-blind upgrade card persists until phase 6 (deferred by ruling, recorded above).
 - Nothing else added.
+
+---
+
+## Phase 5 — editor header credit counter — ✅ COMPLETE (all gates green)
+
+**Files changed**
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx`
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.menus.test.tsx` — *added by orchestrator ruling, see "Blocker resolved" below*
+
+### `GlobalAppHeader.tsx`
+Two edits, both additive:
+1. Import `CreditBadge` from `@/components/billing/CreditBadge` (:37, beside the other shared-component imports).
+2. Mounted `<CreditBadge />` at the **head** of the `:324` right-side cluster, followed by a `<div className="app-divider" />` — the cluster's existing separator idiom. Order is now: badge · divider · `EditorStatusCluster` · divider · `EditHeaderRightPanel`.
+
+Nothing else in the file changed. No props (the component takes none), no editor-store involvement — it self-fetches exactly as it does in `DashboardTopBar`.
+
+### Decisions + why
+- **Head of the cluster, not the tail.** The plan said ":324 right-side cluster" without an intra-cluster position. Placed first so **Publish stays rightmost** — the highest-intent action keeps its established corner. Tail placement would have pushed Publish inward.
+- **No new fetcher, no new component, no ligature.** Mounted the existing component as instructed. `credit_card` was already subset. Second instance polls independently on its own 30s timer — accepted per the brief; added a comment saying so, so nobody later "fixes" it by hoisting balance into a store.
+- **No e2e added.** Phase 5's Verification line is `tsc` / `lint` / `build` + manual only — it specifies no e2e assertion, so I added none and did not touch `e2e/billing-beta.spec.ts`. (The phase-4 `credit-badge` timing flake is therefore untouched and still carried to phase 8.)
+
+### Verification
+- `npx tsc --noEmit` → **clean** (exit 0).
+- `npm run lint` → **no errors**; warnings only, all pre-existing and in other files (`vestria` `<img>`, `ph-provider` deps). None from `GlobalAppHeader.tsx`.
+- `npm run build` → **green**.
+- `npm run test:run` → ❌ **1 file failed / 6 tests failed**; 214 files & 3625 tests pass.
+
+### ✅ Blocker resolved (follow-up pass — orchestrator-authorized scope extension)
+
+**Ruling:** the orchestrator extended Phase 5's *Files touched* by exactly ONE file —
+`src/app/edit/[token]/components/layout/GlobalAppHeader.menus.test.tsx` — on the grounds that
+fixing the harness this mount broke is squarely within the phase, and a red `test:run` blocks the
+merge gate. Confirmed the stop-and-ask was the correct call; no other scope was added.
+
+**What changed in the mock (that file, 1 export + a comment):**
+```ts
+useAuth: () => ({ isSignedIn: false }),
+```
+added to the existing partial `vi.mock('@clerk/nextjs', ...)`, plus a comment above the block
+explaining WHY `useAuth` is there (GlobalAppHeader mounts CreditBadge, which calls it) so the next
+person doesn't delete it as unused. This will recur for ANY future consumer of that header.
+
+**Shape decision — `isSignedIn: false`, not `true`.** `CreditBadge` reads exactly one field from
+`useAuth()` (`CreditBadge.tsx:56` → `const { isSignedIn } = useAuth()`), so that is all the mock
+needs. Chose `false` to match the mock's existing style — the sibling `useUser` already returns
+`{ isSignedIn: false }` and `UserButton` is stubbed to null, i.e. the suite already models a
+signed-out shell. Mixing a signed-out `useUser` with a signed-in `useAuth` would be an incoherent
+harness. (Deviates from the orchestrator's illustrative `isSignedIn: true`, per its own instruction
+to match what the component actually reads and the mock's existing shape.)
+
+**Fetch-stub decision — no stub needed, and none added.** With `isSignedIn: false`, `CreditBadge`'s
+effect early-returns at `CreditBadge.tsx:62` and the component returns `null` at `:85` — *before*
+the `/api/credits/balance` fetch and *before* `setInterval(fetchBalance, 30000)` is ever created.
+So there is no unstubbed fetch, no noise/flake, and **no 30s poll timer to leak** — the risk is
+designed out rather than mopped up. A `vi.stubGlobal('fetch', ...)` would have been dead code. The
+comment records that a future test wanting the badge *rendered* must flip to signed-in AND stub
+fetch, or the timer leaks.
+
+**Assertions:** none weakened, skipped, or adjusted. All 6 tests pin exactly what they pinned
+before (help-menu stays-open regression, outside-pointerdown dismiss, Escape dismiss, back-to-
+dashboard, Settings→SEO, Settings→Social). They now pass for the right reason — the mock gap was
+the sole cause; nothing failed for a real reason.
+
+**Re-verification after this pass:**
+- `npx tsc --noEmit` → **clean** (exit 0).
+- `npm run test:run` → ✅ **fully green: 215 files passed / 1 skipped; 3631 tests passed / 18 skipped.** The 6 failures are gone, no new ones, and the count is back to the expected **3631** (was 3625 passing + 6 failing).
+- `npm run lint` → **no errors**; same two pre-existing warnings in unrelated files.
+- `npm run build` → **not re-run** — the only change in this pass was a test file, which is excluded from the Next build. The earlier green build still stands for the shipped code.
+
+### 🛑 The blocker as originally reported (kept for the record — now fixed above)
+`src/app/edit/[token]/components/layout/GlobalAppHeader.menus.test.tsx` — all 6 of its tests now fail:
+
+```
+Error: [vitest] No "useAuth" export is defined on the "@clerk/nextjs" mock.
+  at CreditBadge (src/components/billing/CreditBadge.tsx:56:26)
+```
+
+Cause: that suite renders `GlobalAppHeader` with a **partial** `@clerk/nextjs` mock. `CreditBadge` calls `useAuth()` (CreditBadge.tsx:56); the mock has no such export, so every render throws. This is a **test-harness gap exposed by a correct product change**, not a defect in the mount — the component, tsc, lint and build are all fine.
+
+Fix is one line (add `useAuth: () => ({ isSignedIn: true })` to that file's `vi.mock`), but `GlobalAppHeader.menus.test.tsx` is **not** in Phase 5's *Files touched* list, so I did not touch it. **Needs an orchestrator ruling to extend the phase by that one test file.** → **Ruling given and applied; see "Blocker resolved" above. `test:run` is now green.**
+
+### Noticed, deliberately untouched
+- `useEditStore` import (:36) + `useEditStore.getState().toggleLeftPanel?.()` (:265) — the deliberate inconsistency the file's header comment says to preserve. Left exactly as-is.
+- The three isolation guards stay green (app-* utilities only, AppIcon, no lucide/stock palette keys — CreditBadge was already compliant from phase 3).
+- CreditBadge's panel is `align="end"`; the badge is no longer the rightmost element, but `align="end"` aligns the panel to the *trigger's* right edge, so it still lands correctly. No change needed.
+
+### Open risks
+- **MANUAL CHECK STILL PENDING — for the founder's list at the merge gate.** Automation cannot cover it; the plan requires it: (a) counter renders at `/edit/[token]` with **no layout shift at `h-14`** (badge computes to ~30px, so it should fit), and (b) **balance refreshes within the 30s poll** after a regen. Neither is asserted by any test — the menus suite deliberately renders the badge signed-out, so nothing in CI exercises the rendered badge inside the editor header.
+- The phase-3 carry still stands: the panel's Upgrade link is mouse-unreachable — now reproducible from the editor too, widening that phase-8 fix's blast radius slightly.
