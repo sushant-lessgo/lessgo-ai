@@ -8,7 +8,6 @@ import { GlobalAppHeader } from './GlobalAppHeader';
 import { LeftPanel } from './LeftPanel';
 import { MainContent } from './MainContent';
 import { useAutoSave } from '@/hooks/useAutoSave';
-import { GlobalButtonConfigModal } from '@/components/layout/GlobalButtonConfigModal';
 import { GlobalFormBuilder } from '@/components/layout/GlobalFormBuilder';
 import { LayoutChangeModal } from '../ui/LayoutChangeModal';
 import { modalEmergencyReset } from '@/utils/modalEmergencyReset';
@@ -136,8 +135,8 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   // Attached to exactly three regions, each a LEAF-side wrapper:
   //   1. the top-bar wrapper        (GlobalAppHeader — the single t1 bar)
   //   2. the rail wrapper           (LeftPanel)
-  //   3. the modal roots            (GlobalFormBuilder / GlobalButtonConfigModal
-  //                                  / LayoutChangeModal / ModalDebugPanel)
+  //   3. the modal roots            (GlobalFormBuilder / LayoutChangeModal
+  //                                  / ModalDebugPanel)
   //
   // PHASE 4 CHANGED THIS MAP: there used to be a FOURTH attach point around a
   // nested <EditHeader> inside the right content column. That row is gone —
@@ -218,9 +217,6 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
       <div className="app-chrome contents">
         {/* MVP Form Builder Modal */}
         <GlobalFormBuilder />
-
-        {/* Global Button Configuration Modal */}
-        <GlobalButtonConfigModal />
 
         {/* Layout Change Modal */}
         <LayoutChangeModal />

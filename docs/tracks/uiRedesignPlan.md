@@ -45,7 +45,7 @@ Related docs:
 | Design menu (t14), SEO/settings (t16/t18) | Reskin | `editor-shell-redesign.spec.md` | |
 | Publish flow (t17) | Reskin | `editor-shell-redesign.spec.md` | absorbs held `publish-ux.spec.md` |
 | Toolbars (t2), link picker (t4), manage-items (t5) | New-behavior | **toolbarPlan** | contract closed 2026-07-14; `selection-highlight-labels.spec.md` in flight as precursor |
-| Media library + storage manager (t7/t8) | New-behavior | **t7 picker SPECCED** (`media-library-picker.spec.md`) — new `MediaAsset` model + picker (Upload/Stock) + image pipeline, wired into main Replace + **de-risks work-onboarding E2 ingestion**; wire-not-rip (stragglers fast-follow); **t8 storage manager (folders/usage/replace-everywhere) DEFERRED**; Unsplash + From-CMS deferred | image-pipeline adjacency; distinct from work-library board (asset picker vs content groups) |
+| Media library + storage manager (t7/t8) | New-behavior | **t7 picker ✅ MERGED** (`media-library-picker.spec.md`, phases 1–4) — new `MediaAsset` model + picker (Upload/Stock) + image pipeline, wired into main Replace + de-risked work-onboarding E2 ingestion; wire-not-rip (stragglers fast-follow); **t8 storage manager (folders/usage/replace-everywhere) DEFERRED**; Unsplash + From-CMS deferred | image-pipeline adjacency; distinct from work-library board (asset picker vs content groups) |
 | CMS boards (t12/t19/t22) | New-behavior | **work vertical** | collections code exists (scale-10); board = missing "part 1" per workEndtoEnd §8a; later fixes Naayom products free |
 | Onboarding (STEP 01–06) | New-behavior | **work vertical phase E** → `work-onboarding.spec.md` (unwritten) | behavior from workEndtoEnd steps 1–7; visuals from handoff Onboarding file |
 | Add page (t11) | Split | modal restyle → `editor-shell-redesign`; template page-set logic → work vertical (skeleton) | |
@@ -85,14 +85,19 @@ sequencing; Design ▾ + rich toolbars unblock after skeleton D merges.
   absorbing redesign specs.
 - `docs/tracks/uiRequirements.md` — superseded (brief delivered).
 
-## Status
+## Status (refreshed 2026-07-18 vs live board — Lane-1 reskin spine COMPLETE)
+
+**All ✅ merged to local main, UNPUSHED (big-bang batch).** The reskin critical path is done;
+what remains is the discretionary tail (see the dashboard "later" tier + notes below).
 
 | Item | Status |
 |---|---|
-| ui-foundation | specced + `/feature` STARTED (feature/ui-foundation) 2026-07-16; font-license gate resolved into spec |
-| auth-redesign | specced (`auth-redesign.spec.md`) — light tier, Clerk `appearance` wrap, copy locked; hold /feature until ui-foundation merges |
-| dashboard-redesign | **SPLIT by risk** (see below); S1 specced (`dashboard-workspace-ia.spec.md`) |
-| editor-shell-redesign | specced (`editor-shell-redesign.spec.md`) — full tier; "Command Bar"=top-bar reskin (not Ctrl+K palette); full skin + grey-out; presentation-only, internals untouched; absorbs held editor-chrome + publish-ux |
+| ui-foundation | ✅ **merged** (held-base; `0ab7053b`→main) |
+| auth-redesign | ✅ **merged** (light tier, Clerk `appearance` wrap) |
+| dashboard-redesign | **SPLIT by risk** (see below) — S1–S4 all ✅ merged |
+| editor-shell-redesign | ✅ **merged** (`f4ab187e`) — full skin + grey-out, internals untouched. **Founder QA + 3 sign-offs still OWED** → deploy-qa §C |
+| media-library-picker (t7) | ✅ **merged** (phases 1–4) |
+| blog-composer-redesign (5a) | ⏸️ **paused** — built, **GATE A owed** (publish/unpublish + visual + hero-image), then merge |
 
 ### Dashboard redesign — risk-cut split (2026-07-16)
 Handoff `Lessgo Dashboard.dc.html` (rev 2026-07-16) is richer than triage implied: adaptive
@@ -102,11 +107,11 @@ dependency, so cosmetic work stays light/standard and risky backend gets concent
 
 | Slice | Scope | Tier | Status |
 |---|---|---|---|
-| S1 `dashboard-workspace-ia` | nav shell (both levels) + grid + ••• shell (destructive greyed) + token-spined URL restructure re-homing existing per-project surfaces as-is + basic Overview + empty state | full (blast radius + authz on moved routes) | **MERGED** |
-| S2 `dashboard-lifecycle-actions` | wire S1's greyed ••• → rename/dup/delete + add unpublish; take-down reuses publish cleanup (KV+blob atomic); **custom-domain attached = BLOCK teardown (guard, no auto-detach)**; delete=any w/ explicit confirm, published cascades take-down; all via assertProjectOwner. Supersedes held `dashboard-lifecycle.spec.md` | full (publish/KV/DB + custom-domain) | specced |
-| S3 `billing-beta` | **LEAN BETA** monetization surface: plan+credit widget/counter, lean Billing&plan view, Upgrade/Top-up CTAs→Stripe Checkout, Manage-billing→Stripe portal, costs-at-action, **gating message** (block→upgrade). Absorbs+supersedes held `plan-credits-surface`. Config-driven (planManager/creditSystem = truth, handoff 2g = visuals only). **Full 2g console (payment method/invoices/usage meters/change-plan cards) DEFERRED post-beta.** | full (Stripe/credits + cross-surface) | specced |
-| S4 rollups + leads inbox | cross-site All Analytics + All Leads inbox + AI reply-draft | new-behavior | pending |
-| later | Grow hub (**GATED** — respect social/email/outreach kill-switches; social-posts has none), notifications panel, profile/account reskin, blog first-run/AI-write, Overview KPIs, interior reskins | mixed | pending |
+| S1 `dashboard-workspace-ia` | nav shell (both levels) + grid + ••• shell (destructive greyed) + token-spined URL restructure re-homing existing per-project surfaces as-is + basic Overview + empty state | full (blast radius + authz on moved routes) | ✅ **MERGED** |
+| S2 `dashboard-lifecycle-actions` | wire S1's greyed ••• → rename/dup/delete + add unpublish; take-down reuses publish cleanup (KV+blob atomic); **custom-domain attached = BLOCK teardown (guard, no auto-detach)**; delete=any w/ explicit confirm, published cascades take-down; all via assertProjectOwner. Supersedes held `dashboard-lifecycle.spec.md` | full (publish/KV/DB + custom-domain) | ✅ **merged** (GATE B open) |
+| S3 `billing-beta` | **LEAN BETA** monetization surface: plan+credit widget/counter, lean Billing&plan view, Upgrade/Top-up CTAs→Stripe Checkout, Manage-billing→Stripe portal, costs-at-action, **gating message** (block→upgrade). Absorbs+supersedes held `plan-credits-surface`. Config-driven (planManager/creditSystem = truth, handoff 2g = visuals only). **Full 2g console (payment method/invoices/usage meters/change-plan cards) DEFERRED post-beta.** | full (Stripe/credits + cross-surface) | ✅ **merged** (`c7e0455a`) — Stripe + funded-gen smoke owed → deploy-qa §A |
+| S4 rollups + leads inbox | cross-site All Analytics (S4a) + All Leads inbox + AI reply-draft (S4b) | new-behavior | ✅ **merged** (S4a `520bee34` · S4b lead-reply `8663e2b5`) |
+| later (**the remaining tail — not started, no beta dependency**) | Grow hub (**GATED** — respect social/email/outreach kill-switches; social-posts has none), notifications panel, profile/account reskin, blog first-run/AI-write, Overview KPIs, interior reskins (restyle the per-project surfaces S1 re-homed as-is) | mixed | ⬜ pending |
 
 Locked decisions: URL restructure = real + token-spined (token = routing key NOT authz →
 keep `assertProjectOwner` on every moved route); S1 grid ships ••• with destructive greyed;

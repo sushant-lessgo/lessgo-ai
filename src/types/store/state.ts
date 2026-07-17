@@ -519,15 +519,7 @@ export interface FormsSlice {
   
   // Active Form State
   activeForm?: string;
-  
-  // Form Builder State
-  formBuilder: {
-    visible: boolean;
-    editingField?: string;
-    editingFormId?: string;
-    fieldLibrary: FormFieldType[];
-  };
-  
+
   // Integrations
   integrations: Record<string, IntegrationConfig>;
   
