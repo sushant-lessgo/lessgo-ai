@@ -71,15 +71,27 @@ Fetches plan+usage in one `useEffect` (:81-84); `openCustomerPortal()` :105-123.
 `checkCredits(userId, creditsRequired) => Promise<{allowed, remaining, required}>` — `src/lib/creditSystem.ts:138`. `remaining` = period `creditsRemaining` + `userPlan.creditPool`. Never throws, never writes a ledger row; callers own the HTTP shape. Dev bypass `DEV_BYPASS_CREDITS=true` → `remaining:999999` (:143). **On internal error it fails closed** (`allowed:false, remaining:0`, :160-163) — indistinguishable from a real 0 balance, so a solvent user can be misreported as broke. Doc comment :126-137 is a rule: **never gate `/api/saveDraft` or `/api/publish`.**
 
 ### ⚠️ THREE incompatible 402 body shapes (the core client problem)
-1. **Pattern A** (pre-check + post-`consumeCredits`, both 402) — `{success:false, error:{code:"insufficient_credits", message:"Insufficient credits. Required: N, Available: M"}}`
-   Routes: `v2/understand` (UNDERSTAND, :163/:270) · `v2/scrape-website` (SCRAPE_WEBSITE, :227/:364) · `audience/{product,service,work}/strategy` (=2) · `audience/{product,service,work}/generate-copy` (=3) · `outreach/[token]` (:382) · `generate-privacy-policy` · `audience/work/regenerate-story`
+> **⚠️ CORRECTED 2026-07-17 — verified against route source with a runtime probe. The original claim that Pattern A is NESTED (`error:{code,message}`) was FALSE.** No route has ever emitted that body. The error propagated from this doc into the plan and into `src/lib/billing/insufficientCredits.ts` (which silently lost the numbers on ~13 of ~15 emitters, including the whole wizard generation lane) before an impl-review probe caught it. Pattern A below is now transcribed verbatim from source. **Read the route, not this prose, when pinning fixtures.**
+
+1. **Pattern A** (pre-check + post-`consumeCredits`, both 402) — **FLAT**: `error` is the CODE (a string), `message` is TOP-LEVEL, and the numbers are structured fields on the body:
+   ```js
+   // src/app/api/v2/scrape-website/route.ts:239-247 (verbatim)
+   { success: false,
+     error: 'insufficient_credits',                               // string code, NOT an object
+     message: 'Insufficient credits. Required: 1, Available: 0',  // top-level
+     creditsRequired: 1, creditsRemaining: 0 }                    // structured numbers — prefer these over the message regex
+   ```
+   Routes: `v2/understand` (UNDERSTAND, :174/:274) · `v2/scrape-website` (SCRAPE_WEBSITE, :239/:360) · `audience/{product,service,work}/strategy` (=2) · `audience/{product,service,work}/generate-copy` (=3) · `outreach/[token]` (:384) · `generate-privacy-policy` (:192) · `audience/work/regenerate-story`
+   - **Variant:** `outreach/[token]/route.ts:384-392` names the numbers **`required`/`remaining`**, not `creditsRequired`/`creditsRemaining`. Everything else is identical.
+   - **Caveat (applies to the whole POST-CONSUME half of Pattern A, not one route):** the post-consume emitters send `message: <result>.error || 'Insufficient credits'`, a bare string that does NOT match the `Required: N, Available: M` regex — only the structured `creditsRequired`/`creditsRemaining` fields recover the values. Sites: `generate-privacy-policy:194`, `v2/understand:270`, `audience/product/strategy:282`, `audience/work/generate-copy:346`, `v2/scrape-website:364`. (Corrected 2026-07-17 — an earlier draft framed this as a `generate-privacy-policy` one-off; it is the general post-consume shape. Verified against route source.)
+   - Independently pinned by an existing test: `src/app/api/audience/product/strategy/route.test.ts:135-140` asserts `json.error === 'insufficient_credits'` + `json.creditsRequired`/`creditsRemaining`.
 2. **Pattern B** (`requireAICredits`/`createErrorResponse`, `src/lib/middleware/planCheck.ts:90,193,208`) — `{error:"Insufficient credits. Required: N, Available: M", code:"INSUFFICIENT_CREDITS"}`
    Routes: `regenerate-section` (:27, SECTION_REGENERATION=2) · `regenerate-element` (ELEMENT_REGENERATION=1) · `generate-privacy-policy` · `regenerate-story`
 3. **`checkAIAccess`** (`planCheck.ts:243`) — Pattern B **plus** `details:{required, available}` (:265-274)
 
 Plus `api/social/[token]/posts/route.ts:233` deliberately uses **403, never 402** for its upgrade wall (separate convention — leave alone).
 
-→ **A single client handler needs a normalizer** that accepts all three shapes. This is presentation-layer and in scope; changing the routes' shapes is NOT (spec Scope OUT).
+→ **A single client handler needs a normalizer** that accepts all three shapes. This is presentation-layer and in scope; changing the routes' shapes is NOT (spec Scope OUT). Precedence for the numbers: structured (`details` > `creditsRequired`/`creditsRemaining` > `required`/`remaining`) **beats** the message regex; regex exposure is therefore scoped to Pattern B only (`planCheck.ts:100`, `:268`), the one shape with no structured numbers.
 
 ### Client callers today
 - **`regenerate-section`** → `src/hooks/editStore/aiActions.ts:98`. Reads `errorData.error`, throws (:114-115); catch :252-266 logs + pushes raw message into `state.aiGeneration.errors`, rethrows. **No status inspection — 402 indistinguishable from 500. No toast fires.**
