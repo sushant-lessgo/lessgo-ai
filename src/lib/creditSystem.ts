@@ -3,27 +3,14 @@ import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 import { getUserPlan } from './planManager';
 
-// Credit costs for different operations
-export const CREDIT_COSTS = {
-  FULL_PAGE_GENERATION: 10,
-  SECTION_REGENERATION: 2,
-  ELEMENT_REGENERATION: 1,
-  FIELD_INFERENCE: 1,
-  FIELD_VALIDATION: 0, // Free operation
-  // V2 Generation system
-  UNDERSTAND: 1,
-  IVOC_RESEARCH: 3, // Only charged when Tavily called (cache hits = 0)
-  STRATEGY_GENERATION: 2,
-  UIBLOCK_SELECT: 1,
-  GENERATE_COPY: 3,
-  // Onboarding website import (fetch + one extraction call). Net-neutral vs
-  // typing manually since it replaces the UNDERSTAND charge on the import path.
-  SCRAPE_WEBSITE: 1,
-  // Legal pages
-  PRIVACY_POLICY_GENERATION: 2,
-  // Cold outreach: prospect scrape (fetch + one extraction call). Charged only on cache-miss/stale.
-  OUTREACH_SCRAPE: 1,
-} as const;
+// Credit costs live in the prisma-free `creditCosts.ts` so client components (and
+// the Playwright runner) can import them without pulling in prisma. Re-exported
+// here verbatim — every existing `@/lib/creditSystem` importer keeps working.
+import { CREDIT_COSTS } from './creditCosts';
+import type { CreditOperation } from './creditCosts';
+
+export { CREDIT_COSTS };
+export type { CreditOperation };
 
 // Event types for usage tracking
 export enum UsageEventType {
