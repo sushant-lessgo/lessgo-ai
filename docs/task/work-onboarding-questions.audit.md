@@ -53,3 +53,50 @@ directly rather than inlining the 4-key map. Documented in the module header.
   `skip` slots are filtered out (they still exist in the `SlotPosture` type for seam clarity).
 - E2 reconciliation flag: `rail.ts` groups/`photos`/`items` preservation kept intact through the union
   extension; expect a merge touchpoint here with E2's groups/price paths.
+
+## Phase 2 — question contract + agnostic renderer + required gate
+
+**Files changed**
+- `src/components/onboarding/journey/engines/types.ts` — added `choice` kind to `JourneyQuestion`; common `required?`/`answered?` on every member; new `JourneyQuestionsContext`; `questions(vm, ctx)` signature.
+- `src/components/onboarding/journey/engines/work.ts` — Phase-2 compile-keep only: `questions()` now takes the second `_ctx: JourneyQuestionsContext` param (unused, `// Phase 3` marker); added the type import. Placeholder question logic UNCHANGED.
+- `src/components/onboarding/journey/steps/StepQuestions.tsx` — choice renderer (single/multi/allowCustom/suggested), answered-compact, ctx build, blocked reporting.
+- `src/components/onboarding/journey/JourneyShell.tsx` — `onBlockedChange` on `JourneyStepProps`; `blocked` state; `journey-next` disabled on step 3 while blocked; reset on step change.
+- `src/hooks/useWizardStore.ts` — added `selectBusinessTypeKey` selector.
+
+**What changed, per file**
+
+`types.ts` — Union extended from 3→4 kinds (D-A). `choice = { id; kind:'choice'; label; options:{value;label}[]; multi?; allowCustom?; suggested?; required?; answered?; commit(values:string[], liveFacts):RailCommit }`. `required?:true` + `answered?:boolean` added to text/group/price/choice. `JourneyQuestionsContext = { businessType:string|null; facts:Record<string,unknown>|undefined; sessionAnswered:readonly string[] }`. Seam `questions(vm)` → `questions(vm, ctx)`. Doc comment updated to record the deliberate E3 extension; union declared CLOSED at 4. Firewall preserved: still type-only imports (`Brief`, `WizardStore`), no react/store value edges.
+
+`StepQuestions.tsx` — Selects `businessTypeKey`; holds `answeredIds` (session-answered, appended after each successful commit — feeds `ctx.sessionAnswered`) and `expandedIds` (which answered-compact rows are re-opened). Builds `ctx` and calls `seam.steps.questions(seam.rail.toVM(facts), ctx)`. Derives `blocked = questions.some(q => q.required && !q.answered)` and reports it via `useEffect` → `onBlockedChange`. New `ChoiceAnswer` renderer: single-select taps commit immediately; `multi` renders ALL options as toggle chips (suggested prominent) + Save; `suggested` options render prominent (border-app-primary/bg-app-tint) — never the only tappable ones (honors orchestrator ruling that multi renders Dutch+English); `allowCustom` → input + Add (single: adds = commits; multi: adds to selection). Answered questions render `AnsweredCompact` (value summary + Change), re-expand on tap. text/group/price renderers unchanged in behavior.
+
+`JourneyShell.tsx` — Mirrors `onBuildingChange` exactly: `onBlockedChange?:(blocked:boolean)=>void` on `JourneyStepProps`; `const [blocked,setBlocked]=useState(false)`; `<Body … onBlockedChange={setBlocked} />`; `journey-next` `disabled={journeyStep===LAST_STEP || nextBlocked}` where `nextBlocked = journeyStep===3 && blocked`; `useEffect(()=>setBlocked(false),[journeyStep])` resets on step change.
+
+`useWizardStore.ts` — `selectBusinessTypeKey = (s) => s.businessTypeKey` (returns `BusinessTypeKey | null`). No state added (field already present).
+
+`journeyAgnostic.test.ts` — NOT modified. Its assertions are import-graph/firewall only (no question-shape assertions), and stayed green — the choice-kind addition added no banned import. No change was required.
+
+**Renderer testids (phase-4 e2e targets):**
+- `question-<id>` — the card wrapper
+- `question-chip-<id>-<value>` — each choice option chip (single = tap-commit; multi = toggle)
+- `question-save-<id>` — commit button (text/group/price Save; choice multi Save; choice single+allowCustom Add-is-commit uses `question-add-<id>` instead — see below)
+- `question-change-<id>` — the answered-compact "Change" affordance (re-expands the row)
+- `question-add-<id>` — the `allowCustom` free-text Add button (NEW; supplements the listed set — needed because multi needs both an Add and a Save; single+custom uses it as commit)
+- (pre-existing, retained) `question-input-<id>`, `question-price-mode-<id>`, `question-price-amount-<id>`, `step-questions`, `questions-none`
+
+**onBlockedChange threading:** identical pattern to `onBuildingChange` — optional prop on `JourneyStepProps`, `useState` in the shell, passed to `<Body>`, consumed to gate the agnostic Continue. Reset-on-step-change guarantees a block never outlives STEP 03.
+
+**Store selector name:** `selectBusinessTypeKey`.
+
+**Deviations:**
+- Added a `question-add-<id>` testid (not in the plan's 4-testid list) for the `allowCustom` Add control. In-scope judgment call (StepQuestions): `multi` needs a distinct Save vs Add, so reusing `question-save-<id>` for both was impossible. Chose an additive, pattern-consistent testid; the plan's listed testids are all still present and unchanged. Logged here per the in-scope-ambiguity rule.
+- `work.ts` second param named `_ctx` with an eslint-disable for no-unused-vars + a `// Phase 3` marker (as instructed — keeps tsc/lint green without implementing Phase 3 logic).
+- Prominent-chip styling uses `app-primary`/`app-tint` (the defined app accent) rather than a non-existent `app-accent` key.
+
+**Verification:**
+- `npx tsc --noEmit` — clean except the pre-existing environmental `src/app/page.tsx` `founder.jpg` TS2307 (present on main; ignored per instructions). No new errors.
+- `npm run test:run` — 225 files passed, 1 skipped; 3848 tests passed, 18 skipped. `journeyAgnostic.test.ts` green.
+- `npm run lint` — warnings only (pre-existing img/hooks), no errors in touched files.
+
+**Open risks:**
+- The answered-compact "value summary" is best-effort (text→prefill, choice→suggested join; price/group show "Answered") — the `JourneyQuestion` descriptor carries no explicit answer-value field, and the contract wasn't extended beyond the specced fields. Phase 3 supplies whether this reads well; phase-4 e2e asserts the `question-change-<id>` affordance, not the summary text.
+- Renderer has no unit harness today (per plan); first real exercise is phase-4 e2e.

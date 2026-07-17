@@ -51,6 +51,7 @@ import type {
   JourneyLoadedDraft,
   JourneyPreflightResult,
   JourneyQuestion,
+  JourneyQuestionsContext,
   JourneyRailAdapter,
   JourneyStep,
   JourneyWizardApi,
@@ -313,7 +314,11 @@ export const workJourneySeam: JourneyEngineSeam = {
      * `kind`-valid (landmine 6: a `kind`-less group nulls `getWorkFacts`, 400s
      * the work strategy, and PERSISTS — a retry never recovers).
      */
-    questions(vm: RailVM): JourneyQuestion[] {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    questions(vm: RailVM, _ctx: JourneyQuestionsContext): JourneyQuestion[] {
+      // Phase 3 — the deterministic gating rewrite (buildQuestionPlan + profession
+      // wording + choice questions) consumes `_ctx`. E1 placeholder logic below
+      // is unchanged and still only reads the VM.
       const field = (id: string) => vm.fields.find((f) => f.id === id);
       const name = field(FIELD_NAME);
       const groups = field(FIELD_GROUPS);
