@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { test, expect } from '@playwright/test';
 import {
   seedWorkBrief,
@@ -5,6 +6,14 @@ import {
   loadDraft,
   seedRealFanoutAtelier2,
 } from './helpers/seedWorkBrief';
+
+/** EXIF fixtures: 2 photos on 2023-06-14, 2 on 2023-06-20 (⇒ two same-day clusters). */
+const EXIF_CLUSTER_FILES = [
+  'exif-day1-a.jpg',
+  'exif-day1-b.jpg',
+  'exif-day2-a.jpg',
+  'exif-day2-b.jpg',
+].map((f) => path.resolve('e2e/fixtures/images', f));
 
 // ============================================================================
 // The work onboarding journey — SEEDED-RESUME e2e (decision 9 / landmine 13).
@@ -187,8 +196,8 @@ test('the journey walks 02 → 04: answers land in the rail and in the DB, kind-
   await page.goto(`/onboarding/${token}`);
   await expect(page.getByTestId('step-show-work')).toBeVisible({ timeout: 30_000 });
 
-  // ── 02: the stub + Skip (E1: no upload pipeline — ingestion is E2) ────────
-  await expect(page.getByTestId('show-work-dropzone')).toBeVisible();
+  // ── 02: the functional show-work body (E2) + Skip ────────────────────────
+  await expect(page.getByTestId('show-work-pick-files')).toBeVisible();
   await page.getByTestId('show-work-skip').click();
   await expect(page.getByTestId('step-questions')).toBeVisible();
 
@@ -257,6 +266,60 @@ test('the journey walks 02 → 04: answers land in the rail and in the DB, kind-
   await page.getByTestId('journey-next').click();
   await expect(page.getByTestId('step-plan')).toBeVisible();
   await expect(page.getByTestId('plan-items').getByRole('listitem')).toHaveCount(count);
+});
+
+// ============================================================================
+// E2 STEP 02 — the FUNCTIONAL show-work body: loose-file upload → EXIF same-day
+// clustering → commit into facts.work.groups[].photos, persisted.
+//
+// What only e2e can prove: real files POST through /api/upload-image, exifr reads
+// their DateTimeOriginal in the browser, `proposeGroups` clusters them into TWO
+// same-day groups, and the D10 commit funnel writes them into the rail (new chips)
+// AND Postgres — surviving a reload. Folder→group is Vitest-only (Playwright can
+// NOT fabricate `webkitRelativePath`); loose-file clustering is the e2e surface.
+// ============================================================================
+
+test('STEP 02 upload: EXIF same-day clusters surface as 2 rail groups + persist', async ({
+  page,
+}) => {
+  const api = await authedApi(page);
+  const { token } = await seedWorkBrief(api);
+
+  await page.goto(`/onboarding/${token}`);
+  await expect(page.getByTestId('step-show-work')).toBeVisible({ timeout: 30_000 });
+
+  // The seeded brief already has 2 groups (g0, g1). Uploading 4 loose photos across
+  // TWO capture days should append TWO new date-labelled groups (g2, g3).
+  await page.locator('[data-testid="show-work-file-input"]').setInputFiles(EXIF_CLUSTER_FILES);
+
+  // The proposal surfaces exactly two clusters…
+  await expect(page.getByTestId('show-work-proposal')).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId('show-work-proposal-group')).toHaveCount(2);
+
+  // …and the rail gains two chips as a consequence of the commit (progressive update).
+  await expect(page.getByTestId('rail-chip-g2')).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId('rail-chip-g3')).toBeVisible();
+
+  // The real assertion: it is in the DB, photo-bearing, and nothing was dropped.
+  const draft = await loadDraft(api, token);
+  const groups = draft.brief.facts.work.groups as Array<{
+    name: string;
+    kind: string;
+    photos?: unknown[];
+  }>;
+  expect(groups.length).toBe(4);
+  for (const g of groups) expect(g.kind).toBe('category'); // landmine 6 — never kind-less
+  const photoBearing = groups.filter((g) => (g.photos ?? []).length > 0);
+  expect(photoBearing.length).toBe(2); // the two uploaded clusters
+  // 4 photos across the 2 new groups (2 per day).
+  const totalPhotos = groups.reduce((n, g) => n + (g.photos?.length ?? 0), 0);
+  expect(totalPhotos).toBe(4);
+  // Sibling facts survived the full-facts re-emit (landmine 4).
+  expect(draft.brief.facts.entry.businessName).toBe('Kundius Studio');
+
+  // Reload: the rail re-projects the committed groups from Postgres.
+  await page.reload();
+  await expect(page.getByTestId('rail-chip-g3')).toBeVisible({ timeout: 30_000 });
 });
 
 // ============================================================================

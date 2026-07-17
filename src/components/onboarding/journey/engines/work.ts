@@ -288,12 +288,19 @@ export const workJourneySeam: JourneyEngineSeam = {
   },
 
   steps: {
-    // STEP 02 content. E1 renders it as a non-functional dropzone stub + "Skip
-    // for now" — the upload pipeline (and the scrape) are E2.
+    // STEP 02 content. E2 makes it functional via `loadStep` (D9): the agnostic
+    // frame renders the engine's real upload/proposal body when this is present,
+    // else its stub. `loadStep` is a DYNAMIC import (landmine 14) — it pulls the
+    // ingestion + upload + exifr code ONLY at render time on STEP 02 (post-
+    // confirm), never onto the pre-confirm entry bundle. The ingestion write
+    // funnel is the work-module `applyRailEdit({field:'groups'})` → store
+    // `commitRail` (D10), NOT the seam's `applyEdit`/`RailEditValue` (photos
+    // cannot ride the chip contract — do not widen it).
     showWork: {
       title: 'Show your work',
       body: 'Your images are what sells the work. Add a few and we’ll build the site around them — or skip and add them later in the editor.',
       icon: 'add_photo_alternate',
+      loadStep: () => import('./work/ShowWorkStep'),
     },
 
     /**

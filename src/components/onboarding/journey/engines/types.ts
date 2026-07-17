@@ -46,8 +46,14 @@
 // functions lazy-import their driver at CALL time.
 // ============================================================================
 
+import type { ComponentType } from 'react';
 import type { Brief, CopyEngine } from '@/types/brief';
 import type { WizardStore } from '@/hooks/useWizardStore';
+// Type-only (erased at compile — contributes NO runtime edge, so the firewall
+// header's "TYPES ONLY" rule holds). `JourneyStepProps` is the prop shape every
+// agnostic step body receives; a seam's optional lazy step component is typed
+// against it so the frame can render it interchangeably with its own stub.
+import type { JourneyStepProps } from '../JourneyShell';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Wizard-state handles
@@ -265,6 +271,41 @@ export type JourneyGenerationResult =
 export type JourneyStep = 2 | 3 | 4 | 5 | 6;
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Shared step-config shape (the SHARED ALTITUDE for lazy step components — D9)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * The display config shared by the agnostic step FRAMES: mono title, body copy,
+ * icon — PLUS the optional lazy engine component (`loadStep`).
+ *
+ * ── WHY `loadStep` LIVES HERE, NOT BOLTED ONTO `showWork` (founder-signed seam) ─
+ * STEP 02 (E2, `showWork`) is the first step to need a real, engine-specific
+ * body (image ingestion) instead of a shared stub. STEP 03 (E3 questions) and
+ * STEP 04 (E4 plan) will need the SAME escape hatch. So the field is defined
+ * ONCE, on this shared shape, and every step-config that wants a lazy body
+ * points at `JourneyStepConfig` — E3/E4 REUSE this exact field rather than
+ * re-widening the seam a second/third time.
+ *
+ * The agnostic frame renders `React.lazy(loadStep)` when present, else its own
+ * default stub. FIREWALL: `loadStep` is a DYNAMIC `import()` invoked at RENDER
+ * time (post-confirm, on the step), so the engine body never lands on the
+ * pre-confirm entry bundle — the seam declares the loader but does not statically
+ * pull it (`journeyAgnostic.test.ts`).
+ */
+export interface JourneyStepConfig {
+  title: string;
+  body: string;
+  icon: string;
+  /**
+   * OPTIONAL lazy engine-specific step body. Absent ⇒ the frame renders its
+   * default stub (every non-work engine keeps the stub for now). Present ⇒ the
+   * frame renders this component, passed the `JourneyStepProps` (`seam` + chrome
+   * callbacks). Additive on purpose: other engines' step configs stay untouched.
+   */
+  loadStep?: () => Promise<{ default: ComponentType<JourneyStepProps> }>;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // The seam
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -283,8 +324,9 @@ export interface JourneyEngineSeam {
   enrichDraftForConfirm(draft: Brief): Brief;
 
   steps: {
-    /** 02 — content only; the agnostic frame renders it. */
-    showWork: { title: string; body: string; icon: string };
+    /** 02 — display config + an OPTIONAL lazy engine body (`loadStep`, D9). The
+     *  agnostic frame renders the lazy body when present, else the stub. */
+    showWork: JourneyStepConfig;
     /** 03 — only the questions still needed, given the current rail. */
     questions(vm: RailVM): JourneyQuestion[];
     /** 04 — `prepare` runs once on entry (work: the CHARGELESS sitemap seed,
