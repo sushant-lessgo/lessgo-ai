@@ -22,6 +22,7 @@ Active tracks only live in `tracks/`; landed/paused tracks moved to `tracks/Comp
 - [workEndtoEnd.md](tracks/workEndtoEnd.md) — **work vertical** end-to-end journey (one line → live site); acceptance-criteria source for phases A–F. Phase C+E3 built; E2 building.
 - [uiRedesignPlan.md](tracks/uiRedesignPlan.md) — **UI redesign** track (designer handoff, 4 surfaces); screen triage + 3 lanes; lifts the reimagine hold.
 - [toolbarPlan.md](tracks/toolbarPlan.md) — **toolbar standard** action contract (Beta vs Final); skeleton-gated rich toolbars.
+- [engineDecider.md](tracks/engineDecider.md) — **how a one-liner becomes an engine**: infer→confirm-when-unsure→revisable belief, buyer-decision question, ambiguous-type registry state, persona-gate retirement. Design agreed, not yet specced.
 - [uiRequirements.md](tracks/uiRequirements.md) — designer brief; **SUPERSEDED by uiRedesignPlan.md**, kept for reference only.
 - **Completed/** — landed or paused tracks: meridianPlan, nsoPlan, multiPagePlan, blogFeature, seoPlan, testimonialSystem, newGeneration, writerFlownTemplate, writerDesignBrief, scalePlan, templatePlan, editorPlan, i18nPlan (i18n = **DEFERRED**).
 - **Someday/** — [universePlan.md](tracks/Someday/universePlan.md) — variant fleet per business (direction agreed; specs when queue-front).
