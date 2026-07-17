@@ -501,12 +501,26 @@ export async function endTrial(userId: string, convert: boolean = false) {
 }
 
 /**
- * Check if user has access to a feature
+ * Check if user has access to a feature.
+ *
+ * CONFIG-DERIVED + DENY-BY-DEFAULT. We resolve the tier from the DB UserPlan row
+ * and read the flag from PLAN_CONFIGS — the per-row feature columns are NEVER
+ * trusted (legacy FREE rows drift, and some feature keys have no DB column at
+ * all). This is behavior-preserving: the create/upgrade/downgrade writers above
+ * populate those columns FROM this same config.
+ *
+ * Previously this read the DB row and tested `=== true || !== 'none'`, which
+ * returned true for `false` and for `undefined` — i.e. every boolean paywall flag
+ * passed on FREE. Semantics now: booleans are strict `=== true`; `analytics` is
+ * the one string enum ('none' | 'basic' | 'full') where any non-'none' value is
+ * access; unknown tier / unknown key / error → false (fail-closed).
+ * See design decision 4.
  */
 export async function hasFeature(userId: string, feature: keyof PlanConfig['features']): Promise<boolean> {
   try {
     const userPlan = await getUserPlan(userId);
-    return (userPlan as any)[feature] === true || (userPlan as any)[feature] !== 'none';
+    const value = PLAN_CONFIGS[userPlan.tier as PlanTier]?.features[feature];
+    return typeof value === 'boolean' ? value : value !== undefined && value !== 'none';
   } catch (error) {
     logger.error('Error checking feature access:', error);
     return false;
@@ -517,12 +531,11 @@ export async function hasFeature(userId: string, feature: keyof PlanConfig['feat
  * Check if user's plan allows tracking pixels (Meta Pixel / GA4) in the
  * published <head>.
  *
- * CONFIG-DERIVED ON PURPOSE — do NOT route this through hasFeature(). hasFeature
- * reads the feature off the DB UserPlan row ((userPlan as any)[feature]) and its
- * test (`=== true || !== 'none'`) returns true for a MISSING column
- * (`undefined !== 'none'`). Since trackingPixels is intentionally not a DB column
- * (no migration), hasFeature('trackingPixels') would fail OPEN for everyone.
- * Instead we resolve the tier and read the flag straight from PLAN_CONFIGS.
+ * CONFIG-DERIVED, like hasFeature() above (which is now config-derived too — the
+ * old fail-open DB-row read is gone). Kept as a SEPARATE helper on purpose:
+ * trackingPixels is intentionally not a DB UserPlan column (no migration), so it
+ * gets its own tier→config accessor rather than being folded into hasFeature.
+ * Collapsing the two is a deliberate deferred DRY-up, not an oversight.
  * Any error / unknown tier → false (fail-closed). See design decision 4.
  */
 export async function hasTrackingPixels(userId: string): Promise<boolean> {

@@ -167,6 +167,37 @@ async function handler(req: NextRequest): Promise<Response> {
         },
       }
     );
+    if (!consumption.success) {
+      // The charge failed AFTER generation → the output is DISCARDED (no free
+      // output). The requireAICredits pre-gate above already 402s a 0-credit
+      // user before any AI work; this is the check→charge race loser.
+      if (consumption.error === 'charge_conflict') {
+        // Solvent user, lost the write race → recoverable. The error code AND
+        // message deliberately avoid the substring "credit": the client rails
+        // regex-match /credit/i and would strand a paying user on the buy wall.
+        logger.error(
+          `[generate-privacy-policy] Charge conflict for user ${userId} — nothing charged, output discarded`
+        );
+        return createSecureResponse(
+          {
+            success: false,
+            error: 'charge_failed',
+            message: 'Temporary billing conflict — please try again. You have not been charged.',
+          },
+          500
+        );
+      }
+      return createSecureResponse(
+        {
+          success: false,
+          error: 'insufficient_credits',
+          message: consumption.error || 'Insufficient credits',
+          creditsRequired: CREDIT_COSTS.PRIVACY_POLICY_GENERATION,
+          creditsRemaining: consumption.remaining,
+        },
+        402
+      );
+    }
 
     return createSecureResponse({
       success: true,

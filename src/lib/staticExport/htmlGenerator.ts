@@ -424,7 +424,7 @@ function buildHTMLDocument(params: {
   ${removeBranding ? '' : renderLessgoBadge()}
 
   <!-- Phase 4: Form handler (loaded if page has forms) -->
-  ${hasForms ? `<script src="${assetBase}/assets/form.v1.js" defer></script>` : ''}
+  ${hasForms ? `<script src="${assetBase}/assets/form.v2.js" defer></script>` : ''}
 
   <!-- Phase 4: TechPremium behaviors (dropdown nav, lightbox, gallery filter, readout tick) -->
   ${usesNaayom ? `<script src="${assetBase}/assets/naayom.v1.js" defer></script>` : ''}

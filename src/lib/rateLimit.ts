@@ -7,9 +7,14 @@ import { getUserPlan, PlanTier } from './planManager';
 // Rate limit configuration types
 export interface RateLimitConfig {
   /**
-   * Namespace for this limit's counters in the shared store. REQUIRED: every
-   * config must declare one, otherwise two different limits silently share a
-   * counter and the lowest `maxRequests` governs both (see `buildStoreKey`).
+   * Bucket namespace. REQUIRED and must be unique per preset: it is prefixed
+   * onto the generated key so each preset counts into its OWN tally.
+   *
+   * Without this, every preset shares one `user:{id}` counter but compares it
+   * against its own `maxRequests` — so cheap-but-frequent traffic (autosaves,
+   * 30/min) silently exhausts an expensive preset's smaller budget (AI) and
+   * generation 429s on requests it never made. That is a real incident, not a
+   * hypothetical: it broke a customer's multi-page generation in production.
    */
   name: string;
   maxRequests: number;
@@ -30,41 +35,41 @@ interface RateLimitEntry {
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
 // Rate limit presets for different endpoint types.
-// Each preset's `name` namespaces its counters — presets do NOT share a budget.
 //
-// Presets use `satisfies RateLimitConfig`, NOT `as RateLimitConfig`. This is
-// load-bearing: a type ASSERTION (`as`) silently permits a preset that omits
-// `name` (it compiles clean), which yields the store key `undefined:user:{id}` —
-// i.e. every such preset shares ONE counter again and the lowest `maxRequests`
-// governs them all (5 AI generations ⇒ /api/publish 429s). `satisfies` makes
-// that a compile error while preserving each preset's literal type. Do not
-// switch these back to `as`.
+// `satisfies RateLimitConfig`, NOT `as RateLimitConfig`. This is load-bearing:
+// a type ASSERTION (`as`) does not enforce required props, so a future preset
+// that omits `name` would compile clean and key into `undefined:user:{id}` —
+// i.e. share ONE counter with every other name-less preset while comparing it
+// against its own `maxRequests`. That is exactly the incident documented on
+// `RateLimitConfig.name` above, silently returned. `satisfies` makes it a
+// compile error at the declaration while preserving each preset's literal type.
+// Do not switch these back to `as`.
 export const RATE_LIMIT_PRESETS = {
   // AI generation endpoints - expensive operations (tier-based)
   AI_GENERATION: {
-    name: 'ai_generation',
-    maxRequests: 5, // Default for FREE tier
+    name: 'ai',
+    maxRequests: 15, // Default for FREE tier; tierBased overrides per TIER_RATE_LIMITS
     windowMs: 60 * 1000, // 1 minute
     tierBased: true,
   } satisfies RateLimitConfig,
 
   // Form submissions - prevent spam
   FORM_SUBMISSION: {
-    name: 'form_submission',
+    name: 'form',
     maxRequests: 10,
     windowMs: 60 * 1000, // 1 minute
   } satisfies RateLimitConfig,
 
   // Draft operations - frequent but less expensive
   DRAFT_OPERATIONS: {
-    name: 'draft_operations',
+    name: 'draft',
     maxRequests: 30,
     windowMs: 60 * 1000, // 1 minute
   } satisfies RateLimitConfig,
 
   // Publishing - critical business operation
   PUBLISHING: {
-    name: 'publishing',
+    name: 'publish',
     maxRequests: 5,
     windowMs: 60 * 1000, // 1 minute
   } satisfies RateLimitConfig,
@@ -78,7 +83,7 @@ export const RATE_LIMIT_PRESETS = {
 
   // Domain verification (per-domain, used by /api/domains/verify-*)
   DOMAIN_VERIFY: {
-    name: 'domain_verify',
+    name: 'domain',
     maxRequests: 1,
     windowMs: 10 * 1000, // 10 seconds
   } satisfies RateLimitConfig,
@@ -112,34 +117,47 @@ export const checkDomainRateLimit = (
   return { allowed: true, retryAfter: 0, resetTime: entry.resetTime };
 };
 
-// Tier-based rate limit multipliers
+// Tier-based rate limit multipliers.
+//
+// These are the LIVE values (`PLAN_CONFIGS[tier].rateLimit` in planManager.ts is
+// dead config — nothing reads it).
+//
+// Sized against the FAN-OUT, not against single requests: ONE click of "generate"
+// is N+1 AI requests, because multi-page generation loops per page (1 strategy +
+// 1 generate-copy per sitemap page, up to ~7 for a 6-page site). The old FREE
+// ceiling of 5 sat BELOW that cost, so a legitimate generation could exhaust its
+// own budget mid-run; it only stayed under by accident, because LLM latency
+// (~50s/page) happened to spread the calls across windows. Any speedup would
+// have broken it. Tiers must keep ascending — a FREE ceiling above PRO's would
+// invert the plans.
+//
+// This is burst protection only. Actual cost is gated by credits
+// (`checkCredits()` / creditSystem.ts), which these numbers do not affect.
 const TIER_RATE_LIMITS: Record<PlanTier, { maxRequests: number; windowMs: number }> = {
   [PlanTier.FREE]: {
-    maxRequests: 5,
+    maxRequests: 15,
     windowMs: 60 * 1000,
   },
   [PlanTier.PRO]: {
-    maxRequests: 10,
+    maxRequests: 30,
     windowMs: 60 * 1000,
   },
   [PlanTier.AGENCY]: {
-    maxRequests: 20,
+    maxRequests: 60,
     windowMs: 60 * 1000,
   },
   [PlanTier.ENTERPRISE]: {
-    maxRequests: 50,
+    maxRequests: 150,
     windowMs: 60 * 1000,
   },
 };
 
-// Default key generator - combines IP and user ID for better accuracy.
-// NOTE: returns the *identity* portion only; `buildStoreKey` adds the preset
-// namespace. Never use this result as a store key directly.
+// Default key generator - combines IP and user ID for better accuracy
 const defaultKeyGenerator = async (req: NextRequest): Promise<string> => {
   try {
     const { userId } = await auth();
     const ip = getClientIP(req);
-
+    
     // Use user ID if authenticated, fall back to IP
     return userId ? `user:${userId}` : `ip:${ip}`;
   } catch (error) {
@@ -150,31 +168,13 @@ const defaultKeyGenerator = async (req: NextRequest): Promise<string> => {
 };
 
 /**
- * THE single place a per-user/IP store key is derived. `rateLimit`,
- * `getRateLimitStatus` and `clearRateLimit` MUST all go through this — if they
- * derive keys independently, status/clear silently read the wrong counter.
- * (`checkDomainRateLimit` is deliberately separate: it keys by `domain:{name}`,
- * which is already namespaced and not per-user.)
- *
- * Keys are namespaced per preset (`{name}:user:{id}`), mirroring the existing
- * `domain:{name}` pattern. Before this, every preset shared ONE counter while
- * each compared it to its OWN `maxRequests`, so the lowest limit governed every
- * route (e.g. 5 AI generations made publishing 429). This is a deliberate
- * LOOSENING: each route now gets its own budget, so a user can make strictly
- * more total requests/min than before. That is intended — it makes each preset's
- * advertised limit true. Do NOT "fix" this back to a shared counter.
- *
- * A custom `config.keyGenerator` is NOT namespaced: a caller supplying one is
- * declaring its own scope (which may intentionally be shared across configs, or
- * already carry a namespace). Bake the namespace into the custom generator if
- * you want per-config isolation.
+ * Namespace an identity key into its preset's bucket, so each preset counts
+ * into its own tally instead of a shared per-user one. MUST wrap every
+ * `keyGenerator` result — an un-namespaced key silently rejoins the shared
+ * bucket and reintroduces the cross-preset starvation this prevents.
  */
-const buildStoreKey = async (req: NextRequest, config: RateLimitConfig): Promise<string> => {
-  if (config.keyGenerator) {
-    return config.keyGenerator(req);
-  }
-  return `${config.name}:${await defaultKeyGenerator(req)}`;
-};
+const buildKey = (config: RateLimitConfig, identity: string): string =>
+  `${config.name}:${identity}`;
 
 // Extract client IP from request
 const getClientIP = (req: NextRequest): string => {
@@ -200,7 +200,14 @@ const cleanExpiredEntries = (): void => {
 export const rateLimit = async (
   req: NextRequest,
   config: RateLimitConfig
-): Promise<{ allowed: boolean; remaining: number; resetTime: number; error?: string }> => {
+): Promise<{
+  allowed: boolean;
+  remaining: number;
+  /** Tier-effective limit actually applied — may exceed `config.maxRequests` when `tierBased`. */
+  limit: number;
+  resetTime: number;
+  error?: string;
+}> => {
   try {
     // Clean expired entries periodically
     if (Math.random() < 0.01) { // 1% chance to clean on each request
@@ -224,7 +231,8 @@ export const rateLimit = async (
       }
     }
 
-    const key = await buildStoreKey(req, effectiveConfig);
+    const keyGenerator = effectiveConfig.keyGenerator || defaultKeyGenerator;
+    const key = buildKey(effectiveConfig, await keyGenerator(req));
     const now = Date.now();
     const resetTime = now + effectiveConfig.windowMs;
 
@@ -242,7 +250,14 @@ export const rateLimit = async (
 
     // Check if limit exceeded
     if (entry.requests >= effectiveConfig.maxRequests) {
-      logger.warn(`Rate limit exceeded for key: ${key}`, {
+      // logger.error, NOT logger.warn: production runs at ERROR level
+      // (logger.ts `getCurrentLevel`), so a warn here is discarded and the
+      // rejection reaches neither Vercel nor Sentry. That blind spot meant a
+      // customer-facing generation failure had to be reconstructed by hand from
+      // raw HTTP status codes. This is the only line naming key/count/limit —
+      // it must survive. Accepted tradeoff: sustained abuse of a limited route
+      // now produces Sentry events.
+      logger.error(`Rate limit exceeded for key: ${key}`, {
         requests: entry.requests,
         limit: effectiveConfig.maxRequests,
         resetTime: entry.resetTime,
@@ -251,6 +266,7 @@ export const rateLimit = async (
       return {
         allowed: false,
         remaining: 0,
+        limit: effectiveConfig.maxRequests,
         resetTime: entry.resetTime,
         error: 'Rate limit exceeded',
       };
@@ -270,6 +286,7 @@ export const rateLimit = async (
     return {
       allowed: true,
       remaining,
+      limit: effectiveConfig.maxRequests,
       resetTime: entry.resetTime,
     };
   } catch (error) {
@@ -279,6 +296,7 @@ export const rateLimit = async (
     return {
       allowed: true,
       remaining: config.maxRequests,
+      limit: config.maxRequests,
       resetTime: Date.now() + config.windowMs,
       error: 'Rate limiting service unavailable',
     };
@@ -307,18 +325,21 @@ export const withRateLimit = (
           headers: {
             'Content-Type': 'application/json',
             'Retry-After': retryAfter.toString(),
-            'X-RateLimit-Limit': config.maxRequests.toString(),
+            // rateLimitResult.limit, not config.maxRequests: on a tierBased
+            // preset the latter is the FREE default and would understate what a
+            // paying tier actually gets.
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
             'X-RateLimit-Remaining': '0',
             'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),
           },
         }
       );
     }
-    
+
     // Add rate limit headers to successful responses
     const response = await handler(req);
-    
-    response.headers.set('X-RateLimit-Limit', config.maxRequests.toString());
+
+    response.headers.set('X-RateLimit-Limit', rateLimitResult.limit.toString());
     response.headers.set('X-RateLimit-Remaining', rateLimitResult.remaining.toString());
     response.headers.set('X-RateLimit-Reset', rateLimitResult.resetTime.toString());
     
@@ -344,7 +365,8 @@ export const withGeneralRateLimit = (handler: (req: NextRequest) => Promise<Resp
 
 // Rate limit status checker (for debugging/monitoring)
 export const getRateLimitStatus = async (req: NextRequest, config: RateLimitConfig) => {
-  const key = await buildStoreKey(req, config);
+  const keyGenerator = config.keyGenerator || defaultKeyGenerator;
+  const key = buildKey(config, await keyGenerator(req));
   const entry = rateLimitStore.get(key);
   
   if (!entry || Date.now() > entry.resetTime) {
@@ -364,7 +386,8 @@ export const getRateLimitStatus = async (req: NextRequest, config: RateLimitConf
 
 // Clear rate limit for a key (useful for testing or admin operations)
 export const clearRateLimit = async (req: NextRequest, config: RateLimitConfig) => {
-  const key = await buildStoreKey(req, config);
+  const keyGenerator = config.keyGenerator || defaultKeyGenerator;
+  const key = buildKey(config, await keyGenerator(req));
   rateLimitStore.delete(key);
 };
 

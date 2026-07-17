@@ -1,25 +1,32 @@
-// publish-trust phase 2a: the per-user/IP store key is namespaced per preset.
+// src/lib/rateLimit.test.ts
+// Regression guard for the production incident where a customer's multi-page
+// generation died on "Generation hit a snag. Too many requests."
 //
-// Before the fix, `defaultKeyGenerator` returned a bare `user:{id}` and every
-// preset shared ONE counter in `rateLimitStore` while each compared it against
-// its OWN `maxRequests` — so the LOWEST limit governed every route for a user
-// (5 AI generations ⇒ /api/publish 429s). These tests pin: presets have
-// independent budgets, each preset still enforces its own limit, and
-// status/clear operate on the SAME namespaced key `rateLimit()` writes.
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+// The 429 came from OUR limiter, not the AI provider. Every preset shared one
+// `user:{id}` counter but compared it against its OWN maxRequests, so autosaves
+// (DRAFT_OPERATIONS, 30/min) ran the shared tally up past the AI budget and the
+// next generate-copy refused itself. Generation autosaves after every page, so
+// the fan-out reliably poisoned its own bucket.
+//
+// The first test below fails on the pre-fix code and is the reason this file
+// exists — keep it honest.
+//
+// Clerk + planManager are mocked at the module boundary; the limiter's real
+// bucket logic runs.
+
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { NextRequest } from 'next/server';
 
 const authMock = vi.fn();
 vi.mock('@clerk/nextjs/server', () => ({ auth: () => authMock() }));
-vi.mock('@/lib/planManager', () => ({
-  PlanTier: { FREE: 'FREE', PRO: 'PRO', AGENCY: 'AGENCY', ENTERPRISE: 'ENTERPRISE' },
-  getUserPlan: vi.fn(),
-}));
-vi.mock('@/lib/logger', () => ({
-  logger: { warn: vi.fn(), error: vi.fn(), dev: vi.fn(), info: vi.fn(), debug: vi.fn() },
-}));
 
-import { getUserPlan } from '@/lib/planManager';
+vi.mock('./planManager', async (importOriginal) => {
+  // PlanTier is a real enum used as a Record key by TIER_RATE_LIMITS — keep it.
+  const actual = await importOriginal<typeof import('./planManager')>();
+  return { ...actual, getUserPlan: vi.fn(async () => ({ tier: actual.PlanTier.FREE })) };
+});
+
+import { getUserPlan, PlanTier } from './planManager';
 import {
   rateLimit,
   getRateLimitStatus,
@@ -30,125 +37,170 @@ import {
 
 const planMock = getUserPlan as unknown as ReturnType<typeof vi.fn>;
 
-// The store is module-level and in-memory. Rather than reaching into it, each
-// test uses a UNIQUE userId, so its namespaced keys cannot collide with any
-// other test's — isolation without pretending to reset private state.
-let seq = 0;
-const freshUser = () => `user_${++seq}_${Math.random().toString(36).slice(2)}`;
+// The limiter only ever reads headers off the request (and only falls back to IP
+// when unauthenticated), so a header stub is a faithful stand-in for NextRequest.
+const req = { headers: new Headers() } as unknown as NextRequest;
 
-const reqFor = (userId: string | null): NextRequest => {
-  authMock.mockResolvedValue({ userId });
-  return { headers: new Headers(), ip: '203.0.113.9' } as unknown as NextRequest;
+// The bucket store is module-level and persists across tests. Rather than reach
+// into it, give each test its own user so buckets can never bleed between tests.
+let userSeq = 0;
+const freshUser = () => {
+  authMock.mockResolvedValue({ userId: `user_${++userSeq}` });
 };
 
+// Unauthenticated counterpart: keys fall back to `ip:{ip}`. Each call gets a
+// UNIQUE ip for the same reason `freshUser` exists — IP buckets are just as
+// module-level, and a shared ip would bleed across tests.
+let ipSeq = 0;
+const freshAnonReq = (): NextRequest => {
+  authMock.mockResolvedValue({ userId: null });
+  return { headers: new Headers(), ip: `203.0.113.${++ipSeq}` } as unknown as NextRequest;
+};
+
+const AI_FREE_LIMIT = 15; // TIER_RATE_LIMITS[FREE]
+
 beforeEach(() => {
-  vi.clearAllMocks();
-  planMock.mockResolvedValue({ tier: 'FREE' });
+  freshUser();
+  // Tier lookups leak across tests otherwise (the PRO case below overrides it).
+  planMock.mockResolvedValue({ tier: PlanTier.FREE });
 });
 
-describe('rateLimit — per-preset namespacing', () => {
-  it('does NOT share a counter across presets: exhausting AI_GENERATION leaves PUBLISHING allowed', async () => {
-    const userId = freshUser();
-    const req = reqFor(userId);
+describe('rateLimit bucket isolation', () => {
+  it('autosaves do not consume the AI budget (the production incident)', async () => {
+    // Enough autosaves to exceed the AI ceiling, but well under DRAFT's own 30.
+    for (let i = 0; i < AI_FREE_LIMIT; i++) {
+      const draft = await rateLimit(req, RATE_LIMIT_PRESETS.DRAFT_OPERATIONS);
+      expect(draft.allowed).toBe(true);
+    }
 
-    // Burn the whole FREE-tier AI budget (5/min).
-    for (let i = 0; i < 5; i++) {
-      const r = await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION);
-      expect(r.allowed).toBe(true);
+    // Pre-fix this returned allowed:false — the AI call read the autosave tally.
+    const ai = await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION);
+    expect(ai.allowed).toBe(true);
+    expect(ai.remaining).toBe(AI_FREE_LIMIT - 1);
+  });
+
+  it('exhausting the AI budget leaves autosaves working', async () => {
+    for (let i = 0; i < AI_FREE_LIMIT; i++) {
+      expect((await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION)).allowed).toBe(true);
     }
     expect((await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION)).allowed).toBe(false);
 
-    // Same user, different preset — must still have its own untouched budget.
-    // (Pre-fix this returned allowed:false — the exact live publish bug.)
-    const publishResult = await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING);
-    expect(publishResult.allowed).toBe(true);
-    expect(publishResult.remaining).toBe(4);
+    // A user out of AI budget must still be able to save their work.
+    expect((await rateLimit(req, RATE_LIMIT_PRESETS.DRAFT_OPERATIONS)).allowed).toBe(true);
   });
 
-  it('still enforces each preset OWN limit: PUBLISHING allows 5, 429s the 6th', async () => {
-    const req = reqFor(freshUser());
+  it('separates buckets per preset, not just AI vs draft', async () => {
+    for (let i = 0; i < RATE_LIMIT_PRESETS.PUBLISHING.maxRequests; i++) {
+      expect((await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING)).allowed).toBe(true);
+    }
+    expect((await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING)).allowed).toBe(false);
 
-    for (let i = 0; i < 5; i++) {
-      const r = await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING);
-      expect(r.allowed).toBe(true);
-      expect(r.remaining).toBe(4 - i);
+    // Publishing is spent; unrelated presets must be untouched.
+    expect((await rateLimit(req, RATE_LIMIT_PRESETS.FORM_SUBMISSION)).allowed).toBe(true);
+    expect((await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION)).allowed).toBe(true);
+  });
+
+  it('still refuses once a preset genuinely exceeds its own ceiling', async () => {
+    for (let i = 0; i < AI_FREE_LIMIT; i++) {
+      await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION);
     }
 
-    const sixth = await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING);
-    expect(sixth.allowed).toBe(false);
-    expect(sixth.remaining).toBe(0);
-    expect(sixth.error).toBe('Rate limit exceeded');
+    const refused = await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION);
+    expect(refused.allowed).toBe(false);
+    expect(refused.remaining).toBe(0);
+    expect(refused.error).toBe('Rate limit exceeded');
+  });
+
+  it('isolates buckets per user', async () => {
+    for (let i = 0; i < AI_FREE_LIMIT; i++) {
+      await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION);
+    }
+    expect((await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION)).allowed).toBe(false);
+
+    freshUser();
+    expect((await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION)).allowed).toBe(true);
   });
 
   it('namespaces unauthenticated callers by IP per preset too', async () => {
-    const req = reqFor(null); // no userId ⇒ ip: key
+    const anon = freshAnonReq(); // no userId ⇒ `ip:` identity
 
-    expect((await rateLimit(req, RATE_LIMIT_PRESETS.DOMAIN_VERIFY)).allowed).toBe(true);
-    expect((await rateLimit(req, RATE_LIMIT_PRESETS.DOMAIN_VERIFY)).allowed).toBe(false);
+    expect((await rateLimit(anon, RATE_LIMIT_PRESETS.DOMAIN_VERIFY)).allowed).toBe(true);
+    expect((await rateLimit(anon, RATE_LIMIT_PRESETS.DOMAIN_VERIFY)).allowed).toBe(false);
 
     // A different preset for the same IP starts from a FULL budget. Asserting
     // `remaining` (not just `allowed`) is what makes this mutation-sensitive:
-    // under a shared counter GENERAL would report 98 remaining, not 99 (the
-    // DOMAIN_VERIFY call that was blocked above never incremented the counter).
-    const general = await rateLimit(req, RATE_LIMIT_PRESETS.GENERAL);
+    // under a shared counter GENERAL would STILL report allowed (its ceiling is
+    // 100, far above DOMAIN_VERIFY's increments), so `allowed` alone proves
+    // nothing here — only the exact count does.
+    const general = await rateLimit(anon, RATE_LIMIT_PRESETS.GENERAL);
     expect(general.allowed).toBe(true);
     expect(general.remaining).toBe(RATE_LIMIT_PRESETS.GENERAL.maxRequests - 1);
   });
 });
 
-describe('rateLimit — tier-based limits', () => {
-  it('PRO gets 10 AI generations where FREE gets 5', async () => {
-    planMock.mockResolvedValue({ tier: 'PRO' });
-    const req = reqFor(freshUser());
+describe('rateLimit tier ceilings', () => {
+  it('reports the tier-effective limit, not the preset default', async () => {
+    // A multi-page generation is ~7 AI calls from one click; the ceiling has to
+    // clear it, and the header must report what was actually applied.
+    const result = await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION);
+    expect(result.limit).toBe(AI_FREE_LIMIT);
+    expect(result.limit).toBeGreaterThan(7);
+  });
 
-    for (let i = 0; i < 10; i++) {
+  it('PRO gets a strictly larger AI budget than FREE', async () => {
+    planMock.mockResolvedValue({ tier: PlanTier.PRO });
+
+    // PRO = 30/min vs FREE's 15 — i.e. well past where FREE already refuses.
+    for (let i = 0; i < 30; i++) {
       expect((await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION)).allowed).toBe(true);
     }
     expect((await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION)).allowed).toBe(false);
   });
 
-  it('falls back to the preset default when the plan lookup throws', async () => {
+  it('survives a failed plan lookup by falling back to the preset default', async () => {
+    // Exercises the INNER tier try/catch: a plan-lookup failure must not break
+    // the limiter. NOTE: this cannot distinguish the fallback from FREE by count
+    // — the preset default and TIER_RATE_LIMITS[FREE] are both 15 by design.
     planMock.mockRejectedValue(new Error('db down'));
-    const req = reqFor(freshUser());
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < RATE_LIMIT_PRESETS.AI_GENERATION.maxRequests; i++) {
       expect((await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION)).allowed).toBe(true);
     }
     expect((await rateLimit(req, RATE_LIMIT_PRESETS.AI_GENERATION)).allowed).toBe(false);
   });
 });
 
-describe('rateLimit — fails OPEN when the limiter itself throws', () => {
+describe('rateLimit fails OPEN when the limiter itself throws', () => {
   it('allows the request (and says so) instead of 500ing the route', async () => {
-    // Throw from `keyGenerator`, which `buildStoreKey` awaits. This provably
-    // hits the OUTER catch, not the inner tier-lookup one: `tierBased` is
-    // absent, so the inner try/catch block never executes at all. (Throwing via
+    // Throw from `keyGenerator`, which `buildKey`'s argument awaits. This
+    // provably hits the OUTER catch, not the inner tier-lookup one: `tierBased`
+    // is absent, so the inner try/catch never executes at all. (Throwing via
     // `auth` would NOT work — `defaultKeyGenerator` swallows auth errors itself
     // and falls back to an IP key, so nothing would reach either catch.)
-    const boom = new Error('rate limit store unreachable');
     const config = {
       name: 'exploding',
       maxRequests: 5,
       windowMs: 60 * 1000,
       keyGenerator: async () => {
-        throw boom;
+        throw new Error('rate limit store unreachable');
       },
     } satisfies RateLimitConfig;
 
-    const result = await rateLimit(reqFor(freshUser()), config);
+    const result = await rateLimit(req, config);
 
     expect(result.allowed).toBe(true);
     expect(result.error).toBe('Rate limiting service unavailable');
     // Fail-open reports the config's FULL budget — it recorded nothing.
     expect(result.remaining).toBe(5);
+    expect(result.limit).toBe(5);
     expect(result.resetTime).toBeGreaterThan(Date.now());
   });
 });
 
-describe('getRateLimitStatus / clearRateLimit — same namespaced key as rateLimit()', () => {
+describe('getRateLimitStatus / clearRateLimit use the same namespaced key as rateLimit()', () => {
+  // The consistency trap: were these to derive keys independently of rateLimit(),
+  // status/clear would silently read and clear the WRONG counter.
   it('getRateLimitStatus reports the count rateLimit() actually recorded', async () => {
-    const req = reqFor(freshUser());
-
     await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING);
     await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING);
 
@@ -159,7 +211,6 @@ describe('getRateLimitStatus / clearRateLimit — same namespaced key as rateLim
   });
 
   it('getRateLimitStatus is per-preset: another preset reads 0 for the same user', async () => {
-    const req = reqFor(freshUser());
     await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING);
 
     const other = await getRateLimitStatus(req, RATE_LIMIT_PRESETS.DRAFT_OPERATIONS);
@@ -168,9 +219,9 @@ describe('getRateLimitStatus / clearRateLimit — same namespaced key as rateLim
   });
 
   it('clearRateLimit actually resets the budget rateLimit() uses', async () => {
-    const req = reqFor(freshUser());
-
-    for (let i = 0; i < 5; i++) await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING);
+    for (let i = 0; i < RATE_LIMIT_PRESETS.PUBLISHING.maxRequests; i++) {
+      await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING);
+    }
     expect((await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING)).allowed).toBe(false);
 
     await clearRateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING);
@@ -184,7 +235,6 @@ describe('getRateLimitStatus / clearRateLimit — same namespaced key as rateLim
   });
 
   it('clearRateLimit only clears its own preset', async () => {
-    const req = reqFor(freshUser());
     await rateLimit(req, RATE_LIMIT_PRESETS.PUBLISHING);
     await rateLimit(req, RATE_LIMIT_PRESETS.DRAFT_OPERATIONS);
 

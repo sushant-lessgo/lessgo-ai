@@ -763,3 +763,102 @@ orchestrator decision. Scope: guards only — no template globs, no sha bump, no
 - Guard 2 fires *after* `public/published.css` is written, so a genuine leak leaves the leaked CSS
   on disk (build still fails non-zero). Not new, not in scope; noting it since the temp-file fix
   invites the question. Only the temp files are cleaned on failure.
+
+---
+
+## Merge: main hotfix × phase 2a
+
+**Files changed** (conflict resolution only — no other file touched):
+- `src/lib/rateLimit.ts`
+- `src/lib/rateLimit.test.ts`
+- `docs/task/publish-trust.audit.md` (this section)
+
+### Context
+
+`git merge main` hit 2 conflicts. Cause: main shipped an independent HOTFIX
+(`cb305f26`, merged `1b8c9f63`) for the SAME shared-counter bug our phase 2a fixed —
+it took down a real customer's multi-page generation in production
+("Generation hit a snag. Too many requests.").
+
+**Net: phase 2a is now largely REDUNDANT with main's hotfix.** Our surviving delta is
+`satisfies` + 8 unique tests. Recorded so nobody re-reads 2a as the origin of the fix.
+
+### `src/lib/rateLimit.ts` — main's version as base
+
+Verified main is strictly broader than ours; took it wholesale:
+- preset bucket namespacing (`ai:`, `draft:` …) — same core fix as 2a
+- `name: string` required on `RateLimitConfig` + incident doc comment
+- `buildKey(config, await keyGenerator(req))` at all 3 call sites — closes the same
+  consistency trap our `buildStoreKey` did. Kept THEIR helper/name, dropped ours.
+- kept every main-only extra: `TIER_RATE_LIMITS` ×3 (15/30/60/150, sized against the
+  ~7-AI-request fan-out of one generation click); `logger.warn`→`logger.error` on
+  rejection (prod runs at ERROR level — the incident left no trace); `limit` on the
+  result + `X-RateLimit-Limit` reporting the TIER-EFFECTIVE limit.
+
+Layered our ONE genuine addition main lacked:
+- **`as RateLimitConfig` → `satisfies RateLimitConfig`** on all 6 presets (main had 6 `as`).
+  An assertion does not enforce required props, so on main a future preset omitting
+  `name` compiled clean → key `undefined:user:{id}` → the incident silently returns.
+  Preserved main's preset doc comments verbatim; added a comment on why `satisfies` is
+  load-bearing.
+
+**`satisfies` proof** — removed `name` from `PUBLISHING`, `tsc`:
+```
+src/lib/rateLimit.ts(74,5): error TS1360: Type '{ maxRequests: number; windowMs: number; }' does not satisfy the expected type 'RateLimitConfig'.
+  Property 'name' is missing in type '{ maxRequests: number; windowMs: number; }' but required in type 'RateLimitConfig'.
+src/lib/rateLimit.ts(360,26): error TS2345: Argument of type '{ maxRequests: number; windowMs: number; }' is not assignable to parameter of type 'RateLimitConfig'.
+  Property 'name' is missing in type '{ maxRequests: number; windowMs: number; }' but required in type 'RateLimitConfig'.
+```
+Errors at BOTH declaration and consumer site, as predicted. `name` restored.
+
+### `src/lib/rateLimit.test.ts` — union of both suites (14 tests)
+
+Base = main's file (structure, naming, mocks, incident header comment). All 6 of main's
+tests kept verbatim, including the incident-pinning one that fails pre-fix.
+
+Added 8 of ours that main lacked:
+- outer fail-open (throwing `keyGenerator` on a non-`tierBased` config, so the inner
+  tier catch provably never runs) — also asserts main's new `limit` field
+- `getRateLimitStatus`/`clearRateLimit` consistency trap (4 tests: same key as
+  `rateLimit()`, per-preset status, clear resets, clear is preset-scoped)
+- IP-namespacing per preset — asserts `remaining` (99), not just `allowed` (vacuous:
+  DOMAIN_VERIFY's increments never approach GENERAL's 100 either way)
+- PRO tier budget; failed-plan-lookup fallback
+
+Skipped as genuine duplicates of main's coverage (not dropped coverage):
+- ours "exhausting AI leaves PUBLISHING allowed" ≈ main's "separates buckets per preset"
+- ours "PUBLISHING allows 5, 429s the 6th" ≈ main's "separates buckets per preset" +
+  "still refuses once a preset exceeds its own ceiling"
+
+### Deviations
+
+- **Our tier assertions updated to MAIN's values** (FREE 15, PRO 30) — ours assumed the
+  old 5/10. Main's limits were NOT changed back.
+- **`beforeEach` now re-asserts `getUserPlan` → FREE.** Main's `beforeEach` only called
+  `freshUser()`; our added PRO test overrides the tier mock, which would otherwise leak
+  into later tests. Minimal addition, preserves main's semantics.
+- **Anon test uses a fresh unique IP per call** (`freshAnonReq`), mirroring main's
+  `freshUser()` isolation — IP buckets are module-level too and would bleed.
+- **"falls back to preset default when plan lookup throws" is now count-indistinguishable
+  from FREE** (both 15 under main's values). Kept for inner-catch coverage but renamed +
+  commented honestly rather than left implying a distinction it cannot prove.
+- **Behavioural note (took main's, per instruction):** our `buildStoreKey` deliberately did
+  NOT namespace custom `keyGenerator` results (caller declares its own scope); main's
+  `buildKey` namespaces everything including custom generators. Main's is the safer
+  default. Any future caller wanting a deliberately shared cross-preset scope via a custom
+  generator can no longer get it — no such caller exists today.
+
+### Gates
+
+- `git status`: no `UU`/`AA`; repo-wide conflict-marker sweep clean. Left staged, UNCOMMITTED.
+- `npx tsc --noEmit` → **0 errors**
+- `npm run test:run` → **3638 passed | 18 skipped (214 files)**, green (pre-merge ours was
+  3586|18; +52 from main's merged work incl. its rateLimit tests)
+- `npm run lint` → **0 errors** (2 pre-existing `react-hooks/exhaustive-deps` warnings, unrelated)
+- `test:e2e` NOT run (per instruction — founder runs it)
+
+### Open risks
+
+- Rate limiting stays in-memory per-instance; on serverless each instance keeps its own
+  buckets, so real ceilings are effectively per-instance. Pre-existing, unchanged by either
+  side, called out because the tier numbers now read as if they were global.

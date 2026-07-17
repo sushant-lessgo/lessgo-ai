@@ -85,7 +85,6 @@ export default function TechPremiumContactPublished(props: Props) {
               data-lessgo-form
               data-form-id={formId}
               data-page-id={props.publishedPageId}
-              data-owner-id={props.pageOwnerId}
               data-success-message={form?.successMessage || 'Request received — we’ll be in touch.'}
             >
               {props.form_heading && <h2 className="tp-form-heading">{props.form_heading}</h2>}

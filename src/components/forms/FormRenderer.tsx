@@ -114,7 +114,6 @@ export function FormRenderer({ form, mode = 'inline', className = '', userId, pu
           body: JSON.stringify({
             formId: form.id,
             data: formData,
-            userId,
             publishedPageId,
           }),
         });

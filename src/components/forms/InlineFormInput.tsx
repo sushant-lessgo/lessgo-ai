@@ -151,7 +151,6 @@ export function InlineFormInput({
           body: JSON.stringify({
             formId: form.id,
             data: submissionData,
-            userId,
             publishedPageId,
           }),
         });
