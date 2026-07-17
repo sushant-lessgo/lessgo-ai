@@ -50,10 +50,9 @@ vi.mock('@/lib/staticExport/injectChrome', () => ({ injectChromeIntoPage: vi.fn(
 
 vi.mock('@/lib/i18n/localeSlugCollision', () => ({ findLocaleSubpageCollision: () => null }));
 
-// generateStaticHTML is reached via renderPublishedExport (the route's actual
-// dynamic-import seam); both are mocked so either can be made to throw.
-vi.mock('@/lib/staticExport/htmlGenerator', () => ({ generateStaticHTML: vi.fn(async () => '<html></html>') }));
-
+// The route's real export seam is `renderPublishedExport` (route.ts :344/:372) — it does
+// NOT import `generateStaticHTML` itself, so mocking htmlGenerator here would be inert.
+// Throw from the real seam instead.
 const renderPublishedExport = vi.fn();
 vi.mock('@/lib/staticExport/renderPublishedExport', () => ({ renderPublishedExport }));
 vi.mock('@/lib/staticExport/versionCleanup', () => ({ cleanupOldVersions: vi.fn(async () => {}) }));
@@ -70,10 +69,14 @@ vi.mock('@/lib/routing/kvRoutes', () => ({
   removeRedirect: vi.fn(async () => {}),
 }));
 
+import * as Sentry from '@sentry/nextjs';
 import { prisma } from '@/lib/prisma';
 import { POST } from './route';
 
 const db = prisma as any;
+
+/** The exact user-facing string the route returns from the export catch (contract). */
+const FAIL_MESSAGE = 'Publish failed. Your changes were saved — please try publishing again.';
 
 const BLOB_KEY = 'pages/page_1/3/index.html';
 
@@ -117,16 +120,23 @@ describe('/api/publish — honest failure on static-export error (publish-trust 
     atomicPublishWithRetry.mockResolvedValue({ attempts: 1, verified: true } as any);
   });
 
-  it('case 1: generateStaticHTML/export throws → 500 { error }, no url, row failed (no blob to roll back)', async () => {
+  it('case 1: static export throws → 500 { error }, no url, row failed (no blob to roll back)', async () => {
     renderPublishedExport.mockRejectedValue(new Error('render blew up'));
 
     const res: any = await POST(makeReq(BODY));
 
     expect(res.__status).toBe(500);
-    expect(typeof res.__body.error).toBe('string');
-    expect(res.__body.error.length).toBeGreaterThan(0);
+    // Pin the EXACT string, not `typeof === 'string'`: status + typeof would also pass on the
+    // outer fatal catch's generic 500 ('Internal Server Error'), i.e. it wouldn't prove we came
+    // through the honest export-failure path at all. The message is also the user-facing
+    // contract (`preview/[token]/page.tsx` → setPublishError → SlugModal `publish-error`).
+    expect(res.__body.error).toBe(FAIL_MESSAGE);
     expect(res.__body.url).toBeUndefined();
     expect(res.__body.message).toBeUndefined();
+
+    // Spec M3 constraint: Sentry capture is PRESERVED behavior — an honest 500 must still
+    // report the underlying cause (the body deliberately leaks no internals).
+    expect(Sentry.captureException).toHaveBeenCalled();
 
     // Failure DURING generation self-cleans inside the helper: no blobKey recorded yet.
     expect(del).not.toHaveBeenCalled();

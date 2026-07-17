@@ -23,8 +23,76 @@ leak so this can never rot silently again.
 
 ## Progress log
 
-- phase 1 M3 route fix + route vitest + docs commit: pending
-- phase 2 M3 e2e seam (dev publish now 500s): pending
+- phase 1 M3 route fix + route vitest + docs commit: **done** (commit `f2776e18`, review loops 1, verdict `ship`)
+  - Plan correction: route calls `renderPublishedExport` (`:344`/`:372`), NOT `generateStaticHTML` (zero
+    matches in route.ts) — scout+plan named the wrong seam; a test mocking only `generateStaticHTML`
+    would have been VACUOUS. Test throws from the real seam. Rollback case split (1b): a throw during
+    generation never records a `blobKey` (helper self-cleans, `renderPublishedExport.ts:547-556`), so
+    case 1 pins `del` NOT called; 1b drives the throw past a successful export to exercise `del`.
+  - Tests mutation-sensitive: 3 of 4 go red on revert (verified by reviewer, not claimed).
+  - Env note: `npx tsc --noEmit` reports ONE pre-existing unrelated error —
+    `src/app/page.tsx(6,26) TS2307 '@/assets/images/founder.jpg'` — this worktree lacks the generated
+    `next-env.d.ts` (gitignored; produced by `next dev/build`). NOT caused by this branch. Expect it
+    in every phase's tsc until a `next build` runs here.
+  - Repo hygiene: vitest rewrites `__snapshots__/uiFoundationIsolation.test.tsx.snap` with LF endings
+    on every run → git flags it modified with an EMPTY diff. Pure EOL churn; `git checkout --` it.
+    Do NOT mistake it for a phase-3 escaping regression (phase 3's guard asserts this file unmodified —
+    check `git diff` CONTENT, not just status).
+- phase 2a rate-limit key namespacing (SCOPE ADDITION — founder-approved 2026-07-17): **impl done**,
+  awaiting review. `name` now REQUIRED on `RateLimitConfig` (optional+fallback would let the bug
+  silently recur; grep proved zero inline configs / zero custom keyGenerators repo-wide). Single
+  `buildStoreKey` = sole key derivation for rateLimit/getRateLimitStatus/clearRateLimit (closes the
+  consistency trap). Custom keyGenerators deliberately NOT namespaced (caller declares own scope) —
+  documented. New `src/lib/rateLimit.test.ts` (9 cases). test:run 3550→3559.
+  - **Non-vacuousness MEASURED, not reasoned:** reverting the namespace → 3 failed / 6 passed.
+    That revert run also caught a DUD test of the implementer's own (an IP-namespacing case that
+    passed even against the bug, because DOMAIN_VERIFY's shared increments still cleared GENERAL's
+    limit of 100 either way) → strengthened to assert `remaining` (99 vs 97). **Lesson: measure
+    non-vacuousness by reverting; reasoning about it would have shipped a dud that looked like coverage.**
+  - Risk accepted (founder-approved): this is a LOOSENING. Per-user AI exposure goes from an
+    effective shared ceiling to the true 5/10 per tier. `checkCredits` — not the limiter — is the
+    real cost gate. Pre-existing + unchanged: store is in-memory per instance, so on multi-instance
+    serverless the limits are already per-lambda and looser than advertised (Redis = long-term answer).
+- phase 2 M3 e2e seam (dev publish now 500s): **impl done**, awaiting review + final e2e.
+  - 429s GONE after 2a (0 in log; 60→68 passed).
+  - `dashboard-shell.spec.ts` DID run (8 passed, 1 skipped) — earlier doubt was a truncated-tail
+    artifact. `dashboard-shell:258` runs (1.5m), does NOT silently skip. Seam works.
+  - Folded in: fix for a PRE-EXISTING e2e flake (see below).
+
+### PRE-EXISTING e2e flake — root-caused 2026-07-17 (NOT caused by this branch)
+
+`dashboard-lifecycle.spec.ts:393` intermittently 404s on `POST /api/projects/{token}/unpublish`.
+**Not the route** — it's `src/middleware.ts:251-253` Clerk `auth.protect()` → `notFound()` on an
+EXPIRED session for a non-document request (same behavior deliberately pinned by the sibling test
+at `:187`). `page.request` shares the browser cookie jar; Clerk's `__session` JWT lives ~60s and is
+refreshed by clerk-js ONLY on an **app** page (see `e2e/publish.spec.ts:19-21` — why `authedApi()`
+exists). `:383` does `page.goto('/p/{slug}')` = published page, no clerk-js → refresh stops → `:393`
+lands past expiry when the test ran slow. Latent at `:287`/`:330` too.
+
+Evidence it's pre-existing: file byte-identical to main; non-deterministic (passes alone 53.8s,
+whole-file 14/14, fails full-suite at identical duration); **main's own full authed run = 2 failed /
+50 passed / 13 did not run (21.4m)** — failures `dashboard-redirects.spec.ts:134` + `publish.spec.ts:14`
+(Lex), BOTH files phase 2 edits and NEITHER fails on our branch. Our run = 1 failed / 55 passed /
+4 did not run (13.9m) — **strictly better than main, and 7.5min faster** (2a cuts limiter backoff).
+
+**MAIN IS NOT A GREEN BASELINE.** Judging this branch by "0 failed" is unfair — score it against main.
+
+"4 did not run" = `test.describe.configure({ mode: 'serial' })` (`:32`) aborting the rest of the
+group after the failure (the 4 tests at `:402`/`:428`/`:452`/`:557`). Not maxFailures (unset), not
+retries (`retries: 0` locally).
+
+### Orchestrator hygiene notes (bit us this run)
+
+- **NEVER pipe `npm run test:e2e` through `tail`** — the pipe returns TAIL's exit code (0), masking a
+  failed suite. Nearly reported a red suite as green. Read the summary line, not `$?`.
+- Port 3000 held by foreign PID 17640 → use explicit `E2E_PORT`. NEVER let Playwright reuse an
+  existing server (`playwright.config.ts:86-90`: it would silently test ANOTHER worktree's code).
+  - Carry into phase 2 (phase-1 review non-blocking, folded — `route.test.ts` added to phase 2 files):
+    (a) drop/reword the dead `vi.mock('@/lib/staticExport/htmlGenerator')` (`route.test.ts:55`) — route
+    never imports it, mock is inert; (b) tighten case 1 to `expect(res.__body.error).toBe('Publish
+    failed. …')` — status+typeof would also pass on an outer FATAL-catch 500, so pin the exact honest-
+    failure path + the user-facing string as contract; (c) add a `Sentry.captureException` called
+    assertion — spec's M3 constraint names Sentry capture as preserved behavior but nothing pins it.
 - phase 3 M4 head escaping + URL scheme gate: pending
 - phase 4 M5 published-CSS globs + in-script guards + sha baseline bump: pending
 - phase 5 integration verification + gates sweep: pending
@@ -118,6 +186,58 @@ routes, rate-limit wrapper, `createSecureResponse`. Cases:
 - Diff review: `Page published successfully` unreachable when the export catch fires.
 - **Known-red window:** authed e2e is expected red until phase 2 lands — do NOT run `test:e2e` as a
   phase-1 gate; phase 2 must immediately follow.
+
+---
+
+## Phase 2a — rate-limit key namespacing (SCOPE ADDITION, founder-approved 2026-07-17)
+
+**Not in the spec.** Surfaced by phase 2: `test:e2e` failed 2× on `/api/publish -> 429`. Root cause is a
+**live production bug**, not a test artifact — orchestrator verified against source, founder approved
+fixing it here (option 1 of 4) rather than splitting it to its own spec.
+
+### The bug
+
+`defaultKeyGenerator` (`src/lib/rateLimit.ts:115-127`) returns `user:{userId}` / `ip:{ip}` with **no
+per-preset namespace**, and every preset shares ONE `rateLimitStore` (`:24`). So every rate-limited
+route increments **the same counter**, then compares it against **its own** `maxRequests`
+(`:195`) — the LOWEST limit effectively governs ALL routes for a given user.
+
+Live impact: AI-generate/regenerate 5× (`AI_GENERATION` = 5/min FREE) → **publish 429s** with "Too many
+requests", a message about a limit the user never hit on publishing. Consumers of the shared counter:
+`withAIRateLimit` (5/tier), `withPublishRateLimit` (5), `withDraftRateLimit` (30),
+`withFormRateLimit` (10), `withGeneralRateLimit` (100) — see `src/app/api/**` (many routes).
+
+Phase 1 did NOT cause this — it EXPOSED it. Publishes used to take ~2min (waiting out doomed Blob/KV
+retries), accidentally spacing them past the 60s window; M3's honest 500 returns in ~2.3s, so the
+collision now surfaces every run.
+
+**The correct pattern already exists 40 lines up:** `checkDomainRateLimit` (`:75`) namespaces its key
+`domain:{name}`. This fix makes the per-user path consistent with it.
+
+### Design
+
+Namespace the store key per preset: `${presetName}:user:${userId}` / `${presetName}:ip:${ip}`.
+
+**Consistency trap (do not miss):** `getRateLimitStatus` (`:297-315`) and `clearRateLimit`
+(`:318-322`) call `keyGenerator` directly and hit the store themselves. If `rateLimit()` namespaces
+but they don't, they silently read/clear the WRONG key. All three must derive the key through ONE
+shared helper. `checkDomainRateLimit` keeps its own `domain:` key (already correct, don't touch).
+
+**This is a LOOSENING** — each route now gets its own budget, so a user may make strictly more total
+requests/min than today. That is the intent (the presets' documented numbers become true), and it is
+the founder-approved tradeoff. Every preset's own advertised limit is still enforced.
+
+**Files touched**
+- `src/lib/rateLimit.ts`
+- `src/lib/rateLimit.test.ts` (new if absent — implementer checks)
+- `docs/task/publish-trust.audit.md` (append `## Phase 2a`)
+
+**Verification**
+- `npx tsc --noEmit` clean; `npm run test:run` green.
+- Unit tests: presets do NOT share a counter (exhaust AI budget → publish still allowed); each preset
+  still enforces its OWN limit (exhaust publish's 5 → 6th publish 429s); `getRateLimitStatus` /
+  `clearRateLimit` operate on the SAME namespaced key `rateLimit()` uses (the consistency trap).
+- Phase 2's `test:e2e` green is the real proof — run it in phase 2, not here.
 
 ---
 

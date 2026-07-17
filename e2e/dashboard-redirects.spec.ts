@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { AUDIENCES, seedDraft } from './helpers/seedDraft';
+import { AUDIENCES, seedDraft, publishSeed } from './helpers/seedDraft';
 
 // dashboard-workspace-ia PHASE 4 (analytics/leads) + PHASE 5 (blog/testimonials) —
 // slug → token redirect shims + the C1/D1 no-hop rule.
@@ -17,7 +17,8 @@ import { AUDIENCES, seedDraft } from './helpers/seedDraft';
 // the re-homed surfaces (single Clerk session, no orphan seeding) → founder gate 1-3.
 //
 // Serial: the published fixture is built ONCE and shared (publishing is slow — the
-// local Blob/KV calls run to their timeouts before the non-fatal fallback returns).
+// local Blob/KV calls run to their timeouts before the route can answer; post
+// publish-trust M3 that answer is an honest 500 locally, see `getPublishedFixture`).
 test.describe.configure({ mode: 'serial' });
 
 const CFG = AUDIENCES[0];
@@ -66,9 +67,19 @@ async function getDraftToken(page: Page): Promise<string | null> {
 }
 
 /**
- * Build (once) a PUBLISHED project: persona → /api/start → seed draft → drive the real
- * publish UI. A `PublishedPage` is what gives us a slug for the shims and an unlocked
- * analytics tab. Mirrors `publish.spec.ts`.
+ * Build (once) a PUBLISHED project: persona → /api/start → seed draft → publish via the
+ * real `/api/publish` route (`publishSeed`). A `PublishedPage` is what gives us a slug for
+ * the shims and an unlocked analytics tab — this fixture only needs a SERVING row, which is
+ * exactly what `publishSeed` guarantees; it never needed the publish UI.
+ *
+ * Was: a hand-rolled drive of the publish UI on pre-t17 selectors (`div.shadow-lg`,
+ * /Choose your page URL/, /Confirm & Publish/, /Page Published/) that the t17 reskin had
+ * already replaced — i.e. it could never have resolved. `publish.spec.ts` is the ONE spec
+ * that owns the publish UI; this one just needs the fixture.
+ *
+ * publish-trust M3: local `/api/publish` honestly 500s (Blob/KV absent → the export catch in
+ * `src/app/api/publish/route.ts` returns 500 instead of the old fake 200). `publishSeed`
+ * absorbs that, but only when the resulting `failed` row actually serves `/p/{slug}`.
  */
 async function getPublishedFixture(page: Page): Promise<Fixture | null> {
   if (fixture !== undefined) return fixture;
@@ -87,23 +98,8 @@ async function getPublishedFixture(page: Page): Promise<Fixture | null> {
   const token = new URL(url).pathname.split('/').filter(Boolean).pop();
   if (!token) return null;
 
-  await seedDraft(api, token, CFG);
-
-  await page.goto(`/preview/${token}`);
-  const publishBtn = page.getByRole('button', { name: 'Publish', exact: true });
-  await expect(publishBtn, 'Publish never enabled (isPublishReady false?)').toBeEnabled({
-    timeout: 45_000,
-  });
-  await publishBtn.click();
-
-  const modal = page
-    .locator('div.shadow-lg')
-    .filter({ hasText: /Choose your page URL|Republish Your Page/ });
-  await expect(modal).toBeVisible();
-  await modal.getByRole('textbox').first().fill(SLUG);
-  await modal.getByPlaceholder('e.g., Design Tools for Social Media Marketers').fill(CFG.title);
-  await modal.getByRole('button', { name: /Confirm & Publish|Update Published Page/ }).click();
-  await expect(page.getByText(/Page Published/i)).toBeVisible({ timeout: 120_000 });
+  const finalContent = await seedDraft(api, token, CFG);
+  await publishSeed(api, token, SLUG, CFG, finalContent);
 
   fixture = { token, slug: SLUG };
   return fixture;
