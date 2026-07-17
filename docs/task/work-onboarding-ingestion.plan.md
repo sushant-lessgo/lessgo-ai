@@ -13,7 +13,7 @@ E2 makes STEP 02 of the work journey real: upload photos (folder or loose files)
 ## Progress log
 
 - phase 1 binding spine + gallery covers (fail-fast reveal proof): done (commit 8cf890ab, impl-review=ship loops 1; tsc clean, 3802 tests pass, build ok; e2e authored, registration deferred to P2)
-- phase 2 WorkDetail + WorkCatalog blocks, conformance relax, atelier2 works flip + pilot enablement: impl done, impl-review=ship (loops 1; tsc clean, 3824 tests pass, build ok; +elementSchema authorized mid-phase, both pairs renderParity-enrolled) — AWAITING FOUNDER PARITY GATE before commit+P3
+- phase 2 WorkDetail + WorkCatalog blocks, conformance relax, atelier2 works flip + pilot enablement: done (commit a91b9272, impl-review=ship loops 1; founder parity gate PASSED; tsc clean, 3824 tests pass, build ok)
 - phase 3 upload spine + functional STEP 02 behind widened seam: pending
 - phase 4 correction screen (5 verbs) + ingestion-writer regression: pending
 - phase 5 end-to-end hardening + Kundius pilot: pending
