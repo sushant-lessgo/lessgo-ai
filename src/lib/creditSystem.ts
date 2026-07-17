@@ -164,12 +164,55 @@ export async function checkCredits(
 }
 
 /**
- * Deduct credits from user's balance (with transaction)
+ * Sentinel thrown inside the deduction tx when a guarded conditional update
+ * affects 0 rows (i.e. someone else spent the same credits between our read and
+ * our write). Throwing it rolls the WHOLE tx back — that rollback is the only
+ * thing preventing a partial charge (monthly decremented, pool guard failed).
+ * Caught by the bounded retry loop in deductCredits; never escapes the module.
+ */
+class BucketConflictError extends Error {
+  constructor() {
+    super('bucket_conflict');
+    this.name = 'BucketConflictError';
+  }
+}
+
+const MAX_DEDUCT_ATTEMPTS = 3;
+
+/**
+ * Deduct credits from user's balance.
+ *
+ * Concurrency model (H1 fix — this used to be a read-modify-write with a FALSE
+ * "lock the usage record" comment; findUnique takes no lock, so N concurrent
+ * spends all read the same balance and all succeeded on one credit):
+ *  - The reads below ONLY compute the monthly/pool split. They enforce NOTHING.
+ *  - Every write is a guarded conditional `updateMany` (`creditsRemaining >=
+ *    fromMonthly`, `creditPool >= fromPool`) whose affected-row count MUST be 1.
+ *    count !== 1 ⇒ BucketConflictError ⇒ whole tx rolls back ⇒ bounded retry.
+ *  - CORROLARY (important): when `fromMonthly === 0` the monthly guard
+ *    (`creditsRemaining: { gte: 0 }`) is TRIVIALLY TRUE — it is NOT a defense on
+ *    pool-only spends. The update still increments creditsUsed + the per-eventType
+ *    counter, and only the pool guard can then fail. On pool-only spends the pool
+ *    guard is the SOLE enforcer and the tx rollback is the only thing that keeps
+ *    creditsUsed from being phantom-inflated by the losers.
+ *  - Retry (max 3) fires ONLY on BucketConflictError: e.g. monthly=1/pool=5 with
+ *    two concurrent cost-1 spends — both pick fromMonthly=1, the loser's monthly
+ *    guard fails even though the pool could cover it; the retry re-reads and
+ *    recomputes the split (fromMonthly=0/fromPool=1) and succeeds.
+ *  - Genuine insufficiency throws immediately (no retry).
+ *  - Retry exhaustion returns error 'charge_conflict' — a DISTINGUISHABLE code,
+ *    never the insufficient-credits string: the user may be perfectly solvent and
+ *    telling them they're broke is a support ticket on the money path.
+ *
+ * Ledger: when `eventData` is supplied, the success UsageEvent is written INSIDE
+ * the tx (last op) so a successful spend and its ledger row are atomic; retries
+ * roll it back, so no duplicate rows.
  */
 export async function deductCredits(
   userId: string,
   creditsToDeduct: number,
-  eventType: UsageEventType
+  eventType: UsageEventType,
+  eventData?: Partial<UsageEventData>
 ): Promise<{ success: boolean; remaining: number; error?: string }> {
   // Dev mode bypass
   if (process.env.NODE_ENV === 'development' && process.env.DEV_BYPASS_CREDITS === 'true') {
@@ -177,102 +220,144 @@ export async function deductCredits(
     return { success: true, remaining: 999999 };
   }
 
-  try {
-    const period = getCurrentPeriod();
+  const period = getCurrentPeriod();
+  // Best-effort balance seen by the last attempt, reported on retry exhaustion.
+  let lastKnownBalance = 0;
 
-    // Use transaction to prevent race conditions
-    const result = await prisma.$transaction(async (tx) => {
-      // Lock the usage record for update
-      const usage = await tx.userUsage.findUnique({
-        where: {
-          userId_period: {
-            userId,
-            period,
+  for (let attempt = 1; attempt <= MAX_DEDUCT_ATTEMPTS; attempt++) {
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const usage = await tx.userUsage.findUnique({
+          where: {
+            userId_period: {
+              userId,
+              period,
+            },
           },
-        },
-      });
-
-      if (!usage) {
-        throw new Error('Usage record not found');
-      }
-
-      // pricing-v2: credits = monthly allotment (this period's creditsRemaining)
-      // PLUS the persistent pool on UserPlan. The OLD guard checked only
-      // creditsRemaining, so FREE/LTD users (monthly creditsLimit=0 →
-      // creditsRemaining=0) threw "Insufficient credits" BEFORE the pool was ever
-      // consulted. New guard checks the combined balance; we then drain the
-      // monthly allotment FIRST and take the remainder from the pool.
-      const userPlan = await tx.userPlan.findUnique({ where: { userId } });
-      const poolBalance = userPlan?.creditPool ?? 0;
-
-      if (usage.creditsRemaining + poolBalance < creditsToDeduct) {
-        throw new Error('Insufficient credits');
-      }
-
-      const fromMonthly = Math.min(usage.creditsRemaining, creditsToDeduct);
-      const fromPool = creditsToDeduct - fromMonthly;
-
-      // Update usage counters based on event type. creditsUsed records the TOTAL
-      // consumed (monthly + pool); creditsRemaining tracks only the monthly bucket.
-      const updateData: any = {
-        creditsUsed: usage.creditsUsed + creditsToDeduct,
-        creditsRemaining: usage.creditsRemaining - fromMonthly,
-      };
-
-      switch (eventType) {
-        case UsageEventType.PAGE_GENERATION:
-          updateData.fullPageGens = usage.fullPageGens + 1;
-          break;
-        case UsageEventType.SECTION_REGEN:
-          updateData.sectionRegens = usage.sectionRegens + 1;
-          break;
-        case UsageEventType.ELEMENT_REGEN:
-          updateData.elementRegens = usage.elementRegens + 1;
-          break;
-        case UsageEventType.FIELD_INFERENCE:
-          updateData.fieldInference = usage.fieldInference + 1;
-          break;
-      }
-
-      // Update usage record
-      const updatedUsage = await tx.userUsage.update({
-        where: {
-          userId_period: {
-            userId,
-            period,
-          },
-        },
-        data: updateData,
-      });
-
-      // Drain the pool for the remainder (if any).
-      let newPoolBalance = poolBalance;
-      if (fromPool > 0) {
-        const updatedPlan = await tx.userPlan.update({
-          where: { userId },
-          data: { creditPool: { decrement: fromPool } },
         });
-        newPoolBalance = updatedPlan.creditPool;
+
+        if (!usage) {
+          throw new Error('Usage record not found');
+        }
+
+        // pricing-v2: credits = monthly allotment (this period's creditsRemaining)
+        // PLUS the persistent pool on UserPlan. Drain the monthly allotment FIRST
+        // and take the remainder from the pool.
+        const userPlan = await tx.userPlan.findUnique({ where: { userId } });
+        const poolBalance = userPlan?.creditPool ?? 0;
+
+        lastKnownBalance = usage.creditsRemaining + poolBalance;
+
+        if (lastKnownBalance < creditsToDeduct) {
+          throw new Error('Insufficient credits');
+        }
+
+        const fromMonthly = Math.min(usage.creditsRemaining, creditsToDeduct);
+        const fromPool = creditsToDeduct - fromMonthly;
+
+        // creditsUsed records the TOTAL consumed (monthly + pool);
+        // creditsRemaining tracks only the monthly bucket.
+        const updateData: any = {
+          creditsUsed: { increment: creditsToDeduct },
+          creditsRemaining: { decrement: fromMonthly },
+        };
+
+        switch (eventType) {
+          case UsageEventType.PAGE_GENERATION:
+            updateData.fullPageGens = { increment: 1 };
+            break;
+          case UsageEventType.SECTION_REGEN:
+            updateData.sectionRegens = { increment: 1 };
+            break;
+          case UsageEventType.ELEMENT_REGEN:
+            updateData.elementRegens = { increment: 1 };
+            break;
+          case UsageEventType.FIELD_INFERENCE:
+            updateData.fieldInference = { increment: 1 };
+            break;
+        }
+
+        const monthlyUpdate = await tx.userUsage.updateMany({
+          where: { userId, period, creditsRemaining: { gte: fromMonthly } },
+          data: updateData,
+        });
+        if (monthlyUpdate.count !== 1) {
+          throw new BucketConflictError();
+        }
+
+        if (fromPool > 0) {
+          const poolUpdate = await tx.userPlan.updateMany({
+            where: { userId, creditPool: { gte: fromPool } },
+            data: { creditPool: { decrement: fromPool } },
+          });
+          if (poolUpdate.count !== 1) {
+            throw new BucketConflictError();
+          }
+        }
+
+        // Ledger row, in-tx (atomic with the decrement).
+        if (eventData) {
+          await tx.usageEvent.create({
+            data: {
+              userId,
+              eventType,
+              creditsUsed: creditsToDeduct,
+              tokensUsed: eventData.tokensUsed,
+              estimatedCost: eventData.estimatedCost,
+              projectId: eventData.projectId,
+              sectionId: eventData.sectionId,
+              elementKey: eventData.elementKey,
+              metadata: eventData.metadata,
+              endpoint: eventData.endpoint,
+              duration: eventData.duration,
+              success: true,
+            },
+          });
+        }
+
+        // Re-read inside the tx (it sees its own writes) for the return value.
+        const freshUsage = await tx.userUsage.findUnique({
+          where: { userId_period: { userId, period } },
+        });
+        const freshPlan = await tx.userPlan.findUnique({ where: { userId } });
+
+        return {
+          remaining: (freshUsage?.creditsRemaining ?? 0) + (freshPlan?.creditPool ?? 0),
+        };
+      });
+
+      logger.dev(`Deducted ${creditsToDeduct} credits from user ${userId}. Remaining: ${result.remaining}`);
+
+      return {
+        success: true,
+        remaining: result.remaining,
+      };
+    } catch (error: any) {
+      if (error instanceof BucketConflictError) {
+        logger.dev(
+          `Credit deduction conflict for user ${userId} (attempt ${attempt}/${MAX_DEDUCT_ATTEMPTS}) — retrying`
+        );
+        continue;
       }
-
-      // Total available after deduction = remaining monthly + remaining pool.
-      return { remaining: updatedUsage.creditsRemaining + newPoolBalance };
-    });
-
-    logger.dev(`Deducted ${creditsToDeduct} credits from user ${userId}. Remaining: ${result.remaining}`);
-
-    return {
-      success: true,
-      remaining: result.remaining,
-    };
-  } catch (error: any) {
-    logger.error('Error deducting credits:', error);
-    return {
-      success: false,
-      remaining: 0,
-      error: error.message || 'Failed to deduct credits',
-    };
+      logger.error('Error deducting credits:', error);
+      return {
+        success: false,
+        remaining: 0,
+        error: error.message || 'Failed to deduct credits',
+      };
+    }
   }
+
+  // Retry exhausted: the user is very likely SOLVENT and just lost every race.
+  // Distinguishable code — callers must NOT show the buy-credits wall for this.
+  logger.error(
+    `Credit deduction conflict exhausted for user ${userId} after ${MAX_DEDUCT_ATTEMPTS} attempts`
+  );
+  return {
+    success: false,
+    remaining: lastKnownBalance,
+    error: 'charge_conflict',
+  };
 }
 
 /**
@@ -379,8 +464,15 @@ export async function consumeCredits(
       };
     }
 
-    // Deduct credits
-    const deduction = await deductCredits(userId, creditsRequired, eventType);
+    // Deduct credits. The success ledger row is written INSIDE the deduction tx
+    // (atomic with the decrement — a crash can no longer leave a silent
+    // unledgered spend), so there is deliberately NO post-hoc success
+    // logUsageEvent here: that would double-ledger. Failure records below stay
+    // on logUsageEvent (no tx to join; swallow-on-error is fine for those).
+    const deduction = await deductCredits(userId, creditsRequired, eventType, {
+      duration: Date.now() - startTime,
+      ...eventData,
+    });
     if (!deduction.success) {
       // Log failed deduction
       await logUsageEvent({
@@ -393,18 +485,11 @@ export async function consumeCredits(
         ...eventData,
       });
 
+      // Propagate the error string UNMANGLED — routes branch on
+      // 'charge_conflict' (solvent user, lost the race → recoverable 500) vs a
+      // genuine insufficiency (→ 402).
       return deduction;
     }
-
-    // Log successful operation
-    await logUsageEvent({
-      userId,
-      eventType,
-      creditsUsed: creditsRequired,
-      success: true,
-      duration: Date.now() - startTime,
-      ...eventData,
-    });
 
     return {
       success: true,
