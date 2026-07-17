@@ -215,3 +215,9 @@ No `src/` file was touched in this phase — the full gate ran clean without cod
 ### Open risks
 - Founder live-walk gate (HUMAN GATE, final) still pending — the local gate proves determinism/wiring, not real-LLM copy quality or the new-vs-established branch copy routing (verified downstream at a generation run / E4).
 - Full-suite e2e remains subject to the Windows-worktree heap-corruption flake; run E3's spec in isolation (or on CI) rather than a from-cold 1.2h local sweep.
+
+## Impl-review (standard-tier, whole diff `main...HEAD`)
+
+**Verdict: ship** (0 blocking). Reviewer re-ran gates: tsc clean, `test:run` 3853 passed | 18 skipped, targeted e2e `required gate|walks 02→04` 3 passed (gate confirmed load-bearing, not theatre). Scope = exactly the 15 files, no creep. Frozen contract respected (no reshape; entry sibling + group photos/items/kind preserved through real /api/saveDraft). `workJourneySeam` is the only seam implementing `questions()`, so the `choice`/`questions(vm,ctx)` extension breaks nothing.
+
+Non-blocking notes (accepted): (1) choice answered-compact summary shows `suggested.join`, not the exact user selection — cosmetic; (2) on-request price re-confirms one tap on back-nav/reload — documented D-C tradeoff, on-request path only; (3) dreamClient rendered multi vs plan's single — superset, logged.
