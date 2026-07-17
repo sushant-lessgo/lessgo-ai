@@ -205,7 +205,58 @@ EXIT=1
 **Merge context (orchestrator):** this is **deploy #2 (security tier)**, NOT the big-bang. Park at the
 merge gate. **Merge order: S1 `billing-correctness` FIRST; publish-trust any time after.**
 - phase 4 M5 published-CSS globs + in-script guards + sha baseline bump: pending
-- phase 5 integration verification + gates sweep: pending
+- phase 4 M5 guards (option C): **done** (commit `d41c08bb`, 1 review loop, `ship`)
+  - `published.css` rebuilds **BYTE-IDENTICAL** (`c2f87e08…`, 32,031 B, ABSENT from `git status`) —
+    verified **3× independently** (implementer, reviewer, orchestrator). No sha bump;
+    `uiFoundationIsolation.test.tsx` untouched + green. Third confirmation the reverted globs
+    contributed nothing = the false premise proven a third way.
+  - Hardening folded in post-review (all 3 non-blocking):
+    1. Guard 2 `process.exit(1)` → `throw` — it fired AFTER the temp files were written, skipping both
+       cleanup paths → a failed build orphaned **untracked, non-gitignored** `tailwind.published.config.js`
+       + `published.input.css` in the repo root. Now the existing catch cleans up; exit stays non-zero,
+       message still names the token. Proven by reproducing.
+    2. `fast-glob` → `glob`. Guard 1 resolved `fast-glob` via **Tailwind's dependency tree**, not a direct
+       dep → "cannot find module" if Tailwind ever drops it (plausible at v4). **`glob@^11.0.3` was
+       ALREADY direct** (`package.json:58`) → swap = zero new deps, `package.json` unmodified. Per-glob
+       counts verified identical incl. the zero case.
+    3. Guard 2 word-boundary matching (was bare substring → `.honest-review` would false-positive on
+       `onest`). 7/7 proof: `.honest-review{}`/`.uncaveated{}` no longer match; `Onest`,
+       `"Material Symbols Outlined"`, `--app-cta`, `.text-app-ink`, `--app-primary`, `Caveat` still caught.
+  - **Reviewer caught its OWN vacuous negative test mid-review**: its first guard-2 probe safelisted
+    `font-app-cta`, which emitted NO CSS → the guard "passed" by having nothing to detect. Retested with
+    `tw-border-spacing-x` (provably present in output, grep: 2 occurrences). **5th vacuous check this run.**
+  - Known + pre-existing (NOT introduced, logged not fixed): guard 2 fires AFTER `published.css` is
+    written, so a GENUINE leak leaves the leaked CSS on disk — build still exits non-zero, so it can't ship.
+- phase 5 integration verification + gates sweep: in progress
+  - `npx tsc --noEmit` → **0 errors**.
+  - `npm run lint` → **0 errors** (pre-existing warnings only: `no-img-element`, `exhaustive-deps` in
+    files this branch never touched).
+  - `npm run build` (FULL chain) → exit 0 (phase 4).
+  - `npm run test:run` → **3586 passed | 18 skipped**.
+  - `npm run test:e2e` → **NOT RE-RUN on the final state — founder runs it (decided 2026-07-17).**
+    3 consecutive runs killed externally (one within 9s of start). Each left zombie node processes
+    (dev server + playwright workers); orchestrator cleaned up only its OWN (today's), leaving the
+    founder's 7/15+7/16 processes untouched.
+    - **Command:** `cd .claude/worktrees/publish-trust && E2E_PORT=3111 npm run test:e2e` (~15m).
+      **Expect 73 passed / 0 failed.** NOT port 3000 (foreign PID 17640). NEVER let playwright reuse an
+      existing server (`playwright.config.ts:86-90` — it would silently test ANOTHER worktree's code).
+    - **Gap is narrow:** last COMPLETE run (73/0) postdates phase 2 but predates 3+4. **Phase 4 is
+      provably inert** (`published.css` byte-identical, verified 3×). **Phase 3 is the real gap** — it
+      changed generated published-page HTML bytes, which parity/render/publish specs exercise. Covered
+      by unit evidence (26 new tests, fix-sensitivity MEASURED: revert → 16 fail; `uiFoundationIsolation`
+      snapshot pins generated HTML, green + unmodified) but NOT end-to-end.
+
+### Orchestrator hygiene — TWO log-reading traps hit this run (both nearly caused false reports)
+
+1. **NEVER pipe `npm run test:e2e` through `tail`** — the pipe returns TAIL's exit code (0), masking a
+   RED suite. Nearly reported a failed suite as green. Redirect to a file + capture `$?` separately.
+2. **A killed/interrupted playwright run LOOKS like mass failures.** Its final report marks the current
+   test `✘ … (0ms)` and everything after `-` (skipped) — so an interrupted run reads as
+   "parity/render/publish specs failing". **0ms = never ran.** Tells: `1 passed / 63 did not run` in 16s
+   against a 15m suite; `✓ auth.setup (9.1s)` proving the server WAS up.
+   Also: resource exhaustion from zombie node processes → workers die with
+   `code=3221225794` (`0xC0000142 STATUS_DLL_INIT_FAILED`) → same 0ms signature.
+   **Both directions of the same disease: read what RAN, never the summary alone.**
 
 ---
 
