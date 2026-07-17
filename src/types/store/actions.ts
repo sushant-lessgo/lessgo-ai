@@ -177,9 +177,8 @@ export interface UIActions {
   setActiveForm: (formId?: string) => void;
   showFormBuilder: () => void;
   hideFormBuilder: () => void;
-  convertCTAToForm: (sectionId: string, elementKey: string) => void;
-  
-  // Images UI  
+
+  // Images UI
   setActiveImage: (imageId?: string) => void;
   showStockPhotoSearch: (query: string) => void;
   hideStockPhotoSearch: () => void;
