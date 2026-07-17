@@ -462,3 +462,12 @@ changes.
 
 ### Open risks
 None new. The spec now runs in the `authed` project on every `test:e2e` invocation.
+
+## Whole-feature impl-review (standard tier — single review over git diff main...HEAD)
+
+**Verdict: ship** (1 loop). tsc exit 0; 4091 tests pass. All 8 binding invariants verified: seam field-reuse only; one write door (commitRail sitemap snapshot/set/revert correct); approve awaits commit + gates advance on ok; generation/credit/reveal untouched (no escalation); no 2nd strategy fetch; zero internal vocab (sectionRow drops unmapped keys); no prod-reachable behavior; no dual-renderer surface. Soft-spots cleared: Phase-1 cast safe (work path carries goal at runtime; write path uses typed ConfirmedStructure); reorder preserves group photos (normalizeWorkGroup carries photos/items verbatim, rail.ts:257-258) — no data-loss on photo-bearing account; single-advance structurally guaranteed (StepPlan early-returns LazyBody before stub mounts).
+
+**Non-blocking notes (carried to merge summary):**
+1. buildStructurePatch now persists `title` for ALL multi-page engines (additive/harmless, title is .optional(); slightly out of E4 scope — more-correct round-trip).
+2. Read-only photo→page mapping heuristic (display-only, documented; Kundius = no-photo path).
+3. e2e inherits free-tier rate-limit retry loop (61s×3) from work-onboarding.spec.ts — slow/possibly flaky under load; known backlog #32/#33, not E4's to fix.
