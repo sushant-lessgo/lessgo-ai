@@ -16,11 +16,13 @@ import { AUDIENCES, seedDraft } from './helpers/seedDraft';
 //   5. Esc dismisses.
 //
 // phase 2 adds the Button/CTA + Footer cases. NOTE: there is deliberately NO form
-// case — the `form` ToolbarType cannot be DISPATCHED in today's editor (every
-// `form_*` element is an InlineTextEditorV2, whose click→focus sets
-// `isTextEditing`, and text is priority 1 in `getActiveToolbar`, so a form
-// selection is unreachable). Fixing that needs `useEditor`/priority changes that
-// are outside phase 2's Files-touched list. See the audit's BLOCKER section.
+// case, and there is no longer any form toolbar to test — phase 3 DELETED the inert
+// `FormToolbar` + `actionSets['form']` per founder ruling 8. Form dispatch is
+// over-determined dead: `determineElementType` (useEditor.ts:182-189) returns 'text'
+// on the tagName branch before `elementKey.includes('form')` (:197) is reached, AND
+// `isTextEditing` outranks `form` (selectionPriority.ts:45-47), AND the real
+// <input>s carry no element key. Form is deferred to Final; it needs a spec that
+// decides what selects a form and lands the DOM affordance.
 //
 // Shape mirrors edit-persistence.spec: authed Clerk session (storageState from the
 // `setup` project) → persona → /api/start → seed a mock-mode Meridian draft via the
@@ -196,7 +198,15 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
     expect(ids).not.toContain('ask-ai');
   });
 
-  test('button/CTA: Link/Action is disabled and inert until phase 3', async ({ page }) => {
+  // phase 3 UPDATE: Link/Action is STILL disabled — deliberately, and not because
+  // it is unfinished. The t4 LinkPicker shipped and replaced the popover at all 15
+  // mounts, but a button's link lives in `elementMetadata[key].buttonConfig`
+  // (a CtaButtonConfig), NOT the `Link{dest,source}` the picker emits, and there is
+  // no inverse mapping. "Button Settings" is the real link editor for buttons, so
+  // the tooltip now points there instead of promising a phase. See the phase-3 audit.
+  test('button/CTA: Link/Action is disabled and points at the control that works', async ({
+    page,
+  }) => {
     await page.locator('[data-element-key="cta_text"]').first().click();
     await expect(page.locator(SHELL)).toHaveCount(1, { timeout: 15_000 });
 
@@ -204,15 +214,16 @@ test.describe('toolbar dispatch (phases 1-2: one shell, curated actions)', () =>
     await expect(link).toHaveCount(1);
     await expect(link).toBeDisabled();
     await expect(link).toHaveAttribute('aria-disabled', 'true');
-    // The tooltip must say WHY (the disabled convention phase 1 standardised).
-    await expect(link).toHaveAttribute('title', /link picker lands next phase/i);
+    // The tooltip must say WHY (the disabled convention phase 1 standardised) and
+    // must NOT promise a future phase — that promise is what went stale.
+    await expect(link).toHaveAttribute('title', /button settings/i);
+    // The control it points at must actually be there, or the tooltip is a dead end.
+    await expect(page.locator(`${SHELL} [data-action="button-config"]`)).toHaveCount(1);
 
-    // Force-click must not open a picker or tear the shell down. If phase 3 wires
-    // the picker without un-disabling this, or un-disables it without a picker,
-    // this fails.
+    // Force-click must not open a picker or tear the shell down.
     await link.click({ force: true });
     await expect(page.locator(SHELL)).toHaveCount(1);
-    await expect(page.locator('[data-link-picker]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="link-picker"]')).toHaveCount(0);
   });
 
   // ── phase 2: Footer ────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@
 // src/modules/templates/vestria/blocks/editPrimitives.tsx
 // SHARED edit-mode primitives for every Vestria block core (one place, not per
 // block). Backed by VestriaEditable (text), the store (image upload + collection
-// writes), and LinkTargetPopover (href editing). Provided to a core via
+// writes), and LinkPicker (href editing). Provided to a core via
 // <VestriaEditProvider> + the module-level `editPrimitives` object; the core stays
 // a pure plain module that only references the VestriaPrimitives contract.
 
@@ -12,7 +12,7 @@ import { useEditStore } from '@/hooks/useEditStore';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { VestriaEditable } from '../components/VestriaEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import { resolveDestination } from '@/utils/resolveCtaHref';
 import { EditableImageCollection } from '@/app/edit/[token]/components/primitives/EditableImageCollection';
 import { resolveAlt } from '@/modules/editing/altText';
@@ -144,7 +144,7 @@ const Link: React.FC<VestriaLinkProps> = ({ hrefKey, href, className, ariaLabel,
   return (
     <span className="vs-link-edit" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       <span className={className} aria-label={ariaLabel}>{children}</span>
-      <LinkTargetPopover
+      <LinkPicker
         value={href || ''}
         sectionOptions={ctx.sectionOptions}
         pageOptions={ctx.pageOptions}

@@ -3,7 +3,7 @@
 // src/modules/skeletons/work/blocks/editPrimitives.tsx
 // SHARED edit-mode primitives for every work-skeleton block core (one place, not
 // per block). Backed by InlineTextEditorV2 (text), the store (image upload +
-// collection writes), and LinkTargetPopover (href editing). Provided to a core via
+// collection writes), and LinkPicker (href editing). Provided to a core via
 // <WorkEditProvider> + the module-level `editPrimitives` object; the core stays a
 // pure plain module that only references the WorkPrimitives contract.
 //
@@ -19,7 +19,7 @@ import { InlineTextEditorV2 } from '@/app/edit/[token]/components/editor/InlineT
 import { useIsElementExcluded } from '@/modules/templates/shared/elementExclusion';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import { resolveDestination } from '@/utils/resolveCtaHref';
 import type {
   WorkPrimitives, WorkTxtProps, WorkImgProps, WorkLinkProps, WorkListProps,
@@ -202,7 +202,7 @@ const Link: React.FC<WorkLinkProps> = ({ hrefKey, href, className, ariaLabel, ch
       data-element-key={hrefKey}
     >
       {children}
-      <LinkTargetPopover
+      <LinkPicker
         value={href || ''}
         sectionOptions={ctx.sectionOptions}
         pageOptions={ctx.pageOptions}

@@ -3,7 +3,7 @@
 // src/components/editor/SocialProfilesPanel.tsx
 // scale-04 (phase 6, D13) — editor panel for the project's SITE-LEVEL social
 // profiles. These are the single source for every footer/nav "social" link and
-// the LinkTargetPopover's derived Social options.
+// the LinkPicker's derived Social options.
 //
 // Storage / bridge: the panel edits the editor's richer `SocialMediaConfig`
 // store slice ({ items:{ id, platform, url, icon, order }[] }) via the existing

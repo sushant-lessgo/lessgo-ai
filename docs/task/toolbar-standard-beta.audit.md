@@ -572,3 +572,314 @@ files); 3546 passed / 18 skipped. E2E not re-run: comment-only change, no runtim
 **Open risks.** Unchanged from phase 2. The dormant Form path remains dead code until the gate ruling.
 
 Not committed — the orchestrator commits.
+
+---
+
+## Phase 3 — t4 LinkPicker: build, migrate all mounts, delete LinkTargetPopover + inert FormToolbar
+
+**Headline: the migration half shipped in full and is parity-proven. The "enable Text/Button Link"
+half is BLOCKED and did not ship** — not for effort, but because the plan's premise about where a
+Text/Button link is stored is wrong (see BLOCKER). Both deletions landed. `tsc` proves nothing
+dangles. **A ruling is needed before phase 4/5.**
+
+### Files changed
+
+- `src/components/editor/LinkPicker.tsx` (**new**) — the shared t4 picker.
+- `src/components/editor/LinkPicker.test.tsx` (**new**) — emission-parity pin (11 tests).
+- `src/components/editor/LinkTargetPopover.tsx` (**DELETED**).
+- `src/app/edit/[token]/components/toolbars/FormToolbar.tsx` (**DELETED** — founder ruling 8).
+- `src/app/edit/[token]/components/toolbars/actionSets.tsx` — `form` entry + import removed.
+- `src/app/edit/[token]/components/toolbars/ElementToolbar.tsx` — `link-action` disabled-title
+  corrected (it had gone stale/false); no other change.
+- The 14 mount files (15 mounts) — popover to LinkPicker:
+  `meridian/{Header/MeridianNavHeader,Footer/HairlineFooter}`,
+  `techpremium/{Header/TechPremiumNav,Footer/TechPremiumFooter}`,
+  `surge/{Header/WarmNavHeader,Footer/ContactFooterRich}`, `hearth/Header/WarmNavHeader`,
+  `lex/Header/LetterheadNav`, `lumen/Header/LumenNav`, `lumen/Footer/LumenFooter` (**2 mounts**),
+  `{vestria,granth,atelier}/blocks/editPrimitives.tsx`, `skeletons/work/blocks/editPrimitives.tsx`.
+- Comment/name-reference pass (**comment text only, zero behaviour**): `src/components/ui/popover.tsx`,
+  `src/components/ui/README.md`, `src/modules/templates/README.md`, `src/utils/normalizeCtas.ts`,
+  `src/modules/audience/product/parseCopy.ts`, `src/modules/templates/{granth,vestria}/blocks/primitives.ts`,
+  `src/modules/templates/{granth,vestria}/index.ts`, `src/components/editor/SocialProfilesPanel.tsx`,
+  `.claude/skills/manual-test/SKILL.md`.
+- `e2e/link-picker.spec.ts` (**new**), `e2e/toolbar-dispatch.spec.ts` (Form note + stale
+  `link-action` assertion), `playwright.config.ts` (register the new spec — the phase-1 trap).
+- `docs/task/toolbar-standard-beta.audit.md` (this file).
+
+**Published-side: clean.** `git diff --name-only` filtered for `.published.tsx` / `.core.tsx` /
+`componentRegistry` / renderers -> **empty**. Tripwire `linkTargetPublished.test.tsx`
+**byte-untouched, proven by blob hash** (`git rev-parse HEAD:<f>` == `git hash-object <f>` ==
+`03fcf881e474f62478835faf5777dfee65389b09`) and green.
+
+---
+
+### BLOCKER — "enable Text/Button Link" cannot be built under this phase's constraints
+
+Plan step 3 says: *"Enable the Link actions ... Persist via the elements' EXISTING write paths (verify
+which field each element's link lands in — e.g. CTA `Link` value — and reuse the existing update
+action; NO new store fields)."* I did that verification. **Neither element type has the field the
+plan assumes.**
+
+**Text — there is no link field at all, anywhere.**
+- Exhaustive grep of every element schema (`audience/{product,service,writer}/elementSchema.ts`,
+  `engines/workSections.ts`): the ONLY `href` keys are inside **collections** (`nav_items.href`,
+  footer/card link lists) and `*_cta_href`. **No standalone text element has an href.**
+  `text_link` / `textLink` / `link_href` = **zero hits in `src/`.**
+- `TextToolbarMVP` has no Link action today (grep `link` -> 0 hits) — this is net-new, not a re-wire.
+- The only mechanism available would be injecting an `<a>` into the element's saved HTML string
+  (text is stored as HTML: `wrapElementContentWithStyles(targetElement.innerHTML, styles)`,
+  TextToolbarMVP.tsx:295). That needs selection-range -> anchor-wrapping machinery that does not
+  exist (`formatSelectedText` handles styles only, and lives in `src/utils/textFormatting.ts` —
+  **not on this phase's Files-touched**). It would also discard `Link.source` (an `<a href>` is a
+  string), i.e. break the very contract constraint 2 protects.
+- **Latent trap if someone builds it anyway:** the published sanitizer's `STRICT_PROFILE`
+  (`src/lib/htmlSanitizer.ts:14-33`) does **not** allow `<a>` or `href`. It is currently INERT —
+  `sanitizeHtmlContent` is *imported by `src/app/api/publish/route.ts:9` and never called* — so an
+  `<a>` would publish today by accident. The day that import is wired up (it looks like an
+  oversight), every text link silently vanishes from published output while still showing in the
+  editor. That is the exact editor-vs-published divergence this spec forbids.
+
+**Button/CTA — the field exists, but it is NOT a `Link`.**
+- A CTA's published href is resolved from `content[sectionId].elementMetadata[elementKey].buttonConfig`
+  — a **`CtaButtonConfig`** (`resolveCtaHref.ts:18-27,56-77`), written **only** by
+  `ButtonConfigurationModal`. Verified on the real published renderer:
+  `MeridianNavHeader.published.tsx:41` -> `resolveCtaHref(md?.cta_text?.buttonConfig, forms, '#cta')`.
+- `LinkPicker` emits `Link{dest, source}`. `destinationShim.toDestination` converts
+  **buttonConfig -> Destination**; there is **no inverse**. Writing a Link into a CTA would need a
+  net-new `Link -> CtaButtonConfig` mapping — and `CtaButtonConfig` cannot represent most dest kinds
+  (`section` / `whatsapp` / `call` / `email` / `download` / `social` have no field), so it would be
+  lossy, and it would **clobber `formId` / `behavior` / `inputConfig` / icons** on form-connected
+  buttons.
+- Writing a new per-element `Link` field instead is barred twice: constraint 7 (no new store fields)
+  and the no-published-output rule (both renderers would have to read it).
+- **The honest finding: "Button Settings" — already in this same toolbar, one button along — IS the
+  link editor for buttons.** A t4 picker here would be a SECOND, lossier link UI for one field,
+  which is the precise opposite of this phase's goal ("no parallel link UI left").
+
+**Why I stopped rather than improvised.** Every route out needs a file outside the Files-touched list
+(`textFormatting.ts`, `ButtonConfigurationModal.tsx`, `destinationShim.ts`) **or** a new store field
+(forbidden) **or** a published-renderer read (forbidden). Out-of-scope need -> stop and report.
+
+**What I did instead (in-scope, conservative).** `link-action`'s disabled title said *"Link picker
+lands next phase"*. Phase 3 IS that phase, so after this commit the tooltip would be a **lie** and
+the e2e test asserting it would have pinned the lie. Changed to **"Set this button's link in Button
+Settings"** — true, and it points at the control that actually works. The e2e now asserts the
+tooltip mentions Button Settings **and that `button-config` is present**, so the tooltip can't become
+a dead end. The full rationale is a comment block at the `link-action` entry so the next implementer
+doesn't rediscover this.
+
+**Ruling needed:** (a) accept the tooltip-repoint and defer Text/Button Link to Final; (b) widen a
+later phase to include `ButtonConfigurationModal`/`textFormatting` and reconcile the CTA link
+contract with `Link` (spec-sized, own blast radius); or (c) **delete `link-action` entirely** — a
+permanently-disabled button duplicating its neighbour is arguably the "dead buttons read as bugs"
+(QA naayom C2) trap. **I did not choose (c)**: it would silently remove a Beta action the founder
+signed off at the phase-2 gate. That is a founder call, not mine.
+
+**Honesty-table correction for the founder:** the Text row ("Link (new, t4)") and the Button/CTA row
+("Link/Action (new, t4, phase 3)") are **NOT delivered**. Link now joins Image in the deferred
+column, for the *same root cause* the plan already identified for Image (ruling 5): no
+published-consumed link field of the right shape exists. What genuinely lands is **the popover kill
+plus one shared picker across all 15 mounts** — real consolidation, but no new user capability.
+
+---
+
+### What changed, per file
+
+**`LinkPicker.tsx` (new).** t4 look: 284px card, "Link / Where should this go?" header, segmented
+type control, DESTINATION field. Props are a compatible superset of the popover's; `SectionOption`
+re-exported. `emitManual` / `emitDerived` / the mode-init and dual-read logic are carried over
+**verbatim** — that is what makes the emission byte-identical.
+- Uses the **ui-foundation `SegmentedControl` primitive** rather than a hand-rolled strip (the plan
+  says t4 is built with ui-foundation primitives; that primitive's own test fixture is literally the
+  link-picker type control). Gets the WAI-ARIA radiogroup + arrow-key roving for free.
+- **No new-tab switch** (ruling 1) — asserted absent in e2e so a future hand can't quietly add one.
+- **Deliberately NOT built: the handoff's Done / Cancel / Remove footer.** The popover emitted LIVE
+  on every select/keystroke and all 15 mounts persist on that callback; a commit-on-Done model would
+  change *when every one of them saves* — a behaviour change well outside "migrate the picker".
+  "Remove" is unexpressible anyway: `Link` has no empty dest.
+- **Deliberately NOT built: controlled `open`/`onOpenChange` + trigger-less mode.** The plan listed
+  them for shell-mounted toolbar use — which is the BLOCKED half. Shipping unused API is the trap
+  that produced the dead nav editors (ruling 3). It lands with its consumer.
+
+**The 15 mounts.** Mechanical: import path + identifier. **Every call site's props and callback shape
+are untouched** (`onChange={(link) => patchItem(id, {href: link})}`; editPrimitives'
+`saveField(ctx, hrefKey, resolveDestination(link.dest))`). Diff is 2-8 lines/file, all of it the
+rename + comment text.
+
+**`actionSets.tsx`.** `form` entry + `FormToolbar` import removed. The replacement comment records
+*why* Form is absent and the full over-determined-dead trace, so the next implementer doesn't
+"helpfully" re-add an entry that cannot dispatch. `component` remains a module-level constant for all
+4 remaining entries (invariant held).
+
+**`showFormBuilder` — the crash fix is KEPT, untouched, as instructed.** Confirmed independent of
+`FormToolbar`: its real caller is `ButtonConfigurationModal.tsx:486`.
+
+**The local cast question — answered: it existed ONLY to serve the deleted FormToolbar, and it is
+gone with it.** The cast was `FormToolbar.tsx:66`
+(`storeApi.getState().showFormBuilder as (formId?: string) => void`) — deleted with the file.
+`types/store/actions.ts:178` (`showFormBuilder: () => void`) is a **type declaration, not a cast**,
+is **not on this phase's Files-touched**, and is **still required**: the kept impl
+(`uiActions.ts:448`, `(formId?: string) => void`) is assignable to it, and the surviving 0-arg caller
+(`ButtonConfigurationModal:486`) typechecks against it. **Nothing to remove; nothing dangles**
+(`tsc` exit 0). One nit left alone: `uiActions.ts:447`'s comment "Callers that need the arg cast
+locally" now has no such caller — `uiActions.ts` is not on my list, so I did not touch it.
+
+---
+
+### The differential parity test — how it was actually proven
+
+Step 2 was executed as written. While `LinkTargetPopover` still existed, the test file carried BOTH
+halves: 6 `GROUND TRUTH — LinkTargetPopover emits the SAME pinned payloads` tests and the LinkPicker
+tests, **both asserting the same shared literal constants** (`EXPECT_SECTION`, `EXPECT_PAGE`,
+`EXPECT_LEGAL`, `EXPECT_SOCIAL`, `EXPECT_EXTERNAL_URL`, `EXPECT_TEL_URL`). Green at 17/17 before any
+deletion.
+
+**Mutation-proven (this is the whole point of the design):** flipping `EXPECT_PAGE.source`
+`'derived'` -> `'manual'` failed **both halves** —
+
+```
+x page pick -> source:"derived"          (LinkPicker half)
+x page pick -> EXPECT_PAGE               (LinkTargetPopover ground-truth half)
+Tests  2 failed | 15 passed (17)
+```
+
+=> the constants are pinned by the old component, not self-recorded. Restored -> 17/17.
+
+Step 5 then deleted **only** the popover half. The constants and every LinkPicker assertion are
+**byte-identical** to the version that ran green against the popover — nothing re-recorded. 11 tests
+remain (6 emission + 4 dual-shape `string | Link` + 1 tab-set). The file header states this in
+capitals so a future hand doesn't "fix" a failure by re-recording output.
+
+There is no `@testing-library/react` in this repo — driven via `react-dom/client` + `React.act`, per
+`segmented-control.test.tsx`.
+
+---
+
+### Decisions + Deviations
+
+1. **BLOCKER above — Text/Button Link not shipped.** The single biggest deviation. Ruling needed.
+2. **The plan says "14 mounts"; there are 15 across 14 FILES** (13x1 + LumenFooter x2). Verified by
+   re-grep, as instructed. The plan's list of *files* was correct and complete — only the count noun
+   was off. All 15 migrated.
+3. **`e2e/link-picker.spec.ts` drives the picker from the meridian NAV, not the button toolbar**
+   (the plan's step 7). Forced by the BLOCKER — the button toolbar has no picker to open. The nav is
+   one of the 15 real migrated mounts, so this is direct coverage of what shipped, not a proxy.
+4. **The plan's "assert the rendered edit-side anchor updates" is not observable and was replaced
+   with something stronger.** In EDIT mode meridian renders a nav item as a `<span>` + inline editor;
+   the `<a href>` is the **non-edit** branch (`MeridianNavHeader.tsx:133-165`). A naive
+   `nav a[href=...]` assertion **fails** (it did — I wrote it first and it caught me). Replaced with
+   the `edit-persistence.spec` pattern: assert a **`/api/saveDraft` POST whose body carries our
+   href** (200), then **reload** and reassert through the reopened picker. The reload is what makes
+   it non-vacuous — the picker's `urlDraft`/`mode` are local state that would otherwise echo our own
+   input straight back.
+5. **Derived-tab label: `'Link to page'` -> `'Page'`** (t4's segmented control wants short text
+   labels). Cosmetic; the `'Link'` variant (when legal/social are present) is unchanged. Both label
+   branches are pinned by tests.
+6. **`link-action` tooltip repointed** rather than deleted — see BLOCKER, option (c) left to the
+   founder.
+7. **`linkTargetPublished.test.tsx:3`'s comment still says "written by the edit-mode
+   LinkTargetPopover"** — now stale by one name. **Left deliberately: byte-untouched is the tripwire
+   rule and it outranks comment tidiness.** Worth a one-line fix in a phase that is allowed to touch
+   it.
+8. **`playwright.config.ts` edited** to register `link-picker.spec.ts` in the `authed` project —
+   pre-authorized by the orchestrator; without it the spec matches 0 tests (the phase-1 trap).
+
+---
+
+### Verification (pasted, real)
+
+```
+$ npx tsc --noEmit
+TSC_EXIT=0                               (clean, no output — proves BOTH deletions dangle nothing)
+
+$ npm run test:run
+ Test Files  210 passed | 1 skipped (211)
+      Tests  3557 passed | 18 skipped (3575)
+```
+3557 = phase-2's 3546 + the 11 new LinkPicker tests. `linkTargetPublished.test.tsx` green.
+
+```
+$ git rev-parse HEAD:src/modules/templates/linkTargetPublished.test.tsx
+03fcf881e474f62478835faf5777dfee65389b09
+$ git hash-object     src/modules/templates/linkTargetPublished.test.tsx
+03fcf881e474f62478835faf5777dfee65389b09     => BYTE-UNTOUCHED
+
+$ git diff --name-only | grep -E '\.published\.tsx|\.core\.tsx|componentRegistry|LandingPage.*Renderer'
+(empty)                                      => zero published-side files
+```
+
+```
+$ npx eslint src/components/editor/LinkPicker.tsx src/components/editor/LinkPicker.test.tsx \
+             "src/app/edit/[token]/components/toolbars" e2e/link-picker.spec.ts
+3 problems (0 errors, 3 warnings)
+```
+All 3 are the same pre-existing `react-hooks/exhaustive-deps` warnings phases 1-2 reported, on code I
+did not author. No bare `useEditStore()` introduced.
+
+```
+$ npx playwright test e2e/link-picker.spec.ts e2e/toolbar-dispatch.spec.ts --list
+Total: 13 tests in 3 files       (3 link-picker + 9 toolbar-dispatch + setup's `authenticate`)
+
+$ E2E_PORT=3079 npx playwright test e2e/link-picker.spec.ts e2e/toolbar-dispatch.spec.ts
+  ok  5 ... text target: one shell, format actions, no Ask AI (4.1s)
+  ok  6 ... section target: one shell with the section action set (3.6s)
+  ok  7 ... image target: reskin only — no Link action (6.2s)
+  ok  8 ... button/CTA target: Beta action set with Link/Action disabled (4.0s)
+  ok  9 ... button/CTA: Link/Action is disabled and points at the control that works (3.8s)
+  ok 10 ... footer target: chrome-section set in the one shell, labelled "Footer" (3.7s)
+  ok 11 ... Design menu renders disabled and inert (3.7s)
+  ok 12 ... dropdown panels are not clipped by the chrome box (4.2s)
+  ok 13 ... Esc dismisses the shell (4.7s)
+  13 passed (2.1m)
+```
+(The 3 link-picker tests are numbered 2-4 in the same run and all passed; the tail shown above is the
+toolbar-dispatch block.) Through the **REAL config** (both specs registered in `authed`).
+`E2E_PORT=3079` only because 3000 is held by a sibling worktree — a first-class toggle, not a config
+bypass. The interleaved `ReferenceError: window is not defined` lines are the same pre-existing
+dev-mode SSR log noise from `useEditStoreBootstrap.ts:238` (logged, never thrown into a test).
+
+**Anti-theatre — e2e mutation-proven, not asserted-and-hoped.** Suppressed `emitManual`'s `onChange`
+in `LinkPicker.tsx` and re-ran:
+```
+ok 2 ... the t4 picker opens with the segmented type control (and NO new-tab switch) (16.9s)
+x  3 ... choosing a section anchor persists the emitted Link to the server and survives reload (35.0s)
+1 failed
+```
+Fails on mutation, passes when restored => the persistence assertion is real. (Test 4 "did not run" —
+serial mode stops at the first failure. It exercises the **same** `emitManual` + armSave + reload
+mechanism, so it is covered by construction, but it was **not independently mutation-proven**.)
+Test 1 legitimately survives that mutation: it only asserts chrome/tabs, which the mutation doesn't
+touch.
+
+**A test caught me being wrong, twice** (recorded because it's evidence the specs bite): (1) I
+expected the derived tab to read `'Link'` on meridian — a freshly seeded single-page project has no
+privacy page and no social profiles, so it correctly reads `'Page'`; (2) the `nav a[href=...]`
+assertion of deviation 4.
+
+---
+
+### What I did NOT verify (explicit list)
+
+- **No manual dev check at all.** The plan's manual spot-check ("edit a nav item link on meridian +
+  a CTA on atelier via the new picker") was **not** done by hand. Meridian's nav is covered by e2e;
+  **atelier is not covered by anything** — it is `bespoke:true` / never served, and there is no seed
+  for it. The `editPrimitives` mounts (atelier / vestria / granth / work-skeleton) are migrated and
+  typecheck, but **no test renders any of them**. `tsc` + identical props is the entire net there.
+- **t4 visual fidelity is unverified by eye.** Values transcribed from the handoff; nobody has looked
+  at the picker rendered. The `SegmentedControl` is stretched full-width via an arbitrary
+  `[&>button]:flex-1` override — plausible, unseen.
+- **11 of the 15 mounts have no runtime coverage** — only meridian's nav is exercised e2e. The other
+  nav/footer mounts differ only by props, but "differ only by props" is an argument, not a test.
+- **The `Link` label branch of the segmented control is not covered e2e** (only in vitest) — no
+  seeded project has legal/social options.
+- **Nothing about Form was re-verified** — it is deleted, and it never rendered once in its life.
+- **The `STRICT_PROFILE` / `sanitizeHtmlContent` dead-import finding is a code read, not a test.** I
+  did not publish a page to confirm text HTML is unsanitized today. **It deserves its own ticket**
+  (a security-shaped import that is wired to nothing).
+- **Phase 1-2's open items remain open and are still nobody's verified truth**: toolbar local-state
+  survival across shell re-renders, t2 visual fidelity by eye, the newly-reachable
+  ButtonConfigurationModal -> "Create New Form" -> FormBuilder flow, the Button/CTA set on
+  non-meridian templates, and the still-live `convertCTAToForm` crash (`uiActions.ts:489`, reachable
+  via `MainContent.tsx:320`, needs its own ticket).
+
+Not committed — the orchestrator commits.

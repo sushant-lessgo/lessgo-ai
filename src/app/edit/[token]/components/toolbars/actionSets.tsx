@@ -21,7 +21,6 @@ import { SectionToolbar } from './SectionToolbar';
 import { ElementToolbar } from './ElementToolbar';
 import { TextToolbarMVP } from './TextToolbarMVP';
 import { ImageToolbar } from './ImageToolbar';
-import { FormToolbar } from './FormToolbar';
 
 /** The positioning target shape produced by the priority resolver. */
 type ToolbarTarget = ReturnType<typeof getToolbarTarget>;
@@ -57,10 +56,22 @@ export interface ActionSetEntry {
   designMenu: TrailingSlotState;
 }
 
-// The 5 RENDERABLE toolbar types (phase 2 added `form`, which had been a live
-// ToolbarType with no entry → the shell's lookup missed and it rendered nothing).
-// `null` stays absent by construction; a resolver returning `null` still yields the
-// empty-bubble guard rather than a bare floating arrow.
+// The 4 RENDERABLE toolbar types. `null` stays absent by construction; a resolver
+// returning `null` still yields the empty-bubble guard rather than a bare floating
+// arrow.
+//
+// `form` is DELIBERATELY ABSENT (founder ruling 8, phase 3). Phase 2 landed a
+// `form` entry + `FormToolbar`; both were provably UNREACHABLE and are now deleted.
+// Form dispatch is over-determined dead: (1) `determineElementType`
+// (useEditor.ts:182-189) hits the tagName branch first — `form_heading`/`form_note`/
+// `form_foot` all render as h2/p — and returns 'text' before :197's
+// `elementKey.includes('form')` is ever evaluated; (2) independently,
+// `isTextEditing` outranks `form` (selectionPriority.ts:45-47); (3) the real
+// <input>s carry no element key, so the selection affordance doesn't exist in the
+// DOM. This is a DESIGN question (what selects a form?), not a wiring bug — a form
+// heading IS prose and clicking it SHOULD inline-edit. Deferred to Final; re-add
+// cost ~15 lines. Do NOT re-add a `form` entry without landing the DOM affordance
+// first — shipping unreachable code is what killed the dead nav editors (ruling 3).
 export const actionSets: Partial<Record<NonNullable<ToolbarType>, ActionSetEntry>> = {
   section: {
     component: SectionToolbar,
@@ -91,25 +102,5 @@ export const actionSets: Partial<Record<NonNullable<ToolbarType>, ActionSetEntry
     designMenu: 'disabled',
     resolveProps: (_selection, target) =>
       target.targetId ? { targetId: target.targetId } : null,
-  },
-  // phase 2. UNREACHABLE / dormant — no click path currently yields
-  // `activeToolbar === 'form'` (see the two blockers documented in
-  // FormToolbar.tsx's header). The wiring below is the INTENDED shape, not
-  // present-tense behaviour: *if* a form selection is ever dispatched, it is
-  // meant to route through `selectedElement` like the `element` set
-  // (uiActions.ts:340-352 sets {sectionId, elementKey, type:'form'}), so the
-  // shell's existing anchor resolution would need no `form` special-case.
-  // Retained pending a founder ruling at the gate; do not treat as live.
-  form: {
-    component: FormToolbar,
-    size: 'md',
-    designMenu: 'disabled',
-    resolveProps: (selection) =>
-      selection.selectedElement
-        ? {
-            sectionId: selection.selectedElement.sectionId,
-            elementKey: selection.selectedElement.elementKey,
-          }
-        : null,
   },
 };

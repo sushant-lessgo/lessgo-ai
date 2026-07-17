@@ -73,6 +73,7 @@ export default defineConfig({
         /work-onboarding\.spec\.ts/,
         // toolbar-standard-beta: seeded editor project + Clerk session.
         /toolbar-dispatch\.spec\.ts/,
+        /link-picker\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },

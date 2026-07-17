@@ -172,18 +172,32 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
     // reused verbatim so Link/Action + Settings appear on exactly the elements
     // that already got Button Settings. No new gating semantics.
     //
-    // Link/Action renders DISABLED this phase: the shared t4 LinkPicker lands in
-    // phase 3, which un-disables this entry and wires it to the element's EXISTING
-    // link write path. Shipping it greyed (rather than omitting it) keeps the Beta
-    // anatomy legible at the phase-2 founder gate and makes the phase-3 diff a
-    // one-line flip.
+    // Link/Action STAYS DISABLED after phase 3 — and the reason is NOT "not built
+    // yet". Phase 3 shipped the shared t4 LinkPicker and migrated all 15 popover
+    // mounts, but it could NOT be wired here, because a button's link does not live
+    // in the shape the picker emits:
+    //   - LinkPicker emits `Link{dest, source}` (types/destination).
+    //   - A CTA's published href is resolved from `content[sectionId]
+    //     .elementMetadata[elementKey].buttonConfig` — a `CtaButtonConfig`
+    //     (resolveCtaHref.ts:18-27,56-77) written ONLY by ButtonConfigurationModal.
+    // `destinationShim.toDestination` converts buttonConfig → Destination, but there
+    // is NO inverse: Link → buttonConfig would be net-new mapping (section/whatsapp/
+    // email/download dests have no buttonConfig representation) and would clobber
+    // `formId` / `behavior` / `inputConfig` / icons on form-connected buttons.
+    // Writing a NEW per-element Link field instead is forbidden (no new store fields
+    // + both published renderers would have to read it = published-output change).
+    //
+    // So the honest state: "Button Settings" (right here, next to this) IS the
+    // link editor for buttons. The title says so rather than promising a phase that
+    // cannot deliver it. See the phase-3 audit's BLOCKER. Un-defer = a spec that
+    // reconciles the CTA link contract with `Link` (own blast radius).
     ...(canConvertToForm() ? [{
       id: 'link-action',
       label: 'Link/Action',
       icon: 'link',
       handler: () => {},
       disabled: true,
-      disabledTitle: 'Link picker lands next phase',
+      disabledTitle: 'Set this button’s link in Button Settings →',
     }] : []),
     // "Style" per toolbarPlan's Beta column is NOT shipped as a rename of this
     // action — see the audit. VERIFIED: no per-button style (primary/secondary/

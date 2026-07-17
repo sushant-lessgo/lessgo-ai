@@ -3,7 +3,7 @@
 // src/modules/templates/atelier/blocks/editPrimitives.tsx
 // SHARED edit-mode primitives for every Atelier block core (one place, not per
 // block). Backed by AtelierEditable (text), the store (image upload + collection
-// writes), and LinkTargetPopover (href editing). Provided to a core via
+// writes), and LinkPicker (href editing). Provided to a core via
 // <AtelierEditProvider> + the module-level `editPrimitives` object; the core stays
 // a pure plain module that only references the AtelierPrimitives contract.
 
@@ -12,7 +12,7 @@ import { useEditStore } from '@/hooks/useEditStore';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { AtelierEditable } from '../components/AtelierEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import { resolveDestination, externalLinkProps } from '@/utils/resolveCtaHref';
 import { EditableImageCollection } from '@/app/edit/[token]/components/primitives/EditableImageCollection';
 import { resolveAlt } from '@/modules/editing/altText';
@@ -144,7 +144,7 @@ const Img: React.FC<AtelierImgProps> = ({ elementKey, src, alt, className, imgCl
 const Link: React.FC<AtelierLinkProps> = ({ hrefKey, href, className, ariaLabel, children }) => {
   const ctx = useCtx();
   // Non-edit (preview/parity): render the SAME static <a> as publishedPrimitives.Link
-  // — no lg-atelier-link-edit wrapper, no LinkTargetPopover trigger — so edit-static
+  // — no lg-atelier-link-edit wrapper, no LinkPicker trigger — so edit-static
   // == published (mode-gated, mirroring MeridianNavHeader.tsx:133). The href-editing
   // control only exists in 'edit'. CTA analytics attrs mirror the published primitive.
   if (ctx.mode !== 'edit') {
@@ -162,7 +162,7 @@ const Link: React.FC<AtelierLinkProps> = ({ hrefKey, href, className, ariaLabel,
   return (
     <span className="lg-atelier-link-edit" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       <span className={className} aria-label={ariaLabel}>{children}</span>
-      <LinkTargetPopover
+      <LinkPicker
         value={href || ''}
         sectionOptions={ctx.sectionOptions}
         pageOptions={ctx.pageOptions}
