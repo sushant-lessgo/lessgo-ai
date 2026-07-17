@@ -12,10 +12,40 @@ Close three verified billing-correctness holes before pricing-v2: (H1) `deductCr
 ## Progress log
 
 ```
-phase 1 H1 atomic decrement + ledger-in-tx + concurrency test: pending
+phase 1 H1 atomic decrement + ledger-in-tx + concurrency test: done (commit d6a4cc21, review loops 1, verdict ship) — AWAITING FOUNDER HUMAN GATE before phase 2
 phase 2 H2 hasFeature deny-by-default + tests: pending
 phase 3 M1/M2 route standardization + withAICredits deletion + route tests: pending
 ```
+
+**Phase 1 review outcome (impl-reviewer, verdict `ship`):** RED proof independently
+reproduced (reviewer reverted to HEAD creditSystem.ts, got identical 3-fail/pool-negative
+result — not fabricated). Atomic design matches decision 2 exactly; retry fires only on
+`instanceof BucketConflictError`; half-charge impossible; neither bucket can go negative;
+split recomputed from fresh reads on retry. `charge_conflict` propagates unmangled
+(`consumeCredits:491`). Ledger single-write in-tx (`:313`), failure paths still outside.
+Case 2 non-vacuous (PAGE_GENERATION → `fullPageGens` counter genuinely increments).
+Pin bites: dynamic `import()` after DATABASE_URL mutation; suite also goes RED inside a
+full `npm run test:run` (real regression net, not a standalone artifact). Cleanup verified
+by querying dev DB after a failing run → 0 leftover rows. Gates: `tsc` FULLY CLEAN (the
+audit's `founder.jpg` error was environmental, resolved once `next-env.d.ts` generated),
+`test:run` 3557 passed w/ concurrency suite EXECUTED (5 real-DB tests), `lint` clean.
+Scope clean — only the 3 planned files.
+
+**Known honest caveat (implementer-flagged, reviewer-confirmed):** concurrency case 1
+(monthly=1,pool=0) passes even PRE-fix — timing luck (losers' reads landed after the
+winner committed). The pool-path cases (2/3/5) are the ones that actually catch H1.
+Suite as a whole genuinely proves H1.
+
+**Non-blocking carry-forward for later phases:**
+- `deductCredits` without `eventData` writes no ledger row — inert today (only
+  `consumeCredits` calls it; phase 3 goes through it), but a latent footgun if a direct
+  caller is ever added.
+- `logger.error('Error deducting credits:', …)` fires on routine genuine insufficiency
+  (a normal 402) and the sentinel serializes as `{}` — cosmetic log noise; tidy when
+  phase 3 wires observability.
+- Typo `CORROLARY` → `COROLLARY` in a creditSystem.ts comment.
+- Commit with explicit paths (`git add <files>`) — `uiFoundationIsolation.test.tsx.snap`
+  shows modified in `git status` but its diff is empty (CRLF touch); it stages as a no-op.
 
 ## Verified ground truth (planner settled the scout contradiction — implementers do NOT re-derive)
 
