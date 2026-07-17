@@ -453,6 +453,38 @@ Deferred follow-ups (before work goes user-facing):
 - **Untyped story action** — `regenerateStoryFromInterview` not yet declared on
   `src/types/store/actions.ts` (panel reaches it via cast).
 
+### Phase E3 — work-onboarding questions (STEP 03): BUILT (2026-07-17)
+
+Status: **built + local gate green**, awaiting the founder live-walk gate.
+Branch `feature/work-onboarding-questions` (plan/audit in
+`docs/task/work-onboarding-questions.{plan,audit}.md`).
+
+The E1 STEP-03 placeholder (name / what-you-sell / one price) is replaced by the full
+question step: a deterministic zero-AI gating layer (`buildQuestionPlan`) decides per
+slot whether we already **know** (skip), are **almost sure** (one-tap confirm), or
+**don't know** (chips ask); price + language are required to proceed; every answer
+writes the frozen `WorkFacts` contract through the existing `commitRail` door. Kundius
+fixture ⇒ exactly 5 questions (price · establishment · dreamClient · contactMethod ·
+languages). "Never ask twice" holds across back/forward + reload.
+
+Accepted design nuances:
+- **On-request price re-confirm after reload (D-C):** a genuine "on request" price
+  degrades to a one-tap re-confirm after a mid-step reload (the seed default is
+  indistinguishable from a real answer) — one tap via the native price-mode picker,
+  never an open re-ask; no answered-marker was added to the frozen contract.
+- **Praise is confirm-ONLY (D-F):** the praise slot surfaces only when
+  `entry.testimonials` exist (one-tap "use these quotes?"), never as an open ask — we
+  carry only what the contract already holds.
+- **dreamClient rendered as multi:** multiple audience chips can be selected; the
+  selections join into the single contract string.
+- **languages options include Dutch + English** tappable chips for the Kundius
+  bilingual pilot.
+
+Deferred to the founder gate: the live STEP 01→03 walk (sees only real gaps, taps not
+typing, rail fills progressively) and the new-vs-established branch proof (E3 SETS
+`facts.work.establishment`; proof-led vs fresh-eyes copy routing verifies at a
+downstream generation run / E4).
+
 ## To brainstorm, one by one
 
 1. ~~Step 2 (work ingestion): sources + auto-curation~~ ✅ agreed, folded into step 2
