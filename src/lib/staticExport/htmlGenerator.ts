@@ -13,7 +13,7 @@ import { validateAndResolveAssetURLs } from './assetResolver';
 import { renderLessgoBadge } from './lessgoBadge';
 import { resolveCanonicalURL } from './canonicalUrl';
 import { resolveOgImage } from './buildPageMetadata';
-import { escapeHTML, robotsMetaTag, faviconLinkTag, jsonLdScriptTag, metaPixelSnippet, ga4Snippet } from './headTags';
+import { escapeHTML, isSafeURL, robotsMetaTag, faviconLinkTag, jsonLdScriptTag, metaPixelSnippet, ga4Snippet } from './headTags';
 import { usesTemplateModule } from '@/types/service';
 import { isSkeletonBacked } from '@/modules/skeletons/ids';
 import type { PageSeo } from '@/types/store/pages';
@@ -308,13 +308,18 @@ function buildHTMLDocument(params: {
   // (b) reciprocal hreflang for ALL locales + (c) x-default — self-canonical (a)
   // is the existing <link rel="canonical"> below (its canonicalPath is already the
   // locale-prefixed path for non-default docs).
+  // Scheme-gate each alternate href (publish-trust M4). Reject semantics = OMIT the
+  // whole <link>: an alternate with an unusable href has no safe degraded form, and an
+  // empty href would self-link this page under a foreign hreflang. Filtered BEFORE the
+  // length check so an all-unsafe set emits no comment block either.
+  const safeAlternates = alternates.filter((a) => isSafeURL(a.href));
   const hreflangTags =
-    multiLocale && alternates.length
+    multiLocale && safeAlternates.length
       ? `\n\n  <!-- i18n hreflang alternates -->` +
-        alternates
+        safeAlternates
           .map(
             (a) =>
-              `\n  <link rel="alternate" hreflang="${escapeHTML(a.hreflang)}" href="${a.href}">`
+              `\n  <link rel="alternate" hreflang="${escapeHTML(a.hreflang)}" href="${escapeHTML(a.href)}">`
           )
           .join('')
       : '';
@@ -344,6 +349,14 @@ function buildHTMLDocument(params: {
 
   // Canonical host: live custom domain when present, else the lessgo.ai subdomain.
   // Path: this page's own path so subpages don't all claim the root canonical.
+  //
+  // NOTE (publish-trust M4) — canonicalURL is escape-only, deliberately NOT isSafeURL-gated,
+  // and that is not an oversight: resolveCanonicalURL ALWAYS builds `https://${host}${path}`
+  // (canonicalUrl.ts:18-21), so the scheme is a literal — the gate could never fire, and a
+  // gate that can't fail is a false reassurance. The only user-influenced parts are host
+  // (slug / canonicalDomain) and path, which sit AFTER the scheme; there the whole attack is
+  // attribute breakout, for which escapeHTML at the sink is the correct and sufficient
+  // defense. Please don't "harden" this with a scheme gate later.
   const canonicalURL = resolveCanonicalURL({
     slug: metadata.slug,
     canonicalDomain: metadata.canonicalDomain,
@@ -379,22 +392,22 @@ function buildHTMLDocument(params: {
   <meta name="description" content="${escapeHTML(metadata.description)}">
 
   <!-- Canonical URL -->
-  <link rel="canonical" href="${canonicalURL}">${robotsMetaTag(metadata.noIndex)}${faviconLinkTag(metadata.faviconUrl)}${hreflangTags}
+  <link rel="canonical" href="${escapeHTML(canonicalURL)}">${robotsMetaTag(metadata.noIndex)}${faviconLinkTag(metadata.faviconUrl)}${hreflangTags}
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="${canonicalURL}">
+  <meta property="og:url" content="${escapeHTML(canonicalURL)}">
   <meta property="og:title" content="${escapeHTML(metadata.title)}">
   <meta property="og:description" content="${escapeHTML(metadata.description)}">
-  <meta property="og:image" content="${ogImage}">
+  <meta property="og:image" content="${escapeHTML(ogImage)}">
   <meta property="og:site_name" content="Lessgo AI">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="${canonicalURL}">
+  <meta name="twitter:url" content="${escapeHTML(canonicalURL)}">
   <meta name="twitter:title" content="${escapeHTML(metadata.title)}">
   <meta name="twitter:description" content="${escapeHTML(metadata.description)}">
-  <meta name="twitter:image" content="${ogImage}">
+  <meta name="twitter:image" content="${escapeHTML(ogImage)}">
 
   <!-- Self-hosted template fonts (Inter, Inter Tight, JetBrains Mono, DM Sans,
        Fraunces, Source Serif 4, Lora, EB Garamond) -->
@@ -428,7 +441,7 @@ function buildHTMLDocument(params: {
   <!-- Phase 4: Analytics beacon (opt-in) -->
   ${
     analyticsOptIn
-      ? `<script src="${assetBase}/assets/a.v2.js" data-page-id="${metadata.publishedPageId}" data-slug="${metadata.slug}" defer></script>`
+      ? `<script src="${assetBase}/assets/a.v2.js" data-page-id="${escapeHTML(metadata.publishedPageId)}" data-slug="${escapeHTML(metadata.slug)}" defer></script>`
       : ''
   }
 </body>

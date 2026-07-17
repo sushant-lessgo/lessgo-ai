@@ -93,7 +93,32 @@ retries (`retries: 0` locally).
     failed. …')` — status+typeof would also pass on an outer FATAL-catch 500, so pin the exact honest-
     failure path + the user-facing string as contract; (c) add a `Sentry.captureException` called
     assertion — spec's M3 constraint names Sentry capture as preserved behavior but nothing pins it.
-- phase 3 M4 head escaping + URL scheme gate: pending
+- **phases 2 + 2a: done** (commit `1a12ad87`, ONE joint review loop, verdict `ship`).
+  - **e2e FULL SUITE GREEN: 73 passed / 0 failed / 10 skipped (15.3m), REAL_EXIT=0.**
+    Beats the main baseline outright (main = 2 failed / 50 passed / 21.4m). +23 tests actually RUN
+    (main's shared-limiter 429s + serial-abort were preventing them). Main's own 2 failures
+    (`dashboard-redirects:134`, `publish.spec:14` Lex) are GREEN here.
+  - Hardening folded in post-review (all 3 non-blocking, orchestrator's call):
+    1. **`as` → `satisfies` on all 6 presets.** The required-`name` guard was THEATRE: a type
+       ASSERTION does not enforce required props (`{maxRequests,windowMs} as RateLimitConfig`
+       compiles with 0 errors), so a future preset copy-pasting the convention would get
+       `undefined:user:{id}` = the shared-counter bug SILENTLY BACK. `satisfies` now errors TWICE
+       (decl `TS1360` + consumer site `TS2345`); under `as` both were invisible. Compile-time only,
+       zero runtime change. **The code was already correct — the PROTECTION was fake.**
+    2. Outer fail-open path pinned (was untested; the existing case covered the INNER tier catch).
+       Seam = a throwing custom `keyGenerator` on a non-tierBased config, so the inner try/catch
+       provably never runs. Implementer REJECTED the obvious `auth`-throws seam because
+       `defaultKeyGenerator` swallows auth errors → nothing reaches either catch → would have been
+       a dud. Mutation-checked (outer catch rethrow → 1 failed).
+    3. `rateLimit.test.ts:90` comment arithmetic 97 → 98.
+  - Reviewer INDEPENDENTLY re-measured non-vacuousness (reverted `buildStoreKey` itself): 4 failed /
+    5 passed — better than the audit's claimed 3, because the strengthened IP case now bites too.
+    Spot-checked all 8 remaining cases for the dud disease: **none found** (the 5 passing pre-fix each
+    target a DIFFERENT mutation).
+  - Audit correction: ONE `page.goto('/p/{slug}')` remains (`dashboard-lifecycle.spec.ts:115`), not two
+    — it's the last statement before unchecked `finally` cleanup, so no expiry hazard.
+  - `test-results/` is gitignored (`.gitignore:52`) — cannot be accidentally committed.
+- phase 3 M4 head escaping + URL scheme gate: pending — **HUMAN GATE**
 - phase 4 M5 published-CSS globs + in-script guards + sha baseline bump: pending
 - phase 5 integration verification + gates sweep: pending
 

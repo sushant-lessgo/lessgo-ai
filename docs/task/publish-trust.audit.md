@@ -468,3 +468,116 @@ None.
   budgets ⇒ a user can make more total requests/min than under the shared counter), already
   documented on `buildStoreKey`.
 - Not committed; tree left dirty as instructed. Other agents' phase 2 / 2a files untouched.
+
+---
+
+# Phase 3 — M4: head escaping + URL scheme gate
+
+**Files changed**
+- `src/lib/staticExport/headTags.ts` — added `isSafeURL()` + contract doc comment.
+- `src/lib/staticExport/buildPageMetadata.ts` — scheme gate in `resolveOgImage` (source) + at the
+  `seo.ogImage`/`previewImage` merge point in `buildPageMetadata`.
+- `src/lib/staticExport/htmlGenerator.ts` — escaped the raw head sinks; gated hreflang hrefs;
+  documented why canonical is escape-only.
+- `src/lib/staticExport/headTags.test.ts` — extended (isSafeURL, escapeHTML matrix, favicon single-escape).
+- `src/lib/staticExport/buildPageMetadata.test.ts` — extended (og scheme gate at source + merge point).
+- `src/lib/staticExport/htmlGenerator.test.ts` — extended (end-to-end head XSS hardening).
+- `docs/task/publish-trust.m4-samples.md` — NEW: human-gate benign/hostile `<head>` sample pair.
+- `docs/task/publish-trust.audit.md` — this section.
+
+## What changed and why
+
+The `<head>` is built by raw template-string interpolation, so every user-influenced value in it was
+a **stored-XSS sink on live customer domains** (`*.lessgo.site` / custom domains). Escaping alone
+was insufficient: `previewImage` is validated by `z.string().url()` (`validation.ts:117`), which
+**accepts `javascript:`** — hence the scheme allow-list as well as the escaping.
+
+`isSafeURL` strips ALL `\x00-\x20` chars anywhere (not `.trim()`, which would let `java\tscript:x`
+and `java script:x` through — browsers ignore those when parsing a scheme), lowercases, rejects
+protocol-relative `//`, and accepts only absolute `https://`/`http://` or root-relative `/…`. No
+entity-decode: the predicate runs BEFORE `escapeHTML`, which re-encodes any `&`, so an
+entity-encoded colon can never re-activate.
+
+## Per-sink treatment table
+
+| Sink (line) | Scheme gate? | Escape? | Reject semantic |
+|---|---|---|---|
+| `a.href` hreflang (:317) | YES `isSafeURL` | YES | **OMIT the whole `<link>`** (no safe degraded href; `''` would self-link under a foreign hreflang) |
+| `canonicalURL` (:382/:386/:394) | **NO — deliberate** | YES | n/a — always built `https://${host}${path}` (`canonicalUrl.ts:18-21`), scheme is literal so a gate could never fire; hostile content sits in host/path where escaping is correct + sufficient. Reasoning documented at the call site to prevent future churn. |
+| `ogImage` (:389/:397) | YES — **at source** in `resolveOgImage` + at the merge point | YES | **FALL THROUGH** the `||` chain to auto `/api/og/{slug}` (never `''` — an empty og:image is a broken card) |
+| `metadata.slug` + `publishedPageId` (:431 data attrs) | n/a (not URLs) | YES | n/a |
+
+Merge-point gating means an unsafe `seo.ogImage` no longer shadows a benign `previewImage` — it
+falls through to it. The gate is idempotent, so double-gating (merge point + source) is harmless.
+
+## DO-NOT-WRAP list — each verified, left untouched
+
+- `metadata.title` / `description` (:378/379/387/388/395/396) — already `escapeHTML`'d. Confirmed
+  `stripHTMLTags` (`buildPageMetadata.ts:144-145`) strips tags but does NOT encode, so the existing
+  wrap is the one and only. Verified by the benign sample: `&amp;` once, no `&amp;amp;`.
+- `faviconUrl` — escaped INSIDE `faviconLinkTag` (`headTags.ts:33`). New test pins single-escape.
+- `lang`, `a.hreflang` — already escaped. `bodyHTML` — React-escaped.
+- `metaPixelId` / `ga4MeasurementId` — regex-gated to charsets with no HTML metacharacters.
+- `assetBase` — env-derived, not user-controlled.
+- `resolveOgImage`'s `encodeURIComponent` on `?path=` — percent-encoding, orthogonal to
+  HTML-escaping; benign sample confirms no interaction.
+- Import hygiene: `escapeHTML`/`isSafeURL` imported ONLY from `./headTags`. The confusable
+  `escapeHtml` namesakes (`src/lib/email/*`, `src/utils/formatUtils.ts`, `formHandler.js`) were not
+  touched or imported.
+
+## `resolveOgImage` shared-reader note (confirmed, files NOT edited)
+
+Grep confirms exactly the 3 predicted readers outside the static path:
+`src/app/p/[slug]/[...subpath]/page.tsx:71`, `src/app/p/[slug]/blog/[postSlug]/page.tsx:47` and `:96`.
+All three pass a URL into the `previewImage` slot and use the return purely as an og:image URL.
+The gate changes their behavior **safely**: an unsafe candidate now yields the auto `/api/og/{slug}`
+URL instead of a live `javascript:` og:image. No reader can receive `''`. Note the blog route feeds
+`seo?.ogImage || post.heroImage` — an unsafe `heroImage` now also degrades to the auto OG image
+(an improvement, not a regression).
+
+## Verification (real output)
+
+- `npx tsc --noEmit` → **exit 0, 0 errors**.
+- `npm run test:run` → **Test Files 211 passed | 1 skipped (212); Tests 3586 passed | 18 skipped
+  (3604)**. Baseline was 3560 passed | 18 skipped → **+26 new tests**, zero regressions.
+- **SNAPSHOT GUARD (asserted, not assumed):**
+  `npx vitest run src/modules/generatedLanding/uiFoundationIsolation.test.tsx` → **5 passed**, and
+  `git diff -- src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap`
+  produced **NO content diff** (only git's `LF will be replaced by CRLF` warning). Its clean URLs
+  (`https://iso.lessgo.site`, `https://lessgo.ai/api/og/iso`) are `escapeHTML` no-ops, as designed.
+  Nothing was re-recorded.
+- `npm run test:e2e` deliberately NOT run (orchestrator has it green: 73 passed / 0 failed).
+
+## Human-gate evidence
+
+`docs/task/publish-trust.m4-samples.md` — real generated `<head>` for a benign and a hostile fixture.
+Benign: identical except `&` → `&amp;` in attributes, no `&amp;amp;`. Hostile: payload inert
+(`&quot;&gt;&lt;script&gt;`), no injected element, `javascript:` absent from the document entirely.
+
+## Deviations
+
+1. **`isSafeURL` also rejects `/\evil.com`** (not just `//evil.com`). In-scope judgment call: some
+   browsers normalize `/\` to `//`, making it a protocol-relative twin. Conservative option taken;
+   test pins it.
+2. **`https://`/`http://` prefix required, not bare `https:`/`http:` scheme match.** The plan says
+   "absolute"; requiring `//` is the stricter reading (rejects `https:foo`). Conservative.
+3. **hreflang filtering happens BEFORE the `alternates.length` check**, so an all-unsafe set emits
+   no `<!-- i18n hreflang alternates -->` comment block either (rather than a dangling comment).
+4. **A transient test harness** (`src/lib/staticExport/__m4sample.test.ts`) was created to generate
+   the sample pair and **deleted immediately after**; it is not in the tree. Samples were written to
+   the scratchpad, not the repo.
+
+## Open risks / must-know
+
+- **`__snapshots__/uiFoundationIsolation.test.tsx.snap` shows as modified in `git status` with an
+  EMPTY content diff** — benign EOL churn from vitest rewriting it with LF, exactly as predicted.
+  I did **not** `git checkout --` it: my hard rules forbid state-changing git commands, and the
+  orchestrator's pre-authorization is an agent message, not user consent. **Orchestrator: please
+  restore it before committing** so the phase-3 diff stays scoped. Content is provably unchanged.
+- Benign published pages change by a few bytes (`&` → `&amp;` in og:image/canonical attrs) — that is
+  the intended, correct delta and the reason this is a human gate.
+- **Out of scope, follow-up findings (NOT fixed):** `cssVariablesStyle` CSS-context injection
+  (`htmlGenerator.ts:441-455`) — raw theme values inside `<style>`, where `escapeHTML` is inert;
+  needs a CSS-value validator. `localeJson` U+2028/29 (pre-ES2019 engines only). `jsonLd` verified
+  already breakout-safe via `structuredData.ts:70`.
+- Not committed; tree left dirty as instructed. Phases 4-5 not touched.

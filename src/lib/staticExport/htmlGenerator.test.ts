@@ -129,3 +129,89 @@ describe('generateStaticHTML — styleTokens in static export (AC-L123)', () => 
     expect(html).not.toContain('--u-radius');
   });
 });
+
+// publish-trust M4: the <head> is a raw template string, so every user-influenced value
+// interpolated into it is a stored-XSS sink on live customer domains (*.lessgo.site).
+// These are the end-to-end guards: hostile input must be inert, benign input unchanged.
+describe('generateStaticHTML — head XSS hardening (M4)', () => {
+  const PAYLOAD = '"><script>alert(1)</script>';
+
+  function head(html: string) {
+    return html.slice(0, html.indexOf('</head>'));
+  }
+
+  async function renderHead(overrides: Record<string, any> = {}) {
+    const res = await generateStaticHTML({
+      sections: [SECTION_ID],
+      content: buildPage(),
+      theme: {},
+      publishedPageId: 'p1',
+      pageOwnerId: 'u',
+      slug: 'gate',
+      title: 'Gate',
+      audienceType: 'service',
+      templateId: 'hearth',
+      paletteId: null,
+      variantId: null,
+      goal: null,
+      analyticsOptIn: true,
+      ...overrides,
+    });
+    return res.html;
+  }
+
+  it('escapes an attribute-breakout payload in slug/canonicalDomain (canonical + og:url + twitter:url)', async () => {
+    const html = await renderHead({ slug: `gate${PAYLOAD}`, canonicalDomain: `evil.com${PAYLOAD}` });
+    const h = head(html);
+    expect(h).not.toContain('<script>alert(1)</script>');
+    expect(h).not.toContain(PAYLOAD);
+    // The payload survives only in inert, escaped form inside the attribute value.
+    expect(h).toContain('&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;');
+  });
+
+  it('drops a javascript: previewImage to the auto /api/og URL (no live scheme in og:image)', async () => {
+    const html = await renderHead({ previewImage: 'javascript:alert(1)' });
+    const h = head(html);
+    expect(h).not.toContain('javascript:');
+    expect(h).toContain('<meta property="og:image" content="https://lessgo.ai/api/og/gate">');
+    expect(h).toContain('<meta name="twitter:image" content="https://lessgo.ai/api/og/gate">');
+  });
+
+  it('escapes a breakout payload in an og:image override rather than emitting raw markup', async () => {
+    const html = await renderHead({ previewImage: `https://cdn/x.png${PAYLOAD}` });
+    const h = head(html);
+    expect(h).not.toContain('<script>alert(1)</script>');
+    expect(h).toContain('&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;');
+  });
+
+  it('escapes slug/publishedPageId in the analytics beacon data attributes', async () => {
+    const html = await renderHead({ slug: `gate${PAYLOAD}`, publishedPageId: `p1${PAYLOAD}` });
+    expect(html).not.toContain(`data-slug="gate${PAYLOAD}"`);
+    expect(html).toContain('data-page-id="p1&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;"');
+    expect(html).toContain('data-slug="gate&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;"');
+  });
+
+  it('omits a hreflang alternate whose href fails the scheme gate, keeps the safe ones', async () => {
+    const html = await renderHead({
+      locale: 'en',
+      localeConfig: { locales: ['en', 'nl'], defaultLocale: 'en' } as any,
+      localeAlternates: [
+        { hreflang: 'en', href: 'https://gate.lessgo.site/' },
+        { hreflang: 'nl', href: 'javascript:alert(1)' },
+      ],
+    });
+    const h = head(html);
+    expect(h).toContain('<link rel="alternate" hreflang="en" href="https://gate.lessgo.site/">');
+    expect(h).not.toContain('hreflang="nl"');
+    expect(h).not.toContain('javascript:');
+  });
+
+  it('leaves a benign head unchanged — & escaped exactly once, never double-escaped', async () => {
+    const html = await renderHead({ previewImage: 'https://cdn/x.png?a=1&b=2' });
+    const h = head(html);
+    expect(h).toContain('<meta property="og:image" content="https://cdn/x.png?a=1&amp;b=2">');
+    expect(h).toContain('<link rel="canonical" href="https://gate.lessgo.site">');
+    expect(h).toContain('<meta property="og:url" content="https://gate.lessgo.site">');
+    expect(h).not.toContain('&amp;amp;');
+  });
+});
