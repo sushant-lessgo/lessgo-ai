@@ -25,7 +25,9 @@ ruled additive exception: a read-only `hasBillingAccount` field on `/api/billing
 - phase 4 gating message + upgrade path (beta blocker): done (commit 26238de9, review loops 1, verdict ship) — 🚧 GATE (a) copy sign-off PASSED 2026-07-17 w/ 3 changes (title→"Not enough credits", Free-plan note dropped, fallbacks aligned); tier-blind CTA deferred → phase 6. e2e wiring proven via reproduced negative control (host unmounted → spec fails).
   - carried to phase 6: (a) tier-blind "Upgrade to Pro" — phase 6 knows tier, show PRO users "Top up credits" instead; (b) COPY the fabricated-config probe pattern (OutOfCreditsModal.test.tsx) — compare-to-imported-config tests CANNOT catch a same-value re-inline; (c) regenerate-element sends NO `details` → the regex fallback in parseInsufficientCredits is LOAD-BEARING there, do not delete it as redundant
   - carried to phase 8: e2e `credit-badge` assertion looks timing-sensitive on a cold-started dashboard (failed once, green on re-run) — consider a proper wait
-- phase 5 editor header credit counter: pending
+- phase 5 editor header credit counter: done (commit ba922be0, review loops 1, verdict ship) — Files touched extended by GlobalAppHeader.menus.test.tsx (orchestrator ruling; mount exposed a partial-Clerk-mock gap). Badge placed first so Publish stays rightmost.
+  - carried to phase 8: (a) the editor mount has ZERO automated coverage — deleting `<CreditBadge />` from GlobalAppHeader leaves all gates green; close with ONE editor-header e2e assertion (fold in with the credit-badge flake fix), do NOT reshape the menus harness; (b) the menus mock comment overstates the timer risk — `afterEach` unmount already clearIntervals; reword to "must stub fetch; unmount cleanup handles the interval"; (c) dangling `app-divider` when CreditBadge returns null on fetch failure (new here — DashboardTopBar has no adjacent divider)
+  - founder manual list: no layout shift at h-14; balance refreshes within the 30s poll after a regen
 - phase 6 lean Billing & plan view + CTAs + sidebar widget: pending
 - phase 7 costs-at-action: pending
 - phase 8 docs + hardening sweep: pending

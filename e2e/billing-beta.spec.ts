@@ -6,6 +6,7 @@ import { AUDIENCES, seedDraft } from './helpers/seedDraft';
 // precisely so it is node-importable from here. Same pattern/reason as the note in
 // e2e/media-picker.spec.ts.
 import { CREDIT_COSTS } from '../src/lib/creditCosts';
+import { PLAN_CONFIGS, PlanTier } from '../src/lib/planConfigs';
 
 // billing-beta PHASE 3 — dashboard header credit counter.
 //
@@ -196,5 +197,119 @@ test.describe('billing-beta — credit block surfaces in the editor', () => {
     // Dismissable — a modal that traps the editor would be worse than silence.
     await modal.getByTestId('out-of-credits-close').click();
     await expect(modal).toBeHidden();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// billing-beta PHASE 6 — the lean Billing & plan view + sidebar upgrade link.
+//
+// No seeding: the view reads only /api/billing/{plan,usage}, which answer for
+// any signed-in user. NO live Stripe assertions — clicking Upgrade would create
+// a real checkout session; these tests stop at the fetch boundary.
+//
+// The test user's billing state is UNKNOWN (and differs between machines), so
+// every tier/account assertion below is pinned to what /api/billing/plan
+// actually returns at runtime rather than to an assumption.
+// ---------------------------------------------------------------------------
+test.describe('billing-beta — Billing & plan view', () => {
+  test.skip(!HAS_AUTH_ENV, 'Clerk E2E creds not configured');
+
+  async function readPlan(page: Page) {
+    const res = await page.request.get('/api/billing/plan');
+    expect(res.ok(), `/api/billing/plan: ${res.status()}`).toBeTruthy();
+    return (await res.json()) as {
+      tier: string;
+      status: string;
+      lifetimeDeal?: boolean;
+      hasBillingAccount?: boolean;
+    };
+  }
+
+  test('renders the plan name from PLAN_CONFIGS and the Pro MONTHLY price only', async ({
+    page,
+  }) => {
+    const plan = await readPlan(page);
+    await page.goto('/dashboard/billing');
+
+    const config = PLAN_CONFIGS[plan.tier as PlanTier];
+    await expect(page.getByTestId('billing-plan-name')).toHaveText(config.name);
+
+    // The Pro price is only offered to a FREE user (a PRO user must never be
+    // told to upgrade to the plan they're on).
+    if (plan.tier === PlanTier.FREE) {
+      await expect(page.getByTestId('pro-price')).toHaveText(
+        `$${PLAN_CONFIGS[PlanTier.PRO].price.monthly}`,
+      );
+    } else {
+      await expect(page.getByTestId('upgrade-cta')).toHaveCount(0);
+      await expect(page.getByTestId('topup-cta')).toBeVisible();
+    }
+
+    // Decision 10: no annual dollar figure in-app — `price.annual` is a PER-MONTH
+    // 24 and the real $290/yr exists only on /pricing. Either would be a lie here.
+    const body = await page.locator('main').innerText();
+    expect(body).not.toContain(`$${PLAN_CONFIGS[PlanTier.PRO].price.annual}`);
+    expect(body).not.toContain(`$${PLAN_CONFIGS[PlanTier.PRO].price.annual * 12}`);
+    expect(body).not.toContain('$290');
+  });
+
+  test('cost rows render from CREDIT_COSTS config (not hardcoded)', async ({ page }) => {
+    await page.goto('/dashboard/billing');
+
+    for (const op of [
+      'FULL_PAGE_GENERATION',
+      'SECTION_REGENERATION',
+      'ELEMENT_REGENERATION',
+    ] as const) {
+      const cost = CREDIT_COSTS[op];
+      const row = page.locator(`[data-testid="billing-cost-row"][data-cost-op="${op}"]`);
+      await expect(row).toBeVisible();
+      await expect(row.getByTestId('billing-cost-value')).toHaveText(
+        `${cost} credit${cost === 1 ? '' : 's'}`,
+      );
+    }
+    await expect(
+      page.locator('[data-testid="billing-cost-row"][data-cost-op="IVOC_RESEARCH"]'),
+    ).toHaveCount(0);
+  });
+
+  test('Manage billing state follows hasBillingAccount, not tier', async ({ page }) => {
+    const plan = await readPlan(page);
+    await page.goto('/dashboard/billing');
+
+    if (plan.hasBillingAccount) {
+      await expect(page.getByTestId('manage-billing-cta')).toBeVisible();
+      await expect(page.getByTestId('manage-billing-disabled')).toHaveCount(0);
+    } else {
+      // Greyed, never omitted — and it says why.
+      await expect(page.getByTestId('manage-billing-disabled')).toBeVisible();
+      await expect(page.getByTestId('manage-billing-cta')).toHaveCount(0);
+    }
+  });
+
+  test('"Next charge" only appears for a live, non-lifetime PRO subscription', async ({ page }) => {
+    const plan = await readPlan(page);
+    await page.goto('/dashboard/billing');
+
+    const shouldShow =
+      plan.tier === PlanTier.PRO &&
+      !plan.lifetimeDeal &&
+      ['active', 'trialing'].includes(plan.status);
+
+    await expect(page.getByTestId('billing-next-charge')).toHaveCount(shouldShow ? 1 : 0);
+  });
+
+  test('sidebar Upgrade is an enabled link to /dashboard/billing', async ({ page }) => {
+    await page.goto('/dashboard');
+
+    const upgrade = page.getByRole('link', { name: 'Upgrade', exact: true });
+    await expect(upgrade).toBeVisible();
+    await expect(upgrade).toHaveAttribute('href', '/dashboard/billing');
+    // It was greyed (aria-disabled) before this phase.
+    await expect(upgrade).not.toHaveAttribute('aria-disabled', 'true');
+
+    await upgrade.click();
+    await expect(page).toHaveURL(/\/dashboard\/billing/);
+    await expect(page.getByTestId('billing-plan-name')).toBeVisible();
   });
 });

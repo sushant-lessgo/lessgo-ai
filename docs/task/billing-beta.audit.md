@@ -780,3 +780,223 @@ Fix is one line (add `useAuth: () => ({ isSignedIn: true })` to that file's `vi.
 ### Open risks
 - **MANUAL CHECK STILL PENDING — for the founder's list at the merge gate.** Automation cannot cover it; the plan requires it: (a) counter renders at `/edit/[token]` with **no layout shift at `h-14`** (badge computes to ~30px, so it should fit), and (b) **balance refreshes within the 30s poll** after a regen. Neither is asserted by any test — the menus suite deliberately renders the badge signed-out, so nothing in CI exercises the rendered badge inside the editor header.
 - The phase-3 carry still stands: the panel's Upgrade link is mouse-unreachable — now reproducible from the editor too, widening that phase-8 fix's blast radius slightly.
+
+---
+
+# Phase 6 — lean Billing & plan view + CTAs + sidebar widget 🚧 HUMAN GATE (spec gate b)
+
+## Files changed
+
+- `src/app/api/billing/plan/route.ts` — **modified** (the one ruled backend change: `hasBillingAccount`)
+- `src/lib/billing/stripeClient.ts` — **new**
+- `src/app/dashboard/billing/page.tsx` — **replaced** (325 lines → lean view)
+- `src/app/dashboard/billing/page.test.tsx` — **new** (Files-touched extension — see Deviations 1)
+- `src/components/dashboard/AppSidebar.tsx` — **modified** (greyed Upgrade → real link)
+- `e2e/billing-beta.spec.ts` — **modified** (phase-6 describe block appended)
+- `docs/task/billing-beta.audit.md` — this section
+
+Nothing else. `OutOfCreditsModal.tsx` was NOT touched (see "Carried items" below).
+
+## What changed, per file
+
+### `src/app/api/billing/plan/route.ts`
+One additive, read-only field: `hasBillingAccount: !!plan.stripeCustomerId` (local var is `plan`, not
+`userPlan`). Boolean only — the customer id itself is never sent to the client. Comment records WHY tier
+is not a proxy. Both existing consumers read the body loosely and are unaffected: `SeoSettingsModal`
+reads only `data?.features?.trackingPixels`; the billing page is the other consumer and I rewrote it.
+Nothing else in the route changed.
+
+### `src/lib/billing/stripeClient.ts` (new)
+Three thin wrappers returning a typed `StripeSessionResult`, never redirecting (the caller navigates, so
+tests can stop at the fetch boundary):
+- `startCheckout()` → POST `{tier: 'PRO', billingInterval: 'monthly'}`. **The interval arg is sent** —
+  the route 400s without it (`create-checkout-session/route.ts:36-41`); "monthly only" means no interval
+  *choice*.
+- `startTopup()` → 404 maps to `{ok:false, reason:'disabled'}` (the `PRICING_V2_COMMERCE` kill-switch),
+  distinct from a real error.
+- `openPortal()` → 400 maps to `{ok:false, reason:'no_billing_account'}`.
+Imports `PlanTier` from `planConfigs` (prisma-free) — no `@/lib/planManager` on the client.
+
+### `src/app/dashboard/billing/page.tsx` (replaced)
+Salvaged exactly the three things named in the plan: the pool-aware math (`monthlyLimit > 0` guard +
+the `creditsLabel` tier ladder), the portal-open semantics (now via `stripeClient.openPortal()`), and the
+`?success=true` banner (both checkout and top-up land here). Dropped: usage-history stub, per-op counter
+list, progress bar, lucide, stock Tailwind.
+Renders: plan summary card (name/price/status/credits/gated Next-charge) · AI-credits card (balance +
+`CREDIT_COSTS` rows) · actions card (Upgrade *or* current-plan note, Top up, Manage billing).
+Gates implemented as ruled: **Next charge** only when `tier === PRO && !lifetimeDeal && status ∈
+{active, trialing} && currentPeriodEnd`; **Manage billing** live iff `hasBillingAccount`, else greyed
+with the "why" tooltip; **top-up 404** → info toast, not a dead button; **monthly only** — `price.monthly`
+is the only dollar figure rendered.
+Balance comes from `/api/billing/{plan,usage}` (as the old page did) — it does **not** fetch
+`/api/credits/balance`; `CreditBadge` remains the only fetcher of that route.
+
+### `src/app/dashboard/billing/page.test.tsx` (new)
+15 tests. 14 compare the DOM to imported config / pin the gates (FREE pool label, LTD lifetime label,
+Next-charge present only for live PRO, absent for FREE / LTD / cancelled-PRO, Manage-billing on
+`hasBillingAccount` incl. **both** real users — churned FREE+customerId stays live, admin-granted PRO
+without one is greyed — and the tier-aware CTA). The 15th is the **fabricated-config mutation probe**
+copied from `OutOfCreditsModal.test.tsx:150-190`.
+
+### `src/components/dashboard/AppSidebar.tsx`
+The S3 greyed `<span>` Upgrade → `<Link href="/dashboard/billing">` (dropped `cursor-not-allowed`,
+`opacity-60`, `aria-disabled`, and the S3 comment; header note updated). No data-flow change — no
+`dashboard/layout.tsx` edit, so no plan/credit read was added to passive chrome.
+
+### `e2e/billing-beta.spec.ts`
+New `billing-beta — Billing & plan view` describe (5 tests, no seeding, `HAS_AUTH_ENV` guard). Every
+tier/account assertion is pinned to a runtime `/api/billing/plan` read, never a tier assumption. No live
+Stripe assertions.
+
+## User-facing copy (verbatim — for the gate)
+
+**Page**
+- H1: `Billing & plan`
+- Sub: `Your plan, your AI credits, and everything payment-related.`
+
+**Success banner** (`?success=true`; reached by BOTH checkout and top-up returns)
+- `Payment complete`
+- `Thanks — your purchase went through. Your plan and credits below update within a few seconds; refresh if they still look stale.`
+- (The old banner said *"Your trial has started. You won't be charged until the trial ends."* — false under pricing-v2 and false for a top-up. Gone.)
+
+**Plan summary card**
+- `Current plan` · `Free` `$0/month` (name + price from `PLAN_CONFIGS[tier]`; LTD shows a `Lifetime` badge instead of a price)
+- Rows: `Status` `active` · `Credits` `12 one-time credits` (label per tier: `N lifetime credits` / `N one-time credits` / `Unlimited` / `N/mo + N bonus` / `N/mo`)
+- `Next charge` `31/01/2030` — **only** for a live, non-lifetime PRO subscription; the row is omitted entirely otherwise.
+
+**AI credits card**
+- `AI credits` · `12` `available`
+- Monthly tiers: `8 of 200 monthly credits used · 12 bonus in pool` · LTD: `Lifetime credits — they never expire.` · FREE: `One-time credits — they don't refill.`
+- `Credit costs:` `Full page generation 10 credits` · `Section regeneration 2 credits` · `Element variation 1 credit` (all from `CREDIT_COSTS`; `IVOC_RESEARCH` never shown)
+
+**Actions card — FREE user**
+- `Upgrade to Pro`
+- `200 AI credits every month, 3 published pages, and custom domains.`
+- `$29` `/month`
+- Button: `Upgrade to Pro` (busy: `Opening checkout…`)
+- `Billed monthly.` `Annual and lifetime plans` → link to `/pricing`
+
+**Actions card — paying/other user** (the phase-4 carried fix)
+- `You're on Pro. Need more credits before your next refill? Top up below.`
+
+**Both**
+- Button: `Top up credits` (busy: `Opening…`)
+- Button: `Manage billing` (busy: `Opening…`) — or greyed with tooltip `No billing account yet — upgrade first`
+- Footnote: `Payment method, invoices, and cancellation are handled in the Stripe billing portal.`
+
+**Toasts**
+- Top-up kill-switch (404): `Top-ups aren't enabled yet. They're coming shortly.` (info)
+- Top-up error: `Couldn't start the top-up. Please try again.` (error)
+- Checkout error: `Couldn't start checkout. Please try again.` (error)
+- Portal residual 400: `No billing account yet — upgrade first.` (error)
+- Portal error: `Couldn't open the billing portal. Please try again.` (error)
+
+## What this view renders vs what the Stripe portal covers (gate b)
+
+| Capability | Where it lives now | Why |
+|---|---|---|
+| Plan name, price, status, LTD flag | **This view** (`PLAN_CONFIGS` + `/api/billing/plan`) | config/DB-derived, no Stripe hop |
+| Credit balance + credit costs | **This view** (`/api/billing/usage` + `CREDIT_COSTS`) | Stripe has no notion of our credits |
+| Next charge date | **This view**, gated to live PRO | `currentPeriodEnd` is a rollover for FREE/LTD |
+| Upgrade to Pro (monthly) | **This view** → `create-checkout-session` | — |
+| Buy credits (top-up) | **This view** → `create-topup-session` | — |
+| Annual / lifetime purchase | **`/pricing`** (linked, one line) | $290/yr exists only there; config has no annual per-year figure (decision 10) |
+| **Payment method** (add/update card) | **Stripe portal** | no server source for last4 — a display would mean fabricating it or a new Stripe read (Scope OUT) |
+| **Invoices / receipts** | **Stripe portal** | Stripe is the system of record |
+| **Cancel / downgrade** | **Stripe portal** | cancel-at-period-end isn't on `UserPlan`; the portal owns the state machine |
+| Usage history, per-op counters, meters | **not built** (2g/post-beta) | dropped per plan |
+
+→ **Gate (b) asks:** walk the portal in Stripe test mode and confirm it covers **payment method +
+invoices + cancellation**. Those three are the entire justification for descoping the 2g console — if the
+portal misses any, this view has a hole. This is also why Manage billing gates on `hasBillingAccount` and
+not tier: a **churned ex-payer is FREE with a customer id**, and tier-gating would lock them out of
+exactly those three capabilities (their invoices, their cancellation).
+
+## Deviations from the plan
+
+1. **Files touched extended by `src/app/dashboard/billing/page.test.tsx` (new).** Phase 6's list has no
+   vitest file, but the orchestrator's carried instruction ("COPY the fabricated-config probe pattern …
+   Phase 6 renders the most pricing of any phase, so it needs this") requires one, and no other listed
+   file could host it. Same class as phase 5's ruled extension. Flagging for the reviewer.
+2. **Balance source: `/api/billing/usage`, not `/api/credits/balance`.** Plan step 3 says "Credit
+   balance: from `credits/balance`", but (a) the hard constraint "CreditBadge stays the ONLY balance
+   fetcher" and (b) the salvage instruction — the pool-aware math at old `:133-150` is written against
+   `usage.credits` + `plan.creditPool` — both point the other way. Took the conservative option: keep the
+   old page's plan+usage fetches (no NEW fetcher of any kind) and salvage the math as written. Same
+   numbers, same route pair as before this phase.
+3. **`stripeClient` helpers return a result instead of redirecting.** Plan says "`startCheckout()` →
+   redirect `url`". Redirecting inside the helper would make every caller untestable and would swallow
+   the two typed non-error paths (404 kill-switch, 400 no-account) the plan explicitly wants toasted. The
+   page does `window.location.href = result.url` — the salvaged `openCustomerPortal()` semantics.
+4. **Dropped the old page's `useAuth()` + `router.push('/sign-in')` redirect.** `/dashboard/*` is already
+   behind `auth.protect()` in `src/middleware.ts` (only `isPublicRoute` escapes), so it was dead
+   belt-and-braces; removing it also keeps the view free of a Clerk mock. Not a salvage item.
+5. **Greyed Manage billing uses `AppTooltip` + `.app-coming` directly, not `<Coming>`.** `<Coming>`
+   hardcodes the tooltip to `Coming soon — {what}`, which would be a lie here: the portal IS built, it is
+   simply unavailable to a user with no Stripe customer id. The recipe is applied in full (class +
+   `aria-disabled` + `tabIndex={-1}` + inert click + a "why" tooltip) — only the copy differs.
+6. **Success-banner copy rewritten** (it was in the salvage list). The old text asserted a trial; pricing-v2
+   has none, and the same banner serves top-ups. Structure/placement salvaged, wording replaced.
+
+## Carried items — how they were handled
+
+- **(a) tier-blind "Upgrade to Pro" (deferred here from the phase-4 gate): FIXED in what phase 6 renders.**
+  `canUpgrade = tier === FREE`; a PRO user sees `You're on Pro. Need more credits before your next
+  refill? Top up below.` and the top-up button is promoted to primary. Pinned by a test asserting the
+  page never matches `/upgrade to pro/i` for a PRO user.
+  **`OutOfCreditsModal.tsx` is still tier-blind and I did NOT touch it — it is not in phase 6's Files
+  touched (reporting, per instruction).** Concretely: the modal is rendered by `CreditsBlockedHost` off a
+  bus carrying only `{required, available}`, so making it tier-aware needs either a plan fetch in the
+  modal (a second fetcher — decision 3 forbids it) or a tier on the bus. Its CTA is a *link* to this
+  view, which is now tier-correct, so a PRO user who hits the modal sees "Upgrade to Pro" once and lands
+  on a page that offers them a top-up. **Recommend folding into phase 8** (rewording the modal's card to
+  a tier-neutral "Need more credits?" is a one-line copy change requiring no new data).
+- **(b) fabricated-config probe: COPIED.** `page.test.tsx` bottom describe. **Negative control run:**
+  re-inlining `$29` / `'Free'` into the page (same values as config) → the probe FAILS
+  (`× renders fabricated PLAN_CONFIGS / CREDIT_COSTS values`); reverted immediately, confirmed green.
+- **(c) `parseInsufficientCredits` regex fallback: untouched** (phase-2 file, not in this phase's list).
+
+## Test results
+
+- `npx tsc --noEmit` → exit 0.
+- `npm run test:run` → **216 passed | 1 skipped (217 files)**; **3646 passed | 18 skipped** — includes the
+  15 new billing-view tests. No pre-existing test needed a change.
+- `npm run lint` → no errors; no new warnings on any touched file (warnings shown are pre-existing, in
+  untouched files).
+- `npm run build` → green (full pipeline incl. `build:published-css` + `build:assets`).
+- **Isolation guards, all three green:**
+  1. published-css sha256 vs fixture, verified against the **freshly built** artifact:
+     `c2f87e08f517a72b43f6e9e0e9b703b6261f4f152c711be9241649c6f26219b6` — identical.
+  2. `tailwindConfigFreeze.test.ts` — 3/3 pass (no `tailwind.config.js` edit at all this phase).
+  3. `e2e/ui-isolation.spec.ts` — 2/2 pass.
+- **`npm run test:e2e` (billing-beta + ui-isolation) → 11 passed.** The 5 phase-6 tests **EXECUTED** under
+  `[authed]` (`✓`, not `-`):
+  ```
+  ✓ 7  [authed] › billing-beta.spec.ts:228 › Billing & plan view › renders the plan name from PLAN_CONFIGS and the Pro MONTHLY price only (6.8s)
+  ✓ 8  [authed] › billing-beta.spec.ts:256 › Billing & plan view › cost rows render from CREDIT_COSTS config (not hardcoded) (1.3s)
+  ✓ 9  [authed] › billing-beta.spec.ts:276 › Billing & plan view › Manage billing state follows hasBillingAccount, not tier (1.3s)
+  ✓ 10 [authed] › billing-beta.spec.ts:290 › Billing & plan view › "Next charge" only appears for a live, non-lifetime PRO subscription (1.1s)
+  ✓ 11 [authed] › billing-beta.spec.ts:302 › Billing & plan view › sidebar Upgrade is an enabled link to /dashboard/billing (4.9s)
+  ```
+  Phases 3-5 specs stayed green in the same run.
+- **Answers plan Q3** (which branch the e2e exercised): every `UserPlan` row in the dev DB is
+  `tier=FREE, status=active, lifetimeDeal=false, stripeCustomerId=null`. So e2e exercised the **FREE +
+  no-billing-account** branch: upgrade CTA + `$29`, greyed Manage billing, no Next-charge row. The
+  churned-ex-payer, admin-granted-PRO, live-PRO and LTD branches are covered by vitest only.
+
+## Open risks
+
+- **Manual (Stripe test mode) still pending — the merge-gate list:** FREE → Upgrade → real Checkout
+  (monthly) → return `?success=true` banner; a paying user → portal opens; top-up with
+  `PRICING_V2_COMMERCE=true` vs unset (both paths); portal 400 toast by hand (no FREE+customerId fixture
+  exists in dev — see Q3 answer). No automated test crosses the Stripe boundary by design.
+- **`OutOfCreditsModal` remains tier-blind** (see Carried items) — a PRO user who runs out sees "Upgrade
+  to Pro" in the modal before landing on a correct page. Cosmetic-but-money-facing; recommend phase 8.
+- **`status` renders raw** (`active`, `past_due`, `incomplete`) with a `capitalize` class — Stripe's
+  vocabulary leaks to the user. Deliberate: mapping statuses to friendly copy is new product copy the
+  gate hasn't seen. Worth a look at the gate.
+- The success banner tells the user to refresh if numbers look stale (the webhook may not have landed
+  yet). Honest, but it is a manual step — an auto-poll is post-beta.
+- `hasBillingAccount` is now on `/api/billing/plan` for every consumer; it is a boolean and leaks no
+  Stripe id, but any future consumer must not treat it as "is paying" — it means "has a Stripe customer
+  record", which a churned FREE user also has.
