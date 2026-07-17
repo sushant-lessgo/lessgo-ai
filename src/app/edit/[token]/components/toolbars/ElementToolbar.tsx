@@ -7,6 +7,7 @@ import { useEditor } from '@/hooks/useEditor';
 
 import { useButtonConfigModal } from '@/hooks/useButtonConfigModal';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
+import { ToolbarButton, ToolbarDivider, ToolbarLabel } from './ToolbarButton';
 
 interface ElementToolbarProps {
   elementSelection: any;
@@ -189,6 +190,7 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
       id: 'delete',
       label: 'Delete',
       icon: 'trash',
+      variant: 'danger' as const,
       handler: async () => {
         const confirmed = await confirmDialog({
           title: 'Delete element',
@@ -205,27 +207,19 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
 
   return (
     <>
-      <div
-        ref={toolbarRef}
-        className="bg-white border border-gray-200 rounded-lg shadow-lg"
-        data-toolbar-type="element"
-      >
-        <div className="flex items-center px-3 py-2">
-          {/* Element Indicator */}
-          <div className="flex items-center space-x-1 mr-3">
-            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-            <span className="text-xs font-medium text-gray-700">
-              {elementSelection.elementKey}
-            </span>
-          </div>
-          
-          {/* Primary Actions */}
-          {primaryActions.map((action, index) => {
-            const actionDisabled = (action as any).disabled === true;
-            return (
+      {/* The t2 chrome box (bg/border/radius/shadow) is the SHELL's now — this
+          body only supplies the label chip + the action row. */}
+      <div ref={toolbarRef} className="flex items-center gap-0.5">
+        <ToolbarLabel dotClassName="bg-purple-400" text={elementSelection.elementKey} />
+
+        {/* Primary Actions */}
+        {primaryActions.map((action, index) => {
+          const actionDisabled = (action as any).disabled === true;
+          return (
             <React.Fragment key={action.id}>
-              {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
-              <button
+              {index > 0 && <ToolbarDivider />}
+              <ToolbarButton
+                data-action={action.id}
                 onClick={(e) => {
                   if (actionDisabled) {
                     e.stopPropagation();
@@ -239,23 +233,21 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
                   action.handler(e);
                 }}
                 disabled={actionDisabled}
-                className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
-                  actionDisabled
-                    ? 'text-gray-300 cursor-not-allowed'
+                disabledTitle={(action as any).disabledTitle}
+                variant={
+                  (action as any).variant === 'danger'
+                    ? 'danger'
                     : action.id === 'edit-text'
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                }`}
-                title={actionDisabled ? (action as any).disabledTitle || action.label : action.label}
+                    ? 'emphasis'
+                    : 'default'
+                }
+                icon={<ElementIcon icon={action.icon} />}
+                label={action.label}
                 aria-haspopup={action.id === 'button-config' ? 'dialog' : undefined}
-              >
-                <ElementIcon icon={action.icon} />
-                <span>{action.label}</span>
-              </button>
+              />
             </React.Fragment>
-            );
-          })}
-        </div>
+          );
+        })}
       </div>
 
 

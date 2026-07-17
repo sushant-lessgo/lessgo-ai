@@ -28,6 +28,17 @@ type ToolbarTarget = ReturnType<typeof getToolbarTarget>;
 /** Rough width class hint (metadata for the shell; no functional gating today). */
 export type ToolbarSize = 'sm' | 'md' | 'lg';
 
+/**
+ * Per-type control of the shell's trailing slot group (handoff t2 anatomy:
+ * `[element actions] · [Design ▾] · [Ask AI] · [⋯/Delete]`).
+ *
+ * - `'disabled'` — the slot renders greyed with a "why" tooltip. Beta default:
+ *   Design ▾ is skeleton-gated (plan D-3), and a greyed control reads as
+ *   deliberate where a missing one reads as an unfinished toolbar.
+ * - `'hidden'` — the slot is not rendered at all.
+ */
+export type TrailingSlotState = 'disabled' | 'hidden';
+
 export interface ActionSetEntry {
   /** Module-level component reference — stable identity across re-renders. */
   component: React.ComponentType<any>;
@@ -37,6 +48,12 @@ export interface ActionSetEntry {
    * when the current selection can't satisfy this toolbar (shell renders nothing).
    */
   resolveProps: (selection: EditorSelection, target: ToolbarTarget) => Record<string, unknown> | null;
+  /**
+   * Design ▾ trailing slot. `'disabled'` everywhere for Beta; the field exists
+   * so the un-defer (skeleton phase-9 cutover) is a per-type flip here rather
+   * than a shell edit.
+   */
+  designMenu: TrailingSlotState;
 }
 
 // Only the 4 RENDERABLE toolbar types. `form` / null intentionally absent → the
@@ -46,18 +63,21 @@ export const actionSets: Partial<Record<NonNullable<ToolbarType>, ActionSetEntry
   section: {
     component: SectionToolbar,
     size: 'md',
+    designMenu: 'disabled',
     resolveProps: (selection) =>
       selection.selectedSection ? { sectionId: selection.selectedSection } : null,
   },
   element: {
     component: ElementToolbar,
     size: 'md',
+    designMenu: 'disabled',
     resolveProps: (selection) =>
       selection.selectedElement ? { elementSelection: selection.selectedElement } : null,
   },
   text: {
     component: TextToolbarMVP,
     size: 'lg',
+    designMenu: 'disabled',
     resolveProps: (selection) => {
       const sel = selection.textEditingElement || selection.selectedElement;
       return sel ? { elementSelection: sel } : null;
@@ -66,6 +86,7 @@ export const actionSets: Partial<Record<NonNullable<ToolbarType>, ActionSetEntry
   image: {
     component: ImageToolbar,
     size: 'md',
+    designMenu: 'disabled',
     resolveProps: (_selection, target) =>
       target.targetId ? { targetId: target.targetId } : null,
   },

@@ -14,6 +14,7 @@ import {
   wrapElementContentWithStyles,
   type PartialFormatResult
 } from '@/utils/textFormatting';
+import { ToolbarButton, ToolbarDivider } from './ToolbarButton';
 
 interface TextToolbarMVPProps {
   elementSelection: any;
@@ -491,11 +492,14 @@ function TextToolbarMVPInner({
 
   return (
     <>
+      {/* The t2 chrome box (bg/border/radius/shadow) is the SHELL's now. The
+          fixed 52px height went with it — the shell's pill sizes itself. The
+          mousedown/mouseup preventDefault below is load-bearing (it stops the
+          toolbar from stealing the text selection) and stays exactly as-is. */}
       <div
         ref={toolbarRef}
-        className="bg-white border border-gray-300 rounded-lg shadow-lg"
+        className="flex items-center gap-0.5"
         style={{
-          height: '52px', // Fixed MVP height
           whiteSpace: 'nowrap',
           userSelect: 'none', // Prevent text selection on toolbar
         }}
@@ -510,120 +514,97 @@ function TextToolbarMVPInner({
           e.stopPropagation();
         }}
       >
-        <div className="flex items-center justify-between px-3 py-2 h-full">
+        <div className="flex items-center gap-0.5">
           {/* Format Controls */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-0.5">
             {/* Bold, Italic, Underline */}
-            <button
+            <ToolbarButton
+              data-action="bold"
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 saveSelection();
                 toggleBold(e as any);
               }}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.bold 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.bold}
+              icon={<BoldIcon />}
               title={`Bold${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
-            >
-              <BoldIcon />
-            </button>
-            
-            <button
+            />
+
+            <ToolbarButton
+              data-action="italic"
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 saveSelection();
                 toggleItalic(e as any);
               }}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.italic 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.italic}
+              icon={<ItalicIcon />}
               title={`Italic${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
-            >
-              <ItalicIcon />
-            </button>
-            
-            <button
+            />
+
+            <ToolbarButton
+              data-action="underline"
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 saveSelection();
                 toggleUnderline(e as any);
               }}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.underline 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.underline}
+              icon={<UnderlineIcon />}
               title={`Underline${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
-            >
-              <UnderlineIcon />
-            </button>
-            
-            <div className="w-px h-6 bg-gray-300" />
-            
+            />
+
+            <ToolbarDivider />
+
             {/* Text Alignment */}
-            <button
+            <ToolbarButton
+              data-action="align-left"
               onMouseDown={(e) => {
                 e.preventDefault();
                 saveSelection();
               }}
               onPointerDown={(e) => setAlignment('left', e)}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.textAlign === 'left' 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.textAlign === 'left'}
+              icon={<AlignLeftIcon />}
               title="Align Left (Note: alignment applies to whole element)"
-            >
-              <AlignLeftIcon />
-            </button>
-            
-            <button
+            />
+
+            <ToolbarButton
+              data-action="align-center"
               onMouseDown={(e) => {
                 e.preventDefault();
                 saveSelection();
               }}
               onPointerDown={(e) => setAlignment('center', e)}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.textAlign === 'center' 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.textAlign === 'center'}
+              icon={<AlignCenterIcon />}
               title="Align Center (Note: alignment applies to whole element)"
-            >
-              <AlignCenterIcon />
-            </button>
-            
-            <button
+            />
+
+            <ToolbarButton
+              data-action="align-right"
               onMouseDown={(e) => {
                 e.preventDefault();
                 saveSelection();
               }}
               onPointerDown={(e) => setAlignment('right', e)}
-              className={`p-1.5 rounded transition-colors select-none ${
-                formatState.textAlign === 'right' 
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              active={formatState.textAlign === 'right'}
+              icon={<AlignRightIcon />}
               title="Align Right (Note: alignment applies to whole element)"
-            >
-              <AlignRightIcon />
-            </button>
+            />
           </div>
-          
-          <div className="w-px h-6 bg-gray-300" />
-          
+
+          <ToolbarDivider />
+
           {/* Font Size & Color */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-0.5">
             {/* Font Size */}
             <div className="relative">
-              <button
+              <ToolbarButton
+                data-action="font-size"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   saveSelection();
@@ -633,16 +614,15 @@ function TextToolbarMVPInner({
                   e.stopPropagation();
                   setShowFontSizePicker(!showFontSizePicker);
                 }}
-                className="flex items-center space-x-1 px-2 py-1.5 text-sm rounded text-gray-600 hover:bg-gray-100 transition-colors select-none"
+                active={showFontSizePicker}
+                icon={<FontSizeIcon />}
+                label={
+                  FONT_SIZE_PRESETS.find(p => p.value === formatState.fontSize)?.shortLabel || 'M'
+                }
+                trailing={<ChevronDownIcon />}
                 title={`Font Size${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
-              >
-                <FontSizeIcon />
-                <span className="text-xs font-medium">
-                  {FONT_SIZE_PRESETS.find(p => p.value === formatState.fontSize)?.shortLabel || 'M'}
-                </span>
-                <ChevronDownIcon />
-              </button>
-              
+              />
+
               {showFontSizePicker && (
                 <div 
                   ref={fontSizePickerRef}
@@ -672,7 +652,8 @@ function TextToolbarMVPInner({
             
             {/* Color Picker */}
             <div className="relative">
-              <button
+              <ToolbarButton
+                data-action="text-color"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   saveSelection();
@@ -682,19 +663,20 @@ function TextToolbarMVPInner({
                   e.stopPropagation();
                   setShowColorPicker(!showColorPicker);
                 }}
-                className="flex items-center space-x-1 px-2 py-1.5 text-sm rounded text-gray-600 hover:bg-gray-100 transition-colors select-none"
+                active={showColorPicker}
+                icon={
+                  <span className="flex items-center gap-1">
+                    <ColorIcon />
+                    <span
+                      className="w-3 h-3 rounded-sm border border-white/25"
+                      style={{ backgroundColor: formatState.color }}
+                    />
+                  </span>
+                }
+                trailing={<ChevronDownIcon />}
                 title={`Text Color${hasTextSelection ? ' (selected text)' : ' (whole element)'}`}
-              >
-                <div className="flex items-center space-x-1">
-                  <ColorIcon />
-                  <div 
-                    className="w-3 h-3 rounded-sm border border-gray-300"
-                    style={{ backgroundColor: formatState.color }}
-                  />
-                </div>
-                <ChevronDownIcon />
-              </button>
-              
+              />
+
               {showColorPicker && (
                 <div 
                   ref={colorPickerRef}
@@ -760,28 +742,28 @@ function TextToolbarMVPInner({
               )}
             </div>
 
-            {/* Divider + AI Sparkle */}
-            <div className="w-px h-6 bg-gray-300" />
-            <button
+            {/* Divider + AI Sparkle. NOTE: this is the EXISTING sparkle →
+                variations flow, not the phase-5 "Ask Lessgo AI" instruction
+                prompt (which lands in the shell's hidden trailing slot). */}
+            <ToolbarDivider />
+            <ToolbarButton
+              data-action="ai-variations"
               onMouseDown={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
               onClick={handleSparkle}
               disabled={aiGeneration.isGenerating || regenLocaleLocked}
-              className={`p-1.5 rounded transition-colors select-none ${
+              disabledTitle={
                 regenLocaleLocked
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : aiGeneration.isGenerating
-                  ? 'text-yellow-500 bg-yellow-50 animate-pulse'
-                  : elementVariations.visible
-                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
-                    : 'text-gray-600 hover:bg-gray-100'
-              }`}
-              title={regenLocaleLocked ? 'Switch to the default language to regenerate.' : 'AI text variations'}
-            >
-              <SparkleIcon />
-            </button>
+                  ? 'Switch to the default language to regenerate.'
+                  : 'Generating…'
+              }
+              active={elementVariations.visible}
+              className={aiGeneration.isGenerating ? 'animate-pulse' : ''}
+              icon={<SparkleIcon />}
+              title="AI text variations"
+            />
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@ import { ElementToggleModal } from '../ui/ElementToggleModal';
 import { isChromeId } from '@/hooks/editStore/pageHelpers';
 import { eligibleVariantCount } from '../ui/BlockVariantSelector';
 import { usesTemplateModule } from '@/types/service';
+import { ToolbarButton, ToolbarDivider, ToolbarLabel, useHideToolbarChrome } from './ToolbarButton';
 
 // Shared chrome (header/footer) is site-wide: hide per-page structural actions.
 const CHROME_HIDDEN_ACTIONS = ['move-up', 'move-down', 'duplicate', 'delete'];
@@ -227,6 +228,13 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
     prevIsRegeneratingRef.current = isRegenerating;
   }, [isRegenerating, announceLiveRegion]);
 
+  // While regenerating (and for the 3s completion card) this component renders a
+  // fixed bottom-right card INSTEAD of a toolbar. The t2 chrome box lives in the
+  // shell now, so tell it to stand down — otherwise an empty dark pill carrying
+  // only the disabled Design ▾ would hover over the section, where today the
+  // toolbar simply disappears.
+  useHideToolbarChrome(isRegenerating || showCompletionMessage);
+
   return (
     <>
       {/* Show loading bar when regenerating this section */}
@@ -267,57 +275,49 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
         </div>
       )}
       
-      {/* Original toolbar - only show when not regenerating */}
+      {/* Original toolbar - only show when not regenerating. The t2 chrome box
+          (bg/border/radius/shadow) is the SHELL's now; this body supplies the
+          label chip + the action row only. */}
       {!isRegenerating && !showCompletionMessage && (
-        <div
-          ref={toolbarRef}
-          className="bg-white border border-gray-200 rounded-lg shadow-lg"
-        >
-        <div className="flex items-center px-3 py-2">
+        <div ref={toolbarRef} className="flex items-center gap-0.5">
           {/* Section Indicator with Validation */}
-          <div className="flex items-center space-x-2 mr-3">
-            <div className={`w-2 h-2 rounded-full ${
-              validation?.isValid ? 'bg-green-500' : 
-              (validation?.completionPercentage || 0) > 50 ? 'bg-yellow-500' : 'bg-red-500'
-            }`}></div>
-            <span className="text-xs font-medium text-gray-700">
-              {sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}
-            </span>
+          <ToolbarLabel
+            dotClassName={
+              validation?.isValid
+                ? 'bg-green-400'
+                : (validation?.completionPercentage || 0) > 50
+                ? 'bg-yellow-400'
+                : 'bg-red-400'
+            }
+            text={sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}
+          >
             {isChromeId(sectionId) ? (
-              <span className="text-[10px] font-medium text-white bg-gray-900/80 rounded px-1.5 py-0.5 whitespace-nowrap">
+              <span className="text-[10px] font-medium text-[#e8e8ee] bg-white/10 rounded px-1.5 py-0.5 whitespace-nowrap">
                 Shared · all pages
               </span>
             ) : (
-              <span className="text-xs text-gray-500">
+              <span className="text-[11px] text-[#7b7b88]">
                 {validation?.completionPercentage || 0}%
               </span>
             )}
-          </div>
-          
+          </ToolbarLabel>
+
           {/* Primary Actions */}
           {primaryActions.map((action, index) => (
             <React.Fragment key={action.id}>
-              {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
-              <button
+              {index > 0 && <ToolbarDivider />}
+              <ToolbarButton
+                data-action={action.id}
                 onClick={action.handler}
                 disabled={action.disabled}
-                data-action={action.id}
-                className={`flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors ${
-                  action.disabled
-                    ? 'text-gray-400 cursor-not-allowed'
-                    : action.variant === 'danger'
-                    ? 'text-red-600 hover:bg-red-50'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                }`}
-                title={action.label}
-              >
-                <ActionIcon icon={action.icon} />
-                <span>{action.label}</span>
-              </button>
+                disabledTitle={action.label}
+                variant={action.variant === 'danger' ? 'danger' : 'default'}
+                icon={<ActionIcon icon={action.icon} />}
+                label={action.label}
+              />
             </React.Fragment>
           ))}
         </div>
-      </div>
       )}
 
       <ElementToggleModal

@@ -10,6 +10,7 @@ import { isForbiddenImageSrc } from '@/hooks/editStore/imageWriteGuard';
 // the in-file StockPhotosPanel — one implementation, not two. Its Stock tab carries
 // the panel's palette-enriched queries / category buttons / curated-on-mount forward.
 import { MediaPickerModal, type MediaPickerTab } from '../ui/MediaPickerModal';
+import { ToolbarButton, ToolbarDivider, ToolbarLabel } from './ToolbarButton';
 
 interface ImageToolbarProps {
   targetId: string;
@@ -263,6 +264,7 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
       id: 'delete-image',
       label: 'Delete',
       icon: 'trash',
+      variant: 'danger' as const,
       handler: async () => {
         if (await confirmDialog({ title: 'Delete image', message: 'Are you sure you want to delete this image?', confirmLabel: 'Delete', destructive: true })) {
           // Remove image by setting empty content
@@ -292,38 +294,32 @@ export function ImageToolbar({ targetId }: ImageToolbarProps) {
 
   return (
     <>
-      <div
-        ref={toolbarRef}
-        className="bg-white border border-gray-200 rounded-lg shadow-lg"
-      >
-        <div className="flex items-center px-3 py-2">
-          {/* Image Indicator */}
-          <div className="flex items-center space-x-1 mr-3">
-            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-            <span className="text-xs font-medium text-gray-700">Image</span>
-          </div>
-          
-          {/* Primary Actions */}
-          {primaryActions.map((action, index) => (
-            <React.Fragment key={action.id}>
-              {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation(); // Prevent event bubbling
-                  action.handler();
-                }}
-                className="flex items-center space-x-1 px-2 py-1 text-xs rounded transition-colors text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                title={action.label}
-              >
-                <ImageIcon icon={action.icon} />
-                <span>{action.label}</span>
-              </button>
-            </React.Fragment>
-          ))}
-          
-          {/* Removed advanced actions menu for MVP */}
-        </div>
+      {/* The t2 chrome box (bg/border/radius/shadow) is the SHELL's now — this
+          body only supplies the label chip + the action row. Reskin ONLY: the
+          Replace/Stock (MediaPickerModal) and Edit (SimpleImageEditor) wiring
+          below is byte-for-byte the media-library-picker's, and no Image → Link
+          action is added (deferred — plan ruling 5: no published-consumed
+          image-link field exists). */}
+      <div ref={toolbarRef} className="flex items-center gap-0.5">
+        <ToolbarLabel dotClassName="bg-orange-400" text="Image" />
+
+        {/* Primary Actions */}
+        {primaryActions.map((action, index) => (
+          <React.Fragment key={action.id}>
+            {index > 0 && <ToolbarDivider />}
+            <ToolbarButton
+              data-action={action.id}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent event bubbling
+                action.handler();
+              }}
+              variant={(action as any).variant === 'danger' ? 'danger' : 'default'}
+              icon={<ImageIcon icon={action.icon} />}
+              label={action.label}
+            />
+          </React.Fragment>
+        ))}
       </div>
 
 
