@@ -21,7 +21,13 @@ import { logger } from '@/lib/logger';
 import { createSecureResponse } from '@/lib/security';
 import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
-import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
+import {
+  checkCredits,
+  consumeCredits,
+  logUsageEvent,
+  CREDIT_COSTS,
+  UsageEventType,
+} from '@/lib/creditSystem';
 import { generateWithSchema } from '@/lib/aiClient';
 import { BriefSchema } from '@/lib/schemas/brief.schema';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
@@ -113,6 +119,35 @@ async function workStrategyHandler(req: NextRequest): Promise<Response> {
       });
     }
 
+    // 2c. Credit PRE-GATE — check the balance BEFORE any AI work (one charging
+    //     model: check → generate → charge on success). Placed AFTER the mock/
+    //     demo short-circuit above, exactly where consumeCredits already applied,
+    //     so mock/demo runs stay both uncharged and ungated.
+    //     The failed attempt is still ledgered here — it mirrors the success:false
+    //     UsageEvent consumeCredits used to write once the AI had already run.
+    const preCheck = await checkCredits(userId, CREDIT_COSTS.STRATEGY_GENERATION);
+    if (!preCheck.allowed) {
+      await logUsageEvent({
+        userId,
+        eventType: UsageEventType.STRATEGY_GENERATION,
+        creditsUsed: 0,
+        success: false,
+        errorMessage: 'Insufficient credits',
+        endpoint: '/api/audience/work/strategy',
+        duration: Date.now() - startTime,
+      });
+      return createSecureResponse(
+        {
+          success: false,
+          error: 'insufficient_credits',
+          message: `Insufficient credits. Required: ${preCheck.required}, Available: ${preCheck.remaining}`,
+          creditsRequired: preCheck.required,
+          creditsRemaining: preCheck.remaining,
+        },
+        402
+      );
+    }
+
     // 3. Derive price position + voice (pure code), then build the lean prompt.
     const pricePosition = derivePricePosition(facts);
     const establishment: Establishment = facts.establishment ?? DEFAULT_ESTABLISHMENT;
@@ -177,8 +212,32 @@ async function workStrategyHandler(req: NextRequest): Promise<Response> {
       }
     );
     if (!creditResult.success) {
-      logger.warn(
-        `[Work Strategy] Credit consumption failed for user ${userId}: ${creditResult.error}`
+      // The charge failed AFTER generation → the output is DISCARDED (no free output).
+      if (creditResult.error === 'charge_conflict') {
+        // Solvent user, lost the write race → recoverable. The error code AND
+        // message deliberately avoid the substring "credit": the client rails
+        // regex-match /credit/i and would strand a paying user on the buy wall.
+        logger.error(
+          `[Work Strategy] Charge conflict for user ${userId} — nothing charged, output discarded`
+        );
+        return createSecureResponse(
+          {
+            success: false,
+            error: 'charge_failed',
+            message: 'Temporary billing conflict — please try again. You have not been charged.',
+          },
+          500
+        );
+      }
+      return createSecureResponse(
+        {
+          success: false,
+          error: 'insufficient_credits',
+          message: creditResult.error || 'Insufficient credits',
+          creditsRequired: CREDIT_COSTS.STRATEGY_GENERATION,
+          creditsRemaining: creditResult.remaining,
+        },
+        402
       );
     }
 

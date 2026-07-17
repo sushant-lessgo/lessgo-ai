@@ -12,12 +12,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const requireAICredits = vi.fn(async () => ({ allowed: true, userId: 'user_test' }));
 const assertProjectOwner = vi.fn(async () => ({ ok: true }));
 const generateRawJson = vi.fn();
+const consumeCredits = vi.fn(async () => ({ success: true, remaining: 40 }) as any);
 
 vi.mock('@/lib/middleware/planCheck', () => ({
   requireAICredits: (...args: unknown[]) => requireAICredits(...(args as [])),
 }));
 vi.mock('@/lib/creditSystem', () => ({
-  consumeCredits: vi.fn(async () => ({ success: true, remaining: 40 })),
+  consumeCredits: (...args: unknown[]) => consumeCredits(...(args as [])),
   CREDIT_COSTS: { SECTION_REGENERATION: 2 },
   UsageEventType: { SECTION_REGEN: 'SECTION_REGEN' },
 }));
@@ -75,6 +76,7 @@ beforeEach(() => {
   requireAICredits.mockResolvedValue({ allowed: true, userId: 'user_test' });
   assertProjectOwner.mockResolvedValue({ ok: true });
   generateRawJson.mockResolvedValue(GOOD_ABOUT);
+  consumeCredits.mockResolvedValue({ success: true, remaining: 40 });
   vi.stubEnv('NEXT_PUBLIC_USE_MOCK_GPT', 'false');
 });
 
@@ -132,6 +134,36 @@ describe('/api/audience/work/regenerate-story', () => {
   it('a malformed body is a 400 validation error, not a silent drop', async () => {
     const res = await POST(makeRequest({ tokenId: 'tok_123' }) as never);
     expect(res.status).toBe(400);
+  });
+
+  // ── billing-correctness phase 3 (M1): post-consume alignment ─────────────
+  // The requireAICredits pre-gate case is already covered above ('credits gate').
+  // These pin the post-AI charge failure, which used to be swallowed into a 200.
+  it('post-AI genuine insufficiency ⇒ non-success 402, story content DISCARDED', async () => {
+    consumeCredits.mockResolvedValue({
+      success: false,
+      remaining: 0,
+      error: 'Insufficient credits',
+    });
+
+    const res = await POST(makeRequest(BASE_BODY) as never);
+    expect(res.status).toBe(402);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error).toBe('insufficient_credits');
+    expect(json.content).toBeUndefined();
+  });
+
+  it('charge_conflict ⇒ 500 charge_failed with NO "credit" in the payload (client-rail guard)', async () => {
+    consumeCredits.mockResolvedValue({ success: false, remaining: 8, error: 'charge_conflict' });
+
+    const res = await POST(makeRequest(BASE_BODY) as never);
+    expect(res.status).toBe(500);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error).toBe('charge_failed');
+    expect(json.content).toBeUndefined();
+    expect(JSON.stringify(json)).not.toMatch(/credit/i);
   });
 });
 

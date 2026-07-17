@@ -241,3 +241,203 @@ $ git diff -U0 src/lib/planManager.ts    # PLAN_CONFIGS values: ZERO changed lin
 - The two inlined `removeBranding` checks now carry misleading comments ("hasFeature fails OPEN") — stale documentation, not a behavior risk. Clean up with the deferred DRY-up.
 - `hasFeature` now genuinely denies. Its only live caller is `domains/add` (already backstopped), so the blast radius is one message string — but any FUTURE caller inherits real deny-by-default semantics, which is the point.
 - Legacy DB rows with drifted feature columns are now fully ignored by `hasFeature`. Those columns remain written on create/upgrade/downgrade and are still read directly by other code paths (e.g. Stripe/webhook display surfaces) — out of scope here; pricing-v2 owns whether those columns should exist at all.
+
+---
+
+# Phase 3 — M1/M2: one charging model across modern AI routes + delete `withAICredits`
+
+## Files changed
+
+1. `src/app/api/audience/product/strategy/route.ts` — credit pre-gate (+failed-attempt ledger) before the AI call; post-consume 402/500 split.
+2. `src/app/api/audience/product/generate-copy/route.ts` — same.
+3. `src/app/api/audience/service/strategy/route.ts` — same.
+4. `src/app/api/audience/service/generate-copy/route.ts` — same.
+5. `src/app/api/audience/work/strategy/route.ts` — same.
+6. `src/app/api/audience/work/generate-copy/route.ts` — same.
+7. `src/app/api/v2/scrape-website/route.ts` — same (pre-gate precedes BOTH the network scrape and the AI call).
+8. `src/app/api/v2/understand/route.ts` — same.
+9. `src/app/api/audience/work/regenerate-story/route.ts` — alignment only: post-consume 402/500 split (pre-gate untouched).
+10. `src/app/api/generate-privacy-policy/route.ts` — alignment only: post-consume 402/500 split (consume result was previously not checked at all).
+11. `src/lib/middleware/planCheck.ts` — deleted `withAICredits` + its doc comment; dropped the now-unused `consumeCredits` import.
+12. `src/app/api/audience/product/strategy/route.test.ts` — extended: strategy-family charging tests (4 cases).
+13. `src/app/api/audience/product/generate-copy/route.test.ts` — **NEW**: generate-copy-family charging tests (4 cases).
+14. `src/app/api/v2/entryCollections.test.ts` — extended: v2-family charging tests (6 cases).
+15. `src/app/api/audience/work/regenerate-story/route.test.ts` — extended: post-consume 402 + charge_conflict cases.
+16. `docs/task/billing-correctness.audit.md` — this section.
+
+## What changed
+
+Design decision 1 applied verbatim to all 8 main routes: `requireAuth` untouched → explicit
+`checkCredits(userId, COST)` pre-gate → on `!allowed` write `logUsageEvent({ creditsUsed:0,
+success:false })` **then** return the route's own `insufficient_credits` 402 envelope → run AI →
+`consumeCredits` → two-way post-consume split. The old
+`if (!creditResult.success) logger.warn(...)` swallow (which returned `success:true` **and** free
+output on a failed charge) is gone from every route. Diff is pure additions: no route's existing
+envelope fields/casing, rate-limit wrapper, demo short-circuit, or parsing changed.
+
+Costs used, one per route family: `STRATEGY_GENERATION` (3 strategy routes), `GENERATE_COPY`
+(3 generate-copy routes), `SCRAPE_WEBSITE` (v2/scrape-website), `UNDERSTAND` (v2/understand).
+
+### Pre-gate placement relative to demo/mock short-circuits (per route)
+
+Every pre-gate sits **after** the route's demo/mock short-circuit — exactly where `consumeCredits`
+already applied — so demo/mock flows stay both **uncharged and ungated**, unchanged.
+
+| Route | Short-circuit | Pre-gate placed |
+|---|---|---|
+| product/strategy | `2b. Mock mode` (`NEXT_PUBLIC_USE_MOCK_GPT` / `DEMO_TOKEN` bearer) | after 2b, before prompt build (new step `2c`) |
+| product/generate-copy | `2b. Mock mode` | after 2b, before the `2c` SiteContext lookup + AI loop |
+| service/strategy | `2b. Mock mode` | after 2b, before prompt build |
+| service/generate-copy | `2b. Mock mode` | after 2b, before prompt build |
+| work/strategy | `2b. Mock mode` | after 2b, before price/voice derivation + prompt |
+| work/generate-copy | `2b. Mock mode` | after 2b, before the `2c` SiteContext lookup + AI loop |
+| v2/scrape-website | `isDemoMode(req)` inside `handleEntryScrape` | after the demo block, **before `scrapeSite()`** — so a 0-credit user triggers no outbound network fetch either |
+| v2/understand | `isDemoMode(req)` inside `handleEntryUnderstand` | after the demo block, before the AI call |
+| work/regenerate-story | `requireAICredits` pre-gate (kept) + `isMock` branch | pre-gate unchanged; only the post-consume split added |
+| generate-privacy-policy | `requireAICredits` pre-gate (kept) | pre-gate unchanged; only the post-consume split added |
+
+Per plan step 3, the two alignment routes KEEP their `requireAICredits` pre-gate (it already 402s
+pre-AI). Whether that middleware ledgers ITS pre-gate failure is **pre-existing behavior — left
+as-is, not touched**: `requireAICredits` → `requireCredits` → `checkCredits` writes no UsageEvent.
+So those two routes' pre-gate 402s remain unledgered, exactly as before this phase.
+
+### `charge_conflict` → recoverable 500 (client-rail guard)
+
+`error: 'charge_failed'` + `message: 'Temporary billing conflict — please try again. You have not
+been charged.'`, logged at `logger.error`, output discarded. Neither the code nor the message
+contains the substring "credit" — the client rails (`work.llm.ts:91`, `trust.ts:296`,
+`thing.ts:359`) regex-match `/credit/i` and would otherwise strand a solvent paying customer on the
+buy-credits wall. This is asserted programmatically in all four test families via
+`expect(JSON.stringify(json)).not.toMatch(/credit/i)` on the FULL response payload, not just the code.
+
+## Explicit sign-off items
+
+**Pre-gate ledgering decision (spec human-gate (b) — founder signs off, does not discover):**
+the pre-gate 402 path **writes the failed-attempt `UsageEvent` itself**
+(`creditsUsed: 0, success: false, errorMessage: 'Insufficient credits'`, route's own eventType +
+endpoint). This deliberately **mirrors the row `consumeCredits` writes today** at
+creditSystem.ts:365-373. Without it, pre-gating would silently delete 0-credit attempts from the
+ledger — the exact missed-ledger regression gate (b) guards. Per founder ruling Q8: preserve
+today's behavior. Verified against the real dev DB in the smoke below (exactly 1 row,
+`success:false`, `creditsUsed:0`).
+
+**`generate-privacy-policy` cost — CONFIRMED** (scout left this unverified): the route uses
+`CREDIT_COSTS.PRIVACY_POLICY_GENERATION` at BOTH its `requireAICredits` pre-gate (route.ts:98) and
+its `consumeCredits` call (route.ts:159). Value = **2** (creditSystem.ts:23). Unchanged by this
+phase; event type `UsageEventType.PRIVACY_POLICY_GENERATION`.
+
+**Known pre-existing shape, NOT a regression from this work (plan step 7, do not fix here):** a user
+with enough credits for `STRATEGY_GENERATION` (2) but not `GENERATE_COPY` (3) pays for strategy,
+then 402s mid-onboarding holding nothing usable. Pre-gating makes this visible EARLIER (at the
+copy call rather than after a wasted generation), but the shape predates this spec. pricing-v2 owns
+the UX/policy.
+
+## Deviations from the plan
+
+- **None material.** Two judgment calls, both conservative, logged here:
+  1. `planCheck.ts` also imports `CREDIT_COSTS`, which is now unused — but it was **already unused
+     before this phase** (`withAICredits` never referenced it), so removing it is outside the plan's
+     "now-unused imports" wording. Left in place; lint reports no error. Only `consumeCredits` (unused
+     *as a result of* the deletion) was removed.
+  2. The `charge_failed` envelope is exactly the plan's three fields — no `recoverable: true` added,
+     despite neighbouring 500s carrying it. Plan specified the envelope literally; matched it.
+- `requireFeature`, `requireAuth`, `requireCredits`, `requireAICredits`, `checkAIAccess` all kept
+  (rulings Q6/Q7). Only `withAICredits` deleted.
+
+## Test results & gates
+
+```
+npx tsc --noEmit                                        → exit 0, clean
+npm run test:run    → Test Files 211 passed | 1 skipped (212)
+                      Tests    3583 passed | 18 skipped (3601)
+                      (phase 2 = 3567 → +16 new phase-3 tests)
+npm run lint        → 0 errors (pre-existing warnings only; NONE in touched files)
+```
+
+Postgres was UP: the phase-1 concurrency suite **executed** (verified separately:
+`creditSystem.concurrency.test.ts → Test Files 1 passed, Tests 5 passed` — real-DB, not skipped).
+The 1 skipped test FILE is pre-existing and unrelated (not the concurrency suite).
+
+**Grep gates**
+
+- `withAICredits` in `src/` → **0 hits** (definition deleted; had zero callers).
+- `Credit consumption failed` (the old swallow) across `src/app/api/{audience,v2,generate-privacy-policy}` → **0 hits**.
+- `charge_failed` / `'Temporary billing conflict...'` literals → present in all **10** routes; none of the code/message strings contain "credit" (also asserted in tests).
+
+**Scope fences — all clean (`git diff --stat HEAD -- <path>` empty for each):**
+
+- `src/app/api/regenerate-{content,section,element}` → empty (regen-modernization owns them).
+- `saveDraft` / `publish` → empty (deliberately ungated, creditSystem.ts:126-137).
+- `src/lib/creditSystem.ts` / `src/lib/planManager.ts` → empty ⇒ **zero** `CREDIT_COSTS` value or `PLAN_CONFIGS` limit changes (M7 fence holds).
+- `src/app/api/outreach` → empty (deferred, ruling Q2).
+- `publish/route.ts:359` / `domains/verify-dns/route.ts:117` stale "fails OPEN" comments → untouched (deferred Q3).
+- (`src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` shows modified in `git status` with an EMPTY diff — the pre-existing CRLF touch the plan already flagged. Not mine.)
+
+## Test honesty — mutation-verified, not theatre
+
+The new tests were proven to be a genuine regression net, not green-only decoration. Mutating
+`product/strategy/route.ts` — pre-gate `if (!preCheck.allowed)` → `if (false)` **and** the
+`charge_conflict` branch → `if (false)` — produced:
+
+```
+× (a) pre-gate: no credits ⇒ 402 BEFORE any AI call, and the attempt is ledgered
+× (c) charge_conflict ⇒ recoverable 500 charge_failed with NO "credit" anywhere (client-rail guard)
+  Test Files  1 failed (1)
+  Tests  2 failed | 5 passed (7)
+```
+
+Route restored byte-exact afterwards (pre-gate + conflict branch re-verified present; no stray
+`if (false)`); full suite re-run green.
+
+**Deliberate coverage substitution (plan step 5):** product/strategy stands in for service/strategy
++ work/strategy; product/generate-copy stands in for service/generate-copy + work/generate-copy.
+The 6 audience routes received identical mechanical edits, so coverage is one test per FAMILY
+(strategy / generate-copy / v2 / work-regen). `service/*` and `work/{strategy,generate-copy}` have
+NO tests of their own — the reviewer diff-reads them against the tested twin. This is stated in the
+test files' headers too.
+
+## Manual smoke — PARTIAL, honestly reported
+
+**The full HTTP smoke could NOT be run**, and I did not fake it. This worktree's env has
+**no AI provider key and no Clerk secret** (`OPENAI_API_KEY`, `NEBIUS_API_KEY`, `USE_OPENAI`,
+`CLERK_SECRET_KEY` all unset; only `DATABASE_URL` is set). Both halves of the prescribed smoke are
+therefore impossible here: a real generation needs a provider key, and hitting the endpoint at all
+needs Clerk auth. **The founder should run the HTTP smoke before merge** — it is the one gate this
+phase leaves open.
+
+What I DID verify, against the **real dev Postgres** with `DEV_BYPASS_CREDITS` unset, driving the
+**real** `checkCredits` / `logUsageEvent` (the exact calls the new pre-gate makes), on a seeded
+0-credit user:
+
+```
+pre-gate checkCredits => {"allowed":false,"remaining":0,"required":2}
+UsageEvent rows: 1 | success: [false] | creditsUsed: [0]
+SMOKE PASS: pre-gate denies a 0-credit user AND ledgers success:false/creditsUsed:0
+funded checkCredits => {"allowed":true,"remaining":10,"required":2}
+SMOKE PASS: funded user passes the pre-gate
+cleanup done
+```
+
+This proves, on real DB rows: (i) a 0-credit user is denied by the pre-gate — before any provider
+call, since the gate precedes the AI call in code; (ii) the attempt IS ledgered as
+`success:false / creditsUsed:0` (gate (b)); (iii) the gate is not a blanket deny — a funded user
+passes. All seeded rows cleaned up; no scratch files left in the repo. What it does NOT prove:
+end-to-end HTTP status codes with real auth, and a real provider decrement.
+
+## Open risks
+
+- **The end-to-end HTTP smoke is unrun** (no provider/Clerk keys here). Route-level status codes and
+  envelopes are covered by the mocked family tests + the real-DB pre-gate smoke, but a real funded
+  generation decrementing against a live provider has not been observed on this branch. Founder gate
+  before merge.
+- **`v2/scrape-website` charges only after a successful scrape + AI call**, and the pre-gate now also
+  prevents the outbound fetch for a 0-credit user — a small, intended behavior improvement (previously
+  a broke user could burn our egress and an AI call for free), but it does change what an unfunded
+  user's import attempt does. Worth a line in release notes.
+- The `charge_conflict` → 500 path has **no client-side auto-retry** (ruling Q9) — the user sees a
+  generic "try again". Acceptable for now; only reachable after 3 lost write races.
+- `deductCredits` without `eventData` still writes no ledger row (phase-1 carry-forward) — inert;
+  phase 3 goes through `consumeCredits`, which always passes eventData.
+- The two alignment routes' `requireAICredits` pre-gate 402s remain **unledgered** (pre-existing,
+  left as-is per plan step 3) — so the ledger's coverage of "blocked attempts" is now consistent
+  across the 8 main routes but still absent on those two. Worth folding into the deferred Q3 DRY-up.
