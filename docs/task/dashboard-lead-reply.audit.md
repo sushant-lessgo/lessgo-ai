@@ -71,3 +71,38 @@ Verified against `deductCredits`/`consumeCredits` (creditSystem.ts): on retry ex
 ### Open risks / follow-ups
 - Founder-confirm at gate (non-blocking): `LEAD_REPLY = 1` price; the two additive `creditSystem.ts` inserts vs in-flight billing-beta merge ordering (second-merger reconciles).
 - Phase 3 (UI pane) consumes this route; the 402 `insufficient_credits` + `remaining` and the distinct 500 `charge_failed`/`generation_failed` codes are the contract the pane must branch on.
+
+---
+
+## Phase 3 — Lead-detail pane UI: DraftReplyPanel
+
+### Files changed
+- `src/app/dashboard/leads/DraftReplyPanel.tsx` (new, `'use client'`)
+- `src/app/dashboard/leads/DraftReplyPanel.test.tsx` (new, Vitest/jsdom)
+- `src/app/dashboard/leads/LeadsInbox.tsx` (edit — mount panel + import only)
+
+### What was built
+- **DraftReplyPanel.tsx** — self-contained `{ submissionId, data }` panel. Gate: renders `null` when `!hasReplyableMessage(data)` (imports ONLY `messageExtraction`, the boundary-safe leadReply module) or when `NEXT_PUBLIC_LEAD_REPLY_DISABLED === 'true'`. State machine `idle → loading → draft | error | nocredits`:
+  - **idle:** "Draft reply" primary pill (AppIcon `auto_awesome`), app-chrome tokens matching the pane.
+  - **loading:** disabled pill, "Drafting…", spinning `progress_activity` icon.
+  - **draft:** controlled `<textarea>` seeded with `reply` (founder edits preserved); one-line "less on-brand" hint when `grounding === 'light'`; **Copy** button reusing the exact FieldRow clipboard idiom (`navigator.clipboard.writeText`, `content_copy`→`check`, 1.2s "Copied"); **Regenerate (1 credit)** button (re-POST).
+  - **402:** greyed/disabled pill + `title` why-tooltip AND a visible muted line, both = server `message` + "Upgrade or top up to draft replies." (greyed-placeholder rule; no invented UX, no dead billing links).
+  - **other errors (400/404/500/network):** inline `text-app-danger` line, button re-enabled to retry; idle-path copy notes "You were not charged."
+  - State resets to idle via `useEffect` on `submissionId` (selecting another lead).
+- **LeadsInbox.tsx** — added `import DraftReplyPanel` and rendered `<DraftReplyPanel submissionId={selected.id} data={selected.data} />` between the field-row list and the meta `<dl>`. No change to `InboxLead`, the list, or any S4a aggregation/route.
+- **DraftReplyPanel.test.tsx** — react-dom/client + `act` idiom (no @testing-library in repo). 7 cases: no-message → renders nothing + no fetch; kill-switch env → renders nothing; click → POSTs `/api/leads/{id}/draft-reply` + editable textarea shows reply; light-grounding hint; 402 → disabled button + asserts upgrade/top-up + "Insufficient credits" TEXT (content, not presence); 500 regenerate → error shown, hand-edited textarea value preserved, retry possible; submissionId change → resets to idle.
+
+### Deviations
+- **402 while a draft already exists (regenerate):** plan's 402 UX is the greyed idle state, but wiping an existing (possibly hand-edited) draft to show it would lose founder edits. Conservative choice: on 402 *from a draft* keep the draft and surface the wall as an inline line (`{message} Upgrade or top up…`); the greyed `nocredits` state is used only for a 402 from idle. Logged here per the in-scope-ambiguity rule.
+- **Reset mechanism:** used an internal `useEffect` on `submissionId` (not a `key` in LeadsInbox) so the panel is self-contained and the reset is unit-testable on the same instance. Plan explicitly allowed either.
+- **Danger/spinner tokens:** reused existing `text-app-danger` + Tailwind `animate-spin` (no new tokens).
+
+### Verification
+- `npx tsc --noEmit` (WORKDIR) → exit 0, 0 errors.
+- `npx vitest run src/app/dashboard/leads/DraftReplyPanel.test.tsx` → 7 passed.
+- `npm run test:run` (WORKDIR) → 228 files passed / 1 skipped; 3869 tests passed / 18 skipped. No regressions.
+- `npx eslint` on the 3 touched files → exit 0 (clean; no bare-store or restricted patterns — dashboard code, no edit-store import).
+
+### Open risks / follow-ups
+- Live-UI eyeball + draft-quality founder gate is Phase 4 (HUMAN GATE); not covered here.
+- `npm run build` not run in this phase (Phase 4 runs the full build gate).
