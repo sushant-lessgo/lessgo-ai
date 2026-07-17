@@ -44,6 +44,25 @@ import {
 // therefore onto the pre-confirm entry path; `journeyAgnostic.test.ts` asserts
 // it does not.
 import { resolveWorkResumeStep } from '@/modules/wizard/work/resumeStep';
+// E3 STEP 03 gating (phase 1) — the seam's ONLY new module-top import family is
+// `wizard/work/*`, a pure sibling of `rail.ts`/`resumeStep.ts` (zod/types/data;
+// no react/stores/templates). `buildQuestionPlan` turns the frozen WorkFacts bag
+// + entry signals into the ordered renderable question list; `resolveQuestionProfession`
+// re-exports the voice resolver so profession reaches the seam THROUGH this family.
+import {
+  buildQuestionPlan,
+  resolveQuestionProfession,
+  type QuestionPlanInput,
+  type QuestionPlanItem,
+} from '@/modules/wizard/work/questionGating';
+// Profession wording maps. `workVocabulary.ts` is PURE DATA (imports nothing at
+// runtime — verified phase 1), so this stays a type/data-only edge and never
+// drags react/stores/templates onto the pre-confirm entry path (landmine 14).
+import {
+  professionWording,
+  dreamClientChips,
+  type ProfessionWording,
+} from '@/modules/engines/workVocabulary';
 import type {
   JourneyEngineSeam,
   JourneyGenerationCallbacks,
@@ -51,6 +70,7 @@ import type {
   JourneyLoadedDraft,
   JourneyPreflightResult,
   JourneyQuestion,
+  JourneyQuestionsContext,
   JourneyRailAdapter,
   JourneyStep,
   JourneyWizardApi,
@@ -70,6 +90,24 @@ const FIELD_NAME = 'name';
 const FIELD_DESCRIPTOR = 'descriptor';
 const FIELD_GROUPS = 'groups';
 const FIELD_PRICE_POSITION = 'pricePosition';
+// E3 read-only rail rows (widened projection). These fill from STEP 03 answers;
+// corrections happen in STEP 03's answered-compact state, NOT rail-side, so they
+// are `editable:false` (no rail edit path — D-E).
+const FIELD_LANGUAGES = 'languages';
+const FIELD_ESTABLISHMENT = 'establishment';
+const FIELD_DREAM_CLIENT = 'dreamClient';
+const FIELD_CONTACT = 'contactMethod';
+
+/** Human labels for the read-only establishment / contact rows. */
+const ESTABLISHMENT_LABEL: Record<string, string> = {
+  new: 'Just starting out',
+  established: 'Established',
+};
+const CONTACT_LABEL: Record<string, string> = {
+  whatsapp: 'WhatsApp',
+  booking: 'Booking link',
+  form: 'Contact form',
+};
 
 /** `g0`, `g1`, … — the chip id derivation (see the rule on `RailChipEdit`). */
 function chipId(index: number): string {
@@ -147,6 +185,46 @@ const workRailAdapter: JourneyRailAdapter = {
           // DERIVED from group prices, never stored ⇒ read-only.
           value: rail.pricePosition ? (PRICE_POSITION_LABEL[rail.pricePosition] ?? rail.pricePosition) : null,
           skeleton: rail.pricePosition === null,
+          editable: false,
+        },
+        // ── E3 widening (the E1 toVM comment reserves these for E2/E3) ──
+        // Read-only rows that fill from STEP 03 answers. Skeleton until answered.
+        // NOT editable rail-side: the correctable path is STEP 03's answered-
+        // compact state, so the rail here only REFLECTS what was answered (D-E).
+        {
+          id: FIELD_LANGUAGES,
+          label: 'LANGUAGES',
+          kind: 'text',
+          value: rail.languages.length ? rail.languages.join(', ') : null,
+          skeleton: rail.languages.length === 0,
+          editable: false,
+        },
+        {
+          id: FIELD_ESTABLISHMENT,
+          label: 'ESTABLISHED',
+          kind: 'text',
+          value: rail.establishment
+            ? (ESTABLISHMENT_LABEL[rail.establishment] ?? rail.establishment)
+            : null,
+          skeleton: rail.establishment === null,
+          editable: false,
+        },
+        {
+          id: FIELD_DREAM_CLIENT,
+          label: 'DREAM CLIENT',
+          kind: 'text',
+          value: rail.dreamClient,
+          skeleton: rail.dreamClient === null,
+          editable: false,
+        },
+        {
+          id: FIELD_CONTACT,
+          label: 'CONTACT',
+          kind: 'text',
+          value: rail.contactMethod
+            ? (CONTACT_LABEL[rail.contactMethod] ?? rail.contactMethod)
+            : null,
+          skeleton: rail.contactMethod === null,
           editable: false,
         },
       ],
@@ -263,6 +341,188 @@ function commitGroupPrice(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// STEP 03 question descriptors (E3) — one plan item → one JourneyQuestion.
+// EVERY commit routes through the rail adapter / `applyRailEdit` (the single
+// validation gate), so no answer can persist a malformed record.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** De-dupe a list of raw strings into `{value,label}` options (order-preserving). */
+function dedupeOptions(values: readonly string[]): { value: string; label: string }[] {
+  const seen = new Set<string>();
+  const out: { value: string; label: string }[] = [];
+  for (const v of values) {
+    if (seen.has(v)) continue;
+    seen.add(v);
+    out.push({ value: v, label: v });
+  }
+  return out;
+}
+
+interface QuestionWordingCtx {
+  wording: ProfessionWording;
+  professionChips: readonly string[];
+  /** Fresh establishment — forks the praise wording (D-F). */
+  establishment: 'new' | 'established' | null;
+  /** NAME prefill from the rail projection. */
+  namePrefill: string;
+}
+
+function buildWorkQuestion(
+  item: QuestionPlanItem,
+  ctx: QuestionWordingCtx
+): JourneyQuestion | null {
+  const answered = item.answered;
+  // `required?: true` is a literal — attach it only when the slot is required
+  // (price + languages), never `required: false`.
+  const requiredField = item.required ? { required: true as const } : {};
+
+  switch (item.slot) {
+    case 'identity':
+      return {
+        id: FIELD_NAME,
+        kind: 'text',
+        label: 'What should we call you?',
+        prefill: ctx.namePrefill,
+        answered,
+        ...requiredField,
+        commit: (value, liveFacts) =>
+          workRailAdapter.applyEdit(FIELD_NAME, { kind: 'text', value }, liveFacts),
+      };
+
+    case 'groups':
+      return {
+        id: FIELD_GROUPS,
+        kind: 'group',
+        // Profession wording: "galleries" (photographer), "projects" (designer)…
+        label: `What ${ctx.wording.workGroup} do you offer?`,
+        answered,
+        ...requiredField,
+        // APPEND through the chip join (ids re-read from the live bag), so this
+        // can never delete a live group even if it fired with groups present.
+        commit: (groupName, liveFacts) =>
+          commitGroupChips([...liveChips(liveFacts), { label: groupName }], liveFacts),
+      };
+
+    case 'price':
+      return {
+        // A QUESTION id, not a rail field id: price is written onto the groups.
+        id: 'price',
+        kind: 'price',
+        label: 'Roughly what do you charge?',
+        answered,
+        ...requiredField,
+        // D-G: ONE blanket practice-level price (per-group split deferred to E4).
+        // `item.suggested` (['on-request']) IS the confirm posture — the price
+        // renderer already defaults to on-request, so the price kind needs no
+        // extra `suggested` field.
+        commit: commitGroupPrice,
+      };
+
+    case 'establishment':
+      return {
+        id: FIELD_ESTABLISHMENT,
+        kind: 'choice',
+        label: 'Are you established, or just starting out?',
+        options: [
+          { value: 'new', label: 'Just starting out' },
+          { value: 'established', label: 'Established' },
+        ],
+        answered,
+        ...requiredField,
+        commit: (values, liveFacts) =>
+          applyRailEdit(
+            { field: 'establishment', value: values[0] as 'new' | 'established' },
+            liveFacts
+          ),
+      };
+
+    case 'dreamClient': {
+      // Profession chips + any confirm-suggested audiences, de-duped. `multi`:
+      // the user may pick several ideal-client types — joined into the single
+      // string contract field with ', '.
+      const suggested = item.suggested ?? [];
+      return {
+        id: FIELD_DREAM_CLIENT,
+        kind: 'choice',
+        label: 'Who is your dream client?',
+        options: dedupeOptions([...suggested, ...ctx.professionChips]),
+        multi: true,
+        allowCustom: true,
+        ...(suggested.length ? { suggested } : {}),
+        answered,
+        ...requiredField,
+        commit: (values, liveFacts) =>
+          applyRailEdit({ field: 'dreamClient', value: values.join(', ') }, liveFacts),
+      };
+    }
+
+    case 'praise': {
+      // Confirm-only (D-F): appears only when entry testimonials exist; the kept
+      // selections are committed verbatim (string[]).
+      const suggested = item.suggested ?? [];
+      return {
+        id: 'praise',
+        kind: 'choice',
+        // BRANCH wording (D-F): a `new` seller has no praise yet → "what to expect".
+        label:
+          ctx.establishment === 'new'
+            ? 'What should clients expect from working with you?'
+            : 'What do clients praise you for?',
+        options: suggested.map((t) => ({ value: t, label: t })),
+        multi: true,
+        ...(suggested.length ? { suggested } : {}),
+        answered,
+        ...requiredField,
+        commit: (values, liveFacts) =>
+          applyRailEdit({ field: 'praise', value: values }, liveFacts),
+      };
+    }
+
+    case 'contactMethod':
+      return {
+        id: FIELD_CONTACT,
+        kind: 'choice',
+        label: 'How should clients reach you?',
+        options: [
+          { value: 'whatsapp', label: 'WhatsApp' },
+          { value: 'booking', label: 'Booking link' },
+          { value: 'form', label: 'Contact form' },
+        ],
+        ...(item.suggested?.length ? { suggested: item.suggested } : {}),
+        answered,
+        ...requiredField,
+        commit: (values, liveFacts) =>
+          applyRailEdit(
+            { field: 'contactMethod', value: values[0] as 'whatsapp' | 'booking' | 'form' },
+            liveFacts
+          ),
+      };
+
+    case 'languages':
+      return {
+        id: FIELD_LANGUAGES,
+        kind: 'choice',
+        label: 'What language(s) is your site in?',
+        // Orchestrator ruling: BOTH Dutch and English are tappable (Kundius is
+        // NL/EN bilingual); English renders suggested-prominent; allowCustom for
+        // anything else — she taps, never free-types the common case.
+        options: [
+          { value: 'English', label: 'English' },
+          { value: 'Dutch', label: 'Dutch' },
+        ],
+        multi: true,
+        allowCustom: true,
+        ...(item.suggested?.length ? { suggested: item.suggested } : {}),
+        answered,
+        ...requiredField,
+        commit: (values, liveFacts) =>
+          applyRailEdit({ field: 'languages', value: values }, liveFacts),
+      };
+  }
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // The seam
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -297,69 +557,47 @@ export const workJourneySeam: JourneyEngineSeam = {
     },
 
     /**
-     * STEP 03 — ONLY the questions still needed, read off the rail projection
-     * (never off the facts bag: the VM is the seam's own contract with the
-     * frame, and it already says what is unknown).
+     * E3 — the deterministic gating step. `buildQuestionPlan` (phase 1) reads the
+     * frozen WorkFacts bag + `facts.entry` signals + this session's answered ids
+     * and returns ONLY the renderable slots (ask/confirm) in display order, capped
+     * at 5 (D-F). Each plan item maps to a `JourneyQuestion` descriptor + a commit
+     * that routes through the rail adapter (never a `kind`-less group — landmine 6).
      *
-     *   • NAME  — only when the rail has none (the entry seed usually supplies it)
-     *   • WHAT YOU SELL — only when the seed produced NO groups. This ask-if is
-     *     load-bearing beyond tidiness: the rail's chips editor is the only
-     *     OTHER group writer, so keeping this question off while chips exist is
-     *     what makes the chip stable-id rule's stale-VM hole unreachable in E1.
-     *   • PRICE — optional, offered once there is something to price. Default
-     *     `on-request`.
+     * Profession wording comes from `ctx.businessType` via `resolveQuestionProfession`
+     * (the pure `wizard/work/*` family), then `professionWording`/`dreamClientChips`
+     * — e.g. a photographer's groups question says "galleries", dream-client chips
+     * are photography audiences.
      *
-     * Every commit routes through the rail adapter ⇒ groups are always
-     * `kind`-valid (landmine 6: a `kind`-less group nulls `getWorkFacts`, 400s
-     * the work strategy, and PERSISTS — a retry never recovers).
+     * `vm` supplies the NAME prefill (the rail already projects it); everything
+     * else is driven off the plan + ctx.
      */
-    questions(vm: RailVM): JourneyQuestion[] {
-      const field = (id: string) => vm.fields.find((f) => f.id === id);
-      const name = field(FIELD_NAME);
-      const groups = field(FIELD_GROUPS);
-      const questions: JourneyQuestion[] = [];
+    questions(vm: RailVM, ctx: JourneyQuestionsContext): JourneyQuestion[] {
+      const plan = buildQuestionPlan({
+        work: getWorkFacts(ctx.facts),
+        entry: (ctx.facts?.['entry'] ?? null) as QuestionPlanInput['entry'],
+        sessionAnswered: ctx.sessionAnswered,
+      });
 
-      if (!name || name.skeleton) {
-        questions.push({
-          id: FIELD_NAME,
-          kind: 'text',
-          label: 'What should we call you?',
-          prefill: name?.value ?? '',
-          commit: (value, liveFacts) =>
-            workRailAdapter.applyEdit(FIELD_NAME, { kind: 'text', value }, liveFacts),
+      const profession = resolveQuestionProfession(ctx.businessType);
+      const wording = professionWording[profession];
+      const professionChips = dreamClientChips[profession];
+      // BRANCH (D-F): establishment reframes the praise wording off the FRESH bag —
+      // pure re-projection, since `questions()` re-runs after every commit.
+      const establishment = getWorkFacts(ctx.facts)?.establishment ?? null;
+
+      const namePrefill = vm.fields.find((f) => f.id === FIELD_NAME)?.value ?? '';
+
+      const out: JourneyQuestion[] = [];
+      for (const item of plan) {
+        const q = buildWorkQuestion(item, {
+          wording,
+          professionChips,
+          establishment,
+          namePrefill,
         });
+        if (q) out.push(q);
       }
-
-      if (!groups || groups.skeleton) {
-        questions.push({
-          id: FIELD_GROUPS,
-          kind: 'group',
-          label: 'What do you sell?',
-          // APPEND through the chip join (ids re-read from the live bag), so
-          // this can never delete a group even if it somehow fires with groups
-          // present.
-          commit: (groupName, liveFacts) =>
-            commitGroupChips([...liveChips(liveFacts), { label: groupName }], liveFacts),
-        });
-      } else {
-        questions.push({
-          // A QUESTION id, not a rail field id: price is not an editable rail
-          // field (PRICE POSITION is derived) — it is written onto the groups.
-          id: 'price',
-          kind: 'price',
-          label: 'Roughly what do you charge?',
-          // ⚠️ E3 NOTE (recorded, deliberately NOT fixed in E1): this answer is
-          // BLANKETED onto EVERY group (see `commitGroupPrice`). Correct today —
-          // E1 asks ONE price for the practice and the entry seed prices every
-          // group uniformly `on-request`, so there is no per-group price to
-          // clobber. The DAY E3 introduces per-group pricing, this one question
-          // silently overwrites all of it. Split the question per group (or scope
-          // the commit) THEN — not before.
-          commit: commitGroupPrice,
-        });
-      }
-
-      return questions;
+      return out;
     },
 
     plan: {
