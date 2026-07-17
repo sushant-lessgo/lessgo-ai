@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { seedWorkBrief, startProject, loadDraft } from './helpers/seedWorkBrief';
+import {
+  seedWorkBrief,
+  startProject,
+  loadDraft,
+  seedRealFanoutAtelier2,
+} from './helpers/seedWorkBrief';
 
 // ============================================================================
 // The work onboarding journey — SEEDED-RESUME e2e (decision 9 / landmine 13).
@@ -486,6 +491,92 @@ test('STEP 05 generates the site (mock), STEP 06 reveals it, and the editor open
   expect(afterEdit.audienceType).toBe('service');
   expect(afterEdit.templateId).toBe('atelier');
   expect(afterEdit.brief.copyEngine).toBe('work');
+});
+
+// ============================================================================
+// P2 (work-onboarding-ingestion E2) — the REAL fan-out path on atelier2.
+//
+// The prior STEP-05 test proves generation on ATELIER (no `works` capability ⇒ the
+// fan-out is dormant). THIS test proves the E2 promise on the works-FLIPPED
+// atelier2 skeleton pilot: a photo-bearing brief, driven through the SAME STEP-05
+// door, produces `/works/<slug>` item pages carrying the user's VERBATIM photos AND
+// stamps those photos as the home gallery's covers — all pure code (mock copy is
+// enough; the binding is deterministic).
+//
+// Same free-tier rate-limit reality as the atelier STEP-05 test (1 strategy + N
+// copy calls); the retry loop is a real finding, not scaffolding (see that test).
+//
+// ⚠️ KNOWN LIMITATION (reported, not hidden): the `/works/<slug>` DETAIL page's
+// in-editor/preview RENDER is blocked until the two collection layouts register in
+// the layout schema aggregator (`src/modules/audience/work/elementSchema.ts`, out
+// of this phase's scope — see the audit Blockers). The fan-out DATA (item pages +
+// verbatim photos) and the schema-backed HOME gallery covers are unaffected, so
+// this test asserts exactly those two.
+// ============================================================================
+test('REAL fan-out on atelier2: STEP 05 binds group photos → /works pages + home covers', async ({
+  page,
+}) => {
+  const api = await authedApi(page);
+  const { token, coverUrls, workSlugs } = await seedRealFanoutAtelier2(api);
+
+  // The flip persisted: the journey resolves onto the works-flipped skeleton pilot.
+  const seeded = await loadDraft(api, token);
+  expect(seeded.templateId).toBe('atelier2');
+  expect(seeded.brief.copyEngine).toBe('work');
+
+  await page.goto(`/onboarding/${token}`);
+  await expect(page.getByTestId('step-show-work')).toBeVisible({ timeout: 30_000 });
+
+  // 02 → 03 → 04 → generation (the fixture answers 03's ask-ifs; price is optional).
+  await page.getByTestId('show-work-skip').click();
+  await expect(page.getByTestId('step-questions')).toBeVisible();
+  await page.getByTestId('journey-next').click();
+  await expect(page.getByTestId('step-plan')).toBeVisible();
+  await page.getByTestId('plan-build').click();
+  await expect(page.getByTestId('step-building')).toBeVisible();
+  await expect(page.getByTestId('building-error-engine-disabled')).toHaveCount(0);
+
+  // Retry through the free-tier AI rate limit ONLY (any other error fails loudly).
+  for (let i = 0; i < 3; i++) {
+    const settled = await Promise.race([
+      page.getByTestId('step-reveal').waitFor({ state: 'visible', timeout: 90_000 }).then(() => 'done' as const),
+      page.getByTestId('building-error-error').waitFor({ state: 'visible', timeout: 90_000 }).then(() => 'error' as const),
+    ]);
+    if (settled === 'done') break;
+    const message = await page.getByTestId('step-building').innerText();
+    expect(message, 'STEP 05 failed for a reason other than the AI rate limit').toMatch(/too many requests/i);
+    await page.waitForTimeout(61_000);
+    await page.getByTestId('building-retry').click();
+  }
+
+  await expect(page.getByTestId('step-reveal')).toBeVisible({ timeout: 120_000 });
+
+  // ── DATA: the fan-out wrote a `/works/<slug>` item page per group, carrying the
+  //         seeded photos VERBATIM (pure code — no AI clobber). ─────────────────
+  const draft = await loadDraft(api, token);
+  const pages = draft.finalContent.pages ?? {};
+  for (let i = 0; i < workSlugs.length; i++) {
+    const slug = workSlugs[i];
+    const pageKey = `page-${slug}`;
+    expect(pages[pageKey], `missing /works/${slug} item page`).toBeTruthy();
+    expect(pages[pageKey].pathSlug).toBe(`/works/${slug}`);
+    // The group's cover photo url reached its item page (shape-tolerant substring).
+    expect(
+      JSON.stringify(pages[pageKey]),
+      `item page /works/${slug} missing its seeded cover photo`
+    ).toContain(coverUrls[i]);
+  }
+
+  // ── REVEAL: the home gallery paints the seeded covers (schema-backed surface). ─
+  const frame = page.frameLocator('[data-testid="reveal-frame"]');
+  await expect(frame.getByTestId('preview-chromeless')).toBeVisible({ timeout: 60_000 });
+  for (const url of coverUrls) {
+    await expect(frame.locator(`img[src="${url}"]`).first()).toBeVisible({ timeout: 30_000 });
+  }
+
+  // The serve stamps are untouched by the run except the intended atelier2 flip.
+  expect(draft.audienceType).toBe('service');
+  expect(draft.templateId).toBe('atelier2');
 });
 
 test('legacy unchanged: a non-seam brief still reaches the entry card / WizardShell', async ({

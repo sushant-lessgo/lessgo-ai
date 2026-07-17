@@ -404,18 +404,47 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
     });
   });
 
-  // ── GLOBAL: (d) dormancy lock + regression + negative fixtures ─────────────
+  // ── GLOBAL: (d) cross-template net + regression + negative fixtures ─────────
   describe('(d) scale-10: collection-family cross-template invariants', () => {
-    // Dormancy lock: NO shipping template declares a collection-family
-    // capability today (the per-template (d) check ships vacuous). If a rung-C
-    // template adds one, this flips red and the implementer must supply the
-    // block pair.
-    it('DORMANT: no shipping template declares a collection-family capability (whole check is vacuous)', () => {
+    // CROSS-TEMPLATE NET (E2 / phase 2 — was the dormancy lock): every template
+    // that declares ANY collection-family capability runs the assert; templates
+    // declaring none stay vacuously green (the loop body `continue`s). This keeps
+    // the global guarantee — a NEW family declaration on ANY template must supply a
+    // resolving catalog+item block pair — while atelier2's `works` flip now
+    // exercises it for real (no longer vacuous).
+    it('every template with a declared collection-family capability resolves its catalog+item pair', () => {
       for (const templateId of templateIds) {
+        assertCollectionCapabilityBacked(
+          templateId,
+          templateMeta[templateId].capabilities,
+          templateMeta[templateId].capabilitySections
+        );
+      }
+    });
+
+    // atelier2's `works` flip is LIVE (E2 / phase 2): the works collection resolves
+    // its workcatalog + workdetail pair in both renderers. This is the explicit
+    // replacement for the old vacuous dormancy assertion.
+    it('atelier2 declares `works` → workcatalog + workdetail pair resolves real (both renderers)', () => {
+      expect(templateMeta.atelier2.capabilities).toContain('works');
+      expect(templateMeta.atelier2.capabilitySections?.works).toBe('workcatalog');
+      assertCollectionCapabilityBacked(
+        'atelier2',
+        templateMeta.atelier2.capabilities,
+        templateMeta.atelier2.capabilitySections
+      );
+    });
+
+    // No OTHER shipping template declares a collection-family capability yet — a
+    // scoped regression lock (narrower than the old whole-vocab dormancy check, so
+    // atelier2's honest `works` declaration doesn't trip it).
+    it('no template OTHER than atelier2 declares a collection-family capability', () => {
+      for (const templateId of templateIds) {
+        if (templateId === 'atelier2') continue;
         for (const cap of COLLECTION_FAMILY) {
           expect(
             templateMeta[templateId].capabilities,
-            `${templateId} declares collection-family "${cap}" — the (d) check is no longer dormant; ensure its catalog+item block pair resolves`
+            `${templateId} declares collection-family "${cap}" — supply its catalog+item block pair (see the atelier2 works flip)`
           ).not.toContain(cap);
         }
       }
@@ -454,6 +483,29 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
           assertCollectionCapabilityBacked('meridian', ['services'], {
             services: services.catalogSectionType,
             'services-item': services.itemSectionType,
+          })
+        ).toThrow();
+      });
+
+      // ── D14 option (b) closed-fail proofs for the relaxed `works` assert ─────
+      it('declaring `works` WITHOUT its workcatalog value throws (relaxed coverage half still bites)', () => {
+        // atelier2 DOES resolve both work blocks — so this proves the coverage
+        // half, not the resolve half: an empty capabilitySections has no
+        // `workcatalog` value, so the retained catalog `toContain` throws.
+        expect(() =>
+          assertCollectionCapabilityBacked('atelier2', ['works'], {})
+        ).toThrow();
+      });
+
+      it('declaring `works` on a resolver with NO work blocks (meridian) throws (resolve half bites)', () => {
+        // Coverage passes (workcatalog IS in the map), but meridian resolves
+        // neither workcatalog nor workdetail — so `resolvesReal` bites, proving
+        // closed-fail with the item section registry-derived (no capabilitySections
+        // entry for it).
+        const works = getCollectionDef('works')!;
+        expect(() =>
+          assertCollectionCapabilityBacked('meridian', ['works'], {
+            works: works.catalogSectionType, // 'workcatalog'
           })
         ).toThrow();
       });

@@ -10,6 +10,14 @@
 // consumes ⊆ contractFor(layoutName) (the work layout schemas reach
 // serviceElementSchema via the audience/work spread).
 //
+// COLLECTION MACHINERY (E2 / phase 2): the `workcatalog` (`/works` index) and
+// `workdetail` (`/works/<slug>` project page) sections are DELIBERATELY absent from
+// this manifest. They are not arrangement variants offered in the section picker —
+// they are collection-fan-out machinery, resolved by SECTION TYPE (resolveWorkBlock)
+// and evidenced by the conformance (b)/(b+)/(d) capability walks, never by the
+// manifest's variant/distinctness (c)/(e) grammar. (Same as every other template's
+// catalog/detail pair — no template lists them in its block manifest.)
+//
 // Phase 3: hero only — `WorkHeroSlider` (the built default) + `WorkHeroVideo` (a
 // declared-but-NOT-built SLOT: a future video-bg hero, capability reserved, built
 // on first demand). The slot is skipped by every conformance walk (phase 1) and is

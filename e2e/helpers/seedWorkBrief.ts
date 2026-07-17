@@ -172,12 +172,80 @@ function buildBoundAtelier2FinalContent(token: string): any {
  */
 export async function seedBoundAtelier2Preview(
   api: APIRequestContext
-): Promise<{ token: string; coverUrls: string[] }> {
+): Promise<{ token: string; coverUrls: string[]; workSlugs: string[] }> {
   const { token } = await seedWorkBrief(api);
   const finalContent = buildBoundAtelier2FinalContent(token);
   const res = await api.post('/api/saveDraft', {
     data: { tokenId: token, title: 'Kundius Studio', templateId: 'atelier2', finalContent },
   });
   expect(res.ok(), `/api/saveDraft: ${res.status()} ${await res.text()}`).toBeTruthy();
-  return { token, coverUrls: [WORK_COVER_URLS.weddings, WORK_COVER_URLS.portraits] };
+  return {
+    token,
+    coverUrls: [WORK_COVER_URLS.weddings, WORK_COVER_URLS.portraits],
+    workSlugs: WORK_GROUPS_WITH_PHOTOS.map((g) => g.slug),
+  };
+}
+
+// ── work-onboarding E2 / phase 2 — the REAL fan-out path on atelier2 ──────────
+// Unlike seedBoundAtelier2Preview (which HAND-SEEDS the bound finalContent), this
+// seeds a PHOTO-BEARING brief on an atelier2 project and lets the journey's STEP-05
+// generation drive the ACTUAL fan-out (works flip live) — the covers + /works item
+// pages are produced by runWorksFanOut, not hand-written. The binding is pure code,
+// so mock copy suffices (deterministic). The seed sets templateId directly (the env
+// override WORK_JOURNEY_TEMPLATE_OVERRIDE is only for manual dev journeys).
+
+/** Photo-bearing work groups (brief facts.work.groups shape: kind + price + photos). */
+const REAL_FANOUT_GROUPS = [
+  {
+    name: 'Wedding day coverage',
+    kind: 'category',
+    price: { mode: 'on-request' },
+    photos: [
+      { id: 'rf-wed-1', url: WORK_COVER_URLS.weddings, cover: true },
+      { id: 'rf-wed-2', url: 'https://e2e.test/covers/weddings-2.jpg' },
+    ],
+  },
+  {
+    name: 'Engagement session',
+    kind: 'category',
+    price: { mode: 'on-request' },
+    photos: [{ id: 'rf-eng-1', url: WORK_COVER_URLS.portraits, cover: true }],
+  },
+] as const;
+
+/**
+ * Seed a SERVED, PHOTO-BEARING work project and flip it onto the atelier2 skeleton
+ * pilot, ready for the journey to drive a REAL STEP-05 fan-out. Returns the token,
+ * the cover URLs the home reveal must paint, and the code-derived work slugs whose
+ * `/works/<slug>` item pages the fan-out must produce (slugify of the group name).
+ */
+export async function seedRealFanoutAtelier2(
+  api: APIRequestContext
+): Promise<{ token: string; coverUrls: string[]; workSlugs: string[] }> {
+  const token = await startProject(api);
+
+  // Confirm a photo-bearing brief (still serves atelier — photos are extra data).
+  const brief = {
+    ...WORK_BRIEF_FIXTURE,
+    facts: {
+      ...WORK_BRIEF_FIXTURE.facts,
+      work: { ...WORK_BRIEF_FIXTURE.facts.work, groups: REAL_FANOUT_GROUPS },
+    },
+  };
+  const confirm = await api.post('/api/brief/confirm', { data: { tokenId: token, brief } });
+  expect(confirm.ok(), `/api/brief/confirm: ${confirm.status()} ${await confirm.text()}`).toBeTruthy();
+  expect((await confirm.json()).outcome).toBe('serve');
+
+  // Flip the persisted templateId onto atelier2 (the works-flipped skeleton pilot).
+  const flip = await api.post('/api/saveDraft', {
+    data: { tokenId: token, title: 'Kundius Studio', templateId: 'atelier2' },
+  });
+  expect(flip.ok(), `/api/saveDraft flip: ${flip.status()} ${await flip.text()}`).toBeTruthy();
+
+  return {
+    token,
+    coverUrls: [WORK_COVER_URLS.weddings, WORK_COVER_URLS.portraits],
+    // slugify('Wedding day coverage') / slugify('Engagement session').
+    workSlugs: ['wedding-day-coverage', 'engagement-session'],
+  };
 }

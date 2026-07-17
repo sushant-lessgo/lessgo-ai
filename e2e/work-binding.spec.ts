@@ -29,7 +29,7 @@ async function authedApi(page: import('@playwright/test').Page) {
 
 test('atelier2 reveal renders the seeded group photos as gallery covers', async ({ page }) => {
   const api = await authedApi(page);
-  const { token, coverUrls } = await seedBoundAtelier2Preview(api);
+  const { token, coverUrls, workSlugs } = await seedBoundAtelier2Preview(api);
 
   // The chromeless preview is the exact surface the STEP 06 reveal iframe embeds.
   await page.goto(`/preview/${token}?chrome=0`);
@@ -44,5 +44,12 @@ test('atelier2 reveal renders the seeded group photos as gallery covers', async 
   // placeholder). This is the reveal promise: the user's real photos, grouped.
   for (const url of coverUrls) {
     await expect(page.locator(`img[src="${url}"]`).first()).toBeVisible({ timeout: 30_000 });
+  }
+
+  // BINDING HREFS (E2 / phase 2): each stamped cover LINKS to its group's
+  // `/works/<slug>` detail page — the D5 href half of stampWorkGalleryBinding. The
+  // covers-only proof above + these links together are the reveal's whole promise.
+  for (const slug of workSlugs) {
+    await expect(page.locator(`a[href="/works/${slug}"]`).first()).toBeVisible({ timeout: 30_000 });
   }
 });

@@ -47,6 +47,15 @@ import WorkFaq from './blocks/Faq/WorkFaq';
 import WorkFaqPublished from './blocks/Faq/WorkFaq.published';
 import WorkResults from './blocks/Results/WorkResults';
 import WorkResultsPublished from './blocks/Results/WorkResults.published';
+// Collection-machinery sections (work-onboarding-ingestion E2 / phase 2): the
+// `/works` catalog index + per-project detail page. These are NOT arrangement
+// variants offered in the section picker (so they carry no block-manifest entry) —
+// they are resolved by SECTION TYPE by the collections fan-out + the conformance
+// (b)/(b+)/(d) capability-evidence walks (resolvesReal), keyed off the works flip.
+import WorkCatalog from './blocks/Catalog/WorkCatalog';
+import WorkCatalogPublished from './blocks/Catalog/WorkCatalog.published';
+import WorkDetail from './blocks/WorkDetail/WorkDetail';
+import WorkDetailPublished from './blocks/WorkDetail/WorkDetail.published';
 
 /** One built layout variant = an edit component + its published twin. */
 export interface WorkBlockVariant {
@@ -140,6 +149,20 @@ export const WORK_BLOCK_REGISTRY: Record<string, WorkSectionEntry> = {
     default: 'workresults',
     variants: {
       workresults: { edit: WorkResults, published: WorkResultsPublished },
+    },
+  },
+  // Collection-machinery sections (E2 / phase 2). Single layout each — the works
+  // fan-out + conformance resolve these by section type (no arrangement variants).
+  workcatalog: {
+    default: 'workcatalog',
+    variants: {
+      workcatalog: { edit: WorkCatalog, published: WorkCatalogPublished },
+    },
+  },
+  workdetail: {
+    default: 'workdetail',
+    variants: {
+      workdetail: { edit: WorkDetail, published: WorkDetailPublished },
     },
   },
 };

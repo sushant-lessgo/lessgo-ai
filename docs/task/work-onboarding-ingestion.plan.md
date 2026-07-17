@@ -13,7 +13,7 @@ E2 makes STEP 02 of the work journey real: upload photos (folder or loose files)
 ## Progress log
 
 - phase 1 binding spine + gallery covers (fail-fast reveal proof): done (commit 8cf890ab, impl-review=ship loops 1; tsc clean, 3802 tests pass, build ok; e2e authored, registration deferred to P2)
-- phase 2 WorkDetail + WorkCatalog blocks, conformance relax, atelier2 works flip + pilot enablement: pending
+- phase 2 WorkDetail + WorkCatalog blocks, conformance relax, atelier2 works flip + pilot enablement: impl done, impl-review=ship (loops 1; tsc clean, 3824 tests pass, build ok; +elementSchema authorized mid-phase, both pairs renderParity-enrolled) — AWAITING FOUNDER PARITY GATE before commit+P3
 - phase 3 upload spine + functional STEP 02 behind widened seam: pending
 - phase 4 correction screen (5 verbs) + ingestion-writer regression: pending
 - phase 5 end-to-end hardening + Kundius pilot: pending
@@ -143,6 +143,7 @@ Rev 2's union widening (`string | readonly string[]`) broke `tsc` at two READ si
 - `src/modules/skeletons/work/blocks/Catalog/WorkCatalog.published.tsx` (new)
 - `src/modules/skeletons/work/blocks/Catalog/styles.ts` (new)
 - `src/modules/skeletons/work/resolveWorkBlock.ts`
+- `src/modules/audience/work/elementSchema.ts` (orchestrator-authorized mid-P2: 2-line `WORK_LAYOUT_TO_SECTION` add — WorkCatalog→'workcatalog', WorkDetail→'workdetail' — so the EDIT band resolves content via `getSchemaDefaults`; without it the two new blocks render empty in edit mode and can't enroll in renderParity, hollowing the P2 parity gate)
 - `src/modules/skeletons/work/manifest.ts`
 - `src/modules/skeletons/work/sectionRules.ts`
 - `src/modules/skeletons/work/coreParity.test.ts`

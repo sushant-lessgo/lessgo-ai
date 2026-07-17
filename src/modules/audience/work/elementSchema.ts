@@ -54,6 +54,14 @@ const WORK_LAYOUT_TO_SECTION: Record<string, string> = {
   WorkAbout: 'about',
   WorkFaq: 'faq',
   WorkResults: 'results',
+  // work-onboarding-ingestion E2 / phase 2 — COLLECTION-MACHINERY sections. Keyed
+  // LOWERCASE because, unlike the section-picker arrangements above (stored
+  // PascalCase), the collections fan-out stores the layout as the lowercase SECTION
+  // TYPE (buildCollection{Catalog,Item}Slice → catType/itType, no COLLECTION_BLOCK_
+  // LAYOUTS override for `works`). This registration is what lets the EDIT/preview
+  // renderer resolve their content (getSchemaDefaults(layout) → this schema).
+  workcatalog: 'workcatalog',
+  workdetail: 'workdetail',
 };
 
 /**

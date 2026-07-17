@@ -172,3 +172,235 @@ driver no-ops, so vitest drives fixture caps `['works']` directly)
 Non-blocking carried forward:
 1. Byte-identical fast-path (`work.llm.ts` `entries.length===0` return) covers the no-GROUPS case; a grouped-but-photoless dev brief instead writes benign `fc.onboardingData.collections.works` + runs a no-op stamp. Harmless + not prod-reachable. The `work.llm.test.ts:341` fixture label conflates "no groups" with "no photos" — cosmetic; the fast-path test is valid for what it covers.
 2. **`e2e/work-binding.spec.ts` is NOT registered in `playwright.config.ts`** (out of Phase-1 scope). → DEFERRED to Phase 2: add `playwright.config.ts` to P2 Files-touched and register `/work-binding\.spec\.ts/` on the `authed` project, since P2 extends that spec through the real (post-flip) fan-out path and is where it must first execute.
+
+---
+
+# work-onboarding-ingestion — Phase 2 audit (WorkDetail + WorkCatalog blocks · conformance relax · atelier2 works flip + pilot enablement)
+
+Branch: `feature/work-onboarding-ingestion` (verified before any edit).
+Scope: Phase 2 ONLY — the two new render surfaces (`.core` single-source pattern),
+the D14 conformance relax, the atelier2 `works` flip, and pilot enablement
+(allow-list + env-gated confirm override). Built ON Phase 1 (commit 8cf890ab).
+
+## Files changed
+
+Created:
+- `src/modules/skeletons/work/blocks/WorkDetail/WorkDetail.core.tsx`
+- `src/modules/skeletons/work/blocks/WorkDetail/WorkDetail.tsx`
+- `src/modules/skeletons/work/blocks/WorkDetail/WorkDetail.published.tsx`
+- `src/modules/skeletons/work/blocks/WorkDetail/styles.ts`
+- `src/modules/skeletons/work/blocks/Catalog/WorkCatalog.core.tsx`
+- `src/modules/skeletons/work/blocks/Catalog/WorkCatalog.tsx`
+- `src/modules/skeletons/work/blocks/Catalog/WorkCatalog.published.tsx`
+- `src/modules/skeletons/work/blocks/Catalog/styles.ts`
+- `src/modules/skeletons/work/workDetailPhotos.test.tsx`
+
+Modified:
+- `src/modules/skeletons/work/resolveWorkBlock.ts` (register workcatalog + workdetail)
+- `src/modules/skeletons/work/manifest.ts` (clarifying note — NO entries; see Deviations)
+- `src/modules/skeletons/work/sectionRules.ts` (surface map: workcatalog/workdetail -> paper)
+- `src/modules/skeletons/work/coreParity.test.ts` (count 17->19 + 2 core render fixtures)
+- `src/modules/skeletons/work/renderParity.work.test.tsx` (NON_VISIBLE_KEY += url/cover)
+- `src/modules/engines/workSections.ts` (ADDITIVE workcatalog contract — freeze untouched)
+- `src/modules/templates/blockMocks/atelier2.ts` (NOTE only — mocks NOT enrolled; see Blockers)
+- `src/modules/templates/templateMeta.ts` (atelier2 works flip)
+- `src/modules/templates/templateConformance.ts` (D14 option-b relax of the (d) assert)
+- `src/modules/templates/conformance.test.ts` (dormancy->cross-template net + atelier2 + 2 negative fixtures)
+- `src/lib/workCopyEngine.ts` (allow-list += atelier2)
+- `src/lib/workCopyEngine.test.ts` (allow-list assertion)
+- `src/modules/wizard/generation/work.llm.test.ts` (allow-list assertion :363)
+- `src/app/api/brief/confirm/route.ts` (env-gated WORK_JOURNEY_TEMPLATE_OVERRIDE)
+- `e2e/work-onboarding.spec.ts` (real-fan-out atelier2 test)
+- `e2e/work-binding.spec.ts` (href-binding assertion)
+- `e2e/helpers/seedWorkBrief.ts` (seedRealFanoutAtelier2 + workSlugs)
+- `playwright.config.ts` (register work-binding on the authed project)
+
+## Per-file changes + D-decisions
+
+### The two block pairs (single-source .core pattern — DUAL-RENDERER gate)
+- WorkDetail (workdetailContract): title (name) + optional client/problem/result
+  meta strip (carry-only, gated by hasStrip) + a FLAT photo grid from the photos
+  collection (element keys photos.<id>.url, COVER photo rendered FIRST via a pure
+  stable coverFirst). Photos ARE a flat list here — the group-references-only
+  invariant is the GALLERY's (galleryGroups.test, untouched/green); the NEW
+  workDetailPhotos.test.tsx mirrors its style but asserts the photo-grid shape
+  (each url -> one <img>, cover-first ordering, one cell per photo, meta present).
+- WorkCatalog (workcatalog catalog slice): eyebrow/headline/lede head + a covers
+  grid from items (name + cover + link -> /works/<slug>). Field names mirror the
+  generic catalog slice (headline/lede, items.name/cover/href).
+- Both follow the Gallery/About wrap pattern EXACTLY: .core.tsx = plain server-safe
+  module rendering through injected E; .tsx = 'use client' thin wrap (useWorkBlock
+  -> useWorkEditCtx -> editPrimitives); .published.tsx = flat props ->
+  makePublishedPrimitives -> core. No hook/'use client' import in any .core. Styles
+  reuse existing --wk-*/--u-* tokens only (WorkCatalog reuses the Gallery's
+  RULE_HEAD + GALLERY_CAPTION grammars from a PLAIN styles module — no client import).
+
+### workSections.ts (ADDITIVE, freeze untouched)
+- New workcatalogContract (sectionType = COLLECTIONS.works.catalogSectionType) +
+  registered as workElementContract.workcatalog. ADDITIVE — NOT a member of
+  workMustSections/workOptionalSections (the freeze), so workContract.test (which
+  walks the section-key lists) stays green with the extra map key.
+
+### templateConformance.ts — D14 OPTION (b), NO type widening
+- assertCollectionCapabilityBacked: KEPT the catalog-section toContain (the one
+  value the single-string map carries), DROPPED the item-section toContain, and
+  continues to resolvesReal BOTH def.catalogSectionType AND def.itemSectionType
+  (registry-derived — the closed-fail spine). TemplateMeta.capabilitySections type
+  UNCHANGED (Partial<Record<CapabilityId, string>>). fit.ts / sectionSelection.ts /
+  sectionGrammar.ts / templateMeta.test.ts UNTOUCHED. The (b) walker (:275-287) and
+  (b+) walker (:292-305) read-verified + test-verified green with the single-string
+  works: 'workcatalog' entry (not vacuous, no absent-value read).
+
+### conformance.test.ts
+- The old vacuous DORMANCY lock (asserting no template declares a family cap) is
+  replaced by a CROSS-TEMPLATE NET: assertCollectionCapabilityBacked runs for EVERY
+  templateId (templates declaring no family cap continue -> vacuously green; atelier2
+  exercises it for real). PLUS an explicit atelier2 pair assertion, PLUS a scoped
+  regression lock (no template OTHER than atelier2 declares a family cap). The global
+  net is preserved — a new family declaration on ANY template must supply a resolving
+  pair. Two NEW negative fixtures both toThrow: (1) works on atelier2 WITHOUT a
+  workcatalog value -> relaxed coverage half bites; (2) works on meridian (no work
+  blocks) -> resolve half bites.
+
+### templateMeta.ts — the flip
+- atelier2.capabilities += 'works', capabilitySections.works = 'workcatalog'
+  (single string). atelier UNTOUCHED. atelier2 stays bespoke:true (off shortlists).
+
+### Pilot enablement
+- WORK_COPY_ENGINE_TEMPLATES = ['atelier','atelier2'] (comment: atelier2 = E2 skeleton
+  pilot; absorb at atelier-skeleton-cutover). Two allow-list test assertions updated.
+- confirm/route.ts: applyWorkTemplateOverride — if WORK_JOURNEY_TEMPLATE_OVERRIDE is
+  a valid templateId AND the gate resolved to atelier, persist the override; unset in
+  prod => byte-identical (D7b). Validates via @/types/service templateIds (pure const
+  list — firewall-safe; header comment updated to note this).
+
+## Deviations
+
+1. Manifest entries NOT added for workcatalog/workdetail (in-scope judgment). Plan
+   step 3 says "manifest entries with honest consumes subset-of contract scalars." But
+   adding a block-manifest entry triggers conformance's consumes-subset-of
+   contractFor(layoutName) walk, and contractFor('WorkCatalog'/'WorkDetail') resolves
+   via serviceElementSchema <- workLayoutElementSchema
+   (src/modules/audience/work/elementSchema.ts) — a file NOT in Phase-2's
+   Files-touched. Collection catalog/detail sections are ALSO absent from every other
+   template's block manifest (they are fan-out machinery resolved by SECTION TYPE, not
+   arrangement variants). So I registered the pair ONLY in resolveWorkBlock (the
+   registry) — which is all the conformance (b)/(b+)/(d) capability walks need
+   (resolvesReal, section-type dispatch) — and documented the omission in manifest.ts.
+   Conservative option chosen to avoid the out-of-scope edit; logged here.
+
+2. renderParity/dev-gallery mocks NOT enrolled for the two new sections — see
+   Blockers (same root cause as Deviation 1). Their EDIT render is blocked without the
+   schema registration, so enrolling them would only add a RED renderParity case for a
+   known out-of-scope gap. Their .core render is instead guarded by coreParity (both
+   pairs added to the fixtures list + the 17->19 count) and workDetailPhotos.
+
+3. e2e authored but NOT executed here (infra-gated, consistent with Phase 1) — the
+   authed harness needs a dev server + Clerk auth.setup. Specs parse + register
+   cleanly (playwright --list shows work-binding under authed + the new
+   work-onboarding real-fan-out test). Must be run against npm run dev.
+
+## BLOCKERS (out-of-scope file needed — REPORTED, not edited)
+
+src/modules/audience/work/elementSchema.ts needs a 2-line WORK_LAYOUT_TO_SECTION
+addition (WorkCatalog -> 'workcatalog', WorkDetail -> 'workdetail') — NOT in Phase-2's
+Files-touched.
+
+Root cause: the EDIT renderer (and the preview render of the /works detail page)
+resolves a block's content via useTemplateBlock -> getSchemaDefaults(layout) ->
+layoutElementSchema[layout], which spreads serviceElementSchema <-
+workLayoutElementSchema. Without the two layouts registered there, getSchemaDefaults
+returns null and the edit/preview render comes back EMPTY (the published render,
+flat-props, is fine). This blocks:
+  - renderParity coverage of the two new EDIT wrappers (the founder dual-renderer gate);
+  - the actual in-editor / in-preview render of /works/<slug> detail-page CONTENT on
+    an atelier2 project.
+It does NOT block: the fan-out DATA (item pages + verbatim photos — pure code), the
+schema-backed HOME gallery covers/hrefs, or any conformance/build/tsc gate. The
+additive workcatalog contract (workSections.ts) is already in place, so the
+workLayoutElementSchema derivation would resolve cleanly (workdetail already exists,
+workcatalog now does too). RECOMMENDATION: add elementSchema.ts to Files-touched, make
+the 2-line edit, then re-enroll the two atelier2 mocks (reverting the NOTE in
+atelier2.ts) so renderParity + the /dev/blocks/atelier2 eyeball cover both pairs.
+
+## Verification (run in WORKDIR)
+
+1. npx tsc --noEmit — CLEAN (the pre-existing founder.jpg TS2307 did not surface).
+2. npm run test:run — 3816 passed | 18 skipped (223 files), zero new failures.
+   Conformance (b)/(b+)/(d) + both new works negative fixtures EXERCISED + green;
+   frozen galleryGroups.test.tsx green + untouched; coreParity (19 cores, both new
+   pairs rendered) + workDetailPhotos green.
+3. npm run build — SUCCEEDED (exit 0, full route table emitted).
+4. e2e — specs parse + register (playwright --list shows both). Execution attempted;
+   infra-gated (dev server + Clerk auth not bootable in this worktree session — see
+   Deviation 3). No genuine assertion failure observed.
+
+## What the impl-reviewer should scrutinize
+
+- The BLOCKER above is the load-bearing item — decide whether to authorize the
+  elementSchema.ts 2-line edit + mock re-enrollment (restores the founder parity gate)
+  or defer it as a Phase 2.5. The two block PAIRS themselves are byte-pattern-identical
+  to the green Gallery/About wraps.
+- D14 relax: confirm the DROPPED item toContain is fully compensated by
+  resolvesReal(def.itemSectionType) — the two negative fixtures prove both halves bite.
+- The dormancy->cross-template-net rewrite: confirm the global guarantee is preserved
+  (every template with a family cap runs the assert; atelier2 real, rest vacuous) and
+  the scoped regression lock doesn't over-fit atelier2.
+- confirm-route override: unset-in-prod byte-identical (D7b); the templateIds import
+  is pure data (firewall-safe).
+
+---
+
+## Phase 2 — BLOCKER RESOLVED (orchestrator authorized the scope addition)
+
+The orchestrator authorized adding ONE file — `src/modules/audience/work/elementSchema.ts`
+— to Phase-2 scope to complete the correctness gap. Done:
+
+- **elementSchema.ts (+2 lines):** `WORK_LAYOUT_TO_SECTION` gains `workcatalog: 'workcatalog'`
+  and `workdetail: 'workdetail'`. Keyed LOWERCASE (not PascalCase like the section-picker
+  arrangements) BECAUSE the collections fan-out stores the layout as the lowercase SECTION
+  TYPE (`buildCollection{Catalog,Item}Slice` → `catType`/`itType`; no `works` entry in
+  `COLLECTION_BLOCK_LAYOUTS`). This makes both layouts resolvable via
+  `getSchemaDefaults(layout)` → `workLayoutElementSchema` → `serviceElementSchema` →
+  `layoutElementSchema`, so the EDIT/preview renderer now populates their content (the
+  additive `workcatalog` contract from workSections.ts + the existing `workdetail` contract
+  supply the schema; the derivation throws if either were missing — both present).
+
+- **atelier2.ts re-enrollment:** reverted the BLOCKED note; the `workcatalog` + `workdetail`
+  sections are now real renderParity/dev-gallery mocks with POPULATED copy (workcatalog:
+  eyebrow/headline/lede + 3 items with names + hrefs; workdetail: name/client/problem/result
+  + a 3-photo grid, image slots empty per the image-led convention). renderParity.work.test.tsx
+  needed no further change (the earlier NON_VISIBLE_KEY += url/cover already covers the media
+  fields).
+
+**HOW edit↔published parity is now PROVEN for both blocks:** `renderParity.work.test.tsx`
+walks `BLOCK_MOCKS.atelier2`, MOUNTS each block's `.tsx` (edit, store-backed, effects run via
+createRoot+act) AND its `.published.tsx` (flat props) on the SAME populated mock content, then
+asserts symmetric visibility of every fixture copy field. Both `atelier2 'workcatalog'` and
+`atelier2 'workdetail'` cases run GREEN (verified via `--reporter=verbose`): "no field renders
+in one mode but not the other", "CTA/link href parity" (workcatalog covers link to
+`/works/<slug>` in published + expose `wk-link-edit` in edit), and "most fixture fields
+actually render" — i.e. the edit band and published band render the SAME `Full brand package`
+/ `Every project` / client / problem / result copy. Plus coreParity (server-render purity, 19
+cores incl. both new pairs) + workDetailPhotos (published flat-photo grid, cover-first).
+
+### Re-verification (FULL gate)
+1. `npx tsc --noEmit` — CLEAN (no founder.jpg error this run).
+2. `npm run test:run` — **3824 passed | 18 skipped** (223 files), 0 failures (+8 vs the
+   pre-fix 3816 = the re-enrolled workcatalog/workdetail parity cases, EXERCISED not skipped).
+   Conformance (b)/(b+)/(d) + both `works` negative fixtures green; frozen galleryGroups green.
+3. `npm run build` — SUCCEEDED (exit 0).
+4. e2e — unchanged from Phase 2 (specs parse + registered; execution infra-gated).
+
+Files changed in this completion: `src/modules/audience/work/elementSchema.ts` (NEW to scope),
+`src/modules/templates/blockMocks/atelier2.ts` (re-enrolled). Everything else from the Phase 2
+section stays as-is.
+
+---
+## Orchestrator record — Phase 2 impl-review
+
+**impl-review verdict: SHIP** (loop 1, no blocking). Independently verified: dual-renderer parity net is real (both pairs enrolled, mounts edit+published on populated content, red-on-divergence, guarded vs green-on-empty); D14 closed-fail genuine (registry-derived resolver check bites a placeholder workdetail; both negative fixtures throw); cross-template conformance net preserved (loops all templateIds, only atelier2's regression lock scoped); prod byte-identical (override env-gated+unset, atelier2 bespoke/off-shortlist); frozen contracts respected (galleryGroups untouched, workSections additive); zero AI/schema touch. Gates: tsc exit 0, test:run 3824 passed / 18 skipped / 0 failures.
+
+Non-blocking: e2e infra-gated (registered, not executable in-worktree); `NON_VISIBLE_KEY` bare-`url` regex is broad (cosmetic, future risk only).
+
+**HELD at FOUNDER PARITY GATE** (spec candidate gate + plan P2 gate) before commit + Phase 3. Awaiting founder eyeball of WorkDetail + WorkCatalog edit↔published parity in the dev gallery.
