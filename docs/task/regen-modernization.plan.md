@@ -8,7 +8,8 @@ Rebuild the three regeneration endpoints (`regenerate-element`, `regenerate-sect
 
 ## Progress log
 
-- phase 1 aiClient hardening + unit tests: pending
+- phase 1 aiClient hardening + unit tests: **done** (commit `d0ba8849`, impl-review loops 1 → `ship` + a follow-up test-integrity fix). 24 tests in new `src/lib/aiClient.test.ts` (first ever on that file), verified discriminating by simulating the pre-hardening extraction. Suite 3570 passed | 18 skipped. `tsc` clean except the known pre-existing `src/app/page.tsx(6,26)` `founder.jpg` error (this worktree was never built → no `next-env.d.ts`; unrelated to the diff). **Plan-invariant correction logged as audit Deviation #4**: the impl added `ECONNRESET`/`ENOTFOUND`/`EAI_AGAIN`/`'timed out'` beyond the authorized `{ECONNREFUSED, ETIMEDOUT}` — old code returned `false` for all four (notably OpenAI's `APIConnectionTimeoutError` message `"Request timed out."`), so the plan's "never a NEW backup call" wording is what's wrong, not the code (the plan already authorized `ETIMEDOUT` + truncation→backup). Real intent — content failures never buy a backup — is honored by the fast-exit. Code kept per orchestrator ruling.
+  - ⏸️ **NEXT: human gate — founder `CAPTURE=1` golden run** (see gate table). Phase 2 must not start until it passes.
 - phase 2 scoped-generation primitive: pending
 - phase 3 regenerate-element rebuild (pilot): pending
 - phase 4 regenerate-section rebuild: pending
