@@ -16,6 +16,7 @@ vi.mock('@/lib/logger', () => ({
 
 import { prisma } from '@/lib/prisma';
 import {
+  hasFeature,
   hasTrackingPixels,
   createDefaultPlan,
   downgradePlan,
@@ -59,6 +60,79 @@ describe('hasTrackingPixels', () => {
   it('unknown / garbage tier → false (fail-closed)', async () => {
     db.userPlan.findUnique.mockResolvedValue({ tier: 'GARBAGE' });
     expect(await hasTrackingPixels('u1')).toBe(false);
+  });
+});
+
+// hasFeature must be config-derived + deny-by-default. Every row below carries
+// DELIBERATELY WRONG per-row feature columns (all true) — if any assertion flips,
+// the DB row is being trusted again and the paywall is open.
+describe('hasFeature (deny-by-default, config-derived)', () => {
+  const wrongRow = (tier: string) => ({
+    tier,
+    // legacy/drifted columns claiming everything is unlocked — must be IGNORED
+    removeBranding: true,
+    customDomains: true,
+    exportHTML: true,
+    whiteLabel: true,
+    analytics: 'full',
+    // note: no trackingPixels column exists on UserPlan at all
+  });
+
+  it('FREE + removeBranding → false even though the DB row says true (the !== \'none\' regression)', async () => {
+    db.userPlan.findUnique.mockResolvedValue(wrongRow(PlanTier.FREE));
+    expect(await hasFeature('u1', 'removeBranding')).toBe(false);
+  });
+
+  it('FREE + whiteLabel / exportHTML / customDomains → false', async () => {
+    db.userPlan.findUnique.mockResolvedValue(wrongRow(PlanTier.FREE));
+    expect(await hasFeature('u1', 'whiteLabel')).toBe(false);
+    expect(await hasFeature('u1', 'exportHTML')).toBe(false);
+    expect(await hasFeature('u1', 'customDomains')).toBe(false);
+  });
+
+  it('FREE + trackingPixels (no DB column → undefined on row) → false', async () => {
+    db.userPlan.findUnique.mockResolvedValue(wrongRow(PlanTier.FREE));
+    expect(await hasFeature('u1', 'trackingPixels')).toBe(false);
+  });
+
+  it('FREE + analytics → true (config says \'basic\')', async () => {
+    db.userPlan.findUnique.mockResolvedValue(wrongRow(PlanTier.FREE));
+    expect(await hasFeature('u1', 'analytics')).toBe(true);
+  });
+
+  it('PRO + removeBranding → true', async () => {
+    db.userPlan.findUnique.mockResolvedValue({ tier: PlanTier.PRO });
+    expect(await hasFeature('u1', 'removeBranding')).toBe(true);
+  });
+
+  it('PRO + exportHTML → false (PRO genuinely lacks it, row column notwithstanding)', async () => {
+    db.userPlan.findUnique.mockResolvedValue(wrongRow(PlanTier.PRO));
+    expect(await hasFeature('u1', 'exportHTML')).toBe(false);
+  });
+
+  it('AGENCY + exportHTML / whiteLabel → true', async () => {
+    db.userPlan.findUnique.mockResolvedValue({ tier: PlanTier.AGENCY });
+    expect(await hasFeature('u1', 'exportHTML')).toBe(true);
+    expect(await hasFeature('u1', 'whiteLabel')).toBe(true);
+  });
+
+  // No shipped tier sets analytics:'none' today, so the 'none' branch is pinned via
+  // an unknown tier (→ undefined) plus a direct config-shape assertion below.
+  it('unknown / garbage tier → false for every key, incl. analytics', async () => {
+    db.userPlan.findUnique.mockResolvedValue(wrongRow('GARBAGE'));
+    expect(await hasFeature('u1', 'removeBranding')).toBe(false);
+    expect(await hasFeature('u1', 'analytics')).toBe(false);
+  });
+
+  it("no shipped tier uses analytics:'none' (so the 'none' branch is currently unreachable)", () => {
+    for (const tier of Object.values(PlanTier)) {
+      expect(PLAN_CONFIGS[tier as PlanTier].features.analytics).not.toBe('none');
+    }
+  });
+
+  it('getUserPlan throws → false (fail-closed)', async () => {
+    db.userPlan.findUnique.mockRejectedValue(new Error('db down'));
+    expect(await hasFeature('u1', 'removeBranding')).toBe(false);
   });
 });
 

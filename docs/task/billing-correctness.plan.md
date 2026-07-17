@@ -200,6 +200,24 @@ Spec says ship as ONE bundle: after phase 3 review passes, user sign-off on the 
 | M7 plan-limit values untouched | 2 (grep) + fence in 3 |
 | `tsc` + `test:run` green | every phase |
 
+## FOUNDER RULINGS (phase-1 human gate, 2026-07-17 — BINDING, do not re-litigate)
+
+- **Phase 1 gate: PASSED.** Founder signed off on the atomic decrement + all three
+  gate-(b) ledger decisions ((i) in-tx success ledger + double-log removed, (ii) pre-gate
+  402 writes the failed UsageEvent at the route in phase 3, (iii) DEV_BYPASS_CREDITS
+  writes no UsageEvent — dev-only, accepted). Phase 2 authorized.
+- **Q1 race-loser policy: 402 + DISCARD OUTPUT.** No free output. Confirms design
+  decision 1. (Retry-exhaustion `charge_conflict` → recoverable 500 stays separate.)
+- **Q4 concurrency-test DB dependency: KEEP AS-IS.** Hard-fail (not skip) when local
+  Postgres is down is the accepted behavior — a silent skip on the money path is the
+  worse failure. Do NOT add a skip fallback.
+- **Q7 phase-3 scope: INCLUDE** `generate-privacy-policy` + `work/regenerate-story` for
+  post-consume alignment (402/500 split) as the plan specifies.
+- Not re-asked, standing as planned: Q2 (outreach deferred), Q3 (DRY-up deferred),
+  Q5 (`domains/add` FREE → 403 feature-gate message), Q6 (`requireFeature` kept),
+  Q8 (pre-gate ledger write — preserve today's behavior), Q9 (`charge_conflict` generic
+  500, no client auto-retry), Q10 (DEV_BYPASS no ledger row).
+
 ## Unresolved questions
 
 1. Race-loser policy: post-AI genuine insufficiency → 402 + discard output (no free output). OK, or prefer deliver-free-and-eat-cost? (Retry-exhaustion conflict now separately → recoverable 500, NOT the credits wall.)

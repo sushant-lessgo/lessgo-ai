@@ -140,3 +140,104 @@ Suite **EXECUTED** (not skipped) inside the full `npm run test:run` too — verb
 - `charge_conflict` has no client-side auto-retry (plan Q9); phase 3 surfaces it as a recoverable 500.
 - Retry exhaustion under sustained real contention returns a 500 rather than queueing — acceptable at current scale, revisit if the money path ever gets hot.
 </content>
+
+---
+
+# Phase 2 — H2: `hasFeature` deny-by-default
+
+## Files changed
+
+- `src/lib/planManager.ts` — reimplemented `hasFeature` as config-derived/deny-by-default (design decision 4 verbatim); refreshed the now-stale `hasTrackingPixels` doc comment (code unchanged).
+- `src/lib/planManager.test.ts` — added a `hasFeature` regression suite (9 tests) driven by rows with deliberately WRONG per-row feature columns.
+- `docs/task/billing-correctness.audit.md` — this section (appended; phase 1 content untouched).
+
+## What changed
+
+### `src/lib/planManager.ts`
+
+`hasFeature` body (was `planManager.ts:506-514`):
+
+```ts
+// before
+return (userPlan as any)[feature] === true || (userPlan as any)[feature] !== 'none';
+// after
+const value = PLAN_CONFIGS[userPlan.tier as PlanTier]?.features[feature];
+return typeof value === 'boolean' ? value : value !== undefined && value !== 'none';
+```
+
+- Signature unchanged: `(userId, feature: keyof PlanConfig['features']) => Promise<boolean>`.
+- Booleans strict; `analytics` (the one string enum) non-`'none'` → true; `undefined` / unknown tier → false; catch → `false` (fail-closed, unchanged).
+- Doc comment records WHY it's config-derived (per-row columns drift; some keys have no column) and that this is behavior-preserving (the create/upgrade/downgrade writers populate those columns from the same config).
+- `hasTrackingPixels` comment block rewritten — it previously documented the bug just fixed. Now: hasFeature is config-derived too; hasTrackingPixels stays separate for its no-DB-column key; collapsing them is a deliberate deferred DRY-up (founder ruling Q3). **Its code is byte-identical.**
+
+### `src/lib/planManager.test.ts`
+
+New `describe('hasFeature (deny-by-default, config-derived)')`. Every FREE/PRO row is built by a `wrongRow()` helper that sets `removeBranding/customDomains/exportHTML/whiteLabel: true` and `analytics: 'full'` — so each assertion fails if the DB row is ever trusted again. Cases: FREE+removeBranding→false (the exact `!== 'none'` regression, row says true); FREE+whiteLabel/exportHTML/customDomains→false; FREE+trackingPixels (no column → undefined)→false; FREE+analytics→true (`'basic'`); PRO+removeBranding→true; PRO+exportHTML→false (PRO genuinely lacks it, row says true); AGENCY+exportHTML/whiteLabel→true; garbage tier→false incl. analytics; getUserPlan throws→false.
+
+## Deviations / decisions the plan didn't cover (conservative choices)
+
+1. **`analytics:'none'` tier does not exist.** No shipped tier sets `'none'` (FREE=`'basic'`, PRO/AGENCY/ENTERPRISE=`'full'`). Per the plan's "else synthetic/unknown tier", the `'none'` branch is pinned via the garbage-tier case (`analytics` → undefined → false) **plus** an explicit config-shape assertion: `for tier of PlanTier → features.analytics !== 'none'`. That second test is a tripwire — if a future tier introduces `'none'`, it fires and forces a real `'none'` case to be written. No synthetic tier was injected into `PLAN_CONFIGS` (would violate the values fence).
+2. **Added AGENCY positive cases** (exportHTML/whiteLabel → true) beyond the listed set — cheap proof the fix isn't a blanket `false`. Additive to the test file only.
+3. Did **not** touch the stale "do NOT use hasFeature… fails OPEN" comments at `publish/route.ts:359` and `domains/verify-dns/route.ts:117` — those files are outside Files-touched, and their code fence is explicit. Their comments now over-state the danger (hasFeature is fixed) but the inlined checks remain correct and behavior is identical. Flagged as tidy-up for whoever does the deferred DRY-up (Q3).
+
+## Step 3 — caller check (READ-ONLY, no edits)
+
+`src/app/api/domains/add/route.ts`, FREE user adding a custom domain:
+
+| | Status | Body |
+|---|---|---|
+| **Before** (hasFeature effectively `() => true`) | `403` at the `checkLimit` backstop (`:62`, FREE `limits.customDomains = 0`) | `{ error: 'Custom domain limit reached', limit: 0, current: 0 }` |
+| **After** (hasFeature correct) | `403` at the feature gate (`:55`) | `{ error: 'Custom domains not available on your plan' }` |
+
+**Delta is status-code-identical (403→403); only the message changes.** The door was never open — the limit backstop already blocked FREE; the feature gate now fires first with a plan-appropriate message. Founder ruled this OK (Q5). Non-FREE tiers are unaffected (PRO/AGENCY/ENTERPRISE all have `features.customDomains: true`, so the gate passes and the limit check behaves exactly as before).
+
+Confirmed UNTOUCHED (read-only inspection, zero diff): `publish/route.ts:359` and `domains/verify-dns/route.ts:117` inlined `getPlanConfig(tier).features.removeBranding === true` checks. `requireFeature` (`planCheck.ts:124`) not touched (phase 3's file; kept per Q6 — it becomes correct now that hasFeature is fixed).
+
+## Scope fences
+
+- **`PLAN_CONFIGS` values diff is EMPTY** — `git diff src/lib/planManager.ts` shows changes ONLY in the `hasFeature` body + two doc-comment blocks. No tier's limit or feature VALUE is touched. M7 (FREE publishedPages vs PRO) deliberately untouched — pricing-v2 owns it.
+- `checkLimit` untouched. `creditSystem.ts` untouched (phase 1). No route files touched (phase 3).
+
+## Gate outputs
+
+```
+$ npx tsc --noEmit
+TSC_EXIT=0   (clean, no output)
+
+$ npx vitest run src/lib/planManager.test.ts
+ Test Files  1 passed (1)
+      Tests  23 passed (23)
+
+$ npm run test:run          # local Postgres UP — phase-1 concurrency suite executed, not skipped
+ Test Files  210 passed | 1 skipped (211)
+      Tests  3567 passed | 18 skipped (3585)
+   Duration  59.42s
+
+# concurrency suite confirmed EXECUTING (run explicitly to show test count, not a skip line):
+$ npx vitest run src/lib/creditSystem.concurrency.test.ts --reporter=verbose
+ ✓ monthly=0, pool=1, N=5 → 1 success; creditsUsed===1 and counter===1 (NO-PARTIAL-CHARGE ROLLBACK PROOF)
+ ✓ monthly=1, pool=1, N=3 → exactly 2 succeed (retry/recompute path), both buckets drained
+ ✓ sequential sanity: monthly=2, pool=1 → drains monthly first, then pool (split-order regression)
+ ✓ ledger atomicity: exactly one success:true UsageEvent per successful spend
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+# The 1 skipped FILE / 18 skipped tests are pre-existing (opt-in golden/real-LLM), not billing.
+
+$ npm run lint
+# clean — only the pre-existing warning in src/providers/ph-provider.tsx:78
+# (react-hooks/exhaustive-deps), unrelated and untouched by this phase.
+
+$ grep "!== 'none'" src/lib/planManager.ts
+512: * Previously this read the DB row and tested `=== true || !== 'none'`, which        <- doc comment
+523:    return typeof value === 'boolean' ? value : value !== undefined && value !== 'none';   <- the analytics enum branch, allowed
+# No other hits. Both permitted by the gate.
+
+$ git diff -U0 src/lib/planManager.ts    # PLAN_CONFIGS values: ZERO changed lines
+# only: hasFeature doc comment, hasFeature 1-line body, hasTrackingPixels doc comment
+```
+
+## Open risks
+
+- The two inlined `removeBranding` checks now carry misleading comments ("hasFeature fails OPEN") — stale documentation, not a behavior risk. Clean up with the deferred DRY-up.
+- `hasFeature` now genuinely denies. Its only live caller is `domains/add` (already backstopped), so the blast radius is one message string — but any FUTURE caller inherits real deny-by-default semantics, which is the point.
+- Legacy DB rows with drifted feature columns are now fully ignored by `hasFeature`. Those columns remain written on create/upgrade/downgrade and are still read directly by other code paths (e.g. Stripe/webhook display surfaces) — out of scope here; pricing-v2 owns whether those columns should exist at all.
