@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { trackFailure } from '@/utils/trackTelemetry';
 import { parseInsufficientCredits } from '@/lib/billing/insufficientCredits';
+import { CREDIT_COSTS } from '@/lib/creditCosts';
 
 /** Hostname-only (privacy: never emit the full URL). null for the text path. */
 function hostOf(url: string | null): string | null {
@@ -102,6 +103,14 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
   const normalizedUrl = normalizeUrl(value);
   const validation = validateOneLiner(value);
   const isValid = !!normalizedUrl || validation.valid;
+
+  // billing-beta phase 7 — surface this step's spend at the affordance. The submit
+  // runs the URL path (/api/v2/scrape-website ⇒ SCRAPE_WEBSITE) or the text path
+  // (/api/v2/understand ⇒ UNDERSTAND); the cost tracks whichever route this input
+  // will hit. Number always from CREDIT_COSTS, never a literal.
+  const actionCost = normalizedUrl
+    ? CREDIT_COSTS.SCRAPE_WEBSITE
+    : CREDIT_COSTS.UNDERSTAND;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -286,7 +295,9 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
             'Continue'
           )}
         </Button>
-        <p className="text-xs text-gray-400 text-center mt-2">Takes ~30 seconds</p>
+        <p className="text-xs text-gray-400 text-center mt-2">
+          Takes ~30 seconds · Costs {actionCost} credit{actionCost === 1 ? '' : 's'}
+        </p>
       </div>
     </form>
   );

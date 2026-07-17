@@ -7,6 +7,13 @@ import { useEditor } from '@/hooks/useEditor';
 
 import { useButtonConfigModal } from '@/hooks/useButtonConfigModal';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
+import { AppTooltip } from '@/components/ui/tooltip';
+import { CREDIT_COSTS } from '@/lib/creditCosts';
+
+// billing-beta phase 7 — cost hint for a spend affordance. Trivial + local:
+// pluralization only. The NUMBER always comes from CREDIT_COSTS, never a literal
+// (config-driven acceptance criterion; a re-inlined `1` is exactly what this guards).
+const creditCostHint = (n: number) => `Costs ${n} credit${n === 1 ? '' : 's'}`;
 
 interface ElementToolbarProps {
   elementSelection: any;
@@ -222,9 +229,16 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
           {/* Primary Actions */}
           {primaryActions.map((action, index) => {
             const actionDisabled = (action as any).disabled === true;
-            return (
-            <React.Fragment key={action.id}>
-              {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
+            // Regenerate hits /api/regenerate-element ⇒ ELEMENT_REGENERATION spend.
+            // Surface its cost on hover. When disabled the button swallows pointer
+            // events (AppTooltip can't fire) so the native disabledTitle carries the
+            // "why", and we keep the native title off the enabled hinted button so the
+            // AppTooltip is the sole hover affordance.
+            const costHint =
+              action.id === 'regenerate-copy' && !actionDisabled
+                ? creditCostHint(CREDIT_COSTS.ELEMENT_REGENERATION)
+                : null;
+            const button = (
               <button
                 onClick={(e) => {
                   if (actionDisabled) {
@@ -246,12 +260,23 @@ export function ElementToolbar({ elementSelection }: ElementToolbarProps) {
                     ? 'bg-blue-500 text-white hover:bg-blue-600'
                     : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                 }`}
-                title={actionDisabled ? (action as any).disabledTitle || action.label : action.label}
+                title={
+                  actionDisabled
+                    ? (action as any).disabledTitle || action.label
+                    : costHint
+                    ? undefined
+                    : action.label
+                }
                 aria-haspopup={action.id === 'button-config' ? 'dialog' : undefined}
               >
                 <ElementIcon icon={action.icon} />
                 <span>{action.label}</span>
               </button>
+            );
+            return (
+            <React.Fragment key={action.id}>
+              {index > 0 && <div className="w-px h-6 bg-gray-200 mx-1" />}
+              {costHint ? <AppTooltip label={costHint}>{button}</AppTooltip> : button}
             </React.Fragment>
             );
           })}

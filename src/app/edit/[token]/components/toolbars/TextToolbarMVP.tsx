@@ -14,6 +14,12 @@ import {
   wrapElementContentWithStyles,
   type PartialFormatResult
 } from '@/utils/textFormatting';
+import { AppTooltip } from '@/components/ui/tooltip';
+import { CREDIT_COSTS } from '@/lib/creditCosts';
+
+// billing-beta phase 7 — cost hint for a spend affordance. Trivial + local:
+// pluralization only. The NUMBER always comes from CREDIT_COSTS, never a literal.
+const creditCostHint = (n: number) => `Costs ${n} credit${n === 1 ? '' : 's'}`;
 
 interface TextToolbarMVPProps {
   elementSelection: any;
@@ -762,26 +768,41 @@ function TextToolbarMVPInner({
 
             {/* Divider + AI Sparkle */}
             <div className="w-px h-6 bg-gray-300" />
-            <button
-              onMouseDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onClick={handleSparkle}
-              disabled={aiGeneration.isGenerating || regenLocaleLocked}
-              className={`p-1.5 rounded transition-colors select-none ${
-                regenLocaleLocked
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : aiGeneration.isGenerating
-                  ? 'text-yellow-500 bg-yellow-50 animate-pulse'
-                  : elementVariations.visible
-                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
-                    : 'text-gray-600 hover:bg-gray-100'
-              }`}
-              title={regenLocaleLocked ? 'Switch to the default language to regenerate.' : 'AI text variations'}
+            {/* handleSparkle hits /api/regenerate-element ⇒ ELEMENT_REGENERATION spend.
+                Surface its cost on hover. When disabled (generating/locked) the button
+                swallows pointer events so AppTooltip can't fire — the native title then
+                carries the state message; on the enabled button the native title is
+                dropped so the AppTooltip is the sole hover affordance. */}
+            <AppTooltip
+              label={`AI text variations · ${creditCostHint(CREDIT_COSTS.ELEMENT_REGENERATION)}`}
             >
-              <SparkleIcon />
-            </button>
+              <button
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onClick={handleSparkle}
+                disabled={aiGeneration.isGenerating || regenLocaleLocked}
+                className={`p-1.5 rounded transition-colors select-none ${
+                  regenLocaleLocked
+                    ? 'text-gray-300 cursor-not-allowed'
+                    : aiGeneration.isGenerating
+                    ? 'text-yellow-500 bg-yellow-50 animate-pulse'
+                    : elementVariations.visible
+                      ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                      : 'text-gray-600 hover:bg-gray-100'
+                }`}
+                title={
+                  regenLocaleLocked
+                    ? 'Switch to the default language to regenerate.'
+                    : aiGeneration.isGenerating
+                    ? 'AI text variations'
+                    : undefined
+                }
+              >
+                <SparkleIcon />
+              </button>
+            </AppTooltip>
           </div>
         </div>
       </div>

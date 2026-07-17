@@ -1000,3 +1000,106 @@ exactly those three capabilities (their invoices, their cancellation).
 - `hasBillingAccount` is now on `/api/billing/plan` for every consumer; it is a boolean and leaks no
   Stripe id, but any future consumer must not treat it as "is paying" — it means "has a Stripe customer
   record", which a churned FREE user also has.
+
+---
+
+# Phase 7 — costs-at-action
+
+**Files changed**
+- `src/app/edit/[token]/components/toolbars/ElementToolbar.tsx`
+- `src/app/edit/[token]/components/toolbars/TextToolbarMVP.tsx`
+- `src/app/onboarding/[token]/components/EntryInputStep.tsx`
+
+No other file touched. Presentation-only; no handler/store/selection logic changed, no new
+balance fetcher, no new Material Symbols ligature.
+
+## What changed, per file
+
+### `ElementToolbar.tsx` (:110 variations action → the "Regenerate" button)
+- Added imports: `AppTooltip` (`@/components/ui/tooltip`) + `CREDIT_COSTS` (`@/lib/creditCosts`).
+- Added a module-local trivial helper `creditCostHint(n)` → `Costs N credit[s]` (pluralization
+  only; the number is always the passed-in config value).
+- In the `primaryActions.map`, the `regenerate-copy` button (which reaches
+  `/api/regenerate-element` via `regenerateElementWithVariations`) now gets a `costHint` from
+  `CREDIT_COSTS.ELEMENT_REGENERATION` and is wrapped in `<AppTooltip label={costHint}>` — hover
+  shows "Costs 1 credit". Refactored the button JSX into a `const button` so only the hinted
+  action is wrapped; all other actions render bare, exactly as before.
+- Native `title` on the hinted+enabled button is set to `undefined` so the `AppTooltip` is the
+  sole hover affordance (no double bubble). When the button is disabled (locale-locked) the
+  `AppTooltip` cannot fire — a disabled `<button>` swallows pointer events — so the native
+  `disabledTitle` still carries the "switch language" message. Every other button's `title`
+  behaviour is byte-identical to before.
+
+### `TextToolbarMVP.tsx` (:404 variations action → the AI Sparkle button)
+- Same two imports + the same local `creditCostHint` helper.
+- The Sparkle button (`onClick={handleSparkle}` → `regenerateElementWithVariations` →
+  `/api/regenerate-element`) is wrapped in `<AppTooltip>` whose label is
+  `AI text variations · Costs 1 credit` — preserving the old "AI text variations" description
+  and appending the cost. Cost from `CREDIT_COSTS.ELEMENT_REGENERATION`.
+- Native `title` reworked to fire ONLY in the disabled states (locale-locked → the switch-language
+  message; generating → "AI text variations"), and `undefined` when enabled, so the `AppTooltip`
+  owns the enabled-hover affordance and there is no double bubble. Class names, handlers,
+  `disabled`, `onMouseDown` unchanged.
+
+### `EntryInputStep.tsx` (import/scrape affordance)
+- Added import `CREDIT_COSTS`. **STOCK-styled, not `app-*`** (phase-4 ruling: this wizard step is
+  entirely stock-Tailwind and a lone `app-*` island renders off-palette) — the hint is plain text
+  in the existing `text-xs text-gray-400` helper line, no `AppTooltip`, no `app-*`.
+- Added `const actionCost = normalizedUrl ? CREDIT_COSTS.SCRAPE_WEBSITE : CREDIT_COSTS.UNDERSTAND`
+  — tracks whichever route the submit will hit (URL → `/api/v2/scrape-website`; text →
+  `/api/v2/understand`; both cost 1). The "Takes ~30 seconds" line under the Continue button now
+  reads `Takes ~30 seconds · Costs 1 credit`, pluralized off `actionCost`.
+
+## Decisions + why
+- **Which cost constant each affordance uses:** both editor toolbar variation actions POST to
+  `/api/regenerate-element`, so both use `CREDIT_COSTS.ELEMENT_REGENERATION` (=1). EntryInputStep's
+  submit is dual-route — I bind the hint to the route the CURRENT input selects
+  (`SCRAPE_WEBSITE` when the input normalizes to a URL, else `UNDERSTAND`) rather than hardcoding
+  one, so the number stays correct if the two constants ever diverge (they are both 1 today).
+- **`AppTooltip` in the toolbars, stock text in onboarding** — per the brief: editor toolbars are
+  app chrome (`app-*`/AppTooltip legitimate; the tooltip is a portal-rendered bubble carrying its
+  own `font-app-sans`, not an inline island against the toolbars' stock palette), whereas
+  EntryInputStep is ruled stock. No `app-*` utility was added to any of the three files' own
+  markup.
+- **Section-regen deliberately un-hinted** — no dedicated visible button exists
+  (`MainContent.tsx:302` is a handler only); its cost stays discoverable via the CreditBadge
+  panel + billing view. `MainContent.tsx:308/314` (the `regenerateElement` setTimeout STUB — no
+  network, no spend) was NOT touched.
+- **No dedicated vitest.** Plan step 3 scopes a new test in only if a hint gets its OWN component;
+  these are inline hints, so none was added (adding an `EntryInputStep.test.tsx` / toolbar test
+  would also introduce a file outside this phase's Files-touched list, and the toolbars need the
+  full edit-store + editor-context providers to render). The config-driven criterion is enforced
+  structurally instead: the number is `CREDIT_COSTS.<KEY>` at every site with a header comment
+  saying so, and the phase-3/4 CreditBadge + OutOfCreditsModal fabricated-config probes already
+  fail on a same-value re-inline of the shared config. `IVOC_RESEARCH` (dead constant) is not
+  surfaced anywhere.
+
+## Verification (WORKDIR, all green)
+- `npx tsc --noEmit` — clean, no output.
+- `npm run test:run` — **216 passed | 1 skipped (217) files; 3646 passed | 18 skipped (3664)
+  tests**. No new tests this phase; count rose vs earlier phases from other landed work, none
+  regressed.
+- `npx eslint <the three files>` — **0 errors**; the single warning
+  (`TextToolbarMVP.tsx:328` `exhaustive-deps` on `applyFormatInternal`) is pre-existing and
+  unrelated to this change.
+- `npm run build` — green (published-css + assets + next build; full route table emitted).
+
+## Noticed but deliberately untouched
+- The three isolation guards were not re-run: this phase adds ZERO `app-*` utility to any file's
+  own markup and does not touch `tailwind.config.js`, templates, published renderers, or
+  `public/published.css`. `AppTooltip` is a portal primitive consumed as-is (no restyle), so the
+  published surface is untouched by construction.
+- `EntryInputStep` uses `Loader2`/`brand-accentPrimary` stock styling throughout — matched, not
+  migrated, per the phase-4 ruling.
+- The other live `CREDIT_COSTS` entries (`FULL_PAGE_GENERATION`, `STRATEGY_GENERATION`,
+  `GENERATE_COPY`, `PRIVACY_POLICY_GENERATION`, `OUTREACH_SCRAPE`…) are not surfaced here — this
+  phase covers only the three visible spend affordances the plan named.
+
+## Open risks
+- **Same-value re-inline is not directly pinned at these three sites** (no cheap standalone test
+  without an out-of-scope file / heavy provider setup). Mitigation: each number is
+  `CREDIT_COSTS.<KEY>` with a load-bearing comment, and the config module itself is guarded by the
+  CreditBadge/modal probes elsewhere. Low risk, documented per the run's re-inline caution.
+- Native `title` + `AppTooltip` coexistence on the toolbar buttons is resolved by only ever
+  populating one at a time (title on disabled, AppTooltip on enabled). If a future edit re-adds a
+  static enabled-state `title`, both bubbles would show — noted so it isn't reintroduced.
