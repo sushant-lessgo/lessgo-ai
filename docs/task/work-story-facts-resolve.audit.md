@@ -112,3 +112,51 @@ No `@/lib/security` exports beyond `createSecureResponse` + `assertProjectOwner`
 - **`getWorkFacts` reads `storedBrief.facts`** — this assumes the stored Brief persists facts under the same `facts.work` shape the client used to post. The happy-path test uses the real `kundiusBrief` fixture, but a **real** work project's persisted `Project.brief` shape is only proven by the founder's live smoke at the merge gate (which is exactly the plan's decision gate: was-400 → now-regenerates). If a real stored Brief lacks `facts.work`, the symptom moves from "always 400" to "clean 400 with the same message" — same status, so the smoke is the only discriminator.
 - The 400 message still says `brief.facts.work` although `brief` is no longer a client input. Kept verbatim to preserve the exact error shape per the plan; mildly misleading to a future reader.
 - Phase 2 still sends a dead `brief` body field until it lands (harmless — stripped).
+
+---
+
+# Phase 2 — client/store cleanup + action typing + guard test
+
+Branch: `feature/work-story-facts-resolve` (verified before any edit). Files-touched respected exactly — no file outside the four was modified.
+
+## Files changed
+- `src/hooks/editStore/aiActions.ts`
+- `src/types/store/actions.ts`
+- `src/app/edit/[token]/components/StoryInterviewPanel.tsx`
+- `src/hooks/editStore/storyInterviewGuard.test.ts`
+
+## Per-file changes
+
+### src/hooks/editStore/aiActions.ts
+- Dropped the third `brief: unknown` param from `regenerateStoryFromInterview` (signature now `(sectionId, interviewAnswers)`).
+- Dropped `brief` from the fetch body (now `{ tokenId, sectionId, interviewAnswers }`).
+- Deleted the stale NOTE (the phase-5 field→facts writeback-gap comment).
+- **Scope discipline:** the file-wide `set((state: EditStore) => …)` and `get() as EditStore` casts were LEFT UNTOUCHED (they are the whole-file pattern, not story-specific). The `about`-prefix section guard (`sectionId.split('-')[0] !== 'about'`) is untouched.
+
+### src/types/store/actions.ts
+- Added `regenerateStoryFromInterview: (sectionId: string, interviewAnswers: { origin: string; moment: string; belief: string }) => Promise<void>;` to **`GenerationActions`** (the AI-owning interface), per the settled ruling — NOT `ContentActions`.
+- **Composition proof:** `src/types/store/index.ts:212` shows `export interface EditStore extends … GenerationActions …`. `tsc --noEmit` is green with the panel accessing the action off `store.getState()` (typed `EditStore`) with no cast — proving the action is on the store surface.
+
+### src/app/edit/[token]/components/StoryInterviewPanel.tsx
+- Removed the `brief?: unknown` prop from `StoryInterviewPanelProps` and the destructure.
+- Removed the `brief` third arg at the call site.
+- Replaced `(store?.getState() as any)?.regenerateStoryFromInterview` with the now-typed `store?.getState().regenerateStoryFromInterview` (no `as any`).
+- Deleted the stale NOTE header block (missing-brief gap).
+- `MainContent.tsx` untouched (it never passed `brief`).
+
+### src/hooks/editStore/storyInterviewGuard.test.ts
+- Dropped the `{}` third arg at both call sites (would be a compile break otherwise).
+- Fetch-URL assertion kept; the test does not assert the fetch body, so no body-shape update needed.
+
+## Verification (actual output)
+- `npx tsc --noEmit` — clean, no output (load-bearing check: typed action compiles at the panel with no cast; `GenerationActions` in store type).
+- `npm run test:run -- src/hooks/editStore/storyInterviewGuard.test.ts` — 1 file, 2 tests passed.
+- `npm run test:run` (full) — 220 passed | 1 skipped (221 files); 3789 passed | 18 skipped (3807 tests). No cross-file fallout.
+- `npm run lint` — no errors; only pre-existing `<img>`/exhaustive-deps warnings. Bare-`useEditStore` ESLint ban stays green.
+
+## Deviations
+None.
+
+## Open risks
+- Route 400 message still reads `brief.facts.work` (client no longer sends `brief`) — cosmetic, inherited from Phase 1.
+- Live founder smoke at the merge gate remains the decision gate (was-400 → now-regenerates).

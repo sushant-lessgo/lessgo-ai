@@ -279,13 +279,9 @@ export function createAIActions(set: any, get: any) {
     // Additive only — existing actions are unchanged. The route validates the
     // returned story against workElementContract.about before responding, so only
     // the `about` (story) section is affected; proof/testimonials are untouched.
-    // NOTE: `brief` (with facts.work) is supplied by the caller — the editStore
-    // does not yet carry facts.work (phase-5 field→facts writeback gap); live
-    // wiring of that is a documented follow-up (see audit).
     regenerateStoryFromInterview: async (
       sectionId: string,
       interviewAnswers: { origin: string; moment: string; belief: string },
-      brief: unknown
     ) => {
       if (regenBlockedForLocale(get)) return; // i18n-phase-1 (3a) regen guard
       // work-copy-engine phase 6 (review-fix) — defensive target guard. This
@@ -322,7 +318,6 @@ export function createAIActions(set: any, get: any) {
             tokenId: currentState.tokenId,
             sectionId,
             interviewAnswers,
-            brief,
           }),
         });
 
