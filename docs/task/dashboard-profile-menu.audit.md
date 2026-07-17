@@ -93,3 +93,11 @@ is the known fresh-worktree/stale-types condition, unrelated to this phase's cha
 - No automated e2e for the popover (deliberate, per plan §E2E: a real logout click would destroy the
   shared authed Playwright session). Coverage is the 4-gate batch + the P0 founder logout click-test
   + the manual a11y checklist.
+
+---
+
+## Impl-review (standard tier, whole-diff) — VERDICT: ship
+
+- All 10 acceptance criteria verified; scope = only the 2 allowed files; frozen foundation untouched; single Popover root (no double-mount); app-* tokens only; `UserButton` removal import-only.
+- Green gate re-run independently by reviewer: tsc 0, lint 0, test:run 4064 passed/18 skipped, build 0.
+- Non-blocking: (1) `logout` glyph unverified in shipped subset font → covered by P0 founder logout click-test, one-line swap if it renders as text; (2) trigger uses `rounded-md` (plan-sanctioned) → visual merge gate.

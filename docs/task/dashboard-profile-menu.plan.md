@@ -16,7 +16,7 @@ frozen popover foundation (`AppPopoverMenu` layer) — no new primitives.
 
 ## Progress log
 
-- phase 1 profile popover + logout: pending
+- phase 1 profile popover + logout: done (commit b856934c, impl-review loops 1 → ship)
 
 ## E2E decision (deterministic-QA rule)
 
