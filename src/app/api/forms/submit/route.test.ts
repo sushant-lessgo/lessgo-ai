@@ -186,7 +186,13 @@ describe('/api/forms/submit — server-side owner derivation (secrets-forms-secu
   it('scopes the form-config lookup to the page’s OWN project', async () => {
     await POST(makeReq(BODY));
 
-    expect(db.project.findUnique).toHaveBeenCalledWith({ where: { id: 'proj_1' } });
+    // The `where` clause is the security-relevant half: the lookup must be pinned to
+    // page.projectId (closes the same-owner cross-project confused-deputy). The `select`
+    // is an incidental wire-cost narrowing — kept here only because this is an exact match.
+    expect(db.project.findUnique).toHaveBeenCalledWith({
+      where: { id: 'proj_1' },
+      select: { content: true },
+    });
   });
 
   it('page with a null projectId → skips the form-config lookup, still stores the lead', async () => {

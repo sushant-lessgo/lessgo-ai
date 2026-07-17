@@ -450,3 +450,47 @@ None.
 
 ### Open risks
 None. Comment/prose-only; no runtime surface touched.
+
+---
+
+## Post-merge — project query narrowed
+
+**Files changed**
+- `src/app/api/forms/submit/route.ts` (modified)
+- `docs/task/secrets-forms-security.audit.md` (appended — this entry)
+
+### `src/app/api/forms/submit/route.ts`
+Added `select: { content: true }` to the `prisma.project.findUnique` form-config
+lookup (~line 165). Only `project.content` is ever read (`content.forms[formId]`);
+the query previously fetched every column.
+
+**Why:** an independent uncommitted change in the main checkout made exactly this
+optimization on the OLD `findMany` query that this branch replaced (narrowing
+`include: { token: true }` → `select: { content: true }` — the joined token row and
+the other JSON columns themeValues/computedDesign/brief/aiBaseline are pure wire
+cost on every submission). This branch deleted that query, so the intent is carried
+forward onto its replacement.
+
+No logic, `where` clause, null-`projectId` guard, or error handling changed.
+Form-config resolution reads `content.forms[formId]` identically.
+
+### Deviations
+None in the code. **BLOCKED before completion**, see below.
+
+### Test results
+- `npx tsc --noEmit` → clean.
+- `npm run test:run` → **1 failed | 3593 passed | 18 skipped**.
+  Failure: `src/app/api/forms/submit/route.test.ts` >
+  "scopes the form-config lookup to the page's OWN project" — asserts
+  `expect(db.project.findUnique).toHaveBeenCalledWith({ where: { id: 'proj_1' } })`,
+  an exact-match assertion that the added `select` key breaks.
+  This is a stale assertion, not a behavior regression.
+- `git diff --stat` → only `src/app/api/forms/submit/route.ts` (+ this audit).
+
+### Open risks
+`route.test.ts` is NOT on this phase's Files-touched list (`route.ts` ONLY), so it was
+left unedited and the suite is RED. Orchestrator must decide: authorize the one-line
+test update (`{ where: { id: 'proj_1' }, select: { content: true } }`) or revert this
+change. Test intent (lookup scoped to the page's own project) is unaffected either way.
+
+**RESOLVED (orchestrator-authorized follow-up):** `src/app/api/forms/submit/route.test.ts` — the stale assertion at ~line 189 was updated to match the real query (`{ where: { id: 'proj_1' }, select: { content: true } }`); intent preserved (the `where` clause still pins the lookup to `page.projectId` — the security property; a comment now marks `select` as incidental). Suite fully green: **3594 passed | 18 skipped | 0 failed**; `npx tsc --noEmit` clean.

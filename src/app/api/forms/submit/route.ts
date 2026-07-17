@@ -164,6 +164,10 @@ async function formSubmitHandler(request: NextRequest) {
       if (page.projectId) {
         const project = await prisma.project.findUnique({
           where: { id: page.projectId },
+          // Only `content` is read below. The other JSON columns
+          // (themeValues/computedDesign/brief/aiBaseline) are pure wire cost on
+          // every submission.
+          select: { content: true },
         });
         const content = project?.content;
         if (content && typeof content === 'object') {
