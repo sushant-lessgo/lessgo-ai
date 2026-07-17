@@ -11,7 +11,7 @@ The work story-interview panel is 100% dead: `/api/audience/work/regenerate-stor
 ## Progress log
 
 ```
-phase 1 route server-resolves facts.work + route tests: pending
+phase 1 route server-resolves facts.work + route tests: done (commit 652b68fc, review loops 1, verdict ship)
 phase 2 client/store cleanup + action typing + guard test: pending
 final gate full green + live smoke (HUMAN GATE): pending
 ```
