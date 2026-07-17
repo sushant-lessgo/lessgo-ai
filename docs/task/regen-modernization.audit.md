@@ -230,7 +230,7 @@ Verbatim from `route.ts` (phases 4–5 reuse this order; the numbered comments a
 
 **Removed (M16 slice):** the route's private `callAIProvider` copy, the hardcoded `gpt-3.5-turbo`/`Mixtral-8x7B` strings, the raw `fetch` to OpenAI/Nebius, the inline generic variations prompt (old `:70-81`), the line-splitting parse fallback, and BOTH filler-copy exits (old `:93-104` provider-failure and `:147-167` catch-all). This route imported no legacy `buildPrompt`/`parseAiResponse` modules, so there was nothing legacy to strip for the phase-6 sweep.
 
-### New helper: `readPersistedLayoutState(content)` (exported from the route)
+### New helper: `readPersistedLayoutState(content)` (module-local to the route — see the phase-4 addendum; it was briefly `export`ed, which is illegal in an App Router route module)
 
 D4 says element scope reads the section's layout from PERSISTED state (the element caller sends no layout). The persisted `content.finalContent` is an `export()` payload, and its layout state lives in **four** places — so the helper merges all of them: the body-only home slice (top-level `sections`/`sectionLayouts`), the legacy `layout.*` nesting (`persistenceActions.ts:113-114` accepts both), every entry of the multi-page `pages` map, and the **shared `chrome` header/footer entries** — which carry `{id, layout}` and live OUTSIDE `sections` (`pageHelpers.ts:47-68`). Missing them would have made header/footer element regen a spurious 422. Legacy projects whose `content` IS the page data (no `finalContent` key) fall back to `content` itself, mirroring `loadDraft/route.ts:120-125`.
 
@@ -277,3 +277,123 @@ M5 and M6 are the two separate 422 codes the phase-2 carry-forward warned about;
 4. **`aiActions.ts:451` `regenerateElement` is a STUB that never calls this route** (a `setTimeout(1500)` that only stamps `aiMetadata`). The live caller is `regenerateElementWithVariations` (`:493`, default 5 variations). If pilot QA "regenerates an element" through a UI path wired to the stub, it will pass without touching the new code — make sure QA drives the **variations** flow (the picker showing current + 5 alternatives).
 5. **Cost per failed request is now up to 3 paid `copy` calls** (MAX_RETRIES=2) charged to nobody — charge-on-success means a hard-failing element burns real OpenAI spend at 0 credits. Intended (never charge for filler), but worth knowing.
 6. Element regen rides the **`copy` endpoint** (product/service) / **`work-copy`** (atelier) — the same model tier as first-gen (D5), at 1 credit.
+
+---
+
+## Phase 4 — rebuild `regenerate-section` (ENGINE SWAP)
+
+**Files changed**
+- `src/app/api/regenerate-section/route.ts` (rewritten)
+- `src/app/api/regenerate-section/route.test.ts` (new — 19 tests)
+- `src/hooks/editStore/aiActions.ts` (modified — the owed ~3-line honest-error fix, at TWO call sites)
+- `src/hooks/editStore/aiActionsErrorSurfacing.test.ts` (new — 4 tests; see Deviation 3)
+- `docs/task/regen-modernization.audit.md` (this section)
+
+> NOT touched: `src/modules/generation/scopedRegen.ts` — no primitive gap surfaced. Section scope, both 422 taxonomies and the work-contract narrowing covered the route with zero changes.
+> Also modified in `git status`: `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` — the same CRLF-only vitest artifact phases 1–3 recorded. Not authored here. `e2e/fixtures/generated/` untracked = the founder's gate-1 `CAPTURE=1` output (gitignored).
+
+### The canonical sequence, exactly as implemented (phase 3's order, verbatim)
+
+1. `requireAICredits(req, UsageEventType.SECTION_REGEN, CREDIT_COSTS.SECTION_REGENERATION /* 2 */)` — check only.
+2. Zod body validation — **`tokenId` stays in the BODY** (caller D contract): `{sectionId, tokenId, userGuidance?, currentContent?, sectionType?, layout?}`. Legacy's hand-rolled `if (!sectionId || !tokenId)` became a real schema; still a 400.
+3. `isMock = NEXT_PUBLIC_USE_MOCK_GPT === 'true' || tokenId === DEMO_TOKEN`; `if (!isMock)` → `assertProjectOwner(userId, tokenId, { action: 'regenerate-section' })` (this route already had it — kept unchanged).
+4. **Project load** wrapped in `if (tokenId !== DEMO_TOKEN)` (the precedent this route itself set) → `findUnique({ select: { id, audienceType, templateId, content, brief, title, inputText } })`; **`templateId` + `brief` added** (engine dispatch + work facts). `if (!project && !isMock)` → **404**. This REPLACES legacy's "swallow the DB error and prompt without context" leniency — legacy's `try/catch` around the fetch is gone too, so a DB failure is now a 500 rather than a silently context-free paid call.
+5. **Mock short-circuit BEFORE engine dispatch** → `resolveMockEngine(project)` + local mock content, `creditsUsed: 0`, `isMock: true`, `meta.engine`.
+6. `resolveCopyEngine(project)` — real path only. `UnsupportedProjectError` → **422 `unsupported_project`**, no AI call, no charge.
+7. `generateScopedCopy({ scope: {kind:'section', sectionId}, layoutState: {sections:[sectionId], sectionLayouts:{[sectionId]: layout}} /* D4: from the REQUEST */, currentContent: JSON.stringify(currentContent), userGuidance })`. `ScopeInputError` → **422 `invalid_scope`** + honest message; `ScopedGenerationError` → **500 `generation_failed`, recoverable** — both BEFORE the charge.
+8. `consumeCredits(userId, SECTION_REGEN, 2, …)` — success only; failure `logger.warn` only.
+9. Respond `{ content, sectionId, originalContent, regenerationType:'section', aiMetadata?, creditsUsed, creditsRemaining, meta }` via `createSecureResponse`; `withAIRateLimit`.
+
+**Engine/AI internals removed (M16 slice + the phase-6 unblock):** `buildSectionPrompt` (`@/modules/prompt/buildPrompt`), `parseAiResponse`, `generateMockResponse` (`@/modules/prompt/mockResponseGenerator`) — **all three legacy imports gone**. Confirmed the brief's suspicion: the `generateMockResponse` import was **unused** (the route always called the local `generateMockSectionContent`); `parseAiResponse` was **also imported but never called** (the route hand-rolled its own `JSON.parse` + type-guessing + key:value line-splitting parser). Also deleted: the private `callAIProvider` copy, the `gpt-3.5-turbo`/`Mixtral-8x7B` strings, the raw OpenAI/Nebius `fetch`, the two-provider fallback, and **all three filler-copy 200 exits** (providers-failed `:161`, parse-fallback `:238`, and the catch-all `:312` that re-read the request body to serve mock content on ANY server error).
+
+**Preserved deliberately:** the proof-truth real-testimonial re-injection block (`listTestimonialsByOwner` → `injectRealTestimonials`) and its `aiMetadata.realProof` provenance field — a live acceptance criterion of another feature, out of this phase's remit to change. It is now gated on `engine !== 'work'` (work injects praise inside `parseWorkCopy`, per scopedRegen) and on `project?.id`, mirroring the legacy `projectData &&` guard.
+
+**Response shape:** `pickSectionElements(result.sections, sectionId)` resolves the model's section-TYPE key (what the builders' `uiblocks` carry), then the raw `sectionId`, then the single key if the scope produced exactly one. Values pass through in their generated shape (`string | string[] | object[]`) — **not** re-wrapped in legacy's `{content, type, isEditable, editMode}` envelope. The store's merge loop (`aiActions.ts:147-171`) accepts `string | {content,type}` and is shape-preserving; keeping strings as strings is what that loop wants (the envelope existed only to feed a parser that is now gone). A contract test asserts every emitted value is a string / array / `{content,…}`.
+
+### The `aiActions.ts` fix (R6.3) — and how I verified it reaches the caller
+
+Two call sites, both minimal, error-surfacing only — **no request/response contract altered, no other action touched**:
+- **Element caller** (`:556`, the one the brief named): was `throw new Error("API error: " + response.status)` with the body DISCARDED. Now reads the body and throws `errorData?.message || errorData?.error || "API error: " + status`.
+- **Section caller** (`:113-116`): already read the body but threw `errorData.error` — the **machine CODE**. For the quote band that renders "**invalid_scope**", which is no more honest to a user than `API error: 422`. Now prefers `message`, falls back to `error`. (In-scope judgment call — Deviation 1.)
+
+Verified by `aiActionsErrorSurfacing.test.ts`, which drives the **REAL** token-scoped store (`createEditStore`) with a stubbed `fetch` returning the exact 422 body the rebuilt routes emit, and asserts the honest text lands in `aiGeneration.errors` (the array the editor renders) — plus explicit negative assertions that it is NOT `'invalid_scope'` and NOT `'API error: 422'`. Both mutation-proven (M9/M10). A body-less 500 still degrades to `API error: 500` (no crash); an `{error}`-only 403 still surfaces `Access denied`.
+
+### The atelier `quote` band, end-to-end (R6.3)
+
+`quote` is a DEFAULT atelier home section (`product/pageArchetypes.ts:141`) with a real block but **no `workElementContract` entry**. Traced and test-pinned end to end:
+1. Editor → `POST /api/regenerate-section` with `sectionId: 'quote-…'`.
+2. Route: gates pass → project loads → `resolveCopyEngine` → `work` → `generateScopedCopy` → `narrowWorkContractMap` → `resolveWorkSchema('quote')` = null → `ScopeInputError('No work element contract for section "quote"')` — **before any AI call, before any charge**.
+3. Route maps it to **422 `invalid_scope`** with `message: "This section isn't AI-written, so it can't be regenerated: No work element contract for section \"quote\""` (+ the machine `error` code + `detail` for logs).
+4. `aiActions.ts` now surfaces that **message** (not the code) → `aiGeneration.errors` → the editor's existing error path. Not a spinner, not filler, not a silent drop.
+
+**This is a VISIBLE behavior change for Kundius**: today's legacy route answers a quote-band regen with hardcoded "Section Title / This is placeholder content…" mock filler (the `default` mock template) at 2 credits. It now honestly refuses at 0 credits. Per R6.3 that is the intended direction; the founder should still expect the report. **Residual (already carried to phase 5):** an in-toolbar *disabled+greyed* control with a tooltip is a UI change — this phase delivers the honest message on ATTEMPT, not a pre-emptive disabled state.
+
+### Tests — per-group MUTATION results (every probe run, then reverted)
+
+Mocked: module boundaries ONLY (planCheck / creditSystem / rateLimit / security / prisma / testimonials repo / **aiClient**). **The phase-2 primitive runs FOR REAL.** Mocks hand-written from the CONTRACT: product = TerminalHero's REQUIRED `headline`/`lede`/`cta_text` (`product/elementSchema.ts:82-84`, read by hand — my first draft used `subheadline`, which the real contract does not require, and the suite correctly rejected it); atelier = `workElementContract.about` = `heading`/`bio`, **never** the layout vocabulary.
+
+| # | Mutation (behavior reverted) | Result | Group proven discriminating |
+|---|---|---|---|
+| M1 | `if (!isMock)` → `if (true)` around `assertProjectOwner` | **2 failed** | demo-token + env-mock sequence |
+| M2 | `if (tokenId !== DEMO_TOKEN)` → `if (true)` around the project fetch | **1 failed** | demo-token "NO project fetch" |
+| M3 | `if (!project && !isMock)` → `if (false)` (404 branch removed) | **1 failed** | unknown-token → 404 |
+| M4 | `resolveCopyEngine(project)` inserted BEFORE the mock short-circuit (the D2 order regression) | **4 failed** | the whole sequence group |
+| M5 | `if (err instanceof UnsupportedProjectError)` → `if (false)` | **2 failed** | writer + ecommerce → 422 |
+| M6 | `if (err instanceof ScopeInputError)` → `if (false)` (the 2nd 422 code) | **2 failed** | **atelier `quote` band** + unknown-section honesty |
+| M7 | `consumeCredits` inserted before the generation-failure exits | **6 failed** | every no-charge assertion |
+| M8 | `content: sectionContent` → `content: {}` | **3 failed** | caller-contract group (incl. atelier `bio`) |
+| M9 | element caller reverted to discarding the body (`API error: ${status}`) | **1 failed** | element honest-message test |
+| M10 | section caller reverted to `errorData.error` (the machine code) | **1 failed** | section honest-message test |
+
+Not separately mutated (would require editing `scopedRegen.ts`, out of scope): engine-aware work narrowing — already mutation-proven in phase 2's fix round, and pinned HERE by construction, because the atelier tests' AI mock speaks `workElementContract` vocabulary, so a layout-keyed narrowing regresses them to 3 calls + 500. The "empty required element → retried, 3 calls, no charge" test independently pins that validation is real (an always-pass validator makes it a 1-call 200).
+
+### Deviations from the plan (and why)
+
+1. **The `aiActions.ts` fix touched TWO call sites, not one.** The brief named the element caller (`:556-558`). But the atelier `quote` band's 422 arrives through the **section** caller (`:113-116`), which read the body yet threw `errorData.error` = `'invalid_scope'`. Leaving it would have shipped R6.3's headline case still unrenderable. Conservative in-scope choice: prefer `message`, keep `error` as the fallback — same file, error-surfacing only, request/response contract untouched.
+2. **Mock content is generated locally, NOT via a `mockResponseGenerator{Product,Service,Work}` sibling** (plan step 3 asked for the siblings). Same reason phase 3 recorded, same judgment: the siblings emit WHOLE-PAGE copy and require strategy / work-facts inputs the demo token (`project === null`) has no honest source for. `resolveMockEngine(project)` **is** still called (it is the seam M4 guards) and reported as `meta.engine`; only the string content is local, preserving legacy's mock output byte-for-byte. **Phase 6 impact: none** — the legacy `mockResponseGenerator.ts` import is gone from this route either way, which is what the deletion sweep needed.
+3. **A new test file, `aiActionsErrorSurfacing.test.ts`.** The brief required "a test that the error BODY reaches the caller" and no `aiActions` test file existed. Named narrowly so it never grows into a general aiActions suite.
+4. **404 conditioned on `!isMock`, not `!project`** — identical to phase 3 (env-mock + unknown token must not 404).
+5. **No `maxTokens` override.** Section scope can legitimately produce a large collection; the 8192 default stands (element scope's 2048 was a phase-3 choice about one short field).
+6. **Legacy's DB-error `try/catch` removed** (sequence step 4). A DB failure now surfaces as a 500 instead of buying a context-free paid AI call. Strictly better; noted because it is a behavior change the plan did not enumerate.
+
+### Green gate (actual output, run in WORKDIR)
+
+- `npx tsc --noEmit` → **ONE error, and it is NOT the expected pre-existing one**:
+
+  ```
+  .next/types/app/api/regenerate-element/route.ts(8,13): error TS2344: Type 'OmitWithTag<typeof import(".../src/app/api/regenerate-element/route"), "POST" | "config" | … | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+    Property 'readPersistedLayoutState' is incompatible with index signature.
+      Type '(content: unknown) => LayoutState' is not assignable to type 'never'.
+  ```
+
+  The baseline `src/app/page.tsx(6,26) founder.jpg` error is **GONE** — a `.next/` now exists in this worktree (the founder's gate runs built it), so `next-env.d.ts` / `.next/types` finally resolve image modules. That same `.next/types` presence is what surfaces the error above. **See the 🚩 below — it is phase 3's, not mine, and I did not touch it.** Zero errors in any phase-4 file.
+- `npm run test:run` → **Test Files 213 passed | 1 failed | 1 skipped (215); Tests 3659 passed | 1 failed | 18 skipped (3678)**. Baseline 3637 + 23 new = 3660 ✔. The single failure is a **flake unrelated to this diff**: `src/modules/businessTypes/pipelineGuards.test.ts > no 'isManufacturerFlow' anywhere in src` — a whole-`src` filesystem walk that exceeded the 5s default timeout under full-suite IO load. **Re-run in isolation: `Test Files 1 passed; Tests 3 passed (3.70s)`.** It reads files with `fs.readFileSync`; nothing in phase 4 changes its inputs.
+
+### 🚩 BLOCKER FOUND OUTSIDE MY FILES-TOUCHED — reported, NOT fixed
+
+`src/app/api/regenerate-element/route.ts:75` does `export function readPersistedLayoutState(...)`. **Next.js App Router route modules may only export route handlers + a fixed config allow-list**; any other export fails the generated `.next/types` constraint. Latent since phase 3, invisible only because the worktree had no `.next/`. **It will fail `npm run build`** (the plan's phase-6 full gate). Fix is one word — drop the `export` (nothing imports it; its own route is the only consumer) or move it to a plain module. **I did not touch it** (not in phase 4's Files-touched). Orchestrator: assign it as a one-line fix in phase 5/6, or as a quick phase-3 amendment.
+
+### Open risks
+
+- **Prompt thinness is now live on a customer path** (R6.1/R6.2): section regen builds the full engine prompt with `bigBenefit`/`uniqueMechanism`/`reasonToBelieve`/`ourPosition` = `''`. Judged against "≥ today's legacy regen": today's legacy section prompt is a ~15-line generic template carrying `Project Title` + `Input Text` and **no element contract at all**, so the modern path is strictly richer in every dimension except the (nonexistent) persisted strategy. Still — real-LLM quality is a founder gate, not a test.
+- **A hard-failing section now burns up to 3 paid `copy`/`work-copy` calls at 0 credits** (MAX_RETRIES=2, charge-on-success). Same intentional trade phase 3 recorded; section-scope calls are bigger.
+- **Kundius will see the quote-band refusal** on her next quote regen (see above). Honest, but new.
+- **Collections in the merge loop:** an array value landing on a non-empty array slot is *skipped* by the store's merge (`aiActions.ts:162-166`, "never clobber a collection with scalar copy" — arrays fall through every branch). Pre-existing store behavior, not introduced here; noted because the new route emits real collections (e.g. hero `stats`) where the legacy route emitted only guessed scalars, so it becomes newly observable.
+
+---
+
+## Phase 4 addendum — illegal App Router export FIXED (assigned follow-up to the blocker above)
+
+**Files changed:** `src/app/api/regenerate-element/route.ts` (one word), `docs/task/regen-modernization.audit.md`.
+
+Resolves the 🚩 blocker recorded above. `src/app/api/regenerate-element/route.ts:75` went from `export function readPersistedLayoutState(...)` to `function readPersistedLayoutState(...)`.
+
+- **Why it's illegal:** App Router route modules may only export route handlers (`GET`/`POST`/…) plus a fixed config allow-list. Next generates `.next/types/app/**/route.ts` asserting every *other* export is `never`; this one produced `TS2344 … Type '(content: unknown) => LayoutState' is not assignable to type 'never'`.
+- **Why it was masked:** the worktree had never been built, so no `.next/types` existed and route-type checking never ran. The founder's `CAPTURE=1` gate runs created `.next/`, which surfaced it.
+- **Why dropping `export` was safe (not a move/redesign):** `readPersistedLayoutState` had **zero importers** — grep across `src/` found exactly two hits, the definition (`:75`) and its single in-file call site (`:242`). The `export` was dead surface area.
+- **`regenerate-section/route.ts` (phase 4) does NOT have this problem.** Audited both route files against the App Router rule: each exports only `dynamic` (allowed config) + `POST` (handler). No other non-handler exports in either file.
+
+**Green gate (actual output, run in WORKDIR):**
+- `npx tsc --noEmit` → **0 errors.** The old `src/app/page.tsx(6,26)` `founder.jpg` baseline error is gone, as predicted — `.next/` now exists so Next's image-module types resolve.
+- `npm run test:run` → **214 files passed | 1 skipped; 3660 tests passed | 18 skipped**, 83.8s. No `pipelineGuards.test.ts` flake this run. (Count is 3660 vs the 3659 baseline quoted to me — one extra test in the suite; no test files were touched in this fix, so this is baseline-count drift, not a regression.)
+- `npm run build` → **SUCCESS** (first-ever build in this worktree; full `build:published-css` → `build:assets` → `next build`, route table emitted, no errors). This is the real proof the illegal export is gone and the phase-6 / merge build gate will pass. No other pre-existing breakage surfaced.

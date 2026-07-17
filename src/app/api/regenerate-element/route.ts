@@ -72,7 +72,7 @@ const RegenerateElementRequestSchema = z.object({
  * multi-page `pages` map, and the shared `chrome` header/footer entries
  * (which live OUTSIDE `sections` — `pageHelpers.ts:47-68`).
  */
-export function readPersistedLayoutState(content: unknown): LayoutState {
+function readPersistedLayoutState(content: unknown): LayoutState {
   const sections: string[] = [];
   const sectionLayouts: Record<string, string> = {};
 

@@ -111,8 +111,13 @@ export function createAIActions(set: any, get: any) {
         });
         
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to regenerate section');
+          const errorData = await response.json().catch(() => null);
+          // regen-modernization phase 4 (R6.3): prefer the server's honest
+          // `message` over the machine `error` CODE — the atelier `quote` band
+          // 422s `invalid_scope`, which alone tells the user nothing.
+          throw new Error(
+            errorData?.message || errorData?.error || 'Failed to regenerate section'
+          );
         }
         
         const data = await response.json();
@@ -554,7 +559,13 @@ export function createAIActions(set: any, get: any) {
         });
 
         if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+          // regen-modernization phase 4 (R6.3): surface the SERVER's honest reason
+          // (e.g. "This element isn't AI-written…" on a 422) instead of a bare
+          // `API error: 422`. A why-message the user never sees isn't a why-message.
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            errorData?.message || errorData?.error || `API error: ${response.status}`
+          );
         }
 
         const result = await response.json();
