@@ -12,7 +12,10 @@
 ## Progress log
 
 - phase 1 page swap + profileAppearance: done (commit 28cd9808, standard tier — no per-phase review) | pre-existing unrelated founder.jpg TS2307 in src/app/page.tsx flagged (out of scope)
-- phase 2 e2e regression spec: pending
+- phase 2 e2e regression spec: done (commit 87be5c79, spec ran+passed 2/2, testMatch registered)
+- whole-diff impl-review (standard tier): SHIP (1 loop, 0 blocking). Non-blocking: (1) e2e cl-userProfile selector only exercises on preview (safe-fail), (2) notifications is a JSX comment carrying the exact TODO. Gates green: tsc 0 · lint 0 (pre-existing warns) · test:run 4035 pass · build ✓ (/dashboard/settings 391B).
+- **TARGET = `next`, NOT main** (founder override of spec — release-train: main FROZEN beta RC, features integrate on next). Branch kept clean off c75e40ec = ONLY the 2 account-settings commits; a temporary main catch-up merge was made then STRIPPED (do-not-fold-main-in). c75e40ec is already an ancestor of next → merging this branch adds account-settings ONLY, no qa-0718.
+- **Next-integration = ORCHESTRATOR's job** (release-train coordination). Handoff written to shared mailbox. This session does NOT merge to next. Orchestrator must re-green on the merged next tree (next carries editor-route-consolidation middleware/XFO; our files don't overlap, expected clean).
 
 ## Invariants (do NOT touch — cite, don't edit)
 
