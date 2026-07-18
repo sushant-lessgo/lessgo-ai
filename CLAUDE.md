@@ -37,6 +37,8 @@ Non-trivial features run through a delegation pipeline (agents in `.claude/agent
 
 Usage: `/discuss <idea>` → agree → it writes `docs/task/<feature>.spec.md` → run `/feature docs/task/<feature>.spec.md`. Artifacts (`spec`/`plan`/`audit`) live in `docs/task/`.
 
+**Bugs** go through the `/bugfix` skill instead (batch per QA round): bug list → per-bug `bug-investigator` (evidence-based root cause) → `implementer` (fix + mandatory regression test) → tier-gated `impl-reviewer` → one `fix/<round>` branch → preview re-test gate → merge gate.
+
 **Branch rules:** all pipeline work happens on `feature/<feature>` (created by the orchestrator at start; subagents hard-stop if `git branch --show-current` mismatches — they never checkout/switch). Per-phase commits land on the feature branch only. Merge to main is a **human gate** (plain merge, no squash); the user pushes manually; then `deploy-watcher` (Haiku/low) polls the Vercel deployment — green → branch deleted, failure → condensed build-log summary. The pipeline never commits on main and never pushes.
 
 ## Architecture Overview
