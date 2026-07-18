@@ -290,3 +290,21 @@ under `npm run test:e2e`.
   mode downstream is a silently blank same-origin iframe (phase 4).
 - The legacy `/preview/:token+` SAMEORIGIN rule is intentionally retained this phase (phase 5
   retires it alongside the reveal move).
+
+### Orchestrator curl -I verification (RUN 2026-07-18, worktree dev on :3022)
+Deterministic half of the XFO human gate — PASSED. Exactly one XFO header per URL
+(headers apply even on 404, proving path-match is route-existence-independent):
+
+| URL | X-Frame-Options |
+|---|---|
+| `/edit/{t}/preview` | SAMEORIGIN ✓ |
+| `/edit/{t}` | DENY ✓ |
+| `/edit/{t}/preview/extra` | DENY ✓ (subtle `$`-anchor case — framable surface NOT widened) |
+| `/preview/{t}` | SAMEORIGIN ✓ |
+| `/` | DENY ✓ |
+| `/dashboard` | DENY ✓ |
+
+Mutual exclusivity confirmed at runtime. Founder's remaining confirm = "iframe actually
+renders, not silent-blank" — folds into phase-4 e2e + merge-gate preview QA (decision:
+consolidate the 3 founder-facing gates at the merge gate, since reveal/publish/pilot
+sign-off need the QA preview deploy which the pipeline can't produce mid-run without a push).
