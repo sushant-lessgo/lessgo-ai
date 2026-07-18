@@ -42,7 +42,7 @@ export function FounderAuthLayout({
   children,
 }: FounderAuthLayoutProps) {
   return (
-    <div className="app-chrome flex min-h-screen w-full bg-app-surface">
+    <div className="app-chrome flex min-h-screen w-full overflow-x-hidden bg-app-surface">
       {/* ================= LEFT: form column ================= */}
       <div className="flex w-full flex-none flex-col px-8 py-11 lg:w-[570px] lg:px-[52px]">
         <Link href="/" className="mb-auto self-start">
