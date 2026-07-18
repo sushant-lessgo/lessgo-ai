@@ -109,6 +109,13 @@ export interface WorkGroupInput {
   photos?: WorkGroup['photos'];
   /** Second level (shoots / projects) — carried through untouched. */
   items?: WorkGroup['items'];
+  /**
+   * Board-owned stable slug (work-library-board) — carried verbatim like
+   * `photos`/`items`. The dashboard seeds it (`slugify(name)`) and it survives a
+   * rename; `normalizeWorkGroup` preserves a non-empty trimmed value. Callers
+   * that omit it (onboarding seed / STEP 03) see no behaviour change.
+   */
+  slug?: string;
 }
 
 /**
@@ -256,6 +263,9 @@ export function normalizeWorkGroup(input: WorkGroupInput | null | undefined): Wo
   const group: WorkGroup = { name, kind, price };
   if (input?.photos !== undefined) group.photos = input.photos;
   if (input?.items !== undefined) group.items = input.items;
+  // Board-owned stable slug — preserve a non-empty trimmed value; absent/blank
+  // stays ABSENT (never `{slug: ''}`), so pre-board facts fall back to name→slug.
+  if (typeof input?.slug === 'string' && input.slug.trim()) group.slug = input.slug.trim();
   return group;
 }
 

@@ -19,9 +19,20 @@
 //       left as-is, which is what makes the engine-wide gallery safe there.
 // D11 — photos clamped to 24 per group (belt; the real cap lands in phase 3).
 //
-// JOIN LAW: group → entry is joined by NAME → slugify(name), NEVER by index.
-// parseCopy preserves group names verbatim (facts law), so the slug is a stable
-// key even after AI polishes the gallery framing copy.
+// JOIN LAW: group → entry is joined by the group's STABLE SLUG —
+// `group.slug ?? slugify(group.name)` — NEVER by index. The board seeds
+// `group.slug` (slugify(name)) on first save and PRESERVES it across a rename,
+// so the `/works/<slug>` item page + gallery href survive a rename; pre-board
+// facts (no `slug`) fall back to `slugify(name)`, keeping today's name→slug join
+// valid for untouched projects. parseCopy preserves group names verbatim (facts
+// law), so the slug is a stable key even after AI polishes the framing copy.
+//
+// HIDE LAW (work-library-board): `deriveWorksEntries` is the SINGLE choke point
+// that drops `hidden:true` photo refs — before cap/cover — so a dashboard-hidden
+// photo never reaches covers/entries/item pages. Every render-surface seeder
+// (stampWorkGalleryBinding, buildCollectionCatalogSlice, multiPageAssembly item
+// seeding, chrome cards) consumes THIS function's output, so none re-implement
+// the filter.
 
 import { slugify } from '@/lib/normalize';
 import type { CollectionEntry, CollectionEntryPhoto } from '@/modules/brief/collections';
@@ -60,8 +71,10 @@ function toEntryPhoto(p: {
 /**
  * Derive the `works` collection entries from the Brief's work facts. Flat groups
  * only — the second `items` level (story-seller shoots) is carry-only per spec
- * and NOT expanded here. Photos are clamped to 24 per group (D11 belt) and
- * url-less refs are dropped. Slug is ALWAYS code-derived from the group name.
+ * and NOT expanded here. `hidden:true` photo refs are dropped FIRST (the single
+ * hide-not-destroy choke point), then url-less refs are dropped and the
+ * remainder clamped to 24 per group (D11 belt). Slug is the group's STABLE slug
+ * (`group.slug ?? slugify(group.name)`) so it survives a board rename.
  * Absent/empty facts ⇒ [].
  */
 export function deriveWorksEntries(facts: WorkFacts | null | undefined): CollectionEntry[] {
@@ -71,10 +84,13 @@ export function deriveWorksEntries(facts: WorkFacts | null | undefined): Collect
     const name = typeof g?.name === 'string' ? g.name.trim() : '';
     if (!name) continue;
     const photos = (g.photos ?? [])
+      .filter((p) => !p?.hidden) // hide-not-destroy: drop hidden refs before cap/cover
       .map(toEntryPhoto)
       .filter((p): p is CollectionEntryPhoto => p !== null)
       .slice(0, WORKS_PHOTOS_PER_GROUP_CAP);
-    const entry: CollectionEntry = { name, slug: slugify(name) };
+    // JOIN LAW: stable slug survives a rename; pre-board facts fall back to name.
+    const slug = (typeof g.slug === 'string' && g.slug.trim()) ? g.slug.trim() : slugify(name);
+    const entry: CollectionEntry = { name, slug };
     if (photos.length) entry.photos = photos;
     out.push(entry);
   }

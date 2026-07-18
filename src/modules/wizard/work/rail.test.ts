@@ -425,3 +425,75 @@ describe('workFactsToBriefPatch', () => {
     expect(getWorkFacts(facts)).not.toBeNull();
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// work-library-board phase 1 — board-owned additive fields: `slug` (group) +
+// `hidden` (photo). PROVES additive-optional (old facts parse) + that the board
+// fields survive `normalizeWorkGroup` / `applyRailEdit({field:'groups'})` re-emit.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('board-owned fields — slug + hidden (additive-optional)', () => {
+  it('pre-existing facts WITHOUT slug/hidden still parse (getWorkFacts non-null)', () => {
+    const legacy = {
+      identity: { name: 'Kundius Studio' },
+      groups: [
+        {
+          name: 'Weddings',
+          kind: 'category',
+          price: { mode: 'on-request' },
+          photos: [{ id: 'p1', url: 'https://cdn/1.jpg' }],
+        },
+      ],
+    };
+    const work = getWorkFacts({ work: legacy });
+    expect(work).not.toBeNull();
+    expect(work!.groups![0]).not.toHaveProperty('slug');
+    expect(work!.groups![0].photos![0]).not.toHaveProperty('hidden');
+  });
+
+  it('normalizeWorkGroup preserves a non-empty trimmed slug, omits blank', () => {
+    const withSlug = normalizeWorkGroup({ name: 'Weddings', slug: '  weddings  ' });
+    expect(withSlug!.slug).toBe('weddings');
+    const blank = normalizeWorkGroup({ name: 'Weddings', slug: '   ' });
+    expect(blank).not.toHaveProperty('slug');
+    const absent = normalizeWorkGroup({ name: 'Weddings' });
+    expect(absent).not.toHaveProperty('slug');
+  });
+
+  it('normalizeWorkGroup carries hidden photo refs verbatim', () => {
+    const g = normalizeWorkGroup({
+      name: 'Weddings',
+      photos: [
+        { id: 'p1', url: 'https://cdn/1.jpg' },
+        { id: 'p2', url: 'https://cdn/2.jpg', hidden: true },
+      ],
+    });
+    expect(g!.photos).toEqual([
+      { id: 'p1', url: 'https://cdn/1.jpg' },
+      { id: 'p2', url: 'https://cdn/2.jpg', hidden: true },
+    ]);
+  });
+
+  it('applyRailEdit({field:groups}) re-emits slug + hidden through the schema gate', () => {
+    const res = applyRailEdit(
+      {
+        field: 'groups',
+        value: [
+          {
+            name: 'Weddings',
+            slug: 'weddings',
+            photos: [
+              { id: 'p1', url: 'https://cdn/1.jpg', cover: true },
+              { id: 'p2', url: 'https://cdn/2.jpg', hidden: true },
+            ],
+          },
+        ],
+      },
+      { entry: ENTRY },
+    );
+    expect(res.ok).toBe(true);
+    const work = getWorkFacts((res as { facts: Record<string, unknown> }).facts)!;
+    expect(work.groups![0].slug).toBe('weddings');
+    expect(work.groups![0].photos![1].hidden).toBe(true);
+  });
+});

@@ -76,6 +76,15 @@ export const WorkPhotoRefSchema = z.object({
   url: z.string().optional(),
   alt: z.string().optional(),
   cover: z.boolean().optional(),
+  /**
+   * BOARD-OWNED, ADDITIVE-OPTIONAL (work-library-board). Dashboard "hide" sets
+   * this flag instead of removing the ref (hide-not-destroy) — the photo stays
+   * in facts, restorable in place. Pre-existing facts omit it and MUST keep
+   * parsing; `deriveWorksEntries` filters `hidden:true` at the single choke
+   * point so a hidden photo never reaches covers/entries/item pages. NEVER emit
+   * `hidden:false` — absent means visible.
+   */
+  hidden: z.boolean().optional(),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -105,6 +114,15 @@ export const WorkGroupSchema = z.object({
   photos: z.array(WorkPhotoRefSchema).optional(),
   /** Second level (shoots / projects), each with its own photos. Optional. */
   items: z.array(WorkSubItemSchema).optional(),
+  /**
+   * BOARD-OWNED, ADDITIVE-OPTIONAL (work-library-board). Stable group identity:
+   * seeded from `slugify(name)` on the first board save and PRESERVED across a
+   * rename, so the `/works/<slug>` item page + gallery `href` survive a rename
+   * (`deriveWorksEntries` joins by `group.slug ?? slugify(group.name)`).
+   * Pre-existing facts omit it and MUST keep parsing — untouched projects fall
+   * back to the name→slug join. NEVER emit an empty slug.
+   */
+  slug: z.string().optional(),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -5,9 +5,12 @@
 //     no-photos no-op, href stamped ONLY when the item page exists (D7a guard).
 
 import { describe, it, expect } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
 import { slugify } from '@/lib/normalize';
 import type { WorkFacts } from '@/lib/schemas/workFacts.schema';
 import { deriveWorksEntries, stampWorkGalleryBinding, WORKS_PHOTOS_PER_GROUP_CAP } from './workCollections';
+import { buildCollectionCatalogSlice, buildCollectionItemSlice } from '@/hooks/editStore/archetypes';
 
 function photo(i: number, over: Partial<{ url: string; cover: boolean; alt: string }> = {}) {
   return { id: `p${i}`, url: over.url ?? `https://cdn/${i}.jpg`, ...over };
@@ -166,5 +169,121 @@ describe('stampWorkGalleryBinding — href D7a guard', () => {
     // cover still stamped (capability-independent), but href left as-is
     expect(fc.content['work-abc'].elements.groups[0].cover_image).toBe('https://cdn/1.jpg');
     expect(fc.content['work-abc'].elements.groups[0].href).toBe('#work');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// work-library-board phase 1 — hide-not-destroy (single choke point) + stable
+// slug across a rename.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('deriveWorksEntries — hide-not-destroy filter (single choke point)', () => {
+  it('drops hidden:true photo refs before the cap/cover, keeps visible ones', () => {
+    const entries = deriveWorksEntries(
+      facts([
+        {
+          name: 'Weddings',
+          kind: 'category',
+          price: { mode: 'on-request' },
+          photos: [
+            photo(1),
+            { id: 'p2', url: 'https://cdn/2.jpg', hidden: true },
+            photo(3),
+          ],
+        },
+      ] as any)
+    );
+    expect(entries[0].photos).toEqual([
+      { id: 'p1', url: 'https://cdn/1.jpg' },
+      { id: 'p3', url: 'https://cdn/3.jpg' },
+    ]);
+  });
+
+  it('cover falls back when the flagged cover photo is hidden', () => {
+    const entries = deriveWorksEntries(
+      facts([
+        {
+          name: 'Weddings',
+          kind: 'category',
+          price: { mode: 'on-request' },
+          photos: [
+            { id: 'p1', url: 'https://cdn/1.jpg', cover: true, hidden: true },
+            photo(2),
+          ],
+        },
+      ] as any)
+    );
+    const fc = fcWithGallery([{ id: 'g1', name: 'Weddings' }], {
+      pages: { 'page-weddings': {} },
+    });
+    stampWorkGalleryBinding(fc, entries);
+    // the hidden cover:true photo is gone → cover falls back to the first visible
+    expect(fc.content['work-abc'].elements.groups[0].cover_image).toBe('https://cdn/2.jpg');
+  });
+
+  it('a hidden photo NEVER reaches any render-surface seeder (catalog / item / gallery)', () => {
+    const HIDDEN = 'https://cdn/secret.jpg';
+    const entries = deriveWorksEntries(
+      facts([
+        {
+          name: 'Weddings',
+          kind: 'category',
+          price: { mode: 'on-request' },
+          photos: [photo(1), { id: 'hush', url: HIDDEN, hidden: true }],
+        },
+      ] as any)
+    );
+    // gallery covers
+    const fc = fcWithGallery([{ id: 'g1', name: 'Weddings' }], {
+      pages: { 'page-weddings': {} },
+    });
+    stampWorkGalleryBinding(fc, entries);
+    // catalog + item slices are seeded from the SAME entries
+    const catalog = buildCollectionCatalogSlice('works', entries);
+    const item = buildCollectionItemSlice('works', entries[0]);
+    const blob = JSON.stringify({ fc, catalog, item });
+    expect(blob).not.toContain(HIDDEN);
+  });
+
+  it('SOURCE GUARD: no other render-surface seeder forks the hidden filter', () => {
+    // The seeders consume deriveWorksEntries output (already-filtered), so the
+    // word `hidden` must NOT appear in their source — proving the filter lives
+    // ONLY at the deriveWorksEntries choke point (like multiPageAssembly.test's
+    // source-level invariant pattern).
+    const multiPage = fs.readFileSync(
+      path.join(__dirname, 'multiPageAssembly.ts'),
+      'utf8'
+    );
+    const archetypes = fs.readFileSync(
+      path.join(__dirname, '..', '..', 'hooks', 'editStore', 'archetypes.ts'),
+      'utf8'
+    );
+    expect(multiPage).not.toContain('hidden');
+    expect(archetypes).not.toContain('hidden');
+  });
+});
+
+describe('deriveWorksEntries — stable slug (survives a board rename)', () => {
+  it('uses group.slug when present, so a rename keeps the /works/<slug> join', () => {
+    const renamed = deriveWorksEntries(
+      facts([
+        {
+          name: 'Wedding Films', // renamed from "Weddings"
+          slug: 'weddings', // stable slug seeded on the first board save
+          kind: 'category',
+          price: { mode: 'on-request' },
+          photos: [photo(1)],
+        },
+      ] as any)
+    );
+    expect(renamed[0].name).toBe('Wedding Films');
+    expect(renamed[0].slug).toBe('weddings'); // NOT slugify('Wedding Films')
+  });
+
+  it('falls back to slugify(name) for pre-board facts (no slug)', () => {
+    const legacy = deriveWorksEntries(
+      facts([{ name: 'Portraits', kind: 'category', price: { mode: 'on-request' } }] as any)
+    );
+    expect(legacy[0].slug).toBe(slugify('Portraits'));
   });
 });
