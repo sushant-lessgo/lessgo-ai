@@ -15,6 +15,9 @@ import {
   movePhoto,
   hidePhoto,
   pickCover,
+  setPhotoHidden,
+  reorderPhoto,
+  moveGroup,
 } from './correctionReducer';
 import { PHOTOS_PER_GROUP_CAP } from '@/modules/wizard/work/ingest/proposeGroups';
 import type { WorkGroupInput } from '@/modules/wizard/work/rail';
@@ -237,5 +240,177 @@ describe('pickCover', () => {
     const g = base();
     pickCover(g, 0, 'w2');
     expect(coverOf(g[0])).toBe('w1');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. setPhotoHidden (dashboard hide/restore — flag, not removal · board verb)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('setPhotoHidden', () => {
+  it('sets hidden:true WITHOUT removing the photo from photos[]', () => {
+    const g = base();
+    const out = setPhotoHidden(g, 0, 'w2', true);
+    expect(urls(out[0])).toEqual(['w1', 'w2']); // still present
+    const w2 = (out[0].photos ?? []).find((p) => p.id === 'w2');
+    expect(w2?.hidden).toBe(true);
+  });
+
+  it('RESTORE removes the hidden KEY (never emits hidden:false)', () => {
+    const g = base();
+    const hiddenOnce = setPhotoHidden(g, 0, 'w2', true);
+    const restored = setPhotoHidden(hiddenOnce, 0, 'w2', false);
+    const w2 = (restored[0].photos ?? []).find((p) => p.id === 'w2');
+    // Key omitted entirely — matches deriveWorksEntries's `!p?.hidden` reader.
+    expect(w2).toEqual({ id: 'w2', url: 'https://cdn/w2.jpg' });
+    expect('hidden' in (w2 as object)).toBe(false);
+  });
+
+  it('hidden flag round-trip (true then false) leaves the ref clean', () => {
+    const g = base();
+    const out = setPhotoHidden(setPhotoHidden(g, 0, 'w1', true), 0, 'w1', false);
+    const w1 = (out[0].photos ?? []).find((p) => p.id === 'w1');
+    // Original had cover:true — the round-trip must preserve it (only hidden toggled).
+    expect(w1).toEqual({ id: 'w1', url: 'https://cdn/w1.jpg', cover: true });
+  });
+
+  it('restoring an already-visible photo is a no-op (same reference)', () => {
+    const g = base();
+    expect(setPhotoHidden(g, 0, 'w1', false)).toBe(g);
+  });
+
+  it('unknown group / photo ⇒ no-op', () => {
+    const g = base();
+    expect(setPhotoHidden(g, 0, 'nope', true)).toBe(g);
+    expect(setPhotoHidden(g, 9, 'w1', true)).toBe(g);
+    expect(setPhotoHidden(g, -1, 'w1', true)).toBe(g);
+  });
+
+  it('does NOT mutate the input', () => {
+    const g = base();
+    setPhotoHidden(g, 0, 'w2', true);
+    const w2 = (g[0].photos ?? []).find((p) => p.id === 'w2');
+    expect(w2?.hidden).toBeUndefined();
+  });
+
+  it('leaves other groups untouched (same reference)', () => {
+    const g = base();
+    const out = setPhotoHidden(g, 0, 'w1', true);
+    expect(out[1]).toBe(g[1]);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. reorderPhoto (within-group order · board verb)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('reorderPhoto', () => {
+  /** One group with three photos, w1 = cover. */
+  const trio = (): WorkGroupInput[] => [
+    {
+      name: 'Weddings',
+      kind: 'category',
+      price: { mode: 'on-request' },
+      photos: [photo('a', true), photo('b'), photo('c')],
+    },
+  ];
+
+  it('moves a photo to a new position within the group', () => {
+    const g = trio();
+    const out = reorderPhoto(g, 0, 'c', 0);
+    expect(urls(out[0])).toEqual(['c', 'a', 'b']);
+  });
+
+  it('moves a photo forward to a later position', () => {
+    const g = trio();
+    const out = reorderPhoto(g, 0, 'a', 2);
+    expect(urls(out[0])).toEqual(['b', 'c', 'a']);
+  });
+
+  it('the cover survives a reorder (flag stays on the moved photo)', () => {
+    const g = trio(); // a is the cover
+    const out = reorderPhoto(g, 0, 'a', 2);
+    expect(coverOf(out[0])).toBe('a');
+    const a = (out[0].photos ?? []).find((p) => p.id === 'a');
+    expect(a?.cover).toBe(true);
+  });
+
+  it('clamps an over-shooting toPos to the last position', () => {
+    const g = trio();
+    const out = reorderPhoto(g, 0, 'a', 99);
+    expect(urls(out[0])).toEqual(['b', 'c', 'a']);
+  });
+
+  it('clamps a negative toPos to the first position', () => {
+    const g = trio();
+    const out = reorderPhoto(g, 0, 'c', -5);
+    expect(urls(out[0])).toEqual(['c', 'a', 'b']);
+  });
+
+  it('moving to the current position is a no-op (same reference)', () => {
+    const g = trio();
+    expect(reorderPhoto(g, 0, 'a', 0)).toBe(g);
+  });
+
+  it('unknown group / photo ⇒ no-op', () => {
+    const g = trio();
+    expect(reorderPhoto(g, 0, 'nope', 1)).toBe(g);
+    expect(reorderPhoto(g, 9, 'a', 1)).toBe(g);
+    expect(reorderPhoto(g, -1, 'a', 1)).toBe(g);
+  });
+
+  it('does NOT mutate the input', () => {
+    const g = trio();
+    reorderPhoto(g, 0, 'a', 2);
+    expect(urls(g[0])).toEqual(['a', 'b', 'c']);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. moveGroup (group order · board verb)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('moveGroup', () => {
+  const three = (): WorkGroupInput[] => [
+    { name: 'A', kind: 'category', price: { mode: 'on-request' }, photos: [photo('a')] },
+    { name: 'B', kind: 'category', price: { mode: 'on-request' }, photos: [photo('b')] },
+    { name: 'C', kind: 'category', price: { mode: 'on-request' }, photos: [photo('c')] },
+  ];
+
+  it('moves a group later in the order', () => {
+    const g = three();
+    const out = moveGroup(g, 0, 2);
+    expect(out.map((x) => x.name)).toEqual(['B', 'C', 'A']);
+  });
+
+  it('moves a group earlier in the order', () => {
+    const g = three();
+    const out = moveGroup(g, 2, 0);
+    expect(out.map((x) => x.name)).toEqual(['C', 'A', 'B']);
+  });
+
+  it('preserves each group photos on reorder', () => {
+    const g = three();
+    const out = moveGroup(g, 0, 1);
+    expect(out.map((x) => x.name)).toEqual(['B', 'A', 'C']);
+    expect(urls(out[1])).toEqual(['a']); // A's photos rode along
+  });
+
+  it('same position ⇒ no-op (same reference)', () => {
+    const g = three();
+    expect(moveGroup(g, 1, 1)).toBe(g);
+  });
+
+  it('out-of-range index ⇒ no-op', () => {
+    const g = three();
+    expect(moveGroup(g, 9, 0)).toBe(g);
+    expect(moveGroup(g, 0, 9)).toBe(g);
+    expect(moveGroup(g, -1, 0)).toBe(g);
+  });
+
+  it('does NOT mutate the input', () => {
+    const g = three();
+    moveGroup(g, 0, 2);
+    expect(g.map((x) => x.name)).toEqual(['A', 'B', 'C']);
   });
 });

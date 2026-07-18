@@ -25,6 +25,21 @@
 //   5. pickCover      — mark ONE photo `cover:true`, EXCLUSIVE per group (every
 //                       other photo in that group has `cover` cleared).
 //
+// ── THREE ADDITIVE BOARD VERBS (work-library-board · dashboard-only) ─────────
+//   The dashboard "Your work" board reuses this reducer with three extra pure
+//   verbs. They are ADDITIVE — the five above are untouched, and onboarding's
+//   CorrectionBoard (default props) never calls them, so its behaviour is
+//   identical. Same purity / no-op / immutability contract as the five.
+//   6. setPhotoHidden — set/clear the `hidden` flag on a photo ref (dashboard
+//                       hide/restore). Does NOT remove from photos[] (that is
+//                       onboarding's `hidePhoto`). RESTORE removes the `hidden`
+//                       KEY (never emits `hidden:false`), matching how
+//                       `deriveWorksEntries` reads the flag (`!p?.hidden`) and
+//                       the phase-1 "never emit hidden:false" decision.
+//   7. reorderPhoto   — within-group reorder (move a photo to a new position in
+//                       the same group). Cover / hidden flags survive the move.
+//   8. moveGroup      — reorder groups (drives gallery card order).
+//
 // ── PURITY / IMMUTABILITY ───────────────────────────────────────────────────
 //   Every function returns a FRESH array; inputs are never mutated. Groups and
 //   photo arrays are shallow-cloned only where they change. An out-of-range
@@ -218,4 +233,101 @@ export function pickCover(
       ),
     };
   });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. setPhotoHidden (dashboard hide/restore — flag, NOT removal)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Set `hidden:true`, or REMOVE the `hidden` key on restore (never `hidden:false`). */
+function withHidden(p: Photo, hidden: boolean): Photo {
+  if (hidden) {
+    if (p.hidden) return p;
+    return { ...p, hidden: true };
+  }
+  if (!p.hidden) return p;
+  const { hidden: _hidden, ...rest } = p;
+  return rest;
+}
+
+/**
+ * Set (or clear) the `hidden` flag on `photoId` in the group at `groupIndex`
+ * (dashboard hide/restore). Unlike onboarding's `hidePhoto`, the photo STAYS in
+ * `photos[]` — `deriveWorksEntries` filters `hidden:true` at the single choke
+ * point, so a hidden photo is off the live site but restorable in place. RESTORE
+ * removes the `hidden` KEY (never emits `hidden:false`), matching the
+ * `!p?.hidden` reader + the phase-1 "never emit hidden:false" decision. Unknown
+ * group / photo ⇒ no-op.
+ */
+export function setPhotoHidden(
+  groups: WorkGroupInput[],
+  groupIndex: number,
+  photoId: string,
+  hidden: boolean
+): WorkGroupInput[] {
+  if (groupIndex < 0 || groupIndex >= groups.length) return groups;
+  const photos = photosOf(groups[groupIndex]);
+  const target = photos.find((p) => p.id === photoId);
+  if (!target) return groups;
+  if (!!target.hidden === hidden) return groups; // already in the requested state ⇒ no-op
+  return groups.map((g, i) => {
+    if (i !== groupIndex) return g;
+    return {
+      ...g,
+      photos: photos.map((p) => (p.id === photoId ? withHidden(p, hidden) : p)),
+    };
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. reorderPhoto (within-group order)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Move `photoId` to position `toPos` within the group at `groupIndex` (the array
+ * length is unchanged — a pure within-group reorder). `toPos` is clamped to the
+ * valid range, so an over/under-shoot lands at the edge rather than dropping the
+ * photo. Cover / hidden flags survive the move (they are carried on the photo
+ * ref, untouched here). Unknown group / photo, or a move to the current
+ * position ⇒ no-op.
+ */
+export function reorderPhoto(
+  groups: WorkGroupInput[],
+  groupIndex: number,
+  photoId: string,
+  toPos: number
+): WorkGroupInput[] {
+  if (groupIndex < 0 || groupIndex >= groups.length) return groups;
+  const photos = photosOf(groups[groupIndex]);
+  const from = photos.findIndex((p) => p.id === photoId);
+  if (from === -1) return groups;
+  const clamped = Math.max(0, Math.min(toPos, photos.length - 1));
+  if (clamped === from) return groups;
+  const next = photos.slice();
+  const [moved] = next.splice(from, 1);
+  next.splice(clamped, 0, moved);
+  return groups.map((g, i) => (i === groupIndex ? { ...g, photos: next } : g));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. moveGroup (group order — drives gallery card order)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Move the group at `fromIndex` to `toIndex` (reorders the groups array — this
+ * is the order the gallery / catalog cards render in). Out-of-range index or a
+ * move to the same position ⇒ no-op.
+ */
+export function moveGroup(
+  groups: WorkGroupInput[],
+  fromIndex: number,
+  toIndex: number
+): WorkGroupInput[] {
+  if (fromIndex < 0 || fromIndex >= groups.length) return groups;
+  if (toIndex < 0 || toIndex >= groups.length) return groups;
+  if (fromIndex === toIndex) return groups;
+  const next = groups.slice();
+  const [moved] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return next;
 }

@@ -40,6 +40,9 @@ import {
   movePhoto,
   hidePhoto,
   pickCover,
+  setPhotoHidden,
+  reorderPhoto,
+  moveGroup,
 } from './correctionReducer';
 
 type Photo = NonNullable<WorkGroupInput['photos']>[number];
@@ -53,6 +56,27 @@ export interface CorrectionBoardProps {
   onCommit: (groups: WorkGroupInput[]) => Promise<{ ok: boolean; error?: string }>;
   /** The step is uploading — verbs are disabled to avoid racing the commit. */
   busy?: boolean;
+  // ── ADDITIVE dashboard-only props (work-library-board) ─────────────────────
+  // Every one defaults to today's onboarding behaviour, so ShowWorkStep (which
+  // passes none of them) renders IDENTICALLY.
+  /**
+   * How "hide" behaves. `'remove'` (default) = onboarding's D12 drop-from-array
+   * (`hidePhoto`). `'flag'` = dashboard hide-not-destroy: sets `hidden:true`
+   * (`setPhotoHidden`) so the photo stays in facts, renders dimmed here, and
+   * offers a Restore affordance. Restore clears the flag (removes the key).
+   */
+  hideBehavior?: 'remove' | 'flag';
+  /** When supplied, renders a per-group "Add photos" button (dashboard only). */
+  onAddPhotos?: (groupIndex: number) => void;
+  /**
+   * When true, enables within-group photo reorder (drag onto another photo) plus
+   * a group up/down reorder affordance. Off by default so the onboarding surface
+   * is visually + behaviourally unchanged (photo drop-targets stay disabled →
+   * only cross-group moves, exactly as today).
+   */
+  enableOrdering?: boolean;
+  /** Suppress the hard-coded "Tidy up your groups" header (dashboard frames it). */
+  hideHeader?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -65,34 +89,56 @@ function PhotoThumb({
   photo,
   blur,
   disabled,
+  enableOrdering,
   onCover,
   onHide,
+  onRestore,
 }: {
   groupIndex: number;
   photoIndex: number;
   photo: Photo;
   blur?: string;
   disabled?: boolean;
+  /** Dashboard: photo is a within-group reorder drop target when true. */
+  enableOrdering?: boolean;
   onCover: () => void;
   onHide: () => void;
+  /** Dashboard flag-mode: clear the `hidden` flag. */
+  onRestore: () => void;
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `photo:${groupIndex}:${photo.id}`,
     data: { groupIndex, photoId: photo.id },
     disabled,
   });
+  // Reorder drop target — DISABLED unless ordering is on, so onboarding keeps
+  // its today-behaviour (photos are not drop targets → only cross-group moves).
+  const { setNodeRef: setDropRef, isOver } = useDroppable({
+    id: `photoslot:${groupIndex}:${photo.id}`,
+    data: { groupIndex, photoId: photo.id, kind: 'photo' },
+    disabled: !enableOrdering,
+  });
+
+  // `hidden` is only ever set in dashboard flag-mode (onboarding removes instead),
+  // so this dimmed + Restore branch never triggers in onboarding.
+  const hidden = !!photo.hidden;
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        setNodeRef(node);
+        setDropRef(node);
+      }}
       data-testid={`correction-photo-${groupIndex}-${photoIndex}`}
       data-photo-url={photo.url}
-      className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md border border-app-hairline bg-app-hairline"
+      className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-md border bg-app-hairline ${
+        isOver ? 'border-app-primary' : 'border-app-hairline'
+      }`}
       style={{
         backgroundImage: blur ? `url("${blur}")` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        opacity: isDragging ? 0.4 : 1,
+        opacity: isDragging ? 0.4 : hidden ? 0.4 : 1,
       }}
     >
       {/* Drag handle covers the thumbnail body. */}
@@ -100,7 +146,7 @@ function PhotoThumb({
         {...listeners}
         {...attributes}
         className="absolute inset-0 cursor-grab active:cursor-grabbing"
-        aria-label="Drag to another group"
+        aria-label={enableOrdering ? 'Drag to reorder or to another group' : 'Drag to another group'}
       >
         {photo.url && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -123,26 +169,41 @@ function PhotoThumb({
       )}
 
       <div className="absolute bottom-1 right-1 flex gap-1">
-        <button
-          type="button"
-          data-testid={`correction-cover-${groupIndex}-${photoIndex}`}
-          title="Use as cover"
-          disabled={disabled}
-          onClick={onCover}
-          className="rounded bg-app-canvas/90 p-0.5 text-app-ink hover:bg-app-canvas disabled:opacity-40"
-        >
-          <AppIcon name={photo.cover ? 'star' : 'star_outline'} size={14} />
-        </button>
-        <button
-          type="button"
-          data-testid={`correction-hide-${groupIndex}-${photoIndex}`}
-          title="Hide this photo"
-          disabled={disabled}
-          onClick={onHide}
-          className="rounded bg-app-canvas/90 p-0.5 text-app-ink hover:bg-app-canvas disabled:opacity-40"
-        >
-          <AppIcon name="visibility_off" size={14} />
-        </button>
+        {hidden ? (
+          <button
+            type="button"
+            data-testid={`correction-restore-${groupIndex}-${photoIndex}`}
+            title="Restore this photo"
+            disabled={disabled}
+            onClick={onRestore}
+            className="rounded bg-app-canvas/90 p-0.5 text-app-ink hover:bg-app-canvas disabled:opacity-40"
+          >
+            <AppIcon name="visibility" size={14} />
+          </button>
+        ) : (
+          <>
+            <button
+              type="button"
+              data-testid={`correction-cover-${groupIndex}-${photoIndex}`}
+              title="Use as cover"
+              disabled={disabled}
+              onClick={onCover}
+              className="rounded bg-app-canvas/90 p-0.5 text-app-ink hover:bg-app-canvas disabled:opacity-40"
+            >
+              <AppIcon name={photo.cover ? 'star' : 'star_outline'} size={14} />
+            </button>
+            <button
+              type="button"
+              data-testid={`correction-hide-${groupIndex}-${photoIndex}`}
+              title="Hide this photo"
+              disabled={disabled}
+              onClick={onHide}
+              className="rounded bg-app-canvas/90 p-0.5 text-app-ink hover:bg-app-canvas disabled:opacity-40"
+            >
+              <AppIcon name="visibility_off" size={14} />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -155,31 +216,43 @@ function PhotoThumb({
 function GroupCard({
   groupIndex,
   group,
+  groupCount,
   blurByUrl,
   disabled,
   selected,
   editing,
   draftName,
+  enableOrdering,
   onToggleSelect,
   onStartRename,
   onDraftName,
   onCommitRename,
   onCover,
   onHide,
+  onRestore,
+  onAddPhotos,
+  onMoveGroup,
 }: {
   groupIndex: number;
   group: WorkGroupInput;
+  groupCount: number;
   blurByUrl: Record<string, string>;
   disabled?: boolean;
   selected: boolean;
   editing: boolean;
   draftName: string;
+  enableOrdering?: boolean;
   onToggleSelect: () => void;
   onStartRename: () => void;
   onDraftName: (v: string) => void;
   onCommitRename: () => void;
   onCover: (photoId: string) => void;
   onHide: (photoId: string) => void;
+  onRestore: (photoId: string) => void;
+  /** Dashboard: render a per-group "Add photos" button when supplied. */
+  onAddPhotos?: (groupIndex: number) => void;
+  /** Dashboard: reorder this group by `delta` (-1 up, +1 down). */
+  onMoveGroup?: (delta: number) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `group:${groupIndex}`,
@@ -234,6 +307,30 @@ function GroupCard({
         <span className="ml-auto font-app-sans text-xs text-app-placeholder">
           {photos.length} photo{photos.length === 1 ? '' : 's'}
         </span>
+        {enableOrdering && onMoveGroup && (
+          <span className="flex items-center gap-0.5">
+            <button
+              type="button"
+              data-testid={`correction-group-up-${groupIndex}`}
+              title="Move group up"
+              disabled={disabled || groupIndex === 0}
+              onClick={() => onMoveGroup(-1)}
+              className="rounded p-0.5 text-app-ink hover:bg-app-tint disabled:opacity-30"
+            >
+              <AppIcon name="arrow_upward" size={14} />
+            </button>
+            <button
+              type="button"
+              data-testid={`correction-group-down-${groupIndex}`}
+              title="Move group down"
+              disabled={disabled || groupIndex === groupCount - 1}
+              onClick={() => onMoveGroup(1)}
+              className="rounded p-0.5 text-app-ink hover:bg-app-tint disabled:opacity-30"
+            >
+              <AppIcon name="arrow_downward" size={14} />
+            </button>
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -245,8 +342,10 @@ function GroupCard({
             photo={p}
             blur={p.url ? blurByUrl[p.url] : undefined}
             disabled={disabled}
+            enableOrdering={enableOrdering}
             onCover={() => onCover(p.id)}
             onHide={() => onHide(p.id)}
+            onRestore={() => onRestore(p.id)}
           />
         ))}
         {photos.length === 0 && (
@@ -255,6 +354,21 @@ function GroupCard({
           </p>
         )}
       </div>
+
+      {onAddPhotos && (
+        <div className="mt-2">
+          <button
+            type="button"
+            data-testid={`correction-add-photos-${groupIndex}`}
+            disabled={disabled}
+            onClick={() => onAddPhotos(groupIndex)}
+            className="inline-flex items-center gap-1 rounded border border-app-hairline px-2 py-1 font-app-sans text-xs text-app-ink hover:bg-app-tint disabled:opacity-40"
+          >
+            <AppIcon name="add" size={14} />
+            Add photos
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -268,6 +382,10 @@ export default function CorrectionBoard({
   blurByUrl,
   onCommit,
   busy,
+  hideBehavior = 'remove',
+  onAddPhotos,
+  enableOrdering = false,
+  hideHeader = false,
 }: CorrectionBoardProps) {
   const [groups, setGroups] = useState<WorkGroupInput[]>(initialGroups);
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -346,9 +464,41 @@ export default function CorrectionBoard({
 
   async function onDragEnd(e: DragEndEvent) {
     const from = e.active.data.current as { groupIndex: number; photoId: string } | undefined;
-    const to = e.over?.data.current as { groupIndex: number } | undefined;
+    const to = e.over?.data.current as
+      | { groupIndex: number; photoId?: string; kind?: string }
+      | undefined;
     if (!from || !to) return;
+    // Dashboard reorder: dropped onto a photo slot (only registered when
+    // `enableOrdering` — in onboarding photo slots are disabled so this never fires).
+    if (enableOrdering && to.kind === 'photo') {
+      if (to.groupIndex === from.groupIndex) {
+        const photos = groups[from.groupIndex]?.photos ?? [];
+        const toPos = photos.findIndex((p) => p.id === to.photoId);
+        await drive(reorderPhoto(groups, from.groupIndex, from.photoId, toPos));
+        return;
+      }
+      // Cross-group drop onto a photo → move into that group (end).
+      await drive(movePhoto(groups, from.groupIndex, from.photoId, to.groupIndex));
+      return;
+    }
     await drive(movePhoto(groups, from.groupIndex, from.photoId, to.groupIndex));
+  }
+
+  /** Hide verb — dashboard flag-mode sets `hidden:true`; onboarding removes (D12). */
+  function onHidePhoto(groupIndex: number, photoId: string) {
+    return hideBehavior === 'flag'
+      ? drive(setPhotoHidden(groups, groupIndex, photoId, true))
+      : drive(hidePhoto(groups, groupIndex, photoId));
+  }
+
+  /** Restore verb — clear the `hidden` flag (dashboard flag-mode only). */
+  function onRestorePhoto(groupIndex: number, photoId: string) {
+    return drive(setPhotoHidden(groups, groupIndex, photoId, false));
+  }
+
+  /** Group reorder — dashboard only (onboarding never renders the affordance). */
+  function onMoveGroup(index: number, delta: number) {
+    return drive(moveGroup(groups, index, index + delta));
   }
 
   if (groups.length === 0) return null;
@@ -356,7 +506,9 @@ export default function CorrectionBoard({
   return (
     <div data-testid="correction-board" className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="font-app-sans text-sm text-app-ink">Tidy up your groups</p>
+        {!hideHeader && (
+          <p className="font-app-sans text-sm text-app-ink">Tidy up your groups</p>
+        )}
         <Button
           type="button"
           variant="secondary"
@@ -377,17 +529,22 @@ export default function CorrectionBoard({
               key={i}
               groupIndex={i}
               group={g}
+              groupCount={groups.length}
               blurByUrl={blurByUrl}
               disabled={disabled}
               selected={selected.has(i)}
               editing={editingIndex === i}
               draftName={draftName}
+              enableOrdering={enableOrdering}
               onToggleSelect={() => toggleSelect(i)}
               onStartRename={() => startRename(i)}
               onDraftName={setDraftName}
               onCommitRename={commitRename}
               onCover={(photoId) => drive(pickCover(groups, i, photoId))}
-              onHide={(photoId) => drive(hidePhoto(groups, i, photoId))}
+              onHide={(photoId) => onHidePhoto(i, photoId)}
+              onRestore={(photoId) => onRestorePhoto(i, photoId)}
+              onAddPhotos={onAddPhotos}
+              onMoveGroup={enableOrdering ? (delta) => onMoveGroup(i, delta) : undefined}
             />
           ))}
         </div>

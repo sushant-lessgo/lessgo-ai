@@ -165,3 +165,97 @@ Run on a dev-DB works-capable project (`templateId: atelier2`) that already has 
 6. Restore via a second PUT — resend the same array with `hidden` removed: `PUT /api/work-library { "tokenId":"TOKEN", "groups":[ ...same groups, PID photo NOT hidden ] }`. Expect `200`. Re-query facts (step 4): the `PID` photo has NO `hidden` flag again; reload `/works/<slug>`: the photo is back. MediaAsset row still untouched throughout.
 
 **Pass criterion:** the photo ref survives in `brief.facts.work.groups` across hide to restore (only the `hidden` flag toggles), the `MediaAsset` row + blob are never modified, and the live pages reflect hide/restore via the resynced `content`.
+
+---
+
+# Phase 4 — Board verbs + CorrectionBoard additive extension
+
+**Files changed**
+- `src/components/onboarding/journey/engines/work/correctionReducer.ts` (added 3 verbs)
+- `src/components/onboarding/journey/engines/work/correctionReducer.test.ts` (added tests)
+- `src/components/onboarding/journey/engines/work/CorrectionBoard.tsx` (added optional props)
+
+## correctionReducer.ts — three ADDITIVE pure verbs
+
+Existing five (`renameGroup`, `mergeGroups`, `movePhoto`, `hidePhoto`, `pickCover`) untouched.
+Same purity contract (fresh arrays, no input mutation, no-op → return input ref on bad
+index/id). All fit the existing `WorkGroupInput`/`Photo` types (`hidden?` added in phase 1).
+
+1. `setPhotoHidden(groups, groupIndex, photoId, hidden)` — flag toggle; the photo STAYS in
+   `photos[]` (unlike onboarding's remove-from-array `hidePhoto`).
+   - **RESTORE = remove-key, NOT `hidden:false`.** `withHidden(p,false)` deletes the `hidden`
+     key entirely; `withHidden(p,true)` sets `{...p, hidden:true}`. This matches how
+     `deriveWorksEntries` reads the flag (`workCollections.ts` L87: `.filter((p) => !p?.hidden)`)
+     and the phase-1 "never emit `hidden:false`" decision — confirmed by reading the reader.
+   - Extra no-op guard: if the target photo's flag already equals the requested state, the input
+     array reference is returned unchanged (keeps the board's optimistic `drive()` no-op path,
+     and is consistent with the other verbs' identity-on-no-op style). Other flags (cover)
+     survive the toggle.
+2. `reorderPhoto(groups, groupIndex, photoId, toPos)` — within-group reorder; array length
+   unchanged. `toPos` is CLAMPED to `[0, len-1]` (over/under-shoot lands at the edge, never
+   drops the photo). Cover/hidden flags ride on the photo ref, untouched. No-op on bad
+   group/photo or a move to the current position.
+3. `moveGroup(groups, fromIndex, toIndex)` — reorders the groups array (drives gallery/catalog
+   card order). No-op on out-of-range index or same position. Each group's photos ride along.
+
+## CorrectionBoard.tsx — optional props, all default to today's behavior
+
+Additive-only. `ShowWorkStep` (NOT in files-touched) passes ONLY `groups`/`blurByUrl`/`onCommit`/
+`busy` (verified at `ShowWorkStep.tsx` L345-351) → every new prop takes its default → onboarding
+renders identically.
+
+- `hideBehavior?: 'remove' | 'flag'` (default `'remove'`). Default → hide calls `hidePhoto`
+  (remove-from-array, D12) EXACTLY as today. `'flag'` → hide calls `setPhotoHidden(...,true)`;
+  hidden photos render dimmed (opacity 0.4) with a Restore button wired to
+  `setPhotoHidden(...,false)`. The dimmed/Restore branch keys off `photo.hidden`, which is only
+  ever set in flag mode → never triggers in onboarding.
+- `onAddPhotos?: (groupIndex) => void` — renders a per-group "Add photos" button ONLY when
+  supplied. Absent in onboarding → no button.
+- `enableOrdering?: boolean` (default `false`). Off → photo drop-targets are `useDroppable({disabled:true})`
+  (only cross-group moves fire, exactly as today) and no group up/down affordance renders.
+  On → within-group reorder dnd (drop a photo onto another photo → `reorderPhoto`; cross-group
+  drop onto a photo → `movePhoto`) + group up/down buttons wired to `moveGroup`.
+- `hideHeader?: boolean` — suppresses ONLY the hard-coded "Tidy up your groups" `<p>`; the Merge
+  button + its flex row stay (dashboard still needs merge). Default → header shown.
+
+### How onboarding stays identical (verified)
+- All four new props default to today's behavior; `ShowWorkStep` passes none of them.
+- Photo `useDroppable` is `disabled: !enableOrdering` → in onboarding photos are NOT drop targets,
+  so `onDragEnd` only ever hits the cross-group `movePhoto` branch (`to.kind === 'photo'` is
+  gated by `enableOrdering`).
+- Base thumbnail className recomposed to include an `isOver` border, but with ordering off
+  `isOver` is always false → resolves to the original `border border-app-hairline bg-app-hairline`.
+- Thumbnail opacity `isDragging ? 0.4 : hidden ? 0.4 : 1` — `hidden` never true in remove-mode →
+  identical to the original `isDragging ? 0.4 : 1`.
+- Drag handle `aria-label` is conditional: `enableOrdering ? '…reorder or to another group' :
+  'Drag to another group'` (original text preserved when ordering off).
+
+## Tests (correctionReducer.test.ts)
+Added `describe` blocks for the three verbs (all under the existing gate-of-record file):
+- `setPhotoHidden`: sets `hidden:true` without removing from array; restore removes the KEY
+  (asserts `'hidden' in obj === false`); true→false round-trip preserves cover; already-visible
+  restore is a same-ref no-op; unknown group/photo no-op; no input mutation; other groups untouched.
+- `reorderPhoto`: move to front / move forward; cover survives a reorder; clamp over-shoot and
+  negative; move-to-current no-op; unknown group/photo no-op; no input mutation.
+- `moveGroup`: move later/earlier; photos ride along; same-position no-op; out-of-range no-op;
+  no input mutation.
+
+## Verification results (all in WORKDIR)
+- `npx tsc --noEmit` — clean, no output.
+- `npx vitest run correctionReducer.test.ts` — 41 passed.
+- `npm run test:run` — **248 files passed | 1 skipped; 4241 tests passed | 18 skipped.** E2
+  onboarding + wizard/generation suites green → additivity held.
+- `npm run lint` — no errors; only pre-existing `<img>`/exhaustive-deps warnings in unrelated
+  files (none in the three touched files).
+- `npm run build` — succeeded (full route table emitted).
+
+## Deviations
+- `setPhotoHidden` got an extra no-op guard (return input ref when the flag already matches the
+  requested state). In-scope judgment call: keeps identity-on-no-op consistent with the other
+  verbs and preserves the board's `drive()` no-op short-circuit. Logged here.
+
+## Open risks
+- None for this phase. `enableOrdering` within-group reorder relies on dnd-kit's default collision
+  picking the (smaller, on-top) photo droppable over the enclosing group droppable — validated by
+  the pure-reducer tests but the drag wiring itself is exercised only in phase 7's Playwright spec
+  (out of scope here).
