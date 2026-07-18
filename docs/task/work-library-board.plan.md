@@ -23,7 +23,7 @@ change needed; parity holds by construction.
 - phase 3 work-library API route: done (commit aebbdaa3, review loops 1) — HUMAN GATE c pending founder sign-off
 - phase 4 board verbs + CorrectionBoard extension: done (commit 15ab32ba, review loops 1)
 - phase 5 dashboard page + tab + client host: done (commit eb973e81, review loops 1)
-- phase 6 manage-link re-point + Update site: pending
+- phase 6 manage-link re-point + Update site: done (commit e3155170, review loops 1) — HUMAN GATE b pending founder sign-off (live visual+parity)
 - phase 7 deterministic QA + founder pilot: pending
 
 ## Load-bearing design decisions (scout-confirmed)
