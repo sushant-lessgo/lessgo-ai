@@ -97,3 +97,91 @@ zero tests).
 - Preview mode currently just unmounts the rail; the chromeless sub-route,
   mobile iframe, reveal fold, and publish relocation are later phases — no
   behavior beyond the in-place mode flip was added.
+
+## Phase 2 — Chromeless editor-preview sub-route
+
+**Files changed**
+- `src/app/edit/[token]/preview/page.tsx` (new)
+- `e2e/editor-preview-route.spec.ts` (new)
+- `playwright.config.ts` (modified — authed-spec allowlist)
+
+### Per-file
+
+**src/app/edit/[token]/preview/page.tsx** (new) — a `"use client"` standalone
+chromeless render of the draft. `EditorPreviewPage` mounts `EditProvider` with
+the SAME preview-optimized options as `preview/[token]/page.tsx:66-71`
+(`resetOnTokenChange: false`, `prefetchBaselineForReview: false`) plus the shared
+`showLoadingState`/`showErrorBoundary`. The main `/edit` route's provider is NOT
+touched, so the ~68 KB baseline-skip is preserved without any provider
+rearchitecture (baseline stays lazy via `ensureBaseline()`). The body,
+`EditorPreviewSiteOnly`, is a verbatim mirror of that page's `PreviewSiteOnly`
+(`?chrome=0`) branch: `setMode('preview')` on mount + a one-shot default-to-home
+effect, then `#landing-preview` → `LandingPageRenderer`. No header, no panels, no
+publish surface.
+
+### Key decisions
+
+- **Baseline-skip preserved without touching `/edit`:** duplicated the provider
+  option block (`resetOnTokenChange:false` + `prefetchBaselineForReview:false`)
+  rather than share a config — the constraint was "don't touch the main provider,"
+  which a new route with its own provider satisfies directly.
+- **No `.app-chrome` in the tree:** the page imports ONLY `EditProvider`, the
+  store hooks, and `LandingPageRenderer` — nothing from `@/app/edit/**` (the
+  editor shell/panels that carry `.app-chrome`). The root layout does not add
+  `.app-chrome` (that class lives inside `EditLayout` / the preview action-bar
+  wrapper, neither of which is in this tree). The canvas therefore has no
+  `.app-chrome` ancestor — asserted by the e2e `closest('.app-chrome')` check.
+- **No Suspense boundary needed (Suspense trap avoided):** unlike
+  `preview/[token]/page.tsx`, this route reads NO `useSearchParams`/`usePathname`
+  at page level — the chromeless render is unconditional (it's the route's whole
+  purpose), so there is no `?chrome=0` flag to read and the
+  `missing-suspense-with-csr-bailout` build failure cannot arise. Confirmed: the
+  build compiled the route cleanly with no Suspense wrapper.
+- **Deliberate documented duplication:** did NOT refactor
+  `preview/[token]/page.tsx` (it retires in a follow-on) — a header comment in the
+  new file records why (churn on a load-bearing flow, dual-renderer/bleed risk,
+  no payoff before retirement).
+- **Distinct testid:** `data-testid="editor-preview-chromeless"` (vs the preview
+  page's `preview-chromeless`) so the two chromeless surfaces stay
+  independently targetable.
+
+**e2e/editor-preview-route.spec.ts** (new) — authed spec modeled on
+`editor-preview-mode.spec.ts`: seeds a mock-mode Meridian draft via
+persona → `/api/start` → `seedDraft`, opens `/edit/{token}/preview`, and asserts
+(all REAL, would fail on regression):
+1. the chromeless container renders AND the renderer main is `data-mode="preview"`
+   AND the seeded hero copy (`/Ship on Friday/i`) is visible — the loadDraft /
+   preview-provider data-integrity check (fails on a blank/broken sub-route);
+2. zero `[contenteditable="true"]` — read-only;
+3. `page.evaluate` → `document.getElementById('landing-preview').closest('.app-chrome')`
+   is `false` (canvas exists AND has no app-chrome ancestor) — fails on chrome
+   bleed OR a missing canvas.
+
+**playwright.config.ts** — added `/editor-preview-route\.spec\.ts/` to the
+`authed` project's `testMatch` allowlist (an unregistered spec silently runs zero
+tests).
+
+### Green gate (run from WORKDIR)
+- `npx tsc --noEmit` → **EXIT 0** (next-env.d.ts already present from phase 1).
+- `npm run test:run` → **EXIT 0** — 250 files passed / 1 skipped; 4035 tests
+  passed / 14 skipped.
+- `npm run lint` → **EXIT 0** — only pre-existing warnings (techpremium/vestria
+  `<img>` LCP + ph-provider exhaustive-deps); NONE in phase-2 files.
+- `npm run build` → **EXIT 0** — new `/edit/[token]/preview` route compiled
+  (1.39 kB / 443 kB first-load, vs `/edit`'s 805 kB — confirms the lean
+  chromeless tree). No Suspense build error.
+
+### Playwright spec status
+- **Not run locally.** Same reason as phase 1: the authed spec needs a live dev
+  server + `E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD` / `CLERK_SECRET_KEY`
+  (it `test.skip`s itself without them). Authored + registered; first real run
+  happens on the configured e2e environment / QA preview via
+  `npx playwright test editor-preview-route`.
+
+### Open risks
+- Sub-route is directly navigable now but its framing (XFO SAMEORIGIN) lands in
+  phase 3 — until then it renders standalone only; the mobile-iframe consumer is
+  phase 4.
+- Spec unexecuted here (see above) — watch the mock-mode Meridian seed rendering
+  the hero copy within the 60s budget (same pattern the phase-1 / toolbar specs
+  rely on, so low risk).

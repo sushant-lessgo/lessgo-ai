@@ -98,6 +98,9 @@ export default defineConfig({
         // editor-route-consolidation (phase 1): the inline Edit/Preview mode flip
         // — seeded editor project + Clerk session.
         /editor-preview-mode\.spec\.ts/,
+        // editor-route-consolidation (phase 2): the chromeless /edit/[token]/preview
+        // sub-route — seeded editor project + Clerk session.
+        /editor-preview-route\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
