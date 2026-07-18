@@ -19,8 +19,8 @@ Re-point the live `atelier` templateId onto the work-skeleton (the `atelier2` st
 - phase 1 re-point atelier onto skeleton + fallback proof: done (commit e62bc087, review loops 1, ship). tsc/test:run(4020)/build/lint green. page.tsx TS2307 confirmed transient/pre-existing. DB safety-check STILL PENDING (user to run) — hard gate before phase-2 publish eyeball.
 - phase 2 publish-parity smoke (human gate): pending
 - phase 3 retire atelier2 id: done (commit 7a8a40a2, review loops 1, ship). Zero id-level atelier2 refs; 40 grep remainders all phase-4 (dir/file/import-path). tsc/test:run(3916)/build/lint green.
-- phase 4 delete old skin dir + fold barrel into templates/atelier (human gate): pending
-- phase 5 final gates + merge readiness (human gate): pending
+- phase 4 delete old skin dir + fold barrel into templates/atelier (human gate): done (commit b9dbcdf3, review loops 1, ship; founder confirmed deletion). atelier/={index.ts,skin.ts}; atelier2→0 hits src+scripts; frozen slider.v1.js kept. tsc/test:run(3859)/build/lint green.
+- phase 5 final gates + merge readiness (human gate): gates GREEN on final tree (tsc 0 / test:run 3859 / build 0 / lint warn-only). Awaiting founder merge+deploy go.
 
 ---
 
