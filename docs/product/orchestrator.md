@@ -4,13 +4,14 @@ Main session = orchestrator for all parallel feature sessions. New orchestrator 
 
 ## ▶ FRESH CYCLE START HERE (2026-07-17 late — cold-start handoff for a new session)
 
-**STRATEGY (founder ruling):** no customer waiting → **build everything, QA once properly, push once.** No incremental pushes. Local `main` is **~185 commits ahead of origin** (origin/main = current live prod, untouched). The one pre-push gate = **`docs/product/deploy-qa-checklist.md`** (living master QA doc; a **preview deploy is MANDATORY** — Stripe/publish/KV/Resend/domains/middleware don't run locally). **All merged worktrees are PRESERVED** until the one deploy is green, then bulk-cleanup (do NOT clean per-merge anymore — batch strategy).
+**STRATEGY (founder ruling):** no customer waiting → **build everything, QA once properly, push once.** No incremental pushes. Local `main` is **~216 commits ahead of origin** (origin/main = current live prod, untouched). The one pre-push gate = **`docs/product/deploy-qa-checklist.md`** (living master QA doc; a **preview deploy is MANDATORY** — Stripe/publish/KV/Resend/domains/middleware don't run locally). **All merged worktrees are PRESERVED** until the one deploy is green, then bulk-cleanup (do NOT clean per-merge anymore — batch strategy).
 
-**Building now (0 active sessions — capacity free for 2–3 fresh launches; see "Ready to launch" below).**
+**Building now (1 active session):**
+- **`work-library-board`** (full, was queue #8) — §8a "Your work" dashboard board: manage photos as a library (groups + add/hide/move/reorder/cover) with display-by-reference (pages update on republish). In flight (ahead 5). **THE LAST BUILD BLOCKER for beta.** Largely a clone (testimonial board pattern + E2 grouping UI + t7 MediaAsset). Cut → backlog #37 (copy-gen slot-machinery / page-promotion / generic products board). Full tier.
 
-**Paused (branches exist, sessions inactive, awaiting founder gates — NOT running):**
-- **`blog-composer-redesign`** (~25h idle) — **GATE A owed** (publish/unpublish + visual + hero-image call).
-- **`content-baseline-split`** — ✅ bake DONE (A live on prod since 07-14) + naayom backup taken 07-18; **B rides the big-bang push**, only a mechanical branch catch-up merge left (245 behind).
+**Paused (branches exist, sessions inactive — NOT running):**
+- **`blog-composer-redesign`** — **GATE A owed** (founder QA: publish/unpublish + visual + hero-image call). Leaf feature — **nothing waits on it → do in QA**, then it merges into the batch.
+- **`content-baseline-split`** — ✅ **RESOLVED**: bake DONE (A live on prod since 07-14), naayom backup taken 07-18. **B rides the big-bang push**; only a **mechanical branch catch-up merge** left (far behind main) — NOT a founder action.
 
 **Merged into local main this cycle (all unpushed):**
 - **UI big-bang:** ui-foundation, auth, dashboard S1/S2/S4a, media-library, editor-shell, work-onboarding-shell (E1).
@@ -21,20 +22,40 @@ Main session = orchestrator for all parallel feature sessions. New orchestrator 
 - **`dashboard-lead-reply` (S4b)** — AI reply-draft in leads inbox, copy-to-clipboard, `LEAD_REPLY=1`, reads `Project.brief`.
 - **`work-onboarding-questions` (E3)** — STEP 03 deterministic 8-slot gating (AI-free), choice kind, required price+lang, rail writes. **Widened the journey seam with a `questions()` data method (see below).**
 - **`billing-beta` (S3)** — MERGED `c7e0455a` (2026-07-17). LEAN beta monetization: plan+credit widget, Billing&plan view, Upgrade/Top-up→Stripe Checkout, Manage→portal, costs-at-action, gating→upgrade block. Config-driven (planManager/creditSystem = truth). Full 2g console DEFERRED post-beta. **OWED QA:** Stripe checkout/portal/webhooks + funded-gen smoke on the preview deploy (§A). Coord `creditSystem.ts` w/ lead-reply's `LEAD_REPLY` cost reconciled at merge.
-- **`work-onboarding-ingestion` (E2)** — MERGED `40e990e1` (2026-07-18). Work photo ingestion; all 5 phases done, main/E3 seam reconciled (rebased onto E3's `questions()`, added `loadStep?` on top). D7b: merges **ZERO prod-reachable behavior** (dev-only pilot on `atelier2`; enablement = atelier-cutover). **P5 Kundius real-photo gate** still owed → QA. **Merging E2 UNBLOCKED both atelier-skeleton-cutover AND E4.**
+- **`work-onboarding-ingestion` (E2)** — MERGED `40e990e1` (2026-07-18). Work photo ingestion; all 5 phases done, main/E3 seam reconciled (rebased onto E3's `questions()`, added `loadStep?` on top). D7b: merged **ZERO prod-reachable behavior** (dev-only pilot on `atelier2`; enablement = atelier-cutover, now DONE). **P5 Kundius real-photo gate** still owed → QA.
+
+**Merged this session (2026-07-18, all unpushed):**
+- **`editor-defect-fixes`** — deleted broken `convertCTAToForm` (wrong solution; real problem → backlog #34 inline-email-hero) + de-dup `GlobalButtonConfigModal` mount (a11y).
+- **`dashboard-profile-menu`** — **P0 RESTORED LOGOUT** via sidebar 2e popover (Settings/Billing/Appearance-greyed/Log out). There was NO logout anywhere in the app — cross-track seam gap (editor removed its UserButton expecting the dashboard to carry it; dashboard menu was deferred). Gated to bilingual? no — logout for all.
+- **`work-onboarding-plan` (E4)** — visual site-plan gate (workEndtoEnd step 4): plan screen + edits → approve writes `Brief.structure` → fires EXISTING work generation → E1's EXISTING reveal. Look-picker DEFERRED. Reuses E2 `loadStep?` (no widening).
+- **`atelier-skeleton-cutover`** — re-pointed the LIVE `atelier` id → work-skeleton, deleted old `templates/atelier/`. **⇒ THE WORK VERTICAL IS NOW REACHABLE (no longer dev-only on `atelier2`).** Unblocks toolbar real action-sets + Form/Menu hosts (now specc-able).
+- **`publish-sanitize`** — real DOM sanitizer (dompurify+jsdom) at the publish gate; killed the stored-XSS hole (64 published blocks were injecting raw user HTML; dead sanitizer removed). **XSS payload smoke still owed on the preview deploy (§A).**
+- **`facts-work-writeback`** — fixed the in-editor work story-interview 400 (`facts.work` now persisted at first-gen + route entry-fallback). Narrow fix; wide editor↔facts sync → backlog #36.
+- **`bilingual-editing`** — re-mounted NL/EN locale controls (toggle in top bar + settings in modal) **gated to bilingual projects only** + `activeLocale` reset-on-load. Kundius bilingual editing restored; naayom→Hindi + full i18nPlan stay deferred.
+
+**⚠️ SESSION DECISIONS (2026-07-18 — durable, read before speccing):**
+- **Work e2e IS IN the beta push** (not dev-only) — cutover merged, work is reachable.
+- **Deferred = fast-follow, NOT beta:** look-picker + Kontur/Pulse skins (**only Atelier ships** for beta) · prove-it-converts (weekly email / promo-links / **WhatsApp-tap tracking — headline conversion number undercounts without it**) · work-library copy-gen slot-machinery + page-promotion + generic products board (backlog #37) · Atelier fidelity contract-fields (accept the ceiling).
+- **engineDecider design AGREED** (`docs/tracks/engineDecider.md`), NOT yet specced: engine = a revisable belief (commit at plan gate); a plain-language **buyer-decision question** replaces the AI tiebreaker when unsure; **businessType→engine is NOT 1:1** → add an `ambiguous` state to the registry; the first-login **persona gate retires** → the one-liner is the entry.
+- **Onboarding is UNIFIED** (`/onboarding/[token]`, scale phase 10 — every engine goes through it). **Work = a bespoke JOURNEY branch** off it (dispatched via `loadStep?`); **thing/trust today ride the GENERIC wizard** (testable now, no bespoke journey). Legacy `product`/`service` routes = redirect shims (cleanup candidate).
 
 **⚠️ E2/E3 SEAM INCIDENT + RULE (2026-07-17):** E3 merged FIRST and widened the founder-signed journey seam (`engines/journey/engines/types.ts`) with a **`questions()` data method** (STEP 03 = data-driven, agnostic `StepQuestions.tsx` renders). E2 at P3 is adding **`showWork.loadStep?` component-injection** (STEP 02 ingestion is too rich for data descriptors). **Two extension mechanisms now coexist on the seam — this is an accepted ruling** (data-driven for Q&A steps; component-injection for rich interactive steps). E2 was told to **merge main first, rebase onto E3's `questions()`, add `loadStep?` on top, do NOT revert/duplicate E3's work.** **RULE for E4 + any future engine step: hand it the seam contract AT LAUNCH — reuse `loadStep?`/`questions()`, never a third widening.** ✅ E4 spec (2026-07-18) honors this — rich interactive step → reuses E2's `loadStep?`, explicit no-widening constraint. Lesson saved: `memory/feedback_shared_contract_coordination` (coordinate shared founder-signed contracts at LAUNCH, not via async mailbox — sessions go idea→merge in <1h).
 
-**Ready to launch NOW (specced + unblocked — spin up own sessions):**
-- `editor-defect-fixes` (standard, queue #2) — **delete** broken `convertCTAToForm` (wrong solution; real problem → backlog #34 inline-email-hero) + de-dup `GlobalButtonConfigModal` mount (a11y). Owed for push (deploy-qa §D). Isolated from work vertical — cleanest true-parallel.
-- `work-onboarding-plan` (E4, standard, queue #3) — WRITTEN 2026-07-18. Visual site-plan gate (workEndtoEnd step 4): plan screen + few edits → approve writes `Brief.structure` → fires EXISTING work generation → E1's EXISTING reveal. Look-picker DEFERRED (only Atelier skin exists). Reuses E2 `loadStep?` seam (contract handed at launch — no third widening). Pilot = Kundius, dev-only + flag-gated.
-- `atelier-skeleton-cutover` (full, queue #1) — **now UNBLOCKED** (E2 merged). Re-points `atelier`→work-skeleton + deletes old `templates/atelier/`. Unblocks toolbar real action sets + Form/Menu hosts. ⚠️ **Coordination:** re-keys the template registry the work vertical renders on — if run parallel with E4, coordinate (E4 fires generation on those ids). editor-defect-fixes is the safe parallel with either.
+**▶ BEFORE-PUSH RUNWAY (the handoff — what's left to beta):**
+1. **Finish `work-library-board`** (in flight — the last build blocker).
+2. **Catch-up merges into the batch:** content-baseline branch (far behind main → merge main in, re-green, merge); blog-composer (after GATE A); toolbar-standard-beta trailing doc commit.
+3. **QA pass — MANDATORY preview deploy** (`deploy-qa-checklist.md` §A/§B): `publish-sanitize` XSS payload smoke · Stripe/billing + funded-gen smoke · publish path / custom domains / Resend emails / edge middleware · secrets-forms M8 · re-run parity + generation specs on final main.
+4. **Founder sign-offs (in QA):** editor-shell (3 sign-offs + phases 4–8 click-through) · blog GATE A · **logout works** · E3 STEP 01→03 walk · lead-reply draft quality · **font regen** (`smartphone` + Help glyphs — blocked, needs a machine with fontTools).
+5. Re-green (tsc+test+build+lint) → preview deploy → walk §A/§B → **founder pushes `origin main`** → deploy-watch → prod smoke → **bulk worktree cleanup** of the whole merged set.
 
-**Still unwritten (need /discuss):**
-- Toolbar action-sets + Form/Menu hosts — after the cutover.
-- thing-e2e / trust-e2e — the strategic next (see `docs/tracks/engineDecider.md`), but they touch the same journey seam and depend on the engineDecider open Qs → hold until E4 + cutover land.
+**The queue is now EMPTY** — every specced item got a branch (merged, or work-library-board building). New specs come from `/discuss`.
 
-**Owed before the push → all in `docs/product/deploy-qa-checklist.md`:** preview-deploy QA of prod-only surfaces (Stripe/publish/domains/emails/middleware); `billing-correctness` live funded-gen smoke; editor-shell founder QA + 3 sign-offs; blog-composer GATE A; content-baseline Deploy B; toolbar 🔴 defects — now split: `editor-defect-fixes` spec covers double-modal a11y + `convertCTAToForm` (being DELETED not patched), **dead-sanitize now SPECCED as `publish-sanitize` (full tier — confirmed real stored-XSS hole, clean-at-publish, real DOM sanitizer; queue #4)**; E3 STEP01→03 walk; lead-reply draft-quality eyeball; final re-green + parity/generation specs. (Regen-verify now covered by toolbar-beta-followup's e2e.)
+**Still unwritten (need /discuss — POST-beta / post-cutover):**
+- Toolbar action-sets + Form/Menu hosts — **now unblocked** (cutover merged). Real per-element actions live in per-template markup.
+- thing-e2e / trust-e2e — resolve the engineDecider open Qs first; thing/trust ride the generic wizard today (testable now, no bespoke journey needed for beta).
+- The deferred work fast-follows: look-picker (+Kontur/Pulse), prove-it-converts, generic CMS board, work-library copy-gen (backlog #37).
+
+**Owed before the push:** see the **BEFORE-PUSH RUNWAY** above (steps 3–5) + the full living list in `docs/product/deploy-qa-checklist.md`. Headlines: preview-deploy QA of prod-only surfaces (Stripe/publish/domains/emails/middleware) · `billing-correctness` + `publish-sanitize` smokes · editor-shell 3 sign-offs · blog GATE A · logout-works · E3 walk · lead-reply eyeball · font regen · final re-green + parity/generation. (content-baseline Deploy B = RESOLVED; toolbar 🔴 defects = shipped via editor-defect-fixes + publish-sanitize.)
 
 **Key durable decisions this cycle (read these memories before speccing):** `project_onboarding_by_engine` (5 engines, audienceType retiring), `project_editor_route_consolidation` + `project_preview_consolidates_into_editor` (generate/reveal/preview → edit route; inputs locked post-gen; iframe+SAMEORIGIN), `project_dashboard_redesign_split`, `project_code_quality_backlog`.
 
@@ -73,7 +94,7 @@ Type = designer handoff surface (`.dc.html`): **Auth · Dashboard · Editor · O
 ⬜ to spec/later. **All ✅ are merged to local main but UNPUSHED** (one big-bang deploy; worktrees preserved
 until deploy green — batch strategy).
 
-Summary: ✅ merged 16 (+ this session: editor-defect-fixes, dashboard-profile-menu/logout, E4 — verify count next sync) · 🔨 building 1 (publish-sanitize) · ⏸️ paused 1 (blog-composer=GATE A; content-baseline bake DONE → mechanical merge only) · 📋 ready-to-launch (atelier-cutover) · ⬜ to spec = 3 work blockers (facts.work writeback, bilingual editing, work-library board) + the rest.
+Summary (2026-07-18 pm): ✅ merged this session = editor-defect-fixes · dashboard-profile-menu (logout) · E4 · **atelier-skeleton-cutover (work now REACHABLE)** · publish-sanitize · facts-work-writeback · bilingual-editing. · 🔨 building 1 = **work-library-board (last build blocker)** · ⏸️ paused 1 (blog-composer=GATE A → do in QA; content-baseline RESOLVED = mechanical merge only) · 📋 queue EMPTY (all branched) · ⬜ to spec = post-beta (toolbar action-sets, thing/trust-e2e, deferred work fast-follows).
 
 | Lane | Type | Spec file | Status |
 |---|---|---|---|
@@ -93,8 +114,14 @@ Summary: ✅ merged 16 (+ this session: editor-defect-fixes, dashboard-profile-m
 | L2 work (E3) | Onboarding | `work-onboarding-questions.spec.md` | ✅ merged (`3b62886d`) — STEP 03 deterministic 8-slot gating; **widened seam w/ `questions()` data method** (see header seam-rule). STEP01→03 walk owed → QA §C |
 | L1 reskin (dash S3) | Dashboard | `billing-beta.spec.md` | ✅ merged (`c7e0455a`) — LEAN beta monetization surface; config-driven; full 2g console deferred post-beta. **Stripe + funded-gen smoke owed → QA §A** |
 | L2 work (E2) | Onboarding | `work-onboarding-ingestion.spec.md` | ✅ merged (`40e990e1`) — work photo ingestion; `loadStep?` seam added atop E3's `questions()`. **P5 Kundius real-photo gate owed → QA.** Merges ZERO prod-reachable behavior (D7b). Unblocked cutover + E4 |
-| L2 work (E4) | Onboarding | `work-onboarding-plan.spec.md` | 📋 **ready to launch** (standard) — visual site-plan gate; approve → `Brief.structure` → EXISTING gen → E1 reveal. Look-picker deferred. Reuses E2 `loadStep?` (contract handed, no widening). Pilot Kundius dev-only |
-| L3 toolbar (defects) | Editor | `editor-defect-fixes.spec.md` | 📋 **ready to launch** (standard) — delete `convertCTAToForm` + de-dup modal (deploy-qa §D). Dead-sanitize split to own `publish-sanitize` spec (unwritten) |
+| L2 work (E4) | Onboarding | `work-onboarding-plan.spec.md` | ✅ **merged** — visual site-plan gate; approve → `Brief.structure` → EXISTING gen → E1 reveal. Look-picker deferred. Reuses E2 `loadStep?`, no widening |
+| L2 work (cutover) | Work | `atelier-skeleton-cutover.spec.md` | ✅ **merged** — re-pointed live `atelier`→work-skeleton, deleted old `templates/atelier/`. **Work vertical now REACHABLE.** Unblocks toolbar action-sets + Form/Menu hosts |
+| L2 work (D2) | Editor/CMS | `work-library-board.spec.md` | 🔨 **building** (full, ahead 5) — §8a "Your work" board; testimonial-board clone + E2 grouping + t7 MediaAsset; display-by-reference. **Last build blocker.** Cut → backlog #37 |
+| L2 work (bug) | Editor | `facts-work-writeback.spec.md` | ✅ **merged** — in-editor work story-interview 400 fixed (facts.work persisted at first-gen + route fallback). Wide sync → backlog #36 |
+| L2 work (i18n) | Editor | `bilingual-editing.spec.md` | ✅ **merged** — re-mounted NL/EN locale controls gated to bilingual + activeLocale reset. Kundius editing restored |
+| L3 toolbar (defects) | Editor | `editor-defect-fixes.spec.md` | ✅ **merged** — deleted `convertCTAToForm` (real problem → backlog #34) + de-dup modal |
+| security | Publish | `publish-sanitize.spec.md` | ✅ **merged** — real DOM sanitizer at publish gate; stored-XSS hole killed, dead sanitizer removed. **XSS smoke owed → QA §A** |
+| L1 reskin (2e) | Dashboard | `dashboard-profile-menu.spec.md` | ✅ **merged** — **P0 restored logout** (sidebar profile popover). Settings/Billing/Appearance-greyed/Log out |
 | L1 reskin (blog 3b–3d) | Dashboard | `blog-composer-redesign.spec.md` | ⏸️ **paused** (`0f6b08c6`, ~25h idle) — **GATE A owed**; resume/merge after gate |
 | L2 work (cutover) | Work | `atelier-skeleton-cutover.spec.md` | 📋 specced — **QUEUED, launch AFTER E2 merges** (deletes `atelier2`). Unblocks BOTH E2 enablement + toolbar action sets |
 | L2 work (E4) | Onboarding | `work-onboarding-plan` (unwritten) | ⬜ to spec (site-plan gate) — after E2 + E3; **hand it the seam contract at launch** |
