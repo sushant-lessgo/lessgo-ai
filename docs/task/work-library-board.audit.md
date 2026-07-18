@@ -104,3 +104,64 @@ None (beyond the in-scope cover-blanking judgment call logged above).
 ### Open risks
 - Republish paths (`buildPagesForExport` / `syncCollection`) can still clobber the resynced `workcatalog.items[]` via `cardFromEntry` — the pre-existing latent bug the plan flags for phase 6 step 2. Out of phase 2 scope; the resync is authoritative only until an export sweep runs, which phase 6 fixes.
 - If `resyncWorkContent` is ever called with empty/null facts, every gallery surface is emptied (facts = source of truth). Not reachable via the board (no delete-all-groups verb; the route always passes validated stored facts), so left faithful rather than special-cased.
+
+---
+
+## Phase 3 — API route: `GET`/`PUT /api/work-library` (+ capability helper + schema)
+
+**Files changed**
+- `src/modules/templates/templateMeta.ts` (added `templateHasCapability` helper)
+- `src/modules/templates/templateMeta.test.ts` (added `templateHasCapability` tests)
+- `src/lib/schemas/workLibrary.schema.ts` (new — PUT body Zod schema)
+- `src/app/api/work-library/route.ts` (new — GET/PUT route)
+- `src/app/api/work-library/route.test.ts` (new — mocked-prisma route tests)
+
+### Per-file changes
+
+**`src/modules/templates/templateMeta.ts`**
+- Added pure, data-only `templateHasCapability(templateId, cap): boolean`. Unknown/null/undefined ids to `false`; reads `meta.capabilities.includes(cap)`. No new non-type imports (`CapabilityId` was already imported as a type). Leaf-module invariant preserved.
+
+**`src/modules/templates/templateMeta.test.ts`**
+- Added a `templateHasCapability` describe block: `atelier2 to 'works'` true; `atelier to 'works'` false (the isWorkCopyTemplate trap — atelier declares gallery/packages/multipage, NOT works); unknown/null/undefined to false; plus a generic probe (`meridian to 'lead-form'` true, `meridian to 'works'` false).
+
+**`src/lib/schemas/workLibrary.schema.ts`** (new)
+- `WorkLibraryPutSchema = { tokenId: string.min(1), groups: GroupInput[] }`. `GroupInput` mirrors `WorkGroupInput` (name required; kind/price/photos/items/slug optional; PhotoRefInput carries `hidden`). Caps REUSE the E2 constants `PHOTOS_PER_GROUP_CAP` (24) / `PHOTOS_TOTAL_CAP` (150) imported from `src/modules/wizard/work/ingest/proposeGroups.ts` — per-group cap via `photos.max(24)`, total cap via a `superRefine`. Documented as a first-gate BELT; `applyRailEdit` to `WorkFactsSchema` remains the authoritative server gate.
+
+**`src/app/api/work-library/route.ts`** (new)
+- `runtime='nodejs'`, `dynamic='force-dynamic'`, 0 credits.
+- Authz: cloned the `/api/media` `gate()` helper verbatim — `auth()` to 401, `validateToken` to 400, `assertProjectOwner` to its status. Owner derived server-side; no body `userId` is read.
+- Eligibility (decision 7): after the gate, loads the project and rejects `!templateHasCapability(project.templateId, 'works')` with 400 ("This project's template doesn't support the work library") — NOT `isWorkCopyTemplate`, so a live-`atelier` project is rejected even though it runs the work engine.
+- GET `?tokenId=` returns `{ groups, blurByUrl }`. `groups` from `getWorkFacts(project.brief.facts).groups` with slugs backfilled in the response only (`withResponseSlugs`, never persisted). `blurByUrl` = `MediaAsset` rows for the token joined by `url` to `blurDataUrl` (hidden rows included; null blur skipped).
+- PUT `{ tokenId, groups }`: Zod safeParse (400 before any DB read) to gate to load FRESH project to eligibility to seed missing slugs (`slugify(name)`, de-duped, existing slugs preserved) to `applyRailEdit({field:'groups', value:seeded}, storedFacts)` (pure rail door). `{ok:false}` to 400 with the rail error string, nothing written. On `ok`: `resyncWorkContent(project.content.finalContent, getWorkFacts(result.facts))`, then a single `prisma.$transaction([...])` updating BOTH `brief` (facts re-emit) and `content` (`{...stored, finalContent: resynced}`).
+
+**Transaction shape:** `await prisma.$transaction([ prisma.project.update({ where:{tokenId}, data:{ brief, content } }) ])` — one atomic update of both JSON columns; a partial write is impossible.
+
+**Cap constant reused:** `PHOTOS_PER_GROUP_CAP` (24) + `PHOTOS_TOTAL_CAP` (150) from `src/modules/wizard/work/ingest/proposeGroups.ts` (the E2/D11 constants) — no fresh numbers hardcoded.
+
+**Content-shape note:** `Project.content` is the `{ onboarding, finalContent, ... }` wrapper (`loadDraft`/`saveDraft`); the resync operates on `finalContent` (the page-data tree `content`/`pages`/`chrome` that phase 2 targets), and the result is written back into `content.finalContent` with the wrapper preserved via spread.
+
+**`src/app/api/work-library/route.test.ts`** (new)
+- Mocks the module boundaries only (`@clerk/nextjs/server` auth, `@/lib/security`, `@/lib/prisma`); the pure core runs FOR REAL, so the PUT round-trip pins the true facts to content transform, not a re-stated mock.
+- Tests (13): 401 no-auth; 403 wrong-owner (GET + PUT, nothing written); 400 missing tokenId; ownership asserted with clerk id + action; live-`atelier` fixture to 400 on GET and PUT (nothing written) (the isWorkCopyTemplate trap); 404 project-not-found; GET payload (slugs backfilled, `blurByUrl` hidden-included/null-skipped); GET slug backfill is response-only (no write); PUT round-trip persists `hidden:true` ref in facts + resynced catalog items + resynced item-page photos in ONE transaction, wrapper key + AI copy preserved; restore (hidden unset) round-trips the photo back; rail-rejected blank-name groups to 400 + no write; schema-invalid body to 400 before any read/write; over-total-cap to 400 + no write.
+
+### Deviations from the plan
+- None. (The route returns the seeded groups alongside `{success:true}` on PUT so the client can adopt the server-assigned slugs — additive, no plan conflict.)
+
+### Verification results
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run` — 248 passed | 1 skipped (249 files); 4220 passed | 18 skipped tests. New: 29 pass across the two touched test files (13 route + 16 templateMeta incl. 4 new).
+- `npm run lint` — no errors on any touched file (only pre-existing `<img>`/exhaustive-deps warnings elsewhere).
+- `npm run build` — success; `/api/work-library/route.js` present in `.next/server/app/api/work-library/`.
+
+### HUMAN-GATE PROOF STEPS (spec gate c — hide-not-destroy)
+
+Run on a dev-DB works-capable project (`templateId: atelier2`) that already has `page-<slug>` item pages + a `workcatalog` singleton (e.g. Kundius's seeded project). Let `TOKEN` be its tokenId; be signed in as the owner in the session used for the request. Minimal API-only proof:
+
+1. Read baseline (before): `GET /api/work-library?tokenId=TOKEN`. Note a target group + a `photo.id` under it (call it `PID`), and its `blurByUrl` entry.
+2. Confirm the MediaAsset row + blob for that url are present (and stay untouched later). DB shell: `SELECT id, url, "blurDataUrl", "hiddenAt" FROM "MediaAsset" WHERE "tokenId" = 'TOKEN' AND url = '<PID url>';`. Record the row id + `hiddenAt` (null). The blob is the `url` itself.
+3. Hide via PUT — send the FULL groups array from step 1 with `hidden:true` added to the `PID` photo: `PUT /api/work-library { "tokenId":"TOKEN", "groups":[ ...groups, that one photo set hidden:true ] }`. Expect `200 {success:true}`.
+4. Assert facts KEPT the ref, flagged hidden (NOT destroyed): `SELECT brief->'facts'->'work'->'groups' FROM "Project" WHERE "tokenId" = 'TOKEN';`. The `PID` photo object is STILL in the array, now with `"hidden": true`.
+5. Assert MediaAsset row + blob untouched: re-run the step-2 query — same row id, `hiddenAt` STILL null, `url`/`blurDataUrl` unchanged (the board's hide never calls `/api/media` DELETE). Loading the live `/works/<slug>` page shows the photo gone from the rendered pages (resynced `content` dropped it) while the source ref/blob persist.
+6. Restore via a second PUT — resend the same array with `hidden` removed: `PUT /api/work-library { "tokenId":"TOKEN", "groups":[ ...same groups, PID photo NOT hidden ] }`. Expect `200`. Re-query facts (step 4): the `PID` photo has NO `hidden` flag again; reload `/works/<slug>`: the photo is back. MediaAsset row still untouched throughout.
+
+**Pass criterion:** the photo ref survives in `brief.facts.work.groups` across hide to restore (only the `hidden` flag toggles), the `MediaAsset` row + blob are never modified, and the live pages reflect hide/restore via the resynced `content`.

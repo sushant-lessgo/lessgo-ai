@@ -65,6 +65,23 @@ export interface TemplateMeta {
   bespoke?: true;
 }
 
+/**
+ * Pure, data-only capability probe (work-library-board phase 3). `true` iff the
+ * template with this id declares `cap` in its `capabilities`. Unknown / null /
+ * undefined ids → `false` (never throws). Kept in this leaf module so both the
+ * `/api/work-library` route and the dashboard page/tab can gate on the SAME
+ * predicate — the works-CAPABLE check (decision 7), NOT `isWorkCopyTemplate`
+ * (which would admit live-`atelier` projects that lack the works fan-out).
+ */
+export function templateHasCapability(
+  templateId: string | null | undefined,
+  cap: CapabilityId
+): boolean {
+  if (!templateId) return false;
+  const meta = (templateMeta as Record<string, TemplateMeta | undefined>)[templateId];
+  return !!meta && meta.capabilities.includes(cap);
+}
+
 export const templateMeta: Record<TemplateId, TemplateMeta> = {
   meridian: {
     copyEngines: ['thing'],

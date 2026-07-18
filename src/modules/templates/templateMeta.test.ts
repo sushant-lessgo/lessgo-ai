@@ -5,7 +5,7 @@
 // proves the declarations are well-formed against the closed vocabularies.
 
 import { describe, it, expect } from 'vitest';
-import { templateMeta } from './templateMeta';
+import { templateMeta, templateHasCapability } from './templateMeta';
 import { engineCoreSections } from '@/modules/engines/coreSections';
 import { templateIds } from '@/types/service';
 import { copyEngines, capabilityIds } from '@/types/brief';
@@ -75,6 +75,31 @@ describe('templateMeta', () => {
 
   it('granth declares no capabilities (no blog blocks exist)', () => {
     expect(templateMeta.granth.capabilities).toEqual([]);
+  });
+});
+
+describe('templateHasCapability', () => {
+  it('atelier2 (skeleton) has the works capability', () => {
+    // The works fan-out (workcatalog + page-<slug> item pages) only exists here.
+    expect(templateHasCapability('atelier2', 'works')).toBe(true);
+  });
+
+  it('live atelier does NOT have works (the isWorkCopyTemplate trap — decision 7)', () => {
+    // atelier is a work-ENGINE template but declares gallery/packages/multipage,
+    // NOT works — so the board must reject it even though isWorkCopyTemplate(atelier)
+    // is true. This asymmetry is the whole reason the helper exists.
+    expect(templateHasCapability('atelier', 'works')).toBe(false);
+  });
+
+  it('unknown / null / undefined ids → false (never throws)', () => {
+    expect(templateHasCapability('not-a-template', 'works')).toBe(false);
+    expect(templateHasCapability(null, 'works')).toBe(false);
+    expect(templateHasCapability(undefined, 'works')).toBe(false);
+  });
+
+  it('probes any declared capability, not just works', () => {
+    expect(templateHasCapability('meridian', 'lead-form')).toBe(true);
+    expect(templateHasCapability('meridian', 'works')).toBe(false);
   });
 });
 
