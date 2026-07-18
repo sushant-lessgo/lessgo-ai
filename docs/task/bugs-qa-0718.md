@@ -42,7 +42,15 @@
 - B14 O5: COMMITTED 905ef900 (see above).
 - B15 O7 "Something wrong?" remove: COMMITTED 52c1c8a0 — NoteBox render BETA-HIDDEN in UnderstoodRail; test skipped; remount test re-pointed via seam.
 - B16-O8: COMMITTED 905ef900. B16-O11: COMMITTED 6be4db35+REVIEWED(ship, no stranding) — hide footer Continue on STEPS_OWNING_ADVANCE {2,4}; closes plan persistence-skip hazard; footerNextVisible helper+test.
-- B10 S3 "Lessgo"→"Lessgo AI" sweep: IN PROGRESS (product-name-vs-domain judgment sweep). Note: memory `product_name_lessgo_ai.md` already records the rule.
+- B10 S3 "Lessgo"→"Lessgo AI" sweep: COMMITTED 9a650ed3 — 20 files, product-name prose+titles+meta+legal+blog+badges+editor strings; domains/URLs/identifiers untouched (verified). Memory rule already recorded. OPEN: external confirmation-email subject should match; OG/title snippet changes intended.
+
+## Founder follow-ups (2026-07-19)
+- B17 (O13 escalated): COMMITTED 8ccf83e5+REVIEWED(ship, risky-tier) — `workCopyEngineEnabled` delegates to allow-list only; env flag removed (only runtime reader); allow-list ['atelier'] preserved; skeleton path intact. Founder: delete Vercel prod `NEXT_PUBLIC_WORK_COPY_ENGINE` after deploy. ⚠️ makes atelier work journey run real LLM gen (credit spend) → merge/deploy gate needs real-LLM atelier smoke.
+- B18: COMMITTED 034ec4bc — resolveSidebarPlan helper defaults display to FREE; findUnique unchanged (side-effect-free); +test. Was: DIAGNOSED CODE bug — `dashboard/layout.tsx:54-64` no-UserPlan-row → `config=undefined` → `plan=undefined` → AppSidebar renders "— plan / — of — sites used". Fix: default display tier to FREE (`PLAN_CONFIGS[userPlan?.tier ?? PlanTier.FREE]`), keep findUnique (no get-or-create side effect). Extract `resolveSidebarPlan` helper + test. Files: `dashboard/layout.tsx` (+ helper+test). Read-only, no entitlement change. Was "config you own" → now real fix.
+- B3: browser-confirm blocked — founder signed in, /sign-up→/dashboard redirect; can't view SSO buttons in authed session. Config-only, GitHub already disabled per founder.
+
+## GREEN GATE (step 2): PASS x2 (after B17/B18 too) — tests 4050 pass/15 skip, lint clean, build ok, tsc clean. 9 commits: 905ef900 f14b7d42 1c95aea8 f6fe284e 52c1c8a0 6be4db35 9a650ed3 034ec4bc(B18) 8ccf83e5(B17). → preview re-test gate (founder).
+## Merge/deploy gate TODO: real-LLM atelier work-generation smoke (B17 makes it prod-reachable); founder delete Vercel `NEXT_PUBLIC_WORK_COPY_ENGINE`; reconcile overlap w/ post-beta feature branches (auth-redesign, dashboard-*, work-onboarding-*).
 
 ---
 
