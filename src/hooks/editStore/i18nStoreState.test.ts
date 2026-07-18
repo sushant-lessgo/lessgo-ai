@@ -380,6 +380,67 @@ describe('i18n Phase 3a — store state layer', () => {
     });
   });
 
+  // ===== reset-on-load invariant (bilingual-editing phase 2) =====
+  // Locks persistenceActions.ts:467-468: a reload ALWAYS re-derives activeLocale
+  // to the defaultLocale — a persisted non-default editing locale never survives
+  // a reload — WHILE the authored overlay round-trips losslessly. Driven through
+  // the real store-level path (export() → loadFromDraft), no fetch theatre.
+  describe('reset-on-load (activeLocale re-derive)', () => {
+    it('after editing in NL, a reload re-derives activeLocale to the default (en) and the NL overlay survives', () => {
+      // beforeEach seeded CONFIG_EN_NL. Author an NL overlay while active in NL.
+      store.getState().setActiveLocale('nl');
+      store.getState().updateElementContent(HERO, 'headline', 'Hallo');
+      expect(store.getState().activeLocale).toBe('nl');
+      expect(store.getState().localeContent.nl[HERO].headline).toBe('Hallo');
+
+      // Round-trip through the persistence shape: export() is exactly what save()
+      // would ship; feed it back as a fresh loadFromDraft (the reset path).
+      const exported: any = store.getState().export();
+      store.getState().loadFromDraft(
+        {
+          tokenId: 'tok-i18n-3a',
+          title: 'i18n 3a',
+          localeConfig: CONFIG_EN_NL,
+          finalContent: exported,
+        },
+        'tok-i18n-3a',
+      );
+
+      const s = store.getState();
+      // (1) reset: editing locale re-derived to the default, NOT the persisted 'nl'.
+      expect(s.activeLocale).toBe('en');
+      // (2) lossless: the authored NL overlay round-tripped intact (switch never dropped it).
+      expect(s.localeContent.nl[HERO].headline).toBe('Hallo');
+      // base copy untouched.
+      expect(s.content[HERO].elements.headline).toBe('Hello');
+    });
+
+    it('a single-locale / no-config reload falls activeLocale back to en (no defaultLocale to derive)', () => {
+      // Park the store in a non-default editing locale first.
+      store.getState().setActiveLocale('nl');
+      expect(store.getState().activeLocale).toBe('nl');
+
+      // Reload WITHOUT a localeConfig (legacy / single-locale project).
+      store.getState().loadFromDraft(
+        {
+          tokenId: 'tok-i18n-3a',
+          title: 'i18n 3a',
+          finalContent: {
+            sections: [HERO],
+            sectionLayouts: { [HERO]: 'LayoutA' },
+            content: { [HERO]: { id: HERO, layout: 'LayoutA', elements: { headline: 'Hello' } } },
+            theme: {},
+          },
+        },
+        'tok-i18n-3a',
+      );
+
+      const s = store.getState();
+      expect(s.localeConfig).toBeNull();
+      expect(s.activeLocale).toBe('en'); // fallback, not the stale 'nl'
+    });
+  });
+
   // ===== hydrate / back-compat =====
   describe('hydrate', () => {
     it('loadFromDraft restores localeConfig, activeLocale=default, and the overlay', () => {

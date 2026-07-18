@@ -107,3 +107,76 @@ exact, non-guessed equivalent. All referenced app-* utilities confirmed present 
 - These are editor-chrome components; there is NO `.published.tsx` twin (plan decision 5) —
   the dual-renderer parity rule does not apply.
 - No store, persistence-route, or renderer files were touched.
+
+---
+
+## Phase 2 — visibility + reset regression tests, full green gate
+
+**Files changed**
+- `src/app/edit/[token]/components/editor/localeControls.visibility.test.tsx` (NEW)
+- `src/hooks/editStore/i18nStoreState.test.ts` (extended — existing cases untouched)
+
+TEST CODE ONLY. No production-code edits. No product gap surfaced — the reset lives
+in `persistenceActions.ts:467-468` and is reachable via the same `loadFromDraft` entry
+the file's existing hydrate cases already use, so no plan amendment was needed.
+
+### `localeControls.visibility.test.tsx` (new)
+Copied the real-store harness from `SocialItemsEditor.test.tsx` verbatim: real
+`createEditStore`; `vi.mock('@/hooks/useEditStore')` re-points `useEditStore`
+(via zustand `useStore`) + `useEditStoreApi` at the live instance; `react-dom/client`
++ `act`, no @testing-library. `IS_REACT_ACT_ENVIRONMENT=true`. Cases:
+- **(a) bilingual → both render:** `localeConfig {en,nl}` → `LanguageToggle` renders
+  exactly the pills `["EN","NL"]` (queried inside `role="group"[aria-label="Editing
+  language"]`) AND `LocaleSettings` renders its globe trigger
+  (`button[aria-haspopup="dialog"]`, `title="Languages"`, non-null).
+- **(b) single-locale → nothing:** `localeConfig {en}` → mounting BOTH together yields
+  `container.innerHTML === ""`.
+- **(b2) null config → nothing:** `localeConfig = null` → same empty-container assertion
+  (legacy project).
+- **(c) interaction — REAL store, not theatre:** bilingual, click the `NL` pill →
+  asserts `store.getState().activeLocale === 'nl'` (the genuine `setActiveLocale`, not a
+  mock) AND that `aria-pressed` moved off EN onto NL after the re-render. A no-op
+  `setActiveLocale` or a detached handler fails on the store-state assertion — this is a
+  real mutation check per the inert-assertion lesson, not an endpoint/handler-fired check.
+
+### `i18nStoreState.test.ts` (extended)
+Added a new `describe('reset-on-load (activeLocale re-derive)')` block BEFORE the
+existing `hydrate` block; all prior cases left intact. Uses the same store-level
+`loadFromDraft` entry the existing hydrate/back-compat cases use — no fetch theatre.
+- **Reset + lossless round-trip:** seed bilingual (`beforeEach` = `CONFIG_EN_NL`),
+  `setActiveLocale('nl')`, author an NL overlay via `updateElementContent`, then round-trip
+  through the real persistence shape — `export()` (exactly what `save()` ships) fed back
+  as a fresh `loadFromDraft` (the reset path, `persistenceActions.ts:467-468`). Asserts
+  `activeLocale === 'en'` (re-derived to defaultLocale, NOT the persisted `nl`) AND the
+  `nl` overlay survived (`localeContent.nl[HERO].headline === 'Hallo'`) AND base copy
+  untouched. Real export→load, no mocked fetch.
+- **No-config fallback:** park store in `activeLocale='nl'`, then `loadFromDraft` with NO
+  `localeConfig` → `localeConfig` null and `activeLocale` falls back to `'en'` (not the
+  stale `nl`).
+
+### Real vs. theatre notes
+- Visibility (c) and both store cases assert REAL store state after driving the genuine
+  action/entry point — not that a handler fired or a mock was pinned.
+- The reset test round-trips through the actual `export()` → `loadFromDraft` pair rather
+  than mocking a load response, so it exercises the real reset line and proves the overlay
+  is lossless end-to-end.
+
+### Deviations from plan
+- None. Files-touched honored exactly; no production code touched.
+
+### Green gate — verbatim results (run from WORKDIR)
+- **`npm run test:run`:** PASS — `Test Files 247 passed | 1 skipped (248)`,
+  `Tests 4186 passed | 18 skipped (4204)`. (Targeted pre-run of just the two files:
+  `Test Files 2 passed (2)`, `Tests 32 passed (32)`.)
+- **`npx tsc --noEmit`:** the ONLY error is the known pre-existing
+  `src/app/page.tsx(6,26): TS2307 Cannot find module '@/assets/images/founder.jpg'` — the
+  documented stale `.jpg`-import typing artifact. Persists after `rm -rf .next` (it is a
+  standalone-tsc moduleResolution quirk, not a `.next/types` staleness), but the asset
+  exists on disk, `page.tsx` is unmodified (not in `git status`), there are NO other tsc
+  errors, and `next build` (which regenerates its own types) compiles it fine. Not ours —
+  neither test file produces any tsc error.
+- **`npm run lint`:** PASS (exit 0) — only pre-existing `@next/next/no-img-element` +
+  `react-hooks/exhaustive-deps` WARNINGS in unrelated template/provider files; zero errors,
+  none in either test file (bare-`useEditStore()` ban satisfied — the harness selector-mocks it).
+- **`npm run build`:** PASS (exit 0) — full build incl. published-CSS + assets steps; all
+  routes compiled. Confirms the standalone-tsc JPG error is inert for the real build.
