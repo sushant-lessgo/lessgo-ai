@@ -24,7 +24,7 @@ test.describe('dashboard shell', () => {
     await expect(page.locator(APP_CHROME)).toHaveCount(1);
 
     // Sidebar: logo → /dashboard, CTA, workspace + account nav.
-    await expect(page.getByRole('button', { name: /New site with AI/i })).toBeEnabled();
+    await expect(page.getByRole('button', { name: /Create my new website/i })).toBeEnabled();
     await expect(page.getByRole('link', { name: 'Projects', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: /Billing & plan/i })).toBeVisible();
     await expect(page.getByText('WORKSPACE', { exact: true })).toBeVisible();
@@ -78,7 +78,7 @@ test.describe('dashboard shell', () => {
       if ((res?.status() ?? 500) >= 400) continue;
       await expect(page.locator(APP_CHROME), `${route}: chrome count`).toHaveCount(1);
       // One sidebar only → the CTA appears exactly once.
-      await expect(page.getByRole('button', { name: /New site with AI/i })).toHaveCount(1);
+      await expect(page.getByRole('button', { name: /Create my new website/i })).toHaveCount(1);
     }
   });
 });
