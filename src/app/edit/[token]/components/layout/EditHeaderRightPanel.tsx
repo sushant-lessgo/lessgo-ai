@@ -6,7 +6,6 @@ import { useShallow } from 'zustand/react/shallow';
 import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { UndoRedoButtons } from '../ui/UndoRedoButtons';
 import { ResetButton } from '../ui/ResetButton';
-import { PreviewButton } from '../ui/PreviewButton';
 import { usePreviewNavigation } from '../ui/usePreviewNavigation';
 import { AppIcon } from '@/components/ui/icon';
 import { Coming } from '@/components/ui/coming';
@@ -86,6 +85,9 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
       localeConfig: s.localeConfig,
     })),
   );
+  // Edit/Preview segmented control drives the real editor mode. Single-scalar
+  // selector (no whole-store subscription); setMode via the store API.
+  const mode = useEditStore((s) => s.mode);
   const storeApi = useEditStoreApi();
   const [showConfirm, setShowConfirm] = useState(false);
   // t1's Publish button. Publishing lives on the preview page, and the ONLY way
@@ -164,21 +166,41 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
         <UndoRedoButtons />
         <ResetButton />
 
-        {/* Edit / Preview segmented (t1). `Edit` is the current view — an inert
-            state indicator, not a "coming" control. `Preview` IS the existing
-            PreviewButton, restyled to wear the inactive segment. */}
+        {/* Edit / Preview segmented (t1). Real mode toggle: each half calls
+            setMode; aria-current follows the live `mode`. setMode('preview')
+            already clears selection + hides the toolbar (coreActions). The
+            active segment wears the raised chip; the inactive is a ghost. */}
         <div
           role="group"
           aria-label="Edit or preview"
           className="inline-flex flex-none items-center gap-1 rounded-app-ctl-sm bg-app-track p-[3px]"
         >
-          <span
-            aria-current="true"
-            className="inline-flex items-center rounded-[7px] bg-app-surface px-3 py-1 text-[13px] font-medium text-app-ink shadow-app-card"
+          <button
+            type="button"
+            aria-current={mode !== 'preview'}
+            onClick={() => storeApi.getState().setMode('edit')}
+            className={`inline-flex items-center rounded-[7px] px-3 py-1 text-[13px] font-medium transition-colors ${
+              mode !== 'preview'
+                ? 'bg-app-surface text-app-ink shadow-app-card'
+                : 'text-app-muted hover:text-app-ink'
+            }`}
           >
             Edit
-          </span>
-          <PreviewButton onPreviewClick={handlePreviewClick} isNavigating={isNavigating} />
+          </button>
+          <button
+            type="button"
+            aria-current={mode === 'preview'}
+            onClick={() => storeApi.getState().setMode('preview')}
+            className={`inline-flex items-center gap-1.5 rounded-[7px] px-3 py-1 text-[13px] font-medium transition-colors ${
+              mode === 'preview'
+                ? 'bg-app-surface text-app-ink shadow-app-card'
+                : 'text-app-muted hover:text-app-ink'
+            }`}
+            title="Preview your landing page"
+          >
+            <AppIcon name="visibility" size={16} />
+            <span>Preview</span>
+          </button>
         </div>
 
         {/* Publish split-button (t1) — built INLINE here on purpose: single

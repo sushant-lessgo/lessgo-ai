@@ -164,30 +164,35 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
 
       {/* Main Layout Container */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Collapsible */}
-        <div
-          className={`
-            app-chrome
-            transition-all duration-300 ease-in-out border-r border-app-border-frame bg-app-surface
-            ${leftPanel.collapsed
-              ? 'w-12 lg:w-12'
-              : `w-[${leftPanel.width}px]`
-            }
-            lg:relative absolute lg:static z-40
-            ${leftPanel.collapsed ? '' : 'shadow-lg lg:shadow-none'}
-          `}
-          style={{
-            width: leftPanel.collapsed ? '48px' : `${leftPanel.width}px`,
-            maxWidth: leftPanel.collapsed ? '48px' : '500px',
-            minWidth: leftPanel.collapsed ? '48px' : '250px',
-          }}
-        >
-          <LeftPanel />
-        </div>
+        {/* Left Panel - Collapsible. Hidden entirely in preview mode so the
+            read view is a clean, edit-affordance-free canvas (the segmented
+            control in the header is the way back to edit). The canvas itself
+            goes read-only for free via the renderer's mode!=='preview' branches. */}
+        {mode !== 'preview' && (
+          <div
+            className={`
+              app-chrome
+              transition-all duration-300 ease-in-out border-r border-app-border-frame bg-app-surface
+              ${leftPanel.collapsed
+                ? 'w-12 lg:w-12'
+                : `w-[${leftPanel.width}px]`
+              }
+              lg:relative absolute lg:static z-40
+              ${leftPanel.collapsed ? '' : 'shadow-lg lg:shadow-none'}
+            `}
+            style={{
+              width: leftPanel.collapsed ? '48px' : `${leftPanel.width}px`,
+              maxWidth: leftPanel.collapsed ? '48px' : '500px',
+              minWidth: leftPanel.collapsed ? '48px' : '250px',
+            }}
+          >
+            <LeftPanel />
+          </div>
+        )}
 
         {/* Mobile Overlay for Left Panel */}
-        {!leftPanel.collapsed && (
-          <div 
+        {mode !== 'preview' && !leftPanel.collapsed && (
+          <div
             className="fixed inset-0 bg-black bg-opacity-25 z-20 lg:hidden"
             onClick={() => storeState?.toggleLeftPanel?.()}
           />

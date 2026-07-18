@@ -95,6 +95,9 @@ export default defineConfig({
         // work-library-board (phase 7): the "Your work" dashboard CorrectionBoard
         // CRUD round-trip — seeded atelier project + Clerk session.
         /work-library\.spec\.ts/,
+        // editor-route-consolidation (phase 1): the inline Edit/Preview mode flip
+        // — seeded editor project + Clerk session.
+        /editor-preview-mode\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
