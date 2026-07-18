@@ -50,7 +50,7 @@ export function LanguageToggle() {
 
   return (
     <div
-      className="flex items-center gap-0.5 rounded-md border border-gray-200 bg-gray-50 p-0.5"
+      className="flex items-center gap-0.5 rounded-app-ctl-sm border border-app-hairline bg-app-track p-0.5"
       role="group"
       aria-label="Editing language"
     >
