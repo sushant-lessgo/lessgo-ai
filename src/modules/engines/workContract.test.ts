@@ -58,7 +58,7 @@ import {
   WorkFactsSchema,
   getWorkFacts,
 } from '@/lib/schemas/workFacts.schema';
-import { businessTypeKeys, businessTypes } from '@/modules/businessTypes/config';
+import { workCandidateBusinessKeys } from '@/modules/businessTypes/config';
 
 const allSectionKeys: readonly WorkSectionKey[] = [
   ...workMustSections,
@@ -138,12 +138,19 @@ describe('vocab coverage', () => {
     }
   });
 
-  it('every work-engine businessType key maps to a wording row', () => {
-    const workBusinessKeys = businessTypeKeys.filter(
-      (k) => businessTypes[k].copyEngine === 'work'
-    );
-    // writer / photographer / designer are the day-one work-engine rows.
-    expect(workBusinessKeys.sort()).toEqual(['designer', 'photographer', 'writer']);
+  it('every work-CANDIDATE businessType key maps to a wording row (engineDecider R2)', () => {
+    // Post-engineDecider "work businessTypes" = committed-`work` ∪ ambiguous with
+    // `work` ∈ candidateEngines (see workCandidateBusinessKeys). writer +
+    // photographer are committed work; designer + agency are ambiguous with a
+    // work candidate — every one is a possible D4 work-pick and so MUST carry a
+    // professionWording row.
+    const workBusinessKeys = workCandidateBusinessKeys();
+    expect([...workBusinessKeys].sort()).toEqual([
+      'agency',
+      'designer',
+      'photographer',
+      'writer',
+    ]);
     for (const k of workBusinessKeys) {
       expect(professionWording, `no wording row for businessType "${k}"`).toHaveProperty(k);
     }

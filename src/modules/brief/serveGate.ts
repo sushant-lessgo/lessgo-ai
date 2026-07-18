@@ -174,7 +174,7 @@ function pickTemplate(brief: Brief, sl: TemplateId[]): TemplateId {
 
 export function decideServe(brief: Brief): ServeDecision {
   const entry = getEntryFacts(brief);
-  const engine: ResolvedEngine | undefined = entry?.resolvedEngine;
+  const engine: ResolvedEngine | null | undefined = entry?.resolvedEngine;
   const known = !!brief.businessType && brief.businessType in businessTypes;
 
   // (a) out-of-icp is EXCLUSIVE — transactional platform ⇒ single tag,
@@ -182,6 +182,21 @@ export function decideServe(brief: Brief): ServeDecision {
   const platformNeeds = entry?.platformNeeds;
   if (platformNeeds === 'checkout' || platformNeeds === 'ordering') {
     return { outcome: 'manual', missing: 'out-of-icp', tags: ['out-of-icp'], outOfIcp: true };
+  }
+
+  // (a2) NULL-ENGINE BACKSTOP (engineDecider R2). A null resolvedEngine is an
+  // `ask` state (pre-D4-pick) or a defect — the decider guarantees a pick before
+  // /api/brief/confirm, so this should never reach a real confirm. Belt-and-
+  // braces: treat it as not-bridgeable/manual with a DEDICATED `engine-unresolved`
+  // tag — never a misleading `rungC:*`/`rungE:*` misfile. `missing` stays
+  // non-empty (matrix/demand invariants hold).
+  if (engine == null) {
+    return {
+      outcome: 'manual',
+      missing: 'engine-unresolved',
+      tags: ['engine-unresolved'],
+      outOfIcp: false,
+    };
   }
 
   // (b) collect ALL failed clauses in canonical order rungC → rungE → bridge → rungA.

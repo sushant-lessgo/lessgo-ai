@@ -246,7 +246,14 @@ export function entryExtractionForSignals(
   if (guess && guess in businessTypes) {
     return extractionForBusinessType(guess as BusinessTypeKey);
   }
-  const { engine } = resolveEngine(signals);
+  // engineDecider R2 — resolveEngine now returns a union. For extraction-vocab
+  // selection we only need the ladder's engine FAMILY, which is `engine` on a
+  // resolved result and `prior` on an `ask` (unknown+none ⇒ prior 'thing',
+  // preserving the pre-engineDecider thing fold; browsing-place/offer rungs
+  // resolve to place/quick-yes ⇒ no fold). Engine DECISION semantics (ask vs
+  // resolved) do not apply to which extraction schema we fold.
+  const resolution = resolveEngine(signals);
+  const engine = resolution.state === 'resolved' ? resolution.engine : resolution.prior;
   if (engine === 'thing' || engine === 'trust' || engine === 'work') {
     return getExtraction(engine);
   }

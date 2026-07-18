@@ -20,14 +20,35 @@
 //   (scalePlan §7.3). requiredCapabilities = ['lead-form'] only.
 // - `likelyIntents` are 3–4 per entry (manufacturer: 2 is fine).
 
-import type { CopyEngine, CapabilityId, DesignStyle } from '@/types/brief';
+import type { CopyEngine, CapabilityId, DesignStyle, ResolvedEngine } from '@/types/brief';
 import type { GoalIntent } from '@/modules/goals/vocabulary';
 import type { CollectionKey } from '@/modules/collections/registry';
 
-export interface BusinessTypeEntry {
+/**
+ * Engine binding (engineDecider R2) — a discriminated union on `engineState`.
+ * Most business types COMMIT to one copy engine; a few are genuinely AMBIGUOUS
+ * (the buyer-decision could go two ways) and defer the engine to the D4 pick.
+ *
+ * - `committed`  → the type maps to exactly one `copyEngine` (zero-question path).
+ * - `ambiguous`  → the type can run under any of `candidateEngines`; `priorEngine`
+ *                  is the best-guess pre-selected at D4 (∈ candidateEngines). No
+ *                  single engine is written until the user picks (resolveEngine
+ *                  returns `ask` for these).
+ *
+ * `candidateEngines`/`priorEngine` use `ResolvedEngine` (the 5-value union) so an
+ * ambiguous type could in principle offer place/quick-yes candidates too.
+ */
+export type EngineBinding =
+  | { engineState: 'committed'; copyEngine: CopyEngine }
+  | {
+      engineState: 'ambiguous';
+      candidateEngines: readonly ResolvedEngine[];
+      priorEngine: ResolvedEngine;
+    };
+
+export type BusinessTypeEntry = {
   key: BusinessTypeKey;
   label: string;
-  copyEngine: CopyEngine;
   requiredCapabilities: readonly CapabilityId[];
   defaultStyle: DesignStyle;
   /** Minimal wizard prompts (2–3 per type) — copy TBD, shape frozen. */
@@ -69,7 +90,7 @@ export interface BusinessTypeEntry {
    * a `requiredCollections` key.
    */
   requiredCollections?: readonly CollectionKey[];
-}
+} & EngineBinding;
 
 export const businessTypeKeys = [
   'saas',
@@ -88,6 +109,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
   saas: {
     key: 'saas',
     label: 'SaaS / software product',
+    engineState: 'committed',
     copyEngine: 'thing',
     requiredCapabilities: ['lead-form'],
     defaultStyle: 'tech-minimal',
@@ -113,7 +135,15 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
   manufacturer: {
     key: 'manufacturer',
     label: 'Manufacturer / exporter',
-    copyEngine: 'thing',
+    // engineDecider R2 — AMBIGUOUS (founder call at the Phase-1 human gate): a
+    // manufacturer can win on the PRODUCT it makes (thing — vestria pilot, the
+    // tailored-trade voice) OR on being a TRUSTED trade supplier/partner (trust).
+    // Prior = thing (preserves the tailored-trade voiceHint + vestria default);
+    // the D4 pick decides. `voiceHint` is a SHARED union field, still consumed by
+    // the thing engine via productVoiceForBusinessType regardless of engineState.
+    engineState: 'ambiguous',
+    candidateEngines: ['thing', 'trust'],
+    priorEngine: 'thing',
     // catalog is PREFERRED not required (scalePlan §7.3) — see header note.
     requiredCapabilities: ['lead-form'],
     defaultStyle: 'editorial-craft',
@@ -141,7 +171,11 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
   agency: {
     key: 'agency',
     label: 'Agency / studio',
-    copyEngine: 'trust',
+    // engineDecider R2 — AMBIGUOUS: an agency can win on trusted expertise
+    // (trust) OR on the work it shows (work). Prior = trust; the D4 pick decides.
+    engineState: 'ambiguous',
+    candidateEngines: ['trust', 'work'],
+    priorEngine: 'trust',
     requiredCapabilities: ['lead-form'],
     defaultStyle: 'bold-performance',
     wizardFields: {
@@ -169,6 +203,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
   consultant: {
     key: 'consultant',
     label: 'Consultant / advisor',
+    engineState: 'committed',
     copyEngine: 'trust',
     requiredCapabilities: ['lead-form'],
     defaultStyle: 'authority-professional',
@@ -193,6 +228,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
   coach: {
     key: 'coach',
     label: 'Coach / trainer',
+    engineState: 'committed',
     copyEngine: 'trust',
     requiredCapabilities: ['lead-form'],
     defaultStyle: 'warm-human',
@@ -217,6 +253,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
   writer: {
     key: 'writer',
     label: 'Writer / author',
+    engineState: 'committed',
     copyEngine: 'work',
     requiredCapabilities: [],
     defaultStyle: 'literary-quiet',
@@ -243,10 +280,12 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
   photographer: {
     key: 'photographer',
     label: 'Photographer / studio',
+    engineState: 'committed',
     copyEngine: 'work',
-    // gallery is REQUIRED — no shipped template declares it, so the serve gate
-    // rejects photographer to the MANUAL-ONBOARD/demand lane (intended: proves
-    // an unbacked capability is honestly non-serveable, not silently degraded).
+    // gallery is REQUIRED and IS backed: atelier natively declares `gallery` on
+    // the work engine (templateMeta.atelier.capabilities; fit.test.ts), so a
+    // photographer serves atelier via the rungC gallery probe (atelier-template
+    // phase 4). Not an unbacked cap.
     requiredCapabilities: ['gallery'],
     defaultStyle: 'editorial-craft',
     wizardFields: {
@@ -270,16 +309,21 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
     // slot (phase 2). This is the businessType signal `isMultipage` reads.
     structureDefault: 'multi',
   },
-  // work-contract phase 4 — designer profession row (CONFIG-ONLY, mirrors
-  // photographer's pattern). `gallery` is REQUIRED and unbacked by any shipped
-  // template, so the serve gate routes designer to the MANUAL-ONBOARD/demand
-  // lane exactly like photographer (honest non-serve until a gallery-capable
-  // work template ships — intended). copyEngine 'work'; wording/chips for all 4
-  // professions live in engines/workVocabulary.ts (single source).
+  // work-contract phase 4 — designer profession row (mirrors photographer's
+  // capability pattern). `gallery` is REQUIRED and IS backed by atelier (the
+  // work template that natively declares `gallery`), so a designer PICKED into
+  // the work engine at D4 serves atelier. wording/chips for all 4 professions
+  // live in engines/workVocabulary.ts (single source).
+  //
+  // engineDecider R2 — AMBIGUOUS (the cirkles case): a branding/design studio
+  // could lead with the work it shows (work) OR the expertise clients trust
+  // (trust). Prior = work; the D4 pick decides.
   designer: {
     key: 'designer',
     label: 'Designer / studio',
-    copyEngine: 'work',
+    engineState: 'ambiguous',
+    candidateEngines: ['work', 'trust'],
+    priorEngine: 'work',
     requiredCapabilities: ['gallery'],
     defaultStyle: 'editorial-craft',
     wizardFields: {
@@ -303,6 +347,7 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
   app: {
     key: 'app',
     label: 'Mobile app',
+    engineState: 'committed',
     copyEngine: 'thing',
     requiredCapabilities: ['lead-form'],
     defaultStyle: 'tech-minimal',
@@ -326,3 +371,21 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
     structureDefault: 'single',
   },
 };
+
+/**
+ * The business-type keys that can run under the WORK engine (engineDecider R2 —
+ * semantic redefinition). Once `designer`/`agency` flip to `ambiguous`, "the
+ * work businessTypes" can no longer mean `copyEngine === 'work'`: it is now
+ * **committed-`'work'` entries ∪ ambiguous entries whose `candidateEngines`
+ * include `'work'`** — because an ambiguous type is a possible D4 work-pick and
+ * so must still carry its work vocabulary (`professionWording`/`dreamClientChips`).
+ * Encoded once here; consumed by the work-contract conformance test.
+ */
+export function workCandidateBusinessKeys(): BusinessTypeKey[] {
+  return businessTypeKeys.filter((k) => {
+    const entry = businessTypes[k];
+    return entry.engineState === 'committed'
+      ? entry.copyEngine === 'work'
+      : entry.candidateEngines.includes('work');
+  });
+}

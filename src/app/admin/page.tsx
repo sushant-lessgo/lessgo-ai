@@ -172,10 +172,19 @@ export default async function AdminPage() {
   }
   const businessTypeRows = businessTypeKeys.map((key) => {
     const entry = businessTypes[key];
+    // engineDecider R2 — union-aware. Committed types have a single copyEngine;
+    // ambiguous types (designer/agency) defer to D4, so use priorEngine for the
+    // capability-backing probe and show `ask (candidates)` in the engine column.
+    const probeEngine =
+      entry.engineState === 'committed' ? entry.copyEngine : entry.priorEngine;
+    const engineLabel =
+      entry.engineState === 'committed'
+        ? entry.copyEngine
+        : `ask (${entry.candidateEngines.join('/')})`;
     const missingCaps = entry.requiredCapabilities.filter(
-      (cap) => !templateIds.some((t) => fit(t, entry.copyEngine, [cap]))
+      (cap) => !templateIds.some((t) => fit(t, probeEngine, [cap]))
     );
-    return { entry, missingCaps, intents: intentsByType.get(key) ?? [] };
+    return { entry, engineLabel, missingCaps, intents: intentsByType.get(key) ?? [] };
   });
 
   return (
@@ -529,11 +538,11 @@ export default async function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {businessTypeRows.map(({ entry, missingCaps, intents }) => (
+                {businessTypeRows.map(({ entry, engineLabel, missingCaps, intents }) => (
                   <tr key={entry.key} className="border-t border-slate-100 hover:bg-slate-50">
                     <td className="px-3 py-2 font-mono text-xs">{entry.key}</td>
                     <td className="px-3 py-2">{entry.label}</td>
-                    <td className="px-3 py-2 font-mono text-xs text-slate-600">{entry.copyEngine}</td>
+                    <td className="px-3 py-2 font-mono text-xs text-slate-600">{engineLabel}</td>
                     <td className="px-3 py-2 font-mono text-xs text-slate-600">
                       {entry.requiredCapabilities.length > 0
                         ? entry.requiredCapabilities.map((cap) => (

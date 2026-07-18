@@ -40,7 +40,11 @@ const entryClassificationFields = {
   // Best-guess business type: a known key OR a short free label ("photographer").
   // GUESS ONLY — the engine is resolved by code lookup, never by the AI (D6).
   businessTypeGuess: z.string().nullable(),
-  // 0-1 confidence in businessTypeGuess (range prompt-enforced).
+  // 0-1 confidence in businessTypeGuess (range prompt-enforced). Deliberately
+  // NOT `.min(0).max(1)` — OpenAI strict structured outputs reject
+  // `minimum`/`maximum` (see file header). The [0,1] clamp (engineDecider R1)
+  // is applied POST-PARSE in code (`clampConfidence` in @/modules/brief/classify
+  // → buildBriefDraft), which never reaches the AI-facing JSON schema.
   businessTypeConfidence: z.number(),
   // Short market category ("Performance marketing"), or null.
   category: z.string().nullable(),
