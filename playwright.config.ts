@@ -64,6 +64,9 @@ export default defineConfig({
         /dashboard-workspace\.spec\.ts/,
         /dashboard-redirects\.spec\.ts/,
         /dashboard-lifecycle\.spec\.ts/,
+        // account-settings: /dashboard/settings renders Clerk <UserProfile/>, not
+        // the old persona selector (locks the "settings → persona selection" bug).
+        /account-settings\.spec\.ts/,
         // blog-composer-redesign: manager = phase 1, composer = phase 2, ai-write = phase 4.
         // Pre-registered ahead of the files landing (harmless — an unmatched pattern is a
         // no-op) so no later phase rediscovers the false-confidence trap called out above.

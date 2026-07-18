@@ -11,7 +11,7 @@
 
 ## Progress log
 
-- phase 1 page swap + profileAppearance: pending
+- phase 1 page swap + profileAppearance: done (commit 28cd9808, standard tier — no per-phase review) | pre-existing unrelated founder.jpg TS2307 in src/app/page.tsx flagged (out of scope)
 - phase 2 e2e regression spec: pending
 
 ## Invariants (do NOT touch — cite, don't edit)
