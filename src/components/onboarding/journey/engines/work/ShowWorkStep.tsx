@@ -336,25 +336,33 @@ export default function ShowWorkStep({ seam }: JourneyStepProps) {
               {failedCount} photo{failedCount === 1 ? '' : 's'} couldn’t be uploaded.
             </p>
           )}
-
-          {/* The correction board (5 tap verbs). Keyed on the upload nonce so a
-              NEW upload remounts it with fresh committed groups; its own verb
-              drives never reset it. Renders the COMMITTED groups (all of them),
-              distinct from the summary above (the just-added clusters). */}
-          {committedGroups.length > 0 && (
-            <CorrectionBoard
-              key={uploadNonce}
-              groups={committedGroups}
-              blurByUrl={blurByUrl}
-              onCommit={commitGroups}
-              busy={busy}
-            />
-          )}
         </div>
       )}
 
+      {/* The correction board (5 tap verbs). Keyed on the upload nonce so a NEW
+          upload remounts it with fresh committed groups; its own verb drives
+          never reset it. Gated on the PERSISTED committedGroups (not the
+          ephemeral `proposal`) so a round-trip away and back to this step —
+          which remounts the component and resets `proposal` to null — still
+          shows every committed photo instead of the board vanishing (B1
+          qa-0718). Renders the COMMITTED groups (all of them), distinct from the
+          summary above (the just-added clusters). */}
+      {committedGroups.length > 0 && (
+        <CorrectionBoard
+          key={uploadNonce}
+          groups={committedGroups}
+          blurByUrl={blurByUrl}
+          onCommit={commitGroups}
+          busy={busy}
+        />
+      )}
+
+      {/* ONE primary advance CTA (B16 qa-0718). When photos are committed the
+          "Looks right" primary is the only action; the "Skip for now" escape
+          shows ONLY in the empty state (zero committed groups). Both key off the
+          persisted committedGroups so they survive a round-trip remount. */}
       <div className="flex items-center gap-4 pt-2">
-        {proposal && proposal.groups.length > 0 && (
+        {committedGroups.length > 0 ? (
           <Button
             type="button"
             data-testid="show-work-continue"
@@ -364,17 +372,18 @@ export default function ShowWorkStep({ seam }: JourneyStepProps) {
             Looks right
             <AppIcon name="arrow_forward" size={16} className="ml-1.5" />
           </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="ghost"
+            data-testid="show-work-skip"
+            disabled={busy}
+            onClick={() => setJourneyStep(3)}
+          >
+            Skip for now
+            <AppIcon name="arrow_forward" size={16} className="ml-1.5" />
+          </Button>
         )}
-        <Button
-          type="button"
-          variant="ghost"
-          data-testid="show-work-skip"
-          disabled={busy}
-          onClick={() => setJourneyStep(3)}
-        >
-          {proposal ? 'Skip the rest' : 'Skip for now'}
-          <AppIcon name="arrow_forward" size={16} className="ml-1.5" />
-        </Button>
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ export interface NewSiteButtonProps {
 }
 
 export default function NewSiteButton({
-  label = 'New site with AI',
+  label = 'Create my new website',
   icon = 'auto_awesome',
   iconSize = 20,
   className,

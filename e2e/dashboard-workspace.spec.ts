@@ -121,6 +121,6 @@ test.describe('workspace chrome + Overview (phase 3)', () => {
     // The root bar's only distinctive control is the greyed bell — absent on 3a.
     await expect(page.getByRole('button', { name: 'Notifications' })).toHaveCount(0);
     // And exactly one sidebar → one CTA.
-    await expect(page.getByRole('button', { name: /New site with AI/i })).toHaveCount(1);
+    await expect(page.getByRole('button', { name: /Create my new website/i })).toHaveCount(1);
   });
 });

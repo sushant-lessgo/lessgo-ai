@@ -11,10 +11,9 @@
 //     • `@/modules/wizard/work/rail.ts`   (pure: zod + types)
 //     • `@/modules/wizard/work/resumeStep.ts` (pure — joins the list in P2b)
 //     • `@/lib/schemas/workFacts.schema`  (pure: zod)
-//     • `@/lib/workCopyEngine`            (zero-dep leaf — hosts BOTH
-//        `isWorkCopyTemplate` and, since P5, the `workCopyEngineEnabled`
-//        kill-switch, precisely so `preflight` can stay SYNC without importing
-//        `work.llm.ts`)
+//     • `@/lib/workCopyEngine`            (zero-dep leaf — hosts the allow-list
+//        predicate `isWorkCopyTemplate` and its `workCopyEngineEnabled` alias,
+//        precisely so `preflight` can stay SYNC without importing `work.llm.ts`)
 //     • `@/types/brief` + `./types`       (types only)
 //     • local copy strings
 // and NOTHING else. In particular NEVER `@/modules/wizard/generation/**` or
@@ -114,6 +113,10 @@ import type {
 const FIELD_NAME = 'name';
 const FIELD_DESCRIPTOR = 'descriptor';
 const FIELD_GROUPS = 'groups';
+// qa-0718 B6 — read-only "WHAT YOU CHARGE" row (the answered charge). A rail
+// field id, distinct from the STEP 03 `price` QUESTION id; no edit path (the
+// price is corrected in STEP 03, like the other read-only rows).
+const FIELD_PRICE = 'price';
 const FIELD_PRICE_POSITION = 'pricePosition';
 // E3 read-only rail rows (widened projection). These fill from STEP 03 answers;
 // corrections happen in STEP 03's answered-compact state, NOT rail-side, so they
@@ -173,6 +176,13 @@ const workRailAdapter: JourneyRailAdapter = {
    */
   toVM(facts: Brief['facts']): RailVM {
     const rail = railFromFacts(facts);
+    // qa-0718 B5 — "WHAT YOU SELL" shows OFFER groups only; E2 upload buckets are
+    // filtered OUT here (display-only). The original index `i` is PRESERVED for the
+    // chip id, because the chip-id join (`commitGroupChips`) resolves ids against
+    // the FULL `facts.work.groups[]` — filtering must not renumber the survivors.
+    const offerGroups = rail.groups
+      .map((g, i) => ({ g, i }))
+      .filter(({ g }) => g.origin !== 'upload');
     return {
       fields: [
         {
@@ -196,12 +206,23 @@ const workRailAdapter: JourneyRailAdapter = {
           label: 'WHAT YOU SELL',
           kind: 'chips',
           value: null,
-          chips: rail.groups.map((g, i) => ({
+          chips: offerGroups.map(({ g, i }) => ({
             id: chipId(i),
             label: g.name,
           })),
-          skeleton: rail.groups.length === 0,
+          skeleton: offerGroups.length === 0,
           editable: true,
+        },
+        {
+          // qa-0718 B6 — the answered charge. Read-only (corrected in STEP 03),
+          // skeleton until an amount-bearing price exists (on-request stays
+          // skeleton — the documented D-C limit).
+          id: FIELD_PRICE,
+          label: 'WHAT YOU CHARGE',
+          kind: 'text',
+          value: rail.priceLabel,
+          skeleton: rail.priceLabel === null,
+          editable: false,
         },
         {
           id: FIELD_PRICE_POSITION,
@@ -300,15 +321,30 @@ const workRailAdapter: JourneyRailAdapter = {
  *
  * NEVER label-match (breaks on rename — the primary edit) and NEVER position
  * (breaks on add/remove).
+ *
+ * qa-0718 B5 — UPLOAD BUCKETS ARE RE-PRESERVED. WHAT YOU SELL chips are
+ * OFFER-only (toVM filters `origin:'upload'`), but `applyRailEdit({field:'groups'})`
+ * REPLACES the whole array ("a live group referenced by no chip is deleted"). So
+ * any offer rename/add/remove would otherwise WIPE every E2 upload bucket AND its
+ * photos. We therefore re-append every live `origin:'upload'` group not already
+ * referenced by a chip — offer chips still add/rename/remove as before, uploads
+ * (never rendered as chips) simply survive. Generation keeps reading the full
+ * groups[] (offers + uploads + photos).
  */
 function commitGroupChips(chips: RailChipEdit[], liveFacts: Brief['facts']): RailCommit {
   const live = liveGroups(liveFacts);
+  const referenced = new Set<number>();
   const next: WorkGroupInput[] = chips.map((chip) => {
     const idx = chipIndex(chip.id);
     const source = idx === null ? undefined : live[idx];
     // No id (or an id this bag never issued) ⇒ NEW group.
     if (!source) return { name: chip.label };
+    referenced.add(idx as number);
     return { ...source, name: chip.label };
+  });
+  // Re-preserve upload buckets the offer-only chip set never referenced.
+  live.forEach((g, i) => {
+    if (!referenced.has(i) && g.origin === 'upload') next.push(g);
   });
   return applyRailEdit({ field: 'groups', value: next }, liveFacts);
 }
@@ -682,20 +718,21 @@ export const workJourneySeam: JourneyEngineSeam = {
 
   /**
    * STEP 05's two hard preconditions, checked BEFORE anything is charged or
-   * written. SYNC by contract: the kill-switch comes from the zero-dep LEAF
+   * written. SYNC by contract: the allow-list check comes from the zero-dep LEAF
    * `@/lib/workCopyEngine`, so this needs no `await` and drags no generation
    * code onto the pre-confirm entry path (landmine 14). NEVER re-implement the
-   * env read here — one kill-switch source, ever.
+   * allow-list check here — one source, ever.
    *
-   * (a) FLAG (landmine 2). `NEXT_PUBLIC_WORK_COPY_ENGINE` off (or a template
-   *     off the allow-list) ⇒ an EXPLICIT error. The failure mode this exists to
-   *     kill is the SILENT one: the legacy wizard's fork falls through to
-   *     `runWorkSkeleton` when the flag is off, and a skeleton in the JOURNEY
-   *     means STEP 06 reveals an EMPTY site as though it were the finished
-   *     thing. The journey has no skeleton path — it says so instead.
-   *     Near-unreachable via dispatch (`isJourneyEligible` already gates on
-   *     `isWorkCopyTemplate`), but the flag is orthogonal to eligibility and is
-   *     build-time inlined: a prod deploy with the flag off would land here.
+   * (a) ALLOW-LIST. A template OFF the work-copy allow-list ⇒ an EXPLICIT error.
+   *     The failure mode this exists to kill is the SILENT one: the legacy
+   *     wizard's fork falls through to `runWorkSkeleton` for a non-allow-list
+   *     template, and a skeleton in the JOURNEY means STEP 06 reveals an EMPTY
+   *     site as though it were the finished thing. The journey has no skeleton
+   *     path — it says so instead. Near-unreachable via dispatch
+   *     (`isJourneyEligible` already gates on `isWorkCopyTemplate`), but this
+   *     stays as a belt-and-braces guard. (B17: the former
+   *     `NEXT_PUBLIC_WORK_COPY_ENGINE` env kill-switch was removed — work is
+   *     always on; the allow-list is the whole gate.)
    *
    * (b) FACTS (landmine 6). `getWorkFacts` null ⇒ the work strategy route 400s
    *     UNRECOVERABLY (a `kind`-less group persists, so a retry never fixes

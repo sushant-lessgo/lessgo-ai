@@ -37,23 +37,23 @@ export default function DashboardEmptyState() {
       }}
     >
       {/* Welcome chip */}
-      <span className="inline-flex items-center gap-1.5 rounded-app-pill bg-app-tint px-3 py-[5px] font-app-sans text-[11px] font-semibold text-app-primary-deep">
-        <AppIcon name="rocket_launch" size={15} />
+      <span className="inline-flex items-center gap-1.5 rounded-app-pill bg-app-tint px-3.5 py-[6px] font-app-sans text-[12.5px] font-semibold text-app-primary-deep">
+        <AppIcon name="rocket_launch" size={17} />
         Welcome to Lessgo AI
       </span>
 
       {/* Graceful fallback: no first name → drop the comma clause, never "there". */}
-      <h1 className="mt-4 max-w-[620px] text-center font-app-sans text-[34px] font-extrabold leading-[1.12] tracking-[-1px] text-app-ink">
+      <h1 className="mt-6 max-w-[760px] text-center font-app-sans text-[46px] font-extrabold leading-[1.08] tracking-[-1.4px] text-app-ink">
         {firstName ? `Let's build your first site, ${firstName}` : "Let's build your first site"}
       </h1>
 
-      <p className="mt-3 max-w-[520px] text-center font-app-sans text-[14.5px] leading-[1.5] text-app-muted">
+      <p className="mt-4 max-w-[600px] text-center font-app-sans text-[17px] leading-[1.55] text-app-muted">
         Describe what you&apos;re launching — or paste your current website — and Lessgo AI builds a
         high-converting site with copy, layout, and a lead form in seconds.
       </p>
 
       {/* Prompt card — visual only (R17b). */}
-      <div className="mt-7 w-full max-w-[680px] rounded-app-card border border-[#e2e6ef] bg-app-surface px-4 pb-[13px] pt-4 shadow-[0_24px_50px_-24px_rgba(20,20,40,.3)]">
+      <div className="mt-9 w-full max-w-[680px] rounded-app-card border border-[#e2e6ef] bg-app-surface px-4 pb-[13px] pt-4 shadow-[0_24px_50px_-24px_rgba(20,20,40,.3)]">
         {/* R17b — both segments disabled; controlled value stays put, no handler. */}
         <SegmentedControl
           aria-label="How would you like to start? (not yet available)"

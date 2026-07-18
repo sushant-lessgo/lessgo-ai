@@ -20,7 +20,7 @@ export default function Footer() {
             .
           </p>
           <p>
-            Want to shape the future of Lessgo?{" "}
+            Want to shape the future of Lessgo AI?{" "}
             <a
               href="https://t.co/kx0zFbtbri"
               target="_blank"

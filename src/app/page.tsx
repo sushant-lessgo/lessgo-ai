@@ -24,7 +24,7 @@ export default function Home() {
   <div className="max-w-6xl mx-auto flex items-center justify-center px-4">
     <img
       src="/logo.svg"
-      alt="Lessgo Logo"
+      alt="Lessgo AI logo"
       className="h-14 md:h-16"
     />
   </div>
@@ -74,7 +74,7 @@ export default function Home() {
 
 
       <p className="text-heading4 font-medium text-brand-mutedText max-w-[60rem] mt-10 mb-20 text-center hidden sm:block">
-      Describe your idea in one line. Watch Lessgo.ai craft your <span className="font-semibold">$5K-quality landing page</span> with both copy and design in minutes. Its Conversion Intelligence Engine tailors every word and layout to maximize leads, sign-ups and sales.
+      Describe your idea in one line. Watch Lessgo AI craft your <span className="font-semibold">$5K-quality landing page</span> with both copy and design in minutes. Its Conversion Intelligence Engine tailors every word and layout to maximize leads, sign-ups and sales.
 
 
       </p>
@@ -220,7 +220,7 @@ export default function Home() {
 
   {/* Body */}
   <p className="text-brand-mutedText text-sm max-w-xs">
-    Lessgo.ai will research your market, define your positioning, craft your big idea, and deliver a high-converting landing page.
+    Lessgo AI will research your market, define your positioning, craft your big idea, and deliver a high-converting landing page.
   </p>
 </div>
 
@@ -376,7 +376,7 @@ export default function Home() {
 
           {/* Footer */}
           <footer className="text-center text-brand-mutedText text-sm mt-12">
-            <p>© 2025 Lessgo.AI. All rights reserved.</p>
+            <p>© 2025 Lessgo AI. All rights reserved.</p>
           </footer>
           
         

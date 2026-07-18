@@ -123,6 +123,15 @@ export const WorkGroupSchema = z.object({
    * back to the name→slug join. NEVER emit an empty slug.
    */
   slug: z.string().optional(),
+  /**
+   * PROVENANCE (qa-0718 B5), ADDITIVE-OPTIONAL. `'offer'` = a thing the seller
+   * sells (entry offering / STEP 03 group answer); `'upload'` = a photo bucket
+   * the E2 ingestion created (folder name / same-day cluster / "Gallery"
+   * fallback). ABSENT = legacy/offer, so pre-existing facts keep parsing.
+   * Only the "WHAT YOU SELL" rail DISPLAY filters on it — generation still reads
+   * EVERY group (photos intact); this never gates parse or generation.
+   */
+  origin: z.enum(['offer', 'upload']).optional(),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

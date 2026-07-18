@@ -84,7 +84,7 @@ export default async function EmailSequenceManagerPage({ params }: PageProps) {
               </h1>
               <p className="text-sm text-gray-500">
                 Copy-only email sequence for this project&apos;s goal. Paste each email into
-                Calendly Workflows or your ESP — Lessgo doesn&apos;t send them.
+                Calendly Workflows or your ESP — Lessgo AI doesn&apos;t send them.
               </p>
             </div>
             <EmailSequencePanel token={tokenId} />

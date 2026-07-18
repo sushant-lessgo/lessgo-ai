@@ -42,7 +42,7 @@ export function FounderAuthLayout({
   children,
 }: FounderAuthLayoutProps) {
   return (
-    <div className="app-chrome flex min-h-screen w-full bg-app-surface">
+    <div className="app-chrome flex min-h-screen w-full overflow-x-hidden bg-app-surface">
       {/* ================= LEFT: form column ================= */}
       <div className="flex w-full flex-none flex-col px-8 py-11 lg:w-[570px] lg:px-[52px]">
         <Link href="/" className="mb-auto self-start">
@@ -115,7 +115,7 @@ export function FounderAuthLayout({
             <div className="leading-[1.35]">
               <div className="font-app-sans text-[15px] font-bold text-white">Sushant Jain</div>
               <div className="font-app-sans text-xs font-normal text-[#c6d2ee]">
-                Founder &amp; CEO, Lessgo.ai
+                Founder &amp; CEO, Lessgo AI
               </div>
             </div>
             <span className="h-[30px] w-px bg-white/25" />

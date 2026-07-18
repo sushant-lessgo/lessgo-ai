@@ -117,7 +117,7 @@ export function PreviewSection({
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="text-xs font-medium text-gray-500">Current Design</div>
-            <div className="text-xs text-gray-400">Lessgo Generated</div>
+            <div className="text-xs text-gray-400">Lessgo AI Generated</div>
           </div>
           
           <BackgroundPreview

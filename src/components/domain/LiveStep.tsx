@@ -15,7 +15,7 @@ export default function LiveStep({ slug, domain, onRemoved }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const remove = async () => {
-    if (!confirm(`Remove ${domain}? Your Lessgo subdomain will become the primary URL again.`)) {
+    if (!confirm(`Remove ${domain}? Your Lessgo AI subdomain will become the primary URL again.`)) {
       return;
     }
     setRemoving(true);
@@ -61,7 +61,7 @@ export default function LiveStep({ slug, domain, onRemoved }: Props) {
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600">
-        Your Lessgo subdomain (<span className="font-mono">{slug}.lessgo.site</span>) now redirects here.
+        Your Lessgo AI subdomain (<span className="font-mono">{slug}.lessgo.site</span>) now redirects here.
       </div>
 
       {error && (

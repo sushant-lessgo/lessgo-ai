@@ -2,8 +2,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service - Lessgo.ai",
-  description: "Read the terms and conditions for using Lessgo.ai.",
+  title: "Terms of Service - Lessgo AI",
+  description: "Read the terms and conditions for using Lessgo AI.",
 };
 
 export default function TermsPage() {
@@ -14,7 +14,7 @@ export default function TermsPage() {
       <p><strong>Effective Date:</strong> 26-05-2025</p>
 
       <p>
-        Welcome to <strong>Lessgo.ai</strong> ("we", "our", or "us"). These Terms of Service ("Terms") govern your access to and use of our website and services. By using Lessgo.ai, you agree to be bound by these Terms.
+        Welcome to <strong>Lessgo AI</strong> ("we", "our", or "us"). These Terms of Service ("Terms") govern your access to and use of our website and services. By using Lessgo AI, you agree to be bound by these Terms.
       </p>
 
       <section>
@@ -30,7 +30,7 @@ export default function TermsPage() {
       <section>
         <h2 className="text-xl font-semibold mt-8 mb-2">2. Use of Service</h2>
         <p>
-          Lessgo.ai allows users to generate AI-based landing pages using short input prompts. The generated content and pages are stored on our infrastructure (hosted on Vercel).
+          Lessgo AI allows users to generate AI-based landing pages using short input prompts. The generated content and pages are stored on our infrastructure (hosted on Vercel).
         </p>
         <ul className="list-disc list-inside mt-2">
           <li>Use the service only for lawful purposes</li>
@@ -59,7 +59,7 @@ export default function TermsPage() {
       <section>
         <h2 className="text-xl font-semibold mt-8 mb-2">5. Payments (Upcoming)</h2>
         <p>
-          Lessgo.ai is currently free. In the future, we may introduce paid plans. Terms of billing, refunds, and pricing will be published at that time.
+          Lessgo AI is currently free. In the future, we may introduce paid plans. Terms of billing, refunds, and pricing will be published at that time.
         </p>
       </section>
 
@@ -88,7 +88,7 @@ export default function TermsPage() {
       <section>
         <h2 className="text-xl font-semibold mt-8 mb-2">9. Limitation of Liability</h2>
         <p>
-          To the fullest extent permitted by law, Lessgo.ai shall not be liable for any indirect, incidental, or consequential damages resulting from your use of the service.
+          To the fullest extent permitted by law, Lessgo AI shall not be liable for any indirect, incidental, or consequential damages resulting from your use of the service.
         </p>
       </section>
 

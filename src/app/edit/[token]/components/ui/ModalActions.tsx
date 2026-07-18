@@ -48,7 +48,7 @@ export function ModalActions({
             onClick={handleReset}
             disabled={isLoading}
             className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Reset to original Lessgo-generated background"
+            title="Reset to original Lessgo AI-generated background"
           >
             <div className="flex items-center space-x-1">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

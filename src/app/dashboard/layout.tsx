@@ -1,6 +1,7 @@
 import { currentUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { PLAN_CONFIGS, PlanTier } from '@/lib/planManager'
+import { PlanTier } from '@/lib/planManager'
+import { resolveSidebarPlan } from '@/lib/sidebarPlan'
 import AppSidebar, { type SidebarPlan } from '@/components/dashboard/AppSidebar'
 import DashboardTopBar from '@/components/dashboard/DashboardTopBar'
 import { DialogHost } from '@/components/ui/ConfirmDialog'
@@ -47,8 +48,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // which writes a UserPlan AND seeds the one-time FREE credit pool (a once-ever,
   // non-refilling grant — see planManager.createDefaultPlan). This layout renders on
   // EVERY /dashboard/* page, so using it would make passive chrome silently mutate
-  // billing state. No row → `plan` stays undefined → the widget greys with em-dashes
-  // (R14: real or absent, never fabricated).
+  // billing state. A missing row is DISPLAY-defaulted to FREE (a signed-in user with
+  // no row is by definition FREE — createDefaultPlan always makes FREE), so the widget
+  // shows "Free plan / 0 of 1 sites" rather than greying with em-dashes (B18). This is
+  // display defaulting only — the read stays side-effect-free and entitlement is
+  // unchanged. The em-dash path in AppSidebar remains the genuine unauthenticated fallback.
   // Both reads below are Clerk-id-keyed (UserPlan.userId and PublishedPage.userId
   // are BOTH Clerk ids) — no cross-ID-space join.
   let plan: SidebarPlan | undefined
@@ -57,10 +61,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       prisma.userPlan.findUnique({ where: { userId: user.id }, select: { tier: true } }),
       prisma.publishedPage.count({ where: { userId: user.id } }),
     ])
-    const config = userPlan ? PLAN_CONFIGS[userPlan.tier as PlanTier] : undefined
-    if (config) {
-      plan = { planName: config.name, used, limit: config.limits.publishedPages }
-    }
+    plan = resolveSidebarPlan(userPlan?.tier as PlanTier | undefined, used)
   }
 
   return (

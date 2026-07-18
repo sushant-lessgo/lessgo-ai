@@ -505,6 +505,10 @@ export default function CorrectionBoard({
 
   return (
     <div data-testid="correction-board" className="space-y-3">
+      {/* BETA-HIDDEN (qa-0718 B14): re-enable when merge/tidy is functional.
+          The "Tidy up your groups" header + non-functional "Merge selected"
+          control confused users; hidden for beta. Underlying merge logic
+          (doMerge / mergeGroups / selection state) is intentionally kept.
       <div className="flex items-center justify-between">
         {!hideHeader && (
           <p className="font-app-sans text-sm text-app-ink">Tidy up your groups</p>
@@ -521,6 +525,7 @@ export default function CorrectionBoard({
           Merge selected
         </Button>
       </div>
+      */}
 
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
         <div className="space-y-2">

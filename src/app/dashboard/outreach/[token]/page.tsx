@@ -56,7 +56,7 @@ export default async function ColdOutreachManagerPage({ params }: PageProps) {
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Cold outreach — {title}</h1>
           <p className="text-sm text-gray-500">
             Prospect-grounded outreach copy for this project. Paste a prospect&apos;s website URL or
-            About text and generate platform-correct messages — Lessgo doesn&apos;t send them.
+            About text and generate platform-correct messages — Lessgo AI doesn&apos;t send them.
           </p>
         </div>
 
