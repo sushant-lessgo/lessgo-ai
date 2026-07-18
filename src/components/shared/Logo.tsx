@@ -4,7 +4,7 @@ export default function Logo({ className = "", size = 40 }: { className?: string
     return (
       <Image
         src="/logo.svg"
-        alt="Lessgo.ai Logo"
+        alt="Lessgo AI logo"
         width={size}
         height={size}
         className={className}

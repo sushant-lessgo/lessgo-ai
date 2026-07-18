@@ -11,7 +11,7 @@ export default function BlogLayout({
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <span className="text-2xl font-bold text-brand-logo">Lessgo.ai</span>
+            <span className="text-2xl font-bold text-brand-logo">Lessgo AI</span>
           </Link>
 
           <nav className="flex items-center gap-6">
@@ -47,7 +47,7 @@ export default function BlogLayout({
         <div className="max-w-6xl mx-auto px-6 py-12">
           <div className="grid md:grid-cols-3 gap-8">
             <div>
-              <h3 className="font-bold text-lg mb-3">Lessgo.ai</h3>
+              <h3 className="font-bold text-lg mb-3">Lessgo AI</h3>
               <p className="text-gray-600 text-sm">
                 AI-powered landing page builder for startup founders.
                 Launch high-converting pages in minutes.
@@ -93,7 +93,7 @@ export default function BlogLayout({
           </div>
 
           <div className="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} Lessgo.ai. All rights reserved.
+            © {new Date().getFullYear()} Lessgo AI. All rights reserved.
           </div>
         </div>
       </footer>

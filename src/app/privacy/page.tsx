@@ -2,8 +2,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy - Lessgo.ai",
-  description: "Learn how Lessgo.ai handles your personal data in compliance with GDPR.",
+  title: "Privacy Policy - Lessgo AI",
+  description: "Learn how Lessgo AI handles your personal data in compliance with GDPR.",
 };
 
 export default function PrivacyPage() {
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
       <p><strong>Effective Date:</strong> 26-05-2025</p>
 
       <p>
-        This Privacy Policy explains how Lessgo.ai ("we", "our", or "us") collects, uses, and protects your personal data in compliance with the EU General Data Protection Regulation (GDPR).
+        This Privacy Policy explains how Lessgo AI ("we", "our", or "us") collects, uses, and protects your personal data in compliance with the EU General Data Protection Regulation (GDPR).
       </p>
 
       <section>
@@ -41,7 +41,7 @@ export default function PrivacyPage() {
       <section>
         <h2 className="text-xl font-semibold mt-8 mb-2">3. Purpose and Legal Basis</h2>
         <ul className="list-disc list-inside">
-          <li>To provide and improve the Lessgo.ai service</li>
+          <li>To provide and improve the Lessgo AI service</li>
           <li>To manage authentication and access (legitimate interest)</li>
           <li>To analyze usage patterns and improve UX (consent via analytics)</li>
           <li>To generate and store your content (contractual necessity)</li>

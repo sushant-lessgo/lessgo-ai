@@ -35,9 +35,9 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://lessgo.ai'),
-  title: "Lessgo.ai – The AI Landing Page Builder for Startup Founders",
+  title: "Lessgo AI – The AI Landing Page Builder for Startup Founders",
   description:
-    "Lessgo.ai is the AI landing page builder made for startup founders. Instantly generate high-converting landing pages from a single input – no code, no writing hassle. Join the waitlist now!",
+    "Lessgo AI is the AI landing page builder made for startup founders. Instantly generate high-converting landing pages from a single input – no code, no writing hassle. Join the waitlist now!",
     keywords: [
       "AI landing page builder",
       "startup landing page tool",
@@ -50,17 +50,17 @@ export const metadata: Metadata = {
       canonical: "https://lessgo.ai",
     },
   openGraph: {
-    title: "Lessgo.ai – The AI Landing Page Builder for Startup Founders",
+    title: "Lessgo AI – The AI Landing Page Builder for Startup Founders",
     description:
-      "Lessgo.ai is the AI landing page builder for startup founders. Instantly generate high-converting landing pages without coding or writing.",
+      "Lessgo AI is the AI landing page builder for startup founders. Instantly generate high-converting landing pages without coding or writing.",
     url: "https://lessgo.ai",
-    siteName: "Lessgo.ai",
+    siteName: "Lessgo AI",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Lessgo.ai - AI-powered landing page builder for startup founders",
+        alt: "Lessgo AI - AI-powered landing page builder for startup founders",
       },
     ],
     locale: "en_US",
@@ -68,9 +68,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lessgo.ai – The AI Landing Page Builder for Startup Founders",
+    title: "Lessgo AI – The AI Landing Page Builder for Startup Founders",
     description:
-      "Generate high-converting landing pages with Lessgo.ai – the AI-powered builder built for startup founders. Fast, smart, and no-code.",
+      "Generate high-converting landing pages with Lessgo AI – the AI-powered builder built for startup founders. Fast, smart, and no-code.",
       images: [
         {
           url: "/og-image.jpg",
@@ -116,9 +116,9 @@ export default function RootLayout({
         title: 'Claim your founding seat',
         titleCombined: 'Claim your founding seat',
         subtitle:
-          'Invite-only access to Lessgo. Set up in minutes, no credit card required.',
+          'Invite-only access to Lessgo AI. Set up in minutes, no credit card required.',
         subtitleCombined:
-          'Invite-only access to Lessgo. Set up in minutes, no credit card required.',
+          'Invite-only access to Lessgo AI. Set up in minutes, no credit card required.',
         actionText: 'Already have an account?',
         actionLink: 'Log in',
       },

@@ -115,7 +115,7 @@ export function FounderAuthLayout({
             <div className="leading-[1.35]">
               <div className="font-app-sans text-[15px] font-bold text-white">Sushant Jain</div>
               <div className="font-app-sans text-xs font-normal text-[#c6d2ee]">
-                Founder &amp; CEO, Lessgo.ai
+                Founder &amp; CEO, Lessgo AI
               </div>
             </div>
             <span className="h-[30px] w-px bg-white/25" />

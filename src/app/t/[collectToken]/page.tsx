@@ -47,7 +47,7 @@ export default async function CollectPage({ params }: PageProps) {
           <p className="text-sm text-gray-500">Your words help others. It only takes a minute.</p>
         </div>
         <CollectFormClient collectToken={params.collectToken} />
-        <p className="mt-8 text-center text-xs text-gray-400">Powered by Lessgo</p>
+        <p className="mt-8 text-center text-xs text-gray-400">Powered by Lessgo AI</p>
       </main>
     </div>
   )

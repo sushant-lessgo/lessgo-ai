@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!post) return {};
 
   return {
-    title: `${post.meta.title} | Lessgo.ai Blog`,
+    title: `${post.meta.title} | Lessgo AI Blog`,
     description: post.meta.description,
     openGraph: {
       title: post.meta.title,
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       url: `https://lessgo.ai/blog/${post.slug}`,
       type: "article",
       publishedTime: post.meta.date,
-      authors: [post.meta.author || "Lessgo.ai Team"],
+      authors: [post.meta.author || "Lessgo AI Team"],
       images: post.meta.image ? [
         {
           url: post.meta.image,
@@ -66,11 +66,11 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     description: post.meta.description,
     author: {
       "@type": "Organization",
-      name: post.meta.author || "Lessgo.ai Team",
+      name: post.meta.author || "Lessgo AI Team",
     },
     publisher: {
       "@type": "Organization",
-      name: "Lessgo.ai",
+      name: "Lessgo AI",
       logo: {
         "@type": "ImageObject",
         url: "https://lessgo.ai/logo.png",

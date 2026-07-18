@@ -60,7 +60,7 @@ const PRICING_TIERS: Tier[] = [
       'Up to 25 form submissions / month',
     ],
     limits: [
-      '“Made with Lessgo” badge',
+      '“Made with Lessgo AI” badge',
       'No custom domains',
       'No integrations',
     ],
@@ -78,7 +78,7 @@ const PRICING_TIERS: Tier[] = [
     features: [
       '3 sites with custom domains',
       '200 credits / month',
-      'No Lessgo badge',
+      'No Lessgo AI badge',
       'Full analytics dashboard',
       'Form integrations (ConvertKit, etc.)',
       'Testimonials + blog',
@@ -100,7 +100,7 @@ const PRICING_TIERS: Tier[] = [
       'Pro features as they exist today — for life',
       '600-credit lifetime pool (not monthly)',
       '3 sites with custom domains',
-      'No Lessgo badge',
+      'No Lessgo AI badge',
       'Beta-only — 60 seats total, never comes back',
     ],
     limits: [],
