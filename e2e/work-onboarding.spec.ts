@@ -650,21 +650,34 @@ test.describe('E3 — STEP 03 questions (deterministic gating)', () => {
 // ============================================================================
 
 // ============================================================================
-// P6 — STEP 06: the reveal → editor handoff.
+// P6 — the reveal → editor handoff (editor-route-consolidation phase 5).
 //
-// The reveal assertions are APPENDED to the P5 generation test rather than given
-// their own spec, deliberately: reaching STEP 06 honestly costs a full work
-// fan-out (1 strategy + 5 copy calls) AND, on the free tier, a 61s rate-limit
-// wait (Bug A). A second spec would double that for zero extra coverage — the
-// generation path is identical. So this ONE test is the full-journey gate:
-// 02 → 06 → the real site in the iframe → the editor.
+// The reveal FOLDED off the journey (former STEP 06 `/preview?chrome=0` iframe)
+// and ONTO the editor: STEP 05 success `router.push`es `/edit/{token}?reveal=1`,
+// the editor reads the flag, shows the site in preview mode wrapped in the reveal
+// animation, then strips the param so a refresh never re-animates. This ONE test
+// is the full-journey gate: 02 → 05 → the editor reveal (renders, not blank), and
+// — the one-drive guard's deterministic pin — generation fires EXACTLY ONCE.
 // ============================================================================
 
-test('STEP 05 generates the site (mock), STEP 06 reveals it, and the editor opens', async ({
+test('STEP 05 generates the site (mock) and folds into the editor reveal (fires once)', async ({
   page,
 }) => {
   const api = await authedApi(page);
   const { token } = await seedWorkBrief(api);
+
+  // ── ONE-DRIVE GUARD PIN ───────────────────────────────────────────────────
+  // The work drive issues EXACTLY ONE `/api/audience/work/strategy` per drive
+  // (`work.llm.ts`). StepBuilding's `startedFor` ref makes React's dev
+  // double-invoke a no-op — if that guard ever regresses, a single mount fans a
+  // SECOND drive and this counter reads 2. A passive request listener (no
+  // interception) so the real generation runs untouched.
+  let strategyCalls = 0;
+  page.on('request', (req) => {
+    if (req.method() === 'POST' && req.url().includes('/api/audience/work/strategy')) {
+      strategyCalls += 1;
+    }
+  });
 
   await page.goto(`/onboarding/${token}`);
   await expect(page.getByTestId('step-show-work')).toBeVisible({ timeout: 30_000 });
@@ -686,21 +699,22 @@ test('STEP 05 generates the site (mock), STEP 06 reveals it, and the editor open
   // engine-disabled state (landmine 2's explicit error would be here instead).
   await expect(page.getByTestId('building-error-engine-disabled')).toHaveCount(0);
   await expect(page.getByTestId('building-stages')).toBeVisible();
-  // NOT asserted here: the top bar's "Building…" slot. Mock generation finishes
-  // in ~2s, so any assertion on an in-flight-only element is a RACE — it passed
-  // and failed run to run. A test that flakes gets retried into meaninglessness;
-  // the transient chrome is a founder-QA item (P7) instead. What IS asserted
-  // below is that it's gone once we're done.
+
+  const editUrl = new RegExp(`/edit/${token}`);
 
   // The free-tier AI rate limit bites on the 6th call (see the header). Retry
   // through it — ONLY for that specific error, and only while the drive is
-  // making progress: any OTHER error must still fail this test loudly.
+  // making progress: any OTHER error must still fail this test loudly. Success
+  // now NAVIGATES to the editor (no in-journey step-reveal), so the "done" signal
+  // is the URL flip, not a testid.
+  //
+  // NB: a rate-limit retry (real-LLM only) would re-drive and push strategyCalls
+  // above 1 — but that path never fires in mock mode (the default here), where
+  // generation completes without a 429. The exactly-once pin below therefore
+  // holds for the mock gate; the loop stays only to keep the real-LLM run honest.
   for (let i = 0; i < 3; i++) {
     const settled = await Promise.race([
-      page
-        .getByTestId('step-reveal')
-        .waitFor({ state: 'visible', timeout: 90_000 })
-        .then(() => 'done' as const),
+      page.waitForURL(editUrl, { timeout: 90_000 }).then(() => 'done' as const),
       page
         .getByTestId('building-error-error')
         .waitFor({ state: 'visible', timeout: 90_000 })
@@ -717,13 +731,29 @@ test('STEP 05 generates the site (mock), STEP 06 reveals it, and the editor open
     await page.getByTestId('building-retry').click();
   }
 
-  // Success ⇒ journeyStep 6. NO router.push — the reveal owns forward motion,
-  // so we must still be on /onboarding/{token}, not /edit/{token} (the
-  // driver's own redirectTo is deliberately dropped by the seam).
-  await expect(page.getByTestId('step-reveal')).toBeVisible({ timeout: 120_000 });
-  expect(new URL(page.url()).pathname).toBe(`/onboarding/${token}`);
-  await expect(page.getByTestId('journey-dot-6')).toHaveAttribute('data-state', 'active');
-  await expect(page.getByTestId('topbar-building')).toHaveCount(0);
+  // Success ⇒ the editor, carrying the reveal. We landed on /edit/{token}.
+  await page.waitForURL(editUrl, { timeout: 120_000 });
+
+  // ── THE ONE-DRIVE GUARD (deterministic) ───────────────────────────────────
+  // Exactly one strategy call = the guard held under React's dev double-invoke.
+  expect(strategyCalls, 'generation fired more than once — one-drive guard broke').toBe(1);
+
+  // ── THE REVEAL, IN THE EDITOR ──────────────────────────────────────────────
+  // The reveal animation container is present (mode='preview', wrapped canvas)...
+  await expect(page.getByTestId('page-reveal')).toBeVisible({ timeout: 60_000 });
+
+  // ...and the reveal param was CONSUMED (router.replace stripped `?reveal=1`),
+  // so a refresh/back never re-animates.
+  await expect
+    .poll(() => new URL(page.url()).search, { timeout: 10_000 })
+    .toBe('');
+
+  // ...and it is the REAL generated site, not an empty shell: template blocks
+  // emit token attributes (same proof render.spec.ts uses). On /edit this lives
+  // in the PAGE document (the editor is not under `.app-chrome`).
+  await expect(
+    page.locator('[data-surface], [data-palette], [data-variant]').first()
+  ).toBeVisible({ timeout: 60_000 });
 
   // ── The DB: content exists AND the in-progress marker is gone ─────────────
   const draft = await loadDraft(api, token);
@@ -753,100 +783,31 @@ test('STEP 05 generates the site (mock), STEP 06 reveals it, and the editor open
     Object.keys(draft.finalContent.pages).length
   );
 
-  // ⚠️ NOT ASSERTED (REPORTED INSTEAD — see the audit): that the in-progress
-  // marker is GONE from the DB. It isn't, and NOT because finalize was skipped —
-  // `runWorkLLMGeneration` does call `finalizeMultiPageGeneration`, which
-  // `delete`s `fc.generationProgress`. The deletion cannot REACH Postgres:
-  // `/api/saveDraft` shallow-SPREADS the incoming finalContent over the stored
-  // one (`{...existingContent.finalContent, ...finalContent}`, route.ts:194-199),
-  // so a key deleted client-side survives from the earlier per-page save.
-  // It predates this phase — every multi-page LLM run (thing included) is
-  // affected. Fixing it means touching `/api/saveDraft` (or having the driver
-  // send an explicit tombstone), both outside this feature's Files-touched.
-  //
-  // ⟳ SEVERITY CORRECTED DOWN (P6 review — P5's wording overstated it).
-  // Landmine 7's stated symptom, "the editor treats a finished site as
-  // mid-generation", is NOT what happens: NO editor code reads
-  // `generationProgress` (only `isResumableGeneration`, the work/thing
-  // skip-loops, `resumeStep.ts`, and `editDelta/capture.ts:98`, where it is
-  // explicitly skip-listed). The real consequence is the brief STEP-05 flash on
-  // reload asserted below, which re-drives CHARGELESSLY (every page is already
-  // in `completedPageKeys` ⇒ 0 AI calls ⇒ re-finalize ⇒ 06), plus permanent junk
-  // in the stored finalContent. Cosmetic + wasteful — NOT a handoff break.
-
   // The stamps are untouched by the whole run (landmine 3).
   expect(draft.audienceType).toBe('service');
   expect(draft.templateId).toBe('atelier');
   expect(draft.brief.copyEngine).toBe('work');
 
-  // ── THE PLUMBING ASSERTION (the P5 trap) ─────────────────────────────────
-  // A reload re-runs load-detection → resolveResumeStep(loaded). Reaching the
-  // REVEAL proves `finalContent` actually reaches the seam: if page.tsx or
-  // JourneyShell ever stops forwarding it, `loaded.finalContent` is undefined,
-  // the rule returns 2, and this sits on STEP 02 forever — with every unit test
-  // in resumeStep.test.ts still green (it fabricates its input). This assertion
-  // is the ONLY thing guarding that chain.
-  //
-  // NB it does not assert "resumes DIRECTLY at 06": because of the stale
-  // in-progress marker above, `isResumableGeneration` is still true, so the
-  // draft resumes at STEP 05 first and re-drives — the fan-out finds every page
-  // already in `completedPageKeys`, skips them all, re-finalizes and advances to
-  // 06. Self-healing and chargeless, but wasted work; it disappears the moment
-  // the saveDraft merge bug is fixed. Asserting the destination (not the route)
-  // keeps this test true both before and after that fix.
+  // ── REFRESH: the reveal does NOT re-animate ────────────────────────────────
+  // The param is stripped, so a reload of /edit shows the editor WITHOUT the
+  // reveal wrapper. Sections still render (the draft loads); the reveal container
+  // is simply absent.
   await page.reload();
-  await expect(page.getByTestId('step-reveal')).toBeVisible({ timeout: 120_000 });
-  await expect(page.getByTestId('step-show-work')).toHaveCount(0);
-
-  // ── P6: THE REVEAL ───────────────────────────────────────────────────────
-  // The site renders in an IFRAME — a separate document — which is the entire
-  // mechanism that keeps the journey's `.app-chrome` from becoming an ancestor
-  // of template output (landmine 1). Asserting through frameLocator is itself
-  // part of the point: if someone ever "simplifies" this into an inline render,
-  // there is no frame to locate and these assertions die loudly.
-  const frame = page.frameLocator('[data-testid="reveal-frame"]');
-
-  // The chromeless preview mounted...
-  await expect(frame.getByTestId('preview-chromeless')).toBeVisible({ timeout: 60_000 });
-
-  // ...and it is the REAL generated site, not an empty shell: template blocks
-  // emit token attributes (same proof render.spec.ts uses). Mock copy still
-  // renders through the real atelier template.
-  await expect(
-    frame.locator('[data-surface], [data-palette], [data-variant]').first()
-  ).toBeVisible({ timeout: 60_000 });
-
-  // ── NO PUBLISH SURFACE — absent from the DOM, not merely hidden ───────────
-  // The reveal IS the review; the only way forward is the editor. `toHaveCount(0)`
-  // (not `not.toBeVisible()`) is the assertion the plan pins: a hidden-but-present
-  // Publish button would pass visibility checks and still be one CSS change from
-  // shipping a publish action into the magic moment.
-  await expect(frame.getByRole('button', { name: 'Publish' })).toHaveCount(0);
-  await expect(frame.getByRole('button', { name: 'Custom Domain' })).toHaveCount(0);
-  await expect(frame.getByRole('button', { name: 'Back to Edit' })).toHaveCount(0);
-  await expect(frame.getByText('Preview from edit mode')).toHaveCount(0);
-
-  // Nor is there a publish control in the SHELL around the iframe.
-  await expect(page.getByRole('button', { name: 'Publish' })).toHaveCount(0);
-
-  // Site content lives ONLY inside the iframe: the shell's own document must
-  // carry no template output (the landmine-1 tripwire, from the outside).
-  await expect(page.locator('[data-surface], [data-palette], [data-variant]')).toHaveCount(0);
-
-  // Phone toggle constrains the frame; desktop is the default.
-  await page.getByTestId('reveal-viewport').getByRole('radio', { name: 'Phone' }).click();
-  await expect(page.getByTestId('reveal-frame')).toHaveAttribute('style', /width:\s*390px/);
-
-  // ── The handoff: the one forward path ────────────────────────────────────
-  await page.getByTestId('reveal-open-editor').click();
-  await page.waitForURL(`**/edit/${token}`, { timeout: 60_000 });
-
-  // The editor loads the generated site (template output present = it rendered,
-  // not an empty canvas). Here it IS in the page document — the editor is not
-  // under `.app-chrome`, which is exactly why the reveal needed the iframe.
   await expect(
     page.locator('[data-surface], [data-palette], [data-variant]').first()
   ).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId('page-reveal')).toHaveCount(0);
+
+  // ── THE PLUMBING ASSERTION (the P5 trap, now via the resume→editor redirect) ─
+  // Navigating back to /onboarding/{token} re-runs load-detection →
+  // resolveResumeStep(loaded). Finished content resolves to STEP 06, which the
+  // shell now REDIRECTS to `/edit/{token}?reveal=1` (the reveal folded onto the
+  // editor). Reaching /edit proves `finalContent` actually reaches the seam: if
+  // page.tsx or JourneyShell ever stops forwarding it, the rule returns 2 and
+  // this sits on STEP 02 forever — with every resumeStep.test.ts unit still green
+  // (it fabricates its input). This assertion is the ONLY thing guarding that chain.
+  await page.goto(`/onboarding/${token}`);
+  await page.waitForURL(editUrl, { timeout: 120_000 });
 
   // The stamps survive the whole journey, end to end (landmine 3).
   const afterEdit = await loadDraft(api, token);
@@ -898,10 +859,13 @@ test('REAL fan-out on atelier2: STEP 05 binds group photos → /works pages + ho
   await expect(page.getByTestId('step-building')).toBeVisible();
   await expect(page.getByTestId('building-error-engine-disabled')).toHaveCount(0);
 
+  const editUrl = new RegExp(`/edit/${token}`);
+
   // Retry through the free-tier AI rate limit ONLY (any other error fails loudly).
+  // Success now navigates to the editor reveal (the fold), so "done" = the URL flip.
   for (let i = 0; i < 3; i++) {
     const settled = await Promise.race([
-      page.getByTestId('step-reveal').waitFor({ state: 'visible', timeout: 90_000 }).then(() => 'done' as const),
+      page.waitForURL(editUrl, { timeout: 90_000 }).then(() => 'done' as const),
       page.getByTestId('building-error-error').waitFor({ state: 'visible', timeout: 90_000 }).then(() => 'error' as const),
     ]);
     if (settled === 'done') break;
@@ -911,7 +875,7 @@ test('REAL fan-out on atelier2: STEP 05 binds group photos → /works pages + ho
     await page.getByTestId('building-retry').click();
   }
 
-  await expect(page.getByTestId('step-reveal')).toBeVisible({ timeout: 120_000 });
+  await page.waitForURL(editUrl, { timeout: 120_000 });
 
   // ── DATA: the fan-out wrote a `/works/<slug>` item page per group, carrying the
   //         seeded photos VERBATIM (pure code — no AI clobber). ─────────────────
@@ -930,10 +894,12 @@ test('REAL fan-out on atelier2: STEP 05 binds group photos → /works pages + ho
   }
 
   // ── REVEAL: the home gallery paints the seeded covers (schema-backed surface). ─
-  const frame = page.frameLocator('[data-testid="reveal-frame"]');
-  await expect(frame.getByTestId('preview-chromeless')).toBeVisible({ timeout: 60_000 });
+  // The reveal folded onto the editor (phase 5) — the site renders in the /edit
+  // PAGE document (mode='preview', wrapped in the reveal animation), not a
+  // journey iframe. Assert the covers directly on the page.
+  await expect(page.getByTestId('page-reveal')).toBeVisible({ timeout: 60_000 });
   for (const url of coverUrls) {
-    await expect(frame.locator(`img[src="${url}"]`).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator(`img[src="${url}"]`).first()).toBeVisible({ timeout: 30_000 });
   }
 
   // The serve stamps are untouched by the run except the intended atelier2 flip.

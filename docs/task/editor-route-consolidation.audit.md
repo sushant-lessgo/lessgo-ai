@@ -406,3 +406,65 @@ regressed, `frameLocator` would time out (deterministic catch).
   prove it. The extended e2e is the deterministic check but is unexecuted here —
   real run on the QA preview is the founder-facing confirm (folds into the merge
   gate per phase-3 note).
+
+## Phase 5 — Reveal folds onto the edit route + retire /preview SAMEORIGIN
+
+**Files changed**
+- `src/components/onboarding/journey/steps/StepBuilding.tsx` (modified — success routes to editor reveal)
+- `src/components/onboarding/journey/steps/StepReveal.tsx` (deleted)
+- `src/components/onboarding/journey/JourneyShell.tsx` (modified — dropped step-6 body + registration; resume-to-6 redirect)
+- `src/app/generate/[token]/components/PageRevealAnimation.tsx` (deleted — moved)
+- `src/components/reveal/PageRevealAnimation.tsx` (new — moved home + `data-testid="page-reveal"`)
+- `src/app/generate/[token]/page.tsx` (modified — import path only)
+- `src/app/edit/[token]/page.tsx` (modified — reveal wiring in EditPageContent)
+- `next.config.js` (modified — removed `/preview` SAMEORIGIN rule; simplified DENY)
+- `e2e/work-onboarding.spec.ts` (modified — both journey-completion tests rewired to the editor reveal + once-fires counter)
+- `e2e/xfo-headers.spec.ts` (modified — `/preview/x` now DENY)
+- `e2e/workPlan.spec.ts` (modified — scope-extended by orchestrator; step-reveal waits rewired to editor-landing)
+
+### Per-file
+
+**StepBuilding.tsx** — On `result.ok`, `setJourneyStep(6)` became `router.push('/edit/{tokenId}?reveal=1')`. Added `useRouter()` and `const tokenId = useWizardStore((s) => s.tokenId)` (exactly as the retired StepReveal read it). Updated the two rationale comment blocks; nothing deleted.
+
+**The one-drive guard was preserved byte-for-byte.** The only edits inside the mount effect are (a) the success branch and (b) comment wording. Still: `startedFor` ref keyed on `attempt`, NO cleanup return, NO cancelled flag, deps `[attempt]` with the eslint-disable. The cleanup/cancelled variants (known bugs that orphan generation) were NOT reintroduced. The guard block reads verbatim: `if (startedFor.current === attempt) return; startedFor.current = attempt;` then the async IIFE, closing with `// eslint-disable-next-line react-hooks/exhaustive-deps` and `}, [attempt]);`.
+
+**JourneyShell.tsx** — Removed the StepReveal import. `STEP_BODIES` retyped `Partial<Record<JourneyStep, …>>` with the `6: StepReveal` entry dropped. `LAST_STEP` 6 to 5. `ready` now also requires `!!Body`, and the body render is gated on `ready && seam && Body &&` so an undefined body can never render.
+- In-scope edge case handled (logged under Deviations): `resolveWorkResumeStep` still returns `6` for finished content (`src/modules/wizard/work/resumeStep.ts` — out of Files-touched, unchanged). With no step-6 body a resume-to-6 would crash on an undefined `Body`. Intercepted inside the resume effect (a Files-touched file): `if (step === 6) { router.push('/edit/{tokenId}?reveal=1'); return; }` — the SAME destination StepBuilding pushes to on fresh success. No `.app-chrome`/reveal surface was introduced inside JourneyShell.
+
+**PageRevealAnimation** moved from `src/app/generate/[token]/components/` to `src/components/reveal/`. Component body identical; added a header comment and `data-testid="page-reveal"` on the animated container. Importer grep result: the ONLY importer was `src/app/generate/[token]/page.tsx` — re-pointed to `@/components/reveal/PageRevealAnimation`. No importer outside Files-touched. `/generate` still reveals this slice.
+
+**edit/[token]/page.tsx** — `EditPageContent` reads the reveal flag via `window.location.search` in a mount effect, NOT `useSearchParams` — deliberately, to avoid the `missing-suspense-with-csr-bailout` build trap (no `<Suspense>` needed; the subtree is already `'use client'` behind EditProvider's hydration gate). When `reveal=1`: `store.getState().setMode('preview')` (reveal = the clean site first; phase-1 segmented control is the go-edit affordance), `setRevealing(true)`, then `router.replace('/edit/{tokenId}')` to strip the param. A `revealHandled` ref makes the effect run once (StrictMode-safe). When revealing, `EditLayout` is wrapped in `<PageRevealAnimation sectionsCount={sections.length}>` (sections from `useEditStoreContext`); else bare. `EditProvider` bootstrap UNCHANGED. Confirmed `loadFromDraft` (`persistenceActions.ts`) never writes `state.mode`, so the pre-load `setMode('preview')` survives the async load. Also removed two dead `useState`s (`loadingState`/`errorMessage`) that only had a no-op setter.
+
+**next.config.js — /preview framer grep + XFO decision.**
+- Grepped the whole repo for `<iframe` framing `/preview`: the ONLY match was `StepReveal.tsx` (now deleted). The surviving `/preview/{token}` references — `src/app/admin/page.tsx`, `src/app/preview/[token]/privacy/page.tsx`, `src/components/dashboard/work/WorkLibraryClient.tsx` — are all plain `<a href>` NAVIGATIONS, which XFO does not affect. Checked all three explicitly per the plan's list.
+- DECISION: REMOVED the `/preview/:token+` SAMEORIGIN rule. The framable surface is now exactly the `/edit/:token/preview` sub-route. DENY source simplified from `/((?!preview/)(?!edit/[^/]+/preview$).*)` to `/((?!edit/[^/]+/preview$).*)`. The two remaining sources stay mutually exclusive (`/edit/{token}/preview` = SAMEORIGIN; everything else incl. `/preview/{token}` and bare `/edit/{token}` = DENY). Comment block rewritten.
+
+**e2e/xfo-headers.spec.ts** — `/preview/{token}` expectation flipped SAMEORIGIN to DENY; matrix comment updated.
+
+**e2e/work-onboarding.spec.ts** — both journey-completion tests rewired:
+- Test 1: a passive `page.on('request')` counter on `POST /api/audience/work/strategy` set up before `plan-build`; the retry loop "done" signal is now `page.waitForURL(/\/edit\/{token}/)`; after landing asserts `strategyCalls === 1` (one-drive guard pin), `page-reveal` container visible, reveal param consumed (`expect.poll` on `URL.search === ''`), and template output visible in the PAGE document. DB assertions (finalContent, generationProgress tripwire, stamps) preserved. Added: reload `/edit` to `page-reveal` count 0 (no re-animate) + sections still render; then `goto('/onboarding/{token}')` to `waitForURL(/edit/)` as the finalContent-to-seam plumbing pin (now exercises the resume-6-to-editor redirect).
+- Test 2 (atelier2 REAL fan-out): retry loop "done" to `waitForURL(/edit/)`; reveal covers asserted on `page` via `page-reveal` + `page.locator('img[src=...]')` (not the old frameLocator).
+
+### Deviations
+- Resume-to-6 redirect (in-scope, JourneyShell) — conservative: redirect to the editor reveal rather than crash; keeps `resumeStep.ts`/`work.ts`/`types.ts` (out of Files-touched) untouched. `JourneyStep` type still declares `6`; `STEP_BODIES` is `Partial` to accommodate the gap.
+- Removed two dead `useState`s in EditPageContent — unused, conservative.
+
+### Green gate (run from WORKDIR)
+- `npx tsc --noEmit` -> EXIT 0 (clean).
+- `npm run test:run` -> EXIT 0 — 250 files passed / 1 skipped; 4035 tests passed / 14 skipped (no unit regressions; `resumeStep.test.ts` / `journeyAgnostic.test.ts` green).
+- `npm run lint` -> EXIT 0 — only pre-existing warnings (techpremium/vestria `<img>` LCP + ph-provider exhaustive-deps); NONE in phase-5 files.
+- `npm run build` -> EXIT 0 — no `missing-suspense-with-csr-bailout` (Suspense trap avoided via the `window.location.search` mount-effect read). Route graph intact: `/edit/[token]` (810 kB), `/edit/[token]/preview` (443 kB), `/generate/[token]` (451 kB) all compiled.
+
+### e2e status
+Both specs authored/updated + already registered in `playwright.config.ts`. Not executed here — same convention as phases 1-4 (authed specs self-skip without `E2E_CLERK_*` creds + a live dev server; xfo self-skips without a reachable server). First real run on the configured e2e env / QA preview.
+
+### workPlan.spec.ts rewire (orchestrator-approved scope extension, +1 file)
+The orchestrator approved extending phase 5 by ONE file to fix the break this change caused. `e2e/workPlan.spec.ts` waited for `getByTestId('step-reveal')` after generation (the race in the retry loop ~line 179, and a final assert ~line 195); with StepReveal deleted that testid never appears, so the spec would TIME OUT. Rewired both, consistent with `work-onboarding.spec.ts`:
+- Added `const editUrl = new RegExp('/edit/' + token)` before the retry loop.
+- Loop "done" branch: `page.getByTestId('step-reveal').waitFor(...)` → `page.waitForURL(editUrl, ...)`.
+- Final assert: `expect(step-reveal).toBeVisible()` → `page.waitForURL(editUrl, { timeout: 120_000 })` **plus** `expect(page.getByTestId('page-reveal')).toBeVisible()` — a REAL landing assertion (fails if generation didn't reach the editor reveal). Nothing else in the spec touched; the downstream DB/structure invariants are unchanged. Re-ran tsc/test:run/lint (all green); build skipped (no non-spec code change this round).
+
+### Open risks
+- XFO is a RUNTIME header — the build only validates config shape. The HUMAN GATE (`curl -I`: `/edit/{t}/preview`->SAMEORIGIN, `/preview/{t}`->DENY now, `/edit/{t}`->DENY, `/`+`/dashboard`->DENY, mutually exclusive) is the real check.
+- Reveal correctness on `/edit` is a runtime concern the e2e pins deterministically but is unexecuted here — the founder's one real work journey on the QA preview is the gate.
+- `workPlan.spec.ts` break (above) — the single explicit out-of-scope item.

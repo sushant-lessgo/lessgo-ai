@@ -173,12 +173,15 @@ test('STEP 04: a removed page is absent from Brief.structure AND never generated
   // real finding as work-onboarding.spec.ts); any OTHER error must fail loudly.
   // The retry RESUMES via completedPageKeys — it never re-issues generate-copy
   // for a page already done, and NEVER for the removed page.
+  //
+  // editor-route-consolidation phase 5: the reveal folded onto the editor —
+  // STEP 05 success now `router.push`es `/edit/{token}?reveal=1` (no in-journey
+  // step-reveal body), so the "done" signal is the URL flip, mirroring
+  // work-onboarding.spec.ts.
+  const editUrl = new RegExp(`/edit/${token}`);
   for (let i = 0; i < 3; i++) {
     const settled = await Promise.race([
-      page
-        .getByTestId('step-reveal')
-        .waitFor({ state: 'visible', timeout: 90_000 })
-        .then(() => 'done' as const),
+      page.waitForURL(editUrl, { timeout: 90_000 }).then(() => 'done' as const),
       page
         .getByTestId('building-error-error')
         .waitFor({ state: 'visible', timeout: 90_000 })
@@ -192,7 +195,9 @@ test('STEP 04: a removed page is absent from Brief.structure AND never generated
     await page.waitForTimeout(61_000);
     await page.getByTestId('building-retry').click();
   }
-  await expect(page.getByTestId('step-reveal')).toBeVisible({ timeout: 120_000 });
+  // Landed on the editor reveal — the real "generation completed" signal.
+  await page.waitForURL(editUrl, { timeout: 120_000 });
+  await expect(page.getByTestId('page-reveal')).toBeVisible({ timeout: 60_000 });
 
   // ── INVARIANT (a): the persisted Brief.structure reflects the plan. ────────
   // The approve commit is the LAST structure-bearing saveDraft (per-tap commits

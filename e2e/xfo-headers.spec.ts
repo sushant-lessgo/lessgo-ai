@@ -3,16 +3,17 @@ import { test, expect } from '@playwright/test';
 /**
  * editor-route-consolidation phase 3: X-Frame-Options route-gate check.
  *
- * WHAT THIS PINS: the three mutually-exclusive `headers()` sources in `next.config.js`
+ * WHAT THIS PINS: the two mutually-exclusive `headers()` sources in `next.config.js`
  * resolve to EXACTLY one XFO value per URL. XFO is a RUNTIME header — a malformed
  * path-to-regexp `source` compiles fine but ships the wrong header (or two), and the
  * failure mode downstream is a SILENTLY BLANK same-origin iframe (phase 4 mobile view).
  * So this is a request-context assertion against the real running server, not a unit test.
  *
- * The matrix (this phase):
- *   /edit/{token}/preview → SAMEORIGIN   (the editor preview sub-route — framable)
+ * The matrix (phase 5 — the legacy `/preview` SAMEORIGIN rule was REMOVED once the
+ * reveal folded onto the editor, so `/preview` is now DENY like every non-framed route):
+ *   /edit/{token}/preview → SAMEORIGIN   (the editor preview sub-route — the ONLY framable surface)
  *   /edit/{token}         → DENY         (bare editor — NOT framable)
- *   /preview/{token}      → SAMEORIGIN   (legacy reveal iframe — retires in phase 5)
+ *   /preview/{token}      → DENY         (reveal no longer frames it; plain-nav only)
  *   /                     → DENY
  *   /dashboard            → DENY
  *
@@ -29,7 +30,7 @@ const TOKEN = 'xfo-probe-token';
 const CASES: Array<{ path: string; expected: 'SAMEORIGIN' | 'DENY' }> = [
   { path: `/edit/${TOKEN}/preview`, expected: 'SAMEORIGIN' },
   { path: `/edit/${TOKEN}`, expected: 'DENY' },
-  { path: `/preview/${TOKEN}`, expected: 'SAMEORIGIN' },
+  { path: `/preview/${TOKEN}`, expected: 'DENY' },
   { path: `/`, expected: 'DENY' },
   { path: `/dashboard`, expected: 'DENY' },
 ];
