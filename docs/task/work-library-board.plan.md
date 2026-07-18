@@ -21,7 +21,7 @@ change needed; parity holds by construction.
 - phase 1 facts foundation (hidden + slug): done (commit ea37f416, review loops 1)
 - phase 2 pure resync module: done (commit 29520e75, review loops 1)
 - phase 3 work-library API route: done (commit aebbdaa3, review loops 1) — HUMAN GATE c pending founder sign-off
-- phase 4 board verbs + CorrectionBoard extension: pending
+- phase 4 board verbs + CorrectionBoard extension: done (commit 15ab32ba, review loops 1)
 - phase 5 dashboard page + tab + client host: pending
 - phase 6 manage-link re-point + Update site: pending
 - phase 7 deterministic QA + founder pilot: pending
@@ -35,9 +35,11 @@ change needed; parity holds by construction.
    migration. Dashboard hide sets the flag (photo stays in facts, restorable in-place); onboarding's
    remove-from-array `hidePhoto` (D12) is untouched. `deriveWorksEntries` filters `hidden` at the
    single choke point so a hidden photo never reaches covers/entries/item pages.
-   *Coherence note:* a dashboard-hidden photo reopened in onboarding's CorrectionBoard (default
-   remove-mode, flag-unaware) renders as normal-visible while still filtered off the live site —
-   confusing but not data-losing; accepted for beta.
+   *Coherence note:* a dashboard-hidden photo reopened in onboarding's CorrectionBoard renders
+   dimmed with a Restore affordance (PhotoThumb keys the dim/Restore branch off `photo.hidden`,
+   not `hideBehavior` — phase-4 impl choice, clearer than the originally-predicted
+   "normal-visible"). Onboarding never sets the flag itself, so today's onboarding is unchanged;
+   not data-losing; accepted for beta.
 3. **Stable group identity = `slug?: string` on `WorkGroupSchema`.** Seeded from `slugify(name)` on
    first board save; rename preserves it → the `/works/<slug>` item page + gallery `href` survive a
    rename (JOIN by stored slug, falling back to `slugify(name)` for pre-board facts — today's
