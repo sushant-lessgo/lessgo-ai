@@ -97,3 +97,65 @@ export const authAppearance: Appearance = {
     formHeaderSubtitle: 'font-app-sans text-sm text-app-muted',
   },
 }
+
+/**
+ * profileAppearance — Clerk `appearance` token map for the managed <UserProfile/>
+ * on `/dashboard/settings` (Lessgo AI account settings).
+ *
+ * PRESENTATION ONLY, same contract as `authAppearance`: Clerk owns every flow
+ * (change name/email/password, avatar upload, connected accounts, delete account).
+ * Nothing here changes behaviour.
+ *
+ * Difference from `authAppearance`: the card chrome is KEPT. The auth map strips
+ * border/shadow/bg because FounderAuthLayout supplies the frame; here <UserProfile/>
+ * is a standalone panel dropped into the dashboard's `#f7f8fa` main, so it needs its
+ * own frame — a clean white surface with an `app-border` hairline and app radius.
+ * Clerk's default INNER UI (its own nav rows / form controls) is founder-accepted for
+ * beta (spec Scope OUT) — this is lightweight theming, not pixel-perfect.
+ *
+ * Styling: `app-*` tokens ONLY (see src/components/ui/README.md). Variables reuse
+ * `authAppearance`'s values verbatim (duplicated, not a shared const, so authAppearance
+ * stays untouched).
+ */
+export const profileAppearance: Appearance = {
+  variables: {
+    colorPrimary: '#006CFF',
+    colorText: '#191922',
+    colorTextSecondary: '#7b7b86',
+    colorBackground: '#ffffff',
+    colorInputBackground: '#ffffff',
+    colorInputText: '#191922',
+    colorDanger: '#d1483a',
+    colorSuccess: '#16a34a',
+    fontFamily: 'Onest, ui-sans-serif, system-ui, sans-serif',
+    borderRadius: '12px',
+  },
+  elements: {
+    // ---- card chrome: KEPT — clean panel on the dashboard canvas ----
+    rootBox: 'w-full',
+    cardBox:
+      'w-full max-w-none rounded-app-card border border-app-border bg-app-surface shadow-app-card',
+    card: 'w-full bg-transparent shadow-none',
+
+    // ---- profile nav (left rail of <UserProfile/>) ----
+    navbar: 'border-app-border',
+    navbarButton:
+      'font-app-sans text-sm text-app-muted transition-colors hover:text-app-ink',
+    navbarButtonIcon: 'text-app-faint',
+
+    // ---- headers ----
+    headerTitle: 'font-app-sans font-extrabold tracking-[-0.4px] text-app-ink',
+    headerSubtitle: 'font-app-sans text-sm text-app-muted',
+
+    // ---- fields (mirrors ui-foundation input.tsx) ----
+    formFieldLabel: 'font-app-sans text-xs font-semibold text-app-label',
+    formFieldInput:
+      'rounded-app-input border border-app-border-input bg-app-surface px-[13px] py-3 font-app-sans text-sm text-app-ink transition-colors placeholder:text-app-placeholder focus:border-app-primary focus:bg-white focus:shadow-none focus-visible:outline-none',
+    formFieldErrorText: 'font-app-sans text-xs text-app-danger',
+    formFieldHintText: 'font-app-sans text-xs text-app-faint',
+
+    // ---- primary CTA (mirrors ui-foundation button.tsx `default`) ----
+    formButtonPrimary:
+      'rounded-app-input bg-app-primary py-3 font-app-sans text-[14.5px] font-bold normal-case tracking-normal text-white shadow-app-btn-primary transition-colors hover:bg-app-primary-hover focus-visible:ring-2 focus-visible:ring-app-primary/40',
+  },
+}
