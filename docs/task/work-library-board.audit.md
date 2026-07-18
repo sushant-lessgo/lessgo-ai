@@ -344,3 +344,125 @@ GET + echo PUT. Two `describe`s / 2 tests:
   multipart upload + t7 pipeline round-trip is exercised only manually / in phase 7's Playwright
   spec (out of scope here).
 - `pipelineGuards.test.ts` known 5s-flake did not trigger this run (full suite green).
+
+---
+
+# Phase 6 — Gallery manage-link re-point + "Update site" + export-sweep guard
+
+## Files changed
+- `src/modules/skeletons/work/blocks/Gallery/WorkGalleryGrid.tsx` — manage-link re-point (edit wrapper only)
+- `src/hooks/editStore/collectionHelpers.ts` — `catalogItemsAuthoritative('works')` export-sweep guard
+- `src/hooks/editStore/collectionHelpers.works.test.ts` (new) — export-guard regression test
+- `src/components/dashboard/work/WorkLibraryClient.tsx` — "Update site" CTA (fallback: deep-link to `/preview/[token]`)
+- `src/components/dashboard/work/WorkLibraryClient.test.tsx` — updated host assertion (was phase-5 disabled-button; now asserts `/preview` link). **NOT on the phase-6 Files-touched list** — see Deviations.
+
+## What changed, per file
+
+### WorkGalleryGrid.tsx (manage-link re-point)
+- Removed the `WORK_LIBRARY_BOARD_HREF = '/dashboard/library'` placeholder; added
+  `workLibraryBoardHref(tokenId)` returning `/dashboard/<tokenId>/work` (falls back to `/dashboard` when null).
+- Reads `tokenId` from the edit store via a narrow one-shot selector `useEditStore(s => s.tokenId)`
+  (the store's meta-slice field; token-scoped factory).
+- The href is still rendered ONLY inside `manageSlot`, which is passed only by the EDIT wrapper.
+- **Published-parity confirmation:** `.core.tsx` and `.published.tsx` were NOT touched. The published
+  wrapper (`WorkGalleryGrid.published.tsx`) calls `WorkGalleryGridCore` with NO `manageSlot`, so no
+  manage href is ever emitted in published output — byte-identical by construction. `galleryGroups.test.tsx`
+  (renders the published core without manageSlot) stays green, proving the published output has no
+  manage markup. The explicit "manageSlot absent in published" test extension is phase-7's scope
+  (its Files-touched owns `galleryGroups.test.tsx`); not editable here.
+
+### collectionHelpers.ts (export-sweep guard — pre-existing latent bug FIX)
+- Added pure `catalogItemsAuthoritative(collectionKey)` returning true for `works` ONLY.
+- **Mechanism:** keyed on `collectionKey === 'works'` (a self-contained guard in this module), NOT a
+  registry def-flag. The clean def-flag would require editing `src/modules/collections/registry.ts`,
+  which is NOT on this phase's Files-touched list; per the phase instruction, the `key === 'works'`
+  guard is the pre-approved in-scope alternative that avoids touching the registry.
+- **Both call sites guarded** (both are the `materializeCatalogItems` writers):
+  - `materializeIntoPages` (export/publish path) — skips the catalog `items[]` write for works.
+  - `syncCollection` (live-editor `commitActivePage` path) — skips the catalog `items[]` write for works.
+  - Per-item `related[]` (`materializeRelated`) writes are LEFT unguarded (plan scopes the guard to
+    the `materializeCatalogItems` call sites only; `related` is a separate field resync never touches).
+- **Why works-only:** `cardFromEntry` reads `rec.images` and emits a `CatalogCard`
+  (`{id,model,name,oneLiner,image,...}`), but a works item page's `workdetail` record carries `photos`
+  (not `images`) and the catalog surface is WorkCatalog's `{id,name,cover,href}` shape → re-deriving
+  would write blank-cover, wrong-shaped cards and clobber the stored `workcatalog.items[]`, which are
+  authoritative (seeded by `buildCollectionCatalogSlice` D13 + maintained by `resyncWorkContent`).
+  products/services/case-studies MUST still re-materialize — the guard leaves them untouched.
+
+### WorkLibraryClient.tsx ("Update site" CTA — FALLBACK path taken)
+- Replaced the disabled placeholder button with an enabled `<a href="/preview/<tokenId>">Update site</a>`
+  plus subcopy "Review and publish your changes on the preview page."
+- Dropped the now-unused `AppTooltip` import.
+
+## Which Update-site path + why
+- **FALLBACK taken** (pre-approved, ruling #2). The primary direct-from-board publish is dead-on-arrival:
+  `buildPagesForExport(state)` consumes the editor-STORE state shape (top-level `state.sections`,
+  `state.content`, `state.pages`, `state.sectionLayouts`, `state.chrome`, `state.currentPageId`,
+  `state.title`), whereas `GET /api/loadDraft` returns a persisted `finalContent` tree (the
+  `{layout,sections,content,pages,chrome,...}` blob). Feeding one into the other requires a store-shape
+  adapter — exactly what the plan told me NOT to build. So the CTA deep-links to `/preview/[token]`,
+  the existing publish flow. The step-2 guard makes this safe: `/preview` publish runs
+  `buildPagesForExport` → the export sweep, which now skips works catalog-item re-derivation.
+- Used a plain `<a>` (not `next/link`) — /preview is a different route tree (full navigation is fine)
+  and it avoids the App-Router-context hazard in the jsdom host test.
+- **DROPPED** `src/lib/workLibrary/publishFromDraft.ts` + its test (not created) — fallback path, per
+  the phase instruction.
+
+## Deviations
+- **Edited `WorkLibraryClient.test.tsx` (NOT on the phase-6 Files-touched list).** The mandated fallback
+  CTA change breaks the phase-5 assertion `expect(cta.disabled).toBe(true)`, and step 5 explicitly
+  requires "a host test that the CTA links to `/preview/[token]`" on the fallback. That host test can
+  only live in this co-located test file, and leaving the suite red violates a hard rule. This is the
+  intended substitute for the dropped `publishFromDraft.test.ts` (net test-file count unchanged). I
+  edited ONLY the 4-line CTA assertion (disabled-button -> `/preview/tok_test` anchor). Flagging for
+  orchestrator visibility; veto if undesired.
+- **CTA is always-enabled, not greyed-when-unpublished.** The phase text suggested greying to
+  "Publish from the editor first" for unpublished projects, but determining publish-state needs data
+  not reachable from this component without editing `route.ts` or `page.tsx` (both out of scope).
+  Conservative choice: an always-enabled link to `/preview/[token]` — the canonical publish flow that
+  handles BOTH first-publish and republish, so it never wrongly blocks a legitimate publish.
+
+## Test results
+- New `collectionHelpers.works.test.ts` (4 describes): `catalogItemsAuthoritative` true-only-for-works;
+  `materializeIntoPages` + `syncCollection` each leave works catalog `items[]` byte-identical
+  (`toEqual(WORK_ITEMS)`) while re-materializing products (empty -> 1 card, image set); full
+  `buildPagesForExport` sweep preserves works items byte-identical + works item pages intact while
+  products re-derive. GREEN.
+- Updated `WorkLibraryClient.test.tsx`: CTA is an `<a>` with `href="/preview/tok_test"`. GREEN.
+- `galleryGroups.test.tsx` (published core, no manageSlot): GREEN (parity verified, not extended — phase 7 owns it).
+
+## Verification (all in WORKDIR, all GREEN)
+- `npx tsc --noEmit` — clean, no output.
+- `npx vitest run` targeted (3 files) — 11/11 passed.
+- `npm run test:run` — 250 passed | 1 skipped (251 files); 4249 passed | 18 skipped. pipelineGuards 5s-flake did not trigger.
+- `npm run lint` — no errors (only pre-existing `no-img-element` / `exhaustive-deps` warnings, none in my files).
+- `npm run build` — succeeded (full route table emitted).
+
+## HUMAN-GATE PROOF STEPS (spec gate b — published rendering)
+Run on a dev/staging **works-CAPABLE** project (atelier2/skeleton with existing `page-<slug>` item
+pages + `workcatalog` singleton — verify first, per phase-7 pre-check):
+1. Open `/dashboard/<token>/work` ("Your work"). Confirm the real groups load (e.g. Weddings/Portraits).
+2. Perform a full board edit through the CorrectionBoard: **rename** a group, **pick a new cover**,
+   **hide** a photo (it dims + shows Restore), **move** a photo to another group, **reorder** a group
+   (up/down). Each verb funnels through `PUT /api/work-library` (busy state, then adopts server groups).
+3. Open the editor at `/edit/<token>`, open the work gallery section, click **"Manage photos"** —
+   confirm it deep-links to `/dashboard/<token>/work` (the board), NOT the old `/dashboard/library`.
+4. Back on the board, click **"Update site"** -> lands on `/preview/<token>` -> publish from there.
+5. On the LIVE published page verify the board edits are reflected on ALL group-reference surfaces:
+   - the **gallery** section (renamed group, new cover, reordered card order, hidden photo absent),
+   - the **chrome** group cards (header/nav group references),
+   - the **`/works` catalog index** (`workcatalog` items[] — order/name/cover/href match the gallery),
+   - each **`/works/<slug>`** item page (photos reflect hide/move; renamed group keeps its slug/URL).
+6. **Editor<->published parity:** open `/edit/<token>` and confirm the gallery/catalog render identically
+   to the published pages (same names/covers/order) — the manage link is present in edit only, absent
+   in published. A merged-away group's `/works/<slug>` 404s (accepted, ruling #1).
+
+## Open risks
+- The `/preview` fallback means "Update site" leaves the dashboard for the editor's preview/publish UI
+  rather than a one-click in-place republish; acceptable per ruling #2, but a future phase could add a
+  loadDraft->store-shape adapter to enable the in-place primary path.
+- The `related[]` per-item materialize for works remains unguarded (out of the plan's `materializeCatalogItems`
+  scope); it writes a derived `related` field on `workdetail` that `resyncWorkContent` never touches and
+  the work item page does not render as a catalog card — no observed corruption, but noting it.
+- Published "manageSlot absent" is proven structurally + via the green published-core test; the explicit
+  assertion extension is deferred to phase 7 (owns `galleryGroups.test.tsx`).

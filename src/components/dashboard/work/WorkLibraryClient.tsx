@@ -18,14 +18,18 @@
 //                 ref `{id: assetId, url}` to the target group and commit through
 //                 the SAME funnel. Multi-file uploads run sequentially; a per-file
 //                 failure toasts and skips that file.
-//   • Update site — the publish CTA lands in phase 6. Rendered DISABLED with a
-//                 why-tooltip until then (greyed-placeholder rule).
+//   • Update site — deep-links to `/preview/[token]`, the existing publish flow
+//                 (phase-6 FALLBACK path, ruling #2). The board's save already
+//                 resynced the stored content + `workcatalog.items[]`; /preview's
+//                 publish runs the export sweep (guarded works-only in
+//                 collectionHelpers) so the resynced catalog survives republish.
+//                 The direct-from-board primary path was DOA: `buildPagesForExport`
+//                 consumes the editor-STORE state shape, not `loadDraft` output.
 // ============================================================================
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import CorrectionBoard from '@/components/onboarding/journey/engines/work/CorrectionBoard'
 import { ToastProvider, useToast } from '@/components/ui/toast'
-import { AppTooltip } from '@/components/ui/tooltip'
 import type { WorkGroupInput } from '@/modules/wizard/work/rail'
 
 interface WorkLibraryClientProps {
@@ -234,23 +238,20 @@ function WorkLibraryInner({ tokenId }: WorkLibraryClientProps) {
             />
           )}
 
-          {/* Update site — the publish handler lands in phase 6. Disabled +
-              why-tooltip until then (greyed-placeholder rule). */}
+          {/* Update site — deep-links to the existing /preview publish flow
+              (phase-6 fallback). Board edits are already resynced into stored
+              content; /preview publishes them live. */}
           <div className="mt-6 border-t border-app-hairline pt-4">
-            <AppTooltip label="Coming soon — publish your changes from here.">
-              <span className="inline-block">
-                <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  title="Coming soon — publish your changes from here."
-                  data-testid="work-update-site"
-                  className="cursor-not-allowed rounded-app-badge bg-app-primary px-4 py-2 font-app-sans text-sm font-medium text-white opacity-50"
-                >
-                  Update site
-                </button>
-              </span>
-            </AppTooltip>
+            <a
+              href={`/preview/${encodeURIComponent(tokenId)}`}
+              data-testid="work-update-site"
+              className="inline-block rounded-app-badge bg-app-primary px-4 py-2 font-app-sans text-sm font-medium text-white hover:opacity-90"
+            >
+              Update site
+            </a>
+            <p className="mt-2 font-app-sans text-xs text-app-muted">
+              Review and publish your changes on the preview page.
+            </p>
           </div>
         </>
       )}

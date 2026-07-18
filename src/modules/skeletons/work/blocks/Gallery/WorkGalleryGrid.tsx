@@ -6,23 +6,29 @@
 // does NOT render this link.
 
 import React from 'react';
+import { useEditStore } from '@/hooks/useEditStore';
 import { useWorkBlock } from '../../hooks/useWorkBlock';
 import { WorkEditProvider, editPrimitives, useWorkEditCtx } from '../editPrimitives';
 import { WorkGalleryGridCore, type WorkGalleryContent } from './WorkGalleryGrid.core';
 
 /**
- * Library-board target for the gallery's "manage photos" link. Placeholder
- * dashboard route until the library board exists — re-pointed in D2.
+ * Library-board target for the gallery's "manage photos" link — the project-scoped
+ * "Your work" dashboard board (`/dashboard/<token>/work`). Edit-only: rendered ONLY
+ * via `manageSlot`, so the published wrapper (no manageSlot) stays byte-identical.
  */
-export const WORK_LIBRARY_BOARD_HREF = '/dashboard/library';
+export function workLibraryBoardHref(tokenId: string | null | undefined): string {
+  return tokenId ? `/dashboard/${tokenId}/work` : '/dashboard';
+}
 
 export default function WorkGalleryGrid({ sectionId }: { sectionId: string }) {
   const { blockContent, handleContentUpdate, handleCollectionUpdate } =
     useWorkBlock<WorkGalleryContent>({ sectionId });
   const ctx = useWorkEditCtx(sectionId, blockContent, handleContentUpdate, handleCollectionUpdate);
+  // One-shot read of the token-scoped store's token → the board deep-link.
+  const tokenId = useEditStore((s) => s.tokenId);
   const manageSlot = (
     <p className="wk-gallery__manage">
-      <a href={WORK_LIBRARY_BOARD_HREF} data-wk-manage-photos="">Manage photos →</a>
+      <a href={workLibraryBoardHref(tokenId)} data-wk-manage-photos="">Manage photos →</a>
     </p>
   );
   return (

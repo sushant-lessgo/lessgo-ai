@@ -123,10 +123,12 @@ describe('WorkLibraryClient — GET payload → board props', () => {
     expect(thumb).not.toBeNull()
     expect(thumb!.style.backgroundImage).toContain('BLURW1')
 
-    // The disabled Update-site placeholder is present (phase-6 handler pending).
-    const cta = testid<HTMLButtonElement>('work-update-site')
+    // The Update-site CTA deep-links to the /preview publish flow (phase-6
+    // fallback path — the direct-from-board primary was DOA on shape mismatch).
+    const cta = testid<HTMLAnchorElement>('work-update-site')
     expect(cta).not.toBeNull()
-    expect(cta!.disabled).toBe(true)
+    expect(cta!.tagName).toBe('A')
+    expect(cta!.getAttribute('href')).toBe('/preview/tok_test')
   })
 })
 

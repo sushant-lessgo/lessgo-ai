@@ -74,6 +74,30 @@ function cardFromEntry(entry: ProjectPageEntry, def: CollectionDef): CatalogCard
   };
 }
 
+/**
+ * Guard: is the collection's catalog `items[]` OWNED elsewhere (do NOT re-derive
+ * it here)? True for `works` ONLY.
+ *
+ * WHY (work-library-board phase 6, pre-existing latent bug): `materializeCatalogItems`
+ * → `cardFromEntry` reads `rec.images` and emits a `CatalogCard`
+ * (`{id,model,name,oneLiner,image,…}`). But a `works` item page's `workdetail`
+ * record carries `photos` (not `images`) and the catalog surface is WorkCatalog's
+ * `{id,name,cover,href}` shape — so re-deriving would write blank-cover, wrong-shaped
+ * cards, clobbering the stored `workcatalog.items[]`. Those items are AUTHORITATIVE
+ * elsewhere: seeded by `buildCollectionCatalogSlice` (D13) and maintained by the
+ * board's `resyncWorkContent`. So for `works` we SKIP catalog-item re-derivation at
+ * both call sites (export sweep + live-editor sync) and leave the stored items
+ * untouched. products/services/case-studies still re-materialize normally. Do NOT
+ * teach `cardFromEntry` the works shape in this branch.
+ *
+ * NOTE: keyed on `collectionKey === 'works'` (not a registry def-flag) to stay a
+ * self-contained guard in this module — the collection registry is a pure-data leaf
+ * that this guard intentionally does not modify.
+ */
+export function catalogItemsAuthoritative(collectionKey: string): boolean {
+  return collectionKey === 'works';
+}
+
 /** All item pages of a collection, order-sorted. */
 export function collectionItems(pages: Pages, collectionKey: string): ProjectPageEntry[] {
   return Object.values(pages || {})
@@ -141,7 +165,10 @@ export function syncCollection(state: any, collectionKey: string): void {
   const pages: Pages = state.pages;
 
   const catalog = findCatalogPage(pages, collectionKey);
-  if (catalog) {
+  // Skip catalog-item re-derivation when the items are authoritative elsewhere
+  // (works — see catalogItemsAuthoritative). Prevents blank-cover clobber on
+  // live-editor collection ops (page switch / record edit).
+  if (catalog && !catalogItemsAuthoritative(collectionKey)) {
     setSectionField(state, catalog.id, def.catalogSectionType, 'items', materializeCatalogItems(pages, collectionKey));
   }
   for (const p of Object.values(pages)) {
@@ -167,7 +194,12 @@ export function materializeIntoPages(pages: Pages, collectionKey: string): void 
       sec.elements[field] = clone(value);
     }
   };
-  writeInto(findCatalogPage(pages, collectionKey), def.catalogSectionType, 'items', materializeCatalogItems(pages, collectionKey));
+  // Skip catalog-item re-derivation when the items are authoritative elsewhere
+  // (works — see catalogItemsAuthoritative). Prevents blank-cover clobber of the
+  // resynced `workcatalog.items[]` at the export/publish boundary.
+  if (!catalogItemsAuthoritative(collectionKey)) {
+    writeInto(findCatalogPage(pages, collectionKey), def.catalogSectionType, 'items', materializeCatalogItems(pages, collectionKey));
+  }
   for (const p of collectionItems(pages, collectionKey)) {
     writeInto(p, def.itemSectionType, 'related', materializeRelated(pages, p, collectionKey));
   }
