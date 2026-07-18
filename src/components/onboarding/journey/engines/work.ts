@@ -11,10 +11,9 @@
 //     • `@/modules/wizard/work/rail.ts`   (pure: zod + types)
 //     • `@/modules/wizard/work/resumeStep.ts` (pure — joins the list in P2b)
 //     • `@/lib/schemas/workFacts.schema`  (pure: zod)
-//     • `@/lib/workCopyEngine`            (zero-dep leaf — hosts BOTH
-//        `isWorkCopyTemplate` and, since P5, the `workCopyEngineEnabled`
-//        kill-switch, precisely so `preflight` can stay SYNC without importing
-//        `work.llm.ts`)
+//     • `@/lib/workCopyEngine`            (zero-dep leaf — hosts the allow-list
+//        predicate `isWorkCopyTemplate` and its `workCopyEngineEnabled` alias,
+//        precisely so `preflight` can stay SYNC without importing `work.llm.ts`)
 //     • `@/types/brief` + `./types`       (types only)
 //     • local copy strings
 // and NOTHING else. In particular NEVER `@/modules/wizard/generation/**` or
@@ -719,20 +718,21 @@ export const workJourneySeam: JourneyEngineSeam = {
 
   /**
    * STEP 05's two hard preconditions, checked BEFORE anything is charged or
-   * written. SYNC by contract: the kill-switch comes from the zero-dep LEAF
+   * written. SYNC by contract: the allow-list check comes from the zero-dep LEAF
    * `@/lib/workCopyEngine`, so this needs no `await` and drags no generation
    * code onto the pre-confirm entry path (landmine 14). NEVER re-implement the
-   * env read here — one kill-switch source, ever.
+   * allow-list check here — one source, ever.
    *
-   * (a) FLAG (landmine 2). `NEXT_PUBLIC_WORK_COPY_ENGINE` off (or a template
-   *     off the allow-list) ⇒ an EXPLICIT error. The failure mode this exists to
-   *     kill is the SILENT one: the legacy wizard's fork falls through to
-   *     `runWorkSkeleton` when the flag is off, and a skeleton in the JOURNEY
-   *     means STEP 06 reveals an EMPTY site as though it were the finished
-   *     thing. The journey has no skeleton path — it says so instead.
-   *     Near-unreachable via dispatch (`isJourneyEligible` already gates on
-   *     `isWorkCopyTemplate`), but the flag is orthogonal to eligibility and is
-   *     build-time inlined: a prod deploy with the flag off would land here.
+   * (a) ALLOW-LIST. A template OFF the work-copy allow-list ⇒ an EXPLICIT error.
+   *     The failure mode this exists to kill is the SILENT one: the legacy
+   *     wizard's fork falls through to `runWorkSkeleton` for a non-allow-list
+   *     template, and a skeleton in the JOURNEY means STEP 06 reveals an EMPTY
+   *     site as though it were the finished thing. The journey has no skeleton
+   *     path — it says so instead. Near-unreachable via dispatch
+   *     (`isJourneyEligible` already gates on `isWorkCopyTemplate`), but this
+   *     stays as a belt-and-braces guard. (B17: the former
+   *     `NEXT_PUBLIC_WORK_COPY_ENGINE` env kill-switch was removed — work is
+   *     always on; the allow-list is the whole gate.)
    *
    * (b) FACTS (landmine 6). `getWorkFacts` null ⇒ the work strategy route 400s
    *     UNRECOVERABLY (a `kind`-less group persists, so a retry never fixes

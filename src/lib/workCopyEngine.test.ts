@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   WORK_COPY_ENGINE_TEMPLATES,
   isWorkCopyTemplate,
@@ -26,45 +26,22 @@ describe('isWorkCopyTemplate (template-membership predicate)', () => {
 });
 
 // ============================================================================
-// The kill-switch, at its NEW home (work-onboarding-shell P5).
+// workCopyEngineEnabled — the ALLOW-LIST gate (B17).
 //
-// It moved OUT of `@/modules/wizard/generation/work.llm` so the journey seam's
-// SYNC `preflight` can read it without a static import of the generation graph
-// (landmine 14). `work.llm.ts` re-exports it, and `work.llm.test.ts` still
-// imports it from there — that suite passing UNTOUCHED is the proof the
-// generation callers' import surface is intact.
-//
-// Landmine 2 is the reason both halves are pinned: flag off ⇒ the work journey
-// must fail LOUDLY at STEP 05, never fall through to a silent skeleton (an
-// empty reveal).
+// The former `NEXT_PUBLIC_WORK_COPY_ENGINE` env kill-switch was REMOVED (founder
+// directive — work is always on). `workCopyEngineEnabled` is now a thin alias of
+// `isWorkCopyTemplate`: the allow-list is the ONLY gate, ENV-INDEPENDENT. These
+// asserts (no env setup, no restore) are the regression guard that no env branch
+// ever creeps back in and that the allow-list still blocks non-atelier work
+// templates.
 // ============================================================================
 
-describe('workCopyEngineEnabled (env kill-switch × allow-list)', () => {
-  const prior = process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
-  afterEach(() => {
-    if (prior === undefined) delete process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
-    else process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = prior;
-  });
-
-  it('flag OFF (unset) ⇒ false even for an allow-listed template', () => {
-    delete process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
-    expect(workCopyEngineEnabled('atelier')).toBe(false);
-  });
-
-  it('flag anything-but-"true" ⇒ false (opt-IN, never truthy-ish)', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = '1';
-    expect(workCopyEngineEnabled('atelier')).toBe(false);
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'false';
-    expect(workCopyEngineEnabled('atelier')).toBe(false);
-  });
-
-  it('flag ON + atelier ⇒ true', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+describe('workCopyEngineEnabled (allow-list, env-independent)', () => {
+  it('atelier ⇒ true (env UNSET — no kill-switch)', () => {
     expect(workCopyEngineEnabled('atelier')).toBe(true);
   });
 
-  it('flag ON + a work template that is NOT allow-listed (granth) ⇒ false', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+  it('allow-list still blocks non-atelier work templates + null/undefined', () => {
     expect(workCopyEngineEnabled('granth')).toBe(false);
     expect(workCopyEngineEnabled('lumen')).toBe(false);
     expect(workCopyEngineEnabled(null)).toBe(false);

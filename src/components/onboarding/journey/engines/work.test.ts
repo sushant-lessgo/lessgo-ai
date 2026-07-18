@@ -15,7 +15,7 @@
 // proves it, over an E2-SHAPED bag (groups that actually carry photos/items).
 // ============================================================================
 
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 import { workJourneySeam } from './work';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
@@ -916,46 +916,25 @@ describe('work seam — correction verbs through the D10 funnel (P4)', () => {
 
 describe('work seam — STEP 05 preflight', () => {
   type PreState = Parameters<typeof workJourneySeam.preflight>[0];
-  const priorFlag = process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
 
   const state = (over: Record<string, unknown>) =>
     ({ templateId: 'atelier', briefFacts: e2Facts(), ...over }) as unknown as PreState;
 
-  afterEach(() => {
-    if (priorFlag === undefined) delete process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
-    else process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = priorFlag;
-  });
+  // B17: the NEXT_PUBLIC_WORK_COPY_ENGINE env kill-switch was REMOVED. Preflight
+  // now gates on the allow-list ALONE (env-independent) — these asserts run with
+  // the env UNSET and are the regression guard that no env branch creeps back.
 
-  it('flag ON + allow-listed template + work facts ⇒ ok', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+  it('allow-listed template + work facts ⇒ ok (env UNSET — no kill-switch)', () => {
     expect(workJourneySeam.preflight(state({}))).toEqual({ ok: true });
   });
 
-  it('flag OFF ⇒ engine-disabled, EXPLICIT — never a silent skeleton (landmine 2)', () => {
-    delete process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
-    const result = workJourneySeam.preflight(state({}));
-    expect(result.ok).toBe(false);
+  it('a work template that is NOT allow-listed (granth) ⇒ engine-disabled', () => {
+    const result = workJourneySeam.preflight(state({ templateId: 'granth' }));
     expect(result.ok === false && result.reason).toBe('engine-disabled');
     expect(result.ok === false && result.message.length).toBeGreaterThan(0);
   });
 
-  it('a work template that is NOT allow-listed (granth) ⇒ engine-disabled even with the flag ON', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
-    const result = workJourneySeam.preflight(state({ templateId: 'granth' }));
-    expect(result.ok === false && result.reason).toBe('engine-disabled');
-  });
-
-  it('reads the kill-switch from the LEAF — one source, no second env check in the seam', () => {
-    // If the seam ever re-implemented the env read, this flip would not be seen
-    // by it (or, worse, would drift from the generation fork's answer).
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
-    expect(workJourneySeam.preflight(state({})).ok).toBe(true);
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'false';
-    expect(workJourneySeam.preflight(state({})).ok).toBe(false);
-  });
-
   it('no work facts ⇒ missing-facts (getWorkFacts null 400s the strategy route unrecoverably)', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
     for (const facts of [undefined, null, {}, { entry: { businessName: 'x' } }]) {
       const result = workJourneySeam.preflight(state({ briefFacts: facts }));
       expect(result.ok).toBe(false);
@@ -964,7 +943,6 @@ describe('work seam — STEP 05 preflight', () => {
   });
 
   it('a KIND-LESS group ⇒ missing-facts, not a green light into an unrecoverable 400 (landmine 6)', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
     const broken = {
       work: { identity: { name: 'X' }, groups: [{ name: 'Weddings' }] },
     };
@@ -973,7 +951,6 @@ describe('work seam — STEP 05 preflight', () => {
   });
 
   it('preflight is SYNC (its result is not a promise) — the firewall depends on it', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
     expect(workJourneySeam.preflight(state({}))).not.toBeInstanceOf(Promise);
   });
 });

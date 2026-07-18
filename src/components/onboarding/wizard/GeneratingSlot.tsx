@@ -105,15 +105,14 @@ export default function GeneratingSlot() {
       return;
     }
 
-    // WORK + multipage (e.g. atelier). Two sub-paths, decided by the LLM engine
-    // flag + template allow-list (work-copy-engine phase 5):
-    //   • flag ON  + atelier (allow-list) → LLM MULTI-PAGE FAN-OUT
+    // WORK + multipage (e.g. atelier). Two sub-paths, decided by the template
+    // allow-list (work-copy-engine phase 5; B17: env kill-switch removed — the
+    // allow-list is now the whole gate, work is always on):
+    //   • atelier (allow-list) → LLM MULTI-PAGE FAN-OUT
     //     (runWorkLLMGeneration: strategy → per-page copy → save).
-    //   • flag OFF, or a non-allow-list template → the EXISTING SKELETON path
+    //   • a non-allow-list template → the EXISTING SKELETON path
     //     (runWorkSkeleton: empty multipage draft for manual fill; zero LLM,
-    //     zero credits, zero copy) — BYTE-IDENTICAL to today when the flag is OFF
-    //     (default). NEXT_PUBLIC_* is build-time inlined; the kill-switch is
-    //     redeploy-speed, not a runtime toggle.
+    //     zero credits, zero copy).
     // Neither is buildWorkInput()/runGeneration('work') nor the MIN_WORKS guard
     // below (that's the writer/granth generator's contract). Granth (work +
     // single-page) never enters here: isWorkMultipage() is false.
