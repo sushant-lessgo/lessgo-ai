@@ -17,8 +17,9 @@ instead of writing new store code.
 
 ## Progress log
 
-- phase 1 re-mount locale controls + bilingual gate: pending
-- phase 2 visibility + reset regression tests, full green gate: pending
+- phase 1 re-mount locale controls + bilingual gate: done (commit 6d9b6c6e, standard-tier no per-phase review)
+- phase 2 visibility + reset regression tests, full green gate: done (commit 47d3a8f6)
+- whole-diff impl-review (standard tier): SHIP, 0 blocking, 3 cosmetic nits (fresh tsc/test/lint green)
 
 ## Design decisions (locked for implementation)
 
