@@ -65,3 +65,62 @@ All match the plan's expected behavior.
 - **HUMAN GATE pending:** allow-policy sign-off (keep/strip table + the `#`-replacement, mailto/tel/fragment allowances, embed→`''`, `video_url` exemption, `class` kept, N1 first-republish byte-diff). All plan defaults were implemented as specified; nothing was changed pending sign-off.
 - `EXTRA_URL_KEYS` is intentionally empty — phase 2's sink grep must reconcile it.
 - Pre-existing tsc error (`founder.jpg`) is environmental; if it blocks a later gate it needs `rm -rf .next` per the known stale-types note, unrelated to this feature.
+
+---
+
+## Phase 2 — Deep-tree chokepoint + sink grep + publish wiring + dead-sanitizer cleanup
+
+### Files changed
+- `src/lib/publishSanitizer.ts` — added the deep-tree walk (`sanitizeContentHtml`), the locale-overlay helper (`sanitizeLocaleOverlay`), and the shared private dispatch (`sanitizeStringField` + `sanitizeItemObject`/`sanitizeElements`/`sanitizeElementMetadata`/`sanitizeSectionFields`). No change to any phase-1 export.
+- `src/app/api/publish/route.ts` — 2 wire calls + removed dead `sanitizeHtmlContent` import + added `publishSanitizer` import.
+- `src/app/api/publish/route.test.ts` — removed orphaned `sanitizeHtmlContent` mock key.
+- `src/lib/security.ts` — deleted dead `sanitizeHtmlContent` (and its now-unused `sanitizePublishedContent` import).
+
+### Step 1 — Reconciled sink table (grep `href=`/`src=` across ALL `**/*.published.tsx` under `src/modules/templates/`; 107 hits)
+
+Every content key rendered into an `<a href>` or `<iframe src>`:
+
+| Key | Where read | Bucket |
+|---|---|---|
+| `href` (collection items: nav `item.href`, footer `link.href`/`l.href`, social `s.href`, contact `r.href`, catalog/lineup `it.href`/`item.href`, nav-child `c.href`) | meridian/hearth/lex/lumen/surge/techpremium footers, headers, contact, catalog, lineup | (a) `endsWith('href')` |
+| `cta_href` (Explainer row `r.cta_href`) | `TechPremiumExplainer.published.tsx:75` | (a) `endsWith('href')` |
+| `whatsapp_href` (`props.whatsapp_href` → waRaw) | `TechPremiumContact.published.tsx:49` | (a) `endsWith('href')` |
+| `url` (footer social `s.url`) | `TechPremiumFooter.published.tsx:83` | (a) `endsWith('url')` |
+| `signin_url` (`props.signin_url`) | `TechPremiumNav.published.tsx:59` | (a) `endsWith('url')` |
+| `book_call_url` (`props.book_call_url`) | `LumenFooter.published.tsx:49`, `LumenContactForm.published.tsx:44` | (a) `endsWith('url')` |
+| `buttonConfig.{url,pathSlug,fileUrl}` + `buttonConfig.dest.{url,fileUrl,pathSlug}` (via `resolveCtaHref`/`resolveDestination`) | all `ctaHref`/`secondaryHref`/`signinHref`/`pkgHref` derivations (meridian/hearth/lex/lumen/surge/techpremium) | (a) elementMetadata walk → `endsWith('url'/'slug')` |
+| `map_embed` (`props.map_embed` → `mapEmbedSrc`) | `TechPremiumContact.published.tsx:101` iframe | (a) `isEmbedContentKey` `endsWith('embed')` |
+| `video_url` (`r.video_url`/`props.video_url` → `ytEmbed`) | `TechPremiumExplainer.published.tsx:48` + `TechPremiumProcess.published.tsx:30` iframes | (c) EXEMPT — `ytEmbed` regex-extracts an 11-char id into a FIXED youtube-nocookie URL or `''` (re-verified) |
+| Composed-scheme hrefs: `mailto:${contact_email}`, `tel:${contact_tel}`, `https://wa.me/${whatsapp_number}`, `#top`/`#contact`/`#cat-…`, literal `/`, `/products`, `/contact` | techpremium/lumen/hearth footers, contact, nav | Out of scope — scheme is FIXED at the template level (interpolated field can't inject a new scheme); the non-URL fields (`whatsapp_number`, `whatsapp_prefill`, `contact_email`, `contact_tel`) fall to the harmless HTML pass |
+| `<img src>` keys: `logo_image`, `hero_image`, `about_image`, `cover_image`, `image`, `im.src`, `logo.url` | many templates | Out of scope — non-executable sink (`<img src>`). Note: keys ending `url`/`image` that happen to match the suffix (e.g. `logo.url`) are gated harmlessly — a valid https image URL passes `isSafeURL` unchanged; only unparseable/`javascript:` → `'#'`, which an `<img>` can't execute anyway. |
+
+- **Bucket (b): NONE.** No real href/iframe-src content key escapes the suffix pattern → `EXTRA_URL_KEYS` stays EMPTY (unchanged from phase-1 seed).
+- **"No non-iframe `embed` key" confirmation:** grep for `\w*embed` across `src/modules/templates` + `src/modules/sections` found the `embed` suffix ONLY on `map_embed` (an `<iframe src>`). No non-iframe content key ends in `embed`; the destructive `endsWith('embed')` → `''` path can't false-positive today.
+
+### Step 2/3 — walk design
+- `sanitizeContentHtml(content)` mirrors `sanitizeContentForPublish`'s traversal exactly: subpages first (`content.subpages` → `sub.layout.sections` → `subContainer = sub.content ?? sub`), then root (`content.layout.sections` → `container = content.content ?? content`), then a defensive `content.chrome.header.data`/`.footer.data` pass (no-op via the injectChrome aliasing, but guards a future copy-not-alias change). Mutates in place.
+- Per section: `elements` (bare string → dispatch on element key; array → object items dispatch on their OWN keys, string items on the element key; object element → one-level defensive walk) + `elementMetadata` (buttonConfig string props, AND `buttonConfig.dest` string props — TWO levels deep, so `dest.fileUrl`/`dest.url`/`dest.pathSlug` are reached). Never touches `layout`/`aiMetadata`/section keys/non-strings.
+- Shared `sanitizeStringField(key,value)` precedence: embed → exempt(HTML) → url → HTML.
+- `sanitizeLocaleOverlay(overlay)` walks `locale → sectionId → elementKey → string|string[]`, same dispatch, arrays per item; mutates-and-returns (seeding site assigns the result).
+
+### Step 4 — wire locations (final line numbers after edits)
+- **Main call** `sanitizeContentHtml(content)` — `src/app/api/publish/route.ts:100-106`, immediately AFTER the chrome-injection block (closes at :98) and BEFORE `cleanTitle`/DB writes/render. Guarded `if (content && typeof content === 'object')`.
+- **Overlay call** — `src/app/api/publish/route.ts:359-364`: `(content as any).localeContent = sanitizeLocaleOverlay(projectLocaleContent)`, inside the existing `if (projectLocaleContent && …)` guard (only-when-present preserved).
+
+### Step 5 — dead-sanitizer path: DELETE
+- Grep (`sanitizeHtmlContent`, src+tests) before edits: definition in `src/lib/security.ts`, dead import in `route.ts`, mock key in `route.test.ts` — NO live caller (docs-only elsewhere). Plan's delete precondition held → **deleted** `sanitizeHtmlContent` from `security.ts` (and its now-orphaned `import { sanitizePublishedContent }`). No repoint needed.
+- Post-edit grep (`src/**/*.{ts,tsx}`): zero `sanitizeHtmlContent` references anywhere. `sanitizePublishedContent` remains defined + default-exported + self-tested in `src/lib/htmlSanitizer.ts` (NOT deleted — plan audit-note-only; now unused by security.ts but still has its own test/default-export consumers).
+
+### Out-of-scope audit notes (no code, per plan)
+- `src/utils/htmlSanitization.ts` (`sanitizeWithDOMPurify`) — second regex sanitizer, NOT on the publish path; left untouched, known non-boundary for a future cleanup ticket.
+- `sanitizePublishedContent` + `STRICT_PROFILE` in `htmlSanitizer.ts` — may now be effectively unused by production code; harmless, out of scope, future cleanup.
+- Template `<style>` constants / hand-authored CSS live OUTSIDE the content tree (module-level string constants in block files) — the walk only touches `content.{subpages,layout/content sections}.{elements,elementMetadata}` + `chrome.*.data`, so it never reaches them by construction.
+
+### Deviations from plan
+- None. `EXTRA_URL_KEYS` left empty exactly as the reconciliation dictated.
+
+### Verification
+- `npx tsc --noEmit`: only the pre-existing unrelated `src/app/page.tsx(6,26)` `founder.jpg` error; none from the touched files.
+- `npm run test:run`: 243 files passed / 1 skipped · 4064 tests passed / 18 skipped (unchanged from phase-1 baseline; `route.test.ts` still green after the mock-key removal + the two new real `publishSanitizer` calls running against its `{layout:{},content:{}}` fixture — walk returns early, no throw).
+- Grep: zero `sanitizeHtmlContent` in src+tests.
+- Manual dev check: skipped (not required per plan; deploy-QA human smoke covers the live path).

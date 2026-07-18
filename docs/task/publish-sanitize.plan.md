@@ -22,8 +22,8 @@ sections are covered, plus a separate pass over the render-only i18n `localeCont
 
 ## Progress log
 
-- phase 1 server sanitizer engine (HTML allow-policy + pattern URL/embed scheme-gate): done (review loops 1, ship; class attr KEPT, rel=noopener via afterSanitizeAttributes; commit pending) — AWAITING allow-policy human gate
-- phase 2 deep-tree chokepoint (post-chrome + locale overlay) + sink grep + publish wiring + dead-sanitizer cleanup: pending
+- phase 1 server sanitizer engine (HTML allow-policy + pattern URL/embed scheme-gate): done (commit 87421a7f, review loops 1, ship; class attr KEPT, rel=noopener via afterSanitizeAttributes). ALLOW-POLICY HUMAN GATE PASSED 2026-07-18 — founder approved all defaults (HTML keep/strip as-is; URLs allow mailto/tel/#fragment, unsafe href→'#', unsafe embed→''; video_url exemption + N1 first-republish normalization acknowledged).
+- phase 2 deep-tree chokepoint (post-chrome + locale overlay) + sink grep + publish wiring + dead-sanitizer cleanup: done (review loops 1, ship; 107 href/src hits all bucket-a, EXTRA_URL_KEYS empty; main call route.ts:105, overlay route.ts:363; sanitizeHtmlContent DELETED). Nit for phase 3: lowercase the EXEMPT_URL_KEYS check for consistency.
 - phase 3 tests (payload matrix, URL-gate matrix incl. flat href/embed keys, benign fixture, chrome/locale/metadata tree, idempotency, e2e assert): pending
 
 ---

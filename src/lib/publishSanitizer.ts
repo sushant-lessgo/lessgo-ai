@@ -250,3 +250,186 @@ export function sanitizePublishedEmbed(value: string): string {
     return '';
   }
 }
+
+// ── Deep-tree chokepoint (the publish walk) ──────────────────────────────────
+//
+// sanitizeContentHtml() mirrors sanitizeContentForPublish's traversal
+// (src/modules/sections/layoutElementSchema.ts) — subpages first, then root,
+// then the defensive chrome-residual pass — and MUTATES IN PLACE. In-place is
+// load-bearing: injectChromeIntoPage aliases `chrome.header.data`/`.footer.data`
+// by reference into every page container (injectChrome.ts:13,18), so cleaning
+// the injected sections also cleans the residual `content.chrome.*` copy that
+// persists in the DB snapshot.
+//
+// Phase-2 sink-grep reconciliation (audit): every content key rendered into an
+// `<a href>` or `<iframe src>` across ALL template dirs matches
+// isUrlContentKey/isEmbedContentKey (bucket a) or is `video_url` (EXEMPT, bucket
+// c). EXTRA_URL_KEYS stays empty (no bucket-b escapee). `<img src>` keys are
+// non-executable and out of scope. Only `map_embed` ends in `embed`.
+
+/**
+ * The one shared key-aware dispatch for a single string field. Precedence:
+ *   1. embed key  → sanitizePublishedEmbed  (value may be a full iframe paste)
+ *   2. exempt key → sanitizePublishedHtml   (URL/ID has no `<` → byte-identical;
+ *                                            `<`-bearing junk still HTML-cleaned)
+ *   3. url key    → sanitizePublishedUrl    (precedes HTML so the no-`<` fast-path
+ *                                            can't pass `javascript:` verbatim)
+ *   4. else       → sanitizePublishedHtml
+ */
+function sanitizeStringField(key: string, value: string): string {
+  if (isEmbedContentKey(key)) return sanitizePublishedEmbed(value);
+  if (EXEMPT_URL_KEYS.includes(key)) return sanitizePublishedHtml(value);
+  if (isUrlContentKey(key) || EXTRA_URL_KEYS.includes(key)) return sanitizePublishedUrl(value);
+  return sanitizePublishedHtml(value);
+}
+
+/**
+ * Walk every string prop of a plain object (a collection item, or a defensively
+ * nested sub-object) through the key dispatch. Dispatches on the object's OWN
+ * field keys (a collection item's `href`/`cta_href`/`quote`/… — NOT the parent
+ * collection key). Arrays of strings dispatch per item; nested objects recurse
+ * ONE level (`allowRecurse`) — deep enough for the shapes that exist, shallow
+ * enough to never chase arbitrary structures. Non-strings untouched.
+ */
+function sanitizeItemObject(obj: Record<string, any>, allowRecurse = true): void {
+  for (const [k, v] of Object.entries(obj)) {
+    if (typeof v === 'string') {
+      obj[k] = sanitizeStringField(k, v);
+    } else if (Array.isArray(v)) {
+      for (let i = 0; i < v.length; i++) {
+        const item = v[i];
+        if (typeof item === 'string') v[i] = sanitizeStringField(k, item);
+        else if (item && typeof item === 'object' && allowRecurse) sanitizeItemObject(item, false);
+      }
+    } else if (v && typeof v === 'object' && allowRecurse) {
+      sanitizeItemObject(v, false);
+    }
+  }
+}
+
+/**
+ * Walk a section's `elements` map. Bare string → dispatch on the element key;
+ * array (collection or string-list) → per item (object items dispatch on their
+ * own keys, string items on the element key); object element → defensive walk.
+ */
+function sanitizeElements(elements: Record<string, any>): void {
+  for (const [key, val] of Object.entries(elements)) {
+    if (typeof val === 'string') {
+      elements[key] = sanitizeStringField(key, val);
+    } else if (Array.isArray(val)) {
+      for (let i = 0; i < val.length; i++) {
+        const item = val[i];
+        if (typeof item === 'string') val[i] = sanitizeStringField(key, item);
+        else if (item && typeof item === 'object') sanitizeItemObject(item);
+      }
+    } else if (val && typeof val === 'object') {
+      sanitizeItemObject(val);
+    }
+  }
+}
+
+/**
+ * Walk a section's `elementMetadata` map — the B1 core. For each entry, dispatch
+ * over `buttonConfig`'s string props (legacy `url`/`pathSlug`/`fileUrl`) AND —
+ * TWO levels deep — over `buttonConfig.dest`'s string props (new-vocabulary
+ * `dest.{url,fileUrl,pathSlug}`; `whatsapp`/`call`/`email` non-URL fields fall to
+ * the HTML pass, harmless). Nothing else in elementMetadata is a URL sink.
+ */
+function sanitizeElementMetadata(elementMetadata: Record<string, any>): void {
+  for (const md of Object.values(elementMetadata)) {
+    const bc = (md as any)?.buttonConfig;
+    if (!bc || typeof bc !== 'object') continue;
+    for (const [k, v] of Object.entries(bc)) {
+      if (typeof v === 'string') (bc as any)[k] = sanitizeStringField(k, v);
+    }
+    const dest = (bc as any).dest;
+    if (dest && typeof dest === 'object' && !Array.isArray(dest)) {
+      for (const [k, v] of Object.entries(dest)) {
+        if (typeof v === 'string') (dest as any)[k] = sanitizeStringField(k, v);
+      }
+    }
+  }
+}
+
+/**
+ * Clean the URL/HTML sinks of ONE section object (`{ elements, elementMetadata,
+ * layout, aiMetadata }`). Never touches `layout`, `aiMetadata`, section keys, or
+ * non-strings.
+ */
+function sanitizeSectionFields(section: any): void {
+  if (!section || typeof section !== 'object') return;
+  if (section.elements && typeof section.elements === 'object') {
+    sanitizeElements(section.elements);
+  }
+  if (section.elementMetadata && typeof section.elementMetadata === 'object') {
+    sanitizeElementMetadata(section.elementMetadata);
+  }
+}
+
+/**
+ * THE main publish chokepoint. Deep-walks the full content tree (base root +
+ * subpages + injected chrome) applying the key-aware dispatch to every
+ * user-authored string sink. Mutates `content` in place (cleans both the DB
+ * snapshot and the render input in one pass). Must run AFTER chrome injection
+ * and BEFORE the PublishedPage writes + render (see api/publish/route.ts).
+ */
+export function sanitizeContentHtml(content: any): void {
+  if (!content || typeof content !== 'object') return;
+
+  // Subpages first (mirror sanitizeContentForPublish order).
+  const subpages = content.subpages;
+  if (subpages && typeof subpages === 'object') {
+    for (const sub of Object.values(subpages) as any[]) {
+      const subSections: string[] | undefined = sub?.layout?.sections;
+      if (!Array.isArray(subSections)) continue;
+      const subContainer = sub.content && typeof sub.content === 'object' ? sub.content : sub;
+      for (const sid of subSections) {
+        sanitizeSectionFields(subContainer[sid]);
+      }
+    }
+  }
+
+  // Root.
+  const sections: string[] | undefined = content?.layout?.sections;
+  if (Array.isArray(sections)) {
+    const container = content.content && typeof content.content === 'object' ? content.content : content;
+    for (const sid of sections) {
+      sanitizeSectionFields(container[sid]);
+    }
+  }
+
+  // Chrome residual (defensive) — normally a no-op via the injectChrome aliasing
+  // above, but guards against any future copy-not-alias change.
+  const chrome = content.chrome;
+  if (chrome && typeof chrome === 'object') {
+    if (chrome.header?.data) sanitizeSectionFields(chrome.header.data);
+    if (chrome.footer?.data) sanitizeSectionFields(chrome.footer.data);
+  }
+}
+
+/**
+ * Clean the render-only i18n `localeContent` overlay
+ * (`locale → sectionId → elementKey → string | string[]`,
+ * src/types/core/content.ts). Same key-aware dispatch, arrays per item. Pure
+ * helper by call convention — mutates the passed object AND returns it (the
+ * seeding site assigns the result). Never persisted to the snapshot.
+ */
+export function sanitizeLocaleOverlay<T>(overlay: T): T {
+  if (!overlay || typeof overlay !== 'object') return overlay;
+  for (const locale of Object.values(overlay as Record<string, any>)) {
+    if (!locale || typeof locale !== 'object') continue;
+    for (const section of Object.values(locale as Record<string, any>)) {
+      if (!section || typeof section !== 'object') continue;
+      for (const [key, val] of Object.entries(section as Record<string, any>)) {
+        if (typeof val === 'string') {
+          (section as any)[key] = sanitizeStringField(key, val);
+        } else if (Array.isArray(val)) {
+          for (let i = 0; i < val.length; i++) {
+            if (typeof val[i] === 'string') val[i] = sanitizeStringField(key, val[i]);
+          }
+        }
+      }
+    }
+  }
+  return overlay;
+}

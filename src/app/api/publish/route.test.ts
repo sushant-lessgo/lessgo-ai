@@ -32,7 +32,6 @@ vi.mock('@/lib/validation', () => ({
 vi.mock('@/lib/security', () => ({
   createSecureResponse: (body: any, status = 200) => ({ __body: body, __status: status }),
   validateSlug: () => ({ valid: true }),
-  sanitizeHtmlContent: (x: any) => x,
   verifyProjectAccess: vi.fn(async () => true),
 }));
 
