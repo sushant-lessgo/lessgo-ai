@@ -18,8 +18,8 @@ change needed; parity holds by construction.
 
 ## Progress log
 
-- phase 1 facts foundation (hidden + slug): pending
-- phase 2 pure resync module: pending
+- phase 1 facts foundation (hidden + slug): done (commit ea37f416, review loops 1)
+- phase 2 pure resync module: done (commit 29520e75, review loops 1)
 - phase 3 work-library API route: pending
 - phase 4 board verbs + CorrectionBoard extension: pending
 - phase 5 dashboard page + tab + client host: pending
