@@ -121,3 +121,102 @@ Used exactly: `refreshFromContent(fresh.content, fresh.baseline, fresh.currentPa
 - No `useReviewState.ts` change (as planned): `null` baseline stays conservatively active until baseline lands.
 - Reset failure path relies on `ensureBaseline` throwing only when `baselineAvailable && fetch fails` (Phase 2 contract). Genuine-legacy `null` returns still hit the onboarding fallback.
 - Deploy-A boundary: server still ships `baseline`, so `ensureBaseline` resolves from resident baseline; the `?part=baseline` fetch path activates at Phase 4 / Deploy B.
+
+## Phase 4 — Server flip: drop `baseline` from default loadDraft response + save-path fence
+
+> ⚠️ DEPLOY B — this phase MUST NOT ship in the same deploy as Phases 1–3 (Deploy A).
+> It drops the resident `baseline` blob from the default loadDraft response; clients
+> must already be fetching lazily via `?part=baseline` (Phase 1/2/3, baked in Deploy A)
+> before this lands, or Reset breaks.
+
+### Files changed
+- `src/app/api/loadDraft/route.ts` (modified)
+- `src/app/api/loadDraft/baseline.test.ts` (modified)
+- `src/app/api/saveDraft/baselinePreserve.test.ts` (new)
+
+### `route.ts` — exact change to the default response
+- REMOVED the `baseline: content.baseline ?? null` field (the one carrying the
+  `// Phase 4 (Deploy B) removes this` comment) from the DEFAULT response object.
+- KEPT `hasBaseline: Boolean(content.baseline)` unchanged.
+- KEPT the `?part=baseline` branch fully intact (returns `{ baseline: content.baseline ?? null }`)
+  — that is now the sole on-demand path clients rely on.
+- Rewrote the now-stale response comments: the old `baseline` comment block became a
+  Phase-4 note explaining the blob is no longer shipped + points to `hasBaseline` /
+  `?part=baseline`; the `localeConfig` comment lost its stale "mirrors `baseline`" phrasing
+  (baseline no longer sits above it) while keeping the whitelist-passthrough rationale.
+
+### `baseline.test.ts` — assertion updates (2)
+- (i) default-response test: renamed + now asserts `expect(res.__body).not.toHaveProperty('baseline')`
+  and `res.__body.baseline` is `undefined`, while `hasBaseline` stays `true`. (Was: asserted
+  `baseline` equalled the stored blob.)
+- (iv) legacy test: replaced `expect(dflt.__body.baseline).toBeNull()` with
+  `expect(dflt.__body).not.toHaveProperty('baseline')`. `hasBaseline:false` unchanged.
+- The `?part=baseline` tests (ii, iii-a, iii-b) are untouched — still return `{ baseline }` /
+  still 401/403. Header comment updated to describe the Deploy-B default-response contract.
+
+### `saveDraft/baselinePreserve.test.ts` — new save-path fence (slice-2 regression)
+Mirrors `saveDraft/i18n.test.ts` mocking (auth/prisma/security/rate-limit mocked; route +
+validation REAL; shared in-memory `store` row seeded with a known `content.baseline`).
+Cases:
+- (i) save WITHOUT `body.baseline` (a normal edit save that mutates finalContent) →
+  the stored baseline stays byte-identical. Key assertion:
+  `expect(store.content.baseline).toEqual(STORED_BASELINE)` — compared against a pristine
+  module-level reference (`STORED_BASELINE`), while the seed row is a `structuredClone` of it,
+  so any in-place mutation of the stored object would diverge and fail. Also asserts the edit
+  itself landed (`finalContent.content['hero-1'].elements.headline === 'Edited headline'`).
+- (i-b) a metadata-only save (no finalContent, no baseline) also preserves the baseline
+  (`toEqual(STORED_BASELINE)`) — proves the guard, not finalContent presence, protects it.
+- (ii) save WITH `body.baseline` → wholesale replace: `store.content.baseline` deep-equals the
+  NEW value and `not.toEqual(STORED_BASELINE)`.
+This fences the `...existingContent` spread + `if (body.baseline !== undefined)` guard against a
+future save-path edit silently dropping baseline preservation.
+
+### Manual payload note (Step 4)
+No code. The loadDraft DEFAULT response no longer carries the (~68 KB on a naayom-scale project)
+baseline blob. Actual byte measurement is deferred to Phase 5 against a real naayom-scale project.
+
+### Verification
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run` — 167 passed | 1 skipped (168 files); 2824 passed | 15 skipped (2839 tests).
+  Targeted trio (baseline.test.ts + baselinePreserve.test.ts + i18n.test.ts) 17 passed.
+- `npm run lint` — clean; only pre-existing warnings (techpremium/vestria `<img>`, ph-provider
+  exhaustive-deps), none in touched files.
+- `npm run build` — FULL build green: `✓ Compiled successfully`, route table emitted normally.
+
+### Deviations
+- None. Scope matched the plan exactly.
+
+### Open risks
+- DEPLOY ORDERING is the sole risk: shipping this before Phase-1/2/3 clients are live in
+  production removes the resident baseline before the lazy `?part=baseline` fetch is in the
+  deployed client bundle → Reset would fail. Must merge/deploy strictly after Deploy A bakes
+  (orchestrator's rollout concern).
+
+## Phase 5 — QA gate (results)
+
+Orchestrator ruling: run **(c)** script-level dev round-trip; **(b)** browser only if dev Clerk
+auth possible w/o founder creds; **(a)** prod naayom read NOT authorized (founder-only).
+
+### (c) script-level dev round-trip — DONE, PASS (12/12) — 2026-07-14
+Method: 3 real dev-project `content` blobs extracted read-only (dev DB only; prod untouched),
+fed through the REAL `loadDraft GET` + `saveDraft POST` handlers (only auth/prisma/security/
+rateLimit mocked; route logic real). Temp test + extract scripts + fixtures deleted after
+(never committed); permanent synthetic coverage stays in `baseline.test.ts` + `baselinePreserve.test.ts`.
+
+Fixtures: lumen/service/2pg (99.6KB, baseline 49.1KB) · vestria/product/5pg (61.5KB, baseline
+25.6KB) · surge/service/1pg (33.1KB, baseline 16.2KB).
+
+Per fixture verified on REAL content:
+1. default loadDraft resp: `baseline` ABSENT, `hasBaseline:true`, `finalContent` byte-identical to stored.
+2. `?part=baseline`: returns exactly `{ baseline }` = stored baseline byte-for-byte.
+3. edit save WITHOUT `body.baseline` → stored `content.baseline` BYTE-IDENTICAL + `onboarding` preserved + edit landed. (Data-loss guarantee confirmed on real 49/26/16KB baselines.)
+4. loadDraft response payload delta: lumen −49.3% (99.6→50.5KB), vestria −41.6% (61.5→35.9KB),
+   surge −48.8% (33.1→17.0KB). "Response ~halved" acceptance criterion MET on real content.
+
+### (b) browser editor QA — SKIPPED
+Dev editor/loadDraft require a Clerk session; no dev test-user creds without founder credentials.
+
+### Residual (not covered by (c))
+Live editor UX on real data — Reset restoring, needs-review markers auto-clearing, Regen-Copy
+recapture, publish byte-equivalence — needs Clerk/browser or founder's own naayom prod-copy pass.
+Data-loss + payload are validated; residual is UX-correctness, not data-safety.

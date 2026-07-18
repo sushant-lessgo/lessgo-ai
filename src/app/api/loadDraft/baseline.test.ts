@@ -1,7 +1,8 @@
-// content-baseline-split Phase 1: loadDraft `hasBaseline` flag + `?part=baseline`
+// content-baseline-split loadDraft `hasBaseline` flag + `?part=baseline`
 // targeted fetch. Mocking pattern mirrors src/app/api/saveDraft/i18n.test.ts
 // (only auth/prisma/security are mocked; the route logic is REAL). Asserts:
-//   (i)  default response carries hasBaseline matching stored content,
+//   (i)  default response carries hasBaseline matching stored content AND
+//        (Phase 4 / Deploy B) NO LONGER ships the `baseline` blob,
 //   (ii) ?part=baseline returns ONLY { baseline } (no other page fields),
 //   (iii)?part=baseline still 401s unauthenticated / 403s non-owner,
 //   (iv) legacy project (no content.baseline) → hasBaseline:false, part→null.
@@ -67,14 +68,17 @@ async function load(part?: string) {
   return (await GET(makeGetReq(TOKEN, part))) as any;
 }
 
-describe('loadDraft baseline split (Phase 1)', () => {
-  // (i) default response carries hasBaseline matching stored content
-  it('(i) default response includes hasBaseline:true when baseline stored (and still ships baseline)', async () => {
+describe('loadDraft baseline split', () => {
+  // (i) default response carries hasBaseline matching stored content and, since
+  // Phase 4 (Deploy B), NO LONGER ships the (large) baseline blob.
+  it('(i) default response includes hasBaseline:true when baseline stored and omits the baseline blob', async () => {
     const res = await load();
     expect(res.__status).toBe(200);
     expect(res.__body.hasBaseline).toBe(true);
-    // Phase-1 additive: baseline field STAYS in the default response.
-    expect(res.__body.baseline).toEqual(BASELINE);
+    // Phase 4 (Deploy B): baseline blob is dropped from the default response;
+    // clients fetch it lazily via ?part=baseline.
+    expect(res.__body).not.toHaveProperty('baseline');
+    expect(res.__body.baseline).toBeUndefined();
   });
 
   // (ii) ?part=baseline returns ONLY { baseline } — no other page fields
@@ -110,7 +114,8 @@ describe('loadDraft baseline split (Phase 1)', () => {
     storedContent = { onboarding: {} }; // no baseline key
     const dflt = await load();
     expect(dflt.__body.hasBaseline).toBe(false);
-    expect(dflt.__body.baseline).toBeNull();
+    // Phase 4 (Deploy B): no baseline blob in the default response, legacy or not.
+    expect(dflt.__body).not.toHaveProperty('baseline');
 
     const part = await load('baseline');
     expect(part.__status).toBe(200);
