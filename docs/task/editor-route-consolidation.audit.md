@@ -468,3 +468,100 @@ The orchestrator approved extending phase 5 by ONE file to fix the break this ch
 - XFO is a RUNTIME header — the build only validates config shape. The HUMAN GATE (`curl -I`: `/edit/{t}/preview`->SAMEORIGIN, `/preview/{t}`->DENY now, `/edit/{t}`->DENY, `/`+`/dashboard`->DENY, mutually exclusive) is the real check.
 - Reveal correctness on `/edit` is a runtime concern the e2e pins deterministically but is unexecuted here — the founder's one real work journey on the QA preview is the gate.
 - `workPlan.spec.ts` break (above) — the single explicit out-of-scope item.
+
+## Phase 6 — Publish relocated into the editor header
+
+**Files changed**
+- `src/app/edit/[token]/components/publish/usePublishFlow.ts` (new — shared publish hook)
+- `src/app/edit/[token]/components/publish/PublishSuccessCard.tsx` (new — extracted "You're live!" card)
+- `src/app/edit/[token]/components/layout/EditHeaderRightPanel.tsx` (modified — Publish button → in-editor flow)
+- `src/app/preview/[token]/page.tsx` (modified — refactored to consume the shared hook + card)
+- `src/app/edit/[token]/components/ui/usePreviewNavigation.ts` (deleted)
+- `e2e/publish.spec.ts` (extended — editor-path publish + /p data-integrity test)
+
+`playwright.config.ts` NOT touched — `publish.spec.ts` is already in the `authed` allowlist; I
+extended it, didn't add a new spec file.
+
+### /api/publish payload contract — UNCHANGED (proof)
+`usePublishFlow.doPublish` sends the same body the old `PreviewPageContent.handlePublish` sent,
+field-for-field: `slug`, `title: stripHTMLTags(publishTitle || title || 'Untitled Page')`,
+`content{ layout:{sections:rootSections,theme}, content:rootContent, forms:safeForms,
+legalPages:legalPages||undefined, subpages:safeSubpages, chrome:safeChrome,
+seo:homeEntry?.seo... }`, `themeValues{ primary:accent, background:bgNeutral, muted:'gray-600' }`,
+`tokenId`, `inputText: onboardingData.oneLiner`, `analyticsEnabled`. The multi-page assembly
+(home-entry root + `subpages` keyed by pathSlug + shared `chrome`), the JSON serialization guards,
+the slug edge-trim, the pre-publish `save()`, and `posthog.capture('publish_clicked',{fromEdit:true})`
+are all carried over byte-identically. The ONLY removed field is `htmlContent`.
+
+### htmlContent drop — server ignores it (verified before removing)
+`src/app/api/publish/route.ts` never reads a client `htmlContent`: it destructures
+`{ slug, title, content, themeValues, tokenId, inputText, previewImage, analyticsEnabled }` (no
+`htmlContent`) and on BOTH create + update hard-sets `htmlContent: ''  // Phase 2: Empty for
+dynamic rendering` (route lines 221, 257; comment at 201-202: "Phase 2: No longer generating
+htmlContent - using dynamic rendering"). `PublishSchema.htmlContent` is `.optional()`
+(validation.ts:117), so omitting it keeps the request valid. Page is re-rendered server-side by
+`renderPublishedExport`. The old `#landing-preview` innerHTML scrape was dead weight (and the
+editor has no such node) — dropped with no contract impact.
+
+### /preview and the editor SHARE one hook (no divergence)
+Both surfaces call `usePublishFlow(tokenId)` and render the same `SlugModal` + `CustomDomainModal`
++ `PublishSuccessCard`. The publish state machine, payload assembly, published-slug seed fetch,
+and success/domain handoff live ONLY in the hook + card. `/preview` stays fully functional (admin
++ work-dashboard "Update site"): all its testids preserved. Editor button gets a distinct
+`editor-publish-trigger` testid.
+
+### onReview in-editor
+`/preview` keeps `onReview={handleEdit}` (navigates back to editor). In the editor there is no
+back-to-editor target, so `onReview` closes the SlugModal + `setMode('edit')` (fix flagged guide
+tasks in edit mode). Live handler, never a dead nav; still a soft nudge, never a publish gate.
+
+### tabManager cleanup
+`usePreviewNavigation.ts` (the only 'edit'-role `getTabManager` owner) is deleted; the preview
+page's 'preview'-role owner + the `preview-source-{tokenId}` sessionStorage stash + the
+focus/close paths in `handleEdit` are removed (preview `handleEdit` is now a plain
+`router.push('/edit/{token}')`). Grep confirms `getTabManager`/`cleanupTabManager` now have ZERO
+callers app-wide — the singleton's purpose (coordinate the edit↔preview NEW-TAB publish hop) is
+retired now that publish is in-place. `src/utils/tabManager.ts` is left in place (out of
+Files-touched) as unreferenced dead code; the "exactly one owner per tab-role" invariant holds
+vacuously (nobody instantiates it). Remaining `/preview` entry points are same-tab navigations,
+so the in-place "Back to Edit" nav is behavior-correct.
+
+### e2e (extended publish.spec.ts)
+Added one authed test: seed a Meridian draft → `/edit/{token}` → wait for seeded hero copy →
+click `editor-publish-trigger` → `publish-confirm-card` → fill slug/title → `Publish now` →
+branch on real `/api/publish` status (200 provisioned / 500 local-dev, same publish-trust M3
+pattern the file uses) → `GET /p/{slug}` asserts `<400`, one `div.landing-page-published`, a
+visible `<h1>`, AND served HTML contains the deterministic seeded CTA href
+`https://example.com/cta` — proving the whole chain (PublishedPage + version + blob + KV) served
+SEEDED content, not an endpoint-only 200. The three preview-route publish cases are untouched.
+
+### Green gate (run from WORKDIR)
+- `npx tsc --noEmit` → EXIT 0 (clean).
+- `npm run test:run` → EXIT 0 — 250 files passed / 1 skipped; 4035 tests passed / 14 skipped.
+- `npm run lint` → EXIT 0 — only pre-existing warnings (techpremium/vestria `<img>` LCP +
+  ph-provider exhaustive-deps); NONE in phase-6 files.
+- `npm run build` → EXIT 0 — all routes compiled. `/edit/[token]` 805 → 818 kB (publish
+  modals/hook now bundled into the editor header); `/preview/[token]` 462 kB. No Suspense/headers
+  errors.
+
+### Playwright status
+Extended `publish.spec.ts` NOT executed locally — same convention as phases 1-5 (authed spec
+needs `E2E_CLERK_*` creds + live dev server; Vercel Blob/KV absent locally → `/api/publish`
+honestly 500s, which the 200/500 branch handles). First real run on the configured e2e env / QA
+preview via `npx playwright test publish`.
+
+### Deviations
+- **save() stays in doPublish (at confirm), not openPublish (at modal-open).** The plan listed
+  `save()` under `openPublish`, but the old preview flow force-saved at CONFIRM. Keeping it there
+  makes `/preview` byte-identical and still guarantees the draft is persisted before publish reads
+  `Project.content`. Conservative no-divergence choice.
+- **Editor Publish button not gated on isPublishReady.** The old editor button (a nav) was never
+  gated; the preview gate was the page-level `isLoading` screen, which the editor lacks. Adding a
+  store-derived gate = scope creep. Logged, not added.
+- `src/utils/tabManager.ts` left as unreferenced dead code (out of Files-touched).
+
+### Open risks
+- Full editor publish path (PublishedPage + version + blob + KV + `/p/[slug]` serve + republish +
+  domain modal) is a runtime concern the extended e2e pins deterministically but is unexecuted
+  here — founder-verified publish-from-editor on the QA preview is the HUMAN GATE.
+- `tabManager.ts` now has no importers; a retirement follow-on can delete it.
