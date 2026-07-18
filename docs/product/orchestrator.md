@@ -10,7 +10,7 @@ Main session = orchestrator for all parallel feature sessions. New orchestrator 
 
 **Paused (branches exist, sessions inactive, awaiting founder gates — NOT running):**
 - **`blog-composer-redesign`** (~25h idle) — **GATE A owed** (publish/unpublish + visual + hero-image call).
-- **`content-baseline-split`** (~3d idle) — **Deploy B** two-deploy gate.
+- **`content-baseline-split`** — ✅ bake DONE (A live on prod since 07-14) + naayom backup taken 07-18; **B rides the big-bang push**, only a mechanical branch catch-up merge left (245 behind).
 
 **Merged into local main this cycle (all unpushed):**
 - **UI big-bang:** ui-foundation, auth, dashboard S1/S2/S4a, media-library, editor-shell, work-onboarding-shell (E1).
@@ -46,7 +46,7 @@ Main session = orchestrator for all parallel feature sessions. New orchestrator 
 
 | Track | Worktree / branch | State |
 |---|---|---|
-| content-baseline-split | `.claude/worktrees/content-baseline-split`, `feature/content-baseline-split` @ `0f062d2d` | ⏸️ FOUNDER gate. Deploy A (`d3bb5e31`) live+baking; Deploy B (`38ce4346`) HELD. **Bake ends ≈2026-07-16** (48h from A ready, OR earlier if founder confirms naayom hard-reloaded). Phase-5 (c) dev round-trip PASS (data-safety + payload −~45% proven). NEEDS FOUNDER: pre-B naayom Project-row dump (recovery belt) → bake signal → go for station merge of B. Two-deploy is NON-NEGOTIABLE. |
+| content-baseline-split | `.claude/worktrees/content-baseline-split`, `feature/content-baseline-split` @ `0f062d2d` (245 behind main) | ✅ **BAKE DONE — B rides the big-bang push.** Deploy A (`d3bb5e31`) LIVE on prod since **2026-07-14** (~4d bake, ≫48h) — so the two-deploy rule is already satisfied (A = its own deploy; the big-bang push IS Deploy B, no separate deploy, no conflict with one-push). ✅ **naayom Project-row backup TAKEN 2026-07-18** (`backups/naayom-project-2026-07-18.json`). REMAINING = mechanical only: merge main into the 245-behind branch → re-green → merge into batch. Optional belt: naayom hard-reload before push. Phase-5 (c) dev round-trip PASS (payload −~45%). |
 | ui-foundation (Lane 1 #1) | `.claude/worktrees/ui-foundation`, `feature/ui-foundation` @ `0ab7053b` | ✅ **BUILT + GREEN, both human gates passed; merge+push HELD for BIG-BANG deploy** with consuming specs (auth/dashboard/editor-shell). Full-tier /feature, 6 phases, each 1 impl-review loop. main (`713d29ef`) already merged IN; tsc/lint/build/**3331 tests** green; **published.css byte-identical** (isolation held through the merge). Mid-flight fix: mono@600 editor↔published divergence → distinct `'JetBrains Mono App'` family (app fonts must never share a template's family name). Worktree PRESERVED — **do NOT clean up / delete branch until the big-bang**. Deploy-watch deferred to combined push. Consuming specs branch from a base that INCLUDES this foundation; read `src/components/ui/README.md`. Founder still owes app-chrome VISUAL-TASTE pass (lands w/ 1st consuming screen). |
 
 ## Worktree cleanup owed
@@ -73,7 +73,7 @@ Type = designer handoff surface (`.dc.html`): **Auth · Dashboard · Editor · O
 ⬜ to spec/later. **All ✅ are merged to local main but UNPUSHED** (one big-bang deploy; worktrees preserved
 until deploy green — batch strategy).
 
-Summary: ✅ merged 16 · 🔨 building 0 · ⏸️ paused 2 (blog-composer=GATE A, content-baseline=Deploy B) · 📋 specced+ready-to-launch 3 (atelier-cutover, editor-defect-fixes, E4 work-onboarding-plan) · ⬜ to spec/later = the rest.
+Summary: ✅ merged 16 (+ this session: editor-defect-fixes, dashboard-profile-menu/logout, E4 — verify count next sync) · 🔨 building 1 (publish-sanitize) · ⏸️ paused 1 (blog-composer=GATE A; content-baseline bake DONE → mechanical merge only) · 📋 ready-to-launch (atelier-cutover) · ⬜ to spec = 3 work blockers (facts.work writeback, bilingual editing, work-library board) + the rest.
 
 | Lane | Type | Spec file | Status |
 |---|---|---|---|
@@ -135,7 +135,7 @@ preserved until that deploy is green, then bulk-cleanup.** All specs depend on u
 
 ## Founder pile (no build blocked)
 
-- **content-baseline-split:** pre-B naayom row dump → bake signal → go for Deploy B station merge.
+- **content-baseline-split:** ✅ RESOLVED — bake done (A live 07-14), naayom backup taken 07-18. B rides the big-bang; only a mechanical branch catch-up merge remains (not a founder action).
 - **work-skeleton NEXT STEPS (D1 shipped 07-16; `atelier2` DEV-ONLY, live `atelier` untouched):**
   1. **Phase-9 cutover (founder GO gate):** re-point live `atelier` id → work skeleton + flip `bespoke` off atelier2 + delete old `src/modules/templates/atelier/` (32-file anti-pattern). Do AFTER Kundius real-content eyeball. Touches paying-customer prod rendering — needs explicit founder go. (Own `/feature` micro-run: registry loader flip + service.ts/serveGate/templateMeta/blockManifest re-key + htmlGenerator gate + dispatch.test proving old stored `Atelier*` layouts fall back to skeleton defaults. Plan §Phase 9 in the (now-deleted) branch — recoverable via git; audit in commit history.)
   2. **Kontur spike = THE architecture gate:** 2nd skin as `skin.ts`+`index.ts` only, ~1 day, zero markup → proves "weeks→a day" economics. Verdict → templatePlan.md.
