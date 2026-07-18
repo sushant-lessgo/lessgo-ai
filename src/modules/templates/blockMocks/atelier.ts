@@ -1,6 +1,6 @@
-// src/modules/templates/blockMocks/atelier2.ts
-// Work-skeleton (Atelier skin, dev id `atelier2`) block mocks — TEST/DEV-ONLY.
-// Feeds the /dev/blocks/atelier2 gallery (edit + published bands) and seeds the
+// src/modules/templates/blockMocks/atelier.ts
+// Work-skeleton (Atelier skin, id `atelier`) block mocks — TEST/DEV-ONLY.
+// Feeds the /dev/blocks/atelier gallery (edit + published bands) and seeds the
 // shared harness store (ALL_BLOCK_MOCK_SECTIONS). NOT imported by the app bundle
 // or any `.published.*` renderer.
 //
@@ -19,17 +19,17 @@
 // same arrangement. The alternate proof SHAPES carry their OWN collection (logos /
 // metrics) since they read a different collection than testimonials.
 //
-// NOTE: atelier2 is NOT enrolled in `assertEditorBasics` (conformance.test.ts), so
+// NOTE: atelier is NOT enrolled in `assertEditorBasics` (conformance.test.ts), so
 // `editBasics` here is informational (authored plausibly, not asserted this phase).
 
 import type { TemplateId } from '@/types/service';
 import type { BlockMockSection } from './index';
 
-const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
+const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'header',
     layout: 'WorkHeader',
-    sectionId: 'atelier2-header',
+    sectionId: 'atelier-header',
     content: {
       logo_text: 'Kristina Kundius',
       cta_label: 'Start Your Project',
@@ -51,7 +51,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'hero',
     layout: 'WorkHeroSlider',
-    sectionId: 'atelier2-hero',
+    sectionId: 'atelier-hero',
     content: {
       role_line: 'Professional Photographer',
       name: 'Kristina <em>Kundius</em>',
@@ -75,7 +75,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'work',
     layout: 'WorkGalleryGrid',
-    sectionId: 'atelier2-work',
+    sectionId: 'atelier-work',
     content: {
       eyebrow: 'Selected work',
       heading: 'The work',
@@ -100,7 +100,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'proof',
     layout: 'WorkProofTestimonials',
-    sectionId: 'atelier2-proof',
+    sectionId: 'atelier-proof',
     content: {
       eyebrow: 'Kind words',
       heading: 'What clients say',
@@ -121,7 +121,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'contact',
     layout: 'WorkContact',
-    sectionId: 'atelier2-contact',
+    sectionId: 'atelier-contact',
     content: {
       eyebrow: 'Get in touch',
       heading: 'Let’s work together',
@@ -141,7 +141,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'footer',
     layout: 'WorkFooter',
-    sectionId: 'atelier2-footer',
+    sectionId: 'atelier-footer',
     content: {
       eyebrow: 'Get in touch',
       heading: 'Let’s make yours.',
@@ -168,7 +168,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   ...(['WorkHeaderStart', 'WorkHeaderCentered', 'WorkHeaderSplit', 'WorkHeaderMinimal'] as const).map((ln) => ({
     sectionType: 'header',
     layout: ln,
-    sectionId: `atelier2-header-${ln.replace('WorkHeader', '').toLowerCase()}`,
+    sectionId: `atelier-header-${ln.replace('WorkHeader', '').toLowerCase()}`,
     content: {
       logo_text: 'Kristina Kundius',
       cta_label: 'Start Your Project',
@@ -194,7 +194,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   ...(['WorkHeroImage', 'WorkHeroSplit', 'WorkHeroCenter'] as const).map((ln) => ({
     sectionType: 'hero',
     layout: ln,
-    sectionId: `atelier2-hero-${ln.replace('WorkHero', '').toLowerCase()}`,
+    sectionId: `atelier-hero-${ln.replace('WorkHero', '').toLowerCase()}`,
     content: {
       role_line: 'Professional Photographer',
       name: 'Kristina <em>Kundius</em>',
@@ -220,7 +220,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   ...(['WorkGalleryMasonry', 'WorkGalleryStrip'] as const).map((ln) => ({
     sectionType: 'work',
     layout: ln,
-    sectionId: `atelier2-work-${ln.replace('WorkGallery', '').toLowerCase()}`,
+    sectionId: `atelier-work-${ln.replace('WorkGallery', '').toLowerCase()}`,
     content: {
       eyebrow: 'Selected work',
       heading: 'The work',
@@ -245,7 +245,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'proof',
     layout: 'WorkProofLogos',
-    sectionId: 'atelier2-proof-logos',
+    sectionId: 'atelier-proof-logos',
     content: {
       eyebrow: 'Trusted by',
       heading: 'Selected clients',
@@ -269,7 +269,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'proof',
     layout: 'WorkProofResults',
-    sectionId: 'atelier2-proof-results',
+    sectionId: 'atelier-proof-results',
     content: {
       eyebrow: 'The numbers',
       heading: 'Results that speak',
@@ -295,7 +295,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'packages',
     layout: 'WorkPackages',
-    sectionId: 'atelier2-packages',
+    sectionId: 'atelier-packages',
     content: {
       eyebrow: 'Packages',
       heading: 'Ways to work together',
@@ -319,7 +319,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'about',
     layout: 'WorkAbout',
-    sectionId: 'atelier2-about',
+    sectionId: 'atelier-about',
     content: {
       eyebrow: 'About',
       heading: 'The person behind the lens',
@@ -343,7 +343,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'faq',
     layout: 'WorkFaq',
-    sectionId: 'atelier2-faq',
+    sectionId: 'atelier-faq',
     content: {
       eyebrow: 'FAQ',
       heading: 'Questions, answered',
@@ -366,7 +366,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'results',
     layout: 'WorkResults',
-    sectionId: 'atelier2-results',
+    sectionId: 'atelier-results',
     content: {
       eyebrow: 'Outcomes',
       heading: 'What the work returns',
@@ -399,7 +399,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'workcatalog',
     layout: 'workcatalog',
-    sectionId: 'atelier2-workcatalog',
+    sectionId: 'atelier-workcatalog',
     content: {
       eyebrow: 'Works',
       headline: 'Every project',
@@ -427,7 +427,7 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   {
     sectionType: 'workdetail',
     layout: 'workdetail',
-    sectionId: 'atelier2-workdetail',
+    sectionId: 'atelier-workdetail',
     content: {
       name: 'Full brand package',
       client: 'Northwind',
@@ -452,6 +452,6 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
 // atelier-skeleton-cutover: templateId is a parameter defaulting to the live
 // `atelier` key. (This file is renamed blockMocks/atelier.ts in phase 4 with the
 // dir move.)
-export function atelier2Sections(templateId: TemplateId = 'atelier'): BlockMockSection[] {
-  return ATELIER2_BLOCK_MOCKS.map((m) => ({ templateId, ...m }));
+export function atelierSections(templateId: TemplateId = 'atelier'): BlockMockSection[] {
+  return ATELIER_BLOCK_MOCKS.map((m) => ({ templateId, ...m }));
 }

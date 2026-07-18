@@ -56,7 +56,7 @@ const files = [
   { src: 'analyticsGenerator.js', out: 'a.v2.js' },       // live beacon: role+placement, v:2
   { src: 'naayomBehaviors.js', out: 'naayom.v1.js' }, // Phase 4: TechPremium behaviors
   { src: 'lumenBehaviors.js', out: 'lumen.v1.js' },   // Lumen: lightbox + reveal + EN/NL toggle/geo
-  { src: 'atelierSliderBehaviors.js', out: 'slider.v1.js' }, // Atelier: hero cover slider (autoplay crossfade + arrows + injected dots). Immutable v1 — behavior change ⇒ slider.v2.js
+  { src: 'atelierSliderBehaviors.js', out: 'slider.v1.js' }, // LEGACY-FROZEN: OLD hand-written Atelier hero cover slider (retired in atelier-skeleton-cutover; new atelier publishes load work.v1.js). Kept ONLY for already-published old blobs. Immutable v1 — behavior change ⇒ slider.v2.js
   { src: 'switcherBehaviors.js', out: 'switcher.v1.js' }, // i18n: shared template-agnostic locale switcher pill + geo redirect
   { src: 'workBehaviors.js', out: 'work.v1.js' }, // Work skeleton: hero slider + fixed header (lightbox deferred to phase 6). Immutable v1 — behavior change ⇒ work.v2.js
 ];

@@ -12,9 +12,7 @@
 //
 // The purity predicate is a PURE function tested BOTH ways (a synthetic dir with a
 // `.tsx`/markup file MUST fail it) so the check provably BITES rather than passing
-// vacuously. We also prove the OLD `atelier` dir is correctly EXCLUDED from the scan
-// (it is NOT in `skeletonBackedTemplateIds`) and that it WOULD fail if scanned —
-// making the exclusion load-bearing, not incidental.
+// vacuously.
 
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
@@ -22,18 +20,13 @@ import path from 'node:path';
 
 import { skeletonBackedTemplateIds } from '@/modules/skeletons/ids';
 import { assertSkinTokens, type WorkSkinTokens } from '@/modules/skeletons/work/tokenContract';
-import { atelierSkin } from './atelier2/skin';
+import { atelierSkin } from './atelier/skin';
 
 const TEMPLATES_DIR = __dirname;
 
-// atelier-skeleton-cutover: the live `atelier` id rides the work-skeleton, but its
-// skin barrel still physically lives in the `atelier2/` dir (the dir is `git mv`'d
-// to `atelier/` in phase 4). Until then, map the skeleton-backed id to its ACTUAL
-// skin dir so the purity scan reads the data-only barrel, NOT the still-present OLD
-// hand-written `templates/atelier/` skin.
-const SKIN_DIR: Record<string, string> = {
-  atelier: 'atelier2',
-};
+// atelier-skeleton-cutover: the old hand-written `templates/atelier/` skin was
+// deleted and the data-only skeleton barrel folded into `templates/atelier/` — so
+// the skeleton-backed id `atelier` now maps directly to its own dir name.
 
 // id → registered skin data (assertSkinTokens gate). Grows as work skins are added.
 const REGISTERED_SKINS: Record<string, { id?: string; tokens: WorkSkinTokens }> = {
@@ -88,7 +81,7 @@ describe('skin file-purity conformance (work-skeleton, AC L121)', () => {
   });
 
   for (const id of skeletonBackedTemplateIds) {
-    const skinDirName = SKIN_DIR[id] ?? id;
+    const skinDirName = id;
     describe(`skin "${id}" (src/modules/templates/${skinDirName}/)`, () => {
       const dir = path.join(TEMPLATES_DIR, skinDirName);
 
@@ -138,26 +131,6 @@ describe('skin file-purity conformance (work-skeleton, AC L121)', () => {
       expect(
         markupViolations('skin.ts', `import type { WorkSkinDef } from '@/x';\nexport const s: WorkSkinDef = { id: 'x' } as any;`),
       ).toEqual([]);
-    });
-  });
-
-  // ── OLD atelier dir is EXCLUDED — and the exclusion is load-bearing ─────────
-  // atelier-skeleton-cutover phase 1: `atelier` IS now skeleton-backed, but it maps
-  // (via SKIN_DIR) to the data-only `atelier2/` barrel — NOT the still-present OLD
-  // hand-written `templates/atelier/` skin. This proves the scan reads the mapped
-  // dir and would fail if it ever read the old dir (the old dir is deleted in
-  // phase 4, at which point the `git mv atelier2 → atelier` makes SKIN_DIR moot).
-  describe('old-atelier module dir is NOT under the purity scan (excluded, not incidental)', () => {
-    it('the live "atelier" id maps to the data-only atelier2/ skin dir, not the old skin dir', () => {
-      expect(SKIN_DIR.atelier).toBe('atelier2');
-    });
-
-    it('the old atelier dir WOULD fail purity if scanned (proves the SKIN_DIR remap is meaningful)', () => {
-      const oldAtelier = path.join(TEMPLATES_DIR, 'atelier');
-      expect(fs.existsSync(oldAtelier)).toBe(true);
-      // The old module dir is full of .tsx/components → purity fails hard. This is
-      // exactly why `atelier` is remapped to the atelier2/ barrel above.
-      expect(purityViolations(oldAtelier).length).toBeGreaterThan(0);
     });
   });
 

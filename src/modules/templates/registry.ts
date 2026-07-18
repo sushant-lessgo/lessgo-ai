@@ -114,12 +114,12 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
   // Photography). Service audience; served to photographers via the serve gate.
   // Skeleton-backed: the loader import()s the work-SKELETON Atelier skin barrel,
   // which builds the full TemplateModule from the skeleton factory + skin data.
-  // (atelier-skeleton-cutover: the old hand-written atelier skin dir is deleted
-  // and the barrel folds into templates/atelier/ in phase 4.) Dispatch firewall
-  // intact: skeleton code rides in this chunk only; nothing new is statically
-  // imported by registry.ts or the main bundle.
+  // (atelier-skeleton-cutover: the old hand-written atelier skin dir was deleted
+  // and the skeleton barrel folded into templates/atelier/ — this IS that barrel.)
+  // Dispatch firewall intact: skeleton code rides in this chunk only; nothing new
+  // is statically imported by registry.ts or the main bundle.
   atelier: async () => {
-    const m = await import('@/modules/templates/atelier2');
+    const m = await import('@/modules/templates/atelier');
     return {
       resolveBlock: m.resolveBlock,
       ThemeInjector: m.ThemeInjector,

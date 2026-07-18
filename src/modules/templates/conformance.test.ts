@@ -77,7 +77,7 @@ import { HearthSSRTokens } from './hearth/components/HearthSSRTokens';
 // block below enforces it anyway so the work-skeleton coverage bites for real.
 // assertSkinTokens is the AC-L122 "out-of-range fails loud" gate, run per
 // registered skin + proven to throw.
-import { atelierSkin } from './atelier2/skin';
+import { atelierSkin } from './atelier/skin';
 import { assertSkinTokens, type WorkSkinTokens } from '@/modules/skeletons/work/tokenContract';
 import { skeletonBackedTemplateIds } from '@/modules/skeletons/ids';
 

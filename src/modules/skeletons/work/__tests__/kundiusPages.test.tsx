@@ -36,7 +36,7 @@ import { describe, it, expect, vi } from 'vitest';
 // htmlGenerator is `import 'server-only'`; neutralize so the publish path runs under vitest.
 vi.mock('server-only', () => ({}));
 
-import { atelier2Sections } from '@/modules/templates/blockMocks/atelier2';
+import { atelierSections } from '@/modules/templates/blockMocks/atelier';
 import { createHarnessStore } from '@/modules/templates/blockMocks/harness';
 import { resolveWorkBlock } from '../resolveWorkBlock';
 import { generateStaticHTML } from '@/lib/staticExport/htmlGenerator';
@@ -128,7 +128,7 @@ function collectHrefs(obj: Record<string, any>): string[] {
 
 // ── Assemble the 5 standard-archetype pages from the shipped Kundius mocks ────────
 
-const MOCKS = atelier2Sections();
+const MOCKS = atelierSections();
 
 /** The DEFAULT-layout mock for a section type (first occurrence in the mock list). */
 function pick(type: string) {

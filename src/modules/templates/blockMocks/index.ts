@@ -10,7 +10,7 @@
 import type { TemplateId } from '@/types/service';
 import { MERIDIAN_BLOCK_MOCKS, MERIDIAN_EDIT_BASICS } from './meridian';
 import { HEARTH_BLOCK_MOCKS } from './hearth';
-import { atelier2Sections } from './atelier2';
+import { atelierSections } from './atelier';
 
 /** One collection's per-item marker expectation (editor-basics). */
 export interface CollectionExpectation {
@@ -85,7 +85,7 @@ export const BLOCK_MOCKS: Partial<Record<TemplateId, BlockMockSection[]>> = {
   hearth: hearthSections(),
   // atelier-skeleton-cutover: atelier shows the work-SKELETON blocks (the old
   // hand-written atelier mocks were retired with the old skin).
-  atelier: atelier2Sections('atelier'),
+  atelier: atelierSections('atelier'),
 };
 
 /** Flat list of every enrolled section (for seeding one shared harness store). */

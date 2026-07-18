@@ -321,3 +321,126 @@ all atelier2-free.
   entirely" by executing the plan step; if a future skin pilot (Kontur/Pulse) needs a
   generic override, it must be re-introduced deliberately.
 - `serviceElementSchema` Atelier* layouts still resolve (phase 4 guarded cleanup).
+
+---
+
+# atelier-skeleton-cutover — Phase 4 audit
+
+Phase 4: the irreversible fold. Delete the OLD hand-written `templates/atelier/`
+skin dir; `git mv templates/atelier2` → `templates/atelier` (the data-only skeleton
+barrel becomes canonical); rename `blockMocks/atelier2.ts` → `atelier.ts`; re-point
+every remaining `@/modules/templates/atelier2` import; guarded cleanup of the 8 dead
+`Atelier*` layout entries in the service element schema. Frozen `slider.v1.js` asset
+KEPT. End state: `atelier2` is GONE everywhere; `templates/atelier/` = `{index.ts,
+skin.ts}` only.
+
+## Files changed
+
+Deleted (old skin dir, `git rm -r`):
+- `src/modules/templates/atelier/**` — 32 files: `AtelierPlaceholderBlock.tsx`,
+  `resolveAtelierBlock.ts`, `tokens.ts`, `palettes.ts`, `paletteSelection.ts`,
+  `imageKeywords.ts`, `sectionRules.ts`, `ThemeInjector.tsx`, `index.ts`, `README.md`,
+  `blocks/`, `components/`, `hooks/`, and the co-located `registration.test.ts` +
+  `coreParity.test.ts`. (`renderParity.atelier.test.tsx` was already deleted in phase 1.)
+
+Moved (`git mv`):
+- `src/modules/templates/atelier2/{index.ts,skin.ts}` → `src/modules/templates/atelier/`
+- `src/modules/templates/blockMocks/atelier2.ts` → `src/modules/templates/blockMocks/atelier.ts`
+
+Edited:
+- `src/modules/templates/atelier/index.ts` (moved; header comment path + id refresh)
+- `src/modules/templates/atelier/skin.ts` (moved; header comment path refresh)
+- `src/modules/templates/blockMocks/atelier.ts` (moved; `atelier2`→`atelier` throughout:
+  `ATELIER_BLOCK_MOCKS` const, `atelierSections` fn, all `atelier-*` sectionIds, header comment)
+- `src/modules/templates/registry.ts` (loader import path + comment)
+- `src/modules/templates/blockMocks/index.ts` (import + call `atelierSections`)
+- `src/modules/templates/skinPurity.test.ts` (import `./atelier/skin`; dropped SKIN_DIR
+  map + the now-moot "old dir excluded" describe)
+- `src/modules/templates/conformance.test.ts` (import path `./atelier/skin`) — see Deviation 1
+- `src/modules/skeletons/work/__tests__/kundiusPages.test.tsx` (import + call) — see Deviation 1
+- `src/modules/audience/service/elementSchema.ts` (deleted 8 dead `Atelier*` layout entries)
+- `src/lib/staticExport/atelierSliderBehaviors.js` (header comment → legacy-frozen)
+- `scripts/buildAssets.js` (`slider.v1.js` entry comment → legacy-frozen)
+
+Not modified (on the list but needed no change):
+- `src/modules/templates/CriticalFontPreload.tsx` — `case 'atelier'` comment already
+  accurately describes the skeleton faces (editorial=Bricolage Grotesque, compact=Fraunces);
+  no stale reference. Left untouched.
+
+## Per-step notes
+
+1. **Delete old skin dir** — `git rm -r src/modules/templates/atelier/` removed all 32
+   remaining files. Recoverable via git history.
+2. **Fold barrel** — `git mv atelier2 → atelier`. Registry loader now
+   `import('@/modules/templates/atelier')`; comment says cutover DONE (this IS the barrel).
+   Moved `index.ts`/`skin.ts` header comments refreshed off the `atelier2`/"phase 9" wording.
+3. **blockMocks rename** — file → `atelier.ts`; `atelier2Sections`→`atelierSections`,
+   `ATELIER2_BLOCK_MOCKS`→`ATELIER_BLOCK_MOCKS`, and all internal `atelier2-*` dev-fixture
+   sectionIds → `atelier-*`. Both consumer imports (index.ts, kundiusPages.test.tsx) re-pointed.
+4. **Guarded elementSchema cleanup** — grep `Atelier` across `src` FIRST. The 8 layout
+   entries (`AtelierNavHeader/Hero/WorkGallery/Packages/About/QuoteBand/Contact/Footer`)
+   had NO live schema readers: the only remaining `Atelier*` references are (a) TEST
+   fixtures that use `AtelierAbout`/`AtelierWork`/etc. as OPAQUE layout-name strings the
+   WORK engine deliberately ignores (`scopedRegen.test.ts`, `regenerate-*/route.test.ts`,
+   `aiActionsErrorSurfacing.test.ts` — the fixtures narrow against the frozen work contract,
+   NOT the schema), and (b) descriptive comments/prose. The live Work* schema lane
+   (`audience/work/elementSchema.ts` spread into serviceElementSchema) is unaffected. Deleted
+   lines 644–898 (comment header + 8 entries + trailing blank). test:run stayed green,
+   confirming no live reader. Deleted via `sed -i '644,898d'` (a 255-line exact-match Edit
+   was impractical; pure structural deletion, boundaries verified before + after).
+5. **Frozen slider asset KEPT** — `atelierSliderBehaviors.js` + buildAssets `slider.v1.js`
+   entry retained; headers now state LEGACY-FROZEN (old atelier skin retired; new atelier
+   publishes load work.v1.js; kept only for already-published old blobs). Build confirms
+   `public/assets/slider.v1.js` still emits alongside `work.v1.js`.
+6. **CriticalFontPreload** — comment already correct; no edit.
+
+## Deviations
+
+1. **`conformance.test.ts` + `kundiusPages.test.tsx` edited — not on the plan's phase-4
+   Files-touched, but EXPLICITLY added by the orchestrator's task message** ("update EVERY
+   `@/modules/templates/atelier2` import path: registry.ts, skinPurity.test.ts,
+   conformance.test.ts, kundiusPages.test.tsx, blockMocks/index.ts"). Both carried a live
+   `atelier2` import that the dir move would break (dangling import → tsc red), so the fix
+   is mandatory for a green gate. Both changes are import-path-only (+ the `atelierSections`
+   rename in kundius). Flagged per scope rules; the plan's Files-touched list simply omitted
+   these two import sites that the orchestrator caught.
+
+2. **One `resolveAtelierBlock` reference survives — a COMMENT in
+   `pageArchetypes.atelier.test.ts` (NOT on my Files-touched).** It reads "…resolve through
+   resolveWorkBlock (NOT the retired resolveAtelierBlock)…" — an accurate historical
+   description of the retirement, not a live code symbol. Editing it would touch an
+   out-of-scope file for a purely cosmetic prose change, so I LEFT it. The verification
+   target's intent ("0 hits outside git history") is about live symbol references; this is
+   descriptive prose. Benign; noted for the reviewer.
+
+## grep verification (from WORKDIR)
+
+- **`grep -rin atelier2 src scripts` → 0 hits.** (The whole point of phase 4 — clean.)
+- **`grep -rn "resolveAtelierBlock|AtelierPlaceholderBlock|AtelierHero" src scripts` → 1
+  hit**, the benign comment in `pageArchetypes.atelier.test.ts:11` (Deviation 2). No live
+  symbol references remain.
+- **`ls templates/atelier/` → `index.ts`, `skin.ts` ONLY** (skinPurity test now enforces
+  this for the live id).
+- **`grep -c Atelier src/modules/audience/service/elementSchema.ts` → 0** (all 8 dead
+  layout entries removed).
+
+## Gate results (run from WORKDIR)
+
+- **`npx tsc --noEmit`**: green (EXIT 0). The dir move / import re-point introduced no
+  dangling imports.
+- **`npm run test:run`**: green — `Test Files 242 passed | 1 skipped`; `Tests 3859 passed
+  | 14 skipped`. (Count dropped from phase 3's 3916: the old dir's co-located
+  `registration.test.ts` + `coreParity.test.ts` were deleted with the dir, and the moot
+  skinPurity "old-atelier excluded" describe was removed — expected.)
+- **`npm run build`**: green (EXIT 0) — full build (buildPublishedCSS + buildAssets + next
+  build). Confirmed `public/assets/slider.v1.js` AND `public/assets/work.v1.js` both emit.
+- **`npm run lint`**: green (EXIT 0) — only pre-existing `no-img-element` / `exhaustive-deps`
+  warnings in unrelated files; zero errors.
+
+## Open risks / deferred
+
+- `templates/atelier/` is now the canonical skeleton barrel (data-only, `{index.ts,skin.ts}`);
+  the `atelier2` staging id is fully gone from src + scripts.
+- The frozen `slider.v1.js` asset + its source remain by contract (old published blobs
+  reference it by URL). New atelier publishes are skeleton pages loading `work.v1.js`.
+- Phase 5 (final gates + merge readiness) is the remaining human gate — not this phase.
