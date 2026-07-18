@@ -22,11 +22,17 @@ const nextConfig = {
       // same-origin (work-onboarding-shell, founder ruling 2026-07-16). DENY blocks
       // framing EVEN same-origin — that's why this exists. Every other route keeps DENY.
       //
-      // ⚠️ These two sources MUST stay mutually exclusive, and they are:
-      //   `/preview/:token+`  → one-or-more segments ⇒ matches `/preview/{token}`
-      //                         (and `/preview/{token}/privacy`), NOT bare `/preview`.
-      //   `/((?!preview/).*)` → everything whose path does not start with `preview/`,
-      //                         which includes bare `/preview`.
+      // ⚠️ These THREE sources MUST stay mutually exclusive, and they are:
+      //   `/preview/:token+`         → one-or-more segments ⇒ matches `/preview/{token}`
+      //                                (and `/preview/{token}/privacy`), NOT bare `/preview`.
+      //   `/edit/:token/preview`     → the editor preview SUB-ROUTE, exactly one token
+      //                                segment (NOT `:token+` — do not widen the framable
+      //                                surface to `/edit/{token}/anything`).
+      //   `/((?!preview/)(?!edit/[^/]+/preview$).*)`
+      //                              → everything that neither starts with `preview/` NOR
+      //                                is exactly `edit/{token}/preview`. Bare `/preview`
+      //                                and bare `/edit/{token}` (no /preview) still land here
+      //                                ⇒ DENY.
       // Do NOT loosen `:token+` to `:token*` (zero-or-more): `*` also matches bare
       // `/preview`, which then matches BOTH sources. Next dedupes headers() by key
       // with LAST-WINS, so today that overlap would resolve to DENY (the DENY entry
@@ -47,8 +53,17 @@ const nextConfig = {
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
         ],
       },
+      // editor-route-consolidation phase 3: the editor preview SUB-ROUTE is framable
+      // same-origin (mobile-view iframe, phase 4). Single-segment `:token` ONLY — the
+      // framable surface is exactly `/edit/{token}/preview`, nothing else under /edit.
       {
-        source: '/((?!preview/).*)',
+        source: '/edit/:token/preview',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+        ],
+      },
+      {
+        source: '/((?!preview/)(?!edit/[^/]+/preview$).*)',
         headers: [
           { key: 'X-Frame-Options', value: 'DENY' },
         ],

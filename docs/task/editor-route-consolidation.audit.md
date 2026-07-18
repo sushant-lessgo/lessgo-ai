@@ -185,3 +185,108 @@ tests).
 - Spec unexecuted here (see above) — watch the mock-mode Meridian seed rendering
   the hero copy within the 60s budget (same pattern the phase-1 / toolbar specs
   rely on, so low risk).
+
+## Phase 3 — XFO: SAMEORIGIN on the sub-route (additive)
+
+**Files changed**
+- `next.config.js` — headers() sources (added sub-route SAMEORIGIN rule + narrowed DENY negative-lookahead; comment block updated to describe three sources).
+- `e2e/xfo-headers.spec.ts` (new) — request-context XFO route-gate spec.
+- `playwright.config.ts` — registered `xfo-headers.spec.ts` in the `public` (no-auth) project testMatch allowlist.
+
+### next.config.js headers block — before / after
+
+BEFORE (the two XFO sources, verbatim):
+```
+      {
+        source: '/preview/:token+',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+        ],
+      },
+      {
+        source: '/((?!preview/).*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+        ],
+      },
+```
+
+AFTER (the three XFO sources, verbatim):
+```
+      {
+        source: '/preview/:token+',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+        ],
+      },
+      // editor-route-consolidation phase 3: the editor preview SUB-ROUTE is framable
+      // same-origin (mobile-view iframe, phase 4). Single-segment `:token` ONLY — the
+      // framable surface is exactly `/edit/{token}/preview`, nothing else under /edit.
+      {
+        source: '/edit/:token/preview',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+        ],
+      },
+      {
+        source: '/((?!preview/)(?!edit/[^/]+/preview$).*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+        ],
+      },
+```
+
+### Why the three sources stay mutually exclusive
+Matching is done by Next against the pathname; the DENY source's captured group begins
+immediately after the leading `/`.
+- `/preview/:token+` — one-or-more segments ⇒ matches `/preview/{token}` (and deeper),
+  NOT bare `/preview`. SAMEORIGIN.
+- `/edit/:token/preview` — path-to-regexp single named segment `:token` (`[^/]+`) then the
+  literal `/preview`. Matches exactly `/edit/{token}/preview`, NOT `/edit/{token}` and NOT
+  `/edit/{token}/preview/extra` (path-to-regexp anchors the full path). SAMEORIGIN.
+- `/((?!preview/)(?!edit/[^/]+/preview$).*)` — DENY for every path that (a) does not start
+  with `preview/` AND (b) is not exactly `edit/{token}/preview`. Walkthrough:
+  - `/edit/x/preview` → lookahead `(?!edit/[^/]+/preview$)` sees the forbidden form ⇒ DENY
+    source does NOT match; handled by the SAMEORIGIN sub-route rule above. ✔ one header.
+  - `/edit/x` → no `/preview$`, lookahead passes ⇒ DENY. The sub-route rule doesn't match. ✔
+  - `/preview/x` → excluded by `(?!preview/)`; DENY doesn't match; SAMEORIGIN `/preview/:token+`
+    matches. ✔ (this legacy rule STAYS this phase — StepReveal still frames it until phase 5.)
+  - `/edit/x/preview/extra` → the `$` anchor fails, lookahead passes ⇒ DENY; the single-segment
+    sub-route rule does NOT match ⇒ the framable surface is not widened. ✔
+  - `/` and `/dashboard` → DENY. ✔
+No path matches two XFO sources, so the header value is order-independent (no reliance on
+Next's last-wins dedupe).
+
+### path-to-regexp runtime validation
+The negative-lookahead-in-path form mirrors the pre-existing working rule's structure exactly
+(same `/(...)` wrapping, same escaping, `$` inside a lookahead is a plain regex anchor). Next
+compiles `source` via path-to-regexp at build time; `npm run build` completed with NO invalid-
+header / invalid-source warning (only pre-existing bundle-size + Sentry deprecation warnings),
+and both `/edit/[token]` and `/edit/[token]/preview` appear in the route manifest. Config shape
+is validated; the actual runtime header values are the founder's `curl -I` HUMAN GATE.
+
+### Green gate results (run from WORKDIR)
+- `npx tsc --noEmit` — PASS (no output).
+- `npm run lint` — PASS (only pre-existing `no-img-element` / `exhaustive-deps` warnings; no errors).
+- `npm run build` — PASS. No headers/config warning. `/edit/[token]/preview` listed (1.39 kB).
+  Non-fatal pre-existing warnings only: "Bundle size exceeds 5KB target" and the Sentry
+  `sentry.client.config.ts` deprecation notice.
+
+### e2e status
+`e2e/xfo-headers.spec.ts` written as a `request`-context spec (no browser/auth) asserting exact
+`x-frame-options` per URL: `/edit/{t}/preview`→SAMEORIGIN, `/edit/{t}`→DENY, `/preview/{t}`→
+SAMEORIGIN, `/`→DENY, `/dashboard`→DENY. Registered in the `public` project. NOT executed here
+(needs the dev webServer; self-skips when no server is reachable, matching phase-1/2 specs). Runs
+under `npm run test:e2e`.
+
+### Deviations
+- Registered the new spec in `playwright.config.ts` (public project allowlist) — an implicit
+  Files-touched addition the phase brief pre-authorized for spec registration. One-line change,
+  no behavioral impact.
+
+### Open risks
+- XFO is a RUNTIME header; the build validates config SHAPE only. The founder/orchestrator
+  `curl -I` HUMAN GATE (four URLs, exactly one XFO each) is the real behavioral check. Failure
+  mode downstream is a silently blank same-origin iframe (phase 4).
+- The legacy `/preview/:token+` SAMEORIGIN rule is intentionally retained this phase (phase 5
+  retires it alongside the reveal move).

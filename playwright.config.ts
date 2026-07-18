@@ -37,7 +37,7 @@ export default defineConfig({
     // Public, no-auth smokes.
     {
       name: 'public',
-      testMatch: [/generation\.spec\.ts/, /render\.spec\.ts/, /parity\.spec\.ts/, /ui-isolation\.spec\.ts/, /forms-forgery\.spec\.ts/],
+      testMatch: [/generation\.spec\.ts/, /render\.spec\.ts/, /parity\.spec\.ts/, /ui-isolation\.spec\.ts/, /forms-forgery\.spec\.ts/, /xfo-headers\.spec\.ts/],
       use: { ...devices['Desktop Chrome'] },
     },
     // Clerk sign-in → saves storageState.
