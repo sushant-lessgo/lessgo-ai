@@ -24,7 +24,7 @@ change needed; parity holds by construction.
 - phase 4 board verbs + CorrectionBoard extension: done (commit 15ab32ba, review loops 1)
 - phase 5 dashboard page + tab + client host: done (commit eb973e81, review loops 1)
 - phase 6 manage-link re-point + Update site: done (commit e3155170, review loops 1) — HUMAN GATE b pending founder sign-off (live visual+parity)
-- phase 7 deterministic QA + founder pilot: pending
+- phase 7 deterministic QA + founder pilot: automated QA done (commit 33567c22, review loops 1) — HUMAN GATE a (founder pilot) + gate b consolidated at merge gate
 
 ## Load-bearing design decisions (scout-confirmed)
 
