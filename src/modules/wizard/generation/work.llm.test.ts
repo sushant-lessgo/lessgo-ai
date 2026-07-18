@@ -14,10 +14,14 @@ import type { GenerationMeta } from './index';
 // ── Mocks ────────────────────────────────────────────────────────────────────
 // saveDraft: capture the finalContent handed to each save (no network).
 const savedFcs: any[] = [];
+// Also capture the FULL save payload (esp. `brief`) so we can prove first-gen
+// persists the composed brief the regen route later reads.
+const savedBodies: any[] = [];
 vi.mock('./finalize', () => ({
   saveDraft: vi.fn(async (body: any) => {
     // Deep-clone so we snapshot the fc AT save time (the adapter mutates it).
     savedFcs.push(JSON.parse(JSON.stringify(body.finalContent)));
+    savedBodies.push(JSON.parse(JSON.stringify(body)));
   }),
 }));
 
@@ -42,6 +46,7 @@ import {
   WORK_COPY_ENGINE_TEMPLATES,
 } from './work.llm';
 import { templateMeta } from '@/modules/templates/templateMeta';
+import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
 import type { WorkGenerationInput } from './work';
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
@@ -137,6 +142,7 @@ function installFetch(opts: {
 
 beforeEach(() => {
   savedFcs.length = 0;
+  savedBodies.length = 0;
   (finalizeMultiPageGeneration as any).mockClear();
 });
 
@@ -180,6 +186,21 @@ describe('runWorkLLMGeneration — fan-out orchestration', () => {
     }
     // Generation marker dropped by finalize ⇒ not a resumable draft anymore.
     expect(finalFc.generationProgress).toBeUndefined();
+  });
+
+  it('persists the composed brief on every saveDraft, and it satisfies the regen route read', async () => {
+    installFetch();
+    await runWorkLLMGeneration(baseInput());
+
+    // At least one save happened (skeleton + per-page + finalize).
+    expect(savedBodies.length).toBeGreaterThan(0);
+    for (const body of savedBodies) {
+      // The saved brief equals the wizard's composed input.brief …
+      expect(body.brief).toEqual(BRIEF);
+      // … and what's persisted actually satisfies the regen route's read
+      // (getWorkFacts(brief.facts) non-null → no `brief.facts.work is required` 400).
+      expect(getWorkFacts(body.brief.facts)).not.toBeNull();
+    }
   });
 
   it('fetches the work strategy when none is pre-supplied', async () => {

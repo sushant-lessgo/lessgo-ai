@@ -33,6 +33,7 @@ import { CopyResponseSchema } from '@/lib/schemas/copy.schema';
 import type { SectionCopy } from '@/types/generation';
 import { prisma } from '@/lib/prisma';
 import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
+import { seedWorkFactsFromEntry } from '@/modules/wizard/work/rail';
 import { derivePricePosition } from '@/modules/audience/work/pricePosition';
 import {
   selectWorkVoice,
@@ -156,7 +157,18 @@ async function regenerateStoryHandler(req: NextRequest): Promise<Response> {
     // 2e. Work facts guard. (A missing project row is unreachable in production
     //     — assertProjectOwner already 404s it above — but the branch stays
     //     defensive rather than relying on that ordering.)
-    const facts = getWorkFacts(storedBrief?.facts);
+    // Read-time fallback: projects generated before brief-persistence landed (or
+    // any row whose `facts.work` is empty) can still be served by re-deriving
+    // `facts.work` from the stored `facts.entry` — the SAME server-side seed
+    // onboarding runs at confirm (rail.ts:seedWorkFactsFromEntry). Derived
+    // read-time ONLY: never written back to Project.brief. The guard is SUPPLIED,
+    // not weakened — if neither facts.work nor a derivable facts.entry exists, the
+    // 400 below still stands.
+    const facts =
+      getWorkFacts(storedBrief?.facts) ??
+      seedWorkFactsFromEntry(
+        (storedBrief?.facts?.['entry'] ?? null) as Parameters<typeof seedWorkFactsFromEntry>[0]
+      );
     if (!facts) {
       return createSecureResponse(
         {
