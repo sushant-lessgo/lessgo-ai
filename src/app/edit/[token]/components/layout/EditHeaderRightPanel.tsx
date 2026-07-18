@@ -7,6 +7,7 @@ import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { UndoRedoButtons } from '../ui/UndoRedoButtons';
 import { ResetButton } from '../ui/ResetButton';
 import { usePreviewNavigation } from '../ui/usePreviewNavigation';
+import { DeviceToggle } from '../ui/DeviceToggle';
 import { AppIcon } from '@/components/ui/icon';
 import { Coming } from '@/components/ui/coming';
 
@@ -202,6 +203,12 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
             <span>Preview</span>
           </button>
         </div>
+
+        {/* Device toggle (phase 4) — only in preview mode. Desktop keeps the
+            inline canvas; Mobile swaps it for a true-viewport iframe of the
+            chromeless sub-route (EditLayout). Absent in edit mode (no device
+            switching while editing). */}
+        {mode === 'preview' && <DeviceToggle />}
 
         {/* Publish split-button (t1) — built INLINE here on purpose: single
             consumer, so phase 1 explicitly declined to make it a primitive. */}

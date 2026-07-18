@@ -7,6 +7,7 @@ import { useEditor } from '@/hooks/useEditor';
 import { GlobalAppHeader } from './GlobalAppHeader';
 import { LeftPanel } from './LeftPanel';
 import { MainContent } from './MainContent';
+import { MobilePreviewFrame } from '../ui/MobilePreviewFrame';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { GlobalFormBuilder } from '@/components/layout/GlobalFormBuilder';
 import { LayoutChangeModal } from '../ui/LayoutChangeModal';
@@ -28,6 +29,9 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
   // Use selectors for state
   const leftPanel = useStoreState(state => state.leftPanel);
   const mode = useStoreState(state => state.mode);
+  // Phase 4: preview-mode device toggle. Mobile swaps the inline canvas for a
+  // true-viewport iframe of the chromeless sub-route.
+  const deviceMode = useStoreState(state => state.globalSettings.deviceMode);
 
   // Get actions from store
   const storeState = store?.getState();
@@ -117,6 +121,28 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
     modalEmergencyReset.enableDiagnosticMode();
   }, []);
 
+  // Phase 4: leaving preview mode resets the device toggle back to desktop, so
+  // the next preview session starts on the inline canvas (no store-level logic —
+  // this is presentation reset). Guarded so it only fires on the edit-mode edge.
+  useEffect(() => {
+    if (mode !== 'preview' && deviceMode !== 'desktop') {
+      storeState?.setDeviceMode?.('desktop');
+    }
+  }, [mode, deviceMode, storeState]);
+
+  // Fresh iframe per entry into mobile view: bump a key so re-entering mobile
+  // remounts MobilePreviewFrame (re-runs its save→reload). Increments on each
+  // transition INTO mobile preview.
+  const isMobilePreview = mode === 'preview' && deviceMode === 'mobile';
+  const [mobileEntryKey, setMobileEntryKey] = useState(0);
+  const wasMobilePreview = useRef(false);
+  useEffect(() => {
+    if (isMobilePreview && !wasMobilePreview.current) {
+      setMobileEntryKey((k) => k + 1);
+    }
+    wasMobilePreview.current = isMobilePreview;
+  }, [isMobilePreview]);
+
   // Prevent context menu in edit mode for cleaner UX
   const handleContextMenu = useCallback((event: React.MouseEvent) => {
     if (mode !== 'preview') {
@@ -203,8 +229,16 @@ export function EditLayout({ tokenId }: EditLayoutProps) {
             <MainContent> (the editor CANVAS) is all that lives here now that the
             second header row is collapsed into the bar. See the attach map. */}
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
-          {/* Main Content Area — CANVAS. Must stay outside every .app-chrome. */}
-          <MainContent tokenId={tokenId} />
+          {/* Main Content Area — CANVAS. Must stay outside every .app-chrome.
+              Phase 4: in mobile preview the inline canvas is replaced by a
+              true-viewport iframe (separate document → escapes .app-chrome by
+              construction, so no bleed hazard). Desktop preview + all edit modes
+              keep the inline canvas. `key` remounts the frame on each entry. */}
+          {isMobilePreview ? (
+            <MobilePreviewFrame key={mobileEntryKey} tokenId={tokenId} />
+          ) : (
+            <MainContent tokenId={tokenId} />
+          )}
         </div>
       </div>
 

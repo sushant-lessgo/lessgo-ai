@@ -308,3 +308,101 @@ Mutual exclusivity confirmed at runtime. Founder's remaining confirm = "iframe a
 renders, not silent-blank" — folds into phase-4 e2e + merge-gate preview QA (decision:
 consolidate the 3 founder-facing gates at the merge gate, since reveal/publish/pilot
 sign-off need the QA preview deploy which the pipeline can't produce mid-run without a push).
+
+## Phase 4 — Mobile-view iframe toggle
+
+**Files changed**
+- `src/app/edit/[token]/components/ui/DeviceToggle.tsx` (modified — wired the dead toggle)
+- `src/app/edit/[token]/components/ui/MobilePreviewFrame.tsx` (new)
+- `src/app/edit/[token]/components/layout/EditHeaderRightPanel.tsx` (modified — mount DeviceToggle in preview mode)
+- `src/app/edit/[token]/components/layout/EditLayout.tsx` (modified — canvas swap + reset effect + remount key)
+- `e2e/editor-preview-mode.spec.ts` (extended — mobile-iframe test)
+
+### DeviceToggle shape reconciliation
+The file previously rendered THREE inert buttons (desktop/tablet/mobile) whose
+commented handler called `setGlobalSettings({ deviceMode })`. Reconciled per the
+plan-review note:
+- **Tablet DROPPED.** The store type is `deviceMode: 'desktop' | 'mobile'`
+  (`src/types/store/state.ts:188`) and `setDeviceMode` (`layoutActions.ts:698`)
+  only accepts those two — tablet was never representable. Now two buttons.
+- **`setDeviceMode` used**, not `setGlobalSettings` — the dedicated 2-value action
+  (called via `useEditStoreApi().getState().setDeviceMode(...)`).
+- Highlight reads the single-scalar selector `useEditStore((s) => s.globalSettings.deviceMode)`
+  (selector form, not the banned bare subscription). Restyled to match the
+  Edit/Preview segmented shell for visual consistency; `aria-label="Preview device"`.
+
+Note: a SEPARATE greyed device `SegmentedControl` still lives in
+`GlobalAppHeader.tsx` (`Coming what="device previews"`), which is OUT of this
+phase's Files-touched and was left untouched. The plan explicitly wires the new
+real toggle into `EditHeaderRightPanel` (preview-only), not that greyed slot — so
+in preview mode the real toggle renders in the right panel. Reconciling/removing
+the greyed center slot is not in Phase 4 scope; logged here as a known follow-up.
+
+### Save-before-frame + key-remount mechanism
+`MobilePreviewFrame` forces `await storeApi.getState().save()` in a mount effect
+and gates the `<iframe>` behind a `ready` flag — the iframe never loads until the
+draft is persisted, so the sub-route's own `EditProvider.loadDraft` reads the
+just-edited copy (handoff = DB reload, NOT postMessage, per spec — no live
+cross-document channel added). Save failure still shows the iframe (renders the
+last-persisted draft; the editor's own save-error UI owns that signal) — chosen as
+the conservative option so a transient save error doesn't hard-block the preview.
+
+Fresh remount per entry: `EditLayout` conditionally renders `MobilePreviewFrame`
+only when `mode==='preview' && deviceMode==='mobile'` (so it naturally unmounts on
+desktop/edit), AND passes a `key={mobileEntryKey}` that increments on each
+transition INTO mobile view (a `wasMobilePreview` ref edge-detector). Re-entering
+mobile therefore remounts the component → re-runs save → reloads the iframe fresh;
+no stale iframe survives a desktop↔mobile round-trip.
+
+### deviceMode reset on preview-exit
+An `EditLayout` effect resets `deviceMode` to `'desktop'` whenever
+`mode !== 'preview'` (guarded on `deviceMode !== 'desktop'` so it only fires on the
+edge) via `storeState?.setDeviceMode?.('desktop')` — no new store logic, pure
+presentation reset. Next preview session starts on the inline canvas.
+
+### EditHeaderRightPanel
+Imported `DeviceToggle`; render `{mode === 'preview' && <DeviceToggle />}` after
+the Edit/Preview segmented group. Absent in edit mode. No other change; Publish
+split-button untouched (phase 6).
+
+### e2e (extended `editor-preview-mode.spec.ts`)
+Added one test: edit the hero headline (append a unique marker, commit via blur) →
+assert device toggle absent in edit mode → Preview (toggle appears, Desktop stays
+inline, no iframe) → Mobile → assert the iframe mounts, its `src` matches
+`/edit/{token}/preview`, its boundingBox width is ~390px (>380 && <400), and —
+the data-integrity crux — `frameLocator` sees the EDITED headline marker inside
+the iframe (proves save-before-frame ran AND the framed sub-route actually
+rendered, so it fails deterministically on a silent-blank XFO frame or a stale
+draft) → Desktop returns inline (iframe unmounts, still preview mode) → Edit
+(toggle vanishes, canvas editable again). Real assertions throughout — would fail
+on regression, not a manual TODO.
+
+### Green gate (run from WORKDIR)
+- `npx tsc --noEmit` → **EXIT 0** (clean).
+- `npm run test:run` → **EXIT 0** — 250 files passed / 1 skipped; 4035 tests
+  passed / 14 skipped (unchanged from phases 1-3; no unit regressions).
+- `npm run lint` → **EXIT 0** — only pre-existing warnings (techpremium/vestria
+  `<img>` LCP + ph-provider exhaustive-deps); NONE in phase-4 files.
+- `npm run build` → **EXIT 0** — `/edit/[token]` (805 kB) and `/edit/[token]/preview`
+  (443 kB) both compile with the new `MobilePreviewFrame` + iframe dependency; no
+  Suspense/headers errors.
+
+### Playwright spec status
+**Not executed locally** — same convention as phases 1-3: the authed spec
+`test.skip`s itself without `E2E_CLERK_USER_EMAIL` / `E2E_CLERK_USER_PASSWORD` /
+`CLERK_SECRET_KEY` + a live dev server, which aren't available in this
+implementation environment. Authored + already registered (the spec file was
+allowlisted in phase 1). First real run happens on the configured e2e env / QA
+preview via `npx playwright test editor-preview-mode`. The mobile-iframe test
+depends on the phase-3 XFO SAMEORIGIN rule (curl-verified) to render — if that
+regressed, `frameLocator` would time out (deterministic catch).
+
+### Open risks
+- Duplicate device control surface: the real `DeviceToggle` (preview-only, right
+  panel) coexists with the still-present greyed `SegmentedControl` in
+  `GlobalAppHeader` (out of scope). Follow-up sweep should remove/replace the
+  greyed slot — flagged, not fixed (out of Files-touched).
+- iframe render correctness is a RUNTIME concern gated by XFO; unit/build can't
+  prove it. The extended e2e is the deterministic check but is unexecuted here —
+  real run on the QA preview is the founder-facing confirm (folds into the merge
+  gate per phase-3 note).

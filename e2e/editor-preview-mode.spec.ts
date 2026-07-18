@@ -34,6 +34,10 @@ const cfg = AUDIENCES.find((a) => a.templateId === 'meridian')!;
 // (LeftPanel's SegmentedControl) each carry a stable aria-label.
 const SEGMENTED = '[role="group"][aria-label="Edit or preview"]';
 const RAIL = '[aria-label="Left rail panel"]';
+// Phase 4: the preview-only device toggle (Desktop/Mobile) + the mobile iframe.
+const DEVICE = '[role="group"][aria-label="Preview device"]';
+const MOBILE_FRAME = '[data-testid="mobile-preview-frame"]';
+const MOBILE_IFRAME = '[data-testid="mobile-preview-iframe"]';
 
 test.describe('editor preview-mode flip (Edit/Preview segmented control)', () => {
   let token: string;
@@ -103,5 +107,74 @@ test.describe('editor preview-mode flip (Edit/Preview segmented control)', () =>
       'edit mode should be editable again after flipping back',
     ).toBeVisible({ timeout: 30_000 });
     await expect(page.locator(RAIL), 'rail should return in edit mode').toHaveCount(1);
+  });
+
+  // ── Phase 4: true-viewport mobile iframe toggle ─────────────────────────────
+  //
+  // What it pins (and what a later phase could silently break):
+  //   (a) The device toggle appears ONLY in preview mode; Mobile swaps the inline
+  //       canvas for an ~390px iframe of the chromeless /edit/{token}/preview
+  //       sub-route. The forced save() BEFORE the iframe mounts means the iframe's
+  //       own loadDraft sees the just-edited headline — the frameLocator asserts
+  //       the EDITED text is visible (save-before-frame data-integrity; this also
+  //       fails deterministically if the iframe silent-blanks on an XFO mistake).
+  //   (b) Desktop returns the inline canvas.
+  //   (c) Back to Edit re-enables editing.
+  test('edit headline → preview → mobile iframe shows edited copy → desktop → edit', async ({ page }) => {
+    const marker = `E2EMOBILE${Date.now()}`;
+    const headline = page.locator('[data-element-key="headline"]').first();
+    await expect(headline).toBeVisible({ timeout: 60_000 });
+
+    // 1. Edit the headline (append a unique marker) and commit via blur.
+    await headline.click();
+    await page.keyboard.press('End');
+    await page.keyboard.type(marker, { delay: 40 });
+    await expect(headline).toContainText(marker, { timeout: 15_000 });
+    await headline.evaluate((el: HTMLElement) => el.blur());
+
+    // 2. The device toggle is absent in edit mode.
+    await expect(page.locator(DEVICE), 'device toggle must not show in edit mode').toHaveCount(0);
+
+    // 3. Flip to Preview — device toggle appears (defaulting to Desktop = inline).
+    await page.locator(`${SEGMENTED} button`, { hasText: 'Preview' }).click();
+    await expect(page.locator('[data-mode]').first()).toHaveAttribute('data-mode', 'preview');
+    await expect(page.locator(DEVICE), 'device toggle should show in preview mode').toHaveCount(1);
+    await expect(page.locator(MOBILE_FRAME), 'desktop preview stays inline (no iframe)').toHaveCount(0);
+
+    // 4. Switch to Mobile — the inline canvas is replaced by the phone iframe.
+    await page.locator(`${DEVICE} button`, { hasText: 'Mobile' }).click();
+    const iframeEl = page.locator(MOBILE_IFRAME);
+    await expect(iframeEl, 'mobile iframe must mount after the forced save').toBeVisible({ timeout: 30_000 });
+
+    // 4a. `src` points at the chromeless editor-preview sub-route.
+    await expect(iframeEl).toHaveAttribute('src', new RegExp(`/edit/${token}/preview`));
+
+    // 4b. The iframe is a real ~390px mobile viewport.
+    const box = await iframeEl.boundingBox();
+    expect(box, 'iframe should have a layout box').not.toBeNull();
+    expect(box!.width, 'mobile iframe should be ~390px wide').toBeGreaterThan(380);
+    expect(box!.width, 'mobile iframe should be ~390px wide').toBeLessThan(400);
+
+    // 4c. DATA-INTEGRITY: the iframe (a separate document that ran its own
+    //     loadDraft) shows the EDITED headline — proves save-before-frame ran and
+    //     the sub-route actually rendered (not a silent-blank XFO frame).
+    await expect(
+      page.frameLocator(MOBILE_IFRAME).locator('[data-element-key="headline"]').first(),
+      'mobile iframe must render the just-edited headline (save-before-frame)',
+    ).toContainText(marker, { timeout: 30_000 });
+
+    // 5. Back to Desktop — inline canvas returns, iframe gone, still preview mode.
+    await page.locator(`${DEVICE} button`, { hasText: 'Desktop' }).click();
+    await expect(page.locator(MOBILE_FRAME), 'mobile iframe must unmount on desktop').toHaveCount(0);
+    await expect(page.locator('[data-mode]').first()).toHaveAttribute('data-mode', 'preview');
+
+    // 6. Back to Edit — device toggle gone, canvas editable again.
+    await page.locator(`${SEGMENTED} button`, { hasText: 'Edit' }).click();
+    await expect(page.locator('[data-mode]').first()).toHaveAttribute('data-mode', 'edit');
+    await expect(page.locator(DEVICE), 'device toggle must vanish back in edit mode').toHaveCount(0);
+    await expect(
+      page.locator('[contenteditable="true"]').first(),
+      'edit mode should be editable again',
+    ).toBeVisible({ timeout: 30_000 });
   });
 });

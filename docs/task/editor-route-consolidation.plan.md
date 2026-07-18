@@ -13,7 +13,7 @@ Make `/edit/[token]` the single home for preview, reveal, and publish on the **w
 - phase 1 inline preview mode (Edit/Preview flip): done (commit dd9d0e37, review loops 1, ship)
 - phase 2 chromeless editor-preview sub-route: done (commit pending, review loops 1, ship)
 - phase 3 XFO SAMEORIGIN on sub-route (additive): done (commit 3b34da3b, review loops 1, ship; curl -I runtime PASSED 6/6 URLs on worktree dev; founder visual iframe-render confirm folds into merge gate)
-- phase 4 mobile-view iframe toggle: pending
+- phase 4 mobile-view iframe toggle: done (commit pending, review loops 1, ship; save-before-frame + key-remount + XFO-target verified; greyed GlobalAppHeader toggle coexistence = later sweep)
 - phase 5 reveal fold onto edit route + /preview XFO retire: pending
 - phase 6 publish relocation into editor header: pending
 - pilot decision gate (founder sign-off): pending
