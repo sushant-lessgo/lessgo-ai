@@ -237,7 +237,11 @@ function refsFor(group: ProposedGroup, markFirstCover: boolean): NonNullable<Wor
  *     rule the rail chip-join lives by).
  *   • NO MATCH → append a NEW `WorkGroupInput` via `normalizeWorkGroup`'s seed
  *     defaults (`kind:'category'`, on-request price) — NEVER a `kind`-less group
- *     (landmine 6). Its first photo is marked cover.
+ *     (landmine 6). Its first photo is marked cover. Tagged `origin:'upload'`
+ *     (qa-0718 B5) so the "WHAT YOU SELL" rail DISPLAY excludes these photo
+ *     buckets (folder name / day label / "Gallery") — they are not things the
+ *     seller sells. Name-matched appends leave the existing group's origin
+ *     UNTOUCHED. Generation still reads every group (photos intact).
  *
  * Returns a fresh `WorkGroupInput[]` (existing groups shallow-cloned, photos
  * arrays rebuilt) suitable for the D10 commit funnel
@@ -263,7 +267,7 @@ export function mergeProposalIntoGroups(
       const refs = refsFor(group, !hasCover && (existing.photos ?? []).length === 0);
       existing.photos = [...(existing.photos ?? []), ...refs];
     } else {
-      const seeded = normalizeWorkGroup({ name: group.name, photos: refsFor(group, true) });
+      const seeded = normalizeWorkGroup({ name: group.name, photos: refsFor(group, true), origin: 'upload' });
       // `normalizeWorkGroup` only returns null for an empty name — proposal
       // group names are never empty (folder name / day label / "Gallery").
       if (seeded) result.push(seeded as WorkGroupInput);

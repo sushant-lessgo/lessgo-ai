@@ -77,6 +77,7 @@ describe('work rail adapter — toVM', () => {
       'name',
       'descriptor',
       'groups',
+      'price', // qa-0718 B6 — WHAT YOU CHARGE (the answered charge)
       'pricePosition',
       // E3 read-only rows (fill from STEP 03; corrections happen in-step, D-E).
       'languages',
@@ -88,6 +89,7 @@ describe('work rail adapter — toVM', () => {
       'NAME',
       'WHAT YOU DO',
       'WHAT YOU SELL',
+      'WHAT YOU CHARGE',
       'PRICE POSITION',
       'LANGUAGES',
       'ESTABLISHED',
@@ -155,7 +157,7 @@ describe('work rail adapter — toVM', () => {
   it('an empty / undefined bag projects an all-skeleton VM (never a throw)', () => {
     for (const facts of [undefined, {}, { work: 'garbage' } as unknown as Record<string, unknown>]) {
       const vm = rail.toVM(facts);
-      expect(vm.fields).toHaveLength(8);
+      expect(vm.fields).toHaveLength(9); // +1: WHAT YOU CHARGE (qa-0718 B6)
       expect(vm.fields.every((f) => f.skeleton)).toBe(true);
       expect(vm.fields.find((f) => f.id === 'groups')!.chips).toEqual([]);
     }
@@ -166,6 +168,97 @@ describe('work rail adapter — toVM', () => {
     const field = rail.toVM(facts).fields.find((f) => f.id === 'pricePosition')!;
     expect(field.value).toBeNull();
     expect(field.skeleton).toBe(true);
+  });
+
+  // ── qa-0718 B5 — upload buckets must NOT leak into "WHAT YOU SELL" ──
+  it('B5: "WHAT YOU SELL" chips EXCLUDE upload-origin groups (offer only)', () => {
+    const facts = {
+      work: {
+        identity: { name: 'Kundius' },
+        groups: [
+          { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, origin: 'offer' },
+          // an E2 photo bucket (folder-named), tagged upload — not a thing sold.
+          {
+            name: 'asset',
+            kind: 'category',
+            price: { mode: 'on-request' },
+            origin: 'upload',
+            photos: [{ id: 'p1', url: 'https://cdn.example.com/p1.jpg' }],
+          },
+        ],
+      },
+    } as unknown as Record<string, unknown>;
+    const chips = rail.toVM(facts).fields.find((f) => f.id === 'groups')!.chips!;
+    // Pre-fix BOTH leaked in ([g0 Weddings, g1 asset]); now offer only.
+    expect(chips).toEqual([{ id: 'g0', label: 'Weddings' }]);
+    // Chip id is the position in the FULL facts bag (index preserved for the join).
+    // If all groups were uploads, the field would skeleton.
+    const allUploads = {
+      work: {
+        identity: { name: 'X' },
+        groups: [{ name: 'asset', kind: 'category', price: { mode: 'on-request' }, origin: 'upload' }],
+      },
+    } as unknown as Record<string, unknown>;
+    const groupsField = rail.toVM(allUploads).fields.find((f) => f.id === 'groups')!;
+    expect(groupsField.chips).toEqual([]);
+    expect(groupsField.skeleton).toBe(true);
+  });
+
+  it('B5: a WHAT YOU SELL chip edit PRESERVES origin:upload buckets + their photos (round-trip)', () => {
+    const facts = {
+      work: {
+        identity: { name: 'Kundius' },
+        groups: [
+          { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, origin: 'offer' },
+          {
+            name: 'asset',
+            kind: 'category',
+            price: { mode: 'on-request' },
+            origin: 'upload',
+            photos: [{ id: 'u1', url: 'https://cdn.example.com/u1.jpg' }],
+          },
+        ],
+      },
+    } as unknown as Record<string, unknown>;
+
+    // The UI seeds ChipsEditor from the OFFER-only chips toVM emits…
+    const chips = rail.toVM(facts).fields.find((f) => f.id === 'groups')!.chips!;
+    expect(chips).toEqual([{ id: 'g0', label: 'Weddings' }]);
+
+    // …rename the only visible chip + add one, and Save through the SAME door the
+    // UI uses (rail.applyEdit → commitGroupChips → applyRailEdit REPLACE).
+    const result = expectOk(
+      rail.applyEdit(
+        'groups',
+        { kind: 'chips', value: [{ id: 'g0', label: 'Portraits' }, { label: 'Film' }] },
+        facts
+      )
+    );
+    const groups = groupsOf(result);
+
+    // Offer chips add/rename as before…
+    expect(groups.map((g) => g.name)).toContain('Portraits');
+    expect(groups.map((g) => g.name)).toContain('Film');
+    // …and the upload bucket + its photo SURVIVED (pre-fix: deleted by the REPLACE).
+    const upload = groups.find((g) => g.origin === 'upload');
+    expect(upload, 'upload bucket must survive an offer edit').toBeTruthy();
+    expect(upload!.name).toBe('asset');
+    expect(upload!.photos?.map((p) => p.url)).toEqual(['https://cdn.example.com/u1.jpg']);
+  });
+
+  // ── qa-0718 B6 — the answered charge shows in the rail ──
+  it('B6: WHAT YOU CHARGE row skeletons on-request, fills on an amount-bearing price', () => {
+    const seeded = {
+      work: { identity: { name: 'X' }, groups: [{ name: 'G', kind: 'category', price: { mode: 'on-request' } }] },
+    } as unknown as Record<string, unknown>;
+    const before = rail.toVM(seeded).fields.find((f) => f.id === 'price')!;
+    expect(before.label).toBe('WHAT YOU CHARGE');
+    expect(before.editable).toBe(false);
+    expect(before.skeleton).toBe(true);
+    // e2Facts' Weddings group carries { from, 2400, EUR }.
+    const after = rail.toVM(e2Facts()).fields.find((f) => f.id === 'price')!;
+    expect(after.value).toBe('From EUR 2400');
+    expect(after.skeleton).toBe(false);
   });
 });
 
@@ -624,6 +717,33 @@ describe('work seam — STEP 02 widening (D9)', () => {
     expect(typeof showWork.icon).toBe('string');
     // …plus the lazy engine body the agnostic frame renders when present.
     expect(typeof showWork.loadStep).toBe('function');
+  });
+});
+
+describe('work seam — ingestion provenance (qa-0718 B5)', () => {
+  it('mergeProposalIntoGroups tags a NEW bucket origin:upload, photos preserved', () => {
+    // A single DATED photo → a date-named bucket (no folder signal).
+    const proposal = proposeGroups([
+      { name: 'shot.jpg', url: 'https://cdn.example.com/shot.jpg', takenAt: new Date(2025, 2, 10, 10, 0, 0) },
+    ]);
+    const merged = mergeProposalIntoGroups(proposal, []);
+    expect(merged).toHaveLength(1);
+    // Pre-fix origin was undefined (bucket leaked into WHAT YOU SELL).
+    expect(merged[0].origin).toBe('upload');
+    expect(merged[0].photos?.map((p) => p.url)).toEqual(['https://cdn.example.com/shot.jpg']);
+  });
+
+  it('a name-matched append leaves the existing group origin UNTOUCHED (offer stays offer)', () => {
+    const existing: WorkGroupInput[] = [
+      { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, origin: 'offer' },
+    ];
+    const proposal = proposeGroups([
+      { name: 'w.jpg', url: 'https://cdn.example.com/w.jpg', relativePath: 'Root/Weddings/w.jpg' },
+    ]);
+    const merged = mergeProposalIntoGroups(proposal, existing);
+    expect(merged).toHaveLength(1);
+    expect(merged[0].origin).toBe('offer'); // photos attached, provenance kept
+    expect(merged[0].photos?.map((p) => p.url)).toEqual(['https://cdn.example.com/w.jpg']);
   });
 });
 

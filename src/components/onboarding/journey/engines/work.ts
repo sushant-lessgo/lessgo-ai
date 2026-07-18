@@ -114,6 +114,10 @@ import type {
 const FIELD_NAME = 'name';
 const FIELD_DESCRIPTOR = 'descriptor';
 const FIELD_GROUPS = 'groups';
+// qa-0718 B6 — read-only "WHAT YOU CHARGE" row (the answered charge). A rail
+// field id, distinct from the STEP 03 `price` QUESTION id; no edit path (the
+// price is corrected in STEP 03, like the other read-only rows).
+const FIELD_PRICE = 'price';
 const FIELD_PRICE_POSITION = 'pricePosition';
 // E3 read-only rail rows (widened projection). These fill from STEP 03 answers;
 // corrections happen in STEP 03's answered-compact state, NOT rail-side, so they
@@ -173,6 +177,13 @@ const workRailAdapter: JourneyRailAdapter = {
    */
   toVM(facts: Brief['facts']): RailVM {
     const rail = railFromFacts(facts);
+    // qa-0718 B5 — "WHAT YOU SELL" shows OFFER groups only; E2 upload buckets are
+    // filtered OUT here (display-only). The original index `i` is PRESERVED for the
+    // chip id, because the chip-id join (`commitGroupChips`) resolves ids against
+    // the FULL `facts.work.groups[]` — filtering must not renumber the survivors.
+    const offerGroups = rail.groups
+      .map((g, i) => ({ g, i }))
+      .filter(({ g }) => g.origin !== 'upload');
     return {
       fields: [
         {
@@ -196,12 +207,23 @@ const workRailAdapter: JourneyRailAdapter = {
           label: 'WHAT YOU SELL',
           kind: 'chips',
           value: null,
-          chips: rail.groups.map((g, i) => ({
+          chips: offerGroups.map(({ g, i }) => ({
             id: chipId(i),
             label: g.name,
           })),
-          skeleton: rail.groups.length === 0,
+          skeleton: offerGroups.length === 0,
           editable: true,
+        },
+        {
+          // qa-0718 B6 — the answered charge. Read-only (corrected in STEP 03),
+          // skeleton until an amount-bearing price exists (on-request stays
+          // skeleton — the documented D-C limit).
+          id: FIELD_PRICE,
+          label: 'WHAT YOU CHARGE',
+          kind: 'text',
+          value: rail.priceLabel,
+          skeleton: rail.priceLabel === null,
+          editable: false,
         },
         {
           id: FIELD_PRICE_POSITION,
@@ -300,15 +322,30 @@ const workRailAdapter: JourneyRailAdapter = {
  *
  * NEVER label-match (breaks on rename — the primary edit) and NEVER position
  * (breaks on add/remove).
+ *
+ * qa-0718 B5 — UPLOAD BUCKETS ARE RE-PRESERVED. WHAT YOU SELL chips are
+ * OFFER-only (toVM filters `origin:'upload'`), but `applyRailEdit({field:'groups'})`
+ * REPLACES the whole array ("a live group referenced by no chip is deleted"). So
+ * any offer rename/add/remove would otherwise WIPE every E2 upload bucket AND its
+ * photos. We therefore re-append every live `origin:'upload'` group not already
+ * referenced by a chip — offer chips still add/rename/remove as before, uploads
+ * (never rendered as chips) simply survive. Generation keeps reading the full
+ * groups[] (offers + uploads + photos).
  */
 function commitGroupChips(chips: RailChipEdit[], liveFacts: Brief['facts']): RailCommit {
   const live = liveGroups(liveFacts);
+  const referenced = new Set<number>();
   const next: WorkGroupInput[] = chips.map((chip) => {
     const idx = chipIndex(chip.id);
     const source = idx === null ? undefined : live[idx];
     // No id (or an id this bag never issued) ⇒ NEW group.
     if (!source) return { name: chip.label };
+    referenced.add(idx as number);
     return { ...source, name: chip.label };
+  });
+  // Re-preserve upload buckets the offer-only chip set never referenced.
+  live.forEach((g, i) => {
+    if (!referenced.has(i) && g.origin === 'upload') next.push(g);
   });
   return applyRailEdit({ field: 'groups', value: next }, liveFacts);
 }
