@@ -278,7 +278,7 @@ export function sanitizePublishedEmbed(value: string): string {
  */
 function sanitizeStringField(key: string, value: string): string {
   if (isEmbedContentKey(key)) return sanitizePublishedEmbed(value);
-  if (EXEMPT_URL_KEYS.includes(key)) return sanitizePublishedHtml(value);
+  if (EXEMPT_URL_KEYS.includes(key.toLowerCase())) return sanitizePublishedHtml(value);
   if (isUrlContentKey(key) || EXTRA_URL_KEYS.includes(key)) return sanitizePublishedUrl(value);
   return sanitizePublishedHtml(value);
 }

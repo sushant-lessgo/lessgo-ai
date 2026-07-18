@@ -124,3 +124,63 @@ Every content key rendered into an `<a href>` or `<iframe src>`:
 - `npm run test:run`: 243 files passed / 1 skipped · 4064 tests passed / 18 skipped (unchanged from phase-1 baseline; `route.test.ts` still green after the mock-key removal + the two new real `publishSanitizer` calls running against its `{layout:{},content:{}}` fixture — walk returns early, no throw).
 - Grep: zero `sanitizeHtmlContent` in src+tests.
 - Manual dev check: skipped (not required per plan; deploy-QA human smoke covers the live path).
+
+---
+
+## Phase 3 — Tests + EXEMPT_URL_KEYS hardening
+
+### Files changed
+- `src/lib/publishSanitizer.test.ts` (new — main suite)
+- `src/modules/templates/techpremium/blocks/Explainer/ytEmbed.test.ts` (new — exemption pin)
+- `e2e/publish.spec.ts` (edit — payload seed + neutralization/benign/javascript assertions)
+- `src/lib/publishSanitizer.ts` (one-line hardening only — see below)
+
+### One-line hardening (approved, phase-2 review nit)
+`sanitizeStringField`: `EXEMPT_URL_KEYS.includes(key)` → `EXEMPT_URL_KEYS.includes(key.toLowerCase())`,
+matching `isUrlContentKey`'s lowercasing. Fail-safe consistency fix; no other engine logic touched.
+Pinned by a new test: mixed-case `Video_url` = bare 11-char ID stays byte-identical (would have been
+gated to `#` before the fix).
+
+### Test counts
+- `ytEmbed.test.ts`: 5 tests (unsafe→'', youtu.be/bare-id/watch→fixed nocookie embed, ''→'').
+- `publishSanitizer.test.ts`: 84 tests across 10 groups — HTML payload matrix (12), URL-gate matrix
+  (incl. all 3 N4 allowances), key-detector matrix, embed-gate matrix, benign fixture
+  (invariants + idempotency, NOT equality-to-self), plain-text no-mangle + N5 `<`-encode tradeoff,
+  idempotency (html/url/embed incl. `#`→`#` and `''`→`''`), deep-tree `sanitizeContentHtml`
+  (root+subpage payloads, flat URL keys, embed keys + video_url exemption, no prose over-gating,
+  buttonConfig url/pathSlug/dest.fileUrl legacy+new root+subpage, collection href/cta_href, layout/
+  aiMetadata untouched, chrome via real `injectChromeIntoPage` proving in-place aliasing), locale
+  overlay, mixed-case exempt key.
+- Both new suites: **89 tests, all pass**. N5 assumption verified live (`price < 5` → `price &lt; 5`).
+- Benign fixture asserts independent invariants (`<a`, `href="https://`, mailto/tel/#/root-relative,
+  `<strong>`/`<b>`, `<li>`, `<h1>`..`<h6>`, `<blockquote>`, whitelisted style props, explicit
+  `noopener` on the `target="_blank"` link) + idempotency — avoids the self-fulfilling trap.
+
+### e2e decision — ADDED (not dropped)
+`e2e/publish.spec.ts`: after the existing `seedDraft`, inject `<img onerror>` into the hero `headline`
++ `cta_href: 'javascript:alert(1)'` and re-`saveDraft` via the SAME authed path (no new auth
+plumbing, no new spec file, no `seedDraft.ts` edit — mutated the returned `finalContent` in-spec).
+After publish, `page.content()` on `/p/{slug}` asserts: no `onerror=`, no `<script>alert`, no
+`href="javascript:`, and the benign `https://example.com/cta` CTA href survives. Valid in BOTH
+publish branches (200 blob + local-dev 500) because `sanitizeContentHtml` runs before the DB write,
+so the `failed`-row DB-served `/p` is also sanitized.
+**Not executed locally** — the authed Playwright harness needs the Clerk session + a running server
+this environment can't provide; it is NOT part of the hard gate (deploy-QA human smoke covers the
+live path). Committed green-by-construction, not red.
+
+### Final gate
+- `npx tsc --noEmit`: PASS — only the KNOWN pre-existing unrelated `src/app/page.tsx(6,26)`
+  `@/assets/images/founder.jpg` error; none from touched files. No `.next` staleness (no `rm -rf`
+  needed).
+- `npm run test:run`: PASS — 245 files passed / 1 skipped · **4153 tests passed** / 18 skipped
+  (baseline + the 89 new; count rose from phase-2's 4064 by the new suites).
+- `npm run lint`: PASS — warnings only (all pre-existing `<img>`/exhaustive-deps), zero errors;
+  `eslint` on the 4 touched files is clean.
+- `npm run build`: PASS — full build script (published-css → assets → next build) completed; the
+  `founder.jpg` item is tsc-only noise (webpack resolves the asset), NOT a build failure.
+
+### Deviations
+- Benign fixture: used independent-invariants + idempotency instead of a hard-coded
+  DOMPurify-normalized golden string. Rationale: authoring the exact normalized bytes without
+  running the engine risks a wrong literal; invariants + idempotency are equally mutation-resistant
+  and were the plan's explicit anti-self-fulfilling requirement. Conservative, in-scope.
