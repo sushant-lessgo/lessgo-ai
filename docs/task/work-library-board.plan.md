@@ -20,7 +20,7 @@ change needed; parity holds by construction.
 
 - phase 1 facts foundation (hidden + slug): done (commit ea37f416, review loops 1)
 - phase 2 pure resync module: done (commit 29520e75, review loops 1)
-- phase 3 work-library API route: pending
+- phase 3 work-library API route: done (commit aebbdaa3, review loops 1) — HUMAN GATE c pending founder sign-off
 - phase 4 board verbs + CorrectionBoard extension: pending
 - phase 5 dashboard page + tab + client host: pending
 - phase 6 manage-link re-point + Update site: pending
