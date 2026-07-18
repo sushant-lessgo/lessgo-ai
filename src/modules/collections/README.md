@@ -64,3 +64,26 @@ The registry is small on purpose — the behavior is implemented against it:
 Tests: `src/hooks/editStore/naayomProducts.test.ts`,
 `homeTeasers.test.ts`, `pageActions.test.ts`,
 `src/modules/generation/multiPageAssembly.test.ts`.
+
+## The `works` collection is managed from the "Your work" board (not the editor)
+For the **works** collection (work engine, `atelier2`/skeleton), the management
+door is the project-scoped **"Your work"** dashboard board at
+`/dashboard/[token]/work` (`WorkLibraryClient` → the reused `CorrectionBoard`),
+NOT the in-editor products panel. The board's source of truth is
+`brief.facts.work.groups`, written through the single rail door
+(`applyRailEdit({field:'groups'})`); on save it also rewrites the stored
+`Project.content` group-reference surfaces via the pure
+`resyncWorkContent` (`src/modules/generation/workLibrarySync.ts`).
+
+**Works catalog-authority rule (work-library-board phase 6).** The works
+`workcatalog.items[]` are **authoritative** — seeded by
+`buildCollectionCatalogSlice` (D13) and maintained by `resyncWorkContent` — so the
+editor/export sweep must **NOT** re-materialize them. `materializeCatalogItems`
+(`src/hooks/editStore/collectionHelpers.ts`) is gated by a
+`catalogItemsAuthoritative` (works) def-flag at BOTH call sites
+(`materializeIntoPages` = export/publish path, and its twin `syncCollection` =
+live-editor `commitActivePage` path): the `works` collection is SKIPPED at both.
+Re-deriving would corrupt them, because `cardFromEntry` reads `rec.images` and
+writes a `CatalogCard` (`{id,model,name,oneLiner,image,…}`), whereas WorkCatalog
+expects `workdetail.photos` → `{id,name,cover,href}`. Products/services/
+case-studies collections still re-materialize normally at both sites.

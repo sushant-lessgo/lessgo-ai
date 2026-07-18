@@ -466,3 +466,122 @@ pages + `workcatalog` singleton — verify first, per phase-7 pre-check):
   the work item page does not render as a catalog card — no observed corruption, but noting it.
 - Published "manageSlot absent" is proven structurally + via the green published-core test; the explicit
   assertion extension is deferred to phase 7 (owns `galleryGroups.test.tsx`).
+
+---
+
+# Phase 7 — Deterministic QA + docs (steps 2–5)
+
+## Files changed
+- `e2e/work-library.spec.ts` (new) — authed board CRUD round-trip.
+- `src/modules/skeletons/work/galleryGroups.test.tsx` — resync-driven parity + manageSlot-leak guard + catalog consistency.
+- `src/modules/skeletons/work/workDetailPhotos.test.tsx` — resynced `photos[]` write (hidden dropped).
+- `src/modules/collections/README.md` — "Your work" board pointer + works catalog-authority rule.
+
+(Phase 7 step 1 = the founder pilot pre-check + live walkthrough on Kundius's REAL project — the LIVE gate, owned by the ORCHESTRATOR, not implemented here. A runnable pre-check procedure is provided below.)
+
+## e2e/work-library.spec.ts — flow + assertions
+Authed (Clerk session from `auth.setup.ts`, the `publish.spec.ts` pattern: `goto('/')` -> wait for `Clerk.user` -> `page.request`). Seeds a WORKS-CAPABLE project directly through the real `/api/saveDraft` route — `templateId: 'atelier2'` (works-capable per `templateMeta`), `brief.facts.work.groups` (Weddings [w1 cover, w2] + Portraits [p1]), and a works-shaped `finalContent` (gallery + `workcatalog` singleton + two `workdetail` item pages) so the PUT resync exercises the real path. No generation/onboarding drive needed — the board reads groups from `brief.facts.work`.
+
+Round-trip, every step a MUTATION assertion (DOM/state change) + full re-verify after reload:
+1. Seed -> `GET /api/work-library` returns the two seeded group names (sanity).
+2. Open `/dashboard/<token>/work` -> `correction-board` visible; group names Weddings + Portraits.
+3. RENAME group 0 -> "Wedding Films" (await PUT 200) -> name button text changes.
+4. HIDE photo w2 (`correction-hide-0-1`) -> `correction-restore-0-1` appears, thumb `opacity: 0.4`, hide button gone.
+5. RESTORE w2 -> hide button returns, `opacity: 1`.
+6. MOVE p1 (pointer-drag from group-1 thumb into `correction-group-0`) -> group 0 gains p1, group 1 has 0 `[data-photo-url]`.
+7. REORDER within group 0 (drag w1 onto w2) -> first thumb no longer w1's url.
+8. PICK COVER on p1 (`correction-cover-0-<idx>`) -> `correction-cover-badge-0-<idx>` visible.
+9. RELOAD -> assert persisted: rename holds; p1 in group 0 + group 1 empty; w2 present + not dimmed; p1 carries the "Cover" badge. Cross-checked against `GET /api/work-library` FACTS: group 0 = "Wedding Films" with photos {p1,w1,w2} and `cover` on p1; group 1 empty.
+
+Each mutating step is wrapped in `commitAnd()` which awaits the board's `PUT /api/work-library` resolving **200** before asserting — so an assertion can never pass on stale optimistic UI without a real server commit.
+
+### e2e EXECUTION BLOCKER (out-of-scope file — documented, NOT a fake green)
+The spec is authored and **typechecks clean standalone** (`tsc --noEmit --strict e2e/work-library.spec.ts` -> exit 0; note the repo `tsconfig.json` EXCLUDES `e2e`, so `npm run tsc` does not cover it — verified separately). BUT it is **NOT executed**: `playwright.config.ts`'s `authed` project uses an explicit `testMatch` ALLOWLIST, and `work-library.spec.ts` is not listed — `npx playwright test --list` collects it under NO project (confirmed: "work-library.spec.ts is NOT collected"). Registering it is a **one-line** addition to that allowlist:
+```
+/work-library\.spec\.ts/,
+```
+`playwright.config.ts` is OUTSIDE this phase's Files-touched list, so per the hard file-scope rule it was NOT edited. **The orchestrator must add that line before the gate run**, else the suite goes green having never run this spec (the exact false-green the config's own comment warns about). Two residual notes once registered: (a) the pointer-drag steps (@dnd-kit PointerSensor) are the standard flake-prone area — a `pointerDrag` helper crosses the 4px activation threshold then travels in steps, but a first live run should confirm the two DnD steps land; (b) needs Clerk test creds in `.env.local` (present here) + `npx playwright install chromium`.
+
+### REGISTRATION RESOLVED (follow-up, 2026-07-18)
+Scoped follow-up granted `playwright.config.ts` as a Files-touched file. The one-line allowlist entry (`/work-library\.spec\.ts/,`, with a two-line comment) was added to the `authed` project's `testMatch`. Verified:
+- `npx playwright test e2e/work-library.spec.ts --list` now collects it: `[authed] › work-library.spec.ts:145:5 › Your work board — full CRUD round-trip...` (previously matched NO project).
+- **ACTUAL RUN (mock mode, the harness default): PASS.** `npx playwright test e2e/work-library.spec.ts` → `2 passed (54.8s)` — `[setup] authenticate` (9.0s) + `[authed] work-library.spec.ts ... full CRUD round-trip persists across reload` (12.2s). Real Clerk test creds present in this env; the full round-trip incl. both @dnd-kit pointer-drag steps (move + reorder) landed green. So this is a real green, not env-blocked.
+- `npx tsc --noEmit` still exit 0.
+
+Files changed by this follow-up: `playwright.config.ts` (allowlist entry only), this audit note.
+
+## Vitest parity/render assertions added
+`galleryGroups.test.tsx` (existing describes untouched; new describes appended, all fixtures produced by the REAL `resyncWorkContent` — no hand-built cards):
+- **resynced cards render** — `WorkGalleryGridPublished` renders every resynced card's name + cover `src=` + `href="/works/<slug>"`; one `wk-gallery__group` cell per entry.
+- **manageSlot edit-only (published-leak tripwire — the phase-6-deferred assertion):** the PUBLISHED wrapper output contains NO `data-wk-manage-photos`, NO "Manage photos", NO `class="wk-gallery__manage"` (attribute, not the CSS-rule string in `<style>`). A paired positive test injects the edit wrapper's exact `manageSlot` into the core and asserts the marker DOES appear — so the negative assertion is provably non-vacuous. If a future edit makes `WorkGalleryGrid.published.tsx` pass a `manageSlot`, the negative test FAILS.
+- **hidden photo absent from gallery output** — hiding the Weddings cover (w1) -> resynced card `cover_image` falls back to w2; rendered gallery HTML never contains the hidden w1 url.
+- **catalog consistency (one fixture)** — with a rename + reorder applied, `WorkGalleryGridPublished` and `WorkCatalogCore` (published primitives) agree on name/cover `src=`/`href=` for both entries AND agree on order (Portraits before Wedding Films) from the SAME resync output.
+
+`workDetailPhotos.test.tsx` (existing describes untouched; new describe appended):
+- **resynced `photos[]` write** — `resyncWorkContent` writes the full facts photo set {w1,w2,w3} onto the item page seeded with only w1; `WorkDetailCore` renders each url once, cover (w1) first.
+- **hidden dropped from item page** — hiding w2 -> resynced item-page photos = {w1,w3}; the hidden url never renders; 2 `wk-detail__media` cells.
+
+## Docs
+`src/modules/collections/README.md` — new section "The `works` collection is managed from the 'Your work' board": points the works flow at `/dashboard/[token]/work` as the management door (source of truth `brief.facts.work.groups` via the rail + `resyncWorkContent`), and states the **works catalog-authority rule** from phase 6 — `workcatalog.items[]` is authoritative, the export/editor sweep skips re-materializing it via the `catalogItemsAuthoritative` (works) def-flag at BOTH `materializeCatalogItems` call sites (`materializeIntoPages` + `syncCollection`), with the `cardFromEntry` shape-mismatch reason. Spec AC checklist NOT ticked (orchestrator owns artifacts).
+
+## Deviations
+- **manageSlot guard asserts on `class="wk-gallery__manage"` (attribute), not the bare `wk-gallery__manage` string** — the latter also appears as a CSS rule inside the injected `<style>` block, so the bare-string check would false-fail. Same discipline the existing `count(html,'class="wk-gallery__group"')` test uses. Conservative + still fails on a real slot leak (the leaked element carries `class="wk-gallery__manage"` + `data-wk-manage-photos`).
+- **`playwright.config.ts` NOT edited** (registration line) — out of Files-touched; flagged above + in the mailbox. This is the only reason the e2e spec is unexecuted.
+
+## Verification (full re-green sweep, step 4)
+- `npx tsc --noEmit` -> **exit 0** (note: excludes `e2e/`; the e2e spec typechecked standalone -> exit 0).
+- `npm run test:run` -> **250 passed | 1 skipped (251) files; 4256 passed | 18 skipped tests**. The two extended parity files: 15 passed.
+- `npm run build` -> **succeeded** (full route table emitted).
+- `npm run lint` -> **no errors** (only pre-existing `@next/next/no-img-element` + one `react-hooks/exhaustive-deps` warnings, all pre-existing/unrelated).
+- `npm run test:e2e` (mock) -> the new `work-library.spec.ts` is **NOT executed** pending the one-line `playwright.config.ts` registration (out-of-scope, see blocker above). No other e2e file was touched. NOT a fake green — honest unexecuted-pending-registration.
+
+## Open risks
+- e2e spec unverified in a live run until registered (+ the two DnD steps confirmed on a real browser). Everything deterministic (tsc/test:run/build/lint + the 4 new vitest assertions incl. the manageSlot-leak guard) is green.
+
+---
+
+# PILOT PRE-CHECK (for orchestrator/founder) — run BEFORE the live walkthrough
+
+Confirm Kundius's REAL project is board-ready. If EITHER check fails, STOP and report a founder-gate finding — template migration (live-`atelier` -> skeleton) is OUT OF SCOPE for this branch (decision 8); the gate cannot pass on a project without works fan-out.
+
+### (a) Template is works-capable
+The board gates on `templateHasCapability(templateId, 'works')` — only `atelier2` declares `works` (live `atelier` does NOT). SQL against the app DB:
+```sql
+SELECT p."tokenId", p."templateId"
+FROM "Project" p
+WHERE p."tokenId" = '<KUNDIUS_TOKEN>';
+-- PASS iff templateId = 'atelier2'
+```
+
+### (b) Stored content has the works surfaces
+`Project.content.finalContent` must contain `page-<slug>` item pages + group-reference gallery cards + the `workcatalog` singleton (else the resync has nothing to bind into). Save the script below as `scratch-precheck.js` at repo root and run `node scratch-precheck.js <KUNDIUS_TOKEN>` with the DATABASE_URL that owns her project (delete after — don't commit):
+```js
+const { PrismaClient } = require("@prisma/client");
+const db = new PrismaClient();
+(async () => {
+  const token = process.argv[2];
+  const p = await db.project.findUnique({ where: { tokenId: token }, select: { templateId: true, content: true, brief: true } });
+  if (!p) { console.log("NO PROJECT for", token); process.exit(1); }
+  const fc = (p.content && p.content.finalContent) || {};
+  const pages = fc.pages || {};
+  const keys = Object.keys(pages);
+  const itemPages = keys.filter(k => k.startsWith("page-") && pages[k] && pages[k].collectionKey === "works" && pages[k].kind === "collectionItem");
+  const hasCatalog = keys.some(k => {
+    const cm = pages[k] && pages[k].content;
+    return cm && Object.values(cm).some(s => (s && s.type) === "workcatalog");
+  });
+  const walk = (cm) => cm && Object.values(cm).some(s => Array.isArray(s && s.elements && s.elements.groups));
+  const hasGalleryCards = walk(fc.content) || Object.values(pages).some(pg => walk(pg && pg.content)) ||
+    (fc.chrome && (walk({ _: fc.chrome.header && fc.chrome.header.data }) || walk({ _: fc.chrome.footer && fc.chrome.footer.data })));
+  const factGroups = (((p.brief || {}).facts || {}).work || {}).groups || [];
+  console.log("templateId:", p.templateId, "(want atelier2)");
+  console.log("works item pages (page-<slug>):", itemPages.length, itemPages);
+  console.log("workcatalog singleton present:", hasCatalog);
+  console.log("group-reference gallery cards present:", hasGalleryCards);
+  console.log("facts.work.groups count:", factGroups.length, factGroups.map(g => g.name));
+  const ok = p.templateId === "atelier2" && itemPages.length > 0 && hasCatalog && hasGalleryCards && factGroups.length > 0;
+  console.log(ok ? "PASS — board-ready" : "FAIL — founder-gate finding (migration out of scope)");
+  await db.$disconnect();
+})();
+```
+PASS iff: `templateId = atelier2`, >=1 `page-<slug>` works item page, `workcatalog` singleton present, gallery group-ref cards present, and `facts.work.groups` non-empty. Only then run the live founder walkthrough (spec gate a).

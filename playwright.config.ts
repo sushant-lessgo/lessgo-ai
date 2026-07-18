@@ -86,6 +86,9 @@ export default defineConfig({
         /manage-items\.spec\.ts/,
         // toolbar-beta-followup: behavioral regen (element + section) through the shell.
         /toolbar-regen\.spec\.ts/,
+        // work-library-board (phase 7): the "Your work" dashboard CorrectionBoard
+        // CRUD round-trip — seeded atelier2 project + Clerk session.
+        /work-library\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
