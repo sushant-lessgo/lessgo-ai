@@ -1,6 +1,6 @@
 # Big-batch pre-push QA checklist
 
-**Strategy (founder, 2026-07-17):** no customer is waiting → build everything, QA once properly, push once. This doc is the **master QA gate** for the accumulated unpushed batch so nothing is missed. Living doc — orchestrator appends as sessions surface risks. Local `main` is **~132 commits ahead of origin** (origin/main = current live prod).
+**Strategy (founder, 2026-07-17):** no customer is waiting → build everything, QA once properly, push once. This doc is the **master QA gate** for the accumulated unpushed batch so nothing is missed. Living doc — orchestrator appends as sessions surface risks. Local `main` is **251 commits ahead of origin** (origin/main = current live prod). **All feature branches merged as of 2026-07-18 (late); build queue empty; §E re-green PASSED.** Deploy the preview from local main HEAD `8030be8c` pushed to a **preview branch (NOT origin/main)**.
 
 ## ⚠️ Ground rules for the QA pass
 1. **A preview/staging deploy is MANDATORY.** A whole class of surfaces does **not** run on `localhost` and green local tests say nothing about them (§A). QA that skips a deployed preview will ship infra bugs straight to prod on the one push.
@@ -41,7 +41,7 @@
 - [ ] Flake — `e2e/link-picker.spec.ts:150` (combined runs).
 
 ## E. Standard re-green on final main (pre-push hook parity)
-- [ ] `tsc` 0 · `test:run` green · `npm run build` · `lint` 0 errors (known flake: `i18nHonesty` 5s timeout — rerun isolated).
+- [x] **DONE 2026-07-18 (late), final main `8030be8c` after all 3 last branches merged:** `tsc` 0 · `test:run` **4035 passed / 0 failed** · `npm run build` exit 0 · `lint` 0 errors (warnings-only). Required `npm install` first (exifr from E2 was in package.json, not installed in primary — pre-existing staleness). *(parity.spec/generation.spec = §B, still owed.)*
 
 ## F. Deploy mechanics
 - [ ] Preview deploy → walk §A/§B on it.

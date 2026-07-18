@@ -22,7 +22,9 @@ Done this cycle (source: `docs/reports/code-quality-report.md`): `billing-correc
 
 ## Queue — specced, not yet started (build order)
 
-**EMPTY as of 2026-07-18.** Every specced item got a branch — all live on the **orchestrator board**
+1. **`editor-route-consolidation`** (`docs/task/editor-route-consolidation.spec.md`, `full` tier) — specced 2026-07-18 via `/discuss`. Consolidate reveal + preview + **publish** onto `/edit/[token]`, piloted on the **work journey** (preview→in-editor mode incl. iframe mobile-view, reveal→editor first-load, publish relocated in-editor, XFO moved atomically). Route deletion (`/preview`+`/generate`) + onboarding post-gen lock are OUT (gated follow-ons). Warm scout brief: `docs/task/editor-route-consolidation.scout.md`. POST-beta (editor track). No branch yet.
+
+**Prior state — EMPTY as of 2026-07-18** (before the above). Every other specced item got a branch — all live on the **orchestrator board**
 now (merged, or building). The 8 specs from the 2026-07-18 speccing session
 (`atelier-skeleton-cutover`, `editor-defect-fixes`, `work-onboarding-plan` E4, `publish-sanitize`,
 `dashboard-profile-menu`, `facts-work-writeback`, `bilingual-editing`) are **merged**;

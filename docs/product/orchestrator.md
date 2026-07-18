@@ -6,12 +6,30 @@ Main session = orchestrator for all parallel feature sessions. New orchestrator 
 
 **STRATEGY (founder ruling):** no customer waiting → **build everything, QA once properly, push once.** No incremental pushes. Local `main` is **~216 commits ahead of origin** (origin/main = current live prod, untouched). The one pre-push gate = **`docs/product/deploy-qa-checklist.md`** (living master QA doc; a **preview deploy is MANDATORY** — Stripe/publish/KV/Resend/domains/middleware don't run locally). **All merged worktrees are PRESERVED** until the one deploy is green, then bulk-cleanup (do NOT clean per-merge anymore — batch strategy).
 
-**Building now (1 active session):**
-- **`work-library-board`** (full, was queue #8) — §8a "Your work" dashboard board: manage photos as a library (groups + add/hide/move/reorder/cover) with display-by-reference (pages update on republish). In flight (ahead 5). **THE LAST BUILD BLOCKER for beta.** Largely a clone (testimonial board pattern + E2 grouping UI + t7 MediaAsset). Cut → backlog #37 (copy-gen slot-machinery / page-promotion / generic products board). Full tier.
+## ✅ 2026-07-18 (late) — BUILD QUEUE EMPTY, ALL BRANCHES MERGED
 
-**Paused (branches exist, sessions inactive — NOT running):**
-- **`blog-composer-redesign`** — **GATE A owed** (founder QA: publish/unpublish + visual + hero-image call). Leaf feature — **nothing waits on it → do in QA**, then it merges into the batch.
-- **`content-baseline-split`** — ✅ **RESOLVED**: bake DONE (A live on prod since 07-14), naayom backup taken 07-18. **B rides the big-bang push**; only a **mechanical branch catch-up merge** left (far behind main) — NOT a founder action.
+**Every feature branch is now merged into local `main` (green).** `git merge-base` confirms zero unmerged feature branches. Local main = **251 ahead of origin** (untouched prod). Re-green PASSED on final main: tsc clean · **4035 vitest passed / 0 failed** · lint warnings-only · `npm run build` exit 0. Backup tag `pre-merge-3branches-backup` @ `7eb4b9a6`. **Nothing left to build — only the QA/preview-deploy pass + founder sign-offs remain before the one push.**
+
+- **`work-library-board`** (last build blocker) — ✅ **MERGED** (ran through phase 7 board CRUD e2e + parity; main HEAD `7eb4b9a6` was its re-green commit). Cut → backlog #37.
+- **`content-baseline-split`** — ✅ **MERGED** (`c632d2bc`); Deploy B rode the big-bang. Was a mechanical catch-up (merged main in, no conflicts, re-greened). A live on prod since 07-14.
+- **`blog-composer-redesign`** — ✅ **MERGED** (`8030be8c`); playwright authed-spec-list conflict resolved by union. **GATE A (founder publish/unpublish + visual + hero-image) STILL OWED — now happens on the preview deploy before the push, not a merge blocker.** Blog flagged 4 "unrelated" e2e failures pre-merge → verify in the QA e2e pass.
+- **`toolbar-standard-beta`** — ✅ **MERGED** (`bef5841e`, docs-only trailing commit; code was already in as `349ec689`).
+
+**Prior "building" note (superseded, kept for trail):** work-library-board was mid-phase-5 when the last handoff was written; it finished and merged.
+
+## 🚦 RELEASE-TRAIN DISCIPLINE (2026-07-18 — durable, read before merging anything)
+
+QA has STARTED on the beta batch → **the batch is FROZEN.** Two lines now run in parallel:
+
+- **`main` = the beta release candidate (FROZEN).** Accepts **ONLY beta QA-bugfixes** (from `bugs18July.md` → `fix/<round>` → merge to main → advance the `qa/beta-big-bang` pointer → re-verify). Nothing else lands on main until beta is pushed to `origin/main`. (Orchestrator bookkeeping DOCS may land — zero deploy impact.)
+- **`next` = post-beta integration line** (cut from `main` @ `7f625227`, 2026-07-18). **All NEW features merge here, NOT main**, so they don't reset the beta QA target / cause scope-creep. Protocol per feature: merge `next` into the feature branch → re-green → merge feature into `next`. Keep `next` current by periodically merging `main` → `next` (pulls beta bugfixes forward; low drift since it was cut early).
+- **QA branch `qa/beta-big-bang`** = frozen preview snapshot of the beta RC; advance its pointer to main's tip only deliberately (after a bugfix round), never continuously.
+
+**When beta ships (main → `origin/main`, deploy green):** promote `next` → main (merge; next already contains beta+fixes if synced), then `next` becomes the next cycle's integration line (or re-cut). Bulk worktree cleanup of the beta set happens here.
+
+**Rule of thumb:** a *bugfix for the thing under QA* → `main`. A *new feature* → `next`. Never a new feature on `main` during the freeze.
+
+**On `next` now:** `editor-route-consolidation` (full tier, built c71e82d1, 0-behind-main; work-journey pilot of reveal+preview+publish-in-editor consolidation). Its own QA = the next-cycle preview, separate from the beta QA.
 
 **Merged into local main this cycle (all unpushed):**
 - **UI big-bang:** ui-foundation, auth, dashboard S1/S2/S4a, media-library, editor-shell, work-onboarding-shell (E1).
@@ -42,8 +60,8 @@ Main session = orchestrator for all parallel feature sessions. New orchestrator 
 **⚠️ E2/E3 SEAM INCIDENT + RULE (2026-07-17):** E3 merged FIRST and widened the founder-signed journey seam (`engines/journey/engines/types.ts`) with a **`questions()` data method** (STEP 03 = data-driven, agnostic `StepQuestions.tsx` renders). E2 at P3 is adding **`showWork.loadStep?` component-injection** (STEP 02 ingestion is too rich for data descriptors). **Two extension mechanisms now coexist on the seam — this is an accepted ruling** (data-driven for Q&A steps; component-injection for rich interactive steps). E2 was told to **merge main first, rebase onto E3's `questions()`, add `loadStep?` on top, do NOT revert/duplicate E3's work.** **RULE for E4 + any future engine step: hand it the seam contract AT LAUNCH — reuse `loadStep?`/`questions()`, never a third widening.** ✅ E4 spec (2026-07-18) honors this — rich interactive step → reuses E2's `loadStep?`, explicit no-widening constraint. Lesson saved: `memory/feedback_shared_contract_coordination` (coordinate shared founder-signed contracts at LAUNCH, not via async mailbox — sessions go idea→merge in <1h).
 
 **▶ BEFORE-PUSH RUNWAY (the handoff — what's left to beta):**
-1. **Finish `work-library-board`** (in flight — the last build blocker).
-2. **Catch-up merges into the batch:** content-baseline branch (far behind main → merge main in, re-green, merge); blog-composer (after GATE A); toolbar-standard-beta trailing doc commit.
+1. ✅ **DONE — `work-library-board` finished + merged** (last build blocker cleared).
+2. ✅ **DONE — all catch-up merges landed** (content-baseline, blog-composer, toolbar doc all merged into main; re-green green). Build queue empty.
 3. **QA pass — MANDATORY preview deploy** (`deploy-qa-checklist.md` §A/§B): `publish-sanitize` XSS payload smoke · Stripe/billing + funded-gen smoke · publish path / custom domains / Resend emails / edge middleware · secrets-forms M8 · re-run parity + generation specs on final main.
 4. **Founder sign-offs (in QA):** editor-shell (3 sign-offs + phases 4–8 click-through) · blog GATE A · **logout works** · E3 STEP 01→03 walk · lead-reply draft quality · **font regen** (`smartphone` + Help glyphs — blocked, needs a machine with fontTools).
 5. Re-green (tsc+test+build+lint) → preview deploy → walk §A/§B → **founder pushes `origin main`** → deploy-watch → prod smoke → **bulk worktree cleanup** of the whole merged set.
@@ -67,7 +85,7 @@ Main session = orchestrator for all parallel feature sessions. New orchestrator 
 
 | Track | Worktree / branch | State |
 |---|---|---|
-| content-baseline-split | `.claude/worktrees/content-baseline-split`, `feature/content-baseline-split` @ `0f062d2d` (245 behind main) | ✅ **BAKE DONE — B rides the big-bang push.** Deploy A (`d3bb5e31`) LIVE on prod since **2026-07-14** (~4d bake, ≫48h) — so the two-deploy rule is already satisfied (A = its own deploy; the big-bang push IS Deploy B, no separate deploy, no conflict with one-push). ✅ **naayom Project-row backup TAKEN 2026-07-18** (`backups/naayom-project-2026-07-18.json`). REMAINING = mechanical only: merge main into the 245-behind branch → re-green → merge into batch. Optional belt: naayom hard-reload before push. Phase-5 (c) dev round-trip PASS (payload −~45%). |
+| content-baseline-split | ✅ **MERGED** into main `c632d2bc` (2026-07-18) — worktree preserved for bulk-cleanup | ✅ **MERGED — B rode the big-bang push.** Deploy A (`d3bb5e31`) LIVE on prod since **2026-07-14** (~4d bake, ≫48h) — so the two-deploy rule is already satisfied (A = its own deploy; the big-bang push IS Deploy B, no separate deploy, no conflict with one-push). ✅ **naayom Project-row backup TAKEN 2026-07-18** (`backups/naayom-project-2026-07-18.json`). REMAINING = mechanical only: merge main into the 245-behind branch → re-green → merge into batch. Optional belt: naayom hard-reload before push. Phase-5 (c) dev round-trip PASS (payload −~45%). |
 | ui-foundation (Lane 1 #1) | `.claude/worktrees/ui-foundation`, `feature/ui-foundation` @ `0ab7053b` | ✅ **BUILT + GREEN, both human gates passed; merge+push HELD for BIG-BANG deploy** with consuming specs (auth/dashboard/editor-shell). Full-tier /feature, 6 phases, each 1 impl-review loop. main (`713d29ef`) already merged IN; tsc/lint/build/**3331 tests** green; **published.css byte-identical** (isolation held through the merge). Mid-flight fix: mono@600 editor↔published divergence → distinct `'JetBrains Mono App'` family (app fonts must never share a template's family name). Worktree PRESERVED — **do NOT clean up / delete branch until the big-bang**. Deploy-watch deferred to combined push. Consuming specs branch from a base that INCLUDES this foundation; read `src/components/ui/README.md`. Founder still owes app-chrome VISUAL-TASTE pass (lands w/ 1st consuming screen). |
 
 ## Worktree cleanup owed
@@ -94,7 +112,7 @@ Type = designer handoff surface (`.dc.html`): **Auth · Dashboard · Editor · O
 ⬜ to spec/later. **All ✅ are merged to local main but UNPUSHED** (one big-bang deploy; worktrees preserved
 until deploy green — batch strategy).
 
-Summary (2026-07-18 pm): ✅ merged this session = editor-defect-fixes · dashboard-profile-menu (logout) · E4 · **atelier-skeleton-cutover (work now REACHABLE)** · publish-sanitize · facts-work-writeback · bilingual-editing. · 🔨 building 1 = **work-library-board (last build blocker)** · ⏸️ paused 1 (blog-composer=GATE A → do in QA; content-baseline RESOLVED = mechanical merge only) · 📋 queue EMPTY (all branched) · ⬜ to spec = post-beta (toolbar action-sets, thing/trust-e2e, deferred work fast-follows).
+Summary (2026-07-18 late): ✅ **ALL BRANCHES MERGED — build queue empty.** work-library-board (last blocker) + content-baseline + blog-composer + toolbar-doc all landed this session; main re-greened (4035 tests, build exit 0), 251 ahead of origin. · 🔨 building 0 · ⏸️ paused 0 · 📋 queue EMPTY · ⬜ to spec = post-beta (toolbar action-sets, thing/trust-e2e, deferred work fast-follows). **Only QA/preview-deploy + founder sign-offs remain** (blog GATE A now runs at QA). 
 
 | Lane | Type | Spec file | Status |
 |---|---|---|---|
@@ -122,7 +140,7 @@ Summary (2026-07-18 pm): ✅ merged this session = editor-defect-fixes · dashbo
 | L3 toolbar (defects) | Editor | `editor-defect-fixes.spec.md` | ✅ **merged** — deleted `convertCTAToForm` (real problem → backlog #34) + de-dup modal |
 | security | Publish | `publish-sanitize.spec.md` | ✅ **merged** — real DOM sanitizer at publish gate; stored-XSS hole killed, dead sanitizer removed. **XSS smoke owed → QA §A** |
 | L1 reskin (2e) | Dashboard | `dashboard-profile-menu.spec.md` | ✅ **merged** — **P0 restored logout** (sidebar profile popover). Settings/Billing/Appearance-greyed/Log out |
-| L1 reskin (blog 3b–3d) | Dashboard | `blog-composer-redesign.spec.md` | ⏸️ **paused** (`0f6b08c6`, ~25h idle) — **GATE A owed**; resume/merge after gate |
+| L1 reskin (blog 3b–3d) | Dashboard | `blog-composer-redesign.spec.md` | ✅ **merged** (`8030be8c`) — playwright spec-list union-resolved. **GATE A (founder publish/unpublish + visual + hero-image) owed at QA** + 4 flagged e2e failures to verify in QA e2e pass |
 | L2 work (cutover) | Work | `atelier-skeleton-cutover.spec.md` | 📋 specced — **QUEUED, launch AFTER E2 merges** (deletes `atelier2`). Unblocks BOTH E2 enablement + toolbar action sets |
 | L2 work (E4) | Onboarding | `work-onboarding-plan` (unwritten) | ⬜ to spec (site-plan gate) — after E2 + E3; **hand it the seam contract at launch** |
 | L1/editor | Editor | `editor-route-consolidation` (unwritten) | ⬜ to spec — generate+reveal+preview → edit route; inputs LOCKED post-gen; `memory/project_editor_route_consolidation` |
