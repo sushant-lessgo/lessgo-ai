@@ -25,17 +25,17 @@
 - [ ] **Generation + parity regression** — `parity.spec` / `generation.spec` NOT re-run since some merges (~12min); run on final main.
 
 ## C. Founder-taste / sign-off gates (the big-bang owed list)
-- [ ] **🔴 P0 — logout works** (needs `dashboard-profile-menu.spec.md` built): there is currently **NO logout anywhere in the app** (editor removed its UserButton expecting the dashboard to carry it; the dashboard profile menu was deferred → seam gap). Verify: sidebar avatar → popover → Log out → session ends → `/sign-in`. **Must ship before push.**
+- [ ] **🔴 P0 — logout works** — `dashboard-profile-menu` ✅ **BUILT+MERGED 2026-07-18** (was: NO logout anywhere in the app — cross-track seam gap). QA-verify: sidebar avatar → popover → Log out → session ends → `/sign-in`, re-login works.
 - [ ] **editor-shell-redesign QA + 3 sign-offs** — nobody has clicked phases 4–8 live: settings rows→right modal (esp. Social & sharing), app menu→Back to dashboard, undo/redo, Regen Copy toast + locale lock, mobile overlay, theme swap + Browse-all-styles, SEO save + noindex, publish e2e, Reset. Sign-offs: creation-entries-moved, `smartphone`→`phone` glyph, ThemePopover.
 - [ ] **blog-composer GATE A** — manual publish/unpublish + visual sign-off + the hero-image deviation call.
-- [ ] **content-baseline-split Deploy B** — its own two-deploy gate (pre-B naayom row dump → bake signal).
+- [x] **content-baseline-split Deploy B** — bake DONE (Deploy A live on prod since 2026-07-14, ≫48h) → **B rides the big-bang push** (two-deploy already satisfied). naayom row backup TAKEN 2026-07-18 (`backups/`). Only a mechanical branch catch-up merge (245 behind) remains.
 - [ ] **toolbar** — dark t2 pill, 5 greyed placeholders + why-tooltips, t5 social panel, submit-path smoke on a **reordered** form (reorder proven to store, not through publish). (Ask-AI slot now removed by toolbar-beta-followup.) Also: LinkPicker now **replaces** Button Settings' destination — verify a **goal-following CTA still follows its goal** post-consolidation.
 - [ ] **E3 work-onboarding (STEP 01→03 walk)** — a work project sees only real gaps (≤5 questions, taps not typing), rail updates, required price+language enforced, new-vs-established branch captured. "Never ask twice" actually holds.
 - [ ] **dashboard-lead-reply draft quality** — on a REAL lead, the AI draft is on-brand (grounded in `Project.brief`) and worth sending with light edits; copy-to-clipboard works; only shows for leads with a message; 1 credit charged on success.
 - [ ] **E2 (when it merges)** — pilots on `atelier2` only, merges ZERO prod-reachable behavior (D7b); real reveal QA comes with the atelier-cutover, not here.
 
 ## D. Toolbar-found 🔴 defects — fix or consciously accept before push
-- [ ] **Published HTML never sanitized** — stored-XSS hole (64 published blocks inject raw user HTML; `sanitizeHtmlContent` imported `publish/route.ts:9` never called). **NOW SPECCED → `docs/task/publish-sanitize.spec.md`** (full tier, clean-at-publish, real DOM sanitizer). Includes a preview-deploy XSS payload smoke (§A). Build + verify before push.
+- [ ] **Published HTML sanitized** — `publish-sanitize` ✅ **BUILT+MERGED 2026-07-18** (real DOM sanitizer at the publish gate; dead sanitizer removed; stored-XSS hole closed). **QA on preview (§A):** publish a page carrying a payload (script tag / `<img onerror>` / `javascript:` link / style `expression()`) → verify neutralized on `/p/[slug]`; a benign page's links/formatting intact.
 - [ ] **`GlobalButtonConfigModal` mounted twice** (`EditLayout.tsx:223` + `GlobalModals.tsx:99`) — Radix cross-aria-hides → screen readers get no dialog + pointer interception. (A11y.)
 - [ ] **`convertCTAToForm` live crash** (`uiActions.ts:489`, via `MainContent.tsx:320`) — writes phantom `state.forms.formBuilder.visible` → TypeError. (Phase 2 fixed the dead sibling, left this live one.)
 - [ ] Flake — `e2e/link-picker.spec.ts:150` (combined runs).

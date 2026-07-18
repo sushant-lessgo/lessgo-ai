@@ -36,7 +36,28 @@ for (const cfg of AUDIENCES) {
     expect(token, `bad token from ${url}`).toBeTruthy();
 
     // 3. Seed a publish-ready draft.
-    await seedDraft(api, token, cfg);
+    const finalContent = await seedDraft(api, token, cfg);
+
+    // 3b. publish-sanitize: inject a stored-XSS payload into a rendered prose field
+    // + a javascript: URL, via the SAME draft-save path, then re-save. The publish
+    // gate (sanitizeContentHtml) must neutralize both before the page is frozen —
+    // asserted against the served HTML at step 7.
+    const heroId = (finalContent.layout.sections as string[]).find((id) => id.startsWith('hero-'));
+    if (heroId) {
+      const heroEls = finalContent.content[heroId].elements as Record<string, any>;
+      heroEls.headline = '<img src=x onerror="alert(1)">Payload Headline Copy Here';
+      heroEls.cta_href = 'javascript:alert(1)';
+      await api.post('/api/saveDraft', {
+        data: {
+          tokenId: token,
+          title: cfg.title,
+          paletteId: cfg.paletteId,
+          templateId: cfg.templateId,
+          variantId: cfg.variantId,
+          finalContent,
+        },
+      });
+    }
 
     // 4. Open preview; Publish enables only when isPublishReady (draft loaded + CTA).
     // Selector note (editor-shell-redesign phase 7): the t17 reskin moved these
@@ -119,5 +140,15 @@ for (const cfg of AUDIENCES) {
     const h1 = page.getByRole('heading', { level: 1 }).first();
     await expect(h1).toBeVisible();
     expect((await h1.innerText()).trim().length, 'empty hero headline').toBeGreaterThan(8);
+
+    // 8. publish-sanitize gate: the served HTML must carry NO live payload and NO
+    // javascript: scheme, while a benign https CTA href survives.
+    const servedHtml = await page.content();
+    expect(servedHtml, 'onerror= payload survived the publish gate').not.toContain('onerror=');
+    expect(servedHtml, '<script>alert survived the publish gate').not.toContain('<script>alert');
+    expect(servedHtml, 'javascript: scheme survived the publish gate').not.toContain(
+      'href="javascript:',
+    );
+    expect(servedHtml, 'benign https CTA href missing').toContain('https://example.com/cta');
   });
 }

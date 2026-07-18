@@ -6,11 +6,12 @@ import { auth } from '@clerk/nextjs/server'
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { PublishSchema, sanitizeForLogging, sanitizeSeo } from '@/lib/validation';
-import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectAccess } from '@/lib/security';
+import { createSecureResponse, validateSlug, verifyProjectAccess } from '@/lib/security';
 import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit, hasTrackingPixels, getPlanConfig, PlanTier } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
+import { sanitizeContentHtml, sanitizeLocaleOverlay } from '@/lib/publishSanitizer';
 import { publishedSubdomainHost, publishSubdomainHosts } from '@/lib/domains/hosts';
 import { isAdmin, logAdminOverride } from '@/lib/admin';
 import { injectChromeIntoPage } from '@/lib/staticExport/injectChrome';
@@ -95,6 +96,14 @@ async function publishHandler(req: NextRequest) {
           if (sub?.layout && sub?.content) injectChromeIntoPage(sub.layout, sub.content, chrome);
         }
       }
+    }
+
+    // publish-sanitize (phase 2): THE canonical XSS/scheme chokepoint. Runs AFTER
+    // chrome injection so injected header/footer nav labels are covered, and BEFORE
+    // the PublishedPage writes + render so BOTH the DB snapshot and the static HTML
+    // are cleaned in one in-place pass (base root + subpages + chrome).
+    if (content && typeof content === 'object') {
+      sanitizeContentHtml(content as Record<string, any>);
     }
 
     // Sanitize title - strip HTML tags for meta/OG image safety
@@ -351,7 +360,10 @@ async function publishHandler(req: NextRequest) {
       // doc, so seed it here. Only set when present ⇒ single-locale publishes
       // stay byte-identical (no key added).
       if (projectLocaleContent && content && typeof content === 'object') {
-        (content as any).localeContent = projectLocaleContent;
+        // publish-sanitize (phase 2): clean the render-only translated overlay too
+        // (verbatim-import path — highest-severity XSS class). Only-when-present
+        // semantics preserved: single-locale publishes add no key, stay byte-identical.
+        (content as any).localeContent = sanitizeLocaleOverlay(projectLocaleContent);
       }
 
       // pricing-v2 (phase 2): suppress the "Made with Lessgo" badge only when the

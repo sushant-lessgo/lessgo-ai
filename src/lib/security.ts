@@ -140,14 +140,6 @@ export const validateEnvironmentSecrets = (): { valid: boolean; missing: string[
   };
 };
 
-// A03: Injection - HTML sanitization for published content using DOMPurify
-import { sanitizePublishedContent } from './htmlSanitizer';
-
-export const sanitizeHtmlContent = (html: string): string => {
-  // Enhanced HTML sanitization using DOMPurify with strict security profile
-  return sanitizePublishedContent(html);
-};
-
 // A09: Security Logging - Create secure response with logging
 export const createSecureResponse = (
   data: any,

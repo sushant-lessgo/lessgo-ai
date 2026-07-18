@@ -230,6 +230,11 @@ export async function runWorkLLMGeneration(
       title: (fc.meta?.title as string) || title,
       ...(input.templateId ? { templateId: input.templateId } : {}),
       ...(themeValues ? { themeValues } : {}),
+      // Persist the wizard's COMPOSED brief (entry + work + collections) so the
+      // regen route can read `Project.brief.facts.work` server-side. saveDraft
+      // replaces `facts` wholesale, so send the whole brief — never a partial
+      // `{facts:{work}}` patch. Idempotent re-send on each save is harmless.
+      ...(input.brief ? { brief: input.brief } : {}),
       finalContent: fc,
     });
   };

@@ -183,6 +183,34 @@ describe('/api/audience/work/regenerate-story', () => {
     expect(generateRawJson).toHaveBeenCalledTimes(3);
   });
 
+  it('read-time fallback: no facts.work but a valid facts.entry ⇒ 200 (facts re-derived server-side)', async () => {
+    // Existing/older work project: brief carries facts.entry (businessName +
+    // offerings, per the rail ENTRY fixture) but was generated before facts.work
+    // was persisted. The route re-derives facts.work via seedWorkFactsFromEntry.
+    findUnique.mockResolvedValue({
+      brief: {
+        businessType: 'photographer',
+        facts: {
+          entry: {
+            businessName: 'Kundius Studio',
+            summary: 'Documentary wedding photography',
+            categories: ['photography', 'weddings'],
+            offerings: ['Wedding day coverage', 'Engagement session'],
+          },
+        },
+      },
+    });
+
+    const res = await POST(makeRequest(BASE_BODY) as never);
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.success).toBe(true);
+    expect(json.regenerationType).toBe('story');
+    expect(typeof json.content.heading).toBe('string');
+    // The story WAS regenerated from server-derived facts — not a 400 skip.
+    expect(generateRawJson).toHaveBeenCalledWith('work-copy', expect.any(String), expect.anything());
+  });
+
   it('a stored brief with no facts.work is a 400 validation error', async () => {
     findUnique.mockResolvedValue({ brief: { businessType: 'photographer', facts: {} } });
 

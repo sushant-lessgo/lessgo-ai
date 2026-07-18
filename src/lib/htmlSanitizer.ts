@@ -176,7 +176,7 @@ const fallbackSanitization = (html: string): string => {
 };
 
 // Sanitize CSS style attributes with whitelist approach
-const sanitizeStyleAttribute = (styleString: string): string => {
+export const sanitizeStyleAttribute = (styleString: string): string => {
   const allowedProperties = new Set([
     'color', 'background-color', 'font-size', 'font-weight', 'font-style',
     'font-family', 'text-align', 'text-decoration', 'line-height',
