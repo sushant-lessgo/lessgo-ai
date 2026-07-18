@@ -162,7 +162,7 @@ export async function generateStaticHTML(
   // Lumen (bespoke §13) pages load lumen.v1.js (lightbox + reveal + EN·NL toggle/geo).
   const usesLumen = options.templateId === 'lumen';
 
-  // Skeleton-backed pages (atelier, atelier2) load work.v1.js (hero slider + fixed
+  // Skeleton-backed pages (atelier) load work.v1.js (hero slider + fixed
   // header). Gated ONLY off the pure-data skeletonBackedTemplateIds list — NO
   // skeleton/registry React import enters the static-export path. Each behavior is
   // independently guarded, so a page missing a section is a no-op.

@@ -64,19 +64,19 @@ import { hearthKnobs, hearthVariants, buildHearthStylesheet } from './hearth/tok
 import { hearthPalettes } from '@/types/service';
 import { HearthSSRTokens } from './hearth/components/HearthSSRTokens';
 
-// atelier-skeleton-cutover phase 1: the OLD hand-written atelier skin's evidence
-// blocks (chrome-key round-trip, knob conformance, knob back-compat/parity) are
-// RETIRED here — atelier now rides the work-skeleton, so its coverage comes from
-// the parameterized templateConformance('atelier') loop + the atelier2 skeleton
-// blocks below (identical resolver/manifest/meta). The old-skin token/SSRToken
-// imports are gone so the phase-4 dir delete can't break this file.
+// atelier-skeleton-cutover: the OLD hand-written atelier skin's evidence blocks
+// (chrome-key round-trip, knob conformance, knob back-compat/parity) are RETIRED
+// here — atelier now rides the work-skeleton, so its coverage comes from the
+// parameterized templateConformance('atelier') loop + the skeleton blocks below.
+// The old-skin token/SSRToken imports are gone so the phase-4 dir delete can't
+// break this file.
 
-// Work-skeleton (atelier2) — engine-core + skin-token BOUNDS conformance (phase 7).
+// Work-skeleton (atelier skin) — engine-core + skin-token BOUNDS conformance.
 // Pure data imports: the registered skin data + the skeleton's loud bounds gate.
-// atelier2 is bespoke (kept off shortlists — see templateMeta), so the standard
-// (a) engine-core loop SKIPS it; the explicit block below enforces it anyway so
-// the work-skeleton coverage bites for real. assertSkinTokens is the AC-L122
-// "out-of-range fails loud" gate, run per registered skin + proven to throw.
+// The standard (a) engine-core loop covers atelier (non-bespoke); the explicit
+// block below enforces it anyway so the work-skeleton coverage bites for real.
+// assertSkinTokens is the AC-L122 "out-of-range fails loud" gate, run per
+// registered skin + proven to throw.
 import { atelierSkin } from './atelier2/skin';
 import { assertSkinTokens, type WorkSkinTokens } from '@/modules/skeletons/work/tokenContract';
 import { skeletonBackedTemplateIds } from '@/modules/skeletons/ids';
@@ -114,13 +114,12 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
   // hearth). surge/vestria/lex/etc. deferred (plan Q6) — they carry no mocks yet.
   assertEditorBasics('meridian');
   assertEditorBasics('hearth');
-  // atelier-skeleton-cutover phase 1: atelier is NO LONGER enrolled in
-  // assertEditorBasics. It now rides the work-skeleton, whose edit blocks do not
-  // emit the `data-edit-primitive` markers this helper asserts (atelier2 was never
-  // enrolled either, for the same reason). The old hand-written atelier editor-
-  // basics mocks + the phase-11b chrome-key round-trip block were retired with the
-  // old skin. Skeleton edit/published parity is covered by the work skeleton's own
-  // renderParity.work.test.tsx + the atelier2 blocks below.
+  // atelier-skeleton-cutover: atelier is NO LONGER enrolled in assertEditorBasics.
+  // It now rides the work-skeleton, whose edit blocks do not emit the
+  // `data-edit-primitive` markers this helper asserts. The old hand-written atelier
+  // editor-basics mocks + the phase-11b chrome-key round-trip block were retired
+  // with the old skin. Skeleton edit/published parity is covered by the work
+  // skeleton's own renderParity.work.test.tsx + the skeleton blocks below.
 
   // ── KNOB + LOOKS conformance (template-factory phase 8) ────────────────────
   // hearth is the FIRST template to opt into knobs (dormant rules from phase 3
@@ -128,9 +127,9 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
   // pure data so templateConformance stays free of template-module imports.
   const HEARTH_VARIANT_IDS = hearthVariants.map((v) => v.id);
   assertKnobConformance('hearth', hearthKnobs);
-  // atelier-skeleton-cutover phase 1: the old-skin atelier knob conformance
-  // (atelierKnobs from the retired skin) is dropped — the work-skeleton skin
-  // supplies its own knob surface (exercised via the atelier2 skeleton blocks).
+  // atelier-skeleton-cutover: the old-skin atelier knob conformance (atelierKnobs
+  // from the retired skin) is dropped — the work-skeleton skin supplies its own
+  // knob surface (exercised via the skeleton blocks).
   assertLooksConformance(
     'hearth',
     templateMeta.hearth.looks,
@@ -197,16 +196,14 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
   // the retired old skin) is removed. The work-skeleton skin's token/knob behavior
   // is exercised through its own skin-token bounds + skeleton blocks below.
 
-  // ── WORK-SKELETON (atelier2): engine-core bites even though bespoke (phase 7) ─
-  // atelier2 keeps `bespoke: true` to stay off real serve shortlists (fit()
-  // excludes only retired||bespoke), so the standard (a) loop skips it. But the
-  // work skeleton is now section-complete (hero·work·about·footer all resolve real
-  // blocks), so we ENFORCE engine-core here explicitly — the exact guarantee a
-  // bespoke-off flip would give, with zero serve-behavior change.
-  describe('atelier2 engine-core sections resolve to real blocks (work-skeleton, phase 7)', () => {
+  // ── WORK-SKELETON (atelier): engine-core resolves to real blocks ─────────────
+  // atelier is skeleton-backed and section-complete (hero·work·about·footer all
+  // resolve real blocks). The standard (a) loop already covers it (atelier is
+  // non-bespoke); this explicit block ENFORCES engine-core belt-and-suspenders.
+  describe('atelier engine-core sections resolve to real blocks (work-skeleton)', () => {
     for (const sectionType of engineCoreSections.work) {
       it(`${sectionType}: real block (edit + published)`, () => {
-        resolvesReal('atelier2', sectionType);
+        resolvesReal('atelier', sectionType);
       });
     }
   });
@@ -215,19 +212,19 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
   // Run assertSkinTokens over every REGISTERED work skin, then prove the gate
   // BITES: an out-of-bounds fixture skin throws with the offending token listed.
   describe('work-skeleton skin-token bounds (assertSkinTokens, AC-L122)', () => {
-    // The only skeleton-backed template today is atelier2 → its registered skin.
+    // The only skeleton-backed template today is atelier → its registered skin.
     it('skeletonBackedTemplateIds is exactly the work skins under bounds check', () => {
-      expect(skeletonBackedTemplateIds).toContain('atelier2');
+      expect(skeletonBackedTemplateIds).toContain('atelier');
     });
 
-    it('the registered atelier2 skin passes assertSkinTokens (all tokens in range)', () => {
+    it('the registered atelier skin passes assertSkinTokens (all tokens in range)', () => {
       expect(() => assertSkinTokens(atelierSkin)).not.toThrow();
     });
 
     it('an OUT-OF-BOUNDS skin FAILS LOUD with the offending token in the message', () => {
       // radiusPx max is 48 → 999 is out of range. Clone so the real skin is intact.
       const badTokens: WorkSkinTokens = { ...atelierSkin.tokens, radiusPx: 999 };
-      const badSkin = { id: 'atelier2-oob-fixture', tokens: badTokens };
+      const badSkin = { id: 'atelier-oob-fixture', tokens: badTokens };
       expect(() => assertSkinTokens(badSkin)).toThrow(/radiusPx/);
       expect(() => assertSkinTokens(badSkin)).toThrow(/out of range/);
     });
@@ -303,7 +300,7 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
     // that declares ANY collection-family capability runs the assert; templates
     // declaring none stay vacuously green (the loop body `continue`s). This keeps
     // the global guarantee — a NEW family declaration on ANY template must supply a
-    // resolving catalog+item block pair — while atelier2's `works` flip now
+    // resolving catalog+item block pair — while atelier's `works` capability now
     // exercises it for real (no longer vacuous).
     it('every template with a declared collection-family capability resolves its catalog+item pair', () => {
       for (const templateId of templateIds) {
@@ -315,11 +312,10 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
       }
     });
 
-    // The `works` flip is LIVE: the works collection resolves its workcatalog +
-    // workdetail pair in both renderers. atelier-skeleton-cutover phase 1: the live
-    // `atelier` id now ALSO declares `works` (it absorbed the skeleton's capability),
-    // so BOTH atelier and the transitional atelier2 are asserted.
-    it.each(['atelier', 'atelier2'] as const)(
+    // The `works` capability is LIVE: the works collection resolves its workcatalog +
+    // workdetail pair in both renderers. atelier-skeleton-cutover: the live `atelier`
+    // id declares `works` (it is skeleton-backed).
+    it.each(['atelier'] as const)(
       '%s declares `works` → workcatalog + workdetail pair resolves real (both renderers)',
       (id) => {
         expect(templateMeta[id].capabilities).toContain('works');
@@ -332,10 +328,10 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
       },
     );
 
-    // No template BEYOND the work look (atelier + the transitional atelier2) declares
-    // a collection-family capability yet — a scoped regression lock (narrower than the
-    // old whole-vocab dormancy check, so the honest `works` declarations don't trip it).
-    const WORKS_TEMPLATES = new Set(['atelier', 'atelier2']);
+    // No template BEYOND the work look (atelier) declares a collection-family
+    // capability yet — a scoped regression lock (narrower than the old whole-vocab
+    // dormancy check, so the honest `works` declaration doesn't trip it).
+    const WORKS_TEMPLATES = new Set(['atelier']);
     it('no template OTHER than the work look declares a collection-family capability', () => {
       for (const templateId of templateIds) {
         if (WORKS_TEMPLATES.has(templateId)) continue;
@@ -387,11 +383,11 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
 
       // ── D14 option (b) closed-fail proofs for the relaxed `works` assert ─────
       it('declaring `works` WITHOUT its workcatalog value throws (relaxed coverage half still bites)', () => {
-        // atelier2 DOES resolve both work blocks — so this proves the coverage
+        // atelier DOES resolve both work blocks — so this proves the coverage
         // half, not the resolve half: an empty capabilitySections has no
         // `workcatalog` value, so the retained catalog `toContain` throws.
         expect(() =>
-          assertCollectionCapabilityBacked('atelier2', ['works'], {})
+          assertCollectionCapabilityBacked('atelier', ['works'], {})
         ).toThrow();
       });
 

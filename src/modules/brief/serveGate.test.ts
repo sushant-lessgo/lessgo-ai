@@ -228,9 +228,6 @@ describe('TEMPLATE_AUDIENCE — served audience derives from picked template (at
       vestria: 'product',
       granth: 'writer',
       atelier: 'service',
-      // work-skeleton Atelier skin (dev id) — mirrors atelier (work engine →
-      // service audience). bespoke, so off every shortlist; entry is total-Record only.
-      atelier2: 'service',
     });
   });
 
@@ -250,9 +247,7 @@ describe('TEMPLATE_AUDIENCE — served audience derives from picked template (at
     // atelier) and atelier. The map exists precisely to encode these deviations,
     // so they are asserted as service directly rather than against
     // BRIDGEABLE_ENGINES['work'] (= 'writer').
-    // atelier2 (work-skeleton dev id) deviates identically to atelier (work engine
-    // → service audience).
-    const DEVIATE = new Set<TemplateId>(['lumen', 'atelier', 'atelier2']);
+    const DEVIATE = new Set<TemplateId>(['lumen', 'atelier']);
     for (const id of templateIds) {
       const meta = templateMeta[id];
       if (meta.retired) continue; // no engine to derive from

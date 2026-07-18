@@ -116,7 +116,7 @@ describe('assertSkinTokens — skin token bounds (loud fail)', () => {
     expect(msg).toContain('--wk-hero-num-display');
   });
 
-  it('accepts the Wave 2A section-header + footer-wordmark opt-ins (atelier2)', () => {
+  it('accepts the Wave 2A section-header + footer-wordmark opt-ins (atelier)', () => {
     const atelier: WorkSkinTokens = {
       ...validTokens,
       sectionHeaderStyle: 'rule',
@@ -142,7 +142,7 @@ describe('assertSkinTokens — skin token bounds (loud fail)', () => {
     expect(msg).toContain('--wk-footer-wm-fs');
   });
 
-  it('accepts the Wave 2B composition opt-ins (atelier2)', () => {
+  it('accepts the Wave 2B composition opt-ins (atelier)', () => {
     const atelier: WorkSkinTokens = {
       ...validTokens,
       galleryCaption: 'overlay',

@@ -72,8 +72,7 @@ describe('generateStaticHTML — slider.v1.js is NEVER injected into a new page'
 });
 
 // work.v1.js (hero slider + fixed header) is injected ONLY for skeleton-backed
-// templateIds (skeletonBackedTemplateIds — atelier + the transitional atelier2) and
-// NEVER for classic templates.
+// templateIds (skeletonBackedTemplateIds — atelier) and NEVER for classic templates.
 const WORK_TAG = '/assets/work.v1.js';
 
 describe('generateStaticHTML — work.v1.js skeleton gating', () => {
@@ -81,11 +80,6 @@ describe('generateStaticHTML — work.v1.js skeleton gating', () => {
     const html = await render('atelier', 'service');
     expect(html).toContain(WORK_TAG);
     expect(html).not.toContain(SLIDER_TAG);
-  });
-
-  it('injects work.v1.js for the transitional atelier2 page', async () => {
-    const html = await render('atelier2', 'service');
-    expect(html).toContain(WORK_TAG);
   });
 
   it('does NOT inject work.v1.js for a meridian (product) page', async () => {
@@ -113,8 +107,8 @@ describe('generateStaticHTML — styleTokens in static export (AC-L123)', () => 
   // serializer emits the CSS-selector form `[data-sid="…"]{--u-…}`.
   const CSS_BLOCK = `[data-sid="${SECTION_ID}"]{`;
 
-  it('emits the [data-sid]{--u-*} CSS block for a skeleton-backed atelier2 page', async () => {
-    const html = await render('atelier2', 'service', STYLED);
+  it('emits the [data-sid]{--u-*} CSS block for a skeleton-backed atelier page', async () => {
+    const html = await render('atelier', 'service', STYLED);
     // serializeStyleTokens output: `[data-sid="hero-abc12345"]{--u-bg:…;--u-fg:…;--u-radius:10px;}`
     expect(html).toContain(CSS_BLOCK);
     expect(html).toContain('--u-radius:10px;');
@@ -122,7 +116,7 @@ describe('generateStaticHTML — styleTokens in static export (AC-L123)', () => 
   });
 
   it('emits NO [data-sid]{…} CSS block when styleTokens is absent (byte-neutral)', async () => {
-    const html = await render('atelier2', 'service', null);
+    const html = await render('atelier', 'service', null);
     expect(html).not.toContain(CSS_BLOCK);
     // No serialized declaration (block cores may still use var(--u-radius, …) fallbacks).
     expect(html).not.toContain('--u-radius:10px;');

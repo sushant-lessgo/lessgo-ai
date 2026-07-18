@@ -136,10 +136,10 @@ precedent), so binding adds no credit op and no prompt input:
   can never clobber the uploaded list). Photos are clamped to the contract max
   (24 per group) at derivation.
 
-**Binding is `atelier2`-only** (Path A pilot): the `works` capability is declared
-only on `atelier2`; on old `atelier` the fan-out stays dormant (no `/works`
-pages, href never stamped) so the STEP-02 UI is engine-wide but the reveal is
-skeleton-scoped. See `generation/README.md` and
+**Binding is `atelier`-only**: the `works` capability is declared only on the
+(skeleton-backed) `atelier` template; on any other work template the fan-out stays
+dormant (no `/works` pages, href never stamped) so the STEP-02 UI is engine-wide
+but the reveal is capability-scoped. See `generation/README.md` and
 `skeletons/work/resolveWorkBlock.ts` for the render half.
 
 ## Key pitfalls

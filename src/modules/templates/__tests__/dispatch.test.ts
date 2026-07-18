@@ -44,10 +44,10 @@ const TEMPLATES: Array<{
     sections: ['header', 'hero', 'features', 'testimonials', 'pricing', 'cta', 'footer'],
   },
   {
-    // Work-skeleton (Atelier skin, dev id atelier2). Phase-7 full coverage:
-    // gallery is section type `work`; proof default shape = testimonials; packages/
-    // about (MUST) + faq/results (built optionals) now resolve real blocks.
-    name: 'atelier2 (work skeleton)',
+    // Work-skeleton (Atelier skin). Full coverage: gallery is section type `work`;
+    // proof default shape = testimonials; packages/about (MUST) + faq/results
+    // (built optionals) now resolve real blocks.
+    name: 'atelier (work skeleton)',
     resolve: resolveWorkBlock as Resolver,
     placeholder: WorkPlaceholderBlock,
     sections: ['header', 'hero', 'work', 'proof', 'packages', 'about', 'faq', 'contact', 'footer', 'results'],
@@ -83,11 +83,11 @@ describe.each(TEMPLATES)('$name dispatch', ({ resolve, placeholder, sections, na
   });
 });
 
-// ── work-skeleton (atelier2) layout-library variants (phase 6) ───────────────
+// ── work-skeleton (atelier) layout-library variants ──────────────────────────
 // The variant-aware resolveWorkBlock(sectionType, mode, layoutName) resolves each
 // built layout. Header arrangements share ONE dispatcher (internal dispatch → SAME
 // component as the default); hero/gallery/proof arrangements are DISTINCT components.
-describe('work-skeleton layout-library dispatch (atelier2)', () => {
+describe('work-skeleton layout-library dispatch (atelier)', () => {
   const modes: Array<'edit' | 'published'> = ['edit', 'published'];
 
   it('header: all 5 arrangements resolve to the SAME component as the default (internal dispatch)', () => {

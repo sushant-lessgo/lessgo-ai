@@ -83,12 +83,9 @@ function hearthSections(): BlockMockSection[] {
 export const BLOCK_MOCKS: Partial<Record<TemplateId, BlockMockSection[]>> = {
   meridian: meridianSections(),
   hearth: hearthSections(),
-  // atelier-skeleton-cutover phase 1: atelier now shows the work-SKELETON blocks
-  // (the old hand-written atelier mocks were retired with the old skin). Shares
-  // the atelier2 skeleton mocks, tagged with the live templateId.
+  // atelier-skeleton-cutover: atelier shows the work-SKELETON blocks (the old
+  // hand-written atelier mocks were retired with the old skin).
   atelier: atelier2Sections('atelier'),
-  // Work-skeleton staging id (retired in phase 3).
-  atelier2: atelier2Sections(),
 };
 
 /** Flat list of every enrolled section (for seeding one shared harness store). */

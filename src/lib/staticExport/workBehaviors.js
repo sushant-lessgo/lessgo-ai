@@ -1,5 +1,5 @@
 /* workBehaviors.js — published-only behaviors for the WORK SKELETON (skin ids in
- * src/modules/skeletons/ids.ts, e.g. atelier2). Built to public/assets/work.v1.js
+ * src/modules/skeletons/ids.ts, e.g. atelier). Built to public/assets/work.v1.js
  * (scripts/buildAssets.js) and injected by htmlGenerator.ts only when
  * templateId ∈ skeletonBackedTemplateIds.
  *

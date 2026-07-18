@@ -8,9 +8,9 @@
 // grouping proposal (capped) → commit into `facts.work.groups[].photos`.
 //
 // ── D7a — ENGINE-WIDE UI ────────────────────────────────────────────────────
-// This body renders for ANY work-engine journey (atelier or atelier2). Only the
-// BINDING/reveal is atelier2-scoped (the fan-out stays dormant on atelier). So
-// nothing here is template-gated.
+// This body renders for ANY work-engine journey. The BINDING/reveal is gated on
+// the `works` capability, which the (skeleton-backed) atelier template declares —
+// so nothing here is template-gated.
 //
 // ── D10 — THE ONE COMMIT FUNNEL ─────────────────────────────────────────────
 // Photos are committed via the work module's `applyRailEdit({field:'groups'})`

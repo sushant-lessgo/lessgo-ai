@@ -6,13 +6,12 @@ import {
 } from './workCopyEngine';
 
 describe('isWorkCopyTemplate (template-membership predicate)', () => {
-  it('allow-list is exactly [atelier, atelier2]', () => {
-    expect([...WORK_COPY_ENGINE_TEMPLATES]).toEqual(['atelier', 'atelier2']);
+  it('allow-list is exactly [atelier]', () => {
+    expect([...WORK_COPY_ENGINE_TEMPLATES]).toEqual(['atelier']);
   });
 
-  it('returns true for a work-copy-engine template (atelier + the atelier2 skeleton pilot)', () => {
+  it('returns true for a work-copy-engine template (atelier)', () => {
     expect(isWorkCopyTemplate('atelier')).toBe(true);
-    expect(isWorkCopyTemplate('atelier2')).toBe(true);
   });
 
   it('returns false for a service template (hearth / lex)', () => {

@@ -26,20 +26,18 @@ import { atelierSkin } from './atelier2/skin';
 
 const TEMPLATES_DIR = __dirname;
 
-// atelier-skeleton-cutover phase 1: the live `atelier` id now rides the work-
-// skeleton, but its skin barrel still physically lives in the `atelier2/` dir (the
-// dir is `git mv`'d to `atelier/` in phase 4). Until then, map each skeleton-backed
-// id to its ACTUAL skin dir so the purity scan reads the data-only barrel, NOT the
-// still-present OLD hand-written `templates/atelier/` skin.
+// atelier-skeleton-cutover: the live `atelier` id rides the work-skeleton, but its
+// skin barrel still physically lives in the `atelier2/` dir (the dir is `git mv`'d
+// to `atelier/` in phase 4). Until then, map the skeleton-backed id to its ACTUAL
+// skin dir so the purity scan reads the data-only barrel, NOT the still-present OLD
+// hand-written `templates/atelier/` skin.
 const SKIN_DIR: Record<string, string> = {
   atelier: 'atelier2',
-  atelier2: 'atelier2',
 };
 
 // id → registered skin data (assertSkinTokens gate). Grows as work skins are added.
 const REGISTERED_SKINS: Record<string, { id?: string; tokens: WorkSkinTokens }> = {
   atelier: atelierSkin,
-  atelier2: atelierSkin,
 };
 
 const FILE_WHITELIST = new Set(['index.ts', 'skin.ts']);

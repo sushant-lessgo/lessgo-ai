@@ -172,3 +172,152 @@ Not modified (were on the Files-touched list but needed no change):
 - The DB safety-check for real `templateId='atelier'` Project rows is the orchestrator's
   out-of-band task; the phase-1 render/resolution fallback proofs cover the render side
   regardless of its outcome.
+
+---
+
+# atelier-skeleton-cutover — Phase 3 audit
+
+Phase 3: retire the `atelier2` staging id. Removed `atelier2` from every
+dispatch/meta/type site so it ceases to exist as a `TemplateId`; `atelier` (now
+skeleton-backed since phase 1) stays. The `templates/atelier2/` DIR and
+`blockMocks/atelier2.ts` FILE stay until phase 4 — only the id/keys/references go.
+
+## Files changed
+
+Source:
+- `src/types/service.ts`
+- `src/modules/templates/registry.ts`
+- `src/modules/templates/blockManifest.ts`
+- `src/modules/templates/templateConformance.ts`
+- `src/modules/templates/templateMeta.ts`
+- `src/modules/brief/serveGate.ts`
+- `src/modules/skeletons/ids.ts`
+- `src/lib/workCopyEngine.ts`
+- `src/app/api/brief/confirm/route.ts`
+- `src/modules/templates/atelier2/skin.ts` (id → 'atelier')
+- `src/modules/templates/blockMocks/index.ts`
+- `src/modules/templates/blockMocks/atelier2.ts` (default param → 'atelier'; file renamed phase 4)
+- `src/lib/staticExport/htmlGenerator.ts` — **OUT OF FILES-TOUCHED (deviation, see below)**
+
+Comment-only refreshes:
+- `src/app/edit/[token]/components/toolbars/ToolbarShell.tsx`
+- `src/app/edit/[token]/components/toolbars/SectionToolbar.tsx`
+- `src/components/onboarding/journey/engines/work/ShowWorkStep.tsx`
+- `src/lib/staticExport/workBehaviors.js`
+- `src/modules/skeletons/work/manifest.ts` · `tokenContract.ts` · `resolveWorkBlock.ts`
+- `src/modules/generation/README.md` · `src/modules/audience/work/README.md`
+
+Tests:
+- `src/lib/workCopyEngine.test.ts`
+- `src/modules/brief/serveGate.test.ts` (atelier2 id sweep only; :319-320 caps untouched)
+- `src/modules/wizard/generation/work.llm.test.ts` (allow-list only; DORMANCY untouched)
+- `src/modules/templates/templateMeta.test.ts`
+- `src/modules/skeletons/work/tokenContract.test.ts`
+- `src/modules/skeletons/work/__tests__/kundiusPages.test.tsx`
+- `src/modules/skeletons/work/renderParity.work.test.tsx`
+- `src/modules/templates/skinPurity.test.ts`
+- `src/lib/staticExport/htmlGenerator.test.ts`
+- `src/modules/templates/__tests__/dispatch.test.ts`
+- `src/modules/templates/conformance.test.ts`
+
+Not modified (on the list but needed no change):
+- `src/modules/wizard/generation/work.llm.ts` + `work.ts` — grep found NO `atelier2`
+  token in either; nothing to refresh. (Listed defensively in the plan.)
+- `src/modules/brief/serveMatrix.test.ts` — union shrink did not bite it (green untouched).
+- `src/modules/skeletons/work/__tests__/oldContentFallback.test.tsx` — did not reference the id.
+
+## Per-file changes
+
+- **service.ts**: dropped `'atelier2'` from `templateIds`, `defaultVariantForTemplate`,
+  `templateLabels`, `templateBlurbs`, `PALETTES_BY_TEMPLATE`. Refreshed the atelier
+  description to the skeleton look (cover-slider hero, masonry gallery) + the stale
+  header comment block.
+- **registry.ts**: deleted the `atelier2` loader; refreshed the atelier loader comment
+  (cutover done — skeleton-backed; barrel folds into templates/atelier/ in phase 4).
+- **blockManifest.ts**: dropped the `atelier2: workSkeletonManifest` key.
+- **templateConformance.ts**: dropped the `atelier2` RESOLVERS entry + refreshed the
+  static-import comment.
+- **templateMeta.ts**: deleted the `atelier2` entry (28 lines) + refreshed the atelier
+  capability comment (no longer references the "staging atelier2 entry").
+- **serveGate.ts**: dropped `atelier2` from `TEMPLATE_AUDIENCE`.
+- **skeletons/ids.ts**: `skeletonBackedTemplateIds = ['atelier']`.
+- **workCopyEngine.ts**: `WORK_COPY_ENGINE_TEMPLATES = ['atelier']` + docstring refresh.
+- **api/brief/confirm/route.ts**: removed the `applyWorkTemplateOverride` dev seam
+  (function + its `templateIds` import + the call site now uses `decision.templateId`
+  directly) + the top-of-file comment about validating the override.
+- **atelier2/skin.ts**: `WorkSkinDef.id: 'atelier'` (grep-confirmed no runtime consumer).
+- **blockMocks/index.ts**: dropped the `atelier2` key; `atelier: atelier2Sections('atelier')`
+  remains. The `atelier2Sections` import + function name stay (they live in
+  blockMocks/atelier2.ts, renamed in phase 4).
+- **blockMocks/atelier2.ts**: default param `= 'atelier'` (was `'atelier2'`, no longer a
+  valid TemplateId → tsc). Internal dev-fixture sectionIds (`atelier2-header` …) + the
+  function name LEFT for phase 4's rename (they are the file's own contents; the plan
+  scopes the rename to phase 4).
+- **Test re-seeds**: allow-list asserts → `['atelier']`; TEMPLATE_AUDIENCE expected map
+  drops atelier2; DEVIATE set → `['lumen','atelier']`; templateMeta counts 10→9 ids,
+  9→8 non-retired, bespoke set → `['lumen']`; conformance `resolvesReal`/`toContain`/
+  `it.each`/`WORKS_TEMPLATES`/`assertCollectionCapabilityBacked` re-pointed atelier2→
+  atelier; htmlGenerator dropped the atelier2 case + repointed styleTokens cases to
+  atelier; dispatch + renderParity + kundius + tokenContract label/id refreshes.
+
+## Deviations
+
+1. **`src/lib/staticExport/htmlGenerator.ts` edited — NOT on the phase-3 Files-touched
+   list.** Line 165 carried a comment `// Skeleton-backed pages (atelier, atelier2) load
+   work.v1.js`. The phase-3 verification target is `grep -ri atelier2 src/` → ZERO except
+   the `templates/atelier2/` dir contents + `blockMocks/atelier2.ts` file. That stray
+   comment is neither, so hitting the target required cleaning it. Change is COMMENT-ONLY,
+   zero behavior change, and directly serves the phase's stated grep-zero gate (the plan's
+   step-12 comment-refresh list simply omitted this file). Flagged per scope rules rather
+   than widening silently. tsc/tests/build/lint all confirm no functional impact.
+
+2. **blockMocks/atelier2.ts internal sectionIds + function name LEFT as `atelier2*`.**
+   Plan step 11 scopes this file to "drop the atelier2 key" only; the file rename (and
+   thus its internal-identifier cleanup) is explicitly phase 4 (step 3). So the
+   `atelier2-*` dev-fixture sectionIds and the `atelier2Sections` export name remain —
+   they are part of the `blockMocks/atelier2.ts` file that phase 4 renames. This is the
+   tolerated phase-4 remainder. Conservative reading of the plan's line-scoping.
+
+## grep -ri atelier2 src/ — remaining hits (all tolerated phase-4 remainders)
+
+All remaining hits reference the still-present `templates/atelier2/` DIR or the
+`blockMocks/atelier2.ts` FILE (import paths, the `SKIN_DIR.atelier → 'atelier2'` mapping
+that must point at the real dir until phase 4, the `atelier2Sections` function that lives
+in that file, its dev-fixture sectionIds, and comments describing those paths):
+- `conformance.test.ts:80`, `skinPurity.test.ts:25`, `registry.ts:122`,
+  `kundiusPages.test.tsx:39`, `blockMocks/index.ts:13` — `import … from '…/atelier2…'`.
+- `blockMocks/atelier2.ts` (whole file), `atelier2/skin.ts`, `atelier2/index.ts` — the
+  dir/file that phase 4 `git mv`s and renames.
+- `skinPurity.test.ts:30-159` — the `SKIN_DIR` value `'atelier2'` + its explanatory
+  block, deliberately load-bearing until the phase-4 dir move.
+- `blockMocks/index.ts:88` + `kundiusPages.test.tsx:131` — the `atelier2Sections` name.
+
+ZERO id-level references remain: the `TemplateId` union, `templateMeta`, `serveGate`
+`TEMPLATE_AUDIENCE`, `skeletonBackedTemplateIds`, `WORK_COPY_ENGINE_TEMPLATES`,
+registry loaders, RESOLVERS, block manifest, and every allow-list/DEVIATE/WORKS set are
+all atelier2-free.
+
+## Gate results (run from WORKDIR)
+
+- **`npx tsc --noEmit`**: green (EXIT 0). The pre-existing `src/app/page.tsx` TS2307
+  (`@/assets/images/founder.jpg`) did NOT surface this run — confirmed transient.
+- **`npm run test:run`**: green — `Test Files 244 passed | 1 skipped`; `Tests 3916 passed
+  | 14 skipped`. (Count dropped from phase 1's 4020 because the retired duplicate
+  allow-list asserts, the htmlGenerator atelier2 case, and the conformance atelier2
+  blocks were removed/re-pointed — expected.)
+- **`npm run build`**: green (EXIT 0) — full build (buildPublishedCSS + buildAssets +
+  next build).
+- **`npm run lint`**: green (EXIT 0) — only pre-existing `no-img-element` /
+  `exhaustive-deps` warnings in unrelated files; zero errors.
+
+## Open risks / deferred
+
+- The `templates/atelier2/` dir + `blockMocks/atelier2.ts` file remain by design (phase 4
+  deletes the old `templates/atelier/` skin, `git mv`s `atelier2/` → `atelier/`, and
+  renames the blockMocks file). Their internal `atelier2` tokens are the only tolerated
+  grep remainder.
+- The `WORK_JOURNEY_TEMPLATE_OVERRIDE` env seam is gone — dev journeys can no longer be
+  re-pointed onto a pilot id (there is no pilot id anymore). Plan Q2 resolved as "delete
+  entirely" by executing the plan step; if a future skin pilot (Kontur/Pulse) needs a
+  generic override, it must be re-introduced deliberately.
+- `serviceElementSchema` Atelier* layouts still resolve (phase 4 guarded cleanup).

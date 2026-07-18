@@ -1,7 +1,7 @@
 // src/modules/skeletons/work/manifest.ts
 // Work-skeleton block manifest — PURE DATA (scale-09 D18 shape). Declares, per
 // section type, the copy-compatible layout variants + the default. Shared by every
-// work SKIN (atelier2 today) since the skeleton owns the markup and skins only
+// work SKIN (atelier today) since the skeleton owns the markup and skins only
 // swap tokens — so ONE manifest describes the whole skeleton's block surface.
 //
 // FIREWALL: imports ONLY the manifest TYPES (erased) — no component, no schema, no
@@ -19,7 +19,7 @@
 // catalog/detail pair — no template lists them in its block manifest.) The blocks
 // themselves register in `resolveWorkBlock.ts`; the LLM-free photo fan-out that
 // fills them lives in `generation/workCollections.ts` (see those headers). The
-// `works` capability that lights them up is declared on `atelier2` ONLY (pilot).
+// `works` capability that lights them up is declared on `atelier` ONLY.
 //
 // Phase 3: hero only — `WorkHeroSlider` (the built default) + `WorkHeroVideo` (a
 // declared-but-NOT-built SLOT: a future video-bg hero, capability reserved, built

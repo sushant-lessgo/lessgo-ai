@@ -408,10 +408,8 @@ export const blockManifests: Partial<Record<TemplateId, TemplateBlockManifest>> 
   hearth: hearthManifest,
   surge: surgeManifest,
   vestria: vestriaManifest,
-  // atelier-skeleton-cutover phase 1: atelier now rides the work-skeleton manifest
-  // (the old hand-written atelierManifest is gone). ONE manifest describes the
-  // whole skeleton's block surface (skins swap tokens only).
+  // atelier-skeleton-cutover: atelier rides the work-skeleton manifest (the old
+  // hand-written atelierManifest is gone). ONE manifest describes the whole
+  // skeleton's block surface (skins swap tokens only).
   atelier: workSkeletonManifest,
-  // Work-skeleton staging id (retired in phase 3).
-  atelier2: workSkeletonManifest,
 };

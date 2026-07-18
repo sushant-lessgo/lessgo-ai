@@ -449,9 +449,9 @@ const ATELIER2_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
   },
 ];
 
-// atelier-skeleton-cutover phase 1: templateId is now a parameter so the SAME
-// skeleton mocks can back BOTH the live `atelier` key and the transitional
-// `atelier2` key (retired in phase 3). Defaults to `atelier2` for back-compat.
-export function atelier2Sections(templateId: TemplateId = 'atelier2'): BlockMockSection[] {
+// atelier-skeleton-cutover: templateId is a parameter defaulting to the live
+// `atelier` key. (This file is renamed blockMocks/atelier.ts in phase 4 with the
+// dir move.)
+export function atelier2Sections(templateId: TemplateId = 'atelier'): BlockMockSection[] {
   return ATELIER2_BLOCK_MOCKS.map((m) => ({ templateId, ...m }));
 }

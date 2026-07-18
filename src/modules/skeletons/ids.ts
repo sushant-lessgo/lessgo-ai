@@ -6,11 +6,10 @@
 // importing template/skeleton code.
 //
 // FIREWALL-SAFE: pure data — NO React, NO template-module imports, NO skeleton
-// imports. atelier-skeleton-cutover phase 1 re-points the live `atelier` id onto
-// the work-skeleton; `atelier2` (the dev staging id) stays listed transitionally
-// and is dropped in phase 3.
+// imports. atelier-skeleton-cutover re-pointed the live `atelier` id onto the
+// work-skeleton (the dev work-skeleton staging id was retired at cutover).
 
-export const skeletonBackedTemplateIds: string[] = ['atelier', 'atelier2'];
+export const skeletonBackedTemplateIds: string[] = ['atelier'];
 
 /** True when a templateId resolves through a skeleton module. */
 export function isSkeletonBacked(id: string | null | undefined): boolean {

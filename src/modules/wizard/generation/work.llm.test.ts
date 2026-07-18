@@ -362,8 +362,8 @@ describe('workCopyEngineEnabled + resolveWorkRoute (allow-list guard)', () => {
     else process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = ORIG;
   });
 
-  it('allow-list is exactly [atelier, atelier2]', () => {
-    expect([...WORK_COPY_ENGINE_TEMPLATES]).toEqual(['atelier', 'atelier2']);
+  it('allow-list is exactly [atelier]', () => {
+    expect([...WORK_COPY_ENGINE_TEMPLATES]).toEqual(['atelier']);
   });
 
   it('flag OFF (default) ⇒ disabled for every template', () => {

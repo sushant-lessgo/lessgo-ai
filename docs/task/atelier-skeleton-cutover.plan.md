@@ -16,7 +16,7 @@ Re-point the live `atelier` templateId onto the work-skeleton (the `atelier2` st
 
 ## Progress log
 
-- phase 1 re-point atelier onto skeleton + fallback proof: pending
+- phase 1 re-point atelier onto skeleton + fallback proof: done (commit e62bc087, review loops 1, ship). tsc/test:run(4020)/build/lint green. page.tsx TS2307 confirmed transient/pre-existing. DB safety-check STILL PENDING (user to run) — hard gate before phase-2 publish eyeball.
 - phase 2 publish-parity smoke (human gate): pending
 - phase 3 retire atelier2 id: pending
 - phase 4 delete old skin dir + fold barrel into templates/atelier (human gate): pending

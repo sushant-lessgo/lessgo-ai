@@ -5,8 +5,6 @@
 // outcome. SERVE ⇒ one Project update {brief, audienceType, templateId} +
 // wizard redirect. MANUAL ⇒ NO project write; client goes to demand capture.
 // Firewall: pure @/modules/brief + prisma only — no template resolver/registry.
-// (@/types/service `templateIds` is a plain const string list — pure data, no
-//  resolver/registry graph; used only to validate the dev/pilot template override.)
 // (proof-truth phase 3) @/lib/testimonials/autoImport is firewall-compatible: a
 // plain prisma-backed lib with NO template/resolver import; it runs on the serve
 // branch to durably import scraped verbatim quotes into the Testimonial table.
@@ -20,27 +18,6 @@ import { createSecureResponse, assertProjectOwner, validateToken } from '@/lib/s
 import { BriefSchema } from '@/lib/schemas/brief.schema';
 import { decideServe } from '@/modules/brief/serveGate';
 import { importScrapedTestimonials } from '@/lib/testimonials/autoImport';
-import { templateIds } from '@/types/service';
-
-/**
- * DEV/PILOT-ONLY template override (work-onboarding-ingestion E2 / D7, D7b). When
- * `WORK_JOURNEY_TEMPLATE_OVERRIDE` names a valid templateId AND the serve gate
- * resolved to `atelier` (a work journey), persist the override instead — the
- * smallest seam to route a manual dev journey onto the `atelier2` skeleton pilot
- * without touching decideServe/shortlist/fit. SERVER env, UNSET in prod ⇒ this is a
- * no-op and the persisted templateId is byte-identical to the gate's verdict.
- */
-function applyWorkTemplateOverride(templateId: string): string {
-  const override = process.env.WORK_JOURNEY_TEMPLATE_OVERRIDE;
-  if (
-    templateId === 'atelier' &&
-    override &&
-    (templateIds as readonly string[]).includes(override)
-  ) {
-    return override;
-  }
-  return templateId;
-}
 
 /** Safely pull scraped verbatim quote strings from the confirmed Brief's entry facts. */
 function extractEntryTestimonials(brief: unknown): string[] {
@@ -99,8 +76,7 @@ export async function POST(req: Request) {
         data: {
           brief: brief as Prisma.InputJsonValue,
           audienceType: decision.audienceType,
-          // D7/D7b: env-gated dev/pilot override (unset in prod ⇒ decision.templateId).
-          templateId: applyWorkTemplateOverride(decision.templateId),
+          templateId: decision.templateId,
         },
         select: { id: true },
       });

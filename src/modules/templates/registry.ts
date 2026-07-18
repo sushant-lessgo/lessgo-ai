@@ -112,31 +112,13 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
   },
   // On-demand work-engine template (visual-portfolio; anchor customer Kundius
   // Photography). Service audience; served to photographers via the serve gate.
-  // atelier-skeleton-cutover phase 1: re-pointed onto the work-SKELETON skin
-  // barrel (formerly the `atelier2` staging id). The old hand-written atelier
-  // skin dir is deleted in phase 4; the `atelier2` loader below is retired in
-  // phase 3. Dispatch firewall intact: skeleton code rides in this chunk only.
+  // Skeleton-backed: the loader import()s the work-SKELETON Atelier skin barrel,
+  // which builds the full TemplateModule from the skeleton factory + skin data.
+  // (atelier-skeleton-cutover: the old hand-written atelier skin dir is deleted
+  // and the barrel folds into templates/atelier/ in phase 4.) Dispatch firewall
+  // intact: skeleton code rides in this chunk only; nothing new is statically
+  // imported by registry.ts or the main bundle.
   atelier: async () => {
-    const m = await import('@/modules/templates/atelier2');
-    return {
-      resolveBlock: m.resolveBlock,
-      ThemeInjector: m.ThemeInjector,
-      SSRTokens: m.SSRTokens,
-      getSurfaceForSection: m.getSurfaceForSection,
-      defaultPaletteId: m.defaultPaletteId,
-      variants: m.variants,
-      defaultVariantId: m.defaultVariantId,
-      paletteImageKeywords: m.paletteImageKeywords,
-      defaultKnobs: m.defaultKnobs,
-      knobs: m.knobs,
-    };
-  },
-  // Work-SKELETON Atelier skin (dev id `atelier2`; cutover to `atelier` in
-  // phase 9). Loader import()s the skin barrel, which builds the full
-  // TemplateModule from the skeleton factory + skin data. Dispatch firewall
-  // intact: skeleton code rides in this chunk; nothing new is statically imported
-  // by registry.ts or the main bundle.
-  atelier2: async () => {
     const m = await import('@/modules/templates/atelier2');
     return {
       resolveBlock: m.resolveBlock,

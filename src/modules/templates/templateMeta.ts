@@ -201,43 +201,14 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
     // capability (never declared per-template). `multipage` is structural
     // (page-menu machinery; exempt from block-evidence).
     //
-    // atelier-skeleton-cutover phase 1: atelier now rides the work-skeleton, so it
-    // absorbs the `works` COLLECTION-FAMILY capability (evidenced by the
-    // `workcatalog` catalog section) that the staging `atelier2` entry declared.
-    // This ACTIVATES the works ingestion fan-out on the live atelier look — the
-    // whole point of the cutover. Conformance (b)/(b+)/(d) now bite: workcatalog +
+    // atelier-skeleton-cutover: atelier rides the work-skeleton, so it declares the
+    // `works` COLLECTION-FAMILY capability (evidenced by the `workcatalog` catalog
+    // section). This ACTIVATES the works ingestion fan-out on the live atelier look
+    // — the whole point of the cutover. Conformance (b)/(b+)/(d) bite: workcatalog +
     // workdetail must resolve to real skeleton blocks in both renderers (they do).
     // atelier STAYS non-bespoke (normal selectable work look).
     capabilities: ['gallery', 'packages', 'multipage', 'works'],
     capabilitySections: { gallery: 'work', packages: 'packages', works: 'workcatalog' },
-  },
-  atelier2: {
-    // Work-SKELETON Atelier skin (dev id; cutover to the live `atelier` id in
-    // phase 9). Now declares HONEST capabilities (mirroring atelier + lumen's
-    // bespoke-with-real-capabilities shape) so the capability-evidence conformance
-    // checks (b)/(b+) BITE: gallery→work + packages→packages must resolve to real
-    // blocks in both renderers (they do — phase 4/7). Engine-core (hero·work·about·
-    // footer) is additionally enforced by an EXPLICIT atelier2 block in
-    // conformance.test.ts (phase 7).
-    //
-    // `bespoke: true` is DELIBERATELY RETAINED here (NOT flipped to satisfy the
-    // standard (a) loop) because flipping it makes fit()/shortlist() serve the
-    // dev-only atelier2 id into REAL photographer/writer shortlists (fit() excludes
-    // only retired||bespoke) — a paying-customer serve-path change that also breaks
-    // serveGate.test.ts + templateMeta.test.ts, both OUTSIDE this phase's scope. The
-    // flip belongs to phase 9 cutover, where the serve wiring is reworked wholesale.
-    // See work-skeleton.audit.md (phase 7 Deviations) + the mailbox note.
-    copyEngines: ['work'],
-    designStyles: ['editorial-craft'],
-    // `works` FLIP (work-onboarding-ingestion E2 / phase 2): declares the works
-    // COLLECTION-FAMILY capability, evidenced by the `workcatalog` catalog section
-    // (single-string entry — no capabilitySections type change, D14 option b). The
-    // conformance (b)/(b+)/(d) checks now BITE: workcatalog + workdetail (its
-    // registry-derived item pair) must resolve to real blocks in both renderers —
-    // they do (phase 2). This is what the ingestion fan-out binds photos into.
-    capabilities: ['gallery', 'packages', 'multipage', 'works'],
-    capabilitySections: { gallery: 'work', packages: 'packages', works: 'workcatalog' },
-    bespoke: true,
   },
   techpremium: {
     copyEngines: [],

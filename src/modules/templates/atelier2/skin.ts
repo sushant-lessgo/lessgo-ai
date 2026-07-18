@@ -14,7 +14,7 @@
 import type { WorkSkinDef } from '@/modules/skeletons/work/skin';
 
 export const atelierSkin: WorkSkinDef = {
-  id: 'atelier2',
+  id: 'atelier',
 
   // Palette-INVARIANT base (warm paper / ink / dark editorial band). Colours are
   // the real Atelier×Kontur oklch values (atelier/tokens.ts atelierBaseTokens).

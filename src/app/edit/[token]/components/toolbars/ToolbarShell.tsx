@@ -261,9 +261,9 @@ export function ToolbarShell() {
             {toolbarBody}
 
             {/* Design ▾ — present but disabled. Skeleton-gated (plan D-3): the
-                `--u-*` token surface exists, but the only template that consumes
-                it (atelier2) is never served, so an enabled Design menu would do
-                nothing for every real user. */}
+                `--u-*` token surface exists, but the served templates' blocks
+                hardcode their CSS (none consume it yet), so an enabled Design menu
+                would do nothing for every real user. Un-defer stays out of scope. */}
             {entry.designMenu !== 'hidden' && (
               <>
                 <ToolbarDivider />
