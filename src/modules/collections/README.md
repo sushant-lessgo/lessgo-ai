@@ -66,7 +66,7 @@ Tests: `src/hooks/editStore/naayomProducts.test.ts`,
 `src/modules/generation/multiPageAssembly.test.ts`.
 
 ## The `works` collection is managed from the "Your work" board (not the editor)
-For the **works** collection (work engine, `atelier2`/skeleton), the management
+For the **works** collection (work engine, `atelier`/skeleton), the management
 door is the project-scoped **"Your work"** dashboard board at
 `/dashboard/[token]/work` (`WorkLibraryClient` → the reused `CorrectionBoard`),
 NOT the in-editor products panel. The board's source of truth is

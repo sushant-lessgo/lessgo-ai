@@ -77,16 +77,17 @@ describe('templateMeta', () => {
 });
 
 describe('templateHasCapability', () => {
-  it('atelier2 (skeleton) has the works capability', () => {
-    // The works fan-out (workcatalog + page-<slug> item pages) only exists here.
-    expect(templateHasCapability('atelier2', 'works')).toBe(true);
+  it('atelier (skeleton-backed) has the works capability', () => {
+    // Post atelier-skeleton-cutover: atelier rides the work-skeleton and declares
+    // `works`. The works fan-out (workcatalog + page-<slug> item pages) lives here.
+    expect(templateHasCapability('atelier', 'works')).toBe(true);
   });
 
-  it('live atelier does NOT have works (the isWorkCopyTemplate trap — decision 7)', () => {
-    // atelier is a work-ENGINE template but declares gallery/packages/multipage,
-    // NOT works — so the board must reject it even though isWorkCopyTemplate(atelier)
-    // is true. This asymmetry is the whole reason the helper exists.
-    expect(templateHasCapability('atelier', 'works')).toBe(false);
+  it('a non-works template does NOT have works (the isWorkCopyTemplate trap — decision 7)', () => {
+    // hearth is a trust-engine template that declares lead-form, NOT works — so the
+    // board must reject it. The helper gates on the works CAPABILITY, not on the
+    // work copy engine; this asymmetry is the whole reason it exists.
+    expect(templateHasCapability('hearth', 'works')).toBe(false);
   });
 
   it('unknown / null / undefined ids → false (never throws)', () => {

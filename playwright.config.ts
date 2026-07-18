@@ -87,7 +87,7 @@ export default defineConfig({
         // toolbar-beta-followup: behavioral regen (element + section) through the shell.
         /toolbar-regen\.spec\.ts/,
         // work-library-board (phase 7): the "Your work" dashboard CorrectionBoard
-        // CRUD round-trip — seeded atelier2 project + Clerk session.
+        // CRUD round-trip — seeded atelier project + Clerk session.
         /work-library\.spec\.ts/,
       ],
       dependencies: ['setup'],

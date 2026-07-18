@@ -5,7 +5,7 @@ import { test, expect, type Page, type Locator } from '@playwright/test';
 //
 // Authed (Clerk session from auth.setup.ts, same pattern as publish.spec.ts).
 // Seeds a WORKS-CAPABLE project directly through the real `/api/saveDraft` route
-// (templateId `atelier2` + `brief.facts.work.groups` + a works-shaped
+// (templateId `atelier` + `brief.facts.work.groups` + a works-shaped
 // finalContent) — the board reads its groups from `brief.facts.work` and the PUT
 // resyncs the stored content, so no generation/onboarding drive is needed.
 //
@@ -152,7 +152,7 @@ test('Your work board — full CRUD round-trip persists across reload', async ({
     data: {
       tokenId: TOKEN,
       title: 'Kundius (e2e)',
-      templateId: 'atelier2',
+      templateId: 'atelier',
       finalContent: seedFinalContent(),
       brief: { facts: seedFacts() },
     },

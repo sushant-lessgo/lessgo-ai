@@ -545,12 +545,14 @@ Files changed by this follow-up: `playwright.config.ts` (allowlist entry only), 
 Confirm Kundius's REAL project is board-ready. If EITHER check fails, STOP and report a founder-gate finding — template migration (live-`atelier` -> skeleton) is OUT OF SCOPE for this branch (decision 8); the gate cannot pass on a project without works fan-out.
 
 ### (a) Template is works-capable
-The board gates on `templateHasCapability(templateId, 'works')` — only `atelier2` declares `works` (live `atelier` does NOT). SQL against the app DB:
+**[Updated 2026-07-18 post-merge: the atelier2→atelier cutover landed on main. `atelier` is now the works-capable template (`atelier2` was promoted to it and no longer exists). The pre-check below now targets `atelier`.]**
+
+The board gates on `templateHasCapability(templateId, 'works')` — `atelier` declares `works` (a non-works template like `meridian`/`hearth` does NOT). SQL against the app DB:
 ```sql
 SELECT p."tokenId", p."templateId"
 FROM "Project" p
 WHERE p."tokenId" = '<KUNDIUS_TOKEN>';
--- PASS iff templateId = 'atelier2'
+-- PASS iff templateId = 'atelier'  (post-cutover works-capable template)
 ```
 
 ### (b) Stored content has the works surfaces
@@ -574,14 +576,14 @@ const db = new PrismaClient();
   const hasGalleryCards = walk(fc.content) || Object.values(pages).some(pg => walk(pg && pg.content)) ||
     (fc.chrome && (walk({ _: fc.chrome.header && fc.chrome.header.data }) || walk({ _: fc.chrome.footer && fc.chrome.footer.data })));
   const factGroups = (((p.brief || {}).facts || {}).work || {}).groups || [];
-  console.log("templateId:", p.templateId, "(want atelier2)");
+  console.log("templateId:", p.templateId, "(want atelier)");
   console.log("works item pages (page-<slug>):", itemPages.length, itemPages);
   console.log("workcatalog singleton present:", hasCatalog);
   console.log("group-reference gallery cards present:", hasGalleryCards);
   console.log("facts.work.groups count:", factGroups.length, factGroups.map(g => g.name));
-  const ok = p.templateId === "atelier2" && itemPages.length > 0 && hasCatalog && hasGalleryCards && factGroups.length > 0;
+  const ok = p.templateId === "atelier" && itemPages.length > 0 && hasCatalog && hasGalleryCards && factGroups.length > 0;
   console.log(ok ? "PASS — board-ready" : "FAIL — founder-gate finding (migration out of scope)");
   await db.$disconnect();
 })();
 ```
-PASS iff: `templateId = atelier2`, >=1 `page-<slug>` works item page, `workcatalog` singleton present, gallery group-ref cards present, and `facts.work.groups` non-empty. Only then run the live founder walkthrough (spec gate a).
+PASS iff: `templateId = atelier` (post-cutover works-capable), >=1 `page-<slug>` works item page, `workcatalog` singleton present, gallery group-ref cards present, and `facts.work.groups` non-empty. Only then run the live founder walkthrough (spec gate a).

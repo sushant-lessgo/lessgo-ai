@@ -16,10 +16,10 @@ import WorkLibraryClient from '@/components/dashboard/work/WorkLibraryClient'
  *
  * ── ELIGIBILITY (decision 7 — the isWorkCopyTemplate trap) ───────────────────
  *   The board gates on `templateHasCapability(templateId, 'works')` — the SAME
- *   predicate the API route uses — NOT `isWorkCopyTemplate`. Live `atelier` is a
- *   work-ENGINE template but declares gallery/packages/multipage, NOT `works`; it
- *   has no `page-<slug>` fan-out for the resync to bind into, so it 404s here.
- *   Only `atelier2` (the work-skeleton pilot) declares `works`.
+ *   predicate the API route uses — NOT `isWorkCopyTemplate`. A work-ENGINE
+ *   template that lacks the `works` capability has no `page-<slug>` fan-out for the
+ *   resync to bind into, so it 404s here. Post atelier-skeleton-cutover, `atelier`
+ *   (the work-skeleton) declares `works` — it is the works-capable template.
  */
 
 export const dynamic = 'force-dynamic'

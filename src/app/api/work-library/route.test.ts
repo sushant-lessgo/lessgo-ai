@@ -153,16 +153,16 @@ function finalContent() {
   };
 }
 
-/** A works-capable project row (atelier2 declares `works`). */
+/** A works-capable project row (atelier declares `works` post-cutover). */
 const worksProject = () => ({
-  templateId: 'atelier2',
+  templateId: 'atelier',
   brief: { facts: { work: workFacts() }, businessType: 'photographer' },
   content: { onboarding: { name: 'KK' }, finalContent: finalContent() },
 });
 
-/** A live-atelier project — work ENGINE but NOT works-capable (the trap). */
+/** A non-works template (hearth = trust engine, lead-form only) — NOT works-capable (the trap). */
 const atelierProject = () => ({
-  templateId: 'atelier',
+  templateId: 'hearth',
   brief: { facts: { work: workFacts() } },
   content: { finalContent: finalContent() },
 });
@@ -258,14 +258,14 @@ describe('/api/work-library — authz gates', () => {
 // ── Eligibility (decision 7 — the isWorkCopyTemplate trap) ──────────────────
 
 describe('/api/work-library — works-capability eligibility', () => {
-  it('live atelier (work engine, NOT works-capable) → 400 on GET', async () => {
+  it('non-works template (hearth) → 400 on GET', async () => {
     findUnique.mockResolvedValue(atelierProject());
     const res = await GET(getReq());
     expect(res.status).toBe(400);
     expect((await res.json()).error).toMatch(/doesn't support the work library/i);
   });
 
-  it('live atelier → 400 on PUT, nothing written', async () => {
+  it('non-works template (hearth) → 400 on PUT, nothing written', async () => {
     findUnique.mockResolvedValue(atelierProject());
     const res = await PUT(putReq({ tokenId: REAL_TOKEN, groups: putGroups() }));
     expect(res.status).toBe(400);

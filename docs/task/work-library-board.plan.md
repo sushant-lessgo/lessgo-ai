@@ -63,13 +63,17 @@ change needed; parity holds by construction.
    the resynced `workcatalog.items[]`** — see phase 6 step 2 (export-sweep guard; pre-existing
    latent bug).
 7. **Board eligibility = `works`-CAPABLE template, not `isWorkCopyTemplate`.** Per
-   `src/modules/templates/templateMeta.ts`, live `atelier` declares
-   `['gallery','packages','multipage']` — NO `works`; only `atelier2` (skeleton, the Kundius
-   atelier-on-skeleton pilot) declares `works` + `capabilitySections.works:'workcatalog'`. The
-   item-page fan-out + gallery `href` stamping only exist on works-capable projects, so the board
-   (tab, page, API) gates on works-capability; `isWorkCopyTemplate` alone would admit live-`atelier`
-   projects where the resync would half-work (no `page-<slug>` pages, bare hrefs). No such helper
-   exists today (`serveGate.ts` inlines `capabilities.includes(...)`) → add a tiny pure
+   `src/modules/templates/templateMeta.ts`, the works-capable template declares `works` +
+   `capabilitySections.works:'workcatalog'`. **[Updated 2026-07-18 after merging main: the
+   atelier2→atelier cutover landed on main — `atelier2` was promoted to `atelier`, so `atelier`
+   now declares `['gallery','packages','multipage','works']` and is the works-capable template;
+   `atelier2` no longer exists. Because the board gates on the `works` CAPABILITY (not the template
+   name), the runtime logic was unaffected by the rename — only fixtures/comments/e2e-seed were
+   re-pointed atelier2→atelier during re-green.]** The item-page fan-out + gallery `href` stamping
+   only exist on works-capable projects, so the board (tab, page, API) gates on works-capability;
+   `isWorkCopyTemplate` alone would admit non-works work-engine templates where the resync would
+   half-work (no `page-<slug>` pages, bare hrefs). No such helper existed
+   (`serveGate.ts` inlines `capabilities.includes(...)`) → added a tiny pure
    `templateHasCapability(templateId, cap)` helper in `templateMeta.ts` (data-only leaf,
    server-safe). The resync module still degrades gracefully on non-works content (phase 2) as
    defense in depth.
@@ -173,7 +177,8 @@ sweep from step 4 documented in the phase audit.
 **Steps**
 1. `templateMeta.ts`: add pure helper `templateHasCapability(templateId: string | null | undefined,
    cap: CapabilityId): boolean` (safe on unknown ids → false; data-only module stays a leaf).
-   Unit-cover in `templateMeta.test.ts` (atelier2→works true; atelier→works false; unknown id
+   Unit-cover in `templateMeta.test.ts` (atelier→works true [post-cutover]; a non-works template
+   e.g. meridian/hearth→works false; unknown id
    false).
 2. New route `src/app/api/work-library/route.ts` — clone the media/testimonials route skeleton:
    `runtime='nodejs'`, `dynamic='force-dynamic'`, `auth()` → 401, `validateToken`,
@@ -365,8 +370,8 @@ manual publish round-trip for the gate.
 
 **Steps**
 1. **Pilot pre-check (BEFORE the founder walkthrough):** confirm Kundius's project is board-ready —
-   (a) its `templateId` is works-capable (`templateHasCapability(templateId,'works')` — i.e. on
-   `atelier2`/the skeleton, per the atelier-on-skeleton pilot), AND (b) its stored
+   (a) its `templateId` is works-capable (`templateHasCapability(templateId,'works')` — post-cutover
+   this is `atelier` itself; `atelier2` was promoted to `atelier` on main), AND (b) its stored
    `Project.content` already contains `page-<slug>` item pages + group-reference gallery cards +
    the `workcatalog` singleton. If either fails, STOP and report it as a founder-gate finding —
    template migration to the skeleton is OUT OF SCOPE for this branch (decision 8); the gate
@@ -417,7 +422,7 @@ pilot pre-check documented; founder pilot walkthrough.
 4. **Concurrent editor-open race**: editor saveDraft after a board save can overwrite resynced
    content until next board save. **RULING: ACCEPT for beta** — board is the management door by design.
 5. **Tab placement**: "Your work" right after Overview, work-engine projects only. **RULING:
-   CONFIRMED.** (Narrowed by review blocker 1: shown for works-CAPABLE projects — atelier2/skeleton
-   — not all `isWorkCopyTemplate` projects.)
+   CONFIRMED.** (Narrowed by review blocker 1: shown for works-CAPABLE projects — post-cutover
+   `atelier` (formerly atelier2/skeleton) — not all `isWorkCopyTemplate` projects.)
 6. Chrome header `/works/<slug>` links on a pruned/renamed group — resync updates group CARDS in
    chrome; plain nav links (non-card) unaffected. **RULING: ACCEPTABLE for beta.**

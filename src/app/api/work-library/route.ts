@@ -18,10 +18,10 @@
 //
 // ── ELIGIBILITY (decision 7 — the isWorkCopyTemplate trap) ───────────────────
 //   The board gates on `templateHasCapability(templateId, 'works')`, NOT
-//   `isWorkCopyTemplate`. Live `atelier` is a work-ENGINE template but declares
-//   gallery/packages/multipage — NOT `works` — so it has no `page-<slug>` fan-out
-//   for the resync to bind into; it MUST be rejected 400. Only `atelier2` (the
-//   work-skeleton pilot) declares `works`.
+//   `isWorkCopyTemplate`. A work-ENGINE template that lacks the `works` capability
+//   has no `page-<slug>` fan-out for the resync to bind into; it MUST be rejected
+//   400. Post atelier-skeleton-cutover, `atelier` (the work-skeleton) declares
+//   `works` — it is the works-capable template the board serves.
 //
 // 0 credits: facts + DB work, no LLM.
 export const runtime = 'nodejs';
