@@ -1,5 +1,17 @@
 "use client";
 
+// ============================================================================
+// PageRevealAnimation — the celebratory "meet your site" reveal wrapper.
+//
+// SHARED HOME (editor-route-consolidation phase 5): moved here from
+// `src/app/generate/[token]/components/` so BOTH consumers can reach it without
+// crossing an app-route boundary:
+//   • the legacy `/generate` reveal page (still live this slice), and
+//   • the editor's first-load reveal (`/edit/{token}?reveal=1`), where the
+//     work-journey now lands after generation instead of the retired STEP 06
+//     `/preview?chrome=0` iframe.
+// ============================================================================
+
 import React, { useEffect, useState, useRef } from 'react';
 import confetti from 'canvas-confetti';
 
@@ -12,7 +24,7 @@ export default function PageRevealAnimation({ children, sectionsCount = 6 }: Pag
   const [isRevealing, setIsRevealing] = useState(true);
   const [showToast, setShowToast] = useState(false);
   const hasTriggeredConfetti = useRef(false);
-  
+
   useEffect(() => {
     // Start reveal animation
     const revealTimer = setTimeout(() => {
@@ -80,8 +92,8 @@ export default function PageRevealAnimation({ children, sectionsCount = 6 }: Pag
           bg-white shadow-2xl rounded-full px-8 py-4
           border-2 border-green-500
           transition-all duration-500 ease-out
-          ${showToast 
-            ? 'opacity-100 translate-y-0 scale-100' 
+          ${showToast
+            ? 'opacity-100 translate-y-0 scale-100'
             : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
           }
         `}
@@ -96,7 +108,10 @@ export default function PageRevealAnimation({ children, sectionsCount = 6 }: Pag
       </div>
 
       {/* Animated Content Wrapper */}
-      <div className={`page-reveal-container ${isRevealing ? 'revealing' : 'revealed'}`}>
+      <div
+        data-testid="page-reveal"
+        className={`page-reveal-container ${isRevealing ? 'revealing' : 'revealed'}`}
+      >
         {children}
       </div>
 

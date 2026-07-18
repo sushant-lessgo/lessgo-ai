@@ -19,11 +19,13 @@
 //   • credits / error — from the drive. `credits` is a billing dead-end (a retry
 //     burns nothing but time); `error` is retryable in place.
 //
-// ── WHY SUCCESS DOES NOT NAVIGATE ───────────────────────────────────────────
-// `journeyStep = 6`, never `router.push`. The reveal (STEP 06) owns forward
-// motion — the generation driver's own `/edit/{token}` redirect is deliberately
-// dropped by the seam. Pushing from here would skip the reveal, which IS the
-// product.
+// ── WHERE SUCCESS GOES ──────────────────────────────────────────────────────
+// On `result.ok` we `router.push('/edit/{token}?reveal=1')`. The reveal (the
+// "meet your site" moment) folded OUT of a journey STEP 06 and ONTO the editor's
+// first load (editor-route-consolidation phase 5): the editor reads `?reveal=1`,
+// shows the site in preview mode wrapped in the reveal animation, then strips the
+// param. The old in-journey `setJourneyStep(6)` / `/preview?chrome=0` iframe is
+// gone — one home for reveal + edit + publish.
 //
 // ── PROGRESS IS HONEST ──────────────────────────────────────────────────────
 // Every number below comes from `onStage` / `onPageProgress`. No timers, no
@@ -31,6 +33,7 @@
 // ============================================================================
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useWizardStore, selectSetJourneyStep } from '@/hooks/useWizardStore';
 import { AppIcon } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
@@ -52,7 +55,11 @@ const STAGE_ORDER: JourneyGenerationStage[] = ['strategy', 'copy', 'saving', 'do
 type Failure = { kind: 'engine-disabled' | 'credits' | 'error'; message: string };
 
 export default function StepBuilding({ seam, onBuildingChange }: JourneyStepProps) {
+  const router = useRouter();
   const setJourneyStep = useWizardStore(selectSetJourneyStep);
+  // The reveal now lives on the editor (`?reveal=1`); success routes there with
+  // the token, exactly as the retired StepReveal read it.
+  const tokenId = useWizardStore((s) => s.tokenId);
   const { toast } = useToast();
 
   const [stage, setStage] = useState<JourneyGenerationStage | null>(null);
@@ -86,8 +93,9 @@ export default function StepBuilding({ seam, onBuildingChange }: JourneyStepProp
     //
     // Post-unmount state updates are no-ops in React 18, so there is nothing to
     // guard against. The one live consequence — a drive that completes after the
-    // user has left STEP 05 still setting `journeyStep = 6` — is CORRECT: the
-    // site is genuinely built, and the reveal is where they belong.
+    // user has left STEP 05 still pushing to `/edit/{token}?reveal=1` is
+    // CORRECT: the site is genuinely built, and the editor reveal is where they
+    // belong.
     void (async () => {
       // PREFLIGHT — before anything is charged or written. `getState()`, not a
       // subscription: the drive reads the store ONCE, at start.
@@ -112,7 +120,10 @@ export default function StepBuilding({ seam, onBuildingChange }: JourneyStepProp
       onBuildingChange?.(false);
 
       if (result.ok) {
-        setJourneyStep(6);
+        // The reveal folded onto the editor: land on `/edit/{token}?reveal=1`
+        // (the editor reads the flag, shows the site in preview mode with the
+        // reveal animation, then strips the param). Replaces `setJourneyStep(6)`.
+        router.push(`/edit/${tokenId}?reveal=1`);
         return;
       }
       setFailure({ kind: result.kind, message: result.message });

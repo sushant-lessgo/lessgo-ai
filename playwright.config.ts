@@ -37,7 +37,7 @@ export default defineConfig({
     // Public, no-auth smokes.
     {
       name: 'public',
-      testMatch: [/generation\.spec\.ts/, /render\.spec\.ts/, /parity\.spec\.ts/, /ui-isolation\.spec\.ts/, /forms-forgery\.spec\.ts/],
+      testMatch: [/generation\.spec\.ts/, /render\.spec\.ts/, /parity\.spec\.ts/, /ui-isolation\.spec\.ts/, /forms-forgery\.spec\.ts/, /xfo-headers\.spec\.ts/],
       use: { ...devices['Desktop Chrome'] },
     },
     // Clerk sign-in → saves storageState.
@@ -95,6 +95,12 @@ export default defineConfig({
         // work-library-board (phase 7): the "Your work" dashboard CorrectionBoard
         // CRUD round-trip — seeded atelier project + Clerk session.
         /work-library\.spec\.ts/,
+        // editor-route-consolidation (phase 1): the inline Edit/Preview mode flip
+        // — seeded editor project + Clerk session.
+        /editor-preview-mode\.spec\.ts/,
+        // editor-route-consolidation (phase 2): the chromeless /edit/[token]/preview
+        // sub-route — seeded editor project + Clerk session.
+        /editor-preview-route\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },
