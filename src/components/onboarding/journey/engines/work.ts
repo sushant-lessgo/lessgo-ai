@@ -649,7 +649,17 @@ export const workJourneySeam: JourneyEngineSeam = {
       async prepare(wizardApi: JourneyWizardApi): Promise<void> {
         await wizardApi.getState().fetchStrategy();
       },
-      /** The seeded sitemap, as page cards. No add/rename/reorder in E1 (E4). */
+      /**
+       * STEP 04 — the RICH plan body (E4). Reuses the founder-signed `loadStep?`
+       * (D9), the SAME field STEP 02/03 use — the agnostic frame renders this
+       * engine body at RENDER time (post-confirm), so `./work/PlanStep` (store +
+       * vocabulary + sitemap) never lands on the pre-confirm entry bundle
+       * (landmine 14; the DYNAMIC import is off the static scan). `items` below
+       * stays the read-only stub every non-work engine renders when `loadStep`
+       * is absent — do not delete it.
+       */
+      loadStep: () => import('./work/PlanStep'),
+      /** The seeded sitemap, as page cards. Stub fallback (non-work engines). */
       items(state: JourneyWizardState): { title: string }[] {
         const sitemap = (state.sitemap ?? []) as {
           title?: unknown;

@@ -25,6 +25,7 @@ import type { ProfessionWording } from '@/modules/engines/workVocabulary';
 import {
   workPageTypes,
   type WorkSiteArchetypeKey,
+  type WorkPageGoalKey,
 } from '@/modules/engines/workPages';
 import { workElementContract } from '@/modules/engines/workSections';
 import { clampSectionList } from '@/modules/audience/product/strategy/parseStrategyProduct';
@@ -38,6 +39,13 @@ export interface WorkSitemapPage {
   pathSlug: string;
   /** Body-only section keys (chrome injected at boundaries). */
   sections: string[];
+  /**
+   * The one action this page asks a visitor to take (E4 plan screen). Optional +
+   * additive: absent here (assembly does not set it) — populated + edited on the
+   * plan screen, then carried through Brief.structure. Generation does not read
+   * it yet. Falls back to `defaultGoalForPage(...)` when unset.
+   */
+  goal?: WorkPageGoalKey;
 }
 
 /**

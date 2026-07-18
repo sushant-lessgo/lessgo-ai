@@ -26,7 +26,11 @@ import {
   workPageTypes,
   workSiteArchetypes,
   proposeWorkSiteStructure,
+  WORK_PAGE_GOAL_KEYS,
+  defaultGoalForPage,
+  addableWorkPages,
   type WorkPageTypeKey,
+  type WorkPageGoalKey,
   type WorkStructureSignals,
 } from './workPages';
 import {
@@ -35,6 +39,8 @@ import {
 } from './workSlots';
 import {
   workVocabulary,
+  workPageGoalWords,
+  workPageGoalBadgePrefix,
   professionWording,
   dreamClientChips,
   type WorkProfession,
@@ -237,6 +243,63 @@ describe('pages', () => {
       expect(p.pages).not.toContain('blog');
       expect(p.pages).not.toContain('project-story');
     }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4b. Per-page goals (E4 plan screen)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('per-page goals (E4)', () => {
+  it('the goal enum mirrors the contactMethod rail (whatsapp|booking|form)', () => {
+    expect([...WORK_PAGE_GOAL_KEYS].sort()).toEqual(['booking', 'form', 'whatsapp']);
+  });
+
+  it('every WorkPageGoalKey has a workPageGoalWords entry with a userLabel', () => {
+    for (const key of WORK_PAGE_GOAL_KEYS) {
+      const entry = workPageGoalWords[key];
+      expect(entry, `no goal word for "${key}"`).toBeDefined();
+      expect(entry.userLabel.length, `empty userLabel for "${key}"`).toBeGreaterThan(0);
+    }
+    // No stray keys beyond the closed enum.
+    expect(Object.keys(workPageGoalWords).sort()).toEqual([...WORK_PAGE_GOAL_KEYS].sort());
+    expect(workPageGoalBadgePrefix.length).toBeGreaterThan(0);
+  });
+
+  it('defaultGoalForPage: contact→form; non-contact page→contactMethod', () => {
+    const methods: WorkPageGoalKey[] = ['whatsapp', 'booking', 'form'];
+    for (const m of methods) {
+      // Contact page always defaults to the form, regardless of contactMethod.
+      expect(defaultGoalForPage('contact', m)).toBe('form');
+      // A non-contact page inherits the seller's contact method.
+      expect(defaultGoalForPage('home', m)).toBe(m);
+      expect(defaultGoalForPage('work', m)).toBe(m);
+    }
+    // Absent contactMethod → neutral 'form' fallback (contact stays 'form' too).
+    expect(defaultGoalForPage('home')).toBe('form');
+    expect(defaultGoalForPage('contact')).toBe('form');
+  });
+
+  it('addableWorkPages excludes work-group + present pages, never returns home', () => {
+    const present = ['home', 'work', 'contact'];
+    const addable = addableWorkPages(present);
+    // Parametric group page never offered.
+    expect(addable).not.toContain('work-group');
+    // home is required — never in the add menu.
+    expect(addable).not.toContain('home');
+    // Already-present pages are excluded.
+    expect(addable).not.toContain('work');
+    expect(addable).not.toContain('contact');
+    // The remaining designed adds ARE offered (incl. blog + project-story).
+    expect(addable).toContain('prices');
+    expect(addable).toContain('about');
+    expect(addable).toContain('blog');
+    expect(addable).toContain('project-story');
+    // Every returned key is a real page-type key.
+    const vocab = new Set<string>(workPageTypeKeys);
+    for (const k of addable) expect(vocab.has(k)).toBe(true);
+    // From an empty plan, home is still never addable.
+    expect(addableWorkPages([])).not.toContain('home');
   });
 });
 
