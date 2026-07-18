@@ -200,8 +200,16 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
     // entry — would only red conformance group (b). `bilingual` is a PLATFORM
     // capability (never declared per-template). `multipage` is structural
     // (page-menu machinery; exempt from block-evidence).
-    capabilities: ['gallery', 'packages', 'multipage'],
-    capabilitySections: { gallery: 'work', packages: 'packages' },
+    //
+    // atelier-skeleton-cutover phase 1: atelier now rides the work-skeleton, so it
+    // absorbs the `works` COLLECTION-FAMILY capability (evidenced by the
+    // `workcatalog` catalog section) that the staging `atelier2` entry declared.
+    // This ACTIVATES the works ingestion fan-out on the live atelier look — the
+    // whole point of the cutover. Conformance (b)/(b+)/(d) now bite: workcatalog +
+    // workdetail must resolve to real skeleton blocks in both renderers (they do).
+    // atelier STAYS non-bespoke (normal selectable work look).
+    capabilities: ['gallery', 'packages', 'multipage', 'works'],
+    capabilitySections: { gallery: 'work', packages: 'packages', works: 'workcatalog' },
   },
   atelier2: {
     // Work-SKELETON Atelier skin (dev id; cutover to the live `atelier` id in

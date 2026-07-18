@@ -15,6 +15,7 @@ import { resolveMeridianBlock } from '@/modules/templates/meridian/resolveMeridi
 import { MeridianPlaceholderBlock } from '@/modules/templates/meridian/MeridianPlaceholderBlock';
 import { resolveWorkBlock } from '@/modules/skeletons/work/resolveWorkBlock';
 import { WorkPlaceholderBlock } from '@/modules/skeletons/work/WorkPlaceholderBlock';
+import { RESOLVERS } from '@/modules/templates/templateConformance';
 
 type Resolver = (sectionType: string, mode?: 'edit' | 'published') => any;
 
@@ -159,6 +160,38 @@ describe('work-skeleton layout-library dispatch (atelier2)', () => {
         resolveWorkBlock('hero', mode, 'WorkHeroSlider'),
       );
     }
+  });
+});
+
+// ── atelier-skeleton-cutover phase 1: graceful-fallback RESOLUTION proof ─────
+// The live `atelier` id now dispatches through the work-skeleton (resolveWorkBlock).
+// A STRAY old-atelier project (persisted with the old skin's layout names / section
+// types) must degrade to neutral skeleton defaults, never throw. These pin the
+// RESOLUTION side; the RENDER side is proven by skeletons/work/__tests__/
+// oldContentFallback.test.tsx.
+describe('atelier stray-old-content graceful fallback (dispatch)', () => {
+  const modes: Array<'edit' | 'published'> = ['edit', 'published'];
+
+  it('(a) stored old layout "AtelierWorkGallery" on a work section resolves the skeleton work DEFAULT (real block, no throw)', () => {
+    for (const mode of modes) {
+      const def = resolveWorkBlock('work', mode, 'WorkGalleryGrid');
+      const resolved = resolveWorkBlock('work', mode, 'AtelierWorkGallery');
+      expect(resolved, `work/AtelierWorkGallery (${mode})`).toBeTruthy();
+      expect(resolved).not.toBe(WorkPlaceholderBlock);
+      // Unknown layout name → section default (A1 guardrail), NOT the placeholder.
+      expect(resolved, `falls back to work default (${mode})`).toBe(def);
+    }
+  });
+
+  it('(b) stored old-only section type "quote" resolves WorkPlaceholderBlock (never throws)', () => {
+    for (const mode of modes) {
+      expect(resolveWorkBlock('quote', mode), `quote (${mode})`).toBe(WorkPlaceholderBlock);
+    }
+  });
+
+  it('(c) atelier dispatches through resolveWorkBlock / WorkPlaceholderBlock in RESOLVERS', () => {
+    expect(RESOLVERS.atelier.resolve).toBe(resolveWorkBlock);
+    expect(RESOLVERS.atelier.placeholder).toBe(WorkPlaceholderBlock);
   });
 });
 

@@ -326,9 +326,12 @@ describe('runWorksFanOut — wiring + dormancy', () => {
     expect((fc.onboardingData as any).collections.works).toHaveLength(1);
   });
 
-  it('DORMANCY: real atelier caps (no `works`) ⇒ no /works pages; fan-out gated', async () => {
+  it('DORMANCY: real no-`works` caps ⇒ no /works pages; fan-out gated', async () => {
+    // atelier-skeleton-cutover phase 1: atelier ABSORBED `works` (the fan-out now
+    // legitimately fires on it), so the dormancy fixture moved to a template that
+    // GENUINELY lacks `works` (meridian). The proof is unchanged — only the fixture.
     const fc = fcWithGallery();
-    const caps = templateMeta['atelier' as keyof typeof templateMeta].capabilities;
+    const caps = templateMeta['meridian' as keyof typeof templateMeta].capabilities;
     expect(caps).not.toContain('works'); // guard the premise
     await runWorksFanOut(fc, baseInput({ brief: PHOTO_BRIEF }), caps, async () => {});
     expect(fc.pages['page-weddings']).toBeUndefined(); // fan-out dormant

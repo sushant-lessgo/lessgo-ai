@@ -112,26 +112,23 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
   },
   // On-demand work-engine template (visual-portfolio; anchor customer Kundius
   // Photography). Service audience; served to photographers via the serve gate.
+  // atelier-skeleton-cutover phase 1: re-pointed onto the work-SKELETON skin
+  // barrel (formerly the `atelier2` staging id). The old hand-written atelier
+  // skin dir is deleted in phase 4; the `atelier2` loader below is retired in
+  // phase 3. Dispatch firewall intact: skeleton code rides in this chunk only.
   atelier: async () => {
-    const m = await import('@/modules/templates/atelier');
+    const m = await import('@/modules/templates/atelier2');
     return {
       resolveBlock: m.resolveBlock,
       ThemeInjector: m.ThemeInjector,
       SSRTokens: m.SSRTokens,
       getSurfaceForSection: m.getSurfaceForSection,
-      defaultPaletteId: m.defaultAtelierPalette,
-      variants: m.atelierVariantDefs,
-      defaultVariantId: m.defaultAtelierVariant,
-      paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
-      // template-factory phase 6/11 — atelier declares all 5 knob axes. Surfacing
-      // `knobs` here populates `mod.knobs` at runtime so editor knob-switching can
-      // read `getLoadedTemplate('atelier').knobs` (mirrors hearth).
-      knobs: m.atelierKnobs,
-      // Phase 12b — atelier's ZERO-CONFIG default knob seed (square buttons, the
-      // Kontur signature). Surfaced here so the creation path (runWorkSkeleton)
-      // can seed themeValues.knobs. Optional on TemplateModule; other templates
-      // leave it undefined.
-      defaultKnobs: m.defaultAtelierKnobs,
+      defaultPaletteId: m.defaultPaletteId,
+      variants: m.variants,
+      defaultVariantId: m.defaultVariantId,
+      paletteImageKeywords: m.paletteImageKeywords,
+      defaultKnobs: m.defaultKnobs,
+      knobs: m.knobs,
     };
   },
   // Work-SKELETON Atelier skin (dev id `atelier2`; cutover to `atelier` in

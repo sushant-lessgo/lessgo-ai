@@ -1,8 +1,11 @@
 // src/lib/staticExport/htmlGenerator.test.ts
-// Phase 10 (atelier-template) — behaviors-asset gating on generateStaticHTML.
-// The Atelier hero cover slider is animated by public/assets/slider.v1.js, which
-// must be injected ONLY on atelier pages (templateId === 'atelier') and NEVER on
-// other templates. This guards the gating flag + <script> tag wiring.
+// Behaviors-asset gating on generateStaticHTML.
+//
+// atelier-skeleton-cutover phase 1: `atelier` now dispatches through the work-
+// skeleton, so NEW atelier publishes get work.v1.js (via skeletonBackedTemplateIds)
+// and NO LONGER emit slider.v1.js — the NEW-embed gate for the old cover slider was
+// removed. slider.v1.js keeps building (immutable-asset contract for old blobs) but
+// is never injected into a freshly generated page anymore.
 
 import { vi, describe, it, expect } from 'vitest';
 // htmlGenerator is `import 'server-only'`; neutralize so it runs under vitest.
@@ -49,10 +52,12 @@ async function render(
 
 const SLIDER_TAG = '/assets/slider.v1.js';
 
-describe('generateStaticHTML — atelier slider.v1.js gating', () => {
-  it('injects slider.v1.js for an atelier page', async () => {
+describe('generateStaticHTML — slider.v1.js is NEVER injected into a new page', () => {
+  // The NEW-embed gate was removed at atelier-skeleton-cutover phase 1. No freshly
+  // generated page — including atelier — emits slider.v1.js anymore.
+  it('does NOT inject slider.v1.js for an atelier page (now a skeleton page)', async () => {
     const html = await render('atelier', 'service');
-    expect(html).toContain(SLIDER_TAG);
+    expect(html).not.toContain(SLIDER_TAG);
   });
 
   it('does NOT inject slider.v1.js for a meridian (product) page', async () => {
@@ -66,14 +71,19 @@ describe('generateStaticHTML — atelier slider.v1.js gating', () => {
   });
 });
 
-// Work skeleton (phase 5): work.v1.js (hero slider + fixed header) is injected ONLY
-// for skeleton-backed templateIds (skeletonBackedTemplateIds, e.g. atelier2) and
-// NEVER for classic templates — including the OLD atelier module, which keeps its
-// own slider.v1.js and must not gain work.v1.js.
+// work.v1.js (hero slider + fixed header) is injected ONLY for skeleton-backed
+// templateIds (skeletonBackedTemplateIds — atelier + the transitional atelier2) and
+// NEVER for classic templates.
 const WORK_TAG = '/assets/work.v1.js';
 
 describe('generateStaticHTML — work.v1.js skeleton gating', () => {
-  it('injects work.v1.js for a skeleton-backed atelier2 page', async () => {
+  it('injects work.v1.js for a skeleton-backed atelier page (and NOT slider.v1.js)', async () => {
+    const html = await render('atelier', 'service');
+    expect(html).toContain(WORK_TAG);
+    expect(html).not.toContain(SLIDER_TAG);
+  });
+
+  it('injects work.v1.js for the transitional atelier2 page', async () => {
     const html = await render('atelier2', 'service');
     expect(html).toContain(WORK_TAG);
   });
@@ -85,11 +95,6 @@ describe('generateStaticHTML — work.v1.js skeleton gating', () => {
 
   it('does NOT inject work.v1.js for a hearth (service) page', async () => {
     const html = await render('hearth', 'service');
-    expect(html).not.toContain(WORK_TAG);
-  });
-
-  it('does NOT inject work.v1.js for the OLD atelier page', async () => {
-    const html = await render('atelier', 'service');
     expect(html).not.toContain(WORK_TAG);
   });
 });

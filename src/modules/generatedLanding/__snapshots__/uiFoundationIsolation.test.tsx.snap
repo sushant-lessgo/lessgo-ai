@@ -521,9 +521,6 @@ exports[`ui-foundation isolation — published HTML baseline (product: meridian)
   <!-- Lumen behaviors (lightbox + reveal + EN·NL toggle/geo) -->
   
 
-  <!-- Atelier hero cover slider (autoplay crossfade + arrows + injected dots) -->
-  
-
   <!-- Work skeleton behaviors (hero slider + fixed header) -->
   
 
@@ -1019,9 +1016,6 @@ exports[`ui-foundation isolation — published HTML baseline (service: hearth) >
   
 
   <!-- Lumen behaviors (lightbox + reveal + EN·NL toggle/geo) -->
-  
-
-  <!-- Atelier hero cover slider (autoplay crossfade + arrows + injected dots) -->
   
 
   <!-- Work skeleton behaviors (hero slider + fixed header) -->
