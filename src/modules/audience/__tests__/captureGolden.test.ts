@@ -1,3 +1,5 @@
+// @vitest-environment node
+//
 // Real-LLM golden-fixture capture. OPT-IN — skipped unless CAPTURE=1.
 //
 //   CAPTURE=1 npx vitest run captureGolden        # capture all templates

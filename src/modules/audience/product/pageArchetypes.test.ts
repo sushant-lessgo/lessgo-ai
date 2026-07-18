@@ -131,8 +131,9 @@ describe('isMultipage — capability ∧ (Brief structure.mode ∨ businessType 
 
 describe('businessTypes structureDefault (scale-07 phase 5)', () => {
   // atelier phase 5 — photographer flips single→multi (work+multipage atelier).
-  const MULTI_DEFAULTS = new Set(['manufacturer', 'photographer']);
-  it('every entry declares structureDefault; manufacturer + photographer are multi', () => {
+  // work-contract phase 4 — designer mirrors photographer (visual portfolio → multi).
+  const MULTI_DEFAULTS = new Set(['manufacturer', 'photographer', 'designer']);
+  it('every entry declares structureDefault; manufacturer + photographer + designer are multi', () => {
     for (const key of businessTypeKeys) {
       const entry = businessTypes[key];
       expect(['single', 'multi']).toContain(entry.structureDefault);

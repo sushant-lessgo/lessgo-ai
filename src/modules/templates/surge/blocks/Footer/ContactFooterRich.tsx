@@ -10,7 +10,7 @@ import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useServiceBlock } from '../../hooks/useServiceBlock';
 import { SurgeEditable } from '../../components/SurgeEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import { resolveDestination } from '@/utils/resolveCtaHref';
 import { FOOTER_STYLES } from './styles';
 import { DEFAULT_FOOTER_LINKS, type FooterLink } from './footerDefaults';
@@ -274,7 +274,7 @@ export default function ContactFooterRich({ sectionId }: ContactFooterRichProps)
                   />
                   {edit && (
                     <>
-                      <LinkTargetPopover
+                      <LinkPicker
                         value={l.href}
                         sectionOptions={sectionOptions}
                         pageOptions={pageOptions}

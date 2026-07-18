@@ -17,6 +17,7 @@
  * The static path already flattens before calling; the dynamic routes must flatten explicitly.
  */
 import { resolveCanonicalURL } from './canonicalUrl';
+import { isSafeURL } from './headTags';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import type { PageSeo } from '@/types/store/pages';
 
@@ -78,6 +79,13 @@ function findHeroId(sections: string[] = []): string | undefined {
  * domain (so the absolute URL matches the host the page lives on) > auto `/api/og/{slug}` on baseUrl.
  * Lifted verbatim from the static generator so no-custom-domain output stays byte-identical.
  * `canonicalPath` (non-root) appends `?path=` so multi-page subpages get their own auto OG image.
+ *
+ * SECURITY (publish-trust M4): `previewImage` is the ONLY user-supplied candidate and its
+ * schema validation is `z.string().url()` (validation.ts:117), which ACCEPTS `javascript:`.
+ * This is the source gate for every og:image consumer (static head + the dynamic /p routes):
+ * an unsafe candidate is dropped so the `||` chain falls through to the auto /api/og/{slug}
+ * URL — a fallback, never '' (an empty og:image is a broken card). The `encodeURIComponent`
+ * on `?path=` is percent-encoding: orthogonal to both this gate and downstream HTML-escaping.
  */
 export function resolveOgImage(opts: {
   slug: string;
@@ -90,8 +98,10 @@ export function resolveOgImage(opts: {
     opts.canonicalPath && opts.canonicalPath !== '/'
       ? `?path=${encodeURIComponent(opts.canonicalPath)}`
       : '';
+  const safePreviewImage =
+    opts.previewImage && isSafeURL(opts.previewImage) ? opts.previewImage : '';
   return (
-    opts.previewImage ||
+    safePreviewImage ||
     (opts.canonicalDomain
       ? `https://${opts.canonicalDomain}/api/og/${opts.slug}${pathQuery}`
       : `${opts.baseUrl}/api/og/${opts.slug}${pathQuery}`)
@@ -153,9 +163,16 @@ export function buildPageMetadata(input: BuildPageMetadataInput): PageMetadata {
   // OG image precedence: seo.ogImage > previewImage > auto /api/og. Implemented by
   // feeding the override through resolveOgImage's previewImage slot so the helper
   // (and the no-seo output) stays byte-identical.
+  // Each candidate is scheme-gated at THIS merge point (defense-in-depth: seo.ogImage is
+  // already HttpsUrl-gated at the schema, but gating is one predicate call) so an unsafe
+  // seo.ogImage falls through to previewImage rather than shadowing it; resolveOgImage
+  // re-gates at source for its other (dynamic-route) callers — the gate is idempotent.
+  const ogCandidate =
+    (seo?.ogImage && isSafeURL(seo.ogImage) ? seo.ogImage : '') ||
+    (input.previewImage && isSafeURL(input.previewImage) ? input.previewImage : '');
   const ogImage = resolveOgImage({
     slug: input.slug,
-    previewImage: seo?.ogImage || input.previewImage,
+    previewImage: ogCandidate,
     canonicalDomain: input.canonicalDomain,
     baseUrl: input.baseUrl,
     canonicalPath: input.canonicalPath,

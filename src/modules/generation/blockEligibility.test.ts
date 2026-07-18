@@ -94,6 +94,51 @@ describe('isBlockEligible — assets (ACCEPTANCE: requiresAssets photos)', () =>
   });
 });
 
+describe('isBlockEligible — SLOT (work-skeleton phase 1)', () => {
+  it('a slot declaration is NEVER eligible (no built component)', () => {
+    expect(isBlockEligible(decl({ slot: true }), {})).toBe(false);
+    // even with all signals satisfied, a slot stays ineligible
+    expect(
+      isBlockEligible(decl({ slot: true, capacity: { minCards: 1, maxCards: 9 } }), {
+        cardCountHint: 3,
+        assetFacts: { ...NO_FACTS, hasPhotos: true },
+      })
+    ).toBe(false);
+  });
+
+  it('a NON-slot sibling in the same set still behaves as before', () => {
+    // pickFromSet with a slot present skips the slot and picks the built default.
+    const set: SectionBlockSet = {
+      default: 'A',
+      variants: [
+        decl({ layoutName: 'A' }),
+        decl({ layoutName: 'B_SLOT', slot: true }),
+      ],
+    };
+    // slot never selected — default is eligible, so it wins
+    expect(pickFromSet(set, {})).toBe('A');
+    // even a seed can never surface the slot (it is excluded from the eligible pool)
+    for (let i = 0; i < 20; i++) {
+      expect(pickFromSet(set, { seed: `tok-${i}` })).toBe('A');
+    }
+    // the non-slot variant is unaffected by the sibling slot
+    expect(isBlockEligible(set.variants[0], {})).toBe(true);
+  });
+
+  it('slot as the only OTHER variant ⇒ selection falls back to the built default', () => {
+    // default itself is built; a lone slot sibling must never be chosen.
+    const set: SectionBlockSet = {
+      default: 'A',
+      variants: [
+        decl({ layoutName: 'A', requiresAssets: ['photos'] }),
+        decl({ layoutName: 'B_SLOT', slot: true }),
+      ],
+    };
+    // A is asset-ineligible here and B is a slot ⇒ never-fail fallback = default A.
+    expect(pickFromSet(set, { assetFacts: NO_FACTS })).toBe('A');
+  });
+});
+
 describe('pickFromSet — fallback order', () => {
   it('no-hint ⇒ default', () => {
     const set: SectionBlockSet = {

@@ -50,7 +50,6 @@ export default function MeridianNewsletterCapture({
         body: JSON.stringify({
           formId,
           data: { [fieldId]: value },
-          userId: pageOwnerId,
           publishedPageId,
         }),
       });

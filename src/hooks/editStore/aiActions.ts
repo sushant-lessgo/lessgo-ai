@@ -9,7 +9,33 @@ import { logger } from '@/lib/logger';
 // extractElementText) later extracts. capture.ts is a pure module (only pulls in
 // editDistance) — safe to import into this client store slice; no server-only deps.
 import { extractElementText } from '@/lib/editDelta/capture';
+// billing-beta phase 4 — credit blocks (402) must SURFACE, not vanish. Both
+// modules are client-safe leaves (no prisma, no React).
+import {
+  parseInsufficientCredits,
+  InsufficientCreditsError,
+} from '@/lib/billing/insufficientCredits';
+import { emitCreditsBlocked } from '@/lib/billing/creditsBlockedBus';
 import { deepCopy, pushHistoryEntry } from './historyHelpers';
+
+// billing-beta phase 4 — the ONE credit-block handler for this file's three
+// credit-gated fetches (/api/regenerate-section, /api/audience/work/regenerate-story,
+// /api/regenerate-element). If the response is an insufficient-credits block,
+// announce it on the bus (a mounted CreditsBlockedHost renders the modal) and
+// return a typed error for the caller to throw; otherwise return null and let
+// the existing non-credit error handling run UNCHANGED.
+//
+// The throw still lands in aiGeneration.errors via each catch block — this is a
+// behavior superset, not a store-shape change.
+//
+// ⚠️ NOT for `regenerateElement` (:~460): that one is a setTimeout MOCK with no
+// network call and no credit spend. Nothing to gate.
+function creditBlockFrom(status: number, body: unknown): InsufficientCreditsError | null {
+  const info = parseInsufficientCredits(status, body);
+  if (!info) return null;
+  emitCreditsBlocked(info);
+  return new InsufficientCreditsError(info);
+}
 
 // data-capture Phase 3 — session-scoped regen attempt counters (module-scoped,
 // in-memory; reset on reload). Keyed `${sectionId}` / `${sectionId}.${elementKey}`.
@@ -111,8 +137,17 @@ export function createAIActions(set: any, get: any) {
         });
         
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to regenerate section');
+          const errorData = await response.json().catch(() => null);
+          // billing-beta phase 4 — surface a 402 credit block BEFORE the generic
+          // error throw (announce on the bus + throw the typed error).
+          const blocked = creditBlockFrom(response.status, errorData);
+          if (blocked) throw blocked;
+          // regen-modernization phase 4 (R6.3): prefer the server's honest
+          // `message` over the machine `error` CODE — the atelier `quote` band
+          // 422s `invalid_scope`, which alone tells the user nothing.
+          throw new Error(
+            errorData?.message || errorData?.error || 'Failed to regenerate section'
+          );
         }
         
         const data = await response.json();
@@ -267,6 +302,184 @@ export function createAIActions(set: any, get: any) {
       }
     },
 
+    // work-copy-engine phase 6 — story-interview (Sugarman) regen. THIN parallel
+    // of regenerateSection: POSTs the 3 interview answers + Brief to the dedicated
+    // work-copy route (NOT the legacy /api/regenerate-section) and applies the
+    // returned `content` EXACTLY the way regenerateSection applies its content.
+    // Additive only — existing actions are unchanged. The route validates the
+    // returned story against workElementContract.about before responding, so only
+    // the `about` (story) section is affected; proof/testimonials are untouched.
+    regenerateStoryFromInterview: async (
+      sectionId: string,
+      interviewAnswers: { origin: string; moment: string; belief: string },
+    ) => {
+      if (regenBlockedForLocale(get)) return; // i18n-phase-1 (3a) regen guard
+      // work-copy-engine phase 6 (review-fix) — defensive target guard. This
+      // action is the untyped-cast entry point for the story interview; it must
+      // only ever touch an `about` (story) section. No-op if mis-targeted so a
+      // stray call can never rewrite hero/proof/etc via the work-story route.
+      if (sectionId.split('-')[0] !== 'about') {
+        logger.warn(
+          `[work-copy-engine] regenerateStoryFromInterview ignored: ${sectionId} is not an about section`,
+        );
+        return;
+      }
+      set((state: EditStore) => {
+        state.aiGeneration.isGenerating = true;
+        state.aiGeneration.currentOperation = 'section';
+        state.aiGeneration.progress = 0;
+        state.aiGeneration.status = 'Rewriting your story…';
+        state.aiGeneration.context = { type: 'section', sectionId };
+      });
+
+      try {
+        const currentState = get() as EditStore;
+        const section = currentState.content[sectionId];
+        if (!section) {
+          throw new Error(`Section ${sectionId} not found`);
+        }
+
+        const sectionType = sectionId.split('-')[0];
+
+        const response = await fetch('/api/audience/work/regenerate-story', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tokenId: currentState.tokenId,
+            sectionId,
+            interviewAnswers,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const blocked = creditBlockFrom(response.status, errorData);
+          if (blocked) throw blocked;
+          throw new Error(errorData.error || errorData.message || 'Failed to regenerate story');
+        }
+
+        const data = await response.json();
+        logger.debug('Story regeneration response:', data);
+
+        // Apply the returned content — IDENTICAL merge to regenerateSection.
+        set((state: EditStore) => {
+          if (state.content[sectionId] && data.content) {
+            const existingElements = state.content[sectionId].elements;
+            const preElements = deepCopy(existingElements);
+            const updatedElements = { ...existingElements };
+
+            const isImageValue = (val: unknown): boolean => {
+              const str = typeof val === 'string' ? val : (val as any)?.content;
+              return typeof str === 'string' && (
+                str.startsWith('/') || str.startsWith('http') || str.startsWith('blob:') || str.startsWith('data:image')
+              );
+            };
+            const isImageKey = (key: string): boolean =>
+              key.includes('image') || key.includes('avatar') ||
+              key.includes('visual') || key.includes('mockup') ||
+              key.includes('logo');
+
+            Object.entries(data.content).forEach(([key, value]: [string, any]) => {
+              if (isImageValue(existingElements[key]) || isImageKey(key)) return;
+
+              const existing = updatedElements[key];
+              const existingIsObject =
+                existing !== null && typeof existing === 'object' && !Array.isArray(existing);
+
+              if (existing !== undefined && existing !== null && existing !== '') {
+                if (typeof value === 'object' && value !== null && value.content !== undefined) {
+                  updatedElements[key] = existingIsObject
+                    ? { ...existing, content: value.content, ...(value.type && { type: value.type }) }
+                    : value.content;
+                } else if (typeof value === 'string') {
+                  if (existingIsObject) {
+                    updatedElements[key] = { ...existing, content: value };
+                  } else if (!Array.isArray(existing)) {
+                    updatedElements[key] = value;
+                  }
+                }
+              } else {
+                updatedElements[key] = value;
+              }
+            });
+
+            state.content[sectionId].elements = updatedElements;
+            state.content[sectionId].aiMetadata = {
+              ...state.content[sectionId].aiMetadata,
+              lastGenerated: Date.now(),
+              isCustomized: false,
+            };
+
+            state.aiGeneration.isGenerating = false;
+            state.aiGeneration.currentOperation = null;
+            state.aiGeneration.progress = 100;
+            state.aiGeneration.status = 'Story regenerated successfully';
+            state.aiGeneration.context = null;
+            state.persistence.isDirty = true;
+            state.lastUpdated = Date.now();
+
+            state.queuedChanges.push({
+              id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              type: 'content',
+              sectionId,
+              oldValue: section.elements,
+              newValue: updatedElements,
+              timestamp: Date.now(),
+              source: 'ai',
+            });
+
+            pushHistoryEntry(state, {
+              type: 'content',
+              description: `Regenerated story ${sectionId}`,
+              timestamp: Date.now(),
+              sectionId,
+              beforeState: { elements: preElements },
+              afterState: { elements: deepCopy(updatedElements) },
+            });
+          }
+        });
+
+        // data-capture Phase 3 — re-freeze the regen output as the new AI baseline.
+        try {
+          const applied = (get() as EditStore).content[sectionId]?.elements ?? {};
+          const normalized: Record<string, string> = {};
+          for (const [k, v] of Object.entries(applied)) {
+            const t = extractElementText(v);
+            if (t !== null) normalized[k] = t;
+          }
+          (get() as EditStore).queueAiBaselinePatch(sectionId, normalized, 'replace');
+
+          const st = get() as EditStore;
+          trackRegen('section_regenerated', {
+            sectionType,
+            attemptNumber: nextAttempt(sectionAttempts, sectionId),
+            templateId: st.templateId ?? null,
+            audienceType: st.audienceType ?? null,
+            source: 'story-interview',
+          });
+        } catch (e) {
+          logger.warn('[data-capture] story re-freeze/emit failed', e);
+        }
+
+        const autoSaveModule = await import('@/utils/autoSaveDraft');
+        if (autoSaveModule.completeSaveDraft) {
+          await autoSaveModule.completeSaveDraft(currentState.tokenId, {
+            description: `Story ${sectionId} regenerated`,
+          });
+        }
+      } catch (error) {
+        logger.error('Story regeneration error:', error);
+        set((state: EditStore) => {
+          state.aiGeneration.isGenerating = false;
+          state.aiGeneration.currentOperation = null;
+          state.aiGeneration.context = null;
+          state.aiGeneration.errors.push(error instanceof Error ? error.message : 'Story regeneration failed');
+          state.aiGeneration.status = 'Failed to regenerate story. Please try again.';
+        });
+        throw error;
+      }
+    },
+
     regenerateElement: async (sectionId: string, elementKey: string, variationCount: number = 1) => {
       if (regenBlockedForLocale(get)) return; // i18n-phase-1 (3a) regen guard
       set((state: EditStore) => {
@@ -373,7 +586,20 @@ export function createAIActions(set: any, get: any) {
         });
 
         if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+          // This path used to throw on the STATUS ALONE, never reading the body —
+          // so a 402 was indistinguishable from any other failure and the block
+          // died in the toolbar's empty catch. Read it (defensively: the body may
+          // be empty/non-JSON) so the normalizer has something to see.
+          const errorData = await response.json().catch(() => null);
+          // billing-beta phase 4 — surface a 402 credit block before the generic throw.
+          const blocked = creditBlockFrom(response.status, errorData);
+          if (blocked) throw blocked;
+          // regen-modernization phase 4 (R6.3): surface the SERVER's honest reason
+          // (e.g. "This element isn't AI-written…" on a 422) instead of a bare
+          // `API error: 422`. A why-message the user never sees isn't a why-message.
+          throw new Error(
+            errorData?.message || errorData?.error || `API error: ${response.status}`
+          );
         }
 
         const result = await response.json();
@@ -515,12 +741,17 @@ export function createAIActions(set: any, get: any) {
           if (section) {
             // Handle both structures: section.elements[elementKey] and section[elementKey]
             if (section.elements && section.elements[elementKey]) {
-              // Update AI metadata
-              (section.elements[elementKey] as any).aiMetadata = {
-                ...(section.elements[elementKey] as any).aiMetadata,
-                lastGenerated: Date.now(),
-                isCustomized: variationIndex === 0, // First option is original content
-              };
+              // Update AI metadata — only for object-valued elements. Meridian (and
+              // other templates) store text elements as bare strings; assigning
+              // `.aiMetadata` onto a string primitive throws under immer, so no-op.
+              const elVal: any = section.elements[elementKey];
+              if (elVal !== null && typeof elVal === 'object' && !Array.isArray(elVal)) {
+                elVal.aiMetadata = {
+                  ...elVal.aiMetadata,
+                  lastGenerated: Date.now(),
+                  isCustomized: variationIndex === 0, // First option is original content
+                };
+              }
             }
             
             // Update section's edit metadata

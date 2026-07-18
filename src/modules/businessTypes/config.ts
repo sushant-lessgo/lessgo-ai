@@ -79,6 +79,7 @@ export const businessTypeKeys = [
   'coach',
   'writer',
   'photographer',
+  'designer',
   'app',
 ] as const;
 export type BusinessTypeKey = (typeof businessTypeKeys)[number];
@@ -267,6 +268,36 @@ export const businessTypes: Record<BusinessTypeKey, BusinessTypeEntry> = {
     // atelier phase 5 — photographers default to MULTI now that a work+multipage
     // template (atelier) exists and the served work flow reaches the structure
     // slot (phase 2). This is the businessType signal `isMultipage` reads.
+    structureDefault: 'multi',
+  },
+  // work-contract phase 4 — designer profession row (CONFIG-ONLY, mirrors
+  // photographer's pattern). `gallery` is REQUIRED and unbacked by any shipped
+  // template, so the serve gate routes designer to the MANUAL-ONBOARD/demand
+  // lane exactly like photographer (honest non-serve until a gallery-capable
+  // work template ships — intended). copyEngine 'work'; wording/chips for all 4
+  // professions live in engines/workVocabulary.ts (single source).
+  designer: {
+    key: 'designer',
+    label: 'Designer / studio',
+    copyEngine: 'work',
+    requiredCapabilities: ['gallery'],
+    defaultStyle: 'editorial-craft',
+    wizardFields: {
+      work: {
+        label: 'What do you design?',
+        example: 'Brand identities and packaging for food & beverage startups',
+      },
+      approach: {
+        label: 'How would you describe your approach?',
+        example: 'Research-led, type-forward — systems, not one-off logos',
+      },
+      offer: {
+        label: 'What is the offer / next step?',
+        example: 'Tell us about your project for a quote',
+      },
+    },
+    extractionSchemaKey: 'work',
+    likelyIntents: ['enquiry', 'book-call', 'follow-social'],
     structureDefault: 'multi',
   },
   app: {

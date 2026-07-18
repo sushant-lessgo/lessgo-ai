@@ -1,7 +1,16 @@
 // /app/edit/[token]/components/ui/ResetButton.tsx
 "use client";
 
+// PHASE 8 — reskinned to the t1 bar vocabulary. t1 draws no Reset control, but
+// this one works today, so (like Regen Copy) it is restyled in place, never
+// dropped: ghost bar button geometry (pad 7/10, radius 8, label 500/13) in the
+// coral warning family (app-review-*, the nearest app-chrome tokens to the old
+// amber — decision 3 forbids inventing a hex to snap to). The hand-drawn SVG
+// becomes the Material `restore` glyph. `useResetSystem`, the `hasOriginalState`
+// self-hide, the modal wiring and the scope handoff are untouched.
+
 import React, { useState } from 'react';
+import { AppIcon } from '@/components/ui/icon';
 import { useResetSystem } from './useResetSystem';
 import { ResetConfirmationModal } from './ResetConfirmationModal';
 import type { ResetScope } from '@/types/core';
@@ -26,16 +35,13 @@ export function ResetButton() {
   return (
     <>
       <button
+        type="button"
         onClick={handleResetClick}
-        className="px-3 py-1.5 text-sm text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-md transition-colors border border-amber-200"
+        className="inline-flex flex-none items-center gap-1.5 rounded-app-badge border border-app-review-border px-2.5 py-[7px] text-[13px] font-medium text-app-review-text transition-colors hover:bg-app-review-bg"
         title="Reset to original LessGo-generated design"
       >
-        <div className="flex items-center space-x-2">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span>Reset</span>
-        </div>
+        <AppIcon name="restore" size={18} />
+        <span>Reset</span>
       </button>
 
       <ResetConfirmationModal

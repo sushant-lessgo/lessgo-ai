@@ -1,6 +1,6 @@
 # Collections — repeatable content pages (guide)
 
-> Evergreen reference for the collection pattern: what it is, when it applies, what exists, how to add one. Delta spec: `docs/task/scale-10-collections.spec.md`. Decisions: `docs/tracks/scalePlan.md` (D9, §7 capability vocab, §8 timing tiers).
+> Evergreen reference for the collection pattern: what it is, when it applies, what exists, how to add one. Delta spec: `docs/task/scale-10-collections.spec.md`. Decisions: `docs/tracks/Completed/scalePlan.md` (D9, §7 capability vocab, §8 timing tiers).
 
 ## The pattern
 

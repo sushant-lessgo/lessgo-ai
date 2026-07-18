@@ -1,10 +1,23 @@
 "use client";
 
+// LEGACY PRODUCT design menu (non-template-module projects only — EditHeader's
+// dispatch). Restyled to the t14 visual vocabulary in editor-shell-redesign
+// phase 5, but deliberately NOT folded into DesignMenuShell (plan step 3 / scout
+// §E): this panel drives the legacy 30-palette colour system (palette siblings,
+// textures, card style, CUSTOM HEX accents) instead of TEMPLATE/STYLE/ACCENT, and
+// t14's "Curated set — no free color or background editing" footer would be a
+// flat lie on a surface that ships a colour picker. Only the shared *trigger*
+// (t1's one Design button) is reused. Behaviour is untouched: every handler,
+// the contrast check, and the wired "Browse all styles" → StyleBrowserModal
+// survive verbatim.
+
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { StyleBrowserModal } from './StyleBrowserModal';
 import { usePaletteSwap } from './usePaletteSwap';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Popover, PopoverTrigger, AppPopoverPanel } from '@/components/ui/popover';
+import { AppIcon } from '@/components/ui/icon';
+import { DesignMenuTrigger } from './DesignMenuShell';
 import { useEditStore } from '@/hooks/useEditStore';
 import {
   getPaletteById,
@@ -171,27 +184,21 @@ export function ThemePopover() {
     [activePalette, theme.colors, updateTheme, recalculateTextColors]
   );
 
-  // Current palette preview color for trigger button
-  const triggerPreview = activePalette?.primary || theme?.colors?.sectionBackgrounds?.primary || 'linear-gradient(135deg, #3b82f6, #2563eb)';
+  // (The old palette-preview swatch on the trigger is gone: t1 draws ONE
+  // `palette`-icon "Design" button, tinted with the live accent instead.)
 
   if (!activePalette) {
     // No palette set — show minimal trigger that does nothing
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <button
-            className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors border border-gray-200"
-            title="Theme — No palette selected"
-          >
-            <div className="w-4 h-4 rounded-sm bg-gray-300" />
-            <span>Theme</span>
-          </button>
+          <DesignMenuTrigger accentColor="#cdcdd4" title="Design — no palette selected" />
         </PopoverTrigger>
-        <PopoverContent side="bottom" align="start" className="w-80">
-          <p className="text-sm text-gray-500">
+        <AppPopoverPanel side="bottom" align="start" width={288}>
+          <p className="px-3.5 py-3.5 text-[12px] text-app-muted">
             No palette active. Generate a page to set a palette.
           </p>
-        </PopoverContent>
+        </AppPopoverPanel>
       </Popover>
     );
   }
@@ -200,54 +207,83 @@ export function ThemePopover() {
     <>
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
-        <button
-          className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors border border-gray-200"
-          title="Theme — Palette, accent & texture"
-        >
-          <div
-            className="w-4 h-4 rounded-sm"
-            style={{ background: triggerPreview }}
-          />
-          <span>Theme</span>
-        </button>
+        <DesignMenuTrigger
+          accentColor={
+            currentAccent === 'custom' && currentAccentCSS
+              ? currentAccentCSS
+              : (currentAccent && ACCENT_HEX[currentAccent]) || '#006CFF'
+          }
+          title="Design — palette, accent & texture"
+        />
       </PopoverTrigger>
 
-      <PopoverContent side="bottom" align="start" className="w-80 p-0">
-        <div className="p-4 space-y-4">
+      <AppPopoverPanel
+        side="bottom"
+        align="start"
+        width={288}
+        // Same height bound as DesignMenuShell (see its note): the panel is
+        // taller than the viewport on small screens and AppPopoverPanel clips.
+        className="flex max-h-[var(--radix-popover-content-available-height,80vh)] flex-col"
+      >
+        {/* t14 header. */}
+        <div className="flex flex-none items-center gap-2 border-b border-app-divider px-3.5 py-3">
+          <AppIcon name="palette" size={18} className="flex-none text-app-primary" />
+          <span className="flex-1 text-[14px] font-semibold text-app-ink">Design</span>
+          <button
+            type="button"
+            onClick={() => setPopoverOpen(false)}
+            aria-label="Close"
+            className="-mr-1 flex-none rounded-app-badge p-1 text-app-icon-muted transition-colors hover:bg-app-hairline"
+          >
+            <AppIcon name="close" size={18} />
+          </button>
+        </div>
+
+        <div className="min-h-0 flex-1 space-y-3.5 overflow-y-auto px-3.5 py-3.5">
           {/* ─── Palette ─── */}
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">Palette</p>
-            <div className="flex gap-2">
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[.09em] text-app-faint">
+              Palette
+            </p>
+            <div className="flex flex-wrap gap-2">
               {paletteSiblings.map((p) => (
                 <button
                   key={p.id}
                   onClick={() => handlePaletteSwap(p)}
-                  className={`w-10 h-10 rounded-md border-2 transition-all ${
-                    p.id === paletteId
-                      ? 'border-blue-500 ring-2 ring-blue-200'
-                      : 'border-gray-200 hover:border-gray-400'
-                  }`}
-                  style={{ background: p.primary }}
+                  aria-pressed={p.id === paletteId}
+                  className="h-9 w-9 flex-none rounded-lg transition-shadow"
+                  style={{
+                    background: p.primary,
+                    boxShadow:
+                      p.id === paletteId
+                        ? '0 0 0 2px #fff, 0 0 0 3.5px #006CFF'
+                        : '0 0 0 1px #e6e6ec',
+                  }}
                   title={p.label}
                 />
               ))}
             </div>
           </div>
 
-          {/* ─── Accent ─── */}
+          {/* ─── Accent — 26px swatches, t14 double-ring selection ─── */}
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">Accent</p>
-            <div className="flex gap-2 items-center">
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[.09em] text-app-faint">
+              Accent
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
               {compatibleAccents.map((accent) => (
                 <button
                   key={accent.name}
                   onClick={() => handleAccentChange(accent.name, accent.tailwind)}
-                  className={`w-7 h-7 rounded-full border-2 transition-all flex items-center justify-center ${
-                    currentAccent === accent.name
-                      ? 'border-gray-800 ring-2 ring-gray-300'
-                      : 'border-transparent hover:border-gray-300'
-                  }`}
-                  style={{ backgroundColor: accent.hex }}
+                  aria-pressed={currentAccent === accent.name}
+                  className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-lg transition-shadow"
+                  style={{
+                    backgroundColor: accent.hex,
+                    boxShadow:
+                      currentAccent === accent.name
+                        ? '0 0 0 2px #fff, 0 0 0 3.5px #006CFF'
+                        : undefined,
+                  }}
                   title={accent.name}
                 >
                   {currentAccent === accent.name && (
@@ -261,21 +297,18 @@ export function ThemePopover() {
               {/* Custom accent toggle */}
               <button
                 onClick={() => setShowCustomInput((v) => !v)}
-                className={`w-7 h-7 rounded-full border-2 transition-all flex items-center justify-center text-xs font-medium ${
-                  currentAccent === 'custom'
-                    ? 'border-gray-800 ring-2 ring-gray-300'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
+                className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-lg text-[12px] font-semibold text-app-muted transition-shadow"
                 style={
                   currentAccent === 'custom' && currentAccentCSS
-                    ? { backgroundColor: currentAccentCSS }
-                    : { backgroundColor: '#e5e7eb' }
+                    ? {
+                        backgroundColor: currentAccentCSS,
+                        boxShadow: '0 0 0 2px #fff, 0 0 0 3.5px #006CFF',
+                      }
+                    : { backgroundColor: '#f1f1f5', boxShadow: '0 0 0 1px #e6e6ec' }
                 }
                 title="Custom color"
               >
-                {currentAccent !== 'custom' && (
-                  <span className="text-gray-500">+</span>
-                )}
+                {currentAccent !== 'custom' && <span>+</span>}
               </button>
             </div>
 
@@ -287,7 +320,7 @@ export function ThemePopover() {
                     type="color"
                     value={customHex}
                     onChange={(e) => setCustomHex(e.target.value)}
-                    className="w-8 h-8 rounded cursor-pointer border-0 p-0"
+                    className="h-8 w-8 cursor-pointer rounded-app-badge border-0 p-0"
                   />
                   <input
                     type="text"
@@ -296,18 +329,18 @@ export function ThemePopover() {
                       const v = e.target.value;
                       if (/^#[0-9a-fA-F]{0,6}$/.test(v)) setCustomHex(v);
                     }}
-                    className="font-mono text-sm border rounded px-2 py-1 w-24"
+                    className="w-24 rounded-app-ctl-sm border border-app-border-hairline px-2.5 py-[7px] font-app-mono text-[12px] text-app-ink"
                     placeholder="#3b82f6"
                   />
                   <button
                     onClick={handleApplyCustomAccent}
-                    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    className="text-[11.5px] font-semibold text-app-primary transition-colors hover:text-app-primary-hover"
                   >
                     Apply
                   </button>
                 </div>
                 {contrastWarning !== null && contrastWarning < 4.5 && (
-                  <p className="text-xs text-orange-600">
+                  <p className="text-[10.5px] text-app-review-text">
                     Low CTA contrast ({contrastWarning.toFixed(1)}:1)
                   </p>
                 )}
@@ -317,16 +350,19 @@ export function ThemePopover() {
 
           {/* ─── Texture ─── */}
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">Texture</p>
-            <div className="flex gap-2">
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[.09em] text-app-faint">
+              Texture
+            </p>
+            <div className="flex flex-wrap gap-1.5">
               {compatibleTextures.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => handleTextureChange(t.id)}
-                  className={`px-3 py-1.5 text-xs rounded-md border transition-all ${
+                  aria-pressed={textureId === t.id}
+                  className={`rounded-app-badge border px-2.5 py-[5px] text-[11.5px] transition-colors ${
                     textureId === t.id
-                      ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-400'
+                      ? 'border-app-primary bg-app-tint-soft font-semibold text-app-primary'
+                      : 'border-app-border-hairline font-medium text-app-dim hover:bg-app-hover'
                   }`}
                 >
                   {t.label}
@@ -337,16 +373,19 @@ export function ThemePopover() {
 
           {/* ─── Card Style ─── */}
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">Card Style</p>
-            <div className="flex gap-2">
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[.09em] text-app-faint">
+              Card style
+            </p>
+            <div className="flex flex-wrap gap-1.5">
               {(['neutral', 'warm', 'cool'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => updateTheme({ uiBlockTheme: t })}
-                  className={`px-3 py-1.5 text-xs rounded-md border transition-all ${
+                  aria-pressed={(theme?.uiBlockTheme || 'neutral') === t}
+                  className={`rounded-app-badge border px-2.5 py-[5px] text-[11.5px] transition-colors ${
                     (theme?.uiBlockTheme || 'neutral') === t
-                      ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-400'
+                      ? 'border-app-primary bg-app-tint-soft font-semibold text-app-primary'
+                      : 'border-app-border-hairline font-medium text-app-dim hover:bg-app-hover'
                   }`}
                 >
                   {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -354,25 +393,23 @@ export function ThemePopover() {
               ))}
             </div>
           </div>
-
-          {/* ─── Divider ─── */}
-          <div className="border-t border-gray-100" />
-
-          {/* ─── Browse all styles ─── */}
-          <button
-            onClick={() => {
-              setPopoverOpen(false);
-              setStyleBrowserOpen(true);
-            }}
-            className="w-full text-left text-sm text-gray-600 hover:text-gray-900 flex items-center justify-between transition-colors"
-          >
-            <span>Browse all styles</span>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
         </div>
-      </PopoverContent>
+
+        {/* Footer — WIRED "Browse all styles" (StyleBrowserModal exists and works
+            today; decision 10's lesson — never grey a working control). t14's
+            lock strip is deliberately absent: this surface DOES offer free colour
+            editing, so the curated-set claim would be false here. */}
+        <button
+          onClick={() => {
+            setPopoverOpen(false);
+            setStyleBrowserOpen(true);
+          }}
+          className="flex w-full flex-none items-center justify-between gap-1.5 border-t border-app-divider bg-app-surface-sunken px-3.5 py-2.5 text-[11.5px] font-semibold text-app-primary transition-colors hover:bg-app-hairline"
+        >
+          <span>Browse all styles</span>
+          <AppIcon name="arrow_forward" size={15} />
+        </button>
+      </AppPopoverPanel>
 
     </Popover>
 

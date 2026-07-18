@@ -17,7 +17,13 @@ import { logger } from '@/lib/logger';
 import { createSecureResponse } from '@/lib/security';
 import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAuth } from '@/lib/middleware/planCheck';
-import { consumeCredits, CREDIT_COSTS, UsageEventType } from '@/lib/creditSystem';
+import {
+  checkCredits,
+  consumeCredits,
+  logUsageEvent,
+  CREDIT_COSTS,
+  UsageEventType,
+} from '@/lib/creditSystem';
 import { generateWithSchema } from '@/lib/aiClient';
 import {
   EntryScrapeSchema,
@@ -212,6 +218,35 @@ async function handleEntryScrape(
     });
   }
 
+  // Credit PRE-GATE — check the balance BEFORE the scrape AND the AI call (one
+  // charging model: check → generate → charge on success). Placed AFTER the
+  // demo/mock short-circuit above, exactly where consumeCredits already applied,
+  // so demo runs stay both uncharged and ungated. The failed attempt is still
+  // ledgered here — it mirrors the success:false UsageEvent consumeCredits used
+  // to write once the scrape + AI call had already run.
+  const preCheck = await checkCredits(userId, CREDIT_COSTS.SCRAPE_WEBSITE);
+  if (!preCheck.allowed) {
+    await logUsageEvent({
+      userId,
+      eventType: UsageEventType.SCRAPE_WEBSITE,
+      creditsUsed: 0,
+      success: false,
+      errorMessage: 'Insufficient credits',
+      endpoint: '/api/v2/scrape-website',
+      duration: Date.now() - startTime,
+    });
+    return createSecureResponse(
+      {
+        success: false,
+        error: 'insufficient_credits',
+        message: `Insufficient credits. Required: ${preCheck.required}, Available: ${preCheck.remaining}`,
+        creditsRequired: preCheck.required,
+        creditsRemaining: preCheck.remaining,
+      },
+      402
+    );
+  }
+
   // No SiteContext cache on the entry path (conservative): cached extracts
   // lack the signal fields, and writing entry-shaped extracts would change
   // what the non-entry cached path returns.
@@ -304,7 +339,34 @@ ${entryClassificationPromptBlock()}${enrichBlock ? `\n\n${enrichBlock}` : ''}`;
     }
   );
   if (!creditResult.success) {
-    logger.warn(`[scrape-website] Credit consumption failed: ${creditResult.error}`);
+    // The charge failed AFTER the scrape + AI call → the output is DISCARDED
+    // (no free output).
+    if (creditResult.error === 'charge_conflict') {
+      // Solvent user, lost the write race → recoverable. The error code AND
+      // message deliberately avoid the substring "credit": the client rails
+      // regex-match /credit/i and would strand a paying user on the buy wall.
+      logger.error(
+        `[scrape-website] Charge conflict for user ${userId} — nothing charged, output discarded`
+      );
+      return createSecureResponse(
+        {
+          success: false,
+          error: 'charge_failed',
+          message: 'Temporary billing conflict — please try again. You have not been charged.',
+        },
+        500
+      );
+    }
+    return createSecureResponse(
+      {
+        success: false,
+        error: 'insufficient_credits',
+        message: creditResult.error || 'Insufficient credits',
+        creditsRequired: CREDIT_COSTS.SCRAPE_WEBSITE,
+        creditsRemaining: creditResult.remaining,
+      },
+      402
+    );
   }
 
   logger.dev(`[scrape-website] entry completed in ${Date.now() - startTime}ms`);

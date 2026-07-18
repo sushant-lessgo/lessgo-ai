@@ -28,6 +28,8 @@
 // thing-engine union), service contract via the block's own layout schema.
 
 import type { TemplateId } from '@/types/service';
+// Work-skeleton manifest is PURE DATA (no component/schema import) — safe here.
+import { workSkeletonManifest } from '@/modules/skeletons/work/manifest';
 
 /** Asset facts a variant may require to be eligible (phase 4 uses these). */
 export type AssetKind = 'photos' | 'logos' | 'testimonialPhotos';
@@ -69,6 +71,16 @@ export interface BlockDeclaration {
    * distinctness guard exempts these (they resolve to the SAME component).
    */
   internalDispatch?: boolean;
+  /**
+   * SLOT (work-skeleton phase 1) — a DECLARED-but-NOT-BUILT capability: this
+   * layout name is reserved (e.g. a future video-bg hero) but has NO component
+   * yet. A slot is metadata only. It is NEVER offered in the editor picker,
+   * NEVER generated (`isBlockEligible` returns false), NEVER counted as a "real"
+   * (built) variant, and is SKIPPED by the conformance resolution/distinctness/
+   * consumes/copyShape walks (it has no resolvable component or contract).
+   * INVARIANT: a slot must NEVER be a set's `default`.
+   */
+  slot?: true;
 }
 
 /** Per-section-type declaration: the default layout + all declared variants. */
@@ -80,6 +92,31 @@ export interface SectionBlockSet {
 
 /** A template's full block manifest, keyed by section type. */
 export type TemplateBlockManifest = Record<string, SectionBlockSet>;
+
+// ── slot helpers (work-skeleton phase 1) — pure data, safe to import from the
+//    client editor UI (this module is a leaf on the import graph) ─────────────
+
+/**
+ * The BUILT (non-slot) variants of a set — the ones that have a real component,
+ * are offered/generated, and count toward "does this section have >1 variant".
+ * Byte-neutral for every existing manifest (nothing declares `slot` yet).
+ */
+export function builtVariants(set: SectionBlockSet): BlockDeclaration[] {
+  return set.variants.filter((v) => !v.slot);
+}
+
+/** Count of BUILT (non-slot) variants — a slot must not inflate this count. */
+export function builtVariantCount(set: SectionBlockSet): number {
+  return builtVariants(set).length;
+}
+
+/**
+ * INVARIANT probe: does the set's `default` name a SLOT declaration? MUST always
+ * be false — a slot (declared-but-not-built) can never be a set default.
+ */
+export function defaultIsSlot(set: SectionBlockSet): boolean {
+  return set.variants.some((v) => v.layoutName === set.default && v.slot === true);
+}
 
 // ── meridian (product / thing engine) ───────────────────────────────────────
 // Source: meridianElementSchema (MERIDIAN_LAYOUT_NAMES). One declared variant
@@ -361,102 +398,6 @@ const vestriaManifest: TemplateBlockManifest = {
   },
 };
 
-// ── atelier (service / work engine) — full manifest ─────────────────────────
-// Atelier is service-audience with its layouts in serviceElementSchema, so
-// contractFor() resolves every layout and a REAL manifest ships (unlike granth,
-// which passes by shipping none). One declared variant per section this phase;
-// real block-component variants land with the phase-9 visual port. `packages`
-// carries the scope-#5 tiered capacity (minCards:2/maxCards:4). Source:
-// serviceElementSchema (Atelier* layouts). `consumes` = each layout's top-level
-// scalar element keys, verbatim.
-const atelierManifest: TemplateBlockManifest = {
-  header: {
-    default: 'AtelierNavHeader',
-    variants: [
-      {
-        layoutName: 'AtelierNavHeader',
-        label: 'Editorial nav',
-        consumes: ['logo_text', 'cta_text', 'logo_image'],
-      },
-    ],
-  },
-  hero: {
-    default: 'AtelierHero',
-    variants: [
-      {
-        layoutName: 'AtelierHero',
-        label: 'Editorial hero',
-        consumes: ['eyebrow', 'headline', 'lede', 'cta_text', 'secondary_cta_text', 'hero_image', 'meta'],
-      },
-    ],
-  },
-  work: {
-    default: 'AtelierWorkGallery',
-    variants: [
-      {
-        layoutName: 'AtelierWorkGallery',
-        label: 'Work gallery',
-        blurb: 'Selected-work showcase (the gallery capability).',
-        consumes: ['eyebrow', 'headline', 'lede'],
-        capacity: { minCards: 1, maxCards: 12 },
-      },
-    ],
-  },
-  packages: {
-    default: 'AtelierPackages',
-    variants: [
-      {
-        layoutName: 'AtelierPackages',
-        label: 'Tiered packages',
-        blurb: 'Two-to-four package cards.',
-        consumes: ['eyebrow', 'headline', 'lede'],
-        // scope #5 — tiered-packages capacity is ENFORCED here.
-        capacity: { minCards: 2, maxCards: 4 },
-      },
-    ],
-  },
-  about: {
-    default: 'AtelierAbout',
-    variants: [
-      {
-        layoutName: 'AtelierAbout',
-        label: 'Studio about',
-        consumes: ['eyebrow', 'headline', 'body', 'body2', 'about_image', 'signature'],
-      },
-    ],
-  },
-  quote: {
-    default: 'AtelierQuoteBand',
-    variants: [
-      {
-        layoutName: 'AtelierQuoteBand',
-        label: 'Quote band',
-        consumes: ['eyebrow', 'quote', 'author_name', 'author_role'],
-      },
-    ],
-  },
-  contact: {
-    default: 'AtelierContact',
-    variants: [
-      {
-        layoutName: 'AtelierContact',
-        label: 'Contact',
-        consumes: ['form_id', 'eyebrow', 'headline', 'lede', 'email', 'phone'],
-      },
-    ],
-  },
-  footer: {
-    default: 'AtelierFooter',
-    variants: [
-      {
-        layoutName: 'AtelierFooter',
-        label: 'Editorial footer',
-        consumes: ['brand_text', 'tagline', 'contact_email', 'contact_phone', 'copyright', 'whatsapp_number'],
-      },
-    ],
-  },
-};
-
 /**
  * Block manifests, keyed by template. Partial — lex/lumen/granth/techpremium are
  * DEFERRED (plan Q6): they carry no manifest yet and fall back to the legacy
@@ -467,5 +408,8 @@ export const blockManifests: Partial<Record<TemplateId, TemplateBlockManifest>> 
   hearth: hearthManifest,
   surge: surgeManifest,
   vestria: vestriaManifest,
-  atelier: atelierManifest,
+  // atelier-skeleton-cutover: atelier rides the work-skeleton manifest (the old
+  // hand-written atelierManifest is gone). ONE manifest describes the whole
+  // skeleton's block surface (skins swap tokens only).
+  atelier: workSkeletonManifest,
 };

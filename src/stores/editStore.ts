@@ -293,12 +293,6 @@ function createInitialState(tokenId: string): EditStore {
     editingFormId: null as string | null,
     simpleForms: [] as any[],
     activeForm: undefined as string | undefined,
-    formBuilder: {
-      visible: false,
-      editingField: undefined as string | undefined,
-      editingFormId: undefined as string | undefined,
-      fieldLibrary: [],
-    },
     integrations: {} as Record<string, any>,
     analytics: {} as Record<string, any>,
 

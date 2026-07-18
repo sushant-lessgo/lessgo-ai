@@ -22,6 +22,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const TEMPLATES_DIR = __dirname; // src/modules/templates
+// work-skeleton D1: skeleton block wrappers (`src/modules/skeletons/**`) render
+// through the SAME two renderers, so their `*.published.tsx` must be boundary-
+// checked too. Scanned alongside templates (dir may hold zero published files in
+// early phases — the combined list is still non-empty).
+const SKELETONS_DIR = path.resolve(__dirname, '..', 'skeletons');
 
 function walkPublished(dir: string, acc: string[] = []): string[] {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -38,7 +43,10 @@ function firstNonEmptyLine(file: string): string {
 
 describe('published renderers must not import values across the \'use client\' boundary', () => {
   it('no *.published.tsx imports a NAMED value from a \'use client\' sibling', () => {
-    const files = walkPublished(TEMPLATES_DIR);
+    const files = [
+      ...walkPublished(TEMPLATES_DIR),
+      ...(fs.existsSync(SKELETONS_DIR) ? walkPublished(SKELETONS_DIR) : []),
+    ];
     expect(files.length).toBeGreaterThan(0); // sanity: we actually scanned something
 
     const namedSiblingImport = /import\s*\{[^}]*\}\s*from\s*'(\.\/[A-Za-z0-9_]+)'/g;

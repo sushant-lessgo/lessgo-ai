@@ -7,7 +7,7 @@
 import React from 'react';
 import { useMeridianBlock } from '../../hooks/useMeridianBlock';
 import { MeridianEditable } from '../../components/MeridianEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import { useEditStore } from '@/hooks/useEditStore';
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions, deriveNavLinks } from '@/utils/pageLinks';
@@ -143,7 +143,7 @@ export default function MeridianNavHeader({ sectionId }: MeridianNavHeaderProps)
                     className="mrd-nav-link"
                     placeholder="Link"
                   />
-                  <LinkTargetPopover
+                  <LinkPicker
                     value={item.href ?? '#'}
                     sectionOptions={sectionOptions}
                     pageOptions={pageOptions}

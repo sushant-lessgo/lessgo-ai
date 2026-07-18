@@ -1,0 +1,1028 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ui-foundation isolation — published HTML baseline (product: meridian) > renders + matches the frozen snapshot 1`] = `
+"<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Title & Description -->
+  <title>Isolation Baseline</title>
+  <meta name="description" content="">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://iso.lessgo.site">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://iso.lessgo.site">
+  <meta property="og:title" content="Isolation Baseline">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://lessgo.ai/api/og/iso">
+  <meta property="og:site_name" content="Lessgo AI">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://iso.lessgo.site">
+  <meta name="twitter:title" content="Isolation Baseline">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://lessgo.ai/api/og/iso">
+
+  <!-- Self-hosted template fonts (Inter, Inter Tight, JetBrains Mono, DM Sans,
+       Fraunces, Source Serif 4, Lora, EB Garamond) -->
+  <link rel="stylesheet" href="https://lessgo.ai/assets/fonts-self-hosted.css">
+
+  <!-- Shared CSS -->
+  <link rel="stylesheet" href="/assets/published.css">
+
+  <!-- Theme CSS Variables (inline, per-page) -->
+  
+</head>
+<body>
+  <style id="meridian-theme">:root{
+  --ink:oklch(0.09 0.008 260);
+  --ink-1:oklch(0.12 0.008 260);
+  --ink-2:oklch(0.16 0.008 260);
+  --bone:oklch(0.98 0.004 260);
+  --bone-2:oklch(0.72 0.006 260);
+  --bone-3:oklch(0.50 0.006 260);
+  --line:oklch(1 0 0 / 0.08);
+  --line-strong:oklch(1 0 0 / 0.14);
+  --line-soft:oklch(1 0 0 / 0.04);
+  --shadow-menu:0 10px 24px -12px oklch(0 0 0 / 0.6), 0 2px 6px -2px oklch(0 0 0 / 0.4);
+  --font-display:"Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-body:"Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;
+  --s-6:32px;--s-7:48px;--s-8:64px;--s-9:96px;--s-10:120px;
+  --r-sm:6px;
+  --r-md:8px;
+  --r-lg:10px;
+  --r-xl:14px;
+  --r-pill:999px;
+  --sec-pad-y:120px;
+  --sec-pad-x:clamp(24px, 4vw, 56px);
+  --max-w:1200px;
+  --accent:oklch(0.78 0.17 155);
+  --accent-ink:oklch(0.18 0.02 155);
+  --accent-dim:oklch(0.78 0.17 155 / 0.14);
+}
+[data-surface="ink"]{background:var(--ink);}
+[data-surface="ink-1"]{background:var(--ink-1);}
+[data-surface="ink-2"]{background:var(--ink-2);}
+[data-palette] em{font-style:normal;color:var(--accent);}
+:root{--blog-ink:var(--bone);--blog-ink-2:var(--bone-2);--blog-line:var(--line);--blog-accent:var(--accent);--blog-accent-on:var(--accent-ink);}
+[data-palette="mint"]{--accent:oklch(0.78 0.17 155);--accent-ink:oklch(0.18 0.02 155);--accent-dim:oklch(0.78 0.17 155 / 0.14);}
+[data-palette="cyan"]{--accent:oklch(0.78 0.14 200);--accent-ink:oklch(0.18 0.02 200);--accent-dim:oklch(0.78 0.14 200 / 0.14);}
+[data-palette="blue"]{--accent:oklch(0.72 0.16 255);--accent-ink:oklch(0.98 0.01 255);--accent-dim:oklch(0.72 0.16 255 / 0.14);}
+[data-palette="violet"]{--accent:oklch(0.72 0.19 295);--accent-ink:oklch(0.98 0.01 295);--accent-dim:oklch(0.72 0.19 295 / 0.14);}
+[data-palette="rose"]{--accent:oklch(0.74 0.17 15);--accent-ink:oklch(0.18 0.02 15);--accent-dim:oklch(0.74 0.17 15 / 0.14);}
+[data-palette="orange"]{--accent:oklch(0.76 0.16 55);--accent-ink:oklch(0.18 0.02 55);--accent-dim:oklch(0.76 0.16 55 / 0.14);}
+[data-palette="amber"]{--accent:oklch(0.82 0.15 85);--accent-ink:oklch(0.18 0.02 85);--accent-dim:oklch(0.82 0.15 85 / 0.14);}
+[data-palette="lime"]{--accent:oklch(0.86 0.17 125);--accent-ink:oklch(0.18 0.02 125);--accent-dim:oklch(0.86 0.17 125 / 0.14);}
+[data-palette="bone"]{--accent:oklch(0.92 0.005 260);--accent-ink:oklch(0.12 0.008 260);--accent-dim:oklch(0.92 0.005 260 / 0.14);}
+[data-variant="light"][data-palette="mint"]{--accent:oklch(0.58 0.15 155);--accent-ink:oklch(0.98 0.01 155);--accent-dim:oklch(0.58 0.15 155 / 0.10);}
+[data-variant="light"][data-palette="cyan"]{--accent:oklch(0.58 0.13 200);--accent-ink:oklch(0.98 0.01 200);--accent-dim:oklch(0.58 0.13 200 / 0.10);}
+[data-variant="light"][data-palette="blue"]{--accent:oklch(0.52 0.18 255);--accent-ink:oklch(0.98 0.01 255);--accent-dim:oklch(0.52 0.18 255 / 0.10);}
+[data-variant="light"][data-palette="violet"]{--accent:oklch(0.52 0.20 295);--accent-ink:oklch(0.98 0.01 295);--accent-dim:oklch(0.52 0.20 295 / 0.10);}
+[data-variant="light"][data-palette="rose"]{--accent:oklch(0.58 0.18 15);--accent-ink:oklch(0.98 0.01 15);--accent-dim:oklch(0.58 0.18 15 / 0.10);}
+[data-variant="light"][data-palette="orange"]{--accent:oklch(0.60 0.17 55);--accent-ink:oklch(0.98 0.01 55);--accent-dim:oklch(0.60 0.17 55 / 0.10);}
+[data-variant="light"][data-palette="amber"]{--accent:oklch(0.68 0.15 85);--accent-ink:oklch(0.15 0.02 85);--accent-dim:oklch(0.68 0.15 85 / 0.10);}
+[data-variant="light"][data-palette="lime"]{--accent:oklch(0.68 0.19 125);--accent-ink:oklch(0.15 0.02 125);--accent-dim:oklch(0.68 0.19 125 / 0.10);}
+[data-variant="light"][data-palette="bone"]{--accent:oklch(0.22 0.008 260);--accent-ink:oklch(0.98 0.003 260);--accent-dim:oklch(0.22 0.008 260 / 0.10);}
+[data-variant="marketing"]{
+  --r-sm:8px;
+  --r-md:12px;
+  --r-lg:16px;
+  --r-xl:22px;
+  --sec-pad-y:144px;
+}
+[data-variant="light"]{
+  --ink:oklch(0.99 0.003 260);
+  --ink-1:oklch(0.96 0.005 260);
+  --ink-2:oklch(0.93 0.006 260);
+  --bone:oklch(0.15 0.01 260);
+  --bone-2:oklch(0.38 0.008 260);
+  --bone-3:oklch(0.58 0.006 260);
+  --line:oklch(0.15 0.01 260 / 0.10);
+  --line-strong:oklch(0.15 0.01 260 / 0.18);
+  --line-soft:oklch(0.15 0.01 260 / 0.05);
+  --shadow-menu:0 10px 24px -12px oklch(0.15 0.01 260 / 0.18), 0 2px 6px -2px oklch(0.15 0.01 260 / 0.08);
+}</style><div data-palette="mint" data-variant="developer" class=""><div class="landing-page-published "><div id="header" data-surface="ink" style="scroll-margin-top:80px"><style>
+.mrd-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px var(--sec-pad-x);
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklch, var(--ink) 80%, transparent);
+  backdrop-filter: blur(8px);
+  font-family: var(--font-body);
+}
+.mrd-nav__left { display: flex; align-items: center; gap: 28px; }
+.mrd-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-display); font-weight: 600; font-size: 15px;
+  letter-spacing: -0.01em; color: var(--bone);
+}
+.mrd-brand-mark {
+  width: 22px; height: 22px; border: 1px solid var(--bone);
+  border-radius: 5px; position: relative; flex-shrink: 0;
+}
+.mrd-brand-mark::after {
+  content: ""; position: absolute; inset: 4px;
+  background: var(--accent); border-radius: 2px;
+}
+.mrd-brand-img { width: 22px; height: 22px; border-radius: 5px; object-fit: cover; }
+.mrd-nav-links { display: flex; align-items: center; gap: 28px; font-size: 13.5px; }
+.mrd-nav-link { color: var(--bone-2); text-decoration: none; }
+.mrd-nav-link:hover { color: var(--bone); }
+.mrd-nav-right { display: flex; align-items: center; gap: 10px; }
+.mrd-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-display); font-weight: 500; font-size: 13.5px;
+  letter-spacing: -0.005em; border-radius: var(--r-md); padding: 10px 14px;
+  transition: all 140ms ease; border: 1px solid transparent; text-decoration: none;
+}
+.mrd-btn--sm { padding: 7px 11px; font-size: 12.5px; }
+.mrd-btn--primary { background: var(--accent); color: var(--accent-ink); }
+.mrd-btn--primary:hover { filter: brightness(1.06); }
+.mrd-btn--quiet { color: var(--bone-2); }
+.mrd-btn--quiet:hover { color: var(--bone); }
+.mrd-btn--arrow::after { content: "→"; font-family: var(--font-mono); font-size: 13px; }
+[data-variant="marketing"] .mrd-btn { border-radius: 12px; font-family: var(--font-body); font-weight: 500; }
+[data-variant="marketing"] .mrd-btn--arrow::after { font-family: var(--font-body); }
+</style><nav class="mrd-nav"><div class="mrd-nav__left"><div class="mrd-brand"><div class="mrd-brand-mark" aria-hidden="true"></div><span>meridian</span></div><div class="mrd-nav-links"><a class="mrd-nav-link" href="https://docs.meridian.dev">Product</a><a class="mrd-nav-link" href="#docs">Docs</a><a class="mrd-nav-link" href="#">Customers</a><a class="mrd-nav-link" href="#">Changelog</a><a class="mrd-nav-link" href="/pricing">Pricing</a></div></div><div class="mrd-nav-right"><a class="mrd-btn mrd-btn--quiet mrd-btn--sm" href="#signin">Sign in</a><a class="mrd-btn mrd-btn--primary mrd-btn--sm mrd-btn--arrow" href="#cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Start free</a></div></nav></div><div id="hero" data-surface="ink" style="scroll-margin-top:80px"><style>
+.mrd-hero {
+  position: relative;
+  padding: 140px var(--sec-pad-x) 120px;
+  max-width: 1340px; margin: 0 auto; overflow: hidden;
+}
+.mrd-hero__grid {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(var(--line-soft) 1px, transparent 1px) 0 0 / 100% 96px,
+    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px) 0 0 / 96px 100%;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 75%);
+  pointer-events: none;
+}
+.mrd-hero__inner { position: relative; z-index: 1; padding-right: 480px; }
+.mrd-hero__top {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--bone-3); margin-bottom: 36px;
+}
+.mrd-hero__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+.mrd-hero__rule { flex: 1; height: 1px; background: var(--line); max-width: 180px; }
+.mrd-hero__headline {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: clamp(56px, 8.5vw, 108px); line-height: 0.94;
+  letter-spacing: -0.035em; margin: 0; max-width: 14ch; color: var(--bone);
+}
+.mrd-hero__headline em { color: var(--accent); position: relative; }
+.mrd-hero__headline em::after {
+  content: "_"; color: var(--accent); margin-left: 2px;
+  animation: mrd-blink 1.1s steps(2, end) infinite;
+}
+@keyframes mrd-blink { 50% { opacity: 0; } }
+.mrd-hero__lede {
+  font-family: var(--font-display); font-weight: 400; font-size: 21px;
+  line-height: 1.5; color: var(--bone-2); max-width: 52ch; margin: 32px 0 0;
+}
+.mrd-hero__actions { display: flex; gap: 10px; margin-top: 40px; align-items: center; flex-wrap: wrap; }
+.mrd-hero__caption { font-family: var(--font-mono); font-size: 11.5px; color: var(--bone-3); margin-left: 10px; }
+.mrd-hero__cta-subtext { font-family: var(--font-mono); font-size: 12px; color: var(--bone-3); margin: 14px 0 0; }
+.mrd-hero__meta {
+  margin-top: 72px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  background: var(--line); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  max-width: 720px;
+}
+.mrd-hero__meta-cell { background: var(--ink); padding: 24px 0 18px; }
+.mrd-hero__meta-k { font-family: var(--font-display); font-weight: 500; font-size: 28px; letter-spacing: -0.01em; color: var(--bone); }
+.mrd-hero__meta-l { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bone-3); margin-top: 6px; }
+.mrd-hero__vis {
+  position: absolute; right: var(--sec-pad-x); top: 180px; width: 440px;
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: linear-gradient(180deg, var(--ink-2), var(--ink-1));
+  overflow: hidden; box-shadow: var(--shadow-menu); z-index: 1;
+}
+.mrd-hero__vis-head {
+  display: flex; align-items: center; gap: 8px; padding: 12px 14px;
+  border-bottom: 1px solid var(--line); font-family: var(--font-mono);
+  font-size: 11px; color: var(--bone-3);
+}
+.mrd-hero__vis-dots { display: flex; gap: 5px; }
+.mrd-hero__vis-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-2); border: 1px solid var(--line-strong); }
+.mrd-hero__vis-body { padding: 18px 16px; font-family: var(--font-mono); font-size: 12px; line-height: 1.7; color: var(--bone-2); }
+.mrd-hero__vis-body .ln { display: block; }
+.mrd-hero__vis-body .k { color: var(--bone-3); }
+.mrd-hero__vis-body .v { color: var(--bone); }
+.mrd-hero__vis-body .a { color: var(--accent); }
+.mrd-hero__vis-body .c { color: var(--bone-3); }
+.mrd-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-display); font-weight: 500; font-size: 13.5px;
+  letter-spacing: -0.005em; border-radius: var(--r-md); padding: 10px 14px;
+  transition: all 140ms ease; border: 1px solid transparent; text-decoration: none;
+}
+.mrd-btn--lg { padding: 14px 20px; font-size: 15px; border-radius: var(--r-md); }
+.mrd-btn--primary { background: var(--accent); color: var(--accent-ink); }
+.mrd-btn--primary:hover { filter: brightness(1.06); }
+.mrd-btn--ghost { color: var(--bone); border-color: var(--line); background: transparent; }
+.mrd-btn--ghost:hover { border-color: var(--line-strong); background: var(--ink-1); }
+.mrd-btn--arrow::after { content: "→"; font-family: var(--font-mono); font-size: 13px; }
+@media (max-width: 1100px) {
+  .mrd-hero { padding-top: 96px; }
+  .mrd-hero__inner { padding-right: 0; }
+  .mrd-hero__vis { position: static; width: 100%; margin-top: 48px; }
+}
+[data-variant="marketing"] .mrd-hero { padding-top: 112px; padding-bottom: 128px; }
+[data-variant="marketing"] .mrd-hero__grid { opacity: 0.35; }
+[data-variant="marketing"] .mrd-hero__top { font-family: var(--font-body); font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--bone-2); }
+[data-variant="marketing"] .mrd-hero__rule { max-width: 80px; }
+[data-variant="marketing"] .mrd-hero__headline { letter-spacing: -0.025em; font-weight: 500; }
+[data-variant="marketing"] .mrd-btn { border-radius: 12px; font-family: var(--font-body); font-weight: 500; }
+[data-variant="marketing"] .mrd-btn--arrow::after { font-family: var(--font-body); }
+</style><section class="mrd-hero"><div class="mrd-hero__grid" aria-hidden="true"></div><div class="mrd-hero__inner"><div class="mrd-hero__top"><span class="mrd-hero__dot"></span><span>v4.2 · shipping now</span><span class="mrd-hero__rule"></span><span>for engineering teams</span></div><h1 class="mrd-hero__headline">Ship on Friday.<br>Sleep on <em>Saturday</em></h1><p class="mrd-hero__lede">Meridian is the deployment layer for teams who don't want a status page. Preview every change, revert any commit, roll out when the graph says so.</p><div class="mrd-hero__actions"><a class="mrd-btn mrd-btn--primary mrd-btn--lg mrd-btn--arrow" href="#cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Start building</a><a class="mrd-btn mrd-btn--ghost mrd-btn--lg" href="#cta" data-lessgo-cta="" data-lessgo-cta-role="secondary">Read the docs</a><span class="mrd-hero__caption">no credit card · 14 day trial</span></div><div class="mrd-hero__meta"><div class="mrd-hero__meta-cell"><div class="mrd-hero__meta-k">48ms</div><div class="mrd-hero__meta-l">p50 deploy</div></div><div class="mrd-hero__meta-cell"><div class="mrd-hero__meta-k">99.995%</div><div class="mrd-hero__meta-l">region uptime</div></div><div class="mrd-hero__meta-cell"><div class="mrd-hero__meta-k">14,200</div><div class="mrd-hero__meta-l">teams shipping</div></div><div class="mrd-hero__meta-cell"><div class="mrd-hero__meta-k">SOC 2 · HIPAA</div><div class="mrd-hero__meta-l">compliance</div></div></div></div><aside class="mrd-hero__vis" aria-hidden="true"><div class="mrd-hero__vis-head"><div class="mrd-hero__vis-dots"><span></span><span></span><span></span></div><span>workspace</span></div><div class="mrd-hero__vis-body"><span class="ln"><span class="c">#</span> <span class="k">overview</span> <span class="v">summary</span></span><span class="ln"><span class="a">✓</span> item one</span><span class="ln"><span class="a">✓</span> item two</span><span class="ln"><span class="a">✓</span> item three</span><span class="ln"><span class="c">→</span> <span class="a">ready</span></span><span class="ln" style="margin-top:10px"><span class="k">metric</span> <span class="v">a · b · c</span></span><span class="ln"><span class="k">status</span>  <span class="v">ok</span></span></div></aside></section></div><div id="features" data-surface="ink" style="scroll-margin-top:80px"><style>
+.mrd-section { padding: var(--sec-pad-y) var(--sec-pad-x); max-width: 1340px; margin: 0 auto; position: relative; }
+.mrd-eyebrow {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--bone-3);
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.mrd-eyebrow::after { content: ""; width: 32px; height: 1px; background: var(--line-strong); display: inline-block; }
+.mrd-section-title {
+  font-family: var(--font-display); font-weight: 500; font-size: 52px;
+  line-height: 1.05; letter-spacing: -0.025em; color: var(--bone);
+  max-width: 22ch; margin: 22px 0 0;
+}
+.mrd-section-lede {
+  font-family: var(--font-display); font-size: 19px; line-height: 1.5;
+  color: var(--bone-2); max-width: 58ch; margin: 16px 0 0;
+}
+.mrd-features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--line); border: 1px solid var(--line);
+  border-radius: var(--r-lg); margin-top: 64px; overflow: hidden;
+}
+@media (max-width: 900px) { .mrd-features-grid { grid-template-columns: 1fr; } }
+.mrd-feature { background: var(--ink); padding: 32px 28px 56px; position: relative; min-height: 260px; }
+.mrd-feature__n { font-family: var(--font-mono); font-size: 11px; color: var(--bone-3); letter-spacing: 0.1em; }
+.mrd-feature__glyph {
+  width: 28px; height: 28px; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  display: grid; place-items: center; margin: 24px 0 20px; color: var(--accent);
+}
+.mrd-feature__title {
+  font-family: var(--font-display); font-weight: 500; font-size: 21px;
+  letter-spacing: -0.015em; line-height: 1.2; margin: 0 0 8px; color: var(--bone);
+}
+.mrd-feature__body { font-size: 14px; color: var(--bone-2); line-height: 1.55; margin: 0; }
+.mrd-feature__link {
+  position: absolute; left: 28px; bottom: 28px;
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--bone-3);
+  letter-spacing: 0.02em; text-decoration: none;
+}
+.mrd-feature__link:hover { color: var(--accent); }
+[data-variant="marketing"] .mrd-eyebrow { font-family: var(--font-body); font-size: 13px; letter-spacing: 0; text-transform: none; font-weight: 500; color: var(--bone-2); }
+[data-variant="marketing"] .mrd-eyebrow::after { display: none; }
+[data-variant="marketing"] .mrd-section-title { font-weight: 500; font-size: 56px; letter-spacing: -0.03em; }
+[data-variant="marketing"] .mrd-section-lede { font-size: 21px; color: var(--bone-2); max-width: 62ch; }
+[data-variant="marketing"] .mrd-feature { padding: 36px 36px 56px; }
+[data-variant="marketing"] .mrd-feature__link { font-family: var(--font-body); font-size: 13px; letter-spacing: 0; left: 36px; bottom: 28px; }
+</style><section class="mrd-section"><div class="mrd-eyebrow"><span>capabilities</span></div><h2 class="mrd-section-title">A deploy loop that fits in your head.</h2><p class="mrd-section-lede">Every commit ships to a real URL. Every URL has a graph behind it. You decide when it becomes production.</p><div class="mrd-features-grid"><article class="mrd-feature"><div class="mrd-feature__n">F-01</div><div class="mrd-feature__glyph"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"></path><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"></path><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"></path></svg></div><h3 class="mrd-feature__title">Preview per commit</h3><p class="mrd-feature__body">A real URL for every branch, every PR, every pushed fix. Your designer and your PM see the same thing you do.</p><a class="mrd-feature__link" href="#">read ↗</a></article><article class="mrd-feature"><div class="mrd-feature__n">F-02</div><div class="mrd-feature__glyph"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg></div><h3 class="mrd-feature__title">Instant rollback</h3><p class="mrd-feature__body">Revert to any deploy in under a second. Not a rebuild — a pointer flip at the edge. The graph tells you what changed.</p><a class="mrd-feature__link" href="#">read ↗</a></article><article class="mrd-feature"><div class="mrd-feature__n">F-03</div><div class="mrd-feature__glyph"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path></svg></div><h3 class="mrd-feature__title">Observability, built in</h3><p class="mrd-feature__body">P50, P99, error rate, cold starts — in the same pane as the deploys that caused them. No separate dashboard to wire up.</p><a class="mrd-feature__link" href="#">read ↗</a></article><article class="mrd-feature"><div class="mrd-feature__n">F-04</div><div class="mrd-feature__glyph"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-box" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg></div><h3 class="mrd-feature__title">Edge-native runtime</h3><p class="mrd-feature__body">One binary, twenty regions, zero cold starts. Shipping to a new continent is a checkbox, not a project.</p><a class="mrd-feature__link" href="#">read ↗</a></article><article class="mrd-feature"><div class="mrd-feature__n">F-05</div><div class="mrd-feature__glyph"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-git-branch" aria-hidden="true"><line x1="6" x2="6" y1="3" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg></div><h3 class="mrd-feature__title">Environments as code</h3><p class="mrd-feature__body">Staging, preview, production — one file, reviewed like anything else. No clicking through a portal to find where the env var went.</p><a class="mrd-feature__link" href="#">read ↗</a></article><article class="mrd-feature"><div class="mrd-feature__n">F-06</div><div class="mrd-feature__glyph"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg></div><h3 class="mrd-feature__title">Audit on by default</h3><p class="mrd-feature__body">Every deploy, every env change, every role grant — recorded, exportable, signed. SOC 2 report is two clicks, not two weeks.</p><a class="mrd-feature__link" href="#">read ↗</a></article></div></section></div><div id="testimonials" data-surface="ink" style="scroll-margin-top:80px"><style>
+.mrd-section { padding: var(--sec-pad-y) var(--sec-pad-x); max-width: 1340px; margin: 0 auto; position: relative; }
+.mrd-eyebrow {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--bone-3);
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.mrd-eyebrow::after { content: ""; width: 32px; height: 1px; background: var(--line-strong); display: inline-block; }
+.mrd-section-title {
+  font-family: var(--font-display); font-weight: 500; font-size: 52px;
+  line-height: 1.05; letter-spacing: -0.025em; color: var(--bone);
+  max-width: 22ch; margin: 22px 0 0;
+}
+.mrd-testi { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 12px; margin-top: 64px; }
+@media (max-width: 900px) { .mrd-testi { grid-template-columns: 1fr; } }
+.mrd-testi-card {
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 28px 28px 24px; background: var(--ink);
+  display: flex; flex-direction: column; position: relative;
+}
+.mrd-testi-card--lg { background: linear-gradient(180deg, var(--ink-1), var(--ink)); padding: 36px 36px 28px; }
+.mrd-testi-card__mark {
+  font-family: var(--font-display); font-size: 42px; line-height: 0.8;
+  color: var(--accent); margin-bottom: 14px; letter-spacing: -0.03em;
+}
+.mrd-testi-card__quote {
+  margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 19px;
+  line-height: 1.45; letter-spacing: -0.01em; color: var(--bone); flex: 1;
+}
+.mrd-testi-card--lg .mrd-testi-card__quote { font-size: 26px; }
+.mrd-testi-card__who {
+  display: flex; align-items: center; gap: 12px;
+  padding-top: 22px; margin-top: 22px; border-top: 1px solid var(--line);
+}
+.mrd-testi-card__avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--ink-2), var(--bone-3));
+  border: 1px solid var(--line-strong); flex-shrink: 0;
+}
+.mrd-testi-card__name { font-family: var(--font-display); font-size: 14px; color: var(--bone); font-weight: 500; }
+.mrd-testi-card__role { font-family: var(--font-mono); font-size: 11px; color: var(--bone-3); margin-top: 2px; }
+.mrd-logo-rail {
+  margin-top: 56px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 0;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+@media (max-width: 900px) { .mrd-logo-rail { grid-template-columns: repeat(3, 1fr); } }
+.mrd-logo-rail__cell {
+  padding: 22px 0; text-align: center;
+  font-family: var(--font-display); font-weight: 600; font-size: 15px;
+  letter-spacing: -0.01em; color: var(--bone-2); border-right: 1px solid var(--line);
+}
+.mrd-logo-rail__cell:last-child { border-right: 0; }
+[data-variant="marketing"] .mrd-eyebrow { font-family: var(--font-body); font-size: 13px; letter-spacing: 0; text-transform: none; font-weight: 500; color: var(--bone-2); }
+[data-variant="marketing"] .mrd-eyebrow::after { display: none; }
+[data-variant="marketing"] .mrd-section-title { font-weight: 500; font-size: 56px; letter-spacing: -0.03em; }
+[data-variant="marketing"] .mrd-testi-card { padding: 36px 36px 28px; }
+[data-variant="marketing"] .mrd-testi-card--lg { padding: 44px 44px 36px; }
+[data-variant="marketing"] .mrd-testi-card__role { font-family: var(--font-body); font-size: 12.5px; text-transform: none; letter-spacing: 0; }
+[data-variant="light"] .mrd-testi-card__avatar { background: linear-gradient(135deg, var(--ink-2), var(--bone-3) 120%); }
+[data-variant="light"] .mrd-testi-card--lg { background: linear-gradient(180deg, var(--ink-1), var(--ink)); }
+</style><section class="mrd-section"><div class="mrd-eyebrow"><span>proof</span></div><h2 class="mrd-section-title">Teams that were already fast got faster.</h2><div class="mrd-testi"><article class="mrd-testi-card mrd-testi-card--lg"><div class="mrd-testi-card__mark" aria-hidden="true">“</div><blockquote class="mrd-testi-card__quote">We cut our deploy window from 40 minutes of tailing logs to a Slack notification. The engineers stopped calling it deploying and started calling it shipping.</blockquote><div class="mrd-testi-card__who"><div class="mrd-testi-card__avatar" aria-hidden="true"></div><div><div class="mrd-testi-card__name">Ines Aldridge</div><div class="mrd-testi-card__role">Staff Engineer · Parallel.sh</div></div></div></article><article class="mrd-testi-card"><div class="mrd-testi-card__mark" aria-hidden="true">“</div><blockquote class="mrd-testi-card__quote">Rolled back a bad migration in 800ms. I was mid-sentence on a call.</blockquote><div class="mrd-testi-card__who"><div class="mrd-testi-card__avatar" aria-hidden="true"></div><div><div class="mrd-testi-card__name">Noah Becher</div><div class="mrd-testi-card__role">CTO · Latchkey</div></div></div></article><article class="mrd-testi-card"><div class="mrd-testi-card__mark" aria-hidden="true">“</div><blockquote class="mrd-testi-card__quote">Our on-call graduated from pager anxiety to reading, which is what on-call should be.</blockquote><div class="mrd-testi-card__who"><div class="mrd-testi-card__avatar" aria-hidden="true"></div><div><div class="mrd-testi-card__name">Priya Vellore</div><div class="mrd-testi-card__role">Infra Lead · Harbor.ai</div></div></div></article></div><div class="mrd-logo-rail"><div class="mrd-logo-rail__cell">parallel</div><div class="mrd-logo-rail__cell">latchkey</div><div class="mrd-logo-rail__cell">harbor</div><div class="mrd-logo-rail__cell">fieldnote</div><div class="mrd-logo-rail__cell">nightfall</div><div class="mrd-logo-rail__cell">quorum</div></div></section></div><div id="pricing" data-surface="ink" style="scroll-margin-top:80px"><style>
+.mrd-section { padding: var(--sec-pad-y) var(--sec-pad-x); max-width: 1340px; margin: 0 auto; position: relative; }
+.mrd-eyebrow {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--bone-3);
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.mrd-eyebrow::after { content: ""; width: 32px; height: 1px; background: var(--line-strong); display: inline-block; }
+.mrd-section-title {
+  font-family: var(--font-display); font-weight: 500; font-size: 52px;
+  line-height: 1.05; letter-spacing: -0.025em; color: var(--bone);
+  max-width: 22ch; margin: 22px 0 0;
+}
+.mrd-section-lede {
+  font-family: var(--font-display); font-size: 19px; line-height: 1.5;
+  color: var(--bone-2); max-width: 58ch; margin: 16px 0 0;
+}
+.mrd-price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 64px; }
+@media (max-width: 900px) { .mrd-price-grid { grid-template-columns: 1fr; } }
+.mrd-price-card {
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 32px 28px 28px; background: var(--ink); position: relative;
+  display: flex; flex-direction: column;
+}
+.mrd-price-card--mid { background: linear-gradient(180deg, var(--ink-1), var(--ink)); border-color: var(--line-strong); }
+.mrd-price-card--mid::before {
+  content: "Most chosen"; position: absolute; top: -1px; right: 24px;
+  transform: translateY(-50%); font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-ink);
+  background: var(--accent); padding: 4px 10px; border-radius: var(--r-pill);
+}
+.mrd-price-card__plan { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--bone-3); text-transform: uppercase; }
+.mrd-price-card__amount {
+  font-family: var(--font-display); font-weight: 500; font-size: 56px;
+  letter-spacing: -0.03em; line-height: 1; margin: 20px 0 4px; color: var(--bone);
+}
+.mrd-price-card__per { font-family: var(--font-mono); font-size: 11.5px; color: var(--bone-3); }
+.mrd-price-card__pitch { font-family: var(--font-display); font-size: 15px; color: var(--bone-2); margin: 18px 0 24px; max-width: 28ch; }
+.mrd-price-card__features { list-style: none; padding: 0; margin: 0 0 28px; flex: 1; }
+.mrd-price-card__features li {
+  display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px;
+  color: var(--bone-2); padding: 8px 0; border-top: 1px solid var(--line-soft);
+}
+.mrd-price-card__features li:first-child { border-top: 0; }
+.mrd-price-card__features li::before {
+  content: ""; width: 12px; height: 12px; border: 1px solid var(--accent);
+  border-radius: 50%; display: inline-block; flex-shrink: 0; margin-top: 3px;
+}
+.mrd-price-card__cta-row { margin-top: auto; }
+.mrd-price-card__cta { width: 100%; justify-content: space-between; }
+.mrd-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-display); font-weight: 500; font-size: 13.5px;
+  letter-spacing: -0.005em; border-radius: var(--r-md); padding: 12px 16px;
+  transition: all 140ms ease; border: 1px solid transparent; text-decoration: none;
+}
+.mrd-btn--primary { background: var(--accent); color: var(--accent-ink); }
+.mrd-btn--primary:hover { filter: brightness(1.06); }
+.mrd-btn--ghost { color: var(--bone); border-color: var(--line); background: transparent; }
+.mrd-btn--ghost:hover { border-color: var(--line-strong); background: var(--ink-1); }
+.mrd-btn--arrow::after { content: "→"; font-family: var(--font-mono); font-size: 13px; }
+[data-variant="marketing"] .mrd-eyebrow { font-family: var(--font-body); font-size: 13px; letter-spacing: 0; text-transform: none; font-weight: 500; color: var(--bone-2); }
+[data-variant="marketing"] .mrd-eyebrow::after { display: none; }
+[data-variant="marketing"] .mrd-section-title { font-weight: 500; font-size: 56px; letter-spacing: -0.03em; }
+[data-variant="marketing"] .mrd-btn { border-radius: 12px; font-family: var(--font-body); font-weight: 500; }
+[data-variant="marketing"] .mrd-btn--arrow::after { font-family: var(--font-body); }
+</style><section class="mrd-section"><div class="mrd-eyebrow"><span>pricing</span></div><h2 class="mrd-section-title">Pay for the deploys, not the dashboard.</h2><p class="mrd-section-lede">Usage-based from day one. No seats, no platform fee, no "talk to sales" until you ask for it.</p><div class="mrd-price-grid"><article class="mrd-price-card"><div class="mrd-price-card__plan">Hobby</div><div class="mrd-price-card__amount">$0</div><div class="mrd-price-card__per">forever · up to 3 projects</div><p class="mrd-price-card__pitch">Everything to ship a side project you&#x27;d actually link to.</p><ul class="mrd-price-card__features"><li>Unlimited preview URLs</li><li>3 regions · 100 GB bandwidth</li><li>Community support</li><li>Single environment</li></ul><div class="mrd-price-card__cta-row"><a href="#cta" class="mrd-btn mrd-btn--ghost mrd-btn--arrow mrd-price-card__cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Start free</a></div></article><article class="mrd-price-card mrd-price-card--mid"><div class="mrd-price-card__plan">Team</div><div class="mrd-price-card__amount">$24</div><div class="mrd-price-card__per">per active dev · per month</div><p class="mrd-price-card__pitch">When you stop being alone and start being an on-call.</p><ul class="mrd-price-card__features"><li>Everything in Hobby</li><li>All regions · 2 TB bandwidth</li><li>Instant rollback + audit log</li><li>Role-based access</li><li>Priority email support</li></ul><div class="mrd-price-card__cta-row"><a href="#cta" class="mrd-btn mrd-btn--primary mrd-btn--arrow mrd-price-card__cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Start 14-day trial</a></div></article><article class="mrd-price-card"><div class="mrd-price-card__plan">Enterprise</div><div class="mrd-price-card__amount">Custom</div><div class="mrd-price-card__per">annual · signed agreement</div><p class="mrd-price-card__pitch">For teams that read SOC 2 reports before signing up.</p><ul class="mrd-price-card__features"><li>Everything in Team</li><li>Private regions · dedicated tenancy</li><li>SSO, SCIM, HIPAA, DPA</li><li>Named support engineer</li><li>99.99% SLA</li></ul><div class="mrd-price-card__cta-row"><a href="#cta" class="mrd-btn mrd-btn--ghost mrd-btn--arrow mrd-price-card__cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Book a call</a></div></article></div></section></div><div id="cta" data-surface="ink" style="scroll-margin-top:80px"><style>
+.mrd-cta-wrap { max-width: 1340px; margin: 0 auto; padding: 120px var(--sec-pad-x); }
+.mrd-cta {
+  position: relative; border: 1px solid var(--line); border-radius: var(--r-xl);
+  padding: 96px 72px; overflow: hidden; background: var(--ink);
+}
+@media (max-width: 760px) { .mrd-cta { padding: 56px 28px; } }
+.mrd-cta__arc {
+  position: absolute; right: -160px; bottom: -220px; width: 640px; height: 640px;
+  border-radius: 50%; border: 1px solid var(--accent); opacity: 0.6; pointer-events: none;
+}
+.mrd-cta__arc::before { content: ""; position: absolute; inset: 40px; border-radius: 50%; border: 1px solid var(--accent-dim); }
+.mrd-cta__arc::after { content: ""; position: absolute; inset: 100px; border-radius: 50%; border: 1px solid var(--accent-dim); }
+.mrd-cta__grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(var(--line-soft) 1px, transparent 1px) 0 0 / 100% 48px,
+    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px) 0 0 / 48px 100%;
+  -webkit-mask-image: linear-gradient(90deg, black 40%, transparent 85%);
+  mask-image: linear-gradient(90deg, black 40%, transparent 85%);
+}
+.mrd-cta__inner { position: relative; z-index: 1; max-width: 640px; }
+.mrd-cta__eyebrow {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--accent);
+}
+.mrd-cta__headline {
+  font-family: var(--font-display); font-weight: 600; font-size: 72px;
+  line-height: 0.95; letter-spacing: -0.03em; margin: 16px 0 0; color: var(--bone);
+}
+@media (max-width: 760px) { .mrd-cta__headline { font-size: 48px; } }
+.mrd-cta__headline em { color: var(--accent); }
+.mrd-cta__body {
+  font-family: var(--font-display); font-size: 19px; color: var(--bone-2);
+  margin: 24px 0 40px; max-width: 44ch;
+}
+.mrd-cta__actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.mrd-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-display); font-weight: 500; font-size: 13.5px;
+  letter-spacing: -0.005em; border-radius: var(--r-md); padding: 10px 14px;
+  transition: all 140ms ease; border: 1px solid transparent; text-decoration: none;
+}
+.mrd-btn--lg { padding: 14px 20px; font-size: 15px; }
+.mrd-btn--primary { background: var(--accent); color: var(--accent-ink); }
+.mrd-btn--primary:hover { filter: brightness(1.06); }
+.mrd-btn--ghost { color: var(--bone); border-color: var(--line); background: transparent; }
+.mrd-btn--ghost:hover { border-color: var(--line-strong); background: var(--ink-1); }
+.mrd-btn--arrow::after { content: "→"; font-family: var(--font-mono); font-size: 13px; }
+[data-variant="marketing"] .mrd-cta__eyebrow { font-family: var(--font-body); letter-spacing: 0; text-transform: none; font-size: 13px; }
+[data-variant="marketing"] .mrd-btn { border-radius: 12px; font-family: var(--font-body); font-weight: 500; }
+[data-variant="marketing"] .mrd-btn--arrow::after { font-family: var(--font-body); }
+</style><section class="mrd-cta-wrap"><div class="mrd-cta"><div class="mrd-cta__grid" aria-hidden="true"></div><div class="mrd-cta__arc" aria-hidden="true"></div><div class="mrd-cta__inner"><div class="mrd-cta__eyebrow">start</div><h2 class="mrd-cta__headline">Your next deploy takes <em>18 seconds</em>.</h2><p class="mrd-cta__body">Connect a repo, point it at a domain, stop thinking about it. If you&#x27;ve used git, you&#x27;ve used Meridian.</p><div class="mrd-cta__actions"><a class="mrd-btn mrd-btn--primary mrd-btn--lg mrd-btn--arrow" href="#cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Start free</a><a class="mrd-btn mrd-btn--ghost mrd-btn--lg" href="#cta" data-lessgo-cta="" data-lessgo-cta-role="secondary">Talk to an engineer</a></div></div></div></section></div><div id="footer" data-surface="ink" style="scroll-margin-top:80px"><style>
+.mrd-footer { border-top: 1px solid var(--line); padding: 72px var(--sec-pad-x) 32px; max-width: 1340px; margin: 0 auto; font-family: var(--font-body); }
+.mrd-footer__top { display: flex; flex-wrap: wrap; gap: 40px; padding-bottom: 56px; border-bottom: 1px solid var(--line); }
+.mrd-footer__brand { flex: 2 1 280px; }
+.mrd-footer__col { flex: 1 1 140px; }
+.mrd-footer__wordmark { font-family: var(--font-display); font-weight: 600; font-size: 26px; letter-spacing: -0.03em; color: var(--bone); }
+.mrd-footer__dot { color: var(--accent); }
+.mrd-footer__tag { font-family: var(--font-display); font-size: 14px; color: var(--bone-2); margin: 12px 0 22px; max-width: 34ch; }
+.mrd-news { display: flex; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; max-width: 320px; }
+.mrd-news__input { flex: 1; border: 0; background: transparent; color: var(--bone); padding: 10px 12px; font: inherit; font-size: 13px; outline: none; }
+.mrd-news__input::placeholder { color: var(--bone-3); }
+.mrd-news__btn { background: var(--ink-1); color: var(--bone); padding: 0 14px; border: 0; border-left: 1px solid var(--line); font-family: var(--font-mono); font-size: 12px; cursor: pointer; }
+.mrd-news__btn:hover { background: var(--ink-2); }
+.mrd-news__btn:disabled { opacity: 0.6; cursor: default; }
+.mrd-news-done { font-family: var(--font-mono); font-size: 12px; color: var(--accent); max-width: 320px; padding: 6px 0; }
+.mrd-footer__col h4 { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--bone-3); margin: 0 0 18px; font-weight: 400; }
+.mrd-footer__col ul { list-style: none; padding: 0; margin: 0; }
+.mrd-footer__col ul li { font-size: 13.5px; color: var(--bone-2); padding: 4px 0; }
+.mrd-footer__col ul li a { color: inherit; text-decoration: none; }
+.mrd-footer__col ul li a:hover { color: var(--bone); }
+.mrd-footer__bottom {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  padding-top: 28px; font-family: var(--font-mono); font-size: 11px; color: var(--bone-3); letter-spacing: 0.04em;
+}
+[data-variant="marketing"] .mrd-footer__col h4 { font-family: var(--font-body); letter-spacing: 0; text-transform: none; font-size: 12px; }
+</style><footer class="mrd-footer"><div class="mrd-footer__top"><div class="mrd-footer__brand"><div class="mrd-footer__wordmark">meridian<span class="mrd-footer__dot" aria-hidden="true">.</span></div><p class="mrd-footer__tag">The deployment layer for teams who want to ship, not watch a progress bar.</p></div><div class="mrd-footer__col"><h4>Product</h4><ul><li><a href="/product/overview">Overview</a></li><li><a href="/product/deploys">Deploys</a></li><li><a href="/product/regions">Regions</a></li><li><a href="/product/rollback">Rollback</a></li><li><a href="/product/observability">Observability</a></li></ul></div><div class="mrd-footer__col"><h4>Developers</h4><ul><li><a href="/docs">Docs</a></li><li><a href="/docs/api">API</a></li><li><a href="/docs/cli">CLI</a></li><li><a href="/changelog">Changelog</a></li><li><a href="https://status.meridian.dev">Status</a></li></ul></div><div class="mrd-footer__col"><h4>Company</h4><ul><li><a href="/company/about">About</a></li><li><a href="/customers">Customers</a></li><li><a href="/careers">Careers</a></li><li><a href="/security">Security</a></li><li><a href="/contact">Contact</a></li></ul></div><div class="mrd-footer__col"><h4>Legal</h4><ul><li><a href="/legal/terms">Terms</a></li><li><a href="/legal/privacy">Privacy</a></li><li><a href="/legal/dpa">DPA</a></li><li><a href="/legal/cookies">Cookies</a></li></ul></div></div><div class="mrd-footer__bottom"><div>© 2026 MERIDIAN LABS, INC.</div><div>SAN FRANCISCO · 37.7749° N, 122.4194° W</div></div></footer></div></div></div><script>(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+      anchor.addEventListener('click', function(e) {
+        var target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  });
+})();</script>
+  <div style="background:#0b0f0e;text-align:center;padding:13px 16px">
+    <a href="https://lessgo.ai/?ref=badge&utm_source=published&utm_medium=badge" target="_blank" rel="noopener" aria-label="Proudly built by Lessgo AI" style="display:inline-flex;align-items:center;gap:7px;font:500 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:0.04em;color:#cbd5d1;text-decoration:none">
+      <span style="color:#a3e635" aria-hidden="true">&#9670;</span>
+      Proudly built by&nbsp;<span style="color:#ffffff;font-weight:600">Lessgo AI</span>
+    </a>
+  </div>
+
+  <!-- Phase 4: Form handler (loaded if page has forms) -->
+  
+
+  <!-- Phase 4: TechPremium behaviors (dropdown nav, lightbox, gallery filter, readout tick) -->
+  
+
+  <!-- Lumen behaviors (lightbox + reveal + EN·NL toggle/geo) -->
+  
+
+  <!-- Work skeleton behaviors (hero slider + fixed header) -->
+  
+
+  <!-- Phase 4: Analytics beacon (opt-in) -->
+  
+</body>
+</html>"
+`;
+
+exports[`ui-foundation isolation — published HTML baseline (service: hearth) > renders + matches the frozen snapshot 1`] = `
+"<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Title & Description -->
+  <title>Isolation Baseline</title>
+  <meta name="description" content="">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://iso.lessgo.site">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://iso.lessgo.site">
+  <meta property="og:title" content="Isolation Baseline">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://lessgo.ai/api/og/iso">
+  <meta property="og:site_name" content="Lessgo AI">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://iso.lessgo.site">
+  <meta name="twitter:title" content="Isolation Baseline">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://lessgo.ai/api/og/iso">
+
+  <!-- Self-hosted template fonts (Inter, Inter Tight, JetBrains Mono, DM Sans,
+       Fraunces, Source Serif 4, Lora, EB Garamond) -->
+  <link rel="stylesheet" href="https://lessgo.ai/assets/fonts-self-hosted.css">
+
+  <!-- Shared CSS -->
+  <link rel="stylesheet" href="/assets/published.css">
+
+  <!-- Theme CSS Variables (inline, per-page) -->
+  
+</head>
+<body>
+  <style id="hearth-theme">:root{
+  --cream:oklch(0.97 0.015 80);
+  --cream-1:oklch(0.95 0.02 75);
+  --cream-2:oklch(0.92 0.025 72);
+  --sand:oklch(0.84 0.03 70);
+  --ink:oklch(0.22 0.02 40);
+  --ink-2:oklch(0.42 0.015 40);
+  --ink-3:oklch(0.58 0.012 40);
+  --sage:oklch(0.72 0.045 135);
+  --clay:oklch(0.78 0.08 55);
+  --line:oklch(0.22 0.02 40 / 0.10);
+  --line-soft:oklch(0.22 0.02 40 / 0.06);
+  --shadow-card:0 20px 40px -24px oklch(0.30 0.04 40 / 0.18), 0 2px 4px -1px oklch(0.30 0.04 40 / 0.06);
+  --shadow-lift:0 40px 70px -30px oklch(0.30 0.04 40 / 0.22), 0 6px 14px -4px oklch(0.30 0.04 40 / 0.10);
+  --font-display:"Fraunces", Georgia, "Times New Roman", serif;
+  --font-body:"DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --accent-ink:oklch(0.99 0.01 80);
+  --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;
+  --s-6:32px;--s-7:48px;--s-8:72px;--s-9:96px;--s-10:140px;
+  --r-sm:10px;
+  --r-md:14px;
+  --r-lg:20px;
+  --r-xl:28px;
+  --r-petal:120px 120px 24px 120px;
+  --sec-pad-y:140px;
+  --sec-pad-x:clamp(24px, 5vw, 80px);
+  --max-w:1240px;
+}
+[data-surface="cream"]{background:var(--cream);}
+[data-surface="cream-1"]{background:var(--cream-1);}
+[data-surface="cream-2"]{background:var(--cream-2);}
+[data-palette] em{font-style:italic;color:var(--accent-deep);}
+:root{--blog-ink:var(--ink);--blog-ink-2:var(--ink-2);--blog-line:var(--line);--blog-accent:var(--accent);--blog-accent-on:var(--accent-ink);}
+[data-palette="terracotta"]{--accent:oklch(0.62 0.15 40);--accent-deep:oklch(0.48 0.15 40);--accent-wash:oklch(0.62 0.15 40 / 0.10);}
+[data-palette="ochre"]{--accent:oklch(0.68 0.14 75);--accent-deep:oklch(0.50 0.14 75);--accent-wash:oklch(0.68 0.14 75 / 0.10);}
+[data-palette="rose"]{--accent:oklch(0.64 0.14 10);--accent-deep:oklch(0.48 0.14 10);--accent-wash:oklch(0.64 0.14 10 / 0.10);}
+[data-palette="moss"]{--accent:oklch(0.52 0.09 145);--accent-deep:oklch(0.38 0.09 145);--accent-wash:oklch(0.52 0.09 145 / 0.10);}
+[data-palette="sage"]{--accent:oklch(0.60 0.06 155);--accent-deep:oklch(0.42 0.07 155);--accent-wash:oklch(0.60 0.06 155 / 0.10);}
+[data-palette="plum"]{--accent:oklch(0.50 0.12 330);--accent-deep:oklch(0.36 0.12 330);--accent-wash:oklch(0.50 0.12 330 / 0.10);}
+[data-palette="indigo"]{--accent:oklch(0.52 0.13 260);--accent-deep:oklch(0.38 0.13 260);--accent-wash:oklch(0.52 0.13 260 / 0.10);}
+[data-palette="teal"]{--accent:oklch(0.56 0.08 195);--accent-deep:oklch(0.40 0.09 195);--accent-wash:oklch(0.56 0.08 195 / 0.10);}
+[data-palette="charcoal"]{--accent:oklch(0.32 0.02 40);--accent-deep:oklch(0.22 0.02 40);--accent-wash:oklch(0.32 0.02 40 / 0.10);}
+[data-variant="condensed"]{
+  --sec-pad-y:96px;
+}
+[data-variant="editorial"]{
+  --r-sm:2px;
+  --r-md:4px;
+  --r-lg:4px;
+  --r-xl:6px;
+  --sec-pad-y:160px;
+}</style><div data-palette="terracotta" data-variant="classic" class=""><div class="landing-page-published "><div id="header" data-surface="cream" style="scroll-margin-top:80px"><style>
+.hearth-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px var(--sec-pad-x);
+  max-width: var(--max-w); margin: 0 auto;
+  font-family: var(--font-body);
+}
+.hearth-nav__left { display: flex; align-items: center; gap: 40px; }
+.hearth-nav__brand {
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--font-display); font-weight: 500; font-size: 22px; letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.hearth-nav__brand-mark {
+  width: 32px; height: 32px; border-radius: 999px;
+  display: grid; place-items: center;
+  background: var(--accent-wash); color: var(--accent-deep);
+  font-family: var(--font-display); font-style: italic; font-size: 16px;
+}
+.hearth-nav__links { display: flex; gap: 32px; font-size: 15px; color: var(--ink-2); }
+.hearth-nav__link { position: relative; padding: 4px 0; text-decoration: none; color: inherit; }
+.hearth-nav__link.is-active { color: var(--ink); }
+.hearth-nav__right { display: flex; align-items: center; gap: 12px; }
+.hearth-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-body); font-weight: 500;
+  border-radius: var(--r-md); text-decoration: none;
+  border: 1px solid transparent;
+}
+.hearth-btn--primary { background: var(--ink); color: var(--cream); padding: 12px 20px; }
+.hearth-btn--sm { padding: 10px 16px; font-size: 13.5px; border-radius: var(--r-sm); }
+</style><nav class="hearth-nav"><div class="hearth-nav__left"><div class="hearth-nav__brand"><div class="hearth-nav__brand-mark">a</div><span>atelier hearth</span></div><div class="hearth-nav__links"><a href="#work" class="hearth-nav__link is-active">Work</a><a href="#services" class="hearth-nav__link">Services</a><a href="#about" class="hearth-nav__link">About</a><a href="#contact" class="hearth-nav__link">Contact</a></div></div><div class="hearth-nav__right"><a class="hearth-btn hearth-btn--primary hearth-btn--sm" href="#cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Book a call</a></div></nav></div><div id="hero" data-surface="cream" style="scroll-margin-top:80px"><style>
+.hearth-hero {
+  display: grid; grid-template-columns: 1.05fr 1fr; gap: 64px;
+  align-items: center; max-width: var(--max-w); margin: 0 auto;
+  padding: 96px var(--sec-pad-x) var(--sec-pad-y);
+}
+@media (max-width: 900px) { .hearth-hero { grid-template-columns: 1fr; gap: 40px; padding-top: 48px; } }
+.hearth-hero__eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  color: var(--ink-2); letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.hearth-hero__pip { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); }
+.hearth-hero__headline {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(48px, 6.4vw, 84px); line-height: 0.98;
+  letter-spacing: -0.015em; font-variation-settings: "opsz" 144;
+  color: var(--ink); margin: 0;
+}
+.hearth-hero__lede {
+  font-family: var(--font-display); font-style: italic; font-weight: 400;
+  font-size: 21px; line-height: 1.5; color: var(--ink-2);
+  max-width: 48ch; margin-top: 28px;
+}
+.hearth-hero__actions {
+  display: flex; gap: 14px; margin-top: 44px; align-items: center; flex-wrap: wrap;
+}
+.hearth-hero__caption {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 14px; color: var(--ink-3);
+}
+.hearth-hero__cta-subtext {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 14px; color: var(--ink-3); margin-top: 16px;
+}
+.hearth-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-body); font-weight: 500;
+  border-radius: var(--r-md); text-decoration: none;
+  border: 1px solid transparent;
+}
+.hearth-btn--primary { background: var(--ink); color: var(--cream); padding: 12px 20px; }
+.hearth-btn--lg { padding: 18px 28px; font-size: 16.5px; }
+.hearth-btn--ghost {
+  background: transparent; color: var(--ink); border-color: var(--sand);
+  padding: 12px 20px;
+}
+.hearth-hero__art { position: relative; aspect-ratio: 4/5; min-height: 420px; }
+.hearth-hero__photo {
+  position: absolute; inset: 0;
+  border-radius: var(--r-petal);
+  background-size: cover; background-position: center;
+  box-shadow: var(--shadow-lift);
+}
+</style><section class="hearth-hero"><div class="hearth-hero__copy"><div class="hearth-hero__eyebrow"><span class="hearth-hero__pip"></span><span>Interior design studio</span></div><h1 class="hearth-hero__headline">Rooms that feel like <em>you</em>, only calmer.</h1><p class="hearth-hero__lede">We design warm, liveable interiors for people who host — one long project, then a home you never want to leave.</p><div class="hearth-hero__actions"><a class="hearth-btn hearth-btn--primary hearth-btn--lg" href="#cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Book a call</a><a class="hearth-btn hearth-btn--ghost hearth-btn--lg" href="#cta" data-lessgo-cta="" data-lessgo-cta-role="secondary">See our work</a><span class="hearth-hero__caption">Booking Q3 2026</span></div><p class="hearth-hero__cta-subtext">Free consult · no obligation</p></div><div class="hearth-hero__art" aria-hidden="true"><div class="hearth-hero__photo hearth-hero__photo--main" style="background-image:linear-gradient(135deg, var(--clay), var(--accent))"></div></div></section></div><div id="services" data-surface="cream-2" style="scroll-margin-top:80px"><style>
+.hearth-services {
+  max-width: var(--max-w); margin: 0 auto;
+  padding: var(--sec-pad-y) var(--sec-pad-x);
+}
+.hearth-services__head { text-align: center; margin-bottom: 64px; }
+.hearth-eyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  color: var(--accent-deep); letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.hearth-eyebrow::before, .hearth-eyebrow::after {
+  content: ""; width: 28px; height: 1px; background: var(--accent);
+}
+.hearth-section-title {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(36px, 4.5vw, 56px); line-height: 1.05;
+  letter-spacing: -0.012em; color: var(--ink); margin: 0 auto;
+  max-width: 22ch; font-variation-settings: "opsz" 96;
+}
+.hearth-section-lede {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 18px; color: var(--ink-2); line-height: 1.5;
+  margin: 20px auto 0; max-width: 56ch;
+}
+.hearth-services__grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+}
+@media (max-width: 900px) { .hearth-services__grid { grid-template-columns: 1fr; } }
+.hearth-service-card {
+  background: var(--cream-1); border: 1px solid var(--sand);
+  border-radius: var(--r-lg); padding: 36px 32px 32px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.hearth-service-card__icon {
+  width: 48px; height: 48px; border-radius: 999px;
+  background: var(--accent-wash); color: var(--accent-deep);
+  display: grid; place-items: center;
+}
+.hearth-service-card__num {
+  font-family: var(--font-display); font-style: italic; font-weight: 500;
+  color: var(--accent-deep); font-size: 14px; letter-spacing: 0.05em;
+}
+.hearth-service-card__title {
+  font-family: var(--font-display); font-weight: 500; font-size: 26px;
+  line-height: 1.25; letter-spacing: -0.008em; color: var(--ink); margin: 0;
+}
+.hearth-service-card__desc {
+  font-family: var(--font-body); font-size: 15px; color: var(--ink-2);
+  line-height: 1.6; margin: 0;
+}
+.hearth-service-card__cta {
+  font-family: var(--font-body); font-weight: 500; font-size: 14px;
+  color: var(--accent-deep); margin-top: auto;
+}
+</style><section class="hearth-services"><div class="hearth-services__head"><div class="hearth-eyebrow">Our approach</div><h2 class="hearth-section-title">What we do</h2><p class="hearth-section-lede">Three ways we take a room from bare to belonging.</p></div><div class="hearth-services__grid"><article class="hearth-service-card"><div class="hearth-service-card__icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path><path d="M4 17v2"></path><path d="M5 18H3"></path></svg></div><div class="hearth-service-card__num">01.</div><h3 class="hearth-service-card__title">Full-home design</h3><p class="hearth-service-card__desc">Concept to install, room by room, on one coherent thread.</p><span class="hearth-service-card__cta">Learn more →</span></article><article class="hearth-service-card"><div class="hearth-service-card__icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette" aria-hidden="true"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"></path><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle></svg></div><div class="hearth-service-card__num">02.</div><h3 class="hearth-service-card__title">Colour & material</h3><p class="hearth-service-card__desc">A palette that holds together in every light, all year.</p><span class="hearth-service-card__cta">Learn more →</span></article><article class="hearth-service-card"><div class="hearth-service-card__icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ruler" aria-hidden="true"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"></path><path d="m14.5 12.5 2-2"></path><path d="m11.5 9.5 2-2"></path><path d="m8.5 6.5 2-2"></path><path d="m17.5 15.5 2-2"></path></svg></div><div class="hearth-service-card__num">03.</div><h3 class="hearth-service-card__title">Space planning</h3><p class="hearth-service-card__desc">Flow, storage, and the small dimensions that make a room work.</p><span class="hearth-service-card__cta">Learn more →</span></article></div></section></div><div id="testimonials" data-surface="cream-2" style="scroll-margin-top:80px"><style>
+.hearth-testi {
+  max-width: 880px; margin: 0 auto;
+  padding: var(--sec-pad-y) var(--sec-pad-x);
+  text-align: center;
+}
+.hearth-eyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  color: var(--accent-deep); letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.hearth-eyebrow::before, .hearth-eyebrow::after {
+  content: ""; width: 28px; height: 1px; background: var(--accent);
+}
+.hearth-testi__card {
+  position: relative;
+  background: var(--cream-1); border: 1px solid var(--sand);
+  border-radius: var(--r-lg); padding: 56px 48px 36px;
+  text-align: left; margin-top: 32px;
+}
+.hearth-testi__mark {
+  position: absolute; top: 16px; left: 32px;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 80px; line-height: 1; color: var(--accent);
+}
+.hearth-testi__quote {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: 24px; line-height: 1.4; color: var(--ink); margin: 0 0 32px;
+}
+.hearth-testi__who {
+  display: flex; align-items: center; gap: 14px;
+  border-top: 1px solid var(--line); padding-top: 24px;
+}
+.hearth-testi__avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background-size: cover; background-position: center; flex-shrink: 0;
+}
+.hearth-testi__name {
+  font-family: var(--font-display); font-weight: 500; font-size: 15px; color: var(--ink);
+}
+.hearth-testi__role {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 13.5px; color: var(--ink-3); margin-top: 2px;
+}
+.hearth-testi__meta {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 13px; color: var(--ink-3); margin-top: 24px;
+}
+</style><section class="hearth-testi"><div class="hearth-eyebrow">Kind words</div><article class="hearth-testi__card"><div class="hearth-testi__mark" aria-hidden="true">&quot;</div><div class="hearth-testi__quote">They read how we actually live and gave us back a home that finally fits. Every guest asks who did it.</div><div class="hearth-testi__who"><div class="hearth-testi__avatar" style="background-image:linear-gradient(135deg, var(--clay), var(--accent))"></div><div><div class="hearth-testi__name">Meera Kapoor</div><div class="hearth-testi__role">Homeowner · Bandra West</div></div></div></article><div class="hearth-testi__meta">Full-home project · 2025</div></section></div><div id="packages" data-surface="cream" style="scroll-margin-top:80px"><style>
+.hearth-pkg {
+  max-width: var(--max-w); margin: 0 auto;
+  padding: var(--sec-pad-y) var(--sec-pad-x);
+}
+.hearth-pkg__head { text-align: center; margin-bottom: 64px; }
+.hearth-eyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  color: var(--accent-deep); letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.hearth-eyebrow::before, .hearth-eyebrow::after {
+  content: ""; width: 28px; height: 1px; background: var(--accent);
+}
+.hearth-section-title {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(36px, 4.5vw, 56px); line-height: 1.05;
+  letter-spacing: -0.012em; color: var(--ink); margin: 0 auto;
+  max-width: 22ch; font-variation-settings: "opsz" 96;
+}
+.hearth-section-lede {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 18px; color: var(--ink-2); line-height: 1.5;
+  margin: 20px auto 0; max-width: 56ch;
+}
+.hearth-pkg__grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  align-items: stretch;
+}
+@media (max-width: 900px) { .hearth-pkg__grid { grid-template-columns: 1fr; } }
+.hearth-pkg__card {
+  background: var(--cream-1); border: 1px solid var(--sand);
+  border-radius: var(--r-xl); padding: 44px 40px 36px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.hearth-pkg__card.is-featured {
+  background: var(--ink); color: var(--cream);
+  transform: translateY(-12px); box-shadow: var(--shadow-lift);
+  border-color: transparent;
+}
+.hearth-pkg__name {
+  font-family: var(--font-display); font-weight: 500; font-size: 24px;
+  color: var(--accent-deep);
+}
+.hearth-pkg__card.is-featured .hearth-pkg__name { color: var(--clay); }
+.hearth-pkg__amount {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(40px, 5vw, 64px); line-height: 1;
+  color: var(--ink); letter-spacing: -0.015em;
+}
+.hearth-pkg__card.is-featured .hearth-pkg__amount { color: var(--cream); }
+.hearth-pkg__per {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 14px; color: var(--ink-2);
+}
+.hearth-pkg__card.is-featured .hearth-pkg__per { color: oklch(0.72 0.01 60); }
+.hearth-pkg__features {
+  list-style: none; padding: 0; margin: 16px 0 24px;
+}
+.hearth-pkg__features li {
+  font-family: var(--font-body); font-size: 14.5px; color: var(--ink-2);
+  padding: 12px 0 12px 22px; border-top: 1px solid var(--line); position: relative;
+}
+.hearth-pkg__card.is-featured .hearth-pkg__features li {
+  color: oklch(0.88 0.01 60); border-top-color: oklch(1 0 0 / 0.08);
+}
+.hearth-pkg__features li:first-child { border-top: 0; }
+.hearth-pkg__features li::before {
+  content: "✓"; position: absolute; left: 0; top: 12px;
+  color: var(--sage); font-weight: 600;
+}
+.hearth-pkg__cta {
+  width: 100%; justify-content: center; margin-top: auto;
+  padding: 14px 18px; text-align: center;
+}
+.hearth-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-body); font-weight: 500; text-decoration: none;
+  border-radius: var(--r-md); border: 1px solid transparent;
+}
+.hearth-btn--ghost {
+  background: transparent; color: var(--ink); border-color: var(--sand);
+}
+.hearth-btn--primary-inverse { background: var(--cream); color: var(--ink); border-radius: var(--r-sm); }
+</style><section class="hearth-pkg"><div class="hearth-pkg__head"><div class="hearth-eyebrow">Engagements</div><h2 class="hearth-section-title">Ways to work together</h2><p class="hearth-section-lede">Transparent scopes — pick the depth that fits your home.</p></div><div class="hearth-pkg__grid"><article class="hearth-pkg__card"><div class="hearth-pkg__name">Consult</div><div class="hearth-pkg__amount">$1,200</div><div class="hearth-pkg__per">1–2 weeks</div><ul class="hearth-pkg__features"><li>One 3-hour walkthrough</li><li>Palette + layout direction</li><li>Shopping list</li></ul><a href="#cta" class="hearth-btn hearth-btn--ghost hearth-pkg__cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Book a call</a></article><article class="hearth-pkg__card is-featured"><div class="hearth-pkg__name">Single room</div><div class="hearth-pkg__amount">$6,500</div><div class="hearth-pkg__per">4–6 weeks</div><ul class="hearth-pkg__features"><li>Full concept + drawings</li><li>Sourcing + procurement</li><li>Install day on site</li></ul><a href="#cta" class="hearth-btn hearth-btn--primary-inverse hearth-pkg__cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Book a call</a></article><article class="hearth-pkg__card"><div class="hearth-pkg__name">Full home</div><div class="hearth-pkg__amount">From $28k</div><div class="hearth-pkg__per">3–6 months</div><ul class="hearth-pkg__features"><li>Every room, one thread</li><li>Contractor coordination</li><li>Styling + handover</li></ul><a href="#cta" class="hearth-btn hearth-btn--ghost hearth-pkg__cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Book a call</a></article></div></section></div><div id="cta" data-surface="cream" style="scroll-margin-top:80px"><style>
+.hearth-cta-wrap {
+  max-width: var(--max-w); margin: 0 auto;
+  padding: var(--sec-pad-y) var(--sec-pad-x);
+}
+.hearth-cta {
+  position: relative;
+  border-radius: var(--r-xl);
+  padding: 120px 80px;
+  background:
+    radial-gradient(circle at 30% 20%, var(--accent-wash), transparent 60%),
+    linear-gradient(160deg, var(--cream-2), var(--cream-1));
+  border: 1px solid var(--sand);
+  text-align: center; overflow: hidden;
+}
+@media (max-width: 760px) { .hearth-cta { padding: 64px 28px; } }
+.hearth-cta__inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+.hearth-eyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  color: var(--accent-deep); letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.hearth-eyebrow::before, .hearth-eyebrow::after {
+  content: ""; width: 28px; height: 1px; background: var(--accent);
+}
+.hearth-cta__headline {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(44px, 5.5vw, 76px); line-height: 1.05;
+  letter-spacing: -0.012em; color: var(--ink); margin: 18px 0 16px;
+  font-variation-settings: "opsz" 144;
+}
+.hearth-cta__lede {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 21px; color: var(--ink-2); line-height: 1.5; margin: 0 auto 36px;
+  max-width: 48ch;
+}
+.hearth-cta__actions {
+  display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap;
+}
+.hearth-cta__caption {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 14px; color: var(--ink-3);
+}
+.hearth-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-body); font-weight: 500; text-decoration: none;
+  border-radius: var(--r-md); border: 1px solid transparent;
+}
+.hearth-btn--primary { background: var(--ink); color: var(--cream); padding: 12px 20px; }
+.hearth-btn--ghost {
+  background: transparent; color: var(--ink); border-color: var(--sand);
+  padding: 12px 20px;
+}
+.hearth-btn--lg { padding: 18px 28px; font-size: 16.5px; }
+</style><section class="hearth-cta-wrap"><div class="hearth-cta"><div class="hearth-cta__inner"><div class="hearth-eyebrow hearth-cta__eyebrow">Let&#x27;s begin</div><h2 class="hearth-cta__headline">Let's talk about your home.</h2><p class="hearth-cta__lede">Tell us how you live and what is not working. We answer within a day.</p><div class="hearth-cta__actions"><a class="hearth-btn hearth-btn--primary hearth-btn--lg" href="#cta" data-lessgo-cta="" data-lessgo-cta-role="primary">Book a call</a><a class="hearth-btn hearth-btn--ghost hearth-btn--lg" href="#cta" data-lessgo-cta="" data-lessgo-cta-role="secondary">See our work</a><span class="hearth-cta__caption">We answer within a day.</span></div></div></div></section></div><div id="footer" data-surface="cream-2" style="scroll-margin-top:80px"><style>
+.hearth-footer {
+  max-width: var(--max-w); margin: 0 auto;
+  padding: 96px var(--sec-pad-x) 40px;
+  font-family: var(--font-body);
+}
+.hearth-footer__top {
+  display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px;
+  padding-bottom: 64px;
+}
+@media (max-width: 760px) { .hearth-footer__top { grid-template-columns: 1fr; gap: 32px; } }
+.hearth-footer__wordmark {
+  font-family: var(--font-display); font-weight: 500; font-size: 36px;
+  color: var(--ink); letter-spacing: -0.01em;
+}
+.hearth-footer__tagline {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 16px; color: var(--ink-2); line-height: 1.5;
+  margin-top: 16px; max-width: 36ch;
+}
+.hearth-footer__col h4 {
+  font-size: 12px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.2em; color: var(--accent-deep);
+  margin: 0 0 22px;
+}
+.hearth-footer__col ul { list-style: none; padding: 0; margin: 0; }
+.hearth-footer__col ul li {
+  font-size: 16px; color: var(--ink-2); padding: 6px 0;
+}
+.hearth-footer__col ul li a { color: inherit; text-decoration: none; }
+.hearth-footer__col ul li a:hover { color: var(--accent-deep); }
+.hearth-footer__bottom {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 32px; border-top: 1px solid var(--line);
+  font-size: 13.5px; color: var(--ink-3);
+}
+.hearth-footer__made { font-style: italic; font-family: var(--font-display); }
+</style><footer class="hearth-footer"><div class="hearth-footer__top"><div class="hearth-footer__brand"><div class="hearth-footer__wordmark">studio</div><p class="hearth-footer__tagline">Warm, liveable interiors for people who host.</p></div><div class="hearth-footer__col"><h4>Contact</h4><ul><li><a href="mailto:hello@atelierhearth.com">hello@atelierhearth.com</a></li><li>(415) 555-0142</li><li>Brooklyn, NY</li></ul></div><div class="hearth-footer__col"><h4>Elsewhere</h4><ul><li><a href="#">Instagram</a></li><li><a href="#">Pinterest</a></li><li><a href="#">Houzz</a></li></ul></div></div><div class="hearth-footer__bottom"><div>© 2026 Atelier Hearth</div><div class="hearth-footer__made">Made with care.</div></div></footer></div></div></div><script>(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+      anchor.addEventListener('click', function(e) {
+        var target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  });
+})();</script>
+  <div style="background:#0b0f0e;text-align:center;padding:13px 16px">
+    <a href="https://lessgo.ai/?ref=badge&utm_source=published&utm_medium=badge" target="_blank" rel="noopener" aria-label="Proudly built by Lessgo AI" style="display:inline-flex;align-items:center;gap:7px;font:500 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:0.04em;color:#cbd5d1;text-decoration:none">
+      <span style="color:#a3e635" aria-hidden="true">&#9670;</span>
+      Proudly built by&nbsp;<span style="color:#ffffff;font-weight:600">Lessgo AI</span>
+    </a>
+  </div>
+
+  <!-- Phase 4: Form handler (loaded if page has forms) -->
+  
+
+  <!-- Phase 4: TechPremium behaviors (dropdown nav, lightbox, gallery filter, readout tick) -->
+  
+
+  <!-- Lumen behaviors (lightbox + reveal + EN·NL toggle/geo) -->
+  
+
+  <!-- Work skeleton behaviors (hero slider + fixed header) -->
+  
+
+  <!-- Phase 4: Analytics beacon (opt-in) -->
+  
+</body>
+</html>"
+`;

@@ -2,6 +2,12 @@
  * Lessgo Forms - Vanilla JS Form Handler
  * Handles form submissions on static published pages
  *
+ * Shipped as `public/assets/form.v2.js` (see scripts/buildAssets.js versioning
+ * contract). v2 no longer reads `data-owner-id` or sends `userId`: the submit
+ * route derives the owner server-side from `publishedPageId`. The frozen v1
+ * source lives at `scripts/legacy/form.v1.src.js` for old immutable blobs —
+ * any further semantic change here needs a v3, never an in-place edit.
+ *
  * Features:
  * - Client-side validation (required, email)
  * - Async submission with keepalive
@@ -159,10 +165,9 @@
     // Get form config from data attributes
     const formId = form.dataset.formId;
     const pageId = form.dataset.pageId;
-    const ownerId = form.dataset.ownerId;
     const successMessage = form.dataset.successMessage;
 
-    if (!formId || !pageId || !ownerId) {
+    if (!formId || !pageId) {
       showError(form, 'Form configuration error. Please contact support.');
       return;
     }
@@ -189,7 +194,6 @@
           formId,
           data,
           publishedPageId: pageId,
-          userId: ownerId,
         }),
         keepalive: true,
       });
@@ -247,10 +251,9 @@
     // Get form config from data attributes
     const formId = container.dataset.lessgoInlineForm;
     const pageId = container.dataset.pageId;
-    const ownerId = container.dataset.ownerId;
     const successMessage = container.dataset.successMessage;
 
-    if (!formId || !pageId || !ownerId) {
+    if (!formId || !pageId) {
       showInlineError(container, 'Form configuration error. Please contact support.');
       return;
     }
@@ -277,7 +280,6 @@
           formId,
           data,
           publishedPageId: pageId,
-          userId: ownerId,
         }),
         keepalive: true,
       });

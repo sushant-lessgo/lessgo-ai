@@ -16,6 +16,17 @@ import { runWorkGeneration, type WorkGenerationInput } from './work';
 // run pre-gate by the wizard store's `fetchStrategy` action.
 export { runStrategy, type RunStrategyResult } from './thing';
 
+// work-copy-engine phase 5 — the guarded WORK LLM multi-page fan-out + its
+// dispatch guard. Called DIRECTLY by GeneratingSlot at the work fork (mirroring
+// runWorkSkeleton), NOT via runGeneration — so this is a discoverability
+// re-export only; runGeneration's dispatch is unchanged.
+export {
+  runWorkLLMGeneration,
+  workCopyEngineEnabled,
+  resolveWorkRoute,
+  type WorkRoutePath,
+} from './work.llm';
+
 /** Progress stages surfaced to the GeneratingSlot UI (mirror old GeneratingStep). */
 export type GenerationStage = 'strategy' | 'copy' | 'saving' | 'done';
 

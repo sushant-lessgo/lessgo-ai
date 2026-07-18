@@ -150,7 +150,7 @@ export function injectRealTestimonials(
 /**
  * Auto-map nav/footer link targets to on-page section anchors by label, so generated
  * links work out of the box (the user can override any in the editor — see
- * LinkTargetPopover). Only touches links whose href is still the unset default
+ * LinkPicker). Only touches links whose href is still the unset default
  * (empty or '#'), and only sets a `#<type>` anchor when that section type actually
  * exists on the page (`presentTypes`). Anchors are bare types here (no timestamp) —
  * they match the wrapper id the renderer emits for the first occurrence of a type.

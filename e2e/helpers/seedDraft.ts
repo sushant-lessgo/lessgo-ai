@@ -206,7 +206,11 @@ function buildFinalContent(
   };
 }
 
-/** Run strategy -> copy (mock) -> saveDraft for the given token + audience. */
+/**
+ * Run strategy -> copy (mock) -> saveDraft for the given token + audience.
+ * Returns the assembled finalContent so callers can publish it via `publishSeed`
+ * without re-deriving it (the publish body needs the same layout/content).
+ */
 export async function seedDraft(request: APIRequestContext, tokenId: string, cfg: AudienceConfig) {
   const strategyJson = await postOk(request, cfg.strategyUrl, cfg.strategyBody);
   const strategy = strategyJson.data;
@@ -227,4 +231,94 @@ export async function seedDraft(request: APIRequestContext, tokenId: string, cfg
     variantId: cfg.variantId,
     finalContent,
   });
+
+  return finalContent;
+}
+
+// ---------------------------------------------------------------------------
+// Publish pacing. `/api/publish` is rate-limited to 5 requests per 60s PER USER
+// (`RATE_LIMIT_PRESETS.PUBLISHING`, `src/lib/rateLimit.ts:48-51`, in-memory), and the suite runs
+// every case as the same Clerk user, serially. Without pacing, a 6th publish in one window 429s — in
+// whichever test happens to land there, which looks EXACTLY like a real publish regression
+// in a test nobody touched. That made test ORDER load-bearing (add a fast test mid-file and
+// the cadence shifts). This wrapper tracks its own publish timestamps and waits the window
+// out, so ordering is irrelevant again.
+//
+// Deliberately NOT an e2e bypass flag on the limiter: the suite must exercise the REAL
+// limiter that production users hit.
+// ---------------------------------------------------------------------------
+const PUBLISH_LIMIT = 5;
+const PUBLISH_WINDOW_MS = 60_000;
+const publishTimes: number[] = [];
+
+async function awaitPublishWindow() {
+  for (;;) {
+    const now = Date.now();
+    while (publishTimes.length && now - publishTimes[0] >= PUBLISH_WINDOW_MS) publishTimes.shift();
+    if (publishTimes.length < PUBLISH_LIMIT) return;
+    // The window frees up when the OLDEST of the tracked calls ages out (+1s of slack for
+    // clock skew between this runner and the server's limiter).
+    const waitMs = PUBLISH_WINDOW_MS - (now - publishTimes[0]) + 1000;
+    // eslint-disable-next-line no-console
+    console.log(`[seed] publish rate limit (5/60s): waiting ${Math.ceil(waitMs / 1000)}s`);
+    await new Promise((r) => setTimeout(r, waitMs));
+  }
+}
+
+/**
+ * Publish a seeded draft through the REAL `/api/publish` route (the same body the preview
+ * page sends, minus the UI-only extras). Used by the lifecycle spec, which needs a PUBLISHED
+ * project without driving the publish UI for each case.
+ *
+ * Self-pacing against the 5/60s publish limiter (see above) — callers may publish freely,
+ * in any test order.
+ *
+ * NOTE on local dev (publish-trust M3): Vercel Blob/KV are absent, so the static export throws
+ * and `/api/publish` now honestly returns **500** (the old non-fatal 200 fall-through was the
+ * lie M3 removed — see the export catch in `src/app/api/publish/route.ts`). The catch still
+ * writes the row as `publishState: 'failed'` BEFORE returning, and `failed` is a SERVING state
+ * (`isServingPublishState`), so `/p/{slug}` still renders and teardown treats it identically to
+ * `'published'` — which is exactly what the specs assert against.
+ *
+ * Hence the acceptance rule below: `200 || (500 && the row actually serves)`. We never blanket-
+ * accept 500 — a genuinely broken publish (no row at all) must still fail loudly.
+ */
+export async function publishSeed(
+  request: APIRequestContext,
+  tokenId: string,
+  slug: string,
+  cfg: AudienceConfig,
+  finalContent: ReturnType<typeof buildFinalContent>,
+) {
+  const body = {
+    slug,
+    title: cfg.title,
+    content: {
+      layout: { sections: finalContent.layout.sections, theme: {} },
+      content: finalContent.content,
+      forms: {},
+    },
+    themeValues: {},
+    tokenId,
+  };
+
+  await awaitPublishWindow();
+  publishTimes.push(Date.now());
+  const res = await request.post('/api/publish', { data: body, timeout: 150_000 });
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok()) {
+    // Only a 500 from the export catch is tolerated, and only if it left a SERVING row.
+    expect(
+      res.status(),
+      `/api/publish -> ${res.status()} ${JSON.stringify(json)} (only an honest 500 is tolerated)`,
+    ).toBe(500);
+    const served = await request.get(`/p/${slug}`, { timeout: 60_000 });
+    expect(
+      served.status(),
+      `/api/publish 500'd AND /p/${slug} -> ${served.status()}: no serving row, publish is genuinely broken`,
+    ).toBeLessThan(400);
+  }
+
+  return json;
 }

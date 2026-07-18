@@ -1,10 +1,15 @@
-/* atelierSliderBehaviors.js — published-only behavior for the Atelier template's
- * hero cover slider. Built to public/assets/slider.v1.js (scripts/buildAssets.js)
- * and injected by htmlGenerator.ts only when templateId === 'atelier'.
+/* atelierSliderBehaviors.js — LEGACY-FROZEN published-only behavior for the OLD
+ * hand-written Atelier hero cover slider. Built to public/assets/slider.v1.js
+ * (scripts/buildAssets.js). The old atelier skin was RETIRED in
+ * atelier-skeleton-cutover — NEW atelier publishes are work-skeleton pages that
+ * load work.v1.js instead and never inject this tag. This source is kept ONLY
+ * because already-published old blobs reference /assets/slider.v1.js by URL
+ * (immutable-asset contract) and must keep loading it. Do not delete; do not edit
+ * semantics (a change = a NEW filename slider.v2.js).
  *
  * NO-OP when the markup is absent, with an idempotent boot guard. Selectors are a
- * HARD CONTRACT with the phase-9a Hero markup (AtelierHero.core.tsx) — do NOT
- * rename without shipping slider.v2.js:
+ * HARD CONTRACT with the old Atelier hero markup — do NOT rename without shipping
+ * slider.v2.js:
  *   .lg-atelier-cover                              closest() ancestor
  *   .lg-atelier-slides[data-atl-slider][data-interval]
  *   .lg-atelier-slide / .is-active                slides + active class

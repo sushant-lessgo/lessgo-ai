@@ -311,8 +311,8 @@ describe('atelier phase 7 — serve backing + over-serve guards', () => {
     // work-engine capability WITH a resolving capabilitySections entry.
     const meta = templateMeta.atelier;
     expect(meta.copyEngines).toEqual(['work']);
-    expect(meta.capabilities).toEqual(['gallery', 'packages', 'multipage']);
-    expect(meta.capabilitySections).toEqual({ gallery: 'work', packages: 'packages' });
+    expect(meta.capabilities).toEqual(['gallery', 'packages', 'multipage', 'works']);
+    expect(meta.capabilitySections).toEqual({ gallery: 'work', packages: 'packages', works: 'workcatalog' });
     expect(meta.retired).toBeFalsy();
     expect(meta.bespoke).toBeFalsy();
   });

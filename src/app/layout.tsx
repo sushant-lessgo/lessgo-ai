@@ -10,6 +10,16 @@ import "./globals.css";
 // (QA vestria: display serif fell back to a slab serif). Declarations are lazy —
 // browsers only download faces actually used on screen.
 import "@/styles/fonts-self-hosted.css";
+// App-chrome @font-face declarations (Onest, JetBrains Mono 600, Material Symbols
+// Rounded, Caveat). Imported ONLY here in the root app layout — NOT inlined into
+// public/published.css and NOT loaded by p/layout.tsx, so these families add zero
+// bytes to published pages. Lazy: only faces used on screen download.
+import "@/styles/fonts-app-chrome.css";
+// App-chrome scope class (.app-chrome) + Material Symbols icon base (.app-icon).
+// Imported ONLY here in the root app layout — NOT loaded by p/layout.tsx and NOT
+// inlined into public/published.css, so it adds zero bytes to published pages.
+// `.app-chrome` is applied to NO screen by this feature; consuming specs attach it.
+import "@/styles/app-chrome.css";
 // import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { Suspense } from 'react';
 import {
@@ -18,7 +28,6 @@ import {
   SignUpButton,
   SignedIn,
   SignedOut,
-  UserButton,
 } from '@clerk/nextjs'
 
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -96,16 +105,73 @@ export default function RootLayout({
     process.env.NEXT_PUBLIC_DASHBOARD_URL,
   ].filter((o): o is string => Boolean(o))
 
+  // Founding-cohort auth copy (auth-redesign). These are FLOW-SCOPED keys —
+  // `signUp.start.*` and `signIn.start.*` are distinct namespaces, so setting both
+  // cannot collide, and no shared/global key is touched (a global override like
+  // `formButtonPrimary` would leak into UserButton/UserProfile forms). Purely
+  // presentational: Clerk still owns every flow, step and redirect.
+  const authLocalization = {
+    signUp: {
+      start: {
+        title: 'Claim your founding seat',
+        titleCombined: 'Claim your founding seat',
+        subtitle:
+          'Invite-only access to Lessgo. Set up in minutes, no credit card required.',
+        subtitleCombined:
+          'Invite-only access to Lessgo. Set up in minutes, no credit card required.',
+        actionText: 'Already have an account?',
+        actionLink: 'Log in',
+      },
+    },
+    signIn: {
+      start: {
+        title: 'Welcome back',
+        titleCombined: 'Welcome back',
+        subtitle: 'Pick up where you left off.',
+        subtitleCombined: 'Pick up where you left off.',
+        actionText: 'New here?',
+        actionLink: 'Claim your seat',
+      },
+    },
+  }
+
   return (
     <ClerkProvider
       allowedRedirectOrigins={allowedRedirectOrigins}
+      localization={authLocalization}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
       signUpForceRedirectUrl="/dashboard"
       signInForceRedirectUrl="/dashboard"
     >
       <html lang="en">
-        <head />
+        <head>
+          {/* App-chrome font preloads (app surface only; see fonts-app-chrome.css).
+              Onest 400/600 = the two most-used chrome weights; Material Symbols
+              subset = icon font used across chrome. Published pages preload their
+              own template hero font via CriticalFontPreload — untouched here. */}
+          <link
+            rel="preload"
+            as="font"
+            type="font/woff2"
+            href="/fonts/onest/onest-latin-400-normal.woff2"
+            crossOrigin="anonymous"
+          />
+          <link
+            rel="preload"
+            as="font"
+            type="font/woff2"
+            href="/fonts/onest/onest-latin-600-normal.woff2"
+            crossOrigin="anonymous"
+          />
+          <link
+            rel="preload"
+            as="font"
+            type="font/woff2"
+            href="/fonts/material-symbols-rounded/material-symbols-rounded.woff2"
+            crossOrigin="anonymous"
+          />
+        </head>
         <body className="antialiased">
           <TooltipProvider>
           <PostHogProvider>

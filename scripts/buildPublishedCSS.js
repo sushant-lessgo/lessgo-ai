@@ -23,7 +23,20 @@ async function buildPublishedCSS() {
     const publishedConfig = {
       mode: 'jit',
       content: [
-        'src/modules/UIBlocks/**/*.published.tsx',
+        // --- Published renderer + registry + wrapper markup ---------------------
+        // Scope note (decided 2026-07-17): this list is deliberately SMALL.
+        // Template / skeleton / sharedBlock published blocks are NOT styled by this
+        // bundle — they carry inline <style> + CSS custom properties + BEM class
+        // names, so Tailwind has nothing to purge from them. Adding
+        // `templates/**`, `skeletons/**`, `Design/**` or `staticExport/*` globs would
+        // only insure a code path that the published-block convention says must not
+        // exist (Tailwind utilities in published blocks). The convention is enforced
+        // by lint (backlog #30), not by widening this list.
+        //
+        // (A dead `src/modules/UIBlocks/**/*.published.tsx` glob — the dir was
+        // removed — lived here until 2026-07 and matched zero files. Harmless in
+        // effect, but exactly the shape of a real purge bug; hence the per-glob
+        // zero-match hard fail below.)
         'src/components/published/**/*.tsx',
         'src/modules/generatedLanding/LandingPagePublishedRenderer.tsx',
         'src/modules/generatedLanding/componentRegistry.published.ts'
@@ -277,6 +290,33 @@ async function buildPublishedCSS() {
       plugins: []
     };
 
+    // --- GUARD 1: per-glob zero-match hard fail --------------------------------
+    // The primary anti-rot guard. A glob that matches nothing is exactly how this
+    // script rotted silently for months: Tailwind does not complain, it just purges
+    // every class it never saw. Aggregate ("total files > 0") checks are what allowed
+    // that, so this MUST stay per-glob.
+    // `glob` is a DIRECT dependency (package.json). Do not swap this for
+    // `fast-glob`: that only resolves via Tailwind's dep tree, so the guard would
+    // break with "cannot find module" the day Tailwind drops it.
+    const { globSync } = require('glob');
+    const emptyGlobs = publishedConfig.content.filter(
+      (glob) => globSync(glob, { cwd: rootDir }).length === 0
+    );
+    if (emptyGlobs.length > 0) {
+      console.error('❌ Published CSS content glob(s) matched ZERO files:');
+      for (const glob of emptyGlobs) {
+        console.error(`   - ${glob}`);
+      }
+      console.error(
+        '   A dead glob silently purges every class in that directory from published.css\n' +
+          '   (editor looks right, published page is unstyled). Fix or remove the glob.'
+      );
+      process.exit(1);
+    }
+    console.log(
+      `✅ All ${publishedConfig.content.length} content globs match at least one file`
+    );
+
     // Write temp config
     const tempConfigPath = path.join(rootDir, 'tailwind.published.config.js');
     fs.writeFileSync(
@@ -332,6 +372,38 @@ async function buildPublishedCSS() {
     } else if (stats.size < 50 * 1024) {
       console.log('✨ CSS size within target range (<50KB)');
     }
+
+    const css = fs.readFileSync(outputPath, 'utf8');
+
+    // --- GUARD 2: app-chrome 0-leak assertion ---------------------------------
+    // published.css ships to customer pages and must contain ZERO app-chrome
+    // (ui-foundation) tokens/fonts. Pins the isolation contract at build time.
+    const APP_CHROME_TOKENS = [
+      'onest',
+      'caveat',
+      'material symbols',
+      'app-primary',
+      'app-cta',
+      'app-ink'
+    ];
+    const lowerCSS = css.toLowerCase();
+    // Word-boundary match, not substring: a bare `includes('onest')` would
+    // false-positive on a future class containing it (`honest`), likewise
+    // `caveat`. `\b` still matches across `-` and ` ` (both non-word chars), so
+    // hyphenated tokens (`app-cta`) and `material symbols` keep working, and the
+    // failure direction stays safe (over-matching, never under-matching).
+    const leaked = APP_CHROME_TOKENS.filter((t) =>
+      new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(lowerCSS)
+    );
+    if (leaked.length > 0) {
+      console.error('   published.css must stay isolated from app-chrome (ui-foundation).');
+      // throw (not process.exit) so the catch below cleans up the temp files that
+      // already exist at this point; it still exits non-zero and names the tokens.
+      throw new Error(
+        `App-chrome token(s) leaked into published.css: ${leaked.join(', ')}`
+      );
+    }
+    console.log('✅ No app-chrome leakage');
 
     // Cleanup temp files
     fs.unlinkSync(tempConfigPath);

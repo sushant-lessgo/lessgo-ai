@@ -90,7 +90,9 @@ import type { ServiceAssetAvailability } from '@/types/service';
 // static import graph).
 import type { ThingGenerationInput } from '@/modules/wizard/generation/thing';
 import type { TrustGenerationInput } from '@/modules/wizard/generation/trust';
+import type { WorkGenerationInput } from '@/modules/wizard/generation/work';
 import type { ProductStrategyOutput, SitemapPage } from '@/types/product';
+import type { WorkPageGoalKey } from '@/modules/engines/workPages';
 
 // ---------------------------------------------------------------------------
 // Field state model
@@ -276,7 +278,62 @@ interface WizardState {
   // generating slot.
   generationProgress: number;
   generationError: string | null;
+
+  /**
+   * work-onboarding-shell P2b — the JOURNEY step machine (2–6).
+   *
+   * ADDITIVE and fully INDEPENDENT of the slot machine above: a project renders
+   * EITHER the legacy `WizardShell` (slots) OR the journey shell (this), never
+   * both, so the two never interact. `slots`/`currentSlot`/`nextSlot`/`prevSlot`
+   * are untouched by the journey.
+   *
+   * STEP 01 is absent by design — it is pre-confirm and owned by the entry page,
+   * so the journey shell only ever mounts at 2+.
+   */
+  journeyStep: WizardJourneyStep;
 }
+
+/**
+ * The journey steps the shell can be on (02 show-work → 06 reveal).
+ *
+ * Structurally identical to `JourneyStep` in
+ * `src/components/onboarding/journey/engines/types.ts`, and deliberately NOT
+ * imported from it: that module imports `WizardStore` from THIS file, so
+ * importing back would be a cycle. Both are the same closed literal union, so
+ * values pass between them without a cast.
+ */
+export type WizardJourneyStep = 2 | 3 | 4 | 5 | 6;
+
+/**
+ * work-onboarding-shell P3 — the OK half of a journey seam's `RailCommit`
+ * (`src/components/onboarding/journey/engines/types.ts`).
+ *
+ * Declared HERE rather than imported for the same reason as `WizardJourneyStep`:
+ * that module imports `WizardStore` from this file, so importing back would be a
+ * cycle. Structurally identical, so a `RailCommit & {ok:true}` passes without a
+ * cast — and the store stays engine-agnostic (it never learns what `work` is).
+ */
+export interface WizardRailCommit {
+  /** The `/api/saveDraft` brief patch — a FULL-facts re-emit (landmine 4). */
+  patch: Partial<Brief>;
+  /** The SAME merged bag, so persist + `briefFacts` land in one `set`. */
+  facts: Record<string, unknown>;
+  /** Store-level mirrors the SEAM declares (e.g. work NAME → `fields['name']`). */
+  fieldMirrors?: { fieldId: string; value: string }[];
+  /**
+   * work-onboarding-plan E4 — an edited sitemap to persist ALONGSIDE the facts
+   * (STEP 04 plan taps). When present, `commitRail` snapshots + optimistically
+   * sets + wholesale-reverts `state.sitemap` together with `briefFacts`, so the
+   * plan screen's optimistic UI + failure-revert cover the sitemap too. The
+   * `patch.structure` (built by `buildPlanCommit`) is what actually persists
+   * through the saveDraft chain; this field keeps the in-memory sitemap — the
+   * list generation reads — in lockstep. Absent for facts-only rail commits.
+   */
+  sitemap?: unknown[];
+}
+
+/** `ok:false` ⇒ the optimistic state was REVERTED; the caller toasts. */
+export type WizardRailCommitResult = { ok: true } | { ok: false; error: string };
 
 interface WizardActions {
   hydrate: (payload: WizardHydratePayload) => void;
@@ -353,6 +410,25 @@ interface WizardActions {
   // generating.
   setGenerationProgress: (progress: number) => void;
   setGenerationError: (error: string | null) => void;
+
+  /**
+   * work-onboarding-shell P2b — journey step machine. Additive; the journey
+   * shell owns forward/back motion. No slot-machine interaction.
+   */
+  setJourneyStep: (step: WizardJourneyStep) => void;
+
+  /**
+   * work-onboarding-shell P3 — apply ONE rail write, atomically, and persist it.
+   * ENGINE-AGNOSTIC: the seam builds the commit, this only applies + saves it.
+   *
+   * `briefFacts` is what GENERATION reads (`resolveWorkBrief` → `buildWorkInput`),
+   * so an unpersisted rail belief would make STEP 05 generate from data that
+   * vanishes on reload. Therefore, unlike `save()`, this is NOT fire-and-forget:
+   * it checks `res.ok` and REVERTS both `briefFacts` and the mirrored `fields` on
+   * any non-2xx/throw, returning `{ok:false}` for the caller to toast. The rail
+   * must never show a belief we failed to persist.
+   */
+  commitRail: (commit: WizardRailCommit) => Promise<WizardRailCommitResult>;
 
   // Persistence (reuses /api/saveDraft — no new API).
   buildBriefPatch: () => Partial<Brief>;
@@ -559,11 +635,18 @@ export function buildStructurePatch(s: WizardState): ConfirmedStructure | null {
     return {
       mode: 'multi',
       pages: sitemap.map((p) => p.archetypeKey),
-      pageDetails: sitemap.map((p) => ({
-        archetypeKey: p.archetypeKey,
-        slug: p.pathSlug,
-        sections: [...p.sections],
-      })),
+      pageDetails: sitemap.map((p) => {
+        // `goal` rides on the work sitemap (WorkSitemapPage) which the store
+        // types loosely as the product SitemapPage; read it via a narrow widen.
+        const goal = (p as { goal?: WorkPageGoalKey }).goal;
+        return {
+          archetypeKey: p.archetypeKey,
+          slug: p.pathSlug,
+          sections: [...p.sections],
+          title: p.title,
+          ...(goal ? { goal } : {}),
+        };
+      }),
     };
   }
   const body = confirmedStructureBody(s);
@@ -667,6 +750,51 @@ export function buildTrustInput(s: WizardState): TrustGenerationInput {
   };
 }
 
+/**
+ * work-copy-engine phase 5 — reconstruct the resolved Brief the WORK LLM routes
+ * read (`facts.work` + businessType + composed goal). The store keeps the
+ * COMPLETE `brief.facts` snapshot (`briefFacts`, taken at hydrate) so `facts.work`
+ * rides it verbatim; businessType + goal are derived. Every BriefSchema field is
+ * optional, so this minimal projection validates at the routes.
+ */
+function resolveWorkBrief(s: WizardState): Brief {
+  const goal = s.goalIntent ? intentToBriefGoal(s.goalIntent, s.goalParam) : undefined;
+  return {
+    facts: (s.briefFacts ?? {}) as Brief['facts'],
+    ...(s.businessTypeKey ? { businessType: s.businessTypeKey } : {}),
+    copyEngine: 'work',
+    ...(goal ? { goal } : {}),
+  };
+}
+
+/**
+ * Project the wizard store state → the WORK adapter input (plain data). Mirrors
+ * buildThingInput / buildTrustInput. Adds (phase 5) the LLM fan-out fields:
+ * the resolved Brief (facts.work), the SiteContext `sourceUrl` (derived from the
+ * scrape entry when URL-like — tone-only), and the confirmed sitemap `pages`.
+ * The granth generator + skeleton paths IGNORE brief/sourceUrl (they never call
+ * the copy routes), so this is additive for those flows.
+ */
+export function buildWorkInput(s: WizardState): WorkGenerationInput {
+  const fields = s.fields as Record<string, { value: unknown }>;
+  const brief = resolveWorkBrief(s);
+  const entry = getEntryFacts(brief);
+  const sourceUrl = rawInputIsUrl(entry?.rawInput) ? entry!.rawInput : undefined;
+  return {
+    tokenId: s.tokenId ?? '',
+    templateId: s.templateId ?? 'granth',
+    writerName: fieldStr(fields, 'name'),
+    oneLiner: fieldStr(fields, 'oneLiner'),
+    // The 3–5 work uploads captured in ProofSlot (contract `theWork`).
+    works: fieldArr(fields, 'theWork'),
+    // The confirmed sitemap pages (multipage skeleton / LLM fan-out; ignored by
+    // the single-page granth generator).
+    pages: (s.sitemap as SitemapPage[] | null) ?? [],
+    brief,
+    ...(sourceUrl ? { sourceUrl } : {}),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Single-page structure helpers (scale-07 phase 4)
 // ---------------------------------------------------------------------------
@@ -732,7 +860,46 @@ const initialState: WizardState = {
   importedTestimonials: [],
   generationProgress: 0,
   generationError: null,
+  // Journey (P2b). 2 = the first resumable step; the entry page owns STEP 01.
+  journeyStep: 2,
 };
+
+/**
+ * work-onboarding-shell P4 — the `commitRail` SERIALIZATION chain.
+ *
+ * WHY (P3 review NB2): `commitRail` is optimistic + REVERTS WHOLESALE to a
+ * pre-edit snapshot on a failed save. With ONE caller that was safe — the rail's
+ * own `saving` flag disabled every submit control while a commit was in flight.
+ * P4 adds a SECOND caller (STEP 03's questions) OUTSIDE the rail, where that
+ * flag does not apply. Interleaved commits would then let a late failure's
+ * revert wipe an EARLIER SUCCESS: B snapshots before A lands, A succeeds, B
+ * fails, B restores the pre-A bag — and the DB (which has A) silently diverges
+ * from `briefFacts`, which is what generation reads.
+ *
+ * Fix: commits run ONE AT A TIME, chained here. Each commit takes its snapshot
+ * only when its turn starts, so a revert can only ever undo ITS OWN edit.
+ *
+ * Module-level (not store state) on purpose: a Promise is not serializable
+ * state, nothing renders from it, and immer must never see it. It only ORDERS
+ * work — `reset()` deliberately does not touch it (an in-flight save must still
+ * settle in order).
+ */
+let railCommitChain: Promise<unknown> = Promise.resolve();
+
+// ---------------------------------------------------------------------------
+// Journey selectors (P2b) — selector-first reads for the journey shell.
+// ---------------------------------------------------------------------------
+
+export const selectJourneyStep = (s: WizardStore): WizardJourneyStep => s.journeyStep;
+export const selectSetJourneyStep = (s: WizardStore) => s.setJourneyStep;
+/** P3 — the rail's source of truth. Re-projected by the seam on every change. */
+export const selectBriefFacts = (s: WizardStore): Record<string, unknown> | null =>
+  s.briefFacts;
+export const selectCommitRail = (s: WizardStore) => s.commitRail;
+/** E3 — the profession wording key STEP 03's `questions(vm, ctx)` needs (D-B).
+ *  Lives on the store (not the facts bag), so the seam reaches it via ctx. */
+export const selectBusinessTypeKey = (s: WizardStore): BusinessTypeKey | null =>
+  s.businessTypeKey;
 
 // ---------------------------------------------------------------------------
 // Store
@@ -851,12 +1018,16 @@ export const useWizardStore = create<WizardStore>()(
             if (persisted.mode === 'multi' && persisted.pageDetails?.length) {
               state.sitemap = persisted.pageDetails.map((d) => ({
                 archetypeKey: d.archetypeKey,
-                // Title isn't persisted (schema carries key/slug/sections
-                // only) — prettify the key; the slot's title input remains
-                // editable.
-                title: d.archetypeKey.charAt(0).toUpperCase() + d.archetypeKey.slice(1),
+                // Title now persists (E4); fall back to prettifying the key for
+                // older Briefs that carry key/slug/sections only.
+                title:
+                  d.title ??
+                  d.archetypeKey.charAt(0).toUpperCase() + d.archetypeKey.slice(1),
                 pathSlug: d.slug,
                 sections: [...d.sections],
+                // Goal round-trips symmetrically (WorkSitemapPage.goal); absent
+                // on non-work / older Briefs.
+                ...(d.goal ? { goal: d.goal } : {}),
               }));
             } else if (persisted.mode === 'single' && persisted.sections?.length) {
               state.structureSections = persisted.sections.filter(
@@ -1151,6 +1322,117 @@ export const useWizardStore = create<WizardStore>()(
         set((state) => {
           state.generationError = error;
         }),
+
+      // work-onboarding-shell P2b — journey step machine (additive). The union
+      // is closed, so no range clamp is needed; the slot machine is untouched.
+      setJourneyStep: (step) =>
+        set((state) => {
+          state.journeyStep = step;
+        }),
+
+      // work-onboarding-shell P3 — the atomic rail commit (decision 5).
+      //
+      // ORDER MATTERS, all of it:
+      //  1. SNAPSHOT `briefFacts` + every field a mirror will overwrite BEFORE
+      //     the optimistic `set` — after it, immer has replaced them and the
+      //     pre-edit values are gone.
+      //  2. ONE `set` applies `facts` + mirrors together. `facts` is the seam's
+      //     merged bag (same object as `patch.facts`), so the rail re-projects
+      //     immediately and the NEXT edit's `liveFacts` is this snapshot — which
+      //     is what makes the seam's chip ids join correctly (chip stable-id
+      //     rule). Never split this into two sets.
+      //  3. POST + CHECK `res.ok`. `save()` swallows everything by design
+      //     (autosave must not block the wizard); this must not — see the action
+      //     doc. On failure we restore BOTH in one `set` and report `ok:false`.
+      //
+      // The toast lives at the CALL SITE (a store cannot use the `useToast`
+      // hook); the revert — the part that protects generation — lives here.
+      commitRail: (commit) => {
+        // SERIALIZED (P4 — see `railCommitChain`). `perform` runs only after the
+        // previous commit has SETTLED, so its snapshot is post-that-commit and
+        // its revert can never undo someone else's successful edit. The queue is
+        // what makes a second caller (STEP 03) safe against the wholesale revert.
+        const perform = async (): Promise<WizardRailCommitResult> => {
+          const { tokenId, currentSlot, slots } = get();
+          if (!tokenId) return { ok: false, error: 'No project token' };
+
+          const mirrors = commit.fieldMirrors ?? [];
+          // Step 1 — pre-edit snapshots. Taken HERE (inside `perform`, i.e. when
+          // this commit's turn starts), never at enqueue time — that is the
+          // whole point of the chain.
+          const prevFacts = get().briefFacts;
+          const prevFields = mirrors.map(
+            (m) => [m.fieldId, get().fields[m.fieldId]] as const
+          );
+          // E4 — the sitemap rides the SAME snapshot/set/revert when a plan tap
+          // supplied one; facts-only commits leave `state.sitemap` untouched.
+          const hasSitemap = commit.sitemap !== undefined;
+          const prevSitemap = hasSitemap ? get().sitemap : null;
+
+          // Step 2 — the one optimistic set.
+          set((state) => {
+            state.briefFacts = commit.facts;
+            if (hasSitemap) state.sitemap = commit.sitemap ?? null;
+            for (const m of mirrors) {
+              const prev = state.fields[m.fieldId];
+              state.fields[m.fieldId] = {
+                value: m.value,
+                source: 'user',
+                confirmed: prev?.confirmed ?? false,
+                state: prev?.state ?? 'ask',
+              };
+            }
+          });
+
+          const revert = () =>
+            set((state) => {
+              state.briefFacts = prevFacts;
+              if (hasSitemap) state.sitemap = prevSitemap;
+              for (const [id, entry] of prevFields) {
+                // A field the mirror CREATED must be removed again, not left as
+                // an `undefined`-valued entry.
+                if (entry === undefined) delete state.fields[id];
+                else state.fields[id] = entry;
+              }
+            });
+
+          // Step 3 — persist. Body shape is `save()`'s, verbatim: the journey
+          // has no slot, so `slots.indexOf(currentSlot)` is -1 → 0. Harmless —
+          // the only consumer of the persisted stepIndex is dashboard
+          // `continueRouting`, whose mid-journey branch routes 0 back through
+          // onboarding (→ journey resume-mount) and whose `finalContent` branch
+          // wins post-generation.
+          try {
+            const res = await fetch('/api/saveDraft', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                tokenId,
+                stepIndex: Math.max(0, slots.indexOf(currentSlot)),
+                brief: commit.patch,
+              }),
+            });
+            if (!res.ok) {
+              revert();
+              return { ok: false, error: `saveDraft failed (${res.status})` };
+            }
+            return { ok: true };
+          } catch {
+            revert();
+            return { ok: false, error: 'saveDraft failed' };
+          }
+        };
+
+        // Chain on SETTLEMENT (both arms), so one rejection cannot stall the
+        // queue forever. `perform` never throws — it returns `{ok:false}` — so
+        // the second arm is belt-and-braces.
+        const run = railCommitChain.then(perform, perform);
+        railCommitChain = run.then(
+          () => undefined,
+          () => undefined
+        );
+        return run;
+      },
 
       // Compose the Brief patch persisted on save — goal is the well-defined
       // writeback (scale-05); field→Brief mapping lands with the phase-5

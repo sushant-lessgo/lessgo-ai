@@ -177,9 +177,8 @@ export interface UIActions {
   setActiveForm: (formId?: string) => void;
   showFormBuilder: () => void;
   hideFormBuilder: () => void;
-  convertCTAToForm: (sectionId: string, elementKey: string) => void;
-  
-  // Images UI  
+
+  // Images UI
   setActiveImage: (imageId?: string) => void;
   showStockPhotoSearch: (query: string) => void;
   hideStockPhotoSearch: () => void;
@@ -499,6 +498,13 @@ export interface GenerationActions {
   }>) => void;
   clearAIErrors: () => void;
   regenerateAllContent: () => Promise<void>;
+
+  // Work-copy-engine story interview (Sugarman) — regenerates ONLY the `about`
+  // (story) section from 3 freeform answers; facts.work is resolved server-side.
+  regenerateStoryFromInterview: (
+    sectionId: string,
+    interviewAnswers: { origin: string; moment: string; belief: string },
+  ) => Promise<void>;
   
   // Element-level AI Actions
   regenerateElement: (sectionId: string, elementKey: string, variationCount?: number) => Promise<void>;

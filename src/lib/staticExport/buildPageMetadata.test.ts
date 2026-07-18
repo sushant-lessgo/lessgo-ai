@@ -82,6 +82,79 @@ describe('resolveOgImage', () => {
     );
   });
 
+  // publish-trust M4: previewImage is validated by z.string().url() (validation.ts:117),
+  // which ACCEPTS `javascript:` — so this is the real gate. Reject semantics = FALL THROUGH
+  // to the auto /api/og URL, never '' (an empty og:image is a broken social card).
+  describe('scheme gate on the previewImage candidate', () => {
+    it.each([
+      'javascript:alert(1)',
+      'JaVaScRiPt:alert(1)',
+      ' javascript:alert(1)',
+      'java\tscript:alert(1)',
+      'data:text/html,<script>alert(1)</script>',
+      'vbscript:msgbox(1)',
+      '//evil.com/x.png',
+    ])('drops hostile previewImage %j → auto /api/og fallback', (hostile) => {
+      expect(
+        resolveOgImage({ slug: 'acme', previewImage: hostile, baseUrl: 'https://lessgo.ai' })
+      ).toBe('https://lessgo.ai/api/og/acme');
+    });
+
+    it('falls back to the custom-domain auto OG when a hostile override is dropped', () => {
+      expect(
+        resolveOgImage({
+          slug: 'acme',
+          previewImage: 'javascript:alert(1)',
+          canonicalDomain: 'scalifixai.com',
+          baseUrl: 'https://lessgo.ai',
+        })
+      ).toBe('https://scalifixai.com/api/og/acme');
+    });
+
+    it('leaves benign previewImage values untouched (no behavior change for real users)', () => {
+      expect(
+        resolveOgImage({ slug: 'acme', previewImage: 'https://cdn/x.png?a=1&b=2', baseUrl: 'https://lessgo.ai' })
+      ).toBe('https://cdn/x.png?a=1&b=2');
+      expect(
+        resolveOgImage({ slug: 'acme', previewImage: 'http://cdn/x.png', baseUrl: 'https://lessgo.ai' })
+      ).toBe('http://cdn/x.png');
+      expect(
+        resolveOgImage({ slug: 'acme', previewImage: '/uploads/x.png', baseUrl: 'https://lessgo.ai' })
+      ).toBe('/uploads/x.png');
+    });
+  });
+});
+
+// The merge point: seo.ogImage > previewImage > auto, each candidate scheme-gated.
+describe('buildPageMetadata — og:image scheme gate at the merge point', () => {
+  const base = { slug: 'acme', pageTitle: 'Acme', content: flatContent, baseUrl: 'https://lessgo.ai' };
+
+  it('drops a hostile previewImage → auto /api/og', () => {
+    expect(buildPageMetadata({ ...base, previewImage: 'javascript:alert(1)' }).ogImage).toBe(
+      'https://lessgo.ai/api/og/acme'
+    );
+  });
+
+  it('drops a hostile seo.ogImage and falls through to a benign previewImage', () => {
+    expect(
+      buildPageMetadata({
+        ...base,
+        previewImage: 'https://cdn/good.png',
+        seo: { ogImage: 'javascript:alert(1)' } as any,
+      }).ogImage
+    ).toBe('https://cdn/good.png');
+  });
+
+  it('keeps benign precedence intact (seo.ogImage wins over previewImage)', () => {
+    expect(
+      buildPageMetadata({
+        ...base,
+        previewImage: 'https://cdn/second.png',
+        seo: { ogImage: 'https://cdn/first.png' } as any,
+      }).ogImage
+    ).toBe('https://cdn/first.png');
+  });
+
   it('manual previewImage still wins over the path-suffixed auto URL', () => {
     expect(
       resolveOgImage({

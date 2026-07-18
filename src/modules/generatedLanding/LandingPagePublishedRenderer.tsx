@@ -24,6 +24,7 @@ import { getLoadedTemplate } from '@/modules/templates/registry';
 import { normalizeCtas, buildNormalizeCtasContext } from '@/utils/normalizeCtas';
 import type { Brief } from '@/types/brief';
 import type { KnobSelection } from '@/types/template';
+import type { StyleTokens } from '@/modules/skeletons/styleTokens';
 
 /**
  * Extract content fields from elements structure
@@ -52,6 +53,7 @@ interface LandingPagePublishedRendererProps {
   variantId?: string | null;    // Template variant (Lex/Meridian token rescale)
   mood?: string | null;         // Neutral mood (vestria; Project.themeValues.mood)
   knobs?: KnobSelection | null; // Knob selection (phase 3; Project.themeValues.knobs)
+  styleTokens?: StyleTokens | null; // User style tokens (work-skeleton D1; Project.themeValues.styleTokens)
   goal?: Brief['goal'] | null;  // scale-04: resolves GOAL_REF ctas via the pre-pass
   // goal-ref-cta phase 3 (F23): the page being rendered + the page holding the
   // conversion form (both precomputed by the exporter, which alone holds every
@@ -75,6 +77,7 @@ export function LandingPagePublishedRenderer({
   variantId = null,
   mood = null,
   knobs = null,
+  styleTokens = null,
   goal = null,
   currentPagePath,
   formPagePath,
@@ -217,7 +220,7 @@ export function LandingPagePublishedRenderer({
   return (
     <>
     {usesTemplate && tmpl ? (
-      <tmpl.SSRTokens paletteId={effectivePalette} variantId={effectiveVariant} mood={mood ?? undefined} knobs={knobs ?? undefined}>
+      <tmpl.SSRTokens paletteId={effectivePalette} variantId={effectiveVariant} mood={mood ?? undefined} knobs={knobs ?? undefined} styleTokens={styleTokens ?? undefined}>
         {sectionsTree}
       </tmpl.SSRTokens>
     ) : (
@@ -247,12 +250,13 @@ export function LandingPagePublishedRenderer({
 
     {/* Form handler (conditionally injected when the page has forms).
         Mirrors htmlGenerator's hasForms gate so the SSR fallback path serves a
-        submittable form — the static blob loads form.v1.js, and without this the
+        submittable form — the static blob loads form.v2.js, and without this the
         SSR-rendered page (e.g. custom-domain slug-for-host fallback) would render
-        identical form markup with no submit handler. */}
+        identical form markup with no submit handler. Must stay in lockstep with
+        htmlGenerator's asset version (old blobs keep the frozen form.v1.js). */}
     {Boolean(content?.forms && Object.keys(content.forms).length > 0) && (
       <Script
-        src="https://lessgo.ai/assets/form.v1.js"
+        src="https://lessgo.ai/assets/form.v2.js"
         strategy="afterInteractive"
       />
     )}

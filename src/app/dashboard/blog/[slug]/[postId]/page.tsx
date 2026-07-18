@@ -1,68 +1,48 @@
-import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
-import Header from '@/components/dashboard/Header'
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
-import BlogPostEditor from './components/BlogPostEditor'
 
-// Blog (Phase 1): post editor shell. Ownership: slug+userId (page) → project →
-// post must belong to the same project.
+/**
+ * REDIRECT SHIM — `/dashboard/blog/{slug}/{postId}` → `/dashboard/{token}/blog/{postId}`.
+ *
+ * The post editor moved into the token workspace. This file only exists to keep old
+ * bookmarks/links working.
+ *
+ * 🚨 This directory must STAY REAL — see the parent shim. Its `components/` folder
+ * (BlogPostEditor + BlogRichTextEditor) moved WITH the page (C3).
+ *
+ * 🚨 The CHILD route `.../preview` is deliberately NOT shimmed and NOT re-homed (B2):
+ * it lives in the `(blog-preview)` root route group, outside the dashboard tree, so no
+ * `.app-chrome` ancestor can leak app styling into real template markup. Its URL is
+ * unchanged and it is still the live preview target (`BlogPostEditor.tsx` links to it).
+ * Next.js resolves that group's `/dashboard/blog/[slug]/[postId]/preview` independently
+ * of this page — this shim only matches the exact `[postId]` segment.
+ *
+ * Authz: redirects UNCONDITIONALLY on a resolvable slug — the target enforces ownership
+ * (`getWorkspaceProject`) AND that the post belongs to the project. `postId` is passed
+ * through unvalidated on purpose: validating it here would duplicate the target's check.
+ * Unknown/unmapped slug → `notFound()`.
+ *
+ * ⚠️ Shims preserve NO query string — in-tab links must target the token URL directly.
+ */
 
 interface PageProps {
   params: { slug: string; postId: string }
 }
 
-export default async function BlogPostEditorPage({ params }: PageProps) {
-  const { userId } = await auth()
-  if (!userId) redirect('/sign-in')
-
+export default async function BlogPostSlugRedirect({ params }: PageProps) {
   const publishedPage = await prisma.publishedPage.findFirst({
-    where: { slug: params.slug, userId },
+    where: { slug: params.slug },
     select: { projectId: true },
   })
-  if (!publishedPage || !publishedPage.projectId) notFound()
+
+  if (!publishedPage?.projectId) notFound()
 
   const project = await prisma.project.findUnique({
     where: { id: publishedPage.projectId },
     select: { tokenId: true },
   })
+
   if (!project) notFound()
 
-  const post = await prisma.blogPost.findUnique({ where: { id: params.postId } })
-  if (!post || post.projectId !== publishedPage.projectId) notFound()
-
-  const body = (post.body as any) || {}
-
-  return (
-    <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900 font-body">
-      <Header />
-      <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Link
-            href={`/dashboard/blog/${params.slug}`}
-            className="flex items-center text-gray-500 hover:text-gray-900 transition"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            All posts
-          </Link>
-        </div>
-        <BlogPostEditor
-          tokenId={project.tokenId}
-          slug={params.slug}
-          post={{
-            id: post.id,
-            slug: post.slug,
-            title: post.title,
-            excerpt: post.excerpt ?? '',
-            heroImage: post.heroImage ?? '',
-            markdown: typeof body.markdown === 'string' ? body.markdown : '',
-            status: post.status,
-            slugLocked: post.firstPublishedAt != null,
-            seo: (post.seo as any) ?? {},
-          }}
-        />
-      </main>
-    </div>
-  )
+  redirect(`/dashboard/${project.tokenId}/blog/${params.postId}`)
 }

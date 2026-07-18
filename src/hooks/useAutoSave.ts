@@ -485,7 +485,8 @@ const forceSave = useCallback(async () => {
  * ===== DEVELOPMENT UTILITIES =====
  */
 
-if (process.env.NODE_ENV === 'development') {
+// dev-SSR guard; module is on the /edit SSR import path where window is undefined
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   (window as any).__autoSaveHookDebug = {
     getHookInstance: () => {
       // This would need to be set up with React DevTools or similar

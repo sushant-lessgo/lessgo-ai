@@ -128,3 +128,51 @@ describe('assertProjectOwner', () => {
     expect(res).toEqual({ ok: false, status: 404, error: 'Project not found' });
   });
 });
+
+// ── regen routes: the isMock-pairing anchor (regen-modernization D6) ────────
+//
+// Every regen route suite mocks `@/lib/security`, so the demo short-circuit each
+// route pairs its own `isMock` check with is otherwise only ever asserted against
+// a fake. These drive the REAL function for the regen action, and pin the exact
+// property that makes the pairing MANDATORY rather than stylistic: the demo
+// token yields `ok: true` for a caller with NO identity at all, before any read.
+describe('assertProjectOwner — regen routes (isMock pairing)', () => {
+  it('the demo token returns ok:true for an UNAUTHENTICATED caller, with no user record and no DB read', async () => {
+    const res = await assertProjectOwner(null, DEMO_TOKEN, { action: 'regenerate-element' });
+
+    // ok:true + userRecord:null + project:null ⇒ a route that trusted `ok` alone
+    // would proceed to charge/generate for an anonymous caller. Hence isMock.
+    expect(res).toEqual({
+      ok: true,
+      isDemo: true,
+      adminOverride: false,
+      userRecord: null,
+      project: null,
+    });
+    expect(db.user.findUnique).not.toHaveBeenCalled();
+    expect(db.project.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('a regen caller on a real token gets the full gate: owner allowed, non-owner 403', async () => {
+    db.user.findUnique.mockResolvedValue({ id: 'user_A' });
+    db.project.findUnique.mockResolvedValue({ userId: 'user_A' });
+    await expect(
+      assertProjectOwner('clerk_A', 'tok_1', { action: 'regenerate-element' })
+    ).resolves.toMatchObject({ ok: true, isDemo: false });
+
+    db.user.findUnique.mockResolvedValue({ id: 'user_B' });
+    await expect(
+      assertProjectOwner('clerk_B', 'tok_1', { action: 'regenerate-element' })
+    ).resolves.toEqual({ ok: false, status: 403, error: 'Access denied' });
+  });
+
+  it('regen never claims and never creates: no claimIfOrphan/allowMissing ⇒ a missing project is a 404', async () => {
+    db.user.findUnique.mockResolvedValue({ id: 'user_B' });
+    db.project.findUnique.mockResolvedValue(null);
+    const res = await assertProjectOwner('clerk_B', 'tok_missing', {
+      action: 'regenerate-element',
+    });
+    expect(res).toEqual({ ok: false, status: 404, error: 'Project not found' });
+    expect(db.project.update).not.toHaveBeenCalled();
+  });
+});

@@ -23,6 +23,9 @@ const BUSINESS_TYPE_TO_SERVICE_TYPE: Partial<Record<BusinessTypeKey, ServiceType
   agency: 'agency',
   consultant: 'consultancy',
   coach: 'coaching',
+  // work-contract phase 4 — designer → 'agency' (same as photographer's fallback,
+  // bridge.test.ts:58); no dedicated ServiceType exists for the work vertical yet.
+  designer: 'agency',
 };
 
 export function serviceTypeForBusinessType(businessType: string | undefined): ServiceType {

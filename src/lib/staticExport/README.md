@@ -36,8 +36,8 @@ Returns `{ html, metadata: { size, cssVariableCount } }`.
     published-page stylesheet.
   - `<link rel="stylesheet" href="https://lessgo.ai/assets/fonts-self-hosted.css">`
     — self-hosted font faces.
-  - `<script src="https://lessgo.ai/assets/form.v1.js">` — only when the page has
-    forms.
+  - `<script src="https://lessgo.ai/assets/form.v2.js">` — only when the page has
+    forms. (Blobs published before the v2 bump reference the frozen `form.v1.js`.)
   - `<script src="…/a.v2.js" data-page-id data-slug>` — analytics beacon, only
     when analytics is opted in. **New publishes use `a.v2.js`** (adds `role` +
     `placement` to `cta_click`, and `v: 2` to every payload). Blobs published
@@ -59,7 +59,7 @@ runs, in order:
 1. **`scripts/buildPublishedCSS.js`** → compiles `public/published.css`
    (the standalone bundle referenced as `/assets/published.css`).
 2. **`scripts/buildAssets.js`** → minifies the source JS in *this directory*
-   (`formHandler.js → form.v1.js`, `analyticsGenerator.js → a.v2.js`,
+   (`formHandler.js → form.v2.js`, `analyticsGenerator.js → a.v2.js`,
    `naayomBehaviors.js → naayom.v1.js`, `lumenBehaviors.js → lumen.v1.js`) into
    `public/assets/`, and copies `fonts-self-hosted.css` verbatim. It also emits the
    frozen `a.v1.js` from `scripts/legacy/a.v1.src.js` (pre-scale-04 beacon, kept
@@ -102,7 +102,7 @@ routing, version cleanup, or blob rollback — those stay in the callers. Full f
 | `lessgoBadge.test.ts` | Tests for the badge. |
 | `injectChrome.ts` | Multi-page: injects shared header/footer chrome into a page (idempotent). |
 | `versionCleanup.ts` | Prunes old `PublishedPageVersion` blobs. |
-| `formHandler.js` | Runtime source → minified to `public/assets/form.v1.js` (published-page form submit). |
+| `formHandler.js` | Runtime source → minified to `public/assets/form.v2.js` (published-page form submit; v2 sends no owner id — the route derives it). The frozen pre-v2 `form.v1.js` is built separately from `scripts/legacy/form.v1.src.js` for old blobs. |
 | `analyticsGenerator.js` | Runtime source → minified to `public/assets/a.v2.js` (live analytics beacon: role/placement + `v:2`). The frozen pre-scale-04 `a.v1.js` is built separately from `scripts/legacy/a.v1.src.js`. |
 | `naayomBehaviors.js` | Runtime source → `naayom.v1.js` (TechPremium behaviors: nav/lightbox/gallery). |
 | `lumenBehaviors.js` | Runtime source → `lumen.v1.js` (Lumen behaviors: lightbox/reveal/EN·NL toggle). |

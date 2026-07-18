@@ -15,6 +15,7 @@ import { z } from 'zod';
 import { copyEngines, designStyles } from '@/types/brief';
 import { templateIds } from '@/types/service';
 import { goalIntents, goalMechanisms } from '@/modules/goals/vocabulary';
+import { WORK_PAGE_GOAL_KEYS } from '@/modules/engines/workPages';
 
 export const BriefSchema = z.object({
   /**
@@ -79,6 +80,17 @@ export const BriefSchema = z.object({
             archetypeKey: z.string(),
             slug: z.string(),
             sections: z.array(z.string()),
+            /**
+             * Human title of the page (E4 plan screen). Optional + additive:
+             * older Briefs omit it — readers prettify the key as a fallback.
+             */
+            title: z.string().optional(),
+            /**
+             * The one action this page asks a visitor to take (E4 plan screen).
+             * Closed enum mirroring the `contactMethod` fact. Optional +
+             * additive; generation does not consume it yet.
+             */
+            goal: z.enum(WORK_PAGE_GOAL_KEYS).optional(),
           })
         )
         .optional(),

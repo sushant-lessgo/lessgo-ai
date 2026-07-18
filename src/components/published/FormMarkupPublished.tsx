@@ -48,7 +48,6 @@ export function FormMarkupPublished({
       data-lessgo-form
       data-form-id={formId}
       data-page-id={publishedPageId}
-      data-owner-id={pageOwnerId}
       data-success-message={successMessage}
       className="space-y-4"
     >

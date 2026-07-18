@@ -47,7 +47,7 @@ vi.mock('@/components/EditProvider', () => ({
 }));
 
 import { templateMeta } from './templateMeta';
-import { blockManifests } from './blockManifest';
+import { blockManifests, builtVariantCount } from './blockManifest';
 import { engineCoreSections } from '@/modules/engines/coreSections';
 import { templateIds } from '@/types/service';
 import { capabilityIds } from '@/types/brief';
@@ -58,22 +58,28 @@ import { LumenPlaceholderBlock } from './lumen/LumenPlaceholderBlock';
 import { createHarnessStore } from './blockMocks/harness';
 import { ALL_BLOCK_MOCK_SECTIONS } from './blockMocks';
 
-// phase 11b round-trip guard: prove atelier chrome keys survive the store→render
-// read path (extractLayoutContent iterates ONLY schema keys — a non-schema key is
-// dropped). Plain data imports; test-only.
-import { extractLayoutContent } from '@/types/storeTypes';
-import { getSchemaDefaults } from '@/modules/sections/layoutElementSchema';
-
 // Hearth knob/looks pilot (template-factory phase 8). Pure data imports (tokens /
 // palettes / service types) — no template-module (client) surface pulled in.
 import { hearthKnobs, hearthVariants, buildHearthStylesheet } from './hearth/tokens';
 import { hearthPalettes } from '@/types/service';
 import { HearthSSRTokens } from './hearth/components/HearthSSRTokens';
 
-// Atelier knob enrollment (phase 6). Pure data imports (tokens) + the published
-// SSRTokens for the back-compat evidence — no client-only surface pulled in.
-import { atelierKnobs, buildAtelierStylesheet } from './atelier/tokens';
-import { AtelierSSRTokens } from './atelier/components/AtelierSSRTokens';
+// atelier-skeleton-cutover: the OLD hand-written atelier skin's evidence blocks
+// (chrome-key round-trip, knob conformance, knob back-compat/parity) are RETIRED
+// here — atelier now rides the work-skeleton, so its coverage comes from the
+// parameterized templateConformance('atelier') loop + the skeleton blocks below.
+// The old-skin token/SSRToken imports are gone so the phase-4 dir delete can't
+// break this file.
+
+// Work-skeleton (atelier skin) — engine-core + skin-token BOUNDS conformance.
+// Pure data imports: the registered skin data + the skeleton's loud bounds gate.
+// The standard (a) engine-core loop covers atelier (non-bespoke); the explicit
+// block below enforces it anyway so the work-skeleton coverage bites for real.
+// assertSkinTokens is the AC-L122 "out-of-range fails loud" gate, run per
+// registered skin + proven to throw.
+import { atelierSkin } from './atelier/skin';
+import { assertSkinTokens, type WorkSkinTokens } from '@/modules/skeletons/work/tokenContract';
+import { skeletonBackedTemplateIds } from '@/modules/skeletons/ids';
 
 import {
   templateConformance,
@@ -108,56 +114,12 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
   // hearth). surge/vestria/lex/etc. deferred (plan Q6) — they carry no mocks yet.
   assertEditorBasics('meridian');
   assertEditorBasics('hearth');
-  // atelier (atelier-template phase 11) — 8 blocks, incl. the works image
-  // collection (add/remove/reorder) + packages at 2/3/4 cards. Mocks in
-  // blockMocks/index.ts; non-vacuous (empty mocks → the deferred-template branch).
-  assertEditorBasics('atelier');
-
-  // ── ROUND-TRIP PERSISTENCE (atelier-template phase 11b) ────────────────────
-  // assertEditorBasics is marker-only: it proves a chrome key is WRAPPED in an
-  // edit primitive, NOT that a value set for it SURVIVES the store→render read
-  // (extractLayoutContent iterates ONLY schema keys, dropping non-schema ones).
-  // Phase 11 shipped green while chrome keys leaked design placeholders precisely
-  // because that round-trip was unchecked. This pins it for atelier's chrome keys:
-  // a value set in `elements` must come back out of extractLayoutContent (i.e. the
-  // key is in the schema) — the exact class of bug 11b fixed.
-  describe('atelier chrome-key round-trip persistence (phase 11b)', () => {
-    // (layout, key, value) — one representative chrome key per affected block.
-    const CASES: Array<[string, string, string]> = [
-      ['AtelierFooter', 'closer_headline', 'Let’s make yours.'],
-      ['AtelierFooter', 'legal_text', 'Privacy · Terms'],
-      ['AtelierContact', 'instagram', '@studioname'],
-      ['AtelierAbout', 'badge_text', 'Maker · City'],
-      ['AtelierWorkGallery', 'more_text', 'View the full portfolio →'],
-      ['AtelierQuoteBand', 'headline', 'Kind words'],
-    ];
-
-    for (const [layout, key, value] of CASES) {
-      it(`${layout}.${key} survives extractLayoutContent (schema-backed, not dropped)`, () => {
-        const schema = getSchemaDefaults(layout);
-        expect(schema, `${layout} has no schema defaults`).toBeTruthy();
-        // The key must be part of the schema-derived contract...
-        expect(Object.keys(schema!)).toContain(key);
-        // ...and a set value must come back out unchanged (round-trip).
-        const out = extractLayoutContent(
-          { [key]: value } as any,
-          schema as any,
-          layout,
-        );
-        expect((out as any)[key]).toBe(value);
-      });
-    }
-
-    it('a NON-schema key is still DROPPED (proves the check is real, not vacuous)', () => {
-      const schema = getSchemaDefaults('AtelierFooter')!;
-      const out = extractLayoutContent(
-        { __not_a_schema_key__: 'leak' } as any,
-        schema as any,
-        'AtelierFooter',
-      );
-      expect((out as any).__not_a_schema_key__).toBeUndefined();
-    });
-  });
+  // atelier-skeleton-cutover: atelier is NO LONGER enrolled in assertEditorBasics.
+  // It now rides the work-skeleton, whose edit blocks do not emit the
+  // `data-edit-primitive` markers this helper asserts. The old hand-written atelier
+  // editor-basics mocks + the phase-11b chrome-key round-trip block were retired
+  // with the old skin. Skeleton edit/published parity is covered by the work
+  // skeleton's own renderParity.work.test.tsx + the skeleton blocks below.
 
   // ── KNOB + LOOKS conformance (template-factory phase 8) ────────────────────
   // hearth is the FIRST template to opt into knobs (dormant rules from phase 3
@@ -165,9 +127,9 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
   // pure data so templateConformance stays free of template-module imports.
   const HEARTH_VARIANT_IDS = hearthVariants.map((v) => v.id);
   assertKnobConformance('hearth', hearthKnobs);
-  // atelier (phase 6) — full 5-axis declaration: real alternates on buttonShape/
-  // cardStyle/density, default-only typePairing/texture.
-  assertKnobConformance('atelier', atelierKnobs);
+  // atelier-skeleton-cutover: the old-skin atelier knob conformance (atelierKnobs
+  // from the retired skin) is dropped — the work-skeleton skin supplies its own
+  // knob surface (exercised via the skeleton blocks).
   assertLooksConformance(
     'hearth',
     templateMeta.hearth.looks,
@@ -229,76 +191,71 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
     });
   });
 
-  // ── back-compat + renderer-parity evidence (atelier knobs, phase 6) ────────
-  // Same two claims as the hearth gate: (1) default emits nothing (byte-identical
-  // to base+palette+variant); (2) a non-default knob emits scoped CSS + a wrapper
-  // attr in the published renderer (AtelierSSRTokens consumes the prop — no silent
-  // no-op). The edit-side AtelierThemeInjector shares buildAtelierStylesheet +
-  // knobDataAttributes, so knob CSS + attrs are byte-identical across renderers.
-  describe('phase-6 knob back-compat + parity evidence (atelier)', () => {
-    const baselineStylesheet = buildAtelierStylesheet();
+  // atelier-skeleton-cutover phase 1: the phase-6 atelier knob back-compat +
+  // renderer-parity evidence block (buildAtelierStylesheet / AtelierSSRTokens from
+  // the retired old skin) is removed. The work-skeleton skin's token/knob behavior
+  // is exercised through its own skin-token bounds + skeleton blocks below.
 
-    it('default: no knobs / all-default knobs emit NOTHING (byte-identical stylesheet)', () => {
-      expect(buildAtelierStylesheet()).toBe(baselineStylesheet);
-      expect(buildAtelierStylesheet(null)).toBe(baselineStylesheet);
-      expect(buildAtelierStylesheet({})).toBe(baselineStylesheet);
-      // Explicit axis DEFAULTS still emit nothing (default = :root).
-      expect(
-        buildAtelierStylesheet({ buttonShape: 'rounded', cardStyle: 'hairline', density: 'comfortable', typePairing: 'classic', texture: 'none' }),
-      ).toBe(baselineStylesheet);
-      expect(baselineStylesheet).not.toContain('data-knob-');
+  // ── WORK-SKELETON (atelier): engine-core resolves to real blocks ─────────────
+  // atelier is skeleton-backed and section-complete (hero·work·about·footer all
+  // resolve real blocks). The standard (a) loop already covers it (atelier is
+  // non-bespoke); this explicit block ENFORCES engine-core belt-and-suspenders.
+  describe('atelier engine-core sections resolve to real blocks (work-skeleton)', () => {
+    for (const sectionType of engineCoreSections.work) {
+      it(`${sectionType}: real block (edit + published)`, () => {
+        resolvesReal('atelier', sectionType);
+      });
+    }
+  });
+
+  // ── SKIN-TOKEN BOUNDS conformance (AC-L122: out-of-range fails loud) ─────────
+  // Run assertSkinTokens over every REGISTERED work skin, then prove the gate
+  // BITES: an out-of-bounds fixture skin throws with the offending token listed.
+  describe('work-skeleton skin-token bounds (assertSkinTokens, AC-L122)', () => {
+    // The only skeleton-backed template today is atelier → its registered skin.
+    it('skeletonBackedTemplateIds is exactly the work skins under bounds check', () => {
+      expect(skeletonBackedTemplateIds).toContain('atelier');
     });
 
-    it('default: AtelierSSRTokens published markup carries NO data-knob-* attr', () => {
-      const html = renderToStaticMarkup(
-        React.createElement(AtelierSSRTokens, { paletteId: 'vermilion' as any }),
-      );
-      expect(html).not.toContain('data-knob-');
+    it('the registered atelier skin passes assertSkinTokens (all tokens in range)', () => {
+      expect(() => assertSkinTokens(atelierSkin)).not.toThrow();
     });
 
-    it('non-default: a knob emits scoped CSS AND a wrapper attr in the published renderer', () => {
-      const css = buildAtelierStylesheet({ buttonShape: 'pill' });
-      expect(css).toContain('[data-knob-buttonShape="pill"]');
-      expect(css).toContain('--btn-r:999px');
-      expect(css.length).toBeGreaterThan(baselineStylesheet.length);
-
-      const html = renderToStaticMarkup(
-        React.createElement(AtelierSSRTokens, {
-          paletteId: 'vermilion' as any,
-          knobs: { buttonShape: 'pill', cardStyle: 'flat', density: 'compact' },
-        }),
-      );
-      expect(html).toContain('data-knob-buttonShape="pill"');
-      expect(html).toContain('data-knob-cardStyle="flat"');
-      expect(html).toContain('data-knob-density="compact"');
-      expect(html).toContain('[data-knob-buttonShape="pill"]');
-      expect(html).toContain('[data-knob-cardStyle="flat"]');
-      expect(html).toContain('[data-knob-density="compact"]');
+    it('an OUT-OF-BOUNDS skin FAILS LOUD with the offending token in the message', () => {
+      // radiusPx max is 48 → 999 is out of range. Clone so the real skin is intact.
+      const badTokens: WorkSkinTokens = { ...atelierSkin.tokens, radiusPx: 999 };
+      const badSkin = { id: 'atelier-oob-fixture', tokens: badTokens };
+      expect(() => assertSkinTokens(badSkin)).toThrow(/radiusPx/);
+      expect(() => assertSkinTokens(badSkin)).toThrow(/out of range/);
     });
 
-    // Dual-renderer parity guard (regression): the compact density knob is applied
-    // on :root in the editor (documentElement) but on a wrapper <div> in published
-    // (AtelierSSRTokens). Custom-property var() substitution resolves at the
-    // DECLARING scope, so a wrapper-scoped `--space:0.82` would leave the :root-
-    // declared `--sec-y`/`--pad-y`/`--pad-y-sm` uncompressed for descendants in the
-    // PUBLISHED renderer (rhythm compresses in editor only). The compact block MUST
-    // therefore redeclare the FINAL section-rhythm vars directly (not only --space).
-    it('parity: compact density redeclares the FINAL section-rhythm vars, not only --space', () => {
-      const css = buildAtelierStylesheet({ density: 'compact' });
-      const block = css.slice(css.indexOf('[data-knob-density="compact"]'));
-      expect(block).toContain('--space:0.82');
-      // The load-bearing assertion — these must appear inside the wrapper-scoped
-      // block so a :root-descendant knob still compresses rhythm in published.
-      expect(block).toContain('--pad-y:');
-      expect(block).toContain('--pad-y-sm:');
+    it('collects EVERY violation (multiple out-of-range tokens all listed)', () => {
+      const badTokens: WorkSkinTokens = {
+        ...atelierSkin.tokens,
+        radiusPx: 999,      // > 48
+        fsBodyPx: 4,        // < 12
+        displayWeight: 123, // not an enum value
+      };
+      let msg = '';
+      try {
+        assertSkinTokens({ id: 'multi-oob', tokens: badTokens });
+      } catch (e) {
+        msg = (e as Error).message;
+      }
+      expect(msg).toMatch(/radiusPx/);
+      expect(msg).toMatch(/fsBodyPx/);
+      expect(msg).toMatch(/displayWeight/);
+      expect(msg).toMatch(/3 token violation/);
     });
   });
 
   // ── GLOBAL sanity: at least one manifest declaration exists to check ───────
   it('block manifests declare at least one variant to check', () => {
+    // builtVariantCount (NOT raw set.variants.length) so a declared-but-not-built
+    // SLOT (e.g. work-skeleton WorkHeroVideo) never inflates the coverage stat.
     const total = Object.values(blockManifests).reduce(
       (n, manifest) =>
-        n + Object.values(manifest ?? {}).reduce((m, set) => m + set.variants.length, 0),
+        n + Object.values(manifest ?? {}).reduce((m, set) => m + builtVariantCount(set), 0),
       0
     );
     expect(total).toBeGreaterThan(0);
@@ -337,18 +294,51 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
     });
   });
 
-  // ── GLOBAL: (d) dormancy lock + regression + negative fixtures ─────────────
+  // ── GLOBAL: (d) cross-template net + regression + negative fixtures ─────────
   describe('(d) scale-10: collection-family cross-template invariants', () => {
-    // Dormancy lock: NO shipping template declares a collection-family
-    // capability today (the per-template (d) check ships vacuous). If a rung-C
-    // template adds one, this flips red and the implementer must supply the
-    // block pair.
-    it('DORMANT: no shipping template declares a collection-family capability (whole check is vacuous)', () => {
+    // CROSS-TEMPLATE NET (E2 / phase 2 — was the dormancy lock): every template
+    // that declares ANY collection-family capability runs the assert; templates
+    // declaring none stay vacuously green (the loop body `continue`s). This keeps
+    // the global guarantee — a NEW family declaration on ANY template must supply a
+    // resolving catalog+item block pair — while atelier's `works` capability now
+    // exercises it for real (no longer vacuous).
+    it('every template with a declared collection-family capability resolves its catalog+item pair', () => {
       for (const templateId of templateIds) {
+        assertCollectionCapabilityBacked(
+          templateId,
+          templateMeta[templateId].capabilities,
+          templateMeta[templateId].capabilitySections
+        );
+      }
+    });
+
+    // The `works` capability is LIVE: the works collection resolves its workcatalog +
+    // workdetail pair in both renderers. atelier-skeleton-cutover: the live `atelier`
+    // id declares `works` (it is skeleton-backed).
+    it.each(['atelier'] as const)(
+      '%s declares `works` → workcatalog + workdetail pair resolves real (both renderers)',
+      (id) => {
+        expect(templateMeta[id].capabilities).toContain('works');
+        expect(templateMeta[id].capabilitySections?.works).toBe('workcatalog');
+        assertCollectionCapabilityBacked(
+          id,
+          templateMeta[id].capabilities,
+          templateMeta[id].capabilitySections
+        );
+      },
+    );
+
+    // No template BEYOND the work look (atelier) declares a collection-family
+    // capability yet — a scoped regression lock (narrower than the old whole-vocab
+    // dormancy check, so the honest `works` declaration doesn't trip it).
+    const WORKS_TEMPLATES = new Set(['atelier']);
+    it('no template OTHER than the work look declares a collection-family capability', () => {
+      for (const templateId of templateIds) {
+        if (WORKS_TEMPLATES.has(templateId)) continue;
         for (const cap of COLLECTION_FAMILY) {
           expect(
             templateMeta[templateId].capabilities,
-            `${templateId} declares collection-family "${cap}" — the (d) check is no longer dormant; ensure its catalog+item block pair resolves`
+            `${templateId} declares collection-family "${cap}" — supply its catalog+item block pair (see the atelier works flip)`
           ).not.toContain(cap);
         }
       }
@@ -387,6 +377,29 @@ describe('template conformance (scalePlan §6a/§6b)', () => {
           assertCollectionCapabilityBacked('meridian', ['services'], {
             services: services.catalogSectionType,
             'services-item': services.itemSectionType,
+          })
+        ).toThrow();
+      });
+
+      // ── D14 option (b) closed-fail proofs for the relaxed `works` assert ─────
+      it('declaring `works` WITHOUT its workcatalog value throws (relaxed coverage half still bites)', () => {
+        // atelier DOES resolve both work blocks — so this proves the coverage
+        // half, not the resolve half: an empty capabilitySections has no
+        // `workcatalog` value, so the retained catalog `toContain` throws.
+        expect(() =>
+          assertCollectionCapabilityBacked('atelier', ['works'], {})
+        ).toThrow();
+      });
+
+      it('declaring `works` on a resolver with NO work blocks (meridian) throws (resolve half bites)', () => {
+        // Coverage passes (workcatalog IS in the map), but meridian resolves
+        // neither workcatalog nor workdetail — so `resolvesReal` bites, proving
+        // closed-fail with the item section registry-derived (no capabilitySections
+        // entry for it).
+        const works = getCollectionDef('works')!;
+        expect(() =>
+          assertCollectionCapabilityBacked('meridian', ['works'], {
+            works: works.catalogSectionType, // 'workcatalog'
           })
         ).toThrow();
       });

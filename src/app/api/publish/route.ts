@@ -6,11 +6,12 @@ import { auth } from '@clerk/nextjs/server'
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { PublishSchema, sanitizeForLogging, sanitizeSeo } from '@/lib/validation';
-import { createSecureResponse, validateSlug, sanitizeHtmlContent, verifyProjectAccess } from '@/lib/security';
+import { createSecureResponse, validateSlug, verifyProjectAccess } from '@/lib/security';
 import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit, hasTrackingPixels, getPlanConfig, PlanTier } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
 import { sanitizeContentForPublish } from '@/modules/sections/layoutElementSchema';
+import { sanitizeContentHtml, sanitizeLocaleOverlay } from '@/lib/publishSanitizer';
 import { publishedSubdomainHost, publishSubdomainHosts } from '@/lib/domains/hosts';
 import { isAdmin, logAdminOverride } from '@/lib/admin';
 import { injectChromeIntoPage } from '@/lib/staticExport/injectChrome';
@@ -97,6 +98,14 @@ async function publishHandler(req: NextRequest) {
       }
     }
 
+    // publish-sanitize (phase 2): THE canonical XSS/scheme chokepoint. Runs AFTER
+    // chrome injection so injected header/footer nav labels are covered, and BEFORE
+    // the PublishedPage writes + render so BOTH the DB snapshot and the static HTML
+    // are cleaned in one in-place pass (base root + subpages + chrome).
+    if (content && typeof content === 'object') {
+      sanitizeContentHtml(content as Record<string, any>);
+    }
+
     // Sanitize title - strip HTML tags for meta/OG image safety
     const cleanTitle = stripHTMLTags(title || '').trim().slice(0, 100) || 'Untitled Page';
 
@@ -169,12 +178,25 @@ async function publishHandler(req: NextRequest) {
       project?.themeValues && typeof (project.themeValues as any).knobs === 'object' && (project.themeValues as any).knobs !== null
         ? (project.themeValues as any).knobs
         : null;
+    // User style tokens (work-skeleton D1/§D) live in Project.themeValues.styleTokens
+    // (per-section Design ▾ overrides — JSON, no flat column). Like knobs, the client
+    // publish payload themeValues doesn't carry them, so read them off the project and
+    // (a) feed them into the static-export render and (b) persist them on PublishedPage
+    // so the SSR fallback + verify-dns regeneration bake the same `--u-*` CSS. Unset
+    // drafts (no styleTokens key) stay byte-identical — serializer emits nothing.
+    const projectStyleTokens: import('@/modules/skeletons/styleTokens').StyleTokens | null =
+      project?.themeValues && typeof (project.themeValues as any).styleTokens === 'object' && (project.themeValues as any).styleTokens !== null
+        ? (project.themeValues as any).styleTokens
+        : null;
     const themeValuesWithMood = projectMood
       ? { ...((themeValues as Record<string, any> | undefined) ?? {}), mood: projectMood }
       : themeValues;
-    const publishedThemeValues = projectKnobs
+    const themeValuesWithKnobs = projectKnobs
       ? { ...((themeValuesWithMood as Record<string, any> | undefined) ?? {}), knobs: projectKnobs }
       : themeValuesWithMood;
+    const publishedThemeValues = projectStyleTokens
+      ? { ...((themeValuesWithKnobs as Record<string, any> | undefined) ?? {}), styleTokens: projectStyleTokens }
+      : themeValuesWithKnobs;
 
     // Phase 2: No longer generating htmlContent - using dynamic rendering
     // Published pages now render on-demand via React Server Components
@@ -213,7 +235,9 @@ async function publishHandler(req: NextRequest) {
     } else {
       // Check published pages limit before creating new page
       const currentPublishedCount = await prisma.publishedPage.count({
-        where: { userId, isPublished: true }
+        // DD0b: isPublished is @default(true) on every row (no writer), so it counted
+        // draft rows too. Slot predicate = publishState !== 'draft'.
+        where: { userId, publishState: { not: 'draft' } }
       });
 
       const limitCheck = await checkLimit(userId, 'publishedPages', currentPublishedCount);
@@ -336,7 +360,10 @@ async function publishHandler(req: NextRequest) {
       // doc, so seed it here. Only set when present ⇒ single-locale publishes
       // stay byte-identical (no key added).
       if (projectLocaleContent && content && typeof content === 'object') {
-        (content as any).localeContent = projectLocaleContent;
+        // publish-sanitize (phase 2): clean the render-only translated overlay too
+        // (verbatim-import path — highest-severity XSS class). Only-when-present
+        // semantics preserved: single-locale publishes add no key, stay byte-identical.
+        (content as any).localeContent = sanitizeLocaleOverlay(projectLocaleContent);
       }
 
       // pricing-v2 (phase 2): suppress the "Made with Lessgo" badge only when the
@@ -368,6 +395,7 @@ async function publishHandler(req: NextRequest) {
         paletteId,
         mood: projectMood,
         knobs: projectKnobs,
+        styleTokens: projectStyleTokens,
         baseUrl,
         canonicalDomain,
         removeBranding,
@@ -459,7 +487,11 @@ async function publishHandler(req: NextRequest) {
           user: { id: userId },
         });
 
-        // Set failed state in DB
+        // Set failed state in DB.
+        // NOTE (publish-trust M3): the outer static-export catch below ALSO writes
+        // publishState:'failed' (+ publishError) for this throw. The double-set is
+        // deliberate and harmless — this one carries the precise KV error message and
+        // runs even if the outer path changes. Don't "clean it up" without checking both.
         await prisma.publishedPage.update({
           where: { id: pageId },
           data: {
@@ -525,8 +557,16 @@ async function publishHandler(req: NextRequest) {
         });
       }
 
-      // Don't block publish - legacy SSR still works
-      console.warn('[Phase 2] Continuing with legacy publish despite static export failure');
+      // publish-trust M3: fail honestly. Previously this fell through to the 200
+      // "Page published successfully" response even though the export threw — so a
+      // first publish with no KV routes, or a republish still serving the PREVIOUS
+      // version, was reported to the user as live (and contradicted the row we just
+      // wrote as 'failed'). Return a 500 the client already surfaces (SlugModal
+      // `publish-error`). Details stay in publishError + Sentry — never in the body.
+      return createSecureResponse(
+        { error: 'Publish failed. Your changes were saved — please try publishing again.' },
+        500,
+      );
     }
 
     return createSecureResponse({

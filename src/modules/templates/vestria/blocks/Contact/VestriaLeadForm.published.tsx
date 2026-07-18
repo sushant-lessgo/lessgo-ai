@@ -31,7 +31,6 @@ export default function VestriaLeadFormPublished(props: Props) {
       data-lessgo-form
       data-form-id={formId}
       data-page-id={props.publishedPageId}
-      data-owner-id={props.pageOwnerId}
       data-success-message={form?.successMessage || VESTRIA_LEAD_SUCCESS_MESSAGE}
     >
       {fields.map((f) => renderVestriaLeadField(f, formId))}

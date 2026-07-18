@@ -13,8 +13,9 @@ import { validateAndResolveAssetURLs } from './assetResolver';
 import { renderLessgoBadge } from './lessgoBadge';
 import { resolveCanonicalURL } from './canonicalUrl';
 import { resolveOgImage } from './buildPageMetadata';
-import { escapeHTML, robotsMetaTag, faviconLinkTag, jsonLdScriptTag, metaPixelSnippet, ga4Snippet } from './headTags';
+import { escapeHTML, isSafeURL, robotsMetaTag, faviconLinkTag, jsonLdScriptTag, metaPixelSnippet, ga4Snippet } from './headTags';
 import { usesTemplateModule } from '@/types/service';
+import { isSkeletonBacked } from '@/modules/skeletons/ids';
 import type { PageSeo } from '@/types/store/pages';
 import type { LocaleConfig } from '@/types/core/content';
 
@@ -42,6 +43,12 @@ export interface StaticHTMLOptions {
    *  `data-knob-*` attrs + inlines the knob CSS. Absent/all-default ⇒ no attrs,
    *  no CSS ⇒ byte-identical output. Only knob-tokenized templates consume it. */
   knobs?: import('@/types/template').KnobSelection | null;
+  /** User style tokens (work-skeleton D1/§D) — Project.themeValues.styleTokens.
+   *  Threaded to the published renderer → skeleton SSRTokens → buildWorkStylesheet →
+   *  serializeStyleTokens, which emits `[data-sid]{--u-*}` CSS. Absent/empty ⇒ the
+   *  serializer returns '' ⇒ no CSS ⇒ byte-identical output. Only skeleton-backed
+   *  templates consume it; classic templates ignore the extra prop. Mirrors `knobs`. */
+  styleTokens?: import('@/modules/skeletons/styleTokens').StyleTokens | null;
   /** scale-04 (phase 3): the project's Brief.goal, threaded into the renderer's
    *  normalization pre-pass so GOAL_REF primaries resolve. OPTIONAL — blog/no-goal
    *  callers omit it → null-goal legacy fallback. */
@@ -138,6 +145,7 @@ export async function generateStaticHTML(
       variantId: options.variantId ?? null,
       mood: options.mood ?? null,
       knobs: options.knobs ?? null,
+      styleTokens: options.styleTokens ?? null,
       goal: options.goal ?? null,
       currentPagePath: options.currentPagePath,
       formPagePath: options.formPagePath,
@@ -154,9 +162,11 @@ export async function generateStaticHTML(
   // Lumen (bespoke §13) pages load lumen.v1.js (lightbox + reveal + EN·NL toggle/geo).
   const usesLumen = options.templateId === 'lumen';
 
-  // Atelier pages load slider.v1.js (hero cover slider: autoplay crossfade + arrows
-  // + injected dots). No-op without the hero markup; degrades to the static slide.
-  const usesAtelier = options.templateId === 'atelier';
+  // Skeleton-backed pages (atelier) load work.v1.js (hero slider + fixed
+  // header). Gated ONLY off the pure-data skeletonBackedTemplateIds list — NO
+  // skeleton/registry React import enters the static-export path. Each behavior is
+  // independently guarded, so a page missing a section is a no-op.
+  const usesWorkSkeleton = isSkeletonBacked(options.templateId);
 
   // 5. Build complete HTML document
   const html = buildHTMLDocument({
@@ -183,7 +193,7 @@ export async function generateStaticHTML(
     hasForms,
     usesNaayom,
     usesLumen,
-    usesAtelier,
+    usesWorkSkeleton,
     locale: options.locale,
     localeConfig: options.localeConfig,
     localeAlternates: options.localeAlternates,
@@ -271,12 +281,12 @@ function buildHTMLDocument(params: {
   hasForms: boolean;
   usesNaayom: boolean;
   usesLumen: boolean;
-  usesAtelier: boolean;
+  usesWorkSkeleton: boolean;
   locale?: string;
   localeConfig?: LocaleConfig;
   localeAlternates?: Array<{ hreflang: string; href: string }>;
 }): string {
-  const { bodyHTML, cssVariables, metadata, analyticsOptIn, removeBranding, hasForms, usesNaayom, usesLumen, usesAtelier } = params;
+  const { bodyHTML, cssVariables, metadata, analyticsOptIn, removeBranding, hasForms, usesNaayom, usesLumen, usesWorkSkeleton } = params;
 
   // i18n (Phase 5): multi-locale head/script emission. When the project declares
   // only one locale (or none), NONE of this fires and the document is
@@ -292,13 +302,18 @@ function buildHTMLDocument(params: {
   // (b) reciprocal hreflang for ALL locales + (c) x-default — self-canonical (a)
   // is the existing <link rel="canonical"> below (its canonicalPath is already the
   // locale-prefixed path for non-default docs).
+  // Scheme-gate each alternate href (publish-trust M4). Reject semantics = OMIT the
+  // whole <link>: an alternate with an unusable href has no safe degraded form, and an
+  // empty href would self-link this page under a foreign hreflang. Filtered BEFORE the
+  // length check so an all-unsafe set emits no comment block either.
+  const safeAlternates = alternates.filter((a) => isSafeURL(a.href));
   const hreflangTags =
-    multiLocale && alternates.length
+    multiLocale && safeAlternates.length
       ? `\n\n  <!-- i18n hreflang alternates -->` +
-        alternates
+        safeAlternates
           .map(
             (a) =>
-              `\n  <link rel="alternate" hreflang="${escapeHTML(a.hreflang)}" href="${a.href}">`
+              `\n  <link rel="alternate" hreflang="${escapeHTML(a.hreflang)}" href="${escapeHTML(a.href)}">`
           )
           .join('')
       : '';
@@ -328,6 +343,14 @@ function buildHTMLDocument(params: {
 
   // Canonical host: live custom domain when present, else the lessgo.ai subdomain.
   // Path: this page's own path so subpages don't all claim the root canonical.
+  //
+  // NOTE (publish-trust M4) — canonicalURL is escape-only, deliberately NOT isSafeURL-gated,
+  // and that is not an oversight: resolveCanonicalURL ALWAYS builds `https://${host}${path}`
+  // (canonicalUrl.ts:18-21), so the scheme is a literal — the gate could never fire, and a
+  // gate that can't fail is a false reassurance. The only user-influenced parts are host
+  // (slug / canonicalDomain) and path, which sit AFTER the scheme; there the whole attack is
+  // attribute breakout, for which escapeHTML at the sink is the correct and sufficient
+  // defense. Please don't "harden" this with a scheme gate later.
   const canonicalURL = resolveCanonicalURL({
     slug: metadata.slug,
     canonicalDomain: metadata.canonicalDomain,
@@ -363,22 +386,22 @@ function buildHTMLDocument(params: {
   <meta name="description" content="${escapeHTML(metadata.description)}">
 
   <!-- Canonical URL -->
-  <link rel="canonical" href="${canonicalURL}">${robotsMetaTag(metadata.noIndex)}${faviconLinkTag(metadata.faviconUrl)}${hreflangTags}
+  <link rel="canonical" href="${escapeHTML(canonicalURL)}">${robotsMetaTag(metadata.noIndex)}${faviconLinkTag(metadata.faviconUrl)}${hreflangTags}
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="${canonicalURL}">
+  <meta property="og:url" content="${escapeHTML(canonicalURL)}">
   <meta property="og:title" content="${escapeHTML(metadata.title)}">
   <meta property="og:description" content="${escapeHTML(metadata.description)}">
-  <meta property="og:image" content="${ogImage}">
+  <meta property="og:image" content="${escapeHTML(ogImage)}">
   <meta property="og:site_name" content="Lessgo AI">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="${canonicalURL}">
+  <meta name="twitter:url" content="${escapeHTML(canonicalURL)}">
   <meta name="twitter:title" content="${escapeHTML(metadata.title)}">
   <meta name="twitter:description" content="${escapeHTML(metadata.description)}">
-  <meta name="twitter:image" content="${ogImage}">
+  <meta name="twitter:image" content="${escapeHTML(ogImage)}">
 
   <!-- Self-hosted template fonts (Inter, Inter Tight, JetBrains Mono, DM Sans,
        Fraunces, Source Serif 4, Lora, EB Garamond) -->
@@ -395,7 +418,7 @@ function buildHTMLDocument(params: {
   ${removeBranding ? '' : renderLessgoBadge()}
 
   <!-- Phase 4: Form handler (loaded if page has forms) -->
-  ${hasForms ? `<script src="${assetBase}/assets/form.v1.js" defer></script>` : ''}
+  ${hasForms ? `<script src="${assetBase}/assets/form.v2.js" defer></script>` : ''}
 
   <!-- Phase 4: TechPremium behaviors (dropdown nav, lightbox, gallery filter, readout tick) -->
   ${usesNaayom ? `<script src="${assetBase}/assets/naayom.v1.js" defer></script>` : ''}
@@ -403,13 +426,13 @@ function buildHTMLDocument(params: {
   <!-- Lumen behaviors (lightbox + reveal + EN·NL toggle/geo) -->
   ${usesLumen ? `<script src="${assetBase}/assets/lumen.v1.js" defer></script>` : ''}
 
-  <!-- Atelier hero cover slider (autoplay crossfade + arrows + injected dots) -->
-  ${usesAtelier ? `<script src="${assetBase}/assets/slider.v1.js" defer></script>` : ''}${switcherTags}
+  <!-- Work skeleton behaviors (hero slider + fixed header) -->
+  ${usesWorkSkeleton ? `<script src="${assetBase}/assets/work.v1.js" defer></script>` : ''}${switcherTags}
 
   <!-- Phase 4: Analytics beacon (opt-in) -->
   ${
     analyticsOptIn
-      ? `<script src="${assetBase}/assets/a.v2.js" data-page-id="${metadata.publishedPageId}" data-slug="${metadata.slug}" defer></script>`
+      ? `<script src="${assetBase}/assets/a.v2.js" data-page-id="${escapeHTML(metadata.publishedPageId)}" data-slug="${escapeHTML(metadata.slug)}" defer></script>`
       : ''
   }
 </body>

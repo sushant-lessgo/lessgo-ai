@@ -65,6 +65,23 @@ export interface TemplateMeta {
   bespoke?: true;
 }
 
+/**
+ * Pure, data-only capability probe (work-library-board phase 3). `true` iff the
+ * template with this id declares `cap` in its `capabilities`. Unknown / null /
+ * undefined ids → `false` (never throws). Kept in this leaf module so both the
+ * `/api/work-library` route and the dashboard page/tab can gate on the SAME
+ * predicate — the works-CAPABLE check (decision 7), NOT `isWorkCopyTemplate`
+ * (which would admit live-`atelier` projects that lack the works fan-out).
+ */
+export function templateHasCapability(
+  templateId: string | null | undefined,
+  cap: CapabilityId
+): boolean {
+  if (!templateId) return false;
+  const meta = (templateMeta as Record<string, TemplateMeta | undefined>)[templateId];
+  return !!meta && meta.capabilities.includes(cap);
+}
+
 export const templateMeta: Record<TemplateId, TemplateMeta> = {
   meridian: {
     copyEngines: ['thing'],
@@ -200,8 +217,15 @@ export const templateMeta: Record<TemplateId, TemplateMeta> = {
     // entry — would only red conformance group (b). `bilingual` is a PLATFORM
     // capability (never declared per-template). `multipage` is structural
     // (page-menu machinery; exempt from block-evidence).
-    capabilities: ['gallery', 'packages', 'multipage'],
-    capabilitySections: { gallery: 'work', packages: 'packages' },
+    //
+    // atelier-skeleton-cutover: atelier rides the work-skeleton, so it declares the
+    // `works` COLLECTION-FAMILY capability (evidenced by the `workcatalog` catalog
+    // section). This ACTIVATES the works ingestion fan-out on the live atelier look
+    // — the whole point of the cutover. Conformance (b)/(b+)/(d) bite: workcatalog +
+    // workdetail must resolve to real skeleton blocks in both renderers (they do).
+    // atelier STAYS non-bespoke (normal selectable work look).
+    capabilities: ['gallery', 'packages', 'multipage', 'works'],
+    capabilitySections: { gallery: 'work', packages: 'packages', works: 'workcatalog' },
   },
   techpremium: {
     copyEngines: [],

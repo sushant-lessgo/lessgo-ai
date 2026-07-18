@@ -961,6 +961,10 @@ export default function LandingPageRenderer({ className = '', tokenId, published
         // undefined for knob-unaware templates / unset drafts; injectors ignore
         // the extra prop, and default knob values emit no CSS (byte-neutral).
         knobs={(themeValues as Record<string, any> | null)?.knobs}
+        // User style tokens (work-skeleton D1) from Project.themeValues.styleTokens —
+        // threaded exactly like `knobs`; skeleton-unaware templates ignore the extra
+        // prop, and an absent map serializes to '' (byte-neutral).
+        styleTokens={(themeValues as Record<string, any> | null)?.styleTokens}
       >
         {renderContent()}
       </ThemeInjector>

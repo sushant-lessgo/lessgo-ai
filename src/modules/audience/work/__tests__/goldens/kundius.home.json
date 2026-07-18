@@ -1,0 +1,193 @@
+{
+  "fixture": "REAL KUNDIUS FACTS (phase-4 gate 2026-07-14); establishment mapped in-between→established, event €100/hr→exact 100 (per-hour in name)",
+  "capturedAt": "2026-07-14T21:24:32.275Z",
+  "meta": {
+    "complete": true,
+    "missingSections": []
+  },
+  "strategy": {
+    "positioningAngle": "Kristina Kundius offers professional photography that captures moments and stories for established brands and enterprises.",
+    "storyAngle": "With a robust portfolio and years of experience, Kristina Kundius tells the stories of brands through her lens with authority and care.",
+    "voiceNotes": [
+      "Clear and concrete over clever.",
+      "Warm and direct — a real person, not a brochure.",
+      "Use preferred words like photograph, shoot, frame; avoid forbidden words."
+    ],
+    "sections": [
+      "header",
+      "hero",
+      "work",
+      "proof",
+      "contact",
+      "footer"
+    ],
+    "uiblocks": {
+      "header": "header",
+      "hero": "hero",
+      "work": "work",
+      "proof": "proof",
+      "contact": "contact",
+      "footer": "footer"
+    },
+    "sitemap": [
+      {
+        "archetypeKey": "home",
+        "title": "Home",
+        "pathSlug": "/",
+        "sections": [
+          "hero",
+          "work",
+          "proof",
+          "contact"
+        ]
+      },
+      {
+        "archetypeKey": "work",
+        "title": "Work",
+        "pathSlug": "/work",
+        "sections": [
+          "work",
+          "proof"
+        ]
+      },
+      {
+        "archetypeKey": "work-group",
+        "title": "Work Group",
+        "pathSlug": "/work/[group]",
+        "sections": [
+          "work"
+        ]
+      },
+      {
+        "archetypeKey": "prices",
+        "title": "Prices",
+        "pathSlug": "/prices",
+        "sections": [
+          "packages"
+        ]
+      },
+      {
+        "archetypeKey": "about",
+        "title": "About",
+        "pathSlug": "/about",
+        "sections": [
+          "about",
+          "proof"
+        ]
+      },
+      {
+        "archetypeKey": "contact",
+        "title": "Contact",
+        "pathSlug": "/contact",
+        "sections": [
+          "contact"
+        ]
+      }
+    ],
+    "archetype": "standard",
+    "leadGroups": [
+      "Full brand package",
+      "Brand photoshoot",
+      "Portrait & business shoot",
+      "Event photography (per hour)"
+    ],
+    "storyBranch": "established",
+    "primaryLanguage": "en",
+    "wording": {
+      "workItem": "shoot",
+      "workGroup": "galleries",
+      "processLabel": "How a shoot works",
+      "groupFallbackLabel": "Galleries"
+    }
+  },
+  "homeCopy": {
+    "header": {
+      "elements": {
+        "logo_text": "Kristina Kundius Photography",
+        "nav_links": [
+          {
+            "label": "Home",
+            "href": "/",
+            "id": "nav_links-80498bd2"
+          },
+          {
+            "label": "Work",
+            "href": "/work",
+            "id": "nav_links-23764a09"
+          },
+          {
+            "label": "About",
+            "href": "/about",
+            "id": "nav_links-4cd4f080"
+          },
+          {
+            "label": "Contact",
+            "href": "/contact",
+            "id": "nav_links-65f0a0a7"
+          }
+        ]
+      }
+    },
+    "hero": {
+      "elements": {
+        "role_line": "Professional Photographer",
+        "name": "Kristina Kundius",
+        "cta_label": "Start Your Project",
+        "socials": []
+      }
+    },
+    "work": {
+      "elements": {
+        "heading": "Visual Stories That Speak Volumes",
+        "groups": [
+          {
+            "name": "Full brand package",
+            "cover_image": null,
+            "href": "/work/full-brand-package",
+            "id": "groups-428a3f2f"
+          },
+          {
+            "name": "Brand photoshoot",
+            "cover_image": null,
+            "href": "/work/brand-photoshoot",
+            "id": "groups-54329746"
+          },
+          {
+            "name": "Portrait & business shoot",
+            "cover_image": null,
+            "href": "/work/portrait-business-shoot",
+            "id": "groups-0027be1f"
+          },
+          {
+            "name": "Event photography",
+            "cover_image": null,
+            "href": "/work/event-photography",
+            "id": "groups-fc7d180f"
+          }
+        ]
+      }
+    },
+    "proof": {
+      "elements": {
+        "heading": "What My Clients Say",
+        "quotes": []
+      }
+    },
+    "contact": {
+      "elements": {
+        "heading": "Ready to Capture Your Story?",
+        "lead": "Let’s collaborate to create visuals that define your brand.",
+        "contact_method": "Email",
+        "cta_label": "Get In Touch"
+      }
+    },
+    "footer": {
+      "elements": {
+        "heading": "Connect with Me",
+        "note": "I look forward to capturing the essence of your brand.",
+        "copyright": "© 2023 Kristina Kundius Photography",
+        "socials": []
+      }
+    }
+  }
+}

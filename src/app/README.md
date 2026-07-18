@@ -77,10 +77,38 @@ the fast path serves static blob HTML; these SSR routes are the fallback.
 |-------|------|---------|
 | `/dashboard` | `dashboard/page.tsx` | Project list / home |
 | `/dashboard/billing` · `/dashboard/settings` | `dashboard/{billing,settings}/page.tsx` | Plan/billing · account settings |
-| `/dashboard/analytics/[slug]` | `dashboard/analytics/[slug]/page.tsx` | Per-page analytics |
-| `/dashboard/forms/[slug]` | `dashboard/forms/[slug]/page.tsx` | Form submissions for a page |
-| `/dashboard/testimonials` | `dashboard/testimonials/page.tsx` | Testimonial moderation |
-| `/dashboard/blog/[slug]` · `…/[postId]` · `…/[postId]/preview` | `dashboard/blog/…` | Per-site blog post management + preview |
+| `/dashboard/testimonials` | `dashboard/testimonials/page.tsx` | Testimonial moderation (account-wide) |
+
+### Per-site workspace — `/dashboard/[token]/*`
+
+Every per-site surface is **token-scoped** (the project token, not the published slug) and lives
+under one shared workspace layout (`dashboard/[token]/layout.tsx` — header + tabs). The token is
+**routing, not authz**: each page independently asserts ownership (admins get a god-view).
+
+| Route | File | Purpose |
+|-------|------|---------|
+| `/dashboard/[token]` | `dashboard/[token]/page.tsx` | Site overview (workspace home) |
+| `/dashboard/[token]/analytics` | `dashboard/[token]/analytics/page.tsx` | Per-site analytics |
+| `/dashboard/[token]/leads` | `dashboard/[token]/leads/page.tsx` | Form submissions for the site |
+| `/dashboard/[token]/blog` · `…/blog/[postId]` | `dashboard/[token]/blog/…` | Per-site blog post management |
+| `/dashboard/[token]/testimonials` | `dashboard/[token]/testimonials/page.tsx` | Testimonials for the site |
+
+**Shims:** the old slug-scoped URLs (`/dashboard/analytics/[slug]`, `/dashboard/forms/[slug]`,
+`/dashboard/blog/[slug]`, `/dashboard/blog/[slug]/[postId]`) are kept as thin redirect-only routes —
+they resolve `slug → projectId → token` and redirect into the workspace, so old bookmarks keep
+working.
+
+**⚠️ The blog preview is NOT shimmed and does NOT live under `src/app/dashboard/`.** It is a real,
+chrome-free page at:
+
+| Route | File | Purpose |
+|-------|------|---------|
+| `/dashboard/blog/[slug]/[postId]/preview` | `(blog-preview)/dashboard/blog/[slug]/[postId]/preview/page.tsx` | Renders the post exactly as published — **URL unchanged** |
+
+It sits in the **`(blog-preview)` route group** (a group adds no URL segment) precisely so it does
+**not** inherit `dashboard/layout.tsx` — an `.app-chrome` ancestor would inject app chrome/fonts and
+break the preview's parity with the live `/p/[slug]/blog/[postSlug]` page, which is the whole point of
+the preview. **Do not "restore" it under `src/app/dashboard/`** — its absence there is deliberate.
 
 ## Admin & dev
 

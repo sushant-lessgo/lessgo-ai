@@ -3,15 +3,13 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-import sharp from 'sharp';
 import { nanoid } from 'nanoid';
-import { put } from '@vercel/blob';
 import { isAdmin, logAdminOverride } from '@/lib/admin';
+import { processImage, storeImage } from '@/lib/media/pipeline';
+import { recordMediaAssetBestEffort } from '@/lib/media/registry';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
-const MAX_WIDTH = 2400;
-const WEBP_QUALITY = 85;
 
 export async function POST(request: NextRequest) {
   console.log('🔵 [UPLOAD] POST handler called');
@@ -107,89 +105,44 @@ export async function POST(request: NextRequest) {
     const timestamp = Date.now();
     const uniqueId = nanoid(10);
 
-    // Process image based on type
-    let processedBuffer: Buffer;
-    let filename: string;
-    let contentType: string;
+    // Process image (shared pipeline: sharp resize → WebP + blur + checksum; SVG passthrough)
+    const processed = await processImage(buffer, file.type);
+    const filename = `${timestamp}-${uniqueId}.${processed.extension}`;
 
-    if (file.type === 'image/svg+xml') {
-      // SVG - save as-is
-      processedBuffer = buffer;
-      filename = `${timestamp}-${uniqueId}.svg`;
-      contentType = 'image/svg+xml';
-    } else {
-      // Raster images - resize and convert to WebP
-      const image = sharp(buffer);
-      const metadata = await image.metadata();
-
-      const processedImage = image
-        .resize(MAX_WIDTH, null, {
-          withoutEnlargement: true,
-          fit: 'inside',
-        })
-        .webp({ quality: WEBP_QUALITY });
-
-      processedBuffer = await processedImage.toBuffer();
-      filename = `${timestamp}-${uniqueId}.webp`;
-      contentType = 'image/webp';
-    }
-
-    // Check for dev mode without blob token (fallback to filesystem)
-    const isDev = process.env.NODE_ENV === 'development';
-    const hasBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
-
-    if (isDev && !hasBlob) {
-      // Fallback to filesystem for local dev
-      const { writeFile, mkdir } = await import('fs/promises');
-      const { existsSync } = await import('fs');
-      const path = await import('path');
-
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', tokenId);
-      if (!existsSync(uploadDir)) {
-        await mkdir(uploadDir, { recursive: true });
-      }
-
-      const filePath = path.join(uploadDir, filename);
-      await writeFile(filePath, processedBuffer);
-
-      const finalMetadata = await sharp(processedBuffer).metadata();
-      const imageUrl = `/uploads/${tokenId}/${filename}`;
-
-      console.log('🔵 [UPLOAD] Dev mode: Saved to filesystem:', imageUrl);
-
-      return NextResponse.json({
-        success: true,
-        url: imageUrl,
-        metadata: {
-          width: finalMetadata.width,
-          height: finalMetadata.height,
-          size: processedBuffer.length,
-          format: file.type === 'image/svg+xml' ? 'svg' : 'webp',
-        },
-      });
-    }
-
-    // Upload to Vercel Blob (production or dev with token)
-    console.log('🔵 [UPLOAD] Uploading to Vercel Blob...');
-    const blob = await put(`uploads/${tokenId}/${filename}`, processedBuffer, {
-      access: 'public',
-      contentType,
-      addRandomSuffix: false,
+    // Store (shared pipeline: Vercel Blob, or filesystem fallback in dev without a blob token)
+    const stored = await storeImage(processed.buffer, {
+      tokenId,
+      filename,
+      contentType: processed.contentType,
     });
 
-    console.log('🔵 [UPLOAD] Upload successful:', blob.url);
+    console.log('🔵 [UPLOAD] Stored:', stored.storage, stored.url);
 
-    // Get final metadata
-    const finalMetadata = await sharp(processedBuffer).metadata();
+    // Registry row — BEST EFFORT: an upload must never fail because the row failed.
+    const assetId = await recordMediaAssetBestEffort({
+      projectId: token.project.id,
+      tokenId,
+      userId: clerkId,
+      url: stored.url,
+      source: 'upload',
+      width: processed.width,
+      height: processed.height,
+      bytes: processed.bytes,
+      format: processed.format,
+      blurDataUrl: processed.blurDataUrl,
+      checksum: processed.checksum,
+    });
 
     return NextResponse.json({
       success: true,
-      url: blob.url,
+      url: stored.url,
       metadata: {
-        width: finalMetadata.width,
-        height: finalMetadata.height,
-        size: processedBuffer.length,
-        format: file.type === 'image/svg+xml' ? 'svg' : 'webp',
+        width: processed.width ?? undefined,
+        height: processed.height ?? undefined,
+        size: processed.bytes,
+        format: processed.format,
+        blurDataUrl: processed.blurDataUrl,
+        assetId,
       },
     });
   } catch (error) {

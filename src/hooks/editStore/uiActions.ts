@@ -427,49 +427,20 @@ export function createUIActions(set: any, get: any): UIActions {
         (state.forms as any).activeForm = formId;
       }),
     
-    showFormBuilder: () =>
+    // NOTE: dead-shadowed at runtime by formActions' pair (spread LAST in
+    // editStore.ts). Kept because the `UIActions` type (actions.ts:178-179)
+    // requires it and `createUIActions` returns `UIActions` — deleting it here
+    // alone would break the type. See editor-defect-fixes Phase 2 audit.
+    showFormBuilder: (formId?: string) =>
       set((state: EditStore) => {
-        (state.forms as any).formBuilder.visible = true;
-        state.leftPanel.activeTab = 'pageStructure'; // Or dedicated forms tab
+        state.formBuilderOpen = true;
+        state.editingFormId = formId ?? null;
       }),
-    
+
     hideFormBuilder: () =>
       set((state: EditStore) => {
-        (state.forms as any).formBuilder.visible = false;
-        (state.forms as any).formBuilder.editingField = undefined;
-      }),
-    
-    convertCTAToForm: (sectionId: string, elementKey: string) =>
-      set((state: EditStore) => {
-        const formId = `form-${Date.now()}`;
-        
-        // Replace CTA element with form element
-        if (state.content[sectionId] && state.content[sectionId].elements[elementKey]) {
-          const oldElement = state.content[sectionId].elements[elementKey];
-          
-          state.content[sectionId].elements[elementKey] = {
-            content: formId,
-            type: 'form',
-            isEditable: true,
-            editMode: 'modal',
-          };
-          
-          // Track change
-          state.history.undoStack.push({
-            type: 'content',
-            description: `Converted CTA to form in ${sectionId}`,
-            timestamp: Date.now(),
-            beforeState: { sectionId, elementKey, element: oldElement },
-            afterState: { sectionId, elementKey, formId },
-            sectionId,
-          });
-          
-          state.history.redoStack = [];
-        }
-        
-        (state.forms as any).activeForm = formId;
-        (state.forms as any).formBuilder.visible = true;
-        state.persistence.isDirty = true;
+        state.formBuilderOpen = false;
+        state.editingFormId = null;
       }),
 
     /**

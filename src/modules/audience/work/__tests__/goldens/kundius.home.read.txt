@@ -1,0 +1,65 @@
+KUNDIUS — WORK COPY ENGINE — HOME GOLDEN (founder read)
+*** REAL KUNDIUS FACTS (phase-4 gate 2026-07-14) — establishment "in-between"→established, event price €100/hr→exact 100 (per-hour in name) ***
+
+== PER-PAGE ONE-LINER / POSITIONING ==
+Positioning angle: Kristina Kundius offers professional photography that captures moments and stories for established brands and enterprises.
+Story angle: With a robust portfolio and years of experience, Kristina Kundius tells the stories of brands through her lens with authority and care.
+Voice notes: Clear and concrete over clever. | Warm and direct — a real person, not a brochure. | Use preferred words like photograph, shoot, frame; avoid forbidden words.
+Archetype: standard
+Home sections: header, hero, work, proof, contact, footer
+
+== PROMISE LINE (hero) ==
+Eyebrow: (empty)
+Heading: (empty)
+Lead: (empty)
+CTA: Start Your Project
+
+== GALLERY INTROS / CAPTIONS (work) ==
+Eyebrow: (empty)
+Heading: Visual Stories That Speak Volumes
+Lead: (empty)
+  - card: Full brand package
+  - card: Brand photoshoot
+  - card: Portrait & business shoot
+  - card: Event photography
+
+== STORY (about) ==
+Eyebrow: (empty)
+Heading: (empty)
+Bio: (empty)
+
+== PRICES FRAMING (packages) ==
+Eyebrow: (empty)
+Heading: (empty)
+
+== PROOF / PRAISE (proof) ==
+Eyebrow: (empty)
+Heading: What My Clients Say
+Awards line: (empty)
+
+== CONTACT NUDGE (contact) ==
+Eyebrow: (empty)
+Heading: Ready to Capture Your Story?
+Note: (empty)
+CTA: Get In Touch
+
+== ALL SECTIONS (raw string dump) ==
+--- header ---
+  logo_text: Kristina Kundius Photography
+--- hero ---
+  role_line: Professional Photographer
+  name: Kristina Kundius
+  cta_label: Start Your Project
+--- work ---
+  heading: Visual Stories That Speak Volumes
+--- proof ---
+  heading: What My Clients Say
+--- contact ---
+  heading: Ready to Capture Your Story?
+  lead: Let’s collaborate to create visuals that define your brand.
+  contact_method: Email
+  cta_label: Get In Touch
+--- footer ---
+  heading: Connect with Me
+  note: I look forward to capturing the essence of your brand.
+  copyright: © 2023 Kristina Kundius Photography

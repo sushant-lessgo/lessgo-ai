@@ -11,7 +11,7 @@ import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useLexBlock } from '../../hooks/useLexBlock';
 import { LexEditable } from '../../components/LexEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import type { Link } from '@/types/destination';
 
 interface NavItem {
@@ -93,7 +93,7 @@ export default function LetterheadNav({ sectionId }: LetterheadNavProps) {
                 placeholder="Link"
               />
               {edit && (
-                <LinkTargetPopover
+                <LinkPicker
                   value={item.href ?? '#'}
                   sectionOptions={sectionOptions}
                   pageOptions={pageOptions}

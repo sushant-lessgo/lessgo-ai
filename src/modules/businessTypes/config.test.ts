@@ -9,14 +9,15 @@ import { goalIntents } from '@/modules/goals/vocabulary';
 import { isExtractionSchemaKey } from '@/lib/schemas/extraction';
 
 describe('businessTypes v0 shape', () => {
-  it('has exactly the 8 seed keys incl. manufacturer + writer + phase-3 photographer/app', () => {
+  it('has exactly the 9 seed keys incl. manufacturer + writer + phase-3 photographer/app + designer', () => {
     const keys = Object.keys(businessTypes).sort();
     expect(keys).toEqual([...businessTypeKeys].sort());
-    expect(keys).toHaveLength(8);
+    expect(keys).toHaveLength(9);
     expect(keys).toContain('manufacturer');
     expect(keys).toContain('writer');
     expect(keys).toContain('photographer');
     expect(keys).toContain('app');
+    expect(keys).toContain('designer');
   });
 
   it('every entry.key matches its record key', () => {
