@@ -10,6 +10,18 @@
 // lookup for it falls through to the placeholder. A1 guardrail preserved: a
 // foreign/unknown layout name resolves to the section's `default`, so switching
 // templates never breaks on a stored layout name.
+//
+// ── COLLECTION SECTIONS (work-onboarding-ingestion E2) ──────────────────────
+// Two sections here are the WORK PHOTO-BINDING render surface, NOT section-picker
+// arrangement variants (hence they're absent from `manifest.ts` — see its header):
+//   • `workcatalog` — the `/works` index: a covers grid over the catalog slice.
+//   • `workdetail`  — a `/works/<slug>` project page: the group's photo grid
+//     (cover first) + optional client/problem/result strip.
+// They resolve by SECTION TYPE (lowercase) and are fed by the LLM-free collection
+// fan-out (`generation/workCollections.ts` + `wizard/generation/work.llm.ts`).
+// The `works` capability that lights them up is declared on `atelier` ONLY; the
+// block pair is single-source `.core.tsx` (dual-renderer parity
+// guarded by `coreParity.test.ts` + `renderParity.work.test.tsx`).
 
 import React from 'react';
 import { WorkPlaceholderBlock } from './WorkPlaceholderBlock';
@@ -47,6 +59,15 @@ import WorkFaq from './blocks/Faq/WorkFaq';
 import WorkFaqPublished from './blocks/Faq/WorkFaq.published';
 import WorkResults from './blocks/Results/WorkResults';
 import WorkResultsPublished from './blocks/Results/WorkResults.published';
+// Collection-machinery sections (work-onboarding-ingestion E2 / phase 2): the
+// `/works` catalog index + per-project detail page. These are NOT arrangement
+// variants offered in the section picker (so they carry no block-manifest entry) —
+// they are resolved by SECTION TYPE by the collections fan-out + the conformance
+// (b)/(b+)/(d) capability-evidence walks (resolvesReal), keyed off the works flip.
+import WorkCatalog from './blocks/Catalog/WorkCatalog';
+import WorkCatalogPublished from './blocks/Catalog/WorkCatalog.published';
+import WorkDetail from './blocks/WorkDetail/WorkDetail';
+import WorkDetailPublished from './blocks/WorkDetail/WorkDetail.published';
 
 /** One built layout variant = an edit component + its published twin. */
 export interface WorkBlockVariant {
@@ -140,6 +161,20 @@ export const WORK_BLOCK_REGISTRY: Record<string, WorkSectionEntry> = {
     default: 'workresults',
     variants: {
       workresults: { edit: WorkResults, published: WorkResultsPublished },
+    },
+  },
+  // Collection-machinery sections (E2 / phase 2). Single layout each — the works
+  // fan-out + conformance resolve these by section type (no arrangement variants).
+  workcatalog: {
+    default: 'workcatalog',
+    variants: {
+      workcatalog: { edit: WorkCatalog, published: WorkCatalogPublished },
+    },
+  },
+  workdetail: {
+    default: 'workdetail',
+    variants: {
+      workdetail: { edit: WorkDetail, published: WorkDetailPublished },
     },
   },
 };

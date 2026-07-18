@@ -30,6 +30,10 @@ export const defaultWorkSectionSurfaces: Record<string, WorkSurface> = {
   results:  'paper-2',
   contact:  'dark',
   footer:   'dark',
+  // Collection-machinery sections (E2 / phase 2): the `/works` catalog index +
+  // per-project detail page. Paper, matching the home gallery surface.
+  workcatalog: 'paper',
+  workdetail:  'paper',
 };
 
 const surfaceVarMap: Record<WorkSurface, string> = {

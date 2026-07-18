@@ -3,8 +3,9 @@
 Generates a complete, lean, voice-true multi-page work site from a work Brief
 (`brief.facts.work`, the phase-A `WorkFacts` contract) plus the work library
 (groups / photos / praise). Modeled on the PRODUCT pipeline
-(`modules/audience/product/*`) — **not** the legacy `parseStrategyResponse()` /
-`parseAiResponse()` shapes in `modules/prompt/`.
+(`modules/audience/product/*`). (It was never modeled on the legacy shared
+`parseStrategyResponse()` / `parseAiResponse()` shapes — those were **deleted** in
+regen-modernization; `modules/prompt/` is now mock-generators only.)
 
 `work` is a **copyEngine**, NOT an `audienceType`. A work project's persisted
 `audienceType` is bridged to an audience by its picked template
@@ -112,6 +113,34 @@ selector.
   = allow-list membership ONLY (independent of the generation kill-switch).
 - Every OTHER work-multipage template keeps today's SKELETON (manual-fill) path
   even with the flag ON, until explicitly added to the allow-list.
+
+## Photo binding — groups → covers + `/works/<slug>` item pages (E2)
+
+The work journey's STEP 02 lets the seller upload photos, which land in
+`facts.work.groups[].photos` (`WorkPhotoRef {id,url?,alt?,cover?}` — ONE truth,
+the Brief facts bag; NO MediaGroup table, no schema touch). Generation binds them
+into the site with **zero AI calls** (the granth LLM-free `generateItemCopy`
+precedent), so binding adds no credit op and no prompt input:
+
+- **Covers + href stamping** (`generation/workCollections.ts` →
+  `stampWorkGalleryBinding`): each HOME `work`-section group card is joined
+  by NAME→slug against the derived entries and stamped with `cover_image`
+  (the `cover:true` photo, else the first, else left as-is) and `href`
+  (`/works/<slug>`) — the href ONLY when that item page exists in `fc.pages`
+  (the guard that keeps the engine-wide STEP-02 UI safe on non-flipped
+  templates). Join by name/slug, NEVER index (parseCopy preserves group names
+  verbatim — facts law).
+- **Item pages** (`deriveWorksEntries` → `runCollectionFanOut`): each group
+  fans out into a `/works/<slug>` `workdetail` page carrying the group's
+  photos VERBATIM (`photos` is in `VERBATIM_ITEM_FIELDS`, so AI connective copy
+  can never clobber the uploaded list). Photos are clamped to the contract max
+  (24 per group) at derivation.
+
+**Binding is `atelier`-only**: the `works` capability is declared only on the
+(skeleton-backed) `atelier` template; on any other work template the fan-out stays
+dormant (no `/works` pages, href never stamped) so the STEP-02 UI is engine-wide
+but the reveal is capability-scoped. See `generation/README.md` and
+`skeletons/work/resolveWorkBlock.ts` for the render half.
 
 ## Key pitfalls
 

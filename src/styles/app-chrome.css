@@ -7,9 +7,18 @@
  * ISOLATION (binding — see docs/task/ui-foundation.plan.md §Isolation mechanism):
  *   - `.app-chrome` is DEFINED here but applied to NO screen by this feature.
  *     Consuming specs (auth-redesign, dashboard, editor-shell) attach it to their
- *     OWN shells. It must NEVER be attached to the root <body>, /p/*, /preview/*,
- *     or any wrapper containing the editor CANVAS — doing so would restyle the base
- *     font/ink of generated template pages and break editor↔published parity.
+ *     OWN shells. It must NEVER be attached to the root <body>, /p/*, or ANY
+ *     WRAPPER CONTAINING THE CANVAS — doing so would restyle the base font/ink of
+ *     generated template pages and break editor↔published parity.
+ *
+ *     THE RULE IS "no canvas ancestor", not "no route". The original wording also
+ *     blanket-forbade /preview/*, which reads as a violation of a legitimate
+ *     pattern: editor-shell-redesign phase 7 attaches the class on /preview/* to
+ *     the publish CHROME (SlugModal + the success card), which are SIBLINGS of the
+ *     canvas — several via `display:contents` wrappers that move no box. Same
+ *     shape as the phase-3/4 attach map in EditLayout.tsx (bar / rail / modal
+ *     roots, canvas a true sibling). A chrome wrapper on a canvas-bearing route is
+ *     fine; a wrapper that CONTAINS the canvas is not, on any route.
  *   - Imported ONLY by the root app layout (src/app/layout.tsx) — NOT by p/layout.tsx
  *     and NOT inlined into public/published.css, so zero bytes reach published pages.
  */
@@ -52,4 +61,80 @@
 
 .app-icon--filled {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ============================================================================
+   .app-coming — THE shared "not yet wired" (greyed) treatment.
+   editor-shell-redesign phase 1 (decisions 2 + 15). Named `coming`; posted to
+   the dashboard-workspace-ia mailbox so dashboard S1 adopts the same name.
+
+   THE one greyed style across every track — do NOT improvise a second.
+   Consumers MUST apply the full recipe (see src/components/ui/README.md §coming):
+
+     <AppTooltip label="Coming soon — page CMS">
+       <button type="button" className="app-coming" aria-disabled="true"
+               tabIndex={-1} onClick={(e) => e.preventDefault()}>…</button>
+     </AppTooltip>
+
+   aria-disabled (NOT `disabled`) is required: a `disabled` button suppresses the
+   pointer events the tooltip needs, so the "why" affordance would never show.
+
+   Derived from the handoff's own held-back legend row (scout §I): the handoff
+   specifies no disabled control, so spec intent ("render greyed, never omitted")
+   supplies the treatment: opacity .5 + #8a8a94 + not-allowed + no hover.
+   ============================================================================ */
+
+.app-coming,
+.app-coming * {
+  color: #8a8a94 !important;
+}
+
+.app-coming {
+  opacity: 0.5;
+  cursor: not-allowed;
+  /* Hover/active states must not fire: the control does nothing yet. Pointer
+     events stay ON so the wrapping tooltip can still explain why. */
+  filter: none;
+}
+
+/* Kill every interactive affordance — greyed controls never react. */
+.app-coming:hover,
+.app-coming:focus,
+.app-coming:active,
+.app-coming:focus-visible {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* Any icon inside inherits the muted tone (AppIcon sets color via `color`). */
+.app-coming .app-icon {
+  color: #8a8a94 !important;
+}
+
+/* ============================================================================
+   .app-divider — 1×22 vertical hairline. t1 top bar uses it ×3.
+   Built here so phase 4 does not improvise its own.
+   `.app-divider--full` stretches to the parent's height instead of a fixed 22px.
+
+   Colour = the `app-border-hairline` token (#e6e6ec), NOT `app-border` (#ececf1)
+   and NOT `app-border-input` (#e2e4ea) — decision 16. Phase 1 hard-coded the
+   literal here while three sources disagreed about which token owned this hex;
+   phase 3 gave it its own key and re-pointed this rule at it, so the divider and
+   the popover borders can never drift apart again.
+   ============================================================================ */
+
+.app-divider {
+  flex: none;
+  width: 1px;
+  height: 22px;
+  background: theme('colors.app.border-hairline');
+  align-self: center;
+}
+
+.app-divider--full {
+  height: auto;
+  align-self: stretch;
 }

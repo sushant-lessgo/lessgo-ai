@@ -1,0 +1,473 @@
+# work-onboarding-plan (E4) — implementation audit
+
+## Phase 1 — Goal contract + structure carries title/goal
+
+### Files changed
+- `src/modules/engines/workPages.ts`
+- `src/modules/engines/workVocabulary.ts`
+- `src/modules/audience/work/strategy/parseStrategyWork.ts`
+- `src/lib/schemas/brief.schema.ts`
+- `src/hooks/useWizardStore.ts`
+- `src/modules/engines/workContract.test.ts`
+
+### What changed, per file
+
+**`src/modules/engines/workPages.ts`** — new "Per-page conversion goal" section inserted before "Named whole-site archetypes":
+- `WORK_PAGE_GOAL_KEYS = ['whatsapp','booking','form'] as const` + `WorkPageGoalKey` type (mirrors the `contactMethod` fact rail, workFacts.schema.ts slot 7).
+- `defaultGoalForPage(pageKey, contactMethod?)` — contact page → `'form'`; every other page → `contactMethod ?? 'form'`.
+- `addableWorkPages(currentKeys: string[]): WorkPageTypeKey[]` — filters `workPageTypeKeys`, excluding `home` (required), `work-group` (parametric), and any present key. `blog` + `project-story` fall through as explicit adds.
+- No new imports (firewall unchanged).
+
+**`src/modules/engines/workVocabulary.ts`** — new "Per-page goal wording" section before "Profession-adaptive wording":
+- `workPageGoalWords: Record<WorkPageGoalKey, {userLabel; description?}>` — whatsapp→"Message on WhatsApp", booking→"Book a time", form→"Send the form".
+- `workPageGoalBadgePrefix = 'asks visitors to:'`.
+- Added `import type { WorkPageGoalKey } from './workPages'` (type-only — the D5 firewall source-scan skips `import type`, and `./workPages` is not on the forbidden list; scan stays green).
+
+**`src/modules/audience/work/strategy/parseStrategyWork.ts`** — `WorkSitemapPage` (interface at L35) gains optional `goal?: WorkPageGoalKey`; imported `WorkPageGoalKey` from workPages. `assembleWorkStrategy` / assembly unchanged (never sets goal — plan-screen populated).
+
+**`src/lib/schemas/brief.schema.ts`** — `structure.pageDetails[]` entry (the `z.object` at L78) gains optional `title: z.string().optional()` + `goal: z.enum(WORK_PAGE_GOAL_KEYS).optional()`. Added `import { WORK_PAGE_GOAL_KEYS }`. `ConfirmedStructure` (fit.ts, derived from `Brief['structure']`) inherits both fields automatically. Shallow-partial trap respected — both are `.optional()`.
+
+**`src/hooks/useWizardStore.ts`**
+- `buildStructurePatch` (was ~L621-637): `pageDetails.map` now emits `title: p.title` always and `goal` when present. `goal` is read via a narrow widen `(p as { goal?: WorkPageGoalKey }).goal` because the store types `s.sitemap` as the product `SitemapPage` (no `goal` field) — product.ts is out of Phase-1 scope, so the cast avoids touching it.
+- Rehydration (was ~L1001, inside `hydrate`): `title` now `d.title ?? prettify(key)` (was always prettify); `goal` spread back onto the sitemap entry when present. Round-trip is lossless.
+- Added `import type { WorkPageGoalKey } from '@/modules/engines/workPages'`.
+
+**`src/modules/engines/workContract.test.ts`** — extended (not rewritten): imported the new symbols; added a "4b. Per-page goals (E4)" describe block with 4 tests — goal enum mirrors the rail; every key has a `workPageGoalWords` entry (+ no stray keys, badge prefix non-empty); `defaultGoalForPage` matrix (contact→form for all methods, non-contact→method, absent→form); `addableWorkPages` excludes `work-group` + present pages, never home, includes prices/about/blog/project-story.
+
+### Goal defaults implemented (exact)
+- `defaultGoalForPage('contact', anything)` → `'form'`
+- `defaultGoalForPage(<non-contact>, method)` → `method`
+- `defaultGoalForPage(<any>)` (no contactMethod) → `'form'` (neutral fallback = contact default). Conservative in-scope choice: the plan said "default = facts.work.contactMethod" but `contactMethod` is optional; chose `'form'` as the fallback rather than throwing/undefined.
+
+### Deviations
+- Plan cited `WorkSitemapPage` as already having `title/pathSlug/sections` — confirmed accurate (parseStrategyWork.ts L35). Also carries `archetypeKey`.
+- Plan line refs verified: `buildStructurePatch` at L621, rehydration map at L1001, `pageDetails` object at brief.schema.ts L78 — all matched.
+- `goal` read via cast in `buildStructurePatch` (store's sitemap is typed as product `SitemapPage`, which lacks `goal`; widening product.ts is out of scope). Rehydration writes `goal` onto `state.sitemap` freely since it is typed `unknown[]`.
+- Restored one incidental file the test run touched: `src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` had a LF→CRLF-only touch (empty content diff) from vitest; ran `git checkout -- <that file>` to keep the change set scoped. No content change discarded.
+
+### Verification (verbatim tails)
+`npx tsc --noEmit`:
+```
+src/app/page.tsx(6,26): error TS2307: Cannot find module '@/assets/images/founder.jpg' or its corresponding type declarations.
+```
+Pre-existing/environmental only — `next-env.d.ts` is absent in this worktree (normally generated by `next dev`/`build`), which supplies the image-module (`*.jpg`) type declarations. The asset exists on disk. Not in any Phase-1 file; none of the touched files error.
+
+`npm run test:run`:
+```
+ Test Files  243 passed | 1 skipped (244)
+      Tests  4068 passed | 18 skipped (4086)
+   Duration  75.78s
+```
+(workContract.test.ts alone: 34 passed.)
+
+### Open risks
+- The `next-env.d.ts`-absent tsc error will vanish once the harness runs a Next build; if a reviewer runs bare `tsc` they will see it — unrelated to E4.
+- `goal` currently flows through persistence only; generation does not consume it (by design — consuming it would modify the copy path → tier escalation). Phase 2+ wires the UI.
+
+## Phase 2 — Seam widening + rich read-only PlanStep
+
+### Files changed
+- `src/components/onboarding/journey/engines/types.ts`
+- `src/components/onboarding/journey/steps/StepPlan.tsx`
+- `src/components/onboarding/journey/engines/work.ts`
+- `src/components/onboarding/journey/engines/work/PlanStep.tsx` (NEW)
+- `src/components/onboarding/journey/engines/work.test.ts`
+
+`journeyAgnostic.test.ts` was NOT modified — it is an import-graph/tripwire guard, not a
+seam/step-frame shape assertion, and the widened `steps.plan` + stub fallback pass it
+unchanged (StepPlan still statically imports no engine/generation module).
+
+### What changed, per file
+
+**`src/components/onboarding/journey/engines/types.ts`** (~L385-397) — widened the
+`steps.plan` seam member. Verbatim type change:
+```
+    plan: {
+      prepare(wizardApi: JourneyWizardApi): Promise<void>;
+      items(state: JourneyWizardState): { title: string }[];
+      loadStep?: JourneyStepConfig['loadStep'];
+    };
+```
+`loadStep?` is typed by indexing the founder-signed `JourneyStepConfig['loadStep']`
+(defined once at ~L346/356 and doc-reserved for STEP 04) — FIELD REUSE, identical
+signature, NOT a new mechanism. `prepare`/`items` and every other seam member untouched.
+Updated the doc comment above `plan` to record the STEP-04 reuse.
+
+**`src/components/onboarding/journey/engines/work.ts`** (~L652) — registered
+`steps.plan.loadStep = () => import('./work/PlanStep')` (dynamic import = firewall,
+copying the `showWork.loadStep` pattern). `plan.prepare` (chargeless `fetchStrategy`
+seed) and `plan.items` (stub projection) left byte-for-byte unchanged beside it; added a
+doc block explaining the reuse.
+
+**`src/components/onboarding/journey/steps/StepPlan.tsx`** — rewrote the frame to mirror
+`StepShowWork`: `prepare` still runs on mount; when `plan.loadStep` is present it renders
+`lazy(plan.loadStep)` inside `<Suspense fallback=…>` as `<LazyBody {...props} />` (passes
+the full `JourneyStepProps` — `seam` + `onBuildingChange`/`onBlockedChange`); when absent
+it renders the CURRENT read-only `items()` projection + the "Build my site" advance
+verbatim (non-work engines unaffected). `data-testid="step-plan"` / `plan-items` /
+`plan-build` preserved on the stub path.
+
+**`src/components/onboarding/journey/engines/work/PlanStep.tsx`** (NEW, `JourneyStepProps`)
+— READ-ONLY work plan. Reads `sitemap` + `selectBriefFacts` via `useWizardStore`, resolves
+work facts with `getWorkFacts(briefFacts)`. Renders one column per `WorkSitemapPage`:
+- title;
+- real ingested photos (prominent) — `photosWithUrl()` collects `groups[].photos[]` +
+  `groups[].items[].photos[]` that carry a `url`, cover-first; the strip renders ONLY when
+  the page has a work section (`hero`/`work`/`workdetail`/`featuredWork`) AND photos exist;
+- plain-word section rows (small) from `workVocabulary[key]` → `userLabel` + `description`;
+  a key with no vocab entry is dropped, never shown raw (zero internal vocabulary);
+- a distinct goal badge = `workPageGoalBadgePrefix` + `workPageGoalWords[page.goal ??
+  defaultGoalForPage(page.archetypeKey, facts.contactMethod)].userLabel`.
+Working "Build my site" → `setJourneyStep(5)`. Renders only the columns + CTA, so the
+shell-owned "What we understood" rail is untouched.
+
+**`src/components/onboarding/journey/engines/work.test.ts`** (~L570) — added a test in the
+`STEP 04 plan` block asserting `steps.plan.loadStep` is a function (mirrors the
+`showWork.loadStep` D9 assertion) and that `prepare`/`items` remain functions beside it.
+
+### No-photo (Kundius) path
+The Kundius fixture groups carry no photo urls, so `photosWithUrl()` returns `[]` and the
+photo strip is skipped entirely — no broken `<img>`, no empty frame. Columns still render
+title + section rows + goal badge cleanly. `defaultGoalForPage` falls back to `'form'`
+(no `contactMethod` in the fixture), so every column shows "asks visitors to: Send the form".
+
+### Deviations
+1. **`blurDataUrl`** — the plan mentioned a `blurDataUrl` preview, but `WorkPhotoRefSchema`
+   (the persisted fact shape) has no such field; `blurDataUrl` is an EPHEMERAL upload signal
+   held only in `ShowWorkStep` component state. This read-only projection of the COMMITTED
+   bag has no access to it, so photos render by `url`. Documented in the file header.
+2. **`steps.plan` widening** — added `loadStep?` alone (via `JourneyStepConfig['loadStep']`)
+   rather than intersecting the whole `JourneyStepConfig` (which would force unused
+   `title`/`body`/`icon` onto the plan seam member — StepPlan supplies its own heading).
+   The plan explicitly allowed this option ("or adding `loadStep?` of the identical signature").
+3. **Badge color tokens** — used existing `bg-app-tint`/`text-app-primary` (the design
+   system has no `app-accent`/`app-accent-subtle` token) for the "distinct" goal badge.
+4. **`journeyAgnostic.test.ts`** left untouched (conditional in the plan; not applicable).
+
+### Verification
+- `npx tsc --noEmit` → only the KNOWN pre-existing env error:
+  `src/app/page.tsx(6,26): error TS2307: Cannot find module '@/assets/images/founder.jpg'…`
+  Nothing else.
+- `npm run test:run` → `Test Files 243 passed | 1 skipped (244)` ·
+  `Tests 4069 passed | 18 skipped (4087)` (was 4068; +1 = the new loadStep assertion).
+
+### Open risks
+- Photo→page mapping is heuristic in read-only mode (all group photos shown on any
+  work-bearing page); the true per-page/per-group placement is generation's job and is not
+  editable here — acceptable for a preview. No change to generation/credit/reveal paths.
+
+## Phase 3 — Tap-powers through the one write door
+
+### Files changed
+- `src/modules/wizard/work/plan.ts` (NEW)
+- `src/modules/wizard/work/plan.test.ts` (NEW)
+- `src/hooks/useWizardStore.ts`
+- `src/components/onboarding/journey/engines/work/PlanStep.tsx`
+
+### What changed, per file
+
+**`src/modules/wizard/work/plan.ts`** (NEW, pure — types + the `workPages` contract
+only; `WizardRailCommit`/`ConfirmedStructure` are TYPE-ONLY imports so no runtime cycle
+with useWizardStore):
+- `PlanEdit` union (index-targeted for the four in-place edits; page-TYPE-key for add):
+  - `{ type:'addPage'; pageKey; contactMethod? }`
+  - `{ type:'removePage'; index }`
+  - `{ type:'renamePage'; index; title }`
+  - `{ type:'movePage'; index; dir:-1|1 }`
+  - `{ type:'setGoal'; index; goal }`
+- `applyPlanEdit(edit, sitemap): {ok:true; next} | {ok:false; error}` — PURE, never
+  mutates input (spreads a copy), never throws. Rejection rules AS IMPLEMENTED:
+  - **addPage**: `pageKey` must be in `addableWorkPages(currentKeys)` — this single check
+    covers "not designed / parametric `work-group` / `home` / already present" (all four
+    reject). New page appended LAST (so `home` stays first) with `archetypeKey/title/
+    pathSlug/sections` from `workPageTypes[pageKey]` (`sections = [...defaultSections]`)
+    and `goal = defaultGoalForPage(def.key, edit.contactMethod)`.
+  - **removePage**: index in range; `home` (archetypeKey `'home'`) rejected. Removed page
+    is absent from `next` (the generation invariant, unit-tested).
+  - **renamePage**: index in range; `title.trim()` non-empty; `pathSlug` UNCHANGED (slugs
+    code-fixed).
+  - **movePage**: index in range; `home` cannot move; destination `index+dir` in range AND
+    `!== 0` (a move into first would displace `home`) → both reject.
+  - **setGoal**: index in range; `goal ∈ WORK_PAGE_GOAL_KEYS`.
+  - `currentKeys` for the add-menu is derived via a local `ARCHETYPE_TO_PAGE_KEY` reverse
+    map (archetypeKey → page-type key) because `project-story`'s archetypeKey is
+    `'work-detail'`, not its page-type key.
+- `buildPlanCommit(nextSitemap, briefFacts): WizardRailCommit` — composes
+  `{ patch:{ structure }, facts:{...(briefFacts ?? {})}, sitemap: nextSitemap }`.
+  `structure` is built with the SAME sitemap→structure mapping `buildStructurePatch`
+  (useWizardStore.ts L622-645) uses, reproduced field-for-field:
+  `mode:'multi'` · `pages = nextSitemap.map(p=>p.archetypeKey)` · `pageDetails` =
+  `{archetypeKey, slug:p.pathSlug, sections:[...p.sections], title:p.title, ...(p.goal?{goal}:{})}`.
+  Typed `ConfirmedStructure` (`= NonNullable<Brief['structure']>`), so no cast is needed
+  (WorkSitemapPage.goal is `WorkPageGoalKey`, unlike the store's product-typed sitemap).
+  Facts are re-emitted UNCHANGED (structure taps touch no facts).
+
+**`src/hooks/useWizardStore.ts`**
+- `WizardRailCommit` (L316-333) gains optional `sitemap?: unknown[]` with a doc block.
+- `commitRail` `perform` (now ~L1358-1400): snapshot `prevSitemap = get().sitemap` guarded
+  by `hasSitemap = commit.sitemap !== undefined`; the ONE optimistic `set` now also does
+  `if (hasSitemap) state.sitemap = commit.sitemap ?? null`; the wholesale `revert` `set`
+  now also restores `if (hasSitemap) state.sitemap = prevSitemap`. Facts-only rail commits
+  (no `sitemap`) leave `state.sitemap` untouched. The saveDraft serialization chain +
+  `patch` body are unchanged — `patch.structure` flows through it exactly as before.
+
+**`src/components/onboarding/journey/engines/work/PlanStep.tsx`** — wired the taps onto the
+phase-2 read-only columns:
+- `runPlanEdit(edit)`: reads the LIVE sitemap via `useWizardStore.getState().sitemap` (not a
+  stale render closure — `commitRail` is serial) → `applyPlanEdit` → on `{ok:false}` set an
+  inline `plan-error` alert; on `{ok:true}` `commitRail(buildPlanCommit(next, liveFacts))`,
+  surfacing a commit failure as the same inline error (clears on next success). Optimistic
+  UI + revert come free from the store set/revert.
+- Per-column controls: rename (inline input, Enter/blur commit, Esc cancel), move earlier/
+  later (chevrons, disabled for `home` and at the ends), remove (hidden for `home`), and a
+  goal `<select>` (options + labels from `workPageGoalWords`/`WORK_PAGE_GOAL_KEYS`).
+- Add-page `<select>` populated from `addableWorkPages(present)` (present derived via the
+  same archetype→page-key reverse map) + an Add button; passes the seller `contactMethod`
+  so the new page's default goal reflects their choice.
+- **Swap which work leads** (`makeLead`): reorders `facts.work.groups` (chosen group moved
+  first) via the EXISTING `applyRailEdit({field:'groups', value}) → commitRail` door (the
+  ShowWorkStep E2 pattern) — no `leadWork` field invented. Rendered as a "Which work leads?"
+  pill row (first pill = current lead, disabled+starred).
+- NO section-level rearranging UI. The read-only render + the `plan-build`
+  `setJourneyStep(5)` advance are intact (approve→structure→fire is Phase 4).
+
+### Deviations
+- **Edit targeting = index** for remove/rename/move/setGoal (the plan left the addressing
+  open). Index is unambiguous (the UI holds it from the column map) and mirrors the existing
+  collection-edit-by-index convention. Add uses the page-TYPE key (the designed-set menu key).
+- **movePage uses `dir:-1|1`** (up/down, mirroring the existing `moveStructureSection(index,
+  dir)`) rather than an arbitrary target index — matches the chevron UI and keeps the
+  home-stays-first guard trivial.
+- **addPage carries an optional `contactMethod`** on the edit rather than threading facts
+  into `applyPlanEdit` — keeps `applyPlanEdit(edit, sitemap)` pure (no facts arg) while
+  letting the added page inherit the seller's contact method as its default goal. When
+  absent, `defaultGoalForPage` falls back to `'form'` (Phase-1 behavior).
+- **New pages append last.** The plan did not specify insertion position; appending is the
+  conservative choice that trivially preserves `home`-first and never reorders existing pages.
+
+### Verification (verbatim tails)
+`npx tsc --noEmit`:
+```
+src/app/page.tsx(6,26): error TS2307: Cannot find module '@/assets/images/founder.jpg' or its corresponding type declarations.
+```
+The ONE known pre-existing env error (absent `next-env.d.ts` image-module decls) — unrelated
+to E4; no Phase-3 file errors.
+
+`npm run test:run`:
+```
+ Test Files  244 passed | 1 skipped (245)
+      Tests  4091 passed | 18 skipped (4109)
+```
+(was 4069; +22 = the new `plan.test.ts`.) `plan.test.ts` alone: 22 passed. Restored the
+incidental CRLF-touched `uiFoundationIsolation.test.tsx.snap` via `git checkout --` to keep
+the change set scoped (also restored an unrelated pre-existing CRLF diff on the plan.md).
+
+### Open risks
+- Goal/rename/reorder persist through `Brief.structure`; generation still does not CONSUME
+  `goal` (by design — consuming it modifies the copy path → tier escalation). The
+  removed-page ⇒ absent-from-`next` invariant is unit-tested here; the end-to-end
+  no-copy-call assertion is Phase 4's e2e.
+- `makeLead` sends the reordered groups through `applyRailEdit({field:'groups'})` which
+  re-normalizes each group; photos/items are carried (WorkGroupInput preserves them), so a
+  reorder does not drop ingested photos — but this relies on the rail's carry contract
+  (documented in rail.ts).
+
+## Phase 4 — Approve→structure→fire handoff + e2e invariant + whole-feature green
+
+### Files changed
+- `src/components/onboarding/journey/engines/work/PlanStep.tsx`
+- `src/components/onboarding/journey/steps/StepPlan.tsx`
+- `e2e/workPlan.spec.ts` (NEW)
+- `docs/tracks/workEndtoEnd.md`
+
+### What changed, per file
+
+**`src/components/onboarding/journey/engines/work/PlanStep.tsx`** — the approve
+("Build my site") handoff. Added an `approving` guard flag + an `approve()` handler;
+`plan-build` now `onClick={() => void approve()}` and is `disabled={pages.length === 0
+|| approving}`. Verbatim ordering (the invariant): read the LIVE sitemap
+(`useWizardStore.getState().sitemap`) + live facts → **await** ONE final
+`commitRail(buildPlanCommit(current, liveFacts))` (idempotent — re-emits the same
+`Brief.structure`, so persistence is guaranteed even if an earlier per-tap commit
+failed) → **gate on `out.ok`**: on `{ok:false}` set the inline `plan-error` and do NOT
+advance; ONLY on success `setJourneyStep(5)`. So: **await persist → gate on success →
+advance.** No generation/credit/rate-limit/reveal wiring touched — STEP 05
+(`StepBuilding` → `seam.runGeneration` → `buildWorkInput(state).pages = s.sitemap`) is
+reused unchanged; the removed page falls out of `input.pages` (verified: `buildWorkInput`
+reads `s.sitemap`, useWizardStore.ts L792; the fan-out iterates that sitemap,
+work.llm.ts L247).
+
+**`src/components/onboarding/journey/steps/StepPlan.tsx`** — single-advance guard. The
+frame ALREADY guarantees one advance path structurally: when `plan.loadStep` is present
+the early `if (LazyBody) return <Suspense><LazyBody/></Suspense>` renders ONLY the injected
+work body, so the stub-fallback's own `plan-build` button (below the return) is never
+mounted and can never also fire. Made that invariant explicit with a comment at the early
+return (no restructure — a runtime guard on the unreachable stub button would be dead code).
+
+**`e2e/workPlan.spec.ts`** (NEW) — the deterministic invariant spec (mock-LLM, seeded
+Kundius resume, serial/authed). It:
+1. Seeds the Kundius work brief (`seedWorkBrief`) and drives 02 → 03 (Skip upload,
+   `answerRequiredQuestions` = price on-request + languages English) → 04.
+2. Asserts the rich plan renders: the home column shows the buyer word "Your promise"
+   (proof the `hero` internal key was translated), and `plan-goal-0` shows the plain
+   badge "asks visitors to:". Then asserts ZERO internal vocabulary leaks into the
+   `step-plan` body innerText — none of `hero`, `quote`, `testimonial`, `cta`,
+   `collection`, `proof`, `workdetail`. (`hero`+`quote` are the atelier pages' pure-
+   internal section keys — `work`/`packages`/`about`/`contact` are excluded from the probe
+   because they legitimately occur as buyer page titles / userLabels; the rest are the
+   engine-internal names the vocabulary rules forbid outright.)
+3. REMOVES a page and RENAMES another via the tap-powers: renames About (col 3) →
+   "Studio and story", then removes Experiences (col 2). (Atelier's default menu has
+   NO "prices" page — the plan's "e.g. prices" example; Experiences is the equivalent
+   removable, `defaultIncluded` page. See Deviations.) Column titles are asserted before
+   the index-addressed edits, so the interaction is self-verifying.
+4. Approves → drives to `step-reveal` (with the same free-tier rate-limit retry loop as
+   work-onboarding.spec.ts — a real finding, not scaffolding; the retry RESUMES via
+   `completedPageKeys`, never re-issuing copy for the removed page), then asserts BOTH
+   halves of the invariant:
+   - (a) persisted `Brief.structure`: intercepts every `/api/saveDraft` body carrying a
+     `brief.structure` (the plan commits); the LAST = the approve commit. Asserts its
+     `pages` lacks `experiences`, its `pageDetails` has no `/experiences` slug, and the
+     `/about` entry's `title` is "Studio and story". Cross-checks the SAME via
+     `/api/loadDraft` (`draft.brief.structure`) so it is proven in Postgres, not just in the
+     request.
+   - (b) no copy for the removed page: intercepts every
+     `/api/audience/work/generate-copy` POST and records `body.page.pathSlug`. Asserts the
+     removed `/experiences` slug is ABSENT, the kept `/about` slug is PRESENT, and the
+     generated-slug set is non-empty — so the absence is a real behavior assert, never a
+     vacuous green (generation demonstrably ran and generated the kept pages).
+
+**`docs/tracks/workEndtoEnd.md`** — one-line status blockquote under "### 4. Show the
+plan" marking it BUILT (dev-gated), pointing at `e2e/workPlan.spec.ts`. No restructure.
+
+### Deviations
+- **Removed-page target = "Experiences", not "prices".** The atelier default sitemap
+  (`ATELIER_PAGE_ARCHETYPES`, all `defaultIncluded`) is Home / Work / Experiences / About /
+  Contact — there is NO prices page. The plan wrote "e.g. the prices page" (an example);
+  the actual equivalent removable, generated page is `experiences` (slug `/experiences`).
+  Conservative in-scope choice — same invariant, real fixture.
+- **Single-advance guard = comment, not code.** The early return already makes the stub
+  button unreachable when `loadStep` is injected; a runtime guard would be dead code. Kept
+  it "small" per the plan by documenting the structural guarantee instead of restructuring.
+- **Structure asserted via BOTH intercept + loadDraft.** Belt-and-suspenders: the approve
+  commit's saveDraft body proves what was sent at approve; `loadDraft` proves it survived
+  generation's later finalContent saves (which carry no `brief`, so they cannot clobber
+  `Brief.structure`).
+
+### BLOCKER — out-of-scope file needed to RUN the e2e (NOT edited)
+`e2e/workPlan.spec.ts` matches NO Playwright project until it is added to the `authed`
+project's `testMatch` allowlist in `playwright.config.ts` (L59-85) — an explicit allowlist
+(the config's own comment: an unregistered spec "silently matches no project and gives
+false confidence"). `playwright.config.ts` is NOT in Phase 4's Files-touched list, so per
+the hard scope rule it was left untouched and REPORTED. Verified unregistered:
+`npx playwright test --list workPlan` → "Total: 0 tests in 0 files". The e2e was therefore
+NOT run. Required (orchestrator-approved) one-line edit — add beside the existing
+`/work-onboarding\.spec\.ts/` entry (~L73):
+
+    /workPlan\.spec\.ts/,
+
+Once registered, run: `E2E_PORT=<free> npm run test:e2e -- workPlan` (needs a fresh dev
+server with `NEXT_PUBLIC_WORK_COPY_ENGINE=true` — already in webServer.env — + Clerk creds
+in `.env.local`; kill stale dev servers first, per the config note at L108-111).
+
+### Verification (verbatim tails)
+`npx tsc --noEmit` (AFTER `npm run build` regenerated `next-env.d.ts`):
+
+    EXIT: 0
+
+(Clean. Before the build the ONE known pre-existing env error persisted —
+`src/app/page.tsx(6,26): error TS2307: Cannot find module '@/assets/images/founder.jpg'` —
+and cleared once the build regenerated `next-env.d.ts`, as expected.)
+
+`npm run test:run`:
+
+     Test Files  244 passed | 1 skipped (245)
+          Tests  4091 passed | 18 skipped (4109)
+
+(Unchanged from Phase 3 — Phase 4 adds no vitest tests; the deterministic invariant lives
+in the e2e. Restored the incidental CRLF-touched `uiFoundationIsolation.test.tsx.snap` and
+`work-onboarding-plan.plan.md` via `git checkout --` to keep the change set scoped.)
+
+`npm run test:e2e -- workPlan`:
+
+    BLOCKED — see the BLOCKER above. `npx playwright test --list workPlan` → 0 tests
+    (spec unregistered in playwright.config.ts, which is out of Phase 4 scope). Not run.
+
+`npm run lint`:
+
+    (only pre-existing @next/next/no-img-element + react-hooks/exhaustive-deps WARNINGS
+    across the repo; ZERO errors — the two touched components add none.)
+
+`npm run build`:
+
+    ✓ Compiled successfully. Route table printed; Middleware 81.8 kB. Exit 0.
+
+### Open risks
+- The e2e is UNRUN pending the one-line `playwright.config.ts` registration (out of scope).
+  The spec is written to the proven work-onboarding.spec.ts patterns (seeded resume, route
+  interception, rate-limit retry) but has not executed — first run may need minor testid/
+  timing tuning. Recommend the orchestrator approve the registration line and run it before
+  the founder-pilot HUMAN GATE.
+- Known pre-existing multi-page saveDraft merge quirk (Bug B, documented in
+  work-onboarding.spec.ts) is unrelated to `Brief.structure` here: plan commits send
+  `brief:{structure}` and generation saves send no `brief`, so the persisted structure is
+  not subject to that shallow-spread issue.
+
+## Phase 4 — e2e registration + run
+
+### Files changed
+- `playwright.config.ts`
+
+### Registration diff
+Added `workPlan.spec.ts` to the `authed` project's `testMatch` allowlist, beside the
+existing `work-onboarding.spec.ts` entry (~L73):
+
+```
+        /work-onboarding\.spec\.ts/,
+        // work-onboarding-plan (E4): the plan-step tap-powers + approve→structure→fire
+        // invariant (removed page absent from persisted Brief.structure AND no
+        // generate-copy for the removed slug; kept pages still generated).
+        /workPlan\.spec\.ts/,
+```
+
+Registration confirmed:
+```
+npx playwright test --list workPlan
+  [setup] › auth.setup.ts:9:6 › authenticate
+  [authed] › workPlan.spec.ts:64:5 › STEP 04: a removed page is absent from Brief.structure AND never generated
+Total: 2 tests in 2 files
+```
+(was "Total: 0 tests in 0 files" before the registration.)
+
+### Run result
+Command: `E2E_PORT=3041 npm run test:e2e -- workPlan` (fresh dev server auto-started by
+Playwright's `webServer`; `NEXT_PUBLIC_WORK_COPY_ENGINE=true` from webServer.env; port 3041
+chosen because 3000/3022 were held by stale servers). Verbatim tail:
+
+```
+  ✓  1 [setup] › e2e\auth.setup.ts:9:6 › authenticate (8.5s)
+  ✓  2 [authed] › e2e\workPlan.spec.ts:64:5 › STEP 04: a removed page is absent from Brief.structure AND never generated (37.8s)
+
+  2 passed (1.3m)
+```
+
+PASS on the first run — NO spec tuning required. Both invariant halves asserted genuinely
+(removed `/experiences` absent from persisted `Brief.structure` + never generated, while
+kept `/about` present in both persisted structure and the generate-copy calls). Mock-LLM
+work strategy/copy confirmed in the server log.
+
+### Deviations
+None. Only the single approved one-line registration was added; the spec itself needed no
+changes.
+
+### Open risks
+None new. The spec now runs in the `authed` project on every `test:e2e` invocation.
+
+## Whole-feature impl-review (standard tier — single review over git diff main...HEAD)
+
+**Verdict: ship** (1 loop). tsc exit 0; 4091 tests pass. All 8 binding invariants verified: seam field-reuse only; one write door (commitRail sitemap snapshot/set/revert correct); approve awaits commit + gates advance on ok; generation/credit/reveal untouched (no escalation); no 2nd strategy fetch; zero internal vocab (sectionRow drops unmapped keys); no prod-reachable behavior; no dual-renderer surface. Soft-spots cleared: Phase-1 cast safe (work path carries goal at runtime; write path uses typed ConfirmedStructure); reorder preserves group photos (normalizeWorkGroup carries photos/items verbatim, rail.ts:257-258) — no data-loss on photo-bearing account; single-advance structurally guaranteed (StepPlan early-returns LazyBody before stub mounts).
+
+**Non-blocking notes (carried to merge summary):**
+1. buildStructurePatch now persists `title` for ALL multi-page engines (additive/harmless, title is .optional(); slightly out of E4 scope — more-correct round-trip).
+2. Read-only photo→page mapping heuristic (display-only, documented; Kundius = no-photo path).
+3. e2e inherits free-tier rate-limit retry loop (61s×3) from work-onboarding.spec.ts — slow/possibly flaky under load; known backlog #32/#33, not E4's to fix.

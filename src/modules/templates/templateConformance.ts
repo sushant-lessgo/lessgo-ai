@@ -73,9 +73,7 @@ import { resolveGranthBlock } from './granth/resolveGranthBlock';
 import { GranthPlaceholderBlock } from './granth/GranthPlaceholderBlock';
 import { resolveLumenBlock } from './lumen/resolveLumenBlock';
 import { LumenPlaceholderBlock } from './lumen/LumenPlaceholderBlock';
-import { resolveAtelierBlock } from './atelier/resolveAtelierBlock';
-import { AtelierPlaceholderBlock } from './atelier/AtelierPlaceholderBlock';
-// Work-skeleton dispatch (dev id `atelier2`). Static import is fine here: this
+// Work-skeleton dispatch (the atelier skin). Static import is fine here: this
 // module is vitest-only infra (never enters the app bundle) — same idiom as the
 // other resolvers above. NOT a firewall breach.
 import { resolveWorkBlock } from '@/modules/skeletons/work/resolveWorkBlock';
@@ -98,8 +96,7 @@ export const RESOLVERS: Record<
   surge: { resolve: resolveSurgeBlock, placeholder: SurgePlaceholderBlock },
   granth: { resolve: resolveGranthBlock, placeholder: GranthPlaceholderBlock },
   lumen: { resolve: resolveLumenBlock, placeholder: LumenPlaceholderBlock },
-  atelier: { resolve: resolveAtelierBlock, placeholder: AtelierPlaceholderBlock },
-  atelier2: { resolve: resolveWorkBlock, placeholder: WorkPlaceholderBlock },
+  atelier: { resolve: resolveWorkBlock, placeholder: WorkPlaceholderBlock },
 };
 
 // Structural capabilities are NOT block-backed: `multipage` is page-menu
@@ -197,11 +194,23 @@ function synthContent(decl: BlockDeclaration): Record<string, unknown> {
 export const COLLECTION_FAMILY = Object.keys(COLLECTIONS) as CollectionKey[];
 
 /**
- * (d) IF a template declares a collection-family capability K, THEN its
- * capabilitySections must expose BOTH the def's catalogSectionType AND
- * itemSectionType, and each must resolve to a REAL (non-placeholder) block in
- * BOTH modes. Exported so `conformance.test.ts` can drive it with FAKE metadata
- * for the negative fixtures (proves the assertion bites).
+ * (d) IF a template declares a collection-family capability K, THEN:
+ *   - its capabilitySections must expose the def's catalogSectionType (the single
+ *     `capabilitySections[K]` value — e.g. `works: 'workcatalog'`), AND
+ *   - BOTH the catalogSectionType AND the itemSectionType (registry-derived) must
+ *     resolve to a REAL (non-placeholder) block in BOTH renderers.
+ *
+ * D14 option (b) (work-onboarding-ingestion E2, rev 3): the ITEM-section
+ * `toContain` requirement is DROPPED — `capabilitySections` stays typed
+ * `Partial<Record<CapabilityId, string>>` (a SINGLE string per capability, no type
+ * widening, zero reader-site blast radius). The item section is instead derived
+ * from the registry (`def.itemSectionType`) and guarded by `resolvesReal` — which
+ * is the actual closed-fail spine: an unbacked item section falls through to the
+ * placeholder and `resolvesReal` bites regardless of capabilitySections. The
+ * catalog `toContain` is KEPT (the one value the map does carry must be honest).
+ *
+ * Exported so `conformance.test.ts` can drive it with FAKE metadata for the
+ * negative fixtures (proves the assertion bites).
  */
 export function assertCollectionCapabilityBacked(
   templateId: TemplateId,
@@ -217,16 +226,16 @@ export function assertCollectionCapabilityBacked(
       `${templateId} declares collection-family "${capability}" but the collections registry has no CollectionDef for it`
     ).toBeTruthy();
 
+    // Coverage half — the ONE value the (single-string) map carries must name the
+    // catalog section. (The item section is registry-derived, guarded below.)
     expect(
       declaredSectionTypes,
       `${templateId} declares collection "${capability}" but capabilitySections is missing its catalog section "${def!.catalogSectionType}"`
     ).toContain(def!.catalogSectionType);
-    expect(
-      declaredSectionTypes,
-      `${templateId} declares collection "${capability}" but capabilitySections is missing its item section "${def!.itemSectionType}"`
-    ).toContain(def!.itemSectionType);
 
-    // The block PAIR must resolve non-placeholder in BOTH renderers.
+    // Resolve half — the block PAIR (catalog + item) must resolve non-placeholder
+    // in BOTH renderers. `resolvesReal(itemSectionType)` is the closed-fail guard
+    // that replaces the dropped item-section `toContain`.
     resolvesReal(templateId, def!.catalogSectionType);
     resolvesReal(templateId, def!.itemSectionType);
   }

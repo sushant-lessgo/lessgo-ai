@@ -46,7 +46,7 @@ export interface WorkSkinTokens {
   displayWeight: number; // one of WORK_TOKEN_ENUMS.displayWeight
 
   // Hero-composition knobs (fidelity Wave 1). NEUTRAL defaults reproduce the
-  // CURRENT hero exactly; a dramatic skin (atelier2) raises them for the Atelier
+  // CURRENT hero exactly; a dramatic skin (atelier) raises them for the Atelier
   // "cover" signature (giant tight centered headline + background numeral). The
   // skeleton owns the markup; these vars let a skin reach the hero's DNA.
   heroAlign: 'start' | 'center'; // hero content alignment (start = current bottom-left)
@@ -69,7 +69,7 @@ export interface WorkSkinTokens {
   footerWordmark: boolean;
 
   // Section-composition personality (fidelity Wave 2B). Each NEUTRAL default renders
-  // its block EXACTLY as today (byte-identical); atelier2 opts into the Atelier
+  // its block EXACTLY as today (byte-identical); atelier opts into the Atelier
   // composition. All are pure var-gated CSS on the frozen contract (no new fields).
 
   // Gallery caption placement. `below` = current stacked name under the cover.

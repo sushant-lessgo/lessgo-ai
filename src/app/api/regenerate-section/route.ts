@@ -1,16 +1,78 @@
-import { NextResponse, NextRequest } from "next/server";
-import { buildSectionPrompt } from "@/modules/prompt/buildPrompt";
-import { parseAiResponse } from "@/modules/prompt/parseAiResponse";
-import { generateMockResponse } from "@/modules/prompt/mockResponseGenerator";
+// src/app/api/regenerate-section/route.ts
+// ============================================================================
+// SECTION REGEN — rebuilt on the scoped-generation primitive (plan phase 4).
+//
+// ENGINE SWAP, not a gating rebuild: this route's gates were already correct
+// (requireAICredits / assertProjectOwner / charge-on-success). What changed is
+// everything BELOW the gates — the hand-rolled `callAIProvider` + inline prompt
+// + `JSON.parse`-or-guess parser + THREE filler-copy exits are gone, replaced by
+// `generateScopedCopy` (section scope), which owns engine dispatch, narrowing,
+// prompting, contract validation and the retry loop.
+//
+// The sequence is phase 3's CANONICAL one (plan D2) — do NOT rearrange:
+//   1. requireAICredits            — CHECK only, never charges.
+//   2. Zod body validation         — tokenId stays in the BODY (caller D).
+//   3. assertProjectOwner          — SKIPPED when isMock.
+//   4. Project load                — `if (tokenId !== DEMO_TOKEN)`; REQUIRED on
+//                                    the real path (404), replacing the legacy
+//                                    "proceed without context" leniency.
+//   5. Mock short-circuit          — BEFORE engine dispatch (mock never 422s).
+//   6. resolveCopyEngine           — real path only → 422 unsupported_project.
+//   7. generateScopedCopy          — failure → 422 invalid_scope / 500, NO charge.
+//   8. consumeCredits              — success only; failure is warn-only.
+//
+// THIN BY RULING (R6.1): no strategy phase is re-run or persisted. The prompt's
+// strategic fields are honestly empty. The bar is "≥ today's legacy regen"
+// (R6.2), NOT first-gen parity.
+//
+// Behavior changes (DELIBERATE):
+//  • No filler copy. The legacy route answered provider failure / parse failure /
+//    ANY server error with 200 + hardcoded "Transform Your Business with AI-
+//    Powered Solutions" mock content. All three exits are removed.
+//  • Sections with no AI copy contract (atelier's `quote` band — a real block the
+//    copy engine has never written) now 422 `invalid_scope` with an HONEST,
+//    user-renderable message instead of silently receiving mock filler (R6.3).
+// ============================================================================
+
+import { NextRequest } from 'next/server';
+import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { withAIRateLimit } from '@/lib/rateLimit';
 import { requireAICredits } from '@/lib/middleware/planCheck';
 import { consumeCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem';
-import { assertProjectOwner } from '@/lib/security';
+import { createSecureResponse, assertProjectOwner } from '@/lib/security';
 import { listTestimonialsByOwner } from '@/lib/testimonials/repo';
 import { injectRealTestimonials as injectProductTestimonials } from '@/modules/audience/product/parseCopy';
 import { injectRealTestimonials as injectServiceTestimonials } from '@/modules/audience/service/parseCopy';
+import {
+  generateScopedCopy,
+  resolveCopyEngine,
+  resolveMockEngine,
+  UnsupportedProjectError,
+  ScopeInputError,
+  ScopedGenerationError,
+  type ScopedProject,
+} from '@/modules/generation/scopedRegen';
+
+export const dynamic = 'force-dynamic';
+
+const DEMO_TOKEN = 'lessgodemomockdata';
+
+const RegenerateSectionRequestSchema = z.object({
+  sectionId: z.string().min(1),
+  tokenId: z.string().min(1),
+  userGuidance: z.string().optional(),
+  currentContent: z.record(z.unknown()).optional(),
+  sectionType: z.string().optional(),
+  layout: z.string().optional(),
+});
+
+/** `hero-abc12345` → `hero` (the key every copy builder / model response uses). */
+function sectionTypeKey(sectionId: string): string {
+  const dash = sectionId.indexOf('-');
+  return dash > 0 ? sectionId.slice(0, dash) : sectionId;
+}
 
 // proof-truth phase 3: is this a testimonials section? (sectionType is the bare
 // type; sectionId is `${type}-${uuid}` — check both, normalized.)
@@ -19,242 +81,252 @@ function isTestimonialsSection(sectionType?: string, sectionId?: string): boolea
   return norm(sectionType).startsWith('testimonials') || norm(sectionId).startsWith('testimonials');
 }
 
-async function handler(req: NextRequest) {
+/**
+ * Pull the target section's elements out of the primitive's result. The model
+ * keys sections by section TYPE (that is what the builders' `uiblocks` carry);
+ * accept the raw sectionId too, and fall back to the single key when the scope
+ * produced exactly one section.
+ */
+function pickSectionElements(
+  sections: Record<string, { elements?: Record<string, unknown> }> | undefined,
+  sectionId: string
+): Record<string, unknown> {
+  if (!sections) return {};
+  const hit = sections[sectionTypeKey(sectionId)] ?? sections[sectionId];
+  if (hit?.elements) return hit.elements;
+  const keys = Object.keys(sections);
+  if (keys.length === 1 && sections[keys[0]]?.elements) return sections[keys[0]].elements!;
+  return {};
+}
+
+/**
+ * Mock-mode section content. Deliberately NOT one of the `mockResponseGenerator*`
+ * siblings: those emit whole-PAGE copy and need strategy / work-facts inputs the
+ * demo token (project === null) has no honest source for. `resolveMockEngine` is
+ * still called — it is the dispatch seam the sequence test guards — and reported
+ * back as `meta.engine`.
+ *
+ * Shape matches the caller's merge loop (`aiActions.ts:147-171`), which accepts
+ * `string | { content, type }`.
+ */
+function generateMockSectionContent(
+  sectionId: string,
+  sectionType?: string
+): Record<string, unknown> {
+  const type = (sectionType || sectionTypeKey(sectionId)).toLowerCase().replace(/[-_]/g, '');
+  const mockTemplates: Record<string, Record<string, string>> = {
+    hero: {
+      headline: 'Transform Your Business with AI-Powered Solutions',
+      subheadline:
+        'Leverage cutting-edge technology to streamline operations and boost productivity',
+      cta_primary: 'Get Started Free',
+    },
+    features: {
+      section_title: 'Powerful Features Built for Growth',
+      feature_1_title: 'Lightning Fast Performance',
+      feature_1_description: 'Experience blazing-fast load times and seamless interactions',
+      feature_2_title: 'Advanced Analytics',
+      feature_2_description: 'Gain deep insights with comprehensive data analysis tools',
+    },
+    pricing: {
+      section_title: 'Simple, Transparent Pricing',
+      section_subtitle: 'Choose the plan that fits your needs',
+      starter_price: '$29/month',
+      pro_price: '$79/month',
+    },
+    testimonials: {
+      section_title: 'Trusted by Industry Leaders',
+      testimonial_1: 'This product has revolutionized how we handle our daily operations.',
+      testimonial_1_author: 'Sarah Johnson, CEO at TechCorp',
+    },
+    cta: {
+      headline: 'Ready to Get Started?',
+      subheadline: 'Join thousands of satisfied customers today',
+      cta_button: 'Start Your Free Trial',
+    },
+    default: {
+      title: 'Section Title',
+      content: 'This is placeholder content for the section. Update with your actual content.',
+    },
+  };
+
+  let template = mockTemplates.default;
+  for (const [key, value] of Object.entries(mockTemplates)) {
+    if (type.includes(key) || key.includes(type)) {
+      template = value;
+      break;
+    }
+  }
+  return { ...template };
+}
+
+async function handler(req: NextRequest): Promise<Response> {
   const startTime = Date.now();
 
   try {
-    // Check authentication and credits (2 credits for section regeneration)
-    const creditCheck = await requireAICredits(req, UsageEventType.SECTION_REGEN, CREDIT_COSTS.SECTION_REGENERATION);
+    // 1. Auth + credits (2 credits) — CHECK only. No charge here.
+    const creditCheck = await requireAICredits(
+      req,
+      UsageEventType.SECTION_REGEN,
+      CREDIT_COSTS.SECTION_REGENERATION
+    );
     if (!creditCheck.allowed) {
       return creditCheck.response!;
     }
-
     const userId = creditCheck.userId!;
 
-    const body = await req.json();
-    const { sectionId, tokenId, userGuidance, currentContent, sectionType, layout } = body;
-    
-    // Debug logging
-    logger.dev("Regenerate section request:", {
+    // 2. Body validation. `tokenId` stays in the BODY (caller D contract).
+    const body = await req.json().catch(() => null);
+    const validation = RegenerateSectionRequestSchema.safeParse(body);
+    if (!validation.success) {
+      return createSecureResponse(
+        {
+          error: 'validation_error',
+          detail: 'sectionId and tokenId are required',
+          issues: validation.error.issues,
+        },
+        400
+      );
+    }
+    const { sectionId, tokenId, userGuidance, currentContent, sectionType, layout } =
+      validation.data;
+
+    logger.dev('[regenerate-section] request', {
       tokenId,
       sectionId,
       sectionType,
       layout,
       hasUserGuidance: !!userGuidance,
       currentContentKeys: currentContent ? Object.keys(currentContent) : [],
-      bodyKeys: Object.keys(body)
     });
 
-    if (!sectionId || !tokenId) {
-      logger.error("Missing required fields:", {
-        sectionId: !!sectionId,
-        tokenId: !!tokenId,
-        receivedBody: body
-      });
-      return NextResponse.json({ 
-        error: "Invalid request", 
-        detail: "sectionId and tokenId are required" 
-      }, { status: 400 });
-    }
+    const isMock = process.env.NEXT_PUBLIC_USE_MOCK_GPT === 'true' || tokenId === DEMO_TOKEN;
 
-    const DEMO_TOKEN = "lessgodemomockdata";
-
-    // A01: Broken Access Control - the caller must own this project before we read its
-    // onboarding context into the AI prompt. Runs BEFORE the project fetch and consumeCredits so a
-    // non-owner is rejected before any cross-tenant read or charge. Skipped in mock/demo mode
-    // (requireAICredits returns a synthetic 'demo-user' id that is not a real Clerk user).
-    const isMock = process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" || tokenId === DEMO_TOKEN;
+    // 3. Ownership — A01. Before any cross-tenant read or charge. Skipped in
+    //    mock/demo (requireAICredits hands back a synthetic demo user id).
     if (!isMock) {
       const access = await assertProjectOwner(userId, tokenId, { action: 'regenerate-section' });
       if (!access.ok) {
-        return NextResponse.json({ error: access.error }, { status: access.status });
+        return createSecureResponse({ error: access.error }, access.status);
       }
     }
 
-    // Get project data to access onboarding information (optional enhancement)
-    let projectData = null;
+    // 4. Project load. The demo token has NO project row → never fetch for it.
+    let project: ScopedProject & { id?: string } | null = null;
     if (tokenId !== DEMO_TOKEN) {
-      try {
-        const project = await prisma.project.findUnique({
-          where: { tokenId },
-          select: {
-            id: true,
-            audienceType: true,
-            inputText: true,
-            content: true,
-            title: true
-          }
-        });
-        
-        if (project) {
-          projectData = project;
-        }
-      } catch (dbError) {
-        logger.warn("Failed to fetch project data, proceeding without database context:", dbError);
-        // Continue without database context - this is not critical
+      project = (await prisma.project.findUnique({
+        where: { tokenId },
+        select: {
+          id: true,
+          audienceType: true,
+          templateId: true,
+          content: true,
+          brief: true,
+          title: true,
+          inputText: true,
+        },
+      })) as (ScopedProject & { id?: string }) | null;
+
+      // REQUIRED on the real path now: engine dispatch + prompt context hang off
+      // it. Legacy proceeded with a context-free prompt instead.
+      if (!project && !isMock) {
+        return createSecureResponse({ error: 'Project not found' }, 404);
       }
     }
 
-    // Check for mock data usage
-    if (process.env.NEXT_PUBLIC_USE_MOCK_GPT === "true" || tokenId === DEMO_TOKEN) {
-      logger.dev("Using mock response for section regeneration");
-      
-      const mockSectionContent = generateMockSectionContent(sectionId, sectionType);
-      
-      return NextResponse.json({
-        content: mockSectionContent,
+    // 5. Mock short-circuit — BEFORE engine dispatch (mock mode never 422s).
+    if (isMock) {
+      const engine = resolveMockEngine(project);
+      logger.dev(`[regenerate-section] mock content (engine=${engine})`);
+      return createSecureResponse({
+        content: generateMockSectionContent(sectionId, sectionType),
         sectionId,
         originalContent: currentContent,
         regenerationType: 'section',
-        isMock: true
+        isMock: true,
+        creditsUsed: 0,
+        meta: { mock: true, engine },
       });
     }
 
-    const useOpenAI = process.env.USE_OPENAI === "true";
-    const model = useOpenAI ? "gpt-3.5-turbo" : "mistralai/Mixtral-8x7B-Instruct-v0.1";
-
-    // Create prompt for section regeneration
-    let prompt = `Regenerate content for the "${sectionType || sectionId}" section.
-
-Section Type: ${sectionType || 'content'}
-Layout: ${layout || 'default'}
-${userGuidance ? `User Guidance: ${userGuidance}` : ''}
-
-Current Content Elements:
-${currentContent ? JSON.stringify(Object.keys(currentContent), null, 2) : 'No current content'}
-
-Requirements:
-- Generate fresh, compelling copy for this specific section
-- Maintain consistency with the overall landing page message
-- Follow conversion optimization best practices
-- Use appropriate tone and style for the section type
-- Return content in the exact JSON format expected for this section
-
-Generate the section content now in valid JSON format with all required elements.`;
-
-    // If we have project data, build a more detailed prompt
-    if (projectData) {
-      try {
-        // Build context from project data - use inputText and content for context
-        const contextPrompt = `
-Business Context:
-- Project Title: ${projectData.title || 'Not specified'}
-- Input Text: ${projectData.inputText || 'Not specified'}
-
-${prompt}`;
-        prompt = contextPrompt;
-      } catch (contextError) {
-        logger.warn("Failed to build context prompt:", contextError);
-      }
-    }
-
-    // Try primary AI provider
-    let result = await callAIProvider(prompt, useOpenAI, model);
-    
-    // Fallback to secondary provider
-    if (!result.success) {
-      logger.warn(`Primary provider failed, trying secondary...`);
-      result = await callAIProvider(prompt, !useOpenAI, !useOpenAI ? "gpt-3.5-turbo" : "mistralai/Mixtral-8x7B-Instruct-v0.1");
-    }
-
-    // Final fallback to mock
-    if (!result.success) {
-      logger.error("Both AI providers failed, returning mock section content");
-      const mockSectionContent = generateMockSectionContent(sectionId, sectionType);
-      return NextResponse.json({
-        content: mockSectionContent,
-        sectionId,
-        originalContent: currentContent,
-        regenerationType: 'section',
-        isPartial: true,
-        warnings: ["AI providers unavailable, using template content"]
-      });
-    }
-
-    // Parse AI response
-    const aiContent = result.data.choices[0]?.message?.content;
-    if (!aiContent) {
-      throw new Error("No content received from AI provider");
-    }
-
-    let sectionContent: any;
+    // 6. Engine dispatch — real path only. Writer/ecommerce → 422, no charge,
+    //    before any AI call (R5).
+    let engine: string;
     try {
-      // Try to parse as JSON
-      const parsed = JSON.parse(aiContent);
-      
-      // Check if it's wrapped in a content object or direct elements
-      sectionContent = parsed.content || parsed.elements || parsed;
-      
-      // Ensure each element has the required structure
-      if (typeof sectionContent === 'object' && !Array.isArray(sectionContent)) {
-        Object.keys(sectionContent).forEach(key => {
-          const element = sectionContent[key];
-          if (typeof element === 'string') {
-            // Convert simple string to element object
-            sectionContent[key] = {
-              content: element,
-              type: key.includes('headline') ? 'headline' : 
-                    key.includes('subheadline') ? 'subheadline' :
-                    key.includes('cta') || key.includes('button') ? 'button' :
-                    key.includes('image') ? 'image' :
-                    key.includes('list') ? 'list' : 'text',
-              isEditable: true,
-              editMode: 'inline'
-            };
-          } else if (element && typeof element === 'object' && !element.type) {
-            // Add missing type field
-            element.type = key.includes('headline') ? 'headline' : 
-                          key.includes('subheadline') ? 'subheadline' :
-                          key.includes('cta') || key.includes('button') ? 'button' :
-                          key.includes('image') ? 'image' :
-                          key.includes('list') ? 'list' : 'text';
-            element.isEditable = element.isEditable !== false;
-            element.editMode = element.editMode || 'inline';
-          }
-        });
+      engine = resolveCopyEngine(project).engine;
+    } catch (err) {
+      if (err instanceof UnsupportedProjectError) {
+        return createSecureResponse(
+          {
+            error: 'unsupported_project',
+            message:
+              "AI copy isn't available for this kind of project, so this section can't be regenerated.",
+            detail: err.message,
+          },
+          422
+        );
       }
-    } catch (parseError) {
-      logger.warn("Failed to parse AI response as JSON, attempting text extraction:", parseError);
-      
-      // Fallback: try to extract key-value pairs from text
-      sectionContent = {};
-      const lines = aiContent.split('\n').filter((line: string) => line.trim());
-      
-      lines.forEach((line: string, index: number) => {
-        const colonIndex = line.indexOf(':');
-        if (colonIndex > 0) {
-          const key = line.substring(0, colonIndex).trim().toLowerCase().replace(/\s+/g, '_');
-          const value = line.substring(colonIndex + 1).trim();
-          sectionContent[key] = {
-            content: value,
-            type: 'text',
-            isEditable: true,
-            editMode: 'inline'
-          };
-        }
-      });
-      
-      // If no valid content extracted, use a basic structure
-      if (Object.keys(sectionContent).length === 0) {
-        sectionContent = generateMockSectionContent(sectionId, sectionType);
-      }
+      throw err;
     }
+
+    // 7. Generate. Section scope's layout state comes from the REQUEST (D4):
+    //    the caller already sends `sectionId` + `layout` — a size-1 map.
+    let result;
+    try {
+      result = await generateScopedCopy({
+        project: project!,
+        layoutState: {
+          sections: [sectionId],
+          sectionLayouts: layout ? { [sectionId]: layout } : {},
+        },
+        scope: { kind: 'section', sectionId },
+        currentContent: currentContent ? JSON.stringify(currentContent) : undefined,
+        userGuidance,
+      });
+    } catch (err) {
+      // A section the copy engine has no contract for (atelier's `quote` band), a
+      // missing layout, or missing work facts. HONEST message (R6.3): never a
+      // silent drop, never relabelled filler.
+      if (err instanceof ScopeInputError) {
+        return createSecureResponse(
+          {
+            error: 'invalid_scope',
+            message: `This section isn't AI-written, so it can't be regenerated: ${err.message}`,
+            detail: err.message,
+          },
+          422
+        );
+      }
+      // Retries exhausted. NO charge, NO filler copy (the legacy route answered
+      // this with 200 + hardcoded mock content — the failure mode being killed).
+      if (err instanceof ScopedGenerationError) {
+        return createSecureResponse(
+          {
+            error: 'generation_failed',
+            message: err.message,
+            recoverable: true,
+            attempts: err.attempts,
+          },
+          500
+        );
+      }
+      throw err;
+    }
+
+    // Contract-validated elements for the target section only. Values stay in
+    // their generated shape (string | string[] | object[]); the caller's merge
+    // loop is shape-preserving and accepts `string | { content, type }`.
+    const sectionContent = pickSectionElements(result.sections, sectionId);
 
     // proof-truth phase 3 (acceptance criterion 4): real proof always wins over
-    // fresh AI inventions. When the regenerated section is testimonials-type, read
-    // the project's table-backed approved quotes (imported + collect/manual) and
-    // re-inject via injectRealTestimonials, overwriting the just-drafted quotes.
-    // Ownership is already asserted above (assertProjectOwner, non-mock path), so
-    // this cross-tenant read is owner-guarded. Table read is dark-flag-agnostic
-    // (repo has no flag gate); pre-import projects have an empty table → no-op,
-    // drafted quotes preserved (acceptable pre-existing-data gap, see plan).
-    // NOTE: table read returns createdAt DESC — quotes MAY reorder vs first-gen's
-    // entry-array order; same quotes/flags, no truth regression.
+    // fresh AI inventions. Ownership is asserted above, so this cross-tenant read
+    // is owner-guarded. Work-engine projects inject praise inside `parseWorkCopy`
+    // (see scopedRegen), so this path is product/service only, as before.
     let reinjectedRealProof = false;
-    if (projectData && isTestimonialsSection(sectionType, sectionId)) {
+    if (project?.id && engine !== 'work' && isTestimonialsSection(sectionType, sectionId)) {
       try {
         const rows = await listTestimonialsByOwner(userId, {
-          projectId: projectData.id,
+          projectId: project.id,
           status: 'approved',
         });
         if (rows.length > 0) {
@@ -264,267 +336,64 @@ ${prompt}`;
             author_role: t.authorRole ?? '',
           }));
           const wrapper = { testimonials: { elements: sectionContent } } as any;
-          if (projectData.audienceType === 'product') {
+          if (project.audienceType === 'product') {
             injectProductTestimonials(wrapper, real);
           } else {
             injectServiceTestimonials(wrapper, real);
           }
-          // proof-truth phase 4: injectRealTestimonials set wrapper.testimonials
-          // .realProof = true. Mirror multiPageAssembly — surface it as section
-          // provenance so the persisted section carries aiMetadata.realProof and
-          // useReviewState suppresses needs-review markers for the real quotes.
           reinjectedRealProof = wrapper.testimonials?.realProof === true;
         }
       } catch (injectErr) {
-        logger.warn('Failed to re-inject real testimonials on section regen:', injectErr);
+        logger.warn('[regenerate-section] real-testimonial re-injection failed:', injectErr);
       }
     }
 
-    // Consume credits for successful section regeneration
-    const consumption = await consumeCredits(userId, UsageEventType.SECTION_REGEN, CREDIT_COSTS.SECTION_REGENERATION, {
-      endpoint: '/api/regenerate-section',
-      duration: Date.now() - startTime,
-      sectionId,
-      metadata: { sectionType, hasUserGuidance: !!userGuidance }
-    });
+    // 8. Charge — success only, after the last failure exit. Warn-only on failure.
+    const consumption = await consumeCredits(
+      userId,
+      UsageEventType.SECTION_REGEN,
+      CREDIT_COSTS.SECTION_REGENERATION,
+      {
+        endpoint: '/api/regenerate-section',
+        duration: Date.now() - startTime,
+        sectionId,
+        metadata: {
+          sectionType,
+          hasUserGuidance: !!userGuidance,
+          engine: result.engine,
+          attempts: result.attempts,
+        },
+      }
+    );
+    if (!consumption.success) {
+      logger.warn(
+        `[regenerate-section] Credit consumption failed for user ${userId}: ${consumption.error}`
+      );
+    }
 
-    return NextResponse.json({
+    // 9. Response — contract preserved: the store reads `data.content` as a
+    //    Record<string, string | { content, type }> and merges it shape-preservingly.
+    return createSecureResponse({
       content: sectionContent,
       sectionId,
       originalContent: currentContent,
       regenerationType: 'section',
-      // proof-truth phase 4: provenance for a re-injected real-proof section.
-      // Real-proof sections keep their first-generation aiMetadata.realProof
-      // across regen already (the edit store preserves existing aiMetadata via
-      // spread), so markers stay suppressed for the common path. This field
-      // carries the flag when the table re-injected real quotes; full client
-      // application of a NEWLY-gained flag (drafted section that later acquired
-      // approved rows) is a follow-up (see audit — regen client does not yet
-      // read this field).
       ...(reinjectedRealProof ? { aiMetadata: { realProof: true } } : {}),
       creditsUsed: CREDIT_COSTS.SECTION_REGENERATION,
-      creditsRemaining: consumption.remaining
+      creditsRemaining: consumption.remaining,
+      meta: { mock: false, engine: result.engine, attempts: result.attempts },
     });
-
-  } catch (err) {
-    logger.error("Section regeneration error:", err);
-    
-    try {
-      const { sectionId, sectionType } = await req.json();
-      const mockSectionContent = generateMockSectionContent(sectionId, sectionType);
-      return NextResponse.json({
-        content: mockSectionContent,
-        sectionId,
-        regenerationType: 'section',
-        isPartial: true,
-        warnings: ["Server error occurred, using fallback content"]
-      });
-    } catch {
-      return NextResponse.json({ 
-        error: "Internal server error", 
-        isPartial: true,
-        content: {},
-        warnings: ["Complete system failure"]
-      }, { status: 500 });
-    }
+  } catch (error: any) {
+    logger.error('[regenerate-section] Endpoint error:', error);
+    return createSecureResponse(
+      {
+        error: 'internal_error',
+        message: error?.message || 'An unexpected error occurred',
+        recoverable: true,
+      },
+      500
+    );
   }
 }
 
-function generateMockSectionContent(sectionId: string, sectionType?: string): any {
-  const type = sectionType || sectionId;
-  
-  // Generate mock content based on section type
-  const mockTemplates: Record<string, any> = {
-    hero: {
-      headline: {
-        content: "Transform Your Business with AI-Powered Solutions",
-        type: "headline",
-        isEditable: true,
-        editMode: "inline"
-      },
-      subheadline: {
-        content: "Leverage cutting-edge technology to streamline operations and boost productivity",
-        type: "subheadline",
-        isEditable: true,
-        editMode: "inline"
-      },
-      cta_primary: {
-        content: "Get Started Free",
-        type: "button",
-        isEditable: true,
-        editMode: "inline"
-      }
-    },
-    features: {
-      section_title: {
-        content: "Powerful Features Built for Growth",
-        type: "headline",
-        isEditable: true,
-        editMode: "inline"
-      },
-      feature_1_title: {
-        content: "Lightning Fast Performance",
-        type: "text",
-        isEditable: true,
-        editMode: "inline"
-      },
-      feature_1_description: {
-        content: "Experience blazing-fast load times and seamless interactions",
-        type: "text",
-        isEditable: true,
-        editMode: "inline"
-      },
-      feature_2_title: {
-        content: "Advanced Analytics",
-        type: "text",
-        isEditable: true,
-        editMode: "inline"
-      },
-      feature_2_description: {
-        content: "Gain deep insights with comprehensive data analysis tools",
-        type: "text",
-        isEditable: true,
-        editMode: "inline"
-      }
-    },
-    pricing: {
-      section_title: {
-        content: "Simple, Transparent Pricing",
-        type: "headline",
-        isEditable: true,
-        editMode: "inline"
-      },
-      section_subtitle: {
-        content: "Choose the plan that fits your needs",
-        type: "subheadline",
-        isEditable: true,
-        editMode: "inline"
-      },
-      starter_price: {
-        content: "$29/month",
-        type: "text",
-        isEditable: true,
-        editMode: "inline"
-      },
-      pro_price: {
-        content: "$79/month",
-        type: "text",
-        isEditable: true,
-        editMode: "inline"
-      }
-    },
-    testimonials: {
-      section_title: {
-        content: "Trusted by Industry Leaders",
-        type: "headline",
-        isEditable: true,
-        editMode: "inline"
-      },
-      testimonial_1: {
-        content: "This product has revolutionized how we handle our daily operations. Highly recommended!",
-        type: "text",
-        isEditable: true,
-        editMode: "inline"
-      },
-      testimonial_1_author: {
-        content: "Sarah Johnson, CEO at TechCorp",
-        type: "text",
-        isEditable: true,
-        editMode: "inline"
-      }
-    },
-    cta: {
-      headline: {
-        content: "Ready to Get Started?",
-        type: "headline",
-        isEditable: true,
-        editMode: "inline"
-      },
-      subheadline: {
-        content: "Join thousands of satisfied customers today",
-        type: "subheadline",
-        isEditable: true,
-        editMode: "inline"
-      },
-      cta_button: {
-        content: "Start Your Free Trial",
-        type: "button",
-        isEditable: true,
-        editMode: "inline"
-      }
-    },
-    default: {
-      title: {
-        content: "Section Title",
-        type: "headline",
-        isEditable: true,
-        editMode: "inline"
-      },
-      content: {
-        content: "This is placeholder content for the section. Update with your actual content.",
-        type: "text",
-        isEditable: true,
-        editMode: "inline"
-      }
-    }
-  };
-  
-  // Find the best matching template
-  const normalizedType = type.toLowerCase().replace(/[-_]/g, '');
-  let template = mockTemplates.default;
-  
-  for (const [key, value] of Object.entries(mockTemplates)) {
-    if (normalizedType.includes(key) || key.includes(normalizedType)) {
-      template = value;
-      break;
-    }
-  }
-  
-  return { ...template };
-}
-
-async function callAIProvider(prompt: string, useOpenAI: boolean, model: string) {
-  try {
-    const apiURL = useOpenAI
-      ? "https://api.openai.com/v1/chat/completions"
-      : "https://api.studio.nebius.ai/v1/chat/completions";
-
-    const apiKey = useOpenAI
-      ? process.env.OPENAI_API_KEY
-      : process.env.NEBIUS_API_KEY;
-
-    if (!apiKey) {
-      logger.error(`Missing API key for ${useOpenAI ? 'OpenAI' : 'Nebius'}`);
-      return { success: false, error: "Missing API key" };
-    }
-
-    const response = await fetch(apiURL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-      }),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      logger.error(`${useOpenAI ? "OpenAI" : "Nebius"} API Error:`, result);
-      return { success: false, error: result };
-    }
-
-    return { success: true, data: result };
-
-  } catch (error) {
-    logger.error(`Error calling ${useOpenAI ? 'OpenAI' : 'Nebius'}:`, error);
-    return { success: false, error };
-  }
-}
-
-// Export with rate limiting
 export const POST = withAIRateLimit(handler);

@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { AppIcon } from '@/components/ui/icon'
+import { CreditBadge } from '@/components/billing/CreditBadge'
 
 /**
  * DashboardTopBar — 64px account-level bar (handoff §E).
@@ -23,7 +24,8 @@ const TITLES: Record<string, [string, string]> = {
   billing: ['Account', 'Billing & plan'],
   testimonials: ['Workspace', 'Testimonials'],
   forms: ['Lead management', 'Leads'],
-  analytics: ['Performance', 'Analytics'],
+  leads: ['Lead management', 'All Leads'],
+  analytics: ['Performance', 'All Analytics'],
   blog: ['Content', 'Blog'],
   emails: ['Grow', 'Email sequences'],
   outreach: ['Grow', 'Cold outreach'],
@@ -59,6 +61,10 @@ export default function DashboardTopBar() {
         </h1>
       </div>
       <div className="flex-1" />
+      {/* Credit counter (billing-beta phase 3). Client-side fetch — never read the
+          plan/balance server-side in this passive chrome. Absent on
+          /dashboard/[token]/* because this bar self-suppresses there (see above). */}
+      <CreditBadge />
       {/* Notifications not built — greyed in place (completeness principle). */}
       <button
         type="button"

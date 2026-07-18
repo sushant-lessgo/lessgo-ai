@@ -56,6 +56,13 @@ A landing page is rendered from three orthogonal inputs:
 - **Templates live in** `src/modules/templates/{meridian,techpremium,hearth,lex}/` — each with `tokens.ts`, `palettes.ts`, `sectionRules.ts`, `ThemeInjector.tsx`, `resolve*Block.ts`, `index.ts`, and `blocks/<Section>/`.
 - A **template is a skin**: it supplies tokens/palettes/variants/block components but consumes the audience's existing content contract. It does NOT change copy generation, the element schema, or the section list. See the `/new-template` skill (`.claude/skills/new-template/SKILL.md`) for the full guide to adding one.
 
+### The 5 Copy Engines (core mental model)
+
+The second core mental model (peer to the 3-tier model). A **copy engine** is the argument machine that writes a page — forked by **how the visitor decides**, not by business type. The master list is **CLOSED at 5**: **thing** (evaluating a product — SaaS/hardware/app) · **trust** (trusting a person/firm — dentist/consultant/agency) · **work** (browsing the work itself — photographer/designer/writer) · **place** (checking a physical place — restaurant/shop/venue) · **quick-yes** (one instant ask — link-in-bio/RSVP/waitlist). Live: thing (`audience/product/`), trust (`audience/service/`), work (`audience/work/`, pilot). place + quick-yes not built yet.
+
+- **Engine ≠ audienceType** — the load-bearing trap. `work` is an *engine*, not an audienceType; atelier projects run the work engine but are `audienceType: 'service'`. Dispatch keys off `isWorkCopyTemplate(templateId)` **first**, then `audienceType` (`src/lib/workCopyEngine.ts`, `resolveCopyEngine → product|service|work`). Onboarding is reorganizing **by engine**; `audienceType` is retiring as the classification axis (still load-bearing plumbing for now).
+- **Full reference:** `docs/architecture/copyEngines.md`.
+
 ### ⚠️ Dual-Renderer Pitfall (the #1 architectural trap)
 
 Every block exists as a **pair** and is rendered by one of **two renderers**:
@@ -68,15 +75,19 @@ Every block exists as a **pair** and is rendered by one of **two renderers**:
 
 ### AI Generation Pipeline (per-audience routes)
 
-Two-phase strategic generation. (The legacy monolithic `/api/generate-landing` route and its `buildStrategyPrompt()` builder were removed in scale-08; generation now runs through the per-audience `/api/audience/{product,service}/{strategy,generate-copy}` routes with their own builders under `src/modules/audience/*`.)
+Two-phase strategic generation, run **per audience/engine**. (The legacy monolithic `/api/generate-landing` route + `buildStrategyPrompt()` were removed in scale-08; the legacy shared `buildPrompt.ts` / `parseAiResponse.ts` / `parseStrategyResponse.ts` were removed in regen-modernization. **`src/modules/prompt/` is now mock-generators only** — see its README.)
 
-1. **Strategy phase** — builds business context + brand positioning + layout requirements; AI returns `copyStrategy` (big idea) + per-section `cardCounts`. Parsed by `parseStrategyResponse()`.
-2. **Copy phase** — instructs the AI to fill each section's elements per the card counts; parsed by `parseAiResponse()`, validated by the layout schema, manual-preferred defaults applied.
+**First generation** — `/api/audience/{product,service,work}/{strategy,generate-copy}`, each with its OWN builders + parsers under `src/modules/audience/*`:
 
-- **Element selection:** `getCompleteElementsMap()` (`src/modules/sections/elementDetermination.ts`) maps every section→layout→all elements and marks excluded optional elements by business context. The AI sees all elements + the exclusion map.
+1. **Strategy phase** — builds business context + brand positioning + layout requirements; AI returns a copy strategy (big idea) + per-section `cardCounts`. Assembled/parsed per audience (e.g. `assembleProductStrategy`), NOT by any shared parser.
+2. **Copy phase** — `modules/audience/{product,service,work}/copyPrompt.ts` instructs the AI to fill each section's elements; parsed per audience (`parseCopy.ts`) and validated against the section contract.
+
+**Regeneration** — `/api/regenerate-{element,section,content}` run on `src/modules/generation/scopedRegen.ts`: server-side prompt construction, engine dispatch (`resolveCopyEngine` → `product` | `service` | `work`), narrowed elements map, Zod-validated output, and its own validate→retry loop. Regen reuses the SAME per-audience copy builders as first-gen. Note: **no strategy is persisted**, so regen prompts are honestly thinner than first-gen's (strategic fields empty/neutral).
+
+- **Engine ≠ audienceType.** `work` is a copy ENGINE (atelier), not an audienceType — atelier projects are `audienceType: 'service'`. Dispatch keys off `isWorkCopyTemplate(templateId)` FIRST, then `audienceType`. See `src/lib/workCopyEngine.ts` + `src/modules/generation/README.md`.
+- **Element selection:** `getCompleteElementsMap()` (`src/modules/sections/elementDetermination.ts`) maps every section→layout→all elements and marks excluded optional elements by business context. The AI sees all elements + the exclusion map. (The **work** engine uses `workElementContract` as its vocabulary instead — a documented pitfall.)
 - **Section selection:** Product uses a fixed section list (`src/modules/sections/sectionList.ts`). Service uses awareness-driven ordering (`src/modules/audience/service/sectionSelection.ts`).
-- **Providers (fallback chain):** OpenAI (`gpt-4o-mini`, primary when `USE_OPENAI=true`) → Nebius/Mixtral → mock response. **Note: the generation pipeline uses OpenAI/Nebius, not Anthropic.** (`@anthropic-ai/sdk` is a dependency but not used in the generation path.)
-- Prompt builders, parsers, and mock generators live in `src/modules/prompt/`.
+- **Models/providers:** endpoints are selected via `src/lib/modelConfig.ts` (incl. `copy` / `work-copy`) through the shared `src/lib/aiClient.ts`, which falls back to a backup model on **infrastructure** errors only (never on content/parse failures). Mock response = demo/`NEXT_PUBLIC_USE_MOCK_GPT` mode only, never a failure fallback.
 
 ### Onboarding Flow
 
@@ -100,7 +111,7 @@ Flow: edit `/edit/[token]` → preview `/preview/[token]` → publish → live `
 - `POST /api/publish` creates/updates `PublishedPage` + a new immutable `PublishedPageVersion`, runs `generateStaticHTML()` (`src/lib/staticExport/htmlGenerator.ts`) via the **published renderer**, uploads to Vercel Blob (`blobKey = pages/{pageId}/{version}/index.html`), then atomically writes KV routes.
 - `publishState` machine: `draft → publishing → published | failed`; orphaned blobs are cleaned up on DB failure.
 - `/p/[slug]` is ISR (`revalidate = 3600`); a blob-proxy edge route serves the static HTML by KV lookup.
-- Published pages embed minified `form.v1.js` and `a.v1.js` (analytics beacon).
+- Published pages embed minified `form.v2.js` and `a.v2.js` (analytics beacon). Asset filenames are versioned and immutable — old blobs keep loading the frozen `form.v1.js`/`a.v1.js`, built from `scripts/legacy/*.src.js`. Any semantic change to a shipped script = a NEW filename, never an in-place edit (contract: `scripts/buildAssets.js`).
 
 ### Custom Domains
 
@@ -111,13 +122,13 @@ Flow: edit `/edit/[token]` → preview `/preview/[token]` → publish → live `
 ### Billing, Plans & Credits
 
 - Models: `UserPlan` (tier FREE/PRO/AGENCY/ENTERPRISE, Stripe IDs, feature flags, limits), `UserUsage` (monthly credit/token tracking), `UsageEvent` (per-operation ledger).
-- Config in `src/lib/planManager.ts`; credit costs in `src/lib/creditSystem.ts` (e.g. FULL_PAGE_GEN=10, SECTION_REGEN=2, ELEMENT_REGEN=1, IVOC_RESEARCH=3, SCRAPE_WEBSITE=1). `checkCredits()` gates AI operations.
+- Config in `src/lib/planManager.ts`; credit costs in `src/lib/creditSystem.ts` (e.g. `FULL_PAGE_GENERATION=10`, `SECTION_REGENERATION=2`, `ELEMENT_REGENERATION=1`, `IVOC_RESEARCH=3`, `SCRAPE_WEBSITE=1`). `checkCredits()` gates AI operations. **Client-facing** billing surfaces must NOT import `planManager`/`creditSystem` (they pull in Prisma) — the prisma-free constants live in `src/lib/planConfigs.ts` (`PLAN_CONFIGS`) and `src/lib/creditCosts.ts` (`CREDIT_COSTS`), which those two modules re-export; import config from there in any client component (see `docs/architecture/pricingSystem.md` › "billing-beta client architecture").
 - Stripe: `/api/stripe/webhooks` (updates plan/status, resets credits on renewal), checkout + portal session routes. Endpoints under `/api/billing` and `/api/credits`.
 
 ### Analytics, Forms & Integrations
 
 - **Analytics:** `PageAnalytics` (daily per-slug aggregation: views, unique visitors, conversions, device split, top referrers/UTM). `POST /api/analytics/event` is a privacy-first beacon (no raw IP/UA stored). PostHog used app-side for tracking + feature flags.
-- **Forms:** `POST /api/forms/submit` validates + stores `FormSubmission`, runs integrations. `UserIntegration` holds encrypted API keys (ConvertKit live: `src/lib/integrations/convertkit.ts`).
+- **Forms:** `POST /api/forms/submit` validates + stores `FormSubmission`, runs integrations. `UserIntegration` holds encrypted API keys (ConvertKit live: `src/lib/integrations/convertkit.ts`). **The owner is derived server-side from `publishedPageId` (→ `PublishedPage.userId`), never from the request body** — a body `userId` is accepted-and-ignored for old-blob back-compat, and public HTML no longer emits the owner's Clerk id.
 - **IVOC (Voice-of-Customer):** `IVOCCache` caches pains/desires/objections/beliefs/phrases keyed by `(categoryKey, audienceKey)` (table retained). The Tavily search client + `ivocExtractor` were removed in scale-08 along with the `/api/market-insights` route that drove them.
 
 ### Admin

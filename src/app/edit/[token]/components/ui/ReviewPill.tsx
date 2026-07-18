@@ -2,6 +2,7 @@
 
 import { useReviewState } from '@/hooks/useReviewState';
 import { useEditStoreContext, useStoreState } from '@/components/EditProvider';
+import { AppIcon } from '@/components/ui/icon';
 
 export function ReviewPill() {
   const { remainingCount, allComplete } = useReviewState();
@@ -25,22 +26,38 @@ export function ReviewPill() {
     }
   };
 
+  const label = `${remainingCount} setup ${remainingCount === 1 ? 'step' : 'steps'} left, click to open`;
+
   return (
     <button
       onClick={handleClick}
-      title={`${remainingCount} setup ${remainingCount === 1 ? 'step' : 'steps'} left, click to open`}
+      title={label}
+      // t1 renders the pill as `flag` + a bare count, so the visible text alone
+      // ("3") is a meaningless accessible name. aria-label carries the same
+      // sentence the tooltip does, keeping the control describable to screen
+      // readers and to selectors after the copy shrank.
+      aria-label={label}
       style={isActive ? pillActiveStyle : pillPendingStyle}
     >
-      {`Setup: ${remainingCount} left`}
+      <AppIcon name="flag" size={15} />
+      {remainingCount}
     </button>
   );
 }
 
+// t1 review pill (editor-shell-redesign phase 2): coral family, `flag` + count.
+// The handoff draws ONE pill; `isActive` (review tab already open) keeps a
+// distinct-but-related emphasis so the toggle still reads as a toggle — the
+// active state is the same family, deepened, not a different hue.
 const pillBase: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '5px',
   fontSize: '12px',
   fontWeight: 600,
-  padding: '4px 10px',
-  borderRadius: '9999px',
+  lineHeight: 1,
+  padding: '4px 9px',
+  borderRadius: '8px', // t1 pills are 8px-radius, not fully rounded
   cursor: 'pointer',
   transition: 'all 0.2s',
   border: '1px solid',
@@ -49,14 +66,14 @@ const pillBase: React.CSSProperties = {
 
 const pillPendingStyle: React.CSSProperties = {
   ...pillBase,
-  background: '#fffbeb',
-  borderColor: '#fde68a',
-  color: '#92400e',
+  background: '#fff2ec', // app-review-bg
+  borderColor: '#ffd9c7', // app-review-border
+  color: '#d9531f', // app-review-text
 };
 
 const pillActiveStyle: React.CSSProperties = {
   ...pillBase,
-  background: '#fef3c7',
-  borderColor: '#f59e0b',
-  color: '#92400e',
+  background: '#ffe1d3', // app-nudge-border — same coral family, one step deeper
+  borderColor: '#d9531f',
+  color: '#d9531f',
 };

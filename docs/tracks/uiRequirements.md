@@ -1,5 +1,9 @@
 # App UI Requirements — designer handoff scope
 
+> **SUPERSEDED 2026-07-15** — brief delivered; the handoff lives at
+> `docs/Design/Lessgo AI UI redesign/design_handoff_lessgo_app/`. Build direction +
+> screen ownership now in `docs/tracks/uiRedesignPlan.md`. Kept for reference only.
+
 Updated: 2026-07-14. Context: `productQueue.md` UI-reimagine hold; screen inventory for designer brief.
 
 Scope: **app.lessgo.ai screens only**. Excludes published output (`/p/[slug]*` — template design, `/new-template` pipeline) and internal `/admin`, `/dev/*`.

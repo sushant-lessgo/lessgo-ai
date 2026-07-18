@@ -291,6 +291,10 @@ async function saveDraftHandler(req: NextRequest) {
         aiBaseline: aiBaselineChanged ? (nextAiBaseline as any) : undefined,
         updatedAt: new Date(),
       },
+      // Only `updatedAt` is read from the result. Without this, Prisma's implicit
+      // RETURNING ships the whole row — content/themeValues/brief/aiBaseline — back
+      // on every autosave.
+      select: { updatedAt: true },
     });
 
     // data-capture (Phase 2): diff collected elements vs the next baseline and

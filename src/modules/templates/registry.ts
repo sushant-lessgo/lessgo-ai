@@ -112,35 +112,14 @@ export const templateRegistry: Record<TemplateId, TemplateModuleLoader> = {
   },
   // On-demand work-engine template (visual-portfolio; anchor customer Kundius
   // Photography). Service audience; served to photographers via the serve gate.
+  // Skeleton-backed: the loader import()s the work-SKELETON Atelier skin barrel,
+  // which builds the full TemplateModule from the skeleton factory + skin data.
+  // (atelier-skeleton-cutover: the old hand-written atelier skin dir was deleted
+  // and the skeleton barrel folded into templates/atelier/ — this IS that barrel.)
+  // Dispatch firewall intact: skeleton code rides in this chunk only; nothing new
+  // is statically imported by registry.ts or the main bundle.
   atelier: async () => {
     const m = await import('@/modules/templates/atelier');
-    return {
-      resolveBlock: m.resolveBlock,
-      ThemeInjector: m.ThemeInjector,
-      SSRTokens: m.SSRTokens,
-      getSurfaceForSection: m.getSurfaceForSection,
-      defaultPaletteId: m.defaultAtelierPalette,
-      variants: m.atelierVariantDefs,
-      defaultVariantId: m.defaultAtelierVariant,
-      paletteImageKeywords: m.PALETTE_IMAGE_KEYWORDS,
-      // template-factory phase 6/11 — atelier declares all 5 knob axes. Surfacing
-      // `knobs` here populates `mod.knobs` at runtime so editor knob-switching can
-      // read `getLoadedTemplate('atelier').knobs` (mirrors hearth).
-      knobs: m.atelierKnobs,
-      // Phase 12b — atelier's ZERO-CONFIG default knob seed (square buttons, the
-      // Kontur signature). Surfaced here so the creation path (runWorkSkeleton)
-      // can seed themeValues.knobs. Optional on TemplateModule; other templates
-      // leave it undefined.
-      defaultKnobs: m.defaultAtelierKnobs,
-    };
-  },
-  // Work-SKELETON Atelier skin (dev id `atelier2`; cutover to `atelier` in
-  // phase 9). Loader import()s the skin barrel, which builds the full
-  // TemplateModule from the skeleton factory + skin data. Dispatch firewall
-  // intact: skeleton code rides in this chunk; nothing new is statically imported
-  // by registry.ts or the main bundle.
-  atelier2: async () => {
-    const m = await import('@/modules/templates/atelier2');
     return {
       resolveBlock: m.resolveBlock,
       ThemeInjector: m.ThemeInjector,

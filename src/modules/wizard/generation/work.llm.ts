@@ -32,14 +32,24 @@ import {
   mergePageIntoFinalContent,
   finalizeMultiPageGeneration,
   isResumableGeneration,
+  runCollectionFanOut,
   type MultiPageOnboardingData,
+  type CollectionFanOutResult,
 } from '@/modules/generation/multiPageAssembly';
+import { deriveWorksEntries, stampWorkGalleryBinding } from '@/modules/generation/workCollections';
+import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
+import { templateMeta } from '@/modules/templates/templateMeta';
+import type { CollectionEntry } from '@/modules/brief/collections';
 import type {
   WorkStrategyOutput,
   WorkSitemapPage,
 } from '@/modules/audience/work/strategy/parseStrategyWork';
 import { saveDraft } from './finalize';
-import { WORK_COPY_ENGINE_TEMPLATES, isWorkCopyTemplate } from '@/lib/workCopyEngine';
+import {
+  WORK_COPY_ENGINE_TEMPLATES,
+  isWorkCopyTemplate,
+  workCopyEngineEnabled,
+} from '@/lib/workCopyEngine';
 import type { WorkGenerationInput } from './work';
 import type { GenerationCallbacks, GenerationResult, GenerationMeta } from './index';
 
@@ -48,26 +58,15 @@ import type { GenerationCallbacks, GenerationResult, GenerationMeta } from './in
 // ---------------------------------------------------------------------------
 
 /**
- * Founder-approved ALLOW-LIST of WORK templates the LLM copy engine may drive.
- * RELOCATED to the leaf module `@/lib/workCopyEngine` (single source of truth,
- * shared with the editor's story-panel gate) — re-exported here so existing
- * generation callers (`index.ts`, `work.ts`, `work.llm.test.ts`) keep their
- * import surface unchanged.
+ * The allow-list, the membership predicate AND the kill-switch all live in the
+ * leaf module `@/lib/workCopyEngine` (single source of truth, shared with the
+ * editor's story-panel gate and — since work-onboarding-shell P5 — the journey
+ * seam's SYNC STEP-05 `preflight`, which must not statically import THIS module
+ * because its top pulls the template registry + multi-page assembly).
+ * Re-exported here so existing generation callers (`index.ts`, `work.ts`,
+ * `work.llm.test.ts`) keep their import surface unchanged.
  */
-export { WORK_COPY_ENGINE_TEMPLATES, isWorkCopyTemplate };
-
-/**
- * Whether the WORK LLM copy engine is enabled for `templateId`. TRUE only when
- * (a) the env kill-switch `NEXT_PUBLIC_WORK_COPY_ENGINE === 'true'` AND (b) the
- * template is on `WORK_COPY_ENGINE_TEMPLATES`. `NEXT_PUBLIC_*` is BUILD-TIME
- * INLINED (plan decision #8) — flipping it needs a REDEPLOY, not a runtime
- * toggle. Default OFF (unset ⇒ false) ⇒ the existing skeleton path is
- * byte-identical.
- */
-export function workCopyEngineEnabled(templateId: string | null | undefined): boolean {
-  if (process.env.NEXT_PUBLIC_WORK_COPY_ENGINE !== 'true') return false;
-  return isWorkCopyTemplate(templateId);
-}
+export { WORK_COPY_ENGINE_TEMPLATES, isWorkCopyTemplate, workCopyEngineEnabled };
 
 export type WorkRoutePath = 'granth-generator' | 'skeleton' | 'llm-fanout';
 
@@ -148,6 +147,57 @@ async function runWorkStrategy(input: WorkGenerationInput): Promise<WorkStrategy
 }
 
 /**
+ * The WORKS binding fan-out (work-onboarding-ingestion E2 / phase 1). Extracted
+ * so it can be driven DIRECTLY in tests (fixture caps ⇒ fires; real caps ⇒
+ * dormant). LLM-FREE — item copy is `{status:'done', copy:{}}` (the granth
+ * precedent): zero new AI calls, zero new credit ops.
+ *
+ * Steps:
+ *   1. entries = derive from `facts.work.groups[]` (resume: re-derive from the
+ *      persisted `onboardingData.collections.works` when present).
+ *   2. persist entries into `fc.onboardingData.collections` (resume durability).
+ *   3. runCollectionFanOut — builds the /works catalog + one item page per entry
+ *      carrying VERBATIM photos. DORMANT unless `works` is a declared capability.
+ *   4. stampWorkGalleryBinding — cover_image (always) + href (only when the item
+ *      page exists — D7a) on the home gallery group cards.
+ *
+ * NO-PHOTO / NO-GROUP FAST PATH: entries empty ⇒ returns immediately WITHOUT
+ * touching `fc` — so a work run that carries no photos (the P1 prod reality: no
+ * upload UI yet) stays byte-identical. Cover stamping is capability-independent
+ * by design (D7a), so it only ever runs when the user actually seeded photos.
+ */
+export async function runWorksFanOut(
+  fc: any,
+  input: WorkGenerationInput,
+  declaredCapabilities: readonly string[],
+  persist: (fc: any) => Promise<void>
+): Promise<CollectionFanOutResult> {
+  const persisted = fc.onboardingData?.collections?.works as CollectionEntry[] | undefined;
+  const entries =
+    persisted && persisted.length
+      ? persisted
+      : deriveWorksEntries(getWorkFacts(input.brief?.facts));
+  if (entries.length === 0) return { status: 'done' }; // no photos/groups ⇒ byte-identical
+
+  if (!fc.onboardingData) fc.onboardingData = {};
+  fc.onboardingData.collections = { ...(fc.onboardingData.collections ?? {}), works: entries };
+
+  const result = await runCollectionFanOut({
+    fc,
+    collections: { works: entries },
+    declaredCapabilities,
+    // LLM-FREE — no route call, no charge (granth precedent). Records ride the
+    // slice seed; the clamp keeps VERBATIM_ITEM_FIELDS (incl. photos) untouched.
+    generateItemCopy: async () => ({ status: 'done', copy: {} }),
+    persist,
+  });
+  if (result.status !== 'done') return result;
+
+  stampWorkGalleryBinding(fc, entries);
+  return { status: 'done' };
+}
+
+/**
  * The WORK LLM multi-page fan-out. Guarded (workCopyEngineEnabled / atelier
  * allow-list) at the GeneratingSlot fork — called DIRECTLY, mirroring
  * runWorkSkeleton (NOT via runGeneration).
@@ -180,6 +230,11 @@ export async function runWorkLLMGeneration(
       title: (fc.meta?.title as string) || title,
       ...(input.templateId ? { templateId: input.templateId } : {}),
       ...(themeValues ? { themeValues } : {}),
+      // Persist the wizard's COMPOSED brief (entry + work + collections) so the
+      // regen route can read `Project.brief.facts.work` server-side. saveDraft
+      // replaces `facts` wholesale, so send the whole brief — never a partial
+      // `{facts:{work}}` patch. Idempotent re-send on each save is harmless.
+      ...(input.brief ? { brief: input.brief } : {}),
       finalContent: fc,
     });
   };
@@ -248,6 +303,18 @@ export async function runWorkLLMGeneration(
       }
     } catch (e: any) {
       return { status: 'error', error: e?.message || 'Copy generation failed.' };
+    }
+
+    // ─── Works binding fan-out (E2 P1) — after the sitemap pages, before finalize.
+    // LLM-free; dormant unless `resolvedTemplateId` declares the `works` capability
+    // (byte-identical no-op on P1 templates). Persists item pages + stamps covers.
+    try {
+      const declaredCapabilities = templateMeta[resolvedTemplateId]?.capabilities ?? [];
+      const worksResult = await runWorksFanOut(fc, input, declaredCapabilities, saveFC);
+      if (worksResult.status === 'credits') return { status: 'credits' };
+      if (worksResult.status === 'error') return { status: 'error', error: worksResult.error };
+    } catch (e: any) {
+      return { status: 'error', error: e?.message || 'Works binding failed.' };
     }
 
     cb.onStage?.('saving');

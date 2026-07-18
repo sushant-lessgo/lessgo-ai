@@ -15,7 +15,7 @@
 //   3. Assert CTA/nav hrefs are consistent across both (published emits real <a
 //      href>; edit exposes a `wk-link-edit` affordance for the same links).
 //
-// Content is sourced from the shipped atelier2 block mocks (fixtures/kundiusBrief.ts
+// Content is sourced from the shipped atelier block mocks (fixtures/kundiusBrief.ts
 // -derived, already mapped onto the frozen work-core contracts) so the parity grid,
 // dev stage, and this proof all reflect the SAME Kundius page. Each page reuses the
 // DEFAULT layout mock per section type, given a page-scoped sectionId.
@@ -36,7 +36,7 @@ import { describe, it, expect, vi } from 'vitest';
 // htmlGenerator is `import 'server-only'`; neutralize so the publish path runs under vitest.
 vi.mock('server-only', () => ({}));
 
-import { atelier2Sections } from '@/modules/templates/blockMocks/atelier2';
+import { atelierSections } from '@/modules/templates/blockMocks/atelier';
 import { createHarnessStore } from '@/modules/templates/blockMocks/harness';
 import { resolveWorkBlock } from '../resolveWorkBlock';
 import { generateStaticHTML } from '@/lib/staticExport/htmlGenerator';
@@ -128,12 +128,12 @@ function collectHrefs(obj: Record<string, any>): string[] {
 
 // ── Assemble the 5 standard-archetype pages from the shipped Kundius mocks ────────
 
-const MOCKS = atelier2Sections();
+const MOCKS = atelierSections();
 
 /** The DEFAULT-layout mock for a section type (first occurrence in the mock list). */
 function pick(type: string) {
   const m = MOCKS.find((s) => s.sectionType === type);
-  if (!m) throw new Error(`no atelier2 mock for section type "${type}"`);
+  if (!m) throw new Error(`no atelier mock for section type "${type}"`);
   return m;
 }
 
@@ -185,7 +185,7 @@ async function renderPublished(page: (typeof PAGES)[number]): Promise<string> {
     slug: `kundius-${page.key}`,
     title: `Kristina Kundius — ${page.key}`,
     audienceType: 'service',
-    templateId: 'atelier2',
+    templateId: 'atelier',
     paletteId: null,
     variantId: null,
     goal: null,

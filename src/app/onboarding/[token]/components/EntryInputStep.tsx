@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { trackFailure } from '@/utils/trackTelemetry';
+import { parseInsufficientCredits } from '@/lib/billing/insufficientCredits';
+import { CREDIT_COSTS } from '@/lib/creditCosts';
 
 /** Hostname-only (privacy: never emit the full URL). null for the text path. */
 function hostOf(url: string | null): string | null {
@@ -89,16 +91,33 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // billing-beta phase 4 — a credit block is NOT a scrape failure. Before this,
+  // a 402 fell through to the generic "Couldn't read that site…" copy below:
+  // misleading (it read the site fine — the user just has no credits) and it
+  // pointed at no way out.
+  const [creditsBlocked, setCreditsBlocked] = useState<{
+    required?: number;
+    available?: number;
+  } | null>(null);
 
   const normalizedUrl = normalizeUrl(value);
   const validation = validateOneLiner(value);
   const isValid = !!normalizedUrl || validation.valid;
+
+  // billing-beta phase 7 — surface this step's spend at the affordance. The submit
+  // runs the URL path (/api/v2/scrape-website ⇒ SCRAPE_WEBSITE) or the text path
+  // (/api/v2/understand ⇒ UNDERSTAND); the cost tracks whichever route this input
+  // will hit. Number always from CREDIT_COSTS, never a literal.
+  const actionCost = normalizedUrl
+    ? CREDIT_COSTS.SCRAPE_WEBSITE
+    : CREDIT_COSTS.UNDERSTAND;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValid || loading) return;
     setLoading(true);
     setError(null);
+    setCreditsBlocked(null);
     try {
       const isUrl = !!normalizedUrl;
       const res = await fetch(isUrl ? '/api/v2/scrape-website' : '/api/v2/understand', {
@@ -113,10 +132,14 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
       const json = await res.json();
       if (!res.ok || !json?.success || !json?.briefDraft) {
         // data-capture phase 4 — scrape/understand failure (fire-and-forget,
-        // side-effect-only). These v2 routes have no credit-blocking branch
-        // (credits are consumed post-hoc), so every non-2xx here is a real
-        // failure. audienceType is unresolved at the unified entry step (serve
-        // gate runs later) ⇒ null; templateId is not known yet ⇒ null.
+        // side-effect-only). These v2 routes DO pre-check credits and emit a
+        // Pattern A 402 before doing any work (scrape-website:239,360;
+        // understand:174), so a 402 is a credit block, NOT a scrape failure —
+        // the `!== 402` guard deliberately keeps those out of 'scrape_failed'
+        // so the funnel isn't corrupted by blocks the user never got to try.
+        // The credits notice below is rendered instead. audienceType is
+        // unresolved at the unified entry step (serve gate runs later) ⇒ null;
+        // templateId is not known yet ⇒ null.
         if (res.status !== 402) {
           trackFailure('scrape_failed', {
             reason: json?.error ?? json?.message ?? null,
@@ -125,6 +148,15 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
             audienceType: null,
             templateId: null,
           });
+        }
+        // billing-beta phase 4 — credit block ⇒ a credits notice, not the generic
+        // failure copy. Read the numbers through the normalizer: these routes
+        // answer Pattern A, whose message/numbers the ad-hoc `json?.message`
+        // fallback below reads inconsistently across emitters.
+        const blocked = parseInsufficientCredits(res.status, json);
+        if (blocked) {
+          setCreditsBlocked(blocked);
+          return;
         }
         setError(
           json?.message ||
@@ -178,6 +210,7 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
           onChange={(e) => {
             setValue(e.target.value);
             if (error) setError(null);
+            if (creditsBlocked) setCreditsBlocked(null);
           }}
           onKeyDown={handleKeyDown}
           className="min-h-[100px]"
@@ -215,6 +248,36 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
 
       {error && <p className="text-xs text-red-500">{error}</p>}
 
+      {/* Credit block — the ONLY honest thing to say here, plus a way out.
+          Stock utilities on purpose: this wizard step is entirely stock-Tailwind
+          (Label/Textarea/Button above), and a lone app-* island would render
+          off-palette. Numbers are omitted when the route sent none. */}
+      {creditsBlocked && (
+        <div
+          data-testid="entry-credits-notice"
+          className="rounded-lg border border-orange-200 bg-orange-50 p-3"
+        >
+          <p className="text-xs text-gray-700">
+            {typeof creditsBlocked.required === 'number' &&
+            typeof creditsBlocked.available === 'number' ? (
+              <>
+                Not enough credits — this needs {creditsBlocked.required} credit
+                {creditsBlocked.required === 1 ? '' : 's'} and you have{' '}
+                {creditsBlocked.available} left.
+              </>
+            ) : (
+              <>You don&apos;t have enough credits left for this.</>
+            )}
+          </p>
+          <a
+            href="/dashboard/billing"
+            className="mt-1 inline-block text-xs font-semibold text-brand-accentPrimary underline"
+          >
+            Get more credits
+          </a>
+        </div>
+      )}
+
       <div>
         <Button
           type="submit"
@@ -232,7 +295,9 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
             'Continue'
           )}
         </Button>
-        <p className="text-xs text-gray-400 text-center mt-2">Takes ~30 seconds</p>
+        <p className="text-xs text-gray-400 text-center mt-2">
+          Takes ~30 seconds · Costs {actionCost} credit{actionCost === 1 ? '' : 's'}
+        </p>
       </div>
     </form>
   );

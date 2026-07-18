@@ -32,15 +32,27 @@ const TABS: TabDef[] = [
   { label: 'Analytics', segment: 'analytics' },
 ]
 
+// "Your work" is inserted after Overview for works-capable projects only
+// (work-library-board P5). Visibility only — the page itself is the guard.
+const WORK_TAB: TabDef = { label: 'Your work', segment: 'work' }
+
 const TAB_BASE = 'relative px-[15px] pb-[13px] pt-[14px] font-app-sans text-[13px]'
 
-export default function WorkspaceTabs({ tokenId }: { tokenId: string }) {
+export default function WorkspaceTabs({
+  tokenId,
+  showWorkTab = false,
+}: {
+  tokenId: string
+  showWorkTab?: boolean
+}) {
   const pathname = usePathname() ?? ''
   const base = `/dashboard/${tokenId}`
 
+  const tabs = showWorkTab ? [TABS[0], WORK_TAB, ...TABS.slice(1)] : TABS
+
   return (
     <div className="flex flex-none gap-0.5 border-b border-[#f0f0f3] bg-app-surface px-[26px]">
-      {TABS.map(({ label, segment }) => {
+      {tabs.map(({ label, segment }) => {
         const href = segment ? `${base}/${segment}` : base
         // Overview is the index → exact match only; a tab owns its nested routes
         // (e.g. blog/{postId} keeps Blog active).

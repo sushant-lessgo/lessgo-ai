@@ -51,13 +51,13 @@ describe('regenerateStoryFromInterview target guard', () => {
   });
 
   it('no-ops on a non-about section without hitting the network', async () => {
-    await (store.getState() as any).regenerateStoryFromInterview('hero-1', answers, {});
+    await (store.getState() as any).regenerateStoryFromInterview('hero-1', answers);
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(store.getState().aiGeneration.isGenerating).toBe(false);
   });
 
   it('proceeds (reaches fetch) for an about section', async () => {
-    await (store.getState() as any).regenerateStoryFromInterview('about-1', answers, {});
+    await (store.getState() as any).regenerateStoryFromInterview('about-1', answers);
     // (an autosave fetch may also fire; assert the story endpoint was hit)
     expect(fetchSpy).toHaveBeenCalledWith(
       '/api/audience/work/regenerate-story',

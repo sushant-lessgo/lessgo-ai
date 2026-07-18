@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { logger } from '@/lib/logger';
 import { getUserPlan, hasFeature, checkLimit, PlanConfig } from '@/lib/planManager';
-import { checkCredits, consumeCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem';
+import { checkCredits, UsageEventType, CREDIT_COSTS } from '@/lib/creditSystem';
 
 // Demo token for mock mode testing
 const DEMO_TOKEN = 'lessgodemomockdata';
@@ -234,64 +234,6 @@ export async function requireAICredits(
   return {
     allowed: true,
     userId,
-  };
-}
-
-/**
- * Wrapper function for AI endpoints with automatic credit consumption
- */
-export function withAICredits(
-  handler: (req: NextRequest, userId: string) => Promise<Response>,
-  eventType: UsageEventType,
-  creditsRequired: number
-) {
-  return async (req: NextRequest): Promise<Response> => {
-    const startTime = Date.now();
-
-    // Check auth and credits
-    const check = await requireAICredits(req, eventType, creditsRequired);
-    if (!check.allowed) {
-      return check.response!;
-    }
-
-    const userId = check.userId!;
-
-    try {
-      // Consume credits before operation
-      const consumption = await consumeCredits(userId, eventType, creditsRequired, {
-        endpoint: req.url,
-      });
-
-      if (!consumption.success) {
-        return NextResponse.json(
-          {
-            error: consumption.error,
-            code: 'CREDIT_CONSUMPTION_FAILED',
-          },
-          { status: 402 }
-        );
-      }
-
-      // Execute handler
-      const response = await handler(req, userId);
-
-      // Add credit info to response headers
-      response.headers.set('X-Credits-Used', creditsRequired.toString());
-      response.headers.set('X-Credits-Remaining', consumption.remaining.toString());
-
-      return response;
-    } catch (error: any) {
-      logger.error('AI operation error:', error);
-
-      // Note: Credits already consumed, but we log the failure
-      return NextResponse.json(
-        {
-          error: 'Operation failed',
-          message: error.message,
-        },
-        { status: 500 }
-      );
-    }
   };
 }
 

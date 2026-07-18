@@ -7,6 +7,9 @@ import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { UndoRedoButtons } from '../ui/UndoRedoButtons';
 import { ResetButton } from '../ui/ResetButton';
 import { PreviewButton } from '../ui/PreviewButton';
+import { usePreviewNavigation } from '../ui/usePreviewNavigation';
+import { AppIcon } from '@/components/ui/icon';
+import { Coming } from '@/components/ui/coming';
 
 interface EditHeaderRightPanelProps {
   tokenId: string;
@@ -23,39 +26,46 @@ function RegenCopyConfirmModal({
 }) {
   if (!isOpen) return null;
 
+  // Kept as a plain conditional overlay (not the Radix Dialog primitive): this
+  // modal is rendered from inside the bar and driven by local `showConfirm`
+  // state, and swapping the mount model would change focus/scroll behavior —
+  // beyond the presentation line. Restyled to the app-chrome card language.
+  //
+  // No `.app-chrome` class here: `fixed` moves the box, not the DOM position, so
+  // this subtree still sits inside the bar's `.app-chrome` wrapper and inherits
+  // the app font. Adding the class would also override the scrim/card background
+  // (app-chrome.css loads after globals.css → it beats a co-located `bg-*`).
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="mx-4 w-full max-w-md overflow-hidden rounded-app-panel border border-app-border-hairline bg-app-surface shadow-app-popover">
         <div className="p-6">
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
+          <div className="flex items-start gap-3">
+            <div className="flex-none">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-app-nudge-bg">
+                <AppIcon name="info" size={22} className="text-app-review-text" />
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="mb-2 text-[15px] font-semibold text-app-ink">
                 Regenerate All Copy
               </h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="mb-4 text-[13px] text-app-muted">
                 This will regenerate all page copy using the same inputs and strategy. Your text edits will be lost.
               </p>
               <button
                 onClick={onConfirm}
-                className="w-full text-left px-4 py-3 border border-amber-200 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
+                className="w-full rounded-app-row border border-app-nudge-border bg-app-nudge-bg px-4 py-3 text-left transition-colors hover:bg-app-review-bg"
               >
-                <div className="font-medium text-amber-900">Regenerate Copy</div>
-                <div className="text-sm text-amber-700">All section text will be rewritten</div>
+                <div className="text-[13px] font-semibold text-app-nudge-text">Regenerate Copy</div>
+                <div className="text-[12px] text-app-nudge-text/80">All section text will be rewritten</div>
               </button>
             </div>
           </div>
         </div>
-        <div className="px-6 py-3 bg-gray-50 rounded-b-lg flex justify-end">
+        <div className="flex justify-end border-t border-app-divider bg-app-canvas px-6 py-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+            className="rounded-app-badge px-4 py-2 text-[13px] font-medium text-app-label transition-colors hover:bg-app-hairline"
           >
             Cancel
           </button>
@@ -78,6 +88,17 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
   );
   const storeApi = useEditStoreApi();
   const [showConfirm, setShowConfirm] = useState(false);
+  // t1's Publish button. Publishing lives on the preview page, and the ONLY way
+  // in today is the Preview navigation — so the split-button's main half reuses
+  // that exact entry point (same hook, same call, no new behavior). The dropdown
+  // half is greyed: the handoff never defines its contents.
+  //
+  // ONE instance for this whole subtree, passed down to PreviewButton as props.
+  // The hook is not pure (it owns the getTabManager/cleanupTabManager lifecycle
+  // for a refcount-less keyed singleton), so two callers with the same tokenId
+  // = two owners of one lifecycle. It also shares `isNavigating`, so Publish's
+  // "Opening…" correctly disables Preview too. See PreviewButton's note.
+  const { handlePreviewClick, isNavigating } = usePreviewNavigation(tokenId);
 
   const isGenerating = aiGeneration?.isGenerating ?? false;
   // i18n-phase-1 (Phase 4): regen only writes the DEFAULT-locale base copy
@@ -116,24 +137,20 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
 
   return (
     <>
-      <div className="flex items-center space-x-3">
-        {/* Regen Copy */}
+      <div className="flex items-center gap-2">
+        {/* Regen Copy. t1 does not draw this control, but it works today — so it
+            is reskinned in place, not dropped. Handler/disabled/title verbatim. */}
         <button
           onClick={() => setShowConfirm(true)}
           disabled={isGenerating || regenLocaleLocked}
-          className={`flex items-center space-x-1.5 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed ${isGenerating ? 'animate-pulse bg-amber-50 border-amber-200' : ''}`}
+          className={`inline-flex items-center gap-1.5 rounded-app-badge px-2.5 py-[7px] text-[13px] font-medium text-app-label transition-colors hover:bg-app-hairline disabled:cursor-not-allowed disabled:opacity-50 ${isGenerating ? 'animate-pulse bg-app-nudge-bg' : ''}`}
           title={regenLocaleLocked ? 'Switch to the default language to regenerate.' : 'Regenerate all page copy'}
         >
-          {isGenerating ? (
-            <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-          ) : (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
+          <AppIcon
+            name={isGenerating ? 'progress_activity' : 'auto_awesome'}
+            size={18}
+            className={isGenerating ? 'animate-spin text-app-icon-muted' : 'text-app-icon-muted'}
+          />
           <span>{isGenerating
             ? (progress > 0 && totalSections > 0
                 ? `Regenerating ${completedSections}/${totalSections}...`
@@ -141,9 +158,48 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
             : 'Regen Copy'}</span>
         </button>
 
+        {/* Not in t1 either; both work today, so both stay. UndoRedoButtons and
+            ResetButton are outside this phase's Files touched — they keep their
+            current styling, which is a known visual gap for a later sweep. */}
         <UndoRedoButtons />
         <ResetButton />
-        <PreviewButton tokenId={tokenId} />
+
+        {/* Edit / Preview segmented (t1). `Edit` is the current view — an inert
+            state indicator, not a "coming" control. `Preview` IS the existing
+            PreviewButton, restyled to wear the inactive segment. */}
+        <div
+          role="group"
+          aria-label="Edit or preview"
+          className="inline-flex flex-none items-center gap-1 rounded-app-ctl-sm bg-app-track p-[3px]"
+        >
+          <span
+            aria-current="true"
+            className="inline-flex items-center rounded-[7px] bg-app-surface px-3 py-1 text-[13px] font-medium text-app-ink shadow-app-card"
+          >
+            Edit
+          </span>
+          <PreviewButton onPreviewClick={handlePreviewClick} isNavigating={isNavigating} />
+        </div>
+
+        {/* Publish split-button (t1) — built INLINE here on purpose: single
+            consumer, so phase 1 explicitly declined to make it a primitive. */}
+        <div className="inline-flex flex-none items-center rounded-app-ctl-sm bg-app-primary shadow-app-btn-publish transition-colors hover:bg-app-primary-hover">
+          <button
+            type="button"
+            onClick={handlePreviewClick}
+            disabled={isNavigating}
+            className="inline-flex items-center gap-1.5 rounded-l-app-ctl-sm py-[7px] pl-2.5 pr-2 text-[13px] font-semibold text-white disabled:cursor-wait disabled:opacity-70"
+            title="Publish your page"
+          >
+            <AppIcon name="rocket_launch" filled size={17} />
+            <span>{isNavigating ? 'Opening…' : 'Publish'}</span>
+          </button>
+          {/* hairline, per t1: rgba(255,255,255,.3) 1x16 */}
+          <span aria-hidden className="h-4 w-px flex-none bg-white/30" />
+          <Coming what="publish options" className="rounded-r-app-ctl-sm py-[7px] pl-1 pr-2">
+            <AppIcon name="expand_more" size={17} />
+          </Coming>
+        </div>
       </div>
 
       <RegenCopyConfirmModal
@@ -152,11 +208,15 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
         onConfirm={handleRegenConfirm}
       />
 
+      {/* No `.app-chrome` on the toast: `fixed` moves the box, not the DOM
+          position — it still renders inside the bar's `.app-chrome` wrapper and
+          inherits the app font. Putting the class on it would also override its
+          own background (app-chrome.css wins on the same element). */}
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium transition-opacity ${
+        <div className={`fixed bottom-6 right-6 z-50 rounded-app-row border px-4 py-2.5 text-[13px] font-medium shadow-app-float transition-opacity ${
           toast.type === 'success'
-            ? 'bg-green-50 text-green-800 border border-green-200'
-            : 'bg-red-50 text-red-800 border border-red-200'
+            ? 'border-app-success/30 bg-app-success-bg text-app-success'
+            : 'border-app-danger/30 bg-app-danger-bg text-app-danger'
         }`}>
           {toast.message}
         </div>

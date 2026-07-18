@@ -68,7 +68,9 @@ describe('fit — atelier full-capability satisfaction (atelier-template phase 7
     // lanes, not templateMeta.
     expect(templateMeta.atelier.capabilities).not.toContain('lead-form');
     expect(templateMeta.atelier.capabilities).not.toContain('bilingual');
-    expect(templateMeta.atelier.capabilities).toEqual(['gallery', 'packages', 'multipage']);
+    // atelier-skeleton-cutover phase 1: atelier absorbed the skeleton's `works`
+    // capability (the works ingestion fan-out now lights up on the live look).
+    expect(templateMeta.atelier.capabilities).toEqual(['gallery', 'packages', 'multipage', 'works']);
   });
 
   it('atelier does NOT fit on a non-work engine even for its own capabilities (engine gate first)', () => {

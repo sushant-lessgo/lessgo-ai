@@ -14,10 +14,14 @@ import type { GenerationMeta } from './index';
 // ── Mocks ────────────────────────────────────────────────────────────────────
 // saveDraft: capture the finalContent handed to each save (no network).
 const savedFcs: any[] = [];
+// Also capture the FULL save payload (esp. `brief`) so we can prove first-gen
+// persists the composed brief the regen route later reads.
+const savedBodies: any[] = [];
 vi.mock('./finalize', () => ({
   saveDraft: vi.fn(async (body: any) => {
     // Deep-clone so we snapshot the fc AT save time (the adapter mutates it).
     savedFcs.push(JSON.parse(JSON.stringify(body.finalContent)));
+    savedBodies.push(JSON.parse(JSON.stringify(body)));
   }),
 }));
 
@@ -36,10 +40,13 @@ vi.mock('@/modules/generation/multiPageAssembly', async (importActual) => {
 import { finalizeMultiPageGeneration } from '@/modules/generation/multiPageAssembly';
 import {
   runWorkLLMGeneration,
+  runWorksFanOut,
   resolveWorkRoute,
   workCopyEngineEnabled,
   WORK_COPY_ENGINE_TEMPLATES,
 } from './work.llm';
+import { templateMeta } from '@/modules/templates/templateMeta';
+import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
 import type { WorkGenerationInput } from './work';
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
@@ -135,6 +142,7 @@ function installFetch(opts: {
 
 beforeEach(() => {
   savedFcs.length = 0;
+  savedBodies.length = 0;
   (finalizeMultiPageGeneration as any).mockClear();
 });
 
@@ -178,6 +186,21 @@ describe('runWorkLLMGeneration — fan-out orchestration', () => {
     }
     // Generation marker dropped by finalize ⇒ not a resumable draft anymore.
     expect(finalFc.generationProgress).toBeUndefined();
+  });
+
+  it('persists the composed brief on every saveDraft, and it satisfies the regen route read', async () => {
+    installFetch();
+    await runWorkLLMGeneration(baseInput());
+
+    // At least one save happened (skeleton + per-page + finalize).
+    expect(savedBodies.length).toBeGreaterThan(0);
+    for (const body of savedBodies) {
+      // The saved brief equals the wizard's composed input.brief …
+      expect(body.brief).toEqual(BRIEF);
+      // … and what's persisted actually satisfies the regen route's read
+      // (getWorkFacts(brief.facts) non-null → no `brief.facts.work is required` 400).
+      expect(getWorkFacts(body.brief.facts)).not.toBeNull();
+    }
   });
 
   it('fetches the work strategy when none is pre-supplied', async () => {
@@ -276,6 +299,78 @@ describe('runWorkLLMGeneration — failures', () => {
     const result = await runWorkLLMGeneration(baseInput({ strategy: null }));
     expect(result.status).toBe('error');
     expect(finalizeMultiPageGeneration).not.toHaveBeenCalled();
+  });
+});
+
+// ── Works binding fan-out (work-onboarding E2 / phase 1) ─────────────────────
+// Drives the EXTRACTED runWorksFanOut directly. Fixture caps ['works'] ⇒ fires
+// (wiring); real templateMeta caps (no `works`) ⇒ fan-out no-op (dormancy).
+
+describe('runWorksFanOut — wiring + dormancy', () => {
+  const PHOTO_BRIEF = {
+    facts: {
+      work: {
+        identity: { name: 'K' },
+        groups: [
+          { name: 'Weddings', kind: 'category', price: { mode: 'on-request' },
+            photos: [{ id: 'w1', url: 'https://cdn/w1.jpg', cover: true }, { id: 'w2', url: 'https://cdn/w2.jpg' }] },
+        ],
+      },
+    },
+  } as any;
+
+  /** fc with a home work gallery card named 'Weddings' + a resume marker. */
+  function fcWithGallery() {
+    return {
+      content: { 'work-1': { id: 'work-1', elements: { groups: [{ id: 'g1', name: 'Weddings', cover_image: '', href: '#work' }] } } },
+      pages: {},
+      onboardingData: {},
+      generationProgress: { completedPageKeys: [] },
+    };
+  }
+
+  it('WIRING: fixture caps [works] ⇒ builds /works pages + stamps covers/href', async () => {
+    const fc = fcWithGallery();
+    const r = await runWorksFanOut(fc, baseInput({ brief: PHOTO_BRIEF }), ['works'], async () => {});
+    expect(r.status).toBe('done');
+    // item + catalog pages built
+    expect(fc.pages['page-weddings']).toBeTruthy();
+    const item = (fc.pages['page-weddings'] as any);
+    const sec = item.content[item.sections[0]];
+    expect(sec.type).toBe('workdetail');
+    expect(sec.elements.photos).toHaveLength(2); // VERBATIM
+    // gallery card stamped: cover (cover:true) + href (item page exists)
+    const card = (fc.content['work-1'] as any).elements.groups[0];
+    expect(card.cover_image).toBe('https://cdn/w1.jpg');
+    expect(card.href).toBe('/works/weddings');
+    // entries persisted for resume
+    expect((fc.onboardingData as any).collections.works).toHaveLength(1);
+  });
+
+  it('DORMANCY: real no-`works` caps ⇒ no /works pages; fan-out gated', async () => {
+    // atelier-skeleton-cutover phase 1: atelier ABSORBED `works` (the fan-out now
+    // legitimately fires on it), so the dormancy fixture moved to a template that
+    // GENUINELY lacks `works` (meridian). The proof is unchanged — only the fixture.
+    const fc = fcWithGallery();
+    const caps = templateMeta['meridian' as keyof typeof templateMeta].capabilities;
+    expect(caps).not.toContain('works'); // guard the premise
+    await runWorksFanOut(fc, baseInput({ brief: PHOTO_BRIEF }), caps, async () => {});
+    expect(fc.pages['page-weddings']).toBeUndefined(); // fan-out dormant
+    // cover stamping IS capability-independent (D7a), href is NOT (no item page)
+    const card = (fc.content['work-1'] as any).elements.groups[0];
+    expect(card.cover_image).toBe('https://cdn/w1.jpg');
+    expect(card.href).toBe('#work'); // left as-is — no /works page exists
+  });
+
+  it('BYTE-IDENTICAL: no photos/groups ⇒ fc untouched (P1 prod reality)', async () => {
+    const fc = fcWithGallery();
+    const before = JSON.stringify(fc);
+    const caps = templateMeta['atelier' as keyof typeof templateMeta].capabilities;
+    const r = await runWorksFanOut(fc, baseInput({ brief: BRIEF }), caps, async () => {
+      throw new Error('persist must not be called on the empty fast path');
+    });
+    expect(r.status).toBe('done');
+    expect(JSON.stringify(fc)).toBe(before);
   });
 });
 

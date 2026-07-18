@@ -1,175 +1,354 @@
 // /app/edit/[token]/components/layout/GlobalAppHeader.tsx
 "use client";
 
+// PHASE 4 — THE single editor bar (t1, decision 1).
+//
+// This is now the ONLY `<header>` in the editor: GlobalAppHeader's old full-width
+// row and EditHeader's old nested row are collapsed into one 56px bar that spans
+// the rail. Composition only — every handler below moved VERBATIM with its markup.
+//
+// Load-bearing details, do NOT "clean up":
+//  - the mobile panel toggle calls `useEditStore.getState().toggleLeftPanel?.()`
+//    (the hook object, not useEditStoreApi()). Inconsistent, deliberate, preserved.
+//  - it MUST stay a `<header>` element: e2e/editor-dirty-guard.spec.ts scopes to
+//    `page.locator('header')` / `header [role="status"]`, and useEditor.ts:212
+//    detects header clicks with `target.closest('header')`.
+//
+// MENU DISMISSAL — every Popover here is CONTROLLED (local `open` state) and each
+// WIRED row sets it false in its own onClick. Radix `Popover` (unlike DropdownMenu)
+// does NOT close on item click, and popover.tsx exports no PopoverClose — so an
+// uncontrolled menu would hang open on top of the modal it just opened. Adding a
+// Close to the shared primitive is a separate call; do NOT "simplify" this away.
+// Greyed <Coming> rows are inert (onClickCapture swallows the click), so they
+// deliberately leave their menu open — nothing happened, nothing to dismiss.
+//
+// GREYED MENU ROWS — the decision-17 pattern, set here (first menu consumer):
+// <Coming> renders its own `inline-flex items-center gap-1.5` span, so a greyed
+// row canNOT be an <AppPopoverItem>. Rather than add a row variant to the shared
+// primitive for this one case, greyed rows are <Coming> carrying AppPopoverItem's
+// row geometry via `className` (COMING_ROW below) — a single const, used for every
+// greyed row in this file. Colors come from `.app-coming` (which !important-wins
+// anyway), so only box/typography is restated. Any later menu consumer should
+// import this idea, not re-improvise it.
+
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEditStore } from '@/hooks/useEditStore';
-import { UserButton, useUser } from '@clerk/nextjs';
 import Logo from '@/components/shared/Logo';
+import { CreditBadge } from '@/components/billing/CreditBadge';
+import { AppIcon } from '@/components/ui/icon';
+import { Coming } from '@/components/ui/coming';
+import { SegmentedControl } from '@/components/ui/segmented-control';
+import {
+  Popover,
+  PopoverTrigger,
+  AppPopoverMenu,
+  AppPopoverItem,
+  AppPopoverLabel,
+  AppPopoverSeparator,
+} from '@/components/ui/popover';
 import { PageSwitcher } from './PageSwitcher';
+// THE t1 bar-control class, defined once (phase 8 de-dupe: this file's private
+// `BAR_BTN` and DesignMenuShell's `DESIGN_TRIGGER_CLASS` were byte-identical).
+import { BAR_CTL_CLASS } from '../ui/DesignMenuShell';
+import { EditorDesignControls, EditorStatusCluster } from './EditHeader';
+import { EditHeaderRightPanel } from './EditHeaderRightPanel';
 import { showSeoModal, showSocialModal } from '../ui/GlobalModals';
 
 interface GlobalAppHeaderProps {
   tokenId: string;
 }
 
+/** Greyed popover row: AppPopoverItem's geometry, worn by <Coming>. See header note. */
+const COMING_ROW =
+  'w-full gap-2.5 rounded-app-badge px-2.5 py-[7px] text-[13px] font-medium';
+
+/**
+ * `Back to dashboard` emphasis (scout §H t1: bg #f5f9ff, arrow_back #006CFF,
+ * text #003E80 600). This is the mock's EMPHASIS treatment, not a selected state:
+ * the row is a navigation action, so it must not carry AppPopoverItem's `active`
+ * (which also sets `data-active` — i.e. announces "this is the current item").
+ * Same pixels, no selected-ness, applied as plain presentation.
+ */
+const EMPHASIS_ROW =
+  'bg-app-tint-soft font-semibold text-app-primary-deep hover:bg-app-tint-soft [&_.app-icon]:text-app-primary';
+
 export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
   const router = useRouter();
-  const { user, isSignedIn } = useUser();
-  
+
   const [showHelpMenu, setShowHelpMenu] = useState(false);
+  const [showAppMenu, setShowAppMenu] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
 
   const handleLogoClick = () => {
     // Navigate to dashboard or home
     router.push('/dashboard');
   };
 
-  const handleHelpClick = () => {
-    setShowHelpMenu(!showHelpMenu);
-  };
-
-
   return (
-    <header className="w-full border-b border-brand-border bg-white px-6 py-3 relative z-60">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Left: Logo and breadcrumb */}
-        <div className="flex items-center space-x-4">
+    <header className="relative z-[60] flex h-14 w-full flex-none items-center gap-3 border-b border-app-border-frame bg-app-surface px-3.5">
+      {/* ── Left cluster ─────────────────────────────────────────────────── */}
+      {/* Logo = app menu (t1). The dashboard navigation that used to be the
+          logo's own onClick is now the `Back to dashboard` row — same handler. */}
+      <Popover open={showAppMenu} onOpenChange={setShowAppMenu}>
+        <PopoverTrigger asChild>
           <button
-            onClick={handleLogoClick}
-            className="hover:opacity-80 transition-opacity"
-            aria-label="Go to dashboard"
+            type="button"
+            className="inline-flex flex-none items-center gap-1 rounded-app-ctl-sm px-1.5 py-1 transition-colors hover:bg-app-hairline data-[state=open]:bg-app-hairline"
+            aria-label="Site menu"
           >
-            <Logo size={180} />
+            {/* t1: logo h22. <Logo> passes `size` to next/image as BOTH width and
+                height, so the height is constrained via className instead — a
+                bare `size` would reserve a square box far taller than the bar. */}
+            <Logo size={110} className="h-[22px] w-auto" />
+            <AppIcon name="expand_more" size={18} className="text-app-icon-faint" />
           </button>
-          
-          {/* Breadcrumb */}
-          <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-500">
-            <span>/</span>
-            <span>Editor</span>
-          </div>
-
-          {/* Multi-page switcher */}
-          <PageSwitcher />
-
-          {/* SEO & Social settings */}
-          <button
-            onClick={showSeoModal}
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-            aria-label="SEO and social settings"
-            title="SEO & Social"
+        </PopoverTrigger>
+        <AppPopoverMenu width={216} align="start">
+          <AppPopoverItem
+            className={EMPHASIS_ROW}
+            icon={<AppIcon name="arrow_back" size={18} />}
+            onClick={() => {
+              setShowAppMenu(false);
+              handleLogoClick();
+            }}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
-            </svg>
-            <span>SEO</span>
-          </button>
-
-          {/* Social profiles panel (scale-04 D13) */}
-          <button
-            onClick={showSocialModal}
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-2.5 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-            aria-label="Social profiles"
-            title="Social profiles"
+            Back to dashboard
+          </AppPopoverItem>
+          <Coming what="a sites list inside the editor" side="right" className={COMING_ROW}>
+            <AppIcon name="grid_view" size={18} />
+            My sites
+          </Coming>
+          <AppPopoverSeparator />
+          <Coming what="renaming a site from the editor" side="right" className={COMING_ROW}>
+            <AppIcon name="edit" size={18} />
+            Rename site
+          </Coming>
+          <Coming what="site duplication" side="right" className={COMING_ROW}>
+            <AppIcon name="content_copy" size={18} />
+            Duplicate
+          </Coming>
+          <AppPopoverSeparator />
+          {/* Works today — reskinned, never greyed (decision 11). Opens the same
+              help menu the old help button opened; that button is its anchor.
+              MUST close this menu first: two popovers on two anchors would
+              otherwise overlap. */}
+          <AppPopoverItem
+            icon={<AppIcon name="help" size={18} />}
+            onClick={() => {
+              setShowAppMenu(false);
+              setShowHelpMenu(true);
+            }}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
-            <span>Social</span>
-          </button>
-        </div>
+            Help & support
+          </AppPopoverItem>
+        </AppPopoverMenu>
+      </Popover>
 
-        {/* Right: User info and actions */}
-        <div className="flex items-center space-x-4">
-        {/* Help Menu */}
-        <div className="relative">
+      <div className="app-divider" />
+
+      {/* Multi-page switcher */}
+      <PageSwitcher />
+
+      {/* Design-system popover + i18n controls (moved from the old EditHeader row) */}
+      <EditorDesignControls />
+
+      {/* Settings menu (t1). Rows dispatch to the EXISTING GlobalModals singleton
+          callers — the two modal systems stay separate (decision 7). */}
+      <Popover open={showSettingsMenu} onOpenChange={setShowSettingsMenu}>
+        <PopoverTrigger asChild>
+          <button type="button" className={BAR_CTL_CLASS} aria-label="Site settings">
+            <AppIcon name="tune" size={18} className="text-app-icon-muted" />
+            <span>Settings</span>
+            <AppIcon name="expand_more" size={18} className="text-app-icon-faint" />
+          </button>
+        </PopoverTrigger>
+        <AppPopoverMenu width={224} align="start">
+          <AppPopoverLabel>Site settings</AppPopoverLabel>
+          {/* Domain has no editor entry point today (it lives in the publish flow),
+              so it renders greyed rather than omitted. Phase 6 builds the t16 pane. */}
+          <Coming what="domain settings in the editor" side="right" className={COMING_ROW}>
+            <AppIcon name="public" size={18} />
+            Domain
+          </Coming>
+          <AppPopoverItem
+            icon={<AppIcon name="search" size={18} />}
+            onClick={() => {
+              setShowSettingsMenu(false);
+              showSeoModal();
+            }}
+          >
+            SEO
+          </AppPopoverItem>
+          {/* WIRED TODAY — never grey this (decision 10). Handler moved verbatim
+              from the old `Social` bar button. */}
+          <AppPopoverItem
+            icon={<AppIcon name="share" size={18} />}
+            onClick={() => {
+              setShowSettingsMenu(false);
+              showSocialModal();
+            }}
+          >
+            Social &amp; sharing
+          </AppPopoverItem>
+        </AppPopoverMenu>
+      </Popover>
+
+      {/* Help menu — CONTROLLED, so the app menu's `Help & support` row can open
+          it while this button remains its anchor. Reskinned; its four rows have
+          never been wired, so each is individually greyed (decision 9). */}
+      <Popover open={showHelpMenu} onOpenChange={setShowHelpMenu}>
+        <PopoverTrigger asChild>
+          {/* No own onClick / aria-expanded: PopoverTrigger already toggles
+              `open` and sets aria-expanded. The old hand-rolled toggle beside it
+              only survived because Radix preventDefault()s a re-entrant trigger
+              click — a coincidence, not a design. Same behavior, on purpose. */}
           <button
-            onClick={handleHelpClick}
-            className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+            type="button"
+            className={BAR_CTL_CLASS}
             aria-label="Help and support"
-            aria-expanded={showHelpMenu}
           >
-            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <AppIcon name="help" size={18} className="text-app-icon-muted" />
           </button>
-
-          {/* Help Dropdown */}
-          {showHelpMenu && (
-            <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-              <div className="px-4 py-2 border-b border-gray-100">
-                <h3 className="font-medium text-gray-900">Help & Support</h3>
-              </div>
-              
-              <div className="py-1">
-                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                  <span>Editor Guide</span>
-                </button>
-                
-                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  <span>Video Tutorials</span>
-                </button>
-                
-                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                  <span>Live Chat Support</span>
-                </button>
-                
-                <div className="border-t border-gray-100 mt-1 pt-1">
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3">
-                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">⌘K</span>
-                    <span>Keyboard Shortcuts</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-          {/* User Profile */}
-          {isSignedIn && (
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:block text-sm text-brand-mutedText font-medium">
-                {user.firstName}
-              </div>
-
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    avatarBox: 'w-9 h-9',
-                  },
-                }}
-              />
-            </div>
-          )}
-
-        {/* App Menu (Hamburger for mobile) */}
-        <button
-          className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors lg:hidden"
-          onClick={() => useEditStore.getState().toggleLeftPanel?.()}
-          aria-label="Toggle navigation menu"
+        </PopoverTrigger>
+        {/* onFocusOutside preventDefault — NOT cruft, do not remove. The app
+            menu's `Help & support` row unmounts the app-menu content and opens
+            THIS one in the same handler. On unmount Radix's FocusScope fires
+            AUTOFOCUS_ON_UNMOUNT in a setTimeout(0); the non-modal popover's
+            default onCloseAutoFocus then focuses the app menu's trigger (the
+            logo button). By then this menu is mounted with its focusin listener
+            live, and the logo button is outside it → onFocusOutside → dismiss.
+            Help would flash open and vanish. Preventing focus-outside dismissal
+            is exactly what Radix's own MODAL popover does. Outside-pointerdown
+            and Escape still dismiss (covered in GlobalAppHeader.menus.test.tsx). */}
+        <AppPopoverMenu
+          width={224}
+          align="start"
+          onFocusOutside={(e) => e.preventDefault()}
         >
-          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-        </div>
+          <AppPopoverLabel>Help &amp; support</AppPopoverLabel>
+          {/* ICON SUBSTITUTES — PENDING A FONT REGENERATION (phase-8 carry, NOT a
+              style choice). The handoff wants `menu_book` / `smart_display` /
+              `keyboard`; the committed subset font has none of them, and an absent
+              ligature renders as its literal NAME, not a glyph. Phase 8 added the
+              four missing names to ./public/fonts/material-symbols-rounded/icons.txt
+              (the authoritative want-list) but could NOT regenerate the woff2 — the
+              NOTICE's toolchain (python + fontTools, subsetting the ~5.3MB upstream
+              font, which is deliberately not committed) is not available here, and
+              hand-editing or guessing at font binaries is forbidden. So the nearest
+              PRESENT glyphs stand in. AFTER someone regenerates per the NOTICE:
+              auto_stories → menu_book, subtitles → smart_display, smart_button →
+              keyboard. Until then, do NOT "fix" these names — you'd ship text. */}
+          <Coming what="the editor guide" side="right" className={COMING_ROW}>
+            <AppIcon name="auto_stories" size={18} />
+            Editor Guide
+          </Coming>
+          <Coming what="video tutorials" side="right" className={COMING_ROW}>
+            <AppIcon name="subtitles" size={18} />
+            Video Tutorials
+          </Coming>
+          <Coming what="live chat support" side="right" className={COMING_ROW}>
+            <AppIcon name="chat" size={18} />
+            Live Chat Support
+          </Coming>
+          <AppPopoverSeparator />
+          <Coming what="the keyboard shortcuts sheet" side="right" className={COMING_ROW}>
+            <AppIcon name="smart_button" size={18} />
+            Keyboard Shortcuts
+          </Coming>
+        </AppPopoverMenu>
+      </Popover>
 
-        {/* Click outside to close dropdowns */}
-        {showHelpMenu && (
-          <div 
-            className="fixed inset-0 z-40" 
-            onClick={() => setShowHelpMenu(false)}
-          />
-        )}
+      {/* Mobile nav toggle. PRESERVED VERBATIM: mutates the store through the
+          hook object, not useEditStoreApi(). Do not "fix" — behavior change. */}
+      <button
+        className="inline-flex h-8 w-8 flex-none items-center justify-center rounded-app-badge text-app-icon-muted transition-colors hover:bg-app-hairline lg:hidden"
+        onClick={() => useEditStore.getState().toggleLeftPanel?.()}
+        aria-label="Toggle navigation menu"
+      >
+        <AppIcon name="menu" size={18} />
+      </button>
+
+      {/* ── Center: device segmented (t1) ────────────────────────────────── */}
+      {/* GREYED slot (decision 12): ui/DeviceToggle.tsx is mounted nowhere, so
+          wiring this would be new behavior. Inertness comes from <Coming>'s
+          onClickCapture + the no-op onValueChange — NOT from `disabled`, which
+          would swallow the tooltip's pointer events (phase-3 precedent). */}
+      {/* ICON SUBSTITUTE — PENDING A FONT REGENERATION (same carry as the Help
+          menu's three above; see that note for the full why). The handoff draws
+          `smartphone`; the committed subset woff2 has no working ligature for it,
+          so it rendered the literal TEXT "smartphone" (measured 144px wide at 24px
+          vs 24px for a real glyph — a visibly broken top bar). `phone` is the only
+          phone-ish glyph actually PRESENT in the subset (verified against the
+          woff2's GSUB ligature table, NOT icons.txt — that manifest is unreliable
+          in both directions: `smartphone` is listed there yet was silently DROPPED
+          by the subset build, and `phone` is absent there yet present in the font).
+          AFTER someone regenerates per public/fonts/material-symbols-rounded/NOTICE:
+          swap `phone` → `smartphone` here. Do NOT restore `smartphone` before that
+          — you'd ship text. */}
+      <div className="ml-auto flex-none">
+        <SegmentedControl
+          aria-label="Preview device"
+          value="desktop"
+          onValueChange={() => {}}
+          options={[
+            {
+              value: 'desktop',
+              label: (
+                <Coming what="device previews">
+                  <AppIcon name="desktop_windows" size={19} />
+                </Coming>
+              ),
+            },
+            {
+              value: 'tablet',
+              label: (
+                <Coming what="device previews">
+                  <AppIcon name="tablet_mac" size={19} />
+                </Coming>
+              ),
+            },
+            {
+              value: 'phone',
+              label: (
+                <Coming what="device previews">
+                  {/* substitute pending font regeneration → `smartphone` */}
+                  <AppIcon name="phone" size={19} />
+                </Coming>
+              ),
+            },
+          ]}
+        />
+      </div>
+
+      {/* ── Right cluster ────────────────────────────────────────────────── */}
+      <div className="ml-auto flex flex-none items-center gap-2">
+        {/* Credit counter (billing-beta phase 5). Self-fetching, zero editor-store
+            involvement — it is the SAME component the dashboard bar mounts, and it
+            stays the only `/api/credits/balance` fetcher (each instance polls on its
+            own 30s timer; that is fine, and is NOT a reason to add a shared store).
+            Placed at the head of the cluster so Publish stays rightmost. */}
+        <CreditBadge />
+
+        {/* CreditBadge renders null when its balance fetch fails; that would leave
+            this divider as the cluster's FIRST child — a hairline dangling with
+            nothing to its left. `first:hidden` drops it in exactly that case
+            (badge present → badge is first, divider shows as normal). */}
+        <div className="app-divider first:hidden" />
+
+        {/* Score + review pills + save-state chip (moved from the old EditHeader) */}
+        <EditorStatusCluster />
+
+        <div className="app-divider" />
+
+        {/* Regen / undo / redo / reset / Edit-Preview / Publish */}
+        <EditHeaderRightPanel tokenId={tokenId} />
+
+        {/* NO avatar / Clerk UserButton here (decision 8b — founder ruling at the
+            phase-4 gate, REVERSING decision 8's "keep it, it's the only in-editor
+            sign-out path"): account actions incl. sign-out live on the DASHBOARD,
+            reachable from the logo menu's `Back to dashboard` row. t1 draws no
+            avatar, so the bar now matches the handoff exactly. Do not re-add. */}
       </div>
     </header>
   );

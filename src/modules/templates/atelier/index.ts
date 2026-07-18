@@ -1,69 +1,28 @@
 // src/modules/templates/atelier/index.ts
-// Atelier template module barrel. Server-safe surface (TemplateModule contract)
-// plugged into the dynamic registry. On-demand work-engine template
-// (visual-portfolio; anchor customer Kundius Photography). Service audience.
+// Atelier work-SKELETON skin barrel (id `atelier`). Builds the full
+// `TemplateModule` surface from the skeleton factory + this skin's DATA, and
+// re-exports it for the dynamic registry loader. (atelier-skeleton-cutover: this
+// data-only barrel replaced the old hand-written atelier skin dir.)
 //
-// FIREWALL: NEVER re-export the client-only helpers (useAtelierBlock /
-// AtelierEditable / editPrimitives) — blocks import those via relative paths, so
+// FIREWALL: server-safe barrel. It re-exports ONLY the TemplateModule surface
+// (resolveBlock / ThemeInjector / SSRTokens / getSurfaceForSection / defaults /
+// variants / knobs). It NEVER re-exports the skeleton's client-only helpers
+// (editPrimitives / useWorkBlock) — blocks import those via relative paths, so
 // this barrel stays importable from server components (registry preload path).
+// The `ThemeInjector` it re-exports is the skin-bound client component.
 
-export {
-  atelierBaseTokens,
-  serializeBaseTokens,
-  serializeVariantOverrides,
-  atelierVariantDefs,
-  defaultAtelierVariant,
-  type AtelierBaseTokens,
-} from './tokens';
+import { makeWorkSkeletonModule } from '@/modules/skeletons/work/skin';
+import { atelierSkin } from './skin';
 
-// Knob surface (template-factory standard axes). `atelierKnobs` is the
-// TemplateModule.knobs declaration; the token map + shared stylesheet builder are
-// consumed by the two renderers. The registry loader (registry.ts) surfaces
-// `knobs: m.atelierKnobs` on the loaded module (phase 11) so editor knob-switching
-// reads `getLoadedTemplate('atelier').knobs`. (The render path itself threads
-// `knobs` directly from `themeValues.knobs` into the injector props — it does NOT
-// read `mod.knobs`.)
-export {
-  atelierKnobs,
-  atelierKnobTokenMap,
-  serializeAtelierKnobOverrides,
-  buildAtelierStylesheet,
-  defaultAtelierKnobs,
-} from './tokens';
+const workModule = makeWorkSkeletonModule(atelierSkin);
 
-export {
-  atelierPaletteConfigs,
-  pilotEnabledPalettes,
-  defaultAtelierPalette,
-  serializePaletteOverrides,
-  type PaletteConfig,
-} from './palettes';
-
-export {
-  atelierSectionSurfaces,
-  surfaceToVar,
-  getSurfaceForSection,
-  type AtelierSurface,
-} from './sectionRules';
-
-export { AtelierThemeInjector } from './ThemeInjector';
-export { AtelierSSRTokens } from './components/AtelierSSRTokens';
-
-// TemplateModule contract surface (consumed via the dynamic registry).
-export { AtelierThemeInjector as ThemeInjector } from './ThemeInjector';
-export { AtelierSSRTokens as SSRTokens } from './components/AtelierSSRTokens';
-
-export {
-  PALETTE_IMAGE_KEYWORDS,
-  getAtelierImageQuery,
-} from './imageKeywords';
-
-export { inferDefaultPalette } from './paletteSelection';
-
-export { resolveAtelierBlock } from './resolveAtelierBlock';
-
-// TemplateModule.resolveBlock(blockType, mode): blockType is the SECTION TYPE.
-import { resolveAtelierBlock as _resolveAtelierBlock } from './resolveAtelierBlock';
-export function resolveBlock(blockType: string, mode: 'edit' | 'published', layoutName?: string) {
-  return _resolveAtelierBlock(blockType, mode, layoutName);
-}
+export const resolveBlock = workModule.resolveBlock;
+export const ThemeInjector = workModule.ThemeInjector;
+export const SSRTokens = workModule.SSRTokens;
+export const getSurfaceForSection = workModule.getSurfaceForSection;
+export const defaultPaletteId = workModule.defaultPaletteId;
+export const variants = workModule.variants;
+export const defaultVariantId = workModule.defaultVariantId;
+export const defaultKnobs = workModule.defaultKnobs;
+export const paletteImageKeywords = workModule.paletteImageKeywords;
+export const knobs = workModule.knobs;

@@ -49,7 +49,7 @@ const GOAL_REF_FLAT_HREF_KEYS: Record<string, string> = { cta_text: 'cta_href' }
 // Known schema-default `cta_href` values across templates (vestria `#contact`,
 // granth `#books`, techpremium `/contact`, plus the generic inert `#`). The bridge
 // overwrites a flat `cta_href` ONLY when it is absent/empty OR EXACTLY one of these
-// — i.e. never a value a human typed via the editor's LinkTargetPopover
+// — i.e. never a value a human typed via the editor's LinkPicker
 // (editPrimitives.tsx writes `elements.cta_href` directly). A flat href present AND
 // not in this set = user-set → left untouched.
 //

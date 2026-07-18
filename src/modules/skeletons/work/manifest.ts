@@ -1,7 +1,7 @@
 // src/modules/skeletons/work/manifest.ts
 // Work-skeleton block manifest — PURE DATA (scale-09 D18 shape). Declares, per
 // section type, the copy-compatible layout variants + the default. Shared by every
-// work SKIN (atelier2 today) since the skeleton owns the markup and skins only
+// work SKIN (atelier today) since the skeleton owns the markup and skins only
 // swap tokens — so ONE manifest describes the whole skeleton's block surface.
 //
 // FIREWALL: imports ONLY the manifest TYPES (erased) — no component, no schema, no
@@ -9,6 +9,17 @@
 // (src/modules/engines/workSections.ts → workElementContract). Conformance proves
 // consumes ⊆ contractFor(layoutName) (the work layout schemas reach
 // serviceElementSchema via the audience/work spread).
+//
+// COLLECTION MACHINERY (E2 / phase 2): the `workcatalog` (`/works` index) and
+// `workdetail` (`/works/<slug>` project page) sections are DELIBERATELY absent from
+// this manifest. They are not arrangement variants offered in the section picker —
+// they are collection-fan-out machinery, resolved by SECTION TYPE (resolveWorkBlock)
+// and evidenced by the conformance (b)/(b+)/(d) capability walks, never by the
+// manifest's variant/distinctness (c)/(e) grammar. (Same as every other template's
+// catalog/detail pair — no template lists them in its block manifest.) The blocks
+// themselves register in `resolveWorkBlock.ts`; the LLM-free photo fan-out that
+// fills them lives in `generation/workCollections.ts` (see those headers). The
+// `works` capability that lights them up is declared on `atelier` ONLY.
 //
 // Phase 3: hero only — `WorkHeroSlider` (the built default) + `WorkHeroVideo` (a
 // declared-but-NOT-built SLOT: a future video-bg hero, capability reserved, built

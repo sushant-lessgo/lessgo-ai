@@ -91,43 +91,60 @@ export function SaveStateChip() {
       role="status"
       aria-live="polite"
     >
-      <span style={{ ...dotStyle, background: view.dot }} aria-hidden="true" />
+      <span
+        style={{ ...dotStyle, background: view.dot }}
+        className={view.pulse ? 'animate-pulse' : undefined}
+        aria-hidden="true"
+      />
       <span>{view.label}</span>
     </div>
   );
 }
 
+// t1 status chip (editor-shell-redesign phase 2). The handoff specifies ONLY the
+// saved state — "7px #16a34a dot + 500/12 #8a8a94", flat (no pill bg/border).
+// The other two are defined by the plan against that geometry:
+//   saving = same geometry, PULSING #8a8a94 dot + "Saving…"
+//   error  = same geometry, app-danger (#d1483a) dot + text
+// All three keep bg/border transparent so the three states are geometrically
+// identical — combined with the min-width reservation below, the chip cannot
+// shift the bar as it swaps. (The old error state had a #fef2f2 pill; dropping
+// it is deliberate — t1's bar has no filled chips.)
 const STATUS_VIEW: Record<
   SaveStatus,
-  { label: string; title: string; dot: string; color: string; bg: string; border: string }
+  { label: string; title: string; dot: string; color: string; bg: string; border: string; pulse?: boolean }
 > = {
   saved: {
     label: 'Saved',
     title: 'All changes saved',
-    dot: '#22c55e',
-    color: '#6b7280',
+    dot: '#16a34a', // app-success
+    color: '#8a8a94', // app-dim
     bg: 'transparent',
     border: 'transparent',
   },
   saving: {
     label: 'Saving…',
     title: 'Saving your changes…',
-    dot: '#f59e0b',
-    color: '#6b7280',
+    dot: '#8a8a94', // app-dim, pulsing — motion carries "in progress", not hue
+    color: '#8a8a94',
     bg: 'transparent',
     border: 'transparent',
+    pulse: true,
   },
   error: {
     label: 'Not saved — retrying',
     title: 'Could not reach the server — retrying automatically',
-    dot: '#ef4444',
-    color: '#b91c1c',
-    bg: '#fef2f2',
-    border: '#fecaca',
+    dot: '#d1483a', // app-danger
+    color: '#d1483a',
+    bg: 'transparent',
+    border: 'transparent',
   },
 };
 
 // Reserve a stable min-width so the chip never shifts the layout between states.
+// LOAD-BEARING — the widest label ("Not saved — retrying") sets the floor; without
+// the reservation the whole right cluster jitters every time the state flips.
+// Restyle the value if t1 geometry demands, never remove the reservation.
 const chipStyle: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',

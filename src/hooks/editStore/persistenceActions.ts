@@ -813,16 +813,6 @@ export function createPersistenceActions(set: any, get: any) {
         }
       }),
 
-    showFormBuilder: () =>
-      set((state: EditStore) => {
-        (state.forms as any).formBuilder.visible = true;
-      }),
-
-    hideFormBuilder: () =>
-      set((state: EditStore) => {
-        (state.forms as any).formBuilder.visible = false;
-      }),
-
     /**
      * ===== IMAGES MANAGEMENT =====
      */

@@ -315,12 +315,6 @@ React.useEffect(() => {
       }
       break;
       
-    case 'convert-form':
-      if (selectedElement) {
-        store?.getState().convertCTAToForm(selectedElement.sectionId, selectedElement.elementKey);
-      }
-      break;
-      
     case 'duplicate':
     case 'duplicate-section':
       if (selectedSection) {

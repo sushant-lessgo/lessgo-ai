@@ -122,12 +122,13 @@ export const VESTRIA_PAGE_ARCHETYPES: PageArchetypeDef[] = [
 /**
  * Atelier (visual-portfolio / work engine — Kundius Photography anchor) 5-page
  * menu: Home / Work / Experiences / About / Contact. Body section types are the
- * ones atelier actually RESOLVES (resolveAtelierBlock): hero, work, packages,
- * about, quote, contact. `header`/`footer` are shared chrome — never in a page's
- * section list. NOTE the quote-band type is `quote` (NOT `quote-band` — a hyphen
- * breaks extractSectionType's id round-trip). Photographers default to `multi`
- * (businessTypes config), so the whole menu (all 5 `defaultIncluded`) is the
- * served skeleton default.
+ * ones atelier actually RESOLVES (work-skeleton resolveWorkBlock): hero, work,
+ * packages, about, proof, contact. `header`/`footer` are shared chrome — never in
+ * a page's section list. NOTE: the dark quote/testimonial band is `proof` (the
+ * skeleton registry key; the old skin's `quote` type was retired at the
+ * atelier-skeleton-cutover). Photographers default to `multi` (businessTypes
+ * config), so the whole menu (all 5 `defaultIncluded`) is the served skeleton
+ * default.
  */
 export const ATELIER_PAGE_ARCHETYPES: PageArchetypeDef[] = [
   {
@@ -136,9 +137,9 @@ export const ATELIER_PAGE_ARCHETYPES: PageArchetypeDef[] = [
     pathSlug: '/',
     required: true,
     defaultIncluded: true,
-    allowedSections: ['hero', 'work', 'quote', 'packages', 'about', 'contact'],
+    allowedSections: ['hero', 'work', 'proof', 'packages', 'about', 'contact'],
     requiredSections: ['hero'],
-    defaultSections: ['hero', 'work', 'quote', 'contact'],
+    defaultSections: ['hero', 'work', 'proof', 'contact'],
     description:
       'The main landing page — a striking hero, a teaser of selected work, a client quote, and a call to get in touch.',
   },
@@ -148,9 +149,9 @@ export const ATELIER_PAGE_ARCHETYPES: PageArchetypeDef[] = [
     pathSlug: '/work',
     required: true,
     defaultIncluded: true,
-    allowedSections: ['work', 'quote', 'contact'],
+    allowedSections: ['work', 'proof', 'contact'],
     requiredSections: ['work'],
-    defaultSections: ['work', 'quote'],
+    defaultSections: ['work', 'proof'],
     description:
       'The portfolio in depth — the full selected-work gallery (the gallery capability), with a client quote.',
   },
@@ -159,9 +160,9 @@ export const ATELIER_PAGE_ARCHETYPES: PageArchetypeDef[] = [
     title: 'Experiences',
     pathSlug: '/experiences',
     defaultIncluded: true,
-    allowedSections: ['packages', 'quote', 'contact'],
+    allowedSections: ['packages', 'proof', 'contact'],
     requiredSections: ['packages'],
-    defaultSections: ['packages', 'quote'],
+    defaultSections: ['packages', 'proof'],
     description:
       'The offering as tiered packages/experiences — two-to-four options, plus a client quote. Right when the studio sells distinct package tiers.',
   },
@@ -170,9 +171,9 @@ export const ATELIER_PAGE_ARCHETYPES: PageArchetypeDef[] = [
     title: 'About',
     pathSlug: '/about',
     defaultIncluded: true,
-    allowedSections: ['about', 'quote', 'packages'],
+    allowedSections: ['about', 'proof', 'packages'],
     requiredSections: ['about'],
-    defaultSections: ['about', 'quote'],
+    defaultSections: ['about', 'proof'],
     description:
       'The studio story — who is behind the camera, the approach, and a client quote as proof.',
   },

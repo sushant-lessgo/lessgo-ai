@@ -1,6 +1,6 @@
 'use client';
 
-// Lumen nav (edit): wordmark + sub + nav links (LinkTargetPopover) + EN·NL
+// Lumen nav (edit): wordmark + sub + nav links (LinkPicker) + EN·NL
 // language toggle + CTA. The toggle drives the Lumen-scoped editLang so the
 // founder authors both languages inline (bilingual is Lumen-contained).
 
@@ -11,7 +11,7 @@ import { buildPageLinkOptions, deriveNavLinks } from '@/utils/pageLinks';
 import { useLumenBlock } from '../../hooks/useLumenBlock';
 import { useLumenEditLang } from '../../editLang';
 import { LumenEditable } from '../../components/LumenEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import type { Link } from '@/types/destination';
 import { HEADER_STYLES } from './styles';
 
@@ -124,7 +124,7 @@ export default function LumenNav({ sectionId }: { sectionId: string }) {
                 />
                 {edit && (
                   <>
-                    <LinkTargetPopover
+                    <LinkPicker
                       value={item.href || '#'}
                       sectionOptions={sectionOptions}
                       pageOptions={pageOptions}

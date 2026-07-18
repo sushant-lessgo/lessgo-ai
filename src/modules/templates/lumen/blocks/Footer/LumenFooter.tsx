@@ -10,7 +10,7 @@ import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { useLumenBlock } from '../../hooks/useLumenBlock';
 import { LumenEditable } from '../../components/LumenEditable';
-import { LinkTargetPopover } from '@/components/editor/LinkTargetPopover';
+import { LinkPicker } from '@/components/editor/LinkPicker';
 import { resolveDestination } from '@/utils/resolveCtaHref';
 import { normalizeCopyrightYear } from '../../../shared/footerHygiene';
 import { FOOTER_STYLES } from './styles';
@@ -140,7 +140,7 @@ export default function LumenFooter({ sectionId }: { sectionId: string }) {
                       enterBehavior="save" placeholder="Link" />
                     {edit && (
                       <>
-                        <LinkTargetPopover value={l.href} sectionOptions={sectionOptions} pageOptions={pageOptions}
+                        <LinkPicker value={l.href} sectionOptions={sectionOptions} pageOptions={pageOptions}
                           onChange={(link) => patchColLink(col.id, l.id, { href: resolveDestination(link.dest) })} triggerClassName="lm-footer-linkcfg" />
                         <button type="button" className="lm-footer-rm" onClick={() => removeColLink(col.id, l.id)} aria-label="Remove">×</button>
                       </>
@@ -168,7 +168,7 @@ export default function LumenFooter({ sectionId }: { sectionId: string }) {
                   enterBehavior="save" placeholder="Legal" />
                 {edit && (
                   <>
-                    <LinkTargetPopover value={l.href} sectionOptions={sectionOptions} pageOptions={pageOptions}
+                    <LinkPicker value={l.href} sectionOptions={sectionOptions} pageOptions={pageOptions}
                       onChange={(link) => patchLegal(l.id, { href: resolveDestination(link.dest) })} triggerClassName="lm-footer-linkcfg" />
                     <button type="button" className="lm-footer-rm" onClick={() => removeLegal(l.id)} aria-label="Remove">×</button>
                   </>

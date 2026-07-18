@@ -24,8 +24,36 @@ font is intentionally NOT committed.
 
 Regeneration
 ------------
+⚠️ READ THIS FIRST — icons.txt IS NOT AN ACCURATE MANIFEST OF THE SHIPPED FONT.
+It is a WANT-list, and it is known wrong in BOTH directions. Measured against the
+committed woff2's actual GSUB ligature table (editor-shell-redesign phase 8):
+
+  * icons.txt had 175 names at the commit that built the font (6e7af964); the
+    font contains 247 ligatures. Names are listed that the font LACKS, and the
+    font has glyphs that icons.txt never listed (e.g. `phone`).
+  * `smartphone` was ALREADY in icons.txt when the font was built, yet is NOT in
+    the font. The subset build below SILENTLY DROPPED IT — exit code 0, missing
+    glyph. So the failure mode is not "the list is stale"; it is "the command can
+    lie". Re-running it as-is may drop `smartphone` again.
+  * A missing ligature does NOT render as a blank or a fallback box — it renders
+    as its LITERAL NAME in text (a 24px `smartphone` icon became a 144px-wide
+    word in the top bar). Silent, and ugly.
+
+Therefore: after regenerating, VERIFY THE OUTPUT AGAINST THE SHIPPED FONT'S
+LIGATURE TABLE. Do not infer success from a clean exit. Parse the woff2's GSUB
+(note: its lookups are type 7 / ExtensionSubst — you must unwrap them to reach
+the type 4 ligature subtables, or you will read zero ligatures and conclude the
+font is empty) and assert every name in icons.txt is PRESENT. Known-missing at
+the time of writing, all of which this regeneration is meant to fix:
+`smartphone`, `menu_book`, `smart_display`, `keyboard`, `warning`, `error`.
+Two live substitutes are waiting on it and are commented at their call sites:
+GlobalAppHeader's device toggle (`phone` → `smartphone`) and its Help menu
+(`auto_stories` → `menu_book`, `subtitles` → `smart_display`, `smart_button` →
+`keyboard`).
+
 The retained icon set is the ligature-name list in ./icons.txt (one name per
-line). To regenerate after editing that list:
+line — keep it comment-free; it is fed to --glyphs-file). To regenerate after
+editing that list:
 
   python -m fontTools.subset <MaterialSymbolsRounded-full.woff2> \
     --output-file=material-symbols-rounded.woff2 \

@@ -26,7 +26,7 @@ import {
   useEditStore,
   useEditStoreApi,
 } from '@/hooks/useEditStore';
-import { SUPPORTED_LOCALES } from '@/lib/i18n/localeContent';
+import { SUPPORTED_LOCALES, isMultiLocale } from '@/lib/i18n/localeContent';
 import { confirmDialog } from '@/components/ui/ConfirmDialog';
 import { localeLabel } from './LanguageToggle';
 
@@ -47,6 +47,11 @@ export function LocaleSettings() {
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
   }, [open]);
+
+  // Gated per bilingual-editing spec: adding a 2nd locale to a single-locale
+  // project is config/white-glove, not a UI flow — so this settings control only
+  // appears once a project is already multi-locale.
+  if (!isMultiLocale(localeConfig)) return null;
 
   const declared = localeConfig?.locales ?? [];
   // The base-content language: existing default, else the conventional 'en'.
@@ -130,10 +135,10 @@ export function LocaleSettings() {
         aria-haspopup="dialog"
         aria-expanded={open}
         title="Languages"
-        className={`flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md border transition-colors ${
+        className={`flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-app-ctl-sm border transition-colors ${
           isMulti
-            ? 'border-gray-200 text-gray-700 hover:bg-gray-50'
-            : 'border-transparent text-gray-500 hover:bg-gray-50'
+            ? 'border-app-hairline text-app-icon-muted hover:bg-app-hairline'
+            : 'border-transparent text-app-icon-muted hover:bg-app-hairline'
         }`}
       >
         <GlobeIcon />
