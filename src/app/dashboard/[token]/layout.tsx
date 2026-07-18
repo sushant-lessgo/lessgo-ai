@@ -1,5 +1,7 @@
 import { stripHTMLTags } from '@/utils/htmlSanitization'
+import { prisma } from '@/lib/prisma'
 import { getWorkspaceProject } from '@/lib/workspace'
+import { templateHasCapability } from '@/modules/templates/templateMeta'
 import WorkspaceHeader from '@/components/dashboard/WorkspaceHeader'
 import WorkspaceTabs from '@/components/dashboard/WorkspaceTabs'
 
@@ -32,6 +34,16 @@ export default async function WorkspaceLayout({
   const { project, publishedPage } = await getWorkspaceProject(params.token)
   const name = stripHTMLTags(project.title || 'Untitled Project')
 
+  // `templateId` isn't part of the workspace context — read it by primary key
+  // (ownership already asserted above) to decide whether the "Your work" tab
+  // shows. CHROME DATA ONLY: this is not the auth boundary; the work page
+  // re-gates on the same predicate.
+  const projectRow = await prisma.project.findUnique({
+    where: { id: project.id },
+    select: { templateId: true },
+  })
+  const showWorkTab = templateHasCapability(projectRow?.templateId, 'works')
+
   return (
     <div className="flex min-h-full flex-col">
       <WorkspaceHeader
@@ -40,7 +52,7 @@ export default async function WorkspaceLayout({
         name={name}
         slug={publishedPage?.slug ?? null}
       />
-      <WorkspaceTabs tokenId={project.tokenId} />
+      <WorkspaceTabs tokenId={project.tokenId} showWorkTab={showWorkTab} />
       <div className="flex-1">{children}</div>
     </div>
   )

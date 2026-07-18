@@ -259,3 +259,88 @@ Added `describe` blocks for the three verbs (all under the existing gate-of-reco
   picking the (smaller, on-top) photo droppable over the enclosing group droppable — validated by
   the pure-reducer tests but the drag wiring itself is exercised only in phase 7's Playwright spec
   (out of scope here).
+
+---
+
+# Phase 5 — Dashboard page + tab + client host ("Your work")
+
+**Files changed**
+- `src/app/dashboard/[token]/work/page.tsx` (new)
+- `src/components/dashboard/work/WorkLibraryClient.tsx` (new)
+- `src/components/dashboard/work/WorkLibraryClient.test.tsx` (new)
+- `src/components/dashboard/WorkspaceTabs.tsx`
+- `src/app/dashboard/[token]/layout.tsx`
+
+## page.tsx — the guard
+Cloned from the testimonials page. `force-dynamic`; calls `getWorkspaceProject(params.token)`
+ITSELF (layout is chrome-only, not an auth boundary — the C2/ownership comment pattern kept). Reads
+`templateId` by primary key (`prisma.project.findUnique({where:{id: project.id}})`) AFTER ownership
+is asserted, then `notFound()` unless `templateHasCapability(templateId, 'works')` — the SAME
+predicate as the API route (decision 7), NOT `isWorkCopyTemplate`. So live-`atelier` work projects
+404 here even though they run the work engine. Heading = **"Your work"** with buyer-words subcopy
+(sets/photos/publish — no "collection"/"gallery"/internal terms). Renders `<WorkLibraryClient>`.
+
+## WorkLibraryClient.tsx — the client host
+`'use client'`. Self-wraps its own `ToastProvider` (drop-in under any dashboard tree) around
+`WorkLibraryInner`.
+- **Load:** `GET /api/work-library?tokenId=` → `{groups, blurByUrl}` into a `LoadState`; loading /
+  error / empty states. Empty-groups → buyer-words placeholder; non-empty → the board.
+- **Commit funnel:** single `commit(groups)` = `PUT /api/work-library {tokenId, groups}`. On !ok it
+  returns `{ok:false, error}` (the board reverts + surfaces the rail string); on ok it adopts the
+  SERVER-returned `groups` (seeded slugs) via `setData`. This is the board's `onCommit` contract and
+  also the funnel add-photos uses.
+- **Board mount:** `hideBehavior='flag'`, `enableOrdering`, `hideHeader`, `onAddPhotos`,
+  `busy={busy}` (busy = any PUT/upload in flight).
+- **Add photos:** `onAddPhotos(groupIndex)` stashes the target group in a ref and clicks a hidden
+  `<input type=file multiple accept="image/*">`. `onFilesSelected` uploads each file SEQUENTIALLY via
+  `POST /api/upload-image` (multipart: `file` + `tokenId`) — the existing t7 pipeline, used as-is.
+  **Confirmed upload response shape (read from the route):** top-level `url`, and `metadata:{assetId,
+  blurDataUrl, width, height, size, format}` (`success:true`). I use `body.url` +
+  `body.metadata.assetId` (→ `WorkPhotoRef {id: assetId, url}`) + `body.metadata.blurDataUrl` (merged
+  into `blurByUrl` for instant paint). Per-file failure → error toast, skip that file. After all
+  uploads, the new refs append to the target group's `photos` and go through the same `commit` funnel.
+- **Update site placeholder:** a DISABLED button (`data-testid="work-update-site"`) wrapped in
+  `AppTooltip` (+ native `title` fallback) with a why-tooltip — greyed-placeholder rule. No publish
+  wiring (the handler lands in phase 6).
+
+## Tab gating
+- `WorkspaceTabs.tsx`: added optional `showWorkTab?: boolean` (default false); when true, inserts
+  `{label:'Your work', segment:'work'}` after Overview (`[TABS[0], WORK_TAB, ...TABS.slice(1)]`) —
+  the existing `TabDef` shape, unchanged rendering loop.
+- `[token]/layout.tsx`: reads `templateId` by primary key (mirrors the testimonials page's
+  read-by-id pattern — WorkspaceContext carries no templateId) and passes
+  `templateHasCapability(templateId, 'works')` as `showWorkTab`. CHROME-DATA ONLY comment kept: the
+  tab is visibility, the page re-gates. Non-works projects: no tab; the route still 404s via the
+  page guard.
+
+## Tests (WorkLibraryClient.test.tsx)
+react-dom/client + `React.act` harness (no @testing-library in repo), `fetch` stubbed to serve
+GET + echo PUT. Two `describe`s / 2 tests:
+1. GET payload → board props: both groups render (verbatim names), the blurred thumbnail paints its
+   blur data-url as `backgroundImage`, and the disabled Update-site placeholder is present.
+2. Flag-mode hide: clicking hide fires exactly one PUT carrying the FULL rebuilt array (both groups,
+   `tokenId`), the hidden ref stays in the array with `hidden:true` (hide-not-destroy), and the
+   Restore affordance renders.
+
+## Deviations
+- The layout did NOT already fetch `templateId` (WorkspaceContext omits it), so I added a
+  by-primary-key `prisma.project.findUnique` in `layout.tsx` (import `prisma` +
+  `templateHasCapability`) — mirroring the testimonials page's own read-by-id pattern rather than
+  widening the shared `getWorkspaceProject` context (out of my Files-touched list). Conservative,
+  in-scope, logged here.
+- Update-site tooltip: wrapped the disabled button in a `<span>` inside `AppTooltip` and added a
+  native `title` fallback (disabled buttons can swallow hover events) so the "why" is always
+  reachable.
+
+## Verification (all in WORKDIR, all green)
+- `npx tsc --noEmit` — clean, no output.
+- `npm run test:run` — 249 files passed / 1 skipped; 4243 tests passed / 18 skipped (incl. the 2 new).
+- `npm run lint` — pre-existing `<img>`/exhaustive-deps warnings only; none in the new/edited files;
+  no errors.
+- `npm run build` — succeeded; `/dashboard/[token]/work` route emitted (14.6 kB / 275 kB First Load).
+
+## Open risks
+- Add-photos drag/upload happy-path is unit-covered for the funnel wiring but the real
+  multipart upload + t7 pipeline round-trip is exercised only manually / in phase 7's Playwright
+  spec (out of scope here).
+- `pipelineGuards.test.ts` known 5s-flake did not trigger this run (full suite green).
