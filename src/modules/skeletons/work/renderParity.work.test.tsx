@@ -1,4 +1,4 @@
-// Dual-renderer CONTENT parity for the WORK SKELETON (atelier2 skin) — the #1
+// Dual-renderer CONTENT parity for the WORK SKELETON (atelier skin) — the #1
 // architectural trap (CLAUDE.md). dispatch/conformance prove each section RESOLVES a
 // block pair; THIS test proves the pair RENDERS the same copy: every visible fixture
 // field must appear in BOTH the edit `.tsx` output and the `.published.tsx` output
@@ -9,7 +9,7 @@
 // resolveWorkBlock (each mock section carries its own `layout`) and the sectionId-
 // taking work wrappers. The edit `.tsx` blocks read the store via useWorkBlock (→
 // useEditStore) + useIsElementExcluded (→ useEditStoreContext), so BOTH store entry
-// points are mocked onto one vanilla store seeded from BLOCK_MOCKS.atelier2. Store
+// points are mocked onto one vanilla store seeded from BLOCK_MOCKS.atelier. Store
 // mode is 'preview' so the edit primitives render the static, marker-emitting path.
 
 import React, { act } from 'react';
@@ -52,7 +52,7 @@ vi.mock('@/components/EditProvider', () => ({
   useEditStoreContext: () => ({ store: h.store, isReady: true, isInitialized: true, error: null }),
 }));
 
-const SECTIONS: BlockMockSection[] = BLOCK_MOCKS.atelier2 ?? [];
+const SECTIONS: BlockMockSection[] = BLOCK_MOCKS.atelier ?? [];
 
 h.store = createHarnessStore(SECTIONS);
 
@@ -91,13 +91,13 @@ function visibleFields(obj: Record<string, any>, prefix = ''): Array<{ key: stri
   return out;
 }
 
-describe('work-skeleton (atelier2) fixtures are enrolled', () => {
-  it('BLOCK_MOCKS.atelier2 is non-empty (parity is not vacuous)', () => {
+describe('work-skeleton (atelier) fixtures are enrolled', () => {
+  it('BLOCK_MOCKS.atelier is non-empty (parity is not vacuous)', () => {
     expect(SECTIONS.length).toBeGreaterThan(0);
   });
 });
 
-describe.each(SECTIONS)('atelier2 $sectionType ($layout) [$sectionId] content parity', (s) => {
+describe.each(SECTIONS)('atelier $sectionType ($layout) [$sectionId] content parity', (s) => {
   const Edit = resolveWorkBlock(s.sectionType, 'edit', s.layout)!;
   const Published = resolveWorkBlock(s.sectionType, 'published', s.layout)!;
   const fields = visibleFields(s.content);

@@ -19,8 +19,8 @@
 //     (cover first) + optional client/problem/result strip.
 // They resolve by SECTION TYPE (lowercase) and are fed by the LLM-free collection
 // fan-out (`generation/workCollections.ts` + `wizard/generation/work.llm.ts`).
-// The `works` capability that lights them up is declared on `atelier2` ONLY (the
-// Path A pilot); the block pair is single-source `.core.tsx` (dual-renderer parity
+// The `works` capability that lights them up is declared on `atelier` ONLY; the
+// block pair is single-source `.core.tsx` (dual-renderer parity
 // guarded by `coreParity.test.ts` + `renderParity.work.test.tsx`).
 
 import React from 'react';

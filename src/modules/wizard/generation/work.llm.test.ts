@@ -14,10 +14,14 @@ import type { GenerationMeta } from './index';
 // ── Mocks ────────────────────────────────────────────────────────────────────
 // saveDraft: capture the finalContent handed to each save (no network).
 const savedFcs: any[] = [];
+// Also capture the FULL save payload (esp. `brief`) so we can prove first-gen
+// persists the composed brief the regen route later reads.
+const savedBodies: any[] = [];
 vi.mock('./finalize', () => ({
   saveDraft: vi.fn(async (body: any) => {
     // Deep-clone so we snapshot the fc AT save time (the adapter mutates it).
     savedFcs.push(JSON.parse(JSON.stringify(body.finalContent)));
+    savedBodies.push(JSON.parse(JSON.stringify(body)));
   }),
 }));
 
@@ -42,6 +46,7 @@ import {
   WORK_COPY_ENGINE_TEMPLATES,
 } from './work.llm';
 import { templateMeta } from '@/modules/templates/templateMeta';
+import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
 import type { WorkGenerationInput } from './work';
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
@@ -137,6 +142,7 @@ function installFetch(opts: {
 
 beforeEach(() => {
   savedFcs.length = 0;
+  savedBodies.length = 0;
   (finalizeMultiPageGeneration as any).mockClear();
 });
 
@@ -180,6 +186,21 @@ describe('runWorkLLMGeneration — fan-out orchestration', () => {
     }
     // Generation marker dropped by finalize ⇒ not a resumable draft anymore.
     expect(finalFc.generationProgress).toBeUndefined();
+  });
+
+  it('persists the composed brief on every saveDraft, and it satisfies the regen route read', async () => {
+    installFetch();
+    await runWorkLLMGeneration(baseInput());
+
+    // At least one save happened (skeleton + per-page + finalize).
+    expect(savedBodies.length).toBeGreaterThan(0);
+    for (const body of savedBodies) {
+      // The saved brief equals the wizard's composed input.brief …
+      expect(body.brief).toEqual(BRIEF);
+      // … and what's persisted actually satisfies the regen route's read
+      // (getWorkFacts(brief.facts) non-null → no `brief.facts.work is required` 400).
+      expect(getWorkFacts(body.brief.facts)).not.toBeNull();
+    }
   });
 
   it('fetches the work strategy when none is pre-supplied', async () => {
@@ -326,9 +347,12 @@ describe('runWorksFanOut — wiring + dormancy', () => {
     expect((fc.onboardingData as any).collections.works).toHaveLength(1);
   });
 
-  it('DORMANCY: real atelier caps (no `works`) ⇒ no /works pages; fan-out gated', async () => {
+  it('DORMANCY: real no-`works` caps ⇒ no /works pages; fan-out gated', async () => {
+    // atelier-skeleton-cutover phase 1: atelier ABSORBED `works` (the fan-out now
+    // legitimately fires on it), so the dormancy fixture moved to a template that
+    // GENUINELY lacks `works` (meridian). The proof is unchanged — only the fixture.
     const fc = fcWithGallery();
-    const caps = templateMeta['atelier' as keyof typeof templateMeta].capabilities;
+    const caps = templateMeta['meridian' as keyof typeof templateMeta].capabilities;
     expect(caps).not.toContain('works'); // guard the premise
     await runWorksFanOut(fc, baseInput({ brief: PHOTO_BRIEF }), caps, async () => {});
     expect(fc.pages['page-weddings']).toBeUndefined(); // fan-out dormant
@@ -359,8 +383,8 @@ describe('workCopyEngineEnabled + resolveWorkRoute (allow-list guard)', () => {
     else process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = ORIG;
   });
 
-  it('allow-list is exactly [atelier, atelier2]', () => {
-    expect([...WORK_COPY_ENGINE_TEMPLATES]).toEqual(['atelier', 'atelier2']);
+  it('allow-list is exactly [atelier]', () => {
+    expect([...WORK_COPY_ENGINE_TEMPLATES]).toEqual(['atelier']);
   });
 
   it('flag OFF (default) ⇒ disabled for every template', () => {

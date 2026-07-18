@@ -398,102 +398,6 @@ const vestriaManifest: TemplateBlockManifest = {
   },
 };
 
-// ── atelier (service / work engine) — full manifest ─────────────────────────
-// Atelier is service-audience with its layouts in serviceElementSchema, so
-// contractFor() resolves every layout and a REAL manifest ships (unlike granth,
-// which passes by shipping none). One declared variant per section this phase;
-// real block-component variants land with the phase-9 visual port. `packages`
-// carries the scope-#5 tiered capacity (minCards:2/maxCards:4). Source:
-// serviceElementSchema (Atelier* layouts). `consumes` = each layout's top-level
-// scalar element keys, verbatim.
-const atelierManifest: TemplateBlockManifest = {
-  header: {
-    default: 'AtelierNavHeader',
-    variants: [
-      {
-        layoutName: 'AtelierNavHeader',
-        label: 'Editorial nav',
-        consumes: ['logo_text', 'cta_text', 'logo_image'],
-      },
-    ],
-  },
-  hero: {
-    default: 'AtelierHero',
-    variants: [
-      {
-        layoutName: 'AtelierHero',
-        label: 'Editorial hero',
-        consumes: ['eyebrow', 'headline', 'lede', 'cta_text', 'secondary_cta_text', 'hero_image', 'meta'],
-      },
-    ],
-  },
-  work: {
-    default: 'AtelierWorkGallery',
-    variants: [
-      {
-        layoutName: 'AtelierWorkGallery',
-        label: 'Work gallery',
-        blurb: 'Selected-work showcase (the gallery capability).',
-        consumes: ['eyebrow', 'headline', 'lede'],
-        capacity: { minCards: 1, maxCards: 12 },
-      },
-    ],
-  },
-  packages: {
-    default: 'AtelierPackages',
-    variants: [
-      {
-        layoutName: 'AtelierPackages',
-        label: 'Tiered packages',
-        blurb: 'Two-to-four package cards.',
-        consumes: ['eyebrow', 'headline', 'lede'],
-        // scope #5 — tiered-packages capacity is ENFORCED here.
-        capacity: { minCards: 2, maxCards: 4 },
-      },
-    ],
-  },
-  about: {
-    default: 'AtelierAbout',
-    variants: [
-      {
-        layoutName: 'AtelierAbout',
-        label: 'Studio about',
-        consumes: ['eyebrow', 'headline', 'body', 'body2', 'about_image', 'signature'],
-      },
-    ],
-  },
-  quote: {
-    default: 'AtelierQuoteBand',
-    variants: [
-      {
-        layoutName: 'AtelierQuoteBand',
-        label: 'Quote band',
-        consumes: ['eyebrow', 'quote', 'author_name', 'author_role'],
-      },
-    ],
-  },
-  contact: {
-    default: 'AtelierContact',
-    variants: [
-      {
-        layoutName: 'AtelierContact',
-        label: 'Contact',
-        consumes: ['form_id', 'eyebrow', 'headline', 'lede', 'email', 'phone'],
-      },
-    ],
-  },
-  footer: {
-    default: 'AtelierFooter',
-    variants: [
-      {
-        layoutName: 'AtelierFooter',
-        label: 'Editorial footer',
-        consumes: ['brand_text', 'tagline', 'contact_email', 'contact_phone', 'copyright', 'whatsapp_number'],
-      },
-    ],
-  },
-};
-
 /**
  * Block manifests, keyed by template. Partial — lex/lumen/granth/techpremium are
  * DEFERRED (plan Q6): they carry no manifest yet and fall back to the legacy
@@ -504,8 +408,8 @@ export const blockManifests: Partial<Record<TemplateId, TemplateBlockManifest>> 
   hearth: hearthManifest,
   surge: surgeManifest,
   vestria: vestriaManifest,
-  atelier: atelierManifest,
-  // Work-skeleton skin (dev id until phase 9). ONE manifest describes the whole
-  // skeleton's block surface (skins swap tokens only). Phase 3: hero + a slot.
-  atelier2: workSkeletonManifest,
+  // atelier-skeleton-cutover: atelier rides the work-skeleton manifest (the old
+  // hand-written atelierManifest is gone). ONE manifest describes the whole
+  // skeleton's block surface (skins swap tokens only).
+  atelier: workSkeletonManifest,
 };

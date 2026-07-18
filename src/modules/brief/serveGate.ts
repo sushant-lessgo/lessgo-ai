@@ -110,10 +110,6 @@ export const TEMPLATE_AUDIENCE: Record<TemplateId, AudienceType> = {
   // the engine bridge, but atelier declares service, so a served photographer
   // reaches a service-audience atelier site (NOT the writer wizard).
   atelier: 'service',
-  // Work-skeleton Atelier skin (dev id) — mirrors atelier (service-audience work
-  // template). bespoke:true keeps it off every shortlist, so this entry only
-  // satisfies the total-Record tsc requirement; it never changes serve behavior.
-  atelier2: 'service',
 };
 
 export type ServeDecision =

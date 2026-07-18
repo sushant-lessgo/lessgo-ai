@@ -12,9 +12,7 @@
 //
 // The purity predicate is a PURE function tested BOTH ways (a synthetic dir with a
 // `.tsx`/markup file MUST fail it) so the check provably BITES rather than passing
-// vacuously. We also prove the OLD `atelier` dir is correctly EXCLUDED from the scan
-// (it is NOT in `skeletonBackedTemplateIds`) and that it WOULD fail if scanned —
-// making the exclusion load-bearing, not incidental.
+// vacuously.
 
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
@@ -22,13 +20,17 @@ import path from 'node:path';
 
 import { skeletonBackedTemplateIds } from '@/modules/skeletons/ids';
 import { assertSkinTokens, type WorkSkinTokens } from '@/modules/skeletons/work/tokenContract';
-import { atelierSkin } from './atelier2/skin';
+import { atelierSkin } from './atelier/skin';
 
 const TEMPLATES_DIR = __dirname;
 
+// atelier-skeleton-cutover: the old hand-written `templates/atelier/` skin was
+// deleted and the data-only skeleton barrel folded into `templates/atelier/` — so
+// the skeleton-backed id `atelier` now maps directly to its own dir name.
+
 // id → registered skin data (assertSkinTokens gate). Grows as work skins are added.
 const REGISTERED_SKINS: Record<string, { id?: string; tokens: WorkSkinTokens }> = {
-  atelier2: atelierSkin,
+  atelier: atelierSkin,
 };
 
 const FILE_WHITELIST = new Set(['index.ts', 'skin.ts']);
@@ -79,8 +81,9 @@ describe('skin file-purity conformance (work-skeleton, AC L121)', () => {
   });
 
   for (const id of skeletonBackedTemplateIds) {
-    describe(`skin "${id}" (src/modules/templates/${id}/)`, () => {
-      const dir = path.join(TEMPLATES_DIR, id);
+    const skinDirName = id;
+    describe(`skin "${id}" (src/modules/templates/${skinDirName}/)`, () => {
+      const dir = path.join(TEMPLATES_DIR, skinDirName);
 
       it('is a data-only dir: ONLY {index.ts, skin.ts}, zero .tsx, zero markup exports', () => {
         expect(purityViolations(dir), purityViolations(dir).join('\n')).toEqual([]);
@@ -128,21 +131,6 @@ describe('skin file-purity conformance (work-skeleton, AC L121)', () => {
       expect(
         markupViolations('skin.ts', `import type { WorkSkinDef } from '@/x';\nexport const s: WorkSkinDef = { id: 'x' } as any;`),
       ).toEqual([]);
-    });
-  });
-
-  // ── OLD atelier dir is EXCLUDED — and the exclusion is load-bearing ─────────
-  describe('old-atelier module dir is NOT under the purity scan (excluded, not incidental)', () => {
-    it('skeletonBackedTemplateIds does NOT include the old markup-bearing "atelier"', () => {
-      expect(skeletonBackedTemplateIds).not.toContain('atelier');
-    });
-
-    it('the old atelier dir WOULD fail purity if scanned (proves exclusion is meaningful)', () => {
-      const oldAtelier = path.join(TEMPLATES_DIR, 'atelier');
-      expect(fs.existsSync(oldAtelier)).toBe(true);
-      // The old module dir is full of .tsx/components → purity fails hard. This is
-      // exactly why it must NOT be in skeletonBackedTemplateIds.
-      expect(purityViolations(oldAtelier).length).toBeGreaterThan(0);
     });
   });
 

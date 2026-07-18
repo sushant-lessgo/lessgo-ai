@@ -34,13 +34,11 @@ export type AudienceType = (typeof audienceTypes)[number];
 // selected via the onboarding `?template=vestria` param OR by default for the
 // `manufacturer` persona. Open to all users (no admin gate).
 // `atelier` = on-demand work-engine template (visual-portfolio; anchor customer
-// Kundius Photography). Service audience (atelier-template phase 1 ruling), first
-// non-bespoke work template — served to photographers via the serve gate.
-// `atelier2` = DEV id for the work-SKELETON Atelier skin (work-skeleton track,
-// phase 3). Registered + renderable but intentionally NOT in the onboarding picker
-// (dev-only until phase 9 cutover, when it replaces the `atelier` id). Service
-// audience; `bespoke: true` in templateMeta while its blocks are unbuilt.
-export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen', 'granth', 'vestria', 'atelier', 'atelier2'] as const;
+// Kundius Photography), now skeleton-backed (the work-skeleton Atelier skin —
+// cover-slider hero, masonry gallery consuming `groups`). Service audience
+// (atelier-template phase 1 ruling), first non-bespoke work template — served to
+// photographers via the serve gate.
+export const templateIds = ['hearth', 'lex', 'surge', 'meridian', 'techpremium', 'lumen', 'granth', 'vestria', 'atelier'] as const;
 export type TemplateId = (typeof templateIds)[number];
 
 export type VariantId = string;
@@ -55,8 +53,7 @@ export const defaultVariantForTemplate: Record<TemplateId, VariantId> = {
   lumen: 'default',
   granth: 'granth', // serif-led (Tiro) default; 'adhunik' = sans-led (Mukta) alt
   vestria: 'tailored',
-  atelier: 'editorial', // editorial default; 'compact' = tighter spacing alt
-  atelier2: 'editorial', // work-skeleton Atelier skin — editorial baseline; 'compact' alt
+  atelier: 'editorial', // work-skeleton Atelier skin — editorial default; 'compact' alt
 };
 
 /**
@@ -348,7 +345,6 @@ export const templateLabels: Record<TemplateId, string> = {
   granth: 'Granth',
   vestria: 'Vestria',
   atelier: 'Atelier',
-  atelier2: 'Atelier (skeleton)',
 };
 
 export const templateBlurbs: Record<TemplateId, string> = {
@@ -360,8 +356,7 @@ export const templateBlurbs: Record<TemplateId, string> = {
   lumen: 'Photography & creative — warm gallery, one brass accent, editorial captions + lightbox.',
   granth: 'Hindi literary — ivory paper, maroon accent, Devanagari-first.',
   vestria: 'Manufacturing & trade — editorial paper, dark bands, cobalt accent, quote-led.',
-  atelier: 'Photography & visual-portfolio — warm paper, vermilion accent, gallery-led, editorial captions.',
-  atelier2: 'Photography & visual-portfolio (work-skeleton skin) — warm paper, vermilion accent, cover-slider hero.',
+  atelier: 'Photography & visual-portfolio — warm paper, vermilion accent, cover-slider hero, masonry gallery, editorial captions.',
 };
 
 /** Palette id list for a template (Hearth → 9 warm, Lex → 9 trust, Surge → 9 accent-hue, Meridian → 9 accent, TechPremium → forest). */
@@ -374,8 +369,7 @@ const PALETTES_BY_TEMPLATE: Record<TemplateId, readonly string[]> = {
   lumen: lumenPalettes,
   granth: granthPalettes,
   vestria: vestriaPalettes,
-  atelier: atelierPalettes,
-  atelier2: atelierPalettes, // work-skeleton Atelier skin reuses the four Kontur accents
+  atelier: atelierPalettes, // work-skeleton Atelier skin — the four Kontur accents
 };
 
 export function palettesForTemplate(templateId: TemplateId): readonly string[] {

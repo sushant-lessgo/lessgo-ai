@@ -329,8 +329,8 @@ export function SectionToolbar({ sectionId }: SectionToolbarProps) {
     // `tmpl.getSurfaceForSection(sectionType)` with NO per-section override argument,
     // and the 8 served templates' blocks hardcode their CSS — none consume
     // `var(--u-bg)`. A real Background action today would visibly do NOTHING for
-    // every user except atelier2 (never served, bespoke:true). Un-defer = templates
-    // consuming `--u-*` / the skeleton phase-9 cutover.
+    // every user (no served template's blocks consume `--u-*` yet). Un-defer =
+    // templates consuming `--u-*`. Stays out of scope for the skeleton cutover.
     {
       id: 'background',
       label: 'Background',

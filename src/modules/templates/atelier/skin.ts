@@ -1,20 +1,19 @@
-// src/modules/templates/atelier2/skin.ts
+// src/modules/templates/atelier/skin.ts
 // Atelier SKIN #1 for the work skeleton — DATA ONLY (zero markup/components;
-// enforced by the phase-7 purity test). Supplies tokens/palettes/selections/
-// variants; the work skeleton owns ALL markup. Consumed by the barrel
+// enforced by the purity test). Supplies tokens/palettes/selections/variants;
+// the work skeleton owns ALL markup. Consumed by the barrel
 // (index.ts → makeWorkSkeletonModule(atelierSkin)).
 //
-// Tokens harvested from the approved Atelier×Kontur design:
-//   src/modules/templates/atelier/tokens.ts (atelierBaseTokens) +
-//   template-design/designer-workspace/atelier/ (styles.css :root, index.html).
-// Palettes reuse the four curated Kontur accents (atelier/palettes.ts). Bounded
-// numerics collapse the design's clamp()/calc() token expressions to a single
-// representative value inside tokenContract's ranges (assertSkinTokens gate).
+// Tokens harvested from the approved Atelier×Kontur design (the retired old
+// hand-written atelier skin's tokens + template-design/designer-workspace/atelier/
+// styles.css :root, index.html). Palettes reuse the four curated Kontur accents.
+// Bounded numerics collapse the design's clamp()/calc() token expressions to a
+// single representative value inside tokenContract's ranges (assertSkinTokens gate).
 
 import type { WorkSkinDef } from '@/modules/skeletons/work/skin';
 
 export const atelierSkin: WorkSkinDef = {
-  id: 'atelier2',
+  id: 'atelier',
 
   // Palette-INVARIANT base (warm paper / ink / dark editorial band). Colours are
   // the real Atelier×Kontur oklch values (atelier/tokens.ts atelierBaseTokens).

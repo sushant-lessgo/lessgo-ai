@@ -73,9 +73,7 @@ import { resolveGranthBlock } from './granth/resolveGranthBlock';
 import { GranthPlaceholderBlock } from './granth/GranthPlaceholderBlock';
 import { resolveLumenBlock } from './lumen/resolveLumenBlock';
 import { LumenPlaceholderBlock } from './lumen/LumenPlaceholderBlock';
-import { resolveAtelierBlock } from './atelier/resolveAtelierBlock';
-import { AtelierPlaceholderBlock } from './atelier/AtelierPlaceholderBlock';
-// Work-skeleton dispatch (dev id `atelier2`). Static import is fine here: this
+// Work-skeleton dispatch (the atelier skin). Static import is fine here: this
 // module is vitest-only infra (never enters the app bundle) — same idiom as the
 // other resolvers above. NOT a firewall breach.
 import { resolveWorkBlock } from '@/modules/skeletons/work/resolveWorkBlock';
@@ -98,8 +96,7 @@ export const RESOLVERS: Record<
   surge: { resolve: resolveSurgeBlock, placeholder: SurgePlaceholderBlock },
   granth: { resolve: resolveGranthBlock, placeholder: GranthPlaceholderBlock },
   lumen: { resolve: resolveLumenBlock, placeholder: LumenPlaceholderBlock },
-  atelier: { resolve: resolveAtelierBlock, placeholder: AtelierPlaceholderBlock },
-  atelier2: { resolve: resolveWorkBlock, placeholder: WorkPlaceholderBlock },
+  atelier: { resolve: resolveWorkBlock, placeholder: WorkPlaceholderBlock },
 };
 
 // Structural capabilities are NOT block-backed: `multipage` is page-menu

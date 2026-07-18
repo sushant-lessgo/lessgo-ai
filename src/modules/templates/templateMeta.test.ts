@@ -16,25 +16,23 @@ import type { CapabilityId } from '@/types/brief';
 const STRUCTURAL_CAPABILITIES: readonly CapabilityId[] = ['multipage', 'bilingual'];
 
 describe('templateMeta', () => {
-  it('has exactly the registry templateIds as keys (10)', () => {
+  it('has exactly the registry templateIds as keys (9)', () => {
     expect(Object.keys(templateMeta).sort()).toEqual([...templateIds].sort());
-    // 10 = the 9 classic templates + atelier2 (work-skeleton dev id, phase 3).
-    expect(Object.keys(templateMeta)).toHaveLength(10);
+    // 9 = the 9 classic templates (the work-skeleton dev staging id was retired
+    // at atelier-skeleton-cutover — atelier is now skeleton-backed).
+    expect(Object.keys(templateMeta)).toHaveLength(9);
   });
 
-  it('has exactly 9 non-retired templates', () => {
+  it('has exactly 8 non-retired templates', () => {
     const nonRetired = Object.values(templateMeta).filter((m) => m.retired !== true);
-    // 9 = 8 classic non-retired + atelier2 (bespoke but not retired).
-    expect(nonRetired).toHaveLength(9);
+    // 8 = 8 classic non-retired (techpremium retired).
+    expect(nonRetired).toHaveLength(8);
   });
 
-  it('flags lumen + atelier2 bespoke and techpremium retired (and nobody else)', () => {
+  it('flags lumen bespoke and techpremium retired (and nobody else)', () => {
     expect(templateMeta.lumen.bespoke).toBe(true);
-    // atelier2 is TEMPORARILY bespoke (work-skeleton phase 3; flips off in phase 7
-    // once its block set is complete).
-    expect(templateMeta.atelier2.bespoke).toBe(true);
     expect(templateMeta.techpremium.retired).toBe(true);
-    const bespokeIds = ['lumen', 'atelier2'];
+    const bespokeIds = ['lumen'];
     for (const [id, meta] of Object.entries(templateMeta)) {
       if (!bespokeIds.includes(id)) expect(meta.bespoke).toBeUndefined();
       if (id !== 'techpremium') expect(meta.retired).toBeUndefined();

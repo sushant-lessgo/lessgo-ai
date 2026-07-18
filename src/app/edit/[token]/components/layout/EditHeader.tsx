@@ -15,14 +15,13 @@
 //  - the `!allComplete` ReviewPill guard is UNCHANGED (old L70) — it double-gates
 //    with ReviewPill's own self-hide, and BOTH are deliberate (scout §D).
 //
-// LANGUAGES CONTROL — REMOVED, do NOT restore (decision 8b, founder ruling at the
-// phase-4 gate; it reverses the earlier "removing a working control is a behavior
-// change" call and authorizes the removal). LanguageToggle is invisible until a
-// project declares a 2nd locale, so on ~every project the pair was dead weight.
-// The two components are deliberately LEFT ON DISK, unimported, at
-// ../editor/{LanguageToggle,LocaleSettings}.tsx: there is a LOGGED OPEN RISK (see
-// docs/product/orchestrator.md) that bilingual projects (Lumen EN/NL, naayom→Hindi)
-// now have no locale-switch affordance — keeping them makes re-mounting cheap.
+// LANGUAGES CONTROLS — RE-MOUNTED by the `bilingual-editing` feature (Kundius
+// NL/EN delivery blocker), superseding the earlier phase-4 decision 8b removal.
+// Both `LanguageToggle` and `LocaleSettings` self-hide via
+// `isMultiLocale(localeConfig)`, so single-locale projects (~99%) still render
+// NOTHING here — the 8b "dead weight in the bar" rationale is preserved by the
+// visibility gate, not by absence. They mount inside EditorDesignControls below,
+// after the design popover (order: design → LanguageToggle → LocaleSettings).
 // The regen locale-lock in EditHeaderRightPanel is UNAFFECTED: it reads
 // activeLocale/localeConfig from the store, never the toggle component.
 //
@@ -42,11 +41,14 @@ import { useShallow } from 'zustand/react/shallow';
 import { useEditStore } from '@/hooks/useEditStore';
 import { useReviewState } from '@/hooks/useReviewState';
 import { usesTemplateModule } from '@/types/service';
+import { LanguageToggle } from '../editor/LanguageToggle';
+import { LocaleSettings } from '../editor/LocaleSettings';
 
 /**
  * Left-cluster editor controls: the design-system popover for this project's
- * audience/template. (The i18n controls that used to sit beside it were removed
- * — see the LANGUAGES CONTROL note at the top of this file.)
+ * audience/template, plus the bilingual locale controls (LanguageToggle +
+ * LocaleSettings) which self-hide on single-locale projects — see the
+ * LANGUAGES CONTROLS note at the top of this file.
  */
 export function EditorDesignControls() {
   // Render-read: audienceType + templateId select which design-control popover renders.
@@ -79,7 +81,13 @@ export function EditorDesignControls() {
     designControls = <ThemePopover />;
   }
 
-  return <div className="flex items-center gap-2">{designControls}</div>;
+  return (
+    <div className="flex items-center gap-2">
+      {designControls}
+      <LanguageToggle />
+      <LocaleSettings />
+    </div>
+  );
 }
 
 /**

@@ -91,10 +91,10 @@ Small helpers that sit **after** the two-phase copy pipeline
   group into a `/works/<slug>` `workdetail` page via `runCollectionFanOut` with an
   **LLM-FREE** `generateItemCopy: async () => ({status:'done', copy:{}})` — records
   the photos verbatim (`photos` ∈ `VERBATIM_ITEM_FIELDS`), **zero AI calls, zero
-  new credit op**. The fan-out is LIVE only on `atelier2` (the `works` capability is
-  declared there alone — Path A pilot); on old `atelier` it no-ops (dormant), so
-  merging E2 changes zero prod-reachable behavior. Empty entries (the no-photos
-  prod reality) return byte-identical.
+  new credit op**. The fan-out is LIVE on `atelier` (the `works` capability is
+  declared there alone — the skeleton-backed work look); on any other template it
+  no-ops (dormant). Empty entries (the no-photos prod reality) return
+  byte-identical.
 - **`postGenerationAnalysis.ts`** — Analyzes generated content and flags sections
   that need manual review (classifies fields by `fillMode`, estimates customization
   time, produces a `PostGenerationReport`). Reads the layout element schema from
