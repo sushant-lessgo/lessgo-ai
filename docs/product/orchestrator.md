@@ -1,6 +1,31 @@
 # Orchestrator state — parallel work (updated 2026-07-17)
 
-Main session = orchestrator for all parallel feature sessions. New orchestrator session: read this + `memory/project_parallel_orchestration.md`.
+Main session = orchestrator for all parallel feature sessions. New orchestrator session: read this + `memory/project_parallel_orchestration.md` + **`memory/feedback_everything_is_prebeta`** + **`memory/project_release_train_discipline`**.
+
+## ▶▶ FRESH CYCLE START HERE (2026-07-19 — cold-start; SUPERSEDES the 07-17/07-18 sections below)
+
+**MODEL NOW = ONE LINE.** `next` was collapsed back into `main` (founder: "next not required now"). **Single integration line = `main`**; features AND bugfixes both land there; the `qa/beta-big-bang` pointer follows main. No more freeze/next split. **EVERYTHING is pre-beta and gets built — do NOT ask beta-scope, do NOT nudge** (`memory/feedback_everything_is_prebeta`, founder was explicit). Kundius/Atelier IS in the beta.
+
+**On `main` now (the combined beta, `f1e18cd8` + bugfix rounds — see `git log`):** engineDecider (D1-D6, O1 dead) · editor-route-consolidation (in-editor preview+mobile+publish) · account-settings (Clerk `<UserProfile/>`) · plan-proposal-gate (shape toggle + tiles) · **2 bugfix rounds** qa-0718 + qa-0719. Collapse re-greened: tsc 0 · **4171 tests** · build ✓ · lint 0-err. One merge conflict resolved (`workPlan.spec.ts`). Backups: `pre-collapse-main-backup`@`153844d8`, `pre-merge-3branches-backup`@`7eb4b9a6`.
+
+**QA IN PROGRESS.** `qa/beta-big-bang` (= main) is deployed to the Vercel **preview** — founder is walking the whole beta funnel. Stable URL (bookmark, per-push it refreshes): `https://lessgo-ai-git-qa-beta-big-bang-sushants-projects-2046e160.vercel.app`. **⚠️ Vercel "Ignored Build Step" must be "Automatic"** or the non-main QA branch build cancels (project setting; restore to "only build production" after beta). Founder pushes (SSH; orchestrator can't push).
+
+**BUGFIX LOOP:** QA finds bugs → a session runs `/bugfix` → `fix/<round>` → merge to `main` → advance `qa/beta-big-bang`→main → founder pushes → verify on preview (ACTUALLY LOOK — per the RCA `docs/reports/qa-pipeline-rca-2026-07-18.md`, green ≠ seen). Done: bugs18July (qa-0718), bugs19thJuly (qa-0719). **In progress: `bugs19thJuly1.md`** round.
+
+**FEATURE PIPELINE (from Kundius 19-Jul QA F1-F6, all pre-beta):**
+- **SPECS TO WRITE (agreed in discuss, not yet written):**
+  - **`cms-collections`** (full, 3-phase: CMS core → pre-defined collections → UI) — the general schema-driven CMS. **Full agreed model + scout map in `docs/task/cms-collections.discussion.md` — READ THAT, then write the spec.** Covers F6 (works). work-library-board = image specialization on top.
+  - **`home-summary-links`** (standard) — F3/F4 About+Packages independent authored + auto "Know more →" link (NOT CMS).
+- **STILL TO `/discuss`:** F1 language-in-Settings · F2 hero full-bleed bg upload+auto-populate.
+- Atelier fidelity bugs (no testimonials, header white-bg/logo/menu, EN-picked-but-Dutch, dup preview toggle, preview-not-clean) → in the bugfix loop.
+
+**CLEANUP OWED (after deploy-verify):** delete `next` + `feature/{account-settings,editor-route-consolidation,plan-proposal-gate,engineDecider}` + `fix/qa-0719` (all merged into main).
+
+**Specs BUILT+MERGED this cycle:** `engineDecider.spec.md`, `account-settings.spec.md`, `plan-proposal-gate.spec.md` (all on main). `editor-route-consolidation.spec.md` (on main).
+
+---
+
+## ▶ (HISTORY 2026-07-17/18) FRESH CYCLE — superseded by the 07-19 section above
 
 ## ▶ FRESH CYCLE START HERE (2026-07-17 late — cold-start handoff for a new session)
 
