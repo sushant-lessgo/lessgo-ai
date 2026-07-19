@@ -19,9 +19,14 @@ const EXIF_CLUSTER_FILES = [
 // The work onboarding journey — SEEDED-RESUME e2e (decision 9 / landmine 13).
 //
 // Mock mode CANNOT classify work, so every spec here SEEDS a confirmed work
-// brief through the REAL serve gate and resumes the shell. The real
-// classify → STEP 01 entry is covered by Vitest (JourneyEntryStep.test.tsx) +
-// P7 founder QA — nothing here fakes it.
+// brief through the REAL serve gate and resumes the shell. The entry path is now
+// the DECIDER (engineDecider phase 3 + follow-up): D1 → (clear/known → silent
+// FinalizeHandoff | almost-sure → D3 → FinalizeHandoff), which owns the confirm
+// handoff the retired JourneyEntryStep used to. That entry — and the O1
+// one-liner-once regression — is covered by e2e/engine-decider.spec.ts (real
+// routing, /api/v2/understand route-intercepted) + FinalizeHandoff.test.tsx (the
+// confirm/serve/manual/enrichment unit gate) + P7 founder QA. Nothing here fakes
+// entry; these specs resume post-confirm.
 //
 // Authed: the flow needs a Clerk session (registered in the `authed` project).
 // Serial for the same reason as publish.spec.ts — one shared test user.

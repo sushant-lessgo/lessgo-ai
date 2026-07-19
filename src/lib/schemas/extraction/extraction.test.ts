@@ -83,10 +83,17 @@ describe('businessType → extraction schema key mapping', () => {
     expect(extractionForBusinessType('manufacturer').key).toBe('manufacturer');
   });
 
-  it('extractionSchemaKey aligns with the businessType copyEngine (manufacturer is a thing variant)', () => {
+  it('extractionSchemaKey aligns with the businessType engine (committed copyEngine / ambiguous priorEngine; manufacturer is a thing variant)', () => {
+    // engineDecider R2 — union-aware. Committed entries align with `copyEngine`;
+    // ambiguous entries (designer/agency/manufacturer) run under their
+    // `priorEngine`'s extraction vocabulary until/unless a D4 pick changes the
+    // lane (manufacturer's priorEngine 'thing' is special-cased to its
+    // 'manufacturer' variant schema below).
     for (const bt of businessTypeKeys) {
       const ex = extractionForBusinessType(bt);
-      const engine = businessTypes[bt].copyEngine;
+      const entry = businessTypes[bt];
+      const engine =
+        entry.engineState === 'committed' ? entry.copyEngine : entry.priorEngine;
       const expected = bt === 'manufacturer' ? 'manufacturer' : engine;
       expect(ex.key).toBe(expected);
     }

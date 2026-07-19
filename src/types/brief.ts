@@ -17,6 +17,18 @@ export const copyEngines = ['thing', 'trust', 'work'] as const;
 export type CopyEngine = (typeof copyEngines)[number];
 
 /**
+ * ===== RESOLVED ENGINES =====
+ * The FULL 5-value resolution union — WIDER than `copyEngines` (the schema enum).
+ * `place`/`quick-yes` are engines a business can RESOLVE to (they route to the
+ * demand board) but can NEVER be written to `brief.copyEngine` (BriefSchema would
+ * throw). Lives here (not in `classify.ts`) so the businessTypes registry can key
+ * its `ambiguous` binding on it without a config↔classify import cycle
+ * (`classify.ts` re-exports `ResolvedEngine` for back-compat).
+ */
+export const resolvedEngines = [...copyEngines, 'place', 'quick-yes'] as const;
+export type ResolvedEngine = (typeof resolvedEngines)[number];
+
+/**
  * ===== CAPABILITIES =====
  * Closed capability vocabulary (scalePlan §7). Block-backed vs structural split
  * lives in the conformance tests (spec 01 phase 4), not here.

@@ -108,9 +108,25 @@ describe('EntryUnderstandSchema', () => {
     ).toThrow();
   });
 
-  it('output feeds buildBriefDraft cleanly (server-side construction path)', () => {
+  it('ask-path: ambiguous agency fixture feeds buildBriefDraft as engine-undetermined (engineDecider R2)', () => {
+    // agency flipped to AMBIGUOUS {candidateEngines:['trust','work'], prior:'trust'},
+    // so the shared agency fixture now resolves to `ask` through the schema seam:
+    // copyEngine unset, resolvedEngine null, engineStatus 'ambiguous'. This is the
+    // new "feeds buildBriefDraft cleanly" — it exercises the null-engine invariant.
     const parsed = EntryUnderstandSchema.parse(validUnderstandFixture);
     const brief = buildBriefDraft(parsed, 'growth agency for SaaS');
+    expect(brief.copyEngine).toBeUndefined();
+    const entry = brief.facts?.entry as any;
+    expect(entry.resolvedEngine).toBeNull();
+    expect(entry.engineStatus).toBe('ambiguous');
+  });
+
+  it('committed-path: a still-committed trust type (consultant) resolves by lookup, not AI', () => {
+    const parsed = EntryUnderstandSchema.parse({
+      ...validUnderstandFixture,
+      businessTypeGuess: 'consultant',
+    });
+    const brief = buildBriefDraft(parsed, 'B2B pricing consultant');
     expect(brief.copyEngine).toBe('trust'); // lookup, not AI
     expect((brief.facts?.entry as any).resolvedEngine).toBe('trust');
   });

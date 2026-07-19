@@ -83,11 +83,33 @@ function validateOneLiner(text: string): { valid: boolean; error?: string } {
   return { valid: true };
 }
 
-interface EntryInputStepProps {
-  onSuccess: (rawInput: string, briefDraft: Brief) => void;
+export interface EntryClassifyController {
+  value: string;
+  setValue: (v: string) => void;
+  loading: boolean;
+  error: string | null;
+  creditsBlocked: { required?: number; available?: number } | null;
+  /** Non-null when the input is URL-like (drives the scrape vs understand path). */
+  normalizedUrl: string | null;
+  isValid: boolean;
+  /** Validation message for the CURRENT text (only meaningful when !isValid). */
+  validationError?: string;
+  /** Credits this submit will spend (SCRAPE_WEBSITE vs UNDERSTAND). */
+  actionCost: number;
+  /** Run classification. Idempotent while loading. Advances via `onSuccess`. */
+  submit: () => Promise<void>;
 }
 
-export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
+/**
+ * The entry submit/classify logic (engineDecider Phase 2 — extracted from the
+ * EntryInputStep component so the D1 composer can reuse it byte-for-byte). Owns
+ * the input value + loading/error/credits state and the URL⇒scrape / text⇒
+ * understand branch. UI is the caller's; behavior is identical to the old inline
+ * handler.
+ */
+export function useEntryClassify(
+  onSuccess: (rawInput: string, briefDraft: Brief) => void
+): EntryClassifyController {
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -112,8 +134,13 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
     ? CREDIT_COSTS.SCRAPE_WEBSITE
     : CREDIT_COSTS.UNDERSTAND;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const setValueClearing = (v: string) => {
+    setValue(v);
+    if (error) setError(null);
+    if (creditsBlocked) setCreditsBlocked(null);
+  };
+
+  const submit = async () => {
     if (!isValid || loading) return;
     setLoading(true);
     setError(null);
@@ -182,9 +209,46 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
     }
   };
 
+  return {
+    value,
+    setValue: setValueClearing,
+    loading,
+    error,
+    creditsBlocked,
+    normalizedUrl,
+    isValid,
+    validationError: validation.error,
+    actionCost,
+    submit,
+  };
+}
+
+interface EntryInputStepProps {
+  onSuccess: (rawInput: string, briefDraft: Brief) => void;
+}
+
+export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
+  const {
+    value,
+    setValue,
+    loading,
+    error,
+    creditsBlocked,
+    normalizedUrl,
+    isValid,
+    validationError,
+    actionCost,
+    submit,
+  } = useEntryClassify(onSuccess);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submit();
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && isValid) {
-      handleSubmit(e as unknown as React.FormEvent);
+      void submit();
     }
   };
 
@@ -207,11 +271,7 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
           id="entry-input"
           placeholder="Growth marketing agency for SaaS startups — or yourcompany.com"
           value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            if (error) setError(null);
-            if (creditsBlocked) setCreditsBlocked(null);
-          }}
+          onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
           className="min-h-[100px]"
           maxLength={500}
@@ -219,7 +279,7 @@ export default function EntryInputStep({ onSuccess }: EntryInputStepProps) {
         />
         <div className="flex items-center justify-between">
           <p className="text-xs text-red-500">
-            {!isValid && value.length > 0 ? validation.error : ''}
+            {!isValid && value.length > 0 ? validationError : ''}
           </p>
           <p className="text-xs text-gray-400">{value.length}/500</p>
         </div>

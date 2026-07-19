@@ -33,6 +33,7 @@
 // ============================================================================
 
 import { useMemo, useState } from 'react';
+import { ArrowLeftRight, CheckCircle2, HelpCircle, Loader2 } from 'lucide-react';
 import {
   useWizardStore,
   selectBriefFacts,
@@ -44,6 +45,9 @@ import { AppIcon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
+// TYPE-ONLY (erased): keeps the entry-bundle firewall intact — classify.ts is a
+// pure module, but even so nothing from it lands on the bundle at this edge.
+import type { EngineStatus } from '@/modules/brief/classify';
 import type {
   JourneyRailAdapter,
   RailChipEdit,
@@ -51,9 +55,47 @@ import type {
   RailFieldVM,
 } from './engines/types';
 
+/**
+ * The "WHAT YOUR SITE LEADS WITH" rail field data (engineDecider). Prop-driven,
+ * NOT store-driven: the resolved engine + decider status live in the entry
+ * page's LOCAL state (R4), so the rail cannot read them off the wizard store.
+ * `label`/`descriptor` are PLAIN-LANGUAGE (no engine jargon); the caller maps the
+ * engine key → copy.
+ */
+export interface EngineRailFieldData {
+  status: EngineStatus;
+  /** Plain-language "leads with" label, e.g. "Lead with your work". */
+  label?: string;
+  /** One-line descriptor under the label. */
+  descriptor?: string;
+  /** Icon chip contents (a lucide glyph). */
+  icon?: React.ReactNode;
+  /** "Change how buyers decide" — reopens D4. */
+  onChangeEngine?: () => void;
+  /**
+   * engineDecider Phase 7 — NEUTRAL card treatment (grey, not confident blue).
+   * Used by the D5 demand board: the engine is LOGGED as demand, not a committed
+   * belief, so its card must not read as a resolved/blue "we're building this".
+   */
+  neutral?: boolean;
+  /**
+   * engineDecider Phase 5 — when set, an amber "DEMAND LOGGED · #<TAG>" chip
+   * renders below the engine card (the D5 demand board for place/quick-yes and
+   * any serve-gate `manual` outcome). Purely a signal: the engine is NOT
+   * committed to the schema enum — the demand is logged, not built.
+   */
+  demandTag?: string;
+}
+
 export interface UnderstoodRailProps {
   /** The engine's rail adapter (from the seam). The ONLY door to engine code. */
   rail: JourneyRailAdapter;
+  /**
+   * Optional engine field (engineDecider Phase 2). When present, the
+   * "HOW YOUR SITE WINS" block renders at the TOP of the rail body. Omitted on
+   * the legacy journey rail (no behavior change for existing callers).
+   */
+  engine?: EngineRailFieldData;
 }
 
 /**
@@ -80,7 +122,7 @@ function projectionKey(facts: object | null | undefined): string {
   return `p${id}`;
 }
 
-export default function UnderstoodRail({ rail }: UnderstoodRailProps) {
+export default function UnderstoodRail({ rail, engine }: UnderstoodRailProps) {
   const briefFacts = useWizardStore(selectBriefFacts);
   const commitRail = useWizardStore(selectCommitRail);
   const { toast } = useToast();
@@ -144,6 +186,7 @@ export default function UnderstoodRail({ rail }: UnderstoodRailProps) {
       </div>
 
       <div className="flex-1 min-h-0 overflow-auto px-[22px]">
+        {engine && <EngineRailField engine={engine} />}
         {vm.fields.map((field) => (
           <RailField
             key={field.id}
@@ -162,6 +205,148 @@ export default function UnderstoodRail({ rail }: UnderstoodRailProps) {
       {/* BETA-HIDDEN (qa-0718 B15): "Something wrong?" input non-functional (submit discarded); re-enable when wired. */}
       {/* <NoteBox saving={saving} onSubmit={submitNote} /> */}
     </aside>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// "WHAT YOUR SITE LEADS WITH" — the engine field (engineDecider)
+//
+// Visual states keyed on `engineStatus`:
+//   • resolving           → blue label + spinner, dashed card, striped placeholder
+//   • set (known/almost-  → white card, blue border, icon chip + label; a green
+//     sure/confirmed)        check trails ONLY when confirmed; almost-sure shows
+//                            a dashed "confirming now…" border
+//   • ambiguous            → amber label + help icon, amber card "could go two ways"
+//   • neutral (demand)     → grey card (LOGGED, not built) — see `neutral` prop
+//
+// The choice is a REVISABLE BELIEF: "Change how buyers decide" reopens D4.
+// Prop-driven — no store, no engine module.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function EngineRailField({ engine }: { engine: EngineRailFieldData }) {
+  const { status, label, descriptor, icon, onChangeEngine, demandTag, neutral } = engine;
+  const resolving = status === 'resolving';
+  const ambiguous = status === 'ambiguous';
+  const confirmed = status === 'confirmed';
+  const almostSure = status === 'almost-sure';
+  // Demand board: the engine is logged, not committed — render it grey/neutral
+  // (never the confident blue "we're building this" card).
+  const isNeutral = !!neutral && !resolving && !ambiguous;
+
+  const labelColor = resolving
+    ? 'text-app-primary'
+    : ambiguous
+      ? 'text-[#c47d1a]'
+      : 'text-app-faint';
+
+  return (
+    <div
+      data-testid="rail-engine-field"
+      data-engine-status={status}
+      className="py-[11px] border-t border-app-hairline"
+    >
+      <div
+        data-testid="rail-engine-label"
+        className={cn(
+          'flex items-center gap-1.5 font-app-mono font-semibold text-[10px] tracking-[0.06em] mb-1.5',
+          labelColor
+        )}
+      >
+        WHAT YOUR SITE LEADS WITH
+        {resolving && (
+          <Loader2
+            data-testid="rail-engine-spinner"
+            aria-label="Working out what your site leads with"
+            className="w-3 h-3 animate-spin"
+          />
+        )}
+        {ambiguous && <HelpCircle aria-hidden className="w-3 h-3" />}
+      </div>
+
+      <div
+        data-testid="rail-engine-card"
+        data-tone={isNeutral ? 'neutral' : 'default'}
+        className={cn(
+          'rounded-app-panel p-3 flex items-center gap-2.5',
+          resolving && 'border-[1.5px] border-dashed border-[#cfe0ff] bg-white',
+          almostSure && !isNeutral && 'border-[1.5px] border-dashed border-[#cfe0ff] bg-white',
+          (confirmed || status === 'known') && !isNeutral && 'border-[1.5px] border-[#cfe0ff] bg-white',
+          isNeutral && 'border-[1.5px] border-app-border-hairline bg-app-surface',
+          ambiguous && 'border-[1.5px] border-[#f0dcb4] bg-[#fdf7ec]'
+        )}
+      >
+        {resolving ? (
+          <span
+            aria-label="Resolving"
+            className="h-[9px] w-[70%] rounded-[5px] bg-app-stripes"
+          />
+        ) : (
+          <>
+            <span
+              className={cn(
+                'flex-none w-[34px] h-[34px] rounded-[9px] flex items-center justify-center',
+                ambiguous
+                  ? 'bg-[#fbf1e0] text-[#c47d1a]'
+                  : isNeutral
+                    ? 'bg-app-track text-app-muted'
+                    : 'bg-app-tint text-app-primary'
+              )}
+            >
+              {icon}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div
+                data-testid="rail-engine-name"
+                className="font-app-sans font-bold text-[13px] text-app-ink truncate"
+              >
+                {ambiguous ? 'Could go two ways' : label ?? '—'}
+              </div>
+              <div className="font-app-sans text-[10.5px] text-app-muted truncate">
+                {ambiguous ? (
+                  <span data-testid="rail-engine-ambiguous">
+                    {descriptor ?? 'You tell us how buyers decide'}
+                  </span>
+                ) : almostSure ? (
+                  'Confirming now…'
+                ) : (
+                  descriptor ?? ''
+                )}
+              </div>
+            </div>
+            {confirmed && (
+              <CheckCircle2
+                data-testid="rail-engine-confirmed"
+                aria-label="Confirmed"
+                className="flex-none w-[18px] h-[18px] text-app-success"
+              />
+            )}
+          </>
+        )}
+      </div>
+
+      {/* engineDecider Phase 5 — the demand chip. The engine is logged as demand,
+          NOT committed: place/quick-yes never reach the schema enum. */}
+      {demandTag && (
+        <div
+          data-testid="rail-engine-demand"
+          className="mt-2 inline-flex items-center gap-1 rounded-[5px] bg-[#fbf1e0] px-2 py-1 font-app-mono font-bold text-[9.5px] tracking-[0.07em] text-[#c47d1a]"
+        >
+          DEMAND LOGGED · #{demandTag}
+        </div>
+      )}
+
+      {onChangeEngine && !resolving && (
+        <button
+          type="button"
+          data-testid="rail-engine-change"
+          onClick={onChangeEngine}
+          className="mt-2 inline-flex items-center gap-1 font-app-sans font-semibold text-[11px] text-app-primary hover:underline"
+        >
+          <ArrowLeftRight className="w-3 h-3" />
+          Change how buyers decide
+        </button>
+      )}
+    </div>
   );
 }
 

@@ -25,7 +25,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { act } from 'react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-import UnderstoodRail from './UnderstoodRail';
+import UnderstoodRail, { type EngineRailFieldData } from './UnderstoodRail';
 import { workJourneySeam } from './engines/work';
 import { ToastProvider } from '@/components/ui/toast';
 import { useWizardStore } from '@/hooks/useWizardStore';
@@ -532,5 +532,122 @@ describe.skip('UnderstoodRail — "Something wrong?"', () => {
     const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
     expect(body.brief.facts.work.userNotes).toEqual(['The prices are wrong']);
     expect(testid<HTMLInputElement>('rail-note-input')!.value).toBe('');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WHAT YOUR SITE LEADS WITH — the engine field (engineDecider Phase 2)
+//
+// Three visual states keyed on engineStatus + the revisable-belief "change" link.
+// Prop-driven (no store), so the field can render at D1 entry before any wizard
+// store exists. Omitting the `engine` prop must leave the legacy rail unchanged.
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function mountRailWithEngine(engine?: EngineRailFieldData) {
+  await act(async () => {
+    root.render(
+      <ToastProvider>
+        <UnderstoodRail rail={workJourneySeam.rail} engine={engine} />
+      </ToastProvider>
+    );
+  });
+  await flush();
+}
+
+describe('UnderstoodRail — engine field (WHAT YOUR SITE LEADS WITH)', () => {
+  it('is absent when no engine prop is passed (legacy rail unchanged)', async () => {
+    await mountRailWithEngine(undefined);
+    expect(testid('rail-engine-field')).toBeNull();
+  });
+
+  it('resolving → spinner + no card content, no change link yet', async () => {
+    await mountRailWithEngine({ status: 'resolving' });
+    expect(testid('rail-engine-field')?.getAttribute('data-engine-status')).toBe('resolving');
+    expect(testid('rail-engine-spinner')).not.toBeNull();
+    // No confirmed check, no ambiguous copy, and the change link is suppressed
+    // while resolving.
+    expect(testid('rail-engine-confirmed')).toBeNull();
+    expect(testid('rail-engine-ambiguous')).toBeNull();
+    expect(testid('rail-engine-change')).toBeNull();
+  });
+
+  it('confirmed → set card with the plain label and a green check', async () => {
+    await mountRailWithEngine({
+      status: 'confirmed',
+      label: 'Lead with your work',
+      descriptor: 'your portfolio does the talking',
+      onChangeEngine: () => {},
+    });
+    expect(testid('rail-engine-field')?.getAttribute('data-engine-status')).toBe('confirmed');
+    expect(testid('rail-engine-spinner')).toBeNull();
+    expect(testid('rail-engine-name')?.textContent).toBe('Lead with your work');
+    expect(testid('rail-engine-confirmed')).not.toBeNull();
+    expect(testid('rail-engine-ambiguous')).toBeNull();
+  });
+
+  it('known → set card, no green check (only confirmed gets the check)', async () => {
+    await mountRailWithEngine({ status: 'known', label: 'Lead with your work' });
+    expect(testid('rail-engine-name')?.textContent).toBe('Lead with your work');
+    expect(testid('rail-engine-confirmed')).toBeNull();
+  });
+
+  it('ambiguous → amber "could go two ways", no engine label claimed', async () => {
+    await mountRailWithEngine({ status: 'ambiguous', onChangeEngine: () => {} });
+    expect(testid('rail-engine-field')?.getAttribute('data-engine-status')).toBe('ambiguous');
+    expect(testid('rail-engine-ambiguous')).not.toBeNull();
+    expect(testid('rail-engine-name')?.textContent).toBe('Could go two ways');
+    expect(testid('rail-engine-confirmed')).toBeNull();
+  });
+
+  // engineDecider Phase 5 — the demand chip. When `demandTag` is set (the D5
+  // board for place/quick-yes + any serve-gate manual outcome) an amber
+  // "DEMAND LOGGED · #<TAG>" chip renders below the card; absent otherwise.
+  it('renders the amber "DEMAND LOGGED" chip when a demandTag is set', async () => {
+    await mountRailWithEngine({
+      status: 'known',
+      label: 'Lead with your place',
+      demandTag: 'PLACE',
+    });
+    const chip = testid('rail-engine-demand');
+    expect(chip).not.toBeNull();
+    expect(chip?.textContent).toContain('DEMAND LOGGED');
+    expect(chip?.textContent).toContain('PLACE');
+  });
+
+  it('omits the demand chip when no demandTag is set', async () => {
+    await mountRailWithEngine({ status: 'known', label: 'Lead with your work' });
+    expect(testid('rail-engine-demand')).toBeNull();
+  });
+
+  // engineDecider Phase 7 — the D5 demand board card is NEUTRAL (grey), not the
+  // confident blue "we're building this" card. The engine is logged, not built.
+  it('neutral → grey card tone (demand board is logged, not committed)', async () => {
+    await mountRailWithEngine({
+      status: 'known',
+      label: 'Lead with your place',
+      demandTag: 'PLACE',
+      neutral: true,
+    });
+    expect(testid('rail-engine-card')?.getAttribute('data-tone')).toBe('neutral');
+  });
+
+  it('a normal known card is NOT neutral (confident tone)', async () => {
+    await mountRailWithEngine({ status: 'known', label: 'Lead with your work' });
+    expect(testid('rail-engine-card')?.getAttribute('data-tone')).toBe('default');
+  });
+
+  it('the "Change how buyers decide" link renders and fires the callback', async () => {
+    let fired = 0;
+    await mountRailWithEngine({
+      status: 'confirmed',
+      label: 'Lead with your work',
+      onChangeEngine: () => {
+        fired += 1;
+      },
+    });
+    const link = testid('rail-engine-change');
+    expect(link).not.toBeNull();
+    await click(link);
+    expect(fired).toBe(1);
   });
 });

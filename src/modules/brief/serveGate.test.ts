@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest';
 import {
   buildBriefDraft,
   applyBusinessTypeCorrection,
+  applyEnginePick,
   type EntrySignals,
 } from './classify';
 import { decideServe, BRIDGEABLE_ENGINES, TEMPLATE_AUDIENCE, uncoveredCollectionTags } from './serveGate';
@@ -52,15 +53,21 @@ describe('BRIDGEABLE_ENGINES', () => {
 });
 
 describe('decideServe — serve paths', () => {
-  it('agency-shaped signals ⇒ serve / service / surge, shortlist [hearth,lex,surge]', () => {
-    const brief = buildBriefDraft(
-      makeSignals({
-        businessTypeGuess: 'agency',
-        category: 'growth marketing agency',
-        goalIntentGuess: 'book-call',
-        designStyleHint: 'bold-performance',
-      }),
-      'growth agency for SaaS'
+  it('agency PICKED trust (D4) ⇒ serve / service / surge, shortlist [hearth,lex,surge]', () => {
+    // agency is now AMBIGUOUS (engineDecider) — pre-pick it is engine-unresolved
+    // (see the null-engine block below). A D4 pick of `trust` is what makes it
+    // serveable; the serve outcome is byte-identical to the old committed-agency.
+    const brief = applyEnginePick(
+      buildBriefDraft(
+        makeSignals({
+          businessTypeGuess: 'agency',
+          category: 'growth marketing agency',
+          goalIntentGuess: 'book-call',
+          designStyleHint: 'bold-performance',
+        }),
+        'growth agency for SaaS'
+      ),
+      'trust'
     );
     const decision = decideServe(brief);
     expect(decision).toEqual({
@@ -71,16 +78,19 @@ describe('decideServe — serve paths', () => {
     });
   });
 
-  it('D3 hardening: agency with OFF-LIST designStyleHint still picks surge via defaultStyle retry', () => {
+  it('D3 hardening: agency (picked trust) with OFF-LIST designStyleHint still picks surge via defaultStyle retry', () => {
     // 'literary-quiet' matches no trust-shortlisted template → hint misses →
     // businessTypes.agency.defaultStyle ('bold-performance') retry → surge.
-    const brief = buildBriefDraft(
-      makeSignals({
-        businessTypeGuess: 'agency',
-        goalIntentGuess: 'book-call',
-        designStyleHint: 'literary-quiet',
-      }),
-      'growth agency for SaaS'
+    const brief = applyEnginePick(
+      buildBriefDraft(
+        makeSignals({
+          businessTypeGuess: 'agency',
+          goalIntentGuess: 'book-call',
+          designStyleHint: 'literary-quiet',
+        }),
+        'growth agency for SaaS'
+      ),
+      'trust'
     );
     const decision = decideServe(brief);
     expect(decision.outcome).toBe('serve');
@@ -335,10 +345,13 @@ describe('atelier phase 7 — serve backing + over-serve guards', () => {
     }
   });
 
-  it('over-serve guard: a TRUST-engine serve (agency) never lists atelier (work-only)', () => {
-    const brief = buildBriefDraft(
-      makeSignals({ businessTypeGuess: 'agency', goalIntentGuess: 'book-call' }),
-      'growth agency'
+  it('over-serve guard: a TRUST-engine serve (agency picked trust) never lists atelier (work-only)', () => {
+    const brief = applyEnginePick(
+      buildBriefDraft(
+        makeSignals({ businessTypeGuess: 'agency', goalIntentGuess: 'book-call' }),
+        'growth agency'
+      ),
+      'trust'
     );
     const decision = decideServe(brief);
     expect(decision.outcome).toBe('serve');
@@ -372,6 +385,134 @@ describe('atelier phase 7 — serve backing + over-serve guards', () => {
     if (decision.outcome === 'manual') {
       expect(decision.missing).toBe('out-of-icp');
       expect(decision.outOfIcp).toBe(true);
+    }
+  });
+});
+
+describe('engineDecider Phase 3 — work-lane serveability pre-check (STEP 0)', () => {
+  // The critical path: a photographer one-liner resolves `work` via LOOKUP
+  // (committed type, classificationSource 'lookup', tiebreaker 'none' — the exact
+  // shape D1 hands D6, and what WORK_BRIEF_FIXTURE carries), and the confirmed
+  // brief SERVES atelier. This is DISTINCT from the portfolio-is-proof rungC probe
+  // test above: here there is NO tiebreaker gallery injection — atelier must be
+  // shortlisted through the NORMAL work+gallery capability path. If this ever
+  // fails, the whole work critical path (photographer → D2 → D6 → work journey) is
+  // unmet and Phase 3 must STOP (the stale config comments claiming gallery is
+  // unbacked are wrong — atelier natively declares it).
+  it('photographer (lookup, tiebreaker none) ⇒ serve / service / atelier — no rungC probe', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'photographer', tiebreaker: 'none' }),
+      'documentary wedding photographer in Amsterdam'
+    );
+    const entry = brief.facts?.['entry'] as {
+      resolvedEngine?: string;
+      classificationSource?: string;
+      tiebreaker?: string;
+    };
+    // The exact D1 work-lane shape (lookup, not the tiebreaker path).
+    expect(entry.resolvedEngine).toBe('work');
+    expect(entry.classificationSource).toBe('lookup');
+    expect(entry.tiebreaker).toBe('none');
+
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.audienceType).toBe('service'); // work = engine, atelier = service audience
+      expect(decision.templateId).toBe('atelier');
+      expect(decision.shortlist).toContain('atelier');
+    }
+  });
+
+  it('designer PICKED work (D4) ⇒ serve / service / atelier (gallery backed)', () => {
+    // The ambiguous-designer → D4-pick-work → confirm path also serves atelier.
+    const brief = applyEnginePick(
+      buildBriefDraft(makeSignals({ businessTypeGuess: 'designer' }), 'branding & design studio'),
+      'work'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.templateId).toBe('atelier');
+      expect(decision.shortlist).toContain('atelier');
+    }
+  });
+});
+
+describe('decideServe — null resolvedEngine backstop (engineDecider R2)', () => {
+  // Ambiguous registry types (agency/designer) resolve to `ask` ⇒ null engine
+  // pre-D4-pick. The gate must treat null as not-bridgeable/manual with a
+  // DEDICATED `engine-unresolved` tag (never a misleading rungC/rungE misfile),
+  // and `missing` must stay non-empty. A D4 pick then flips it to serve.
+  it('ambiguous agency, NO pick ⇒ manual engine-unresolved (exact tag)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'agency', goalIntentGuess: 'book-call' }),
+      'growth agency'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('manual');
+    if (decision.outcome === 'manual') {
+      expect(decision.missing).toBe('engine-unresolved');
+      expect(decision.tags).toEqual(['engine-unresolved']);
+      expect(decision.outOfIcp).toBe(false);
+    }
+  });
+
+  it('ambiguous designer, NO pick ⇒ manual engine-unresolved', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'designer' }),
+      'branding & design studio'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('manual');
+    if (decision.outcome === 'manual') {
+      expect(decision.missing).toBe('engine-unresolved');
+    }
+  });
+
+  it('unknown + none (genuinely undetermined), NO pick ⇒ manual engine-unresolved', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'mystery-biz', tiebreaker: 'none' }),
+      'cannot classify'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('manual');
+    if (decision.outcome === 'manual') {
+      expect(decision.missing).toBe('engine-unresolved');
+    }
+  });
+
+  it('a D4 pick of trust flips ambiguous agency to serve', () => {
+    const brief = applyEnginePick(
+      buildBriefDraft(
+        makeSignals({ businessTypeGuess: 'agency', goalIntentGuess: 'book-call' }),
+        'growth agency'
+      ),
+      'trust'
+    );
+    expect(decideServe(brief).outcome).toBe('serve');
+  });
+
+  it('a D4 pick of work flips ambiguous designer to serve on atelier (gallery backed)', () => {
+    const brief = applyEnginePick(
+      buildBriefDraft(makeSignals({ businessTypeGuess: 'designer' }), 'studio'),
+      'work'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.templateId).toBe('atelier');
+    }
+  });
+
+  it('a D4 pick of place NEVER serves — routes to demand via rungE', () => {
+    const brief = applyEnginePick(
+      buildBriefDraft(makeSignals({ businessTypeGuess: 'designer' }), 'studio'),
+      'place',
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('manual');
+    if (decision.outcome === 'manual') {
+      expect(decision.tags).toContain('rungE:place');
     }
   });
 });
@@ -443,7 +584,12 @@ describe('decideServe — inferred structureHint never changes serve/manual outc
   // serve, the same audienceType). Inference is a soft signal — it must never
   // reject and never re-route.
   const serveableFixtures: Array<Partial<EntrySignals>> = [
-    { businessTypeGuess: 'agency', goalIntentGuess: 'book-call' },
+    // (agency dropped from this list: it is now AMBIGUOUS → engine-unresolved
+    // pre-pick, so it is not directly serveable via buildBriefDraft. Trust-engine
+    // serve coverage remains via consultant + coach. The single-vs-multi
+    // invariance for the ambiguous pre-pick state is trivially satisfied — both
+    // yield the same engine-unresolved manual — and is covered where agency's
+    // null-engine path is asserted below.)
     { businessTypeGuess: 'coach', goalIntentGuess: 'book-call' },
     { businessTypeGuess: 'consultant', goalIntentGuess: 'request-quote' },
     { businessTypeGuess: 'saas', goalIntentGuess: 'free-trial' },
@@ -540,9 +686,12 @@ describe('decideServe — style-first pick, multipage is a dormant same-style ti
 
   it('(d) returned shortlist keeps templateIds order (only the pick gains the tiebreak)', () => {
     const decision = decideServe(
-      buildBriefDraft(
-        makeSignals({ businessTypeGuess: 'agency', goalIntentGuess: 'book-call', structureHint: 'multi' }),
-        'x'
+      applyEnginePick(
+        buildBriefDraft(
+          makeSignals({ businessTypeGuess: 'agency', goalIntentGuess: 'book-call', structureHint: 'multi' }),
+          'x'
+        ),
+        'trust'
       )
     );
     expect(decision.outcome).toBe('serve');

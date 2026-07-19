@@ -9,6 +9,7 @@ import {
   resolveEngine,
   buildBriefDraft,
   applyBusinessTypeCorrection,
+  applyEnginePick,
   getEntryFacts,
   type EntrySignals,
 } from './classify';
@@ -47,33 +48,67 @@ describe('LOW_CONFIDENCE_THRESHOLD', () => {
   });
 });
 
-describe('resolveEngine — lookup for all 6 businessTypes', () => {
-  it.each(businessTypeKeys)('%s → config engine, source lookup', (key) => {
-    const result = resolveEngine(makeSignals({ businessTypeGuess: key }));
-    expect(result).toEqual({
-      engine: businessTypes[key].copyEngine,
+describe('resolveEngine — committed lookup', () => {
+  const committedKeys = businessTypeKeys.filter(
+    (k) => businessTypes[k].engineState === 'committed'
+  );
+  it.each(committedKeys)('%s → resolved via config lookup', (key) => {
+    const entry = businessTypes[key];
+    if (entry.engineState !== 'committed') throw new Error('fixture drift');
+    expect(resolveEngine(makeSignals({ businessTypeGuess: key }))).toEqual({
+      state: 'resolved',
+      engine: entry.copyEngine,
       source: 'lookup',
     });
   });
 });
 
-describe('resolveEngine — tiebreaker ladder (unknown type, all 5 rungs)', () => {
-  const ladder = [
+describe('resolveEngine — ambiguous registry types → ask (D4)', () => {
+  it('designer → ask {work,trust}, prior work, reason ambiguous-type', () => {
+    expect(resolveEngine(makeSignals({ businessTypeGuess: 'designer' }))).toEqual({
+      state: 'ask',
+      candidates: ['work', 'trust'],
+      prior: 'work',
+      reason: 'ambiguous-type',
+    });
+  });
+
+  it('agency → ask {trust,work}, prior trust, reason ambiguous-type', () => {
+    expect(resolveEngine(makeSignals({ businessTypeGuess: 'agency' }))).toEqual({
+      state: 'ask',
+      candidates: ['trust', 'work'],
+      prior: 'trust',
+      reason: 'ambiguous-type',
+    });
+  });
+});
+
+describe('resolveEngine — unknown type tiebreaker ladder', () => {
+  // Definite rungs still RESOLVE (preserves honest place/quick-yes → demand
+  // routing at the serve gate). 'florist' = an UNKNOWN businessType stand-in.
+  const definite = [
     ['expertise', 'trust'],
     ['portfolio-is-proof', 'work'],
     ['browsing-place', 'place'],
     ['offer-already-understood', 'quick-yes'],
-    ['none', 'thing'],
   ] as const;
 
-  // 'florist' is a deliberately UNKNOWN businessType (not a businessTypeKey) —
-  // was 'photographer' until scale-08 phase 3 promoted photographer to a known
-  // key; repointed so this still exercises the unknown-type tiebreaker ladder.
-  it.each(ladder)('%s → %s, source tiebreaker', (rung, engine) => {
-    const result = resolveEngine(
-      makeSignals({ businessTypeGuess: 'florist', tiebreaker: rung })
-    );
-    expect(result).toEqual({ engine, source: 'tiebreaker' });
+  it.each(definite)('%s → resolved %s, source tiebreaker', (rung, engine) => {
+    expect(
+      resolveEngine(makeSignals({ businessTypeGuess: 'florist', tiebreaker: rung }))
+    ).toEqual({ state: 'resolved', engine, source: 'tiebreaker' });
+  });
+
+  it('none → ask (unknown-type) with tiebreaker prior thing — no silent thing collapse', () => {
+    expect(
+      resolveEngine(makeSignals({ businessTypeGuess: 'florist', tiebreaker: 'none' }))
+    ).toEqual({ state: 'ask', candidates: [], prior: 'thing', reason: 'unknown-type' });
+  });
+
+  it('null guess + none → ask (unknown-type), same as an unrecognized label', () => {
+    expect(
+      resolveEngine(makeSignals({ businessTypeGuess: null, tiebreaker: 'none' }))
+    ).toEqual({ state: 'ask', candidates: [], prior: 'thing', reason: 'unknown-type' });
   });
 });
 
@@ -100,31 +135,45 @@ describe('buildBriefDraft — schema safety for non-enum engines (D2)', () => {
 });
 
 describe('buildBriefDraft — enum engines + carrier payload', () => {
-  it('known agency: copyEngine set via lookup, facts.entry carries prefill + rawInput', () => {
+  it('committed consultant: copyEngine set via lookup, facts.entry carries prefill + rawInput', () => {
+    // (agency was the fixture here pre-engineDecider; it flipped to AMBIGUOUS, so
+    // this "known lookup carries prefill" intent moves to a still-committed
+    // trust type. Ambiguous agency coverage lives in the ambiguous block below.)
     const brief = buildBriefDraft(
       makeSignals({
-        businessTypeGuess: 'agency',
-        category: 'growth marketing agency',
+        businessTypeGuess: 'consultant',
+        category: 'pricing consultancy',
         goalIntentGuess: 'book-call',
-        designStyleHint: 'bold-performance',
-        summary: 'Growth agency for SaaS.',
+        designStyleHint: 'authority-professional',
+        summary: 'Pricing consultant for SaaS.',
         businessName: 'GrowthCo',
-        offerings: ['paid social'],
+        offerings: ['pricing audits'],
         audiences: ['SaaS founders'],
       }),
-      'growth agency for SaaS'
+      'pricing consultant for SaaS'
     );
-    expect(brief.businessType).toBe('agency');
+    expect(brief.businessType).toBe('consultant');
     expect(brief.copyEngine).toBe('trust');
     // goal mechanism = primary (first) from goalIntentMeta
     expect(brief.goal).toEqual({ intent: 'book-call', mechanism: 'M1' });
     expect(brief.structure).toEqual({ mode: 'single', pages: [] });
-    expect(brief.designStyleHint).toBe('bold-performance');
+    expect(brief.designStyleHint).toBe('authority-professional');
     const entry = getEntryFacts(brief);
-    expect(entry?.rawInput).toBe('growth agency for SaaS');
+    expect(entry?.rawInput).toBe('pricing consultant for SaaS');
     expect(entry?.resolvedEngine).toBe('trust');
     expect(entry?.classificationSource).toBe('lookup');
+    expect(entry?.engineStatus).toBe('known');
     expect(entry?.businessName).toBe('GrowthCo');
+  });
+
+  it('low-confidence committed lookup ⇒ engineStatus almost-sure (presentation only, same engine)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'consultant', businessTypeConfidence: 0.4 }),
+      'some consultancy'
+    );
+    expect(brief.copyEngine).toBe('trust');
+    expect(getEntryFacts(brief)?.resolvedEngine).toBe('trust');
+    expect(getEntryFacts(brief)?.engineStatus).toBe('almost-sure');
   });
 
   it('unknown florist via portfolio-is-proof: copyEngine=work IS set (enum member)', () => {
@@ -142,6 +191,53 @@ describe('buildBriefDraft — enum engines + carrier payload', () => {
   it('null guess omits businessType', () => {
     const brief = buildBriefDraft(makeSignals({ businessTypeGuess: null }), 'x');
     expect(brief.businessType).toBeUndefined();
+  });
+});
+
+describe('buildBriefDraft — ambiguous types leave the engine undetermined (engineDecider)', () => {
+  it('agency (ambiguous): businessType kept, copyEngine unset, resolvedEngine null, status ambiguous', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'agency', goalIntentGuess: 'book-call' }),
+      'growth agency for SaaS'
+    );
+    // We KNOW the type, but not the engine — that is the D4 pick's job.
+    expect(brief.businessType).toBe('agency');
+    expect(brief.copyEngine).toBeUndefined();
+    const entry = getEntryFacts(brief);
+    expect(entry?.resolvedEngine).toBeNull();
+    expect(entry?.engineStatus).toBe('ambiguous');
+  });
+
+  it('designer (ambiguous): copyEngine unset, resolvedEngine null', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'designer' }),
+      'branding & design studio'
+    );
+    expect(brief.copyEngine).toBeUndefined();
+    expect(getEntryFacts(brief)?.resolvedEngine).toBeNull();
+  });
+
+  it('unknown + none: copyEngine unset, resolvedEngine null, status ambiguous (no silent thing)', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'mystery-biz', tiebreaker: 'none' }),
+      'something we cannot classify'
+    );
+    expect(brief.copyEngine).toBeUndefined();
+    expect(getEntryFacts(brief)?.resolvedEngine).toBeNull();
+    expect(getEntryFacts(brief)?.engineStatus).toBe('ambiguous');
+  });
+
+  it('confidence is clamped into [0,1] (R1 — presentation defense, never changes resolution)', () => {
+    const hi = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'saas', businessTypeConfidence: 5 }),
+      'x'
+    );
+    expect(hi.confidence).toBe(1);
+    const lo = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'saas', businessTypeConfidence: -3 }),
+      'x'
+    );
+    expect(lo.confidence).toBe(0);
   });
 });
 
@@ -238,5 +334,57 @@ describe('applyBusinessTypeCorrection (D7 — the single correction path)', () =
     applyBusinessTypeCorrection(draft, 'coach');
     expect(draft.businessType).toBe('photographer');
     expect(getEntryFacts(draft)?.tiebreaker).toBe('portfolio-is-proof');
+  });
+});
+
+describe('applyEnginePick (engineDecider — the D4-pick writer)', () => {
+  it('picks a SCHEMA engine (trust) on an ambiguous agency ⇒ copyEngine set, confirmed', () => {
+    const draft = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'agency', goalIntentGuess: 'book-call' }),
+      'growth agency'
+    );
+    expect(draft.copyEngine).toBeUndefined(); // pre-pick
+    const picked = applyEnginePick(draft, 'trust');
+    expect(picked.copyEngine).toBe('trust');
+    const entry = getEntryFacts(picked);
+    expect(entry?.resolvedEngine).toBe('trust');
+    expect(entry?.engineStatus).toBe('confirmed');
+    expect(entry?.classificationSource).toBe('user-pick');
+    expect(entry?.tiebreaker).toBe('none');
+  });
+
+  it('picks WORK on ambiguous designer ⇒ copyEngine work, confirmed', () => {
+    const draft = buildBriefDraft(makeSignals({ businessTypeGuess: 'designer' }), 'studio');
+    const picked = applyEnginePick(draft, 'work');
+    expect(picked.copyEngine).toBe('work');
+    expect(getEntryFacts(picked)?.resolvedEngine).toBe('work');
+  });
+
+  it('picks PLACE ⇒ copyEngine NEVER written (BriefSchema-safe), resolvedEngine place', () => {
+    const draft = buildBriefDraft(
+      makeSignals({ businessTypeGuess: null, tiebreaker: 'none' }),
+      'a place'
+    );
+    const picked = applyEnginePick(draft, 'place');
+    expect(picked.copyEngine).toBeUndefined();
+    const entry = getEntryFacts(picked);
+    expect(entry?.resolvedEngine).toBe('place');
+    expect(entry?.engineStatus).toBe('confirmed');
+  });
+
+  it('picking a non-schema engine CLEARS a previously-set copyEngine', () => {
+    // saas resolves committed thing (copyEngine set); a later place pick must
+    // unset it so BriefSchema stays valid.
+    const draft = buildBriefDraft(makeSignals({ businessTypeGuess: 'saas' }), 'x');
+    expect(draft.copyEngine).toBe('thing');
+    const picked = applyEnginePick(draft, 'quick-yes');
+    expect(picked.copyEngine).toBeUndefined();
+    expect(getEntryFacts(picked)?.resolvedEngine).toBe('quick-yes');
+  });
+
+  it('does not mutate the input draft', () => {
+    const draft = buildBriefDraft(makeSignals({ businessTypeGuess: 'agency' }), 'x');
+    applyEnginePick(draft, 'work');
+    expect(getEntryFacts(draft)?.resolvedEngine).toBeNull();
   });
 });

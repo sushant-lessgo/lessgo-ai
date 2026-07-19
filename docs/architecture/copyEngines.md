@@ -81,13 +81,56 @@ This is the trap that has already misled specs. **The engine is not the same axi
 **The AI picks the engine ONLY when the business-type list doesn't already know it.** The
 classify call outputs a business-type guess:
 
-- entry exists ⇒ `copyEngine = entry.copyEngine` (pure lookup, zero AI)
-- no entry ⇒ AI applies the tiebreaker ladder above → shown back on page 2 in the user's
-  language, one tap to correct (this lead also doubles as a demand signal for a new type)
-- low confidence ⇒ chooser shown upfront
+- entry `committed` ⇒ `copyEngine = entry.copyEngine` (pure lookup, zero AI)
+- entry `ambiguous` / no entry ⇒ resolution collapses to `ask` → the **D4** buyer-decision
+  question, prior pre-selected (this lead also doubles as a demand signal for a new type)
+- low confidence on a committed type ⇒ a one-tap **D3** confirm (never changes the engine)
+
+See **The entry decider** below for the full routing table + revisable-belief lifecycle.
 
 The AI's job shrinks over time to mapping one-liners onto known types; the ladder fires only for
 genuinely new types — precisely the leads the demand board wants flagged.
+
+## The entry decider (how the choice reaches the user)
+
+The **entry decider** is the first-touch flow that turns a one-liner into a resolved engine and
+routes accordingly. It replaces the old persona gate and the double one-liner entry. The user
+types their business in ONE line (D1); the AI returns only signals (`EntrySignals` — a
+business-type guess + confidence + tiebreaker, **never** an engine — the firewall). Code resolves
+the engine deterministically (`resolveEngine`), and confidence only nudges presentation, never
+which engine wins.
+
+Registry state drives which screen fires — never AI confidence:
+
+| Registry state of the guessed type | Screen | What the user sees |
+|---|---|---|
+| `committed`, confidence ≥ 0.6 | (silent) | no question — straight to `FinalizeHandoff` (work) or the confirm→wizard transition (thing/trust) |
+| `committed`, confidence < 0.6 | **D3** | one-tap "is that right?" confirm of the SAME lookup engine (no re-classify) |
+| `ambiguous` (e.g. designer/agency/manufacturer) | **D4** | the buyer-decision question, prior pre-selected |
+| unknown / not in registry | **D4** | the buyer-decision question, prior = tiebreaker result if any |
+
+**Routing table** (one-liner → classify → route):
+
+- **clear work** → `FinalizeHandoff` (silent auto-confirm on mount → work journey at Show Your Work)
+- **clear thing / trust** → confirm → generic wizard entered at the `understanding` slot (identity not re-asked)
+- **clear place / quick-yes** → **D5 demand board** (logged, never built — `brief.copyEngine` never set)
+- **ambiguous / unknown** → **D4** buyer-decision question; the pick (`applyEnginePick`) then routes as above
+
+D2 (a "you're a photographer" confirmation screen) and D6 (an engine-set handoff ceremony) were
+**cut** after founder QA — the clear path must not stop for ceremony. The live screens are
+**D1** (entry), **D3** (almost-sure confirm), **D4** (buyer-decision question), **D5** (demand
+board), the silent **FinalizeHandoff** / **ConfirmToWizard** transitions, and the
+`WHAT YOUR SITE LEADS WITH` rail field.
+
+**The engine is a revisable belief, not a verdict.** Its lifecycle: **inferred** (from the
+one-liner at D1) → **confirmed** (the user's D3/D4 pick, or the silent clear path) → **committed**
+(locked at the plan gate). The rail's "Change how buyers decide" link reopens D4 any time before
+the plan gate. `place`/`quick-yes` never enter this lifecycle in the schema — they resolve, route
+to demand, and are logged, never written to `brief.copyEngine` (the enum stays `{thing,trust,work}`).
+
+Code: entry screens in `src/app/onboarding/[token]/components/decider/`; resolver +
+`applyEnginePick` in `src/modules/brief/classify.ts`; the rail engine field in
+`src/components/onboarding/journey/UnderstoodRail.tsx`.
 
 ## Direction: engines are replacing audienceType as the spine
 
