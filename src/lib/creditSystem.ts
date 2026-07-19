@@ -2,6 +2,13 @@
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 import { getUserPlan } from './planManager';
+import { isAdmin } from './admin';
+
+// QA-enablement (founder-approved, qa-0719): ADMIN accounts get UNLIMITED credits
+// — never blocked, never charged, no ledger rows. Sentinel balance reported to
+// callers/UI. Gated ENTIRELY by ADMIN_CLERK_IDS (see isAdmin); a no-op for anyone
+// whose clerk id is not in that env allow-list.
+const ADMIN_UNLIMITED = 999_999;
 
 // Credit costs live in the prisma-free `creditCosts.ts` so client components (and
 // the Playwright runner) can import them without pulling in prisma. Re-exported
@@ -137,6 +144,11 @@ export async function checkCredits(
     return { allowed: true, remaining: 999999, required: creditsRequired };
   }
 
+  // Admin QA bypass (founder-approved): admins are never gated.
+  if (isAdmin(userId)) {
+    return { allowed: true, remaining: ADMIN_UNLIMITED, required: creditsRequired };
+  }
+
   try {
     // pricing-v2: available = current-period monthly remaining + persistent pool.
     const usage = await getUserUsage(userId);
@@ -210,6 +222,12 @@ export async function deductCredits(
   if (process.env.NODE_ENV === 'development' && process.env.DEV_BYPASS_CREDITS === 'true') {
     logger.dev(`[DEV] Bypassing credit deduction of ${creditsToDeduct} credits`);
     return { success: true, remaining: 999999 };
+  }
+
+  // Admin QA bypass (founder-approved): admins are never charged and write NO
+  // ledger row — no DB write at all for admin spends.
+  if (isAdmin(userId)) {
+    return { success: true, remaining: ADMIN_UNLIMITED };
   }
 
   const period = getCurrentPeriod();
@@ -586,6 +604,26 @@ export async function updateCreditLimit(userId: string, newLimit: number): Promi
  * Get credit balance summary
  */
 export async function getCreditBalance(userId: string) {
+  // Admin QA bypass (founder-approved): synthetic unlimited balance, same keys as
+  // the real return. Computed reset dates match the real code below.
+  if (isAdmin(userId)) {
+    const now = new Date();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const daysUntilReset = Math.ceil((nextMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return {
+      used: 0,
+      remaining: ADMIN_UNLIMITED,
+      limit: ADMIN_UNLIMITED,
+      percentUsed: 0,
+      daysUntilReset,
+      nextResetDate: nextMonth,
+      tier: 'AGENCY' as const,
+      monthlyRemaining: ADMIN_UNLIMITED,
+      poolRemaining: ADMIN_UNLIMITED,
+      totalAvailable: ADMIN_UNLIMITED,
+    };
+  }
+
   try {
     const usage = await getUserUsage(userId);
     const userPlan = await getUserPlan(userId);

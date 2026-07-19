@@ -22,6 +22,10 @@ vi.mock('@/lib/logger', () => ({
 vi.mock('./planManager', () => ({
   getUserPlan: vi.fn(),
 }));
+// qa-0719 admin-unlimited: control isAdmin so only 'admin_1' is treated as admin.
+vi.mock('./admin', () => ({
+  isAdmin: (id: string) => id === 'admin_1',
+}));
 
 import { prisma } from '@/lib/prisma';
 import { getUserPlan } from './planManager';
@@ -295,6 +299,59 @@ describe('resetCredits does not touch the pool', () => {
     await resetCredits('u1');
     expect(db.userUsage.upsert).toHaveBeenCalled();
     expect(db.userPlan.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('admin-unlimited (QA, founder-approved)', () => {
+  it('checkCredits: admin short-circuits before prisma → allowed, remaining 999999', async () => {
+    const r = await checkCredits('admin_1', 10);
+    expect(r).toEqual({ allowed: true, remaining: 999999, required: 10 });
+    // never touched the DB
+    expect(db.userUsage.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('deductCredits: admin short-circuits before prisma → success, no tx, no ledger', async () => {
+    const r = await deductCredits('admin_1', 10, UsageEventType.SECTION_REGEN);
+    expect(r.success).toBe(true);
+    expect(r.remaining).toBe(999999);
+    // no DB write of any kind for admins
+    expect(db.$transaction).not.toHaveBeenCalled();
+    expect(db.usageEvent.create).not.toHaveBeenCalled();
+  });
+
+  it('getCreditBalance: admin returns synthetic unlimited with the same keys as real', async () => {
+    const b: any = await getCreditBalance('admin_1');
+    expect(b.totalAvailable).toBe(999999);
+    expect(b.remaining).toBe(999999);
+    expect(b.limit).toBe(999999);
+    expect(b.monthlyRemaining).toBe(999999);
+    expect(b.poolRemaining).toBe(999999);
+    expect(b.used).toBe(0);
+    expect(b.percentUsed).toBe(0);
+    expect(b.tier).toBe('AGENCY');
+    // same key set as the real return
+    expect(Object.keys(b).sort()).toEqual(
+      [
+        'used', 'remaining', 'limit', 'percentUsed', 'daysUntilReset',
+        'nextResetDate', 'tier', 'monthlyRemaining', 'poolRemaining', 'totalAvailable',
+      ].sort(),
+    );
+    expect(b.nextResetDate instanceof Date).toBe(true);
+    expect(typeof b.daysUntilReset).toBe('number');
+    // never touched the DB
+    expect(db.userUsage.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('NON-INERT GUARD: a non-admin is NOT short-circuited (reaches the DB path)', async () => {
+    // Non-admin 'user_2' must go through the real balance computation, not the
+    // 999999 sentinel. Pre-fix (no admin branch) admin_1 would ALSO reach here and
+    // fail; post-fix only non-admins do.
+    db.userUsage.findUnique.mockResolvedValue({ creditsRemaining: 4, creditsLimit: 200 });
+    planStub.mockResolvedValue({ creditPool: 1, creditsLimit: 200 });
+    const r = await checkCredits('user_2', 3);
+    expect(r.remaining).not.toBe(999999);
+    expect(r.remaining).toBe(5);
+    expect(db.userUsage.findUnique).toHaveBeenCalled();
   });
 });
 

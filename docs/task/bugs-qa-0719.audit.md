@@ -298,3 +298,56 @@ The `priceLabel` spacing change broke one stale assertion in `src/components/onb
 **Files changed (this follow-up):** `src/components/onboarding/journey/engines/work.test.ts`.
 
 **Full re-gate:** `npx vitest run` (WHOLE suite) → 259 files pass / 1 skipped; 4079 tests pass / 15 skipped; **0 failures**. `npx tsc --noEmit` → clean except the known pre-existing `src/app/page.tsx:6` founder.jpg TS2307.
+
+---
+
+## admin-unlimited (QA, founder-approved)
+
+**Files changed**
+- `src/lib/creditSystem.ts` — admin short-circuit at the top of the 3 choke points
+- `src/lib/creditSystem.test.ts` — regression tests (admin bypass + non-inert non-admin guard)
+
+### What changed & why
+Founder-approved QA enablement: ADMIN accounts get UNLIMITED credits — never
+blocked, never charged, no ledger rows. Added `import { isAdmin } from './admin'`
+and `const ADMIN_UNLIMITED = 999_999;`, then an admin short-circuit at the TOP of
+each of the three functions (AFTER the existing dev-mode bypass, BEFORE any prisma
+call), keyed on `isAdmin(userId)`:
+
+- **checkCredits** → `{ allowed: true, remaining: 999999, required: creditsRequired }`.
+- **deductCredits** → `{ success: true, remaining: 999999 }`. No DB write, no
+  `$transaction`, **no UsageEvent ledger row** for admins (intended).
+- **getCreditBalance** → synthetic object with the SAME keys as the real return:
+  `used:0, remaining:999999, limit:999999, percentUsed:0, daysUntilReset/nextResetDate`
+  computed exactly as the real code, `tier:'AGENCY'`, `monthlyRemaining:999999`,
+  `poolRemaining:999999, totalAvailable:999999`.
+
+`consumeCredits` was deliberately NOT special-cased — it composes checkCredits +
+deductCredits and inherits the bypass. Non-admin paths, the dev bypass, and the
+deduction concurrency/retry logic are untouched — non-admins behave EXACTLY as
+before. `getUsageStats` / `getRecentUsageEvents` left as-is. No import cycle
+(`admin.ts` does not import `creditSystem`).
+
+### Ledger note
+Admins write NO `UsageEvent` rows on spends (deductCredits returns before any DB
+write). Admin usage is intentionally invisible in the usage ledger.
+
+### ⚠️ ENV DEPENDENCY (prominent)
+This bypass triggers ONLY for clerk ids present in `ADMIN_CLERK_IDS` (parsed in
+`src/lib/admin.ts`). For it to work on the Vercel **PREVIEW** environment,
+`ADMIN_CLERK_IDS` MUST be set there with the founder's clerk id. If unset on
+preview, `isAdmin` is false for everyone and the code is a no-op (normal credit
+gating applies).
+
+### Tests
+- `npx vitest run src/lib/creditSystem.test.ts` → 21 pass. New admin block:
+  checkCredits/deductCredits/getCreditBalance admin short-circuits + a NON-INERT
+  guard asserting a non-admin ('user_2') is NOT short-circuited (reaches DB path,
+  remaining !== 999999).
+- **Fail-pre-fix confirmed:** temporarily reverting `creditSystem.ts` to HEAD (no
+  admin branch) → the 3 admin tests FAIL (admin path hits prisma → not 999999),
+  non-inert guard still passes. Fix restored.
+- Gate B8 balance-reading tests still pass: `npx vitest run
+  src/hooks/useWizardStore.b8.test.ts src/modules/wizard/generation/work.llm.b8.test.ts`
+  → pass.
+- `npx tsc --noEmit` → clean.

@@ -8,6 +8,10 @@
 
 ## Progress log (resume anchor)
 **ALL 10 FIXED. Green gate PASS:** tsc (only pre-existing benign founder.jpg .jpg-type error, present on main), lint (warnings only), `npm run build` OK, `npm run test:run` 4079 pass / 0 fail / 15 skip. Next: push branch → preview re-test gate.
+
+**QA-enablement extras (founder-requested, committed on this branch):**
+- pre-push gate now runs on `main` ONLY (skips feature/fix branches) — `.githooks/pre-push` (221d370f). Unblocks off-main pushes from the stale-.next/types typecheck flake.
+- ADMIN accounts (ADMIN_CLERK_IDS) get UNLIMITED credits (never blocked/charged, no ledger) — creditSystem.ts checkCredits/deductCredits/getCreditBalance. **ENV DEP: only works where ADMIN_CLERK_IDS includes the founder clerk id — must be set on the Vercel PREVIEW env.** Ships to prod on merge (founder = unlimited forever). Re-test B8 (out-of-credits) with a NON-admin account.
 - B1 upload drops half the photos: FIXED (review 1→ship). NEW compressImageClient.ts (≤2400px WebP q0.85, safe passthrough SVG/GIF/decode-fail/not-smaller, never throws); uploadClient.ts compresses via injectable seam before POST, keeps original File for EXIF/grouping. 8 tests (pre-fix seam test fails). Server pipeline/route untouched. FAST-FOLLOW ticket: editor path formsImageActions.ts uploadImage (identical bug, editStore internals=risky, not founder-reported) should call same util.
 - B2 pricing question confusing + no currency: FIXED (cluster; review 1→ship). Currency control in PriceAnswer (default $, set $/€/£/₹) threaded via commitGroupPrice; price label reworded for multi-service ("Your typical starting price…"). NEEDS-FOUNDER-SIGNOFF on preview: currency default + label wording.
 - B3 answered-state inconsistent (name vanishes / charge stays "Answered"): FIXED (cluster; ship). Added `slot` to JourneyQuestion; StepQuestions tracks answered by slot (fallback id); work.ts sets slot per descriptor → identity no longer dropped, all answered questions stay answered-compact uniformly.
