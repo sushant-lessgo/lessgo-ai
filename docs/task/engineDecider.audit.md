@@ -496,3 +496,83 @@ There is **no `src/app/api/start/*.test.ts`** (glob confirmed only `route.ts` ex
 
 ### Recommendation to the orchestrator (out-of-scope follow-up)
 Retiring the `personaToAudienceType` derivation is a real, clean cleanup but belongs in its OWN slice with a Files-touched list covering: `seedDraft.ts` (pass `audienceType`), `saveDraft/route.ts` (accept+persist `audienceType`), the ~10 authed e2e specs, and `route.ts`. It is coupled to the broader `audienceType`-column retirement (CLAUDE.md: "still load-bearing plumbing for now"), so it likely wants to ride that retirement rather than a persona-only edit. Until then, leaving `/api/start`'s derivation is the conservative, correct state — the persona GATE (the access decision) is already gone; only a harmless audienceType-default derivation remains, and it is actively depended upon.
+
+## Phase 7 — Copy humanization + hi-fi polish + full gates (FINAL)
+
+Branch: `feature/engineDecider` (verified `git branch --show-current` before any edit). No commits (orchestrator commits). No renderer/`.published.tsx`/template/schema/`/api/brief/confirm`/`/api/demand-lead`/`/api/start` code touched; seam contract (`engines/types.ts`) NOT widened; firewall intact; mount-once guards on FinalizeHandoff/ConfirmToWizard left intact (not refactored).
+
+### Files changed (complete scope map — 5 files)
+
+1. `src/app/onboarding/[token]/components/decider/D1Entry.tsx` — copy: removed the jargon rail footer ("The engine is a first read … ingestion can still change it"); example-header eyebrow reworded; ENGINE_COPY doc-comment de-Phase-7'd; header comment label updated. No logic change.
+2. `src/components/onboarding/journey/UnderstoodRail.tsx` — the rail engine-field label `HOW YOUR SITE WINS` -> **`WHAT YOUR SITE LEADS WITH`** (+ spinner aria-label + section comment); NEW optional `neutral?: boolean` on `EngineRailFieldData` + a `data-tone` attr on the card + grey card/icon-chip treatment when neutral (the D5 rail-card fix). Legacy rail callers unchanged (no `neutral` => `data-tone="default"`, prior visuals identical).
+3. `src/app/onboarding/[token]/components/decider/D5DemandBoard.tsx` — passes `neutral: true` to the rail `EngineRailField` so the demand card renders grey ("logged, not built"), not confident blue. No copy/logic change otherwise.
+4. `src/components/onboarding/journey/UnderstoodRail.test.tsx` — fixed a test-fixture descriptor (`your portfolio is the argument` -> `your portfolio does the talking`, matching shipped copy); 2 NEW tests (neutral card -> `data-tone="neutral"`; normal known card -> `data-tone="default"`); comment label updates.
+5. `e2e/engine-decider.spec.ts` — NEW `CONSULTANT_ALMOST_SURE_DRAFT` fixture + NEW test: almost-sure -> D3 -> the rail "Change how buyers decide" link reopens D4 (the revisable-belief reopen path; the four routing outcomes were already covered). Existing 5 specs + the `{exact:true}` Understanding matcher untouched.
+
+Also updated (non-source): `docs/architecture/copyEngines.md` — NEW "The entry decider" section (routing table + registry-state table + revisable-belief lifecycle) + de-staled the "How the engine is chosen" bullets to match the deterministic D3/D4 model (D2/D6 cut noted). `docs/task/engineDecider.audit.md` (this file).
+
+### Copy changes — old -> new (founder sign-off table)
+
+| Where | Old | New |
+|---|---|---|
+| Rail engine-field label (all decider screens) | `HOW YOUR SITE WINS` | `WHAT YOUR SITE LEADS WITH` |
+| Rail spinner aria-label | "Working out how your site wins" | "Working out what your site leads with" |
+| D1 rail footer note | "The engine is a first read, not a lock — ingestion can still change it." | "This is just a first read — you can change any of it before we build." |
+| D1 examples eyebrow | `A LINE IS ENOUGH — IT ROUTES ITSELF` | `A LINE IS ENOUGH — WE TAKE IT FROM THERE` |
+| Test-fixture descriptor (not shipped copy) | "your portfolio is the argument" | "your portfolio does the talking" |
+
+Everything else was ALREADY jargon-free and founder-plain from earlier phases and was verified, not rewritten. Unchanged (kept verbatim / already clean), for the founder's reference:
+- **The 5 D4 buyer-decision lines — KEPT VERBATIM** as required: "They see my work and love it." / "They trust my experience & track record." / "They understand what my product does." / "They see my space, menu, or location." / "They already know me — I just need them to act."
+- D1 title "Tell us what you do — in a line."; subtitle "One sentence about your business, or paste your current site. We read it and set the page up the way your buyers actually decide."; eyebrow "Welcome to Lessgo AI"; tabs "Describe your business" / "Use my current site".
+- D3 questions (per engine) e.g. "Sounds like people hire you for your experience — is that right?"; "Yes — that's it" / "It's something else".
+- D4 pill "COULD GO TWO WAYS"; question "When someone lands on your site, what makes them reach out?"; "Our best guess from your description"; "SOON"; "Continue with <noun>".
+- D5 "COMING SOON"; "We don't build <X> sites yet — but we're close."; "Keep me posted & call me"; "Actually, it's something else".
+- FinalizeHandoff "Setting up your site…".
+- Per-engine "leads with" copy ("Lead with your work / your experience / your product / your place", "One clear ask").
+
+**Product name:** grep confirmed only "Lessgo AI" appears in the decider files (D1 eyebrow, D5 subtext) — no bare "Lessgo".
+
+**NO engine jargon in user-facing text:** grep for `engine`/`ingestion`/`copy engine`/`portfolio is the argument` across the decider dir found ONLY code identifiers + comments after the D1-footer fix. The closed-5 engine names never surface to the user.
+
+### The D5 rail-card fix (Phase 5 nit)
+Phase 5's D5 rail passed `status:'known'`, which rendered the confident BLUE engine card (`#cfe0ff` border, blue icon chip) for an engine we can't build — reading as "we're building this". Fixed by adding an OPT-IN `neutral` flag on `EngineRailFieldData` (kept within the two Files-touched files — NOT by adding a new `EngineStatus`, which lives in the out-of-scope `classify.ts`). When `neutral` (D5 only): card border -> `app-border-hairline`, icon chip -> `bg-app-track text-app-muted` (grey), `data-tone="neutral"`. Every other caller omits the flag => `data-tone="default"` => byte-identical prior visuals. Unit-asserted (both tones).
+
+### Hi-fi token polish
+The screens were already built on the ui-foundation `app-*` tokens + lucide (R3) across Phases 2–5 (audited there). This phase's polish is targeted, not a re-skin: the neutral demand card + the humanized rail label. All decider colors/spacing/radii/shadows already track the scout digest tokens (amber `#c47d1a`/`#fdf7ec`/`#f0dcb4`, blue `#006CFF`/`app-primary`, CTA `app-cta`, etc.); no arbitrary-hex drift introduced. JourneyTopBar (on the Files-touched list) needed no change — its copy is universal + jargon-free and it is the shared journey chrome (its `AppIcon` glyphs are the committed journey icon subset, not new decider UI).
+
+### copyEngines.md — the "Entry decider" section
+Added a concise section after "How the engine is chosen": the AI-signals-only firewall restatement; the registry-state->screen table (committed>=0.6 silent / committed<0.6 D3 / ambiguous D4 / unknown D4); the one-liner->classify->route table (clear work->FinalizeHandoff, clear thing/trust->wizard@understanding, clear place/quick-yes->D5, ambiguous/unknown->D4->applyEnginePick); the note that **D2/D6 were CUT** (live screens = D1/D3/D4/D5 + silent FinalizeHandoff/ConfirmToWizard + the rail field); and the revisable-belief lifecycle **inferred -> confirmed -> committed** (plan gate), place/quick-yes never entering the schema enum. Matches reality.
+
+### e2e coverage (final consolidated pass)
+All FOUR routing outcomes are covered in the one spec, plus the rail reopen:
+- **work** — photographer -> silent finalize -> work journey (O1 asserted once).
+- **clear non-work -> wizard** — CLEAR SaaS (thing) -> wizard at `understanding` (`{exact:true}` matcher preserved — the substring trap NOT reintroduced).
+- **ambiguous -> D4** — agency -> D4 (prior=trust pre-selected, 5 options, exactly 2 SOON) -> pick trust->wizard; designer -> D4 (prior=work) -> pick work->journey.
+- **place -> D5** — D4 place-pick -> D5 demand board -> `/api/demand-lead` POST (`missing:rungE:place`, `copyEngine` undefined) -> go-back reopens D4.
+- **NEW rail-reopen-D4** — almost-sure consultant -> D3 -> the rail "Change how buyers decide" link -> D4 (revisable belief). O1 holds on every screen.
+No existing assertion weakened; one new test + one new fixture added.
+
+### Deviations from the plan (in-scope judgment calls)
+1. **D5 rail-card fix via an opt-in `neutral` prop, NOT a new `EngineStatus`.** The status union lives in `classify.ts` (out of Phase 7 scope). An opt-in boolean on `EngineRailFieldData` (a Files-touched file) achieves the neutral treatment with zero risk to the resolver/machine and zero change to legacy callers. Conservative + scoped.
+2. **`ManualOnboardStep.tsx` left untouched (out of Files-touched).** It carries a hardcoded founder first name in the confirmed-state copy ("Sushant will reach out shortly to personalize.") — pre-existing from scale-02, user-facing, and arguably worth de-personalizing, but the file is NOT on the Phase 7 Files-touched list. Flagged for the orchestrator as an out-of-scope follow-up; not edited.
+3. **Rail label wording = "WHAT YOUR SITE LEADS WITH".** The plan invited a proposal ("e.g. 'What your site leads with'"). Chose the imperative-object phrasing that matches the per-engine card labels ("Lead with your work") for a consistent read. Founder can adjust at sign-off — it is a single shared string.
+4. **Rail reopen exercised from D3 (almost-sure), not from D4 itself.** The reopen affordance renders wherever the rail's `EngineRailField` carries `onChangeEngine`; per Phase 4 it is wired on D3 (D4 is already the question). The new e2e drives the real D3->D4 reopen. (Reopen from inside the post-confirm wizard remains deferred per Phase 4 Deviation 5 — a larger un-confirm feature, out of scope.)
+
+### Firewall / invariants held
+- AI never emits an engine (`entryClassify.schema` still forbids it); only `resolveEngine`/`applyEnginePick` decide. No blocking confirm — clear paths never stop, D3/D4 one-tap.
+- `BriefSchema.copyEngine` enum unchanged `{thing,trust,work}`; place/quick-yes route to demand only, never written to `brief.copyEngine`.
+- `/api/brief/confirm`, `/api/demand-lead`, `/api/start`, the seam contract — CONSUMED, NOT edited. No schema/Prisma change.
+- FinalizeHandoff/ConfirmToWizard mount-once guards (`firedRef`/`activeRef` + Retry) untouched.
+- All decider screens dynamically imported (ssr:false); no renderer/template/`.published.tsx` code touched — dual-renderer parity out of blast radius.
+
+### Verification — FULL GATE SUITE (all five green)
+1. `npx tsc --noEmit`: **clean, exit 0** (no `founder.jpg` artifact this run).
+2. `npm run test:run`: **Test Files 253 passed | 1 skipped (254); Tests 4094 passed | 14 skipped (4108).** 0 failures (+2 vs the Phase-5 base 4092 = the 2 new neutral-card rail tests).
+3. `npm run lint`: **exit 0, no errors.** Only pre-existing warnings in unrelated files (`<img>` LCP notes in templates, exhaustive-deps in ph-provider/store bootstrap). Zero warnings in any touched file.
+4. `npm run build`: **succeeded** (buildPublishedCSS -> buildAssets -> next build; full route table emitted).
+5. `npx playwright test e2e/engine-decider.spec.ts`: **6 passed** (setup + photographer->work + CLEAR-SaaS->wizard + AMBIGUOUS-agency->D4->trust/work + D4-place->D5->demand-lead->go-back + NEW almost-sure->D3->rail-reopen-D4, 1.2m) — REAL authed run (dev server, real Clerk, real `/api/brief/confirm` serve, real `loadDraft`; classifier + demand-lead intercepted as in earlier phases).
+
+### Open risks / notes for the founder gate (spec gate 1 — copy sign-off)
+- **`ManualOnboardStep` founder-name copy** (Deviation 2) — "Sushant will reach out…" is user-facing and out of Phase 7 scope; a de-personalization is a trivial follow-up if the founder wants it.
+- **Rail label wording** is a taste call (Deviation 3) — one string to flip if the founder prefers a different phrasing.
+- Broader authed suite: only `engine-decider.spec.ts` was run in this env (the multi-minute real-generation work/journey specs were not re-run — this phase touched no generation/journey code, only decider copy + the rail neutral flag). The full authed suite is the QA-preview gate the plan reserves.

@@ -3,8 +3,8 @@
 // D1 — "One line in" entry composer (engineDecider Phase 2).
 //
 // The hi-fi entry screen: a live-read rail on the LEFT (matching the work
-// journey's rail convention) whose "HOW YOUR SITE WINS" field animates spinner →
-// resolved card as classification lands, + a centered composer (radial bg) to its
+// journey's rail convention) whose "WHAT YOUR SITE LEADS WITH" field animates
+// spinner → resolved card as classification lands, + a centered composer to its
 // right. It WRAPS the shared `useEntryClassify` hook (URL ⇒
 // /api/v2/scrape-website, text ⇒ /api/v2/understand, entry:true) — same submit
 // logic as the legacy EntryInputStep, new chrome.
@@ -38,9 +38,8 @@ import { cn } from '@/lib/utils';
 import { useEntryClassify } from '../EntryInputStep';
 
 /**
- * Plain-language "how you win" copy per resolved engine (NO engine jargon in
- * user-facing text — the closed-5 engine names never surface here). Final
- * humanization + icon mapping is Phase 7; these are honest placeholders.
+ * Plain-language "what your site leads with" copy per resolved engine (NO engine
+ * jargon in user-facing text — the closed-5 engine names never surface here).
  */
 const ENGINE_COPY: Record<
   ResolvedEngine,
@@ -150,7 +149,7 @@ export default function D1Entry({ onSuccess }: D1EntryProps) {
 
         <div className="flex-none px-[22px] py-3.5 border-t border-app-hairline">
           <p className="font-app-sans text-[11px] text-app-faint">
-            The engine is a first read, not a lock — ingestion can still change it.
+            This is just a first read — you can change any of it before we build.
           </p>
         </div>
       </aside>
@@ -283,7 +282,7 @@ export default function D1Entry({ onSuccess }: D1EntryProps) {
           {/* Example rows */}
           <div className="mt-8 w-full max-w-[560px] text-left">
             <div className="font-app-mono font-semibold text-[10px] tracking-[0.11em] text-app-faint mb-2">
-              A LINE IS ENOUGH — IT ROUTES ITSELF
+              A LINE IS ENOUGH — WE TAKE IT FROM THERE
             </div>
             <div className="flex flex-col gap-2">
               {EXAMPLES.map((ex) => (

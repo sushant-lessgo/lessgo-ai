@@ -56,7 +56,7 @@ import type {
 } from './engines/types';
 
 /**
- * The "HOW YOUR SITE WINS" rail field data (engineDecider Phase 2). Prop-driven,
+ * The "WHAT YOUR SITE LEADS WITH" rail field data (engineDecider). Prop-driven,
  * NOT store-driven: the resolved engine + decider status live in the entry
  * page's LOCAL state (R4), so the rail cannot read them off the wizard store.
  * `label`/`descriptor` are PLAIN-LANGUAGE (no engine jargon); the caller maps the
@@ -64,14 +64,20 @@ import type {
  */
 export interface EngineRailFieldData {
   status: EngineStatus;
-  /** Plain-language "how you win" label, e.g. "Lead with your work". */
+  /** Plain-language "leads with" label, e.g. "Lead with your work". */
   label?: string;
   /** One-line descriptor under the label. */
   descriptor?: string;
   /** Icon chip contents (a lucide glyph). */
   icon?: React.ReactNode;
-  /** "Change how buyers decide" — reopens D4 (wired in Phase 4). */
+  /** "Change how buyers decide" — reopens D4. */
   onChangeEngine?: () => void;
+  /**
+   * engineDecider Phase 7 — NEUTRAL card treatment (grey, not confident blue).
+   * Used by the D5 demand board: the engine is LOGGED as demand, not a committed
+   * belief, so its card must not read as a resolved/blue "we're building this".
+   */
+  neutral?: boolean;
   /**
    * engineDecider Phase 5 — when set, an amber "DEMAND LOGGED · #<TAG>" chip
    * renders below the engine card (the D5 demand board for place/quick-yes and
@@ -202,25 +208,29 @@ export default function UnderstoodRail({ rail, engine }: UnderstoodRailProps) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// "HOW YOUR SITE WINS" — the engine field (engineDecider Phase 2)
+// "WHAT YOUR SITE LEADS WITH" — the engine field (engineDecider)
 //
-// Three visual states keyed on `engineStatus`:
+// Visual states keyed on `engineStatus`:
 //   • resolving           → blue label + spinner, dashed card, striped placeholder
 //   • set (known/almost-  → white card, blue border, icon chip + label; a green
 //     sure/confirmed)        check trails ONLY when confirmed; almost-sure shows
 //                            a dashed "confirming now…" border
 //   • ambiguous            → amber label + help icon, amber card "could go two ways"
+//   • neutral (demand)     → grey card (LOGGED, not built) — see `neutral` prop
 //
-// The engine is a REVISABLE BELIEF: "Change how buyers decide" reopens D4 (the
-// callback is wired in Phase 4). Prop-driven — no store, no engine module.
+// The choice is a REVISABLE BELIEF: "Change how buyers decide" reopens D4.
+// Prop-driven — no store, no engine module.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function EngineRailField({ engine }: { engine: EngineRailFieldData }) {
-  const { status, label, descriptor, icon, onChangeEngine, demandTag } = engine;
+  const { status, label, descriptor, icon, onChangeEngine, demandTag, neutral } = engine;
   const resolving = status === 'resolving';
   const ambiguous = status === 'ambiguous';
   const confirmed = status === 'confirmed';
   const almostSure = status === 'almost-sure';
+  // Demand board: the engine is logged, not committed — render it grey/neutral
+  // (never the confident blue "we're building this" card).
+  const isNeutral = !!neutral && !resolving && !ambiguous;
 
   const labelColor = resolving
     ? 'text-app-primary'
@@ -241,11 +251,11 @@ export function EngineRailField({ engine }: { engine: EngineRailFieldData }) {
           labelColor
         )}
       >
-        HOW YOUR SITE WINS
+        WHAT YOUR SITE LEADS WITH
         {resolving && (
           <Loader2
             data-testid="rail-engine-spinner"
-            aria-label="Working out how your site wins"
+            aria-label="Working out what your site leads with"
             className="w-3 h-3 animate-spin"
           />
         )}
@@ -254,11 +264,13 @@ export function EngineRailField({ engine }: { engine: EngineRailFieldData }) {
 
       <div
         data-testid="rail-engine-card"
+        data-tone={isNeutral ? 'neutral' : 'default'}
         className={cn(
           'rounded-app-panel p-3 flex items-center gap-2.5',
           resolving && 'border-[1.5px] border-dashed border-[#cfe0ff] bg-white',
-          almostSure && 'border-[1.5px] border-dashed border-[#cfe0ff] bg-white',
-          (confirmed || status === 'known') && 'border-[1.5px] border-[#cfe0ff] bg-white',
+          almostSure && !isNeutral && 'border-[1.5px] border-dashed border-[#cfe0ff] bg-white',
+          (confirmed || status === 'known') && !isNeutral && 'border-[1.5px] border-[#cfe0ff] bg-white',
+          isNeutral && 'border-[1.5px] border-app-border-hairline bg-app-surface',
           ambiguous && 'border-[1.5px] border-[#f0dcb4] bg-[#fdf7ec]'
         )}
       >
@@ -272,7 +284,11 @@ export function EngineRailField({ engine }: { engine: EngineRailFieldData }) {
             <span
               className={cn(
                 'flex-none w-[34px] h-[34px] rounded-[9px] flex items-center justify-center',
-                ambiguous ? 'bg-[#fbf1e0] text-[#c47d1a]' : 'bg-app-tint text-app-primary'
+                ambiguous
+                  ? 'bg-[#fbf1e0] text-[#c47d1a]'
+                  : isNeutral
+                    ? 'bg-app-track text-app-muted'
+                    : 'bg-app-tint text-app-primary'
               )}
             >
               {icon}

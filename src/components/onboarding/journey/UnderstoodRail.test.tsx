@@ -524,7 +524,7 @@ describe('UnderstoodRail — "Something wrong?"', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HOW YOUR SITE WINS — the engine field (engineDecider Phase 2)
+// WHAT YOUR SITE LEADS WITH — the engine field (engineDecider Phase 2)
 //
 // Three visual states keyed on engineStatus + the revisable-belief "change" link.
 // Prop-driven (no store), so the field can render at D1 entry before any wizard
@@ -542,7 +542,7 @@ async function mountRailWithEngine(engine?: EngineRailFieldData) {
   await flush();
 }
 
-describe('UnderstoodRail — engine field (HOW YOUR SITE WINS)', () => {
+describe('UnderstoodRail — engine field (WHAT YOUR SITE LEADS WITH)', () => {
   it('is absent when no engine prop is passed (legacy rail unchanged)', async () => {
     await mountRailWithEngine(undefined);
     expect(testid('rail-engine-field')).toBeNull();
@@ -563,7 +563,7 @@ describe('UnderstoodRail — engine field (HOW YOUR SITE WINS)', () => {
     await mountRailWithEngine({
       status: 'confirmed',
       label: 'Lead with your work',
-      descriptor: 'your portfolio is the argument',
+      descriptor: 'your portfolio does the talking',
       onChangeEngine: () => {},
     });
     expect(testid('rail-engine-field')?.getAttribute('data-engine-status')).toBe('confirmed');
@@ -605,6 +605,23 @@ describe('UnderstoodRail — engine field (HOW YOUR SITE WINS)', () => {
   it('omits the demand chip when no demandTag is set', async () => {
     await mountRailWithEngine({ status: 'known', label: 'Lead with your work' });
     expect(testid('rail-engine-demand')).toBeNull();
+  });
+
+  // engineDecider Phase 7 — the D5 demand board card is NEUTRAL (grey), not the
+  // confident blue "we're building this" card. The engine is logged, not built.
+  it('neutral → grey card tone (demand board is logged, not committed)', async () => {
+    await mountRailWithEngine({
+      status: 'known',
+      label: 'Lead with your place',
+      demandTag: 'PLACE',
+      neutral: true,
+    });
+    expect(testid('rail-engine-card')?.getAttribute('data-tone')).toBe('neutral');
+  });
+
+  it('a normal known card is NOT neutral (confident tone)', async () => {
+    await mountRailWithEngine({ status: 'known', label: 'Lead with your work' });
+    expect(testid('rail-engine-card')?.getAttribute('data-tone')).toBe('default');
   });
 
   it('the "Change how buyers decide" link renders and fires the callback', async () => {

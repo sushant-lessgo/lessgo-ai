@@ -108,6 +108,9 @@ export default function D5DemandBoard({
                 descriptor: lead.descriptor,
                 icon: lead.icon,
                 demandTag: chipTag,
+                // NEUTRAL grey card — the demand is LOGGED, not built; it must
+                // not read as the confident blue "we're building this" card.
+                neutral: true,
               }}
             />
           </div>

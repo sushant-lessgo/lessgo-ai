@@ -189,6 +189,40 @@ const DESIGNER_AMBIGUOUS_DRAFT = {
   confidence: 0.5,
 };
 
+/** An ALMOST-SURE consultant draft (committed `trust`, but engineStatus
+ *  `almost-sure` — below the confidence floor). D1 routes it to D3 (the one-tap
+ *  confirm), whose rail carries the "Change how buyers decide" reopen link. */
+const CONSULTANT_ALMOST_SURE_DRAFT = {
+  businessType: 'consultant',
+  copyEngine: 'trust',
+  category: 'consulting',
+  facts: {
+    entry: {
+      rawInput: 'leadership coaching for new managers',
+      resolvedEngine: 'trust',
+      engineStatus: 'almost-sure',
+      classificationSource: 'lookup',
+      tiebreaker: 'none',
+      platformNeeds: 'none',
+      summary: 'Leadership coaching for new managers',
+      businessName: 'Feenstra Coaching',
+      offerings: ['1:1 coaching', 'Team workshops'],
+      audiences: ['Newly promoted managers'],
+      categories: ['consulting', 'coaching'],
+      outcomes: [],
+      deliveryModel: 'remote',
+      offer: 'Book an intro call',
+      oneLiner: 'Leadership coaching for new managers',
+      testimonials: [],
+    },
+  },
+  proofAvailable: [],
+  socialProfiles: [],
+  structure: { mode: 'multi', pages: [] },
+  designStyleHint: 'editorial-craft',
+  confidence: 0.5,
+};
+
 /** Pin the ONE classifier call (mock mode can't classify) to a fixed brief. */
 async function pinUnderstand(
   page: import('@playwright/test').Page,
@@ -428,4 +462,29 @@ test('D4 place-pick → D5 demand board → demand-lead POST; copyEngine NEVER p
   // Confirmed state: the fast-track affordance appears, the go-back is gone.
   await expect(page.getByTestId('demand-confirmed')).toBeVisible({ timeout: 10_000 });
   await expect(page.getByTestId('decider-d5-back')).toHaveCount(0);
+});
+
+test('ALMOST-SURE → D3; the rail "Change how buyers decide" link reopens D4 (revisable belief)', async ({
+  page,
+}) => {
+  const api = await authedApi(page);
+  const token = await startProject(api);
+  // A committed `trust` type BELOW the confidence floor → D1 routes to D3.
+  await pinUnderstand(page, CONSULTANT_ALMOST_SURE_DRAFT);
+
+  await page.goto(`/onboarding/${token}`);
+  await submitD1(page, 'Leadership coaching for new managers');
+
+  // D3 (one-tap confirm), NOT a silent finalize / D4.
+  await expect(page.getByTestId('decider-d3')).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId('decider-d4')).toHaveCount(0);
+  // O1 holds on D3 too: no editable one-liner.
+  await assertNoOneLinerInput(page);
+
+  // The engine is a REVISABLE BELIEF: the rail's "Change how buyers decide" link
+  // reopens D4 from D3 (the reopen affordance, not the D3 "something else" body).
+  await page.getByTestId('rail-engine-change').click();
+  await expect(page.getByTestId('decider-d4')).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId('decider-d3')).toHaveCount(0);
+  await assertNoOneLinerInput(page);
 });
