@@ -180,3 +180,40 @@ Results: new tests 6/6 pass; existing `useWizardStore.test.ts` 83/83 pass (concu
 **Results** — all b8 files 9/9 pass; existing `useWizardStore.test.ts` + `errorMessage.test.ts` + `work.llm.test.ts` 107/107 pass; `tsc --noEmit` clean except the known unrelated `src/app/page.tsx:6` founder.jpg error.
 
 **Deviations from the follow-up** — none. WORK is now covered end-to-end (fast-fail + warm copy + correct CTA). The granth (work single-page) generator and the non-allow-list skeleton path make ZERO charged LLM calls, so they need no gate.
+
+---
+
+## B1 — "Uploaded 8 photos, only 4 uploaded" (work-engine photo ingestion)
+
+**Files changed**
+- `src/lib/media/compressImageClient.ts` (NEW) — client-side downscale/re-encode util.
+- `src/lib/media/uploadClient.ts` — calls the compress seam before each POST; injectable `compress` option.
+- `src/lib/media/uploadClient.test.ts` — B1 regression tests (seam + SVG passthrough).
+
+**Root cause** — Onboarding POSTs each RAW full-res image File to `/api/upload-image`. On Vercel a serverless Function 413s AT THE EDGE any body > ~4.5 MB before the handler runs. Full-res photographer JPEGs routinely exceed 4.5 MB → those requests 413 → land in the client `failed` bucket → only sub-4.5MB photos survive ("8 → 4"). No client-side downscale existed even though the server pipeline already downscales to 2400px WebP. (Precedent: the VIDEO path was moved to direct-to-Blob to dodge this same 413; images never got equivalent treatment.)
+
+**Fix (root-cause)** — Added a client raster downscale/re-encode step BEFORE building the multipart body, so uploaded bytes stay well under the ~4.5MB edge cap. The server sharp pipeline (`route.ts` / `processImage`) is UNTOUCHED and remains the authoritative producer of the stored WebP + blur + checksum + assetId. Direct-to-Blob was NOT adopted (rejected for B1 — it bypasses that pipeline).
+
+**compress util contract** (`compressImageForUpload(file) => Promise<File>`):
+- Max longest edge = 2400px (`CLIENT_MAX_EDGE`, mirrors server `MAX_WIDTH`).
+- Format = WebP, quality 0.85 (`CLIENT_WEBP_QUALITY`, mirrors server `WEBP_QUALITY`=85).
+- Uses `createImageBitmap` → `<canvas>` draw → `canvas.toBlob('image/webp', 0.85)`.
+- PASSTHROUGH (return the untouched original) when: SVG (`image/svg+xml`) or GIF (`image/gif`); non-image type; no canvas/`createImageBitmap` (SSR/jsdom); decode fails; toBlob returns null; OR the re-encode is NOT smaller than the original.
+- NEVER throws — any failure falls back to the original File (edge cap + server validation remain the backstop).
+- Preserves the original filename stem (extension → `.webp`) and `lastModified`.
+
+**Seam injection for tests** — `UploadImageFilesOptions.compress?: CompressImageFn`; defaults to the real `compressImageForUpload`. `uploadOne` awaits `compress(file)` and POSTs the result, but returns the ORIGINAL `file` in `UploadedImage.file` so `ShowWorkStep` can still join EXIF dates / `webkitRelativePath` by File identity (those are read from originals pre-upload — `ShowWorkStep.tsx` NOT changed). Tests inject a fake `compress` returning a small WebP Blob (jsdom has no real canvas encode).
+
+**Size-guard change** — The onboarding path (`uploadClient.ts`) had NO client-side size guard; the only guard is the server route's `MAX_FILE_SIZE = 10MB`, left UNTOUCHED per scope (a sane server safety net; after client compression images are typically <1MB, well under both it and the ~4.5MB edge cap). So the correct fix is bounding the payload client-side, not relaxing a guard. No guard was weakened.
+
+**Regression test + before/after** — `uploadClient.test.ts`:
+- "routes a large raster through the compress seam" — feeds a ~6MB `image/jpeg`, injects a fake compress → asserts the seam was called with the original, the FormData file sent to `fetch` is `image/webp` and smaller than the original, and `uploaded[0].file` is still the original. PRE-FIX: FAILS ("expected compress to be called 1 times, got 0" — old `uploadOne` appended the untouched original). POST-FIX: PASSES.
+- "passthrough: SVG uploaded unchanged" — default compress; asserts the POSTed file IS the original SVG.
+- Verified: `git stash` of the fix → `vitest run` → 1 failed / 7 passed (the B1 seam test fails). Restored → 8/8 pass.
+- LIMITATION (documented in-test): jsdom has no canvas encode, so tests pin the CODE-LEVEL contract "client routes each file through the compress seam and POSTs the result" — not real canvas re-encoding. The actual 413 only manifests on Vercel (dev has no 4.5MB cap).
+
+**Fast-follow (NOT done — out of scope)** — The EDITOR image-upload path `src/hooks/editStore/formsImageActions.ts` (`uploadImage`, client guard `10MB` at line ~313) has the IDENTICAL bug: it POSTs raw Files to `/api/upload-image` with a 10MB guard > the ~4.5MB edge cap. It should call the same new `compressImageForUpload` before POST. Left as a documented fast-follow ticket — editor-store internals are a risky surface and this was not founder-reported.
+
+**Results** — `vitest run src/lib/media/uploadClient.test.ts` → 8/8 pass. `tsc --noEmit` clean except the known unrelated `src/app/page.tsx:6` founder.jpg error.
+
+**Deviations** — none.

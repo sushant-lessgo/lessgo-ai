@@ -104,4 +104,61 @@ describe('uploadImageFiles', () => {
     expect(res).toEqual({ uploaded: [], failed: [] });
     expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  // ==========================================================================
+  // B1 (qa-0719): the client MUST bound the payload BEFORE the POST, so a
+  // full-res photo does not 413 at Vercel's ~4.5 MB edge cap (which silently
+  // dropped photos — "uploaded 8, only 4 arrived").
+  //
+  // LIMITATION: jsdom has no real canvas encode, so these tests inject a FAKE
+  // compress via the seam. They pin the CODE-LEVEL contract — "uploadClient
+  // routes each file through the compress seam and POSTs the seam's result" —
+  // not the real canvas re-encoding. The real 413 only manifests on Vercel.
+  // ==========================================================================
+
+  function largeRaster(name: string, bytes = 6 * 1024 * 1024): File {
+    return new File([new Uint8Array(bytes)], name, { type: 'image/jpeg' });
+  }
+
+  it('B1: routes a large raster through the compress seam — the POSTed file is the re-encoded copy, not the untouched original', async () => {
+    (global.fetch as any).mockResolvedValue(okResponse('https://cdn/x.webp'));
+
+    const original = largeRaster('big.jpg'); // ~6MB — would 413 raw
+    // Fake canvas re-encode: a tiny WebP well under the ~4.5MB edge cap.
+    const compress = vi.fn(async (f: File) =>
+      new File([new Uint8Array([1, 2, 3, 4])], f.name.replace(/\.\w+$/, '.webp'), {
+        type: 'image/webp',
+      })
+    );
+
+    const { uploaded } = await uploadImageFiles([original], 'tok_1', { compress });
+
+    // Seam was invoked with the original.
+    expect(compress).toHaveBeenCalledTimes(1);
+    expect(compress.mock.calls[0][0]).toBe(original);
+
+    // The file placed in the FormData sent to fetch is the COMPRESSED copy.
+    const [, init] = (global.fetch as any).mock.calls[0];
+    const sent = (init.body as FormData).get('file') as File;
+    expect(sent.type).toBe('image/webp');
+    expect(sent.size).toBeLessThan(original.size);
+
+    // The ORIGINAL File is still carried through for EXIF/path join by identity.
+    expect(uploaded[0].file).toBe(original);
+  });
+
+  it('B1 passthrough: an SVG is uploaded unchanged (default compress does not re-encode)', async () => {
+    (global.fetch as any).mockResolvedValue(okResponse('https://cdn/logo.svg'));
+    const svg = new File(['<svg/>'], 'logo.svg', { type: 'image/svg+xml' });
+
+    // No `compress` override → uses the real compressImageForUpload, which
+    // passes SVG straight through (and would also passthrough on jsdom, which
+    // lacks canvas encode). Either way, the POSTed file must be the original.
+    await uploadImageFiles([svg], 'tok_1');
+
+    const [, init] = (global.fetch as any).mock.calls[0];
+    const sent = (init.body as FormData).get('file') as File;
+    expect(sent).toBe(svg);
+    expect(sent.type).toBe('image/svg+xml');
+  });
 });

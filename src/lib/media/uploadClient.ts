@@ -15,7 +15,20 @@
 //     (route.ts) — NO route change of any kind.
 //
 // FIREWALL: browser `fetch` only. No react, no stores, no template runtime.
+//
+// B1: each file is re-encoded (downscaled WebP) BEFORE the multipart POST so the
+// body stays well under Vercel's ~4.5 MB edge cap (a serverless Function 413s at
+// the edge before the handler runs — that silently dropped full-res photos). The
+// compress step is an INJECTABLE SEAM (`options.compress`) so tests can supply a
+// deterministic fake — jsdom has no real canvas encode. The ORIGINAL File is
+// still carried through in `UploadedImage.file` so callers can join EXIF dates /
+// relativePath by identity.
 // ============================================================================
+
+import { compressImageForUpload } from './compressImageClient';
+
+/** Injectable compress seam: maps an input File to the upload-ready copy. */
+export type CompressImageFn = (file: File) => Promise<File>;
 
 export interface UploadedImage {
   /** The original File (so callers can join EXIF dates / relativePath by identity). */
@@ -45,16 +58,28 @@ export interface UploadImageFilesOptions {
   onProgress?: (done: number, total: number) => void;
   /** Test/abort seam — passed straight to `fetch`. */
   signal?: AbortSignal;
+  /**
+   * Compress seam — re-encodes each file before POST. Defaults to the real
+   * canvas-based `compressImageForUpload`. Override in tests (jsdom has no
+   * canvas encode) or to disable compression.
+   */
+  compress?: CompressImageFn;
 }
 
 /** One file → the `/api/upload-image` route. Rejects on a non-2xx / network error. */
 async function uploadOne(
   file: File,
   tokenId: string,
+  compress: CompressImageFn,
   signal?: AbortSignal
 ): Promise<UploadedImage> {
+  // Bound the payload BEFORE building the multipart body (B1). The compress fn
+  // passes SVG/GIF and any decode failure straight through, so this is safe for
+  // every input; the ORIGINAL `file` is still returned to the caller below.
+  const uploadFile = await compress(file);
+
   const form = new FormData();
-  form.append('file', file);
+  form.append('file', uploadFile);
   form.append('tokenId', tokenId);
 
   const res = await fetch('/api/upload-image', { method: 'POST', body: form, signal });
@@ -90,6 +115,7 @@ export async function uploadImageFiles(
   options: UploadImageFilesOptions = {}
 ): Promise<UploadImageFilesResult> {
   const concurrency = Math.max(1, options.concurrency ?? 3);
+  const compress = options.compress ?? compressImageForUpload;
   const total = files.length;
   const uploaded: (UploadedImage | undefined)[] = new Array(total);
   const failed: (UploadFailure | undefined)[] = new Array(total);
@@ -102,7 +128,7 @@ export async function uploadImageFiles(
       const i = next++;
       if (i >= total) return;
       try {
-        uploaded[i] = await uploadOne(files[i], tokenId, options.signal);
+        uploaded[i] = await uploadOne(files[i], tokenId, compress, options.signal);
       } catch (err) {
         failed[i] = { file: files[i], error: err instanceof Error ? err.message : 'Upload failed' };
       } finally {
