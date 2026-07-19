@@ -454,3 +454,45 @@ Both terminate at `step === 'manual'`, which is now the D5 board:
 - The e2e INTERCEPTS `/api/demand-lead` (no DB row / no founder email in-test). The founder-QA on dev is where a real `DemandLead` row + founder email are exercised end to end — the gate the plan reserves.
 - Mock mode can't classify a real restaurant→place, so the e2e reaches D5 via a D4 place PICK (the other real entry to D5). A true place classification (Kanji-Ramen-style) is exercised only under real `/api/v2/understand` at the founder gate.
 - Serve-gate `manual` → D5 is wired (FinalizeHandoff/ConfirmToWizard `onManual`) and unit-covered, but not e2e-exercised here (both confirm paths serve in the current fixtures); the wiring is identical to the D4-place path (both hit `step:'manual'` → D5).
+
+## Phase 6 — /api/start residual cleanup + persona-gate verification
+
+Branch: `feature/engineDecider` (verified `git branch --show-current` before any action). No commits (orchestrator commits). **NO source files changed this phase — see the STOP decision below.**
+
+### Files changed (complete scope map)
+**NONE.** This was a verify phase; the verification determined the residual plumbing is NOT dead (see below), and removing it safely requires editing files outside the Phase-6 Files-touched list. Per the orchestrator's explicit STOP instruction ("If the verify step reveals the cleanup would touch a live access path, STOP and report rather than proceeding") I made no edits. Only `docs/task/engineDecider.audit.md` (this file) was appended.
+
+### 1 — VERIFIED current `/api/start` state (pure creator, no classifier, no gate)
+Read `src/app/api/start/route.ts` in full. Confirmed:
+- It is a `GET` with **no request body / no `persona` param**. It: `auth()` → (if signed in) `user.upsert` on `clerkId` → create default `UserPlan` if missing → mint a `Token` (`nanoid(12)`) → create a `Project` linked to token+user → return `{ url: /onboarding/{token} }`.
+- The **persona-gate classifier is GONE** (retired in scale-02). There is no allowlist, no `PILOT_SERVICE_PERSONAS`, no waitlist bounce, no rejection branch. It never turns anyone away.
+- Access-gating for who-gets-served lives downstream in `decideServe` (`src/modules/brief/serveGate.ts`) → `manual` outcome → `/api/demand-lead` (+ D5 demand board), reached via `/api/brief/confirm`. `/api/start` itself makes no serve/deny decision. Confirmed `PILOT_SERVICE_PERSONAS` = zero hits in `src/`.
+- The ONLY persona residue in `route.ts` is the `personaToAudienceType`/`audienceType` **derivation** (L50-53, 67-69): it reads the persisted `dbUser.persona` (NOT a request param) and derives `Project.audienceType` (default `'product'`). This is a data-shaping default, not an access gate.
+
+### 2 — Grep for callers that pass `persona` to `/api/start` → RESULT: none pass it in-request; the derivation is nonetheless LIVE
+`/api/start` is a GET, so no caller sends `persona` in the request. The derivation instead reads `User.persona`, which callers set via a SEPARATE `POST /api/user/persona` immediately before calling `/api/start`. That pattern is **live and load-bearing**, not dead:
+
+- **Production:** `PersonaPrompt` is still rendered (`src/app/dashboard/settings/page.tsx`) — a user can set/change their persona, and a subsequent New-Site `/api/start` reads it. `src/components/dashboard/NewSiteButton.tsx` (the dashboard "New site" CTA, reused by sidebar/filter-row/empty-state) does `GET /api/start` with **no persona** — so the New-Site CTA itself does NOT drive persona.
+- **e2e seed harness (the decisive dependency):** `auth.setup.ts` + ~10 authed specs (`publish`, `edit-persistence`, `dashboard-shell`, `dashboard-lifecycle`, `dashboard-redirects`, `blog-composer`, `billing-beta`, `renderProbe`, work seeds) all do `POST /api/user/persona` → `GET /api/start`, then seed via `e2e/helpers/seedDraft.ts`. **`seedDraft` never passes `audienceType`, and `/api/saveDraft` never WRITES `audienceType` from its request body** (it only reads `existingProject.audienceType`, route.ts:312). So the ONLY source of a service/work `Project.audienceType` in these tests is `/api/start`'s `personaToAudienceType` derivation (`agency → 'service'`, `saas-founder → 'product'`, confirmed `src/types/service.ts:150`). `dashboard-redirects.spec.ts:42-43` states this explicitly: "`audienceType` is captured on the Project at [`/api/start`] time." Removing the derivation would default every agency/service seed to `'product'` → wrong-template dispatch → publish/render/redirect assertions break.
+
+**Why I did NOT re-point the callers + remove the plumbing:** the plan's fallback ("re-point that caller in THIS phase, then remove the plumbing — do not leave a caller broken") cannot be satisfied within scope. A safe removal requires: (a) `e2e/helpers/seedDraft.ts` to pass `audienceType`; (b) `src/app/api/saveDraft/route.ts` to accept+persist `audienceType` from the body; (c) ~10 e2e specs' seed calls. **None are on the Phase-6 Files-touched list.** Per the hard rule "Out-of-scope need (a file NOT on the list): stop and report," and the orchestrator's explicit first-touch STOP condition, I left the plumbing intact. Note also `CLAUDE.md` states `audienceType` is "still load-bearing plumbing for now" — the column it populates has not retired, so its populator is not yet dead. The route's own header comment (L4-9) already documents this as intentional back-compat.
+
+### 3 — waitlist page decision: LEFT in place (not retired)
+`src/app/onboarding/waitlist/page.tsx` is an 8-line `redirect('/dashboard')` stub (scale-02). Checked every inbound reference: no code in the new flow navigates/redirects TO `/onboarding/waitlist` (the app-root waitlist was retired to `/welcome` in middleware; `PersonaPrompt` no longer bounces there). BUT it is NOT zero-inbound: (a) it serves **old external bookmarks/links** (its documented purpose — an inbound the plan counts), and (b) `src/app/onboarding/[token]/layout.tsx:14` relies on it as a **static App-Router sibling that outranks the dynamic `[token]` segment** (so a project token literally named `waitlist` can't collide). Per the plan ("retire ONLY if zero inbound routes remain; else LEAVE it and note in the audit") I left it untouched. Documented as a redirect in `src/app/README.md:41`.
+
+### 4 — start-path tests
+There is **no `src/app/api/start/*.test.ts`** (glob confirmed only `route.ts` exists). No route test to update. Start-path behavior is covered by the authed e2e seed harness (which ran green, below).
+
+### Access-safety confirmation (first-touch access path)
+- **No access check was added, removed, or weakened** — zero source changes this phase.
+- `/api/start` remains a pure creator that turns away no one; it has no gate to weaken.
+- **Every rejection path still logs a demand signal, unchanged:** serve-gate `manual` → `/api/demand-lead`; D4 place/quick-yes → D5 → `/api/demand-lead` (verified green by e2e test #10, which asserts the demand-lead POST fires and `brief.copyEngine` is never `place`).
+- Legacy `/onboarding/product|service/[token]` routes untouched (out of scope; existing projects keep working).
+
+### Verification
+- `npx tsc --noEmit`: clean, exit 0 (no `founder.jpg` artifact this run).
+- `npm run test:run` (full vitest): **Test Files 253 passed | 1 skipped (254); Tests 4092 passed | 14 skipped (4106).** 0 failures — identical to the Phase-5 base (no source change).
+- `npx playwright test e2e/engine-decider.spec.ts e2e/generation.spec.ts`: **6 passed | 4 skipped** — engine-decider all 4 routing outcomes (photographer→work / clear-SaaS→wizard / ambiguous-agency→D4→trust+work / place→D5→demand-lead) + product generation pipeline. The 4 skips are env-gated public specs (service-generation auth-gated + unified-wizard-route cases), not failures. This exercises the REAL `/api/user/persona` → `/api/start` → seed path end-to-end and confirms the start path is a working, unbroken pure creator.
+
+### Recommendation to the orchestrator (out-of-scope follow-up)
+Retiring the `personaToAudienceType` derivation is a real, clean cleanup but belongs in its OWN slice with a Files-touched list covering: `seedDraft.ts` (pass `audienceType`), `saveDraft/route.ts` (accept+persist `audienceType`), the ~10 authed e2e specs, and `route.ts`. It is coupled to the broader `audienceType`-column retirement (CLAUDE.md: "still load-bearing plumbing for now"), so it likely wants to ride that retirement rather than a persona-only edit. Until then, leaving `/api/start`'s derivation is the conservative, correct state — the persona GATE (the access decision) is already gone; only a harmless audienceType-default derivation remains, and it is actively depended upon.
