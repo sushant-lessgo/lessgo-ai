@@ -1335,6 +1335,133 @@ describe('useWizardStore — COMPOSED served photographer path (atelier phase 7)
   });
 });
 
+// ===========================================================================
+// plan-proposal-gate phase 1 — PROPOSAL-DRIVEN work+multipage seed
+// ===========================================================================
+// The seed no longer always emits the full atelier menu: it derives the site
+// shape from `facts.work` (deriveStructureSignals → proposeWorkSiteStructure) and
+// seeds the proposal's page subset — one-pager folds the FULL stack onto Home,
+// compact seeds home/work/contact, standard seeds all 5 (today's behavior). A
+// null-facts brief keeps the full-menu multi seed (pinned by the phase-5/7 tests
+// above, whose fixtures carry no `facts.work`).
+function workBriefWithFacts(work: Record<string, unknown>): Brief {
+  return {
+    businessType: 'photographer',
+    copyEngine: 'work',
+    facts: {
+      entry: { rawInput: 'kundius photography', oneLiner: 'editorial photographer' },
+      work,
+    },
+  } as Brief;
+}
+
+describe('useWizardStore — proposal-driven work+multipage seed (plan-proposal-gate phase 1)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('one-pager signals ⇒ Home-only seed with the FULL folded stacked sections', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    // 1 group, on-request price, not established ⇒ one-pager.
+    const brief = workBriefWithFacts({
+      identity: { name: 'Kundius' },
+      groups: [{ name: 'Weddings', kind: 'category', price: { mode: 'on-request' } }],
+    });
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tok1', brief, audienceType: 'service', templateId: 'atelier' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const s = useWizardStore.getState();
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(s.strategyStatus).toBe('done');
+    const map = s.sitemap as any[];
+    expect(map).toHaveLength(1);
+    expect(map[0].archetypeKey).toBe('home');
+    // The FULL stacked set (union of all 5 atelier pages), in home.allowedSections
+    // order — deliberately richer than the one-pager `[home]` subset.
+    expect(map[0].sections).toEqual([
+      'hero', 'work', 'proof', 'packages', 'about', 'contact',
+    ]);
+  });
+
+  it('compact signals ⇒ 3-page seed home/work/contact (no /experiences, no /about)', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    // 2 groups, on-request prices, not established ⇒ compact (matches the Kundius
+    // e2e fixture derivation).
+    const brief = workBriefWithFacts({
+      identity: { name: 'Kundius' },
+      groups: [
+        { name: 'Weddings', kind: 'category', price: { mode: 'on-request' } },
+        { name: 'Engagements', kind: 'category', price: { mode: 'on-request' } },
+      ],
+    });
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tok2', brief, audienceType: 'service', templateId: 'atelier' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const map = useWizardStore.getState().sitemap as any[];
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(map.map((p) => p.archetypeKey)).toEqual(['home', 'work', 'contact']);
+    expect(map.some((p) => p.pathSlug === '/experiences')).toBe(false);
+    expect(map.some((p) => p.pathSlug === '/about')).toBe(false);
+  });
+
+  it('standard signals (established) ⇒ today’s 5-page seed (regression pin)', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    // established ⇒ standard, regardless of group count.
+    const brief = workBriefWithFacts({
+      identity: { name: 'Kundius' },
+      establishment: 'established',
+      groups: [
+        { name: 'Weddings', kind: 'category', price: { mode: 'on-request' } },
+        { name: 'Engagements', kind: 'category', price: { mode: 'on-request' } },
+      ],
+    });
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tok3', brief, audienceType: 'service', templateId: 'atelier' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const map = useWizardStore.getState().sitemap as any[];
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(map.map((p) => p.archetypeKey)).toEqual([
+      'home', 'work', 'experiences', 'about', 'contact',
+    ]);
+  });
+
+  it('null work facts ⇒ full-menu multi seed (unchanged)', async () => {
+    const spy = vi.fn(async () => ({ ok: true, json: async () => ({}) }));
+    vi.stubGlobal('fetch', spy);
+
+    // photographerAtelierBrief carries NO facts.work ⇒ getWorkFacts null.
+    useWizardStore.getState().reset();
+    useWizardStore
+      .getState()
+      .hydrate({ tokenId: 'tok4', brief: photographerAtelierBrief, audienceType: 'service', templateId: 'atelier' });
+
+    await useWizardStore.getState().fetchStrategy();
+    const map = useWizardStore.getState().sitemap as any[];
+
+    expect(map.map((p) => p.archetypeKey)).toEqual([
+      'home', 'work', 'experiences', 'about', 'contact',
+    ]);
+  });
+});
+
 // onboarding-fixes phase 4 — the 7b empty-collection-node predicate. Gates
 // whether a 0-item collection surfaces at the structure gate: catalog-shaped
 // (manufacturer / future requiredCollections) YES, SaaS `thing` family NO.

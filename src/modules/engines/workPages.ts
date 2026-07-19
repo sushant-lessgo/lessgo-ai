@@ -34,6 +34,7 @@
 
 import type { PageArchetypeDef } from '@/modules/audience/product/pageArchetypes';
 import type { WorkSectionKey } from './workSections';
+import type { WorkFacts, WorkGroup } from '@/lib/schemas/workFacts.schema';
 import { COLLECTIONS } from '@/modules/collections/registry';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -339,4 +340,34 @@ export function proposeWorkSiteStructure(signals: WorkStructureSignals): WorkStr
   }
 
   return { archetype, pages, promotedGroupCount };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Signal derivation (pure, from facts).
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// RELOCATED here from `slimStrategy.ts` (plan-proposal-gate phase 1): the store's
+// seed needs the signals→proposal derivation, and exporting it OUT of the
+// generation tree (slimStrategy) would drag `workElementContract`/
+// `professionWording`/`./voice` into the pre-confirm store bundle. This module
+// already hosts `WorkStructureSignals` + `proposeWorkSiteStructure` with type-only
+// deps, so it is the firewall-safe home. `slimStrategy` re-imports/re-exports it so
+// its callers/tests are untouched.
+
+/** Total work items across groups; falls back to group count when no sub-items. */
+function countWorkItems(groups: WorkGroup[]): number {
+  const items = groups.reduce((n, g) => n + (g.items?.length ?? 0), 0);
+  return items > 0 ? items : groups.length;
+}
+
+/** Derive the deterministic proposal signals from the work facts. Pure, zero AI. */
+export function deriveStructureSignals(facts: WorkFacts): WorkStructureSignals {
+  const groups = facts.groups ?? [];
+  return {
+    groupCount: groups.length,
+    workItemCount: countWorkItems(groups),
+    // "prices present" = real numbers stated (on-request alone is not a number).
+    pricesPresent: groups.some((g) => g.price?.amount !== undefined),
+    established: facts.establishment === 'established',
+  };
 }

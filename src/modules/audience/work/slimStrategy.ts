@@ -30,11 +30,17 @@
 import type { WorkFacts, WorkGroup } from '@/lib/schemas/workFacts.schema';
 import {
   proposeWorkSiteStructure,
+  deriveStructureSignals,
   workPageTypes,
   type WorkPageTypeKey,
   type WorkSiteArchetypeKey,
   type WorkStructureSignals,
 } from '@/modules/engines/workPages';
+
+// `deriveStructureSignals` was RELOCATED to `workPages.ts` (plan-proposal-gate
+// phase 1, firewall: keep it out of the store's bundle path). Re-exported here so
+// existing callers/tests that import it from this module are untouched.
+export { deriveStructureSignals };
 import {
   workElementContract,
   type WorkSectionKey,
@@ -82,27 +88,6 @@ export interface WorkStructure {
   wording: ProfessionWording;
   /** The structure signals used (echoed for tests / the copy phase). */
   signals: WorkStructureSignals;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Signal derivation (pure, from facts).
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** Total work items across groups; falls back to group count when no sub-items. */
-function countWorkItems(groups: WorkGroup[]): number {
-  const items = groups.reduce((n, g) => n + (g.items?.length ?? 0), 0);
-  return items > 0 ? items : groups.length;
-}
-
-export function deriveStructureSignals(facts: WorkFacts): WorkStructureSignals {
-  const groups = facts.groups ?? [];
-  return {
-    groupCount: groups.length,
-    workItemCount: countWorkItems(groups),
-    // "prices present" = real numbers stated (on-request alone is not a number).
-    pricesPresent: groups.some((g) => g.price?.amount !== undefined),
-    established: facts.establishment === 'established',
-  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

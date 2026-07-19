@@ -7,9 +7,28 @@
 // ============================================================================
 
 import { describe, it, expect } from 'vitest';
-import { applyPlanEdit, buildPlanCommit } from './plan';
+import {
+  applyPlanEdit,
+  buildPlanCommit,
+  applyTileToggle,
+  applyWorkGroupToggle,
+} from './plan';
 import type { WorkSitemapPage } from '@/modules/audience/work/strategy/parseStrategyWork';
-import { workPageTypes } from '@/modules/engines/workPages';
+import { workPageTypes, type WorkPageTypeKey } from '@/modules/engines/workPages';
+import { getPageArchetypesForTemplate } from '@/modules/audience/product/pageArchetypes';
+import { slugify } from '@/lib/normalize';
+
+const ATELIER_MENU = getPageArchetypesForTemplate('atelier')!;
+
+/** An atelier-shaped 5-page sitemap (menu-keyed archetypeKeys incl. `experiences`). */
+function atelierSitemap(): WorkSitemapPage[] {
+  return ATELIER_MENU.filter((a) => a.defaultIncluded).map((a) => ({
+    archetypeKey: a.key,
+    title: a.title,
+    pathSlug: a.pathSlug,
+    sections: [...a.defaultSections],
+  }));
+}
 
 /** A standard 5-page work sitemap, built from the frozen page contract. */
 function standardSitemap(): WorkSitemapPage[] {
@@ -227,5 +246,158 @@ describe('buildPlanCommit', () => {
   it('tolerates null facts (empty bag)', () => {
     const commit = buildPlanCommit(standardSitemap(), null);
     expect(commit.facts).toEqual({});
+  });
+});
+
+describe('applyTileToggle — off (remove via alias)', () => {
+  it('toggling off prices removes the atelier /experiences page (reverse alias) and leaves it absent', () => {
+    const sitemap = atelierSitemap();
+    const res = applyTileToggle('prices', false, sitemap, { menu: ATELIER_MENU });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.next.some((p) => p.archetypeKey === 'experiences')).toBe(false);
+    expect(res.next.some((p) => p.pathSlug === '/experiences')).toBe(false);
+  });
+
+  it('rejects toggling off home (non-removable, inherits the applyPlanEdit guard)', () => {
+    const res = applyTileToggle('home', false, atelierSitemap(), { menu: ATELIER_MENU });
+    expect(res.ok).toBe(false);
+  });
+
+  it('rejects toggling off a page that is not present', () => {
+    const sitemap = atelierSitemap().filter((p) => p.archetypeKey !== 'about');
+    const res = applyTileToggle('about', false, sitemap, { menu: ATELIER_MENU });
+    expect(res.ok).toBe(false);
+  });
+});
+
+describe('applyTileToggle — on (add)', () => {
+  it('toggling on prices restores the atelier MENU def (slug /experiences) at its menu-order position', () => {
+    const sitemap = atelierSitemap().filter((p) => p.archetypeKey !== 'experiences');
+    // [home, work, about, contact]
+    const res = applyTileToggle('prices', true, sitemap, { menu: ATELIER_MENU });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    const added = res.next.find((p) => p.archetypeKey === 'experiences')!;
+    expect(added.pathSlug).toBe('/experiences');
+    // Inserted at menu order (after work, before about).
+    expect(res.next.map((p) => p.archetypeKey)).toEqual([
+      'home', 'work', 'experiences', 'about', 'contact',
+    ]);
+  });
+
+  it('toggling on project-story builds from workPageTypes (no atelier menu def) and appends last', () => {
+    const sitemap = atelierSitemap();
+    const res = applyTileToggle('project-story', true, sitemap, {
+      menu: ATELIER_MENU,
+      contactMethod: 'whatsapp',
+    });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    const added = res.next[res.next.length - 1];
+    expect(added.archetypeKey).toBe(workPageTypes['project-story'].key); // 'work-detail'
+    expect(added.pathSlug).toBe(workPageTypes['project-story'].pathSlug);
+    expect(added.goal).toBe('whatsapp');
+    expect(res.next[0].archetypeKey).toBe('home'); // home stays first
+  });
+
+  it('toggling on blog builds from workPageTypes and appends', () => {
+    const res = applyTileToggle('blog', true, atelierSitemap(), { menu: ATELIER_MENU });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.next[res.next.length - 1].archetypeKey).toBe('blog');
+  });
+
+  it('rejects an out-of-vocab key (closed vocabulary)', () => {
+    const res = applyTileToggle(
+      'not-a-page' as WorkPageTypeKey,
+      true,
+      atelierSitemap(),
+      { menu: ATELIER_MENU }
+    );
+    expect(res.ok).toBe(false);
+  });
+
+  it('rejects a duplicate add (already present via alias)', () => {
+    const res = applyTileToggle('prices', true, atelierSitemap(), { menu: ATELIER_MENU });
+    expect(res.ok).toBe(false); // experiences already present
+  });
+
+  it('rejects adding home and work-group through the tile door', () => {
+    expect(applyTileToggle('home', true, atelierSitemap(), { menu: ATELIER_MENU }).ok).toBe(false);
+    expect(applyTileToggle('work-group', true, atelierSitemap(), { menu: ATELIER_MENU }).ok).toBe(false);
+  });
+
+  it('builds from the canonical contract when no menu is supplied', () => {
+    const sitemap = atelierSitemap().filter((p) => p.archetypeKey !== 'experiences');
+    const res = applyTileToggle('prices', true, sitemap, { menu: null });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    const added = res.next[res.next.length - 1];
+    expect(added.archetypeKey).toBe('prices');
+    expect(added.pathSlug).toBe(workPageTypes.prices.pathSlug); // '/prices'
+  });
+
+  it('does not mutate the input sitemap', () => {
+    const sitemap = atelierSitemap();
+    const snapshot = JSON.stringify(sitemap);
+    applyTileToggle('blog', true, sitemap, { menu: ATELIER_MENU });
+    applyTileToggle('prices', false, sitemap, { menu: ATELIER_MENU });
+    expect(JSON.stringify(sitemap)).toBe(snapshot);
+  });
+});
+
+describe('applyWorkGroupToggle', () => {
+  it('rejects promotion below PROMOTE_GROUP_MIN', () => {
+    const res = applyWorkGroupToggle(true, 'Weddings', 1, atelierSitemap());
+    expect(res.ok).toBe(false);
+  });
+
+  it('promotes a group: /work/<slug>, title = group name, inserted after work', () => {
+    const sitemap = atelierSitemap();
+    const res = applyWorkGroupToggle(true, 'Beach Weddings', 3, sitemap);
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    const added = res.next.find((p) => p.archetypeKey === 'work-group')!;
+    expect(added.title).toBe('Beach Weddings');
+    expect(added.pathSlug).toBe(`/work/${slugify('Beach Weddings')}`);
+    expect(added.pathSlug).toBe('/work/beach-weddings');
+    expect(added.sections).toEqual([...workPageTypes['work-group'].defaultSections]);
+    // Positioned right after the work page.
+    const workIdx = res.next.findIndex((p) => p.archetypeKey === 'work');
+    expect(res.next[workIdx + 1].archetypeKey).toBe('work-group');
+  });
+
+  it('appends when there is no work page', () => {
+    const sitemap = atelierSitemap().filter((p) => p.archetypeKey !== 'work');
+    const res = applyWorkGroupToggle(true, 'Weddings', 3, sitemap);
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.next[res.next.length - 1].archetypeKey).toBe('work-group');
+  });
+
+  it('rejects a duplicate work-group', () => {
+    const first = applyWorkGroupToggle(true, 'Weddings', 3, atelierSitemap());
+    expect(first.ok).toBe(true);
+    if (!first.ok) return;
+    const second = applyWorkGroupToggle(true, 'Portraits', 3, first.next);
+    expect(second.ok).toBe(false);
+  });
+
+  it('toggles off by archetype key', () => {
+    const on = applyWorkGroupToggle(true, 'Weddings', 3, atelierSitemap());
+    expect(on.ok).toBe(true);
+    if (!on.ok) return;
+    const off = applyWorkGroupToggle(false, '', 3, on.next);
+    expect(off.ok).toBe(true);
+    if (!off.ok) return;
+    expect(off.next.some((p) => p.archetypeKey === 'work-group')).toBe(false);
+  });
+
+  it('does not mutate the input sitemap', () => {
+    const sitemap = atelierSitemap();
+    const snapshot = JSON.stringify(sitemap);
+    applyWorkGroupToggle(true, 'Weddings', 3, sitemap);
+    expect(JSON.stringify(sitemap)).toBe(snapshot);
   });
 });

@@ -65,10 +65,7 @@ import {
 import { computeFieldStates, type FieldState } from '@/modules/wizard/waterfall';
 // Single-page structure clamp law (scale-07 phase 4) — plain data-layer module
 // (generalized clampSitemap sibling), safe for the client store.
-import {
-  applyConfirmedSections,
-  filterSectionsByProof,
-} from '@/modules/audience/product/strategy/parseStrategyProduct';
+import { applyConfirmedSections } from '@/modules/audience/product/strategy/parseStrategyProduct';
 // atelier phase 2 — pure audience-level DATA (templateMeta/businessTypes siblings,
 // firewall-safe): the multipage-capability gate + page-archetype menu that the
 // served work→multipage skeleton path seeds its sitemap from.
@@ -76,6 +73,15 @@ import {
   getPageArchetypesForTemplate,
   isMultipage,
 } from '@/modules/audience/product/pageArchetypes';
+// plan-proposal-gate phase 1 — pure work page-structure machinery (firewall-safe:
+// workPages/shape carry type-only + pure-data deps, NOT the generation tree). The
+// work+multipage seed proposes a site shape and seeds the proposal's page subset.
+import {
+  deriveStructureSignals,
+  proposeWorkSiteStructure,
+} from '@/modules/engines/workPages';
+import { expandToMultiPage, foldToSinglePage } from '@/modules/wizard/work/shape';
+import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
 // scale-07 phase 6 — pure data-layer hard-fit helper (templateMeta/coreSections
 // data only, no template modules; firewall-safe for the client store).
 import {
@@ -1220,18 +1226,38 @@ export const useWizardStore = create<WizardStore>()(
           set((state) => {
             if (!state.sitemap) {
               const menu = getPageArchetypesForTemplate(state.templateId) ?? [];
-              state.sitemap = menu
-                .filter((a) => a.defaultIncluded)
-                .map((a) => ({
-                  archetypeKey: a.key,
-                  title: a.title,
-                  pathSlug: a.pathSlug,
-                  // Proof hard rule (F22) — same filter StructureSlot's addPage
-                  // uses: an unpromised proof section can't be seeded.
-                  sections: filterSectionsByProof([...a.defaultSections], {
-                    hasTestimonials: state.proof.hasTestimonials,
-                  }),
-                }));
+              // Proof hard rule (F22) — an unpromised proof section is never
+              // seeded (mirrored by expandToMultiPage/foldToSinglePage).
+              const proofOpts = { hasTestimonials: state.proof.hasTestimonials };
+              // plan-proposal-gate phase 1 — PROPOSAL-DRIVEN seed. Derive the
+              // deterministic site shape from the work facts and seed the
+              // proposal's page subset (so the plan gate's tiles come up
+              // preselected to the archetype). Null facts → keep today's
+              // full-menu multi seed.
+              const facts = getWorkFacts(state.briefFacts ?? undefined);
+              if (facts) {
+                const proposal = proposeWorkSiteStructure(
+                  deriveStructureSignals(facts)
+                );
+                if (proposal.archetype === 'one-pager') {
+                  // One-pager → fold the FULL menu onto Home (every section
+                  // stacked), NOT the `[home]` subset — nothing silently dropped.
+                  state.sitemap = foldToSinglePage(
+                    expandToMultiPage(menu, proofOpts),
+                    proofOpts
+                  );
+                } else {
+                  // compact/standard → the proposal's page subset (compact →
+                  // home/work/contact; standard → all 5 = today's seed).
+                  state.sitemap = expandToMultiPage(menu, {
+                    ...proofOpts,
+                    pages: proposal.pages,
+                  });
+                }
+              } else {
+                // No work facts → today's full-menu multi seed (unchanged).
+                state.sitemap = expandToMultiPage(menu, proofOpts);
+              }
             }
             state.strategyStatus = 'done';
           });
