@@ -18,6 +18,7 @@ export const WORK_PROOF_STYLES = `
 .wk-proof__card{ background:var(--wk-paper); border:1px solid var(--wk-line); border-radius:var(--u-radius, var(--wk-r)); padding:clamp(20px,2.4vw,32px); display:flex; flex-direction:column; gap:16px; }
 .wk-proof__quote{ font-family:var(--wk-ff-display); font-size:1.15rem; line-height:1.45; letter-spacing:-0.01em; opacity:var(--u-opacity, 1); margin:0; }
 .wk-proof__source{ font-family:var(--wk-ff-body); font-weight:600; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--wk-ink-mute); margin:0; }
+.wk-proof__empty{ border:1px dashed var(--wk-line); border-radius:var(--u-radius, var(--wk-r)); padding:clamp(20px,2.4vw,32px); color:var(--wk-ink-mute); font-family:var(--wk-ff-body); font-size:13px; letter-spacing:0.02em; text-align:center; margin-bottom:clamp(16px,2.2vw,30px); }
 ${RULE_HEAD('wk-proof', 'awards')}`;
 
 // Shared head grammar for the alternate proof SHAPES (logos/results) — centered.

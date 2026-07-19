@@ -12,5 +12,5 @@ interface Props extends WorkProofContent {
 
 export default function WorkProofTestimonialsPublished(props: Props) {
   const E = makePublishedPrimitives();
-  return <WorkProofTestimonialsCore content={props} E={E} sectionId={props.sectionId} />;
+  return <WorkProofTestimonialsCore content={props} E={E} sectionId={props.sectionId} editable={false} />;
 }
