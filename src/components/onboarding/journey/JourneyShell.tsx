@@ -43,7 +43,6 @@ import StepShowWork from './steps/StepShowWork';
 import StepQuestions from './steps/StepQuestions';
 import StepPlan from './steps/StepPlan';
 import StepBuilding from './steps/StepBuilding';
-import StepReveal from './steps/StepReveal';
 
 export interface JourneyShellProps {
   tokenId: string;
@@ -86,16 +85,23 @@ export interface JourneyStepProps {
   onBlockedChange?: (blocked: boolean) => void;
 }
 
-const STEP_BODIES: Record<JourneyStep, (props: JourneyStepProps) => JSX.Element> = {
+// STEP 06 (the reveal) folded OUT of the journey and ONTO the editor
+// (editor-route-consolidation phase 5): StepBuilding now `router.push`es to
+// `/edit/{token}?reveal=1` on success, and a resume that resolves to 6 (finished
+// content) is redirected to the same place below — so there is no step-6 body.
+// `Partial` because the map no longer covers the full `JourneyStep` union.
+const STEP_BODIES: Partial<Record<JourneyStep, (props: JourneyStepProps) => JSX.Element>> = {
   2: StepShowWork,
   3: StepQuestions,
   4: StepPlan,
   5: StepBuilding,
-  6: StepReveal,
 };
 
 const FIRST_STEP: JourneyStep = 2;
-const LAST_STEP: JourneyStep = 6;
+// The last WALKABLE in-journey step is 5 (building); 5 owns its own forward
+// motion (it pushes to the editor reveal on success), so "Continue" is disabled
+// there too.
+const LAST_STEP: JourneyStep = 5;
 
 // Steps whose bodies render their OWN primary advance CTA — StepShowWork ("Looks
 // right" / "Skip for now") and StepPlan ("Build my site", which runs an AWAITED
@@ -168,7 +174,16 @@ export default function JourneyShell({
         templateId,
         finalContent,
       });
-      if (!cancelled) setJourneyStep(step);
+      if (cancelled) return;
+      // Finished content resumes to STEP 06 in the resume rules — but the reveal
+      // folded onto the editor (phase 5). A returning user with a finished site
+      // belongs in the editor's reveal, not a journey step that no longer exists.
+      // (This is the SAME destination StepBuilding pushes to on fresh success.)
+      if (step === 6) {
+        router.push(`/edit/${tokenId}?reveal=1`);
+        return;
+      }
+      setJourneyStep(step);
     })();
     return () => {
       cancelled = true;
@@ -183,7 +198,10 @@ export default function JourneyShell({
   }, [journeyStep]);
 
   const Body = STEP_BODIES[journeyStep];
-  const ready = hydrated && !!seam;
+  // `Body` can be undefined for a transient step === 6 (resume-finished) before
+  // the redirect above fires — the map no longer registers 6. `ready` gates it so
+  // the shell shows its loader rather than crashing on an undefined body.
+  const ready = hydrated && !!seam && !!Body;
   const nextBlocked = journeyStep === 3 && blocked;
 
   return (
@@ -222,7 +240,7 @@ export default function JourneyShell({
                 </p>
               )}
 
-              {ready && seam && (
+              {ready && seam && Body && (
                 <div className="space-y-8">
                   <Body seam={seam} onBuildingChange={setBuilding} onBlockedChange={setBlocked} />
 

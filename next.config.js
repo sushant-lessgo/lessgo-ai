@@ -18,37 +18,37 @@ const nextConfig = {
           { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(), camera=()' },
         ],
       },
-      // 🚨 X-Frame-Options is SPLIT so onboarding STEP 06 can iframe the preview
-      // same-origin (work-onboarding-shell, founder ruling 2026-07-16). DENY blocks
+      // 🚨 X-Frame-Options is SPLIT so the editor preview SUB-ROUTE can be iframed
+      // same-origin (the mobile-view preview + the work-journey reveal). DENY blocks
       // framing EVEN same-origin — that's why this exists. Every other route keeps DENY.
       //
-      // ⚠️ These two sources MUST stay mutually exclusive, and they are:
-      //   `/preview/:token+`  → one-or-more segments ⇒ matches `/preview/{token}`
-      //                         (and `/preview/{token}/privacy`), NOT bare `/preview`.
-      //   `/((?!preview/).*)` → everything whose path does not start with `preview/`,
-      //                         which includes bare `/preview`.
-      // Do NOT loosen `:token+` to `:token*` (zero-or-more): `*` also matches bare
-      // `/preview`, which then matches BOTH sources. Next dedupes headers() by key
-      // with LAST-WINS, so today that overlap would resolve to DENY (the DENY entry
-      // is last) rather than sending two conflicting XFO values — but it makes the
-      // behavior depend on ENTRY ORDER instead of the source patterns. Keep them
-      // exclusive so order can't matter.
+      // editor-route-consolidation phase 5: the work-journey reveal FOLDED onto the
+      // editor (`/edit/{token}?reveal=1`, an in-editor presentation state — NOT an
+      // iframe), so the ONLY thing that ever framed `/preview` (the retired STEP 06
+      // iframe in StepReveal.tsx) is gone. Grep confirmed no remaining `<iframe`
+      // targets `/preview` — the surviving `/preview/{token}` references are plain
+      // <a href> navigations (admin, work-dashboard "Update site", privacy), which
+      // XFO does not affect. So the legacy `/preview/:token+` SAMEORIGIN rule is
+      // REMOVED here: `/preview` now falls under DENY like every other non-framed
+      // route. The `/edit/{token}/preview` sub-route stays the single framable surface.
       //
-      // ⚠️ INTERIM TARGET — THIS RULE MUST MOVE WITH THE REVEAL. Generate + reveal
-      // + preview are consolidating onto the edit route (preview becomes an editor
-      // mode toggle; `/preview` retires) — future editor-track work. Whoever
-      // retires `/preview`: re-point this source at the editor preview surface in
-      // the SAME change. Do not leave it dangling on a nonexistent route, and do
-      // not simply delete it — the reveal's iframe stops rendering without it.
-      // The matching iframe call site is src/components/onboarding/journey/steps/StepReveal.tsx.
+      // ⚠️ These TWO sources MUST stay mutually exclusive, and they are:
+      //   `/edit/:token/preview`     → the editor preview SUB-ROUTE, exactly one token
+      //                                segment (NOT `:token+` — do not widen the framable
+      //                                surface to `/edit/{token}/anything`). SAMEORIGIN.
+      //   `/((?!edit/[^/]+/preview$).*)`
+      //                              → everything that is not exactly `edit/{token}/preview`.
+      //                                Bare `/preview/{token}` and bare `/edit/{token}` (no
+      //                                /preview) both land here ⇒ DENY. No path matches both,
+      //                                so header value is order-independent.
       {
-        source: '/preview/:token+',
+        source: '/edit/:token/preview',
         headers: [
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
         ],
       },
       {
-        source: '/((?!preview/).*)',
+        source: '/((?!edit/[^/]+/preview$).*)',
         headers: [
           { key: 'X-Frame-Options', value: 'DENY' },
         ],

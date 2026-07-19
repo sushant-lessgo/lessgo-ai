@@ -1,45 +1,39 @@
-import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
-import PersonaPrompt from '@/components/onboarding/PersonaPrompt';
-import type { UserPersona } from '@/types/service';
+import { UserProfile } from '@clerk/nextjs';
+import { profileAppearance } from '@/lib/clerkAppearance';
 
+/**
+ * Account settings (`/dashboard/settings`) — Lessgo AI.
+ *
+ * Renders Clerk's managed <UserProfile/> as plain content inside the dashboard
+ * shell (src/app/dashboard/layout.tsx already supplies `.app-chrome` + sidebar +
+ * top bar + <main>). Clerk owns every account flow; this page adds no chrome.
+ *
+ * Server component: the `auth()` guard runs server-side; <UserProfile/> is a
+ * Clerk client component that hydrates beneath it (do NOT add 'use client').
+ */
 export default async function SettingsPage() {
   const { userId } = await auth();
   if (!userId) {
     redirect('/sign-in');
   }
 
-  const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
-    select: { persona: true },
-  });
-
   return (
-    <div className="flex flex-col min-h-screen bg-white text-brand-text font-body">
-      <main className="flex-grow w-full max-w-3xl mx-auto px-4 py-8">
-        <Link
-          href="/dashboard"
-          className="inline-block text-sm text-brand-mutedText hover:text-brand-text mb-6"
-        >
-          ← Back to dashboard
-        </Link>
-        <h1 className="text-heading2 font-heading text-landing-textPrimary mb-2">
+    <div className="px-[26px] pb-[26px] pt-[22px]">
+      <div className="mb-6">
+        <h1 className="font-app-sans text-2xl font-bold tracking-[-0.4px] text-app-ink">
           Account settings
         </h1>
-        <p className="text-brand-mutedText mb-8">
-          Update what you do. We'll tailor what we build for you.
+        <p className="mt-1 font-app-sans text-sm text-app-muted">
+          Manage your Lessgo AI profile, email, and password.
         </p>
+      </div>
 
-        <PersonaPrompt
-          embedded
-          initialPersona={(user?.persona as UserPersona) ?? null}
-          next="/dashboard?personaUpdated=1"
-          heading="What do you do?"
-          subheading="Pick the option that fits best. You can change this later."
-        />
-      </main>
+      <UserProfile routing="hash" appearance={profileAppearance} />
+
+      {/* Notifications settings placeholder — not built for beta.
+          // TODO(beta+): notifications settings — needs a prefs backend */}
     </div>
   );
 }

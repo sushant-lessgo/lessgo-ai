@@ -39,8 +39,31 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 37. **Work-library board fast-follows** (deferred from `work-library-board`): (a) **new-category → new-service → slot machinery** — a new group auto-generates its price row + intro copy via the work copy engine; (b) **category → page one-tap promotion** (suggested when earned); (c) **generic products/case-studies board** — generalize the work-photos board to fix Naayom's product UI for free. From work-library-board discuss 2026-07-18.
 36. **Full editor ↔ work-facts writeback** — per-field editor edits (price/services/establishment…) flow back into `facts.work` so ALL regens see live edits, not just the onboarding snapshot. The "wide" option split out of `facts-work-writeback` (which does the narrow story-regen fix only). From facts-work-writeback discuss 2026-07-18.
 35. **Trust testimonial integrity (LOW PRIORITY)** — two data-integrity bugs on the trust engine: (a) `regenerate-element` overwrites real testimonial quotes with AI invention + leaves a stale `realProof` flag (false provenance); (b) trust pages render UNATTRIBUTED testimonials — entry pipeline reduces `testimonials` to quote-only `string[]`, authors blank. De-risks trust-e2e but not urgent. Also in productQueue bugs table. Deprioritized 2026-07-17
+38. **Account settings page (build from scratch)** — real account-settings surface per `Lessgo Dashboard.dc.html` 2f; today the entry mis-routes to persona selection (no real page exists). `next`-cycle feature → /discuss+/feature. From 18 July QA (Pricing #3).
+39. **Onboarding page/section management** — on the "Here is your site" plan screen: remove/reorder pages + change/remove/reorder sections. Missing capability (no controls today). `next`-cycle feature → /discuss+/feature. From 18 July QA (O12).
+40. **engineDecider** — QA-prioritized by the 18 July double-onboarding (old wizard input → journey re-asks the same thing). Already agreed not specced (`docs/tracks/engineDecider.md`); needs /discuss→spec→/feature on `next`. From 18 July QA (O1).
 
 | 3 | Research brief — premium research-backed path: agentic Claude VoC + competitor research → editable Brief → generation | `docs/task/research-brief.spec.md` | queued — HELD until atelier lands (generation-path conflict) |
 | 4 | Universe v1 — variant fan-out (message-match / SEO keyword / audience), shared-edit propagation, universe view + per-variant analytics | `docs/tracks/Someday/universePlan.md` → universe-01… (spec required before /feature) | reserved, awaiting spec (**needs editorPlan phase 4 ops**) |
 | 5 | Campaign/offer pages — time-bound promo variants (universe v2) | universePlan.md U2 (spec required before /feature) | reserved, awaiting spec |
 | 6 | A/B testing — split traffic between variants (universe v3) | universePlan.md U2 (spec required before /feature) | reserved, awaiting spec |
+
+## User Feedback (production)
+
+Raw logs → `docs/reports/userFeedback.md`. Triage tags: ✅ covered · 🟡 planned-but-deferred · 🔴 new.
+
+### Ravi Kumar — service project `app.lessgo.ai/edit/ArGEPtpVe9FA`, 2026-07-17
+- ⭐🔴 **Look/template switching without starting over** — "don't like this template, have a different look in mind, how — do I start over?"; no smooth "show other looks, keep my content" flow (look-picker deferred). **User-flagged critical.** → /discuss.
+- ⭐🟡 **Global brand style layer** — set color + typeface at GLOBAL level (not per-element) + brand-guidelines input; user has brand guidelines. Today scattered per-element. → Design ▾ (deferred) + [[project_toolbar_track]] + backlog #13.
+- ✅ Mobile preview — `editor-route-consolidation` (mobile iframe toggle).
+- ✅ Clean preview / "link options are a hindrance, can't get real preview" — `editor-route-consolidation` (read-mode clears toolbars).
+- 🟡 Element delete — exists; discoverability gap (toolbar-beta owns clarity).
+- 🟡 Language toggle "doesn't work / not in preview" — `bilingual-editing` gated to bilingual projects → confusing/dead on a mono-lingual project; **likely a bug**.
+- 🟡 Stock-image suggestions (free/paid) — media **t8** (Unsplash/From-CMS), deferred.
+- 🟡 Setup steps "clickable but nothing happens" (add logo) — setup popup **t9** (backlog); the dead click = **bug**.
+- 🔴 Image dimension + weight guidance shown in-editor (cut iteration).
+- 🔴 AI image generation.
+- 🔴 Alt-text editing for SEO — `alt` in data, no editor UI to set it.
+- 🔴 Character limits — surface in editor + first-gen stays within limit.
+- 🔴 Template visual bugs — menu/logo misalignment, noisy top-aligned header, "Request Quote" wraps 2 lines → next `/bugfix`.
+- 🔴 Brand-kit input — upload brand colors + typography per brand.

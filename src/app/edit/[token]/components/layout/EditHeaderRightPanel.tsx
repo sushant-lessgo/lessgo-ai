@@ -6,8 +6,11 @@ import { useShallow } from 'zustand/react/shallow';
 import { useEditStore, useEditStoreApi } from '@/hooks/useEditStore';
 import { UndoRedoButtons } from '../ui/UndoRedoButtons';
 import { ResetButton } from '../ui/ResetButton';
-import { PreviewButton } from '../ui/PreviewButton';
-import { usePreviewNavigation } from '../ui/usePreviewNavigation';
+import { DeviceToggle } from '../ui/DeviceToggle';
+import { usePublishFlow } from '../publish/usePublishFlow';
+import { PublishSuccessCard } from '../publish/PublishSuccessCard';
+import { SlugModal } from '@/components/SlugModal';
+import CustomDomainModal from '@/components/CustomDomainModal';
 import { AppIcon } from '@/components/ui/icon';
 import { Coming } from '@/components/ui/coming';
 
@@ -86,19 +89,18 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
       localeConfig: s.localeConfig,
     })),
   );
+  // Edit/Preview segmented control drives the real editor mode. Single-scalar
+  // selector (no whole-store subscription); setMode via the store API.
+  const mode = useEditStore((s) => s.mode);
   const storeApi = useEditStoreApi();
   const [showConfirm, setShowConfirm] = useState(false);
-  // t1's Publish button. Publishing lives on the preview page, and the ONLY way
-  // in today is the Preview navigation — so the split-button's main half reuses
-  // that exact entry point (same hook, same call, no new behavior). The dropdown
-  // half is greyed: the handoff never defines its contents.
-  //
-  // ONE instance for this whole subtree, passed down to PreviewButton as props.
-  // The hook is not pure (it owns the getTabManager/cleanupTabManager lifecycle
-  // for a refcount-less keyed singleton), so two callers with the same tokenId
-  // = two owners of one lifecycle. It also shares `isNavigating`, so Publish's
-  // "Opening…" correctly disables Preview too. See PreviewButton's note.
-  const { handlePreviewClick, isNavigating } = usePreviewNavigation(tokenId);
+  // editor-route-consolidation phase 6: the Publish split-button now runs the REAL
+  // publish flow IN-PLACE (SlugModal → /api/publish → success card → domain upsell)
+  // via the SHARED `usePublishFlow` hook — the exact same implementation `/preview`
+  // uses, so the two surfaces can never diverge. No more hop to `/preview`; the old
+  // tab-manager preview-navigation hook is retired. The dropdown half stays greyed:
+  // the handoff never defines its contents.
+  const publish = usePublishFlow(tokenId);
 
   const isGenerating = aiGeneration?.isGenerating ?? false;
   // i18n-phase-1 (Phase 4): regen only writes the DEFAULT-locale base copy
@@ -164,35 +166,62 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
         <UndoRedoButtons />
         <ResetButton />
 
-        {/* Edit / Preview segmented (t1). `Edit` is the current view — an inert
-            state indicator, not a "coming" control. `Preview` IS the existing
-            PreviewButton, restyled to wear the inactive segment. */}
+        {/* Edit / Preview segmented (t1). Real mode toggle: each half calls
+            setMode; aria-current follows the live `mode`. setMode('preview')
+            already clears selection + hides the toolbar (coreActions). The
+            active segment wears the raised chip; the inactive is a ghost. */}
         <div
           role="group"
           aria-label="Edit or preview"
           className="inline-flex flex-none items-center gap-1 rounded-app-ctl-sm bg-app-track p-[3px]"
         >
-          <span
-            aria-current="true"
-            className="inline-flex items-center rounded-[7px] bg-app-surface px-3 py-1 text-[13px] font-medium text-app-ink shadow-app-card"
+          <button
+            type="button"
+            aria-current={mode !== 'preview'}
+            onClick={() => storeApi.getState().setMode('edit')}
+            className={`inline-flex items-center rounded-[7px] px-3 py-1 text-[13px] font-medium transition-colors ${
+              mode !== 'preview'
+                ? 'bg-app-surface text-app-ink shadow-app-card'
+                : 'text-app-muted hover:text-app-ink'
+            }`}
           >
             Edit
-          </span>
-          <PreviewButton onPreviewClick={handlePreviewClick} isNavigating={isNavigating} />
+          </button>
+          <button
+            type="button"
+            aria-current={mode === 'preview'}
+            onClick={() => storeApi.getState().setMode('preview')}
+            className={`inline-flex items-center gap-1.5 rounded-[7px] px-3 py-1 text-[13px] font-medium transition-colors ${
+              mode === 'preview'
+                ? 'bg-app-surface text-app-ink shadow-app-card'
+                : 'text-app-muted hover:text-app-ink'
+            }`}
+            title="Preview your landing page"
+          >
+            <AppIcon name="visibility" size={16} />
+            <span>Preview</span>
+          </button>
         </div>
+
+        {/* Device toggle (phase 4) — only in preview mode. Desktop keeps the
+            inline canvas; Mobile swaps it for a true-viewport iframe of the
+            chromeless sub-route (EditLayout). Absent in edit mode (no device
+            switching while editing). */}
+        {mode === 'preview' && <DeviceToggle />}
 
         {/* Publish split-button (t1) — built INLINE here on purpose: single
             consumer, so phase 1 explicitly declined to make it a primitive. */}
         <div className="inline-flex flex-none items-center rounded-app-ctl-sm bg-app-primary shadow-app-btn-publish transition-colors hover:bg-app-primary-hover">
           <button
             type="button"
-            onClick={handlePreviewClick}
-            disabled={isNavigating}
+            data-testid="editor-publish-trigger"
+            onClick={publish.openPublish}
+            disabled={publish.publishing}
             className="inline-flex items-center gap-1.5 rounded-l-app-ctl-sm py-[7px] pl-2.5 pr-2 text-[13px] font-semibold text-white disabled:cursor-wait disabled:opacity-70"
             title="Publish your page"
           >
             <AppIcon name="rocket_launch" filled size={17} />
-            <span>{isNavigating ? 'Opening…' : 'Publish'}</span>
+            <span>{publish.publishing ? 'Publishing…' : 'Publish'}</span>
           </button>
           {/* hairline, per t1: rgba(255,255,255,.3) 1x16 */}
           <span aria-hidden className="h-4 w-px flex-none bg-white/30" />
@@ -207,6 +236,51 @@ export function EditHeaderRightPanel({ tokenId }: EditHeaderRightPanelProps) {
         onClose={() => setShowConfirm(false)}
         onConfirm={handleRegenConfirm}
       />
+
+      {/* Publish flow (phase 6) — the SAME modals/card `/preview` renders, driven by
+          the shared usePublishFlow hook. In-editor overlays, no route hop. */}
+      {publish.showSlugModal && (
+        <SlugModal
+          slug={publish.customSlug}
+          onChange={publish.setCustomSlug}
+          title={publish.publishTitle}
+          onTitleChange={publish.setPublishTitle}
+          onCancel={() => publish.setShowSlugModal(false)}
+          onConfirm={publish.doPublish}
+          loading={publish.publishing}
+          error={publish.publishError}
+          existingPublished={publish.existingPublished}
+          analyticsEnabled={publish.analyticsEnabled}
+          onAnalyticsChange={publish.setAnalyticsEnabled}
+          // t17-A "Review" nudge. Unlike `/preview` (where it navigated back to the
+          // editor), we're ALREADY in the editor — so it just closes the dialog and
+          // drops into edit mode to fix the flagged guide tasks. Never a gate.
+          onReview={() => {
+            publish.setShowSlugModal(false);
+            storeApi.getState().setMode('edit');
+          }}
+        />
+      )}
+
+      {publish.showDomainModal && publish.existingPublished?.slug && (
+        <CustomDomainModal
+          slug={publish.existingPublished.slug}
+          open={publish.showDomainModal}
+          onClose={() => publish.setShowDomainModal(false)}
+        />
+      )}
+
+      {publish.publishSuccess && (
+        <PublishSuccessCard
+          publishedUrl={publish.publishedUrl}
+          existingPublished={publish.existingPublished}
+          onClose={() => publish.setPublishSuccess(false)}
+          onConnectDomain={() => {
+            publish.setPublishSuccess(false);
+            publish.setShowDomainModal(true);
+          }}
+        />
+      )}
 
       {/* No `.app-chrome` on the toast: `fixed` moves the box, not the DOM
           position — it still renders inside the bar's `.app-chrome` wrapper and

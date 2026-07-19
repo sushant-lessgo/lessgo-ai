@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { EditProvider, useEditStoreContext } from '@/components/EditProvider';
 import LandingPageRenderer from '@/modules/generatedLanding/LandingPageRenderer';
 import EditTransitionModal from './components/EditTransitionModal';
-import PageRevealAnimation from './components/PageRevealAnimation';
+import PageRevealAnimation from '@/components/reveal/PageRevealAnimation';
 
 import { logger } from '@/lib/logger';
 export default function GeneratePage() {

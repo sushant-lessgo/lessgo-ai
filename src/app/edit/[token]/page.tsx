@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { EditProvider } from "@/components/EditProvider";
+import { EditProvider, useEditStoreContext } from "@/components/EditProvider";
 import { EditLayout } from "./components/layout/EditLayout";
+import PageRevealAnimation from "@/components/reveal/PageRevealAnimation";
 import { EditLayoutErrorBoundary } from "@/app/edit/[token]/components/layout/EditLayoutErrorBoundary";
 import { ToastProvider } from "./components/ui/ToastProvider";
 import { DialogHost } from "@/components/ui/ConfirmDialog";
@@ -58,15 +59,44 @@ export default function EditPage() {
 // Separate component for the actual page logic
 function EditPageContent({ tokenId }: { tokenId: string }) {
   const router = useRouter();
-  
-  const [loadingState, setLoadingState] = useState<'loading' | 'success' | 'error'>('loading');
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const { store, sections } = useEditStoreContext();
 
-  // The EditProvider handles store initialization
+  // ── Reveal fold (editor-route-consolidation phase 5) ──────────────────────
+  // The work journey used to reveal the finished site in a journey STEP 06
+  // (`/preview?chrome=0` iframe). That folded onto the editor: StepBuilding /
+  // resume now `router.push('/edit/{token}?reveal=1')`, and here we consume it.
+  //
+  // ⚠️ SUSPENSE TRAP: this codebase's `next build` HARD-FAILS with
+  // `missing-suspense-with-csr-bailout` if `useSearchParams` is used without a
+  // <Suspense> boundary. We deliberately read `window.location.search` in a
+  // mount effect instead — no Suspense needed, and this subtree is already
+  // '"use client"' + client-only (behind EditProvider's hydration gate).
+  const [revealing, setRevealing] = useState(false);
+  const revealHandled = useRef(false);
+
   useEffect(() => {
-    setLoadingState('success');
+    if (revealHandled.current) return; // once per mount (StrictMode double-invoke safe)
+    revealHandled.current = true;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('reveal') !== '1') return;
+    // Reveal = the clean site first (preview mode); the header segmented control
+    // is the "go edit" affordance. loadFromDraft never touches `mode`, so this
+    // survives the async draft load.
+    store?.getState().setMode('preview');
+    setRevealing(true);
+    // Strip the param so a refresh / back-navigation never re-animates.
+    router.replace(`/edit/${tokenId}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // The EditProvider handles loading and error states, so we just render the layout
+  // The EditProvider handles loading and error states; we just render the layout,
+  // wrapped in the reveal animation for the one first-load reveal paint.
+  if (revealing) {
+    return (
+      <PageRevealAnimation sectionsCount={sections.length}>
+        <EditLayout tokenId={tokenId} />
+      </PageRevealAnimation>
+    );
+  }
   return <EditLayout tokenId={tokenId} />;
 }
