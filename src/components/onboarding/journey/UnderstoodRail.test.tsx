@@ -404,9 +404,17 @@ describe('UnderstoodRail — chips', () => {
     await type(testid<HTMLInputElement>('rail-chip-input-0')!, 'DRAFT — never saved');
     expect(testid<HTMLInputElement>('rail-chip-input-0')!.value).toBe('DRAFT — never saved');
 
-    // Commit through a path that does NOT touch `editingId`.
-    await type(testid<HTMLInputElement>('rail-note-input')!, 'The prices are wrong');
-    await click(testid('rail-note-submit'));
+    // Commit through a path that does NOT touch `editingId`. B15 (qa-0718) hid the
+    // "Something wrong?" NoteBox UI, so drive the SAME seam-level note commit
+    // directly — the mechanism under test is the projectionKey remount, not the
+    // (now-hidden) input widget. Re-point the UI vector here when NoteBox returns.
+    await act(async () => {
+      const live = useWizardStore.getState().briefFacts;
+      const commit = workJourneySeam.rail.appendNote('The prices are wrong', live ?? undefined);
+      if (!commit.ok) throw new Error(`note commit invalid: ${commit.error}`);
+      await useWizardStore.getState().commitRail(commit);
+    });
+    await flush();
 
     // Still editing groups — so the editor is here for a reason other than
     // `editingId` changing.
@@ -509,7 +517,11 @@ describe('UnderstoodRail — D8 ingestion-shaped commit regression', () => {
 // Notes
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe('UnderstoodRail — "Something wrong?"', () => {
+// SKIPPED (qa-0718 B15): the "Something wrong?" note input is BETA-HIDDEN in
+// UnderstoodRail.tsx (non-functional — submit was discarded). Kept as-is to
+// document intended future behavior; re-enable (describe → describe.skip → describe)
+// when the note input is wired back in.
+describe.skip('UnderstoodRail — "Something wrong?"', () => {
   it('appends a note through the seam and clears the box', async () => {
     const fetchMock = mockSaveDraft(true);
     await mountRail();

@@ -106,13 +106,14 @@ selector.
 - `WORK_COPY_ENGINE_TEMPLATES = ['atelier']` — the founder-approved allow-list
   (single source of truth; the ONLY tested work-multipage template).
 - Generation fork (`wizard/generation/work.llm.ts` → `workCopyEngineEnabled`) =
-  `NEXT_PUBLIC_WORK_COPY_ENGINE === 'true'` AND `templateId` in the allow-list.
-  Env flag is **build-time inlined** — flipping it needs a REDEPLOY, not a
-  runtime toggle (the "kill-switch" is redeploy-speed).
+  `templateId` in the allow-list. (B17: the former `NEXT_PUBLIC_WORK_COPY_ENGINE`
+  env kill-switch was REMOVED — work is always on; `workCopyEngineEnabled` is now
+  a thin alias of `isWorkCopyTemplate`. The Vercel prod env var is inert; delete
+  it after deploy.)
 - Editor story panel gate (`MainContent.tsx` → `isWorkCopyTemplate(templateId)`)
-  = allow-list membership ONLY (independent of the generation kill-switch).
+  = allow-list membership.
 - Every OTHER work-multipage template keeps today's SKELETON (manual-fill) path
-  even with the flag ON, until explicitly added to the allow-list.
+  until explicitly added to the allow-list.
 
 ## Photo binding — groups → covers + `/works/<slug>` item pages (E2)
 

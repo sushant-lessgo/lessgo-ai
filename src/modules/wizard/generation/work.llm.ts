@@ -54,15 +54,16 @@ import type { WorkGenerationInput } from './work';
 import type { GenerationCallbacks, GenerationResult, GenerationMeta } from './index';
 
 // ---------------------------------------------------------------------------
-// Flag + dispatch guard (plan decisions #8 + N4/step-4 orchestrator ruling).
+// Allow-list + dispatch guard (plan N4/step-4 orchestrator ruling; B17: env
+// kill-switch removed — the allow-list is now the whole gate).
 // ---------------------------------------------------------------------------
 
 /**
- * The allow-list, the membership predicate AND the kill-switch all live in the
- * leaf module `@/lib/workCopyEngine` (single source of truth, shared with the
- * editor's story-panel gate and — since work-onboarding-shell P5 — the journey
- * seam's SYNC STEP-05 `preflight`, which must not statically import THIS module
- * because its top pulls the template registry + multi-page assembly).
+ * The allow-list, the membership predicate AND `workCopyEngineEnabled` all live
+ * in the leaf module `@/lib/workCopyEngine` (single source of truth, shared with
+ * the editor's story-panel gate and — since work-onboarding-shell P5 — the
+ * journey seam's SYNC STEP-05 `preflight`, which must not statically import THIS
+ * module because its top pulls the template registry + multi-page assembly).
  * Re-exported here so existing generation callers (`index.ts`, `work.ts`,
  * `work.llm.test.ts`) keep their import surface unchanged.
  */
@@ -72,11 +73,11 @@ export type WorkRoutePath = 'granth-generator' | 'skeleton' | 'llm-fanout';
 
 /**
  * The WORK dispatch decision, extracted PURE so `GeneratingSlot`'s work fork is
- * PROVABLE without rendering React (see work.llm.test.ts's byte-identical routing
- * proof). Three cases:
- *   • not multipage (granth)          → 'granth-generator' (runWorkGeneration)
- *   • multipage + flag/allow-list ON  → 'llm-fanout'       (runWorkLLMGeneration)
- *   • multipage + flag/allow-list OFF → 'skeleton'         (runWorkSkeleton, UNCHANGED)
+ * PROVABLE without rendering React (see work.llm.test.ts's routing proof). Three
+ * cases:
+ *   • not multipage (granth)         → 'granth-generator' (runWorkGeneration)
+ *   • multipage + allow-list template → 'llm-fanout'       (runWorkLLMGeneration)
+ *   • multipage + non-allow-list      → 'skeleton'         (runWorkSkeleton, UNCHANGED)
  */
 export function resolveWorkRoute(opts: {
   isWorkMultipage: boolean;

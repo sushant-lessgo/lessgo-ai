@@ -172,17 +172,18 @@ describe('deriveRailPricePosition (DERIVED, never stored)', () => {
     expect(deriveRailPricePosition({ identity: { name: 'A' } })).toBeNull();
   });
 
-  it('defers to the canonical rubric once groups exist', () => {
+  it('defers to the canonical rubric once a genuine signal exists', () => {
     const base = (extra: Partial<WorkFacts>): WorkFacts => ({
       identity: { name: 'A' },
       groups: [{ name: 'G', kind: 'category', price: { mode: 'on-request' } }],
       ...extra,
     });
-    // on-request only ⇒ conservative middle (not auto-premium)
-    expect(deriveRailPricePosition(base({}))).toBe('middle');
-    // on-request + premium dreamClient ⇒ premium
+    // qa-0718 B7: on-request only, NO price/keyword signal ⇒ null (honest
+    // skeleton, not a confident band over zero evidence). Was 'middle' pre-fix.
+    expect(deriveRailPricePosition(base({}))).toBeNull();
+    // on-request + premium dreamClient (keyword signal) ⇒ premium
     expect(deriveRailPricePosition(base({ dreamClient: 'discerning, high-end couples' }))).toBe('premium');
-    // low from-priced + friendly dreamClient ⇒ friendly
+    // low from-priced (stated-price signal) + friendly dreamClient ⇒ friendly
     expect(
       deriveRailPricePosition({
         identity: { name: 'A' },
@@ -190,6 +191,23 @@ describe('deriveRailPricePosition (DERIVED, never stored)', () => {
         dreamClient: 'local families on a budget',
       })
     ).toBe('friendly');
+  });
+
+  it('B7 (qa-0718): seeded on-request-only ⇒ null even though groups exist (was premature "Mid-range")', () => {
+    const seeded = seedWorkFactsFromEntry({ offerings: ['Portraits'] } as Partial<EntryFacts>)!;
+    // groups DO exist (the pre-fix null-only-when-empty gate would fire 'middle')…
+    expect((seeded.groups ?? []).length).toBeGreaterThan(0);
+    // …but with no stated price and no keyword there is no evidence ⇒ null.
+    expect(deriveRailPricePosition(seeded)).toBeNull();
+  });
+
+  it('B7 (qa-0718): a stated amount that nets to middle is still SHOWN (signal present)', () => {
+    // amount-bearing price is a genuine signal even when the band is 'middle'.
+    const withPrice: WorkFacts = {
+      identity: { name: 'A' },
+      groups: [{ name: 'G', kind: 'category', price: { mode: 'exact', amount: 800 } }],
+    };
+    expect(deriveRailPricePosition(withPrice)).toBe('middle');
   });
 
   it('is never persisted — no pricePosition key survives a rail write', () => {
@@ -409,6 +427,44 @@ describe('appendUserNote', () => {
   });
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// qa-0718 B5 / B6 — rail projection of provenance + the answered charge.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('rail projection — provenance (B5) + answered charge (B6)', () => {
+  it('B5: railFromWorkFacts carries group origin (upload buckets are marked)', () => {
+    const work: WorkFacts = {
+      identity: { name: 'A' },
+      groups: [
+        { name: 'Weddings', kind: 'category', price: { mode: 'on-request' }, origin: 'offer' },
+        { name: 'Mar 10, 2025', kind: 'category', price: { mode: 'on-request' }, origin: 'upload' },
+      ],
+    };
+    const rail = railFromWorkFacts(work);
+    expect(rail.groups.map((g) => g.origin)).toEqual(['offer', 'upload']);
+  });
+
+  it('B6: priceLabel is null (skeleton) for seeded on-request-only facts', () => {
+    // pre-fix there was no rail.priceLabel field at all (undefined).
+    expect(railFromFacts(seededFactsBag()).priceLabel).toBeNull();
+  });
+
+  it('B6: priceLabel fills after an amount-bearing answer through the edit door', () => {
+    // Seed = on-request groups. Answer a from-price through applyRailEdit — the
+    // SINGLE write gate the STEP 03 charge answer (commitGroupPrice) routes
+    // through — and the representative charge becomes visible in the rail.
+    const seeded = seededFactsBag();
+    const groups = (getWorkFacts(seeded)!.groups ?? []).map((g) => ({
+      ...g,
+      price: { mode: 'from' as const, amount: 2400, currency: 'EUR' },
+    }));
+    const res = applyRailEdit({ field: 'groups', value: groups }, seeded);
+    expect(res.ok).toBe(true);
+    const rail = railFromFacts((res as { facts: Record<string, unknown> }).facts);
+    expect(rail.priceLabel).toBe('From EUR 2400');
+  });
+});
+
 describe('workFactsToBriefPatch', () => {
   it('rejects work facts that would null getWorkFacts (kind-less group)', () => {
     const bad = { identity: { name: 'A' }, groups: [{ name: 'G', price: { mode: 'on-request' } }] } as unknown as WorkFacts;
@@ -472,6 +528,12 @@ describe('board-owned fields — slug + hidden (additive-optional)', () => {
       { id: 'p1', url: 'https://cdn/1.jpg' },
       { id: 'p2', url: 'https://cdn/2.jpg', hidden: true },
     ]);
+  });
+
+  it('normalizeWorkGroup carries origin (qa-0718 B5); absent stays ABSENT (= offer)', () => {
+    expect(normalizeWorkGroup({ name: 'asset', origin: 'upload' })!.origin).toBe('upload');
+    expect(normalizeWorkGroup({ name: 'Weddings', origin: 'offer' })!.origin).toBe('offer');
+    expect(normalizeWorkGroup({ name: 'Weddings' })).not.toHaveProperty('origin');
   });
 
   it('applyRailEdit({field:groups}) re-emits slug + hidden through the schema gate', () => {

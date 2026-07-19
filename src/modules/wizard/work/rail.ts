@@ -62,6 +62,13 @@ export interface WorkRailGroup {
   price: WorkPrice;
   /** Human chip label, e.g. "On request", "From 500", "1200". */
   priceLabel: string;
+  /**
+   * Provenance (qa-0718 B5). `'upload'` groups are E2 photo buckets, NOT things
+   * the seller sells — the "WHAT YOU SELL" rail DISPLAY filters them out. Absent
+   * = offer/legacy. Carried so the seam can filter while chip ids stay indexed
+   * against the FULL facts bag (the chip-id join reads raw facts).
+   */
+  origin?: WorkGroup['origin'];
 }
 
 /**
@@ -80,6 +87,14 @@ export interface WorkRail {
   reach: string | null;
   /** `facts.work.groups[]` — "WHAT YOU SELL". */
   groups: WorkRailGroup[];
+  /**
+   * Representative answered CHARGE label (qa-0718 B6) — "WHAT YOU CHARGE".
+   * The first amount-bearing group price (`exact`/`from` with an amount), via
+   * the `priceLabel()` helper; `null` when only on-request / no groups (the
+   * honest skeleton — a seed on-request default is indistinguishable from an
+   * answered "on request", a documented D-C limit).
+   */
+  priceLabel: string | null;
   /** DERIVED from group prices — never stored. `null` = unknown (no prices). */
   pricePosition: PricePosition | null;
   /** `facts.work.languages[]` (NOT `brief.locales` — different i18n field). */
@@ -116,6 +131,12 @@ export interface WorkGroupInput {
    * that omit it (onboarding seed / STEP 03) see no behaviour change.
    */
   slug?: string;
+  /**
+   * Provenance (qa-0718 B5) — carried verbatim like `photos`/`slug`. Set to
+   * `'upload'` by `mergeProposalIntoGroups` for buckets it creates; callers that
+   * omit it (onboarding seed / STEP 03 offers) leave it absent = offer/legacy.
+   */
+  origin?: WorkGroup['origin'];
 }
 
 /**
@@ -157,6 +178,7 @@ const EMPTY_RAIL: WorkRail = {
   location: null,
   reach: null,
   groups: [],
+  priceLabel: null,
   pricePosition: null,
   languages: [],
   establishment: null,
@@ -174,11 +196,50 @@ function priceLabel(price: WorkPrice): string {
 }
 
 /**
+ * Representative answered CHARGE label (qa-0718 B6). The first group with an
+ * amount-bearing price (`exact`/`from` + a defined amount), rendered via
+ * `priceLabel()`. `null` when only on-request / no groups — the rail then shows
+ * the honest skeleton. (In E1 one blanket price is written across all groups, so
+ * "first amount-bearing" IS the practice price; per-group pricing is deferred.)
+ *
+ * DOCUMENTED D-C LIMIT: a seeded on-request default is indistinguishable from an
+ * answered "on request", so an on-request answer stays skeleton — but an
+ * amount-bearing answer becomes visible, which is the bug this fixes.
+ */
+function representativePriceLabel(groups: WorkGroup[] | undefined): string | null {
+  const g = (groups ?? []).find(
+    (grp) => grp.price?.mode !== 'on-request' && grp.price?.amount !== undefined
+  );
+  return g ? priceLabel(g.price) : null;
+}
+
+/**
+ * Is there a GENUINE pricing/positioning signal (qa-0718 B7)? A confident band
+ * must not appear over zero evidence, so the rail projection gates on either:
+ *   • an explicit STATED price (a group priced `exact`/`from` with an amount), or
+ *   • a premium/friendly KEYWORD — detected by re-running the canonical rubric
+ *     with prices NEUTRALIZED (`groups:[]`), so only the dreamClient/praise
+ *     keyword families can move the band off `'middle'`. This REUSES the rubric's
+ *     word lists (one source of truth) — no keyword list is duplicated here.
+ * A seeded on-request-only bag has neither ⇒ no signal ⇒ null (skeleton).
+ */
+function hasPricePositionSignal(work: WorkFacts): boolean {
+  const groups = work.groups ?? [];
+  const statedPrice = groups.some(
+    (g) => (g.price?.mode === 'exact' || g.price?.mode === 'from') && g.price?.amount !== undefined
+  );
+  if (statedPrice) return true;
+  return derivePricePosition({ ...work, groups: [] }) !== 'middle';
+}
+
+/**
  * PRICE POSITION is DERIVED, NEVER STORED (scout §3 verdict). Unknown (`null`)
- * when there are no groups at all — the canonical `derivePricePosition` is
+ * when there are no groups at all, OR when there is no genuine pricing/
+ * positioning signal (qa-0718 B7) — the canonical `derivePricePosition` is
  * default-'middle' by design, which would render a confident-looking band over
- * zero evidence. With groups present we defer to the canonical rubric (one
- * source of truth for the band — this module never re-implements it).
+ * zero evidence (e.g. a seeded on-request-only bag). Only once a real signal
+ * exists do we defer to the canonical rubric (one source of truth for the band —
+ * this module never re-implements it).
  */
 export function deriveRailPricePosition(
   work: WorkFacts | null | undefined
@@ -186,6 +247,7 @@ export function deriveRailPricePosition(
   if (!work) return null;
   const groups = work.groups ?? [];
   if (groups.length === 0) return null;
+  if (!hasPricePositionSignal(work)) return null;
   return derivePricePosition(work);
 }
 
@@ -202,7 +264,9 @@ export function railFromWorkFacts(work: WorkFacts | null | undefined): WorkRail 
       kind: g.kind,
       price: g.price,
       priceLabel: priceLabel(g.price),
+      ...(g.origin ? { origin: g.origin } : {}),
     })),
+    priceLabel: representativePriceLabel(work.groups),
     pricePosition: deriveRailPricePosition(work),
     languages: work.languages ?? [],
     establishment: work.establishment ?? null,
@@ -266,6 +330,8 @@ export function normalizeWorkGroup(input: WorkGroupInput | null | undefined): Wo
   // Board-owned stable slug — preserve a non-empty trimmed value; absent/blank
   // stays ABSENT (never `{slug: ''}`), so pre-board facts fall back to name→slug.
   if (typeof input?.slug === 'string' && input.slug.trim()) group.slug = input.slug.trim();
+  // Provenance (qa-0718 B5) — carried verbatim; absent stays ABSENT (= offer).
+  if (input?.origin === 'offer' || input?.origin === 'upload') group.origin = input.origin;
   return group;
 }
 

@@ -97,6 +97,24 @@ const STEP_BODIES: Record<JourneyStep, (props: JourneyStepProps) => JSX.Element>
 const FIRST_STEP: JourneyStep = 2;
 const LAST_STEP: JourneyStep = 6;
 
+// Steps whose bodies render their OWN primary advance CTA — StepShowWork ("Looks
+// right" / "Skip for now") and StepPlan ("Build my site", which runs an AWAITED
+// commitRail persistence before advancing). On these steps the generic footer
+// "Continue" would be a confusing SECOND advance button, and on step 4 a HAZARD
+// (bare setJourneyStep skips the awaited commit). We hide footer Continue here
+// but keep Back. (qa-0718 B16)
+const STEPS_OWNING_ADVANCE = new Set<JourneyStep>([2, 4]);
+
+/**
+ * Whether the generic footer "Continue" (data-testid="journey-next") should
+ * render for a given step. Extracted as a pure helper so the B16 regression test
+ * can assert it directly (full-shell render blocks on the async seam loader).
+ * The JSX below is wired to THIS function so the test guards real behavior.
+ */
+export function footerNextVisible(step: JourneyStep): boolean {
+  return !STEPS_OWNING_ADVANCE.has(step);
+}
+
 export default function JourneyShell({
   tokenId,
   brief,
@@ -228,17 +246,19 @@ export default function JourneyShell({
                       <AppIcon name="arrow_back" size={16} />
                       Back
                     </button>
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        setJourneyStep(Math.min(LAST_STEP, journeyStep + 1) as JourneyStep)
-                      }
-                      disabled={journeyStep === LAST_STEP || nextBlocked}
-                      data-testid="journey-next"
-                    >
-                      Continue
-                      <AppIcon name="arrow_forward" size={16} className="ml-1.5" />
-                    </Button>
+                    {footerNextVisible(journeyStep) && (
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          setJourneyStep(Math.min(LAST_STEP, journeyStep + 1) as JourneyStep)
+                        }
+                        disabled={journeyStep === LAST_STEP || nextBlocked}
+                        data-testid="journey-next"
+                      >
+                        Continue
+                        <AppIcon name="arrow_forward" size={16} className="ml-1.5" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}

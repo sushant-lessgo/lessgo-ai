@@ -87,7 +87,7 @@ export default function DnsStep({
           Step 2 of 2
         </div>
         <h3 role="status" aria-live="polite" className="font-semibold text-gray-800">
-          Point your DNS to Lessgo
+          Point your DNS to Lessgo AI
         </h3>
         <p className="text-sm text-gray-600 mt-1">
           {status === 'issuing_ssl'

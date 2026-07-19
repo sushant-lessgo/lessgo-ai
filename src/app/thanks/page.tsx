@@ -7,7 +7,7 @@ export default function ThankYouPage() {
         </h1>
 
         <p className="text-lg">
-          Welcome to the founding circle of <span className="font-semibold">Lessgo.ai</span>, AI-powered coversion-focused landing page builder.
+          Welcome to the founding circle of <span className="font-semibold">Lessgo AI</span>, AI-powered coversion-focused landing page builder.
         </p>
 
         <div className="space-y-4">
@@ -15,7 +15,7 @@ export default function ThankYouPage() {
     href={`${process.env.NEXT_PUBLIC_DASHBOARD_URL ?? ''}/dashboard`}
     className="inline-block bg-brand-logo text-white font-semibold px-6 py-3 rounded-xl shadow hover:bg-brand-accentPrimary transition"
   >
-    Try Lessgo.ai Now!
+    Try Lessgo AI Now!
   </a>
 
   <p className="text-sm text-gray-700">
@@ -35,7 +35,7 @@ export default function ThankYouPage() {
         <div className="text-left mt-8 space-y-4 border-t border-gray-200 pt-10">
           <h2 className="text-xl font-semibold">What happens next?</h2>
           <ul className="list-disc list-inside text-gray-700 space-y-2">
-            <li>You now have early access to Lessgo.ai</li>
+            <li>You now have early access to Lessgo AI</li>
             <li>Expect occasional updates from the founder</li>
             <li>You'll receive founder-only perks & early features</li>
           </ul>

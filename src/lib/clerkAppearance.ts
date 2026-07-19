@@ -43,8 +43,13 @@ export const authAppearance: Appearance = {
   elements: {
     // ---- card chrome: stripped; the auth layout column is the frame ----
     rootBox: 'w-full',
-    cardBox: 'w-full max-w-none rounded-none border-0 bg-transparent shadow-none',
-    card: 'w-full gap-0 rounded-none border-0 bg-transparent p-0 shadow-none',
+    // overflow-visible: Clerk's default card chrome clips with `overflow:hidden`
+    // (for its rounded corners). We render rounded-none/transparent, and the bold
+    // headerTitle's tight negative tracking pushes the first glyph's ink slightly
+    // left of x=0 — the card's hidden overflow was clipping the leading "C" (B9).
+    cardBox:
+      'w-full max-w-none overflow-visible rounded-none border-0 bg-transparent shadow-none',
+    card: 'w-full gap-0 overflow-visible rounded-none border-0 bg-transparent p-0 shadow-none',
 
     // ---- header (title + subline) ----
     header: 'mb-6 items-start gap-0 text-left',

@@ -55,10 +55,10 @@ export default function WaitlistForm({ formPosition }: WaitlistFormProps) {
           <div className="bg-green-50 border border-green-200 text-green-900 p-4 rounded-xl shadow-sm">
           <p className="font-semibold text-lg mb-6">✅ You're In! One Last Step…</p>
           <p className="mb-2">Check your inbox and <strong>confirm your email</strong> to activate early access.<br/>
-          <span className="text-sm text-gray-600">(Look for: “Confirm your spot at Lessgo.ai” – it might be in Promotions)</span></p>
+          <span className="text-sm text-gray-600">(Look for: “Confirm your spot at Lessgo AI” – it might be in Promotions)</span></p>
 
           <a href={`${process.env.NEXT_PUBLIC_DASHBOARD_URL ?? ''}/dashboard`} className="inline-block mt-4 px-5 py-2 bg-brand-logo text-white font-semibold rounded-lg hover:bg-brand-accentPrimary transition">
-          Try Lessgo.ai Now
+          Try Lessgo AI Now
           </a>
 
           <ul className="text-sm text-gray-700 mt-6 list-disc list-inside">

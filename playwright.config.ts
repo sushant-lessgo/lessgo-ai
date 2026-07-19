@@ -119,14 +119,8 @@ export default defineConfig({
       // reuseExistingServer:true silently tests a FOREIGN worktree's code.
       // With this, `E2E_PORT=<n>` alone is sufficient and self-consistent.
       PORT: String(PORT),
-      // work-onboarding-shell: the work copy-engine kill-switch. Off ⇒ STEP 05
-      // hard-fails by design (landmine 2), so the journey e2e needs it ON.
-      //
-      // ⚠️ NEXT_PUBLIC_* is BUILD-TIME INLINED and `reuseExistingServer: !CI`
-      // means a dev server already listening on the port is reused AS-IS — it
-      // will not have this var. Kill stale dev servers before running the suite.
-      // (The PORT line above makes E2E_PORT sufficient to get a fresh one.)
-      NEXT_PUBLIC_WORK_COPY_ENGINE: 'true',
+      // (B17: the work copy-engine env kill-switch `NEXT_PUBLIC_WORK_COPY_ENGINE`
+      // was removed — work is always on via the allow-list. No env entry needed.)
     },
   },
 });

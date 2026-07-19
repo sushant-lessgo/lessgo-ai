@@ -202,7 +202,8 @@ export default function UnderstoodRail({ rail, engine }: UnderstoodRailProps) {
         ))}
       </div>
 
-      <NoteBox saving={saving} onSubmit={submitNote} />
+      {/* BETA-HIDDEN (qa-0718 B15): "Something wrong?" input non-functional (submit discarded); re-enable when wired. */}
+      {/* <NoteBox saving={saving} onSubmit={submitNote} /> */}
     </aside>
   );
 }

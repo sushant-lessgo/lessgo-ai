@@ -377,49 +377,36 @@ describe('runWorksFanOut — wiring + dormancy', () => {
 // ── Dispatch guard (byte-identical routing proof; plan step 4 / N4) ───────────
 
 describe('workCopyEngineEnabled + resolveWorkRoute (allow-list guard)', () => {
-  const ORIG = process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
-  afterEach(() => {
-    if (ORIG === undefined) delete process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
-    else process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = ORIG;
-  });
+  // B17: the NEXT_PUBLIC_WORK_COPY_ENGINE env kill-switch was REMOVED — the
+  // allow-list is now the whole gate (env-independent). These cases run with the
+  // env UNSET and guard against an env branch creeping back.
 
   it('allow-list is exactly [atelier]', () => {
     expect([...WORK_COPY_ENGINE_TEMPLATES]).toEqual(['atelier']);
   });
 
-  it('flag OFF (default) ⇒ disabled for every template', () => {
-    delete process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
-    expect(workCopyEngineEnabled('atelier')).toBe(false);
-    expect(workCopyEngineEnabled('lumen')).toBe(false);
-  });
-
-  it('flag ON ⇒ enabled ONLY for allow-listed templates', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+  it('enabled ONLY for allow-listed templates (env UNSET)', () => {
     expect(workCopyEngineEnabled('atelier')).toBe(true);
     expect(workCopyEngineEnabled('lumen')).toBe(false);
     expect(workCopyEngineEnabled(null)).toBe(false);
   });
 
-  // The 4 byte-identical routing cases the orchestrator mandated.
-  it('(a) granth (not multipage) ⇒ granth-generator regardless of flag', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+  // The byte-identical routing cases the orchestrator mandated (env-independent).
+  it('(a) granth (not multipage) ⇒ granth-generator', () => {
     expect(resolveWorkRoute({ isWorkMultipage: false, templateId: 'granth' })).toBe(
       'granth-generator'
     );
   });
 
-  it('(b) flag OFF + work-multipage ⇒ skeleton (unchanged)', () => {
-    delete process.env.NEXT_PUBLIC_WORK_COPY_ENGINE;
-    expect(resolveWorkRoute({ isWorkMultipage: true, templateId: 'atelier' })).toBe('skeleton');
+  it('(b) atelier multipage ⇒ llm-fanout unconditionally (env unset)', () => {
+    expect(resolveWorkRoute({ isWorkMultipage: true, templateId: 'atelier' })).toBe('llm-fanout');
   });
 
-  it('(c) flag ON + non-atelier multipage ⇒ skeleton (unchanged)', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+  it('(c) non-atelier multipage ⇒ skeleton (allow-list still blocks lumen)', () => {
     expect(resolveWorkRoute({ isWorkMultipage: true, templateId: 'lumen' })).toBe('skeleton');
   });
 
-  it('(d) flag ON + atelier multipage ⇒ llm-fanout', () => {
-    process.env.NEXT_PUBLIC_WORK_COPY_ENGINE = 'true';
+  it('(d) atelier multipage ⇒ llm-fanout', () => {
     expect(resolveWorkRoute({ isWorkMultipage: true, templateId: 'atelier' })).toBe('llm-fanout');
   });
 });
