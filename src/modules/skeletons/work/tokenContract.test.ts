@@ -225,7 +225,8 @@ describe('serializeSkinTokens — Wave 2B derived vars', () => {
     expect(css).toContain('--wk-pkg-price-fs:clamp(32px,3vw,42px);');
     expect(css).toContain('--wk-about-align:center;');
     expect(css).toContain('--wk-about-eyebrow-display:inline-block;');
-    expect(css).toContain('--wk-header-bg:transparent;');
+    expect(css).toContain('--wk-header-bg:var(--wk-dark);');
+    expect(css).not.toContain('--wk-header-bg:transparent');
     expect(css).toContain('--wk-header-fg:var(--wk-on-dark);');
     expect(css).toContain('--wk-header-dot:inline-block;');
   });
