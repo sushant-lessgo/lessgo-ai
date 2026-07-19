@@ -68,3 +68,114 @@ Result: fixture derives **compact** (NON-one-pager) → the seeded e2e journey w
 
 - The e2e spec `e2e/workPlan.spec.ts` is now stale (compact 3-page seed) — phase-2 rewrites it in the same PR-train. Do not run the e2e gate between phases.
 - `.next` was cleared during verification (`rm -rf .next`) to rule out the stale-types phantom; harmless (rebuilds on next dev/build).
+
+---
+
+# plan-proposal-gate — Phase 2 implementation audit
+
+Phase 2 ONLY (PlanStep UI rework + dead-variant deletion + e2e rewrite). Built on
+the phase-1 pure machinery (shape.ts, applyTileToggle/applyWorkGroupToggle).
+
+## Files changed
+
+1. `src/components/onboarding/journey/engines/work/PlanStep.tsx` — full body rework.
+2. `src/modules/wizard/work/plan.ts` — deleted `renamePage`/`movePage`/`setGoal` PlanEdit variants + impl.
+3. `src/modules/wizard/work/plan.test.ts` — deleted the three matching describes.
+4. `e2e/workPlan.spec.ts` — rewritten to 3 tests.
+
+## Per-file
+
+### PlanStep.tsx (full rework)
+- KEPT verbatim: `approve()` (live-state read, ONE awaited idempotent
+  `commitRail(buildPlanCommit(...))`, advance to step 5 only on ok, inline
+  `plan-error` alert, `approving` guard); testids `step-plan` (root, with
+  `data-journey-step={4}`), `plan-build` (CTA wired to `approve()`), `plan-error`.
+  Component export shape + seam loading untouched.
+- DELETED: photo strip + `photosWithUrl`, section rows + `sectionRow`/`workVocabulary`,
+  goal badge/select + `workPageGoalWords`/`workPageGoalBadgePrefix`, rename UI,
+  move buttons, add-select dropdown, lead-group swap + `makeLead` + `applyRailEdit`.
+  Their now-unused imports removed (`applyPlanEdit`, `applyRailEdit`, `WorkGroupInput`,
+  `WorkPhotoRef`, `workVocabulary`, goal words, `defaultGoalForPage`,
+  `addableWorkPages`, `workPageTypes`, `WORK_PAGE_GOAL_KEYS`).
+- ADDED: two `role="radio"` shape cards (`plan-shape-single`/`plan-shape-multi`,
+  `aria-checked`), selected state DERIVED from `siteShapeOf(sitemap)` (no local shape
+  state); PAGE tiles (`plan-tile-<canonicalKey>`, `aria-pressed`) rendered only in
+  multi shape, selected = present-in-sitemap via `TILE_ALIAS`, Home locked-on with
+  lock icon; Work-Group tile hidden unless `canPromoteWorkGroup(groups.length)`
+  (RULING 3); Prices tile labelled "Prices" (RULING 1); footnote `plan-footnote`.
+- Every edit flows through the one write door: `applyTileToggle`/`applyWorkGroupToggle`
+  / `foldToSinglePage` / `expandToMultiPage` → `commitRail(buildPlanCommit(next, liveFacts))`.
+- Styling: app-chrome tokens only (`bg-app-surface`/`border-app-hairline`/`text-app-*`,
+  accents `text-app-primary`/`bg-app-tint`, CTA via existing `cta` button variant),
+  `font-app-sans`, `<AppIcon>`. No hardcoded hexes. Menu read from store via pure-data
+  `getPageArchetypesForTemplate(templateId)` (StructureSlot precedent, firewall-safe).
+
+### plan.ts
+- Removed `renamePage`/`movePage`/`setGoal` from the `PlanEdit` union + their switch
+  cases; removed the now-unused `WORK_PAGE_GOAL_KEYS` import; updated the applyPlanEdit
+  doc-comment rules block. `addPage`/`removePage` + phase-1 `applyTileToggle`/
+  `applyWorkGroupToggle`/`buildPlanCommit` untouched.
+- Grep-confirmed no other consumer of the removed variants before deleting: the only
+  hits for `'renamePage'`/`'movePage'`/`'setGoal'` were plan.ts, plan.test.ts, and
+  PlanStep.tsx (the file being reworked).
+
+### plan.test.ts
+- Deleted the three describes for the removed variants. Kept add/remove/purity/
+  buildPlanCommit + the phase-1 tile/work-group suites. Re-pointed the purity test's
+  second edit from `renamePage` to `addPage` (equivalent no-mutation probe).
+
+### e2e/workPlan.spec.ts (3 tests, compact Kundius fixture)
+- Test 1: STEP 04 → multi selected + per-archetype preselection (home/work/contact ON,
+  prices/about OFF); Work-Group tile renders qualified (nit b); no `plan-add-select`;
+  leak probe with `collection` DROPPED (nit a) and `experiences` ADDED; one-tap add
+  About, remove Contact → build → reveal; assert LAST structure commit + DB lacks
+  `contact`/`/contact`, includes `about`/`/about`; generate-copy lacks `/contact`,
+  includes `/about` + `/work`.
+- Test 2: fresh seed → single → tiles hidden → build → reveal; assert structure
+  `mode:'multi'`, `pages===['home']`, Home sections include hero/work/proof/packages/
+  about/contact; `generatedSlugs` deduped `['/']`. Atelier's `proof` band is always
+  folded onto Home — F22 gates only the `testimonials` section key (which atelier never
+  uses), so `filterSectionsByProof` never drops atelier's `proof` band. (That the `proof`
+  band is unguarded by F22 is a pre-existing platform gap, out of scope here.)
+- Test 3: intercept `/api/saveDraft` → 500 once on the structure-bearing approve commit
+  → assert `plan-error` visible + `step-plan` still present + no `step-building`/`step-reveal`.
+
+## Deviations
+
+- **Single-page folds the FULL menu, not the live compact subset.** The plan's UI
+  step-3 text says `foldToSinglePage(liveSitemap, …)`, but Test 2 (and the spec's
+  "every section stacked", the human gate item #2, and the tier-why rationale
+  "silently drops content") require the single page to carry hero/work/packages/about/
+  contact — which a compact (3-page) live sitemap fold cannot produce. Resolved the
+  in-scope contradiction conservatively: `selectShape('single')` folds
+  `expandToMultiPage(menu, proofOpts)` (the full menu), mirroring the seed's one-pager
+  branch exactly. The user's multi tile choices are still stashed in a `useRef` and
+  restored on switch-back (ruling 5). This avoids silent content loss.
+- **Contact/Blog tile copy** written as plain fixed strings ("How buyers reach you — one
+  clear way to get in touch." / "Notes and updates on their own page.") — the plan left
+  Contact's line as "(own plain line)" and gave no Blog line; chose plain, key-free copy.
+- **Leak-probe forbidden list** = `hero/quote/testimonial/cta/proof/workdetail/experiences`
+  — dropped `collection` (nit a, collides with Work-Group copy) and added `experiences`
+  to enforce RULING 1 (the atelier slug must never surface).
+
+## Verification (all green)
+
+- `npx tsc --noEmit` — clean (no output).
+- `npm run test:run` — 4079 passed | 15 skipped (255 files). plan/shape/useWizardStore
+  suites green after the variant deletion.
+- `npm run lint` — clean (only pre-existing warnings in unrelated template/provider
+  files; none in the touched files).
+- `npm run build` — full build (buildPublishedCSS → buildAssets → next build) succeeded.
+- e2e spec type-check — `tsc -p` over `e2e/workPlan.spec.ts` + its helpers (temp config
+  extending root tsconfig) clean; selectors match the testids PlanStep emits.
+  **e2e EXECUTION deferred to the founder QA gate** (needs a running dev server + Clerk
+  session per e2e/README.md) — not run here.
+
+## Open risks
+
+- Work-Group promotion downstream generation is unproven (human-gate item #3): the tile
+  is shipped ENABLED-when-qualified per RULING 3; founder rules greyed-vs-enabled at the
+  gate. No greying implemented.
+- Single-page fold-drop: pages outside `home.allowedSections` (e.g. a promoted
+  work-group / project-story page's sections) are dropped with a `console.warn` when
+  folded to single (phase-1 behavior) — human-gate item #4 confirms acceptability.

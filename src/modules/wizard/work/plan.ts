@@ -33,7 +33,6 @@ import {
   workPageTypeKeys,
   addableWorkPages,
   defaultGoalForPage,
-  WORK_PAGE_GOAL_KEYS,
   type WorkPageTypeKey,
   type WorkPageGoalKey,
 } from '@/modules/engines/workPages';
@@ -61,10 +60,7 @@ import type { ConfirmedStructure } from '@/modules/templates/fit';
  */
 export type PlanEdit =
   | { type: 'addPage'; pageKey: WorkPageTypeKey; contactMethod?: WorkPageGoalKey }
-  | { type: 'removePage'; index: number }
-  | { type: 'renamePage'; index: number; title: string }
-  | { type: 'movePage'; index: number; dir: -1 | 1 }
-  | { type: 'setGoal'; index: number; goal: WorkPageGoalKey };
+  | { type: 'removePage'; index: number };
 
 export type PlanEditResult =
   | { ok: true; next: WorkSitemapPage[] }
@@ -112,10 +108,9 @@ function currentPageKeys(sitemap: WorkSitemapPage[]): WorkPageTypeKey[] {
  *               `home` stays first. Gets its `defaultSections`/slug/title from
  *               `workPageTypes` + `defaultGoalForPage(pageKey, contactMethod)`.
  *  - removePage index valid; `home` is non-removable.
- *  - renamePage index valid; title trimmed non-empty; slug UNCHANGED (code-fixed).
- *  - movePage   index valid; `home` cannot move and cannot be displaced from
- *               first (a move into position 0 is refused).
- *  - setGoal    index valid; goal ∈ `WORK_PAGE_GOAL_KEYS`.
+ *
+ * (rename / reorder / per-page goal are the editor's job — not offered at the
+ * gate — so those edit kinds were removed with the plan-proposal-gate UI rework.)
  */
 export function applyPlanEdit(edit: PlanEdit, sitemap: WorkSitemapPage[]): PlanEditResult {
   const pages = [...sitemap];
@@ -142,41 +137,6 @@ export function applyPlanEdit(edit: PlanEdit, sitemap: WorkSitemapPage[]): PlanE
       if (!target) return { ok: false, error: 'No such page.' };
       if (isHome(target)) return { ok: false, error: `The home page can't be removed.` };
       return { ok: true, next: pages.filter((_, i) => i !== edit.index) };
-    }
-
-    case 'renamePage': {
-      const target = pages[edit.index];
-      if (!target) return { ok: false, error: 'No such page.' };
-      const title = edit.title.trim();
-      if (!title) return { ok: false, error: 'A page needs a name.' };
-      // slug is code-fixed — rename touches the title only.
-      const next = pages.map((p, i) => (i === edit.index ? { ...p, title } : p));
-      return { ok: true, next };
-    }
-
-    case 'movePage': {
-      const target = pages[edit.index];
-      if (!target) return { ok: false, error: 'No such page.' };
-      if (isHome(target)) return { ok: false, error: `The home page stays first.` };
-      const dest = edit.index + edit.dir;
-      if (dest < 0 || dest >= pages.length) {
-        return { ok: false, error: `That page can't move any further.` };
-      }
-      if (dest === 0) return { ok: false, error: `The home page stays first.` };
-      const next = [...pages];
-      const [moved] = next.splice(edit.index, 1);
-      next.splice(dest, 0, moved);
-      return { ok: true, next };
-    }
-
-    case 'setGoal': {
-      const target = pages[edit.index];
-      if (!target) return { ok: false, error: 'No such page.' };
-      if (!WORK_PAGE_GOAL_KEYS.includes(edit.goal)) {
-        return { ok: false, error: 'Unknown goal.' };
-      }
-      const next = pages.map((p, i) => (i === edit.index ? { ...p, goal: edit.goal } : p));
-      return { ok: true, next };
     }
   }
 }

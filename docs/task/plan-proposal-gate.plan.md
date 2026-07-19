@@ -14,8 +14,9 @@ Replace the overloaded STEP 04 "Here's your site" gate with the reconceived desi
 
 ## Progress log
 
-- phase 1 shape/seed machinery + unit tests: pending
+- phase 1 shape/seed machinery + unit tests: done (commit c66a822a, impl-review loops 1 → ship; plan-review loops 2 → approve) — tsc/test:run(4089✓)/lint green; Kundius fixture confirmed compact. 1 harmless nit (dead F22 belt-and-braces in shape.test — no action).
 - phase 2 PlanStep UI rework + e2e rewrite: pending
+  - CARRY-FORWARD to phase 2 (plan-review nits): (a) e2e leak-probe forbidden list must DROP `collection` (collides with Work Group tile plain copy "Promote one collection…") + any other plain-English overlap; (b) compact fixture PROMOTES (2 groups ≥ PROMOTE_GROUP_MIN) so `plan-tile-work-group` renders qualified in Test 1 — add an explicit assert it renders.
 
 ## Ground-truth constraints (scout-confirmed — bind both phases)
 

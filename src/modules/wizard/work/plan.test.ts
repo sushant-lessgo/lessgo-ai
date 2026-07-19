@@ -121,97 +121,12 @@ describe('applyPlanEdit — removePage', () => {
   });
 });
 
-describe('applyPlanEdit — renamePage', () => {
-  it('renames the title and leaves the slug unchanged', () => {
-    const sitemap = standardSitemap();
-    const idx = sitemap.findIndex((p) => p.archetypeKey === 'about');
-    const prevSlug = sitemap[idx].pathSlug;
-    const res = applyPlanEdit({ type: 'renamePage', index: idx, title: '  Studio  ' }, sitemap);
-    expect(res.ok).toBe(true);
-    if (!res.ok) return;
-    expect(res.next[idx].title).toBe('Studio'); // trimmed
-    expect(res.next[idx].pathSlug).toBe(prevSlug); // slug code-fixed
-  });
-
-  it('rejects an empty / whitespace title', () => {
-    const res = applyPlanEdit({ type: 'renamePage', index: 1, title: '   ' }, standardSitemap());
-    expect(res.ok).toBe(false);
-  });
-
-  it('rejects an out-of-range index', () => {
-    const res = applyPlanEdit(
-      { type: 'renamePage', index: 99, title: 'X' },
-      standardSitemap()
-    );
-    expect(res.ok).toBe(false);
-  });
-});
-
-describe('applyPlanEdit — movePage', () => {
-  it('reorders two non-home pages', () => {
-    const sitemap = standardSitemap(); // home, work, prices, about, contact
-    // Move `prices` (idx 2) up to idx 1.
-    const res = applyPlanEdit({ type: 'movePage', index: 2, dir: -1 }, sitemap);
-    expect(res.ok).toBe(true);
-    if (!res.ok) return;
-    expect(res.next.map((p) => p.archetypeKey)).toEqual([
-      'home',
-      'prices',
-      'work',
-      'about',
-      'contact',
-    ]);
-  });
-
-  it('rejects moving home', () => {
-    const res = applyPlanEdit({ type: 'movePage', index: 0, dir: 1 }, standardSitemap());
-    expect(res.ok).toBe(false);
-  });
-
-  it('rejects moving a page into first (would displace home)', () => {
-    const res = applyPlanEdit({ type: 'movePage', index: 1, dir: -1 }, standardSitemap());
-    expect(res.ok).toBe(false);
-  });
-
-  it('rejects a move past the end', () => {
-    const sitemap = standardSitemap();
-    const res = applyPlanEdit(
-      { type: 'movePage', index: sitemap.length - 1, dir: 1 },
-      sitemap
-    );
-    expect(res.ok).toBe(false);
-  });
-});
-
-describe('applyPlanEdit — setGoal', () => {
-  it('sets a known goal key', () => {
-    const res = applyPlanEdit({ type: 'setGoal', index: 1, goal: 'booking' }, standardSitemap());
-    expect(res.ok).toBe(true);
-    if (!res.ok) return;
-    expect(res.next[1].goal).toBe('booking');
-  });
-
-  it('rejects an unknown goal key', () => {
-    const res = applyPlanEdit(
-      // @ts-expect-error — deliberately passing an off-enum key.
-      { type: 'setGoal', index: 1, goal: 'call-me' },
-      standardSitemap()
-    );
-    expect(res.ok).toBe(false);
-  });
-
-  it('rejects an out-of-range index', () => {
-    const res = applyPlanEdit({ type: 'setGoal', index: 99, goal: 'form' }, standardSitemap());
-    expect(res.ok).toBe(false);
-  });
-});
-
 describe('applyPlanEdit — purity', () => {
   it('does not mutate the input sitemap', () => {
     const sitemap = standardSitemap();
     const snapshot = JSON.stringify(sitemap);
     applyPlanEdit({ type: 'removePage', index: 2 }, sitemap);
-    applyPlanEdit({ type: 'renamePage', index: 1, title: 'X' }, sitemap);
+    applyPlanEdit({ type: 'addPage', pageKey: 'blog' }, sitemap);
     expect(JSON.stringify(sitemap)).toBe(snapshot);
   });
 });
