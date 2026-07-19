@@ -4,6 +4,16 @@
 # Installed via the "prepare" npm script (git config core.hooksPath .githooks).
 # Emergency bypass: git push --no-verify
 
+# Only main auto-deploys to prod, so only main needs the local gate. Feature/fix
+# branches deploy to isolated Vercel previews (QA sandboxes) where a phantom
+# stale-.next/types typecheck flake shouldn't block a push. Skip the gate off main;
+# run your own green gate before merging to main.
+branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+if [ "$branch" != "main" ]; then
+  echo "[pre-push] on '$branch' (not main) — skipping gate (main-only)"
+  exit 0
+fi
+
 echo "[pre-push] typecheck"
 # tsconfig has incremental:true; a stale tsconfig.tsbuildinfo can produce ghost
 # TS2304 errors — on failure, drop the cache and retry once before blocking.
