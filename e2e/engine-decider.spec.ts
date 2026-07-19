@@ -362,3 +362,70 @@ test('AMBIGUOUS agency → D4 (prior pre-selected, 5 options incl. 2 SOON); pick
   expect(draft2.brief.copyEngine).toBe('work');
   expect(draft2.templateId).toBe('atelier');
 });
+
+test('D4 place-pick → D5 demand board → demand-lead POST; copyEngine NEVER place; go-back reopens D4', async ({
+  page,
+}) => {
+  const api = await authedApi(page);
+  const token = await startProject(api);
+  // Mock mode can't classify — pin the ONE classifier call to an AMBIGUOUS draft
+  // so D1 hands off to D4 (the buyer-decision question), where we PICK "place"
+  // (the SOON/dashed storefront option) to reach the demand board.
+  await pinUnderstand(page, AGENCY_AMBIGUOUS_DRAFT);
+
+  // Intercept the demand-lead write (no DB row in the e2e) and capture the body.
+  let demandBody: Record<string, unknown> | null = null;
+  await page.route('**/api/demand-lead', async (route) => {
+    if (route.request().method() === 'POST') {
+      demandBody = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ id: 'lead_e2e' }),
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  await page.goto(`/onboarding/${token}`);
+  await submitD1(page, 'Branding & design studio');
+
+  // D4 fires; pick the dashed "SOON" place option → continue → D5 demand board.
+  await expect(page.getByTestId('decider-d4')).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId('decider-d4-option-place')).toHaveAttribute('data-soon', 'true');
+  await page.getByTestId('decider-d4-option-place').click();
+  await page.getByTestId('decider-d4-continue').click();
+
+  // ── D5: the honest storefront + the amber "DEMAND LOGGED" rail chip. ─────────
+  await expect(page.getByTestId('decider-d5')).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId('rail-engine-demand')).toBeVisible();
+  await expect(page.getByTestId('rail-engine-demand')).toContainText('PLACE');
+  // O1 holds on D5 too: no editable one-liner anywhere on the demand board.
+  await assertNoOneLinerInput(page);
+
+  // ── "Go back" reopens D4 (the engine is a revisable belief). ────────────────
+  await page.getByTestId('decider-d5-back').click();
+  await expect(page.getByTestId('decider-d4')).toBeVisible({ timeout: 30_000 });
+
+  // ── Re-pick place → D5 → submit the email → POST /api/demand-lead. ──────────
+  await page.getByTestId('decider-d4-option-place').click();
+  await page.getByTestId('decider-d4-continue').click();
+  await expect(page.getByTestId('decider-d5')).toBeVisible({ timeout: 30_000 });
+
+  await page.getByTestId('demand-email').fill('founder@example.com');
+  await page.getByTestId('demand-submit').click();
+
+  // The demand lead is logged with the rungE:place tag; copyEngine is NEVER set
+  // (place stays off the schema enum).
+  await expect.poll(() => demandBody, { timeout: 10_000 }).not.toBeNull();
+  expect((demandBody as Record<string, unknown>).email).toBe('founder@example.com');
+  expect((demandBody as Record<string, unknown>).missing).toBe('rungE:place');
+  expect(
+    ((demandBody as Record<string, unknown>).briefDraft as { copyEngine?: string }).copyEngine
+  ).toBeUndefined();
+
+  // Confirmed state: the fast-track affordance appears, the go-back is gone.
+  await expect(page.getByTestId('demand-confirmed')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('decider-d5-back')).toHaveCount(0);
+});

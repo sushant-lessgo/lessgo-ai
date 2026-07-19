@@ -398,3 +398,59 @@ Verification (this follow-up):
 - `npx tsc --noEmit`: clean, exit 0.
 - `npm run test:run`: **Test Files 252 passed | 1 skipped (253); Tests 4085 passed | 14 skipped (4099)** — 0 failures.
 - `npx playwright test e2e/engine-decider.spec.ts` (setup + authed): **4 passed** — photographer→work, **CLEAR SaaS** (now green for the right reason), and AMBIGUOUS agency→D4 (trust + work branches). The `CLEAR SaaS` failure is resolved.
+
+## Phase 5 — D5 demand board + serve-gate demand wiring
+
+Branch: `feature/engineDecider` (verified `git branch --show-current` before any edit). No commits (orchestrator commits). Backend consumed, not edited: `/api/demand-lead`, `/api/brief/confirm`, seam contract UNTOUCHED. No Prisma/schema change. No renderer/template/published/`.published.tsx` code touched. Firewall intact.
+
+### Files changed (complete scope map — 7 files)
+
+New (2):
+1. `src/app/onboarding/[token]/components/decider/D5DemandBoard.tsx` — the honest demand board. Full-viewport `app-chrome` (top bar + LEFT live-read rail + amber storefront main). Amber tile (`bg #fdf7ec` / border `#f0dcb4` / accent `#fbf1e0` / text `#c47d1a`), "COMING SOON" pill, honest headline `We don't build ${noun} sites yet — but we're close.` (noun = humanized `businessType`, else first category, else "this kind of site"), plain-language subtext ("Lessgo AI"). Reuses `ManualOnboardStep` for the byte-identical demand-lead capture. Rail shows a NEUTRAL engine card (`ENGINE_LEAD[engine]`, status `known`) + the amber `DEMAND LOGGED · #<TAG>` chip. "Go back" (`decider-d5-back`) → `onGoBack` (reopens D4), hidden once `leadId` is set. testids: `decider-d5`, `decider-d5-back`. Reads only `getEntryFacts` (pure) — no `brief.copyEngine` write anywhere.
+2. `src/app/onboarding/[token]/components/decider/D5DemandBoard.test.tsx` — companion (react-dom/client + `React.act`, no @testing-library). 5 tests: headline noun interpolation + rail demand chip; O1 kill (no textarea/`d1-entry-input`); demand-lead POST body assertion (`input`/`missing:rungE:place`/`email`, `briefDraft.copyEngine` undefined, no `userId` in body) + `onLeadCreated`; go-back fires `onGoBack`; go-back hidden + confirmed state when `leadId` set.
+
+Modified (5):
+3. `src/components/onboarding/journey/UnderstoodRail.tsx` — `EngineRailFieldData` gains optional `demandTag?: string`; `EngineRailField` renders an amber `DEMAND LOGGED · #<TAG>` chip (`data-testid="rail-engine-demand"`) below the card when set (absent otherwise → legacy rail unchanged). Purely a signal — the engine is NOT committed to the schema enum.
+4. `src/components/onboarding/journey/UnderstoodRail.test.tsx` — 2 new tests in the engine-field describe: chip renders with `DEMAND LOGGED` + the tag when `demandTag` set; chip omitted otherwise.
+5. `src/app/onboarding/[token]/components/ManualOnboardStep.tsx` — REUSED/ABSORBED as the inner demand-capture form of D5 (chrome removed: the storefront headline/subtext/rail now live in D5). **API contract byte-identical** — POST `{input, briefDraft, missing, email, phone?}` + PATCH `{id, fasttrack:true}` unchanged; `collectionReason` kept. Restyled to app-chrome tokens (removed `bg-brand-accentPrimary`), CTA text → "Keep me posted & call me", added testids (`demand-email`/`demand-phone`/`demand-submit`/`demand-fasttrack`/`demand-confirmed`). Now imported ONLY by D5DemandBoard (page.tsx no longer imports it directly).
+6. `src/app/onboarding/[token]/page.tsx` — replaced the Phase-4 D5 STUB (`ManualOnboardStep` in the legacy centered card) with a full-viewport `D5DemandBoard` early return for `step === 'manual'`; added the `D5DemandBoard` dynamic import (ssr:false); dropped the direct `ManualOnboardStep` import; refreshed the routing-table comments (place/quick-yes + serve-gate `manual` → the real D5). `onGoBack` = `setDeciderScreen('D4'); setStep('decider')`.
+7. `e2e/engine-decider.spec.ts` — NEW spec `D4 place-pick → D5 demand board …`: pin understand to the ambiguous agency draft → D1 → D4 → pick the dashed SOON `place` option → D5 renders + rail `DEMAND LOGGED · #PLACE` chip + O1 holds → go-back reopens D4 → re-pick place → submit email → intercepted `/api/demand-lead` POST asserted (`email`, `missing:rungE:place`, `briefDraft.copyEngine` undefined) → confirmed state, go-back gone. Existing 4 specs untouched (the `{exact:true}` Understanding matcher preserved — no substring trap reintroduced).
+
+### The demand-lead payload D5 POSTs + the demand tag
+D5 reuses `ManualOnboardStep`, which POSTs `{ input: rawInput (the one-liner), briefDraft, missing, email, ...(phone) }` to `/api/demand-lead`. The demand TAG is `missing`:
+- D4 place/quick-yes pick → `page.tsx` sets `missing = rungE:<engine>` (e.g. `rungE:place`).
+- Serve-gate `manual` outcome → `missing` = the server's own tags (verbatim from `/api/brief/confirm`, incl. `collection:*`, `rungA:*`, or `engine-unresolved`).
+`userId` is NEVER sent in the body — the route derives it server-side from Clerk auth (in-scope deviation from the plan's `{userId, …}` wording; keeps the contract byte-identical and honors the ownership-column design). `fasttrack` remains the PATCH double-intent upgrade (unchanged).
+
+### How BOTH unserveable paths reach D5 (relocated access gate, never a dead-end)
+Both terminate at `step === 'manual'`, which is now the D5 board:
+- **D4 place/quick-yes pick** — `handleD4Pick(place|quick-yes)` → `applyEnginePick` (copyEngine cleared/undefined; `facts.entry.resolvedEngine` set) → `setMissing('rungE:<engine>')` → `setStep('manual')`. (A clear place/quick-yes from D1 takes the same `routeAfterResolve` branch.)
+- **Serve-gate `manual`** — `FinalizeHandoff` (work) and `ConfirmToWizard` (thing/trust) call `onManual(missing)` on a non-serve `/api/brief/confirm` verdict → `setMissing(missing); setStep('manual')`. Includes the `engine-unresolved` defect path (Phase-1 backstop). No bare `ManualOnboardStep` dead-end remains; the demand is honest + logged + founder-emailed.
+
+### brief.copyEngine is NEVER set for place/quick-yes (confirmed)
+- `applyEnginePick` writes `copyEngine` ONLY for schema engines `{thing,trust,work}` and CLEARS it for place/quick-yes (verified in `classify.ts:379-395` + asserted in the e2e + D5 unit test: `briefDraft.copyEngine` is `undefined` in the intercepted POST body).
+- D5DemandBoard reads `getEntryFacts` only; it writes nothing to the brief. `BriefSchema.copyEngine` enum untouched.
+
+### Deviations from the plan (in-scope judgment calls)
+1. **`userId` not sent in the demand-lead body** (above) — the route ignores a body `userId` and derives the ownership column from Clerk; sending it would be dead payload. Contract kept byte-identical.
+2. **Rail "neutral engine card" uses `ENGINE_LEAD[engine]` at status `known`** (falls back to `place`). The scout says "neutral card"; the `known` card is the closest existing neutral affordance and reads honestly ("here's how your site would win — logged, not built"). No new rail status invented.
+3. **Added `D5DemandBoard.test.tsx`** (companion of a Files-touched file, precedent: `FinalizeHandoff.test.tsx`/`ConfirmToWizard.test.tsx`) — pins the copyEngine-never-place invariant + the POST body + go-back at the unit level.
+4. **Reused `ManualOnboardStep` rather than deleting it** — the plan said "reuse/absorb"; nesting it inside D5's amber card (chrome stripped) both honors "keep the API contract identical" literally (its fetch calls are untouched) and avoids a risky file deletion + import churn. `page.tsx` no longer imports it directly (only D5 does).
+5. **`go back` hidden once a lead is logged** (nothing left to revise) — conservative UX; the confirmed state shows the fast-track affordance instead.
+
+### Firewall / invariants held
+- AI never emits an engine; only `resolveEngine`/`applyEnginePick` decide. No blocking confirm.
+- `BriefSchema.copyEngine` enum unchanged; place/quick-yes route to demand only, never written to `brief.copyEngine`.
+- `/api/demand-lead` + `/api/brief/confirm` + seam contract consumed, NOT edited. No schema/Prisma change.
+- All decider screens (incl. D5) dynamically imported (ssr:false); page.tsx imports only pure `@/modules/brief` + fetch. No renderer/template/published code touched.
+
+### Verification
+- `npx tsc --noEmit`: clean, exit 0 (no `founder.jpg` artifact this run).
+- `npm run test:run` (full vitest): **Test Files 253 passed | 1 skipped (254); Tests 4092 passed | 14 skipped (4106).** 0 failures (+7 vs the Phase-4 base 4085 = D5DemandBoard 5 + rail demand-chip 2).
+- Targeted: `UnderstoodRail.test.tsx` + `D5DemandBoard.test.tsx` — 2 files / 26 tests passed.
+- `npx playwright test e2e/engine-decider.spec.ts`: **5 passed** (setup + photographer→work + CLEAR SaaS + AMBIGUOUS agency→D4 + the NEW D4 place-pick→D5→demand-lead→go-back, 1.3m) — REAL authed run (dev server, real Clerk; `/api/demand-lead` intercepted to assert the POST body without a DB row).
+
+### Open risks / notes for the human gate (spec gate 2, part 1/2)
+- The e2e INTERCEPTS `/api/demand-lead` (no DB row / no founder email in-test). The founder-QA on dev is where a real `DemandLead` row + founder email are exercised end to end — the gate the plan reserves.
+- Mock mode can't classify a real restaurant→place, so the e2e reaches D5 via a D4 place PICK (the other real entry to D5). A true place classification (Kanji-Ramen-style) is exercised only under real `/api/v2/understand` at the founder gate.
+- Serve-gate `manual` → D5 is wired (FinalizeHandoff/ConfirmToWizard `onManual`) and unit-covered, but not e2e-exercised here (both confirm paths serve in the current fixtures); the wiring is identical to the D4-place path (both hit `step:'manual'` → D5).

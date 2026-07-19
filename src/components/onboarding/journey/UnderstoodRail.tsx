@@ -72,6 +72,13 @@ export interface EngineRailFieldData {
   icon?: React.ReactNode;
   /** "Change how buyers decide" — reopens D4 (wired in Phase 4). */
   onChangeEngine?: () => void;
+  /**
+   * engineDecider Phase 5 — when set, an amber "DEMAND LOGGED · #<TAG>" chip
+   * renders below the engine card (the D5 demand board for place/quick-yes and
+   * any serve-gate `manual` outcome). Purely a signal: the engine is NOT
+   * committed to the schema enum — the demand is logged, not built.
+   */
+  demandTag?: string;
 }
 
 export interface UnderstoodRailProps {
@@ -209,7 +216,7 @@ export default function UnderstoodRail({ rail, engine }: UnderstoodRailProps) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function EngineRailField({ engine }: { engine: EngineRailFieldData }) {
-  const { status, label, descriptor, icon, onChangeEngine } = engine;
+  const { status, label, descriptor, icon, onChangeEngine, demandTag } = engine;
   const resolving = status === 'resolving';
   const ambiguous = status === 'ambiguous';
   const confirmed = status === 'confirmed';
@@ -299,6 +306,17 @@ export function EngineRailField({ engine }: { engine: EngineRailFieldData }) {
           </>
         )}
       </div>
+
+      {/* engineDecider Phase 5 — the demand chip. The engine is logged as demand,
+          NOT committed: place/quick-yes never reach the schema enum. */}
+      {demandTag && (
+        <div
+          data-testid="rail-engine-demand"
+          className="mt-2 inline-flex items-center gap-1 rounded-[5px] bg-[#fbf1e0] px-2 py-1 font-app-mono font-bold text-[9.5px] tracking-[0.07em] text-[#c47d1a]"
+        >
+          DEMAND LOGGED · #{demandTag}
+        </div>
+      )}
 
       {onChangeEngine && !resolving && (
         <button

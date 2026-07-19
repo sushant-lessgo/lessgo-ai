@@ -51,7 +51,6 @@ import { isJourneyEligible } from '@/lib/journeyEngines';
 import { screenForStatus } from './components/decider/deciderMachine';
 import Logo from '@/components/shared/Logo';
 import ConfirmBriefStep from './components/ConfirmBriefStep';
-import ManualOnboardStep from './components/ManualOnboardStep';
 
 // FIREWALL: dynamic-import the wizard dispatcher so the entry path stays
 // firewall-pure and slot code stays out of the entry bundle.
@@ -123,6 +122,19 @@ const ConfirmToWizard = dynamic(() => import('./components/decider/ConfirmToWiza
     </div>
   ),
 });
+// D5 — the DEMAND BOARD (engineDecider Phase 5). Every unserveable lane lands
+// here (place/quick-yes picks + any serve-gate `manual` outcome), full-viewport,
+// so it escapes the legacy centered card. Reuses ManualOnboardStep's demand-lead
+// capture (contract unchanged). Dynamically imported (ssr:false) — same firewall
+// discipline as the other decider screens; it renders its own chrome.
+const D5DemandBoard = dynamic(() => import('./components/decider/D5DemandBoard'), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen flex items-center justify-center text-gray-500">
+      <Loader2 className="w-5 h-5 animate-spin" />
+    </div>
+  ),
+});
 
 // FIREWALL: the D1 composer transitively pulls the agnostic rail (→ the wizard
 // store), so it is DYNAMICALLY imported (ssr:false) to keep that graph off the
@@ -143,11 +155,12 @@ const D1Entry = dynamic(() => import('./components/decider/D1Entry'), {
 //   • CLEAR work (almost-sure)   → D3 → finalize
 //   • CLEAR thing/trust (known)  → confirmWizard (confirm → wizard @ understanding)
 //   • CLEAR thing/trust (a-sure) → D3 → confirmWizard
-//   • CLEAR place/quick-yes      → demand board (D5; STUB → `manual` this phase)
+//   • CLEAR place/quick-yes      → D5 demand board (`manual` step; never a dead-end)
 //   • AMBIGUOUS / unknown        → D4 (pick) → applyEnginePick → route by engine
 // D4 picks re-enter this same table: work→finalize, thing/trust→confirmWizard,
-// place/quick-yes→demand. `confirm` (legacy ConfirmBriefStep) is no longer routed
-// to, but the branch is kept as a harmless fallback.
+// place/quick-yes→D5. A serve-gate `manual` verdict (unserveable confirmed Brief)
+// also lands on the D5 demand board. `confirm` (legacy ConfirmBriefStep) is no
+// longer routed to, but the branch is kept as a harmless fallback.
 type EntryStep = 'input' | 'decider' | 'confirm' | 'manual' | 'wizard' | 'journey';
 
 /** Which decider screen renders (engineDecider Phase 4). */
@@ -296,8 +309,8 @@ export default function EntryOnboardingPage() {
       setStep('decider');
       return;
     }
-    // CLEAR place / quick-yes → demand board (D5 in Phase 5; STUB → the existing
-    // `manual` branch this phase, never a dead-end). NEVER written to copyEngine.
+    // CLEAR place / quick-yes → the D5 demand board (the `manual` step, never a
+    // dead-end). NEVER written to copyEngine.
     if (resolvedEngine === 'place' || resolvedEngine === 'quick-yes') {
       setMissing(`rungE:${resolvedEngine}`);
       setStep('manual');
@@ -444,6 +457,28 @@ export default function EntryOnboardingPage() {
     );
   }
 
+  // ── D5 DEMAND BOARD — FULL-VIEWPORT EARLY RETURN (engineDecider Phase 5) ─────
+  // Every unserveable lane lands here: a D4 place/quick-yes pick, or a serve-gate
+  // `manual` verdict from FinalizeHandoff/ConfirmToWizard (an unserveable confirmed
+  // Brief, incl. the `engine-unresolved` defect path). Honest + logged, never a
+  // cold waitlist and never a dead-end. NEVER writes `brief.copyEngine`. "Go back"
+  // reopens D4 (the engine is a revisable belief).
+  if (!checking && step === 'manual' && briefDraft) {
+    return (
+      <D5DemandBoard
+        rawInput={rawInput}
+        briefDraft={briefDraft}
+        missing={missing}
+        leadId={leadId}
+        onLeadCreated={setLeadId}
+        onGoBack={() => {
+          setDeciderScreen('D4');
+          setStep('decider');
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
@@ -482,16 +517,6 @@ export default function EntryOnboardingPage() {
                   setMissing(missingTags);
                   setStep('manual');
                 }}
-              />
-            )}
-
-            {!checking && step === 'manual' && briefDraft && (
-              <ManualOnboardStep
-                rawInput={rawInput}
-                briefDraft={briefDraft}
-                missing={missing}
-                leadId={leadId}
-                onLeadCreated={setLeadId}
               />
             )}
           </div>

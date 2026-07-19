@@ -1,19 +1,26 @@
 'use client';
 
-// Entry step 3 (scale-02 phase 5, spec §5/§11.11): MANUAL-ONBOARD demand
-// capture. Screen is the same for no-coverage and out-of-icp; the internal
-// `missing` tag in the payload differs and is never rendered raw. Exception
-// (scale-10 phase 3): a `collection:<key>` tag adds ONE graceful, readable
-// sentence (registry label, never the raw tag) so a portfolio/services lead
-// sees a reason.
-// Submit ⇒ POST /api/demand-lead (returns {id}); thank-you offers the
-// "Need it sooner?" fast-track ⇒ PATCH {id, fasttrack:true} ⇒ message
-// upgrades (spec §11.11 double-intent signal).
+// Demand-capture FORM (scale-02 phase 5, spec §5/§11.11) — reused as the inner
+// form of the D5 demand board (engineDecider Phase 5). The screen chrome (honest
+// storefront headline, live-read rail, "go back") lives in D5DemandBoard; this
+// component is JUST the email/phone capture + confirmed state + fast-track.
+//
+// The screen is the same for no-coverage, out-of-icp, place/quick-yes and any
+// serve-gate `manual` outcome; only the internal `missing` tag in the payload
+// differs and is never rendered raw. Exception (scale-10 phase 3): a
+// `collection:<key>` tag adds ONE graceful, readable sentence (registry label,
+// never the raw tag) so a portfolio/services lead sees a reason.
+//
+// ⚠ API CONTRACT — DO NOT REGRESS (engineDecider Phase 5): the POST body
+// (`{input, briefDraft, missing, email, phone?}`) and the PATCH fast-track
+// (`{id, fasttrack:true}`) are byte-identical to the scale-02 implementation.
+// `userId` is derived SERVER-SIDE from Clerk auth — never sent in the body.
+// Submit ⇒ POST /api/demand-lead (returns {id}); thank-you offers the "Need it
+// sooner?" fast-track ⇒ PATCH {id, fasttrack:true} (spec §11.11 double-intent).
 
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { Brief } from '@/types/brief';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getCollectionDef } from '@/modules/collections/registry';
@@ -121,61 +128,55 @@ export default function ManualOnboardStep({
 
   if (submitted) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">
+      <div className="space-y-4" data-testid="demand-confirmed">
+        <div className="rounded-app-panel border border-app-border-hairline bg-app-surface p-4">
+          <p className="font-app-sans font-bold text-[15px] text-app-ink">
             You&apos;re on the list
-          </h1>
-          <p className="mt-2 text-gray-600">
+          </p>
+          <p className="mt-1 font-app-sans text-[13px] text-app-muted">
             {fasttracked
-              ? 'Sushant will connect with you shortly to personalize.'
-              : 'Not automated yet — someone from Lessgo AI will connect with you shortly.'}
+              ? 'Sushant will reach out shortly to personalize.'
+              : 'Not automated yet — someone from Lessgo AI will reach out shortly.'}
           </p>
         </div>
 
         {!fasttracked && (
-          <Button
+          <button
             type="button"
+            data-testid="demand-fasttrack"
             onClick={handleFasttrack}
             disabled={fasttracking}
-            variant="outline"
-            className="w-full"
-            size="lg"
+            className="w-full inline-flex items-center justify-center gap-1.5 rounded-[11px] border-[1.5px] border-app-border-hairline bg-app-surface px-4 py-3 font-app-sans font-bold text-[13.5px] text-app-ink transition-colors hover:border-app-primary/40 disabled:opacity-60"
           >
             {fasttracking ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                <Loader2 className="w-4 h-4 animate-spin" />
                 One sec…
               </>
             ) : (
               'Need it sooner?'
             )}
-          </Button>
+          </button>
         )}
 
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && <p className="text-xs text-app-danger">{error}</p>}
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">
-          We&apos;ve got you — almost
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Not automated yet — someone from Lessgo AI will connect with you shortly.
-        </p>
-        {reason && <p className="mt-2 text-sm text-gray-500">{reason}</p>}
-      </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {reason && (
+        <p className="font-app-sans text-[13px] text-app-muted">{reason}</p>
+      )}
 
-      <div className="space-y-2">
-        <Label htmlFor="lead-email" className="text-gray-700">
-          Email <span className="text-red-500">*</span>
+      <div className="space-y-1.5">
+        <Label htmlFor="lead-email" className="font-app-sans text-[12.5px] text-app-slate">
+          Email <span className="text-app-danger">*</span>
         </Label>
         <Input
           id="lead-email"
+          data-testid="demand-email"
           type="email"
           inputMode="email"
           placeholder="you@company.com"
@@ -188,12 +189,13 @@ export default function ManualOnboardStep({
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="lead-phone" className="text-gray-700">
-          Phone <span className="text-gray-400">(optional)</span>
+      <div className="space-y-1.5">
+        <Label htmlFor="lead-phone" className="font-app-sans text-[12.5px] text-app-slate">
+          Phone <span className="text-app-placeholder">(optional)</span>
         </Label>
         <Input
           id="lead-phone"
+          data-testid="demand-phone"
           type="tel"
           inputMode="tel"
           placeholder="+91 98765 43210"
@@ -204,26 +206,23 @@ export default function ManualOnboardStep({
         />
       </div>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-app-danger">{error}</p>}
 
-      <div>
-        <Button
-          type="submit"
-          disabled={!emailValid || submitting}
-          className="w-full bg-brand-accentPrimary hover:bg-orange-500 hover:shadow-lg
-                     transform hover:scale-105 transition-all duration-200"
-          size="lg"
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
-              Sending…
-            </>
-          ) : (
-            'Keep me posted'
-          )}
-        </Button>
-      </div>
+      <button
+        type="submit"
+        data-testid="demand-submit"
+        disabled={!emailValid || submitting}
+        className="w-full inline-flex items-center justify-center gap-1.5 rounded-[11px] bg-app-cta px-4 py-3 font-app-sans font-bold text-[13.5px] text-white shadow-app-btn-cta transition-opacity disabled:opacity-50"
+      >
+        {submitting ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Sending…
+          </>
+        ) : (
+          'Keep me posted & call me'
+        )}
+      </button>
     </form>
   );
 }

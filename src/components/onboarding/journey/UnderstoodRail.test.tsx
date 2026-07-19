@@ -587,6 +587,26 @@ describe('UnderstoodRail — engine field (HOW YOUR SITE WINS)', () => {
     expect(testid('rail-engine-confirmed')).toBeNull();
   });
 
+  // engineDecider Phase 5 — the demand chip. When `demandTag` is set (the D5
+  // board for place/quick-yes + any serve-gate manual outcome) an amber
+  // "DEMAND LOGGED · #<TAG>" chip renders below the card; absent otherwise.
+  it('renders the amber "DEMAND LOGGED" chip when a demandTag is set', async () => {
+    await mountRailWithEngine({
+      status: 'known',
+      label: 'Lead with your place',
+      demandTag: 'PLACE',
+    });
+    const chip = testid('rail-engine-demand');
+    expect(chip).not.toBeNull();
+    expect(chip?.textContent).toContain('DEMAND LOGGED');
+    expect(chip?.textContent).toContain('PLACE');
+  });
+
+  it('omits the demand chip when no demandTag is set', async () => {
+    await mountRailWithEngine({ status: 'known', label: 'Lead with your work' });
+    expect(testid('rail-engine-demand')).toBeNull();
+  });
+
   it('the "Change how buyers decide" link renders and fires the callback', async () => {
     let fired = 0;
     await mountRailWithEngine({
