@@ -217,3 +217,40 @@ Results: new tests 6/6 pass; existing `useWizardStore.test.ts` 83/83 pass (concu
 **Results** — `vitest run src/lib/media/uploadClient.test.ts` → 8/8 pass. `tsc --noEmit` clean except the known unrelated `src/app/page.tsx:6` founder.jpg error.
 
 **Deviations** — none.
+
+---
+
+## B2–B6 — work-engine STEP 03 question step (cluster)
+
+**Files changed**
+- `src/components/onboarding/journey/engines/types.ts` — added `slot?` (all 4 question kinds) + `selected?` (choice) to `JourneyQuestion`; widened the `price` commit signature with `currency?`.
+- `src/components/onboarding/journey/engines/work.ts` — set `slot` on every question descriptor; seeded `selected` on choice questions from live facts; persisted `currency` in `commitGroupPrice`; reworded the price label.
+- `src/components/onboarding/journey/steps/StepQuestions.tsx` — session-answered + expand tracked by slot key; unified single/multi choice on buffer+Save; seeded ChoiceAnswer selection; answered-summary reads committed value; added a currency control to PriceAnswer.
+- `src/components/onboarding/journey/engines/work.test.ts` — added B2 (currency persist) + B3 (identity slot) unit regressions.
+- `src/components/onboarding/journey/steps/StepQuestions.test.tsx` — NEW: B2/B3/B4/B5/B6 renderer regressions.
+
+**Shared changes (one coherent set, not five patches)**
+- **`slot` field** — `JourneyQuestion` now carries an explicit gating slot. The frame tracks `answeredIds`/`expandedIds` by `slot ?? id`; the seam sets `slot` on every descriptor. This makes answered-compact behaviour uniform across all questions (all stay visible + correctable) and is the direct fix for B3.
+- **Seeded selection** — `choice` questions carry `selected` (the committed value projected from live facts). `ChoiceAnswer` seeds its `useState` from committed values, or `suggested` in confirm posture (nothing committed). Fixes B5 (multi commit carries pre-selected chips) and B6 (Save enabled on arrival).
+- **Unified Save** — single-select `choice` now buffers on tap and commits via the SAME Save button multi uses ("pick, then Save"); chip tap no longer instant-commits. Fixes B4.
+- **Currency** — `PriceAnswer` collects a currency (SegmentedControl, default `$`, shown for from/exact) and passes `{mode,amount,currency}`; `commitGroupPrice` persists it. Fixes B2.
+
+**Per-bug — root cause (not symptom)**
+- **B3** — `answeredIds` populated with `question.id`, but gating decides re-render via `session(slot)`. For identity, `id='name' ≠ slot 'identity'` → `session('identity')` never true → slot dropped → name question vanished. Fixed at the source: track by slot; seam declares slot per question. (`id` remains the React-key/testid/commit-hardcode handle.)
+- **B4** — chip `onClick` hard-committed single-select while everything else used Save. Unified on buffer+Save.
+- **B5** — `selected` initialized `[]`, never seeded from committed/suggested; multi commit `applyRailEdit({dreamClient, value:[...selected].join})` REPLACED the field, dropping un-re-tapped chips; `answeredSummary` for choice returned `suggested` not the committed value. Fixed by seeding + summary reading `selected`.
+- **B6** — same origin as B5: `disabled={selected.length === 0}` with empty seed. Seeding resolves it (no separate dirty-flag exists).
+- **B2** — `WorkPriceSchema.currency` was modelled but never collected; `commitGroupPrice` hardcoded `g.price?.currency` (undefined on fresh seed) → `priceLabel` rendered a bare number. Added the control + persist path; reworded label to set multi-service expectations.
+
+**Tests** — new `StepQuestions.test.tsx` (B2/B3/B4/B5/B6) + 2 work.test.ts units (B2 currency, B3 slot). Each targets the pre-fix defect (verified by inspection: pre-fix the currency control is absent, identity slot undefined, single-tap commits, seed empty). `vitest run` of the two files → 62/62 pass; full `src/components/onboarding/journey` suite → 173 pass / 1 skipped. `tsc --noEmit` clean except the known `src/app/page.tsx:6` founder.jpg error.
+
+**Deviations** — none. (StepQuestions is onboarding chrome, not a landing block → no `.published.tsx` pair; dual-renderer parity N/A.)
+
+**Founder sign-off on preview** — (1) currency default `$` USD + the 4-currency set ($/€/£/₹); (2) price label wording "Your typical starting price (we'll show 'from' pricing)"; (3) the Save-everywhere UX change (single-select now buffers on tap instead of instant-commit).
+
+**Post-review polish (folded in before commit)**
+- **NIT (fix-introduced defect)** — `answeredSummary` for `choice` was joining raw option VALUES, so single-select compact rows read "established"/"whatsapp" instead of friendly labels. Now maps each committed value → its option label via `question.options` (fallback to the raw value when no match, so dreamClient/languages/praise + custom entries are unaffected). Still reads the COMMITTED value, not `suggested`. `rail.ts` untouched (currency spacing handled elsewhere).
+- **Added deselect round-trip test** — multi choice pre-seeded `['A','B']`, deselect 'A', Save → commit receives `['B']` (removal persists through the replace-commit; B5 covered lost additions, this covers removals).
+- **Added friendly-label test** — establishment compact row renders "Established", not the raw enum "established".
+
+**Re-gate** — `tsc --noEmit` clean except the known founder.jpg error; full `src/components/onboarding/journey` suite → 175 pass / 1 skipped (was 173 + the 2 new tests).

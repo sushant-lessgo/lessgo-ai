@@ -586,6 +586,25 @@ describe('work seam — STEP 03 commits (all routed through applyRailEdit)', () 
     expect(q.commit({ mode: 'from', amount: Number.NaN }, facts).ok).toBe(false);
   });
 
+  // ── qa-0719 B2 — the answered currency is PERSISTED onto every group ──
+  it('B2: price commit persists the chosen currency across every group', () => {
+    const facts = fixtureFacts();
+    const q = questionsFor(facts).find((x) => x.id === 'price')!;
+    if (q.kind !== 'price') throw new Error('expected a price question');
+    const result = expectOk(q.commit({ mode: 'exact', amount: 100, currency: 'EUR' }, facts));
+    const groups = getWorkFacts(result.facts)!.groups!;
+    // Pre-fix: currency was `g.price?.currency` (undefined on a fresh seed).
+    for (const g of groups) expect(g.price.currency).toBe('EUR');
+  });
+
+  // ── qa-0719 B3 — the identity question's GATING slot is 'identity' ──
+  it('B3: the identity question carries slot:"identity" (id stays the rail field "name")', () => {
+    const q = questionsFor(noNameFacts()).find((x) => x.id === 'name')!;
+    // The frame tracks session-answered by slot; a missing/`name` slot left
+    // session('identity') false ⇒ the answered name question vanished.
+    expect(q.slot).toBe('identity');
+  });
+
   it('the GROUP answer appends through the chip join — never destructive', () => {
     const groupQ = questionsFor(noGroupsFacts()).find((x) => x.id === 'groups')!;
     if (groupQ.kind !== 'group') throw new Error('expected a group question');

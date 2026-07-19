@@ -62,16 +62,30 @@ const PRICE_MODES: { value: PriceMode; label: string }[] = [
   { value: 'exact', label: 'Exact' },
 ];
 
+// qa-0719 B2 — the currency the amount is quoted in. Default USD; the founder
+// validates on preview. The rail's `priceLabel` renders whatever is committed.
+const CURRENCIES: { value: string; label: string }[] = [
+  { value: '$', label: '$ USD' },
+  { value: '€', label: '€ EUR' },
+  { value: '£', label: '£ GBP' },
+  { value: '₹', label: '₹ INR' },
+];
+const DEFAULT_CURRENCY = '$';
+
 export default function StepQuestions({ seam, onBlockedChange }: JourneyStepProps) {
   const briefFacts = useWizardStore(selectBriefFacts);
   const businessTypeKey = useWizardStore(selectBusinessTypeKey);
   const commitRail = useWizardStore(selectCommitRail);
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
-  // Question ids answered THIS session (D-C). Feeds ctx so the gating layer can
+  // Question SLOTS answered THIS session (D-C). Feeds ctx so the gating layer can
   // tell a genuine "on request" answer from the seed default after an answer.
+  // qa-0719 B3 — tracked by `slot` (not `id`): the gating layer decides re-render
+  // via `session(slot)`, and a question's `id` can DIFFER from its slot (work's
+  // identity question is `id:'name'`). Keying by id left `session('identity')`
+  // permanently false → the name question VANISHED after being answered.
   const [answeredIds, setAnsweredIds] = useState<readonly string[]>([]);
-  // Which answered-compact rows the user re-opened to correct (D-E).
+  // Which answered-compact rows the user re-opened to correct (D-E). Same slot key.
   const [expandedIds, setExpandedIds] = useState<readonly string[]>([]);
 
   const facts = briefFacts ?? undefined;
@@ -91,8 +105,9 @@ export default function StepQuestions({ seam, onBlockedChange }: JourneyStepProp
     onBlockedChange?.(blocked);
   }, [blocked, onBlockedChange]);
 
-  /** The ONE write path (identical failure semantics to the rail's). */
-  const submit = async (result: RailCommit, questionId: string): Promise<boolean> => {
+  /** The ONE write path (identical failure semantics to the rail's). `slotKey`
+   *  is the question's gating SLOT (`slot ?? id`) — see `answeredIds` above. */
+  const submit = async (result: RailCommit, slotKey: string): Promise<boolean> => {
     if (!result.ok) {
       // Seam zod pre-validation failed ⇒ nothing was sent (landmine 5).
       toast(result.error, { variant: 'error' });
@@ -106,9 +121,9 @@ export default function StepQuestions({ seam, onBlockedChange }: JourneyStepProp
       toast('Couldn’t save — reverted, try again', { variant: 'error' });
       return false;
     }
-    setAnsweredIds((ids) => (ids.includes(questionId) ? ids : [...ids, questionId]));
+    setAnsweredIds((ids) => (ids.includes(slotKey) ? ids : [...ids, slotKey]));
     // Collapse the row back to compact after a successful correction.
-    setExpandedIds((ids) => ids.filter((id) => id !== questionId));
+    setExpandedIds((ids) => ids.filter((id) => id !== slotKey));
     return true;
   };
 
@@ -133,21 +148,25 @@ export default function StepQuestions({ seam, onBlockedChange }: JourneyStepProp
         </p>
       )}
 
-      {questions.map((question) => (
-        <QuestionCard
-          key={question.id}
-          question={question}
-          saving={saving}
-          expanded={expandedIds.includes(question.id)}
-          onExpand={() =>
-            setExpandedIds((ids) =>
-              ids.includes(question.id) ? ids : [...ids, question.id]
-            )
-          }
-          onCommit={(result) => submit(result, question.id)}
-          liveFacts={facts}
-        />
-      ))}
+      {questions.map((question) => {
+        // Gating SLOT key (qa-0719 B3): `slot` when the seam supplies it, else the
+        // id. Session-answered + expand state are tracked by THIS, so the gating
+        // layer's `session(slot)` re-render decision fires for every slot.
+        const slotKey = question.slot ?? question.id;
+        return (
+          <QuestionCard
+            key={question.id}
+            question={question}
+            saving={saving}
+            expanded={expandedIds.includes(slotKey)}
+            onExpand={() =>
+              setExpandedIds((ids) => (ids.includes(slotKey) ? ids : [...ids, slotKey]))
+            }
+            onCommit={(result) => submit(result, slotKey)}
+            liveFacts={facts}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -221,6 +240,7 @@ function QuestionCard({
               multi={question.multi ?? false}
               allowCustom={question.allowCustom ?? false}
               suggested={question.suggested ?? []}
+              selected={question.selected ?? []}
               saving={saving}
               onSubmit={(values) => onCommit(question.commit(values, liveFacts))}
             />
@@ -236,7 +256,16 @@ function QuestionCard({
  *  back to nothing (the label above already names the slot). */
 function answeredSummary(question: JourneyQuestion): string {
   if (question.kind === 'text') return question.prefill ?? '';
-  if (question.kind === 'choice') return (question.suggested ?? []).join(', ');
+  // qa-0719 B5 — the COMMITTED value(s), projected from live facts — NOT
+  // `suggested` (the confirm candidate set), which mis-reported the answer.
+  // Map each committed value back to its option LABEL so single-select rows read
+  // "Established"/"WhatsApp", not the raw enum values; fall back to the raw value
+  // (dreamClient/languages/praise where value===label, or a custom entry).
+  if (question.kind === 'choice') {
+    const labelOf = (value: string) =>
+      question.options.find((o) => o.value === value)?.label ?? value;
+    return (question.selected ?? []).map(labelOf).join(', ');
+  }
   return '';
 }
 
@@ -326,10 +355,12 @@ function PriceAnswer({
 }: {
   id: string;
   saving: boolean;
-  onSubmit: (price: { mode: PriceMode; amount?: number }) => Promise<boolean>;
+  onSubmit: (price: { mode: PriceMode; amount?: number; currency?: string }) => Promise<boolean>;
 }) {
   const [mode, setMode] = useState<PriceMode>('on-request');
   const [amount, setAmount] = useState('');
+  // qa-0719 B2 — currency for the from/exact modes (defaults USD).
+  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
 
   const parsed = Number(amount);
   const amountOk = amount.trim() !== '' && Number.isFinite(parsed) && parsed >= 0;
@@ -346,16 +377,25 @@ function PriceAnswer({
       />
 
       {mode !== 'on-request' && (
-        <Input
-          value={amount}
-          disabled={saving}
-          inputMode="decimal"
-          placeholder="e.g. 2400"
-          data-testid={`question-price-amount-${id}`}
-          aria-label="Amount"
-          onChange={(e) => setAmount(e.target.value)}
-          className="h-9 text-[13px]"
-        />
+        <div className="flex items-center gap-2">
+          <SegmentedControl
+            value={currency}
+            onValueChange={setCurrency}
+            options={CURRENCIES}
+            aria-label="Currency"
+            data-testid={`question-price-currency-${id}`}
+          />
+          <Input
+            value={amount}
+            disabled={saving}
+            inputMode="decimal"
+            placeholder="e.g. 2400"
+            data-testid={`question-price-amount-${id}`}
+            aria-label="Amount"
+            onChange={(e) => setAmount(e.target.value)}
+            className="h-9 text-[13px]"
+          />
+        </div>
       )}
 
       <Button
@@ -365,7 +405,7 @@ function PriceAnswer({
         data-testid={`question-save-${id}`}
         onClick={() =>
           void onSubmit(
-            mode === 'on-request' ? { mode } : { mode, amount: parsed }
+            mode === 'on-request' ? { mode } : { mode, amount: parsed, currency }
           )
         }
       >
@@ -375,20 +415,34 @@ function PriceAnswer({
   );
 }
 
+/** De-dupe an ordered string list (order-preserving). */
+function dedupe(values: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const v of values) {
+    if (seen.has(v)) continue;
+    seen.add(v);
+    out.push(v);
+  }
+  return out;
+}
+
 /**
- * `choice` (E3, D-A). Three postures over ONE kind:
- *   • single-select      → tapping a chip COMMITS immediately (one tap = answer).
- *   • single + suggested  → the suggested chip(s) render PROMINENT (one-tap
- *                           confirm); the rest are quieter chips. Still commits
- *                           on tap.
- *   • multi               → every option is a TOGGLE chip (suggested prominent);
- *                           a Save button commits the selected array.
- *   • allowCustom         → a small input + add for a free-text escape (single:
- *                           adding commits the custom value; multi: adds it to
- *                           the selection).
- * `suggested` options are ALWAYS rendered within the full option list, just more
- * prominent — never the only tappable options (orchestrator ruling: multi must
- * render ALL options, e.g. Dutch + English).
+ * `choice` (E3, D-A). ONE mental model — "pick, then Save" (qa-0719 B4):
+ *   • single-select → tapping a chip SELECTS it (radio); Save commits it.
+ *   • multi         → every option is a TOGGLE chip; Save commits the array.
+ *   • allowCustom   → a small input + add appends a free-text chip to the
+ *                     selection (single: replaces the selection).
+ *
+ * The selection is SEEDED from `selected` (the committed value, projected from
+ * live facts) — or, when nothing is committed yet, from `suggested` (the
+ * one-tap-confirm candidate set). So pre-selected / already-answered chips arrive
+ * ACTIVE and Save is enabled on mount (qa-0719 B5/B6), and a multi commit can
+ * never DROP a value the user did not re-tap (pre-fix the field was REPLACED with
+ * only the re-tapped chips).
+ *
+ * `suggested` options render PROMINENT within the full option list — never the
+ * only tappable options (orchestrator ruling: multi renders ALL options).
  */
 function ChoiceAnswer({
   id,
@@ -396,6 +450,7 @@ function ChoiceAnswer({
   multi,
   allowCustom,
   suggested,
+  selected: seededSelected,
   saving,
   onSubmit,
 }: {
@@ -404,35 +459,41 @@ function ChoiceAnswer({
   multi: boolean;
   allowCustom: boolean;
   suggested: string[];
+  selected: string[];
   saving: boolean;
   onSubmit: (values: string[]) => Promise<boolean>;
 }) {
-  const [selected, setSelected] = useState<readonly string[]>([]);
+  // Seed from the committed value(s); confirm posture (nothing committed) seeds
+  // the suggested set so it can be confirmed in one Save tap.
+  const [selected, setSelected] = useState<readonly string[]>(() => {
+    const committed = seededSelected.filter((v) => v.trim().length > 0);
+    return dedupe(committed.length > 0 ? committed : suggested);
+  });
   const [custom, setCustom] = useState('');
-  // Custom values added this session (rendered as extra chips so they toggle
-  // like any option once present).
-  const [extras, setExtras] = useState<{ value: string; label: string }[]>([]);
+  // Custom values added this session PLUS any seeded selection not in `options`
+  // (an earlier free-text answer) — rendered as extra chips so they show ACTIVE.
+  const [extras, setExtras] = useState<{ value: string; label: string }[]>(() => {
+    const known = new Set(options.map((o) => o.value));
+    return dedupe(seededSelected.filter((v) => v.trim().length > 0 && !known.has(v))).map(
+      (v) => ({ value: v, label: v })
+    );
+  });
 
   const isSuggested = (value: string) => suggested.includes(value);
   const allOptions = [...options, ...extras];
 
   const toggle = (value: string) =>
-    setSelected((cur) =>
-      cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value]
-    );
+    setSelected((cur) => {
+      if (!multi) return cur.includes(value) ? [] : [value];
+      return cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value];
+    });
 
   const addCustom = () => {
     const v = custom.trim();
     if (!v || saving) return;
-    if (multi) {
-      if (!allOptions.some((o) => o.value === v)) setExtras((e) => [...e, { value: v, label: v }]);
-      setSelected((cur) => (cur.includes(v) ? cur : [...cur, v]));
-      setCustom('');
-    } else {
-      // Single-select custom: adding IS the answer.
-      void onSubmit([v]);
-      setCustom('');
-    }
+    if (!allOptions.some((o) => o.value === v)) setExtras((e) => [...e, { value: v, label: v }]);
+    setSelected((cur) => (multi ? (cur.includes(v) ? cur : [...cur, v]) : [v]));
+    setCustom('');
   };
 
   return (
@@ -447,15 +508,15 @@ function ChoiceAnswer({
               type="button"
               disabled={saving}
               data-testid={`question-chip-${id}-${opt.value}`}
-              aria-pressed={multi ? active : undefined}
-              onClick={() => (multi ? toggle(opt.value) : void onSubmit([opt.value]))}
+              aria-pressed={active}
+              onClick={() => toggle(opt.value)}
               className={cn(
                 'font-app-sans inline-flex items-center rounded-app-pill border px-3 py-1.5 text-[13px]',
                 'transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed',
                 prominent
                   ? 'border-app-primary bg-app-tint font-semibold text-app-ink'
                   : 'border-app-hairline bg-app-surface text-app-muted hover:text-app-ink',
-                multi && active && 'ring-2 ring-app-primary ring-offset-1'
+                active && 'ring-2 ring-app-primary ring-offset-1'
               )}
             >
               {opt.label}
@@ -491,17 +552,15 @@ function ChoiceAnswer({
         </div>
       )}
 
-      {multi && (
-        <Button
-          type="button"
-          size="sm"
-          disabled={saving || selected.length === 0}
-          data-testid={`question-save-${id}`}
-          onClick={() => void onSubmit([...selected])}
-        >
-          Save
-        </Button>
-      )}
+      <Button
+        type="button"
+        size="sm"
+        disabled={saving || selected.length === 0}
+        data-testid={`question-save-${id}`}
+        onClick={() => void onSubmit([...selected])}
+      >
+        Save
+      </Button>
     </div>
   );
 }

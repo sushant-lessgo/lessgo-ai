@@ -223,13 +223,20 @@ export interface JourneyRailAdapter {
  * emit `choice`; the renderer switch in `StepQuestions.tsx` adds ONE case and
  * the existing text/group/price rendering is unchanged.
  *
- * Two OPTIONAL common fields (E3, D-A) sit on EVERY member:
+ * Three OPTIONAL common fields sit on EVERY member:
  *   • `required?: true`   — drives the STEP-03 proceed gate (D-D).
  *   • `answered?: boolean` — drives answered-compact rendering (D-E).
+ *   • `slot?: string`      — the GATING slot key (identity / groups / price / …).
+ *     `id` is only a React-key / testid / commit hardcode handle and can DIFFER
+ *     from the slot (work's identity question has `id:'name'`). The frame tracks
+ *     session-answered + expand state by `slot` (falling back to `id`), so the
+ *     gating layer's `session(slot)` re-render decision fires for EVERY slot —
+ *     not just those whose id happens to equal the slot (qa-0719 B3).
  */
 export type JourneyQuestion =
   | {
       id: string;
+      slot?: string;
       kind: 'text';
       label: string;
       prefill?: string;
@@ -239,6 +246,7 @@ export type JourneyQuestion =
     }
   | {
       id: string;
+      slot?: string;
       kind: 'group';
       label: string;
       required?: true;
@@ -247,17 +255,19 @@ export type JourneyQuestion =
     }
   | {
       id: string;
+      slot?: string;
       kind: 'price';
       label: string;
       required?: true;
       answered?: boolean;
       commit(
-        price: { mode: 'exact' | 'from' | 'on-request'; amount?: number },
+        price: { mode: 'exact' | 'from' | 'on-request'; amount?: number; currency?: string },
         liveFacts: Brief['facts']
       ): RailCommit;
     }
   | {
       id: string;
+      slot?: string;
       kind: 'choice';
       label: string;
       /** The full tappable option set. `multi` renders ALL of these as chips. */
@@ -272,6 +282,14 @@ export type JourneyQuestion =
        * visually prominent ones within the full option list.
        */
       suggested?: string[];
+      /**
+       * The CURRENTLY COMMITTED value(s), projected from live facts (qa-0719
+       * B5/B6). The renderer SEEDS its selection from this (so pre-selected /
+       * already-answered chips arrive ACTIVE and Save is enabled without a
+       * redundant tap), and the answered-compact summary reflects it — NOT
+       * `suggested` (which is only the confirm candidate set).
+       */
+      selected?: string[];
       required?: true;
       answered?: boolean;
       commit(values: string[], liveFacts: Brief['facts']): RailCommit;

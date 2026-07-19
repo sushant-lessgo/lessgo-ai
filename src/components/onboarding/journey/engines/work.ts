@@ -53,7 +53,7 @@
 // ============================================================================
 
 import type { Brief } from '@/types/brief';
-import { getWorkFacts } from '@/lib/schemas/workFacts.schema';
+import { getWorkFacts, type WorkFacts } from '@/lib/schemas/workFacts.schema';
 import { workCopyEngineEnabled } from '@/lib/workCopyEngine';
 import {
   railFromFacts,
@@ -378,9 +378,15 @@ function liveChips(liveFacts: Brief['facts']): RailChipEdit[] {
  * without a finite amount rather than silently degrading to `on-request`
  * (`normalizeWorkGroup` would degrade — a rail headed WHAT WE UNDERSTOOD must
  * not quietly record something the user did not say).
+ *
+ * qa-0719 B2 — the `currency` the STEP 03 PriceAnswer collects is PERSISTED here
+ * (the schema modelled `WorkPrice.currency` all along; the old `g.price?.currency`
+ * passthrough was always undefined on a fresh seed, so `priceLabel` rendered a
+ * bare number). One blanket practice-level price still writes across every group
+ * (per-service pricing is editable later in the editor / E4).
  */
 function commitGroupPrice(
-  price: { mode: 'exact' | 'from' | 'on-request'; amount?: number },
+  price: { mode: 'exact' | 'from' | 'on-request'; amount?: number; currency?: string },
   liveFacts: Brief['facts']
 ): RailCommit {
   const live = liveGroups(liveFacts);
@@ -396,7 +402,7 @@ function commitGroupPrice(
     price:
       price.mode === 'on-request'
         ? { mode: 'on-request' as const }
-        : { mode: price.mode, amount: price.amount, currency: g.price?.currency },
+        : { mode: price.mode, amount: price.amount, currency: price.currency ?? g.price?.currency },
   }));
   return applyRailEdit({ field: 'groups', value: next }, liveFacts);
 }
@@ -426,6 +432,21 @@ interface QuestionWordingCtx {
   establishment: 'new' | 'established' | null;
   /** NAME prefill from the rail projection. */
   namePrefill: string;
+  /**
+   * The FRESH work facts (qa-0719 B5/B6) — seeds each choice question's
+   * `selected` from what is already committed, so pre-selected / already-answered
+   * chips arrive ACTIVE (Save enabled without a redundant tap) and a multi commit
+   * can never DROP a value the user did not re-tap.
+   */
+  work: WorkFacts | null;
+}
+
+/** dreamClient is a single ', '-joined string; project it back to a chip array. */
+function dreamClientSelected(work: WorkFacts | null): string[] {
+  return (work?.dreamClient ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 }
 
 function buildWorkQuestion(
@@ -441,6 +462,10 @@ function buildWorkQuestion(
     case 'identity':
       return {
         id: FIELD_NAME,
+        // qa-0719 B3 — the gating slot is 'identity' even though the rail-field id
+        // (and commit hardcode) is 'name'; the frame tracks session-answered by
+        // slot, so answering the name no longer drops the identity slot.
+        slot: 'identity',
         kind: 'text',
         label: 'What should we call you?',
         prefill: ctx.namePrefill,
@@ -453,6 +478,7 @@ function buildWorkQuestion(
     case 'groups':
       return {
         id: FIELD_GROUPS,
+        slot: 'groups',
         kind: 'group',
         // Profession wording: "galleries" (photographer), "projects" (designer)…
         label: `What ${ctx.wording.workGroup} do you offer?`,
@@ -468,8 +494,12 @@ function buildWorkQuestion(
       return {
         // A QUESTION id, not a rail field id: price is written onto the groups.
         id: 'price',
+        slot: 'price',
         kind: 'price',
-        label: 'Roughly what do you charge?',
+        // qa-0719 B2 — sets expectations for a multi-service seller: this is the
+        // ONE starting price the site leads with; per-service pricing is editable
+        // later in the editor.
+        label: 'Your typical starting price (we’ll show “from” pricing)',
         answered,
         ...requiredField,
         // D-G: ONE blanket practice-level price (per-group split deferred to E4).
@@ -482,12 +512,14 @@ function buildWorkQuestion(
     case 'establishment':
       return {
         id: FIELD_ESTABLISHMENT,
+        slot: 'establishment',
         kind: 'choice',
         label: 'Are you established, or just starting out?',
         options: [
           { value: 'new', label: 'Just starting out' },
           { value: 'established', label: 'Established' },
         ],
+        ...(ctx.work?.establishment ? { selected: [ctx.work.establishment] } : {}),
         answered,
         ...requiredField,
         commit: (values, liveFacts) =>
@@ -502,14 +534,17 @@ function buildWorkQuestion(
       // the user may pick several ideal-client types — joined into the single
       // string contract field with ', '.
       const suggested = item.suggested ?? [];
+      const selected = dreamClientSelected(ctx.work);
       return {
         id: FIELD_DREAM_CLIENT,
+        slot: 'dreamClient',
         kind: 'choice',
         label: 'Who is your dream client?',
-        options: dedupeOptions([...suggested, ...ctx.professionChips]),
+        options: dedupeOptions([...selected, ...suggested, ...ctx.professionChips]),
         multi: true,
         allowCustom: true,
         ...(suggested.length ? { suggested } : {}),
+        ...(selected.length ? { selected } : {}),
         answered,
         ...requiredField,
         commit: (values, liveFacts) =>
@@ -521,17 +556,20 @@ function buildWorkQuestion(
       // Confirm-only (D-F): appears only when entry testimonials exist; the kept
       // selections are committed verbatim (string[]).
       const suggested = item.suggested ?? [];
+      const selected = ctx.work?.praise ?? [];
       return {
         id: 'praise',
+        slot: 'praise',
         kind: 'choice',
         // BRANCH wording (D-F): a `new` seller has no praise yet → "what to expect".
         label:
           ctx.establishment === 'new'
             ? 'What should clients expect from working with you?'
             : 'What do clients praise you for?',
-        options: suggested.map((t) => ({ value: t, label: t })),
+        options: dedupeOptions([...selected, ...suggested]),
         multi: true,
         ...(suggested.length ? { suggested } : {}),
+        ...(selected.length ? { selected } : {}),
         answered,
         ...requiredField,
         commit: (values, liveFacts) =>
@@ -542,6 +580,7 @@ function buildWorkQuestion(
     case 'contactMethod':
       return {
         id: FIELD_CONTACT,
+        slot: 'contactMethod',
         kind: 'choice',
         label: 'How should clients reach you?',
         options: [
@@ -550,6 +589,7 @@ function buildWorkQuestion(
           { value: 'form', label: 'Contact form' },
         ],
         ...(item.suggested?.length ? { suggested: item.suggested } : {}),
+        ...(ctx.work?.contactMethod ? { selected: [ctx.work.contactMethod] } : {}),
         answered,
         ...requiredField,
         commit: (values, liveFacts) =>
@@ -559,26 +599,31 @@ function buildWorkQuestion(
           ),
       };
 
-    case 'languages':
+    case 'languages': {
+      const selected = ctx.work?.languages ?? [];
       return {
         id: FIELD_LANGUAGES,
+        slot: 'languages',
         kind: 'choice',
         label: 'What language(s) is your site in?',
         // Orchestrator ruling: BOTH Dutch and English are tappable (Kundius is
         // NL/EN bilingual); English renders suggested-prominent; allowCustom for
         // anything else — she taps, never free-types the common case.
-        options: [
-          { value: 'English', label: 'English' },
-          { value: 'Dutch', label: 'Dutch' },
-        ],
+        options: dedupeOptions([
+          ...selected,
+          'English',
+          'Dutch',
+        ]),
         multi: true,
         allowCustom: true,
         ...(item.suggested?.length ? { suggested: item.suggested } : {}),
+        ...(selected.length ? { selected } : {}),
         answered,
         ...requiredField,
         commit: (values, liveFacts) =>
           applyRailEdit({ field: 'languages', value: values }, liveFacts),
       };
+    }
   }
   return null;
 }
@@ -651,7 +696,8 @@ export const workJourneySeam: JourneyEngineSeam = {
       const professionChips = dreamClientChips[profession];
       // BRANCH (D-F): establishment reframes the praise wording off the FRESH bag —
       // pure re-projection, since `questions()` re-runs after every commit.
-      const establishment = getWorkFacts(ctx.facts)?.establishment ?? null;
+      const work = getWorkFacts(ctx.facts);
+      const establishment = work?.establishment ?? null;
 
       const namePrefill = vm.fields.find((f) => f.id === FIELD_NAME)?.value ?? '';
 
@@ -662,6 +708,7 @@ export const workJourneySeam: JourneyEngineSeam = {
           professionChips,
           establishment,
           namePrefill,
+          work,
         });
         if (q) out.push(q);
       }
