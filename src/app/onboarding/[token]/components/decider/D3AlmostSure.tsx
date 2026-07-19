@@ -19,17 +19,8 @@ import type { ResolvedEngine } from '@/modules/brief/classify';
 import { getEntryFacts } from '@/modules/brief/classify';
 import { EngineRailField } from '@/components/onboarding/journey/UnderstoodRail';
 import JourneyTopBar from '@/components/onboarding/journey/JourneyTopBar';
-import { ENGINE_LEAD } from './D2Known';
+import { ENGINE_LEAD, ENGINE_QUESTION } from './engineCopy';
 import { cn } from '@/lib/utils';
-
-/** Plain-language buyer-decision question per engine (no jargon). */
-const ENGINE_QUESTION: Record<ResolvedEngine, string> = {
-  work: 'Sounds like people pick you once they see your work — is that right?',
-  trust: 'Sounds like people hire you for your experience — is that right?',
-  thing: 'Sounds like people decide once they get what your product does — is that right?',
-  place: 'Sounds like people decide once they see your place — is that right?',
-  'quick-yes': 'Sounds like people already know you and just need one clear ask — is that right?',
-};
 
 interface D3AlmostSureProps {
   briefDraft: Brief;
@@ -54,6 +45,34 @@ export default function D3AlmostSure({
       <JourneyTopBar step={null} right={<span />} />
 
       <div className="flex-1 min-h-0 overflow-auto flex">
+        {/* Live-read rail (LEFT — matches the work journey's rail convention). */}
+        <aside className="w-[320px] flex-none bg-app-surface-sunken border-r border-app-border-frame flex flex-col">
+          <div className="flex-none px-[22px] pt-5 pb-3.5">
+            <div className="font-app-mono font-bold text-[10px] tracking-[0.11em] text-app-faint">
+              WHAT WE UNDERSTOOD
+            </div>
+          </div>
+          <div className="flex-1 min-h-0 overflow-auto px-[22px]">
+            <div className="py-[11px] border-t border-app-hairline">
+              <div className="font-app-mono font-semibold text-[10px] tracking-[0.06em] text-app-faint mb-1.5">
+                WHAT YOU DO
+              </div>
+              <span className="font-app-sans font-medium text-[13px] text-app-slate">
+                {facts?.summary || facts?.oneLiner || '—'}
+              </span>
+            </div>
+            <EngineRailField
+              engine={{
+                status: 'almost-sure',
+                label: copy.label,
+                descriptor: copy.descriptor,
+                icon: copy.icon,
+                onChangeEngine: onSomethingElse,
+              }}
+            />
+          </div>
+        </aside>
+
         <div className="flex-1 flex flex-col items-center justify-center p-10 bg-[radial-gradient(120%_90%_at_50%_-6%,#eef4ff_0%,#fcfcfd_58%)]">
           <div data-testid="decider-d3" className="w-full max-w-[520px] flex flex-col items-center text-center">
             <h1 className="font-app-sans font-extrabold text-[28px] leading-[1.18] tracking-[-0.8px] text-app-ink max-w-[460px]">
@@ -99,33 +118,6 @@ export default function D3AlmostSure({
             </div>
           </div>
         </div>
-
-        <aside className="w-[320px] flex-none bg-app-surface-sunken border-l border-app-border-frame flex flex-col">
-          <div className="flex-none px-[22px] pt-5 pb-3.5">
-            <div className="font-app-mono font-bold text-[10px] tracking-[0.11em] text-app-faint">
-              WHAT WE UNDERSTOOD
-            </div>
-          </div>
-          <div className="flex-1 min-h-0 overflow-auto px-[22px]">
-            <div className="py-[11px] border-t border-app-hairline">
-              <div className="font-app-mono font-semibold text-[10px] tracking-[0.06em] text-app-faint mb-1.5">
-                WHAT YOU DO
-              </div>
-              <span className="font-app-sans font-medium text-[13px] text-app-slate">
-                {facts?.summary || facts?.oneLiner || '—'}
-              </span>
-            </div>
-            <EngineRailField
-              engine={{
-                status: 'almost-sure',
-                label: copy.label,
-                descriptor: copy.descriptor,
-                icon: copy.icon,
-                onChangeEngine: onSomethingElse,
-              }}
-            />
-          </div>
-        </aside>
       </div>
     </div>
   );

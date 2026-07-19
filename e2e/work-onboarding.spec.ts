@@ -20,10 +20,11 @@ const EXIF_CLUSTER_FILES = [
 //
 // Mock mode CANNOT classify work, so every spec here SEEDS a confirmed work
 // brief through the REAL serve gate and resumes the shell. The entry path is now
-// the DECIDER (engineDecider phase 3): D1 → D2/D3 → D6 (which owns the confirm
-// handoff the retired JourneyEntryStep used to). That entry — and the O1
+// the DECIDER (engineDecider phase 3 + follow-up): D1 → (clear/known → silent
+// FinalizeHandoff | almost-sure → D3 → FinalizeHandoff), which owns the confirm
+// handoff the retired JourneyEntryStep used to. That entry — and the O1
 // one-liner-once regression — is covered by e2e/engine-decider.spec.ts (real
-// routing, /api/v2/understand route-intercepted) + D6Handoff.test.tsx (the
+// routing, /api/v2/understand route-intercepted) + FinalizeHandoff.test.tsx (the
 // confirm/serve/manual/enrichment unit gate) + P7 founder QA. Nothing here fakes
 // entry; these specs resume post-confirm.
 //

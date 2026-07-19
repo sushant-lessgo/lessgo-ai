@@ -2,9 +2,10 @@
 
 // D1 — "One line in" entry composer (engineDecider Phase 2).
 //
-// The hi-fi entry screen: a centered composer (radial bg) + a live-read rail on
-// the RIGHT whose "HOW YOUR SITE WINS" field animates spinner → resolved card as
-// classification lands. It WRAPS the shared `useEntryClassify` hook (URL ⇒
+// The hi-fi entry screen: a live-read rail on the LEFT (matching the work
+// journey's rail convention) whose "HOW YOUR SITE WINS" field animates spinner →
+// resolved card as classification lands, + a centered composer (radial bg) to its
+// right. It WRAPS the shared `useEntryClassify` hook (URL ⇒
 // /api/v2/scrape-website, text ⇒ /api/v2/understand, entry:true) — same submit
 // logic as the legacy EntryInputStep, new chrome.
 //
@@ -129,6 +130,31 @@ export default function D1Entry({ onSuccess }: D1EntryProps) {
 
   return (
     <div className="min-h-screen flex bg-app-frame">
+      {/* Live-read rail (LEFT — matches the work journey's rail convention). */}
+      <aside className="w-[320px] flex-none bg-app-surface-sunken border-r border-app-border-frame flex flex-col">
+        <div className="flex-none px-[22px] pt-5 pb-3.5">
+          <div className="font-app-mono font-bold text-[10px] tracking-[0.11em] text-app-faint">
+            WHAT WE UNDERSTOOD
+          </div>
+          <div className="font-app-sans text-[11.5px] text-app-placeholder mt-[3px]">
+            A first read — nothing here is locked
+          </div>
+        </div>
+
+        <div className="flex-1 min-h-0 overflow-auto px-[22px]">
+          <D1RailFact label="WHAT YOU DO" value={facts?.summary || facts?.oneLiner} />
+          <D1RailFact label="WHERE" value={facts?.deliveryModel ?? undefined} />
+          {engineRail && <EngineRailField engine={engineRail} />}
+          <D1RailFact label="WHAT YOU SELL" value={facts?.offer} />
+        </div>
+
+        <div className="flex-none px-[22px] py-3.5 border-t border-app-hairline">
+          <p className="font-app-sans text-[11px] text-app-faint">
+            The engine is a first read, not a lock — ingestion can still change it.
+          </p>
+        </div>
+      </aside>
+
       {/* Composer */}
       <div className="flex-1 flex items-center justify-center px-6 py-10 bg-[radial-gradient(120%_90%_at_50%_-6%,#eef4ff_0%,#fcfcfd_58%)]">
         <div className="w-full max-w-[700px] flex flex-col items-center text-center">
@@ -288,31 +314,6 @@ export default function D1Entry({ onSuccess }: D1EntryProps) {
           </div>
         </div>
       </div>
-
-      {/* Live-read rail (right) */}
-      <aside className="w-[320px] flex-none bg-app-surface-sunken border-l border-app-border-frame flex flex-col">
-        <div className="flex-none px-[22px] pt-5 pb-3.5">
-          <div className="font-app-mono font-bold text-[10px] tracking-[0.11em] text-app-faint">
-            WHAT WE UNDERSTOOD
-          </div>
-          <div className="font-app-sans text-[11.5px] text-app-placeholder mt-[3px]">
-            A first read — nothing here is locked
-          </div>
-        </div>
-
-        <div className="flex-1 min-h-0 overflow-auto px-[22px]">
-          <D1RailFact label="WHAT YOU DO" value={facts?.summary || facts?.oneLiner} />
-          <D1RailFact label="WHERE" value={facts?.deliveryModel ?? undefined} />
-          {engineRail && <EngineRailField engine={engineRail} />}
-          <D1RailFact label="WHAT YOU SELL" value={facts?.offer} />
-        </div>
-
-        <div className="flex-none px-[22px] py-3.5 border-t border-app-hairline">
-          <p className="font-app-sans text-[11px] text-app-faint">
-            The engine is a first read, not a lock — ingestion can still change it.
-          </p>
-        </div>
-      </aside>
     </div>
   );
 }

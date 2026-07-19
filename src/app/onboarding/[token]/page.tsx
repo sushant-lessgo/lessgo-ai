@@ -77,18 +77,12 @@ const JourneyShell = dynamic(
   }
 );
 
-// FIREWALL: the decider work-lane screens (D2/D3/D6) transitively pull the
-// agnostic rail (→ the wizard store) and, for D6, the seam registry loader — so
-// each is DYNAMICALLY imported (ssr:false), same discipline as JourneyShell.
-// D6 owns the confirm handoff that the retired JourneyEntryStep used to own.
-const D2Known = dynamic(() => import('./components/decider/D2Known'), {
-  ssr: false,
-  loading: () => (
-    <div className="min-h-screen flex items-center justify-center text-gray-500">
-      <Loader2 className="w-5 h-5 animate-spin" />
-    </div>
-  ),
-});
+// FIREWALL: the decider work-lane screens (D3 + the silent FinalizeHandoff)
+// transitively pull the agnostic rail (→ the wizard store) and, for Finalize, the
+// seam registry loader — so each is DYNAMICALLY imported (ssr:false), same
+// discipline as JourneyShell. FinalizeHandoff owns the confirm handoff that the
+// retired JourneyEntryStep — and then the cut D6 ceremony screen — used to own.
+// The clear/known path skips straight through it (no D2, no ceremony).
 const D3AlmostSure = dynamic(() => import('./components/decider/D3AlmostSure'), {
   ssr: false,
   loading: () => (
@@ -97,7 +91,7 @@ const D3AlmostSure = dynamic(() => import('./components/decider/D3AlmostSure'), 
     </div>
   ),
 });
-const D6Handoff = dynamic(() => import('./components/decider/D6Handoff'), {
+const FinalizeHandoff = dynamic(() => import('./components/decider/FinalizeHandoff'), {
   ssr: false,
   loading: () => (
     <div className="min-h-screen flex items-center justify-center text-gray-500">
@@ -119,13 +113,15 @@ const D1Entry = dynamic(() => import('./components/decider/D1Entry'), {
   ),
 });
 
-// engineDecider Phase 3 — `decider` is the WORK-lane sub-flow (D2/D3 → D6). The
-// specific screen is tracked by `deciderScreen`. Non-work lanes still route to
-// `confirm` this phase (Phases 4–5 re-point them to D4/D5).
+// engineDecider Phase 3 — `decider` is the WORK-lane sub-flow. The clear/known
+// path goes STRAIGHT to the silent `finalize` transition (no D2, no ceremony);
+// the almost-sure path stops at D3 for one tap, then `finalize`. The specific
+// screen is tracked by `deciderScreen`. Non-work lanes still route to `confirm`
+// this phase (Phases 4–5 re-point them to D4/D5).
 type EntryStep = 'input' | 'decider' | 'confirm' | 'manual' | 'wizard' | 'journey';
 
-/** Which work-lane decider screen renders (engineDecider Phase 3). */
-type DeciderScreen = 'D2' | 'D3' | 'D6';
+/** Which work-lane decider screen renders (engineDecider Phase 3 follow-up). */
+type DeciderScreen = 'D3' | 'finalize';
 
 /**
  * The decider's LOCAL state (engineDecider Phase 2 — R4: no new store). Captured
@@ -175,7 +171,7 @@ export default function EntryOnboardingPage() {
   // engineDecider Phase 2 — the decider's local state (R4: no new store). Phase 3
   // WIRES A REAL READER: the work-lane D2/D3/D6 routing consumes it below.
   const [deciderState, setDeciderState] = useState<DeciderState | null>(null);
-  const [deciderScreen, setDeciderScreen] = useState<DeciderScreen>('D2');
+  const [deciderScreen, setDeciderScreen] = useState<DeciderScreen>('finalize');
 
   // Load-detection: does a DB-confirmed brief already exist for this token?
   useEffect(() => {
@@ -275,15 +271,18 @@ export default function EntryOnboardingPage() {
             resolvedEngine,
           });
 
-          // engineDecider Phase 3 — WORK LANE ONLY. A resolved `work` engine
-          // (the ONLY engine with a journey seam today) enters the decider at D2
-          // (known) or D3 (almost-sure) → D6, which owns the confirm handoff. The
-          // old JourneyEntryStep double-entry is bypassed entirely (O1 kill).
-          // Every other lane — clear thing/trust, ambiguous, place/quick-yes —
-          // keeps the existing `confirm` path until Phases 4–5 re-point it.
+          // engineDecider Phase 3 (+ follow-up) — WORK LANE ONLY. A resolved
+          // `work` engine (the ONLY engine with a journey seam today):
+          //   • KNOWN → STRAIGHT to the silent `finalize` transition (no D2, no
+          //     ceremony) — the clear ~80% path never stops to click.
+          //   • ALMOST-SURE → D3 (one-tap confirm) → `finalize`.
+          // FinalizeHandoff owns the confirm handoff; the old JourneyEntryStep
+          // double-entry is bypassed entirely (O1 kill). Every other lane — clear
+          // thing/trust, ambiguous, place/quick-yes — keeps the existing `confirm`
+          // path until Phases 4–5 re-point it.
           if (resolvedEngine === 'work') {
             const screen = screenForStatus(facts?.engineStatus);
-            setDeciderScreen(screen === 'D3' ? 'D3' : 'D2');
+            setDeciderScreen(screen === 'D3' ? 'D3' : 'finalize');
             setStep('decider');
           } else {
             setStep('confirm');
@@ -294,38 +293,30 @@ export default function EntryOnboardingPage() {
   }
 
   // ── DECIDER WORK LANE — FULL-VIEWPORT EARLY RETURNS (engineDecider Phase 3) ──
-  // D2/D3 present the resolved work engine with ZERO / one-tap friction, then
-  // hand to D6. NO editable one-liner appears on any of these (the O1 kill): the
-  // one-liner is typed exactly once, at D1. D6 owns the confirm POST; on serve it
-  // hard-navs and load-detection mounts JourneyShell at showWork, on manual it
-  // routes to the existing demand branch.
+  // The clear/known path lands directly on `finalize` (no D2, no ceremony). The
+  // almost-sure path stops at D3 for one tap, then `finalize`. NO editable
+  // one-liner appears on any of these (the O1 kill): the one-liner is typed
+  // exactly once, at D1. FinalizeHandoff owns the confirm POST and fires it
+  // silently on mount; on serve it hard-navs and load-detection mounts
+  // JourneyShell at showWork, on manual it routes to the existing demand branch.
+  // (When D4 lands in Phase 4, its work-pick routes through this SAME `finalize`
+  // transition — set `deciderScreen` to 'finalize' after `applyEnginePick`.)
   if (!checking && step === 'decider' && briefDraft && deciderState?.resolvedEngine) {
     const resolvedEngine = deciderState.resolvedEngine;
-    if (deciderScreen === 'D2') {
-      return (
-        <D2Known
-          briefDraft={briefDraft}
-          resolvedEngine={resolvedEngine}
-          onContinue={() => setDeciderScreen('D6')}
-          // D4 is Phase 4 — the change-affordance is a greyed placeholder until
-          // then (no dead-end route), so no `onChange` is passed.
-        />
-      );
-    }
     if (deciderScreen === 'D3') {
       return (
         <D3AlmostSure
           briefDraft={briefDraft}
           resolvedEngine={resolvedEngine}
           // "Yes" = confirm the SAME lookup engine — pure local state, no
-          // re-classification, no extra UNDERSTAND credit.
-          onYes={() => setDeciderScreen('D6')}
+          // re-classification, no extra UNDERSTAND credit. → the silent finalize.
+          onYes={() => setDeciderScreen('finalize')}
           // "Something else" → D4 (Phase 4) — greyed placeholder until then.
         />
       );
     }
     return (
-      <D6Handoff
+      <FinalizeHandoff
         tokenId={tokenId}
         briefDraft={briefDraft}
         resolvedEngine={resolvedEngine}
@@ -333,7 +324,6 @@ export default function EntryOnboardingPage() {
           setMissing(missingTags);
           setStep('manual');
         }}
-        onBack={() => setDeciderScreen(deciderState.engineStatus === 'almost-sure' ? 'D3' : 'D2')}
       />
     );
   }

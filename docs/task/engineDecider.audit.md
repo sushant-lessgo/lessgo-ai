@@ -201,3 +201,82 @@ Retired from the entry path AND deleted (both file + test). It was reachable onl
 - Mock mode still cannot classify work, so the e2e pins the ONE classifier call via route-intercept. The founder-QA on dev (real `/api/v2/understand`) is the only place the true photographer→work classification is exercised end to end — the gate the plan reserves. Everything downstream of that call is real in the e2e.
 - Ambiguous/non-work lanes (designer, thing/trust, place) still route to the legacy `confirm` path this phase — Phase 4 (D4) + Phase 5 (D5) re-point them. Deliberate (work lane only).
 - Greyed change-affordances mean a work-lane visitor who genuinely isn't work has no in-decider escape until Phase 4; interim + honest (Phase 4 is the immediate next slice).
+
+## Phase 3 — follow-up (cut D2/D6 for clear path, rail left)
+
+Branch: `feature/engineDecider` (verified `git branch --show-current` before any edit). No commits (orchestrator commits). No renderer/`.published.tsx`/template/schema/`/api/brief/confirm` server code touched; seam contract (`engines/types.ts`) NOT widened; firewall intact.
+
+Founder QA at the Phase-3 gate dictated two flow changes; this amends Phase 3.
+
+### Files changed (complete scope map — 8 entries)
+
+New (2):
+1. `src/app/onboarding/[token]/components/decider/engineCopy.ts` — NEW shared module. Holds `ENGINE_LEAD` (moved from the deleted `D2Known.tsx`, whose export `D3AlmostSure`/D6 imported) + `ENGINE_QUESTION` (moved from `D3AlmostSure.tsx` local). Nothing now imports engine copy from a deleted screen. `.ts` (not `.tsx`) so icons are built with `createElement` instead of JSX. Plain-language, no engine jargon.
+2. `src/app/onboarding/[token]/components/decider/FinalizeHandoff.tsx` — the RENAMED, headless replacement for `D6Handoff.tsx`. Same confirm-handoff ownership; the ONLY behavioural change is the TRIGGER — it fires the WHOLE sequence AUTOMATICALLY in a mount-once `useEffect` behind a minimal "Setting up your site…" spinner (NO Continue button, NO belief-lifecycle card, NO engine-ceremony copy). Added a `seam == null` guard (the old D6 disabled its CTA until the seam loaded; the headless version guards inline). `data-testid="decider-finalize"` + `decider-finalize-error`.
+
+New/renamed test (1):
+3. `src/app/onboarding/[token]/components/decider/FinalizeHandoff.test.tsx` — the ported `D6Handoff.test.tsx`, rewritten for auto-fire (mount → `waitFor` the outcome, no CTA click). Preserves every gate: serve hard-nav, manual + fallback tag, seam enrichment (`facts.work` built, every group `kind:'category'`, sibling `facts.entry` survives), non-ok error (no nav/manual), thrown fetch, and the O1 kill (no `<textarea>`, no `journey-entry-oneliner`, never `/api/v2/understand`).
+
+Deleted (2):
+4. `src/app/onboarding/[token]/components/decider/D2Known.tsx` — cut from the flow (the clear/known path no longer shows a "you're a photographer" screen).
+5. `src/app/onboarding/[token]/components/decider/D6Handoff.tsx` — renamed to `FinalizeHandoff.tsx` (see #2). (There was no separate `D2Known.test.tsx`; the D6 test became `FinalizeHandoff.test.tsx`.)
+
+Modified (3):
+6. `src/app/onboarding/[token]/components/decider/D3AlmostSure.tsx` — imports `ENGINE_LEAD` + `ENGINE_QUESTION` from `./engineCopy` (was `./D2Known` + a local const); rail moved to the LEFT (aside first, `border-r`; composer to its right). "Yes" behaviour unchanged (pure local state; page now routes it to `finalize`).
+7. `src/app/onboarding/[token]/components/decider/D1Entry.tsx` — rail moved to the LEFT (aside first with `border-r`, composer to its right); header comment updated. No logic change.
+8. `src/app/onboarding/[token]/page.tsx` — routing rework. `DeciderScreen` type `'D2'|'D3'|'D6'` → `'D3'|'finalize'`; default state `'D2'` → `'finalize'`. D1 `onSuccess` work-lane: `screenForStatus` `'D3'` → D3, everything else (i.e. `known`) → STRAIGHT to `finalize`. Decider render: D2 branch DELETED; D3 `onYes` → `finalize`; the fall-through renders `FinalizeHandoff`. Dynamic import `D6Handoff` → `FinalizeHandoff`; `D2Known` import removed. `screenForStatus` still consumed (unchanged).
+
+Also updated (e2e, in this phase's Files-touched):
+9. `e2e/engine-decider.spec.ts` — photographer test now asserts the CUT path: after D1 Continue, `decider-d2` / `decider-d6` / `decider-d6-continue` all `toHaveCount(0)` (no second screen, no second Continue), then the work journey (`step-show-work`) renders via the silent finalize. O1 assertion KEPT + meaningful: `d1-entry-input` visible + `toHaveCount(1)` at D1, and `assertNoOneLinerInput` (count 0) at the journey — appears exactly once. `decider-d2` testid removed.
+10. `e2e/work-onboarding.spec.ts` — comment-only: stale `D2 → D6` / `D6Handoff.test.tsx` references repointed to the silent-finalize flow + `FinalizeHandoff.test.tsx`.
+
+### Where the confirm-handoff now fires (proving it is preserved)
+The load-bearing sequence moved from `D6Handoff.confirm handler` (Continue click) to `FinalizeHandoff`'s mount-once `useEffect`, byte-equivalent:
+`loadJourneySeam(briefDraft.copyEngine)` → `seam.enrichDraftForConfirm(briefDraft)` [PURE] → `POST /api/brief/confirm` `{tokenId, brief: enriched}` → `res.ok && json.outcome`: `serve` + `redirectTo` ⇒ `window.location.assign(redirectTo)` (hard nav → load-detection mounts `JourneyShell` at showWork) / else ⇒ `onManual(typeof json.missing === 'string' ? json.missing : 'rungA:unclassified')`. Non-ok/no-outcome ⇒ inline error, no nav/manual. `/api/brief/confirm/route.ts` and the seam contract UNEDITED. The e2e's real authed confirm still serves atelier (`loadDraft` → `service`/`atelier`/`copyEngine:'work'` + enrichment-built `facts.work`).
+
+### The new known-path flow
+- KNOWN (clear committed engine, e.g. explicit photographer→work): D1 → `finalize` (silent spinner, auto-confirm on mount) → hard-nav → work journey at Show Your Work. No D2, no D6 ceremony, one Continue click total.
+- ALMOST-SURE: D1 → D3 (one-tap "Yes") → `finalize` → journey. No D6 ceremony.
+- D4 (Phase 4) work-pick will route through the SAME `finalize` transition — seam left obvious in `page.tsx` (comment) and `FinalizeHandoff.tsx` (header).
+
+### Rail placement
+Rail moved to the LEFT on `D1Entry.tsx` and `D3AlmostSure.tsx` (aside first in DOM, `border-r`, composer to its right) — matches the work journey's "what we understood" rail. `FinalizeHandoff` shows a minimal centered spinner (no rail, per "minimal setting-up spinner").
+
+### Deviations
+None material. In-scope judgment calls:
+- Kept `resolvedEngine` in `FinalizeHandoff`'s prop interface (destructured out) — unused for display but load-bearing signal for D4's future work-pick seam; matches the e2e/test which pass `resolvedEngine="work"`.
+- `FinalizeHandoff` shows NO rail (founder: "if it shows a rail" — it does not; a bare spinner is the minimal transition asked for).
+- Reused the machine's `screenForStatus` unchanged (still returns `'D2'` for `known`); `page.tsx` maps anything-not-`'D3'` → `finalize`, so `deciderMachine.ts` needed no edit (out of this phase's touch set).
+
+### Firewall / invariants held
+- AI never emits an engine; only code resolves it. No blocking confirm — the known path never stops; D3 is one-tap.
+- `BriefSchema.copyEngine` enum untouched; `/api/brief/confirm` request/response shape unchanged. Seam contract not widened.
+- FinalizeHandoff dynamically imported (ssr:false) — seam/generation graph off the entry bundle. No renderer/template/published code touched.
+
+### Verification
+- `npx tsc --noEmit`: clean, exit 0 (no `founder.jpg` artifact this run — `.next/types` regenerated during the e2e dev boot).
+- `npm run test:run`: **Test Files 251 passed | 1 skipped (252); Tests 4069 passed | 14 skipped (4083).** 0 failures (identical totals to the Phase-3 base — D6's 7 tests became FinalizeHandoff's 7).
+- Decider dir targeted: `deciderMachine.test.tsx` + `FinalizeHandoff.test.tsx` — 2 files / 16 tests passed.
+- `npx playwright test e2e/engine-decider.spec.ts`: **2 passed** (setup + photographer silent-finalize spec, 26.2s) — REAL run (dev server, real Clerk auth, real `/api/brief/confirm` serve, real `loadDraft`).
+
+### impl-review fixes (blocking + 2 nits)
+
+Files changed (2): `FinalizeHandoff.tsx`, `FinalizeHandoff.test.tsx`. (NIT 2's D3 greying was already present — see below.)
+
+**BLOCKING — mount-once guard on `FinalizeHandoff.tsx`.** The auto-confirm effect had only a per-invocation `cancelled` cleanup flag, which stops post-unmount setState but NOT a second effect invocation's `fetch`. Under Next's default `reactStrictMode:true`, StrictMode dev-double-invokes the effect (setup→cleanup→setup) → two `/api/brief/confirm` POSTs → `importScrapedTestimonials` (read-then-write, no unique index) races itself → duplicate testimonial rows + double nav. Fix: a persistent `firedRef = useRef(false)` guard — survives the same-fiber remount, so the confirm fires EXACTLY once.
+
+- **Deviation from the literal spec (in-scope, necessary):** the spec said "keep the existing `cancelled` cleanup logic as-is." Implemented literally (`firedRef` guard + closure `cancelled`), this yields ZERO POSTs under StrictMode, not one: setup1 fires the single async, cleanup1 flips its captured `cancelled=true`, setup2 is skipped by the guard, and the one async then aborts at its post-await `if (cancelled) return`. Empirically confirmed — the test hung at 0 POSTs. Replaced the per-invocation `cancelled` closure with a component-level `activeRef = useRef(true)` set true at the TOP of every setup (before the fired guard) and false in cleanup. StrictMode's re-setup restores `activeRef=true`, so the single in-flight async (kept alive by `firedRef`, not restarted) resumes against an active component and POSTs once; on a REAL unmount there is no re-setup so it stays false and late setState/nav is skipped. The spec's INTENT (single confirm + post-unmount guard) is preserved; only the mechanism differs.
+
+**NIT 1 — real Retry on the error path.** Non-ok/thrown confirm now renders a `Try again` button (`data-testid="decider-finalize-retry"`) whose `handleRetry` resets `firedRef.current = false`, clears the error, and bumps a `retryNonce` state that the confirm effect depends on — the only way the effect re-runs. Guarded against concurrent double-fire: `inFlight` state disables the button and `handleRetry` early-returns while a confirm is in flight.
+
+**NIT 2 — greyed inert D3 affordance (already satisfied; no edit needed).** `D3AlmostSure.tsx` already renders "It's something else" as visibly disabled/greyed (`disabled={!onSomethingElse}`, `opacity-60 cursor-not-allowed`, "Coming soon" `title`, "Changing this is coming soon" subtext) when `onSomethingElse` is absent — which is exactly how `page.tsx` renders it (only `onYes` wired). The rail's "Change how buyers decide" affordance does NOT render on D3 (`EngineRailField` only shows the button when `onChangeEngine` is truthy; D3 passes the undefined `onSomethingElse`), so there is no live-but-dead rail control to grey; greying an absent control would require editing the shared `UnderstoodRail.tsx`, out of this fix's scope. Left as-is; D4 (Phase 4) re-enables both by wiring `onSomethingElse`.
+
+**StrictMode test strengthening.** Added `mountFinalizeStrict` (wraps in `<React.StrictMode>`) + a new test asserting `/api/brief/confirm` is POSTed EXACTLY once and `window.location.assign` called exactly once under StrictMode — this is the regression the pre-existing `:153` test (non-strict mount) missed. Also added a Retry test (first confirm fails → click Retry → second confirm serves + hard-navs; asserts exactly 2 confirm POSTs, proving the re-fire). The 0-POST hang seen during development proves this env genuinely double-invokes effects, so the test exercises the real StrictMode path.
+
+Verification (re-run after these fixes):
+- `npx tsc --noEmit`: clean, exit 0.
+- `FinalizeHandoff.test.tsx`: **9 passed** (was 7 + 2 new).
+- `npm run test:run`: **Test Files 251 passed | 1 skipped (252); Tests 4071 passed | 14 skipped (4085).** 0 failures.
+- `npx playwright test e2e/engine-decider.spec.ts`: **2 passed** (setup + photographer silent-finalize, real authed run).
+
+Open risks: none new. StrictMode double-invoke behaviour is dev-only; production fires once regardless, but the `firedRef` guard also protects against any future genuine remount. `importScrapedTestimonials` remains single-flight-by-contract (no DB unique index) — the guard removes the only known client-side double-fire; a server-side idempotency key is still a separate hardening opportunity (out of scope).

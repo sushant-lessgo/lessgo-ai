@@ -2,12 +2,19 @@ import { test, expect } from '@playwright/test';
 import { startProject, loadDraft } from './helpers/seedWorkBrief';
 
 // ============================================================================
-// Engine Decider — the WORK-lane entry, end to end (engineDecider Phase 3).
+// Engine Decider — the WORK-lane entry, end to end (engineDecider Phase 3 +
+// follow-up).
+//
+// FOUNDER-QA change: for a CLEAR/known engine (an explicit photographer → work)
+// there is NO D2 screen and NO D6 ceremony — after D1 the flow runs a SILENT
+// "setting up your site…" finalize transition (auto-confirm on mount, no
+// Continue button) and hard-navs straight into the work journey at Show Your Work.
 //
 // The regression this spec exists to kill is O1: the retired JourneyEntryStep
 // re-presented the one-liner in a SECOND editable textarea (and re-classified,
 // burning a second UNDERSTAND credit). The whole flow must ask the one-liner
-// EXACTLY ONCE — at D1 — and never again through D2 → D6 → the work journey.
+// EXACTLY ONCE — at D1 — and never again through the silent finalize → work
+// journey.
 //
 // ── WHY /api/v2/understand IS INTERCEPTED (decision 9 / landmine 13) ─────────
 // Mock mode CANNOT classify work: the real `/api/v2/understand` returns the
@@ -34,8 +41,9 @@ async function authedApi(page: import('@playwright/test').Page) {
 
 /**
  * A photographer→work entry draft, exactly as D1 hands it to the decider: only
- * `facts.entry` (D6's enrichment builds `facts.work`), `engineStatus:'known'` so
- * the decider routes to D2 (not D3/D4), and a schema-valid + serve-valid shape
+ * `facts.entry` (FinalizeHandoff's enrichment builds `facts.work`),
+ * `engineStatus:'known'` so the decider routes STRAIGHT to the silent finalize
+ * transition (no D2, no D3/D4), and a schema-valid + serve-valid shape
  * (mirrors WORK_BRIEF_FIXTURE, which the drift guard proves serves atelier).
  * Zero app imports — the Playwright runner has no `@/` alias.
  */
@@ -79,7 +87,7 @@ async function assertNoOneLinerInput(page: import('@playwright/test').Page) {
   await expect(page.getByTestId('journey-entry-step')).toHaveCount(0);
 }
 
-test('photographer one-liner → D2 → D6 → work journey; one-liner asked exactly once', async ({
+test('photographer one-liner → silent finalize → work journey; one-liner asked exactly once', async ({
   page,
 }) => {
   const api = await authedApi(page);
@@ -109,17 +117,13 @@ test('photographer one-liner → D2 → D6 → work journey; one-liner asked exa
   await oneLiner.fill('Documentary wedding photography in Amsterdam');
   await page.getByTestId('d1-continue').click();
 
-  // ── D2: known engine, zero questions. NO one-liner input. ──────────────────
-  await expect(page.getByTestId('decider-d2')).toBeVisible({ timeout: 30_000 });
-  await assertNoOneLinerInput(page);
-  await page.getByTestId('decider-d2-continue').click();
-
-  // ── D6: engine set, owns the confirm handoff. NO one-liner input. ──────────
-  await expect(page.getByTestId('decider-d6')).toBeVisible({ timeout: 30_000 });
-  await assertNoOneLinerInput(page);
-  // Also structurally: D6 carries no <textarea> at all.
-  await expect(page.locator('[data-testid="decider-d6"] textarea')).toHaveCount(0);
-  await page.getByTestId('decider-d6-continue').click();
+  // ── The clear/known path is CUT straight through: NO D2 screen, NO D6
+  //    ceremony. A silent finalize transition auto-confirms on mount and
+  //    hard-navs into the journey. We only ever click Continue ONCE (at D1). ──
+  await expect(page.getByTestId('decider-d2')).toHaveCount(0);
+  await expect(page.getByTestId('decider-d6')).toHaveCount(0);
+  // No second Continue exists on the finalize transition.
+  await expect(page.getByTestId('decider-d6-continue')).toHaveCount(0);
 
   // ── Serve → hard-nav → load-detection mounts the JOURNEY at showWork. ──────
   await expect(page.getByTestId('step-show-work')).toBeVisible({ timeout: 30_000 });
