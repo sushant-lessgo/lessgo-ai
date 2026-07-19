@@ -77,6 +77,10 @@ export default defineConfig({
         // work-onboarding-shell: the journey needs a Clerk session (seeded via
         // the real /api/start + /api/brief/confirm routes).
         /work-onboarding\.spec\.ts/,
+        // engineDecider (phase 3): the WORK-lane entry D1→D2→D6→journey + the O1
+        // one-liner-once regression. Authed (confirm + loadDraft need a session);
+        // /api/v2/understand is route-intercepted (mock can't classify work).
+        /engine-decider\.spec\.ts/,
         // work-onboarding-plan (E4): the plan-step tap-powers + approve→structure→fire
         // invariant (removed page absent from persisted Brief.structure AND no
         // generate-copy for the removed slug; kept pages still generated).

@@ -389,6 +389,55 @@ describe('atelier phase 7 — serve backing + over-serve guards', () => {
   });
 });
 
+describe('engineDecider Phase 3 — work-lane serveability pre-check (STEP 0)', () => {
+  // The critical path: a photographer one-liner resolves `work` via LOOKUP
+  // (committed type, classificationSource 'lookup', tiebreaker 'none' — the exact
+  // shape D1 hands D6, and what WORK_BRIEF_FIXTURE carries), and the confirmed
+  // brief SERVES atelier. This is DISTINCT from the portfolio-is-proof rungC probe
+  // test above: here there is NO tiebreaker gallery injection — atelier must be
+  // shortlisted through the NORMAL work+gallery capability path. If this ever
+  // fails, the whole work critical path (photographer → D2 → D6 → work journey) is
+  // unmet and Phase 3 must STOP (the stale config comments claiming gallery is
+  // unbacked are wrong — atelier natively declares it).
+  it('photographer (lookup, tiebreaker none) ⇒ serve / service / atelier — no rungC probe', () => {
+    const brief = buildBriefDraft(
+      makeSignals({ businessTypeGuess: 'photographer', tiebreaker: 'none' }),
+      'documentary wedding photographer in Amsterdam'
+    );
+    const entry = brief.facts?.['entry'] as {
+      resolvedEngine?: string;
+      classificationSource?: string;
+      tiebreaker?: string;
+    };
+    // The exact D1 work-lane shape (lookup, not the tiebreaker path).
+    expect(entry.resolvedEngine).toBe('work');
+    expect(entry.classificationSource).toBe('lookup');
+    expect(entry.tiebreaker).toBe('none');
+
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.audienceType).toBe('service'); // work = engine, atelier = service audience
+      expect(decision.templateId).toBe('atelier');
+      expect(decision.shortlist).toContain('atelier');
+    }
+  });
+
+  it('designer PICKED work (D4) ⇒ serve / service / atelier (gallery backed)', () => {
+    // The ambiguous-designer → D4-pick-work → confirm path also serves atelier.
+    const brief = applyEnginePick(
+      buildBriefDraft(makeSignals({ businessTypeGuess: 'designer' }), 'branding & design studio'),
+      'work'
+    );
+    const decision = decideServe(brief);
+    expect(decision.outcome).toBe('serve');
+    if (decision.outcome === 'serve') {
+      expect(decision.templateId).toBe('atelier');
+      expect(decision.shortlist).toContain('atelier');
+    }
+  });
+});
+
 describe('decideServe — null resolvedEngine backstop (engineDecider R2)', () => {
   // Ambiguous registry types (agency/designer) resolve to `ask` ⇒ null engine
   // pre-D4-pick. The gate must treat null as not-bridgeable/manual with a
