@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useClerk } from '@clerk/nextjs'
+import Logo from '@/components/shared/Logo'
 import { AppIcon } from '@/components/ui/icon'
 import { NavItem, navItemClasses } from '@/components/ui/nav-item'
 import { Coming } from '@/components/ui/coming'
@@ -111,14 +111,7 @@ export default function AppSidebar({ profile, plan }: AppSidebarProps) {
       {/* Logo — transparent wordmark (no background box), sits on the app surface. */}
       <div className="flex items-center px-2 pb-5 pt-1">
         <Link href="/dashboard" aria-label="Lessgo AI — Projects" className="inline-flex">
-          <Image
-            src="/lessgo-logo.png"
-            alt="Lessgo AI"
-            width={152}
-            height={40}
-            priority
-            className="h-[30px] w-auto"
-          />
+          <Logo size={30} className="h-[30px] w-auto" />
         </Link>
       </div>
 

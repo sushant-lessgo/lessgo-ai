@@ -97,10 +97,9 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
             className="inline-flex flex-none items-center gap-1 rounded-app-ctl-sm px-1.5 py-1 transition-colors hover:bg-app-hairline data-[state=open]:bg-app-hairline"
             aria-label="Site menu"
           >
-            {/* t1: logo h22. <Logo> passes `size` to next/image as BOTH width and
-                height, so the height is constrained via className instead — a
-                bare `size` would reserve a square box far taller than the bar. */}
-            <Logo size={110} className="h-[22px] w-auto" />
+            {/* t1: logo h22. <Logo> renders the aspect-correct wordmark; the
+                display height is pinned to the 58px bar via className. */}
+            <Logo size={22} className="h-[22px] w-auto" />
             <AppIcon name="expand_more" size={18} className="text-app-icon-faint" />
           </button>
         </PopoverTrigger>
