@@ -40,9 +40,14 @@ import { useParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import type { Brief } from '@/types/brief';
 import type { AudienceType, TemplateId } from '@/types/service';
+import type {
+  EngineStatus,
+  ResolvedEngine,
+  TiebreakerRung,
+} from '@/modules/brief/classify';
+import { getEntryFacts } from '@/modules/brief/classify';
 import { hasJourneySeam, isJourneyEligible } from '@/lib/journeyEngines';
 import Logo from '@/components/shared/Logo';
-import EntryInputStep from './components/EntryInputStep';
 import ConfirmBriefStep from './components/ConfirmBriefStep';
 import ManualOnboardStep from './components/ManualOnboardStep';
 
@@ -81,7 +86,37 @@ const JourneyEntryStep = dynamic(
   }
 );
 
+// FIREWALL: the D1 composer transitively pulls the agnostic rail (→ the wizard
+// store), so it is DYNAMICALLY imported (ssr:false) to keep that graph off the
+// entry bundle — same discipline as WizardShell/JourneyShell. D1 renders its own
+// full-viewport chrome, so it must escape the legacy centered card below.
+const D1Entry = dynamic(() => import('./components/decider/D1Entry'), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen flex items-center justify-center text-gray-500">
+      <Loader2 className="w-5 h-5 animate-spin" />
+    </div>
+  ),
+});
+
 type EntryStep = 'input' | 'confirm' | 'manual' | 'wizard' | 'journey';
+
+/**
+ * The decider's LOCAL state (engineDecider Phase 2 — R4: no new store). Captured
+ * from the D1 read; the D2–D6 routing that CONSUMES it is wired in Phases 3–5.
+ * Held here so the entry page owns the revisable-belief state end-to-end.
+ */
+interface DeciderState {
+  oneLiner: string;
+  entrySignals: {
+    businessTypeGuess: string | null;
+    confidence: number;
+    tiebreaker: TiebreakerRung;
+  };
+  engineStatus?: EngineStatus;
+  resolvedEngine: ResolvedEngine | null;
+  demandTag?: string;
+}
 
 interface WizardData {
   brief: Brief;
@@ -111,6 +146,9 @@ export default function EntryOnboardingPage() {
   const [missing, setMissing] = useState<string>('rungA:unclassified');
   const [leadId, setLeadId] = useState<string | null>(null);
   const [wizardData, setWizardData] = useState<WizardData | null>(null);
+  // engineDecider Phase 2 — the decider's local state (R4: no new store). Held
+  // for the Phase 3–5 D2–D6 routing that consumes it; setter-only until then.
+  const [, setDeciderState] = useState<DeciderState | null>(null);
 
   // Load-detection: does a DB-confirmed brief already exist for this token?
   useEffect(() => {
@@ -205,6 +243,34 @@ export default function EntryOnboardingPage() {
     );
   }
 
+  // ── D1 ENTRY COMPOSER — FULL-VIEWPORT EARLY RETURN ────────────────────────
+  // D1 renders its own chrome (composer + live-read rail), so it escapes the
+  // legacy centered card like the journey branches. On a resolved read it hands
+  // the draft up to the existing confirm/journey branch (routing is re-pointed
+  // to D2–D6 in Phases 3–4); Phase 2 keeps that path intact.
+  if (!checking && step === 'input') {
+    return (
+      <D1Entry
+        onSuccess={(input, draft) => {
+          setRawInput(input);
+          setBriefDraft(draft);
+          const facts = getEntryFacts(draft);
+          setDeciderState({
+            oneLiner: facts?.oneLiner || facts?.rawInput || input,
+            entrySignals: {
+              businessTypeGuess: draft.businessType ?? null,
+              confidence: draft.confidence ?? 0,
+              tiebreaker: facts?.tiebreaker ?? 'none',
+            },
+            engineStatus: facts?.engineStatus,
+            resolvedEngine: facts?.resolvedEngine ?? null,
+          });
+          setStep('confirm');
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
@@ -228,16 +294,6 @@ export default function EntryOnboardingPage() {
                 brief={wizardData.brief}
                 audienceType={wizardData.audienceType}
                 templateId={wizardData.templateId}
-              />
-            )}
-
-            {!checking && step === 'input' && (
-              <EntryInputStep
-                onSuccess={(input, draft) => {
-                  setRawInput(input);
-                  setBriefDraft(draft);
-                  setStep('confirm');
-                }}
               />
             )}
 

@@ -33,6 +33,7 @@
 // ============================================================================
 
 import { useMemo, useState } from 'react';
+import { ArrowLeftRight, CheckCircle2, HelpCircle, Loader2 } from 'lucide-react';
 import {
   useWizardStore,
   selectBriefFacts,
@@ -44,6 +45,9 @@ import { AppIcon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
+// TYPE-ONLY (erased): keeps the entry-bundle firewall intact — classify.ts is a
+// pure module, but even so nothing from it lands on the bundle at this edge.
+import type { EngineStatus } from '@/modules/brief/classify';
 import type {
   JourneyRailAdapter,
   RailChipEdit,
@@ -51,9 +55,34 @@ import type {
   RailFieldVM,
 } from './engines/types';
 
+/**
+ * The "HOW YOUR SITE WINS" rail field data (engineDecider Phase 2). Prop-driven,
+ * NOT store-driven: the resolved engine + decider status live in the entry
+ * page's LOCAL state (R4), so the rail cannot read them off the wizard store.
+ * `label`/`descriptor` are PLAIN-LANGUAGE (no engine jargon); the caller maps the
+ * engine key → copy.
+ */
+export interface EngineRailFieldData {
+  status: EngineStatus;
+  /** Plain-language "how you win" label, e.g. "Lead with your work". */
+  label?: string;
+  /** One-line descriptor under the label. */
+  descriptor?: string;
+  /** Icon chip contents (a lucide glyph). */
+  icon?: React.ReactNode;
+  /** "Change how buyers decide" — reopens D4 (wired in Phase 4). */
+  onChangeEngine?: () => void;
+}
+
 export interface UnderstoodRailProps {
   /** The engine's rail adapter (from the seam). The ONLY door to engine code. */
   rail: JourneyRailAdapter;
+  /**
+   * Optional engine field (engineDecider Phase 2). When present, the
+   * "HOW YOUR SITE WINS" block renders at the TOP of the rail body. Omitted on
+   * the legacy journey rail (no behavior change for existing callers).
+   */
+  engine?: EngineRailFieldData;
 }
 
 /**
@@ -80,7 +109,7 @@ function projectionKey(facts: object | null | undefined): string {
   return `p${id}`;
 }
 
-export default function UnderstoodRail({ rail }: UnderstoodRailProps) {
+export default function UnderstoodRail({ rail, engine }: UnderstoodRailProps) {
   const briefFacts = useWizardStore(selectBriefFacts);
   const commitRail = useWizardStore(selectCommitRail);
   const { toast } = useToast();
@@ -144,6 +173,7 @@ export default function UnderstoodRail({ rail }: UnderstoodRailProps) {
       </div>
 
       <div className="flex-1 min-h-0 overflow-auto px-[22px]">
+        {engine && <EngineRailField engine={engine} />}
         {vm.fields.map((field) => (
           <RailField
             key={field.id}
@@ -161,6 +191,127 @@ export default function UnderstoodRail({ rail }: UnderstoodRailProps) {
 
       <NoteBox saving={saving} onSubmit={submitNote} />
     </aside>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// "HOW YOUR SITE WINS" — the engine field (engineDecider Phase 2)
+//
+// Three visual states keyed on `engineStatus`:
+//   • resolving           → blue label + spinner, dashed card, striped placeholder
+//   • set (known/almost-  → white card, blue border, icon chip + label; a green
+//     sure/confirmed)        check trails ONLY when confirmed; almost-sure shows
+//                            a dashed "confirming now…" border
+//   • ambiguous            → amber label + help icon, amber card "could go two ways"
+//
+// The engine is a REVISABLE BELIEF: "Change how buyers decide" reopens D4 (the
+// callback is wired in Phase 4). Prop-driven — no store, no engine module.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function EngineRailField({ engine }: { engine: EngineRailFieldData }) {
+  const { status, label, descriptor, icon, onChangeEngine } = engine;
+  const resolving = status === 'resolving';
+  const ambiguous = status === 'ambiguous';
+  const confirmed = status === 'confirmed';
+  const almostSure = status === 'almost-sure';
+
+  const labelColor = resolving
+    ? 'text-app-primary'
+    : ambiguous
+      ? 'text-[#c47d1a]'
+      : 'text-app-faint';
+
+  return (
+    <div
+      data-testid="rail-engine-field"
+      data-engine-status={status}
+      className="py-[11px] border-t border-app-hairline"
+    >
+      <div
+        data-testid="rail-engine-label"
+        className={cn(
+          'flex items-center gap-1.5 font-app-mono font-semibold text-[10px] tracking-[0.06em] mb-1.5',
+          labelColor
+        )}
+      >
+        HOW YOUR SITE WINS
+        {resolving && (
+          <Loader2
+            data-testid="rail-engine-spinner"
+            aria-label="Working out how your site wins"
+            className="w-3 h-3 animate-spin"
+          />
+        )}
+        {ambiguous && <HelpCircle aria-hidden className="w-3 h-3" />}
+      </div>
+
+      <div
+        data-testid="rail-engine-card"
+        className={cn(
+          'rounded-app-panel p-3 flex items-center gap-2.5',
+          resolving && 'border-[1.5px] border-dashed border-[#cfe0ff] bg-white',
+          almostSure && 'border-[1.5px] border-dashed border-[#cfe0ff] bg-white',
+          (confirmed || status === 'known') && 'border-[1.5px] border-[#cfe0ff] bg-white',
+          ambiguous && 'border-[1.5px] border-[#f0dcb4] bg-[#fdf7ec]'
+        )}
+      >
+        {resolving ? (
+          <span
+            aria-label="Resolving"
+            className="h-[9px] w-[70%] rounded-[5px] bg-app-stripes"
+          />
+        ) : (
+          <>
+            <span
+              className={cn(
+                'flex-none w-[34px] h-[34px] rounded-[9px] flex items-center justify-center',
+                ambiguous ? 'bg-[#fbf1e0] text-[#c47d1a]' : 'bg-app-tint text-app-primary'
+              )}
+            >
+              {icon}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div
+                data-testid="rail-engine-name"
+                className="font-app-sans font-bold text-[13px] text-app-ink truncate"
+              >
+                {ambiguous ? 'Could go two ways' : label ?? '—'}
+              </div>
+              <div className="font-app-sans text-[10.5px] text-app-muted truncate">
+                {ambiguous ? (
+                  <span data-testid="rail-engine-ambiguous">
+                    {descriptor ?? 'You tell us how buyers decide'}
+                  </span>
+                ) : almostSure ? (
+                  'Confirming now…'
+                ) : (
+                  descriptor ?? ''
+                )}
+              </div>
+            </div>
+            {confirmed && (
+              <CheckCircle2
+                data-testid="rail-engine-confirmed"
+                aria-label="Confirmed"
+                className="flex-none w-[18px] h-[18px] text-app-success"
+              />
+            )}
+          </>
+        )}
+      </div>
+
+      {onChangeEngine && !resolving && (
+        <button
+          type="button"
+          data-testid="rail-engine-change"
+          onClick={onChangeEngine}
+          className="mt-2 inline-flex items-center gap-1 font-app-sans font-semibold text-[11px] text-app-primary hover:underline"
+        >
+          <ArrowLeftRight className="w-3 h-3" />
+          Change how buyers decide
+        </button>
+      )}
+    </div>
   );
 }
 

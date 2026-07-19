@@ -9,8 +9,8 @@ Build the Engine Decider: the one-liner entry (D1) resolves every incoming busin
 
 ## Progress log
 
-- phase 1 engine-resolution core (types + registry `ambiguous` + resolveEngine): pending
-- phase 2 decider state machine + D1 entry + rail engine field: pending
+- phase 1 engine-resolution core (types + registry `ambiguous` + resolveEngine): done (commit 45d9c93d, impl-review 1 loop → ship; founder gate: ambiguous set = {designer, agency, manufacturer} — manufacturer flipped per founder; deviations: confidence clamp post-parse not Zod, workContract set incl. agency)
+- phase 2 decider state machine + D1 entry + rail engine field: done (commit <pending>, impl-review 1 loop → ship; carry to P3: wire a DeciderState reader, verify entrySignals confidence source clamped-vs-raw)
 - phase 3 work lane D2/D3/D6 + journey handoff (O1 kill): pending
 - phase 4 D4 buyer-decision question + routing table + wizard step-2 entry: pending
 - phase 5 D5 demand board + serve-gate demand wiring: pending

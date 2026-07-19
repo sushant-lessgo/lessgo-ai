@@ -96,3 +96,49 @@ None. Scope was exactly the manufacturer flip + fixture fallout. The two comment
 - `npx tsc --noEmit`: sole error is the pre-existing unrelated `src/app/page.tsx(6,26): error TS2307 @/assets/images/founder.jpg` (untouched file). No new errors.
 - Affected subset (config, pipelineGuards, workContract, extraction, entryClassify, classify, serveGate, serveMatrix, voice, promptBranch): **10 files / 205 tests passed**.
 - `npm run test:run`: **Test Files 250 passed | 1 skipped (251); Tests 4056 passed | 14 skipped (4070).** 0 failures (identical totals to the base Phase-1 audit — the flip re-pointed assertions without adding/removing tests net; config.test.ts swapped one assertion into a dedicated test, keeping the count stable).
+
+## Phase 2 — Decider state machine + D1 entry + rail engine field
+
+Branch: `feature/engineDecider` (verified `git branch --show-current` before any edit). No commits (orchestrator commits). UI-only phase — no renderer/published/template/schema/serve-gate code touched; firewall intact (AI still emits only signals; code resolves the engine).
+
+### Files changed (complete scope map — 6 files, all on the plan's Phase-2 Files-touched list)
+
+New (3):
+1. `src/app/onboarding/[token]/components/decider/deciderMachine.ts` — the pure R1 status machine. `statusFromResolution(EngineResolution, confidence)` mirrors `buildBriefDraft`'s derivation exactly (committed lookup → known >=0.6 / almost-sure <0.6; tiebreaker → known; `ask` → ambiguous); `screenForStatus` maps status → D2/D3/D4 and is DEFENSIVE on `undefined` (→ resolving); `statusAfterPick` → confirmed. No React, no store, no 'use client'.
+2. `src/app/onboarding/[token]/components/decider/deciderMachine.test.ts` — R1 table exhaustively: each committed/tiebreaker/ambiguous/unknown branch, the 0.6 boundary, and garbage/NaN/±Inf/out-of-range confidence (never throws, never flips an `ask` into a resolved screen) + screen-map + undefined defense + pick transition.
+3. `src/app/onboarding/[token]/components/decider/D1Entry.tsx` — the hi-fi entry composer: radial-bg composer column (eyebrow pill "Welcome to Lessgo AI", 38px title, 2-tab segmented describe/site, orange Continue CTA, 3 example rows) + a live-read rail on the RIGHT whose `EngineRailField` runs spinner (loading) → resolved card. Wraps `useEntryClassify` (identical submit logic). Dwells 700ms on the resolved read, then hands the draft up via `onSuccess` (cleaned up on unmount).
+
+Modified (3):
+4. `src/app/onboarding/[token]/components/EntryInputStep.tsx` — extracted the submit/classify logic into an exported `useEntryClassify(onSuccess)` hook (value/loading/error/creditsBlocked state + URL⇒scrape / text⇒understand branch + credit-block handling, byte-for-byte). The component is now a thin consumer of the hook — same UI, same testids (`entry-credits-notice`), same behavior. Module helpers (`normalizeUrl`/`validateOneLiner`/`hostOf`) unchanged.
+5. `src/components/onboarding/journey/UnderstoodRail.tsx` — added the exported `EngineRailField` component + `EngineRailFieldData` type and an OPTIONAL `engine?` prop on `UnderstoodRail` (renders the field at the top of the rail body when present; omitted = legacy rail unchanged). Three states keyed on `engineStatus`: resolving (blue label + spinner, dashed card, striped placeholder) / set — known|almost-sure|confirmed (white card, blue border, icon chip + plain label; green check only when confirmed; almost-sure = dashed "Confirming now…") / ambiguous (amber label + help icon, amber card "Could go two ways"). "Change how buyers decide" link emits `onChangeEngine` (Phase-4 wiring; prop exposed now). Prop-driven, no store read for the engine — so D1 can render it pre-hydration. `EngineStatus` imported type-only (erased; entry-bundle firewall intact — `journeyAgnostic.test.ts` green).
+6. `src/components/onboarding/journey/UnderstoodRail.test.tsx` — new `engine field` describe: absent without the prop (legacy unchanged), resolving→spinner/no-link, confirmed→set card + green check, known→card no-check, ambiguous→amber "could go two ways", and the change link renders + fires its callback. Mounted through the real work seam + store as the existing suite does.
+7. `src/app/onboarding/[token]/page.tsx` — D1 replaces the bare input step as a FULL-VIEWPORT early return (own chrome + rail, like the journey branches); D1 dynamically imported (ssr:false) so the rail→wizard-store graph stays off the entry bundle. Added a `DeciderState` interface + local state (R4: no new store) capturing oneLiner/entrySignals/engineStatus/resolvedEngine from the D1 read. Existing `confirm|manual|wizard|journey` branches untouched and reachable — D1's `onSuccess` still advances to `confirm` (routing re-pointed to D2–D6 in Phases 3–4). Dropped the now-unused `EntryInputStep` import.
+
+### D1 / rail → design-token mapping
+Built entirely on the ui-foundation app-chrome tokens (README §Design Tokens):
+- Primary blue `#006CFF` = `app-primary`; deep blue `#003E80` = `app-primary-deep`; blue tint `#e6f0ff` = `app-tint`; orange CTA `#FF6B3D` = `app-cta` (+ `shadow-app-btn-cta`); ink `#191922` = `app-ink`; muted/faint/placeholder = `app-muted`/`app-faint`/`app-placeholder`; slate value text = `app-slate`; green check `#16a34a` = `app-success`; canvas frame `#ececee` = `app-frame`; rail `#fafafb` = `app-surface-sunken`; stripes placeholder = `bg-app-stripes`.
+- Amber (ambiguous) has NO app token — used the exact design hexes as arbitrary values: text `#c47d1a`, bg `#fdf7ec`/`#fbf1e0`, border `#f0dcb4`. Blue engine-card border `#cfe0ff` likewise arbitrary (matches design).
+- Radial composer bg, radii (`app-modal` 20 / `app-pill` 20 / `app-ctl` 10 / `app-panel` 14 / `app-input` 12), `shadow-app-float` for the input card, `font-app-sans` (UI) / `font-app-mono` (eyebrows/tags) per handoff.
+
+### Deviations from the plan (in-scope judgment calls)
+1. **Icons = lucide-react (R3), not the rail's AppIcon.** The existing rail uses `AppIcon` (self-hosted Material Symbols). R3 rules "map Material Symbols names → lucide-react" — followed literally for all NEW decider UI (D1 + engine field). No Google-Fonts runtime dep added. Deliberate minor icon-system mix within `UnderstoodRail.tsx` (lucide field alongside AppIcon rows) — R3 is explicit; visually consistent (both small monochrome glyphs).
+2. **`'decider'` EntryStep enum member NOT added; `DeciderState` local state IS.** With no D2–D6 renderers until Phase 3, a `'decider'` step that renders nothing would be dead, unreachable code. Conservative choice: hold the decider fields in `DeciderState` local state (the concrete "hold decider state in local state" requirement) and keep D1 on the existing `'input'` step; the `'decider'` routing branch + D2–D6 render land in Phase 3 when they exist. Captured, not routed — exactly what "do not wire the new routing yet" asks.
+3. **`DeciderState` held setter-only (`const [, setDeciderState] = useState`).** Nothing reads it in Phase 2 (Phases 3–5 do). Setter-only destructuring holds the state while avoiding an unused-binding lint error; the reader is added when routing consumes it.
+4. **User-facing engine copy is plain-language, no engine jargon.** The closed-5 engine names never surface: engine card labels are "Lead with your work / your experience / your product / your place" + "One clear ask"; example tags are "PRODUCT / EXPERIENCE / COULD GO TWO WAYS" (not THING/TRUST/ASK). Placeholder copy; Phase 7 does final humanization.
+5. **D1 dwells 700ms then advances to the existing confirm branch.** Phase 2 has no D2–D6 to route to, so after showing the resolved rail card D1 hands off to the current confirm/journey path (unchanged reachability). The full resolved-card DWELL + D2–D6 routing is Phase 3–4. Satisfies the manual check "spinner → resolved card".
+
+### Firewall / invariants held
+- AI never emits an engine; `deciderMachine`/`buildBriefDraft` (code) decide. No blocking confirm added (D1 auto-advances).
+- Entry-bundle firewall: D1 dynamically imported (ssr:false) so the rail→`useWizardStore` graph never enters the entry bundle; `EngineStatus` type-only import into `UnderstoodRail`. `journeyAgnostic.test.ts` green.
+- No renderer/`.published.tsx`/template/schema/serve-gate/`/api/brief/confirm` code touched. Dual-renderer parity out of blast radius.
+- `BriefSchema.copyEngine` enum untouched; place/quick-yes still never written to `brief.copyEngine` (ambiguous rail card shows "could go two ways", no engine claimed).
+
+### Verification
+- `npx tsc --noEmit`: sole error is the pre-existing unrelated `src/app/page.tsx(6,26) TS2307 @/assets/images/founder.jpg` (untouched file). No new errors.
+- Targeted: `deciderMachine.test.ts` + `UnderstoodRail.test.tsx` + `journeyAgnostic.test.ts` — **3 files / 39 tests passed**.
+- `npm run test:run`: **Test Files 251 passed | 1 skipped (252); Tests 4071 passed | 14 skipped (4085).** 0 failures (+15 net vs the Phase-1 base 4056: deciderMachine + rail engine-field).
+
+### Open risks / notes
+- D1's rail is a bespoke lightweight aside (not the store-bound `UnderstoodRail`) because no wizard store is hydrated at entry — it reuses the shared `EngineRailField` for the engine block only. If Phase 3+ wants D1's fact rows editable, they'd need the store; deferred (design shows D1's rail as read-only "first read").
+- The 2-tab describe/site control is cosmetic (placeholder/helper only) — submission still auto-detects URL vs text via `normalizeUrl`, matching the single-field architecture. No behavior fork introduced.
+- Manual dev check (not automated this phase): submit a one-liner → rail spinner → resolved card → advances to the existing confirm/journey branch. Full D2–D6 routing + e2e land in Phases 3–4.
