@@ -15,8 +15,8 @@ Replace the overloaded STEP 04 "Here's your site" gate with the reconceived desi
 ## Progress log
 
 - phase 1 shape/seed machinery + unit tests: done (commit c66a822a, impl-review loops 1 → ship; plan-review loops 2 → approve) — tsc/test:run(4089✓)/lint green; Kundius fixture confirmed compact. 1 harmless nit (dead F22 belt-and-braces in shape.test — no action).
-- phase 2 PlanStep UI rework + e2e rewrite: pending
-  - CARRY-FORWARD to phase 2 (plan-review nits): (a) e2e leak-probe forbidden list must DROP `collection` (collides with Work Group tile plain copy "Promote one collection…") + any other plain-English overlap; (b) compact fixture PROMOTES (2 groups ≥ PROMOTE_GROUP_MIN) so `plan-tile-work-group` renders qualified in Test 1 — add an explicit assert it renders.
+- phase 2 PlanStep UI rework + e2e rewrite: done (commit 854dbda8, impl-review loops 1: fix-first→ship) — tsc/test:run(4079✓)/lint/**build** green. Fix applied: inverted e2e Test-2 proof assertion (atelier proof band is always folded; F22 gates only `testimonials`). Reviewer CONCURRED the single-page full-menu fold deviation is correct+spec-faithful; ruling-5 stash/restore verified. Carry-forward nits (a)+(b) applied. e2e execution (3 tests) DEFERRED to founder QA gate.
+  - ⛔ HUMAN GATE owed (founder): visual eyeball vs design; Single + Multi end-to-end generation on QA preview; Work-Group `/work/<group>` generation ruling (greyed-fallback if downstream chokes).
 
 ## Ground-truth constraints (scout-confirmed — bind both phases)
 
