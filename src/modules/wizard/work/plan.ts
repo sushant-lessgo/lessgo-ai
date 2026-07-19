@@ -33,11 +33,18 @@ import {
   workPageTypeKeys,
   addableWorkPages,
   defaultGoalForPage,
-  WORK_PAGE_GOAL_KEYS,
   type WorkPageTypeKey,
   type WorkPageGoalKey,
 } from '@/modules/engines/workPages';
+import { filterSectionsByProof } from '@/modules/audience/product/strategy/parseStrategyProduct';
+import { slugify } from '@/lib/normalize';
+import {
+  TILE_ALIAS,
+  MENU_KEY_FOR_TILE,
+  canPromoteWorkGroup,
+} from './shape';
 import type { WorkSitemapPage } from '@/modules/audience/work/strategy/parseStrategyWork';
+import type { PageArchetypeDef } from '@/modules/audience/product/pageArchetypes';
 import type { WizardRailCommit } from '@/hooks/useWizardStore';
 import type { ConfirmedStructure } from '@/modules/templates/fit';
 
@@ -53,10 +60,7 @@ import type { ConfirmedStructure } from '@/modules/templates/fit';
  */
 export type PlanEdit =
   | { type: 'addPage'; pageKey: WorkPageTypeKey; contactMethod?: WorkPageGoalKey }
-  | { type: 'removePage'; index: number }
-  | { type: 'renamePage'; index: number; title: string }
-  | { type: 'movePage'; index: number; dir: -1 | 1 }
-  | { type: 'setGoal'; index: number; goal: WorkPageGoalKey };
+  | { type: 'removePage'; index: number };
 
 export type PlanEditResult =
   | { ok: true; next: WorkSitemapPage[] }
@@ -104,10 +108,9 @@ function currentPageKeys(sitemap: WorkSitemapPage[]): WorkPageTypeKey[] {
  *               `home` stays first. Gets its `defaultSections`/slug/title from
  *               `workPageTypes` + `defaultGoalForPage(pageKey, contactMethod)`.
  *  - removePage index valid; `home` is non-removable.
- *  - renamePage index valid; title trimmed non-empty; slug UNCHANGED (code-fixed).
- *  - movePage   index valid; `home` cannot move and cannot be displaced from
- *               first (a move into position 0 is refused).
- *  - setGoal    index valid; goal ∈ `WORK_PAGE_GOAL_KEYS`.
+ *
+ * (rename / reorder / per-page goal are the editor's job — not offered at the
+ * gate — so those edit kinds were removed with the plan-proposal-gate UI rework.)
  */
 export function applyPlanEdit(edit: PlanEdit, sitemap: WorkSitemapPage[]): PlanEditResult {
   const pages = [...sitemap];
@@ -135,42 +138,156 @@ export function applyPlanEdit(edit: PlanEdit, sitemap: WorkSitemapPage[]): PlanE
       if (isHome(target)) return { ok: false, error: `The home page can't be removed.` };
       return { ok: true, next: pages.filter((_, i) => i !== edit.index) };
     }
-
-    case 'renamePage': {
-      const target = pages[edit.index];
-      if (!target) return { ok: false, error: 'No such page.' };
-      const title = edit.title.trim();
-      if (!title) return { ok: false, error: 'A page needs a name.' };
-      // slug is code-fixed — rename touches the title only.
-      const next = pages.map((p, i) => (i === edit.index ? { ...p, title } : p));
-      return { ok: true, next };
-    }
-
-    case 'movePage': {
-      const target = pages[edit.index];
-      if (!target) return { ok: false, error: 'No such page.' };
-      if (isHome(target)) return { ok: false, error: `The home page stays first.` };
-      const dest = edit.index + edit.dir;
-      if (dest < 0 || dest >= pages.length) {
-        return { ok: false, error: `That page can't move any further.` };
-      }
-      if (dest === 0) return { ok: false, error: `The home page stays first.` };
-      const next = [...pages];
-      const [moved] = next.splice(edit.index, 1);
-      next.splice(dest, 0, moved);
-      return { ok: true, next };
-    }
-
-    case 'setGoal': {
-      const target = pages[edit.index];
-      if (!target) return { ok: false, error: 'No such page.' };
-      if (!WORK_PAGE_GOAL_KEYS.includes(edit.goal)) {
-        return { ok: false, error: 'Unknown goal.' };
-      }
-      const next = pages.map((p, i) => (i === edit.index ? { ...p, goal: edit.goal } : p));
-      return { ok: true, next };
-    }
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// applyTileToggle — the STEP 04 PAGE-tile add/remove entry point
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Menu-order index of an archetypeKey in a template menu, or -1. */
+function menuIndexOf(menu: PageArchetypeDef[], archetypeKey: string): number {
+  return menu.findIndex((d) => d.key === archetypeKey);
+}
+
+/**
+ * Toggle a canonical PAGE tile on/off. Pure — returns the next sitemap or an
+ * error, never mutating the input. Speaks the CANONICAL tile vocabulary; the
+ * `TILE_ALIAS` / `MENU_KEY_FOR_TILE` bridge maps to the template menu's page keys
+ * (e.g. `prices` ↔ atelier `experiences`).
+ *
+ * - `on === false`: remove the page whose `TILE_ALIAS[archetypeKey] === tile`
+ *   (delegates to `applyPlanEdit({removePage})` — inherits the home guard).
+ * - `on === true`: reject a duplicate (via alias), an out-of-vocab key, or
+ *   `home` / `work-group` (work-group has its own door). When the template `menu`
+ *   carries the def for `MENU_KEY_FOR_TILE[tile] ?? tile`, build from that MENU
+ *   def (real slug, e.g. `/experiences`) and insert at its menu-order position;
+ *   otherwise build from `workPageTypes[tile]` with a default goal and append last
+ *   (home stays first).
+ */
+export function applyTileToggle(
+  tile: WorkPageTypeKey,
+  on: boolean,
+  sitemap: WorkSitemapPage[],
+  ctx: {
+    menu: PageArchetypeDef[] | null;
+    contactMethod?: WorkPageGoalKey;
+    hasTestimonials?: boolean;
+  }
+): PlanEditResult {
+  const pages = [...sitemap];
+
+  if (!on) {
+    const index = pages.findIndex((p) => TILE_ALIAS[p.archetypeKey] === tile);
+    if (index < 0) return { ok: false, error: 'That page is not in the plan.' };
+    return applyPlanEdit({ type: 'removePage', index }, pages);
+  }
+
+  // on === true — add.
+  if (tile === 'home' || tile === 'work-group') {
+    return { ok: false, error: `That page can't be added here.` };
+  }
+  if (!workPageTypeKeys.includes(tile)) {
+    return { ok: false, error: `That page can't be added.` };
+  }
+  if (pages.some((p) => TILE_ALIAS[p.archetypeKey] === tile)) {
+    return { ok: false, error: 'That page is already in the plan.' };
+  }
+
+  const menu = ctx.menu ?? [];
+  const menuKey = MENU_KEY_FOR_TILE[tile] ?? tile;
+  const menuDef = menu.find((d) => d.key === menuKey);
+
+  if (menuDef) {
+    // Build from the MENU def (real title/slug/defaultSections) — no goal, mirrors
+    // the seed's menu-built pages.
+    const newPage: WorkSitemapPage = {
+      archetypeKey: menuDef.key,
+      title: menuDef.title,
+      pathSlug: menuDef.pathSlug,
+      sections: filterSectionsByProof([...menuDef.defaultSections], {
+        hasTestimonials: ctx.hasTestimonials,
+      }),
+    };
+    // Insert at the menu-order position so re-adding restores the menu order.
+    const newOrder = menuIndexOf(menu, menuDef.key);
+    let insertAt = pages.length;
+    for (let i = 0; i < pages.length; i++) {
+      const pOrder = menuIndexOf(menu, pages[i].archetypeKey);
+      if (pOrder > newOrder) {
+        insertAt = i;
+        break;
+      }
+    }
+    if (insertAt === 0) insertAt = 1; // home stays first
+    const next = [...pages];
+    next.splice(insertAt, 0, newPage);
+    return { ok: true, next };
+  }
+
+  // No menu def — build from the canonical page-type contract, append last.
+  const def = workPageTypes[tile];
+  const newPage: WorkSitemapPage = {
+    archetypeKey: def.key,
+    title: def.title,
+    pathSlug: def.pathSlug,
+    sections: filterSectionsByProof([...def.defaultSections], {
+      hasTestimonials: ctx.hasTestimonials,
+    }),
+    goal: defaultGoalForPage(def.key, ctx.contactMethod),
+  };
+  return { ok: true, next: [...pages, newPage] };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// applyWorkGroupToggle — the promoted work-group page tile
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Toggle a PROMOTED `work-group` page on/off. Parametric — its slug derives from
+ * the group name via the canonical `slugify` (`@/lib/normalize`). Pure.
+ *
+ * - `on`: reject unless `canPromoteWorkGroup(groupCount)` and no `work-group` page
+ *   is present. Sections `['work']`; slug `/work/<slug>`; title = the group name.
+ *   Inserted right after the `work` page if present, else appended.
+ * - `off`: remove the `work-group` page.
+ */
+export function applyWorkGroupToggle(
+  on: boolean,
+  groupName: string,
+  groupCount: number,
+  sitemap: WorkSitemapPage[]
+): PlanEditResult {
+  const pages = [...sitemap];
+
+  if (!on) {
+    const index = pages.findIndex((p) => p.archetypeKey === 'work-group');
+    if (index < 0) return { ok: false, error: 'No work-group page in the plan.' };
+    return applyPlanEdit({ type: 'removePage', index }, pages);
+  }
+
+  if (!canPromoteWorkGroup(groupCount)) {
+    return { ok: false, error: `There aren't enough groups to promote one.` };
+  }
+  if (pages.some((p) => p.archetypeKey === 'work-group')) {
+    return { ok: false, error: 'A work-group page is already in the plan.' };
+  }
+  const name = groupName.trim();
+  if (!name) return { ok: false, error: 'A group needs a name.' };
+
+  const def = workPageTypes['work-group'];
+  const newPage: WorkSitemapPage = {
+    archetypeKey: def.key,
+    title: name,
+    pathSlug: `/work/${slugify(name)}`,
+    sections: [...def.defaultSections],
+  };
+
+  const workIdx = pages.findIndex((p) => p.archetypeKey === 'work');
+  const next = [...pages];
+  if (workIdx >= 0) next.splice(workIdx + 1, 0, newPage);
+  else next.push(newPage);
+  return { ok: true, next };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
