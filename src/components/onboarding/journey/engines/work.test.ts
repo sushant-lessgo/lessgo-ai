@@ -41,7 +41,7 @@ function e2Facts(): Record<string, unknown> {
         {
           name: 'Weddings',
           kind: 'category',
-          price: { mode: 'from', amount: 2400, currency: 'EUR' },
+          price: { mode: 'from', amount: 2400, currency: '€' },
           photos: [{ id: 'ph_w1', url: 'https://cdn.example.com/w1.jpg' }],
         },
         {
@@ -255,9 +255,9 @@ describe('work rail adapter — toVM', () => {
     expect(before.label).toBe('WHAT YOU CHARGE');
     expect(before.editable).toBe(false);
     expect(before.skeleton).toBe(true);
-    // e2Facts' Weddings group carries { from, 2400, EUR }.
+    // e2Facts' Weddings group carries { from, 2400, € } (B2 stores symbols).
     const after = rail.toVM(e2Facts()).fields.find((f) => f.id === 'price')!;
-    expect(after.value).toBe('From EUR 2400');
+    expect(after.value).toBe('From €2400');
     expect(after.skeleton).toBe(false);
   });
 });
@@ -290,7 +290,7 @@ describe('work rail adapter — chip-id join (landmine 15: the photos/items wipe
     // its price — it was rebuilt from liveFacts, not from the lossy chip.
     const renamed = groups[1];
     expect(renamed.photos).toEqual([{ id: 'ph_w1', url: 'https://cdn.example.com/w1.jpg' }]);
-    expect(renamed.price).toEqual({ mode: 'from', amount: 2400, currency: 'EUR' });
+    expect(renamed.price).toEqual({ mode: 'from', amount: 2400, currency: '€' });
     expect(renamed.kind).toBe('category');
 
     // The reordered sibling kept ITS unprojected payload too.

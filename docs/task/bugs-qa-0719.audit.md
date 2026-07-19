@@ -291,3 +291,10 @@ Updated two pre-existing assertions to reflect the deliberate spacing behavior c
 
 ### Open risks
 - None material. Back-fill reads `facts.entry` which the real flow preserves (verified in enrichDraftForConfirm + every applyRailEdit re-emit). If a future flow drops `facts.entry` before the name is committed, the back-fill silently no-ops (row stays skeleton) — same conservative failure as today, never wrong data.
+
+### Follow-up — green-gate regression (stale fixture outside gate scope)
+The `priceLabel` spacing change broke one stale assertion in `src/components/onboarding/journey/engines/work.test.ts:260` (`'From EUR 2400'`), which the module-scoped gate (`src/modules/wizard/work`) did not cover. Fixed by aligning the shared `e2Facts()` fixture to the post-B2 symbol convention: currency `'EUR'` → `'€'` (line 44), label assertion → `'From €2400'` (line 260), and the raw round-trip price assertion → `currency: '€'` (line 293). Repo-wide grep for space-before-amount price labels found no other broken assertions (other files store ISO codes but never assert a spaced `priceLabel`).
+
+**Files changed (this follow-up):** `src/components/onboarding/journey/engines/work.test.ts`.
+
+**Full re-gate:** `npx vitest run` (WHOLE suite) → 259 files pass / 1 skipped; 4079 tests pass / 15 skipped; **0 failures**. `npx tsc --noEmit` → clean except the known pre-existing `src/app/page.tsx:6` founder.jpg TS2307.
