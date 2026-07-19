@@ -338,6 +338,73 @@ describe('useWizardStore — slot machine (keyed by slot IDs, skips honored)', (
   });
 });
 
+describe('useWizardStore — enter-at-slot (engineDecider Phase 4)', () => {
+  // (a) The reviewer flag: entering at `understanding` skips the `identity` slot
+  // (name + one-liner already captured at D1) — but the businessName MUST still be
+  // hydrated, else generation loses it. hydrate prefills EVERY contract field
+  // regardless of the entry slot, so `fields['name']` carries the scraped value.
+  it('enter-at-understanding hydrates businessName (identity skipped, name NOT lost)', () => {
+    useWizardStore.getState().hydrate({
+      brief: richThing,
+      audienceType: 'product',
+      templateId: 'meridian',
+      initialSlot: 'understanding',
+    });
+    const s = useWizardStore.getState();
+    expect(s.currentSlot).toBe('understanding');
+    // identity IS in the slot list (skipped, not removed) — proving we jumped it.
+    expect(s.slots[0]).toBe('identity');
+    // The name captured at D1 is present even though identity is never shown.
+    expect(s.fields['name'].value).toBe('Acme Invoicing');
+    expect(s.fields['oneLiner'].value).toBeTruthy();
+  });
+
+  // (b) goToSlot / prevSlot are INDEX-based and clamped; entering at `understanding`
+  // must FLOOR back-nav there so `identity` (the name/one-liner re-ask) is
+  // unreachable. Basics stay reachable only via an explicit edit.
+  it('prevSlot from the enter-at-understanding entry is floored — never re-enters identity', () => {
+    useWizardStore.getState().hydrate({
+      brief: richThing,
+      audienceType: 'product',
+      templateId: 'meridian',
+      initialSlot: 'understanding',
+    });
+    expect(useWizardStore.getState().currentSlot).toBe('understanding');
+    expect(useWizardStore.getState().slotFloorIndex).toBe(
+      useWizardStore.getState().slots.indexOf('understanding')
+    );
+    // Hammer prevSlot: it clamps at the floor, never falling into identity.
+    for (let i = 0; i < 5; i++) useWizardStore.getState().prevSlot();
+    expect(useWizardStore.getState().currentSlot).toBe('understanding');
+    expect(useWizardStore.getState().currentSlot).not.toBe('identity');
+  });
+
+  it('normal entry (no initialSlot) still starts at identity and prevSlot reaches it', () => {
+    useWizardStore.getState().hydrate({ brief: richThing, audienceType: 'product', templateId: 'meridian' });
+    expect(useWizardStore.getState().currentSlot).toBe('identity');
+    expect(useWizardStore.getState().slotFloorIndex).toBe(0);
+    useWizardStore.getState().nextSlot();
+    useWizardStore.getState().prevSlot();
+    expect(useWizardStore.getState().currentSlot).toBe('identity');
+  });
+
+  it('initialSlot that is slot-0 or a non-member is a no-op (slot-0 entry preserved)', () => {
+    // identity is slot 0 ⇒ no raise.
+    useWizardStore.getState().hydrate({
+      brief: richThing, audienceType: 'product', templateId: 'meridian', initialSlot: 'identity',
+    });
+    expect(useWizardStore.getState().currentSlot).toBe('identity');
+    expect(useWizardStore.getState().slotFloorIndex).toBe(0);
+    useWizardStore.getState().reset();
+    // structure is SKIPPED for WORK ⇒ not a member ⇒ no-op, starts at identity.
+    useWizardStore.getState().hydrate({
+      brief: workBrief, audienceType: 'writer', templateId: 'granth', initialSlot: 'structure',
+    });
+    expect(useWizardStore.getState().currentSlot).toBe('identity');
+    expect(useWizardStore.getState().slotFloorIndex).toBe(0);
+  });
+});
+
 describe('useWizardStore — review/fill mode derivation', () => {
   it('URL entry ⇒ review mode', () => {
     expect(deriveMode(richThing)).toBe('review');

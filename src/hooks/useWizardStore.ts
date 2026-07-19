@@ -165,6 +165,16 @@ export interface WizardHydratePayload {
   /** serveGate result (persisted on the Project at confirm). */
   audienceType?: AudienceType | null;
   templateId?: TemplateId | null;
+  /**
+   * engineDecider Phase 4 — ENTER-AT-SLOT. When the decider hands a clear/picked
+   * thing/trust engine to the wizard, the `identity` slot (name + one-liner) was
+   * already captured at D1, so we start at `understanding` instead of re-asking.
+   * The slot must be a MEMBER of the derived `slots` and NOT the first slot to
+   * take effect (else it's a no-op ⇒ normal slot-0 entry, preserving every
+   * existing caller). It also FLOORS back-nav (`prevSlot`) at this slot so
+   * `identity` is unreachable — Basics stay reachable only via an explicit edit.
+   */
+  initialSlot?: WizardSlot;
 }
 
 interface WizardState {
@@ -183,6 +193,13 @@ interface WizardState {
   // Slot machine (keyed by slot IDs; `slots` = contract skeleton minus skips).
   slots: WizardSlot[];
   currentSlot: WizardSlot;
+  /**
+   * engineDecider Phase 4 — the back-nav FLOOR index into `slots`. 0 for a normal
+   * slot-0 entry (`prevSlot` clamps at `identity`); raised to the enter-at-slot
+   * index when the decider enters the wizard at `understanding`, so back-nav can
+   * never fall into the skipped `identity` re-ask.
+   */
+  slotFloorIndex: number;
 
   // Per-field state map (keyed by contract field id).
   fields: Record<string, WizardFieldEntry>;
@@ -831,6 +848,7 @@ const initialState: WizardState = {
   mode: 'fill',
   slots: [],
   currentSlot: 'identity',
+  slotFloorIndex: 0,
   fields: {},
   goalIntent: null,
   goalParam: {},
@@ -962,7 +980,16 @@ export const useWizardStore = create<WizardStore>()(
             state.briefStructureMode = confirmedStructure.mode;
           }
           state.slots = slotsForEngine(engine, templateId ?? null, briefSignalFromState(state));
-          state.currentSlot = state.slots[0] ?? 'identity';
+          // engineDecider Phase 4 — ENTER-AT-SLOT. Default to slot 0 (every
+          // existing caller). An `initialSlot` takes effect ONLY when it is a
+          // member of the derived slots AND not the first slot; it also raises
+          // the back-nav floor so `prevSlot` can never re-enter `identity`.
+          const initialIdx = payload.initialSlot
+            ? state.slots.indexOf(payload.initialSlot)
+            : -1;
+          const startIdx = initialIdx > 0 ? initialIdx : 0;
+          state.currentSlot = state.slots[startIdx] ?? 'identity';
+          state.slotFloorIndex = startIdx;
 
           // Per-field state via the phase-1 waterfall (logic NOT duplicated here).
           const btEntry = businessTypeEntryFor(brief);
@@ -1061,7 +1088,10 @@ export const useWizardStore = create<WizardStore>()(
         set((state) => {
           const i = state.slots.indexOf(state.currentSlot);
           if (i === -1) return;
-          const prev = Math.max(i - 1, 0);
+          // Clamp at the ENTER-AT-SLOT floor (0 for a normal entry) so an
+          // enter-at-`understanding` hand-off never falls back into `identity`
+          // (engineDecider Phase 4). Basics stay reachable only via explicit edit.
+          const prev = Math.max(i - 1, state.slotFloorIndex);
           state.currentSlot = state.slots[prev];
         }),
 

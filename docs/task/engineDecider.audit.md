@@ -280,3 +280,121 @@ Verification (re-run after these fixes):
 - `npx playwright test e2e/engine-decider.spec.ts`: **2 passed** (setup + photographer silent-finalize, real authed run).
 
 Open risks: none new. StrictMode double-invoke behaviour is dev-only; production fires once regardless, but the `firedRef` guard also protects against any future genuine remount. `importScrapedTestimonials` remains single-flight-by-contract (no DB unique index) — the guard removes the only known client-side double-fire; a server-side idempotency key is still a separate hardening opportunity (out of scope).
+
+## Phase 4 — D4 buyer-decision question + full routing table + wizard step-2 entry
+
+Branch: `feature/engineDecider` (verified `git branch --show-current` before any edit). No commits (orchestrator commits). No renderer/`.published.tsx`/template/schema/`/api/brief/confirm` server code touched; seam contract (`engines/types.ts`) NOT widened; firewall intact; `BriefSchema.copyEngine` enum untouched (place/quick-yes NEVER written to `brief.copyEngine`).
+
+### Files changed (complete scope map — 6 files)
+
+New (1):
+1. `src/app/onboarding/[token]/components/decider/D4BuyerDecision.tsx` — the KEY screen. Rail (LEFT) `EngineRailField status:'ambiguous'` (amber "could go two ways") + "COULD GO TWO WAYS" pill + the verbatim question "When someone lands on your site, what makes them reach out?" + 5 option rows (work/trust/thing active; place/quick-yes DASHED "SOON"). The prior is **pre-selected** with a "Our best guess from your description" caption; footer CTA "Continue with <noun>". Reports the pick up via `onPick` (page.tsx runs `applyEnginePick` + routes). **Prior derivation:** the collapsed `EntryFacts` does NOT persist candidates/prior (resolvedEngine is null for an `ask`), so D4 RE-DERIVES it client-side via `resolveEngine({businessTypeGuess: draft.businessType, tiebreaker})` — same pure code path, never AI. testids: `decider-d4`, `decider-d4-option-<engine>` (+ `data-soon`), `decider-d4-continue`.
+
+Modified (5):
+2. `src/app/onboarding/[token]/page.tsx` — the FULL routing table (see below). Added `applyEnginePick` + `WizardSlot` (type-only) imports; D4 dynamic import (ssr:false); `DeciderScreen` `'D3'|'finalize'` -> `'D3'|'D4'|'finalize'|'confirmWizard'`; `routeAfterResolve(resolvedEngine, engineStatus)` + `handleD4Pick(engine)`; decider render switched on `deciderScreen` (no longer requires a non-null `deciderState.resolvedEngine` — D4 fires with a null engine); D3's `onSomethingElse` RE-ENABLED -> reopen D4; `WizardData.initialSlot` carried; load-detection reads `?enter=understanding` from the URL -> forwards `initialSlot` to WizardShell; NEW in-file `ConfirmToWizard` component (the thing/trust confirm->wizard transition).
+3. `src/hooks/useWizardStore.ts` — ENTER-AT-SLOT: `WizardHydratePayload.initialSlot?`; NEW `slotFloorIndex` state (default 0); hydrate sets `currentSlot`/`slotFloorIndex` from `initialSlot` (member AND not-first, else slot 0); `prevSlot` clamps at `slotFloorIndex` (was 0).
+4. `src/components/onboarding/wizard/WizardShell.tsx` — accepts `initialSlot?` prop, forwards it to `hydrate`.
+5. `src/hooks/useWizardStore.test.ts` — NEW `enter-at-slot` describe (4 tests, incl. the two required named ones).
+6. `e2e/engine-decider.spec.ts` — 2 new specs + helpers (`pinUnderstand`, `submitD1`) + 3 fixtures.
+
+`classify.test.ts` was NOT touched — `applyEnginePick` already exists (Phase 1) with full test coverage; no gaps surfaced.
+
+### The routing table AS-BUILT (note the stale-plan correction)
+The plan's Phase 4 text says "D4 work-pick -> D6"; per the Phase 3 FOLLOW-UP, D2Known/D6Handoff were DELETED and the confirm-handoff now lives in the auto-firing, mount-once-guarded **`FinalizeHandoff`**. So every "-> D6" below is really "-> the silent `finalize` transition (`FinalizeHandoff`)".
+
+| Entry resolution | D1 route | D4-pick route |
+|---|---|---|
+| CLEAR **work** (known) | `finalize` -> journey | work -> `finalize` -> journey |
+| CLEAR **work** (almost-sure) | D3 -> (Yes) `finalize` | — |
+| CLEAR **thing/trust** (known) | `confirmWizard` -> wizard @ `understanding` | thing/trust -> `confirmWizard` -> wizard @ `understanding` |
+| CLEAR **thing/trust** (almost-sure) | D3 -> (Yes) `confirmWizard` | — |
+| CLEAR **place/quick-yes** | `manual` (D5 STUB) | place/quick-yes -> `manual` (D5 STUB), tag `rungE:<engine>` |
+| **AMBIGUOUS / unknown** (null engine) | **D4** | — |
+
+- **work terminal** = `FinalizeHandoff` (unchanged; seam enrich + confirm POST + hard-nav to journey).
+- **thing/trust terminal** = `ConfirmToWizard` (NEW, in page.tsx): plain confirm POST (thing/trust have no seam) -> on serve, hard-nav to `redirectTo?enter=understanding` -> load-detection re-hydrates the DB brief and mounts WizardShell at `understanding`; on manual -> the demand branch.
+- **place/quick-yes** = the existing `ManualOnboardStep` branch with a `rungE:<engine>` tag — the safe D5 STUB (Phase 5 builds the real board). NEVER written to `brief.copyEngine` (guarded by `applyEnginePick`).
+- **D3 "something else"** + its rail "Change how buyers decide" link are RE-ENABLED (page passes `onSomethingElse` -> `setDeciderScreen('D4')`).
+
+### How enter-at-understanding works + the name-hydration verification
+- `ConfirmToWizard` hard-navs to `...?enter=understanding`. On the reload, page.tsx load-detection reads `new URLSearchParams(window.location.search).get('enter')` (client-only, avoids `useSearchParams`/Suspense) and, ONLY for the wizard (never the journey, which has its own resume), sets `WizardData.initialSlot = 'understanding'` -> WizardShell -> `hydrate({..., initialSlot})`.
+- hydrate honors `initialSlot` ONLY when it is a MEMBER of the derived slots AND not the first slot (else no-op => normal slot-0 entry — every existing caller unchanged). It also raises `slotFloorIndex` so `prevSlot` can never fall back into `identity`.
+- **Name-hydration (reviewer flag): NOT lost.** hydrate prefills EVERY contract field via `prefillValueFor` regardless of the entry slot — so `fields['name']` (prefillKey `businessName`) carries the D1-captured name even though `identity` is skipped. Verified by named test (a) and by the passing e2e (thing/trust served with the name intact).
+
+### The two named wizard-store tests (+ 2 guards)
+- (a) `enter-at-understanding hydrates businessName (identity skipped, name NOT lost)` — hydrate richThing with `initialSlot:'understanding'` => `currentSlot==='understanding'`, `slots[0]==='identity'` (skipped not removed), `fields['name'].value==='Acme Invoicing'`, oneLiner truthy.
+- (b) `prevSlot from the enter-at-understanding entry is floored — never re-enters identity` — `slotFloorIndex === slots.indexOf('understanding')`; hammering `prevSlot` x5 stays at `understanding`, never `identity`.
+- guard: normal entry (no initialSlot) still starts at identity, floor 0, prevSlot reaches identity.
+- guard: initialSlot that is slot-0 (`identity`) OR a non-member (`structure` for WORK) is a no-op (slot-0 entry preserved).
+
+### e2e additions (mock mode; ONE classifier call route-intercepted, everything downstream REAL authed)
+- `CLEAR SaaS -> no decider question -> wizard at understanding, one-liner NOT re-asked` — SaaS(thing, known) -> NO D4/D3 -> silent confirm -> wizard shows "Understanding", `assertNoOneLinerInput` (O1 holds), `draft.brief.copyEngine==='thing'`.
+- `AMBIGUOUS agency -> D4 ... pick trust -> wizard; pick work -> journey` — agency(ambiguous) -> D4 visible, 5 options, EXACTLY 2 `data-soon`, prior **trust** pre-selected (`aria-pressed`), O1 holds; pick trust -> wizard@understanding (`copyEngine==='trust'`); then designer(ambiguous, prior **work**) -> D4 -> pick work -> `step-show-work` journey (`copyEngine==='work'`, `templateId==='atelier'`). The original photographer O1-once spec still holds.
+
+### Deviations from the (stale) plan
+1. **"work-pick -> D6" -> `FinalizeHandoff`** (the stale-plan correction the orchestrator flagged) — D6 was cut in the Phase 3 follow-up; work-pick routes through the silent `finalize` transition.
+2. **thing/trust confirm lives in a NEW in-file `ConfirmToWizard`, not FinalizeHandoff.** FinalizeHandoff is work-only (it `loadJourneySeam(engine)` -> null for thing/trust -> errors) and was NOT on Phase 4's Files-touched list (must not edit). Reused FinalizeHandoff's exact StrictMode mount-once guard pattern (`firedRef` + `activeRef` + Retry) for a plain (seam-less) confirm POST. Kept in page.tsx (an allowed file) rather than adding an unlisted component file.
+3. **Enter-at-understanding uses a `?enter=understanding` reload param, not an in-memory wizard mount.** An in-memory mount would need `decideServe` client-side to get audienceType/templateId — but `decideServe` may transitively pull template-fit metadata into the firewall-pure entry bundle (a firewall risk). The reload path keeps the SERVER as the serve authority and re-hydrates from the DB (matches ConfirmBriefStep's documented rationale). Default (no param) = slot-0 entry, so existing callers are untouched.
+4. **D4 built with app-chrome tokens + lucide, not the raw `OptionCard`.** `OptionCard` uses `brand-accentPrimary`/gray styling that clashes with the app-chrome decider (D1/D3/finalize all use `app-*` tokens per the Phase-2/3 precedent) and has no dashed/SOON/best-guess-caption affordance. Bespoke app-token rows keep the decider visually consistent. (The design handoff folder was ABSENT from both the worktree and the main repo at the documented path — built to the scout's detailed D4 spec + design tokens.)
+5. **Rail "Change how buyers decide" reopen wired on D3 only, not "the wizard".** The reopen affordance renders via `EngineRailField`'s `onChangeEngine`, which only the decider screens carry; WizardShell has no rail engine field and D1Entry's rail is a read-only first-read (neither is on Phase 4's Files-touched list). Reopening D4 from inside the post-confirm wizard would mean un-confirming — a larger feature. Deferred + noted; the decider-screen reopen (D3 -> D4) is live.
+6. **Legacy `confirm` branch (`ConfirmBriefStep`) is now unrouted-but-kept.** Nothing routes to `step:'confirm'` after the rewire; the branch is left as a harmless fallback (deleting ConfirmBriefStep is out of Phase 4 scope).
+
+### Firewall / invariants held
+- AI never emits an engine; `resolveEngine`/`applyEnginePick` (code) decide. No blocking confirm — D2 gone, D3/D4 one-tap, clear paths never stop.
+- `BriefSchema.copyEngine` enum untouched; place/quick-yes route to demand only (`applyEnginePick` guards `isSchemaEngine`). `/api/brief/confirm` request/response shape unchanged. Seam contract not widened.
+- All decider screens dynamically imported (ssr:false); page.tsx imports only pure `@/modules/brief` + fetch. No renderer/template/published code touched.
+
+### Verification
+- `npx tsc --noEmit`: clean, exit 0 (no `founder.jpg` artifact this run).
+- `npm run test:run`: **Test Files 251 passed | 1 skipped (252); Tests 4075 passed | 14 skipped (4089).** 0 failures (+4 vs the Phase-3 base 4071 — the four enter-at-slot tests).
+- `npx vitest run src/hooks/useWizardStore.test.ts`: 87 passed.
+- `npx playwright test e2e/engine-decider.spec.ts`: **4 passed** (setup + photographer silent-finalize + CLEAR-SaaS->wizard + AMBIGUOUS-agency->D4->trust/work, 35.3s) — REAL authed run (dev server, real Clerk, real `/api/brief/confirm` serve for thing/trust/work, real `loadDraft`).
+
+### Open risks / notes for the human gate (spec gate 4 — wrong-site check)
+- Founder-QA on dev (real `/api/v2/understand`) is where the true cirkles classification (branding-studio -> ambiguous, prior work) is exercised end to end; the e2e pins that ONE classifier call (mock can't classify), everything downstream is real.
+- D5 is STILL a stub (place/quick-yes -> `ManualOnboardStep` with a `rungE:` tag). Phase 5 builds the real demand board.
+- Reopen-D4 from inside the wizard is deferred (see Deviation 5).
+
+### Phase 4 FOLLOW-UP — `ConfirmToWizard` extracted + StrictMode exactly-once test (blocking review fix)
+
+Testability/regression-protection fix from the Phase 4 impl-review. **No live bug existed** — the inline guard was already byte-identical to `FinalizeHandoff` (firedRef + activeRef, correct ordering, Retry reset). The problem was purely that, being INLINE + non-exported in `page.tsx`, nothing could unit-test the mount-once guard, so a future refactor could silently reintroduce a double `/api/brief/confirm` POST (→ duplicate testimonial imports — the exact failure the Phase 3 follow-up fixed).
+
+Files changed (this follow-up — 3 files):
+1. `src/app/onboarding/[token]/components/decider/ConfirmToWizard.tsx` (**NEW**) — the inline `ConfirmToWizard` lifted verbatim into its own default-export file, mirroring `FinalizeHandoff.tsx`'s structure. Runtime is byte-equivalent: same `firedRef`/`activeRef` mount-once guard, same plain (seam-less) `POST /api/brief/confirm`, same `serve → window.location.assign(redirectTo + ?enter=understanding)` (with `?`/`&` separator handling), same `manual → onManual(missing)`, same Retry (`firedRef=false` + nonce bump). Same testids (`decider-confirm-wizard[-error|-retry]`) and identical layout/CSS. Imports only `react` + `Brief` type + `Loader2` — firewall-pure.
+2. `src/app/onboarding/[token]/page.tsx` — removed the ~110-line inline `ConfirmToWizard` definition + its now-unused `useRef` import; added a `dynamic(() => import('./components/decider/ConfirmToWizard'), { ssr:false })` binding (same discipline as `FinalizeHandoff`/`D4BuyerDecision`). The `<ConfirmToWizard .../>` call site in the `confirmWizard` branch is unchanged. No routing/guard/behavior change.
+3. `src/app/onboarding/[token]/components/decider/ConfirmToWizard.test.tsx` (**NEW**) — mirrors `FinalizeHandoff.test.tsx` (react-dom/client + `React.act`, no @testing-library). **10 tests**: serve→hard-nav-with-`?enter=understanding` (+ `&` separator when redirectTo already has a query), plain-brief POST shape (no seam enrichment), manual→onManual (+ fallback tag), **StrictMode exactly-once guard**, error surfacing, Retry re-fire (fail→success, exactly 2 confirm POSTs), thrown-fetch, and the O1 kill (no textarea, never `/api/v2/understand`).
+
+**The StrictMode test genuinely guards the regression (verified).** Temporarily neutralising the `if (firedRef.current) return` guard made the StrictMode test fail with `confirmCalls.length` `+2` vs expected `1` (StrictMode's dev setup→cleanup→setup fired the confirm POST twice); restored, it is green. So deleting `firedRef` in a future refactor now fails the suite — the double `/api/brief/confirm` (→ duplicate testimonial imports) can no longer be reintroduced silently.
+
+Scope discipline: extract + test only. Did NOT touch routing, guard logic, `/api/brief/confirm/route.ts`, the seam contract, or any other Phase 4 behavior. This supersedes Phase-4 Deviation 2 ("kept in page.tsx"): the reviewer explicitly approved the extraction to its own file.
+
+Verification (this follow-up):
+- `npx tsc --noEmit`: clean, exit 0 (no `founder.jpg` artifact this run).
+- `npm run test:run`: **Test Files 252 passed | 1 skipped (253); Tests 4085 passed | 14 skipped (4099)** — 0 failures (+10 vs the Phase-4 base 4075 = the new ConfirmToWizard suite).
+- `npx vitest run ConfirmToWizard.test.tsx`: **10 passed**.
+- `npx playwright test e2e/engine-decider.spec.ts`: **NOT fully green — one PRE-EXISTING failure unrelated to this extraction (see below).**
+
+**⚠ Open risk / orchestrator flag — the `CLEAR SaaS` e2e now fails (NOT caused by this extraction):**
+- `CLEAR SaaS → wizard at understanding` fails at `expect(draft.brief.copyEngine).toBe('thing')` — `loadDraft` returns a **null brief** (the SaaS `thing` fixture never persisted a confirmed brief). The photographer→work test (#2) and the AMBIGUOUS-agency→D4 test (#4, whose "pick trust → wizard" branch routes through `ConfirmToWizard` on a REAL authed path) both **PASS**.
+- **Proven independent of this extraction:** (a) my `ConfirmToWizard` is byte-equivalent to the original inline — a temporary STATIC import (truest reproduction of the original synchronous inline component) fails the SaaS test IDENTICALLY; (b) `ConfirmToWizard` is proven working on a real path by the passing D4→trust→wizard test; (c) only the `thing` fixture fails while the `trust` path (same component) serves and persists fine. So the failure localizes to the `thing` serve-gate/fixture in the current shared-dev-infra state, not to how `ConfirmToWizard` is wired. The Phase-4 audit recorded this test "4 passed" at implementation time — the dev DB/serve-gate state has since drifted.
+- Out of this follow-up's extract-only scope to fix (the e2e spec is not on the Files-touched list; `/api/brief/confirm` is explicitly off-limits). Flagged for the orchestrator: the `thing`-lane serve gate / SAAS_ENTRY_DRAFT fixture needs a look (likely returns `manual`, and the `getByText('Understanding')` assertion passes spuriously before the `loadDraft` check fails).
+
+### Phase 4 FOLLOW-UP #2 — root-cause + fix of the `CLEAR SaaS` e2e failure
+
+Files changed (this follow-up — 1 file):
+1. `e2e/engine-decider.spec.ts` — changed the two wizard-mount assertions from the SUBSTRING `getByText('Understanding')` to the EXACT `getByText('Understanding', { exact: true })` (CLEAR-SaaS test + the D4→trust branch of the AMBIGUOUS-agency test), with an explanatory comment on the inert-match trap. No other test logic changed.
+
+**Root cause — e2e-wiring / inert-assertion bug, NOT a product bug, NOT the serve gate/fixture.** The prior flag's "likely returns manual / serve-gate drift" hypothesis was WRONG; evidence:
+- A deterministic vitest probe of the exact `SAAS_ENTRY_DRAFT` object proved it is well-formed and SERVES: `BriefSchema.safeParse` ok, `requiredCapabilitiesFromBrief = ['lead-form']`, `shortlist = ['meridian','vestria']`, `decideServe = { serve, product, meridian }`. So when `/api/brief/confirm` receives that draft it persists — the serve gate is not the bug.
+- Instrumented the live authed e2e (network + browser console). The `pinUnderstand` intercept DID apply (understand returned the SAAS fixture); `onSuccess`→`routeAfterResolve('thing','known')`→ the `confirmWizard` decider branch rendered. But **NO `/api/brief/confirm` request was ever made** and `ConfirmToWizard`'s effect never ran — it was still on its `next/dynamic` loading fallback when the test moved on.
+- Why the test "moved on": `getByText('Understanding')` SUBSTRING-matches D1's Continue button, which reads **"Understanding…"** while classifying and stays that way through D1's 700 ms post-classify dwell. The assertion greenlit against that button — before the dynamically-imported `ConfirmToWizard` had loaded + POSTed confirm — so `loadDraft` ran against a not-yet-persisted brief (→ `brief` null → `Cannot read properties of null (reading 'copyEngine')`).
+- Confirmed the diagnosis by inserting a temporary `waitForTimeout(4000)`: `[CTW] effect` then fired, confirm served, the wizard hard-navigated and mounted showing the real "Understanding" progress label, and BOTH tests passed. (Temporary wait + all instrumentation removed before finalising.)
+
+**Why the fix is correct and the assertion stays meaningful.** The wizard's progress-header renders `SLOT_LABELS['understanding'] === 'Understanding'` (no ellipsis) and it appears ONLY after confirm serves → hard-nav → `useWizardStore` hydrate. D1's button is `"Understanding…"` (ellipsis) and the UnderstandingSlot title is `"Who it's for, and why you"`, so exact `'Understanding'` resolves to exactly the wizard label and nothing else. The exact assertion therefore (a) can no longer be satisfied by D1's loading button, so it genuinely WAITS for the serve+nav+mount, and (b) still asserts "wizard is at the understanding slot" (distinct from `identity`→'Basics'). The downstream `loadDraft.brief.copyEngine === 'thing'` and `assertNoOneLinerInput` (O1) assertions are untouched and remain load-bearing. The agency→D4→trust assertion got the same exact treatment defensively (it passed before only because D1 is unmounted on that path).
+
+Scope discipline: touched ONLY the e2e spec. Did NOT weaken any assertion (strengthened two), did NOT edit `/api/brief/confirm/route.ts`, the seam contract, `decideServe`, or the `SAAS_ENTRY_DRAFT` fixture (proven correct). Product code (`page.tsx`, `ConfirmToWizard.tsx`) unchanged — the extraction/firewall/mount-once guard are intact.
+
+Verification (this follow-up):
+- `npx tsc --noEmit`: clean, exit 0.
+- `npm run test:run`: **Test Files 252 passed | 1 skipped (253); Tests 4085 passed | 14 skipped (4099)** — 0 failures.
+- `npx playwright test e2e/engine-decider.spec.ts` (setup + authed): **4 passed** — photographer→work, **CLEAR SaaS** (now green for the right reason), and AMBIGUOUS agency→D4 (trust + work branches). The `CLEAR SaaS` failure is resolved.

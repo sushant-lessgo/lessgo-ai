@@ -41,6 +41,14 @@ interface WizardShellProps {
   brief: Brief;
   audienceType: AudienceType | null;
   templateId: TemplateId | null;
+  /**
+   * engineDecider Phase 4 — ENTER-AT-SLOT. When the decider hands a clear/picked
+   * thing/trust engine to the wizard, `identity` (name + one-liner) was already
+   * captured at D1, so the wizard starts at `understanding` (no re-ask) and
+   * back-nav is floored there. Omitted / not a valid non-first slot ⇒ normal
+   * slot-0 entry (every existing caller is unchanged).
+   */
+  initialSlot?: WizardSlot;
 }
 
 const SLOT_LABELS: Record<WizardSlot, string> = {
@@ -104,6 +112,7 @@ export default function WizardShell({
   brief,
   audienceType,
   templateId,
+  initialSlot,
 }: WizardShellProps) {
   const hydrate = useWizardStore((s) => s.hydrate);
   const save = useWizardStore((s) => s.save);
@@ -131,7 +140,7 @@ export default function WizardShell({
 
   // Hydrate once from the DB-confirmed brief (load-detection already fetched it).
   useEffect(() => {
-    hydrate({ tokenId, brief, audienceType, templateId });
+    hydrate({ tokenId, brief, audienceType, templateId, initialSlot });
     // brief is a stable per-mount payload; re-running on every render would
     // clobber user edits.
     // eslint-disable-next-line react-hooks/exhaustive-deps

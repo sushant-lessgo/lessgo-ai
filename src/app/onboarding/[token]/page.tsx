@@ -40,12 +40,13 @@ import { useParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import type { Brief } from '@/types/brief';
 import type { AudienceType, TemplateId } from '@/types/service';
+import type { WizardSlot } from '@/modules/engines/inputContracts';
 import type {
   EngineStatus,
   ResolvedEngine,
   TiebreakerRung,
 } from '@/modules/brief/classify';
-import { getEntryFacts } from '@/modules/brief/classify';
+import { applyEnginePick, getEntryFacts } from '@/modules/brief/classify';
 import { isJourneyEligible } from '@/lib/journeyEngines';
 import { screenForStatus } from './components/decider/deciderMachine';
 import Logo from '@/components/shared/Logo';
@@ -99,6 +100,29 @@ const FinalizeHandoff = dynamic(() => import('./components/decider/FinalizeHando
     </div>
   ),
 });
+// D4 — the buyer-decision question (engineDecider Phase 4). Transitively pulls the
+// agnostic rail (→ the wizard store), so dynamically imported (ssr:false) — same
+// firewall discipline as the other decider screens.
+const D4BuyerDecision = dynamic(() => import('./components/decider/D4BuyerDecision'), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen flex items-center justify-center text-gray-500">
+      <Loader2 className="w-5 h-5 animate-spin" />
+    </div>
+  ),
+});
+// ConfirmToWizard — the SILENT thing/trust confirm→wizard transition (engineDecider
+// Phase 4). Extracted from page.tsx so it is unit-testable in isolation (see
+// ConfirmToWizard.test.tsx). Pure fetch only, but dynamically imported (ssr:false)
+// for the same discipline as FinalizeHandoff/D4.
+const ConfirmToWizard = dynamic(() => import('./components/decider/ConfirmToWizard'), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen flex items-center justify-center text-gray-500">
+      <Loader2 className="w-5 h-5 animate-spin" />
+    </div>
+  ),
+});
 
 // FIREWALL: the D1 composer transitively pulls the agnostic rail (→ the wizard
 // store), so it is DYNAMICALLY imported (ssr:false) to keep that graph off the
@@ -113,15 +137,21 @@ const D1Entry = dynamic(() => import('./components/decider/D1Entry'), {
   ),
 });
 
-// engineDecider Phase 3 — `decider` is the WORK-lane sub-flow. The clear/known
-// path goes STRAIGHT to the silent `finalize` transition (no D2, no ceremony);
-// the almost-sure path stops at D3 for one tap, then `finalize`. The specific
-// screen is tracked by `deciderScreen`. Non-work lanes still route to `confirm`
-// this phase (Phases 4–5 re-point them to D4/D5).
+// engineDecider Phase 4 — `decider` is the engine-resolution sub-flow (all lanes
+// now). The specific screen is tracked by `deciderScreen`. The full routing table:
+//   • CLEAR work (known)         → finalize (silent confirm → journey)
+//   • CLEAR work (almost-sure)   → D3 → finalize
+//   • CLEAR thing/trust (known)  → confirmWizard (confirm → wizard @ understanding)
+//   • CLEAR thing/trust (a-sure) → D3 → confirmWizard
+//   • CLEAR place/quick-yes      → demand board (D5; STUB → `manual` this phase)
+//   • AMBIGUOUS / unknown        → D4 (pick) → applyEnginePick → route by engine
+// D4 picks re-enter this same table: work→finalize, thing/trust→confirmWizard,
+// place/quick-yes→demand. `confirm` (legacy ConfirmBriefStep) is no longer routed
+// to, but the branch is kept as a harmless fallback.
 type EntryStep = 'input' | 'decider' | 'confirm' | 'manual' | 'wizard' | 'journey';
 
-/** Which work-lane decider screen renders (engineDecider Phase 3 follow-up). */
-type DeciderScreen = 'D3' | 'finalize';
+/** Which decider screen renders (engineDecider Phase 4). */
+type DeciderScreen = 'D3' | 'D4' | 'finalize' | 'confirmWizard';
 
 /**
  * The decider's LOCAL state (engineDecider Phase 2 — R4: no new store). Captured
@@ -153,6 +183,13 @@ interface WizardData {
    * it (the legacy wizard has its own resume) — journey only.
    */
   finalContent?: unknown;
+  /**
+   * engineDecider Phase 4 — ENTER-AT-SLOT. When the decider confirmed a clear/
+   * picked thing/trust engine, it hard-navigates with `?enter=understanding` so
+   * the wizard skips the `identity` re-ask (name + one-liner already captured at
+   * D1). Read from the URL by load-detection and forwarded to WizardShell.
+   */
+  initialSlot?: WizardSlot;
 }
 
 export default function EntryOnboardingPage() {
@@ -201,6 +238,16 @@ export default function EntryOnboardingPage() {
           // work-engine templates that are not allow-listed (granth) — keeps the
           // unified wizard, unchanged.
           const journey = isJourneyEligible(brief.copyEngine, templateId);
+          // engineDecider Phase 4 — ENTER-AT-SLOT. A decider confirm→wizard hand-off
+          // hard-navigates with `?enter=understanding`; honor it ONLY for the wizard
+          // (never the journey, which has its own resume). Read from the URL here so
+          // the intent survives the reload. Absent ⇒ normal slot-0 entry.
+          const enterParam =
+            typeof window !== 'undefined'
+              ? new URLSearchParams(window.location.search).get('enter')
+              : null;
+          const initialSlot: WizardSlot | undefined =
+            !journey && enterParam === 'understanding' ? 'understanding' : undefined;
           if (!cancelled) {
             setWizardData({
               brief,
@@ -208,6 +255,7 @@ export default function EntryOnboardingPage() {
               templateId,
               // Carried for the journey's resume rules only (see WizardData).
               finalContent: json?.finalContent ?? null,
+              initialSlot,
             });
             setStep(journey ? 'journey' : 'wizard');
             setChecking(false);
@@ -223,6 +271,63 @@ export default function EntryOnboardingPage() {
       cancelled = true;
     };
   }, [tokenId]);
+
+  // engineDecider Phase 4 — the routing table (see the EntryStep note). Given a
+  // RESOLVED (or null/ambiguous) engine, pick the next decider screen / terminal.
+  // Firewall: only pure `@/modules/brief` reads + local state.
+  const routeAfterResolve = (
+    resolvedEngine: ResolvedEngine | null,
+    engineStatus: EngineStatus | undefined
+  ) => {
+    // CLEAR work / thing / trust. A committed lookup below the confidence floor
+    // (`almost-sure`) stops at D3 for one tap; otherwise straight to the terminal
+    // (work → silent finalize → journey; thing/trust → confirm → wizard).
+    if (
+      resolvedEngine === 'work' ||
+      resolvedEngine === 'thing' ||
+      resolvedEngine === 'trust'
+    ) {
+      const screen = screenForStatus(engineStatus);
+      if (screen === 'D3') {
+        setDeciderScreen('D3');
+      } else {
+        setDeciderScreen(resolvedEngine === 'work' ? 'finalize' : 'confirmWizard');
+      }
+      setStep('decider');
+      return;
+    }
+    // CLEAR place / quick-yes → demand board (D5 in Phase 5; STUB → the existing
+    // `manual` branch this phase, never a dead-end). NEVER written to copyEngine.
+    if (resolvedEngine === 'place' || resolvedEngine === 'quick-yes') {
+      setMissing(`rungE:${resolvedEngine}`);
+      setStep('manual');
+      return;
+    }
+    // AMBIGUOUS / unknown (null engine) → D4 (the buyer-decision question).
+    setDeciderScreen('D4');
+    setStep('decider');
+  };
+
+  // engineDecider Phase 4 — the D4 PICK writer. `applyEnginePick` sets the
+  // confirmed resolution (copyEngine only for schema engines {thing,trust,work};
+  // place/quick-yes never touch brief.copyEngine), then we re-enter the routing
+  // table by the picked engine.
+  const handleD4Pick = (engine: ResolvedEngine) => {
+    if (!briefDraft) return;
+    const picked = applyEnginePick(briefDraft, engine);
+    setBriefDraft(picked);
+    setDeciderState((prev) =>
+      prev ? { ...prev, resolvedEngine: engine, engineStatus: 'confirmed' } : prev
+    );
+    if (engine === 'work') {
+      setDeciderScreen('finalize');
+    } else if (engine === 'thing' || engine === 'trust') {
+      setDeciderScreen('confirmWizard');
+    } else {
+      setMissing(`rungE:${engine}`);
+      setStep('manual');
+    }
+  };
 
   // ── JOURNEY DISPATCH — FULL-VIEWPORT EARLY RETURNS ────────────────────────
   // These render their own chrome (top bar + `.app-chrome` wrapper), so they
@@ -271,55 +376,66 @@ export default function EntryOnboardingPage() {
             resolvedEngine,
           });
 
-          // engineDecider Phase 3 (+ follow-up) — WORK LANE ONLY. A resolved
-          // `work` engine (the ONLY engine with a journey seam today):
-          //   • KNOWN → STRAIGHT to the silent `finalize` transition (no D2, no
-          //     ceremony) — the clear ~80% path never stops to click.
-          //   • ALMOST-SURE → D3 (one-tap confirm) → `finalize`.
-          // FinalizeHandoff owns the confirm handoff; the old JourneyEntryStep
-          // double-entry is bypassed entirely (O1 kill). Every other lane — clear
-          // thing/trust, ambiguous, place/quick-yes — keeps the existing `confirm`
-          // path until Phases 4–5 re-point it.
-          if (resolvedEngine === 'work') {
-            const screen = screenForStatus(facts?.engineStatus);
-            setDeciderScreen(screen === 'D3' ? 'D3' : 'finalize');
-            setStep('decider');
-          } else {
-            setStep('confirm');
-          }
+          // engineDecider Phase 4 — the FULL routing table (see EntryStep note).
+          routeAfterResolve(resolvedEngine, facts?.engineStatus);
         }}
       />
     );
   }
 
-  // ── DECIDER WORK LANE — FULL-VIEWPORT EARLY RETURNS (engineDecider Phase 3) ──
-  // The clear/known path lands directly on `finalize` (no D2, no ceremony). The
-  // almost-sure path stops at D3 for one tap, then `finalize`. NO editable
-  // one-liner appears on any of these (the O1 kill): the one-liner is typed
-  // exactly once, at D1. FinalizeHandoff owns the confirm POST and fires it
-  // silently on mount; on serve it hard-navs and load-detection mounts
-  // JourneyShell at showWork, on manual it routes to the existing demand branch.
-  // (When D4 lands in Phase 4, its work-pick routes through this SAME `finalize`
-  // transition — set `deciderScreen` to 'finalize' after `applyEnginePick`.)
-  if (!checking && step === 'decider' && briefDraft && deciderState?.resolvedEngine) {
-    const resolvedEngine = deciderState.resolvedEngine;
-    if (deciderScreen === 'D3') {
+  // ── DECIDER — FULL-VIEWPORT EARLY RETURNS (engineDecider Phase 4) ───────────
+  // Every lane resolves here. NO editable one-liner appears on ANY decider screen
+  // (the O1 kill): the one-liner is typed exactly once, at D1.
+  //   • D4          — the buyer-decision question (ambiguous/unknown). Pick →
+  //                   applyEnginePick → re-enter the routing table.
+  //   • D3          — almost-sure one-tap confirm. "Yes" → the engine's terminal
+  //                   (work→finalize, thing/trust→confirmWizard); "something else"
+  //                   → D4 (the affordance is RE-ENABLED this phase).
+  //   • confirmWizard — thing/trust: confirm silently, then enter the WIZARD at
+  //                   the `understanding` slot (no name/one-liner re-ask).
+  //   • finalize    — work: confirm silently, then hard-nav into the journey.
+  if (!checking && step === 'decider' && briefDraft) {
+    if (deciderScreen === 'D4') {
+      return <D4BuyerDecision briefDraft={briefDraft} onPick={handleD4Pick} />;
+    }
+    if (deciderScreen === 'D3' && deciderState?.resolvedEngine) {
+      const resolvedEngine = deciderState.resolvedEngine;
       return (
         <D3AlmostSure
           briefDraft={briefDraft}
           resolvedEngine={resolvedEngine}
           // "Yes" = confirm the SAME lookup engine — pure local state, no
-          // re-classification, no extra UNDERSTAND credit. → the silent finalize.
-          onYes={() => setDeciderScreen('finalize')}
-          // "Something else" → D4 (Phase 4) — greyed placeholder until then.
+          // re-classification, no extra UNDERSTAND credit. → the engine terminal.
+          onYes={() =>
+            setDeciderScreen(resolvedEngine === 'work' ? 'finalize' : 'confirmWizard')
+          }
+          // "Something else" → reopen D4 (RE-ENABLED — was greyed in Phase 3).
+          onSomethingElse={() => setDeciderScreen('D4')}
         />
       );
     }
+    if (deciderScreen === 'confirmWizard') {
+      return (
+        <ConfirmToWizard
+          tokenId={tokenId}
+          briefDraft={briefDraft}
+          onManual={(missingTags) => {
+            setMissing(missingTags);
+            setStep('manual');
+          }}
+        />
+      );
+    }
+    // finalize (default — the work terminal). FinalizeHandoff owns the confirm
+    // POST + seam enrichment; on serve it hard-navs and load-detection mounts the
+    // JourneyShell at showWork; on manual it routes to the demand branch.
     return (
       <FinalizeHandoff
         tokenId={tokenId}
         briefDraft={briefDraft}
-        resolvedEngine={resolvedEngine}
+        resolvedEngine={
+          briefDraft.copyEngine ?? deciderState?.resolvedEngine ?? 'work'
+        }
         onManual={(missingTags) => {
           setMissing(missingTags);
           setStep('manual');
@@ -351,6 +467,9 @@ export default function EntryOnboardingPage() {
                 brief={wizardData.brief}
                 audienceType={wizardData.audienceType}
                 templateId={wizardData.templateId}
+                // engineDecider Phase 4 — enter at `understanding` when the decider
+                // handed off a clear/picked thing/trust engine (see load-detection).
+                initialSlot={wizardData.initialSlot}
               />
             )}
 
