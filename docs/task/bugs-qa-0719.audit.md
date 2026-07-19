@@ -54,3 +54,56 @@ the repo's harness — no @testing-library) and asserts the emitted `img` has
 - Visual review recommended on the marketing Header (240→40) and onboarding/PersonaPrompt
   top bars (80→30) — heights chosen to match the dashboard ~30px reference, but not
   visually confirmed in-browser. Not a dual-renderer surface (no `.published.tsx` pair).
+
+---
+
+## B10 — Unpublish menu row renders literal `cloud_off` text; "Unpublish" label overflows
+
+**Files changed**
+- `src/components/dashboard/ProjectCardMenu.tsx` (modified)
+- `public/fonts/material-symbols-rounded/icons.txt` (modified)
+- `src/components/dashboard/ProjectCardMenu.test.tsx` (created)
+
+### What changed
+- **ProjectCardMenu.tsx:277** — swapped the Unpublish row's `<AppIcon name="cloud_off" size={17} />`
+  for `name="visibility_off"` (same size). `cloud_off` is absent from the shipped Material
+  Symbols woff2 subset, so the browser painted the raw ligature name as text; with
+  `.app-icon { white-space:nowrap }` inside the fixed 186px menu that wide literal blew out the
+  row and pushed "Unpublish" off-edge. `visibility_off` IS in the subset (icons.txt line ~176,
+  and it already renders live at CorrectionBoard.tsx:203) and reads as the natural opposite of
+  the `visibility` glyph on the "Visit site" row. Added an inline comment noting the intent to
+  restore `cloud_off` after a font-subset regen. No CSS / menu-width change (root cause was the
+  glyph width, so a normal ~17px glyph fixes the truncation).
+- **icons.txt** — added `cloud_off` in alphabetical position with an inline `#` comment marking it
+  as the ideal Unpublish glyph, pending a woff2 subset regen. This alone does NOT fix the bug (the
+  shipped font still lacks the glyph); it just records the want so a future regen restores it.
+
+### Regression test
+`src/components/dashboard/ProjectCardMenu.test.tsx` (react-dom/client + React.act idiom, per
+GlobalAppHeader.menus.test.tsx — no @testing-library in repo):
+- Renders `<ProjectCardMenu>` for a PUBLISHED project (publishState: 'published') so the
+  isPublished-gated Unpublish row mounts; opens the Radix dropdown via the keyboard path
+  (Enter on the focused trigger — jsdom has no PointerEvent, and Radix opens on pointerdown).
+- Parses `icons.txt` into a "shipped subset" Set, treating any line containing `#` as a
+  comment / documented-pending entry (excluded) — so the pending `cloud_off` entry is NOT
+  counted as shipped.
+- Asserts every rendered `.app-icon` glyph ∈ subset, and that a menu item contains "Unpublish".
+- Comment documents that icons.txt is a lower-bound proxy (woff2 GSUB is authoritative), guarding
+  the specific subset-drop class.
+
+**Before/after:** pre-fix (`name="cloud_off"`) → FAILS `AssertionError: glyph "cloud_off" is not
+in the shipped subset` (subset = 179 entries, cloud_off excluded via the pending-comment rule).
+Post-fix → both tests PASS (2 passed). Verified by temporarily reverting the glyph.
+
+### Deviations
+- None. Used the preferred full-render test (no fallback needed).
+
+### Gate
+- `npx vitest run src/components/dashboard/ProjectCardMenu.test.tsx` → 2 passed.
+- `npx tsc --noEmit` → only the pre-existing unrelated `src/app/page.tsx:6` founder.jpg
+  TS2307 error; no new errors.
+
+### Open risks
+- The proper `cloud_off` glyph is still not shipped in the woff2 subset; a future font-subset
+  regen (using the now-recorded icons.txt entry) can restore it and revert the swap. Low priority
+  — `visibility_off` is an acceptable, correct-reading substitute.

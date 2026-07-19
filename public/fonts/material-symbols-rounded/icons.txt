@@ -36,6 +36,7 @@ checklist
 chevron_left
 chevron_right
 close
+cloud_off  # ideal Unpublish glyph (ProjectCardMenu) — NOT yet in the shipped woff2 subset; re-run the font-subset regen to bring it in. Until then ProjectCardMenu uses visibility_off (B10, qa-0719).
 collections
 colorize
 content_copy

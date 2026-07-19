@@ -274,7 +274,13 @@ export default function ProjectCardMenu({ project, onOpenEditor }: ProjectCardMe
             title={blockedByDomain ? DOMAIN_BLOCKED_MESSAGE : undefined}
             onSelect={handleUnpublish}
           >
-            <AppIcon name="cloud_off" size={17} />
+            {/* B10: `cloud_off` (the ideal Unpublish glyph) is absent from the shipped
+                Material Symbols subset, so the browser rendered the literal ligature name as
+                text — blowing out the fixed-width row and pushing "Unpublish" off-edge.
+                `visibility_off` IS in the subset (and reads as the opposite of the
+                "Visit site" `visibility` glyph). Swap back to `cloud_off` after a font-subset
+                regen restores it. */}
+            <AppIcon name="visibility_off" size={17} />
             Unpublish
           </DropdownMenuItem>
         )}
