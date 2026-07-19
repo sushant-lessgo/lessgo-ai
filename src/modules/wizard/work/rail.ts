@@ -191,7 +191,9 @@ const EMPTY_RAIL: WorkRail = {
 function priceLabel(price: WorkPrice): string {
   if (price.mode === 'on-request') return 'On request';
   const amount = price.amount !== undefined ? String(price.amount) : '';
-  const money = [price.currency, amount].filter(Boolean).join(' ');
+  // Currency is a SYMBOL (qa-0719 B2), so it sits DIRECTLY against the amount —
+  // "$2400", not "$ 2400". Absent currency ⇒ just the amount.
+  const money = price.currency ? `${price.currency}${amount}` : amount;
   return price.mode === 'from' ? `From ${money}`.trim() : money;
 }
 
@@ -367,15 +369,36 @@ function stringArray(v: unknown): string[] {
  * worth seeding (or when the result would not parse) — the caller then simply
  * omits `facts.work`. The output ALWAYS passes `getWorkFacts`.
  */
+/**
+ * Derive "WHAT YOU DO" (identity.descriptor) from entry facts (qa-0719 B7).
+ * Precedence: an explicit `summary`, else joined `categories`, else the
+ * `oneLiner`, else the `rawInput`. The oneLiner/rawInput fallback ensures a
+ * one-liner-only entry (no summary/categories) still answers the rail's
+ * "WHAT YOU DO" row instead of leaving it a skeleton all session.
+ */
+function descriptorFromEntry(
+  entry: Record<string, unknown> | null | undefined
+): string | undefined {
+  if (!entry || typeof entry !== 'object') return undefined;
+  const summary = trimmedString(entry['summary']);
+  const categories = stringArray(entry['categories']);
+  const oneLiner = trimmedString(entry['oneLiner']);
+  const rawInput = trimmedString(entry['rawInput']);
+  return (
+    summary ??
+    (categories.length ? categories.join(', ') : undefined) ??
+    oneLiner ??
+    rawInput
+  );
+}
+
 export function seedWorkFactsFromEntry(
   entry: Partial<EntryFacts> | null | undefined
 ): WorkFacts | null {
   if (!entry || typeof entry !== 'object') return null;
 
   const name = trimmedString((entry as Record<string, unknown>)['businessName']);
-  const summary = trimmedString((entry as Record<string, unknown>)['summary']);
-  const categories = stringArray((entry as Record<string, unknown>)['categories']);
-  const descriptor = summary ?? (categories.length ? categories.join(', ') : undefined);
+  const descriptor = descriptorFromEntry(entry as Record<string, unknown>);
 
   const groups = stringArray((entry as Record<string, unknown>)['offerings'])
     .map((offering) => normalizeWorkGroup({ name: offering }))
@@ -449,6 +472,15 @@ export function applyRailEdit(
       const name = edit.value.trim();
       if (!name) return { ok: false, error: 'Name cannot be empty' };
       next.identity = { ...(next.identity ?? {}), name };
+      // B7 back-fill: a no-name one-liner entry seeds NO identity (name is
+      // required inside identity), so its derived descriptor is dropped. Now
+      // that a name exists, back-fill "WHAT YOU DO" from the live entry facts
+      // (same precedence as the seed) unless one was already answered.
+      if (!next.identity.descriptor) {
+        const entry = liveFacts?.['entry'] as Record<string, unknown> | undefined;
+        const descriptor = descriptorFromEntry(entry);
+        if (descriptor) next.identity.descriptor = descriptor;
+      }
       break;
     }
     case 'descriptor':

@@ -94,6 +94,23 @@ describe('seedWorkFactsFromEntry', () => {
     expect(seeded!.groups).toEqual([{ name: 'Portraits', kind: 'category', price: { mode: 'on-request' } }]);
     expect(getWorkFacts({ work: seeded })).not.toBeNull();
   });
+
+  it('B7(a): descriptor falls back to oneLiner when summary + categories absent (name present)', () => {
+    const seeded = seedWorkFactsFromEntry({
+      businessName: 'Ava',
+      oneLiner: 'Wedding photographer in Amsterdam',
+    });
+    // Pre-fix: descriptor derived only from summary/categories ⇒ null skeleton.
+    expect(railFromWorkFacts(seeded).descriptor).toBe('Wedding photographer in Amsterdam');
+  });
+
+  it('B7(a): descriptor falls back to rawInput when even oneLiner absent', () => {
+    const seeded = seedWorkFactsFromEntry({
+      businessName: 'Ava',
+      rawInput: 'I shoot weddings',
+    });
+    expect(railFromWorkFacts(seeded).descriptor).toBe('I shoot weddings');
+  });
 });
 
 describe('workFacts.schema additive-optional fields', () => {
@@ -139,7 +156,7 @@ describe('railFromFacts (projection)', () => {
     const work: WorkFacts = {
       identity: { name: 'A', location: 'Amsterdam', reach: 'Europe' },
       groups: [
-        { name: 'X', kind: 'category', price: { mode: 'from', amount: 500, currency: 'EUR' } },
+        { name: 'X', kind: 'category', price: { mode: 'from', amount: 500, currency: '€' } },
         { name: 'Y', kind: 'story', price: { mode: 'exact', amount: 1200 } },
       ],
       languages: ['en', 'nl'],
@@ -154,8 +171,24 @@ describe('railFromFacts (projection)', () => {
     expect(rail.languages).toEqual(['en', 'nl']);
     expect(rail.establishment).toBe('established');
     expect(rail.contactMethod).toBe('form');
-    expect(rail.groups[0].priceLabel).toBe('From EUR 500');
+    expect(rail.groups[0].priceLabel).toBe('From €500');
     expect(rail.groups[1].priceLabel).toBe('1200');
+  });
+
+  it('NIT: currency SYMBOL sits directly against the amount (no space)', () => {
+    const work: WorkFacts = {
+      identity: { name: 'A' },
+      groups: [
+        { name: 'X', kind: 'category', price: { mode: 'from', amount: 2400, currency: '$' } },
+        { name: 'Y', kind: 'category', price: { mode: 'exact', amount: 900, currency: '£' } },
+        { name: 'Z', kind: 'category', price: { mode: 'exact', amount: 700 } }, // no currency
+      ],
+    };
+    const rail = railFromWorkFacts(work);
+    // Pre-fix: "From $ 2400" / "£ 900".
+    expect(rail.groups[0].priceLabel).toBe('From $2400');
+    expect(rail.groups[1].priceLabel).toBe('£900');
+    expect(rail.groups[2].priceLabel).toBe('700');
   });
 
   it('railFromBrief reads brief.facts', () => {
@@ -293,6 +326,32 @@ describe('applyRailEdit — full-facts re-emit + snapshot sync', () => {
     const work = getWorkFacts((second as { facts: Record<string, unknown> }).facts)!;
     expect(work.identity).toEqual({ name: 'New Name', descriptor: 'Portrait photography' });
     expect(work.groups).toHaveLength(2);
+  });
+
+  it('B7(b): committing the name back-fills descriptor from entry when the seed had none', () => {
+    // No businessName ⇒ seed emits NO identity ⇒ its derived descriptor is
+    // dropped (documented). The entry (with only a oneLiner) is preserved on
+    // the facts bag the real flow re-emits.
+    const noNameEntry: Partial<EntryFacts> = { oneLiner: 'Wedding photographer in Amsterdam' };
+    const seed = seedWorkFactsFromEntry(noNameEntry);
+    expect(seed).toBeNull(); // no name, no groups ⇒ nothing to seed
+    const liveFacts: Record<string, unknown> = { entry: noNameEntry, collections: { works: [] } };
+    const res = applyRailEdit({ field: 'name', value: 'Ava' }, liveFacts);
+    expect(res.ok).toBe(true);
+    const work = getWorkFacts((res as { facts: Record<string, unknown> }).facts)!;
+    // Pre-fix: identity = {name:'Ava'} only ⇒ descriptor absent.
+    expect(work.identity).toEqual({ name: 'Ava', descriptor: 'Wedding photographer in Amsterdam' });
+  });
+
+  it('B7(b): committing the name does NOT overwrite an already-answered descriptor', () => {
+    const liveFacts: Record<string, unknown> = {
+      entry: { oneLiner: 'from the entry' } as Partial<EntryFacts>,
+      work: { identity: { name: 'Old', descriptor: 'answered by hand' } },
+    };
+    const res = applyRailEdit({ field: 'name', value: 'New' }, liveFacts);
+    expect(res.ok).toBe(true);
+    const work = getWorkFacts((res as { facts: Record<string, unknown> }).facts)!;
+    expect(work.identity).toEqual({ name: 'New', descriptor: 'answered by hand' });
   });
 
   it('rejects invalid edits instead of sending them (landmine 5)', () => {
@@ -456,12 +515,12 @@ describe('rail projection — provenance (B5) + answered charge (B6)', () => {
     const seeded = seededFactsBag();
     const groups = (getWorkFacts(seeded)!.groups ?? []).map((g) => ({
       ...g,
-      price: { mode: 'from' as const, amount: 2400, currency: 'EUR' },
+      price: { mode: 'from' as const, amount: 2400, currency: '€' },
     }));
     const res = applyRailEdit({ field: 'groups', value: groups }, seeded);
     expect(res.ok).toBe(true);
     const rail = railFromFacts((res as { facts: Record<string, unknown> }).facts);
-    expect(rail.priceLabel).toBe('From EUR 2400');
+    expect(rail.priceLabel).toBe('From €2400');
   });
 });
 

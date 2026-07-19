@@ -254,3 +254,40 @@ Results: new tests 6/6 pass; existing `useWizardStore.test.ts` 83/83 pass (concu
 - **Added friendly-label test** — establishment compact row renders "Established", not the raw enum "established".
 
 **Re-gate** — `tsc --noEmit` clean except the known founder.jpg error; full `src/components/onboarding/journey` suite → 175 pass / 1 skipped (was 173 + the 2 new tests).
+
+---
+
+## B7 — Rail "WHAT YOU DO" never populated from the one-liner (+ currency-spacing NIT)
+
+**Files changed**
+- `src/modules/wizard/work/rail.ts`
+- `src/modules/wizard/work/rail.test.ts`
+
+### rail.ts — what changed
+Two-prong root-cause fix for descriptor + the currency-symbol spacing nit.
+
+1. **Descriptor precedence widened (seed).** Added `descriptorFromEntry(entry)` helper: `summary ?? categories.join(', ') ?? oneLiner ?? rawInput`. `seedWorkFactsFromEntry` now derives `descriptor` via this helper (previously `summary ?? categories` only, so a one-liner-only entry produced no descriptor). Existing summary/categories priority unchanged — only the oneLiner/rawInput fallback is added.
+2. **Name-commit back-fill (recovery point).** In `applyRailEdit`'s `name` case: after setting the name, if `identity.descriptor` is still absent, derive it from the live `facts.entry` via the SAME `descriptorFromEntry` precedence. This is the correct recovery point because descriptor is schema-nested under `identity` (which requires a name) — a no-name one-liner seeds no identity at all, so the descriptor is only recoverable once the name is answered. Guarded to NOT overwrite an already-answered descriptor.
+3. **NIT — `priceLabel` currency spacing.** Currency is now a SYMBOL (B2 fix), so the old `[currency, amount].join(' ')` rendered "From $ 2400". Now the symbol concatenates directly against the amount: `price.currency ? \`${currency}${amount}\` : amount`. Absent currency ⇒ amount only (unchanged). "From " prefix for from-mode retained.
+
+### rail.test.ts — tests added / changed
+New regression tests (each FAILS on pre-fix source, verified via `git stash` of rail.ts → 6 targeted fails):
+- **B7(a)** descriptor falls back to oneLiner when summary+categories absent (name present) → `railFromWorkFacts(seed).descriptor === 'Wedding photographer in Amsterdam'`. Pre-fix: null.
+- **B7(a)** descriptor falls back to rawInput when even oneLiner absent.
+- **B7(b)** committing the name back-fills descriptor from a no-name-seed entry (seed is null; entry preserved on facts bag) → `identity === {name:'Ava', descriptor:'Wedding photographer in Amsterdam'}`. Pre-fix: descriptor absent.
+- **B7(b) guard** committing the name does NOT overwrite an already-answered descriptor (passes pre- and post-fix; documents intent).
+- **NIT** symbol currencies render "From $2400" / "£900", and a currencyless price renders "700". Pre-fix: "From $ 2400" / "£ 900".
+
+Updated two pre-existing assertions to reflect the deliberate spacing behavior change (currency data switched from the 3-letter code `'EUR'` to the post-B2 symbol `'€'`; expected outputs `'From €500'` and `'From €2400'`). Logged as deviation below.
+
+### Deviations
+- Changed pre-existing test fixtures from `currency:'EUR'` → `currency:'€'` and their expected labels from spaced (`'From EUR 500'`) to concatenated (`'From €500'`). Necessary because the nit's concatenation applies to all currency values and, post-B2, currency is always a symbol; keeping `'EUR'` would have left the tests asserting `'EUR500'` (meaningless). Conservative: only the two labels touched by the spacing change were updated; no other fixtures altered.
+
+### Test results
+- `npx vitest run src/modules/wizard/work/rail.test.ts` → 49 pass.
+- `npx vitest run src/modules/wizard/work` → 120 pass (7 files), no neighbor regressions.
+- `npx tsc --noEmit` → clean except the known pre-existing `src/app/page.tsx:6` founder.jpg TS2307.
+- Fail-pre-fix confirmed: stashing rail.ts → 6 targeted tests fail, restored cleanly.
+
+### Open risks
+- None material. Back-fill reads `facts.entry` which the real flow preserves (verified in enrichDraftForConfirm + every applyRailEdit re-emit). If a future flow drops `facts.entry` before the name is committed, the back-fill silently no-ops (row stays skeleton) — same conservative failure as today, never wrong data.
