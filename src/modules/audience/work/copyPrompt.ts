@@ -210,6 +210,14 @@ export function buildWorkCopyPrompt(input: WorkCopyPromptInput): string {
 
   const prompt = `${voice.identity}
 
+## OUTPUT LANGUAGE — ${language} (READ FIRST)
+Your entire output MUST be written in ${language}. The grounding material below —
+the facts, the WORK LIBRARY, and any POSITIONING / STORY ANGLE text — MAY be written
+in another language. When it is, render its MEANING in ${language}: translate the
+idea, never copy or echo the source-language wording. No source-language fragments,
+names of things, or phrases may survive into your output (unless ${language} IS that
+language). Proper nouns (the business name, place names, people's names) stay as-is.
+
 ## POSITIONING (the angle this site takes)
 ${strategy.positioningAngle}
 
