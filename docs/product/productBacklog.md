@@ -47,3 +47,23 @@ Things I want to build. Unspecced — moves to `productQueue.md` once a spec exi
 | 4 | Universe v1 — variant fan-out (message-match / SEO keyword / audience), shared-edit propagation, universe view + per-variant analytics | `docs/tracks/Someday/universePlan.md` → universe-01… (spec required before /feature) | reserved, awaiting spec (**needs editorPlan phase 4 ops**) |
 | 5 | Campaign/offer pages — time-bound promo variants (universe v2) | universePlan.md U2 (spec required before /feature) | reserved, awaiting spec |
 | 6 | A/B testing — split traffic between variants (universe v3) | universePlan.md U2 (spec required before /feature) | reserved, awaiting spec |
+
+## User Feedback (production)
+
+Raw logs → `docs/reports/userFeedback.md`. Triage tags: ✅ covered · 🟡 planned-but-deferred · 🔴 new.
+
+### Ravi Kumar — service project `app.lessgo.ai/edit/ArGEPtpVe9FA`, 2026-07-17
+- ⭐🔴 **Look/template switching without starting over** — "don't like this template, have a different look in mind, how — do I start over?"; no smooth "show other looks, keep my content" flow (look-picker deferred). **User-flagged critical.** → /discuss.
+- ⭐🟡 **Global brand style layer** — set color + typeface at GLOBAL level (not per-element) + brand-guidelines input; user has brand guidelines. Today scattered per-element. → Design ▾ (deferred) + [[project_toolbar_track]] + backlog #13.
+- ✅ Mobile preview — `editor-route-consolidation` (mobile iframe toggle).
+- ✅ Clean preview / "link options are a hindrance, can't get real preview" — `editor-route-consolidation` (read-mode clears toolbars).
+- 🟡 Element delete — exists; discoverability gap (toolbar-beta owns clarity).
+- 🟡 Language toggle "doesn't work / not in preview" — `bilingual-editing` gated to bilingual projects → confusing/dead on a mono-lingual project; **likely a bug**.
+- 🟡 Stock-image suggestions (free/paid) — media **t8** (Unsplash/From-CMS), deferred.
+- 🟡 Setup steps "clickable but nothing happens" (add logo) — setup popup **t9** (backlog); the dead click = **bug**.
+- 🔴 Image dimension + weight guidance shown in-editor (cut iteration).
+- 🔴 AI image generation.
+- 🔴 Alt-text editing for SEO — `alt` in data, no editor UI to set it.
+- 🔴 Character limits — surface in editor + first-gen stays within limit.
+- 🔴 Template visual bugs — menu/logo misalignment, noisy top-aligned header, "Request Quote" wraps 2 lines → next `/bugfix`.
+- 🔴 Brand-kit input — upload brand colors + typography per brand.
