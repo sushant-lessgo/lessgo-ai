@@ -47,7 +47,7 @@ import {
   type PageArchetypeDef,
 } from '@/modules/audience/product/pageArchetypes';
 import { filterSectionsByProof } from '@/modules/audience/product/strategy/parseStrategyProduct';
-import { humanizeGenerationError } from '@/modules/wizard/generation/errorMessage';
+import { humanizeGenerationError, OUT_OF_CREDITS_COPY } from '@/modules/wizard/generation/errorMessage';
 import { businessTypes } from '@/modules/businessTypes/config';
 import {
   getCollectionDef,
@@ -342,15 +342,13 @@ export default function StructureSlot() {
         <h1 className="text-2xl font-semibold text-gray-900">Your site plan</h1>
         {strategyCreditsError ? (
           <>
-            <p className="text-gray-600">
-              You&apos;ve used your generation credits. Top up to continue.
-            </p>
+            <p className="text-gray-600">{OUT_OF_CREDITS_COPY.body}</p>
             <div className="flex items-center gap-4">
               <a
-                href="/dashboard/settings"
+                href={OUT_OF_CREDITS_COPY.ctaHref}
                 className="px-5 py-2.5 rounded-lg bg-brand-accentPrimary text-white hover:bg-orange-500"
               >
-                View plans
+                {OUT_OF_CREDITS_COPY.ctaLabel}
               </a>
               <button
                 type="button"

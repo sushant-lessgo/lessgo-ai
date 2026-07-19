@@ -27,7 +27,7 @@ import {
   type GenerationStage,
   type GenerationInput,
 } from '@/modules/wizard/generation';
-import { humanizeGenerationError } from '@/modules/wizard/generation/errorMessage';
+import { humanizeGenerationError, OUT_OF_CREDITS_COPY } from '@/modules/wizard/generation/errorMessage';
 import { trackGenerationDegraded } from '@/utils/trackTelemetry';
 import {
   runWorkSkeleton,
@@ -227,16 +227,14 @@ export default function GeneratingSlot() {
   if (creditsError) {
     return (
       <div className="text-center py-12 max-w-md mx-auto">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Out of credits</h3>
-        <p className="text-gray-600 mb-6">
-          You&apos;ve used your generation credits. Top up to continue.
-        </p>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">{OUT_OF_CREDITS_COPY.heading}</h3>
+        <p className="text-gray-600 mb-6">{OUT_OF_CREDITS_COPY.body}</p>
         <div className="flex flex-col gap-3 items-center">
           <a
-            href="/dashboard/settings"
+            href={OUT_OF_CREDITS_COPY.ctaHref}
             className="px-5 py-2.5 rounded-lg bg-brand-accentPrimary text-white hover:bg-orange-500"
           >
-            View plans
+            {OUT_OF_CREDITS_COPY.ctaLabel}
           </a>
           <button
             onClick={() => router.push(`/edit/${tokenId}`)}

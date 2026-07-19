@@ -26,6 +26,21 @@ export const GENERIC_GENERATION_ERROR =
   'Something went wrong while building your page. Please try again.';
 
 /**
+ * B8 (qa-0719) — ONE shared out-of-credits treatment for the onboarding
+ * generation flow (used by BOTH GeneratingSlot and StructureSlot credit
+ * blocks). Warm + conversion-framed, not technical, and the CTA points at the
+ * REAL top-up flow (`/dashboard/billing`) — NOT `/dashboard/settings`, which is
+ * the account/persona page with no top-up. Copy pending founder sign-off on
+ * preview.
+ */
+export const OUT_OF_CREDITS_COPY = {
+  heading: "You're out of credits",
+  body: "Your page is ready to write — top up and we'll build it right now.",
+  ctaLabel: 'Top up now',
+  ctaHref: '/dashboard/billing',
+} as const;
+
+/**
  * True when `s` looks like a raw ZodError / JSON blob rather than a human
  * sentence — a serialized issue array/object, or one carrying Zod issue markers
  * even when truncated. Deliberately conservative: only strings that clearly are

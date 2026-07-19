@@ -46,6 +46,11 @@ import type {
 } from '@/modules/audience/work/strategy/parseStrategyWork';
 import { saveDraft } from './finalize';
 import {
+  estimateFullRunCost,
+  estimateCopyOnlyCost,
+  isRunUnaffordable,
+} from '@/lib/creditRunGate';
+import {
   WORK_COPY_ENGINE_TEMPLATES,
   isWorkCopyTemplate,
   workCopyEngineEnabled,
@@ -341,6 +346,23 @@ export async function runWorkLLMGeneration(
     }
   } catch {
     /* resume is best-effort — fall through to a fresh run */
+  }
+
+  // ─── B8 (qa-0719) UPFRONT full-run credit gate — FRESH runs only ───
+  // Before the FIRST charged LLM call (work strategy, or per-page copy when a
+  // strategy is pre-supplied), check the balance ONCE against the WHOLE-run
+  // cost. The work sitemap is KNOWN upfront (`input.pages`, seeded chargeless
+  // from the page-archetype menu), so this is an EXACT estimate — no mid-fan-out
+  // gap. Insufficient ⇒ status:'credits' (GeneratingSlot renders the shared warm
+  // out-of-credits block) with ZERO AI calls / zero partial charge. A resumable
+  // run returned above, so its already-paid strategy is never re-gated; the
+  // per-page 402 stays the backstop for both resume and any add-pages overrun.
+  const pageCount = input.pages?.length || 1;
+  const fullCost = input.strategy
+    ? estimateCopyOnlyCost(pageCount) // strategy already paid/pre-supplied
+    : estimateFullRunCost(pageCount);
+  if (await isRunUnaffordable(fullCost)) {
+    return { status: 'credits' };
   }
 
   // ─── Fresh run: the ONE work strategy call (unless pre-supplied) ───

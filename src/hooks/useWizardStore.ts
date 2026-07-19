@@ -40,6 +40,7 @@ import type { AudienceType, TemplateId } from '@/types/service';
 import type { GoalIntent } from '@/modules/goals/vocabulary';
 import type { GoalParamInput } from '@/modules/brief/bridge';
 import { intentToBriefGoal } from '@/modules/brief/bridge';
+import { estimateFullRunCost, isRunUnaffordable } from '@/lib/creditRunGate';
 import { getEntryFacts, type EntryFacts } from '@/modules/brief/classify';
 // scale-10 phase 4 — Brief-carried collections (parallel channel). Pure helpers
 // (slug re-derivation lives here — "slugs never AI"); NO waterfall change:
@@ -587,6 +588,37 @@ function slotsForEngine(
   }
   return wizardSlots.filter((s) => !skips.has(s));
 }
+
+// ---------------------------------------------------------------------------
+// B8 (qa-0719) — upfront full-run credit cost estimate.
+//
+// A single page is charged in TWO stages across TWO routes: STRATEGY_GENERATION
+// (strategy) then GENERATE_COPY × pages (copy). Before firing the slow, charged
+// strategy call, fetchStrategy checks the balance ONCE against this whole-run
+// cost so a partial balance is caught INSTANTLY ("the moment he says build my
+// site") instead of mid-pipeline after a wasted strategy call + partial charge.
+//
+// pageCount at strategy time: prefer an already-seeded sitemap (work-multipage,
+// resumed runs); else a multipage template's default-included archetype count;
+// else 1 (single-page). It's an estimate — the per-route copy gate stays the
+// backstop if the user later ADDS pages beyond the estimate.
+// ---------------------------------------------------------------------------
+function estimateRunPageCount(
+  s: Pick<WizardState, 'sitemap' | 'templateId' | 'businessTypeKey' | 'briefStructureMode'>,
+): number {
+  if (s.sitemap && s.sitemap.length > 0) return s.sitemap.length;
+  const briefSignal = briefSignalFromState(s);
+  if (isMultipage(s.templateId ?? undefined, briefSignal)) {
+    const menu = getPageArchetypesForTemplate(s.templateId) ?? [];
+    const n = menu.filter((a) => a.defaultIncluded).length;
+    return n > 0 ? n : 1;
+  }
+  return 1;
+}
+
+// `estimateFullRunCost` / `isRunUnaffordable` now live in the PLAIN, client-safe
+// `@/lib/creditRunGate` module so the work generation adapter (which must not
+// import this store) can share the exact same gate.
 
 // ---------------------------------------------------------------------------
 // Store → THING adapter projection (scale-07 phase 3).
@@ -1240,11 +1272,32 @@ export const useWizardStore = create<WizardStore>()(
         // Only structure-gated engines fetch here (work single-page keeps its
         // slot skip; work multipage is handled chargeless above).
         if (s.engine !== 'thing' && s.engine !== 'trust') return;
+        // Flip to 'fetching' SYNCHRONOUSLY (before any await) so concurrent
+        // fetchStrategy calls still collapse to one — the balance check below
+        // is the first awaited op, and a second call in the same tick bails at
+        // the status guard above.
         set((state) => {
           state.strategyStatus = 'fetching';
           state.strategyError = null;
           state.strategyCreditsError = false;
         });
+
+        // B8 (qa-0719) — UPFRONT full-run credit gate. Before the slow, charged
+        // strategy call fires, check the balance ONCE against the WHOLE run cost
+        // (strategy + copy×pages). A partial balance used to pass the strategy
+        // gate, sit through the strategy AI call + a 2-credit charge, THEN hit
+        // the copy gate mid-pipeline ("we couldn't build your site — out of
+        // credits", after a wasted wait + partial charge). Gating here = instant
+        // feedback, zero partial charge. A balance-endpoint hiccup does NOT block
+        // (null ⇒ proceed) — the per-route 402 gates remain the backstop.
+        if (await isRunUnaffordable(estimateFullRunCost(estimateRunPageCount(s)))) {
+          set((state) => {
+            state.strategyStatus = 'error';
+            state.strategyCreditsError = true;
+            state.strategyError = 'Out of credits.';
+          });
+          return;
+        }
 
         // Lazy-load the engine's adapter so the generation tree stays out of
         // the store's static import graph (firewall note at the top of this
