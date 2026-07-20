@@ -55,7 +55,39 @@ phase 2 render trio + shared-block registries + parity: done (3f08b57c + hardeni
       non-numeric siblings — NOT "all keys numeric"). Test predicate now keys.some(numeric)===false.
     ↳ Open (deferred, not blocking): the 2 primitive factories are still hand-duplicated — the gate
       now DETECTS divergence but does not PREVENT it. aria-label still excluded from comparison.
-phase 3 placement + publish materialization: pending
+phase 3 placement + publish materialization: done (df26d10a, impl-review loops 1 → ship) — ⏸ AWAITING FOUNDER PUBLISH GATE
+    ↳ /api/publish now has its FIRST ownership check (assertProjectOwner, result-checked,
+      allowMissing:true). Route previously imported verifyProjectAccess and never called it.
+      NEW failure mode: Clerk-authed caller with no User row → 404 (security.ts:75-77). Can only
+      bite someone publishing a project they don't own (Project.userId is an FK to User.id).
+    ↳ BLOCKING BUG FOUND IN REVIEW (loop 1) — publish-only corruption, empirically probed:
+      sanitizeContentHtml (route.ts:133, the SECOND chokepoint the plan never pinned) rewrites any
+      string whose KEY ends in href|url|link|slug → '#' via isUrlContentKey. roles.primaryLink (a
+      FIELD ID) and collectionSlug were clobbered → data-cms-collection="#" and the card CTA slot
+      EMPTY on published while populated in the editor. Fixed by rename, NOT by exempting cmsModel
+      (which would have lost HTML escaping over user-authored collection/group names):
+        roles.primaryLink → primaryCta · collectionSlug → collectionRef · item slug → itemRef
+      Stored CollectionRoles.primaryLink (Zod/DB) KEEPS its name — never enters elements.
+      ⚠️ NAMING CONSTRAINT IS PERMANENT: no key in the render model may end in href/url/link/slug
+      except the genuine {url} value keys. Guarded by a meta-guard importing the REAL
+      isUrlContentKey (tracks the rule, cannot drift) + binding gate now runs BOTH chokepoints in
+      route order. Revert-proof: reverting one rename → 4 failures incl. the parity skeleton.
+    ↳ GENERAL TRAP (not CMS-specific, nothing outside src/modules/cms audited): sanitizeItemObject
+      corrupts ANY structured element payload this way. Flat string-copy elements are unaffected,
+      which is why no existing block hit it. Candidate for the code-quality backlog.
+    ↳ Materializer: zero-query fast path when no cms sections; filters on section-type prefix so it
+      is STRUCTURALLY incapable of touching works/products (the works-authority gate, restated);
+      preserves content[sid].layout + id; FAIL-CLOSED on DB error (500, not a silent empty block).
+    ↳ Dual pin honestly scoped: the materializer's layout default is the REAL guard; the store pin
+      is belt-and-braces (map-only would publish an empty block, not vanish). cmsActions.test.ts
+      asserts both halves anyway.
+    ↳ refreshCmsData has ZERO callers — nothing populates cmsData yet, so a placed section shows the
+      skeleton until a later phase wires it. Expected (no placement UI until phase 6).
+    ↳ Bundle hygiene: constants moved to prisma-free src/modules/cms/sectionKeys.ts (materializePublish
+      RE-EXPORTS them — load-bearing, two test files import from there). Measured win ~280 bytes, NOT
+      the ~73kB the review estimated (webpack resolves @prisma/client via its browser field to a Proxy
+      stub). Kept on the architectural argument, not the number.
+    ↳ tsc baseline is now FULLY clean (the old founder.jpg TS2307 noise no longer reproduces).
 phase 4 detail pages + slugs: pending
 phase 5 authoring UI primitives: pending
 phase 6 schema builder + CMS entry point: pending
