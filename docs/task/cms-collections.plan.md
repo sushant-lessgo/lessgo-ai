@@ -88,7 +88,41 @@ phase 3 placement + publish materialization: done (df26d10a, impl-review loops 1
       the ~73kB the review estimated (webpack resolves @prisma/client via its browser field to a Proxy
       stub). Kept on the architectural argument, not the number.
     ↳ tsc baseline is now FULLY clean (the old founder.jpg TS2307 noise no longer reproduces).
-phase 4 detail pages + slugs: pending
+phase 4 detail pages + slugs: done (a69c42f2, impl-review loops 0 → ship) — ⏸ AWAITING FOUNDER DETAIL-PAGES GATE
+    ↳ Server-side fan-out is SOLE authority; pageActions.ts NEVER opened → naayom's live products
+      path untouched BY CONSTRUCTION (confirmed by diff scope, not by claim).
+    ↳ DEPTH FINDING (the phase's crux, independently re-verified): toDetailModel hoists the item out
+      of groups[].items[] onto a bare `item` prop, so on a DETAIL page itemRef sits at
+      elements→cmsItem→item→itemRef — INSIDE sanitizeItemObject's one-level budget — where on the
+      LISTING it was one level too deep. Same key, opposite outcome. collectionRef walked on both.
+      ⇒ The phase-3 renames (primaryCta/collectionRef/itemRef) went from defensive to LOAD-BEARING.
+      Had we not renamed itemRef proactively in phase 3, every detail page's links would ship '#'.
+      Depth table now in src/modules/cms/README.md (element key is `cmsItem`, NOT `cmsDetail`).
+    ↳ Collision guard: checks BEFORE any mutation (payload byte-identical after throw), maps to 409
+      via a NARROW instanceof catch; DB errors keep fail-closed 500. Test uses importOriginal so the
+      thrown class IS the real one — a hand-built fake would pass a catch-all and fail the correct
+      narrow catch (inverted test). Client already surfaces result.error → user sees the colliding path.
+    ↳ Single feed intact: toDetailModel returns model.roles and CmsItemRender BY REFERENCE (asserted
+      with toBe) — no second shaping path.
+
+    CARRIES (real, none blocking v1 — do not lose these):
+    ↳ PHASE 7 OWES: `slugLocked` is an UNGUARDED pin. Nothing reads it until the item editor; the
+      old test claiming to guard it was INERT (removing the flag left it passing) and has been made
+      honest. If phase 7 ships an editor that ignores the flag, NOTHING will fail. Phase 7 must add
+      the guarding test.
+    ↳ PHASE 7 OWES: item CREATE has no top-level-slug shadow guard (collection POST/PATCH and item
+      PATCH do). A created item can still mint a colliding path — caught at publish as the 409.
+    ↳ A collection slugged `blog` SILENTLY loses its detail pages (renderPublishedExport.ts:271 skips
+      isReservedBlogPath with only a console.warn; /blog isn't in content.pages so the shadow guard
+      can't see it). Silent, not corrupting.
+    ↳ A collection slugged with a locale code (e.g. `nl`) fails publish with a MISLEADING message
+      telling the user to rename a page that doesn't exist (localeSlugCollision.ts:35-41 reads the
+      first path segment). Only reachable on i18n projects (deferred track).
+    ↳ SCALE: fan-out is unbounded — one blob render + one KV route per item, SERIALLY, on every
+      publish (renderPublishedExport.ts:265). No item cap anywhere. Fine for pilot collections;
+      needs a ceiling before anyone points this at a few hundred items.
+    ↳ Vitest parity cannot reach: chrome injection into detail subpages, theme cascade, per-subpage
+      metadata/blob path. Those are e2e-only (and e2e needs dev server + Clerk + Blob/KV).
 phase 5 authoring UI primitives: pending
 phase 6 schema builder + CMS entry point: pending
 phase 7 item editor + group management: pending
