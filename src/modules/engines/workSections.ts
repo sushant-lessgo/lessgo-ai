@@ -208,6 +208,9 @@ const packagesContract: UIBlockSchemaV2 = {
     eyebrow: str('optional'),
     heading: str('required'),
     lead: str('optional'),
+    // Section-level category label (Wave 2 packages quad). AI-visible + editable
+    // (manual_preferred); optional → no default injection, absent until written.
+    category_label: str('optional'),
   },
   collections: {
     packages: {
@@ -222,6 +225,17 @@ const packagesContract: UIBlockSchemaV2 = {
         price_line: { type: 'string', fillMode: FILL, default: 'On request' },
         description: { type: 'string', fillMode: FILL, default: '' },
         cta_label: { type: 'string', fillMode: FILL, default: '' },
+        // Wave 2 packages quad — per-tier extensions. All optional, graceful-empty
+        // (empty → today's card markup exactly).
+        //  • bullets — newline-delimited "what's included" list, split at render.
+        //    AI-drafted (manual_preferred), but facts-verbatim-injected at parse
+        //    (injectPackages) when the seller stated group items.
+        //  • image / featured — MANUAL lane (`fillMode:'system'`): never AI-emitted
+        //    (isSystemField skip in the prompt + the parse-time system-key strip);
+        //    set only via the editor (picker / toggle).
+        bullets: { type: 'string', fillMode: FILL, default: '' },
+        image: { type: 'string', fillMode: 'system', default: '' },
+        featured: { type: 'string', fillMode: 'system', default: '' },
       },
     },
   },

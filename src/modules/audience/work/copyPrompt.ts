@@ -78,6 +78,8 @@ const WORK_CHAR_CAPS: Record<string, number> = {
   cta_label: 28,
   description: 140,
   price_line: 40,
+  category_label: 32,
+  bullets: 200, // whole newline-list; each line stays short (see the packages rule)
   label: 40,
   value: 24,
   question: 100,
@@ -177,6 +179,15 @@ export function buildWorkCopyPrompt(input: WorkCopyPromptInput): string {
     );
     bindingRuleLines.push(
       `${nextRule++}. **Prices are law — verbatim or mode-phrased.** Use each item's price EXACTLY as given in the WORK LIBRARY: an exact price as stated, a "from" price framed as "from …", and an on-request item framed as "on request" / "price on enquiry". NEVER invent, round, discount, or attach a number the library does not state.`
+    );
+  }
+
+  if (hasPackages) {
+    // Package bullets are facts-verbatim-injected at parse (injectPackages) from
+    // the seller's stated group items — like proof quotes. So the model drafts
+    // bullets ONLY as a silent-facts fallback, and never fabricates inclusions.
+    bindingRuleLines.push(
+      `${nextRule++}. **Package \`bullets\` — draft only when the facts are silent; NEVER fabricate inclusions.** \`bullets\` is a short newline-separated "what's included" list (one concise line per line, no leading dash — the layout adds it). If the WORK LIBRARY states what a package includes, the system injects those verbatim — do NOT restate or invent them. When the library says nothing about inclusions, you MAY draft 3–5 true, concrete lines drawn ONLY from what the seller actually offers — never invent a deliverable, turnaround, or perk the facts do not support. Leave \`bullets\` empty rather than pad it.`
     );
   }
 

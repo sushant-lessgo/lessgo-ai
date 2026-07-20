@@ -12,7 +12,7 @@ Close the Wave-2 gaps in the frozen work-engine content contract so Atelier reac
 ## Progress log
 
 - phase 1 editor media + primitive foundation + header logo lane: done (review loops 1)
-- phase 2 packages quad end-to-end (pilot): pending
+- phase 2 packages quad end-to-end (pilot): done (review loops 1; +3 orchestrator-authorized mid-phase files: generate-copy route, playwright.config, scopedRegen) — AWAITING HUMAN GATE
 - phase 3 about — portrait / signature / badge: pending
 - phase 4 hero — slides[] + 2nd CTA: pending
 - phase 5 footer — derived columns + contact: pending
@@ -91,6 +91,9 @@ The pattern-proving slice: contract field → wizard facts ask → AI/facts lane
 - `src/modules/skeletons/work/blocks/Packages/WorkPackages.core.tsx` + `src/modules/skeletons/work/blocks/Packages/styles.ts`
 - `src/modules/templates/blockMocks/atelier.ts`
 - `e2e/workWave2.spec.ts` (new)
+- `src/app/api/audience/work/generate-copy/route.ts` (ADDED mid-phase by orchestrator: thread `facts.work.groups` into `parseWorkCopy` so injectPackages facts-verbatim bullets are LIVE on first-gen — the pilot must prove the facts lane end-to-end; match the injectPraise data-flow)
+- `playwright.config.ts` (ADDED mid-phase by orchestrator: register `e2e/workWave2.spec.ts` in the testMatch allowlist so the deterministic-QA spec actually runs)
+- `src/modules/generation/scopedRegen.ts` (ADDED mid-phase by orchestrator: thread `workFacts?.groups` as the 4th `parseWorkCopy` arg at ~L904-908, mirroring the existing `workFacts?.praise` line, so packages-section regen re-injects facts-verbatim bullets identically to injectPraise — else regen silently replaces verbatim bullets with AI drafts)
 
 **Verification**
 

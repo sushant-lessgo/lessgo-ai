@@ -299,11 +299,14 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
     sectionId: 'atelier-packages',
     content: {
       eyebrow: 'Packages',
+      category_label: 'Commissions',
       heading: 'Ways to work together',
       lead: 'Clear, honest pricing — pick the scope that fits your brand.',
+      // Wave 2 packages quad exercised: per-tier image + bullets + a "most booked"
+      // featured flag, plus the section category label above.
       packages: [
-        { id: 'pk1', name: 'Full brand package', price_mode: 'from', price_line: '€2,400', description: 'A complete shoot day plus a curated library for every channel.', cta_label: 'Enquire →' },
-        { id: 'pk2', name: 'Brand photoshoot', price_mode: 'exact', price_line: '€1,200', description: 'A focused half-day covering your core brand imagery.', cta_label: 'Enquire →' },
+        { id: 'pk1', name: 'Full brand package', price_mode: 'from', price_line: '€2,400', description: 'A complete shoot day plus a curated library for every channel.', cta_label: 'Enquire →', image: 'https://cdn.example.com/pkg-full.jpg', bullets: 'A full production day, art-directed\nEnough material for a year of publishing\nEdited selects + full archive access\nFull commercial license' },
+        { id: 'pk2', name: 'Brand photoshoot', price_mode: 'exact', price_line: '€1,200', description: 'A focused half-day covering your core brand imagery.', cta_label: 'Enquire →', image: 'https://cdn.example.com/pkg-brand.jpg', featured: 'true', bullets: 'Half a day, multiple setups\nPosed and candid material\nA full set for web and social\nUsage license included' },
         { id: 'pk3', name: 'Portrait & business shoot', price_mode: 'on-request', price_line: 'On request', description: 'Team headshots and executive portraits, scoped to your size.', cta_label: 'Enquire →' },
       ],
     },

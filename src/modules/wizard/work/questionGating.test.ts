@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildQuestionPlan, resolveQuestionProfession } from './questionGating';
 import { getWorkFacts, type WorkFacts } from '@/lib/schemas/workFacts.schema';
+import { workSlotIds } from '@/modules/engines/workSlots';
 import type { EntryFacts } from '@/modules/brief/classify';
 import { WORK_BRIEF_FIXTURE } from '../../../../e2e/helpers/workBriefFixture';
 
@@ -208,6 +209,46 @@ describe('buildQuestionPlan — price answered-detection (D-C)', () => {
     expect(price).toBeDefined();
     expect(price!.answered).toBe(true);
     expect(price!.suggested).toEqual(['on-request']);
+  });
+});
+
+// ── Wave 2 packages quad — bullets ride the EXISTING `groups` slot ───────────
+// Package `bullets` are sourced from `group.items` (WorkFactsSchema), so the
+// wizard needs NO new slot for them. Category label folds into the groups
+// question copy (no slot). These guard against a future accidental slot add.
+describe('buildQuestionPlan — packages bullets ride the groups slot (no new slot)', () => {
+  it('never emits a slot outside the frozen workSlotIds (no bullets/category question)', () => {
+    const rich: WorkFacts = {
+      identity: { name: 'Studio Co' },
+      groups: [
+        {
+          name: 'Portrait sessions',
+          kind: 'category',
+          price: { mode: 'from', amount: 250 },
+          items: [{ name: 'One focused hour', photos: [] }],
+        },
+      ],
+    };
+    const plan = buildQuestionPlan({ work: rich, entry: null, sessionAnswered: [] });
+    for (const item of plan) {
+      expect(workSlotIds as readonly string[]).toContain(item.slot);
+    }
+    expect(plan.map((p) => p.slot)).not.toContain('bullets');
+    expect(plan.map((p) => p.slot)).not.toContain('category');
+  });
+
+  it('adding group items (the bullets source) does not change the emitted slot set', () => {
+    const base: WorkFacts = {
+      identity: { name: 'Studio Co' },
+      groups: [{ name: 'Portrait sessions', kind: 'category', price: { mode: 'from', amount: 250 } }],
+    };
+    const withItems: WorkFacts = {
+      ...base,
+      groups: [{ ...base.groups![0], items: [{ name: 'Retouched selects', photos: [] }] }],
+    };
+    const slotsOf = (w: WorkFacts) =>
+      buildQuestionPlan({ work: w, entry: null, sessionAnswered: [] }).map((p) => p.slot);
+    expect(slotsOf(withItems)).toEqual(slotsOf(base));
   });
 });
 
