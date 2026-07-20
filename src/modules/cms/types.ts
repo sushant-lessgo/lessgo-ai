@@ -17,6 +17,9 @@ import type {
   GalleryValue,
   MediaValue,
   LinkValue,
+  StatValue,
+  CollectionPurpose,
+  CollectionPurposes,
 } from '@/lib/schemas/collection.schema';
 
 export type {
@@ -30,6 +33,9 @@ export type {
   GalleryValue,
   MediaValue,
   LinkValue,
+  StatValue,
+  CollectionPurpose,
+  CollectionPurposes,
 };
 
 /**
@@ -45,7 +51,21 @@ export interface CmsCollection {
   slug: string;
   fieldSchema: FieldDef[];
   roles: CollectionRoles;
+  /**
+   * Amendment item 2 — STORED, VALIDATED, READ BY NOTHING. Per-purpose rendering
+   * is deferred (v1 = one shared block on every template). Do not delete it as
+   * unused; do not branch rendering on it without a spec change.
+   *
+   * OPTIONAL because narrowers written before phase 8A (e.g. `toCmsCollection` in
+   * materializePublish.ts, which 8A must not touch) legitimately omit it.
+   */
+  purposes?: CollectionPurposes;
   detailPages: boolean;
+  /**
+   * Phase 8B: publish also emits a listing subpage at `/<slug>`. Optional for the
+   * same reason as `purposes` — the publish narrower does not carry it until 8B.
+   */
+  listingPage?: boolean;
   /** Reserved seam for per-template group layouts (v1 renders stacked only). */
   layoutHint: string | null;
   order: number;
@@ -67,6 +87,12 @@ export interface CmsItem {
   values: ItemValues;
   order: number;
   slugLocked: boolean;
+  /**
+   * Amendment item 3 — RESERVED COLUMN, UNWIRED BY RULING. No UI, no read path,
+   * no promotion logic (there is no engine-agnostic home lineup to promote into).
+   * Optional: narrowers that predate the column omit it.
+   */
+  featuredOnHome?: boolean;
 }
 
 /** One collection with its groups + items — the unit both renderer feeds use. */

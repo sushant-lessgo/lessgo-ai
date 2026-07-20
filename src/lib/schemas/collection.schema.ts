@@ -27,7 +27,10 @@
 
 import { z } from 'zod';
 
-/** The CLOSED set of field types. Do not extend without a spec change. */
+/**
+ * The CLOSED set of field types — now **10** (`stat` added by the 2026-07-20 spec
+ * amendment, item 1). Do not extend without a spec change.
+ */
 export const FIELD_TYPES = [
   'image',
   'gallery',
@@ -38,6 +41,7 @@ export const FIELD_TYPES = [
   'link',
   'date',
   'tags',
+  'stat',
 ] as const;
 
 export const FieldTypeSchema = z.enum(FIELD_TYPES);
@@ -114,6 +118,26 @@ export const DateValueSchema = z
 
 export const TagsValueSchema = z.array(z.string().min(1).max(80)).max(50);
 
+/**
+ * `stat` — one spec/stat PAIR (amendment item 1: Naayom specs, Scalifix metrics).
+ * One field = one pair; a spec LIST is several `stat` fields, never a numeric-keyed
+ * map (which `coercePublishValue` would concatenate — coercion-proof rule 2).
+ *
+ * ⚠️ KEY NAMES ARE LOAD-BEARING: `key` / `value` were chosen because neither ends
+ * in `href|url|link|slug`. `sanitizeContentHtml` (publishSanitizer.ts, the SECOND
+ * publish chokepoint) rewrites any string under such a key to `'#'` — publish-only,
+ * invisible in the editor. That bug already shipped once in this feature (phase 3:
+ * `roles.primaryLink` / `collectionSlug`). Do NOT rename these to e.g. `specLink`.
+ *
+ * Both halves may be EMPTY (the all-values-optional law). Unlike date/link/media,
+ * `stat` therefore needs NO empty→null mapping in the caller: `{key:'',value:''}`
+ * validates. It carries no `type`+`content` pair (coercion-proof rule 1).
+ */
+export const StatValueSchema = z.object({
+  key: z.string().max(120),
+  value: z.string().max(500),
+});
+
 export const FIELD_VALUE_SCHEMAS: Record<FieldType, z.ZodTypeAny> = {
   image: ImageValueSchema,
   gallery: GalleryValueSchema,
@@ -124,12 +148,14 @@ export const FIELD_VALUE_SCHEMAS: Record<FieldType, z.ZodTypeAny> = {
   link: LinkValueSchema,
   date: DateValueSchema,
   tags: TagsValueSchema,
+  stat: StatValueSchema,
 };
 
 export type ImageValue = z.infer<typeof ImageValueSchema>;
 export type GalleryValue = z.infer<typeof GalleryValueSchema>;
 export type MediaValue = z.infer<typeof MediaValueSchema>;
 export type LinkValue = z.infer<typeof LinkValueSchema>;
+export type StatValue = z.infer<typeof StatValueSchema>;
 
 /** Union of every legal stored value (for readers/renderers). */
 export type FieldValue =
@@ -137,6 +163,7 @@ export type FieldValue =
   | GalleryValue
   | MediaValue
   | LinkValue
+  | StatValue
   | string
   | string[];
 
@@ -235,6 +262,34 @@ export function makeRolesSchema(fields: FieldDef[]) {
   });
 }
 
+// ── Purposes (amendment 2026-07-20, item 2) ─────────────────────────────────
+//
+// ⚠️ STORED AND VALIDATED, READ BY NOTHING. Marks what a collection is FOR
+// (offer / proof / price). v1 ships ONE shared block that renders identically on
+// every template (plan Deviations #1), so "case studies as a proof band" needs
+// per-purpose renderers that are explicitly deferred. Founder ruling: "store it,
+// unread for now."
+//
+//   → A future agent must NOT delete this as dead code (it is forward-compat by
+//     ruling), and must NOT branch any render/materialization path on it without
+//     a spec change lifting Deviation #1.
+
+/** Closed vocabulary. Set semantics: order is not meaningful, duplicates collapse. */
+export const COLLECTION_PURPOSES = ['offer', 'proof', 'price'] as const;
+
+export const PurposeSchema = z.enum(COLLECTION_PURPOSES);
+export type CollectionPurpose = z.infer<typeof PurposeSchema>;
+
+/** Deduped list, no default — use `PurposesSchema` on create bodies. */
+export const PurposesListSchema = z
+  .array(PurposeSchema)
+  .max(COLLECTION_PURPOSES.length * 4) // bounded before dedupe; a set can't exceed 3
+  .transform((list) => Array.from(new Set(list)));
+
+/** Deduped list defaulting to `[]` (absent = no purposes, never null). */
+export const PurposesSchema = PurposesListSchema.default([]);
+export type CollectionPurposes = CollectionPurpose[];
+
 // ── Request bodies (consumed by /api/collections/*) ─────────────────────────
 
 export const SlugSchema = z
@@ -249,7 +304,10 @@ export const CollectionCreateSchema = z.object({
   slug: SlugSchema.optional(), // derived from name server-side when absent
   fieldSchema: FieldSchemaArraySchema,
   roles: RolesShapeSchema.default({}),
+  purposes: PurposesSchema,
   detailPages: z.boolean().default(false),
+  /** Phase 8: publish also emits a listing subpage at `/<slug>`. */
+  listingPage: z.boolean().default(false),
   layoutHint: z.string().max(60).nullable().optional(),
 });
 export type CollectionCreateInput = z.infer<typeof CollectionCreateSchema>;
@@ -261,7 +319,9 @@ export const CollectionPatchSchema = z
     slug: SlugSchema.optional(),
     fieldSchema: FieldSchemaArraySchema.optional(),
     roles: RolesShapeSchema.optional(),
+    purposes: PurposesListSchema.optional(),
     detailPages: z.boolean().optional(),
+    listingPage: z.boolean().optional(),
     layoutHint: z.string().max(60).nullable().optional(),
     order: z.number().int().min(0).optional(),
   })
@@ -310,6 +370,13 @@ export const ItemPatchSchema = z
     groupId: z.string().min(1).nullable().optional(),
     slug: SlugSchema.optional(),
     order: z.number().int().min(0).optional(),
+    /**
+     * Amendment item 3 — RESERVED, UNWIRED BY RULING. Accepted + persisted so the
+     * column isn't dead at the API edge, but NOTHING reads it: there is no
+     * engine-agnostic home lineup to promote into (the `materializeHome*` helpers
+     * are products+techpremium hardcoded and spec §Out). No UI control ships.
+     */
+    featuredOnHome: z.boolean().optional(),
   })
   .refine(
     (v) => Object.keys(v).some((k) => k !== 'tokenId'),

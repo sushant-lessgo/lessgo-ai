@@ -5,7 +5,8 @@
 //
 // What these assert, and why each one earns its keep:
 //
-//  1. CONTROL PER TYPE — all 9 field types render THEIR control, chosen by TYPE.
+//  1. CONTROL PER TYPE — every field type with a control renders THEIR control,
+//     chosen by TYPE (`stat`, the 10th type, gets its control in phase 8B).
 //     Name-driven controls are how a CMS grows a hidden second schema.
 //
 //  2. SAVE PAYLOAD — the PATCH body actually sent (values map + method + url).
@@ -208,8 +209,13 @@ describe('control per field type', () => {
       const control = wrapper.querySelector(`[data-control="${field.type}"]`);
       expect(control, `no control for ${field.id} (${field.type})`).toBeTruthy();
     }
-    // Every closed type is actually exercised above — no silent gap.
-    expect(new Set(ALL_FIELDS.map((f) => f.type))).toEqual(new Set(FIELD_TYPES));
+    // Every type WITH A CONTROL is actually exercised above — no silent gap.
+    // `stat` (the 10th closed type) has no control until phase 8B; it is named
+    // explicitly so this stays a coverage assertion rather than a loose subset
+    // check — adding an 11th type without a control fails here.
+    expect(new Set(ALL_FIELDS.map((f) => f.type))).toEqual(
+      new Set(FIELD_TYPES.filter((t) => t !== 'stat'))
+    );
   });
 
   it('uses a plain textarea for text_long — ruling #3, no rich-text toolbar', () => {

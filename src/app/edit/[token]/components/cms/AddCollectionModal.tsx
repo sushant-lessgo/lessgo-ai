@@ -10,9 +10,9 @@
 //      GREYED + why-tooltip via <Coming>. Not omitted, not enabled. The greyed-
 //      placeholder rule is a contract — deleting those chips is a regression, and
 //      AddCollectionModal.test.tsx fails if they disappear or become actionable.
-//  #2  There is NO `Price` field type. The closed 9 only; price is `Text — short`.
+//  #2  There is NO `Price` field type. The closed set only; price is `Text — short`.
 //  #3  `Text — long` is a PLAIN textarea type — no rich-text toolbar (no such
-//      control exists in `components/ui`, and it is not one of the 9).
+//      control exists in `components/ui`, and it is not one of the closed set).
 //  #4  No mono/SKU variant.
 //  #5  Per-row role menu (title / cover / primaryLink), TYPE-FILTERED off
 //      ROLE_ALLOWED_TYPES — cover only on image|gallery, primaryLink only on link,
@@ -89,7 +89,7 @@ import {
   AppPopoverLabel,
 } from '@/components/ui/popover';
 
-/** Human labels for the CLOSED 9. Ruling #2: no Price. Ruling #4: no SKU/mono. */
+/** Human labels for the CLOSED 10. Ruling #2: no Price. Ruling #4: no SKU/mono. */
 export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
   image: 'Image',
   gallery: 'Gallery',
@@ -100,7 +100,18 @@ export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
   link: 'Link / button',
   date: 'Date',
   tags: 'Tags',
+  stat: 'Spec / stat',
 };
+
+/**
+ * Types offered in the "+ Add field" picker.
+ *
+ * `stat` is in the CLOSED 10 (contract, phase 8A) but is NOT offered yet: its
+ * item-editor control and its renderer land in phase 8B (plan step 5b). Offering
+ * it now would let a user create a field with no way to fill it and nothing to
+ * render it. **Phase 8B deletes this filter** and the picker becomes FIELD_TYPES.
+ */
+export const PICKER_FIELD_TYPES = FIELD_TYPES.filter((t) => t !== 'stat');
 
 const ROLE_LABELS: Record<RoleKey, string> = {
   title: 'Title field',
@@ -469,7 +480,7 @@ export function AddCollectionModal({
               </PopoverTrigger>
               <AppPopoverMenu width={200} align="start" style={{ pointerEvents: 'auto' }}>
                 <AppPopoverLabel>Field type</AppPopoverLabel>
-                {FIELD_TYPES.map((type) => (
+                {PICKER_FIELD_TYPES.map((type) => (
                   <AppPopoverItem
                     key={type}
                     data-add-field-type={type}

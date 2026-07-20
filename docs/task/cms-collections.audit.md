@@ -2422,3 +2422,148 @@ published-path code untouched; the empty→`null` semantics unchanged.
   *does* hand-edit a live item's permalink — the old URL 404s. The auto-follow removal
   shrinks how often that happens to "only when deliberate"; it does not solve it.
 - The two CMS e2e specs are still unproven on a real run (unchanged from phase 7).
+
+---
+
+# Phase 8A — contracts + data (amendment items 1-4 + `listingPage` column)
+
+**Files changed**
+
+1. `prisma/schema.prisma`
+2. `prisma/migrations/20260720150017_cms_amendment/migration.sql` (new)
+3. `src/lib/schemas/collection.schema.ts`
+4. `src/lib/schemas/collection.schema.test.ts`
+5. `src/app/api/collections/route.ts`
+6. `src/app/api/collections/[collectionId]/route.ts`
+7. `src/app/api/collections/[collectionId]/items/[itemId]/route.ts`
+8. `src/app/api/collections/collections.authz.test.ts`
+9. `src/modules/cms/types.ts`
+10. `src/modules/cms/README.md`
+11. `src/app/edit/[token]/components/cms/AddCollectionModal.tsx` — *closed-at-9 sweep + the tsc consequence of a 10th type*
+12. `src/app/edit/[token]/components/cms/AddCollectionModal.test.tsx` — *sweep*
+13. `src/app/edit/[token]/components/cms/ItemEditor.tsx` — *comment only*
+14. `src/app/edit/[token]/components/cms/ItemEditor.test.tsx` — *sweep*
+15. `src/modules/cms/render/CollectionSection.core.tsx` — *comment only*
+16. `src/modules/cms/render/parity.test.tsx` — *comments + one test NAME*
+17. `src/modules/cms/materializePublish.test.ts` — *comment only*
+18. `e2e/cms-authoring.spec.ts` — *comment only*
+19. `docs/task/cms-collections.audit.md` (this entry)
+
+(`src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` shows as
+modified in `git status` — it was ALREADY dirty at session start, untouched by this phase.)
+
+NOT touched, deliberately: `docs/task/cms-collections.plan.md` (orchestrator owns it),
+`materializePublish.ts`, `collectionHelpers.ts`, any renderer/component beyond the comment
+sweep, `src/app/api/collections/[collectionId]/items/route.ts` (item CREATE).
+
+## Per file
+
+**`prisma/schema.prisma` + the migration.** ONE migration, `prisma migrate dev` (never
+`db push`). `Collection.purposes Json @default("[]")`, `Collection.listingPage Boolean
+@default(false)`, `CollectionItem.featuredOnHome Boolean @default(false)`. Purely additive
+`ALTER TABLE … ADD COLUMN … NOT NULL DEFAULT`. Each column carries a schema comment saying
+what reads it (nothing, for two of the three) and why.
+
+**`collection.schema.ts`.** `stat` appended to `FIELD_TYPES` (closed set 9 → **10**);
+`StatValueSchema = {key: string, value: string}`, both allowed EMPTY per the
+all-values-optional law, with a docblock spelling out that the two property names are
+load-bearing (neither ends in `href|url|link|slug`, so `sanitizeContentHtml` cannot rewrite
+them to `'#'` — the phase-3 bug) and that `stat` needs no empty→null caller mapping.
+`COLLECTION_PURPOSES` / `PurposeSchema` / `PurposesListSchema` (deduped, no default) /
+`PurposesSchema` (deduped + `.default([])`). `purposes` + `listingPage` on
+`CollectionCreateSchema` (defaults `[]` / `false`) and as optionals on
+`CollectionPatchSchema`; `featuredOnHome` optional on `ItemPatchSchema`. The purposes block
+carries a large "STORED, VALIDATED, READ BY NOTHING — do not delete, do not branch on it"
+header.
+
+**The three routes.** New fields destructured, validated and persisted. `assertProjectOwner`
+gate shape untouched (result-checked, `allowMissing:false`, no `claimIfOrphan`); the nested
+token-scoped lookups (`loadOwnedCollection` / `loadOwnedItem`) untouched. PATCH keeps its
+`...(x !== undefined ? {x} : {})` discipline, so omitting a new field never resets it. GET
+`/api/collections` now returns `purposes` + `listingPage` in the list projection. Route
+docblocks record the preset-seeding path and the reserved/unread status of the new fields.
+
+**`types.ts`.** Re-exports `StatValue`, `CollectionPurpose`, `CollectionPurposes`; adds
+`purposes?` / `listingPage?` to `CmsCollection` and `featuredOnHome?` to `CmsItem`, each
+with a why-it-is-unread docblock.
+
+**`README.md`.** Closed set stated as **10** with the `stat` shape, its key-naming
+constraint and its 8A-contract-only status. New section **"Two fields exist ON PURPOSE with
+no reader — do not wire them up, do not delete them"**: a table giving, per field, the exact
+state and the WHY (Deviation #1 for `purposes`; the products-hardcoded `materializeHome*`
+helpers + the greyed-placeholder rule presupposing a destination for `featuredOnHome`),
+plus an explicit "do NOT touch `materializeHome*` to hook this up".
+
+**The sweep.** Every stale "closed at 9 / all 9 / ALL NINE" claim in live code, tests, the
+module README and the e2e spec now reads correctly (either "10" or "the closed set"), each
+noting that `stat` has no control/renderer until 8B.
+
+## Deviations (all conservative, all logged)
+
+1. **`stat` is a SINGLE `{key,value}` pair, not an array of pairs.** The amendment's safety
+   note mentions "an ARRAY of pairs", but the plan step and the phase brief both specify the
+   value schema as `{key, value}`. Implemented as the pair; a spec LIST is several `stat`
+   fields. Documented in the schema docblock and the README. If 8B wants repeated pairs in
+   ONE field, that is a contract change, not a rendering detail.
+2. **`stat` is NOT offered in the "+ Add field" picker yet.** Adding a 10th type to
+   `FIELD_TYPES` is a tsc error against `FIELD_TYPE_LABELS: Record<FieldType,string>`, so
+   `AddCollectionModal.tsx` had to be touched (it is in Files-touched via the sweep clause —
+   it literally carried "the closed 9"). Rather than expose a type the user could create but
+   not fill (no `ItemEditor` control, no renderer until 8B), the picker iterates a new
+   exported `PICKER_FIELD_TYPES = FIELD_TYPES.filter(t => t !== 'stat')`. Picker behaviour is
+   byte-identical to phase 7. **Phase 8B must delete this filter** — the constant's docblock
+   says so.
+3. **`CmsCollection.purposes` / `.listingPage` / `CmsItem.featuredOnHome` are OPTIONAL in
+   the TS interfaces.** Required fields broke `toCmsCollection` in `materializePublish.ts`,
+   which this phase is explicitly forbidden to touch. Optional is honest (a pre-8A narrower
+   omits them) and keeps `if (c.listingPage)` working for 8B. 8B may tighten when it edits
+   the materializer.
+4. **`featuredOnHome` was added to item PATCH only, not item CREATE.** The item-create route
+   (`items/route.ts`) is not in Files touched. A `featuredOnHome` in a create body is
+   silently stripped by Zod today; the column defaults to `false`. No caller sends it (there
+   is no UI, by ruling).
+5. **`ItemEditor.test.tsx`'s type-coverage assertion** now compares against
+   `FIELD_TYPES.filter(t => t !== 'stat')` rather than `FIELD_TYPES`. It still bites for an
+   11th type added without a control; 8B removes the filter when the `stat` control lands.
+
+## Verification (actual)
+
+- `npx prisma validate` → schema valid. `npx prisma migrate dev --name cms_amendment` →
+  `20260720150017_cms_amendment` created and applied, client regenerated.
+- `npx tsc --noEmit` → **exit 0, zero output**.
+- `npm run test:run` → **282 passed | 1 skipped (283 files); 4522 passed | 15 skipped
+  (4537); 0 failed.** Baseline was 4502/4517 → **+20 tests, no regressions, same file
+  count**.
+- `npx next lint` on all touched files → clean; the only output is a PRE-EXISTING
+  `no-img-element` warning at `parity.test.tsx:451` (untouched line).
+- **Live DB spot-check** (`information_schema` + a real probe row on the dev DB):
+  defaults are `listingPage → false`, `purposes → '[]'::jsonb`, `featuredOnHome → false`,
+  all `NOT NULL`. The 2 PRE-EXISTING `Collection` rows read back `purposes: []`,
+  `listingPage: false`, and existing items read `featuredOnHome: false` — backfill correct.
+  Probe rows deleted.
+
+### Non-vacuity evidence (both probes bit)
+
+1. **`StatValueSchema`** replaced with `z.any()` → `collection.schema.test.ts` went
+   **1 failed | 38 passed**, failing exactly `"stat accepts a {key, value} pair and rejects
+   other shapes"`. Restored → green.
+2. **`PurposeSchema`** replaced with a `z.string()` cast (closed vocab defeated, types still
+   compiling) → **2 failed | 98 passed** across both suites: `"REJECTS anything outside the
+   closed vocab"` (schema) and `"a preset carrying an unknown purpose is refused (closed
+   vocab)"` (route). Restored → green. Note the route-level test failed too, proving the
+   closed vocab is enforced at the API edge and not only in isolation.
+
+## Open risks / carries for 8B
+
+- **`purposes` has no reader BY RULING.** Its guard is documentation only — nothing fails if
+  a future agent branches rendering on it. The README section is the whole defence.
+- **`featuredOnHome` likewise**, plus the specific trap that `collectionHelpers.ts`'s dormant
+  `materializeHome*` functions look like the obvious place to "finish" it. They are
+  products-hardcoded and spec §Out.
+- **8B owes:** delete `PICKER_FIELD_TYPES`; add the `stat` control + emit path + renderer;
+  extend the `materializePublish.test.ts` key-name meta-guard fixture and `parity.test.tsx`
+  to cover `stat` (both currently say so in comments); restore `ItemEditor.test.tsx`'s
+  coverage assertion to the full `FIELD_TYPES`; consider tightening the three optional type
+  fields when `toCmsCollection` is edited.
+- `stat` currently reaches the DB only via a programmatic/preset POST — no UI path creates
+  one, so the type is unexercised end-to-end until 8B.

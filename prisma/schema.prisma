@@ -337,7 +337,13 @@ model Collection {
   slug        String
   fieldSchema Json // ordered field defs: [{id, name, type}]
   roles       Json // {title?, cover?, primaryLink?} → field ids
+  // Amendment 2026-07-20 item 2: closed vocab ['offer','proof','price'], set semantics.
+  // STORED AND VALIDATED BUT READ BY NOTHING (v1 ships one shared block identical on every
+  // template; per-purpose renderers are deferred). Do not branch render logic on it.
+  purposes    Json     @default("[]")
   detailPages Boolean  @default(false)
+  // Phase 8: when true, publish also emits a listing subpage at /<slug>.
+  listingPage Boolean  @default(false)
   layoutHint  String? // reserved seam for per-template group layouts (v1: stacked only)
   order       Int      @default(0)
   createdAt   DateTime @default(now())
@@ -364,17 +370,21 @@ model CollectionGroup {
 }
 
 model CollectionItem {
-  id           String           @id @default(cuid())
-  collectionId String
-  collection   Collection       @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  groupId      String? // group delete → items fall back to ungrouped
-  group        CollectionGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
-  slug         String
-  values       Json // partial record keyed by field id (see coercion-proof note above)
-  order        Int              @default(0)
-  slugLocked   Boolean          @default(false) // manual slug edit → re-materialization never clobbers it
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  id             String           @id @default(cuid())
+  collectionId   String
+  collection     Collection       @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  groupId        String? // group delete → items fall back to ungrouped
+  group          CollectionGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  slug           String
+  values         Json // partial record keyed by field id (see coercion-proof note above)
+  order          Int              @default(0)
+  slugLocked     Boolean          @default(false) // manual slug edit → re-materialization never clobbers it
+  // Amendment 2026-07-20 item 3: RESERVED COLUMN, UNWIRED BY RULING. No UI control, no
+  // read path, no promotion logic — the home-lineup machinery is products-hardcoded and
+  // out of scope. Reserved so a later feature needn't migrate a populated table.
+  featuredOnHome Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
   @@unique([collectionId, slug])
   @@index([collectionId, order])

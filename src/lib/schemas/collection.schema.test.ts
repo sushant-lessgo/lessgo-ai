@@ -8,6 +8,12 @@ import {
   makeItemValuesSchema,
   makeRolesSchema,
   ROLE_ALLOWED_TYPES,
+  COLLECTION_PURPOSES,
+  PurposesSchema,
+  PurposesListSchema,
+  CollectionCreateSchema,
+  CollectionPatchSchema,
+  ItemPatchSchema,
   type FieldDef,
 } from './collection.schema';
 
@@ -21,10 +27,11 @@ const fields: FieldDef[] = [
   { id: 'buy', name: 'Buy', type: 'link' },
   { id: 'released', name: 'Released', type: 'date' },
   { id: 'tags', name: 'Tags', type: 'tags' },
+  { id: 'spec', name: 'Spec', type: 'stat' },
 ];
 
 describe('field type contract', () => {
-  it('is closed at exactly the 9 spec types', () => {
+  it('is closed at exactly the 10 spec types', () => {
     expect([...FIELD_TYPES].sort()).toEqual(
       [
         'audio',
@@ -36,6 +43,7 @@ describe('field type contract', () => {
         'text_long',
         'text_short',
         'video',
+        'stat',
       ].sort()
     );
     expect(FieldTypeSchema.safeParse('price').success).toBe(false);
@@ -134,6 +142,59 @@ describe('per-type value shapes', () => {
     expect(ok({ tags: [1, 2] })).toBe(false);
   });
 
+  // ── stat (amendment 2026-07-20, item 1) ───────────────────────────────────
+
+  it('stat accepts a {key, value} pair and rejects other shapes', () => {
+    expect(ok({ spec: { key: 'Weight', value: '1.2 kg' } })).toBe(true);
+    expect(ok({ spec: 'Weight: 1.2 kg' })).toBe(false);
+    expect(ok({ spec: { key: 'Weight' } })).toBe(false);
+    expect(ok({ spec: { value: '1.2 kg' } })).toBe(false);
+    expect(ok({ spec: [{ key: 'Weight', value: '1.2 kg' }] })).toBe(false);
+    expect(ok({ spec: { key: 1, value: 2 } })).toBe(false);
+  });
+
+  it('stat allows BOTH halves empty (the all-values-optional law)', () => {
+    // Unlike date/link/media, `stat` needs no empty→null mapping in the caller.
+    expect(ok({ spec: { key: '', value: '' } })).toBe(true);
+    expect(ok({ spec: { key: 'Weight', value: '' } })).toBe(true);
+    expect(ok({ spec: { key: '', value: '1.2 kg' } })).toBe(true);
+  });
+
+  it('stat carries NO key that sanitizeContentHtml would rewrite to "#"', () => {
+    // The phase-3 publish bug, pinned at the contract: `sanitizeContentHtml`
+    // rewrites any string under a key ending in href|url|link|slug. Renaming
+    // `key`/`value` to e.g. `specLink` must fail HERE, not on a live page.
+    const res = schema.safeParse({ spec: { key: 'Weight', value: '1.2 kg' } });
+    expect(res.success).toBe(true);
+    if (res.success) {
+      for (const k of Object.keys(res.data.spec as Record<string, unknown>)) {
+        expect(/(href|url|link|slug)$/i.test(k), `illegal stat key "${k}"`).toBe(false);
+      }
+    }
+  });
+
+  it('every one of the 10 closed types round-trips a sample value', () => {
+    const samples: Record<string, unknown> = {
+      cover: { url: '/a.webp' },
+      shots: [{ url: '/a.webp' }],
+      clip: { kind: 'upload', url: '/v.mp4' },
+      track: { kind: 'link', url: 'https://x/y.mp3' },
+      title: 'Dune',
+      blurb: 'A long blurb.',
+      buy: { url: 'https://shop', label: 'Buy' },
+      released: '2026-07-20',
+      tags: ['a'],
+      spec: { key: 'Weight', value: '1.2 kg' },
+    };
+    // Anti-vacuity: the sample map must exercise EVERY closed type, not a subset.
+    expect(new Set(fields.map((f) => f.type))).toEqual(new Set(FIELD_TYPES));
+    expect(Object.keys(samples).sort()).toEqual(fields.map((f) => f.id).sort());
+
+    const res = schema.safeParse(samples);
+    expect(res.success, JSON.stringify(res.success ? {} : res.error.issues)).toBe(true);
+    if (res.success) expect(res.data).toEqual(samples);
+  });
+
   it('reports the offending field id in the issue path', () => {
     const res = schema.safeParse({ cover: 'nope' });
     expect(res.success).toBe(false);
@@ -195,5 +256,91 @@ describe('roles are type-filtered against the field schema', () => {
 
   it('rejects unknown role keys', () => {
     expect(roles.safeParse({ subtitle: 'title' }).success).toBe(false);
+  });
+});
+
+// ── Amendment 2026-07-20: purposes + the two new booleans ───────────────────
+
+describe('purposes (amendment item 2 — stored, validated, READ BY NOTHING)', () => {
+  it('exposes a CLOSED vocabulary of exactly offer/proof/price', () => {
+    expect([...COLLECTION_PURPOSES].sort()).toEqual(['offer', 'price', 'proof']);
+  });
+
+  it('accepts members of the closed vocab', () => {
+    expect(PurposesSchema.parse(['offer'])).toEqual(['offer']);
+    expect(PurposesSchema.parse(['offer', 'proof', 'price'])).toEqual([
+      'offer',
+      'proof',
+      'price',
+    ]);
+    expect(PurposesSchema.parse([])).toEqual([]);
+  });
+
+  it('REJECTS anything outside the closed vocab', () => {
+    for (const bad of ['case-study', 'Offer', 'proofs', '', 'price ']) {
+      expect(PurposesSchema.safeParse([bad]).success, `accepted "${bad}"`).toBe(false);
+    }
+    // a valid member alongside an invalid one still fails
+    expect(PurposesSchema.safeParse(['offer', 'nope']).success).toBe(false);
+    // wrong container
+    expect(PurposesSchema.safeParse('offer').success).toBe(false);
+    expect(PurposesSchema.safeParse([1]).success).toBe(false);
+  });
+
+  it('DEDUPES (set semantics), preserving first-seen order', () => {
+    expect(PurposesSchema.parse(['proof', 'offer', 'proof', 'offer'])).toEqual([
+      'proof',
+      'offer',
+    ]);
+    expect(PurposesListSchema.parse(['price', 'price', 'price'])).toEqual(['price']);
+  });
+
+  it('defaults to [] when absent — never null/undefined', () => {
+    expect(PurposesSchema.parse(undefined)).toEqual([]);
+    const created = CollectionCreateSchema.parse({
+      tokenId: 't',
+      name: 'Books',
+      fieldSchema: [{ id: 'title', name: 'Title', type: 'text_short' }],
+    });
+    expect(created.purposes).toEqual([]);
+  });
+
+  it('is optional (not defaulted) on PATCH — omission means "leave it alone"', () => {
+    const patched = CollectionPatchSchema.parse({ tokenId: 't', name: 'Books' });
+    expect(patched.purposes).toBeUndefined();
+    expect(CollectionPatchSchema.parse({ tokenId: 't', purposes: ['proof', 'proof'] }).purposes)
+      .toEqual(['proof']);
+  });
+});
+
+describe('listingPage / featuredOnHome booleans', () => {
+  const minimalCreate = {
+    tokenId: 't',
+    name: 'Books',
+    fieldSchema: [{ id: 'title', name: 'Title', type: 'text_short' }],
+  };
+
+  it('listingPage defaults to FALSE on create (never on-by-default)', () => {
+    expect(CollectionCreateSchema.parse(minimalCreate).listingPage).toBe(false);
+    expect(CollectionCreateSchema.parse({ ...minimalCreate, listingPage: true }).listingPage)
+      .toBe(true);
+  });
+
+  it('detailPages still defaults to FALSE (unchanged by the amendment)', () => {
+    expect(CollectionCreateSchema.parse(minimalCreate).detailPages).toBe(false);
+  });
+
+  it('listingPage is optional on PATCH and rejects non-booleans', () => {
+    expect(CollectionPatchSchema.parse({ tokenId: 't', name: 'X' }).listingPage).toBeUndefined();
+    expect(CollectionPatchSchema.parse({ tokenId: 't', listingPage: true }).listingPage).toBe(true);
+    expect(CollectionPatchSchema.safeParse({ tokenId: 't', listingPage: 'yes' }).success).toBe(
+      false
+    );
+  });
+
+  it('featuredOnHome is accepted on item PATCH (reserved column, unwired)', () => {
+    expect(ItemPatchSchema.parse({ tokenId: 't', featuredOnHome: true }).featuredOnHome).toBe(true);
+    expect(ItemPatchSchema.parse({ tokenId: 't', slug: 'a' }).featuredOnHome).toBeUndefined();
+    expect(ItemPatchSchema.safeParse({ tokenId: 't', featuredOnHome: 'yes' }).success).toBe(false);
   });
 });

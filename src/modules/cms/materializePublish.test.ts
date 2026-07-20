@@ -92,9 +92,11 @@ const FIELDS: FieldDef[] = [
   { id: 'title', name: 'Title', type: 'text_short' },
   { id: 'blurb', name: 'Blurb', type: 'text_long' },
   { id: 'shots', name: 'Shots', type: 'gallery' },
-  // video + audio are here so the KEY-NAME meta-guard below covers ALL NINE field
-  // types: a future `mediaUrl`-style key added to the media branch must trip the
-  // no-suffix-match assertion, not slip through an unexercised branch.
+  // video + audio are here so the KEY-NAME meta-guard below covers every field
+  // type that has an emit path: a future `mediaUrl`-style key added to the media
+  // branch must trip the no-suffix-match assertion, not slip through an
+  // unexercised branch. (`stat` — the 10th type — has no emit path until phase
+  // 8B, which plan step 5b requires to extend this fixture.)
   { id: 'clip', name: 'Clip', type: 'video' },
   { id: 'track', name: 'Track', type: 'audio' },
   { id: 'buy', name: 'Buy', type: 'link' },

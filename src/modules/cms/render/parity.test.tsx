@@ -2,7 +2,8 @@
 //
 // The discipline that makes this test real: BOTH twins are rendered from the
 // output of the REAL `toRenderModel()` run over a RAW fixture (collection +
-// groups + items, all 9 field types, roles set AND unset). A hand-written model
+// groups + items, every RENDERED field type, roles set AND unset; `stat` is in the
+// closed 10 but has no renderer until phase 8B). A hand-written model
 // fixture would let the two data feeds drift while this test sat green — the
 // exact class of "inert assertion" this repo has been bitten by before.
 //
@@ -304,7 +305,7 @@ describe('CMS collection block — editor↔published parity', () => {
     expect(editSkeleton).toContain('href=/books/loose');
   });
 
-  it('all 9 field types reach the DOM in both twins', () => {
+  it('every rendered field type reaches the DOM in both twins', () => {
     const model = toRenderModel(rawBundle(false));
     const edit = dom(<CollectionSection sectionId="s1" model={model} />);
     const published = dom(

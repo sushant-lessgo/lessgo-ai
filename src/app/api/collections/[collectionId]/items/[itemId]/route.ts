@@ -3,7 +3,11 @@
 // (cms-collections plan phase 1, step 5).
 //
 //   GET    ?tokenId=…                          → { item }
-//   PATCH  { tokenId, values?|slug?|groupId?|order? } → { item }
+//   PATCH  { tokenId, values?|slug?|groupId?|order?|featuredOnHome? } → { item }
+//
+//   `featuredOnHome` is a RESERVED column (amendment 2026-07-20 item 3): accepted
+//   and persisted, but no UI sets it and nothing reads it. Do not build promotion
+//   logic on it without a spec change.
 //   DELETE ?tokenId=…                          → { success: true }
 //
 // ── AUTHZ — THREE nested gates, all mandatory ────────────────────────────────
@@ -95,7 +99,7 @@ export async function PATCH(req: Request, { params }: Params) {
         400
       );
     }
-    const { tokenId, values, groupId, slug, order } = parsed.data;
+    const { tokenId, values, groupId, slug, order, featuredOnHome } = parsed.data;
 
     const denied = await gate(tokenId, 'collections:item-update');
     if (denied) return denied;
@@ -181,6 +185,8 @@ export async function PATCH(req: Request, { params }: Params) {
         ...(groupId !== undefined ? { groupId } : {}),
         ...(slug !== undefined ? { slug, slugLocked } : {}),
         ...(order !== undefined ? { order } : {}),
+        // RESERVED FLAG (amendment item 3): persisted, read by nothing, no UI.
+        ...(featuredOnHome !== undefined ? { featuredOnHome } : {}),
       },
     });
 

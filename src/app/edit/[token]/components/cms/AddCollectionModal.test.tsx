@@ -115,8 +115,8 @@ describe('nextFieldId (pure) — coercion-proof ids', () => {
   // Previously only text_short/image were pinned — a type whose name started with
   // a digit (or that minted a bare-number suffix) would have slipped through and
   // been mangled by `coercePublishValue` at publish time only.
-  it('satisfies FIELD_ID_REGEX for ALL 9 types, fresh / clamped / unique', () => {
-    expect(FIELD_TYPES).toHaveLength(9);
+  it('satisfies FIELD_ID_REGEX for ALL 10 types, fresh / clamped / unique', () => {
+    expect(FIELD_TYPES).toHaveLength(10);
     for (const type of FIELD_TYPES) {
       const fresh = nextFieldId(type, []);
       const clamped = nextFieldId(type, [type, `${type}_2`]);

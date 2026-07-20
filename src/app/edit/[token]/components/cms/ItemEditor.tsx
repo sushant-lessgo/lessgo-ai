@@ -7,7 +7,7 @@
 //
 // ── RULINGS APPLIED VERBATIM (scout §E) ──────────────────────────────────────
 //  #3  `text_long` is a PLAIN <textarea>. No rich-text toolbar (no such control
-//      exists in components/ui and rich text is not one of the closed 9).
+//      exists in components/ui and rich text is not one of the closed set).
 //  #7  Group assignment IS the per-item "Category" select, including an
 //      "Ungrouped" option (the null group).
 //  #8  NO Draft/Published status pill — per-item status does not exist in v1;

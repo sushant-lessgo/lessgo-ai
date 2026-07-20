@@ -2,8 +2,14 @@
 // CMS collections — token-scoped list + create (cms-collections plan phase 1, step 5).
 //
 //   GET  ?tokenId=…   → { collections: [...] } (ordered, with item/field counts)
-//   POST { tokenId, name, fieldSchema, roles?, detailPages?, layoutHint? }
+//   POST { tokenId, name, fieldSchema, roles?, purposes?, detailPages?,
+//          listingPage?, layoutHint? }
 //                     → { collection }
+//
+//   A PRESET is literally a pre-filled POST body (amendment item 4): a fully
+//   populated fieldSchema + roles (+ purposes) creates a valid collection in ONE
+//   call, slug derived server-side. Pinned by a test in collections.authz.test.ts.
+//   `purposes` is stored and returned but READ BY NOTHING — see the Zod contract.
 //
 // ── AUTHZ (pinned by the plan, identical in all five collection route files) ──
 //   The token identifies WHICH project, NEVER ownership. `assertProjectOwner`
@@ -75,7 +81,9 @@ export async function GET(req: Request) {
       slug: c.slug,
       fieldSchema: (c.fieldSchema ?? []) as unknown as FieldDef[],
       roles: (c.roles ?? {}) as Record<string, string>,
+      purposes: (c.purposes ?? []) as unknown as string[],
       detailPages: c.detailPages,
+      listingPage: c.listingPage,
       layoutHint: c.layoutHint,
       order: c.order,
       itemCount: c._count.items,
@@ -99,7 +107,8 @@ export async function POST(req: Request) {
         400
       );
     }
-    const { tokenId, name, fieldSchema, roles, detailPages, layoutHint } = parsed.data;
+    const { tokenId, name, fieldSchema, roles, purposes, detailPages, listingPage, layoutHint } =
+      parsed.data;
 
     const denied = await gate(tokenId, 'collections:create');
     if (denied) return denied;
@@ -186,7 +195,10 @@ export async function POST(req: Request) {
         slug,
         fieldSchema: fieldSchema as any,
         roles: rolesCheck.data as any,
+        // Stored + validated, READ BY NOTHING (amendment item 2 — see the schema).
+        purposes: purposes as any,
         detailPages,
+        listingPage,
         layoutHint: layoutHint ?? null,
         order: nextOrder,
       },

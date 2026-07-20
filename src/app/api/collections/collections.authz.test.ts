@@ -710,3 +710,152 @@ describe('/api/collections — non-destructive semantics', () => {
     );
   });
 });
+
+// ── 5. amendment 2026-07-20: preset seeding + the new stored fields ──────────
+//
+// AMENDMENT ITEM 4 — "presets must not be precluded". A preset is nothing but a
+// pre-filled POST body: a fully populated fieldSchema + roles (+ purposes) must
+// create a valid collection in ONE call, with the slug derived server-side. No
+// preset UI ships in v1 (the START FROM chips are greyed), so this route path has
+// no other caller — which is exactly why it needs a pin: a future refactor could
+// break programmatic seeding and every shipped surface would stay green.
+
+describe('/api/collections — preset seeding (amendment item 4)', () => {
+  beforeEach(() => signInAs(CLERK_OWNER_A));
+
+  /** A realistic "Products" preset, as a seeding caller would send it. */
+  const PRESET = {
+    name: 'Products',
+    fieldSchema: [
+      { id: 'title', name: 'Name', type: 'text_short' },
+      { id: 'cover', name: 'Photo', type: 'image' },
+      { id: 'blurb', name: 'Description', type: 'text_long' },
+      { id: 'price', name: 'Price', type: 'text_short' }, // ruling #2: no Price TYPE
+      { id: 'spec', name: 'Spec', type: 'stat' },
+      { id: 'buy', name: 'Buy', type: 'link' },
+    ],
+    roles: { title: 'title', cover: 'cover', primaryLink: 'buy' },
+    purposes: ['offer', 'price'],
+    detailPages: true,
+  };
+
+  it('ONE POST with a fully pre-filled schema + roles + purposes creates the collection', async () => {
+    const { status, body } = await readJson(
+      await collectionsRoute.POST(jsonReq('/api/collections', { tokenId: TOKEN_A, ...PRESET }))
+    );
+
+    expect(status).toBe(201);
+    expect(db.collectionCreate).toHaveBeenCalledTimes(1); // ONE call, not a build-up
+    expect(db.collectionCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          projectId: 'p_a',
+          tokenId: TOKEN_A,
+          name: 'Products',
+          slug: 'products', // derived server-side, not supplied
+          fieldSchema: PRESET.fieldSchema,
+          roles: PRESET.roles, // survives the cross-field role gate intact
+          purposes: ['offer', 'price'],
+          detailPages: true,
+          listingPage: false,
+        }),
+      })
+    );
+    expect(body.collection.name).toBe('Products');
+  });
+
+  it('a preset whose roles point at the wrong field TYPE is refused, not silently dropped', async () => {
+    // Anti-vacuity for the test above: the role gate really runs on this path.
+    const { status } = await readJson(
+      await collectionsRoute.POST(
+        jsonReq('/api/collections', {
+          tokenId: TOKEN_A,
+          ...PRESET,
+          roles: { title: 'blurb' }, // text_long — not allowed for `title`
+        })
+      )
+    );
+    expect(status).toBe(400);
+    expect(db.collectionCreate).not.toHaveBeenCalled();
+  });
+
+  it('a preset carrying an unknown purpose is refused (closed vocab)', async () => {
+    const { status } = await readJson(
+      await collectionsRoute.POST(
+        jsonReq('/api/collections', { tokenId: TOKEN_A, ...PRESET, purposes: ['case-study'] })
+      )
+    );
+    expect(status).toBe(400);
+    expect(db.collectionCreate).not.toHaveBeenCalled();
+  });
+
+  it('purposes default to [] and listingPage to false when the body omits them', async () => {
+    const { status } = await readJson(
+      await collectionsRoute.POST(
+        jsonReq('/api/collections', { tokenId: TOKEN_A, name: 'Books', fieldSchema: FIELDS })
+      )
+    );
+    expect(status).toBe(201);
+    expect(db.collectionCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ purposes: [], listingPage: false, detailPages: false }),
+      })
+    );
+  });
+
+  it('PATCH persists listingPage + deduped purposes, and omission leaves them alone', async () => {
+    const { status } = await readJson(
+      await collectionRoute.PATCH(
+        jsonReq(
+          `/api/collections/${COLLECTION_A}`,
+          { tokenId: TOKEN_A, listingPage: true, purposes: ['proof', 'proof', 'offer'] },
+          'PATCH'
+        ),
+        { params: { collectionId: COLLECTION_A } }
+      )
+    );
+    expect(status).toBe(200);
+    const data = db.collectionUpdate.mock.calls[0][0].data;
+    expect(data.listingPage).toBe(true);
+    expect(data.purposes).toEqual(['proof', 'offer']);
+
+    // Omitted → the key is not written at all (no accidental reset to false/[]).
+    db.collectionUpdate.mockClear();
+    await collectionRoute.PATCH(
+      jsonReq(`/api/collections/${COLLECTION_A}`, { tokenId: TOKEN_A, name: 'Renamed' }, 'PATCH'),
+      { params: { collectionId: COLLECTION_A } }
+    );
+    const data2 = db.collectionUpdate.mock.calls[0][0].data;
+    expect('listingPage' in data2).toBe(false);
+    expect('purposes' in data2).toBe(false);
+  });
+
+  it('item PATCH persists featuredOnHome (reserved column — accepted, never read)', async () => {
+    db.itemFindFirst.mockResolvedValue({
+      id: ITEM_A,
+      collectionId: COLLECTION_A,
+      slug: 'x',
+      slugLocked: false,
+      values: {},
+      order: 0,
+      featuredOnHome: false,
+      collection: COLLECTION_ROWS[COLLECTION_A],
+    });
+
+    const { status } = await readJson(
+      await itemRoute.PATCH(
+        jsonReq(
+          `/api/collections/${COLLECTION_A}/items/${ITEM_A}`,
+          { tokenId: TOKEN_A, featuredOnHome: true },
+          'PATCH'
+        ),
+        { params: { collectionId: COLLECTION_A, itemId: ITEM_A } }
+      )
+    );
+
+    expect(status).toBe(200);
+    expect(db.itemUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ featuredOnHome: true }) })
+    );
+  });
+});

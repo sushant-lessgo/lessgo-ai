@@ -1,7 +1,7 @@
 # `src/modules/cms` — user-authored CMS collections
 
 The engine- and template-agnostic CMS core. A user names a **Collection**, composes its
-schema from a **closed set of 9 field types**, optionally **groups** items, and fills
+schema from a **closed set of 10 field types**, optionally **groups** items, and fills
 items by hand. **Zero AI.** Rendering keys off field TYPE, delivered as ONE shared block
 that renders identically on every template.
 
@@ -23,9 +23,15 @@ and `tokenId` (route key) — the `MediaAsset` shape.
 
 ## Invariants (read before touching anything)
 
-1. **The 9 field types are CLOSED**: `image · gallery · video · audio · text_short ·
-   text_long · link · date · tags`. No Price, no rich-text. Extending the set is a spec
-   change, not an implementation detail.
+1. **The 10 field types are CLOSED**: `image · gallery · video · audio · text_short ·
+   text_long · link · date · tags · stat`. No Price, no rich-text. Extending the set is a
+   spec change, not an implementation detail. (`stat` = one `{key, value}` spec/stat PAIR,
+   added by the 2026-07-20 spec amendment. Those two property names are load-bearing —
+   see "Render-model KEY NAMES are constrained" below; anything ending in
+   `href|url|link|slug` becomes `'#'` at publish. One field = one pair; a spec LIST is
+   several `stat` fields, never a numeric-keyed map. **Phase 8A ships the contract only**:
+   `stat` has no item-editor control, no picker entry (`PICKER_FIELD_TYPES` filters it out)
+   and no renderer until phase 8B.)
 2. **Roles are CLOSED at 3 and type-filtered**: `title` → `text_short`, `cover` →
    `image|gallery`, `primaryLink` → `link`. Cross-validated (`makeRolesSchema`).
    (The STORED key is `primaryLink`; the RENDER-MODEL key is `primaryCta` — see
@@ -153,6 +159,19 @@ constant — never re-type the literal.
 `collectionModel`, a nested `data` prop, …) does not throw, does not warn, and does not
 fail the publish — the page just renders an empty **"No items yet"** block. The consumer at
 risk is phase 3's publish materializer (`materializePublish.ts`), which produces the key.
+
+## ⚠️ Two fields exist ON PURPOSE with no reader — do not "wire them up", do not delete them
+
+Both come from the **2026-07-20 spec amendment** (founder-confirmed rulings). They look
+like dead code to a grep and to a linter. They are not.
+
+| Field | State | WHY it is unread — and what changing it would require |
+|---|---|---|
+| `Collection.purposes` (`['offer'\|'proof'\|'price']`) | **Stored + validated + returned by the API. READ BY NOTHING.** | Marks what the collection is FOR. Rendering it would mean *per-purpose* renderers (e.g. case studies as a proof band), but v1 ships **ONE shared block that renders identically on every template** (plan Deviation #1). Founder ruling: "store it, unread for now." It is forward-compat, **not a delivered capability** — do not branch any render or materialization path on it without a spec change lifting Deviation #1, and do not present it to users as something that changes output. |
+| `CollectionItem.featuredOnHome` | **Column + API field only. NO UI control, no read path, no promotion logic.** | The home-promotion machinery (`materializeHomeLineup` / `…Gallery` / `…Teasers` in `collectionHelpers.ts`) is **products + techpremium hardcoded** and explicitly spec §Out — there is no engine-agnostic home lineup to promote INTO. A checkbox promoting nothing is a fake affordance, and the greyed-placeholder rule presupposes the destination exists; here it does not. The column is reserved so a later feature needn't migrate a populated table. **Not** covered by Spec 2 `home-summary-links` (that promotes PAGES, not items). Do NOT touch the dormant `materializeHome*` helpers to "hook this up". |
+
+Deleting either as unused re-opens a migration on a populated table; wiring either up ships
+behaviour the spec explicitly deferred. Leave both alone absent a new ruling.
 
 ## Other pinned decisions
 

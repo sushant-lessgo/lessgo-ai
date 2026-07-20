@@ -3,7 +3,8 @@
 // (cms-collections plan phase 1, step 5).
 //
 //   GET    ?tokenId=…  → { collection, groups, items }
-//   PATCH  { tokenId, name?|slug?|fieldSchema?|roles?|detailPages?|layoutHint?|order? }
+//   PATCH  { tokenId, name?|slug?|fieldSchema?|roles?|purposes?|detailPages?
+//            |listingPage?|layoutHint?|order? }
 //   DELETE ?tokenId=…  → { success: true }  (groups + items cascade)
 //
 // ── AUTHZ — TWO gates, both mandatory ────────────────────────────────────────
@@ -108,8 +109,18 @@ export async function PATCH(req: Request, { params }: Params) {
         400
       );
     }
-    const { tokenId, name, slug, fieldSchema, roles, detailPages, layoutHint, order } =
-      parsed.data;
+    const {
+      tokenId,
+      name,
+      slug,
+      fieldSchema,
+      roles,
+      purposes,
+      detailPages,
+      listingPage,
+      layoutHint,
+      order,
+    } = parsed.data;
 
     const denied = await gate(tokenId, 'collections:update');
     if (denied) return denied;
@@ -179,7 +190,10 @@ export async function PATCH(req: Request, { params }: Params) {
         ...(fieldSchema !== undefined ? { fieldSchema: fieldSchema as any } : {}),
         // Roles are always rewritten: an unsupplied-roles schema edit may prune.
         roles: nextRoles as any,
+        // Stored + validated, READ BY NOTHING (amendment item 2 — see the schema).
+        ...(purposes !== undefined ? { purposes: purposes as any } : {}),
         ...(detailPages !== undefined ? { detailPages } : {}),
+        ...(listingPage !== undefined ? { listingPage } : {}),
         ...(layoutHint !== undefined ? { layoutHint: layoutHint ?? null } : {}),
         ...(order !== undefined ? { order } : {}),
       },

@@ -6,7 +6,8 @@
 // each inject their own emitters, so both trees are identical by construction
 // (the markup half of the parity guarantee; the data half is toRenderModel).
 //
-// Rendering keys off the field TYPE (the closed 9) — never off a field name and
+// Rendering keys off the field TYPE (the closed set, 10 since phase 8A; `stat`
+// renders in phase 8B) — never off a field name and
 // never off the template. Roles drive card composition:
 //   cover → the card's lead media · title → the card heading · primaryCta → CTA
 // Every remaining field renders in schema order beneath. Empty and unsafe values

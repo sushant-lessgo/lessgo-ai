@@ -58,7 +58,7 @@ test('author a collection end to end through the CMS UI', async ({ page }) => {
   await expect(modal).toBeVisible();
   await modal.locator('[data-slug-name]').fill(NAME);
 
-  // Two fields from the closed 9: a title (text_short) and a body (text_long).
+  // Two fields from the closed set: a title (text_short) and a body (text_long).
   for (const type of ['text_short', 'text_long'] as const) {
     await modal.locator('[data-add-field-trigger]').click();
     await page.locator(`[data-add-field-type="${type}"]`).click();
