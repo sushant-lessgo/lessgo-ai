@@ -9,8 +9,9 @@
 //   1. HTML allow-policy  — DOMPurify + jsdom, adapted from EDITOR_PROFILE (the
 //      only htmlSanitizer profile that keeps <a>). Real DOM parse, not regex.
 //   2. URL / embed scheme-gate — a pattern-based (suffix-matched) key detector
-//      routes every url-bearing / iframe-src field through isSafeURL (single-
-//      sourced from headTags.ts), replacing unsafe schemes with an inert value.
+//      routes every url-bearing / iframe-src field through isSafePublishedUrl
+//      (single-sourced from src/lib/safeUrl.ts), replacing unsafe schemes with
+//      an inert value.
 //
 // NOT a security boundary (explicitly out of scope): the regex paths in
 // `sanitizeHTMLServer` (src/lib/htmlSanitizer.ts) and `sanitizeWithDOMPurify`
@@ -39,8 +40,17 @@
 import { JSDOM } from 'jsdom';
 import createDOMPurify from 'dompurify';
 import type { DOMPurify as DOMPurifyInstance } from 'dompurify';
-import { isSafeURL } from '@/lib/staticExport/headTags';
+import { isSafePublishedUrl } from '@/lib/safeUrl';
 import { sanitizeStyleAttribute } from '@/lib/htmlSanitizer';
+
+/**
+ * Re-export: `isSafePublishedUrl` MOVED to the pure `src/lib/safeUrl.ts`
+ * (cms-collections phase 2) so the client-safe CMS render model can share it
+ * without importing this server-only module (jsdom/dompurify). Callers that
+ * import it from here — incl. publishSanitizer.test.ts — stay green.
+ * ONE implementation, never a fork.
+ */
+export { isSafePublishedUrl };
 
 // ── HTML allow-policy ───────────────────────────────────────────────────────
 //
@@ -136,27 +146,9 @@ export function sanitizePublishedHtml(html: string): string {
 
 // ── URL scheme-gate ─────────────────────────────────────────────────────────
 
-/**
- * Publish-side URL safety predicate. Wraps (does NOT fork) the single-sourced
- * `isSafeURL` from headTags.ts (https/http/root-relative; rejects
- * javascript:/data:/vbscript:/protocol-relative; strips control chars), OR'd with
- * the three schemes published pages legitimately need but isSafeURL rejects:
- *   - mailto:  (email CTAs)
- *   - tel:     (call-conversion CTAs)
- *   - #frag    (in-page anchor / section-scroll CTA system)
- * Empty string is treated as "nothing to gate" by sanitizePublishedUrl, not here.
- */
-export function isSafePublishedUrl(url: string): boolean {
-  if (!url || typeof url !== 'string') return false;
-  if (isSafeURL(url)) return true;
-  const normalized = url.replace(/[\x00-\x20]/g, '').toLowerCase();
-  if (!normalized) return false;
-  return (
-    normalized.startsWith('mailto:') ||
-    normalized.startsWith('tel:') ||
-    normalized.startsWith('#')
-  );
-}
+// `isSafePublishedUrl` now lives in `src/lib/safeUrl.ts` (imported + re-exported
+// at the top of this file). Its contract — isSafeURL OR mailto:/tel:/#frag, the
+// three schemes published pages legitimately need — is documented there.
 
 /**
  * Gate a url-bearing value. Empty/whitespace passes through unchanged (no link).

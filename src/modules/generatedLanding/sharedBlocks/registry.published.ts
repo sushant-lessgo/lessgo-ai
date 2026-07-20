@@ -10,11 +10,14 @@ import type React from 'react';
 import LeadFormPublished from './LeadForm/LeadForm.published';
 import StoreBadgesPublished from './StoreBadges/StoreBadges.published';
 import FollowStripPublished from './FollowStrip/FollowStrip.published';
+// CMS collections — published twin (server-safe; lives in src/modules/cms/).
+import CollectionSectionPublished from '@/modules/cms/render/CollectionSection.published';
 
 export const sharedBlockPublishedRegistry: Record<string, React.ComponentType<any>> = {
   leadform: LeadFormPublished,
   storebadges: StoreBadgesPublished,
   followstrip: FollowStripPublished,
+  cmscollection: CollectionSectionPublished,
 };
 
 export function resolveSharedBlockPublished(

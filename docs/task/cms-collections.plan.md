@@ -27,7 +27,17 @@ Build a user-authored, engine- and template-agnostic CMS: the user names a Colle
 ## Progress log
 
 ```
-phase 1 data core (tables + schema + routes): pending
+phase 1 data core (tables + schema + routes): done (1A 3a4a077a, 1B 66d4518f, impl-review loops 0 → ship)
+    ↳ schema human gate PASSED (founder go). Migration 20260720000717_cms_collections applied to dev.
+    ↳ Live DB constraint spot-check PASSED (orchestrator, not just schema-text asserted):
+      both @@uniques → P2002; group delete → item survives with groupId=null (SetNull);
+      project delete → cascades collections/groups/items to 0. Closes impl-review nit #8.
+    ↳ Carry into phase 7: item `values` PATCH MERGES (null = delete sentinel); a field
+      cannot be cleared by omission — the item editor must send explicit null, not omit.
+    ↳ Carry into any later phase touching src/app/api/collections/: extract the 5 duplicated
+      gate() copies into a shared helper (impl-review nit #5 — drift risk on a security check).
+    ↳ Deliberate omission: src/lib/schemas/index.ts NOT edited (it is an LLM-structured-output
+      barrel; brief/media/workLibrary aren't in it either). Plan Files-touched delta, not creep.
 phase 2 render trio + shared-block registries + parity: pending
 phase 3 placement + publish materialization: pending
 phase 4 detail pages + slugs: pending

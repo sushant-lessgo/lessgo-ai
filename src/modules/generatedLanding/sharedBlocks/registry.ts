@@ -11,11 +11,15 @@ import type React from 'react';
 import LeadForm from './LeadForm/LeadForm';
 import StoreBadges from './StoreBadges/StoreBadges';
 import FollowStrip from './FollowStrip/FollowStrip';
+// CMS collections: a user-authored, engine- and template-agnostic block. It lives
+// in src/modules/cms/ (not in this folder) because the whole CMS core ships there.
+import CollectionSection from '@/modules/cms/render/CollectionSection';
 
 export const sharedBlockRegistry: Record<string, React.ComponentType<any>> = {
   leadform: LeadForm,
   storebadges: StoreBadges,
   followstrip: FollowStrip,
+  cmscollection: CollectionSection,
 };
 
 export function resolveSharedBlock(sectionType: string): React.ComponentType<any> | null {

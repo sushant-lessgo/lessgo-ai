@@ -25,6 +25,10 @@ export const sharedBlockCapability: Record<string, CapabilityId | null> = {
   leadform: 'lead-form',
   storebadges: 'store-badges',
   followstrip: null, // no capability id exists for it today
+  // cms-collections v1 deliberately adds NO CapabilityId: the shared block renders
+  // on EVERY template, so capability gating/shortlisting is moot (plan Deviations
+  // #2). Same precedent as followstrip.
+  cmscollection: null,
 };
 
 /**

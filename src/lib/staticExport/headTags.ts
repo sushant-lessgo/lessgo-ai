@@ -23,37 +23,14 @@ export function escapeHTML(str: string): string {
 /**
  * Scheme allow-list for any user-influenced URL baked into the head (publish-trust M4).
  *
- * CONTRACT — returns true ONLY for:
- *   - absolute `https://…` / `http://…`, or
- *   - root-relative `/path…` (but NOT protocol-relative `//evil.com`, which inherits
- *     the page scheme and points off-origin, nor the `/\evil.com` browser-quirk twin).
- * Everything else is false: `javascript:`, `data:`, `vbscript:`, no-scheme garbage, ''.
- *
- * NORMALIZATION: strips ALL chars \x00-\x20 ANYWHERE (not `.trim()`) then lowercases.
- * Browsers ignore embedded control/whitespace chars when parsing a scheme, so
- * `java\tscript:x`, `java script:x` and ` javascript:x` are all LIVE URLs — a trim-only
- * normalization lets them through.
- *
- * NO ENTITY-DECODE NEEDED: this predicate runs BEFORE escapeHTML at every call site.
- * An entity-encoded colon (`javascript&#58;x`) fails the allow-list here, and escapeHTML
- * afterwards re-encodes the `&` — so an encoded scheme can never re-activate in the
- * emitted attribute.
- *
- * REJECT SEMANTICS ARE PER-SINK (never emit '' into an href — that yields a self-link):
- *   - og:image  → gated at source in resolveOgImage(); an unsafe candidate falls through
- *                 the `||` chain to the auto /api/og/{slug} URL.
- *   - hreflang  → the whole <link rel="alternate"> is OMITTED.
- *   - canonical → NOT gated (escape-only); see the call-site note in htmlGenerator.ts.
+ * MOVED to `src/lib/safeUrl.ts` (cms-collections phase 2) — a pure, zero-import
+ * module so the client-safe CMS render model can use the same predicate without
+ * dragging a server-only dependency into the client bundle. The full contract
+ * lives there. Re-exported here because the existing call sites
+ * (htmlGenerator.ts, buildPageMetadata.ts, publishSanitizer.ts, headTags.test.ts)
+ * import it from `./headTags` — ONE implementation, never a fork.
  */
-export function isSafeURL(url: string): boolean {
-  if (!url) return false;
-  const normalized = url.replace(/[\x00-\x20]/g, '').toLowerCase();
-  if (!normalized) return false;
-  // Protocol-relative `//host` (and the `/\host` quirk form) are off-origin absolutes.
-  if (normalized.startsWith('//') || normalized.startsWith('/\\')) return false;
-  if (normalized.startsWith('/')) return true;
-  return normalized.startsWith('https://') || normalized.startsWith('http://');
-}
+export { isSafeURL } from '@/lib/safeUrl';
 
 /**
  * noindex meta tag. Deliberately a meta tag, NOT robots.txt Disallow — a

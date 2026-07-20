@@ -1,0 +1,220 @@
+// THE binding editor↔published parity gate for the CMS block.
+//
+// The discipline that makes this test real: BOTH twins are rendered from the
+// output of the REAL `toRenderModel()` run over a RAW fixture (collection +
+// groups + items, all 9 field types, roles set AND unset). A hand-written model
+// fixture would let the two data feeds drift while this test sat green — the
+// exact class of "inert assertion" this repo has been bitten by before.
+//
+// What is compared: the `[data-cms-body]` subtree skeleton — tag names, class
+// lists, layout `data-cms-*` attributes and text content. Edit-only chrome (the
+// greyed "Manage items" placeholder) lives OUTSIDE that subtree by construction,
+// and non-markup attribute differences (inert onClick vs target/rel + CTA beacon
+// attrs) are intentionally out of the skeleton — those are the sanctioned twin
+// differences, everything structural must match.
+
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, it, expect } from 'vitest';
+import { toRenderModel } from './toRenderModel';
+import CollectionSection from './CollectionSection';
+import CollectionSectionPublished from './CollectionSection.published';
+import { CMS_MODEL_ELEMENT_KEY } from './toRenderModel';
+import type { CmsCollectionBundle, FieldDef } from '../types';
+
+const FIELDS: FieldDef[] = [
+  { id: 'cover', name: 'Cover', type: 'image' },
+  { id: 'title', name: 'Title', type: 'text_short' },
+  { id: 'blurb', name: 'Blurb', type: 'text_long' },
+  { id: 'shots', name: 'Shots', type: 'gallery' },
+  { id: 'clip', name: 'Clip', type: 'video' },
+  { id: 'track', name: 'Track', type: 'audio' },
+  { id: 'buy', name: 'Buy', type: 'link' },
+  { id: 'released', name: 'Released', type: 'date' },
+  { id: 'topics', name: 'Topics', type: 'tags' },
+];
+
+const VALUES = {
+  cover: { url: 'https://cdn.test/cover.png', assetId: 'a1' },
+  title: 'Deep Work',
+  blurb: 'A long\nblurb about focus.',
+  shots: [{ url: '/one.png' }, { url: 'https://cdn.test/two.png' }],
+  clip: { kind: 'link' as const, url: 'https://video.test/clip' },
+  track: { kind: 'upload' as const, url: '/audio/track.mp3' },
+  buy: { url: 'mailto:hi@acme.com', label: 'Email me' },
+  released: '2026-01-02',
+  topics: ['focus', 'craft'],
+};
+
+/** roles UNSET → fallback resolution; roles SET → explicit resolution. */
+function rawBundle(rolesSet: boolean): CmsCollectionBundle {
+  return {
+    collection: {
+      id: 'col1',
+      projectId: 'proj1',
+      tokenId: 'tok1',
+      name: 'Books',
+      slug: 'books',
+      fieldSchema: FIELDS,
+      roles: rolesSet ? { title: 'title', cover: 'shots', primaryLink: 'buy' } : {},
+      detailPages: false,
+      layoutHint: null,
+      order: 0,
+    },
+    groups: [
+      { id: 'gA', collectionId: 'col1', name: 'Recent', order: 0 },
+      { id: 'gB', collectionId: 'col1', name: 'Archive', order: 1 },
+    ],
+    items: [
+      {
+        id: 'i1',
+        collectionId: 'col1',
+        groupId: 'gA',
+        slug: 'deep-work',
+        values: VALUES,
+        order: 0,
+        slugLocked: false,
+      },
+      {
+        id: 'i2',
+        collectionId: 'col1',
+        groupId: 'gB',
+        slug: 'sparse',
+        values: { title: 'Sparse item', topics: ['solo'] },
+        order: 0,
+        slugLocked: false,
+      },
+      {
+        id: 'i3',
+        collectionId: 'col1',
+        groupId: null,
+        slug: 'loose',
+        values: { title: 'Ungrouped', buy: { url: 'tel:+15551234', label: 'Call' } },
+        order: 0,
+        slugLocked: false,
+      },
+    ],
+  };
+}
+
+/**
+ * Structural skeleton: tag + class list + layout data-attrs + text, recursively.
+ * Deliberately EXCLUDES href/target/rel/loading/aria/beacon attrs — the sanctioned
+ * twin differences.
+ */
+function skeleton(node: Element): string {
+  const parts: string[] = [];
+  const walk = (el: Element, depth: number) => {
+    const cls = el.getAttribute('class') || '';
+    const dataBits = Array.from(el.attributes)
+      .filter((a) => a.name.startsWith('data-cms'))
+      .map((a) => `${a.name}=${a.value}`)
+      .sort()
+      .join(',');
+    parts.push(`${'  '.repeat(depth)}${el.tagName.toLowerCase()}[${cls}]{${dataBits}}`);
+    for (const child of Array.from(el.childNodes)) {
+      if (child.nodeType === 3) {
+        const t = (child.textContent || '').trim();
+        if (t) parts.push(`${'  '.repeat(depth + 1)}#text:${t}`);
+      } else if (child.nodeType === 1) {
+        walk(child as Element, depth + 1);
+      }
+    }
+  };
+  walk(node, 0);
+  return parts.join('\n');
+}
+
+/** Render a twin to static markup and parse it into a real DOM (jsdom env). */
+function dom(node: React.ReactElement): HTMLElement {
+  const host = document.createElement('div');
+  host.innerHTML = renderToStaticMarkup(node);
+  return host;
+}
+
+function bodyOf(container: HTMLElement): Element {
+  const body = container.querySelector('[data-cms-body]');
+  if (!body) throw new Error('no [data-cms-body] rendered');
+  return body;
+}
+
+describe('CMS collection block — editor↔published parity', () => {
+  for (const rolesSet of [false, true]) {
+    it(`renders an identical body skeleton from the SAME toRenderModel output (roles ${rolesSet ? 'set' : 'unset'})`, () => {
+      const model = toRenderModel(rawBundle(rolesSet));
+
+      const edit = dom(<CollectionSection sectionId="cmscollection-1" model={model} />);
+      const published = dom(
+        <CollectionSectionPublished
+          sectionId="cmscollection-1"
+          {...{ [CMS_MODEL_ELEMENT_KEY]: model }}
+        />
+      );
+
+      const editSkeleton = skeleton(bodyOf(edit));
+      const publishedSkeleton = skeleton(bodyOf(published));
+
+      expect(publishedSkeleton).toBe(editSkeleton);
+      // Guard against a vacuous pass: the fixture must actually render content.
+      expect(editSkeleton.split('\n').length).toBeGreaterThan(30);
+      expect(editSkeleton).toContain('#text:Deep Work');
+    });
+  }
+
+  it('all 9 field types reach the DOM in both twins', () => {
+    const model = toRenderModel(rawBundle(false));
+    const edit = dom(<CollectionSection sectionId="s1" model={model} />);
+    const published = dom(
+      <CollectionSectionPublished sectionId="s1" {...{ [CMS_MODEL_ELEMENT_KEY]: model }} />
+    );
+
+    // Non-role fields carry data-cms-field=<fieldType>; cover/title/primaryLink are
+    // consumed by the role slots (image/text_short/link).
+    const typesIn = (c: HTMLElement) =>
+      Array.from(c.querySelectorAll('[data-cms-field]'))
+        .map((e) => e.getAttribute('data-cms-field'))
+        .sort();
+    const expected = ['audio', 'date', 'gallery', 'tags', 'tags', 'text_long', 'video'].sort();
+    expect(typesIn(edit)).toEqual(expected);
+    expect(typesIn(published)).toEqual(expected);
+
+    // Role slots present in both.
+    for (const c of [edit, published]) {
+      expect(c.querySelector('.lg-cms__cover')).toBeTruthy(); // image role
+      expect(c.querySelector('.lg-cms__title')).toBeTruthy(); // text_short role
+      expect(c.querySelector('.lg-cms__cta')).toBeTruthy();   // link role
+    }
+  });
+
+  it('mailto:/tel: CTA hrefs survive into the published anchor (wide predicate end-to-end)', () => {
+    const model = toRenderModel(rawBundle(false));
+    const container = dom(
+      <CollectionSectionPublished sectionId="s1" {...{ [CMS_MODEL_ELEMENT_KEY]: model }} />
+    );
+    const hrefs = Array.from(container.querySelectorAll('a.lg-cms__cta')).map((a) =>
+      a.getAttribute('href')
+    );
+    expect(hrefs).toContain('mailto:hi@acme.com');
+    expect(hrefs).toContain('tel:+15551234');
+  });
+
+  it('the edit twin shows a DISABLED "Manage items" placeholder, outside the compared body', () => {
+    const model = toRenderModel(rawBundle(false));
+    const container = dom(<CollectionSection sectionId="s1" model={model} />);
+    const btn = container.querySelector('[data-cms-manage] button') as HTMLButtonElement;
+    expect(btn).toBeTruthy();
+    expect(btn.disabled).toBe(true);
+    expect(btn.getAttribute('title')).toBeTruthy(); // why-tooltip is a contract
+    expect(bodyOf(container).querySelector('[data-cms-manage]')).toBeNull();
+  });
+
+  it('published twin renders an empty (not broken) block when no model was materialized', () => {
+    const container = dom(<CollectionSectionPublished sectionId="s1" />);
+    expect(bodyOf(container).textContent).toContain('No items yet');
+  });
+
+  it('edit twin shows a skeleton (not a crash) before the model is available', () => {
+    const container = dom(<CollectionSection sectionId="s1" />);
+    expect(container.querySelector('[data-cms-skeleton]')).toBeTruthy();
+  });
+});

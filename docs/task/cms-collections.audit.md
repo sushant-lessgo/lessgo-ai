@@ -292,3 +292,155 @@ item PATCH preserves orphan keys, manual slug sets `slugLocked`).
   passes every gate here with `project: null`. `POST /api/collections` then 404s at
   the server-side project lookup rather than writing anything, which is the safe
   outcome, but it is incidental rather than an explicit demo-token guard.
+
+---
+
+## Phase 2 — Render trio + shared-block registries + parity
+
+### Files changed
+
+**New**
+- `src/lib/safeUrl.ts`
+- `src/modules/cms/render/primitives.ts`
+- `src/modules/cms/render/toRenderModel.ts`
+- `src/modules/cms/render/toRenderModel.test.ts`
+- `src/modules/cms/render/CollectionSection.core.tsx`
+- `src/modules/cms/render/CollectionSection.tsx`
+- `src/modules/cms/render/CollectionSection.published.tsx`
+- `src/modules/cms/render/parity.test.tsx`
+
+**Modified**
+- `src/lib/staticExport/headTags.ts`
+- `src/lib/publishSanitizer.ts`
+- `src/modules/generatedLanding/sharedBlocks/registry.ts`
+- `src/modules/generatedLanding/sharedBlocks/registry.published.ts`
+- `src/modules/generatedLanding/sharedBlocks/capabilities.ts`
+- `src/modules/generatedLanding/sharedBlocks/capabilities.test.ts`
+- `docs/task/cms-collections.audit.md` (this entry)
+
+No file outside the plan's Phase-2 Files-touched list was edited. `componentRegistry.*`
+untouched, as pinned.
+
+### Per file
+
+**`src/lib/safeUrl.ts` (new)** — pure, ZERO imports. Houses BOTH predicates:
+`isSafeURL` MOVED from `headTags.ts:48` and `isSafePublishedUrl` MOVED from
+`publishSanitizer.ts:149-159` (bodies byte-identical to the originals; only the
+JSDoc was extended with the which-one-to-use note and the CMS reject semantic).
+This is the mechanism for the boundary law — `toRenderModel.ts` imports its
+predicates from here and NEVER from `publishSanitizer.ts` (jsdom/dompurify).
+
+**`headTags.ts`** — local `isSafeURL` deleted, replaced by a RE-export from
+`@/lib/safeUrl`, so the existing `./headTags` callers (`htmlGenerator.ts`,
+`buildPageMetadata.ts`, `headTags.test.ts`) stay green. The full contract JSDoc
+moved to `safeUrl.ts` with a pointer left behind.
+
+**`publishSanitizer.ts`** — three edits, all inside this server-only file:
+(1) the `isSafeURL` import from `@/lib/staticExport/headTags` replaced by
+`isSafePublishedUrl` from `@/lib/safeUrl`;
+(2) added `export { isSafePublishedUrl };` — the plan said "import", but a
+re-export is REQUIRED or `publishSanitizer.test.ts:4` (which imports it from
+`./publishSanitizer`) breaks tsc; the brief called this out and it is what I did;
+(3) the local `isSafePublishedUrl` definition deleted + the module-header line that
+claimed the URL gate routes through `isSafeURL` corrected (it routes through
+`isSafePublishedUrl`). One implementation of each predicate, no fork.
+
+**`primitives.ts`** — TYPES ONLY (`CmsPrimitives` = Txt, Img, Link, List). The
+SHAPE is copied from `WorkPrimitives`; there is NO import from
+`src/modules/skeletons/work/blocks/primitives.ts`. Dropped `Logo`/`Nav` (not needed)
+and the `elementKey` write-path (CMS items are never canvas-editable).
+
+**`toRenderModel.ts`** — the single data feed. Coercion-proof by construction:
+per-field shape is `{fieldId, name, fieldType, value}` (never `{type, content}`);
+ordered data lives in ARRAYS (groups/items/fields), so there is no numeric-keyed map
+anywhere in the model. Sanitization is INSIDE this function — NARROW `isSafeURL` on
+image/gallery src, WIDE `isSafePublishedUrl` on link/video/audio — so editor and
+publish consume the same already-sanitized model. Also exports
+`CMS_MODEL_ELEMENT_KEY = 'cmsModel'` (the element key phase 3's materializer must
+write) plus the reader helpers the core uses.
+
+**`CollectionSection.core.tsx`** — plain server-safe layout, dispatched purely on
+field TYPE, roles driving card composition (cover = lead media, title = h3,
+primaryLink = CTA). Stacked groups with headers (Deviations #1). Styles ship inline
+via a `<style>` tag (the FollowStrip/StoreBadges shared-block convention), so the
+block needs NOTHING from `public/published.css` — no CSS build step is required for
+this phase. Self-sets `data-surface="neutral"`.
+
+**`CollectionSection.tsx`** — `'use client'` edit twin; edit primitives (inert
+anchors) + the greyed "Manage items" placeholder button (`disabled` + `title`
+why-tooltip), rendered OUTSIDE `[data-cms-body]`. No store access yet (phase 3);
+no `model` prop renders the loading skeleton.
+
+**`CollectionSection.published.tsx`** — flat props, no hooks; reads
+`props[CMS_MODEL_ELEMENT_KEY]` (the published renderer's `extractContentFields`
+spread — no nested `data` prop invented). Imports only the core + `resolveCtaHref`
+(plain module). Missing model gives `EMPTY_CMS_MODEL` → empty block, never a crash.
+
+**Registries** — `cmscollection` added to `registry.ts` (edit twin) and
+`registry.published.ts` (published twin), `cmscollection: null` added to
+`capabilities.ts` (followstrip precedent, no new `CapabilityId`), and
+`capabilities.test.ts` (c) now asserts `sharedBlockCapability.cmscollection` is null
+with `sharedBlockCapabilities` still `toHaveLength(2)`. Test (a) key-sync passes.
+
+### Deviations / unpinned decisions I had to make
+
+1. **`publishSanitizer.ts` re-exports rather than merely imports**
+   `isSafePublishedUrl` — required by `publishSanitizer.test.ts:4`. Flagged in the
+   brief; recorded here.
+2. **Unsafe URL drops the FIELD**, it is not rewritten to `'#'` (the publish
+   sanitizer's convention). Rationale: a CMS field is content, not a template CTA;
+   a dead `#` link with a real label is a worse lie than an absent field. The
+   defense-in-depth publish walker still runs downstream.
+3. **Ungrouped bucket placement** (plan silent): FIRST when the collection has no
+   groups at all (the common single-list case), LAST when named groups exist.
+   Empty groups are dropped (no stray headers).
+4. **video/audio v1 render as a labelled destination link**, not an inline player.
+   Player is a follow-on; the stored value + wide predicate already support both.
+5. **Role fallback is per-collection, not per-item** — resolved once from the field
+   schema (first allowed-type field in order) and stored on `model.roles`. An
+   explicit role pointing at a deleted or wrong-typed field falls back rather than
+   erroring (defensive-defaults, matching phase 1's orphaned-key tolerance).
+   Tested both ways.
+6. **Edit twin takes `model` as a prop this phase.** Phase 3 replaces that with the
+   store adapter (`elements.collectionId` → `cmsData` → `toRenderModel`). Building
+   the store read now would have required editing phase-3 files.
+7. **Parity comparison scope**: the `[data-cms-body]` subtree, comparing tag +
+   class + `data-cms-*` attrs + text. `href`/`target`/`rel`/`loading`/`aria`/
+   `data-lessgo-cta` are deliberately excluded — those are the sanctioned twin
+   differences (inert edit anchors vs live published CTAs). Everything structural
+   must match exactly.
+8. `@testing-library/react` is NOT a dependency in this repo; the parity test uses
+   `renderToStaticMarkup` + jsdom parsing, matching `followStrip.parity.test.tsx`.
+
+### Verification (actual results)
+
+| Check | Result |
+|---|---|
+| `npx tsc --noEmit` | **clean**, zero output |
+| `npm run test:run` (FULL) | **268 files passed / 1 skipped (269)** · **4290 tests passed / 15 skipped (4305)** — baseline 266 files / 4263 tests, so +2 files (the two new test files) and +27 tests, zero regressions |
+| `npx vitest run src/modules/cms src/modules/generatedLanding/sharedBlocks` | 7 files / 70 tests passed |
+| `headTags` / staticExport / `publishSanitizer` suites (the predicate-move regression signal) | green inside the full run |
+| `npx next lint --file <14 touched files>` | 0 errors; 2 warnings, both the repo-wide `@next/next/no-img-element` on the twin `<img>` emitters — identical to every other block twin (a published renderer cannot use `next/image`) |
+| Published-CSS build | not needed: the block ships its CSS in an inline `<style>` tag, so there is no `public/published.css` dependency |
+
+### Open risks / what the reviewer should scrutinise
+
+- **The predicate move is the highest-blast-radius edit here.** Both bodies were
+  copied verbatim; the regression signal is the existing `headTags.test.ts`
+  `isSafeURL` block + `publishSanitizer.test.ts`, both green. Worth a reviewer
+  eyeball on the diff to confirm no character drifted.
+- **Boundary law**: `toRenderModel.ts` imports only `@/lib/safeUrl` plus type-only
+  imports from `../types`. Nothing in `src/modules/cms/render/` (except the
+  `'use client'` edit twin itself) is client-hostile. This is the invariant to
+  re-check in phase 3 when the editor adapter lands.
+- **`CMS_MODEL_ELEMENT_KEY = 'cmsModel'`** is now a cross-phase contract: phase 3's
+  materializer MUST write the model under that exact key or the published twin
+  silently renders "No items yet". The published twin reads it via the constant.
+- The parity gate compares a *structural skeleton*, not byte-identical HTML. That
+  is deliberate (twins legitimately differ on href/target/beacon attrs) but it does
+  mean an attribute-only divergence would not be caught here — the byte-identical
+  round-trip gate lands in phase 3.
+- The block is **not yet reachable** from any UI or publish path (by design —
+  phase 3 wires placement). Registry resolution is proven by the
+  `capabilities.test.ts` key-sync test, not by a dispatch test through
+  `componentRegistry` (not in this phase's Files touched).

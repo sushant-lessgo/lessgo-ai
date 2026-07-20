@@ -30,10 +30,11 @@ describe('sharedBlockCapability declaration', () => {
     expect(sharedBlockCapability.leadform).toBe('lead-form');
     expect(sharedBlockCapability.storebadges).toBe('store-badges');
     expect(sharedBlockCapability.followstrip).toBeNull();
+    expect(sharedBlockCapability.cmscollection).toBeNull();
 
     expect(sharedBlockCapabilities).toContain('lead-form');
     expect(sharedBlockCapabilities).toContain('store-badges');
-    // followstrip has no capability id → contributes nothing
+    // followstrip + cmscollection have no capability id → contribute nothing
     expect(sharedBlockCapabilities).toHaveLength(2);
   });
 
