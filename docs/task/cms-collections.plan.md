@@ -236,7 +236,8 @@ phase 7 item editor + group management: done (a130d22b, impl-review loops 0 → 
       (live refresh) is proven ONLY by an e2e that has never executed.
     ↳ Post-create editor flash: selectedId set before the refresh lands → the just-created item's
       editor briefly unmounts to the placeholder, reading as if Save closed the form. Cosmetic.
-phase 8 rail CMS tab + listing-page toggle: pending  ← ADDED 2026-07-20 from founder gate feedback
+phase 8A contracts + data (amendment 1-4 + listingPage column): pending  ← ADDED 2026-07-20
+phase 8B rail CMS tab + listing page + stat rendering: pending  ← ADDED 2026-07-20 from founder gate feedback
     ↳ A: the rail ALREADY has a greyed `cms` tab (LeftPanel.tsx RAIL_TABS) — phase 6's "no rail
       exists yet" justification was FACTUALLY WRONG, and left two entry points with one lying.
       Founder ruling: move to the rail tab, delete the header button. Contents unchanged.
@@ -562,7 +563,45 @@ The "New collection" flow + the CMS surface entry in the editor chrome. All desi
 
 ---
 
-## Phase 8 — Rail CMS tab + listing-page toggle (ADDED 2026-07-20, founder gate feedback)
+## SPEC AMENDMENT — 2026-07-20 (founder, via mailbox; source `docs/tracks/uniformJourney.md` §Findings)
+
+Arrived AFTER phases 1-7 shipped. Amendment said "apply before Phase-1 data model freezes"; phase 1 froze on 2026-07-20. **Retrofit, not rework** — two facts made it cheap:
+- `fieldSchema`/`roles`/`values` are **JSON columns validated by Zod**, NOT enum columns → a 10th field type needs **ZERO Prisma migration**.
+- These tables hold **no production data** (unreleased) and phase 8 already needed a migration for `listingPage` → items 2-3 ride it for ~zero marginal cost.
+
+| # | Amendment | Ruling |
+|---|---|---|
+| 1 | **10th field type: Stat/Spec pair `{key, value}`** (Naayom specs[], Scalifix metrics). Closed set 9 → **10**. | **ACCEPTED.** Criterion #2 is not honestly reachable without it (specs would be a text_long blob). Safety-checked against BOTH publish traps: neither `key` nor `value` ends in `href\|url\|link\|slug` (no `'#'` rewrite); a repeated spec list is an ARRAY of pairs (Array.isArray branch), not a numeric-keyed map (no `coercePublishValue` collapse). |
+| 2 | **Collection-level role SET `{offer, proof, price}`** — marks what the collection is FOR. | **DATA ACCEPTED, RENDER EFFECT NOT DELIVERABLE IN v1.** Founder confirmed "store it, unread for now". Deviation #1 ships ONE shared block identical on every template — "case studies as a proof band" needs per-purpose renderers that v1 explicitly defers. `purposes` is stored + validated + surfaced in the schema builder and **read by NOTHING**. Forward-compat, not a delivered capability. Must stay labelled as such. |
+| 3 | **`featuredOnHome` per-item flag.** | **COLUMN ONLY, NO CONTROL** (founder confirmed). The home-promotion machinery (`materializeHomeLineup`/`Gallery`/`Teasers`) is products+techpremium hardcoded and explicitly spec §Out — there is no engine-agnostic home lineup to promote INTO. A checkbox promoting nothing is a fake affordance; the greyed-placeholder rule presupposes the destination exists, and here it does not. Column reserved so a later feature needn't migrate a populated table. **NOT covered by Spec 2 `home-summary-links`** — that promotes PAGES, not items. |
+| 4 | **Presets: programmatic schema seeding must not be precluded.** | **ALREADY SATISFIED, ZERO CODE.** `POST /api/collections` already accepts `{name, fieldSchema, roles, detailPages, layoutHint}` and derives the slug server-side; a preset is literally a pre-filled payload, and the greyed "START FROM" chip row is the cut UI seam. Adding one test pinning "fully pre-filled fieldSchema+roles creates a valid collection in ONE call" so a refactor can't silently break the seeding path. |
+
+---
+
+## Phase 8A — Contracts + data (amendment items 1-4 data layer + listingPage column)
+
+**No UI, no rendering.** One migration covers everything the amendment and phase 8B need.
+
+### Steps
+1. **ONE migration** in `prisma/schema.prisma` (`npx prisma migrate dev --name cms_amendment`, NEVER `db push`):
+   - `Collection.listingPage Boolean @default(false)` (phase-8 toggle)
+   - `Collection.purposes Json @default("[]")` (amendment 2 — set semantics, closed vocab, optional)
+   - `CollectionItem.featuredOnHome Boolean @default(false)` (amendment 3 — reserved, unwired)
+2. **Zod** (`collection.schema.ts`): add `stat` to `FIELD_TYPES` (→ 10) + its value schema `{key: string, value: string}` (both optional-empty per the all-values-optional law); `PurposesSchema` = array of `'offer'|'proof'|'price'`, deduped, default `[]`; `listingPage`/`featuredOnHome` booleans on the relevant create/patch schemas.
+3. **Routes**: accept + persist the new fields (`collections/route.ts`, `[collectionId]/route.ts`, `items/[itemId]/route.ts`). Same pinned `assertProjectOwner` gate shape — do not alter it.
+4. **Preset-seeding test** (amendment 4): a single POST with a fully pre-filled `fieldSchema` + `roles` (+ `purposes`) creates a valid collection in one call.
+5. **Docs**: `src/modules/cms/README.md` — closed set is now **10**; record `purposes` as stored-but-unread and `featuredOnHome` as reserved-unwired, both with WHY, so a future agent doesn't "wire up the dead field" or delete it as unused.
+6. **Sweep the "CLOSED at 9" law text** — it appears in several places (README, schema comments, plan). All → 10.
+
+### Files touched
+`prisma/schema.prisma` + new migration · `src/lib/schemas/collection.schema.ts` + `.test.ts` · `src/app/api/collections/route.ts` · `src/app/api/collections/[collectionId]/route.ts` · `src/app/api/collections/[collectionId]/items/[itemId]/route.ts` · `src/modules/cms/types.ts` · `src/modules/cms/README.md` · `docs/task/cms-collections.audit.md`
+
+### Verification
+`npx tsc --noEmit`, `npm run test:run` green. Live DB spot-check: all three new columns default correctly on EXISTING rows (`purposes` → `[]`, both booleans → `false`).
+
+---
+
+## Phase 8B — Rail CMS tab + listing page + stat rendering (ADDED 2026-07-20, founder gate feedback)
 
 Added after the founder drove the phase-7 flow. Two findings, both founder-ruled.
 
@@ -596,6 +635,8 @@ Designer t12 asserts **"Two pages, always"**: a collection yields a listing page
    - **Collision guard**: `/<collectionRef>` colliding with a non-cms subpage → the existing `CmsPathCollisionError` → 409, checked BEFORE any mutation. (The phase-4 collection-slug shadow guard already blocks shadowing a top-level PAGE at write time; this is the publish-time backstop.)
    - **Toggle off → prune** the listing subpage, cms-only, same pruning discipline as detail pages.
    - Runs at the same pinned insertion point (after the ownership check, before sanitize).
+5b. **Stat/Spec pair rendering + control (amendment item 1).** `toRenderModel` emit path for `stat`; render in `CollectionSection.core.tsx` (spec row / stat line) and `CollectionDetail.core.tsx`; new `key-value-field.tsx` control in `src/components/ui/` (model it on `link-pair-field.tsx`, same empty→`null` caller-contract docblock) wired into `ItemEditor`'s type switch and `AddCollectionModal`'s type picker. Extend the `materializePublish.test.ts` meta-guard fixture to include `stat` so all 10 types are swept. `purposes` gets a schema-builder control (stored-but-unread — label it so the user isn't promised rendering behaviour that doesn't exist yet).
+
 5. **Empty-state copy.** A placed `cmscollection` section whose collection has no items currently renders an empty block. Give it an explicit empty state pointing at where items are authored ("No items yet — add them in CMS → <collection>"). Edit twin only; the published twin must stay unchanged (an empty collection publishes as nothing, not as editor chrome). Parity comparator excludes it the same way `manageSlot` is excluded.
 
 ### Files touched
