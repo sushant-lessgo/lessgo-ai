@@ -1435,3 +1435,233 @@ then reverted; the restored files re-run green):
   still carried to later phases per the phase-4 audit.
 
 Not committed, per instructions.
+
+---
+
+# Phase 5 — Authoring UI primitives
+
+## Files changed
+
+All NEW, all in `src/components/ui/` (nothing else touched — no CMS wiring, no
+renderer/store/publish contact):
+
+- `src/components/ui/field-row-list.tsx`
+- `src/components/ui/field-row-list.test.tsx`
+- `src/components/ui/date-field.tsx`
+- `src/components/ui/date-field.test.tsx`
+- `src/components/ui/tag-input.tsx`
+- `src/components/ui/tag-input.test.tsx`
+- `src/components/ui/link-pair-field.tsx`
+- `src/components/ui/link-pair-field.test.tsx`
+- `src/components/ui/media-or-link-field.tsx`
+- `src/components/ui/media-or-link-field.test.tsx`
+- `src/components/ui/slug-input.tsx`
+- `src/components/ui/slug-input.test.tsx`
+- `src/components/ui/item-pager.tsx`
+- `src/components/ui/item-pager.test.tsx`
+- `docs/task/cms-collections.audit.md` (this section)
+
+## What each file does
+
+**`field-row-list.tsx`** — t12's schema-builder row list. Row anatomy = drag handle ·
+editable name · type-chip slot · trailing slot (role badge) / default delete button.
+`renderTypeChip` / `renderTrailing` are render-prop slots so phase 6 composes t12's exact
+row without forking. `onReorder` emits the FULL new id order (not from/to), so the caller
+never re-derives. Exports the pure `reorderIds(ids, from, to)` that BOTH reorder paths
+funnel through. dnd-kit `PointerSensor` drives pointer drag; ArrowUp/ArrowDown on the drag
+handle drives keyboard reorder.
+
+**`date-field.tsx`** — native `<input type="date">` on the app-input tokens. Value = ISO
+`YYYY-MM-DD` or `""`. Clearing emits `""` explicitly (feeds the phase-1 carry: a field
+cannot be cleared by omission).
+
+**`tag-input.tsx`** — controlled `string[]` pill input. Enter/comma commits, ✕ removes,
+Backspace-on-empty removes the last, Escape clears the draft without touching the value.
+Blur also commits (a leftover draft silently vanishing on Save is the classic bug).
+Duplicates + whitespace dropped.
+
+**`link-pair-field.tsx`** — ruling #10. url + label side-by-side; value shape is the
+stored `{url, label}` verbatim. Deliberately does NO URL validation — `toRenderModel` is
+the single sanitization authority, and a second predicate here would reject legitimate
+`mailto:`/`tel:`/`#` CTAs (the phase-2 narrow-predicate regression).
+
+**`media-or-link-field.tsx`** — ruling #11. `{kind:'upload'|'link', url}` with a
+`SegmentedControl` toggle. Upload side calls `onPickRequest()`; the CALLER opens
+`MediaPickerModal`. The picker is NOT imported here.
+
+**`slug-input.tsx`** — two exports. `SlugInput` (t12): name input + read-only mono slug
+suffix inside the same box; the slug is passed IN (no second slugify —
+`src/modules/cms/slug.ts` stays the one authority). `EditableSlugInput` (t19 permalink):
+read-only mono prefix + editable mono segment.
+
+**`item-pager.tsx`** — t19 "Item 3 of 24". Zero-based `index`, one-based label, emits the
+absolute target index. Bounds enforced twice: native `disabled` AND inside the handler.
+Left/Right arrows also move.
+
+## Deviations / judgement calls (all in-scope, conservative option taken)
+
+1. **Reorder is tested via the KEYBOARD path, not simulated pointer drag.** dnd-kit
+   collision detection needs real layout (`getBoundingClientRect` is all-zero in jsdom), so
+   a simulated drag would assert luck — one of the four documented inert-assertion
+   patterns. Per the phase brief this was pre-authorised. The chosen route is *better* than
+   a bare imperative callback: keyboard reorder on the handle is a real user-reachable a11y
+   path AND it funnels through the identical `move()` → `reorderIds()` → `onReorder()`
+   chain the pointer path uses. Pointer drag itself is therefore covered only indirectly
+   (see Risks).
+2. **`@dnd-kit/utilities` NOT imported** even though it is present in `node_modules`. It is
+   a transitive dep, not in `package.json`; the 3-line `translate3d` transform is written
+   by hand instead of importing a phantom dependency.
+3. **`KeyboardSensor` is registered but does not own Arrow keys** (it activates on
+   Space/Enter). Our handle `onKeyDown` owns Arrows. No conflict observed.
+4. **`media-or-link-field` toggling is non-destructive**: the last url per kind is
+   remembered locally, so an accidental toggle does not wipe a pasted link — but an upload
+   url is never re-emitted as a user-typed link (and vice versa). Alternative (clear on
+   toggle) loses user data; alternative (carry url across) mislabels a blob url as a link.
+5. **No new Material Symbols glyphs.** Every icon used (`drag_indicator`, `delete`,
+   `close`, `chevron_left/right`, `perm_media`, `upload`, `link`) is already in the
+   committed `icons.txt` subset — no font regeneration needed.
+6. Only `app-*` tokens used; no stock Tailwind key touched, no new styling system.
+
+## Verification — actual results
+
+- `npx tsc --noEmit` → **exit 0, zero output**.
+- `npm run test:run` → **278 passed | 1 skipped (279 files); 4415 passed | 15 skipped (4430)**.
+  Baseline was 271/272 files, 4369/4384 tests. Delta = exactly +7 files and +46 tests
+  (9 field-row-list, 9 tag-input, 5 date-field, 4 link-pair, 7 media-or-link, 6 slug-input,
+  6 item-pager). **Zero pre-existing tests changed state.**
+- `npx eslint` on all 14 new files → clean, no output.
+- `E2E_PORT=3117 npx playwright test ui-isolation` → **2 passed (54.0s)** — it DID run
+  locally (playwright auto-starts the dev server via `webServer`); both the computed-style
+  baseline and the "no app-chrome fonts/classes on the block surface" check are green.
+- Isolation rule grepped on all 7 components: **zero** imports from `modules/templates/**`,
+  `modules/generatedLanding/**`, `components/published/**`. Imports are only
+  `@/lib/utils`, `./icon`, `./button`, `./input`, `./segmented-control`, `@dnd-kit/*`.
+
+### Non-vacuity evidence (observed, not asserted)
+
+Broke both stateful components' emit paths (replaced the callback invocation with
+`void <same expression>`, leaving the computation intact so it was a *handler* break, not a
+compile break) and re-ran:
+
+- **9 failed | 9 passed** of 18.
+- field-row-list failures: `ArrowDown … emits the full reordered id list`,
+  `ArrowUp moves the row the other way`,
+  `re-renders in the new order when the caller applies the emitted order`.
+- tag-input failures: `Enter adds a pill and calls back with the NEW array`,
+  `comma also commits`, `renders one pill per value … controlled round-trip`,
+  `trims the committed tag`, `✕ removes the RIGHT pill`,
+  `Backspace on an empty draft removes the LAST pill only`.
+- The 9 that stayed green under the break are the ones that SHOULD: the pure `reorderIds`
+  unit tests, the negative bounds/duplicate/Escape assertions, the delete/name-edit
+  callbacks (different handlers), and the slot-rendering test.
+- Handlers restored byte-identical from backup; re-run → **18 passed**.
+
+## Open risks / what the reviewer should scrutinise
+
+1. **Pointer drag is untested.** `handleDragEnd` maps `active`/`over` ids to indexes and
+   calls the same `move()`, but nothing exercises dnd-kit's own event pipeline. A wiring
+   bug in `handleDragEnd` (e.g. swapped indexes) would ship green. Covering it needs a
+   real-layout e2e, which does not exist until phase 6 mounts the list on a route.
+2. **`onNameChange` fires per keystroke** (no debounce, no Enter/blur gate) despite the
+   prop doc calling it a "commit". Correct for a controlled parent that holds draft schema
+   state — which is what phase 6 will do — but if phase 6 wires it straight to a PATCH it
+   will write per keystroke. Flagged for phase 6, not fixed here (out of scope).
+3. **`tag-input` commits on blur**, so clicking Save with an uncommitted draft produces an
+   `onValueChange` *and* the Save in the same tick. Phase 7 must ensure Save reads the
+   post-blur value (React event ordering makes this fine for a real pointer click; a
+   programmatic save path might not blur first).
+4. **`slug-input` derives nothing.** If phase 6 forgets to pass `slug`, the field silently
+   renders with no suffix rather than erroring. Pinned by a test, but it is a quiet failure
+   mode by design (the alternative was a second slugify implementation in `ui/`).
+5. `media-or-link-field`'s per-kind memory lives in a `ref` mutated during render. It is
+   idempotent and only caches, but it is not StrictMode-double-render-*pure*. Behaviour is
+   unchanged under double render (same value written twice); called out for completeness.
+
+Not committed, per instructions.
+
+## Phase 5 nit pass (7 findings from impl-review)
+
+Docs/tests-only except two behavioural extractions (`resolveDragEnd`, `KeyboardSensor` removal).
+No value shapes changed. No debounce added. No url validator added.
+
+### Files changed
+
+- `src/components/ui/field-row-list.tsx` (modified)
+- `src/components/ui/field-row-list.test.tsx` (modified)
+- `src/components/ui/tag-input.test.tsx` (modified)
+- `src/components/ui/link-pair-field.tsx` (modified — docblock only)
+- `src/components/ui/media-or-link-field.tsx` (modified — docblock only)
+- `docs/task/cms-collections.audit.md` (this entry)
+
+### Per file
+
+**`field-row-list.tsx`** — five of the seven findings:
+1. `onNameChange` JSDoc rewritten. Was "Commit of an in-place name edit (blur or
+   Enter)" — false and misleading toward wiring a PATCH. Now states plainly that it
+   fires on every keystroke, that the parent must hold draft state (the input is
+   controlled on `item.name`), and must not write per keystroke. No internal
+   debounce — that would desync typed vs rendered text and fight the parent.
+2. Extracted `resolveDragEnd(ids, activeId, overId) → string[] | null`;
+   `handleDragEnd` is now a thin adapter over it. Returns `null` for the three
+   no-op cases (`overId === null`, self-drop, unknown id).
+4. `KeyboardSensor` DROPPED (and its false comment). It was fully inert: the row
+   handle's explicit `onKeyDown` follows `{...listeners}` in JSX, so the later prop
+   wins and dnd-kit's activator never ran. Chose removal over chaining because if
+   the sensor *did* activate, its document-level Arrow handling would double-fire
+   against the handle's own Arrow move. New comment states this. The Arrow-key a11y
+   path is untouched and still tested. Top-of-file docblock updated to match.
+5. Added `role="listitem"` to the row div (kept the container `role="list"` — the
+   reviewer's preferred fix of the two).
+7. `displayName = "FieldRowList"` set on the underlying `forwardRef` component
+   before the generic-preserving cast (parity with the other six primitives).
+
+**`link-pair-field.tsx` / `media-or-link-field.tsx`** (finding 3, the live phase-7
+trap) — added the explicit empty→`null` caller contract that only `date-field` had,
+concrete about the shape each control emits: link emits `{url:"",label:""}`; media
+emits `{kind:'link',url:""}` on clear and `{kind:'upload',url:""}` on a toggle with
+nothing remembered. All three 400 against `min(1)` schemas, because the item PATCH
+merge deletes only on `v === null`. Controls unchanged — they are correct as
+controls. No url predicate added anywhere; `toRenderModel` stays sole sanitizer.
+
+**`field-row-list.test.tsx`** — new `describe("resolveDragEnd (pure …)")`, 4 tests:
+normal move (both directions, so a swapped from/to fails), `overId === null`,
+self-drop, unknown id either side. Notes in-file why mocking `DndContext` is not an
+option (`useSortable` resolves dnd-kit internal context → degenerate rows).
+
+**`tag-input.test.tsx`** — 2 tests for the previously untested blur-commit path:
+blur commits a leftover draft; blur with an empty draft does not mutate.
+
+### Deviations
+
+- Finding 4 offered two options; chose removal (see reasoning above) rather than
+  chaining to `listeners.onKeyDown`.
+- Finding 6 asked for ~1 test; added 2 (the empty-draft negative was 4 extra lines
+  and guards the obvious over-correction). Test delta is +6, not +5.
+- First blur-test draft dispatched a `blur` event and failed. Root cause: React 17+
+  delegates `onBlur` to native `focusout`. Switched to `focusout` and left an
+  in-file comment — a `blur` dispatch here would have been a permanently-green
+  inert assertion.
+
+### Test results (actual)
+
+- `npx tsc --noEmit` — exit 0, zero output.
+- `npm run test:run` — **278 passed | 1 skipped (279 files); 4421 passed | 15
+  skipped (4436)**. Baseline was 4415/4430 → +6 tests, 0 regressions.
+- `npx next lint` on the 5 changed source/test files — "No ESLint warnings or errors".
+
+### Non-vacuity evidence (finding 6, and finding 2 unprompted)
+
+- Mutated `onBlur={() => commit(draft)}` → `onBlur={() => {}}`: blur test FAILED
+  (`expected "vi.fn()" to be called 1 times, but got 0 times`), other 10 stayed
+  green. Restored; `git diff --stat` clean; 11/11 green.
+- Mutated `reorderIds(ids, from, to)` → `(ids, to, from)` inside `resolveDragEnd`:
+  the mapping test FAILED, 12 others green. Restored; 13/13 green.
+
+### Open risks
+
+- dnd-kit's pointer event plumbing (sensor → collision detection → `DragEndEvent`)
+  remains uncovered by unit tests; only the id→index mapping is now tested. Genuine
+  e2e territory (jsdom `getBoundingClientRect` is all-zero).
+- Findings 1 and 3 are DOCUMENTATION of caller obligations, not enforcement. Phase 6
+  (draft state, no per-keystroke PATCH) and phase 7 (empty→`null` before PATCH) can
+  still get these wrong; nothing in the type system stops them.
