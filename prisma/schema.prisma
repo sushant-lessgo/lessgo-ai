@@ -18,11 +18,11 @@ model User {
 }
 
 model Project {
-  id          String  @id @default(cuid())
-  userId      String?
-  user        User?   @relation(fields: [userId], references: [id])
-  tokenId     String  @unique
-  token       Token   @relation(fields: [tokenId], references: [value])
+  id           String  @id @default(cuid())
+  userId       String?
+  user         User?   @relation(fields: [userId], references: [id])
+  tokenId      String  @unique
+  token        Token   @relation(fields: [tokenId], references: [value])
   title        String  @default("Untitled Project")
   status       String  @default("draft")
   audienceType String  @default("product")
@@ -39,17 +39,18 @@ model Project {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  pages        ProjectPage[]
-  testimonials Testimonial[]
-  collectLink  CollectLink?
-  blogPosts    BlogPost[]
-  editDeltas   EditDelta[]
-  socialPosts  SocialPost[]
-  emailSequence EmailSequence?
-  outreachIntake  OutreachIntake?
-  prospectScrapes ProspectScrape[]
+  pages            ProjectPage[]
+  testimonials     Testimonial[]
+  collectLink      CollectLink?
+  blogPosts        BlogPost[]
+  editDeltas       EditDelta[]
+  socialPosts      SocialPost[]
+  emailSequence    EmailSequence?
+  outreachIntake   OutreachIntake?
+  prospectScrapes  ProspectScrape[]
   outreachMessages OutreachMessage[]
   mediaAssets      MediaAsset[]
+  collections      Collection[]
 }
 
 // Data-capture: records "AI wrote X, user changed it to Y" per element. Upserted
@@ -228,7 +229,7 @@ model TaxonomyEmbedding {
 }
 
 model FormSubmission {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   userId          String // Clerk User ID (owner of the form)
   publishedPageId String? // Optional - which published page the form was on
   formId          String // The MVP form ID from the store
@@ -236,7 +237,7 @@ model FormSubmission {
   data            Json // The actual form submission data
   ipAddress       String? // Optional - visitor's IP
   userAgent       String? // Optional - visitor's browser
-  createdAt       DateTime @default(now())
+  createdAt       DateTime  @default(now())
   notifiedAt      DateTime? // When the lead-notification email was sent successfully (null = not sent / skipped)
   notifyError     String? // Short reason the lead-notification email failed (null = no failure recorded)
 
@@ -311,6 +312,73 @@ model MediaAsset {
   @@index([projectId])
   @@index([groupId])
   @@index([projectId, checksum])
+}
+
+// ── CMS collections (docs/task/cms-collections.plan.md) ──────────────────────
+// User-authored, engine- and template-agnostic CMS. Keyed by BOTH projectId
+// (@relation, cascade-delete — project delete never orphans rows) AND tokenId
+// (route key, avoids a lookup in token-scoped routes) — copies the MediaAsset
+// shape above. `fieldSchema`/`roles`/`values` JSON is validated by the closed
+// 9-field-type Zod contract in src/lib/schemas/collection.schema.ts, enforced at
+// the /api/collections/* routes (NEVER bolted onto DraftSaveSchema).
+//
+// COERCION-PROOF INVARIANTS (publish-only failure modes — see the plan's
+// "Pinned render-model shape"): item `values` keys are field ids matching
+// ^[A-Za-z][A-Za-z0-9_-]*$ (numeric-string keys get concatenated into one string
+// by coercePublishValue); group/item ids are cuids (letter-prefixed) → safe by
+// construction. No stored object may carry BOTH a string `content` and a string
+// `type` key — the render model uses {fieldType, value}.
+model Collection {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tokenId     String // project token (route key)
+  name        String
+  slug        String
+  fieldSchema Json // ordered field defs: [{id, name, type}]
+  roles       Json // {title?, cover?, primaryLink?} → field ids
+  detailPages Boolean  @default(false)
+  layoutHint  String? // reserved seam for per-template group layouts (v1: stacked only)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  groups CollectionGroup[]
+  items  CollectionItem[]
+
+  @@unique([tokenId, slug])
+  @@index([tokenId, order])
+  @@index([projectId])
+}
+
+model CollectionGroup {
+  id           String     @id @default(cuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  name         String
+  order        Int        @default(0)
+
+  items CollectionItem[]
+
+  @@index([collectionId, order])
+}
+
+model CollectionItem {
+  id           String           @id @default(cuid())
+  collectionId String
+  collection   Collection       @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  groupId      String? // group delete → items fall back to ungrouped
+  group        CollectionGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  slug         String
+  values       Json // partial record keyed by field id (see coercion-proof note above)
+  order        Int              @default(0)
+  slugLocked   Boolean          @default(false) // manual slug edit → re-materialization never clobbers it
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@unique([collectionId, slug])
+  @@index([collectionId, order])
+  @@index([groupId])
 }
 
 model EmailSequence {
@@ -470,10 +538,10 @@ model UserPlan {
   creditsLimit Int @default(30)
 
   // Pricing v2: lifetime deal + persistent credit pool
-  lifetimeDeal  Boolean @default(false)
-  ltdCohort     Int?
-  ltdPricePaid  Int? // cents
-  creditPool    Int     @default(0)
+  lifetimeDeal Boolean @default(false)
+  ltdCohort    Int?
+  ltdPricePaid Int? // cents
+  creditPool   Int     @default(0)
 
   // Feature limits
   publishedPagesLimit  Int @default(1)
