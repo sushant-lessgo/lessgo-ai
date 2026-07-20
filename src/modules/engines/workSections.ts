@@ -145,6 +145,10 @@ const headerContract: UIBlockSchemaV2 = {
   sectionType: 'header',
   elements: {
     logo_text: str('required'),
+    // Optional wordmark IMAGE. Manual lane (`fillMode:'system'`) — never AI-emitted;
+    // the text wordmark stays the default. `WorkHeader.core` already binds
+    // `E.Logo imageKey="logo_image"`; empty → wordmark, unchanged.
+    logo_image: { type: 'string', requirement: 'optional', fillMode: 'system', default: '' },
     cta_label: str('optional'),
     cta_href: str('optional', '#contact'),
   },

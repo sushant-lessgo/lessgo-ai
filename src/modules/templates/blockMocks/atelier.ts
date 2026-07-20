@@ -32,6 +32,7 @@ const ATELIER_BLOCK_MOCKS: Omit<BlockMockSection, 'templateId'>[] = [
     sectionId: 'atelier-header',
     content: {
       logo_text: 'Kristina Kundius',
+      logo_image: '',
       cta_label: 'Start Your Project',
       cta_href: '#contact',
       nav_links: [

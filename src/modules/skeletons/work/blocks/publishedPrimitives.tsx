@@ -9,7 +9,7 @@ import React from 'react';
 import { externalLinkProps } from '@/utils/resolveCtaHref';
 import type {
   WorkPrimitives, WorkTxtProps, WorkImgProps, WorkLinkProps, WorkListProps,
-  WorkLogoProps, WorkNavProps,
+  WorkLogoProps, WorkNavProps, WorkToggleProps,
 } from './primitives';
 
 const isHtml = (s?: string) => !!s && /<[^>]*>/.test(s);
@@ -80,5 +80,11 @@ export function makePublishedPrimitives(): WorkPrimitives {
     </nav>
   );
 
-  return { Txt, Img, Link, List, Logo, Nav };
+  // Toggle: the visible chip is rendered by the block core from the flag value;
+  // published renders only `children` (the annotated node) and NO edit control —
+  // zero extra DOM vs the edit render's in-flow output (the edit-only flip button
+  // is absolute/zero-layout).
+  const Toggle: React.FC<WorkToggleProps> = ({ children }) => <>{children ?? null}</>;
+
+  return { Txt, Img, Link, List, Logo, Nav, Toggle };
 }

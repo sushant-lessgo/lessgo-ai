@@ -20,10 +20,11 @@ import { useIsElementExcluded } from '@/modules/templates/shared/elementExclusio
 import { buildSectionLinkOptions } from '@/utils/sectionAnchors';
 import { buildPageLinkOptions } from '@/utils/pageLinks';
 import { LinkPicker } from '@/components/editor/LinkPicker';
+import { MediaPickerModal } from '@/app/edit/[token]/components/ui/MediaPickerModal';
 import { resolveDestination } from '@/utils/resolveCtaHref';
 import type {
   WorkPrimitives, WorkTxtProps, WorkImgProps, WorkLinkProps, WorkListProps,
-  WorkLogoProps, WorkNavProps, WorkTag,
+  WorkLogoProps, WorkNavProps, WorkToggleProps, WorkTag,
 } from './primitives';
 
 export interface WorkEditCtx {
@@ -32,6 +33,9 @@ export interface WorkEditCtx {
   updateCollection: (collectionKey: string, value: any[]) => void;
   getCollection: (collectionKey: string) => any[];
   uploadImage?: (file: File, t?: { sectionId: string; elementKey: string }) => Promise<string | void>;
+  /** Token-scoped project id — passed to the shared MediaPickerModal (its
+   *  /api/media + /api/upload-image calls are token-scoped). */
+  tokenId?: string | null;
   sectionOptions: { value: string; label: string }[];
   pageOptions: { value: string; label: string }[];
 }
@@ -147,19 +151,14 @@ const Txt: React.FC<WorkTxtProps> = ({ elementKey, value, as = 'span', className
 
 const Img: React.FC<WorkImgProps> = ({ elementKey, src, alt, className, imgClassName, placeholder, eager }) => {
   const ctx = useCtx();
-  const [uploading, setUploading] = React.useState(false);
-  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file || !ctx.uploadImage) return;
-    setUploading(true);
-    try {
-      const p = parsePath(elementKey);
-      const url = await ctx.uploadImage(file, { sectionId: ctx.sectionId, elementKey });
-      if (p && typeof url === 'string') saveField(ctx, elementKey, url);
-    } catch { /* surfaced by the store */ }
-    finally { setUploading(false); }
-  };
+  // Open the shared MediaPickerModal (Library/Upload/Stock) instead of a raw file
+  // input — copies the CMS `ItemEditor` idiom: local `picking` flag → one modal →
+  // `onPick(url)` writes the url string into content exactly where the old upload
+  // path wrote it (`saveField(elementKey, url)`). The picker's Upload tab replaces
+  // the direct-upload UX. Because `Logo` delegates to this `Img`, the header logo
+  // rides this rewire with no separate wiring.
+  const [picking, setPicking] = React.useState(false);
+  const onPick = (url: string) => saveField(ctx, elementKey, url);
   const clear = () => saveField(ctx, elementKey, '');
   // Parity: the wrapper must stay a STATIC (non-positioned) box like the published
   // `<div class={className}>`. If it were `position:relative` it becomes a
@@ -177,12 +176,21 @@ const Img: React.FC<WorkImgProps> = ({ elementKey, src, alt, className, imgClass
     >
       {src ? <img src={src} alt={alt || ''} className={imgClassName} loading={eager ? 'eager' : 'lazy'} decoding="async" /> : placeholder}
       <span className="wk-img-edit">
-        <label className="wk-img-edit__btn">
-          {uploading ? '…' : (src ? 'Replace' : '↥ Image')}
-          <input type="file" accept="image/*" onChange={onFile} hidden disabled={uploading} />
-        </label>
+        <button type="button" className="wk-img-edit__btn" onClick={() => setPicking(true)}>
+          {src ? 'Replace' : '↥ Image'}
+        </button>
         {src && <button type="button" className="wk-img-edit__x" onClick={clear}>Remove</button>}
       </span>
+      {/* Radix Dialog renders nothing while `open` is false → zero in-flow DOM,
+          parity preserved. `'use client'` MediaPickerModal lives ONLY on the edit
+          side (this module) — never reachable from publishedPrimitives. */}
+      <MediaPickerModal
+        open={picking}
+        onOpenChange={setPicking}
+        tokenId={ctx.tokenId}
+        initialTab="library"
+        onPick={onPick}
+      />
     </div>
   );
 };
@@ -300,7 +308,34 @@ const Nav: React.FC<WorkNavProps> = ({
   );
 };
 
-export const editPrimitives: WorkPrimitives = { Txt, Img, Link, List, Logo, Nav };
+// Toggle: boolean-flag affordance for a content key. The core renders the VISIBLE
+// chip from `value`; this primitive only adds the edit-mode click-to-flip control.
+// Parity: the control is ZERO-LAYOUT chrome (absolute, opacity:0 until hover — the
+// `.wk-img-edit`/`.wk-list-add` idiom) rendered as a sibling of `children`, so the
+// edit render adds NO in-flow node the published Toggle lacks. The stored flag is
+// the string `'true'` (on) / `''` (off).
+const Toggle: React.FC<WorkToggleProps> = ({ elementKey, value, label = 'Toggle', className, children }) => {
+  const ctx = useCtx();
+  const flip = () => saveField(ctx, elementKey, value ? '' : 'true');
+  return (
+    <>
+      {children}
+      <button
+        type="button"
+        className={`wk-toggle-edit${className ? ` ${className}` : ''}`}
+        data-section-id={ctx.sectionId}
+        data-element-key={elementKey}
+        aria-pressed={!!value}
+        onClick={flip}
+        title={label}
+      >
+        {value ? `✓ ${label}` : label}
+      </button>
+    </>
+  );
+};
+
+export const editPrimitives: WorkPrimitives = { Txt, Img, Link, List, Logo, Nav, Toggle };
 
 /**
  * Build the edit context every work block wrapper needs, in one place, so the thin
@@ -316,6 +351,9 @@ export function useWorkEditCtx(
   const sections = useEditStore((s) => (s as any).sections) as string[] | undefined;
   const pages = useEditStore((s) => (s as any).pages);
   const uploadImage = useEditStore((s) => (s as any).uploadImage);
+  // Token-scoped project id → the shared MediaPickerModal (same store field the
+  // gallery wrapper reads for its board deep-link).
+  const tokenId = useEditStore((s) => (s as any).tokenId) as string | null | undefined;
   const sectionOptions = React.useMemo(() => buildSectionLinkOptions(sections || []), [sections]);
   const pageOptions = React.useMemo(() => buildPageLinkOptions(pages), [pages]);
   const contentRef = React.useRef(blockContent);
@@ -326,6 +364,7 @@ export function useWorkEditCtx(
     updateCollection,
     getCollection: (k) => (contentRef.current?.[k] as any[]) || [],
     uploadImage,
+    tokenId,
     sectionOptions,
     pageOptions,
   };
@@ -355,4 +394,11 @@ export const EDIT_AFFORDANCE_STYLES = `
 .wk-link-edit{ position:relative; }
 .wk-link-edit__btn{ position:absolute; top:50%; left:100%; transform:translateY(-50%); margin-left:4px; z-index:5; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; opacity:0; pointer-events:none; transition:opacity .15s; background:transparent; border:none; cursor:pointer; color:var(--wk-accent); }
 .wk-link-edit:hover .wk-link-edit__btn, .wk-link-edit__btn:focus-visible{ opacity:1; pointer-events:auto; }
+/* Toggle affordance: the flip control floats OUT of layout flow (absolute, zero
+   in-flow footprint) so the edit render adds no node the published Toggle lacks;
+   hidden until the host card is hovered or the control is focused, same gating as
+   .wk-list-add. Anchors to the block's nearest positioned ancestor (the card). */
+.wk-toggle-edit{ position:absolute; top:8px; left:8px; z-index:4; font-family:var(--wk-ff-body); font-size:11px; letter-spacing:.04em; color:var(--wk-ink); background:var(--wk-paper); border:1px solid var(--wk-line); border-radius:var(--wk-r); padding:5px 9px; cursor:pointer; opacity:0; pointer-events:none; transition:opacity .15s; }
+.wk-toggle-edit[aria-pressed="true"]{ color:var(--wk-paper); background:var(--wk-accent); border-color:var(--wk-accent); }
+.wk-toggle-edit:hover, *:hover > .wk-toggle-edit, .wk-toggle-edit:focus-visible{ opacity:1; pointer-events:auto; }
 `;
