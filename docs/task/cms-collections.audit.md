@@ -444,3 +444,126 @@ with `sharedBlockCapabilities` still `toHaveLength(2)`. Test (a) key-sync passes
   phase 3 wires placement). Registry resolution is proven by the
   `capabilities.test.ts` key-sync test, not by a dispatch test through
   `componentRegistry` (not in this phase's Files touched).
+
+---
+
+## Phase 2 hardening
+
+Additive tightening of the phase-2 test/doc surface, closing 4 non-blocking
+impl-review nits. **No runtime behaviour changed** — no source file under
+`render/` other than the two test files was touched.
+
+**Files changed**
+
+- `src/modules/cms/render/parity.test.tsx`
+- `src/modules/cms/render/toRenderModel.test.ts`
+- `src/modules/cms/README.md`
+- `docs/task/cms-collections.audit.md` (this section)
+
+### 1. `parity.test.tsx` — hardened the comparator (the important one)
+
+`skeleton()` compared only tag + `class` + `data-cms-*` + text. Because the two
+primitive factories are hand-duplicated ~60-line copies, the EXCLUDED attributes
+were exactly where divergence can hide.
+
+- Introduced `COMPARED_ATTRS = ['class', 'style', 'src', 'alt', 'href']` and
+  folded it into the skeleton line format (`tag[class=…|style=…|src=…|alt=…|href=…]{data-cms…}`).
+- Exclusion list shrunk to the genuinely sanctioned twin differences only:
+  `target`, `rel` (published-only, from `externalLinkProps`), `data-lessgo-cta*`
+  (published-only beacon), `aria-label`, and edit-only interaction hooks (inert
+  `onClick`) / the `manageSlot` affordance (already outside `[data-cms-body]`).
+- `href` un-excluded: it is byte-identical in both twins (`href || '#'` in each),
+  so excluding it was over-broad.
+- Header comment rewritten to match.
+
+**Fixture already exercised everything newly compared** (verified, not assumed):
+`blurb: 'A long\nblurb about focus.'` → multiline `text_long` → `pre-wrap`;
+cover/gallery images carry a non-empty `alt` (`title` value / `field.name`);
+`buy` carries `mailto:`/`tel:` hrefs. Added four explicit anti-theatre guards in
+the parity test asserting `pre-wrap`, a real `src`, a non-empty `alt` and
+`href=mailto:hi@acme.com` are actually present in the compared skeleton — so
+widening `COMPARED_ATTRS` can never be vacuous.
+
+**Proof the hardened gate bites.** Ran the divergence experiment two ways:
+
+1. *Permanent meta-test* (new `describe('the parity comparator detects a real
+   divergence')`, 3 tests): renders `CollectionSectionCore` with a deliberately
+   diverged published `Txt` (pre-wrap dropped — the exact bug that would collapse
+   `text_long` newlines in published only) and a diverged `Img` (alt dropped), and
+   asserts the skeletons DIFFER; a third test asserts the REAL published
+   primitives still match, so the mutations are the only difference.
+2. *Confirming the widening is what bites*: temporarily narrowed
+   `COMPARED_ATTRS` back to `['class']` and re-ran. Observed **4 failures**:
+   both `renders an identical body skeleton …` cases failed on
+   `expected '…' to contain 'pre-wrap'`, and BOTH meta-tests failed with
+   `expected '…' not to be '…' // Object.is equality` — i.e. under the old
+   comparator the pre-wrap divergence and the alt divergence produced
+   **identical skeletons and sat green**. Exactly the inert-assertion class this
+   repo has been bitten by. Restored immediately; verified byte-identical against
+   a scratchpad backup (`diff` → no output) before proceeding.
+
+### 2. `parity.test.tsx` — dispatch resolution asserted
+
+New `describe('CMS collection block — shared-block dispatch resolves')`:
+`resolveSharedBlock('cmscollection') === CollectionSection` and
+`resolveSharedBlockPublished('cmscollection') === CollectionSectionPublished`
+(the assertions `followStrip.parity.test.tsx:61-67` has and this lacked). Without
+them a consistently mis-cased key (`cmsCollection` in BOTH registries AND
+`capabilities.ts`) passes the key-sync test and then never resolves at runtime.
+
+### 3. `toRenderModel.test.ts` — corrected the coercion predicate (live phase-3 trap)
+
+The test asserted `keys.every(numeric)` ("all keys numeric"). The real rule in
+`coercePublishValue` (`layoutElementSchema.ts:389-394`) is
+`charKeys.length > 0 && charKeys.every(k => typeof val[k] === 'string')` over the
+NUMERIC keys only — so **any single** numeric key holding a string collapses the
+whole object into the concatenation of just its numeric keys, silently discarding
+every non-numeric sibling. Changed to the stronger `keys.some(isNumeric) === false`
+on every object in the model, with a comment stating the real rule. Matches the
+orchestrator-corrected plan text. (`deepWalk` skips arrays before `visit()`, so
+array indices do not false-positive — checked.)
+
+### 4. `README.md` — cross-phase element-key contract documented
+
+New prominent `## ⚠️ Element-key contract (cross-phase, silent on failure)`
+section: the materialized model MUST be written under `CMS_MODEL_ELEMENT_KEY`
+(`'cmsModel'`, `toRenderModel.ts:53-59`), imported as the constant, never
+re-typed. Any other key does not throw, warn, or fail the publish — the page just
+renders an empty **"No items yet"** block, because the published twin falls back
+to `EMPTY_CMS_MODEL`. Names phase 3's `materializePublish.ts` as the consumer at
+risk.
+
+### Deviations
+
+1. **The divergence proof lives in the test file, not as a transient edit to
+   `CollectionSection.published.tsx`.** The brief suggested temporarily mutating
+   the published primitive; that file is NOT on this phase's Files-touched list,
+   and the Files-touched rule is a hard stop. I got the same evidence entirely
+   in-scope — and strictly stronger, since the meta-test is now a PERMANENT guard
+   that the comparator keeps biting, rather than a one-off manual check. I also
+   ran the `COMPARED_ATTRS = ['class']` narrowing (in my own file) to prove the
+   widening specifically is what catches it. Both experiments restored; working
+   tree verified.
+2. `href` guard asserts the `mailto:` case specifically rather than all hrefs —
+   conservative, and the pre-existing wide-predicate test already covers
+   `mailto:`/`tel:` end-to-end.
+
+### Verification (actual)
+
+- `npx tsc --noEmit` → **clean, zero output**.
+- `npm run test:run` → **268 files passed | 1 skipped (269)**;
+  **4295 tests passed | 15 skipped (4310)**, 74.5s.
+  Baseline was 268 files / 4290 tests → **+5 tests, exactly the 5 added**
+  (2 dispatch + 3 comparator meta-tests). **Zero regressions.**
+- `src/modules/cms` alone: 3 files / 44 tests passed (was 41).
+
+### Open risks
+
+- The two primitive factories remain hand-duplicated; the hardened gate now
+  *detects* divergence but does not *prevent* it. Deduping them is explicitly
+  out of scope here and left for a later phase.
+- `aria-label` is still excluded from the comparison. It is currently identical
+  in both twins, so excluding it is over-broad the same way `href` was — a small
+  follow-on could fold it in. Left alone to keep this pass minimal.
+- The `.lg-cms__gframe` sizing nit and `CollectionSection.core.tsx` rendering
+  were untouched, as instructed.

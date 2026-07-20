@@ -301,11 +301,16 @@ describe('toRenderModel — coercion-proof shape', () => {
     expect(offenders).toBe(0);
   });
 
-  it('no object has all-numeric keys (the string-spread reassembly trap)', () => {
+  it('no object has ANY numeric key (the string-spread reassembly trap)', () => {
+    // The REAL rule in `coercePublishValue` (layoutElementSchema.ts:389-394) is
+    // `charKeys.length > 0 && charKeys.every(k => typeof val[k] === 'string')`,
+    // where charKeys are only the NUMERIC keys. So a single numeric key holding a
+    // string collapses the whole object into the concatenation of just its
+    // numeric keys, silently discarding every non-numeric sibling. The safe
+    // invariant is therefore "no numeric keys at all" — NOT "not all keys numeric".
     let offenders = 0;
     deepWalk(fullModel(), (o) => {
-      const keys = Object.keys(o);
-      if (keys.length > 0 && keys.every((k) => /^\d+$/.test(k))) offenders += 1;
+      if (Object.keys(o).some((k) => /^\d+$/.test(k))) offenders += 1;
     });
     expect(offenders).toBe(0);
   });

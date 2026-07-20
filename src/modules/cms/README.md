@@ -61,6 +61,20 @@ feature must avoid:
    `sanitizeContentForPublish` **byte-identical** (phase 3) — not merely "placement
    elements survive".
 
+## ⚠️ Element-key contract (cross-phase, silent on failure)
+
+The materialized render model MUST be written under the element key exported as
+**`CMS_MODEL_ELEMENT_KEY`** (`= 'cmsModel'`, `render/toRenderModel.ts:53-59`). Import the
+constant — never re-type the literal.
+
+`LandingPagePublishedRenderer`'s `extractContentFields` spreads
+`content[sectionId].elements` FLAT onto the published twin's props, and
+`CollectionSection.published.tsx` reads `props[CMS_MODEL_ELEMENT_KEY]`, falling back to
+`EMPTY_CMS_MODEL`. So writing the model under **any other key** (`cms_model`,
+`collectionModel`, a nested `data` prop, …) does not throw, does not warn, and does not
+fail the publish — the page just renders an empty **"No items yet"** block. The consumer at
+risk is phase 3's publish materializer (`materializePublish.ts`), which produces the key.
+
 ## Other pinned decisions
 
 - **Image values are objects** — `{url, assetId?}`, never bare URL strings. Renderers read
