@@ -88,7 +88,15 @@ phase 3 placement + publish materialization: done (df26d10a, impl-review loops 1
       the ~73kB the review estimated (webpack resolves @prisma/client via its browser field to a Proxy
       stub). Kept on the architectural argument, not the number.
     ↳ tsc baseline is now FULLY clean (the old founder.jpg TS2307 noise no longer reproduces).
-phase 4 detail pages + slugs: done (a69c42f2, impl-review loops 0 → ship) — ⏸ AWAITING FOUNDER DETAIL-PAGES GATE
+phase 4 detail pages + slugs: done (a69c42f2, impl-review loops 0 → ship)
+    ↳ 🔶 GATE DEFERRED BY FOUNDER (2026-07-20) → FOLDED INTO THE PHASE 7 GATE. Rationale: no authoring
+      UI exists until phase 7, so checking today means hand-crafting API calls; after phase 7 the same
+      verification runs through the real UI and tests the path a user actually takes.
+      **PHASE 7 GATE MUST THEREFORE ALSO COVER:** create a collection with detailPages ON via the UI →
+      publish → listing cards link correctly → item detail pages serve with right slugs + content →
+      toggle detailPages OFF → item pages gone → naayom's products pages still publish untouched.
+      Accepted risk: phases 5-7 stack on fan-out never eyeballed by a human. Mitigated by the vitest
+      gate rendering the materialized snapshot through the REAL LandingPagePublishedRenderer.
     ↳ Server-side fan-out is SOLE authority; pageActions.ts NEVER opened → naayom's live products
       path untouched BY CONSTRUCTION (confirmed by diff scope, not by claim).
     ↳ DEPTH FINDING (the phase's crux, independently re-verified): toDetailModel hoists the item out
