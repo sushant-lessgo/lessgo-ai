@@ -154,7 +154,44 @@ phase 5 authoring UI primitives: done (128bbe2e, impl-review loops 0 → ship)
       DndContext does NOT work (useSortable resolves dnd-kit internal context). KeyboardSensor was
       INERT (explicit onKeyDown overrode dnd-kit's activator) → removed rather than chained, because
       chaining would double-fire against the handle's own Arrow move.
-phase 6 schema builder + CMS entry point: pending
+phase 6 schema builder + CMS entry point: done (23acc357, impl-review loops 1 → ship)
+    ↳ All 11 rulings verified IN CODE by the reviewer (not from the audit): Blank enabled, 4 presets
+      present+greyed+aria-disabled+tooltip and proven inert, closed 9 / no Price, Text-long plain,
+      role menu type-filtered (types with no eligible role render NO trigger), detailPages tiles
+      reactive both directions, no status pill, no Write-with-AI.
+    ↳ 🐛 BLOCKING BUG (data corruption, caught in review): field ids minted per TYPE and clamped only
+      against the CURRENT DRAFT. Because phase-1 field deletion is deliberately NON-DESTRUCTIVE
+      (orphan values survive), delete-then-add of the same type RECYCLED an id items still held
+      values under → the deleted field's values silently reappeared under the NEW field, in the
+      editor AND in published output. Worse across sessions: once saved, the id is gone from the
+      stored schema so no draft-local clamp could ever see it.
+      ⇒ THE LESSON: no single decision was wrong. Phase 1's non-destructive delete was right; phase
+      6's type-derived regex-safe ids were right. The bug lived BETWEEN two correct contracts —
+      type-derived ids are only safe if ids are never REUSED. That is why a spec, 4 plan-review
+      rounds and a fully-briefed implementer all missed it.
+      FIX = two independent defences: (1) reservedFieldIds = draft ids ∪ stored fieldSchema ids ∪
+      EVERY key in ANY item's values (the only record surviving a saved delete); (2) edit-mode ids
+      carry a random suffix, so the invariant does NOT depend on the item cache being complete.
+      Create-mode keeps readable ordinals (isEdit is false only when no collection exists → reserved
+      is provably empty). Plan-mandated drop warning now shipped; its "values are hidden, not
+      deleted, and re-adding won't restore them" claim is TRUE ONLY because ids never recycle.
+    ↳ Entry mounts beside PageSwitcher in GlobalAppHeader — deliberately NOT a left rail (that is the
+      ui-redesign track's surface; building one here would collide with parked work).
+    ↳ Placement reuses phase-3 addCmsSection unmodified (dual pin intact, not duplicated).
+    ↳ parity.test.tsx's phase-2 "disabled placeholder" assertion RETIRED BY DESIGN (orchestrator-
+      authorized): now pins a LIVE button AND that clicking dispatches lessgo:manage-collections.
+      Proof the stronger assertion matters: breaking the dispatch left `disabled===false` GREEN.
+
+    CARRIES FOR PHASE 7:
+    ↳ CollectionSection dispatches detail:{collectionId} but CmsPanel's listener IGNORES e.detail —
+      "Manage items" on a placed block opens the panel WITHOUT targeting that collection. Consume it.
+    ↳ CmsPanel never resets `editing` to null on modal close. Harmless today (both open paths set it
+      explicitly); a latent trap the moment a third open path is added.
+    ↳ fieldIdsWithValues treats a structurally-empty value ({url:''}) as present → over-eager drop
+      warning. Cosmetic.
+    ↳ Orphaned item values accumulate forever, no GC path (by design, carried).
+    ↳ N+1 fetch: refresh() issues one list call + one per collection, sequentially, on every menu
+      open. Fine at 3 collections, not at 30.
 phase 7 item editor + group management: pending
 phase 8 generic CMS board + docs: pending
 ```
