@@ -78,6 +78,7 @@ import type {
   GalleryValue,
   MediaValue,
   LinkValue,
+  StatValue,
 } from '../types';
 
 /**
@@ -105,7 +106,8 @@ export type CmsRenderValue =
   | ImageValue        // image
   | GalleryValue      // gallery
   | MediaValue        // video, audio
-  | LinkValue;        // link
+  | LinkValue         // link
+  | StatValue;        // stat — {key, value}; NEITHER name ends in href/url/link/slug
 
 export interface CmsItemRender {
   itemId: string;
@@ -143,6 +145,18 @@ export interface CmsRenderModel {
   /** The collection's slug. NAMED `collectionRef`, never `collectionSlug`. */
   collectionRef: string;
   detailPages: boolean;
+  /**
+   * Phase 8B — publish also emits a LISTING subpage at `/<collectionRef>`.
+   * Carried on the model (like `detailPages`) so the publish materializer decides
+   * from the single shaped feed rather than reaching back into the raw row.
+   * Nothing in the RENDER branches on it: a listing page is the same block on its
+   * own page, not a different block.
+   *
+   * REQUIRED (tightened once `CollectionSection.published.tsx` came into scope):
+   * `toRenderModel` always emits it and `EMPTY_CMS_MODEL` now spells it out, so
+   * there is no model in the system without it.
+   */
+  listingPage: boolean;
   /** Reserved seam for per-template group layouts; v1 renders stacked groups. */
   layoutHint: string | null;
   roles: CmsResolvedRoles;
@@ -213,6 +227,23 @@ function safeLink(v: unknown): LinkValue | null {
 }
 
 /**
+ * stat: a `{key, value}` spec pair. NO url predicate — neither half is a URL, and
+ * neither property NAME ends in `href|url|link|slug`, so the publish walker's
+ * key-suffix dispatch cannot rewrite either to `'#'` (the phase-3 bug class).
+ * Both halves are optional-empty in the schema, so a pair with NEITHER half filled
+ * is dropped like any other empty value; a half-filled pair is kept (a spec with a
+ * label and no number is still meaningful, and vice-versa).
+ */
+function safeStat(v: unknown): StatValue | null {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
+  const raw = v as Record<string, unknown>;
+  const key = str(raw.key) ?? '';
+  const value = str(raw.value) ?? '';
+  if (!key && !value) return null;
+  return { key, value };
+}
+
+/**
  * Normalize one stored value for one field type. Returns `null` when the value is
  * absent, empty, the wrong shape, or fails its URL predicate — the caller then
  * DROPS the field entirely.
@@ -231,6 +262,8 @@ export function normalizeFieldValue(type: FieldType, v: unknown): CmsRenderValue
       return safeMedia(v);
     case 'link':
       return safeLink(v);
+    case 'stat':
+      return safeStat(v);
     case 'text_short':
     case 'text_long':
     case 'date':
@@ -310,6 +343,7 @@ export function toRenderModel(bundle: CmsCollectionBundle): CmsRenderModel {
     collectionName: collection.name,
     collectionRef: collection.slug,
     detailPages: !!collection.detailPages,
+    listingPage: !!collection.listingPage,
     layoutHint: collection.layoutHint ?? null,
     roles: {
       title: resolveRole('title', fields, roleInput.title),

@@ -2567,3 +2567,629 @@ noting that `stat` has no control/renderer until 8B.
   fields when `toCmsCollection` is edited.
 - `stat` currently reaches the DB only via a programmatic/preset POST — no UI path creates
   one, so the type is unexercised end-to-end until 8B.
+
+---
+
+# Phase 8B — rail CMS tab + listing page + stat rendering
+
+**Files changed**
+
+1. `src/app/edit/[token]/components/layout/LeftPanel.tsx`
+2. `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx`
+3. `src/app/edit/[token]/components/cms/CmsPanel.tsx`
+4. `src/app/edit/[token]/components/cms/CmsPanel.test.tsx`
+5. `src/app/edit/[token]/components/cms/AddCollectionModal.tsx`
+6. `src/app/edit/[token]/components/cms/AddCollectionModal.test.tsx`
+7. `src/app/edit/[token]/components/cms/ItemEditor.tsx`
+8. `src/app/edit/[token]/components/cms/ItemEditor.test.tsx`
+9. `src/components/ui/key-value-field.tsx` *(new)*
+10. `src/components/ui/key-value-field.test.tsx` *(new)*
+11. `src/modules/cms/sectionKeys.ts`
+12. `src/modules/cms/materializePublish.ts`
+13. `src/modules/cms/materializePublish.test.ts`
+14. `src/modules/cms/render/toRenderModel.ts`
+15. `src/modules/cms/render/CollectionSection.core.tsx`
+16. `src/modules/cms/render/CollectionSection.tsx`
+17. `src/modules/cms/render/parity.test.tsx`
+18. `src/modules/cms/README.md`
+19. `e2e/cms-publish.spec.ts`
+20. `docs/task/cms-collections.audit.md` (this entry)
+
+NOT touched, deliberately: `prisma/schema.prisma` + migration, `collection.schema.ts`,
+the collections routes (**8B step 2 was already delivered by 8A** — `listingPage` /
+`purposes` / `stat` are in the schema, the DB and all three routes already);
+`src/modules/cms/types.ts` (see deviation 4); `CollectionSection.published.tsx`,
+`CollectionDetail.*`, `toRenderModel.test.ts`, `GlobalAppHeader.menus.test.tsx`,
+`src/app/api/publish/route.ts` (see deviations 3 and 5).
+
+(`src/modules/generatedLanding/__snapshots__/uiFoundationIsolation.test.tsx.snap` shows as
+modified in `git status` — already dirty at session start, untouched by this phase.)
+
+## Per file
+
+**`LeftPanel.tsx` — step 1, the rail move.** The `cms` tab loses its `<Coming>` wrapper and
+becomes real; `pages`/`theme` stay inert. `SegmentedControl` is now driven by a `railTab`
+state with an allow-list `onValueChange` (a `<Coming>` accidentally deleted must not silently
+become a selectable tab with no body). Body switches to `<CmsPanel>` on the CMS tab; the
+header label reads "Collections"; the greyed add-section slot is hidden there (CMS has its
+own New-collection row). Review mode still wins over everything. A `lessgo:manage-collections`
+listener switches to the tab and forwards the target collection id.
+
+**`GlobalAppHeader.tsx`.** `<CmsPanel>` mount and its import deleted, replaced by a comment
+recording WHY there must not be a second entry point.
+
+**`CmsPanel.tsx` — host change.** Popover trigger + `AppPopoverMenu`/`AppPopoverItem`/
+`BAR_CTL_CLASS` removed; the list is inline rail markup carrying the SAME
+`data-collection-{row,items,place,delete,new}` hooks and the same `N·M` count. Refresh moved
+from open→mount (LeftPanel mounts it only while the tab is selected, so the "never one request
+per editor load" property is preserved by the host instead of by a popover). New
+`initialCollectionId` prop for the event-arrived-while-unmounted case. Every behaviour from
+phases 6/7 is intact: `e.detail.collectionId` targeting, create/edit/delete (incl. the
+DELETE-then-sweep ordering), Add-to-page, browser, item editor, group manager, `editing`
+reset on close.
+
+**`materializePublish.ts` — step 4, the listing page.** New `buildListingSubpage` /
+`buildListingSubpages` / `isCmsListingSubpage` / `applyCmsListingPages`, structurally cloned
+from the phase-4 detail set so every pin re-applies verbatim: dual pin, leading-slash
+`/<collectionRef>` key, `{layout:{sections},content,title}` with `theme` omitted, no
+url-suffixed keys, cms-only authority, `CmsPathCollisionError` before any mutation, toggle-off
+prune. Also: new `assertNoCmsPathCollisions` pre-pass (below), `toCmsCollection` now carries
+`listingPage`, and the collision message says "collection page" rather than "collection item
+page" now that it covers both families.
+
+**`sectionKeys.ts`.** `CMS_LISTING_MARKER` / `cmsListingSectionId` / `isCmsListingSectionId` /
+`cmsListingPath`. The marker segment is the phase's one genuinely NEW piece of reasoning —
+see "Findings" below. Module stays import-free.
+
+**`toRenderModel.ts`.** `safeStat` + the `stat` case in `normalizeFieldValue`;
+`StatValue` in `CmsRenderValue`; `listingPage` on `CmsRenderModel` (so publish decides from
+the single shaped feed, not from the raw row).
+
+**`CollectionSection.core.tsx`.** `FieldNode` case `stat` (two spans, shared by listing card
+AND detail page — `CollectionDetail.core.tsx` renders fields through this same function, so
+step 5b's detail-page half needed no edit there); three `lg-cms__stat*` styles; new
+`emptySlot` prop rendered OUTSIDE `[data-cms-body]` when there are no items.
+
+**`CollectionSection.tsx`.** `EmptyHint` — edit-only, outside the compared body, dispatches
+the same window event as `ManageButton` (renderer code, no app-chrome import).
+
+**`AddCollectionModal.tsx`.** `PICKER_FIELD_TYPES` deleted → picker is `FIELD_TYPES` (all 10).
+Second `listingPage` switch; CREATES-THESE-PAGES tiles now react to BOTH toggles, with an
+explicit line for the neither-on case. `purposes` chip row with copy stating it does not
+affect rendering yet. Both new fields ride the existing create/patch payload.
+
+**`ItemEditor.tsx`.** `stat` in `seedDraft`, `normalizeValue` (all-empty → `null`, half-filled
+kept) and the `FieldControl` switch (`KeyValueField`).
+
+**`key-value-field.tsx`.** Modelled on `link-pair-field.tsx`, same empty→`null` caller-contract
+docblock — with the difference spelled out: `stat` does not 400 on an empty write, it silently
+STORES an empty pair, so the mapping is required for a quieter reason.
+
+**Tests.** Listing set mirrors the phase-4 detail set assertion for assertion (18 new cases);
+`stat` added to the `materializePublish` meta-guard fixture (all 10 types now swept), to the
+parity fixture and to `ItemEditor`'s coverage assertion (filter removed); 4 empty-state parity
+cases; 4 rail-integration cases; 4 `KeyValueField` cases; e2e listing on/off + `stat`
+end-to-end.
+
+## Findings worth carrying
+
+**🐛 The listing page's ownership test could NOT be structural — and copying phase 4's would
+have deleted user pages.** Detail-page pruning is safe because a user cannot author a
+`cmscollectionitem` section at all. But a user CAN "Add to page" a `cmscollection` block onto
+their own subpage. A subpage whose only section is that block is *structurally
+indistinguishable* from an auto-emitted listing page, so the obvious symmetric implementation
+(`every section id has the cmscollection prefix`) would have made the first
+`listingPage: false` **delete the user's page**. Fixed with a marker segment in the section id
+(`cmscollection-listing-<collectionId>`); user placements are `cmscollection-<uuid>` and a
+uuid can never start with `listing-`. Pinned by a dedicated test and by the README table.
+
+**The collision guard needed a pre-pass.** `applyCmsDetailPages` runs first and mutates; a
+LISTING collision thrown afterwards would leave detail pages already written, breaking the
+stated "checked before any mutation" invariant (the publish route discards the payload on a
+409, so this was invariant-drift, not a live bug). `assertNoCmsPathCollisions` now checks both
+families up front; each `apply*` keeps its own guard for direct callers.
+
+## Deviations (all conservative, all logged)
+
+1. **Listing pages are coupled to PLACEMENT, like detail pages.** A collection with
+   `listingPage: true` that is placed nowhere emits no page, because the authoritative set is
+   built from the bundles publish already loaded. Alternative = query every collection on
+   every publish, which breaks phase 3's celebrated zero-query fast path for non-CMS
+   customers (naayom) on the highest-blast-radius route. Chose consistency with the existing
+   `buildDetailSubpages` coupling. **Founder-visible at the gate:** toggling listing on
+   without placing the block produces nothing. Documented in the README.
+2. **The rail tab is LOCAL state, not `leftPanel.activeTab`.** The brief said to wire
+   `leftPanel.activeTab === 'cms'`, but that store field is a different axis with a different
+   closed union (`'pageStructure' | 'review' | …`) driving the Setup checklist, and widening
+   it means editing `types/store/state.ts` + `actions.ts` — neither in Files touched. Nothing
+   outside `LeftPanel` reads the rail tab, so local state is behaviourally identical.
+3. **`CmsRenderModel.listingPage` is OPTIONAL, not required.** Required broke
+   `EMPTY_CMS_MODEL` in `CollectionSection.published.tsx`, which is NOT in Files touched.
+   `toRenderModel` always emits it; read as `!!model.listingPage`. **One line
+   (`listingPage: false` in `EMPTY_CMS_MODEL`) tightens it — orchestrator's call.**
+4. **`src/modules/cms/types.ts` NOT tightened** (8A's carry offered it). Making
+   `listingPage`/`purposes`/`featuredOnHome` required would force fixture edits across
+   `cmsActions.test.ts`, `CmsPanel.test.tsx` and others, several outside Files touched, for
+   zero behavioural gain. `toCmsCollection` now populates `listingPage`, which was the actual
+   point of the carry.
+5. **8B step 2 (`listingPage` data) needed NO work** — phase 8A already shipped the column,
+   the Zod schemas and all three routes. Verified by reading, not assumed.
+6. **`toRenderModel.test.ts` not extended for `stat`.** Not in Files touched; `stat`'s emit
+   path is covered by the `materializePublish` meta-guard + byte-identical round-trip and by
+   two parity tests, and its empty→null mapping by `ItemEditor.test.tsx`.
+7. **The published twin's empty state is UNCHANGED** — it still renders the plain
+   `<p class="lg-cms__empty">No items yet.</p>` it rendered before. The brief said both
+   "published twin must stay unchanged" and "publishes as nothing"; those conflict, so the
+   conservative reading (no published-output change at all) won. The editor therefore shows
+   the plain line inside the body AND the guidance hint above it — slightly redundant, but
+   the hint cannot move into the body without entering the parity comparison.
+8. **`CmsPanel.test.tsx` host adapted, assertions not weakened.** `openMenu()` deleted (the
+   list is inline); "refreshes on OPEN not on mount" became "refreshes ONCE on mount", which
+   is the same invariant under the new host; "opens on the event" became "refreshes on the
+   event" plus a NEW stronger case pinning `initialCollectionId`. The targeting test and the
+   failed-DELETE-must-not-sweep ordering guard are untouched.
+
+## Verification (actual)
+
+- `npx tsc --noEmit` → **exit 0, zero output**.
+- `npm run test:run` → **283 passed | 1 skipped (284 files); 4566 passed | 15 skipped
+  (4581); 0 failed.** Baseline 283 files / 4522+15 → **+1 file (`key-value-field.test.tsx`),
+  +44 tests, no regressions.** `GlobalAppHeader.menus.test.tsx`, `naayomProducts.test.ts`,
+  `collectionHelpers.works.test.ts`, staticExport and persistence suites all green and
+  untouched.
+- `npx next lint` on all 17 touched source/test files → **no errors**; two PRE-EXISTING
+  `no-img-element` warnings (`CollectionSection.tsx:52`, the edit `Img` primitive; and the
+  known `parity.test.tsx` one, line-shifted by additions).
+- **e2e NOT RUN — stated honestly.** `e2e/cms-publish.spec.ts` gained
+  `listingPage ON publishes /<collection>; OFF removes it`; `npx playwright test --list
+  cms-publish` now lists **3** tests in that file (was 2), so it is registered, not orphaned
+  (the phase-7 dead-file lesson). Executing it needs a dev server + a Clerk session + Blob/KV,
+  none of which this session has; and per the file's own header a local run 500s on publish
+  anyway. Every binding listing-page assertion is in vitest.
+- **DB:** no migration in this phase (8A's `20260720150017_cms_amendment` already added
+  `listingPage`, verified default `false` on existing rows in the 8A entry).
+
+### Non-vacuity evidence (all three probes bit)
+
+1. **Listing dual pin** — deleted `layout: CMS_COLLECTION_LAYOUT` from `buildListingSubpage`
+   → **2 failed | 71 passed**: `"DUAL PIN: every id in layout.sections has a non-empty
+   content[sid].layout"` AND `"publishes the SAME body skeleton the editor renders from the
+   same tables"` (the latter through `LandingPagePublishedRenderer`, i.e. the silent vanish
+   was observed end-to-end, not just as a missing property). Restored → green.
+2. **Listing collision guard** — replaced both `throw new CmsPathCollisionError(path)` sites
+   (the `applyCmsListingPages` guard and the listing half of the pre-pass) with no-ops →
+   **3 failed | 70 passed**: fails-loud-before-mutation, the message-names-the-path case, and
+   the `assertNoCmsPathCollisions` pre-pass case. Restored → green.
+3. **Published twin has no empty-state chrome** — made the core emit a hardcoded
+   `data-cms-empty-hint` when no `emptySlot` was passed (i.e. leaked editor chrome into the
+   published twin) → **1 failed | 23 passed**, exactly `"the PUBLISHED twin carries NO editor
+   chrome at all"`. Restored → green.
+
+## Open risks / carries
+
+- **Listing pages need the block placed** (deviation 1). If the founder's gate expects
+  "toggle on → page exists" with nothing placed, that is a scope decision to revisit, not a
+  bug — and undoing it costs the zero-query fast path.
+- **`purposes` still has no reader.** It now has a CONTROL, which raises the stakes on the
+  README section: a future agent who deletes the "does not change how it looks" copy without
+  shipping per-purpose renderers turns a truthful control into a user-facing lie.
+- **Two listeners on `lessgo:manage-collections`** (LeftPanel + CmsPanel). Both are needed
+  and both are tested, but a third surface adding a listener should re-read the note in
+  `CmsPanel.tsx` first.
+- **The editor shows two empty messages** for an empty collection (deviation 7). Cosmetic;
+  resolving it means a founder ruling on whether an empty collection should publish the
+  `No items yet.` line at all.
+- **`EMPTY_CMS_MODEL` keeps `listingPage` optional** (deviation 3) — a one-line tighten in a
+  file this phase could not open.
+- Unchanged from phase 7: no conflict handling, unbounded fan-out (now +1 page per
+  listing-enabled collection, negligible), a hand-edited permalink still 404s the old URL.
+
+---
+
+# Phase 8B-decouple — page emission decoupled from placement (founder ruling)
+
+Amends phase 8B **before commit**. Ruling: a collection with `listingPage` and/or
+`detailPages` on must emit its pages on publish **regardless of placement**. This closes
+phase 8B deviation 1 and, with it, the same defect `detailPages` had carried since phase 4.
+
+## Files changed
+
+- `src/modules/cms/materializePublish.ts`
+- `src/modules/cms/materializePublish.test.ts`
+- `src/modules/cms/render/CollectionSection.published.tsx`
+- `src/modules/cms/render/toRenderModel.ts`  <-- **not on the Files-touched list — see Deviations #1**
+- `src/modules/cms/README.md`
+- `docs/task/cms-collections.audit.md`
+
+## What changed, per file
+
+### `materializePublish.ts`
+
+- `loadCmsBundles(tokenId, collectionIds)` -> **`loadCmsBundlesForToken(tokenId)`**. The
+  `where` is now `{ tokenId }` alone — covered by the existing `@@index([tokenId, order])` on
+  `Collection` — with a matching `orderBy: { order: 'asc' }` so the emitted page set is
+  deterministic run-to-run. `include` was replaced by an explicit nested **`select`** (11
+  collection columns + 4 group + 7 item), so the stored-but-unread `purposes` column and the
+  timestamps stay off the wire. Still ONE round trip; groups/items ride the same query. The
+  old function had no callers outside this module (verified by grep), so the rename is inert.
+- **`materializeCmsForPublish`** no longer derives collection ids from the payload. It loads
+  by token, then runs the unchanged sequence: `assertNoCmsPathCollisions` -> `materializeCmsContent`
+  -> `applyCmsDetailPages` -> `applyCmsListingPages`. The phase-3 zero-cms-sections early return
+  is **deleted**.
+- Nothing else moved. Every pin is untouched and still exercised: dual pin, leading-slash
+  absolute keys, the key-naming law, authority scoping, the `cmscollection-listing-<id>` marker
+  segment, fail-loud 409 before mutation, toggle-off pruning, the insertion point in
+  `route.ts`, and both sanitize chokepoints via `runPublishSanitizers()`.
+- Doc comments rewritten where they asserted the now-false coupling: the file header (new
+  "DISCOVERY IS TOKEN-KEYED" block), the phase-4 detail preamble, the phase-8B "COUPLED TO
+  PLACEMENT" block (now "DECOUPLED"), the `materializeCmsForPublish` docstring (states the
+  cost and the byte-identity invariant that replaces the fast path), and a stale
+  `loadCmsBundles` reference in the `materializeCmsContent` docstring.
+
+### `materializePublish.test.ts` (+8 tests, 73 -> 81)
+
+The `@/lib/prisma` mock became `{ collection: { findMany } }` (a `vi.hoisted` stub) so the
+entry point can be driven end-to-end; every pre-existing gate still runs on fixtures and is
+unchanged. A `beforeEach` resets the stub so a leftover `mockResolvedValueOnce` cannot leak.
+Byte-identity is asserted on `JSON.stringify`, **not** `toEqual` — key order counts.
+
+New gates:
+
+| Test | Proves |
+|---|---|
+| zero collections -> byte-identical, subpages included | the invariant replacing the fast path |
+| all-toggles-off -> byte-identical | same, with rows actually loaded |
+| reads by `tokenId` only, exactly one `findMany` | tenant boundary + one round trip |
+| listing AND item pages for a collection **placed nowhere** | the bug being fixed |
+| placed AND toggled on -> exactly ONE listing page | no duplicate across the two routes; also asserts the placement keeps its uuid id while the page gets the marker id |
+| toggle off -> pages pruned, nothing placed | prune works on the decoupled path |
+| pruning cannot touch a user page containing a placed block | the marker segment, now through the **entry point** (wider surface) |
+| unplaced collection colliding with a real page -> 409, payload unmutated | fail-loud survives decoupling |
+
+### `CollectionSection.published.tsx`
+
+`EMPTY_CMS_MODEL` gains `listingPage: false` (the one line phase 8B flagged and could not open).
+
+### `toRenderModel.ts`
+
+`CmsRenderModel.listingPage` tightened `?: boolean` -> `: boolean`, comment updated. See
+Deviations #1.
+
+### `README.md`
+
+"The pages a collection publishes" rewritten: both families are decoupled, discovery is
+`tokenId`-keyed, the ruling's rationale, the explicit cost (one indexed query per publish) and
+the two byte-identity guarantees that replace the fast path — plus the corollary that the
+pruning surface is now wider, which is what makes the listing marker load-bearing.
+
+## Deviations
+
+1. **Edited `src/modules/cms/render/toRenderModel.ts`, which is NOT on the Files-touched
+   list.** The task authorized tightening `CmsRenderModel.listingPage` to required; that type
+   is *declared* in `toRenderModel.ts`, not in the listed `CollectionSection.published.tsx`
+   (which only holds `EMPTY_CMS_MODEL`). The tighten is impossible without it. I treated the
+   explicit instruction as authorization-by-implication rather than stopping, because the edit
+   is two lines (`?` removal + comment) in a file phase 8B had already modified. **Flagging
+   loudly: revert both halves if that reading is wrong** — nothing else depends on them.
+2. **"All toggles off -> byte-identical" is asserted on a payload with no placed block.** With
+   a block placed, materialization legitimately writes its model, so byte-identity cannot hold
+   and asserting it would be wrong. Conservative reading; noted in the test and the README.
+3. **`route.ts:74-75` now carries a stale comment** — "Zero cms sections => zero queries =>
+   existing publishes are byte-identical". The behaviour it describes is gone. `route.ts` is
+   out of scope, so I did not touch it. **Owed follow-up** (comment only; no logic depends on
+   it).
+
+## Test results (actual)
+
+- `npx tsc --noEmit` -> **exit 0, zero output**.
+- `npm run test:run` -> **283 passed | 1 skipped (284 files); 4574 passed | 15 skipped (4589);
+  0 failed**. Baseline was 4566 passed / 4581 total; delta is exactly the 8 new tests.
+  `naayomProducts.test.ts`, `collectionHelpers.works.test.ts`, staticExport and persistence all
+  green and untouched.
+- `npx eslint` on the four changed source files -> **0 errors**, 1 pre-existing
+  `@next/next/no-img-element` warning in `CollectionSection.published.tsx` (a published twin
+  must emit a raw `<img>`; unchanged by this phase).
+
+## Non-vacuity evidence (three deliberate breaks, each restored)
+
+1. **Byte-identity** — appended `(content as any).cmsTouched = true;` at the end of
+   `materializeCmsForPublish` -> **2 failed | 79 passed**: exactly the zero-collections and
+   all-toggles-off gates. Confirms both compare the WHOLE payload and are wired to the
+   function under test. Restored -> 81 passed.
+2. **Placed-nowhere emission** — re-inserted the phase-3 coupling
+   (`if (findCmsSections(content).length === 0) { ...empty reconcile...; return 0; }`) -> **3
+   failed | 78 passed**: "placed NOWHERE", "toggle OFF prunes ... nothing is placed", and the
+   unplaced-collision 409. Confirms the emission gate fails under the exact regression it
+   guards. Restored -> 81 passed.
+3. **Pruning / marker segment** (re-verified because the surface grew) — swapped
+   `isCmsListingSectionId` for `isCmsSectionId` inside `isCmsListingSubpage` -> **2 failed | 79
+   passed**: the phase-8B unit gate AND the new entry-point gate. Confirms a user's own
+   subpage containing a placed block would be DELETED without the marker. Restored -> 81 passed.
+
+## Open risks
+
+- **Every publish now issues one collection query**, including for projects that have never
+  used the CMS. Indexed and narrow, but it is a new unconditional dependency on the DB inside
+  the highest-risk route: a `Collection` read failure now fails a publish that previously did
+  not touch that table. It falls to the route's outer 500 (fail-closed), which is correct, but
+  it is a genuinely new failure mode worth watching after deploy.
+- **Fan-out is unbounded and now unconditional**: a collection with `detailPages` on and 500
+  items emits 500 subpages whether or not the user ever placed the block. Previously placement
+  was an accidental brake. No cap exists.
+- **Collision blast radius widened**: a `listingPage`-on collection whose slug matches an
+  existing page now 409s the publish even if the block was never placed. Correct per the
+  ruling (the page is promised), but a user could hit a 409 on a collection they consider
+  inactive. The message names the path, so it is actionable.
+- Phase 8B's other carries are unchanged, except deviation 1 (listing needs placement) and
+  the `EMPTY_CMS_MODEL` carry, both of which this amendment closes.
+
+---
+
+# Amendment 2 — decoupling close-out (rulings + fan-out cap)
+
+## Files changed
+
+- `src/modules/cms/materializePublish.ts`
+- `src/modules/cms/materializePublish.test.ts`
+- `src/app/api/publish/route.ts` (comment + error mapping only — no logic change beyond the
+  added `instanceof` arm)
+- `src/app/api/publish/route.test.ts`
+- `src/modules/cms/README.md`
+- `docs/task/cms-collections.audit.md` (this file)
+
+`src/modules/cms/render/toRenderModel.ts` is NOT in this amendment — its `listingPage`-required
+edit is from the previous amendment and was ruled approved. Untouched here.
+
+## 1. `toRenderModel.ts` ruling — no action
+
+Confirmed approved. No further edit made.
+
+## 2. `src/app/api/publish/route.ts` — stale comment replaced
+
+The comment claimed "Zero cms sections ⇒ zero queries ⇒ existing publishes are byte-identical".
+That fast path no longer exists. Replaced with what is now true: the materializer loads THIS
+project's collections by the ownership-verified `tokenId` on EVERY publish (one indexed query),
+and the guarantee that stands in its place is byte-identity for a project with zero collections
+or with all toggles off — enforced by tests, not by an early return.
+
+The same comment block now documents TWO expected user-facing failures (collision + fan-out
+cap) instead of one, and states explicitly why the catch is two explicit `instanceof` arms and
+not a shared base class. No logic changed apart from the second arm.
+
+## 3. NEW GUARD — detail-page fan-out cap
+
+**`MAX_CMS_DETAIL_PAGES_PER_COLLECTION = 100`** (exported from `materializePublish.ts`).
+
+Chosen value and why: publish does a static render + blob upload + KV write **per page,
+serially, in one request**. At an observed-realistic ~100-300ms per page, 100 pages is ~10-30s,
+which still fits a typical 60s serverless budget alongside the rest of publish (export, DB
+writes, version cleanup). A few hundred does not. No concrete reason was found to deviate from
+the suggested 100, so 100 it is.
+
+Mechanism:
+
+- `assertCmsFanOutWithinLimit(bundles)` — pure, no DB, no mutation. Called in
+  `materializeCmsForPublish` **first**, before `assertNoCmsPathCollisions` and before any
+  container is touched. Cap-before-collision because an over-cap collection is a refusal
+  regardless of where its paths land, and it is the cheaper check.
+- `CmsFanOutLimitError(collectionName, itemCount)` — a DISTINCT class (not a subclass of
+  `CmsPathCollisionError`, not a shared base). Message names the collection, its item count and
+  the limit, plus the two remedies.
+- Route maps it to **409** — same shape and status as the collision precedent, via a narrow
+  `instanceof cmsError instanceof CmsPathCollisionError || instanceof CmsFanOutLimitError`.
+  DB/unexpected errors still fall through to the fail-closed 500 (case 5 pins this).
+- **No truncation.** An over-cap collection refuses the whole publish.
+
+## Deviations (in-scope judgment calls)
+
+1. **Counted on ITEMS, not on emitted detail pages.** `bundle.items.length`, not
+   `allRenderItems(toRenderModel(b)).filter(hasPath).length`. They differ only for slug-less
+   items (which emit no page), so item-counting is the CONSERVATIVE side — it can trip slightly
+   early, never late — and it keeps the message ("has N items") literally true against what the
+   user sees in the collection editor. Also avoids running `toRenderModel` twice per publish.
+2. **Only `detailPages`-on collections are counted.** A toggled-off collection emits no detail
+   pages, so its size is irrelevant; listing pages are exactly one per collection and need no
+   cap. Pinned by a test.
+3. **Per-collection, not a global total.** Matches the founder's message wording ("limited to N
+   per collection"). Pinned by a test so nobody "fixes" it into a total later. Noted as a
+   residual risk below.
+4. Chose 409 over 413/422 — reuses this route's existing conflict vocabulary as instructed.
+
+## Tests
+
+New in `src/modules/cms/materializePublish.test.ts` (`describe('detail fan-out cap')`), 6 gates:
+
+- pure guard passes AT the cap, throws ONE over
+- over-cap collection with `detailPages` OFF is exempt
+- publishing AT the cap works and emits exactly N detail pages
+- one over → rejects with `CmsFanOutLimitError`, message contains collection name, item count
+  and the limit
+- the over-cap failure **mutates NOTHING** — byte-identity via `JSON.stringify` (not `toEqual`),
+  with anti-vacuity assertions that the payload really did carry subpages and a placed block
+  that could have been damaged
+- the cap is per-collection, not a total
+
+New in `src/app/api/publish/route.test.ts`: case 6 — `CmsFanOutLimitError` → 409 whose body
+names the collection, the count and the limit, with the same "no side effect" assertions as the
+collision case (`renderPublishedExport` / `publishedPage.update|create` / `project.upsert` all
+uncalled).
+
+### Non-vacuity — observed, not assumed
+
+- Broke the cap (`count > MAX * 1000`): **3 of the 6 new gates failed** — "the pure guard passes
+  AT the cap and throws ONE over it", "ONE over the cap FAILS LOUD…", "the over-cap failure
+  mutates NOTHING". The other 3 correctly stayed green (they assert the non-throwing side).
+  Restored; back to green.
+- Removed the `|| cmsError instanceof CmsFanOutLimitError` arm from the route: **route case 6
+  failed** (1 failed | 6 passed). Restored; back to green.
+
+## Verification (actual)
+
+- `npx tsc --noEmit` → **exit 0, zero output**
+- `npm run test:run` → **283 passed | 1 skipped (284 files); 4581 passed | 15 skipped (4596);
+  0 failed**. Baseline was 4574/4589 — exactly +7 tests (6 cms + 1 route), no pre-existing test
+  disturbed.
+- `npx eslint` on the 4 changed source/test files → **exit 0, no output**
+- Not committed.
+
+## Open risks
+
+- **The cap is a v1 SAFETY VALVE, not a product decision about collection size.** The real fix
+  is batched or async fan-out (a later track). Until then a user with a 150-item collection
+  simply cannot ship detail pages — they get a clear 409, but no path forward other than
+  trimming. That is deliberate (loud beats an opaque timeout) but it IS a product-visible
+  ceiling worth surfacing in the collections UI before beta.
+- **Per-collection, not global.** Ten 100-item collections still fan out to 1000 pages in one
+  request and will time out exactly as before. The per-collection framing came from the ruling's
+  message wording; a global cap is the stricter guard if the timeout is the real concern. Flagged
+  rather than changed — out of scope for this phase.
+- The 100 figure is reasoned from typical per-page cost, **not measured** against a real publish
+  of 100 pages. Worth one real timing run before beta; the constant is tunable in one place.
+- No UI surface warns about the cap before the user hits publish. The collections modal's
+  "CREATES THESE PAGES" tiles could show the count against the limit; not in scope here.
+
+---
+
+# Addendum — the GLOBAL fan-out cap (correction round)
+
+## Files changed
+
+- `src/modules/cms/materializePublish.ts`
+- `src/modules/cms/materializePublish.test.ts`
+- `src/app/api/publish/route.ts`
+- `src/app/api/publish/route.test.ts`
+- `src/modules/cms/README.md`
+- `docs/task/cms-collections.audit.md` (this file)
+
+## Why
+
+The previous round's open risk ("per-collection, not global") was accepted by the founder: a
+per-collection cap **cannot** be the binding constraint, because the timeout is a property of
+the whole publish REQUEST. Ten collections of 100 items each are ten individually *legal*
+collections that still fan out to 1000 pages and die as the same opaque timeout. This round adds
+the global cap and keeps the per-collection one for message quality.
+
+## What changed, per file
+
+### `src/modules/cms/materializePublish.ts`
+
+- New exported constant **`MAX_CMS_DETAIL_PAGES_TOTAL = 100`** — total detail pages across ALL
+  collections in one publish.
+- New exported error class **`CmsTotalFanOutLimitError`** — carries `totalItems`; message states
+  the total, the limit and the remedy ("turn detail pages off for some collections, or reduce
+  their items"). **Separate class, no shared base** with `CmsFanOutLimitError` (a hierarchy would
+  silently enrol future error types into the route's 409 branch).
+- `assertCmsFanOutWithinLimit` now accumulates a running total. Order is deliberate:
+  per-collection check **first** (so a single oversized collection yields the message that NAMES
+  it), global check after the loop (the check the request budget actually depends on). Still
+  PURE, still called before the collision guard and before any mutation — unchanged insertion
+  point.
+- Header comment rewritten to state the two caps' distinct jobs and to record that both numbers
+  are **arithmetic estimates, not measurements**.
+
+### Sizing the global cap — 100, and the reasoning
+
+Publish renders one blob **and** writes one KV route **per page, serially**, in one request.
+Assume ~300ms/page worst case (~100ms typical). The same request must also fit the rest of
+publish: root HTML render, both sanitize passes, KV route writes, DB work. Reserving roughly
+half of a 60s serverless budget for that leaves ~30s for fan-out => **~100 pages** at the
+worst-case per-page cost. Erring conservative deliberately: too low fails loud with an
+actionable 409 and is a one-line raise; too high fails as the opaque timeout the cap exists to
+eliminate.
+
+Consequence worth stating plainly: with both caps at 100, the per-collection cap is
+**subsumed** as a guard — it can only fire when the total would fire too. That is the intended
+design (it exists for message quality), and the invariant `PER_COLLECTION <= TOTAL` is pinned by
+a test so a future edit can't make it dead or make it permit what the total forbids.
+
+### `src/app/api/publish/route.ts`
+
+Imports the new class and adds it to the `instanceof` narrowing → 409 with `.message` verbatim.
+Explicit third `instanceof`, still no catch-all, still no base class. Comment updated (TWO →
+THREE expected user-facing failures) and states which class is the actual guard.
+
+### `src/modules/cms/materializePublish.test.ts`
+
+- **Removed** the gate "the cap is a per-COLLECTION limit, not a total across collections" — it
+  asserted precisely the behaviour this round fixes (two 51-item collections passing). Keeping it
+  would have pinned the bug.
+- **New `describe('total fan-out cap (across ALL collections)')`, 8 gates:**
+  - the load-bearing one — **throws when the TOTAL exceeds the cap even though EVERY collection is
+    under the per-collection cap** (5 collections x 26 items), with an anti-vacuity loop asserting
+    each bundle passes `assertCmsFanOutWithinLimit` alone, so only the global check can be what
+    throws;
+  - passes AT the total, throws ONE over;
+  - a single oversized collection still gets the collection-NAMING error (`CmsFanOutLimitError`,
+    NOT the aggregate one) — pins the check ORDER;
+  - the two error classes are siblings (neither `instanceof` the other; both prototypes are
+    `Error`) — pins "no shared base class";
+  - `detailPages`-off collections don't count toward the total;
+  - end-to-end publish AT the total emits exactly that many detail pages;
+  - one over the total fails loud with a message containing the total and the limit;
+  - the over-total failure **mutates NOTHING** — payload byte-identical after the throw, with the
+    existing anti-vacuity assertions (the payload really does carry a placed block and an
+    unrelated `/about` subpage that the throw must have spared).
+
+### `src/app/api/publish/route.test.ts`
+
+New `case 7: CmsTotalFanOutLimitError → 409 NAMING the total and the limit` — asserts 409, body
+contains the total and the limit, is not "Internal Server Error", no `url`, and no side effect
+(no export, no DB write). Header comment documents why: unmapped, this class would fall to the
+fatal catch and surface as a bare 500 — the exact unactionable failure the cap replaces.
+
+### `src/modules/cms/README.md`
+
+"The fan-out cap" section rewritten: a two-row table of the two constants and their distinct
+jobs, an explicit paragraph on **why a per-collection cap alone is not a guard** (recording that
+this was the original design and it was wrong), the `PER_COLLECTION <= TOTAL` invariant and the
+test that pins it, and the three-class `instanceof` narrowing. Adds the note that both numbers
+are estimates and that **one real timing run against a seeded collection is owed before beta**,
+with the measured per-page cost to be written back into the constants' comments.
+
+## Deviations from the instruction
+
+None on scope. One judgment call inside the Files-touched list: the instruction said "keep the
+per-collection one", and doing so required **deleting** the existing test that asserted the cap
+is explicitly *not* a total. Deleting a green test is normally a smell, so recording it: that
+test encoded the exact defect being corrected, and its replacement (the "every collection under,
+total over" gate) covers the same fixture shape with the now-correct expectation.
+
+## Test results (actual)
+
+- `npx tsc --noEmit` → **exit 0, zero output**
+- `npm run test:run` → **283 passed | 1 skipped (284 files); 4590 passed | 15 skipped (4605);
+  0 failed**. Baseline was 283/1 (284) and 4581/15 (4596) — exactly **+9 tests** (8 cms + 1
+  route), no pre-existing test disturbed (1 deleted, 9 added, net +8 named gates).
+- `npx eslint` on the 4 changed source/test files → **exit 0, no output**
+- Not committed.
+
+## Non-vacuity evidence
+
+Mutated the global check in `assertCmsFanOutWithinLimit` to `if (false && total > MAX_...)` and
+re-ran both files:
+
+    Test Files  1 failed | 1 passed (2)
+         Tests  4 failed | 99 passed (103)
+
+The 4 failures were exactly the global-cap gates that can only pass because of that line
+("throws when the TOTAL exceeds the cap even though EVERY collection is under the per-collection
+cap", "passes AT the total and throws ONE over it", "ONE over the total FAILS LOUD...", "the
+over-total failure mutates NOTHING..." — the last reporting `promise resolved "1" instead of
+rejecting`, i.e. the publish went ahead and materialized). The other 99 (including every
+per-collection-cap gate) stayed green, confirming the new gates are driven by the global check
+specifically and not by the pre-existing one. Restored the line; both files back to 103 passed.
+
+## Open risks (updated)
+
+- **Both numbers remain arithmetic estimates.** Owed before beta: one timing run (seed a
+  collection at the cap, publish, measure) with the measured per-page cost written back into the
+  constants' comments, so the next person tunes from data. Recorded in the README too.
+- **The ceiling is now lower in aggregate**, and product-visible: a user with several medium
+  collections can be refused even though no single collection looks large. The message says so
+  and names the total, but no UI surface warns before publish — the "CREATES THESE PAGES" tiles
+  showing a running count against the limit is the obvious fast-follow; not in scope here.
+- Batched/async fan-out is still the real fix and still a later track. Both constants remain
+  tunable in one place.
+- 60s is assumed, not read from a `maxDuration` export — `/api/publish` sets `runtime = 'nodejs'`
+  and `dynamic = 'force-dynamic'` but no explicit `maxDuration`, so the effective ceiling is the
+  Vercel plan default. Worth confirming during the same timing run.

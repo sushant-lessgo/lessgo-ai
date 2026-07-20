@@ -139,6 +139,51 @@ function ManageButton({ collectionId }: { collectionId?: string }) {
   );
 }
 
+/**
+ * EDIT-ONLY empty state (phase 8B step 5). A placed block whose collection has no
+ * items rendered an unexplained blank band; this says where the items are
+ * authored and opens that surface.
+ *
+ * PUBLISHED PARITY: rendered outside `[data-cms-body]` (the manageSlot rule), so
+ * the parity comparator never sees it — and the published twin does not pass it
+ * at all. A live visitor must never be told to "add them in CMS".
+ *
+ * Same firewall as ManageButton: a window event, never an app-chrome import.
+ */
+function EmptyHint({
+  collectionId,
+  collectionName,
+}: {
+  collectionId?: string;
+  collectionName: string;
+}) {
+  return (
+    <div className="lg-cms__emptyhint" data-cms-empty-hint="">
+      <button
+        type="button"
+        data-cms-empty-hint-btn=""
+        onClick={() => {
+          if (typeof window === 'undefined') return;
+          window.dispatchEvent(
+            new CustomEvent('lessgo:manage-collections', { detail: { collectionId } })
+          );
+        }}
+        style={{
+          fontSize: 13,
+          padding: '10px 14px',
+          borderRadius: 8,
+          border: '1px dashed rgba(0,0,0,.2)',
+          color: 'rgba(0,0,0,.6)',
+          background: 'transparent',
+          cursor: 'pointer',
+        }}
+      >
+        No items yet — add them in CMS → {collectionName}
+      </button>
+    </div>
+  );
+}
+
 function Skeleton({ sectionId }: { sectionId: string }) {
   return (
     <section className="lg-cms" data-surface="neutral" data-sid={sectionId} data-cms-skeleton="">
@@ -166,6 +211,12 @@ function Rendered({
       E={E}
       sectionId={sectionId}
       manageSlot={<ManageButton collectionId={collectionId} />}
+      emptySlot={
+        <EmptyHint
+          collectionId={collectionId || model.collectionId}
+          collectionName={model.collectionName}
+        />
+      }
     />
   );
 }

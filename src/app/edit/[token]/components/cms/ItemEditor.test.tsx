@@ -6,7 +6,7 @@
 // What these assert, and why each one earns its keep:
 //
 //  1. CONTROL PER TYPE — every field type with a control renders THEIR control,
-//     chosen by TYPE (`stat`, the 10th type, gets its control in phase 8B).
+//     chosen by TYPE (all 10, `stat` included since phase 8B).
 //     Name-driven controls are how a CMS grows a hidden second schema.
 //
 //  2. SAVE PAYLOAD — the PATCH body actually sent (values map + method + url).
@@ -77,6 +77,10 @@ const ALL_FIELDS: FieldDef[] = [
   { id: 'buy', name: 'Buy', type: 'link' },
   { id: 'published', name: 'Published', type: 'date' },
   { id: 'topics', name: 'Topics', type: 'tags' },
+  // The 10th type. Phase 8A added it to the contract with NO control, so this
+  // fixture deliberately excluded it; 8B shipped `key-value-field`, so it is back
+  // and the coverage assertion below is the full closed set again.
+  { id: 'weight', name: 'Weight', type: 'stat' },
 ];
 
 function makeCollection(over: Partial<CmsCollection> = {}): CmsCollection {
@@ -201,7 +205,7 @@ function lastMethod(): string {
 /* ------------------------------------------------ 1. control per field TYPE */
 
 describe('control per field type', () => {
-  it('renders a control for every one of the closed 9, keyed on TYPE', () => {
+  it('renders a control for every one of the closed 10, keyed on TYPE', () => {
     render({ item: makeItem() });
 
     for (const field of ALL_FIELDS) {
@@ -209,13 +213,9 @@ describe('control per field type', () => {
       const control = wrapper.querySelector(`[data-control="${field.type}"]`);
       expect(control, `no control for ${field.id} (${field.type})`).toBeTruthy();
     }
-    // Every type WITH A CONTROL is actually exercised above — no silent gap.
-    // `stat` (the 10th closed type) has no control until phase 8B; it is named
-    // explicitly so this stays a coverage assertion rather than a loose subset
-    // check — adding an 11th type without a control fails here.
-    expect(new Set(ALL_FIELDS.map((f) => f.type))).toEqual(
-      new Set(FIELD_TYPES.filter((t) => t !== 'stat'))
-    );
+    // EVERY closed type is exercised above — no silent gap, and no filter to
+    // hide behind: adding an 11th type without a control fails here.
+    expect(new Set(ALL_FIELDS.map((f) => f.type))).toEqual(new Set(FIELD_TYPES));
   });
 
   it('uses a plain textarea for text_long — ruling #3, no rich-text toolbar', () => {
@@ -494,6 +494,23 @@ describe('empty values', () => {
     expect(normalizeValue('text_short', '   ')).toBeNull();
     expect(normalizeValue('text_long', '')).toBeNull();
     expect(normalizeValue('tags', [])).toEqual([]);
+    // `stat` is the QUIET one: StatValueSchema ACCEPTS {key:'',value:''}, so an
+    // unmapped empty pair would be STORED rather than 400ing — a cleared spec
+    // silently reappearing as an empty row on the published page.
+    expect(normalizeValue('stat', { key: '', value: '' })).toBeNull();
+    expect(normalizeValue('stat', { key: '  ', value: '  ' })).toBeNull();
+    expect(normalizeValue('stat', undefined)).toBeNull();
+  });
+
+  it('keeps a HALF-filled stat pair (a spec name with no number is still content)', () => {
+    expect(normalizeValue('stat', { key: 'Weight', value: '' })).toEqual({
+      key: 'Weight',
+      value: '',
+    });
+    expect(normalizeValue('stat', { key: '', value: '4.2 kg' })).toEqual({
+      key: '',
+      value: '4.2 kg',
+    });
   });
 
   it('buildValuesPayload only sends the delete sentinel for keys the item HAS', () => {

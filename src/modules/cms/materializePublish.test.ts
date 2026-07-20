@@ -44,11 +44,14 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// `@/lib/prisma` is only used by loadCmsBundles (not exercised here — the pure
-// materializer takes fixtures), but importing the module must not boot Prisma.
-vi.mock('@/lib/prisma', () => ({ prisma: {} }));
+// Most gates below drive the PURE materializer with fixtures and never touch the
+// DB. The `materializeCmsForPublish` set at the bottom does, so `collection
+// .findMany` is a stub whose rows each test sets — importing the module must
+// still never boot Prisma.
+const findMany = vi.hoisted(() => vi.fn(async (): Promise<any[]> => []));
+vi.mock('@/lib/prisma', () => ({ prisma: { collection: { findMany } } }));
 
 import {
   materializeCmsContent,
@@ -62,8 +65,21 @@ import {
   collectionSlugShadowsPage,
   itemSlugShadowsPage,
   CmsPathCollisionError,
+  CmsFanOutLimitError,
+  CmsTotalFanOutLimitError,
+  assertCmsFanOutWithinLimit,
+  MAX_CMS_DETAIL_PAGES_PER_COLLECTION,
+  MAX_CMS_DETAIL_PAGES_TOTAL,
   CMS_COLLECTION_LAYOUT,
   CMS_COLLECTION_ITEM_LAYOUT,
+  applyCmsListingPages,
+  buildListingSubpages,
+  isCmsListingSubpage,
+  assertNoCmsPathCollisions,
+  cmsListingPath,
+  cmsListingSectionId,
+  isCmsListingSectionId,
+  materializeCmsForPublish,
 } from './materializePublish';
 import {
   toRenderModel,
@@ -95,13 +111,16 @@ const FIELDS: FieldDef[] = [
   // video + audio are here so the KEY-NAME meta-guard below covers every field
   // type that has an emit path: a future `mediaUrl`-style key added to the media
   // branch must trip the no-suffix-match assertion, not slip through an
-  // unexercised branch. (`stat` — the 10th type — has no emit path until phase
-  // 8B, which plan step 5b requires to extend this fixture.)
+  // unexercised branch. Phase 8B added `stat` (below) so ALL 10 types are swept.
   { id: 'clip', name: 'Clip', type: 'video' },
   { id: 'track', name: 'Track', type: 'audio' },
   { id: 'buy', name: 'Buy', type: 'link' },
   { id: 'released', name: 'Released', type: 'date' },
   { id: 'topics', name: 'Topics', type: 'tags' },
+  // The 10th type. Its two property names (`key`, `value`) are a publish-
+  // correctness contract — renaming either to something ending in
+  // href/url/link/slug ships '#' on every published spec row.
+  { id: 'weight', name: 'Weight', type: 'stat' },
 ];
 
 function bundle(id = 'col1'): CmsCollectionBundle {
@@ -135,6 +154,7 @@ function bundle(id = 'col1'): CmsCollectionBundle {
           buy: { url: 'mailto:hi@acme.com', label: 'Email me' },
           released: '2026-01-02',
           topics: ['focus', 'craft'],
+          weight: { key: 'Weight', value: '4.2 kg' },
         } as any,
         order: 0,
         slugLocked: false,
@@ -1045,5 +1065,719 @@ describe('buildDetailSubpages', () => {
     const b = detailBundle();
     b.items[0].slug = '';
     expect([...buildDetailSubpages(bundleMap(b)).keys()]).toEqual([PATH_2]);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// PHASE 8B — the LISTING page (`/<collectionRef>`, per-collection toggle)
+// ════════════════════════════════════════════════════════════════════════════
+//
+// This mirrors the phase-4 detail set ASSERTION FOR ASSERTION, because it is the
+// same publish path with the same five ways to fail silently:
+//
+//  A. PATH CONVENTION — the subpage KEY is leading-slash absolute `/<ref>`.
+//     Slash-less breaks KV route derivation and the locale collision guard.
+//  B. DUAL PIN — every id in `layout.sections` must have a non-empty
+//     `content[sid].layout`, or `LandingPagePublishedRenderer` silently
+//     `return null`s it and the page publishes BLANK.
+//  C. AUTHORITY — only listing pages WE authored are written or pruned. Unlike
+//     detail pages this is NOT purely structural: a user can put a
+//     `cmscollection` block on their own subpage, so ownership is proven by the
+//     `cmscollection-listing-*` marker, not by the type prefix.
+//  D. SANITIZE — round-trips BOTH chokepoints byte-identical.
+//  E. PARITY — rendered through the REAL published renderer, never the registry
+//     component (which bypasses exactly the failure B describes).
+
+/** Same collection as `bundle()`, with the LISTING page on. */
+function listingBundle(id = 'col1'): CmsCollectionBundle {
+  const b = bundle(id);
+  b.collection.listingPage = true;
+  return b;
+}
+
+const LISTING_PATH = '/books';
+
+describe('listing page — path convention + entry shape', () => {
+  it('keys the subpage by the LEADING-SLASH absolute path', () => {
+    const content = payload();
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+
+    const keys = Object.keys(content.subpages).filter((k) => k !== '/about');
+    expect(keys).toEqual([LISTING_PATH]);
+    expect(keys[0].startsWith('/')).toBe(true);
+    expect(keys[0].startsWith('/p/')).toBe(false);
+    expect(cmsListingPath('books')).toBe(LISTING_PATH);
+  });
+
+  it('matches the pinned subpage shape {layout:{sections}, content, title}', () => {
+    const content = payload();
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+    const sub = content.subpages[LISTING_PATH];
+
+    expect(Object.keys(sub).sort()).toEqual(['content', 'layout', 'title']);
+    expect(Array.isArray(sub.layout.sections)).toBe(true);
+    expect(sub.layout.sections).toHaveLength(1);
+    // `theme` is deliberately ABSENT — the root theme cascades.
+    expect(sub.layout.theme).toBeUndefined();
+    expect(sub.title).toBe('Books');
+  });
+
+  it('DUAL PIN: every id in layout.sections has a non-empty content[sid].layout', () => {
+    const content = payload();
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+    const sub = content.subpages[LISTING_PATH];
+
+    for (const sid of sub.layout.sections) {
+      const entry = sub.content[sid];
+      expect(entry, sid).toBeTruthy();
+      expect(typeof entry.layout).toBe('string');
+      expect(entry.layout.length).toBeGreaterThan(0);
+      expect(entry.layout).toBe(CMS_COLLECTION_LAYOUT);
+      expect(entry.id).toBe(sid);
+    }
+  });
+
+  it('carries the SAME model the placed block gets (one feed, not a second)', () => {
+    const content = payload();
+    const b = listingBundle();
+    applyCmsListingPages(content, bundleMap(b));
+    const sub = content.subpages[LISTING_PATH];
+    const sid = sub.layout.sections[0];
+
+    expect(sub.content[sid].elements[CMS_MODEL_ELEMENT_KEY]).toEqual(toRenderModel(b));
+    expect(sub.content[sid].elements.collectionId).toBe('col1');
+  });
+
+  it('emits NOTHING when the toggle is off, and nothing for a slug-less collection', () => {
+    const off = payload();
+    applyCmsListingPages(off, bundleMap(bundle()));
+    expect(Object.keys(off.subpages)).toEqual(['/about']);
+
+    const b = listingBundle();
+    b.collection.slug = '';
+    const noSlug = payload();
+    applyCmsListingPages(noSlug, bundleMap(b));
+    expect(Object.keys(noSlug.subpages)).toEqual(['/about']);
+  });
+});
+
+describe('listing page — authority scoping + pruning', () => {
+  it('leaves non-cms subpages byte-identical', () => {
+    const content = payload();
+    const before = clone(content);
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+
+    expect(content.subpages['/about']).toEqual(before.subpages['/about']);
+    expect(content.content).toEqual(before.content);
+    expect(content.layout).toEqual(before.layout);
+  });
+
+  it('TOGGLE OFF prunes the listing page it previously wrote', () => {
+    const content = payload();
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+    expect(content.subpages[LISTING_PATH]).toBeTruthy();
+
+    const off = applyCmsListingPages(content, bundleMap(bundle()));
+    expect(content.subpages[LISTING_PATH]).toBeUndefined();
+    expect(off.removed).toBe(1);
+    // …and it took nothing else with it.
+    expect(Object.keys(content.subpages)).toEqual(['/about']);
+  });
+
+  it('never prunes a USER subpage that merely CONTAINS a placed collection block', () => {
+    // THE trap that detail pages do not have: a user can "Add to page" a
+    // cmscollection block onto their own subpage. A type-prefix ownership test
+    // would claim `/shop` as ours and DELETE it the moment the toggle goes off.
+    const content = payload();
+    content.subpages['/shop'] = {
+      title: 'Shop',
+      layout: { sections: [CMS_SID_SUB] },
+      content: {
+        [CMS_SID_SUB]: {
+          id: CMS_SID_SUB,
+          layout: CMS_COLLECTION_LAYOUT,
+          elements: { collectionId: 'col1' },
+        },
+      },
+    };
+    const before = clone(content.subpages['/shop']);
+
+    applyCmsListingPages(content, bundleMap(bundle())); // toggle OFF ⇒ prune pass
+    expect(content.subpages['/shop']).toEqual(before);
+    expect(isCmsListingSubpage(content.subpages['/shop'])).toBe(false);
+  });
+
+  it('overwrites a stale CLIENT-SENT copy of the listing path (server authority)', () => {
+    const content = payload();
+    const sid = cmsListingSectionId('col1');
+    content.subpages[LISTING_PATH] = {
+      title: 'stale',
+      layout: { sections: [sid] },
+      content: {
+        [sid]: {
+          id: sid,
+          layout: CMS_COLLECTION_LAYOUT,
+          elements: { collectionId: 'col1', [CMS_MODEL_ELEMENT_KEY]: { hacked: true } },
+        },
+      },
+    };
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+
+    expect(content.subpages[LISTING_PATH].title).toBe('Books');
+    expect(content.subpages[LISTING_PATH].content[sid].elements[CMS_MODEL_ELEMENT_KEY]).toEqual(
+      toRenderModel(listingBundle())
+    );
+  });
+
+  it('a listing path landing on a REAL page FAILS LOUD, before any mutation', () => {
+    const content = payload();
+    content.subpages[LISTING_PATH] = realPage('Our books');
+    const before = clone(content);
+
+    expect(() => applyCmsListingPages(content, bundleMap(listingBundle()))).toThrow(
+      CmsPathCollisionError
+    );
+    // The narrow instanceof catch in api/publish maps THIS class to a 409; the
+    // payload must be untouched so a failed publish changes nothing.
+    expect(content).toEqual(before);
+  });
+
+  it('the collision message names the colliding path (the user has to act on it)', () => {
+    const content = payload();
+    content.subpages[LISTING_PATH] = realPage('Our books');
+    try {
+      applyCmsListingPages(content, bundleMap(listingBundle()));
+      throw new Error('expected a collision');
+    } catch (e) {
+      expect(e).toBeInstanceOf(CmsPathCollisionError);
+      expect((e as Error).message).toContain(LISTING_PATH);
+    }
+  });
+
+  it('assertNoCmsPathCollisions catches a LISTING collision before detail pages are written', () => {
+    // Without the pre-pass, applyCmsDetailPages would already have mutated
+    // `content` by the time the listing guard threw.
+    const b = listingBundle();
+    b.collection.detailPages = true;
+    const content = payload();
+    content.subpages[LISTING_PATH] = realPage('Our books');
+    const before = clone(content);
+
+    expect(() => assertNoCmsPathCollisions(content, bundleMap(b))).toThrow(CmsPathCollisionError);
+    expect(content).toEqual(before);
+  });
+});
+
+describe('listing page — coercion + url-key proof', () => {
+  it('round-trips through BOTH publish chokepoints BYTE-IDENTICAL', () => {
+    const content = payload();
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+    const beforeSanitize = clone(content);
+
+    runPublishSanitizers(content);
+
+    expect(content.subpages[LISTING_PATH]).toEqual(beforeSanitize.subpages[LISTING_PATH]);
+
+    const sid = content.subpages[LISTING_PATH].layout.sections[0];
+    const model = content.subpages[LISTING_PATH].content[sid].elements[CMS_MODEL_ELEMENT_KEY];
+    // anti-vacuity + the exact values the url-key walker corrupts
+    expect(model.groups.length).toBeGreaterThan(0);
+    expect(model.roles.primaryCta).toBe('buy');
+    expect(model.collectionRef).toBe('books');
+  });
+
+  it('the SECOND chokepoint scheme-gates nothing on the listing page to "#"', () => {
+    const content = payload();
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+    runPublishSanitizers(content);
+    const sub = content.subpages[LISTING_PATH];
+    expect(allEntries(sub).filter(([, v]) => v === '#')).toEqual([]);
+  });
+
+  it('META-GUARD: nothing added by the listing page ends in href/url/link/slug', () => {
+    const content = payload();
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+    const entries = allEntries(content.subpages[LISTING_PATH]);
+    expect(entries.length).toBeGreaterThan(20); // anti-vacuity
+    const offenders = entries.filter(([k]) => isUrlContentKey(k)).filter(([k]) => k !== 'url');
+    expect(offenders).toEqual([]);
+    expect(entries.some(([k]) => k === 'url')).toBe(true);
+  });
+
+  it('carries NO numeric key anywhere (coercion rule 2)', () => {
+    const content = payload();
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+    const keys = allKeys(content.subpages[LISTING_PATH]);
+    expect(keys.length).toBeGreaterThan(10);
+    expect(keys.some((k) => /^\d+$/.test(k))).toBe(false);
+  });
+});
+
+describe('listing page ↔ editor parity (through the real published renderer)', () => {
+  const renderListing = (content: Record<string, any>) => {
+    const sub = content.subpages[LISTING_PATH];
+    return dom(
+      React.createElement(LandingPagePublishedRenderer, {
+        sections: sub.layout.sections,
+        content: sub.content,
+        theme: { colors: { sectionBackgrounds: {} } },
+      })
+    );
+  };
+
+  it('publishes the SAME body skeleton the editor renders from the same tables', () => {
+    const content = payload();
+    const b = listingBundle();
+    applyCmsListingPages(content, bundleMap(b));
+    runPublishSanitizers(content);
+
+    const published = renderListing(content);
+    const sid = content.subpages[LISTING_PATH].layout.sections[0];
+    const edit = dom(
+      React.createElement(CollectionSection, { sectionId: sid, model: toRenderModel(b) })
+    );
+
+    const publishedSkeleton = skeleton(cmsBodyOf(published));
+    expect(publishedSkeleton).toBe(skeleton(cmsBodyOf(edit)));
+    // anti-vacuity: real content, real CTA, and the 10th type actually rendered
+    expect(publishedSkeleton).toContain('#text:Deep Work');
+    expect(publishedSkeleton).toContain('lg-cms__cta');
+    expect(publishedSkeleton).toContain('#text:4.2 kg');
+    expect(publishedSkeleton.split('\n').length).toBeGreaterThan(20);
+  });
+
+  it('a listing section stripped of its layout DOES vanish (the gate bites)', () => {
+    const content = payload();
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+    const sid = content.subpages[LISTING_PATH].layout.sections[0];
+    delete content.subpages[LISTING_PATH].content[sid].layout;
+
+    expect(renderListing(content).querySelector('[data-cms-body]')).toBeNull();
+  });
+});
+
+describe('listing page — fast-path pruning', () => {
+  it('prunes an orphaned listing page even with ZERO cms sections left', () => {
+    // The last collection block was deleted from the page. No cms sections ⇒ no
+    // queries — but the previously published listing page must still go away.
+    const content = payload({ cmsRoot: false });
+    applyCmsListingPages(content, bundleMap(listingBundle()));
+    expect(content.subpages[LISTING_PATH]).toBeTruthy();
+
+    applyCmsListingPages(content, new Map());
+    expect(content.subpages[LISTING_PATH]).toBeUndefined();
+    expect(content.subpages['/about']).toBeTruthy();
+  });
+});
+
+describe('buildListingSubpages', () => {
+  it('produces nothing for a listingPage-off collection', () => {
+    expect(buildListingSubpages(bundleMap(bundle())).size).toBe(0);
+  });
+
+  it('produces exactly one entry for a listingPage-on collection', () => {
+    expect([...buildListingSubpages(bundleMap(listingBundle())).keys()]).toEqual([LISTING_PATH]);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// DECOUPLING (founder ruling) — page emission does NOT depend on placement
+// ════════════════════════════════════════════════════════════════════════════
+//
+// `materializeCmsForPublish` now discovers collections by TOKEN, not by walking
+// the payload for placed blocks. Two things must be proven here:
+//
+//  1. THE BUG IT FIXES — a collection with `listingPage` / `detailPages` on but
+//     placed NOWHERE emits its pages. (The modal's "CREATES THESE PAGES" tiles
+//     promised them; coupling made the promise fail silently. `detailPages` had
+//     this defect since phase 4, not just the new listing pages.)
+//  2. THE GUARANTEE THAT REPLACED THE FAST PATH — phase 3's "zero cms sections ⇒
+//     zero queries" mitigation is gone, so the materializer can now reach
+//     payloads it never touched before. Byte-identity for a project with no
+//     collections (and for one whose toggles are all off) is what stands in its
+//     place, and it is asserted on the SERIALIZED payload, not with `toEqual`.
+
+/** A Prisma `Collection` row (+ nested groups/items) built from a fixture bundle. */
+function rowOf(b: CmsCollectionBundle) {
+  return { ...b.collection, groups: b.groups, items: b.items };
+}
+
+const TOKEN = 'tok1';
+/** True byte-identity, not structural equality: key ORDER counts too. */
+const bytes = (v: unknown) => JSON.stringify(v);
+
+// Each gate below queues its own rows with `mockResolvedValueOnce`; without this
+// a leftover queue entry would silently feed the next test.
+beforeEach(() => {
+  findMany.mockReset();
+  findMany.mockResolvedValue([]);
+});
+
+describe('materializeCmsForPublish — the zero-query fast path is replaced by byte-identity', () => {
+  it('a project with ZERO collections is byte-identical, subpages included', async () => {
+    findMany.mockResolvedValueOnce([]);
+    const content = payload({ cmsRoot: false });
+    const before = bytes(content);
+
+    expect(await materializeCmsForPublish(TOKEN, content)).toBe(0);
+
+    expect(bytes(content)).toBe(before);
+    // anti-vacuity: the payload really does carry subpages we could have damaged
+    expect(Object.keys(content.subpages)).toEqual(['/about']);
+  });
+
+  it('a project whose collections all have BOTH toggles off is byte-identical', async () => {
+    findMany.mockResolvedValueOnce([rowOf(bundle())]); // detailPages+listingPage off
+    const content = payload({ cmsRoot: false });
+    const before = bytes(content);
+
+    await materializeCmsForPublish(TOKEN, content);
+
+    expect(bytes(content)).toBe(before);
+  });
+
+  it('reads collections by tokenId ONLY (the tenant boundary, after the owner gate)', async () => {
+    findMany.mockResolvedValueOnce([]);
+    await materializeCmsForPublish(TOKEN, payload({ cmsRoot: false }));
+
+    const arg = findMany.mock.calls.at(-1)![0] as any;
+    expect(arg.where).toEqual({ tokenId: TOKEN });
+    expect(findMany).toHaveBeenCalledTimes(1); // one round trip per publish
+  });
+});
+
+describe('materializeCmsForPublish — emission is DECOUPLED from placement', () => {
+  it('emits listing AND item pages for a collection PLACED NOWHERE (the fixed bug)', async () => {
+    const b = listingBundle();
+    b.collection.detailPages = true;
+    findMany.mockResolvedValueOnce([rowOf(b)]);
+
+    const content = payload({ cmsRoot: false }); // no cmscollection section anywhere
+    expect(findCmsSections(content)).toEqual([]);
+
+    expect(await materializeCmsForPublish(TOKEN, content)).toBe(0); // nothing INLINE
+
+    expect(Object.keys(content.subpages).sort()).toEqual(
+      ['/about', LISTING_PATH, '/books/deep-work', '/books/loose'].sort()
+    );
+    // the listing page is fully formed, not a husk (DUAL PIN + the real model)
+    const sub = content.subpages[LISTING_PATH];
+    const sid = sub.layout.sections[0];
+    expect(sub.content[sid].layout).toBe(CMS_COLLECTION_LAYOUT);
+    expect(sub.content[sid].elements[CMS_MODEL_ELEMENT_KEY]).toEqual(toRenderModel(b));
+  });
+
+  it('placed AND toggled on ⇒ exactly ONE listing page (no duplicate from two routes)', async () => {
+    const b = listingBundle();
+    findMany.mockResolvedValueOnce([rowOf(b)]);
+
+    const content = payload({ cmsRoot: true }); // block ALSO placed on the root page
+    expect(await materializeCmsForPublish(TOKEN, content)).toBe(1); // inline still works
+
+    const listingPaths = Object.keys(content.subpages).filter((k) => k === LISTING_PATH);
+    expect(listingPaths).toHaveLength(1);
+    // the two routes produce DIFFERENT section ids — the placement keeps its uuid
+    // id, the page gets the marker id — so neither can shadow the other.
+    expect(content.content[CMS_SID].elements[CMS_MODEL_ELEMENT_KEY]).toEqual(toRenderModel(b));
+    expect(isCmsListingSectionId(CMS_SID)).toBe(false);
+    expect(content.subpages[LISTING_PATH].layout.sections).toEqual([cmsListingSectionId('col1')]);
+  });
+
+  it('toggle OFF prunes the pages again even though nothing is placed', async () => {
+    const on = listingBundle();
+    on.collection.detailPages = true;
+    findMany.mockResolvedValueOnce([rowOf(on)]);
+    const content = payload({ cmsRoot: false });
+    await materializeCmsForPublish(TOKEN, content);
+    expect(content.subpages[LISTING_PATH]).toBeTruthy();
+
+    findMany.mockResolvedValueOnce([rowOf(bundle())]); // both toggles back off
+    await materializeCmsForPublish(TOKEN, content);
+
+    expect(Object.keys(content.subpages)).toEqual(['/about']);
+  });
+
+  it('PRUNING STILL CANNOT TOUCH a user page that merely contains a placed block', async () => {
+    // The pruning surface GREW with decoupling: this pass now runs on payloads
+    // the materializer previously never saw. The `cmscollection-listing-` marker
+    // is the only thing stopping `/shop` from being deleted here.
+    const content = payload({ cmsRoot: false });
+    content.subpages['/shop'] = {
+      title: 'Shop',
+      layout: { sections: [CMS_SID_SUB] },
+      content: {
+        [CMS_SID_SUB]: {
+          id: CMS_SID_SUB,
+          layout: CMS_COLLECTION_LAYOUT,
+          elements: { collectionId: 'col1' },
+        },
+      },
+    };
+    const before = bytes(content.subpages['/shop']);
+
+    findMany.mockResolvedValueOnce([]); // collection deleted ⇒ full prune pass
+    await materializeCmsForPublish(TOKEN, content);
+
+    expect(content.subpages['/shop']).toBeTruthy();
+    expect(bytes(content.subpages['/shop'])).toBe(before);
+  });
+
+  it('an unplaced collection whose listing path hits a REAL page still 409s, unmutated', async () => {
+    findMany.mockResolvedValueOnce([rowOf(listingBundle())]);
+    const content = payload({ cmsRoot: false });
+    content.subpages[LISTING_PATH] = realPage('Our books');
+    const before = bytes(content);
+
+    await expect(materializeCmsForPublish(TOKEN, content)).rejects.toBeInstanceOf(
+      CmsPathCollisionError
+    );
+    expect(bytes(content)).toBe(before);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// FAN-OUT CAP — the brake decoupling removed
+// ════════════════════════════════════════════════════════════════════════════
+//
+// Before decoupling, detail-page fan-out was conditional on PLACEMENT — an
+// accidental brake. Now every `detailPages`-on collection fans out on every
+// publish, and publish renders one blob + writes one KV route PER ITEM,
+// SERIALLY, inside ONE serverless request. Uncapped, a few-hundred-item
+// collection dies as an OPAQUE TIMEOUT on the highest-blast-radius route.
+//
+// What these gates pin:
+//  · at the cap        → publishes fine (the cap is not off-by-one strict)
+//  · one over the cap  → FAILS LOUD, mapped-status error naming the collection
+//  · the failure happens BEFORE ANY MUTATION (byte-identity, same discipline as
+//    the collision guard) — never a half-published collection
+//  · a toggled-OFF collection is exempt at any size (it emits no pages)
+
+/** `detailBundle()` inflated to exactly `n` items (unique ids + slugs). */
+function bigDetailBundle(n: number, id = 'col1'): CmsCollectionBundle {
+  const b = detailBundle(id);
+  const proto = b.items[0];
+  b.items = Array.from({ length: n }, (_, i) => ({
+    ...clone(proto),
+    id: `i${i}`,
+    collectionId: id,
+    groupId: 'gA',
+    slug: `item-${i}`,
+    order: i,
+  }));
+  return b;
+}
+
+describe('detail fan-out cap', () => {
+  it('the pure guard passes AT the cap and throws ONE over it', () => {
+    expect(() =>
+      assertCmsFanOutWithinLimit(bundleMap(bigDetailBundle(MAX_CMS_DETAIL_PAGES_PER_COLLECTION)))
+    ).not.toThrow();
+    expect(() =>
+      assertCmsFanOutWithinLimit(bundleMap(bigDetailBundle(MAX_CMS_DETAIL_PAGES_PER_COLLECTION + 1)))
+    ).toThrow(CmsFanOutLimitError);
+  });
+
+  it('an OVER-cap collection with detailPages OFF is exempt (it emits no pages)', () => {
+    const b = bigDetailBundle(MAX_CMS_DETAIL_PAGES_PER_COLLECTION * 5);
+    b.collection.detailPages = false;
+    expect(() => assertCmsFanOutWithinLimit(bundleMap(b))).not.toThrow();
+  });
+
+  it('publishing AT the cap works and emits exactly that many detail pages', async () => {
+    const n = MAX_CMS_DETAIL_PAGES_PER_COLLECTION;
+    findMany.mockResolvedValueOnce([rowOf(bigDetailBundle(n))]);
+    const content = payload({ cmsRoot: false });
+
+    await materializeCmsForPublish(TOKEN, content);
+
+    const detailPaths = Object.keys(content.subpages).filter((k) => k.startsWith('/books/'));
+    expect(detailPaths).toHaveLength(n);
+  });
+
+  it('ONE over the cap FAILS LOUD, naming the collection and the limit', async () => {
+    const n = MAX_CMS_DETAIL_PAGES_PER_COLLECTION + 1;
+    // NOT `…Once`: this gate makes two calls (throw-type, then message).
+    findMany.mockResolvedValue([rowOf(bigDetailBundle(n))]);
+    const content = payload({ cmsRoot: false });
+
+    await expect(materializeCmsForPublish(TOKEN, content)).rejects.toBeInstanceOf(
+      CmsFanOutLimitError
+    );
+
+    // The message is the user-facing contract: it must identify WHICH collection
+    // and WHAT the limit is, or the user cannot act on it.
+    const err = await materializeCmsForPublish(TOKEN, payload({ cmsRoot: false })).catch((e) => e);
+    expect(err).toBeInstanceOf(CmsFanOutLimitError);
+    expect(err.message).toContain('Books');
+    expect(err.message).toContain(String(n));
+    expect(err.message).toContain(String(MAX_CMS_DETAIL_PAGES_PER_COLLECTION));
+  });
+
+  it('the over-cap failure mutates NOTHING (no half-written fan-out)', async () => {
+    findMany.mockResolvedValue([rowOf(bigDetailBundle(MAX_CMS_DETAIL_PAGES_PER_COLLECTION + 1))]);
+    const content = payload({ cmsRoot: true }); // block placed too — nothing may be rewritten
+    const before = bytes(content);
+
+    await expect(materializeCmsForPublish(TOKEN, content)).rejects.toBeInstanceOf(
+      CmsFanOutLimitError
+    );
+
+    expect(bytes(content)).toBe(before);
+    // anti-vacuity: this payload DOES carry the things the throw must have spared
+    expect(Object.keys(content.subpages)).toEqual(['/about']);
+    expect(content.content[CMS_SID].elements[CMS_MODEL_ELEMENT_KEY]).toBeUndefined();
+  });
+
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// THE GLOBAL FAN-OUT CAP — the one that actually guards the timeout
+// ════════════════════════════════════════════════════════════════════════════
+//
+// A PER-COLLECTION cap cannot bound the request: the timeout is a property of
+// the WHOLE publish, so ten collections of 100 items each are ten individually
+// LEGAL collections that still fan out to 1000 pages and time out exactly as if
+// there were no cap at all. `MAX_CMS_DETAIL_PAGES_TOTAL` closes that gap; the
+// per-collection cap survives only to name the culprit when there is one.
+//
+// The load-bearing gate below is "MANY collections, each UNDER the
+// per-collection cap, summing OVER the total" — that is the exact case the
+// per-collection cap structurally cannot catch.
+
+/** Two-plus collections whose per-collection counts are all legal. */
+function spreadBundles(n: number, per: number): CmsCollectionBundle[] {
+  return Array.from({ length: n }, (_, i) => {
+    const b = bigDetailBundle(per, `col${i}`);
+    b.collection.name = `Coll ${i}`;
+    b.collection.slug = `books-${i}`;
+    return b;
+  });
+}
+
+describe('total fan-out cap (across ALL collections)', () => {
+  it('the per-collection cap is <= the total, so it can never permit what the total forbids', () => {
+    expect(MAX_CMS_DETAIL_PAGES_PER_COLLECTION).toBeLessThanOrEqual(MAX_CMS_DETAIL_PAGES_TOTAL);
+  });
+
+  // ── THE GAP THIS CLOSES ───────────────────────────────────────────────────
+  it('throws when the TOTAL exceeds the cap even though EVERY collection is under the per-collection cap', () => {
+    const per = Math.floor(MAX_CMS_DETAIL_PAGES_TOTAL / 4) + 1;
+    const bundles = spreadBundles(5, per);
+
+    // anti-vacuity: the per-collection guard is genuinely satisfied by each one,
+    // so ONLY the global check can be what throws here.
+    for (const b of bundles) {
+      expect(b.items.length).toBeLessThanOrEqual(MAX_CMS_DETAIL_PAGES_PER_COLLECTION);
+      expect(() => assertCmsFanOutWithinLimit(bundleMap(b))).not.toThrow();
+    }
+    expect(per * 5).toBeGreaterThan(MAX_CMS_DETAIL_PAGES_TOTAL);
+
+    expect(() => assertCmsFanOutWithinLimit(bundleMap(...bundles))).toThrow(
+      CmsTotalFanOutLimitError
+    );
+  });
+
+  it('passes AT the total and throws ONE over it', () => {
+    const half = MAX_CMS_DETAIL_PAGES_TOTAL / 2;
+    const at = [bigDetailBundle(half, 'colA'), bigDetailBundle(MAX_CMS_DETAIL_PAGES_TOTAL - half, 'colB')];
+    at[1].collection.slug = 'b-books';
+    expect(() => assertCmsFanOutWithinLimit(bundleMap(...at))).not.toThrow();
+
+    const over = [bigDetailBundle(half, 'colA'), bigDetailBundle(MAX_CMS_DETAIL_PAGES_TOTAL - half + 1, 'colB')];
+    over[1].collection.slug = 'b-books';
+    expect(() => assertCmsFanOutWithinLimit(bundleMap(...over))).toThrow(CmsTotalFanOutLimitError);
+  });
+
+  it('a single OVERSIZED collection still gets the collection-NAMING error, not the aggregate one', () => {
+    // Both caps are breached; the per-collection check runs first precisely so
+    // the user is told WHICH collection rather than a total he cannot attribute.
+    const b = bigDetailBundle(MAX_CMS_DETAIL_PAGES_PER_COLLECTION + 1);
+    const err = (() => {
+      try {
+        assertCmsFanOutWithinLimit(bundleMap(b));
+      } catch (e) {
+        return e as Error;
+      }
+    })();
+    expect(err).toBeInstanceOf(CmsFanOutLimitError);
+    expect(err).not.toBeInstanceOf(CmsTotalFanOutLimitError);
+  });
+
+  it('the two error classes are SEPARATE — neither is a base of the other', () => {
+    // A shared hierarchy would silently enrol future error types into the
+    // route's 409 branch. Keep them siblings.
+    const total = new CmsTotalFanOutLimitError(999);
+    const per = new CmsFanOutLimitError('Books', 999);
+    expect(total).not.toBeInstanceOf(CmsFanOutLimitError);
+    expect(per).not.toBeInstanceOf(CmsTotalFanOutLimitError);
+    expect(Object.getPrototypeOf(CmsTotalFanOutLimitError)).toBe(Error);
+    expect(Object.getPrototypeOf(CmsFanOutLimitError)).toBe(Error);
+  });
+
+  it('collections with detailPages OFF do not count toward the total', () => {
+    const bundles = spreadBundles(5, MAX_CMS_DETAIL_PAGES_TOTAL);
+    for (const b of bundles) b.collection.detailPages = false;
+    expect(() => assertCmsFanOutWithinLimit(bundleMap(...bundles))).not.toThrow();
+  });
+
+  it('publishing AT the total works and emits exactly that many detail pages', async () => {
+    const half = MAX_CMS_DETAIL_PAGES_TOTAL / 2;
+    const a = bigDetailBundle(half, 'colA');
+    a.collection.slug = 'a-books';
+    const b = bigDetailBundle(MAX_CMS_DETAIL_PAGES_TOTAL - half, 'colB');
+    b.collection.slug = 'b-books';
+    findMany.mockResolvedValueOnce([rowOf(a), rowOf(b)]);
+    const content = payload({ cmsRoot: false });
+
+    await materializeCmsForPublish(TOKEN, content);
+
+    const detailPaths = Object.keys(content.subpages).filter(
+      (k) => k.startsWith('/a-books/') || k.startsWith('/b-books/')
+    );
+    expect(detailPaths).toHaveLength(MAX_CMS_DETAIL_PAGES_TOTAL);
+  });
+
+  it('ONE over the total FAILS LOUD, naming the TOTAL and the limit', async () => {
+    const per = Math.floor(MAX_CMS_DETAIL_PAGES_TOTAL / 4) + 1;
+    const bundles = spreadBundles(5, per);
+    const total = per * 5;
+    // NOT `…Once`: this gate makes two calls (throw-type, then message).
+    findMany.mockResolvedValue(bundles.map(rowOf));
+
+    await expect(materializeCmsForPublish(TOKEN, payload({ cmsRoot: false }))).rejects.toBeInstanceOf(
+      CmsTotalFanOutLimitError
+    );
+
+    const err = await materializeCmsForPublish(TOKEN, payload({ cmsRoot: false })).catch((e) => e);
+    expect(err).toBeInstanceOf(CmsTotalFanOutLimitError);
+    expect(err.message).toContain(String(total));
+    expect(err.message).toContain(String(MAX_CMS_DETAIL_PAGES_TOTAL));
+  });
+
+  it('the over-total failure mutates NOTHING (no half-written fan-out)', async () => {
+    const per = Math.floor(MAX_CMS_DETAIL_PAGES_TOTAL / 4) + 1;
+    findMany.mockResolvedValue(spreadBundles(5, per).map(rowOf));
+    const content = payload({ cmsRoot: true }); // block placed too — nothing may be rewritten
+    const before = bytes(content);
+
+    await expect(materializeCmsForPublish(TOKEN, content)).rejects.toBeInstanceOf(
+      CmsTotalFanOutLimitError
+    );
+
+    expect(bytes(content)).toBe(before);
+    // anti-vacuity: this payload DOES carry the things the throw must have spared
+    expect(Object.keys(content.subpages)).toEqual(['/about']);
+    expect(content.content[CMS_SID].elements[CMS_MODEL_ELEMENT_KEY]).toBeUndefined();
+  });
+});
+
+describe('listing section ids are distinguishable from user placements', () => {
+  it('a marked listing id is recognised; a uuid placement is NOT', () => {
+    expect(isCmsListingSectionId(cmsListingSectionId('col1'))).toBe(true);
+    expect(isCmsListingSectionId(CMS_SID)).toBe(false);
+    expect(isCmsListingSectionId('cmscollection-3f9a1b2c-4d5e')).toBe(false);
+    expect(isCmsListingSectionId('cmscollectionitem-i1')).toBe(false);
+    // …and it still dispatches as a cmscollection block.
+    expect(isCmsSectionId(cmsListingSectionId('col1'))).toBe(true);
   });
 });

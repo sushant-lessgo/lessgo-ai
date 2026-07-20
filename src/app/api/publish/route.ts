@@ -7,7 +7,7 @@ import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { PublishSchema, sanitizeForLogging, sanitizeSeo } from '@/lib/validation';
 import { createSecureResponse, validateSlug, verifyProjectAccess, assertProjectOwner } from '@/lib/security';
-import { materializeCmsForPublish, CmsPathCollisionError } from '@/modules/cms/materializePublish';
+import { materializeCmsForPublish, CmsPathCollisionError, CmsFanOutLimitError, CmsTotalFanOutLimitError } from '@/modules/cms/materializePublish';
 import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit, hasTrackingPixels, getPlanConfig, PlanTier } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
@@ -71,25 +71,46 @@ async function publishHandler(req: NextRequest) {
     // Server-authoritative: placed `cmscollection` sections get their data read
     // from the Collection tables (keyed by the tokenId just verified above) and
     // written into the snapshot. Runs BEFORE both sanitize chokepoints so the
-    // materialized payload flows through them like any other content. Zero cms
-    // sections ⇒ zero queries ⇒ existing publishes are byte-identical.
+    // materialized payload flows through them like any other content.
     //
-    // The ONLY expected user-facing failure here is `CmsPathCollisionError`: a
-    // computed detail path (`/<collectionRef>/<itemRef>`) is already occupied by a
-    // NON-cms subpage, so publishing would silently overwrite a real page. That is
-    // an actionable conflict — the user has to rename the page or change a slug —
-    // so it must reach them with the offending PATH, not die as a generic 500 in
-    // Sentry. 409 matches this route's existing conflict vocabulary ('Slug already
-    // taken', :241).
+    // Page emission is DECOUPLED from placement, so there is no longer a zero-cms-
+    // sections fast path: the materializer loads THIS project's collections by the
+    // tokenId just ownership-verified above, on EVERY publish (one indexed query).
+    // The guarantee that replaced the old fast path is byte-identity — a project
+    // with zero collections, or with all toggles off, comes out of materialization
+    // byte-identical — and it is enforced by tests (`materializePublish.test.ts`),
+    // not by an early return.
     //
-    // Catch ONLY this class. Everything else (DB failure, unexpected bug) keeps
-    // falling to the outer fatal catch's 500 — fail-CLOSED: we must never publish a
-    // half-materialized snapshot because a read failed.
+    // THREE expected user-facing failures here, all actionable, all 409 (this
+    // route's existing conflict vocabulary — 'Slug already taken', :241):
+    //   · `CmsPathCollisionError` — a computed cms path (`/<collectionRef>` or
+    //     `/<collectionRef>/<itemRef>`) is already occupied by a NON-cms subpage, so
+    //     publishing would silently overwrite a real page. The user must rename the
+    //     page or change a slug, so the offending PATH has to reach them.
+    //   · `CmsTotalFanOutLimitError` — THE fan-out guard: the TOTAL detail pages
+    //     across ALL collections exceeds what one request can serially
+    //     render+upload+route. The timeout is a property of the whole REQUEST, so
+    //     only a total can bound it — ten individually-legal collections still time
+    //     out. Without this cap that dies as an opaque function TIMEOUT.
+    //   · `CmsFanOutLimitError` — the same failure attributed to ONE oversized
+    //     collection. Not the binding constraint (the total is); it exists so the
+    //     common case names the culprit collection instead of an aggregate number.
+    // All three messages are user-facing contracts; pass `.message` through verbatim.
+    //
+    // Catch ONLY these three classes, by explicit `instanceof` (no shared base class —
+    // a hierarchy would silently enrol future error types into a 409). Everything
+    // else (DB failure, unexpected bug) keeps falling to the outer fatal catch's 500
+    // — fail-CLOSED: we must never publish a half-materialized snapshot because a
+    // read failed.
     if (content && typeof content === 'object') {
       try {
         await materializeCmsForPublish(tokenId, content as Record<string, any>);
       } catch (cmsError) {
-        if (cmsError instanceof CmsPathCollisionError) {
+        if (
+          cmsError instanceof CmsPathCollisionError ||
+          cmsError instanceof CmsFanOutLimitError ||
+          cmsError instanceof CmsTotalFanOutLimitError
+        ) {
           return createSecureResponse({ error: cmsError.message }, 409);
         }
         throw cmsError;

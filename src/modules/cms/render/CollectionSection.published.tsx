@@ -105,6 +105,7 @@ export const EMPTY_CMS_MODEL: CmsRenderModel = {
   collectionName: '',
   collectionRef: '',
   detailPages: false,
+  listingPage: false,
   layoutHint: null,
   roles: { title: null, cover: null, primaryCta: null },
   groups: [],

@@ -304,19 +304,115 @@ describe('AddCollectionModal — greyed presets (ruling #1, greyed-placeholder c
   });
 });
 
-describe('AddCollectionModal — CREATES THESE PAGES tiles are reactive (ruling #6)', () => {
-  it('shows the listing tile only until detailPages is switched on', () => {
+describe('AddCollectionModal — CREATES THESE PAGES tiles are reactive (ruling #6 + phase 8B)', () => {
+  // Both toggles default OFF (the listing page is a founder-ruled opt-in, NOT
+  // designer t12's "two pages, always"), so the honest starting state is "no
+  // pages of its own" — and saying that in words beats an empty box.
+  it('shows NO tiles and an explanatory line when both toggles are off', () => {
     renderModal();
     typeName('Books');
 
+    expect(q('[data-page-tile="listing"]')).toBeNull();
+    expect(q('[data-page-tile="item"]')).toBeNull();
+    const none = q('[data-page-tile-none]');
+    expect(none).not.toBeNull();
+    expect(none!.textContent).toContain('only where you');
+  });
+
+  it('reacts to EACH toggle independently, in both directions', () => {
+    renderModal();
+    typeName('Books');
+
+    click('[data-listing-page]');
     expect(q('[data-page-tile="listing"]')).not.toBeNull();
     expect(q('[data-page-tile="item"]')).toBeNull();
+    expect(q('[data-page-tile-none]')).toBeNull();
 
     click('[data-detail-pages]');
+    expect(q('[data-page-tile="listing"]')).not.toBeNull();
+    expect(q('[data-page-tile="item"]')).not.toBeNull();
+
+    click('[data-listing-page]');
+    expect(q('[data-page-tile="listing"]')).toBeNull();
     expect(q('[data-page-tile="item"]')).not.toBeNull();
 
     click('[data-detail-pages]');
-    expect(q('[data-page-tile="item"]')).toBeNull();
+    expect(q('[data-page-tile-none]')).not.toBeNull();
+  });
+
+  it('the listing tile carries the LEADING-SLASH path the publisher will use', () => {
+    renderModal();
+    typeName('Case studies');
+    click('[data-listing-page]');
+    expect(q('[data-page-tile="listing"]')!.textContent).toContain('/case-studies');
+  });
+});
+
+describe('AddCollectionModal — listingPage + purposes payload (phase 8B)', () => {
+  it('defaults listingPage to false and purposes to [] when untouched', async () => {
+    renderModal();
+    typeName('Team');
+    addField('text_short');
+
+    await act(async () => {
+      (must('[data-cms-modal-save]') as HTMLButtonElement).click();
+    });
+
+    const body = bodyOfLastFetch();
+    expect(body.listingPage).toBe(false);
+    expect(body.purposes).toEqual([]);
+  });
+
+  it('POSTs listingPage:true and the chosen purposes', async () => {
+    renderModal();
+    typeName('Products');
+    addField('text_short');
+    click('[data-listing-page]');
+    click('[data-purpose-chip="offer"]');
+    click('[data-purpose-chip="price"]');
+
+    await act(async () => {
+      (must('[data-cms-modal-save]') as HTMLButtonElement).click();
+    });
+
+    const body = bodyOfLastFetch();
+    expect(body.listingPage).toBe(true);
+    expect(body.purposes).toEqual(['offer', 'price']);
+  });
+
+  it('purposes chips toggle OFF again (a set, not an append-only list)', async () => {
+    renderModal();
+    typeName('Products');
+    addField('text_short');
+    click('[data-purpose-chip="proof"]');
+    click('[data-purpose-chip="proof"]');
+
+    await act(async () => {
+      (must('[data-cms-modal-save]') as HTMLButtonElement).click();
+    });
+
+    expect(bodyOfLastFetch().purposes).toEqual([]);
+  });
+
+  // Amendment item 2 is DATA-ONLY by ruling. The control must not promise a
+  // rendering effect that does not exist — if someone later deletes this note
+  // without shipping per-purpose renderers, that is a user-facing lie.
+  it('labels purposes as not-yet-affecting-rendering', () => {
+    renderModal();
+    const note = q('[data-purposes-note]');
+    expect(note).not.toBeNull();
+    expect(note!.textContent).toMatch(/does not change how the collection looks/i);
+  });
+
+  // Phase 8A hid `stat` behind PICKER_FIELD_TYPES because it had no control and
+  // no renderer. 8B shipped both, so the picker is the full closed set again.
+  it('offers ALL 10 field types in the picker, `stat` included', () => {
+    renderModal();
+    click('[data-add-field-trigger]');
+    for (const type of FIELD_TYPES) {
+      expect(q(`[data-add-field-type="${type}"]`), type).not.toBeNull();
+    }
+    expect(q('[data-add-field-type="stat"]')).not.toBeNull();
   });
 });
 

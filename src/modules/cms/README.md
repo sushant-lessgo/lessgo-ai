@@ -29,9 +29,11 @@ and `tokenId` (route key) — the `MediaAsset` shape.
    added by the 2026-07-20 spec amendment. Those two property names are load-bearing —
    see "Render-model KEY NAMES are constrained" below; anything ending in
    `href|url|link|slug` becomes `'#'` at publish. One field = one pair; a spec LIST is
-   several `stat` fields, never a numeric-keyed map. **Phase 8A ships the contract only**:
-   `stat` has no item-editor control, no picker entry (`PICKER_FIELD_TYPES` filters it out)
-   and no renderer until phase 8B.)
+   several `stat` fields, never a numeric-keyed map. Phase 8A shipped the contract; **phase
+   8B shipped the rest** — `key-value-field.tsx` (the control), the `ItemEditor` type-switch
+   branch, the `toRenderModel` emit path and a `FieldNode` case shared by the listing card
+   and the detail page. 8A's `PICKER_FIELD_TYPES` filter is gone; the picker is the full 10
+   again.)
 2. **Roles are CLOSED at 3 and type-filtered**: `title` → `text_short`, `cover` →
    `image|gallery`, `primaryLink` → `link`. Cross-validated (`makeRolesSchema`).
    (The STORED key is `primaryLink`; the RENDER-MODEL key is `primaryCta` — see
@@ -146,6 +148,111 @@ except `url`.
 Do NOT "fix" this by exempting `cmsModel` from `sanitizeContentHtml`: that would also lose the
 legitimate HTML pass over `collectionName` and group names.
 
+## The pages a collection publishes (listing + detail)
+
+A collection can emit up to **two** page families, both authored SOLELY by
+`materializePublish.ts` (plan Deviation #3 — no editor page entries exist for either):
+
+| Toggle | Path | Section id | Ownership marker |
+|---|---|---|---|
+| `listingPage` (phase 8B, default **OFF**) | `/<collectionRef>` | `cmscollection-listing-<collectionId>` | the `listing` marker segment |
+| `detailPages` (phase 4, default OFF) | `/<collectionRef>/<itemRef>` | `cmscollectionitem-<itemId>` | the `cmscollectionitem` type prefix |
+
+Both keys are **leading-slash absolute** (never slash-less, never `/p/<slug>/…`), both entries
+are `{layout:{sections}, content, title}` with `theme` omitted (the root theme cascades), and
+both get the **DUAL PIN**: a full `content[sid] = {id, layout, elements}` for every id in
+`layout.sections`. A missing `layout` is a SILENT vanish
+(`LandingPagePublishedRenderer.tsx:106-121` → `return null`), not an error.
+
+**⚠️ The two ownership tests are NOT symmetric, and the asymmetry is the point.** A user
+cannot author a `cmscollectionitem` section at all, so detail-page ownership is purely
+structural. But a user CAN put a `cmscollection` block on their own subpage via "Add to page"
+— so if listing ownership were also "every section has the `cmscollection` type prefix", the
+first `listingPage: false` would **delete that user's page**. Hence
+`cmsListingSectionId`/`isCmsListingSectionId` and the `listing` marker segment
+(`sectionKeys.ts`); user placements are `cmscollection-<uuid>` and a uuid can never begin
+with `listing-`. Pinned by "never prunes a USER subpage that merely CONTAINS a placed
+collection block" in `materializePublish.test.ts`.
+
+**Both families are DECOUPLED from placement** (founder ruling, phase 8B). Discovery is
+`tokenId`-keyed — `loadCmsBundlesForToken(tokenId)` reads *every* collection of the project —
+so a collection with a toggle on emits its pages whether or not its block sits on any page.
+The modal's "CREATES THESE PAGES" tiles promise those pages the moment the toggle flips;
+coupling them to placement made that promise fail **silently**. This retro-fixes `detailPages`
+too, which had been coupled since phase 4. Placement still drives INLINE rendering exactly as
+before: `materializeCmsContent` rewrites only sections actually present in the payload.
+
+**What this cost, and what replaced it.** Phase 3 gave the materializer a **zero-query fast
+path** (no cms sections in the payload ⇒ no queries at all) as an explicit blast-radius
+mitigation on the highest-risk route in the codebase. Decoupling necessarily trades it for
+**one indexed query per publish** (`where: {tokenId}`, covered by `@@index([tokenId, order])`,
+explicit `select`, single round trip, run strictly AFTER `assertProjectOwner`). The guarantee
+that stands in its place — and the thing to protect from here on — is **byte-identity**:
+
+- a project with **zero collections** is byte-identical after materialization, whole payload
+  and `subpages` included;
+- a project whose collections all have **both toggles off** is byte-identical too (absent a
+  placed block, which legitimately gets its model written).
+
+Both hold structurally, because with an empty desired set the reconcilers only prune entries
+they can PROVE they authored and never create `content.subpages`. Both are pinned by explicit
+tests in `materializePublish.test.ts` ("the zero-query fast path is replaced by byte-identity").
+Note the corollary: the **pruning surface is now wider** — the reconcilers run on payloads they
+previously never touched — which is exactly why the listing marker segment above is
+load-bearing rather than merely tidy.
+
+Collisions with a real page throw `CmsPathCollisionError` → 409, and
+`assertNoCmsPathCollisions` runs BOTH families' checks before EITHER reconciler mutates.
+
+### The fan-out cap (the brake decoupling removed)
+
+Placement used to be an **accidental brake** on detail-page fan-out: an unplaced collection
+emitted nothing. Decoupling made fan-out both **unconditional and unbounded** — and publish
+renders one blob **and** writes one KV route **per item, serially, inside a single serverless
+request**. A few-hundred-item collection therefore doesn't get slow, it exhausts the function
+timeout and dies as an **opaque timeout** on the highest-blast-radius route in the codebase.
+
+So fan-out is capped by `assertCmsFanOutWithinLimit`, which runs **before** the collision guard
+and before anything mutates. There are **TWO caps with two different jobs**, and only one of
+them is the actual guard:
+
+| Constant | Job | Over it → |
+|---|---|---|
+| `MAX_CMS_DETAIL_PAGES_TOTAL` (100) | **THE GUARD.** Total detail pages across **ALL** collections in one publish. | `CmsTotalFanOutLimitError` → 409 naming the **total**, the limit and the remedy |
+| `MAX_CMS_DETAIL_PAGES_PER_COLLECTION` (100) | **The better error message.** Names the culprit when ONE collection is oversized. Checked **first** for that reason. | `CmsFanOutLimitError` → 409 naming the **collection**, its item count and the limit |
+
+**Why a per-collection cap alone is not a guard** (this was the original design and it was
+wrong): the timeout is a property of the **whole request**, so ten collections of 100 items
+each are ten individually *legal* collections that still fan out to 1000 pages and time out
+exactly as if there were no cap at all. Only a total can bound the request. The per-collection
+cap is kept purely for message quality and is `<=` the total by construction, so it can never
+permit something the total forbids. Pinned by the gate "throws when the TOTAL exceeds the cap
+even though EVERY collection is under the per-collection cap" in `materializePublish.test.ts`.
+
+The route narrows on the three error classes by explicit `instanceof` — **no shared base
+class**, so a future error type can't silently enrol itself into a 409; DB failures still fall
+through to the fail-closed 500.
+
+**⚠️ Both numbers are arithmetic estimates, not measurements.** They come from an assumed
+~100-300ms per page (static render + blob upload + KV write, serial) against roughly half a 60s
+serverless budget — never timed against a real seeded collection. **Owed before beta:** one
+timing run (seed a collection at the cap, publish, measure) with the **measured** per-page cost
+written back into the constants' comments, so the next person tunes from data instead of
+re-deriving the guess.
+
+Two deliberate non-choices:
+
+- **No silent truncation to the first N.** A half-published collection is worse than a refused
+  one — the user gets a live page with items missing and no signal at all.
+- **Counted on ITEMS, not on emitted pages.** They differ only for slug-less items (which emit
+  no page), so counting items trips slightly early rather than late, and keeps the message
+  ("has N items") true against what the collection editor shows. Applies to both caps;
+  `detailPages`-off collections count toward neither.
+
+This is a **v1 safety valve, not a product decision about collection size.** The real fix is
+batched or async fan-out; that's a later track. Until then these two constants are the one
+place to raise or retire the limits.
+
 ## ⚠️ Element-key contract (cross-phase, silent on failure)
 
 The materialized render model MUST be written under the element key exported as
@@ -167,7 +274,7 @@ like dead code to a grep and to a linter. They are not.
 
 | Field | State | WHY it is unread — and what changing it would require |
 |---|---|---|
-| `Collection.purposes` (`['offer'\|'proof'\|'price']`) | **Stored + validated + returned by the API. READ BY NOTHING.** | Marks what the collection is FOR. Rendering it would mean *per-purpose* renderers (e.g. case studies as a proof band), but v1 ships **ONE shared block that renders identically on every template** (plan Deviation #1). Founder ruling: "store it, unread for now." It is forward-compat, **not a delivered capability** — do not branch any render or materialization path on it without a spec change lifting Deviation #1, and do not present it to users as something that changes output. |
+| `Collection.purposes` (`['offer'\|'proof'\|'price']`) | **Stored + validated + returned by the API. READ BY NOTHING.** | Marks what the collection is FOR. Rendering it would mean *per-purpose* renderers (e.g. case studies as a proof band), but v1 ships **ONE shared block that renders identically on every template** (plan Deviation #1). Founder ruling: "store it, unread for now." It is forward-compat, **not a delivered capability** — do not branch any render or materialization path on it without a spec change lifting Deviation #1, and do not present it to users as something that changes output. **Phase 8B added a schema-builder control for it** — that is deliberate (the greyed-placeholder rule needs a destination and per-purpose renderers are not one), and it ships with copy saying it does not change how the collection looks yet. Deleting that copy without shipping the renderers turns a truthful control into a lie. |
 | `CollectionItem.featuredOnHome` | **Column + API field only. NO UI control, no read path, no promotion logic.** | The home-promotion machinery (`materializeHomeLineup` / `…Gallery` / `…Teasers` in `collectionHelpers.ts`) is **products + techpremium hardcoded** and explicitly spec §Out — there is no engine-agnostic home lineup to promote INTO. A checkbox promoting nothing is a fake affordance, and the greyed-placeholder rule presupposes the destination exists; here it does not. The column is reserved so a later feature needn't migrate a populated table. **Not** covered by Spec 2 `home-summary-links` (that promotes PAGES, not items). Do NOT touch the dormant `materializeHome*` helpers to "hook this up". |
 
 Deleting either as unused re-opens a migration on a populated table; wiring either up ships
@@ -177,6 +284,13 @@ behaviour the spec explicitly deferred. Leave both alone absent a new ruling.
 
 - **Image values are objects** — `{url, assetId?}`, never bare URL strings. Renderers read
   `.url`.
+- **The CMS has ONE entry point: the left rail's `CMS` tab** (`LeftPanel.tsx` → `CmsPanel`).
+  Phase 6 also mounted a "Collections" button in `GlobalAppHeader` on the false premise that
+  no rail existed; phase 8B deleted it (founder ruling). Do not add a second entry — a
+  greyed "coming soon" tab beside a working button is worse than either alone.
+  `lessgo:manage-collections` now has TWO listeners by necessity: LeftPanel (switches to the
+  tab, since an unmounted panel cannot hear its own cue) and CmsPanel (targets the
+  collection). Both are load-bearing.
 - **Schema edits are non-destructive**: removing a field orphans its key in item `values`;
   reads ignore unknown keys, writes preserve them. No destructive rewrite of items.
 - **Slug output contract**: `slugifyName`/`uniqueSlug` always return a value matching

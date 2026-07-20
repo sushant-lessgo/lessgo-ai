@@ -11,6 +11,13 @@
 // cms-collections phase 4 adds the CMS materializer's error mapping:
 //   4. CmsPathCollisionError    → 409 naming the colliding PATH (actionable)
 //   5. any OTHER materializer error → still 500 (fail-closed, catch stays narrow)
+//   6. CmsFanOutLimitError      → 409 naming the COLLECTION + the limit (the
+//      detail-page fan-out cap; uncapped this is an opaque function timeout)
+//   7. CmsTotalFanOutLimitError → 409 naming the TOTAL + the limit. THIS is the
+//      class that actually guards the timeout: the budget belongs to the whole
+//      REQUEST, so many individually-legal collections still blow it and only a
+//      global total can catch that. Unmapped, it would 500 as "Internal Server
+//      Error" — indistinguishable from the opaque failure the cap replaced.
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 vi.mock('@clerk/nextjs/server', () => ({ auth: vi.fn(async () => ({ userId: 'user_1' })) }));
@@ -97,7 +104,13 @@ vi.mock('@/lib/routing/kvRoutes', () => ({
 
 import * as Sentry from '@sentry/nextjs';
 import { prisma } from '@/lib/prisma';
-import { CmsPathCollisionError } from '@/modules/cms/materializePublish';
+import {
+  CmsPathCollisionError,
+  CmsFanOutLimitError,
+  CmsTotalFanOutLimitError,
+  MAX_CMS_DETAIL_PAGES_TOTAL,
+  MAX_CMS_DETAIL_PAGES_PER_COLLECTION,
+} from '@/modules/cms/materializePublish';
 import { POST } from './route';
 
 const db = prisma as any;
@@ -247,6 +260,56 @@ describe('/api/publish — CMS detail-path collision surfaces as an actionable 4
     expect(res.__body.url).toBeUndefined();
 
     // Fail-closed BEFORE any side effect: nothing published, nothing written.
+    expect(renderPublishedExport).not.toHaveBeenCalled();
+    expect(db.publishedPage.update).not.toHaveBeenCalled();
+    expect(db.publishedPage.create).not.toHaveBeenCalled();
+    expect(db.project.upsert).not.toHaveBeenCalled();
+  });
+
+  // The fan-out cap is the brake that placement-coupling used to provide for
+  // free. Uncapped, an over-size collection does not 409 — it exhausts the
+  // function timeout and the user sees nothing actionable at all.
+  it('case 6: CmsFanOutLimitError → 409 NAMING the collection and the limit', async () => {
+    const over = MAX_CMS_DETAIL_PAGES_PER_COLLECTION + 240;
+    materializeCmsForPublish.mockRejectedValue(new CmsFanOutLimitError('Books', over) as any);
+
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__status).toBe(409);
+    // Actionability: WHICH collection, HOW many it has, and WHAT the limit is.
+    expect(res.__body.error).toContain('Books');
+    expect(res.__body.error).toContain(String(over));
+    expect(res.__body.error).toContain(String(MAX_CMS_DETAIL_PAGES_PER_COLLECTION));
+    expect(res.__body.error).not.toBe('Internal Server Error');
+    expect(res.__body.url).toBeUndefined();
+
+    // Fail-closed BEFORE any side effect — nothing published, nothing written.
+    expect(renderPublishedExport).not.toHaveBeenCalled();
+    expect(db.publishedPage.update).not.toHaveBeenCalled();
+    expect(db.publishedPage.create).not.toHaveBeenCalled();
+    expect(db.project.upsert).not.toHaveBeenCalled();
+  });
+
+  // The GLOBAL cap is the one that actually prevents the timeout — a
+  // per-collection cap cannot, since ten legal collections still blow the
+  // request budget. If this class were left out of the route's `instanceof`
+  // narrowing it would fall to the fatal catch and surface as a bare 500,
+  // i.e. exactly the unactionable failure the cap exists to replace.
+  it('case 7: CmsTotalFanOutLimitError → 409 NAMING the total and the limit', async () => {
+    const total = MAX_CMS_DETAIL_PAGES_TOTAL + 137;
+    materializeCmsForPublish.mockRejectedValue(new CmsTotalFanOutLimitError(total) as any);
+
+    const res: any = await POST(makeReq(BODY));
+
+    expect(res.__status).toBe(409);
+    // Actionability: HOW many pages it would create, WHAT the limit is, and the
+    // remedy — no single collection is at fault, so the total has to reach them.
+    expect(res.__body.error).toContain(String(total));
+    expect(res.__body.error).toContain(String(MAX_CMS_DETAIL_PAGES_TOTAL));
+    expect(res.__body.error).not.toBe('Internal Server Error');
+    expect(res.__body.url).toBeUndefined();
+
+    // Fail-closed BEFORE any side effect — nothing published, nothing written.
     expect(renderPublishedExport).not.toHaveBeenCalled();
     expect(db.publishedPage.update).not.toHaveBeenCalled();
     expect(db.publishedPage.create).not.toHaveBeenCalled();

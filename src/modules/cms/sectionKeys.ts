@@ -35,6 +35,48 @@ export function isCmsSectionId(sectionId: string): boolean {
   return typeof sectionId === 'string' && sectionId.split('-')[0].toLowerCase() === CMS_SECTION_TYPE;
 }
 
+// ── LISTING PAGES (the auto-emitted `/<collectionRef>` page, phase 8B) ──────
+//
+// A listing PAGE is the same `cmscollection` block on a page of its own. Its
+// section id therefore SHARES the `cmscollection` type prefix (dispatch must
+// resolve the same block) — but it carries a distinguishing SECOND segment so
+// the materializer can tell "a page WE authored" from "a subpage the user built
+// that happens to contain a placed collection block".
+//
+// ⚠️ THAT DISTINCTION IS THE PRUNE SAFETY. Detail pages can use a purely
+// structural test (a user cannot author a `cmscollectionitem` section at all),
+// but a user CAN put a `cmscollection` block on their own subpage via "Add to
+// page". Without this marker, toggling `listingPage` off would delete that
+// user's page. User placements are `cmscollection-<uuid>`; a uuid is hex +
+// hyphens, so it can never begin with `listing-`.
+
+/** Second segment marking a section as the auto-emitted listing page's own. */
+export const CMS_LISTING_MARKER = 'listing';
+
+/** The deterministic section id of a collection's listing page. */
+export function cmsListingSectionId(collectionId: string): string {
+  return `${CMS_SECTION_TYPE}-${CMS_LISTING_MARKER}-${collectionId}`;
+}
+
+/** `cmscollection-listing-abc` → true; `cmscollection-<uuid>` (a user placement) → false. */
+export function isCmsListingSectionId(sectionId: string): boolean {
+  if (typeof sectionId !== 'string') return false;
+  const parts = sectionId.split('-');
+  return (
+    parts[0].toLowerCase() === CMS_SECTION_TYPE &&
+    parts[1] === CMS_LISTING_MARKER &&
+    parts.length > 2
+  );
+}
+
+/** The published path of a collection's listing page: `/<collectionRef>`.
+ *  LEADING-SLASH ABSOLUTE — the pinned convention (see `cmsDetailPath`).
+ *  `null` when the collection has no slug (→ no page). */
+export function cmsListingPath(collectionRef: string | null | undefined): string | null {
+  if (!collectionRef) return null;
+  return `/${collectionRef}`;
+}
+
 // ── DETAIL SECTIONS (the per-item fan-out pages, phase 4) ───────────────────
 //
 // A SEPARATE type prefix on purpose: `findCmsSections` (the listing walk) matches

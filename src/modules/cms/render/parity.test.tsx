@@ -43,6 +43,10 @@ const FIELDS: FieldDef[] = [
   { id: 'buy', name: 'Buy', type: 'link' },
   { id: 'released', name: 'Released', type: 'date' },
   { id: 'topics', name: 'Topics', type: 'tags' },
+  // The 10th type (phase 8B). Included here so `stat` markup is compared between
+  // the twins like every other type — a type present in the model but absent from
+  // this fixture is a type whose parity nobody checks.
+  { id: 'weight', name: 'Weight', type: 'stat' },
 ];
 
 const VALUES = {
@@ -55,6 +59,7 @@ const VALUES = {
   buy: { url: 'mailto:hi@acme.com', label: 'Email me' },
   released: '2026-01-02',
   topics: ['focus', 'craft'],
+  weight: { key: 'Weight', value: '4.2 kg' },
 };
 
 /** roles UNSET → fallback resolution; roles SET → explicit resolution. */
@@ -318,7 +323,16 @@ describe('CMS collection block — editor↔published parity', () => {
       Array.from(c.querySelectorAll('[data-cms-field]'))
         .map((e) => e.getAttribute('data-cms-field'))
         .sort();
-    const expected = ['audio', 'date', 'gallery', 'tags', 'tags', 'text_long', 'video'].sort();
+    const expected = [
+      'audio',
+      'date',
+      'gallery',
+      'stat',
+      'tags',
+      'tags',
+      'text_long',
+      'video',
+    ].sort();
     expect(typesIn(edit)).toEqual(expected);
     expect(typesIn(published)).toEqual(expected);
 
@@ -328,6 +342,75 @@ describe('CMS collection block — editor↔published parity', () => {
       expect(c.querySelector('.lg-cms__title')).toBeTruthy(); // text_short role
       expect(c.querySelector('.lg-cms__cta')).toBeTruthy();   // link role
     }
+  });
+
+  // The 10th type, phase 8B. The pair renders as two spans; a twin emitting only
+  // one half (or swapping the order) is exactly the kind of divergence the
+  // skeleton comparison exists for, but it is worth naming the values too —
+  // `key`/`value` are the property names the publish walker must not rewrite.
+  it('renders BOTH halves of a `stat` pair, identically in both twins', () => {
+    const model = toRenderModel(rawBundle(false));
+    const edit = dom(<CollectionSection sectionId="s1" model={model} />);
+    const published = dom(
+      <CollectionSectionPublished sectionId="s1" {...{ [CMS_MODEL_ELEMENT_KEY]: model }} />
+    );
+
+    for (const [name, c] of [['edit', edit], ['published', published]] as const) {
+      const stat = c.querySelector('[data-cms-field="stat"]');
+      expect(stat, name).toBeTruthy();
+      expect(stat!.querySelector('.lg-cms__statk')!.textContent, name).toBe('Weight');
+      expect(stat!.querySelector('.lg-cms__statv')!.textContent, name).toBe('4.2 kg');
+    }
+    expect(skeleton(bodyOf(published))).toBe(skeleton(bodyOf(edit)));
+  });
+
+  // ── EMPTY STATE (phase 8B step 5) ─────────────────────────────────────────
+  // The edit twin points the author at where items live; the published twin must
+  // be UNCHANGED — a live visitor must never read "add them in CMS". Like
+  // manageSlot the hint sits outside `[data-cms-body]`, which is what keeps the
+  // comparator blind to it.
+  describe('empty collection', () => {
+    const emptyModel = () => {
+      const b = rawBundle(false);
+      return toRenderModel({ ...b, items: [] });
+    };
+
+    it('the EDIT twin names the collection and points at the CMS panel', () => {
+      const container = dom(<CollectionSection sectionId="s1" model={emptyModel()} />);
+      const hint = container.querySelector('[data-cms-empty-hint]');
+      expect(hint).toBeTruthy();
+      expect(hint!.textContent).toContain('No items yet');
+      expect(hint!.textContent).toContain('Books'); // the collection, not "a collection"
+    });
+
+    it('the PUBLISHED twin carries NO editor chrome at all', () => {
+      const model = emptyModel();
+      const container = dom(
+        <CollectionSectionPublished sectionId="s1" {...{ [CMS_MODEL_ELEMENT_KEY]: model }} />
+      );
+      expect(container.querySelector('[data-cms-empty-hint]')).toBeNull();
+      expect(container.querySelector('[data-cms-manage]')).toBeNull();
+      expect(container.innerHTML).not.toContain('CMS');
+      expect(container.innerHTML).not.toContain('add them in');
+      // …and it still renders the section (anti-vacuity: the assertions above
+      // would all pass on an empty string).
+      expect(container.querySelector('[data-cms-body]')).toBeTruthy();
+    });
+
+    it('the hint lives OUTSIDE the compared body, so parity still holds', () => {
+      const model = emptyModel();
+      const edit = dom(<CollectionSection sectionId="s1" model={model} />);
+      const published = dom(
+        <CollectionSectionPublished sectionId="s1" {...{ [CMS_MODEL_ELEMENT_KEY]: model }} />
+      );
+      expect(bodyOf(edit).querySelector('[data-cms-empty-hint]')).toBeNull();
+      expect(skeleton(bodyOf(published))).toBe(skeleton(bodyOf(edit)));
+    });
+
+    it('the hint is absent once the collection HAS items', () => {
+      const container = dom(<CollectionSection sectionId="s1" model={toRenderModel(rawBundle(false))} />);
+      expect(container.querySelector('[data-cms-empty-hint]')).toBeNull();
+    });
   });
 
   it('mailto:/tel: CTA hrefs survive into the published anchor (wide predicate end-to-end)', () => {

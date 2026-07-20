@@ -48,7 +48,6 @@ import {
   AppPopoverSeparator,
 } from '@/components/ui/popover';
 import { PageSwitcher } from './PageSwitcher';
-import { CmsPanel } from '../cms/CmsPanel';
 // THE t1 bar-control class, defined once (phase 8 de-dupe: this file's private
 // `BAR_BTN` and DesignMenuShell's `DESIGN_TRIGGER_CLASS` were byte-identical).
 import { BAR_CTL_CLASS } from '../ui/DesignMenuShell';
@@ -150,12 +149,12 @@ export function GlobalAppHeader({ tokenId }: GlobalAppHeaderProps) {
       {/* Multi-page switcher */}
       <PageSwitcher />
 
-      {/* CMS entry (cms-collections phase 6). Mounted BESIDE Pages because the
-          handoff's CMS rail tab has no rail to live in yet — that rail belongs to
-          the ui-redesign track, and building a competing one here is out of scope.
-          Ungated on purpose: the collection block is a SHARED block that renders on
-          every template, so there is no capability to check (plan Deviations #2). */}
-      <CmsPanel tokenId={tokenId} />
+      {/* NO CMS entry here. Phase 6 mounted one beside Pages on the premise that
+          "the handoff's CMS rail tab has no rail to live in yet" — which was
+          FACTUALLY WRONG: LeftPanel is mounted and its RAIL_TABS already carried
+          a (greyed) `cms` tab. The result was two entry points, one of them
+          lying. Founder ruling (phase 8B): the CMS lives in the rail tab, and
+          this button is gone. See LeftPanel.tsx. */}
 
       {/* Design-system popover + i18n controls (moved from the old EditHeader row) */}
       <EditorDesignControls />

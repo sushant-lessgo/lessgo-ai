@@ -13,7 +13,8 @@ import { AUDIENCES, seedDraft } from './helpers/seedDraft';
 //     LandingPagePublishedRenderer)
 //   • src/app/api/publish/publish.authz.test.ts   (the new ownership 403)
 //
-// Phase 4 EXTENDS this file (detail pages) rather than adding a second cms spec.
+// Phases 4 and 8B EXTEND this file (detail pages, then the listing page)
+// rather than adding a second cms spec.
 
 test.describe.configure({ mode: 'serial' });
 
@@ -259,4 +260,120 @@ test('detailPages ON publishes an item page per item; OFF removes them', async (
 
   const gone = await page.goto(detailUrl);
   expect(gone?.status(), `${detailUrl} after toggle-off`).toBeGreaterThanOrEqual(400);
+});
+
+// ── PHASE 8B: the auto-emitted LISTING page ─────────────────────────────────
+// Same tolerance as everything above (a local publish 500s without Blob/KV), so
+// this is opportunistic. The binding listing-page assertions — leading-slash key,
+// dual pin, both sanitize chokepoints, parity through the real published
+// renderer, collision 409, toggle-off prune — all live in
+// `src/modules/cms/materializePublish.test.ts`.
+test('listingPage ON publishes /<collection>; OFF removes it', async ({ page }) => {
+  const cfg = AUDIENCES.find((c) => c.templateId === 'meridian')!;
+  const slug = 'e2e-cms-listing-smoke';
+  const TITLE = 'Deep Work Listing';
+
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean((window as any).Clerk?.user), null, { timeout: 30_000 });
+  const api = page.request;
+
+  const personaRes = await api.post('/api/user/persona', { data: { persona: cfg.persona } });
+  expect(personaRes.ok(), `persona: ${personaRes.status()}`).toBeTruthy();
+
+  const startRes = await api.get('/api/start');
+  expect(startRes.ok(), `/api/start: ${startRes.status()}`).toBeTruthy();
+  const { url } = await startRes.json();
+  const token = new URL(url).pathname.split('/').filter(Boolean).pop()!;
+
+  const finalContent = await seedDraft(api, token, cfg);
+
+  const colRes = await api.post('/api/collections', {
+    data: {
+      tokenId: token,
+      name: 'E2E Listing Books',
+      slug: `e2e-listing-${Date.now()}`,
+      fieldSchema: [
+        { id: 'title', name: 'Title', type: 'text_short' },
+        // The 10th type end-to-end: created, filled and rendered through the
+        // real routes. Until phase 8B nothing but a hand-written POST could
+        // produce one.
+        { id: 'weight', name: 'Weight', type: 'stat' },
+      ],
+      roles: { title: 'title' },
+      listingPage: true,
+    },
+  });
+  expect(colRes.ok(), `create collection: ${colRes.status()}`).toBeTruthy();
+  const { collection } = await colRes.json();
+  expect(collection.listingPage, 'listingPage persisted').toBe(true);
+
+  const itemRes = await api.post(`/api/collections/${collection.id}/items`, {
+    data: {
+      tokenId: token,
+      values: { title: TITLE, weight: { key: 'Weight', value: '4.2 kg' } },
+    },
+  });
+  expect(itemRes.ok(), `create item: ${itemRes.status()}`).toBeTruthy();
+
+  // The listing page is emitted for a PLACED collection (same coupling detail
+  // pages have had since phase 4), so place the block.
+  const sectionId = 'cmscollection-e2e0003';
+  finalContent.layout.sections.push(sectionId);
+  finalContent.content[sectionId] = {
+    id: sectionId,
+    layout: 'SharedCmsCollection',
+    elements: { collectionId: collection.id },
+  } as any;
+  const save = async () => {
+    const res = await api.post('/api/saveDraft', {
+      data: { tokenId: token, finalContent },
+    });
+    expect(res.ok(), `saveDraft: ${res.status()}`).toBeTruthy();
+  };
+  await save();
+
+  await page.goto(`/edit/${token}`);
+  await expect(page.getByText(cfg.heroText).first()).toBeVisible({ timeout: 45_000 });
+
+  const publish = async () => {
+    const btn = page.getByTestId('editor-publish-trigger');
+    await expect(btn).toBeEnabled({ timeout: 15_000 });
+    await btn.click();
+    const modal = page.getByTestId('publish-confirm-card');
+    await expect(modal).toBeVisible();
+    await modal.getByTestId('publish-slug-input').fill(slug);
+    await modal.getByTestId('publish-title-input').fill(cfg.title);
+    const resPromise = page.waitForResponse(
+      (r) => r.url().includes('/api/publish') && r.request().method() === 'POST',
+      { timeout: 120_000 },
+    );
+    await modal.getByRole('button', { name: 'Publish now' }).click();
+    const status = (await resPromise).status();
+    expect([200, 500], `/api/publish -> ${status}`).toContain(status);
+  };
+  await publish();
+
+  // The listing page serves at /p/<slug>/<collectionSlug> — the leading-slash
+  // key, derived server-side from the tables.
+  const listingUrl = `/p/${slug}/${collection.slug}`;
+  const listing = await page.goto(listingUrl);
+  expect(listing?.status(), `${listingUrl} status`).toBeLessThan(400);
+  await expect(page.locator('[data-cms-body]')).toHaveCount(1);
+  await expect(page.getByText(TITLE).first()).toBeVisible();
+  // …and the stat pair rendered, both halves.
+  await expect(page.locator('.lg-cms__statk').first()).toHaveText('Weight');
+  await expect(page.locator('.lg-cms__statv').first()).toHaveText('4.2 kg');
+
+  // Toggle OFF → republish → the listing page is gone.
+  const offRes = await api.patch(`/api/collections/${collection.id}`, {
+    data: { tokenId: token, listingPage: false },
+  });
+  expect(offRes.ok(), `toggle off: ${offRes.status()}`).toBeTruthy();
+
+  await page.goto(`/edit/${token}`);
+  await expect(page.getByText(cfg.heroText).first()).toBeVisible({ timeout: 45_000 });
+  await publish();
+
+  const gone = await page.goto(listingUrl);
+  expect(gone?.status(), `${listingUrl} after toggle-off`).toBeGreaterThanOrEqual(400);
 });

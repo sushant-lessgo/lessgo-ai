@@ -84,6 +84,7 @@ import { AppIcon } from '@/components/ui/icon';
 import { DateField } from '@/components/ui/date-field';
 import { TagInput } from '@/components/ui/tag-input';
 import { LinkPairField } from '@/components/ui/link-pair-field';
+import { KeyValueField } from '@/components/ui/key-value-field';
 import { MediaOrLinkField } from '@/components/ui/media-or-link-field';
 import { EditableSlugInput } from '@/components/ui/slug-input';
 import { ItemPager } from '@/components/ui/item-pager';
@@ -133,6 +134,18 @@ export function normalizeValue(type: FieldType, draft: unknown): unknown | null 
     case 'date': {
       const s = typeof draft === 'string' ? draft : '';
       return s ? s : null;
+    }
+    case 'stat': {
+      // `StatValueSchema` ACCEPTS `{key:'',value:''}` (every CMS value is
+      // optional-empty), so an all-empty pair would be STORED rather than
+      // rejected — a quieter failure than link/date/media, and the reason `stat`
+      // still needs the empty→null mapping. A half-filled pair is kept: a spec
+      // name with no number (or the reverse) is still something the user typed.
+      const v = draft as { key?: string; value?: string } | undefined;
+      const key = typeof v?.key === 'string' ? v.key.trim() : '';
+      const value = typeof v?.value === 'string' ? v.value.trim() : '';
+      if (!key && !value) return null;
+      return { key, value };
     }
     case 'tags': {
       // EXEMPT from the null contract: TagsValueSchema accepts `[]`, so an empty
@@ -190,6 +203,9 @@ function seedDraft(fields: readonly FieldDef[], item: CmsItem | null): Draft {
         break;
       case 'link':
         draft[f.id] = (stored as { url: string; label: string }) ?? { url: '', label: '' };
+        break;
+      case 'stat':
+        draft[f.id] = (stored as { key: string; value: string }) ?? { key: '', value: '' };
         break;
       case 'tags':
         draft[f.id] = Array.isArray(stored) ? [...(stored as string[])] : [];
@@ -623,6 +639,17 @@ function FieldControl({
       return (
         <div data-control="link">
           <LinkPairField value={v} onValueChange={onChange} />
+        </div>
+      );
+    }
+
+    // The 10th type (amendment item 1) — a spec/stat PAIR. One field = one pair;
+    // a spec LIST is several `stat` fields (contract decision, phase 8A).
+    case 'stat': {
+      const v = (value as { key: string; value: string }) || { key: '', value: '' };
+      return (
+        <div data-control="stat">
+          <KeyValueField value={v} onValueChange={onChange} />
         </div>
       );
     }

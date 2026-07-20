@@ -7,6 +7,7 @@ import { useReviewState } from '@/hooks/useReviewState';
 import { AppIcon } from '@/components/ui/icon';
 import { Coming } from '@/components/ui/coming';
 import { SegmentedControl } from '@/components/ui/segmented-control';
+import { CmsPanel, MANAGE_COLLECTIONS_EVENT } from '../cms/CmsPanel';
 
 const getSectionLabel = (sectionId: string): string => {
   const type = sectionId.split('-')[0];
@@ -117,10 +118,16 @@ function GettingStartedChecklist() {
 /**
  * RAIL TABS (t1: `Sections | Pages | CMS | Theme`).
  *
- * Only `Sections` exists as a surface today — Pages/CMS/Theme are drawn by the
- * handoff but nothing implements them, so they render via <Coming> (decision 15:
- * the component, never the bare class — it carries aria-disabled + the "why"
- * tooltip inseparably) rather than being omitted.
+ * `Sections` and — since cms-collections phase 8B — `CMS` are REAL surfaces.
+ * Pages/Theme are drawn by the handoff but nothing implements them, so they
+ * render via <Coming> (decision 15: the component, never the bare class — it
+ * carries aria-disabled + the "why" tooltip inseparably) rather than being
+ * omitted. Those two belong to the ui-redesign track.
+ *
+ * ⚠️ THE CMS TAB IS THE ONLY CMS ENTRY POINT. Phase 6 shipped a second one (a
+ * "Collections" button in GlobalAppHeader) on the false premise that no rail
+ * existed — leaving a greyed "CMS — coming soon" tab next to a working button.
+ * Do not re-add a header entry; move this one if the IA changes.
  *
  * Geometry note for phase 4 (decision 17): <Coming> renders its own
  * `inline-flex items-center gap-1.5` span. Inside a SegmentedControl option
@@ -130,12 +137,16 @@ function GettingStartedChecklist() {
 const RAIL_TABS = [
   { value: 'sections', label: 'Sections' },
   { value: 'pages', label: <Coming what="the pages panel">Pages</Coming> },
-  { value: 'cms', label: <Coming what="page CMS">CMS</Coming> },
+  { value: 'cms', label: 'CMS' },
   { value: 'theme', label: <Coming what="the rail theme panel">Theme</Coming> },
 ];
 
+/** The rail tabs that are actually wired (the rest are inert `<Coming>`). */
+type RailTab = 'sections' | 'cms';
+const LIVE_RAIL_TABS: readonly string[] = ['sections', 'cms'];
+
 export function LeftPanel() {
-  const { store } = useEditStoreContext();
+  const { store, tokenId } = useEditStoreContext();
   const leftPanel = useStoreState(state => state.leftPanel);
   const sections = useStoreState(state => state.sections);
   // Read-only: drives the t1 active-row treatment. No write path added here.
@@ -149,11 +160,37 @@ export function LeftPanel() {
   const [isResizing, setIsResizing] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  // The rail tab is LOCAL state, deliberately. `leftPanel.activeTab` in the store
+  // is a DIFFERENT axis with a different closed union ('pageStructure' | 'review'
+  // | …) that drives the Setup checklist; widening it would mean editing
+  // `types/store/state.ts` + `actions.ts`, neither of which this phase may touch,
+  // for no behavioural gain — nothing outside this component reads the rail tab.
+  const [railTab, setRailTab] = useState<RailTab>('sections');
+  // A collection the CMS panel should open on, when the cue arrived while the
+  // panel was unmounted (see the two-listener note in CmsPanel).
+  const [cmsTarget, setCmsTarget] = useState<string | null>(null);
+
   // Hide the Setup tab entirely once every guide task is done — even if the
   // active tab is still 'review', fall back to the sections view.
   const isReviewMode = leftPanel.activeTab === 'review' && !allComplete;
+  // Review mode (the Setup checklist) takes precedence: it hides the tab strip
+  // entirely, so a CMS selection cannot be reached or changed while it is on.
+  const isCmsMode = !isReviewMode && railTab === 'cms';
 
   useEffect(() => setMounted(true), []);
+
+  // "Manage items" on a placed collection block asks for this surface. The panel
+  // itself also listens (for the already-mounted case); this listener is the half
+  // that can SWITCH TABS, which the unmounted panel cannot do for itself.
+  useEffect(() => {
+    const onManage = (e: Event) => {
+      const id = (e as CustomEvent<{ collectionId?: string }>).detail?.collectionId;
+      setRailTab('cms');
+      if (id) setCmsTarget(id);
+    };
+    window.addEventListener(MANAGE_COLLECTIONS_EVENT, onManage);
+    return () => window.removeEventListener(MANAGE_COLLECTIONS_EVENT, onManage);
+  }, []);
 
   // Resize handle
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -215,12 +252,14 @@ export function LeftPanel() {
           <div className="flex-shrink-0 px-3 pb-1 pt-3">
             <SegmentedControl
               aria-label="Left rail panel"
-              value="sections"
-              // Pages/CMS/Theme are inert: <Coming> swallows the click in the
-              // capture phase, so this never fires for them. The guard is
-              // belt-and-braces, and keeps `Sections` a no-op re-select rather
-              // than a new store write.
-              onValueChange={() => {}}
+              value={railTab}
+              // Pages/Theme are inert: <Coming> swallows the click in the capture
+              // phase, so this never fires for them. The allow-list is
+              // belt-and-braces — a `<Coming>` removed by accident must not
+              // silently become a selectable tab with no body.
+              onValueChange={(next) => {
+                if (LIVE_RAIL_TABS.includes(next)) setRailTab(next as RailTab);
+              }}
               options={RAIL_TABS}
               className="w-full justify-between gap-0 rounded-app-ctl-sm bg-app-track p-[3px] [&>button]:flex-1 [&>button]:justify-center [&>button]:px-2 [&>button]:text-[12px]"
             />
@@ -230,14 +269,15 @@ export function LeftPanel() {
         {/* Header */}
         <div className="flex h-10 flex-shrink-0 items-center justify-between pl-4 pr-2.5">
           <h2 className="text-[10.5px] font-bold uppercase tracking-[.09em] text-app-faint">
-            {isReviewMode ? 'Setup' : 'Page sections'}
+            {isReviewMode ? 'Setup' : isCmsMode ? 'Collections' : 'Page sections'}
           </h2>
           <div className="flex items-center gap-0.5">
             {/* t1 draws an `add` affordance here. Add-section is owned by
                 AddSectionButton / EnhancedAddSection, NOT this rail — there is
                 no handler at this mount, so the slot renders greyed rather than
-                being omitted or fake-wired. */}
-            {!isReviewMode && (
+                being omitted or fake-wired. (CMS has its own "New collection"
+                row, so the greyed slot is not shown on that tab.) */}
+            {!isReviewMode && !isCmsMode && (
               <Coming what="adding sections from the rail" side="left" className="p-1">
                 <AppIcon name="add" size={18} />
               </Coming>
@@ -256,6 +296,11 @@ export function LeftPanel() {
         <div className="min-h-0 flex-1 overflow-y-auto">
           {isReviewMode ? (
             <GettingStartedChecklist />
+          ) : isCmsMode ? (
+            /* The ONE CMS entry point (see the RAIL_TABS note). Mounted only
+               while this tab is selected, which is what keeps its data fetch to
+               one-per-open rather than one-per-editor-load. */
+            <CmsPanel tokenId={tokenId} initialCollectionId={cmsTarget} />
           ) : (
             <div className="px-2.5 pb-3">
               <div className="space-y-0.5">

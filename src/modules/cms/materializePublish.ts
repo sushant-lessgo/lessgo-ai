@@ -13,6 +13,15 @@
 // Passing an unverified tokenId in would be a cross-tenant leak — see the
 // publish route's step-1 gate and `publish.authz.test.ts`.
 //
+// ── DISCOVERY IS TOKEN-KEYED, NOT PAYLOAD-DERIVED ──────────────────────────
+// The collection set comes from ONE `tokenId` query (`loadCmsBundlesForToken`),
+// not from walking the payload for placed sections. Page emission is therefore
+// DECOUPLED from placement (founder ruling, phase 8B): toggling `listingPage` /
+// `detailPages` on publishes those pages even if the block sits nowhere. This
+// replaced phase 3's zero-query fast path; the guarantee that now stands in its
+// place is the zero-collections BYTE-IDENTITY invariant documented on
+// `materializeCmsForPublish` and pinned by test.
+//
 // ── PARITY BY CONSTRUCTION ──────────────────────────────────────────────────
 // The model comes from `toRenderModel()` — the exact same function the editor
 // adapter calls. One shaping path ⇒ the two feeds cannot diverge.
@@ -70,6 +79,10 @@ import {
   CMS_ITEM_SECTION_TYPE,
   CMS_COLLECTION_ITEM_LAYOUT,
   isCmsItemSectionId,
+  CMS_LISTING_MARKER,
+  cmsListingSectionId,
+  isCmsListingSectionId,
+  cmsListingPath,
 } from './sectionKeys';
 
 // EVERY section-identity constant (listing AND detail) lives in the prisma-free
@@ -85,6 +98,10 @@ export {
   CMS_ITEM_SECTION_TYPE,
   CMS_COLLECTION_ITEM_LAYOUT,
   isCmsItemSectionId,
+  CMS_LISTING_MARKER,
+  cmsListingSectionId,
+  isCmsListingSectionId,
+  cmsListingPath,
 };
 
 /** One placed cms section, located inside whichever container holds it. */
@@ -137,8 +154,12 @@ function placedCollectionId(section: any): string | null {
 }
 
 /**
- * Rewrite every cms section's elements from `bundles`. PURE (no DB) — the DB
- * read is `loadCmsBundles`, so tests drive this with fixtures.
+ * Rewrite every PLACED cms section's elements from `bundles`. PURE (no DB) — the
+ * DB read is `loadCmsBundlesForToken`, so tests drive this with fixtures.
+ *
+ * Placement is still what drives INLINE rendering: a collection in `bundles` that
+ * is placed nowhere contributes no section here (it may still emit PAGES — see
+ * `materializeCmsForPublish`).
  *
  * - preserves `layout` (defaulting to `CMS_COLLECTION_LAYOUT`) and `id`
  * - preserves every non-`elements` section prop (backgroundType, aiMetadata, …)
@@ -183,8 +204,9 @@ export function materializeCmsContent(
 // DETAIL PAGES (phase 4) — server-authoritative fan-out into content.subpages
 // ════════════════════════════════════════════════════════════════════════════
 //
-// `detailPages: on` ⇒ every item of a PLACED collection gets its own published
-// page. There are no editor page entries for these (plan Deviations #3): this
+// `detailPages: on` ⇒ every item of the collection gets its own published page —
+// placed or not (the decoupling ruling; before it, an unplaced collection's item
+// pages silently never shipped). There are no editor page entries for these (plan Deviations #3): this
 // module is their SOLE author, they ride the existing generic subpage chain
 // (subpages → blob → KV → /p/<slug>/<subpath>), and `pageActions.ts` is not
 // touched — so naayom's live products pages are untouched by construction.
@@ -225,10 +247,172 @@ export function materializeCmsContent(
 export class CmsPathCollisionError extends Error {
   constructor(public readonly path: string) {
     super(
-      `A page already exists at "${path}", so the collection item page cannot be created. ` +
+      `A page already exists at "${path}", so the collection page cannot be created. ` +
         `Rename that page, or change the collection or item slug.`
     );
     this.name = 'CmsPathCollisionError';
+  }
+}
+
+// ── FAN-OUT CAP (the serial-publish safety valve) ───────────────────────────
+// Detail-page fan-out used to be BOTH conditional and small: only a PLACED
+// collection emitted pages, so placement was an accidental brake. Decoupling
+// removed that brake — every collection with `detailPages` on now fans out, on
+// every publish, unconditionally.
+//
+// The cost is not linear-and-harmless: publish renders one blob AND writes one
+// KV route PER PAGE, SERIALLY, inside a single serverless request. A collection
+// with a few hundred items therefore does not merely get slow — it exhausts the
+// function timeout and dies as an OPAQUE timeout on the highest-blast-radius
+// route in the codebase, with no message the user (or Sentry) can act on.
+//
+// So the fan-out is CAPPED, and exceeding the cap fails LOUD and EARLY (before
+// any mutation, same discipline as the collision guard).
+//
+// ── TWO CAPS, TWO DIFFERENT JOBS (read this before touching either) ─────────
+// There are TWO constants, and only ONE of them is the actual safety guard:
+//
+//  · MAX_CMS_DETAIL_PAGES_TOTAL — THE GUARD. The timeout is a property of the
+//    WHOLE publish request, so only a TOTAL across every collection can bound
+//    it. A per-collection cap cannot: ten collections of 100 items each are ten
+//    individually-legal collections that still fan out to 1000 pages and time
+//    out exactly as if there were no cap at all. This constant is what actually
+//    prevents the opaque timeout.
+//  · MAX_CMS_DETAIL_PAGES_PER_COLLECTION — THE BETTER ERROR MESSAGE. When ONE
+//    oversized collection is the cause, naming it ("Books has 340 items") is far
+//    more actionable than an aggregate total the user has to attribute himself.
+//    Checked FIRST for exactly that reason. It is deliberately NOT the binding
+//    constraint, and it is <= the total by construction, so it can never permit
+//    something the total forbids.
+//
+// NOT a product statement about how big a collection may be — a v1 safety valve
+// chosen to sit comfortably inside one request. Batched/async fan-out is the
+// real fix and is a later track; when it lands, these two constants are the
+// single place to raise or retire the limits.
+//
+// ⚠️ BOTH NUMBERS ARE ARITHMETIC ESTIMATES, NOT MEASUREMENTS. They are derived
+// from an assumed ~100-300ms per page, never timed against a real seeded
+// collection. Owed before beta: ONE timing run (seed a collection at the cap,
+// publish, measure) and write the MEASURED per-page cost into the comments
+// below, so the next person tunes from data instead of re-deriving the guess.
+
+/**
+ * Max detail pages ONE PUBLISH may emit, across ALL collections. THE GUARD.
+ *
+ * 100: publish renders one blob + writes one KV route per page, SERIALLY, in a
+ * single request — assume ~300ms per page worst case (~100ms typical). The
+ * request also has to fit the REST of publish: the root HTML render, both
+ * sanitize passes, the KV route writes and the DB work. Reserving roughly half
+ * of a 60s serverless budget for that leaves ~30s for fan-out ⇒ ~100 pages at
+ * the worst-case per-page cost.
+ *
+ * Deliberately CONSERVATIVE: too low fails loud with an actionable 409 and is a
+ * one-line raise; too high fails as the opaque timeout this cap exists to
+ * eliminate. (Estimate, not a measurement — see the ⚠️ note above.)
+ */
+export const MAX_CMS_DETAIL_PAGES_TOTAL = 100;
+
+/**
+ * Max detail pages ONE collection may fan out to in a single publish.
+ *
+ * Equal to the total cap today, which is intentional: a single collection may
+ * legitimately use the whole budget. Its job is NOT to bound the request (the
+ * total does that) but to produce the specific, actionable message when one
+ * collection is the culprit. Keep it <= `MAX_CMS_DETAIL_PAGES_TOTAL`; a larger
+ * value would be dead, since the total would trip first.
+ */
+export const MAX_CMS_DETAIL_PAGES_PER_COLLECTION = 100;
+
+/**
+ * Thrown when a collection's detail-page fan-out would exceed the cap.
+ *
+ * Mapped by the publish route to a 409 carrying `.message` verbatim, exactly
+ * like `CmsPathCollisionError` — the user can act on it (turn the toggle off, or
+ * split/trim the collection) but only if they are told WHICH collection and what
+ * the limit is. So the message is a user-facing contract; keep the collection
+ * name and the number in it, and keep the class exported.
+ *
+ * We do NOT truncate to the first N items instead: a half-published collection
+ * is worse than a refused one — the user gets a live page with items silently
+ * missing and no signal that anything was dropped.
+ */
+export class CmsFanOutLimitError extends Error {
+  constructor(
+    public readonly collectionName: string,
+    public readonly itemCount: number
+  ) {
+    super(
+      `Collection "${collectionName}" has ${itemCount} items; detail pages are limited to ` +
+        `${MAX_CMS_DETAIL_PAGES_PER_COLLECTION} per collection. Turn detail pages off for ` +
+        `this collection, or reduce its items.`
+    );
+    this.name = 'CmsFanOutLimitError';
+  }
+}
+
+/**
+ * Thrown when the TOTAL detail-page fan-out across ALL collections would exceed
+ * the request-wide cap. This is the class that guards the actual failure mode —
+ * `CmsFanOutLimitError` only fires when a SINGLE collection is oversized, which
+ * is the easy case.
+ *
+ * Mapped by the publish route to a 409 carrying `.message` verbatim, like the
+ * other two. It is a SEPARATE class with NO shared base: a base class would let
+ * a future error type silently enrol itself into the route's 409 branch, so the
+ * route narrows on each class by explicit `instanceof`.
+ *
+ * The message must carry the TOTAL, the LIMIT, and the remedy — the user cannot
+ * act on "too many pages" alone, because no single collection is at fault and
+ * the total is not visible anywhere in the UI. No truncation, for the same
+ * reason as above: a half-published site is worse than a refused publish.
+ */
+export class CmsTotalFanOutLimitError extends Error {
+  constructor(public readonly totalItems: number) {
+    super(
+      `Publishing would create ${totalItems} collection detail pages, but one publish is ` +
+        `limited to ${MAX_CMS_DETAIL_PAGES_TOTAL} in total across all collections. ` +
+        `Turn detail pages off for some collections, or reduce their items.`
+    );
+    this.name = 'CmsTotalFanOutLimitError';
+  }
+}
+
+/**
+ * Fail loud if the detail-page fan-out would exceed EITHER cap. PURE (no DB, no
+ * mutation) — call it BEFORE anything writes.
+ *
+ * Order is deliberate: the PER-COLLECTION check runs first so that a single
+ * oversized collection yields the message that NAMES it, rather than an opaque
+ * aggregate the user has to attribute himself. The TOTAL check then runs over
+ * the accumulated count and is the one that actually bounds the request — it
+ * catches the case the per-collection cap structurally cannot: many collections
+ * each individually UNDER the per-collection cap whose SUM still times the
+ * function out.
+ *
+ * Counts the collections' ITEMS, not the pages that would actually be emitted.
+ * The two differ only for slug-less items (which emit no page), so counting
+ * items is the CONSERVATIVE choice — it can trip slightly early, never late —
+ * and it keeps the error messages ("has N items" / "would create N pages") true
+ * against what the user sees in the collection editor.
+ *
+ * Only `detailPages`-on collections are counted, for BOTH caps: a toggled-off
+ * collection emits no detail pages at all, so its size is irrelevant to the
+ * request's cost. Listing pages are exactly one per collection and need no cap.
+ */
+export function assertCmsFanOutWithinLimit(bundles: Map<string, CmsCollectionBundle>): void {
+  let total = 0;
+  for (const bundle of bundles.values()) {
+    if (!bundle.collection.detailPages) continue;
+    const count = bundle.items.length;
+    if (count > MAX_CMS_DETAIL_PAGES_PER_COLLECTION) {
+      throw new CmsFanOutLimitError(bundle.collection.name || bundle.collection.slug, count);
+    }
+    total += count;
+  }
+  // THE guard. Runs after the loop so the per-collection message wins whenever
+  // it applies, but this is the check the timeout actually depends on.
+  if (total > MAX_CMS_DETAIL_PAGES_TOTAL) {
+    throw new CmsTotalFanOutLimitError(total);
   }
 }
 
@@ -355,6 +539,165 @@ export function applyCmsDetailPages(
   return { written: desired.size, removed };
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// LISTING PAGES (phase 8B) — the `/<collectionRef>` page, per-collection toggle
+// ════════════════════════════════════════════════════════════════════════════
+//
+// Designer t12 says a collection yields TWO pages: a listing (`/books`) and item
+// pages (`/books/:slug`). v1 shipped only the item half plus a manually PLACED
+// listing block; `listingPage` (default OFF, founder ruling) restores the other
+// half as an opt-in.
+//
+// A listing page is NOT a new block: it is the SAME `cmscollection` section on a
+// page of its own, carrying the SAME `toRenderModel()` output under the SAME
+// element key. So every phase-3/4 pin re-applies verbatim, and nothing new can
+// diverge between the placed block and the listing page — they are one renderer
+// fed by one model.
+//
+// ── EVERY PIN, RESTATED (this path has already produced two publish-only bugs) ─
+//  · DUAL PIN — `content[sid] = {id, layout: CMS_COLLECTION_LAYOUT, elements}`
+//    for the single id in `layout.sections`. Layout-less ⇒ the published
+//    renderer's silent `return null` and a BLANK page, with no error anywhere.
+//  · LEADING-SLASH ABSOLUTE key `/<collectionRef>` (`cmsListingPath`). Never
+//    slash-less, never `/p/<slug>/…`.
+//  · ENTRY SHAPE `{layout:{sections}, content, title}`; `theme` omitted on
+//    purpose (the root theme cascades, `renderPublishedExport.ts:262-278`).
+//  · KEY-NAMING LAW — nothing added here ends in href/url/link/slug.
+//  · AUTHORITY SCOPING — only cms listing paths are written or pruned.
+//  · COLLISION → `CmsPathCollisionError` → 409, checked BEFORE any mutation.
+//
+// ── DECOUPLED FROM PLACEMENT (founder ruling — supersedes the phase-8B draft) ─
+// The authoritative set is EVERY collection of the token with `listingPage` on,
+// placed or not. The modal's "CREATES THESE PAGES" tiles promise these pages the
+// moment the toggle flips; coupling them to placement made that promise fail
+// silently. The same ruling retro-fixes `detailPages`, which had been coupled
+// since phase 4. Cost + the invariant that replaced the zero-query fast path:
+// see `materializeCmsForPublish`.
+
+/**
+ * Build ONE listing subpage entry. Shape PINNED, same as `buildDetailSubpage`.
+ * The section id embeds the collection id, so republishing is byte-identical and
+ * the entry is recognisably OURS (see `CMS_LISTING_MARKER`).
+ */
+function buildListingSubpage(model: CmsRenderModel): Record<string, any> {
+  const sid = cmsListingSectionId(model.collectionId);
+  return {
+    layout: { sections: [sid] },
+    content: {
+      // THE DUAL PIN. Drop `layout` and this page publishes BLANK, silently.
+      [sid]: {
+        id: sid,
+        layout: CMS_COLLECTION_LAYOUT,
+        elements: {
+          collectionId: model.collectionId,
+          [CMS_MODEL_ELEMENT_KEY]: model,
+        },
+      },
+    },
+    title: model.collectionName || model.collectionRef,
+  };
+}
+
+/** Every listing subpage a set of bundles should produce, keyed by path. */
+export function buildListingSubpages(
+  bundles: Map<string, CmsCollectionBundle>
+): Map<string, Record<string, any>> {
+  const out = new Map<string, Record<string, any>>();
+  for (const bundle of bundles.values()) {
+    const model: CmsRenderModel = toRenderModel(bundle);
+    if (!model.listingPage) continue; // toggle OFF ⇒ no page
+    const path = cmsListingPath(model.collectionRef);
+    if (!path) continue; // no slug ⇒ no page
+    out.set(path, buildListingSubpage(model));
+  }
+  return out;
+}
+
+/**
+ * Is this subpage entry a listing page WE authored?
+ *
+ * Non-empty AND every section id carries the listing marker. A user CAN place a
+ * `cmscollection` block on their own subpage, so a bare type-prefix test would
+ * claim that page as ours and DELETE it on toggle-off. The marker segment is
+ * what makes the ownership test safe.
+ */
+export function isCmsListingSubpage(sub: any): boolean {
+  const sections = sub?.layout?.sections;
+  if (!Array.isArray(sections) || sections.length === 0) return false;
+  return sections.every((s: unknown) => typeof s === 'string' && isCmsListingSectionId(s));
+}
+
+/**
+ * Reconcile `content.subpages` with the authoritative listing pages. PURE (no DB).
+ * Mutates `content` in place. Identical discipline to `applyCmsDetailPages`:
+ * fail-loud collision FIRST, then prune only our own, then write.
+ */
+export function applyCmsListingPages(
+  content: Record<string, any>,
+  bundles: Map<string, CmsCollectionBundle>
+): { written: number; removed: number } {
+  const desired = buildListingSubpages(bundles);
+
+  const existing =
+    content?.subpages && typeof content.subpages === 'object' ? content.subpages : null;
+
+  // 1. collision guard — before ANY mutation, so a failed publish changes nothing.
+  if (existing) {
+    for (const path of desired.keys()) {
+      const sub = existing[path];
+      if (sub !== undefined && !isCmsListingSubpage(sub)) {
+        throw new CmsPathCollisionError(path);
+      }
+    }
+  }
+
+  if (!existing && desired.size === 0) return { written: 0, removed: 0 };
+
+  const subpages: Record<string, any> = existing ?? {};
+  if (!existing) content.subpages = subpages;
+
+  // 2. prune stale listing pages (never anything else — see isCmsListingSubpage).
+  let removed = 0;
+  for (const path of Object.keys(subpages)) {
+    if (desired.has(path)) continue;
+    if (!isCmsListingSubpage(subpages[path])) continue; // not ours → untouched
+    delete subpages[path];
+    removed++;
+  }
+
+  // 3. write the authoritative entries.
+  for (const [path, entry] of desired) subpages[path] = entry;
+
+  return { written: desired.size, removed };
+}
+
+/**
+ * Check BOTH cms path families for collisions before EITHER reconciler mutates.
+ *
+ * Each `apply*` already guards itself, but they run in sequence: without this
+ * pre-pass a LISTING collision would throw only after the DETAIL pages had
+ * already been written into `content`. The publish route discards the payload on
+ * a 409 either way, so this is about keeping the stated invariant true —
+ * "checked before any mutation" — rather than about a live bug.
+ */
+export function assertNoCmsPathCollisions(
+  content: Record<string, any>,
+  bundles: Map<string, CmsCollectionBundle>
+): void {
+  const existing =
+    content?.subpages && typeof content.subpages === 'object' ? content.subpages : null;
+  if (!existing) return;
+
+  for (const path of buildDetailSubpages(bundles).keys()) {
+    const sub = existing[path];
+    if (sub !== undefined && !isCmsDetailSubpage(sub)) throw new CmsPathCollisionError(path);
+  }
+  for (const path of buildListingSubpages(bundles).keys()) {
+    const sub = existing[path];
+    if (sub !== undefined && !isCmsListingSubpage(sub)) throw new CmsPathCollisionError(path);
+  }
+}
+
 /**
  * The top-level page paths a project already occupies (`Project.content.pages[*]
  * .pathSlug`), as leading-slash absolute paths.
@@ -411,31 +754,75 @@ function toCmsCollection(row: any): CmsCollection {
     fieldSchema: (Array.isArray(row.fieldSchema) ? row.fieldSchema : []) as FieldDef[],
     roles: ((row.roles && typeof row.roles === 'object' ? row.roles : {}) as CollectionRoles),
     detailPages: !!row.detailPages,
+    // Phase 8B: carried so `toRenderModel` can decide the listing page. The two
+    // remaining amendment fields (`purposes`, `featuredOnHome`) are deliberately
+    // NOT narrowed here — they are stored-but-unread by ruling, and putting them
+    // in the publish model would make them look like a delivered capability.
+    listingPage: !!row.listingPage,
     layoutHint: row.layoutHint ?? null,
     order: row.order ?? 0,
   };
 }
 
 /**
- * Read the requested collections (with groups + items) for ONE token.
+ * Read ALL of this token's collections (with groups + items) in ONE query.
  *
- * The `tokenId` filter is the tenant boundary: even a collectionId belonging to
- * another project cannot be loaded here, so a tampered snapshot yields an empty
- * block rather than someone else's content. (The route's ownership gate is the
- * first line of defence; this is the second.)
+ * The `tokenId` filter is the tenant boundary AND the whole `where` clause: it is
+ * the only key this module ever reads by, so a tampered snapshot can never pull
+ * another project's rows. (The route's ownership gate is the first line of
+ * defence; this is the second — and the caller MUST have run it, see
+ * `materializeCmsForPublish`.)
+ *
+ * ── WHY "ALL", NOT "THE PLACED ONES" (founder ruling, phase 8B) ─────────────
+ * Page emission is DECOUPLED from placement: a collection whose `listingPage` /
+ * `detailPages` toggle is on must publish its pages whether or not its block sits
+ * on any page — the modal's "CREATES THESE PAGES" tiles promise exactly that, and
+ * the old placement-derived id list silently broke the promise. So discovery is
+ * `tokenId`-keyed, not payload-derived.
+ *
+ * The `select` is explicit (not `include`) so the query carries only the columns
+ * the bundle actually reads — the stored-but-unread `purposes` column and the
+ * timestamps stay off the wire.
  */
-export async function loadCmsBundles(
-  tokenId: string,
-  collectionIds: string[]
+export async function loadCmsBundlesForToken(
+  tokenId: string
 ): Promise<Map<string, CmsCollectionBundle>> {
   const bundles = new Map<string, CmsCollectionBundle>();
-  if (!tokenId || collectionIds.length === 0) return bundles;
+  if (!tokenId) return bundles;
 
   const rows = await prisma.collection.findMany({
-    where: { tokenId, id: { in: collectionIds } },
-    include: {
-      groups: { orderBy: { order: 'asc' } },
-      items: { orderBy: { order: 'asc' } },
+    // `@@index([tokenId, order])` on Collection covers this exactly, and the
+    // matching `orderBy` keeps the emitted page set deterministic run-to-run.
+    where: { tokenId },
+    orderBy: { order: 'asc' },
+    select: {
+      id: true,
+      projectId: true,
+      tokenId: true,
+      name: true,
+      slug: true,
+      fieldSchema: true,
+      roles: true,
+      detailPages: true,
+      listingPage: true,
+      layoutHint: true,
+      order: true,
+      groups: {
+        orderBy: { order: 'asc' },
+        select: { id: true, collectionId: true, name: true, order: true },
+      },
+      items: {
+        orderBy: { order: 'asc' },
+        select: {
+          id: true,
+          collectionId: true,
+          groupId: true,
+          slug: true,
+          values: true,
+          order: true,
+          slugLocked: true,
+        },
+      },
     },
   });
 
@@ -466,10 +853,37 @@ export async function loadCmsBundles(
 /**
  * Publish entry point. Mutates `content` IN PLACE.
  *
- * NO-OP FAST PATH: a payload with zero cms sections issues ZERO queries, so
- * every existing (non-CMS) publish keeps exactly today's behaviour and DB load.
+ * `tokenId` MUST already be ownership-verified by the caller — the collection
+ * read below happens AFTER the route's `assertProjectOwner` gate and is keyed by
+ * nothing else.
  *
- * `tokenId` MUST already be ownership-verified by the caller.
+ * ── PAGE EMISSION IS DECOUPLED FROM PLACEMENT (founder ruling, phase 8B) ────
+ * Discovery is `tokenId`-keyed, NOT payload-derived: every collection with
+ * `listingPage` / `detailPages` on emits its pages regardless of whether its
+ * block is placed anywhere. Placement still drives INLINE rendering exactly as
+ * before (`materializeCmsContent` rewrites only placed sections).
+ *
+ * ── WHAT THIS COST, AND WHAT REPLACED IT ───────────────────────────────────
+ * Phase 3 had a zero-query FAST PATH: a payload with no cms sections issued no
+ * queries at all, which was the blast-radius mitigation on this (highest-risk)
+ * route. Decoupling necessarily trades it for ONE indexed query per publish. The
+ * guarantee that REPLACES it — and that is now the thing to protect — is
+ * BYTE-IDENTITY:
+ *   · a project with ZERO collections is byte-identical after materialization
+ *     (whole payload, `subpages` included), and
+ *   · a project whose collections all have BOTH toggles off is byte-identical
+ *     too (absent a placed block, which legitimately gets its model written).
+ * Both hold structurally: with an empty desired set the reconcilers only prune
+ * entries they can PROVE they authored (the `cmscollectionitem` prefix / the
+ * `cmscollection-listing-` marker), and they never create `content.subpages`.
+ * Both are pinned by explicit tests in `materializePublish.test.ts`.
+ *
+ * Decoupling ALSO removed placement as an accidental brake on detail-page
+ * fan-out, so the fan-out is now CAPPED — `assertCmsFanOutWithinLimit`, checked
+ * below before anything mutates. TWO caps: `MAX_CMS_DETAIL_PAGES_TOTAL` is the
+ * guard (the timeout is a property of the whole REQUEST, so only a total can
+ * bound it); `MAX_CMS_DETAIL_PAGES_PER_COLLECTION` exists to name the culprit
+ * collection when there is one.
  *
  * @returns the number of cms sections materialized
  */
@@ -477,33 +891,29 @@ export async function materializeCmsForPublish(
   tokenId: string,
   content: Record<string, any>
 ): Promise<number> {
-  const sections = findCmsSections(content);
+  const bundles = await loadCmsBundlesForToken(tokenId);
 
-  if (sections.length === 0) {
-    // FAST PATH — still ZERO queries. The detail-page reconcile runs with an empty
-    // authoritative set because it is PURELY STRUCTURAL: it drops orphaned cms
-    // detail subpages left behind when the last collection section was removed.
-    // Without this, deleting the block would leave its item pages published
-    // forever. Non-cms subpages are untouched, so a project that never used the
-    // CMS is byte-identical to today.
-    applyCmsDetailPages(content, new Map());
-    return 0;
-  }
-
-  const ids = Array.from(
-    new Set(
-      sections
-        .map(({ container, sectionId }) => placedCollectionId(container[sectionId]))
-        .filter((id): id is string => !!id)
-    )
-  );
-
-  const bundles = await loadCmsBundles(tokenId, ids);
+  // BOTH fail-loud guards run FIRST — before any container is touched, so a
+  // rejected publish leaves the payload byte-identical.
+  // Cap before collisions: an over-cap collection is a refusal regardless of
+  // where its paths land, and this check is the cheaper of the two.
+  assertCmsFanOutWithinLimit(bundles);
+  assertNoCmsPathCollisions(content, bundles);
+  // Placed sections only: unplaced collections contribute PAGES (below), never
+  // inline content.
   const materialized = materializeCmsContent(content, bundles);
   // Fan-out AFTER the listing sections: the detail sections we add carry the
   // `cmscollectionitem` prefix, which `findCmsSections` deliberately does not
   // match, so the two passes cannot interfere in either order — but this order
   // keeps "listing first, then its pages" readable.
+  //
+  // With an empty `bundles` these two are the ORPHAN REAPER: they drop cms pages
+  // left behind by a deleted collection or a toggled-off switch, and touch
+  // nothing else.
   applyCmsDetailPages(content, bundles);
+  // Listing pages last. Both reconcilers write disjoint path sets (`/<c>` vs
+  // `/<c>/<i>`) and each prunes ONLY entries it can prove it authored, so the
+  // order is not load-bearing — it just reads as "the block, then its pages".
+  applyCmsListingPages(content, bundles);
   return materialized;
 }

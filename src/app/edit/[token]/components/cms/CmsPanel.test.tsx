@@ -17,6 +17,16 @@
 //
 // Repo convention: no @testing-library/react — react-dom/client + React.act,
 // per GlobalAppHeader.menus.test.tsx.
+//
+// ── PHASE 8B: THE HOST MOVED, THE CONTRACTS DID NOT ──────────────────────────
+// CmsPanel was a popover bar-control in GlobalAppHeader; it is now the body of
+// the left rail's `CMS` tab. So the list is INLINE (there is no menu to open) and
+// the data refresh fires on MOUNT — LeftPanel mounts the panel only while that
+// tab is selected, which is how "never a request per editor load" survives the
+// move. `openMenu()` is gone, every assertion below is not: the delete ordering
+// guard, the `detail.collectionId` targeting and the listener teardown are
+// unchanged, and the rail integration (tab renders the panel, header does not)
+// is pinned at the bottom of this file.
 
 import React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -79,6 +89,23 @@ vi.mock('@/hooks/useEditStore', () => ({
   }),
 }));
 vi.mock('@/components/ui/ConfirmDialog', () => ({ confirmDialog }));
+// LeftPanel's own dependencies (the rail-integration block at the bottom of this
+// file mounts it). CmsPanel itself uses none of these.
+vi.mock('@/components/EditProvider', () => ({
+  useEditStoreContext: () => ({
+    store: { getState: () => ({ setLeftPanelWidth: () => {}, toggleLeftPanel: () => {} }) },
+    tokenId: 'tok',
+  }),
+  useStoreState: (selector: (s: any) => unknown) =>
+    selector({
+      leftPanel: { activeTab: 'pageStructure', collapsed: false, width: 300 },
+      sections: ['hero-abc12345'],
+      selectedSection: null,
+    }),
+}));
+vi.mock('@/hooks/useReviewState', () => ({
+  useReviewState: () => ({ guideTasks: [], allComplete: true }),
+}));
 // The schema builder has its own contract suite; stub it so this file is about
 // the panel only (and so opening the modal cannot portal a second dialog in).
 vi.mock('./AddCollectionModal', () => ({
@@ -87,6 +114,7 @@ vi.mock('./AddCollectionModal', () => ({
 }));
 
 import { CmsPanel, MANAGE_COLLECTIONS_EVENT } from './CmsPanel';
+import { LeftPanel } from '../layout/LeftPanel';
 
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT =
   true;
@@ -111,7 +139,7 @@ afterEach(() => {
   container.remove();
 });
 
-/** Popover content is portalled to document.body — query globally. */
+/** The browser dialog is portalled to document.body — query globally. */
 function q<T extends Element = HTMLElement>(sel: string): T | null {
   return document.querySelector<T>(sel);
 }
@@ -120,26 +148,22 @@ function must<T extends Element = HTMLElement>(sel: string): T {
   if (!el) throw new Error(`not found: ${sel}`);
   return el;
 }
-function openMenu() {
-  act(() => must<HTMLButtonElement>('button[aria-label="Collections"]').click());
-}
 
 describe('CmsPanel — listing', () => {
   it('lists the project’s collections with an item·field count', () => {
-    openMenu();
     const row = must('[data-collection-row="col_1"]');
     expect(row.textContent).toContain('Books');
     expect(row.textContent).toContain('1·1'); // 1 item · 1 field
   });
 
-  it('refreshes on OPEN, not on mount (mounting must not add a request per editor load)', () => {
-    expect(refreshCmsData).not.toHaveBeenCalled();
-    openMenu();
+  // Same invariant as the phase-6 popover version ("never a request per editor
+  // load"), now upheld by the HOST: LeftPanel mounts this panel only while the
+  // CMS tab is selected, so mounting IS opening — and it must fetch exactly once.
+  it('refreshes ONCE on mount (mount == the user opening the CMS tab)', () => {
     expect(refreshCmsData).toHaveBeenCalledTimes(1);
   });
 
   it('places the collection on the current page via addCmsSection', () => {
-    openMenu();
     act(() => must<HTMLButtonElement>('[data-collection-place="col_1"]').click());
     expect(addCmsSection).toHaveBeenCalledWith('col_1');
   });
@@ -147,7 +171,6 @@ describe('CmsPanel — listing', () => {
 
 describe('CmsPanel — delete is TWO writes', () => {
   async function clickDelete() {
-    openMenu();
     await act(async () => {
       must<HTMLButtonElement>('[data-collection-delete="col_1"]').click();
     });
@@ -187,8 +210,11 @@ describe('CmsPanel — delete is TWO writes', () => {
 });
 
 describe('CmsPanel — firewall handoff', () => {
-  it('opens on the `lessgo:manage-collections` window event the placed block fires', () => {
-    expect(q('[data-collection-row="col_1"]')).toBeNull();
+  // In the rail the list is ALREADY on screen, so "opens" collapses to "refreshes
+  // and targets". The refresh half still matters: the block's Manage button is
+  // fired from the canvas, where the panel's cache may be minutes stale.
+  it('refreshes on the `lessgo:manage-collections` window event the placed block fires', () => {
+    expect(refreshCmsData).toHaveBeenCalledTimes(1); // the mount fetch
 
     act(() => {
       window.dispatchEvent(
@@ -197,7 +223,24 @@ describe('CmsPanel — firewall handoff', () => {
     });
 
     expect(q('[data-collection-row="col_1"]')).not.toBeNull();
-    expect(refreshCmsData).toHaveBeenCalledTimes(1);
+    expect(refreshCmsData).toHaveBeenCalledTimes(2);
+  });
+
+  // The mount-time half of the two-listener handoff: when the event arrives while
+  // the CMS tab is NOT selected, this panel does not exist to hear it — LeftPanel
+  // switches tabs and forwards the id, and the panel must open ON that collection
+  // from its very first render. Ignoring the prop would silently reduce every
+  // canvas "Manage items" click (the common path) to "the list, go find it".
+  it('opens the browser on `initialCollectionId` given at mount', () => {
+    act(() => root.unmount());
+    container.remove();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+    act(() => root.render(<CmsPanel tokenId="tok" initialCollectionId="col_1" />));
+
+    const browser = must('[data-cms-browser]');
+    expect(browser.textContent).toContain('Books');
   });
 
   // The event carries `{collectionId}`. Ignoring it (the pre-phase-7 behaviour)
@@ -229,6 +272,7 @@ describe('CmsPanel — firewall handoff', () => {
 
   it('unsubscribes on unmount (no listener leak across editor remounts)', () => {
     act(() => root.unmount());
+    refreshCmsData.mockClear(); // discard the mount fetch
     act(() => {
       window.dispatchEvent(new CustomEvent(MANAGE_COLLECTIONS_EVENT));
     });
@@ -236,5 +280,84 @@ describe('CmsPanel — firewall handoff', () => {
 
     // afterEach unmounts again; re-root so that call is harmless.
     root = createRoot(container);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// RAIL INTEGRATION (phase 8B) — the CMS entry point is the rail tab, and there
+// is exactly ONE of them.
+//
+// What this defends: phase 6 shipped a greyed "CMS — coming soon" rail tab AND a
+// working Collections button in the header. Either half regressing (the tab going
+// back to <Coming>, or a second entry reappearing) is invisible to every other
+// test in the repo — GlobalAppHeader.menus.test.tsx never knew about CmsPanel.
+// ────────────────────────────────────────────────────────────────────────────
+
+describe('LeftPanel — the CMS rail tab is the CMS entry point', () => {
+  let railContainer: HTMLDivElement;
+  let railRoot: Root;
+
+  const mountRail = () => {
+    railContainer = document.createElement('div');
+    document.body.appendChild(railContainer);
+    railRoot = createRoot(railContainer);
+    act(() => railRoot.render(<LeftPanel />));
+  };
+
+  const tab = (label: string) =>
+    Array.from(railContainer.querySelectorAll<HTMLButtonElement>('[role="radio"]')).find(
+      (b) => (b.textContent || '').trim() === label
+    );
+
+  beforeEach(mountRail);
+  afterEach(() => {
+    act(() => railRoot.unmount());
+    railContainer.remove();
+  });
+
+  it('renders a LIVE CMS tab — not the greyed <Coming> placeholder', () => {
+    const cms = tab('CMS');
+    expect(cms).toBeTruthy();
+    // <Coming> marks its child aria-disabled and swallows clicks. If the tab
+    // regressed to a placeholder, this is what would come back.
+    expect(cms!.getAttribute('aria-disabled')).toBeNull();
+    expect(cms!.querySelector('[aria-disabled="true"]')).toBeNull();
+    expect(cms!.disabled).toBe(false);
+  });
+
+  it('selecting the CMS tab renders the collections panel; Sections does not', () => {
+    expect(railContainer.querySelector('[data-cms-panel]')).toBeNull();
+
+    act(() => tab('CMS')!.click());
+    expect(railContainer.querySelector('[data-cms-panel]')).not.toBeNull();
+    expect(railContainer.querySelector('[data-collection-row="col_1"]')).not.toBeNull();
+
+    act(() => tab('Sections')!.click());
+    expect(railContainer.querySelector('[data-cms-panel]')).toBeNull();
+  });
+
+  it('Pages / Theme stay inert — clicking them never swaps the body', () => {
+    for (const label of ['Pages', 'Theme']) {
+      const t = tab(label);
+      expect(t, label).toBeTruthy();
+      act(() => t!.click());
+      // Still the sections list, and certainly not the CMS panel.
+      expect(railContainer.querySelector('[data-cms-panel]'), label).toBeNull();
+    }
+  });
+
+  // The block's "Manage items" button fires this from the CANVAS, where the rail
+  // is almost always on the Sections tab — so the rail has to switch itself.
+  it('a `lessgo:manage-collections` event switches to CMS and targets the collection', () => {
+    expect(railContainer.querySelector('[data-cms-panel]')).toBeNull();
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent(MANAGE_COLLECTIONS_EVENT, { detail: { collectionId: 'col_1' } })
+      );
+    });
+
+    expect(railContainer.querySelector('[data-cms-panel]')).not.toBeNull();
+    expect(document.querySelector('[data-cms-browser]')!.textContent).toContain('Books');
   });
 });

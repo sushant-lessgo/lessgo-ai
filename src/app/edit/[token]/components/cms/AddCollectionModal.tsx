@@ -17,8 +17,10 @@
 //  #5  Per-row role menu (title / cover / primaryLink), TYPE-FILTERED off
 //      ROLE_ALLOWED_TYPES — cover only on image|gallery, primaryLink only on link,
 //      title only on text_short. Rendered through field-row-list's `renderTrailing`.
-//  #6  detailPages is a `switch`, and the CREATES THESE PAGES tiles are REACTIVE:
-//      toggle off → listing tile only.
+//  #6  detailPages is a `switch`, and the CREATES THESE PAGES tiles are REACTIVE.
+//      Phase 8B adds a SECOND switch, `listingPage` (founder ruling: per
+//      collection, DEFAULT OFF), and the tiles now react to BOTH: neither on →
+//      no tiles + a line saying the collection only renders where it is placed.
 //  #9  No "Write with AI" anywhere.
 //
 // ── DRAFT STATE IS LOCAL, ON PURPOSE ─────────────────────────────────────────
@@ -60,9 +62,11 @@ import {
   FIELD_TYPES,
   FIELD_ID_REGEX,
   ROLE_ALLOWED_TYPES,
+  COLLECTION_PURPOSES,
   type FieldDef,
   type FieldType,
   type RoleKey,
+  type CollectionPurpose,
 } from '@/lib/schemas/collection.schema';
 import type { CmsCollection, CmsItem, CollectionRoles } from '@/modules/cms/types';
 import { slugifyName } from '@/modules/cms/slug';
@@ -103,15 +107,9 @@ export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
   stat: 'Spec / stat',
 };
 
-/**
- * Types offered in the "+ Add field" picker.
- *
- * `stat` is in the CLOSED 10 (contract, phase 8A) but is NOT offered yet: its
- * item-editor control and its renderer land in phase 8B (plan step 5b). Offering
- * it now would let a user create a field with no way to fill it and nothing to
- * render it. **Phase 8B deletes this filter** and the picker becomes FIELD_TYPES.
- */
-export const PICKER_FIELD_TYPES = FIELD_TYPES.filter((t) => t !== 'stat');
+// (Phase 8A's `PICKER_FIELD_TYPES` filter is GONE, as its docblock promised:
+// `stat` now has a control (`key-value-field`) and a renderer (`FieldNode`), so
+// the picker offers the full closed 10 again.)
 
 const ROLE_LABELS: Record<RoleKey, string> = {
   title: 'Title field',
@@ -120,6 +118,13 @@ const ROLE_LABELS: Record<RoleKey, string> = {
 };
 
 const ROLE_KEYS = Object.keys(ROLE_ALLOWED_TYPES) as RoleKey[];
+
+/** Amendment item 2 — the closed purpose vocabulary, human-labelled. */
+const PURPOSE_LABELS: Record<CollectionPurpose, string> = {
+  offer: 'What I sell',
+  proof: 'Proof / results',
+  price: 'Prices',
+};
 
 /** Ruling #1 — rendered greyed, never omitted. `blank` is the only live start. */
 export const PRESET_CHIPS = [
@@ -235,6 +240,11 @@ export function AddCollectionModal({
   const [fields, setFields] = React.useState<FieldDef[]>([]);
   const [roles, setRoles] = React.useState<CollectionRoles>({});
   const [detailPages, setDetailPages] = React.useState(false);
+  // Phase 8B, founder ruling: per-collection, DEFAULT OFF (not designer t12's
+  // "two pages, always", not omitted).
+  const [listingPage, setListingPage] = React.useState(false);
+  // Amendment item 2 — STORED, VALIDATED, READ BY NOTHING. See the label copy.
+  const [purposes, setPurposes] = React.useState<CollectionPurpose[]>([]);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [addOpen, setAddOpen] = React.useState(false);
@@ -247,6 +257,8 @@ export function AddCollectionModal({
     setFields(collection ? [...(collection.fieldSchema || [])] : []);
     setRoles(collection ? { ...(collection.roles || {}) } : {});
     setDetailPages(collection?.detailPages ?? false);
+    setListingPage(collection?.listingPage ?? false);
+    setPurposes([...(collection?.purposes ?? [])]);
     setError(null);
     setSaving(false);
   }, [open, collection]);
@@ -327,6 +339,8 @@ export function AddCollectionModal({
       fieldSchema: fields,
       roles,
       detailPages,
+      listingPage,
+      purposes,
     };
     try {
       const res = await fetch(
@@ -480,7 +494,7 @@ export function AddCollectionModal({
               </PopoverTrigger>
               <AppPopoverMenu width={200} align="start" style={{ pointerEvents: 'auto' }}>
                 <AppPopoverLabel>Field type</AppPopoverLabel>
-                {PICKER_FIELD_TYPES.map((type) => (
+                {FIELD_TYPES.map((type) => (
                   <AppPopoverItem
                     key={type}
                     data-add-field-type={type}
@@ -493,8 +507,65 @@ export function AddCollectionModal({
             </Popover>
           </div>
 
-          {/* DETAIL PAGES — ruling #6 (switch + reactive tiles) */}
+          {/* PURPOSES — amendment item 2. STORED, VALIDATED, READ BY NOTHING.
+              Shipping it with a truthful label is the point: the greyed-
+              placeholder rule presupposes a destination, and here the destination
+              (per-purpose renderers) is explicitly deferred, so the honest thing
+              is a working control that says what it does and does not do. Do NOT
+              "finish" this by branching rendering on it — that needs a spec. */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[10.5px] font-bold uppercase tracking-[.09em] text-app-faint">
+              What is this collection for?
+            </span>
+            <div className="flex flex-wrap items-center gap-1.5" data-purposes="">
+              {COLLECTION_PURPOSES.map((p) => {
+                const on = purposes.includes(p);
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    data-purpose-chip={p}
+                    aria-pressed={on}
+                    onClick={() =>
+                      setPurposes((prev) =>
+                        prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
+                      )
+                    }
+                    className={
+                      on
+                        ? 'rounded-app-pill border border-app-primary bg-app-tint-soft px-2.5 py-1 text-[12px] font-semibold text-app-primary-deep'
+                        : 'rounded-app-pill border border-app-border px-2.5 py-1 text-[12px] font-semibold text-app-label hover:bg-app-hover'
+                    }
+                  >
+                    {PURPOSE_LABELS[p]}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11.5px] text-app-muted" data-purposes-note="">
+              Saved with the collection, but it does not change how the collection
+              looks yet — every collection renders the same way in this version.
+            </p>
+          </div>
+
+          {/* PAGES — ruling #6 (detailPages switch + reactive tiles) plus the
+              phase-8B listing switch. BOTH toggles drive the tiles. */}
           <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[13px] font-semibold text-app-ink">Listing page</p>
+                <p className="text-[11.5px] text-app-muted">
+                  Publish a page at {listingPath} showing every item.
+                </p>
+              </div>
+              <Switch
+                checked={listingPage}
+                onCheckedChange={setListingPage}
+                data-listing-page=""
+                aria-label="Listing page"
+              />
+            </div>
+
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-[13px] font-semibold text-app-ink">Detail pages</p>
@@ -515,11 +586,24 @@ export function AddCollectionModal({
                 Creates these pages
               </span>
               <div className="flex flex-col gap-1">
-                <PageTile kind="listing" label="Listing" path={listingPath} />
-                {/* Reactive: OFF → the item tile is GONE, not greyed. There is no
-                    "coming soon" here — the user just turned it off. */}
+                {/* Reactive to BOTH toggles. OFF → the tile is GONE, not greyed:
+                    there is no "coming soon" here, the user just turned it off.
+                    Neither on is a REAL state (the block still renders wherever
+                    it is placed) so it gets a line, not an empty box. */}
+                {listingPage ? (
+                  <PageTile kind="listing" label="Listing" path={listingPath} />
+                ) : null}
                 {detailPages ? (
                   <PageTile kind="item" label="Item page" path={`${listingPath}/:slug`} />
+                ) : null}
+                {!listingPage && !detailPages ? (
+                  <p
+                    data-page-tile-none=""
+                    className="rounded-app-ctl border border-dashed border-app-border px-2.5 py-2 text-[11.5px] text-app-muted"
+                  >
+                    No pages of its own — this collection shows up only where you
+                    add it to a page.
+                  </p>
                 ) : null}
               </div>
             </div>

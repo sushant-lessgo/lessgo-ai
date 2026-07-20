@@ -6,8 +6,8 @@
 // each inject their own emitters, so both trees are identical by construction
 // (the markup half of the parity guarantee; the data half is toRenderModel).
 //
-// Rendering keys off the field TYPE (the closed set, 10 since phase 8A; `stat`
-// renders in phase 8B) — never off a field name and
+// Rendering keys off the field TYPE (the closed set of 10; `stat` gained its
+// emit path in phase 8B) — never off a field name and
 // never off the template. Roles drive card composition:
 //   cover → the card's lead media · title → the card heading · primaryCta → CTA
 // Every remaining field renders in schema order beneath. Empty and unsafe values
@@ -33,7 +33,7 @@ import {
   type CmsItemRender,
   type CmsResolvedRoles,
 } from './toRenderModel';
-import type { GalleryValue, LinkValue, MediaValue, ImageValue } from '../types';
+import type { GalleryValue, LinkValue, MediaValue, ImageValue, StatValue } from '../types';
 
 export const CMS_COLLECTION_STYLES = `
 .lg-cms{padding:var(--section-py,64px) 20px;}
@@ -61,6 +61,9 @@ export const CMS_COLLECTION_STYLES = `
 .lg-cms__titlelink{color:inherit;text-decoration:none;}
 .lg-cms__more{font-size:14px;text-decoration:underline;}
 .lg-cms__empty{font-size:14px;opacity:.55;}
+.lg-cms__stat{display:flex;align-items:baseline;gap:8px;font-size:14px;}
+.lg-cms__statk{opacity:.6;}
+.lg-cms__statv{font-weight:600;}
 `;
 
 /**
@@ -114,6 +117,20 @@ export function FieldNode({ field, E }: { field: CmsFieldRender; E: CmsPrimitive
         <E.Link href={v.url} className="lg-cms__media" ariaLabel={field.name}>
           {field.name}
         </E.Link>
+      );
+    }
+    // A spec/stat PAIR (amendment item 1) — "Weight · 4.2 kg". Rendered as one
+    // row of two spans, shared by the listing card and the detail page (both go
+    // through this function). Either half may be empty (toRenderModel drops the
+    // field only when BOTH are), so each span is emitted through E.Txt, which
+    // renders nothing for an empty value.
+    case 'stat': {
+      const v = field.value as StatValue;
+      return (
+        <span className="lg-cms__stat">
+          <E.Txt value={v.key} as="span" className="lg-cms__statk" />
+          <E.Txt value={v.value} as="span" className="lg-cms__statv" />
+        </span>
       );
     }
     case 'link': {
@@ -211,6 +228,18 @@ export interface CollectionSectionCoreProps {
    * modes. The published wrapper never passes it.
    */
   manageSlot?: React.ReactNode;
+  /**
+   * Edit-only empty-state guidance (phase 8B step 5), rendered ONLY when the
+   * collection has no renderable items.
+   *
+   * Like `manageSlot` it lives OUTSIDE `[data-cms-body]`, which is what makes it
+   * invisible to the parity comparator — and that placement is the WHOLE reason
+   * it is a slot instead of body copy. The published twin never passes it: an
+   * empty collection must publish exactly what it published before (the plain
+   * "No items yet." line), never editor chrome telling a visitor where the CMS
+   * panel is.
+   */
+  emptySlot?: React.ReactNode;
 }
 
 /**
@@ -223,6 +252,7 @@ export function CollectionSectionCore({
   E,
   sectionId,
   manageSlot,
+  emptySlot,
 }: CollectionSectionCoreProps) {
   const hasItems = model.groups.some((g) => g.items.length > 0);
   return (
@@ -236,6 +266,7 @@ export function CollectionSectionCore({
         data-cms-collection={model.collectionRef}
       >
         {manageSlot}
+        {!hasItems ? emptySlot : null}
         <div className="lg-cms__in" data-cms-body="">
           {hasItems ? (
             model.groups.map((group) => (
