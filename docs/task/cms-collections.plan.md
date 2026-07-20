@@ -236,8 +236,50 @@ phase 7 item editor + group management: done (a130d22b, impl-review loops 0 → 
       (live refresh) is proven ONLY by an e2e that has never executed.
     ↳ Post-create editor flash: selectedId set before the refresh lands → the just-created item's
       editor briefly unmounts to the placeholder, reading as if Save closed the form. Cosmetic.
-phase 8A contracts + data (amendment 1-4 + listingPage column): pending  ← ADDED 2026-07-20
-phase 8B rail CMS tab + listing page + stat rendering: pending  ← ADDED 2026-07-20 from founder gate feedback
+phase 8A contracts + data (amendment 1-4 + listingPage column): done (a8aa8221)
+phase 8B rail CMS tab + listing page + stat rendering: done (394d461c) — 8A+8B reviewed TOGETHER, loops 0 → ship
+    ↳ FILES-TOUCHED LISTS WERE STALE (reviewer nit 1) — these files were edited under plan STEP TEXT
+      that the file lists never caught up with. Recorded so future reviews stop flagging phantom creep:
+      `src/app/api/publish/route.ts` + `route.test.ts` (global-cap correction round), `toRenderModel.ts`
+      (8B step 5b names it), `src/components/ui/key-value-field.tsx` + test (5b), `ItemEditor.tsx` + test
+      (5b), `CollectionSection.published.tsx`, `collections.authz.test.ts` (8A step 4 preset test),
+      `e2e/cms-authoring.spec.ts`. Only the publish route changed RUNTIME behaviour, and that came from
+      the founder-accepted global-cap correction.
+    ↳ 10th field type `stat` {key,value} — NO migration needed (fieldSchema/roles/values are JSON cols
+      validated by Zod, not enum cols). Safety-checked against both publish traps: neither key matches
+      isUrlContentKey; a spec list is an ARRAY of pairs so coercePublishValue can't collapse it.
+      8A deliberately FILTERED stat out of the field picker until 8B shipped its control+renderer —
+      a creatable type with no control and no renderer is broken, not merely unavailable. 8B removed it.
+    ↳ `purposes` verified read by NOTHING (reviewer grepped every occurrence; the materializer's explicit
+      select omits it). `featuredOnHome` verified: no control, no reader, collectionHelpers.ts not in the
+      diff at all. Both are forward-compat storage, NOT delivered capabilities.
+    ↳ RAIL: LeftPanel's `cms` tab existed and was GREYED all along — phase 6's "no rail exists yet"
+      justification was FACTUALLY WRONG and shipped two entry points with one saying "coming soon".
+      Header mount removed; pages/theme stay inert.
+    ↳ 🔧 FOUNDER RULING — PAGES DECOUPLED FROM PLACEMENT. A toggled-on collection now emits its pages
+      even if the block was never placed. The modal's "CREATES THESE PAGES" tiles were promising pages
+      that silently never appeared. ALSO fixes the identical gap detail pages have had since phase 4.
+      COST: phase 3's zero-query fast path is GONE (one indexed tokenId query per publish). It is
+      REPLACED by two enforced guarantees — zero-collections and all-toggles-off projects are
+      byte-identical after materialization, asserted on JSON.stringify of the WHOLE payload (key order
+      counts) with anti-vacuity checks. The materializer can now mutate payloads for projects it
+      previously never reached; those two tests ARE the new blast-radius argument.
+    ↳ Pruning surface GREW with decoupling. The `cmscollection-listing-<collectionId>` marker segment is
+      what stops pruning deleting a USER'S OWN subpage containing a placed collection block. Copying
+      phase 4's structural ownership test verbatim WOULD HAVE DELETED USER PAGES — the implementer
+      caught that and used the marker instead.
+    ↳ FAN-OUT CAPS: global 100 total (the timeout guard) + per-collection 100 (the actionable message).
+      Pure pre-pass BEFORE the collision guard and before any mutation; fails loud 409; NEVER truncates
+      (a half-published collection is a silent lie). Two SIBLING error classes, no shared base — a
+      hierarchy would silently enrol future error types into a 409. DB errors still fail-closed 500.
+      ⚠️ My spec was WRONG here: I asked for per-collection only, which does not bound the request at
+      all (ten 100-item collections still time out). The implementer flagged it instead of following me.
+      ⚠️ Both numbers are ARITHMETIC ESTIMATES, not measurements. Owed before beta: one real timing run
+      against a seeded collection, with the measured per-page cost written back into the constants'
+      comments. Also confirm /api/publish's effective maxDuration (no explicit export today).
+    ↳ A GREEN TEST WAS DELETED, correctly: 'the cap is a per-COLLECTION limit, not a total' asserted the
+      very behaviour the global cap corrects. Keeping a passing test that pins a bug is worse than none.
+      Replacement covers the same fixture shape with the corrected expectation + an anti-vacuity loop.
     ↳ A: the rail ALREADY has a greyed `cms` tab (LeftPanel.tsx RAIL_TABS) — phase 6's "no rail
       exists yet" justification was FACTUALLY WRONG, and left two entry points with one lying.
       Founder ruling: move to the rail tab, delete the header button. Contents unchanged.
