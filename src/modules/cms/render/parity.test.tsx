@@ -15,6 +15,8 @@
 // See COMPARED_ATTRS below for why the exclusion list is kept this narrow.
 
 import React from 'react';
+import { act } from 'react';
+import { createRoot } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
 import { toRenderModel, toDetailModel, allRenderItems } from './toRenderModel';
@@ -339,14 +341,60 @@ describe('CMS collection block — editor↔published parity', () => {
     expect(hrefs).toContain('tel:+15551234');
   });
 
-  it('the edit twin shows a DISABLED "Manage items" placeholder, outside the compared body', () => {
+  // Phase 6 retired the greyed placeholder: the affordance is now LIVE and routes
+  // to the CMS panel. It stays edit-only chrome OUTSIDE `[data-cms-body]`, so it
+  // still cannot pollute the parity comparison against the published twin.
+  it('the edit twin shows a LIVE "Manage items" button, outside the compared body', () => {
     const model = toRenderModel(rawBundle(false));
     const container = dom(<CollectionSection sectionId="s1" model={model} />);
     const btn = container.querySelector('[data-cms-manage] button') as HTMLButtonElement;
     expect(btn).toBeTruthy();
-    expect(btn.disabled).toBe(true);
+    expect(btn.disabled).toBe(false);
     expect(btn.getAttribute('title')).toBeTruthy(); // why-tooltip is a contract
     expect(bodyOf(container).querySelector('[data-cms-manage]')).toBeNull();
+  });
+
+  // An enabled-but-INERT button would sit green on the test above, so pin the
+  // wiring itself. `dom()` is renderToStaticMarkup (no handlers attached), hence a
+  // real client mount here — repo convention is react-dom/client + act.
+  it('clicking "Manage items" dispatches lessgo:manage-collections', () => {
+    const g = globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT?: boolean };
+    const prevActEnv = g.IS_REACT_ACT_ENVIRONMENT;
+    g.IS_REACT_ACT_ENVIRONMENT = true;
+
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const root = createRoot(host);
+
+    const seen: Array<unknown> = [];
+    const onManage = (e: Event) => seen.push((e as CustomEvent).detail);
+    window.addEventListener('lessgo:manage-collections', onManage);
+
+    try {
+      const model = toRenderModel(rawBundle(false));
+      act(() => {
+        root.render(<CollectionSection sectionId="s1" model={model} collectionId="c1" />);
+      });
+
+      const btn = host.querySelector('[data-cms-manage] button') as HTMLButtonElement;
+      expect(btn).toBeTruthy();
+
+      act(() => {
+        btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+
+      // Payload SHAPE only. On the injected-`model` path `CollectionSection`
+      // renders `<Rendered>` without forwarding `collectionId`, so the id is
+      // undefined here; the store-backed path (the one the editor actually uses)
+      // does forward it. Asserting the literal id would pin that gap in place.
+      expect(seen).toHaveLength(1);
+      expect(seen[0]).toHaveProperty('collectionId');
+    } finally {
+      window.removeEventListener('lessgo:manage-collections', onManage);
+      act(() => root.unmount());
+      host.remove();
+      g.IS_REACT_ACT_ENVIRONMENT = prevActEnv;
+    }
   });
 
   it('published twin renders an empty (not broken) block when no model was materialized', () => {

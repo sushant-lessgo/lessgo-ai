@@ -149,4 +149,54 @@ export const createCmsActions = (set: any, get: () => EditStore) => ({
       state.persistence.isDirty = true;
       state.lastUpdated = Date.now();
     }),
+
+  /**
+   * Deleting a collection cascades server-side (Collection → groups → items), but
+   * the PLACEMENT lives in section content, which the server never touches. Without
+   * this sweep the page keeps a `cmscollection` section pointing at a row that no
+   * longer exists — it would publish as an empty block forever.
+   *
+   * Sweeps the ACTIVE working set AND every stored page slice: `addCmsSection`
+   * writes to the active page only, but the user can place a section, switch pages
+   * (which commits that slice into `state.pages[id]`), then delete the collection.
+   * A top-level-only sweep would leave the stale placement on the other page.
+   *
+   * @returns how many sections were removed (0 = nothing referenced it).
+   */
+  removeCmsSectionsForCollection: (collectionId: string): number => {
+    let removed = 0;
+    set((state: EditStore) => {
+      const sweep = (slice: {
+        sections: string[];
+        sectionLayouts: Record<string, string>;
+        content: Record<string, any>;
+      }) => {
+        const doomed = (slice.sections || []).filter((sid) => {
+          if (!sid.startsWith(`${CMS_SECTION_TYPE}-`)) return false;
+          return slice.content?.[sid]?.elements?.collectionId === collectionId;
+        });
+        for (const sid of doomed) {
+          slice.sections = slice.sections.filter((id) => id !== sid);
+          delete slice.sectionLayouts[sid];
+          delete slice.content[sid];
+          removed++;
+          if (state.selectedSection === sid) state.selectedSection = undefined;
+          state.multiSelection = state.multiSelection.filter((id) => id !== sid);
+        }
+      };
+
+      sweep(state as any);
+      for (const page of Object.values(state.pages || {})) {
+        // Older drafts can carry page entries without a full slice.
+        if (!page || !Array.isArray((page as any).sections)) continue;
+        sweep(page as any);
+      }
+
+      if (removed > 0) {
+        state.persistence.isDirty = true;
+        state.lastUpdated = Date.now();
+      }
+    });
+    return removed;
+  },
 });

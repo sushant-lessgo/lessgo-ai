@@ -99,26 +99,38 @@ export function makeCmsEditPrimitives(): CmsPrimitives {
 }
 
 /**
- * "Manage items" affordance. GREYED PLACEHOLDER until phase 6 wires the CMS
- * panel — the capability is visible-but-disabled with a why-tooltip, never
- * silently omitted and never faked. Rendered outside `[data-cms-body]` so it is
- * edit-only chrome and cannot affect the parity comparison.
+ * "Manage items" affordance — LIVE since phase 6 (it was a greyed placeholder
+ * while no CMS panel existed).
+ *
+ * FIREWALL: this is renderer code and must NOT import app chrome, so the button
+ * asks for the panel with a window event instead of calling into
+ * `app/edit/[token]/components/cms/CmsPanel`. Same mechanism the catalog block
+ * uses for `lessgo:manage-products`; the listener lives in CmsPanel.
+ *
+ * Rendered outside `[data-cms-body]` so it stays edit-only chrome and cannot
+ * affect the parity comparison against the published twin.
  */
-function ManagePlaceholder() {
+function ManageButton({ collectionId }: { collectionId?: string }) {
   return (
     <div className="lg-cms__manage" data-cms-manage="">
       <button
         type="button"
-        disabled
-        title="Item management arrives with the CMS panel — for now, collections are edited via the API."
+        data-cms-manage-btn=""
+        title="Open the CMS panel to edit this collection's schema and items"
+        onClick={() => {
+          if (typeof window === 'undefined') return;
+          window.dispatchEvent(
+            new CustomEvent('lessgo:manage-collections', { detail: { collectionId } })
+          );
+        }}
         style={{
           fontSize: 12,
           padding: '4px 10px',
           borderRadius: 6,
           border: '1px solid rgba(0,0,0,.15)',
-          color: 'rgba(0,0,0,.4)',
+          color: 'rgba(0,0,0,.65)',
           background: 'transparent',
-          cursor: 'not-allowed',
+          cursor: 'pointer',
         }}
       >
         Manage items
@@ -138,14 +150,22 @@ function Skeleton({ sectionId }: { sectionId: string }) {
 }
 
 /** Render a resolved model with the edit primitives + edit-only chrome. */
-function Rendered({ sectionId, model }: { sectionId: string; model: CmsRenderModel }) {
+function Rendered({
+  sectionId,
+  model,
+  collectionId,
+}: {
+  sectionId: string;
+  model: CmsRenderModel;
+  collectionId?: string;
+}) {
   const E = makeCmsEditPrimitives();
   return (
     <CollectionSectionCore
       model={model}
       E={E}
       sectionId={sectionId}
-      manageSlot={<ManagePlaceholder />}
+      manageSlot={<ManageButton collectionId={collectionId} />}
     />
   );
 }
@@ -157,7 +177,13 @@ function Rendered({ sectionId, model }: { sectionId: string; model: CmsRenderMod
 function StoreBacked({ sectionId, collectionId }: { sectionId: string; collectionId: string }) {
   const bundle = useEditStore((s) => s.cmsData?.bundles?.[collectionId]);
   if (!bundle) return <Skeleton sectionId={sectionId} />;
-  return <Rendered sectionId={sectionId} model={toRenderModel(bundle)} />;
+  return (
+    <Rendered
+      sectionId={sectionId}
+      model={toRenderModel(bundle)}
+      collectionId={collectionId}
+    />
+  );
 }
 
 export interface CollectionSectionProps {
@@ -177,7 +203,17 @@ export default function CollectionSection({
   collectionId,
   elements,
 }: CollectionSectionProps) {
-  if (model) return <Rendered sectionId={sectionId} model={model} />;
+  // `collectionId` is forwarded here too: it is inert today (CmsPanel's listener
+  // ignores `e.detail`) but the store-backed path below already passes it, and an
+  // injected-model render that silently drops it is a latent inconsistency.
+  if (model)
+    return (
+      <Rendered
+        sectionId={sectionId}
+        model={model}
+        collectionId={collectionId || (elements?.collectionId as string | undefined)}
+      />
+    );
   // The edit renderer spreads the whole section object, so placement arrives as
   // `elements.collectionId`; a flat `collectionId` prop is honoured too.
   const placed = collectionId || (elements?.collectionId as string | undefined);

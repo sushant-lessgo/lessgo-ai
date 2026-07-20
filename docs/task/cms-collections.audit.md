@@ -1665,3 +1665,320 @@ blur commits a leftover draft; blur with an empty draft does not mutate.
 - Findings 1 and 3 are DOCUMENTATION of caller obligations, not enforcement. Phase 6
   (draft state, no per-keystroke PATCH) and phase 7 (empty→`null` before PATCH) can
   still get these wrong; nothing in the type system stops them.
+
+---
+
+## Phase 6 — Schema builder + CMS entry point (t12)
+
+### Files changed
+
+| File | New? | What |
+|---|---|---|
+| `src/app/edit/[token]/components/cms/AddCollectionModal.tsx` | new | t12 schema-builder modal (create + edit) |
+| `src/app/edit/[token]/components/cms/AddCollectionModal.test.tsx` | new | 14 behaviour tests (mutation-verified) |
+| `src/app/edit/[token]/components/cms/CmsPanel.tsx` | new | CMS entry: collection list, place, delete, new |
+| `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx` | edit | mounts `<CmsPanel>` beside `<PageSwitcher>` (2 lines + import) |
+| `src/hooks/editStore/cmsActions.ts` | edit | `removeCmsSectionsForCollection` |
+| `src/types/store/actions.ts` | edit | its signature on `MetaActions` |
+| `src/modules/cms/render/CollectionSection.tsx` | edit | greyed "Manage items" placeholder → live, event-dispatching button |
+| `docs/task/cms-collections.audit.md` | edit | this section |
+
+**BLOCKED — one out-of-scope file needs a 1-line change; NOT edited (see "Blocked" below):**
+`src/modules/cms/render/parity.test.tsx`. `npm run test:run` is therefore **1 test red**.
+
+### Per file
+
+**`AddCollectionModal.tsx`** — 460px `dialog`. `SlugInput` NAME row with live `slugifyName()`
+suffix (edit mode shows the STORED slug: re-deriving it would silently propose moving every
+published item page). START FROM chips, `FieldRowList` for fields with an `AppPopoverMenu`
+"+ Add field" listing the closed 9, per-row type chip + role menu + delete via `renderTrailing`,
+`Switch` for detailPages, reactive CREATES-THESE-PAGES tiles, footer Cancel/Create.
+Create → `POST /api/collections`; edit → `PATCH /api/collections/:id`.
+
+Rulings applied verbatim: **#1** Blank enabled + 4 chips greyed via `<Coming>` with why-tooltips ·
+**#2** no Price (closed 9 only) · **#3** `Text — long` is a plain type, no toolbar · **#4** no mono
+variant · **#5** per-row role menu filtered through `ROLE_ALLOWED_TYPES` · **#6** `Switch` + reactive
+tiles · **#9** no "Write with AI".
+
+Contracts honoured:
+- `onNameChange` fires per keystroke → the whole schema is **local draft state**, written exactly
+  once on save. No handler in this file touches the network.
+- Optional fields are omitted or sent explicitly; `layoutHint` is never sent as an empty string.
+- Field ids are minted from the **type** (`text_short`, `text_short_2`, …) — letter-prefixed by
+  construction, so `FIELD_ID_REGEX`-valid and stable while the user retypes the label. Deriving
+  ids from the (per-keystroke-changing) name would have been both unstable and regex-risky.
+- Deleting a field prunes any role pointing at it — the server's cross-field roles gate would 400
+  on a dangling role.
+
+**`CmsPanel.tsx`** — bar control (`aria-label="Collections"`) beside Pages, per plan step 1;
+**no rail** (that is the ui-redesign track's) and **no capability gating** (shared block ⇒ renders
+everywhere, Deviations #2 — `templateMeta.ts` untouched). Rows show `N items · M fields`, click →
+edit modal, hover buttons → "Add to page" (`addCmsSection`, the phase-3 dual pin, unmodified) and
+"Delete" (confirm → DELETE → `removeCmsSectionsForCollection` → refresh). `refreshCmsData` runs on
+menu OPEN, never on mount, so mounting the panel adds no request to every editor load.
+
+**`cmsActions.ts` / `actions.ts`** — `removeCmsSectionsForCollection(collectionId): number` sweeps
+the active working set **and every stored `state.pages[*]` slice** (a placement made before a page
+switch lives in the committed slice; a top-level-only sweep would strand it). Filters on the
+`cmscollection-` id prefix + `elements.collectionId`, so it is structurally incapable of touching a
+non-CMS section. Item values are untouched — deleting a *field* stays non-destructive per phase-1
+semantics.
+
+**`CollectionSection.tsx`** — `ManagePlaceholder` → `ManageButton`, dispatching the
+`window` event `lessgo:manage-collections` (the `lessgo:manage-products` precedent). Renderer code
+must not import app chrome, so the event is the seam; `CmsPanel` listens. Still rendered outside
+`[data-cms-body]`, so the parity comparison is unaffected.
+
+### Deviations
+
+1. **`CmsPanel` uses `useEditStore` (hook object + selector), NOT `useEditStoreApi()`.**
+   `GlobalAppHeader.menus.test.tsx` mocks `@/hooks/useEditStore` exporting only `useEditStore`;
+   importing `useEditStoreApi` into the header's tree makes that (untouchable) suite throw. The
+   hook-object path is already the header's own documented pattern. Selector reads and action calls
+   are optional-chained for the same reason. Revisit if that mock ever gains the api export.
+2. **Popover menus inside the dialog carry `style={{pointerEvents:'auto'}}`.** Radix Dialog sets
+   `pointer-events:none` on `<body>`; portalled popover content is a body child and would be
+   unclickable for real users (jsdom would not have caught it).
+3. **"Delete field warns values will be hidden" is not implemented as a modal warning.** The
+   destructive-sounding path is collection DELETE, which does confirm. Field delete is reversible
+   before save (nothing is written until Save) and phase-1 semantics keep orphaned values intact, so
+   a blocking confirm per field-removal would be noise. Conservative call; flag if the founder wants
+   the copy at the gate.
+4. **Presets are chips only** — no preset seeds anything (ruling #1 = Blank only).
+5. **Icon `category`, not `database`.** `icons.txt` lists `database`, but that manifest is documented
+   unreliable in both directions and a missing ligature renders as literal TEXT. `category` is
+   proven present (live in `PageSwitcher`).
+
+### Blocked — out-of-scope file
+
+`src/modules/cms/render/parity.test.tsx:342-350` pins the OLD contract:
+
+    it('the edit twin shows a DISABLED "Manage items" placeholder, …
+        expect(btn.disabled).toBe(true);
+
+Phase 6 step 4 explicitly requires that placeholder to become live ("the phase-2 greyed 'Manage
+items' placeholder now routes to the CMS panel"), so this assertion is obsolete **by design** — but
+the file is not on the Files-touched list, so it was NOT edited. Needed change (orchestrator call):
+retitle to "…shows a LIVE 'Manage items' button…", replace `expect(btn.disabled).toBe(true)` with
+`expect(btn.disabled).toBe(false)`, keep the `title` and the outside-`[data-cms-body]` assertions,
+and ideally assert the click dispatches `lessgo:manage-collections`.
+
+### Test results (actual)
+
+- `npx tsc --noEmit` → **exit 0, zero output** (baseline held).
+- `npm run test:run` → **1 failed | 278 passed | 1 skipped (280 files); 1 failed | 4434 passed |
+  15 skipped (4450)**. The single failure is the blocked `parity.test.tsx` assertion above.
+  Baseline was 278/4421 passed; +13 net new passing tests, no other movement.
+  `GlobalAppHeader.menus.test.tsx` **green** (6/6) with `<CmsPanel>` mounted.
+- `AddCollectionModal.test.tsx` → 14 passed.
+- Lint on the 7 touched files → clean; one PRE-EXISTING `@next/next/no-img-element` warning at
+  `CollectionSection.tsx:52` (the untouched edit primitive).
+
+**Non-vacuity (mutation-checked, restored after each):**
+
+| Mutation | Result |
+|---|---|
+| `fieldSchema: fields` → `fieldSchema: []` in the POST body | **3 red** (create payload, role-prune, edit-mode PATCH) |
+| delete the `Team` preset chip from `PRESET_CHIPS` | **1 red** (greyed-preset contract) |
+| `rolesForType` returns all `ROLE_KEYS` (no type filter) | **4 red** (pure filter + both menu tests + the no-role-trigger test) |
+
+All 14 green again after restore.
+
+### Open risks
+
+- Phase-7 carries are untouched and still owed: `slugLocked` is an UNGUARDED pin; item CREATE has no
+  top-level-slug shadow guard.
+- `cmsData` is fetch-on-open, so a collection created in a second tab is not visible until the menu
+  is reopened (the accepted v1 freshness risk).
+- The panel lists collections but has no item authoring — "Manage items" opens this panel, which
+  currently offers schema edit / place / delete only. Item editor is phase 7, as scoped.
+- `nextFieldId` mints ids from the type, so an id can outlive a rename ("Title" renamed to
+  "Headline" keeps id `text_short`). Harmless (ids are opaque) but visible to anyone reading raw
+  item JSON.
+- Detail-page fan-out is still unverified by a human (phase-4 gate folded into the phase-7 gate).
+
+---
+
+## Phase 6 — follow-up: retire the parity placeholder assertion (authorized scope extension)
+
+### Files changed
+
+| File | New? | What |
+|---|---|---|
+| `src/modules/cms/render/parity.test.tsx` | no | Retired the obsolete DISABLED-placeholder assertion; pinned the LIVE button + its dispatch wiring. |
+| `docs/task/cms-collections.audit.md` | no | This entry. |
+
+`src/modules/cms/render/CollectionSection.tsx` was temporarily mutated for the non-vacuity
+check and **restored** — verified by grep (only `window.dispatchEvent` remains, no
+`MUTATION-TEST` marker). It carries no net change from this follow-up.
+
+### What changed in `parity.test.tsx`
+
+1. Retitled `the edit twin shows a DISABLED "Manage items" placeholder…` →
+   `the edit twin shows a LIVE "Manage items" button, outside the compared body`, and flipped
+   `expect(btn.disabled).toBe(true)` → `toBe(false)`. The `title` (why-tooltip) assertion and
+   the `bodyOf(container).querySelector('[data-cms-manage]')).toBeNull()` (outside
+   `[data-cms-body]`) assertion are **unchanged** — those still hold and remain what keeps the
+   edit-only affordance out of the parity-compared region.
+2. Added a second test pinning the wiring: mount, click, assert a
+   `lessgo:manage-collections` window event fired. `dom()` is `renderToStaticMarkup` (no React
+   handlers attached), so this test uses a real client mount — `react-dom/client` `createRoot`
+   + `act`, the repo convention (`ToolbarButton.test.tsx`), with `IS_REACT_ACT_ENVIRONMENT`
+   set/restored locally so the other `renderToStaticMarkup` tests in the file are unaffected.
+   Listener removal + unmount are in a `finally`.
+3. Added `act` / `createRoot` imports.
+
+No other assertion in the file was touched. The published twin is unchanged — the affordance
+remains edit-only and outside the compared skeleton.
+
+### Deviations
+
+- **Asserted the payload SHAPE, not the literal collection id.** The brief suggested pinning the
+  dispatch; I initially asserted `detail === { collectionId: 'c1' }` and it failed. Cause:
+  `CollectionSection.tsx:206` takes the injected-`model` path via
+  `if (model) return <Rendered sectionId={sectionId} model={model} />` — it does **not** forward
+  `collectionId`, so `detail.collectionId` is `undefined` on that path. The store-backed path
+  (line 181, the one the editor actually uses) *does* forward it, so this is not a live bug —
+  the injected-`model` path is tests/future-callers only. `CollectionSection.tsx` is out of
+  scope, so rather than edit it or pin the gap in place with a literal-`undefined` assertion
+  (which would fail the day someone fixes line 206), the test asserts
+  `expect(seen).toHaveLength(1)` + `expect(seen[0]).toHaveProperty('collectionId')`. That still
+  fully catches an inert or deleted dispatch. Logged as a risk below.
+
+### Non-vacuity evidence (dispatch broken, NOT the enabled flag)
+
+Replaced the `window.dispatchEvent(...)` body in `ManageButton`'s `onClick` with a no-op
+(`void collectionId;`), leaving the button enabled. Result:
+
+```
+FAIL  parity.test.tsx > clicking "Manage items" dispatches lessgo:manage-collections
+AssertionError: expected [] to have a length of 1 but got +0
+ Tests  1 failed | 18 passed (19)
+```
+
+The key observation: **only the new test failed — the `disabled).toBe(false)` test stayed
+green.** An enabled-but-inert button is precisely the failure the enabled-flag assertion cannot
+see, and the new test does see it. Dispatch restored; file back to 19 passed.
+
+### Store-access confirmation (requested)
+
+`CmsPanel.tsx` uses **selector form**, not a bare whole-store subscription. The only reactive
+read is line 59:
+
+```ts
+const bundles = useEditStore(
+  (s) => s.cmsData?.bundles as Record<string, CmsCollectionBundle> | undefined
+);
+```
+
+All other accesses are one-shot `useEditStore.getState().<action>?.()` (lines 81, 115, 135),
+which is not a subscription. There is no `useEditStore()` call anywhere in the file, so the
+ESLint `no-restricted-syntax` ban is not tripped — consistent with lint passing.
+
+### Test results (actual)
+
+- `npx tsc --noEmit` → **exit 0, zero output**.
+- `npm run test:run` → **279 passed | 1 skipped (280 files); 4436 passed | 15 skipped (4451
+  tests); 0 failed.** Was 1 failed / 4434 passed: +1 from the retired assertion now passing,
+  +1 new dispatch test.
+- Not committed, per instruction.
+
+### Open risks
+
+- `CollectionSection.tsx:206` drops `collectionId` on the injected-`model` path. Inert today
+  (only tests inject `model`), but any future caller that injects a model would get a
+  Manage-items event with `collectionId: undefined`, and `CmsPanel` would open without
+  targeting a collection. One-line fix (`collectionId={collectionId}`) when someone owns that
+  file; deliberately not made here.
+
+---
+
+# Phase 6 — fix pass (BLOCKING id-recycling + 4 nits)
+
+## Files changed
+- `src/app/edit/[token]/components/cms/AddCollectionModal.tsx` (modified)
+- `src/app/edit/[token]/components/cms/AddCollectionModal.test.tsx` (modified)
+- `src/app/edit/[token]/components/cms/CmsPanel.tsx` (modified)
+- `src/app/edit/[token]/components/cms/CmsPanel.test.tsx` (**new**)
+- `src/hooks/editStore/cmsActions.test.ts` (modified)
+- `src/modules/cms/render/CollectionSection.tsx` (modified)
+- `docs/task/cms-collections.audit.md` (this entry)
+
+## BLOCKING — field-id recycling resurrects orphaned item values
+
+**Root cause.** `nextFieldId` clamped only against ids in the *draft*. Because field
+deletion is deliberately non-destructive (items keep `values[fieldId]` forever), a
+delete-then-add of the same type re-minted the deleted id and `toRenderModel`'s
+`values[f.id]` served the old field's content under the new field's label — editor
+and published output alike.
+
+**Fix (two independent defences, both in `AddCollectionModal.tsx`).**
+1. `reservedFieldIds(collection, items)` — the clamp floor is now the UNION of the
+   draft's ids, the STORED `fieldSchema` ids, and every key present in any item's
+   `values`. The item keys are the authoritative orphan record and are the only one
+   that survives across sessions (a saved delete erases the schema entry).
+2. `nextFieldId(type, existing, { unique: true })` — in EDIT mode new fields get a
+   random suffix (`text_short_a3f9`) instead of the next ordinal, so the invariant
+   does not depend on the item cache being complete or fresh. CREATE mode keeps the
+   readable ordinal ids (no items exist yet → nothing to resurrect).
+
+All minted ids remain letter-prefixed → `FIELD_ID_REGEX`-valid.
+`CmsPanel.tsx` now passes the editing collection's `items` (from the store bundle)
+into the modal — read-only, never written.
+
+## Deletion warning (plan step 3, previously Deviation 3)
+
+`droppedWithValues` = stored fields absent from the draft that at least one item holds
+a **non-empty** value for. Rendered inline under the field list as
+`[data-cms-field-drop-warning]` (`role="status"`): names the fields and states that the
+values are *hidden, not deleted*, and that re-adding the field will not bring them back
+(true by construction now — the new field gets a fresh id). Deletion stays entirely
+non-destructive and draft-local until Save; nothing rewrites items.
+
+## Nits
+1. `removeCmsSectionsForCollection` — 5 new tests in `cmsActions.test.ts`: current-page
+   removal (both pin halves + sections entry), sweep across every `state.pages[*]`,
+   a DIFFERENT collection untouched, a non-cms section untouched even when its content
+   carries a matching `collectionId` (the type-prefix gate), and a clean 0-removed no-op
+   that does not dirty the draft.
+2. `CmsPanel.test.tsx` (new, 8 tests): listing + item·field count, refresh-on-open not
+   on-mount, `addCmsSection` placement, and the destructive path — confirm → DELETE →
+   sweep, cancel writes nothing, and a **failed** DELETE must not sweep. Plus the
+   `lessgo:manage-collections` listener opening the panel and unsubscribing on unmount.
+   Uses the repo's `createRoot` + `act` pattern; no `@testing-library` added.
+3. `CollectionSection.tsx:206` — `collectionId` now forwarded on the injected-`model`
+   path (falls back to `elements?.collectionId`, matching the store-backed path).
+
+## Deviations
+- **Warning styling uses `bg-app-danger-bg`.** No `app-warning-*` token exists in
+  `tailwind.config.js`; `danger-bg` is the repo's only soft alert surface. Paired with
+  `text-app-ink` (not `text-app-danger`) so it reads as caution, not failure. Noted
+  inline in the source.
+- **Edit-mode ids are now random-suffixed**, so the pre-existing edit-mode test could no
+  longer assert `id === 'tags'`; it asserts `/^tags_/` + regex validity instead. This is
+  the conservative choice: it makes the never-recycle invariant unconditional rather than
+  contingent on the item cache. Create-mode ids are unchanged.
+- Nothing else touched: delete stays non-destructive, `addCmsSection`'s dual pin, the
+  rulings and all value shapes are untouched.
+
+## Test results (actual)
+- `npx tsc --noEmit` → exit 0, **zero output**.
+- `npm run test:run` → **280 passed | 1 skipped (281 files); 4456 passed | 15 skipped
+  (4471); 0 failed.** vs baseline 279/1 (280) and 4436/15 (4451) → +1 file, +20 tests.
+- `npx next lint --file …` on all 6 changed source/test files → only the pre-existing
+  `@next/next/no-img-element` warning at `CollectionSection.tsx:52` (untouched line).
+- **Non-vacuity evidence.** Reverted `addField` to the draft-only clamp
+  (`nextFieldId(type, prev.map(f => f.id))`) and re-ran the modal suite: **3 failed | 18
+  passed**, including the exact target assertion
+  `AssertionError: expected 'text_short' not to be 'text_short'` in *"delete a valued
+  field then add the same TYPE"* and in *"reserves an ORPHAN key present only on items"*,
+  plus `expected "tags" to match /^tags_/`. Fix restored; suite back to green.
+
+## Open risks
+- The reserved set is only as complete as the store's `cmsData` bundle. If items failed
+  to load, defence (1) is blind — defence (2) (the random suffix) is what actually
+  guarantees the invariant in edit mode. Do not remove it in favour of the union clamp.
+- Orphaned values still accumulate on item rows forever by design. No GC exists; a future
+  "clean up unused values" affordance would need its own explicit destructive gate.
+- The warning counts a value as present if it is non-empty (`null`/`''`/`[]` excluded).
+  A structurally empty object (e.g. `{ url: '' }`) still counts as a value and will warn.

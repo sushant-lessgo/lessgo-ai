@@ -90,3 +90,120 @@ describe('addCmsSection — the dual pin', () => {
     expect(s.content[sid]).toBeUndefined();
   });
 });
+
+// ── removeCmsSectionsForCollection ───────────────────────────────────────────
+// A DESTRUCTIVE cross-page mutation: it deletes sections from the user's pages.
+// It fires from CmsPanel right after a collection DELETE, because the server
+// cascade cannot reach section content. Two ways it can go wrong, both bad:
+//  · too little — a stored page keeps a placement pointing at a deleted row
+//    (publishes as an empty block forever), because `addCmsSection` only ever
+//    writes the ACTIVE slice and the user can place-then-switch-page;
+//  · too much — it takes out a hero, or another collection's block.
+describe('removeCmsSectionsForCollection — the cross-page sweep', () => {
+  let store: Store;
+  beforeEach(() => {
+    store = createEditStore('tok-cms');
+    seed(store);
+  });
+
+  /** A stored page slice carrying one cms section for `collectionId`. */
+  function stashPage(store: Store, pageId: string, collectionId: string): string {
+    const sid = `${CMS_SECTION_TYPE}-${pageId}`;
+    store.setState((state: any) => {
+      state.pages = state.pages || {};
+      state.pages[pageId] = {
+        id: pageId,
+        archetypeKey: 'basic',
+        pathSlug: `/${pageId}`,
+        title: pageId,
+        order: 1,
+        sections: ['hero-x', sid],
+        sectionLayouts: { 'hero-x': 'LayoutA', [sid]: CMS_COLLECTION_LAYOUT },
+        content: {
+          'hero-x': { id: 'hero-x', layout: 'LayoutA', elements: {} },
+          [sid]: { id: sid, layout: CMS_COLLECTION_LAYOUT, elements: { collectionId } },
+        },
+      };
+    });
+    return sid;
+  }
+
+  it('removes the placement on the CURRENT page (both halves + sections entry)', () => {
+    const sid = store.getState().addCmsSection('col-1');
+
+    const removed = store.getState().removeCmsSectionsForCollection('col-1');
+    const s = store.getState();
+
+    expect(removed).toBe(1);
+    expect(s.sections).toEqual(['hero-1']);
+    expect(s.sectionLayouts[sid]).toBeUndefined();
+    expect(s.content[sid]).toBeUndefined();
+    expect(s.persistence.isDirty).toBe(true);
+  });
+
+  it('ALSO removes placements stored in state.pages[*] (place → switch page → delete)', () => {
+    const active = store.getState().addCmsSection('col-1');
+    const onPageA = stashPage(store, 'pageA', 'col-1');
+    const onPageB = stashPage(store, 'pageB', 'col-1');
+
+    const removed = store.getState().removeCmsSectionsForCollection('col-1');
+    const s = store.getState() as any;
+
+    expect(removed).toBe(3);
+    expect(s.content[active]).toBeUndefined();
+    for (const [pageId, sid] of [
+      ['pageA', onPageA],
+      ['pageB', onPageB],
+    ] as const) {
+      const page = s.pages[pageId];
+      expect(page.sections).toEqual(['hero-x']);
+      expect(page.sectionLayouts[sid]).toBeUndefined();
+      expect(page.content[sid]).toBeUndefined();
+    }
+  });
+
+  it('leaves a DIFFERENT collection’s placement completely alone', () => {
+    const keep = store.getState().addCmsSection('col-2');
+    const doomed = store.getState().addCmsSection('col-1');
+    const keepOnPage = stashPage(store, 'pageA', 'col-2');
+
+    const removed = store.getState().removeCmsSectionsForCollection('col-1');
+    const s = store.getState() as any;
+
+    expect(removed).toBe(1);
+    expect(s.content[doomed]).toBeUndefined();
+    expect(s.content[keep].elements.collectionId).toBe('col-2');
+    expect(s.sectionLayouts[keep]).toBe(CMS_COLLECTION_LAYOUT);
+    expect(s.pages.pageA.content[keepOnPage]).toBeDefined();
+    expect(s.pages.pageA.sections).toContain(keepOnPage);
+  });
+
+  it('never touches a non-cms section, even one whose content names the collection', () => {
+    // Type-prefix gate: only `cmscollection-*` ids are eligible. Without it a
+    // hero that happened to carry a `collectionId` element would be deleted.
+    store.setState((state: any) => {
+      state.content['hero-1'].elements.collectionId = 'col-1';
+    });
+    const doomed = store.getState().addCmsSection('col-1');
+
+    const removed = store.getState().removeCmsSectionsForCollection('col-1');
+    const s = store.getState();
+
+    expect(removed).toBe(1);
+    expect(s.sections).toEqual(['hero-1']);
+    expect(s.content['hero-1']).toBeDefined();
+    expect(s.content[doomed]).toBeUndefined();
+  });
+
+  it('is a no-op (0 removed, draft not dirtied) when nothing references it', () => {
+    store.setState((state: any) => {
+      state.persistence.isDirty = false;
+    });
+
+    const removed = store.getState().removeCmsSectionsForCollection('col-nope');
+
+    expect(removed).toBe(0);
+    expect(store.getState().sections).toEqual(['hero-1']);
+    expect(store.getState().persistence.isDirty).toBe(false);
+  });
+});

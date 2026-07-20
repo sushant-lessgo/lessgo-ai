@@ -434,6 +434,13 @@ export interface MetaActions {
   addCmsSection: (collectionId: string, opts?: { layoutHint?: string; position?: number }) => string;
   /** Remove one placed cms section (sections list + layout map + content entry). */
   removeCmsSection: (sectionId: string) => void;
+  /**
+   * Remove EVERY placed `cmscollection` section pointing at `collectionId`, across
+   * the active working set and every stored page slice. Called after a collection
+   * DELETE (which cascades server-side but cannot touch section content).
+   * @returns how many sections were removed
+   */
+  removeCmsSectionsForCollection: (collectionId: string) => number;
 
   // Meta Data Management
   updateMeta: (meta: Partial<any>) => void;
