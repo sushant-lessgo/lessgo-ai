@@ -236,7 +236,16 @@ phase 7 item editor + group management: done (a130d22b, impl-review loops 0 → 
       (live refresh) is proven ONLY by an e2e that has never executed.
     ↳ Post-create editor flash: selectedId set before the refresh lands → the just-created item's
       editor briefly unmounts to the placeholder, reading as if Save closed the form. Cosmetic.
-phase 8 generic CMS board + docs: pending
+phase 8 rail CMS tab + listing-page toggle: pending  ← ADDED 2026-07-20 from founder gate feedback
+    ↳ A: the rail ALREADY has a greyed `cms` tab (LeftPanel.tsx RAIL_TABS) — phase 6's "no rail
+      exists yet" justification was FACTUALLY WRONG, and left two entry points with one lying.
+      Founder ruling: move to the rail tab, delete the header button. Contents unchanged.
+    ↳ B: designer t12's "two pages, always" listing PAGE was silently dropped from the spec (only
+      the detailPages half was carried). Founder ruling: per-collection toggle, DEFAULT OFF.
+    ↳ Touches the publish path AGAIN — the surface that has already produced two publish-only bugs.
+      Every phase-3/4 pin reapplies verbatim (dual pin, leading-slash, key-naming law, authority
+      scoping, collision guard, both chokepoints, parity via LandingPagePublishedRenderer).
+phase 9 generic CMS board + docs: pending  (was phase 8)
 ```
 
 ---
@@ -553,7 +562,69 @@ The "New collection" flow + the CMS surface entry in the editor chrome. All desi
 
 ---
 
-## Phase 8 — Generic CMS board (dashboard) + docs
+## Phase 8 — Rail CMS tab + listing-page toggle (ADDED 2026-07-20, founder gate feedback)
+
+Added after the founder drove the phase-7 flow. Two findings, both founder-ruled.
+
+### Finding A — the CMS entry is in the WRONG PLACE, and the orchestrator's reasoning was WRONG
+Phase 6 mounted the entry in `GlobalAppHeader` beside `PageSwitcher`, justified as "the handoff's CMS rail tab has no rail to live in yet". **That is false.** `LeftPanel.tsx` IS mounted (`EditLayout.tsx:215`) and already carries a tab strip whose options include a GREYED CMS tab:
+```js
+const RAIL_TABS = [
+  { value: 'sections', label: 'Sections' },
+  { value: 'pages',    label: <Coming what="the pages panel">Pages</Coming> },
+  { value: 'cms',      label: <Coming what="page CMS">CMS</Coming> },   // ← already there
+  { value: 'theme',    label: <Coming what="the rail theme panel">Theme</Coming> },
+];
+```
+Net result of the phase-6 decision: TWO entry points, one of them lying — a greyed "CMS — coming soon" tab in the rail AND a working Collections button in the header. Worse than either option alone.
+**FOUNDER RULING: move it to the rail CMS tab; remove the header button.** `CmsPanel`'s CONTENTS are unchanged — only the host moves. Un-grey the tab (drop its `<Coming>` wrapper), wire `leftPanel.activeTab === 'cms'`, leave `pages`/`theme` greyed (ui-redesign track owns those).
+
+### Finding B — the auto-created LISTING PAGE was silently dropped from scope
+Designer t12 asserts **"Two pages, always"**: a collection yields a listing page (`/books`) AND item pages (`/books/:slug`). What shipped: listing = a SECTION the user places manually; item pages = automatic on publish. The item half is built; **the listing-page half was never specced** and the divergence was not flagged when the scout surfaced it (scout section E, conflict #6 covered only the detailPages toggle).
+**FOUNDER RULING: make it a per-collection toggle, defaulting OFF** (not "always", not omitted).
+
+### Steps
+1. **Rail move.** Un-grey the `cms` rail tab; render the collections panel body when `leftPanel.activeTab === 'cms'`; wire `onValueChange` for `sections`↔`cms` only (`pages`/`theme` stay inert `<Coming>`). Remove `<CmsPanel />` from `GlobalAppHeader.tsx`. Keep every existing behaviour: the `lessgo:manage-collections` listener (incl. `e.detail.collectionId` targeting), create/edit/delete, "Add to page", the browser + item editor + group manager. `GlobalAppHeader.menus.test.tsx` must stay green.
+2. **`listingPage` data.** Add `listingPage Boolean @default(false)` to `Collection` in `prisma/schema.prisma` + migration (`npx prisma migrate dev`, NEVER `db push`). Add to the create/patch Zod schemas and the collection routes.
+3. **`listingPage` UI.** A second `switch` beside detailPages in `AddCollectionModal`. The "CREATES THESE PAGES" tiles become reactive to **BOTH** toggles: neither on → no tiles (+ a line saying the collection renders only where you place it); listing only → listing tile; detail only → item tile; both → both.
+4. **`listingPage` publish materialization** — extend `materializePublish.ts`. When on, emit a subpage at **`/<collectionRef>`** containing a `cmscollection` section for that collection. **EVERY pin from phases 3-4 applies unchanged — this is the same publish path that has already produced two publish-only bugs:**
+   - **DUAL PIN** on the listing subpage's section: `content[sid] = {id, layout:'SharedCmsCollection', elements:{collectionId}}` AND the id present in `layout.sections`. Layout-less = silent `return null` vanish (`LandingPagePublishedRenderer.tsx:106-121`).
+   - **Leading-slash absolute** key `/<collectionRef>` (never slash-less, never `/p/<slug>/…`).
+   - Subpage entry shape `{layout:{sections,theme?},content,title}`; `theme` optional, `layout.sections` NOT.
+   - **Key-naming law**: nothing added may end in `href|url|link|slug` except genuine `{url}` value keys.
+   - **Authority scoping**: touches ONLY cms paths; non-cms subpages/works/products byte-identical.
+   - **Collision guard**: `/<collectionRef>` colliding with a non-cms subpage → the existing `CmsPathCollisionError` → 409, checked BEFORE any mutation. (The phase-4 collection-slug shadow guard already blocks shadowing a top-level PAGE at write time; this is the publish-time backstop.)
+   - **Toggle off → prune** the listing subpage, cms-only, same pruning discipline as detail pages.
+   - Runs at the same pinned insertion point (after the ownership check, before sanitize).
+5. **Empty-state copy.** A placed `cmscollection` section whose collection has no items currently renders an empty block. Give it an explicit empty state pointing at where items are authored ("No items yet — add them in CMS → <collection>"). Edit twin only; the published twin must stay unchanged (an empty collection publishes as nothing, not as editor chrome). Parity comparator excludes it the same way `manageSlot` is excluded.
+
+### Files touched
+- `src/app/edit/[token]/components/layout/LeftPanel.tsx`
+- `src/app/edit/[token]/components/layout/GlobalAppHeader.tsx` (remove mount)
+- `src/app/edit/[token]/components/cms/CmsPanel.tsx` (host change only)
+- `src/app/edit/[token]/components/cms/CmsPanel.test.tsx`
+- `src/app/edit/[token]/components/cms/AddCollectionModal.tsx` + `.test.tsx`
+- `prisma/schema.prisma` + new migration
+- `src/lib/schemas/collection.schema.ts` + `.test.ts`
+- `src/app/api/collections/route.ts`, `src/app/api/collections/[collectionId]/route.ts`
+- `src/modules/cms/materializePublish.ts` + `.test.ts`
+- `src/modules/cms/sectionKeys.ts` (if a listing constant is needed)
+- `src/modules/cms/render/CollectionSection.core.tsx` + `.tsx` (empty state, edit twin only)
+- `src/modules/cms/render/parity.test.tsx`
+- `e2e/cms-publish.spec.ts` (extend: listing page on/off)
+- `src/modules/cms/README.md`
+
+### Verification
+- `npx tsc --noEmit`, `npm run test:run` green; `GlobalAppHeader.menus.test.tsx`, `naayomProducts.test.ts`, `collectionHelpers.works.test.ts`, staticExport + persistence untouched-green.
+- Listing-page tests mirror phase 4's detail-page set: leading-slash key, dual pin (`content[sid].layout` non-empty), BOTH sanitize chokepoints byte-identical via `runPublishSanitizers()`, parity through **`LandingPagePublishedRenderer`** (not the registry component), non-cms byte-identical, collision → 409, toggle-off prunes.
+- Live DB spot-check the new column defaults to `false` for existing rows.
+
+### 🔶 HUMAN GATE
+Founder re-drives the flow: CMS opens from the rail tab (header button gone, no greyed CMS tab), listing-page toggle produces `/<collection>` on publish and removes it when toggled off, detail pages still work, naayom untouched.
+
+---
+
+## Phase 9 — Generic CMS board (dashboard) + docs
 
 Founder ruling: expand `work-library-board` into a **generic CMS board**. Highest works-corruption risk of the feature — the works catalog is authoritative (`collectionHelpers.ts:97`, `modules/collections/README.md`) and its board writes through `applyRailEdit`/`resyncWorkContent`, a pipeline the generic board must NOT touch.
 
