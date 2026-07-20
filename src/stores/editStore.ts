@@ -32,6 +32,7 @@ import { createLayoutActions } from '../hooks/editStore/layoutActions';
 import { createCSSVariableActions } from '../hooks/editStore/cssVariableActions';
 import { createRegenerationActions } from '../hooks/editStore/regenerationActions';
 import { createPageActions } from '../hooks/editStore/pageActions';
+import { createCmsActions } from '../hooks/editStore/cmsActions';
 
 // Import storage utilities
 import { getStorageKey, trackProjectAccess, isStorageAvailable } from '@/utils/storage';
@@ -149,6 +150,11 @@ function createInitialState(tokenId: string): EditStore {
     navigationConfig: undefined,
     socialMediaConfig: undefined,
     legalPages: undefined,
+    // CMS collections runtime cache (cms-collections phase 3). RUNTIME-ONLY:
+    // deliberately absent from `partialize` below and from every save/publish
+    // payload — the Collection tables are the source of truth. Placement rides
+    // `content[sectionId].elements`, which persists normally.
+    cmsData: undefined,
     globalSettings: {
       maxWidth: '1200px',
       containerPadding: '32px',
@@ -422,6 +428,7 @@ export function createEditStore(tokenId: string) {
             ...createCSSVariableActions(set, get),
             ...createRegenerationActions(set, get),
             ...createPageActions(set, get),
+            ...createCmsActions(set, get),
 
             // Token-specific actions
             loadFromOnboarding: () => {

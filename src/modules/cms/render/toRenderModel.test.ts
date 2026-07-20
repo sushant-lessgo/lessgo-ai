@@ -61,12 +61,14 @@ describe('toRenderModel — roles', () => {
         },
       })
     );
-    expect(m.roles).toEqual({ title: 'title', cover: 'shots', primaryLink: 'buy' });
+    // Stored role key is `primaryLink`; the MODEL key is `primaryCta` (a `*Link`
+    // model key would be scheme-gated to '#' by the publish walker).
+    expect(m.roles).toEqual({ title: 'title', cover: 'shots', primaryCta: 'buy' });
   });
 
   it('falls back to the first field of an allowed type, in schema order', () => {
     const m = toRenderModel(bundle());
-    expect(m.roles).toEqual({ title: 'title', cover: 'cover', primaryLink: 'buy' });
+    expect(m.roles).toEqual({ title: 'title', cover: 'cover', primaryCta: 'buy' });
   });
 
   it('ignores an explicit role whose field type is not allowed', () => {
@@ -94,7 +96,7 @@ describe('toRenderModel — roles', () => {
         },
       })
     );
-    expect(m.roles).toEqual({ title: null, cover: null, primaryLink: null });
+    expect(m.roles).toEqual({ title: null, cover: null, primaryCta: null });
   });
 });
 
@@ -332,8 +334,15 @@ describe('toRenderModel — coercion-proof shape', () => {
       })
     );
     expect(m.collectionId).toBe('col1');
-    expect(m.collectionSlug).toBe('books');
+    expect(m.collectionRef).toBe('books');
     expect(m.detailPages).toBe(true);
     expect(m.layoutHint).toBe('grid');
+  });
+
+  it('carries the item slug under `itemRef` (never a `slug`-suffixed key)', () => {
+    const m = toRenderModel(bundle({ items: [item('i1', { title: 'A' })] }));
+    const rendered = m.groups[0].items[0];
+    expect(rendered.itemRef).toBe('i1');
+    expect((rendered as any).slug).toBeUndefined();
   });
 });

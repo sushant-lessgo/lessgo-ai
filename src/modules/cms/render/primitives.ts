@@ -43,7 +43,7 @@ export interface CmsImgProps {
 export interface CmsLinkProps {
   href?: string;
   className?: string;
-  /** Marks the collection's primaryLink role → published CTA beacon attrs. */
+  /** Marks the collection's `primaryCta` role → published CTA beacon attrs. */
   isPrimaryCta?: boolean;
   ariaLabel?: string;
   children?: React.ReactNode;

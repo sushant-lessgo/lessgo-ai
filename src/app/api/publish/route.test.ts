@@ -29,10 +29,18 @@ vi.mock('@/lib/validation', () => ({
   sanitizeSeo: (x: any) => x,
 }));
 
+// NOTE: this factory REPLACES the whole '@/lib/security' module — any export the
+// route imports but this mock omits resolves as `undefined` and blows up at call
+// time. Keep it in sync with the real export surface when adding to security.ts.
 vi.mock('@/lib/security', () => ({
   createSecureResponse: (body: any, status = 200) => ({ __body: body, __status: status }),
   validateSlug: () => ({ valid: true }),
   verifyProjectAccess: vi.fn(async () => true),
+  // Mirrors the ProjectOwnerResult success branch (owner path) in src/lib/security.ts.
+  // The route only branches on `.ok`, so this is a pass-through gate for these tests.
+  assertProjectOwner: vi.fn(async () => ({
+    ok: true, isDemo: false, adminOverride: false, userRecord: { id: 'u1' }, project: null,
+  })),
 }));
 
 vi.mock('@/lib/planManager', () => ({

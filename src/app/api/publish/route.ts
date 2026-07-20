@@ -6,7 +6,8 @@ import { auth } from '@clerk/nextjs/server'
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { PublishSchema, sanitizeForLogging, sanitizeSeo } from '@/lib/validation';
-import { createSecureResponse, validateSlug, verifyProjectAccess } from '@/lib/security';
+import { createSecureResponse, validateSlug, verifyProjectAccess, assertProjectOwner } from '@/lib/security';
+import { materializeCmsForPublish } from '@/modules/cms/materializePublish';
 import { withPublishRateLimit } from '@/lib/rateLimit';
 import { getUserPlan, checkLimit, hasTrackingPixels, getPlanConfig, PlanTier } from '@/lib/planManager';
 import { stripHTMLTags } from '@/utils/smartTitleGenerator';
@@ -48,6 +49,33 @@ async function publishHandler(req: NextRequest) {
     }
     
     const { slug, title, content, themeValues, tokenId, inputText, previewImage, analyticsEnabled } = validationResult.data;
+
+    // ── OWNERSHIP GATE (cms-collections phase 3, step 1) ────────────────────
+    // The body-supplied `tokenId` identifies WHICH project — it is NOT proof of
+    // ownership, and until now this route never checked it (the only owner
+    // comparison, `existing.userId !== userId` below, is ~150 lines down and only
+    // runs when the target slug already exists). Anything that reads project data
+    // by this tokenId — starting with the CMS materializer immediately below —
+    // would otherwise be a cross-tenant leak.
+    //
+    // `assertProjectOwner` returns a RESULT object: it does NOT throw and does NOT
+    // 403 by itself, so the result MUST be `.ok`-checked. `allowMissing: true` is
+    // load-bearing — this route tolerates a missing Project row today (see the
+    // `project` lookup below and `projectId: project?.id || null`); without it
+    // those publishes would become NEW 404s. Admin override + demo-token
+    // short-circuit semantics match the route's existing behaviour.
+    const owner = await assertProjectOwner(userId, tokenId, { action: 'publish', allowMissing: true });
+    if (!owner.ok) return createSecureResponse({ error: owner.error }, owner.status);
+
+    // ── CMS materialization (cms-collections phase 3, step 4) ───────────────
+    // Server-authoritative: placed `cmscollection` sections get their data read
+    // from the Collection tables (keyed by the tokenId just verified above) and
+    // written into the snapshot. Runs BEFORE both sanitize chokepoints so the
+    // materialized payload flows through them like any other content. Zero cms
+    // sections ⇒ zero queries ⇒ existing publishes are byte-identical.
+    if (content && typeof content === 'object') {
+      await materializeCmsForPublish(tokenId, content as Record<string, any>);
+    }
 
     // Sanitize: strip excluded elements, set required defaults
     if (content && typeof content === 'object') {

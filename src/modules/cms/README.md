@@ -28,6 +28,8 @@ and `tokenId` (route key) — the `MediaAsset` shape.
    change, not an implementation detail.
 2. **Roles are CLOSED at 3 and type-filtered**: `title` → `text_short`, `cover` →
    `image|gallery`, `primaryLink` → `link`. Cross-validated (`makeRolesSchema`).
+   (The STORED key is `primaryLink`; the RENDER-MODEL key is `primaryCta` — see
+   "Render-model KEY NAMES are constrained" below. Do not unify them.)
 3. **This is ALONGSIDE, not an extension of, `src/modules/collections/registry.ts`.**
    Do NOT add keys to that module's closed `CollectionKey` union. The two systems coexist
    in v1.
@@ -60,6 +62,51 @@ feature must avoid:
 3. **Binding test:** the materialized snapshot round-trips through
    `sanitizeContentForPublish` **byte-identical** (phase 3) — not merely "placement
    elements survive".
+
+## ⚠️ Render-model KEY NAMES are constrained (do not "improve" them)
+
+There are **TWO** publish sanitize chokepoints, not one (`src/app/api/publish/route.ts`):
+`sanitizeContentForPublish` (line 82, the coercion pass above) **and**
+`sanitizeContentHtml` (line 133, `src/lib/publishSanitizer.ts`). The second one walks every
+section's `elements` and key-dispatches strings by **suffix**: `isUrlContentKey`
+(`publishSanitizer.ts:173-181`) matches any key ending in **`href` / `url` / `link` / `slug`**
+(case-insensitive) and routes its value through `sanitizePublishedUrl`, which rewrites
+anything that isn't a URL to **`'#'`**.
+
+`elements.cmsModel` is an object, so the walker recurses into it: **every top-level string
+prop of the model AND every string prop of the nested `roles` object is dispatched.** A model
+key that merely *looks* url-ish is therefore corrupted at publish time only — the editor keeps
+showing the true value. This actually happened: `roles.primaryLink: "buy"` → `'#'` and
+`collectionSlug: "books"` → `'#'`, which put `data-cms-collection="#"` on every published CMS
+section and — because `fieldById(item, '#')` returns `null` — **silently emptied every card's
+CTA on the published page** while the editor rendered it fine.
+
+Hence the deliberately non-matching names:
+
+| Model key | NEVER call it | Carries |
+|---|---|---|
+| `roles.primaryCta` | `primaryLink` | a FIELD ID |
+| `collectionRef` | `collectionSlug` | the collection slug |
+| item `itemRef` | `slug` | the item slug |
+
+The stored `CollectionRoles.primaryLink` (DB/Zod contract) keeps its name — it never enters
+`elements`. `toRenderModel()` bridges the two vocabularies.
+
+Item-level keys escape the walker *today* only by recursion **depth** (`groups[].items` is
+reached with `allowRecurse=false`) — that is luck, not design, and phase 4 renders item slugs
+into hrefs, so `itemRef` is named defensively too.
+
+The **only** sanctioned url-suffixed keys are the genuine URL values inside image / gallery /
+video / audio / link values (`{url, …}`) — gating those is correct and desirable. **Any new
+model key must not end in `href`/`url`/`link`/`slug`.**
+
+**Binding protection:** `materializePublish.test.ts` runs BOTH chokepoints in route order
+(never just the first — running only the first is why this shipped green once) and carries a
+permanent meta-guard asserting no key in a materialized `cmsModel` matches the suffix rule
+except `url`.
+
+Do NOT "fix" this by exempting `cmsModel` from `sanitizeContentHtml`: that would also lose the
+legitimate HTML pass over `collectionName` and group names.
 
 ## ⚠️ Element-key contract (cross-phase, silent on failure)
 

@@ -211,7 +211,7 @@ describe('CMS collection block — editor↔published parity', () => {
       <CollectionSectionPublished sectionId="s1" {...{ [CMS_MODEL_ELEMENT_KEY]: model }} />
     );
 
-    // Non-role fields carry data-cms-field=<fieldType>; cover/title/primaryLink are
+    // Non-role fields carry data-cms-field=<fieldType>; cover/title/primaryCta are
     // consumed by the role slots (image/text_short/link).
     const typesIn = (c: HTMLElement) =>
       Array.from(c.querySelectorAll('[data-cms-field]'))

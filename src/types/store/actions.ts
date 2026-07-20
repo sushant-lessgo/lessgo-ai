@@ -410,6 +410,31 @@ export interface ValidationActions {
  * ===== META ACTIONS INTERFACE =====
  */
 export interface MetaActions {
+  // ===== CMS COLLECTIONS (cms-collections phase 3) =====
+  // Implemented in `src/hooks/editStore/cmsActions.ts`. Declared HERE rather than
+  // on LayoutActions because `createLayoutActions` is annotated `: LayoutActions`
+  // and is implemented in a file this phase must not touch — adding members there
+  // would break its return type. MetaActions is the store's cross-cutting bag
+  // (reset/export/save/baseline) and is composed from several creators, so it
+  // takes new members cleanly.
+  //
+  // Placement is ordinary section state (persisted via `content`); `cmsData`
+  // itself is a runtime-only cache (never partialized, never published).
+  /** Replace the runtime `cmsData` cache (no network). */
+  setCmsData: (bundles: Record<string, import('@/modules/cms/types').CmsCollectionBundle>) => void;
+  /** Fetch every collection for this token into the runtime cache. */
+  refreshCmsData: () => Promise<void>;
+  /**
+   * Place a `cmscollection` section on the CURRENT page. Sets BOTH
+   * `sectionLayouts[id]` AND the full `content[id]` entry (incl. `layout`) — the
+   * publish payload carries no `sectionLayouts` map, so a half-pin renders in the
+   * editor and silently VANISHES when published.
+   * @returns the new section id
+   */
+  addCmsSection: (collectionId: string, opts?: { layoutHint?: string; position?: number }) => string;
+  /** Remove one placed cms section (sections list + layout map + content entry). */
+  removeCmsSection: (sectionId: string) => void;
+
   // Meta Data Management
   updateMeta: (meta: Partial<any>) => void;
   loadFromOnboarding: () => void;

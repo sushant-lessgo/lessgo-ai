@@ -567,3 +567,480 @@ risk.
   follow-on could fold it in. Left alone to keep this pass minimal.
 - The `.lg-cms__gframe` sizing nit and `CollectionSection.core.tsx` rendering
   were untouched, as instructed.
+
+---
+
+## Phase 3 — placement + publish materialization
+
+**STATUS: code complete + green, EXCEPT one blocked out-of-scope edit — see
+"Blocked (needs orchestrator approval)" below. `npm run test:run` is currently
+RED on 4 pre-existing tests in `src/app/api/publish/route.test.ts`, a file that
+is NOT on this phase's Files-touched list, so I did not touch it.**
+
+### Files changed
+
+| File | New? | What changed |
+|---|---|---|
+| `src/modules/cms/materializePublish.ts` | new | server-only publish materializer |
+| `src/modules/cms/materializePublish.test.ts` | new | the binding publish gate (18 tests) |
+| `src/app/api/publish/route.ts` | — | ownership gate + materializer call (+2 imports) |
+| `src/app/api/publish/publish.authz.test.ts` | new | authz regression for the new gate (6 tests) |
+| `src/hooks/editStore/cmsActions.ts` | new | `cmsData` cache + placement actions |
+| `src/types/store/state.ts` | — | `CmsDataCache` + `cmsData?` on `LayoutSlice` |
+| `src/types/store/actions.ts` | — | 4 action signatures (on `MetaActions`, see Deviations) |
+| `src/stores/editStore.ts` | — | slice wiring + `cmsData: undefined` initial state (NOT `partialize`) |
+| `src/modules/cms/render/CollectionSection.tsx` | — | store adapter (placement → `cmsData` → `toRenderModel`) |
+| `e2e/cms-publish.spec.ts` | new | opportunistic e2e (not the gate) |
+| `docs/task/cms-collections.audit.md` | — | this section |
+
+### Per file
+
+**`src/modules/cms/materializePublish.ts`** — `findCmsSections` walks BOTH
+containers (root `content.content ?? content` via `content.layout.sections`, and
+every `content.subpages[*]` via its own `layout.sections`), filtering on the
+lowercased section-id TYPE prefix, so it is structurally incapable of rewriting
+`works` / `products` / anything else. `materializeCmsContent` (PURE, no DB) sets
+`elements = {collectionId, layoutHint?, cmsModel}` and **preserves `id` and
+`layout`** (defaulting to `SharedCmsCollection` only when absent) plus every
+other section prop. The model is written under the imported
+`CMS_MODEL_ELEMENT_KEY` constant — never a retyped literal. `loadCmsBundles`
+filters by `tokenId` as a second tenant boundary. `materializeCmsForPublish` has
+a **zero-query fast path**: a payload with no cms sections issues no queries at
+all, so every existing customer publish is unchanged in behaviour and DB load.
+
+**`src/app/api/publish/route.ts`** — two insertions, both immediately before the
+`sanitizeContentForPublish` call:
+
+1. the pinned, result-checked
+   `assertProjectOwner(userId, tokenId, { action: 'publish', allowMissing: true })`
+   followed by `if (!owner.ok) return createSecureResponse(...)`. This gate did
+   not exist before this phase.
+2. `await materializeCmsForPublish(tokenId, content)` — after the gate, before
+   both sanitize chokepoints.
+
+`verifyProjectAccess` remains imported-but-unused (pre-existing; removing it was
+out of scope).
+
+**Store** — `cmsData` is runtime-only: absent from `partialize`, from
+`finalContent`, from the publish payload; `persistenceActions.ts` untouched.
+`addCmsSection` writes the **DUAL PIN** (`sectionLayouts[sid]` AND
+`content[sid] = {id, layout, elements}`) and NO `sectionSpacing` entry.
+
+**`CollectionSection.tsx`** — an injected `model` prop still wins (keeps
+`parity.test.tsx` store-free and green); otherwise the placement
+(`elements.collectionId`) is resolved against `cmsData` in a CHILD component, so
+the `useEditStore` hook never runs on the injected path and the block stays
+renderable outside an `EditProvider`. No markup/CSS change → `.published.tsx`
+needed no edit (parity preserved; the parity suite still passes).
+
+### Deviations from the plan
+
+1. **Action signatures went on `MetaActions`, not `LayoutActions`** (plan said
+   "where `navigationConfig`/`legalPages` and the existing action types live").
+   `createLayoutActions` is annotated `: LayoutActions` and lives in
+   `layoutActions.ts`, which is NOT on this phase's Files-touched list — adding
+   required members to `LayoutActions` broke its return type (TS2739).
+   `MetaActions` is the store's cross-cutting bag (reset/export/save/baseline),
+   is composed from several creators, and required no out-of-scope edit.
+   `state.ts` still carries `cmsData` on `LayoutSlice` as planned. Documented
+   inline at the declaration.
+2. **Unknown/deleted `collectionId` → the `cmsModel` key is OMITTED** rather than
+   written as an empty model. The published twin already falls back to
+   `EMPTY_CMS_MODEL` and renders "No items yet"; omitting avoids importing a
+   `.tsx` renderer into the server-only materializer. Asserted by test.
+3. **A DB failure inside the materializer fails the publish** (bubbles to the
+   route's outer catch → 500) rather than publishing silently-stale content.
+   Blast radius is nil for non-CMS projects (zero-query fast path). Flagged for
+   the reviewer below.
+4. `e2e/cms-publish.spec.ts` places the section by writing the persisted shape
+   through `saveDraft` (there is no placement UI until phase 6).
+
+### Verification (actual)
+
+- `npx tsc --noEmit` → **clean, zero output**.
+- `npm run test:run` → **269 passed | 1 failed | 1 skipped (271 files)**;
+  **4315 passed | 4 failed | 15 skipped**.
+  - The 4 failures are ALL in `src/app/api/publish/route.test.ts` (pre-existing
+    file, not on Files-touched): its `vi.mock('@/lib/security', ...)` returns a
+    hand-built object with only `createSecureResponse` / `validateSlug` /
+    `verifyProjectAccess`, so the route's new `assertProjectOwner` call throws
+    `[vitest] No "assertProjectOwner" export is defined on the "@/lib/security"
+    mock`. It is a MOCK-COMPLETENESS gap, not a behaviour regression.
+  - Every other pre-existing suite is green, including `collectionHelpers.works`,
+    `naayomProducts`, `homeTeasers`, `collections.authz`, the cms parity suite,
+    and the staticExport + persistence suites.
+  - New tests: 18 (`materializePublish.test.ts`) + 6 (`publish.authz.test.ts`).
+  - Note: the brief's stated baseline (268 files / 4295 tests) is stale; the
+    actual pre-phase baseline on this branch is 269 files / 4310 tests.
+- **Mutation check (the gate is not theatre):** deleting the
+  `if (!owner.ok) return ...` line makes 3 of the 6 authz tests fail
+  (403 / 401 / 404 + body). Restored immediately; `git diff --stat` confirms the
+  file matches the intended 29-line insertion.
+- `npx eslint` on all touched files → 0 errors, 1 warning (the pre-existing
+  `no-img-element` warning in `CollectionSection.tsx`, untouched by this phase).
+- **e2e NOT run** — Playwright needs a dev server + Clerk session + Blob/KV; not
+  executed locally. I am not claiming it passes.
+
+### Blocked (needs orchestrator approval)
+
+`src/app/api/publish/route.test.ts` needs one entry added to its existing
+`vi.mock('@/lib/security', ...)` factory:
+
+```ts
+assertProjectOwner: vi.fn(async () => ({
+  ok: true, isDemo: false, adminOverride: false, userRecord: { id: 'u1' }, project: null,
+})),
+```
+
+That is the whole fix (mock completeness — that file's 4 tests are about
+static-export failure handling and are unrelated to ownership). The file is not
+on this phase's Files-touched list, so per the scope rules I did NOT edit it.
+**`npm run test:run` stays RED until this is approved.**
+
+### What the reviewer should scrutinise
+
+- The route insertion ORDER: gate → materializer → `sanitizeContentForPublish`
+  (:54) → `sanitizeContentHtml` (:106). Anything reordered breaks the XSS and
+  coercion arguments.
+- `allowMissing: true` is load-bearing; the `TOKEN_ORPHANLESS` test covers it.
+- Deviation 3 (materializer DB error fails the publish) is a judgment call —
+  swap to fail-soft if the founder prefers publishing with a stale/empty block.
+- The parity test in `materializePublish.test.ts` renders through
+  `LandingPagePublishedRenderer` and includes a deliberate "delete the layout →
+  the section vanishes" test proving the gate bites. Do not let a future pass
+  simplify it to a direct registry render.
+- Orphan-project pass-through (`security.ts:97-109`) is inherited, not
+  introduced: any authed user still passes the gate on an unowned project.
+
+---
+
+## Phase 3 — follow-up (authorized scope extension)
+
+### Files changed (this follow-up)
+
+- `src/app/api/publish/route.test.ts`
+
+### What changed
+
+Added the missing `assertProjectOwner` entry to the file's existing
+`vi.mock('@/lib/security', ...)` factory, unblocking module resolution for the
+route's new call. Also added a 3-line comment above the factory explaining that
+the factory REPLACES the whole module, so any omitted export resolves as
+`undefined` and fails at call time — the next person adding a `security.ts`
+export sees why it must stay in sync.
+
+Verified against the REAL success shape in `src/lib/security.ts:47-55`
+(`ProjectOwnerResult`). The proposed mock matched the real owner-path success
+branch (`security.ts:94`) **exactly** — no difference to report. `project: null`
+is valid per the type (`project: { userId: string | null } | null`) and is the
+literal shape returned by the `allowMissing` branch (`security.ts:87`), which is
+the branch this route triggers.
+
+**No behavioural change to the 4 tests.** The route consumes the result only via
+`if (!owner.ok) return ...` (`route.ts:68`) — it never reads `userRecord`,
+`project`, `isDemo`, or `adminOverride`. An `ok: true` mock is therefore a pure
+pass-through gate. All 4 tests still exercise static-export failure handling with
+their original bodies and assertions untouched (case 1 throw → 500, case 1b
+blob rollback via `del()`, case 2 KV-write sub-catch, case 3 happy-path pin).
+
+Only the mock factory was edited. No assertion, test body, or unrelated mock was
+altered.
+
+### Rulings accepted (recorded, no action taken)
+
+1. **Action signatures on `MetaActions`, not `LayoutActions`** — accepted as
+   built. `createLayoutActions` is annotated in a file outside the phase's
+   Files-touched list; forcing it there would have required an out-of-scope edit.
+2. **Materializer DB error fails the publish (500) rather than publishing an
+   empty block** — accepted, kept as built. This is a **deliberate fail-closed
+   decision**: silently publishing a page with the user's catalog missing is
+   worse than a retryable failed publish. The zero-query fast path (no
+   `cmscollection` section placed → no DB call) means non-CMS publishes carry no
+   new failure mode. Supersedes the "swap to fail-soft" note above.
+
+### Test results (ACTUAL)
+
+- `npx tsc --noEmit` — clean, no output, exit 0.
+- `npx vitest run src/app/api/publish/route.test.ts` — **4 passed / 4**.
+- `npm run test:run` — **FULLY GREEN: 270 passed | 1 skipped (271 files);
+  4319 passed | 15 skipped (4334 tests)**, 75.09s.
+
+Corrected baseline: pre-phase was **269 files / 4310 tests** (not 268/4295 —
+that figure was stale). +2 files / +24 tests from this phase lands exactly on the
+predicted 271 / 4334.
+
+### Open risks
+
+Unchanged from the Phase 3 section above. The mock-completeness class of bug
+recurs whenever a route gains a `security.ts` import while a whole-module
+`vi.mock` factory shadows it; the inline comment is the only guard (vitest does
+not type-check factory completeness against the real module).
+
+Not committed, per instructions.
+
+---
+
+## Phase 3 — BLOCKING fix: url-suffix key corruption at the SECOND publish chokepoint
+
+### Files changed
+
+- `src/modules/cms/render/toRenderModel.ts`
+- `src/modules/cms/render/toRenderModel.test.ts`
+- `src/modules/cms/render/CollectionSection.core.tsx`
+- `src/modules/cms/render/CollectionSection.published.tsx`
+- `src/modules/cms/render/parity.test.tsx` (one comment)
+- `src/modules/cms/materializePublish.ts` (header note only)
+- `src/modules/cms/materializePublish.test.ts`
+- `src/modules/cms/README.md`
+- `src/hooks/editStore/cmsActions.test.ts` (**new**)
+- `e2e/cms-publish.spec.ts` (one comment)
+- `docs/task/cms-collections.audit.md` (this section)
+
+NOT changed: `src/hooks/editStore/cmsActions.ts` (no rename reached it — it only
+writes placement `collectionId`/`layoutHint`), `src/modules/cms/render/CollectionSection.tsx`
+(carries no renamed key), `src/modules/cms/render/primitives.ts` (see Deviations #1).
+
+### The bug (confirmed, not theoretical)
+
+The plan pinned coercion on ONE chokepoint (`sanitizeContentForPublish`,
+`route.ts:82`). There is a SECOND: `sanitizeContentHtml` (`route.ts:133`), whose
+`sanitizeItemObject` walks `elements` and key-dispatches strings by SUFFIX via
+`isUrlContentKey` (`publishSanitizer.ts:173-181`: `href|url|link|slug`) then
+`sanitizePublishedUrl`, which yields `'#'` for non-URLs.
+
+`elements.cmsModel` is an object, so it is recursed with `allowRecurse=true`:
+top-level string props AND the nested `roles` object are all dispatched. Two
+render-model keys matched the suffix rule but are NOT URLs:
+
+| key | value | became |
+|---|---|---|
+| `CmsResolvedRoles.primaryLink` | a FIELD ID (`"buy"`) | `'#'` |
+| `CmsRenderModel.collectionSlug` | a slug (`"books"`) | `'#'` |
+
+Published consequences: `data-cms-collection="#"` on every published CMS section,
+and — because `fieldById(item, '#')` returns `null` (`CollectionSection.core.tsx:133`)
+— **every card's CTA slot rendered empty on the published page while populated in
+the editor**; the link field fell through to `nonRoleFields` and rendered as a
+generic row. Hits ANY collection with a link field (`resolveRole` auto-falls-back
+to the first link field even with no explicit role).
+
+### Fix — approach (a): renamed the keys
+
+Did NOT exempt `cmsModel` from the walk (that would lose the legitimate HTML pass
+over `collectionName` + group names).
+
+| was | now | carries |
+|---|---|---|
+| `CmsResolvedRoles.primaryLink` | `primaryCta` | a field id |
+| `CmsRenderModel.collectionSlug` | `collectionRef` | the collection slug |
+| `CmsItemRender.slug` | `itemRef` | the item slug |
+
+`itemRef` was renamed too even though it escapes the walker today: it escapes only
+by recursion DEPTH (`groups[].items` is reached with `allowRecurse=false`) — depth
+luck, not design — and phase 4 renders item slugs into hrefs.
+
+**Sweep result:** the only remaining suffix-matching keys anywhere in the model are
+the genuine `url` keys inside image / gallery / video / audio / link values. Those
+are real URLs; scheme-gating them is correct and desirable, so they were left
+alone. Non-matching keys verified individually: `collectionId`, `collectionName`,
+`detailPages`, `layoutHint`, `groupId`, `name`, `items`, `itemId`, `fields`,
+`fieldId`, `fieldType`, `value`, `label`, `kind`, `assetId`, `title`, `cover`.
+This sweep is now enforced permanently by a meta-test rather than by inspection.
+
+The STORED `CollectionRoles.primaryLink` (Zod/DB contract) keeps its name — it
+never enters `elements`. `toRenderModel()` bridges the two vocabularies at one
+line, commented at the bridge.
+
+Consumers updated: `toRenderModel.ts` (types, `ROLE_TYPES`, `toItemRender`,
+`toRenderModel`, `nonRoleFields`), `CollectionSection.core.tsx` (`roles.primaryCta`,
+`data-cms-collection={model.collectionRef}`), `CollectionSection.published.tsx`
+(`EMPTY_CMS_MODEL`), and all phase-2/3 tests.
+
+`materializePublish.ts` needed no code change (it never names these keys); it got a
+header note pointing at the two-chokepoint hazard, because it is the module that
+writes the model into `elements`.
+
+Why-note recorded in BOTH `toRenderModel.ts` (a top-of-file block, where an author
+renaming a field will actually be looking) and `src/modules/cms/README.md` (new
+section "Render-model KEY NAMES are constrained"), including an explicit
+"do NOT fix this by exempting `cmsModel`" instruction.
+
+### The gate could not see this bug — fixed
+
+`materializePublish.test.ts` ran only `sanitizeContentForPublish`. Both the
+byte-identical round-trip AND the materialized-snapshot parity render now go
+through a shared `runPublishSanitizers()` helper that runs **both chokepoints in
+route order**. Added:
+
+- named non-`'#'` assertions on exactly the corrupted values
+  (`roles.primaryCta === 'buy'`, `collectionRef === 'books'`, `itemRef === 'deep-work'`);
+- a "no model key was scheme-gated to `'#'`" test;
+- **a permanent META-GUARD**: no key anywhere in a materialized `cmsModel` may match
+  `isUrlContentKey` except `url` — imported from the real `publishSanitizer`, so it
+  tracks the rule rather than duplicating it. Includes anti-vacuity assertions on
+  both sides (>20 entries walked; the sanctioned `url` key must actually be present).
+- CTA anti-vacuity in the parity test (`lg-cms__cta` + `mailto:hi@acme.com` present
+  in the published skeleton) — the assertion the bug's symptom would break.
+
+**Deliberate-revert evidence (ACTUAL, observed).** Reverted `primaryCta` back to
+`primaryLink` across `toRenderModel.ts` + `CollectionSection.core.tsx`, then ran
+`npx vitest run src/modules/cms/materializePublish.test.ts`:
+
+```
+Tests  4 failed | 16 passed (20)
+
+x round-trips through BOTH publish chokepoints BYTE-IDENTICAL
+x the SECOND chokepoint does not scheme-gate any model key to "#"
+    AssertionError: expected [ [ 'primaryLink', '#' ] ] to deeply equal []
+x META-GUARD: no model key ends in href/url/link/slug except sanctioned `url` values
+    AssertionError: expected [ 'primaryLink' ] to deeply equal []
+x publishes the SAME body skeleton the editor renders from the same tables
+    AssertionError: expected 'div[class=lg-cms__in|...' to be 'div[class=lg-cms__in|...'
+```
+
+Four independent failures, including the parity skeleton diverging — i.e. the gate
+now catches the real user-visible symptom (published CTA gone), not just the key
+name. Rename restored; full suite re-run green (below). The pre-fix gate caught
+NONE of these.
+
+### Also fixed (from the same review)
+
+1. **`e2e/cms-publish.spec.ts:87` comment corrected.** It claimed "Editor renders
+   the collection from the runtime cache" while asserting only hero text. Nothing
+   populates `cmsData` yet (`refreshCmsData` still has zero callers until the CMS
+   panel lands), so a placed section shows the skeleton there. The comment now says
+   the step asserts only that the page mounted, and points at `parity.test.tsx` for
+   real editor-side collection rendering. **The assertion was NOT changed** — no
+   faking in either direction.
+2. **Dual-pin framing corrected + now actually tested.** The earlier audit
+   overstated the protection: reverting `addCmsSection` to map-only would NOT have
+   failed the suite, because `materializeCmsContent` defaults a missing layout to
+   `CMS_COLLECTION_LAYOUT` (`materializePublish.ts:148`), so the section would
+   publish as an EMPTY block rather than vanishing — green suite, broken page. New
+   `src/hooks/editStore/cmsActions.test.ts` (4 tests, driven through the real
+   `createEditStore`) asserts `addCmsSection` writes BOTH
+   `sectionLayouts[sectionId]` AND `content[sectionId].layout` as independent
+   assertions, on both the default and the `layoutHint`+`position` path, plus
+   `removeCmsSection` clearing both. That file's header records why the publish-side
+   test cannot cover this.
+
+### Deviations
+
+1. **`primitives.ts` left untouched.** It carries a stale doc-comment referring to
+   the "primaryLink role". I edited it, then reverted it byte-for-byte on noticing
+   the file is NOT on this phase's Files-touched list (`git diff` confirms zero
+   diff). It is a comment-only inaccuracy in a prop doc; flagging rather than
+   editing out of scope.
+2. **`parity.test.tsx` got only a comment update.** Its `roles: {...primaryLink: 'buy'}`
+   fixture is the STORED `CollectionRoles` shape (correct as-is); it makes no
+   assertion on the renamed model keys, so no assertion changed.
+3. **`cmsActions.ts` not modified** — no rename reached it, and the review asked for
+   it "only if a rename touches it".
+4. `cmsActions.test.ts` uses the real `createEditStore` (the `pageActions.test.ts`
+   precedent) rather than a hand-rolled fake `set`, so it exercises the real
+   immer/persist pipeline the bug would live in.
+
+### Test results (ACTUAL)
+
+- `npx tsc --noEmit` — **clean, no output, exit 0.**
+- `npm run test:run` — **FULLY GREEN: 271 passed | 1 skipped (272 files);
+  4326 passed | 15 skipped (4341 tests)**, 75.97s.
+- Delta vs the stated baseline (270/1 files, 4319/15 tests): **+1 file** (new
+  `cmsActions.test.ts`), **+7 tests** = 4 cmsActions + 1 `itemRef` in
+  `toRenderModel.test.ts` + 2 in `materializePublish.test.ts` (scheme-gate check +
+  meta-guard). Exactly as predicted; no test was deleted or weakened.
+- Scoped re-run after restoring the rename:
+  `npx vitest run src/modules/cms src/hooks/editStore/cmsActions.test.ts src/app/api/publish`
+  → **7 files / 79 tests passed.**
+- **e2e NOT run** — Playwright needs a dev server + Clerk session + Blob/KV. Not
+  claiming it passes; the only change there is a comment.
+
+### Open risks
+
+1. **The suffix rule is a moving target.** The meta-guard imports the real
+   `isUrlContentKey`, so widening the rule in `publishSanitizer.ts` (e.g. adding
+   `endsWith('path')`) will fail the CMS gate rather than silently corrupting
+   published pages. That is intended — but whoever widens it must be prepared to
+   rename a CMS model key, not to add an exemption.
+2. **The class of bug is broader than CMS.** Any future structured (non-flat-string)
+   element payload hits the same `sanitizeItemObject` walk. Nothing outside
+   `src/modules/cms` was audited for it in this pass; that sweep is out of scope
+   here and worth queueing.
+3. **`refreshCmsData` still has zero callers** — a placed section shows the skeleton
+   in the editor until the CMS panel phase wires it. Known, expected, now honestly
+   documented in the e2e spec instead of implied otherwise.
+4. Item-level model keys are still only ONE recursion level away from the walker. If
+   `sanitizeItemObject`'s `allowRecurse` depth is ever increased, `itemRef` is
+   already safe but any NEW item-level key must obey the same naming rule — the
+   meta-guard walks the whole model, so it covers that.
+
+Not committed, per instructions.
+
+---
+
+## Phase 3 — cleanup (3 non-blocking nits from re-review)
+
+**Files changed**
+- `src/modules/cms/sectionKeys.ts` (NEW)
+- `src/modules/cms/materializePublish.ts`
+- `src/hooks/editStore/cmsActions.ts`
+- `src/modules/cms/render/primitives.ts`
+- `src/modules/cms/materializePublish.test.ts`
+- `docs/task/cms-collections.audit.md` (this section)
+
+No runtime behaviour, rendering, sanitize-chain, 403-gate or assertion strength changed.
+
+### 1. `@prisma/client` out of the editor client bundle
+
+`src/modules/cms/sectionKeys.ts` (new, zero imports) now OWNS `CMS_SECTION_TYPE`,
+`CMS_COLLECTION_LAYOUT`, `isCmsSectionId`. `materializePublish.ts` imports them from
+there and **re-exports all three** — required, not optional: `materializePublish.test.ts`
+AND `cmsActions.test.ts` (the latter outside this phase's Files-touched list) both import
+them from `materializePublish`. `cmsActions.ts` now imports from `sectionKeys`; a header
+comment in both files pins WHY, so the slice doesn't become the precedent.
+
+**Verified by build, before/after — with one correction to the reported magnitude:**
+
+| | chunk | `PrismaClient` in chunk | size |
+|---|---|---|---|
+| before | `3500-929ca15c5e5332db.js` | 1 (`new eS.PrismaClient` immediately preceding `let ek="SharedCmsCollection"`) | 348,332 B |
+| after | `3500-d2c0365b86f896a1.js` | **0** | 348,052 B |
+
+After the fix, `PrismaClient` appears in **zero** files under `.next/static/chunks` (whole-dir
+grep on a clean rebuild — the stale pre-fix chunk was not left behind, so this is a true
+full-build result). The CMS constants are no longer colocated with Prisma: post-fix context
+is `…return o}let ew="SharedCmsCollection"`, with the `new eS.PrismaClient` clause gone.
+
+**Deviation from the brief's framing (measurement, not scope):** the actual byte saving is
+**~280 B, not ~73 kB**. Webpack resolves `@prisma/client` via its `browser` field to
+`index-browser.js` (19 kB unminified — the Proxy stub), not the full engine runtime, so the
+73 kB figure in the review was overstated. The dead weight was real but small. The reason to
+keep the fix is architectural (no Prisma-bearing import in an editor store slice, no
+precedent), not the byte count. Flagging so nobody later cites a 73 kB win that isn't there.
+
+### 2. Stale comment
+`render/primitives.ts:46` `primaryLink` → `` `primaryCta` `` on `CmsLinkProps.isPrimaryCta`.
+Comment only.
+
+### 3. Widened meta-guard fixture
+`materializePublish.test.ts` `FIELDS` gained `clip` (`video`) + `track` (`audio`), with
+matching `MediaValue` values on item `i1` (`{kind:'link',url:'https://cdn.test/clip.mp4'}`,
+`{kind:'upload',url:'/track.mp3'}` — shapes taken from `safeMedia`). All **9** field types
+now flow through the KEY-NAME meta-guard, so a future `mediaUrl`-style key in the
+video/audio branch would trip the no-suffix-match assertion. Added no new test cases and
+changed no assertion — the wider fixture flows through the existing ones (hence +0 net
+tests, as predicted).
+
+### Test results (actual)
+- `npx tsc --noEmit` → **exit 0, zero output**
+- `npm run test:run` → **271 passed | 1 skipped (272 files); 4326 passed | 15 skipped (4341)** — exact baseline, +0 net
+- `npm run build` → **succeeded**, plus the bundle observation above
+
+### Open risks
+- `sectionKeys.ts` stays safe only while it stays import-free; that invariant lives in a
+  comment, not a lint rule. A future import there re-opens the hole silently.
+- `cmsActions.test.ts` still imports the constants via the `materializePublish` re-export
+  (out of scope to change). The re-export is therefore load-bearing — deleting it breaks
+  two test files.
+
+Not committed, per instructions.

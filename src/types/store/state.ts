@@ -161,9 +161,32 @@ export interface LegalPages {
 }
 
 /**
+ * CMS collections runtime cache (cms-collections phase 3).
+ *
+ * ⚠️ RUNTIME-ONLY STATE — deliberately NOT persisted anywhere:
+ *   - NOT in `partialize` (localStorage), NOT in `finalContent` / the save payload,
+ *     NOT in the publish payload.
+ * The Collection tables are the single source of truth; this is just a fetched
+ * cache so placed `cmscollection` sections can render in the editor. PLACEMENT
+ * (which collection a section shows) lives in `content[sectionId].elements`, which
+ * persists like any other section content — it does not ride this cache.
+ */
+export interface CmsDataCache {
+  /** collectionId → the collection with its groups + items. */
+  bundles: Record<string, import('@/modules/cms/types').CmsCollectionBundle>;
+  status: 'idle' | 'loading' | 'loaded' | 'error';
+  /** Epoch ms of the last successful load (staleness is accepted for v1). */
+  loadedAt?: number;
+  error?: string;
+}
+
+/**
  * ===== LAYOUT SLICE INTERFACE =====
  */
 export interface LayoutSlice {
+  // CMS collections runtime cache (see CmsDataCache — never persisted).
+  cmsData?: CmsDataCache;
+
   // Section Structure
   sections: string[];
   sectionLayouts: Record<string, string>;

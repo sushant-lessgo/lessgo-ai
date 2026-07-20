@@ -25,6 +25,33 @@
 // Unsafe → the value is DROPPED (the field disappears), never rewritten to '#':
 // a CMS field is content, not a template CTA, so a dead link is worse than none.
 //
+// ── ⚠️ MODEL KEY NAMES ARE CONSTRAINED — DO NOT "IMPROVE" THEM ────────────
+// The publish walker (`sanitizeItemObject` → `sanitizeStringField`, publishSanitizer.ts)
+// key-dispatches every STRING prop it reaches by SUFFIX: a key ending in
+// `href` / `url` / `link` / `slug` (case-insensitive, `isUrlContentKey`,
+// publishSanitizer.ts:173-181) is run through `sanitizePublishedUrl`, which
+// rewrites anything that is not a URL to `'#'`.
+//
+// `elements.cmsModel` is an object, so the walker recurses into it: every
+// top-level string prop of the model AND every string prop of the nested `roles`
+// object is dispatched. So a model key that merely LOOKS url-ish is silently
+// corrupted at publish time only — the editor keeps showing the true value.
+// (Real incident: `roles.primaryLink: "buy"` → `'#'` and `collectionSlug:
+// "books"` → `'#'`, which emptied every card's CTA on published pages.)
+//
+// Hence the deliberately non-suffix-matching names:
+//   `roles.primaryCta`   (a FIELD ID, not a URL) — never `primaryLink`
+//   `collectionRef`      (a collection slug string) — never `collectionSlug`
+//   item `itemRef`       (an item slug string) — never `slug`
+// Item-level keys escape the walker TODAY only by recursion DEPTH (groups[].items
+// is reached with `allowRecurse=false`) — that is luck, not design, so `itemRef`
+// is named defensively too.
+//
+// The ONLY sanctioned `url`-suffixed keys are the genuine URL values inside
+// image / gallery / video / audio / link values (`{url, …}`) — gating those is
+// correct and desirable. Any NEW key must not end in href/url/link/slug.
+// Guarded permanently by the meta-test in `materializePublish.test.ts`.
+//
 // ── COERCION-PROOF SHAPE (load-bearing; see the plan's pinned section) ─────
 // `coercePublishValue` (layoutElementSchema.ts:380-397) runs over every published
 // element value and silently rewrites two shapes:
@@ -79,7 +106,8 @@ export type CmsRenderValue =
 
 export interface CmsItemRender {
   itemId: string;
-  slug: string;
+  /** The item's slug. NAMED `itemRef`, never `slug` — see the key-name note above. */
+  itemRef: string;
   /** Non-empty fields, in collection field-schema order. */
   fields: CmsFieldRender[];
 }
@@ -92,17 +120,25 @@ export interface CmsGroupRender {
   items: CmsItemRender[];
 }
 
-/** Resolved role → field id (after explicit-role validation + fallbacks). */
+/**
+ * Resolved role → field id (after explicit-role validation + fallbacks).
+ *
+ * NOTE the key is `primaryCta`, NOT `primaryLink` (the stored `CollectionRoles`
+ * key). A `*Link` key would be scheme-gated to `'#'` at publish — see the
+ * key-name note at the top of this file. The two vocabularies are bridged in
+ * `toRenderModel()`.
+ */
 export interface CmsResolvedRoles {
   title: string | null;
   cover: string | null;
-  primaryLink: string | null;
+  primaryCta: string | null;
 }
 
 export interface CmsRenderModel {
   collectionId: string;
   collectionName: string;
-  collectionSlug: string;
+  /** The collection's slug. NAMED `collectionRef`, never `collectionSlug`. */
+  collectionRef: string;
   detailPages: boolean;
   /** Reserved seam for per-template group layouts; v1 renders stacked groups. */
   layoutHint: string | null;
@@ -115,7 +151,7 @@ export interface CmsRenderModel {
 const ROLE_TYPES: Record<keyof CmsResolvedRoles, readonly FieldType[]> = {
   title: ['text_short'],
   cover: ['image', 'gallery'],
-  primaryLink: ['link'],
+  primaryCta: ['link'],
 };
 
 /**
@@ -216,7 +252,7 @@ function toItemRender(item: CmsItem, fields: FieldDef[]): CmsItemRender {
     if (value === null) continue; // empty / unsafe → dropped
     rendered.push({ fieldId: f.id, name: f.name, fieldType: f.type, value });
   }
-  return { itemId: item.id, slug: item.slug, fields: rendered };
+  return { itemId: item.id, itemRef: item.slug, fields: rendered };
 }
 
 const byOrder = <T extends { order: number }>(a: T, b: T) => a.order - b.order;
@@ -269,13 +305,14 @@ export function toRenderModel(bundle: CmsCollectionBundle): CmsRenderModel {
   return {
     collectionId: collection.id,
     collectionName: collection.name,
-    collectionSlug: collection.slug,
+    collectionRef: collection.slug,
     detailPages: !!collection.detailPages,
     layoutHint: collection.layoutHint ?? null,
     roles: {
       title: resolveRole('title', fields, roleInput.title),
       cover: resolveRole('cover', fields, roleInput.cover),
-      primaryLink: resolveRole('primaryLink', fields, roleInput.primaryLink),
+      // stored role key `primaryLink` → model key `primaryCta` (key-name note).
+      primaryCta: resolveRole('primaryCta', fields, roleInput.primaryLink),
     },
     groups: rendered,
   };
@@ -290,7 +327,7 @@ export function fieldById(item: CmsItemRender, fieldId: string | null): CmsField
 
 /** Fields that are NOT already consumed by a role, in schema order. */
 export function nonRoleFields(item: CmsItemRender, roles: CmsResolvedRoles): CmsFieldRender[] {
-  const taken = new Set([roles.title, roles.cover, roles.primaryLink].filter(Boolean) as string[]);
+  const taken = new Set([roles.title, roles.cover, roles.primaryCta].filter(Boolean) as string[]);
   return item.fields.filter((f) => !taken.has(f.fieldId));
 }
 

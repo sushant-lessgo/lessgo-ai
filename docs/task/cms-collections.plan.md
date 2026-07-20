@@ -38,7 +38,23 @@ phase 1 data core (tables + schema + routes): done (1A 3a4a077a, 1B 66d4518f, im
       gate() copies into a shared helper (impl-review nit #5 — drift risk on a security check).
     ↳ Deliberate omission: src/lib/schemas/index.ts NOT edited (it is an LLM-structured-output
       barrel; brief/media/workLibrary aren't in it either). Plan Files-touched delta, not creep.
-phase 2 render trio + shared-block registries + parity: pending
+phase 2 render trio + shared-block registries + parity: done (3f08b57c + hardening b9902e85, impl-review loops 0 → ship)
+    ↳ Predicates isSafeURL/isSafePublishedUrl MOVED to pure src/lib/safeUrl.ts (zero imports);
+      reviewer verified both byte-identical to originals; headTags + publishSanitizer re-export.
+      Import closure of BOTH twins traced clean (no 'use client'/jsdom/dompurify/publishSanitizer).
+    ↳ PARITY COMPARATOR WAS A FALSE GREEN — old skeleton() compared only tag/class/data-cms-*/text,
+      so a published twin dropping whiteSpace:pre-wrap (text_long newlines collapse, published-only)
+      or dropping alt was byte-identical. Widened to class/style/src/alt/href + permanent 3-test
+      meta-guard proving the comparator bites + 4 anti-vacuity guards. THE lesson of this phase.
+    ↳ Dispatch-resolution assertions added (mis-cased key in BOTH registries passes key-sync but
+      never resolves at runtime — key-sync alone cannot see it).
+    ↳ CROSS-PHASE CONTRACT for phase 3: materializer MUST write the model under the element key
+      CMS_MODEL_ELEMENT_KEY = 'cmsModel' (toRenderModel.ts:53-59). Wrong key = silent "No items yet",
+      no error. Documented in src/modules/cms/README.md.
+    ↳ Coercion rule 2 CORRECTED in the pinned section above (ANY numeric key collapses + discards
+      non-numeric siblings — NOT "all keys numeric"). Test predicate now keys.some(numeric)===false.
+    ↳ Open (deferred, not blocking): the 2 primitive factories are still hand-duplicated — the gate
+      now DETECTS divergence but does not PREVENT it. aria-label still excluded from comparison.
 phase 3 placement + publish materialization: pending
 phase 4 detail pages + slugs: pending
 phase 5 authoring UI primitives: pending

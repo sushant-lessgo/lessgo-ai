@@ -55,7 +55,7 @@ export function makeCmsPublishedPrimitives(): CmsPrimitives {
 
   const Link: React.FC<CmsLinkProps> = ({ href, className, isPrimaryCta, ariaLabel, children }) => {
     const target = href || '#';
-    // CTA beacon attrs on the primaryLink role only (StoreBadges/FollowStrip
+    // CTA beacon attrs on the primaryCta role only (StoreBadges/FollowStrip
     // convention); ordinary content links are not conversion events.
     const ctaAttrs = isPrimaryCta
       ? { 'data-lessgo-cta': '', 'data-lessgo-cta-role': 'primary' }
@@ -103,10 +103,10 @@ export function makeCmsPublishedPrimitives(): CmsPrimitives {
 export const EMPTY_CMS_MODEL: CmsRenderModel = {
   collectionId: '',
   collectionName: '',
-  collectionSlug: '',
+  collectionRef: '',
   detailPages: false,
   layoutHint: null,
-  roles: { title: null, cover: null, primaryLink: null },
+  roles: { title: null, cover: null, primaryCta: null },
   groups: [],
 };
 

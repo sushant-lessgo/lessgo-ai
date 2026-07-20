@@ -8,7 +8,7 @@
 //
 // Rendering keys off the field TYPE (the closed 9) — never off a field name and
 // never off the template. Roles drive card composition:
-//   cover → the card's lead media · title → the card heading · primaryLink → CTA
+//   cover → the card's lead media · title → the card heading · primaryCta → CTA
 // Every remaining field renders in schema order beneath. Empty and unsafe values
 // were already dropped upstream in toRenderModel, so anything reaching here is
 // renderable.
@@ -130,7 +130,7 @@ function ItemCard({
 }) {
   const cover = fieldById(item, roles.cover);
   const title = fieldById(item, roles.title);
-  const cta = fieldById(item, roles.primaryLink);
+  const cta = fieldById(item, roles.primaryCta);
   const src = coverSrc(cover);
   const rest = nonRoleFields(item, roles);
 
@@ -200,7 +200,7 @@ export function CollectionSectionCore({
         data-surface="neutral"
         data-sid={sectionId}
         data-section-id={sectionId}
-        data-cms-collection={model.collectionSlug}
+        data-cms-collection={model.collectionRef}
       >
         {manageSlot}
         <div className="lg-cms__in" data-cms-body="">

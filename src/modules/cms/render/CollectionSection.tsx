@@ -10,12 +10,19 @@
 // deliberate parity simplification — with no canvas write-path there is nothing
 // for the two twins to disagree about beyond attributes.
 //
-// PHASE SCOPE: this phase renders from an injected `model` prop only. Phase 3
-// adds the store adapter (read `elements.collectionId` → `cmsData` →
-// `toRenderModel()`); until then a section with no model shows the loading
-// skeleton below.
+// STORE ADAPTER (phase 3): with no injected `model` prop the block reads its
+// placement (`elements.collectionId`, spread flat onto props by the edit
+// renderer) and resolves it against the runtime `cmsData` cache through the SAME
+// `toRenderModel()` the publish materializer uses — one shaping path, so the two
+// feeds cannot diverge. Missing/stale cache → the loading skeleton, never a crash.
+//
+// The store read lives in a CHILD component so the injected-`model` path stays
+// completely store-free (hooks may not be conditional; a conditionally-RENDERED
+// child is fine). That keeps this block renderable outside an `EditProvider` —
+// which the parity gate relies on.
 
 import React from 'react';
+import { useEditStore } from '@/hooks/useEditStore';
 import type {
   CmsPrimitives,
   CmsTxtProps,
@@ -24,7 +31,7 @@ import type {
   CmsListProps,
 } from './primitives';
 import { CollectionSectionCore } from './CollectionSection.core';
-import type { CmsRenderModel } from './toRenderModel';
+import { toRenderModel, type CmsRenderModel } from './toRenderModel';
 
 /** Edit-mode emitters. Identical tags/classes to the published twin; the only
  *  differences are non-markup (inert anchors, no CTA beacon attrs). */
@@ -130,15 +137,8 @@ function Skeleton({ sectionId }: { sectionId: string }) {
   );
 }
 
-export interface CollectionSectionProps {
-  sectionId: string;
-  /** Phase 3 supplies this from the store adapter. */
-  model?: CmsRenderModel;
-  [key: string]: any;
-}
-
-export default function CollectionSection({ sectionId, model }: CollectionSectionProps) {
-  if (!model) return <Skeleton sectionId={sectionId} />;
+/** Render a resolved model with the edit primitives + edit-only chrome. */
+function Rendered({ sectionId, model }: { sectionId: string; model: CmsRenderModel }) {
   const E = makeCmsEditPrimitives();
   return (
     <CollectionSectionCore
@@ -148,4 +148,39 @@ export default function CollectionSection({ sectionId, model }: CollectionSectio
       manageSlot={<ManagePlaceholder />}
     />
   );
+}
+
+/**
+ * Store-backed path. Rendered ONLY when no `model` was injected, so the hook
+ * below never runs outside an EditProvider on the injected path.
+ */
+function StoreBacked({ sectionId, collectionId }: { sectionId: string; collectionId: string }) {
+  const bundle = useEditStore((s) => s.cmsData?.bundles?.[collectionId]);
+  if (!bundle) return <Skeleton sectionId={sectionId} />;
+  return <Rendered sectionId={sectionId} model={toRenderModel(bundle)} />;
+}
+
+export interface CollectionSectionProps {
+  sectionId: string;
+  /** Injected model (tests / future callers) — wins over the store lookup. */
+  model?: CmsRenderModel;
+  /** Placement, spread flat off `content[sectionId].elements` by the renderer. */
+  collectionId?: string;
+  /** The raw section data the edit renderer also spreads (`{id, layout, elements}`). */
+  elements?: Record<string, any>;
+  [key: string]: any;
+}
+
+export default function CollectionSection({
+  sectionId,
+  model,
+  collectionId,
+  elements,
+}: CollectionSectionProps) {
+  if (model) return <Rendered sectionId={sectionId} model={model} />;
+  // The edit renderer spreads the whole section object, so placement arrives as
+  // `elements.collectionId`; a flat `collectionId` prop is honoured too.
+  const placed = collectionId || (elements?.collectionId as string | undefined);
+  if (!placed) return <Skeleton sectionId={sectionId} />;
+  return <StoreBacked sectionId={sectionId} collectionId={placed} />;
 }
