@@ -288,7 +288,37 @@ phase 8B rail CMS tab + listing page + stat rendering: done (394d461c) — 8A+8B
     ↳ Touches the publish path AGAIN — the surface that has already produced two publish-only bugs.
       Every phase-3/4 pin reapplies verbatim (dual pin, leading-slash, key-naming law, authority
       scoping, collision guard, both chokepoints, parity via LandingPagePublishedRenderer).
-phase 9 generic CMS board + docs: pending  (was phase 8)
+phase 9 generic CMS board + docs: done (0fbb0554 + fix 62656c38, impl-review loops 1 → ship)
+    ↳ Works isolation PROVEN, not asserted: zero /api/work-library calls (positive whitelist — every
+      URL startsWith /api/collections — PLUS calls.length>2 / patchCalls>0 anti-vacuity, so it can't
+      pass by never loading), a TRANSITIVE source-text import guard, work-library files byte-untouched
+      across the whole branch, e2e/work-library.spec.ts green untouched, and bundle corroboration
+      (219 kB First Load vs /work's 256 kB — the store graph genuinely isn't in there).
+    ↳ 🐛 A NAIVE MERGE WOULD HAVE BEEN DATA LOSS. The board's buildValuesPayload copy skipped
+      non-editable types; unifying without that would have normalized its never-drafted MEDIA fields
+      to null and sent them as DELETES — silently wiping images the board cannot even display.
+      Fixed with an explicit editableTypes option, pinned BOTH ways by a mutation-guard pair.
+      ⇒ Duplication of the empty→null contract was the hazard; src/modules/cms/values.ts is now the
+      single store-free/prisma-free source (one type-only import, verified not assumed).
+    ↳ docs/guides/collections.md REWRITTEN — it previously stated "record schema = the item block's
+      element contract", the exact premise this feature replaced, and would have sent the next agent
+      down the abandoned model. Reviewer checked every load-bearing claim against source and found
+      NOTHING the guide asserts that the code does not do. It was also never indexed in docs/README.md.
+    ↳ Content nav tab: greyed+tooltip at zero collections, never hidden; the prisma count is take:1 in
+      a try/catch that degrades to greyed — that layout wraps Overview/Leads/Analytics, so an
+      unguarded throw would 500 them all to decide a tab's state.
+    ↳ ⚠️ PROCESS LESSON (caused the only blocking issue of this phase): a blind global find-replace
+      during mutation-REVERT rewrote three PROSE mentions of /api/work-library into the collections
+      URL, inverting the works-authority invariant in the file most likely to be read by whoever next
+      touches works — including a docblock claiming commitItem "never touches" the URL its next
+      statement fetches. Zero runtime impact, caught by review. RESTORE MUTATIONS FROM A SAVED COPY,
+      NEVER A TEXTUAL RE-REPLACE.
+    ↳ Board is EDIT-ONLY in v1: no create/delete for items/groups/collections; media fields read-only
+      with a why-note + editor deep link (greyed-placeholder discipline). Flag at QA if CRUD parity
+      with the rail was expected.
+    ↳ Greyed→live nav flip needs a server navigation (creating your first collection in the editor
+      leaves the tab greyed until the next full render). Self-correcting; a revalidate-on-create
+      would close it properly.
 ```
 
 ---
