@@ -192,7 +192,50 @@ phase 6 schema builder + CMS entry point: done (23acc357, impl-review loops 1 �
     ↳ Orphaned item values accumulate forever, no GC path (by design, carried).
     ↳ N+1 fetch: refresh() issues one list call + one per collection, sequentially, on every menu
       open. Fine at 3 collections, not at 30.
-phase 7 item editor + group management: pending
+phase 7 item editor + group management: done (a130d22b, impl-review loops 0 → ship) — ⏸ AWAITING COMBINED FOUNDER GATE (absorbs phase 4's deferred gate)
+    ↳ DEBTS PAID: empty→null mapping for every affected type (normalizeValue/buildValuesPayload);
+      slugLocked finally has a READER and a guarding test; CmsPanel consumes e.detail.collectionId;
+      editing resets on close. Item-create shadow guard NOT added (route out of scope) — the 409 is
+      surfaced verbatim instead.
+    ↳ 🐛 SILENT DATA DIVERGENCE fixed: the delete sentinel was computed against the item PROP, which
+      only freshens when refreshCmsCollection lands — and that refresh is fire-and-forget, swallowing
+      failures. Fill field → save → refresh fails → clear field → save → NO null sent, server keeps
+      the old value, editor shows it cleared. Now computed against the SAVE RESPONSE (storedRef).
+    ↳ 🔧 ORCHESTRATOR RULING — title→slug AUTO-FOLLOW REMOVED (founder may reverse): it fired exactly
+      ONCE (the route then sets slugLocked), after which the UI called the slug "Custom permalink"
+      though the user never touched it. materializePublish never re-derives slugs, so this editor was
+      the ONLY thing that moved an item slug → a typo-fix in a title moved a LIVE detail page's URL
+      and the old path 404'd with no redirect. Spec says "reuse code-derived slug… user can also
+      edit" = derive at CREATE + explicit edit. Title-tracking slugs remain a legitimate product
+      choice IF given guardrails (stop following once published, or leave a redirect).
+    ↳ 🚨 BOTH CMS E2E SPECS WERE DEAD FILES. playwright.config.ts's authed.testMatch is an ALLOWLIST;
+      neither cms-publish (written phase 3, extended phase 4) nor cms-authoring was in it —
+      `--list` returned 0. Four phases described them as "opportunistic coverage"; they were not
+      coverage at all. Now registered (2 and 3 tests listed). REGISTRATION IS NOT COVERAGE — first
+      real execution may surface breakage four phases of never running has hidden. Budget for it.
+    ↳ COINCIDENTALLY-GREEN FAMILY, entries 3 and 4 (see phase 2 + phase 5 for 1 and 2):
+      (3) the no-status-pill test scanned /\bpublished\b/, which could never match because the DOM
+          concatenates to "itemPublishedCategory" — no word boundary. Now structural, and guarded by
+          a companion test asserting the Badge class signature holds for EVERY variant, so a
+          badge.tsx restyle can't silently narrow it to matching nothing.
+      (4) NEW LESSON: a mutation that stays GREEN may mean the MUTATION didn't land, not that the
+          test is vacuous. The implementer's first auto-follow mutation used an inline require() in
+          a client module, never took effect, and reported 30/30 pass. Verify the mutation landed
+          before trusting its verdict.
+    ↳ GroupManager tests use SPARSE post-delete orders (0, 5, 9) deliberately — a two-row-swap
+      implementation would pass an "ids moved" assertion while still emitting gaps/ties.
+
+    OPEN RISKS carried past phase 7:
+    ↳ storedRef is per-mount: two tabs editing one item means this editor trusts its own last write
+      response over a fresher prop. Conservative for the bug at hand; this feature has NO conflict
+      handling anywhere.
+    ↳ A hand-edited permalink on a LIVE item still 404s the old URL with no redirect. Removing
+      auto-follow shrinks this to "only when deliberate" — it does not solve it.
+    ↳ Zero vitest cover: CollectionBrowser (role resolution, group sub-label, delete→onChanged) and
+      refreshCmsCollection (404-drops-bundle, merge semantics). Plan-compliant, but plan step 4
+      (live refresh) is proven ONLY by an e2e that has never executed.
+    ↳ Post-create editor flash: selectedId set before the refresh lands → the just-created item's
+      editor briefly unmounts to the placeholder, reading as if Save closed the form. Cosmetic.
 phase 8 generic CMS board + docs: pending
 ```
 
