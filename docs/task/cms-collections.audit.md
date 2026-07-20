@@ -3354,3 +3354,315 @@ misdescribing the contract in the file a future agent copies from.
   mounted case.
 - e2e was not run (unchanged tolerance: local publish 500s without Blob/KV); only a comment changed
   in that file.
+
+---
+
+## Phase 9 — Generic CMS board (dashboard) + docs
+
+### Files changed
+
+**Created**
+- `src/app/dashboard/[token]/cms/page.tsx`
+- `src/components/dashboard/cms/CmsBoardClient.tsx`
+- `src/components/dashboard/cms/CmsBoardClient.test.tsx`
+
+**Modified**
+- `docs/guides/collections.md` (full rewrite)
+- `docs/README.md` (one added index line)
+- `docs/task/cms-collections.audit.md` (this section)
+
+**NOT changed — and one step is consequently NOT done**
+- `src/app/dashboard/[token]/layout.tsx` — untouched. See "Step 3 BLOCKED" below.
+- No plain module was extracted (none was needed — see the import-ban note).
+
+### ⛔ Step 3 (dashboard nav entry) is BLOCKED — out-of-scope file
+
+Plan step 3 says "add CMS entry in `src/app/dashboard/[token]/layout.tsx`". **The tab list does
+not live there.** `layout.tsx` only renders `<WorkspaceTabs tokenId showWorkTab />`; the tab
+array (`TABS`, `WORK_TAB`) and all rendering live in
+`src/components/dashboard/WorkspaceTabs.tsx`, which is **not** on the phase's Files-touched list.
+Adding a Content tab requires editing that component (a new `showCmsTab`/`cmsDisabled` prop +
+one array entry + the greyed-tab branch — the `Grow` button already models the greyed shape).
+
+Per the standing rule ("Out-of-scope need → stop and report"), I left `layout.tsx` **entirely
+untouched** rather than making an incoherent half-edit. The route `/dashboard/[token]/cms` works
+and is deep-linkable; it is simply not yet reachable from the tab bar.
+
+**To unblock:** authorize `src/components/dashboard/WorkspaceTabs.tsx` + `layout.tsx` and the
+nav entry is ~15 lines. The greyed/why-tooltip requirement needs a collection COUNT in the
+layout (one `prisma.collection.count({where:{tokenId}})`, chrome data only, same pattern as the
+existing `templateId` read) — it must be greyed, never hidden, and never template-gated
+(Deviations #2).
+
+### What changed, per file
+
+**`src/app/dashboard/[token]/cms/page.tsx`** — server page, `force-dynamic`. Calls
+`getWorkspaceProject` ITSELF (the layout is chrome, not an auth boundary — the same comment the
+work page carries). Reads `templateId` by primary key **only** to decide whether the works
+deep-link row is honest for this project; the CMS board itself is never template-gated.
+
+**`src/components/dashboard/cms/CmsBoardClient.tsx`** — the board. Host pattern copied from
+`WorkLibraryClient`: load → local state → ONE write funnel (`commitItem`), which PATCHes
+`/api/collections/{cid}/items/{itemId}` with `{tokenId, ...}` and adopts the SERVER-returned item.
+Index column = collection list + the works deep-link row; detail pane = group filter + item
+cards (cover/title resolved with the render model's role-fallback order) + an inline item editor.
+
+- **editStore import ban honoured with zero exceptions.** `CmsPanel` imports `useEditStore`
+  directly; `CollectionBrowser`/`ItemEditor`/`GroupManager` are clean **themselves**, but
+  `ItemEditor` → `@/app/edit/[token]/components/ui/MediaPickerModal` → `@/hooks/useEditStore`.
+  So NONE of the editor components are reusable here and none is imported. What IS reused
+  verbatim: the phase-5 `src/components/ui/*` field primitives (`date-field`, `tag-input`,
+  `link-pair-field`, `key-value-field`), independently verified editStore-free. No extraction
+  was needed, so no new plain module exists.
+- **`storedRef` reproduced deliberately.** The delete sentinel is computed against the SAVE
+  RESPONSE, not the list state — the phase-7 silent-divergence bug, avoided by construction.
+- `purposes` / `featuredOnHome`: no control, no reader. Untouched.
+
+**`src/components/dashboard/cms/CmsBoardClient.test.tsx`** — 13 tests (load/filter/works-row,
+write funnel, works isolation).
+
+**`docs/guides/collections.md`** — full rewrite. The old guide was actively misleading on every
+load-bearing point (one collection type; `works`→writers/`/books`; "record schema = the item
+block's element contract"). New structure: the TWO systems side by side → CMS core (tables, the
+closed **10** field types + value shapes + the never-reuse-field-ids law, the 3 type-filtered
+roles, `purposes` as stored-but-unread, listing+detail toggles decoupled from placement + the
+100/100 caps, shared-block delivery + dual-layer parity + the safeUrl predicates, publish
+materialization + the new ownership gate) → **the two laws** (coercion-proof shape; key-naming
+suffix law with the rename table) → editing surfaces + the empty→null caller contract → **works
+authority**, stated loudly → the legacy registry (closed 4-key union `products|services|
+case-studies|works`, verified in `registry.ts:23`) → known v1 limits.
+
+**`docs/README.md`** — the guide was NOT indexed at all (only `copyQualityEval.md` was under
+`guides/`). Added one line summarizing the new content.
+
+### Deviations from the plan
+
+1. **Step 3 not done** — out-of-scope file. Reported above rather than silently expanded.
+2. **`ItemEditor` composition not reused** (plan step 1 said "where feasible"). It is not
+   feasible: the transitive `MediaPickerModal → useEditStore` edge makes it a hard-rule
+   violation. A thin dashboard variant was built instead, exactly as the plan's fallback allows.
+3. **`normalizeValue`/`buildValuesPayload` are DUPLICATED, not imported.** They are exported
+   from `ItemEditor.tsx`, but importing them drags the whole module (and the edit store) in.
+   The duplicate covers only the 6 types this board edits. **This is real drift risk on a law
+   this feature has already been bitten by** — flagged as an open risk below. Editing
+   `ItemEditor.tsx` to extract them was not authorized by the Files-touched list.
+4. **Media fields (`image`/`gallery`/`video`/`audio`) are READ-ONLY on this board**, not
+   omitted: they render with the reason ("chosen with the media picker in the site editor") as
+   both visible text and a `title` tooltip, plus a deep link to `/edit/{token}` —
+   greyed-placeholder discipline. They are never included in a write payload (asserted).
+   `video`/`audio` *could* have been editable (`media-or-link-field` is clean) but its
+   `onPickRequest` contract expects a picker; keeping all four media types on one rule is the
+   conservative call.
+5. **The works deep-link row renders only when the project is works-capable** (page passes
+   `hasWorkLibrary` from `templateHasCapability`). Linking every project to a page that
+   `notFound()`s would be worse than omitting it; a non-works project has no works library to
+   omit. In-scope judgment call, logged per instructions.
+6. **Item create/delete, group CRUD, collection create/schema-edit are NOT on this board** —
+   those stay in the editor's CMS rail tab. The plan's step 1 scope ("typed-field rows/cards,
+   group columns/filters, item open") is met; broader CRUD was not requested.
+
+### Verification — actual results
+
+- `npx tsc --noEmit` → **exit 0, zero output.**
+- `npm run test:run` → **284 passed | 1 skipped (285 files); 4610 passed | 15 skipped (4625);
+  0 failed.** Baseline was 283/1 (284 files) and 4597/15 (4612) — delta is exactly +1 file and
+  +13 tests, all mine. `WorkLibraryClient.test.tsx` and `collectionHelpers.works.test.ts`
+  untouched and green.
+- `npx next lint` on all three new files → **"✔ No ESLint warnings or errors."**
+- `npm run build` (FULL: published CSS → assets → next build) → **"✓ Compiled successfully"**,
+  route table shows `ƒ /dashboard/[token]/cms  6.6 kB  219 kB` (vs `/work` at 10.1 kB / 256 kB —
+  the small first-load figure is corroborating evidence that no edit-store graph was pulled in).
+- **e2e RAN and passed:** `npx playwright test work-library.spec.ts` → **2 passed** (auth setup +
+  "Your work board — full CRUD round-trip persists across reload", 41.8s). `git status`/`git diff`
+  on `e2e/` is **empty** — the spec is byte-untouched, so this is a genuine proof the works
+  specialization survived. `cms-authoring.spec.ts` / `cms-publish.spec.ts` were NOT run (they
+  publish, which needs Blob/KV; unchanged tolerance from earlier phases).
+
+### Non-vacuity evidence (3 mutations, each landed and reverted)
+
+Every mutation was asserted to have actually changed the file text before running (the phase-7
+lesson: a green mutation may mean the mutation didn't land).
+
+1. **Added `await fetch('/api/work-library?...')` to the load effect** → **3 failed**:
+   `performs ZERO /api/work-library calls across the whole flow`, `the source imports neither the
+   works API nor the edit store`, and `lists collections from GET /api/collections` (call-order).
+   ⇒ the mandatory works regression bites. Reverted.
+2. **`buildValuesPayload(fields, draft, storedRef.current)` → `(fields, draft, null)`** →
+   **1 failed**: `sends explicit null for a CLEARED stored field (the delete sentinel)`.
+   ⇒ the empty→null contract is really asserted. Reverted.
+3. **Write-funnel URL → `/api/work-library`** → **5 failed**: both write-funnel tests, both
+   works-isolation call tests, and the source guard. ⇒ the funnel test pins the endpoint, not
+   just "a PATCH happened". Reverted.
+
+After all reverts: **13 passed (13)**, and the full suite green as reported above.
+
+The works-isolation test is deliberately built on **absence** plus anti-vacuity: it first asserts
+`calls.length > 2` and `patchCalls().length > 0` (the flow really did talk to a server), THEN
+that `workLibraryCalls()` is `[]` and that *every* recorded URL starts with `/api/collections`.
+A companion test reads the component's own source text and asserts its import lines contain
+neither `work-library` nor `hooks/editStore` nor `useEditStore` — this is what catches a LAZY
+works write or an edit-store import that a mount-only test could never see.
+
+### Open risks
+
+1. **The duplicated empty→null mapping** (deviation 3) is the one thing here that can silently
+   rot. If `ItemEditor.normalizeValue` changes and this copy doesn't, the two surfaces disagree
+   about clearing a field. **Recommended follow-on:** extract `normalizeValue`/
+   `buildValuesPayload` into a plain `src/modules/cms/values.ts` and have BOTH import it — a
+   ~20-line change that needs `ItemEditor.tsx` on the Files-touched list.
+2. **No nav entry** until step 3 is unblocked — the route is deep-link-only.
+3. **No refresh/conflict handling**: the board's bundle is fetched once per selection. The
+   editor and this board open at once can disagree until reselect. Same accepted posture as the
+   rest of the feature.
+4. **The board does not create or delete anything** — if founder QA expects full CRUD parity
+   with the editor rail, that is a scope conversation, not a bug.
+5. **Manual three-shape pass (plan step "Manual pass — success criterion #2") NOT performed** —
+   it is a founder-gate activity requiring real publishes.
+
+---
+
+## Phase 9 — authorized follow-ups (nav entry + values extraction)
+
+Two closing items, both explicitly authorized. Open risks 1 and 2 above are now CLOSED.
+
+### Files changed
+
+- `src/components/dashboard/WorkspaceTabs.tsx` (modified)
+- `src/components/dashboard/WorkspaceTabs.test.tsx` (**new**)
+- `src/app/dashboard/[token]/layout.tsx` (modified)
+- `src/modules/cms/values.ts` (**new**)
+- `src/modules/cms/values.test.ts` (**new**)
+- `src/app/edit/[token]/components/cms/ItemEditor.tsx` (modified)
+- `src/components/dashboard/cms/CmsBoardClient.tsx` (modified)
+- `src/components/dashboard/cms/CmsBoardClient.test.tsx` (modified — guard strengthened only)
+- `docs/task/cms-collections.audit.md` (this append)
+
+### 1. The nav entry (closes open risk 2)
+
+`WorkspaceTabs.tsx` — added `CMS_TAB` (`Content` → `cms`) inserted **after Blog**, computed
+from `withWork.findIndex(...)` so it lands correctly with and without the "Your work" tab.
+New optional prop `hasCollections` (default `false`).
+
+- **>=1 collection** → an ordinary `<Link>` to `/dashboard/{token}/cms`, active-underline and
+  nested-route matching identical to every other tab.
+- **0 collections** → the SAME tab, rendered as a `disabled` + `aria-disabled` button with
+  `title={CMS_DISABLED_WHY}` ("No collections yet. Create one in the site editor's CMS panel,
+  then manage its items here."). **Greyed, never hidden** — the capability exists, it just has
+  nothing to show yet, and a tab that silently materialises later is a capability the user never
+  discovers.
+- **No template gating**, per Deviations #2: the collection block is a shared block that renders
+  on every template, so `showWorkTab` (the capability signal) must not influence Content. A test
+  pins exactly this by crossing the two flags.
+- Extracted the greyed class string to `TAB_DISABLED` and re-pointed the existing Grow stub at
+  it, so the two disabled tabs cannot drift apart visually. Grow's behaviour is unchanged (a
+  regression test asserts it stays greyed).
+
+`layout.tsx` — added the `prisma.collection.count({ where: { projectId }, take: 1 })` that feeds
+the flag, wrapped in `try/catch`:
+
+```ts
+let hasCollections = false
+try {
+  hasCollections = (await prisma.collection.count({ where: { projectId: project.id }, take: 1 })) > 0
+} catch (err) { console.warn(...) }
+```
+
+`take: 1` keeps it cheap (existence, not a full count). The catch is load-bearing: this layout
+wraps **every** page under `/dashboard/[token]`, so an unguarded count would let a transient DB
+hiccup 500 Overview, Leads and Analytics too — to decide a tab's enabled state. On failure it
+degrades to the greyed state, which is the honest answer ("we can't show you anything"), and
+logs. Commented as CHROME DATA ONLY, consistent with the `templateId` read directly above it.
+
+### 2. `normalizeValue` / `buildValuesPayload` extraction (closes open risk 1)
+
+New `src/modules/cms/values.ts` holds the single definition of both, plus the `Draft` type.
+Both `ItemEditor.tsx` and `CmsBoardClient.tsx` now import it; the duplicated bodies are gone.
+
+- The WHY docblock is carried over **and expanded** — it cites the four rejecting Zod schemas by
+  name (`Date`/`Link`/`Media`/`ImageValueSchema`), the PATCH delete-sentinel with its file path,
+  the `tags` exemption, and now also the *silent* failure mode (an omitted empty is a no-op
+  because the PATCH is a merge). A second section records why the module exists at all, so the
+  next person doesn't re-inline it.
+- **The one API change:** `buildValuesPayload` takes an optional 4th arg
+  `{ editableTypes?: readonly FieldType[] }`. This was **required for correctness**, not
+  cosmetic. The two former copies differed: the board's version `continue`d on non-editable
+  types. Had I shipped one unified body, the board would have normalized its never-drafted media
+  fields to `null` and — because `stored` holds those keys — **sent them as deletes, silently
+  wiping images the board cannot even display.** The board passes `EDITABLE_TYPES`; `ItemEditor`
+  omits the option and processes every field, exactly as before. This is pinned by three tests
+  including a mutation-guard pair (same inputs with and without the option produce different
+  payloads), so neither branch can pass vacuously.
+- `ItemEditor.tsx` **re-exports** both names, so its own tests and any other caller importing
+  from that path are untouched. **`ItemEditor.test.tsx` was not modified and is green.**
+
+**Store-free / prisma-free — verified, not assumed.** `values.ts` has exactly one import line and
+it is `import type { FieldDef, FieldType, ImageValue } from './types'`. Type-only imports are
+erased by TypeScript, so the module has **zero runtime dependencies** — nothing can be reached
+through it. Pinned by assertions in *both* `values.test.ts` and `CmsBoardClient.test.tsx`, which
+parse the import lines and require every one to match `/^\s*import\s+type\s/`.
+
+The board's existing source-text import guard is **unchanged in strength and strengthened by
+one hop**: its original assertions (no `work-library`, no `hooks/editStore`, no `useEditStore`,
+no runtime works fetch) are all intact; a new sibling test follows the single new import into
+`values.ts` and applies the same check there. This closes the back door the extraction would
+otherwise have opened — the old guard only read *this* file's imports, so a clean-looking import
+of a dirty module would have walked straight past it.
+
+The zero-`/api/work-library`-calls regression is **untouched**, including its anti-vacuity
+preamble.
+
+### Deviations
+
+1. **Tab placement — after Blog.** The plan didn't specify a position. Chose the conservative
+   option: it groups with the other content surface and disturbs no existing tab's order
+   (asserted for both the with-work and without-work arrangements).
+2. **Label "Content", not "CMS".** Matches the `<h1>Content</h1>` the `cms/page.tsx` already
+   renders; a tab reading "CMS" landing on a page titled "Content" would be a seam.
+3. **`buildValuesPayload` gained an options arg.** Justified above — merging the two bodies
+   without it is a data-loss bug, not a simplification.
+4. **Guards bite on module specifiers, not raw file text.** My first cut asserted
+   `not.toContain('editStore')` on the whole file; that failed because `values.ts`'s docblock
+   *deliberately* names `src/hooks/editStore/**` to explain the ban. Rewrote both guards to
+   extract `from '...'` specifiers and check those. Strictly more precise — prose can no longer
+   produce a false positive, and an actual import still cannot hide.
+5. **Added a new `values.test.ts` rather than moving ItemEditor's assertions.** The brief allowed
+   either. Moving them would have meant editing `ItemEditor.test.tsx`, which I was told to stop
+   on. The shared module is now directly tested; ItemEditor's coverage through the re-export
+   remains as belt-and-braces.
+
+### Verification (actual results)
+
+- `npx tsc --noEmit` → **exit 0, ZERO output.**
+- `npm run test:run` → **286 passed | 1 skipped (287 files); 4631 passed | 15 skipped (4646);
+  0 failed.** Baseline was 285 files / 4625 tests ⇒ **+2 files, +21 tests, 0 regressions.**
+  `ItemEditor.test.tsx`, `WorkLibraryClient.test.tsx` and `collectionHelpers.works.test.ts` are
+  **untouched and green**.
+- `npx eslint` on all eight touched files → **exit 0, no output.**
+- `npm run build` → **green.**
+
+**Non-vacuity (three mutants, each reverted):**
+
+1. Greyed branch disabled (`if (false)`) → **2 failed** — the greyed state is really asserted.
+2. Content tab not inserted at all (`const tabs = withWork`) → **5 failed**, including the
+   ordering gates.
+3. `editableTypes` filter deleted from `values.ts` → **2 failed** in `values.test.ts` (the
+   media-delete regression + its mutation-guard partner).
+
+**Bundle:** `/dashboard/[token]/cms` = **6.79 kB route / 219 kB First Load** vs the 6.6 kB /
+219 kB baseline. **First Load JS is unchanged** — the number that would have moved had the
+extraction leaked the edit store. The +0.19 kB route delta is expected and accounted for: the
+shared `normalizeValue` carries the `image`/`gallery`/`video`/`audio` cases that the board's
+former trimmed copy did not have. That is the cost of one definition instead of two.
+
+### Open risks
+
+- Open risks 1 (duplicated mapping) and 2 (no nav entry) from the phase-9 audit above are
+  **closed**. Risks 3 (no refresh/conflict handling), 4 (board is edit-only, no create/delete)
+  and 5 (manual three-shape pass is a founder gate) still stand, unchanged.
+- The greyed→live transition needs a **navigation** to re-run the server layout. A user who
+  creates their first collection in the editor and switches tab without a full page load may see
+  the tab still greyed until the next server render. Cheap to fix later (revalidate on
+  collection create) — out of this phase's scope, and it self-corrects on any navigation.
+- `hasCollections` is chrome only. Deep-linking to `/dashboard/{token}/cms` with zero
+  collections still works and shows the board's own `cms-empty` state — correct, since the tab
+  is a hint, not an authz boundary.

@@ -44,6 +44,24 @@ export default async function WorkspaceLayout({
   })
   const showWorkTab = templateHasCapability(projectRow?.templateId, 'works')
 
+  // Does this project have any collections? CHROME DATA ONLY — it decides whether
+  // the "Content" tab LINKS or renders greyed, nothing more; `[token]/cms` re-gates
+  // itself. Deliberately NOT template-gated: the collection block is a shared block
+  // that renders on every template, so every project can author collections.
+  //
+  // ⚠️ A count must never 500 the whole workspace shell. This layout wraps EVERY
+  // page under `/dashboard/[token]`, so a transient DB hiccup here would take out
+  // Overview, Leads and Analytics too — for a tab's enabled/disabled state. On
+  // failure we degrade to the greyed state (the honest "we can't show you anything"
+  // answer) and log; we never let it propagate.
+  let hasCollections = false
+  try {
+    hasCollections =
+      (await prisma.collection.count({ where: { projectId: project.id }, take: 1 })) > 0
+  } catch (err) {
+    console.warn('[WorkspaceLayout] collection count failed; Content tab greyed', err)
+  }
+
   return (
     <div className="flex min-h-full flex-col">
       <WorkspaceHeader
@@ -52,7 +70,11 @@ export default async function WorkspaceLayout({
         name={name}
         slug={publishedPage?.slug ?? null}
       />
-      <WorkspaceTabs tokenId={project.tokenId} showWorkTab={showWorkTab} />
+      <WorkspaceTabs
+        tokenId={project.tokenId}
+        showWorkTab={showWorkTab}
+        hasCollections={hasCollections}
+      />
       <div className="flex-1">{children}</div>
     </div>
   )

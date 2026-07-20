@@ -19,21 +19,14 @@
 //      upload side asks US to open the shared MediaPickerModal.
 //
 // ── ⚠️ THE EMPTY-VALUE → `null` CONTRACT (the phase-5 carry) ─────────────────
-// This component is THE caller the primitives' JSDoc warns about. The Zod value
-// schemas REJECT empty strings:
-//     DateValueSchema  — regex, "" never matches
-//     LinkValueSchema  — url: z.string().min(1)
-//     MediaValueSchema — url: z.string().min(1)
-//     ImageValueSchema — url: z.string().min(1)
-// …and the item PATCH deletes a key ONLY on an explicit `v === null`
-// (`items/[itemId]/route.ts` — the merge). So a cleared date sent as `""`, a
-// cleared link sent as `{url:"",label:""}` or a media toggle sent as
-// `{kind:'upload',url:""}` is a **400, not a clear**. `normalizeValue()` below
-// maps every empty shape to `null`, and `buildValuesPayload()` decides whether
-// that null must actually be SENT (only when the stored item still holds the
-// key — sending nulls for never-filled fields would be pure noise).
-// `tags` is the one exemption: `[]` validates, so an empty tag list is sent as
-// `[]` and simply renders nothing.
+// This component is THE caller the primitives' JSDoc warns about, but it no longer
+// OWNS the contract: `normalizeValue`/`buildValuesPayload` live in
+// `@/modules/cms/values` (store-free, prisma-free) because the dashboard CMS board
+// owes the same contract and cannot import anything edit-store-bound. Read the
+// full "why empty maps to null" note there before changing either surface; a
+// second copy of that mapping is how the two surfaces silently disagree about what
+// "empty" means.
+// They are RE-EXPORTED below so this module's public surface is unchanged.
 //
 // ── ⚠️ `stored` COMES FROM THE SERVER'S LAST ANSWER, NOT FROM THE PROP ───────
 // The delete sentinel above is only emitted when the STORED row still holds the
@@ -90,100 +83,16 @@ import { EditableSlugInput } from '@/components/ui/slug-input';
 import { ItemPager } from '@/components/ui/item-pager';
 import { MediaPickerModal } from '../ui/MediaPickerModal';
 
+import { normalizeValue, buildValuesPayload, type Draft } from '@/modules/cms/values';
+
+// Re-exported: these WERE defined here, and both this component's tests and any
+// other caller import them from this path. The definitions moved to
+// `@/modules/cms/values` so the dashboard board can share them without dragging
+// the media picker (and with it the edit store) into the dashboard bundle.
+export { normalizeValue, buildValuesPayload };
+
 /** The "no group" option value in the Category select (ruling #7). */
 export const UNGROUPED = '__ungrouped__';
-
-/** Draft values are per-field working copies; shapes mirror the stored ones. */
-type Draft = Record<string, unknown>;
-
-/* ------------------------------------------------------------------ values */
-
-/**
- * Map one field's DRAFT value to what may be STORED, or `null` when the field is
- * empty. `null` is the API's delete sentinel — see the empty-value contract note
- * at the top of this file. Exported for the tests, which assert each type.
- */
-export function normalizeValue(type: FieldType, draft: unknown): unknown | null {
-  switch (type) {
-    case 'image': {
-      const v = draft as ImageValue | undefined;
-      if (!v || !v.url) return null;
-      return v.assetId ? { url: v.url, assetId: v.assetId } : { url: v.url };
-    }
-    case 'gallery': {
-      const list = Array.isArray(draft) ? (draft as ImageValue[]) : [];
-      const kept = list.filter((v) => v && v.url);
-      return kept.length ? kept.map((v) => (v.assetId ? { url: v.url, assetId: v.assetId } : { url: v.url })) : null;
-    }
-    case 'video':
-    case 'audio': {
-      const v = draft as { kind?: string; url?: string } | undefined;
-      if (!v || !v.url) return null;
-      return { kind: v.kind === 'link' ? 'link' : 'upload', url: v.url };
-    }
-    case 'text_short':
-    case 'text_long': {
-      const s = typeof draft === 'string' ? draft : '';
-      return s.trim() ? s : null;
-    }
-    case 'link': {
-      const v = draft as { url?: string; label?: string } | undefined;
-      if (!v || !v.url) return null;
-      return { url: v.url, label: v.label ?? '' };
-    }
-    case 'date': {
-      const s = typeof draft === 'string' ? draft : '';
-      return s ? s : null;
-    }
-    case 'stat': {
-      // `StatValueSchema` ACCEPTS `{key:'',value:''}` (every CMS value is
-      // optional-empty), so an all-empty pair would be STORED rather than
-      // rejected — a quieter failure than link/date/media, and the reason `stat`
-      // still needs the empty→null mapping. A half-filled pair is kept: a spec
-      // name with no number (or the reverse) is still something the user typed.
-      const v = draft as { key?: string; value?: string } | undefined;
-      const key = typeof v?.key === 'string' ? v.key.trim() : '';
-      const value = typeof v?.value === 'string' ? v.value.trim() : '';
-      if (!key && !value) return null;
-      return { key, value };
-    }
-    case 'tags': {
-      // EXEMPT from the null contract: TagsValueSchema accepts `[]`, so an empty
-      // list is a legal stored value and needs no delete sentinel.
-      return Array.isArray(draft) ? draft.filter((t) => typeof t === 'string' && t.trim()) : [];
-    }
-    default:
-      return null;
-  }
-}
-
-/**
- * Build the `values` map for the write.
- *
- *  - a non-empty field is always sent;
- *  - an EMPTY field is sent as explicit `null` **only when the stored item still
- *    holds that key** — that null is the delete. Sending nulls for fields that
- *    were never filled would bloat every payload for no effect;
- *  - on CREATE there is nothing to delete, so empties are simply omitted.
- */
-export function buildValuesPayload(
-  fields: readonly FieldDef[],
-  draft: Draft,
-  stored: Record<string, unknown> | null
-): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const f of fields) {
-    const next = normalizeValue(f.type, draft[f.id]);
-    if (next !== null) {
-      out[f.id] = next;
-      continue;
-    }
-    if (stored && Object.prototype.hasOwnProperty.call(stored, f.id)) {
-      out[f.id] = null; // the delete sentinel — see the header contract note
-    }
-  }
-  return out;
-}
 
 /** Seed the draft from a stored item (or empty defaults for a new one). */
 function seedDraft(fields: readonly FieldDef[], item: CmsItem | null): Draft {
