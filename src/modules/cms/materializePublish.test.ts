@@ -1436,6 +1436,27 @@ describe('materializeCmsForPublish — the zero-query fast path is replaced by b
     expect(bytes(content)).toBe(before);
   });
 
+  // The two gates above both start from a payload that ALREADY has
+  // `content.subpages`. The commoner single-page case (no `subpages` key at all)
+  // is guarded only STRUCTURALLY, by the `!existing && desired.size === 0` early
+  // returns in both reconcilers — nothing pinned it, so an edit that
+  // unconditionally did `content.subpages = {}` would slip through green while
+  // adding a key to every single-page publish payload.
+  it('a payload with NO `content.subpages` key is byte-identical, and none is created', async () => {
+    for (const rows of [[], [rowOf(bundle())]]) {
+      findMany.mockResolvedValueOnce(rows);
+      const content = payload({ cmsRoot: false });
+      delete content.subpages; // the single-page shape
+      const before = bytes(content);
+
+      await materializeCmsForPublish(TOKEN, content);
+
+      expect(bytes(content)).toBe(before);
+      // …and specifically: the key was not conjured into existence as `{}`.
+      expect('subpages' in content).toBe(false);
+    }
+  });
+
   it('reads collections by tokenId ONLY (the tenant boundary, after the owner gate)', async () => {
     findMany.mockResolvedValueOnce([]);
     await materializeCmsForPublish(TOKEN, payload({ cmsRoot: false }));
@@ -1716,8 +1737,76 @@ describe('total fan-out cap (across ALL collections)', () => {
 
   it('collections with detailPages OFF do not count toward the total', () => {
     const bundles = spreadBundles(5, MAX_CMS_DETAIL_PAGES_TOTAL);
-    for (const b of bundles) b.collection.detailPages = false;
+    for (const b of bundles) {
+      b.collection.detailPages = false;
+      b.collection.listingPage = false;
+    }
     expect(() => assertCmsFanOutWithinLimit(bundleMap(...bundles))).not.toThrow();
+  });
+
+  // ── LISTING PAGES COUNT TOO ───────────────────────────────────────────────
+  // "Listing pages are exactly one per collection and need no cap" was FALSE as
+  // a guarantee: nothing bounds how many collections a project may have
+  // (`POST /api/collections` has no ceiling), so N listing-page collections are
+  // N serial blob renders + KV writes — the identical failure class. A total
+  // that skipped a page class did not bound the request at all.
+
+  /** `n` collections with ONLY a listing page each (detail pages off). */
+  function listingOnlyBundles(n: number): CmsCollectionBundle[] {
+    return Array.from({ length: n }, (_, i) => {
+      const b = listingBundle(`col${i}`);
+      b.collection.detailPages = false;
+      b.collection.name = `Coll ${i}`;
+      b.collection.slug = `books-${i}`;
+      return b;
+    });
+  }
+
+  it('listing pages ALONE can exceed the total (the gap the old comment denied)', () => {
+    const under = listingOnlyBundles(MAX_CMS_DETAIL_PAGES_TOTAL);
+    expect(() => assertCmsFanOutWithinLimit(bundleMap(...under))).not.toThrow();
+
+    const over = listingOnlyBundles(MAX_CMS_DETAIL_PAGES_TOTAL + 1);
+    // anti-vacuity: not one of them is over the PER-COLLECTION cap — each has
+    // two items and detail pages off — so only the total can be what throws.
+    for (const b of over) {
+      expect(b.items.length).toBeLessThanOrEqual(MAX_CMS_DETAIL_PAGES_PER_COLLECTION);
+      expect(() => assertCmsFanOutWithinLimit(bundleMap(b))).not.toThrow();
+    }
+    expect(() => assertCmsFanOutWithinLimit(bundleMap(...over))).toThrow(
+      CmsTotalFanOutLimitError
+    );
+  });
+
+  it('a listing page tips an AT-the-cap detail collection over the total', () => {
+    const b = bigDetailBundle(MAX_CMS_DETAIL_PAGES_TOTAL);
+    expect(() => assertCmsFanOutWithinLimit(bundleMap(b))).not.toThrow(); // exactly at it
+    b.collection.listingPage = true; // one more PAGE this request must emit
+    expect(() => assertCmsFanOutWithinLimit(bundleMap(b))).toThrow(CmsTotalFanOutLimitError);
+  });
+
+  it('over-total listing pages FAIL LOUD through publish, mutating NOTHING', async () => {
+    const bundles = listingOnlyBundles(MAX_CMS_DETAIL_PAGES_TOTAL + 1);
+    // NOT `…Once`: two calls (throw-type, then message).
+    findMany.mockResolvedValue(bundles.map(rowOf));
+    const content = payload({ cmsRoot: true }); // a placed block too — nothing may be rewritten
+    const before = bytes(content);
+
+    // The class the publish route narrows on by `instanceof` → 409, not the
+    // opaque 500/timeout the cap replaced.
+    await expect(materializeCmsForPublish(TOKEN, content)).rejects.toBeInstanceOf(
+      CmsTotalFanOutLimitError
+    );
+
+    // Byte-identical: the throw happens before ANY container is touched.
+    expect(bytes(content)).toBe(before);
+    // anti-vacuity: this payload DOES carry the things the throw must have spared
+    expect(Object.keys(content.subpages)).toEqual(['/about']);
+    expect(content.content[CMS_SID].elements[CMS_MODEL_ELEMENT_KEY]).toBeUndefined();
+
+    const err = await materializeCmsForPublish(TOKEN, payload()).catch((e) => e);
+    expect(err.message).toContain(String(MAX_CMS_DETAIL_PAGES_TOTAL + 1));
+    expect(err.message).toContain(String(MAX_CMS_DETAIL_PAGES_TOTAL));
   });
 
   it('publishing AT the total works and emits exactly that many detail pages', async () => {

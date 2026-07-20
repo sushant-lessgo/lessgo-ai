@@ -315,8 +315,13 @@ test('listingPage ON publishes /<collection>; OFF removes it', async ({ page }) 
   });
   expect(itemRes.ok(), `create item: ${itemRes.status()}`).toBeTruthy();
 
-  // The listing page is emitted for a PLACED collection (same coupling detail
-  // pages have had since phase 4), so place the block.
+  // ⚠️ Placement is NOT required for the listing page. Phase 8B DECOUPLED page
+  // emission from placement (founder ruling): every collection with
+  // `listingPage` / `detailPages` on emits its pages whether or not its block
+  // sits anywhere — the same ruling retro-fixed `detailPages`, which had been
+  // coupled since phase 4. The block is placed here only so the ROOT page also
+  // renders the collection inline; it is extra coverage, not a precondition.
+  // (The unplaced-emission case is pinned in `materializePublish.test.ts`.)
   const sectionId = 'cmscollection-e2e0003';
   finalContent.layout.sections.push(sectionId);
   finalContent.content[sectionId] = {

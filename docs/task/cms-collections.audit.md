@@ -3193,3 +3193,164 @@ specifically and not by the pre-existing one. Restored the line; both files back
 - 60s is assumed, not read from a `maxDuration` export — `/api/publish` sets `runtime = 'nodejs'`
   and `dynamic = 'force-dynamic'` but no explicit `maxDuration`, so the effective ceiling is the
   Vercel plan default. Worth confirming during the same timing run.
+
+---
+
+## Nit pass — closing the combined 8A+8B impl-review findings (verdict `ship`)
+
+Follow-up commits on top of the committed 8A/8B phases. No behaviour redesign; the caps' NUMBERS
+(100/100), the two error classes' shape, the route's narrow `instanceof` arms, the fail-closed 500,
+`purposes`/`featuredOnHome`, the CmsPanel targeting test and the failed-DELETE ordering guard are
+all untouched.
+
+**Files changed**
+
+- `src/modules/cms/materializePublish.ts`
+- `src/modules/cms/materializePublish.test.ts`
+- `src/modules/cms/sectionKeys.ts`
+- `src/hooks/editStore/cmsActions.test.ts`
+- `src/app/edit/[token]/components/layout/LeftPanel.tsx`
+- `src/app/edit/[token]/components/cms/CmsPanel.test.tsx`
+- `src/modules/cms/render/parity.test.tsx`
+- `e2e/cms-publish.spec.ts`
+- `docs/task/cms-collections.audit.md` (this entry)
+
+### 1. `materializePublish.ts` — listing pages now count toward the total cap (nit 2)
+
+The comment claimed listing pages "are exactly one per collection and need no cap", which made the
+stated guarantee ("only a total can bound the request") false: nothing bounds the NUMBER of
+collections (`POST /api/collections` has no ceiling), so N listing-page collections are N serial
+blob renders + KV writes — the exact failure class the cap exists to eliminate.
+
+`assertCmsFanOutWithinLimit` now adds `+1` per `listingPage`-on collection to `total`. The
+PER-COLLECTION cap is unchanged (still detail-items only — it exists to name a culprit collection,
+and a listing page cannot make one oversized). Counting is conservative in the same way item counts
+are: a slug-less collection emits no listing page but is still counted, so the guard trips early,
+never late.
+
+Comment/doc updates that now say what is true: the two-caps block, the `MAX_CMS_DETAIL_PAGES_TOTAL`
+docblock (name keeps `DETAIL` for continuity; the count is every cms page),
+`CmsTotalFanOutLimitError`'s docblock, and the function docblock.
+
+**Message wording** changed from "N collection detail pages … Turn detail pages off" to
+"N collection pages … Turn detail or listing pages off" — required for the message to stay true now
+that listing pages are counted. Class shape is untouched: `CmsTotalFanOutLimitError(totalItems)`
+keeps its constructor signature and its public `totalItems` field (documented as now counting
+pages). `publish/route.test.ts` asserts only the NUMBERS in that message, not the wording, so the
+route contract tests are unaffected and that file was not edited.
+
+### 2. `sectionKeys.ts` — corrected the WRONG rationale in the prune-safety comment (nit 3)
+
+The comment claimed placements are `cmscollection-<uuid>` and that "a uuid is hex + hyphens, so it
+can never begin with `listing-`". Factually wrong: `newCmsSectionId()`
+(`hooks/editStore/cmsActions.ts:40-43`) mints `cmscollection-` +
+`Math.random().toString(36).slice(2,10)` — base36, **no hyphen**. The code is safe for the OPPOSITE
+reason: `parts.length > 2` in `isCmsListingSectionId`, which holds only because a placement id
+contains no hyphen after the type prefix. Rewritten to name `parts.length > 2` as the invariant, to
+state that placement ids MUST stay hyphen-free, and to call out that a switch to
+`crypto.randomUUID()` (uuids DO contain hyphens) would break the guard that stops pruning from
+deleting a user's own subpage. The `isCmsListingSectionId` docblock now points at that invariant too.
+
+### 3. `cmsActions.test.ts` — hyphen-free id format is now pinned (nit 3, second half)
+
+New gate `mints a HYPHEN-FREE id after the type prefix (the listing-prune invariant)`: 50 mints,
+each asserted to split into exactly 2 parts with the `cmscollection` prefix, plus the consequence
+that actually matters — `isCmsListingSectionId(sid) === false`. A future id-format change now fails
+loudly instead of silently arming the prune. Imports `isCmsListingSectionId` through the existing
+`materializePublish` re-export (the path this file already used).
+
+### 4. `LeftPanel.tsx` — `cmsTarget` is consumed once (nit 4)
+
+**Choice: clear once consumed, not on tab switch.** A new effect
+(`if (isCmsMode && cmsTarget) setCmsTarget(null)`) clears the target right after the mount that used
+it. Tab-switch clearing would have fixed only the reported repro; consume-once also covers panel
+collapse/expand, which remounts `CmsPanel` the same way. Safe because `CmsPanel` reads
+`initialCollectionId` ONLY in a `useState` initializer, which runs during the child's render — i.e.
+before this parent effect — so the value is always spent before it is cleared. The already-mounted
+case is unaffected (the panel's own listener handles it).
+
+### 5. `CmsPanel.test.tsx` — strengthened the inert-tabs assertion + regression gate (nits 4, 5)
+
+- `'Pages / Theme stay inert…'` now asserts the SECTIONS list is still rendered (the `Hero` row for
+  the mocked `hero-abc12345`) in addition to `[data-cms-panel]` being null. Previously it would have
+  passed if `Pages` had gone live with a body of its own — it did not test what its name claimed.
+- New gate `the "Manage items" target is consumed ONCE — returning to CMS shows the list`:
+  event → browser open → Sections → CMS → list, no browser.
+
+### 6. `parity.test.tsx` — explicit `stat` detail-page assertion (nit 8)
+
+`renders a 'stat' pair on the DETAIL page too (shared FieldNode), both twins` asserts
+`[data-cms-field="stat"]` plus both halves (`Weight` / `4.2 kg`) inside `[data-cms-detail-body]` in
+each twin. Previously true-but-inferred: the skeleton comparison pins edit==published and would stay
+green if `stat` rendered NOWHERE on a detail page. (Placed here rather than in
+`materializePublish.test.ts` because the claim is about rendered markup, which is this file's job.)
+
+### 7. `materializePublish.test.ts` — two new fixture sets (nits 1, 5)
+
+- Cap: `listing pages ALONE can exceed the total`, `a listing page tips an AT-the-cap detail
+  collection over the total`, and `over-total listing pages FAIL LOUD through publish, mutating
+  NOTHING` (rejects with `CmsTotalFanOutLimitError` — the class the route maps to 409 — payload
+  byte-identical after the throw, with anti-vacuity checks that the payload really carried a subpage
+  and a placed block). Each listing-only fixture is individually legal under the per-collection cap,
+  so only the total can be what throws.
+- Byte-identity: `a payload with NO 'content.subpages' key is byte-identical, and none is created`,
+  run for BOTH zero collections and both-toggles-off, asserting `'subpages' in content === false`.
+  Closes the gap where an edit that unconditionally did `content.subpages = {}` would have added a
+  key to every single-page publish payload unnoticed.
+- Adjusted `collections with detailPages OFF do not count toward the total` to also set
+  `listingPage = false` — it was implicitly relying on the fixture default, which is now
+  load-bearing.
+
+### 8. `e2e/cms-publish.spec.ts` — stale coupling comment fixed (nit 7)
+
+The listing test said the page "is emitted for a PLACED collection (same coupling detail pages have
+had since phase 4), so place the block" — that coupling was REMOVED by this phase. Rewritten to say
+placement is NOT required (emission is decoupled, and the ruling retro-fixed `detailPages` too), and
+that the block is placed only so the root page also renders it inline. Harmless to the test; it was
+misdescribing the contract in the file a future agent copies from.
+
+### Deviations
+
+1. **`CmsTotalFanOutLimitError`'s message wording changed** (see §1). Judged in-scope: keeping the
+   old wording would have made the message lie about what it counts. Class shape, constructor
+   signature, public field name and the route's `instanceof` arm are all unchanged.
+2. **`MAX_CMS_DETAIL_PAGES_TOTAL` keeps its name** although it now bounds every cms page. Renaming
+   would have rippled into `publish/route.ts` and `route.test.ts`, neither of which is on the
+   Files-touched list. Documented in place instead.
+3. **The CmsPanel regression test unmounts the file-level standalone `CmsPanel` first.** That panel
+   is mounted for every test in the file by `beforeEach`, hears the same window event and portals its
+   OWN Radix dialog to `document.body`, so a document-scoped browser assertion could not tell the two
+   panels apart (and the dialog is portalled, so it cannot be rail-scoped either). Uses the existing
+   `act(() => root.unmount())` … `root = createRoot(container)` pattern from the teardown test above
+   it.
+
+### Verification (actual results)
+
+- `npx tsc --noEmit` → exit 0, ZERO output.
+- `npm run test:run` → **283 passed | 1 skipped (284 files); 4597 passed | 15 skipped (4612); 0
+  failed.** Baseline was 4590 passed / 4605 total ⇒ +7 tests, all new here (3 cap, 1 subpages-absent,
+  1 hyphen-free id, 1 cmsTarget consume-once, 1 detail `stat`), 0 regressions.
+- `npx next lint` on the changed `src/` files → clean except one PRE-EXISTING warning
+  (`parity.test.tsx:557` `@next/next/no-img-element`, in code this pass did not touch).
+- **Non-vacuity, nit 1 (required):** deleting the single new line
+  `if (bundle.collection.listingPage) total += 1;` and re-running `materializePublish.test.ts` →
+  **3 failed | 96 passed**, the three failures being exactly the three new listing-count gates; every
+  pre-existing cap test stayed green (so the change is additive, not a re-shuffle). Line restored,
+  suite back to 99 passed.
+- **Non-vacuity, nit 4 (extra):** commenting out the `setCmsTarget(null)` effect →
+  `CmsPanel.test.tsx` **1 failed | 15 passed**, the failure being the new consume-once gate.
+  Restored, 16 passed.
+
+### Open risks
+
+- The cap numbers are still ARITHMETIC ESTIMATES, never timed (the pre-existing owed-before-beta note
+  stands). Adding listing pages to the total makes the guard slightly stricter, which is the safe
+  direction.
+- `assertCmsFanOutWithinLimit` counts a listing page for a slug-less collection that would emit none.
+  Deliberate (conservative, matches the item-count convention) but means the total can trip a few
+  pages early on projects with slug-less collections.
+- Consume-once means a rapid double "Manage items" on DIFFERENT collections while the panel is
+  UNMOUNTED still lands on the last id — unchanged behaviour, and the panel's own listener covers the
+  mounted case.
+- e2e was not run (unchanged tolerance: local publish 500s without Blob/KV); only a comment changed
+  in that file.

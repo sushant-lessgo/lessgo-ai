@@ -46,9 +46,22 @@ export function isCmsSectionId(sectionId: string): boolean {
 // ⚠️ THAT DISTINCTION IS THE PRUNE SAFETY. Detail pages can use a purely
 // structural test (a user cannot author a `cmscollectionitem` section at all),
 // but a user CAN put a `cmscollection` block on their own subpage via "Add to
-// page". Without this marker, toggling `listingPage` off would delete that
-// user's page. User placements are `cmscollection-<uuid>`; a uuid is hex +
-// hyphens, so it can never begin with `listing-`.
+// page". Without this marker, toggling `listingPage` off would DELETE that
+// user's page.
+//
+// ── THE INVARIANT THAT MAKES IT SAFE: `parts.length > 2` ────────────────────
+// A user placement is `cmscollection-<rand>` where `<rand>` is
+// `Math.random().toString(36).slice(2,10)` (`hooks/editStore/cmsActions.ts`,
+// `newCmsSectionId`) — base36, HYPHEN-FREE. So a placement splits into exactly
+// TWO parts and `isCmsListingSectionId`'s `parts.length > 2` rejects it, no
+// matter what `parts[1]` happens to spell. The type-prefix and marker checks
+// alone are NOT the guard.
+//
+// ⚠️ THEREFORE: placement ids MUST remain hyphen-free. Switching
+// `newCmsSectionId` to `crypto.randomUUID()` (uuids CONTAIN hyphens) would give
+// a placement 6 parts, and any placement whose second segment spelled `listing`
+// would be claimed as ours and pruned. `cmsActions.test.ts` pins the hyphen-free
+// id format so that change fails loudly instead of silently.
 
 /** Second segment marking a section as the auto-emitted listing page's own. */
 export const CMS_LISTING_MARKER = 'listing';
@@ -58,7 +71,9 @@ export function cmsListingSectionId(collectionId: string): string {
   return `${CMS_SECTION_TYPE}-${CMS_LISTING_MARKER}-${collectionId}`;
 }
 
-/** `cmscollection-listing-abc` → true; `cmscollection-<uuid>` (a user placement) → false. */
+/** `cmscollection-listing-abc` → true; `cmscollection-<rand>` (a user placement,
+ *  hyphen-free ⇒ 2 parts) → false. `parts.length > 2` is the load-bearing half —
+ *  see the hyphen-free invariant above. */
 export function isCmsListingSectionId(sectionId: string): boolean {
   if (typeof sectionId !== 'string') return false;
   const parts = sectionId.split('-');

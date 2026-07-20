@@ -277,7 +277,12 @@ export class CmsPathCollisionError extends Error {
 //    it. A per-collection cap cannot: ten collections of 100 items each are ten
 //    individually-legal collections that still fan out to 1000 pages and time
 //    out exactly as if there were no cap at all. This constant is what actually
-//    prevents the opaque timeout.
+//    prevents the opaque timeout — and for that claim to be TRUE it must count
+//    EVERY page the request emits, LISTING pages included. Nothing bounds how
+//    many collections a project may have (`POST /api/collections` has no
+//    ceiling), so N listing-page collections are N more serial blob renders and
+//    KV writes: the exact failure class this cap exists to eliminate. They are
+//    only one page each, but "one each" is not a bound.
 //  · MAX_CMS_DETAIL_PAGES_PER_COLLECTION — THE BETTER ERROR MESSAGE. When ONE
 //    oversized collection is the cause, naming it ("Books has 340 items") is far
 //    more actionable than an aggregate total the user has to attribute himself.
@@ -297,7 +302,10 @@ export class CmsPathCollisionError extends Error {
 // below, so the next person tunes from data instead of re-deriving the guess.
 
 /**
- * Max detail pages ONE PUBLISH may emit, across ALL collections. THE GUARD.
+ * Max cms pages ONE PUBLISH may emit, across ALL collections — detail pages AND
+ * listing pages. THE GUARD. (The name keeps `DETAIL` for continuity; the count
+ * is every cms page, because a total that omitted a page class would not bound
+ * the request.)
  *
  * 100: publish renders one blob + writes one KV route per page, SERIALLY, in a
  * single request — assume ~300ms per page worst case (~100ms typical). The
@@ -351,8 +359,9 @@ export class CmsFanOutLimitError extends Error {
 }
 
 /**
- * Thrown when the TOTAL detail-page fan-out across ALL collections would exceed
- * the request-wide cap. This is the class that guards the actual failure mode —
+ * Thrown when the TOTAL cms-page fan-out across ALL collections — detail pages
+ * AND listing pages — would exceed the request-wide cap. This is the class that
+ * guards the actual failure mode —
  * `CmsFanOutLimitError` only fires when a SINGLE collection is oversized, which
  * is the easy case.
  *
@@ -367,11 +376,13 @@ export class CmsFanOutLimitError extends Error {
  * reason as above: a half-published site is worse than a refused publish.
  */
 export class CmsTotalFanOutLimitError extends Error {
+  /** `totalItems` keeps its name (it is part of the shipped class shape) but now
+   *  counts every cms PAGE the publish would emit: detail pages + listing pages. */
   constructor(public readonly totalItems: number) {
     super(
-      `Publishing would create ${totalItems} collection detail pages, but one publish is ` +
+      `Publishing would create ${totalItems} collection pages, but one publish is ` +
         `limited to ${MAX_CMS_DETAIL_PAGES_TOTAL} in total across all collections. ` +
-        `Turn detail pages off for some collections, or reduce their items.`
+        `Turn detail or listing pages off for some collections, or reduce their items.`
     );
     this.name = 'CmsTotalFanOutLimitError';
   }
@@ -395,13 +406,20 @@ export class CmsTotalFanOutLimitError extends Error {
  * and it keeps the error messages ("has N items" / "would create N pages") true
  * against what the user sees in the collection editor.
  *
- * Only `detailPages`-on collections are counted, for BOTH caps: a toggled-off
- * collection emits no detail pages at all, so its size is irrelevant to the
- * request's cost. Listing pages are exactly one per collection and need no cap.
+ * Only `detailPages`-on collections are counted by the PER-COLLECTION cap: a
+ * toggled-off collection emits no detail pages, so its size is irrelevant.
+ *
+ * The TOTAL counts LISTING pages too (one per `listingPage`-on collection).
+ * Nothing bounds how many collections a project may have, so listing pages alone
+ * are an unbounded serial blob-render + KV-write sequence — the same failure the
+ * cap exists to stop. Counting them is what makes "only a total can bound the
+ * request" TRUE rather than merely stated. Conservative, like the item count: a
+ * slug-less collection emits no listing page but is still counted.
  */
 export function assertCmsFanOutWithinLimit(bundles: Map<string, CmsCollectionBundle>): void {
   let total = 0;
   for (const bundle of bundles.values()) {
+    if (bundle.collection.listingPage) total += 1;
     if (!bundle.collection.detailPages) continue;
     const count = bundle.items.length;
     if (count > MAX_CMS_DETAIL_PAGES_PER_COLLECTION) {

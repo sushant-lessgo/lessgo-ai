@@ -336,14 +336,53 @@ describe('LeftPanel — the CMS rail tab is the CMS entry point', () => {
     expect(railContainer.querySelector('[data-cms-panel]')).toBeNull();
   });
 
+  /** The rendered `Sections` list row for the mocked `hero-abc12345` section. */
+  const sectionRow = () =>
+    Array.from(railContainer.querySelectorAll<HTMLButtonElement>('button')).find((b) =>
+      (b.textContent || '').includes('Hero')
+    );
+
   it('Pages / Theme stay inert — clicking them never swaps the body', () => {
     for (const label of ['Pages', 'Theme']) {
       const t = tab(label);
       expect(t, label).toBeTruthy();
       act(() => t!.click());
-      // Still the sections list, and certainly not the CMS panel.
+      // The body must STILL be the sections list. Asserting only "no CMS panel"
+      // would also pass if Pages went live with a body of its own — which is not
+      // what this test claims to check.
+      expect(sectionRow(), label).toBeTruthy();
       expect(railContainer.querySelector('[data-cms-panel]'), label).toBeNull();
     }
+  });
+
+  // Phase 6 shipped the same family of bug with `editing`: a one-shot cue that is
+  // never cleared re-fires on every later mount. Here, `cmsTarget` survived the
+  // mount that consumed it, so leaving CMS and coming back re-opened the item
+  // browser the user had already closed.
+  it('the "Manage items" target is consumed ONCE — returning to CMS shows the list', () => {
+    // The file-level standalone CmsPanel hears the same window event and portals
+    // its OWN browser dialog to document.body; unmount it so the assertions below
+    // can only be about the RAIL's panel. (afterEach unmounts again — re-rooted
+    // at the end, per the teardown test above.)
+    act(() => root.unmount());
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent(MANAGE_COLLECTIONS_EVENT, { detail: { collectionId: 'col_1' } })
+      );
+    });
+    // The browser renders in a portal, so it is document- not rail-scoped
+    // (same query as the targeting test above).
+    expect(document.querySelector('[data-cms-browser]')).not.toBeNull();
+
+    act(() => tab('Sections')!.click());
+    act(() => tab('CMS')!.click());
+
+    expect(railContainer.querySelector('[data-cms-panel]')).not.toBeNull();
+    expect(document.querySelector('[data-cms-browser]')).toBeNull();
+    expect(railContainer.querySelector('[data-collection-row="col_1"]')).not.toBeNull();
+
+    root = createRoot(container);
   });
 
   // The block's "Manage items" button fires this from the CANVAS, where the rail

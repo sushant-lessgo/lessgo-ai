@@ -19,7 +19,11 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createEditStore } from '@/stores/editStore';
-import { CMS_COLLECTION_LAYOUT, CMS_SECTION_TYPE } from '@/modules/cms/materializePublish';
+import {
+  CMS_COLLECTION_LAYOUT,
+  CMS_SECTION_TYPE,
+  isCmsListingSectionId,
+} from '@/modules/cms/materializePublish';
 
 type Store = ReturnType<typeof createEditStore>;
 
@@ -67,6 +71,27 @@ describe('addCmsSection — the dual pin', () => {
     expect(s.content[sid].elements.collectionId).toBe('col-1');
     expect(s.content[sid].elements.layoutHint).toBeUndefined();
     expect(s.persistence.isDirty).toBe(true);
+  });
+
+  // ── THE HYPHEN-FREE ID INVARIANT (prune safety, not cosmetics) ─────────────
+  // `isCmsListingSectionId` distinguishes a page WE authored
+  // (`cmscollection-listing-<collectionId>`) from a user's own subpage carrying a
+  // placed block — and the load-bearing half of that test is `parts.length > 2`,
+  // which holds ONLY because a placement id contains no hyphen after the type
+  // prefix. Switch `newCmsSectionId` to `crypto.randomUUID()` (uuids have
+  // hyphens) and a placement gains extra parts; one whose second segment spelled
+  // `listing` would be claimed as ours and DELETED on toggle-off. So the id
+  // FORMAT is a contract, pinned here rather than left to a comment.
+  it('mints a HYPHEN-FREE id after the type prefix (the listing-prune invariant)', () => {
+    for (let i = 0; i < 50; i++) {
+      const sid = store.getState().addCmsSection('col-1');
+      const parts = sid.split('-');
+      expect(parts).toHaveLength(2);
+      expect(parts[0]).toBe(CMS_SECTION_TYPE);
+      expect(parts[1]).not.toBe('');
+      // …and the consequence that actually matters: the pruner does not own it.
+      expect(isCmsListingSectionId(sid)).toBe(false);
+    }
   });
 
   it('carries an explicit layoutHint and honours an insert position', () => {

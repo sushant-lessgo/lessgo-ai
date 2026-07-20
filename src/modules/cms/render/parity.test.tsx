@@ -247,6 +247,29 @@ describe('CMS detail block — editor↔published parity', () => {
     });
   }
 
+  // `stat` renders on DETAIL pages too — not by its own code path but because
+  // `CollectionDetail.core.tsx` imports the SAME shared `FieldNode` the listing
+  // card uses. That was true-but-unstated: the skeleton comparison above pins
+  // edit==published, and would stay green if `stat` silently rendered NOWHERE on
+  // a detail page. This asserts it renders at all, in both twins.
+  it('renders a `stat` pair on the DETAIL page too (shared FieldNode), both twins', () => {
+    const detail = detailOf(false);
+    const edit = dom(<CollectionDetail sectionId="cmscollectionitem-i1" model={detail} />);
+    const published = dom(
+      <CollectionDetailPublished
+        sectionId="cmscollectionitem-i1"
+        {...{ [CMS_DETAIL_ELEMENT_KEY]: detail }}
+      />
+    );
+
+    for (const [name, c] of [['edit', edit], ['published', published]] as const) {
+      const stat = detailBodyOf(c).querySelector('[data-cms-field="stat"]');
+      expect(stat, name).toBeTruthy();
+      expect(stat!.querySelector('.lg-cms__statk')!.textContent, name).toBe('Weight');
+      expect(stat!.querySelector('.lg-cms__statv')!.textContent, name).toBe('4.2 kg');
+    }
+  });
+
   it('published detail twin renders an empty (not broken) page with no model', () => {
     const container = dom(<CollectionDetailPublished sectionId="s1" />);
     expect(detailBodyOf(container).textContent).toContain('Nothing here yet');

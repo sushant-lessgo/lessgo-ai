@@ -167,7 +167,8 @@ export function LeftPanel() {
   // for no behavioural gain — nothing outside this component reads the rail tab.
   const [railTab, setRailTab] = useState<RailTab>('sections');
   // A collection the CMS panel should open on, when the cue arrived while the
-  // panel was unmounted (see the two-listener note in CmsPanel).
+  // panel was unmounted (see the two-listener note in CmsPanel). CONSUME-ONCE —
+  // see the clearing effect below.
   const [cmsTarget, setCmsTarget] = useState<string | null>(null);
 
   // Hide the Setup tab entirely once every guide task is done — even if the
@@ -191,6 +192,18 @@ export function LeftPanel() {
     window.addEventListener(MANAGE_COLLECTIONS_EVENT, onManage);
     return () => window.removeEventListener(MANAGE_COLLECTIONS_EVENT, onManage);
   }, []);
+
+  // CONSUME-ONCE. `CmsPanel` reads `initialCollectionId` ONLY in a `useState`
+  // initializer, so it is spent the moment the panel mounts — but the value
+  // stayed here, and EVERY later remount (tab away and back, panel
+  // collapse/expand) re-opened the item browser on it unbidden. Clearing it
+  // right after the mount that used it is safe (the child ran its initializer
+  // during that render, before this effect) and leaves the already-mounted case
+  // to the panel's own listener. Same family as phase 6's "`editing` never
+  // resets" carry.
+  useEffect(() => {
+    if (isCmsMode && cmsTarget) setCmsTarget(null);
+  }, [isCmsMode, cmsTarget]);
 
   // Resize handle
   const handleMouseDown = (e: React.MouseEvent) => {
