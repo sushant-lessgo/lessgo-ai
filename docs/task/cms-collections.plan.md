@@ -131,7 +131,29 @@ phase 4 detail pages + slugs: done (a69c42f2, impl-review loops 0 → ship)
       needs a ceiling before anyone points this at a few hundred items.
     ↳ Vitest parity cannot reach: chrome injection into detail subpages, theme cascade, per-subpage
       metadata/blob path. Those are e2e-only (and e2e needs dev server + Clerk + Blob/KV).
-phase 5 authoring UI primitives: pending
+phase 5 authoring UI primitives: done (128bbe2e, impl-review loops 0 → ship)
+    ↳ 7 primitives, NO new dependency (@testing-library NOT installed — tests use the repo's
+      createRoot+act pattern, ToolbarButton.test.tsx precedent). Isolation verified TRANSITIVELY.
+      e2e ui-isolation canary actually RAN (2 passed) — Playwright auto-starts the dev server.
+    ↳ Test quality: implementer mutation-checked 2 components, REVIEWER independently mutation-
+      checked the other 5 (7 failures, every one caught by the semantically right test).
+    ↳ ⚠️ PHASE 6/7 MUST HONOUR — empty-value → null caller contract (now documented on all 3 controls):
+      Zod REJECTS empty strings (DateValueSchema:110 regex, LinkValueSchema:104 + MediaValueSchema:96
+      require url min(1)) and item PATCH deletes ONLY on `v === null` (items/[itemId]/route.ts:113).
+      So a cleared date sent as "" / cleared link as {url:"",label:""} / media toggle as
+      {kind:'upload',url:''} each 400 instead of clearing. The CALLER must map empty → null.
+      tags is exempt ([] validates).
+    ↳ ⚠️ PHASE 6 MUST HONOUR — field-row-list `onNameChange` fires PER KEYSTROKE (JSDoc previously
+      said "blur or Enter" — corrected). Parent holds draft schema state; do NOT wire it to a PATCH.
+      Deliberately NOT debounced internally: the input is controlled on item.name, so an internal
+      debounce would desync typed text from rendered text and fight the parent.
+    ↳ NEAR-MISS worth remembering: the first blur test dispatched `blur` and never fired the handler
+      (React 17+ delegates onBlur to native `focusout`). Would have been a permanently-green inert
+      assertion; the mutation check caught it. Use `focusout` for blur tests in this repo.
+    ↳ handleDragEnd gap closed by extracting pure `resolveDragEnd(ids, activeId, overId)` — mocking
+      DndContext does NOT work (useSortable resolves dnd-kit internal context). KeyboardSensor was
+      INERT (explicit onKeyDown overrode dnd-kit's activator) → removed rather than chained, because
+      chaining would double-fire against the handle's own Arrow move.
 phase 6 schema builder + CMS entry point: pending
 phase 7 item editor + group management: pending
 phase 8 generic CMS board + docs: pending
