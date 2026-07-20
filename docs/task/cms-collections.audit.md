@@ -3666,3 +3666,66 @@ former trimmed copy did not have. That is the cost of one definition instead of 
 - `hasCollections` is chrome only. Deep-linking to `/dashboard/{token}/cms` with zero
   collections still works and shows the board's own `cms-empty` state — correct, since the tab
   is a hint, not an authz boundary.
+
+---
+
+## Phase 9 follow-up — comment restore + two nits (no behaviour change)
+
+**Files changed**
+- `src/components/dashboard/cms/CmsBoardClient.tsx`
+- `src/components/dashboard/cms/CmsBoardClient.test.tsx`
+- `src/components/dashboard/WorkspaceTabs.tsx`
+- `docs/task/cms-collections.audit.md`
+
+### `CmsBoardClient.tsx` — BLOCKING fix (comments only)
+Phase-9 audit mutation #3 swapped the write-funnel URL to `/api/work-library`; the revert then
+replaced EVERY `/api/work-library` occurrence with the collections item URL, including three
+PROSE mentions. Restored to `/api/work-library`:
+- **:13** — the works pipeline (`applyRailEdit` → `resyncWorkContent`) is the works route, not
+  the collections item route the corruption named.
+- **:17** — the ZERO-requests claim is about the WORKS route; as corrupted it claimed this file
+  never calls the endpoint it exists to call.
+- **:265** — `commitItem` docblock: "never touches `/api/work-library`", the assertion its very
+  next statement (a collections PATCH) was contradicting.
+
+Surrounding sentences re-read after the swap; all three paragraphs are coherent. **Zero runtime
+lines touched** — diff is 3 comment lines. Line 8 (`writes to /api/collections/*, never anywhere
+else`) was already correct and left alone.
+
+**Collateral scan** of the rest of the phase-9 files for the same revert damage: grepped
+`encodeURIComponent(collectionId)` across `src/`. Remaining 4 hits are all legitimate runtime
+URLs (`CmsBoardClient.tsx:234`/`:279`, `editStore/cmsActions.ts:129`, `GroupManager.tsx:53`).
+No other collateral found.
+
+### `CmsBoardClient.test.tsx` — dead whitelist removed
+`:341` stripped the phrase ``/api/work-library` → `applyRailEdit`` before the source-text guard.
+Determined empirically: after restoring :13 the `.replace` DOES strip text, but the guard
+(`/fetch\([^)]*work-library/`) does not need it — the pattern stops at the first `)` and the
+first `fetch(` in the file is at :233, well after all prose, so the raw source never matches
+(verified: `raw match: false`, `after replace: false`). The whitelist was therefore a pure hole,
+not a necessity → removed; the guard now runs against the RAW source. This STRENGTHENS the
+guard (no exempted substring); assertion target and strength otherwise unchanged.
+
+**Guard-still-bites evidence:** injected `await fetch(`/api/work-library?tokenId=${tokenId}`)`
+into the load effect → `npx vitest run src/components/dashboard/cms/CmsBoardClient.test.tsx`
+= **2 failed | 12 passed (14)**: the runtime zero-calls regression AND the source-text guard at
+`:345` both failed. Mutation reverted; file back to 3-comment-line diff.
+
+### `WorkspaceTabs.tsx` — latent ordering fallback
+`blogAt = findIndex(... 'blog')` fed `slice(0, blogAt + 1)`; if Blog were removed from `TABS`,
+`-1 + 1 = 0` would place Content ahead of Overview. Added `cmsAt = blogAt >= 0 ? blogAt + 1 :
+withWork.length` (append) plus a comment on the const. Bit-identical today (Blog is present).
+
+### Deviations
+- No test added for the `WorkspaceTabs` fallback: `TABS` is a module-private const with no
+  injection seam, so exercising `blogAt < 0` would require exporting it or module mocking —
+  both larger than this comment/nit pass. Conservative choice: comment-documented fallback only.
+
+### Test results (ACTUAL)
+- `npx tsc --noEmit` → exit 0, zero output.
+- `npm run test:run` → **286 passed | 1 skipped (287 files); 4631 passed | 15 skipped (4646);
+  0 failed** — exactly baseline.
+- `npx next lint` on the 3 changed files → "No ESLint warnings or errors", exit 0.
+
+### Open risks
+None. No runtime behaviour, endpoint, or assertion strength changed. Not committed.

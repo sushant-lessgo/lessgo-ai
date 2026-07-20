@@ -338,9 +338,11 @@ describe('CmsBoardClient — 🚨 works isolation (mandatory regression)', () =>
     expect(imports).not.toContain('hooks/editStore')
     expect(imports).not.toContain('useEditStore')
     // …and no runtime fetch string for the works route anywhere in the file.
-    expect(src.replace(/\/api\/work-library`? → `applyRailEdit`/g, '')).not.toMatch(
-      /fetch\([^)]*work-library/
-    )
+    // Matched against the RAW source, with no prose whitelist: the pattern is
+    // anchored on `fetch(` and stops at the first `)`, so the file's docblock
+    // mentions of `/api/work-library` (which the works-isolation rule is written
+    // down in) cannot reach it — only a real call site can.
+    expect(src).not.toMatch(/fetch\([^)]*work-library/)
   })
 
   it('the shared values module it imports is itself store-free (one hop deeper)', async () => {

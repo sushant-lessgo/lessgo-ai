@@ -48,7 +48,8 @@ const TABS: TabDef[] = [
 const WORK_TAB: TabDef = { label: 'Your work', segment: 'work' }
 
 // "Content" (the CMS board) is inserted after Blog for EVERY project — greyed when
-// the project has no collections yet. See the header note.
+// the project has no collections yet. See the header note. (If Blog were ever
+// removed from TABS, Content appends at the end rather than jumping to index 0.)
 const CMS_TAB: TabDef = { label: 'Content', segment: 'cms' }
 
 /** Why the Content tab is greyed — shown as the native `title` tooltip. */
@@ -74,7 +75,11 @@ export default function WorkspaceTabs({
   // Overview · [Your work] · Blog · Content · Leads · Testimonials · Analytics
   const withWork = showWorkTab ? [TABS[0], WORK_TAB, ...TABS.slice(1)] : TABS
   const blogAt = withWork.findIndex((t) => t.segment === 'blog')
-  const tabs = [...withWork.slice(0, blogAt + 1), CMS_TAB, ...withWork.slice(blogAt + 1)]
+  // Fallback: if Blog is ever dropped from TABS, `findIndex` returns -1 and a bare
+  // `blogAt + 1` would silently insert Content at index 0 — ahead of Overview.
+  // Append instead; a future TABS edit must not be able to reorder the nav.
+  const cmsAt = blogAt >= 0 ? blogAt + 1 : withWork.length
+  const tabs = [...withWork.slice(0, cmsAt), CMS_TAB, ...withWork.slice(cmsAt)]
 
   return (
     <div className="flex flex-none gap-0.5 border-b border-[#f0f0f3] bg-app-surface px-[26px]">

@@ -10,11 +10,11 @@
 // ── 🚨 WORKS IS NOT THIS BOARD'S BUSINESS (the phase's highest risk) ─────────
 // The `works` catalog is AUTHORITATIVE (`collectionHelpers.ts`,
 // `src/modules/collections/README.md`) and is edited through a COMPLETELY
-// different pipeline: `/api/collections/${encodeURIComponent(collectionId)}/items/${encodeURIComponent(itemId)}` → `applyRailEdit` → `resyncWorkContent`,
+// different pipeline: `/api/work-library` → `applyRailEdit` → `resyncWorkContent`,
 // sourced from `brief.facts.work.groups` — NOT from the Collection tables. A
 // generic board that wrote through that pipeline would corrupt a live customer's
 // catalog. Therefore:
-//   · this file issues ZERO requests to `/api/collections/${encodeURIComponent(collectionId)}/items/${encodeURIComponent(itemId)}` (pinned by a
+//   · this file issues ZERO requests to `/api/work-library` (pinned by a
 //     mandatory regression test asserting the ABSENCE of such calls);
 //   · `works` does not appear in this board in v1 (unify pass deferred);
 //   · the only link between the two surfaces is the deep-link row below, which
@@ -262,7 +262,7 @@ export default function CmsBoardClient({ tokenId, hasWorkLibrary = false }: CmsB
 
   /**
    * The ONE write funnel. Every mutation this board performs goes through here,
-   * as a PATCH to the COLLECTIONS api. It never touches `/api/collections/${encodeURIComponent(collectionId)}/items/${encodeURIComponent(itemId)}`.
+   * as a PATCH to the COLLECTIONS api. It never touches `/api/work-library`.
    * On success the SERVER-returned item is adopted (server-authoritative) and
    * `storedRef` advances to it.
    */
