@@ -47,6 +47,7 @@ import {
 } from '@/components/ui/popover';
 import { BAR_CTL_CLASS } from '../ui/DesignMenuShell';
 import { AddCollectionModal } from './AddCollectionModal';
+import { CollectionBrowser } from './CollectionBrowser';
 
 /** The event a placed collection block fires to open this panel. */
 export const MANAGE_COLLECTIONS_EVENT = 'lessgo:manage-collections';
@@ -55,6 +56,10 @@ export function CmsPanel({ tokenId }: { tokenId: string }) {
   const [open, setOpen] = React.useState(false);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<CmsCollection | null>(null);
+  // The collection whose ITEMS are open in the browser. An ID, not the object:
+  // "Manage items" can arrive from a placed block BEFORE the refresh that would
+  // put that collection in the cache, so the browser resolves late (below).
+  const [browsingId, setBrowsingId] = React.useState<string | null>(null);
 
   const bundles = useEditStore(
     (s) => s.cmsData?.bundles as Record<string, CmsCollectionBundle> | undefined
@@ -83,6 +88,11 @@ export function CmsPanel({ tokenId }: { tokenId: string }) {
     [editing, bundles]
   );
 
+  const browsingBundle = React.useMemo(
+    () => (browsingId ? bundles?.[browsingId] : undefined),
+    [browsingId, bundles]
+  );
+
   const refresh = React.useCallback(() => {
     // Optional-chained: the store may not carry the cms slice in every host
     // (see the store-access note above).
@@ -97,9 +107,20 @@ export function CmsPanel({ tokenId }: { tokenId: string }) {
   };
 
   React.useEffect(() => {
-    const onManage = () => {
+    // CONSUME `e.detail` (phase-6 carry): the placed block dispatches
+    // `{collectionId}`, and ignoring it made "Manage items" open a generic
+    // collection list — the user then had to find, in a menu, the collection they
+    // had just clicked ON. With the id we open THAT collection's items directly.
+    // No id (a generic caller) still falls back to the list.
+    const onManage = (e: Event) => {
       refresh();
+      const collectionId = (e as CustomEvent<{ collectionId?: string }>).detail?.collectionId;
+      // The list opens either way — it is what the user falls back to when the
+      // browser is dismissed, and `CmsPanel.test.tsx` (phase 6, outside this
+      // phase's file list) pins it. With an id we ALSO open that collection's
+      // items on top, which is the whole point of consuming the detail.
       setOpen(true);
+      if (collectionId) setBrowsingId(collectionId);
     };
     window.addEventListener(MANAGE_COLLECTIONS_EVENT, onManage);
     return () => window.removeEventListener(MANAGE_COLLECTIONS_EVENT, onManage);
@@ -116,6 +137,17 @@ export function CmsPanel({ tokenId }: { tokenId: string }) {
     setEditing(collection);
     setModalOpen(true);
   };
+
+  /** Open the t22 browser (items + groups) for one collection. */
+  const openItems = (collectionId: string) => {
+    setOpen(false);
+    setBrowsingId(collectionId);
+  };
+
+  /** A single-collection refresh — item/group saves cannot touch the others. */
+  const refreshOne = React.useCallback((collectionId: string) => {
+    void useEditStore.getState().refreshCmsCollection?.(collectionId);
+  }, []);
 
   /** Place the collection on the CURRENT page (dual pin lives in addCmsSection). */
   const addToPage = (collectionId: string) => {
@@ -183,6 +215,18 @@ export function CmsPanel({ tokenId }: { tokenId: string }) {
                     Same shape PageSwitcher uses for its row actions. */}
                 <button
                   type="button"
+                  data-collection-items={c.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openItems(c.id);
+                  }}
+                  aria-label={`Manage ${c.name} items`}
+                  className="hidden h-6 w-6 flex-none items-center justify-center rounded-app-badge text-app-icon-faint transition-colors group-hover:flex hover:bg-app-hover hover:text-app-ink"
+                >
+                  <AppIcon name="list" size={16} />
+                </button>
+                <button
+                  type="button"
                   data-collection-place={c.id}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -219,12 +263,35 @@ export function CmsPanel({ tokenId }: { tokenId: string }) {
 
       <AddCollectionModal
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={(next) => {
+          setModalOpen(next);
+          // Reset on close (phase-6 carry). It was harmless while both open paths
+          // set `editing` explicitly; with a third surface it is exactly the kind
+          // of leak that reopens "New collection" pre-filled with the last edited
+          // schema.
+          if (!next) setEditing(null);
+        }}
         tokenId={tokenId}
         collection={editing}
         items={editingItems}
         onSaved={refresh}
       />
+
+      {/* t22 — resolved from the cache, so a "Manage items" event that arrives
+          before the refresh lands simply opens as soon as the bundle appears. */}
+      {browsingBundle ? (
+        <CollectionBrowser
+          open
+          onOpenChange={(next) => {
+            if (!next) setBrowsingId(null);
+          }}
+          tokenId={tokenId}
+          collection={browsingBundle.collection}
+          groups={browsingBundle.groups || []}
+          items={browsingBundle.items || []}
+          onChanged={() => refreshOne(browsingBundle.collection.id)}
+        />
+      ) : null}
     </div>
   );
 }

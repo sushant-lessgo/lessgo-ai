@@ -1982,3 +1982,443 @@ non-destructive and draft-local until Save; nothing rewrites items.
   "clean up unused values" affordance would need its own explicit destructive gate.
 - The warning counts a value as present if it is non-empty (`null`/`''`/`[]` excluded).
   A structurally empty object (e.g. `{ url: '' }`) still counts as a value and will warn.
+
+---
+
+# Phase 7 — item editor + group management (t19/t22)
+
+## Files changed
+1. `src/app/edit/[token]/components/cms/ItemEditor.tsx` (new)
+2. `src/app/edit/[token]/components/cms/ItemEditor.test.tsx` (new)
+3. `src/app/edit/[token]/components/cms/CollectionBrowser.tsx` (new)
+4. `src/app/edit/[token]/components/cms/GroupManager.tsx` (new)
+5. `src/app/edit/[token]/components/cms/CmsPanel.tsx` (modified)
+6. `src/hooks/editStore/cmsActions.ts` (modified)
+7. `src/types/store/actions.ts` (modified)
+8. `e2e/cms-authoring.spec.ts` (new)
+9. `docs/task/cms-collections.audit.md` (this section)
+
+Nothing outside the plan's Phase 7 list was edited. Two files that the work
+*pointed at* were deliberately NOT touched — see **Deviations** 1 and 2.
+
+## What changed, per file
+
+### `ItemEditor.tsx` (new) — t19
+412px-style panel: header/breadcrumb (+ back), `item-pager`, one control **per field
+TYPE**, Category select, permalink, footer Save/Cancel. Create mode (`item === null`)
+POSTs to `/items`; edit mode PATCHes `/items/:id`.
+
+Control map — dispatched off `field.type` in one `switch`, never off the field name:
+
+| type | control |
+|---|---|
+| `image` | thumb + Replace/Remove, empty state = dashed "Choose an image" -> shared `MediaPickerModal` |
+| `gallery` | thumb strip w/ per-thumb remove + dashed "+" tile -> same picker |
+| `video`/`audio` | `media-or-link-field` (upload side calls back to open the picker) |
+| `text_short` | `Input` |
+| `text_long` | plain `Textarea` — **ruling #3**, no toolbar |
+| `link` | `link-pair-field` |
+| `date` | `date-field` |
+| `tags` | `tag-input` |
+
+`MediaPickerModal` is opened by THIS component (`onPick(url)` -> stored as `{url}`,
+`initialTab="library"`), preserving the primitives' picker-agnostic contract.
+No status pill (**#8**), no Write-with-AI (**#9**). Group = the "Category" select
+incl. "Ungrouped" (**#7**). Permalink (`EditableSlugInput`) renders only when
+`collection.detailPages` is on AND the item exists.
+
+**Debt 1 — the empty -> `null` contract.** `normalizeValue(type, draft)` (exported)
+maps every empty shape to `null`: `''` date, `{url:'',label:''}` link,
+`{kind,url:''}` media, `{url:''}` image, `[]` gallery, blank text. `tags` is the
+documented exemption and always sends an array. `buildValuesPayload()` (exported)
+then sends a non-empty value always, and the `null` **delete sentinel only when the
+stored item still holds that key** — sending nulls for never-filled fields would be
+payload noise with no effect. Create mode has nothing to delete, so empties are
+simply omitted.
+
+**Debt 2 — `slugLocked` is now READ, not just written.** While an item is unlocked
+the permalink FOLLOWS the title field (`slugifyName`); once locked it never moves,
+whatever the title does. A manual permalink edit locks it locally, mirroring what
+the route does server-side. `slugLocked` is deliberately NOT sent in the body:
+`ItemPatchSchema` has no such key, so Zod would strip it — the SLUG edit is what sets
+the flag, on the server. Sending a stripped key would be decorative.
+
+**Debt 3 — item-create slug shadowing.** The route file is outside this phase's list,
+so the guard was NOT wired; instead the editor **surfaces the server error verbatim**
+(409 included) in `[data-cms-item-error]`, with a code comment naming the gap. Covered
+by a test that feeds a 409 and asserts the message reaches the user. The residual risk
+is unchanged from phase 4: a created item can still mint a path that only fails at
+publish.
+
+### `CollectionBrowser.tsx` (new) — t22
+Dialog hosting the browser (left, 400px) + the item editor (right). Header count
+pill, search, "+ New", 2-col card grid (cover-role thumb, title-role title, **grey
+GROUP sub-label — never a status**, ruling #8), selection ring, per-card delete.
+Groups live in a collapsible footer section (`GroupManager`). Pure props in / events
+out: it reads no store, so `CmsPanel` stays the single place that decides what
+"fresh" means after a write.
+
+### `GroupManager.tsx` (new)
+Add / rename (commit on blur or Enter, never per keystroke) / delete / **up-down
+reorder, no drag** (founder ruling). A move re-numbers the WHOLE list from 0 in one
+PATCH — sending only the two swapped rows leaves ties/gaps whenever stored orders are
+not already 0..n-1 (they are not, after a delete), and ties render in insertion order,
+which reads as "the reorder silently failed". Delete confirm states that items are
+kept and become Ungrouped (the FK's `SetNull`).
+
+### `CmsPanel.tsx` (modified)
+- **Debt 4** — the `lessgo:manage-collections` listener now consumes
+  `e.detail.collectionId` and opens the browser on THAT collection (see Deviations 1
+  for why the list also still opens).
+- **Debt 5** — `editing` resets to `null` on modal close.
+- New per-row "Manage items" action (`data-collection-items`) -> browser.
+- The browser is resolved from `cmsData` by ID, so a Manage event arriving before the
+  refresh lands simply opens once the bundle appears.
+
+### `cmsActions.ts` + `actions.ts` (modified)
+New `refreshCmsCollection(collectionId)`: re-fetches ONE bundle and merges it. The
+item editor saves one item at a time; `refreshCmsData` would re-issue the list call
+plus one call per collection (its documented N+1) for a change that can only have
+touched one. A 404 drops the bundle; a transient failure keeps the previous one
+(blanking the cache would empty a placed section on the canvas mid-save). Status is
+NOT flipped to `loading` — a save must not blink the placed block back to skeleton.
+This is what makes plan step 4 (live refresh) work: `onChanged` -> `refreshCmsCollection`
+-> bundles update -> the adapter re-runs `toRenderModel` on the placed section.
+
+### `e2e/cms-authoring.spec.ts` (new)
+Success criterion #1 through the UI: create collection (t12) -> group -> two items
+(t19) -> place -> the placed section shows both item titles in the editor. Publish leg
+intentionally absent (it lives in `cms-publish.spec.ts`, opportunistic per the
+local-500 caveat); the binding publish assertions stay in `materializePublish.test.ts`.
+
+## Deviations from the plan
+
+1. **The Manage event opens the collection LIST as well as the browser.** The plan's
+   debt 4 says "Manage items on a placed block opens THAT collection". Implemented —
+   but `src/app/edit/[token]/components/cms/CmsPanel.test.tsx` (phase 6, **not** in
+   this phase's Files-touched list) dispatches that event WITH a `collectionId` and
+   asserts the popover LIST row renders. Opening only the browser turned that test
+   red. Rather than edit an out-of-scope file I made the listener do both: the list
+   opens (it is also the sensible landing when the browser is dismissed) and the
+   browser opens on top, targeted at the dispatched collection.
+   ** CONSEQUENCE — an owed test:** the new targeting behaviour has NO vitest cover,
+   because the only place to assert it is that out-of-scope file. `CmsPanel.test.tsx`
+   should gain "the event with a collectionId opens the browser on THAT collection".
+   Until then the behaviour is covered only by the (currently unrunnable) e2e spec and
+   by manual QA.
+2. **`e2e/cms-authoring.spec.ts` does not run — `playwright.config.ts` is out of
+   scope.** That config's `authed.testMatch` is an explicit ALLOWLIST, and its own
+   comment warns that an unlisted spec "silently matches no project and the suite goes
+   green having never run it". Verified empirically:
+   `npx playwright test cms-authoring --list` -> **"Total: 0 tests in 0 files"**.
+   **`cms-publish.spec.ts` (phase 3/4) is unlisted too** — it has never run either.
+   One edit is owed by whoever owns that file: add `/cms-authoring\.spec\.ts/` **and**
+   `/cms-publish\.spec\.ts/` to the `authed` project.
+3. **Category uses a native `<select>`, not the Radix `select` primitive.** The panel
+   lives inside a Radix Dialog and the portalled Radix listbox needs pointer-event
+   capabilities jsdom does not provide, which would make the ruling-#7 group contract
+   untestable. Styled on the same app-chrome input tokens. Cosmetic divergence,
+   recorded rather than hidden.
+4. **The permalink is hidden in CREATE mode.** The slug is derived server-side from
+   the title role on POST, so an editable permalink before the row exists would be a
+   control with nothing behind it. It appears immediately after the first save.
+5. **Auto-follow semantics (in-scope judgment call).** An unlocked permalink follows
+   the title and IS sent on save — so a title rename does move the URL once, and that
+   PATCH locks the slug server-side. The alternative (display-only follow) would show
+   the user a permalink that is not what gets stored. Chose "what you see is what is
+   saved". Worth a look at the founder UX gate.
+6. **Item creation is a full create form, not "POST an empty row then edit".** Keeps
+   the server free to derive a meaningful slug from the title role instead of minting
+   `books`, `books-2`... from the collection name.
+
+## Test results (actual)
+
+- `npx tsc --noEmit` -> **exit 0, zero output.**
+- `npm run test:run` -> **281 passed | 1 skipped (282 files); 4482 passed | 15 skipped
+  (4497); 0 failed.** vs the stated baseline 280/1 (281) and 4456/15 (4471) -> +1 file,
+  +26 tests.
+  (One intermediate red: `CmsPanel.test.tsx` failed on the first full run — that is the
+  Deviation-1 collision, resolved in `CmsPanel.tsx`, not by touching the test.)
+- `npx next lint --file ...` on all 7 changed source/test files -> **"No ESLint warnings
+  or errors."**
+- `npm run test:e2e` — **NOT RUN, and cannot be**: it needs a dev server + a Clerk
+  session, and the spec is unregistered (Deviation 2). It was standalone type-checked
+  clean (`tsc --noEmit` on the file).
+
+### Non-vacuity evidence (mutation sweep, each mutation applied then reverted)
+
+| # | mutation to `ItemEditor.tsx` | result |
+|---|---|---|
+| 1 | `date` empty -> `''` instead of `null` | **4 failed** incl. *clearing a stored DATE sends null* |
+| 2 | `link` empty -> `{url:'',label:''}` | **3 failed** incl. *clearing a stored LINK sends null* |
+| 3 | `video`/`audio` empty -> `{kind,url:''}` | **4 failed** incl. *clearing a stored VIDEO/AUDIO link sends null* |
+| 4 | `image` empty -> `{url:''}` | **4 failed** incl. *removing a stored IMAGE sends null* |
+| 5 | `gallery` empty -> `[]` | **3 failed** incl. *emptying a stored GALLERY sends null* |
+| 6 | text empty -> `''` | **5 failed** incl. *clearing stored TEXT sends null* |
+| 7 | `tags` exemption dropped (`[]` -> `null`) | **4 failed** incl. *emptying TAGS sends []* |
+| 8 | delete sentinel never sent (`out[f.id] = null` removed) | **7 failed** — every clear-a-stored-value test |
+| 9 | `slugLocked` ignored (permalink always follows title) | **2 failed** incl. *a LOCKED permalink NEVER moves* |
+| 10 | manual permalink edit does not lock locally | **1 failed** — *a manual permalink edit LOCKS it locally* |
+| 11 | `slug` never put in the PATCH body | **3 failed** incl. *editing the permalink PATCHes the slug* |
+
+Every empty->null test and both `slugLocked` tests bite. Full suite re-verified green
+after the sweep (the file was restored from a pristine copy, and `git diff` on it is
+the intended diff only).
+
+One test was found to be **coincidentally green** during authoring and was fixed
+before landing: the ruling-#8 status-pill check scanned `textContent` for
+`/\bpublished\b/`, which never matched because the DOM concatenates to
+`...itemPublishedCategory...` (no word boundary). It now asserts structurally over
+button/span labels and keys on "Draft" — "Published" is unusable there because the
+fixture deliberately contains a FIELD named "Published" (which is itself the proof
+that controls key on type, not name).
+
+## Open risks
+- **Deviation 1's owed test** (targeting behaviour uncovered) and **Deviation 2's owed
+  config line** (both cms e2e specs never run) are the two loose ends of this phase.
+- Item CREATE still has no top-level-slug shadow guard (phase-4 carry, debt 3). The
+  editor surfaces the 409; it does not prevent it.
+- `CollectionBrowser` holds no optimistic state: after a save the UI waits on the
+  single-collection refetch. On a slow connection a just-saved item can be stale for a
+  beat. Accepted (matches the `cmsData` cache posture).
+- Deleting the item currently open in the editor clears the selection; deleting the
+  LAST item leaves the empty state. No undo anywhere in the CMS.
+- The pager walks `items` in stored order; unsaved edits are DISCARDED when paging
+  away (no dirty guard). Worth a look at the founder UX gate.
+- Group rename fires a PATCH per blur; rapid tab-through of several groups issues
+  several requests. Fine at pilot sizes.
+
+## Reminder — this phase's HUMAN GATE also absorbs phase 4's
+Per the plan's phase-4 entry, the founder gate here must ALSO cover: create a
+collection with **detailPages ON via the UI** -> publish -> listing cards link
+correctly -> item detail pages serve with the right slugs + content -> toggle
+detailPages OFF -> item pages gone -> **naayom's products pages still publish
+untouched**.
+
+---
+
+## Phase 7 — follow-ups (authorized scope extension: 2 files)
+
+### Files changed
+- `playwright.config.ts`
+- `src/app/edit/[token]/components/cms/CmsPanel.test.tsx`
+- `docs/task/cms-collections.audit.md` (this append)
+
+(`src/app/edit/[token]/components/cms/CmsPanel.tsx` was temporarily mutated for a
+non-vacuity check and **restored byte-for-byte** — it carries no net change from
+these follow-ups.)
+
+### 1. `playwright.config.ts` — registered the CMS e2e specs
+
+Added `/cms-authoring\.spec\.ts/` and `/cms-publish\.spec\.ts/` to the **`authed`**
+project's `testMatch` allowlist (both need a Clerk session: the collection/item routes
+and `/api/publish`), with a comment matching the file's existing per-track style.
+
+This closes the loose end recorded above. Both specs had matched **no project** since
+they were written — `cms-publish.spec.ts` (phase 3, extended phase 4) and
+`cms-authoring.spec.ts` (phase 7) were dead files. Four phases described them as
+coverage; they were not.
+
+**Registration verified (the deliverable):**
+- `npx playwright test cms-authoring --list` -> **2 tests in 2 files**:
+  `[authed] cms-authoring.spec.ts:26 "author a collection end to end through the CMS UI"`
+  plus the `[setup] auth.setup.ts` dependency. => **1 CMS test**.
+- `npx playwright test cms-publish --list` -> **3 tests in 2 files**:
+  `[authed] cms-publish.spec.ts:20 "a placed CMS collection publishes with its items"`
+  and `:135 "detailPages ON publishes an item page per item; OFF removes them"`,
+  plus `[setup]`. => **2 CMS tests**.
+
+Playwright parsed both specs with **no syntax or type error** — nothing to fix.
+
+**Not claimed:** that they PASS. Neither was executed (needs a dev server + real Clerk
+session). Execution is the founder's/CI's gate; registration is what changed here.
+
+### 2. `CmsPanel.test.tsx` — targeting now has vitest cover
+
+Added two tests to `describe('CmsPanel — firewall handoff')`. The phase-6 tests are
+**unchanged** — both behaviours are real, so both are pinned:
+- `opens the item browser on the collection named in detail.collectionId` — asserts
+  `[data-cms-browser]` exists, its text contains `Books`, and `[data-item-card="it_1"]`
+  is present (the RIGHT collection's item, not merely "a browser").
+- `a detail-less event opens the list ONLY (no browser to dismiss)` — the fallback
+  path, which nothing else covered.
+
+**Non-vacuity verified.** Neutered the consumption in `CmsPanel.tsx`
+(`if (collectionId)` -> `if (false && collectionId)`) and re-ran the file:
+`1 failed | 9 passed`, the failure being exactly the new targeting test
+(`Error: not found: [data-cms-browser]`). Notably the phase-6 test did NOT fail under
+the mutation — confirming it pins only the list and never covered targeting, which was
+the whole gap. Mutation reverted; file back to 10 passed.
+
+### Deviations
+- **+2 tests, not the expected +1.** The second (detail-less -> list only) is the
+  negative half of the same branch; without it the targeting test alone can't
+  distinguish "consumes detail" from "always opens the browser". Conservative addition,
+  no existing assertion touched.
+
+### Near-miss worth recording — third instance of a familiar failure family
+The ruling-#8 status-pill assertion I wrote earlier in phase 7 scanned for
+`/\bpublished\b/`. It was **coincidentally green**: the DOM concatenates the pill and
+its neighbour to `itemPublishedCategory`, so `\b` never matched — the regex could never
+have fired, pass or fail. Caught and fixed during phase 7 by mutating the source.
+
+That is the **third** occurrence in this pipeline of a test that sits green while
+asserting nothing (cf. the two dead e2e specs above, which are the same disease in a
+different organ: a check nobody ever executed). The standing lesson holds — **mutate the
+source or it isn't a test**; a green assertion proves nothing until you've watched it go
+red.
+
+### Test results (actual)
+- `npx tsc --noEmit` -> **exit 0, zero output**.
+- `npm run test:run` -> **281 passed | 1 skipped (282 files); 4484 passed | 15 skipped
+  (4499); 0 failed.** Baseline was 4482/4497 -> **+2 tests, 0 regressions**.
+- Playwright `--list` counts as above.
+
+### Open risks
+- The two CMS e2e specs are now registered but **still unproven** — first real execution
+  may surface selector/timing breakage that four phases of never running has hidden.
+  Budget for that at the founder gate rather than treating registration as coverage.
+- Unlocked permalink following (and silently saving) the title remains a **taste call**
+  carried to the founder's UX gate, per the orchestrator — not ruled on here.
+
+---
+
+## Phase 7 — FIX PASS (impl-review findings, pre-commit)
+
+### Files changed
+- `src/app/edit/[token]/components/cms/ItemEditor.tsx`
+- `src/app/edit/[token]/components/cms/ItemEditor.test.tsx`
+- `src/app/edit/[token]/components/cms/GroupManager.tsx`
+- `src/app/edit/[token]/components/cms/GroupManager.test.tsx` *(new)*
+- `e2e/cms-authoring.spec.ts`
+- `docs/task/cms-collections.audit.md`
+
+### 1. Stale `stored` silently dropped a clear — FIXED
+`buildValuesPayload`'s `stored` came from the `item?.values` **prop**, which only
+freshens when `refreshCmsCollection` lands — a fire-and-forget refresh whose failure is
+swallowed to a `logger.warn` with the previous bundle left cached. Sequence that lost
+data: fill X → save → refresh fails/lags → clear X → save → X absent from `stored` →
+**no `null` sentinel sent** → server keeps the old value while the editor shows it
+cleared. Silent editor↔published divergence.
+
+Fix: a `storedRef`, seeded from the prop and re-seeded on the row-change effect, but
+**advanced from each write's RESPONSE row** (`data.item.values`) — what the server
+actually holds. `handleSave` now computes the payload against `storedRef.current`.
+
+**Deviation (conservative, in-scope):** `storedRef` is advanced **only** when the
+response carries a real `values` object. A response without one is ambiguous, and
+treating it as "the row is empty" would drop the *next* clear — reintroducing the bug
+from the other side. Covered by its own test. Consequence: `storedRef` never regresses
+to a *fresher* prop either (e.g. an edit from another tab); the write-response is
+authoritative for this editor's session, which is the conservative read.
+
+The empty→`null` mapping semantics are untouched — only where `stored` comes from.
+
+### 2. Title→slug auto-follow REMOVED (founder ruling)
+The old behaviour let an unlocked title rename send `slug`; the route then set
+`slugLocked: true`, after which the hint claimed *"Custom permalink"* for a permalink
+the user never customized. And since `materializePublish` never re-derives slugs, this
+editor was the **only** thing that could move an item slug — a title typo-fix relocated
+a LIVE detail page's URL and 404'd `/collection/old-slug` with no redirect.
+
+Now: slug is derived at CREATE only (phase-1 route); after that it moves **only** on an
+explicit permalink edit, which still PATCHes `slug` and still lets the server set
+`slugLocked`. Removed the auto-follow write path, the `titleFieldId` read and the
+now-unused `slugifyName` import.
+
+Hint copy rewritten to be true in **every** state — provenance, not behaviour:
+"You set this permalink." / "Made from the title when this item was created.", both
+followed by "Changing it changes this item's link — the old one stops working."
+
+**Deviation (conservative, in-scope):** `slugLocked` is **kept** as local state and kept
+read-in-UI (for that provenance copy) rather than deleted. Deleting it would have made
+the editor stop reading the flag entirely, reverting the phase-4 carry; keeping it
+preserves the read without letting it gate a rename it can no longer affect. Documented
+in the file header.
+
+Tests: `an UNLOCKED permalink follows the title` replaced by **`a title change alone
+sends NO slug`**; the LOCKED-never-moves guard and the manual-edit-PATCHes guard both
+kept; added a hint-copy test asserting the editor never says "Custom permalink" or
+"Follows the title" for a derived slug.
+
+### 3. Ruling-#8 guard tightened — the escape hatch is closed
+The old assertion scanned `querySelectorAll('button, span')` for the exact string
+`'Draft'`. `Badge` renders a **`<div>`**, so the scan could not see one at all, and any
+label but exactly "Draft" walked past both it and the `[data-item-status]` check —
+while `CollectionBrowser` already ships `<Badge variant="status">`, i.e. the realistic
+way someone re-adds a pill.
+
+Replaced with a **positive structural** check: no element in the editor carries the
+`Badge` class signature (`inline-flex items-center gap-1 py-0.5 text-xs font-semibold`)
+— catching a Badge of any variant with any text. Backed by a second test that asserts
+that signature still holds for **every** `badgeVariants` variant, so a `badge.tsx`
+restyle cannot silently narrow the guard to matching nothing. `[data-item-status]` and
+the Write-with-AI checks retained (the latter widened from `button, span` to `*`).
+
+### 4. Honesty fixes
+- **`ItemEditor.test.tsx`** — `'image and gallery ask the SHARED media picker'` only
+  clicked `[data-image-add]`. Now exercises **both**: image opens it, close, gallery
+  opens it, and the pick is applied and asserted to land in the **gallery** field
+  (`[data-gallery-thumb="0"]`) — which is what proves the second open was the
+  gallery's. Renamed to match what it does.
+- **`e2e/cms-authoring.spec.ts`** — the registration comment still told readers to add
+  both specs to `playwright.config.ts`; verified they ARE listed (lines 114-115) and
+  rewrote it as a rename warning. Line 61's "a title (text_short) and a cover (image)"
+  corrected to `text_long`, which is what the loop adds.
+- **`GroupManager.tsx`** — the rename input is uncontrolled (`defaultValue`, commit on
+  blur), so a rejected PATCH left the **rejected name** on screen next to the error
+  banner, reading as accepted. `run()` now resolves a boolean and `renameGroup` reverts
+  the DOM node to the stored name on failure. **Extended (in-scope):** also reverts on a
+  blank/whitespace-only commit, which had the same "shows what was never saved" defect.
+
+### 5. GroupManager coverage — the load-bearing claim is now tested
+`GroupManager.test.tsx` (new, 14 tests): reorder up/down emits the **full list
+renumbered from 0**; the fixture deliberately uses **sparse post-delete orders (0, 5,
+9)** so a two-row swap would pass an "ids moved" assertion while still emitting
+gaps/ties, and the tests assert the whole array instead. Plus: sorts by stored order not
+array position; first/last buttons disabled; rename payload; rename revert on 409 and on
+network failure; delete confirms first, is a `DELETE` with the group in the **query
+string** and no body, and writes nothing when declined; add trims and clears; `onChanged`
+fires only after the server accepts.
+
+### Out of scope, respected
+No drag added to `GroupManager`; no `@testing-library`; `materializePublish.ts` and all
+published-path code untouched; the empty→`null` semantics unchanged.
+
+### Non-vacuity evidence (mutate or it isn't a test)
+- **Item 1** — reverted `storedRef.current` to `item?.values ?? null`:
+  `computes the delete sentinel against the SAVE RESPONSE, not the item prop` **FAILED**
+  (`the clear was dropped: expected undefined to be null`). Restored → green.
+- **Item 2** — re-added the auto-follow:
+  `a title change alone sends NO slug` **FAILED**. Restored → green.
+  ⚠️ **My first attempt at this mutation was itself a false green** — I injected the
+  auto-follow via an inline `require()` inside a client module, which did not take
+  effect, and the suite reported 30/30 pass. Re-done with a static import, it failed as
+  expected. *A mutation that produces green is not evidence the test is vacuous — it may
+  be evidence the mutation didn't land.* Verify the mutation before trusting its result.
+  (This is the fourth entry in this file's coincidentally-green family.)
+- **Item 3** — inserted `<Badge variant="status">Live</Badge>` into the editor header:
+  the ruling-#8 test **FAILED** (`expected [ 'Live' ] to deeply equal []`). The OLD
+  assertion would have missed it entirely (a `<div>`, and not the string "Draft").
+  Restored → green.
+
+### Test results (actual)
+- `npx tsc --noEmit` → **exit 0, zero output**.
+- `npm run test:run` → **282 passed | 1 skipped (283 files); 4502 passed | 15 skipped
+  (4517); 0 failed.** Baseline 281/282 files, 4484/4499 → **+1 file, +18 tests, 0
+  regressions, 0 failures**.
+- `npx eslint` on the four changed source/test files → **exit 0, no output**. (The
+  repo-wide `next lint` warnings are pre-existing `no-img-element`/`exhaustive-deps` in
+  unrelated files; `ItemEditor.tsx`'s own `<img>` uses already carry inline disables.)
+- E2E not executed (no server/Clerk session in this pass) — the two CMS specs remain
+  registered-but-unproven, as flagged in the phase-7 section above.
+
+### Open risks
+- `storedRef` is per-mount session state: if the same item is edited concurrently in two
+  tabs, this editor trusts its own last write-response over a fresher prop. That is the
+  conservative choice for the clear-dropping bug but it is **not** last-write-wins
+  conflict handling, which this feature does not have anywhere.
+- The permalink is now immutable-by-default. There is still **no redirect** when a user
+  *does* hand-edit a live item's permalink — the old URL 404s. The auto-follow removal
+  shrinks how often that happens to "only when deliberate"; it does not solve it.
+- The two CMS e2e specs are still unproven on a real run (unchanged from phase 7).

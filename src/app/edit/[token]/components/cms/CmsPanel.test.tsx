@@ -200,6 +200,33 @@ describe('CmsPanel — firewall handoff', () => {
     expect(refreshCmsData).toHaveBeenCalledTimes(1);
   });
 
+  // The event carries `{collectionId}`. Ignoring it (the pre-phase-7 behaviour)
+  // made "Manage items" on a placed block open a GENERIC collection list — the
+  // user had to hunt, in a menu, for the collection they had just clicked on.
+  // Both surfaces are real now: the list still opens (pinned above), and with an
+  // id the browser opens ON that collection.
+  it('opens the item browser on the collection named in `detail.collectionId`', () => {
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent(MANAGE_COLLECTIONS_EVENT, { detail: { collectionId: 'col_1' } })
+      );
+    });
+
+    const browser = must('[data-cms-browser]');
+    // The right collection, not merely "a browser": its name and ITS item.
+    expect(browser.textContent).toContain('Books');
+    expect(q('[data-item-card="it_1"]')).not.toBeNull();
+  });
+
+  it('a detail-less event opens the list ONLY (no browser to dismiss)', () => {
+    act(() => {
+      window.dispatchEvent(new CustomEvent(MANAGE_COLLECTIONS_EVENT));
+    });
+
+    expect(q('[data-collection-row="col_1"]')).not.toBeNull();
+    expect(q('[data-cms-browser]')).toBeNull();
+  });
+
   it('unsubscribes on unmount (no listener leak across editor remounts)', () => {
     act(() => root.unmount());
     act(() => {

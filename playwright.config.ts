@@ -108,6 +108,11 @@ export default defineConfig({
         // editor-route-consolidation (phase 2): the chromeless /edit/[token]/preview
         // sub-route — seeded editor project + Clerk session.
         /editor-preview-route\.spec\.ts/,
+        // cms-collections: authoring (phase 7) + publish round-trip (phases 3-4).
+        // Both need a Clerk session (collection/item routes + /api/publish).
+        // Registered late — until now they matched no project and never ran.
+        /cms-authoring\.spec\.ts/,
+        /cms-publish\.spec\.ts/,
       ],
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], storageState: AUTH_FILE },

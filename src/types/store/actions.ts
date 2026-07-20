@@ -425,6 +425,12 @@ export interface MetaActions {
   /** Fetch every collection for this token into the runtime cache. */
   refreshCmsData: () => Promise<void>;
   /**
+   * Re-fetch ONE collection's bundle into the cache (item/group saves). Avoids
+   * `refreshCmsData`'s list + per-collection N+1 for a single-row change; a 404
+   * drops the bundle.
+   */
+  refreshCmsCollection: (collectionId: string) => Promise<void>;
+  /**
    * Place a `cmscollection` section on the CURRENT page. Sets BOTH
    * `sectionLayouts[id]` AND the full `content[id]` entry (incl. `layout`) — the
    * publish payload carries no `sectionLayouts` map, so a half-pin renders in the

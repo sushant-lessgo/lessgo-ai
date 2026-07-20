@@ -108,6 +108,58 @@ export const createCmsActions = (set: any, get: () => EditStore) => ({
     }
   },
 
+  /**
+   * Re-fetch ONE collection's bundle and merge it into the cache.
+   *
+   * The item editor saves one item at a time; routing every save through
+   * `refreshCmsData` would re-issue the list call PLUS one call per collection
+   * (its documented N+1) for a change that can only have touched one of them.
+   * A 404 means the row is gone — drop it from the cache rather than leaving a
+   * stale bundle the panel would keep listing.
+   *
+   * Status is deliberately NOT flipped to 'loading': this runs after a save, and
+   * blanking the placed section into its skeleton mid-refresh is a worse lie than
+   * one render of slightly-stale data.
+   */
+  refreshCmsCollection: async (collectionId: string) => {
+    const tokenId = get().tokenId;
+    if (!tokenId || !collectionId) return;
+    try {
+      const res = await fetch(
+        `/api/collections/${encodeURIComponent(collectionId)}?tokenId=${encodeURIComponent(tokenId)}`
+      );
+      if (res.status === 404) {
+        set((state: EditStore) => {
+          if (!state.cmsData?.bundles) return;
+          delete state.cmsData.bundles[collectionId];
+          state.cmsData.loadedAt = Date.now();
+        });
+        return;
+      }
+      if (!res.ok) throw new Error(`collection fetch failed (${res.status})`);
+      const data = (await res.json()) as { collection?: any; groups?: any[]; items?: any[] };
+      if (!data?.collection) return;
+      set((state: EditStore) => {
+        const bundles = state.cmsData?.bundles || {};
+        bundles[collectionId] = {
+          collection: data.collection,
+          groups: data.groups || [],
+          items: data.items || [],
+        };
+        state.cmsData = {
+          bundles,
+          status: 'loaded',
+          loadedAt: Date.now(),
+        };
+      });
+    } catch (err: any) {
+      // Non-fatal: the cache keeps the previous bundle, the next full refresh
+      // heals it. Blanking the cache on a transient failure would empty a placed
+      // section on the canvas.
+      logger.warn('[cms] refreshCmsCollection failed:', () => err);
+    }
+  },
+
   addCmsSection: (
     collectionId: string,
     opts?: { layoutHint?: string; position?: number }
